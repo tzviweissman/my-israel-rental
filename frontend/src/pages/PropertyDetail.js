@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import axios from 'axios';
 import { API, AuthContext } from '../App';
-import { Bed, Bath, Home as HomeIcon, MapPin, Building2, Star, MessageCircle, Calendar, ChevronLeft, ChevronRight, Film } from 'lucide-react';
+import { Bed, Bath, Home as HomeIcon, MapPin, Building2, MessageCircle, Calendar, ChevronLeft, ChevronRight, Film, Snowflake, WashingMachine, UtensilsCrossed, DoorOpen, ArrowUpFromLine, ShowerHead, Warehouse, Flame, Dumbbell, Waves, Sparkles, Car, Wifi } from 'lucide-react';
 import { toast } from 'sonner';
 
 const PropertyDetail = () => {
@@ -217,12 +217,30 @@ const PropertyDetail = () => {
               <div className="bg-white p-6 rounded-2xl border border-[#E5E5E5] mb-8">
                 <h2 className="text-2xl font-bold mb-4" style={{ fontFamily: 'Playfair Display' }}>{t('property.amenities')}</h2>
                 <div className="grid grid-cols-2 gap-3">
-                  {property.amenities.map((amenity, index) => (
-                    <div key={index} className="flex items-center gap-2">
-                      <Star size={16} style={{ color: "#D4AF37" }} />
-                      <span>{amenity}</span>
-                    </div>
-                  ))}
+                  {property.amenities.map((amenity, index) => {
+                    const iconMap = {
+                      'Air conditioning / Central heating': Snowflake,
+                      'In-unit washer and dryer': WashingMachine,
+                      'Dishwasher': UtensilsCrossed,
+                      'Walk in Closets': DoorOpen,
+                      'High Ceilings': ArrowUpFromLine,
+                      'Ensuite Bathroom': ShowerHead,
+                      'Storage Space': Warehouse,
+                      'Heated Floors': Flame,
+                      'Gym / Fitness center': Dumbbell,
+                      'Swimming pool (indoor or outdoor)': Waves,
+                      'Hot tub / Spa': Sparkles,
+                      'On-site parking (garage or lot)': Car,
+                      'Wi-Fi included': Wifi,
+                    };
+                    const Icon = iconMap[amenity] || HomeIcon;
+                    return (
+                      <div key={index} className="flex items-center gap-2">
+                        <Icon size={16} style={{ color: "#D4AF37" }} />
+                        <span>{amenity}</span>
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
             )}
