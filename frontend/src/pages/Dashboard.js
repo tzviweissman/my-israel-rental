@@ -343,29 +343,58 @@ const Dashboard = () => {
                       required
                       data-testid="property-area-input"
                     >
-                      <option value="">Select a city</option>
-                      {[
-                        'Acre (Akko)', 'Arad', 'Ariel', 'Ashdod', 'Ashkelon',
-                        'Bat Yam', 'Beersheba', 'Beit Shean', 'Beit Shemesh', 'Bnei Brak',
-                        'Caesarea', 'Dimona',
-                        'Eilat', 'Even Yehuda',
-                        'Gedera', 'Givat Shmuel', 'Givatayim',
-                        'Hadera', 'Haifa', 'Harish', 'Herzliya', 'Hod HaSharon', 'Holon',
-                        'Jerusalem',
-                        'Karmiel', 'Kfar Saba', 'Kiryat Ata', 'Kiryat Bialik', 'Kiryat Gat', 'Kiryat Malakhi', 'Kiryat Motzkin', 'Kiryat Ono', 'Kiryat Shmona', 'Kiryat Yam',
-                        'Lod',
-                        'Maale Adumim', 'Migdal HaEmek', 'Modiin', 'Modiin Illit',
-                        'Nahariya', 'Nazareth', 'Nes Ziona', 'Nesher', 'Netanya', 'Netivot',
-                        'Ofakim', 'Or Akiva', 'Or Yehuda',
-                        'Petah Tikva',
-                        'Raanana', 'Rahat', 'Ramat Gan', 'Ramat HaSharon', 'Ramla', 'Rehovot', 'Rishon LeZion', 'Rosh HaAyin',
-                        'Safed (Tzfat)', 'Sderot', 'Shoham',
-                        'Tel Aviv', 'Tiberias', 'Tirat Carmel',
-                        'Yavne', 'Yehud', 'Yokneam',
-                        'Zichron Yaakov'
-                      ].map(city => (
-                        <option key={city} value={city}>{city}</option>
-                      ))}
+                      <option value="">Select a neighborhood</option>
+                      <optgroup label="Jerusalem">
+                        {['Abu Tor','American Colony','Arnona','Arzei HaBira','Baka','Bayit VeGan','Beit HaKerem','Beit Yisrael','Bukharan Quarter','East Talpiot','Ein Kerem','French Hill','Geula','German Colony','Gilo','Givat HaMivtar','Givat Massuah','Givat Mordechai','Givat Ram','Givat Shaul','Greek Colony','Har Nof','Holyland','Jewish Quarter','Katamon','Kerem Avraham','Kiryat HaYovel','Kiryat Menachem','Kiryat Moshe','Kiryat Shmuel','Maalot Dafna','Mahane Yehuda','Malha','Mamilla','Mea Shearim','Mekor Baruch','Mekor Chaim','Mishkenot Shaananim','Musrara','Nachlaot','Neve Yaakov','Old City','Pat','Pisgat Zeev','Ramat Beit HaKerem','Ramat Denya','Ramat Eshkol','Ramat Shlomo','Ramot','Rassco','Rehavia','Romema','Sanhedria','Sanhedria Murhevet','Shaare Hesed','Shmuel HaNavi','Talbiya','Talpiot','Yemin Moshe'].map(n => <option key={n} value={`Jerusalem - ${n}`}>{n}</option>)}
+                      </optgroup>
+                      <optgroup label="Tel Aviv">
+                        {['Afeka','Bavli','City Center (Lev Ha\'Ir)','Florentin','HaTikva','Jaffa (Yafo)','Kerem HaTeimanim','Kikar HaMedina','Kiryat Shalom','Lev Ha\'Ir','Nahalat Binyamin','Neve Ofer','Neve Sha\'anan','Neve Tzedek','New North','Nordau','Old North','Old Jaffa','Park Tzameret','Ramat Aviv','Ramat HaHayal','Ramat HaTayasim','Sarona','Shapira','Tel Baruch','White City','Yad Eliyahu'].map(n => <option key={n} value={`Tel Aviv - ${n}`}>{n}</option>)}
+                      </optgroup>
+                      <optgroup label="Haifa">
+                        {['Ahuza','Bat Galim','Carmel Center','Carmeliya','Denia','French Carmel','German Colony','Hadar HaCarmel','Halisa','Kababir','Kiryat Eliezer','Kiryat Haim','Kiryat Shmuel','Neve David','Neve Sha\'anan','Ramat Almogi','Ramat Eshkol','Romema','Stella Maris','Wadi Nisnas','Western Carmel'].map(n => <option key={n} value={`Haifa - ${n}`}>{n}</option>)}
+                      </optgroup>
+                      <optgroup label="Beersheba">
+                        {['City Center','Dalet','Gimmel','Hey','Nahal Beka','Neve Menachem','Neve Noy','Neve Zeev','Old City','Ramot','Ramot Bet','Tet','Vav'].map(n => <option key={n} value={`Beersheba - ${n}`}>{n}</option>)}
+                      </optgroup>
+                      <optgroup label="Netanya">
+                        {['City Center','Galei Yam','HaAgamim','Ir Yamim','Kiryat Hasharon','Kiryat Nordau','Neve Itamar','Neve Oz','North Netanya','Poleg','Ramat Chen','Ramat Herzl','South Netanya','Umm Khalid'].map(n => <option key={n} value={`Netanya - ${n}`}>{n}</option>)}
+                      </optgroup>
+                      <optgroup label="Ashdod">
+                        {['Alef','Bet','City Center','Dalet','Gimmel','Hey','Marina','Tet','Vav','Yud','Yud Alef','Yud Bet','Yud Zayin','Zayin'].map(n => <option key={n} value={`Ashdod - ${n}`}>{n}</option>)}
+                      </optgroup>
+                      <optgroup label="Ashkelon">
+                        {['Afridar','Barnea','City Center','HaGiborim','Migdalei HaYam','Neve Dekalim','Neve Ilan','Samson Quarter','Shimshon','South Beach','Zion Hills'].map(n => <option key={n} value={`Ashkelon - ${n}`}>{n}</option>)}
+                      </optgroup>
+                      <optgroup label="Petah Tikva">
+                        {['Am Israel Hai','City Center','Ein Ganim','Hadar Ganim','Kfar Avraham','Kfar Ganim','Kiryat Aryeh','Kiryat Matalon','Neve Oz','Ramat Siv','Yad Labanim'].map(n => <option key={n} value={`Petah Tikva - ${n}`}>{n}</option>)}
+                      </optgroup>
+                      <optgroup label="Rishon LeZion">
+                        {['City Center','HaHadasha','HaMizrah','Kiryat Rishon','Maarav','Nahalat Yehuda','Neve Dekalim','Neve Hof','Neve Ilan','Old Rishon','Ramat Eliyahu','Ramat Ilan','Superland Area'].map(n => <option key={n} value={`Rishon LeZion - ${n}`}>{n}</option>)}
+                      </optgroup>
+                      <optgroup label="Ramat Gan">
+                        {['City Center','Diamond Exchange','Givat Geula','Kiryat Borochov','Kiryat Krinitzi','Neve Yehoshua','Ramat Chen','Ramat Efal','Ramat Shikma','Tel Binyamin'].map(n => <option key={n} value={`Ramat Gan - ${n}`}>{n}</option>)}
+                      </optgroup>
+                      <optgroup label="Herzliya">
+                        {['City Center','Herzliya HaTzeira','Herzliya Pituah','Neve Amal','Neve Oved','Nof Yam','Ramat HaSharon'].map(n => <option key={n} value={`Herzliya - ${n}`}>{n}</option>)}
+                      </optgroup>
+                      <optgroup label="Raanana">
+                        {['City Center','Neve Zemer','North Raanana','Ramat Raanana','South Raanana','West Raanana'].map(n => <option key={n} value={`Raanana - ${n}`}>{n}</option>)}
+                      </optgroup>
+                      <optgroup label="Kfar Saba">
+                        {['City Center','Green Kfar Saba','Neve Issar','North Kfar Saba','Old Kfar Saba','South Kfar Saba','Yoseftal'].map(n => <option key={n} value={`Kfar Saba - ${n}`}>{n}</option>)}
+                      </optgroup>
+                      <optgroup label="Modiin">
+                        {['Avnei Hen','Buchman','City Center','Hahashmonaim','Moriah','Neve Ilan','Reut'].map(n => <option key={n} value={`Modiin - ${n}`}>{n}</option>)}
+                      </optgroup>
+                      <optgroup label="Beit Shemesh">
+                        {['City Center','Givat Sharett','Nofei HaShemesh','Old Beit Shemesh','Ramat Beit Shemesh Alef','Ramat Beit Shemesh Bet','Ramat Beit Shemesh Gimmel','Sheinfeld'].map(n => <option key={n} value={`Beit Shemesh - ${n}`}>{n}</option>)}
+                      </optgroup>
+                      <optgroup label="Eilat">
+                        {['Arava','City Center','HaDekel','HaSharon','North Beach','North Eilat','Shahamon','South Eilat','Tourist Center'].map(n => <option key={n} value={`Eilat - ${n}`}>{n}</option>)}
+                      </optgroup>
+                      <optgroup label="Other Cities">
+                        {['Acre (Akko)','Arad','Ariel','Bat Yam','Bnei Brak','Caesarea','Dimona','Gedera','Givat Shmuel','Givatayim','Hadera','Harish','Hod HaSharon','Holon','Kiryat Ata','Kiryat Gat','Kiryat Ono','Kiryat Yam','Lod','Maale Adumim','Nahariya','Nazareth','Nes Ziona','Nesher','Netivot','Or Yehuda','Rahat','Ramla','Rehovot','Rosh HaAyin','Safed (Tzfat)','Sderot','Shoham','Tiberias','Yavne','Yokneam','Zichron Yaakov'].map(n => <option key={n} value={n}>{n}</option>)}
+                      </optgroup>
                     </select>
                   </div>
                   <div>
