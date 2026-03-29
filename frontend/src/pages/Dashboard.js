@@ -482,6 +482,54 @@ const Dashboard = () => {
                   </div>
                 </div>
 
+                <div>
+                  <label className="block text-sm font-medium mb-4">Amenities</label>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                    {[
+                      'Air conditioning / Central heating',
+                      'In-unit washer and dryer',
+                      'Dishwasher',
+                      'Walk in Closets',
+                      'High Ceilings',
+                      'Ensuite Bathroom',
+                      'Storage Space',
+                      'Heated Floors',
+                      'Gym / Fitness center',
+                      'Yoga / Pilates studio',
+                      'Sauna / Steam room',
+                      'Swimming pool (indoor or outdoor)',
+                      'Hot tub / Spa',
+                      'On-site parking (garage or lot)',
+                      'Security cameras / Monitored security system',
+                      'Wi-Fi included',
+                      'Cable / Internet package',
+                      'Smart home features (keyless entry, thermostat, lighting)'
+                    ].map((amenity) => (
+                      <label key={amenity} className="flex items-center gap-2">
+                        <input
+                          type="checkbox"
+                          checked={propertyForm.amenities.includes(amenity)}
+                          onChange={(e) => {
+                            if (e.target.checked) {
+                              setPropertyForm({
+                                ...propertyForm,
+                                amenities: [...propertyForm.amenities, amenity]
+                              });
+                            } else {
+                              setPropertyForm({
+                                ...propertyForm,
+                                amenities: propertyForm.amenities.filter(a => a !== amenity)
+                              });
+                            }
+                          }}
+                          className="w-4 h-4 rounded border-[#E5E5E5]"
+                        />
+                        <span className="text-sm">{amenity}</span>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+
                 <div className="flex gap-4">
                   <button type="submit" className="flex-1 primary-btn" data-testid="submit-property-button">
                     Add Property
