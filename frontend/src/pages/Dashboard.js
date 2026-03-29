@@ -33,6 +33,7 @@ const Dashboard = () => {
     amenities: [],
     monthly_price: '',
     nightly_price: '',
+    currency: 'ILS',
     images: []
   });
 
@@ -320,21 +321,32 @@ const Dashboard = () => {
                   </div>
                   <div>
                     <label className="block text-sm font-medium mb-2">Price {propertyForm.rental_type === 'vacation' ? '(per night)' : '(monthly)'}</label>
-                    <input
-                      type="number"
-                      value={propertyForm.rental_type === 'vacation' ? propertyForm.nightly_price : propertyForm.monthly_price}
-                      onChange={(e) => {
-                        if (propertyForm.rental_type === 'vacation') {
-                          setPropertyForm({ ...propertyForm, nightly_price: parseFloat(e.target.value) });
-                        } else {
-                          setPropertyForm({ ...propertyForm, monthly_price: parseFloat(e.target.value) });
-                        }
-                      }}
-                      min="0"
-                      className="w-full px-4 py-2 rounded-lg border border-[#E5E5E5] focus:outline-none focus:ring-2 focus:ring-[#000000]/50"
-                      required
-                      data-testid="property-price-input"
-                    />
+                    <div className="flex gap-2">
+                      <input
+                        type="number"
+                        value={propertyForm.rental_type === 'vacation' ? propertyForm.nightly_price : propertyForm.monthly_price}
+                        onChange={(e) => {
+                          if (propertyForm.rental_type === 'vacation') {
+                            setPropertyForm({ ...propertyForm, nightly_price: parseFloat(e.target.value) });
+                          } else {
+                            setPropertyForm({ ...propertyForm, monthly_price: parseFloat(e.target.value) });
+                          }
+                        }}
+                        min="0"
+                        className="flex-1 px-4 py-2 rounded-lg border border-[#E5E5E5] focus:outline-none focus:ring-2 focus:ring-[#000000]/50"
+                        required
+                        data-testid="property-price-input"
+                      />
+                      <select
+                        value={propertyForm.currency}
+                        onChange={(e) => setPropertyForm({ ...propertyForm, currency: e.target.value })}
+                        className="px-4 py-2 rounded-lg border border-[#E5E5E5] focus:outline-none focus:ring-2 focus:ring-[#000000]/50"
+                        data-testid="property-currency-select"
+                      >
+                        <option value="ILS">₪ ILS</option>
+                        <option value="USD">$ USD</option>
+                      </select>
+                    </div>
                   </div>
                 </div>
 
