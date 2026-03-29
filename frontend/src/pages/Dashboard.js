@@ -443,7 +443,7 @@ const Dashboard = () => {
                         className="w-5 h-5 rounded border-[#E5E5E5]"
                         data-testid="property-elevator-checkbox"
                       />
-                      <span>Has Elevator</span>
+                      <span>Elevator</span>
                     </label>
                     {propertyForm.has_elevator && (
                       <label className="flex items-center gap-2 ml-7">
