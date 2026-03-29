@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import axios from 'axios';
 import { API, AuthContext } from '../App';
-import { Bed, Bath, Home as HomeIcon, MapPin, Building2, Star, MessageCircle, Calendar } from 'lucide-react';
+import { Bed, Bath, Home as HomeIcon, MapPin, Building2, Star, MessageCircle, Calendar, ChevronLeft, ChevronRight, Film } from 'lucide-react';
 import { toast } from 'sonner';
 
 const PropertyDetail = () => {
@@ -12,6 +12,7 @@ const PropertyDetail = () => {
   const navigate = useNavigate();
   const { user, token } = useContext(AuthContext);
   const [property, setProperty] = useState(null);
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [bookingData, setBookingData] = useState({
     start_date: '',
     end_date: '',
@@ -77,11 +78,49 @@ const PropertyDetail = () => {
           <div className="lg:col-span-2">
             <div className="mb-6">
               {property.images && property.images.length > 0 ? (
-                <img
-                  src={property.images[0]}
-                  alt={property.title}
-                  className="w-full h-96 object-cover rounded-2xl"
-                />
+                <div className="relative" data-testid="image-gallery">
+                  <img
+                    src={property.images[currentImageIndex].startsWith('/api') ? `${API.replace('/api', '')}${property.images[currentImageIndex]}` : property.images[currentImageIndex]}
+                    alt={`${property.title} - ${currentImageIndex + 1}`}
+                    className="w-full h-96 object-cover rounded-2xl"
+                    data-testid="gallery-main-image"
+                  />
+                  {property.images.length > 1 && (
+                    <>
+                      <button
+                        onClick={() => setCurrentImageIndex(prev => prev === 0 ? property.images.length - 1 : prev - 1)}
+                        className="absolute left-3 top-1/2 -translate-y-1/2 bg-black/60 text-white p-2 rounded-full hover:bg-black/80 transition-colors"
+                        data-testid="gallery-prev"
+                      >
+                        <ChevronLeft size={20} />
+                      </button>
+                      <button
+                        onClick={() => setCurrentImageIndex(prev => prev === property.images.length - 1 ? 0 : prev + 1)}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 bg-black/60 text-white p-2 rounded-full hover:bg-black/80 transition-colors"
+                        data-testid="gallery-next"
+                      >
+                        <ChevronRight size={20} />
+                      </button>
+                      <div className="absolute bottom-3 left-1/2 -translate-x-1/2 bg-black/60 text-white text-xs px-3 py-1 rounded-full">
+                        {currentImageIndex + 1} / {property.images.length}
+                      </div>
+                    </>
+                  )}
+                  {property.images.length > 1 && (
+                    <div className="flex gap-2 mt-3 overflow-x-auto pb-2" data-testid="gallery-thumbnails">
+                      {property.images.map((img, idx) => (
+                        <img
+                          key={idx}
+                          src={img.startsWith('/api') ? `${API.replace('/api', '')}${img}` : img}
+                          alt={`Thumb ${idx + 1}`}
+                          onClick={() => setCurrentImageIndex(idx)}
+                          className={`w-20 h-14 object-cover rounded-lg cursor-pointer flex-shrink-0 transition-all ${idx === currentImageIndex ? 'ring-2 ring-black opacity-100' : 'opacity-60 hover:opacity-100'}`}
+                          data-testid={`gallery-thumb-${idx}`}
+                        />
+                      ))}
+                    </div>
+                  )}
+                </div>
               ) : (
                 <div
                   className="w-full h-96 rounded-2xl"
@@ -91,6 +130,23 @@ const PropertyDetail = () => {
                     backgroundPosition: 'center'
                   }}
                 ></div>
+              )}
+
+              {property.videos && property.videos.length > 0 && (
+                <div className="mt-4" data-testid="property-videos">
+                  <h3 className="text-sm font-medium mb-2 flex items-center gap-2"><Film size={16} /> Videos</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    {property.videos.map((video, idx) => (
+                      <video
+                        key={idx}
+                        src={video.startsWith('/api') ? `${API.replace('/api', '')}${video}` : video}
+                        controls
+                        className="w-full rounded-xl border border-[#E5E5E5]"
+                        data-testid={`property-video-${idx}`}
+                      />
+                    ))}
+                  </div>
+                </div>
               )}
             </div>
 

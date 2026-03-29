@@ -2,7 +2,7 @@ import React, { useState, useEffect, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { API, AuthContext } from '../App';
-import { Plus, Edit, Trash2, Eye, MessageCircle } from 'lucide-react';
+import { Plus, Edit, Trash2, Eye, MessageCircle, Upload, X, Image, Film } from 'lucide-react';
 import { toast } from 'sonner';
 
 const Dashboard = () => {
@@ -11,6 +11,9 @@ const Dashboard = () => {
   const [properties, setProperties] = useState([]);
   const [bookings, setBookings] = useState([]);
   const [showAddProperty, setShowAddProperty] = useState(false);
+  const [uploadedFiles, setUploadedFiles] = useState([]);
+  const [uploading, setUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
   const [propertyForm, setPropertyForm] = useState({
     title: '',
     description: '',
@@ -68,6 +71,54 @@ const Dashboard = () => {
     }
   };
 
+  const handleFileUpload = async (e) => {
+    const files = Array.from(e.target.files);
+    if (files.length === 0) return;
+
+    setUploading(true);
+    setUploadProgress(0);
+    const uploaded = [];
+    
+    for (let i = 0; i < files.length; i++) {
+      const formData = new FormData();
+      formData.append('file', files[i]);
+      try {
+        const res = await axios.post(`${API}/upload`, formData, {
+          headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'multipart/form-data' }
+        });
+        uploaded.push({ ...res.data, original_name: files[i].name });
+      } catch (err) {
+        toast.error(`Failed to upload ${files[i].name}: ${err.response?.data?.detail || 'Error'}`);
+      }
+      setUploadProgress(Math.round(((i + 1) / files.length) * 100));
+    }
+
+    const newImages = uploaded.filter(f => f.file_type === 'image').map(f => f.url);
+    const newVideos = uploaded.filter(f => f.file_type === 'video').map(f => f.url);
+    setUploadedFiles(prev => [...prev, ...uploaded]);
+    setPropertyForm(prev => ({
+      ...prev,
+      images: [...prev.images, ...newImages],
+      videos: [...(prev.videos || []), ...newVideos]
+    }));
+    setUploading(false);
+    if (uploaded.length > 0) toast.success(`${uploaded.length} file(s) uploaded`);
+  };
+
+  const removeUploadedFile = async (fileToRemove) => {
+    try {
+      await axios.delete(`${API}/upload/${fileToRemove.filename}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+    } catch (e) { /* ignore */ }
+    setUploadedFiles(prev => prev.filter(f => f.filename !== fileToRemove.filename));
+    setPropertyForm(prev => ({
+      ...prev,
+      images: prev.images.filter(url => url !== fileToRemove.url),
+      videos: (prev.videos || []).filter(url => url !== fileToRemove.url)
+    }));
+  };
+
   const handleAddProperty = async (e) => {
     e.preventDefault();
     try {
@@ -110,8 +161,10 @@ const Dashboard = () => {
         monthly_price: '',
         nightly_price: '',
         currency: 'ILS',
-        images: []
+        images: [],
+        videos: []
       });
+      setUploadedFiles([]);
     } catch (error) {
       toast.error('Failed to add property');
     }
@@ -563,6 +616,82 @@ const Dashboard = () => {
                 </div>
                 )}
 
+                {/* File Upload Section */}
+                <div data-testid="file-upload-section">
+                  <label className="block text-sm font-medium mb-2">Photos & Videos</label>
+                  <div
+                    className="border-2 border-dashed border-[#E5E5E5] rounded-xl p-6 text-center hover:border-black/30 transition-colors cursor-pointer"
+                    onClick={() => document.getElementById('file-upload-input').click()}
+                    onDragOver={(e) => { e.preventDefault(); e.currentTarget.classList.add('border-black/40', 'bg-gray-50'); }}
+                    onDragLeave={(e) => { e.preventDefault(); e.currentTarget.classList.remove('border-black/40', 'bg-gray-50'); }}
+                    onDrop={(e) => {
+                      e.preventDefault();
+                      e.currentTarget.classList.remove('border-black/40', 'bg-gray-50');
+                      const dt = new DataTransfer();
+                      Array.from(e.dataTransfer.files).forEach(f => dt.items.add(f));
+                      const input = document.getElementById('file-upload-input');
+                      input.files = dt.files;
+                      input.dispatchEvent(new Event('change', { bubbles: true }));
+                    }}
+                    data-testid="file-drop-zone"
+                  >
+                    <Upload size={32} className="mx-auto mb-2 text-gray-400" />
+                    <p className="text-sm text-gray-600 mb-1">Drag & drop or click to upload</p>
+                    <p className="text-xs text-gray-400">JPEG, PNG, WebP, GIF, MP4, MOV, WebM — Max 50MB each</p>
+                    <input
+                      id="file-upload-input"
+                      type="file"
+                      multiple
+                      accept="image/jpeg,image/png,image/webp,image/gif,video/mp4,video/quicktime,video/webm"
+                      className="hidden"
+                      onChange={handleFileUpload}
+                      data-testid="file-upload-input"
+                    />
+                  </div>
+
+                  {uploading && (
+                    <div className="mt-3" data-testid="upload-progress">
+                      <div className="flex items-center gap-2 text-sm text-gray-600 mb-1">
+                        <div className="w-4 h-4 border-2 border-black border-t-transparent rounded-full animate-spin"></div>
+                        Uploading... {uploadProgress}%
+                      </div>
+                      <div className="w-full bg-gray-200 rounded-full h-1.5">
+                        <div className="h-1.5 rounded-full bg-black transition-all" style={{ width: `${uploadProgress}%` }}></div>
+                      </div>
+                    </div>
+                  )}
+
+                  {uploadedFiles.length > 0 && (
+                    <div className="mt-4 grid grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3" data-testid="uploaded-files-grid">
+                      {uploadedFiles.map((file) => (
+                        <div key={file.filename} className="relative group rounded-lg overflow-hidden border border-[#E5E5E5]" data-testid={`uploaded-file-${file.filename}`}>
+                          {file.file_type === 'image' ? (
+                            <img src={`${API.replace('/api', '')}${file.url}`} alt={file.original_name} className="w-full h-20 object-cover" />
+                          ) : (
+                            <div className="w-full h-20 bg-gray-900 flex items-center justify-center">
+                              <Film size={24} className="text-white" />
+                            </div>
+                          )}
+                          <button
+                            type="button"
+                            onClick={() => removeUploadedFile(file)}
+                            className="absolute top-1 right-1 bg-black/70 text-white rounded-full p-0.5 opacity-0 group-hover:opacity-100 transition-opacity"
+                            data-testid={`remove-file-${file.filename}`}
+                          >
+                            <X size={14} />
+                          </button>
+                          <div className="absolute bottom-0 left-0 right-0 bg-black/50 px-1 py-0.5">
+                            <div className="flex items-center gap-1">
+                              {file.file_type === 'image' ? <Image size={10} className="text-white" /> : <Film size={10} className="text-white" />}
+                              <span className="text-[10px] text-white truncate">{file.original_name}</span>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
                 <div className="flex gap-4">
                   <button type="submit" className="flex-1 primary-btn" data-testid="submit-property-button">
                     Add Property
@@ -583,7 +712,7 @@ const Dashboard = () => {
               {properties.map((property) => (
                 <div key={property.id} className="bg-white rounded-2xl border border-[#E5E5E5] overflow-hidden" data-testid={`dashboard-property-${property.id}`}>
                   <div className="h-48 bg-gray-200" style={{
-                    backgroundImage: `url(${property.images?.[0] || 'https://images.pexels.com/photos/1669799/pexels-photo-1669799.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940'})`,
+                    backgroundImage: `url(${property.images?.[0] ? (property.images[0].startsWith('/api') ? `${API.replace('/api', '')}${property.images[0]}` : property.images[0]) : 'https://images.pexels.com/photos/1669799/pexels-photo-1669799.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940'})`,
                     backgroundSize: 'cover',
                     backgroundPosition: 'center'
                   }}></div>

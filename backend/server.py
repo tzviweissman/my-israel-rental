@@ -1,5 +1,6 @@
 from fastapi import FastAPI, APIRouter, HTTPException, UploadFile, File, Form, Depends, Header
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+from fastapi.staticfiles import StaticFiles
 from dotenv import load_dotenv
 from starlette.middleware.cors import CORSMiddleware
 from motor.motor_asyncio import AsyncIOMotorClient
@@ -18,6 +19,7 @@ from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 import base64
 import json
+import shutil
 
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
@@ -497,7 +499,82 @@ async def submit_contact(request: ContactRequest):
     await db.contacts.insert_one(contact_doc)
     return {"message": "Contact request submitted successfully"}
 
-@api_router.get("/admin/dashboard")
+UPLOAD_DIR = ROOT_DIR / "uploads"
+UPLOAD_DIR.mkdir(exist_ok=True)
+MAX_FILE_SIZE = 50 * 1024 * 1024  # 50MB
+ALLOWED_IMAGE_TYPES = {"image/jpeg", "image/png", "image/webp", "image/gif"}
+ALLOWED_VIDEO_TYPES = {"video/mp4", "video/quicktime", "video/webm", "video/mpeg"}
+
+@api_router.post("/upload")
+async def upload_file(file: UploadFile = File(...), payload=Depends(verify_token)):
+    if not file.content_type:
+        raise HTTPException(status_code=400, detail="Could not determine file type")
+
+    is_image = file.content_type in ALLOWED_IMAGE_TYPES
+    is_video = file.content_type in ALLOWED_VIDEO_TYPES
+    if not is_image and not is_video:
+        raise HTTPException(status_code=400, detail=f"Unsupported file type: {file.content_type}. Allowed: JPEG, PNG, WebP, GIF, MP4, MOV, WebM")
+
+    ext = file.filename.rsplit(".", 1)[-1].lower() if "." in file.filename else "bin"
+    file_id = str(uuid.uuid4())
+    filename = f"{file_id}.{ext}"
+    file_path = UPLOAD_DIR / filename
+
+    size = 0
+    with open(file_path, "wb") as f:
+        while chunk := await file.read(1024 * 256):
+            size += len(chunk)
+            if size > MAX_FILE_SIZE:
+                f.close()
+                file_path.unlink(missing_ok=True)
+                raise HTTPException(status_code=413, detail="File too large. Max 50MB")
+            f.write(chunk)
+
+    file_type = "image" if is_image else "video"
+    url = f"/api/uploads/{filename}"
+
+    return {"url": url, "file_type": file_type, "filename": filename, "size": size}
+
+@api_router.post("/upload/multiple")
+async def upload_multiple_files(files: List[UploadFile] = File(...), payload=Depends(verify_token)):
+    results = []
+    for file in files:
+        is_image = file.content_type in ALLOWED_IMAGE_TYPES
+        is_video = file.content_type in ALLOWED_VIDEO_TYPES
+        if not is_image and not is_video:
+            results.append({"filename": file.filename, "error": f"Unsupported type: {file.content_type}"})
+            continue
+
+        ext = file.filename.rsplit(".", 1)[-1].lower() if "." in file.filename else "bin"
+        file_id = str(uuid.uuid4())
+        filename = f"{file_id}.{ext}"
+        file_path = UPLOAD_DIR / filename
+
+        size = 0
+        try:
+            with open(file_path, "wb") as f:
+                while chunk := await file.read(1024 * 256):
+                    size += len(chunk)
+                    if size > MAX_FILE_SIZE:
+                        raise HTTPException(status_code=413, detail="File too large")
+                    f.write(chunk)
+            file_type = "image" if is_image else "video"
+            url = f"/api/uploads/{filename}"
+            results.append({"url": url, "file_type": file_type, "filename": filename, "size": size, "original_name": file.filename})
+        except Exception as e:
+            file_path.unlink(missing_ok=True)
+            results.append({"filename": file.filename, "error": str(e)})
+
+    return results
+
+@api_router.delete("/upload/{filename}")
+async def delete_upload(filename: str, payload=Depends(verify_token)):
+    file_path = UPLOAD_DIR / filename
+    if file_path.exists():
+        file_path.unlink()
+    return {"message": "File deleted"}
+
+
 async def get_admin_dashboard(payload = Depends(verify_token)):
     if payload['role'] != 'admin':
         raise HTTPException(status_code=403, detail="Admin access required")
@@ -657,6 +734,7 @@ async def get_manager_properties(manager_id: str):
     }
 
 app.include_router(api_router)
+app.mount("/api/uploads", StaticFiles(directory=str(UPLOAD_DIR)), name="uploads")
 
 app.add_middleware(
     CORSMiddleware,
