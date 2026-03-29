@@ -228,6 +228,11 @@ const PropertyDetail = () => {
             )}
 
             <div className="flex flex-wrap gap-3">
+              {property.has_agent_fee && property.agent_fee_price && (
+                <span className="px-4 py-2 rounded-full text-sm font-medium" style={{ backgroundColor: '#D4AF37', color: '#000000' }}>
+                  Agent Fee: {property.agent_fee_currency === 'USD' ? '$' : '₪'}{property.agent_fee_price}
+                </span>
+              )}
               {property.has_elevator && (
                 <span className="px-4 py-2 rounded-full text-sm font-medium" style={{ backgroundColor: '#E5E5E5', color: '#000000' }}>
                   {t('property.elevator')}
