@@ -377,7 +377,7 @@ const Dashboard = () => {
                     )}
                   </div>
                   {propertyForm.rental_type === 'long-term' && (
-                    <div>
+                    <div className="flex flex-col gap-2">
                       <label className="block text-sm font-medium mb-2">Furniture Option</label>
                       <select
                         value={propertyForm.furniture_option}
@@ -389,6 +389,31 @@ const Dashboard = () => {
                         <option value="furniture_package">Furniture Package</option>
                         <option value="furniture_free">Furniture Free</option>
                       </select>
+                      <div className="mt-2">
+                        <label className="flex items-center gap-2">
+                          <input
+                            type="checkbox"
+                            checked={propertyForm.has_agent_fee}
+                            onChange={(e) => setPropertyForm({ ...propertyForm, has_agent_fee: e.target.checked, agent_fee_price: e.target.checked ? propertyForm.agent_fee_price : '' })}
+                            className="w-5 h-5 rounded border-[#E5E5E5]"
+                            data-testid="property-agent-fee-checkbox"
+                          />
+                          <span>Agent Fee</span>
+                        </label>
+                        {propertyForm.has_agent_fee && (
+                          <div className="ml-7 mt-1">
+                            <input
+                              type="number"
+                              value={propertyForm.agent_fee_price}
+                              onChange={(e) => setPropertyForm({ ...propertyForm, agent_fee_price: parseFloat(e.target.value) })}
+                              placeholder="Fee amount"
+                              min="0"
+                              className="w-full px-3 py-2 rounded-lg border border-[#E5E5E5] focus:outline-none focus:ring-2 focus:ring-[#000000]/50 text-sm"
+                              data-testid="property-agent-fee-input"
+                            />
+                          </div>
+                        )}
+                      </div>
                     </div>
                   )}
                 </div>
@@ -416,31 +441,6 @@ const Dashboard = () => {
                         />
                         <span className="text-sm text-gray-600">Shabbat Elevator</span>
                       </label>
-                    )}
-                  </div>
-                  <div className="flex flex-col gap-2">
-                    <label className="flex items-center gap-2">
-                      <input
-                        type="checkbox"
-                        checked={propertyForm.has_agent_fee}
-                        onChange={(e) => setPropertyForm({ ...propertyForm, has_agent_fee: e.target.checked, agent_fee_price: e.target.checked ? propertyForm.agent_fee_price : '' })}
-                        className="w-5 h-5 rounded border-[#E5E5E5]"
-                        data-testid="property-agent-fee-checkbox"
-                      />
-                      <span>Agent Fee</span>
-                    </label>
-                    {propertyForm.has_agent_fee && (
-                      <div className="ml-7">
-                        <input
-                          type="number"
-                          value={propertyForm.agent_fee_price}
-                          onChange={(e) => setPropertyForm({ ...propertyForm, agent_fee_price: parseFloat(e.target.value) })}
-                          placeholder="Fee amount"
-                          min="0"
-                          className="w-full px-3 py-2 rounded-lg border border-[#E5E5E5] focus:outline-none focus:ring-2 focus:ring-[#000000]/50 text-sm"
-                          data-testid="property-agent-fee-input"
-                        />
-                      </div>
                     )}
                   </div>
                 </div>
