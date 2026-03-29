@@ -521,15 +521,10 @@ const Dashboard = () => {
                       'Storage Space',
                       'Heated Floors',
                       'Gym / Fitness center',
-                      'Yoga / Pilates studio',
-                      'Sauna / Steam room',
                       'Swimming pool (indoor or outdoor)',
                       'Hot tub / Spa',
                       'On-site parking (garage or lot)',
-                      'Security cameras / Monitored security system',
-                      'Wi-Fi included',
-                      'Cable / Internet package',
-                      'Smart home features (keyless entry, thermostat, lighting)'
+                      'Wi-Fi included'
                     ].map((amenity) => (
                       <label key={amenity} className="flex items-center gap-2">
                         <input
