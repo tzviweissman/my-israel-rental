@@ -337,7 +337,7 @@ const Dashboard = () => {
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div className="flex flex-col gap-2">
+                  <div>
                     <label className="block text-sm font-medium mb-2">Number of Porches</label>
                     <input
                       type="number"
@@ -349,7 +349,7 @@ const Dashboard = () => {
                     />
                     {propertyForm.porches > 0 && (
                       <>
-                        <div className="ml-2">
+                        <div className="ml-2 mt-2">
                           <label className="block text-sm text-gray-600 mb-1">Square Meters</label>
                           <input
                             type="number"
@@ -361,7 +361,7 @@ const Dashboard = () => {
                             data-testid="property-sqm-input"
                           />
                         </div>
-                        <label className="flex items-center gap-2 ml-2 mt-1">
+                        <label className="flex items-center gap-2 ml-2 mt-2">
                           <input
                             type="checkbox"
                             checked={propertyForm.sukkah_compatible}
