@@ -288,7 +288,6 @@ const Dashboard = () => {
                       <option value="-2">Basement 2</option>
                       <option value="-1">Basement 1</option>
                       <option value="0">Ground Floor</option>
-                      <option value="0.5">Mezzanine</option>
                       <option value="1">1</option>
                       <option value="1.5">1.5</option>
                       <option value="2">2</option>
