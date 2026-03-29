@@ -261,7 +261,7 @@ const Dashboard = () => {
                     </select>
                   </div>
                   <div>
-                    <label className="block text-sm font-medium mb-2">Area</label>
+                    <label className="block text-sm font-medium mb-2">Property Location</label>
                     <input
                       type="text"
                       value={propertyForm.area}
