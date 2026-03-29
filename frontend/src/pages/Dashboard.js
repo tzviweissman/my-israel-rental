@@ -348,6 +348,32 @@ const Dashboard = () => {
                   </div>
                 </div>
 
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="flex flex-col gap-2">
+                    <label className="block text-sm font-medium mb-2">Number of Porches</label>
+                    <input
+                      type="number"
+                      value={propertyForm.porches}
+                      onChange={(e) => setPropertyForm({ ...propertyForm, porches: parseInt(e.target.value) || 0, sukkah_compatible: (parseInt(e.target.value) || 0) > 0 ? propertyForm.sukkah_compatible : false })}
+                      min="0"
+                      className="w-full px-4 py-2 rounded-lg border border-[#E5E5E5] focus:outline-none focus:ring-2 focus:ring-[#000000]/50"
+                      data-testid="property-porches-input"
+                    />
+                    {propertyForm.porches > 0 && (
+                      <label className="flex items-center gap-2 ml-2 mt-1">
+                        <input
+                          type="checkbox"
+                          checked={propertyForm.sukkah_compatible}
+                          onChange={(e) => setPropertyForm({ ...propertyForm, sukkah_compatible: e.target.checked })}
+                          className="w-4 h-4 rounded border-[#E5E5E5]"
+                          data-testid="property-sukkah-checkbox"
+                        />
+                        <span className="text-sm text-gray-600">Sukkah Compatible</span>
+                      </label>
+                    )}
+                  </div>
+                </div>
+
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                   <div className="flex flex-col gap-2">
                     <label className="flex items-center gap-2">
@@ -373,16 +399,6 @@ const Dashboard = () => {
                       </label>
                     )}
                   </div>
-                  <label className="flex items-center gap-2">
-                    <input
-                      type="checkbox"
-                      checked={propertyForm.sukkah_compatible}
-                      onChange={(e) => setPropertyForm({ ...propertyForm, sukkah_compatible: e.target.checked })}
-                      className="w-5 h-5 rounded border-[#E5E5E5]"
-                      data-testid="property-sukkah-checkbox"
-                    />
-                    <span>Sukkah Compatible</span>
-                  </label>
                   <label className="flex items-center gap-2">
                     <input
                       type="checkbox"
