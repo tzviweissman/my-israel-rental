@@ -336,14 +336,37 @@ const Dashboard = () => {
                   )}
                   <div>
                     <label className="block text-sm font-medium mb-2">Property Location</label>
-                    <input
-                      type="text"
+                    <select
                       value={propertyForm.area}
                       onChange={(e) => setPropertyForm({ ...propertyForm, area: e.target.value })}
                       className="w-full px-4 py-2 rounded-lg border border-[#E5E5E5] focus:outline-none focus:ring-2 focus:ring-[#000000]/50"
                       required
                       data-testid="property-area-input"
-                    />
+                    >
+                      <option value="">Select a city</option>
+                      {[
+                        'Acre (Akko)', 'Arad', 'Ariel', 'Ashdod', 'Ashkelon',
+                        'Bat Yam', 'Beersheba', 'Beit Shean', 'Beit Shemesh', 'Bnei Brak',
+                        'Caesarea', 'Dimona',
+                        'Eilat', 'Even Yehuda',
+                        'Gedera', 'Givat Shmuel', 'Givatayim',
+                        'Hadera', 'Haifa', 'Harish', 'Herzliya', 'Hod HaSharon', 'Holon',
+                        'Jerusalem',
+                        'Karmiel', 'Kfar Saba', 'Kiryat Ata', 'Kiryat Bialik', 'Kiryat Gat', 'Kiryat Malakhi', 'Kiryat Motzkin', 'Kiryat Ono', 'Kiryat Shmona', 'Kiryat Yam',
+                        'Lod',
+                        'Maale Adumim', 'Migdal HaEmek', 'Modiin', 'Modiin Illit',
+                        'Nahariya', 'Nazareth', 'Nes Ziona', 'Nesher', 'Netanya', 'Netivot',
+                        'Ofakim', 'Or Akiva', 'Or Yehuda',
+                        'Petah Tikva',
+                        'Raanana', 'Rahat', 'Ramat Gan', 'Ramat HaSharon', 'Ramla', 'Rehovot', 'Rishon LeZion', 'Rosh HaAyin',
+                        'Safed (Tzfat)', 'Sderot', 'Shoham',
+                        'Tel Aviv', 'Tiberias', 'Tirat Carmel',
+                        'Yavne', 'Yehud', 'Yokneam',
+                        'Zichron Yaakov'
+                      ].map(city => (
+                        <option key={city} value={city}>{city}</option>
+                      ))}
+                    </select>
                   </div>
                   <div>
                     <label className="block text-sm font-medium mb-2">Address</label>
