@@ -64,7 +64,7 @@ const Chat = () => {
     <div className="min-h-screen" data-testid="chat-page">
       <div className="max-w-4xl mx-auto px-6 py-12">
         {property && (
-          <div className="bg-white rounded-2xl p-6 border border-[#E5E3DC] mb-6">
+          <div className="bg-white rounded-2xl p-6 border border-[#E5E5E5] mb-6">
             <h2 className="text-2xl font-bold" style={{ fontFamily: 'Playfair Display' }}>
               {property.title}
             </h2>
@@ -72,7 +72,7 @@ const Chat = () => {
           </div>
         )}
 
-        <div className="bg-white rounded-2xl border border-[#E5E3DC] flex flex-col h-[600px]">
+        <div className="bg-white rounded-2xl border border-[#E5E5E5] flex flex-col h-[600px]">
           <div className="flex-1 overflow-y-auto p-6 space-y-4" data-testid="chat-messages">
             {messages.map((msg) => (
               <div
@@ -83,7 +83,7 @@ const Chat = () => {
                 <div
                   className={`max-w-xs px-4 py-3 rounded-2xl ${
                     msg.sender_id === user.id
-                      ? 'bg-[#2C4A3B] text-white'
+                      ? 'bg-[#000000] text-white'
                       : 'bg-gray-100 text-gray-800'
                   }`}
                 >
@@ -98,14 +98,14 @@ const Chat = () => {
             ))}
           </div>
 
-          <form onSubmit={sendMessage} className="p-6 border-t border-[#E5E3DC]" data-testid="chat-form">
+          <form onSubmit={sendMessage} className="p-6 border-t border-[#E5E5E5]" data-testid="chat-form">
             <div className="flex gap-3">
               <input
                 type="text"
                 value={newMessage}
                 onChange={(e) => setNewMessage(e.target.value)}
                 placeholder="Type your message..."
-                className="flex-1 px-4 py-3 rounded-full border border-[#E5E3DC] focus:outline-none focus:ring-2 focus:ring-[#2C4A3B]/50"
+                className="flex-1 px-4 py-3 rounded-full border border-[#E5E5E5] focus:outline-none focus:ring-2 focus:ring-[#000000]/50"
                 data-testid="chat-input"
               />
               <button type="submit" className="primary-btn flex items-center gap-2" data-testid="send-message-button">

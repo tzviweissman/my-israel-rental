@@ -64,7 +64,7 @@ const Properties = () => {
         </div>
 
         {showFilters && (
-          <div className="bg-white rounded-2xl p-6 border border-[#E5E3DC] mb-8" data-testid="filters-panel">
+          <div className="bg-white rounded-2xl p-6 border border-[#E5E5E5] mb-8" data-testid="filters-panel">
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
               <div>
                 <label className="block text-sm font-medium mb-2">Area</label>
@@ -73,7 +73,7 @@ const Properties = () => {
                   value={filters.area}
                   onChange={(e) => handleFilterChange('area', e.target.value)}
                   placeholder="e.g., Tel Aviv, Jerusalem"
-                  className="w-full px-4 py-2 rounded-lg border border-[#E5E3DC] focus:outline-none focus:ring-2 focus:ring-[#2C4A3B]/50"
+                  className="w-full px-4 py-2 rounded-lg border border-[#E5E5E5] focus:outline-none focus:ring-2 focus:ring-[#000000]/50"
                   data-testid="filter-area-input"
                 />
               </div>
@@ -84,7 +84,7 @@ const Properties = () => {
                   value={filters.min_bedrooms}
                   onChange={(e) => handleFilterChange('min_bedrooms', e.target.value)}
                   min="0"
-                  className="w-full px-4 py-2 rounded-lg border border-[#E5E3DC] focus:outline-none focus:ring-2 focus:ring-[#2C4A3B]/50"
+                  className="w-full px-4 py-2 rounded-lg border border-[#E5E5E5] focus:outline-none focus:ring-2 focus:ring-[#000000]/50"
                   data-testid="filter-bedrooms-input"
                 />
               </div>
@@ -95,7 +95,7 @@ const Properties = () => {
                   value={filters.max_price}
                   onChange={(e) => handleFilterChange('max_price', e.target.value)}
                   min="0"
-                  className="w-full px-4 py-2 rounded-lg border border-[#E5E3DC] focus:outline-none focus:ring-2 focus:ring-[#2C4A3B]/50"
+                  className="w-full px-4 py-2 rounded-lg border border-[#E5E5E5] focus:outline-none focus:ring-2 focus:ring-[#000000]/50"
                   data-testid="filter-price-input"
                 />
               </div>
@@ -148,13 +148,13 @@ const Properties = () => {
                   )}
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="text-2xl font-bold" style={{ color: '#2C4A3B' }}>
+                  <span className="text-2xl font-bold" style={{ color: "#D4AF37" }}>
                     ₪{property.monthly_price || property.nightly_price}
                     <span className="text-sm font-normal text-gray-600">
                       {property.rental_type === 'vacation' ? '/night' : '/month'}
                     </span>
                   </span>
-                  <span className="text-sm px-3 py-1 rounded-full" style={{ backgroundColor: '#E5E3DC', color: '#2C4A3B' }}>
+                  <span className="text-sm px-3 py-1 rounded-full" style={{ backgroundColor: '#E5E5E5', color: '#000000' }}>
                     {property.rental_type}
                   </span>
                 </div>

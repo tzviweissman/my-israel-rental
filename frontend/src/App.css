@@ -8,7 +8,7 @@
 
 body {
   font-family: 'Manrope', sans-serif;
-  background-color: #F9F8F6;
+  background-color: #FAFAFA;
   color: #1A1A1A;
 }
 
@@ -18,39 +18,42 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .primary-btn {
-  background-color: #2C4A3B;
-  color: white;
+  background-color: #000000;
+  color: #D4AF37;
   padding: 0.75rem 2rem;
   border-radius: 9999px;
-  border: none;
+  border: 1px solid #D4AF37;
   font-weight: 500;
   cursor: pointer;
   transition: all 0.3s ease-in-out;
 }
 
 .primary-btn:hover {
-  background-color: #3D6652;
+  background-color: #D4AF37;
+  color: #000000;
   transform: translateY(-2px);
 }
 
 .secondary-btn {
   background-color: transparent;
-  color: #2C4A3B;
+  color: #000000;
   padding: 0.75rem 2rem;
   border-radius: 9999px;
-  border: 1px solid #2C4A3B;
+  border: 1px solid #000000;
   font-weight: 500;
   cursor: pointer;
   transition: all 0.3s ease-in-out;
 }
 
 .secondary-btn:hover {
-  background-color: rgba(44, 74, 59, 0.05);
+  background-color: rgba(0, 0, 0, 0.05);
+  border-color: #D4AF37;
+  color: #D4AF37;
 }
 
 .property-card {
   background: white;
-  border: 1px solid #E5E3DC;
+  border: 1px solid #E5E5E5;
   border-radius: 1rem;
   overflow: hidden;
   transition: all 0.3s ease-in-out;
@@ -59,13 +62,14 @@ h1, h2, h3, h4, h5, h6 {
 
 .property-card:hover {
   transform: translateY(-4px);
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 10px 40px rgba(212, 175, 55, 0.2);
+  border-color: #D4AF37;
 }
 
 .glassmorphism {
-  background: rgba(255, 255, 255, 0.8);
+  background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(12px);
-  border-bottom: 1px solid #E5E3DC;
+  border-bottom: 1px solid #E5E5E5;
 }
 
 [dir="rtl"] {

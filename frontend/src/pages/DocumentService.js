@@ -40,7 +40,7 @@ const DocumentService = () => {
           Document Filing Service
         </h1>
 
-        <div className="bg-white rounded-2xl p-8 border border-[#E5E3DC] mb-8">
+        <div className="bg-white rounded-2xl p-8 border border-[#E5E5E5] mb-8">
           <p className="text-gray-700 mb-6">
             We provide professional document filing services for arnona documents, name change documents, and more. 
             Fill out the form below and our team will contact you shortly.
@@ -52,7 +52,7 @@ const DocumentService = () => {
               <select
                 value={formData.service_type}
                 onChange={(e) => setFormData({ ...formData, service_type: e.target.value })}
-                className="w-full px-4 py-3 rounded-lg border border-[#E5E3DC] focus:outline-none focus:ring-2 focus:ring-[#2C4A3B]/50"
+                className="w-full px-4 py-3 rounded-lg border border-[#E5E5E5] focus:outline-none focus:ring-2 focus:ring-[#000000]/50"
                 data-testid="service-type-select"
               >
                 <option value="arnona">Arnona Documents</option>
@@ -67,7 +67,7 @@ const DocumentService = () => {
                 type="text"
                 value={formData.property_address}
                 onChange={(e) => setFormData({ ...formData, property_address: e.target.value })}
-                className="w-full px-4 py-3 rounded-lg border border-[#E5E3DC] focus:outline-none focus:ring-2 focus:ring-[#2C4A3B]/50"
+                className="w-full px-4 py-3 rounded-lg border border-[#E5E5E5] focus:outline-none focus:ring-2 focus:ring-[#000000]/50"
                 required
                 data-testid="property-address-input"
               />
@@ -79,7 +79,7 @@ const DocumentService = () => {
                 type="text"
                 value={formData.tenant_name}
                 onChange={(e) => setFormData({ ...formData, tenant_name: e.target.value })}
-                className="w-full px-4 py-3 rounded-lg border border-[#E5E3DC] focus:outline-none focus:ring-2 focus:ring-[#2C4A3B]/50"
+                className="w-full px-4 py-3 rounded-lg border border-[#E5E5E5] focus:outline-none focus:ring-2 focus:ring-[#000000]/50"
                 required
                 data-testid="tenant-name-input"
               />
@@ -91,7 +91,7 @@ const DocumentService = () => {
                 type="text"
                 value={formData.tenant_id}
                 onChange={(e) => setFormData({ ...formData, tenant_id: e.target.value })}
-                className="w-full px-4 py-3 rounded-lg border border-[#E5E3DC] focus:outline-none focus:ring-2 focus:ring-[#2C4A3B]/50"
+                className="w-full px-4 py-3 rounded-lg border border-[#E5E5E5] focus:outline-none focus:ring-2 focus:ring-[#000000]/50"
                 required
                 data-testid="tenant-id-input"
               />
@@ -103,7 +103,7 @@ const DocumentService = () => {
                 value={formData.additional_info}
                 onChange={(e) => setFormData({ ...formData, additional_info: e.target.value })}
                 rows="4"
-                className="w-full px-4 py-3 rounded-lg border border-[#E5E3DC] focus:outline-none focus:ring-2 focus:ring-[#2C4A3B]/50"
+                className="w-full px-4 py-3 rounded-lg border border-[#E5E5E5] focus:outline-none focus:ring-2 focus:ring-[#000000]/50"
                 data-testid="additional-info-input"
               ></textarea>
             </div>
@@ -115,14 +115,14 @@ const DocumentService = () => {
           </form>
         </div>
 
-        <div className="bg-white rounded-2xl p-8 border border-[#E5E3DC]">
+        <div className="bg-white rounded-2xl p-8 border border-[#E5E5E5]">
           <h2 className="text-2xl font-bold mb-4" style={{ fontFamily: 'Playfair Display' }}>Payment Information</h2>
           <p className="text-gray-700 mb-4">
             Once we review your request, we will contact you with pricing and payment details.
             You can pay securely through our PayPal integration.
           </p>
           <p className="text-gray-700">
-            For immediate assistance, contact us at: <a href="tel:+972553225141" className="font-bold" style={{ color: '#2C4A3B' }}>+972 55 322 5141</a>
+            For immediate assistance, contact us at: <a href="tel:+972553225141" className="font-bold" style={{ color: '#000000' }}>+972 55 322 5141</a>
           </p>
         </div>
       </div>

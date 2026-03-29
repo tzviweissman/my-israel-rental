@@ -105,36 +105,36 @@ const PropertyDetail = () => {
 
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
               {property.bedrooms && (
-                <div className="bg-white p-4 rounded-xl border border-[#E5E3DC]">
+                <div className="bg-white p-4 rounded-xl border border-[#E5E5E5]">
                   <div className="flex items-center gap-2 mb-1">
-                    <Bed size={20} style={{ color: '#2C4A3B' }} />
+                    <Bed size={20} style={{ color: "#D4AF37" }} />
                     <span className="text-sm text-gray-600">{t('property.bedrooms')}</span>
                   </div>
                   <p className="text-2xl font-bold">{property.bedrooms}</p>
                 </div>
               )}
               {property.bathrooms && (
-                <div className="bg-white p-4 rounded-xl border border-[#E5E3DC]">
+                <div className="bg-white p-4 rounded-xl border border-[#E5E5E5]">
                   <div className="flex items-center gap-2 mb-1">
-                    <Bath size={20} style={{ color: '#2C4A3B' }} />
+                    <Bath size={20} style={{ color: "#D4AF37" }} />
                     <span className="text-sm text-gray-600">{t('property.bathrooms')}</span>
                   </div>
                   <p className="text-2xl font-bold">{property.bathrooms}</p>
                 </div>
               )}
               {property.square_meters && (
-                <div className="bg-white p-4 rounded-xl border border-[#E5E3DC]">
+                <div className="bg-white p-4 rounded-xl border border-[#E5E5E5]">
                   <div className="flex items-center gap-2 mb-1">
-                    <HomeIcon size={20} style={{ color: '#2C4A3B' }} />
+                    <HomeIcon size={20} style={{ color: "#D4AF37" }} />
                     <span className="text-sm text-gray-600">{t('property.sqm')}</span>
                   </div>
                   <p className="text-2xl font-bold">{property.square_meters}</p>
                 </div>
               )}
               {property.floor !== null && (
-                <div className="bg-white p-4 rounded-xl border border-[#E5E3DC]">
+                <div className="bg-white p-4 rounded-xl border border-[#E5E5E5]">
                   <div className="flex items-center gap-2 mb-1">
-                    <Building2 size={20} style={{ color: '#2C4A3B' }} />
+                    <Building2 size={20} style={{ color: "#D4AF37" }} />
                     <span className="text-sm text-gray-600">{t('property.floor')}</span>
                   </div>
                   <p className="text-2xl font-bold">{property.floor}</p>
@@ -142,18 +142,18 @@ const PropertyDetail = () => {
               )}
             </div>
 
-            <div className="bg-white p-6 rounded-2xl border border-[#E5E3DC] mb-8">
+            <div className="bg-white p-6 rounded-2xl border border-[#E5E5E5] mb-8">
               <h2 className="text-2xl font-bold mb-4" style={{ fontFamily: 'Playfair Display' }}>Description</h2>
               <p className="text-gray-700 leading-relaxed">{property.description}</p>
             </div>
 
             {property.amenities && property.amenities.length > 0 && (
-              <div className="bg-white p-6 rounded-2xl border border-[#E5E3DC] mb-8">
+              <div className="bg-white p-6 rounded-2xl border border-[#E5E5E5] mb-8">
                 <h2 className="text-2xl font-bold mb-4" style={{ fontFamily: 'Playfair Display' }}>{t('property.amenities')}</h2>
                 <div className="grid grid-cols-2 gap-3">
                   {property.amenities.map((amenity, index) => (
                     <div key={index} className="flex items-center gap-2">
-                      <Star size={16} style={{ color: '#2C4A3B' }} />
+                      <Star size={16} style={{ color: "#D4AF37" }} />
                       <span>{amenity}</span>
                     </div>
                   ))}
@@ -163,7 +163,7 @@ const PropertyDetail = () => {
 
             <div className="flex flex-wrap gap-3">
               {property.has_elevator && (
-                <span className="px-4 py-2 rounded-full text-sm font-medium" style={{ backgroundColor: '#E5E3DC', color: '#2C4A3B' }}>
+                <span className="px-4 py-2 rounded-full text-sm font-medium" style={{ backgroundColor: '#E5E5E5', color: '#000000' }}>
                   {t('property.elevator')}
                 </span>
               )}
@@ -178,7 +178,7 @@ const PropertyDetail = () => {
                 </span>
               )}
               {property.furniture_package && (
-                <span className="px-4 py-2 rounded-full text-sm font-medium" style={{ backgroundColor: '#E5E3DC', color: '#2C4A3B' }}>
+                <span className="px-4 py-2 rounded-full text-sm font-medium" style={{ backgroundColor: '#E5E5E5', color: '#000000' }}>
                   {t('property.furniture')}
                 </span>
               )}
@@ -186,9 +186,9 @@ const PropertyDetail = () => {
           </div>
 
           <div className="lg:col-span-1">
-            <div className="bg-white p-6 rounded-2xl border border-[#E5E3DC] sticky top-24">
+            <div className="bg-white p-6 rounded-2xl border border-[#E5E5E5] sticky top-24">
               <div className="mb-6">
-                <span className="text-4xl font-bold" style={{ color: '#2C4A3B' }}>
+                <span className="text-4xl font-bold" style={{ color: "#D4AF37" }}>
                   ₪{property.monthly_price || property.nightly_price}
                 </span>
                 <span className="text-lg text-gray-600">
@@ -215,7 +215,7 @@ const PropertyDetail = () => {
                       type="date"
                       value={bookingData.start_date}
                       onChange={(e) => setBookingData({ ...bookingData, start_date: e.target.value })}
-                      className="w-full px-4 py-2 rounded-lg border border-[#E5E3DC] focus:outline-none focus:ring-2 focus:ring-[#2C4A3B]/50"
+                      className="w-full px-4 py-2 rounded-lg border border-[#E5E5E5] focus:outline-none focus:ring-2 focus:ring-[#000000]/50"
                       data-testid="booking-start-date"
                     />
                   </div>
@@ -225,7 +225,7 @@ const PropertyDetail = () => {
                       type="date"
                       value={bookingData.end_date}
                       onChange={(e) => setBookingData({ ...bookingData, end_date: e.target.value })}
-                      className="w-full px-4 py-2 rounded-lg border border-[#E5E3DC] focus:outline-none focus:ring-2 focus:ring-[#2C4A3B]/50"
+                      className="w-full px-4 py-2 rounded-lg border border-[#E5E5E5] focus:outline-none focus:ring-2 focus:ring-[#000000]/50"
                       data-testid="booking-end-date"
                     />
                   </div>
@@ -236,7 +236,7 @@ const PropertyDetail = () => {
                       value={bookingData.guest_count}
                       onChange={(e) => setBookingData({ ...bookingData, guest_count: parseInt(e.target.value) })}
                       min="1"
-                      className="w-full px-4 py-2 rounded-lg border border-[#E5E3DC] focus:outline-none focus:ring-2 focus:ring-[#2C4A3B]/50"
+                      className="w-full px-4 py-2 rounded-lg border border-[#E5E5E5] focus:outline-none focus:ring-2 focus:ring-[#000000]/50"
                       data-testid="booking-guest-count"
                     />
                   </div>
@@ -246,7 +246,7 @@ const PropertyDetail = () => {
                       value={bookingData.message}
                       onChange={(e) => setBookingData({ ...bookingData, message: e.target.value })}
                       rows="3"
-                      className="w-full px-4 py-2 rounded-lg border border-[#E5E3DC] focus:outline-none focus:ring-2 focus:ring-[#2C4A3B]/50"
+                      className="w-full px-4 py-2 rounded-lg border border-[#E5E5E5] focus:outline-none focus:ring-2 focus:ring-[#000000]/50"
                       data-testid="booking-message"
                     ></textarea>
                   </div>

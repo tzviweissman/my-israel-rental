@@ -49,10 +49,10 @@ const AdminDashboard = () => {
         <h1 className="text-4xl font-bold mb-12" style={{ fontFamily: 'Playfair Display' }}>Admin Dashboard</h1>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
-          <div className="bg-white p-6 rounded-2xl border border-[#E5E3DC]" data-testid="stat-active-listings">
+          <div className="bg-white p-6 rounded-2xl border border-[#E5E5E5]" data-testid="stat-active-listings">
             <div className="flex items-center gap-4 mb-2">
-              <div className="p-3 rounded-xl" style={{ backgroundColor: '#E5E3DC' }}>
-                <Home size={24} style={{ color: '#2C4A3B' }} />
+              <div className="p-3 rounded-xl" style={{ backgroundColor: '#E5E5E5' }}>
+                <Home size={24} style={{ color: '#000000' }} />
               </div>
               <div>
                 <p className="text-3xl font-bold">{dashboard.active_listings}</p>
@@ -61,10 +61,10 @@ const AdminDashboard = () => {
             </div>
           </div>
 
-          <div className="bg-white p-6 rounded-2xl border border-[#E5E3DC]" data-testid="stat-total-views">
+          <div className="bg-white p-6 rounded-2xl border border-[#E5E5E5]" data-testid="stat-total-views">
             <div className="flex items-center gap-4 mb-2">
-              <div className="p-3 rounded-xl" style={{ backgroundColor: '#E5E3DC' }}>
-                <Eye size={24} style={{ color: '#2C4A3B' }} />
+              <div className="p-3 rounded-xl" style={{ backgroundColor: '#E5E5E5' }}>
+                <Eye size={24} style={{ color: '#000000' }} />
               </div>
               <div>
                 <p className="text-3xl font-bold">{dashboard.total_views}</p>
@@ -73,10 +73,10 @@ const AdminDashboard = () => {
             </div>
           </div>
 
-          <div className="bg-white p-6 rounded-2xl border border-[#E5E3DC]" data-testid="stat-total-inquiries">
+          <div className="bg-white p-6 rounded-2xl border border-[#E5E5E5]" data-testid="stat-total-inquiries">
             <div className="flex items-center gap-4 mb-2">
-              <div className="p-3 rounded-xl" style={{ backgroundColor: '#E5E3DC' }}>
-                <FileText size={24} style={{ color: '#2C4A3B' }} />
+              <div className="p-3 rounded-xl" style={{ backgroundColor: '#E5E5E5' }}>
+                <FileText size={24} style={{ color: '#000000' }} />
               </div>
               <div>
                 <p className="text-3xl font-bold">{dashboard.total_inquiries}</p>
@@ -85,10 +85,10 @@ const AdminDashboard = () => {
             </div>
           </div>
 
-          <div className="bg-white p-6 rounded-2xl border border-[#E5E3DC]" data-testid="stat-total-users">
+          <div className="bg-white p-6 rounded-2xl border border-[#E5E5E5]" data-testid="stat-total-users">
             <div className="flex items-center gap-4 mb-2">
-              <div className="p-3 rounded-xl" style={{ backgroundColor: '#E5E3DC' }}>
-                <Users size={24} style={{ color: '#2C4A3B' }} />
+              <div className="p-3 rounded-xl" style={{ backgroundColor: '#E5E5E5' }}>
+                <Users size={24} style={{ color: '#000000' }} />
               </div>
               <div>
                 <p className="text-3xl font-bold">{dashboard.total_users}</p>
@@ -100,7 +100,7 @@ const AdminDashboard = () => {
 
         <div className="mb-12">
           <h2 className="text-2xl font-bold mb-6" style={{ fontFamily: 'Playfair Display' }}>Recent Properties</h2>
-          <div className="bg-white rounded-2xl border border-[#E5E3DC] overflow-hidden">
+          <div className="bg-white rounded-2xl border border-[#E5E5E5] overflow-hidden">
             <table className="w-full">
               <thead className="bg-gray-50">
                 <tr>
@@ -113,15 +113,15 @@ const AdminDashboard = () => {
               </thead>
               <tbody>
                 {dashboard.recent_properties.map((property) => (
-                  <tr key={property.id} className="border-t border-[#E5E3DC]" data-testid={`property-row-${property.id}`}>
+                  <tr key={property.id} className="border-t border-[#E5E5E5]" data-testid={`property-row-${property.id}`}>
                     <td className="px-6 py-4 font-medium">{property.title}</td>
                     <td className="px-6 py-4">{property.area}</td>
                     <td className="px-6 py-4">
-                      <span className="px-3 py-1 rounded-full text-sm" style={{ backgroundColor: '#E5E3DC', color: '#2C4A3B' }}>
+                      <span className="px-3 py-1 rounded-full text-sm" style={{ backgroundColor: '#E5E5E5', color: '#000000' }}>
                         {property.rental_type}
                       </span>
                     </td>
-                    <td className="px-6 py-4 font-bold" style={{ color: '#2C4A3B' }}>
+                    <td className="px-6 py-4 font-bold" style={{ color: '#000000' }}>
                       ₪{property.monthly_price || property.nightly_price}
                     </td>
                     <td className="px-6 py-4">{property.views || 0}</td>
@@ -134,7 +134,7 @@ const AdminDashboard = () => {
 
         <div>
           <h2 className="text-2xl font-bold mb-6" style={{ fontFamily: 'Playfair Display' }}>All Chats</h2>
-          <div className="bg-white rounded-2xl border border-[#E5E3DC] overflow-hidden">
+          <div className="bg-white rounded-2xl border border-[#E5E5E5] overflow-hidden">
             <table className="w-full">
               <thead className="bg-gray-50">
                 <tr>
@@ -147,7 +147,7 @@ const AdminDashboard = () => {
               </thead>
               <tbody>
                 {allChats.slice(0, 20).map((chat) => (
-                  <tr key={chat.id} className="border-t border-[#E5E3DC]" data-testid={`chat-row-${chat.id}`}>
+                  <tr key={chat.id} className="border-t border-[#E5E5E5]" data-testid={`chat-row-${chat.id}`}>
                     <td className="px-6 py-4">{chat.property_id}</td>
                     <td className="px-6 py-4">{chat.sender_id}</td>
                     <td className="px-6 py-4">{chat.receiver_id}</td>

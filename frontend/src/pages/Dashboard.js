@@ -136,7 +136,7 @@ const Dashboard = () => {
         </div>
 
         {user && user.role !== 'renter' && (
-          <div className="bg-white p-6 rounded-2xl border border-[#E5E3DC] mb-8" data-testid="manager-page-section">
+          <div className="bg-white p-6 rounded-2xl border border-[#E5E5E5] mb-8" data-testid="manager-page-section">
             <h2 className="text-xl font-bold mb-4">Your Manager Page</h2>
             <p className="text-gray-600 mb-4">Share this link with potential renters to show all your properties:</p>
             <div className="flex gap-2">
@@ -144,7 +144,7 @@ const Dashboard = () => {
                 type="text"
                 value={getShareableLink()}
                 readOnly
-                className="flex-1 px-4 py-2 rounded-lg border border-[#E5E3DC] bg-gray-50"
+                className="flex-1 px-4 py-2 rounded-lg border border-[#E5E5E5] bg-gray-50"
                 data-testid="shareable-link"
               />
               <button onClick={copyShareableLink} className="secondary-btn" data-testid="copy-link-button">
@@ -166,7 +166,7 @@ const Dashboard = () => {
                       type="text"
                       value={propertyForm.title}
                       onChange={(e) => setPropertyForm({ ...propertyForm, title: e.target.value })}
-                      className="w-full px-4 py-2 rounded-lg border border-[#E5E3DC] focus:outline-none focus:ring-2 focus:ring-[#2C4A3B]/50"
+                      className="w-full px-4 py-2 rounded-lg border border-[#E5E5E5] focus:outline-none focus:ring-2 focus:ring-[#000000]/50"
                       required
                       data-testid="property-title-input"
                     />
@@ -176,7 +176,7 @@ const Dashboard = () => {
                     <select
                       value={propertyForm.rental_type}
                       onChange={(e) => setPropertyForm({ ...propertyForm, rental_type: e.target.value })}
-                      className="w-full px-4 py-2 rounded-lg border border-[#E5E3DC] focus:outline-none focus:ring-2 focus:ring-[#2C4A3B]/50"
+                      className="w-full px-4 py-2 rounded-lg border border-[#E5E5E5] focus:outline-none focus:ring-2 focus:ring-[#000000]/50"
                       data-testid="property-rental-type-select"
                     >
                       <option value="long-term">Long Term</option>
@@ -190,7 +190,7 @@ const Dashboard = () => {
                     <select
                       value={propertyForm.property_type}
                       onChange={(e) => setPropertyForm({ ...propertyForm, property_type: e.target.value })}
-                      className="w-full px-4 py-2 rounded-lg border border-[#E5E3DC] focus:outline-none focus:ring-2 focus:ring-[#2C4A3B]/50"
+                      className="w-full px-4 py-2 rounded-lg border border-[#E5E5E5] focus:outline-none focus:ring-2 focus:ring-[#000000]/50"
                       data-testid="property-type-select"
                     >
                       <option value="apartment">Apartment</option>
@@ -204,7 +204,7 @@ const Dashboard = () => {
                       value={propertyForm.bedrooms}
                       onChange={(e) => setPropertyForm({ ...propertyForm, bedrooms: parseInt(e.target.value) })}
                       min="0"
-                      className="w-full px-4 py-2 rounded-lg border border-[#E5E3DC] focus:outline-none focus:ring-2 focus:ring-[#2C4A3B]/50"
+                      className="w-full px-4 py-2 rounded-lg border border-[#E5E5E5] focus:outline-none focus:ring-2 focus:ring-[#000000]/50"
                       data-testid="property-bedrooms-input"
                     />
                   </div>
@@ -215,7 +215,7 @@ const Dashboard = () => {
                       value={propertyForm.bathrooms}
                       onChange={(e) => setPropertyForm({ ...propertyForm, bathrooms: parseInt(e.target.value) })}
                       min="0"
-                      className="w-full px-4 py-2 rounded-lg border border-[#E5E3DC] focus:outline-none focus:ring-2 focus:ring-[#2C4A3B]/50"
+                      className="w-full px-4 py-2 rounded-lg border border-[#E5E5E5] focus:outline-none focus:ring-2 focus:ring-[#000000]/50"
                       data-testid="property-bathrooms-input"
                     />
                   </div>
@@ -225,7 +225,7 @@ const Dashboard = () => {
                       type="text"
                       value={propertyForm.area}
                       onChange={(e) => setPropertyForm({ ...propertyForm, area: e.target.value })}
-                      className="w-full px-4 py-2 rounded-lg border border-[#E5E3DC] focus:outline-none focus:ring-2 focus:ring-[#2C4A3B]/50"
+                      className="w-full px-4 py-2 rounded-lg border border-[#E5E5E5] focus:outline-none focus:ring-2 focus:ring-[#000000]/50"
                       required
                       data-testid="property-area-input"
                     />
@@ -236,7 +236,7 @@ const Dashboard = () => {
                       type="text"
                       value={propertyForm.address}
                       onChange={(e) => setPropertyForm({ ...propertyForm, address: e.target.value })}
-                      className="w-full px-4 py-2 rounded-lg border border-[#E5E3DC] focus:outline-none focus:ring-2 focus:ring-[#2C4A3B]/50"
+                      className="w-full px-4 py-2 rounded-lg border border-[#E5E5E5] focus:outline-none focus:ring-2 focus:ring-[#000000]/50"
                       required
                       data-testid="property-address-input"
                     />
@@ -249,7 +249,7 @@ const Dashboard = () => {
                       onChange={(e) => setPropertyForm({ ...propertyForm, square_meters: parseFloat(e.target.value) })}
                       min="0"
                       step="0.1"
-                      className="w-full px-4 py-2 rounded-lg border border-[#E5E3DC] focus:outline-none focus:ring-2 focus:ring-[#2C4A3B]/50"
+                      className="w-full px-4 py-2 rounded-lg border border-[#E5E5E5] focus:outline-none focus:ring-2 focus:ring-[#000000]/50"
                       data-testid="property-sqm-input"
                     />
                   </div>
@@ -259,7 +259,7 @@ const Dashboard = () => {
                       type="number"
                       value={propertyForm.floor}
                       onChange={(e) => setPropertyForm({ ...propertyForm, floor: parseInt(e.target.value) })}
-                      className="w-full px-4 py-2 rounded-lg border border-[#E5E3DC] focus:outline-none focus:ring-2 focus:ring-[#2C4A3B]/50"
+                      className="w-full px-4 py-2 rounded-lg border border-[#E5E5E5] focus:outline-none focus:ring-2 focus:ring-[#000000]/50"
                       data-testid="property-floor-input"
                     />
                   </div>
@@ -276,7 +276,7 @@ const Dashboard = () => {
                         }
                       }}
                       min="0"
-                      className="w-full px-4 py-2 rounded-lg border border-[#E5E3DC] focus:outline-none focus:ring-2 focus:ring-[#2C4A3B]/50"
+                      className="w-full px-4 py-2 rounded-lg border border-[#E5E5E5] focus:outline-none focus:ring-2 focus:ring-[#000000]/50"
                       required
                       data-testid="property-price-input"
                     />
@@ -289,7 +289,7 @@ const Dashboard = () => {
                     value={propertyForm.description}
                     onChange={(e) => setPropertyForm({ ...propertyForm, description: e.target.value })}
                     rows="4"
-                    className="w-full px-4 py-2 rounded-lg border border-[#E5E3DC] focus:outline-none focus:ring-2 focus:ring-[#2C4A3B]/50"
+                    className="w-full px-4 py-2 rounded-lg border border-[#E5E5E5] focus:outline-none focus:ring-2 focus:ring-[#000000]/50"
                     required
                     data-testid="property-description-input"
                   ></textarea>
@@ -301,7 +301,7 @@ const Dashboard = () => {
                       type="checkbox"
                       checked={propertyForm.has_elevator}
                       onChange={(e) => setPropertyForm({ ...propertyForm, has_elevator: e.target.checked })}
-                      className="w-5 h-5 rounded border-[#E5E3DC]"
+                      className="w-5 h-5 rounded border-[#E5E5E5]"
                       data-testid="property-elevator-checkbox"
                     />
                     <span>Has Elevator</span>
@@ -311,7 +311,7 @@ const Dashboard = () => {
                       type="checkbox"
                       checked={propertyForm.is_shabbat_elevator}
                       onChange={(e) => setPropertyForm({ ...propertyForm, is_shabbat_elevator: e.target.checked })}
-                      className="w-5 h-5 rounded border-[#E5E3DC]"
+                      className="w-5 h-5 rounded border-[#E5E5E5]"
                       data-testid="property-shabbat-elevator-checkbox"
                     />
                     <span>Shabbat Elevator</span>
@@ -321,7 +321,7 @@ const Dashboard = () => {
                       type="checkbox"
                       checked={propertyForm.sukkah_compatible}
                       onChange={(e) => setPropertyForm({ ...propertyForm, sukkah_compatible: e.target.checked })}
-                      className="w-5 h-5 rounded border-[#E5E3DC]"
+                      className="w-5 h-5 rounded border-[#E5E5E5]"
                       data-testid="property-sukkah-checkbox"
                     />
                     <span>Sukkah Compatible</span>
@@ -331,7 +331,7 @@ const Dashboard = () => {
                       type="checkbox"
                       checked={propertyForm.furniture_package}
                       onChange={(e) => setPropertyForm({ ...propertyForm, furniture_package: e.target.checked })}
-                      className="w-5 h-5 rounded border-[#E5E3DC]"
+                      className="w-5 h-5 rounded border-[#E5E5E5]"
                       data-testid="property-furniture-checkbox"
                     />
                     <span>Furniture Package</span>
@@ -356,7 +356,7 @@ const Dashboard = () => {
             <h2 className="text-2xl font-bold mb-6" style={{ fontFamily: 'Playfair Display' }}>My Properties</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {properties.map((property) => (
-                <div key={property.id} className="bg-white rounded-2xl border border-[#E5E3DC] overflow-hidden" data-testid={`dashboard-property-${property.id}`}>
+                <div key={property.id} className="bg-white rounded-2xl border border-[#E5E5E5] overflow-hidden" data-testid={`dashboard-property-${property.id}`}>
                   <div className="h-48 bg-gray-200" style={{
                     backgroundImage: `url(${property.images?.[0] || 'https://images.pexels.com/photos/1669799/pexels-photo-1669799.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940'})`,
                     backgroundSize: 'cover',
@@ -366,7 +366,7 @@ const Dashboard = () => {
                     <h3 className="text-lg font-bold mb-2">{property.title}</h3>
                     <p className="text-gray-600 text-sm mb-4">{property.area}</p>
                     <div className="flex items-center justify-between">
-                      <span className="text-xl font-bold" style={{ color: '#2C4A3B' }}>
+                      <span className="text-xl font-bold" style={{ color: '#000000' }}>
                         ₪{property.monthly_price || property.nightly_price}
                       </span>
                       <div className="flex gap-2">
@@ -387,7 +387,7 @@ const Dashboard = () => {
 
         <div>
           <h2 className="text-2xl font-bold mb-6" style={{ fontFamily: 'Playfair Display' }}>Bookings</h2>
-          <div className="bg-white rounded-2xl border border-[#E5E3DC] overflow-hidden">
+          <div className="bg-white rounded-2xl border border-[#E5E5E5] overflow-hidden">
             <table className="w-full">
               <thead className="bg-gray-50">
                 <tr>
@@ -399,12 +399,12 @@ const Dashboard = () => {
               </thead>
               <tbody>
                 {bookings.map((booking) => (
-                  <tr key={booking.id} className="border-t border-[#E5E3DC]" data-testid={`booking-row-${booking.id}`}>
+                  <tr key={booking.id} className="border-t border-[#E5E5E5]" data-testid={`booking-row-${booking.id}`}>
                     <td className="px-6 py-4">{booking.property_id}</td>
                     <td className="px-6 py-4">{booking.start_date} - {booking.end_date}</td>
                     <td className="px-6 py-4">{booking.guest_count}</td>
                     <td className="px-6 py-4">
-                      <span className="px-3 py-1 rounded-full text-sm" style={{ backgroundColor: '#E5E3DC', color: '#2C4A3B' }}>
+                      <span className="px-3 py-1 rounded-full text-sm" style={{ backgroundColor: '#E5E5E5', color: '#000000' }}>
                         {booking.status}
                       </span>
                     </td>

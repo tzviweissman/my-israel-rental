@@ -34,7 +34,7 @@ const Auth = () => {
   return (
     <div className="min-h-screen flex items-center justify-center px-6 py-12">
       <div className="w-full max-w-md">
-        <div className="bg-white rounded-2xl p-8 border border-[#E5E3DC]">
+        <div className="bg-white rounded-2xl p-8 border border-[#E5E5E5]">
           <h2 className="text-3xl font-bold mb-8 text-center" style={{ fontFamily: 'Playfair Display' }}>
             {mode === 'login' ? t('auth.loginTitle') : t('auth.signupTitle')}
           </h2>
@@ -47,7 +47,7 @@ const Auth = () => {
                   type="text"
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  className="w-full px-4 py-3 rounded-lg border border-[#E5E3DC] focus:outline-none focus:ring-2 focus:ring-[#2C4A3B]/50"
+                  className="w-full px-4 py-3 rounded-lg border border-[#E5E5E5] focus:outline-none focus:ring-2 focus:ring-[#000000]/50"
                   required
                   data-testid="auth-name-input"
                 />
@@ -60,7 +60,7 @@ const Auth = () => {
                 type="email"
                 value={formData.email}
                 onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                className="w-full px-4 py-3 rounded-lg border border-[#E5E3DC] focus:outline-none focus:ring-2 focus:ring-[#2C4A3B]/50"
+                className="w-full px-4 py-3 rounded-lg border border-[#E5E5E5] focus:outline-none focus:ring-2 focus:ring-[#000000]/50"
                 required
                 data-testid="auth-email-input"
               />
@@ -72,7 +72,7 @@ const Auth = () => {
                 type="password"
                 value={formData.password}
                 onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                className="w-full px-4 py-3 rounded-lg border border-[#E5E3DC] focus:outline-none focus:ring-2 focus:ring-[#2C4A3B]/50"
+                className="w-full px-4 py-3 rounded-lg border border-[#E5E5E5] focus:outline-none focus:ring-2 focus:ring-[#000000]/50"
                 required
                 data-testid="auth-password-input"
               />
@@ -86,7 +86,7 @@ const Auth = () => {
                     type="tel"
                     value={formData.phone}
                     onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                    className="w-full px-4 py-3 rounded-lg border border-[#E5E3DC] focus:outline-none focus:ring-2 focus:ring-[#2C4A3B]/50"
+                    className="w-full px-4 py-3 rounded-lg border border-[#E5E5E5] focus:outline-none focus:ring-2 focus:ring-[#000000]/50"
                     data-testid="auth-phone-input"
                   />
                 </div>
@@ -96,7 +96,7 @@ const Auth = () => {
                   <select
                     value={formData.role}
                     onChange={(e) => setFormData({ ...formData, role: e.target.value })}
-                    className="w-full px-4 py-3 rounded-lg border border-[#E5E3DC] focus:outline-none focus:ring-2 focus:ring-[#2C4A3B]/50"
+                    className="w-full px-4 py-3 rounded-lg border border-[#E5E5E5] focus:outline-none focus:ring-2 focus:ring-[#000000]/50"
                     data-testid="auth-role-select"
                   >
                     <option value="renter">{t('auth.renter')}</option>
@@ -115,14 +115,14 @@ const Auth = () => {
             {mode === 'login' ? (
               <p className="text-sm text-gray-600">
                 Don't have an account?{' '}
-                <a href="/auth/signup" className="font-medium" style={{ color: '#2C4A3B' }} data-testid="auth-toggle-link">
+                <a href="/auth/signup" className="font-medium" style={{ color: '#000000' }} data-testid="auth-toggle-link">
                   Sign up
                 </a>
               </p>
             ) : (
               <p className="text-sm text-gray-600">
                 Already have an account?{' '}
-                <a href="/auth/login" className="font-medium" style={{ color: '#2C4A3B' }} data-testid="auth-toggle-link">
+                <a href="/auth/login" className="font-medium" style={{ color: '#000000' }} data-testid="auth-toggle-link">
                   Login
                 </a>
               </p>

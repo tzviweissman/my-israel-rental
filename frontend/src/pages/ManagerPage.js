@@ -34,10 +34,10 @@ const ManagerPage = () => {
   return (
     <div className="min-h-screen" data-testid="manager-page">
       <div className="max-w-7xl mx-auto px-6 py-12">
-        <div className="bg-white rounded-2xl p-8 border border-[#E5E3DC] mb-12">
+        <div className="bg-white rounded-2xl p-8 border border-[#E5E5E5] mb-12">
           <div className="flex items-center gap-6">
-            <div className="w-24 h-24 rounded-full flex items-center justify-center" style={{ backgroundColor: '#E5E3DC' }}>
-              <User size={48} style={{ color: '#2C4A3B' }} />
+            <div className="w-24 h-24 rounded-full flex items-center justify-center" style={{ backgroundColor: '#E5E5E5' }}>
+              <User size={48} style={{ color: '#000000' }} />
             </div>
             <div>
               <h1 className="text-4xl font-bold mb-2" style={{ fontFamily: 'Playfair Display' }} data-testid="manager-name">
@@ -91,13 +91,13 @@ const ManagerPage = () => {
                   )}
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="text-2xl font-bold" style={{ color: '#2C4A3B' }}>
+                  <span className="text-2xl font-bold" style={{ color: '#000000' }}>
                     ₪{property.monthly_price || property.nightly_price}
                     <span className="text-sm font-normal text-gray-600">
                       {property.rental_type === 'vacation' ? '/night' : '/month'}
                     </span>
                   </span>
-                  <span className="text-sm px-3 py-1 rounded-full" style={{ backgroundColor: '#E5E3DC', color: '#2C4A3B' }}>
+                  <span className="text-sm px-3 py-1 rounded-full" style={{ backgroundColor: '#E5E5E5', color: '#000000' }}>
                     {property.rental_type}
                   </span>
                 </div>

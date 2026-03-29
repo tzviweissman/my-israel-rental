@@ -54,7 +54,7 @@ const Home = () => {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
-              className="flex-1 px-6 py-4 rounded-full text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#2C4A3B]"
+              className="flex-1 px-6 py-4 rounded-full text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#000000]"
               data-testid="hero-search-input"
             />
             <button onClick={handleSearch} className="primary-btn flex items-center gap-2" data-testid="hero-search-button">
@@ -110,13 +110,13 @@ const Home = () => {
                   )}
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="text-2xl font-bold" style={{ color: '#2C4A3B' }}>
+                  <span className="text-2xl font-bold" style={{ color: "#D4AF37" }}>
                     ₪{property.monthly_price || property.nightly_price}
                     <span className="text-sm font-normal text-gray-600">
                       {property.rental_type === 'vacation' ? '/night' : '/month'}
                     </span>
                   </span>
-                  <span className="text-sm px-3 py-1 rounded-full" style={{ backgroundColor: '#E5E3DC', color: '#2C4A3B' }}>
+                  <span className="text-sm px-3 py-1 rounded-full" style={{ backgroundColor: '#E5E5E5', color: '#000000' }}>
                     {property.rental_type}
                   </span>
                 </div>
@@ -126,7 +126,7 @@ const Home = () => {
         </div>
       </div>
 
-      <div className="py-16" style={{ backgroundColor: '#2C4A3B' }}>
+      <div className="py-16" style={{ backgroundColor: '#000000' }}>
         <div className="max-w-7xl mx-auto px-6 text-center text-white">
           <h2 className="text-3xl font-bold mb-4" style={{ fontFamily: 'Playfair Display' }}>
             {t('footer.contact')}
