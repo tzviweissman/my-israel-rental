@@ -210,6 +210,7 @@ const PropertyDetail = () => {
                     <span className="text-sm text-gray-600">{t('property.floor')}</span>
                   </div>
                   <p className="text-2xl font-bold">{property.floor}</p>
+                  {property.has_elevator && <p className="text-xs mt-1 font-semibold text-gray-600">Elevator{property.is_shabbat_elevator ? ' (Shabbat)' : ''}</p>}
                 </div>
               )}
               {property.porches > 0 && (
@@ -265,16 +266,6 @@ const PropertyDetail = () => {
               {property.has_agent_fee && property.agent_fee_price && (
                 <span className="px-4 py-2 rounded-full text-sm font-medium" style={{ backgroundColor: '#D4AF37', color: '#000000' }}>
                   Agent Fee: {property.agent_fee_currency === 'USD' ? '$' : '₪'}{property.agent_fee_price}
-                </span>
-              )}
-              {property.has_elevator && (
-                <span className="px-4 py-2 rounded-full text-sm font-medium" style={{ backgroundColor: '#E5E5E5', color: '#000000' }}>
-                  {t('property.elevator')}
-                </span>
-              )}
-              {property.is_shabbat_elevator && (
-                <span className="px-4 py-2 rounded-full text-sm font-medium" style={{ backgroundColor: '#D99A5B', color: 'white' }}>
-                  {t('property.shabbatElevator')}
                 </span>
               )}
               {property.furniture_package && (
