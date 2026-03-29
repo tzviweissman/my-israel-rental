@@ -24,6 +24,7 @@ const Dashboard = () => {
     floor: 1,
     has_elevator: false,
     is_shabbat_elevator: false,
+    is_tama: false,
     has_agent_fee: false,
     agent_fee_price: '',
     agent_fee_currency: 'ILS',
@@ -406,7 +407,7 @@ const Dashboard = () => {
                   )}
                 </div>
 
-                <div className="grid grid-cols-2 md:grid-cols-2 gap-6">
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
                   <div className="flex flex-col gap-2">
                     <label className="flex items-center gap-2">
                       <input
@@ -430,6 +431,18 @@ const Dashboard = () => {
                         <span className="text-sm text-gray-600">Shabbat Elevator</span>
                       </label>
                     )}
+                  </div>
+                  <div>
+                    <label className="flex items-center gap-2">
+                      <input
+                        type="checkbox"
+                        checked={propertyForm.is_tama}
+                        onChange={(e) => setPropertyForm({ ...propertyForm, is_tama: e.target.checked })}
+                        className="w-5 h-5 rounded border-[#E5E5E5]"
+                        data-testid="property-tama-checkbox"
+                      />
+                      <span>Tama (Under Construction)</span>
+                    </label>
                   </div>
                   <div className="flex flex-col gap-2">
                     <label className="flex items-center gap-2">
