@@ -125,6 +125,12 @@ class DocumentServiceRequest(BaseModel):
     tenant_id: str
     additional_info: Optional[str] = None
 
+class SiteSettings(BaseModel):
+    whatsapp_number: Optional[str] = None
+    contact_email: Optional[str] = None
+    contact_phone: Optional[str] = None
+    featured_property_ids: Optional[List[str]] = []
+
 class ContactRequest(BaseModel):
     name: str
     email: EmailStr
@@ -503,6 +509,7 @@ async def get_admin_dashboard(payload = Depends(verify_token)):
     
     total_bookings = await db.bookings.count_documents({})
     total_users = await db.users.count_documents({})
+    pending_services = await db.document_services.count_documents({"status": "pending"})
     
     recent_properties = await db.properties.find({}, {"_id": 0}).sort("created_at", -1).limit(10).to_list(10)
     
@@ -511,8 +518,59 @@ async def get_admin_dashboard(payload = Depends(verify_token)):
         "total_views": total_views[0]['total'] if total_views else 0,
         "total_inquiries": total_bookings,
         "total_users": total_users,
+        "pending_services": pending_services,
         "recent_properties": recent_properties
     }
+
+@api_router.get("/admin/users")
+async def get_all_users(payload = Depends(verify_token)):
+    if payload['role'] != 'admin':
+        raise HTTPException(status_code=403, detail="Admin access required")
+    users = await db.users.find({}, {"_id": 0, "password": 0}).sort("created_at", -1).to_list(1000)
+    return users
+
+@api_router.put("/admin/users/{user_id}/status")
+async def update_user_status(user_id: str, payload = Depends(verify_token)):
+    if payload['role'] != 'admin':
+        raise HTTPException(status_code=403, detail="Admin access required")
+    user = await db.users.find_one({"id": user_id}, {"_id": 0})
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    new_status = "blocked" if user.get("status", "active") == "active" else "active"
+    await db.users.update_one({"id": user_id}, {"$set": {"status": new_status}})
+    return {"message": f"User {new_status}", "status": new_status}
+
+@api_router.delete("/admin/users/{user_id}")
+async def delete_user(user_id: str, payload = Depends(verify_token)):
+    if payload['role'] != 'admin':
+        raise HTTPException(status_code=403, detail="Admin access required")
+    if user_id == payload['user_id']:
+        raise HTTPException(status_code=400, detail="Cannot delete your own account")
+    await db.users.delete_one({"id": user_id})
+    await db.properties.delete_many({"owner_id": user_id})
+    return {"message": "User and their properties deleted"}
+
+@api_router.get("/admin/properties")
+async def get_all_properties_admin(payload = Depends(verify_token)):
+    if payload['role'] != 'admin':
+        raise HTTPException(status_code=403, detail="Admin access required")
+    properties = await db.properties.find({}, {"_id": 0}).sort("created_at", -1).to_list(1000)
+    for prop in properties:
+        owner = await db.users.find_one({"id": prop.get("owner_id")}, {"_id": 0, "name": 1, "email": 1})
+        prop["owner_name"] = owner.get("name", "Unknown") if owner else "Unknown"
+        prop["owner_email"] = owner.get("email", "") if owner else ""
+    return properties
+
+@api_router.put("/admin/properties/{property_id}/status")
+async def toggle_property_status(property_id: str, payload = Depends(verify_token)):
+    if payload['role'] != 'admin':
+        raise HTTPException(status_code=403, detail="Admin access required")
+    prop = await db.properties.find_one({"id": property_id}, {"_id": 0})
+    if not prop:
+        raise HTTPException(status_code=404, detail="Property not found")
+    new_status = "inactive" if prop.get("status") == "active" else "active"
+    await db.properties.update_one({"id": property_id}, {"$set": {"status": new_status}})
+    return {"message": f"Property {new_status}", "status": new_status}
 
 @api_router.get("/admin/chats")
 async def get_all_chats(payload = Depends(verify_token)):
@@ -520,7 +578,70 @@ async def get_all_chats(payload = Depends(verify_token)):
         raise HTTPException(status_code=403, detail="Admin access required")
     
     messages = await db.messages.find({}, {"_id": 0}).sort("created_at", -1).to_list(1000)
-    return messages
+    
+    conversations = {}
+    for msg in messages:
+        conv_key = f"{msg['property_id']}_{min(msg['sender_id'], msg['receiver_id'])}_{max(msg['sender_id'], msg['receiver_id'])}"
+        if conv_key not in conversations:
+            prop = await db.properties.find_one({"id": msg["property_id"]}, {"_id": 0, "title": 1})
+            sender = await db.users.find_one({"id": msg["sender_id"]}, {"_id": 0, "name": 1, "role": 1})
+            receiver = await db.users.find_one({"id": msg["receiver_id"]}, {"_id": 0, "name": 1, "role": 1})
+            conversations[conv_key] = {
+                "property_id": msg["property_id"],
+                "property_title": prop.get("title", "Unknown") if prop else "Unknown",
+                "participants": [
+                    {"id": msg["sender_id"], "name": sender.get("name", "Unknown") if sender else "Unknown", "role": sender.get("role", "") if sender else ""},
+                    {"id": msg["receiver_id"], "name": receiver.get("name", "Unknown") if receiver else "Unknown", "role": receiver.get("role", "") if receiver else ""}
+                ],
+                "messages": [],
+                "last_message_time": msg["created_at"]
+            }
+        conversations[conv_key]["messages"].append({
+            "sender_id": msg["sender_id"],
+            "message": msg["message"],
+            "created_at": msg["created_at"]
+        })
+    
+    return list(conversations.values())
+
+@api_router.get("/admin/document-services")
+async def get_all_document_services(payload = Depends(verify_token)):
+    if payload['role'] != 'admin':
+        raise HTTPException(status_code=403, detail="Admin access required")
+    services = await db.document_services.find({}, {"_id": 0}).sort("created_at", -1).to_list(1000)
+    for svc in services:
+        user = await db.users.find_one({"id": svc.get("user_id")}, {"_id": 0, "name": 1, "email": 1})
+        svc["user_name"] = user.get("name", "Unknown") if user else "Unknown"
+        svc["user_email"] = user.get("email", "") if user else ""
+    return services
+
+@api_router.put("/admin/document-services/{service_id}/status")
+async def update_service_status(service_id: str, status: str, payload = Depends(verify_token)):
+    if payload['role'] != 'admin':
+        raise HTTPException(status_code=403, detail="Admin access required")
+    if status not in ["pending", "in_progress", "completed", "rejected"]:
+        raise HTTPException(status_code=400, detail="Invalid status")
+    await db.document_services.update_one({"id": service_id}, {"$set": {"status": status}})
+    return {"message": f"Service status updated to {status}"}
+
+@api_router.get("/admin/settings")
+async def get_site_settings(payload = Depends(verify_token)):
+    if payload['role'] != 'admin':
+        raise HTTPException(status_code=403, detail="Admin access required")
+    settings = await db.site_settings.find_one({"key": "global"}, {"_id": 0})
+    if not settings:
+        return {"whatsapp_number": "", "contact_email": "", "contact_phone": "", "featured_property_ids": []}
+    return settings
+
+@api_router.put("/admin/settings")
+async def update_site_settings(settings: SiteSettings, payload = Depends(verify_token)):
+    if payload['role'] != 'admin':
+        raise HTTPException(status_code=403, detail="Admin access required")
+    settings_doc = settings.model_dump()
+    settings_doc["key"] = "global"
+    settings_doc["updated_at"] = datetime.now(timezone.utc).isoformat()
+    await db.site_settings.update_one({"key": "global"}, {"$set": settings_doc}, upsert=True)
+    return {"message": "Settings updated successfully"}
 
 @api_router.get("/manager/{manager_id}/properties")
 async def get_manager_properties(manager_id: str):
