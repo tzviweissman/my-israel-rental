@@ -127,7 +127,7 @@ const Dashboard = () => {
       <div className="max-w-7xl mx-auto px-6 py-12">
         <div className="flex items-center justify-between mb-8">
           <h1 className="text-4xl font-bold" style={{ fontFamily: 'Playfair Display' }}>Dashboard</h1>
-          {user.role !== 'renter' && (
+          {user && user.role !== 'renter' && (
             <button onClick={() => setShowAddProperty(true)} className="primary-btn flex items-center gap-2" data-testid="add-property-button">
               <Plus size={20} />
               Add Property
@@ -135,8 +135,8 @@ const Dashboard = () => {
           )}
         </div>
 
-        {user.role !== 'renter' && (
-          <div className="bg-white p-6 rounded-2xl border border-[#E5E3DC] mb-8">
+        {user && user.role !== 'renter' && (
+          <div className="bg-white p-6 rounded-2xl border border-[#E5E3DC] mb-8" data-testid="manager-page-section">
             <h2 className="text-xl font-bold mb-4">Your Manager Page</h2>
             <p className="text-gray-600 mb-4">Share this link with potential renters to show all your properties:</p>
             <div className="flex gap-2">
@@ -351,7 +351,7 @@ const Dashboard = () => {
           </div>
         )}
 
-        {user.role !== 'renter' && (
+        {user && user.role !== 'renter' && (
           <div className="mb-12">
             <h2 className="text-2xl font-bold mb-6" style={{ fontFamily: 'Playfair Display' }}>My Properties</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
