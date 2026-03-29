@@ -212,6 +212,15 @@ const PropertyDetail = () => {
                   <p className="text-2xl font-bold">{property.floor}</p>
                 </div>
               )}
+              {property.porches > 0 && (
+                <div className="bg-white p-4 rounded-xl border border-[#E5E5E5]">
+                  <div className="flex items-center gap-2 mb-1">
+                    <HomeIcon size={20} style={{ color: "#D4AF37" }} />
+                    <span className="text-sm text-gray-600">{property.porches === 1 ? 'Porch' : 'Porches'}</span>
+                  </div>
+                  <p className="text-2xl font-bold">{property.porches}{property.porch_square_meters ? <span className="text-sm font-normal text-gray-500 ml-1">({property.porch_square_meters} sqm)</span> : ''}</p>
+                </div>
+              )}
             </div>
 
             <div className="bg-white p-6 rounded-2xl border border-[#E5E5E5] mb-8">
@@ -270,11 +279,6 @@ const PropertyDetail = () => {
               {property.sukkah_compatible && (
                 <span className="px-4 py-2 rounded-full text-sm font-medium" style={{ backgroundColor: '#345C45', color: 'white' }}>
                   {t('property.sukkah')}
-                </span>
-              )}
-              {property.porches > 0 && (
-                <span className="px-4 py-2 rounded-full text-sm font-medium" style={{ backgroundColor: '#E5E5E5', color: '#000000' }}>
-                  {property.porches} {property.porches === 1 ? 'Porch' : 'Porches'}{property.porch_square_meters ? ` (${property.porch_square_meters} sqm)` : ''}
                 </span>
               )}
               {property.furniture_package && (
