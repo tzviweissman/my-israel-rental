@@ -277,7 +277,7 @@ const PropertyDetail = () => {
           </div>
 
           <div className="lg:col-span-1">
-            <div className="bg-white p-6 rounded-2xl border border-[#E5E5E5] sticky top-24">
+            <div className="bg-white p-6 rounded-2xl border border-[#E5E5E5] sticky top-40">
               <div className="mb-6">
                 <span className="text-4xl font-bold" style={{ color: "#D4AF37" }}>
                   {property.currency === 'USD' ? '$' : '₪'}{property.monthly_price || property.nightly_price}
