@@ -127,12 +127,15 @@ const Home = () => {
       </div>
 
       <div className="py-16" style={{ backgroundColor: '#000000' }}>
-        <div className="max-w-7xl mx-auto px-6 text-center text-white">
+        <div className="max-w-7xl mx-auto px-6 text-center" style={{ color: '#D4AF37' }}>
           <h2 className="text-3xl font-bold mb-4" style={{ fontFamily: 'Playfair Display' }}>
             {t('footer.contact')}
           </h2>
-          <p className="text-lg">
+          <p className="text-lg mb-2">
             {t('footer.phone')}: <a href="tel:+972553225141" className="font-bold hover:underline">+972 55 322 5141</a>
+          </p>
+          <p className="text-lg">
+            Email: <a href="mailto:mir@myisraelrental.com" className="font-bold hover:underline">mir@myisraelrental.com</a>
           </p>
         </div>
       </div>
