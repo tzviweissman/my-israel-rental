@@ -23,8 +23,12 @@ const Navigation = () => {
     <nav className="glassmorphism sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-6 py-4">
         <div className="flex items-center justify-between">
-          <Link to="/" className="text-2xl font-bold" style={{ fontFamily: 'Playfair Display', color: '#D4AF37' }} data-testid="nav-logo">
-            MyIsraelRental.com
+          <Link to="/" className="flex items-center" data-testid="nav-logo">
+            <img 
+              src="https://customer-assets.emergentagent.com/job_listing-manager-pro-2/artifacts/eez1bw5g_IMG_1742.JPG" 
+              alt="MyIsraelRental" 
+              className="h-16 w-auto"
+            />
           </Link>
 
           <div className="flex items-center gap-6">
