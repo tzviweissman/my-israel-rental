@@ -219,6 +219,7 @@ const PropertyDetail = () => {
                     <span className="text-sm text-gray-600">{property.porches === 1 ? 'Porch' : 'Porches'}</span>
                   </div>
                   <p className="text-2xl font-bold">{property.porches}{property.porch_square_meters ? <span className="text-sm font-normal text-gray-500 ml-1">({property.porch_square_meters} sqm)</span> : ''}</p>
+                  {property.sukkah_compatible && <p className="text-xs mt-1" style={{ color: '#345C45', fontWeight: 600 }}>Sukkah Compatible</p>}
                 </div>
               )}
             </div>
