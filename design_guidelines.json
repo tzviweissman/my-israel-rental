@@ -1,0 +1,109 @@
+{
+  "theme": "light",
+  "archetype": "Organic & Earthy",
+  "colors": {
+    "background": "#F9F8F6",
+    "surface": "#FFFFFF",
+    "primary": "#2C4A3B",
+    "primary_hover": "#3D6652",
+    "secondary": "#D99A5B",
+    "text_main": "#1A1A1A",
+    "text_muted": "#6E6B65",
+    "border": "#E5E3DC",
+    "success": "#345C45",
+    "warning": "#C48A4D",
+    "error": "#9B3D3D",
+    "info": "#4A6E7D"
+  },
+  "typography": {
+    "heading_font": "Playfair Display",
+    "body_font": "Manrope",
+    "weights": {
+      "heading": "600, 700",
+      "body": "400, 500"
+    },
+    "scales": {
+      "h1": "text-4xl sm:text-5xl lg:text-6xl tracking-tight leading-none",
+      "h2": "text-2xl sm:text-3xl lg:text-4xl tracking-tight",
+      "h3": "text-xl sm:text-2xl",
+      "h4": "text-lg sm:text-xl",
+      "body": "text-base leading-relaxed",
+      "small": "text-sm tracking-wider"
+    }
+  },
+  "spacing_and_layout": {
+    "container_padding": "p-6 md:p-12 lg:p-16",
+    "gap_standard": "gap-8 lg:gap-12",
+    "bento_grid": "grid-cols-1 md:grid-cols-8 lg:grid-cols-12 gap-8",
+    "dashboard_grid": "grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6",
+    "border_radius": "rounded-2xl"
+  },
+  "components": {
+    "navigation": "Backdrop-blur glassmorphism (bg-white/80) with 1px border-b border-border.",
+    "buttons": "Rounded-full or rounded-xl. Primary: bg-primary text-white hover:bg-primary_hover. Secondary: border border-primary text-primary hover:bg-primary/5.",
+    "cards": "Flat solid surfaces. 1px subtle border (#E5E3DC), no shadow by default. On hover: slight lift (-translate-y-1) and shadow-lg.",
+    "inputs": "Shadcn standard but with rounded-lg, focus:ring-2 focus:ring-primary/50.",
+    "forms": "Use Shadcn Form, Input, Select, Calendar for date pickers.",
+    "data_display": "Shadcn Tables for admin dashboard. Badges for property attributes (Sukkah, Shobbos Elevator, etc)."
+  },
+  "interactive_and_motion": {
+    "hover_states": "All interactive elements must change background/text color or lift on hover.",
+    "transitions": "transition-all duration-300 ease-in-out",
+    "page_load": "Framer motion staggered fade-in up for lists."
+  },
+  "iconography": {
+    "library": "lucide-react",
+    "style": "Clean, line-based, stroke-width 1.5."
+  },
+  "images": {
+    "hero": [
+      {
+        "url": "https://images.unsplash.com/photo-1667584523543-d1d9cc828a15?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjA1NTN8MHwxfHNlYXJjaHwxfHxtb2Rlcm4lMjBsaXZpbmclMjByb29tJTIwaW50ZXJpb3J8ZW58MHx8fHwxNzc0NzUwMTM0fDA&ixlib=rb-4.1.0&q=85",
+        "description": "Modern living room, use for main hero section background",
+        "category": "hero"
+      }
+    ],
+    "properties": [
+      {
+        "url": "https://images.unsplash.com/photo-1600489000125-0345b89df4a6?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjY2NzV8MHwxfHNlYXJjaHwyfHxtb2Rlcm4lMjBiZWRyb29tJTIwaW50ZXJpb3J8ZW58MHx8fHwxNzc0NzUwMTQwfDA&ixlib=rb-4.1.0&q=85",
+        "description": "White bedroom near glass window",
+        "category": "property_bedroom"
+      },
+      {
+        "url": "https://images.pexels.com/photos/1669799/pexels-photo-1669799.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940",
+        "description": "Stylish minimalist living room",
+        "category": "property_living"
+      },
+      {
+        "url": "https://images.unsplash.com/photo-1693209079362-521e1792aeb9?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjAzNDR8MHwxfHNlYXJjaHwxfHx0ZWwlMjBhdml2JTIwYXBhcnRtZW50fGVufDB8fHx8MTc3NDc1MDEzOXww&ixlib=rb-4.1.0&q=85",
+        "description": "Building exterior",
+        "category": "property_exterior"
+      }
+    ],
+    "profiles": [
+      {
+        "url": "https://images.pexels.com/photos/7578866/pexels-photo-7578866.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940",
+        "description": "Smiling real estate agent",
+        "category": "manager_avatar"
+      }
+    ]
+  },
+  "specific_features_guidelines": {
+    "bilingual": "Design must support both LTR (English) and RTL (Hebrew). Use CSS logical properties (ps-, pe-, ms-, me-) where possible, or rely on Tailwind's dir/rtl variants.",
+    "property_attributes": "Highlight unique Jewish/Israeli attributes like 'Shobbos Elevator', 'Sukkah Balcony', and 'Arnona' with custom icon badges to stand out.",
+    "contracts": "Provide a clean multi-step upload and signing UI for English/Hebrew contracts.",
+    "admin_dashboard": "Use 'Control Room' grid. Dense, data-heavy layout for listings, views, and active chats."
+  },
+  "accessibility": {
+    "contrast": "Ensure minimum 4.5:1 contrast ratio. Primary color text over white bg.",
+    "testing": "All interactive elements MUST include data-testid attribute (e.g., data-testid='submit-listing-btn')"
+  },
+  "instructions_to_main_agent": [
+    "Initialize React with Tailwind CSS and Shadcn UI.",
+    "Apply Playfair Display for headings and Manrope for body text.",
+    "Setup RTL routing or dir='rtl' wrapper for Hebrew language toggle.",
+    "Build standard property listing cards prioritizing large image views.",
+    "Ensure the hero section uses the provided living room image with a subtle black/30 overlay.",
+    "Use lucide-react for all icons."
+  ]
+}
