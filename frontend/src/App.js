@@ -27,6 +27,7 @@ function App() {
   const { i18n } = useTranslation();
   const [user, setUser] = useState(null);
   const [token, setToken] = useState(localStorage.getItem('token'));
+  const [loading, setLoading] = useState(!!localStorage.getItem('token'));
 
   useEffect(() => {
     if (token) {
@@ -47,6 +48,8 @@ function App() {
     } catch (error) {
       console.error('Failed to fetch user', error);
       logout();
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -60,7 +63,16 @@ function App() {
     localStorage.removeItem('token');
     setToken(null);
     setUser(null);
+    setLoading(false);
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="w-8 h-8 border-4 border-black border-t-transparent rounded-full animate-spin"></div>
+      </div>
+    );
+  }
 
   return (
     <AuthContext.Provider value={{ user, token, login, logout }}>
