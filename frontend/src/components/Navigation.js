@@ -27,7 +27,7 @@ const Navigation = () => {
             <img 
               src="https://customer-assets.emergentagent.com/job_listing-manager-pro-2/artifacts/hx4hc6hw_IMG_1745%20%281%29.PNG" 
               alt="MyIsraelRental" 
-              className="h-full w-auto py-1"
+              className="h-14 w-auto"
             />
           </Link>
 
