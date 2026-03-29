@@ -768,7 +768,7 @@ const Dashboard = () => {
                     <p className="text-gray-600 text-sm mb-4">{property.area}</p>
                     <div className="flex items-center justify-between">
                       <span className="text-xl font-bold" style={{ color: '#000000' }}>
-                        ₪{property.monthly_price || property.nightly_price}
+                        {property.currency === 'USD' ? '$' : '₪'}{property.monthly_price || property.nightly_price}
                       </span>
                       <div className="flex gap-2">
                         <button onClick={() => startEditProperty(property)} className="p-2 hover:bg-gray-100 rounded-lg" data-testid={`edit-property-${property.id}`}>

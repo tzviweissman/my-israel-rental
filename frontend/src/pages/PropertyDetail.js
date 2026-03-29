@@ -284,7 +284,7 @@ const PropertyDetail = () => {
             <div className="bg-white p-6 rounded-2xl border border-[#E5E5E5] sticky top-24">
               <div className="mb-6">
                 <span className="text-4xl font-bold" style={{ color: "#D4AF37" }}>
-                  ₪{property.monthly_price || property.nightly_price}
+                  {property.currency === 'USD' ? '$' : '₪'}{property.monthly_price || property.nightly_price}
                 </span>
                 <span className="text-lg text-gray-600">
                   {property.rental_type === 'vacation' ? '/night' : '/month'}
