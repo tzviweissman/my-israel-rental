@@ -65,26 +65,6 @@ const Home = () => {
         </div>
       </div>
 
-      {/* About Us Section */}
-      <div className="py-20" style={{ backgroundColor: '#F5F5F5' }}>
-        <div className="max-w-5xl mx-auto px-6">
-          <h2 className="text-4xl sm:text-5xl font-bold mb-8 text-center" style={{ fontFamily: 'Playfair Display', color: '#000000' }}>
-            About Us
-          </h2>
-          <div className="space-y-6 text-lg leading-relaxed text-gray-700">
-            <p className="text-center text-xl mb-8" style={{ color: '#D4AF37', fontWeight: '600' }}>
-              What Our Goals Are as a Company and What We Have to Offer
-            </p>
-            <p>
-              <strong style={{ color: '#000000' }}>My Israel Rental LLC</strong> is transforming the rental landscape in Israel, offering a seamless, free, and efficient way to find apartments. Our mission is to simplify the process of renting, buying, ensuring that both tenants and property owners save time, money, and energy. With an intuitive platform that tailors property suggestions to your needs, we stand out as the go-to solution for finding the perfect home in Israel.
-            </p>
-            <p>
-              Inspired by the success of platforms like Airbnb and Zillow, My Israel Rental LLC is designed to cater specifically to the Israeli market, providing long-term rentals, short-term rentals, vacation rentals, and even machsan (storage space) rentals. We aim to make the process fluid, user-friendly, and free, creating a hassle-free experience for everyone involved.
-            </p>
-          </div>
-        </div>
-      </div>
-
       <div className="max-w-7xl mx-auto px-6 py-16">
         <h2 className="text-3xl sm:text-4xl font-bold mb-12 text-center" style={{ fontFamily: 'Playfair Display' }}>
           Featured Properties
@@ -143,6 +123,26 @@ const Home = () => {
               </div>
             </div>
           ))}
+        </div>
+      </div>
+
+      {/* About Us Section */}
+      <div className="py-20" style={{ backgroundColor: '#F5F5F5' }}>
+        <div className="max-w-5xl mx-auto px-6">
+          <h2 className="text-4xl sm:text-5xl font-bold mb-8 text-center" style={{ fontFamily: 'Playfair Display', color: '#000000' }}>
+            About Us
+          </h2>
+          <div className="space-y-6 text-lg leading-relaxed text-gray-700">
+            <p className="text-center text-xl mb-8" style={{ color: '#D4AF37', fontWeight: '600' }}>
+              What Our Goals Are as a Company and What We Have to Offer
+            </p>
+            <p>
+              <strong style={{ color: '#000000' }}>My Israel Rental LLC</strong> is transforming the rental landscape in Israel, offering a seamless, free, and efficient way to find apartments. Our mission is to simplify the process of renting, buying, ensuring that both tenants and property owners save time, money, and energy. With an intuitive platform that tailors property suggestions to your needs, we stand out as the go-to solution for finding the perfect home in Israel.
+            </p>
+            <p>
+              Inspired by the success of platforms like Airbnb and Zillow, My Israel Rental LLC is designed to cater specifically to the Israeli market, providing long-term rentals, short-term rentals, vacation rentals, and even machsan (storage space) rentals. We aim to make the process fluid, user-friendly, and free, creating a hassle-free experience for everyone involved.
+            </p>
+          </div>
         </div>
       </div>
 
