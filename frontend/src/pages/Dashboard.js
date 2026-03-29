@@ -374,6 +374,21 @@ const Dashboard = () => {
                       </>
                     )}
                   </div>
+                  {propertyForm.rental_type === 'long-term' && (
+                    <div>
+                      <label className="block text-sm font-medium mb-2">Furniture Option</label>
+                      <select
+                        value={propertyForm.furniture_option}
+                        onChange={(e) => setPropertyForm({ ...propertyForm, furniture_option: e.target.value })}
+                        className="w-full px-4 py-2 rounded-lg border border-[#E5E5E5] focus:outline-none focus:ring-2 focus:ring-[#000000]/50"
+                        data-testid="property-furniture-select"
+                      >
+                        <option value="no_furniture">No Furniture</option>
+                        <option value="furniture_package">Furniture Package</option>
+                        <option value="furniture_free">Furniture Free</option>
+                      </select>
+                    </div>
+                  )}
                 </div>
 
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
@@ -401,21 +416,6 @@ const Dashboard = () => {
                       </label>
                     )}
                   </div>
-                  {propertyForm.rental_type === 'long-term' && (
-                    <div>
-                      <label className="block text-sm font-medium mb-2">Furniture Option</label>
-                      <select
-                        value={propertyForm.furniture_option}
-                        onChange={(e) => setPropertyForm({ ...propertyForm, furniture_option: e.target.value })}
-                        className="w-full px-4 py-2 rounded-lg border border-[#E5E5E5] focus:outline-none focus:ring-2 focus:ring-[#000000]/50"
-                        data-testid="property-furniture-select"
-                      >
-                        <option value="no_furniture">No Furniture</option>
-                        <option value="furniture_package">Furniture Package</option>
-                        <option value="furniture_free">Furniture Free</option>
-                      </select>
-                    </div>
-                  )}
                 </div>
 
                 <div className="flex gap-4">
