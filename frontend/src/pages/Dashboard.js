@@ -71,7 +71,15 @@ const Dashboard = () => {
   const handleAddProperty = async (e) => {
     e.preventDefault();
     try {
-      await axios.post(`${API}/properties`, propertyForm, {
+      // Convert empty strings to null for optional numeric fields
+      const cleanedForm = {
+        ...propertyForm,
+        square_meters: propertyForm.square_meters === '' ? null : propertyForm.square_meters,
+        agent_fee_price: propertyForm.agent_fee_price === '' ? null : propertyForm.agent_fee_price,
+        monthly_price: propertyForm.monthly_price === '' ? null : propertyForm.monthly_price,
+        nightly_price: propertyForm.nightly_price === '' ? null : propertyForm.nightly_price,
+      };
+      await axios.post(`${API}/properties`, cleanedForm, {
         headers: { Authorization: `Bearer ${token}` }
       });
       toast.success('Property added successfully!');
@@ -90,13 +98,18 @@ const Dashboard = () => {
         floor: 1,
         has_elevator: false,
         is_shabbat_elevator: false,
+        is_tama: false,
+        has_agent_fee: false,
+        agent_fee_price: '',
+        agent_fee_currency: 'ILS',
         porches: 0,
         sukkah_compatible: false,
         condition: 'good',
-        furniture_package: false,
+        furniture_option: 'no_furniture',
         amenities: [],
         monthly_price: '',
         nightly_price: '',
+        currency: 'ILS',
         images: []
       });
     } catch (error) {
@@ -353,6 +366,19 @@ const Dashboard = () => {
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <label className="block text-sm font-medium mb-2">Property Condition</label>
+                    <select
+                      value={propertyForm.condition}
+                      onChange={(e) => setPropertyForm({ ...propertyForm, condition: e.target.value })}
+                      className="w-full px-4 py-2 rounded-lg border border-[#E5E5E5] focus:outline-none focus:ring-2 focus:ring-[#000000]/50"
+                      data-testid="property-condition-select"
+                    >
+                      <option value="renovated">Renovated</option>
+                      <option value="partially_renovated">Partially Renovated</option>
+                      <option value="good">Good Condition</option>
+                    </select>
+                  </div>
                   <div>
                     <label className="block text-sm font-medium mb-2">Number of Porches</label>
                     <input

@@ -67,22 +67,26 @@ class PropertyCreate(BaseModel):
     description: str
     rental_type: str
     property_type: str
-    bedrooms: Optional[int] = None
-    bathrooms: Optional[int] = None
+    bedrooms: Optional[float] = None
+    bathrooms: Optional[float] = None
     area: str
     address: str
     square_meters: Optional[float] = None
-    floor: Optional[int] = None
+    floor: Optional[float] = None
     has_elevator: Optional[bool] = False
     is_shabbat_elevator: Optional[bool] = False
+    is_tama: Optional[bool] = False
+    has_agent_fee: Optional[bool] = False
+    agent_fee_price: Optional[float] = None
+    agent_fee_currency: Optional[str] = 'ILS'
     porches: Optional[int] = 0
     sukkah_compatible: Optional[bool] = False
-    condition: Optional[str] = None
-    furniture_package: Optional[bool] = False
-    furniture_price: Optional[float] = None
+    condition: Optional[str] = 'good'
+    furniture_option: Optional[str] = 'no_furniture'
     amenities: Optional[List[str]] = []
     monthly_price: Optional[float] = None
     nightly_price: Optional[float] = None
+    currency: Optional[str] = 'ILS'
     images: Optional[List[str]] = []
     videos: Optional[List[str]] = []
     ical_url: Optional[str] = None
