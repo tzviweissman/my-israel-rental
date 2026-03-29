@@ -25,13 +25,9 @@ const Navigation = () => {
         <div className="flex items-center justify-between">
           <Link to="/" className="flex items-center" data-testid="nav-logo">
             <img 
-              src="https://customer-assets.emergentagent.com/job_listing-manager-pro-2/artifacts/eez1bw5g_IMG_1742.JPG" 
+              src="https://customer-assets.emergentagent.com/job_listing-manager-pro-2/artifacts/hx4hc6hw_IMG_1745%20%281%29.PNG" 
               alt="MyIsraelRental" 
-              className="h-28 w-auto"
-              style={{ 
-                filter: 'brightness(2) contrast(1.5) saturate(1.2)',
-                mixBlendMode: 'lighten'
-              }}
+              className="h-32 w-auto"
             />
           </Link>
 
