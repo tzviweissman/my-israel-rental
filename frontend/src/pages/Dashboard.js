@@ -14,6 +14,7 @@ const Dashboard = () => {
   const [uploadedFiles, setUploadedFiles] = useState([]);
   const [uploading, setUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
+  const [editingPropertyId, setEditingPropertyId] = useState(null);
   const [propertyForm, setPropertyForm] = useState({
     title: '',
     description: '',
@@ -119,6 +120,44 @@ const Dashboard = () => {
     }));
   };
 
+  const startEditProperty = (property) => {
+    setPropertyForm({
+      title: property.title || '',
+      description: property.description || '',
+      rental_type: property.rental_type || 'long-term',
+      property_type: property.property_type || 'apartment',
+      bedrooms: property.bedrooms || 1,
+      bathrooms: property.bathrooms || 1,
+      area: property.area || '',
+      address: property.address || '',
+      square_meters: property.square_meters || '',
+      floor: property.floor || 1,
+      has_elevator: property.has_elevator || false,
+      is_shabbat_elevator: property.is_shabbat_elevator || false,
+      is_tama: property.is_tama || false,
+      has_agent_fee: property.has_agent_fee || false,
+      agent_fee_price: property.agent_fee_price || '',
+      agent_fee_currency: property.agent_fee_currency || 'ILS',
+      porches: property.porches || 0,
+      sukkah_compatible: property.sukkah_compatible || false,
+      condition: property.condition || 'good',
+      furniture_option: property.furniture_option || 'no_furniture',
+      amenities: property.amenities || [],
+      monthly_price: property.monthly_price || '',
+      nightly_price: property.nightly_price || '',
+      currency: property.currency || 'ILS',
+      images: property.images || [],
+      videos: property.videos || []
+    });
+    setUploadedFiles((property.images || []).map((url, i) => ({
+      url, file_type: 'image', filename: url.split('/').pop(), original_name: `Image ${i + 1}`
+    })).concat((property.videos || []).map((url, i) => ({
+      url, file_type: 'video', filename: url.split('/').pop(), original_name: `Video ${i + 1}`
+    }))));
+    setEditingPropertyId(property.id);
+    setShowAddProperty(true);
+  };
+
   const handleAddProperty = async (e) => {
     e.preventDefault();
     try {
@@ -130,11 +169,19 @@ const Dashboard = () => {
         monthly_price: propertyForm.monthly_price === '' ? null : propertyForm.monthly_price,
         nightly_price: propertyForm.nightly_price === '' ? null : propertyForm.nightly_price,
       };
-      await axios.post(`${API}/properties`, cleanedForm, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      toast.success('Property added successfully!');
+      if (editingPropertyId) {
+        await axios.put(`${API}/properties/${editingPropertyId}`, cleanedForm, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        toast.success('Property updated successfully!');
+      } else {
+        await axios.post(`${API}/properties`, cleanedForm, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        toast.success('Property added successfully!');
+      }
       setShowAddProperty(false);
+      setEditingPropertyId(null);
       fetchProperties();
       setPropertyForm({
         title: '',
@@ -199,7 +246,7 @@ const Dashboard = () => {
         <div className="flex items-center justify-between mb-8">
           <h1 className="text-4xl font-bold" style={{ fontFamily: 'Playfair Display' }}>Dashboard</h1>
           {user && user.role !== 'renter' && (
-            <button onClick={() => setShowAddProperty(true)} className="primary-btn flex items-center gap-2" data-testid="add-property-button">
+            <button onClick={() => { setEditingPropertyId(null); setUploadedFiles([]); setPropertyForm({ title: '', description: '', rental_type: 'long-term', property_type: 'apartment', bedrooms: 1, bathrooms: 1, area: '', address: '', square_meters: '', floor: 1, has_elevator: false, is_shabbat_elevator: false, is_tama: false, has_agent_fee: false, agent_fee_price: '', agent_fee_currency: 'ILS', porches: 0, sukkah_compatible: false, condition: 'good', furniture_option: 'no_furniture', amenities: [], monthly_price: '', nightly_price: '', currency: 'ILS', images: [], videos: [] }); setShowAddProperty(true); }} className="primary-btn flex items-center gap-2" data-testid="add-property-button">
               <Plus size={20} />
               Add Property
             </button>
@@ -228,7 +275,7 @@ const Dashboard = () => {
         {showAddProperty && (
           <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-6" data-testid="add-property-modal">
             <div className="bg-white rounded-2xl p-8 max-w-4xl w-full max-h-[90vh] overflow-y-auto">
-              <h2 className="text-3xl font-bold mb-6" style={{ fontFamily: 'Playfair Display' }}>Add New Property</h2>
+              <h2 className="text-3xl font-bold mb-6" style={{ fontFamily: 'Playfair Display' }}>{editingPropertyId ? 'Edit Property' : 'Add New Property'}</h2>
               <form onSubmit={handleAddProperty} className="space-y-6">
                 <div>
                   <label className="block text-sm font-medium mb-2">Title</label>
@@ -694,9 +741,9 @@ const Dashboard = () => {
 
                 <div className="flex gap-4">
                   <button type="submit" className="flex-1 primary-btn" data-testid="submit-property-button">
-                    Add Property
+                    {editingPropertyId ? 'Save Changes' : 'Add Property'}
                   </button>
-                  <button type="button" onClick={() => setShowAddProperty(false)} className="flex-1 secondary-btn" data-testid="cancel-add-property-button">
+                  <button type="button" onClick={() => { setShowAddProperty(false); setEditingPropertyId(null); }} className="flex-1 secondary-btn" data-testid="cancel-add-property-button">
                     Cancel
                   </button>
                 </div>
@@ -724,6 +771,9 @@ const Dashboard = () => {
                         ₪{property.monthly_price || property.nightly_price}
                       </span>
                       <div className="flex gap-2">
+                        <button onClick={() => startEditProperty(property)} className="p-2 hover:bg-gray-100 rounded-lg" data-testid={`edit-property-${property.id}`}>
+                          <Edit size={18} />
+                        </button>
                         <button onClick={() => navigate(`/property/${property.id}`)} className="p-2 hover:bg-gray-100 rounded-lg" data-testid={`view-property-${property.id}`}>
                           <Eye size={18} />
                         </button>
