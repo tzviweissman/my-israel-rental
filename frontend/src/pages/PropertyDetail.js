@@ -272,6 +272,11 @@ const PropertyDetail = () => {
                   {t('property.sukkah')}
                 </span>
               )}
+              {property.porches > 0 && (
+                <span className="px-4 py-2 rounded-full text-sm font-medium" style={{ backgroundColor: '#E5E5E5', color: '#000000' }}>
+                  {property.porches} {property.porches === 1 ? 'Porch' : 'Porches'}{property.porch_square_meters ? ` (${property.porch_square_meters} sqm)` : ''}
+                </span>
+              )}
               {property.furniture_package && (
                 <span className="px-4 py-2 rounded-full text-sm font-medium" style={{ backgroundColor: '#E5E5E5', color: '#000000' }}>
                   {t('property.furniture')}
