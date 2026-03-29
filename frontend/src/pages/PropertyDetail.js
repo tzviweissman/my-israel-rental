@@ -219,7 +219,7 @@ const PropertyDetail = () => {
                 <div className="grid grid-cols-2 gap-3">
                   {property.amenities.map((amenity, index) => {
                     const iconMap = {
-                      'Air conditioning / Central heating': Snowflake,
+                      'Central AC / Heating': Snowflake,
                       'In-unit washer and dryer': WashingMachine,
                       'Dishwasher': UtensilsCrossed,
                       'Walk in Closets': DoorOpen,

@@ -623,7 +623,7 @@ const Dashboard = () => {
                   <label className="block text-sm font-medium mb-4">Amenities</label>
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
                     {[
-                      'Air conditioning / Central heating',
+                      'Central AC / Heating',
                       'In-unit washer and dryer',
                       'Dishwasher',
                       'Walk in Closets',
