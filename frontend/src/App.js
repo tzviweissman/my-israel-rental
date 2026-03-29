@@ -6,6 +6,7 @@ import './i18n';
 import '@/App.css';
 
 import Navigation from './components/Navigation';
+import WhatsAppButton from './components/WhatsAppButton';
 import Home from './pages/Home';
 import Properties from './pages/Properties';
 import PropertyDetail from './pages/PropertyDetail';
@@ -65,6 +66,7 @@ function App() {
       <BrowserRouter>
         <div className="App">
           <Navigation />
+          <WhatsAppButton />
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/properties/:type" element={<Properties />} />
