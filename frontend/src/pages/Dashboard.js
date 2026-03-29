@@ -256,7 +256,7 @@ const Dashboard = () => {
                       <option value="6">6+</option>
                     </select>
                   </div>
-                  <div>
+                  <div className="flex flex-col gap-2">
                     <label className="block text-sm font-medium mb-2">Area</label>
                     <input
                       type="text"
@@ -266,6 +266,20 @@ const Dashboard = () => {
                       required
                       data-testid="property-area-input"
                     />
+                    {propertyForm.area && (
+                      <div className="ml-2">
+                        <label className="block text-sm text-gray-600 mb-1">Square Meters</label>
+                        <input
+                          type="number"
+                          value={propertyForm.square_meters}
+                          onChange={(e) => setPropertyForm({ ...propertyForm, square_meters: parseFloat(e.target.value) })}
+                          min="0"
+                          step="0.1"
+                          className="w-full px-3 py-2 rounded-lg border border-[#E5E5E5] focus:outline-none focus:ring-2 focus:ring-[#000000]/50 text-sm"
+                          data-testid="property-sqm-input"
+                        />
+                      </div>
+                    )}
                   </div>
                   <div>
                     <label className="block text-sm font-medium mb-2">Address</label>
@@ -276,18 +290,6 @@ const Dashboard = () => {
                       className="w-full px-4 py-2 rounded-lg border border-[#E5E5E5] focus:outline-none focus:ring-2 focus:ring-[#000000]/50"
                       required
                       data-testid="property-address-input"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium mb-2">Square Meters</label>
-                    <input
-                      type="number"
-                      value={propertyForm.square_meters}
-                      onChange={(e) => setPropertyForm({ ...propertyForm, square_meters: parseFloat(e.target.value) })}
-                      min="0"
-                      step="0.1"
-                      className="w-full px-4 py-2 rounded-lg border border-[#E5E5E5] focus:outline-none focus:ring-2 focus:ring-[#000000]/50"
-                      data-testid="property-sqm-input"
                     />
                   </div>
                   <div>
