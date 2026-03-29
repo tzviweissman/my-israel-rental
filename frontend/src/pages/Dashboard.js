@@ -26,6 +26,7 @@ const Dashboard = () => {
     is_shabbat_elevator: false,
     has_agent_fee: false,
     agent_fee_price: '',
+    agent_fee_currency: 'ILS',
     porches: 0,
     sukkah_compatible: false,
     condition: 'good',
@@ -443,15 +444,26 @@ const Dashboard = () => {
                     </label>
                     {propertyForm.has_agent_fee && (
                       <div className="ml-7">
-                        <input
-                          type="number"
-                          value={propertyForm.agent_fee_price}
-                          onChange={(e) => setPropertyForm({ ...propertyForm, agent_fee_price: parseFloat(e.target.value) })}
-                          placeholder="Fee amount"
-                          min="0"
-                          className="w-full px-3 py-2 rounded-lg border border-[#E5E5E5] focus:outline-none focus:ring-2 focus:ring-[#000000]/50 text-sm"
-                          data-testid="property-agent-fee-input"
-                        />
+                        <div className="flex gap-2">
+                          <input
+                            type="number"
+                            value={propertyForm.agent_fee_price}
+                            onChange={(e) => setPropertyForm({ ...propertyForm, agent_fee_price: parseFloat(e.target.value) })}
+                            placeholder="Fee amount"
+                            min="0"
+                            className="flex-1 px-3 py-2 rounded-lg border border-[#E5E5E5] focus:outline-none focus:ring-2 focus:ring-[#000000]/50 text-sm"
+                            data-testid="property-agent-fee-input"
+                          />
+                          <select
+                            value={propertyForm.agent_fee_currency}
+                            onChange={(e) => setPropertyForm({ ...propertyForm, agent_fee_currency: e.target.value })}
+                            className="px-3 py-2 rounded-lg border border-[#E5E5E5] focus:outline-none focus:ring-2 focus:ring-[#000000]/50 text-sm"
+                            data-testid="property-agent-fee-currency-select"
+                          >
+                            <option value="ILS">₪</option>
+                            <option value="USD">$</option>
+                          </select>
+                        </div>
                       </div>
                     )}
                   </div>
