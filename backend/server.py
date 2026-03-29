@@ -74,6 +74,7 @@ class PropertyCreate(BaseModel):
     area: str
     address: str
     square_meters: Optional[float] = None
+    porch_square_meters: Optional[float] = None
     floor: Optional[float] = None
     has_elevator: Optional[bool] = False
     is_shabbat_elevator: Optional[bool] = False

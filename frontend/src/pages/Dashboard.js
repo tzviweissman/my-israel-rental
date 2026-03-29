@@ -25,6 +25,7 @@ const Dashboard = () => {
     area: '',
     address: '',
     square_meters: '',
+    porch_square_meters: '',
     floor: 1,
     has_elevator: false,
     is_shabbat_elevator: false,
@@ -131,6 +132,7 @@ const Dashboard = () => {
       area: property.area || '',
       address: property.address || '',
       square_meters: property.square_meters || '',
+      porch_square_meters: property.porch_square_meters || '',
       floor: property.floor || 1,
       has_elevator: property.has_elevator || false,
       is_shabbat_elevator: property.is_shabbat_elevator || false,
@@ -165,6 +167,7 @@ const Dashboard = () => {
       const cleanedForm = {
         ...propertyForm,
         square_meters: propertyForm.square_meters === '' ? null : propertyForm.square_meters,
+        porch_square_meters: propertyForm.porch_square_meters === '' ? null : propertyForm.porch_square_meters,
         agent_fee_price: propertyForm.agent_fee_price === '' ? null : propertyForm.agent_fee_price,
         monthly_price: propertyForm.monthly_price === '' ? null : propertyForm.monthly_price,
         nightly_price: propertyForm.nightly_price === '' ? null : propertyForm.nightly_price,
@@ -193,6 +196,7 @@ const Dashboard = () => {
         area: '',
         address: '',
         square_meters: '',
+    porch_square_meters: '',
         floor: 1,
         has_elevator: false,
         is_shabbat_elevator: false,
@@ -352,6 +356,19 @@ const Dashboard = () => {
                       data-testid="property-address-input"
                     />
                   </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-2">Square Meters</label>
+                    <input
+                      type="number"
+                      value={propertyForm.square_meters}
+                      onChange={(e) => setPropertyForm({ ...propertyForm, square_meters: parseFloat(e.target.value) || '' })}
+                      min="0"
+                      step="0.1"
+                      placeholder="Total apartment size"
+                      className="w-full px-4 py-2 rounded-lg border border-[#E5E5E5] focus:outline-none focus:ring-2 focus:ring-[#000000]/50"
+                      data-testid="property-sqm-input"
+                    />
+                  </div>
                   {propertyForm.rental_type !== 'storage' && (
                   <div>
                     <label className="block text-sm font-medium mb-2">Bedrooms</label>
@@ -501,15 +518,15 @@ const Dashboard = () => {
                     {propertyForm.porches > 0 && (
                       <>
                         <div className="ml-2 mt-2">
-                          <label className="block text-sm text-gray-600 mb-1">Square Meters</label>
+                          <label className="block text-sm text-gray-600 mb-1">Porch Square Meters</label>
                           <input
                             type="number"
-                            value={propertyForm.square_meters}
-                            onChange={(e) => setPropertyForm({ ...propertyForm, square_meters: parseFloat(e.target.value) })}
+                            value={propertyForm.porch_square_meters}
+                            onChange={(e) => setPropertyForm({ ...propertyForm, porch_square_meters: parseFloat(e.target.value) || '' })}
                             min="0"
                             step="0.1"
                             className="w-full px-3 py-2 rounded-lg border border-[#E5E5E5] focus:outline-none focus:ring-2 focus:ring-[#000000]/50 text-sm"
-                            data-testid="property-sqm-input"
+                            data-testid="property-porch-sqm-input"
                           />
                         </div>
                         <label className="flex items-center gap-2 ml-2 mt-2">
