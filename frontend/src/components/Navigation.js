@@ -21,13 +21,13 @@ const Navigation = () => {
 
   return (
     <nav className="sticky top-0 z-50" style={{ backgroundColor: '#1a1a1a', borderBottom: '1px solid #D4AF37' }}>
-      <div className="max-w-7xl mx-auto px-6" style={{ height: '140px' }}>
+      <div className="max-w-7xl mx-auto px-6" style={{ height: '120px' }}>
         <div className="flex items-center justify-between h-full">
           <Link to="/" className="flex items-center" data-testid="nav-logo">
             <img 
               src="https://customer-assets.emergentagent.com/job_listing-manager-pro-2/artifacts/hx4hc6hw_IMG_1745%20%281%29.PNG" 
               alt="MyIsraelRental" 
-              className="w-auto" style={{ height: '130px' }}
+              className="w-auto" style={{ height: '140px' }}
             />
           </Link>
 
