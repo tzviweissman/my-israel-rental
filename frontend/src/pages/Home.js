@@ -76,10 +76,10 @@ const Home = () => {
               What Our Goals Are as a Company and What We Have to Offer
             </p>
             <p>
-              <strong style={{ color: '#000000' }}>My Israel Rental</strong> is transforming the rental landscape in Israel, offering a seamless, free, and efficient way to find apartments. Our mission is to simplify the process of renting, buying, ensuring that both tenants and property owners save time, money, and energy. With an intuitive platform that tailors property suggestions to your needs, we stand out as the go-to solution for finding the perfect home in Israel.
+              <strong style={{ color: '#000000' }}>My Israel Rental LLC</strong> is transforming the rental landscape in Israel, offering a seamless, free, and efficient way to find apartments. Our mission is to simplify the process of renting, buying, ensuring that both tenants and property owners save time, money, and energy. With an intuitive platform that tailors property suggestions to your needs, we stand out as the go-to solution for finding the perfect home in Israel.
             </p>
             <p>
-              Inspired by the success of platforms like Airbnb and Zillow, My Israel Rental is designed to cater specifically to the Israeli market, providing long-term rentals, short-term rentals, vacation rentals, and even machsan (storage space) rentals. We aim to make the process fluid, user-friendly, and free, creating a hassle-free experience for everyone involved.
+              Inspired by the success of platforms like Airbnb and Zillow, My Israel Rental LLC is designed to cater specifically to the Israeli market, providing long-term rentals, short-term rentals, vacation rentals, and even machsan (storage space) rentals. We aim to make the process fluid, user-friendly, and free, creating a hassle-free experience for everyone involved.
             </p>
           </div>
         </div>
