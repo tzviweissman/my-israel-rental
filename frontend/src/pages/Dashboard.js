@@ -349,28 +349,30 @@ const Dashboard = () => {
                 </div>
 
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                  <label className="flex items-center gap-2">
-                    <input
-                      type="checkbox"
-                      checked={propertyForm.has_elevator}
-                      onChange={(e) => setPropertyForm({ ...propertyForm, has_elevator: e.target.checked, is_shabbat_elevator: e.target.checked ? propertyForm.is_shabbat_elevator : false })}
-                      className="w-5 h-5 rounded border-[#E5E5E5]"
-                      data-testid="property-elevator-checkbox"
-                    />
-                    <span>Has Elevator</span>
-                  </label>
-                  {propertyForm.has_elevator && (
+                  <div className="flex flex-col gap-2">
                     <label className="flex items-center gap-2">
                       <input
                         type="checkbox"
-                        checked={propertyForm.is_shabbat_elevator}
-                        onChange={(e) => setPropertyForm({ ...propertyForm, is_shabbat_elevator: e.target.checked })}
+                        checked={propertyForm.has_elevator}
+                        onChange={(e) => setPropertyForm({ ...propertyForm, has_elevator: e.target.checked, is_shabbat_elevator: e.target.checked ? propertyForm.is_shabbat_elevator : false })}
                         className="w-5 h-5 rounded border-[#E5E5E5]"
-                        data-testid="property-shabbat-elevator-checkbox"
+                        data-testid="property-elevator-checkbox"
                       />
-                      <span>Shabbat Elevator</span>
+                      <span>Has Elevator</span>
                     </label>
-                  )}
+                    {propertyForm.has_elevator && (
+                      <label className="flex items-center gap-2 ml-7">
+                        <input
+                          type="checkbox"
+                          checked={propertyForm.is_shabbat_elevator}
+                          onChange={(e) => setPropertyForm({ ...propertyForm, is_shabbat_elevator: e.target.checked })}
+                          className="w-4 h-4 rounded border-[#E5E5E5]"
+                          data-testid="property-shabbat-elevator-checkbox"
+                        />
+                        <span className="text-sm text-gray-600">Shabbat Elevator</span>
+                      </label>
+                    )}
+                  </div>
                   <label className="flex items-center gap-2">
                     <input
                       type="checkbox"
