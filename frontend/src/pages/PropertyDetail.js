@@ -277,11 +277,6 @@ const PropertyDetail = () => {
                   {t('property.shabbatElevator')}
                 </span>
               )}
-              {property.sukkah_compatible && (
-                <span className="px-4 py-2 rounded-full text-sm font-medium" style={{ backgroundColor: '#345C45', color: 'white' }}>
-                  {t('property.sukkah')}
-                </span>
-              )}
               {property.furniture_package && (
                 <span className="px-4 py-2 rounded-full text-sm font-medium" style={{ backgroundColor: '#E5E5E5', color: '#000000' }}>
                   {t('property.furniture')}
