@@ -79,12 +79,22 @@ const PropertyDetail = () => {
             <div className="mb-6">
               {property.images && property.images.length > 0 ? (
                 <div className="relative" data-testid="image-gallery">
-                  <img
-                    src={property.images[currentImageIndex].startsWith('/api') ? `${API.replace('/api', '')}${property.images[currentImageIndex]}` : property.images[currentImageIndex]}
-                    alt={`${property.title} - ${currentImageIndex + 1}`}
-                    className="w-full h-96 object-cover rounded-2xl"
-                    data-testid="gallery-main-image"
-                  />
+                  <div className="overflow-hidden rounded-2xl">
+                    <div
+                      className="flex transition-transform duration-500 ease-in-out"
+                      style={{ transform: `translateX(-${currentImageIndex * 100}%)` }}
+                    >
+                      {property.images.map((img, idx) => (
+                        <img
+                          key={idx}
+                          src={img.startsWith('/api') ? `${API.replace('/api', '')}${img}` : img}
+                          alt={`${property.title} - ${idx + 1}`}
+                          className="w-full h-96 object-cover flex-shrink-0"
+                          data-testid={idx === currentImageIndex ? 'gallery-main-image' : undefined}
+                        />
+                      ))}
+                    </div>
+                  </div>
                   {property.images.length > 1 && (
                     <>
                       <button
