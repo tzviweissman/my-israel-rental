@@ -353,22 +353,24 @@ const Dashboard = () => {
                     <input
                       type="checkbox"
                       checked={propertyForm.has_elevator}
-                      onChange={(e) => setPropertyForm({ ...propertyForm, has_elevator: e.target.checked })}
+                      onChange={(e) => setPropertyForm({ ...propertyForm, has_elevator: e.target.checked, is_shabbat_elevator: e.target.checked ? propertyForm.is_shabbat_elevator : false })}
                       className="w-5 h-5 rounded border-[#E5E5E5]"
                       data-testid="property-elevator-checkbox"
                     />
                     <span>Has Elevator</span>
                   </label>
-                  <label className="flex items-center gap-2">
-                    <input
-                      type="checkbox"
-                      checked={propertyForm.is_shabbat_elevator}
-                      onChange={(e) => setPropertyForm({ ...propertyForm, is_shabbat_elevator: e.target.checked })}
-                      className="w-5 h-5 rounded border-[#E5E5E5]"
-                      data-testid="property-shabbat-elevator-checkbox"
-                    />
-                    <span>Shabbat Elevator</span>
-                  </label>
+                  {propertyForm.has_elevator && (
+                    <label className="flex items-center gap-2">
+                      <input
+                        type="checkbox"
+                        checked={propertyForm.is_shabbat_elevator}
+                        onChange={(e) => setPropertyForm({ ...propertyForm, is_shabbat_elevator: e.target.checked })}
+                        className="w-5 h-5 rounded border-[#E5E5E5]"
+                        data-testid="property-shabbat-elevator-checkbox"
+                      />
+                      <span>Shabbat Elevator</span>
+                    </label>
+                  )}
                   <label className="flex items-center gap-2">
                     <input
                       type="checkbox"
