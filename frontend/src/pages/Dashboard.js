@@ -279,13 +279,42 @@ const Dashboard = () => {
                   </div>
                   <div>
                     <label className="block text-sm font-medium mb-2">Floor</label>
-                    <input
-                      type="number"
+                    <select
                       value={propertyForm.floor}
-                      onChange={(e) => setPropertyForm({ ...propertyForm, floor: parseInt(e.target.value) })}
+                      onChange={(e) => setPropertyForm({ ...propertyForm, floor: parseFloat(e.target.value) })}
                       className="w-full px-4 py-2 rounded-lg border border-[#E5E5E5] focus:outline-none focus:ring-2 focus:ring-[#000000]/50"
                       data-testid="property-floor-input"
-                    />
+                    >
+                      <option value="-2">Basement 2</option>
+                      <option value="-1">Basement 1</option>
+                      <option value="0">Ground Floor</option>
+                      <option value="0.5">Mezzanine</option>
+                      <option value="1">1</option>
+                      <option value="1.5">1.5</option>
+                      <option value="2">2</option>
+                      <option value="2.5">2.5</option>
+                      <option value="3">3</option>
+                      <option value="3.5">3.5</option>
+                      <option value="4">4</option>
+                      <option value="4.5">4.5</option>
+                      <option value="5">5</option>
+                      <option value="5.5">5.5</option>
+                      <option value="6">6</option>
+                      <option value="6.5">6.5</option>
+                      <option value="7">7</option>
+                      <option value="7.5">7.5</option>
+                      <option value="8">8</option>
+                      <option value="8.5">8.5</option>
+                      <option value="9">9</option>
+                      <option value="9.5">9.5</option>
+                      <option value="10">10</option>
+                      <option value="11">11</option>
+                      <option value="12">12</option>
+                      <option value="13">13</option>
+                      <option value="14">14</option>
+                      <option value="15">15</option>
+                      <option value="20">20+</option>
+                    </select>
                   </div>
                   <div>
                     <label className="block text-sm font-medium mb-2">Price {propertyForm.rental_type === 'vacation' ? '(per night)' : '(monthly)'}</label>
