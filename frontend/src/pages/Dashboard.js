@@ -216,6 +216,7 @@ const Dashboard = () => {
                       <option value="storage">Storage</option>
                     </select>
                   </div>
+                  {propertyForm.rental_type !== 'storage' && (
                   <div>
                     <label className="block text-sm font-medium mb-2">Property Type</label>
                     <select
@@ -228,6 +229,7 @@ const Dashboard = () => {
                       <option value="house">House</option>
                     </select>
                   </div>
+                  )}
                   <div>
                     <label className="block text-sm font-medium mb-2">Property Location</label>
                     <input
@@ -250,6 +252,7 @@ const Dashboard = () => {
                       data-testid="property-address-input"
                     />
                   </div>
+                  {propertyForm.rental_type !== 'storage' && (
                   <div>
                     <label className="block text-sm font-medium mb-2">Bedrooms</label>
                     <select
@@ -275,6 +278,8 @@ const Dashboard = () => {
                       <option value="8">8+</option>
                     </select>
                   </div>
+                  )}
+                  {propertyForm.rental_type !== 'storage' && (
                   <div>
                     <label className="block text-sm font-medium mb-2">Bathrooms</label>
                     <select
@@ -296,6 +301,7 @@ const Dashboard = () => {
                       <option value="6">6+</option>
                     </select>
                   </div>
+                  )}
                   <div>
                     <label className="block text-sm font-medium mb-2">Floor</label>
                     <select
@@ -366,6 +372,7 @@ const Dashboard = () => {
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {propertyForm.rental_type !== 'storage' && (
                   <div>
                     <label className="block text-sm font-medium mb-2">Property Condition</label>
                     <select
@@ -379,6 +386,8 @@ const Dashboard = () => {
                       <option value="good">Good Condition</option>
                     </select>
                   </div>
+                  )}
+                  {propertyForm.rental_type !== 'storage' && (
                   <div>
                     <label className="block text-sm font-medium mb-2">Number of Porches</label>
                     <input
@@ -416,6 +425,7 @@ const Dashboard = () => {
                       </>
                     )}
                   </div>
+                  )}
                   {propertyForm.rental_type === 'long-term' && (
                     <div>
                       <label className="block text-sm font-medium mb-2">Furniture Option</label>
@@ -508,6 +518,7 @@ const Dashboard = () => {
                   </div>
                 </div>
 
+                {propertyForm.rental_type !== 'storage' && (
                 <div>
                   <label className="block text-sm font-medium mb-4">Amenities</label>
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
@@ -550,6 +561,7 @@ const Dashboard = () => {
                     ))}
                   </div>
                 </div>
+                )}
 
                 <div className="flex gap-4">
                   <button type="submit" className="flex-1 primary-btn" data-testid="submit-property-button">
