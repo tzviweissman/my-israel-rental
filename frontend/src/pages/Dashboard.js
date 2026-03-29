@@ -215,6 +215,28 @@ const Dashboard = () => {
                     </select>
                   </div>
                   <div>
+                    <label className="block text-sm font-medium mb-2">Property Location</label>
+                    <input
+                      type="text"
+                      value={propertyForm.area}
+                      onChange={(e) => setPropertyForm({ ...propertyForm, area: e.target.value })}
+                      className="w-full px-4 py-2 rounded-lg border border-[#E5E5E5] focus:outline-none focus:ring-2 focus:ring-[#000000]/50"
+                      required
+                      data-testid="property-area-input"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-2">Address</label>
+                    <input
+                      type="text"
+                      value={propertyForm.address}
+                      onChange={(e) => setPropertyForm({ ...propertyForm, address: e.target.value })}
+                      className="w-full px-4 py-2 rounded-lg border border-[#E5E5E5] focus:outline-none focus:ring-2 focus:ring-[#000000]/50"
+                      required
+                      data-testid="property-address-input"
+                    />
+                  </div>
+                  <div>
                     <label className="block text-sm font-medium mb-2">Bedrooms</label>
                     <select
                       value={propertyForm.bedrooms}
@@ -259,28 +281,6 @@ const Dashboard = () => {
                       <option value="5.5">5.5</option>
                       <option value="6">6+</option>
                     </select>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium mb-2">Property Location</label>
-                    <input
-                      type="text"
-                      value={propertyForm.area}
-                      onChange={(e) => setPropertyForm({ ...propertyForm, area: e.target.value })}
-                      className="w-full px-4 py-2 rounded-lg border border-[#E5E5E5] focus:outline-none focus:ring-2 focus:ring-[#000000]/50"
-                      required
-                      data-testid="property-area-input"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium mb-2">Address</label>
-                    <input
-                      type="text"
-                      value={propertyForm.address}
-                      onChange={(e) => setPropertyForm({ ...propertyForm, address: e.target.value })}
-                      className="w-full px-4 py-2 rounded-lg border border-[#E5E5E5] focus:outline-none focus:ring-2 focus:ring-[#000000]/50"
-                      required
-                      data-testid="property-address-input"
-                    />
                   </div>
                   <div>
                     <label className="block text-sm font-medium mb-2">Floor</label>
