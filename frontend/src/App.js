@@ -7,6 +7,7 @@ import '@/App.css';
 
 import Navigation from './components/Navigation';
 import WhatsAppButton from './components/WhatsAppButton';
+import AccessibilityButton from './components/AccessibilityButton';
 import Home from './pages/Home';
 import Properties from './pages/Properties';
 import PropertyDetail from './pages/PropertyDetail';
@@ -67,6 +68,7 @@ function App() {
         <div className="App">
           <Navigation />
           <WhatsAppButton />
+          <AccessibilityButton />
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/properties/:type" element={<Properties />} />
