@@ -41,11 +41,11 @@ const Home = () => {
       >
         <div className="absolute inset-0 bg-black/30"></div>
         <div className="relative z-10 text-center text-white px-6 max-w-4xl">
-          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold mb-6" style={{ fontFamily: 'Playfair Display', WebkitTextStroke: '1px #D4AF37', color: 'white' }}>
+          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold mb-6" style={{ fontFamily: 'Playfair Display', color: 'white' }}>
             {t('hero.title')}
           </h1>
-          <p className="text-lg sm:text-xl mb-8 font-semibold" style={{ WebkitTextStroke: '0.5px #D4AF37', color: 'white' }}>
-            Find Your Perfect Rental, <span style={{ WebkitTextStroke: '0.5px #ffffff', color: 'white' }}>Any Duration</span>
+          <p className="text-lg sm:text-xl mb-8 font-semibold text-white">
+            Find Your Perfect Rental, <span style={{ color: '#D4AF37', WebkitTextStroke: '0.5px white' }}>Any Duration</span>
           </p>
           <div className="flex gap-2 max-w-2xl mx-auto">
             <input
