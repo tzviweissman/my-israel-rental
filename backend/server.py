@@ -168,13 +168,13 @@ class UserLogin(BaseModel):
 
 class PropertyCreate(BaseModel):
     title: str
-    description: str
+    description: Optional[str] = None
     rental_type: str
     property_type: str
     bedrooms: Optional[float] = None
     bathrooms: Optional[float] = None
     area: str
-    address: str
+    address: Optional[str] = None
     square_meters: Optional[float] = None
     porch_square_meters: Optional[float] = None
     floor: Optional[float] = None

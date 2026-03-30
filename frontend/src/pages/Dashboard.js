@@ -367,7 +367,6 @@ const Dashboard = () => {
                     onChange={(e) => setPropertyForm({ ...propertyForm, description: e.target.value })}
                     rows="4"
                     className="w-full px-4 py-2 rounded-lg border border-[#E5E5E5] focus:outline-none focus:ring-2 focus:ring-[#2D2D2D]/50"
-                    required
                     data-testid="property-description-input"
                   ></textarea>
                 </div>
@@ -471,7 +470,6 @@ const Dashboard = () => {
                       value={propertyForm.address}
                       onChange={(e) => setPropertyForm({ ...propertyForm, address: e.target.value })}
                       className="w-full px-4 py-2 rounded-lg border border-[#E5E5E5] focus:outline-none focus:ring-2 focus:ring-[#2D2D2D]/50"
-                      required
                       data-testid="property-address-input"
                     />
                   </div>
