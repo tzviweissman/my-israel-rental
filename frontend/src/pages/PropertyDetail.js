@@ -78,7 +78,7 @@ const PropertyDetail = () => {
       <div className="max-w-7xl mx-auto px-6 py-12">
         <button onClick={() => navigate(-1)} className="flex items-center gap-2 text-sm font-medium mb-6 hover:text-[#D4AF37] transition-colors" data-testid="back-button">
           <ArrowLeft size={18} />
-          {user && user.role !== 'renter' ? 'Back to dashboard' : 'Back to listings'}
+          {user && user.role !== 'renter' ? t('property.backToDashboard') : t('property.backToListings')}
         </button>
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <div className="lg:col-span-2">
@@ -150,7 +150,7 @@ const PropertyDetail = () => {
 
               {property.videos && property.videos.length > 0 && (
                 <div className="mt-4" data-testid="property-videos">
-                  <h3 className="text-sm font-medium mb-2 flex items-center gap-2"><Film size={16} /> Videos</h3>
+                  <h3 className="text-sm font-medium mb-2 flex items-center gap-2"><Film size={16} /> {t('property.videos')}</h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                     {property.videos.map((video, idx) => (
                       <video
@@ -210,23 +210,23 @@ const PropertyDetail = () => {
                     <span className="text-sm text-gray-600">{t('property.floor')}</span>
                   </div>
                   <p className="text-2xl font-bold">{property.floor}</p>
-                  {property.has_elevator && <p className="text-xs mt-1 font-semibold text-gray-600">Elevator{property.is_shabbat_elevator ? ' (Shabbat)' : ''}</p>}
+                  {property.has_elevator && <p className="text-xs mt-1 font-semibold text-gray-600">{t('property.elevator')}{property.is_shabbat_elevator ? ` (${t('property.shabbatElevator')})` : ''}</p>}
                 </div>
               )}
               {property.porches > 0 && (
                 <div className="bg-white p-4 rounded-xl border border-[#E5E5E5]">
                   <div className="flex items-center gap-2 mb-1">
                     <HomeIcon size={20} style={{ color: "#D4AF37" }} />
-                    <span className="text-sm text-gray-600">{property.porches === 1 ? 'Porch' : 'Porches'}</span>
+                    <span className="text-sm text-gray-600">{property.porches === 1 ? t('property.porch') : t('property.porches')}</span>
                   </div>
                   <p className="text-2xl font-bold">{property.porches}{property.porch_square_meters ? <span className="text-sm font-normal text-gray-500 ml-1">({property.porch_square_meters} sqm)</span> : ''}</p>
-                  {property.sukkah_compatible && <p className="text-xs mt-1" style={{ color: '#345C45', fontWeight: 600 }}>Sukkah Compatible</p>}
+                  {property.sukkah_compatible && <p className="text-xs mt-1" style={{ color: '#345C45', fontWeight: 600 }}>{t('property.sukkah')}</p>}
                 </div>
               )}
             </div>
 
             <div className="bg-white p-6 rounded-2xl border border-[#E5E5E5] mb-8">
-              <h2 className="text-2xl font-bold mb-4" style={{ fontFamily: 'Playfair Display' }}>Description</h2>
+              <h2 className="text-2xl font-bold mb-4" style={{ fontFamily: 'Playfair Display' }}>{t('property.description')}</h2>
               <p className="text-gray-700 leading-relaxed">{property.description}</p>
             </div>
 

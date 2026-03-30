@@ -1,11 +1,13 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import axios from 'axios';
 import { API, AuthContext } from '../App';
 import { Plus, Edit, Trash2, Eye, MessageCircle, Upload, X, Image, Film } from 'lucide-react';
 import { toast } from 'sonner';
 
 const Dashboard = () => {
+  const { t } = useTranslation();
   const { user, token } = useContext(AuthContext);
   const navigate = useNavigate();
   const [properties, setProperties] = useState([]);
@@ -252,7 +254,7 @@ const Dashboard = () => {
           {user && user.role !== 'renter' && (
             <button onClick={() => { setEditingPropertyId(null); setUploadedFiles([]); setPropertyForm({ title: '', description: '', rental_type: 'long-term', property_type: 'apartment', bedrooms: 1, bathrooms: 1, area: '', address: '', square_meters: '', floor: 1, has_elevator: false, is_shabbat_elevator: false, is_tama: false, has_agent_fee: false, agent_fee_price: '', agent_fee_currency: 'ILS', porches: 0, sukkah_compatible: false, condition: 'good', furniture_option: 'no_furniture', amenities: [], monthly_price: '', nightly_price: '', currency: 'ILS', images: [], videos: [] }); setShowAddProperty(true); }} className="primary-btn flex items-center gap-2" data-testid="add-property-button">
               <Plus size={20} />
-              Add Property
+              {t('dashboard.addProperty')}
             </button>
           )}
         </div>
@@ -279,7 +281,7 @@ const Dashboard = () => {
         {showAddProperty && (
           <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-6" data-testid="add-property-modal">
             <div className="bg-white rounded-2xl p-8 max-w-4xl w-full max-h-[90vh] overflow-y-auto">
-              <h2 className="text-3xl font-bold mb-6" style={{ fontFamily: 'Playfair Display' }}>{editingPropertyId ? 'Edit Property' : 'Add New Property'}</h2>
+              <h2 className="text-3xl font-bold mb-6" style={{ fontFamily: 'Playfair Display' }}>{editingPropertyId ? t('dashboard.editProperty') : t('dashboard.addNewProperty')}</h2>
               <form onSubmit={handleAddProperty} className="space-y-6">
                 <div>
                   <label className="block text-sm font-medium mb-2">Title</label>
@@ -307,7 +309,7 @@ const Dashboard = () => {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
-                    <label className="block text-sm font-medium mb-2">Rental Type</label>
+                    <label className="block text-sm font-medium mb-2">{t('property.rentalType')}</label>
                     <select
                       value={propertyForm.rental_type}
                       onChange={(e) => setPropertyForm({ ...propertyForm, rental_type: e.target.value })}
@@ -322,7 +324,7 @@ const Dashboard = () => {
                   </div>
                   {propertyForm.rental_type !== 'storage' && (
                   <div>
-                    <label className="block text-sm font-medium mb-2">Property Type</label>
+                    <label className="block text-sm font-medium mb-2">{t('property.propertyType')}</label>
                     <select
                       value={propertyForm.property_type}
                       onChange={(e) => setPropertyForm({ ...propertyForm, property_type: e.target.value })}
@@ -335,7 +337,7 @@ const Dashboard = () => {
                   </div>
                   )}
                   <div>
-                    <label className="block text-sm font-medium mb-2">Property Location</label>
+                    <label className="block text-sm font-medium mb-2">{t('property.propertyLocation')}</label>
                     <select
                       value={propertyForm.area}
                       onChange={(e) => setPropertyForm({ ...propertyForm, area: e.target.value })}
@@ -343,7 +345,7 @@ const Dashboard = () => {
                       required
                       data-testid="property-area-input"
                     >
-                      <option value="">Select a neighborhood</option>
+                      <option value="">{t('property.selectNeighborhood')}</option>
                       <optgroup label="Jerusalem">
                         {['Abu Tor','American Colony','Arnona','Arzei HaBira','Baka','Bayit VeGan','Beit HaKerem','Beit Yisrael','Bukharan Quarter','East Talpiot','Ein Kerem','French Hill','Geula','German Colony','Gilo','Givat HaMivtar','Givat Massuah','Givat Mordechai','Givat Ram','Givat Shaul','Greek Colony','Har Nof','Holyland','Jewish Quarter','Katamon','Kerem Avraham','Kiryat HaYovel','Kiryat Menachem','Kiryat Moshe','Kiryat Shmuel','Maalot Dafna','Mahane Yehuda','Malha','Mamilla','Mea Shearim','Mekor Baruch','Mekor Chaim','Mishkenot Shaananim','Musrara','Nachlaot','Neve Yaakov','Old City','Pat','Pisgat Zeev','Ramat Beit HaKerem','Ramat Denya','Ramat Eshkol','Ramat Shlomo','Ramot','Rassco','Rehavia','Romema','Sanhedria','Sanhedria Murhevet','Shaare Hesed','Shmuel HaNavi','Talbiya','Talpiot','Yemin Moshe'].map(n => <option key={n} value={`Jerusalem - ${n}`}>{n}</option>)}
                       </optgroup>
@@ -398,7 +400,7 @@ const Dashboard = () => {
                     </select>
                   </div>
                   <div>
-                    <label className="block text-sm font-medium mb-2">Address</label>
+                    <label className="block text-sm font-medium mb-2">{t('property.address')}</label>
                     <input
                       type="text"
                       value={propertyForm.address}
@@ -409,7 +411,7 @@ const Dashboard = () => {
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium mb-2">Square Meters</label>
+                    <label className="block text-sm font-medium mb-2">{t('property.sqm')}</label>
                     <input
                       type="number"
                       value={propertyForm.square_meters}
@@ -423,7 +425,7 @@ const Dashboard = () => {
                   </div>
                   {propertyForm.rental_type !== 'storage' && (
                   <div>
-                    <label className="block text-sm font-medium mb-2">Bedrooms</label>
+                    <label className="block text-sm font-medium mb-2">{t('property.bedrooms')}</label>
                     <select
                       value={propertyForm.bedrooms}
                       onChange={(e) => setPropertyForm({ ...propertyForm, bedrooms: parseFloat(e.target.value) })}
@@ -450,7 +452,7 @@ const Dashboard = () => {
                   )}
                   {propertyForm.rental_type !== 'storage' && (
                   <div>
-                    <label className="block text-sm font-medium mb-2">Bathrooms</label>
+                    <label className="block text-sm font-medium mb-2">{t('property.bathrooms')}</label>
                     <select
                       value={propertyForm.bathrooms}
                       onChange={(e) => setPropertyForm({ ...propertyForm, bathrooms: parseFloat(e.target.value) })}
@@ -472,7 +474,7 @@ const Dashboard = () => {
                   </div>
                   )}
                   <div>
-                    <label className="block text-sm font-medium mb-2">Floor</label>
+                    <label className="block text-sm font-medium mb-2">{t('property.floor')}</label>
                     <select
                       value={propertyForm.floor}
                       onChange={(e) => setPropertyForm({ ...propertyForm, floor: parseFloat(e.target.value) })}
@@ -481,7 +483,7 @@ const Dashboard = () => {
                     >
                       <option value="-2">Basement 2</option>
                       <option value="-1">Basement 1</option>
-                      <option value="0">Ground Floor</option>
+                      <option value="0">{t('property.groundFloor')}</option>
                       <option value="1">1</option>
                       <option value="1.5">1.5</option>
                       <option value="2">2</option>
@@ -543,22 +545,22 @@ const Dashboard = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   {propertyForm.rental_type !== 'storage' && (
                   <div>
-                    <label className="block text-sm font-medium mb-2">Property Condition</label>
+                    <label className="block text-sm font-medium mb-2">{t('property.condition')}</label>
                     <select
                       value={propertyForm.condition}
                       onChange={(e) => setPropertyForm({ ...propertyForm, condition: e.target.value })}
                       className="w-full px-4 py-2 rounded-lg border border-[#E5E5E5] focus:outline-none focus:ring-2 focus:ring-[#000000]/50"
                       data-testid="property-condition-select"
                     >
-                      <option value="renovated">Renovated</option>
-                      <option value="partially_renovated">Partially Renovated</option>
-                      <option value="good">Good Condition</option>
+                      <option value="renovated">{t('property.renovated')}</option>
+                      <option value="partially_renovated">{t('property.partiallyRenovated')}</option>
+                      <option value="good">{t('property.goodCondition')}</option>
                     </select>
                   </div>
                   )}
                   {propertyForm.rental_type !== 'storage' && (
                   <div>
-                    <label className="block text-sm font-medium mb-2">Number of Porches</label>
+                    <label className="block text-sm font-medium mb-2">{t('property.numberOfPorches')}</label>
                     <input
                       type="number"
                       value={propertyForm.porches}
@@ -570,7 +572,7 @@ const Dashboard = () => {
                     {propertyForm.porches > 0 && (
                       <>
                         <div className="ml-2 mt-2">
-                          <label className="block text-sm text-gray-600 mb-1">Porch Square Meters</label>
+                          <label className="block text-sm text-gray-600 mb-1">{t('property.parchSqm')}</label>
                           <input
                             type="number"
                             value={propertyForm.porch_square_meters}
@@ -589,7 +591,7 @@ const Dashboard = () => {
                             className="w-4 h-4 rounded border-[#E5E5E5]"
                             data-testid="property-sukkah-checkbox"
                           />
-                          <span className="text-sm text-gray-600">Sukkah Compatible</span>
+                          <span className="text-sm text-gray-600">{t('property.sukkah')}</span>
                         </label>
                       </>
                     )}
@@ -597,16 +599,16 @@ const Dashboard = () => {
                   )}
                   {propertyForm.rental_type === 'long-term' && (
                     <div>
-                      <label className="block text-sm font-medium mb-2">Furniture Option</label>
+                      <label className="block text-sm font-medium mb-2">{t('property.furnitureOption')}</label>
                       <select
                         value={propertyForm.furniture_option}
                         onChange={(e) => setPropertyForm({ ...propertyForm, furniture_option: e.target.value })}
                         className="w-full px-4 py-2 rounded-lg border border-[#E5E5E5] focus:outline-none focus:ring-2 focus:ring-[#000000]/50"
                         data-testid="property-furniture-select"
                       >
-                        <option value="no_furniture">No Furniture</option>
-                        <option value="furniture_package">Furniture Package</option>
-                        <option value="furniture_free">Furniture Free</option>
+                        <option value="no_furniture">{t('property.noFurniture')}</option>
+                        <option value="furniture_package">{t('property.furniturePackage')}</option>
+                        <option value="furniture_free">{t('property.furnitureFree')}</option>
                       </select>
                     </div>
                   )}
@@ -622,7 +624,7 @@ const Dashboard = () => {
                         className="w-5 h-5 rounded border-[#E5E5E5]"
                         data-testid="property-elevator-checkbox"
                       />
-                      <span>Elevator</span>
+                      <span>{t('property.elevator')}</span>
                     </label>
                     {propertyForm.has_elevator && (
                       <label className="flex items-center gap-2 ml-7">
@@ -633,7 +635,7 @@ const Dashboard = () => {
                           className="w-4 h-4 rounded border-[#E5E5E5]"
                           data-testid="property-shabbat-elevator-checkbox"
                         />
-                        <span className="text-sm text-gray-600">Shabbat Elevator</span>
+                        <span className="text-sm text-gray-600">{t('property.shabbatElevator')}</span>
                       </label>
                     )}
                   </div>
@@ -658,7 +660,7 @@ const Dashboard = () => {
                         className="w-5 h-5 rounded border-[#E5E5E5]"
                         data-testid="property-agent-fee-checkbox"
                       />
-                      <span>Agent Fee</span>
+                      <span>{t('property.agentFee')}</span>
                     </label>
                     {propertyForm.has_agent_fee && (
                       <div className="ml-7">
@@ -689,7 +691,7 @@ const Dashboard = () => {
 
                 {propertyForm.rental_type !== 'storage' && (
                 <div>
-                  <label className="block text-sm font-medium mb-4">Amenities</label>
+                  <label className="block text-sm font-medium mb-4">{t('property.amenities')}</label>
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
                     {[
                       'Central AC / Heating',
@@ -734,7 +736,7 @@ const Dashboard = () => {
 
                 {/* File Upload Section */}
                 <div data-testid="file-upload-section">
-                  <label className="block text-sm font-medium mb-2">Photos & Videos</label>
+                  <label className="block text-sm font-medium mb-2">{t('property.photosVideos')}</label>
                   <div
                     className="border-2 border-dashed border-[#E5E5E5] rounded-xl p-6 text-center hover:border-black/30 transition-colors cursor-pointer"
                     onClick={() => document.getElementById('file-upload-input').click()}
@@ -752,8 +754,8 @@ const Dashboard = () => {
                     data-testid="file-drop-zone"
                   >
                     <Upload size={32} className="mx-auto mb-2 text-gray-400" />
-                    <p className="text-sm text-gray-600 mb-1">Drag & drop or click to upload</p>
-                    <p className="text-xs text-gray-400">JPEG, PNG, WebP, GIF, MP4, MOV, WebM — Max 50MB each</p>
+                    <p className="text-sm text-gray-600 mb-1">{t('property.dragDrop')}</p>
+                    <p className="text-xs text-gray-400">{t('property.fileTypes')}</p>
                     <input
                       id="file-upload-input"
                       type="file"
@@ -769,7 +771,7 @@ const Dashboard = () => {
                     <div className="mt-3" data-testid="upload-progress">
                       <div className="flex items-center gap-2 text-sm text-gray-600 mb-1">
                         <div className="w-4 h-4 border-2 border-black border-t-transparent rounded-full animate-spin"></div>
-                        Uploading... {uploadProgress}%
+                        {t('property.uploading')} {uploadProgress}%
                       </div>
                       <div className="w-full bg-gray-200 rounded-full h-1.5">
                         <div className="h-1.5 rounded-full bg-black transition-all" style={{ width: `${uploadProgress}%` }}></div>
@@ -810,10 +812,10 @@ const Dashboard = () => {
 
                 <div className="flex gap-4">
                   <button type="submit" className="flex-1 primary-btn" data-testid="submit-property-button">
-                    {editingPropertyId ? 'Save Changes' : 'Add Property'}
+                    {editingPropertyId ? t('dashboard.saveChanges') : t('dashboard.addProperty')}
                   </button>
                   <button type="button" onClick={() => { setShowAddProperty(false); setEditingPropertyId(null); }} className="flex-1 secondary-btn" data-testid="cancel-add-property-button">
-                    Cancel
+                    {t('dashboard.cancel')}
                   </button>
                 </div>
               </form>
@@ -823,7 +825,7 @@ const Dashboard = () => {
 
         {user && user.role !== 'renter' && (
           <div className="mb-12">
-            <h2 className="text-2xl font-bold mb-6" style={{ fontFamily: 'Playfair Display' }}>My Properties</h2>
+            <h2 className="text-2xl font-bold mb-6" style={{ fontFamily: 'Playfair Display' }}>{t('dashboard.myProperties')}</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {properties.map((property) => (
                 <div key={property.id} className="bg-white rounded-2xl border border-[#E5E5E5] overflow-hidden" data-testid={`dashboard-property-${property.id}`}>

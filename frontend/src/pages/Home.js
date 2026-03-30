@@ -45,7 +45,7 @@ const Home = () => {
             {t('hero.title')}
           </h1>
           <p className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-8" style={{ fontFamily: 'Playfair Display', color: '#D4AF37' }}>
-            Any Duration
+          {t('hero.anyDuration')}
           </p>
           <div className="flex gap-2 max-w-2xl mx-auto">
             <input
@@ -59,7 +59,7 @@ const Home = () => {
             />
             <button onClick={handleSearch} className="primary-btn flex items-center gap-2" data-testid="hero-search-button">
               <Search size={20} />
-              Search
+              {t('hero.search')}
             </button>
           </div>
         </div>
@@ -67,7 +67,7 @@ const Home = () => {
 
       <div className="max-w-7xl mx-auto px-6 py-16">
         <h2 className="text-3xl sm:text-4xl font-bold mb-12 text-center" style={{ fontFamily: 'Playfair Display' }}>
-          Featured Properties
+          {t('home.featuredProperties')}
         </h2>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -130,7 +130,7 @@ const Home = () => {
       <div className="py-20" style={{ backgroundColor: '#F5F5F5' }}>
         <div className="max-w-5xl mx-auto px-6">
           <h2 className="text-4xl sm:text-5xl font-bold mb-8 text-center" style={{ fontFamily: 'Playfair Display', color: '#000000' }}>
-            About Us
+            {t('home.aboutUs')}
           </h2>
           <div className="space-y-6 text-lg leading-relaxed text-gray-700">
             <p className="text-center text-xl mb-8" style={{ color: '#D4AF37', fontWeight: '600' }}>
