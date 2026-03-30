@@ -21,11 +21,16 @@ const Auth = () => {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [termsAccepted, setTermsAccepted] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (mode === 'signup' && formData.password !== confirmPassword) {
       toast.error(t('auth.passwordMismatch'));
+      return;
+    }
+    if (mode === 'signup' && !termsAccepted) {
+      toast.error(t('auth.mustAcceptTerms'));
       return;
     }
     try {
@@ -147,6 +152,25 @@ const Auth = () => {
                   </select>
                 </div>
               </>
+            )}
+
+            {mode === 'signup' && (
+              <div className="flex items-start gap-3">
+                <input
+                  type="checkbox"
+                  id="terms"
+                  checked={termsAccepted}
+                  onChange={(e) => setTermsAccepted(e.target.checked)}
+                  className="mt-1 w-4 h-4 rounded border-gray-300 accent-[#D4AF37] cursor-pointer"
+                  data-testid="auth-terms-checkbox"
+                />
+                <label htmlFor="terms" className="text-sm text-gray-600 cursor-pointer leading-snug">
+                  {t('auth.agreeToTerms')}{' '}
+                  <a href="/terms" target="_blank" className="font-medium underline underline-offset-2" style={{ color: '#D4AF37' }} data-testid="auth-terms-link">
+                    {t('auth.termsAndConditions')}
+                  </a>
+                </label>
+              </div>
             )}
 
             <button type="submit" className="w-full primary-btn" data-testid="auth-submit-button">
