@@ -18,7 +18,7 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .primary-btn {
-  background-color: #000000;
+  background-color: #0B1D3A;
   color: #D4AF37;
   padding: 0.75rem 2rem;
   border-radius: 9999px;
@@ -30,16 +30,16 @@ h1, h2, h3, h4, h5, h6 {
 
 .primary-btn:hover {
   background-color: #D4AF37;
-  color: #000000;
+  color: #0B1D3A;
   transform: translateY(-2px);
 }
 
 .secondary-btn {
   background-color: transparent;
-  color: #000000;
+  color: #0B1D3A;
   padding: 0.75rem 2rem;
   border-radius: 9999px;
-  border: 1px solid #000000;
+  border: 1px solid #0B1D3A;
   font-weight: 500;
   cursor: pointer;
   transition: all 0.3s ease-in-out;

@@ -60,7 +60,7 @@ const Auth = () => {
                   type="text"
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  className="w-full px-4 py-3 rounded-lg border border-[#E5E5E5] focus:outline-none focus:ring-2 focus:ring-[#000000]/50"
+                  className="w-full px-4 py-3 rounded-lg border border-[#E5E5E5] focus:outline-none focus:ring-2 focus:ring-[#0B1D3A]/50"
                   required
                   data-testid="auth-name-input"
                 />
@@ -73,7 +73,7 @@ const Auth = () => {
                 type="email"
                 value={formData.email}
                 onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                className="w-full px-4 py-3 rounded-lg border border-[#E5E5E5] focus:outline-none focus:ring-2 focus:ring-[#000000]/50"
+                className="w-full px-4 py-3 rounded-lg border border-[#E5E5E5] focus:outline-none focus:ring-2 focus:ring-[#0B1D3A]/50"
                 required
                 data-testid="auth-email-input"
               />
@@ -86,7 +86,7 @@ const Auth = () => {
                   type={showPassword ? 'text' : 'password'}
                   value={formData.password}
                   onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                  className="w-full px-4 py-3 pr-12 rounded-lg border border-[#E5E5E5] focus:outline-none focus:ring-2 focus:ring-[#000000]/50"
+                  className="w-full px-4 py-3 pr-12 rounded-lg border border-[#E5E5E5] focus:outline-none focus:ring-2 focus:ring-[#0B1D3A]/50"
                   required
                   data-testid="auth-password-input"
                 />
@@ -110,7 +110,7 @@ const Auth = () => {
                       type={showConfirmPassword ? 'text' : 'password'}
                       value={confirmPassword}
                       onChange={(e) => setConfirmPassword(e.target.value)}
-                      className={`w-full px-4 py-3 pr-12 rounded-lg border focus:outline-none focus:ring-2 focus:ring-[#000000]/50 ${confirmPassword && confirmPassword !== formData.password ? 'border-red-400' : 'border-[#E5E5E5]'}`}
+                      className={`w-full px-4 py-3 pr-12 rounded-lg border focus:outline-none focus:ring-2 focus:ring-[#0B1D3A]/50 ${confirmPassword && confirmPassword !== formData.password ? 'border-red-400' : 'border-[#E5E5E5]'}`}
                       required
                       data-testid="auth-confirm-password-input"
                     />
@@ -134,7 +134,7 @@ const Auth = () => {
                     type="tel"
                     value={formData.phone}
                     onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                    className="w-full px-4 py-3 rounded-lg border border-[#E5E5E5] focus:outline-none focus:ring-2 focus:ring-[#000000]/50"
+                    className="w-full px-4 py-3 rounded-lg border border-[#E5E5E5] focus:outline-none focus:ring-2 focus:ring-[#0B1D3A]/50"
                     data-testid="auth-phone-input"
                   />
                 </div>
@@ -144,7 +144,7 @@ const Auth = () => {
                   <select
                     value={formData.role}
                     onChange={(e) => setFormData({ ...formData, role: e.target.value })}
-                    className="w-full px-4 py-3 rounded-lg border border-[#E5E5E5] focus:outline-none focus:ring-2 focus:ring-[#000000]/50"
+                    className="w-full px-4 py-3 rounded-lg border border-[#E5E5E5] focus:outline-none focus:ring-2 focus:ring-[#0B1D3A]/50"
                     data-testid="auth-role-select"
                   >
                     <option value="renter">{t('auth.renter')}</option>
@@ -182,14 +182,14 @@ const Auth = () => {
             {mode === 'login' ? (
               <p className="text-sm text-gray-600">
                 {t('auth.noAccount')}{' '}
-                <a href="/auth/signup" className="font-medium" style={{ color: '#000000' }} data-testid="auth-toggle-link">
+                <a href="/auth/signup" className="font-medium" style={{ color: '#0B1D3A' }} data-testid="auth-toggle-link">
                   {t('auth.signUpHere')}
                 </a>
               </p>
             ) : (
               <p className="text-sm text-gray-600">
                 {t('auth.haveAccount')}{' '}
-                <a href="/auth/login" className="font-medium" style={{ color: '#000000' }} data-testid="auth-toggle-link">
+                <a href="/auth/login" className="font-medium" style={{ color: '#0B1D3A' }} data-testid="auth-toggle-link">
                   {t('auth.loginHere')}
                 </a>
               </p>

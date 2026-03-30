@@ -279,7 +279,7 @@ const PropertyDetail = () => {
 
             <div className="flex flex-wrap gap-3">
               {property.has_agent_fee && property.agent_fee_price && (
-                <span className="px-4 py-2 rounded-full text-sm font-medium" style={{ backgroundColor: '#D4AF37', color: '#000000' }}>
+                <span className="px-4 py-2 rounded-full text-sm font-medium" style={{ backgroundColor: '#D4AF37', color: '#0B1D3A' }}>
                   {t('property.agentFee')}: {property.agent_fee_currency === 'USD' ? '$' : '₪'}{property.agent_fee_price.toLocaleString()}
                   {(() => {
                     const c = convertPrice(property.agent_fee_price, property.agent_fee_currency);
@@ -288,7 +288,7 @@ const PropertyDetail = () => {
                 </span>
               )}
               {property.furniture_package && (
-                <span className="px-4 py-2 rounded-full text-sm font-medium" style={{ backgroundColor: '#E5E5E5', color: '#000000' }}>
+                <span className="px-4 py-2 rounded-full text-sm font-medium" style={{ backgroundColor: '#E5E5E5', color: '#0B1D3A' }}>
                   {t('property.furniture')}
                 </span>
               )}
@@ -452,7 +452,7 @@ const PropertyDetail = () => {
                       onChange={(e) => setBookingData({ ...bookingData, message: e.target.value })}
                       rows="3"
                       placeholder={t('property.messagePlaceholder')}
-                      className="w-full px-4 py-2 rounded-lg border border-[#E5E5E5] focus:outline-none focus:ring-2 focus:ring-[#000000]/50 text-sm resize-none"
+                      className="w-full px-4 py-2 rounded-lg border border-[#E5E5E5] focus:outline-none focus:ring-2 focus:ring-[#0B1D3A]/50 text-sm resize-none"
                       data-testid="booking-message"
                     ></textarea>
                   </div>
