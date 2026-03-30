@@ -52,7 +52,7 @@ const Navigation = () => {
               onClick={() => setMenuOpen(!menuOpen)}
               className="flex items-center gap-2 rounded-xl transition-all duration-200"
               style={{
-                backgroundColor: '#0B1D3A',
+                backgroundColor: '#4A90D9',
                 border: '1.5px solid #D4AF37',
                 padding: '10px 18px'
               }}
@@ -66,7 +66,7 @@ const Navigation = () => {
               <div
                 className="absolute right-0 top-full mt-3 w-72 rounded-2xl overflow-hidden"
                 style={{
-                  backgroundColor: '#0B1D3A',
+                  backgroundColor: '#4A90D9',
                   border: '1.5px solid rgba(212,175,55,0.25)',
                   boxShadow: '0 16px 48px rgba(0,0,0,0.5), 0 0 0 1px rgba(212,175,55,0.08)'
                 }}
@@ -126,7 +126,7 @@ const Navigation = () => {
                         <span className="w-4 h-4 flex items-center justify-center opacity-60 group-hover:opacity-100 text-xs">&#x2192;</span>
                         <span>{t('nav.login')}</span>
                       </button>
-                      <button onClick={() => handleNav('/auth/signup')} className="w-full mt-1 py-2.5 rounded-lg text-sm font-bold tracking-wide transition-all duration-200 hover:shadow-lg" style={{ backgroundColor: '#D4AF37', color: '#0B1D3A' }} data-testid="nav-signup">
+                      <button onClick={() => handleNav('/auth/signup')} className="w-full mt-1 py-2.5 rounded-lg text-sm font-bold tracking-wide transition-all duration-200 hover:shadow-lg" style={{ backgroundColor: '#D4AF37', color: '#4A90D9' }} data-testid="nav-signup">
                         {t('nav.signup')}
                       </button>
                     </>

@@ -54,7 +54,7 @@ const Home = () => {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
-              className="flex-1 px-6 py-4 rounded-full text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#0B1D3A]"
+              className="flex-1 px-6 py-4 rounded-full text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#4A90D9]"
               data-testid="hero-search-input"
             />
             <button onClick={handleSearch} className="primary-btn flex items-center gap-2" data-testid="hero-search-button">
@@ -116,7 +116,7 @@ const Home = () => {
                       {property.rental_type === 'vacation' ? t('property.perNight') : t('property.perMonth')}
                     </span>
                   </span>
-                  <span className="text-sm px-3 py-1 rounded-full" style={{ backgroundColor: '#E5E5E5', color: '#0B1D3A' }}>
+                  <span className="text-sm px-3 py-1 rounded-full" style={{ backgroundColor: '#E5E5E5', color: '#4A90D9' }}>
                     {{'long-term': t('property.longTerm'), 'short-term': t('property.shortTerm'), 'vacation': t('property.vacationType'), 'storage': t('property.storageType')}[property.rental_type] || property.rental_type}
                   </span>
                 </div>
@@ -129,7 +129,7 @@ const Home = () => {
       {/* About Us Section */}
       <div className="py-20" style={{ backgroundColor: '#F5F5F5' }}>
         <div className="max-w-5xl mx-auto px-6">
-          <h2 className="text-4xl sm:text-5xl font-bold mb-8 text-center" style={{ fontFamily: 'Playfair Display', color: '#0B1D3A' }}>
+          <h2 className="text-4xl sm:text-5xl font-bold mb-8 text-center" style={{ fontFamily: 'Playfair Display', color: '#4A90D9' }}>
             {t('home.aboutUs')}
           </h2>
           <div className="space-y-6 text-lg leading-relaxed text-gray-700">
@@ -139,7 +139,7 @@ const Home = () => {
         </div>
       </div>
 
-      <div className="py-16" style={{ backgroundColor: '#0B1D3A' }}>
+      <div className="py-16" style={{ backgroundColor: '#4A90D9' }}>
         <div className="max-w-7xl mx-auto px-6 text-center" style={{ color: '#D4AF37' }}>
           <h2 className="text-3xl font-bold mb-4" style={{ fontFamily: 'Playfair Display' }}>
             {t('footer.contact')}
