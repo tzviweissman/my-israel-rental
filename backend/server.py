@@ -202,7 +202,12 @@ async def get_properties(
     min_bedrooms: Optional[int] = None,
     max_price: Optional[float] = None,
     area: Optional[str] = None,
-    owner_id: Optional[str] = None
+    owner_id: Optional[str] = None,
+    min_bathrooms: Optional[float] = None,
+    max_floor: Optional[float] = None,
+    min_porches: Optional[int] = None,
+    has_elevator: Optional[bool] = None,
+    condition: Optional[str] = None
 ):
     query = {}
     if rental_type:
@@ -218,6 +223,16 @@ async def get_properties(
         query['area'] = {"$regex": area, "$options": "i"}
     if owner_id:
         query['owner_id'] = owner_id
+    if min_bathrooms:
+        query['bathrooms'] = {"$gte": min_bathrooms}
+    if max_floor is not None:
+        query['floor'] = {"$lte": max_floor}
+    if min_porches:
+        query['porches'] = {"$gte": min_porches}
+    if has_elevator is not None:
+        query['has_elevator'] = has_elevator
+    if condition:
+        query['condition'] = condition
     
     properties = await db.properties.find(query, {"_id": 0}).to_list(1000)
     return properties
