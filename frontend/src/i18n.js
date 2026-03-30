@@ -70,7 +70,13 @@ const resources = {
         perMonth: '/month',
         perNight: '/night',
         backToDashboard: 'Back to dashboard',
-        backToListings: 'Back to listings'
+        backToListings: 'Back to listings',
+        longTerm: 'Long Term',
+        shortTerm: 'Short Term',
+        vacationType: 'Vacation',
+        storageType: 'Storage',
+        apartment: 'Apartment',
+        house: 'House'
       },
       dashboard: {
         myProperties: 'My Properties',
@@ -81,17 +87,16 @@ const resources = {
         cancel: 'Cancel',
         noProperties: 'No properties yet. Add your first listing!',
         myBookings: 'My Bookings',
-        noBookings: 'No bookings yet'
+        noBookings: 'No bookings yet',
+        dates: 'Dates',
+        guests: 'Guests'
       },
       home: {
         featuredProperties: 'Featured Properties',
         aboutUs: 'About Us',
-        aboutText: 'MyIsraelRental is a premier property rental platform connecting tenants with property owners across Israel. Whether you need a long-term apartment, a short-term stay, a vacation rental, or storage space, we have you covered.',
-        whyChoose: 'Why Choose Us?',
-        reason1: 'Verified listings across all of Israel',
-        reason2: 'Secure payment and contract management',
-        reason3: 'Direct communication with property owners',
-        reason4: 'Bilingual support in English and Hebrew',
+        aboutSubtitle: 'What Our Goals Are as a Company and What We Have to Offer',
+        aboutPara1: 'My Israel Rental LLC is transforming the rental landscape in Israel, offering a seamless, free, and efficient way to find apartments. Our mission is to simplify the process of renting, buying, ensuring that both tenants and property owners save time, money, and energy. With an intuitive platform that tailors property suggestions to your needs, we stand out as the go-to solution for finding the perfect home in Israel.',
+        aboutPara2: 'Inspired by the success of platforms like Airbnb and Zillow, My Israel Rental LLC is designed to cater specifically to the Israeli market, providing long-term rentals, short-term rentals, vacation rentals, and even machsan (storage space) rentals. We aim to make the process fluid, user-friendly, and free, creating a hassle-free experience for everyone involved.',
         contactUs: 'Contact Us',
         phone: 'Phone',
         email: 'Email'
@@ -220,7 +225,13 @@ const resources = {
         perMonth: '/חודש',
         perNight: '/לילה',
         backToDashboard: 'חזרה ללוח בקרה',
-        backToListings: 'חזרה לרשימות'
+        backToListings: 'חזרה לרשימות',
+        longTerm: 'טווח ארוך',
+        shortTerm: 'טווח קצר',
+        vacationType: 'נופש',
+        storageType: 'אחסון',
+        apartment: 'דירה',
+        house: 'בית'
       },
       dashboard: {
         myProperties: 'הנכסים שלי',
@@ -231,17 +242,16 @@ const resources = {
         cancel: 'ביטול',
         noProperties: 'אין נכסים עדיין. הוסף את הרישום הראשון שלך!',
         myBookings: 'ההזמנות שלי',
-        noBookings: 'אין הזמנות עדיין'
+        noBookings: 'אין הזמנות עדיין',
+        dates: 'תאריכים',
+        guests: 'אורחים'
       },
       home: {
         featuredProperties: 'נכסים מומלצים',
         aboutUs: 'אודותינו',
-        aboutText: 'MyIsraelRental היא פלטפורמת השכרה מובילה המחברת שוכרים עם בעלי נכסים בכל רחבי ישראל. בין אם אתם צריכים דירה לטווח ארוך, שהייה קצרה, נופש או מחסן - אנחנו כאן בשבילכם.',
-        whyChoose: 'למה לבחור בנו?',
-        reason1: 'נכסים מאומתים בכל רחבי ישראל',
-        reason2: 'תשלום מאובטח וניהול חוזים',
-        reason3: 'תקשורת ישירה עם בעלי הנכסים',
-        reason4: 'תמיכה דו-לשונית באנגלית ובעברית',
+        aboutSubtitle: 'המטרות שלנו כחברה ומה יש לנו להציע',
+        aboutPara1: 'My Israel Rental LLC משנה את נוף השכירות בישראל, ומציעה דרך חלקה, חינמית ויעילה למצוא דירות. המשימה שלנו היא לפשט את תהליך השכירות, ולוודא שגם שוכרים וגם בעלי נכסים חוסכים זמן, כסף ואנרגיה. עם פלטפורמה אינטואיטיבית שמתאימה הצעות נכסים לצרכים שלכם, אנחנו הפתרון המוביל למציאת הבית המושלם בישראל.',
+        aboutPara2: 'בהשראת ההצלחה של פלטפורמות כמו Airbnb ו-Zillow, My Israel Rental LLC מעוצבת במיוחד עבור השוק הישראלי, ומספקת השכרות לטווח ארוך, טווח קצר, נופש ואפילו השכרת מחסנים. אנו שואפים להפוך את התהליך לזורם, ידידותי למשתמש וחינמי, וליצור חוויה ללא טרחה לכל המעורבים.',
         contactUs: 'צור קשר',
         phone: 'טלפון',
         email: 'אימייל'

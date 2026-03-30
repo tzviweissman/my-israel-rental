@@ -265,7 +265,7 @@ const PropertyDetail = () => {
             <div className="flex flex-wrap gap-3">
               {property.has_agent_fee && property.agent_fee_price && (
                 <span className="px-4 py-2 rounded-full text-sm font-medium" style={{ backgroundColor: '#D4AF37', color: '#000000' }}>
-                  Agent Fee: {property.agent_fee_currency === 'USD' ? '$' : '₪'}{property.agent_fee_price}
+                  {t('property.agentFee')}: {property.agent_fee_currency === 'USD' ? '$' : '₪'}{property.agent_fee_price}
                 </span>
               )}
               {property.furniture_package && (
@@ -283,7 +283,7 @@ const PropertyDetail = () => {
                   {property.currency === 'USD' ? '$' : '₪'}{property.monthly_price || property.nightly_price}
                 </span>
                 <span className="text-lg text-gray-600">
-                  {property.rental_type === 'vacation' ? '/night' : '/month'}
+                  {property.rental_type === 'vacation' ? t('property.perNight') : t('property.perMonth')}
                 </span>
               </div>
 

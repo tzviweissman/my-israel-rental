@@ -316,10 +316,10 @@ const Dashboard = () => {
                       className="w-full px-4 py-2 rounded-lg border border-[#E5E5E5] focus:outline-none focus:ring-2 focus:ring-[#000000]/50"
                       data-testid="property-rental-type-select"
                     >
-                      <option value="long-term">Long Term</option>
-                      <option value="short-term">Short Term</option>
-                      <option value="vacation">Vacation</option>
-                      <option value="storage">Storage</option>
+                      <option value="long-term">{t('property.longTerm')}</option>
+                      <option value="short-term">{t('property.shortTerm')}</option>
+                      <option value="vacation">{t('property.vacationType')}</option>
+                      <option value="storage">{t('property.storageType')}</option>
                     </select>
                   </div>
                   {propertyForm.rental_type !== 'storage' && (
@@ -331,8 +331,8 @@ const Dashboard = () => {
                       className="w-full px-4 py-2 rounded-lg border border-[#E5E5E5] focus:outline-none focus:ring-2 focus:ring-[#000000]/50"
                       data-testid="property-type-select"
                     >
-                      <option value="apartment">Apartment</option>
-                      <option value="house">House</option>
+                      <option value="apartment">{t('property.apartment')}</option>
+                      <option value="house">{t('property.house')}</option>
                     </select>
                   </div>
                   )}
@@ -861,15 +861,15 @@ const Dashboard = () => {
         )}
 
         <div>
-          <h2 className="text-2xl font-bold mb-6" style={{ fontFamily: 'Playfair Display' }}>Bookings</h2>
+          <h2 className="text-2xl font-bold mb-6" style={{ fontFamily: 'Playfair Display' }}>{t('dashboard.myBookings')}</h2>
           <div className="bg-white rounded-2xl border border-[#E5E5E5] overflow-hidden">
             <table className="w-full">
               <thead className="bg-gray-50">
                 <tr>
-                  <th className="px-6 py-4 text-left text-sm font-medium text-gray-700">Property</th>
-                  <th className="px-6 py-4 text-left text-sm font-medium text-gray-700">Dates</th>
-                  <th className="px-6 py-4 text-left text-sm font-medium text-gray-700">Guests</th>
-                  <th className="px-6 py-4 text-left text-sm font-medium text-gray-700">Status</th>
+                  <th className="px-6 py-4 text-left text-sm font-medium text-gray-700">{t('property.title')}</th>
+                  <th className="px-6 py-4 text-left text-sm font-medium text-gray-700">{t('dashboard.dates')}</th>
+                  <th className="px-6 py-4 text-left text-sm font-medium text-gray-700">{t('dashboard.guests')}</th>
+                  <th className="px-6 py-4 text-left text-sm font-medium text-gray-700">{t('admin.status')}</th>
                 </tr>
               </thead>
               <tbody>

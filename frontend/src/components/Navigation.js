@@ -10,7 +10,7 @@ const Navigation = () => {
   const navigate = useNavigate();
 
   const toggleLanguage = () => {
-    const newLang = i18n.language === 'en' ? 'he' : 'en';
+    const newLang = i18n.language.startsWith('he') ? 'en' : 'he';
     i18n.changeLanguage(newLang);
   };
 
@@ -50,7 +50,7 @@ const Navigation = () => {
 
             <button onClick={toggleLanguage} className="flex items-center gap-2 text-base font-medium hover:text-white transition-colors" style={{ color: '#D4AF37' }} data-testid="language-toggle">
               <Globe size={18} />
-              {i18n.language === 'en' ? 'עב' : 'EN'}
+              {i18n.language.startsWith('he') ? 'EN' : 'עב'}
             </button>
 
             {user ? (

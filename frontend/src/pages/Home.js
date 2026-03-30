@@ -113,11 +113,11 @@ const Home = () => {
                   <span className="text-2xl font-bold" style={{ color: "#D4AF37" }}>
                     ₪{property.monthly_price || property.nightly_price}
                     <span className="text-sm font-normal text-gray-600">
-                      {property.rental_type === 'vacation' ? '/night' : '/month'}
+                      {property.rental_type === 'vacation' ? t('property.perNight') : t('property.perMonth')}
                     </span>
                   </span>
                   <span className="text-sm px-3 py-1 rounded-full" style={{ backgroundColor: '#E5E5E5', color: '#000000' }}>
-                    {property.rental_type}
+                    {{'long-term': t('property.longTerm'), 'short-term': t('property.shortTerm'), 'vacation': t('property.vacationType'), 'storage': t('property.storageType')}[property.rental_type] || property.rental_type}
                   </span>
                 </div>
               </div>
@@ -134,13 +134,13 @@ const Home = () => {
           </h2>
           <div className="space-y-6 text-lg leading-relaxed text-gray-700">
             <p className="text-center text-xl mb-8" style={{ color: '#D4AF37', fontWeight: '600' }}>
-              What Our Goals Are as a Company and What We Have to Offer
+              {t('home.aboutSubtitle')}
             </p>
             <p>
-              <strong style={{ color: '#000000' }}>My Israel Rental LLC</strong> is transforming the rental landscape in Israel, offering a seamless, free, and efficient way to find apartments. Our mission is to simplify the process of renting, buying, ensuring that both tenants and property owners save time, money, and energy. With an intuitive platform that tailors property suggestions to your needs, we stand out as the go-to solution for finding the perfect home in Israel.
+              {t('home.aboutPara1')}
             </p>
             <p>
-              Inspired by the success of platforms like Airbnb and Zillow, My Israel Rental LLC is designed to cater specifically to the Israeli market, providing long-term rentals, short-term rentals, vacation rentals, and even machsan (storage space) rentals. We aim to make the process fluid, user-friendly, and free, creating a hassle-free experience for everyone involved.
+              {t('home.aboutPara2')}
             </p>
           </div>
         </div>
@@ -155,7 +155,7 @@ const Home = () => {
             {t('footer.phone')}: <a href="tel:+972553225141" className="font-bold hover:underline">+972 55 322 5141</a>
           </p>
           <p className="text-lg">
-            Email: <a href="mailto:mir@myisraelrental.com" className="font-bold hover:underline">mir@myisraelrental.com</a>
+            {t('home.email')}: <a href="mailto:mir@myisraelrental.com" className="font-bold hover:underline">mir@myisraelrental.com</a>
           </p>
         </div>
       </div>

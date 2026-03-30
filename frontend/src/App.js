@@ -36,7 +36,7 @@ function App() {
   }, [token]);
 
   useEffect(() => {
-    document.documentElement.dir = i18n.language === 'he' ? 'rtl' : 'ltr';
+    document.documentElement.dir = i18n.language.startsWith('he') ? 'rtl' : 'ltr';
   }, [i18n.language]);
 
   const fetchCurrentUser = async () => {
