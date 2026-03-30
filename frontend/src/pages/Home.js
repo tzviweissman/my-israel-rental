@@ -133,15 +133,8 @@ const Home = () => {
             {t('home.aboutUs')}
           </h2>
           <div className="space-y-6 text-lg leading-relaxed text-gray-700">
-            <p className="text-center text-xl mb-8" style={{ color: '#D4AF37', fontWeight: '600' }}>
-              {t('home.aboutSubtitle')}
-            </p>
-            <p>
-              {t('home.aboutPara1')}
-            </p>
-            <p>
-              {t('home.aboutPara2')}
-            </p>
+            <p dangerouslySetInnerHTML={{ __html: t('home.aboutPara1') }} />
+            <p dangerouslySetInnerHTML={{ __html: t('home.aboutPara2') }} />
           </div>
         </div>
       </div>
