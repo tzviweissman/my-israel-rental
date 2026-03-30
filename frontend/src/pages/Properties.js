@@ -3,7 +3,10 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import axios from 'axios';
 import { API } from '../App';
-import { Search, Bed, Bath, Home as HomeIcon, MapPin, Filter, Building2, X, ChevronDown, ChevronUp } from 'lucide-react';
+import { Search, Bed, Bath, Home as HomeIcon, MapPin, Filter, Building2, X, ChevronDown, ChevronUp, Calendar as CalendarIcon } from 'lucide-react';
+import { Calendar } from '../components/ui/calendar';
+import { Popover, PopoverContent, PopoverTrigger } from '../components/ui/popover';
+import { format } from 'date-fns';
 
 const Properties = () => {
   const { type } = useParams();
@@ -24,6 +27,7 @@ const Properties = () => {
     date_to: ''
   });
   const [showFilters, setShowFilters] = useState(false);
+  const [dateRange, setDateRange] = useState({ from: undefined, to: undefined });
 
   useEffect(() => {
     setFilters(prev => ({ ...prev, rental_type: type !== 'all' ? type : '' }));
@@ -79,6 +83,7 @@ const Properties = () => {
       date_to: ''
     };
     setFilters(cleared);
+    setDateRange({ from: undefined, to: undefined });
     // Fetch with cleared filters directly to avoid stale state
     const params = new URLSearchParams();
     if (cleared.rental_type && cleared.rental_type !== 'all') params.append('rental_type', cleared.rental_type);
@@ -265,27 +270,104 @@ const Properties = () => {
 
             {/* Dates Available Row */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-5">
-              <div>
-                <label className="block text-xs font-semibold text-gray-500 uppercase mb-1.5">{t('filters.startDate')}</label>
-                <input
-                  type="date"
-                  value={filters.date_from}
-                  onChange={(e) => handleFilterChange('date_from', e.target.value)}
-                  min={new Date().toISOString().split('T')[0]}
-                  className="w-full px-3 py-2.5 rounded-lg border border-[#E5E5E5] focus:outline-none focus:ring-2 focus:ring-[#000000]/20 text-sm"
-                  data-testid="filter-date-from"
-                />
-              </div>
-              <div>
-                <label className="block text-xs font-semibold text-gray-500 uppercase mb-1.5">{t('filters.endDate')}</label>
-                <input
-                  type="date"
-                  value={filters.date_to}
-                  onChange={(e) => handleFilterChange('date_to', e.target.value)}
-                  min={filters.date_from || new Date().toISOString().split('T')[0]}
-                  className="w-full px-3 py-2.5 rounded-lg border border-[#E5E5E5] focus:outline-none focus:ring-2 focus:ring-[#000000]/20 text-sm"
-                  data-testid="filter-date-to"
-                />
+              <div className="lg:col-span-2">
+                <label className="block text-xs font-semibold text-gray-500 uppercase mb-1.5">{t('filters.datesAvailable')}</label>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <button
+                      className="w-full px-3 py-2.5 rounded-lg border border-[#E5E5E5] focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/30 text-sm flex items-center gap-2 bg-white hover:border-[#D4AF37] transition-colors text-left"
+                      data-testid="filter-date-picker-trigger"
+                    >
+                      <CalendarIcon size={16} className="text-[#D4AF37] shrink-0" />
+                      {dateRange.from ? (
+                        <span className="text-gray-800">
+                          {format(dateRange.from, 'MMM d, yyyy')}
+                          {dateRange.to && (
+                            <span className="text-[#D4AF37] font-medium mx-1.5">&#8594;</span>
+                          )}
+                          {dateRange.to && format(dateRange.to, 'MMM d, yyyy')}
+                        </span>
+                      ) : (
+                        <span className="text-gray-400">{t('filters.startDate')} — {t('filters.endDate')}</span>
+                      )}
+                      {dateRange.from && (
+                        <span
+                          role="button"
+                          className="ml-auto text-gray-400 hover:text-gray-700 transition-colors"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setDateRange({ from: undefined, to: undefined });
+                            handleFilterChange('date_from', '');
+                            handleFilterChange('date_to', '');
+                          }}
+                          data-testid="filter-date-clear"
+                        >
+                          <X size={14} />
+                        </span>
+                      )}
+                    </button>
+                  </PopoverTrigger>
+                  <PopoverContent
+                    className="w-auto p-0 border-0 shadow-xl rounded-xl overflow-hidden"
+                    align="start"
+                    sideOffset={8}
+                    style={{ minWidth: '580px' }}
+                  >
+                    <div className="bg-[#1a1a1a] text-white px-4 py-3 flex items-center justify-between">
+                      <span className="text-sm font-semibold tracking-wide">{t('filters.datesAvailable')}</span>
+                      {dateRange.from && dateRange.to && (
+                        <span className="text-xs px-2 py-0.5 rounded-full bg-[#D4AF37]/20 text-[#D4AF37]">
+                          {Math.ceil((dateRange.to - dateRange.from) / (1000 * 60 * 60 * 24))} {t('property.nights')}
+                        </span>
+                      )}
+                    </div>
+                    <Calendar
+                      mode="range"
+                      selected={dateRange}
+                      onSelect={(range) => {
+                        setDateRange(range || { from: undefined, to: undefined });
+                        if (range?.from) {
+                          handleFilterChange('date_from', format(range.from, 'yyyy-MM-dd'));
+                        } else {
+                          handleFilterChange('date_from', '');
+                        }
+                        if (range?.to) {
+                          handleFilterChange('date_to', format(range.to, 'yyyy-MM-dd'));
+                        } else {
+                          handleFilterChange('date_to', '');
+                        }
+                      }}
+                      numberOfMonths={2}
+                      disabled={{ before: new Date() }}
+                      className="bg-white"
+                      classNames={{
+                        months: "flex flex-col sm:flex-row gap-0 divide-x divide-[#E5E5E5]",
+                        month: "p-4",
+                        caption: "flex justify-center pt-1 relative items-center mb-2",
+                        caption_label: "text-sm font-bold text-[#1a1a1a]",
+                        nav: "space-x-1 flex items-center",
+                        nav_button: "h-7 w-7 bg-transparent border border-[#E5E5E5] rounded-md p-0 opacity-60 hover:opacity-100 hover:border-[#D4AF37] transition-all inline-flex items-center justify-center",
+                        nav_button_previous: "absolute left-1",
+                        nav_button_next: "absolute right-1",
+                        table: "w-full border-collapse",
+                        head_row: "flex",
+                        head_cell: "text-[#D4AF37] rounded-md w-9 font-semibold text-[0.7rem] uppercase",
+                        row: "flex w-full mt-1",
+                        cell: "relative p-0 text-center text-sm focus-within:relative focus-within:z-20 [&:has([aria-selected])]:bg-[#D4AF37]/10 [&:has([aria-selected].day-outside)]:bg-[#D4AF37]/5 [&:has([aria-selected].day-range-end)]:rounded-r-md [&:has(>.day-range-end)]:rounded-r-md [&:has(>.day-range-start)]:rounded-l-md first:[&:has([aria-selected])]:rounded-l-md last:[&:has([aria-selected])]:rounded-r-md",
+                        day: "h-9 w-9 p-0 font-normal rounded-md hover:bg-[#D4AF37]/10 transition-colors inline-flex items-center justify-center aria-selected:opacity-100 cursor-pointer",
+                        day_range_start: "day-range-start bg-[#1a1a1a] text-white hover:bg-[#1a1a1a] rounded-l-md",
+                        day_range_end: "day-range-end bg-[#1a1a1a] text-white hover:bg-[#1a1a1a] rounded-r-md",
+                        day_selected: "bg-[#1a1a1a] text-white hover:bg-[#1a1a1a] focus:bg-[#1a1a1a] focus:text-white",
+                        day_today: "border border-[#D4AF37] text-[#D4AF37] font-bold",
+                        day_outside: "text-gray-300 aria-selected:bg-[#D4AF37]/5 aria-selected:text-gray-400",
+                        day_disabled: "text-gray-300 opacity-40 cursor-not-allowed",
+                        day_range_middle: "aria-selected:bg-[#D4AF37]/10 aria-selected:text-[#1a1a1a]",
+                        day_hidden: "invisible"
+                      }}
+                      data-testid="filter-date-calendar"
+                    />
+                  </PopoverContent>
+                </Popover>
               </div>
             </div>
 
