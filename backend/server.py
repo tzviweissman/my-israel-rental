@@ -207,7 +207,9 @@ async def get_properties(
     max_floor: Optional[float] = None,
     min_porches: Optional[int] = None,
     has_elevator: Optional[bool] = None,
-    condition: Optional[str] = None
+    condition: Optional[str] = None,
+    date_from: Optional[str] = None,
+    date_to: Optional[str] = None
 ):
     query = {}
     if rental_type:
@@ -235,6 +237,22 @@ async def get_properties(
         query['condition'] = condition
     
     properties = await db.properties.find(query, {"_id": 0}).to_list(1000)
+    
+    # Filter out properties that have overlapping bookings for requested dates
+    if date_from and date_to:
+        booked_property_ids = set()
+        overlapping_bookings = await db.bookings.find(
+            {
+                "status": {"$in": ["pending", "confirmed"]},
+                "start_date": {"$lt": date_to},
+                "end_date": {"$gt": date_from}
+            },
+            {"_id": 0, "property_id": 1}
+        ).to_list(10000)
+        for b in overlapping_bookings:
+            booked_property_ids.add(b['property_id'])
+        properties = [p for p in properties if p['id'] not in booked_property_ids]
+    
     return properties
 
 @api_router.get("/properties/{property_id}")
@@ -596,6 +614,7 @@ async def delete_upload(filename: str, payload=Depends(verify_token)):
     return {"message": "File deleted"}
 
 
+@api_router.get("/admin/dashboard")
 async def get_admin_dashboard(payload = Depends(verify_token)):
     if payload['role'] != 'admin':
         raise HTTPException(status_code=403, detail="Admin access required")

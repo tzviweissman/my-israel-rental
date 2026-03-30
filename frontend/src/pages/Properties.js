@@ -19,7 +19,9 @@ const Properties = () => {
     max_floor: '',
     min_porches: '',
     has_elevator: '',
-    condition: ''
+    condition: '',
+    date_from: '',
+    date_to: ''
   });
   const [showFilters, setShowFilters] = useState(false);
 
@@ -43,6 +45,8 @@ const Properties = () => {
       if (filters.min_porches) params.append('min_porches', filters.min_porches);
       if (filters.has_elevator === 'true') params.append('has_elevator', 'true');
       if (filters.condition) params.append('condition', filters.condition);
+      if (filters.date_from) params.append('date_from', filters.date_from);
+      if (filters.date_to) params.append('date_to', filters.date_to);
 
       const response = await axios.get(`${API}/properties?${params.toString()}`);
       setProperties(response.data);
@@ -61,7 +65,7 @@ const Properties = () => {
   };
 
   const clearFilters = () => {
-    setFilters({
+    const cleared = {
       rental_type: type !== 'all' ? type : '',
       min_bedrooms: '',
       max_price: '',
@@ -70,8 +74,15 @@ const Properties = () => {
       max_floor: '',
       min_porches: '',
       has_elevator: '',
-      condition: ''
-    });
+      condition: '',
+      date_from: '',
+      date_to: ''
+    };
+    setFilters(cleared);
+    // Fetch with cleared filters directly to avoid stale state
+    const params = new URLSearchParams();
+    if (cleared.rental_type && cleared.rental_type !== 'all') params.append('rental_type', cleared.rental_type);
+    axios.get(`${API}/properties?${params.toString()}`).then(res => setProperties(res.data)).catch(() => {});
   };
 
   const activeFilterCount = Object.entries(filters).filter(([k, v]) => v && k !== 'rental_type').length;
@@ -252,11 +263,37 @@ const Properties = () => {
               </div>
             </div>
 
+            {/* Dates Available Row */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-5">
+              <div>
+                <label className="block text-xs font-semibold text-gray-500 uppercase mb-1.5">{t('filters.startDate')}</label>
+                <input
+                  type="date"
+                  value={filters.date_from}
+                  onChange={(e) => handleFilterChange('date_from', e.target.value)}
+                  min={new Date().toISOString().split('T')[0]}
+                  className="w-full px-3 py-2.5 rounded-lg border border-[#E5E5E5] focus:outline-none focus:ring-2 focus:ring-[#000000]/20 text-sm"
+                  data-testid="filter-date-from"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-semibold text-gray-500 uppercase mb-1.5">{t('filters.endDate')}</label>
+                <input
+                  type="date"
+                  value={filters.date_to}
+                  onChange={(e) => handleFilterChange('date_to', e.target.value)}
+                  min={filters.date_from || new Date().toISOString().split('T')[0]}
+                  className="w-full px-3 py-2.5 rounded-lg border border-[#E5E5E5] focus:outline-none focus:ring-2 focus:ring-[#000000]/20 text-sm"
+                  data-testid="filter-date-to"
+                />
+              </div>
+            </div>
+
             <div className="flex items-center gap-3">
               <button onClick={applyFilters} className="primary-btn" data-testid="apply-filters-button">
                 {t('filters.apply')}
               </button>
-              <button onClick={() => { clearFilters(); fetchProperties(); }} className="text-sm text-gray-500 hover:text-black transition-colors flex items-center gap-1" data-testid="clear-filters-button">
+              <button onClick={clearFilters} className="text-sm text-gray-500 hover:text-black transition-colors flex items-center gap-1" data-testid="clear-filters-button">
                 <X size={14} />
                 {t('filters.clear')}
               </button>

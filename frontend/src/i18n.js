@@ -167,6 +167,27 @@ const resources = {
         completed: 'Completed',
         rejected: 'Rejected'
       },
+      filters: {
+        filters: 'Filters',
+        allProperties: 'All Properties',
+        any: 'Any',
+        anyLocation: 'Any Location',
+        anyPrice: 'Any Price',
+        maxPrice: 'Max Price',
+        minBedrooms: 'Min Bedrooms',
+        minBathrooms: 'Min Bathrooms',
+        maxFloor: 'Max Floor',
+        minPorches: 'Min Porches',
+        upTo: 'Up to',
+        apply: 'Apply Filters',
+        clear: 'Clear All',
+        results: 'results',
+        noResults: 'No properties found matching your criteria.',
+        yes: 'Yes',
+        datesAvailable: 'Dates Available',
+        startDate: 'Start Date',
+        endDate: 'End Date'
+      },
       footer: {
         contact: 'Contact Us',
         phone: 'Phone'
@@ -336,6 +357,27 @@ const resources = {
         inProgress: 'בטיפול',
         completed: 'הושלם',
         rejected: 'נדחה'
+      },
+      filters: {
+        filters: 'סינון',
+        allProperties: 'כל הנכסים',
+        any: 'הכל',
+        anyLocation: 'כל מיקום',
+        anyPrice: 'כל מחיר',
+        maxPrice: 'מחיר מקסימלי',
+        minBedrooms: 'מינ\' חדרי שינה',
+        minBathrooms: 'מינ\' חדרי רחצה',
+        maxFloor: 'קומה מקסימלית',
+        minPorches: 'מינ\' מרפסות',
+        upTo: 'עד',
+        apply: 'החל סינון',
+        clear: 'נקה הכל',
+        results: 'תוצאות',
+        noResults: 'לא נמצאו נכסים התואמים לקריטריונים שלך.',
+        yes: 'כן',
+        datesAvailable: 'תאריכים זמינים',
+        startDate: 'תאריך התחלה',
+        endDate: 'תאריך סיום'
       },
       footer: {
         contact: 'צור קשר',
