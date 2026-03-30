@@ -20,6 +20,7 @@ from email.mime.multipart import MIMEMultipart
 import base64
 import json
 import shutil
+import httpx
 
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
@@ -34,6 +35,24 @@ security = HTTPBearer()
 
 JWT_SECRET = os.environ.get('JWT_SECRET', 'your-secret-key-change-in-production-12345')
 EMERGENT_LLM_KEY = os.environ.get('EMERGENT_LLM_KEY', '')
+
+# Exchange rate cache
+_exchange_cache = {"rate": None, "fetched_at": None}
+
+async def get_usd_ils_rate():
+    now = datetime.now(timezone.utc)
+    if _exchange_cache["rate"] and _exchange_cache["fetched_at"] and (now - _exchange_cache["fetched_at"]).total_seconds() < 3600:
+        return _exchange_cache["rate"]
+    try:
+        async with httpx.AsyncClient(timeout=5) as client_http:
+            resp = await client_http.get("https://api.exchangerate-api.com/v4/latest/USD")
+            data = resp.json()
+            rate = data["rates"]["ILS"]
+            _exchange_cache["rate"] = rate
+            _exchange_cache["fetched_at"] = now
+            return rate
+    except Exception:
+        return _exchange_cache["rate"] or 3.65
 
 def create_token(user_id: str, role: str) -> str:
     payload = {
@@ -139,6 +158,12 @@ class ContactRequest(BaseModel):
     email: EmailStr
     phone: Optional[str] = None
     message: str
+
+
+@api_router.get("/exchange-rate")
+async def get_exchange_rate():
+    rate = await get_usd_ils_rate()
+    return {"usd_to_ils": round(rate, 4), "ils_to_usd": round(1 / rate, 4)}
 
 @api_router.post("/auth/register")
 async def register(user_data: UserRegister):

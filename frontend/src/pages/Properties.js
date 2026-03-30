@@ -60,6 +60,11 @@ const Properties = () => {
   const [dateRange, setDateRange] = useState({ from: undefined, to: undefined });
   const [priceRange, setPriceRange] = useState([0, PRICE_MAX]);
   const [priceCurrency, setPriceCurrency] = useState('ILS');
+  const [exchangeRate, setExchangeRate] = useState(null);
+
+  useEffect(() => {
+    axios.get(`${API}/exchange-rate`).then(res => setExchangeRate(res.data)).catch(() => setExchangeRate({ usd_to_ils: 3.65, ils_to_usd: 0.274 }));
+  }, []);
 
   useEffect(() => {
     setFilters(prev => ({ ...prev, rental_type: type !== 'all' ? type : '' }));
@@ -100,6 +105,12 @@ const Properties = () => {
   const applyFilters = () => {
     fetchProperties();
     setShowFilters(false);
+  };
+
+  const convertPrice = (price, fromCurrency) => {
+    if (!exchangeRate || !price) return null;
+    if (fromCurrency === 'USD') return { amount: Math.round(price * exchangeRate.usd_to_ils), symbol: '₪' };
+    return { amount: Math.round(price * exchangeRate.ils_to_usd), symbol: '$' };
   };
 
   const clearFilters = () => {
@@ -534,12 +545,24 @@ const Properties = () => {
                   )}
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="text-2xl font-bold" style={{ color: "#D4AF37" }}>
-                    {property.currency === 'USD' ? '$' : '₪'}{property.monthly_price || property.nightly_price}
-                    <span className="text-sm font-normal text-gray-600">
-                      {property.rental_type === 'vacation' ? t('property.perNight') : t('property.perMonth')}
+                  <div>
+                    <span className="text-2xl font-bold" style={{ color: "#D4AF37" }} data-testid={`property-price-${property.id}`}>
+                      {property.currency === 'USD' ? '$' : '₪'}{(property.monthly_price || property.nightly_price || 0).toLocaleString()}
+                      <span className="text-sm font-normal text-gray-600">
+                        {property.rental_type === 'vacation' ? t('property.perNight') : t('property.perMonth')}
+                      </span>
                     </span>
-                  </span>
+                    {(() => {
+                      const converted = convertPrice(property.monthly_price || property.nightly_price, property.currency);
+                      if (!converted) return null;
+                      return (
+                        <div className="text-xs text-gray-400 mt-0.5" data-testid={`property-converted-price-${property.id}`}>
+                          ≈ {converted.symbol}{converted.amount.toLocaleString()}
+                          {property.rental_type === 'vacation' ? t('property.perNight') : t('property.perMonth')}
+                        </div>
+                      );
+                    })()}
+                  </div>
                   <span className="text-sm px-3 py-1 rounded-full" style={{ backgroundColor: '#E5E5E5', color: '#000000' }}>
                     {{'long-term': t('property.longTerm'), 'short-term': t('property.shortTerm'), 'vacation': t('property.vacationType'), 'storage': t('property.storageType')}[property.rental_type] || property.rental_type}
                   </span>
