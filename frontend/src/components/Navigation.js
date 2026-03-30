@@ -20,7 +20,20 @@ const Navigation = () => {
   };
 
   return (
-    <nav className="sticky top-0 z-50" style={{ backgroundColor: '#1a1a1a', borderBottom: '1px solid #D4AF37' }}>
+    <nav className="sticky top-0 z-50" style={{
+      borderBottom: '1px solid #D4AF37',
+      background: `
+        linear-gradient(135deg, #1a1a1a 25%, transparent 25%) -10px 0/ 20px 20px,
+        linear-gradient(225deg, #1a1a1a 25%, transparent 25%) -10px 0/ 20px 20px,
+        linear-gradient(315deg, #1a1a1a 25%, transparent 25%) 0 0/ 20px 20px,
+        linear-gradient(45deg, #1a1a1a 25%, transparent 25%) 0 0/ 20px 20px,
+        linear-gradient(135deg, #222 25%, transparent 25%) 0 0/ 20px 20px,
+        linear-gradient(225deg, #222 25%, transparent 25%) 0 0/ 20px 20px,
+        linear-gradient(315deg, #222 25%, transparent 25%) 10px 0/ 20px 20px,
+        linear-gradient(45deg, #222 25%, transparent 25%) 10px 0/ 20px 20px,
+        #111
+      `
+    }}>
       <div className="max-w-7xl mx-auto px-6" style={{ height: '120px' }}>
         <div className="flex items-center justify-between h-full">
           <Link to="/" className="flex items-center" data-testid="nav-logo">
