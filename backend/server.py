@@ -231,6 +231,11 @@ async def get_property(property_id: str):
     await db.properties.update_one({"id": property_id}, {"$inc": {"views": 1}})
     property_data['views'] = property_data.get('views', 0) + 1
     
+    owner = await db.users.find_one({"id": property_data.get("owner_id")}, {"_id": 0, "name": 1, "email": 1})
+    if owner:
+        property_data['owner_name'] = owner.get('name', '')
+        property_data['owner_email'] = owner.get('email', '')
+    
     return property_data
 
 @api_router.put("/properties/{property_id}")

@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import axios from 'axios';
 import { API, AuthContext } from '../App';
-import { Bed, Bath, Home as HomeIcon, MapPin, Building2, MessageCircle, Calendar, ChevronLeft, ChevronRight, Film, Snowflake, WashingMachine, UtensilsCrossed, DoorOpen, ArrowUpFromLine, ShowerHead, Warehouse, Flame, Dumbbell, Waves, Sparkles, Car, Wifi } from 'lucide-react';
+import { Bed, Bath, Home as HomeIcon, MapPin, Building2, MessageCircle, Calendar, ChevronLeft, ChevronRight, Film, Snowflake, WashingMachine, UtensilsCrossed, DoorOpen, ArrowUpFromLine, ShowerHead, Warehouse, Flame, Dumbbell, Waves, Sparkles, Car, Wifi, Mail } from 'lucide-react';
 import { toast } from 'sonner';
 
 import { ArrowLeft } from 'lucide-react';
@@ -293,10 +293,21 @@ const PropertyDetail = () => {
                     <Calendar size={20} />
                     {t('property.book')}
                   </button>
-                  <button onClick={handleChat} className="w-full secondary-btn flex items-center justify-center gap-2" data-testid="contact-owner-button">
+                  <button onClick={handleChat} className="w-full secondary-btn flex items-center justify-center gap-2" data-testid="message-owner-button">
                     <MessageCircle size={20} />
-                    {t('property.contact')}
+                    {t('property.messageOwner')}
                   </button>
+                  {property.owner_email && (
+                    <a
+                      href={`mailto:${property.owner_email}?subject=${encodeURIComponent(t('property.emailSubject') + ': ' + property.title)}`}
+                      className="w-full flex items-center justify-center gap-2 px-6 py-3 rounded-full text-sm font-medium border-2 transition-colors"
+                      style={{ borderColor: '#D4AF37', color: '#D4AF37' }}
+                      data-testid="email-owner-button"
+                    >
+                      <Mail size={20} />
+                      {t('property.emailOwner')}
+                    </a>
+                  )}
                 </div>
               ) : (
                 <div className="space-y-4" data-testid="booking-form">
