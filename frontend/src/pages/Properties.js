@@ -59,6 +59,7 @@ const Properties = () => {
   const [showFilters, setShowFilters] = useState(false);
   const [dateRange, setDateRange] = useState({ from: undefined, to: undefined });
   const [priceRange, setPriceRange] = useState([0, PRICE_MAX]);
+  const [priceCurrency, setPriceCurrency] = useState('ILS');
 
   useEffect(() => {
     setFilters(prev => ({ ...prev, rental_type: type !== 'all' ? type : '' }));
@@ -83,6 +84,7 @@ const Properties = () => {
       if (filters.condition) params.append('condition', filters.condition);
       if (filters.date_from) params.append('date_from', filters.date_from);
       if (filters.date_to) params.append('date_to', filters.date_to);
+      if (filters.min_price || filters.max_price) params.append('currency', priceCurrency);
 
       const response = await axios.get(`${API}/properties?${params.toString()}`);
       setProperties(response.data);
@@ -118,6 +120,7 @@ const Properties = () => {
     setFilters(cleared);
     setDateRange({ from: undefined, to: undefined });
     setPriceRange([0, PRICE_MAX]);
+    setPriceCurrency('ILS');
     const params = new URLSearchParams();
     if (cleared.rental_type && cleared.rental_type !== 'all') params.append('rental_type', cleared.rental_type);
     axios.get(`${API}/properties?${params.toString()}`).then(res => setProperties(res.data)).catch(() => {});
@@ -177,7 +180,25 @@ const Properties = () => {
               <div>
                 {/* Price Range Section */}
                 <div className="p-6 pb-5" data-testid="filter-price-section">
-                  <h3 className="text-lg font-bold text-[#1a1a1a] mb-0.5">{t('filters.priceRange')}</h3>
+                  <div className="flex items-center justify-between mb-0.5">
+                    <h3 className="text-lg font-bold text-[#1a1a1a]">{t('filters.priceRange')}</h3>
+                    <div className="flex rounded-full border border-gray-300 overflow-hidden" data-testid="filter-currency-toggle">
+                      <button
+                        onClick={() => { setPriceCurrency('ILS'); setPriceRange([0, PRICE_MAX]); handleFilterChange('min_price', ''); handleFilterChange('max_price', ''); }}
+                        className={`px-3.5 py-1 text-sm font-semibold transition-colors ${priceCurrency === 'ILS' ? 'bg-[#1a1a1a] text-white' : 'bg-white text-gray-500 hover:text-gray-800'}`}
+                        data-testid="filter-currency-ils"
+                      >
+                        ₪
+                      </button>
+                      <button
+                        onClick={() => { setPriceCurrency('USD'); setPriceRange([0, PRICE_MAX]); handleFilterChange('min_price', ''); handleFilterChange('max_price', ''); }}
+                        className={`px-3.5 py-1 text-sm font-semibold transition-colors ${priceCurrency === 'USD' ? 'bg-[#1a1a1a] text-white' : 'bg-white text-gray-500 hover:text-gray-800'}`}
+                        data-testid="filter-currency-usd"
+                      >
+                        $
+                      </button>
+                    </div>
+                  </div>
                   <p className="text-sm text-gray-500 mb-5">{t('filters.priceSubtitle')}</p>
                   
                   <div className="px-1 mb-5">
@@ -196,7 +217,7 @@ const Properties = () => {
                     <div className="flex-1">
                       <label className="text-xs text-gray-500 mb-1 block">{t('filters.minimum')}</label>
                       <div className="flex items-center rounded-full border border-gray-300 px-4 py-2.5 bg-white hover:border-[#1a1a1a] transition-colors">
-                        <span className="text-sm text-gray-500 mr-1">₪</span>
+                        <span className="text-sm text-gray-500 mr-1">{priceCurrency === 'USD' ? '$' : '₪'}</span>
                         <input
                           type="number"
                           value={priceRange[0] || ''}
@@ -216,7 +237,7 @@ const Properties = () => {
                     <div className="flex-1">
                       <label className="text-xs text-gray-500 mb-1 block">{t('filters.maximum')}</label>
                       <div className="flex items-center rounded-full border border-gray-300 px-4 py-2.5 bg-white hover:border-[#1a1a1a] transition-colors">
-                        <span className="text-sm text-gray-500 mr-1">₪</span>
+                        <span className="text-sm text-gray-500 mr-1">{priceCurrency === 'USD' ? '$' : '₪'}</span>
                         <input
                           type="number"
                           value={priceRange[1] >= PRICE_MAX ? '' : priceRange[1]}

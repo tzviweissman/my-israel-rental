@@ -204,6 +204,7 @@ async def get_properties(
     area: Optional[str] = None,
     owner_id: Optional[str] = None,
     min_price: Optional[float] = None,
+    currency: Optional[str] = None,
     min_bathrooms: Optional[float] = None,
     max_floor: Optional[float] = None,
     min_porches: Optional[int] = None,
@@ -228,6 +229,8 @@ async def get_properties(
             query[price_field] = {**query[price_field], "$gte": min_price}
         else:
             query[price_field] = {"$gte": min_price}
+    if currency:
+        query['currency'] = currency
     if area:
         query['area'] = {"$regex": area, "$options": "i"}
     if owner_id:
