@@ -243,19 +243,6 @@ async def get_properties(
         query['rental_type'] = rental_type
     if min_bedrooms:
         query['bedrooms'] = {"$gte": min_bedrooms}
-    if max_price:
-        if rental_type == 'vacation':
-            query['nightly_price'] = {"$lte": max_price}
-        else:
-            query['monthly_price'] = {"$lte": max_price}
-    if min_price:
-        price_field = 'nightly_price' if rental_type == 'vacation' else 'monthly_price'
-        if price_field in query:
-            query[price_field] = {**query[price_field], "$gte": min_price}
-        else:
-            query[price_field] = {"$gte": min_price}
-    if currency:
-        query['currency'] = currency
     if area:
         query['area'] = {"$regex": area, "$options": "i"}
     if owner_id:
@@ -272,6 +259,31 @@ async def get_properties(
         query['condition'] = condition
     
     properties = await db.properties.find(query, {"_id": 0}).to_list(1000)
+    
+    # Cross-currency price filtering
+    if min_price or max_price:
+        rate = await get_usd_ils_rate()
+        filtered = []
+        for p in properties:
+            # Use whichever price the property has
+            raw_price = p.get('monthly_price') or p.get('nightly_price') or 0
+            prop_currency = p.get('currency', 'ILS')
+            # Convert property price to the filter currency
+            if currency and prop_currency != currency:
+                if currency == 'USD' and prop_currency == 'ILS':
+                    price_in_filter_currency = raw_price / rate
+                elif currency == 'ILS' and prop_currency == 'USD':
+                    price_in_filter_currency = raw_price * rate
+                else:
+                    price_in_filter_currency = raw_price
+            else:
+                price_in_filter_currency = raw_price
+            if min_price and price_in_filter_currency < min_price:
+                continue
+            if max_price and price_in_filter_currency > max_price:
+                continue
+            filtered.append(p)
+        properties = filtered
     
     # Filter out properties that have overlapping bookings for requested dates
     if date_from and date_to:
