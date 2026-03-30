@@ -45,7 +45,7 @@ const Home = () => {
             {t('hero.title')}
           </h1>
           <p className="text-lg sm:text-xl mb-8 text-white/90">
-            {t('hero.subtitle')}
+            Find Your Perfect Rental, <span style={{ color: '#D4AF37' }}>Any Duration</span>
           </p>
           <div className="flex gap-2 max-w-2xl mx-auto">
             <input
