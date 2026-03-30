@@ -37,14 +37,14 @@ const Navigation = () => {
 
   return (
     <nav className="sticky top-0 z-50" style={{ background: 'linear-gradient(to bottom, rgba(0,0,0,0.35) 0%, transparent 100%)' }}>
-      <div className="max-w-7xl mx-auto px-6 py-2">
+      <div className="max-w-7xl mx-auto px-6 py-3">
         <div className="flex items-center justify-between">
           <Link to="/" className="flex items-center" data-testid="nav-logo" onClick={() => window.scrollTo(0, 0)}>
-            <div className="rounded-xl px-1 py-0.5" style={{ backgroundColor: '#1a1a1a' }}>
+            <div className="rounded-xl flex items-center justify-center" style={{ backgroundColor: '#1a1a1a', border: '1.5px solid #D4AF37', padding: '4px 8px' }}>
               <img
                 src="https://customer-assets.emergentagent.com/job_listing-manager-pro-2/artifacts/hx4hc6hw_IMG_1745%20%281%29.PNG"
                 alt="MyIsraelRental"
-                className="w-auto" style={{ height: '90px' }}
+                className="w-auto" style={{ height: '36px' }}
               />
             </div>
           </Link>
@@ -52,14 +52,15 @@ const Navigation = () => {
           <div className="relative" ref={menuRef}>
             <button
               onClick={() => setMenuOpen(!menuOpen)}
-              className="flex items-center gap-2.5 px-5 py-2.5 rounded-xl transition-all duration-200"
+              className="flex items-center gap-2.5 px-5 rounded-xl transition-all duration-200"
               style={{
                 backgroundColor: '#1a1a1a',
-                border: '1.5px solid #D4AF37'
+                border: '1.5px solid #D4AF37',
+                padding: '6px 20px'
               }}
               data-testid="nav-menu-button"
             >
-              {menuOpen ? <X size={20} color="#D4AF37" /> : <Menu size={20} color="#D4AF37" />}
+              {menuOpen ? <X size={18} color="#D4AF37" /> : <Menu size={18} color="#D4AF37" />}
               <span className="text-sm font-semibold tracking-wide" style={{ color: '#D4AF37' }}>Menu</span>
             </button>
 
