@@ -116,6 +116,8 @@ const resources = {
         signupTitle: 'Create an Account',
         email: 'Email',
         password: 'Password',
+        confirmPassword: 'Confirm Password',
+        passwordMismatch: 'Passwords do not match',
         name: 'Full Name',
         phone: 'Phone Number',
         role: 'I am a',
@@ -125,7 +127,10 @@ const resources = {
         noAccount: "Don't have an account?",
         haveAccount: 'Already have an account?',
         signUpHere: 'Sign up here',
-        loginHere: 'Login here'
+        loginHere: 'Login here',
+        welcomeBack: 'Welcome back!',
+        accountCreated: 'Account created successfully!',
+        failed: 'Authentication failed'
       },
       admin: {
         title: 'Super Admin Dashboard',
@@ -281,6 +286,8 @@ const resources = {
         signupTitle: 'צור חשבון חדש',
         email: 'אימייל',
         password: 'סיסמה',
+        confirmPassword: 'אימות סיסמה',
+        passwordMismatch: 'הסיסמאות אינן תואמות',
         name: 'שם מלא',
         phone: 'מספר טלפון',
         role: 'אני',
@@ -290,7 +297,10 @@ const resources = {
         noAccount: 'אין לך חשבון?',
         haveAccount: 'כבר יש לך חשבון?',
         signUpHere: 'הירשם כאן',
-        loginHere: 'התחבר כאן'
+        loginHere: 'התחבר כאן',
+        welcomeBack: '!ברוך שובך',
+        accountCreated: '!החשבון נוצר בהצלחה',
+        failed: 'האימות נכשל'
       },
       admin: {
         title: 'לוח בקרה ראשי',

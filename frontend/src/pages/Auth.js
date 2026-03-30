@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import axios from 'axios';
 import { API, AuthContext } from '../App';
 import { toast } from 'sonner';
+import { Eye, EyeOff } from 'lucide-react';
 
 const Auth = () => {
   const { mode } = useParams();
@@ -17,17 +18,24 @@ const Auth = () => {
     phone: '',
     role: 'renter'
   });
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (mode === 'signup' && formData.password !== confirmPassword) {
+      toast.error(t('auth.passwordMismatch'));
+      return;
+    }
     try {
       const endpoint = mode === 'login' ? '/auth/login' : '/auth/register';
       const response = await axios.post(`${API}${endpoint}`, formData);
       login(response.data.token, response.data.user);
-      toast.success(mode === 'login' ? 'Welcome back!' : 'Account created successfully!');
+      toast.success(mode === 'login' ? t('auth.welcomeBack') : t('auth.accountCreated'));
       navigate('/dashboard');
     } catch (error) {
-      toast.error(error.response?.data?.detail || 'Authentication failed');
+      toast.error(error.response?.data?.detail || t('auth.failed'));
     }
   };
 
@@ -68,18 +76,53 @@ const Auth = () => {
 
             <div>
               <label className="block text-sm font-medium mb-2">{t('auth.password')}</label>
-              <input
-                type="password"
-                value={formData.password}
-                onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                className="w-full px-4 py-3 rounded-lg border border-[#E5E5E5] focus:outline-none focus:ring-2 focus:ring-[#000000]/50"
-                required
-                data-testid="auth-password-input"
-              />
+              <div className="relative">
+                <input
+                  type={showPassword ? 'text' : 'password'}
+                  value={formData.password}
+                  onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                  className="w-full px-4 py-3 pr-12 rounded-lg border border-[#E5E5E5] focus:outline-none focus:ring-2 focus:ring-[#000000]/50"
+                  required
+                  data-testid="auth-password-input"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-700 transition-colors"
+                  data-testid="toggle-password-visibility"
+                >
+                  {showPassword ? <Eye size={20} /> : <EyeOff size={20} />}
+                </button>
+              </div>
             </div>
 
             {mode === 'signup' && (
               <>
+                <div>
+                  <label className="block text-sm font-medium mb-2">{t('auth.confirmPassword')}</label>
+                  <div className="relative">
+                    <input
+                      type={showConfirmPassword ? 'text' : 'password'}
+                      value={confirmPassword}
+                      onChange={(e) => setConfirmPassword(e.target.value)}
+                      className={`w-full px-4 py-3 pr-12 rounded-lg border focus:outline-none focus:ring-2 focus:ring-[#000000]/50 ${confirmPassword && confirmPassword !== formData.password ? 'border-red-400' : 'border-[#E5E5E5]'}`}
+                      required
+                      data-testid="auth-confirm-password-input"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-700 transition-colors"
+                      data-testid="toggle-confirm-password-visibility"
+                    >
+                      {showConfirmPassword ? <Eye size={20} /> : <EyeOff size={20} />}
+                    </button>
+                  </div>
+                  {confirmPassword && confirmPassword !== formData.password && (
+                    <p className="text-xs text-red-500 mt-1" data-testid="password-mismatch-error">{t('auth.passwordMismatch')}</p>
+                  )}
+                </div>
+
                 <div>
                   <label className="block text-sm font-medium mb-2">{t('auth.phone')}</label>
                   <input
@@ -114,16 +157,16 @@ const Auth = () => {
           <div className="mt-6 text-center">
             {mode === 'login' ? (
               <p className="text-sm text-gray-600">
-                Don't have an account?{' '}
+                {t('auth.noAccount')}{' '}
                 <a href="/auth/signup" className="font-medium" style={{ color: '#000000' }} data-testid="auth-toggle-link">
-                  Sign up
+                  {t('auth.signUpHere')}
                 </a>
               </p>
             ) : (
               <p className="text-sm text-gray-600">
-                Already have an account?{' '}
+                {t('auth.haveAccount')}{' '}
                 <a href="/auth/login" className="font-medium" style={{ color: '#000000' }} data-testid="auth-toggle-link">
-                  Login
+                  {t('auth.loginHere')}
                 </a>
               </p>
             )}
