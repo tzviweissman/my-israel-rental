@@ -40,11 +40,11 @@ const Navigation = () => {
       <div className="max-w-7xl mx-auto px-6 py-3">
         <div className="flex items-center justify-between">
           <Link to="/" className="flex items-center" data-testid="nav-logo" onClick={() => window.scrollTo(0, 0)}>
-            <div className="rounded-xl flex items-center justify-center" style={{ backgroundColor: '#1a1a1a', border: '1.5px solid #D4AF37', padding: '4px 8px' }}>
+            <div className="rounded-xl flex items-center justify-center" style={{ backgroundColor: '#1a1a1a', border: '1.5px solid #D4AF37', padding: '8px 14px' }}>
               <img
                 src="https://customer-assets.emergentagent.com/job_listing-manager-pro-2/artifacts/hx4hc6hw_IMG_1745%20%281%29.PNG"
                 alt="MyIsraelRental"
-                className="w-auto" style={{ height: '36px' }}
+                className="w-auto" style={{ height: '60px' }}
               />
             </div>
           </Link>
@@ -52,16 +52,16 @@ const Navigation = () => {
           <div className="relative" ref={menuRef}>
             <button
               onClick={() => setMenuOpen(!menuOpen)}
-              className="flex items-center gap-2.5 px-5 rounded-xl transition-all duration-200"
+              className="flex items-center gap-3 rounded-xl transition-all duration-200"
               style={{
                 backgroundColor: '#1a1a1a',
                 border: '1.5px solid #D4AF37',
-                padding: '6px 20px'
+                padding: '20px 28px'
               }}
               data-testid="nav-menu-button"
             >
-              {menuOpen ? <X size={18} color="#D4AF37" /> : <Menu size={18} color="#D4AF37" />}
-              <span className="text-sm font-semibold tracking-wide" style={{ color: '#D4AF37' }}>Menu</span>
+              {menuOpen ? <X size={22} color="#D4AF37" /> : <Menu size={22} color="#D4AF37" />}
+              <span className="text-base font-semibold tracking-wide" style={{ color: '#D4AF37' }}>Menu</span>
             </button>
 
             {menuOpen && (
