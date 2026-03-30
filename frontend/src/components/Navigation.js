@@ -22,7 +22,7 @@ const Navigation = () => {
   return (
     <nav className="sticky top-0 z-50" style={{
       borderBottom: '2px solid #D4AF37',
-      backgroundColor: '#555555'
+      backgroundColor: '#1a1a1a'
     }}>
       <div className="max-w-7xl mx-auto px-6" style={{ height: '120px' }}>
         <div className="flex items-center justify-between h-full">
