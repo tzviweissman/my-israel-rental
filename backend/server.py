@@ -203,6 +203,7 @@ async def get_properties(
     max_price: Optional[float] = None,
     area: Optional[str] = None,
     owner_id: Optional[str] = None,
+    min_price: Optional[float] = None,
     min_bathrooms: Optional[float] = None,
     max_floor: Optional[float] = None,
     min_porches: Optional[int] = None,
@@ -221,6 +222,12 @@ async def get_properties(
             query['nightly_price'] = {"$lte": max_price}
         else:
             query['monthly_price'] = {"$lte": max_price}
+    if min_price:
+        price_field = 'nightly_price' if rental_type == 'vacation' else 'monthly_price'
+        if price_field in query:
+            query[price_field] = {**query[price_field], "$gte": min_price}
+        else:
+            query[price_field] = {"$gte": min_price}
     if area:
         query['area'] = {"$regex": area, "$options": "i"}
     if owner_id:
