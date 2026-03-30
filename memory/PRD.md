@@ -34,6 +34,10 @@ Build a bilingual (English/Hebrew) rental website named MyIsraelRental.com with 
   - Blocked dates shown as disabled on property calendar
   - Date filter checks both internal bookings and external iCal bookings
   - Dashboard UI: add/remove iCal URLs, sync status, export URL copy
+- [x] **Description & Address Optional** (2026-03-31):
+  - PropertyCreate Pydantic model: description and address changed to Optional[str] = None
+  - Frontend Dashboard.js: removed `required` attribute from description textarea and address input
+  - Auth playbook validated against integration_playbook_expert_v2
 
 ### Key API Endpoints
 - Auth: POST /api/auth/register, /api/auth/login, GET /api/auth/me
