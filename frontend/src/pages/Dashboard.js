@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import axios from 'axios';
 import { API, AuthContext } from '../App';
-import { Plus, Edit, Trash2, Eye, MessageCircle, Upload, X, Image, Film } from 'lucide-react';
+import { Plus, Edit, Trash2, Eye, MessageCircle, Upload, X, Image, Film, CalendarSync, Link2, Copy, Check, RefreshCw } from 'lucide-react';
 import { toast } from 'sonner';
 
 const Dashboard = () => {
@@ -17,6 +17,11 @@ const Dashboard = () => {
   const [uploading, setUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [editingPropertyId, setEditingPropertyId] = useState(null);
+  const [icalPanel, setIcalPanel] = useState(null);
+  const [icalUrl, setIcalUrl] = useState('');
+  const [icalSyncing, setIcalSyncing] = useState(false);
+  const [icalData, setIcalData] = useState({});
+  const [copiedExport, setCopiedExport] = useState(false);
   const [propertyForm, setPropertyForm] = useState({
     title: '',
     description: '',
@@ -244,6 +249,66 @@ const Dashboard = () => {
   const copyShareableLink = () => {
     navigator.clipboard.writeText(getShareableLink());
     toast.success('Link copied to clipboard!');
+  };
+
+  const openIcalPanel = async (propertyId) => {
+    setIcalPanel(icalPanel === propertyId ? null : propertyId);
+    setIcalUrl('');
+    setCopiedExport(false);
+    if (icalPanel !== propertyId) {
+      try {
+        const res = await axios.get(`${API}/properties/${propertyId}/blocked-dates`);
+        setIcalData(prev => ({ ...prev, [propertyId]: res.data }));
+      } catch (e) {}
+    }
+  };
+
+  const addIcalUrl = async (propertyId) => {
+    if (!icalUrl.trim()) return;
+    setIcalSyncing(true);
+    try {
+      await axios.post(`${API}/properties/${propertyId}/ical`, { url: icalUrl.trim() }, { headers: { Authorization: `Bearer ${token}` } });
+      toast.success(t('property.ical.copied') || 'iCal feed added!');
+      setIcalUrl('');
+      const res = await axios.get(`${API}/properties/${propertyId}/blocked-dates`);
+      setIcalData(prev => ({ ...prev, [propertyId]: res.data }));
+      fetchProperties();
+    } catch (e) {
+      toast.error(e.response?.data?.detail || 'Failed to add iCal feed');
+    }
+    setIcalSyncing(false);
+  };
+
+  const removeIcalUrl = async (propertyId, url) => {
+    try {
+      await axios.delete(`${API}/properties/${propertyId}/ical`, { data: { url }, headers: { Authorization: `Bearer ${token}` } });
+      toast.success('iCal feed removed');
+      const res = await axios.get(`${API}/properties/${propertyId}/blocked-dates`);
+      setIcalData(prev => ({ ...prev, [propertyId]: res.data }));
+      fetchProperties();
+    } catch (e) {
+      toast.error('Failed to remove iCal feed');
+    }
+  };
+
+  const manualSync = async (propertyId) => {
+    setIcalSyncing(true);
+    try {
+      await axios.post(`${API}/properties/${propertyId}/ical-sync`, {}, { headers: { Authorization: `Bearer ${token}` } });
+      const res = await axios.get(`${API}/properties/${propertyId}/blocked-dates`);
+      setIcalData(prev => ({ ...prev, [propertyId]: res.data }));
+      toast.success('Sync complete');
+    } catch (e) {
+      toast.error('Sync failed');
+    }
+    setIcalSyncing(false);
+  };
+
+  const copyExportUrl = (propertyId) => {
+    const url = `${API.replace('/api', '')}/api/properties/${propertyId}/ical-export`;
+    navigator.clipboard.writeText(url);
+    setCopiedExport(true);
+    setTimeout(() => setCopiedExport(false), 2000);
   };
 
   return (
@@ -853,6 +918,90 @@ const Dashboard = () => {
                         </button>
                       </div>
                     </div>
+                    {/* iCal Sync for Vacation Properties */}
+                    {property.rental_type === 'vacation' && (
+                      <div className="mt-3 pt-3 border-t border-gray-100">
+                        <button
+                          onClick={() => openIcalPanel(property.id)}
+                          className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-all"
+                          style={{ backgroundColor: icalPanel === property.id ? '#2D2D2D' : '#f5f5f0', color: icalPanel === property.id ? '#D4AF37' : '#2D2D2D' }}
+                          data-testid={`ical-toggle-${property.id}`}
+                        >
+                          <CalendarSync size={15} />
+                          {t('property.ical.title')}
+                          {property.ical_urls?.length > 0 && <span className="w-5 h-5 rounded-full text-[10px] flex items-center justify-center font-bold bg-[#D4AF37] text-white">{property.ical_urls.length}</span>}
+                        </button>
+
+                        {icalPanel === property.id && (
+                          <div className="mt-3 space-y-3" data-testid={`ical-panel-${property.id}`}>
+                            <p className="text-xs text-gray-500">{t('property.ical.subtitle')}</p>
+
+                            {/* Add URL */}
+                            <div className="flex gap-2">
+                              <input
+                                type="url"
+                                value={icalUrl}
+                                onChange={(e) => setIcalUrl(e.target.value)}
+                                placeholder={t('property.ical.urlPlaceholder')}
+                                className="flex-1 px-3 py-2 rounded-lg border border-gray-200 text-sm focus:outline-none focus:border-[#D4AF37]"
+                                data-testid={`ical-url-input-${property.id}`}
+                              />
+                              <button
+                                onClick={() => addIcalUrl(property.id)}
+                                disabled={icalSyncing || !icalUrl.trim()}
+                                className="px-3 py-2 rounded-lg text-sm font-medium text-white disabled:opacity-40"
+                                style={{ backgroundColor: '#2D2D2D' }}
+                                data-testid={`ical-add-btn-${property.id}`}
+                              >
+                                {icalSyncing ? t('property.ical.syncing') : t('property.ical.add')}
+                              </button>
+                            </div>
+
+                            {/* Connected Calendars */}
+                            {property.ical_urls?.length > 0 ? (
+                              <div className="space-y-1.5">
+                                {property.ical_urls.map((url, i) => (
+                                  <div key={i} className="flex items-center gap-2 px-3 py-2 rounded-lg bg-gray-50 text-xs">
+                                    <Link2 size={12} className="text-[#D4AF37] shrink-0" />
+                                    <span className="flex-1 truncate text-gray-600">{url}</span>
+                                    <button onClick={() => removeIcalUrl(property.id, url)} className="text-red-400 hover:text-red-600 shrink-0" data-testid={`ical-remove-${i}`}>
+                                      <X size={14} />
+                                    </button>
+                                  </div>
+                                ))}
+                              </div>
+                            ) : (
+                              <p className="text-xs text-gray-400 text-center py-2">{t('property.ical.noUrls')}</p>
+                            )}
+
+                            {/* Sync Status */}
+                            {icalData[property.id] && (
+                              <div className="flex items-center justify-between text-xs text-gray-500">
+                                <span>{icalData[property.id].external?.length || 0} {t('property.ical.blockedDates')}</span>
+                                <button onClick={() => manualSync(property.id)} disabled={icalSyncing} className="flex items-center gap-1 text-[#D4AF37] hover:underline disabled:opacity-40" data-testid={`ical-sync-btn-${property.id}`}>
+                                  <RefreshCw size={12} className={icalSyncing ? 'animate-spin' : ''} />
+                                  {t('property.ical.autoSync')}
+                                </button>
+                              </div>
+                            )}
+
+                            {/* Export */}
+                            <div className="pt-2 border-t border-gray-100">
+                              <p className="text-xs font-medium text-gray-700 mb-1">{t('property.ical.exportTitle')}</p>
+                              <p className="text-[11px] text-gray-400 mb-2">{t('property.ical.exportDesc')}</p>
+                              <button
+                                onClick={() => copyExportUrl(property.id)}
+                                className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-lg border border-gray-200 text-sm hover:border-[#D4AF37] transition-colors"
+                                data-testid={`ical-export-btn-${property.id}`}
+                              >
+                                {copiedExport ? <Check size={14} className="text-green-500" /> : <Copy size={14} className="text-gray-500" />}
+                                <span className="text-gray-700">{copiedExport ? t('property.ical.copied') : t('property.ical.copyUrl')}</span>
+                              </button>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    )}
                   </div>
                 </div>
               ))}

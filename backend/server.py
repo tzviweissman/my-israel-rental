@@ -21,6 +21,8 @@ import base64
 import json
 import shutil
 import httpx
+import asyncio
+from icalendar import Calendar as iCalCalendar, Event as iCalEvent
 
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
@@ -53,6 +55,87 @@ async def get_usd_ils_rate():
             return rate
     except Exception:
         return _exchange_cache["rate"] or 3.65
+
+
+# --- iCal Sync ---
+async def parse_ical_feed(url: str):
+    """Fetch and parse an iCal feed, return list of {start, end, summary} date ranges."""
+    blocked = []
+    try:
+        async with httpx.AsyncClient(timeout=15, follow_redirects=True) as http:
+            resp = await http.get(url)
+            resp.raise_for_status()
+            cal = iCalCalendar.from_ical(resp.text)
+            for component in cal.walk():
+                if component.name == 'VEVENT':
+                    dtstart = component.get('dtstart')
+                    dtend = component.get('dtend')
+                    summary = str(component.get('summary', 'Blocked'))
+                    if dtstart and dtend:
+                        start = dtstart.dt
+                        end = dtend.dt
+                        if hasattr(start, 'date'):
+                            start = start.date()
+                        if hasattr(end, 'date'):
+                            end = end.date()
+                        blocked.append({
+                            "start": str(start),
+                            "end": str(end),
+                            "summary": summary
+                        })
+    except Exception as e:
+        logging.error(f"iCal fetch error for {url}: {e}")
+    return blocked
+
+async def sync_property_ical(property_id: str):
+    """Sync all iCal feeds for a single property."""
+    prop = await db.properties.find_one({"id": property_id}, {"_id": 0, "ical_urls": 1})
+    if not prop or not prop.get("ical_urls"):
+        return
+    all_blocked = []
+    for url_entry in prop["ical_urls"]:
+        url = url_entry if isinstance(url_entry, str) else url_entry.get("url", "")
+        if not url:
+            continue
+        dates = await parse_ical_feed(url)
+        for d in dates:
+            d["source_url"] = url
+        all_blocked.extend(dates)
+    # Replace all external bookings for this property
+    await db.external_bookings.delete_many({"property_id": property_id})
+    if all_blocked:
+        docs = []
+        for b in all_blocked:
+            docs.append({
+                "id": str(uuid.uuid4()),
+                "property_id": property_id,
+                "start_date": b["start"],
+                "end_date": b["end"],
+                "summary": b["summary"],
+                "source_url": b["source_url"],
+                "synced_at": datetime.now(timezone.utc).isoformat()
+            })
+        await db.external_bookings.insert_many(docs)
+    await db.properties.update_one(
+        {"id": property_id},
+        {"$set": {"ical_last_synced": datetime.now(timezone.utc).isoformat()}}
+    )
+
+async def sync_all_ical_feeds():
+    """Background task: sync all vacation properties with iCal URLs every 5 minutes."""
+    while True:
+        try:
+            props = await db.properties.find(
+                {"rental_type": "vacation", "ical_urls": {"$exists": True, "$ne": []}},
+                {"_id": 0, "id": 1}
+            ).to_list(1000)
+            for p in props:
+                await sync_property_ical(p["id"])
+            if props:
+                logging.info(f"iCal sync complete: {len(props)} properties synced")
+        except Exception as e:
+            logging.error(f"iCal background sync error: {e}")
+        await asyncio.sleep(300)  # 5 minutes
 
 def create_token(user_id: str, role: str) -> str:
     payload = {
@@ -297,6 +380,16 @@ async def get_properties(
             {"_id": 0, "property_id": 1}
         ).to_list(10000)
         for b in overlapping_bookings:
+            booked_property_ids.add(b['property_id'])
+        # Also check external iCal bookings
+        external_overlaps = await db.external_bookings.find(
+            {
+                "start_date": {"$lt": date_to},
+                "end_date": {"$gt": date_from}
+            },
+            {"_id": 0, "property_id": 1}
+        ).to_list(10000)
+        for b in external_overlaps:
             booked_property_ids.add(b['property_id'])
         properties = [p for p in properties if p['id'] not in booked_property_ids]
     
@@ -820,6 +913,102 @@ async def get_manager_properties(manager_id: str):
         "properties": properties
     }
 
+
+# --- iCal Endpoints ---
+class ICalUrlInput(BaseModel):
+    url: str
+
+@api_router.post("/properties/{property_id}/ical")
+async def add_ical_url(property_id: str, data: ICalUrlInput, payload=Depends(verify_token)):
+    prop = await db.properties.find_one({"id": property_id}, {"_id": 0})
+    if not prop:
+        raise HTTPException(status_code=404, detail="Property not found")
+    if prop.get("owner_id") != payload["user_id"] and payload["role"] != "admin":
+        raise HTTPException(status_code=403, detail="Not authorized")
+    if prop.get("rental_type") != "vacation":
+        raise HTTPException(status_code=400, detail="iCal sync is only available for vacation rentals")
+    # Validate URL by trying to fetch it
+    dates = await parse_ical_feed(data.url)
+    ical_urls = prop.get("ical_urls", [])
+    if data.url not in ical_urls:
+        ical_urls.append(data.url)
+    await db.properties.update_one({"id": property_id}, {"$set": {"ical_urls": ical_urls}})
+    # Sync immediately
+    await sync_property_ical(property_id)
+    return {"message": "iCal feed added and synced", "blocked_dates": len(dates), "ical_urls": ical_urls}
+
+@api_router.delete("/properties/{property_id}/ical")
+async def remove_ical_url(property_id: str, data: ICalUrlInput, payload=Depends(verify_token)):
+    prop = await db.properties.find_one({"id": property_id}, {"_id": 0})
+    if not prop:
+        raise HTTPException(status_code=404, detail="Property not found")
+    if prop.get("owner_id") != payload["user_id"] and payload["role"] != "admin":
+        raise HTTPException(status_code=403, detail="Not authorized")
+    ical_urls = prop.get("ical_urls", [])
+    if data.url in ical_urls:
+        ical_urls.remove(data.url)
+    await db.properties.update_one({"id": property_id}, {"$set": {"ical_urls": ical_urls}})
+    await db.external_bookings.delete_many({"property_id": property_id, "source_url": data.url})
+    return {"message": "iCal feed removed", "ical_urls": ical_urls}
+
+@api_router.get("/properties/{property_id}/ical-export")
+async def export_ical(property_id: str):
+    prop = await db.properties.find_one({"id": property_id}, {"_id": 0, "title": 1})
+    if not prop:
+        raise HTTPException(status_code=404, detail="Property not found")
+    bookings = await db.bookings.find(
+        {"property_id": property_id, "status": {"$in": ["pending", "confirmed"]}},
+        {"_id": 0}
+    ).to_list(1000)
+    cal = iCalCalendar()
+    cal.add('prodid', '-//MyIsraelRental//EN')
+    cal.add('version', '2.0')
+    cal.add('calscale', 'GREGORIAN')
+    cal.add('method', 'PUBLISH')
+    cal.add('x-wr-calname', prop.get('title', 'Property Calendar'))
+    for b in bookings:
+        event = iCalEvent()
+        event.add('summary', f'Booked - {prop.get("title", "")}')
+        event.add('dtstart', datetime.strptime(b['start_date'], '%Y-%m-%d').date())
+        event.add('dtend', datetime.strptime(b['end_date'], '%Y-%m-%d').date())
+        event.add('uid', b.get('id', str(uuid.uuid4())))
+        event.add('dtstamp', datetime.now(timezone.utc))
+        cal.add_component(event)
+    from starlette.responses import Response
+    return Response(content=cal.to_ical(), media_type="text/calendar", headers={"Content-Disposition": f"attachment; filename={property_id}.ics"})
+
+@api_router.get("/properties/{property_id}/blocked-dates")
+async def get_blocked_dates(property_id: str):
+    # Internal bookings
+    bookings = await db.bookings.find(
+        {"property_id": property_id, "status": {"$in": ["pending", "confirmed"]}},
+        {"_id": 0, "start_date": 1, "end_date": 1}
+    ).to_list(1000)
+    # External iCal bookings
+    external = await db.external_bookings.find(
+        {"property_id": property_id},
+        {"_id": 0, "start_date": 1, "end_date": 1, "summary": 1}
+    ).to_list(1000)
+    # Get last sync time
+    prop = await db.properties.find_one({"id": property_id}, {"_id": 0, "ical_last_synced": 1, "ical_urls": 1})
+    return {
+        "internal": bookings,
+        "external": external,
+        "ical_urls_count": len(prop.get("ical_urls", [])) if prop else 0,
+        "last_synced": prop.get("ical_last_synced") if prop else None
+    }
+
+@api_router.post("/properties/{property_id}/ical-sync")
+async def manual_ical_sync(property_id: str, payload=Depends(verify_token)):
+    prop = await db.properties.find_one({"id": property_id}, {"_id": 0})
+    if not prop:
+        raise HTTPException(status_code=404, detail="Property not found")
+    if prop.get("owner_id") != payload["user_id"] and payload["role"] != "admin":
+        raise HTTPException(status_code=403, detail="Not authorized")
+    await sync_property_ical(property_id)
+    return {"message": "Sync complete", "last_synced": datetime.now(timezone.utc).isoformat()}
+
+
 app.include_router(api_router)
 app.mount("/api/uploads", StaticFiles(directory=str(UPLOAD_DIR)), name="uploads")
 
@@ -836,6 +1025,11 @@ logging.basicConfig(
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
 )
 logger = logging.getLogger(__name__)
+
+
+@app.on_event("startup")
+async def start_ical_sync():
+    asyncio.create_task(sync_all_ical_feeds())
 
 @app.on_event("shutdown")
 async def shutdown_db_client():

@@ -27,6 +27,7 @@ const PropertyDetail = () => {
   });
   const [showBooking, setShowBooking] = useState(false);
   const [exchangeRate, setExchangeRate] = useState(null);
+  const [blockedDates, setBlockedDates] = useState([]);
 
   useEffect(() => {
     axios.get(`${API}/exchange-rate`).then(res => setExchangeRate(res.data)).catch(() => setExchangeRate({ usd_to_ils: 3.65, ils_to_usd: 0.274 }));
@@ -46,6 +47,18 @@ const PropertyDetail = () => {
     try {
       const response = await axios.get(`${API}/properties/${id}`);
       setProperty(response.data);
+      // Fetch blocked dates
+      const blockedRes = await axios.get(`${API}/properties/${id}/blocked-dates`);
+      const allBlocked = [...(blockedRes.data.internal || []), ...(blockedRes.data.external || [])];
+      const dates = [];
+      allBlocked.forEach(b => {
+        const start = new Date(b.start_date);
+        const end = new Date(b.end_date);
+        for (let d = new Date(start); d < end; d.setDate(d.getDate() + 1)) {
+          dates.push(new Date(d));
+        }
+      });
+      setBlockedDates(dates);
     } catch (error) {
       console.error('Failed to fetch property', error);
       toast.error('Property not found');
@@ -385,7 +398,7 @@ const PropertyDetail = () => {
                             }
                           }}
                           numberOfMonths={1}
-                          disabled={{ before: new Date() }}
+                          disabled={[{ before: new Date() }, ...blockedDates.map(d => new Date(d))]}
                           className="rounded-xl"
                           classNames={{
                             months: "flex flex-col",
