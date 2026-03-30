@@ -3,7 +3,9 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import axios from 'axios';
 import { API, AuthContext } from '../App';
-import { Bed, Bath, Home as HomeIcon, MapPin, Building2, MessageCircle, Calendar, ChevronLeft, ChevronRight, Film, Snowflake, WashingMachine, UtensilsCrossed, DoorOpen, ArrowUpFromLine, ShowerHead, Warehouse, Flame, Dumbbell, Waves, Sparkles, Car, Wifi, Mail } from 'lucide-react';
+import { Bed, Bath, Home as HomeIcon, MapPin, Building2, MessageCircle, Calendar as CalendarIcon, ChevronLeft, ChevronRight, Film, Snowflake, WashingMachine, UtensilsCrossed, DoorOpen, ArrowUpFromLine, ShowerHead, Warehouse, Flame, Dumbbell, Waves, Sparkles, Car, Wifi, Mail, Users, X } from 'lucide-react';
+import { Calendar } from '../components/ui/calendar';
+import { format } from 'date-fns';
 import { toast } from 'sonner';
 
 import { ArrowLeft } from 'lucide-react';
@@ -15,6 +17,8 @@ const PropertyDetail = () => {
   const { user, token } = useContext(AuthContext);
   const [property, setProperty] = useState(null);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [showCalendar, setShowCalendar] = useState(null);
+  const [dateRange, setDateRange] = useState({ from: undefined, to: undefined });
   const [bookingData, setBookingData] = useState({
     start_date: '',
     end_date: '',
@@ -290,7 +294,7 @@ const PropertyDetail = () => {
               {!showBooking ? (
                 <div className="space-y-3">
                   <button onClick={() => setShowBooking(true)} className="w-full primary-btn flex items-center justify-center gap-2" data-testid="book-now-button">
-                    <Calendar size={20} />
+                    <CalendarIcon size={20} />
                     {t('property.book')}
                   </button>
                   <button onClick={handleChat} className="w-full secondary-btn flex items-center justify-center gap-2" data-testid="message-owner-button">
@@ -312,52 +316,128 @@ const PropertyDetail = () => {
               ) : (
                 <div className="space-y-4" data-testid="booking-form">
                   <div>
-                    <label className="block text-sm font-medium mb-2">Check-in</label>
-                    <input
-                      type="date"
-                      value={bookingData.start_date}
-                      onChange={(e) => setBookingData({ ...bookingData, start_date: e.target.value })}
-                      className="w-full px-4 py-2 rounded-lg border border-[#E5E5E5] focus:outline-none focus:ring-2 focus:ring-[#000000]/50"
-                      data-testid="booking-start-date"
-                    />
+                    <label className="block text-sm font-medium mb-2">{t('property.checkIn')} & {t('property.checkOut')}</label>
+                    <div className="grid grid-cols-2 gap-2">
+                      <button
+                        type="button"
+                        onClick={() => setShowCalendar(showCalendar === 'range' ? null : 'range')}
+                        className="flex items-center gap-2 px-3 py-2.5 rounded-lg border border-[#E5E5E5] text-sm text-left hover:border-black/30 transition-colors"
+                        data-testid="booking-start-date"
+                      >
+                        <CalendarIcon size={14} className="text-gray-400 flex-shrink-0" />
+                        <span className={dateRange.from ? 'text-black' : 'text-gray-400'}>
+                          {dateRange.from ? format(dateRange.from, 'MMM d, yyyy') : t('property.checkIn')}
+                        </span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setShowCalendar(showCalendar === 'range' ? null : 'range')}
+                        className="flex items-center gap-2 px-3 py-2.5 rounded-lg border border-[#E5E5E5] text-sm text-left hover:border-black/30 transition-colors"
+                        data-testid="booking-end-date"
+                      >
+                        <CalendarIcon size={14} className="text-gray-400 flex-shrink-0" />
+                        <span className={dateRange.to ? 'text-black' : 'text-gray-400'}>
+                          {dateRange.to ? format(dateRange.to, 'MMM d, yyyy') : t('property.checkOut')}
+                        </span>
+                      </button>
+                    </div>
+                    {showCalendar === 'range' && (
+                      <div className="mt-2 bg-white rounded-xl border border-[#E5E5E5] shadow-lg p-1 relative" data-testid="booking-calendar">
+                        <button
+                          onClick={() => setShowCalendar(null)}
+                          className="absolute top-2 right-2 p-1 rounded-full hover:bg-gray-100 z-10"
+                        >
+                          <X size={14} />
+                        </button>
+                        <Calendar
+                          mode="range"
+                          selected={dateRange}
+                          onSelect={(range) => {
+                            setDateRange(range || { from: undefined, to: undefined });
+                            if (range?.from) setBookingData(prev => ({ ...prev, start_date: format(range.from, 'yyyy-MM-dd') }));
+                            if (range?.to) {
+                              setBookingData(prev => ({ ...prev, end_date: format(range.to, 'yyyy-MM-dd') }));
+                              setShowCalendar(null);
+                            }
+                          }}
+                          numberOfMonths={1}
+                          disabled={{ before: new Date() }}
+                          className="rounded-xl"
+                          classNames={{
+                            months: "flex flex-col",
+                            month: "space-y-3",
+                            caption: "flex justify-center pt-1 relative items-center",
+                            caption_label: "text-sm font-bold",
+                            nav: "space-x-1 flex items-center",
+                            nav_button: "h-7 w-7 bg-transparent p-0 opacity-50 hover:opacity-100 inline-flex items-center justify-center rounded-md border border-[#E5E5E5]",
+                            nav_button_previous: "absolute left-1",
+                            nav_button_next: "absolute right-1",
+                            table: "w-full border-collapse",
+                            head_row: "flex",
+                            head_cell: "text-gray-500 rounded-md w-9 font-medium text-[0.75rem] uppercase",
+                            row: "flex w-full mt-1",
+                            cell: "relative p-0 text-center text-sm focus-within:relative focus-within:z-20 [&:has([aria-selected])]:bg-black/5 first:[&:has([aria-selected])]:rounded-l-full last:[&:has([aria-selected])]:rounded-r-full [&:has(>.day-range-start)]:rounded-l-full [&:has(>.day-range-end)]:rounded-r-full",
+                            day: "h-9 w-9 p-0 font-normal rounded-full hover:bg-gray-100 inline-flex items-center justify-center",
+                            day_range_start: "day-range-start bg-black text-white rounded-full hover:bg-black",
+                            day_range_end: "day-range-end bg-black text-white rounded-full hover:bg-black",
+                            day_selected: "bg-black text-white hover:bg-black focus:bg-black",
+                            day_today: "font-bold text-[#D4AF37]",
+                            day_outside: "text-gray-300",
+                            day_disabled: "text-gray-200",
+                            day_range_middle: "aria-selected:bg-black/5 aria-selected:text-black",
+                            day_hidden: "invisible",
+                          }}
+                        />
+                        {dateRange.from && dateRange.to && (
+                          <div className="px-3 pb-2 pt-1 text-center">
+                            <span className="text-xs text-gray-500">
+                              {Math.ceil((dateRange.to - dateRange.from) / (1000 * 60 * 60 * 24))} {t('property.nights')}
+                            </span>
+                          </div>
+                        )}
+                      </div>
+                    )}
                   </div>
                   <div>
-                    <label className="block text-sm font-medium mb-2">Check-out</label>
-                    <input
-                      type="date"
-                      value={bookingData.end_date}
-                      onChange={(e) => setBookingData({ ...bookingData, end_date: e.target.value })}
-                      className="w-full px-4 py-2 rounded-lg border border-[#E5E5E5] focus:outline-none focus:ring-2 focus:ring-[#000000]/50"
-                      data-testid="booking-end-date"
-                    />
+                    <label className="block text-sm font-medium mb-2">{t('property.guests')}</label>
+                    <div className="flex items-center gap-3">
+                      <button
+                        type="button"
+                        onClick={() => setBookingData(prev => ({ ...prev, guest_count: Math.max(1, prev.guest_count - 1) }))}
+                        className="w-9 h-9 rounded-full border border-[#E5E5E5] flex items-center justify-center hover:border-black/40 transition-colors text-lg"
+                      >
+                        -
+                      </button>
+                      <div className="flex items-center gap-2">
+                        <Users size={16} className="text-gray-400" />
+                        <span className="text-sm font-medium w-4 text-center" data-testid="booking-guest-count">{bookingData.guest_count}</span>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => setBookingData(prev => ({ ...prev, guest_count: prev.guest_count + 1 }))}
+                        className="w-9 h-9 rounded-full border border-[#E5E5E5] flex items-center justify-center hover:border-black/40 transition-colors text-lg"
+                      >
+                        +
+                      </button>
+                    </div>
                   </div>
                   <div>
-                    <label className="block text-sm font-medium mb-2">Guests</label>
-                    <input
-                      type="number"
-                      value={bookingData.guest_count}
-                      onChange={(e) => setBookingData({ ...bookingData, guest_count: parseInt(e.target.value) })}
-                      min="1"
-                      className="w-full px-4 py-2 rounded-lg border border-[#E5E5E5] focus:outline-none focus:ring-2 focus:ring-[#000000]/50"
-                      data-testid="booking-guest-count"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium mb-2">Message</label>
+                    <label className="block text-sm font-medium mb-2">{t('property.messageLabel')}</label>
                     <textarea
                       value={bookingData.message}
                       onChange={(e) => setBookingData({ ...bookingData, message: e.target.value })}
                       rows="3"
-                      className="w-full px-4 py-2 rounded-lg border border-[#E5E5E5] focus:outline-none focus:ring-2 focus:ring-[#000000]/50"
+                      placeholder={t('property.messagePlaceholder')}
+                      className="w-full px-4 py-2 rounded-lg border border-[#E5E5E5] focus:outline-none focus:ring-2 focus:ring-[#000000]/50 text-sm resize-none"
                       data-testid="booking-message"
                     ></textarea>
                   </div>
                   <div className="flex gap-2">
                     <button onClick={handleBooking} className="flex-1 primary-btn" data-testid="confirm-booking-button">
-                      Confirm
+                      {t('property.confirm')}
                     </button>
-                    <button onClick={() => setShowBooking(false)} className="flex-1 secondary-btn" data-testid="cancel-booking-button">
-                      Cancel
+                    <button onClick={() => { setShowBooking(false); setShowCalendar(null); }} className="flex-1 secondary-btn" data-testid="cancel-booking-button">
+                      {t('dashboard.cancel')}
                     </button>
                   </div>
                 </div>
