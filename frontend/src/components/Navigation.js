@@ -26,7 +26,7 @@ const Navigation = () => {
     }}>
       <div className="max-w-7xl mx-auto px-6" style={{ height: '120px' }}>
         <div className="flex items-center justify-between h-full">
-          <Link to="/" className="flex items-center" data-testid="nav-logo">
+          <Link to="/" className="flex items-center" data-testid="nav-logo" onClick={() => window.scrollTo(0, 0)}>
             <img 
               src="https://customer-assets.emergentagent.com/job_listing-manager-pro-2/artifacts/hx4hc6hw_IMG_1745%20%281%29.PNG" 
               alt="MyIsraelRental" 
