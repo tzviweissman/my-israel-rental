@@ -36,14 +36,14 @@ const Navigation = () => {
   }, [menuOpen]);
 
   return (
-    <nav className="sticky top-0 z-50" style={{ background: 'linear-gradient(to bottom, rgba(0,0,0,0.35) 0%, transparent 100%)' }}>
-      <div className="max-w-7xl mx-auto px-6 py-3">
+    <nav className="sticky top-0 z-50" style={{ background: 'transparent' }}>
+      <div className="max-w-7xl mx-auto px-6 py-1">
         <div className="flex items-center justify-between">
           <Link to="/" className="flex items-center" data-testid="nav-logo" onClick={() => window.scrollTo(0, 0)}>
             <img
               src="https://customer-assets.emergentagent.com/job_listing-manager-pro-2/artifacts/hx4hc6hw_IMG_1745%20%281%29.PNG"
               alt="MyIsraelRental"
-              className="w-auto" style={{ height: '130px' }}
+              className="w-auto" style={{ height: '200px' }}
             />
           </Link>
 
