@@ -40,22 +40,22 @@ const Navigation = () => {
       <div className="max-w-7xl mx-auto px-6 py-2">
         <div className="flex items-center justify-between">
           <Link to="/" className="flex items-center" data-testid="nav-logo" onClick={() => window.scrollTo(0, 0)}>
-            <img
-              src="https://customer-assets.emergentagent.com/job_listing-manager-pro-2/artifacts/hx4hc6hw_IMG_1745%20%281%29.PNG"
-              alt="MyIsraelRental"
-              className="w-auto" style={{ height: '100px' }}
-            />
+            <div className="rounded-xl px-3 py-1" style={{ backgroundColor: '#1a1a1a' }}>
+              <img
+                src="https://customer-assets.emergentagent.com/job_listing-manager-pro-2/artifacts/hx4hc6hw_IMG_1745%20%281%29.PNG"
+                alt="MyIsraelRental"
+                className="w-auto" style={{ height: '70px' }}
+              />
+            </div>
           </Link>
 
           <div className="relative" ref={menuRef}>
             <button
               onClick={() => setMenuOpen(!menuOpen)}
-              className="flex items-center gap-2.5 px-4 py-2.5 rounded-xl transition-all duration-200"
+              className="flex items-center gap-2.5 px-5 py-2.5 rounded-xl transition-all duration-200"
               style={{
-                border: '1.5px solid rgba(212,175,55,0.5)',
-                backgroundColor: menuOpen ? 'rgba(26,26,26,0.85)' : 'rgba(26,26,26,0.45)',
-                backdropFilter: 'blur(12px)',
-                WebkitBackdropFilter: 'blur(12px)'
+                backgroundColor: '#1a1a1a',
+                border: '1.5px solid #D4AF37'
               }}
               data-testid="nav-menu-button"
             >
