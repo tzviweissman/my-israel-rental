@@ -224,7 +224,7 @@ async def create_property(property_data: PropertyCreate, payload = Depends(verif
 @api_router.get("/properties")
 async def get_properties(
     rental_type: Optional[str] = None,
-    min_bedrooms: Optional[int] = None,
+    min_bedrooms: Optional[float] = None,
     max_price: Optional[float] = None,
     area: Optional[str] = None,
     owner_id: Optional[str] = None,

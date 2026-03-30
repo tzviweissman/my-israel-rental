@@ -143,9 +143,9 @@ const Properties = () => {
     handleFilterChange('max_price', values[1] < PRICE_MAX ? String(values[1]) : '');
   };
 
-  const stepValue = (key, direction, max = 10) => {
+  const stepValue = (key, direction, max = 10, step = 1) => {
     const current = filters[key] ? Number(filters[key]) : 0;
-    const next = current + direction;
+    const next = Math.round((current + direction * step) * 10) / 10;
     if (next < 0) return;
     if (next > max) return;
     handleFilterChange(key, next === 0 ? '' : String(next));
@@ -298,8 +298,8 @@ const Properties = () => {
                     <StepperControl
                       label={t('property.bedrooms')}
                       value={filters.min_bedrooms ? Number(filters.min_bedrooms) : 0}
-                      onDecrement={() => stepValue('min_bedrooms', -1)}
-                      onIncrement={() => stepValue('min_bedrooms', 1, 8)}
+                      onDecrement={() => stepValue('min_bedrooms', -1, 8, 0.5)}
+                      onIncrement={() => stepValue('min_bedrooms', 1, 8, 0.5)}
                       displayValue={filters.min_bedrooms || t('filters.any')}
                       testId="filter-bedrooms"
                     />
@@ -307,8 +307,8 @@ const Properties = () => {
                     <StepperControl
                       label={t('property.bathrooms')}
                       value={filters.min_bathrooms ? Number(filters.min_bathrooms) : 0}
-                      onDecrement={() => stepValue('min_bathrooms', -1)}
-                      onIncrement={() => stepValue('min_bathrooms', 1, 5)}
+                      onDecrement={() => stepValue('min_bathrooms', -1, 5, 0.5)}
+                      onIncrement={() => stepValue('min_bathrooms', 1, 5, 0.5)}
                       displayValue={filters.min_bathrooms || t('filters.any')}
                       testId="filter-bathrooms"
                     />
