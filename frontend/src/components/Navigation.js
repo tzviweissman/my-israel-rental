@@ -36,14 +36,14 @@ const Navigation = () => {
   }, [menuOpen]);
 
   return (
-    <nav className="sticky top-0 z-50" style={{ borderBottom: '2px solid #D4AF37', backgroundColor: '#1a1a1a' }}>
-      <div className="max-w-7xl mx-auto px-6" style={{ height: '120px' }}>
-        <div className="flex items-center justify-between h-full">
+    <nav className="sticky top-0 z-50" style={{ background: 'linear-gradient(to bottom, rgba(0,0,0,0.35) 0%, transparent 100%)' }}>
+      <div className="max-w-7xl mx-auto px-6 py-2">
+        <div className="flex items-center justify-between">
           <Link to="/" className="flex items-center" data-testid="nav-logo" onClick={() => window.scrollTo(0, 0)}>
             <img
               src="https://customer-assets.emergentagent.com/job_listing-manager-pro-2/artifacts/hx4hc6hw_IMG_1745%20%281%29.PNG"
               alt="MyIsraelRental"
-              className="w-auto" style={{ height: '200px' }}
+              className="w-auto" style={{ height: '100px' }}
             />
           </Link>
 
@@ -52,8 +52,10 @@ const Navigation = () => {
               onClick={() => setMenuOpen(!menuOpen)}
               className="flex items-center gap-2.5 px-4 py-2.5 rounded-xl transition-all duration-200"
               style={{
-                border: '1.5px solid rgba(212,175,55,0.4)',
-                backgroundColor: menuOpen ? 'rgba(212,175,55,0.1)' : 'transparent'
+                border: '1.5px solid rgba(212,175,55,0.5)',
+                backgroundColor: menuOpen ? 'rgba(26,26,26,0.85)' : 'rgba(26,26,26,0.45)',
+                backdropFilter: 'blur(12px)',
+                WebkitBackdropFilter: 'blur(12px)'
               }}
               data-testid="nav-menu-button"
             >

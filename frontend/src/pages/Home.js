@@ -31,7 +31,7 @@ const Home = () => {
   return (
     <div className="min-h-screen">
       <div
-        className="relative h-[600px] flex items-center justify-center"
+        className="relative h-[600px] flex items-center justify-center -mt-[96px] pt-[96px]"
         style={{
           backgroundImage: 'url(https://images.unsplash.com/photo-1667584523543-d1d9cc828a15?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjA1NTN8MHwxfHNlYXJjaHwxfHxtb2Rlcm4lMjBsaXZpbmclMjByb29tJTIwaW50ZXJpb3J8ZW58MHx8fHwxNzc0NzUwMTM0fDA&ixlib=rb-4.1.0&q=85)',
           backgroundSize: 'cover',
