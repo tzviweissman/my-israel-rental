@@ -21,16 +21,36 @@ const Navigation = () => {
 
   return (
     <nav className="sticky top-0 z-50" style={{
-      borderBottom: '1px solid #D4AF37',
+      borderBottom: '2px solid #D4AF37',
       background: `
-        linear-gradient(135deg, #1a1a1a 25%, transparent 25%) -10px 0/ 20px 20px,
-        linear-gradient(225deg, #1a1a1a 25%, transparent 25%) -10px 0/ 20px 20px,
-        linear-gradient(315deg, #1a1a1a 25%, transparent 25%) 0 0/ 20px 20px,
-        linear-gradient(45deg, #1a1a1a 25%, transparent 25%) 0 0/ 20px 20px,
-        linear-gradient(135deg, #222 25%, transparent 25%) 0 0/ 20px 20px,
-        linear-gradient(225deg, #222 25%, transparent 25%) 0 0/ 20px 20px,
-        linear-gradient(315deg, #222 25%, transparent 25%) 10px 0/ 20px 20px,
-        linear-gradient(45deg, #222 25%, transparent 25%) 10px 0/ 20px 20px,
+        repeating-linear-gradient(
+          45deg,
+          transparent,
+          transparent 4px,
+          rgba(255,255,255,0.12) 4px,
+          rgba(255,255,255,0.12) 5px
+        ),
+        repeating-linear-gradient(
+          -45deg,
+          transparent,
+          transparent 4px,
+          rgba(255,255,255,0.12) 4px,
+          rgba(255,255,255,0.12) 5px
+        ),
+        repeating-linear-gradient(
+          35deg,
+          transparent,
+          transparent 12px,
+          rgba(255,255,255,0.06) 12px,
+          rgba(255,255,255,0.06) 14px
+        ),
+        repeating-linear-gradient(
+          -35deg,
+          transparent,
+          transparent 12px,
+          rgba(255,255,255,0.06) 12px,
+          rgba(255,255,255,0.06) 14px
+        ),
         #111
       `
     }}>
