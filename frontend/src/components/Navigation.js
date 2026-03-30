@@ -27,31 +27,31 @@ const Navigation = () => {
           45deg,
           transparent,
           transparent 4px,
-          rgba(255,255,255,0.12) 4px,
-          rgba(255,255,255,0.12) 5px
+          rgba(255,255,255,0.35) 4px,
+          rgba(255,255,255,0.35) 5px
         ),
         repeating-linear-gradient(
           -45deg,
           transparent,
           transparent 4px,
-          rgba(255,255,255,0.12) 4px,
-          rgba(255,255,255,0.12) 5px
+          rgba(255,255,255,0.35) 4px,
+          rgba(255,255,255,0.35) 5px
         ),
         repeating-linear-gradient(
           35deg,
           transparent,
           transparent 12px,
-          rgba(255,255,255,0.06) 12px,
-          rgba(255,255,255,0.06) 14px
+          rgba(255,255,255,0.2) 12px,
+          rgba(255,255,255,0.2) 14px
         ),
         repeating-linear-gradient(
           -35deg,
           transparent,
           transparent 12px,
-          rgba(255,255,255,0.06) 12px,
-          rgba(255,255,255,0.06) 14px
+          rgba(255,255,255,0.2) 12px,
+          rgba(255,255,255,0.2) 14px
         ),
-        #111
+        #222
       `
     }}>
       <div className="max-w-7xl mx-auto px-6" style={{ height: '120px' }}>
