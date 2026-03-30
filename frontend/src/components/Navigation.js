@@ -40,11 +40,11 @@ const Navigation = () => {
       <div className="max-w-7xl mx-auto px-6 py-2">
         <div className="flex items-center justify-between">
           <Link to="/" className="flex items-center" data-testid="nav-logo" onClick={() => window.scrollTo(0, 0)}>
-            <div className="rounded-xl px-3 py-1" style={{ backgroundColor: '#1a1a1a' }}>
+            <div className="rounded-xl px-1 py-0.5" style={{ backgroundColor: '#1a1a1a' }}>
               <img
                 src="https://customer-assets.emergentagent.com/job_listing-manager-pro-2/artifacts/hx4hc6hw_IMG_1745%20%281%29.PNG"
                 alt="MyIsraelRental"
-                className="w-auto" style={{ height: '70px' }}
+                className="w-auto" style={{ height: '90px' }}
               />
             </div>
           </Link>
