@@ -22,37 +22,7 @@ const Navigation = () => {
   return (
     <nav className="sticky top-0 z-50" style={{
       borderBottom: '2px solid #D4AF37',
-      background: `
-        repeating-linear-gradient(
-          45deg,
-          transparent,
-          transparent 4px,
-          rgba(255,255,255,0.35) 4px,
-          rgba(255,255,255,0.35) 5px
-        ),
-        repeating-linear-gradient(
-          -45deg,
-          transparent,
-          transparent 4px,
-          rgba(255,255,255,0.35) 4px,
-          rgba(255,255,255,0.35) 5px
-        ),
-        repeating-linear-gradient(
-          35deg,
-          transparent,
-          transparent 12px,
-          rgba(255,255,255,0.2) 12px,
-          rgba(255,255,255,0.2) 14px
-        ),
-        repeating-linear-gradient(
-          -35deg,
-          transparent,
-          transparent 12px,
-          rgba(255,255,255,0.2) 12px,
-          rgba(255,255,255,0.2) 14px
-        ),
-        #222
-      `
+      backgroundColor: '#ffffff'
     }}>
       <div className="max-w-7xl mx-auto px-6" style={{ height: '120px' }}>
         <div className="flex items-center justify-between h-full">
@@ -64,42 +34,42 @@ const Navigation = () => {
             />
           </Link>
 
-          <div className="flex items-center gap-6" style={{ color: '#D4AF37' }}>
-            <Link to="/properties/long-term" className="text-base font-medium hover:text-white transition-colors" style={{ color: '#D4AF37' }} data-testid="nav-long-term">
+          <div className="flex items-center gap-6" style={{ color: '#1a1a1a' }}>
+            <Link to="/properties/long-term" className="text-base font-medium hover:text-[#D4AF37] transition-colors" style={{ color: '#1a1a1a' }} data-testid="nav-long-term">
               {t('nav.longTerm')}
             </Link>
-            <Link to="/properties/short-term" className="text-base font-medium hover:text-white transition-colors" style={{ color: '#D4AF37' }} data-testid="nav-short-term">
+            <Link to="/properties/short-term" className="text-base font-medium hover:text-[#D4AF37] transition-colors" style={{ color: '#1a1a1a' }} data-testid="nav-short-term">
               {t('nav.shortTerm')}
             </Link>
-            <Link to="/properties/vacation" className="text-base font-medium hover:text-white transition-colors" style={{ color: '#D4AF37' }} data-testid="nav-vacation">
+            <Link to="/properties/vacation" className="text-base font-medium hover:text-[#D4AF37] transition-colors" style={{ color: '#1a1a1a' }} data-testid="nav-vacation">
               {t('nav.vacation')}
             </Link>
-            <Link to="/properties/storage" className="text-base font-medium hover:text-white transition-colors" style={{ color: '#D4AF37' }} data-testid="nav-storage">
+            <Link to="/properties/storage" className="text-base font-medium hover:text-[#D4AF37] transition-colors" style={{ color: '#1a1a1a' }} data-testid="nav-storage">
               {t('nav.storage')}
             </Link>
 
-            <button onClick={toggleLanguage} className="flex items-center gap-2 text-base font-medium hover:text-white transition-colors" style={{ color: '#D4AF37' }} data-testid="language-toggle">
+            <button onClick={toggleLanguage} className="flex items-center gap-2 text-base font-medium hover:text-[#D4AF37] transition-colors" style={{ color: '#1a1a1a' }} data-testid="language-toggle">
               <Globe size={18} />
               {i18n.language === 'en' ? 'עב' : 'EN'}
             </button>
 
             {user ? (
               <>
-                <Link to={user.role === 'admin' ? '/admin' : '/dashboard'} className="flex items-center gap-2 text-base font-medium hover:text-white transition-colors" style={{ color: '#D4AF37' }} data-testid="nav-dashboard">
+                <Link to={user.role === 'admin' ? '/admin' : '/dashboard'} className="flex items-center gap-2 text-base font-medium hover:text-[#D4AF37] transition-colors" style={{ color: '#1a1a1a' }} data-testid="nav-dashboard">
                   <LayoutDashboard size={18} />
                   {t('nav.dashboard')}
                 </Link>
-                <button onClick={handleLogout} className="flex items-center gap-2 text-base font-medium hover:text-white transition-colors" style={{ color: '#D4AF37' }} data-testid="nav-logout">
+                <button onClick={handleLogout} className="flex items-center gap-2 text-base font-medium hover:text-[#D4AF37] transition-colors" style={{ color: '#1a1a1a' }} data-testid="nav-logout">
                   <LogOut size={18} />
                   {t('nav.logout')}
                 </button>
               </>
             ) : (
               <>
-                <Link to="/auth/login" className="text-base font-medium hover:text-white transition-colors" style={{ color: '#D4AF37' }} data-testid="nav-login">
+                <Link to="/auth/login" className="text-base font-medium hover:text-[#D4AF37] transition-colors" style={{ color: '#1a1a1a' }} data-testid="nav-login">
                   {t('nav.login')}
                 </Link>
-                <Link to="/auth/signup" className="primary-btn" data-testid="nav-signup">
+                <Link to="/auth/signup" className="px-6 py-2 rounded-full text-sm font-medium transition-colors" style={{ backgroundColor: '#1a1a1a', color: '#D4AF37' }} data-testid="nav-signup">
                   {t('nav.signup')}
                 </Link>
               </>
