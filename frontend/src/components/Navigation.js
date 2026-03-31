@@ -9,6 +9,7 @@ const Navigation = () => {
   const { user, logout } = useContext(AuthContext);
   const navigate = useNavigate();
   const [menuOpen, setMenuOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
   const menuRef = useRef(null);
 
   const toggleLanguage = () => {
@@ -35,31 +36,46 @@ const Navigation = () => {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [menuOpen]);
 
+  useEffect(() => {
+    const handleScroll = () => {
+      setScrolled(window.scrollY > 400);
+    };
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
   return (
-    <nav className="sticky top-0 z-50" style={{ background: 'transparent' }}>
-      <div className="max-w-7xl mx-auto px-6 py-0">
-        <div className="flex items-start justify-between">
-          <Link to="/" className="flex items-center -mt-4" data-testid="nav-logo" onClick={() => window.scrollTo(0, 0)}>
+    <nav
+      className="sticky top-0 z-50 transition-all duration-300"
+      style={{
+        background: scrolled ? '#1E6A6A' : 'transparent',
+        boxShadow: scrolled ? '0 2px 20px rgba(0,0,0,0.3)' : 'none'
+      }}
+    >
+      <div className="max-w-7xl mx-auto px-6" style={{ padding: scrolled ? '4px 24px' : '0 24px' }}>
+        <div className="flex items-center justify-between">
+          <Link to="/" className="flex items-center" data-testid="nav-logo" onClick={() => window.scrollTo(0, 0)}>
             <img
               src="https://customer-assets.emergentagent.com/job_listing-manager-pro-2/artifacts/hx4hc6hw_IMG_1745%20%281%29.PNG"
               alt="MyIsraelRental"
-              className="w-auto" style={{ height: '200px' }}
+              className="w-auto transition-all duration-300"
+              style={{ height: scrolled ? '60px' : '200px', marginTop: scrolled ? '0' : '-16px' }}
             />
           </Link>
 
-          <div className="relative pt-12" ref={menuRef}>
+          <div className="relative" ref={menuRef}>
             <button
               onClick={() => setMenuOpen(!menuOpen)}
               className="flex items-center gap-2 rounded-xl transition-all duration-200"
               style={{
                 backgroundColor: 'transparent',
                 border: '1.5px solid #D4AF37',
-                padding: '10px 18px'
+                padding: scrolled ? '6px 14px' : '10px 18px'
               }}
               data-testid="nav-menu-button"
             >
-              {menuOpen ? <X size={18} color="#D4AF37" /> : <Menu size={18} color="#D4AF37" />}
-              <span className="text-sm font-semibold tracking-wide" style={{ color: '#D4AF37' }}>Menu</span>
+              {menuOpen ? <X size={scrolled ? 16 : 18} color="#D4AF37" /> : <Menu size={scrolled ? 16 : 18} color="#D4AF37" />}
+              <span className="font-semibold tracking-wide" style={{ color: '#D4AF37', fontSize: scrolled ? '12px' : '14px' }}>Menu</span>
             </button>
 
             {menuOpen && (
@@ -126,7 +142,7 @@ const Navigation = () => {
                         <span className="w-4 h-4 flex items-center justify-center opacity-60 group-hover:opacity-100 text-xs">&#x2192;</span>
                         <span>{t('nav.login')}</span>
                       </button>
-                      <button onClick={() => handleNav('/auth/signup')} className="w-full mt-1 py-2.5 rounded-lg text-sm font-bold tracking-wide transition-all duration-200 hover:shadow-lg" style={{ backgroundColor: '#D4AF37', color: '#011B3C' }} data-testid="nav-signup">
+                      <button onClick={() => handleNav('/auth/signup')} className="w-full mt-1 py-2.5 rounded-lg text-sm font-bold tracking-wide transition-all duration-200 hover:shadow-lg" style={{ backgroundColor: '#D4AF37', color: '#1E6A6A' }} data-testid="nav-signup">
                         {t('nav.signup')}
                       </button>
                     </>
