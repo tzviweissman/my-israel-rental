@@ -190,7 +190,7 @@ const AdminDashboard = () => {
                 return (
                   <div key={stat.label} className="bg-white p-5 rounded-xl border border-[#E5E5E5]" data-testid={`stat-${stat.label.toLowerCase().replace(/\s/g, '-')}`}>
                     <div className="flex items-center gap-3">
-                      <div className="p-2 rounded-lg" style={{ backgroundColor: '#2D2D2D' }}>
+                      <div className="p-2 rounded-lg" style={{ backgroundColor: '#011B3C' }}>
                         <Icon size={18} color="#D4AF37" />
                       </div>
                       <div>
@@ -373,7 +373,7 @@ const AdminDashboard = () => {
                     data-testid={`chat-toggle-${idx}`}
                   >
                     <div className="flex items-center gap-4 text-left">
-                      <div className="p-2 rounded-lg" style={{ backgroundColor: '#2D2D2D' }}>
+                      <div className="p-2 rounded-lg" style={{ backgroundColor: '#011B3C' }}>
                         <MessageCircle size={16} color="#D4AF37" />
                       </div>
                       <div>

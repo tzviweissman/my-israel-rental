@@ -23,7 +23,7 @@ const StepperControl = ({ label, value, onDecrement, onIncrement, displayValue, 
       >
         <Minus size={14} strokeWidth={2.5} />
       </button>
-      <span className="w-7 text-center text-[14px] font-semibold text-[#2D2D2D] tabular-nums" data-testid={`${testId}-value`}>
+      <span className="w-7 text-center text-[14px] font-semibold text-[#011B3C] tabular-nums" data-testid={`${testId}-value`}>
         {displayValue}
       </span>
       <button
@@ -172,16 +172,16 @@ const Properties = () => {
             onClick={() => setShowFilters(!showFilters)}
             className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold tracking-wide transition-all duration-200 hover:shadow-md active:scale-[0.98]"
             style={{ 
-              backgroundColor: showFilters ? '#2D2D2D' : '#fafaf8', 
-              color: showFilters ? '#D4AF37' : '#2D2D2D',
-              border: showFilters ? '1.5px solid #2D2D2D' : '1.5px solid #e0dcd4'
+              backgroundColor: showFilters ? '#011B3C' : '#fafaf8', 
+              color: showFilters ? '#D4AF37' : '#011B3C',
+              border: showFilters ? '1.5px solid #011B3C' : '1.5px solid #e0dcd4'
             }}
             data-testid="filter-toggle-button"
           >
             <Filter size={16} />
             {t('filters.filters')}
             {activeFilterCount > 0 && (
-              <span className="w-5 h-5 rounded-full text-[10px] flex items-center justify-center font-bold bg-[#D4AF37] text-[#2D2D2D]">
+              <span className="w-5 h-5 rounded-full text-[10px] flex items-center justify-center font-bold bg-[#D4AF37] text-[#011B3C]">
                 {activeFilterCount}
               </span>
             )}
@@ -191,12 +191,12 @@ const Properties = () => {
         {showFilters && (
           <div className="mb-8 rounded-2xl overflow-hidden" style={{ border: '1px solid #e0dcd4', boxShadow: '0 8px 40px rgba(0,0,0,0.08), 0 1px 3px rgba(0,0,0,0.04)' }} data-testid="filters-panel">
             {/* Header */}
-            <div className="px-7 py-4 flex items-center justify-between" style={{ background: 'linear-gradient(135deg, #2D2D2D 0%, #3A3A3A 100%)' }}>
+            <div className="px-7 py-4 flex items-center justify-between" style={{ background: 'linear-gradient(135deg, #011B3C 0%, #0A2A52 100%)' }}>
               <div className="flex items-center gap-2.5">
                 <Filter size={16} className="text-[#D4AF37]" />
                 <span className="text-[13px] font-semibold tracking-[0.08em] uppercase text-white/90">{t('filters.filters')}</span>
                 {activeFilterCount > 0 && (
-                  <span className="ml-1 w-5 h-5 rounded-full text-[10px] flex items-center justify-center font-bold bg-[#D4AF37] text-[#2D2D2D]">
+                  <span className="ml-1 w-5 h-5 rounded-full text-[10px] flex items-center justify-center font-bold bg-[#D4AF37] text-[#011B3C]">
                     {activeFilterCount}
                   </span>
                 )}
@@ -213,11 +213,11 @@ const Properties = () => {
                   {/* Price Range Section */}
                   <div className="px-7 pt-6 pb-5" data-testid="filter-price-section">
                     <div className="flex items-center justify-between mb-1">
-                      <h3 className="text-[13px] font-bold tracking-[0.06em] uppercase text-[#2D2D2D]">{t('filters.priceRange')}</h3>
+                      <h3 className="text-[13px] font-bold tracking-[0.06em] uppercase text-[#011B3C]">{t('filters.priceRange')}</h3>
                       <div className="flex rounded-lg overflow-hidden" style={{ border: '1.5px solid #d0ccc4' }} data-testid="filter-currency-toggle">
                         <button
                           onClick={() => { setPriceCurrency('ILS'); setPriceRange([0, PRICE_MAX]); handleFilterChange('min_price', ''); handleFilterChange('max_price', ''); }}
-                          className={`px-3 py-1 text-xs font-bold tracking-wider transition-all duration-200 ${priceCurrency === 'ILS' ? 'bg-[#2D2D2D] text-[#D4AF37]' : 'bg-transparent text-[#999] hover:text-[#666]'}`}
+                          className={`px-3 py-1 text-xs font-bold tracking-wider transition-all duration-200 ${priceCurrency === 'ILS' ? 'bg-[#011B3C] text-[#D4AF37]' : 'bg-transparent text-[#999] hover:text-[#666]'}`}
                           data-testid="filter-currency-ils"
                         >
                           ₪ ILS
@@ -225,7 +225,7 @@ const Properties = () => {
                         <div className="w-px bg-[#d0ccc4]" />
                         <button
                           onClick={() => { setPriceCurrency('USD'); setPriceRange([0, PRICE_MAX]); handleFilterChange('min_price', ''); handleFilterChange('max_price', ''); }}
-                          className={`px-3 py-1 text-xs font-bold tracking-wider transition-all duration-200 ${priceCurrency === 'USD' ? 'bg-[#2D2D2D] text-[#D4AF37]' : 'bg-transparent text-[#999] hover:text-[#666]'}`}
+                          className={`px-3 py-1 text-xs font-bold tracking-wider transition-all duration-200 ${priceCurrency === 'USD' ? 'bg-[#011B3C] text-[#D4AF37]' : 'bg-transparent text-[#999] hover:text-[#666]'}`}
                           data-testid="filter-currency-usd"
                         >
                           $ USD
@@ -241,7 +241,7 @@ const Properties = () => {
                         min={0}
                         max={PRICE_MAX}
                         step={100}
-                        className="[&_[role=slider]]:h-5 [&_[role=slider]]:w-5 [&_[role=slider]]:border-[2.5px] [&_[role=slider]]:border-[#2D2D2D] [&_[role=slider]]:bg-white [&_[role=slider]]:shadow-md [&_[role=slider]]:hover:shadow-lg [&_[role=slider]]:hover:scale-110 [&_[role=slider]]:transition-all [&_.bg-primary\\/20]:bg-[#e0dcd4] [&_.bg-primary\\/20]:h-[3px] [&_.bg-primary]:bg-[#D4AF37] [&_.bg-primary]:h-[3px]"
+                        className="[&_[role=slider]]:h-5 [&_[role=slider]]:w-5 [&_[role=slider]]:border-[2.5px] [&_[role=slider]]:border-[#011B3C] [&_[role=slider]]:bg-white [&_[role=slider]]:shadow-md [&_[role=slider]]:hover:shadow-lg [&_[role=slider]]:hover:scale-110 [&_[role=slider]]:transition-all [&_.bg-primary\\/20]:bg-[#e0dcd4] [&_.bg-primary\\/20]:h-[3px] [&_.bg-primary]:bg-[#D4AF37] [&_.bg-primary]:h-[3px]"
                         data-testid="filter-price-slider"
                       />
                     </div>
@@ -261,7 +261,7 @@ const Properties = () => {
                               handleFilterChange('min_price', val > 0 ? String(val) : '');
                             }}
                             placeholder="0"
-                            className="w-full text-sm font-medium bg-transparent outline-none text-[#2D2D2D] placeholder:text-[#ccc]"
+                            className="w-full text-sm font-medium bg-transparent outline-none text-[#011B3C] placeholder:text-[#ccc]"
                             data-testid="filter-price-min-input"
                           />
                         </div>
@@ -281,7 +281,7 @@ const Properties = () => {
                               handleFilterChange('max_price', val < PRICE_MAX ? String(val) : '');
                             }}
                             placeholder={`${PRICE_MAX.toLocaleString()}+`}
-                            className="w-full text-sm font-medium bg-transparent outline-none text-[#2D2D2D] placeholder:text-[#ccc]"
+                            className="w-full text-sm font-medium bg-transparent outline-none text-[#011B3C] placeholder:text-[#ccc]"
                             data-testid="filter-price-max-input"
                           />
                         </div>
@@ -293,7 +293,7 @@ const Properties = () => {
 
                   {/* Rooms & Details Section */}
                   <div className="px-7 py-5" data-testid="filter-rooms-section">
-                    <h3 className="text-[13px] font-bold tracking-[0.06em] uppercase text-[#2D2D2D] mb-1">{t('filters.roomsAndDetails')}</h3>
+                    <h3 className="text-[13px] font-bold tracking-[0.06em] uppercase text-[#011B3C] mb-1">{t('filters.roomsAndDetails')}</h3>
                     
                     <StepperControl
                       label={t('property.bedrooms')}
@@ -337,7 +337,7 @@ const Properties = () => {
                 <div>
                   {/* Property Section */}
                   <div className="px-7 pt-6 pb-5" data-testid="filter-property-section">
-                    <h3 className="text-[13px] font-bold tracking-[0.06em] uppercase text-[#2D2D2D] mb-4">{t('filters.propertySection')}</h3>
+                    <h3 className="text-[13px] font-bold tracking-[0.06em] uppercase text-[#011B3C] mb-4">{t('filters.propertySection')}</h3>
                     
                     <div className="space-y-4">
                       {/* Location */}
@@ -346,7 +346,7 @@ const Properties = () => {
                         <select
                           value={filters.area}
                           onChange={(e) => handleFilterChange('area', e.target.value)}
-                          className="w-full px-3.5 py-2.5 rounded-lg text-sm bg-white focus:outline-none focus:shadow-sm transition-all duration-200 text-[#2D2D2D] appearance-none"
+                          className="w-full px-3.5 py-2.5 rounded-lg text-sm bg-white focus:outline-none focus:shadow-sm transition-all duration-200 text-[#011B3C] appearance-none"
                           style={{ border: '1.5px solid #e0dcd4', backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23D4AF37' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E")`, backgroundRepeat: 'no-repeat', backgroundPosition: 'right 12px center' }}
                           data-testid="filter-area-input"
                         >
@@ -385,7 +385,7 @@ const Properties = () => {
                         <select
                           value={filters.condition}
                           onChange={(e) => handleFilterChange('condition', e.target.value)}
-                          className="w-full px-3.5 py-2.5 rounded-lg text-sm bg-white focus:outline-none focus:shadow-sm transition-all duration-200 text-[#2D2D2D] appearance-none"
+                          className="w-full px-3.5 py-2.5 rounded-lg text-sm bg-white focus:outline-none focus:shadow-sm transition-all duration-200 text-[#011B3C] appearance-none"
                           style={{ border: '1.5px solid #e0dcd4', backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23D4AF37' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E")`, backgroundRepeat: 'no-repeat', backgroundPosition: 'right 12px center' }}
                           data-testid="filter-condition-input"
                         >
@@ -402,7 +402,7 @@ const Properties = () => {
 
                   {/* Dates Available Section */}
                   <div className="px-7 py-5" data-testid="filter-dates-section">
-                    <h3 className="text-[13px] font-bold tracking-[0.06em] uppercase text-[#2D2D2D] mb-3">{t('filters.datesAvailable')}</h3>
+                    <h3 className="text-[13px] font-bold tracking-[0.06em] uppercase text-[#011B3C] mb-3">{t('filters.datesAvailable')}</h3>
                     <Popover>
                       <PopoverTrigger asChild>
                         <button
@@ -412,7 +412,7 @@ const Properties = () => {
                         >
                           <CalendarIcon size={15} className="text-[#D4AF37] shrink-0" />
                           {dateRange.from ? (
-                            <span className="text-[#2D2D2D] font-medium text-[13px]">
+                            <span className="text-[#011B3C] font-medium text-[13px]">
                               {format(dateRange.from, 'MMM d, yyyy')}
                               {dateRange.to && (
                                 <span className="text-[#D4AF37] font-bold mx-1.5">&#8594;</span>
@@ -445,7 +445,7 @@ const Properties = () => {
                         sideOffset={8}
                         style={{ minWidth: '580px' }}
                       >
-                        <div className="px-4 py-3 flex items-center justify-between" style={{ background: 'linear-gradient(135deg, #2D2D2D 0%, #3A3A3A 100%)' }}>
+                        <div className="px-4 py-3 flex items-center justify-between" style={{ background: 'linear-gradient(135deg, #011B3C 0%, #0A2A52 100%)' }}>
                           <span className="text-[12px] font-semibold tracking-[0.06em] uppercase text-white/90">{t('filters.datesAvailable')}</span>
                           {dateRange.from && dateRange.to && (
                             <span className="text-[11px] px-2.5 py-0.5 rounded-full bg-[#D4AF37]/20 text-[#D4AF37] font-semibold">
@@ -476,7 +476,7 @@ const Properties = () => {
                             months: "flex flex-col sm:flex-row gap-0 divide-x divide-[#E5E5E5]",
                             month: "p-4",
                             caption: "flex justify-center pt-1 relative items-center mb-2",
-                            caption_label: "text-sm font-bold text-[#2D2D2D]",
+                            caption_label: "text-sm font-bold text-[#011B3C]",
                             nav: "space-x-1 flex items-center",
                             nav_button: "h-7 w-7 bg-transparent border border-[#E5E5E5] rounded-md p-0 opacity-60 hover:opacity-100 hover:border-[#D4AF37] transition-all inline-flex items-center justify-center",
                             nav_button_previous: "absolute left-1",
@@ -487,13 +487,13 @@ const Properties = () => {
                             row: "flex w-full mt-1",
                             cell: "relative p-0 text-center text-sm focus-within:relative focus-within:z-20 [&:has([aria-selected])]:bg-[#D4AF37]/10 [&:has([aria-selected].day-outside)]:bg-[#D4AF37]/5 [&:has([aria-selected].day-range-end)]:rounded-r-md [&:has(>.day-range-end)]:rounded-r-md [&:has(>.day-range-start)]:rounded-l-md first:[&:has([aria-selected])]:rounded-l-md last:[&:has([aria-selected])]:rounded-r-md",
                             day: "h-9 w-9 p-0 font-normal rounded-md hover:bg-[#D4AF37]/10 transition-colors inline-flex items-center justify-center aria-selected:opacity-100 cursor-pointer",
-                            day_range_start: "day-range-start bg-[#2D2D2D] text-white hover:bg-[#2D2D2D] rounded-l-md",
-                            day_range_end: "day-range-end bg-[#2D2D2D] text-white hover:bg-[#2D2D2D] rounded-r-md",
-                            day_selected: "bg-[#2D2D2D] text-white hover:bg-[#2D2D2D] focus:bg-[#2D2D2D] focus:text-white",
+                            day_range_start: "day-range-start bg-[#011B3C] text-white hover:bg-[#011B3C] rounded-l-md",
+                            day_range_end: "day-range-end bg-[#011B3C] text-white hover:bg-[#011B3C] rounded-r-md",
+                            day_selected: "bg-[#011B3C] text-white hover:bg-[#011B3C] focus:bg-[#011B3C] focus:text-white",
                             day_today: "border border-[#D4AF37] text-[#D4AF37] font-bold",
                             day_outside: "text-gray-300 aria-selected:bg-[#D4AF37]/5 aria-selected:text-gray-400",
                             day_disabled: "text-gray-300 opacity-40 cursor-not-allowed",
-                            day_range_middle: "aria-selected:bg-[#D4AF37]/10 aria-selected:text-[#2D2D2D]",
+                            day_range_middle: "aria-selected:bg-[#D4AF37]/10 aria-selected:text-[#011B3C]",
                             day_hidden: "invisible"
                           }}
                           data-testid="filter-date-calendar"
@@ -506,7 +506,7 @@ const Properties = () => {
             </div>
 
             {/* Bottom Action Bar */}
-            <div className="px-7 py-4 flex items-center justify-between" style={{ background: 'linear-gradient(135deg, #2D2D2D 0%, #3A3A3A 100%)' }}>
+            <div className="px-7 py-4 flex items-center justify-between" style={{ background: 'linear-gradient(135deg, #011B3C 0%, #0A2A52 100%)' }}>
               <button
                 onClick={clearFilters}
                 className="text-[13px] font-medium text-white/50 hover:text-white transition-colors underline underline-offset-4 decoration-white/20 hover:decoration-white/50"
@@ -516,7 +516,7 @@ const Properties = () => {
               </button>
               <button
                 onClick={applyFilters}
-                className="px-7 py-2.5 rounded-lg text-[13px] font-bold tracking-wide text-[#2D2D2D] transition-all duration-200 hover:shadow-lg hover:scale-[1.02] active:scale-[0.98]"
+                className="px-7 py-2.5 rounded-lg text-[13px] font-bold tracking-wide text-[#011B3C] transition-all duration-200 hover:shadow-lg hover:scale-[1.02] active:scale-[0.98]"
                 style={{ backgroundColor: '#D4AF37' }}
                 data-testid="apply-filters-button"
               >

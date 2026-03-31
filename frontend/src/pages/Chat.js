@@ -83,7 +83,7 @@ const Chat = () => {
                 <div
                   className={`max-w-xs px-4 py-3 rounded-2xl ${
                     msg.sender_id === user.id
-                      ? 'bg-[#2D2D2D] text-white'
+                      ? 'bg-[#011B3C] text-white'
                       : 'bg-gray-100 text-gray-800'
                   }`}
                 >
@@ -105,7 +105,7 @@ const Chat = () => {
                 value={newMessage}
                 onChange={(e) => setNewMessage(e.target.value)}
                 placeholder="Type your message..."
-                className="flex-1 px-4 py-3 rounded-full border border-[#E5E5E5] focus:outline-none focus:ring-2 focus:ring-[#2D2D2D]/50"
+                className="flex-1 px-4 py-3 rounded-full border border-[#E5E5E5] focus:outline-none focus:ring-2 focus:ring-[#011B3C]/50"
                 data-testid="chat-input"
               />
               <button type="submit" className="primary-btn flex items-center gap-2" data-testid="send-message-button">
