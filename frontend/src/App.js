@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import axios from 'axios';
 import './i18n';
@@ -8,6 +8,12 @@ import '@/App.css';
 import Navigation from './components/Navigation';
 import WhatsAppButton from './components/WhatsAppButton';
 import AccessibilityButton from './components/AccessibilityButton';
+
+function ScrollToTop() {
+  const { pathname } = useLocation();
+  useEffect(() => { window.scrollTo(0, 0); }, [pathname]);
+  return null;
+}
 import Home from './pages/Home';
 import Properties from './pages/Properties';
 import PropertyDetail from './pages/PropertyDetail';
@@ -77,6 +83,7 @@ function App() {
   return (
     <AuthContext.Provider value={{ user, token, login, logout }}>
       <BrowserRouter>
+        <ScrollToTop />
         <div className="App">
           <Navigation />
           <WhatsAppButton />
