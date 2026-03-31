@@ -2,7 +2,7 @@ import React, { useContext, useState, useRef, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { AuthContext } from '../App';
-import { Globe, LogOut, LayoutDashboard, Menu, X, Home, Building, Palmtree, Warehouse, ChevronRight } from 'lucide-react';
+import { Globe, LogOut, LayoutDashboard, Menu, X, Home, Building, Palmtree, Warehouse, ChevronRight, Search } from 'lucide-react';
 
 const Navigation = () => {
   const { t, i18n } = useTranslation();
@@ -10,6 +10,8 @@ const Navigation = () => {
   const navigate = useNavigate();
   const [menuOpen, setMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [showSearch, setShowSearch] = useState(false);
+  const [navSearch, setNavSearch] = useState('');
   const menuRef = useRef(null);
 
   const toggleLanguage = () => {
@@ -28,6 +30,12 @@ const Navigation = () => {
     setMenuOpen(false);
   };
 
+  const handleNavSearch = () => {
+    if (navSearch.trim()) {
+      navigate(`/properties/all?search=${navSearch}`);
+    }
+  };
+
   useEffect(() => {
     const handleClickOutside = (e) => {
       if (menuRef.current && !menuRef.current.contains(e.target)) setMenuOpen(false);
@@ -38,7 +46,8 @@ const Navigation = () => {
 
   useEffect(() => {
     const handleScroll = () => {
-      setScrolled(window.scrollY > 400);
+      setScrolled(window.scrollY > 80);
+      setShowSearch(window.scrollY > 420);
     };
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
@@ -62,6 +71,29 @@ const Navigation = () => {
               style={{ height: scrolled ? '70px' : '200px', marginTop: scrolled ? '0' : '-16px' }}
             />
           </Link>
+
+          {showSearch && (
+            <div className="flex-1 max-w-md mx-6 transition-all duration-300" style={{ opacity: showSearch ? 1 : 0 }}>
+              <div className="flex items-center bg-white/15 rounded-full border border-[#D4AF37]/30 overflow-hidden">
+                <input
+                  type="text"
+                  placeholder={t('hero.searchPlaceholder')}
+                  value={navSearch}
+                  onChange={(e) => setNavSearch(e.target.value)}
+                  onKeyPress={(e) => e.key === 'Enter' && handleNavSearch()}
+                  className="flex-1 px-4 py-2 bg-transparent text-white placeholder-white/60 text-sm focus:outline-none"
+                  data-testid="nav-search-input"
+                />
+                <button
+                  onClick={handleNavSearch}
+                  className="px-3 py-2 text-white/80 hover:text-white transition-colors"
+                  data-testid="nav-search-button"
+                >
+                  <Search size={16} />
+                </button>
+              </div>
+            </div>
+          )}
 
           <div className="relative" ref={menuRef}>
             <button
