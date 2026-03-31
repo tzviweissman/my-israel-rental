@@ -47,7 +47,7 @@ const Navigation = () => {
             />
           </Link>
 
-          <div className="relative pt-4" ref={menuRef}>
+          <div className="relative pt-12" ref={menuRef}>
             <button
               onClick={() => setMenuOpen(!menuOpen)}
               className="flex items-center gap-2 rounded-xl transition-all duration-200"
