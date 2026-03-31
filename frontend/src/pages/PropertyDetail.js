@@ -102,9 +102,9 @@ const PropertyDetail = () => {
   }
 
   return (
-    <div className="min-h-screen" data-testid="property-detail-page">
+    <div className="min-h-screen -mt-[180px] pt-[130px]" data-testid="property-detail-page">
       <div className="max-w-7xl mx-auto px-6 pt-0 pb-12">
-        <button onClick={() => navigate(-1)} className="flex items-center gap-2 text-sm font-medium mb-3 hover:text-[#D4AF37] transition-colors" data-testid="back-button">
+        <button onClick={() => navigate(-1)} className="flex items-center gap-2 text-sm font-medium mb-2 hover:text-[#D4AF37] transition-colors" data-testid="back-button">
           <ArrowLeft size={18} />
           {user && user.role !== 'renter' ? t('property.backToDashboard') : t('property.backToListings')}
         </button>
