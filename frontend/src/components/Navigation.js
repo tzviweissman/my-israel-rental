@@ -52,7 +52,7 @@ const Navigation = () => {
               onClick={() => setMenuOpen(!menuOpen)}
               className="flex items-center gap-2 rounded-xl transition-all duration-200"
               style={{
-                backgroundColor: '#011B3C',
+                backgroundColor: 'transparent',
                 border: '1.5px solid #D4AF37',
                 padding: '10px 18px'
               }}
@@ -66,7 +66,7 @@ const Navigation = () => {
               <div
                 className="absolute right-0 top-full mt-3 w-72 rounded-2xl overflow-hidden"
                 style={{
-                  backgroundColor: '#011B3C',
+                  backgroundColor: '#1E6A6A',
                   border: '1.5px solid rgba(212,175,55,0.25)',
                   boxShadow: '0 16px 48px rgba(0,0,0,0.5), 0 0 0 1px rgba(212,175,55,0.08)'
                 }}
