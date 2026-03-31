@@ -59,7 +59,7 @@ const Navigation = () => {
               src="https://customer-assets.emergentagent.com/job_listing-manager-pro-2/artifacts/hx4hc6hw_IMG_1745%20%281%29.PNG"
               alt="MyIsraelRental"
               className="w-auto transition-all duration-300"
-              style={{ height: scrolled ? '60px' : '200px', marginTop: scrolled ? '0' : '-16px' }}
+              style={{ height: scrolled ? '70px' : '200px', marginTop: scrolled ? '0' : '-16px' }}
             />
           </Link>
 
