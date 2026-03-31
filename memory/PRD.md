@@ -7,7 +7,7 @@ Build a bilingual (English/Hebrew) rental website named MyIsraelRental.com with 
 - **Frontend**: React + TailwindCSS + Lucide-react icons + Shadcn/UI
 - **Backend**: FastAPI + Motor (Async MongoDB)
 - **Database**: MongoDB
-- **Theme**: Dark Grey and Gold (#2D2D2D, #D4AF37)
+- **Theme**: Navy Blue and Gold (#011B3C, #D4AF37)
 - **i18n**: i18next with English and Hebrew (RTL) support
 
 ## What's Been Implemented
@@ -37,7 +37,10 @@ Build a bilingual (English/Hebrew) rental website named MyIsraelRental.com with 
 - [x] **Description & Address Optional** (2026-03-31):
   - PropertyCreate Pydantic model: description and address changed to Optional[str] = None
   - Frontend Dashboard.js: removed `required` attribute from description textarea and address input
-  - Auth playbook validated against integration_playbook_expert_v2
+- [x] **Navy Blue Theme + Coastline Hero** (2026-03-31):
+  - Changed theme from dark grey (#2D2D2D) to navy blue (#011B3C) across all components
+  - Gradient accent updated from #3A3A3A to #0A2A52
+  - Hero background replaced with Israel coastline/skyline sunset photo (Tel Aviv)
 
 ### Key API Endpoints
 - Auth: POST /api/auth/register, /api/auth/login, GET /api/auth/me
