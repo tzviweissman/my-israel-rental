@@ -57,7 +57,7 @@ const Home = () => {
               className="flex-1 px-6 py-4 rounded-full text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#1E6A6A]"
               data-testid="hero-search-input"
             />
-            <button onClick={handleSearch} className="primary-btn flex items-center gap-2" data-testid="hero-search-button">
+            <button onClick={handleSearch} className="primary-btn flex items-center gap-2" style={{ color: '#FFFFFF' }} data-testid="hero-search-button">
               <Search size={20} />
               {t('hero.search')}
             </button>
