@@ -72,8 +72,16 @@ const Navigation = () => {
             />
           </Link>
 
-          {showSearch && (
-            <div className="flex-1 max-w-md mx-6 transition-all duration-300" style={{ opacity: showSearch ? 1 : 0 }}>
+          {scrolled && (
+            <div
+              className="flex-1 max-w-md mx-6 transition-all duration-500 overflow-hidden"
+              style={{
+                opacity: showSearch ? 1 : 0,
+                maxWidth: showSearch ? '28rem' : '0',
+                transform: showSearch ? 'scaleX(1)' : 'scaleX(0)',
+                transformOrigin: 'center'
+              }}
+            >
               <div className="flex items-center bg-white/15 rounded-full border border-[#D4AF37]/30 overflow-hidden">
                 <input
                   type="text"
