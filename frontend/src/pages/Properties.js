@@ -526,7 +526,7 @@ const Properties = () => {
           </div>
         )}
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-8">
           {properties.map((property) => (
             <div
               key={property.id}
@@ -534,18 +534,18 @@ const Properties = () => {
               onClick={() => navigate(`/property/${property.id}`)}
               data-testid={`property-card-${property.id}`}
             >
-              <div className="h-64 bg-gray-200" style={{
+              <div className="h-36 md:h-64 bg-gray-200" style={{
                 backgroundImage: `url(${property.images?.[0] ? (property.images[0].startsWith('/api') ? `${API.replace('/api', '')}${property.images[0]}` : property.images[0]) : 'https://images.pexels.com/photos/1669799/pexels-photo-1669799.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940'})`,
                 backgroundSize: 'cover',
                 backgroundPosition: 'center'
               }}></div>
-              <div className="p-6">
-                <h3 className="text-xl font-bold mb-2">{property.title}</h3>
-                <div className="flex items-center gap-2 text-gray-600 mb-3">
-                  <MapPin size={16} />
-                  <span className="text-sm">{property.area}</span>
+              <div className="p-3 md:p-6">
+                <h3 className="text-sm md:text-xl font-bold mb-1 md:mb-2 line-clamp-1">{property.title}</h3>
+                <div className="flex items-center gap-2 text-gray-600 mb-2 md:mb-3">
+                  <MapPin size={14} className="md:w-4 md:h-4 shrink-0" />
+                  <span className="text-xs md:text-sm truncate">{property.area}</span>
                 </div>
-                <div className="flex items-center gap-4 mb-4 text-sm text-gray-700">
+                <div className="hidden md:flex items-center gap-4 mb-4 text-sm text-gray-700">
                   {property.bedrooms > 0 && (
                     <div className="flex items-center gap-1">
                       <Bed size={16} />
@@ -573,9 +573,9 @@ const Properties = () => {
                 </div>
                 <div className="flex items-center justify-between">
                   <div>
-                    <span className="text-2xl font-bold" style={{ color: "#D4AF37" }} data-testid={`property-price-${property.id}`}>
+                    <span className="text-base md:text-2xl font-bold" style={{ color: "#D4AF37" }} data-testid={`property-price-${property.id}`}>
                       {property.currency === 'USD' ? '$' : '₪'}{(property.monthly_price || property.nightly_price || 0).toLocaleString()}
-                      <span className="text-sm font-normal text-gray-600">
+                      <span className="text-[10px] md:text-sm font-normal text-gray-600">
                         {property.rental_type === 'vacation' ? t('property.perNight') : t('property.perMonth')}
                       </span>
                     </span>
@@ -590,7 +590,7 @@ const Properties = () => {
                       );
                     })()}
                   </div>
-                  <span className="text-sm px-3 py-1 rounded-full" style={{ backgroundColor: '#E5E5E5', color: '#000000' }}>
+                  <span className="hidden md:inline text-sm px-3 py-1 rounded-full" style={{ backgroundColor: '#E5E5E5', color: '#000000' }}>
                     {{'long-term': t('property.longTerm'), 'short-term': t('property.shortTerm'), 'vacation': t('property.vacationType'), 'storage': t('property.storageType')}[property.rental_type] || property.rental_type}
                   </span>
                 </div>
