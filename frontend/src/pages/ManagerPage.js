@@ -78,8 +78,6 @@ const ManagerPage = () => {
               <h1 className="text-4xl font-bold mb-2 text-white" style={{ fontFamily: 'Playfair Display' }} data-testid="manager-name">
                 {data.manager.name}
               </h1>
-              <p className="text-white/70">{data.manager.email}</p>
-              {data.manager.phone && <p className="text-white/70">{data.manager.phone}</p>}
               <p className="mt-2 text-sm" style={{ color: '#D4AF37' }}>
                 {data.properties.length} {data.properties.length === 1 ? 'Property' : 'Properties'} Available
               </p>
