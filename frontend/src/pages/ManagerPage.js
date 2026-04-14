@@ -1,14 +1,24 @@
 import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import axios from 'axios';
 import { API } from '../App';
 import { Bed, Bath, Home as HomeIcon, MapPin, User } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+
+const RENTAL_TYPES = [
+  { key: 'all', label: 'All' },
+  { key: 'long-term', label: 'Long Term' },
+  { key: 'short-term', label: 'Short Term' },
+  { key: 'vacation', label: 'Vacation' },
+  { key: 'storage', label: 'Storage' },
+];
 
 const ManagerPage = () => {
   const { managerId } = useParams();
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const [data, setData] = useState(null);
+  const [activeType, setActiveType] = useState('all');
 
   useEffect(() => {
     fetchManagerData();
@@ -31,28 +41,75 @@ const ManagerPage = () => {
     );
   }
 
+  const filteredProperties = activeType === 'all'
+    ? data.properties
+    : data.properties.filter(p => p.rental_type === activeType);
+
+  // Only show tabs that have properties
+  const availableTypes = RENTAL_TYPES.filter(
+    rt => rt.key === 'all' || data.properties.some(p => p.rental_type === rt.key)
+  );
+
+  const rentalTypeLabels = {
+    'long-term': t('property.longTerm'),
+    'short-term': t('property.shortTerm'),
+    'vacation': t('property.vacationType'),
+    'storage': t('property.storageType'),
+  };
+
   return (
     <div className="min-h-screen" data-testid="manager-page">
-      <div className="max-w-7xl mx-auto px-6 py-12">
-        <div className="bg-white rounded-2xl p-8 border border-[#E5E5E5] mb-12">
+      <div className="max-w-7xl mx-auto px-6 pt-28 pb-12">
+        <div className="rounded-2xl p-8 border border-[#E5E5E5] mb-10" style={{ background: 'linear-gradient(135deg, #1E6A6A 0%, #2A8585 100%)' }}>
           <div className="flex items-center gap-6">
-            <div className="w-24 h-24 rounded-full flex items-center justify-center" style={{ backgroundColor: '#E5E5E5' }}>
-              <User size={48} style={{ color: '#000000' }} />
+            <div className="w-24 h-24 rounded-full flex items-center justify-center" style={{ backgroundColor: 'rgba(255,255,255,0.15)' }}>
+              <User size={48} style={{ color: '#D4AF37' }} />
             </div>
             <div>
-              <h1 className="text-4xl font-bold mb-2" style={{ fontFamily: 'Playfair Display' }} data-testid="manager-name">
+              <h1 className="text-4xl font-bold mb-2 text-white" style={{ fontFamily: 'Playfair Display' }} data-testid="manager-name">
                 {data.manager.name}
               </h1>
-              <p className="text-gray-600">{data.manager.email}</p>
-              {data.manager.phone && <p className="text-gray-600">{data.manager.phone}</p>}
+              <p className="text-white/70">{data.manager.email}</p>
+              {data.manager.phone && <p className="text-white/70">{data.manager.phone}</p>}
+              <p className="mt-2 text-sm" style={{ color: '#D4AF37' }}>
+                {data.properties.length} {data.properties.length === 1 ? 'Property' : 'Properties'} Available
+              </p>
             </div>
           </div>
         </div>
 
-        <h2 className="text-3xl font-bold mb-8" style={{ fontFamily: 'Playfair Display' }}>Available Properties</h2>
+        {/* Rental Type Tabs */}
+        {availableTypes.length > 2 && (
+          <div className="flex flex-wrap gap-3 mb-8" data-testid="rental-type-tabs">
+            {availableTypes.map(rt => (
+              <button
+                key={rt.key}
+                onClick={() => setActiveType(rt.key)}
+                className="px-5 py-2.5 rounded-full text-sm font-semibold tracking-wide transition-all duration-200"
+                style={{
+                  backgroundColor: activeType === rt.key ? '#1E6A6A' : 'transparent',
+                  color: activeType === rt.key ? '#D4AF37' : '#1E6A6A',
+                  border: activeType === rt.key ? '1.5px solid #1E6A6A' : '1.5px solid #d0d0d0',
+                }}
+                data-testid={`tab-${rt.key}`}
+              >
+                {rt.key === 'all' ? 'All Properties' : (rentalTypeLabels[rt.key] || rt.label)}
+                {rt.key !== 'all' && (
+                  <span className="ml-2 text-xs opacity-60">
+                    ({data.properties.filter(p => p.rental_type === rt.key).length})
+                  </span>
+                )}
+              </button>
+            ))}
+          </div>
+        )}
+
+        <h2 className="text-3xl font-bold mb-8" style={{ fontFamily: 'Playfair Display' }} data-testid="properties-heading">
+          {activeType === 'all' ? 'Available Properties' : (rentalTypeLabels[activeType] || activeType)}
+        </h2>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {data.properties.map((property) => (
+          {filteredProperties.map((property) => (
             <div
               key={property.id}
               className="property-card"
@@ -91,14 +148,14 @@ const ManagerPage = () => {
                   )}
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="text-2xl font-bold" style={{ color: '#000000' }}>
-                    ₪{property.monthly_price || property.nightly_price}
+                  <span className="text-2xl font-bold" style={{ color: '#D4AF37' }}>
+                    {property.currency === 'USD' ? '$' : '₪'}{(property.monthly_price || property.nightly_price || 0).toLocaleString()}
                     <span className="text-sm font-normal text-gray-600">
-                      {property.rental_type === 'vacation' ? '/night' : '/month'}
+                      {property.rental_type === 'vacation' ? t('property.perNight') : t('property.perMonth')}
                     </span>
                   </span>
-                  <span className="text-sm px-3 py-1 rounded-full" style={{ backgroundColor: '#E5E5E5', color: '#000000' }}>
-                    {property.rental_type}
+                  <span className="text-sm px-3 py-1 rounded-full" style={{ backgroundColor: '#E5E5E5', color: '#1E6A6A' }}>
+                    {rentalTypeLabels[property.rental_type] || property.rental_type}
                   </span>
                 </div>
               </div>
@@ -106,9 +163,11 @@ const ManagerPage = () => {
           ))}
         </div>
 
-        {data.properties.length === 0 && (
+        {filteredProperties.length === 0 && (
           <div className="text-center py-16">
-            <p className="text-xl text-gray-600">No properties available at the moment.</p>
+            <p className="text-xl text-gray-600">
+              {activeType === 'all' ? 'No properties available at the moment.' : `No ${rentalTypeLabels[activeType] || activeType} properties available.`}
+            </p>
           </div>
         )}
       </div>
