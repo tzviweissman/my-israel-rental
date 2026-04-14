@@ -45,9 +45,15 @@ const Navigation = () => {
   }, [menuOpen]);
 
   useEffect(() => {
+    let lastScrolled = false;
+    let lastShowSearch = false;
     const handleScroll = () => {
-      setScrolled(window.scrollY > 80);
-      setShowSearch(window.scrollY > 420);
+      const y = window.scrollY;
+      // Hysteresis: higher threshold to shrink, lower to expand back
+      if (!lastScrolled && y > 120) { lastScrolled = true; setScrolled(true); }
+      else if (lastScrolled && y < 30) { lastScrolled = false; setScrolled(false); }
+      if (!lastShowSearch && y > 450) { lastShowSearch = true; setShowSearch(true); }
+      else if (lastShowSearch && y < 350) { lastShowSearch = false; setShowSearch(false); }
     };
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
