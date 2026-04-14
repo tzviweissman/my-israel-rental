@@ -45,15 +45,9 @@ const Navigation = () => {
   }, [menuOpen]);
 
   useEffect(() => {
-    let lastScrolled = false;
-    let lastShowSearch = false;
     const handleScroll = () => {
-      const y = window.scrollY;
-      // Hysteresis: higher threshold to shrink, lower to expand back
-      if (!lastScrolled && y > 120) { lastScrolled = true; setScrolled(true); }
-      else if (lastScrolled && y < 30) { lastScrolled = false; setScrolled(false); }
-      if (!lastShowSearch && y > 450) { lastShowSearch = true; setShowSearch(true); }
-      else if (lastShowSearch && y < 350) { lastShowSearch = false; setShowSearch(false); }
+      setScrolled(window.scrollY > 120);
+      setShowSearch(window.scrollY > 450);
     };
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
@@ -61,7 +55,7 @@ const Navigation = () => {
 
   return (
     <nav
-      className="sticky top-0 z-50 transition-all duration-300"
+      className="fixed top-0 left-0 right-0 z-50 transition-all duration-300"
       style={{
         background: scrolled ? '#1E6A6A' : 'transparent',
         boxShadow: scrolled ? '0 2px 20px rgba(0,0,0,0.3)' : 'none'
