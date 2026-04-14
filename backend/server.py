@@ -1,4 +1,4 @@
-from fastapi import FastAPI, APIRouter, HTTPException, UploadFile, File, Form, Depends, Header
+from fastapi import FastAPI, APIRouter, HTTPException, UploadFile, File, Form, Depends, Header, Request
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from fastapi.staticfiles import StaticFiles
 from dotenv import load_dotenv
@@ -40,6 +40,33 @@ security = HTTPBearer()
 
 JWT_SECRET = os.environ.get('JWT_SECRET', 'your-secret-key-change-in-production-12345')
 EMERGENT_LLM_KEY = os.environ.get('EMERGENT_LLM_KEY', '')
+
+# SMTP Configuration
+SMTP_HOST = os.environ.get('SMTP_HOST', '')
+SMTP_PORT = int(os.environ.get('SMTP_PORT', '587'))
+SMTP_USER = os.environ.get('SMTP_USER', '')
+SMTP_PASSWORD = os.environ.get('SMTP_PASSWORD', '')
+SMTP_FROM = os.environ.get('SMTP_FROM', SMTP_USER)
+
+
+async def send_email(to_email: str, subject: str, html_body: str):
+    """Send an email via SMTP (AWS SES)."""
+    try:
+        msg = MIMEMultipart('alternative')
+        msg['From'] = SMTP_FROM
+        msg['To'] = to_email
+        msg['Subject'] = subject
+        msg.attach(MIMEText(html_body, 'html'))
+
+        with smtplib.SMTP(SMTP_HOST, SMTP_PORT) as server:
+            server.starttls()
+            server.login(SMTP_USER, SMTP_PASSWORD)
+            server.sendmail(SMTP_FROM, to_email, msg.as_string())
+        logger.info(f"Email sent to {to_email}: {subject}")
+        return True
+    except Exception as e:
+        logger.error(f"Failed to send email to {to_email}: {e}")
+        return False
 
 # Exchange rate cache
 _exchange_cache = {"rate": None, "fetched_at": None}
@@ -308,11 +335,12 @@ async def get_current_user(payload = Depends(verify_token)):
 
 
 @api_router.post("/auth/forgot-password")
-async def forgot_password(request: ForgotPasswordRequest):
+async def forgot_password(request: ForgotPasswordRequest, req: Request = None):
+    from starlette.requests import Request as StarletteRequest
     user = await db.users.find_one({"email": request.email}, {"_id": 0})
     if not user:
         # Return success even if email not found (security best practice)
-        return {"message": "If an account with that email exists, a password reset link has been generated.", "reset_token": None}
+        return {"message": "If an account with that email exists, a password reset link has been sent."}
 
     reset_token = str(uuid.uuid4())
     expires_at = (datetime.now(timezone.utc) + timedelta(hours=1)).isoformat()
@@ -327,12 +355,58 @@ async def forgot_password(request: ForgotPasswordRequest):
         "created_at": datetime.now(timezone.utc).isoformat()
     })
 
-    # In production, this would send an email with the reset link.
-    # For now, return the token directly so the frontend can redirect.
-    return {
-        "message": "If an account with that email exists, a password reset link has been generated.",
-        "reset_token": reset_token
-    }
+    # Build the reset link using the frontend origin
+    origin = os.environ.get('FRONTEND_URL', '')
+    if not origin and req:
+        referer = req.headers.get('referer', '')
+        if referer:
+            from urllib.parse import urlparse
+            parsed = urlparse(referer)
+            origin = f"{parsed.scheme}://{parsed.netloc}"
+    if not origin:
+        origin = "http://localhost:3000"
+
+    reset_link = f"{origin}/auth/reset-password?token={reset_token}"
+
+    # Send the reset email
+    html_body = f"""
+    <div style="font-family: Arial, sans-serif; max-width: 500px; margin: 0 auto; padding: 30px; background: #f9f9f9; border-radius: 12px;">
+        <div style="text-align: center; margin-bottom: 24px;">
+            <h1 style="color: #1E6A6A; font-size: 22px; margin: 0;">MyIsraelRental</h1>
+        </div>
+        <div style="background: white; padding: 30px; border-radius: 10px; border: 1px solid #e5e5e5;">
+            <h2 style="color: #333; font-size: 18px; margin-top: 0;">Password Reset Request</h2>
+            <p style="color: #555; font-size: 14px; line-height: 1.6;">
+                Hi {user.get('name', 'there')},<br><br>
+                We received a request to reset your password. Click the button below to set a new password:
+            </p>
+            <div style="text-align: center; margin: 28px 0;">
+                <a href="{reset_link}" style="background-color: #1E6A6A; color: white; padding: 14px 32px; text-decoration: none; border-radius: 8px; font-size: 14px; font-weight: bold; display: inline-block;">
+                    Reset My Password
+                </a>
+            </div>
+            <p style="color: #888; font-size: 12px; line-height: 1.5;">
+                This link expires in 1 hour. If you didn't request this, you can safely ignore this email.<br><br>
+                Or copy this link: <a href="{reset_link}" style="color: #D4AF37; word-break: break-all;">{reset_link}</a>
+            </p>
+        </div>
+        <p style="text-align: center; color: #aaa; font-size: 11px; margin-top: 16px;">
+            &copy; MyIsraelRental.com
+        </p>
+    </div>
+    """
+
+    email_sent = await send_email(request.email, "Reset Your Password — MyIsraelRental", html_body)
+
+    if email_sent:
+        return {"message": "If an account with that email exists, a password reset link has been sent."}
+    else:
+        # Fallback: return token directly if email fails
+        logger.warning(f"Email failed for {request.email}, returning reset token directly")
+        return {
+            "message": "Email delivery failed. Use the link below to reset your password.",
+            "reset_token": reset_token
+        }
 
 
 @api_router.post("/auth/reset-password")

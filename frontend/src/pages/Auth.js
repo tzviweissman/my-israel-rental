@@ -68,12 +68,12 @@ const Auth = () => {
     try {
       const res = await axios.post(`${API}/auth/forgot-password`, { email: forgotEmail });
       if (res.data.reset_token) {
-        // In development, navigate directly to reset page
+        // Fallback: email failed, navigate directly to reset page
         navigate(`/auth/reset-password?token=${res.data.reset_token}`);
         toast.success('Redirecting to password reset...');
       } else {
         setForgotSent(true);
-        toast.success('If an account exists with that email, you will receive reset instructions.');
+        toast.success('Password reset email sent! Check your inbox.');
       }
     } catch (err) {
       toast.error(err.response?.data?.detail || 'Something went wrong. Please try again.');
@@ -120,7 +120,7 @@ const Auth = () => {
                 </div>
                 <h2 className="text-2xl font-bold mb-3" style={{ fontFamily: 'Playfair Display' }}>Check Your Email</h2>
                 <p className="text-gray-600 text-sm mb-6">
-                  If an account with <strong>{forgotEmail}</strong> exists, we've sent password reset instructions.
+                  We've sent a password reset link to <strong>{forgotEmail}</strong>. Check your inbox (and spam folder) and click the link to reset your password.
                 </p>
                 <button
                   onClick={() => navigate('/auth/login')}
