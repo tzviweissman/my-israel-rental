@@ -11,8 +11,9 @@ const Navigation = () => {
   const location = useLocation();
   const isHome = location.pathname === '/';
   const [menuOpen, setMenuOpen] = useState(false);
-  const [scrolled, setScrolled] = useState(!isHome);
-  const [showSearch, setShowSearch] = useState(!isHome);
+  const [homeScrolled, setHomeScrolled] = useState(false);
+  const [homeShowSearch, setHomeShowSearch] = useState(false);
+  const navSearch_ref = useRef('');
   const [navSearch, setNavSearch] = useState('');
   const menuRef = useRef(null);
 
@@ -47,20 +48,19 @@ const Navigation = () => {
   }, [menuOpen]);
 
   useEffect(() => {
-    if (!isHome) {
-      setScrolled(true);
-      setShowSearch(true);
-      return;
-    }
-    setScrolled(window.scrollY > 120);
-    setShowSearch(window.scrollY > 450);
+    if (!isHome) return;
     const handleScroll = () => {
-      setScrolled(window.scrollY > 120);
-      setShowSearch(window.scrollY > 450);
+      setHomeScrolled(window.scrollY > 120);
+      setHomeShowSearch(window.scrollY > 450);
     };
+    handleScroll();
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, [isHome]);
+
+  // Non-home pages always compact; home page depends on scroll
+  const scrolled = isHome ? homeScrolled : true;
+  const showSearch = isHome ? homeShowSearch : true;
 
   return (
     <nav
