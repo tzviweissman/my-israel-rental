@@ -169,6 +169,17 @@ class UserLogin(BaseModel):
     email: EmailStr
     password: str
 
+class ForgotPasswordRequest(BaseModel):
+    email: EmailStr
+
+class ResetPasswordRequest(BaseModel):
+    token: str
+    new_password: str
+
+class ChangePasswordRequest(BaseModel):
+    current_password: str
+    new_password: str
+
 class PropertyCreate(BaseModel):
     title: str
     description: Optional[str] = None
@@ -294,6 +305,81 @@ async def get_current_user(payload = Depends(verify_token)):
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
     return user
+
+
+@api_router.post("/auth/forgot-password")
+async def forgot_password(request: ForgotPasswordRequest):
+    user = await db.users.find_one({"email": request.email}, {"_id": 0})
+    if not user:
+        # Return success even if email not found (security best practice)
+        return {"message": "If an account with that email exists, a password reset link has been generated.", "reset_token": None}
+
+    reset_token = str(uuid.uuid4())
+    expires_at = (datetime.now(timezone.utc) + timedelta(hours=1)).isoformat()
+
+    await db.password_resets.delete_many({"email": request.email})
+    await db.password_resets.insert_one({
+        "token": reset_token,
+        "email": request.email,
+        "user_id": user['id'],
+        "expires_at": expires_at,
+        "used": False,
+        "created_at": datetime.now(timezone.utc).isoformat()
+    })
+
+    # In production, this would send an email with the reset link.
+    # For now, return the token directly so the frontend can redirect.
+    return {
+        "message": "If an account with that email exists, a password reset link has been generated.",
+        "reset_token": reset_token
+    }
+
+
+@api_router.post("/auth/reset-password")
+async def reset_password(request: ResetPasswordRequest):
+    reset_doc = await db.password_resets.find_one({"token": request.token, "used": False}, {"_id": 0})
+    if not reset_doc:
+        raise HTTPException(status_code=400, detail="Invalid or expired reset token")
+
+    expires_at = datetime.fromisoformat(reset_doc['expires_at'])
+    if datetime.now(timezone.utc) > expires_at:
+        raise HTTPException(status_code=400, detail="Reset token has expired")
+
+    if len(request.new_password) < 6:
+        raise HTTPException(status_code=400, detail="Password must be at least 6 characters")
+
+    hashed = bcrypt.hashpw(request.new_password.encode('utf-8'), bcrypt.gensalt())
+    await db.users.update_one(
+        {"id": reset_doc['user_id']},
+        {"$set": {"password": hashed.decode('utf-8')}}
+    )
+    await db.password_resets.update_one(
+        {"token": request.token},
+        {"$set": {"used": True}}
+    )
+
+    return {"message": "Password has been reset successfully"}
+
+
+@api_router.post("/auth/change-password")
+async def change_password(request: ChangePasswordRequest, payload=Depends(verify_token)):
+    user = await db.users.find_one({"id": payload['user_id']}, {"_id": 0})
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    if not bcrypt.checkpw(request.current_password.encode('utf-8'), user['password'].encode('utf-8')):
+        raise HTTPException(status_code=400, detail="Current password is incorrect")
+
+    if len(request.new_password) < 6:
+        raise HTTPException(status_code=400, detail="New password must be at least 6 characters")
+
+    hashed = bcrypt.hashpw(request.new_password.encode('utf-8'), bcrypt.gensalt())
+    await db.users.update_one(
+        {"id": payload['user_id']},
+        {"$set": {"password": hashed.decode('utf-8')}}
+    )
+
+    return {"message": "Password changed successfully"}
 
 @api_router.post("/properties")
 async def create_property(property_data: PropertyCreate, payload = Depends(verify_token)):

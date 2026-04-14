@@ -195,6 +195,51 @@ backend:
           agent: "testing"
           comment: "✅ TESTED: Contract deletion working correctly. Successfully uploaded test contract and then deleted it. File removed from both database and disk storage. Proper authorization checks in place."
 
+  - task: "Forgot Password API"
+    implemented: true
+    working: true
+    file: "backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: "NA"
+          agent: "main"
+          comment: "Implemented POST /api/auth/forgot-password - generates reset token stored in DB, returns token in response (in production would email it). Token expires after 1 hour."
+        - working: true
+          agent: "testing"
+          comment: "✅ TESTED: Forgot Password API working correctly. Successfully tested with valid email (owner@test.com) - received reset token. Also tested with non-existent email - correctly returned null reset_token for security. Token generation, database storage, and proper response handling all working."
+
+  - task: "Reset Password API"
+    implemented: true
+    working: true
+    file: "backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: "NA"
+          agent: "main"
+          comment: "Implemented POST /api/auth/reset-password - validates token, checks expiry, hashes new password, marks token as used"
+        - working: true
+          agent: "testing"
+          comment: "✅ TESTED: Reset Password API working correctly. Successfully reset password using valid token from forgot-password flow. Verified login with new password works. Token validation, password hashing, database updates all functional. Password restored to original (Test1234!) after testing."
+
+  - task: "Change Password API"
+    implemented: true
+    working: true
+    file: "backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: "NA"
+          agent: "main"
+          comment: "Implemented POST /api/auth/change-password - authenticated endpoint, verifies current password, updates to new password"
+        - working: true
+          agent: "testing"
+          comment: "✅ TESTED: Change Password API working correctly. Successfully changed password with valid current password and auth token. Verified login with new password works. Correctly rejected request with wrong current password (400 error). Authentication, password verification, and database updates all functional. Password restored to original (Test1234!) after testing."
+
 frontend:
   - task: "Contract Manager Component with upload, translate, sign UI"
     implemented: true
@@ -220,6 +265,30 @@ frontend:
           agent: "main"
           comment: "Added tab navigation (Properties, Contracts, Bookings) in Dashboard.js, Contracts tab loads ContractManager component"
 
+  - task: "Forgot Password Page"
+    implemented: true
+    working: "NA"
+    file: "frontend/src/pages/Auth.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+        - working: "NA"
+          agent: "main"
+          comment: "Added 'Forgot your password?' link on login page, forgot-password page with email input, reset-password page with new password form, success confirmation screens"
+
+  - task: "Change Password in Dashboard Settings"
+    implemented: true
+    working: "NA"
+    file: "frontend/src/pages/Dashboard.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+        - working: "NA"
+          agent: "main"
+          comment: "Added Settings tab in Dashboard with expandable Change Password section. Form has current password, new password, confirm new password fields with visibility toggles."
+
 metadata:
   created_by: "main_agent"
   version: "1.0"
@@ -238,3 +307,7 @@ agent_communication:
       message: "Full contract management system implemented. Backend has 6 new/revamped endpoints for upload, list, get, translate, sign, and delete. Frontend has ContractManager component integrated into Dashboard via tabs. Test credentials: owner@test.com / Test1234! (role: owner). A test property exists with title 'Cozy Tel Aviv Apartment'. For upload testing, create a test PDF file and test the upload endpoint. Translation uses Claude via emergentintegrations. Auth token required for all endpoints."
     - agent: "testing"
       message: "✅ BACKEND TESTING COMPLETE: Contract management APIs tested successfully. 6/6 endpoints working (5 fully working, 1 with external service limitation). Contract upload, list, get, signing, download, and delete all functional. Only translation API failing due to LLM budget exceeded - this is a service configuration issue, not code issue. All file operations, text extraction, authentication, and database operations working correctly. Ready for production use."
+    - agent: "main"
+      message: "Added forgot password + reset password + change password features. 3 new backend endpoints: POST /api/auth/forgot-password, POST /api/auth/reset-password, POST /api/auth/change-password. Frontend updated: Auth.js has forgot-password and reset-password views, Dashboard.js has new Settings tab with Change Password form. Test credentials: owner@test.com / Test1234!. Please test the 3 new auth endpoints."
+    - agent: "testing"
+      message: "✅ PASSWORD MANAGEMENT TESTING COMPLETE: All 3 new password management endpoints tested successfully and working correctly. Forgot Password API generates reset tokens properly (returns null for non-existent emails for security). Reset Password API validates tokens, updates passwords, and marks tokens as used. Change Password API requires authentication, validates current password, and updates to new password. All endpoints handle authentication, validation, database operations, and error cases properly. Password restored to original (Test1234!) after all tests."
