@@ -246,9 +246,20 @@ const Dashboard = () => {
     return `${window.location.origin}/manager/${user.id}`;
   };
 
-  const copyShareableLink = () => {
-    navigator.clipboard.writeText(getShareableLink());
-    toast.success('Link copied to clipboard!');
+  const copyShareableLink = async () => {
+    const link = getShareableLink();
+    try {
+      await navigator.clipboard.writeText(link);
+      toast.success('Link copied to clipboard!');
+    } catch {
+      const textarea = document.createElement('textarea');
+      textarea.value = link;
+      document.body.appendChild(textarea);
+      textarea.select();
+      document.execCommand('copy');
+      document.body.removeChild(textarea);
+      toast.success('Link copied to clipboard!');
+    }
   };
 
   const openIcalPanel = async (propertyId) => {
@@ -304,9 +315,18 @@ const Dashboard = () => {
     setIcalSyncing(false);
   };
 
-  const copyExportUrl = (propertyId) => {
+  const copyExportUrl = async (propertyId) => {
     const url = `${API.replace('/api', '')}/api/properties/${propertyId}/ical-export`;
-    navigator.clipboard.writeText(url);
+    try {
+      await navigator.clipboard.writeText(url);
+    } catch {
+      const textarea = document.createElement('textarea');
+      textarea.value = url;
+      document.body.appendChild(textarea);
+      textarea.select();
+      document.execCommand('copy');
+      document.body.removeChild(textarea);
+    }
     setCopiedExport(true);
     setTimeout(() => setCopiedExport(false), 2000);
   };
