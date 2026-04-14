@@ -23,6 +23,9 @@ import shutil
 import httpx
 import asyncio
 from icalendar import Calendar as iCalCalendar, Event as iCalEvent
+import pdfplumber
+from docx import Document as DocxDocument
+from io import BytesIO
 
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
@@ -221,6 +224,7 @@ class TranslationRequest(BaseModel):
 
 class ContractSignature(BaseModel):
     contract_id: str
+    signer_name: str
     signature_data: str
 
 class DocumentServiceRequest(BaseModel):
@@ -600,52 +604,276 @@ async def translate_text(request: TranslationRequest):
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Translation failed: {str(e)}")
 
+# --- Contract Management ---
+
+CONTRACT_DIR = ROOT_DIR / "uploads" / "contracts"
+CONTRACT_DIR.mkdir(parents=True, exist_ok=True)
+ALLOWED_CONTRACT_TYPES = {
+    "application/pdf": "pdf",
+    "application/vnd.openxmlformats-officedocument.wordprocessingml.document": "docx",
+    "image/jpeg": "jpg",
+    "image/png": "png",
+    "image/webp": "webp",
+}
+
+def extract_text_from_pdf(file_path: str) -> str:
+    text_parts = []
+    try:
+        with pdfplumber.open(file_path) as pdf:
+            for page in pdf.pages:
+                page_text = page.extract_text()
+                if page_text:
+                    text_parts.append(page_text)
+    except Exception as e:
+        logger.error(f"PDF extraction error: {e}")
+    return "\n\n".join(text_parts)
+
+def extract_text_from_docx(file_path: str) -> str:
+    text_parts = []
+    try:
+        doc = DocxDocument(file_path)
+        for para in doc.paragraphs:
+            if para.text.strip():
+                text_parts.append(para.text)
+    except Exception as e:
+        logger.error(f"DOCX extraction error: {e}")
+    return "\n\n".join(text_parts)
+
+def extract_text_from_image(file_path: str) -> str:
+    try:
+        import pytesseract
+        from PIL import Image
+        img = Image.open(file_path)
+        text = pytesseract.image_to_string(img, lang='heb+eng')
+        return text.strip()
+    except Exception as e:
+        logger.warning(f"OCR extraction failed (pytesseract may not be installed): {e}")
+        return ""
+
+
 @api_router.post("/contracts/upload")
-async def upload_contract(property_id: str = Form(...), contract_file: str = Form(...), payload = Depends(verify_token)):
+async def upload_contract(
+    file: UploadFile = File(...),
+    property_id: str = Form(...),
+    payload=Depends(verify_token)
+):
+    # Verify property exists and user is owner
     property_data = await db.properties.find_one({"id": property_id}, {"_id": 0})
     if not property_data:
         raise HTTPException(status_code=404, detail="Property not found")
-    
-    if property_data['owner_id'] != payload['user_id'] and payload['role'] != 'admin':
-        raise HTTPException(status_code=403, detail="Not authorized")
-    
+    if property_data.get('owner_id') != payload['user_id'] and payload.get('role') != 'admin':
+        raise HTTPException(status_code=403, detail="Only property owners can upload contracts")
+
+    # Validate file type
+    content_type = file.content_type or ""
+    if content_type not in ALLOWED_CONTRACT_TYPES:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Unsupported file type: {content_type}. Allowed: PDF, DOCX, JPG, PNG, WebP"
+        )
+
+    file_ext = ALLOWED_CONTRACT_TYPES[content_type]
     contract_id = str(uuid.uuid4())
+    filename = f"{contract_id}.{file_ext}"
+    file_path = CONTRACT_DIR / filename
+
+    # Save file to disk
+    size = 0
+    with open(file_path, "wb") as f:
+        while chunk := await file.read(1024 * 256):
+            size += len(chunk)
+            if size > MAX_FILE_SIZE:
+                f.close()
+                file_path.unlink(missing_ok=True)
+                raise HTTPException(status_code=413, detail="File too large. Max 50MB")
+            f.write(chunk)
+
+    # Extract text based on file type
+    extracted_text = ""
+    if file_ext == "pdf":
+        extracted_text = extract_text_from_pdf(str(file_path))
+    elif file_ext == "docx":
+        extracted_text = extract_text_from_docx(str(file_path))
+    elif file_ext in ("jpg", "png", "webp"):
+        extracted_text = extract_text_from_image(str(file_path))
+
     contract_doc = {
         "id": contract_id,
         "property_id": property_id,
         "owner_id": payload['user_id'],
-        "file_data": contract_file,
+        "original_filename": file.filename,
+        "stored_filename": filename,
+        "file_type": file_ext,
+        "file_size": size,
+        "extracted_text": extracted_text,
+        "translated_text": None,
+        "translation_direction": None,
+        "translation_status": "none",
+        "signatures": [],
         "signed": False,
-        "created_at": datetime.now(timezone.utc).isoformat()
+        "created_at": datetime.now(timezone.utc).isoformat(),
+        "updated_at": datetime.now(timezone.utc).isoformat(),
     }
-    
+
     await db.contracts.insert_one(contract_doc)
-    return {"id": contract_id, "message": "Contract uploaded successfully"}
+    return {
+        "id": contract_id,
+        "original_filename": file.filename,
+        "file_type": file_ext,
+        "extracted_text_length": len(extracted_text),
+        "message": "Contract uploaded successfully"
+    }
 
-@api_router.post("/contracts/sign")
-async def sign_contract(signature: ContractSignature, payload = Depends(verify_token)):
-    contract = await db.contracts.find_one({"id": signature.contract_id}, {"_id": 0})
+
+@api_router.get("/contracts")
+async def list_contracts(property_id: Optional[str] = None, payload=Depends(verify_token)):
+    query = {}
+    if payload.get('role') != 'admin':
+        query["owner_id"] = payload['user_id']
+    if property_id:
+        query["property_id"] = property_id
+    contracts = await db.contracts.find(query, {"_id": 0}).sort("created_at", -1).to_list(500)
+    return contracts
+
+
+@api_router.get("/contracts/download/{contract_id}")
+async def download_contract(contract_id: str):
+    from starlette.responses import FileResponse
+    contract = await db.contracts.find_one({"id": contract_id}, {"_id": 0})
     if not contract:
         raise HTTPException(status_code=404, detail="Contract not found")
-    
-    await db.contracts.update_one(
-        {"id": signature.contract_id},
-        {"$set": {
-            "signed": True,
-            "signature_data": signature.signature_data,
-            "signer_id": payload['user_id'],
-            "signed_at": datetime.now(timezone.utc).isoformat()
-        }}
+
+    file_path = CONTRACT_DIR / contract.get('stored_filename', '')
+    if not file_path.exists():
+        raise HTTPException(status_code=404, detail="Contract file not found on disk")
+
+    media_types = {
+        "pdf": "application/pdf",
+        "docx": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        "jpg": "image/jpeg",
+        "png": "image/png",
+        "webp": "image/webp",
+    }
+    media_type = media_types.get(contract.get('file_type', ''), "application/octet-stream")
+
+    return FileResponse(
+        path=str(file_path),
+        media_type=media_type,
+        filename=contract.get('original_filename', f"contract.{contract.get('file_type', 'pdf')}")
     )
-    
-    return {"message": "Contract signed successfully"}
 
-@api_router.get("/contracts/{property_id}")
-async def get_contract(property_id: str, payload = Depends(verify_token)):
-    contract = await db.contracts.find_one({"property_id": property_id}, {"_id": 0})
+
+@api_router.get("/contracts/{contract_id}")
+async def get_contract(contract_id: str, payload=Depends(verify_token)):
+    contract = await db.contracts.find_one({"id": contract_id}, {"_id": 0})
     if not contract:
         raise HTTPException(status_code=404, detail="Contract not found")
+    if contract['owner_id'] != payload['user_id'] and payload.get('role') != 'admin':
+        # Also allow signers to view
+        signer_ids = [s.get('signer_id') for s in contract.get('signatures', [])]
+        if payload['user_id'] not in signer_ids:
+            raise HTTPException(status_code=403, detail="Not authorized")
     return contract
+
+
+@api_router.post("/contracts/{contract_id}/translate")
+async def translate_contract(contract_id: str, direction: str = Form("he-en"), payload=Depends(verify_token)):
+    contract = await db.contracts.find_one({"id": contract_id}, {"_id": 0})
+    if not contract:
+        raise HTTPException(status_code=404, detail="Contract not found")
+    if contract['owner_id'] != payload['user_id'] and payload.get('role') != 'admin':
+        raise HTTPException(status_code=403, detail="Not authorized")
+
+    text = contract.get('extracted_text', '')
+    if not text or len(text.strip()) < 10:
+        raise HTTPException(status_code=400, detail="No sufficient text extracted from the contract to translate. Please ensure the document contains readable text.")
+
+    # Determine translation direction
+    if direction == "he-en":
+        from_lang, to_lang = "Hebrew", "English"
+    elif direction == "en-he":
+        from_lang, to_lang = "English", "Hebrew"
+    else:
+        raise HTTPException(status_code=400, detail="Invalid direction. Use 'he-en' or 'en-he'")
+
+    # Mark as pending
+    await db.contracts.update_one(
+        {"id": contract_id},
+        {"$set": {"translation_status": "pending", "translation_direction": direction, "updated_at": datetime.now(timezone.utc).isoformat()}}
+    )
+
+    try:
+        chat = LlmChat(
+            api_key=EMERGENT_LLM_KEY,
+            session_id=str(uuid.uuid4()),
+            system_message=f"You are a professional legal document translator specializing in Israeli rental contracts. Translate the following contract text from {from_lang} to {to_lang}. Maintain the original formatting, paragraph structure, and legal terminology. Only provide the translation, no explanations or notes."
+        )
+        chat.with_model("anthropic", "claude-4-sonnet-20250514")
+
+        message = UserMessage(text=text)
+        translated = await chat.send_message(message)
+
+        await db.contracts.update_one(
+            {"id": contract_id},
+            {"$set": {
+                "translated_text": translated,
+                "translation_status": "completed",
+                "translation_direction": direction,
+                "updated_at": datetime.now(timezone.utc).isoformat()
+            }}
+        )
+
+        return {"translated_text": translated, "direction": direction, "status": "completed"}
+
+    except Exception as e:
+        await db.contracts.update_one(
+            {"id": contract_id},
+            {"$set": {"translation_status": "failed", "updated_at": datetime.now(timezone.utc).isoformat()}}
+        )
+        logger.error(f"Translation failed for contract {contract_id}: {e}")
+        raise HTTPException(status_code=500, detail=f"Translation failed: {str(e)}")
+
+
+@api_router.post("/contracts/{contract_id}/sign")
+async def sign_contract(contract_id: str, signature: ContractSignature, payload=Depends(verify_token)):
+    contract = await db.contracts.find_one({"id": contract_id}, {"_id": 0})
+    if not contract:
+        raise HTTPException(status_code=404, detail="Contract not found")
+
+    new_signature = {
+        "signer_id": payload['user_id'],
+        "signer_name": signature.signer_name,
+        "signature_data": signature.signature_data,
+        "signed_at": datetime.now(timezone.utc).isoformat()
+    }
+
+    await db.contracts.update_one(
+        {"id": contract_id},
+        {
+            "$push": {"signatures": new_signature},
+            "$set": {"signed": True, "updated_at": datetime.now(timezone.utc).isoformat()}
+        }
+    )
+
+    return {"message": "Contract signed successfully", "signed_at": new_signature['signed_at']}
+
+
+@api_router.delete("/contracts/{contract_id}")
+async def delete_contract(contract_id: str, payload=Depends(verify_token)):
+    contract = await db.contracts.find_one({"id": contract_id}, {"_id": 0})
+    if not contract:
+        raise HTTPException(status_code=404, detail="Contract not found")
+    if contract['owner_id'] != payload['user_id'] and payload.get('role') != 'admin':
+        raise HTTPException(status_code=403, detail="Not authorized")
+
+    # Delete file from disk
+    file_path = CONTRACT_DIR / contract.get('stored_filename', '')
+    if file_path.exists():
+        file_path.unlink()
+
+    await db.contracts.delete_one({"id": contract_id})
+    return {"message": "Contract deleted successfully"}
+
 
 @api_router.post("/document-service")
 async def request_document_service(request: DocumentServiceRequest, payload = Depends(verify_token)):

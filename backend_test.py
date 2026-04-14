@@ -1,7 +1,10 @@
 import requests
 import sys
 import json
+import io
 from datetime import datetime
+from reportlab.pdfgen import canvas
+from reportlab.lib.pagesizes import letter
 
 class RentalWebsiteAPITester:
     def __init__(self, base_url="https://where-am-i-project.preview.emergentagent.com"):
@@ -11,6 +14,7 @@ class RentalWebsiteAPITester:
         self.users = {}
         self.property_ids = []
         self.booking_ids = []
+        self.contract_ids = []
         self.tests_run = 0
         self.tests_passed = 0
 
@@ -442,6 +446,296 @@ class RentalWebsiteAPITester:
             token=self.tokens['owner']
         )
 
+    def create_test_pdf(self):
+        """Create a simple test PDF file"""
+        buffer = io.BytesIO()
+        p = canvas.Canvas(buffer, pagesize=letter)
+        p.drawString(100, 750, "Test Contract Document")
+        p.drawString(100, 730, "This is a test contract for MyIsraelRental.com")
+        p.drawString(100, 710, "Property: Test Apartment")
+        p.drawString(100, 690, "Tenant: Test Tenant")
+        p.drawString(100, 670, "Duration: 12 months")
+        p.drawString(100, 650, "Monthly Rent: 5000 ILS")
+        p.showPage()
+        p.save()
+        buffer.seek(0)
+        return buffer
+
+    def test_contract_upload(self):
+        """Test contract upload functionality"""
+        if 'owner' not in self.tokens:
+            print("❌ No owner token available for contract upload")
+            return
+
+        # First, get a property ID for the owner
+        success, properties = self.run_test(
+            "Get Owner Properties for Contract",
+            "GET",
+            f"properties?owner_id={self.users['owner']['id']}",
+            200,
+            token=self.tokens['owner']
+        )
+        
+        if not success or not properties:
+            print("❌ No properties found for contract upload test")
+            return
+
+        property_id = properties[0]['id']
+        
+        # Create a test PDF
+        pdf_buffer = self.create_test_pdf()
+        
+        # Upload contract
+        url = f"{self.api_url}/contracts/upload"
+        headers = {'Authorization': f'Bearer {self.tokens["owner"]}'}
+        
+        files = {
+            'file': ('test_contract.pdf', pdf_buffer, 'application/pdf')
+        }
+        data = {
+            'property_id': property_id
+        }
+        
+        self.tests_run += 1
+        print(f"\n🔍 Testing Contract Upload...")
+        
+        try:
+            response = requests.post(url, headers=headers, files=files, data=data)
+            success = response.status_code == 200
+            
+            if success:
+                self.tests_passed += 1
+                print(f"✅ Passed - Status: {response.status_code}")
+                response_data = response.json()
+                if 'id' in response_data:
+                    self.contract_ids.append(response_data['id'])
+                    print(f"✅ Contract uploaded with ID: {response_data['id']}")
+                return success, response_data
+            else:
+                print(f"❌ Failed - Expected 200, got {response.status_code}")
+                try:
+                    print(f"Response: {response.json()}")
+                except:
+                    print(f"Response text: {response.text}")
+                return False, {}
+                
+        except Exception as e:
+            print(f"❌ Failed - Error: {str(e)}")
+            return False, {}
+
+    def test_contract_list(self):
+        """Test contract listing"""
+        if 'owner' not in self.tokens:
+            print("❌ No owner token available for contract list")
+            return
+
+        success, response = self.run_test(
+            "List Contracts",
+            "GET",
+            "contracts",
+            200,
+            token=self.tokens['owner']
+        )
+        
+        if success:
+            print(f"✅ Retrieved {len(response)} contracts")
+
+    def test_contract_get(self):
+        """Test getting individual contract"""
+        if 'owner' not in self.tokens or not self.contract_ids:
+            print("❌ No owner token or contract ID available for contract get")
+            return
+
+        contract_id = self.contract_ids[0]
+        success, response = self.run_test(
+            "Get Contract Details",
+            "GET",
+            f"contracts/{contract_id}",
+            200,
+            token=self.tokens['owner']
+        )
+
+    def test_contract_translation(self):
+        """Test contract translation"""
+        if 'owner' not in self.tokens or not self.contract_ids:
+            print("❌ No owner token or contract ID available for translation")
+            return
+
+        contract_id = self.contract_ids[0]
+        
+        # Test translation
+        url = f"{self.api_url}/contracts/{contract_id}/translate"
+        headers = {'Authorization': f'Bearer {self.tokens["owner"]}'}
+        
+        data = {
+            'direction': 'en-he'
+        }
+        
+        self.tests_run += 1
+        print(f"\n🔍 Testing Contract Translation...")
+        
+        try:
+            response = requests.post(url, headers=headers, data=data)
+            success = response.status_code == 200
+            
+            if success:
+                self.tests_passed += 1
+                print(f"✅ Passed - Status: {response.status_code}")
+                response_data = response.json()
+                print(f"✅ Translation completed: {response_data.get('status', 'unknown')}")
+                return success, response_data
+            else:
+                print(f"❌ Failed - Expected 200, got {response.status_code}")
+                try:
+                    print(f"Response: {response.json()}")
+                except:
+                    print(f"Response text: {response.text}")
+                return False, {}
+                
+        except Exception as e:
+            print(f"❌ Failed - Error: {str(e)}")
+            return False, {}
+
+    def test_contract_signing(self):
+        """Test contract digital signing"""
+        if 'owner' not in self.tokens or not self.contract_ids:
+            print("❌ No owner token or contract ID available for signing")
+            return
+
+        contract_id = self.contract_ids[0]
+        
+        signature_data = {
+            "contract_id": contract_id,
+            "signer_name": "Test Owner",
+            "signature_data": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg=="
+        }
+
+        success, response = self.run_test(
+            "Sign Contract",
+            "POST",
+            f"contracts/{contract_id}/sign",
+            200,
+            data=signature_data,
+            token=self.tokens['owner']
+        )
+
+    def test_contract_download(self):
+        """Test contract download"""
+        if not self.contract_ids:
+            print("❌ No contract ID available for download")
+            return
+
+        contract_id = self.contract_ids[0]
+        
+        url = f"{self.api_url}/contracts/download/{contract_id}"
+        
+        self.tests_run += 1
+        print(f"\n🔍 Testing Contract Download...")
+        
+        try:
+            response = requests.get(url)
+            success = response.status_code == 200
+            
+            if success:
+                self.tests_passed += 1
+                print(f"✅ Passed - Status: {response.status_code}")
+                print(f"✅ Downloaded file size: {len(response.content)} bytes")
+                return success, {}
+            else:
+                print(f"❌ Failed - Expected 200, got {response.status_code}")
+                try:
+                    print(f"Response: {response.json()}")
+                except:
+                    print(f"Response text: {response.text}")
+                return False, {}
+                
+        except Exception as e:
+            print(f"❌ Failed - Error: {str(e)}")
+            return False, {}
+
+    def test_contract_delete(self):
+        """Test contract deletion"""
+        if 'owner' not in self.tokens:
+            print("❌ No owner token available for contract deletion")
+            return
+
+        # Upload another contract for deletion test
+        success, properties = self.run_test(
+            "Get Owner Properties for Delete Test",
+            "GET",
+            f"properties?owner_id={self.users['owner']['id']}",
+            200,
+            token=self.tokens['owner']
+        )
+        
+        if not success or not properties:
+            print("❌ No properties found for contract deletion test")
+            return
+
+        property_id = properties[0]['id']
+        
+        # Create and upload a test PDF for deletion
+        pdf_buffer = self.create_test_pdf()
+        
+        url = f"{self.api_url}/contracts/upload"
+        headers = {'Authorization': f'Bearer {self.tokens["owner"]}'}
+        
+        files = {
+            'file': ('test_contract_delete.pdf', pdf_buffer, 'application/pdf')
+        }
+        data = {
+            'property_id': property_id
+        }
+        
+        try:
+            response = requests.post(url, headers=headers, files=files, data=data)
+            if response.status_code == 200:
+                contract_data = response.json()
+                contract_id = contract_data['id']
+                
+                # Now delete the contract
+                success, response = self.run_test(
+                    "Delete Contract",
+                    "DELETE",
+                    f"contracts/{contract_id}",
+                    200,
+                    token=self.tokens['owner']
+                )
+            else:
+                print("❌ Failed to upload contract for deletion test")
+                
+        except Exception as e:
+            print(f"❌ Failed to setup contract for deletion: {str(e)}")
+
+    def test_contract_management_flow(self):
+        """Test complete contract management workflow"""
+        print("\n📄 Testing Contract Management System...")
+        
+        # Test with existing credentials
+        login_success, login_response = self.run_test(
+            "Login Owner for Contracts",
+            "POST",
+            "auth/login",
+            200,
+            data={"email": "owner@test.com", "password": "Test1234!"}
+        )
+        
+        if login_success and 'token' in login_response:
+            self.tokens['owner'] = login_response['token']
+            self.users['owner'] = login_response['user']
+            print("✅ Logged in with test credentials")
+        else:
+            print("❌ Failed to login with test credentials")
+            return
+
+        self.test_contract_upload()
+        self.test_contract_list()
+        self.test_contract_get()
+        self.test_contract_translation()
+        self.test_contract_signing()
+        self.test_contract_download()
+        self.test_contract_delete()
+
 def main():
     print("🚀 Starting Rental Website API Testing...")
     print("=" * 60)
@@ -485,6 +779,9 @@ def main():
     
     print("\n🏢 Testing Manager Page...")
     tester.test_manager_page()
+    
+    print("\n📄 Testing Contract Management...")
+    tester.test_contract_management_flow()
     
     # Print final results
     print("\n" + "=" * 60)

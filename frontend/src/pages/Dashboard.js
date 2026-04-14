@@ -3,8 +3,9 @@ import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import axios from 'axios';
 import { API, AuthContext } from '../App';
-import { Plus, Edit, Trash2, Eye, MessageCircle, Upload, X, Image, Film, CalendarSync, Link2, Copy, Check, RefreshCw } from 'lucide-react';
+import { Plus, Edit, Trash2, Eye, MessageCircle, Upload, X, Image, Film, CalendarSync, Link2, Copy, Check, RefreshCw, FileText } from 'lucide-react';
 import { toast } from 'sonner';
+import ContractManager from '../components/ContractManager';
 
 const Dashboard = () => {
   const { t } = useTranslation();
@@ -24,6 +25,7 @@ const Dashboard = () => {
   const [copiedExport, setCopiedExport] = useState(false);
   const [businessLogo, setBusinessLogo] = useState(null);
   const [logoUploading, setLogoUploading] = useState(false);
+  const [activeTab, setActiveTab] = useState('properties');
   const [propertyForm, setPropertyForm] = useState({
     title: '',
     description: '',
@@ -446,6 +448,41 @@ const Dashboard = () => {
           </div>
         )}
 
+        {/* Tab Navigation */}
+        <div className="flex gap-1 mb-6 bg-gray-100 rounded-xl p-1" data-testid="dashboard-tabs">
+          <button
+            onClick={() => setActiveTab('properties')}
+            className={`flex-1 py-2.5 px-4 rounded-lg text-sm font-medium transition-all ${activeTab === 'properties' ? 'bg-white text-[#1E6A6A] shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
+            data-testid="tab-properties"
+          >
+            {t('dashboard.myProperties')}
+          </button>
+          {user && user.role !== 'renter' && (
+            <button
+              onClick={() => setActiveTab('contracts')}
+              className={`flex-1 py-2.5 px-4 rounded-lg text-sm font-medium transition-all flex items-center justify-center gap-2 ${activeTab === 'contracts' ? 'bg-white text-[#1E6A6A] shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
+              data-testid="tab-contracts"
+            >
+              <FileText size={16} />
+              Contracts
+            </button>
+          )}
+          <button
+            onClick={() => setActiveTab('bookings')}
+            className={`flex-1 py-2.5 px-4 rounded-lg text-sm font-medium transition-all ${activeTab === 'bookings' ? 'bg-white text-[#1E6A6A] shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
+            data-testid="tab-bookings"
+          >
+            {t('dashboard.myBookings')}
+          </button>
+        </div>
+
+        {/* Contracts Tab */}
+        {activeTab === 'contracts' && user && user.role !== 'renter' && (
+          <ContractManager properties={properties} />
+        )}
+
+        {activeTab === 'properties' && (
+        <>
         {showAddProperty && (
           <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-6" data-testid="add-property-modal">
             <div className="bg-white rounded-2xl p-8 max-w-4xl w-full max-h-[90vh] overflow-y-auto">
@@ -1109,7 +1146,10 @@ const Dashboard = () => {
             </div>
           </div>
         )}
+        </>
+        )}
 
+        {activeTab === 'bookings' && (
         <div>
           <h2 className="text-2xl font-bold mb-6" style={{ fontFamily: 'Playfair Display' }}>{t('dashboard.myBookings')}</h2>
           <div className="bg-white rounded-2xl border border-[#E5E5E5] overflow-hidden">
@@ -1139,6 +1179,7 @@ const Dashboard = () => {
             </table>
           </div>
         </div>
+        )}
       </div>
     </div>
   );
