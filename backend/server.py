@@ -913,6 +913,31 @@ async def get_manager_properties(manager_id: str):
         "properties": properties
     }
 
+@api_router.post("/user/logo")
+async def upload_user_logo(file: UploadFile = File(...), payload=Depends(verify_token)):
+    if not file.content_type.startswith("image/"):
+        raise HTTPException(status_code=400, detail="File must be an image")
+    ext = file.filename.split(".")[-1] if "." in file.filename else "png"
+    filename = f"logo_{payload['user_id']}_{uuid.uuid4().hex[:8]}.{ext}"
+    filepath = UPLOAD_DIR / filename
+    content = await file.read()
+    with open(filepath, "wb") as f:
+        f.write(content)
+    logo_url = f"/api/uploads/{filename}"
+    await db.users.update_one({"id": payload["user_id"]}, {"$set": {"business_logo": logo_url}})
+    return {"logo_url": logo_url}
+
+@api_router.delete("/user/logo")
+async def delete_user_logo(payload=Depends(verify_token)):
+    user = await db.users.find_one({"id": payload["user_id"]}, {"_id": 0})
+    if user and user.get("business_logo"):
+        old_file = UPLOAD_DIR / user["business_logo"].split("/")[-1]
+        if old_file.exists():
+            old_file.unlink()
+    await db.users.update_one({"id": payload["user_id"]}, {"$unset": {"business_logo": ""}})
+    return {"message": "Logo removed"}
+
+
 
 # --- iCal Endpoints ---
 class ICalUrlInput(BaseModel):

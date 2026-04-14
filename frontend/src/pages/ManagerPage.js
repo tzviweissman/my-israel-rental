@@ -62,9 +62,18 @@ const ManagerPage = () => {
       <div className="max-w-7xl mx-auto px-6 pt-28 pb-12">
         <div className="rounded-2xl p-8 border border-[#E5E5E5] mb-10" style={{ background: 'linear-gradient(135deg, #1E6A6A 0%, #2A8585 100%)' }}>
           <div className="flex items-center gap-6">
-            <div className="w-24 h-24 rounded-full flex items-center justify-center" style={{ backgroundColor: 'rgba(255,255,255,0.15)' }}>
-              <User size={48} style={{ color: '#D4AF37' }} />
-            </div>
+            {data.manager.business_logo ? (
+              <img
+                src={data.manager.business_logo.startsWith('/api') ? `${API.replace('/api', '')}${data.manager.business_logo}` : data.manager.business_logo}
+                alt={`${data.manager.name} logo`}
+                className="w-24 h-24 rounded-xl object-cover border-2 border-[#D4AF37]"
+                data-testid="manager-logo"
+              />
+            ) : (
+              <div className="w-24 h-24 rounded-full flex items-center justify-center" style={{ backgroundColor: 'rgba(255,255,255,0.15)' }}>
+                <User size={48} style={{ color: '#D4AF37' }} />
+              </div>
+            )}
             <div>
               <h1 className="text-4xl font-bold mb-2 text-white" style={{ fontFamily: 'Playfair Display' }} data-testid="manager-name">
                 {data.manager.name}

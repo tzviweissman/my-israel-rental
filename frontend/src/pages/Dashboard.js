@@ -22,6 +22,8 @@ const Dashboard = () => {
   const [icalSyncing, setIcalSyncing] = useState(false);
   const [icalData, setIcalData] = useState({});
   const [copiedExport, setCopiedExport] = useState(false);
+  const [businessLogo, setBusinessLogo] = useState(null);
+  const [logoUploading, setLogoUploading] = useState(false);
   const [propertyForm, setPropertyForm] = useState({
     title: '',
     description: '',
@@ -55,8 +57,22 @@ const Dashboard = () => {
     if (user) {
       fetchProperties();
       fetchBookings();
+      fetchBusinessLogo();
     }
   }, [user]);
+
+  const fetchBusinessLogo = async () => {
+    try {
+      const response = await axios.get(`${API}/auth/me`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      if (response.data.business_logo) {
+        setBusinessLogo(response.data.business_logo);
+      }
+    } catch (error) {
+      console.error('Failed to fetch user data', error);
+    }
+  };
 
   const fetchProperties = async () => {
     try {
@@ -246,6 +262,36 @@ const Dashboard = () => {
     return `${window.location.origin}/manager/${user.id}`;
   };
 
+  const handleLogoUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    setLogoUploading(true);
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      const response = await axios.post(`${API}/user/logo`, formData, {
+        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'multipart/form-data' }
+      });
+      setBusinessLogo(response.data.logo_url);
+      toast.success('Business logo uploaded!');
+    } catch (error) {
+      toast.error('Failed to upload logo');
+    }
+    setLogoUploading(false);
+  };
+
+  const handleLogoRemove = async () => {
+    try {
+      await axios.delete(`${API}/user/logo`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setBusinessLogo(null);
+      toast.success('Logo removed');
+    } catch (error) {
+      toast.error('Failed to remove logo');
+    }
+  };
+
   const copyShareableLink = async () => {
     const link = getShareableLink();
     try {
@@ -347,6 +393,43 @@ const Dashboard = () => {
         {user && user.role !== 'renter' && (
           <div className="bg-white p-6 rounded-2xl border border-[#E5E5E5] mb-8" data-testid="manager-page-section">
             <h2 className="text-xl font-bold mb-4">Your Manager Page</h2>
+            
+            {/* Business Logo Upload */}
+            <div className="mb-6">
+              <label className="block text-sm font-medium mb-2">Business Logo</label>
+              <div className="flex items-center gap-4">
+                {businessLogo ? (
+                  <div className="relative">
+                    <img
+                      src={businessLogo.startsWith('/api') ? `${API.replace('/api', '')}${businessLogo}` : businessLogo}
+                      alt="Business Logo"
+                      className="w-20 h-20 rounded-xl object-cover border-2 border-[#D4AF37]"
+                      data-testid="business-logo-preview"
+                    />
+                    <button
+                      onClick={handleLogoRemove}
+                      className="absolute -top-2 -right-2 w-6 h-6 rounded-full bg-red-500 text-white flex items-center justify-center text-xs hover:bg-red-600"
+                      data-testid="remove-logo-button"
+                    >
+                      <X size={12} />
+                    </button>
+                  </div>
+                ) : (
+                  <div className="w-20 h-20 rounded-xl border-2 border-dashed border-gray-300 flex items-center justify-center text-gray-400">
+                    <Image size={24} />
+                  </div>
+                )}
+                <div>
+                  <label className="cursor-pointer inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors" style={{ backgroundColor: '#1E6A6A', color: '#D4AF37' }} data-testid="upload-logo-button">
+                    <Upload size={16} />
+                    {logoUploading ? 'Uploading...' : businessLogo ? 'Change Logo' : 'Upload Logo'}
+                    <input type="file" accept="image/*" onChange={handleLogoUpload} className="hidden" disabled={logoUploading} />
+                  </label>
+                  <p className="text-xs text-gray-500 mt-1">Appears on your public manager page</p>
+                </div>
+              </div>
+            </div>
+
             <p className="text-gray-600 mb-4">Share this link with potential renters to show all your properties:</p>
             <div className="flex gap-2">
               <input
