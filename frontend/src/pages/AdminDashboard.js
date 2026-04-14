@@ -154,7 +154,7 @@ const AdminDashboard = () => {
 
   return (
     <div className="min-h-screen bg-[#fafafa]" data-testid="admin-dashboard-page">
-      <div className="max-w-7xl mx-auto px-6 py-8">
+      <div className="max-w-7xl mx-auto px-6 pt-20 pb-8">
         <h1 className="text-4xl font-bold mb-8" style={{ fontFamily: 'Playfair Display' }} data-testid="admin-title">Super Admin Dashboard</h1>
 
         {/* Tab Navigation */}

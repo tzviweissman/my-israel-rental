@@ -1,5 +1,5 @@
 import React, { useContext, useState, useRef, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { AuthContext } from '../App';
 import { Globe, LogOut, LayoutDashboard, Menu, X, Home, Building, Palmtree, Warehouse, ChevronRight, Search } from 'lucide-react';
@@ -8,9 +8,11 @@ const Navigation = () => {
   const { t, i18n } = useTranslation();
   const { user, logout } = useContext(AuthContext);
   const navigate = useNavigate();
+  const location = useLocation();
+  const isHome = location.pathname === '/';
   const [menuOpen, setMenuOpen] = useState(false);
-  const [scrolled, setScrolled] = useState(false);
-  const [showSearch, setShowSearch] = useState(false);
+  const [scrolled, setScrolled] = useState(!isHome);
+  const [showSearch, setShowSearch] = useState(!isHome);
   const [navSearch, setNavSearch] = useState('');
   const menuRef = useRef(null);
 
@@ -45,13 +47,20 @@ const Navigation = () => {
   }, [menuOpen]);
 
   useEffect(() => {
+    if (!isHome) {
+      setScrolled(true);
+      setShowSearch(true);
+      return;
+    }
+    setScrolled(window.scrollY > 120);
+    setShowSearch(window.scrollY > 450);
     const handleScroll = () => {
       setScrolled(window.scrollY > 120);
       setShowSearch(window.scrollY > 450);
     };
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
+  }, [isHome]);
 
   return (
     <nav

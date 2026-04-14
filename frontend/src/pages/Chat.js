@@ -62,7 +62,7 @@ const Chat = () => {
 
   return (
     <div className="min-h-screen" data-testid="chat-page">
-      <div className="max-w-4xl mx-auto px-6 py-12">
+      <div className="max-w-4xl mx-auto px-6 pt-20 pb-12">
         {property && (
           <div className="bg-white rounded-2xl p-6 border border-[#E5E5E5] mb-6">
             <h2 className="text-2xl font-bold" style={{ fontFamily: 'Playfair Display' }}>

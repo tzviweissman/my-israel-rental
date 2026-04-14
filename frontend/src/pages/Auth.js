@@ -45,7 +45,7 @@ const Auth = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-6 py-12">
+    <div className="min-h-screen flex items-center justify-center px-6 pt-20 pb-12">
       <div className="w-full max-w-md">
         <div className="bg-white rounded-2xl p-8 border border-[#E5E5E5]">
           <h2 className="text-3xl font-bold mb-8 text-center" style={{ fontFamily: 'Playfair Display' }}>
