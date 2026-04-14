@@ -56,7 +56,7 @@ Build a bilingual (English/Hebrew) rental website named MyIsraelRental.com with 
 
 ### P1 - Medium Priority
 - [ ] PayPal integration for paid services (Arnona/name change)
-- [ ] Rental contract upload, translation (Hebrew->English), digital signing
+- [x] Rental contract upload, translation (Hebrew<->English), digital signing
 - [ ] Email/SMTP notifications for renter alerts
 
 ### P2 - Lower Priority
