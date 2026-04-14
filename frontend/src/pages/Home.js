@@ -40,7 +40,7 @@ const Home = () => {
         data-testid="hero-section"
       >
         <div className="absolute inset-0 bg-black/30"></div>
-        <div className="relative z-10 text-center text-white px-6 max-w-4xl">
+        <div className="relative z-10 text-center text-white px-6 max-w-4xl mt-24 md:mt-0">
           <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold mb-2" style={{ fontFamily: 'Playfair Display', color: 'white' }}>
             {t('hero.title')}
           </h1>
