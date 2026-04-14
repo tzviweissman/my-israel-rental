@@ -60,7 +60,7 @@ const Navigation = () => {
 
   // Non-home pages always compact; home page depends on scroll
   const scrolled = isHome ? homeScrolled : true;
-  const showSearch = isHome ? homeShowSearch : true;
+  const showSearch = isHome ? homeShowSearch : false;
 
   return (
     <nav
