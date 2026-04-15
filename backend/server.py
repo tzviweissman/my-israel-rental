@@ -831,6 +831,14 @@ async def get_my_subleases(payload=Depends(verify_token)):
     subleases = await db.subleases.find(
         {"subleasor_id": payload['user_id']}, {"_id": 0}
     ).sort("created_at", -1).to_list(100)
+
+    # Enrich with contract signing status
+    for sub in subleases:
+        if sub.get("contract_id"):
+            contract = await db.contracts.find_one({"id": sub["contract_id"]}, {"_id": 0, "signed": 1})
+            sub["contract_signed"] = contract.get("signed", False) if contract else False
+        else:
+            sub["contract_signed"] = False
     return subleases
 
 
@@ -848,6 +856,143 @@ async def update_sublease(sublease_id: str, updates: dict = Body(...), payload=D
 
     await db.subleases.update_one({"id": sublease_id}, {"$set": update_fields})
     return {"message": "Sublease updated successfully"}
+
+
+@api_router.post("/subleases/{sublease_id}/contract")
+async def upload_sublease_contract(
+    sublease_id: str,
+    file: UploadFile = File(...),
+    payload=Depends(verify_token)
+):
+    sublease = await db.subleases.find_one({"id": sublease_id}, {"_id": 0})
+    if not sublease:
+        raise HTTPException(status_code=404, detail="Sublease not found")
+    if sublease['subleasor_id'] != payload['user_id']:
+        raise HTTPException(status_code=403, detail="Only the subleasor can upload contracts")
+
+    content_type = file.content_type or ""
+    if content_type not in ALLOWED_CONTRACT_TYPES:
+        raise HTTPException(status_code=400, detail="Unsupported file type. Allowed: PDF, DOCX, JPG, PNG, WebP")
+
+    file_ext = ALLOWED_CONTRACT_TYPES[content_type]
+    contract_id = str(uuid.uuid4())
+    filename = f"{contract_id}.{file_ext}"
+    file_path = CONTRACT_DIR / filename
+
+    size = 0
+    with open(file_path, "wb") as f:
+        while chunk := await file.read(1024 * 256):
+            size += len(chunk)
+            if size > MAX_FILE_SIZE:
+                f.close()
+                file_path.unlink(missing_ok=True)
+                raise HTTPException(status_code=413, detail="File too large. Max 50MB")
+            f.write(chunk)
+
+    extracted_text = ""
+    if file_ext == "pdf":
+        extracted_text = extract_text_from_pdf(str(file_path))
+    elif file_ext == "docx":
+        extracted_text = extract_text_from_docx(str(file_path))
+    elif file_ext in ("jpg", "png", "webp"):
+        extracted_text = extract_text_from_image(str(file_path))
+
+    sign_token = str(uuid.uuid4())
+
+    contract_doc = {
+        "id": contract_id,
+        "sublease_id": sublease_id,
+        "property_id": sublease.get("original_property_id", ""),
+        "owner_id": payload['user_id'],
+        "original_filename": file.filename,
+        "stored_filename": filename,
+        "file_type": file_ext,
+        "file_size": size,
+        "extracted_text": extracted_text,
+        "translated_text": None,
+        "translation_direction": None,
+        "translation_status": "none",
+        "signatures": [],
+        "signed": False,
+        "sign_token": sign_token,
+        "created_at": datetime.now(timezone.utc).isoformat(),
+        "updated_at": datetime.now(timezone.utc).isoformat(),
+    }
+
+    await db.contracts.insert_one(contract_doc)
+    await db.subleases.update_one(
+        {"id": sublease_id},
+        {"$set": {"contract_id": contract_id, "sign_token": sign_token, "updated_at": datetime.now(timezone.utc).isoformat()}}
+    )
+
+    return {
+        "id": contract_id,
+        "sign_token": sign_token,
+        "original_filename": file.filename,
+        "message": "Contract uploaded. Share the signing link with your sublessee."
+    }
+
+
+@api_router.get("/contracts/sign/{sign_token}")
+async def get_contract_for_signing(sign_token: str):
+    """Public endpoint - sublessee accesses contract via sign_token (no auth needed)"""
+    contract = await db.contracts.find_one({"sign_token": sign_token}, {"_id": 0})
+    if not contract:
+        raise HTTPException(status_code=404, detail="Contract not found or link is invalid")
+
+    sublease = None
+    if contract.get("sublease_id"):
+        sublease = await db.subleases.find_one({"id": contract["sublease_id"]}, {"_id": 0})
+
+    return {
+        "id": contract["id"],
+        "original_filename": contract.get("original_filename"),
+        "file_type": contract.get("file_type"),
+        "extracted_text": contract.get("extracted_text"),
+        "translated_text": contract.get("translated_text"),
+        "translation_status": contract.get("translation_status"),
+        "signatures": contract.get("signatures", []),
+        "signed": contract.get("signed", False),
+        "sublease": {
+            "title": sublease.get("title", "") if sublease else "",
+            "area": sublease.get("area", "") if sublease else "",
+            "available_from": sublease.get("available_from", "") if sublease else "",
+            "available_to": sublease.get("available_to", "") if sublease else "",
+            "price": sublease.get("price", 0) if sublease else 0,
+            "price_type": sublease.get("price_type", "") if sublease else "",
+        } if sublease else None
+    }
+
+
+@api_router.post("/contracts/sign/{sign_token}")
+async def sign_contract_public(sign_token: str, body: dict = Body(...)):
+    """Public endpoint - sublessee signs the contract via sign_token"""
+    contract = await db.contracts.find_one({"sign_token": sign_token}, {"_id": 0})
+    if not contract:
+        raise HTTPException(status_code=404, detail="Contract not found or link is invalid")
+
+    signer_name = body.get("signer_name", "").strip()
+    signature_data = body.get("signature_data", "")
+
+    if not signer_name or not signature_data:
+        raise HTTPException(status_code=400, detail="Name and signature are required")
+
+    new_signature = {
+        "signer_id": "sublessee",
+        "signer_name": signer_name,
+        "signature_data": signature_data,
+        "signed_at": datetime.now(timezone.utc).isoformat()
+    }
+
+    await db.contracts.update_one(
+        {"sign_token": sign_token},
+        {
+            "$push": {"signatures": new_signature},
+            "$set": {"signed": True, "updated_at": datetime.now(timezone.utc).isoformat()}
+        }
+    )
+
+    return {"message": "Contract signed successfully", "signed_at": new_signature['signed_at']}
 
 
 @api_router.delete("/subleases/{sublease_id}")

@@ -1,9 +1,9 @@
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useState, useEffect, useContext, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import axios from 'axios';
 import { API, AuthContext } from '../App';
-import { Plus, Edit, Trash2, Eye, MessageCircle, Upload, X, Image, Film, CalendarSync, Link2, Copy, Check, RefreshCw, FileText, KeyRound, EyeOff, Home, FileCheck, Sparkles, ClipboardList, ArrowRight, Send, Heart, MapPin, Bed, Bath } from 'lucide-react';
+import { Plus, Edit, Trash2, Eye, MessageCircle, Upload, X, Image, Film, CalendarSync, Link2, Copy, Check, RefreshCw, FileText, KeyRound, EyeOff, Home, FileCheck, Sparkles, ClipboardList, ArrowRight, Send, Heart, MapPin, Bed, Bath, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import ContractManager from '../components/ContractManager';
 
@@ -42,6 +42,9 @@ const Dashboard = () => {
   const [loadingSubleases, setLoadingSubleases] = useState(false);
   const [showSubleaseForm, setShowSubleaseForm] = useState(false);
   const [myBookings, setMyBookings] = useState([]);
+  const [uploadingContractFor, setUploadingContractFor] = useState(null);
+  const [copiedSignLink, setCopiedSignLink] = useState(null);
+  const subleaseFileRef = useRef(null);
   const [likedProperties, setLikedProperties] = useState([]);
   const [loadingLiked, setLoadingLiked] = useState(false);
   const [propertyForm, setPropertyForm] = useState({
@@ -572,6 +575,38 @@ const Dashboard = () => {
     setShowSubleaseForm(true);
   };
 
+  const handleSubleaseContractUpload = async (subleaseId, file) => {
+    if (!file) return;
+    const allowed = ['application/pdf', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'image/jpeg', 'image/png', 'image/webp'];
+    if (!allowed.includes(file.type)) {
+      toast.error('Please upload a PDF, DOCX, JPG, PNG, or WebP file.');
+      return;
+    }
+    setUploadingContractFor(subleaseId);
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      const res = await axios.post(`${API}/subleases/${subleaseId}/contract`, formData, {
+        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'multipart/form-data' }
+      });
+      toast.success('Contract uploaded! Share the signing link with your sublessee.');
+      fetchMySubleases();
+    } catch (err) {
+      toast.error(err.response?.data?.detail || 'Failed to upload contract.');
+    } finally {
+      setUploadingContractFor(null);
+    }
+  };
+
+  const copySignLink = (signToken) => {
+    const origin = window.location.origin;
+    const link = `${origin}/sign/${signToken}`;
+    navigator.clipboard.writeText(link);
+    setCopiedSignLink(signToken);
+    toast.success('Signing link copied to clipboard!');
+    setTimeout(() => setCopiedSignLink(null), 3000);
+  };
+
   return (
     <div className="min-h-screen" data-testid="dashboard-page">
       <div className="max-w-7xl mx-auto px-6 pt-28 pb-12">
@@ -1086,45 +1121,95 @@ const Dashboard = () => {
                   <div className="space-y-3">
                     <h4 className="text-sm font-semibold text-gray-700">Your Sublease Listings</h4>
                     {mySubleases.map(sub => (
-                      <div key={sub.id} className="flex items-center gap-4 p-4 rounded-xl border border-gray-200 bg-white" data-testid={`sublease-${sub.id}`}>
-                        <div
-                          className="w-16 h-16 rounded-lg bg-gray-200 shrink-0"
-                          style={{
-                            backgroundImage: `url(${sub.images?.[0] ? (sub.images[0].startsWith('/api') ? `${API.replace('/api', '')}${sub.images[0]}` : sub.images[0]) : ''})`,
-                            backgroundSize: 'cover', backgroundPosition: 'center'
-                          }}
-                        />
-                        <div className="min-w-0 flex-1">
-                          <p className="text-sm font-bold text-gray-800 truncate">{sub.title}</p>
-                          <p className="text-xs text-gray-500">{sub.area} • {sub.bedrooms_available} bed</p>
-                          <p className="text-xs text-gray-400 mt-0.5">
-                            {new Date(sub.available_from).toLocaleDateString()} — {new Date(sub.available_to).toLocaleDateString()}
-                          </p>
-                        </div>
-                        <div className="text-right shrink-0">
-                          <p className="text-base font-bold" style={{ color: '#D4AF37' }}>
-                            ₪{sub.price?.toLocaleString()}
-                            <span className="text-[10px] font-normal text-gray-500">
-                              {sub.price_type === 'per_night' ? '/night' : ' total'}
+                      <div key={sub.id} className="rounded-xl border border-gray-200 bg-white overflow-hidden" data-testid={`sublease-${sub.id}`}>
+                        <div className="flex items-center gap-4 p-4">
+                          <div
+                            className="w-16 h-16 rounded-lg bg-gray-200 shrink-0"
+                            style={{
+                              backgroundImage: `url(${sub.images?.[0] ? (sub.images[0].startsWith('/api') ? `${API.replace('/api', '')}${sub.images[0]}` : sub.images[0]) : ''})`,
+                              backgroundSize: 'cover', backgroundPosition: 'center'
+                            }}
+                          />
+                          <div className="min-w-0 flex-1">
+                            <p className="text-sm font-bold text-gray-800 truncate">{sub.title}</p>
+                            <p className="text-xs text-gray-500">{sub.area} • {sub.bedrooms_available} bed</p>
+                            <p className="text-xs text-gray-400 mt-0.5">
+                              {new Date(sub.available_from).toLocaleDateString()} — {new Date(sub.available_to).toLocaleDateString()}
+                            </p>
+                          </div>
+                          <div className="text-right shrink-0">
+                            <p className="text-base font-bold" style={{ color: '#D4AF37' }}>
+                              ₪{sub.price?.toLocaleString()}
+                              <span className="text-[10px] font-normal text-gray-500">
+                                {sub.price_type === 'per_night' ? '/night' : ' total'}
+                              </span>
+                            </p>
+                            <span className={`inline-block mt-1 px-2 py-0.5 rounded-full text-[10px] font-semibold ${sub.active ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500'}`}>
+                              {sub.active ? 'Active' : 'Paused'}
                             </span>
-                          </p>
-                          <span className={`inline-block mt-1 px-2 py-0.5 rounded-full text-[10px] font-semibold ${sub.active ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500'}`}>
-                            {sub.active ? 'Active' : 'Paused'}
-                          </span>
+                          </div>
+                          <div className="flex flex-col gap-1 shrink-0">
+                            <button
+                              onClick={() => toggleSubleaseActive(sub.id, sub.active)}
+                              className="text-xs px-2.5 py-1 rounded-lg border border-gray-200 hover:border-[#1E6A6A] hover:text-[#1E6A6A] transition-colors"
+                            >
+                              {sub.active ? 'Pause' : 'Activate'}
+                            </button>
+                            <button
+                              onClick={() => deleteSublease(sub.id)}
+                              className="text-xs px-2.5 py-1 rounded-lg border border-gray-200 hover:border-red-400 hover:text-red-500 transition-colors"
+                            >
+                              Remove
+                            </button>
+                          </div>
                         </div>
-                        <div className="flex flex-col gap-1 shrink-0">
-                          <button
-                            onClick={() => toggleSubleaseActive(sub.id, sub.active)}
-                            className="text-xs px-2.5 py-1 rounded-lg border border-gray-200 hover:border-[#1E6A6A] hover:text-[#1E6A6A] transition-colors"
-                          >
-                            {sub.active ? 'Pause' : 'Activate'}
-                          </button>
-                          <button
-                            onClick={() => deleteSublease(sub.id)}
-                            className="text-xs px-2.5 py-1 rounded-lg border border-gray-200 hover:border-red-400 hover:text-red-500 transition-colors"
-                          >
-                            Remove
-                          </button>
+
+                        {/* Contract Section */}
+                        <div className="px-4 pb-4 border-t border-gray-100 pt-3">
+                          {sub.contract_id && sub.sign_token ? (
+                            <div className="flex items-center gap-3 flex-wrap">
+                              <div className="flex items-center gap-2 flex-1 min-w-0">
+                                <FileText size={16} className="text-[#1E6A6A] shrink-0" />
+                                <span className="text-xs font-medium text-gray-700 truncate">Contract uploaded</span>
+                                <span className={`px-2 py-0.5 rounded-full text-[10px] font-semibold shrink-0 ${sub.contract_signed ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}`}>
+                                  {sub.contract_signed ? 'Signed' : 'Awaiting signature'}
+                                </span>
+                              </div>
+                              <button
+                                onClick={() => copySignLink(sub.sign_token)}
+                                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium border border-[#1E6A6A]/20 text-[#1E6A6A] hover:bg-[#1E6A6A]/5 transition-colors shrink-0"
+                                data-testid={`copy-sign-link-${sub.id}`}
+                              >
+                                {copiedSignLink === sub.sign_token ? (
+                                  <><Check size={12} /> Copied!</>
+                                ) : (
+                                  <><Copy size={12} /> Copy Signing Link</>
+                                )}
+                              </button>
+                            </div>
+                          ) : (
+                            <div className="flex items-center gap-3">
+                              <input
+                                type="file"
+                                ref={subleaseFileRef}
+                                className="hidden"
+                                accept=".pdf,.docx,.jpg,.jpeg,.png,.webp"
+                                onChange={(e) => { if (e.target.files?.[0]) handleSubleaseContractUpload(sub.id, e.target.files[0]); e.target.value = ''; }}
+                              />
+                              <button
+                                onClick={() => subleaseFileRef.current?.click()}
+                                disabled={uploadingContractFor === sub.id}
+                                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium border border-dashed border-[#D4AF37]/50 text-[#D4AF37] hover:bg-[#D4AF37]/5 transition-colors disabled:opacity-50"
+                                data-testid={`upload-contract-${sub.id}`}
+                              >
+                                {uploadingContractFor === sub.id ? (
+                                  <><Loader2 size={12} className="animate-spin" /> Uploading...</>
+                                ) : (
+                                  <><Upload size={12} /> Upload Contract for Sublessee to Sign</>
+                                )}
+                              </button>
+                            </div>
+                          )}
                         </div>
                       </div>
                     ))}
