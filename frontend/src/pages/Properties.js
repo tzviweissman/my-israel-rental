@@ -1,13 +1,14 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import axios from 'axios';
-import { API } from '../App';
-import { Bed, Bath, Home as HomeIcon, MapPin, Filter, Building2, X, ChevronDown, ChevronUp, Calendar as CalendarIcon, Minus, Plus } from 'lucide-react';
+import { API, AuthContext } from '../App';
+import { Bed, Bath, Home as HomeIcon, MapPin, Filter, Building2, X, ChevronDown, ChevronUp, Calendar as CalendarIcon, Minus, Plus, Heart } from 'lucide-react';
 import { Calendar } from '../components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '../components/ui/popover';
 import { Slider } from '../components/ui/slider';
 import { format } from 'date-fns';
+import { toast } from 'sonner';
 
 const PRICE_MAX = 50000;
 
@@ -61,6 +62,38 @@ const Properties = () => {
   const [priceRange, setPriceRange] = useState([0, PRICE_MAX]);
   const [priceCurrency, setPriceCurrency] = useState('ILS');
   const [exchangeRate, setExchangeRate] = useState(null);
+  const { user, token } = useContext(AuthContext);
+  const [likedIds, setLikedIds] = useState(new Set());
+
+  useEffect(() => {
+    if (token) {
+      axios.get(`${API}/liked-property-ids`, { headers: { Authorization: `Bearer ${token}` } })
+        .then(res => setLikedIds(new Set(res.data)))
+        .catch(() => {});
+    }
+  }, [token]);
+
+  const toggleLike = async (e, propertyId) => {
+    e.stopPropagation();
+    if (!token) {
+      toast.error('Please log in to save properties.');
+      return;
+    }
+    try {
+      const res = await axios.post(`${API}/properties/${propertyId}/like`, {}, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setLikedIds(prev => {
+        const next = new Set(prev);
+        if (res.data.liked) next.add(propertyId);
+        else next.delete(propertyId);
+        return next;
+      });
+      toast.success(res.data.liked ? 'Saved to favorites!' : 'Removed from favorites');
+    } catch (err) {
+      toast.error('Failed to update favorites');
+    }
+  };
 
   useEffect(() => {
     axios.get(`${API}/exchange-rate`).then(res => setExchangeRate(res.data)).catch(() => setExchangeRate({ usd_to_ils: 3.65, ils_to_usd: 0.274 }));
@@ -534,11 +567,22 @@ const Properties = () => {
               onClick={() => navigate(`/property/${property.id}`)}
               data-testid={`property-card-${property.id}`}
             >
-              <div className="h-36 md:h-64 bg-gray-200" style={{
+              <div className="h-36 md:h-64 bg-gray-200 relative" style={{
                 backgroundImage: `url(${property.images?.[0] ? (property.images[0].startsWith('/api') ? `${API.replace('/api', '')}${property.images[0]}` : property.images[0]) : 'https://images.pexels.com/photos/1669799/pexels-photo-1669799.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940'})`,
                 backgroundSize: 'cover',
                 backgroundPosition: 'center'
-              }}></div>
+              }}>
+                <button
+                  onClick={(e) => toggleLike(e, property.id)}
+                  className="absolute top-2 right-2 md:top-3 md:right-3 w-8 h-8 md:w-10 md:h-10 rounded-full bg-white/90 hover:bg-white flex items-center justify-center shadow-md transition-all hover:scale-110 active:scale-95 z-10"
+                  data-testid={`like-btn-${property.id}`}
+                >
+                  <Heart
+                    size={16}
+                    className={`md:w-5 md:h-5 transition-colors ${likedIds.has(property.id) ? 'fill-red-500 text-red-500' : 'text-gray-500'}`}
+                  />
+                </button>
+              </div>
               <div className="p-3 md:p-6">
                 <h3 className="text-sm md:text-xl font-bold mb-1 md:mb-2 line-clamp-1">{property.title}</h3>
                 <div className="flex items-center gap-2 text-gray-600 mb-2 md:mb-3">

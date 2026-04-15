@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import axios from 'axios';
 import { API, AuthContext } from '../App';
-import { Bed, Bath, Home as HomeIcon, MapPin, Building2, MessageCircle, Calendar as CalendarIcon, ChevronLeft, ChevronRight, Film, Snowflake, WashingMachine, UtensilsCrossed, DoorOpen, ArrowUpFromLine, ShowerHead, Warehouse, Flame, Dumbbell, Waves, Sparkles, Car, Wifi, Mail, Users, X } from 'lucide-react';
+import { Bed, Bath, Home as HomeIcon, MapPin, Building2, MessageCircle, Calendar as CalendarIcon, ChevronLeft, ChevronRight, Film, Snowflake, WashingMachine, UtensilsCrossed, DoorOpen, ArrowUpFromLine, ShowerHead, Warehouse, Flame, Dumbbell, Waves, Sparkles, Car, Wifi, Mail, Users, X, Heart } from 'lucide-react';
 import { Calendar } from '../components/ui/calendar';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
@@ -28,6 +28,7 @@ const PropertyDetail = () => {
   const [showBooking, setShowBooking] = useState(false);
   const [exchangeRate, setExchangeRate] = useState(null);
   const [blockedDates, setBlockedDates] = useState([]);
+  const [isLiked, setIsLiked] = useState(false);
 
   useEffect(() => {
     axios.get(`${API}/exchange-rate`).then(res => setExchangeRate(res.data)).catch(() => setExchangeRate({ usd_to_ils: 3.65, ils_to_usd: 0.274 }));
@@ -41,7 +42,28 @@ const PropertyDetail = () => {
 
   useEffect(() => {
     fetchProperty();
-  }, [id]);
+    if (token) {
+      axios.get(`${API}/liked-property-ids`, { headers: { Authorization: `Bearer ${token}` } })
+        .then(res => setIsLiked(res.data.includes(id)))
+        .catch(() => {});
+    }
+  }, [id, token]);
+
+  const toggleLike = async () => {
+    if (!token) {
+      toast.error('Please log in to save properties.');
+      return;
+    }
+    try {
+      const res = await axios.post(`${API}/properties/${id}/like`, {}, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setIsLiked(res.data.liked);
+      toast.success(res.data.liked ? 'Saved to favorites!' : 'Removed from favorites');
+    } catch (err) {
+      toast.error('Failed to update favorites');
+    }
+  };
 
   const fetchProperty = async () => {
     try {
@@ -194,9 +216,24 @@ const PropertyDetail = () => {
               )}
             </div>
 
-            <h1 className="text-4xl font-bold mb-4" style={{ fontFamily: 'Playfair Display' }} data-testid="property-title">
-              {property.title}
-            </h1>
+            <div className="flex items-center justify-between mb-4">
+              <h1 className="text-4xl font-bold" style={{ fontFamily: 'Playfair Display' }} data-testid="property-title">
+                {property.title}
+              </h1>
+              <button
+                onClick={toggleLike}
+                className="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-gray-200 hover:border-red-300 transition-all hover:shadow-md active:scale-95 shrink-0"
+                data-testid="detail-like-btn"
+              >
+                <Heart
+                  size={20}
+                  className={`transition-colors ${isLiked ? 'fill-red-500 text-red-500' : 'text-gray-400'}`}
+                />
+                <span className={`text-sm font-medium ${isLiked ? 'text-red-500' : 'text-gray-500'}`}>
+                  {isLiked ? 'Saved' : 'Save'}
+                </span>
+              </button>
+            </div>
 
             <div className="flex items-center gap-2 text-gray-600 mb-6">
               <MapPin size={20} />
