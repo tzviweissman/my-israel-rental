@@ -73,8 +73,14 @@ const Dashboard = () => {
     monthly_price: '',
     nightly_price: '',
     currency: 'ILS',
-    images: []
+    images: [],
+    cancellation_policy: 'flexible',
+    custom_cancellation_policy: ''
   });
+  // Cancellation modal states
+  const [cancelModal, setCancelModal] = useState({ show: false, bookingId: null, type: '' });
+  const [cancelReason, setCancelReason] = useState('');
+  const [processingCancel, setProcessingCancel] = useState(false);
 
   useEffect(() => {
     if (user) {
@@ -143,6 +149,66 @@ const Dashboard = () => {
       setBookings(response.data);
     } catch (error) {
       console.error('Failed to fetch bookings', error);
+    }
+  };
+
+  // Cancellation functions
+  const handleCancelBooking = async (bookingId) => {
+    setCancelModal({ show: true, bookingId, type: 'cancel' });
+  };
+
+  const handleRequestCancel = async (bookingId) => {
+    setCancelModal({ show: true, bookingId, type: 'request' });
+  };
+
+  const handleApproveCancel = async (bookingId) => {
+    if (!window.confirm('Approve this cancellation request?')) return;
+    try {
+      await axios.post(`${API}/bookings/${bookingId}/approve-cancel`, {}, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      toast.success('Cancellation approved');
+      fetchBookings();
+    } catch (error) {
+      toast.error('Failed to approve cancellation');
+    }
+  };
+
+  const handleDenyCancel = async (bookingId) => {
+    setCancelModal({ show: true, bookingId, type: 'deny' });
+  };
+
+  const submitCancellation = async () => {
+    if (!cancelReason.trim()) {
+      toast.error('Please provide a reason');
+      return;
+    }
+    setProcessingCancel(true);
+    try {
+      const { bookingId, type } = cancelModal;
+      if (type === 'cancel') {
+        await axios.post(`${API}/bookings/${bookingId}/cancel`, { reason: cancelReason }, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        toast.success('Booking cancelled');
+      } else if (type === 'request') {
+        await axios.post(`${API}/bookings/${bookingId}/request-cancel`, { reason: cancelReason }, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        toast.success('Cancellation request submitted');
+      } else if (type === 'deny') {
+        await axios.post(`${API}/bookings/${bookingId}/deny-cancel`, { denial_reason: cancelReason }, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        toast.success('Cancellation request denied');
+      }
+      setCancelModal({ show: false, bookingId: null, type: '' });
+      setCancelReason('');
+      fetchBookings();
+    } catch (error) {
+      toast.error('Failed to process cancellation');
+    } finally {
+      setProcessingCancel(false);
     }
   };
 
@@ -222,7 +288,9 @@ const Dashboard = () => {
       nightly_price: property.nightly_price || '',
       currency: property.currency || 'ILS',
       images: property.images || [],
-      videos: property.videos || []
+      videos: property.videos || [],
+      cancellation_policy: property.cancellation_policy || 'flexible',
+      custom_cancellation_policy: property.custom_cancellation_policy || ''
     });
     setUploadedFiles((property.images || []).map((url, i) => ({
       url, file_type: 'image', filename: url.split('/').pop(), original_name: `Image ${i + 1}`
@@ -286,7 +354,9 @@ const Dashboard = () => {
         nightly_price: '',
         currency: 'ILS',
         images: [],
-        videos: []
+        videos: [],
+        cancellation_policy: 'flexible',
+        custom_cancellation_policy: ''
       });
       setUploadedFiles([]);
     } catch (error) {
@@ -613,7 +683,7 @@ const Dashboard = () => {
         <div className="flex items-center justify-between mb-8">
           <h1 className="text-4xl font-bold" style={{ fontFamily: 'Playfair Display' }}>Dashboard</h1>
           {user && user.role !== 'renter' && (
-            <button onClick={() => { setEditingPropertyId(null); setUploadedFiles([]); setPropertyForm({ title: '', description: '', rental_type: 'long-term', property_type: 'apartment', bedrooms: 1, bathrooms: 1, area: '', address: '', square_meters: '', floor: 1, has_elevator: false, is_shabbat_elevator: false, is_tama: false, has_agent_fee: false, agent_fee_price: '', agent_fee_currency: 'ILS', porches: 0, sukkah_compatible: false, condition: 'good', furniture_option: 'no_furniture', amenities: [], monthly_price: '', nightly_price: '', currency: 'ILS', images: [], videos: [] }); setShowAddProperty(true); }} className="primary-btn flex items-center gap-2" data-testid="add-property-button">
+            <button onClick={() => { setEditingPropertyId(null); setUploadedFiles([]); setPropertyForm({ title: '', description: '', rental_type: 'long-term', property_type: 'apartment', bedrooms: 1, bathrooms: 1, area: '', address: '', square_meters: '', floor: 1, has_elevator: false, is_shabbat_elevator: false, is_tama: false, has_agent_fee: false, agent_fee_price: '', agent_fee_currency: 'ILS', porches: 0, sukkah_compatible: false, condition: 'good', furniture_option: 'no_furniture', amenities: [], monthly_price: '', nightly_price: '', currency: 'ILS', images: [], videos: [], cancellation_policy: 'flexible', custom_cancellation_policy: '' }); setShowAddProperty(true); }} className="primary-btn flex items-center gap-2" data-testid="add-property-button">
               <Plus size={20} />
               {t('dashboard.addProperty')}
             </button>
@@ -1625,6 +1695,40 @@ const Dashboard = () => {
                   </div>
                 </div>
 
+                {/* Cancellation Policy - Vacation Rentals Only */}
+                {propertyForm.rental_type === 'vacation' && (
+                  <div className="border-t border-gray-200 pt-6">
+                    <h3 className="text-lg font-bold mb-4">Cancellation Policy</h3>
+                    <div className="space-y-4">
+                      <div>
+                        <label className="block text-sm font-medium mb-2">Policy Type</label>
+                        <select
+                          value={propertyForm.cancellation_policy}
+                          onChange={(e) => setPropertyForm({ ...propertyForm, cancellation_policy: e.target.value })}
+                          className="w-full px-4 py-2 rounded-lg border border-[#E5E5E5] focus:outline-none focus:ring-2 focus:ring-[#1E6A6A]/50"
+                        >
+                          <option value="flexible">Flexible - Full refund 7+ days before check-in</option>
+                          <option value="moderate">Moderate - 50% refund 14+ days before check-in</option>
+                          <option value="strict">Strict - No refunds after booking</option>
+                          <option value="custom">Custom - Write your own policy</option>
+                        </select>
+                      </div>
+                      {propertyForm.cancellation_policy === 'custom' && (
+                        <div>
+                          <label className="block text-sm font-medium mb-2">Custom Cancellation Policy</label>
+                          <textarea
+                            value={propertyForm.custom_cancellation_policy}
+                            onChange={(e) => setPropertyForm({ ...propertyForm, custom_cancellation_policy: e.target.value })}
+                            placeholder="Describe your cancellation policy in detail..."
+                            rows={3}
+                            className="w-full px-4 py-2 rounded-lg border border-[#E5E5E5] focus:outline-none focus:ring-2 focus:ring-[#1E6A6A]/50"
+                          />
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   {propertyForm.rental_type !== 'storage' && (
                   <div>
@@ -2032,33 +2136,137 @@ const Dashboard = () => {
         {activeTab === 'bookings' && (
         <div>
           <h2 className="text-2xl font-bold mb-6" style={{ fontFamily: 'Playfair Display' }}>{t('dashboard.myBookings')}</h2>
-          <div className="bg-white rounded-2xl border border-[#E5E5E5] overflow-hidden">
-            <table className="w-full">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th className="px-6 py-4 text-left text-sm font-medium text-gray-700">{t('property.title')}</th>
-                  <th className="px-6 py-4 text-left text-sm font-medium text-gray-700">{t('dashboard.dates')}</th>
-                  <th className="px-6 py-4 text-left text-sm font-medium text-gray-700">{t('dashboard.guests')}</th>
-                  <th className="px-6 py-4 text-left text-sm font-medium text-gray-700">{t('admin.status')}</th>
-                </tr>
-              </thead>
-              <tbody>
-                {bookings.map((booking) => (
-                  <tr key={booking.id} className="border-t border-[#E5E5E5]" data-testid={`booking-row-${booking.id}`}>
-                    <td className="px-6 py-4">{booking.property_id}</td>
-                    <td className="px-6 py-4">{booking.start_date} - {booking.end_date}</td>
-                    <td className="px-6 py-4">{booking.guest_count}</td>
-                    <td className="px-6 py-4">
-                      <span className="px-3 py-1 rounded-full text-sm" style={{ backgroundColor: '#E5E5E5', color: '#1E6A6A' }}>
-                        {booking.status}
-                      </span>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+          {bookings.length === 0 ? (
+            <div className="bg-white rounded-2xl border border-gray-200 p-12 text-center">
+              <p className="text-gray-500">No bookings yet</p>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {bookings.map((booking) => {
+                const getStatusColor = (status) => {
+                  switch(status) {
+                    case 'confirmed': return 'bg-green-100 text-green-700';
+                    case 'pending': return 'bg-yellow-100 text-yellow-700';
+                    case 'rejected': return 'bg-red-100 text-red-700';
+                    case 'cancellation_requested': return 'bg-orange-100 text-orange-700';
+                    case 'cancelled': return 'bg-gray-100 text-gray-700';
+                    default: return 'bg-gray-100 text-gray-700';
+                  }
+                };
+
+                const isOwner = user.role === 'owner' || user.role === 'manager';
+                const isRenter = user.role === 'renter';
+                const canCancel = isOwner && ['pending', 'confirmed'].includes(booking.status);
+                const canRequestCancel = isRenter && ['pending', 'confirmed'].includes(booking.status);
+                const canApprove = isOwner && booking.status === 'cancellation_requested';
+
+                return (
+                  <div key={booking.id} className="bg-white rounded-2xl border border-gray-200 p-6" data-testid={`booking-row-${booking.id}`}>
+                    <div className="flex items-start justify-between gap-4">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-3 mb-3">
+                          <h3 className="text-lg font-bold text-gray-900">{booking.property_id}</h3>
+                          <span className={`px-3 py-1 rounded-full text-xs font-semibold ${getStatusColor(booking.status)}`}>
+                            {booking.status === 'cancellation_requested' ? 'Cancellation Requested' : booking.status}
+                          </span>
+                        </div>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm text-gray-600">
+                          <p><span className="font-medium">Dates:</span> {new Date(booking.start_date).toLocaleDateString()} - {new Date(booking.end_date).toLocaleDateString()}</p>
+                          {booking.message && <p><span className="font-medium">Message:</span> {booking.message}</p>}
+                        </div>
+                        {booking.cancellation_reason && (
+                          <div className="mt-3 p-3 bg-gray-50 rounded-lg">
+                            <p className="text-sm"><span className="font-medium text-gray-700">Cancellation Reason:</span> {booking.cancellation_reason}</p>
+                          </div>
+                        )}
+                        {booking.cancellation_denial_reason && (
+                          <div className="mt-3 p-3 bg-red-50 rounded-lg">
+                            <p className="text-sm"><span className="font-medium text-red-700">Denial Reason:</span> {booking.cancellation_denial_reason}</p>
+                          </div>
+                        )}
+                      </div>
+                      <div className="flex gap-2">
+                        {canCancel && (
+                          <button
+                            onClick={() => handleCancelBooking(booking.id)}
+                            className="px-4 py-2 rounded-lg text-sm font-medium bg-red-500 text-white hover:bg-red-600 transition-colors"
+                          >
+                            Cancel Booking
+                          </button>
+                        )}
+                        {canRequestCancel && (
+                          <button
+                            onClick={() => handleRequestCancel(booking.id)}
+                            className="px-4 py-2 rounded-lg text-sm font-medium bg-orange-500 text-white hover:bg-orange-600 transition-colors"
+                          >
+                            Request Cancellation
+                          </button>
+                        )}
+                        {canApprove && (
+                          <>
+                            <button
+                              onClick={() => handleApproveCancel(booking.id)}
+                              className="px-4 py-2 rounded-lg text-sm font-medium bg-green-500 text-white hover:bg-green-600 transition-colors"
+                            >
+                              Approve
+                            </button>
+                            <button
+                              onClick={() => handleDenyCancel(booking.id)}
+                              className="px-4 py-2 rounded-lg text-sm font-medium bg-red-500 text-white hover:bg-red-600 transition-colors"
+                            >
+                              Deny
+                            </button>
+                          </>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
         </div>
+        )}
+
+        {/* Cancellation Modal */}
+        {cancelModal.show && (
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50" onClick={() => setCancelModal({ show: false, bookingId: null, type: '' })}>
+            <div className="bg-white rounded-2xl p-6 max-w-md w-full mx-4" onClick={(e) => e.stopPropagation()}>
+              <h3 className="text-xl font-bold mb-4">
+                {cancelModal.type === 'cancel' && 'Cancel Booking'}
+                {cancelModal.type === 'request' && 'Request Cancellation'}
+                {cancelModal.type === 'deny' && 'Deny Cancellation Request'}
+              </h3>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                {cancelModal.type === 'deny' ? 'Reason for denial' : 'Reason for cancellation'}
+              </label>
+              <textarea
+                value={cancelReason}
+                onChange={(e) => setCancelReason(e.target.value)}
+                placeholder="Please provide a detailed reason..."
+                rows={4}
+                className="w-full px-4 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#1E6A6A]/30 focus:border-[#1E6A6A] text-sm"
+              />
+              <div className="flex gap-3 mt-4">
+                <button
+                  onClick={submitCancellation}
+                  disabled={processingCancel}
+                  className="flex-1 px-4 py-2 rounded-lg text-sm font-medium bg-[#1E6A6A] text-white hover:bg-[#1E6A6A]/90 disabled:opacity-50 transition-colors"
+                >
+                  {processingCancel ? 'Processing...' : 'Submit'}
+                </button>
+                <button
+                  onClick={() => {
+                    setCancelModal({ show: false, bookingId: null, type: '' });
+                    setCancelReason('');
+                  }}
+                  className="px-4 py-2 rounded-lg text-sm font-medium border border-gray-300 hover:bg-gray-50 transition-colors"
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          </div>
         )}
       </div>
     </div>
