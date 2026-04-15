@@ -67,13 +67,12 @@ const Auth = () => {
     setForgotSending(true);
     try {
       const res = await axios.post(`${API}/auth/forgot-password`, { email: forgotEmail });
-      if (res.data.reset_token) {
-        // Fallback: email failed, navigate directly to reset page
-        navigate(`/auth/reset-password?token=${res.data.reset_token}`);
-        toast.success('Redirecting to password reset...');
+      // Always redirect to reset page with the token
+      navigate(`/auth/reset-password?token=${res.data.reset_token}`);
+      if (res.data.email_sent) {
+        toast.success('Password reset email sent! Also redirecting you now...');
       } else {
-        setForgotSent(true);
-        toast.success('Password reset email sent! Check your inbox.');
+        toast.success('Redirecting to password reset...');
       }
     } catch (err) {
       toast.error(err.response?.data?.detail || 'Something went wrong. Please try again.');

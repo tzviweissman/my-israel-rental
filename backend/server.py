@@ -340,11 +340,9 @@ async def get_current_user(payload = Depends(verify_token)):
 
 @api_router.post("/auth/forgot-password")
 async def forgot_password(request: ForgotPasswordRequest, req: Request = None):
-    from starlette.requests import Request as StarletteRequest
     user = await db.users.find_one({"email": request.email}, {"_id": 0})
     if not user:
-        # Return success even if email not found (security best practice)
-        return {"message": "If an account with that email exists, a password reset link has been sent."}
+        raise HTTPException(status_code=404, detail="No account found with that email address.")
 
     reset_token = str(uuid.uuid4())
     expires_at = (datetime.now(timezone.utc) + timedelta(hours=1)).isoformat()
@@ -402,15 +400,11 @@ async def forgot_password(request: ForgotPasswordRequest, req: Request = None):
 
     email_sent = await send_email(request.email, "Reset Your Password — MyIsraelRental", html_body)
 
-    if email_sent:
-        return {"message": "If an account with that email exists, a password reset link has been sent."}
-    else:
-        # Fallback: return token directly if email fails
-        logger.warning(f"Email failed for {request.email}, returning reset token directly")
-        return {
-            "message": "Email delivery failed. Use the link below to reset your password.",
-            "reset_token": reset_token
-        }
+    return {
+        "message": "Password reset link has been generated.",
+        "reset_token": reset_token,
+        "email_sent": email_sent
+    }
 
 
 @api_router.post("/auth/reset-password")
