@@ -269,6 +269,15 @@ class ContractSignature(BaseModel):
     signer_name: str
     signature_data: str
 
+class SubleaseCreate(BaseModel):
+    property_id: str
+    available_from: str
+    available_to: str
+    price: float
+    price_type: str  # "flat" or "per_night"
+    bedrooms_available: Optional[int] = None
+    notes: Optional[str] = None
+
 class DocumentServiceRequest(BaseModel):
     service_type: str
     property_address: str
@@ -758,6 +767,99 @@ async def get_bookings(payload = Depends(verify_token)):
     
     bookings = await db.bookings.find(query, {"_id": 0}).to_list(1000)
     return bookings
+
+
+# --- Subleases ---
+
+@api_router.post("/subleases")
+async def create_sublease(sublease_data: SubleaseCreate, payload=Depends(verify_token)):
+    # Verify the renter has a booking for this property
+    booking = await db.bookings.find_one({
+        "property_id": sublease_data.property_id,
+        "renter_id": payload['user_id'],
+        "status": {"$in": ["pending", "confirmed"]}
+    }, {"_id": 0})
+
+    if not booking:
+        raise HTTPException(status_code=403, detail="You can only sublease properties you have an active booking for")
+
+    # Get the original property details
+    property_data = await db.properties.find_one({"id": sublease_data.property_id}, {"_id": 0})
+    if not property_data:
+        raise HTTPException(status_code=404, detail="Property not found")
+
+    sublease_id = str(uuid.uuid4())
+    sublease_doc = {
+        "id": sublease_id,
+        "original_property_id": sublease_data.property_id,
+        "subleasor_id": payload['user_id'],
+        "available_from": sublease_data.available_from,
+        "available_to": sublease_data.available_to,
+        "price": sublease_data.price,
+        "price_type": sublease_data.price_type,
+        "bedrooms_available": sublease_data.bedrooms_available if sublease_data.bedrooms_available is not None else property_data.get('bedrooms', 0),
+        "notes": sublease_data.notes or "",
+        # Copy key property details for the listing
+        "title": f"Sublease: {property_data.get('title', '')}",
+        "description": property_data.get('description', ''),
+        "area": property_data.get('area', ''),
+        "address": property_data.get('address', ''),
+        "bathrooms": property_data.get('bathrooms', 0),
+        "images": property_data.get('images', []),
+        "amenities": property_data.get('amenities', []),
+        "property_type": property_data.get('property_type', ''),
+        "active": True,
+        "created_at": datetime.now(timezone.utc).isoformat(),
+        "updated_at": datetime.now(timezone.utc).isoformat()
+    }
+
+    await db.subleases.insert_one(sublease_doc)
+    return {"id": sublease_id, "message": "Sublease listed successfully"}
+
+
+@api_router.get("/subleases")
+async def list_subleases(area: Optional[str] = None):
+    query = {"active": True}
+    if area:
+        query["area"] = {"$regex": area, "$options": "i"}
+    subleases = await db.subleases.find(query, {"_id": 0}).sort("created_at", -1).to_list(500)
+    return subleases
+
+
+@api_router.get("/my-subleases")
+async def get_my_subleases(payload=Depends(verify_token)):
+    subleases = await db.subleases.find(
+        {"subleasor_id": payload['user_id']}, {"_id": 0}
+    ).sort("created_at", -1).to_list(100)
+    return subleases
+
+
+@api_router.put("/subleases/{sublease_id}")
+async def update_sublease(sublease_id: str, updates: dict = Body(...), payload=Depends(verify_token)):
+    sublease = await db.subleases.find_one({"id": sublease_id}, {"_id": 0})
+    if not sublease:
+        raise HTTPException(status_code=404, detail="Sublease not found")
+    if sublease['subleasor_id'] != payload['user_id'] and payload.get('role') != 'admin':
+        raise HTTPException(status_code=403, detail="Not authorized")
+
+    allowed = {"available_from", "available_to", "price", "price_type", "bedrooms_available", "notes", "active"}
+    update_fields = {k: v for k, v in updates.items() if k in allowed}
+    update_fields["updated_at"] = datetime.now(timezone.utc).isoformat()
+
+    await db.subleases.update_one({"id": sublease_id}, {"$set": update_fields})
+    return {"message": "Sublease updated successfully"}
+
+
+@api_router.delete("/subleases/{sublease_id}")
+async def delete_sublease(sublease_id: str, payload=Depends(verify_token)):
+    sublease = await db.subleases.find_one({"id": sublease_id}, {"_id": 0})
+    if not sublease:
+        raise HTTPException(status_code=404, detail="Sublease not found")
+    if sublease['subleasor_id'] != payload['user_id'] and payload.get('role') != 'admin':
+        raise HTTPException(status_code=403, detail="Not authorized")
+
+    await db.subleases.delete_one({"id": sublease_id})
+    return {"message": "Sublease removed successfully"}
 
 @api_router.post("/chat/messages")
 async def send_message(chat_data: ChatMessage, payload = Depends(verify_token)):

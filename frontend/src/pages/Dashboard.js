@@ -35,9 +35,13 @@ const Dashboard = () => {
   const [showCurrentPw, setShowCurrentPw] = useState(false);
   const [showNewPw, setShowNewPw] = useState(false);
   // Service request states
-  const [subleaseForm, setSubleaseForm] = useState({ address: '', duration: '', notes: '' });
+  const [subleaseForm, setSubleaseForm] = useState({ property_id: '', available_from: '', available_to: '', price: '', price_type: 'per_night', bedrooms_available: '', notes: '' });
   const [arnonaForm, setArnonaForm] = useState({ full_name: '', id_number: '', address: '', service_type: 'arnona_discount', notes: '' });
   const [submittingService, setSubmittingService] = useState(false);
+  const [mySubleases, setMySubleases] = useState([]);
+  const [loadingSubleases, setLoadingSubleases] = useState(false);
+  const [showSubleaseForm, setShowSubleaseForm] = useState(false);
+  const [myBookings, setMyBookings] = useState([]);
   const [likedProperties, setLikedProperties] = useState([]);
   const [loadingLiked, setLoadingLiked] = useState(false);
   const [propertyForm, setPropertyForm] = useState({
@@ -460,16 +464,112 @@ const Dashboard = () => {
         headers: { Authorization: `Bearer ${token}` }
       });
       toast.success('Service request submitted! We will contact you shortly.');
-      if (serviceType === 'sublease') {
-        setSubleaseForm({ address: '', duration: '', notes: '' });
-      } else {
-        setArnonaForm({ full_name: '', id_number: '', address: '', service_type: 'arnona_discount', notes: '' });
-      }
+      setArnonaForm({ full_name: '', id_number: '', address: '', service_type: 'arnona_discount', notes: '' });
     } catch (err) {
       toast.error(err.response?.data?.detail || 'Failed to submit request.');
     } finally {
       setSubmittingService(false);
     }
+  };
+
+  const fetchMySubleases = async () => {
+    setLoadingSubleases(true);
+    try {
+      const res = await axios.get(`${API}/my-subleases`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setMySubleases(res.data);
+    } catch (err) {
+      console.error('Failed to fetch subleases', err);
+    } finally {
+      setLoadingSubleases(false);
+    }
+  };
+
+  const fetchRenterBookings = async () => {
+    try {
+      const res = await axios.get(`${API}/bookings`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      // Get full property details for each booking
+      const bookingsWithProps = await Promise.all(
+        res.data.map(async (b) => {
+          try {
+            const propRes = await axios.get(`${API}/properties/${b.property_id}`);
+            return { ...b, property: propRes.data };
+          } catch {
+            return { ...b, property: null };
+          }
+        })
+      );
+      setMyBookings(bookingsWithProps.filter(b => b.property));
+    } catch (err) {
+      console.error('Failed to fetch bookings', err);
+    }
+  };
+
+  const handleCreateSublease = async (e) => {
+    e.preventDefault();
+    if (!subleaseForm.property_id || !subleaseForm.available_from || !subleaseForm.available_to || !subleaseForm.price) {
+      toast.error('Please fill in all required fields.');
+      return;
+    }
+    setSubmittingService(true);
+    try {
+      await axios.post(`${API}/subleases`, {
+        property_id: subleaseForm.property_id,
+        available_from: subleaseForm.available_from,
+        available_to: subleaseForm.available_to,
+        price: parseFloat(subleaseForm.price),
+        price_type: subleaseForm.price_type,
+        bedrooms_available: subleaseForm.bedrooms_available ? parseInt(subleaseForm.bedrooms_available) : null,
+        notes: subleaseForm.notes
+      }, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      toast.success('Sublease listed successfully!');
+      setSubleaseForm({ property_id: '', available_from: '', available_to: '', price: '', price_type: 'per_night', bedrooms_available: '', notes: '' });
+      setShowSubleaseForm(false);
+      fetchMySubleases();
+    } catch (err) {
+      toast.error(err.response?.data?.detail || 'Failed to create sublease.');
+    } finally {
+      setSubmittingService(false);
+    }
+  };
+
+  const deleteSublease = async (subleaseId) => {
+    if (!window.confirm('Remove this sublease listing?')) return;
+    try {
+      await axios.delete(`${API}/subleases/${subleaseId}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      toast.success('Sublease removed.');
+      fetchMySubleases();
+    } catch (err) {
+      toast.error('Failed to remove sublease.');
+    }
+  };
+
+  const toggleSubleaseActive = async (subleaseId, currentActive) => {
+    try {
+      await axios.put(`${API}/subleases/${subleaseId}`, { active: !currentActive }, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      toast.success(!currentActive ? 'Sublease reactivated' : 'Sublease paused');
+      fetchMySubleases();
+    } catch (err) {
+      toast.error('Failed to update sublease.');
+    }
+  };
+
+  const selectPropertyForSublease = (booking) => {
+    setSubleaseForm({
+      ...subleaseForm,
+      property_id: booking.property_id,
+      bedrooms_available: booking.property?.bedrooms?.toString() || ''
+    });
+    setShowSubleaseForm(true);
   };
 
   return (
@@ -576,7 +676,7 @@ const Dashboard = () => {
             Settings
           </button>
           <button
-            onClick={() => setActiveTab('services')}
+            onClick={() => { setActiveTab('services'); fetchMySubleases(); }}
             className={`flex-1 py-2.5 px-4 rounded-lg text-sm font-medium transition-all flex items-center justify-center gap-2 ${activeTab === 'services' ? 'bg-white text-[#D4AF37] shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
             data-testid="tab-services"
           >
@@ -793,74 +893,249 @@ const Dashboard = () => {
           <div className="space-y-6" data-testid="services-tab">
             <h2 className="text-2xl font-bold" style={{ fontFamily: 'Playfair Display' }}>Our Services</h2>
 
-            {/* Sublease Property Card */}
+            {/* Sublease Section */}
             <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden shadow-sm">
               <div className="bg-gradient-to-r from-[#1E6A6A] to-[#267a7a] px-6 py-5">
-                <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 rounded-xl bg-white/20 flex items-center justify-center backdrop-blur-sm">
-                    <Home size={24} className="text-white" />
-                  </div>
-                  <div>
-                    <h3 className="text-lg font-bold text-white">Sublease Your Property</h3>
-                    <p className="text-white/80 text-sm">List your sublease in just a few clicks</p>
-                  </div>
-                </div>
-              </div>
-              <div className="p-6">
-                <p className="text-gray-600 text-sm mb-5 leading-relaxed">
-                  Moving out temporarily? Sublease your rental property easily. We'll help you find the right sublessee and handle the paperwork.
-                </p>
-                <form onSubmit={(e) => { e.preventDefault(); handleServiceRequest('sublease', subleaseForm); }} className="space-y-4" data-testid="sublease-form">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1.5">Property Address</label>
-                    <input
-                      type="text"
-                      value={subleaseForm.address}
-                      onChange={(e) => setSubleaseForm({ ...subleaseForm, address: e.target.value })}
-                      placeholder="Enter the full property address"
-                      className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#1E6A6A]/30 focus:border-[#1E6A6A] text-sm"
-                      required
-                      data-testid="sublease-address-input"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1.5">Sublease Duration</label>
-                    <select
-                      value={subleaseForm.duration}
-                      onChange={(e) => setSubleaseForm({ ...subleaseForm, duration: e.target.value })}
-                      className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#1E6A6A]/30 focus:border-[#1E6A6A] text-sm"
-                      required
-                      data-testid="sublease-duration-select"
-                    >
-                      <option value="">Select duration...</option>
-                      <option value="1-3 months">1–3 Months</option>
-                      <option value="3-6 months">3–6 Months</option>
-                      <option value="6-12 months">6–12 Months</option>
-                      <option value="12+ months">12+ Months</option>
-                    </select>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1.5">Additional Notes</label>
-                    <textarea
-                      value={subleaseForm.notes}
-                      onChange={(e) => setSubleaseForm({ ...subleaseForm, notes: e.target.value })}
-                      placeholder="Any additional details (furnished, parking, utilities included, etc.)"
-                      rows={3}
-                      className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#1E6A6A]/30 focus:border-[#1E6A6A] text-sm resize-none"
-                      data-testid="sublease-notes-input"
-                    />
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="w-12 h-12 rounded-xl bg-white/20 flex items-center justify-center backdrop-blur-sm">
+                      <Home size={24} className="text-white" />
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-bold text-white">Sublease Your Property</h3>
+                      <p className="text-white/80 text-sm">Post your rental for others in just a few clicks</p>
+                    </div>
                   </div>
                   <button
-                    type="submit"
-                    disabled={submittingService}
-                    className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-white text-sm font-medium disabled:opacity-50 transition-all hover:shadow-md"
-                    style={{ backgroundColor: '#1E6A6A' }}
-                    data-testid="sublease-submit-btn"
+                    onClick={() => { setShowSubleaseForm(!showSubleaseForm); if (!showSubleaseForm) fetchRenterBookings(); }}
+                    className="px-4 py-2 rounded-xl bg-white/20 hover:bg-white/30 text-white text-sm font-medium transition-all backdrop-blur-sm"
+                    data-testid="create-sublease-btn"
                   >
-                    <Send size={16} />
-                    {submittingService ? 'Submitting...' : 'Submit Sublease Request'}
+                    {showSubleaseForm ? 'Cancel' : '+ New Sublease'}
                   </button>
-                </form>
+                </div>
+              </div>
+
+              <div className="p-6">
+                {showSubleaseForm && (
+                  <div className="mb-6 bg-gray-50 rounded-xl p-5" data-testid="sublease-form-section">
+                    {/* Step 1: Select Property */}
+                    {!subleaseForm.property_id ? (
+                      <div>
+                        <h4 className="text-sm font-bold text-gray-800 mb-3">Step 1: Select the property you're renting</h4>
+                        {myBookings.length === 0 ? (
+                          <div className="text-center py-6">
+                            <p className="text-gray-500 text-sm">You don't have any active bookings to sublease.</p>
+                            <p className="text-gray-400 text-xs mt-1">Book a property first, then you can sublease it here.</p>
+                          </div>
+                        ) : (
+                          <div className="space-y-2">
+                            {myBookings.map(b => (
+                              <button
+                                key={b.id}
+                                onClick={() => selectPropertyForSublease(b)}
+                                className="w-full flex items-center gap-3 p-3 rounded-xl border border-gray-200 hover:border-[#1E6A6A] hover:bg-white transition-all text-left"
+                                data-testid={`select-booking-${b.id}`}
+                              >
+                                <div
+                                  className="w-14 h-14 rounded-lg bg-gray-200 shrink-0"
+                                  style={{
+                                    backgroundImage: `url(${b.property?.images?.[0] ? (b.property.images[0].startsWith('/api') ? `${API.replace('/api', '')}${b.property.images[0]}` : b.property.images[0]) : ''})`,
+                                    backgroundSize: 'cover', backgroundPosition: 'center'
+                                  }}
+                                />
+                                <div className="min-w-0 flex-1">
+                                  <p className="text-sm font-semibold text-gray-800 truncate">{b.property?.title}</p>
+                                  <p className="text-xs text-gray-500">{b.property?.area} • {b.property?.bedrooms} bed • {b.property?.bathrooms} bath</p>
+                                </div>
+                                <span className="text-xs font-medium text-[#1E6A6A]">Select →</span>
+                              </button>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    ) : (
+                      /* Step 2: Set sublease details */
+                      <div>
+                        <div className="flex items-center justify-between mb-4">
+                          <h4 className="text-sm font-bold text-gray-800">Step 2: Set your sublease details</h4>
+                          <button
+                            onClick={() => setSubleaseForm({ ...subleaseForm, property_id: '' })}
+                            className="text-xs text-gray-500 hover:text-[#1E6A6A]"
+                          >
+                            ← Change property
+                          </button>
+                        </div>
+
+                        {/* Selected property preview */}
+                        {(() => {
+                          const selectedBooking = myBookings.find(b => b.property_id === subleaseForm.property_id);
+                          return selectedBooking?.property ? (
+                            <div className="flex items-center gap-3 p-3 rounded-xl bg-white border border-[#1E6A6A]/20 mb-4">
+                              <div
+                                className="w-12 h-12 rounded-lg bg-gray-200 shrink-0"
+                                style={{
+                                  backgroundImage: `url(${selectedBooking.property.images?.[0] ? (selectedBooking.property.images[0].startsWith('/api') ? `${API.replace('/api', '')}${selectedBooking.property.images[0]}` : selectedBooking.property.images[0]) : ''})`,
+                                  backgroundSize: 'cover', backgroundPosition: 'center'
+                                }}
+                              />
+                              <div>
+                                <p className="text-sm font-semibold text-gray-800">{selectedBooking.property.title}</p>
+                                <p className="text-xs text-gray-500">{selectedBooking.property.area}</p>
+                              </div>
+                              <Check size={18} className="text-[#1E6A6A] ml-auto" />
+                            </div>
+                          ) : null;
+                        })()}
+
+                        <form onSubmit={handleCreateSublease} className="space-y-4" data-testid="sublease-form">
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                              <label className="block text-xs font-medium text-gray-700 mb-1.5">Available From</label>
+                              <input
+                                type="date"
+                                value={subleaseForm.available_from}
+                                onChange={(e) => setSubleaseForm({ ...subleaseForm, available_from: e.target.value })}
+                                className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#1E6A6A]/30 focus:border-[#1E6A6A] text-sm"
+                                required
+                                data-testid="sublease-from-date"
+                              />
+                            </div>
+                            <div>
+                              <label className="block text-xs font-medium text-gray-700 mb-1.5">Available To</label>
+                              <input
+                                type="date"
+                                value={subleaseForm.available_to}
+                                onChange={(e) => setSubleaseForm({ ...subleaseForm, available_to: e.target.value })}
+                                className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#1E6A6A]/30 focus:border-[#1E6A6A] text-sm"
+                                required
+                                data-testid="sublease-to-date"
+                              />
+                            </div>
+                          </div>
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                              <label className="block text-xs font-medium text-gray-700 mb-1.5">Price (₪)</label>
+                              <input
+                                type="number"
+                                value={subleaseForm.price}
+                                onChange={(e) => setSubleaseForm({ ...subleaseForm, price: e.target.value })}
+                                placeholder="e.g. 200"
+                                className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#1E6A6A]/30 focus:border-[#1E6A6A] text-sm"
+                                required
+                                min="1"
+                                data-testid="sublease-price"
+                              />
+                            </div>
+                            <div>
+                              <label className="block text-xs font-medium text-gray-700 mb-1.5">Price Type</label>
+                              <select
+                                value={subleaseForm.price_type}
+                                onChange={(e) => setSubleaseForm({ ...subleaseForm, price_type: e.target.value })}
+                                className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#1E6A6A]/30 focus:border-[#1E6A6A] text-sm"
+                                data-testid="sublease-price-type"
+                              >
+                                <option value="per_night">Per Night</option>
+                                <option value="flat">Flat Rate (Total)</option>
+                              </select>
+                            </div>
+                          </div>
+                          <div>
+                            <label className="block text-xs font-medium text-gray-700 mb-1.5">
+                              Bedrooms Available <span className="text-gray-400">(leave blank for all rooms)</span>
+                            </label>
+                            <input
+                              type="number"
+                              value={subleaseForm.bedrooms_available}
+                              onChange={(e) => setSubleaseForm({ ...subleaseForm, bedrooms_available: e.target.value })}
+                              placeholder="All rooms"
+                              className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#1E6A6A]/30 focus:border-[#1E6A6A] text-sm"
+                              min="1"
+                              data-testid="sublease-bedrooms"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-xs font-medium text-gray-700 mb-1.5">Notes for Sublessee</label>
+                            <textarea
+                              value={subleaseForm.notes}
+                              onChange={(e) => setSubleaseForm({ ...subleaseForm, notes: e.target.value })}
+                              placeholder="e.g. Furnished, utilities included, no pets..."
+                              rows={2}
+                              className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#1E6A6A]/30 focus:border-[#1E6A6A] text-sm resize-none"
+                              data-testid="sublease-notes"
+                            />
+                          </div>
+                          <button
+                            type="submit"
+                            disabled={submittingService}
+                            className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-white text-sm font-medium disabled:opacity-50 transition-all hover:shadow-md"
+                            style={{ backgroundColor: '#1E6A6A' }}
+                            data-testid="sublease-submit-btn"
+                          >
+                            <Send size={16} />
+                            {submittingService ? 'Posting...' : 'Post Sublease Listing'}
+                          </button>
+                        </form>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* My Active Subleases */}
+                {mySubleases.length > 0 ? (
+                  <div className="space-y-3">
+                    <h4 className="text-sm font-semibold text-gray-700">Your Sublease Listings</h4>
+                    {mySubleases.map(sub => (
+                      <div key={sub.id} className="flex items-center gap-4 p-4 rounded-xl border border-gray-200 bg-white" data-testid={`sublease-${sub.id}`}>
+                        <div
+                          className="w-16 h-16 rounded-lg bg-gray-200 shrink-0"
+                          style={{
+                            backgroundImage: `url(${sub.images?.[0] ? (sub.images[0].startsWith('/api') ? `${API.replace('/api', '')}${sub.images[0]}` : sub.images[0]) : ''})`,
+                            backgroundSize: 'cover', backgroundPosition: 'center'
+                          }}
+                        />
+                        <div className="min-w-0 flex-1">
+                          <p className="text-sm font-bold text-gray-800 truncate">{sub.title}</p>
+                          <p className="text-xs text-gray-500">{sub.area} • {sub.bedrooms_available} bed</p>
+                          <p className="text-xs text-gray-400 mt-0.5">
+                            {new Date(sub.available_from).toLocaleDateString()} — {new Date(sub.available_to).toLocaleDateString()}
+                          </p>
+                        </div>
+                        <div className="text-right shrink-0">
+                          <p className="text-base font-bold" style={{ color: '#D4AF37' }}>
+                            ₪{sub.price?.toLocaleString()}
+                            <span className="text-[10px] font-normal text-gray-500">
+                              {sub.price_type === 'per_night' ? '/night' : ' total'}
+                            </span>
+                          </p>
+                          <span className={`inline-block mt-1 px-2 py-0.5 rounded-full text-[10px] font-semibold ${sub.active ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500'}`}>
+                            {sub.active ? 'Active' : 'Paused'}
+                          </span>
+                        </div>
+                        <div className="flex flex-col gap-1 shrink-0">
+                          <button
+                            onClick={() => toggleSubleaseActive(sub.id, sub.active)}
+                            className="text-xs px-2.5 py-1 rounded-lg border border-gray-200 hover:border-[#1E6A6A] hover:text-[#1E6A6A] transition-colors"
+                          >
+                            {sub.active ? 'Pause' : 'Activate'}
+                          </button>
+                          <button
+                            onClick={() => deleteSublease(sub.id)}
+                            className="text-xs px-2.5 py-1 rounded-lg border border-gray-200 hover:border-red-400 hover:text-red-500 transition-colors"
+                          >
+                            Remove
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : !showSubleaseForm ? (
+                  <div className="text-center py-6">
+                    <Home size={32} className="mx-auto mb-3 text-gray-300" />
+                    <p className="text-gray-500 text-sm font-medium">No active subleases</p>
+                    <p className="text-gray-400 text-xs mt-1">Click "+ New Sublease" to post your rental for others.</p>
+                  </div>
+                ) : null}
               </div>
             </div>
 
