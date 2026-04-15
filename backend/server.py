@@ -240,12 +240,13 @@ class PropertyCreate(BaseModel):
     images: Optional[List[str]] = []
     videos: Optional[List[str]] = []
     ical_url: Optional[str] = None
+    cancellation_policy: Optional[str] = 'flexible'
+    custom_cancellation_policy: Optional[str] = None
 
 class BookingCreate(BaseModel):
     property_id: str
     start_date: str
     end_date: str
-    guest_count: int
     message: Optional[str] = None
 
 class ChatMessage(BaseModel):
@@ -767,6 +768,163 @@ async def get_bookings(payload = Depends(verify_token)):
     
     bookings = await db.bookings.find(query, {"_id": 0}).to_list(1000)
     return bookings
+
+# Booking Cancellation Endpoints
+
+@api_router.post("/bookings/{booking_id}/cancel")
+async def cancel_booking(booking_id: str, reason: str = Body(..., embed=True), payload=Depends(verify_token)):
+    """Owner/Manager direct cancellation"""
+    booking = await db.bookings.find_one({"id": booking_id}, {"_id": 0})
+    if not booking:
+        raise HTTPException(status_code=404, detail="Booking not found")
+    
+    # Verify user is owner or manager
+    if payload['role'] not in ['owner', 'manager'] or booking['owner_id'] != payload['user_id']:
+        raise HTTPException(status_code=403, detail="Not authorized")
+    
+    # Update booking
+    await db.bookings.update_one(
+        {"id": booking_id},
+        {"$set": {
+            "status": "cancelled",
+            "cancelled_by": payload['user_id'],
+            "cancelled_at": datetime.now(timezone.utc).isoformat(),
+            "cancellation_reason": reason
+        }}
+    )
+    
+    # Notify renter
+    notification = {
+        "id": str(uuid.uuid4()),
+        "user_id": booking['renter_id'],
+        "type": "booking_cancelled",
+        "booking_id": booking_id,
+        "message": f"Your booking has been cancelled by the owner. Reason: {reason}",
+        "read": False,
+        "created_at": datetime.now(timezone.utc).isoformat()
+    }
+    await db.notifications.insert_one(notification)
+    
+    return {"message": "Booking cancelled successfully"}
+
+@api_router.post("/bookings/{booking_id}/request-cancel")
+async def request_cancel_booking(booking_id: str, reason: str = Body(..., embed=True), payload=Depends(verify_token)):
+    """Renter requests cancellation"""
+    booking = await db.bookings.find_one({"id": booking_id}, {"_id": 0})
+    if not booking:
+        raise HTTPException(status_code=404, detail="Booking not found")
+    
+    # Verify user is the renter
+    if booking['renter_id'] != payload['user_id']:
+        raise HTTPException(status_code=403, detail="Not authorized")
+    
+    # Save previous status before changing
+    previous_status = booking.get('status', 'confirmed')
+    
+    # Update booking
+    await db.bookings.update_one(
+        {"id": booking_id},
+        {"$set": {
+            "status": "cancellation_requested",
+            "previous_status": previous_status,
+            "cancellation_reason": reason,
+            "cancellation_requested_at": datetime.now(timezone.utc).isoformat()
+        }}
+    )
+    
+    # Notify owner
+    notification = {
+        "id": str(uuid.uuid4()),
+        "user_id": booking['owner_id'],
+        "type": "cancellation_request",
+        "booking_id": booking_id,
+        "message": f"Renter has requested to cancel their booking. Reason: {reason}",
+        "read": False,
+        "created_at": datetime.now(timezone.utc).isoformat()
+    }
+    await db.notifications.insert_one(notification)
+    
+    return {"message": "Cancellation request submitted"}
+
+@api_router.post("/bookings/{booking_id}/approve-cancel")
+async def approve_cancel_request(booking_id: str, payload=Depends(verify_token)):
+    """Owner approves cancellation request"""
+    booking = await db.bookings.find_one({"id": booking_id}, {"_id": 0})
+    if not booking:
+        raise HTTPException(status_code=404, detail="Booking not found")
+    
+    # Verify user is owner or manager
+    if payload['role'] not in ['owner', 'manager'] or booking['owner_id'] != payload['user_id']:
+        raise HTTPException(status_code=403, detail="Not authorized")
+    
+    if booking.get('status') != 'cancellation_requested':
+        raise HTTPException(status_code=400, detail="No cancellation request pending")
+    
+    # Update booking
+    await db.bookings.update_one(
+        {"id": booking_id},
+        {"$set": {
+            "status": "cancelled",
+            "cancelled_by": payload['user_id'],
+            "cancelled_at": datetime.now(timezone.utc).isoformat()
+        }}
+    )
+    
+    # Notify renter
+    notification = {
+        "id": str(uuid.uuid4()),
+        "user_id": booking['renter_id'],
+        "type": "cancellation_approved",
+        "booking_id": booking_id,
+        "message": "Your cancellation request has been approved",
+        "read": False,
+        "created_at": datetime.now(timezone.utc).isoformat()
+    }
+    await db.notifications.insert_one(notification)
+    
+    return {"message": "Cancellation approved"}
+
+@api_router.post("/bookings/{booking_id}/deny-cancel")
+async def deny_cancel_request(booking_id: str, denial_reason: str = Body(..., embed=True), payload=Depends(verify_token)):
+    """Owner denies cancellation request"""
+    booking = await db.bookings.find_one({"id": booking_id}, {"_id": 0})
+    if not booking:
+        raise HTTPException(status_code=404, detail="Booking not found")
+    
+    # Verify user is owner or manager
+    if payload['role'] not in ['owner', 'manager'] or booking['owner_id'] != payload['user_id']:
+        raise HTTPException(status_code=403, detail="Not authorized")
+    
+    if booking.get('status') != 'cancellation_requested':
+        raise HTTPException(status_code=400, detail="No cancellation request pending")
+    
+    # Revert to previous status (confirmed or pending)
+    previous_status = booking.get('previous_status', 'confirmed')
+    await db.bookings.update_one(
+        {"id": booking_id},
+        {"$set": {
+            "status": previous_status,
+            "cancellation_denied": True,
+            "cancellation_denial_reason": denial_reason,
+            "cancellation_denied_at": datetime.now(timezone.utc).isoformat()
+        },
+         "$unset": {"cancellation_requested_at": ""}
+        }
+    )
+    
+    # Notify renter
+    notification = {
+        "id": str(uuid.uuid4()),
+        "user_id": booking['renter_id'],
+        "type": "cancellation_denied",
+        "booking_id": booking_id,
+        "message": f"Your cancellation request has been denied. Reason: {denial_reason}",
+        "read": False,
+        "created_at": datetime.now(timezone.utc).isoformat()
+    }
+    await db.notifications.insert_one(notification)
+    
+    return {"message": "Cancellation request denied"}
 
 
 # --- Subleases ---

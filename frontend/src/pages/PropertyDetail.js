@@ -22,7 +22,6 @@ const PropertyDetail = () => {
   const [bookingData, setBookingData] = useState({
     start_date: '',
     end_date: '',
-    guest_count: 1,
     message: ''
   });
   const [showBooking, setShowBooking] = useState(false);
@@ -471,29 +470,6 @@ const PropertyDetail = () => {
                         )}
                       </div>
                     )}
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium mb-2">{t('property.guests')}</label>
-                    <div className="flex items-center gap-3">
-                      <button
-                        type="button"
-                        onClick={() => setBookingData(prev => ({ ...prev, guest_count: Math.max(1, prev.guest_count - 1) }))}
-                        className="w-9 h-9 rounded-full border border-[#E5E5E5] flex items-center justify-center hover:border-black/40 transition-colors text-lg"
-                      >
-                        -
-                      </button>
-                      <div className="flex items-center gap-2">
-                        <Users size={16} className="text-gray-400" />
-                        <span className="text-sm font-medium w-4 text-center" data-testid="booking-guest-count">{bookingData.guest_count}</span>
-                      </div>
-                      <button
-                        type="button"
-                        onClick={() => setBookingData(prev => ({ ...prev, guest_count: prev.guest_count + 1 }))}
-                        className="w-9 h-9 rounded-full border border-[#E5E5E5] flex items-center justify-center hover:border-black/40 transition-colors text-lg"
-                      >
-                        +
-                      </button>
-                    </div>
                   </div>
                   <div>
                     <label className="block text-sm font-medium mb-2">{t('property.messageLabel')}</label>
