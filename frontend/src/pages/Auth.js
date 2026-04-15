@@ -5,6 +5,7 @@ import axios from 'axios';
 import { API, AuthContext } from '../App';
 import { toast } from 'sonner';
 import { Eye, EyeOff, ArrowLeft, Mail, KeyRound, CheckCircle } from 'lucide-react';
+import WelcomePopups from '../components/WelcomePopups';
 
 const Auth = () => {
   const { mode } = useParams();
@@ -36,6 +37,7 @@ const Auth = () => {
   const [resetting, setResetting] = useState(false);
   const [resetDone, setResetDone] = useState(false);
   const [showResetPassword, setShowResetPassword] = useState(false);
+  const [showWelcomePopups, setShowWelcomePopups] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -52,7 +54,11 @@ const Auth = () => {
       const response = await axios.post(`${API}${endpoint}`, formData);
       login(response.data.token, response.data.user);
       toast.success(mode === 'login' ? t('auth.welcomeBack') : t('auth.accountCreated'));
-      navigate('/dashboard');
+      if (mode === 'signup' && formData.role === 'renter') {
+        setShowWelcomePopups(true);
+      } else {
+        navigate('/dashboard');
+      }
     } catch (error) {
       toast.error(error.response?.data?.detail || t('auth.failed'));
     }
@@ -265,6 +271,7 @@ const Auth = () => {
   // --- Login / Signup View ---
   return (
     <div className="min-h-screen flex items-center justify-center px-6 pt-20 pb-12">
+      {showWelcomePopups && <WelcomePopups onDismiss={() => { setShowWelcomePopups(false); navigate('/dashboard'); }} />}
       <div className="w-full max-w-md">
         <div className="bg-white rounded-2xl p-8 border border-[#E5E5E5]">
           <h2 className="text-3xl font-bold mb-8 text-center" style={{ fontFamily: 'Playfair Display' }}>

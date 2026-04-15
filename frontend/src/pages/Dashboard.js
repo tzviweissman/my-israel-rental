@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import axios from 'axios';
 import { API, AuthContext } from '../App';
-import { Plus, Edit, Trash2, Eye, MessageCircle, Upload, X, Image, Film, CalendarSync, Link2, Copy, Check, RefreshCw, FileText, KeyRound, EyeOff } from 'lucide-react';
+import { Plus, Edit, Trash2, Eye, MessageCircle, Upload, X, Image, Film, CalendarSync, Link2, Copy, Check, RefreshCw, FileText, KeyRound, EyeOff, Home, FileCheck, Sparkles, ClipboardList, ArrowRight, Send } from 'lucide-react';
 import { toast } from 'sonner';
 import ContractManager from '../components/ContractManager';
 
@@ -34,6 +34,10 @@ const Dashboard = () => {
   const [changingPassword, setChangingPassword] = useState(false);
   const [showCurrentPw, setShowCurrentPw] = useState(false);
   const [showNewPw, setShowNewPw] = useState(false);
+  // Service request states
+  const [subleaseForm, setSubleaseForm] = useState({ address: '', duration: '', notes: '' });
+  const [arnonaForm, setArnonaForm] = useState({ full_name: '', id_number: '', address: '', service_type: 'arnona_discount', notes: '' });
+  const [submittingService, setSubmittingService] = useState(false);
   const [propertyForm, setPropertyForm] = useState({
     title: '',
     description: '',
@@ -417,6 +421,28 @@ const Dashboard = () => {
     }
   };
 
+  const handleServiceRequest = async (serviceType, formDataObj) => {
+    setSubmittingService(true);
+    try {
+      await axios.post(`${API}/service-requests`, {
+        service_type: serviceType,
+        ...formDataObj
+      }, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      toast.success('Service request submitted! We will contact you shortly.');
+      if (serviceType === 'sublease') {
+        setSubleaseForm({ address: '', duration: '', notes: '' });
+      } else {
+        setArnonaForm({ full_name: '', id_number: '', address: '', service_type: 'arnona_discount', notes: '' });
+      }
+    } catch (err) {
+      toast.error(err.response?.data?.detail || 'Failed to submit request.');
+    } finally {
+      setSubmittingService(false);
+    }
+  };
+
   return (
     <div className="min-h-screen" data-testid="dashboard-page">
       <div className="max-w-7xl mx-auto px-6 pt-28 pb-12">
@@ -519,6 +545,14 @@ const Dashboard = () => {
           >
             <KeyRound size={16} />
             Settings
+          </button>
+          <button
+            onClick={() => setActiveTab('services')}
+            className={`flex-1 py-2.5 px-4 rounded-lg text-sm font-medium transition-all flex items-center justify-center gap-2 ${activeTab === 'services' ? 'bg-white text-[#D4AF37] shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
+            data-testid="tab-services"
+          >
+            <Sparkles size={16} />
+            Services
           </button>
         </div>
 
@@ -624,6 +658,194 @@ const Dashboard = () => {
                   </form>
                 </div>
               )}
+            </div>
+          </div>
+        )}
+
+        {/* Services Tab */}
+        {activeTab === 'services' && (
+          <div className="space-y-6" data-testid="services-tab">
+            <h2 className="text-2xl font-bold" style={{ fontFamily: 'Playfair Display' }}>Our Services</h2>
+
+            {/* Sublease Property Card */}
+            <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden shadow-sm">
+              <div className="bg-gradient-to-r from-[#1E6A6A] to-[#267a7a] px-6 py-5">
+                <div className="flex items-center gap-3">
+                  <div className="w-12 h-12 rounded-xl bg-white/20 flex items-center justify-center backdrop-blur-sm">
+                    <Home size={24} className="text-white" />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-bold text-white">Sublease Your Property</h3>
+                    <p className="text-white/80 text-sm">List your sublease in just a few clicks</p>
+                  </div>
+                </div>
+              </div>
+              <div className="p-6">
+                <p className="text-gray-600 text-sm mb-5 leading-relaxed">
+                  Moving out temporarily? Sublease your rental property easily. We'll help you find the right sublessee and handle the paperwork.
+                </p>
+                <form onSubmit={(e) => { e.preventDefault(); handleServiceRequest('sublease', subleaseForm); }} className="space-y-4" data-testid="sublease-form">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1.5">Property Address</label>
+                    <input
+                      type="text"
+                      value={subleaseForm.address}
+                      onChange={(e) => setSubleaseForm({ ...subleaseForm, address: e.target.value })}
+                      placeholder="Enter the full property address"
+                      className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#1E6A6A]/30 focus:border-[#1E6A6A] text-sm"
+                      required
+                      data-testid="sublease-address-input"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1.5">Sublease Duration</label>
+                    <select
+                      value={subleaseForm.duration}
+                      onChange={(e) => setSubleaseForm({ ...subleaseForm, duration: e.target.value })}
+                      className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#1E6A6A]/30 focus:border-[#1E6A6A] text-sm"
+                      required
+                      data-testid="sublease-duration-select"
+                    >
+                      <option value="">Select duration...</option>
+                      <option value="1-3 months">1–3 Months</option>
+                      <option value="3-6 months">3–6 Months</option>
+                      <option value="6-12 months">6–12 Months</option>
+                      <option value="12+ months">12+ Months</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1.5">Additional Notes</label>
+                    <textarea
+                      value={subleaseForm.notes}
+                      onChange={(e) => setSubleaseForm({ ...subleaseForm, notes: e.target.value })}
+                      placeholder="Any additional details (furnished, parking, utilities included, etc.)"
+                      rows={3}
+                      className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#1E6A6A]/30 focus:border-[#1E6A6A] text-sm resize-none"
+                      data-testid="sublease-notes-input"
+                    />
+                  </div>
+                  <button
+                    type="submit"
+                    disabled={submittingService}
+                    className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-white text-sm font-medium disabled:opacity-50 transition-all hover:shadow-md"
+                    style={{ backgroundColor: '#1E6A6A' }}
+                    data-testid="sublease-submit-btn"
+                  >
+                    <Send size={16} />
+                    {submittingService ? 'Submitting...' : 'Submit Sublease Request'}
+                  </button>
+                </form>
+              </div>
+            </div>
+
+            {/* Government Document Services Card */}
+            <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden shadow-sm">
+              <div className="bg-gradient-to-r from-[#D4AF37] to-[#c4a030] px-6 py-5">
+                <div className="flex items-center gap-3">
+                  <div className="w-12 h-12 rounded-xl bg-white/20 flex items-center justify-center backdrop-blur-sm">
+                    <FileCheck size={24} className="text-white" />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-bold text-white">Government Document Services</h3>
+                    <p className="text-white/80 text-sm">Let us handle the hassle for you</p>
+                  </div>
+                </div>
+              </div>
+              <div className="p-6">
+                <p className="text-gray-600 text-sm mb-4 leading-relaxed">
+                  We take care of all government documents, your <strong className="text-[#1E6A6A]">Arnona discount</strong>, and the <strong className="text-[#1E6A6A]">property name change</strong> — quickly and professionally.
+                </p>
+
+                {/* Service badges */}
+                <div className="flex flex-wrap gap-2 mb-5">
+                  <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#1E6A6A]/10 text-[#1E6A6A] text-xs font-medium">
+                    <Check size={12} /> Arnona Discount
+                  </span>
+                  <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#D4AF37]/10 text-[#D4AF37] text-xs font-medium">
+                    <Check size={12} /> Property Name Change
+                  </span>
+                  <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-gray-100 text-gray-600 text-xs font-medium">
+                    <Check size={12} /> Government Forms
+                  </span>
+                </div>
+
+                <form onSubmit={(e) => { e.preventDefault(); handleServiceRequest('government', arnonaForm); }} className="space-y-4" data-testid="government-service-form">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1.5">Full Legal Name</label>
+                      <input
+                        type="text"
+                        value={arnonaForm.full_name}
+                        onChange={(e) => setArnonaForm({ ...arnonaForm, full_name: e.target.value })}
+                        placeholder="As it appears on your ID"
+                        className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/30 focus:border-[#D4AF37] text-sm"
+                        required
+                        data-testid="gov-fullname-input"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1.5">ID / Passport Number</label>
+                      <input
+                        type="text"
+                        value={arnonaForm.id_number}
+                        onChange={(e) => setArnonaForm({ ...arnonaForm, id_number: e.target.value })}
+                        placeholder="ID or Teudat Zehut number"
+                        className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/30 focus:border-[#D4AF37] text-sm"
+                        required
+                        data-testid="gov-id-input"
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1.5">Property Address</label>
+                    <input
+                      type="text"
+                      value={arnonaForm.address}
+                      onChange={(e) => setArnonaForm({ ...arnonaForm, address: e.target.value })}
+                      placeholder="Full property address"
+                      className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/30 focus:border-[#D4AF37] text-sm"
+                      required
+                      data-testid="gov-address-input"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1.5">Service Needed</label>
+                    <select
+                      value={arnonaForm.service_type}
+                      onChange={(e) => setArnonaForm({ ...arnonaForm, service_type: e.target.value })}
+                      className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/30 focus:border-[#D4AF37] text-sm"
+                      required
+                      data-testid="gov-service-type-select"
+                    >
+                      <option value="arnona_discount">Arnona Discount Application</option>
+                      <option value="name_change">Property Name Change</option>
+                      <option value="both">Both — Arnona Discount + Name Change</option>
+                      <option value="other">Other Government Documents</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1.5">Additional Notes</label>
+                    <textarea
+                      value={arnonaForm.notes}
+                      onChange={(e) => setArnonaForm({ ...arnonaForm, notes: e.target.value })}
+                      placeholder="Any specific details about your request"
+                      rows={3}
+                      className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/30 focus:border-[#D4AF37] text-sm resize-none"
+                      data-testid="gov-notes-input"
+                    />
+                  </div>
+                  <button
+                    type="submit"
+                    disabled={submittingService}
+                    className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-white text-sm font-medium disabled:opacity-50 transition-all hover:shadow-md"
+                    style={{ backgroundColor: '#D4AF37' }}
+                    data-testid="gov-submit-btn"
+                  >
+                    <Send size={16} />
+                    {submittingService ? 'Submitting...' : 'Submit Request'}
+                  </button>
+                </form>
+              </div>
             </div>
           </div>
         )}

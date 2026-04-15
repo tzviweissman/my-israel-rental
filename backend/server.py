@@ -1,4 +1,4 @@
-from fastapi import FastAPI, APIRouter, HTTPException, UploadFile, File, Form, Depends, Header, Request
+from fastapi import FastAPI, APIRouter, HTTPException, UploadFile, File, Form, Depends, Header, Request, Body
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from fastapi.staticfiles import StaticFiles
 from dotenv import load_dotenv
@@ -1053,8 +1053,31 @@ async def get_document_services(payload = Depends(verify_token)):
         services = await db.document_services.find({"user_id": payload['user_id']}, {"_id": 0}).to_list(1000)
     return services
 
+@api_router.post("/service-requests")
+async def create_service_request(request_data: dict = Body(...), payload=Depends(verify_token)):
+    request_id = str(uuid.uuid4())
+    service_doc = {
+        "id": request_id,
+        "user_id": payload['user_id'],
+        "service_type": request_data.get('service_type', 'unknown'),
+        "details": request_data,
+        "status": "pending",
+        "created_at": datetime.now(timezone.utc).isoformat(),
+        "updated_at": datetime.now(timezone.utc).isoformat()
+    }
+    await db.service_requests.insert_one(service_doc)
+    return {"id": request_id, "message": "Service request submitted successfully"}
+
+
+@api_router.get("/service-requests")
+async def list_service_requests(payload=Depends(verify_token)):
+    query = {"user_id": payload['user_id']} if payload.get('role') != 'admin' else {}
+    requests = await db.service_requests.find(query, {"_id": 0}).sort("created_at", -1).to_list(500)
+    return requests
+
+
 @api_router.post("/contact")
-async def submit_contact(request: ContactRequest):
+async def submit_contact_form(request: ContactRequest):
     contact_id = str(uuid.uuid4())
     contact_doc = request.model_dump()
     contact_doc['id'] = contact_id
