@@ -315,7 +315,69 @@ async def register(user_data: UserRegister):
     
     await db.users.insert_one(user_doc)
     token = create_token(user_id, user_data.role)
-    
+
+    # Send welcome email (fire and forget — don't block registration)
+    try:
+        welcome_html = f"""
+        <div style="font-family: Arial, sans-serif; max-width: 540px; margin: 0 auto; padding: 30px; background: #f9f9f9; border-radius: 12px;">
+            <div style="text-align: center; margin-bottom: 24px;">
+                <h1 style="color: #1E6A6A; font-size: 24px; margin: 0;">MyIsraelRental</h1>
+                <p style="color: #D4AF37; font-size: 12px; letter-spacing: 2px; margin-top: 4px;">YOUR HOME IN ISRAEL</p>
+            </div>
+            <div style="background: white; padding: 32px; border-radius: 10px; border: 1px solid #e5e5e5;">
+                <h2 style="color: #333; font-size: 20px; margin-top: 0;">Welcome, {user_data.name}!</h2>
+                <p style="color: #555; font-size: 14px; line-height: 1.7;">
+                    Thank you for joining <strong style="color: #1E6A6A;">MyIsraelRental</strong>. We're excited to have you on board!
+                </p>
+                <div style="background: #f7f7f7; border-radius: 8px; padding: 16px; margin: 20px 0; border-left: 4px solid #1E6A6A;">
+                    <p style="color: #555; font-size: 13px; margin: 0; line-height: 1.6;">
+                        <strong style="color: #333;">Your Account Details:</strong><br>
+                        Email: {user_data.email}<br>
+                        Role: {user_data.role.title()}
+                    </p>
+                </div>
+                <p style="color: #555; font-size: 14px; line-height: 1.7;">
+                    Here's what you can do next:
+                </p>
+                <table style="width: 100%; border-collapse: collapse; margin: 16px 0;">
+                    <tr>
+                        <td style="padding: 10px 12px; background: #1E6A6A10; border-radius: 8px 8px 0 0; border-bottom: 1px solid #e5e5e5;">
+                            <span style="color: #1E6A6A; font-weight: bold; font-size: 13px;">🏠 Browse Properties</span>
+                            <p style="color: #666; font-size: 12px; margin: 4px 0 0;">Find long-term, short-term, or vacation rentals across Israel</p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 10px 12px; background: #D4AF3710; border-bottom: 1px solid #e5e5e5;">
+                            <span style="color: #D4AF37; font-weight: bold; font-size: 13px;">📋 Sublease Your Property</span>
+                            <p style="color: #666; font-size: 12px; margin: 4px 0 0;">List your sublease in just a few clicks</p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 10px 12px; background: #f7f7f7; border-radius: 0 0 8px 8px;">
+                            <span style="color: #333; font-weight: bold; font-size: 13px;">📄 Government Services</span>
+                            <p style="color: #666; font-size: 12px; margin: 4px 0 0;">Arnona discounts, property name changes, and more — handled for you</p>
+                        </td>
+                    </tr>
+                </table>
+                <div style="text-align: center; margin-top: 24px;">
+                    <a href="https://myisraelrental.com/dashboard" style="background-color: #1E6A6A; color: white; padding: 14px 32px; text-decoration: none; border-radius: 8px; font-size: 14px; font-weight: bold; display: inline-block;">
+                        Go to Your Dashboard
+                    </a>
+                </div>
+            </div>
+            <div style="text-align: center; margin-top: 20px;">
+                <p style="color: #999; font-size: 11px; line-height: 1.5;">
+                    Questions? Contact us at <a href="mailto:mir@myisraelrental.com" style="color: #D4AF37;">mir@myisraelrental.com</a>
+                    or call <a href="tel:+972553225141" style="color: #D4AF37;">+972 55 322 5141</a>
+                </p>
+                <p style="color: #bbb; font-size: 10px; margin-top: 8px;">&copy; MyIsraelRental.com — My Israel Rental LLC</p>
+            </div>
+        </div>
+        """
+        asyncio.create_task(send_email(user_data.email, "Welcome to MyIsraelRental! 🏠", welcome_html))
+    except Exception as e:
+        logger.warning(f"Failed to queue welcome email for {user_data.email}: {e}")
+
     return {"token": token, "user": {"id": user_id, "email": user_data.email, "name": user_data.name, "role": user_data.role}}
 
 @api_router.post("/auth/login")
