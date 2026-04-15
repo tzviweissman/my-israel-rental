@@ -618,6 +618,12 @@ const Dashboard = () => {
               {t('dashboard.addProperty')}
             </button>
           )}
+          {user && user.role === 'renter' && (
+            <button onClick={() => { setShowSubleaseForm(!showSubleaseForm); if (!showSubleaseForm) fetchRenterBookings(); setActiveTab('subleases'); }} className="primary-btn flex items-center gap-2" data-testid="sublease-property-button">
+              <Home size={20} />
+              Sublease Property
+            </button>
+          )}
         </div>
 
         {user && user.role !== 'renter' && (
@@ -702,6 +708,16 @@ const Dashboard = () => {
           >
             {t('dashboard.myBookings')}
           </button>
+          {user && user.role === 'renter' && (
+            <button
+              onClick={() => { setActiveTab('subleases'); fetchMySubleases(); }}
+              className={`flex-1 py-2.5 px-4 rounded-lg text-sm font-medium transition-all flex items-center justify-center gap-2 ${activeTab === 'subleases' ? 'bg-white text-[#1E6A6A] shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
+              data-testid="tab-subleases"
+            >
+              <Home size={16} />
+              My Subleases
+            </button>
+          )}
           <button
             onClick={() => setActiveTab('settings')}
             className={`flex-1 py-2.5 px-4 rounded-lg text-sm font-medium transition-all flex items-center justify-center gap-2 ${activeTab === 'settings' ? 'bg-white text-[#1E6A6A] shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
@@ -710,14 +726,16 @@ const Dashboard = () => {
             <KeyRound size={16} />
             Settings
           </button>
-          <button
-            onClick={() => { setActiveTab('services'); fetchMySubleases(); }}
-            className={`flex-1 py-2.5 px-4 rounded-lg text-sm font-medium transition-all flex items-center justify-center gap-2 ${activeTab === 'services' ? 'bg-white text-[#D4AF37] shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
-            data-testid="tab-services"
-          >
-            <Sparkles size={16} />
-            Services
-          </button>
+          {user && user.role === 'renter' && (
+            <button
+              onClick={() => { setActiveTab('services'); }}
+              className={`flex-1 py-2.5 px-4 rounded-lg text-sm font-medium transition-all flex items-center justify-center gap-2 ${activeTab === 'services' ? 'bg-white text-[#D4AF37] shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
+              data-testid="tab-services"
+            >
+              <Sparkles size={16} />
+              Services
+            </button>
+          )}
           <button
             onClick={() => { setActiveTab('liked'); fetchLikedProperties(); }}
             className={`flex-1 py-2.5 px-4 rounded-lg text-sm font-medium transition-all flex items-center justify-center gap-2 ${activeTab === 'liked' ? 'bg-white text-red-500 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
@@ -923,12 +941,11 @@ const Dashboard = () => {
           </div>
         )}
 
-        {/* Services Tab */}
-        {activeTab === 'services' && (
-          <div className="space-y-6" data-testid="services-tab">
-            <h2 className="text-2xl font-bold" style={{ fontFamily: 'Playfair Display' }}>Our Services</h2>
-
-            {/* Sublease Section */}
+        {/* My Subleases Tab */}
+        {activeTab === 'subleases' && user && user.role === 'renter' && (
+          <div className="space-y-6" data-testid="subleases-tab">
+            <h2 className="text-2xl font-bold" style={{ fontFamily: 'Playfair Display' }}>My Subleases</h2>
+            
             <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden shadow-sm">
               <div className="bg-gradient-to-r from-[#1E6A6A] to-[#267a7a] px-6 py-5">
                 <div className="flex items-center justify-between">
@@ -937,8 +954,8 @@ const Dashboard = () => {
                       <Home size={24} className="text-white" />
                     </div>
                     <div>
-                      <h3 className="text-lg font-bold text-white">Sublease Your Property</h3>
-                      <p className="text-white/80 text-sm">Post your rental for others in just a few clicks</p>
+                      <h3 className="text-lg font-bold text-white">Sublease Your Rental</h3>
+                      <p className="text-white/80 text-sm">Post your property for others to rent</p>
                     </div>
                   </div>
                   <button
@@ -1223,6 +1240,13 @@ const Dashboard = () => {
                 ) : null}
               </div>
             </div>
+          </div>
+        )}
+
+        {/* Services Tab */}
+        {activeTab === 'services' && user && user.role === 'renter' && (
+          <div className="space-y-6" data-testid="services-tab">
+            <h2 className="text-2xl font-bold" style={{ fontFamily: 'Playfair Display' }}>Our Services</h2>
 
             {/* Government Document Services Card */}
             <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden shadow-sm">

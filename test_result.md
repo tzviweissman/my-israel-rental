@@ -289,10 +289,70 @@ frontend:
           agent: "main"
           comment: "Added Settings tab in Dashboard with expandable Change Password section. Form has current password, new password, confirm new password fields with visibility toggles."
 
+  - task: "Sublease Feature Restructuring - Renter Dashboard Button"
+    implemented: true
+    working: true
+    file: "frontend/src/pages/Dashboard.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: "NA"
+          agent: "main"
+          comment: "Restructured sublease feature: Added 'Sublease Property' button at top of renter dashboard (similar to manager's 'Add Property' button). Button opens sublease form in dedicated 'My Subleases' tab."
+        - working: true
+          agent: "testing"
+          comment: "✅ TESTED: 'Sublease Property' button working correctly for renters. Button appears at top right of dashboard, opens sublease form when clicked, and automatically switches to 'My Subleases' tab. 'Add Property' button correctly NOT shown for renters."
+
+  - task: "Sublease Feature Restructuring - My Subleases Tab"
+    implemented: true
+    working: true
+    file: "frontend/src/pages/Dashboard.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: "NA"
+          agent: "main"
+          comment: "Created dedicated 'My Subleases' tab in renter dashboard navigation (between Bookings and Settings). Tab shows sublease creation form (Step 1: Select property, Step 2: Details), '+ New Sublease' button, active sublease listings, and contract upload functionality."
+        - working: true
+          agent: "testing"
+          comment: "✅ TESTED: 'My Subleases' tab working correctly. Tab exists in navigation, shows 'My Subleases' heading, displays sublease creation form with 2-step process, '+ New Sublease' button functional, and existing sublease listings displayed with contract upload/signing features."
+
+  - task: "Sublease Feature Restructuring - Services Tab Cleanup"
+    implemented: true
+    working: true
+    file: "frontend/src/pages/Dashboard.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: "NA"
+          agent: "main"
+          comment: "Removed sublease section from Services tab. Services tab now ONLY shows 'Government Document Services' (Arnona discount, Property name change). Sublease is now a first-class feature with dedicated tab."
+        - working: true
+          agent: "testing"
+          comment: "✅ TESTED: Services tab cleanup successful. Services tab ONLY shows 'Government Document Services' section with Arnona discount and property name change forms. NO sublease section exists (correctly removed). Government services form is functional."
+
+  - task: "Sublease Feature Restructuring - Manager Dashboard Unchanged"
+    implemented: true
+    working: true
+    file: "frontend/src/pages/Dashboard.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: "NA"
+          agent: "main"
+          comment: "Verified manager dashboard unchanged. Managers still see 'Add Property' button at top. Managers do NOT see 'Sublease Property' button or 'My Subleases' tab (renters only). Services tab also not shown to managers."
+        - working: true
+          agent: "testing"
+          comment: "✅ TESTED: Manager dashboard correctly unchanged. 'Add Property' button shown for managers. 'Sublease Property' button, 'My Subleases' tab, and 'Services' tab correctly NOT shown for managers (renters only)."
+
 metadata:
   created_by: "main_agent"
   version: "1.0"
-  test_sequence: 2
+  test_sequence: 3
   run_ui: false
 
 test_plan:
@@ -311,3 +371,7 @@ agent_communication:
       message: "Added forgot password + reset password + change password features. 3 new backend endpoints: POST /api/auth/forgot-password, POST /api/auth/reset-password, POST /api/auth/change-password. Frontend updated: Auth.js has forgot-password and reset-password views, Dashboard.js has new Settings tab with Change Password form. Test credentials: owner@test.com / Test1234!. Please test the 3 new auth endpoints."
     - agent: "testing"
       message: "✅ PASSWORD MANAGEMENT TESTING COMPLETE: All 3 new password management endpoints tested successfully and working correctly. Forgot Password API generates reset tokens properly (returns null for non-existent emails for security). Reset Password API validates tokens, updates passwords, and marks tokens as used. Change Password API requires authentication, validates current password, and updates to new password. All endpoints handle authentication, validation, database operations, and error cases properly. Password restored to original (Test1234!) after all tests."
+    - agent: "main"
+      message: "Restructured sublease feature in MyIsraelRental.com dashboard. Moved sublease from Services tab to dedicated 'My Subleases' tab. Added 'Sublease Property' button at top of renter dashboard. Services tab now only shows Government Document Services. Test credentials: renter@test.com / Test1234! (role: renter), owner@test.com / Test1234! (role: owner)."
+    - agent: "testing"
+      message: "✅ SUBLEASE RESTRUCTURING TESTING COMPLETE: All 4 test scenarios passed successfully (16/16 individual tests). Renter dashboard shows 'Sublease Property' button at top (not 'Add Property'). 'My Subleases' tab exists with full functionality (form, listings, contract upload). Services tab cleaned up - ONLY shows Government Document Services, NO sublease section. Manager dashboard unchanged - shows 'Add Property', does NOT show sublease features. Sublease is now a first-class feature for renters with easy access via top button and dedicated tab."
