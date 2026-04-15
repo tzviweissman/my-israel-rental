@@ -944,8 +944,6 @@ const Dashboard = () => {
         {/* My Subleases Tab */}
         {activeTab === 'subleases' && user && user.role === 'renter' && (
           <div className="space-y-6" data-testid="subleases-tab">
-            <h2 className="text-2xl font-bold" style={{ fontFamily: 'Playfair Display' }}>My Subleases</h2>
-            
             <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden shadow-sm">
               <div className="bg-gradient-to-r from-[#1E6A6A] to-[#267a7a] px-6 py-5">
                 <div className="flex items-center justify-between">
@@ -954,8 +952,11 @@ const Dashboard = () => {
                       <Home size={24} className="text-white" />
                     </div>
                     <div>
-                      <h3 className="text-lg font-bold text-white">Sublease Your Rental</h3>
-                      <p className="text-white/80 text-sm">Post your property for others to rent</p>
+                      <h3 className="text-lg font-bold text-white flex items-center gap-2">
+                        <Plus size={20} className="text-white" />
+                        Sublease Your Property
+                      </h3>
+                      <p className="text-white/80 text-sm">Post your rental for others in just a few clicks</p>
                     </div>
                   </div>
                   <button
