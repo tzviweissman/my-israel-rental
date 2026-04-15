@@ -41,28 +41,32 @@ security = HTTPBearer()
 JWT_SECRET = os.environ.get('JWT_SECRET', 'your-secret-key-change-in-production-12345')
 EMERGENT_LLM_KEY = os.environ.get('EMERGENT_LLM_KEY', '')
 
-# SMTP Configuration
-SMTP_HOST = os.environ.get('SMTP_HOST', '')
-SMTP_PORT = int(os.environ.get('SMTP_PORT', '587'))
-SMTP_USER = os.environ.get('SMTP_USER', '')
-SMTP_PASSWORD = os.environ.get('SMTP_PASSWORD', '')
-SMTP_FROM = os.environ.get('SMTP_FROM', SMTP_USER)
+# SMTP / SES Configuration
+SMTP_FROM = os.environ.get('SMTP_FROM', '')
+AWS_ACCESS_KEY_ID = os.environ.get('AWS_ACCESS_KEY_ID', '')
+AWS_SECRET_ACCESS_KEY = os.environ.get('AWS_SECRET_ACCESS_KEY', '')
+AWS_REGION = os.environ.get('AWS_REGION', 'us-east-1')
 
 
 async def send_email(to_email: str, subject: str, html_body: str):
-    """Send an email via SMTP (AWS SES)."""
+    """Send an email via AWS SES boto3 API."""
     try:
-        msg = MIMEMultipart('alternative')
-        msg['From'] = SMTP_FROM
-        msg['To'] = to_email
-        msg['Subject'] = subject
-        msg.attach(MIMEText(html_body, 'html'))
-
-        with smtplib.SMTP(SMTP_HOST, SMTP_PORT) as server:
-            server.starttls()
-            server.login(SMTP_USER, SMTP_PASSWORD)
-            server.sendmail(SMTP_FROM, to_email, msg.as_string())
-        logger.info(f"Email sent to {to_email}: {subject}")
+        import boto3
+        ses_client = boto3.client(
+            'ses',
+            region_name=AWS_REGION,
+            aws_access_key_id=AWS_ACCESS_KEY_ID,
+            aws_secret_access_key=AWS_SECRET_ACCESS_KEY
+        )
+        response = ses_client.send_email(
+            Source=SMTP_FROM,
+            Destination={'ToAddresses': [to_email]},
+            Message={
+                'Subject': {'Data': subject, 'Charset': 'UTF-8'},
+                'Body': {'Html': {'Data': html_body, 'Charset': 'UTF-8'}}
+            }
+        )
+        logger.info(f"Email sent to {to_email}: {subject} (MessageId: {response.get('MessageId')})")
         return True
     except Exception as e:
         logger.error(f"Failed to send email to {to_email}: {e}")
