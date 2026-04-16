@@ -739,24 +739,46 @@ async def create_booking(booking_data: BookingCreate, payload = Depends(verify_t
     booking_doc['id'] = booking_id
     booking_doc['renter_id'] = payload['user_id']
     booking_doc['owner_id'] = property_data['owner_id']
-    booking_doc['status'] = 'pending'
-    booking_doc['created_at'] = datetime.now(timezone.utc).isoformat()
     
+    # Auto-confirm for vacation rentals, pending for long-term and short-term
+    if property_data.get('rental_type') == 'vacation':
+        booking_doc['status'] = 'confirmed'
+        notification_message = f"Your booking for {property_data['title']} is confirmed!"
+        notification_type = "booking_confirmed"
+        # Notify renter of confirmation
+        renter_notification = {
+            "id": str(uuid.uuid4()),
+            "user_id": payload['user_id'],
+            "type": notification_type,
+            "property_id": booking_data.property_id,
+            "booking_id": booking_id,
+            "message": notification_message,
+            "read": False,
+            "created_at": datetime.now(timezone.utc).isoformat()
+        }
+        await db.notifications.insert_one(renter_notification)
+    else:
+        booking_doc['status'] = 'pending'
+        notification_message = f"New booking request for {property_data['title']}"
+        notification_type = "booking_request"
+    
+    booking_doc['created_at'] = datetime.now(timezone.utc).isoformat()
     await db.bookings.insert_one(booking_doc)
     
-    notification = {
+    # Notify owner of booking request (or confirmation for vacation)
+    owner_notification = {
         "id": str(uuid.uuid4()),
         "user_id": property_data['owner_id'],
-        "type": "booking_request",
+        "type": notification_type,
         "property_id": booking_data.property_id,
         "booking_id": booking_id,
-        "message": f"New booking request for {property_data['title']}",
+        "message": notification_message if booking_doc['status'] == 'pending' else f"New vacation rental booking for {property_data['title']}",
         "read": False,
         "created_at": datetime.now(timezone.utc).isoformat()
     }
-    await db.notifications.insert_one(notification)
+    await db.notifications.insert_one(owner_notification)
     
-    return {"id": booking_id, "message": "Booking created successfully"}
+    return {"id": booking_id, "status": booking_doc['status'], "message": "Booking confirmed!" if booking_doc['status'] == 'confirmed' else "Booking request sent successfully"}
 
 @api_router.get("/bookings")
 async def get_bookings(payload = Depends(verify_token)):
@@ -1149,6 +1171,27 @@ async def sign_contract_public(sign_token: str, body: dict = Body(...)):
             "$set": {"signed": True, "updated_at": datetime.now(timezone.utc).isoformat()}
         }
     )
+    
+    # Update sublease to mark contract as signed
+    if contract.get("sublease_id"):
+        await db.subleases.update_one(
+            {"id": contract["sublease_id"]},
+            {"$set": {"contract_signed": True}}
+        )
+        
+        # Notify the subleasor (renter who posted the sublease)
+        sublease = await db.subleases.find_one({"id": contract["sublease_id"]}, {"_id": 0})
+        if sublease:
+            notification = {
+                "id": str(uuid.uuid4()),
+                "user_id": sublease["subleasor_id"],
+                "type": "sublease_contract_signed",
+                "sublease_id": contract["sublease_id"],
+                "message": f"{signer_name} has signed the sublease contract for {sublease.get('title', 'your property')}",
+                "read": False,
+                "created_at": datetime.now(timezone.utc).isoformat()
+            }
+            await db.notifications.insert_one(notification)
 
     return {"message": "Contract signed successfully", "signed_at": new_signature['signed_at']}
 
@@ -1966,6 +2009,38 @@ async def manual_ical_sync(property_id: str, payload=Depends(verify_token)):
         raise HTTPException(status_code=403, detail="Not authorized")
     await sync_property_ical(property_id)
     return {"message": "Sync complete", "last_synced": datetime.now(timezone.utc).isoformat()}
+
+
+# --- Notifications ---
+
+@api_router.get("/notifications")
+async def get_notifications(payload=Depends(verify_token)):
+    """Get all notifications for the current user"""
+    notifications = await db.notifications.find(
+        {"user_id": payload['user_id']},
+        {"_id": 0}
+    ).sort("created_at", -1).to_list(100)
+    return notifications
+
+@api_router.put("/notifications/{notification_id}/read")
+async def mark_notification_read(notification_id: str, payload=Depends(verify_token)):
+    """Mark a notification as read"""
+    result = await db.notifications.update_one(
+        {"id": notification_id, "user_id": payload['user_id']},
+        {"$set": {"read": True}}
+    )
+    if result.modified_count == 0:
+        raise HTTPException(status_code=404, detail="Notification not found")
+    return {"message": "Notification marked as read"}
+
+@api_router.put("/notifications/read-all")
+async def mark_all_notifications_read(payload=Depends(verify_token)):
+    """Mark all notifications as read"""
+    await db.notifications.update_many(
+        {"user_id": payload['user_id'], "read": False},
+        {"$set": {"read": True}}
+    )
+    return {"message": "All notifications marked as read"}
 
 
 app.include_router(api_router)

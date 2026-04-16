@@ -141,7 +141,7 @@ const PropertyDetail = () => {
       
       <div className="max-w-7xl mx-auto px-6 pb-12 bg-white">
         <div className="flex items-center justify-between mb-6">
-          <button onClick={() => navigate(-1)} className="flex items-center gap-2 text-sm font-medium hover:text-[#D4AF37] transition-colors" data-testid="back-button">
+          <button onClick={() => navigate(isFromDashboard ? '/dashboard' : '/')} className="flex items-center gap-2 text-sm font-medium hover:text-[#D4AF37] transition-colors" data-testid="back-button">
             <ArrowLeft size={18} />
             {isFromDashboard ? 'Back to Dashboard' : 'Back to Listings'}
           </button>
