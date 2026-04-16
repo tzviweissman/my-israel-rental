@@ -2255,7 +2255,7 @@ const Dashboard = () => {
                           <p><span className="font-medium">Dates:</span> {new Date(booking.start_date).toLocaleDateString()} - {new Date(booking.end_date).toLocaleDateString()}</p>
                           {booking.message && <p><span className="font-medium">Message:</span> {booking.message}</p>}
                         </div>
-                        {booking.cancellation_reason && (
+                        {booking.cancellation_reason && ['cancelled', 'cancellation_requested'].includes(booking.status) && (
                           <div className="mt-3 p-3 bg-gray-50 rounded-lg">
                             <p className="text-sm"><span className="font-medium text-gray-700">Cancellation Reason:</span> {booking.cancellation_reason}</p>
                           </div>
