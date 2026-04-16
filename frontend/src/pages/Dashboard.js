@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import axios from 'axios';
 import { API, AuthContext } from '../App';
@@ -11,6 +11,7 @@ const Dashboard = () => {
   const { t } = useTranslation();
   const { user, token } = useContext(AuthContext);
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [properties, setProperties] = useState([]);
   const [bookings, setBookings] = useState([]);
   const [showAddProperty, setShowAddProperty] = useState(false);
@@ -94,6 +95,14 @@ const Dashboard = () => {
       fetchLikedProperties();
     }
   }, [user]);
+  
+  // Handle tab query parameter from notifications
+  useEffect(() => {
+    const tab = searchParams.get('tab');
+    if (tab) {
+      setActiveTab(tab);
+    }
+  }, [searchParams]);
 
   // Close location dropdown when clicking outside
   useEffect(() => {

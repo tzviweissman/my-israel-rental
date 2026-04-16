@@ -1,12 +1,14 @@
 import React, { useContext, useState, useRef, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { AuthContext } from '../App';
-import { Globe, LogOut, LayoutDashboard, Menu, X, Home, Building, Palmtree, Warehouse, ChevronRight, Search } from 'lucide-react';
+import { AuthContext, API } from '../App';
+import { Globe, LogOut, LayoutDashboard, Menu, X, Home, Building, Palmtree, Warehouse, ChevronRight, Search, Bell } from 'lucide-react';
+import axios from 'axios';
+import { toast } from 'sonner';
 
 const Navigation = () => {
   const { t, i18n } = useTranslation();
-  const { user, logout } = useContext(AuthContext);
+  const { user, logout, token } = useContext(AuthContext);
   const navigate = useNavigate();
   const location = useLocation();
   const isHome = location.pathname === '/';
@@ -16,6 +18,12 @@ const Navigation = () => {
   const navSearch_ref = useRef('');
   const [navSearch, setNavSearch] = useState('');
   const menuRef = useRef(null);
+  
+  // Notification states
+  const [notifications, setNotifications] = useState([]);
+  const [showNotifications, setShowNotifications] = useState(false);
+  const [unreadCount, setUnreadCount] = useState(0);
+  const notificationRef = useRef(null);
 
   const toggleLanguage = () => {
     const newLang = i18n.language.startsWith('he') ? 'en' : 'he';
@@ -38,14 +46,79 @@ const Navigation = () => {
       navigate(`/properties/all?search=${navSearch}`);
     }
   };
+  
+  // Fetch notifications
+  const fetchNotifications = async () => {
+    if (!user || !token) return;
+    try {
+      const response = await axios.get(`${API}/notifications`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setNotifications(response.data);
+      setUnreadCount(response.data.filter(n => !n.read).length);
+    } catch (error) {
+      console.error('Failed to fetch notifications', error);
+    }
+  };
+  
+  const markAsRead = async (notificationId) => {
+    try {
+      await axios.put(`${API}/notifications/${notificationId}/read`, {}, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setNotifications(prev => prev.map(n => 
+        n.id === notificationId ? { ...n, read: true } : n
+      ));
+      setUnreadCount(prev => Math.max(0, prev - 1));
+    } catch (error) {
+      console.error('Failed to mark notification as read', error);
+    }
+  };
+  
+  const markAllAsRead = async () => {
+    try {
+      await axios.put(`${API}/notifications/read-all`, {}, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setNotifications(prev => prev.map(n => ({ ...n, read: true })));
+      setUnreadCount(0);
+      toast.success('All notifications marked as read');
+    } catch (error) {
+      console.error('Failed to mark all as read', error);
+    }
+  };
+  
+  const handleNotificationClick = (notification) => {
+    markAsRead(notification.id);
+    setShowNotifications(false);
+    
+    // Navigate based on notification type
+    if (notification.booking_id) {
+      navigate('/dashboard?tab=bookings');
+    } else if (notification.sublease_id) {
+      navigate('/dashboard?tab=subleases');
+    } else {
+      navigate('/dashboard');
+    }
+  };
 
   useEffect(() => {
     const handleClickOutside = (e) => {
       if (menuRef.current && !menuRef.current.contains(e.target)) setMenuOpen(false);
+      if (notificationRef.current && !notificationRef.current.contains(e.target)) setShowNotifications(false);
     };
-    if (menuOpen) document.addEventListener('mousedown', handleClickOutside);
+    if (menuOpen || showNotifications) document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, [menuOpen]);
+  }, [menuOpen, showNotifications]);
+  
+  // Fetch notifications on mount and periodically
+  useEffect(() => {
+    if (user && token) {
+      fetchNotifications();
+      const interval = setInterval(fetchNotifications, 30000); // Every 30 seconds
+      return () => clearInterval(interval);
+    }
+  }, [user, token]);
 
   useEffect(() => {
     if (!isHome) return;
@@ -112,10 +185,89 @@ const Navigation = () => {
             </div>
           )}
 
-          <div className="relative" ref={menuRef}>
-            <button
-              onClick={() => setMenuOpen(!menuOpen)}
-              className="flex items-center gap-2 rounded-xl transition-all duration-200"
+          <div className="flex items-center gap-3">
+            {/* Notification Bell */}
+            {user && (
+              <div className="relative" ref={notificationRef}>
+                <button
+                  onClick={() => setShowNotifications(!showNotifications)}
+                  className="relative p-2 rounded-full hover:bg-white/10 transition-colors"
+                  data-testid="notification-bell"
+                >
+                  <Bell size={scrolled ? 20 : 22} color="#D4AF37" />
+                  {unreadCount > 0 && (
+                    <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
+                      {unreadCount > 9 ? '9+' : unreadCount}
+                    </span>
+                  )}
+                </button>
+
+                {/* Notification Dropdown */}
+                {showNotifications && (
+                  <div
+                    className="absolute right-0 top-full mt-3 w-96 max-h-[500px] overflow-y-auto rounded-2xl"
+                    style={{
+                      backgroundColor: '#1E6A6A',
+                      border: '1.5px solid rgba(212,175,55,0.25)',
+                      boxShadow: '0 16px 48px rgba(0,0,0,0.5)'
+                    }}
+                    data-testid="notification-dropdown"
+                  >
+                    <div className="sticky top-0 bg-[#1E6A6A] border-b border-[#D4AF37]/20 p-4 flex items-center justify-between">
+                      <h3 className="text-white font-bold text-sm">Notifications</h3>
+                      {unreadCount > 0 && (
+                        <button
+                          onClick={markAllAsRead}
+                          className="text-xs text-[#D4AF37] hover:text-[#D4AF37]/80 transition-colors"
+                        >
+                          Mark all as read
+                        </button>
+                      )}
+                    </div>
+
+                    {notifications.length === 0 ? (
+                      <div className="p-8 text-center">
+                        <Bell size={32} className="mx-auto mb-3 text-white/30" />
+                        <p className="text-white/60 text-sm">No notifications yet</p>
+                      </div>
+                    ) : (
+                      <div className="divide-y divide-white/10">
+                        {notifications.map((notification) => (
+                          <button
+                            key={notification.id}
+                            onClick={() => handleNotificationClick(notification)}
+                            className={`w-full text-left p-4 hover:bg-white/5 transition-colors ${
+                              !notification.read ? 'bg-white/10' : ''
+                            }`}
+                            data-testid={`notification-${notification.id}`}
+                          >
+                            <div className="flex items-start gap-3">
+                              <div className={`w-2 h-2 rounded-full mt-2 flex-shrink-0 ${
+                                !notification.read ? 'bg-[#D4AF37]' : 'bg-transparent'
+                              }`} />
+                              <div className="flex-1 min-w-0">
+                                <p className={`text-sm ${!notification.read ? 'text-white font-medium' : 'text-white/70'}`}>
+                                  {notification.message}
+                                </p>
+                                <p className="text-xs text-white/40 mt-1">
+                                  {new Date(notification.created_at).toLocaleString()}
+                                </p>
+                              </div>
+                            </div>
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Menu Button */}
+            <div className="relative" ref={menuRef}>
+              <button
+                onClick={() => setMenuOpen(!menuOpen)}
+                className="flex items-center gap-2 rounded-xl transition-all duration-200"
               style={{
                 backgroundColor: 'transparent',
                 border: '1.5px solid #D4AF37',
@@ -199,6 +351,7 @@ const Navigation = () => {
                 </div>
               </div>
             )}
+          </div>
           </div>
         </div>
       </div>
