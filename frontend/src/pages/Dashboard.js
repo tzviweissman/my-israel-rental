@@ -811,67 +811,74 @@ const Dashboard = () => {
         )}
 
         {/* Tab Navigation */}
-        <div className="flex gap-1 mb-6 bg-gray-100 rounded-xl p-1 overflow-x-auto scrollbar-hide" data-testid="dashboard-tabs">
-          <button
-            onClick={() => setActiveTab('properties')}
-            className={`flex-shrink-0 py-2.5 px-3 md:px-4 rounded-lg text-xs md:text-sm font-medium transition-all whitespace-nowrap ${activeTab === 'properties' ? 'bg-white text-[#1E6A6A] shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
-            data-testid="tab-properties"
-          >
-            {t('dashboard.myProperties')}
-          </button>
-          {user && user.role !== 'renter' && (
+        <div className="relative">
+          {/* Scroll indicator - left fade */}
+          <div className="absolute left-0 top-0 bottom-0 w-8 bg-gradient-to-r from-gray-100 to-transparent pointer-events-none z-10 md:hidden"></div>
+          {/* Scroll indicator - right fade */}
+          <div className="absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-gray-100 to-transparent pointer-events-none z-10 md:hidden"></div>
+          
+          <div className="flex gap-1 mb-6 bg-gray-100 rounded-xl p-1 overflow-x-auto scrollbar-hide" data-testid="dashboard-tabs">
             <button
-              onClick={() => setActiveTab('contracts')}
-              className={`flex-shrink-0 py-2.5 px-3 md:px-4 rounded-lg text-xs md:text-sm font-medium transition-all flex items-center justify-center gap-1.5 whitespace-nowrap ${activeTab === 'contracts' ? 'bg-white text-[#1E6A6A] shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
-              data-testid="tab-contracts"
+              onClick={() => setActiveTab('properties')}
+              className={`flex-shrink-0 py-2.5 px-3 md:px-4 rounded-lg text-xs md:text-sm font-medium transition-all whitespace-nowrap ${activeTab === 'properties' ? 'bg-white text-[#1E6A6A] shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
+              data-testid="tab-properties"
             >
-              <FileText size={14} />
-              Contracts
+              {t('dashboard.myProperties')}
             </button>
-          )}
-          <button
-            onClick={() => setActiveTab('bookings')}
-            className={`flex-shrink-0 py-2.5 px-3 md:px-4 rounded-lg text-xs md:text-sm font-medium transition-all whitespace-nowrap ${activeTab === 'bookings' ? 'bg-white text-[#1E6A6A] shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
-            data-testid="tab-bookings"
-          >
-            {t('dashboard.myBookings')}
-          </button>
-          {user && user.role === 'renter' && (
+            {user && user.role !== 'renter' && (
+              <button
+                onClick={() => setActiveTab('contracts')}
+                className={`flex-shrink-0 py-2.5 px-3 md:px-4 rounded-lg text-xs md:text-sm font-medium transition-all flex items-center justify-center gap-1.5 whitespace-nowrap ${activeTab === 'contracts' ? 'bg-white text-[#1E6A6A] shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
+                data-testid="tab-contracts"
+              >
+                <FileText size={14} />
+                Contracts
+              </button>
+            )}
             <button
-              onClick={() => { setActiveTab('subleases'); fetchMySubleases(); }}
-              className={`flex-shrink-0 py-2.5 px-3 md:px-4 rounded-lg text-xs md:text-sm font-medium transition-all flex items-center justify-center gap-1.5 whitespace-nowrap ${activeTab === 'subleases' ? 'bg-white text-[#1E6A6A] shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
-              data-testid="tab-subleases"
+              onClick={() => setActiveTab('bookings')}
+              className={`flex-shrink-0 py-2.5 px-3 md:px-4 rounded-lg text-xs md:text-sm font-medium transition-all whitespace-nowrap ${activeTab === 'bookings' ? 'bg-white text-[#1E6A6A] shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
+              data-testid="tab-bookings"
             >
-              <Home size={14} />
-              Subleases
+              {t('dashboard.myBookings')}
             </button>
-          )}
-          <button
-            onClick={() => setActiveTab('settings')}
-            className={`flex-shrink-0 py-2.5 px-3 md:px-4 rounded-lg text-xs md:text-sm font-medium transition-all flex items-center justify-center gap-1.5 whitespace-nowrap ${activeTab === 'settings' ? 'bg-white text-[#1E6A6A] shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
-            data-testid="tab-settings"
-          >
-            <KeyRound size={14} />
-            Settings
-          </button>
-          {user && user.role === 'renter' && (
+            {user && user.role === 'renter' && (
+              <button
+                onClick={() => { setActiveTab('subleases'); fetchMySubleases(); }}
+                className={`flex-shrink-0 py-2.5 px-3 md:px-4 rounded-lg text-xs md:text-sm font-medium transition-all flex items-center justify-center gap-1.5 whitespace-nowrap ${activeTab === 'subleases' ? 'bg-white text-[#1E6A6A] shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
+                data-testid="tab-subleases"
+              >
+                <Home size={14} />
+                Subleases
+              </button>
+            )}
             <button
-              onClick={() => { setActiveTab('services'); }}
-              className={`flex-shrink-0 py-2.5 px-3 md:px-4 rounded-lg text-xs md:text-sm font-medium transition-all flex items-center justify-center gap-1.5 whitespace-nowrap ${activeTab === 'services' ? 'bg-white text-[#D4AF37] shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
-              data-testid="tab-services"
+              onClick={() => setActiveTab('settings')}
+              className={`flex-shrink-0 py-2.5 px-3 md:px-4 rounded-lg text-xs md:text-sm font-medium transition-all flex items-center justify-center gap-1.5 whitespace-nowrap ${activeTab === 'settings' ? 'bg-white text-[#1E6A6A] shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
+              data-testid="tab-settings"
             >
-              <Sparkles size={14} />
-              Services
+              <KeyRound size={14} />
+              Settings
             </button>
-          )}
-          <button
-            onClick={() => { setActiveTab('liked'); fetchLikedProperties(); }}
-            className={`flex-shrink-0 py-2.5 px-3 md:px-4 rounded-lg text-xs md:text-sm font-medium transition-all flex items-center justify-center gap-1.5 whitespace-nowrap ${activeTab === 'liked' ? 'bg-white text-red-500 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
-            data-testid="tab-liked"
-          >
-            <Heart size={14} />
-            Liked
-          </button>
+            {user && user.role === 'renter' && (
+              <button
+                onClick={() => { setActiveTab('services'); }}
+                className={`flex-shrink-0 py-2.5 px-3 md:px-4 rounded-lg text-xs md:text-sm font-medium transition-all flex items-center justify-center gap-1.5 whitespace-nowrap ${activeTab === 'services' ? 'bg-white text-[#D4AF37] shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
+                data-testid="tab-services"
+              >
+                <Sparkles size={14} />
+                Services
+              </button>
+            )}
+            <button
+              onClick={() => { setActiveTab('liked'); fetchLikedProperties(); }}
+              className={`flex-shrink-0 py-2.5 px-3 md:px-4 rounded-lg text-xs md:text-sm font-medium transition-all flex items-center justify-center gap-1.5 whitespace-nowrap ${activeTab === 'liked' ? 'bg-white text-red-500 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
+              data-testid="tab-liked"
+            >
+              <Heart size={14} />
+              Liked
+            </button>
+          </div>
         </div>
 
         {/* Contracts Tab */}

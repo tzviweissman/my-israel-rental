@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import axios from 'axios';
 import { API, AuthContext } from '../App';
-import { Bed, Bath, Home as HomeIcon, MapPin, Building2, MessageCircle, Calendar as CalendarIcon, ChevronLeft, ChevronRight, Film, Snowflake, WashingMachine, UtensilsCrossed, DoorOpen, ArrowUpFromLine, ShowerHead, Warehouse, Flame, Dumbbell, Waves, Sparkles, Car, Wifi, Mail, Users, X, Heart } from 'lucide-react';
+import { Bed, Bath, Home as HomeIcon, MapPin, Building2, MessageCircle, Calendar as CalendarIcon, ChevronLeft, ChevronRight, Film, Snowflake, WashingMachine, UtensilsCrossed, DoorOpen, ArrowUpFromLine, ShowerHead, Warehouse, Flame, Dumbbell, Waves, Sparkles, Car, Wifi, Mail, Users, X, Heart, Share2, Copy, Check } from 'lucide-react';
 import { Calendar } from '../components/ui/calendar';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
@@ -28,6 +28,7 @@ const PropertyDetail = () => {
   const [exchangeRate, setExchangeRate] = useState(null);
   const [blockedDates, setBlockedDates] = useState([]);
   const [isLiked, setIsLiked] = useState(false);
+  const [shareCopied, setShareCopied] = useState(false);
 
   useEffect(() => {
     axios.get(`${API}/exchange-rate`).then(res => setExchangeRate(res.data)).catch(() => setExchangeRate({ usd_to_ils: 3.65, ils_to_usd: 0.274 }));
@@ -114,6 +115,14 @@ const PropertyDetail = () => {
     navigate(`/chat/${id}`);
   };
 
+  const handleShare = () => {
+    const url = `${window.location.origin}/property/${id}`;
+    navigator.clipboard.writeText(url);
+    setShareCopied(true);
+    toast.success('Property link copied to clipboard!');
+    setTimeout(() => setShareCopied(false), 3000);
+  };
+
   if (!property) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -128,10 +137,20 @@ const PropertyDetail = () => {
       <div className="h-[90px] bg-white"></div>
       
       <div className="max-w-7xl mx-auto px-6 pb-12 bg-white">
-        <button onClick={() => navigate(-1)} className="flex items-center gap-2 text-sm font-medium mb-6 hover:text-[#D4AF37] transition-colors" data-testid="back-button">
-          <ArrowLeft size={18} />
-          {user && user.role !== 'renter' ? t('property.backToDashboard') : t('property.backToListings')}
-        </button>
+        <div className="flex items-center justify-between mb-6">
+          <button onClick={() => user ? navigate('/dashboard') : navigate(-1)} className="flex items-center gap-2 text-sm font-medium hover:text-[#D4AF37] transition-colors" data-testid="back-button">
+            <ArrowLeft size={18} />
+            {user ? 'Back to Dashboard' : t('property.backToListings')}
+          </button>
+          <button 
+            onClick={handleShare}
+            className="flex items-center gap-2 px-4 py-2 rounded-lg border border-[#1E6A6A] text-[#1E6A6A] hover:bg-[#1E6A6A]/10 transition-colors text-sm font-medium"
+            data-testid="share-button"
+          >
+            {shareCopied ? <Check size={16} /> : <Share2 size={16} />}
+            {shareCopied ? 'Copied!' : 'Share Property'}
+          </button>
+        </div>
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <div className="lg:col-span-2">
             <div className="mb-6">

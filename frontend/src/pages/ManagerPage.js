@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import React, { useState, useEffect, useContext } from 'react';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import axios from 'axios';
-import { API } from '../App';
-import { Bed, Bath, Home as HomeIcon, MapPin, User } from 'lucide-react';
+import { API, AuthContext } from '../App';
+import { Bed, Bath, Home as HomeIcon, MapPin, User, LogIn } from 'lucide-react';
 
 const RENTAL_TYPES = [
   { key: 'all', label: 'All' },
@@ -16,7 +16,9 @@ const RENTAL_TYPES = [
 const ManagerPage = () => {
   const { managerId } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
   const { t } = useTranslation();
+  const { user } = useContext(AuthContext);
   const [data, setData] = useState(null);
   const [activeType, setActiveType] = useState('all');
 
@@ -61,27 +63,41 @@ const ManagerPage = () => {
     <div className="min-h-screen" data-testid="manager-page">
       <div className="max-w-7xl mx-auto px-6 pt-28 pb-12">
         <div className="rounded-2xl p-8 border border-[#E5E5E5] mb-10" style={{ background: 'linear-gradient(135deg, #1E6A6A 0%, #2A8585 100%)' }}>
-          <div className="flex items-center gap-6">
-            {data.manager.business_logo ? (
-              <img
-                src={data.manager.business_logo.startsWith('/api') ? `${API.replace('/api', '')}${data.manager.business_logo}` : data.manager.business_logo}
-                alt={`${data.manager.name} logo`}
-                className="w-24 h-24 rounded-xl object-cover border-2 border-[#D4AF37]"
-                data-testid="manager-logo"
-              />
-            ) : (
-              <div className="w-24 h-24 rounded-full flex items-center justify-center" style={{ backgroundColor: 'rgba(255,255,255,0.15)' }}>
-                <User size={48} style={{ color: '#D4AF37' }} />
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-6">
+              {data.manager.business_logo ? (
+                <img
+                  src={data.manager.business_logo.startsWith('/api') ? `${API.replace('/api', '')}${data.manager.business_logo}` : data.manager.business_logo}
+                  alt={`${data.manager.name} logo`}
+                  className="w-24 h-24 rounded-xl object-cover border-2 border-[#D4AF37]"
+                  data-testid="manager-logo"
+                />
+              ) : (
+                <div className="w-24 h-24 rounded-full flex items-center justify-center" style={{ backgroundColor: 'rgba(255,255,255,0.15)' }}>
+                  <User size={48} style={{ color: '#D4AF37' }} />
+                </div>
+              )}
+              <div>
+                <h1 className="text-4xl font-bold mb-2 text-white" style={{ fontFamily: 'Playfair Display' }} data-testid="manager-name">
+                  {data.manager.name}
+                </h1>
+                <p className="mt-2 text-sm" style={{ color: '#D4AF37' }}>
+                  {data.properties.length} {data.properties.length === 1 ? 'Property' : 'Properties'} Available
+                </p>
               </div>
-            )}
-            <div>
-              <h1 className="text-4xl font-bold mb-2 text-white" style={{ fontFamily: 'Playfair Display' }} data-testid="manager-name">
-                {data.manager.name}
-              </h1>
-              <p className="mt-2 text-sm" style={{ color: '#D4AF37' }}>
-                {data.properties.length} {data.properties.length === 1 ? 'Property' : 'Properties'} Available
-              </p>
             </div>
+            
+            {/* Sign In Button */}
+            {!user && (
+              <button
+                onClick={() => navigate(`/auth/login?redirect=${encodeURIComponent(location.pathname)}`)}
+                className="flex items-center gap-2 px-6 py-3 rounded-xl bg-white/20 hover:bg-white/30 text-white font-medium transition-all backdrop-blur-sm border border-white/30"
+                data-testid="manager-signin-button"
+              >
+                <LogIn size={18} />
+                Sign In
+              </button>
+            )}
           </div>
         </div>
 
