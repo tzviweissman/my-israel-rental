@@ -2334,7 +2334,6 @@ const Dashboard = () => {
                     <option value="Found another property">Found another property</option>
                     <option value="Dates changed">Dates changed</option>
                     <option value="Emergency situation">Emergency situation</option>
-                    <option value="Financial constraints">Financial constraints</option>
                     <option value="Property doesn't meet expectations">Property doesn't meet expectations</option>
                     <option value="Other">Other (specify below)</option>
                   </select>
