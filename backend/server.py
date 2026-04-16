@@ -789,6 +789,18 @@ async def get_bookings(payload = Depends(verify_token)):
         query['owner_id'] = payload['user_id']
     
     bookings = await db.bookings.find(query, {"_id": 0}).to_list(1000)
+    
+    # Enrich bookings with property details
+    for booking in bookings:
+        property_data = await db.properties.find_one(
+            {"id": booking['property_id']}, 
+            {"_id": 0, "title": 1, "location": 1, "rental_type": 1}
+        )
+        if property_data:
+            booking['property_title'] = property_data.get('title', 'Unknown Property')
+            booking['property_location'] = property_data.get('location', '')
+            booking['property_rental_type'] = property_data.get('rental_type', '')
+    
     return bookings
 
 # Booking Cancellation Endpoints

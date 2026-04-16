@@ -205,7 +205,7 @@ const Navigation = () => {
                 {/* Notification Dropdown */}
                 {showNotifications && (
                   <div
-                    className="absolute right-0 top-full mt-3 w-96 max-h-[500px] overflow-y-auto rounded-2xl"
+                    className="absolute right-0 top-full mt-3 w-[calc(100vw-2rem)] sm:w-96 max-w-md max-h-[70vh] sm:max-h-[500px] overflow-y-auto rounded-2xl"
                     style={{
                       backgroundColor: '#1E6A6A',
                       border: '1.5px solid rgba(212,175,55,0.25)',
@@ -213,12 +213,12 @@ const Navigation = () => {
                     }}
                     data-testid="notification-dropdown"
                   >
-                    <div className="sticky top-0 bg-[#1E6A6A] border-b border-[#D4AF37]/20 p-4 flex items-center justify-between">
+                    <div className="sticky top-0 bg-[#1E6A6A] border-b border-[#D4AF37]/20 p-3 sm:p-4 flex items-center justify-between">
                       <h3 className="text-white font-bold text-sm">Notifications</h3>
                       {unreadCount > 0 && (
                         <button
                           onClick={markAllAsRead}
-                          className="text-xs text-[#D4AF37] hover:text-[#D4AF37]/80 transition-colors"
+                          className="text-xs text-[#D4AF37] hover:text-[#D4AF37]/80 transition-colors whitespace-nowrap"
                         >
                           Mark all as read
                         </button>
@@ -226,7 +226,7 @@ const Navigation = () => {
                     </div>
 
                     {notifications.length === 0 ? (
-                      <div className="p-8 text-center">
+                      <div className="p-6 sm:p-8 text-center">
                         <Bell size={32} className="mx-auto mb-3 text-white/30" />
                         <p className="text-white/60 text-sm">No notifications yet</p>
                       </div>
@@ -236,20 +236,20 @@ const Navigation = () => {
                           <button
                             key={notification.id}
                             onClick={() => handleNotificationClick(notification)}
-                            className={`w-full text-left p-4 hover:bg-white/5 transition-colors ${
+                            className={`w-full text-left p-3 sm:p-4 hover:bg-white/5 transition-colors ${
                               !notification.read ? 'bg-white/10' : ''
                             }`}
                             data-testid={`notification-${notification.id}`}
                           >
-                            <div className="flex items-start gap-3">
+                            <div className="flex items-start gap-2 sm:gap-3">
                               <div className={`w-2 h-2 rounded-full mt-2 flex-shrink-0 ${
                                 !notification.read ? 'bg-[#D4AF37]' : 'bg-transparent'
                               }`} />
                               <div className="flex-1 min-w-0">
-                                <p className={`text-sm ${!notification.read ? 'text-white font-medium' : 'text-white/70'}`}>
+                                <p className={`text-xs sm:text-sm break-words ${!notification.read ? 'text-white font-medium' : 'text-white/70'}`}>
                                   {notification.message}
                                 </p>
-                                <p className="text-xs text-white/40 mt-1">
+                                <p className="text-[10px] sm:text-xs text-white/40 mt-1">
                                   {new Date(notification.created_at).toLocaleString()}
                                 </p>
                               </div>
