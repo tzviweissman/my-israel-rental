@@ -717,6 +717,9 @@ const Dashboard = () => {
   const filteredLocations = locationOptions.flatMap(cityGroup => 
     cityGroup.neighborhoods
       .filter(neighborhood => {
+        // If no search term, show all locations
+        if (!locationSearch || locationSearch.trim() === '') return true;
+        
         const searchLower = locationSearch.toLowerCase();
         const neighborhoodLower = neighborhood.toLowerCase();
         const cityLower = cityGroup.city.toLowerCase();
@@ -1550,12 +1553,24 @@ const Dashboard = () => {
                     <label className="block text-sm font-medium mb-2">{t('property.propertyLocation')}</label>
                     <input
                       type="text"
-                      value={locationSearch || propertyForm.area}
+                      value={showLocationDropdown ? locationSearch : (propertyForm.area || '')}
                       onChange={(e) => {
                         setLocationSearch(e.target.value);
+                        if (e.target.value === '') {
+                          setPropertyForm({ ...propertyForm, area: '' });
+                        }
                         setShowLocationDropdown(true);
                       }}
-                      onFocus={() => setShowLocationDropdown(true)}
+                      onFocus={() => {
+                        setLocationSearch('');
+                        setShowLocationDropdown(true);
+                      }}
+                      onBlur={() => {
+                        // If no selection was made and field is empty, keep it empty
+                        if (!propertyForm.area && locationSearch === '') {
+                          setLocationSearch('');
+                        }
+                      }}
                       placeholder="Type to search location..."
                       className="w-full px-4 py-2 rounded-lg border border-[#E5E5E5] focus:outline-none focus:ring-2 focus:ring-[#1E6A6A]/50"
                       required={!propertyForm.area}
