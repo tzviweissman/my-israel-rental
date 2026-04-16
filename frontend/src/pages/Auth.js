@@ -13,6 +13,7 @@ const Auth = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { login } = useContext(AuthContext);
+  const redirectUrl = searchParams.get('redirect') || '/dashboard';
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -57,7 +58,7 @@ const Auth = () => {
       if (mode === 'signup' && formData.role === 'renter') {
         setShowWelcomePopups(true);
       } else {
-        navigate('/dashboard');
+        navigate(redirectUrl);
       }
     } catch (error) {
       toast.error(error.response?.data?.detail || t('auth.failed'));
