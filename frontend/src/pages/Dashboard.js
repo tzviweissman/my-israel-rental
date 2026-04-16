@@ -81,6 +81,7 @@ const Dashboard = () => {
   // Cancellation modal states
   const [cancelModal, setCancelModal] = useState({ show: false, bookingId: null, type: '' });
   const [cancelReason, setCancelReason] = useState('');
+  const [customCancelReason, setCustomCancelReason] = useState('');
   const [processingCancel, setProcessingCancel] = useState(false);
   // Location search states
   const [locationSearch, setLocationSearch] = useState('');
@@ -203,31 +204,49 @@ const Dashboard = () => {
   };
 
   const submitCancellation = async () => {
-    if (!cancelReason.trim()) {
+    // For request type, check if reason is selected
+    if (cancelModal.type === 'request' && !cancelReason) {
+      toast.error('Please select a cancellation reason');
+      return;
+    }
+    
+    // If "Other" is selected, require custom reason
+    if (cancelModal.type === 'request' && cancelReason === 'Other' && !customCancelReason.trim()) {
+      toast.error('Please provide a detailed reason');
+      return;
+    }
+    
+    // For other types, require text reason
+    if (cancelModal.type !== 'request' && !cancelReason.trim()) {
       toast.error('Please provide a reason');
       return;
     }
+    
     setProcessingCancel(true);
     try {
       const { bookingId, type } = cancelModal;
+      // Use custom reason if "Other" selected, otherwise use dropdown value
+      const finalReason = cancelReason === 'Other' ? customCancelReason : cancelReason;
+      
       if (type === 'cancel') {
-        await axios.post(`${API}/bookings/${bookingId}/cancel`, { reason: cancelReason }, {
+        await axios.post(`${API}/bookings/${bookingId}/cancel`, { reason: finalReason }, {
           headers: { Authorization: `Bearer ${token}` }
         });
         toast.success('Booking cancelled');
       } else if (type === 'request') {
-        await axios.post(`${API}/bookings/${bookingId}/request-cancel`, { reason: cancelReason }, {
+        await axios.post(`${API}/bookings/${bookingId}/request-cancel`, { reason: finalReason }, {
           headers: { Authorization: `Bearer ${token}` }
         });
         toast.success('Cancellation request submitted');
       } else if (type === 'deny') {
-        await axios.post(`${API}/bookings/${bookingId}/deny-cancel`, { denial_reason: cancelReason }, {
+        await axios.post(`${API}/bookings/${bookingId}/deny-cancel`, { denial_reason: finalReason }, {
           headers: { Authorization: `Bearer ${token}` }
         });
         toast.success('Cancellation request denied');
       }
       setCancelModal({ show: false, bookingId: null, type: '' });
       setCancelReason('');
+      setCustomCancelReason('');
       fetchBookings();
     } catch (error) {
       toast.error('Failed to process cancellation');
@@ -2292,23 +2311,59 @@ const Dashboard = () => {
 
         {/* Cancellation Modal */}
         {cancelModal.show && (
-          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50" onClick={() => setCancelModal({ show: false, bookingId: null, type: '' })}>
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50" onClick={() => { setCancelModal({ show: false, bookingId: null, type: '' }); setCancelReason(''); setCustomCancelReason(''); }}>
             <div className="bg-white rounded-2xl p-6 max-w-md w-full mx-4" onClick={(e) => e.stopPropagation()}>
               <h3 className="text-xl font-bold mb-4">
                 {cancelModal.type === 'cancel' && 'Cancel Booking'}
                 {cancelModal.type === 'request' && 'Request Cancellation'}
                 {cancelModal.type === 'deny' && 'Deny Cancellation Request'}
               </h3>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                {cancelModal.type === 'deny' ? 'Reason for denial' : 'Reason for cancellation'}
-              </label>
-              <textarea
-                value={cancelReason}
-                onChange={(e) => setCancelReason(e.target.value)}
-                placeholder="Please provide a detailed reason..."
-                rows={4}
-                className="w-full px-4 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#1E6A6A]/30 focus:border-[#1E6A6A] text-sm"
-              />
+              
+              {cancelModal.type === 'request' ? (
+                <>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Reason for cancellation
+                  </label>
+                  <select
+                    value={cancelReason}
+                    onChange={(e) => setCancelReason(e.target.value)}
+                    className="w-full px-4 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#1E6A6A]/30 focus:border-[#1E6A6A] text-sm mb-3"
+                  >
+                    <option value="">Select a reason...</option>
+                    <option value="Change of plans">Change of plans</option>
+                    <option value="Found another property">Found another property</option>
+                    <option value="Dates changed">Dates changed</option>
+                    <option value="Emergency situation">Emergency situation</option>
+                    <option value="Financial constraints">Financial constraints</option>
+                    <option value="Property doesn't meet expectations">Property doesn't meet expectations</option>
+                    <option value="Other">Other (specify below)</option>
+                  </select>
+                  
+                  {cancelReason === 'Other' && (
+                    <textarea
+                      value={customCancelReason}
+                      onChange={(e) => setCustomCancelReason(e.target.value)}
+                      placeholder="Please provide a detailed reason..."
+                      rows={4}
+                      className="w-full px-4 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#1E6A6A]/30 focus:border-[#1E6A6A] text-sm"
+                    />
+                  )}
+                </>
+              ) : (
+                <>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    {cancelModal.type === 'deny' ? 'Reason for denial' : 'Reason for cancellation'}
+                  </label>
+                  <textarea
+                    value={cancelReason}
+                    onChange={(e) => setCancelReason(e.target.value)}
+                    placeholder="Please provide a detailed reason..."
+                    rows={4}
+                    className="w-full px-4 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#1E6A6A]/30 focus:border-[#1E6A6A] text-sm"
+                  />
+                </>
+              )}
+              
               <div className="flex gap-3 mt-4">
                 <button
                   onClick={submitCancellation}
@@ -2321,6 +2376,7 @@ const Dashboard = () => {
                   onClick={() => {
                     setCancelModal({ show: false, bookingId: null, type: '' });
                     setCancelReason('');
+                    setCustomCancelReason('');
                   }}
                   className="px-4 py-2 rounded-lg text-sm font-medium border border-gray-300 hover:bg-gray-50 transition-colors"
                 >
