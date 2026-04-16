@@ -248,6 +248,8 @@ class BookingCreate(BaseModel):
     start_date: str
     end_date: str
     message: Optional[str] = None
+    contract_signed: Optional[bool] = False
+    signature_data: Optional[str] = None  # Base64 encoded signature image
 
 class ChatMessage(BaseModel):
     property_id: str
@@ -734,11 +736,23 @@ async def create_booking(booking_data: BookingCreate, payload = Depends(verify_t
     if not property_data:
         raise HTTPException(status_code=404, detail="Property not found")
     
+    # Check if property requires contract signature
+    rental_type = property_data.get('rental_type', '')
+    has_contract = bool(property_data.get('contract_url'))
+    
+    if has_contract and rental_type in ['long-term', 'short-term']:
+        if not booking_data.contract_signed or not booking_data.signature_data:
+            raise HTTPException(status_code=400, detail="Contract signature required for this property")
+    
     booking_id = str(uuid.uuid4())
     booking_doc = booking_data.model_dump()
     booking_doc['id'] = booking_id
     booking_doc['renter_id'] = payload['user_id']
     booking_doc['owner_id'] = property_data['owner_id']
+    
+    # Add signature timestamp if contract was signed
+    if booking_data.contract_signed and booking_data.signature_data:
+        booking_doc['contract_signed_at'] = datetime.now(timezone.utc).isoformat()
     
     # Auto-confirm for vacation rentals, pending for long-term and short-term
     if property_data.get('rental_type') == 'vacation':
@@ -1666,6 +1680,108 @@ async def submit_contact_form(request: ContactRequest):
     
     await db.contacts.insert_one(contact_doc)
     return {"message": "Contact request submitted successfully"}
+
+
+# --- Property Contracts ---
+
+@api_router.post("/properties/{property_id}/contract")
+async def upload_property_contract(
+    property_id: str,
+    file: UploadFile = File(...),
+    payload=Depends(verify_token)
+):
+    """Upload contract for a property (owner/manager only)"""
+    # Verify property exists and user is owner
+    property_data = await db.properties.find_one({"id": property_id}, {"_id": 0})
+    if not property_data:
+        raise HTTPException(status_code=404, detail="Property not found")
+    
+    if property_data['owner_id'] != payload['user_id']:
+        raise HTTPException(status_code=403, detail="Not authorized")
+    
+    # Check if property is long-term or short-term
+    rental_type = property_data.get('rental_type', '')
+    if rental_type not in ['long-term', 'short-term']:
+        raise HTTPException(status_code=400, detail="Contracts only available for long-term and short-term rentals")
+    
+    # Validate file type (PDF only for contracts)
+    if not file.content_type or file.content_type != 'application/pdf':
+        raise HTTPException(status_code=400, detail="Only PDF files are allowed for contracts")
+    
+    # Save file
+    UPLOAD_DIR = ROOT_DIR / "uploads"
+    UPLOAD_DIR.mkdir(exist_ok=True)
+    file_id = str(uuid.uuid4())
+    filename = f"contract_{file_id}.pdf"
+    file_path = UPLOAD_DIR / filename
+    
+    size = 0
+    MAX_CONTRACT_SIZE = 10 * 1024 * 1024  # 10MB
+    with open(file_path, "wb") as f:
+        while chunk := await file.read(1024 * 256):
+            size += len(chunk)
+            if size > MAX_CONTRACT_SIZE:
+                f.close()
+                file_path.unlink(missing_ok=True)
+                raise HTTPException(status_code=413, detail="Contract file too large. Max 10MB")
+            f.write(chunk)
+    
+    contract_url = f"/api/uploads/{filename}"
+    
+    # Update property with contract URL
+    await db.properties.update_one(
+        {"id": property_id},
+        {"$set": {
+            "contract_url": contract_url,
+            "contract_uploaded_at": datetime.now(timezone.utc).isoformat()
+        }}
+    )
+    
+    return {"contract_url": contract_url, "message": "Contract uploaded successfully"}
+
+
+@api_router.get("/properties/{property_id}/contract")
+async def get_property_contract(property_id: str):
+    """Get contract details for a property"""
+    property_data = await db.properties.find_one(
+        {"id": property_id}, 
+        {"_id": 0, "contract_url": 1, "contract_uploaded_at": 1, "rental_type": 1}
+    )
+    if not property_data:
+        raise HTTPException(status_code=404, detail="Property not found")
+    
+    return {
+        "has_contract": bool(property_data.get('contract_url')),
+        "contract_url": property_data.get('contract_url'),
+        "uploaded_at": property_data.get('contract_uploaded_at'),
+        "rental_type": property_data.get('rental_type')
+    }
+
+
+@api_router.delete("/properties/{property_id}/contract")
+async def delete_property_contract(property_id: str, payload=Depends(verify_token)):
+    """Delete contract for a property"""
+    property_data = await db.properties.find_one({"id": property_id}, {"_id": 0})
+    if not property_data:
+        raise HTTPException(status_code=404, detail="Property not found")
+    
+    if property_data['owner_id'] != payload['user_id']:
+        raise HTTPException(status_code=403, detail="Not authorized")
+    
+    # Delete file from disk
+    if property_data.get('contract_url'):
+        filename = property_data['contract_url'].split('/')[-1]
+        file_path = ROOT_DIR / "uploads" / filename
+        file_path.unlink(missing_ok=True)
+    
+    # Remove from database
+    await db.properties.update_one(
+        {"id": property_id},
+        {"$unset": {"contract_url": "", "contract_uploaded_at": ""}}
+    )
+    
+    return {"message": "Contract deleted successfully"}
+
 
 UPLOAD_DIR = ROOT_DIR / "uploads"
 UPLOAD_DIR.mkdir(exist_ok=True)

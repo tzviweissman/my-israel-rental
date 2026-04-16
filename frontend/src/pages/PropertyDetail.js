@@ -29,6 +29,11 @@ const PropertyDetail = () => {
   const [blockedDates, setBlockedDates] = useState([]);
   const [isLiked, setIsLiked] = useState(false);
   const [shareCopied, setShareCopied] = useState(false);
+  const [propertyContract, setPropertyContract] = useState(null);
+  const [showSignatureModal, setShowSignatureModal] = useState(false);
+  const [signatureData, setSignatureData] = useState(null);
+  const [isDrawing, setIsDrawing] = useState(false);
+  const signatureCanvasRef = React.useRef(null);
   
   // Determine where user came from
   const isFromDashboard = document.referrer.includes('/dashboard');
@@ -72,6 +77,17 @@ const PropertyDetail = () => {
     try {
       const response = await axios.get(`${API}/properties/${id}`);
       setProperty(response.data);
+      
+      // Fetch contract if property is long-term or short-term
+      if (response.data.rental_type === 'long-term' || response.data.rental_type === 'short-term') {
+        try {
+          const contractRes = await axios.get(`${API}/properties/${id}/contract`);
+          setPropertyContract(contractRes.data);
+        } catch (err) {
+          setPropertyContract(null);
+        }
+      }
+      
       // Fetch blocked dates
       const blockedRes = await axios.get(`${API}/properties/${id}/blocked-dates`);
       const allBlocked = [...(blockedRes.data.internal || []), ...(blockedRes.data.external || [])];
@@ -96,18 +112,83 @@ const PropertyDetail = () => {
       return;
     }
 
+    // Check if contract signature is required
+    if (propertyContract?.has_contract && !signatureData) {
+      setShowSignatureModal(true);
+      return;
+    }
+
     try {
       await axios.post(`${API}/bookings`, {
         property_id: id,
-        ...bookingData
+        ...bookingData,
+        contract_signed: !!signatureData,
+        signature_data: signatureData
       }, {
         headers: { Authorization: `Bearer ${token}` }
       });
       toast.success('Booking request sent successfully!');
       setShowBooking(false);
+      setSignatureData(null);
+      setShowSignatureModal(false);
     } catch (error) {
-      toast.error('Failed to create booking');
+      toast.error(error.response?.data?.detail || 'Failed to create booking');
     }
+  };
+
+  // Signature canvas handlers
+  const startDrawing = (e) => {
+    const canvas = signatureCanvasRef.current;
+    const rect = canvas.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    const ctx = canvas.getContext('2d');
+    ctx.beginPath();
+    ctx.moveTo(x, y);
+    setIsDrawing(true);
+  };
+
+  const draw = (e) => {
+    if (!isDrawing) return;
+    const canvas = signatureCanvasRef.current;
+    const rect = canvas.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    const ctx = canvas.getContext('2d');
+    ctx.lineTo(x, y);
+    ctx.stroke();
+  };
+
+  const stopDrawing = () => {
+    setIsDrawing(false);
+  };
+
+  const clearSignature = () => {
+    const canvas = signatureCanvasRef.current;
+    const ctx = canvas.getContext('2d');
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    setSignatureData(null);
+  };
+
+  const saveSignature = () => {
+    const canvas = signatureCanvasRef.current;
+    const dataUrl = canvas.toDataURL('image/png');
+    setSignatureData(dataUrl);
+    setShowSignatureModal(false);
+    handleBooking(); // Proceed with booking after signature
+  };
+
+  const handleSignatureImageUpload = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setSignatureData(reader.result);
+      setShowSignatureModal(false);
+      handleBooking(); // Proceed with booking after signature
+    };
+    reader.readAsDataURL(file);
   };
 
   const handleChat = () => {
@@ -521,6 +602,81 @@ const PropertyDetail = () => {
           </div>
         </div>
       </div>
+
+      {/* Signature Modal */}
+      {showSignatureModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-6">
+          <div className="bg-white rounded-2xl p-8 max-w-2xl w-full">
+            <h2 className="text-2xl font-bold mb-4">Sign Contract</h2>
+            <p className="text-sm text-gray-600 mb-4">
+              This property requires a signed contract. Please sign below or upload your signature.
+            </p>
+            
+            {propertyContract?.contract_url && (
+              <a
+                href={`${API.replace('/api', '')}${propertyContract.contract_url}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-sm text-[#1E6A6A] hover:text-[#D4AF37] underline mb-4 block"
+              >
+                View Contract (PDF)
+              </a>
+            )}
+
+            <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 mb-4">
+              <canvas
+                ref={signatureCanvasRef}
+                width={600}
+                height={200}
+                className="w-full cursor-crosshair bg-gray-50 rounded"
+                onMouseDown={startDrawing}
+                onMouseMove={draw}
+                onMouseUp={stopDrawing}
+                onMouseLeave={stopDrawing}
+              />
+              <p className="text-xs text-gray-500 mt-2 text-center">Draw your signature above</p>
+            </div>
+
+            <div className="flex items-center gap-3 mb-4">
+              <div className="flex-1 border-t border-gray-300"></div>
+              <span className="text-xs text-gray-500">OR</span>
+              <div className="flex-1 border-t border-gray-300"></div>
+            </div>
+
+            <label className="block w-full px-4 py-3 rounded-lg border-2 border-dashed border-gray-300 text-center text-sm font-medium cursor-pointer hover:border-[#1E6A6A] transition-colors mb-4">
+              Upload Signature Image
+              <input
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={handleSignatureImageUpload}
+              />
+            </label>
+
+            <div className="flex gap-3">
+              <button
+                onClick={clearSignature}
+                className="px-4 py-2 rounded-lg border border-gray-300 text-sm font-medium hover:bg-gray-50"
+              >
+                Clear
+              </button>
+              <button
+                onClick={saveSignature}
+                className="flex-1 px-4 py-2 rounded-lg text-sm font-medium text-white"
+                style={{ backgroundColor: '#1E6A6A' }}
+              >
+                Sign & Continue
+              </button>
+              <button
+                onClick={() => setShowSignatureModal(false)}
+                className="px-4 py-2 rounded-lg border border-gray-300 text-sm font-medium hover:bg-gray-50"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

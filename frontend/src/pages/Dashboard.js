@@ -421,6 +421,45 @@ const Dashboard = () => {
     }
   };
 
+  const handleContractUpload = async (propertyId, file) => {
+    if (!file) return;
+    if (file.type !== 'application/pdf') {
+      toast.error('Only PDF files are allowed for contracts');
+      return;
+    }
+    
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      
+      await axios.post(`${API}/properties/${propertyId}/contract`, formData, {
+        headers: { 
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'multipart/form-data'
+        }
+      });
+      
+      toast.success('Contract uploaded successfully!');
+      fetchProperties();
+    } catch (error) {
+      toast.error(error.response?.data?.detail || 'Failed to upload contract');
+    }
+  };
+
+  const handleDeleteContract = async (propertyId) => {
+    if (!window.confirm('Are you sure you want to delete this contract?')) return;
+    
+    try {
+      await axios.delete(`${API}/properties/${propertyId}/contract`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      toast.success('Contract deleted successfully!');
+      fetchProperties();
+    } catch (error) {
+      toast.error('Failed to delete contract');
+    }
+  };
+
   const getShareableLink = () => {
     return `${window.location.origin}/manager/${user.id}`;
   };
@@ -2121,6 +2160,44 @@ const Dashboard = () => {
                         </button>
                       </div>
                     </div>
+                    {/* Contract Upload for Long-Term/Short-Term */}
+                    {(property.rental_type === 'long-term' || property.rental_type === 'short-term') && (
+                      <div className="mt-3 pt-3 border-t border-gray-100">
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="text-xs font-medium text-gray-700">Property Contract</span>
+                          {property.contract_url && (
+                            <a
+                              href={`${API.replace('/api', '')}${property.contract_url}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-xs text-[#1E6A6A] hover:text-[#D4AF37] flex items-center gap-1"
+                            >
+                              <FileText size={12} /> View
+                            </a>
+                          )}
+                        </div>
+                        <label className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-xs font-medium cursor-pointer transition-all border border-dashed"
+                          style={{ borderColor: property.contract_url ? '#D4AF37' : '#ccc', backgroundColor: property.contract_url ? '#f5f5f0' : 'transparent', color: property.contract_url ? '#1E6A6A' : '#666' }}
+                        >
+                          <Upload size={14} />
+                          {property.contract_url ? 'Replace Contract' : 'Upload Contract (PDF)'}
+                          <input
+                            type="file"
+                            accept=".pdf"
+                            className="hidden"
+                            onChange={(e) => handleContractUpload(property.id, e.target.files[0])}
+                          />
+                        </label>
+                        {property.contract_url && (
+                          <button
+                            onClick={() => handleDeleteContract(property.id)}
+                            className="w-full mt-2 text-xs text-red-500 hover:text-red-700 py-1"
+                          >
+                            Delete Contract
+                          </button>
+                        )}
+                      </div>
+                    )}
                     {/* iCal Sync for Vacation Properties */}
                     {property.rental_type === 'vacation' && (
                       <div className="mt-3 pt-3 border-t border-gray-100">
