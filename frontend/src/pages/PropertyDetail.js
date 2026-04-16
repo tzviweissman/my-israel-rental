@@ -123,12 +123,12 @@ const PropertyDetail = () => {
   }
 
   return (
-    <div className="min-h-screen -mt-[180px]" data-testid="property-detail-page">
-      {/* Mobile: White spacing area between nav and content */}
-      <div className="h-[100px] md:h-[130px] bg-white md:bg-transparent"></div>
+    <div className="min-h-screen" data-testid="property-detail-page">
+      {/* White spacing area between nav bar and content - ALL DEVICES */}
+      <div className="h-[90px] bg-white"></div>
       
-      <div className="max-w-7xl mx-auto px-6 pb-12 bg-white md:bg-transparent">
-        <button onClick={() => navigate(-1)} className="flex items-center gap-2 text-sm font-medium mb-4 md:mb-2 hover:text-[#D4AF37] transition-colors" data-testid="back-button">
+      <div className="max-w-7xl mx-auto px-6 pb-12 bg-white">
+        <button onClick={() => navigate(-1)} className="flex items-center gap-2 text-sm font-medium mb-6 hover:text-[#D4AF37] transition-colors" data-testid="back-button">
           <ArrowLeft size={18} />
           {user && user.role !== 'renter' ? t('property.backToDashboard') : t('property.backToListings')}
         </button>
