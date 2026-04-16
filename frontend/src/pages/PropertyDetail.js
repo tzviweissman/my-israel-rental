@@ -123,15 +123,15 @@ const PropertyDetail = () => {
   }
 
   return (
-    <div className="min-h-screen -mt-[180px] pt-[130px]" data-testid="property-detail-page">
+    <div className="min-h-screen -mt-[180px] pt-[150px] md:pt-[130px]" data-testid="property-detail-page">
       <div className="max-w-7xl mx-auto px-6 pt-0 pb-12">
-        <button onClick={() => navigate(-1)} className="flex items-center gap-2 text-sm font-medium mb-2 hover:text-[#D4AF37] transition-colors" data-testid="back-button">
+        <button onClick={() => navigate(-1)} className="flex items-center gap-2 text-sm font-medium mb-4 md:mb-2 hover:text-[#D4AF37] transition-colors" data-testid="back-button">
           <ArrowLeft size={18} />
           {user && user.role !== 'renter' ? t('property.backToDashboard') : t('property.backToListings')}
         </button>
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <div className="lg:col-span-2">
-            <div className="mb-6">
+            <div className="mb-6 mt-2 md:mt-0">
               {property.images && property.images.length > 0 ? (
                 <div className="relative" data-testid="image-gallery">
                   <div className="overflow-hidden rounded-2xl">
