@@ -272,7 +272,7 @@ const Auth = () => {
   // --- Login / Signup View ---
   return (
     <div className="min-h-screen flex items-center justify-center px-6 pt-20 pb-12">
-      {showWelcomePopups && <WelcomePopups onDismiss={() => { setShowWelcomePopups(false); navigate('/dashboard'); }} />}
+      {showWelcomePopups && <WelcomePopups onDismiss={() => { setShowWelcomePopups(false); navigate(redirectUrl); }} />}
       <div className="w-full max-w-md">
         <div className="bg-white rounded-2xl p-8 border border-[#E5E5E5]">
           <h2 className="text-3xl font-bold mb-8 text-center" style={{ fontFamily: 'Playfair Display' }}>

@@ -29,6 +29,9 @@ const PropertyDetail = () => {
   const [blockedDates, setBlockedDates] = useState([]);
   const [isLiked, setIsLiked] = useState(false);
   const [shareCopied, setShareCopied] = useState(false);
+  
+  // Determine where user came from
+  const isFromDashboard = document.referrer.includes('/dashboard');
 
   useEffect(() => {
     axios.get(`${API}/exchange-rate`).then(res => setExchangeRate(res.data)).catch(() => setExchangeRate({ usd_to_ils: 3.65, ils_to_usd: 0.274 }));
@@ -89,7 +92,7 @@ const PropertyDetail = () => {
 
   const handleBooking = async () => {
     if (!user) {
-      navigate('/auth/login');
+      navigate(`/auth/login?redirect=${encodeURIComponent(`/property/${id}`)}`);
       return;
     }
 
@@ -109,7 +112,7 @@ const PropertyDetail = () => {
 
   const handleChat = () => {
     if (!user) {
-      navigate('/auth/login');
+      navigate(`/auth/login?redirect=${encodeURIComponent(`/property/${id}`)}`);
       return;
     }
     navigate(`/chat/${id}`);
@@ -138,9 +141,9 @@ const PropertyDetail = () => {
       
       <div className="max-w-7xl mx-auto px-6 pb-12 bg-white">
         <div className="flex items-center justify-between mb-6">
-          <button onClick={() => user ? navigate('/dashboard') : navigate(-1)} className="flex items-center gap-2 text-sm font-medium hover:text-[#D4AF37] transition-colors" data-testid="back-button">
+          <button onClick={() => navigate(-1)} className="flex items-center gap-2 text-sm font-medium hover:text-[#D4AF37] transition-colors" data-testid="back-button">
             <ArrowLeft size={18} />
-            {user ? 'Back to Dashboard' : t('property.backToListings')}
+            {isFromDashboard ? 'Back to Dashboard' : 'Back to Listings'}
           </button>
           <button 
             onClick={handleShare}
