@@ -1487,6 +1487,7 @@ const Dashboard = () => {
                     >
                       <option value="apartment">{t('property.apartment')}</option>
                       <option value="house">{t('property.house')}</option>
+                      <option value="villa">Villa</option>
                     </select>
                   </div>
                   )}
