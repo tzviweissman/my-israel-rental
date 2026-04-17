@@ -534,6 +534,82 @@ const PropertyDetail = () => {
                         </span>
                       </button>
                     </div>
+                    
+                    {/* Quick Select Buttons for Longer Stays */}
+                    <div className="mt-3">
+                      <p className="text-xs text-gray-500 mb-2">Quick select:</p>
+                      <div className="flex gap-2 flex-wrap">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const from = new Date();
+                            from.setDate(from.getDate() + 1); // Start tomorrow
+                            const to = new Date(from);
+                            to.setMonth(to.getMonth() + 3); // +3 months
+                            setDateRange({ from, to });
+                            setBookingData(prev => ({
+                              ...prev,
+                              start_date: format(from, 'yyyy-MM-dd'),
+                              end_date: format(to, 'yyyy-MM-dd')
+                            }));
+                          }}
+                          className="px-3 py-1.5 rounded-lg border border-[#1E6A6A] text-[#1E6A6A] hover:bg-[#1E6A6A] hover:text-white text-xs font-medium transition-colors"
+                        >
+                          + 3 Months
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const from = new Date();
+                            from.setDate(from.getDate() + 1);
+                            const to = new Date(from);
+                            to.setMonth(to.getMonth() + 6); // +6 months
+                            setDateRange({ from, to });
+                            setBookingData(prev => ({
+                              ...prev,
+                              start_date: format(from, 'yyyy-MM-dd'),
+                              end_date: format(to, 'yyyy-MM-dd')
+                            }));
+                          }}
+                          className="px-3 py-1.5 rounded-lg border border-[#1E6A6A] text-[#1E6A6A] hover:bg-[#1E6A6A] hover:text-white text-xs font-medium transition-colors"
+                        >
+                          + 6 Months
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const from = new Date();
+                            from.setDate(from.getDate() + 1);
+                            const to = new Date(from);
+                            to.setFullYear(to.getFullYear() + 1); // +1 year
+                            setDateRange({ from, to });
+                            setBookingData(prev => ({
+                              ...prev,
+                              start_date: format(from, 'yyyy-MM-dd'),
+                              end_date: format(to, 'yyyy-MM-dd')
+                            }));
+                          }}
+                          className="px-3 py-1.5 rounded-lg border border-[#1E6A6A] text-[#1E6A6A] hover:bg-[#1E6A6A] hover:text-white text-xs font-medium transition-colors"
+                        >
+                          + 1 Year
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setDateRange({ from: undefined, to: undefined });
+                            setBookingData(prev => ({
+                              ...prev,
+                              start_date: '',
+                              end_date: ''
+                            }));
+                          }}
+                          className="px-3 py-1.5 rounded-lg border border-gray-300 text-gray-600 hover:bg-gray-50 text-xs font-medium transition-colors"
+                        >
+                          Clear
+                        </button>
+                      </div>
+                    </div>
+                    
                     {showCalendar === 'range' && (
                       <div className="mt-2 bg-white rounded-xl border border-[#E5E5E5] shadow-lg p-4 relative z-50" data-testid="booking-calendar">
                         <button
