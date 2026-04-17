@@ -244,7 +244,7 @@ class PropertyCreate(BaseModel):
     custom_cancellation_policy: Optional[str] = None
     available_from: Optional[str] = None  # For short-term/vacation
     starting_date: Optional[str] = None  # For long-term (fixed start date)
-    minimum_booking_days: Optional[int] = None  # Minimum booking length in days
+    minimum_booking_days: Optional[int] = None  # For vacation (in days), for others (in months)
 
 class BookingCreate(BaseModel):
     property_id: str

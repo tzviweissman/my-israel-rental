@@ -480,8 +480,10 @@ const PropertyDetail = () => {
                   <CalendarIcon size={18} className="text-gray-600" />
                   <span className="text-sm font-medium text-gray-700">Minimum Stay:</span>
                   <span className="text-sm font-bold text-gray-900">
-                    {property.minimum_booking_days} {property.minimum_booking_days === 1 ? 'day' : 'days'}
-                    {property.minimum_booking_days >= 30 && ` (≈${Math.round(property.minimum_booking_days / 30)} ${Math.round(property.minimum_booking_days / 30) === 1 ? 'month' : 'months'})`}
+                    {property.rental_type === 'vacation' 
+                      ? `${property.minimum_booking_days} ${property.minimum_booking_days === 1 ? 'day' : 'days'}`
+                      : `${property.minimum_booking_days} ${property.minimum_booking_days === 1 ? 'month' : 'months'}`
+                    }
                   </span>
                 </div>
               </div>
@@ -679,11 +681,17 @@ const PropertyDetail = () => {
                           onSelect={(range) => {
                             console.log('Date selected:', range);
                             
-                            // Handle minimum booking days
+                            // Handle minimum booking days/months
                             if (range?.from && !range?.to && property.minimum_booking_days) {
-                              const minDays = parseInt(property.minimum_booking_days);
+                              const minValue = parseInt(property.minimum_booking_days);
                               const minCheckout = new Date(range.from);
-                              minCheckout.setDate(minCheckout.getDate() + minDays);
+                              
+                              // For vacation: add days, for others: add months
+                              if (property.rental_type === 'vacation') {
+                                minCheckout.setDate(minCheckout.getDate() + minValue);
+                              } else {
+                                minCheckout.setMonth(minCheckout.getMonth() + minValue);
+                              }
                               
                               // Auto-set minimum checkout
                               const updatedRange = { from: range.from, to: minCheckout };

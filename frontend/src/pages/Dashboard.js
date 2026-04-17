@@ -1846,43 +1846,64 @@ const Dashboard = () => {
                 {/* Starting Date (Long-term only) OR Date Available (Others) */}
                 {propertyForm.rental_type === 'long-term' ? (
                   <div>
-                    <label className="block text-sm font-medium mb-2">Starting Date *</label>
-                    <input
-                      type="date"
-                      value={propertyForm.starting_date}
-                      onChange={(e) => setPropertyForm({ ...propertyForm, starting_date: e.target.value })}
-                      className="w-full px-4 py-2 rounded-lg border border-[#E5E5E5] focus:outline-none focus:ring-2 focus:ring-[#1E6A6A]/50"
-                      min={new Date().toISOString().split('T')[0]}
-                    />
-                    <p className="text-xs text-gray-500 mt-1">Fixed start date for this rental (cannot be changed by renters)</p>
+                    <label className="block text-sm font-medium mb-2 flex items-center gap-2">
+                      <CalendarIcon size={16} style={{ color: '#1E6A6A' }} />
+                      Starting Date *
+                    </label>
+                    <div className="relative">
+                      <input
+                        type="date"
+                        value={propertyForm.starting_date}
+                        onChange={(e) => setPropertyForm({ ...propertyForm, starting_date: e.target.value })}
+                        className="w-full px-4 py-3 rounded-lg border-2 border-[#1E6A6A]/30 focus:outline-none focus:ring-2 focus:ring-[#1E6A6A] focus:border-[#1E6A6A] text-base"
+                        style={{ colorScheme: 'light' }}
+                        min={new Date().toISOString().split('T')[0]}
+                      />
+                    </div>
+                    <p className="text-xs text-[#1E6A6A] mt-2 flex items-start gap-1">
+                      <span className="font-semibold">📌</span>
+                      Fixed start date for this rental (cannot be changed by renters)
+                    </p>
                   </div>
                 ) : (
                   <div>
-                    <label className="block text-sm font-medium mb-2">Date Available</label>
-                    <input
-                      type="date"
-                      value={propertyForm.available_from}
-                      onChange={(e) => setPropertyForm({ ...propertyForm, available_from: e.target.value })}
-                      className="w-full px-4 py-2 rounded-lg border border-[#E5E5E5] focus:outline-none focus:ring-2 focus:ring-[#1E6A6A]/50"
-                      min={new Date().toISOString().split('T')[0]}
-                    />
-                    <p className="text-xs text-gray-500 mt-1">The earliest date this property can be booked from</p>
+                    <label className="block text-sm font-medium mb-2 flex items-center gap-2">
+                      <CalendarIcon size={16} style={{ color: '#D4AF37' }} />
+                      Date Available
+                    </label>
+                    <div className="relative">
+                      <input
+                        type="date"
+                        value={propertyForm.available_from}
+                        onChange={(e) => setPropertyForm({ ...propertyForm, available_from: e.target.value })}
+                        className="w-full px-4 py-3 rounded-lg border-2 border-[#D4AF37]/30 focus:outline-none focus:ring-2 focus:ring-[#D4AF37] focus:border-[#D4AF37] text-base"
+                        style={{ colorScheme: 'light' }}
+                        min={new Date().toISOString().split('T')[0]}
+                      />
+                    </div>
+                    <p className="text-xs text-gray-500 mt-2">The earliest date this property can be booked from</p>
                   </div>
                 )}
 
                 {/* Minimum Booking Length */}
                 <div>
-                  <label className="block text-sm font-medium mb-2">Minimum Booking Length (Days)</label>
+                  <label className="block text-sm font-medium mb-2">
+                    {propertyForm.rental_type === 'vacation' 
+                      ? 'Minimum Booking Length (Days)' 
+                      : 'Minimum Booking Length (Months)'}
+                  </label>
                   <input
                     type="number"
                     value={propertyForm.minimum_booking_days}
                     onChange={(e) => setPropertyForm({ ...propertyForm, minimum_booking_days: e.target.value })}
-                    placeholder={propertyForm.rental_type === 'long-term' ? '365' : '30'}
+                    placeholder={propertyForm.rental_type === 'vacation' ? '7' : '12'}
                     className="w-full px-4 py-2 rounded-lg border border-[#E5E5E5] focus:outline-none focus:ring-2 focus:ring-[#1E6A6A]/50"
                     min="1"
                   />
                   <p className="text-xs text-gray-500 mt-1">
-                    Minimum number of days a renter must book (e.g., 30 days, 365 days)
+                    {propertyForm.rental_type === 'vacation'
+                      ? 'Minimum number of days a renter must book (e.g., 3, 7, 14 days)'
+                      : 'Minimum number of months a renter must book (e.g., 6, 12, 24 months)'}
                   </p>
                 </div>
 
