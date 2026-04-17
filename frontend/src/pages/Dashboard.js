@@ -90,6 +90,13 @@ const Dashboard = () => {
   const [processingCancel, setProcessingCancel] = useState(false);
   // Accept booking confirmation modal
   const [acceptModal, setAcceptModal] = useState({ show: false, bookingId: null });
+  // Contract signing modal for renters
+  const [showContractSignModal, setShowContractSignModal] = useState(false);
+  const [contractBookingId, setContractBookingId] = useState(null);
+  const [signatureData, setSignatureData] = useState('');
+  const [signatureMethod, setSignatureMethod] = useState('draw');
+  const canvasRef = useRef(null);
+  const [isDrawing, setIsDrawing] = useState(false);
   // Location search states
   const [locationSearch, setLocationSearch] = useState('');
   const [showLocationDropdown, setShowLocationDropdown] = useState(false);
@@ -233,6 +240,85 @@ const Dashboard = () => {
     } catch (error) {
       console.error('Accept booking error:', error);
       toast.error(error.response?.data?.detail || 'Failed to accept booking');
+    }
+  };
+
+  // Contract signing functions
+  const openContractSignModal = (bookingId) => {
+    setContractBookingId(bookingId);
+    setShowContractSignModal(true);
+    setSignatureData('');
+    setSignatureMethod('draw');
+  };
+
+  const startDrawing = (e) => {
+    if (!canvasRef.current) return;
+    const canvas = canvasRef.current;
+    const rect = canvas.getBoundingClientRect();
+    const ctx = canvas.getContext('2d');
+    ctx.strokeStyle = '#000';
+    ctx.lineWidth = 2;
+    ctx.lineCap = 'round';
+    ctx.beginPath();
+    ctx.moveTo(e.clientX - rect.left, e.clientY - rect.top);
+    setIsDrawing(true);
+  };
+
+  const draw = (e) => {
+    if (!isDrawing || !canvasRef.current) return;
+    const canvas = canvasRef.current;
+    const rect = canvas.getBoundingClientRect();
+    const ctx = canvas.getContext('2d');
+    ctx.lineTo(e.clientX - rect.left, e.clientY - rect.top);
+    ctx.stroke();
+  };
+
+  const stopDrawing = () => {
+    setIsDrawing(false);
+    if (canvasRef.current) {
+      setSignatureData(canvasRef.current.toDataURL());
+    }
+  };
+
+  const clearSignature = () => {
+    if (canvasRef.current) {
+      const canvas = canvasRef.current;
+      const ctx = canvas.getContext('2d');
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+    }
+    setSignatureData('');
+  };
+
+  const handleSignatureUpload = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setSignatureData(reader.result);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const submitContractSignature = async () => {
+    if (!signatureData) {
+      toast.error('Please provide a signature');
+      return;
+    }
+
+    try {
+      await axios.post(`${API}/bookings/${contractBookingId}/sign-contract`, {
+        signature_data: signatureData
+      }, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      toast.success('Contract signed successfully!');
+      setShowContractSignModal(false);
+      setContractBookingId(null);
+      setSignatureData('');
+      await fetchBookings();
+    } catch (error) {
+      toast.error(error.response?.data?.detail || 'Failed to sign contract');
     }
   };
 
@@ -2564,6 +2650,7 @@ const Dashboard = () => {
                 const canRequestCancel = isRenter && ['pending', 'confirmed'].includes(booking.status);
                 const canApprove = isOwner && booking.status === 'cancellation_requested';
                 const canAccept = isOwner && booking.status === 'pending';
+                const needsSignature = isRenter && booking.status === 'confirmed' && booking.contract_sent_at && !booking.contract_signed;
 
                 return (
                   <div key={booking.id} className="bg-white rounded-2xl border border-gray-200 p-6" data-testid={`booking-row-${booking.id}`}>
@@ -2594,6 +2681,16 @@ const Dashboard = () => {
                         )}
                       </div>
                       <div className="flex gap-2">
+                        {needsSignature && (
+                          <button
+                            onClick={() => openContractSignModal(booking.id)}
+                            className="px-4 py-2 rounded-lg text-sm font-medium text-white hover:bg-opacity-90 transition-colors flex items-center gap-2"
+                            style={{ backgroundColor: '#D4AF37' }}
+                          >
+                            <FileText size={16} />
+                            Sign Contract
+                          </button>
+                        )}
                         {canAccept && (
                           <button
                             onClick={() => handleAcceptBooking(booking.id)}
@@ -2742,6 +2839,121 @@ const Dashboard = () => {
                 </button>
                 <button
                   onClick={() => setAcceptModal({ show: false, bookingId: null })}
+                  className="px-4 py-3 rounded-lg text-sm font-medium border border-gray-300 hover:bg-gray-50 transition-colors"
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Contract Signing Modal for Renters */}
+        {showContractSignModal && (
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" onClick={() => setShowContractSignModal(false)}>
+            <div className="bg-white rounded-2xl p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+              <div className="flex items-center justify-between mb-6">
+                <h3 className="text-2xl font-bold text-[#1E6A6A]">Sign Rental Contract</h3>
+                <button
+                  onClick={() => setShowContractSignModal(false)}
+                  className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                >
+                  <X size={24} />
+                </button>
+              </div>
+
+              <p className="text-gray-600 mb-6">
+                Please provide your signature to complete this booking. You can either draw your signature or upload an image of it.
+              </p>
+
+              {/* Signature Method Tabs */}
+              <div className="flex gap-2 mb-4">
+                <button
+                  onClick={() => setSignatureMethod('draw')}
+                  className={`flex-1 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                    signatureMethod === 'draw'
+                      ? 'bg-[#1E6A6A] text-white'
+                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  }`}
+                >
+                  Draw Signature
+                </button>
+                <button
+                  onClick={() => setSignatureMethod('upload')}
+                  className={`flex-1 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                    signatureMethod === 'upload'
+                      ? 'bg-[#1E6A6A] text-white'
+                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  }`}
+                >
+                  Upload Signature
+                </button>
+              </div>
+
+              {/* Draw Signature */}
+              {signatureMethod === 'draw' && (
+                <div className="mb-6">
+                  <canvas
+                    ref={canvasRef}
+                    width={600}
+                    height={200}
+                    onMouseDown={startDrawing}
+                    onMouseMove={draw}
+                    onMouseUp={stopDrawing}
+                    onMouseLeave={stopDrawing}
+                    className="w-full border-2 border-gray-300 rounded-lg cursor-crosshair bg-white"
+                    style={{ touchAction: 'none' }}
+                  />
+                  <button
+                    onClick={clearSignature}
+                    className="mt-2 px-4 py-2 rounded-lg text-sm font-medium border border-gray-300 hover:bg-gray-50 transition-colors"
+                  >
+                    Clear Signature
+                  </button>
+                </div>
+              )}
+
+              {/* Upload Signature */}
+              {signatureMethod === 'upload' && (
+                <div className="mb-6">
+                  <label className="flex flex-col items-center justify-center w-full h-48 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-[#1E6A6A] transition-colors">
+                    {signatureData ? (
+                      <img src={signatureData} alt="Signature" className="max-h-40 object-contain" />
+                    ) : (
+                      <div className="text-center">
+                        <Upload size={40} className="mx-auto mb-2 text-gray-400" />
+                        <p className="text-sm text-gray-600">Click to upload signature image</p>
+                      </div>
+                    )}
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleSignatureUpload}
+                      className="hidden"
+                    />
+                  </label>
+                </div>
+              )}
+
+              {/* Preview */}
+              {signatureData && (
+                <div className="mb-6 p-4 bg-gray-50 rounded-lg">
+                  <p className="text-sm font-medium text-gray-700 mb-2">Signature Preview:</p>
+                  <img src={signatureData} alt="Signature preview" className="max-h-32 border border-gray-300 rounded bg-white" />
+                </div>
+              )}
+
+              {/* Submit Buttons */}
+              <div className="flex gap-3">
+                <button
+                  onClick={submitContractSignature}
+                  disabled={!signatureData}
+                  className="flex-1 px-4 py-3 rounded-lg text-sm font-medium bg-[#D4AF37] text-white hover:bg-[#D4AF37]/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                >
+                  Sign Contract
+                </button>
+                <button
+                  onClick={() => setShowContractSignModal(false)}
                   className="px-4 py-3 rounded-lg text-sm font-medium border border-gray-300 hover:bg-gray-50 transition-colors"
                 >
                   Cancel
