@@ -211,7 +211,8 @@ const Dashboard = () => {
   };
 
   const handleAcceptBooking = async (bookingId) => {
-    if (!window.confirm('Accept this booking request? The dates will remain reserved.')) return;
+    // Removed window.confirm() as it's blocked in preview iframe sandbox
+    // Using direct acceptance with toast confirmation instead
     try {
       console.log('Accepting booking:', bookingId);
       const response = await axios.post(`${API}/bookings/${bookingId}/accept`, {}, {
