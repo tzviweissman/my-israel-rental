@@ -611,10 +611,10 @@ const PropertyDetail = () => {
                     </div>
                     
                     {showCalendar === 'range' && (
-                      <div className="mt-2 bg-white rounded-xl border border-[#E5E5E5] shadow-lg p-4 relative z-50" data-testid="booking-calendar">
+                      <div className="mt-2 bg-white rounded-xl border-2 border-[#1E6A6A] shadow-2xl p-4 relative z-[100]" data-testid="booking-calendar" style={{ pointerEvents: 'auto' }}>
                         <button
                           onClick={() => setShowCalendar(null)}
-                          className="absolute top-2 right-2 p-1 rounded-full hover:bg-gray-100 z-[60]"
+                          className="absolute top-2 right-2 p-1 rounded-full hover:bg-gray-100 z-[110]"
                         >
                           <X size={14} />
                         </button>
@@ -622,6 +622,7 @@ const PropertyDetail = () => {
                           mode="range"
                           selected={dateRange}
                           onSelect={(range) => {
+                            console.log('Date selected:', range);
                             setDateRange(range || { from: undefined, to: undefined });
                             if (range?.from) setBookingData(prev => ({ ...prev, start_date: format(range.from, 'yyyy-MM-dd') }));
                             if (range?.to) {
@@ -631,28 +632,29 @@ const PropertyDetail = () => {
                           }}
                           numberOfMonths={1}
                           disabled={[{ before: new Date() }, ...blockedDates.map(d => new Date(d))]}
-                          className="rounded-xl pointer-events-auto"
+                          className="rounded-xl"
+                          style={{ pointerEvents: 'auto' }}
                           classNames={{
                             months: "flex flex-col",
                             month: "space-y-3",
                             caption: "flex justify-center pt-1 relative items-center",
                             caption_label: "text-sm font-bold",
                             nav: "space-x-1 flex items-center",
-                            nav_button: "h-7 w-7 bg-transparent p-0 opacity-50 hover:opacity-100 inline-flex items-center justify-center rounded-md border border-[#E5E5E5] cursor-pointer",
+                            nav_button: "h-7 w-7 bg-transparent p-0 opacity-50 hover:opacity-100 inline-flex items-center justify-center rounded-md border border-[#E5E5E5]",
                             nav_button_previous: "absolute left-1",
                             nav_button_next: "absolute right-1",
-                            table: "w-full border-collapse pointer-events-auto",
+                            table: "w-full border-collapse",
                             head_row: "flex",
                             head_cell: "text-gray-500 rounded-md w-9 font-medium text-[0.75rem] uppercase",
                             row: "flex w-full mt-1",
-                            cell: "relative p-0 text-center text-sm pointer-events-auto",
-                            day: "h-9 w-9 p-0 font-normal rounded-full hover:bg-[#1E6A6A]/10 hover:border hover:border-[#1E6A6A] inline-flex items-center justify-center cursor-pointer text-gray-900 pointer-events-auto transition-all",
+                            cell: "relative p-0 text-center text-sm",
+                            day: "h-9 w-9 p-0 font-bold rounded-full hover:bg-[#1E6A6A] hover:text-white inline-flex items-center justify-center text-gray-900 transition-all text-base",
                             day_range_start: "day-range-start !bg-black !text-white rounded-full hover:!bg-black",
                             day_range_end: "day-range-end !bg-black !text-white rounded-full hover:!bg-black",
                             day_selected: "!bg-black !text-white hover:!bg-black focus:!bg-black",
-                            day_today: "font-bold text-[#D4AF37] border border-[#D4AF37]",
+                            day_today: "font-bold text-[#D4AF37] border-2 border-[#D4AF37]",
                             day_outside: "text-gray-300 opacity-50",
-                            day_disabled: "text-gray-300 opacity-30 cursor-not-allowed pointer-events-none",
+                            day_disabled: "text-gray-200 opacity-30 line-through",
                             day_range_middle: "aria-selected:bg-black/10 aria-selected:text-black",
                             day_hidden: "invisible",
                           }}
