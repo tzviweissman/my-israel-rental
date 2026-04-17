@@ -730,6 +730,18 @@ const PropertyDetail = () => {
                               }
                             }
                           }}
+                          defaultMonth={(() => {
+                            // Smart calendar navigation: jump to minimum checkout month
+                            if (property.rental_type === 'long-term' && property.starting_date && property.minimum_booking_days) {
+                              const startDate = new Date(property.starting_date);
+                              const minCheckout = new Date(startDate);
+                              minCheckout.setMonth(minCheckout.getMonth() + parseInt(property.minimum_booking_days));
+                              return minCheckout;
+                            } else if (dateRange?.from) {
+                              return dateRange.from;
+                            }
+                            return new Date();
+                          })()}
                           numberOfMonths={1}
                           disabled={[
                             { before: new Date() },
