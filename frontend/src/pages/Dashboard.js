@@ -88,6 +88,8 @@ const Dashboard = () => {
   const [cancelReason, setCancelReason] = useState('');
   const [customCancelReason, setCustomCancelReason] = useState('');
   const [processingCancel, setProcessingCancel] = useState(false);
+  // Accept booking confirmation modal
+  const [acceptModal, setAcceptModal] = useState({ show: false, bookingId: null });
   // Location search states
   const [locationSearch, setLocationSearch] = useState('');
   const [showLocationDropdown, setShowLocationDropdown] = useState(false);
@@ -211,8 +213,14 @@ const Dashboard = () => {
   };
 
   const handleAcceptBooking = async (bookingId) => {
-    // Removed window.confirm() as it's blocked in preview iframe sandbox
-    // Using direct acceptance with toast confirmation instead
+    // Show custom modal instead of window.confirm (which is blocked in preview)
+    setAcceptModal({ show: true, bookingId });
+  };
+
+  const confirmAcceptBooking = async () => {
+    const bookingId = acceptModal.bookingId;
+    setAcceptModal({ show: false, bookingId: null });
+    
     try {
       console.log('Accepting booking:', bookingId);
       const response = await axios.post(`${API}/bookings/${bookingId}/accept`, {}, {
@@ -220,7 +228,7 @@ const Dashboard = () => {
       });
       console.log('Accept response:', response.data);
       toast.success('Booking accepted successfully!');
-      await fetchBookings(); // Ensure we wait for refresh
+      await fetchBookings();
       console.log('Bookings refreshed after accept');
     } catch (error) {
       console.error('Accept booking error:', error);
@@ -2707,6 +2715,34 @@ const Dashboard = () => {
                     setCustomCancelReason('');
                   }}
                   className="px-4 py-2 rounded-lg text-sm font-medium border border-gray-300 hover:bg-gray-50 transition-colors"
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Accept Booking Confirmation Modal */}
+        {acceptModal.show && (
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50" onClick={() => setAcceptModal({ show: false, bookingId: null })}>
+            <div className="bg-white rounded-2xl p-6 max-w-md w-full mx-4" onClick={(e) => e.stopPropagation()}>
+              <h3 className="text-xl font-bold mb-4 text-[#1E6A6A]">Accept Booking Request</h3>
+              
+              <p className="text-gray-600 mb-6">
+                Are you sure you want to accept this booking request? The dates will be reserved and the renter will be notified.
+              </p>
+              
+              <div className="flex gap-3">
+                <button
+                  onClick={confirmAcceptBooking}
+                  className="flex-1 px-4 py-3 rounded-lg text-sm font-medium bg-[#1E6A6A] text-white hover:bg-[#1E6A6A]/90 transition-colors"
+                >
+                  Accept Booking
+                </button>
+                <button
+                  onClick={() => setAcceptModal({ show: false, bookingId: null })}
+                  className="px-4 py-3 rounded-lg text-sm font-medium border border-gray-300 hover:bg-gray-50 transition-colors"
                 >
                   Cancel
                 </button>
