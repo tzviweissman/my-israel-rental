@@ -659,12 +659,25 @@ const PropertyDetail = () => {
                         <button
                           type="button"
                           onClick={() => {
-                            setDateRange({ from: undefined, to: undefined });
-                            setBookingData(prev => ({
-                              ...prev,
-                              start_date: '',
-                              end_date: ''
-                            }));
+                            // For long-term rentals with fixed starting date, only clear checkout
+                            if (property.rental_type === 'long-term' && property.starting_date) {
+                              setDateRange({ 
+                                from: dateRange.from, // Keep the fixed starting date
+                                to: undefined 
+                              });
+                              setBookingData(prev => ({
+                                ...prev,
+                                end_date: '' // Only clear end date
+                              }));
+                            } else {
+                              // For other rentals, clear both dates
+                              setDateRange({ from: undefined, to: undefined });
+                              setBookingData(prev => ({
+                                ...prev,
+                                start_date: '',
+                                end_date: ''
+                              }));
+                            }
                           }}
                           className="px-3 py-1.5 rounded-lg border border-gray-300 text-gray-600 hover:bg-gray-50 text-xs font-medium transition-colors"
                         >
