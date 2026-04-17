@@ -49,7 +49,6 @@ const PropertyDetail = () => {
   
   const getBackButtonText = () => {
     if (isFromDashboard) return 'Back to Dashboard';
-    if (isFromManager) return 'Back to Manager Listings';
     return 'Back to Listings';
   };
 
