@@ -1855,42 +1855,63 @@ const Dashboard = () => {
                 {/* Starting Date (Long-term only) OR Date Available (Others) */}
                 {propertyForm.rental_type === 'long-term' ? (
                   <div>
-                    <label className="block text-sm font-medium mb-2 flex items-center gap-2">
-                      <Calendar size={16} style={{ color: '#1E6A6A' }} />
-                      Starting Date *
+                    <label className="block text-sm font-medium mb-3 flex items-center gap-2 text-gray-700">
+                      <div className="p-2 bg-[#1E6A6A]/10 rounded-lg">
+                        <Calendar size={18} style={{ color: '#1E6A6A' }} />
+                      </div>
+                      <span className="font-semibold">Starting Date *</span>
                     </label>
-                    <div className="relative">
+                    <div className="relative group">
                       <input
                         type="date"
                         value={propertyForm.starting_date}
                         onChange={(e) => setPropertyForm({ ...propertyForm, starting_date: e.target.value })}
-                        className="w-full px-4 py-3 rounded-lg border-2 border-[#1E6A6A]/30 focus:outline-none focus:ring-2 focus:ring-[#1E6A6A] focus:border-[#1E6A6A] text-base"
-                        style={{ colorScheme: 'light' }}
+                        className="w-full px-5 py-4 rounded-xl border-2 border-[#1E6A6A]/20 bg-white focus:outline-none focus:ring-3 focus:ring-[#1E6A6A]/20 focus:border-[#1E6A6A] transition-all duration-200 text-base font-medium text-gray-700 shadow-sm hover:border-[#1E6A6A]/40 hover:shadow-md cursor-pointer"
+                        style={{ 
+                          colorScheme: 'light',
+                          fontFamily: 'inherit'
+                        }}
                         min={new Date().toISOString().split('T')[0]}
                       />
+                      <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none">
+                        <Calendar size={20} className="text-[#1E6A6A]/40 group-hover:text-[#1E6A6A]/60 transition-colors" />
+                      </div>
                     </div>
-                    <p className="text-xs text-[#1E6A6A] mt-2 flex items-start gap-1">
-                      <span className="font-semibold">📌</span>
-                      Fixed start date for this rental (cannot be changed by renters)
-                    </p>
+                    <div className="mt-3 p-3 bg-[#1E6A6A]/5 rounded-lg border border-[#1E6A6A]/10">
+                      <p className="text-xs text-[#1E6A6A] flex items-start gap-2">
+                        <span className="text-base">📌</span>
+                        <span className="font-medium">Fixed start date for this long-term rental (cannot be changed by renters)</span>
+                      </p>
+                    </div>
                   </div>
                 ) : (
                   <div>
-                    <label className="block text-sm font-medium mb-2 flex items-center gap-2">
-                      <Calendar size={16} style={{ color: '#D4AF37' }} />
-                      Date Available
+                    <label className="block text-sm font-medium mb-3 flex items-center gap-2 text-gray-700">
+                      <div className="p-2 bg-[#D4AF37]/10 rounded-lg">
+                        <Calendar size={18} style={{ color: '#D4AF37' }} />
+                      </div>
+                      <span className="font-semibold">Date Available</span>
                     </label>
-                    <div className="relative">
+                    <div className="relative group">
                       <input
                         type="date"
                         value={propertyForm.available_from}
                         onChange={(e) => setPropertyForm({ ...propertyForm, available_from: e.target.value })}
-                        className="w-full px-4 py-3 rounded-lg border-2 border-[#D4AF37]/30 focus:outline-none focus:ring-2 focus:ring-[#D4AF37] focus:border-[#D4AF37] text-base"
-                        style={{ colorScheme: 'light' }}
+                        className="w-full px-5 py-4 rounded-xl border-2 border-[#D4AF37]/20 bg-white focus:outline-none focus:ring-3 focus:ring-[#D4AF37]/20 focus:border-[#D4AF37] transition-all duration-200 text-base font-medium text-gray-700 shadow-sm hover:border-[#D4AF37]/40 hover:shadow-md cursor-pointer"
+                        style={{ 
+                          colorScheme: 'light',
+                          fontFamily: 'inherit'
+                        }}
                         min={new Date().toISOString().split('T')[0]}
                       />
+                      <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none">
+                        <Calendar size={20} className="text-[#D4AF37]/40 group-hover:text-[#D4AF37]/60 transition-colors" />
+                      </div>
                     </div>
-                    <p className="text-xs text-gray-500 mt-2">The earliest date this property can be booked from</p>
+                    <p className="text-xs text-gray-500 mt-3 flex items-center gap-2">
+                      <span className="text-sm">ℹ️</span>
+                      <span>The earliest date this property can be booked from</span>
+                    </p>
                   </div>
                 )}
 

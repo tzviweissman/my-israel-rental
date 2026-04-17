@@ -91,3 +91,48 @@ h1, h2, h3, h4, h5, h6 {
 .scrollbar-hide::-webkit-scrollbar {
   display: none;
 }
+
+/* Professional Date Input Styling */
+input[type="date"] {
+  position: relative;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+}
+
+/* Enhance date input calendar icon */
+input[type="date"]::-webkit-calendar-picker-indicator {
+  position: absolute;
+  right: 12px;
+  cursor: pointer;
+  opacity: 0;
+  width: 24px;
+  height: 24px;
+}
+
+/* Firefox date input */
+input[type="date"]::-moz-calendar-picker-indicator {
+  opacity: 0;
+}
+
+/* Date input hover effect */
+input[type="date"]:hover {
+  box-shadow: 0 4px 12px rgba(30, 106, 106, 0.08);
+}
+
+/* Date input focus state */
+input[type="date"]:focus {
+  box-shadow: 0 0 0 3px rgba(30, 106, 106, 0.1), 0 4px 12px rgba(30, 106, 106, 0.15);
+}
+
+/* Placeholder styling for empty date */
+input[type="date"]:not(:valid):before {
+  content: attr(placeholder);
+  color: #9CA3AF;
+  margin-right: 0.5rem;
+}
+
+input[type="date"]:focus:before,
+input[type="date"]:valid:before {
+  content: "";
+}
