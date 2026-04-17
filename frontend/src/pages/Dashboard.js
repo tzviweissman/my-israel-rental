@@ -3,7 +3,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import axios from 'axios';
 import { API, AuthContext } from '../App';
-import { Plus, Edit, Trash2, Eye, MessageCircle, Upload, X, Image, Film, CalendarSync, Link2, Copy, Check, RefreshCw, FileText, KeyRound, EyeOff, Home, FileCheck, Sparkles, ClipboardList, ArrowRight, Send, Heart, MapPin, Bed, Bath, Loader2 } from 'lucide-react';
+import { Plus, Edit, Trash2, Eye, MessageCircle, Upload, X, Image, Film, CalendarSync, Link2, Copy, Check, RefreshCw, FileText, KeyRound, EyeOff, Home, FileCheck, Sparkles, ClipboardList, ArrowRight, Send, Heart, MapPin, Bed, Bath, Loader2, Calendar } from 'lucide-react';
 import { toast } from 'sonner';
 import ContractManager from '../components/ContractManager';
 
@@ -1856,7 +1856,7 @@ const Dashboard = () => {
                 {propertyForm.rental_type === 'long-term' ? (
                   <div>
                     <label className="block text-sm font-medium mb-2 flex items-center gap-2">
-                      <CalendarIcon size={16} style={{ color: '#1E6A6A' }} />
+                      <Calendar size={16} style={{ color: '#1E6A6A' }} />
                       Starting Date *
                     </label>
                     <div className="relative">
@@ -1877,7 +1877,7 @@ const Dashboard = () => {
                 ) : (
                   <div>
                     <label className="block text-sm font-medium mb-2 flex items-center gap-2">
-                      <CalendarIcon size={16} style={{ color: '#D4AF37' }} />
+                      <Calendar size={16} style={{ color: '#D4AF37' }} />
                       Date Available
                     </label>
                     <div className="relative">
