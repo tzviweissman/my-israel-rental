@@ -484,30 +484,8 @@ const PropertyDetail = () => {
                 })()}
               </div>
 
-              {!showBooking ? (
-                <div className="space-y-3">
-                  <button onClick={() => setShowBooking(true)} className="w-full primary-btn flex items-center justify-center gap-2" data-testid="book-now-button">
-                    <CalendarIcon size={20} />
-                    {t('property.book')}
-                  </button>
-                  <button onClick={handleChat} className="w-full secondary-btn flex items-center justify-center gap-2" data-testid="message-owner-button">
-                    <MessageCircle size={20} />
-                    {t('property.messageOwner')}
-                  </button>
-                  {property.owner_email && (
-                    <a
-                      href={`mailto:${property.owner_email}?subject=${encodeURIComponent(t('property.emailSubject') + ': ' + property.title)}`}
-                      className="w-full flex items-center justify-center gap-2 px-6 py-3 rounded-full text-sm font-medium border-2 transition-colors"
-                      style={{ borderColor: '#D4AF37', color: '#D4AF37' }}
-                      data-testid="email-owner-button"
-                    >
-                      <Mail size={20} />
-                      {t('property.emailOwner')}
-                    </a>
-                  )}
-                </div>
-              ) : (
-                <div className="space-y-4" data-testid="booking-form">
+              {/* Booking Form - Always Visible */}
+              <div className="space-y-4" data-testid="booking-form">
                   <div>
                     <label className="block text-sm font-medium mb-2">{t('property.checkIn')} & {t('property.checkOut')}</label>
                     <div className="grid grid-cols-2 gap-2">
@@ -680,20 +658,33 @@ const PropertyDetail = () => {
                       data-testid="booking-message"
                     ></textarea>
                   </div>
-                  <div className="flex gap-2">
-                    <button onClick={handleBooking} className="flex-1 primary-btn" data-testid="confirm-booking-button">
-                      {t('property.confirm')}
-                    </button>
-                    <button onClick={() => { setShowBooking(false); setShowCalendar(null); }} className="flex-1 secondary-btn" data-testid="cancel-booking-button">
-                      {t('dashboard.cancel')}
-                    </button>
-                  </div>
+                  <button onClick={handleBooking} className="w-full primary-btn" data-testid="confirm-booking-button">
+                    {t('property.confirm')}
+                  </button>
                 </div>
-              )}
+              </div>
+              
+              {/* Other Actions */}
+              <div className="space-y-3 mt-4 pt-4 border-t border-gray-200">
+                <button onClick={handleChat} className="w-full secondary-btn flex items-center justify-center gap-2" data-testid="message-owner-button">
+                  <MessageCircle size={20} />
+                  {t('property.messageOwner')}
+                </button>
+                {property.owner_email && (
+                  <a
+                    href={`mailto:${property.owner_email}?subject=${encodeURIComponent(t('property.emailSubject') + ': ' + property.title)}`}
+                    className="w-full flex items-center justify-center gap-2 px-6 py-3 rounded-full text-sm font-medium border-2 transition-colors"
+                    style={{ borderColor: '#D4AF37', color: '#D4AF37' }}
+                    data-testid="email-owner-button"
+                  >
+                    <Mail size={20} />
+                    {t('property.emailOwner')}
+                  </a>
+                )}
+              </div>
             </div>
           </div>
         </div>
-      </div>
 
       {/* Signature Modal */}
       {showSignatureModal && (
