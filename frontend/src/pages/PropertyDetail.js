@@ -679,17 +679,6 @@ const PropertyDetail = () => {
                       </div>
                     )}
                   </div>
-                  <div>
-                    <label className="block text-sm font-medium mb-1">{t('property.messageLabel')}</label>
-                    <textarea
-                      value={bookingData.message}
-                      onChange={(e) => setBookingData({ ...bookingData, message: e.target.value })}
-                      rows="2"
-                      placeholder={t('property.messagePlaceholder')}
-                      className="w-full px-3 py-2 rounded-lg border border-[#E5E5E5] focus:outline-none focus:ring-2 focus:ring-[#1E6A6A]/50 text-sm resize-none"
-                      data-testid="booking-message"
-                    ></textarea>
-                  </div>
                   
                   {/* Contact Actions - Above Reserve Booking */}
                   <div className="space-y-2">
