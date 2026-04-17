@@ -739,23 +739,14 @@ async def create_booking(booking_data: BookingCreate, payload = Depends(verify_t
     if not property_data:
         raise HTTPException(status_code=404, detail="Property not found")
     
-    # Check if property requires contract signature
-    rental_type = property_data.get('rental_type', '')
-    has_contract = bool(property_data.get('contract_url'))
-    
-    if has_contract and rental_type in ['long-term', 'short-term']:
-        if not booking_data.contract_signed or not booking_data.signature_data:
-            raise HTTPException(status_code=400, detail="Contract signature required for this property")
+    # No contract signature required at booking time
+    # Contract will be sent after owner accepts for long-term/short-term rentals
     
     booking_id = str(uuid.uuid4())
     booking_doc = booking_data.model_dump()
     booking_doc['id'] = booking_id
     booking_doc['renter_id'] = payload['user_id']
     booking_doc['owner_id'] = property_data['owner_id']
-    
-    # Add signature timestamp if contract was signed
-    if booking_data.contract_signed and booking_data.signature_data:
-        booking_doc['contract_signed_at'] = datetime.now(timezone.utc).isoformat()
     
     # Auto-confirm for vacation rentals, pending for long-term and short-term
     if property_data.get('rental_type') == 'vacation':
@@ -837,6 +828,11 @@ async def accept_booking(booking_id: str, payload=Depends(verify_token)):
     if booking['status'] != 'pending':
         raise HTTPException(status_code=400, detail="Only pending bookings can be accepted")
     
+    # Get property details
+    property_data = await db.properties.find_one({"id": booking['property_id']}, {"_id": 0})
+    if not property_data:
+        raise HTTPException(status_code=404, detail="Property not found")
+    
     # Update booking to confirmed
     await db.bookings.update_one(
         {"id": booking_id},
@@ -846,21 +842,69 @@ async def accept_booking(booking_id: str, payload=Depends(verify_token)):
         }}
     )
     
-    # Notify renter
-    property_data = await db.properties.find_one({"id": booking['property_id']}, {"_id": 0, "title": 1})
-    notification = {
-        "id": str(uuid.uuid4()),
-        "user_id": booking['renter_id'],
-        "type": "booking_confirmed",
-        "booking_id": booking_id,
-        "property_id": booking['property_id'],
-        "message": f"Your booking request for {property_data.get('title', 'the property')} has been accepted!",
-        "read": False,
-        "created_at": datetime.now(timezone.utc).isoformat()
-    }
-    await db.notifications.insert_one(notification)
-    
-    return {"message": "Booking accepted successfully"}
+    # Check if property has a contract
+    if property_data.get('contract_path'):
+        # Create a contract signing request for the renter
+        contract_sign_token = str(uuid.uuid4())
+        
+        # Store contract signing info in booking
+        await db.bookings.update_one(
+            {"id": booking_id},
+            {"$set": {
+                "contract_sign_token": contract_sign_token,
+                "contract_sent_at": datetime.now(timezone.utc).isoformat(),
+                "contract_signed": False
+            }}
+        )
+        
+        # Notify renter to sign the contract
+        renter_notification = {
+            "id": str(uuid.uuid4()),
+            "user_id": booking['renter_id'],
+            "type": "contract_pending",
+            "booking_id": booking_id,
+            "property_id": booking['property_id'],
+            "message": f"Your booking for {property_data.get('title', 'the property')} was accepted! Please sign the rental contract to complete your booking.",
+            "read": False,
+            "created_at": datetime.now(timezone.utc).isoformat()
+        }
+        await db.notifications.insert_one(renter_notification)
+        
+        # Notify owner that contract was sent
+        owner_notification = {
+            "id": str(uuid.uuid4()),
+            "user_id": booking['owner_id'],
+            "type": "contract_sent",
+            "booking_id": booking_id,
+            "property_id": booking['property_id'],
+            "message": f"The rental contract for {property_data.get('title', 'your property')} has been automatically sent to the renter for signing.",
+            "read": False,
+            "created_at": datetime.now(timezone.utc).isoformat()
+        }
+        await db.notifications.insert_one(owner_notification)
+        
+        return {
+            "message": "Booking accepted and contract sent to renter for signing",
+            "contract_sent": True
+        }
+    else:
+        # No contract - just notify renter of acceptance
+        renter_notification = {
+            "id": str(uuid.uuid4()),
+            "user_id": booking['renter_id'],
+            "type": "booking_confirmed",
+            "booking_id": booking_id,
+            "property_id": booking['property_id'],
+            "message": f"Your booking request for {property_data.get('title', 'the property')} has been accepted!",
+            "read": False,
+            "created_at": datetime.now(timezone.utc).isoformat()
+        }
+        await db.notifications.insert_one(renter_notification)
+        
+        return {
+            "message": "Booking accepted successfully",
+            "contract_sent": False
+        }
 
 @api_router.post("/bookings/{booking_id}/cancel")
 async def cancel_booking(booking_id: str, reason: str = Body(..., embed=True), payload=Depends(verify_token)):
@@ -936,6 +980,58 @@ async def request_cancel_booking(booking_id: str, reason: str = Body(..., embed=
     await db.notifications.insert_one(notification)
     
     return {"message": "Cancellation request submitted"}
+
+@api_router.post("/bookings/{booking_id}/sign-contract")
+async def sign_booking_contract(booking_id: str, body: dict = Body(...), payload=Depends(verify_token)):
+    """Renter signs the rental contract after owner acceptance"""
+    booking = await db.bookings.find_one({"id": booking_id}, {"_id": 0})
+    if not booking:
+        raise HTTPException(status_code=404, detail="Booking not found")
+    
+    # Verify user is the renter
+    if booking['renter_id'] != payload['user_id']:
+        raise HTTPException(status_code=403, detail="Not authorized")
+    
+    # Check if contract was sent
+    if not booking.get('contract_sign_token'):
+        raise HTTPException(status_code=400, detail="No contract to sign for this booking")
+    
+    # Check if already signed
+    if booking.get('contract_signed'):
+        raise HTTPException(status_code=400, detail="Contract already signed")
+    
+    signature_data = body.get('signature_data', '')
+    if not signature_data:
+        raise HTTPException(status_code=400, detail="Signature data is required")
+    
+    # Update booking with signature
+    await db.bookings.update_one(
+        {"id": booking_id},
+        {"$set": {
+            "contract_signed": True,
+            "signature_data": signature_data,
+            "contract_signed_at": datetime.now(timezone.utc).isoformat()
+        }}
+    )
+    
+    # Notify owner that contract was signed
+    property_data = await db.properties.find_one({"id": booking['property_id']}, {"_id": 0, "title": 1})
+    owner_notification = {
+        "id": str(uuid.uuid4()),
+        "user_id": booking['owner_id'],
+        "type": "contract_signed",
+        "booking_id": booking_id,
+        "property_id": booking['property_id'],
+        "message": f"The rental contract for {property_data.get('title', 'your property')} has been signed by the renter. The booking is now fully confirmed!",
+        "read": False,
+        "created_at": datetime.now(timezone.utc).isoformat()
+    }
+    await db.notifications.insert_one(owner_notification)
+    
+    return {
+        "message": "Contract signed successfully",
+        "booking_status": "confirmed"
+    }
 
 @api_router.post("/bookings/{booking_id}/approve-cancel")
 async def approve_cancel_request(booking_id: str, payload=Depends(verify_token)):

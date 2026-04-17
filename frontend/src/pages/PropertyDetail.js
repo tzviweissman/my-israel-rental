@@ -144,18 +144,15 @@ const PropertyDetail = () => {
       return;
     }
 
-    // Check if contract signature is required
-    if (propertyContract?.has_contract && !signatureData) {
-      setShowSignatureModal(true);
-      return;
-    }
+    // No contract signature required at booking time
+    // Contract will be sent after owner accepts the booking
 
     try {
       await axios.post(`${API}/bookings`, {
         property_id: id,
         ...bookingData,
-        contract_signed: !!signatureData,
-        signature_data: signatureData
+        contract_signed: false, // Will be signed after owner accepts
+        signature_data: null
       }, {
         headers: { Authorization: `Bearer ${token}` }
       });
