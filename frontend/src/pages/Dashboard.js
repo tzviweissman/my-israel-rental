@@ -6,6 +6,8 @@ import { API, AuthContext } from '../App';
 import { Plus, Edit, Trash2, Eye, MessageCircle, Upload, X, Image, Film, CalendarSync, Link2, Copy, Check, RefreshCw, FileText, KeyRound, EyeOff, Home, FileCheck, Sparkles, ClipboardList, ArrowRight, Send, Heart, MapPin, Bed, Bath, Loader2, Calendar } from 'lucide-react';
 import { toast } from 'sonner';
 import ContractManager from '../components/ContractManager';
+import { Calendar as CalendarComponent } from '../components/ui/calendar';
+import { format } from 'date-fns';
 
 const Dashboard = () => {
   const { t } = useTranslation();
@@ -90,6 +92,10 @@ const Dashboard = () => {
   const [locationSearch, setLocationSearch] = useState('');
   const [showLocationDropdown, setShowLocationDropdown] = useState(false);
   const locationDropdownRef = useRef(null);
+  // Calendar states for date picker
+  const [showStartingDateCalendar, setShowStartingDateCalendar] = useState(false);
+  const [showAvailableFromCalendar, setShowAvailableFromCalendar] = useState(false);
+
 
   useEffect(() => {
     if (user) {
@@ -1854,29 +1860,51 @@ const Dashboard = () => {
 
                 {/* Starting Date (Long-term only) OR Date Available (Others) */}
                 {propertyForm.rental_type === 'long-term' ? (
-                  <div>
+                  <div className="relative">
                     <label className="block text-sm font-medium mb-3 flex items-center gap-2 text-gray-700">
                       <div className="p-2 bg-[#1E6A6A]/10 rounded-lg">
                         <Calendar size={18} style={{ color: '#1E6A6A' }} />
                       </div>
                       <span className="font-semibold">Starting Date *</span>
                     </label>
-                    <div className="relative group">
-                      <input
-                        type="date"
-                        value={propertyForm.starting_date}
-                        onChange={(e) => setPropertyForm({ ...propertyForm, starting_date: e.target.value })}
-                        className="w-full px-5 py-4 rounded-xl border-2 border-[#1E6A6A]/20 bg-white focus:outline-none focus:ring-3 focus:ring-[#1E6A6A]/20 focus:border-[#1E6A6A] transition-all duration-200 text-base font-medium text-gray-700 shadow-sm hover:border-[#1E6A6A]/40 hover:shadow-md cursor-pointer"
-                        style={{ 
-                          colorScheme: 'light',
-                          fontFamily: 'inherit'
-                        }}
-                        min={new Date().toISOString().split('T')[0]}
-                      />
-                      <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none">
+                    <div 
+                      className="relative cursor-pointer"
+                      onClick={() => setShowStartingDateCalendar(!showStartingDateCalendar)}
+                    >
+                      <div className="w-full px-5 py-4 rounded-xl border-2 border-[#1E6A6A]/20 bg-white hover:border-[#1E6A6A]/40 hover:shadow-md transition-all duration-200 flex items-center justify-between group">
+                        <span className={`text-base font-medium ${propertyForm.starting_date ? 'text-gray-700' : 'text-gray-400'}`}>
+                          {propertyForm.starting_date ? format(new Date(propertyForm.starting_date), 'MMMM d, yyyy') : 'Select starting date'}
+                        </span>
                         <Calendar size={20} className="text-[#1E6A6A]/40 group-hover:text-[#1E6A6A]/60 transition-colors" />
                       </div>
                     </div>
+                    
+                    {showStartingDateCalendar && (
+                      <div className="absolute top-full mt-2 bg-white rounded-xl border-2 border-[#1E6A6A] shadow-2xl p-4 z-[100] w-[320px]">
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setShowStartingDateCalendar(false);
+                          }}
+                          className="absolute top-2 right-2 p-1 rounded-full hover:bg-gray-100 z-[110]"
+                        >
+                          <X size={14} />
+                        </button>
+                        <CalendarComponent
+                          mode="single"
+                          selected={propertyForm.starting_date ? new Date(propertyForm.starting_date) : undefined}
+                          onSelect={(date) => {
+                            if (date) {
+                              setPropertyForm({ ...propertyForm, starting_date: format(date, 'yyyy-MM-dd') });
+                              setShowStartingDateCalendar(false);
+                            }
+                          }}
+                          disabled={[{ before: new Date() }]}
+                          initialFocus
+                        />
+                      </div>
+                    )}
+                    
                     <div className="mt-3 p-3 bg-[#1E6A6A]/5 rounded-lg border border-[#1E6A6A]/10">
                       <p className="text-xs text-[#1E6A6A] flex items-start gap-2">
                         <span className="text-base">📌</span>
@@ -1885,29 +1913,51 @@ const Dashboard = () => {
                     </div>
                   </div>
                 ) : (
-                  <div>
+                  <div className="relative">
                     <label className="block text-sm font-medium mb-3 flex items-center gap-2 text-gray-700">
                       <div className="p-2 bg-[#D4AF37]/10 rounded-lg">
                         <Calendar size={18} style={{ color: '#D4AF37' }} />
                       </div>
                       <span className="font-semibold">Date Available</span>
                     </label>
-                    <div className="relative group">
-                      <input
-                        type="date"
-                        value={propertyForm.available_from}
-                        onChange={(e) => setPropertyForm({ ...propertyForm, available_from: e.target.value })}
-                        className="w-full px-5 py-4 rounded-xl border-2 border-[#D4AF37]/20 bg-white focus:outline-none focus:ring-3 focus:ring-[#D4AF37]/20 focus:border-[#D4AF37] transition-all duration-200 text-base font-medium text-gray-700 shadow-sm hover:border-[#D4AF37]/40 hover:shadow-md cursor-pointer"
-                        style={{ 
-                          colorScheme: 'light',
-                          fontFamily: 'inherit'
-                        }}
-                        min={new Date().toISOString().split('T')[0]}
-                      />
-                      <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none">
+                    <div 
+                      className="relative cursor-pointer"
+                      onClick={() => setShowAvailableFromCalendar(!showAvailableFromCalendar)}
+                    >
+                      <div className="w-full px-5 py-4 rounded-xl border-2 border-[#D4AF37]/20 bg-white hover:border-[#D4AF37]/40 hover:shadow-md transition-all duration-200 flex items-center justify-between group">
+                        <span className={`text-base font-medium ${propertyForm.available_from ? 'text-gray-700' : 'text-gray-400'}`}>
+                          {propertyForm.available_from ? format(new Date(propertyForm.available_from), 'MMMM d, yyyy') : 'Select available date'}
+                        </span>
                         <Calendar size={20} className="text-[#D4AF37]/40 group-hover:text-[#D4AF37]/60 transition-colors" />
                       </div>
                     </div>
+                    
+                    {showAvailableFromCalendar && (
+                      <div className="absolute top-full mt-2 bg-white rounded-xl border-2 border-[#D4AF37] shadow-2xl p-4 z-[100] w-[320px]">
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setShowAvailableFromCalendar(false);
+                          }}
+                          className="absolute top-2 right-2 p-1 rounded-full hover:bg-gray-100 z-[110]"
+                        >
+                          <X size={14} />
+                        </button>
+                        <CalendarComponent
+                          mode="single"
+                          selected={propertyForm.available_from ? new Date(propertyForm.available_from) : undefined}
+                          onSelect={(date) => {
+                            if (date) {
+                              setPropertyForm({ ...propertyForm, available_from: format(date, 'yyyy-MM-dd') });
+                              setShowAvailableFromCalendar(false);
+                            }
+                          }}
+                          disabled={[{ before: new Date() }]}
+                          initialFocus
+                        />
+                      </div>
+                    )}
+                    
                     <p className="text-xs text-gray-500 mt-3 flex items-center gap-2">
                       <span className="text-sm">ℹ️</span>
                       <span>The earliest date this property can be booked from</span>
