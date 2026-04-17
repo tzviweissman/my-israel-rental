@@ -3,11 +3,12 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import axios from 'axios';
 import { API, AuthContext } from '../App';
-import { Plus, Edit, Trash2, Eye, MessageCircle, Upload, X, Image, Film, CalendarSync, Link2, Copy, Check, RefreshCw, FileText, KeyRound, EyeOff, Home, FileCheck, Sparkles, ClipboardList, ArrowRight, Send, Heart, MapPin, Bed, Bath, Loader2, Calendar, Filter } from 'lucide-react';
+import { Plus, Edit, Trash2, Eye, MessageCircle, Upload, X, Image, Film, CalendarSync, Link2, Copy, Check, RefreshCw, FileText, KeyRound, EyeOff, Home, FileCheck, Sparkles, ClipboardList, ArrowRight, Send, Heart, MapPin, Bed, Bath, Loader2, Calendar, Filter, Move, Maximize2 } from 'lucide-react';
 import { toast } from 'sonner';
 import ContractManager from '../components/ContractManager';
 import { Calendar as CalendarComponent } from '../components/ui/calendar';
 import { format } from 'date-fns';
+import { Rnd } from 'react-rnd';
 
 const Dashboard = () => {
   const { t } = useTranslation();
@@ -97,6 +98,10 @@ const Dashboard = () => {
   const [signatureMethod, setSignatureMethod] = useState('draw');
   const canvasRef = useRef(null);
   const [isDrawing, setIsDrawing] = useState(false);
+  const [contractPreviewUrl, setContractPreviewUrl] = useState('');
+  const [signaturePosition, setSignaturePosition] = useState({ x: 50, y: 100 });
+  const [signatureSize, setSignatureSize] = useState({ width: 200, height: 100 });
+  const [showContractPreview, setShowContractPreview] = useState(false);
   // Location search states
   const [locationSearch, setLocationSearch] = useState('');
   const [showLocationDropdown, setShowLocationDropdown] = useState(false);
@@ -244,11 +249,28 @@ const Dashboard = () => {
   };
 
   // Contract signing functions
-  const openContractSignModal = (bookingId) => {
+  const openContractSignModal = async (bookingId) => {
     setContractBookingId(bookingId);
     setShowContractSignModal(true);
     setSignatureData('');
     setSignatureMethod('draw');
+    setShowContractPreview(false);
+    setSignaturePosition({ x: 50, y: 100 });
+    setSignatureSize({ width: 200, height: 100 });
+    
+    // Fetch the booking to get property contract
+    try {
+      const booking = bookings.find(b => b.id === bookingId);
+      if (booking) {
+        const propertyRes = await axios.get(`${API}/properties/${booking.property_id}/contract`);
+        if (propertyRes.data.has_contract && propertyRes.data.contract_url) {
+          const fullContractUrl = `${API.replace('/api', '')}${propertyRes.data.contract_url}`;
+          setContractPreviewUrl(fullContractUrl);
+        }
+      }
+    } catch (error) {
+      console.error('Failed to fetch contract:', error);
+    }
   };
 
   const startDrawing = (e) => {
@@ -308,12 +330,17 @@ const Dashboard = () => {
 
     try {
       await axios.post(`${API}/bookings/${contractBookingId}/sign-contract`, {
-        signature_data: signatureData
+        signature_data: signatureData,
+        signature_x: signaturePosition.x,
+        signature_y: signaturePosition.y,
+        signature_width: signatureSize.width,
+        signature_height: signatureSize.height
       }, {
         headers: { Authorization: `Bearer ${token}` }
       });
       toast.success('Contract signed successfully!');
       setShowContractSignModal(false);
+      setShowContractPreview(false);
       setContractBookingId(null);
       setSignatureData('');
       await fetchBookings();
@@ -2691,6 +2718,17 @@ const Dashboard = () => {
                             Sign Contract
                           </button>
                         )}
+                        {booking.contract_signed && booking.signed_contract_url && (
+                          <a
+                            href={`${API.replace('/api', '')}${booking.signed_contract_url}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="px-4 py-2 rounded-lg text-sm font-medium bg-green-500 text-white hover:bg-green-600 transition-colors flex items-center gap-2"
+                          >
+                            <FileCheck size={16} />
+                            View Signed Contract
+                          </a>
+                        )}
                         {canAccept && (
                           <button
                             onClick={() => handleAcceptBooking(booking.id)}
@@ -2851,7 +2889,7 @@ const Dashboard = () => {
         {/* Contract Signing Modal for Renters */}
         {showContractSignModal && (
           <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" onClick={() => setShowContractSignModal(false)}>
-            <div className="bg-white rounded-2xl p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+            <div className="bg-white rounded-2xl p-6 max-w-6xl w-full max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
               <div className="flex items-center justify-between mb-6">
                 <h3 className="text-2xl font-bold text-[#1E6A6A]">Sign Rental Contract</h3>
                 <button
@@ -2862,103 +2900,194 @@ const Dashboard = () => {
                 </button>
               </div>
 
-              <p className="text-gray-600 mb-6">
-                Please provide your signature to complete this booking. You can either draw your signature or upload an image of it.
-              </p>
+              {!showContractPreview ? (
+                <>
+                  <p className="text-gray-600 mb-6">
+                    Step 1: Create your signature. You can either draw it or upload an image.
+                  </p>
 
-              {/* Signature Method Tabs */}
-              <div className="flex gap-2 mb-4">
-                <button
-                  onClick={() => setSignatureMethod('draw')}
-                  className={`flex-1 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                    signatureMethod === 'draw'
-                      ? 'bg-[#1E6A6A] text-white'
-                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                  }`}
-                >
-                  Draw Signature
-                </button>
-                <button
-                  onClick={() => setSignatureMethod('upload')}
-                  className={`flex-1 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                    signatureMethod === 'upload'
-                      ? 'bg-[#1E6A6A] text-white'
-                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                  }`}
-                >
-                  Upload Signature
-                </button>
-              </div>
+                  {/* Signature Method Tabs */}
+                  <div className="flex gap-2 mb-4">
+                    <button
+                      onClick={() => setSignatureMethod('draw')}
+                      className={`flex-1 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                        signatureMethod === 'draw'
+                          ? 'bg-[#1E6A6A] text-white'
+                          : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                      }`}
+                    >
+                      Draw Signature
+                    </button>
+                    <button
+                      onClick={() => setSignatureMethod('upload')}
+                      className={`flex-1 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                        signatureMethod === 'upload'
+                          ? 'bg-[#1E6A6A] text-white'
+                          : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                      }`}
+                    >
+                      Upload Signature
+                    </button>
+                  </div>
 
-              {/* Draw Signature */}
-              {signatureMethod === 'draw' && (
-                <div className="mb-6">
-                  <canvas
-                    ref={canvasRef}
-                    width={600}
-                    height={200}
-                    onMouseDown={startDrawing}
-                    onMouseMove={draw}
-                    onMouseUp={stopDrawing}
-                    onMouseLeave={stopDrawing}
-                    className="w-full border-2 border-gray-300 rounded-lg cursor-crosshair bg-white"
-                    style={{ touchAction: 'none' }}
-                  />
-                  <button
-                    onClick={clearSignature}
-                    className="mt-2 px-4 py-2 rounded-lg text-sm font-medium border border-gray-300 hover:bg-gray-50 transition-colors"
-                  >
-                    Clear Signature
-                  </button>
-                </div>
-              )}
+                  {/* Draw Signature */}
+                  {signatureMethod === 'draw' && (
+                    <div className="mb-6">
+                      <canvas
+                        ref={canvasRef}
+                        width={600}
+                        height={200}
+                        onMouseDown={startDrawing}
+                        onMouseMove={draw}
+                        onMouseUp={stopDrawing}
+                        onMouseLeave={stopDrawing}
+                        className="w-full border-2 border-gray-300 rounded-lg cursor-crosshair bg-white"
+                        style={{ touchAction: 'none' }}
+                      />
+                      <button
+                        onClick={clearSignature}
+                        className="mt-2 px-4 py-2 rounded-lg text-sm font-medium border border-gray-300 hover:bg-gray-50 transition-colors"
+                      >
+                        Clear Signature
+                      </button>
+                    </div>
+                  )}
 
-              {/* Upload Signature */}
-              {signatureMethod === 'upload' && (
-                <div className="mb-6">
-                  <label className="flex flex-col items-center justify-center w-full h-48 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-[#1E6A6A] transition-colors">
-                    {signatureData ? (
-                      <img src={signatureData} alt="Signature" className="max-h-40 object-contain" />
+                  {/* Upload Signature */}
+                  {signatureMethod === 'upload' && (
+                    <div className="mb-6">
+                      <label className="flex flex-col items-center justify-center w-full h-48 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-[#1E6A6A] transition-colors">
+                        {signatureData ? (
+                          <img src={signatureData} alt="Signature" className="max-h-40 object-contain" />
+                        ) : (
+                          <div className="text-center">
+                            <Upload size={40} className="mx-auto mb-2 text-gray-400" />
+                            <p className="text-sm text-gray-600">Click to upload signature image</p>
+                          </div>
+                        )}
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={handleSignatureUpload}
+                          className="hidden"
+                        />
+                      </label>
+                    </div>
+                  )}
+
+                  {/* Preview */}
+                  {signatureData && (
+                    <div className="mb-6 p-4 bg-gray-50 rounded-lg">
+                      <p className="text-sm font-medium text-gray-700 mb-2">Signature Preview:</p>
+                      <img src={signatureData} alt="Signature preview" className="max-h-32 border border-gray-300 rounded bg-white" />
+                    </div>
+                  )}
+
+                  {/* Next Button */}
+                  <div className="flex gap-3">
+                    {contractPreviewUrl && signatureData ? (
+                      <button
+                        onClick={() => setShowContractPreview(true)}
+                        className="flex-1 px-4 py-3 rounded-lg text-sm font-medium bg-[#1E6A6A] text-white hover:bg-[#1E6A6A]/90 transition-colors"
+                      >
+                        Next: Position Signature
+                      </button>
                     ) : (
-                      <div className="text-center">
-                        <Upload size={40} className="mx-auto mb-2 text-gray-400" />
-                        <p className="text-sm text-gray-600">Click to upload signature image</p>
-                      </div>
+                      <button
+                        onClick={submitContractSignature}
+                        disabled={!signatureData}
+                        className="flex-1 px-4 py-3 rounded-lg text-sm font-medium bg-[#D4AF37] text-white hover:bg-[#D4AF37]/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                      >
+                        Sign Contract
+                      </button>
                     )}
-                    <input
-                      type="file"
-                      accept="image/*"
-                      onChange={handleSignatureUpload}
-                      className="hidden"
-                    />
-                  </label>
-                </div>
-              )}
+                    <button
+                      onClick={() => setShowContractSignModal(false)}
+                      className="px-4 py-3 rounded-lg text-sm font-medium border border-gray-300 hover:bg-gray-50 transition-colors"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <p className="text-gray-600 mb-4">
+                    Step 2: Drag and resize your signature to position it on the contract.
+                  </p>
 
-              {/* Preview */}
-              {signatureData && (
-                <div className="mb-6 p-4 bg-gray-50 rounded-lg">
-                  <p className="text-sm font-medium text-gray-700 mb-2">Signature Preview:</p>
-                  <img src={signatureData} alt="Signature preview" className="max-h-32 border border-gray-300 rounded bg-white" />
-                </div>
-              )}
+                  {/* Contract Preview with Draggable Signature */}
+                  <div className="mb-6 relative border-2 border-gray-300 rounded-lg overflow-auto bg-gray-100" style={{ maxHeight: '60vh' }}>
+                    <div className="relative inline-block">
+                      {/* Contract Document */}
+                      {contractPreviewUrl.toLowerCase().endsWith('.pdf') ? (
+                        <iframe
+                          src={contractPreviewUrl}
+                          className="w-full h-auto"
+                          style={{ minHeight: '800px', minWidth: '600px' }}
+                          title="Contract Preview"
+                        />
+                      ) : (
+                        <img
+                          src={contractPreviewUrl}
+                          alt="Contract"
+                          className="w-full h-auto"
+                          style={{ minWidth: '600px' }}
+                        />
+                      )}
 
-              {/* Submit Buttons */}
-              <div className="flex gap-3">
-                <button
-                  onClick={submitContractSignature}
-                  disabled={!signatureData}
-                  className="flex-1 px-4 py-3 rounded-lg text-sm font-medium bg-[#D4AF37] text-white hover:bg-[#D4AF37]/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                >
-                  Sign Contract
-                </button>
-                <button
-                  onClick={() => setShowContractSignModal(false)}
-                  className="px-4 py-3 rounded-lg text-sm font-medium border border-gray-300 hover:bg-gray-50 transition-colors"
-                >
-                  Cancel
-                </button>
-              </div>
+                      {/* Draggable Signature Overlay */}
+                      <Rnd
+                        size={{ width: signatureSize.width, height: signatureSize.height }}
+                        position={{ x: signaturePosition.x, y: signaturePosition.y }}
+                        onDragStop={(e, d) => {
+                          setSignaturePosition({ x: d.x, y: d.y });
+                        }}
+                        onResizeStop={(e, direction, ref, delta, position) => {
+                          setSignatureSize({
+                            width: ref.offsetWidth,
+                            height: ref.offsetHeight,
+                          });
+                          setSignaturePosition(position);
+                        }}
+                        bounds="parent"
+                        className="border-2 border-dashed border-blue-500 bg-white/80 flex items-center justify-center cursor-move"
+                        style={{ zIndex: 10 }}
+                      >
+                        <img
+                          src={signatureData}
+                          alt="Signature"
+                          className="w-full h-full object-contain pointer-events-none"
+                        />
+                        <div className="absolute top-1 right-1 bg-blue-500 text-white text-xs px-2 py-1 rounded">
+                          <Move size={12} className="inline" /> Drag & <Maximize2 size={12} className="inline" /> Resize
+                        </div>
+                      </Rnd>
+                    </div>
+                  </div>
+
+                  {/* Position Info */}
+                  <div className="mb-4 p-3 bg-blue-50 rounded-lg text-sm text-gray-700">
+                    <p><strong>Tip:</strong> Drag the signature to move it. Drag the edges or corners to resize it.</p>
+                    <p className="mt-1">Position: X: {Math.round(signaturePosition.x)}px, Y: {Math.round(signaturePosition.y)}px | Size: {Math.round(signatureSize.width)} × {Math.round(signatureSize.height)}px</p>
+                  </div>
+
+                  {/* Action Buttons */}
+                  <div className="flex gap-3">
+                    <button
+                      onClick={() => setShowContractPreview(false)}
+                      className="px-4 py-3 rounded-lg text-sm font-medium border border-gray-300 hover:bg-gray-50 transition-colors"
+                    >
+                      Back
+                    </button>
+                    <button
+                      onClick={submitContractSignature}
+                      className="flex-1 px-4 py-3 rounded-lg text-sm font-medium bg-[#D4AF37] text-white hover:bg-[#D4AF37]/90 transition-colors"
+                    >
+                      Sign Contract
+                    </button>
+                  </div>
+                </>
+              )}
             </div>
           </div>
         )}

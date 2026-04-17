@@ -1001,28 +1001,145 @@ async def sign_booking_contract(booking_id: str, body: dict = Body(...), payload
         raise HTTPException(status_code=400, detail="Contract already signed")
     
     signature_data = body.get('signature_data', '')
+    signature_x = body.get('signature_x', 0)
+    signature_y = body.get('signature_y', 0)
+    signature_width = body.get('signature_width', 200)
+    signature_height = body.get('signature_height', 100)
+    
     if not signature_data:
         raise HTTPException(status_code=400, detail="Signature data is required")
     
-    # Update booking with signature
+    # Get property to retrieve contract
+    property_data = await db.properties.find_one({"id": booking['property_id']}, {"_id": 0})
+    if not property_data:
+        raise HTTPException(status_code=404, detail="Property not found")
+    
+    signed_contract_url = None
+    
+    # If property has a contract, stamp the signature onto it
+    if property_data.get('contract_url'):
+        try:
+            # Get the original contract filename from URL
+            contract_filename = property_data['contract_url'].split('/')[-1]
+            contract_path = ROOT_DIR / "uploads" / contract_filename
+            
+            if not contract_path.exists():
+                raise HTTPException(status_code=404, detail="Contract file not found")
+            
+            # Determine file type
+            file_ext = contract_path.suffix.lower()
+            
+            # Generate signed contract filename
+            signed_filename = f"signed_{booking_id}_{contract_filename}"
+            signed_path = ROOT_DIR / "uploads" / signed_filename
+            
+            # Convert base64 signature to image
+            from PIL import Image
+            signature_image_data = signature_data.split(',')[1] if ',' in signature_data else signature_data
+            signature_bytes = base64.b64decode(signature_image_data)
+            signature_img = Image.open(BytesIO(signature_bytes)).convert("RGBA")
+            
+            # Resize signature to specified dimensions
+            signature_img = signature_img.resize((int(signature_width), int(signature_height)), Image.Resampling.LANCZOS)
+            
+            if file_ext == '.pdf':
+                # Handle PDF signing
+                from PyPDF2 import PdfReader, PdfWriter
+                from reportlab.pdfgen import canvas
+                from reportlab.lib.pagesizes import letter
+                
+                # Read original PDF
+                reader = PdfReader(str(contract_path))
+                writer = PdfWriter()
+                
+                # Get first page dimensions
+                first_page = reader.pages[0]
+                page_width = float(first_page.mediabox.width)
+                page_height = float(first_page.mediabox.height)
+                
+                # Create signature overlay on first page
+                signature_overlay = BytesIO()
+                c = canvas.Canvas(signature_overlay, pagesize=(page_width, page_height))
+                
+                # Save signature as temp PNG for reportlab
+                temp_sig_path = ROOT_DIR / "uploads" / f"temp_sig_{booking_id}.png"
+                signature_img.save(str(temp_sig_path), "PNG")
+                
+                # Draw signature on PDF (convert y coordinate as PDF origin is bottom-left)
+                pdf_y = page_height - signature_y - signature_height
+                c.drawImage(str(temp_sig_path), signature_x, pdf_y, 
+                           width=signature_width, height=signature_height, 
+                           mask='auto', preserveAspectRatio=True)
+                c.save()
+                
+                # Merge signature overlay with first page
+                signature_overlay.seek(0)
+                signature_pdf = PdfReader(signature_overlay)
+                first_page.merge_page(signature_pdf.pages[0])
+                writer.add_page(first_page)
+                
+                # Add remaining pages
+                for page_num in range(1, len(reader.pages)):
+                    writer.add_page(reader.pages[page_num])
+                
+                # Write signed PDF
+                with open(signed_path, 'wb') as output_file:
+                    writer.write(output_file)
+                
+                # Clean up temp signature file
+                temp_sig_path.unlink(missing_ok=True)
+                
+            else:
+                # Handle image signing (jpg, png, etc.)
+                contract_img = Image.open(contract_path).convert("RGBA")
+                
+                # Create a transparent layer for signature
+                signature_layer = Image.new('RGBA', contract_img.size, (255, 255, 255, 0))
+                signature_layer.paste(signature_img, (int(signature_x), int(signature_y)), signature_img)
+                
+                # Composite signature onto contract
+                signed_image = Image.alpha_composite(contract_img, signature_layer)
+                
+                # Convert back to RGB if saving as JPEG
+                if file_ext in ['.jpg', '.jpeg']:
+                    signed_image = signed_image.convert('RGB')
+                
+                signed_image.save(signed_path)
+            
+            signed_contract_url = f"/api/uploads/{signed_filename}"
+            
+        except Exception as e:
+            logger.error(f"Failed to stamp signature on contract: {e}")
+            raise HTTPException(status_code=500, detail=f"Failed to process signature: {e}")
+    
+    # Update booking with signature and signed contract
+    update_data = {
+        "contract_signed": True,
+        "signature_data": signature_data,
+        "signature_position": {"x": signature_x, "y": signature_y, "width": signature_width, "height": signature_height},
+        "contract_signed_at": datetime.now(timezone.utc).isoformat()
+    }
+    
+    if signed_contract_url:
+        update_data["signed_contract_url"] = signed_contract_url
+    
     await db.bookings.update_one(
         {"id": booking_id},
-        {"$set": {
-            "contract_signed": True,
-            "signature_data": signature_data,
-            "contract_signed_at": datetime.now(timezone.utc).isoformat()
-        }}
+        {"$set": update_data}
     )
     
     # Notify owner that contract was signed
-    property_data = await db.properties.find_one({"id": booking['property_id']}, {"_id": 0, "title": 1})
+    message = f"The rental contract for {property_data.get('title', 'your property')} has been signed by the renter. The booking is now fully confirmed!"
+    if signed_contract_url:
+        message += " View the signed contract in the booking details."
+    
     owner_notification = {
         "id": str(uuid.uuid4()),
         "user_id": booking['owner_id'],
         "type": "contract_signed",
         "booking_id": booking_id,
         "property_id": booking['property_id'],
-        "message": f"The rental contract for {property_data.get('title', 'your property')} has been signed by the renter. The booking is now fully confirmed!",
+        "message": message,
         "read": False,
         "created_at": datetime.now(timezone.utc).isoformat()
     }
@@ -1030,7 +1147,8 @@ async def sign_booking_contract(booking_id: str, body: dict = Body(...), payload
     
     return {
         "message": "Contract signed successfully",
-        "booking_status": "confirmed"
+        "booking_status": "confirmed",
+        "signed_contract_url": signed_contract_url
     }
 
 @api_router.post("/bookings/{booking_id}/approve-cancel")
