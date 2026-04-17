@@ -360,11 +360,22 @@ const PropertyDetail = () => {
                 <span className="text-lg">{property.address}, {property.area}</span>
               </div>
               {property.has_agent_fee && property.agent_fee_price && (
-                <div className="flex items-center gap-2 px-3 py-1.5 bg-[#D4AF37]/10 rounded-lg border border-[#D4AF37]/30">
-                  <span className="text-sm font-medium text-gray-700">Agent Fee:</span>
-                  <span className="text-sm font-bold" style={{ color: '#D4AF37' }}>
-                    {property.agent_fee_currency === 'USD' ? '$' : '₪'}{property.agent_fee_price.toLocaleString()}
-                  </span>
+                <div className="flex flex-col gap-1 px-3 py-1.5 bg-[#D4AF37]/10 rounded-lg border border-[#D4AF37]/30">
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm font-medium text-gray-700">Agent Fee:</span>
+                    <span className="text-sm font-bold" style={{ color: '#D4AF37' }}>
+                      {property.agent_fee_currency === 'USD' ? '$' : '₪'}{property.agent_fee_price.toLocaleString()}
+                    </span>
+                  </div>
+                  {(() => {
+                    const converted = convertPrice(property.agent_fee_price, property.agent_fee_currency);
+                    if (!converted) return null;
+                    return (
+                      <div className="text-xs text-gray-500">
+                        ≈ {converted.symbol}{converted.amount.toLocaleString()}
+                      </div>
+                    );
+                  })()}
                 </div>
               )}
             </div>
