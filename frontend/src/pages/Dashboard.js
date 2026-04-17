@@ -98,7 +98,7 @@ const Dashboard = () => {
       fetchBusinessLogo();
       fetchLikedProperties();
     }
-  }, [user]);
+  }, [user]); // Only depend on user, functions are stable
   
   // Handle tab query parameter from notifications
   useEffect(() => {
@@ -310,7 +310,10 @@ const Dashboard = () => {
       await axios.delete(`${API}/upload/${fileToRemove.filename}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
-    } catch (e) { /* ignore */ }
+    } catch (e) {
+      console.error('Failed to delete file from server:', e);
+      // Continue with local removal even if server deletion fails
+    }
     setUploadedFiles(prev => prev.filter(f => f.filename !== fileToRemove.filename));
     setPropertyForm(prev => ({
       ...prev,
@@ -549,7 +552,10 @@ const Dashboard = () => {
       try {
         const res = await axios.get(`${API}/properties/${propertyId}/blocked-dates`);
         setIcalData(prev => ({ ...prev, [propertyId]: res.data }));
-      } catch (e) {}
+      } catch (e) {
+        console.error('Failed to fetch blocked dates:', e);
+        toast.error('Could not load calendar data');
+      }
     }
   };
 

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import DOMPurify from 'dompurify';
 import { API } from '../App';
 import { Search, Bed, Bath, Home as HomeIcon, MapPin } from 'lucide-react';
 
@@ -136,8 +137,8 @@ const Home = () => {
             {t('home.aboutUs')}
           </h2>
           <div className="space-y-6 text-lg leading-relaxed text-gray-700">
-            <p dangerouslySetInnerHTML={{ __html: t('home.aboutPara1') }} />
-            <p dangerouslySetInnerHTML={{ __html: t('home.aboutPara2') }} />
+            <p dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(t('home.aboutPara1')) }} />
+            <p dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(t('home.aboutPara2')) }} />
           </div>
         </div>
       </div>

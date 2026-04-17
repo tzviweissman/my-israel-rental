@@ -53,8 +53,10 @@ const PropertyDetail = () => {
   };
 
   useEffect(() => {
-    axios.get(`${API}/exchange-rate`).then(res => setExchangeRate(res.data)).catch(() => setExchangeRate({ usd_to_ils: 3.65, ils_to_usd: 0.274 }));
-  }, []);
+    axios.get(`${API}/exchange-rate`)
+      .then(res => setExchangeRate(res.data))
+      .catch(() => setExchangeRate({ usd_to_ils: 3.65, ils_to_usd: 0.274 }));
+  }, [API]);
 
   const convertPrice = (price, fromCurrency) => {
     if (!exchangeRate || !price) return null;
@@ -67,9 +69,11 @@ const PropertyDetail = () => {
     if (token) {
       axios.get(`${API}/liked-property-ids`, { headers: { Authorization: `Bearer ${token}` } })
         .then(res => setIsLiked(res.data.includes(id)))
-        .catch(() => {});
+        .catch((err) => {
+          console.error('Failed to fetch liked properties:', err);
+        });
     }
-  }, [id, token]);
+  }, [id, token, fetchProperty, API]);
 
   const toggleLike = async () => {
     if (!token) {
@@ -679,8 +683,6 @@ const PropertyDetail = () => {
                           mode="range"
                           selected={dateRange}
                           onSelect={(range) => {
-                            console.log('Date selected:', range);
-                            
                             // Handle minimum booking days/months
                             if (range?.from && !range?.to && property.minimum_booking_days) {
                               const minValue = parseInt(property.minimum_booking_days);
