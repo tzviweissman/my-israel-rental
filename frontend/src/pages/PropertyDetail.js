@@ -690,29 +690,30 @@ const PropertyDetail = () => {
                       data-testid="booking-message"
                     ></textarea>
                   </div>
+                  
+                  {/* Contact Actions - Above Reserve Booking */}
+                  <div className="space-y-2">
+                    {property.owner_email && (
+                      <a
+                        href={`mailto:${property.owner_email}?subject=${encodeURIComponent(t('property.emailSubject') + ': ' + property.title)}`}
+                        className="w-full flex items-center justify-center gap-2 px-6 py-2.5 rounded-full text-sm font-medium border-2 transition-colors"
+                        style={{ borderColor: '#D4AF37', color: '#D4AF37' }}
+                        data-testid="email-owner-button"
+                      >
+                        <Mail size={18} />
+                        {t('property.emailOwner')}
+                      </a>
+                    )}
+                    <button onClick={handleChat} className="w-full secondary-btn flex items-center justify-center gap-2 py-2.5" data-testid="message-owner-button">
+                      <MessageCircle size={18} />
+                      {t('property.messageOwner')}
+                    </button>
+                  </div>
+                  
                   <button onClick={handleBooking} className="w-full primary-btn py-2.5" data-testid="confirm-booking-button">
                     Reserve Booking
                   </button>
                 </div>
-              </div>
-              
-              {/* Other Actions */}
-              <div className="space-y-2 mt-3 pt-3 border-t border-gray-200">
-                <button onClick={handleChat} className="w-full secondary-btn flex items-center justify-center gap-2" data-testid="message-owner-button">
-                  <MessageCircle size={20} />
-                  {t('property.messageOwner')}
-                </button>
-                {property.owner_email && (
-                  <a
-                    href={`mailto:${property.owner_email}?subject=${encodeURIComponent(t('property.emailSubject') + ': ' + property.title)}`}
-                    className="w-full flex items-center justify-center gap-2 px-6 py-3 rounded-full text-sm font-medium border-2 transition-colors"
-                    style={{ borderColor: '#D4AF37', color: '#D4AF37' }}
-                    data-testid="email-owner-button"
-                  >
-                    <Mail size={20} />
-                    {t('property.emailOwner')}
-                  </a>
-                )}
               </div>
             </div>
           </div>
