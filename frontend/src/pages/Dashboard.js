@@ -437,8 +437,20 @@ const Dashboard = () => {
 
   const handleContractUpload = async (propertyId, file) => {
     if (!file) return;
-    if (file.type !== 'application/pdf') {
-      toast.error('Only PDF files are allowed for contracts');
+    
+    // Allow PDF and image formats
+    const allowedTypes = [
+      'application/pdf',
+      'image/jpeg',
+      'image/jpg',
+      'image/png',
+      'image/webp',
+      'image/heic',
+      'image/heif'
+    ];
+    
+    if (!allowedTypes.includes(file.type)) {
+      toast.error('Only PDF and image files (JPG, PNG, WEBP, HEIC) are allowed');
       return;
     }
     
@@ -2207,10 +2219,10 @@ const Dashboard = () => {
                           style={{ borderColor: property.contract_url ? '#D4AF37' : '#ccc', backgroundColor: property.contract_url ? '#f5f5f0' : 'transparent', color: property.contract_url ? '#1E6A6A' : '#666' }}
                         >
                           <Upload size={14} />
-                          {property.contract_url ? 'Replace Contract' : 'Upload Contract (PDF)'}
+                          {property.contract_url ? 'Replace Contract' : 'Upload Contract'}
                           <input
                             type="file"
-                            accept=".pdf"
+                            accept=".pdf,.jpg,.jpeg,.png,.webp,.heic,.heif"
                             className="hidden"
                             onChange={(e) => handleContractUpload(property.id, e.target.files[0])}
                           />

@@ -1745,15 +1745,36 @@ async def upload_property_contract(
     if rental_type not in ['long-term', 'short-term']:
         raise HTTPException(status_code=400, detail="Contracts only available for long-term and short-term rentals")
     
-    # Validate file type (PDF only for contracts)
-    if not file.content_type or file.content_type != 'application/pdf':
-        raise HTTPException(status_code=400, detail="Only PDF files are allowed for contracts")
+    # Validate file type (PDF and image formats)
+    ALLOWED_TYPES = [
+        'application/pdf',
+        'image/jpeg',
+        'image/jpg', 
+        'image/png',
+        'image/webp',
+        'image/heic',
+        'image/heif'
+    ]
+    if not file.content_type or file.content_type not in ALLOWED_TYPES:
+        raise HTTPException(status_code=400, detail="Only PDF and image files (JPG, PNG, WEBP, HEIC) are allowed for contracts")
     
     # Save file
     UPLOAD_DIR = ROOT_DIR / "uploads"
     UPLOAD_DIR.mkdir(exist_ok=True)
     file_id = str(uuid.uuid4())
-    filename = f"contract_{file_id}.pdf"
+    
+    # Get file extension from content type
+    extension_map = {
+        'application/pdf': 'pdf',
+        'image/jpeg': 'jpg',
+        'image/jpg': 'jpg',
+        'image/png': 'png',
+        'image/webp': 'webp',
+        'image/heic': 'heic',
+        'image/heif': 'heif'
+    }
+    ext = extension_map.get(file.content_type, 'pdf')
+    filename = f"contract_{file_id}.{ext}"
     file_path = UPLOAD_DIR / filename
     
     size = 0
