@@ -114,6 +114,16 @@ const PropertyDetail = () => {
         }
       });
       setBlockedDates(dates);
+      
+      // For long-term rentals, set the starting date as check-in (read-only)
+      if (response.data.rental_type === 'long-term' && response.data.starting_date) {
+        const startDate = new Date(response.data.starting_date);
+        setBookingData(prev => ({
+          ...prev,
+          start_date: format(startDate, 'yyyy-MM-dd')
+        }));
+        setDateRange({ from: startDate, to: undefined });
+      }
     } catch (error) {
       console.error('Failed to fetch property', error);
       toast.error('Property not found');
@@ -430,7 +440,24 @@ const PropertyDetail = () => {
               )}
             </div>
 
-            {property.available_from && (
+            {/* Starting Date (Long-term) or Available From (Others) */}
+            {property.rental_type === 'long-term' && property.starting_date && (
+              <div className="bg-[#1E6A6A]/10 border border-[#1E6A6A]/30 p-4 rounded-xl mb-6">
+                <div className="flex items-center gap-2">
+                  <CalendarIcon size={20} style={{ color: '#1E6A6A' }} />
+                  <span className="font-medium text-gray-700">Starting Date (Fixed):</span>
+                  <span className="font-bold" style={{ color: '#1E6A6A' }}>
+                    {new Date(property.starting_date).toLocaleDateString('en-US', { 
+                      year: 'numeric', 
+                      month: 'long', 
+                      day: 'numeric' 
+                    })}
+                  </span>
+                </div>
+              </div>
+            )}
+            
+            {property.rental_type !== 'long-term' && property.available_from && (
               <div className="bg-[#D4AF37]/10 border border-[#D4AF37]/30 p-4 rounded-xl mb-6">
                 <div className="flex items-center gap-2">
                   <CalendarIcon size={20} style={{ color: '#D4AF37' }} />
@@ -441,6 +468,20 @@ const PropertyDetail = () => {
                       month: 'long', 
                       day: 'numeric' 
                     })}
+                  </span>
+                </div>
+              </div>
+            )}
+
+            {/* Minimum Booking Length */}
+            {property.minimum_booking_days && (
+              <div className="bg-gray-50 border border-gray-200 p-3 rounded-xl mb-6">
+                <div className="flex items-center gap-2">
+                  <CalendarIcon size={18} className="text-gray-600" />
+                  <span className="text-sm font-medium text-gray-700">Minimum Stay:</span>
+                  <span className="text-sm font-bold text-gray-900">
+                    {property.minimum_booking_days} {property.minimum_booking_days === 1 ? 'day' : 'days'}
+                    {property.minimum_booking_days >= 30 && ` (≈${Math.round(property.minimum_booking_days / 30)} ${Math.round(property.minimum_booking_days / 30) === 1 ? 'month' : 'months'})`}
                   </span>
                 </div>
               </div>
@@ -516,12 +557,20 @@ const PropertyDetail = () => {
               <div className="space-y-2.5" data-testid="booking-form">
                   <div>
                     <label className="block text-sm font-medium mb-1.5">{t('property.checkIn')} & {t('property.checkOut')}</label>
+                    {property.rental_type === 'long-term' && property.starting_date && (
+                      <p className="text-xs text-[#D4AF37] mb-1.5">Starting date is fixed for this long-term rental</p>
+                    )}
                     <div className="grid grid-cols-2 gap-2">
                       <button
                         type="button"
-                        onClick={() => setShowCalendar(showCalendar === 'range' ? null : 'range')}
-                        className="flex items-center gap-2 px-3 py-2.5 rounded-lg border border-[#E5E5E5] text-sm text-left hover:border-black/30 transition-colors"
+                        onClick={() => property.rental_type !== 'long-term' && setShowCalendar(showCalendar === 'range' ? null : 'range')}
+                        className={`flex items-center gap-2 px-3 py-2.5 rounded-lg border text-sm text-left transition-colors ${
+                          property.rental_type === 'long-term' 
+                            ? 'border-gray-200 bg-gray-50 cursor-not-allowed' 
+                            : 'border-[#E5E5E5] hover:border-black/30'
+                        }`}
                         data-testid="booking-start-date"
+                        disabled={property.rental_type === 'long-term'}
                       >
                         <CalendarIcon size={14} className="text-gray-400 flex-shrink-0" />
                         <span className={dateRange.from ? 'text-black' : 'text-gray-400'}>
@@ -629,17 +678,38 @@ const PropertyDetail = () => {
                           selected={dateRange}
                           onSelect={(range) => {
                             console.log('Date selected:', range);
-                            setDateRange(range || { from: undefined, to: undefined });
-                            if (range?.from) setBookingData(prev => ({ ...prev, start_date: format(range.from, 'yyyy-MM-dd') }));
-                            if (range?.to) {
-                              setBookingData(prev => ({ ...prev, end_date: format(range.to, 'yyyy-MM-dd') }));
+                            
+                            // Handle minimum booking days
+                            if (range?.from && !range?.to && property.minimum_booking_days) {
+                              const minDays = parseInt(property.minimum_booking_days);
+                              const minCheckout = new Date(range.from);
+                              minCheckout.setDate(minCheckout.getDate() + minDays);
+                              
+                              // Auto-set minimum checkout
+                              const updatedRange = { from: range.from, to: minCheckout };
+                              setDateRange(updatedRange);
+                              setBookingData(prev => ({
+                                ...prev,
+                                start_date: format(range.from, 'yyyy-MM-dd'),
+                                end_date: format(minCheckout, 'yyyy-MM-dd')
+                              }));
                               setShowCalendar(null);
+                            } else {
+                              setDateRange(range || { from: undefined, to: undefined });
+                              if (range?.from) setBookingData(prev => ({ ...prev, start_date: format(range.from, 'yyyy-MM-dd') }));
+                              if (range?.to) {
+                                setBookingData(prev => ({ ...prev, end_date: format(range.to, 'yyyy-MM-dd') }));
+                                setShowCalendar(null);
+                              }
                             }
                           }}
                           numberOfMonths={1}
                           disabled={[
                             { before: new Date() },
-                            ...(property.available_from ? [{ before: new Date(property.available_from) }] : []),
+                            ...(property.rental_type === 'long-term' && property.starting_date 
+                              ? []  // For long-term, don't disable any dates in calendar since check-in is fixed
+                              : property.available_from ? [{ before: new Date(property.available_from) }] : []
+                            ),
                             ...blockedDates.map(d => new Date(d))
                           ]}
                           className="rounded-xl"

@@ -242,7 +242,9 @@ class PropertyCreate(BaseModel):
     ical_url: Optional[str] = None
     cancellation_policy: Optional[str] = 'flexible'
     custom_cancellation_policy: Optional[str] = None
-    available_from: Optional[str] = None  # Date property becomes available
+    available_from: Optional[str] = None  # For short-term/vacation
+    starting_date: Optional[str] = None  # For long-term (fixed start date)
+    minimum_booking_days: Optional[int] = None  # Minimum booking length in days
 
 class BookingCreate(BaseModel):
     property_id: str

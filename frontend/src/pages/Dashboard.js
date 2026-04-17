@@ -77,7 +77,9 @@ const Dashboard = () => {
     images: [],
     cancellation_policy: 'flexible',
     custom_cancellation_policy: '',
-    available_from: ''
+    available_from: '',
+    starting_date: '',
+    minimum_booking_days: ''
   });
   // Cancellation modal states
   const [cancelModal, setCancelModal] = useState({ show: false, bookingId: null, type: '' });
@@ -1841,17 +1843,47 @@ const Dashboard = () => {
                   </div>
                 </div>
 
-                {/* Date Available */}
+                {/* Starting Date (Long-term only) OR Date Available (Others) */}
+                {propertyForm.rental_type === 'long-term' ? (
+                  <div>
+                    <label className="block text-sm font-medium mb-2">Starting Date *</label>
+                    <input
+                      type="date"
+                      value={propertyForm.starting_date}
+                      onChange={(e) => setPropertyForm({ ...propertyForm, starting_date: e.target.value })}
+                      className="w-full px-4 py-2 rounded-lg border border-[#E5E5E5] focus:outline-none focus:ring-2 focus:ring-[#1E6A6A]/50"
+                      min={new Date().toISOString().split('T')[0]}
+                    />
+                    <p className="text-xs text-gray-500 mt-1">Fixed start date for this rental (cannot be changed by renters)</p>
+                  </div>
+                ) : (
+                  <div>
+                    <label className="block text-sm font-medium mb-2">Date Available</label>
+                    <input
+                      type="date"
+                      value={propertyForm.available_from}
+                      onChange={(e) => setPropertyForm({ ...propertyForm, available_from: e.target.value })}
+                      className="w-full px-4 py-2 rounded-lg border border-[#E5E5E5] focus:outline-none focus:ring-2 focus:ring-[#1E6A6A]/50"
+                      min={new Date().toISOString().split('T')[0]}
+                    />
+                    <p className="text-xs text-gray-500 mt-1">The earliest date this property can be booked from</p>
+                  </div>
+                )}
+
+                {/* Minimum Booking Length */}
                 <div>
-                  <label className="block text-sm font-medium mb-2">Date Available</label>
+                  <label className="block text-sm font-medium mb-2">Minimum Booking Length (Days)</label>
                   <input
-                    type="date"
-                    value={propertyForm.available_from}
-                    onChange={(e) => setPropertyForm({ ...propertyForm, available_from: e.target.value })}
+                    type="number"
+                    value={propertyForm.minimum_booking_days}
+                    onChange={(e) => setPropertyForm({ ...propertyForm, minimum_booking_days: e.target.value })}
+                    placeholder={propertyForm.rental_type === 'long-term' ? '365' : '30'}
                     className="w-full px-4 py-2 rounded-lg border border-[#E5E5E5] focus:outline-none focus:ring-2 focus:ring-[#1E6A6A]/50"
-                    min={new Date().toISOString().split('T')[0]}
+                    min="1"
                   />
-                  <p className="text-xs text-gray-500 mt-1">The earliest date this property can be booked from</p>
+                  <p className="text-xs text-gray-500 mt-1">
+                    Minimum number of days a renter must book (e.g., 30 days, 365 days)
+                  </p>
                 </div>
 
                 {/* Cancellation Policy - Vacation Rentals Only */}
