@@ -3,7 +3,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import axios from 'axios';
 import { API, AuthContext } from '../App';
-import { Plus, Edit, Trash2, Eye, MessageCircle, Upload, X, Image, Film, CalendarSync, Link2, Copy, Check, RefreshCw, FileText, KeyRound, EyeOff, Home, FileCheck, Sparkles, ClipboardList, ArrowRight, Send, Heart, MapPin, Bed, Bath, Loader2, Calendar } from 'lucide-react';
+import { Plus, Edit, Trash2, Eye, MessageCircle, Upload, X, Image, Film, CalendarSync, Link2, Copy, Check, RefreshCw, FileText, KeyRound, EyeOff, Home, FileCheck, Sparkles, ClipboardList, ArrowRight, Send, Heart, MapPin, Bed, Bath, Loader2, Calendar, Filter } from 'lucide-react';
 import { toast } from 'sonner';
 import ContractManager from '../components/ContractManager';
 import { Calendar as CalendarComponent } from '../components/ui/calendar';
@@ -95,6 +95,8 @@ const Dashboard = () => {
   // Calendar states for date picker
   const [showStartingDateCalendar, setShowStartingDateCalendar] = useState(false);
   const [showAvailableFromCalendar, setShowAvailableFromCalendar] = useState(false);
+  // Bookings filter state
+  const [bookingsFilter, setBookingsFilter] = useState('');
 
 
   useEffect(() => {
@@ -2465,14 +2467,73 @@ const Dashboard = () => {
 
         {activeTab === 'bookings' && (
         <div>
-          <h2 className="text-2xl font-bold mb-6" style={{ fontFamily: 'Playfair Display' }}>{t('dashboard.myBookings')}</h2>
-          {bookings.length === 0 ? (
-            <div className="bg-white rounded-2xl border border-gray-200 p-12 text-center">
-              <p className="text-gray-500">No bookings yet</p>
-            </div>
-          ) : (
-            <div className="space-y-4">
-              {bookings.map((booking) => {
+          <div className="flex items-center justify-between mb-6 gap-4">
+            <h2 className="text-2xl font-bold" style={{ fontFamily: 'Playfair Display' }}>{t('dashboard.myBookings')}</h2>
+            
+            {/* Search Filter */}
+            {bookings.length > 0 && (
+              <div className="flex-1 max-w-md">
+                <div className="relative">
+                  <input
+                    type="text"
+                    placeholder="Search bookings by property, location, or status..."
+                    value={bookingsFilter}
+                    onChange={(e) => setBookingsFilter(e.target.value)}
+                    className="w-full px-4 py-2.5 pl-10 rounded-xl border-2 border-gray-200 focus:border-[#1E6A6A] focus:outline-none text-sm"
+                  />
+                  <Filter size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                  {bookingsFilter && (
+                    <button
+                      onClick={() => setBookingsFilter('')}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                    >
+                      <X size={16} />
+                    </button>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
+          
+          {(() => {
+            // Filter and sort bookings
+            const filteredBookings = bookings
+              .filter(booking => {
+                if (!bookingsFilter) return true;
+                const searchTerm = bookingsFilter.toLowerCase();
+                return (
+                  (booking.property_title || '').toLowerCase().includes(searchTerm) ||
+                  (booking.property_location || '').toLowerCase().includes(searchTerm) ||
+                  (booking.status || '').toLowerCase().includes(searchTerm) ||
+                  (booking.message || '').toLowerCase().includes(searchTerm)
+                );
+              })
+              .sort((a, b) => {
+                // Sort by created_at, newest first
+                const dateA = new Date(a.created_at || 0);
+                const dateB = new Date(b.created_at || 0);
+                return dateB - dateA;
+              });
+            
+            return filteredBookings.length === 0 ? (
+              <div className="bg-white rounded-2xl border border-gray-200 p-12 text-center">
+                {bookingsFilter ? (
+                  <>
+                    <p className="text-gray-500 mb-2">No bookings match your search</p>
+                    <button
+                      onClick={() => setBookingsFilter('')}
+                      className="text-[#1E6A6A] hover:underline text-sm"
+                    >
+                      Clear filter
+                    </button>
+                  </>
+                ) : (
+                  <p className="text-gray-500">No bookings yet</p>
+                )}
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {filteredBookings.map((booking) => {
                 const getStatusColor = (status) => {
                   switch(status) {
                     case 'confirmed': return 'bg-green-100 text-green-700';
@@ -2567,7 +2628,8 @@ const Dashboard = () => {
                 );
               })}
             </div>
-          )}
+            );
+          })()}
         </div>
         )}
 
