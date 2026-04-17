@@ -39,12 +39,14 @@ const PropertyDetail = () => {
   const previousPath = sessionStorage.getItem('previousPath') || '/';
   const isFromDashboard = previousPath.includes('/dashboard');
   const isFromManager = previousPath.includes('/manager/');
+  const isFromListings = previousPath.includes('/properties/');
   
   // Determine back button destination and text
   const getBackDestination = () => {
     if (isFromDashboard) return '/dashboard';
     if (isFromManager) return previousPath;
-    return '/';
+    if (isFromListings) return previousPath; // Return to the specific listings page
+    return '/properties/all'; // Default to all properties listings instead of home
   };
   
   const getBackButtonText = () => {
