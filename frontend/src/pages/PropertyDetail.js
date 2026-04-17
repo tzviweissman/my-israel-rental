@@ -465,19 +465,19 @@ const PropertyDetail = () => {
           </div>
 
           <div className="lg:col-span-1">
-            <div className="bg-white p-6 rounded-2xl border border-[#E5E5E5] sticky top-40">
-              <div className="mb-6">
-                <span className="text-4xl font-bold" style={{ color: "#D4AF37" }} data-testid="property-detail-price">
+            <div className="bg-white p-4 rounded-2xl border border-[#E5E5E5] sticky top-24 max-h-[calc(100vh-120px)] overflow-y-auto">
+              <div className="mb-4">
+                <span className="text-3xl font-bold" style={{ color: "#D4AF37" }} data-testid="property-detail-price">
                   {property.currency === 'USD' ? '$' : '₪'}{(property.monthly_price || property.nightly_price || 0).toLocaleString()}
                 </span>
-                <span className="text-lg text-gray-600">
+                <span className="text-base text-gray-600">
                   {property.rental_type === 'vacation' ? t('property.perNight') : t('property.perMonth')}
                 </span>
                 {(() => {
                   const converted = convertPrice(property.monthly_price || property.nightly_price, property.currency);
                   if (!converted) return null;
                   return (
-                    <div className="text-sm text-gray-400 mt-1" data-testid="property-detail-converted-price">
+                    <div className="text-xs text-gray-400 mt-1" data-testid="property-detail-converted-price">
                       ≈ {converted.symbol}{converted.amount.toLocaleString()}{property.rental_type === 'vacation' ? t('property.perNight') : t('property.perMonth')}
                     </div>
                   );
@@ -485,7 +485,7 @@ const PropertyDetail = () => {
               </div>
 
               {/* Booking Form - Always Visible */}
-              <div className="space-y-4" data-testid="booking-form">
+              <div className="space-y-3" data-testid="booking-form">
                   <div>
                     <label className="block text-sm font-medium mb-2">{t('property.checkIn')} & {t('property.checkOut')}</label>
                     <div className="grid grid-cols-2 gap-2">
@@ -648,24 +648,24 @@ const PropertyDetail = () => {
                     )}
                   </div>
                   <div>
-                    <label className="block text-sm font-medium mb-2">{t('property.messageLabel')}</label>
+                    <label className="block text-sm font-medium mb-1">{t('property.messageLabel')}</label>
                     <textarea
                       value={bookingData.message}
                       onChange={(e) => setBookingData({ ...bookingData, message: e.target.value })}
-                      rows="3"
+                      rows="2"
                       placeholder={t('property.messagePlaceholder')}
-                      className="w-full px-4 py-2 rounded-lg border border-[#E5E5E5] focus:outline-none focus:ring-2 focus:ring-[#1E6A6A]/50 text-sm resize-none"
+                      className="w-full px-3 py-2 rounded-lg border border-[#E5E5E5] focus:outline-none focus:ring-2 focus:ring-[#1E6A6A]/50 text-sm resize-none"
                       data-testid="booking-message"
                     ></textarea>
                   </div>
-                  <button onClick={handleBooking} className="w-full primary-btn" data-testid="confirm-booking-button">
+                  <button onClick={handleBooking} className="w-full primary-btn py-2.5" data-testid="confirm-booking-button">
                     {t('property.confirm')}
                   </button>
                 </div>
               </div>
               
               {/* Other Actions */}
-              <div className="space-y-3 mt-4 pt-4 border-t border-gray-200">
+              <div className="space-y-2 mt-3 pt-3 border-t border-gray-200">
                 <button onClick={handleChat} className="w-full secondary-btn flex items-center justify-center gap-2" data-testid="message-owner-button">
                   <MessageCircle size={20} />
                   {t('property.messageOwner')}
