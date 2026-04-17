@@ -349,7 +349,10 @@ const Dashboard = () => {
       images: property.images || [],
       videos: property.videos || [],
       cancellation_policy: property.cancellation_policy || 'flexible',
-      custom_cancellation_policy: property.custom_cancellation_policy || ''
+      custom_cancellation_policy: property.custom_cancellation_policy || '',
+      available_from: property.available_from || '',
+      starting_date: property.starting_date || '',
+      minimum_booking_days: property.minimum_booking_days || ''
     });
     setUploadedFiles((property.images || []).map((url, i) => ({
       url, file_type: 'image', filename: url.split('/').pop(), original_name: `Image ${i + 1}`
@@ -836,7 +839,7 @@ const Dashboard = () => {
         <div className="flex items-center justify-between mb-8">
           <h1 className="text-4xl font-bold" style={{ fontFamily: 'Playfair Display' }}>Dashboard</h1>
           {user && user.role !== 'renter' && (
-            <button onClick={() => { setEditingPropertyId(null); setUploadedFiles([]); setPropertyForm({ title: '', description: '', rental_type: 'long-term', property_type: 'apartment', bedrooms: 1, bathrooms: 1, area: '', address: '', square_meters: '', floor: 1, has_elevator: false, is_shabbat_elevator: false, is_tama: false, has_agent_fee: false, agent_fee_price: '', agent_fee_currency: 'ILS', porches: 0, sukkah_compatible: false, condition: 'good', furniture_option: 'no_furniture', amenities: [], monthly_price: '', nightly_price: '', currency: 'ILS', images: [], videos: [], cancellation_policy: 'flexible', custom_cancellation_policy: '' }); setShowAddProperty(true); }} className="primary-btn flex items-center gap-2" data-testid="add-property-button">
+            <button onClick={() => { setEditingPropertyId(null); setUploadedFiles([]); setPropertyForm({ title: '', description: '', rental_type: 'long-term', property_type: 'apartment', bedrooms: 1, bathrooms: 1, area: '', address: '', square_meters: '', floor: 1, has_elevator: false, is_shabbat_elevator: false, is_tama: false, has_agent_fee: false, agent_fee_price: '', agent_fee_currency: 'ILS', porches: 0, sukkah_compatible: false, condition: 'good', furniture_option: 'no_furniture', amenities: [], monthly_price: '', nightly_price: '', currency: 'ILS', images: [], videos: [], cancellation_policy: 'flexible', custom_cancellation_policy: '', available_from: '', starting_date: '', minimum_booking_days: '' }); setShowAddProperty(true); }} className="primary-btn flex items-center gap-2" data-testid="add-property-button">
               <Plus size={20} />
               {t('dashboard.addProperty')}
             </button>
