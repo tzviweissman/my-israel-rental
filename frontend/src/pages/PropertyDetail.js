@@ -493,8 +493,8 @@ const PropertyDetail = () => {
           </div>
 
           <div className="lg:col-span-1">
-            <div className="bg-white p-4 rounded-2xl border border-[#E5E5E5] sticky top-24 max-h-[calc(100vh-120px)] overflow-y-auto">
-              <div className="mb-4">
+            <div className="bg-white p-4 rounded-2xl border border-[#E5E5E5] sticky top-20 max-h-[calc(100vh-100px)] overflow-y-auto">
+              <div className="mb-3">
                 <span className="text-3xl font-bold" style={{ color: "#D4AF37" }} data-testid="property-detail-price">
                   {property.currency === 'USD' ? '$' : '₪'}{(property.monthly_price || property.nightly_price || 0).toLocaleString()}
                 </span>
@@ -513,9 +513,9 @@ const PropertyDetail = () => {
               </div>
 
               {/* Booking Form - Always Visible */}
-              <div className="space-y-3" data-testid="booking-form">
+              <div className="space-y-2.5" data-testid="booking-form">
                   <div>
-                    <label className="block text-sm font-medium mb-2">{t('property.checkIn')} & {t('property.checkOut')}</label>
+                    <label className="block text-sm font-medium mb-1.5">{t('property.checkIn')} & {t('property.checkOut')}</label>
                     <div className="grid grid-cols-2 gap-2">
                       <button
                         type="button"
