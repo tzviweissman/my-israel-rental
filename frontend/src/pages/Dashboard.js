@@ -213,12 +213,16 @@ const Dashboard = () => {
   const handleAcceptBooking = async (bookingId) => {
     if (!window.confirm('Accept this booking request? The dates will remain reserved.')) return;
     try {
-      await axios.post(`${API}/bookings/${bookingId}/accept`, {}, {
+      console.log('Accepting booking:', bookingId);
+      const response = await axios.post(`${API}/bookings/${bookingId}/accept`, {}, {
         headers: { Authorization: `Bearer ${token}` }
       });
+      console.log('Accept response:', response.data);
       toast.success('Booking accepted successfully!');
-      fetchBookings();
+      await fetchBookings(); // Ensure we wait for refresh
+      console.log('Bookings refreshed after accept');
     } catch (error) {
+      console.error('Accept booking error:', error);
       toast.error(error.response?.data?.detail || 'Failed to accept booking');
     }
   };
