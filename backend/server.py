@@ -819,6 +819,46 @@ async def get_bookings(payload = Depends(verify_token)):
 
 # Booking Cancellation Endpoints
 
+@api_router.post("/bookings/{booking_id}/accept")
+async def accept_booking(booking_id: str, payload=Depends(verify_token)):
+    """Owner/Manager accepts a pending booking"""
+    booking = await db.bookings.find_one({"id": booking_id}, {"_id": 0})
+    if not booking:
+        raise HTTPException(status_code=404, detail="Booking not found")
+    
+    # Verify user is owner or manager
+    if payload['role'] not in ['owner', 'manager'] or booking['owner_id'] != payload['user_id']:
+        raise HTTPException(status_code=403, detail="Not authorized")
+    
+    # Check if booking is pending
+    if booking['status'] != 'pending':
+        raise HTTPException(status_code=400, detail="Only pending bookings can be accepted")
+    
+    # Update booking to confirmed
+    await db.bookings.update_one(
+        {"id": booking_id},
+        {"$set": {
+            "status": "confirmed",
+            "confirmed_at": datetime.now(timezone.utc).isoformat()
+        }}
+    )
+    
+    # Notify renter
+    property_data = await db.properties.find_one({"id": booking['property_id']}, {"_id": 0, "title": 1})
+    notification = {
+        "id": str(uuid.uuid4()),
+        "user_id": booking['renter_id'],
+        "type": "booking_confirmed",
+        "booking_id": booking_id,
+        "property_id": booking['property_id'],
+        "message": f"Your booking request for {property_data.get('title', 'the property')} has been accepted!",
+        "read": False,
+        "created_at": datetime.now(timezone.utc).isoformat()
+    }
+    await db.notifications.insert_one(notification)
+    
+    return {"message": "Booking accepted successfully"}
+
 @api_router.post("/bookings/{booking_id}/cancel")
 async def cancel_booking(booking_id: str, reason: str = Body(..., embed=True), payload=Depends(verify_token)):
     """Owner/Manager direct cancellation"""

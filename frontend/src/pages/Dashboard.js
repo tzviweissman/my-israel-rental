@@ -199,6 +199,19 @@ const Dashboard = () => {
     }
   };
 
+  const handleAcceptBooking = async (bookingId) => {
+    if (!window.confirm('Accept this booking request? The dates will remain reserved.')) return;
+    try {
+      await axios.post(`${API}/bookings/${bookingId}/accept`, {}, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      toast.success('Booking accepted successfully!');
+      fetchBookings();
+    } catch (error) {
+      toast.error(error.response?.data?.detail || 'Failed to accept booking');
+    }
+  };
+
   const handleDenyCancel = async (bookingId) => {
     setCancelModal({ show: true, bookingId, type: 'deny' });
   };
@@ -2317,6 +2330,7 @@ const Dashboard = () => {
                 const canCancel = isOwner && ['pending', 'confirmed'].includes(booking.status);
                 const canRequestCancel = isRenter && ['pending', 'confirmed'].includes(booking.status);
                 const canApprove = isOwner && booking.status === 'cancellation_requested';
+                const canAccept = isOwner && booking.status === 'pending';
 
                 return (
                   <div key={booking.id} className="bg-white rounded-2xl border border-gray-200 p-6" data-testid={`booking-row-${booking.id}`}>
@@ -2347,6 +2361,15 @@ const Dashboard = () => {
                         )}
                       </div>
                       <div className="flex gap-2">
+                        {canAccept && (
+                          <button
+                            onClick={() => handleAcceptBooking(booking.id)}
+                            className="px-4 py-2 rounded-lg text-sm font-medium text-white hover:bg-opacity-90 transition-colors"
+                            style={{ backgroundColor: '#1E6A6A' }}
+                          >
+                            Accept Booking
+                          </button>
+                        )}
                         {canCancel && (
                           <button
                             onClick={() => handleCancelBooking(booking.id)}

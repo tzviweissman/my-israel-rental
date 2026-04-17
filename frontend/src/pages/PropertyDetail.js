@@ -660,7 +660,7 @@ const PropertyDetail = () => {
                     ></textarea>
                   </div>
                   <button onClick={handleBooking} className="w-full primary-btn py-2.5" data-testid="confirm-booking-button">
-                    {t('property.confirm')}
+                    Reserve Booking
                   </button>
                 </div>
               </div>
