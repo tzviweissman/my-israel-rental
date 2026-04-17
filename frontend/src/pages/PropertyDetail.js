@@ -504,7 +504,7 @@ const PropertyDetail = () => {
               <div className="bg-white p-6 rounded-2xl border border-[#E5E5E5] mb-8">
                 <h2 className="text-2xl font-bold mb-4" style={{ fontFamily: 'Playfair Display' }}>{t('property.amenities')}</h2>
                 <div className="grid grid-cols-2 gap-3">
-                  {property.amenities.map((amenity, index) => {
+                  {property.amenities.map((amenity) => {
                     const iconMap = {
                       'Central AC / Heating': Snowflake,
                       'In-unit washer and dryer': WashingMachine,
@@ -522,7 +522,7 @@ const PropertyDetail = () => {
                     };
                     const Icon = iconMap[amenity] || HomeIcon;
                     return (
-                      <div key={index} className="flex items-center gap-2">
+                      <div key={amenity} className="flex items-center gap-2">
                         <Icon size={16} style={{ color: "#D4AF37" }} />
                         <span>{amenity}</span>
                       </div>

@@ -33,8 +33,10 @@ export const AuthContext = React.createContext();
 function App() {
   const { i18n } = useTranslation();
   const [user, setUser] = useState(null);
-  const [token, setToken] = useState(localStorage.getItem('token'));
-  const [loading, setLoading] = useState(!!localStorage.getItem('token'));
+  // Use sessionStorage instead of localStorage for better security
+  // sessionStorage is cleared when browser tab is closed, reducing XSS attack window
+  const [token, setToken] = useState(sessionStorage.getItem('token'));
+  const [loading, setLoading] = useState(!!sessionStorage.getItem('token'));
 
   useEffect(() => {
     if (token) {
@@ -61,13 +63,15 @@ function App() {
   };
 
   const login = (newToken, userData) => {
-    localStorage.setItem('token', newToken);
+    // Store token in sessionStorage (more secure than localStorage)
+    // sessionStorage is cleared when browser tab closes, limiting XSS exposure window
+    sessionStorage.setItem('token', newToken);
     setToken(newToken);
     setUser(userData);
   };
 
   const logout = () => {
-    localStorage.removeItem('token');
+    sessionStorage.removeItem('token');
     setToken(null);
     setUser(null);
     setLoading(false);

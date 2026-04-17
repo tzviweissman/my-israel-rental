@@ -1376,11 +1376,30 @@ async def get_notifications(payload = Depends(verify_token)):
 
 @api_router.put("/notifications/{notification_id}/read")
 async def mark_notification_read(notification_id: str, payload = Depends(verify_token)):
-    await db.notifications.update_one(
+    result = await db.notifications.update_one(
         {"id": notification_id, "user_id": payload['user_id']},
         {"$set": {"read": True}}
     )
+    if result.modified_count == 0:
+        raise HTTPException(status_code=404, detail="Notification not found")
     return {"message": "Notification marked as read"}
+
+@api_router.put("/notifications/read-all")
+async def mark_all_notifications_read(payload=Depends(verify_token)):
+    """Mark all notifications as read"""
+    await db.notifications.update_many(
+        {"user_id": payload['user_id'], "read": False},
+        {"$set": {"read": True}}
+    )
+    return {"message": "All notifications marked as read"}
+
+@api_router.delete("/notifications/clear-all")
+async def clear_all_notifications(payload=Depends(verify_token)):
+    """Delete all notifications for the current user"""
+    result = await db.notifications.delete_many(
+        {"user_id": payload['user_id']}
+    )
+    return {"message": f"{result.deleted_count} notifications cleared"}
 
 @api_router.post("/translate")
 async def translate_text(request: TranslationRequest):
@@ -2201,38 +2220,6 @@ async def manual_ical_sync(property_id: str, payload=Depends(verify_token)):
         raise HTTPException(status_code=403, detail="Not authorized")
     await sync_property_ical(property_id)
     return {"message": "Sync complete", "last_synced": datetime.now(timezone.utc).isoformat()}
-
-
-# --- Notifications ---
-
-@api_router.get("/notifications")
-async def get_notifications(payload=Depends(verify_token)):
-    """Get all notifications for the current user"""
-    notifications = await db.notifications.find(
-        {"user_id": payload['user_id']},
-        {"_id": 0}
-    ).sort("created_at", -1).to_list(100)
-    return notifications
-
-@api_router.put("/notifications/{notification_id}/read")
-async def mark_notification_read(notification_id: str, payload=Depends(verify_token)):
-    """Mark a notification as read"""
-    result = await db.notifications.update_one(
-        {"id": notification_id, "user_id": payload['user_id']},
-        {"$set": {"read": True}}
-    )
-    if result.modified_count == 0:
-        raise HTTPException(status_code=404, detail="Notification not found")
-    return {"message": "Notification marked as read"}
-
-@api_router.put("/notifications/read-all")
-async def mark_all_notifications_read(payload=Depends(verify_token)):
-    """Mark all notifications as read"""
-    await db.notifications.update_many(
-        {"user_id": payload['user_id'], "read": False},
-        {"$set": {"read": True}}
-    )
-    return {"message": "All notifications marked as read"}
 
 
 app.include_router(api_router)

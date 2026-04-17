@@ -88,16 +88,39 @@ const Navigation = () => {
     }
   };
   
+  const clearAllNotifications = async () => {
+    if (!window.confirm('Are you sure you want to clear all notifications? This cannot be undone.')) {
+      return;
+    }
+    try {
+      await axios.delete(`${API}/notifications/clear-all`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setNotifications([]);
+      setUnreadCount(0);
+      toast.success('All notifications cleared');
+    } catch (error) {
+      console.error('Failed to clear notifications', error);
+      toast.error('Failed to clear notifications');
+    }
+  };
+  
   const handleNotificationClick = (notification) => {
     markAsRead(notification.id);
     setShowNotifications(false);
     
-    // Navigate based on notification type
+    // Navigate directly to the specific item based on notification type and entity ID
     if (notification.booking_id) {
-      navigate('/dashboard?tab=bookings');
+      // Navigate to dashboard bookings tab and scroll to specific booking
+      navigate(`/dashboard?tab=bookings&highlight=${notification.booking_id}`);
+    } else if (notification.property_id) {
+      // Navigate directly to the property detail page
+      navigate(`/property/${notification.property_id}`);
     } else if (notification.sublease_id) {
-      navigate('/dashboard?tab=subleases');
+      // Navigate to dashboard subleases tab and highlight sublease
+      navigate(`/dashboard?tab=subleases&highlight=${notification.sublease_id}`);
     } else {
+      // Fallback to dashboard
       navigate('/dashboard');
     }
   };
@@ -215,14 +238,24 @@ const Navigation = () => {
                   >
                     <div className="sticky top-0 bg-[#1E6A6A] border-b border-[#D4AF37]/20 p-3 sm:p-4 flex items-center justify-between">
                       <h3 className="text-white font-bold text-sm">Notifications</h3>
-                      {unreadCount > 0 && (
-                        <button
-                          onClick={markAllAsRead}
-                          className="text-xs text-[#D4AF37] hover:text-[#D4AF37]/80 transition-colors whitespace-nowrap"
-                        >
-                          Mark all as read
-                        </button>
-                      )}
+                      <div className="flex items-center gap-2">
+                        {unreadCount > 0 && (
+                          <button
+                            onClick={markAllAsRead}
+                            className="text-xs text-[#D4AF37] hover:text-[#D4AF37]/80 transition-colors whitespace-nowrap"
+                          >
+                            Mark all as read
+                          </button>
+                        )}
+                        {notifications.length > 0 && (
+                          <button
+                            onClick={clearAllNotifications}
+                            className="text-xs text-red-400 hover:text-red-300 transition-colors whitespace-nowrap"
+                          >
+                            Clear All
+                          </button>
+                        )}
+                      </div>
                     </div>
 
                     {notifications.length === 0 ? (
