@@ -76,7 +76,8 @@ const Dashboard = () => {
     currency: 'ILS',
     images: [],
     cancellation_policy: 'flexible',
-    custom_cancellation_policy: ''
+    custom_cancellation_policy: '',
+    available_from: ''
   });
   // Cancellation modal states
   const [cancelModal, setCancelModal] = useState({ show: false, bookingId: null, type: '' });
@@ -1826,6 +1827,19 @@ const Dashboard = () => {
                       </select>
                     </div>
                   </div>
+                </div>
+
+                {/* Date Available */}
+                <div>
+                  <label className="block text-sm font-medium mb-2">Date Available</label>
+                  <input
+                    type="date"
+                    value={propertyForm.available_from}
+                    onChange={(e) => setPropertyForm({ ...propertyForm, available_from: e.target.value })}
+                    className="w-full px-4 py-2 rounded-lg border border-[#E5E5E5] focus:outline-none focus:ring-2 focus:ring-[#1E6A6A]/50"
+                    min={new Date().toISOString().split('T')[0]}
+                  />
+                  <p className="text-xs text-gray-500 mt-1">The earliest date this property can be booked from</p>
                 </div>
 
                 {/* Cancellation Policy - Vacation Rentals Only */}

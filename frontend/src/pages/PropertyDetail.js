@@ -419,6 +419,22 @@ const PropertyDetail = () => {
               )}
             </div>
 
+            {property.available_from && (
+              <div className="bg-[#D4AF37]/10 border border-[#D4AF37]/30 p-4 rounded-xl mb-6">
+                <div className="flex items-center gap-2">
+                  <CalendarIcon size={20} style={{ color: '#D4AF37' }} />
+                  <span className="font-medium text-gray-700">Available from:</span>
+                  <span className="font-bold" style={{ color: '#1E6A6A' }}>
+                    {new Date(property.available_from).toLocaleDateString('en-US', { 
+                      year: 'numeric', 
+                      month: 'long', 
+                      day: 'numeric' 
+                    })}
+                  </span>
+                </div>
+              </div>
+            )}
+
             <div className="bg-white p-6 rounded-2xl border border-[#E5E5E5] mb-8">
               <h2 className="text-2xl font-bold mb-4" style={{ fontFamily: 'Playfair Display' }}>{t('property.description')}</h2>
               <p className="text-gray-700 leading-relaxed">{property.description}</p>
@@ -610,7 +626,11 @@ const PropertyDetail = () => {
                             }
                           }}
                           numberOfMonths={1}
-                          disabled={[{ before: new Date() }, ...blockedDates.map(d => new Date(d))]}
+                          disabled={[
+                            { before: new Date() },
+                            ...(property.available_from ? [{ before: new Date(property.available_from) }] : []),
+                            ...blockedDates.map(d => new Date(d))
+                          ]}
                           className="rounded-xl"
                           style={{ pointerEvents: 'auto' }}
                           classNames={{
