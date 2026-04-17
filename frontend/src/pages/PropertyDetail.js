@@ -589,7 +589,7 @@ const PropertyDetail = () => {
                     </div>
                     
                     {showCalendar === 'range' && (
-                      <div className="mt-2 bg-white rounded-xl border-2 border-[#1E6A6A] shadow-2xl p-4 relative z-[100]" data-testid="booking-calendar" style={{ pointerEvents: 'auto' }}>
+                      <div className="mt-2 bg-white rounded-xl border-2 border-[#1E6A6A] shadow-2xl p-4 relative z-[100] w-[320px]" data-testid="booking-calendar" style={{ pointerEvents: 'auto' }}>
                         <button
                           onClick={() => setShowCalendar(null)}
                           className="absolute top-2 right-2 p-1 rounded-full hover:bg-gray-100 z-[110]"
@@ -614,9 +614,9 @@ const PropertyDetail = () => {
                           style={{ pointerEvents: 'auto' }}
                           classNames={{
                             months: "flex flex-col",
-                            month: "space-y-3",
-                            caption: "flex justify-center pt-1 relative items-center",
-                            caption_label: "text-sm font-bold",
+                            month: "space-y-3 w-full",
+                            caption: "flex justify-center pt-1 relative items-center min-w-[280px]",
+                            caption_label: "text-sm font-bold min-w-[100px] text-center",
                             nav: "space-x-1 flex items-center",
                             nav_button: "h-7 w-7 bg-transparent p-0 opacity-50 hover:opacity-100 inline-flex items-center justify-center rounded-md border border-[#E5E5E5]",
                             nav_button_previous: "absolute left-1",
