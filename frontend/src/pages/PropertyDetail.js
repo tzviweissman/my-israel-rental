@@ -354,9 +354,19 @@ const PropertyDetail = () => {
               </button>
             </div>
 
-            <div className="flex items-center gap-2 text-gray-600 mb-6">
-              <MapPin size={20} />
-              <span className="text-lg">{property.address}, {property.area}</span>
+            <div className="flex items-center justify-between gap-4 mb-6">
+              <div className="flex items-center gap-2 text-gray-600">
+                <MapPin size={20} />
+                <span className="text-lg">{property.address}, {property.area}</span>
+              </div>
+              {property.has_agent_fee && property.agent_fee_price && (
+                <div className="flex items-center gap-2 px-3 py-1.5 bg-[#D4AF37]/10 rounded-lg border border-[#D4AF37]/30">
+                  <span className="text-sm font-medium text-gray-700">Agent Fee:</span>
+                  <span className="text-sm font-bold" style={{ color: '#D4AF37' }}>
+                    {property.agent_fee_currency === 'USD' ? '$' : '₪'}{property.agent_fee_price.toLocaleString()}
+                  </span>
+                </div>
+              )}
             </div>
 
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
