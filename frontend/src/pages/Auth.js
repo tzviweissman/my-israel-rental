@@ -13,7 +13,7 @@ const Auth = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { login } = useContext(AuthContext);
-  const redirectUrl = searchParams.get('redirect') || '/dashboard';
+  const redirectUrl = searchParams.get('redirect') || '/';
   const [formData, setFormData] = useState({
     email: '',
     password: '',
