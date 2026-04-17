@@ -457,15 +457,6 @@ const PropertyDetail = () => {
             )}
 
             <div className="flex flex-wrap gap-3">
-              {property.has_agent_fee && property.agent_fee_price && (
-                <span className="px-4 py-2 rounded-full text-sm font-medium" style={{ backgroundColor: '#D4AF37', color: '#1E6A6A' }}>
-                  {t('property.agentFee')}: {property.agent_fee_currency === 'USD' ? '$' : '₪'}{property.agent_fee_price.toLocaleString()}
-                  {(() => {
-                    const c = convertPrice(property.agent_fee_price, property.agent_fee_currency);
-                    return c ? ` (≈ ${c.symbol}${c.amount.toLocaleString()})` : '';
-                  })()}
-                </span>
-              )}
               {property.furniture_package && (
                 <span className="px-4 py-2 rounded-full text-sm font-medium" style={{ backgroundColor: '#E5E5E5', color: '#1E6A6A' }}>
                   {t('property.furniture')}
