@@ -355,7 +355,7 @@ const Dashboard = () => {
       custom_cancellation_policy: property.custom_cancellation_policy || '',
       available_from: property.available_from || '',
       starting_date: property.starting_date || '',
-      minimum_booking_days: property.minimum_booking_days || ''
+      minimum_booking_days: property.minimum_booking_days ? String(property.minimum_booking_days) : ''
     });
     setUploadedFiles((property.images || []).map((url, i) => ({
       url, file_type: 'image', filename: url.split('/').pop(), original_name: `Image ${i + 1}`

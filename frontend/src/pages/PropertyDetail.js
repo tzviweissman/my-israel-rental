@@ -56,7 +56,8 @@ const PropertyDetail = () => {
     axios.get(`${API}/exchange-rate`)
       .then(res => setExchangeRate(res.data))
       .catch(() => setExchangeRate({ usd_to_ils: 3.65, ils_to_usd: 0.274 }));
-  }, [API]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const convertPrice = (price, fromCurrency) => {
     if (!exchangeRate || !price) return null;
@@ -73,7 +74,8 @@ const PropertyDetail = () => {
           console.error('Failed to fetch liked properties:', err);
         });
     }
-  }, [id, token, fetchProperty, API]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [id, token]);
 
   const toggleLike = async () => {
     if (!token) {
