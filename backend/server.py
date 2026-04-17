@@ -27,6 +27,13 @@ import pdfplumber
 from docx import Document as DocxDocument
 from io import BytesIO
 
+# Import our utilities
+from utils.auth import create_token, verify_token
+from utils.email import send_email
+from utils.helpers import get_usd_ils_rate, parse_ical_feed, sync_property_ical, sync_all_ical_feeds
+from utils.pdf import stamp_signature_on_document
+from models import *
+
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
 
@@ -38,7 +45,6 @@ app = FastAPI()
 api_router = APIRouter(prefix="/api")
 security = HTTPBearer()
 
-JWT_SECRET = os.environ.get('JWT_SECRET', 'your-secret-key-change-in-production-12345')
 EMERGENT_LLM_KEY = os.environ.get('EMERGENT_LLM_KEY', '')
 
 # SMTP / SES Configuration
