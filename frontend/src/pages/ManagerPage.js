@@ -122,7 +122,10 @@ const ManagerPage = () => {
             <div
               key={property.id}
               className="property-card"
-              onClick={() => navigate(`/property/${property.id}`)}
+              onClick={() => {
+                sessionStorage.setItem('previousPath', window.location.pathname);
+                navigate(`/property/${property.id}`);
+              }}
               data-testid={`manager-property-${property.id}`}
             >
               <div className="h-36 md:h-64 bg-gray-200" style={{

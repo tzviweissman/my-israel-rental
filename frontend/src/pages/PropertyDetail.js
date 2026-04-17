@@ -36,7 +36,22 @@ const PropertyDetail = () => {
   const signatureCanvasRef = React.useRef(null);
   
   // Determine where user came from
-  const isFromDashboard = document.referrer.includes('/dashboard');
+  const previousPath = sessionStorage.getItem('previousPath') || '/';
+  const isFromDashboard = previousPath.includes('/dashboard');
+  const isFromManager = previousPath.includes('/manager/');
+  
+  // Determine back button destination and text
+  const getBackDestination = () => {
+    if (isFromDashboard) return '/dashboard';
+    if (isFromManager) return previousPath;
+    return '/';
+  };
+  
+  const getBackButtonText = () => {
+    if (isFromDashboard) return 'Back to Dashboard';
+    if (isFromManager) return 'Back to Manager Listings';
+    return 'Back to Listings';
+  };
 
   useEffect(() => {
     axios.get(`${API}/exchange-rate`).then(res => setExchangeRate(res.data)).catch(() => setExchangeRate({ usd_to_ils: 3.65, ils_to_usd: 0.274 }));
@@ -222,9 +237,9 @@ const PropertyDetail = () => {
       
       <div className="max-w-7xl mx-auto px-6 pb-12 bg-white">
         <div className="flex items-center justify-between mb-6">
-          <button onClick={() => navigate(isFromDashboard ? '/dashboard' : '/')} className="flex items-center gap-2 text-sm font-medium hover:text-[#D4AF37] transition-colors" data-testid="back-button">
+          <button onClick={() => navigate(getBackDestination())} className="flex items-center gap-2 text-sm font-medium hover:text-[#D4AF37] transition-colors" data-testid="back-button">
             <ArrowLeft size={18} />
-            {isFromDashboard ? 'Back to Dashboard' : 'Back to Listings'}
+            {getBackButtonText()}
           </button>
           <button 
             onClick={handleShare}
