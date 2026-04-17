@@ -842,8 +842,8 @@ async def accept_booking(booking_id: str, payload=Depends(verify_token)):
         }}
     )
     
-    # Check if property has a contract
-    if property_data.get('contract_path'):
+    # Check if property has a contract (check both contract_path and contract_url)
+    if property_data.get('contract_path') or property_data.get('contract_url'):
         # Create a contract signing request for the renter
         contract_sign_token = str(uuid.uuid4())
         
