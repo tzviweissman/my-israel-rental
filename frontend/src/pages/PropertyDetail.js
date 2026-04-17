@@ -733,9 +733,18 @@ const PropertyDetail = () => {
                           numberOfMonths={1}
                           disabled={[
                             { before: new Date() },
-                            ...(property.rental_type === 'long-term' && property.starting_date 
-                              ? []  // For long-term, don't disable any dates in calendar since check-in is fixed
-                              : property.available_from ? [{ before: new Date(property.available_from) }] : []
+                            ...(property.rental_type === 'long-term' && property.starting_date && property.minimum_booking_days
+                              ? (() => {
+                                  // For long-term with fixed starting date and minimum months
+                                  // Disable all dates before the minimum checkout date
+                                  const startDate = new Date(property.starting_date);
+                                  const minCheckout = new Date(startDate);
+                                  minCheckout.setMonth(minCheckout.getMonth() + parseInt(property.minimum_booking_days));
+                                  return [{ before: minCheckout }];
+                                })()
+                              : property.available_from 
+                                ? [{ before: new Date(property.available_from) }] 
+                                : []
                             ),
                             ...blockedDates.map(d => new Date(d))
                           ]}
