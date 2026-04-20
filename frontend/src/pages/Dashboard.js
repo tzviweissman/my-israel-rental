@@ -10,6 +10,7 @@ import { Calendar as CalendarComponent } from '../components/ui/calendar';
 import { format } from 'date-fns';
 import { Rnd } from 'react-rnd';
 import BookingsList from '../components/dashboard/BookingsList';
+import SettingsTab from '../components/dashboard/SettingsTab';
 
 const Dashboard = () => {
   const { t } = useTranslation();
@@ -1127,104 +1128,13 @@ const Dashboard = () => {
 
         {/* Settings Tab */}
         {activeTab === 'settings' && (
-          <div className="space-y-6">
-            <h2 className="text-2xl font-bold" style={{ fontFamily: 'Playfair Display' }}>Account Settings</h2>
-
-            {/* Change Password Section */}
-            <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden">
-              <div
-                className="flex items-center justify-between px-6 py-4 cursor-pointer hover:bg-gray-50 transition-colors"
-                onClick={() => setShowChangePassword(!showChangePassword)}
-                data-testid="change-password-toggle"
-              >
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-[#1E6A6A]/10 flex items-center justify-center">
-                    <KeyRound size={18} className="text-[#1E6A6A]" />
-                  </div>
-                  <div>
-                    <p className="text-sm font-semibold text-gray-800">Change Password</p>
-                    <p className="text-xs text-gray-500">Update your account password</p>
-                  </div>
-                </div>
-                {showChangePassword ? <X size={18} className="text-gray-400" /> : <Eye size={18} className="text-gray-400" />}
-              </div>
-
-              {showChangePassword && (
-                <div className="px-6 pb-6 border-t border-gray-100 pt-4">
-                  <form onSubmit={handleChangePassword} className="space-y-4 max-w-md" data-testid="change-password-form">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1.5">Current Password</label>
-                      <div className="relative">
-                        <input
-                          type={showCurrentPw ? 'text' : 'password'}
-                          value={currentPassword}
-                          onChange={(e) => setCurrentPassword(e.target.value)}
-                          placeholder="Enter your current password"
-                          className="w-full px-4 py-2.5 pr-12 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#1E6A6A]/30 focus:border-[#1E6A6A] text-sm"
-                          required
-                          data-testid="current-password-input"
-                        />
-                        <button
-                          type="button"
-                          onClick={() => setShowCurrentPw(!showCurrentPw)}
-                          className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-700"
-                        >
-                          {showCurrentPw ? <Eye size={16} /> : <EyeOff size={16} />}
-                        </button>
-                      </div>
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1.5">New Password</label>
-                      <div className="relative">
-                        <input
-                          type={showNewPw ? 'text' : 'password'}
-                          value={newPassword}
-                          onChange={(e) => setNewPassword(e.target.value)}
-                          placeholder="At least 6 characters"
-                          className="w-full px-4 py-2.5 pr-12 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#1E6A6A]/30 focus:border-[#1E6A6A] text-sm"
-                          required
-                          minLength={6}
-                          data-testid="new-password-input"
-                        />
-                        <button
-                          type="button"
-                          onClick={() => setShowNewPw(!showNewPw)}
-                          className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-700"
-                        >
-                          {showNewPw ? <Eye size={16} /> : <EyeOff size={16} />}
-                        </button>
-                      </div>
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1.5">Confirm New Password</label>
-                      <input
-                        type="password"
-                        value={confirmNewPassword}
-                        onChange={(e) => setConfirmNewPassword(e.target.value)}
-                        placeholder="Repeat your new password"
-                        className={`w-full px-4 py-2.5 rounded-xl border focus:outline-none focus:ring-2 focus:ring-[#1E6A6A]/30 text-sm ${confirmNewPassword && confirmNewPassword !== newPassword ? 'border-red-400 focus:border-red-400' : 'border-gray-200 focus:border-[#1E6A6A]'}`}
-                        required
-                        data-testid="confirm-new-password-input"
-                      />
-                      {confirmNewPassword && confirmNewPassword !== newPassword && (
-                        <p className="text-xs text-red-500 mt-1">Passwords do not match</p>
-                      )}
-                    </div>
-                    <button
-                      type="submit"
-                      disabled={changingPassword}
-                      className="px-6 py-2.5 rounded-xl text-white text-sm font-medium disabled:opacity-50 transition-all hover:shadow-md"
-                      style={{ backgroundColor: '#1E6A6A' }}
-                      data-testid="change-password-submit"
-                    >
-                      {changingPassword ? 'Updating...' : 'Update Password'}
-                    </button>
-                  </form>
-                </div>
-              )}
-            </div>
-          </div>
+          <SettingsTab 
+            user={user}
+            token={token}
+            API={API}
+          />
         )}
+
 
         {/* Liked Properties Tab */}
         {activeTab === 'liked' && (
