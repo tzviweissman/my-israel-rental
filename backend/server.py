@@ -46,6 +46,8 @@ api_router = APIRouter(prefix="/api")
 security = HTTPBearer()
 
 EMERGENT_LLM_KEY = os.environ.get('EMERGENT_LLM_KEY', '')
+JWT_SECRET = os.environ.get('JWT_SECRET', 'your-secret-key-change-in-production-12345')
+
 
 # SMTP / SES Configuration
 SMTP_FROM = os.environ.get('SMTP_FROM', '')
