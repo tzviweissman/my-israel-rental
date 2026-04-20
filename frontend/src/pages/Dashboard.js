@@ -11,6 +11,7 @@ import { format } from 'date-fns';
 import { Rnd } from 'react-rnd';
 import BookingsList from '../components/dashboard/BookingsList';
 import SettingsTab from '../components/dashboard/SettingsTab';
+import ServicesTab from '../components/dashboard/ServicesTab';
 
 const Dashboard = () => {
   const { t } = useTranslation();
