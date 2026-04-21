@@ -2115,8 +2115,65 @@ async def upload_property_contract(
             "contract_uploaded_at": datetime.now(timezone.utc).isoformat()
         }}
     )
-    
-    return {"contract_url": contract_url, "message": "Contract uploaded successfully"}
+
+    # Retroactively send the contract to any already-confirmed bookings that
+    # haven't had one yet (owner accepted the booking BEFORE uploading a contract)
+    pending_bookings = await db.bookings.find({
+        "property_id": property_id,
+        "status": "confirmed",
+        "contract_signed": {"$ne": True},
+        "contract_sign_token": {"$in": [None, ""]},
+    }, {"_id": 0}).to_list(500)
+
+    notified_count = 0
+    for bk in pending_bookings:
+        sign_token = str(uuid.uuid4())
+        await db.bookings.update_one(
+            {"id": bk["id"]},
+            {"$set": {
+                "contract_sign_token": sign_token,
+                "contract_sent_at": datetime.now(timezone.utc).isoformat(),
+                "contract_signed": False,
+            }}
+        )
+        # Notify renter
+        await db.notifications.insert_one({
+            "id": str(uuid.uuid4()),
+            "user_id": bk["renter_id"],
+            "type": "contract_pending",
+            "booking_id": bk["id"],
+            "property_id": property_id,
+            "message": f"The owner has uploaded a contract for {property_data.get('title', 'your booking')}. Please sign it to finalize your rental.",
+            "read": False,
+            "created_at": datetime.now(timezone.utc).isoformat(),
+        })
+        # Email the renter
+        try:
+            renter = await db.users.find_one({"id": bk["renter_id"]}, {"_id": 0, "email": 1, "name": 1})
+            if renter and renter.get("email"):
+                frontend = os.environ.get("FRONTEND_URL", "").rstrip("/")
+                dashboard_link = f"{frontend}/dashboard?tab=bookings" if frontend else "/dashboard"
+                html = f"""
+                <p>Hi {renter.get('name','there')},</p>
+                <p>The owner of <strong>{property_data.get('title', 'your rental')}</strong> has uploaded the rental contract.
+                Please review and sign it to finalize your booking.</p>
+                <p><a href="{dashboard_link}" style="background:#1E6A6A;color:#fff;padding:12px 28px;border-radius:8px;text-decoration:none;display:inline-block;font-weight:600;">Open your dashboard to sign</a></p>
+                """
+                asyncio.create_task(send_email(
+                    renter["email"],
+                    f"Action needed: sign your rental contract — {property_data.get('title', 'My Israel Rental')}",
+                    html,
+                    tag="contract-pending",
+                ))
+        except Exception as e:
+            logger.warning(f"Failed to queue contract-pending email for booking {bk['id']}: {e}")
+        notified_count += 1
+
+    return {
+        "contract_url": contract_url,
+        "message": "Contract uploaded successfully",
+        "retroactive_notifications_sent": notified_count,
+    }
 
 
 @api_router.get("/properties/{property_id}/contract")
