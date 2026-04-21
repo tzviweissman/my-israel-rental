@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import { X, Upload, Move, Maximize2 } from 'lucide-react';
 import { Rnd } from 'react-rnd';
 import { API } from '../../App';
@@ -17,6 +17,28 @@ const ContractSignModal = ({
   const [signatureSize, setSignatureSize] = useState({ width: 200, height: 100 });
   const canvasRef = useRef(null);
   const [isDrawing, setIsDrawing] = useState(false);
+  const previewScrollRef = useRef(null);
+  const prevScrollTopRef = useRef(0);
+
+  // When the preview scrolls, shift the signature's Y position by the same
+  // delta so it visually stays in the viewport. The stored position still
+  // represents where the signature will be stamped on the contract.
+  useEffect(() => {
+    if (!showContractPreview) return;
+    const el = previewScrollRef.current;
+    if (!el) return;
+    prevScrollTopRef.current = el.scrollTop;
+    const onScroll = () => {
+      const newTop = el.scrollTop;
+      const delta = newTop - prevScrollTopRef.current;
+      prevScrollTopRef.current = newTop;
+      if (delta !== 0) {
+        setSignaturePosition(prev => ({ x: prev.x, y: Math.max(0, prev.y + delta) }));
+      }
+    };
+    el.addEventListener('scroll', onScroll, { passive: true });
+    return () => el.removeEventListener('scroll', onScroll);
+  }, [showContractPreview]);
 
   // Convert a pointer event (mouse or touch) to canvas-buffer coordinates.
   // The canvas has a fixed internal resolution (e.g. 600x200) but is stretched
@@ -228,7 +250,7 @@ const ContractSignModal = ({
             </p>
 
             {/* Contract Preview with Draggable Signature */}
-            <div className="mb-6 relative border-2 border-gray-300 rounded-lg overflow-auto bg-gray-100" style={{ maxHeight: '60vh' }}>
+            <div ref={previewScrollRef} className="mb-6 relative border-2 border-gray-300 rounded-lg overflow-auto bg-gray-100" style={{ maxHeight: '60vh' }}>
               <div className="relative inline-block">
                 {/* Contract Document */}
                 {contractPreviewUrl.toLowerCase().endsWith('.pdf') ? (
