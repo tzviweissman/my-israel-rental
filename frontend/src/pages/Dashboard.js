@@ -507,13 +507,24 @@ const Dashboard = () => {
     e.preventDefault();
     try {
       // Convert empty strings to null for optional numeric fields
+      const toNumOrNull = (v) => (v === '' || v === null || v === undefined ? null : Number(v));
+      const toIntOrNull = (v) => {
+        if (v === '' || v === null || v === undefined) return null;
+        const n = parseInt(v, 10);
+        return Number.isNaN(n) ? null : n;
+      };
       const cleanedForm = {
         ...propertyForm,
-        square_meters: propertyForm.square_meters === '' ? null : propertyForm.square_meters,
-        porch_square_meters: propertyForm.porch_square_meters === '' ? null : propertyForm.porch_square_meters,
-        agent_fee_price: propertyForm.agent_fee_price === '' ? null : propertyForm.agent_fee_price,
-        monthly_price: propertyForm.monthly_price === '' ? null : propertyForm.monthly_price,
-        nightly_price: propertyForm.nightly_price === '' ? null : propertyForm.nightly_price,
+        square_meters: toNumOrNull(propertyForm.square_meters),
+        porch_square_meters: toNumOrNull(propertyForm.porch_square_meters),
+        agent_fee_price: toNumOrNull(propertyForm.agent_fee_price),
+        monthly_price: toNumOrNull(propertyForm.monthly_price),
+        nightly_price: toNumOrNull(propertyForm.nightly_price),
+        bedrooms: toNumOrNull(propertyForm.bedrooms),
+        bathrooms: toNumOrNull(propertyForm.bathrooms),
+        floor: toNumOrNull(propertyForm.floor),
+        porches: toIntOrNull(propertyForm.porches) ?? 0,
+        minimum_booking_days: toIntOrNull(propertyForm.minimum_booking_days),
       };
       if (editingPropertyId) {
         await axios.put(`${API}/properties/${editingPropertyId}`, cleanedForm, {
@@ -562,7 +573,16 @@ const Dashboard = () => {
       });
       setUploadedFiles([]);
     } catch (error) {
-      toast.error('Failed to add property');
+      // Surface the real backend validation error instead of a generic message
+      const detail = error?.response?.data?.detail;
+      let msg = editingPropertyId ? 'Failed to update property' : 'Failed to add property';
+      if (Array.isArray(detail) && detail[0]?.msg) {
+        msg = `${msg}: ${detail[0].loc?.slice(1).join('.') || 'field'} — ${detail[0].msg}`;
+      } else if (typeof detail === 'string') {
+        msg = `${msg}: ${detail}`;
+      }
+      console.error('Property save error:', error?.response?.data || error);
+      toast.error(msg);
     }
   };
 

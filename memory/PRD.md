@@ -66,7 +66,7 @@ Build a bilingual (English/Hebrew) rental website named MyIsraelRental.com with 
 - [ ] PayPal integration for paid services (Arnona/name change)
 - [x] Rental contract upload, translation (Hebrew<->English), digital signing
 - [x] Email/SMTP notifications — migrated to Postmark (welcome, reset, booking confirm/notify)
-- [ ] Fix "Failed to add property" error when EDITING a property (frontend payload bug; backend PUT verified OK)
+- [x] Fixed "Failed to add property" on EDIT (2026-04-21) — `handleAddProperty` was sending `minimum_booking_days=""` which Pydantic v2 couldn't parse as int; also now surfaces real validation errors in the toast
 - [ ] Manager bulk property upload + profile pages
 
 ### P2 - Lower Priority
