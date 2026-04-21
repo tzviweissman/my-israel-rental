@@ -13,6 +13,17 @@ import BookingsList from '../components/dashboard/BookingsList';
 import SettingsTab from '../components/dashboard/SettingsTab';
 import ServicesTab from '../components/dashboard/ServicesTab';
 
+// Parse a 'YYYY-MM-DD' string as a LOCAL date. `new Date('2026-06-02')` parses
+// as UTC midnight, which shifts back a day when rendered in timezones east of
+// UTC (e.g. Israel). Use this helper whenever we display or pre-select a
+// date-only string from the backend.
+const parseLocalDate = (dateStr) => {
+  if (!dateStr) return undefined;
+  const [y, m, d] = String(dateStr).split('T')[0].split('-').map(Number);
+  if (!y || !m || !d) return undefined;
+  return new Date(y, m - 1, d);
+};
+
 const Dashboard = () => {
   const { t } = useTranslation();
   const { user, token } = useContext(AuthContext);
@@ -1931,7 +1942,7 @@ const Dashboard = () => {
                     >
                       <div className="w-full px-5 py-4 rounded-xl border-2 border-[#1E6A6A]/20 bg-white hover:border-[#1E6A6A]/40 hover:shadow-md transition-all duration-200 flex items-center justify-between group">
                         <span className={`text-base font-medium ${propertyForm.starting_date ? 'text-gray-700' : 'text-gray-400'}`}>
-                          {propertyForm.starting_date ? format(new Date(propertyForm.starting_date), 'MMMM d, yyyy') : 'Select starting date'}
+                          {propertyForm.starting_date ? format(parseLocalDate(propertyForm.starting_date), 'MMMM d, yyyy') : 'Select starting date'}
                         </span>
                         <Calendar size={20} className="text-[#1E6A6A]/40 group-hover:text-[#1E6A6A]/60 transition-colors" />
                       </div>
@@ -1950,7 +1961,7 @@ const Dashboard = () => {
                         </button>
                         <CalendarComponent
                           mode="single"
-                          selected={propertyForm.starting_date ? new Date(propertyForm.starting_date) : undefined}
+                          selected={parseLocalDate(propertyForm.starting_date)}
                           onSelect={(date) => {
                             if (date) {
                               setPropertyForm({ ...propertyForm, starting_date: format(date, 'yyyy-MM-dd') });
@@ -1984,7 +1995,7 @@ const Dashboard = () => {
                     >
                       <div className="w-full px-5 py-4 rounded-xl border-2 border-[#D4AF37]/20 bg-white hover:border-[#D4AF37]/40 hover:shadow-md transition-all duration-200 flex items-center justify-between group">
                         <span className={`text-base font-medium ${propertyForm.available_from ? 'text-gray-700' : 'text-gray-400'}`}>
-                          {propertyForm.available_from ? format(new Date(propertyForm.available_from), 'MMMM d, yyyy') : 'Select available date'}
+                          {propertyForm.available_from ? format(parseLocalDate(propertyForm.available_from), 'MMMM d, yyyy') : 'Select available date'}
                         </span>
                         <Calendar size={20} className="text-[#D4AF37]/40 group-hover:text-[#D4AF37]/60 transition-colors" />
                       </div>
@@ -2003,7 +2014,7 @@ const Dashboard = () => {
                         </button>
                         <CalendarComponent
                           mode="single"
-                          selected={propertyForm.available_from ? new Date(propertyForm.available_from) : undefined}
+                          selected={parseLocalDate(propertyForm.available_from)}
                           onSelect={(date) => {
                             if (date) {
                               setPropertyForm({ ...propertyForm, available_from: format(date, 'yyyy-MM-dd') });

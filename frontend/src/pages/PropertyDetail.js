@@ -10,6 +10,15 @@ import { toast } from 'sonner';
 
 import { ArrowLeft } from 'lucide-react';
 
+// Parse 'YYYY-MM-DD' as a LOCAL date (avoids the UTC-shift bug where
+// selecting June 2 displays as June 1 in timezones east of UTC).
+const parseLocalDate = (dateStr) => {
+  if (!dateStr) return undefined;
+  const [y, m, d] = String(dateStr).split('T')[0].split('-').map(Number);
+  if (!y || !m || !d) return undefined;
+  return new Date(y, m - 1, d);
+};
+
 const PropertyDetail = () => {
   const { id } = useParams();
   const { t } = useTranslation();
@@ -126,7 +135,7 @@ const PropertyDetail = () => {
       
       // For long-term rentals, set the starting date as check-in (read-only)
       if (response.data.rental_type === 'long-term' && response.data.starting_date) {
-        const startDate = new Date(response.data.starting_date);
+        const startDate = parseLocalDate(response.data.starting_date);
         setBookingData(prev => ({
           ...prev,
           start_date: format(startDate, 'yyyy-MM-dd')
@@ -485,11 +494,7 @@ const PropertyDetail = () => {
                   <CalendarIcon size={20} style={{ color: '#1E6A6A' }} />
                   <span className="font-medium text-gray-700">Starting Date (Fixed):</span>
                   <span className="font-bold" style={{ color: '#1E6A6A' }}>
-                    {new Date(property.starting_date).toLocaleDateString('en-US', { 
-                      year: 'numeric', 
-                      month: 'long', 
-                      day: 'numeric' 
-                    })}
+                    {format(parseLocalDate(property.starting_date), 'MMMM d, yyyy')}
                   </span>
                 </div>
               </div>
@@ -501,11 +506,7 @@ const PropertyDetail = () => {
                   <CalendarIcon size={20} style={{ color: '#D4AF37' }} />
                   <span className="font-medium text-gray-700">Available from:</span>
                   <span className="font-bold" style={{ color: '#1E6A6A' }}>
-                    {new Date(property.available_from).toLocaleDateString('en-US', { 
-                      year: 'numeric', 
-                      month: 'long', 
-                      day: 'numeric' 
-                    })}
+                    {format(parseLocalDate(property.available_from), 'MMMM d, yyyy')}
                   </span>
                 </div>
               </div>
@@ -763,7 +764,7 @@ const PropertyDetail = () => {
                           defaultMonth={(() => {
                             // Smart calendar navigation: jump to minimum checkout month
                             if (property.rental_type === 'long-term' && property.starting_date && property.minimum_booking_days) {
-                              const startDate = new Date(property.starting_date);
+                              const startDate = parseLocalDate(property.starting_date);
                               const minCheckout = new Date(startDate);
                               minCheckout.setMonth(minCheckout.getMonth() + parseInt(property.minimum_booking_days));
                               return minCheckout;
@@ -779,13 +780,13 @@ const PropertyDetail = () => {
                               ? (() => {
                                   // For long-term with fixed starting date and minimum months
                                   // Disable all dates before the minimum checkout date
-                                  const startDate = new Date(property.starting_date);
+                                  const startDate = parseLocalDate(property.starting_date);
                                   const minCheckout = new Date(startDate);
                                   minCheckout.setMonth(minCheckout.getMonth() + parseInt(property.minimum_booking_days));
                                   return [{ before: minCheckout }];
                                 })()
                               : property.available_from 
-                                ? [{ before: new Date(property.available_from) }] 
+                                ? [{ before: parseLocalDate(property.available_from) }] 
                                 : []
                             ),
                             ...blockedDates.map(d => new Date(d))
