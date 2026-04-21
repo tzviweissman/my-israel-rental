@@ -609,7 +609,7 @@ const Dashboard = () => {
     }
   };
 
-  const handleContractUpload = async (propertyId, file) => {
+  const handleContractUpload = async (propertyId, file, inputEl) => {
     if (!file) return;
     
     // Allow PDF and image formats
@@ -625,6 +625,7 @@ const Dashboard = () => {
     
     if (!allowedTypes.includes(file.type)) {
       toast.error('Only PDF and image files (JPG, PNG, WEBP, HEIC) are allowed');
+      if (inputEl) inputEl.value = '';
       return;
     }
     
@@ -640,9 +641,13 @@ const Dashboard = () => {
       });
       
       toast.success('Contract uploaded successfully!');
-      fetchProperties();
+      await fetchProperties();
     } catch (error) {
+      console.error('Upload contract error:', error?.response?.data || error);
       toast.error(error.response?.data?.detail || 'Failed to upload contract');
+    } finally {
+      // Reset the input so uploading the SAME file again still triggers onChange.
+      if (inputEl) inputEl.value = '';
     }
   };
 
@@ -2427,7 +2432,8 @@ const Dashboard = () => {
                             type="file"
                             accept=".pdf,.jpg,.jpeg,.png,.webp,.heic,.heif"
                             className="hidden"
-                            onChange={(e) => handleContractUpload(property.id, e.target.files[0])}
+                            onChange={(e) => handleContractUpload(property.id, e.target.files[0], e.target)}
+                            data-testid={`upload-contract-${property.id}`}
                           />
                         </label>
                         {property.contract_url && (
