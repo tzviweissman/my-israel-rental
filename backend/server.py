@@ -1087,7 +1087,11 @@ async def sign_booking_contract(booking_id: str, body: dict = Body(...), payload
     signature_y = body.get('signature_y', 0)
     signature_width = body.get('signature_width', 200)
     signature_height = body.get('signature_height', 100)
-    
+    # Displayed contract dimensions in the signing UI. Used to scale signature
+    # coordinates from CSS pixels to the native image/PDF coordinate system.
+    display_width = body.get('display_width')
+    display_height = body.get('display_height')
+
     if not signature_data:
         raise HTTPException(status_code=400, detail="Signature data is required")
     
@@ -1120,74 +1124,102 @@ async def sign_booking_contract(booking_id: str, body: dict = Body(...), payload
             signature_image_data = signature_data.split(',')[1] if ',' in signature_data else signature_data
             signature_bytes = base64.b64decode(signature_image_data)
             signature_img = Image.open(BytesIO(signature_bytes)).convert("RGBA")
-            
-            # Resize signature to specified dimensions
-            signature_img = signature_img.resize((int(signature_width), int(signature_height)), Image.Resampling.LANCZOS)
-            
+
             if file_ext == '.pdf':
                 # Handle PDF signing
                 from PyPDF2 import PdfReader, PdfWriter
                 from reportlab.pdfgen import canvas
                 from reportlab.lib.pagesizes import letter
-                
+
                 # Read original PDF
                 reader = PdfReader(str(contract_path))
                 writer = PdfWriter()
-                
-                # Get first page dimensions
+
+                # Get first page dimensions (in PDF points)
                 first_page = reader.pages[0]
                 page_width = float(first_page.mediabox.width)
                 page_height = float(first_page.mediabox.height)
-                
+
+                # Scale signature coords from display pixels -> PDF points
+                if display_width and display_height:
+                    scale_x = page_width / float(display_width)
+                    scale_y = page_height / float(display_height)
+                else:
+                    scale_x = scale_y = 1.0
+                sig_x = signature_x * scale_x
+                sig_y = signature_y * scale_y
+                sig_w = signature_width * scale_x
+                sig_h = signature_height * scale_y
+
+                # Resize signature image to specified (scaled) dimensions
+                signature_img_scaled = signature_img.resize(
+                    (max(1, int(sig_w)), max(1, int(sig_h))), Image.Resampling.LANCZOS
+                )
+
                 # Create signature overlay on first page
                 signature_overlay = BytesIO()
                 c = canvas.Canvas(signature_overlay, pagesize=(page_width, page_height))
-                
+
                 # Save signature as temp PNG for reportlab
                 temp_sig_path = ROOT_DIR / "uploads" / f"temp_sig_{booking_id}.png"
-                signature_img.save(str(temp_sig_path), "PNG")
-                
+                signature_img_scaled.save(str(temp_sig_path), "PNG")
+
                 # Draw signature on PDF (convert y coordinate as PDF origin is bottom-left)
-                pdf_y = page_height - signature_y - signature_height
-                c.drawImage(str(temp_sig_path), signature_x, pdf_y, 
-                           width=signature_width, height=signature_height, 
+                pdf_y = page_height - sig_y - sig_h
+                c.drawImage(str(temp_sig_path), sig_x, pdf_y,
+                           width=sig_w, height=sig_h,
                            mask='auto', preserveAspectRatio=True)
                 c.save()
-                
+
                 # Merge signature overlay with first page
                 signature_overlay.seek(0)
                 signature_pdf = PdfReader(signature_overlay)
                 first_page.merge_page(signature_pdf.pages[0])
                 writer.add_page(first_page)
-                
+
                 # Add remaining pages
                 for page_num in range(1, len(reader.pages)):
                     writer.add_page(reader.pages[page_num])
-                
+
                 # Write signed PDF
                 with open(signed_path, 'wb') as output_file:
                     writer.write(output_file)
-                
+
                 # Clean up temp signature file
                 temp_sig_path.unlink(missing_ok=True)
-                
+
             else:
                 # Handle image signing (jpg, png, etc.)
                 contract_img = Image.open(contract_path).convert("RGBA")
-                
+                native_w, native_h = contract_img.size
+
+                # Scale signature coords from display pixels -> native image pixels
+                if display_width and display_height:
+                    scale_x = native_w / float(display_width)
+                    scale_y = native_h / float(display_height)
+                else:
+                    scale_x = scale_y = 1.0
+                sig_x = int(signature_x * scale_x)
+                sig_y = int(signature_y * scale_y)
+                sig_w = max(1, int(signature_width * scale_x))
+                sig_h = max(1, int(signature_height * scale_y))
+
+                # Resize signature to scaled dimensions
+                signature_img_scaled = signature_img.resize((sig_w, sig_h), Image.Resampling.LANCZOS)
+
                 # Create a transparent layer for signature
                 signature_layer = Image.new('RGBA', contract_img.size, (255, 255, 255, 0))
-                signature_layer.paste(signature_img, (int(signature_x), int(signature_y)), signature_img)
-                
+                signature_layer.paste(signature_img_scaled, (sig_x, sig_y), signature_img_scaled)
+
                 # Composite signature onto contract
                 signed_image = Image.alpha_composite(contract_img, signature_layer)
-                
+
                 # Convert back to RGB if saving as JPEG
                 if file_ext in ['.jpg', '.jpeg']:
                     signed_image = signed_image.convert('RGB')
-                
+
                 signed_image.save(signed_path)
-            
+
             signed_contract_url = f"/api/uploads/{signed_filename}"
             
         except Exception as e:

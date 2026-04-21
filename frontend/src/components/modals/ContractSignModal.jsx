@@ -19,6 +19,7 @@ const ContractSignModal = ({
   const [isDrawing, setIsDrawing] = useState(false);
   const previewScrollRef = useRef(null);
   const prevScrollTopRef = useRef(0);
+  const contractElRef = useRef(null);
 
   // When the preview scrolls, shift the signature's Y position by the same
   // delta so it visually stays in the viewport. The stored position still
@@ -255,6 +256,7 @@ const ContractSignModal = ({
                 {/* Contract Document */}
                 {contractPreviewUrl.toLowerCase().endsWith('.pdf') ? (
                   <iframe
+                    ref={contractElRef}
                     src={contractPreviewUrl}
                     className="w-full h-auto"
                     style={{ minHeight: '800px', minWidth: '600px' }}
@@ -262,6 +264,7 @@ const ContractSignModal = ({
                   />
                 ) : (
                   <img
+                    ref={contractElRef}
                     src={contractPreviewUrl}
                     alt="Contract"
                     className="w-full h-auto"
@@ -314,7 +317,15 @@ const ContractSignModal = ({
                 Back
               </button>
               <button
-                onClick={() => onSignSuccess(signatureData, signaturePosition, signatureSize)}
+                onClick={() => {
+                  // Capture the displayed contract dimensions so the backend can
+                  // scale signature coords from CSS pixels to native resolution.
+                  const el = contractElRef.current;
+                  const displayDims = el
+                    ? { width: el.clientWidth, height: el.clientHeight }
+                    : null;
+                  onSignSuccess(signatureData, signaturePosition, signatureSize, displayDims);
+                }}
                 className="flex-1 px-4 py-3 rounded-lg text-sm font-medium bg-[#D4AF37] text-white hover:bg-[#D4AF37]/90 transition-colors"
               >
                 Sign Contract

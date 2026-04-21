@@ -36,7 +36,7 @@ const BookingsList = ({ bookings, onUpdate, user, token, API }) => {
   };
 
   // Submit contract signature
-  const submitContractSignature = async (signatureData, signaturePosition, signatureSize) => {
+  const submitContractSignature = async (signatureData, signaturePosition, signatureSize, displayDims) => {
     if (!signatureData) {
       toast.error('Please provide a signature');
       return;
@@ -48,7 +48,9 @@ const BookingsList = ({ bookings, onUpdate, user, token, API }) => {
         signature_x: signaturePosition.x,
         signature_y: signaturePosition.y,
         signature_width: signatureSize.width,
-        signature_height: signatureSize.height
+        signature_height: signatureSize.height,
+        display_width: displayDims?.width,
+        display_height: displayDims?.height,
       }, {
         headers: { Authorization: `Bearer ${token}` }
       });
