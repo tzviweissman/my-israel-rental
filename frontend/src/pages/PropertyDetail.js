@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import axios from 'axios';
 import { API, AuthContext } from '../App';
-import { Bed, Bath, Home as HomeIcon, MapPin, Building2, MessageCircle, Calendar as CalendarIcon, ChevronLeft, ChevronRight, Film, Snowflake, WashingMachine, UtensilsCrossed, DoorOpen, ArrowUpFromLine, ShowerHead, Warehouse, Flame, Dumbbell, Waves, Sparkles, Car, Wifi, Mail, Users, X, Heart, Share2, Copy, Check } from 'lucide-react';
+import { Bed, Bath, Home as HomeIcon, MapPin, Building2, MessageCircle, Calendar as CalendarIcon, ChevronLeft, ChevronRight, Film, Snowflake, WashingMachine, UtensilsCrossed, DoorOpen, ArrowUpFromLine, ShowerHead, Warehouse, Flame, Dumbbell, Waves, Sparkles, Car, Wifi, Mail, Users, X, Heart, Share2, Copy, Check, Play } from 'lucide-react';
 import { Calendar } from '../components/ui/calendar';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
@@ -17,6 +17,7 @@ const PropertyDetail = () => {
   const { user, token } = useContext(AuthContext);
   const [property, setProperty] = useState(null);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const videoRefs = React.useRef({});
   const [showCalendar, setShowCalendar] = useState(null);
   const [dateRange, setDateRange] = useState({ from: undefined, to: undefined });
   const [bookingData, setBookingData] = useState({
@@ -267,87 +268,119 @@ const PropertyDetail = () => {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <div className="lg:col-span-2">
             <div className="mb-6">
-              {property.images && property.images.length > 0 ? (
-                <div className="relative" data-testid="image-gallery">
-                  <div className="overflow-hidden rounded-2xl">
+              {(() => {
+                const media = [
+                  ...(property.images || []).map(url => ({ type: 'image', url })),
+                  ...(property.videos || []).map(url => ({ type: 'video', url })),
+                ];
+                const toSrc = (url) => (url.startsWith('/api') ? `${API.replace('/api', '')}${url}` : url);
+                const goTo = (newIdx) => {
+                  // Pause any video that was playing before navigating
+                  Object.values(videoRefs.current).forEach(v => { try { v && v.pause(); } catch (_) {} });
+                  setCurrentImageIndex(newIdx);
+                };
+                if (media.length === 0) {
+                  return (
                     <div
-                      className="flex transition-transform duration-500 ease-in-out"
-                      style={{ transform: `translateX(-${currentImageIndex * 100}%)` }}
-                    >
-                      {property.images.map((img, idx) => (
-                        <img
-                          key={img}
-                          src={img.startsWith('/api') ? `${API.replace('/api', '')}${img}` : img}
-                          alt={`${property.title} - ${idx + 1}`}
-                          className="w-full h-96 object-cover flex-shrink-0"
-                          data-testid={idx === currentImageIndex ? 'gallery-main-image' : undefined}
-                        />
-                      ))}
-                    </div>
-                  </div>
-                  {property.images.length > 1 && (
-                    <>
-                      <button
-                        onClick={() => setCurrentImageIndex(prev => prev === 0 ? property.images.length - 1 : prev - 1)}
-                        className="absolute left-3 top-1/2 -translate-y-1/2 bg-black/60 text-white p-2 rounded-full hover:bg-black/80 transition-colors"
-                        data-testid="gallery-prev"
+                      className="w-full h-96 rounded-2xl"
+                      style={{
+                        backgroundImage: 'url(https://images.pexels.com/photos/1669799/pexels-photo-1669799.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940)',
+                        backgroundSize: 'cover',
+                        backgroundPosition: 'center'
+                      }}
+                    ></div>
+                  );
+                }
+                return (
+                  <div className="relative" data-testid="image-gallery">
+                    <div className="overflow-hidden rounded-2xl bg-black">
+                      <div
+                        className="flex transition-transform duration-500 ease-in-out"
+                        style={{ transform: `translateX(-${currentImageIndex * 100}%)` }}
                       >
-                        <ChevronLeft size={20} />
-                      </button>
-                      <button
-                        onClick={() => setCurrentImageIndex(prev => prev === property.images.length - 1 ? 0 : prev + 1)}
-                        className="absolute right-3 top-1/2 -translate-y-1/2 bg-black/60 text-white p-2 rounded-full hover:bg-black/80 transition-colors"
-                        data-testid="gallery-next"
-                      >
-                        <ChevronRight size={20} />
-                      </button>
-                      <div className="absolute bottom-3 left-1/2 -translate-x-1/2 bg-black/60 text-white text-xs px-3 py-1 rounded-full">
-                        {currentImageIndex + 1} / {property.images.length}
+                        {media.map((m, idx) => (
+                          m.type === 'image' ? (
+                            <img
+                              key={m.url}
+                              src={toSrc(m.url)}
+                              alt={`${property.title} - ${idx + 1}`}
+                              className="w-full h-96 object-cover flex-shrink-0"
+                              data-testid={idx === currentImageIndex ? 'gallery-main-image' : undefined}
+                            />
+                          ) : (
+                            <video
+                              key={m.url}
+                              ref={el => { videoRefs.current[idx] = el; }}
+                              src={toSrc(m.url)}
+                              controls
+                              playsInline
+                              preload="metadata"
+                              className="w-full h-96 object-contain flex-shrink-0 bg-black"
+                              data-testid={`gallery-video-${idx}`}
+                            />
+                          )
+                        ))}
                       </div>
-                    </>
-                  )}
-                  {property.images.length > 1 && (
-                    <div className="flex gap-2 mt-3 overflow-x-auto pb-2" data-testid="gallery-thumbnails">
-                      {property.images.map((img, idx) => (
-                        <img
-                          key={`thumb-${img}`}
-                          src={img.startsWith('/api') ? `${API.replace('/api', '')}${img}` : img}
-                          alt={`Thumb ${idx + 1}`}
-                          onClick={() => setCurrentImageIndex(idx)}
-                          className={`w-20 h-14 object-cover rounded-lg cursor-pointer flex-shrink-0 transition-all ${idx === currentImageIndex ? 'ring-2 ring-black opacity-100' : 'opacity-60 hover:opacity-100'}`}
-                          data-testid={`gallery-thumb-${idx}`}
-                        />
-                      ))}
                     </div>
-                  )}
-                </div>
-              ) : (
-                <div
-                  className="w-full h-96 rounded-2xl"
-                  style={{
-                    backgroundImage: 'url(https://images.pexels.com/photos/1669799/pexels-photo-1669799.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940)',
-                    backgroundSize: 'cover',
-                    backgroundPosition: 'center'
-                  }}
-                ></div>
-              )}
-
-              {property.videos && property.videos.length > 0 && (
-                <div className="mt-4" data-testid="property-videos">
-                  <h3 className="text-sm font-medium mb-2 flex items-center gap-2"><Film size={16} /> {t('property.videos')}</h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                    {property.videos.map((video, idx) => (
-                      <video
-                        key={video}
-                        src={video.startsWith('/api') ? `${API.replace('/api', '')}${video}` : video}
-                        controls
-                        className="w-full rounded-xl border border-[#E5E5E5]"
-                        data-testid={`property-video-${idx}`}
-                      />
-                    ))}
+                    {media.length > 1 && (
+                      <>
+                        <button
+                          onClick={() => goTo(currentImageIndex === 0 ? media.length - 1 : currentImageIndex - 1)}
+                          className="absolute left-3 top-1/2 -translate-y-1/2 bg-black/60 text-white p-2 rounded-full hover:bg-black/80 transition-colors z-10"
+                          data-testid="gallery-prev"
+                        >
+                          <ChevronLeft size={20} />
+                        </button>
+                        <button
+                          onClick={() => goTo(currentImageIndex === media.length - 1 ? 0 : currentImageIndex + 1)}
+                          className="absolute right-3 top-1/2 -translate-y-1/2 bg-black/60 text-white p-2 rounded-full hover:bg-black/80 transition-colors z-10"
+                          data-testid="gallery-next"
+                        >
+                          <ChevronRight size={20} />
+                        </button>
+                        <div className="absolute bottom-3 left-1/2 -translate-x-1/2 bg-black/60 text-white text-xs px-3 py-1 rounded-full pointer-events-none">
+                          {currentImageIndex + 1} / {media.length}
+                          {media[currentImageIndex]?.type === 'video' && (
+                            <span className="ml-2 inline-flex items-center gap-1"><Film size={11} /> video</span>
+                          )}
+                        </div>
+                      </>
+                    )}
+                    {media.length > 1 && (
+                      <div className="flex gap-2 mt-3 overflow-x-auto pb-2" data-testid="gallery-thumbnails">
+                        {media.map((m, idx) => (
+                          <div
+                            key={`thumb-${m.url}`}
+                            onClick={() => goTo(idx)}
+                            className={`relative w-20 h-14 rounded-lg cursor-pointer flex-shrink-0 transition-all overflow-hidden ${idx === currentImageIndex ? 'ring-2 ring-black opacity-100' : 'opacity-60 hover:opacity-100'}`}
+                            data-testid={`gallery-thumb-${idx}`}
+                          >
+                            {m.type === 'image' ? (
+                              <img
+                                src={toSrc(m.url)}
+                                alt={`Thumb ${idx + 1}`}
+                                className="w-full h-full object-cover"
+                              />
+                            ) : (
+                              <>
+                                <video
+                                  src={toSrc(m.url)}
+                                  preload="metadata"
+                                  muted
+                                  className="w-full h-full object-cover bg-black"
+                                />
+                                <div className="absolute inset-0 flex items-center justify-center bg-black/30 pointer-events-none">
+                                  <Play size={18} className="text-white drop-shadow" fill="white" />
+                                </div>
+                              </>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    )}
                   </div>
-                </div>
-              )}
+                );
+              })()}
             </div>
 
             <div className="flex items-center justify-between mb-4">
