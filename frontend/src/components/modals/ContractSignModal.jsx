@@ -18,25 +18,42 @@ const ContractSignModal = ({
   const canvasRef = useRef(null);
   const [isDrawing, setIsDrawing] = useState(false);
 
-  const startDrawing = (e) => {
-    if (!canvasRef.current) return;
+  // Convert a pointer event (mouse or touch) to canvas-buffer coordinates.
+  // The canvas has a fixed internal resolution (e.g. 600x200) but is stretched
+  // via CSS to fill the container — so we must scale by rect.width/height.
+  const getCanvasPoint = (e) => {
     const canvas = canvasRef.current;
     const rect = canvas.getBoundingClientRect();
-    const ctx = canvas.getContext('2d');
+    const scaleX = canvas.width / rect.width;
+    const scaleY = canvas.height / rect.height;
+    // Support touch events too
+    const clientX = e.clientX ?? e.touches?.[0]?.clientX ?? e.changedTouches?.[0]?.clientX ?? 0;
+    const clientY = e.clientY ?? e.touches?.[0]?.clientY ?? e.changedTouches?.[0]?.clientY ?? 0;
+    return {
+      x: (clientX - rect.left) * scaleX,
+      y: (clientY - rect.top) * scaleY,
+    };
+  };
+
+  const startDrawing = (e) => {
+    if (!canvasRef.current) return;
+    e.preventDefault?.();
+    const { x, y } = getCanvasPoint(e);
+    const ctx = canvasRef.current.getContext('2d');
     ctx.strokeStyle = '#000';
     ctx.lineWidth = 2;
     ctx.lineCap = 'round';
     ctx.beginPath();
-    ctx.moveTo(e.clientX - rect.left, e.clientY - rect.top);
+    ctx.moveTo(x, y);
     setIsDrawing(true);
   };
 
   const draw = (e) => {
     if (!isDrawing || !canvasRef.current) return;
-    const canvas = canvasRef.current;
-    const rect = canvas.getBoundingClientRect();
-    const ctx = canvas.getContext('2d');
-    ctx.lineTo(e.clientX - rect.left, e.clientY - rect.top);
+    e.preventDefault?.();
+    const { x, y } = getCanvasPoint(e);
+    const ctx = canvasRef.current.getContext('2d');
+    ctx.lineTo(x, y);
     ctx.stroke();
   };
 
@@ -132,6 +149,10 @@ const ContractSignModal = ({
                   onMouseMove={draw}
                   onMouseUp={stopDrawing}
                   onMouseLeave={stopDrawing}
+                  onTouchStart={startDrawing}
+                  onTouchMove={draw}
+                  onTouchEnd={stopDrawing}
+                  onTouchCancel={stopDrawing}
                   className="w-full border-2 border-gray-300 rounded-lg cursor-crosshair bg-white"
                   style={{ touchAction: 'none' }}
                 />
