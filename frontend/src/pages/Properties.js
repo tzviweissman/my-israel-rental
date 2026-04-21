@@ -105,6 +105,7 @@ const Properties = () => {
 
   useEffect(() => {
     fetchProperties();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [type]);
 
   const fetchProperties = async () => {

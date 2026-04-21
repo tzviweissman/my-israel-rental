@@ -325,3 +325,6 @@ credentials.json
 *.pem
 *.key
 .credentials
+
+# Test environment
+backend/tests/.env.test

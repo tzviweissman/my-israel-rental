@@ -276,7 +276,7 @@ const PropertyDetail = () => {
                     >
                       {property.images.map((img, idx) => (
                         <img
-                          key={idx}
+                          key={img}
                           src={img.startsWith('/api') ? `${API.replace('/api', '')}${img}` : img}
                           alt={`${property.title} - ${idx + 1}`}
                           className="w-full h-96 object-cover flex-shrink-0"
@@ -310,7 +310,7 @@ const PropertyDetail = () => {
                     <div className="flex gap-2 mt-3 overflow-x-auto pb-2" data-testid="gallery-thumbnails">
                       {property.images.map((img, idx) => (
                         <img
-                          key={idx}
+                          key={`thumb-${img}`}
                           src={img.startsWith('/api') ? `${API.replace('/api', '')}${img}` : img}
                           alt={`Thumb ${idx + 1}`}
                           onClick={() => setCurrentImageIndex(idx)}
@@ -338,7 +338,7 @@ const PropertyDetail = () => {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                     {property.videos.map((video, idx) => (
                       <video
-                        key={idx}
+                        key={video}
                         src={video.startsWith('/api') ? `${API.replace('/api', '')}${video}` : video}
                         controls
                         className="w-full rounded-xl border border-[#E5E5E5]"

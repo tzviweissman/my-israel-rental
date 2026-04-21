@@ -14,11 +14,13 @@ import uuid
 
 BASE_URL = os.environ.get('REACT_APP_BACKEND_URL', '').rstrip('/')
 
-# Test credentials from test_credentials.md
-OWNER_EMAIL = "owner@test.com"
-OWNER_PASSWORD = "Test1234!"
-RENTER_EMAIL = "renter@test.com"
-RENTER_PASSWORD = "Test1234!"
+# Test credentials loaded from tests/.env.test via conftest
+from conftest import (
+    TEST_OWNER2_EMAIL as OWNER_EMAIL,
+    TEST_OWNER2_PASSWORD as OWNER_PASSWORD,
+    TEST_RENTER2_EMAIL as RENTER_EMAIL,
+    TEST_RENTER2_PASSWORD as RENTER_PASSWORD,
+)
 
 
 class TestCancellationWorkflow:

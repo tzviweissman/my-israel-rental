@@ -29,6 +29,7 @@ const AdminDashboard = () => {
 
   useEffect(() => {
     fetchDashboard();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
@@ -37,6 +38,7 @@ const AdminDashboard = () => {
     if (activeTab === 'chats' && chats.length === 0) fetchChats();
     if (activeTab === 'services' && services.length === 0) fetchServices();
     if (activeTab === 'settings') fetchSettings();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeTab]);
 
   const fetchDashboard = async () => {
@@ -366,7 +368,7 @@ const AdminDashboard = () => {
             {chats.length === 0 && <p className="text-center text-gray-400 py-12 text-sm">No conversations yet</p>}
             <div className="space-y-3">
               {chats.map((conv, idx) => (
-                <div key={idx} className="bg-white rounded-xl border border-[#E5E5E5] overflow-hidden" data-testid={`chat-conv-${idx}`}>
+                <div key={conv.property_id || conv.property_title || idx} className="bg-white rounded-xl border border-[#E5E5E5] overflow-hidden" data-testid={`chat-conv-${idx}`}>
                   <button
                     onClick={() => setExpandedChat(expandedChat === idx ? null : idx)}
                     className="w-full flex items-center justify-between px-5 py-4 hover:bg-gray-50 transition-colors"

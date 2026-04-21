@@ -5,6 +5,12 @@ Tests: GET /api/properties with various filter parameters
 import pytest
 import requests
 import os
+from conftest import (
+    TEST_ADMIN_EMAIL,
+    TEST_ADMIN_PASSWORD,
+    TEST_RENTER_EMAIL,
+    TEST_RENTER_PASSWORD,
+)
 
 BASE_URL = os.environ.get('REACT_APP_BACKEND_URL', '').rstrip('/')
 
@@ -141,8 +147,8 @@ class TestAdminDashboard:
     def admin_token(self):
         """Get admin authentication token"""
         response = requests.post(f"{BASE_URL}/api/auth/login", json={
-            "email": "admin@rental.com",
-            "password": "admin123"
+            "email": TEST_ADMIN_EMAIL,
+            "password": TEST_ADMIN_PASSWORD
         })
         if response.status_code == 200:
             return response.json().get("token")
@@ -175,8 +181,8 @@ class TestAdminDashboard:
         """GET /api/admin/dashboard returns 403 for non-admin users"""
         # Login as renter
         login_response = requests.post(f"{BASE_URL}/api/auth/login", json={
-            "email": "renter@rental.com",
-            "password": "renter123"
+            "email": TEST_RENTER_EMAIL,
+            "password": TEST_RENTER_PASSWORD
         })
         if login_response.status_code != 200:
             pytest.skip("Renter authentication failed")

@@ -5,6 +5,7 @@ Feature: POST /api/properties should accept properties without description and a
 import pytest
 import requests
 import os
+from conftest import TEST_OWNER_EMAIL, TEST_OWNER_PASSWORD
 
 BASE_URL = os.environ.get('REACT_APP_BACKEND_URL', '').rstrip('/')
 
@@ -19,8 +20,8 @@ class TestOptionalPropertyFields:
         
         # Login as owner
         login_response = self.session.post(f"{BASE_URL}/api/auth/login", json={
-            "email": "owner@rental.com",
-            "password": "owner123"
+            "email": TEST_OWNER_EMAIL,
+            "password": TEST_OWNER_PASSWORD
         })
         
         if login_response.status_code != 200:

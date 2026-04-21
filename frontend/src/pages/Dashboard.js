@@ -123,7 +123,8 @@ const Dashboard = () => {
       fetchBusinessLogo();
       fetchLikedProperties();
     }
-  }, [user]); // Only depend on user, functions are stable
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user]); // Intentional: fetchers only need to re-run when user identity changes
   
   // Handle tab query parameter from notifications
   useEffect(() => {
@@ -237,14 +238,11 @@ const Dashboard = () => {
     setAcceptModal({ show: false, bookingId: null });
     
     try {
-      console.log('Accepting booking:', bookingId);
-      const response = await axios.post(`${API}/bookings/${bookingId}/accept`, {}, {
+      await axios.post(`${API}/bookings/${bookingId}/accept`, {}, {
         headers: { Authorization: `Bearer ${token}` }
       });
-      console.log('Accept response:', response.data);
       toast.success('Booking accepted successfully!');
       await fetchBookings();
-      console.log('Bookings refreshed after accept');
     } catch (error) {
       console.error('Accept booking error:', error);
       toast.error(error.response?.data?.detail || 'Failed to accept booking');
@@ -1758,9 +1756,9 @@ const Dashboard = () => {
                         {filteredLocations.length === 0 ? (
                           <div className="px-4 py-3 text-sm text-gray-500">No locations found</div>
                         ) : (
-                          filteredLocations.map((location, idx) => (
+                          filteredLocations.map((location) => (
                             <div
-                              key={idx}
+                              key={location.value}
                               onClick={() => {
                                 setPropertyForm({ ...propertyForm, area: location.value });
                                 setLocationSearch('');
@@ -2473,7 +2471,7 @@ const Dashboard = () => {
                             {property.ical_urls?.length > 0 ? (
                               <div className="space-y-1.5">
                                 {property.ical_urls.map((url, i) => (
-                                  <div key={i} className="flex items-center gap-2 px-3 py-2 rounded-lg bg-gray-50 text-xs">
+                                  <div key={url} className="flex items-center gap-2 px-3 py-2 rounded-lg bg-gray-50 text-xs">
                                     <Link2 size={12} className="text-[#D4AF37] shrink-0" />
                                     <span className="flex-1 truncate text-gray-600">{url}</span>
                                     <button onClick={() => removeIcalUrl(property.id, url)} className="text-red-400 hover:text-red-600 shrink-0" data-testid={`ical-remove-${i}`}>

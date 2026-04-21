@@ -543,8 +543,8 @@ const ContractManager = ({ properties }) => {
                         <Check size={16} /> Signatures ({contract.signatures.length})
                       </h4>
                       <div className="space-y-3">
-                        {contract.signatures.map((sig, idx) => (
-                          <div key={idx} className="flex items-center gap-3 bg-white rounded-lg p-3 border border-green-200">
+                        {contract.signatures.map((sig) => (
+                          <div key={`${sig.signer_name}-${sig.signed_at}`} className="flex items-center gap-3 bg-white rounded-lg p-3 border border-green-200">
                             <img src={sig.signature_data} alt="Signature" className="h-10 w-auto border border-gray-100 rounded" />
                             <div>
                               <p className="text-sm font-medium text-gray-800">{sig.signer_name}</p>

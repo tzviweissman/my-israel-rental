@@ -12,9 +12,11 @@ import uuid
 
 BASE_URL = os.environ.get('REACT_APP_BACKEND_URL', '').rstrip('/')
 
-# Test credentials from test_credentials.md
-OWNER_EMAIL = "owner@rental.com"
-OWNER_PASSWORD = "owner123"
+# Test credentials loaded from tests/.env.test via conftest
+from conftest import (
+    TEST_OWNER_EMAIL as OWNER_EMAIL,
+    TEST_OWNER_PASSWORD as OWNER_PASSWORD,
+)
 
 class TestAuthAndSetup:
     """Authentication tests to get token for property tests"""

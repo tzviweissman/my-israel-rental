@@ -12,13 +12,15 @@ import uuid
 
 BASE_URL = os.environ.get('REACT_APP_BACKEND_URL', '').rstrip('/')
 
-# Test credentials
-OWNER_EMAIL = "owner@rental.com"
-OWNER_PASSWORD = "owner123"
-ADMIN_EMAIL = "admin@rental.com"
-ADMIN_PASSWORD = "admin123"
-RENTER_EMAIL = "renter@rental.com"
-RENTER_PASSWORD = "renter123"
+# Test credentials loaded from tests/.env.test via conftest
+from conftest import (
+    TEST_OWNER_EMAIL as OWNER_EMAIL,
+    TEST_OWNER_PASSWORD as OWNER_PASSWORD,
+    TEST_ADMIN_EMAIL as ADMIN_EMAIL,
+    TEST_ADMIN_PASSWORD as ADMIN_PASSWORD,
+    TEST_RENTER_EMAIL as RENTER_EMAIL,
+    TEST_RENTER_PASSWORD as RENTER_PASSWORD,
+)
 
 
 @pytest.fixture(scope="module")
