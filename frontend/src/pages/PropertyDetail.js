@@ -638,8 +638,11 @@ const PropertyDetail = () => {
                         <button
                           type="button"
                           onClick={() => {
-                            const from = new Date();
-                            from.setDate(from.getDate() + 1);
+                            // For long-term rentals with a fixed starting date, anchor the
+                            // +1 year range to that date. Otherwise, start tomorrow.
+                            const from = (property.rental_type === 'long-term' && property.starting_date)
+                              ? parseLocalDate(property.starting_date)
+                              : (() => { const d = new Date(); d.setDate(d.getDate() + 1); return d; })();
                             const to = new Date(from);
                             to.setFullYear(to.getFullYear() + 1); // +1 year
                             setDateRange({ from, to });
