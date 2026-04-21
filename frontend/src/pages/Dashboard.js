@@ -648,15 +648,16 @@ const Dashboard = () => {
 
   const handleDeleteContract = async (propertyId) => {
     if (!window.confirm('Are you sure you want to delete this contract?')) return;
-    
+
     try {
       await axios.delete(`${API}/properties/${propertyId}/contract`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       toast.success('Contract deleted successfully!');
-      fetchProperties();
+      await fetchProperties();
     } catch (error) {
-      toast.error('Failed to delete contract');
+      console.error('Delete contract error:', error?.response?.data || error);
+      toast.error(error?.response?.data?.detail || 'Failed to delete contract');
     }
   };
 
@@ -2431,8 +2432,14 @@ const Dashboard = () => {
                         </label>
                         {property.contract_url && (
                           <button
-                            onClick={() => handleDeleteContract(property.id)}
-                            className="w-full mt-2 text-xs text-red-500 hover:text-red-700 py-1"
+                            type="button"
+                            onClick={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              handleDeleteContract(property.id);
+                            }}
+                            className="w-full mt-2 text-xs text-red-500 hover:text-red-700 py-2 border border-red-200 rounded-lg hover:bg-red-50 transition-colors"
+                            data-testid={`delete-contract-${property.id}`}
                           >
                             Delete Contract
                           </button>
