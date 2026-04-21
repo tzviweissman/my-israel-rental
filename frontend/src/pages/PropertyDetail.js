@@ -639,42 +639,6 @@ const PropertyDetail = () => {
                           type="button"
                           onClick={() => {
                             const from = new Date();
-                            from.setDate(from.getDate() + 1); // Start tomorrow
-                            const to = new Date(from);
-                            to.setMonth(to.getMonth() + 3); // +3 months
-                            setDateRange({ from, to });
-                            setBookingData(prev => ({
-                              ...prev,
-                              start_date: format(from, 'yyyy-MM-dd'),
-                              end_date: format(to, 'yyyy-MM-dd')
-                            }));
-                          }}
-                          className="px-3 py-1.5 rounded-lg border border-[#1E6A6A] text-[#1E6A6A] hover:bg-[#1E6A6A] hover:text-white text-xs font-medium transition-colors"
-                        >
-                          + 3 Months
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => {
-                            const from = new Date();
-                            from.setDate(from.getDate() + 1);
-                            const to = new Date(from);
-                            to.setMonth(to.getMonth() + 6); // +6 months
-                            setDateRange({ from, to });
-                            setBookingData(prev => ({
-                              ...prev,
-                              start_date: format(from, 'yyyy-MM-dd'),
-                              end_date: format(to, 'yyyy-MM-dd')
-                            }));
-                          }}
-                          className="px-3 py-1.5 rounded-lg border border-[#1E6A6A] text-[#1E6A6A] hover:bg-[#1E6A6A] hover:text-white text-xs font-medium transition-colors"
-                        >
-                          + 6 Months
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => {
-                            const from = new Date();
                             from.setDate(from.getDate() + 1);
                             const to = new Date(from);
                             to.setFullYear(to.getFullYear() + 1); // +1 year
