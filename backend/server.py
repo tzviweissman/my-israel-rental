@@ -55,7 +55,120 @@ EMERGENT_LLM_KEY = os.environ.get('EMERGENT_LLM_KEY', '')
 JWT_SECRET = os.environ.get('JWT_SECRET', 'your-secret-key-change-in-production-12345')
 
 
-# Email sending is handled by utils.email (Postmark)
+POSTMARK_WEBHOOK_SECRET = os.environ.get('POSTMARK_WEBHOOK_SECRET', '')
+
+
+@api_router.post("/webhooks/postmark")
+async def postmark_webhook(request: Request, token: Optional[str] = None):
+    """Receive delivery / bounce / spam-complaint events from Postmark.
+
+    Configure the URL in Postmark → Servers → Message Streams → outbound →
+    Webhooks as: {BACKEND_URL}/api/webhooks/postmark?token={POSTMARK_WEBHOOK_SECRET}
+    Enable Delivery, Bounce, and SpamComplaint events.
+    """
+    # Optional shared-secret check (query param). If secret env is unset we accept anything.
+    if POSTMARK_WEBHOOK_SECRET and token != POSTMARK_WEBHOOK_SECRET:
+        raise HTTPException(status_code=401, detail="Invalid webhook token")
+
+    try:
+        payload = await request.json()
+    except Exception:
+        raise HTTPException(status_code=400, detail="Invalid JSON body")
+
+    record_type = payload.get("RecordType", "Unknown")
+    message_id = payload.get("MessageID")
+    tag = payload.get("Tag")
+
+    # Postmark uses "Email" on Bounce/Complaint, "Recipient" on Delivery
+    email = payload.get("Email") or payload.get("Recipient") or ""
+
+    event_doc = {
+        "id": str(uuid.uuid4()),
+        "record_type": record_type,
+        "email": email.lower() if email else "",
+        "message_id": message_id,
+        "tag": tag,
+        "bounce_type": payload.get("Type"),  # HardBounce, SoftBounce, Transient, etc.
+        "description": payload.get("Description") or payload.get("Details"),
+        "raw": payload,
+        "received_at": datetime.now(timezone.utc).isoformat(),
+    }
+    await db.email_events.insert_one(event_doc)
+
+    # Update the user's email health flag so admins can see deliverability state
+    if email:
+        status_map = {
+            "Bounce": "bounced",
+            "SpamComplaint": "complained",
+            "Delivery": "delivered",
+        }
+        user_status = status_map.get(record_type)
+        if user_status:
+            update = {
+                "email_status": user_status,
+                "last_email_event_at": event_doc["received_at"],
+                "last_email_event_type": record_type,
+            }
+            # Hard bounces and complaints should suppress future sends — track it
+            if record_type in ("Bounce", "SpamComplaint"):
+                update["email_suppressed"] = True
+                if payload.get("Type") == "HardBounce" or record_type == "SpamComplaint":
+                    update["email_suppressed_reason"] = (
+                        payload.get("Description")
+                        or payload.get("Details")
+                        or f"{record_type} ({payload.get('Type', '')})".strip()
+                    )
+            elif record_type == "Delivery":
+                # Clear suppression if a later delivery succeeds (rare but possible)
+                update["email_suppressed"] = False
+            await db.users.update_one({"email": email.lower()}, {"$set": update})
+
+    logger.info(
+        "Postmark webhook: %s for %s (tag=%s, msg=%s)",
+        record_type, email, tag, message_id
+    )
+    return {"ok": True}
+
+
+@api_router.get("/admin/email-health")
+async def admin_email_health(payload=Depends(verify_token)):
+    """Admin-only: email deliverability stats + recent events."""
+    if payload['role'] != 'admin':
+        raise HTTPException(status_code=403, detail="Admin access required")
+
+    # Aggregate counts by record_type for the last 30 days
+    thirty_days_ago = (datetime.now(timezone.utc) - timedelta(days=30)).isoformat()
+    pipeline = [
+        {"$match": {"received_at": {"$gte": thirty_days_ago}}},
+        {"$group": {"_id": "$record_type", "count": {"$sum": 1}}},
+    ]
+    agg = await db.email_events.aggregate(pipeline).to_list(100)
+    counts = {row["_id"]: row["count"] for row in agg}
+
+    delivered = counts.get("Delivery", 0)
+    bounced = counts.get("Bounce", 0)
+    complained = counts.get("SpamComplaint", 0)
+    total_attempts = delivered + bounced + complained
+    delivery_rate = round((delivered / total_attempts) * 100, 1) if total_attempts else None
+
+    recent = await db.email_events.find(
+        {}, {"_id": 0, "raw": 0}
+    ).sort("received_at", -1).limit(50).to_list(50)
+
+    suppressed_users = await db.users.count_documents({"email_suppressed": True})
+
+    return {
+        "window_days": 30,
+        "delivered": delivered,
+        "bounced": bounced,
+        "complained": complained,
+        "delivery_rate_pct": delivery_rate,
+        "suppressed_users": suppressed_users,
+        "recent_events": recent,
+    }
+
+
+# --- Hot Reload Helper --------------------------------------------------
 
 # Exchange rate cache
 _exchange_cache = {"rate": None, "fetched_at": None}

@@ -68,6 +68,8 @@ Build a bilingual (English/Hebrew) rental website named MyIsraelRental.com with 
 - [x] Email/SMTP notifications — migrated to Postmark (welcome, reset, booking confirm/notify)
 - [x] Fixed "Failed to add property" on EDIT (2026-04-21)
 - [x] Code-review critical fixes (2026-04-21): test creds → `.env.test` + `conftest.py`, array-index keys → stable IDs (6 files), debug console.logs removed, intentional-hook ESLint markers
+- [x] **Postmark webhooks** (2026-04-21): `/api/webhooks/postmark` receives Delivery/Bounce/SpamComplaint events, stores in `email_events` collection, flags `users.email_suppressed=True` on hard bounce or complaint. Admin endpoint `/api/admin/email-health` returns 30-day stats. AdminDashboard overview tab now has an "Email Deliverability" card. `send_email()` auto-skips suppressed recipients.
+  - **User setup required:** In Postmark → Servers → outbound stream → Webhooks, add `{BACKEND_URL}/api/webhooks/postmark?token=BSuezo9yKFgz66RSR3TMoAqQpYCjxpCINmBW7HAt3FM` and enable Delivery + Bounce + SpamComplaint events.
 - [ ] Manager bulk property upload + profile pages
 
 ### P2 - Lower Priority

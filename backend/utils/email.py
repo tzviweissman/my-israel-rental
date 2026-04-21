@@ -29,6 +29,19 @@ BRAND_GOLD = "#D4AF37"
 
 # Lazy-initialise client so import doesn't fail when token missing (e.g. tests)
 _postmark_client: Optional[PostmarkClient] = None
+_mongo_db = None  # lazy Motor database handle for suppression lookups
+
+
+def _get_db():
+    """Lazy-init a shared Motor database for suppression lookups."""
+    global _mongo_db
+    if _mongo_db is None:
+        from motor.motor_asyncio import AsyncIOMotorClient
+        mongo_url = os.environ.get("MONGO_URL")
+        db_name = os.environ.get("DB_NAME")
+        if mongo_url and db_name:
+            _mongo_db = AsyncIOMotorClient(mongo_url)[db_name]
+    return _mongo_db
 
 
 def _get_client() -> Optional[PostmarkClient]:
@@ -54,13 +67,38 @@ async def send_email(
     *,
     tag: Optional[str] = None,
     text_body: Optional[str] = None,
+    skip_suppression_check: bool = False,
 ) -> bool:
     """Send an HTML email through Postmark. Non-blocking for callers via
-    asyncio.to_thread. Returns True on success, False otherwise."""
+    asyncio.to_thread. Returns True on success, False otherwise.
+
+    If the recipient has been flagged as hard-bounced or spam-complained via
+    the Postmark webhook (users.email_suppressed=True), the send is skipped
+    unless skip_suppression_check=True.
+    """
     client = _get_client()
     if client is None:
         logger.error("Postmark client unavailable — POSTMARK_SERVER_TOKEN not set")
         return False
+
+    # Check suppression list (writable via the /webhooks/postmark endpoint)
+    if not skip_suppression_check and to_email:
+        try:
+            _db = _get_db()
+            if _db is not None:
+                suppressed = await _db.users.find_one(
+                    {"email": to_email.lower(), "email_suppressed": True},
+                    {"_id": 0, "email_suppressed_reason": 1},
+                )
+                if suppressed:
+                    logger.warning(
+                        "Skipping email to %s — suppressed (%s)",
+                        to_email, suppressed.get("email_suppressed_reason", "unknown"),
+                    )
+                    return False
+        except Exception as e:  # noqa: BLE001
+            # Don't block sends if suppression check fails
+            logger.debug("Suppression check failed (non-fatal): %s", e)
 
     from_address = _from_address()
 
