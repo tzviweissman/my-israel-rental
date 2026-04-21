@@ -29,7 +29,13 @@ from io import BytesIO
 
 # Import our utilities
 from utils.auth import create_token, verify_token
-from utils.email import send_email
+from utils.email import (
+    send_email,
+    send_welcome_email,
+    send_password_reset_email,
+    send_booking_confirmation_email,
+    send_booking_notification_email,
+)
 from utils.helpers import get_usd_ils_rate, parse_ical_feed, sync_property_ical, sync_all_ical_feeds
 from utils.pdf import stamp_signature_on_document
 from models import *
@@ -49,36 +55,7 @@ EMERGENT_LLM_KEY = os.environ.get('EMERGENT_LLM_KEY', '')
 JWT_SECRET = os.environ.get('JWT_SECRET', 'your-secret-key-change-in-production-12345')
 
 
-# SMTP / SES Configuration
-SMTP_FROM = os.environ.get('SMTP_FROM', '')
-AWS_ACCESS_KEY_ID = os.environ.get('AWS_ACCESS_KEY_ID', '')
-AWS_SECRET_ACCESS_KEY = os.environ.get('AWS_SECRET_ACCESS_KEY', '')
-AWS_REGION = os.environ.get('AWS_REGION', 'us-east-1')
-
-
-async def send_email(to_email: str, subject: str, html_body: str):
-    """Send an email via AWS SES boto3 API."""
-    try:
-        import boto3
-        ses_client = boto3.client(
-            'ses',
-            region_name=AWS_REGION,
-            aws_access_key_id=AWS_ACCESS_KEY_ID,
-            aws_secret_access_key=AWS_SECRET_ACCESS_KEY
-        )
-        response = ses_client.send_email(
-            Source=SMTP_FROM,
-            Destination={'ToAddresses': [to_email]},
-            Message={
-                'Subject': {'Data': subject, 'Charset': 'UTF-8'},
-                'Body': {'Html': {'Data': html_body, 'Charset': 'UTF-8'}}
-            }
-        )
-        logger.info(f"Email sent to {to_email}: {subject} (MessageId: {response.get('MessageId')})")
-        return True
-    except Exception as e:
-        logger.error(f"Failed to send email to {to_email}: {e}")
-        return False
+# Email sending is handled by utils.email (Postmark)
 
 # Exchange rate cache
 _exchange_cache = {"rate": None, "fetched_at": None}
@@ -339,65 +316,9 @@ async def register(user_data: UserRegister):
     await db.users.insert_one(user_doc)
     token = create_token(user_id, user_data.role)
 
-    # Send welcome email (fire and forget — don't block registration)
+    # Send welcome email via Postmark (fire and forget — don't block registration)
     try:
-        welcome_html = f"""
-        <div style="font-family: Arial, sans-serif; max-width: 540px; margin: 0 auto; padding: 30px; background: #f9f9f9; border-radius: 12px;">
-            <div style="text-align: center; margin-bottom: 24px;">
-                <h1 style="color: #1E6A6A; font-size: 24px; margin: 0;">MyIsraelRental</h1>
-                <p style="color: #D4AF37; font-size: 12px; letter-spacing: 2px; margin-top: 4px;">YOUR HOME IN ISRAEL</p>
-            </div>
-            <div style="background: white; padding: 32px; border-radius: 10px; border: 1px solid #e5e5e5;">
-                <h2 style="color: #333; font-size: 20px; margin-top: 0;">Welcome, {user_data.name}!</h2>
-                <p style="color: #555; font-size: 14px; line-height: 1.7;">
-                    Thank you for joining <strong style="color: #1E6A6A;">MyIsraelRental</strong>. We're excited to have you on board!
-                </p>
-                <div style="background: #f7f7f7; border-radius: 8px; padding: 16px; margin: 20px 0; border-left: 4px solid #1E6A6A;">
-                    <p style="color: #555; font-size: 13px; margin: 0; line-height: 1.6;">
-                        <strong style="color: #333;">Your Account Details:</strong><br>
-                        Email: {user_data.email}<br>
-                        Role: {user_data.role.title()}
-                    </p>
-                </div>
-                <p style="color: #555; font-size: 14px; line-height: 1.7;">
-                    Here's what you can do next:
-                </p>
-                <table style="width: 100%; border-collapse: collapse; margin: 16px 0;">
-                    <tr>
-                        <td style="padding: 10px 12px; background: #1E6A6A10; border-radius: 8px 8px 0 0; border-bottom: 1px solid #e5e5e5;">
-                            <span style="color: #1E6A6A; font-weight: bold; font-size: 13px;">🏠 Browse Properties</span>
-                            <p style="color: #666; font-size: 12px; margin: 4px 0 0;">Find long-term, short-term, or vacation rentals across Israel</p>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td style="padding: 10px 12px; background: #D4AF3710; border-bottom: 1px solid #e5e5e5;">
-                            <span style="color: #D4AF37; font-weight: bold; font-size: 13px;">📋 Sublease Your Property</span>
-                            <p style="color: #666; font-size: 12px; margin: 4px 0 0;">List your sublease in just a few clicks</p>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td style="padding: 10px 12px; background: #f7f7f7; border-radius: 0 0 8px 8px;">
-                            <span style="color: #333; font-weight: bold; font-size: 13px;">📄 Government Services</span>
-                            <p style="color: #666; font-size: 12px; margin: 4px 0 0;">Arnona discounts, property name changes, and more — handled for you</p>
-                        </td>
-                    </tr>
-                </table>
-                <div style="text-align: center; margin-top: 24px;">
-                    <a href="https://myisraelrental.com/dashboard" style="background-color: #1E6A6A; color: white; padding: 14px 32px; text-decoration: none; border-radius: 8px; font-size: 14px; font-weight: bold; display: inline-block;">
-                        Go to Your Dashboard
-                    </a>
-                </div>
-            </div>
-            <div style="text-align: center; margin-top: 20px;">
-                <p style="color: #999; font-size: 11px; line-height: 1.5;">
-                    Questions? Contact us at <a href="mailto:mir@myisraelrental.com" style="color: #D4AF37;">mir@myisraelrental.com</a>
-                    or call <a href="tel:+972553225141" style="color: #D4AF37;">+972 55 322 5141</a>
-                </p>
-                <p style="color: #bbb; font-size: 10px; margin-top: 8px;">&copy; MyIsraelRental.com — My Israel Rental LLC</p>
-            </div>
-        </div>
-        """
-        asyncio.create_task(send_email(user_data.email, "Welcome to MyIsraelRental! 🏠", welcome_html))
+        asyncio.create_task(send_welcome_email(user_data.email, user_data.name, user_data.role))
     except Exception as e:
         logger.warning(f"Failed to queue welcome email for {user_data.email}: {e}")
 
@@ -455,35 +376,7 @@ async def forgot_password(request: ForgotPasswordRequest, req: Request = None):
 
     reset_link = f"{origin}/auth/reset-password?token={reset_token}"
 
-    # Send the reset email
-    html_body = f"""
-    <div style="font-family: Arial, sans-serif; max-width: 500px; margin: 0 auto; padding: 30px; background: #f9f9f9; border-radius: 12px;">
-        <div style="text-align: center; margin-bottom: 24px;">
-            <h1 style="color: #1E6A6A; font-size: 22px; margin: 0;">MyIsraelRental</h1>
-        </div>
-        <div style="background: white; padding: 30px; border-radius: 10px; border: 1px solid #e5e5e5;">
-            <h2 style="color: #333; font-size: 18px; margin-top: 0;">Password Reset Request</h2>
-            <p style="color: #555; font-size: 14px; line-height: 1.6;">
-                Hi {user.get('name', 'there')},<br><br>
-                We received a request to reset your password. Click the button below to set a new password:
-            </p>
-            <div style="text-align: center; margin: 28px 0;">
-                <a href="{reset_link}" style="background-color: #1E6A6A; color: white; padding: 14px 32px; text-decoration: none; border-radius: 8px; font-size: 14px; font-weight: bold; display: inline-block;">
-                    Reset My Password
-                </a>
-            </div>
-            <p style="color: #888; font-size: 12px; line-height: 1.5;">
-                This link expires in 1 hour. If you didn't request this, you can safely ignore this email.<br><br>
-                Or copy this link: <a href="{reset_link}" style="color: #D4AF37; word-break: break-all;">{reset_link}</a>
-            </p>
-        </div>
-        <p style="text-align: center; color: #aaa; font-size: 11px; margin-top: 16px;">
-            &copy; MyIsraelRental.com
-        </p>
-    </div>
-    """
-
-    email_sent = await send_email(request.email, "Reset Your Password — MyIsraelRental", html_body)
+    email_sent = await send_password_reset_email(request.email, user.get('name', ''), reset_link)
 
     return {
         "message": "Password reset link has been generated.",
@@ -793,7 +686,56 @@ async def create_booking(booking_data: BookingCreate, payload = Depends(verify_t
         "created_at": datetime.now(timezone.utc).isoformat()
     }
     await db.notifications.insert_one(owner_notification)
-    
+
+    # --- Send transactional emails via Postmark (fire-and-forget) ---
+    try:
+        renter = await db.users.find_one({"id": payload['user_id']}, {"_id": 0, "email": 1, "name": 1})
+        owner = await db.users.find_one({"id": property_data['owner_id']}, {"_id": 0, "email": 1, "name": 1})
+        currency = property_data.get('currency', 'ILS')
+
+        # Compute total for vacation rentals (nights * nightly_price)
+        total_price = None
+        if property_data.get('rental_type') == 'vacation' and property_data.get('nightly_price'):
+            try:
+                start = datetime.fromisoformat(booking_data.start_date.replace('Z', ''))
+                end = datetime.fromisoformat(booking_data.end_date.replace('Z', ''))
+                nights = max(1, (end - start).days)
+                total_price = float(property_data['nightly_price']) * nights
+            except Exception:
+                total_price = None
+
+        if renter and renter.get('email'):
+            asyncio.create_task(send_booking_confirmation_email(
+                to_email=renter['email'],
+                guest_name=renter.get('name', ''),
+                property_title=property_data.get('title', 'your rental'),
+                property_location=property_data.get('location', property_data.get('area', '')),
+                check_in=booking_data.start_date,
+                check_out=booking_data.end_date,
+                total_price=total_price,
+                currency=currency,
+                booking_id=booking_id,
+                status=booking_doc['status'],
+            ))
+
+        if owner and owner.get('email'):
+            asyncio.create_task(send_booking_notification_email(
+                to_email=owner['email'],
+                owner_name=owner.get('name', ''),
+                guest_name=(renter or {}).get('name', 'A guest'),
+                guest_email=(renter or {}).get('email', ''),
+                property_title=property_data.get('title', 'your property'),
+                property_location=property_data.get('location', property_data.get('area', '')),
+                check_in=booking_data.start_date,
+                check_out=booking_data.end_date,
+                total_price=total_price,
+                currency=currency,
+                booking_id=booking_id,
+                is_pending=(booking_doc['status'] == 'pending'),
+            ))
+    except Exception as e:
+        logger.warning(f"Failed to queue booking emails for booking {booking_id}: {e}")
+
     return {"id": booking_id, "status": booking_doc['status'], "message": "Booking confirmed!" if booking_doc['status'] == 'confirmed' else "Booking request sent successfully"}
 
 @api_router.get("/bookings")
@@ -849,6 +791,25 @@ async def accept_booking(booking_id: str, payload=Depends(verify_token)):
             "confirmed_at": datetime.now(timezone.utc).isoformat()
         }}
     )
+
+    # Send acceptance email to the renter (Postmark, fire-and-forget)
+    try:
+        renter = await db.users.find_one({"id": booking['renter_id']}, {"_id": 0, "email": 1, "name": 1})
+        if renter and renter.get('email'):
+            asyncio.create_task(send_booking_confirmation_email(
+                to_email=renter['email'],
+                guest_name=renter.get('name', ''),
+                property_title=property_data.get('title', 'your rental'),
+                property_location=property_data.get('location', property_data.get('area', '')),
+                check_in=booking.get('start_date', ''),
+                check_out=booking.get('end_date', ''),
+                total_price=None,
+                currency=property_data.get('currency', 'ILS'),
+                booking_id=booking_id,
+                status='confirmed',
+            ))
+    except Exception as e:
+        logger.warning(f"Failed to queue acceptance email for booking {booking_id}: {e}")
     
     # Check if property has a contract (check both contract_path and contract_url)
     if property_data.get('contract_path') or property_data.get('contract_url'):

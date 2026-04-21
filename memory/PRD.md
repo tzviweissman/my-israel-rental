@@ -43,6 +43,14 @@ Build a bilingual (English/Hebrew) rental website named MyIsraelRental.com with 
   - Menu button made transparent (no background) to match logo style
   - Gradient accent: #2A8585
 
+- [x] **Postmark Transactional Emails** (2026-04-21):
+  - Replaced AWS SES with Postmark (SDK: `postmarker`) in `/app/backend/utils/email.py`
+  - Brand-styled HTML templates with teal/gold theme, inline CSS for client compatibility
+  - Flows wired: welcome (on register), password reset (on forgot-password), booking confirmation (to guest on create & accept), booking notification (to owner on create)
+  - From: `My Israel Rental <no-reply@myisraelrental.com>`, token stored in `POSTMARK_SERVER_TOKEN` env var
+  - Helpers: `send_welcome_email`, `send_password_reset_email`, `send_booking_confirmation_email`, `send_booking_notification_email`
+  - Verified end-to-end: all 4 flows returned `MessageID` from Postmark API
+
 ### Key API Endpoints
 - Auth: POST /api/auth/register, /api/auth/login, GET /api/auth/me
 - Properties: GET /api/properties (with 13 filter params), POST/PUT/DELETE /api/properties
@@ -57,7 +65,9 @@ Build a bilingual (English/Hebrew) rental website named MyIsraelRental.com with 
 ### P1 - Medium Priority
 - [ ] PayPal integration for paid services (Arnona/name change)
 - [x] Rental contract upload, translation (Hebrew<->English), digital signing
-- [ ] Email/SMTP notifications for renter alerts
+- [x] Email/SMTP notifications — migrated to Postmark (welcome, reset, booking confirm/notify)
+- [ ] Fix "Failed to add property" error when EDITING a property (frontend payload bug; backend PUT verified OK)
+- [ ] Manager bulk property upload + profile pages
 
 ### P2 - Lower Priority
 - [ ] Manager bulk property upload via text
