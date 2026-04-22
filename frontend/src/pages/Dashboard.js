@@ -2476,6 +2476,25 @@ const Dashboard = () => {
                             Delete Contract
                           </button>
                         )}
+                        {/* Download blank template */}
+                        <div className="mt-2 flex items-center gap-2 text-[11px] text-gray-500">
+                          <span>Need a template?</span>
+                          <a
+                            href={`${API}/contract-template/en`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-[#1E6A6A] hover:text-[#D4AF37] underline"
+                            data-testid={`template-en-${property.id}`}
+                          >EN</a>
+                          <span className="text-gray-300">·</span>
+                          <a
+                            href={`${API}/contract-template/he`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-[#1E6A6A] hover:text-[#D4AF37] underline"
+                            data-testid={`template-he-${property.id}`}
+                          >HE</a>
+                        </div>
                       </div>
                     )}
                     {/* iCal Sync for Vacation Properties */}

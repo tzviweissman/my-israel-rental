@@ -38,6 +38,7 @@ from utils.email import (
 )
 from utils.helpers import get_usd_ils_rate, parse_ical_feed, sync_property_ical, sync_all_ical_feeds
 from utils.pdf import stamp_signature_on_document
+from utils.contract_template import ensure_templates as ensure_contract_templates
 from models import *
 
 ROOT_DIR = Path(__file__).parent
@@ -56,6 +57,30 @@ JWT_SECRET = os.environ.get('JWT_SECRET', 'your-secret-key-change-in-production-
 
 
 POSTMARK_WEBHOOK_SECRET = os.environ.get('POSTMARK_WEBHOOK_SECRET', '')
+
+
+@api_router.get("/contract-template/{lang}")
+async def download_contract_template(lang: str):
+    """Serve the MyIsraelRental blank fillable rental-contract PDF.
+    Public endpoint — owners and renters alike can download a blank template.
+    Supported languages: 'en' (English) and 'he' (Hebrew)."""
+    from starlette.responses import FileResponse
+    if lang not in ("en", "he"):
+        raise HTTPException(status_code=404, detail="Language not available. Use 'en' or 'he'.")
+    pdf_path = ROOT_DIR / "uploads" / "templates" / f"myisraelrental_contract_{lang}.pdf"
+    if not pdf_path.exists():
+        try:
+            ensure_contract_templates(ROOT_DIR / "uploads")
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=f"Template generation failed: {e}")
+    if not pdf_path.exists():
+        raise HTTPException(status_code=404, detail="Contract template not found")
+    return FileResponse(
+        str(pdf_path),
+        media_type="application/pdf",
+        filename=f"myisraelrental-rental-contract-{lang}.pdf",
+    )
+
 
 
 @api_router.post("/webhooks/postmark")
@@ -2737,6 +2762,11 @@ logger = logging.getLogger(__name__)
 @app.on_event("startup")
 async def start_ical_sync():
     asyncio.create_task(sync_all_ical_feeds())
+    try:
+        ensure_contract_templates(ROOT_DIR / "uploads")
+        logger.info("Contract templates ready")
+    except Exception as e:
+        logger.warning(f"Contract template generation failed (non-fatal): {e}")
 
 @app.on_event("shutdown")
 async def shutdown_db_client():
