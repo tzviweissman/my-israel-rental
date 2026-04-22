@@ -70,6 +70,14 @@ Build a bilingual (English/Hebrew) rental website named MyIsraelRental.com with 
 - [x] Code-review critical fixes (2026-04-21): test creds → `.env.test` + `conftest.py`, array-index keys → stable IDs (6 files), debug console.logs removed, intentional-hook ESLint markers
 - [x] **Postmark webhooks** (2026-04-21): `/api/webhooks/postmark` receives Delivery/Bounce/SpamComplaint events, stores in `email_events` collection, flags `users.email_suppressed=True` on hard bounce or complaint. Admin endpoint `/api/admin/email-health` returns 30-day stats. AdminDashboard overview tab now has an "Email Deliverability" card. `send_email()` auto-skips suppressed recipients.
   - **User setup required:** In Postmark → Servers → outbound stream → Webhooks, add `{BACKEND_URL}/api/webhooks/postmark?token=BSuezo9yKFgz66RSR3TMoAqQpYCjxpCINmBW7HAt3FM` and enable Delivery + Bounce + SpamComplaint events.
+- [x] **Saved Search / Availability Alerts** (2026-04-22):
+  - Renter can save search criteria (area, rental_type, min bedrooms, max price, dates) from an empty-results "Notify Me" card on `/properties/*`.
+  - Alerts auto-expire after 60 days; dedupe on identical filters.
+  - Triggers fire on property create, price drop, and booking cancel (freed dates); match uses ±30-day fuzziness.
+  - In-app notification (bell icon) + Postmark email; owner never notified of own listing; 7-day throttle per (search × property) pair.
+  - New Dashboard tab "Alerts" lets renters view & delete their saved searches.
+  - Endpoints: `POST/GET/DELETE /api/saved-searches`. Collections: `saved_searches`, `saved_search_alerts`.
+  - Files: `backend/utils/saved_search.py`, `frontend/src/components/NotifyMeCard.jsx`, `frontend/src/components/dashboard/SavedSearchesTab.jsx`. Backend pytest: 12/12 green (`/app/backend/tests/test_saved_searches.py`).
 - [ ] Manager bulk property upload + profile pages
 
 ### P2 - Lower Priority
