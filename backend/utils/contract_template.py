@@ -348,8 +348,8 @@ def _build_page(c: canvas.Canvas, t: dict, rtl: bool, lang_prefix: str):
     c.setFillColor(INK)
     c.setFont(reg, 9)
     for i, item in enumerate(t["terms_items"], start=1):
-        # Page-break guard: if we don't have room, flow to the next page first
-        needed = 10 * mm if item else 15 * mm
+        # Page-break guard: blanks need 14mm, filled need 10mm
+        needed = 10 * mm if item else 14 * mm
         if y - needed < 30 * mm:
             c.showPage()
             _draw_header(c, t, rtl)
@@ -364,27 +364,37 @@ def _build_page(c: canvas.Canvas, t: dict, rtl: bool, lang_prefix: str):
         if item:
             # pre-filled text for the 3 first clauses
             c.drawString(MARGIN + 6 * mm, y, item[:120])
-            # soft continuation underline — sits one "row" (5mm) below the text
+            # soft continuation underline directly below the text
             c.setStrokeColor(LINE)
             c.setLineWidth(0.5)
-            c.line(MARGIN + 6 * mm, y - 5 * mm, PAGE_W - MARGIN, y - 5 * mm)
+            c.line(MARGIN + 6 * mm, y - 1.5, PAGE_W - MARGIN, y - 1.5)
             y -= 10 * mm
         else:
-            # Single long underline starting right after the number, like:
-            #   4.______________________________________________________
-            # _field() draws its own underline + invisible AcroForm textbox,
-            # so we don't need to draw an additional line.
-            _field(
-                c,
-                f"{lang_prefix}_term_{i}",
-                MARGIN + 6 * mm,
-                y - 1.5,
-                PAGE_W - 2 * MARGIN - 6 * mm,
-                7 * mm,
-                rtl=rtl,
-                font_size=10,
-            )
-            y -= 10 * mm
+            # Two equidistant writing lines per blank item. Every gap is 7mm:
+            #   number→line1, line1→line2, line2→next number all = 7mm.
+            c.setStrokeColor(LINE)
+            c.setLineWidth(0.6)
+            c.line(MARGIN + 6 * mm, y - 1, PAGE_W - MARGIN, y - 1)
+            c.line(MARGIN + 6 * mm, y - 7 * mm - 1, PAGE_W - MARGIN, y - 7 * mm - 1)
+            # Invisible AcroForm field so owner can type directly in the PDF
+            try:
+                c.acroForm.textfield(
+                    name=f"{lang_prefix}_term_{i}",
+                    x=MARGIN + 6 * mm,
+                    y=y - 8 * mm,
+                    width=PAGE_W - 2 * MARGIN - 6 * mm,
+                    height=9 * mm,
+                    borderWidth=0,
+                    fillColor=Color(1, 1, 1, alpha=0),
+                    textColor=INK,
+                    fontName=reg,
+                    fontSize=10,
+                    fieldFlags="multiline",
+                    forceBorder=False,
+                )
+            except Exception:
+                pass
+            y -= 14 * mm
 
     y -= 2 * mm
 
