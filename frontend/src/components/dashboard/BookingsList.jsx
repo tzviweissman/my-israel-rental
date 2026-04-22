@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Filter, X, FileText, FileCheck } from 'lucide-react';
+import { Filter, X, FileText, FileCheck, Download } from 'lucide-react';
 import { toast } from 'sonner';
 import axios from 'axios';
 import ContractSignModal from '../modals/ContractSignModal';
@@ -268,15 +268,27 @@ const BookingsList = ({ bookings, onUpdate, user, token, API }) => {
                       </button>
                     )}
                     {booking.contract_signed && booking.signed_contract_url && (
-                      <a
-                        href={`${API.replace('/api', '')}${booking.signed_contract_url}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="px-4 py-2 rounded-lg text-sm font-medium bg-green-500 text-white hover:bg-green-600 transition-colors flex items-center gap-2"
-                      >
-                        <FileCheck size={16} />
-                        View Signed Contract
-                      </a>
+                      <>
+                        <a
+                          href={`${API.replace('/api', '')}${booking.signed_contract_url}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="px-4 py-2 rounded-lg text-sm font-medium bg-green-500 text-white hover:bg-green-600 transition-colors flex items-center gap-2"
+                          data-testid={`view-signed-contract-${booking.id}`}
+                        >
+                          <FileCheck size={16} />
+                          View Signed Contract
+                        </a>
+                        <a
+                          href={`${API.replace('/api', '')}${booking.signed_contract_url}`}
+                          download
+                          className="px-4 py-2 rounded-lg text-sm font-medium bg-[#1E6A6A] text-white hover:bg-[#1E6A6A]/90 transition-colors flex items-center gap-2"
+                          data-testid={`download-signed-contract-${booking.id}`}
+                        >
+                          <Download size={16} />
+                          Download
+                        </a>
+                      </>
                     )}
                     {canAccept && (
                       <button
