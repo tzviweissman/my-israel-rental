@@ -348,9 +348,8 @@ def _build_page(c: canvas.Canvas, t: dict, rtl: bool, lang_prefix: str):
     c.setFillColor(INK)
     c.setFont(reg, 9)
     for i, item in enumerate(t["terms_items"], start=1):
-        # Page-break guard: if we don't have room for a two-line blank field,
-        # flow to the next page before drawing it.
-        needed = 7 * mm if item else 15 * mm
+        # Page-break guard: if we don't have room, flow to the next page first
+        needed = 10 * mm if item else 15 * mm
         if y - needed < 30 * mm:
             c.showPage()
             _draw_header(c, t, rtl)
@@ -365,13 +364,15 @@ def _build_page(c: canvas.Canvas, t: dict, rtl: bool, lang_prefix: str):
         if item:
             # pre-filled text for the 3 first clauses
             c.drawString(MARGIN + 6 * mm, y, item[:120])
-            # soft continuation underline in case they extend
+            # soft continuation underline — sits one "row" (5mm) below the text
+            # so spacing matches the double-underline blanks below.
             c.setStrokeColor(LINE)
-            c.setLineWidth(0.4)
-            c.line(MARGIN + 6 * mm, y - 1.2, PAGE_W - MARGIN, y - 1.2)
-            y -= 7 * mm
+            c.setLineWidth(0.5)
+            c.line(MARGIN + 6 * mm, y - 5 * mm, PAGE_W - MARGIN, y - 5 * mm)
+            y -= 10 * mm
         else:
-            # Two-line fillable area for added clauses (items 4-9)
+            # Two-line fillable area for added clauses (items 4-9) with
+            # equidistant rows: 5mm between the number, line 1, and line 2.
             _field(
                 c,
                 f"{lang_prefix}_term_{i}",
@@ -385,10 +386,8 @@ def _build_page(c: canvas.Canvas, t: dict, rtl: bool, lang_prefix: str):
             )
             c.setStrokeColor(LINE)
             c.setLineWidth(0.5)
-            # Line 1 (first writing row, right below the number)
-            c.line(MARGIN + 6 * mm, y - 1.2, PAGE_W - MARGIN, y - 1.2)
-            # Line 2 (second writing row, well below — clearly separated)
-            c.line(MARGIN + 6 * mm, y - 8 * mm, PAGE_W - MARGIN, y - 8 * mm)
+            c.line(MARGIN + 6 * mm, y - 5 * mm, PAGE_W - MARGIN, y - 5 * mm)
+            c.line(MARGIN + 6 * mm, y - 10 * mm, PAGE_W - MARGIN, y - 10 * mm)
             y -= 15 * mm
 
     y -= 2 * mm
