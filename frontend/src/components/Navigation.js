@@ -88,21 +88,45 @@ const Navigation = () => {
     }
   };
   
-  const clearAllNotifications = async () => {
-    if (!window.confirm('Are you sure you want to clear all notifications? This cannot be undone.')) {
-      return;
-    }
-    try {
-      await axios.delete(`${API}/notifications/clear-all`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      setNotifications([]);
-      setUnreadCount(0);
-      toast.success('All notifications cleared');
-    } catch (error) {
-      console.error('Failed to clear notifications', error);
-      toast.error('Failed to clear notifications');
-    }
+  const clearAllNotifications = () => {
+    // Use a toast-based confirm. window.confirm() gets silently blocked inside
+    // preview iframes and some browsers, making the button "do nothing".
+    toast((tInst) => (
+      <div className="flex flex-col gap-2 min-w-[240px]">
+        <p className="text-sm font-medium">Clear all notifications?</p>
+        <p className="text-xs text-gray-500">This cannot be undone.</p>
+        <div className="flex gap-2 mt-1">
+          <button
+            type="button"
+            onClick={async () => {
+              toast.dismiss(tInst);
+              try {
+                await axios.delete(`${API}/notifications/clear-all`, {
+                  headers: { Authorization: `Bearer ${token}` }
+                });
+                setNotifications([]);
+                setUnreadCount(0);
+                toast.success('All notifications cleared');
+              } catch (error) {
+                console.error('Failed to clear notifications', error);
+                toast.error(error?.response?.data?.detail || 'Failed to clear notifications');
+              }
+            }}
+            className="flex-1 px-3 py-1.5 rounded-md bg-red-500 text-white text-xs hover:bg-red-600"
+            data-testid="confirm-clear-notifications-btn"
+          >
+            Clear All
+          </button>
+          <button
+            type="button"
+            onClick={() => toast.dismiss(tInst)}
+            className="flex-1 px-3 py-1.5 rounded-md bg-gray-200 text-gray-700 text-xs hover:bg-gray-300"
+          >
+            Cancel
+          </button>
+        </div>
+      </div>
+    ), { duration: 10000 });
   };
   
   const handleNotificationClick = (notification) => {
