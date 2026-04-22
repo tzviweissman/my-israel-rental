@@ -365,30 +365,26 @@ def _build_page(c: canvas.Canvas, t: dict, rtl: bool, lang_prefix: str):
             # pre-filled text for the 3 first clauses
             c.drawString(MARGIN + 6 * mm, y, item[:120])
             # soft continuation underline — sits one "row" (5mm) below the text
-            # so spacing matches the double-underline blanks below.
             c.setStrokeColor(LINE)
             c.setLineWidth(0.5)
             c.line(MARGIN + 6 * mm, y - 5 * mm, PAGE_W - MARGIN, y - 5 * mm)
             y -= 10 * mm
         else:
-            # Two-line fillable area for added clauses (items 4-9) with
-            # equidistant rows: 5mm between the number, line 1, and line 2.
+            # Single long underline starting right after the number, like:
+            #   4.______________________________________________________
+            # _field() draws its own underline + invisible AcroForm textbox,
+            # so we don't need to draw an additional line.
             _field(
                 c,
                 f"{lang_prefix}_term_{i}",
                 MARGIN + 6 * mm,
-                y - 11 * mm,
+                y - 1.5,
                 PAGE_W - 2 * MARGIN - 6 * mm,
-                14 * mm,
+                7 * mm,
                 rtl=rtl,
-                multiline=True,
-                font_size=9,
+                font_size=10,
             )
-            c.setStrokeColor(LINE)
-            c.setLineWidth(0.5)
-            c.line(MARGIN + 6 * mm, y - 5 * mm, PAGE_W - MARGIN, y - 5 * mm)
-            c.line(MARGIN + 6 * mm, y - 10 * mm, PAGE_W - MARGIN, y - 10 * mm)
-            y -= 15 * mm
+            y -= 10 * mm
 
     y -= 2 * mm
 
