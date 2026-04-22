@@ -348,6 +348,16 @@ def _build_page(c: canvas.Canvas, t: dict, rtl: bool, lang_prefix: str):
     c.setFillColor(INK)
     c.setFont(reg, 9)
     for i, item in enumerate(t["terms_items"], start=1):
+        # Page-break guard: if we don't have room for a two-line blank field,
+        # flow to the next page before drawing it.
+        needed = 7 * mm if item else 15 * mm
+        if y - needed < 30 * mm:
+            c.showPage()
+            _draw_header(c, t, rtl)
+            y = PAGE_H - 36 * mm
+            y = _section_header(c, y, t["terms"] + " (continued)", rtl)
+            y -= 4 * mm
+
         # number prefix
         c.setFont(bold, 9)
         c.drawString(MARGIN, y, f"{i}.")
@@ -359,17 +369,27 @@ def _build_page(c: canvas.Canvas, t: dict, rtl: bool, lang_prefix: str):
             c.setStrokeColor(LINE)
             c.setLineWidth(0.4)
             c.line(MARGIN + 6 * mm, y - 1.2, PAGE_W - MARGIN, y - 1.2)
+            y -= 7 * mm
         else:
+            # Two-line fillable area for added clauses (items 4-9)
             _field(
                 c,
                 f"{lang_prefix}_term_{i}",
                 MARGIN + 6 * mm,
-                y - 2,
+                y - 11 * mm,
                 PAGE_W - 2 * MARGIN - 6 * mm,
-                6 * mm,
+                14 * mm,
                 rtl=rtl,
+                multiline=True,
+                font_size=9,
             )
-        y -= 7 * mm
+            c.setStrokeColor(LINE)
+            c.setLineWidth(0.5)
+            # Line 1 (first writing row, right below the number)
+            c.line(MARGIN + 6 * mm, y - 1.2, PAGE_W - MARGIN, y - 1.2)
+            # Line 2 (second writing row, well below — clearly separated)
+            c.line(MARGIN + 6 * mm, y - 8 * mm, PAGE_W - MARGIN, y - 8 * mm)
+            y -= 15 * mm
 
     y -= 2 * mm
 
@@ -399,27 +419,32 @@ def _build_page(c: canvas.Canvas, t: dict, rtl: bool, lang_prefix: str):
 
     # -- Signatures
     y = _section_header(c, y, t["signatures"], rtl)
-    y -= 10 * mm
+    # Give enough vertical room so the "Landlord / Sublessor" label sits BELOW
+    # the section header and doesn't overlap it.
+    y -= 18 * mm
     sig_w = (PAGE_W - 2 * MARGIN - 10 * mm) / 2
-    # Landlord signature
-    c.setFillColor(INK)
-    c.setFont(bold, 9)
-    c.drawString(MARGIN, y + 12 * mm, t["landlord_sig"])
-    c.setStrokeColor(LINE)
-    c.setLineWidth(0.8)
-    c.line(MARGIN, y, MARGIN + sig_w * 0.7, y)
-    _label(c, MARGIN, y - 4, "Signature / חתימה", rtl)
-    c.line(MARGIN + sig_w * 0.72, y, MARGIN + sig_w - 2, y)
-    _label(c, MARGIN + sig_w * 0.72, y - 4, t["date"], rtl)
 
-    # Tenant signature
-    x2 = MARGIN + sig_w + 10 * mm
-    c.setFont(bold, 9)
-    c.drawString(x2, y + 12 * mm, t["tenant_sig"])
-    c.line(x2, y, x2 + sig_w * 0.7, y)
-    _label(c, x2, y - 4, "Signature / חתימה", rtl)
-    c.line(x2 + sig_w * 0.72, y, x2 + sig_w - 2, y)
-    _label(c, x2 + sig_w * 0.72, y - 4, t["date"], rtl)
+    def _sig_block(x: float, role_label: str, field_prefix: str):
+        # Role label sits above the signature line
+        c.setFillColor(INK)
+        c.setFont(bold, 9)
+        c.drawString(x, y + 10 * mm, role_label)
+        # Signature line + date line
+        c.setStrokeColor(LINE)
+        c.setLineWidth(0.8)
+        c.line(x, y, x + sig_w * 0.7, y)
+        c.line(x + sig_w * 0.72, y, x + sig_w - 2, y)
+        # Sub-labels below the lines (with breathing room)
+        c.setFillColor(MUTED)
+        c.setFont(reg, 8)
+        c.drawString(x, y - 4 * mm, "Signature")
+        c.drawString(x + sig_w * 0.72, y - 4 * mm, t["date"])
+        # Invisible AcroForm text fields over the lines (lets someone type name)
+        _field(c, f"{field_prefix}_name", x, y + 0.5, sig_w * 0.68, 7 * mm, rtl=rtl, font_size=10)
+        _field(c, f"{field_prefix}_date", x + sig_w * 0.72, y + 0.5, sig_w * 0.26, 7 * mm, rtl=rtl, font_size=10)
+
+    _sig_block(MARGIN, t["landlord_sig"], f"{lang_prefix}_ll_sig")
+    _sig_block(MARGIN + sig_w + 10 * mm, t["tenant_sig"], f"{lang_prefix}_tn_sig")
 
     y -= 18 * mm
 
