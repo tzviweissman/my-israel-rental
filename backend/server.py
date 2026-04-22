@@ -39,6 +39,7 @@ from utils.email import (
 from utils.helpers import get_usd_ils_rate, parse_ical_feed, sync_property_ical, sync_all_ical_feeds
 from utils.pdf import stamp_signature_on_document
 from utils.contract_template import ensure_templates as ensure_contract_templates
+from utils.saved_search import match_property_against_searches
 from models import *
 
 ROOT_DIR = Path(__file__).parent
