@@ -134,3 +134,19 @@ class ContactRequest(BaseModel):
 
 class ICalUrlInput(BaseModel):
     url: str
+
+
+
+class SavedSearchFilters(BaseModel):
+    rental_type: Optional[str] = None
+    area: Optional[str] = None
+    bedrooms_min: Optional[float] = None
+    max_price: Optional[float] = None
+    start_date: Optional[str] = None  # YYYY-MM-DD
+    end_date: Optional[str] = None    # YYYY-MM-DD
+
+
+class SavedSearchCreate(BaseModel):
+    name: Optional[str] = None  # user-facing label; we'll derive one if absent
+    filters: SavedSearchFilters
+    date_fuzziness_days: Optional[int] = 30

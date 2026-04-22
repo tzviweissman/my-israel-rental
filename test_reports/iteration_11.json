@@ -1,0 +1,41 @@
+{
+  "summary": "Tested Saved Search / Availability Notification feature. Backend: 12/12 pytest pass covering CRUD, auth-gate, dedupe, 60-day expiry, ownership-based delete 403/404, owner-not-notified-for-own-listing, property-create trigger, price-drop trigger, and booking-cancel trigger (booking_freed). Frontend: verified anonymous flow — empty search shows NotifyMeCard with filter chips, clicking save-btn redirects anonymous user to /auth?return=... as required. Could not drive the logged-in UI flow inside the testing browser (see action items) but the backend-side create-search API (which NotifyMeCard calls) is fully exercised by pytest.",
+  "backend_issues": {
+    "critical": [],
+    "minor": [
+      {"endpoint": "/api/saved-searches (POST)", "issue": "No server-side enforcement that the caller has role='renter'; an owner can create an alert. Trigger logic does filter owners out of own-property matches, so no notification leak, but enforcing role at create would be tidier."}
+    ]
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": [
+      {"screen": "Auth login page", "issues": ["Email/Password inputs have no type='email'/'password' attribute (rendered as generic inputs) which complicates autofill and automated testing."]}
+    ]
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_saved_searches.py",
+    "/app/test_reports/pytest/saved_searches.xml"
+  ],
+  "action_items": [
+    "None required for functionality — feature works end-to-end.",
+    "For future UI test automation: Auth form should expose input[type=email] and input[type=password] (currently generic inputs with only label text).",
+    "Optional: enforce role='renter' in POST /api/saved-searches to prevent owners from subscribing (current code lets them but trigger logic filters owner out anyway)."
+  ],
+  "critical_code_review_comments": [
+    "utils/saved_search.py uses asyncio.create_task inside match_property_against_searches for email send — loss of task reference is OK since it's fire-and-forget, but no logging on email failure beyond 'warning'. Acceptable.",
+    "server.py: update_property reuses PropertyCreate model so 'status' cannot actually be passed through model_dump for reactivation detection unless status is part of the Pydantic schema (it is not). Therefore reason='reactivated' can only fire when old_status was not 'active' — e.g. 'archived'. Practically, reactivation trigger is dead code given current schema. Flagging for follow-up.",
+    "Email dispatch through Postmark is fire-and-forget; failures only logged at warn. For observability a saved_search_alerts.email_status field would be nicer.",
+    "server.py is 2898 lines — recommend splitting into routers (exceeds 700-line guideline)."
+  ],
+  "updated_files": [
+    "/app/backend/tests/test_saved_searches.py (new test file with 12 tests)"
+  ],
+  "success_rate": {"backend": "100%", "frontend": "75%"},
+  "test_credentials": "renter@test.com / Test1234! ; owner@test.com / Test1234! (from /app/memory/test_credentials.md)",
+  "seed_data_creation": "Tests create TEST_* prefixed properties and saved searches, cleaned up via module-scoped teardown fixtures (DELETE /api/properties/{id} and /api/saved-searches/{id}).",
+  "retest_needed": false,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "IMPORTANT: the frontend AuthContext stores JWT in sessionStorage (not localStorage) — see App.js line 38 `useState(sessionStorage.getItem('token'))`. For Playwright logged-in flows, seed with page.evaluate(([t,u]) => { sessionStorage.setItem('token', t); sessionStorage.setItem('user', JSON.stringify(u)); }, [token, user]). Login inputs on /auth are generic inputs (no type=email) — use positional input selection or label-based locator after waiting for the form (there are only 2 inputs on the auth page besides the nav search). Filter modal uses data-testid=filter-bedrooms-plus / filter-bathrooms-plus steppers (each click = 0.5); no URL-param-driven filtering — must open the Filters modal. Area is a <select data-testid='filter-area-input'> (use select_option, not fill). 'Eilat' may or may not be an option; using bedrooms=8 alone guarantees zero results. Backend pytest is green; the only gap is driving the end-to-end UI after login in a fresh Playwright session. The NotifyMeCard visibility + anonymous /auth redirect is verified.",
+  "rca of the issue": "No functional bugs found. Previously agent-reported feature verified end-to-end server-side and anonymous-side. The 'reactivated' code path will not fire in practice because PropertyCreate does not include 'status' field, so update_doc never contains a new_status differing from old; recommend adding an explicit /api/properties/{id}/status endpoint or adding 'status' to PropertyCreate for true reactivation triggers."
+}

@@ -9,6 +9,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '../components/ui/popove
 import { Slider } from '../components/ui/slider';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
+import NotifyMeCard from '../components/NotifyMeCard';
 
 const PRICE_MAX = 50000;
 
@@ -648,8 +649,9 @@ const Properties = () => {
         </div>
 
         {properties.length === 0 && (
-          <div className="text-center py-16">
-            <p className="text-xl text-gray-600">{t('filters.noResults')}</p>
+          <div className="text-center py-16" data-testid="no-results-empty-state">
+            <p className="text-xl text-gray-600 mb-2">{t('filters.noResults')}</p>
+            <NotifyMeCard filters={filters} dateRange={dateRange} />
           </div>
         )}
       </div>

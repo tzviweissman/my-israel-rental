@@ -581,6 +581,15 @@ async def create_property(property_data: PropertyCreate, payload = Depends(verif
     property_doc['status'] = 'active'
     
     await db.properties.insert_one(property_doc)
+
+    # Fire saved-search alerts (non-blocking)
+    try:
+        asyncio.create_task(match_property_against_searches(
+            db, property_id, reason="new_listing", send_email_fn=send_email,
+        ))
+    except Exception as e:
+        logger.warning(f"saved-search trigger failed (create): {e}")
+
     return {"id": property_id, "message": "Property created successfully"}
 
 @api_router.get("/properties")
@@ -701,6 +710,25 @@ async def update_property(property_id: str, property_data: PropertyCreate, paylo
     
     update_doc = property_data.model_dump()
     await db.properties.update_one({"id": property_id}, {"$set": update_doc})
+
+    # Fire saved-search alerts when price drops or listing re-activates
+    try:
+        old_price = existing.get("monthly_price") or existing.get("nightly_price")
+        new_price = update_doc.get("monthly_price") or update_doc.get("nightly_price")
+        old_status = existing.get("status")
+        new_status = update_doc.get("status", old_status)
+        reason = None
+        if old_status != "active" and new_status == "active":
+            reason = "reactivated"
+        elif old_price and new_price and float(new_price) < float(old_price):
+            reason = "price_drop"
+        if reason:
+            asyncio.create_task(match_property_against_searches(
+                db, property_id, reason=reason, send_email_fn=send_email,
+            ))
+    except Exception as e:
+        logger.warning(f"saved-search trigger failed (update): {e}")
+
     return {"message": "Property updated successfully"}
 
 @api_router.delete("/properties/{property_id}")
@@ -714,6 +742,86 @@ async def delete_property(property_id: str, payload = Depends(verify_token)):
     
     await db.properties.delete_one({"id": property_id})
     return {"message": "Property deleted successfully"}
+
+
+# --- Saved Searches (renter availability alerts) ---
+
+@api_router.post("/saved-searches")
+async def create_saved_search(body: SavedSearchCreate, payload=Depends(verify_token)):
+    """Renter subscribes to an availability alert for a given criteria+dates.
+    Auto-expires after 60 days. Requires sign-in."""
+    user = await db.users.find_one({"id": payload['user_id']}, {"_id": 0, "email": 1, "name": 1})
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    filters = body.filters.model_dump()
+    # Derive a name if the user didn't provide one
+    name = body.name
+    if not name:
+        parts = []
+        if filters.get("area"):
+            parts.append(filters["area"])
+        if filters.get("rental_type"):
+            parts.append(filters["rental_type"].replace("-", " ").title())
+        if filters.get("bedrooms_min"):
+            parts.append(f"{filters['bedrooms_min']}+ BR")
+        if filters.get("max_price"):
+            parts.append(f"≤ {int(filters['max_price']):,}")
+        if filters.get("start_date") and filters.get("end_date"):
+            parts.append(f"{filters['start_date']} → {filters['end_date']}")
+        name = " · ".join(parts) or "My alert"
+
+    now = datetime.now(timezone.utc)
+    expires_at = now + timedelta(days=60)
+    search_id = str(uuid.uuid4())
+
+    # Dedupe: if the exact same filters already exist & are active, return it
+    existing = await db.saved_searches.find_one({
+        "user_id": payload['user_id'],
+        "filters": filters,
+        "active": True,
+        "expires_at": {"$gt": now.isoformat()},
+    }, {"_id": 0})
+    if existing:
+        return {"id": existing["id"], "message": "Alert already active", "existing": True}
+
+    await db.saved_searches.insert_one({
+        "id": search_id,
+        "user_id": payload['user_id'],
+        "email": user.get("email"),
+        "user_name": user.get("name", ""),
+        "name": name,
+        "filters": filters,
+        "date_fuzziness_days": int(body.date_fuzziness_days or 30),
+        "active": True,
+        "created_at": now.isoformat(),
+        "expires_at": expires_at.isoformat(),
+    })
+    return {"id": search_id, "message": "Alert saved", "expires_at": expires_at.isoformat()}
+
+
+@api_router.get("/saved-searches")
+async def list_saved_searches(payload=Depends(verify_token)):
+    """List the current user's active saved searches (newest first)."""
+    now = datetime.now(timezone.utc).isoformat()
+    rows = await db.saved_searches.find(
+        {"user_id": payload['user_id'], "active": True, "expires_at": {"$gt": now}},
+        {"_id": 0},
+    ).sort("created_at", -1).to_list(200)
+    return rows
+
+
+@api_router.delete("/saved-searches/{search_id}")
+async def delete_saved_search(search_id: str, payload=Depends(verify_token)):
+    """Renter deletes (deactivates) a saved search."""
+    search = await db.saved_searches.find_one({"id": search_id}, {"_id": 0})
+    if not search:
+        raise HTTPException(status_code=404, detail="Saved search not found")
+    if search['user_id'] != payload['user_id'] and payload.get('role') != 'admin':
+        raise HTTPException(status_code=403, detail="Not authorized")
+    await db.saved_searches.delete_one({"id": search_id})
+    return {"message": "Alert removed"}
+
 
 
 # --- Liked Properties ---
@@ -1047,7 +1155,15 @@ async def cancel_booking(booking_id: str, reason: str = Body(..., embed=True), p
         "created_at": datetime.now(timezone.utc).isoformat()
     }
     await db.notifications.insert_one(notification)
-    
+
+    # Fire saved-search alerts — the freed-up dates might match pending alerts
+    try:
+        asyncio.create_task(match_property_against_searches(
+            db, booking['property_id'], reason="booking_freed", send_email_fn=send_email,
+        ))
+    except Exception as e:
+        logger.warning(f"saved-search trigger failed (cancel): {e}")
+
     return {"message": "Booking cancelled successfully"}
 
 @api_router.post("/bookings/{booking_id}/request-cancel")
@@ -1369,7 +1485,15 @@ async def approve_cancel_request(booking_id: str, payload=Depends(verify_token))
         "created_at": datetime.now(timezone.utc).isoformat()
     }
     await db.notifications.insert_one(notification)
-    
+
+    # Fire saved-search alerts — dates freed up
+    try:
+        asyncio.create_task(match_property_against_searches(
+            db, booking['property_id'], reason="booking_freed", send_email_fn=send_email,
+        ))
+    except Exception as e:
+        logger.warning(f"saved-search trigger failed (approve-cancel): {e}")
+
     return {"message": "Cancellation approved"}
 
 @api_router.post("/bookings/{booking_id}/deny-cancel")
