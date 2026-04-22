@@ -1175,11 +1175,16 @@ async def sign_booking_contract(booking_id: str, body: dict = Body(...), payload
 
                 # Print the signer's legal name below the signature for legal clarity.
                 # Font size scaled with signature width, but clamped to a readable range.
-                name_font_size = max(8.0, min(14.0, sig_w / 18.0))
+                name_font_size = max(10.0, min(16.0, sig_w / 20.0))
+                pad = max(8.0, sig_h * 0.12)
+                name_y_pdf = max(0, pdf_y - pad - name_font_size)
+                # Draw "Name: " bold-ish via two chars then regular name
+                c.setFillColorRGB(0.08, 0.08, 0.08)
+                c.setFont("Helvetica-Bold", name_font_size)
+                c.drawString(sig_x, name_y_pdf, "Name: ")
+                label_width = c.stringWidth("Name: ", "Helvetica-Bold", name_font_size)
                 c.setFont("Helvetica", name_font_size)
-                c.setFillColorRGB(0.1, 0.1, 0.1)
-                name_label = f"Signed by: {legal_name}"
-                c.drawString(sig_x, max(0, pdf_y - name_font_size - 3), name_label)
+                c.drawString(sig_x + label_width, name_y_pdf, legal_name)
                 c.save()
 
                 # Merge signature overlay with first page
@@ -1227,14 +1232,26 @@ async def sign_booking_contract(booking_id: str, body: dict = Body(...), payload
                 from PIL import ImageDraw, ImageFont
                 draw = ImageDraw.Draw(signature_layer)
                 # Font size scaled with signature width; fall back to default if ttf missing
-                font_size = max(12, min(36, int(sig_w / 14)))
+                font_size = max(14, min(32, int(sig_w / 16)))
                 try:
-                    font = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf", font_size)
+                    font_reg = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf", font_size)
+                    font_bold = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf", font_size)
                 except Exception:
-                    font = ImageFont.load_default()
-                name_label = f"Signed by: {legal_name}"
-                name_y = min(native_h - font_size - 4, sig_y + sig_h + 4)
-                draw.text((sig_x, name_y), name_label, fill=(20, 20, 20, 255), font=font)
+                    font_reg = font_bold = ImageFont.load_default()
+
+                # Padding between signature box and printed name (larger on big contracts)
+                pad = max(12, int(sig_h * 0.12))
+                name_y = sig_y + sig_h + pad
+                # If we'd overflow the page, stack the name just above the signature instead
+                if name_y + font_size + 4 > native_h:
+                    name_y = max(0, sig_y - font_size - pad)
+
+                label = "Name: "
+                name_val = legal_name
+                # Draw "Name: " in bold, then the actual legal name in regular for clarity
+                label_w = draw.textlength(label, font=font_bold) if hasattr(draw, 'textlength') else font_size * len(label) * 0.55
+                draw.text((sig_x, name_y), label, fill=(20, 20, 20, 255), font=font_bold)
+                draw.text((sig_x + int(label_w), name_y), name_val, fill=(20, 20, 20, 255), font=font_reg)
 
                 # Composite signature + legal-name onto contract
                 signed_image = Image.alpha_composite(contract_img, signature_layer)
