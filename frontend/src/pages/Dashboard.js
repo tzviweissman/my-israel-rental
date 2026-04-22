@@ -1134,7 +1134,7 @@ const Dashboard = () => {
             >
               {t('dashboard.myBookings')}
             </button>
-            {user && user.role !== 'renter' && (
+            {user && user.role !== 'renter' && false && (
               <button
                 onClick={() => setActiveTab('contracts')}
                 className={`flex-shrink-0 py-2.5 px-3 md:px-4 rounded-lg text-xs md:text-sm font-medium transition-all flex items-center justify-center gap-1.5 whitespace-nowrap ${activeTab === 'contracts' ? 'bg-white text-[#1E6A6A] shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}

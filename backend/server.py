@@ -1930,31 +1930,8 @@ async def translate_contract(contract_id: str, direction: str = Form("he-en"), p
     if not text or len(text.strip()) < 10:
         raise HTTPException(status_code=400, detail="No sufficient text extracted from the contract to translate. Please ensure the document contains readable text.")
 
-    # Determine translation direction
-    if direction == "he-en":
-        from_lang, to_lang = "Hebrew", "English"
-    elif direction == "en-he":
-        from_lang, to_lang = "English", "Hebrew"
-    else:
-        raise HTTPException(status_code=400, detail="Invalid direction. Use 'he-en' or 'en-he'")
-
-    # Mark as pending
-    await db.contracts.update_one(
-        {"id": contract_id},
-        {"$set": {"translation_status": "pending", "translation_direction": direction, "updated_at": datetime.now(timezone.utc).isoformat()}}
-    )
-
     try:
-        chat = LlmChat(
-            api_key=EMERGENT_LLM_KEY,
-            session_id=str(uuid.uuid4()),
-            system_message=f"You are a professional legal document translator specializing in Israeli rental contracts. Translate the following contract text from {from_lang} to {to_lang}. Maintain the original formatting, paragraph structure, and legal terminology. Only provide the translation, no explanations or notes."
-        )
-        chat.with_model("anthropic", "claude-4-sonnet-20250514")
-
-        message = UserMessage(text=text)
-        translated = await chat.send_message(message)
-
+        translated = await _translate_text(text, direction)
         await db.contracts.update_one(
             {"id": contract_id},
             {"$set": {
@@ -1964,16 +1941,105 @@ async def translate_contract(contract_id: str, direction: str = Form("he-en"), p
                 "updated_at": datetime.now(timezone.utc).isoformat()
             }}
         )
-
         return {"translated_text": translated, "direction": direction, "status": "completed"}
-
     except Exception as e:
-        await db.contracts.update_one(
-            {"id": contract_id},
-            {"$set": {"translation_status": "failed", "updated_at": datetime.now(timezone.utc).isoformat()}}
-        )
         logger.error(f"Translation failed for contract {contract_id}: {e}")
         raise HTTPException(status_code=500, detail=f"Translation failed: {str(e)}")
+
+
+async def _translate_text(text: str, direction: str) -> str:
+    """Shared LLM-translation helper used by both /contracts/.../translate and
+    the renter-facing /bookings/.../translate-contract endpoints."""
+    if direction == "he-en":
+        from_lang, to_lang = "Hebrew", "English"
+    elif direction == "en-he":
+        from_lang, to_lang = "English", "Hebrew"
+    else:
+        raise HTTPException(status_code=400, detail="Invalid direction. Use 'he-en' or 'en-he'")
+    chat = LlmChat(
+        api_key=EMERGENT_LLM_KEY,
+        session_id=str(uuid.uuid4()),
+        system_message=(
+            f"You are a professional legal document translator specializing in Israeli rental contracts. "
+            f"Translate the following contract text from {from_lang} to {to_lang}. "
+            f"Maintain the original formatting, paragraph structure, and legal terminology. "
+            f"Only provide the translation, no explanations or notes."
+        ),
+    )
+    chat.with_model("anthropic", "claude-4-sonnet-20250514")
+    return await chat.send_message(UserMessage(text=text))
+
+
+@api_router.post("/bookings/{booking_id}/translate-contract")
+async def translate_booking_contract(booking_id: str, body: dict = Body(default={}), payload=Depends(verify_token)):
+    """Translate the property contract associated with a booking.
+
+    Designed for RENTERS who receive a contract in a language they don't read.
+    The translation is cached on the booking so repeat calls are free.
+    Request body: { "direction": "he-en" | "en-he" }  (default "he-en")
+    """
+    booking = await db.bookings.find_one({"id": booking_id}, {"_id": 0})
+    if not booking:
+        raise HTTPException(status_code=404, detail="Booking not found")
+    # Renter (signing party) or the booking owner can request a translation
+    if booking['renter_id'] != payload['user_id'] and booking['owner_id'] != payload['user_id']:
+        raise HTTPException(status_code=403, detail="Not authorized")
+
+    direction = (body.get('direction') or 'he-en').lower()
+
+    # Return cached translation if direction matches
+    if booking.get('contract_translated_text') and booking.get('contract_translation_direction') == direction:
+        return {
+            "translated_text": booking['contract_translated_text'],
+            "direction": direction,
+            "status": "completed",
+            "cached": True,
+        }
+
+    property_data = await db.properties.find_one({"id": booking['property_id']}, {"_id": 0})
+    if not property_data or not property_data.get('contract_url'):
+        raise HTTPException(status_code=404, detail="No contract available for this booking")
+
+    contract_filename = property_data['contract_url'].split('/')[-1]
+    contract_path = ROOT_DIR / "uploads" / contract_filename
+    if not contract_path.exists():
+        raise HTTPException(status_code=404, detail="Contract file not found on server")
+
+    ext = contract_path.suffix.lower()
+    if ext == '.pdf':
+        text = extract_text_from_pdf(str(contract_path))
+    elif ext in ('.jpg', '.jpeg', '.png', '.webp', '.heic', '.heif'):
+        text = extract_text_from_image(str(contract_path))
+    else:
+        raise HTTPException(status_code=400, detail="Unsupported contract format")
+
+    if not text or len(text.strip()) < 10:
+        raise HTTPException(status_code=400, detail="Could not extract readable text from the contract. It may be a low-quality scan.")
+
+    try:
+        translated = await _translate_text(text, direction)
+    except Exception as e:
+        logger.error(f"Booking contract translation failed for {booking_id}: {e}")
+        raise HTTPException(status_code=500, detail=f"Translation failed: {str(e)}")
+
+    # Cache on booking to avoid repeated LLM calls
+    await db.bookings.update_one(
+        {"id": booking_id},
+        {"$set": {
+            "contract_original_text": text,
+            "contract_translated_text": translated,
+            "contract_translation_direction": direction,
+            "contract_translated_at": datetime.now(timezone.utc).isoformat(),
+        }}
+    )
+
+    return {
+        "translated_text": translated,
+        "original_text": text,
+        "direction": direction,
+        "status": "completed",
+        "cached": False,
+    }
 
 
 @api_router.post("/contracts/{contract_id}/sign")

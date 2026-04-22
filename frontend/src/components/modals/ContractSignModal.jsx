@@ -1,7 +1,9 @@
-import React, { useRef, useState, useEffect } from 'react';
-import { X, Upload, Move, Maximize2 } from 'lucide-react';
+import React, { useRef, useState, useEffect, useContext } from 'react';
+import { X, Upload, Move, Maximize2, Languages, Loader2 } from 'lucide-react';
 import { Rnd } from 'react-rnd';
-import { API } from '../../App';
+import axios from 'axios';
+import { toast } from 'sonner';
+import { API, AuthContext } from '../../App';
 
 const ContractSignModal = ({ 
   isOpen, 
@@ -10,6 +12,7 @@ const ContractSignModal = ({
   contractPreviewUrl,
   onSignSuccess 
 }) => {
+  const { token } = useContext(AuthContext);
   const [signatureData, setSignatureData] = useState('');
   const [signatureMethod, setSignatureMethod] = useState('draw');
   const [showContractPreview, setShowContractPreview] = useState(false);
@@ -20,6 +23,29 @@ const ContractSignModal = ({
   const previewScrollRef = useRef(null);
   const prevScrollTopRef = useRef(0);
   const contractElRef = useRef(null);
+  const [translating, setTranslating] = useState(false);
+  const [translatedText, setTranslatedText] = useState('');
+  const [translationDirection, setTranslationDirection] = useState('he-en');
+  const [showTranslation, setShowTranslation] = useState(false);
+
+  const handleTranslate = async (direction) => {
+    setTranslating(true);
+    try {
+      const res = await axios.post(
+        `${API}/bookings/${bookingId}/translate-contract`,
+        { direction },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      setTranslatedText(res.data.translated_text || '');
+      setTranslationDirection(direction);
+      setShowTranslation(true);
+      toast.success(res.data.cached ? 'Translation loaded' : 'Contract translated');
+    } catch (err) {
+      toast.error(err?.response?.data?.detail || 'Translation failed');
+    } finally {
+      setTranslating(false);
+    }
+  };
 
   // When the preview scrolls, shift the signature's Y position by the same
   // delta so it visually stays in the viewport. The stored position still
@@ -249,6 +275,60 @@ const ContractSignModal = ({
             <p className="text-gray-600 mb-4">
               Step 2: Drag and resize your signature to position it on the contract.
             </p>
+
+            {/* Translate helper for renters whose native language differs from the contract */}
+            <div className="mb-4 bg-[#F7F4EC] border border-[#D4AF37]/30 rounded-lg p-3 flex flex-wrap items-center gap-2" data-testid="contract-translate-bar">
+              <div className="flex items-center gap-2 text-sm text-gray-700">
+                <Languages size={16} className="text-[#1E6A6A]" />
+                <span className="font-medium">Can't read the contract?</span>
+              </div>
+              <button
+                type="button"
+                onClick={() => handleTranslate('he-en')}
+                disabled={translating}
+                className="px-3 py-1.5 rounded-lg bg-[#1E6A6A] text-white text-xs font-medium hover:bg-[#1E6A6A]/90 disabled:opacity-50 flex items-center gap-1.5"
+                data-testid="translate-he-to-en-btn"
+              >
+                {translating && translationDirection === 'he-en' && <Loader2 size={12} className="animate-spin" />}
+                Hebrew → English
+              </button>
+              <button
+                type="button"
+                onClick={() => handleTranslate('en-he')}
+                disabled={translating}
+                className="px-3 py-1.5 rounded-lg bg-[#1E6A6A] text-white text-xs font-medium hover:bg-[#1E6A6A]/90 disabled:opacity-50 flex items-center gap-1.5"
+                data-testid="translate-en-to-he-btn"
+              >
+                {translating && translationDirection === 'en-he' && <Loader2 size={12} className="animate-spin" />}
+                English → Hebrew
+              </button>
+              {translatedText && (
+                <button
+                  type="button"
+                  onClick={() => setShowTranslation((v) => !v)}
+                  className="ml-auto text-xs text-[#1E6A6A] underline"
+                >
+                  {showTranslation ? 'Hide translation' : 'Show translation'}
+                </button>
+              )}
+            </div>
+
+            {/* Translation output — read-only, for reference only. The original
+                remains the legally-binding document that gets signed. */}
+            {showTranslation && translatedText && (
+              <div className="mb-4 bg-white border border-gray-200 rounded-lg p-4 max-h-72 overflow-y-auto" data-testid="translation-panel">
+                <div className="flex items-center justify-between mb-2 text-xs text-gray-500">
+                  <span>Translation ({translationDirection === 'he-en' ? 'English' : 'Hebrew'}) — reference only</span>
+                  <span className="text-[10px] italic">The original-language document is what you sign.</span>
+                </div>
+                <p
+                  className="text-sm text-gray-800 whitespace-pre-wrap leading-relaxed"
+                  dir={translationDirection === 'en-he' ? 'rtl' : 'ltr'}
+                >
+                  {translatedText}
+                </p>
+              </div>
+            )}
 
             {/* Contract Preview with Draggable Signature */}
             <div ref={previewScrollRef} className="mb-6 relative border-2 border-gray-300 rounded-lg overflow-auto bg-gray-100" style={{ maxHeight: '60vh' }}>
