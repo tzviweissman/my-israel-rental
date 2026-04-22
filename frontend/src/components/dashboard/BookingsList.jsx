@@ -36,9 +36,13 @@ const BookingsList = ({ bookings, onUpdate, user, token, API }) => {
   };
 
   // Submit contract signature
-  const submitContractSignature = async (signatureData, signaturePosition, signatureSize, displayDims) => {
+  const submitContractSignature = async (signatureData, signaturePosition, signatureSize, displayDims, legalName) => {
     if (!signatureData) {
       toast.error('Please provide a signature');
+      return;
+    }
+    if (!legalName || !legalName.trim()) {
+      toast.error('Please enter your full legal name');
       return;
     }
 
@@ -51,6 +55,7 @@ const BookingsList = ({ bookings, onUpdate, user, token, API }) => {
         signature_height: signatureSize.height,
         display_width: displayDims?.width,
         display_height: displayDims?.height,
+        legal_name: legalName.trim(),
       }, {
         headers: { Authorization: `Bearer ${token}` }
       });

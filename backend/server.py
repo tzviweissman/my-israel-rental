@@ -1091,9 +1091,12 @@ async def sign_booking_contract(booking_id: str, body: dict = Body(...), payload
     # coordinates from CSS pixels to the native image/PDF coordinate system.
     display_width = body.get('display_width')
     display_height = body.get('display_height')
+    legal_name = (body.get('legal_name') or '').strip()
 
     if not signature_data:
         raise HTTPException(status_code=400, detail="Signature data is required")
+    if not legal_name:
+        raise HTTPException(status_code=400, detail="Full legal name is required")
     
     # Get property to retrieve contract
     property_data = await db.properties.find_one({"id": booking['property_id']}, {"_id": 0})
@@ -1169,6 +1172,14 @@ async def sign_booking_contract(booking_id: str, body: dict = Body(...), payload
                 c.drawImage(str(temp_sig_path), sig_x, pdf_y,
                            width=sig_w, height=sig_h,
                            mask='auto', preserveAspectRatio=True)
+
+                # Print the signer's legal name below the signature for legal clarity.
+                # Font size scaled with signature width, but clamped to a readable range.
+                name_font_size = max(8.0, min(14.0, sig_w / 18.0))
+                c.setFont("Helvetica", name_font_size)
+                c.setFillColorRGB(0.1, 0.1, 0.1)
+                name_label = f"Signed by: {legal_name}"
+                c.drawString(sig_x, max(0, pdf_y - name_font_size - 3), name_label)
                 c.save()
 
                 # Merge signature overlay with first page
@@ -1211,7 +1222,21 @@ async def sign_booking_contract(booking_id: str, body: dict = Body(...), payload
                 signature_layer = Image.new('RGBA', contract_img.size, (255, 255, 255, 0))
                 signature_layer.paste(signature_img_scaled, (sig_x, sig_y), signature_img_scaled)
 
-                # Composite signature onto contract
+                # Draw the signer's legal name just below the signature, on the
+                # same transparent layer so it composites cleanly.
+                from PIL import ImageDraw, ImageFont
+                draw = ImageDraw.Draw(signature_layer)
+                # Font size scaled with signature width; fall back to default if ttf missing
+                font_size = max(12, min(36, int(sig_w / 14)))
+                try:
+                    font = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf", font_size)
+                except Exception:
+                    font = ImageFont.load_default()
+                name_label = f"Signed by: {legal_name}"
+                name_y = min(native_h - font_size - 4, sig_y + sig_h + 4)
+                draw.text((sig_x, name_y), name_label, fill=(20, 20, 20, 255), font=font)
+
+                # Composite signature + legal-name onto contract
                 signed_image = Image.alpha_composite(contract_img, signature_layer)
 
                 # Convert back to RGB if saving as JPEG
@@ -1231,6 +1256,7 @@ async def sign_booking_contract(booking_id: str, body: dict = Body(...), payload
         "contract_signed": True,
         "signature_data": signature_data,
         "signature_position": {"x": signature_x, "y": signature_y, "width": signature_width, "height": signature_height},
+        "signer_legal_name": legal_name,
         "contract_signed_at": datetime.now(timezone.utc).isoformat()
     }
     

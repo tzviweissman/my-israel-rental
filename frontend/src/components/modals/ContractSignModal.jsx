@@ -27,6 +27,7 @@ const ContractSignModal = ({
   const [translatedText, setTranslatedText] = useState('');
   const [translationDirection, setTranslationDirection] = useState('he-en');
   const [showTranslation, setShowTranslation] = useState(false);
+  const [legalName, setLegalName] = useState('');
 
   const handleTranslate = async (direction) => {
     setTranslating(true);
@@ -244,19 +245,51 @@ const ContractSignModal = ({
               </div>
             )}
 
+            {/* Full Legal Name — printed alongside the signature on the contract */}
+            <div className="mb-6">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Full Legal Name <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="text"
+                value={legalName}
+                onChange={(e) => setLegalName(e.target.value)}
+                placeholder="As it appears on your ID"
+                className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:border-[#1E6A6A] focus:outline-none focus:ring-2 focus:ring-[#1E6A6A]/30 text-sm"
+                data-testid="legal-name-input"
+                required
+              />
+              <p className="text-xs text-gray-500 mt-1.5">
+                This printed name will appear on the signed contract next to your signature for legal clarity.
+              </p>
+            </div>
+
             {/* Next Button */}
             <div className="flex gap-3">
               {contractPreviewUrl && signatureData ? (
                 <button
-                  onClick={() => setShowContractPreview(true)}
-                  className="flex-1 px-4 py-3 rounded-lg text-sm font-medium bg-[#1E6A6A] text-white hover:bg-[#1E6A6A]/90 transition-colors"
+                  onClick={() => {
+                    if (!legalName.trim()) {
+                      toast.error('Please enter your full legal name');
+                      return;
+                    }
+                    setShowContractPreview(true);
+                  }}
+                  disabled={!legalName.trim()}
+                  className="flex-1 px-4 py-3 rounded-lg text-sm font-medium bg-[#1E6A6A] text-white hover:bg-[#1E6A6A]/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                 >
                   Next: Position Signature
                 </button>
               ) : (
                 <button
-                  onClick={onSignSuccess}
-                  disabled={!signatureData}
+                  onClick={() => {
+                    if (!legalName.trim()) {
+                      toast.error('Please enter your full legal name');
+                      return;
+                    }
+                    onSignSuccess(signatureData, signaturePosition, signatureSize, null, legalName.trim());
+                  }}
+                  disabled={!signatureData || !legalName.trim()}
                   className="flex-1 px-4 py-3 rounded-lg text-sm font-medium bg-[#D4AF37] text-white hover:bg-[#D4AF37]/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                 >
                   Sign Contract
@@ -404,7 +437,7 @@ const ContractSignModal = ({
                   const displayDims = el
                     ? { width: el.clientWidth, height: el.clientHeight }
                     : null;
-                  onSignSuccess(signatureData, signaturePosition, signatureSize, displayDims);
+                  onSignSuccess(signatureData, signaturePosition, signatureSize, displayDims, legalName.trim());
                 }}
                 className="flex-1 px-4 py-3 rounded-lg text-sm font-medium bg-[#D4AF37] text-white hover:bg-[#D4AF37]/90 transition-colors"
               >
