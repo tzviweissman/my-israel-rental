@@ -233,10 +233,12 @@ const PropertyList = ({ properties, onEdit, onRefresh, API, token }) => {
       toast.error('No properties need images right now');
       return;
     }
-    // Precompute slugs once, longest title first so "BuildingA1" wins over "BuildingA"
+    // Precompute slugs once, longest title first so "BuildingA1" wins over "BuildingA".
+    // Require ≥3 chars to avoid a trivial title like "A" collapsing to "a" matching
+    // every filename that happens to contain the letter 'a'.
     const slugged = pending
       .map((p) => ({ id: p.id, titleSlug: slug(p.title) }))
-      .filter((x) => x.titleSlug)
+      .filter((x) => x.titleSlug.length >= 3)
       .sort((a, b) => b.titleSlug.length - a.titleSlug.length);
 
     setImageAssignments((prev) => {
@@ -244,7 +246,8 @@ const PropertyList = ({ properties, onEdit, onRefresh, API, token }) => {
       let matchedCount = 0;
       incoming.forEach((f, i) => {
         const fslug = slug(f.name);
-        const hit = slugged.find((x) => fslug.startsWith(x.titleSlug));
+        // `.includes` catches both "buildinga_hero" AND "hero_buildinga"
+        const hit = slugged.find((x) => fslug.includes(x.titleSlug));
         if (hit) matchedCount += 1;
         const propertyId = hit ? hit.id : pending[(base.length + i) % pending.length].id;
         base.push({ file: f, propertyId });
