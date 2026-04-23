@@ -9,7 +9,7 @@ import uuid
 from datetime import datetime, timedelta, timezone
 from io import BytesIO
 from pathlib import Path
-from typing import List, Optional
+from typing import Any, List, Optional
 
 import bcrypt
 import httpx
@@ -39,7 +39,7 @@ api_router = router  # alias so existing @api_router decorators work verbatim
 
 
 @api_router.post("/chat/messages")
-async def send_message(chat_data: ChatMessage, payload = Depends(verify_token)):
+async def send_message(chat_data: ChatMessage, payload: dict = Depends(verify_token)) -> Any:
     message_id = str(uuid.uuid4())
     message_doc = {
         "id": message_id,
@@ -68,7 +68,7 @@ async def send_message(chat_data: ChatMessage, payload = Depends(verify_token)):
 
 
 @api_router.get("/chat/messages/{property_id}")
-async def get_messages(property_id: str, payload = Depends(verify_token)):
+async def get_messages(property_id: str, payload: dict = Depends(verify_token)) -> Any:
     messages = await db.messages.find(
         {
             "property_id": property_id,
@@ -89,7 +89,7 @@ async def get_messages(property_id: str, payload = Depends(verify_token)):
 
 
 @api_router.get("/chat/conversations")
-async def get_conversations(payload = Depends(verify_token)):
+async def get_conversations(payload: dict = Depends(verify_token)) -> Any:
     messages = await db.messages.find(
         {"$or": [{"sender_id": payload['user_id']}, {"receiver_id": payload['user_id']}]},
         {"_id": 0}

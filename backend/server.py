@@ -66,7 +66,7 @@ app.add_middleware(
 
 
 @app.on_event("startup")
-async def startup_tasks():
+async def startup_tasks() -> None:
     """Kick off the iCal background sync and make sure the blank-contract
     PDF templates exist on disk."""
     asyncio.create_task(sync_all_ical_feeds())
@@ -78,6 +78,6 @@ async def startup_tasks():
 
 
 @app.on_event("shutdown")
-async def shutdown_db_client():
+async def shutdown_db_client() -> None:
     """Close the Motor client on graceful shutdown."""
     client.close()

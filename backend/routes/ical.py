@@ -9,7 +9,7 @@ import uuid
 from datetime import datetime, timedelta, timezone
 from io import BytesIO
 from pathlib import Path
-from typing import List, Optional
+from typing import Any, List, Optional
 
 import bcrypt
 import httpx
@@ -40,7 +40,7 @@ api_router = router  # alias so existing @api_router decorators work verbatim
 
 
 @api_router.post("/properties/{property_id}/ical")
-async def add_ical_url(property_id: str, data: ICalUrlInput, payload=Depends(verify_token)):
+async def add_ical_url(property_id: str, data: ICalUrlInput, payload: dict = Depends(verify_token)) -> Any:
     prop = await db.properties.find_one({"id": property_id}, {"_id": 0})
     if not prop:
         raise HTTPException(status_code=404, detail="Property not found")
@@ -60,7 +60,7 @@ async def add_ical_url(property_id: str, data: ICalUrlInput, payload=Depends(ver
 
 
 @api_router.delete("/properties/{property_id}/ical")
-async def remove_ical_url(property_id: str, data: ICalUrlInput, payload=Depends(verify_token)):
+async def remove_ical_url(property_id: str, data: ICalUrlInput, payload: dict = Depends(verify_token)) -> Any:
     prop = await db.properties.find_one({"id": property_id}, {"_id": 0})
     if not prop:
         raise HTTPException(status_code=404, detail="Property not found")
@@ -75,7 +75,7 @@ async def remove_ical_url(property_id: str, data: ICalUrlInput, payload=Depends(
 
 
 @api_router.get("/properties/{property_id}/ical-export")
-async def export_ical(property_id: str):
+async def export_ical(property_id: str) -> Any:
     prop = await db.properties.find_one({"id": property_id}, {"_id": 0, "title": 1})
     if not prop:
         raise HTTPException(status_code=404, detail="Property not found")
@@ -102,7 +102,7 @@ async def export_ical(property_id: str):
 
 
 @api_router.get("/properties/{property_id}/blocked-dates")
-async def get_blocked_dates(property_id: str):
+async def get_blocked_dates(property_id: str) -> Any:
     # Internal bookings
     bookings = await db.bookings.find(
         {"property_id": property_id, "status": {"$in": ["pending", "confirmed"]}},
@@ -124,7 +124,7 @@ async def get_blocked_dates(property_id: str):
 
 
 @api_router.post("/properties/{property_id}/ical-sync")
-async def manual_ical_sync(property_id: str, payload=Depends(verify_token)):
+async def manual_ical_sync(property_id: str, payload: dict = Depends(verify_token)) -> Any:
     prop = await db.properties.find_one({"id": property_id}, {"_id": 0})
     if not prop:
         raise HTTPException(status_code=404, detail="Property not found")

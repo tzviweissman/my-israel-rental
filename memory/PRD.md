@@ -117,6 +117,14 @@ Build a bilingual (English/Hebrew) rental website named MyIsraelRental.com with 
   - `AdminDashboard.js`: **910 → 546 lines (−40%)**. Dropped `properties`, `selectedPropIds`, `bookedModalOpen`, `bookedTarget`, `blockStart/End/Indefinite/Saving` state and 8 handlers now owned by ListingsTab.
   - Swept the last `<style jsx>` in `AccessibilityButton.js` → plain `<style>`, eliminating the recurring React DOM warning.
   - Smoke-tested: full mark-booked → badge → unblock round-trip works, no console errors.
+- [x] **Backend type-hint coverage — 100%** (2026-04-23):
+  - Added mypy (`1.19.1`) + pragmatic `mypy.ini` with `disallow_untyped_defs = True` and `disallow_incomplete_defs = True`. Ignores 3rd-party stubs we don't own (motor, postmarker, reportlab, etc.).
+  - Brought the backend from **231 mypy errors → 0** across all 25 source files (`server.py` + `routes/` + `utils/` + `models.py`).
+  - Every route handler has typed `payload: dict = Depends(verify_token)` params and a return type. Utility functions fully annotated.
+  - Fixed real bugs surfaced by the type checker: unsafe `file.filename.split(".")` on `Optional[str]` in 3 upload handlers (`routes/misc.py`), unreachable `if not origin and req` dead branch in password-reset, `dict[str, list]` vs `dict[str, str|None]` in payloads, `ImageFont` union-type in signature stamping.
+  - New pytest gate `tests/test_type_coverage.py` shells out to mypy and fails if anyone later merges untyped code.
+  - `motor` handle `db` typed as `Any` (Motor has no upstream stubs) — single source-of-truth annotation in `routes/deps.py`.
+  - Regression: all 79 relevant pytest cases pass with the proper env (`test_type_coverage`, `test_admin_mark_booked`, `test_refactor_regression`, `test_cancellation`).
 - [ ] Manager bulk property upload + profile pages
 
 ### P2 - Lower Priority

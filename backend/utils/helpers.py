@@ -7,6 +7,7 @@ import asyncio
 import logging
 import uuid
 from datetime import datetime, timezone
+from typing import Any, Optional
 
 import httpx
 from icalendar import Calendar as iCalCalendar
@@ -16,10 +17,10 @@ from routes.deps import db
 logger = logging.getLogger("server")
 
 # Exchange rate cache (module-level, 1-hour TTL)
-_exchange_cache = {"rate": None, "fetched_at": None}
+_exchange_cache: dict[str, Any] = {"rate": None, "fetched_at": None}
 
 
-async def get_usd_ils_rate():
+async def get_usd_ils_rate() -> float:
     """Get USD to ILS exchange rate with 1-hour caching. Falls back to 3.65."""
     now = datetime.now(timezone.utc)
     if (
@@ -40,7 +41,7 @@ async def get_usd_ils_rate():
         return _exchange_cache["rate"] or 3.65
 
 
-async def parse_ical_feed(url: str):
+async def parse_ical_feed(url: str) -> list[dict]:
     """Fetch and parse an iCal feed. Returns list of {start, end, summary}."""
     blocked = []
     try:
@@ -66,7 +67,7 @@ async def parse_ical_feed(url: str):
     return blocked
 
 
-async def sync_property_ical(property_id: str):
+async def sync_property_ical(property_id: str) -> None:
     """Sync all iCal feeds for a single property into the external_bookings collection."""
     prop = await db.properties.find_one({"id": property_id}, {"_id": 0, "ical_urls": 1})
     if not prop or not prop.get("ical_urls"):
@@ -102,7 +103,7 @@ async def sync_property_ical(property_id: str):
     )
 
 
-async def sync_all_ical_feeds():
+async def sync_all_ical_feeds() -> None:
     """Background task: sync every vacation property with iCal URLs every 5 min."""
     while True:
         try:

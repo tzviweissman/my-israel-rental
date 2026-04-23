@@ -128,11 +128,11 @@ def property_matches_search(prop: dict, search: dict, bookings: list[dict]) -> b
 
 # --------------------------- persistence + dispatch -----------------------
 async def match_property_against_searches(
-    db,
+    db: Any,
     property_id: str,
     *,
     reason: str = "new_listing",
-    send_email_fn=None,
+    send_email_fn: Any = None,
 ) -> int:
     """Check a property against every active saved search and fire alerts
     for each match. Returns the number of alerts sent."""

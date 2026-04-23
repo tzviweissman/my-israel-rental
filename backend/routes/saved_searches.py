@@ -9,7 +9,7 @@ import uuid
 from datetime import datetime, timedelta, timezone
 from io import BytesIO
 from pathlib import Path
-from typing import List, Optional
+from typing import Any, List, Optional
 
 import bcrypt
 import httpx
@@ -39,7 +39,7 @@ api_router = router  # alias so existing @api_router decorators work verbatim
 
 
 @api_router.post("/saved-searches")
-async def create_saved_search(body: SavedSearchCreate, payload=Depends(verify_token)):
+async def create_saved_search(body: SavedSearchCreate, payload: dict = Depends(verify_token)) -> Any:
     """Renter subscribes to an availability alert for a given criteria+dates.
     Auto-expires after 60 days. Requires sign-in."""
     user = await db.users.find_one({"id": payload['user_id']}, {"_id": 0, "email": 1, "name": 1})
@@ -94,7 +94,7 @@ async def create_saved_search(body: SavedSearchCreate, payload=Depends(verify_to
 
 
 @api_router.get("/saved-searches")
-async def list_saved_searches(payload=Depends(verify_token)):
+async def list_saved_searches(payload: dict = Depends(verify_token)) -> Any:
     """List the current user's active saved searches (newest first)."""
     now = datetime.now(timezone.utc).isoformat()
     rows = await db.saved_searches.find(
@@ -106,7 +106,7 @@ async def list_saved_searches(payload=Depends(verify_token)):
 
 
 @api_router.delete("/saved-searches/{search_id}")
-async def delete_saved_search(search_id: str, payload=Depends(verify_token)):
+async def delete_saved_search(search_id: str, payload: dict = Depends(verify_token)) -> Any:
     """Renter deletes (deactivates) a saved search."""
     search = await db.saved_searches.find_one({"id": search_id}, {"_id": 0})
     if not search:

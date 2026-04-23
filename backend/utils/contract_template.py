@@ -19,7 +19,7 @@ from reportlab.pdfbase.ttfonts import TTFont
 from reportlab.pdfgen import canvas
 
 try:
-    from bidi.algorithm import get_display  # type: ignore
+    from bidi.algorithm import get_display
 except ImportError:  # pragma: no cover
     def get_display(text: str) -> str:  # fallback: no RTL reordering
         return text
@@ -41,7 +41,7 @@ MARGIN = 18 * mm
 FONTS_DIR = Path(__file__).resolve().parent.parent / "fonts"
 
 
-def _register_fonts():
+def _register_fonts() -> None:
     """Register Liberation Sans (bundled) + Noto Hebrew. Idempotent."""
     mappings = [
         ("Inter", "/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf"),
@@ -161,7 +161,7 @@ def _body_font(rtl: bool) -> tuple[str, str]:
     return ("Hebrew", "Hebrew-Bold") if rtl else ("Inter", "Inter-Bold")
 
 
-def _draw_header(c: canvas.Canvas, t: dict, rtl: bool):
+def _draw_header(c: canvas.Canvas, t: dict, rtl: bool) -> None:
     # Full-width header band
     c.setFillColor(BRAND_DARK)
     c.rect(0, PAGE_H - 28 * mm, PAGE_W, 28 * mm, fill=1, stroke=0)
@@ -188,7 +188,7 @@ def _draw_header(c: canvas.Canvas, t: dict, rtl: bool):
     c.drawRightString(PAGE_W - MARGIN, PAGE_H - 19 * mm, t["site"])
 
 
-def _draw_footer(c: canvas.Canvas, t: dict, rtl: bool, page_num: int):
+def _draw_footer(c: canvas.Canvas, t: dict, rtl: bool, page_num: int) -> None:
     reg, _ = _body_font(rtl)
     c.setFillColor(MUTED)
     c.setFont(reg, 8)
@@ -208,7 +208,7 @@ def _section_header(c: canvas.Canvas, y: float, label: str, rtl: bool) -> float:
     return y - 6
 
 
-def _label(c: canvas.Canvas, x: float, y: float, text: str, rtl: bool):
+def _label(c: canvas.Canvas, x: float, y: float, text: str, rtl: bool) -> None:
     reg, _ = _body_font(rtl)
     c.setFillColor(MUTED)
     c.setFont(reg, 8)
@@ -256,7 +256,7 @@ def _field(
 # -----------------------------------------------------------------------------
 # Page renderer
 # -----------------------------------------------------------------------------
-def _build_page(c: canvas.Canvas, t: dict, rtl: bool, lang_prefix: str):
+def _build_page(c: canvas.Canvas, t: dict, rtl: bool, lang_prefix: str) -> None:
     reg, bold = _body_font(rtl)
 
     _draw_header(c, t, rtl)
@@ -429,7 +429,7 @@ def _build_page(c: canvas.Canvas, t: dict, rtl: bool, lang_prefix: str):
     y -= 18 * mm
     sig_w = (PAGE_W - 2 * MARGIN - 10 * mm) / 2
 
-    def _sig_block(x: float, role_label: str, field_prefix: str):
+    def _sig_block(x: float, role_label: str, field_prefix: str) -> None:
         # Role label sits above the signature line
         c.setFillColor(INK)
         c.setFont(bold, 9)

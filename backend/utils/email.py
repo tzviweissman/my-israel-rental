@@ -9,7 +9,7 @@ from __future__ import annotations
 import asyncio
 import logging
 import os
-from typing import Optional
+from typing import Optional, Any
 
 from postmarker.core import PostmarkClient
 
@@ -32,7 +32,7 @@ _postmark_client: Optional[PostmarkClient] = None
 _mongo_db = None  # lazy Motor database handle for suppression lookups
 
 
-def _get_db():
+def _get_db() -> Any:
     """Lazy-init a shared Motor database for suppression lookups."""
     global _mongo_db
     if _mongo_db is None:

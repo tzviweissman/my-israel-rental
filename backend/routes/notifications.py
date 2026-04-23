@@ -9,7 +9,7 @@ import uuid
 from datetime import datetime, timedelta, timezone
 from io import BytesIO
 from pathlib import Path
-from typing import List, Optional
+from typing import Any, List, Optional
 
 import bcrypt
 import httpx
@@ -39,7 +39,7 @@ api_router = router  # alias so existing @api_router decorators work verbatim
 
 
 @api_router.post("/notifications/preferences")
-async def set_notification_preferences(prefs: NotificationPreferences, payload = Depends(verify_token)):
+async def set_notification_preferences(prefs: NotificationPreferences, payload: dict = Depends(verify_token)) -> Any:
     pref_doc = prefs.model_dump()
     pref_doc['user_id'] = payload['user_id']
     pref_doc['created_at'] = datetime.now(timezone.utc).isoformat()
@@ -54,7 +54,7 @@ async def set_notification_preferences(prefs: NotificationPreferences, payload =
 
 
 @api_router.get("/notifications")
-async def get_notifications(payload = Depends(verify_token)):
+async def get_notifications(payload: dict = Depends(verify_token)) -> Any:
     notifications = await db.notifications.find(
         {"user_id": payload['user_id']},
         {"_id": 0}
@@ -64,7 +64,7 @@ async def get_notifications(payload = Depends(verify_token)):
 
 
 @api_router.put("/notifications/{notification_id}/read")
-async def mark_notification_read(notification_id: str, payload = Depends(verify_token)):
+async def mark_notification_read(notification_id: str, payload: dict = Depends(verify_token)) -> Any:
     result = await db.notifications.update_one(
         {"id": notification_id, "user_id": payload['user_id']},
         {"$set": {"read": True}}
@@ -75,7 +75,7 @@ async def mark_notification_read(notification_id: str, payload = Depends(verify_
 
 
 @api_router.put("/notifications/read-all")
-async def mark_all_notifications_read(payload=Depends(verify_token)):
+async def mark_all_notifications_read(payload: dict = Depends(verify_token)) -> Any:
     """Mark all notifications as read"""
     await db.notifications.update_many(
         {"user_id": payload['user_id'], "read": False},
@@ -85,7 +85,7 @@ async def mark_all_notifications_read(payload=Depends(verify_token)):
 
 
 @api_router.delete("/notifications/clear-all")
-async def clear_all_notifications(payload=Depends(verify_token)):
+async def clear_all_notifications(payload: dict = Depends(verify_token)) -> Any:
     """Delete all notifications for the current user"""
     result = await db.notifications.delete_many(
         {"user_id": payload['user_id']}

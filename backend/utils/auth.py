@@ -25,7 +25,7 @@ def create_token(user_id: str, role: str) -> str:
     return jwt.encode(payload, JWT_SECRET, algorithm='HS256')
 
 
-def verify_token(credentials: HTTPAuthorizationCredentials = Depends(security)):
+def verify_token(credentials: HTTPAuthorizationCredentials = Depends(security)) -> dict:
     """Verify JWT token and return payload"""
     try:
         token = credentials.credentials

@@ -9,7 +9,7 @@ import uuid
 from datetime import datetime, timedelta, timezone
 from io import BytesIO
 from pathlib import Path
-from typing import List, Optional
+from typing import Any, List, Optional
 
 import bcrypt
 import httpx
@@ -39,7 +39,7 @@ api_router = router  # alias so existing @api_router decorators work verbatim
 
 
 @api_router.post("/auth/register")
-async def register(user_data: UserRegister):
+async def register(user_data: UserRegister) -> Any:
     existing = await db.users.find_one({"email": user_data.email})
     if existing:
         raise HTTPException(status_code=400, detail="Email already registered")
@@ -70,7 +70,7 @@ async def register(user_data: UserRegister):
 
 
 @api_router.post("/auth/login")
-async def login(credentials: UserLogin):
+async def login(credentials: UserLogin) -> Any:
     user = await db.users.find_one({"email": credentials.email}, {"_id": 0})
     if not user:
         raise HTTPException(status_code=401, detail="Invalid credentials")
@@ -83,7 +83,7 @@ async def login(credentials: UserLogin):
 
 
 @api_router.get("/auth/me")
-async def get_current_user(payload = Depends(verify_token)):
+async def get_current_user(payload: dict = Depends(verify_token)) -> Any:
     user = await db.users.find_one({"id": payload['user_id']}, {"_id": 0, "password": 0})
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
@@ -92,7 +92,7 @@ async def get_current_user(payload = Depends(verify_token)):
 
 
 @api_router.post("/auth/forgot-password")
-async def forgot_password(request: ForgotPasswordRequest, req: Request = None):
+async def forgot_password(request: ForgotPasswordRequest, req: Request) -> Any:
     user = await db.users.find_one({"email": request.email}, {"_id": 0})
     if not user:
         raise HTTPException(status_code=404, detail="No account found with that email address.")
@@ -112,7 +112,7 @@ async def forgot_password(request: ForgotPasswordRequest, req: Request = None):
 
     # Build the reset link using the frontend origin
     origin = os.environ.get('FRONTEND_URL', '')
-    if not origin and req:
+    if not origin:
         referer = req.headers.get('referer', '')
         if referer:
             from urllib.parse import urlparse
@@ -134,7 +134,7 @@ async def forgot_password(request: ForgotPasswordRequest, req: Request = None):
 
 
 @api_router.post("/auth/reset-password")
-async def reset_password(request: ResetPasswordRequest):
+async def reset_password(request: ResetPasswordRequest) -> Any:
     reset_doc = await db.password_resets.find_one({"token": request.token, "used": False}, {"_id": 0})
     if not reset_doc:
         raise HTTPException(status_code=400, detail="Invalid or expired reset token")
@@ -161,7 +161,7 @@ async def reset_password(request: ResetPasswordRequest):
 
 
 @api_router.post("/auth/change-password")
-async def change_password(request: ChangePasswordRequest, payload=Depends(verify_token)):
+async def change_password(request: ChangePasswordRequest, payload: dict = Depends(verify_token)) -> Any:
     user = await db.users.find_one({"id": payload['user_id']}, {"_id": 0})
     if not user:
         raise HTTPException(status_code=404, detail="User not found")

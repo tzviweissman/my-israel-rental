@@ -9,7 +9,7 @@ import uuid
 from datetime import datetime, timedelta, timezone
 from io import BytesIO
 from pathlib import Path
-from typing import List, Optional
+from typing import Any, List, Optional
 
 import bcrypt
 import httpx
@@ -39,7 +39,7 @@ api_router = router  # alias so existing @api_router decorators work verbatim
 
 
 @api_router.post("/bookings")
-async def create_booking(booking_data: BookingCreate, payload = Depends(verify_token)):
+async def create_booking(booking_data: BookingCreate, payload: dict = Depends(verify_token)) -> Any:
     property_data = await db.properties.find_one({"id": booking_data.property_id}, {"_id": 0})
     if not property_data:
         raise HTTPException(status_code=404, detail="Property not found")
@@ -144,7 +144,7 @@ async def create_booking(booking_data: BookingCreate, payload = Depends(verify_t
 
 
 @api_router.get("/bookings")
-async def get_bookings(payload = Depends(verify_token)):
+async def get_bookings(payload: dict = Depends(verify_token)) -> Any:
     query = {}
     if payload['role'] == 'renter':
         query['renter_id'] = payload['user_id']
@@ -170,7 +170,7 @@ async def get_bookings(payload = Depends(verify_token)):
 
 
 @api_router.post("/bookings/{booking_id}/accept")
-async def accept_booking(booking_id: str, payload=Depends(verify_token)):
+async def accept_booking(booking_id: str, payload: dict = Depends(verify_token)) -> Any:
     """Owner/Manager accepts a pending booking"""
     booking = await db.bookings.find_one({"id": booking_id}, {"_id": 0})
     if not booking:
@@ -283,7 +283,7 @@ async def accept_booking(booking_id: str, payload=Depends(verify_token)):
 
 
 @api_router.post("/bookings/{booking_id}/cancel")
-async def cancel_booking(booking_id: str, reason: str = Body(..., embed=True), payload=Depends(verify_token)):
+async def cancel_booking(booking_id: str, reason: str = Body(..., embed=True), payload: dict = Depends(verify_token)) -> Any:
     """Owner/Manager direct cancellation"""
     booking = await db.bookings.find_one({"id": booking_id}, {"_id": 0})
     if not booking:
@@ -328,7 +328,7 @@ async def cancel_booking(booking_id: str, reason: str = Body(..., embed=True), p
 
 
 @api_router.post("/bookings/{booking_id}/request-cancel")
-async def request_cancel_booking(booking_id: str, reason: str = Body(..., embed=True), payload=Depends(verify_token)):
+async def request_cancel_booking(booking_id: str, reason: str = Body(..., embed=True), payload: dict = Depends(verify_token)) -> Any:
     """Renter requests cancellation"""
     booking = await db.bookings.find_one({"id": booking_id}, {"_id": 0})
     if not booking:
@@ -368,7 +368,7 @@ async def request_cancel_booking(booking_id: str, reason: str = Body(..., embed=
 
 
 @api_router.post("/bookings/{booking_id}/sign-contract")
-async def sign_booking_contract(booking_id: str, body: dict = Body(...), payload=Depends(verify_token)):
+async def sign_booking_contract(booking_id: str, body: dict = Body(...), payload: dict = Depends(verify_token)) -> Any:
     """Renter signs the rental contract after owner acceptance"""
     booking = await db.bookings.find_one({"id": booking_id}, {"_id": 0})
     if not booking:
@@ -537,6 +537,8 @@ async def sign_booking_contract(booking_id: str, body: dict = Body(...), payload
                 draw = ImageDraw.Draw(signature_layer)
                 # Font size scaled with signature width; fall back to default if ttf missing
                 font_size = max(14, min(32, int(sig_w / 16)))
+                font_reg: Any
+                font_bold: Any
                 try:
                     font_reg = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf", font_size)
                     font_bold = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf", font_size)
@@ -614,7 +616,7 @@ async def sign_booking_contract(booking_id: str, body: dict = Body(...), payload
 
 
 @api_router.post("/bookings/{booking_id}/approve-cancel")
-async def approve_cancel_request(booking_id: str, payload=Depends(verify_token)):
+async def approve_cancel_request(booking_id: str, payload: dict = Depends(verify_token)) -> Any:
     """Owner approves cancellation request"""
     booking = await db.bookings.find_one({"id": booking_id}, {"_id": 0})
     if not booking:
@@ -661,7 +663,7 @@ async def approve_cancel_request(booking_id: str, payload=Depends(verify_token))
 
 
 @api_router.post("/bookings/{booking_id}/deny-cancel")
-async def deny_cancel_request(booking_id: str, denial_reason: str = Body(..., embed=True), payload=Depends(verify_token)):
+async def deny_cancel_request(booking_id: str, denial_reason: str = Body(..., embed=True), payload: dict = Depends(verify_token)) -> Any:
     """Owner denies cancellation request"""
     booking = await db.bookings.find_one({"id": booking_id}, {"_id": 0})
     if not booking:
@@ -707,7 +709,7 @@ async def deny_cancel_request(booking_id: str, denial_reason: str = Body(..., em
 
 
 @api_router.post("/bookings/{booking_id}/translate-contract")
-async def translate_booking_contract(booking_id: str, body: dict = Body(default={}), payload=Depends(verify_token)):
+async def translate_booking_contract(booking_id: str, body: dict = Body(default={}), payload: dict = Depends(verify_token)) -> Any:
     """Translate the property contract associated with a booking.
 
     Designed for RENTERS who receive a contract in a language they don't read.

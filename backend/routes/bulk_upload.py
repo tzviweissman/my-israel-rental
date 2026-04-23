@@ -22,7 +22,7 @@ import uuid
 import zipfile
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import List, Optional
+from typing import Any, List, Optional
 
 from fastapi import APIRouter, Body, Depends, File, Form, HTTPException, UploadFile
 from fastapi.responses import StreamingResponse
@@ -58,7 +58,7 @@ class BulkCommitBody(BaseModel):
     rows: List[dict]
 
 
-def _parse_bool(val) -> bool:
+def _parse_bool(val: Any) -> bool:
     if isinstance(val, bool):
         return val
     s = str(val or "").strip().lower()
@@ -69,7 +69,7 @@ def _parse_bool(val) -> bool:
     raise ValueError(f"expected yes/no, got '{val}'")
 
 
-def _parse_number(val, caster, field):
+def _parse_number(val: Any, caster: Any, field: str) -> Any:
     if val in (None, "", "-"):
         return None
     try:
@@ -78,7 +78,7 @@ def _parse_number(val, caster, field):
         raise ValueError(f"'{field}' must be a number (got '{val}')")
 
 
-def _split_list(val) -> list:
+def _split_list(val: Any) -> list:
     if not val:
         return []
     if isinstance(val, list):
@@ -182,7 +182,7 @@ def _parse_paste(text: str) -> List[dict]:
 # ------------------------ ENDPOINTS ------------------------
 
 @api_router.get("/properties/bulk/template")
-async def download_template(fmt: str = "csv"):
+async def download_template(fmt: str = "csv") -> Any:
     """Stream a blank CSV template with instructions in row 2."""
     if fmt not in ("csv", "xlsx"):
         raise HTTPException(status_code=400, detail="fmt must be csv or xlsx")
@@ -237,8 +237,8 @@ async def download_template(fmt: str = "csv"):
 async def parse_bulk(
     file: Optional[UploadFile] = File(None),
     text: Optional[str] = Form(None),
-    payload=Depends(verify_token),
-):
+    payload: dict = Depends(verify_token),
+) -> Any:
     """Dry run: parse the input and return [{row, normalized, errors}]. No DB writes."""
     if payload.get("role") not in ("owner", "manager", "admin"):
         raise HTTPException(status_code=403, detail="Only owners and managers can bulk-upload")
@@ -263,7 +263,7 @@ async def parse_bulk(
 
     preview = []
     for i, raw in enumerate(raw_rows, start=1):
-        entry = {"index": i, "raw": raw, "errors": []}
+        entry: dict[str, Any] = {"index": i, "raw": raw, "errors": []}
         try:
             normalized = _normalize_row(raw)
             err = _validate_row(normalized)
@@ -280,7 +280,7 @@ async def parse_bulk(
 
 
 @api_router.post("/properties/bulk/commit")
-async def commit_bulk(body: BulkCommitBody, payload=Depends(verify_token)):
+async def commit_bulk(body: BulkCommitBody, payload: dict = Depends(verify_token)) -> Any:
     """Create every row in `body.rows`. Rows must already be normalized (call /parse first)."""
     if payload.get("role") not in ("owner", "manager", "admin"):
         raise HTTPException(status_code=403, detail="Only owners and managers can bulk-upload")
@@ -322,8 +322,8 @@ async def commit_bulk(body: BulkCommitBody, payload=Depends(verify_token)):
 async def attach_bulk_images(
     file: UploadFile = File(...),
     mapping: str = Form(...),
-    payload=Depends(verify_token),
-):
+    payload: dict = Depends(verify_token),
+) -> Any:
     """Unzip `file`, match entries by filename, and attach to properties.
 
     `mapping` is a JSON string: {property_id: [filename1, filename2, ...]}.
@@ -346,7 +346,7 @@ async def attach_bulk_images(
     # Build filename → zip-entry lookup (basename only; owners often zip a folder)
     entries = {Path(n).name: n for n in zf.namelist() if not n.endswith("/")}
 
-    results = {"attached": [], "missing": [], "not_owned": []}
+    results: dict[str, list] = {"attached": [], "missing": [], "not_owned": []}
     for prop_id, filenames in property_map.items():
         prop = await db.properties.find_one({"id": prop_id}, {"_id": 0, "owner_id": 1, "images": 1})
         if not prop:
@@ -391,8 +391,8 @@ async def attach_bulk_images(
 async def attach_bulk_images_flat(
     mapping: str = Form(...),
     files: List[UploadFile] = File(...),
-    payload=Depends(verify_token),
-):
+    payload: dict = Depends(verify_token),
+) -> Any:
     """Attach N individual image uploads to properties by a property_id→[filename] map.
 
     This is the flat-file sibling of /properties/bulk/images. Owners drop
@@ -415,7 +415,7 @@ async def attach_bulk_images_flat(
             file_bytes[name] = await f.read()
 
     allowed_exts = (".jpg", ".jpeg", ".png", ".webp", ".gif", ".heic", ".heif")
-    results = {"attached": [], "missing": [], "not_owned": []}
+    results: dict[str, list] = {"attached": [], "missing": [], "not_owned": []}
     for prop_id, filenames in property_map.items():
         prop = await db.properties.find_one({"id": prop_id}, {"_id": 0, "owner_id": 1, "images": 1})
         if not prop:

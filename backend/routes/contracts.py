@@ -9,7 +9,7 @@ import uuid
 from datetime import datetime, timedelta, timezone
 from io import BytesIO
 from pathlib import Path
-from typing import List, Optional
+from typing import Any, List, Optional
 
 import bcrypt
 import httpx
@@ -39,7 +39,7 @@ api_router = router  # alias so existing @api_router decorators work verbatim
 
 
 @api_router.get("/contract-template/{lang}")
-async def download_contract_template(lang: str):
+async def download_contract_template(lang: str) -> Any:
     """Serve the MyIsraelRental blank fillable rental-contract PDF.
     Public endpoint — owners and renters alike can download a blank template.
     Supported languages: 'en' (English) and 'he' (Hebrew)."""
@@ -67,8 +67,8 @@ async def download_contract_template(lang: str):
 async def upload_contract(
     file: UploadFile = File(...),
     property_id: str = Form(...),
-    payload=Depends(verify_token)
-):
+    payload: dict = Depends(verify_token)
+) -> Any:
     # Verify property exists and user is owner
     property_data = await db.properties.find_one({"id": property_id}, {"_id": 0})
     if not property_data:
@@ -139,7 +139,7 @@ async def upload_contract(
 
 
 @api_router.get("/contracts")
-async def list_contracts(property_id: Optional[str] = None, payload=Depends(verify_token)):
+async def list_contracts(property_id: Optional[str] = None, payload: dict = Depends(verify_token)) -> Any:
     query = {}
     if payload.get('role') != 'admin':
         query["owner_id"] = payload['user_id']
@@ -151,7 +151,7 @@ async def list_contracts(property_id: Optional[str] = None, payload=Depends(veri
 
 
 @api_router.get("/contracts/download/{contract_id}")
-async def download_contract(contract_id: str):
+async def download_contract(contract_id: str) -> Any:
     from starlette.responses import FileResponse
     contract = await db.contracts.find_one({"id": contract_id}, {"_id": 0})
     if not contract:
@@ -179,7 +179,7 @@ async def download_contract(contract_id: str):
 
 
 @api_router.get("/contracts/{contract_id}")
-async def get_contract(contract_id: str, payload=Depends(verify_token)):
+async def get_contract(contract_id: str, payload: dict = Depends(verify_token)) -> Any:
     contract = await db.contracts.find_one({"id": contract_id}, {"_id": 0})
     if not contract:
         raise HTTPException(status_code=404, detail="Contract not found")
@@ -193,7 +193,7 @@ async def get_contract(contract_id: str, payload=Depends(verify_token)):
 
 
 @api_router.post("/contracts/{contract_id}/translate")
-async def translate_contract(contract_id: str, direction: str = Form("he-en"), payload=Depends(verify_token)):
+async def translate_contract(contract_id: str, direction: str = Form("he-en"), payload: dict = Depends(verify_token)) -> Any:
     contract = await db.contracts.find_one({"id": contract_id}, {"_id": 0})
     if not contract:
         raise HTTPException(status_code=404, detail="Contract not found")
@@ -223,7 +223,7 @@ async def translate_contract(contract_id: str, direction: str = Form("he-en"), p
 
 
 @api_router.post("/contracts/{contract_id}/sign")
-async def sign_contract(contract_id: str, signature: ContractSignature, payload=Depends(verify_token)):
+async def sign_contract(contract_id: str, signature: ContractSignature, payload: dict = Depends(verify_token)) -> Any:
     contract = await db.contracts.find_one({"id": contract_id}, {"_id": 0})
     if not contract:
         raise HTTPException(status_code=404, detail="Contract not found")
@@ -248,7 +248,7 @@ async def sign_contract(contract_id: str, signature: ContractSignature, payload=
 
 
 @api_router.delete("/contracts/{contract_id}")
-async def delete_contract(contract_id: str, payload=Depends(verify_token)):
+async def delete_contract(contract_id: str, payload: dict = Depends(verify_token)) -> Any:
     contract = await db.contracts.find_one({"id": contract_id}, {"_id": 0})
     if not contract:
         raise HTTPException(status_code=404, detail="Contract not found")

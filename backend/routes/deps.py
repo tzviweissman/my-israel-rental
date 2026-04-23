@@ -8,6 +8,8 @@ import logging
 import os
 from pathlib import Path
 
+from typing import Any
+
 from dotenv import load_dotenv
 from motor.motor_asyncio import AsyncIOMotorClient
 
@@ -19,7 +21,7 @@ load_dotenv(ROOT_DIR / ".env")
 
 _mongo_url = os.environ["MONGO_URL"]
 client = AsyncIOMotorClient(_mongo_url)
-db = client[os.environ["DB_NAME"]]
+db: Any = client[os.environ["DB_NAME"]]
 
 JWT_SECRET = os.environ.get("JWT_SECRET", "your-secret-key-change-in-production-12345")
 EMERGENT_LLM_KEY = os.environ.get("EMERGENT_LLM_KEY", "")
