@@ -217,10 +217,20 @@ const PropertyList = ({ properties, onEdit, onRefresh, API, token }) => {
   };
 
   // ---- Bulk image drop handlers ----
-  // Normalize for filename-prefix matching: lowercase, strip extension,
-  // drop everything that isn't a letter or digit. "Drop Test TLV" ↔
-  // "drop-test-tlv-hero.jpg" both collapse to "droptesttlv".
-  const slug = (s) => String(s || '').toLowerCase().replace(/\.[^.]+$/, '').replace(/[^a-z0-9]/g, '');
+  // Normalize for filename-prefix matching. Three steps:
+  //   1. Lowercase + strip the file extension
+  //   2. NFD-decompose Unicode and remove combining marks → "Bâtiment" → "batiment"
+  //   3. Keep any Unicode letter or digit (so Hebrew, Arabic, Cyrillic etc. still
+  //      match against themselves); drop everything else.
+  // Note: cross-script matching won't work (Hebrew ↔ English), but same-script
+  // matching now does, which covers the realistic "בניין-א.jpg" → "בניין א" case.
+  const slug = (s) =>
+    String(s || '')
+      .toLowerCase()
+      .replace(/\.[^.]+$/, '')
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/[^\p{L}\p{N}]/gu, '');
 
   const addDroppedFiles = (fileList) => {
     const incoming = Array.from(fileList).filter((f) => f.type.startsWith('image/'));
