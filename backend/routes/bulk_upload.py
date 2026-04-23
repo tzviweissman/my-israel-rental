@@ -385,3 +385,69 @@ async def attach_bulk_images(
             )
 
     return results
+
+
+@api_router.post("/properties/bulk/images/attach")
+async def attach_bulk_images_flat(
+    mapping: str = Form(...),
+    files: List[UploadFile] = File(...),
+    payload=Depends(verify_token),
+):
+    """Attach N individual image uploads to properties by a property_id→[filename] map.
+
+    This is the flat-file sibling of /properties/bulk/images. Owners drop
+    loose files (from the "Needs Images" filter drop-zone) instead of zipping
+    first — the frontend just sends the raw File objects alongside a mapping.
+    """
+    if payload.get("role") not in ("owner", "manager", "admin"):
+        raise HTTPException(status_code=403, detail="Only owners and managers can bulk-upload")
+
+    try:
+        property_map: dict = json.loads(mapping)
+    except Exception:
+        raise HTTPException(status_code=400, detail="mapping must be JSON: {property_id: [filenames]}")
+
+    # Read every uploaded file into a dict keyed by basename (matches the zip path)
+    file_bytes: dict = {}
+    for f in files:
+        name = Path(f.filename or "").name
+        if name:
+            file_bytes[name] = await f.read()
+
+    allowed_exts = (".jpg", ".jpeg", ".png", ".webp", ".gif", ".heic", ".heif")
+    results = {"attached": [], "missing": [], "not_owned": []}
+    for prop_id, filenames in property_map.items():
+        prop = await db.properties.find_one({"id": prop_id}, {"_id": 0, "owner_id": 1, "images": 1})
+        if not prop:
+            results["not_owned"].append(prop_id)
+            continue
+        if prop.get("owner_id") != payload["user_id"] and payload.get("role") != "admin":
+            results["not_owned"].append(prop_id)
+            continue
+
+        new_image_urls = list(prop.get("images") or [])
+        attached_any = False
+        for fname in filenames:
+            basename = Path(fname).name
+            data = file_bytes.get(basename)
+            if data is None:
+                results["missing"].append({"property_id": prop_id, "filename": fname})
+                continue
+            ext = Path(basename).suffix.lower() or ".jpg"
+            if ext not in allowed_exts:
+                results["missing"].append({"property_id": prop_id, "filename": fname, "reason": "unsupported type"})
+                continue
+            safe_name = f"{uuid.uuid4().hex}{ext}"
+            out_path = UPLOAD_DIR / safe_name
+            out_path.write_bytes(data)
+            new_image_urls.append(f"/api/uploads/{safe_name}")
+            results["attached"].append({"property_id": prop_id, "filename": fname, "url": f"/api/uploads/{safe_name}"})
+            attached_any = True
+
+        if attached_any:
+            await db.properties.update_one(
+                {"id": prop_id},
+                {"$set": {"images": new_image_urls}, "$unset": {"pending_image_filenames": ""}},
+            )
+
+    return results

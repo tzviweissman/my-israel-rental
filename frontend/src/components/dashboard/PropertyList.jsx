@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import axios from 'axios';
-import { Edit, Eye, Trash2, Upload, FileText, CalendarSync, Link2, X, RefreshCw, Copy, Check, Sparkles, Image as ImageIcon } from 'lucide-react';
+import { Edit, Eye, Trash2, Upload, FileText, CalendarSync, Link2, X, RefreshCw, Copy, Check, Sparkles, Image as ImageIcon, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 
 /**
@@ -20,6 +20,10 @@ const PropertyList = ({ properties, onEdit, onRefresh, API, token }) => {
   const [icalSyncing, setIcalSyncing] = useState(false);
   // Exactly one filter can be active at a time ('bulk' | 'no_images' | null).
   const [activeFilter, setActiveFilter] = useState(null);
+  // Drag-and-drop bulk image upload (visible only while Needs Images filter is active)
+  const [dropHover, setDropHover] = useState(false);
+  const [imageAssignments, setImageAssignments] = useState([]); // [{file, propertyId}]
+  const [bulkImgUploading, setBulkImgUploading] = useState(false);
   const [icalData, setIcalData] = useState({});
   const [copiedExport, setCopiedExport] = useState(false);
 
@@ -207,7 +211,70 @@ const PropertyList = ({ properties, onEdit, onRefresh, API, token }) => {
     activeFilter === 'bulk' ? properties.filter(isFreshBulkUpload)
     : activeFilter === 'no_images' ? properties.filter((p) => !p.images || p.images.length === 0)
     : properties;
-  const toggleFilter = (f) => setActiveFilter((prev) => (prev === f ? null : f));
+  const toggleFilter = (f) => {
+    setActiveFilter((prev) => (prev === f ? null : f));
+    setImageAssignments([]); // clear pending assignments when switching filters
+  };
+
+  // ---- Bulk image drop handlers ----
+  const addDroppedFiles = (fileList) => {
+    const incoming = Array.from(fileList).filter((f) => f.type.startsWith('image/'));
+    if (incoming.length === 0) {
+      toast.error('Drop image files only (.jpg, .png, .webp, .heic)');
+      return;
+    }
+    const pending = displayedProperties; // already filtered to no-image set
+    if (pending.length === 0) {
+      toast.error('No properties need images right now');
+      return;
+    }
+    // Default assignment: round-robin through pending properties
+    setImageAssignments((prev) => {
+      const base = [...prev];
+      incoming.forEach((f, i) => {
+        const propertyId = pending[(base.length + i) % pending.length].id;
+        base.push({ file: f, propertyId });
+      });
+      return base;
+    });
+  };
+
+  const handleDrop = (e) => {
+    e.preventDefault();
+    setDropHover(false);
+    addDroppedFiles(e.dataTransfer.files);
+  };
+
+  const removeAssignment = (idx) => setImageAssignments((prev) => prev.filter((_, i) => i !== idx));
+
+  const updateAssignment = (idx, propertyId) =>
+    setImageAssignments((prev) => prev.map((a, i) => (i === idx ? { ...a, propertyId } : a)));
+
+  const submitBulkImages = async () => {
+    if (imageAssignments.length === 0) return;
+    setBulkImgUploading(true);
+    try {
+      // Build {property_id: [filename]} mapping
+      const mapping = {};
+      imageAssignments.forEach(({ file, propertyId }) => {
+        if (!mapping[propertyId]) mapping[propertyId] = [];
+        mapping[propertyId].push(file.name);
+      });
+      const formData = new FormData();
+      formData.append('mapping', JSON.stringify(mapping));
+      imageAssignments.forEach(({ file }) => formData.append('files', file));
+      const res = await axios.post(`${API}/properties/bulk/images/attach`, formData, {
+        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'multipart/form-data' },
+      });
+      toast.success(`${res.data.attached.length} image(s) attached`);
+      setImageAssignments([]);
+      await onRefresh();
+    } catch (err) {
+      toast.error(err.response?.data?.detail || 'Bulk image upload failed');
+    } finally {
+      setBulkImgUploading(false);
+    }
+  };
 
   return (
     <div className="mb-12">
@@ -254,6 +321,106 @@ const PropertyList = ({ properties, onEdit, onRefresh, API, token }) => {
           )}
         </div>
       </div>
+
+      {/* Bulk drag-and-drop image upload — only when Needs Images filter is active */}
+      {activeFilter === 'no_images' && (
+        <div className="mb-6" data-testid="bulk-image-dropzone-wrapper">
+          <div
+            onDragOver={(e) => { e.preventDefault(); setDropHover(true); }}
+            onDragLeave={() => setDropHover(false)}
+            onDrop={handleDrop}
+            className={`rounded-2xl border-2 border-dashed p-6 text-center transition-all ${
+              dropHover ? 'border-[#D4AF37] bg-[#fafaf0]' : 'border-gray-300 bg-[#fafaf5]'
+            }`}
+            data-testid="bulk-image-dropzone"
+          >
+            <div className="flex flex-col items-center gap-2">
+              <div className="w-12 h-12 rounded-full bg-[#1E6A6A]/10 flex items-center justify-center">
+                <Upload className="text-[#1E6A6A]" size={22} />
+              </div>
+              <p className="text-sm font-semibold text-gray-800">Drop images here</p>
+              <p className="text-xs text-gray-500 max-w-md">
+                We'll assign one image to each listing above in order — you can re-map any of them below before confirming.
+              </p>
+              <label className="mt-1 text-xs text-[#1E6A6A] font-medium cursor-pointer hover:underline">
+                or click to choose files
+                <input
+                  type="file"
+                  accept="image/*"
+                  multiple
+                  className="hidden"
+                  onChange={(e) => { addDroppedFiles(e.target.files); e.target.value = ''; }}
+                  data-testid="bulk-image-file-input"
+                />
+              </label>
+            </div>
+          </div>
+
+          {imageAssignments.length > 0 && (
+            <div className="mt-3 rounded-2xl bg-white border border-[#E5E5E5] overflow-hidden" data-testid="bulk-image-assignments">
+              <div className="px-4 py-3 border-b border-gray-100 flex items-center justify-between">
+                <span className="text-sm font-semibold text-gray-800">
+                  {imageAssignments.length} image{imageAssignments.length === 1 ? '' : 's'} ready
+                </span>
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => setImageAssignments([])}
+                    className="text-xs text-gray-500 hover:text-gray-800 px-2 py-1"
+                    data-testid="bulk-image-clear-btn"
+                  >
+                    Clear
+                  </button>
+                  <button
+                    onClick={submitBulkImages}
+                    disabled={bulkImgUploading}
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-white disabled:opacity-50"
+                    style={{ backgroundColor: '#1E6A6A' }}
+                    data-testid="bulk-image-attach-btn"
+                  >
+                    {bulkImgUploading ? <Loader2 size={12} className="animate-spin" /> : <Check size={12} />}
+                    {bulkImgUploading ? 'Attaching...' : `Attach ${imageAssignments.length}`}
+                  </button>
+                </div>
+              </div>
+              <div className="divide-y divide-gray-100 max-h-[320px] overflow-auto">
+                {imageAssignments.map((a, i) => (
+                  <div key={i} className="flex items-center gap-3 px-4 py-2 hover:bg-gray-50" data-testid={`bulk-image-row-${i}`}>
+                    <img
+                      src={URL.createObjectURL(a.file)}
+                      alt={a.file.name}
+                      className="w-12 h-12 rounded-lg object-cover shrink-0"
+                      onLoad={(e) => URL.revokeObjectURL(e.target.src)}
+                    />
+                    <div className="flex-1 min-w-0">
+                      <p className="text-xs font-medium text-gray-800 truncate">{a.file.name}</p>
+                      <p className="text-[10px] text-gray-400">{(a.file.size / 1024).toFixed(0)} KB</p>
+                    </div>
+                    <select
+                      value={a.propertyId}
+                      onChange={(e) => updateAssignment(i, e.target.value)}
+                      className="text-xs px-2 py-1.5 rounded-lg border border-gray-200 focus:outline-none focus:border-[#1E6A6A] max-w-[240px]"
+                      data-testid={`bulk-image-select-${i}`}
+                    >
+                      {displayedProperties.map((p) => (
+                        <option key={p.id} value={p.id}>{p.title}</option>
+                      ))}
+                    </select>
+                    <button
+                      onClick={() => removeAssignment(i)}
+                      className="text-gray-400 hover:text-red-500 p-1"
+                      data-testid={`bulk-image-remove-${i}`}
+                      aria-label="Remove"
+                    >
+                      <X size={14} />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {displayedProperties.map((property) => (
           <div key={property.id} className="bg-white rounded-2xl border border-[#E5E5E5] overflow-hidden" data-testid={`dashboard-property-${property.id}`}>
