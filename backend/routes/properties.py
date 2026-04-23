@@ -148,6 +148,15 @@ async def get_properties(
         ).to_list(10000)
         for b in external_overlaps:
             booked_property_ids.add(b['property_id'])
+        # Admin manual blocks (indefinite => end_date is null; open-start => start_date is null)
+        admin_blocks = await db.admin_blocks.find(
+            {}, {"_id": 0, "property_id": 1, "start_date": 1, "end_date": 1}
+        ).to_list(10000)
+        for b in admin_blocks:
+            bs = b.get('start_date') or '0000-01-01'
+            be = b.get('end_date') or '9999-12-31'
+            if bs < date_to and be > date_from:
+                booked_property_ids.add(b['property_id'])
         properties = [p for p in properties if p['id'] not in booked_property_ids]
     
     return properties

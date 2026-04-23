@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useContext } from 'react';
 import axios from 'axios';
 import { API, AuthContext } from '../App';
-import { Users, Home, Eye, MessageCircle, FileText, Settings, Trash2, Ban, CheckCircle, ChevronDown, ChevronUp, ToggleLeft, ToggleRight, Search, X, Mail, AlertTriangle } from 'lucide-react';
+import { Users, Home, Eye, MessageCircle, FileText, Settings, Trash2, Ban, CheckCircle, ChevronDown, ChevronUp, ToggleLeft, ToggleRight, Search, X, Mail, AlertTriangle, CalendarX, CalendarCheck, Lock } from 'lucide-react';
 import { toast } from 'sonner';
 
 const TABS = [
@@ -25,6 +25,15 @@ const AdminDashboard = () => {
   const [expandedChat, setExpandedChat] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [emailHealth, setEmailHealth] = useState(null);
+  // --- Mark-as-booked state ---
+  const [selectedPropIds, setSelectedPropIds] = useState(new Set());
+  const [bookedModalOpen, setBookedModalOpen] = useState(false);
+  // bookedTarget: either { mode: 'single', id: '...' } or { mode: 'bulk' }
+  const [bookedTarget, setBookedTarget] = useState(null);
+  const [blockStart, setBlockStart] = useState('');
+  const [blockEnd, setBlockEnd] = useState('');
+  const [blockIndefinite, setBlockIndefinite] = useState(false);
+  const [blockSaving, setBlockSaving] = useState(false);
 
   const headers = { Authorization: `Bearer ${token}` };
 
@@ -167,6 +176,100 @@ const AdminDashboard = () => {
         </div>
       </div>
     ), { duration: 10000 });
+  };
+
+  // --- Mark-as-booked (admin manual block) ---
+  const openMarkBookedModal = (target) => {
+    setBookedTarget(target);
+    setBlockStart('');
+    setBlockEnd('');
+    setBlockIndefinite(false);
+    setBookedModalOpen(true);
+  };
+
+  const closeMarkBookedModal = () => {
+    setBookedModalOpen(false);
+    setBookedTarget(null);
+  };
+
+  const submitMarkBooked = async () => {
+    if (!bookedTarget) return;
+    if (!blockIndefinite) {
+      if (!blockStart || !blockEnd) {
+        toast.error('Pick start & end dates, or tick "Block indefinitely".');
+        return;
+      }
+      if (blockEnd <= blockStart) {
+        toast.error('End date must be after start date.');
+        return;
+      }
+    }
+    const body = {
+      start_date: blockIndefinite ? null : blockStart,
+      end_date: blockIndefinite ? null : blockEnd,
+      indefinite: blockIndefinite,
+    };
+    setBlockSaving(true);
+    try {
+      if (bookedTarget.mode === 'single') {
+        await axios.post(`${API}/admin/properties/${bookedTarget.id}/mark-booked`, body, { headers });
+        toast.success('Property marked as booked');
+      } else {
+        const ids = Array.from(selectedPropIds);
+        if (ids.length === 0) {
+          toast.error('No properties selected');
+          setBlockSaving(false);
+          return;
+        }
+        const res = await axios.post(`${API}/admin/properties/bulk-mark-booked`, { ...body, property_ids: ids }, { headers });
+        toast.success(res.data.message || `${ids.length} properties marked as booked`);
+        setSelectedPropIds(new Set());
+      }
+      closeMarkBookedModal();
+      fetchProperties();
+    } catch (e) {
+      toast.error(e.response?.data?.detail || 'Failed to mark as booked');
+    } finally {
+      setBlockSaving(false);
+    }
+  };
+
+  const unmarkBooked = (property) => {
+    const block = property.active_admin_block;
+    if (!block) return;
+    toast.custom((tid) => (
+      <div className="bg-white rounded-xl shadow-xl border border-gray-200 p-4 w-80">
+        <p className="text-sm font-semibold text-gray-800 mb-1">Remove admin block?</p>
+        <p className="text-xs text-gray-500 mb-3">The property will become available for renters again{block.indefinite ? '' : ` during ${block.start_date?.slice(0, 10)} → ${block.end_date?.slice(0, 10)}`}.</p>
+        <div className="flex gap-2 justify-end">
+          <button onClick={() => toast.dismiss(tid)} className="px-3 py-1.5 rounded-lg text-xs font-medium text-gray-600 hover:bg-gray-100">
+            Cancel
+          </button>
+          <button
+            onClick={async () => {
+              toast.dismiss(tid);
+              try {
+                await axios.delete(`${API}/admin/properties/blocks/${block.id}`, { headers });
+                toast.success('Admin block removed');
+                fetchProperties();
+              } catch (e) { toast.error('Failed to remove block'); }
+            }}
+            className="px-3 py-1.5 rounded-lg text-xs font-semibold text-white bg-black hover:bg-gray-800"
+            data-testid={`confirm-unblock-${property.id}`}
+          >
+            Remove block
+          </button>
+        </div>
+      </div>
+    ), { duration: 10000 });
+  };
+
+  const togglePropSelected = (id) => {
+    setSelectedPropIds(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id); else next.add(id);
+      return next;
+    });
   };
 
   const updateServiceStatus = async (serviceId, status) => {
@@ -360,7 +463,7 @@ const AdminDashboard = () => {
         {/* LISTINGS TAB */}
         {activeTab === 'listings' && (
           <div data-testid="admin-listings-section">
-            <div className="flex items-center gap-4 mb-6">
+            <div className="flex items-center gap-4 mb-6 flex-wrap">
               <div className="relative flex-1 max-w-md">
                 <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
                 <input
@@ -373,11 +476,44 @@ const AdminDashboard = () => {
                 />
               </div>
               <span className="text-sm text-gray-500">{filteredProperties.length} listings</span>
+              {selectedPropIds.size > 0 && (
+                <div className="flex items-center gap-2 ml-auto">
+                  <span className="text-xs font-medium text-gray-700" data-testid="selected-count">{selectedPropIds.size} selected</span>
+                  <button
+                    onClick={() => openMarkBookedModal({ mode: 'bulk' })}
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-black text-white text-xs font-semibold hover:bg-gray-800"
+                    data-testid="bulk-mark-booked-btn"
+                  >
+                    <CalendarX size={14} /> Mark selected as booked
+                  </button>
+                  <button
+                    onClick={() => setSelectedPropIds(new Set())}
+                    className="px-2 py-1.5 rounded-lg text-xs font-medium text-gray-600 hover:bg-gray-100"
+                    data-testid="clear-selection-btn"
+                  >
+                    Clear
+                  </button>
+                </div>
+              )}
             </div>
             <div className="bg-white rounded-xl border border-[#E5E5E5] overflow-hidden">
               <table className="w-full">
                 <thead className="bg-gray-50">
                   <tr>
+                    <th className="px-3 py-3 w-8">
+                      <input
+                        type="checkbox"
+                        checked={filteredProperties.length > 0 && filteredProperties.every(p => selectedPropIds.has(p.id))}
+                        onChange={e => {
+                          if (e.target.checked) {
+                            setSelectedPropIds(new Set(filteredProperties.map(p => p.id)));
+                          } else {
+                            setSelectedPropIds(new Set());
+                          }
+                        }}
+                        data-testid="select-all-listings"
+                      />
+                    </th>
                     <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Title</th>
                     <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Owner</th>
                     <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Area</th>
@@ -390,7 +526,28 @@ const AdminDashboard = () => {
                 <tbody>
                   {filteredProperties.map(p => (
                     <tr key={p.id} className="border-t border-[#E5E5E5] hover:bg-gray-50" data-testid={`listing-row-${p.id}`}>
-                      <td className="px-4 py-3 font-medium text-sm">{p.title}</td>
+                      <td className="px-3 py-3">
+                        <input
+                          type="checkbox"
+                          checked={selectedPropIds.has(p.id)}
+                          onChange={() => togglePropSelected(p.id)}
+                          data-testid={`select-listing-${p.id}`}
+                        />
+                      </td>
+                      <td className="px-4 py-3 font-medium text-sm">
+                        <div className="flex items-center gap-2">
+                          <span>{p.title}</span>
+                          {p.admin_blocked_now && (
+                            <span
+                              className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-amber-100 text-amber-800"
+                              title={p.active_admin_block?.indefinite ? 'Blocked indefinitely by admin' : `Blocked ${p.active_admin_block?.start_date?.slice(0,10)} → ${p.active_admin_block?.end_date?.slice(0,10)}`}
+                              data-testid={`admin-blocked-badge-${p.id}`}
+                            >
+                              <Lock size={10} /> Admin blocked
+                            </span>
+                          )}
+                        </div>
+                      </td>
                       <td className="px-4 py-3 text-sm text-gray-600">{p.owner_name}<br/><span className="text-xs text-gray-400">{p.owner_email}</span></td>
                       <td className="px-4 py-3 text-sm">{p.area}</td>
                       <td className="px-4 py-3"><span className="px-2 py-1 rounded-full text-xs bg-[#E5E5E5]">{p.rental_type}</span></td>
@@ -402,6 +559,25 @@ const AdminDashboard = () => {
                       </td>
                       <td className="px-4 py-3">
                         <div className="flex items-center gap-1">
+                          {p.admin_blocked_now ? (
+                            <button
+                              onClick={() => unmarkBooked(p)}
+                              className="p-1.5 rounded hover:bg-green-50 text-green-600"
+                              title="Remove admin block"
+                              data-testid={`unmark-booked-${p.id}`}
+                            >
+                              <CalendarCheck size={18} />
+                            </button>
+                          ) : (
+                            <button
+                              onClick={() => openMarkBookedModal({ mode: 'single', id: p.id })}
+                              className="p-1.5 rounded hover:bg-amber-50 text-amber-600"
+                              title="Mark as booked"
+                              data-testid={`mark-booked-${p.id}`}
+                            >
+                              <CalendarX size={18} />
+                            </button>
+                          )}
                           <button onClick={() => togglePropertyStatus(p.id)} className="p-1.5 rounded hover:bg-gray-100" title={p.status === 'active' ? 'Deactivate' : 'Activate'} data-testid={`toggle-property-${p.id}`}>
                             {p.status === 'active' ? <ToggleRight size={18} className="text-green-600" /> : <ToggleLeft size={18} className="text-gray-400" />}
                           </button>
@@ -647,6 +823,84 @@ const AdminDashboard = () => {
           </div>
         )}
       </div>
+
+      {/* Mark as Booked modal */}
+      {bookedModalOpen && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4"
+          data-testid="mark-booked-modal"
+        >
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6 relative">
+            <button
+              onClick={closeMarkBookedModal}
+              className="absolute top-3 right-3 p-1 rounded-lg hover:bg-gray-100"
+              data-testid="close-mark-booked-modal"
+            >
+              <X size={18} />
+            </button>
+            <div className="flex items-center gap-2 mb-1">
+              <CalendarX size={20} className="text-amber-600" />
+              <h2 className="text-lg font-bold">Mark as booked</h2>
+            </div>
+            <p className="text-xs text-gray-500 mb-5">
+              {bookedTarget?.mode === 'bulk'
+                ? `Block ${selectedPropIds.size} selected propert${selectedPropIds.size === 1 ? 'y' : 'ies'} from appearing in renter date searches.`
+                : 'Block this property from appearing in renter date searches. Existing bookings are kept unchanged.'}
+            </p>
+
+            <label className="flex items-center gap-2 mb-4 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={blockIndefinite}
+                onChange={e => setBlockIndefinite(e.target.checked)}
+                data-testid="block-indefinite-checkbox"
+              />
+              <span className="text-sm font-medium">Block indefinitely (until removed)</span>
+            </label>
+
+            <div className={`grid grid-cols-2 gap-3 mb-5 ${blockIndefinite ? 'opacity-40 pointer-events-none' : ''}`}>
+              <div>
+                <label className="block text-xs font-medium text-gray-600 mb-1">Start date</label>
+                <input
+                  type="date"
+                  value={blockStart}
+                  onChange={e => setBlockStart(e.target.value)}
+                  className="w-full px-3 py-2 rounded-lg border border-[#E5E5E5] text-sm focus:outline-none focus:ring-2 focus:ring-black/20"
+                  data-testid="block-start-date"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-gray-600 mb-1">End date</label>
+                <input
+                  type="date"
+                  value={blockEnd}
+                  onChange={e => setBlockEnd(e.target.value)}
+                  className="w-full px-3 py-2 rounded-lg border border-[#E5E5E5] text-sm focus:outline-none focus:ring-2 focus:ring-black/20"
+                  data-testid="block-end-date"
+                />
+              </div>
+            </div>
+
+            <div className="flex justify-end gap-2">
+              <button
+                onClick={closeMarkBookedModal}
+                className="px-4 py-2 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-100"
+                data-testid="cancel-mark-booked-btn"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={submitMarkBooked}
+                disabled={blockSaving}
+                className="px-4 py-2 rounded-lg text-sm font-semibold text-white bg-black hover:bg-gray-800 disabled:opacity-50"
+                data-testid="confirm-mark-booked-btn"
+              >
+                {blockSaving ? 'Saving…' : 'Mark as booked'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

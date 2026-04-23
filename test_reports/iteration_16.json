@@ -1,0 +1,61 @@
+{
+  "summary": "End-to-end testing of Admin 'Mark as Booked' feature (backend + frontend). All 20 pytest cases pass covering single/bulk mark-booked, delete block, admin properties enrichment, public search filter (no dates / overlapping / non-overlapping / indefinite), and 403 auth for non-admins. Frontend Playwright validated: modal open from CalendarX, indefinite checkbox disables date pickers via CSS, submit creates block with badge, CalendarCheck unblock flow with confirm toast, invalid end<=start shows validation toast and keeps modal open, dated block covering today shows badge, select-all + bulk-mark works on 12 listings, clear-selection hides bar, Cancel and X close the modal. All admin_blocks cleaned up.",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {"ui_bugs": [], "integration_issues": [], "design_issues": []},
+  "test_report_links": [
+    "/app/backend/tests/test_admin_mark_booked.py",
+    "/app/test_reports/pytest/admin_mark_booked.xml"
+  ],
+  "backend_coverage": {
+    "POST /api/admin/properties/{id}/mark-booked indefinite": "PASS",
+    "POST /api/admin/properties/{id}/mark-booked dated range": "PASS",
+    "POST mark-booked with end<=start": "PASS - 400",
+    "POST mark-booked empty body (null start & end)": "PASS - becomes indefinite:true",
+    "POST mark-booked on missing property": "PASS - 404",
+    "GET /api/admin/properties/{id}/blocks": "PASS",
+    "DELETE /api/admin/properties/blocks/{id}": "PASS (200 on success, 404 on ghost id)",
+    "POST /api/admin/properties/bulk-mark-booked": "PASS - one block per property; created/skipped counts correct",
+    "Bulk with empty ids": "PASS - 400",
+    "Bulk with nonexistent ids": "PASS - created=0, skipped=N",
+    "GET /api/admin/properties enrichment": "PASS - admin_blocks, admin_blocked_now, active_admin_block present",
+    "Public /api/properties NO date filter with active block": "PASS - property still visible (block is date-overlap only)",
+    "Public /api/properties overlapping dates with block": "PASS - property excluded",
+    "Public /api/properties non-overlapping dates": "PASS - property included",
+    "Indefinite block excludes any future date range": "PASS",
+    "403 owner/renter on all /api/admin/properties/* endpoints": "PASS",
+    "401/403 with no token": "PASS"
+  },
+  "frontend_coverage": {
+    "AdminDashboard → Listings tab reachable": "PASS",
+    "Click CalendarX (mark-booked-{id}) opens modal": "PASS",
+    "block-indefinite-checkbox disables date pickers": "PASS - via CSS (opacity-40 pointer-events-none on parent grid)",
+    "Indefinite submit creates block, admin-blocked-badge-{id} shown, CalendarCheck unmark icon replaces CalendarX": "PASS",
+    "Unmark icon + confirm-unblock-{id} toast removes block, badge disappears": "PASS",
+    "Invalid end<=start keeps modal open (client validation toast)": "PASS",
+    "Dated block covering today shows badge": "PASS",
+    "Dated block entirely in the future does NOT show badge (admin_blocked_now=false) — correct behaviour": "PASS",
+    "select-all-listings toggles all rows, selected-count appears": "PASS (12 selected)",
+    "bulk-mark-booked-btn + confirm creates indefinite block for every listing": "PASS",
+    "clear-selection-btn hides selection bar": "PASS",
+    "cancel-mark-booked-btn closes modal": "PASS",
+    "close-mark-booked-modal (X) closes modal": "PASS"
+  },
+  "critical_code_review_comments": [
+    "admin.py mark-booked: `indefinite: bool(block.indefinite) or end is None` — correctly records indefinite even when client omits the flag and just passes null dates. Consistent with properties.py filter which treats null as open-ended (0000..9999). Good.",
+    "properties.py date filter uses lexicographic `bs < date_to and be > date_from` comparison on ISO strings. Works for YYYY-MM-DD and full ISO timestamps but would silently misbehave if mixed formats land in the collection. Low risk.",
+    "AdminDashboard.js disables date inputs via CSS (pointer-events-none) rather than the HTML `disabled` attribute. UX is fine, but assistive-tech (screen readers, keyboard users who click the label) may still focus the inputs. Consider adding `disabled={blockIndefinite}` to both <input type=date> as well.",
+    "No 'reason/note' field — matches spec (choice 3c). Fine.",
+    "AdminDashboard Listings tab is 900+ lines — consider extracting the Mark-as-Booked modal + bulk bar into its own component for maintainability (exceeds the 700-line guideline).",
+    "Minor pre-existing React warning 'Received `true` for non-boolean attribute `jsx`' on AdminDashboard render — unrelated to this feature, but worth a sweep."
+  ],
+  "updated_files": [
+    "/app/backend/tests/test_admin_mark_booked.py (new - 20 pytest cases)"
+  ],
+  "success_rate": {"backend": "100% (20/20)", "frontend": "100% (13/13 checks)"},
+  "test_credentials": "admin@rental.com / Admin1234! (admin), owner@test.com / Test1234! (owner 403), renter@test.com / Test1234! (renter 403)",
+  "seed_data_creation": "Created admin_blocks during tests on the seeded test property (86c6e09c-b1e0-4705-a86c-91cd9ce13765) and bulk-across all 12 properties. All blocks cleaned up via DELETE /api/admin/properties/blocks/{id} at teardown. Final state verified: 0 admin_blocks remaining.",
+  "retest_needed": false,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "Feature fully validated. Note: admin_blocked_now & active_admin_block are time-sensitive (only TRUE when NOW falls within [start,end] or either is null). Future-dated blocks will have admin_blocks populated but admin_blocked_now=false → badge hidden, which is correct. Public /api/properties respects dated overlap for searches but stays visible when no date filter is set (per choice 4b). Test file: /app/backend/tests/test_admin_mark_booked.py. Pytest xml: /app/test_reports/pytest/admin_mark_booked.xml.",
+  "rca of the issue": "N/A - no bugs found"
+}

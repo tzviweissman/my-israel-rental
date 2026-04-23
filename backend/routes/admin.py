@@ -217,11 +217,150 @@ async def get_all_properties_admin(payload = Depends(verify_token)):
     if payload['role'] != 'admin':
         raise HTTPException(status_code=403, detail="Admin access required")
     properties = await db.properties.find({}, {"_id": 0}).sort("created_at", -1).to_list(1000)
+
+    # Pull every admin block in one go and group by property
+    blocks_by_prop: dict = {}
+    async for block in db.admin_blocks.find({}, {"_id": 0}):
+        blocks_by_prop.setdefault(block["property_id"], []).append(block)
+
+    now_iso = datetime.now(timezone.utc).isoformat()
+
     for prop in properties:
         owner = await db.users.find_one({"id": prop.get("owner_id")}, {"_id": 0, "name": 1, "email": 1})
         prop["owner_name"] = owner.get("name", "Unknown") if owner else "Unknown"
         prop["owner_email"] = owner.get("email", "") if owner else ""
+
+        prop_blocks = blocks_by_prop.get(prop["id"], [])
+        # A block is "active" if its date window covers "now"
+        # (indefinite = null end, or start_date null = open-ended past)
+        active_blocks = []
+        for b in prop_blocks:
+            bs = b.get("start_date")
+            be = b.get("end_date")
+            if (bs is None or bs <= now_iso) and (be is None or be >= now_iso):
+                active_blocks.append(b)
+        prop["admin_blocks"] = prop_blocks
+        prop["admin_blocked_now"] = len(active_blocks) > 0
+        prop["active_admin_block"] = active_blocks[0] if active_blocks else None
+
     return properties
+
+
+class AdminBlockIn(BaseModel):
+    start_date: Optional[str] = None  # ISO string; None => starts now
+    end_date: Optional[str] = None    # ISO string; None => indefinite
+    indefinite: Optional[bool] = False
+
+
+@api_router.post("/admin/properties/{property_id}/mark-booked")
+async def admin_mark_property_booked(
+    property_id: str,
+    block: AdminBlockIn,
+    payload = Depends(verify_token),
+):
+    """Super-admin: block a property for a date range or indefinitely.
+
+    The block is additive — existing renter bookings are NOT modified.
+    When renters search with overlapping dates, the property is filtered out.
+    """
+    if payload['role'] != 'admin':
+        raise HTTPException(status_code=403, detail="Admin access required")
+
+    prop = await db.properties.find_one({"id": property_id}, {"_id": 0, "id": 1})
+    if not prop:
+        raise HTTPException(status_code=404, detail="Property not found")
+
+    start = block.start_date or None
+    end = None if block.indefinite else (block.end_date or None)
+
+    # Validate that end_date > start_date if both provided
+    if start and end and end <= start:
+        raise HTTPException(status_code=400, detail="end_date must be after start_date")
+
+    block_doc = {
+        "id": str(uuid.uuid4()),
+        "property_id": property_id,
+        "start_date": start,
+        "end_date": end,
+        "indefinite": bool(block.indefinite) or end is None,
+        "created_by": payload["user_id"],
+        "created_at": datetime.now(timezone.utc).isoformat(),
+    }
+    await db.admin_blocks.insert_one(block_doc)
+    block_doc.pop("_id", None)
+    return {"message": "Property marked as booked", "block": block_doc}
+
+
+@api_router.get("/admin/properties/{property_id}/blocks")
+async def admin_list_property_blocks(property_id: str, payload = Depends(verify_token)):
+    if payload['role'] != 'admin':
+        raise HTTPException(status_code=403, detail="Admin access required")
+    blocks = await db.admin_blocks.find(
+        {"property_id": property_id}, {"_id": 0}
+    ).sort("created_at", -1).to_list(500)
+    return blocks
+
+
+@api_router.delete("/admin/properties/blocks/{block_id}")
+async def admin_remove_block(block_id: str, payload = Depends(verify_token)):
+    if payload['role'] != 'admin':
+        raise HTTPException(status_code=403, detail="Admin access required")
+    result = await db.admin_blocks.delete_one({"id": block_id})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Block not found")
+    return {"message": "Block removed"}
+
+
+class BulkMarkBookedIn(BaseModel):
+    property_ids: List[str]
+    start_date: Optional[str] = None
+    end_date: Optional[str] = None
+    indefinite: Optional[bool] = False
+
+
+@api_router.post("/admin/properties/bulk-mark-booked")
+async def admin_bulk_mark_booked(
+    data: BulkMarkBookedIn,
+    payload = Depends(verify_token),
+):
+    if payload['role'] != 'admin':
+        raise HTTPException(status_code=403, detail="Admin access required")
+    if not data.property_ids:
+        raise HTTPException(status_code=400, detail="property_ids must not be empty")
+
+    start = data.start_date or None
+    end = None if data.indefinite else (data.end_date or None)
+    if start and end and end <= start:
+        raise HTTPException(status_code=400, detail="end_date must be after start_date")
+
+    # Only insert blocks for properties that actually exist
+    existing_ids = set()
+    async for prop in db.properties.find(
+        {"id": {"$in": data.property_ids}}, {"_id": 0, "id": 1}
+    ):
+        existing_ids.add(prop["id"])
+
+    now = datetime.now(timezone.utc).isoformat()
+    docs = [
+        {
+            "id": str(uuid.uuid4()),
+            "property_id": pid,
+            "start_date": start,
+            "end_date": end,
+            "indefinite": bool(data.indefinite) or end is None,
+            "created_by": payload["user_id"],
+            "created_at": now,
+        }
+        for pid in data.property_ids
+        if pid in existing_ids
+    ]
+    if docs:
+        await db.admin_blocks.insert_many(docs)
+    return {
+        "message": f"{len(docs)} properties marked as booked",
+        "created": len(docs),
+        "skipped": len(data.property_ids) - len(docs),
+    }
 
 
 @api_router.put("/admin/properties/{property_id}/status")
