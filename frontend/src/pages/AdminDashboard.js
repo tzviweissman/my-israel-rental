@@ -858,14 +858,15 @@ const AdminDashboard = () => {
               <span className="text-sm font-medium">Block indefinitely (until removed)</span>
             </label>
 
-            <div className={`grid grid-cols-2 gap-3 mb-5 ${blockIndefinite ? 'opacity-40 pointer-events-none' : ''}`}>
+            <div className={`grid grid-cols-2 gap-3 mb-5 ${blockIndefinite ? 'opacity-40' : ''}`}>
               <div>
                 <label className="block text-xs font-medium text-gray-600 mb-1">Start date</label>
                 <input
                   type="date"
                   value={blockStart}
                   onChange={e => setBlockStart(e.target.value)}
-                  className="w-full px-3 py-2 rounded-lg border border-[#E5E5E5] text-sm focus:outline-none focus:ring-2 focus:ring-black/20"
+                  disabled={blockIndefinite}
+                  className="w-full px-3 py-2 rounded-lg border border-[#E5E5E5] text-sm focus:outline-none focus:ring-2 focus:ring-black/20 disabled:cursor-not-allowed"
                   data-testid="block-start-date"
                 />
               </div>
@@ -875,7 +876,8 @@ const AdminDashboard = () => {
                   type="date"
                   value={blockEnd}
                   onChange={e => setBlockEnd(e.target.value)}
-                  className="w-full px-3 py-2 rounded-lg border border-[#E5E5E5] text-sm focus:outline-none focus:ring-2 focus:ring-black/20"
+                  disabled={blockIndefinite}
+                  className="w-full px-3 py-2 rounded-lg border border-[#E5E5E5] text-sm focus:outline-none focus:ring-2 focus:ring-black/20 disabled:cursor-not-allowed"
                   data-testid="block-end-date"
                 />
               </div>

@@ -104,6 +104,14 @@ Build a bilingual (English/Hebrew) rental website named MyIsraelRental.com with 
   - "Bulk Upload" button wired into Dashboard next to "Add Property" for owners/managers.
   - Permissions: renter role gets 403 on all bulk endpoints.
   - Tested: 15/15 pytest pass + full frontend wizard validated (iteration_15.json). ZIP subfolder matching verified.
+- [x] **Super-Admin Mark Property as Booked** (2026-04-23):
+  - New `admin_blocks` collection; blocks are additive — existing renter bookings untouched.
+  - Admin can block a property with a date range OR indefinitely (`end_date=null`).
+  - Public `/api/properties` search filters out any property whose admin block overlaps the requested dates; when no dates are passed, the property stays visible (choice 4b).
+  - Per-row "Mark as Booked" / "Unmark" action + bulk-select bar in Admin → Listings tab.
+  - New endpoints (all admin-only): `POST /api/admin/properties/{id}/mark-booked`, `POST /api/admin/properties/bulk-mark-booked`, `GET /api/admin/properties/{id}/blocks`, `DELETE /api/admin/properties/blocks/{id}`. `GET /api/admin/properties` now enriches with `admin_blocks`, `admin_blocked_now`, `active_admin_block`.
+  - Frontend: AdminDashboard.js adds checkbox column, `CalendarX`/`CalendarCheck` icons, amber "Admin blocked" badge, and a Shadcn-styled modal with "Block indefinitely" toggle.
+  - Tested: 20/20 pytest + 13/13 frontend Playwright checks pass (iteration_16.json). Test file: `/app/backend/tests/test_admin_mark_booked.py`.
 - [ ] Manager bulk property upload + profile pages
 
 ### P2 - Lower Priority
