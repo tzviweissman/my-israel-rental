@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useContext } from 'react';
 import axios from 'axios';
 import { API, AuthContext } from '../App';
-import { Users, Home, Eye, MessageCircle, FileText, Settings, Trash2, Ban, CheckCircle, ChevronDown, ChevronUp, ToggleLeft, ToggleRight, Search, X } from 'lucide-react';
+import { Users, Home, Eye, MessageCircle, FileText, Settings, Trash2, Ban, CheckCircle, ChevronDown, ChevronUp, ToggleLeft, ToggleRight, Search, X, Mail, AlertTriangle } from 'lucide-react';
 import { toast } from 'sonner';
 
 const TABS = [
@@ -101,15 +101,34 @@ const AdminDashboard = () => {
     } catch (e) { toast.error('Failed to update user'); }
   };
 
-  const deleteUser = async (userId) => {
-    if (!window.confirm('Delete this user and all their properties? This cannot be undone.')) return;
-    try {
-      await axios.delete(`${API}/admin/users/${userId}`, { headers });
-      toast.success('User deleted');
-      fetchUsers();
-      fetchProperties();
-      fetchDashboard();
-    } catch (e) { toast.error(e.response?.data?.detail || 'Failed to delete user'); }
+  const deleteUser = (userId) => {
+    toast.custom((tid) => (
+      <div className="bg-white rounded-xl shadow-xl border border-gray-200 p-4 w-80">
+        <p className="text-sm font-semibold text-gray-800 mb-1">Delete this user?</p>
+        <p className="text-xs text-gray-500 mb-3">All of their properties will be deleted too. This cannot be undone.</p>
+        <div className="flex gap-2 justify-end">
+          <button onClick={() => toast.dismiss(tid)} className="px-3 py-1.5 rounded-lg text-xs font-medium text-gray-600 hover:bg-gray-100">
+            Cancel
+          </button>
+          <button
+            onClick={async () => {
+              toast.dismiss(tid);
+              try {
+                await axios.delete(`${API}/admin/users/${userId}`, { headers });
+                toast.success('User deleted');
+                fetchUsers();
+                fetchProperties();
+                fetchDashboard();
+              } catch (e) { toast.error(e.response?.data?.detail || 'Failed to delete user'); }
+            }}
+            className="px-3 py-1.5 rounded-lg text-xs font-semibold text-white bg-red-500 hover:bg-red-600"
+            data-testid={`confirm-delete-user-${userId}`}
+          >
+            Delete
+          </button>
+        </div>
+      </div>
+    ), { duration: 10000 });
   };
 
   const togglePropertyStatus = async (propertyId) => {
@@ -121,14 +140,33 @@ const AdminDashboard = () => {
     } catch (e) { toast.error('Failed to update property'); }
   };
 
-  const deleteProperty = async (propertyId) => {
-    if (!window.confirm('Delete this listing permanently?')) return;
-    try {
-      await axios.delete(`${API}/properties/${propertyId}`, { headers });
-      toast.success('Property deleted');
-      fetchProperties();
-      fetchDashboard();
-    } catch (e) { toast.error('Failed to delete property'); }
+  const deleteProperty = (propertyId) => {
+    toast.custom((tid) => (
+      <div className="bg-white rounded-xl shadow-xl border border-gray-200 p-4 w-80">
+        <p className="text-sm font-semibold text-gray-800 mb-1">Delete this listing?</p>
+        <p className="text-xs text-gray-500 mb-3">Permanently removes the property. This cannot be undone.</p>
+        <div className="flex gap-2 justify-end">
+          <button onClick={() => toast.dismiss(tid)} className="px-3 py-1.5 rounded-lg text-xs font-medium text-gray-600 hover:bg-gray-100">
+            Cancel
+          </button>
+          <button
+            onClick={async () => {
+              toast.dismiss(tid);
+              try {
+                await axios.delete(`${API}/properties/${propertyId}`, { headers });
+                toast.success('Property deleted');
+                fetchProperties();
+                fetchDashboard();
+              } catch (e) { toast.error('Failed to delete property'); }
+            }}
+            className="px-3 py-1.5 rounded-lg text-xs font-semibold text-white bg-red-500 hover:bg-red-600"
+            data-testid={`confirm-delete-listing-${propertyId}`}
+          >
+            Delete
+          </button>
+        </div>
+      </div>
+    ), { duration: 10000 });
   };
 
   const updateServiceStatus = async (serviceId, status) => {

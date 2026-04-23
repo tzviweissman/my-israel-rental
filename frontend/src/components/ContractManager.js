@@ -158,17 +158,34 @@ const ContractManager = ({ properties }) => {
     }
   };
 
-  const deleteContract = async (contractId) => {
-    if (!window.confirm('Are you sure you want to delete this contract?')) return;
-    try {
-      await axios.delete(`${API}/contracts/${contractId}`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      toast.success('Contract deleted.');
-      fetchContracts();
-    } catch (err) {
-      toast.error('Failed to delete contract.');
-    }
+  const deleteContract = (contractId) => {
+    toast.custom((tid) => (
+      <div className="bg-white rounded-xl shadow-xl border border-gray-200 p-4 w-80">
+        <p className="text-sm font-semibold text-gray-800 mb-1">Delete this contract?</p>
+        <p className="text-xs text-gray-500 mb-3">This removes the uploaded file permanently. Renters with pending bookings will lose access to it.</p>
+        <div className="flex gap-2 justify-end">
+          <button onClick={() => toast.dismiss(tid)} className="px-3 py-1.5 rounded-lg text-xs font-medium text-gray-600 hover:bg-gray-100">
+            Cancel
+          </button>
+          <button
+            onClick={async () => {
+              toast.dismiss(tid);
+              try {
+                await axios.delete(`${API}/contracts/${contractId}`, { headers: { Authorization: `Bearer ${token}` } });
+                toast.success('Contract deleted.');
+                fetchContracts();
+              } catch (err) {
+                toast.error('Failed to delete contract.');
+              }
+            }}
+            className="px-3 py-1.5 rounded-lg text-xs font-semibold text-white bg-red-500 hover:bg-red-600"
+            data-testid={`confirm-delete-contract-${contractId}`}
+          >
+            Delete
+          </button>
+        </div>
+      </div>
+    ), { duration: 10000 });
   };
 
   const downloadContract = (contractId) => {
