@@ -217,6 +217,11 @@ const PropertyList = ({ properties, onEdit, onRefresh, API, token }) => {
   };
 
   // ---- Bulk image drop handlers ----
+  // Normalize for filename-prefix matching: lowercase, strip extension,
+  // drop everything that isn't a letter or digit. "Drop Test TLV" ↔
+  // "drop-test-tlv-hero.jpg" both collapse to "droptesttlv".
+  const slug = (s) => String(s || '').toLowerCase().replace(/\.[^.]+$/, '').replace(/[^a-z0-9]/g, '');
+
   const addDroppedFiles = (fileList) => {
     const incoming = Array.from(fileList).filter((f) => f.type.startsWith('image/'));
     if (incoming.length === 0) {
@@ -228,13 +233,28 @@ const PropertyList = ({ properties, onEdit, onRefresh, API, token }) => {
       toast.error('No properties need images right now');
       return;
     }
-    // Default assignment: round-robin through pending properties
+    // Precompute slugs once, longest title first so "BuildingA1" wins over "BuildingA"
+    const slugged = pending
+      .map((p) => ({ id: p.id, titleSlug: slug(p.title) }))
+      .filter((x) => x.titleSlug)
+      .sort((a, b) => b.titleSlug.length - a.titleSlug.length);
+
     setImageAssignments((prev) => {
       const base = [...prev];
+      let matchedCount = 0;
       incoming.forEach((f, i) => {
-        const propertyId = pending[(base.length + i) % pending.length].id;
+        const fslug = slug(f.name);
+        const hit = slugged.find((x) => fslug.startsWith(x.titleSlug));
+        if (hit) matchedCount += 1;
+        const propertyId = hit ? hit.id : pending[(base.length + i) % pending.length].id;
         base.push({ file: f, propertyId });
       });
+      // Flash a tiny hint if smart-match actually helped
+      if (matchedCount > 0 && matchedCount < incoming.length) {
+        toast.success(`Matched ${matchedCount} of ${incoming.length} by filename — rest distributed in order`);
+      } else if (matchedCount === incoming.length) {
+        toast.success(`All ${incoming.length} matched by filename`);
+      }
       return base;
     });
   };
@@ -340,7 +360,7 @@ const PropertyList = ({ properties, onEdit, onRefresh, API, token }) => {
               </div>
               <p className="text-sm font-semibold text-gray-800">Drop images here</p>
               <p className="text-xs text-gray-500 max-w-md">
-                We'll assign one image to each listing above in order — you can re-map any of them below before confirming.
+                We match files to listings by filename (e.g. <code className="bg-white px-1 rounded">tel-aviv-hero.jpg</code> → <em>Tel Aviv</em> listing) and round-robin the rest. Re-map any row below before confirming.
               </p>
               <label className="mt-1 text-xs text-[#1E6A6A] font-medium cursor-pointer hover:underline">
                 or click to choose files
