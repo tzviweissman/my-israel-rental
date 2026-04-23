@@ -1,28 +1,45 @@
-"""Authentication routes"""
-from fastapi import APIRouter, HTTPException, Depends, Request, Body
-from motor.motor_asyncio import AsyncIOMotorDatabase
-from datetime import datetime, timezone, timedelta
-import bcrypt
-import uuid
+"""Auto-extracted from server.py during the 2026-04 refactor."""
 import asyncio
+import base64
+import json as _json
 import logging
 import os
+import shutil
+import uuid
+from datetime import datetime, timedelta, timezone
+from io import BytesIO
+from pathlib import Path
+from typing import List, Optional
 
-from models import UserRegister, UserLogin, ForgotPasswordRequest, ResetPasswordRequest, ChangePasswordRequest
-from utils.auth import create_token, verify_token
-from utils.email import send_email
+import bcrypt
+import httpx
+from fastapi import APIRouter, Body, Depends, File, Form, HTTPException, Request, UploadFile
+from pydantic import BaseModel
 
-router = APIRouter(prefix="/auth", tags=["auth"])
-logger = logging.getLogger(__name__)
+from models import *
+from routes.deps import db, logger, verify_token, create_token, EMERGENT_LLM_KEY, POSTMARK_WEBHOOK_SECRET, ROOT_DIR
+from utils.email import (
+    send_email,
+    send_welcome_email,
+    send_password_reset_email,
+    send_booking_confirmation_email,
+    send_booking_notification_email,
+)
+from utils.pdf import stamp_signature_on_document
+from utils.saved_search import match_property_against_searches
+from utils.helpers import get_usd_ils_rate, parse_ical_feed, sync_property_ical
+from utils.files import extract_text_from_pdf, extract_text_from_docx, extract_text_from_image
+from utils.translate import translate_text as _translate_text
+from utils.contract_template import ensure_templates as ensure_contract_templates
+
+from emergentintegrations.llm.chat import LlmChat, UserMessage
+
+router = APIRouter()
+api_router = router  # alias so existing @api_router decorators work verbatim
 
 
-def get_db():
-    """Dependency to get database - will be injected from main"""
-    pass
-
-
-@router.post("/register")
-async def register(user_data: UserRegister, db: AsyncIOMotorDatabase = Depends(get_db)):
+@api_router.post("/auth/register")
+async def register(user_data: UserRegister):
     existing = await db.users.find_one({"email": user_data.email})
     if existing:
         raise HTTPException(status_code=400, detail="Email already registered")
@@ -43,36 +60,17 @@ async def register(user_data: UserRegister, db: AsyncIOMotorDatabase = Depends(g
     await db.users.insert_one(user_doc)
     token = create_token(user_id, user_data.role)
 
-    # Send welcome email (fire and forget)
+    # Send welcome email via Postmark (fire and forget — don't block registration)
     try:
-        welcome_html = f"""
-        <div style="font-family: Arial, sans-serif; max-width: 540px; margin: 0 auto; padding: 30px; background: #f9f9f9; border-radius: 12px;">
-            <div style="text-align: center; margin-bottom: 24px;">
-                <h1 style="color: #1E6A6A; font-size: 24px; margin: 0;">MyIsraelRental</h1>
-                <p style="color: #D4AF37; font-size: 12px; letter-spacing: 2px; margin-top: 4px;">YOUR HOME IN ISRAEL</p>
-            </div>
-            <div style="background: white; padding: 32px; border-radius: 10px; border: 1px solid #e5e5e5;">
-                <h2 style="color: #333; font-size: 20px; margin-top: 0;">Welcome, {user_data.name}!</h2>
-                <p style="color: #555; font-size: 14px; line-height: 1.7;">
-                    Thank you for joining <strong style="color: #1E6A6A;">MyIsraelRental</strong>. We're excited to have you on board!
-                </p>
-                <div style="text-align: center; margin-top: 24px;">
-                    <a href="https://myisraelrental.com/dashboard" style="background-color: #1E6A6A; color: white; padding: 14px 32px; text-decoration: none; border-radius: 8px; font-size: 14px; font-weight: bold; display: inline-block;">
-                        Go to Your Dashboard
-                    </a>
-                </div>
-            </div>
-        </div>
-        """
-        asyncio.create_task(send_email(user_data.email, "Welcome to MyIsraelRental! 🏠", welcome_html))
+        asyncio.create_task(send_welcome_email(user_data.email, user_data.name, user_data.role))
     except Exception as e:
-        logger.warning(f"Failed to queue welcome email: {e}")
+        logger.warning(f"Failed to queue welcome email for {user_data.email}: {e}")
 
     return {"token": token, "user": {"id": user_id, "email": user_data.email, "name": user_data.name, "role": user_data.role}}
 
 
-@router.post("/login")
-async def login(credentials: UserLogin, db: AsyncIOMotorDatabase = Depends(get_db)):
+@api_router.post("/auth/login")
+async def login(credentials: UserLogin):
     user = await db.users.find_one({"email": credentials.email}, {"_id": 0})
     if not user:
         raise HTTPException(status_code=401, detail="Invalid credentials")
@@ -84,19 +82,20 @@ async def login(credentials: UserLogin, db: AsyncIOMotorDatabase = Depends(get_d
     return {"token": token, "user": {"id": user['id'], "email": user['email'], "name": user['name'], "role": user['role']}}
 
 
-@router.get("/me")
-async def get_current_user(payload = Depends(verify_token), db: AsyncIOMotorDatabase = Depends(get_db)):
+@api_router.get("/auth/me")
+async def get_current_user(payload = Depends(verify_token)):
     user = await db.users.find_one({"id": payload['user_id']}, {"_id": 0, "password": 0})
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
     return user
 
 
-@router.post("/forgot-password")
-async def forgot_password(request: ForgotPasswordRequest, req: Request = None, db: AsyncIOMotorDatabase = Depends(get_db)):
+
+@api_router.post("/auth/forgot-password")
+async def forgot_password(request: ForgotPasswordRequest, req: Request = None):
     user = await db.users.find_one({"email": request.email}, {"_id": 0})
     if not user:
-        return {"message": "If that email exists, a reset link has been sent", "reset_token": None, "email_sent": False}
+        raise HTTPException(status_code=404, detail="No account found with that email address.")
 
     reset_token = str(uuid.uuid4())
     expires_at = (datetime.now(timezone.utc) + timedelta(hours=1)).isoformat()
@@ -111,27 +110,31 @@ async def forgot_password(request: ForgotPasswordRequest, req: Request = None, d
         "created_at": datetime.now(timezone.utc).isoformat()
     })
 
-    origin = os.environ.get('FRONTEND_URL', 'http://localhost:3000')
+    # Build the reset link using the frontend origin
+    origin = os.environ.get('FRONTEND_URL', '')
+    if not origin and req:
+        referer = req.headers.get('referer', '')
+        if referer:
+            from urllib.parse import urlparse
+            parsed = urlparse(referer)
+            origin = f"{parsed.scheme}://{parsed.netloc}"
+    if not origin:
+        origin = "http://localhost:3000"
+
     reset_link = f"{origin}/auth/reset-password?token={reset_token}"
 
-    html_body = f"""
-    <div style="font-family: Arial, sans-serif; max-width: 500px; margin: 0 auto; padding: 30px;">
-        <h2>Password Reset Request</h2>
-        <p>Click the button below to reset your password:</p>
-        <a href="{reset_link}" style="background-color: #1E6A6A; color: white; padding: 14px 32px; text-decoration: none; border-radius: 8px;">
-            Reset My Password
-        </a>
-        <p>This link expires in 1 hour.</p>
-    </div>
-    """
+    email_sent = await send_password_reset_email(request.email, user.get('name', ''), reset_link)
 
-    email_sent = await send_email(request.email, "Reset Your Password — MyIsraelRental", html_body)
-
-    return {"message": "Password reset link has been generated.", "reset_token": reset_token, "email_sent": email_sent}
+    return {
+        "message": "Password reset link has been generated.",
+        "reset_token": reset_token,
+        "email_sent": email_sent
+    }
 
 
-@router.post("/reset-password")
-async def reset_password(request: ResetPasswordRequest, db: AsyncIOMotorDatabase = Depends(get_db)):
+
+@api_router.post("/auth/reset-password")
+async def reset_password(request: ResetPasswordRequest):
     reset_doc = await db.password_resets.find_one({"token": request.token, "used": False}, {"_id": 0})
     if not reset_doc:
         raise HTTPException(status_code=400, detail="Invalid or expired reset token")
@@ -156,8 +159,9 @@ async def reset_password(request: ResetPasswordRequest, db: AsyncIOMotorDatabase
     return {"message": "Password has been reset successfully"}
 
 
-@router.post("/change-password")
-async def change_password(request: ChangePasswordRequest, payload=Depends(verify_token), db: AsyncIOMotorDatabase = Depends(get_db)):
+
+@api_router.post("/auth/change-password")
+async def change_password(request: ChangePasswordRequest, payload=Depends(verify_token)):
     user = await db.users.find_one({"id": payload['user_id']}, {"_id": 0})
     if not user:
         raise HTTPException(status_code=404, detail="User not found")

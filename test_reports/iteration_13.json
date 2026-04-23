@@ -1,0 +1,34 @@
+{
+  "summary": "Backend-only regression test after server.py (2897-line) -> /app/backend/routes/* modular refactor. Wrote comprehensive pytest suite (/app/backend/tests/test_refactor_regression.py) covering every new router module (auth, properties, bookings, subleases, contracts, chat, notifications, saved_searches, ical, admin, misc) with representative GET/POST/PUT/DELETE calls + a parametrized router-wiring probe. Also re-ran existing saved-search suite (12/12 passing) to confirm cross-module wiring (property create -> saved-search alert) still works. Total: 47/47 new tests + 12/12 saved-search = 59/59 PASS. Zero regression detected.",
+  "backend_issues": {
+    "critical": [],
+    "minor": [
+      {"endpoint": "PUT /api/properties/{id}", "issue": "Requires full PropertyCreate body (not partial). Pre-existing behavior, not caused by refactor; test adjusted accordingly."},
+      {"endpoint": "POST /api/auth/forgot-password", "issue": "Returns 404 for unknown email instead of the more conventional idempotent 200 — allows email enumeration. Pre-existing, not a refactor regression."}
+    ]
+  },
+  "frontend_issues": {"ui_bugs": [], "integration_issues": [], "design_issues": []},
+  "test_report_links": [
+    "/app/backend/tests/test_refactor_regression.py",
+    "/app/backend/tests/test_saved_searches.py",
+    "/app/test_reports/pytest/refactor_regression.xml"
+  ],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "Startup hooks verified: contract templates auto-generated (/app/backend/uploads/templates/myisraelrental_contract_en.pdf + _he.pdf present); iCal background sync task spawned cleanly. 'Application startup complete' logged on every recent reload.",
+    "84 @api_router.* decorators present across routes/* (matches the count main agent called out), and all representative probes return non-404, confirming include_router(prefix='/api') wiring is correct for every module.",
+    "server.py slim assembler (82 lines) correctly imports all 11 router modules via routes/__init__.py and includes them with /api prefix; shared db/logger/auth live cleanly in routes/deps.py.",
+    "utils/helpers.sync_all_ical_feeds() rewrite (taking shared db via module-level import instead of function arg) works — previous 'TypeError: sync_all_ical_feeds() missing 1 required positional argument: db' errors are historical (2026-04-20/21) and no longer present after the final refactor.",
+    "Minor pre-existing smells (not blocking): (a) forgot-password leaks user existence via 404; (b) PUT /api/properties is not a true partial update — consumers must send full PropertyCreate payload; (c) Postmark 406 bounce warnings for owner@test.com / renter@test.com are expected because those addresses are marked inactive in Postmark — noise, not a bug."
+  ],
+  "updated_files": [
+    "/app/backend/tests/test_refactor_regression.py (new — 47 regression tests across all 11 router modules)"
+  ],
+  "success_rate": {"backend": "100% (47/47 new + 12/12 saved-search)", "frontend": "not tested (backend-only request)"},
+  "test_credentials": "owner@test.com / Test1234!, renter@test.com / Test1234! (from /app/memory/test_credentials.md)",
+  "seed_data_creation": "Test creates + deletes TEST_refactor_* properties and saved-searches per run; no residual data left in DB.",
+  "retest_needed": false,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "Use /app/backend/tests/test_refactor_regression.py as the canonical post-refactor smoke suite. IMPORTANT: login endpoint returns key 'token' (not 'access_token'). PUT /api/properties requires a full PropertyCreate body. GET /api/manager/{id}/properties returns {manager, properties: [...]} object (not a list). POST /api/auth/forgot-password returns 404 for unknown emails. Postmark 406 inactive-recipient errors for the seeded test users are expected (addresses are suppressed).",
+  "rca of the issue": "No regression. Refactor is clean: 84 endpoints across 11 router modules all respond, startup hooks (iCal sync, contract template generation) execute successfully, and cross-module integration (property create -> saved-search alert in routes/properties.py wiring into utils/saved_search) continues to fire end-to-end."
+}
