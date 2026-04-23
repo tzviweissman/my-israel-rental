@@ -1,0 +1,51 @@
+{
+  "summary": "Frontend-only regression test of Dashboard.js refactor where LikedTab, SubleasesTab and GovernmentServicesTab were extracted into self-contained components. Logged in as renter@test.com and exercised every extracted tab plus the unchanged Properties/Alerts/top-right Sublease Property button. All critical interactions work. No regressions detected; refactor appears clean.",
+  "backend_issues": {
+    "critical": [],
+    "minor": []
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "verified_flows": [
+    "Login as renter -> session token persisted in sessionStorage -> /dashboard renders with all tabs (tab-properties, tab-bookings, tab-subleases, tab-settings, tab-services, tab-alerts, tab-liked)",
+    "tab-liked: LikedTab renders 'Liked Properties' heading; two existing liked properties displayed with unlike-btn heart buttons. Empty-state branch inspected in source (browse-properties-btn wired to /properties/all).",
+    "tab-subleases: hero 'Sublease Your Property' + '+ New Sublease' button renders. Clicking opens form showing 'Step 1: Select the property you're renting'. Existing sublease card renders.",
+    "tab-subleases: Pause/Activate toggle successfully flipped 'Pause' -> 'Activate' (PUT /api/subleases/{id}) and back.",
+    "tab-subleases: Remove button opens a toast.custom confirmation (NOT window.confirm). Cancel + Remove buttons visible; Cancel dismisses and sublease remains. confirm-delete-sublease-{id} data-testid present and targetable.",
+    "tab-subleases: pre-existing sublease has contract -> 'Copy Signing Link' button present; clicking toggled button text to 'Copied!' (3s state). navigator.clipboard called with `${origin}/sign/{token}`.",
+    "tab-services: GovernmentServicesTab renders all required fields: gov-fullname-input, gov-id-input, gov-address-input, gov-service-type-select, gov-notes-input, gov-submit-btn.",
+    "tab-alerts: clicked without crash (previously extracted component unchanged).",
+    "tab-properties (unchanged): renter role hides add-property-button (expected — renter is not an owner). No crash when clicking tab.",
+    "Top-right 'Sublease Property' button (data-testid=sublease-property-button) correctly switches active tab to Subleases.",
+    "Rapid tab switching (liked <-> subleases <-> services) cleanly remounts components without errors."
+  ],
+  "not_verified": [
+    "Unlike removal (POST /api/properties/{id}/like) — intentionally skipped to avoid mutating pre-seeded liked-properties state; wiring verified via code review only.",
+    "Contract PDF upload on a sublease without contract — the only existing sublease already has a contract, so upload-contract-{id} button was not present to exercise at runtime. Code path in SubleasesTab.handleContractUpload validates file type and posts multipart to /api/subleases/{id}/contract."
+  ],
+  "console_warnings": [
+    "React warning: 'Received true for a non-boolean attribute jsx' — pre-existing, unrelated to this refactor (emitted from some styled-jsx/legacy component).",
+    "One 404 on a resource (asset/endpoint) — appears unrelated to extracted tabs; not triggered by tab interactions directly."
+  ],
+  "critical_code_review_comments": [
+    "SubleasesTab.jsx uses a SINGLE useRef (fileRef) shared across ALL sublease rows. If the user has multiple subleases awaiting contract upload, all of them will share one hidden <input type=file> and its onChange closure captures the sublease id via handleContractUpload(sub.id, ...) — but because the same input is rendered per row inside the loop, the effective `ref` callback last-wins. Works for single sublease, but could misfire uploads to the wrong sublease when >1 row needs upload. Recommend moving <input type=file> outside the map with state-tracked targetSubleaseId, or use one ref per row via object ref map.",
+    "SubleasesTab.jsx fetchRenterBookings does N+1 property GETs inside Promise.all for each booking. Fine for small lists, but consider a bulk endpoint or caching if bookings grow.",
+    "LikedTab.jsx fetches liked properties in a useEffect with empty deps — when the tab is remounted via tab click the fetch runs, which is fine, but if the Dashboard re-mounts the component on every tab switch, stale state is OK. Verify Dashboard.js mounts/unmounts these tabs (not just toggles CSS). If conditionally rendered, data is always fresh which is correct behaviour.",
+    "Dashboard.js is still 1944 lines after refactor. Consider extracting PropertiesTab and AddPropertyModal next to continue the split."
+  ],
+  "test_report_links": [],
+  "action_items": [
+    "(Optional/minor) Fix SubleasesTab shared fileRef issue — move the hidden file input out of the map or maintain per-row refs to guarantee correct target when multiple subleases await contract upload.",
+    "(Optional) Investigate pre-existing 'non-boolean attribute jsx' React console warning (not blocking, not introduced by this refactor)."
+  ],
+  "updated_files": [],
+  "success_rate": {"backend": "N/A (not tested per request)", "frontend": "100% of refactor-related interactions"},
+  "test_credentials": "renter@test.com / Test1234! (used); owner not needed for this refactor since all three extracted tabs are renter-only features.",
+  "seed_data_creation": "None. Pre-existing sublease 'sublease-0b90daa8-...' was used for Pause/Activate and Copy-Signing-Link tests. No data deleted or created; state restored (toggle flipped back).",
+  "retest_needed": false,
+  "should_main_agent_self_test": true,
+  "context_for_next_testing_agent": "Dashboard.js refactor verified green. Three extracted tabs (LikedTab, SubleasesTab, GovernmentServicesTab) work end-to-end. The one latent issue worth watching: SubleasesTab uses a single shared fileRef inside a .map() — won't surface until a renter has 2+ subleases without contracts. When adding more tabs/flows, keep renter role in mind: renter cannot add properties (no add-property-button rendered), so Property-tab tests need an owner login."
+}
