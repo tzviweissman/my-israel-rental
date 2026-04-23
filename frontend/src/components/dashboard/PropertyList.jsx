@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import axios from 'axios';
-import { Edit, Eye, Trash2, Upload, FileText, CalendarSync, Link2, X, RefreshCw, Copy, Check } from 'lucide-react';
+import { Edit, Eye, Trash2, Upload, FileText, CalendarSync, Link2, X, RefreshCw, Copy, Check, Sparkles } from 'lucide-react';
 import { toast } from 'sonner';
 
 /**
@@ -18,6 +18,7 @@ const PropertyList = ({ properties, onEdit, onRefresh, API, token }) => {
   const [icalPanel, setIcalPanel] = useState(null);
   const [icalUrl, setIcalUrl] = useState('');
   const [icalSyncing, setIcalSyncing] = useState(false);
+  const [showBulkOnly, setShowBulkOnly] = useState(false);
   const [icalData, setIcalData] = useState({});
   const [copiedExport, setCopiedExport] = useState(false);
 
@@ -199,11 +200,35 @@ const PropertyList = ({ properties, onEdit, onRefresh, API, token }) => {
     return ageMs < 24 * 60 * 60 * 1000;
   };
 
+  const bulkCount = properties.filter(isFreshBulkUpload).length;
+  const displayedProperties = showBulkOnly ? properties.filter(isFreshBulkUpload) : properties;
+
   return (
     <div className="mb-12">
-      <h2 className="text-2xl font-bold mb-6" style={{ fontFamily: 'Playfair Display' }}>{t('dashboard.myProperties')}</h2>
+      <div className="flex items-center justify-between flex-wrap gap-3 mb-6">
+        <h2 className="text-2xl font-bold" style={{ fontFamily: 'Playfair Display' }}>{t('dashboard.myProperties')}</h2>
+        {bulkCount > 0 && (
+          <button
+            onClick={() => setShowBulkOnly((v) => !v)}
+            className={`inline-flex items-center gap-1.5 pl-2.5 pr-3 py-1.5 rounded-full text-xs font-semibold transition-all ${
+              showBulkOnly
+                ? 'bg-[#D4AF37] text-[#1E6A6A] shadow-sm'
+                : 'bg-[#fafaf5] text-gray-600 hover:text-[#1E6A6A] border border-[#E5E5E5]'
+            }`}
+            data-testid="filter-bulk-only-btn"
+            title="Show only properties added in the last 24 hours via bulk upload"
+          >
+            <Sparkles size={12} />
+            Recently Bulk-Uploaded
+            <span className={`ml-0.5 px-1.5 py-0.5 rounded-full text-[10px] ${showBulkOnly ? 'bg-[#1E6A6A] text-[#D4AF37]' : 'bg-white text-[#1E6A6A]'}`}>
+              {bulkCount}
+            </span>
+            {showBulkOnly && <X size={12} className="opacity-70" />}
+          </button>
+        )}
+      </div>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {properties.map((property) => (
+        {displayedProperties.map((property) => (
           <div key={property.id} className="bg-white rounded-2xl border border-[#E5E5E5] overflow-hidden" data-testid={`dashboard-property-${property.id}`}>
             <div
               className="h-48 bg-gray-200 relative"
