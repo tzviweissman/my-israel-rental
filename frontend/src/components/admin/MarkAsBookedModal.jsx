@@ -1,0 +1,130 @@
+import React, { useState, useEffect } from 'react';
+import { CalendarX, X } from 'lucide-react';
+import { toast } from 'sonner';
+
+/**
+ * Modal for the super-admin "Mark as booked" action.
+ *
+ * Props:
+ *  - open: bool
+ *  - target: null | { mode: 'single', id } | { mode: 'bulk' }
+ *  - selectedCount: number (only used in bulk mode copy)
+ *  - saving: bool
+ *  - onClose(): void
+ *  - onSubmit({ start_date, end_date, indefinite }): Promise<void>
+ */
+export const MarkAsBookedModal = ({ open, target, selectedCount = 0, saving = false, onClose, onSubmit }) => {
+  const [blockStart, setBlockStart] = useState('');
+  const [blockEnd, setBlockEnd] = useState('');
+  const [blockIndefinite, setBlockIndefinite] = useState(false);
+
+  // Reset the form each time the modal opens
+  useEffect(() => {
+    if (open) {
+      setBlockStart('');
+      setBlockEnd('');
+      setBlockIndefinite(false);
+    }
+  }, [open]);
+
+  if (!open) return null;
+
+  const handleSubmit = () => {
+    if (!blockIndefinite) {
+      if (!blockStart || !blockEnd) {
+        toast.error('Pick start & end dates, or tick "Block indefinitely".');
+        return;
+      }
+      if (blockEnd <= blockStart) {
+        toast.error('End date must be after start date.');
+        return;
+      }
+    }
+    onSubmit({
+      start_date: blockIndefinite ? null : blockStart,
+      end_date: blockIndefinite ? null : blockEnd,
+      indefinite: blockIndefinite,
+    });
+  };
+
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4"
+      data-testid="mark-booked-modal"
+    >
+      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6 relative">
+        <button
+          onClick={onClose}
+          className="absolute top-3 right-3 p-1 rounded-lg hover:bg-gray-100"
+          data-testid="close-mark-booked-modal"
+        >
+          <X size={18} />
+        </button>
+        <div className="flex items-center gap-2 mb-1">
+          <CalendarX size={20} className="text-amber-600" />
+          <h2 className="text-lg font-bold">Mark as booked</h2>
+        </div>
+        <p className="text-xs text-gray-500 mb-5">
+          {target?.mode === 'bulk'
+            ? `Block ${selectedCount} selected propert${selectedCount === 1 ? 'y' : 'ies'} from appearing in renter date searches.`
+            : 'Block this property from appearing in renter date searches. Existing bookings are kept unchanged.'}
+        </p>
+
+        <label className="flex items-center gap-2 mb-4 cursor-pointer">
+          <input
+            type="checkbox"
+            checked={blockIndefinite}
+            onChange={e => setBlockIndefinite(e.target.checked)}
+            data-testid="block-indefinite-checkbox"
+          />
+          <span className="text-sm font-medium">Block indefinitely (until removed)</span>
+        </label>
+
+        <div className={`grid grid-cols-2 gap-3 mb-5 ${blockIndefinite ? 'opacity-40' : ''}`}>
+          <div>
+            <label className="block text-xs font-medium text-gray-600 mb-1">Start date</label>
+            <input
+              type="date"
+              value={blockStart}
+              onChange={e => setBlockStart(e.target.value)}
+              disabled={blockIndefinite}
+              className="w-full px-3 py-2 rounded-lg border border-[#E5E5E5] text-sm focus:outline-none focus:ring-2 focus:ring-black/20 disabled:cursor-not-allowed"
+              data-testid="block-start-date"
+            />
+          </div>
+          <div>
+            <label className="block text-xs font-medium text-gray-600 mb-1">End date</label>
+            <input
+              type="date"
+              value={blockEnd}
+              onChange={e => setBlockEnd(e.target.value)}
+              disabled={blockIndefinite}
+              className="w-full px-3 py-2 rounded-lg border border-[#E5E5E5] text-sm focus:outline-none focus:ring-2 focus:ring-black/20 disabled:cursor-not-allowed"
+              data-testid="block-end-date"
+            />
+          </div>
+        </div>
+
+        <div className="flex justify-end gap-2">
+          <button
+            onClick={onClose}
+            className="px-4 py-2 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-100"
+            data-testid="cancel-mark-booked-btn"
+          >
+            Cancel
+          </button>
+          <button
+            onClick={handleSubmit}
+            disabled={saving}
+            className="px-4 py-2 rounded-lg text-sm font-semibold text-white bg-black hover:bg-gray-800 disabled:opacity-50"
+            data-testid="confirm-mark-booked-btn"
+          >
+            {saving ? 'Saving…' : 'Mark as booked'}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default MarkAsBookedModal;

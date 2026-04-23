@@ -112,6 +112,11 @@ Build a bilingual (English/Hebrew) rental website named MyIsraelRental.com with 
   - New endpoints (all admin-only): `POST /api/admin/properties/{id}/mark-booked`, `POST /api/admin/properties/bulk-mark-booked`, `GET /api/admin/properties/{id}/blocks`, `DELETE /api/admin/properties/blocks/{id}`. `GET /api/admin/properties` now enriches with `admin_blocks`, `admin_blocked_now`, `active_admin_block`.
   - Frontend: AdminDashboard.js adds checkbox column, `CalendarX`/`CalendarCheck` icons, amber "Admin blocked" badge, and a Shadcn-styled modal with "Block indefinitely" toggle.
   - Tested: 20/20 pytest + 13/13 frontend Playwright checks pass (iteration_16.json). Test file: `/app/backend/tests/test_admin_mark_booked.py`.
+- [x] **AdminDashboard.js refactor + style-jsx sweep** (2026-04-23):
+  - Extracted Listings tab and Mark-as-Booked modal into self-contained components under `/app/frontend/src/components/admin/`: `ListingsTab.jsx` (owns its own properties fetch, search, selection, modal state, and all row/bulk actions) and `MarkAsBookedModal.jsx` (pure presentational — resets its form on each open).
+  - `AdminDashboard.js`: **910 → 546 lines (−40%)**. Dropped `properties`, `selectedPropIds`, `bookedModalOpen`, `bookedTarget`, `blockStart/End/Indefinite/Saving` state and 8 handlers now owned by ListingsTab.
+  - Swept the last `<style jsx>` in `AccessibilityButton.js` → plain `<style>`, eliminating the recurring React DOM warning.
+  - Smoke-tested: full mark-booked → badge → unblock round-trip works, no console errors.
 - [ ] Manager bulk property upload + profile pages
 
 ### P2 - Lower Priority
