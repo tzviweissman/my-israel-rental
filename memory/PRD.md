@@ -84,6 +84,13 @@ Build a bilingual (English/Hebrew) rental website named MyIsraelRental.com with 
   - Fixed latent bug: SubleasesTab shared a single `fileRef` inside `.map()` (would misfire when >1 sublease awaited upload). Moved hidden input out of the loop with `uploadTargetId` state.
   - Dashboard.js: **2624 → 1944 lines (−26%)**. Deleted stale unused `ServicesTab.jsx`.
   - Tested: full frontend regression pass (iteration_12.json) — all extracted tabs work, pause/activate/remove/upload/copy-link all verified.
+- [x] **server.py refactor — routers split** (2026-04-23):
+  - Split 2897-line `server.py` into 11 domain routers under `/app/backend/routes/`:
+    - `auth.py`, `properties.py`, `bookings.py`, `subleases.py`, `contracts.py`, `chat.py`, `notifications.py`, `admin.py`, `saved_searches.py`, `ical.py`, `misc.py`.
+  - New `routes/deps.py` owns singletons: `db`, `client`, `logger`, `verify_token`, `create_token`, `security`, `UPLOAD_DIR`, `CONTRACT_DIR`, `MAX_FILE_SIZE`, allowlists, env constants.
+  - Moved helpers out of server.py: `extract_text_from_pdf/docx/image` → `utils/files.py`; `_translate_text` → `utils/translate.py`; authoritative `sync_all_ical_feeds` rewrite → `utils/helpers.py` (now uses shared `db` from deps, no arg).
+  - `server.py` is now **82 lines** (−97%): FastAPI app + CORS + static mount + startup/shutdown + `include_router` of every domain.
+  - Tested: 47/47 new regression tests + 12/12 saved-search tests = **59/59 pass** (iteration_13.json). Every one of the 84 endpoints across 11 routers verified reachable.
 - [ ] Manager bulk property upload + profile pages
 
 ### P2 - Lower Priority
