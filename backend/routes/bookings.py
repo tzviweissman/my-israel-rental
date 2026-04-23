@@ -1,38 +1,23 @@
 """Auto-extracted from server.py during the 2026-04 refactor."""
 import asyncio
 import base64
-import json as _json
-import logging
-import os
-import shutil
 import uuid
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime
 from io import BytesIO
-from pathlib import Path
-from typing import Any, List, Optional
+from typing import Any
 
-import bcrypt
-import httpx
-from fastapi import APIRouter, Body, Depends, File, Form, HTTPException, Request, UploadFile
-from pydantic import BaseModel
+from fastapi import APIRouter, Body, Depends, HTTPException
 
-from models import *
-from routes.deps import db, logger, verify_token, create_token, EMERGENT_LLM_KEY, POSTMARK_WEBHOOK_SECRET, ROOT_DIR
+from models import BookingCreate
+from routes.deps import ROOT_DIR, db, logger, verify_token
 from utils.email import (
-    send_email,
-    send_welcome_email,
-    send_password_reset_email,
     send_booking_confirmation_email,
     send_booking_notification_email,
+    send_email,
 )
-from utils.pdf import stamp_signature_on_document
+from utils.files import extract_text_from_image, extract_text_from_pdf
 from utils.saved_search import match_property_against_searches
-from utils.helpers import get_usd_ils_rate, parse_ical_feed, sync_property_ical
-from utils.files import extract_text_from_pdf, extract_text_from_docx, extract_text_from_image
 from utils.translate import translate_text as _translate_text
-from utils.contract_template import ensure_templates as ensure_contract_templates
-
-from emergentintegrations.llm.chat import LlmChat, UserMessage
 
 router = APIRouter()
 api_router = router  # alias so existing @api_router decorators work verbatim
@@ -67,7 +52,7 @@ async def create_booking(booking_data: BookingCreate, payload: dict = Depends(ve
             "booking_id": booking_id,
             "message": notification_message,
             "read": False,
-            "created_at": datetime.now(timezone.utc).isoformat()
+            "created_at": datetime.now(UTC).isoformat()
         }
         await db.notifications.insert_one(renter_notification)
     else:
@@ -75,7 +60,7 @@ async def create_booking(booking_data: BookingCreate, payload: dict = Depends(ve
         notification_message = f"New booking request for {property_data['title']}"
         notification_type = "booking_request"
     
-    booking_doc['created_at'] = datetime.now(timezone.utc).isoformat()
+    booking_doc['created_at'] = datetime.now(UTC).isoformat()
     await db.bookings.insert_one(booking_doc)
     
     # Notify owner of booking request (or confirmation for vacation)
@@ -87,7 +72,7 @@ async def create_booking(booking_data: BookingCreate, payload: dict = Depends(ve
         "booking_id": booking_id,
         "message": notification_message if booking_doc['status'] == 'pending' else f"New vacation rental booking for {property_data['title']}",
         "read": False,
-        "created_at": datetime.now(timezone.utc).isoformat()
+        "created_at": datetime.now(UTC).isoformat()
     }
     await db.notifications.insert_one(owner_notification)
 
@@ -194,7 +179,7 @@ async def accept_booking(booking_id: str, payload: dict = Depends(verify_token))
         {"id": booking_id},
         {"$set": {
             "status": "confirmed",
-            "confirmed_at": datetime.now(timezone.utc).isoformat()
+            "confirmed_at": datetime.now(UTC).isoformat()
         }}
     )
 
@@ -227,7 +212,7 @@ async def accept_booking(booking_id: str, payload: dict = Depends(verify_token))
             {"id": booking_id},
             {"$set": {
                 "contract_sign_token": contract_sign_token,
-                "contract_sent_at": datetime.now(timezone.utc).isoformat(),
+                "contract_sent_at": datetime.now(UTC).isoformat(),
                 "contract_signed": False
             }}
         )
@@ -241,7 +226,7 @@ async def accept_booking(booking_id: str, payload: dict = Depends(verify_token))
             "property_id": booking['property_id'],
             "message": f"Your booking for {property_data.get('title', 'the property')} was accepted! Please sign the rental contract to complete your booking.",
             "read": False,
-            "created_at": datetime.now(timezone.utc).isoformat()
+            "created_at": datetime.now(UTC).isoformat()
         }
         await db.notifications.insert_one(renter_notification)
         
@@ -254,7 +239,7 @@ async def accept_booking(booking_id: str, payload: dict = Depends(verify_token))
             "property_id": booking['property_id'],
             "message": f"The rental contract for {property_data.get('title', 'your property')} has been automatically sent to the renter for signing.",
             "read": False,
-            "created_at": datetime.now(timezone.utc).isoformat()
+            "created_at": datetime.now(UTC).isoformat()
         }
         await db.notifications.insert_one(owner_notification)
         
@@ -272,7 +257,7 @@ async def accept_booking(booking_id: str, payload: dict = Depends(verify_token))
             "property_id": booking['property_id'],
             "message": f"Your booking request for {property_data.get('title', 'the property')} has been accepted!",
             "read": False,
-            "created_at": datetime.now(timezone.utc).isoformat()
+            "created_at": datetime.now(UTC).isoformat()
         }
         await db.notifications.insert_one(renter_notification)
         
@@ -299,7 +284,7 @@ async def cancel_booking(booking_id: str, reason: str = Body(..., embed=True), p
         {"$set": {
             "status": "cancelled",
             "cancelled_by": payload['user_id'],
-            "cancelled_at": datetime.now(timezone.utc).isoformat(),
+            "cancelled_at": datetime.now(UTC).isoformat(),
             "cancellation_reason": reason
         }}
     )
@@ -312,7 +297,7 @@ async def cancel_booking(booking_id: str, reason: str = Body(..., embed=True), p
         "booking_id": booking_id,
         "message": f"Your booking has been cancelled by the owner. Reason: {reason}",
         "read": False,
-        "created_at": datetime.now(timezone.utc).isoformat()
+        "created_at": datetime.now(UTC).isoformat()
     }
     await db.notifications.insert_one(notification)
 
@@ -348,7 +333,7 @@ async def request_cancel_booking(booking_id: str, reason: str = Body(..., embed=
             "status": "cancellation_requested",
             "previous_status": previous_status,
             "cancellation_reason": reason,
-            "cancellation_requested_at": datetime.now(timezone.utc).isoformat()
+            "cancellation_requested_at": datetime.now(UTC).isoformat()
         }}
     )
     
@@ -360,7 +345,7 @@ async def request_cancel_booking(booking_id: str, reason: str = Body(..., embed=
         "booking_id": booking_id,
         "message": f"Renter has requested to cancel their booking. Reason: {reason}",
         "read": False,
-        "created_at": datetime.now(timezone.utc).isoformat()
+        "created_at": datetime.now(UTC).isoformat()
     }
     await db.notifications.insert_one(notification)
     
@@ -436,7 +421,6 @@ async def sign_booking_contract(booking_id: str, body: dict = Body(...), payload
                 # Handle PDF signing
                 from PyPDF2 import PdfReader, PdfWriter
                 from reportlab.pdfgen import canvas
-                from reportlab.lib.pagesizes import letter
 
                 # Read original PDF
                 reader = PdfReader(str(contract_path))
@@ -580,7 +564,7 @@ async def sign_booking_contract(booking_id: str, body: dict = Body(...), payload
         "signature_data": signature_data,
         "signature_position": {"x": signature_x, "y": signature_y, "width": signature_width, "height": signature_height},
         "signer_legal_name": legal_name,
-        "contract_signed_at": datetime.now(timezone.utc).isoformat()
+        "contract_signed_at": datetime.now(UTC).isoformat()
     }
     
     if signed_contract_url:
@@ -604,7 +588,7 @@ async def sign_booking_contract(booking_id: str, body: dict = Body(...), payload
         "property_id": booking['property_id'],
         "message": message,
         "read": False,
-        "created_at": datetime.now(timezone.utc).isoformat()
+        "created_at": datetime.now(UTC).isoformat()
     }
     await db.notifications.insert_one(owner_notification)
     
@@ -635,7 +619,7 @@ async def approve_cancel_request(booking_id: str, payload: dict = Depends(verify
         {"$set": {
             "status": "cancelled",
             "cancelled_by": payload['user_id'],
-            "cancelled_at": datetime.now(timezone.utc).isoformat()
+            "cancelled_at": datetime.now(UTC).isoformat()
         }}
     )
     
@@ -647,7 +631,7 @@ async def approve_cancel_request(booking_id: str, payload: dict = Depends(verify
         "booking_id": booking_id,
         "message": "Your cancellation request has been approved",
         "read": False,
-        "created_at": datetime.now(timezone.utc).isoformat()
+        "created_at": datetime.now(UTC).isoformat()
     }
     await db.notifications.insert_one(notification)
 
@@ -684,7 +668,7 @@ async def deny_cancel_request(booking_id: str, denial_reason: str = Body(..., em
             "status": previous_status,
             "cancellation_denied": True,
             "cancellation_denial_reason": denial_reason,
-            "cancellation_denied_at": datetime.now(timezone.utc).isoformat()
+            "cancellation_denied_at": datetime.now(UTC).isoformat()
         },
          "$unset": {"cancellation_requested_at": ""}
         }
@@ -698,7 +682,7 @@ async def deny_cancel_request(booking_id: str, denial_reason: str = Body(..., em
         "booking_id": booking_id,
         "message": f"Your cancellation request has been denied. Reason: {denial_reason}",
         "read": False,
-        "created_at": datetime.now(timezone.utc).isoformat()
+        "created_at": datetime.now(UTC).isoformat()
     }
     await db.notifications.insert_one(notification)
     
@@ -767,7 +751,7 @@ async def translate_booking_contract(booking_id: str, body: dict = Body(default=
             "contract_original_text": text,
             "contract_translated_text": translated,
             "contract_translation_direction": direction,
-            "contract_translated_at": datetime.now(timezone.utc).isoformat(),
+            "contract_translated_at": datetime.now(UTC).isoformat(),
         }}
     )
 

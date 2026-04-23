@@ -1,38 +1,19 @@
 """Auto-extracted from server.py during the 2026-04 refactor."""
 import asyncio
-import base64
-import json as _json
-import logging
 import os
-import shutil
 import uuid
-from datetime import datetime, timedelta, timezone
-from io import BytesIO
-from pathlib import Path
-from typing import Any, List, Optional
+from datetime import UTC, datetime, timedelta
+from typing import Any
 
 import bcrypt
-import httpx
-from fastapi import APIRouter, Body, Depends, File, Form, HTTPException, Request, UploadFile
-from pydantic import BaseModel
+from fastapi import APIRouter, Depends, HTTPException, Request
 
-from models import *
-from routes.deps import db, logger, verify_token, create_token, EMERGENT_LLM_KEY, POSTMARK_WEBHOOK_SECRET, ROOT_DIR
+from models import ChangePasswordRequest, ForgotPasswordRequest, ResetPasswordRequest, UserLogin, UserRegister
+from routes.deps import create_token, db, logger, verify_token
 from utils.email import (
-    send_email,
-    send_welcome_email,
     send_password_reset_email,
-    send_booking_confirmation_email,
-    send_booking_notification_email,
+    send_welcome_email,
 )
-from utils.pdf import stamp_signature_on_document
-from utils.saved_search import match_property_against_searches
-from utils.helpers import get_usd_ils_rate, parse_ical_feed, sync_property_ical
-from utils.files import extract_text_from_pdf, extract_text_from_docx, extract_text_from_image
-from utils.translate import translate_text as _translate_text
-from utils.contract_template import ensure_templates as ensure_contract_templates
-
-from emergentintegrations.llm.chat import LlmChat, UserMessage
 
 router = APIRouter()
 api_router = router  # alias so existing @api_router decorators work verbatim
@@ -54,7 +35,7 @@ async def register(user_data: UserRegister) -> Any:
         "name": user_data.name,
         "role": user_data.role,
         "phone": user_data.phone,
-        "created_at": datetime.now(timezone.utc).isoformat()
+        "created_at": datetime.now(UTC).isoformat()
     }
     
     await db.users.insert_one(user_doc)
@@ -98,7 +79,7 @@ async def forgot_password(request: ForgotPasswordRequest, req: Request) -> Any:
         raise HTTPException(status_code=404, detail="No account found with that email address.")
 
     reset_token = str(uuid.uuid4())
-    expires_at = (datetime.now(timezone.utc) + timedelta(hours=1)).isoformat()
+    expires_at = (datetime.now(UTC) + timedelta(hours=1)).isoformat()
 
     await db.password_resets.delete_many({"email": request.email})
     await db.password_resets.insert_one({
@@ -107,7 +88,7 @@ async def forgot_password(request: ForgotPasswordRequest, req: Request) -> Any:
         "user_id": user['id'],
         "expires_at": expires_at,
         "used": False,
-        "created_at": datetime.now(timezone.utc).isoformat()
+        "created_at": datetime.now(UTC).isoformat()
     })
 
     # Build the reset link using the frontend origin
@@ -140,7 +121,7 @@ async def reset_password(request: ResetPasswordRequest) -> Any:
         raise HTTPException(status_code=400, detail="Invalid or expired reset token")
 
     expires_at = datetime.fromisoformat(reset_doc['expires_at'])
-    if datetime.now(timezone.utc) > expires_at:
+    if datetime.now(UTC) > expires_at:
         raise HTTPException(status_code=400, detail="Reset token has expired")
 
     if len(request.new_password) < 6:

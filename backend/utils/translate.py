@@ -1,8 +1,8 @@
 """LLM-backed translation helper shared by the contract-translation routes."""
 import uuid
 
-from fastapi import HTTPException
 from emergentintegrations.llm.chat import LlmChat, UserMessage
+from fastapi import HTTPException
 
 from routes.deps import EMERGENT_LLM_KEY
 

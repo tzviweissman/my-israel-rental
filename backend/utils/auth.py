@@ -1,11 +1,12 @@
 """Authentication utility functions"""
 import os
-import jwt
-from datetime import datetime, timezone, timedelta
-from fastapi import Depends, HTTPException
-from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
-from dotenv import load_dotenv
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
+
+import jwt
+from dotenv import load_dotenv
+from fastapi import Depends, HTTPException
+from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 
 # Load JWT_SECRET from environment
 ROOT_DIR = Path(__file__).parent.parent
@@ -20,7 +21,7 @@ def create_token(user_id: str, role: str) -> str:
     payload = {
         'user_id': user_id,
         'role': role,
-        'exp': datetime.now(timezone.utc) + timedelta(days=30)
+        'exp': datetime.now(UTC) + timedelta(days=30)
     }
     return jwt.encode(payload, JWT_SECRET, algorithm='HS256')
 

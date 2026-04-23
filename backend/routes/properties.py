@@ -1,38 +1,24 @@
 """Auto-extracted from server.py during the 2026-04 refactor."""
 import asyncio
-import base64
-import json as _json
-import logging
 import os
-import shutil
 import uuid
-from datetime import datetime, timedelta, timezone
-from io import BytesIO
-from pathlib import Path
-from typing import Any, List, Optional
+from datetime import UTC, datetime
+from typing import Any
 
-import bcrypt
-import httpx
-from fastapi import APIRouter, Body, Depends, File, Form, HTTPException, Request, UploadFile
-from pydantic import BaseModel
+from fastapi import APIRouter, Depends, File, HTTPException, UploadFile
 
-from models import *
-from routes.deps import db, logger, verify_token, create_token, EMERGENT_LLM_KEY, POSTMARK_WEBHOOK_SECRET, ROOT_DIR, UPLOAD_DIR
+from models import PropertyCreate
+from routes.deps import (
+    ROOT_DIR,
+    db,
+    logger,
+    verify_token,
+)
 from utils.email import (
     send_email,
-    send_welcome_email,
-    send_password_reset_email,
-    send_booking_confirmation_email,
-    send_booking_notification_email,
 )
-from utils.pdf import stamp_signature_on_document
+from utils.helpers import get_usd_ils_rate
 from utils.saved_search import match_property_against_searches
-from utils.helpers import get_usd_ils_rate, parse_ical_feed, sync_property_ical
-from utils.files import extract_text_from_pdf, extract_text_from_docx, extract_text_from_image
-from utils.translate import translate_text as _translate_text
-from utils.contract_template import ensure_templates as ensure_contract_templates
-
-from emergentintegrations.llm.chat import LlmChat, UserMessage
 
 router = APIRouter()
 api_router = router  # alias so existing @api_router decorators work verbatim
@@ -44,7 +30,7 @@ async def create_property(property_data: PropertyCreate, payload: dict = Depends
     property_doc = property_data.model_dump()
     property_doc['id'] = property_id
     property_doc['owner_id'] = payload['user_id']
-    property_doc['created_at'] = datetime.now(timezone.utc).isoformat()
+    property_doc['created_at'] = datetime.now(UTC).isoformat()
     property_doc['views'] = 0
     property_doc['status'] = 'active'
     
@@ -63,20 +49,20 @@ async def create_property(property_data: PropertyCreate, payload: dict = Depends
 
 @api_router.get("/properties")
 async def get_properties(
-    rental_type: Optional[str] = None,
-    min_bedrooms: Optional[float] = None,
-    max_price: Optional[float] = None,
-    area: Optional[str] = None,
-    owner_id: Optional[str] = None,
-    min_price: Optional[float] = None,
-    currency: Optional[str] = None,
-    min_bathrooms: Optional[float] = None,
-    max_floor: Optional[float] = None,
-    min_porches: Optional[int] = None,
-    has_elevator: Optional[bool] = None,
-    condition: Optional[str] = None,
-    date_from: Optional[str] = None,
-    date_to: Optional[str] = None
+    rental_type: str | None = None,
+    min_bedrooms: float | None = None,
+    max_price: float | None = None,
+    area: str | None = None,
+    owner_id: str | None = None,
+    min_price: float | None = None,
+    currency: str | None = None,
+    min_bathrooms: float | None = None,
+    max_floor: float | None = None,
+    min_porches: int | None = None,
+    has_elevator: bool | None = None,
+    condition: str | None = None,
+    date_from: str | None = None,
+    date_to: str | None = None
 ) -> Any:
     query: dict = {}
     if rental_type:
@@ -247,7 +233,7 @@ async def toggle_like_property(property_id: str, payload: dict = Depends(verify_
             "id": str(uuid.uuid4()),
             "user_id": payload['user_id'],
             "property_id": property_id,
-            "created_at": datetime.now(timezone.utc).isoformat()
+            "created_at": datetime.now(UTC).isoformat()
         })
         return {"liked": True, "message": "Property saved to favorites"}
 
@@ -356,7 +342,7 @@ async def upload_property_contract(
         {"id": property_id},
         {"$set": {
             "contract_url": contract_url,
-            "contract_uploaded_at": datetime.now(timezone.utc).isoformat()
+            "contract_uploaded_at": datetime.now(UTC).isoformat()
         }}
     )
 
@@ -376,7 +362,7 @@ async def upload_property_contract(
             {"id": bk["id"]},
             {"$set": {
                 "contract_sign_token": sign_token,
-                "contract_sent_at": datetime.now(timezone.utc).isoformat(),
+                "contract_sent_at": datetime.now(UTC).isoformat(),
                 "contract_signed": False,
             }}
         )
@@ -389,7 +375,7 @@ async def upload_property_contract(
             "property_id": property_id,
             "message": f"The owner has uploaded a contract for {property_data.get('title', 'your booking')}. Please sign it to finalize your rental.",
             "read": False,
-            "created_at": datetime.now(timezone.utc).isoformat(),
+            "created_at": datetime.now(UTC).isoformat(),
         })
         # Email the renter
         try:

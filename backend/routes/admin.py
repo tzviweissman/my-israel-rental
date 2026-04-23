@@ -1,45 +1,20 @@
 """Auto-extracted from server.py during the 2026-04 refactor."""
-import asyncio
-import base64
-import json as _json
-import logging
-import os
-import shutil
 import uuid
-from datetime import datetime, timedelta, timezone
-from io import BytesIO
-from pathlib import Path
-from typing import Any, List, Optional
+from datetime import UTC, datetime, timedelta
+from typing import Any, List
 
-import bcrypt
-import httpx
-from fastapi import APIRouter, Body, Depends, File, Form, HTTPException, Request, UploadFile
+from fastapi import APIRouter, Depends, HTTPException, Request
 from pydantic import BaseModel
 
-from models import *
-from routes.deps import db, logger, verify_token, create_token, EMERGENT_LLM_KEY, POSTMARK_WEBHOOK_SECRET, ROOT_DIR
-from utils.email import (
-    send_email,
-    send_welcome_email,
-    send_password_reset_email,
-    send_booking_confirmation_email,
-    send_booking_notification_email,
-)
-from utils.pdf import stamp_signature_on_document
-from utils.saved_search import match_property_against_searches
-from utils.helpers import get_usd_ils_rate, parse_ical_feed, sync_property_ical
-from utils.files import extract_text_from_pdf, extract_text_from_docx, extract_text_from_image
-from utils.translate import translate_text as _translate_text
-from utils.contract_template import ensure_templates as ensure_contract_templates
-
-from emergentintegrations.llm.chat import LlmChat, UserMessage
+from models import SiteSettings
+from routes.deps import POSTMARK_WEBHOOK_SECRET, db, logger, verify_token
 
 router = APIRouter()
 api_router = router  # alias so existing @api_router decorators work verbatim
 
 
 @api_router.post("/webhooks/postmark")
-async def postmark_webhook(request: Request, token: Optional[str] = None) -> Any:
+async def postmark_webhook(request: Request, token: str | None = None) -> Any:
     """Receive delivery / bounce / spam-complaint events from Postmark.
 
     Configure the URL in Postmark → Servers → Message Streams → outbound →
@@ -71,7 +46,7 @@ async def postmark_webhook(request: Request, token: Optional[str] = None) -> Any
         "bounce_type": payload.get("Type"),  # HardBounce, SoftBounce, Transient, etc.
         "description": payload.get("Description") or payload.get("Details"),
         "raw": payload,
-        "received_at": datetime.now(timezone.utc).isoformat(),
+        "received_at": datetime.now(UTC).isoformat(),
     }
     await db.email_events.insert_one(event_doc)
 
@@ -118,7 +93,7 @@ async def admin_email_health(payload: dict = Depends(verify_token)) -> Any:
         raise HTTPException(status_code=403, detail="Admin access required")
 
     # Aggregate counts by record_type for the last 30 days
-    thirty_days_ago = (datetime.now(timezone.utc) - timedelta(days=30)).isoformat()
+    thirty_days_ago = (datetime.now(UTC) - timedelta(days=30)).isoformat()
     pipeline = [
         {"$match": {"received_at": {"$gte": thirty_days_ago}}},
         {"$group": {"_id": "$record_type", "count": {"$sum": 1}}},
@@ -223,7 +198,7 @@ async def get_all_properties_admin(payload: dict = Depends(verify_token)) -> Any
     async for block in db.admin_blocks.find({}, {"_id": 0}):
         blocks_by_prop.setdefault(block["property_id"], []).append(block)
 
-    now_iso = datetime.now(timezone.utc).isoformat()
+    now_iso = datetime.now(UTC).isoformat()
 
     for prop in properties:
         owner = await db.users.find_one({"id": prop.get("owner_id")}, {"_id": 0, "name": 1, "email": 1})
@@ -247,9 +222,9 @@ async def get_all_properties_admin(payload: dict = Depends(verify_token)) -> Any
 
 
 class AdminBlockIn(BaseModel):
-    start_date: Optional[str] = None  # ISO string; None => starts now
-    end_date: Optional[str] = None    # ISO string; None => indefinite
-    indefinite: Optional[bool] = False
+    start_date: str | None = None  # ISO string; None => starts now
+    end_date: str | None = None    # ISO string; None => indefinite
+    indefinite: bool | None = False
 
 
 @api_router.post("/admin/properties/{property_id}/mark-booked")
@@ -284,7 +259,7 @@ async def admin_mark_property_booked(
         "end_date": end,
         "indefinite": bool(block.indefinite) or end is None,
         "created_by": payload["user_id"],
-        "created_at": datetime.now(timezone.utc).isoformat(),
+        "created_at": datetime.now(UTC).isoformat(),
     }
     await db.admin_blocks.insert_one(block_doc)
     block_doc.pop("_id", None)
@@ -313,9 +288,9 @@ async def admin_remove_block(block_id: str, payload: dict = Depends(verify_token
 
 class BulkMarkBookedIn(BaseModel):
     property_ids: List[str]
-    start_date: Optional[str] = None
-    end_date: Optional[str] = None
-    indefinite: Optional[bool] = False
+    start_date: str | None = None
+    end_date: str | None = None
+    indefinite: bool | None = False
 
 
 @api_router.post("/admin/properties/bulk-mark-booked")
@@ -340,7 +315,7 @@ async def admin_bulk_mark_booked(
     ):
         existing_ids.add(prop["id"])
 
-    now = datetime.now(timezone.utc).isoformat()
+    now = datetime.now(UTC).isoformat()
     docs = [
         {
             "id": str(uuid.uuid4()),
@@ -446,6 +421,6 @@ async def update_site_settings(settings: SiteSettings, payload: dict = Depends(v
         raise HTTPException(status_code=403, detail="Admin access required")
     settings_doc = settings.model_dump()
     settings_doc["key"] = "global"
-    settings_doc["updated_at"] = datetime.now(timezone.utc).isoformat()
+    settings_doc["updated_at"] = datetime.now(UTC).isoformat()
     await db.site_settings.update_one({"key": "global"}, {"$set": settings_doc}, upsert=True)
     return {"message": "Settings updated successfully"}

@@ -16,7 +16,7 @@ import asyncio
 import logging
 import os
 import uuid
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from typing import Any
 
 logger = logging.getLogger(__name__)
@@ -140,7 +140,7 @@ async def match_property_against_searches(
     if not prop:
         return 0
 
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
     searches = await db.saved_searches.find(
         {"active": True, "expires_at": {"$gt": now.isoformat()}},
         {"_id": 0},

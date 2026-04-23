@@ -1,38 +1,22 @@
 """Auto-extracted from server.py during the 2026-04 refactor."""
-import asyncio
-import base64
-import json as _json
-import logging
-import os
-import shutil
 import uuid
-from datetime import datetime, timedelta, timezone
-from io import BytesIO
-from pathlib import Path
-from typing import Any, List, Optional
-
-import bcrypt
-import httpx
-from fastapi import APIRouter, Body, Depends, File, Form, HTTPException, Request, UploadFile
-from pydantic import BaseModel
-
-from models import *
-from routes.deps import db, logger, verify_token, create_token, EMERGENT_LLM_KEY, POSTMARK_WEBHOOK_SECRET, ROOT_DIR, UPLOAD_DIR, CONTRACT_DIR, MAX_FILE_SIZE, ALLOWED_IMAGE_TYPES, ALLOWED_VIDEO_TYPES, ALLOWED_CONTRACT_TYPES
-from utils.email import (
-    send_email,
-    send_welcome_email,
-    send_password_reset_email,
-    send_booking_confirmation_email,
-    send_booking_notification_email,
-)
-from utils.pdf import stamp_signature_on_document
-from utils.saved_search import match_property_against_searches
-from utils.helpers import get_usd_ils_rate, parse_ical_feed, sync_property_ical
-from utils.files import extract_text_from_pdf, extract_text_from_docx, extract_text_from_image
-from utils.translate import translate_text as _translate_text
-from utils.contract_template import ensure_templates as ensure_contract_templates
+from datetime import UTC, datetime
+from typing import Any, List
 
 from emergentintegrations.llm.chat import LlmChat, UserMessage
+from fastapi import APIRouter, Body, Depends, File, HTTPException, UploadFile
+
+from models import ContactRequest, DocumentServiceRequest, TranslationRequest
+from routes.deps import (
+    ALLOWED_IMAGE_TYPES,
+    ALLOWED_VIDEO_TYPES,
+    EMERGENT_LLM_KEY,
+    MAX_FILE_SIZE,
+    UPLOAD_DIR,
+    db,
+    verify_token,
+)
+from utils.helpers import get_usd_ils_rate
 
 router = APIRouter()
 api_router = router  # alias so existing @api_router decorators work verbatim
@@ -69,7 +53,7 @@ async def request_document_service(request: DocumentServiceRequest, payload: dic
     service_doc['id'] = service_id
     service_doc['user_id'] = payload['user_id']
     service_doc['status'] = 'pending'
-    service_doc['created_at'] = datetime.now(timezone.utc).isoformat()
+    service_doc['created_at'] = datetime.now(UTC).isoformat()
     
     await db.document_services.insert_one(service_doc)
     return {"id": service_id, "message": "Document service request submitted successfully"}
@@ -93,8 +77,8 @@ async def create_service_request(request_data: dict = Body(...), payload: dict =
         "service_type": request_data.get('service_type', 'unknown'),
         "details": request_data,
         "status": "pending",
-        "created_at": datetime.now(timezone.utc).isoformat(),
-        "updated_at": datetime.now(timezone.utc).isoformat()
+        "created_at": datetime.now(UTC).isoformat(),
+        "updated_at": datetime.now(UTC).isoformat()
     }
     await db.service_requests.insert_one(service_doc)
     return {"id": request_id, "message": "Service request submitted successfully"}
@@ -114,7 +98,7 @@ async def submit_contact_form(request: ContactRequest) -> Any:
     contact_id = str(uuid.uuid4())
     contact_doc = request.model_dump()
     contact_doc['id'] = contact_id
-    contact_doc['created_at'] = datetime.now(timezone.utc).isoformat()
+    contact_doc['created_at'] = datetime.now(UTC).isoformat()
     contact_doc['status'] = 'new'
     
     await db.contacts.insert_one(contact_doc)

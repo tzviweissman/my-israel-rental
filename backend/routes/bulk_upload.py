@@ -16,20 +16,18 @@ with the CSV delimiter and most owners know semicolons from ICS/export formats.
 import csv
 import io
 import json
-import re
-import shutil
 import uuid
 import zipfile
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
-from typing import Any, List, Optional
+from typing import Any, List
 
-from fastapi import APIRouter, Body, Depends, File, Form, HTTPException, UploadFile
+from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel, ValidationError
 
 from models import PropertyCreate
-from routes.deps import db, logger, verify_token, UPLOAD_DIR
+from routes.deps import UPLOAD_DIR, db, verify_token
 
 router = APIRouter()
 api_router = router
@@ -132,7 +130,7 @@ def _normalize_row(raw: dict) -> dict:
     return row
 
 
-def _validate_row(row: dict) -> Optional[str]:
+def _validate_row(row: dict) -> str | None:
     """Run Pydantic validation. Returns None if OK, otherwise a short error string."""
     # Strip fields that PropertyCreate doesn't know about (image_filenames is
     # our own meta, not a DB field).
@@ -235,8 +233,8 @@ async def download_template(fmt: str = "csv") -> Any:
 
 @api_router.post("/properties/bulk/parse")
 async def parse_bulk(
-    file: Optional[UploadFile] = File(None),
-    text: Optional[str] = Form(None),
+    file: UploadFile | None = File(None),
+    text: str | None = Form(None),
     payload: dict = Depends(verify_token),
 ) -> Any:
     """Dry run: parse the input and return [{row, normalized, errors}]. No DB writes."""
@@ -304,7 +302,7 @@ async def commit_bulk(body: BulkCommitBody, payload: dict = Depends(verify_token
                 "owner_id": payload["user_id"],
                 "images": [],
                 "videos": [],
-                "created_at": datetime.now(timezone.utc).isoformat(),
+                "created_at": datetime.now(UTC).isoformat(),
                 "status": "active",
                 "liked_by": [],
                 "pending_image_filenames": image_filenames,  # resolved later by /bulk/images

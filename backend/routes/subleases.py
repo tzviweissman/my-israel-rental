@@ -1,38 +1,13 @@
 """Auto-extracted from server.py during the 2026-04 refactor."""
-import asyncio
-import base64
-import json as _json
-import logging
-import os
-import shutil
 import uuid
-from datetime import datetime, timedelta, timezone
-from io import BytesIO
-from pathlib import Path
-from typing import Any, List, Optional
+from datetime import UTC, datetime
+from typing import Any
 
-import bcrypt
-import httpx
-from fastapi import APIRouter, Body, Depends, File, Form, HTTPException, Request, UploadFile
-from pydantic import BaseModel
+from fastapi import APIRouter, Body, Depends, File, HTTPException, UploadFile
 
-from models import *
-from routes.deps import db, logger, verify_token, create_token, EMERGENT_LLM_KEY, POSTMARK_WEBHOOK_SECRET, ROOT_DIR, UPLOAD_DIR, CONTRACT_DIR, MAX_FILE_SIZE, ALLOWED_IMAGE_TYPES, ALLOWED_VIDEO_TYPES, ALLOWED_CONTRACT_TYPES
-from utils.email import (
-    send_email,
-    send_welcome_email,
-    send_password_reset_email,
-    send_booking_confirmation_email,
-    send_booking_notification_email,
-)
-from utils.pdf import stamp_signature_on_document
-from utils.saved_search import match_property_against_searches
-from utils.helpers import get_usd_ils_rate, parse_ical_feed, sync_property_ical
-from utils.files import extract_text_from_pdf, extract_text_from_docx, extract_text_from_image
-from utils.translate import translate_text as _translate_text
-from utils.contract_template import ensure_templates as ensure_contract_templates
-
-from emergentintegrations.llm.chat import LlmChat, UserMessage
+from models import SubleaseCreate
+from routes.deps import ALLOWED_CONTRACT_TYPES, CONTRACT_DIR, MAX_FILE_SIZE, db, verify_token
+from utils.files import extract_text_from_docx, extract_text_from_image, extract_text_from_pdf
 
 router = APIRouter()
 api_router = router  # alias so existing @api_router decorators work verbatim
@@ -76,8 +51,8 @@ async def create_sublease(sublease_data: SubleaseCreate, payload: dict = Depends
         "amenities": property_data.get('amenities', []),
         "property_type": property_data.get('property_type', ''),
         "active": True,
-        "created_at": datetime.now(timezone.utc).isoformat(),
-        "updated_at": datetime.now(timezone.utc).isoformat()
+        "created_at": datetime.now(UTC).isoformat(),
+        "updated_at": datetime.now(UTC).isoformat()
     }
 
     await db.subleases.insert_one(sublease_doc)
@@ -86,7 +61,7 @@ async def create_sublease(sublease_data: SubleaseCreate, payload: dict = Depends
 
 
 @api_router.get("/subleases")
-async def list_subleases(area: Optional[str] = None) -> Any:
+async def list_subleases(area: str | None = None) -> Any:
     query: dict = {"active": True}
     if area:
         query["area"] = {"$regex": area, "$options": "i"}
@@ -122,7 +97,7 @@ async def update_sublease(sublease_id: str, updates: dict = Body(...), payload: 
 
     allowed = {"available_from", "available_to", "price", "price_type", "bedrooms_available", "notes", "active"}
     update_fields = {k: v for k, v in updates.items() if k in allowed}
-    update_fields["updated_at"] = datetime.now(timezone.utc).isoformat()
+    update_fields["updated_at"] = datetime.now(UTC).isoformat()
 
     await db.subleases.update_one({"id": sublease_id}, {"$set": update_fields})
     return {"message": "Sublease updated successfully"}
@@ -186,14 +161,14 @@ async def upload_sublease_contract(
         "signatures": [],
         "signed": False,
         "sign_token": sign_token,
-        "created_at": datetime.now(timezone.utc).isoformat(),
-        "updated_at": datetime.now(timezone.utc).isoformat(),
+        "created_at": datetime.now(UTC).isoformat(),
+        "updated_at": datetime.now(UTC).isoformat(),
     }
 
     await db.contracts.insert_one(contract_doc)
     await db.subleases.update_one(
         {"id": sublease_id},
-        {"$set": {"contract_id": contract_id, "sign_token": sign_token, "updated_at": datetime.now(timezone.utc).isoformat()}}
+        {"$set": {"contract_id": contract_id, "sign_token": sign_token, "updated_at": datetime.now(UTC).isoformat()}}
     )
 
     return {
@@ -254,14 +229,14 @@ async def sign_contract_public(sign_token: str, body: dict = Body(...)) -> Any:
         "signer_id": "sublessee",
         "signer_name": signer_name,
         "signature_data": signature_data,
-        "signed_at": datetime.now(timezone.utc).isoformat()
+        "signed_at": datetime.now(UTC).isoformat()
     }
 
     await db.contracts.update_one(
         {"sign_token": sign_token},
         {
             "$push": {"signatures": new_signature},
-            "$set": {"signed": True, "updated_at": datetime.now(timezone.utc).isoformat()}
+            "$set": {"signed": True, "updated_at": datetime.now(UTC).isoformat()}
         }
     )
     
@@ -282,7 +257,7 @@ async def sign_contract_public(sign_token: str, body: dict = Body(...)) -> Any:
                 "sublease_id": contract["sublease_id"],
                 "message": f"{signer_name} has signed the sublease contract for {sublease.get('title', 'your property')}",
                 "read": False,
-                "created_at": datetime.now(timezone.utc).isoformat()
+                "created_at": datetime.now(UTC).isoformat()
             }
             await db.notifications.insert_one(notification)
 

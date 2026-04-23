@@ -1,39 +1,15 @@
 """Auto-extracted from server.py during the 2026-04 refactor."""
-import asyncio
-import base64
-import json as _json
-import logging
-import os
-import shutil
 import uuid
-from datetime import datetime, timedelta, timezone
-from io import BytesIO
-from pathlib import Path
-from typing import Any, List, Optional
+from datetime import UTC, datetime
+from typing import Any
 
-import bcrypt
-import httpx
-from fastapi import APIRouter, Body, Depends, File, Form, HTTPException, Request, UploadFile
-from pydantic import BaseModel
+from fastapi import APIRouter, Depends, HTTPException
+from icalendar import Calendar as iCalCalendar
+from icalendar import Event as iCalEvent
 
-from models import *
-from routes.deps import db, logger, verify_token, create_token, EMERGENT_LLM_KEY, POSTMARK_WEBHOOK_SECRET, ROOT_DIR
-from utils.email import (
-    send_email,
-    send_welcome_email,
-    send_password_reset_email,
-    send_booking_confirmation_email,
-    send_booking_notification_email,
-)
-from utils.pdf import stamp_signature_on_document
-from utils.saved_search import match_property_against_searches
-from utils.helpers import get_usd_ils_rate, parse_ical_feed, sync_property_ical
-from utils.files import extract_text_from_pdf, extract_text_from_docx, extract_text_from_image
-from utils.translate import translate_text as _translate_text
-from utils.contract_template import ensure_templates as ensure_contract_templates
-
-from emergentintegrations.llm.chat import LlmChat, UserMessage
-from icalendar import Calendar as iCalCalendar, Event as iCalEvent
+from models import ICalUrlInput
+from routes.deps import db, verify_token
+from utils.helpers import parse_ical_feed, sync_property_ical
 
 router = APIRouter()
 api_router = router  # alias so existing @api_router decorators work verbatim
@@ -95,7 +71,7 @@ async def export_ical(property_id: str) -> Any:
         event.add('dtstart', datetime.strptime(b['start_date'], '%Y-%m-%d').date())
         event.add('dtend', datetime.strptime(b['end_date'], '%Y-%m-%d').date())
         event.add('uid', b.get('id', str(uuid.uuid4())))
-        event.add('dtstamp', datetime.now(timezone.utc))
+        event.add('dtstamp', datetime.now(UTC))
         cal.add_component(event)
     from starlette.responses import Response
     return Response(content=cal.to_ical(), media_type="text/calendar", headers={"Content-Disposition": f"attachment; filename={property_id}.ics"})
@@ -131,4 +107,4 @@ async def manual_ical_sync(property_id: str, payload: dict = Depends(verify_toke
     if prop.get("owner_id") != payload["user_id"] and payload["role"] != "admin":
         raise HTTPException(status_code=403, detail="Not authorized")
     await sync_property_ical(property_id)
-    return {"message": "Sync complete", "last_synced": datetime.now(timezone.utc).isoformat()}
+    return {"message": "Sync complete", "last_synced": datetime.now(UTC).isoformat()}

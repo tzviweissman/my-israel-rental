@@ -21,12 +21,24 @@ ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / ".env")
 
 # Import the shared db + constants first so side-effects (connection, dir creation) run once
+# Domain routers — order doesn't matter (all share the /api prefix)
+from routes import (  # noqa: E402
+    admin,
+    auth,
+    bookings,
+    bulk_upload,
+    chat,
+    contracts,
+    ical,
+    misc,
+    notifications,
+    properties,
+    saved_searches,
+    subleases,
+)
 from routes.deps import UPLOAD_DIR, client, db  # noqa: E402  (import after load_dotenv on purpose)
 from utils.contract_template import ensure_templates as ensure_contract_templates  # noqa: E402
 from utils.helpers import sync_all_ical_feeds  # noqa: E402
-
-# Domain routers — order doesn't matter (all share the /api prefix)
-from routes import admin, auth, bookings, bulk_upload, chat, contracts, ical, misc, notifications, properties, saved_searches, subleases  # noqa: E402
 
 logging.basicConfig(
     level=logging.INFO,

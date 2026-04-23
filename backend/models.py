@@ -1,6 +1,7 @@
 """Pydantic models for API requests/responses"""
+from typing import List
+
 from pydantic import BaseModel, EmailStr
-from typing import List, Optional
 
 
 class UserRegister(BaseModel):
@@ -8,7 +9,7 @@ class UserRegister(BaseModel):
     password: str
     name: str
     role: str
-    phone: Optional[str] = None
+    phone: str | None = None
 
 
 class UserLogin(BaseModel):
@@ -32,47 +33,47 @@ class ChangePasswordRequest(BaseModel):
 
 class PropertyCreate(BaseModel):
     title: str
-    description: Optional[str] = None
+    description: str | None = None
     rental_type: str
     property_type: str
-    bedrooms: Optional[float] = None
-    bathrooms: Optional[float] = None
+    bedrooms: float | None = None
+    bathrooms: float | None = None
     area: str
-    address: Optional[str] = None
-    square_meters: Optional[float] = None
-    porch_square_meters: Optional[float] = None
-    floor: Optional[float] = None
-    has_elevator: Optional[bool] = False
-    is_shabbat_elevator: Optional[bool] = False
-    is_tama: Optional[bool] = False
-    has_agent_fee: Optional[bool] = False
-    agent_fee_price: Optional[float] = None
-    agent_fee_currency: Optional[str] = 'ILS'
-    porches: Optional[int] = 0
-    sukkah_compatible: Optional[bool] = False
-    condition: Optional[str] = 'good'
-    furniture_option: Optional[str] = 'no_furniture'
-    amenities: Optional[List[str]] = []
-    monthly_price: Optional[float] = None
-    nightly_price: Optional[float] = None
-    currency: Optional[str] = 'ILS'
-    images: Optional[List[str]] = []
-    videos: Optional[List[str]] = []
-    ical_url: Optional[str] = None
-    cancellation_policy: Optional[str] = 'flexible'
-    custom_cancellation_policy: Optional[str] = None
-    available_from: Optional[str] = None
-    starting_date: Optional[str] = None
-    minimum_booking_days: Optional[int] = None
+    address: str | None = None
+    square_meters: float | None = None
+    porch_square_meters: float | None = None
+    floor: float | None = None
+    has_elevator: bool | None = False
+    is_shabbat_elevator: bool | None = False
+    is_tama: bool | None = False
+    has_agent_fee: bool | None = False
+    agent_fee_price: float | None = None
+    agent_fee_currency: str | None = 'ILS'
+    porches: int | None = 0
+    sukkah_compatible: bool | None = False
+    condition: str | None = 'good'
+    furniture_option: str | None = 'no_furniture'
+    amenities: List[str] | None = []
+    monthly_price: float | None = None
+    nightly_price: float | None = None
+    currency: str | None = 'ILS'
+    images: List[str] | None = []
+    videos: List[str] | None = []
+    ical_url: str | None = None
+    cancellation_policy: str | None = 'flexible'
+    custom_cancellation_policy: str | None = None
+    available_from: str | None = None
+    starting_date: str | None = None
+    minimum_booking_days: int | None = None
 
 
 class BookingCreate(BaseModel):
     property_id: str
     start_date: str
     end_date: str
-    message: Optional[str] = None
-    contract_signed: Optional[bool] = False
-    signature_data: Optional[str] = None
+    message: str | None = None
+    contract_signed: bool | None = False
+    signature_data: str | None = None
 
 
 class ChatMessage(BaseModel):
@@ -82,10 +83,10 @@ class ChatMessage(BaseModel):
 
 
 class NotificationPreferences(BaseModel):
-    rental_type: Optional[str] = None
-    min_bedrooms: Optional[int] = None
-    max_price: Optional[float] = None
-    area: Optional[str] = None
+    rental_type: str | None = None
+    min_bedrooms: int | None = None
+    max_price: float | None = None
+    area: str | None = None
 
 
 class TranslationRequest(BaseModel):
@@ -106,8 +107,8 @@ class SubleaseCreate(BaseModel):
     available_to: str
     price: float
     price_type: str
-    bedrooms_available: Optional[int] = None
-    notes: Optional[str] = None
+    bedrooms_available: int | None = None
+    notes: str | None = None
 
 
 class DocumentServiceRequest(BaseModel):
@@ -115,20 +116,20 @@ class DocumentServiceRequest(BaseModel):
     property_address: str
     tenant_name: str
     tenant_id: str
-    additional_info: Optional[str] = None
+    additional_info: str | None = None
 
 
 class SiteSettings(BaseModel):
-    whatsapp_number: Optional[str] = None
-    contact_email: Optional[str] = None
-    contact_phone: Optional[str] = None
-    featured_property_ids: Optional[List[str]] = []
+    whatsapp_number: str | None = None
+    contact_email: str | None = None
+    contact_phone: str | None = None
+    featured_property_ids: List[str] | None = []
 
 
 class ContactRequest(BaseModel):
     name: str
     email: EmailStr
-    phone: Optional[str] = None
+    phone: str | None = None
     message: str
 
 
@@ -138,15 +139,15 @@ class ICalUrlInput(BaseModel):
 
 
 class SavedSearchFilters(BaseModel):
-    rental_type: Optional[str] = None
-    area: Optional[str] = None
-    bedrooms_min: Optional[float] = None
-    max_price: Optional[float] = None
-    start_date: Optional[str] = None  # YYYY-MM-DD
-    end_date: Optional[str] = None    # YYYY-MM-DD
+    rental_type: str | None = None
+    area: str | None = None
+    bedrooms_min: float | None = None
+    max_price: float | None = None
+    start_date: str | None = None  # YYYY-MM-DD
+    end_date: str | None = None    # YYYY-MM-DD
 
 
 class SavedSearchCreate(BaseModel):
-    name: Optional[str] = None  # user-facing label; we'll derive one if absent
+    name: str | None = None  # user-facing label; we'll derive one if absent
     filters: SavedSearchFilters
-    date_fuzziness_days: Optional[int] = 30
+    date_fuzziness_days: int | None = 30

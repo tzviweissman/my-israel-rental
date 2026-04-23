@@ -3,6 +3,7 @@ import base64
 import logging
 from io import BytesIO
 from pathlib import Path
+
 from PIL import Image
 from PyPDF2 import PdfReader, PdfWriter
 from reportlab.pdfgen import canvas

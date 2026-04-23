@@ -1,0 +1,52 @@
+# Backend tooling config.
+# Consolidates ruff (linter/formatter) and mypy (type checker).
+# A single `ruff check` now catches annotation regressions — we no longer
+# need a separate pytest run to see most type-coverage breakages.
+
+[tool.ruff]
+target-version = "py311"
+line-length = 120
+exclude = [
+    "uploads",
+    "fonts",
+    "__pycache__",
+    ".pytest_cache",
+]
+
+[tool.ruff.lint]
+# Enable:
+#   E,F  – pyflakes / pycodestyle basics
+#   I    – isort
+#   B    – common bugs (flake8-bugbear)
+#   ANN  – missing-annotation rules (was a pytest-only gate before)
+#   UP   – modern-syntax hints (f-strings, dict union, etc.)
+select = ["E", "F", "I", "B", "ANN", "UP"]
+ignore = [
+    # Intentional pragmatic escapes — match mypy config.
+    "ANN401",   # Dynamically-typed Any is OK at our boundaries (request payloads, 3rd-party returns).
+    "ANN002",   # *args annotation — rarely adds value.
+    "ANN003",   # **kwargs annotation — rarely adds value.
+    # Style-only noise we don't care about right now.
+    "E501",     # line too long — handled by formatter, not blocking.
+    "B008",     # FastAPI uses Depends() in defaults on purpose.
+    "B904",     # `raise ... from ...` — noisy in our route code.
+    "UP006",    # Prefer list over List — we still allow typing.List for now.
+    "UP007",    # Prefer X | Y over Union — same.
+    "UP035",    # Prefer importing from `collections.abc` — noise for the value.
+    "E402",     # module-level import not at top — routes have load_dotenv first.
+]
+
+[tool.ruff.lint.per-file-ignores]
+# Tests: fixtures and helpers rely on untyped params by design.
+"tests/**" = ["ANN"]
+# __init__.py files are empty / just re-exports.
+"**/__init__.py" = ["F401", "ANN"]
+# server.py performs monkey-style dynamic imports which ruff can't follow.
+"server.py" = ["F401"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["routes", "utils", "models"]
+
+# Mypy config lives in mypy.ini next to this file. Keeping it there (rather
+# than duplicating under [tool.mypy]) avoids drift between the two formats
+# and lets CI run `mypy --config-file mypy.ini` explicitly.

@@ -11,7 +11,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from reportlab.lib.colors import HexColor, Color
+from reportlab.lib.colors import Color, HexColor
 from reportlab.lib.pagesizes import A4
 from reportlab.lib.units import mm
 from reportlab.pdfbase import pdfmetrics

@@ -9,7 +9,7 @@ from __future__ import annotations
 import asyncio
 import logging
 import os
-from typing import Optional, Any
+from typing import Any
 
 from postmarker.core import PostmarkClient
 
@@ -28,7 +28,7 @@ BRAND_TEAL = "#1E6A6A"
 BRAND_GOLD = "#D4AF37"
 
 # Lazy-initialise client so import doesn't fail when token missing (e.g. tests)
-_postmark_client: Optional[PostmarkClient] = None
+_postmark_client: PostmarkClient | None = None
 _mongo_db = None  # lazy Motor database handle for suppression lookups
 
 
@@ -44,7 +44,7 @@ def _get_db() -> Any:
     return _mongo_db
 
 
-def _get_client() -> Optional[PostmarkClient]:
+def _get_client() -> PostmarkClient | None:
     global _postmark_client
     if _postmark_client is None:
         token = os.environ.get("POSTMARK_SERVER_TOKEN") or POSTMARK_SERVER_TOKEN
@@ -65,8 +65,8 @@ async def send_email(
     subject: str,
     html_body: str,
     *,
-    tag: Optional[str] = None,
-    text_body: Optional[str] = None,
+    tag: str | None = None,
+    text_body: str | None = None,
     skip_suppression_check: bool = False,
 ) -> bool:
     """Send an HTML email through Postmark. Non-blocking for callers via
@@ -202,7 +202,7 @@ def _detail_row(label: str, value: str) -> str:
 
 
 # --- High-level transactional email helpers --------------------------------
-async def send_welcome_email(to_email: str, name: str, role: str, verification_link: Optional[str] = None) -> bool:
+async def send_welcome_email(to_email: str, name: str, role: str, verification_link: str | None = None) -> bool:
     verify_block = ""
     if verification_link:
         verify_block = (
@@ -271,9 +271,9 @@ async def send_booking_confirmation_email(
     property_location: str,
     check_in: str,
     check_out: str,
-    total_price: Optional[float],
+    total_price: float | None,
     currency: str = "USD",
-    booking_id: Optional[str] = None,
+    booking_id: str | None = None,
     status: str = "confirmed",
 ) -> bool:
     """Email sent to the GUEST/RENTER confirming their booking (or request)."""
@@ -333,9 +333,9 @@ async def send_booking_notification_email(
     property_location: str,
     check_in: str,
     check_out: str,
-    total_price: Optional[float],
+    total_price: float | None,
     currency: str = "USD",
-    booking_id: Optional[str] = None,
+    booking_id: str | None = None,
     is_pending: bool = False,
 ) -> bool:
     """Email sent to the OWNER/MANAGER notifying of a new booking or request."""

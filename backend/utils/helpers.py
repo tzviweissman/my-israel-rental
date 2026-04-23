@@ -6,8 +6,8 @@ server.py). Any router that needs iCal or USD/ILS pulls from here.
 import asyncio
 import logging
 import uuid
-from datetime import datetime, timezone
-from typing import Any, Optional
+from datetime import UTC, datetime
+from typing import Any
 
 import httpx
 from icalendar import Calendar as iCalCalendar
@@ -22,7 +22,7 @@ _exchange_cache: dict[str, Any] = {"rate": None, "fetched_at": None}
 
 async def get_usd_ils_rate() -> float:
     """Get USD to ILS exchange rate with 1-hour caching. Falls back to 3.65."""
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
     if (
         _exchange_cache["rate"]
         and _exchange_cache["fetched_at"]
@@ -92,14 +92,14 @@ async def sync_property_ical(property_id: str) -> None:
                 "end_date": b["end"],
                 "summary": b["summary"],
                 "source_url": b["source_url"],
-                "synced_at": datetime.now(timezone.utc).isoformat(),
+                "synced_at": datetime.now(UTC).isoformat(),
             }
             for b in all_blocked
         ]
         await db.external_bookings.insert_many(docs)
     await db.properties.update_one(
         {"id": property_id},
-        {"$set": {"ical_last_synced": datetime.now(timezone.utc).isoformat()}},
+        {"$set": {"ical_last_synced": datetime.now(UTC).isoformat()}},
     )
 
 

@@ -125,6 +125,12 @@ Build a bilingual (English/Hebrew) rental website named MyIsraelRental.com with 
   - New pytest gate `tests/test_type_coverage.py` shells out to mypy and fails if anyone later merges untyped code.
   - `motor` handle `db` typed as `Any` (Motor has no upstream stubs) — single source-of-truth annotation in `routes/deps.py`.
   - Regression: all 79 relevant pytest cases pass with the proper env (`test_type_coverage`, `test_admin_mark_booked`, `test_refactor_regression`, `test_cancellation`).
+- [x] **Unified lint surface + Pydantic plugin** (2026-04-23):
+  - Enabled the Pydantic mypy plugin (`plugins = pydantic.mypy` in `mypy.ini`) — now `PropertyCreate(...)` / `BookingCreate(...)` callers get field-level errors: wrong type, wrong name, required-field omission.
+  - Created `/app/backend/pyproject.toml` with ruff config that enables `ANN` rules — missing annotations are now caught at **lint time**, not just pytest time.
+  - Cleaned up **603 ruff auto-fixable issues** (400 unused imports, 65 `datetime.timezone.utc` → `datetime.UTC`, 88 `Optional[X]` → `X | None`, 21 unsorted imports) introduced by the earlier server.py auto-extract refactor.
+  - Killed the 11 `from models import *` star-imports across `routes/` — each file now explicitly lists the Pydantic models it actually uses.
+  - Added single-entry-point `/app/backend/scripts/check.sh` that runs ruff + mypy + pytest-gate in sequence — **one green check**. All three gates currently pass.
 - [ ] Manager bulk property upload + profile pages
 
 ### P2 - Lower Priority
