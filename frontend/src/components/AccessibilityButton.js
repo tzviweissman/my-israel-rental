@@ -127,7 +127,7 @@ const AccessibilityButton = () => {
         </div>
       )}
 
-      <style jsx>{`
+      <style>{`
         .high-contrast {
           filter: contrast(1.5);
         }
