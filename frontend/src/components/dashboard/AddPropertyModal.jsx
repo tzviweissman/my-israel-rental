@@ -4,7 +4,6 @@ import axios from 'axios';
 import { toast } from 'sonner';
 
 import { Calendar as CalendarComponent } from '../ui/calendar';
-import { Popover, PopoverContent, PopoverTrigger } from '../ui/popover';
 import { Calendar, Upload, X, Image, Film } from 'lucide-react';
 
 // Parse YYYY-MM-DD without UTC midnight drift (matches Dashboard.js helper)

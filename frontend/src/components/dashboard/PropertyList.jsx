@@ -81,11 +81,14 @@ const PropertyList = ({ properties, onEdit, onRefresh, API, token }) => {
   };
 
   const handleDeleteContract = (propertyId) => {
-    toast((tid) => (
-      <div className="flex flex-col gap-2 min-w-[240px]">
-        <p className="text-sm font-medium">Delete this contract?</p>
-        <p className="text-xs text-gray-500">Renters with pending bookings will no longer see it.</p>
-        <div className="flex gap-2 mt-1">
+    toast.custom((tid) => (
+      <div className="bg-white rounded-xl shadow-xl border border-gray-200 p-4 w-80">
+        <p className="text-sm font-semibold text-gray-800 mb-1">Delete this contract?</p>
+        <p className="text-xs text-gray-500 mb-3">Renters with pending bookings will no longer see it.</p>
+        <div className="flex gap-2 justify-end">
+          <button onClick={() => toast.dismiss(tid)} className="px-3 py-1.5 rounded-lg text-xs font-medium text-gray-600 hover:bg-gray-100">
+            Cancel
+          </button>
           <button
             type="button"
             onClick={async () => {
@@ -98,13 +101,10 @@ const PropertyList = ({ properties, onEdit, onRefresh, API, token }) => {
                 toast.error(err?.response?.data?.detail || 'Failed to delete contract');
               }
             }}
-            className="flex-1 px-3 py-1.5 rounded-md bg-red-500 text-white text-xs hover:bg-red-600"
+            className="px-3 py-1.5 rounded-lg text-xs font-semibold text-white bg-red-500 hover:bg-red-600"
             data-testid="confirm-delete-contract-btn"
           >
             Delete
-          </button>
-          <button type="button" onClick={() => toast.dismiss(tid)} className="flex-1 px-3 py-1.5 rounded-md bg-gray-200 text-gray-700 text-xs hover:bg-gray-300">
-            Cancel
           </button>
         </div>
       </div>

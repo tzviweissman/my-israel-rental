@@ -91,6 +91,12 @@ Build a bilingual (English/Hebrew) rental website named MyIsraelRental.com with 
   - Moved helpers out of server.py: `extract_text_from_pdf/docx/image` → `utils/files.py`; `_translate_text` → `utils/translate.py`; authoritative `sync_all_ical_feeds` rewrite → `utils/helpers.py` (now uses shared `db` from deps, no arg).
   - `server.py` is now **82 lines** (−97%): FastAPI app + CORS + static mount + startup/shutdown + `include_router` of every domain.
   - Tested: 47/47 new regression tests + 12/12 saved-search tests = **59/59 pass** (iteration_13.json). Every one of the 84 endpoints across 11 routers verified reachable.
+- [x] **Dashboard.js refactor — PropertyList + AddPropertyModal extraction** (2026-04-23):
+  - Extracted the 700-line Add/Edit Property modal into `AddPropertyModal.jsx` (918 lines, self-contained: owns form, upload, location dropdown, date pickers, submit/edit logic). Hydrates from `editingProperty` prop.
+  - Extracted the 180-line owner property grid into `PropertyList.jsx` (376 lines, self-contained: owns iCal panel, contract upload/delete, property delete with iframe-safe toast confirms).
+  - Replaced `window.confirm` in delete-property with `toast.custom` (iframe-safe).
+  - **Dashboard.js: 1944 → 593 lines (−69%)**. Removed ~1350 lines of dead state/handlers (propertyForm, uploadedFiles, ical panel state, location search, handleFileUpload, handleAddProperty, handleDeleteProperty, handleChangePassword dup, locationOptions, filteredLocations).
+  - Tested: 9/9 frontend flows pass via testing_agent_v3_fork (iteration_14.json): add/edit/delete flows, iCal panel, location dropdown, contract upload, cross-tab navigation. Zero regressions.
 - [ ] Manager bulk property upload + profile pages
 
 ### P2 - Lower Priority
