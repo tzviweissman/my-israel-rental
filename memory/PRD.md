@@ -78,6 +78,12 @@ Build a bilingual (English/Hebrew) rental website named MyIsraelRental.com with 
   - New Dashboard tab "Alerts" lets renters view & delete their saved searches.
   - Endpoints: `POST/GET/DELETE /api/saved-searches`. Collections: `saved_searches`, `saved_search_alerts`.
   - Files: `backend/utils/saved_search.py`, `frontend/src/components/NotifyMeCard.jsx`, `frontend/src/components/dashboard/SavedSearchesTab.jsx`. Backend pytest: 12/12 green (`/app/backend/tests/test_saved_searches.py`).
+- [x] **Dashboard.js refactor** (2026-04-23):
+  - Extracted 3 large inline tabs into self-contained components: `LikedTab.jsx`, `SubleasesTab.jsx`, `GovernmentServicesTab.jsx` (each owns its own state + fetches).
+  - Replaced blocked `window.confirm` with a shadcn/sonner `toast.custom` confirm pattern for "Remove sublease".
+  - Fixed latent bug: SubleasesTab shared a single `fileRef` inside `.map()` (would misfire when >1 sublease awaited upload). Moved hidden input out of the loop with `uploadTargetId` state.
+  - Dashboard.js: **2624 → 1944 lines (−26%)**. Deleted stale unused `ServicesTab.jsx`.
+  - Tested: full frontend regression pass (iteration_12.json) — all extracted tabs work, pause/activate/remove/upload/copy-link all verified.
 - [ ] Manager bulk property upload + profile pages
 
 ### P2 - Lower Priority

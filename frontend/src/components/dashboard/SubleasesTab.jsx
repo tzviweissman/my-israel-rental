@@ -25,6 +25,9 @@ const SubleasesTab = ({ API, token }) => {
   const [submitting, setSubmitting] = useState(false);
   const [uploadingFor, setUploadingFor] = useState(null);
   const [copiedSignLink, setCopiedSignLink] = useState(null);
+  // Single hidden file input rendered once outside the list. We track which
+  // sublease triggered it so the onChange handler uploads to the correct row.
+  const [uploadTargetId, setUploadTargetId] = useState(null);
   const fileRef = useRef(null);
 
   const authHeaders = { headers: { Authorization: `Bearer ${token}` } };
@@ -218,6 +221,19 @@ const SubleasesTab = ({ API, token }) => {
 
   return (
     <div className="space-y-6" data-testid="subleases-tab">
+      {/* Single shared file picker — triggered per row via uploadTargetId */}
+      <input
+        type="file"
+        ref={fileRef}
+        className="hidden"
+        accept=".pdf,.docx,.jpg,.jpeg,.png,.webp"
+        onChange={(e) => {
+          const file = e.target.files?.[0];
+          if (file && uploadTargetId) handleContractUpload(uploadTargetId, file);
+          e.target.value = '';
+          setUploadTargetId(null);
+        }}
+      />
       <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden shadow-sm">
         <div className="bg-gradient-to-r from-[#1E6A6A] to-[#267a7a] px-6 py-5">
           <div className="flex items-center justify-between">
@@ -506,18 +522,11 @@ const SubleasesTab = ({ API, token }) => {
                       </div>
                     ) : (
                       <div className="flex items-center gap-3">
-                        <input
-                          type="file"
-                          ref={fileRef}
-                          className="hidden"
-                          accept=".pdf,.docx,.jpg,.jpeg,.png,.webp"
-                          onChange={(e) => {
-                            if (e.target.files?.[0]) handleContractUpload(sub.id, e.target.files[0]);
-                            e.target.value = '';
-                          }}
-                        />
                         <button
-                          onClick={() => fileRef.current?.click()}
+                          onClick={() => {
+                            setUploadTargetId(sub.id);
+                            fileRef.current?.click();
+                          }}
                           disabled={uploadingFor === sub.id}
                           className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium border border-dashed border-[#D4AF37]/50 text-[#D4AF37] hover:bg-[#D4AF37]/5 transition-colors disabled:opacity-50"
                           data-testid={`upload-contract-${sub.id}`}
