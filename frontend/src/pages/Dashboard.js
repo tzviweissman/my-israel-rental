@@ -17,6 +17,7 @@ import SubleasesTab from '../components/dashboard/SubleasesTab';
 import GovernmentServicesTab from '../components/dashboard/GovernmentServicesTab';
 import PropertyList from '../components/dashboard/PropertyList';
 import AddPropertyModal from '../components/dashboard/AddPropertyModal';
+import BulkUploadModal from '../components/dashboard/BulkUploadModal';
 
 // Parse a 'YYYY-MM-DD' string as a LOCAL date. `new Date('2026-06-02')` parses
 // as UTC midnight, which shifts back a day when rendered in timezones east of
@@ -37,6 +38,7 @@ const Dashboard = () => {
   const [properties, setProperties] = useState([]);
   const [bookings, setBookings] = useState([]);
   const [showAddProperty, setShowAddProperty] = useState(false);
+  const [showBulkUpload, setShowBulkUpload] = useState(false);
   const [editingProperty, setEditingProperty] = useState(null);
   const [businessLogo, setBusinessLogo] = useState(null);
   const [logoUploading, setLogoUploading] = useState(false);
@@ -357,10 +359,20 @@ const Dashboard = () => {
         <div className="flex items-center justify-between mb-8">
           <h1 className="text-4xl font-bold" style={{ fontFamily: 'Playfair Display' }}>Dashboard</h1>
           {user && user.role !== 'renter' && (
-            <button onClick={() => { setEditingProperty(null); setShowAddProperty(true); }} className="primary-btn flex items-center gap-2" data-testid="add-property-button">
-              <Plus size={20} />
-              {t('dashboard.addProperty')}
-            </button>
+            <div className="flex gap-2">
+              <button
+                onClick={() => setShowBulkUpload(true)}
+                className="secondary-btn flex items-center gap-2"
+                data-testid="bulk-upload-button"
+              >
+                <Upload size={18} />
+                Bulk Upload
+              </button>
+              <button onClick={() => { setEditingProperty(null); setShowAddProperty(true); }} className="primary-btn flex items-center gap-2" data-testid="add-property-button">
+                <Plus size={20} />
+                {t('dashboard.addProperty')}
+              </button>
+            </div>
           )}
           {user && user.role === 'renter' && (
             <button onClick={() => { setActiveTab('subleases'); }} className="primary-btn flex items-center gap-2" data-testid="sublease-property-button">
@@ -550,6 +562,13 @@ const Dashboard = () => {
               onClose={() => { setShowAddProperty(false); setEditingProperty(null); }}
               editingProperty={editingProperty}
               onSaved={fetchProperties}
+              API={API}
+              token={token}
+            />
+            <BulkUploadModal
+              isOpen={showBulkUpload}
+              onClose={() => setShowBulkUpload(false)}
+              onDone={fetchProperties}
               API={API}
               token={token}
             />

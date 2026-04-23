@@ -26,7 +26,7 @@ from utils.contract_template import ensure_templates as ensure_contract_template
 from utils.helpers import sync_all_ical_feeds  # noqa: E402
 
 # Domain routers — order doesn't matter (all share the /api prefix)
-from routes import admin, auth, bookings, chat, contracts, ical, misc, notifications, properties, saved_searches, subleases  # noqa: E402
+from routes import admin, auth, bookings, bulk_upload, chat, contracts, ical, misc, notifications, properties, saved_searches, subleases  # noqa: E402
 
 logging.basicConfig(
     level=logging.INFO,
@@ -40,6 +40,7 @@ api_router = APIRouter(prefix="/api")
 for mod in (
     auth,
     properties,
+    bulk_upload,
     bookings,
     subleases,
     contracts,

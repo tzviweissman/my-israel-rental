@@ -1,0 +1,63 @@
+{
+  "summary": "End-to-end testing of Ship Manager Bulk Property Upload (backend + frontend). All 15 pytest cases pass. Full UI wizard flow validated: template download buttons, paste input, parse/preview, role-based 403 for renters, commit persistence, auto-skip of step 4 when no image_filenames, success screen, list refresh. Cleanup done.",
+  "backend_issues": {
+    "critical": [],
+    "minor": []
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_bulk_upload.py",
+    "/app/test_reports/pytest/bulk_upload_results.xml"
+  ],
+  "backend_coverage": {
+    "GET /api/properties/bulk/template?fmt=csv": "PASS - header+sample row, attachment disposition",
+    "GET /api/properties/bulk/template?fmt=xlsx": "PASS - valid .xlsx (PK zip magic, correct mime)",
+    "GET /api/properties/bulk/template?fmt=pdf": "PASS - 400 returned",
+    "POST /api/properties/bulk/parse (CSV)": "PASS - 3 valid + 1 invalid, error mentions 'rental_type' is required",
+    "POST /api/properties/bulk/parse (XLSX)": "PASS - 2 valid parsed",
+    "POST /api/properties/bulk/parse (paste tab)": "PASS",
+    "POST /api/properties/bulk/parse (paste comma)": "PASS",
+    "POST /api/properties/bulk/parse (no input)": "PASS - 400",
+    "POST /api/properties/bulk/parse (renter)": "PASS - 403",
+    "POST /api/properties/bulk/commit": "PASS - 3 created, each retrievable via GET /api/properties/{id} with correct owner_id + title",
+    "POST /api/properties/bulk/commit (renter)": "PASS - 403",
+    "POST /api/properties/bulk/commit (invalid rows)": "PASS - skipped with error",
+    "POST /api/properties/bulk/images": "PASS - subfolder filename match works; missing filenames tracked; property.images patched",
+    "POST /api/properties/bulk/images (renter)": "PASS - 403",
+    "POST /api/properties/bulk/images (bad zip)": "PASS - 400"
+  },
+  "frontend_coverage": {
+    "bulk-upload-button next to Add Property": "PASS - visible on owner dashboard",
+    "bulk-upload-modal opens on click": "PASS",
+    "Step 1 - CSV + XLSX download cards": "PASS - both data-testid buttons rendered",
+    "Step 2 - paste input accepts rows": "PASS",
+    "Step 3 - preview summary chips (valid/invalid/selected)": "PASS - shows '2 valid · 1 invalid · 2 selected to create'",
+    "Step 3 - invalid row checkbox disabled + inline error": "PASS - row 3 disabled, shows \"'rental_type' is required\"",
+    "Step 3 - valid rows auto-selected": "PASS - row 1 checked by default",
+    "Commit button label reflects selected count": "PASS - 'Create 2 properties'",
+    "Step 4 skipped when no image_filenames": "PASS - bulk-step-4 not rendered, jumped directly to step 5",
+    "Step 5 success screen": "PASS - '2 properties created'",
+    "List refresh after Done": "PASS - TEST_UI_V1 + TEST_UI_V2 visible in My Properties",
+    "No console errors from modal": "PASS (only pre-existing React non-boolean jsx attribute warning noise)"
+  },
+  "critical_code_review_comments": [
+    "bulk_upload.py line 292: the branch `_normalize_row(row) if any(isinstance(v, str) for v in row.values()) else row` is fragile. If a client sends already-normalized rows (all non-string after parse), the second validate uses the raw row without defaulting image_filenames — works today because the parse endpoint returns strings mixed with parsed values, but a purely machine-generated commit payload could surprise. Consider always running _normalize_row with idempotent coercions.",
+    "bulk_upload.py /images: the loop always issues an update_one even when no filenames resolve, which clears pending_image_filenames prematurely. Minor — UX is fine because the wizard doesn't re-attempt after skip.",
+    "BulkUploadModal.jsx header still says '4-step wizard' in the JSDoc but there are actually 5 steps (Template, Input, Preview, Images, Done).",
+    "No critical issues found; endpoints + wizard are cleanly implemented."
+  ],
+  "updated_files": [
+    "/app/backend/tests/test_bulk_upload.py (new - 15 pytest cases)"
+  ],
+  "success_rate": {"backend": "100%", "frontend": "100%"},
+  "test_credentials": "owner@test.com / Test1234! (owner role), renter@test.com / Test1234! (renter role) — loaded via /app/backend/tests/.env.test TEST_OWNER2_* / TEST_RENTER2_*",
+  "seed_data_creation": "Test properties created during backend+frontend runs (TEST_BULK_*, TEST_IMG_*, TEST_UI_V1, TEST_UI_V2) — all cleaned up via DELETE /api/properties/{id} after the tests completed. Database left in original state.",
+  "retest_needed": false,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "Bulk upload module is solid. If extending, note: (1) _normalize_row uses ';' as list separator, not comma; (2) PropertyCreate model is the canonical validator; (3) image ZIP matching is by Path.name so subfolders work; (4) permissions use payload['role'] in (owner, manager, admin). Test file: /app/backend/tests/test_bulk_upload.py.",
+  "rca of the issue": "N/A - no bugs found"
+}
