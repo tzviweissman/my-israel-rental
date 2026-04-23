@@ -191,6 +191,14 @@ const PropertyList = ({ properties, onEdit, onRefresh, API, token }) => {
         : property.images[0]
       : 'https://images.pexels.com/photos/1669799/pexels-photo-1669799.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940';
 
+  // "NEW" badge on bulk-created listings, fades out after 24h so managers
+  // can spot the ones they just uploaded without scrolling.
+  const isFreshBulkUpload = (property) => {
+    if (!property.bulk_created || !property.created_at) return false;
+    const ageMs = Date.now() - new Date(property.created_at).getTime();
+    return ageMs < 24 * 60 * 60 * 1000;
+  };
+
   return (
     <div className="mb-12">
       <h2 className="text-2xl font-bold mb-6" style={{ fontFamily: 'Playfair Display' }}>{t('dashboard.myProperties')}</h2>
@@ -198,9 +206,20 @@ const PropertyList = ({ properties, onEdit, onRefresh, API, token }) => {
         {properties.map((property) => (
           <div key={property.id} className="bg-white rounded-2xl border border-[#E5E5E5] overflow-hidden" data-testid={`dashboard-property-${property.id}`}>
             <div
-              className="h-48 bg-gray-200"
+              className="h-48 bg-gray-200 relative"
               style={{ backgroundImage: `url(${propImage(property)})`, backgroundSize: 'cover', backgroundPosition: 'center' }}
-            />
+            >
+              {isFreshBulkUpload(property) && (
+                <span
+                  className="absolute top-3 left-3 px-2.5 py-1 rounded-full text-[10px] font-bold tracking-[0.1em] uppercase shadow-md"
+                  style={{ backgroundColor: '#D4AF37', color: '#1E6A6A' }}
+                  data-testid={`new-badge-${property.id}`}
+                  title="Added in the last 24 hours via bulk upload"
+                >
+                  New
+                </span>
+              )}
+            </div>
             <div className="p-4">
               <h3 className="text-lg font-bold mb-2">{property.title}</h3>
               <p className="text-gray-600 text-sm mb-4">{property.area}</p>

@@ -308,6 +308,7 @@ async def commit_bulk(body: BulkCommitBody, payload=Depends(verify_token)):
                 "status": "active",
                 "liked_by": [],
                 "pending_image_filenames": image_filenames,  # resolved later by /bulk/images
+                "bulk_created": True,  # drives the "NEW" badge on the dashboard for 24h
             })
             await db.properties.insert_one(doc)
             created.append({"index": i, "id": property_id, "title": doc["title"], "image_filenames": image_filenames})
