@@ -95,8 +95,15 @@ Build a bilingual (English/Hebrew) rental website named MyIsraelRental.com with 
   - Extracted the 700-line Add/Edit Property modal into `AddPropertyModal.jsx` (918 lines, self-contained: owns form, upload, location dropdown, date pickers, submit/edit logic). Hydrates from `editingProperty` prop.
   - Extracted the 180-line owner property grid into `PropertyList.jsx` (376 lines, self-contained: owns iCal panel, contract upload/delete, property delete with iframe-safe toast confirms).
   - Replaced `window.confirm` in delete-property with `toast.custom` (iframe-safe).
-  - **Dashboard.js: 1944 → 593 lines (−69%)**. Removed ~1350 lines of dead state/handlers (propertyForm, uploadedFiles, ical panel state, location search, handleFileUpload, handleAddProperty, handleDeleteProperty, handleChangePassword dup, locationOptions, filteredLocations).
-  - Tested: 9/9 frontend flows pass via testing_agent_v3_fork (iteration_14.json): add/edit/delete flows, iCal panel, location dropdown, contract upload, cross-tab navigation. Zero regressions.
+  - **Dashboard.js: 1944 → 593 lines (−69%)**. Removed ~1350 lines of dead state/handlers.
+  - Tested: 9/9 frontend flows pass via testing_agent_v3_fork (iteration_14.json).
+- [x] **Manager Bulk Property Upload** (2026-04-23):
+  - 4 new backend endpoints in `routes/bulk_upload.py`: template download (CSV+XLSX), parse (CSV/XLSX/paste with live validation), commit (validated rows → DB), images (ZIP → match-by-filename → attach).
+  - Added `openpyxl` dep for XLSX parsing.
+  - Frontend 5-step wizard `BulkUploadModal.jsx`: Template → Input → Preview (with per-row errors + checkbox selection) → Images (auto-skipped when no image_filenames) → Done.
+  - "Bulk Upload" button wired into Dashboard next to "Add Property" for owners/managers.
+  - Permissions: renter role gets 403 on all bulk endpoints.
+  - Tested: 15/15 pytest pass + full frontend wizard validated (iteration_15.json). ZIP subfolder matching verified.
 - [ ] Manager bulk property upload + profile pages
 
 ### P2 - Lower Priority

@@ -4,12 +4,14 @@ import { Download, Upload, FileSpreadsheet, Clipboard, CheckCircle2, XCircle, Al
 import { toast } from 'sonner';
 
 /**
- * 4-step wizard for bulk-creating properties. Steps:
+ * 5-step wizard for bulk-creating properties. Steps:
  *   1. Template   — owner downloads the CSV or XLSX template
  *   2. Input      — upload a CSV/XLSX file OR paste tab/CSV rows
  *   3. Preview    — dry-run parse; shows inline errors per row; owner can
  *                   uncheck rows before commit
- *   4. Images     — optional ZIP upload to attach images by filename
+ *   4. Images     — optional ZIP upload to attach images by filename (auto-
+ *                   skipped when no rows referenced any image_filenames)
+ *   5. Done       — success summary
  */
 const BulkUploadModal = ({ isOpen, onClose, onDone, API, token }) => {
   const [step, setStep] = useState(1);

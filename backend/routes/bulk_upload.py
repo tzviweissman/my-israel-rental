@@ -1,7 +1,8 @@
 """Bulk property upload — parse, preview, commit, attach images.
 
-Workflow:
-  1. POST /properties/bulk/template    → download CSV template
+5-step owner wizard on the frontend (Template → Input → Preview → Images → Done).
+Backend workflow:
+  1. GET  /properties/bulk/template    → download CSV/XLSX template
   2. POST /properties/bulk/parse       → dry-run: parse file/text, validate every row,
                                           return preview + errors (no DB writes)
   3. POST /properties/bulk/commit      → create every valid row in a single transaction
@@ -287,9 +288,10 @@ async def commit_bulk(body: BulkCommitBody, payload=Depends(verify_token)):
     created = []
     skipped = []
     for i, row in enumerate(body.rows, start=1):
-        # Re-validate server-side — never trust client-sent normalization
+        # Always re-normalize + re-validate. Coercions are idempotent so it's safe
+        # to run even if the caller already sent clean values.
         try:
-            normalized = _normalize_row(row) if any(isinstance(v, str) for v in row.values()) else row
+            normalized = _normalize_row(row)
             err = _validate_row(normalized)
             if err:
                 skipped.append({"index": i, "title": row.get("title"), "error": err})
@@ -354,6 +356,7 @@ async def attach_bulk_images(
             continue
 
         new_image_urls = list(prop.get("images") or [])
+        attached_any = False
         for fname in filenames:
             entry = entries.get(Path(fname).name)
             if entry is None:
@@ -370,10 +373,14 @@ async def attach_bulk_images(
             out_path.write_bytes(data)
             new_image_urls.append(f"/api/uploads/{safe_name}")
             results["attached"].append({"property_id": prop_id, "filename": fname, "url": f"/api/uploads/{safe_name}"})
+            attached_any = True
 
-        await db.properties.update_one(
-            {"id": prop_id},
-            {"$set": {"images": new_image_urls}, "$unset": {"pending_image_filenames": ""}},
-        )
+        # Only patch the doc if we actually attached something — otherwise preserve
+        # `pending_image_filenames` so the owner can re-try with a different zip.
+        if attached_any:
+            await db.properties.update_one(
+                {"id": prop_id},
+                {"$set": {"images": new_image_urls}, "$unset": {"pending_image_filenames": ""}},
+            )
 
     return results
