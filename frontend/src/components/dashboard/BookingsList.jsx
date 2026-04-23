@@ -100,16 +100,36 @@ const BookingsList = ({ bookings, onUpdate, user, token, API }) => {
     setCancelModal({ show: true, bookingId, type: 'deny' });
   };
 
-  const handleApproveCancel = async (bookingId) => {
-    try {
-      await axios.post(`${API}/bookings/${bookingId}/approve-cancel`, {}, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      toast.success('Cancellation approved');
-      await onUpdate();
-    } catch (error) {
-      toast.error(error.response?.data?.detail || 'Failed to approve cancellation');
-    }
+  const handleApproveCancel = (bookingId) => {
+    toast.custom((tid) => (
+      <div className="bg-white rounded-xl shadow-xl border border-gray-200 p-4 w-80">
+        <p className="text-sm font-semibold text-gray-800 mb-1">Approve this cancellation?</p>
+        <p className="text-xs text-gray-500 mb-3">The booking will be cancelled and the renter notified.</p>
+        <div className="flex gap-2 justify-end">
+          <button onClick={() => toast.dismiss(tid)} className="px-3 py-1.5 rounded-lg text-xs font-medium text-gray-600 hover:bg-gray-100">
+            Cancel
+          </button>
+          <button
+            onClick={async () => {
+              toast.dismiss(tid);
+              try {
+                await axios.post(`${API}/bookings/${bookingId}/approve-cancel`, {}, {
+                  headers: { Authorization: `Bearer ${token}` }
+                });
+                toast.success('Cancellation approved');
+                await onUpdate();
+              } catch (error) {
+                toast.error(error.response?.data?.detail || 'Failed to approve cancellation');
+              }
+            }}
+            className="px-3 py-1.5 rounded-lg text-xs font-semibold text-white bg-[#1E6A6A] hover:bg-[#175555]"
+            data-testid={`confirm-approve-cancel-${bookingId}`}
+          >
+            Approve
+          </button>
+        </div>
+      </div>
+    ), { duration: 10000 });
   };
 
   const submitCancellation = async (reason) => {

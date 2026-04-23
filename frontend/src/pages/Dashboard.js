@@ -125,19 +125,6 @@ const Dashboard = () => {
     setCancelModal({ show: true, bookingId, type: 'request' });
   };
 
-  const handleApproveCancel = async (bookingId) => {
-    if (!window.confirm('Approve this cancellation request?')) return;
-    try {
-      await axios.post(`${API}/bookings/${bookingId}/approve-cancel`, {}, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      toast.success('Cancellation approved');
-      fetchBookings();
-    } catch (error) {
-      toast.error('Failed to approve cancellation');
-    }
-  };
-
   const handleAcceptBooking = async (bookingId) => {
     // Show custom modal instead of window.confirm (which is blocked in preview)
     setAcceptModal({ show: true, bookingId });
