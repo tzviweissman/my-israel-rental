@@ -158,6 +158,13 @@ Build a bilingual (English/Hebrew) rental website named MyIsraelRental.com with 
   - Initial bug found & fixed: cache keys are full URLs, but backend publishes path prefixes — flipped the matcher from `startsWith` to `includes` so e.g. `/api/admin/properties` matches `https://host/api/admin/properties|token`.
   - **Verified end-to-end in the browser**: remote `mark-booked` → badge appears in our UI within ~1 s with zero user action. Remote unblock → badge disappears. SSE subscriber count goes 0 → 1 on dashboard mount, back to 0 on disconnect.
   - All gates green: `scripts/check.sh` passes, 68/68 regression tests pass.
+- [x] **Bulk Upload — friendly UX rewrite** (2026-04-26):
+  - User feedback: the previous flow handed users a CSV/XLSX template they then had to open in Excel/Notepad — a non-technical user opened the XLSX in Notepad and saw raw binary garbage.
+  - Replaced the 5-step "Template → Input → Preview → Images" wizard with a single **visual editor** as the default: each property is a card with proper inputs (dropdowns for rental_type / property_type / furniture / condition / cancellation, number inputs, currency selector). Essentials always visible; secondary fields (elevator, sukkah, amenities, etc.) hidden behind a one-click "More fields" toggle on each card.
+  - Rows can be added (`+ Add another property`), duplicated, or removed in-place. Inline validation: required fields show row-level error banners before the network call.
+  - **Spreadsheet path preserved** for power users: tucked behind a single-line `Already have your properties in a spreadsheet? Import CSV / XLSX →` affordance. Imports populate the visual editor so users can review/fix before saving.
+  - Same backend (`/parse + /commit + /images`) — frontend serialises rows to TSV before posting. Image attach + done screens unchanged.
+  - **Verified end-to-end**: filled 2 rows (long-term + short-term, mixed currencies, expanded "More fields"), saved, reached "All set!" with 2 properties created. Import panel reveals on demand.
 - [ ] Manager bulk property upload + profile pages
 
 ### P2 - Lower Priority

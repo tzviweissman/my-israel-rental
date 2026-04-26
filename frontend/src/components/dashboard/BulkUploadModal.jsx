@@ -1,442 +1,652 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import axios from 'axios';
-import { Download, Upload, FileSpreadsheet, Clipboard, CheckCircle2, XCircle, AlertCircle, Image as ImageIcon, ArrowRight, ArrowLeft, X } from 'lucide-react';
 import { toast } from 'sonner';
+import {
+  X, Plus, Trash2, Image as ImageIcon, FileSpreadsheet, ArrowLeft,
+  CheckCircle2, AlertCircle, Sparkles, Download,
+} from 'lucide-react';
 
 /**
- * 5-step wizard for bulk-creating properties. Steps:
- *   1. Template   — owner downloads the CSV or XLSX template
- *   2. Input      — upload a CSV/XLSX file OR paste tab/CSV rows
- *   3. Preview    — dry-run parse; shows inline errors per row; owner can
- *                   uncheck rows before commit
- *   4. Images     — optional ZIP upload to attach images by filename (auto-
- *                   skipped when no rows referenced any image_filenames)
- *   5. Done       — success summary
+ * Bulk-upload modal — friendly UX edition.
+ *
+ * Two modes:
+ *   1. Visual editor (default): a stack of property "cards", one per row.
+ *      Add / remove / edit inline with proper inputs. The point is that a
+ *      non-technical user never has to look at a CSV.
+ *   2. Spreadsheet import (advanced): the original file/paste UI, hidden
+ *      behind a small toggle for power users with existing data.
+ *
+ * Both modes funnel through the same backend (/parse + /commit), and both
+ * end at the same image-attach step + success screen.
  */
+
+// Default values for a brand-new property card.
+const blankProperty = () => ({
+  // Required by the backend
+  title: '',
+  address: '',
+  area: '',
+  description: '',
+  rental_type: 'long-term',
+  property_type: 'apartment',
+  bedrooms: 1,
+  bathrooms: 1,
+  floor: 1,
+  square_meters: '',
+  monthly_price: '',
+  nightly_price: '',
+  currency: 'ILS',
+  // Optional — collapsed under "More fields"
+  porch_square_meters: '',
+  porches: 0,
+  has_elevator: 'no',
+  is_shabbat_elevator: 'no',
+  is_tama: 'no',
+  sukkah_compatible: 'no',
+  furniture_option: 'no_furniture',
+  condition: 'good',
+  cancellation_policy: 'flexible',
+  amenities: '',
+  minimum_booking_days: '',
+});
+
+const RENTAL_TYPES = [
+  { v: 'long-term', label: 'Long-term rental' },
+  { v: 'short-term', label: 'Short-term rental' },
+  { v: 'vacation', label: 'Vacation / Airbnb' },
+  { v: 'storage', label: 'Storage' },
+];
+
+const PROPERTY_TYPES = [
+  { v: 'apartment', label: 'Apartment' },
+  { v: 'house', label: 'House' },
+  { v: 'studio', label: 'Studio' },
+  { v: 'duplex', label: 'Duplex' },
+  { v: 'penthouse', label: 'Penthouse' },
+  { v: 'cottage', label: 'Cottage' },
+  { v: 'storage', label: 'Storage unit' },
+];
+
+const FURNITURE = [
+  { v: 'no_furniture', label: 'Unfurnished' },
+  { v: 'partial', label: 'Partially furnished' },
+  { v: 'full', label: 'Fully furnished' },
+];
+
+const CONDITIONS = [
+  { v: 'good', label: 'Good' },
+  { v: 'after_renovation', label: 'After renovation' },
+  { v: 'needs_renovation', label: 'Needs renovation' },
+  { v: 'new', label: 'New' },
+];
+
+const CANCEL_POLICIES = [
+  { v: 'flexible', label: 'Flexible' },
+  { v: 'moderate', label: 'Moderate' },
+  { v: 'strict', label: 'Strict' },
+];
+
 const BulkUploadModal = ({ isOpen, onClose, onDone, API, token }) => {
-  const [step, setStep] = useState(1);
+  // 'editor' = visual rows | 'import' = spreadsheet path | 'images' | 'done'
+  const [stage, setStage] = useState('editor');
+  const [rows, setRows] = useState([blankProperty()]);
+  const [rowErrors, setRowErrors] = useState({}); // index -> server error string
+  const [saving, setSaving] = useState(false);
+  // Spreadsheet path
+  const [showImportPanel, setShowImportPanel] = useState(false);
   const [file, setFile] = useState(null);
   const [pasteText, setPasteText] = useState('');
-  const [parsed, setParsed] = useState(null); // {rows, summary}
-  const [selected, setSelected] = useState(new Set()); // row indices to commit
-  const [committing, setCommitting] = useState(false);
+  // After commit
   const [commitResult, setCommitResult] = useState(null);
   const [zipFile, setZipFile] = useState(null);
   const [attaching, setAttaching] = useState(false);
 
+  // Quick client-side check before we hit the server. Must be declared before
+  // any conditional return so React's rules-of-hooks stays happy.
+  const visibleRowSummary = useMemo(() => {
+    const issues = [];
+    rows.forEach((r, i) => {
+      if (!r.title.trim()) issues.push({ i, msg: 'Title is required' });
+      else if (!r.address.trim()) issues.push({ i, msg: 'Address is required' });
+      else if (!r.area.trim()) issues.push({ i, msg: 'Area is required' });
+      else if (!r.description.trim()) issues.push({ i, msg: 'Description is required' });
+      else if ((r.rental_type === 'long-term' || r.rental_type === 'storage') && !r.monthly_price) issues.push({ i, msg: 'Monthly price is required' });
+      else if ((r.rental_type === 'short-term' || r.rental_type === 'vacation') && !r.nightly_price) issues.push({ i, msg: 'Nightly price is required' });
+    });
+    return issues;
+  }, [rows]);
+
   if (!isOpen) return null;
 
   const authHeaders = { headers: { Authorization: `Bearer ${token}` } };
-  const propertiesWithImages = commitResult?.created?.filter((c) => c.image_filenames?.length > 0) || [];
 
   const reset = () => {
-    setStep(1);
+    setStage('editor');
+    setRows([blankProperty()]);
+    setRowErrors({});
+    setShowImportPanel(false);
     setFile(null);
     setPasteText('');
-    setParsed(null);
-    setSelected(new Set());
     setCommitResult(null);
     setZipFile(null);
   };
 
   const close = () => { reset(); onClose(); };
 
-  const downloadTemplate = (fmt) => {
-    window.open(`${API}/properties/bulk/template?fmt=${fmt}`, '_blank');
+  // -------------------------------------------------------------- editor ---
+  const updateRow = (i, key, value) => {
+    setRows(prev => prev.map((r, idx) => idx === i ? { ...r, [key]: value } : r));
+    if (rowErrors[i]) setRowErrors(prev => { const n = { ...prev }; delete n[i]; return n; });
   };
 
-  const handleParse = async () => {
-    if (!file && !pasteText.trim()) {
-      toast.error('Upload a file or paste your rows first');
+  const addRow = () => setRows(prev => [...prev, blankProperty()]);
+  const duplicateRow = (i) => setRows(prev => [...prev.slice(0, i + 1), { ...prev[i] }, ...prev.slice(i + 1)]);
+  const removeRow = (i) => setRows(prev => prev.length === 1 ? [blankProperty()] : prev.filter((_, idx) => idx !== i));
+
+  const handleSaveAll = async () => {
+    if (visibleRowSummary.length > 0) {
+      const map = {};
+      visibleRowSummary.forEach(({ i, msg }) => { map[i] = msg; });
+      setRowErrors(map);
+      toast.error(`Fix ${visibleRowSummary.length} row(s) before saving`);
       return;
     }
+    setSaving(true);
     try {
-      const formData = new FormData();
-      if (file) formData.append('file', file);
-      if (pasteText.trim()) formData.append('text', pasteText);
-      const res = await axios.post(`${API}/properties/bulk/parse`, formData, {
+      // Send the rows as TSV pasted text — the backend's /parse can read that
+      // path without our needing a new endpoint.
+      const headers = Object.keys(rows[0]);
+      const tsv = [
+        headers.join('\t'),
+        ...rows.map(r => headers.map(h => {
+          const v = r[h];
+          // Normalise boolean-like dropdowns to yes/no the backend expects.
+          if (v === '' || v === null || v === undefined) return '';
+          return String(v).replace(/\t/g, ' ').replace(/\n/g, ' ');
+        }).join('\t')),
+      ].join('\n');
+
+      const fd = new FormData();
+      fd.append('text', tsv);
+      const parseRes = await axios.post(`${API}/properties/bulk/parse`, fd, {
         headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'multipart/form-data' },
       });
-      setParsed(res.data);
-      // Auto-select valid rows
-      const valid = new Set(res.data.rows.filter((r) => r.errors.length === 0).map((r) => r.index));
-      setSelected(valid);
-      setStep(3);
-    } catch (err) {
-      toast.error(err.response?.data?.detail || 'Failed to parse input');
+
+      const parsed = parseRes.data;
+      const errMap = {};
+      let hasError = false;
+      parsed.rows.forEach(p => {
+        if (p.errors.length > 0) {
+          errMap[p.index - 1] = p.errors[0];
+          hasError = true;
+        }
+      });
+      if (hasError) {
+        setRowErrors(errMap);
+        toast.error('Some rows have errors — see them inline');
+        setSaving(false);
+        return;
+      }
+
+      const commitRes = await axios.post(
+        `${API}/properties/bulk/commit`,
+        { rows: parsed.rows.map(r => r.normalized) },
+        authHeaders,
+      );
+      setCommitResult(commitRes.data);
+      toast.success(`${commitRes.data.summary.created} properties created`);
+      setStage('images');
+    } catch (e) {
+      toast.error(e.response?.data?.detail || 'Save failed');
+    } finally {
+      setSaving(false);
     }
   };
 
-  const toggleRow = (idx) => {
-    setSelected((prev) => {
-      const next = new Set(prev);
-      if (next.has(idx)) next.delete(idx); else next.add(idx);
-      return next;
-    });
-  };
-
-  const handleCommit = async () => {
-    const rowsToCommit = parsed.rows
-      .filter((r) => selected.has(r.index) && r.errors.length === 0)
-      .map((r) => r.normalized);
-    if (rowsToCommit.length === 0) {
-      toast.error('Select at least one valid row');
+  // ---------------------------------------------------- spreadsheet import -
+  const handleSpreadsheetImport = async () => {
+    if (!file && !pasteText.trim()) {
+      toast.error('Choose a file or paste rows first');
       return;
     }
-    setCommitting(true);
+    setSaving(true);
     try {
-      const res = await axios.post(`${API}/properties/bulk/commit`, { rows: rowsToCommit }, authHeaders);
-      setCommitResult(res.data);
-      toast.success(`${res.data.summary.created} properties created`);
-      // Skip step 4 if no images to attach
-      setStep(res.data.created.some((c) => c.image_filenames?.length > 0) ? 4 : 5);
-    } catch (err) {
-      toast.error(err.response?.data?.detail || 'Commit failed');
+      const fd = new FormData();
+      if (file) fd.append('file', file);
+      if (pasteText.trim()) fd.append('text', pasteText);
+      const parseRes = await axios.post(`${API}/properties/bulk/parse`, fd, {
+        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'multipart/form-data' },
+      });
+      const parsed = parseRes.data;
+      // Surface every row in the visual editor for inline review
+      const editorRows = parsed.rows.map(p => ({
+        ...blankProperty(),
+        ...p.normalized,
+        // Coerce list / object fields back into strings the inputs expect
+        amenities: Array.isArray(p.normalized?.amenities) ? p.normalized.amenities.join(', ') : (p.normalized?.amenities || ''),
+      }));
+      setRows(editorRows.length ? editorRows : [blankProperty()]);
+      const errMap = {};
+      parsed.rows.forEach((p, i) => { if (p.errors.length) errMap[i] = p.errors[0]; });
+      setRowErrors(errMap);
+      setShowImportPanel(false);
+      setStage('editor');
+      toast.success(
+        parsed.summary.invalid
+          ? `Imported ${parsed.summary.total} rows — ${parsed.summary.invalid} need fixing`
+          : `Imported ${parsed.summary.total} rows — ready to save`,
+      );
+    } catch (e) {
+      toast.error(e.response?.data?.detail || 'Import failed');
     } finally {
-      setCommitting(false);
+      setSaving(false);
     }
   };
+
+  const downloadTemplate = (fmt) => window.open(`${API}/properties/bulk/template?fmt=${fmt}`, '_blank');
+
+  // ------------------------------------------------------------- images ---
+  const propertiesWithImageRefs = (commitResult?.created || []).filter(c => c.image_filenames?.length > 0);
 
   const handleAttachImages = async () => {
     if (!zipFile) {
-      toast.error('Select a ZIP of images first');
+      toast.error('Pick a ZIP of images first');
       return;
     }
     setAttaching(true);
     try {
       const mapping = {};
-      commitResult.created.forEach((c) => {
+      commitResult.created.forEach(c => {
         if (c.image_filenames?.length) mapping[c.id] = c.image_filenames;
       });
-      const formData = new FormData();
-      formData.append('file', zipFile);
-      formData.append('mapping', JSON.stringify(mapping));
-      const res = await axios.post(`${API}/properties/bulk/images`, formData, {
+      const fd = new FormData();
+      fd.append('file', zipFile);
+      fd.append('mapping', JSON.stringify(mapping));
+      const res = await axios.post(`${API}/properties/bulk/images`, fd, {
         headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'multipart/form-data' },
       });
       toast.success(`${res.data.attached.length} images attached${res.data.missing.length ? ` · ${res.data.missing.length} missing` : ''}`);
-      setStep(5);
-    } catch (err) {
-      toast.error(err.response?.data?.detail || 'Image attach failed');
+      setStage('done');
+    } catch (e) {
+      toast.error(e.response?.data?.detail || 'Image attach failed');
     } finally {
       setAttaching(false);
     }
   };
 
-  const finish = () => {
-    onDone && onDone();
-    close();
-  };
-
-  // ------------------------ RENDER ------------------------
-
-  const StepDot = ({ n, label }) => (
-    <div className="flex items-center gap-2">
-      <div
-        className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold transition-colors ${
-          step > n ? 'bg-[#1E6A6A] text-[#D4AF37]'
-          : step === n ? 'bg-[#D4AF37] text-white'
-          : 'bg-gray-200 text-gray-500'
-        }`}
-      >
-        {step > n ? <CheckCircle2 size={14} /> : n}
-      </div>
-      <span className={`text-xs ${step === n ? 'font-bold text-[#1E6A6A]' : 'text-gray-500'}`}>{label}</span>
-    </div>
-  );
-
+  // =========================================================================
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" onClick={close}>
-      <div
-        className="bg-white rounded-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden shadow-2xl flex flex-col"
-        onClick={(e) => e.stopPropagation()}
-        data-testid="bulk-upload-modal"
-      >
+    <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-start justify-center overflow-y-auto p-4 sm:p-8" data-testid="bulk-upload-modal">
+      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-5xl my-auto">
         {/* Header */}
-        <div className="px-6 py-4 border-b border-gray-200 flex items-center justify-between bg-gradient-to-r from-[#fafaf5] to-white">
+        <div className="flex items-start justify-between gap-4 px-6 py-5 border-b border-gray-100">
           <div>
-            <h2 className="text-xl font-bold" style={{ fontFamily: 'Playfair Display' }}>Bulk Upload Properties</h2>
-            <p className="text-xs text-gray-500 mt-0.5">Add multiple listings in one go</p>
+            <h2 className="text-2xl font-bold flex items-center gap-2" style={{ fontFamily: 'Playfair Display' }}>
+              <Sparkles size={20} className="text-[#D4AF37]" />
+              Add multiple properties
+            </h2>
+            <p className="text-sm text-gray-500 mt-0.5">
+              Add as many properties as you want — they're all created in one click.
+            </p>
           </div>
-          <button onClick={close} className="p-2 hover:bg-gray-100 rounded-lg" data-testid="bulk-close-btn">
-            <X size={18} />
+          <button onClick={close} className="p-1.5 rounded-lg hover:bg-gray-100" data-testid="close-bulk-modal">
+            <X size={20} />
           </button>
         </div>
 
-        {/* Stepper */}
-        <div className="px-6 py-3 border-b border-gray-100 flex items-center justify-between gap-2 flex-wrap">
-          <StepDot n={1} label="Template" />
-          <ArrowRight size={14} className="text-gray-300" />
-          <StepDot n={2} label="Input" />
-          <ArrowRight size={14} className="text-gray-300" />
-          <StepDot n={3} label="Preview" />
-          <ArrowRight size={14} className="text-gray-300" />
-          <StepDot n={4} label="Images" />
-          <ArrowRight size={14} className="text-gray-300" />
-          <StepDot n={5} label="Done" />
-        </div>
-
-        {/* Body */}
-        <div className="flex-1 overflow-auto p-6">
-          {step === 1 && (
-            <div className="space-y-4" data-testid="bulk-step-1">
-              <p className="text-sm text-gray-600">
-                Start by downloading our template. It includes all the columns we support, with a sample row showing the expected format.
-                Lists (like amenities and image filenames) use <code className="bg-gray-100 px-1.5 py-0.5 rounded text-xs">;</code> as a separator.
-              </p>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+        {/* ---------------- EDITOR STAGE ---------------- */}
+        {stage === 'editor' && (
+          <div className="px-6 py-5">
+            {/* Tiny "got a spreadsheet?" affordance */}
+            {!showImportPanel && (
+              <div className="flex items-center justify-between mb-4 p-3 rounded-lg bg-amber-50 border border-amber-100">
+                <div className="flex items-center gap-2 text-sm text-amber-900">
+                  <FileSpreadsheet size={16} />
+                  <span>Already have your properties in a spreadsheet?</span>
+                </div>
                 <button
-                  onClick={() => downloadTemplate('csv')}
-                  className="flex items-center gap-3 p-5 rounded-xl border-2 border-dashed border-gray-200 hover:border-[#1E6A6A] hover:bg-[#fafaf5] transition-colors text-left"
-                  data-testid="download-csv-template"
+                  onClick={() => setShowImportPanel(true)}
+                  className="text-xs font-semibold text-amber-900 underline hover:no-underline"
+                  data-testid="show-import-panel"
                 >
-                  <div className="w-12 h-12 rounded-lg bg-[#1E6A6A]/10 flex items-center justify-center"><Download className="text-[#1E6A6A]" size={22} /></div>
-                  <div>
-                    <p className="font-semibold text-gray-800 text-sm">CSV Template</p>
-                    <p className="text-xs text-gray-500">Simplest — opens in Excel, Numbers, or Google Sheets</p>
-                  </div>
-                </button>
-                <button
-                  onClick={() => downloadTemplate('xlsx')}
-                  className="flex items-center gap-3 p-5 rounded-xl border-2 border-dashed border-gray-200 hover:border-[#1E6A6A] hover:bg-[#fafaf5] transition-colors text-left"
-                  data-testid="download-xlsx-template"
-                >
-                  <div className="w-12 h-12 rounded-lg bg-[#D4AF37]/10 flex items-center justify-center"><FileSpreadsheet className="text-[#D4AF37]" size={22} /></div>
-                  <div>
-                    <p className="font-semibold text-gray-800 text-sm">Excel Template (.xlsx)</p>
-                    <p className="text-xs text-gray-500">Preserves cell types — use if you prefer Excel-native</p>
-                  </div>
+                  Import CSV / XLSX →
                 </button>
               </div>
-              <div className="rounded-lg bg-[#1E6A6A]/5 border border-[#1E6A6A]/15 p-3 text-xs text-gray-600">
-                <strong className="text-[#1E6A6A]">Required:</strong> title, rental_type, property_type, bedrooms, area.
-                <br />
-                <strong className="text-[#1E6A6A]">Tip:</strong> You can skip the image_filenames column and upload images later per-property via Edit.
-              </div>
-            </div>
-          )}
+            )}
 
-          {step === 2 && (
-            <div className="space-y-4" data-testid="bulk-step-2">
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                <label className="flex flex-col items-center justify-center gap-2 p-8 rounded-xl border-2 border-dashed border-gray-200 hover:border-[#1E6A6A] hover:bg-[#fafaf5] cursor-pointer transition-colors min-h-[160px]">
-                  <Upload className="text-[#1E6A6A]" size={28} />
-                  <span className="font-semibold text-sm text-gray-800">Upload CSV or XLSX</span>
-                  <span className="text-xs text-gray-500 text-center">{file ? file.name : 'Click or drag a file'}</span>
-                  <input
-                    type="file"
-                    accept=".csv,.xlsx"
-                    className="hidden"
-                    onChange={(e) => setFile(e.target.files?.[0] || null)}
-                    data-testid="bulk-file-input"
-                  />
-                </label>
-                <div className="flex flex-col p-5 rounded-xl border-2 border-dashed border-gray-200 hover:border-[#1E6A6A] transition-colors min-h-[160px]">
-                  <div className="flex items-center gap-2 mb-2">
-                    <Clipboard className="text-[#D4AF37]" size={18} />
-                    <span className="font-semibold text-sm text-gray-800">Or paste rows</span>
-                  </div>
-                  <p className="text-xs text-gray-500 mb-2">Copy rows from Excel/Google Sheets (tab or comma separated)</p>
-                  <textarea
-                    value={pasteText}
-                    onChange={(e) => setPasteText(e.target.value)}
-                    rows={4}
-                    placeholder="title,rental_type,property_type,bedrooms,area,monthly_price..."
-                    className="flex-1 w-full px-3 py-2 rounded-lg border border-gray-200 text-xs font-mono focus:outline-none focus:border-[#1E6A6A] resize-none"
-                    data-testid="bulk-paste-input"
-                  />
+            {showImportPanel && (
+              <div className="mb-5 p-4 rounded-xl border-2 border-dashed border-amber-300 bg-amber-50/50" data-testid="spreadsheet-import-panel">
+                <div className="flex items-center justify-between mb-3">
+                  <p className="text-sm font-semibold text-gray-800">Import from a spreadsheet</p>
+                  <button onClick={() => setShowImportPanel(false)} className="text-xs text-gray-500 hover:text-gray-800" data-testid="close-import-panel">
+                    Close
+                  </button>
+                </div>
+                <p className="text-xs text-gray-600 mb-3">
+                  Need a starting point? <button onClick={() => downloadTemplate('xlsx')} className="underline font-medium" data-testid="download-xlsx">download Excel template</button> or <button onClick={() => downloadTemplate('csv')} className="underline font-medium" data-testid="download-csv">CSV template</button>.
+                </p>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  <label className="block">
+                    <span className="text-xs font-medium text-gray-700">Upload .csv or .xlsx</span>
+                    <input
+                      type="file"
+                      accept=".csv,.xlsx"
+                      onChange={e => setFile(e.target.files?.[0] || null)}
+                      className="mt-1 block w-full text-xs text-gray-700 file:mr-2 file:px-3 file:py-1.5 file:rounded file:border-0 file:bg-black file:text-[#D4AF37] file:text-xs file:font-semibold"
+                      data-testid="bulk-upload-file"
+                    />
+                  </label>
+                  <label className="block">
+                    <span className="text-xs font-medium text-gray-700">…or paste rows from Excel/Sheets</span>
+                    <textarea
+                      value={pasteText}
+                      onChange={e => setPasteText(e.target.value)}
+                      placeholder="Tab- or comma-separated rows, headers in first line"
+                      rows={3}
+                      className="mt-1 block w-full text-xs px-2 py-1.5 rounded border border-gray-300 focus:outline-none focus:ring-1 focus:ring-amber-400"
+                      data-testid="bulk-paste-text"
+                    />
+                  </label>
+                </div>
+                <div className="mt-3 flex justify-end">
+                  <button
+                    onClick={handleSpreadsheetImport}
+                    disabled={saving}
+                    className="px-3 py-1.5 rounded-lg bg-amber-700 text-white text-xs font-semibold hover:bg-amber-800 disabled:opacity-50"
+                    data-testid="bulk-import-btn"
+                  >
+                    {saving ? 'Importing…' : 'Import into editor'}
+                  </button>
                 </div>
               </div>
+            )}
+
+            <div className="space-y-3" data-testid="bulk-rows">
+              {rows.map((row, i) => (
+                <PropertyRowCard
+                  key={i}
+                  index={i}
+                  row={row}
+                  error={rowErrors[i]}
+                  onChange={(k, v) => updateRow(i, k, v)}
+                  onDuplicate={() => duplicateRow(i)}
+                  onRemove={() => removeRow(i)}
+                />
+              ))}
             </div>
-          )}
 
-          {step === 3 && parsed && (
-            <div className="space-y-3" data-testid="bulk-step-3">
-              <div className="flex flex-wrap gap-2 text-xs">
-                <span className="px-3 py-1.5 rounded-full bg-green-100 text-green-700 font-medium flex items-center gap-1.5">
-                  <CheckCircle2 size={12} /> {parsed.summary.valid} valid
-                </span>
-                {parsed.summary.invalid > 0 && (
-                  <span className="px-3 py-1.5 rounded-full bg-red-100 text-red-700 font-medium flex items-center gap-1.5">
-                    <XCircle size={12} /> {parsed.summary.invalid} invalid
-                  </span>
-                )}
-                <span className="px-3 py-1.5 rounded-full bg-gray-100 text-gray-600 font-medium">
-                  {selected.size} selected to create
-                </span>
-              </div>
+            <button
+              onClick={addRow}
+              className="mt-4 w-full py-3 rounded-xl border-2 border-dashed border-gray-300 hover:border-[#1E6A6A] hover:bg-gray-50 text-sm font-semibold text-gray-600 hover:text-[#1E6A6A] flex items-center justify-center gap-2 transition-colors"
+              data-testid="add-row-btn"
+            >
+              <Plus size={16} />
+              Add another property
+            </button>
+          </div>
+        )}
 
-              <div className="rounded-xl border border-gray-200 overflow-hidden">
-                <table className="w-full text-sm">
-                  <thead className="bg-gray-50 border-b border-gray-200">
-                    <tr>
-                      <th className="px-3 py-2 text-left w-10"></th>
-                      <th className="px-3 py-2 text-left w-12">#</th>
-                      <th className="px-3 py-2 text-left">Title</th>
-                      <th className="px-3 py-2 text-left">Area</th>
-                      <th className="px-3 py-2 text-left">Type</th>
-                      <th className="px-3 py-2 text-right">Price</th>
-                      <th className="px-3 py-2 text-left">Status</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {parsed.rows.map((r) => {
-                      const hasErr = r.errors.length > 0;
-                      const title = r.raw.title || '(no title)';
-                      const rt = r.raw.rental_type || '';
-                      const price = r.raw.monthly_price || r.raw.nightly_price || '';
-                      return (
-                        <tr
-                          key={r.index}
-                          className={`border-b border-gray-100 ${hasErr ? 'bg-red-50/50' : ''}`}
-                          data-testid={`bulk-row-${r.index}`}
-                        >
-                          <td className="px-3 py-2">
-                            <input
-                              type="checkbox"
-                              disabled={hasErr}
-                              checked={selected.has(r.index)}
-                              onChange={() => toggleRow(r.index)}
-                              className="accent-[#1E6A6A] w-4 h-4"
-                              data-testid={`bulk-row-check-${r.index}`}
-                            />
-                          </td>
-                          <td className="px-3 py-2 text-gray-500 text-xs">{r.index}</td>
-                          <td className="px-3 py-2 font-medium text-gray-800 max-w-[180px] truncate">{title}</td>
-                          <td className="px-3 py-2 text-gray-600 text-xs max-w-[140px] truncate">{r.raw.area || '-'}</td>
-                          <td className="px-3 py-2 text-xs text-gray-600">{rt}</td>
-                          <td className="px-3 py-2 text-right font-mono text-xs">{price || '-'}</td>
-                          <td className="px-3 py-2 text-xs">
-                            {hasErr ? (
-                              <span className="text-red-600 flex items-center gap-1">
-                                <AlertCircle size={12} /> {r.errors[0]}
-                              </span>
-                            ) : (
-                              <span className="text-green-600">ok</span>
-                            )}
-                          </td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
-              </div>
-              {parsed.rows.length === 0 && (
-                <p className="text-center py-8 text-gray-500 text-sm">No rows found. Check your file has a header row.</p>
-              )}
+        {/* ---------------- IMAGES STAGE ---------------- */}
+        {stage === 'images' && (
+          <div className="px-6 py-5" data-testid="bulk-images-stage">
+            <div className="flex items-center gap-2 mb-2">
+              <CheckCircle2 size={20} className="text-green-600" />
+              <p className="text-lg font-semibold">{commitResult.summary.created} properties created.</p>
             </div>
-          )}
-
-          {step === 4 && (
-            <div className="space-y-4" data-testid="bulk-step-4">
-              <div className="rounded-lg bg-[#1E6A6A]/5 border border-[#1E6A6A]/15 p-3 text-xs text-gray-600">
-                <strong className="text-[#1E6A6A]">{propertiesWithImages.length} of your new properties referenced images.</strong>
-                {' '}Zip those image files together and upload — we'll match by filename and attach them automatically.
-                You can skip this and upload images later per-property.
-              </div>
-
-              <div className="rounded-xl border border-gray-200 p-4 max-h-[240px] overflow-auto">
-                <p className="text-xs text-gray-500 mb-2">Expected filenames:</p>
-                <ul className="space-y-1.5">
-                  {propertiesWithImages.map((p) => (
-                    <li key={p.id} className="flex items-start gap-2 text-xs">
-                      <ImageIcon size={12} className="text-[#D4AF37] shrink-0 mt-0.5" />
-                      <span className="font-medium text-gray-800 min-w-[120px] truncate">{p.title}</span>
-                      <span className="text-gray-500 font-mono truncate">{p.image_filenames.join('; ')}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-
-              <label className="flex flex-col items-center justify-center gap-2 p-6 rounded-xl border-2 border-dashed border-gray-200 hover:border-[#D4AF37] hover:bg-[#fafaf5] cursor-pointer transition-colors">
-                <Upload className="text-[#D4AF37]" size={24} />
-                <span className="font-semibold text-sm text-gray-800">Upload ZIP of images</span>
-                <span className="text-xs text-gray-500">{zipFile ? zipFile.name : 'Nested folders are OK — we match by filename'}</span>
+            {propertiesWithImageRefs.length > 0 ? (
+              <>
+                <p className="text-sm text-gray-600 mb-4">
+                  Some rows referenced image filenames. Drop a ZIP file containing those images and we'll match them automatically.
+                </p>
                 <input
                   type="file"
                   accept=".zip"
-                  className="hidden"
-                  onChange={(e) => setZipFile(e.target.files?.[0] || null)}
-                  data-testid="bulk-zip-input"
+                  onChange={e => setZipFile(e.target.files?.[0] || null)}
+                  className="block w-full text-sm text-gray-700 file:mr-3 file:px-4 file:py-2 file:rounded-lg file:border-0 file:bg-black file:text-[#D4AF37] file:font-semibold"
+                  data-testid="bulk-zip-file"
                 />
-              </label>
-            </div>
-          )}
-
-          {step === 5 && commitResult && (
-            <div className="space-y-4 text-center py-8" data-testid="bulk-step-5">
-              <div className="w-16 h-16 rounded-full bg-green-100 flex items-center justify-center mx-auto">
-                <CheckCircle2 className="text-green-600" size={32} />
-              </div>
-              <div>
-                <h3 className="text-xl font-bold text-gray-800" style={{ fontFamily: 'Playfair Display' }}>
-                  {commitResult.summary.created} {commitResult.summary.created === 1 ? 'property' : 'properties'} created
-                </h3>
-                {commitResult.summary.skipped > 0 && (
-                  <p className="text-xs text-amber-600 mt-1">{commitResult.summary.skipped} skipped due to errors</p>
-                )}
-                <p className="text-sm text-gray-500 mt-2">You can edit individual listings and add more images from your dashboard.</p>
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* Footer */}
-        <div className="px-6 py-4 border-t border-gray-200 flex items-center justify-between bg-white">
-          <button
-            onClick={step === 1 ? close : () => setStep(Math.max(1, step - 1))}
-            className="flex items-center gap-1 text-xs font-medium text-gray-600 hover:text-[#1E6A6A] transition-colors"
-          >
-            {step === 1 ? 'Cancel' : <><ArrowLeft size={14} /> Back</>}
-          </button>
-          <div className="flex gap-2">
-            {step === 1 && (
-              <button onClick={() => setStep(2)} className="px-5 py-2 rounded-lg text-white text-sm font-semibold flex items-center gap-1.5" style={{ backgroundColor: '#1E6A6A' }} data-testid="bulk-next-1">
-                Next <ArrowRight size={14} />
-              </button>
-            )}
-            {step === 2 && (
-              <button onClick={handleParse} className="px-5 py-2 rounded-lg text-white text-sm font-semibold flex items-center gap-1.5" style={{ backgroundColor: '#1E6A6A' }} data-testid="bulk-parse-btn">
-                Parse & Preview <ArrowRight size={14} />
-              </button>
-            )}
-            {step === 3 && (
-              <button
-                onClick={handleCommit}
-                disabled={committing || selected.size === 0}
-                className="px-5 py-2 rounded-lg text-white text-sm font-semibold disabled:opacity-50 flex items-center gap-1.5"
-                style={{ backgroundColor: '#D4AF37' }}
-                data-testid="bulk-commit-btn"
-              >
-                {committing ? 'Creating...' : `Create ${selected.size} ${selected.size === 1 ? 'property' : 'properties'}`}
-              </button>
-            )}
-            {step === 4 && (
+                <div className="mt-4 flex justify-end gap-2">
+                  <button onClick={() => setStage('done')} className="px-4 py-2 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-100" data-testid="skip-images-btn">
+                    Skip images
+                  </button>
+                  <button
+                    onClick={handleAttachImages}
+                    disabled={!zipFile || attaching}
+                    className="px-4 py-2 rounded-lg bg-black text-[#D4AF37] text-sm font-semibold hover:bg-gray-900 disabled:opacity-50"
+                    data-testid="attach-images-btn"
+                  >
+                    {attaching ? 'Attaching…' : 'Attach images'}
+                  </button>
+                </div>
+              </>
+            ) : (
               <>
-                <button onClick={() => setStep(5)} className="px-4 py-2 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-100" data-testid="bulk-skip-images">
-                  Skip — upload later
-                </button>
-                <button
-                  onClick={handleAttachImages}
-                  disabled={attaching || !zipFile}
-                  className="px-5 py-2 rounded-lg text-white text-sm font-semibold disabled:opacity-50 flex items-center gap-1.5"
-                  style={{ backgroundColor: '#1E6A6A' }}
-                  data-testid="bulk-attach-images-btn"
-                >
-                  {attaching ? 'Attaching...' : 'Attach images'}
-                </button>
+                <p className="text-sm text-gray-600">You can add photos to each property later from your dashboard.</p>
+                <div className="mt-4 flex justify-end">
+                  <button onClick={() => setStage('done')} className="px-4 py-2 rounded-lg bg-black text-[#D4AF37] text-sm font-semibold" data-testid="continue-to-done-btn">
+                    Continue
+                  </button>
+                </div>
               </>
             )}
-            {step === 5 && (
-              <button onClick={finish} className="px-5 py-2 rounded-lg text-white text-sm font-semibold" style={{ backgroundColor: '#1E6A6A' }} data-testid="bulk-finish-btn">
-                Done
-              </button>
-            )}
           </div>
-        </div>
+        )}
+
+        {/* ---------------- DONE STAGE ---------------- */}
+        {stage === 'done' && (
+          <div className="px-6 py-10 text-center" data-testid="bulk-done-stage">
+            <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-green-100 mb-4">
+              <CheckCircle2 size={32} className="text-green-600" />
+            </div>
+            <p className="text-2xl font-bold mb-2" style={{ fontFamily: 'Playfair Display' }}>All set!</p>
+            <p className="text-sm text-gray-600 mb-6">
+              {commitResult.summary.created} properties added to your account.
+            </p>
+            <button
+              onClick={() => { onDone && onDone(); close(); }}
+              className="px-6 py-2.5 rounded-lg bg-black text-[#D4AF37] text-sm font-semibold hover:bg-gray-900"
+              data-testid="bulk-finish-btn"
+            >
+              Done
+            </button>
+          </div>
+        )}
+
+        {/* ---------------- FOOTER ---------------- */}
+        {stage === 'editor' && (
+          <div className="flex items-center justify-between gap-3 px-6 py-4 border-t border-gray-100 bg-gray-50 rounded-b-2xl" data-testid="bulk-footer">
+            <div className="text-xs text-gray-500">
+              {rows.length} propert{rows.length === 1 ? 'y' : 'ies'}
+              {Object.keys(rowErrors).length > 0 && (
+                <span className="ml-2 text-red-600 font-medium">· {Object.keys(rowErrors).length} need fixing</span>
+              )}
+            </div>
+            <div className="flex gap-2">
+              <button onClick={close} className="px-4 py-2 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-100" data-testid="bulk-cancel-btn">
+                Cancel
+              </button>
+              <button
+                onClick={handleSaveAll}
+                disabled={saving}
+                className="px-5 py-2 rounded-lg bg-black text-[#D4AF37] text-sm font-semibold hover:bg-gray-900 disabled:opacity-50"
+                data-testid="bulk-save-btn"
+              >
+                {saving ? 'Saving…' : `Save ${rows.length} propert${rows.length === 1 ? 'y' : 'ies'}`}
+              </button>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
 };
+
+// ===========================================================================
+// Property card — used inside the visual editor.
+// ===========================================================================
+const PropertyRowCard = ({ index, row, error, onChange, onDuplicate, onRemove }) => {
+  const [showMore, setShowMore] = useState(false);
+  const isPerNight = row.rental_type === 'short-term' || row.rental_type === 'vacation';
+
+  return (
+    <div
+      className={`rounded-xl border ${error ? 'border-red-300 bg-red-50/30' : 'border-gray-200 bg-white'} p-4 transition-colors`}
+      data-testid={`bulk-row-${index}`}
+    >
+      <div className="flex items-center justify-between mb-3">
+        <span className="text-xs font-bold text-gray-400 uppercase tracking-wide">Property {index + 1}</span>
+        <div className="flex items-center gap-1">
+          <button
+            onClick={onDuplicate}
+            className="text-xs font-medium text-gray-500 hover:text-[#1E6A6A] px-2 py-1 rounded hover:bg-gray-50"
+            title="Duplicate this row"
+            data-testid={`duplicate-row-${index}`}
+          >
+            Duplicate
+          </button>
+          <button
+            onClick={onRemove}
+            className="p-1.5 rounded text-red-500 hover:bg-red-50"
+            title="Remove this row"
+            data-testid={`remove-row-${index}`}
+          >
+            <Trash2 size={14} />
+          </button>
+        </div>
+      </div>
+
+      {error && (
+        <div className="mb-3 flex items-start gap-2 text-xs text-red-700 bg-red-50 border border-red-200 rounded-lg px-3 py-2" data-testid={`row-error-${index}`}>
+          <AlertCircle size={14} className="shrink-0 mt-0.5" />
+          <span>{error}</span>
+        </div>
+      )}
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+        <Input label="Title*" value={row.title} onChange={v => onChange('title', v)} placeholder="Cozy Tel Aviv 2BR" testid={`r${index}-title`} />
+        <Input label="Address*" value={row.address} onChange={v => onChange('address', v)} placeholder="King George 10" testid={`r${index}-address`} />
+        <Input label="Area / Neighborhood*" value={row.area} onChange={v => onChange('area', v)} placeholder="Jerusalem - Rehavia" testid={`r${index}-area`} />
+        <Select label="Rental type*" value={row.rental_type} onChange={v => onChange('rental_type', v)} options={RENTAL_TYPES} testid={`r${index}-rental_type`} />
+        <Select label="Property type" value={row.property_type} onChange={v => onChange('property_type', v)} options={PROPERTY_TYPES} testid={`r${index}-property_type`} />
+        <NumberInput label="Bedrooms" value={row.bedrooms} onChange={v => onChange('bedrooms', v)} testid={`r${index}-bedrooms`} />
+        <NumberInput label="Bathrooms" value={row.bathrooms} onChange={v => onChange('bathrooms', v)} testid={`r${index}-bathrooms`} />
+        <NumberInput label="Floor" value={row.floor} onChange={v => onChange('floor', v)} testid={`r${index}-floor`} />
+        <NumberInput label="Square meters" value={row.square_meters} onChange={v => onChange('square_meters', v)} testid={`r${index}-square_meters`} placeholder="e.g. 75" />
+
+        <div className="grid grid-cols-[1fr_90px] gap-2">
+          <NumberInput
+            label={isPerNight ? 'Nightly price*' : 'Monthly price*'}
+            value={isPerNight ? row.nightly_price : row.monthly_price}
+            onChange={v => onChange(isPerNight ? 'nightly_price' : 'monthly_price', v)}
+            testid={`r${index}-price`}
+            placeholder="100"
+          />
+          <Select
+            label="Currency"
+            value={row.currency}
+            onChange={v => onChange('currency', v)}
+            options={[{ v: 'ILS', label: '₪ ILS' }, { v: 'USD', label: '$ USD' }]}
+            testid={`r${index}-currency`}
+          />
+        </div>
+
+        <div className="md:col-span-2">
+          <Textarea
+            label="Description*"
+            value={row.description}
+            onChange={v => onChange('description', v)}
+            placeholder="Bright, recently renovated 2-bedroom apartment with a balcony…"
+            testid={`r${index}-description`}
+          />
+        </div>
+      </div>
+
+      <button
+        onClick={() => setShowMore(!showMore)}
+        className="mt-3 text-xs font-medium text-[#1E6A6A] hover:underline"
+        data-testid={`toggle-more-${index}`}
+      >
+        {showMore ? '↑ Hide extra fields' : '↓ More fields (amenities, elevator, sukkah, etc.)'}
+      </button>
+
+      {showMore && (
+        <div className="mt-3 pt-3 border-t border-gray-100 grid grid-cols-1 md:grid-cols-3 gap-3">
+          <NumberInput label="Porches" value={row.porches} onChange={v => onChange('porches', v)} testid={`r${index}-porches`} />
+          <NumberInput label="Porch sqm" value={row.porch_square_meters} onChange={v => onChange('porch_square_meters', v)} testid={`r${index}-porch_sqm`} />
+          <NumberInput label="Min booking days" value={row.minimum_booking_days} onChange={v => onChange('minimum_booking_days', v)} testid={`r${index}-min_days`} />
+          <Select label="Furniture" value={row.furniture_option} onChange={v => onChange('furniture_option', v)} options={FURNITURE} testid={`r${index}-furniture`} />
+          <Select label="Condition" value={row.condition} onChange={v => onChange('condition', v)} options={CONDITIONS} testid={`r${index}-condition`} />
+          <Select label="Cancellation policy" value={row.cancellation_policy} onChange={v => onChange('cancellation_policy', v)} options={CANCEL_POLICIES} testid={`r${index}-cancel_policy`} />
+          <Select label="Elevator" value={row.has_elevator} onChange={v => onChange('has_elevator', v)} options={YESNO} testid={`r${index}-elevator`} />
+          <Select label="Shabbat elevator" value={row.is_shabbat_elevator} onChange={v => onChange('is_shabbat_elevator', v)} options={YESNO} testid={`r${index}-shabbat`} />
+          <Select label="TAMA / earthquake reinforced" value={row.is_tama} onChange={v => onChange('is_tama', v)} options={YESNO} testid={`r${index}-tama`} />
+          <Select label="Sukkah compatible" value={row.sukkah_compatible} onChange={v => onChange('sukkah_compatible', v)} options={YESNO} testid={`r${index}-sukkah`} />
+          <div className="md:col-span-3">
+            <Input label="Amenities (comma-separated)" value={row.amenities} onChange={v => onChange('amenities', v)} placeholder="wifi, parking, AC" testid={`r${index}-amenities`} />
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+const YESNO = [{ v: 'no', label: 'No' }, { v: 'yes', label: 'Yes' }];
+
+// ----- tiny presentational input wrappers -----
+const Input = ({ label, value, onChange, placeholder, testid }) => (
+  <label className="block">
+    <span className="block text-[11px] font-semibold text-gray-600 uppercase tracking-wide mb-1">{label}</span>
+    <input
+      type="text"
+      value={value || ''}
+      onChange={e => onChange(e.target.value)}
+      placeholder={placeholder}
+      className="w-full px-3 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#1E6A6A]/30 focus:border-[#1E6A6A] text-sm"
+      data-testid={testid}
+    />
+  </label>
+);
+
+const NumberInput = ({ label, value, onChange, placeholder, testid }) => (
+  <label className="block">
+    <span className="block text-[11px] font-semibold text-gray-600 uppercase tracking-wide mb-1">{label}</span>
+    <input
+      type="number"
+      value={value === '' || value === undefined || value === null ? '' : value}
+      onChange={e => onChange(e.target.value === '' ? '' : Number(e.target.value))}
+      placeholder={placeholder}
+      className="w-full px-3 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#1E6A6A]/30 focus:border-[#1E6A6A] text-sm"
+      data-testid={testid}
+    />
+  </label>
+);
+
+const Select = ({ label, value, onChange, options, testid }) => (
+  <label className="block">
+    <span className="block text-[11px] font-semibold text-gray-600 uppercase tracking-wide mb-1">{label}</span>
+    <select
+      value={value || ''}
+      onChange={e => onChange(e.target.value)}
+      className="w-full px-3 py-2 rounded-lg border border-gray-200 bg-white focus:outline-none focus:ring-2 focus:ring-[#1E6A6A]/30 focus:border-[#1E6A6A] text-sm"
+      data-testid={testid}
+    >
+      {options.map(o => <option key={o.v} value={o.v}>{o.label}</option>)}
+    </select>
+  </label>
+);
+
+const Textarea = ({ label, value, onChange, placeholder, testid }) => (
+  <label className="block">
+    <span className="block text-[11px] font-semibold text-gray-600 uppercase tracking-wide mb-1">{label}</span>
+    <textarea
+      value={value || ''}
+      onChange={e => onChange(e.target.value)}
+      placeholder={placeholder}
+      rows={2}
+      className="w-full px-3 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#1E6A6A]/30 focus:border-[#1E6A6A] text-sm"
+      data-testid={testid}
+    />
+  </label>
+);
 
 export default BulkUploadModal;
