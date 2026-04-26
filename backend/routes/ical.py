@@ -1,9 +1,9 @@
 """Auto-extracted from server.py during the 2026-04 refactor."""
 import uuid
 from datetime import UTC, datetime
-from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException
+from fastapi.responses import Response
 from icalendar import Calendar as iCalCalendar
 from icalendar import Event as iCalEvent
 
@@ -16,7 +16,7 @@ api_router = router  # alias so existing @api_router decorators work verbatim
 
 
 @api_router.post("/properties/{property_id}/ical")
-async def add_ical_url(property_id: str, data: ICalUrlInput, payload: dict = Depends(verify_token)) -> Any:
+async def add_ical_url(property_id: str, data: ICalUrlInput, payload: dict = Depends(verify_token)) -> dict:
     prop = await db.properties.find_one({"id": property_id}, {"_id": 0})
     if not prop:
         raise HTTPException(status_code=404, detail="Property not found")
@@ -36,7 +36,7 @@ async def add_ical_url(property_id: str, data: ICalUrlInput, payload: dict = Dep
 
 
 @api_router.delete("/properties/{property_id}/ical")
-async def remove_ical_url(property_id: str, data: ICalUrlInput, payload: dict = Depends(verify_token)) -> Any:
+async def remove_ical_url(property_id: str, data: ICalUrlInput, payload: dict = Depends(verify_token)) -> dict:
     prop = await db.properties.find_one({"id": property_id}, {"_id": 0})
     if not prop:
         raise HTTPException(status_code=404, detail="Property not found")
@@ -51,7 +51,7 @@ async def remove_ical_url(property_id: str, data: ICalUrlInput, payload: dict = 
 
 
 @api_router.get("/properties/{property_id}/ical-export")
-async def export_ical(property_id: str) -> Any:
+async def export_ical(property_id: str) -> Response:
     prop = await db.properties.find_one({"id": property_id}, {"_id": 0, "title": 1})
     if not prop:
         raise HTTPException(status_code=404, detail="Property not found")
@@ -73,12 +73,11 @@ async def export_ical(property_id: str) -> Any:
         event.add('uid', b.get('id', str(uuid.uuid4())))
         event.add('dtstamp', datetime.now(UTC))
         cal.add_component(event)
-    from starlette.responses import Response
     return Response(content=cal.to_ical(), media_type="text/calendar", headers={"Content-Disposition": f"attachment; filename={property_id}.ics"})
 
 
 @api_router.get("/properties/{property_id}/blocked-dates")
-async def get_blocked_dates(property_id: str) -> Any:
+async def get_blocked_dates(property_id: str) -> dict:
     # Internal bookings
     bookings = await db.bookings.find(
         {"property_id": property_id, "status": {"$in": ["pending", "confirmed"]}},
@@ -100,7 +99,7 @@ async def get_blocked_dates(property_id: str) -> Any:
 
 
 @api_router.post("/properties/{property_id}/ical-sync")
-async def manual_ical_sync(property_id: str, payload: dict = Depends(verify_token)) -> Any:
+async def manual_ical_sync(property_id: str, payload: dict = Depends(verify_token)) -> dict:
     prop = await db.properties.find_one({"id": property_id}, {"_id": 0})
     if not prop:
         raise HTTPException(status_code=404, detail="Property not found")

@@ -3,7 +3,6 @@ import asyncio
 import os
 import uuid
 from datetime import UTC, datetime, timedelta
-from typing import Any
 
 import bcrypt
 from fastapi import APIRouter, Depends, HTTPException, Request
@@ -20,7 +19,7 @@ api_router = router  # alias so existing @api_router decorators work verbatim
 
 
 @api_router.post("/auth/register")
-async def register(user_data: UserRegister) -> Any:
+async def register(user_data: UserRegister) -> dict:
     existing = await db.users.find_one({"email": user_data.email})
     if existing:
         raise HTTPException(status_code=400, detail="Email already registered")
@@ -51,7 +50,7 @@ async def register(user_data: UserRegister) -> Any:
 
 
 @api_router.post("/auth/login")
-async def login(credentials: UserLogin) -> Any:
+async def login(credentials: UserLogin) -> dict:
     user = await db.users.find_one({"email": credentials.email}, {"_id": 0})
     if not user:
         raise HTTPException(status_code=401, detail="Invalid credentials")
@@ -64,7 +63,7 @@ async def login(credentials: UserLogin) -> Any:
 
 
 @api_router.get("/auth/me")
-async def get_current_user(payload: dict = Depends(verify_token)) -> Any:
+async def get_current_user(payload: dict = Depends(verify_token)) -> dict:
     user = await db.users.find_one({"id": payload['user_id']}, {"_id": 0, "password": 0})
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
@@ -73,7 +72,7 @@ async def get_current_user(payload: dict = Depends(verify_token)) -> Any:
 
 
 @api_router.post("/auth/forgot-password")
-async def forgot_password(request: ForgotPasswordRequest, req: Request) -> Any:
+async def forgot_password(request: ForgotPasswordRequest, req: Request) -> dict:
     user = await db.users.find_one({"email": request.email}, {"_id": 0})
     if not user:
         raise HTTPException(status_code=404, detail="No account found with that email address.")
@@ -115,7 +114,7 @@ async def forgot_password(request: ForgotPasswordRequest, req: Request) -> Any:
 
 
 @api_router.post("/auth/reset-password")
-async def reset_password(request: ResetPasswordRequest) -> Any:
+async def reset_password(request: ResetPasswordRequest) -> dict:
     reset_doc = await db.password_resets.find_one({"token": request.token, "used": False}, {"_id": 0})
     if not reset_doc:
         raise HTTPException(status_code=400, detail="Invalid or expired reset token")
@@ -142,7 +141,7 @@ async def reset_password(request: ResetPasswordRequest) -> Any:
 
 
 @api_router.post("/auth/change-password")
-async def change_password(request: ChangePasswordRequest, payload: dict = Depends(verify_token)) -> Any:
+async def change_password(request: ChangePasswordRequest, payload: dict = Depends(verify_token)) -> dict:
     user = await db.users.find_one({"id": payload['user_id']}, {"_id": 0})
     if not user:
         raise HTTPException(status_code=404, detail="User not found")

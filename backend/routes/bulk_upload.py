@@ -180,7 +180,7 @@ def _parse_paste(text: str) -> List[dict]:
 # ------------------------ ENDPOINTS ------------------------
 
 @api_router.get("/properties/bulk/template")
-async def download_template(fmt: str = "csv") -> Any:
+async def download_template(fmt: str = "csv") -> StreamingResponse:
     """Stream a blank CSV template with instructions in row 2."""
     if fmt not in ("csv", "xlsx"):
         raise HTTPException(status_code=400, detail="fmt must be csv or xlsx")
@@ -236,7 +236,7 @@ async def parse_bulk(
     file: UploadFile | None = File(None),
     text: str | None = Form(None),
     payload: dict = Depends(verify_token),
-) -> Any:
+) -> dict:
     """Dry run: parse the input and return [{row, normalized, errors}]. No DB writes."""
     if payload.get("role") not in ("owner", "manager", "admin"):
         raise HTTPException(status_code=403, detail="Only owners and managers can bulk-upload")
@@ -278,7 +278,7 @@ async def parse_bulk(
 
 
 @api_router.post("/properties/bulk/commit")
-async def commit_bulk(body: BulkCommitBody, payload: dict = Depends(verify_token)) -> Any:
+async def commit_bulk(body: BulkCommitBody, payload: dict = Depends(verify_token)) -> dict:
     """Create every row in `body.rows`. Rows must already be normalized (call /parse first)."""
     if payload.get("role") not in ("owner", "manager", "admin"):
         raise HTTPException(status_code=403, detail="Only owners and managers can bulk-upload")
@@ -321,7 +321,7 @@ async def attach_bulk_images(
     file: UploadFile = File(...),
     mapping: str = Form(...),
     payload: dict = Depends(verify_token),
-) -> Any:
+) -> dict:
     """Unzip `file`, match entries by filename, and attach to properties.
 
     `mapping` is a JSON string: {property_id: [filename1, filename2, ...]}.
@@ -390,7 +390,7 @@ async def attach_bulk_images_flat(
     mapping: str = Form(...),
     files: List[UploadFile] = File(...),
     payload: dict = Depends(verify_token),
-) -> Any:
+) -> dict:
     """Attach N individual image uploads to properties by a property_id→[filename] map.
 
     This is the flat-file sibling of /properties/bulk/images. Owners drop

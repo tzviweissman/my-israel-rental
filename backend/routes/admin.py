@@ -1,7 +1,7 @@
 """Auto-extracted from server.py during the 2026-04 refactor."""
 import uuid
 from datetime import UTC, datetime, timedelta
-from typing import Any, List
+from typing import List
 
 from fastapi import APIRouter, Depends, HTTPException, Request
 from pydantic import BaseModel
@@ -14,7 +14,7 @@ api_router = router  # alias so existing @api_router decorators work verbatim
 
 
 @api_router.post("/webhooks/postmark")
-async def postmark_webhook(request: Request, token: str | None = None) -> Any:
+async def postmark_webhook(request: Request, token: str | None = None) -> dict:
     """Receive delivery / bounce / spam-complaint events from Postmark.
 
     Configure the URL in Postmark → Servers → Message Streams → outbound →
@@ -87,7 +87,7 @@ async def postmark_webhook(request: Request, token: str | None = None) -> Any:
 
 
 @api_router.get("/admin/email-health")
-async def admin_email_health(payload: dict = Depends(verify_token)) -> Any:
+async def admin_email_health(payload: dict = Depends(verify_token)) -> dict:
     """Admin-only: email deliverability stats + recent events."""
     if payload['role'] != 'admin':
         raise HTTPException(status_code=403, detail="Admin access required")
@@ -131,7 +131,7 @@ _exchange_cache = {"rate": None, "fetched_at": None}
 
 
 @api_router.get("/admin/dashboard")
-async def get_admin_dashboard(payload: dict = Depends(verify_token)) -> Any:
+async def get_admin_dashboard(payload: dict = Depends(verify_token)) -> dict:
     if payload['role'] != 'admin':
         raise HTTPException(status_code=403, detail="Admin access required")
     
@@ -157,7 +157,7 @@ async def get_admin_dashboard(payload: dict = Depends(verify_token)) -> Any:
 
 
 @api_router.get("/admin/users")
-async def get_all_users(payload: dict = Depends(verify_token)) -> Any:
+async def get_all_users(payload: dict = Depends(verify_token)) -> list[dict]:
     if payload['role'] != 'admin':
         raise HTTPException(status_code=403, detail="Admin access required")
     users = await db.users.find({}, {"_id": 0, "password": 0}).sort("created_at", -1).to_list(1000)
@@ -165,7 +165,7 @@ async def get_all_users(payload: dict = Depends(verify_token)) -> Any:
 
 
 @api_router.put("/admin/users/{user_id}/status")
-async def update_user_status(user_id: str, payload: dict = Depends(verify_token)) -> Any:
+async def update_user_status(user_id: str, payload: dict = Depends(verify_token)) -> dict:
     if payload['role'] != 'admin':
         raise HTTPException(status_code=403, detail="Admin access required")
     user = await db.users.find_one({"id": user_id}, {"_id": 0})
@@ -177,7 +177,7 @@ async def update_user_status(user_id: str, payload: dict = Depends(verify_token)
 
 
 @api_router.delete("/admin/users/{user_id}")
-async def delete_user(user_id: str, payload: dict = Depends(verify_token)) -> Any:
+async def delete_user(user_id: str, payload: dict = Depends(verify_token)) -> dict:
     if payload['role'] != 'admin':
         raise HTTPException(status_code=403, detail="Admin access required")
     if user_id == payload['user_id']:
@@ -188,7 +188,7 @@ async def delete_user(user_id: str, payload: dict = Depends(verify_token)) -> An
 
 
 @api_router.get("/admin/properties")
-async def get_all_properties_admin(payload: dict = Depends(verify_token)) -> Any:
+async def get_all_properties_admin(payload: dict = Depends(verify_token)) -> list[dict]:
     if payload['role'] != 'admin':
         raise HTTPException(status_code=403, detail="Admin access required")
     properties = await db.properties.find({}, {"_id": 0}).sort("created_at", -1).to_list(1000)
@@ -232,7 +232,7 @@ async def admin_mark_property_booked(
     property_id: str,
     block: AdminBlockIn,
     payload: dict = Depends(verify_token),
-) -> Any:
+) -> dict:
     """Super-admin: block a property for a date range or indefinitely.
 
     The block is additive — existing renter bookings are NOT modified.
@@ -267,7 +267,7 @@ async def admin_mark_property_booked(
 
 
 @api_router.get("/admin/properties/{property_id}/blocks")
-async def admin_list_property_blocks(property_id: str, payload: dict = Depends(verify_token)) -> Any:
+async def admin_list_property_blocks(property_id: str, payload: dict = Depends(verify_token)) -> list[dict]:
     if payload['role'] != 'admin':
         raise HTTPException(status_code=403, detail="Admin access required")
     blocks = await db.admin_blocks.find(
@@ -277,7 +277,7 @@ async def admin_list_property_blocks(property_id: str, payload: dict = Depends(v
 
 
 @api_router.delete("/admin/properties/blocks/{block_id}")
-async def admin_remove_block(block_id: str, payload: dict = Depends(verify_token)) -> Any:
+async def admin_remove_block(block_id: str, payload: dict = Depends(verify_token)) -> dict:
     if payload['role'] != 'admin':
         raise HTTPException(status_code=403, detail="Admin access required")
     result = await db.admin_blocks.delete_one({"id": block_id})
@@ -297,7 +297,7 @@ class BulkMarkBookedIn(BaseModel):
 async def admin_bulk_mark_booked(
     data: BulkMarkBookedIn,
     payload: dict = Depends(verify_token),
-) -> Any:
+) -> dict:
     if payload['role'] != 'admin':
         raise HTTPException(status_code=403, detail="Admin access required")
     if not data.property_ids:
@@ -339,7 +339,7 @@ async def admin_bulk_mark_booked(
 
 
 @api_router.put("/admin/properties/{property_id}/status")
-async def toggle_property_status(property_id: str, payload: dict = Depends(verify_token)) -> Any:
+async def toggle_property_status(property_id: str, payload: dict = Depends(verify_token)) -> dict:
     if payload['role'] != 'admin':
         raise HTTPException(status_code=403, detail="Admin access required")
     prop = await db.properties.find_one({"id": property_id}, {"_id": 0})
@@ -351,7 +351,7 @@ async def toggle_property_status(property_id: str, payload: dict = Depends(verif
 
 
 @api_router.get("/admin/chats")
-async def get_all_chats(payload: dict = Depends(verify_token)) -> Any:
+async def get_all_chats(payload: dict = Depends(verify_token)) -> list[dict]:
     if payload['role'] != 'admin':
         raise HTTPException(status_code=403, detail="Admin access required")
     
@@ -384,7 +384,7 @@ async def get_all_chats(payload: dict = Depends(verify_token)) -> Any:
 
 
 @api_router.get("/admin/document-services")
-async def get_all_document_services(payload: dict = Depends(verify_token)) -> Any:
+async def get_all_document_services(payload: dict = Depends(verify_token)) -> list[dict]:
     if payload['role'] != 'admin':
         raise HTTPException(status_code=403, detail="Admin access required")
     services = await db.document_services.find({}, {"_id": 0}).sort("created_at", -1).to_list(1000)
@@ -396,7 +396,7 @@ async def get_all_document_services(payload: dict = Depends(verify_token)) -> An
 
 
 @api_router.put("/admin/document-services/{service_id}/status")
-async def update_service_status(service_id: str, status: str, payload: dict = Depends(verify_token)) -> Any:
+async def update_service_status(service_id: str, status: str, payload: dict = Depends(verify_token)) -> dict:
     if payload['role'] != 'admin':
         raise HTTPException(status_code=403, detail="Admin access required")
     if status not in ["pending", "in_progress", "completed", "rejected"]:
@@ -406,7 +406,7 @@ async def update_service_status(service_id: str, status: str, payload: dict = De
 
 
 @api_router.get("/admin/settings")
-async def get_site_settings(payload: dict = Depends(verify_token)) -> Any:
+async def get_site_settings(payload: dict = Depends(verify_token)) -> dict:
     if payload['role'] != 'admin':
         raise HTTPException(status_code=403, detail="Admin access required")
     settings = await db.site_settings.find_one({"key": "global"}, {"_id": 0})
@@ -416,7 +416,7 @@ async def get_site_settings(payload: dict = Depends(verify_token)) -> Any:
 
 
 @api_router.put("/admin/settings")
-async def update_site_settings(settings: SiteSettings, payload: dict = Depends(verify_token)) -> Any:
+async def update_site_settings(settings: SiteSettings, payload: dict = Depends(verify_token)) -> dict:
     if payload['role'] != 'admin':
         raise HTTPException(status_code=403, detail="Admin access required")
     settings_doc = settings.model_dump()

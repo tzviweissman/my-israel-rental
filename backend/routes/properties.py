@@ -3,7 +3,6 @@ import asyncio
 import os
 import uuid
 from datetime import UTC, datetime
-from typing import Any
 
 from fastapi import APIRouter, Depends, File, HTTPException, UploadFile
 
@@ -25,7 +24,7 @@ api_router = router  # alias so existing @api_router decorators work verbatim
 
 
 @api_router.post("/properties")
-async def create_property(property_data: PropertyCreate, payload: dict = Depends(verify_token)) -> Any:
+async def create_property(property_data: PropertyCreate, payload: dict = Depends(verify_token)) -> dict:
     property_id = str(uuid.uuid4())
     property_doc = property_data.model_dump()
     property_doc['id'] = property_id
@@ -63,7 +62,7 @@ async def get_properties(
     condition: str | None = None,
     date_from: str | None = None,
     date_to: str | None = None
-) -> Any:
+) -> list[dict]:
     query: dict = {}
     if rental_type:
         query['rental_type'] = rental_type
@@ -149,7 +148,7 @@ async def get_properties(
 
 
 @api_router.get("/properties/{property_id}")
-async def get_property(property_id: str) -> Any:
+async def get_property(property_id: str) -> dict:
     property_data = await db.properties.find_one({"id": property_id}, {"_id": 0})
     if not property_data:
         raise HTTPException(status_code=404, detail="Property not found")
@@ -166,7 +165,7 @@ async def get_property(property_id: str) -> Any:
 
 
 @api_router.put("/properties/{property_id}")
-async def update_property(property_id: str, property_data: PropertyCreate, payload: dict = Depends(verify_token)) -> Any:
+async def update_property(property_id: str, property_data: PropertyCreate, payload: dict = Depends(verify_token)) -> dict:
     existing = await db.properties.find_one({"id": property_id}, {"_id": 0})
     if not existing:
         raise HTTPException(status_code=404, detail="Property not found")
@@ -199,7 +198,7 @@ async def update_property(property_id: str, property_data: PropertyCreate, paylo
 
 
 @api_router.delete("/properties/{property_id}")
-async def delete_property(property_id: str, payload: dict = Depends(verify_token)) -> Any:
+async def delete_property(property_id: str, payload: dict = Depends(verify_token)) -> dict:
     existing = await db.properties.find_one({"id": property_id}, {"_id": 0})
     if not existing:
         raise HTTPException(status_code=404, detail="Property not found")
@@ -215,7 +214,7 @@ async def delete_property(property_id: str, payload: dict = Depends(verify_token
 
 
 @api_router.post("/properties/{property_id}/like")
-async def toggle_like_property(property_id: str, payload: dict = Depends(verify_token)) -> Any:
+async def toggle_like_property(property_id: str, payload: dict = Depends(verify_token)) -> dict:
     prop = await db.properties.find_one({"id": property_id}, {"_id": 0})
     if not prop:
         raise HTTPException(status_code=404, detail="Property not found")
@@ -240,7 +239,7 @@ async def toggle_like_property(property_id: str, payload: dict = Depends(verify_
 
 
 @api_router.get("/liked-properties")
-async def get_liked_properties(payload: dict = Depends(verify_token)) -> Any:
+async def get_liked_properties(payload: dict = Depends(verify_token)) -> list[dict]:
     likes = await db.liked_properties.find(
         {"user_id": payload['user_id']}, {"_id": 0}
     ).sort("created_at", -1).to_list(500)
@@ -265,7 +264,7 @@ async def get_liked_properties(payload: dict = Depends(verify_token)) -> Any:
 
 
 @api_router.get("/liked-property-ids")
-async def get_liked_property_ids(payload: dict = Depends(verify_token)) -> Any:
+async def get_liked_property_ids(payload: dict = Depends(verify_token)) -> list[str]:
     likes = await db.liked_properties.find(
         {"user_id": payload['user_id']}, {"_id": 0, "property_id": 1}
     ).to_list(500)
@@ -277,7 +276,7 @@ async def upload_property_contract(
     property_id: str,
     file: UploadFile = File(...),
     payload: dict = Depends(verify_token)
-) -> Any:
+) -> dict:
     """Upload contract for a property (owner/manager only)"""
     # Verify property exists and user is owner
     property_data = await db.properties.find_one({"id": property_id}, {"_id": 0})
@@ -408,7 +407,7 @@ async def upload_property_contract(
 
 
 @api_router.get("/properties/{property_id}/contract")
-async def get_property_contract(property_id: str) -> Any:
+async def get_property_contract(property_id: str) -> dict:
     """Get contract details for a property"""
     property_data = await db.properties.find_one(
         {"id": property_id}, 
@@ -427,7 +426,7 @@ async def get_property_contract(property_id: str) -> Any:
 
 
 @api_router.delete("/properties/{property_id}/contract")
-async def delete_property_contract(property_id: str, payload: dict = Depends(verify_token)) -> Any:
+async def delete_property_contract(property_id: str, payload: dict = Depends(verify_token)) -> dict:
     """Delete contract for a property"""
     property_data = await db.properties.find_one({"id": property_id}, {"_id": 0})
     if not property_data:
@@ -452,7 +451,7 @@ async def delete_property_contract(property_id: str, payload: dict = Depends(ver
 
 
 @api_router.get("/manager/{manager_id}/properties")
-async def get_manager_properties(manager_id: str) -> Any:
+async def get_manager_properties(manager_id: str) -> dict:
     properties = await db.properties.find({"owner_id": manager_id}, {"_id": 0}).to_list(1000)
     manager = await db.users.find_one({"id": manager_id, "role": {"$in": ["manager", "owner"]}}, {"_id": 0, "password": 0})
     

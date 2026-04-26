@@ -135,6 +135,13 @@ Build a bilingual (English/Hebrew) rental website named MyIsraelRental.com with 
   - Extracted Overview, Users, Chats, Services, and Settings tabs into self-contained components under `/app/frontend/src/components/admin/`. Each tab owns its own data fetching, state, and actions.
   - `AdminDashboard.js`: **546 → 103 lines (–81%)**. The page is now a pure tab router that owns only `dashboard` (for the loading gate) + `emailHealth` + `activeTab`.
   - Smoke-tested every tab end-to-end: all 6 sections render, zero console errors.
+- [x] **Tightened return annotations + body-level type checking** (2026-04-26):
+  - Wrote a 2-pass AST analyzer that walks each function, inspects every `return` (literal dicts/lists, awaited `to_list()`/`find_one()`, `FileResponse`/`Response` constructors, single-var traces), and tightens `-> Any` to `-> dict` / `-> list[dict]` / `-> list[str]` / `-> FileResponse` / `-> Response`.
+  - Tightened **93 of 95** route returns (97.9%). The 2 remaining are legitimate: `_parse_number` (generic caster) and `_get_db` (Motor DB handle, no upstream stubs).
+  - Hoisted lazy `from starlette.responses import …` imports in `routes/contracts.py` and `routes/ical.py` to module level so annotations resolve.
+  - Flipped `check_untyped_defs = True` in `mypy.ini` — mypy now type-checks function bodies, not just signatures. Currently **0 errors**.
+  - **Real bug caught immediately**: my over-tightening of `liked-property-ids` to `list[dict]` was rejected at runtime by FastAPI's response-validation (the endpoint actually returns `list[str]`). Fixed → `-> list[str]`. **This is a free integration check tightened types now buy us.**
+  - Verified across 17 real endpoints (admin + renter + owner) — all 200. 110/110 pytest cases pass. `scripts/check.sh` all-green.
 - [ ] Manager bulk property upload + profile pages
 
 ### P2 - Lower Priority

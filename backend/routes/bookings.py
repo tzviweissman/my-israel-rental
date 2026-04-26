@@ -24,7 +24,7 @@ api_router = router  # alias so existing @api_router decorators work verbatim
 
 
 @api_router.post("/bookings")
-async def create_booking(booking_data: BookingCreate, payload: dict = Depends(verify_token)) -> Any:
+async def create_booking(booking_data: BookingCreate, payload: dict = Depends(verify_token)) -> dict:
     property_data = await db.properties.find_one({"id": booking_data.property_id}, {"_id": 0})
     if not property_data:
         raise HTTPException(status_code=404, detail="Property not found")
@@ -129,7 +129,7 @@ async def create_booking(booking_data: BookingCreate, payload: dict = Depends(ve
 
 
 @api_router.get("/bookings")
-async def get_bookings(payload: dict = Depends(verify_token)) -> Any:
+async def get_bookings(payload: dict = Depends(verify_token)) -> list[dict]:
     query = {}
     if payload['role'] == 'renter':
         query['renter_id'] = payload['user_id']
@@ -155,7 +155,7 @@ async def get_bookings(payload: dict = Depends(verify_token)) -> Any:
 
 
 @api_router.post("/bookings/{booking_id}/accept")
-async def accept_booking(booking_id: str, payload: dict = Depends(verify_token)) -> Any:
+async def accept_booking(booking_id: str, payload: dict = Depends(verify_token)) -> dict:
     """Owner/Manager accepts a pending booking"""
     booking = await db.bookings.find_one({"id": booking_id}, {"_id": 0})
     if not booking:
@@ -268,7 +268,7 @@ async def accept_booking(booking_id: str, payload: dict = Depends(verify_token))
 
 
 @api_router.post("/bookings/{booking_id}/cancel")
-async def cancel_booking(booking_id: str, reason: str = Body(..., embed=True), payload: dict = Depends(verify_token)) -> Any:
+async def cancel_booking(booking_id: str, reason: str = Body(..., embed=True), payload: dict = Depends(verify_token)) -> dict:
     """Owner/Manager direct cancellation"""
     booking = await db.bookings.find_one({"id": booking_id}, {"_id": 0})
     if not booking:
@@ -313,7 +313,7 @@ async def cancel_booking(booking_id: str, reason: str = Body(..., embed=True), p
 
 
 @api_router.post("/bookings/{booking_id}/request-cancel")
-async def request_cancel_booking(booking_id: str, reason: str = Body(..., embed=True), payload: dict = Depends(verify_token)) -> Any:
+async def request_cancel_booking(booking_id: str, reason: str = Body(..., embed=True), payload: dict = Depends(verify_token)) -> dict:
     """Renter requests cancellation"""
     booking = await db.bookings.find_one({"id": booking_id}, {"_id": 0})
     if not booking:
@@ -353,7 +353,7 @@ async def request_cancel_booking(booking_id: str, reason: str = Body(..., embed=
 
 
 @api_router.post("/bookings/{booking_id}/sign-contract")
-async def sign_booking_contract(booking_id: str, body: dict = Body(...), payload: dict = Depends(verify_token)) -> Any:
+async def sign_booking_contract(booking_id: str, body: dict = Body(...), payload: dict = Depends(verify_token)) -> dict:
     """Renter signs the rental contract after owner acceptance"""
     booking = await db.bookings.find_one({"id": booking_id}, {"_id": 0})
     if not booking:
@@ -600,7 +600,7 @@ async def sign_booking_contract(booking_id: str, body: dict = Body(...), payload
 
 
 @api_router.post("/bookings/{booking_id}/approve-cancel")
-async def approve_cancel_request(booking_id: str, payload: dict = Depends(verify_token)) -> Any:
+async def approve_cancel_request(booking_id: str, payload: dict = Depends(verify_token)) -> dict:
     """Owner approves cancellation request"""
     booking = await db.bookings.find_one({"id": booking_id}, {"_id": 0})
     if not booking:
@@ -647,7 +647,7 @@ async def approve_cancel_request(booking_id: str, payload: dict = Depends(verify
 
 
 @api_router.post("/bookings/{booking_id}/deny-cancel")
-async def deny_cancel_request(booking_id: str, denial_reason: str = Body(..., embed=True), payload: dict = Depends(verify_token)) -> Any:
+async def deny_cancel_request(booking_id: str, denial_reason: str = Body(..., embed=True), payload: dict = Depends(verify_token)) -> dict:
     """Owner denies cancellation request"""
     booking = await db.bookings.find_one({"id": booking_id}, {"_id": 0})
     if not booking:
@@ -693,7 +693,7 @@ async def deny_cancel_request(booking_id: str, denial_reason: str = Body(..., em
 
 
 @api_router.post("/bookings/{booking_id}/translate-contract")
-async def translate_booking_contract(booking_id: str, body: dict = Body(default={}), payload: dict = Depends(verify_token)) -> Any:
+async def translate_booking_contract(booking_id: str, body: dict = Body(default={}), payload: dict = Depends(verify_token)) -> dict:
     """Translate the property contract associated with a booking.
 
     Designed for RENTERS who receive a contract in a language they don't read.

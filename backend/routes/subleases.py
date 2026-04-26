@@ -1,7 +1,6 @@
 """Auto-extracted from server.py during the 2026-04 refactor."""
 import uuid
 from datetime import UTC, datetime
-from typing import Any
 
 from fastapi import APIRouter, Body, Depends, File, HTTPException, UploadFile
 
@@ -14,7 +13,7 @@ api_router = router  # alias so existing @api_router decorators work verbatim
 
 
 @api_router.post("/subleases")
-async def create_sublease(sublease_data: SubleaseCreate, payload: dict = Depends(verify_token)) -> Any:
+async def create_sublease(sublease_data: SubleaseCreate, payload: dict = Depends(verify_token)) -> dict:
     # Verify the renter has a booking for this property
     booking = await db.bookings.find_one({
         "property_id": sublease_data.property_id,
@@ -61,7 +60,7 @@ async def create_sublease(sublease_data: SubleaseCreate, payload: dict = Depends
 
 
 @api_router.get("/subleases")
-async def list_subleases(area: str | None = None) -> Any:
+async def list_subleases(area: str | None = None) -> list[dict]:
     query: dict = {"active": True}
     if area:
         query["area"] = {"$regex": area, "$options": "i"}
@@ -71,7 +70,7 @@ async def list_subleases(area: str | None = None) -> Any:
 
 
 @api_router.get("/my-subleases")
-async def get_my_subleases(payload: dict = Depends(verify_token)) -> Any:
+async def get_my_subleases(payload: dict = Depends(verify_token)) -> list[dict]:
     subleases = await db.subleases.find(
         {"subleasor_id": payload['user_id']}, {"_id": 0}
     ).sort("created_at", -1).to_list(100)
@@ -88,7 +87,7 @@ async def get_my_subleases(payload: dict = Depends(verify_token)) -> Any:
 
 
 @api_router.put("/subleases/{sublease_id}")
-async def update_sublease(sublease_id: str, updates: dict = Body(...), payload: dict = Depends(verify_token)) -> Any:
+async def update_sublease(sublease_id: str, updates: dict = Body(...), payload: dict = Depends(verify_token)) -> dict:
     sublease = await db.subleases.find_one({"id": sublease_id}, {"_id": 0})
     if not sublease:
         raise HTTPException(status_code=404, detail="Sublease not found")
@@ -109,7 +108,7 @@ async def upload_sublease_contract(
     sublease_id: str,
     file: UploadFile = File(...),
     payload: dict = Depends(verify_token)
-) -> Any:
+) -> dict:
     sublease = await db.subleases.find_one({"id": sublease_id}, {"_id": 0})
     if not sublease:
         raise HTTPException(status_code=404, detail="Sublease not found")
@@ -181,7 +180,7 @@ async def upload_sublease_contract(
 
 
 @api_router.get("/contracts/sign/{sign_token}")
-async def get_contract_for_signing(sign_token: str) -> Any:
+async def get_contract_for_signing(sign_token: str) -> dict:
     """Public endpoint - sublessee accesses contract via sign_token (no auth needed)"""
     contract = await db.contracts.find_one({"sign_token": sign_token}, {"_id": 0})
     if not contract:
@@ -213,7 +212,7 @@ async def get_contract_for_signing(sign_token: str) -> Any:
 
 
 @api_router.post("/contracts/sign/{sign_token}")
-async def sign_contract_public(sign_token: str, body: dict = Body(...)) -> Any:
+async def sign_contract_public(sign_token: str, body: dict = Body(...)) -> dict:
     """Public endpoint - sublessee signs the contract via sign_token"""
     contract = await db.contracts.find_one({"sign_token": sign_token}, {"_id": 0})
     if not contract:
@@ -266,7 +265,7 @@ async def sign_contract_public(sign_token: str, body: dict = Body(...)) -> Any:
 
 
 @api_router.delete("/subleases/{sublease_id}")
-async def delete_sublease(sublease_id: str, payload: dict = Depends(verify_token)) -> Any:
+async def delete_sublease(sublease_id: str, payload: dict = Depends(verify_token)) -> dict:
     sublease = await db.subleases.find_one({"id": sublease_id}, {"_id": 0})
     if not sublease:
         raise HTTPException(status_code=404, detail="Sublease not found")

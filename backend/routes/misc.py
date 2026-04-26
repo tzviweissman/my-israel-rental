@@ -1,7 +1,7 @@
 """Auto-extracted from server.py during the 2026-04 refactor."""
 import uuid
 from datetime import UTC, datetime
-from typing import Any, List
+from typing import List
 
 from emergentintegrations.llm.chat import LlmChat, UserMessage
 from fastapi import APIRouter, Body, Depends, File, HTTPException, UploadFile
@@ -23,13 +23,13 @@ api_router = router  # alias so existing @api_router decorators work verbatim
 
 
 @api_router.get("/exchange-rate")
-async def get_exchange_rate() -> Any:
+async def get_exchange_rate() -> dict:
     rate = await get_usd_ils_rate()
     return {"usd_to_ils": round(rate, 4), "ils_to_usd": round(1 / rate, 4)}
 
 
 @api_router.post("/translate")
-async def translate_text(request: TranslationRequest) -> Any:
+async def translate_text(request: TranslationRequest) -> dict:
     try:
         chat = LlmChat(
             api_key=EMERGENT_LLM_KEY,
@@ -47,7 +47,7 @@ async def translate_text(request: TranslationRequest) -> Any:
 
 
 @api_router.post("/document-service")
-async def request_document_service(request: DocumentServiceRequest, payload: dict = Depends(verify_token)) -> Any:
+async def request_document_service(request: DocumentServiceRequest, payload: dict = Depends(verify_token)) -> dict:
     service_id = str(uuid.uuid4())
     service_doc = request.model_dump()
     service_doc['id'] = service_id
@@ -60,7 +60,7 @@ async def request_document_service(request: DocumentServiceRequest, payload: dic
 
 
 @api_router.get("/document-service")
-async def get_document_services(payload: dict = Depends(verify_token)) -> Any:
+async def get_document_services(payload: dict = Depends(verify_token)) -> list[dict]:
     if payload['role'] == 'admin':
         services = await db.document_services.find({}, {"_id": 0}).to_list(1000)
     else:
@@ -69,7 +69,7 @@ async def get_document_services(payload: dict = Depends(verify_token)) -> Any:
 
 
 @api_router.post("/service-requests")
-async def create_service_request(request_data: dict = Body(...), payload: dict = Depends(verify_token)) -> Any:
+async def create_service_request(request_data: dict = Body(...), payload: dict = Depends(verify_token)) -> dict:
     request_id = str(uuid.uuid4())
     service_doc = {
         "id": request_id,
@@ -86,7 +86,7 @@ async def create_service_request(request_data: dict = Body(...), payload: dict =
 
 
 @api_router.get("/service-requests")
-async def list_service_requests(payload: dict = Depends(verify_token)) -> Any:
+async def list_service_requests(payload: dict = Depends(verify_token)) -> list[dict]:
     query = {"user_id": payload['user_id']} if payload.get('role') != 'admin' else {}
     requests = await db.service_requests.find(query, {"_id": 0}).sort("created_at", -1).to_list(500)
     return requests
@@ -94,7 +94,7 @@ async def list_service_requests(payload: dict = Depends(verify_token)) -> Any:
 
 
 @api_router.post("/contact")
-async def submit_contact_form(request: ContactRequest) -> Any:
+async def submit_contact_form(request: ContactRequest) -> dict:
     contact_id = str(uuid.uuid4())
     contact_doc = request.model_dump()
     contact_doc['id'] = contact_id
@@ -109,7 +109,7 @@ async def submit_contact_form(request: ContactRequest) -> Any:
 
 
 @api_router.post("/upload")
-async def upload_file(file: UploadFile = File(...), payload: dict = Depends(verify_token)) -> Any:
+async def upload_file(file: UploadFile = File(...), payload: dict = Depends(verify_token)) -> dict:
     if not file.content_type:
         raise HTTPException(status_code=400, detail="Could not determine file type")
 
@@ -140,7 +140,7 @@ async def upload_file(file: UploadFile = File(...), payload: dict = Depends(veri
 
 
 @api_router.post("/upload/multiple")
-async def upload_multiple_files(files: List[UploadFile] = File(...), payload: dict = Depends(verify_token)) -> Any:
+async def upload_multiple_files(files: List[UploadFile] = File(...), payload: dict = Depends(verify_token)) -> list[dict]:
     results: list[dict] = []
     for file in files:
         is_image = file.content_type in ALLOWED_IMAGE_TYPES
@@ -173,7 +173,7 @@ async def upload_multiple_files(files: List[UploadFile] = File(...), payload: di
 
 
 @api_router.delete("/upload/{filename}")
-async def delete_upload(filename: str, payload: dict = Depends(verify_token)) -> Any:
+async def delete_upload(filename: str, payload: dict = Depends(verify_token)) -> dict:
     file_path = UPLOAD_DIR / filename
     if file_path.exists():
         file_path.unlink()
@@ -182,7 +182,7 @@ async def delete_upload(filename: str, payload: dict = Depends(verify_token)) ->
 
 
 @api_router.post("/user/logo")
-async def upload_user_logo(file: UploadFile = File(...), payload: dict = Depends(verify_token)) -> Any:
+async def upload_user_logo(file: UploadFile = File(...), payload: dict = Depends(verify_token)) -> dict:
     if not (file.content_type or "").startswith("image/"):
         raise HTTPException(status_code=400, detail="File must be an image")
     ext = (file.filename or "").split(".")[-1] if "." in (file.filename or "") else "png"
@@ -197,7 +197,7 @@ async def upload_user_logo(file: UploadFile = File(...), payload: dict = Depends
 
 
 @api_router.delete("/user/logo")
-async def delete_user_logo(payload: dict = Depends(verify_token)) -> Any:
+async def delete_user_logo(payload: dict = Depends(verify_token)) -> dict:
     user = await db.users.find_one({"id": payload["user_id"]}, {"_id": 0})
     if user and user.get("business_logo"):
         old_file = UPLOAD_DIR / user["business_logo"].split("/")[-1]
