@@ -131,6 +131,10 @@ Build a bilingual (English/Hebrew) rental website named MyIsraelRental.com with 
   - Cleaned up **603 ruff auto-fixable issues** (400 unused imports, 65 `datetime.timezone.utc` → `datetime.UTC`, 88 `Optional[X]` → `X | None`, 21 unsorted imports) introduced by the earlier server.py auto-extract refactor.
   - Killed the 11 `from models import *` star-imports across `routes/` — each file now explicitly lists the Pydantic models it actually uses.
   - Added single-entry-point `/app/backend/scripts/check.sh` that runs ruff + mypy + pytest-gate in sequence — **one green check**. All three gates currently pass.
+- [x] **Full AdminDashboard tab extraction** (2026-04-26):
+  - Extracted Overview, Users, Chats, Services, and Settings tabs into self-contained components under `/app/frontend/src/components/admin/`. Each tab owns its own data fetching, state, and actions.
+  - `AdminDashboard.js`: **546 → 103 lines (–81%)**. The page is now a pure tab router that owns only `dashboard` (for the loading gate) + `emailHealth` + `activeTab`.
+  - Smoke-tested every tab end-to-end: all 6 sections render, zero console errors.
 - [ ] Manager bulk property upload + profile pages
 
 ### P2 - Lower Priority
