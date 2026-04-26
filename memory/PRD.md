@@ -165,6 +165,16 @@ Build a bilingual (English/Hebrew) rental website named MyIsraelRental.com with 
   - **Spreadsheet path preserved** for power users: tucked behind a single-line `Already have your properties in a spreadsheet? Import CSV / XLSX →` affordance. Imports populate the visual editor so users can review/fix before saving.
   - Same backend (`/parse + /commit + /images`) — frontend serialises rows to TSV before posting. Image attach + done screens unchanged.
   - **Verified end-to-end**: filled 2 rows (long-term + short-term, mixed currencies, expanded "More fields"), saved, reached "All set!" with 2 properties created. Import panel reveals on demand.
+- [x] **Bulk Upload — Smart Paste (LLM-powered)** (2026-04-26):
+  - User feedback: pasted 3 messy WhatsApp property descriptions (mixed English + Hebrew, free-form bullets) and the old paste-to-CSV path created 20 garbage rows with no extracted data.
+  - New backend endpoint `POST /api/properties/bulk/extract` calls Claude Sonnet via Emergent LLM key + `emergentintegrations`. Detailed system prompt covers: rental_type / property_type detection, Hebrew → English translation for titles/descriptions while preserving transliterated place names, ground-floor → 0, basement → -1, "1.5 bedroom" → 1.5, "Rosh Chodesh Iyar" → string available_from, yes/no boolean dropdowns, currency inference from "nis"/"₪"/"$".
+  - New "Got listings from WhatsApp, email, or a colleague?" panel at the top of the bulk modal. User pastes anything → Claude extracts → editor populates with structured rows ready for review.
+  - **Verified with the user's exact 3-property paste**:
+    - Sanhedria Murchevet 1.5BR → title generated, `bedrooms=1.5`, `monthly_price=9000`, `furniture_option=full`, `available_from="Rosh Chodesh Iyar"`, description auto-translated from Hebrew.
+    - Sanhedria Murchevet 1BR → `monthly_price=8000`, `available_from="2024-04-01"`, "back yard" preserved in description.
+    - Belz / Kedushat Aharon → `floor=-1`, `square_meters=60`, `monthly_price=9500`, `condition=after_renovation`, `sukkah=yes`, `elevator=no`, address transliterated to "Kedushat Aharon Street".
+  - Editor receives 3 rows (not 20), all required fields filled. User can review/edit/delete before saving. Spreadsheet import path still available below for power users.
+  - 30 k char input cap; 50 properties max per extraction. Owners + managers + admins authorized.
 - [ ] Manager bulk property upload + profile pages
 
 ### P2 - Lower Priority

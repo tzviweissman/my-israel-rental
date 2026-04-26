@@ -449,3 +449,114 @@ async def attach_bulk_images_flat(
             )
 
     return results
+
+
+# ---------------------------------------------------------------------------
+# Smart paste: parse messy free-form property descriptions (WhatsApp / email /
+# Telegram) into structured rows using Claude. The frontend pipes the result
+# into the visual editor so the user can review/edit before committing.
+# ---------------------------------------------------------------------------
+
+class SmartExtractIn(BaseModel):
+    text: str
+
+
+_EXTRACT_SYSTEM_PROMPT = """You are an extraction engine for an Israeli rental-property platform.
+
+The user pastes free-form text (often from WhatsApp/email) describing one or more properties.
+Each property is usually separated by blank lines, "---", a numbered list, or a clear topic shift.
+Languages mix English and Hebrew freely.
+
+Return a JSON object with a single key "properties" — an array. Each entry must be a single
+property using EXACTLY these field names (snake_case). Translate any Hebrew values into English
+prose for the human-readable fields (title, description, area, address). Do NOT translate
+proper-noun place names beyond what an Anglophone Israeli would recognize (e.g. keep
+"Sanhedria Murchevet" or "Belz" as transliteration; "רחוב קדושת אהרון" -> "Kedushat Aharon Street").
+
+Required fields (always emit):
+  - title          (string, <= 80 chars, generated if not present -- e.g. "Ground-floor 1.5 BR in Sanhedria Murchevet")
+  - description    (string, 1-3 sentences summarising what's in the source text, in English)
+  - area           (string, neighbourhood or city + neighbourhood, in English)
+  - address        (string, best-guess address; empty string if not in source)
+  - rental_type    (one of: long-term | short-term | vacation | storage; default long-term)
+  - property_type  (one of: apartment | house | studio | duplex | penthouse | cottage | storage; default apartment)
+  - bedrooms       (number; if "1.5 bedroom" -> 1.5, if "studio" -> 0)
+  - bathrooms      (number; default 1 if not mentioned)
+  - floor          (integer; -1 = basement, 0 = ground; "ground floor" -> 0)
+  - currency       (ILS or USD; default ILS for prices in nis/shekels, USD for $; default ILS)
+  - monthly_price  (number -- for long-term/storage; null otherwise)
+  - nightly_price  (number -- for short-term/vacation; null otherwise)
+
+Optional (emit when source mentions them):
+  - square_meters, porch_square_meters, porches, has_elevator, is_shabbat_elevator,
+    is_tama, sukkah_compatible, furniture_option (no_furniture | partial | full),
+    condition (good | after_renovation | needs_renovation | new), amenities (comma-separated string),
+    cancellation_policy (flexible | moderate | strict), available_from (ISO date if derivable, else string),
+    minimum_booking_days
+
+Booleans MUST be the literal strings "yes" or "no" (lower-case).
+
+Important rules:
+- If unsure about a value, OMIT it rather than guess.
+- Hebrew month references (e.g. "ר"ח אייר" / "Rosh Chodesh Iyar") -> put the transliterated phrase into available_from as a string.
+- "Fully furnished" -> furniture_option: "full". "partially" -> "partial". "Unfurnished" -> "no_furniture".
+- "renovated" / "after renovation" -> condition: "after_renovation".
+- "approx 60" -> square_meters: 60.
+- Identify property boundaries: blank lines, "---", numbered prefixes (1., 2.), bold area headers, or repeated location lines.
+
+Return ONLY raw JSON -- no markdown fences, no commentary.
+"""
+
+
+@api_router.post("/properties/bulk/extract")
+async def smart_extract(
+    body: SmartExtractIn,
+    payload: dict = Depends(verify_token),
+) -> dict:
+    """Use Claude to parse messy free-form property descriptions into structured rows."""
+    if payload.get("role") not in ("admin", "owner", "manager"):
+        raise HTTPException(status_code=403, detail="Owner or manager role required")
+
+    text = (body.text or "").strip()
+    if not text:
+        raise HTTPException(status_code=400, detail="Empty input")
+    if len(text) > 30_000:
+        raise HTTPException(status_code=413, detail="Input too long (max 30k characters)")
+
+    from emergentintegrations.llm.chat import LlmChat, UserMessage
+
+    from routes.deps import EMERGENT_LLM_KEY
+
+    chat = LlmChat(
+        api_key=EMERGENT_LLM_KEY,
+        session_id=str(uuid.uuid4()),
+        system_message=_EXTRACT_SYSTEM_PROMPT,
+    )
+    chat.with_model("anthropic", "claude-4-sonnet-20250514")
+    raw = await chat.send_message(UserMessage(text=text))
+
+    parsed: Any
+    try:
+        cleaned = raw.strip()
+        if cleaned.startswith("```"):
+            cleaned = cleaned.split("```", 2)[1]
+            if cleaned.lower().startswith("json"):
+                cleaned = cleaned[4:]
+            cleaned = cleaned.strip().strip("`").strip()
+        parsed = json.loads(cleaned)
+    except (json.JSONDecodeError, IndexError) as e:
+        raise HTTPException(
+            status_code=502,
+            detail=f"Could not parse LLM response as JSON: {e}",
+        )
+
+    properties = parsed.get("properties") if isinstance(parsed, dict) else None
+    if not isinstance(properties, list):
+        raise HTTPException(status_code=502, detail="LLM did not return a 'properties' array")
+
+    # Sanity-clamp to prevent prompt-injection or hallucinated rows.
+    if len(properties) > 50:
+        properties = properties[:50]
+
+    return {"properties": properties, "count": len(properties)}
+

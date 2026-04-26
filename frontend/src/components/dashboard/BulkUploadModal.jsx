@@ -96,6 +96,9 @@ const BulkUploadModal = ({ isOpen, onClose, onDone, API, token }) => {
   const [showImportPanel, setShowImportPanel] = useState(false);
   const [file, setFile] = useState(null);
   const [pasteText, setPasteText] = useState('');
+  // Smart paste (LLM-extracted from free-form WhatsApp/email text)
+  const [smartPaste, setSmartPaste] = useState('');
+  const [smartPasting, setSmartPasting] = useState(false);
   // After commit
   const [commitResult, setCommitResult] = useState(null);
   const [zipFile, setZipFile] = useState(null);
@@ -243,6 +246,54 @@ const BulkUploadModal = ({ isOpen, onClose, onDone, API, token }) => {
     }
   };
 
+  // ---------------------------------------------------------- smart paste -
+  // The killer feature: paste a WhatsApp/email message containing N property
+  // descriptions in mixed English/Hebrew, and Claude extracts structured rows
+  // straight into the visual editor. No CSV, no template, no fuss.
+  const handleSmartPaste = async () => {
+    if (!smartPaste.trim()) {
+      toast.error('Paste some property text first');
+      return;
+    }
+    setSmartPasting(true);
+    try {
+      const res = await axios.post(
+        `${API}/properties/bulk/extract`,
+        { text: smartPaste },
+        authHeaders,
+      );
+      const extracted = res.data.properties || [];
+      if (!extracted.length) {
+        toast.error('Could not find any properties in that text');
+        return;
+      }
+      // Merge into blank-property defaults so missing fields keep dropdowns valid
+      const editorRows = extracted.map(p => {
+        const merged = { ...blankProperty() };
+        for (const [k, v] of Object.entries(p)) {
+          if (v === null || v === undefined) continue;
+          merged[k] = v;
+        }
+        // Normalise booleans the editor expects (yes/no strings)
+        for (const bf of ['has_elevator', 'is_shabbat_elevator', 'is_tama', 'sukkah_compatible']) {
+          if (typeof merged[bf] === 'boolean') merged[bf] = merged[bf] ? 'yes' : 'no';
+          if (!['yes', 'no'].includes(merged[bf])) merged[bf] = 'no';
+        }
+        // amenities: ensure string
+        if (Array.isArray(merged.amenities)) merged.amenities = merged.amenities.join(', ');
+        return merged;
+      });
+      setRows(editorRows);
+      setRowErrors({});
+      setSmartPaste('');
+      toast.success(`Extracted ${editorRows.length} propert${editorRows.length === 1 ? 'y' : 'ies'} — review below`);
+    } catch (e) {
+      toast.error(e.response?.data?.detail || 'AI extraction failed — try the manual editor');
+    } finally {
+      setSmartPasting(false);
+    }
+  };
+
   const downloadTemplate = (fmt) => window.open(`${API}/properties/bulk/template?fmt=${fmt}`, '_blank');
 
   // ------------------------------------------------------------- images ---
@@ -297,6 +348,39 @@ const BulkUploadModal = ({ isOpen, onClose, onDone, API, token }) => {
         {/* ---------------- EDITOR STAGE ---------------- */}
         {stage === 'editor' && (
           <div className="px-6 py-5">
+            {/* Smart paste — the killer feature for managers receiving listings via WhatsApp */}
+            <div className="mb-5 p-4 rounded-xl bg-gradient-to-br from-[#1E6A6A]/5 to-[#D4AF37]/10 border border-[#1E6A6A]/20" data-testid="smart-paste-panel">
+              <div className="flex items-start gap-2 mb-2">
+                <Sparkles size={16} className="text-[#1E6A6A] mt-0.5 shrink-0" />
+                <div className="flex-1">
+                  <p className="text-sm font-semibold text-gray-900">Got listings from WhatsApp, email, or a colleague?</p>
+                  <p className="text-xs text-gray-600 mt-0.5">
+                    Paste anything — English, Hebrew, mixed — and we'll extract every property automatically.
+                  </p>
+                </div>
+              </div>
+              <textarea
+                value={smartPaste}
+                onChange={e => setSmartPaste(e.target.value)}
+                placeholder={'Paste your property descriptions here…\n\nExample:\nסנהדריה מורחבת\n1.5 bedroom, fully furnished\nGround floor, 9000nis\n\nBelz area, 1BR, basement, 9500'}
+                rows={smartPaste ? 6 : 3}
+                className="w-full px-3 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#1E6A6A]/30 focus:border-[#1E6A6A] text-sm font-mono bg-white/70 transition-all"
+                data-testid="smart-paste-input"
+              />
+              <div className="flex items-center justify-between mt-2">
+                <p className="text-[11px] text-gray-500">{smartPaste.length.toLocaleString()} / 30,000 characters</p>
+                <button
+                  onClick={handleSmartPaste}
+                  disabled={smartPasting || !smartPaste.trim()}
+                  className="px-4 py-1.5 rounded-lg bg-[#1E6A6A] text-[#D4AF37] text-xs font-semibold hover:bg-[#175757] disabled:opacity-50 inline-flex items-center gap-1.5"
+                  data-testid="smart-paste-btn"
+                >
+                  <Sparkles size={12} />
+                  {smartPasting ? 'Reading…' : 'Extract properties'}
+                </button>
+              </div>
+            </div>
+
             {/* Tiny "got a spreadsheet?" affordance */}
             {!showImportPanel && (
               <div className="flex items-center justify-between mb-4 p-3 rounded-lg bg-amber-50 border border-amber-100">
