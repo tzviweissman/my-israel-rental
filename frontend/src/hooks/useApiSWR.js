@@ -28,6 +28,9 @@ import axios from 'axios';
 // Module-level state — survives across re-mounts.
 const cache = new Map();    // key -> { data, fetchedAt }
 const inFlight = new Map(); // key -> Promise (dedup concurrent fetches)
+// Subscribers: each mounted hook adds a (urlPrefix, refreshFn) entry so an
+// invalidation can immediately refetch the tab the user is currently on.
+const refreshSubscribers = new Set(); // { url, refresh } objects
 
 // If the cached entry is fresher than this, we skip the background fetch
 // entirely — the most direct way to actually *save* admin API calls when the
@@ -86,6 +89,16 @@ export function useApiSWR(url, token, { initial = null, dedupeMs = DEFAULT_DEDUP
     refresh();
   }, [refresh]);
 
+  // Subscribe to live invalidations: when the SSE channel pushes an
+  // `invalidate` for a URL prefix that matches this hook's url, force a
+  // refresh so the currently-mounted tab updates immediately.
+  useEffect(() => {
+    if (!url) return undefined;
+    const sub = { url, refresh: () => refresh({ force: true }) };
+    refreshSubscribers.add(sub);
+    return () => { refreshSubscribers.delete(sub); };
+  }, [url, refresh]);
+
   // Optimistic / manual override (useful right after a mutation).
   const mutate = useCallback((updater) => {
     const next = typeof updater === 'function' ? updater(data) : updater;
@@ -100,13 +113,22 @@ export function useApiSWR(url, token, { initial = null, dedupeMs = DEFAULT_DEDUP
 }
 
 /**
- * Drop every cached entry whose key starts with this URL prefix.
- * Useful when a write to one endpoint should also invalidate related
- * cached reads — e.g. deleting a user should clear `/admin/users` AND
- * `/admin/dashboard` since the latter shows a user count.
+ * Drop every cached entry whose key includes this URL substring AND
+ * trigger an immediate refresh on every mounted hook whose url matches.
+ *
+ * Path prefixes (e.g. ``/api/admin/properties``) work even though cache
+ * keys store full URLs (``https://host/api/admin/properties|token``) —
+ * we match by substring rather than ``startsWith``.
+ *
+ * Called by the SSE live-events hook so other admin sessions update in
+ * near-real-time after a write happens elsewhere.
  */
 export function invalidateAdminCache(urlPrefix) {
   for (const k of Array.from(cache.keys())) {
-    if (k.startsWith(urlPrefix)) cache.delete(k);
+    if (k.includes(urlPrefix)) cache.delete(k);
+  }
+  // Notify mounted hooks so the UI rerenders without waiting for a tab switch.
+  for (const sub of refreshSubscribers) {
+    if (sub.url.includes(urlPrefix)) sub.refresh();
   }
 }

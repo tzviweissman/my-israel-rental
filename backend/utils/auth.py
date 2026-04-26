@@ -36,3 +36,18 @@ def verify_token(credentials: HTTPAuthorizationCredentials = Depends(security)) 
         raise HTTPException(status_code=401, detail="Token has expired")
     except jwt.InvalidTokenError:
         raise HTTPException(status_code=401, detail="Invalid token")
+
+
+def decode_query_token(token: str) -> dict:
+    """Decode a JWT passed as a query parameter.
+
+    Used by SSE endpoints because EventSource cannot set Authorization
+    headers. Same validation as verify_token, just without the FastAPI
+    Depends() plumbing.
+    """
+    try:
+        return jwt.decode(token, JWT_SECRET, algorithms=['HS256'])
+    except jwt.ExpiredSignatureError:
+        raise HTTPException(status_code=401, detail="Token has expired")
+    except jwt.InvalidTokenError:
+        raise HTTPException(status_code=401, detail="Invalid token")

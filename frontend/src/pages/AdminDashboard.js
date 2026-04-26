@@ -2,6 +2,7 @@ import React, { useState, useContext } from 'react';
 import { Eye, Home, Users, MessageCircle, FileText, Settings } from 'lucide-react';
 import { API, AuthContext } from '../App';
 import { useApiSWR } from '../hooks/useApiSWR';
+import { useAdminLiveEvents } from '../hooks/useAdminLiveEvents';
 import OverviewTab from '../components/admin/OverviewTab';
 import ListingsTab from '../components/admin/ListingsTab';
 import UsersTab from '../components/admin/UsersTab';
@@ -36,6 +37,11 @@ const AdminDashboard = () => {
     `${API}/admin/dashboard`, token
   );
   const { data: emailHealth } = useApiSWR(`${API}/admin/email-health`, token);
+
+  // Open one SSE channel for the lifetime of this page; remote admin writes
+  // (mark-booked, delete-user, save-settings, etc.) push invalidation events
+  // that auto-refresh the matching tab in this browser.
+  useAdminLiveEvents(token);
 
   if (!dashboard) {
     return (

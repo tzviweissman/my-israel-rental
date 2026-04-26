@@ -1,16 +1,81 @@
 """Auto-extracted from server.py during the 2026-04 refactor."""
+import asyncio
+import json
 import uuid
+from collections.abc import AsyncGenerator
 from datetime import UTC, datetime, timedelta
 from typing import List
 
 from fastapi import APIRouter, Depends, HTTPException, Request
+from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 
 from models import SiteSettings
 from routes.deps import POSTMARK_WEBHOOK_SECRET, db, logger, verify_token
+from utils.auth import decode_query_token
+from utils.events import publish, subscribe, subscriber_count, unsubscribe
 
 router = APIRouter()
 api_router = router  # alias so existing @api_router decorators work verbatim
+
+
+# ---------------------------------------------------------------------------
+# Live event channel for the admin dashboard.
+# ---------------------------------------------------------------------------
+# When any of the mutation handlers below run, they ``publish()`` a tiny
+# event with the URL prefix the frontend should evict from its SWR cache.
+# Other admins viewing the dashboard receive the event over SSE within a
+# second and re-fetch only what changed — no 30 s polling.
+#
+# Token is passed via query string because EventSource cannot set custom
+# headers. The token has the same lifetime / scope as the regular Bearer.
+
+@api_router.get("/admin/events")
+async def admin_events_stream(token: str) -> StreamingResponse:
+    """SSE stream of cache-invalidation events for super admins."""
+    payload = decode_query_token(token)
+    if payload.get("role") != "admin":
+        raise HTTPException(status_code=403, detail="Admin access required")
+
+    async def gen() -> AsyncGenerator[str, None]:
+        try:
+            q = await subscribe()
+        except RuntimeError:
+            yield "event: error\ndata: too many subscribers\n\n"
+            return
+        try:
+            # Initial hello — tells the client the stream is live.
+            yield "event: hello\ndata: {}\n\n"
+            while True:
+                try:
+                    msg = await asyncio.wait_for(q.get(), timeout=20.0)
+                    yield f"data: {json.dumps(msg)}\n\n"
+                except TimeoutError:
+                    # Periodic comment line keeps the connection open through
+                    # idle proxies (kubernetes ingress, browsers, etc).
+                    yield ": ping\n\n"
+        except asyncio.CancelledError:
+            raise
+        finally:
+            unsubscribe(q)
+
+    return StreamingResponse(
+        gen(),
+        media_type="text/event-stream",
+        headers={
+            "Cache-Control": "no-cache, no-transform",
+            "X-Accel-Buffering": "no",
+            "Connection": "keep-alive",
+        },
+    )
+
+
+@api_router.get("/admin/events/health")
+async def admin_events_health(payload: dict = Depends(verify_token)) -> dict:
+    """How many live admin SSE subscribers we currently have."""
+    if payload.get("role") != "admin":
+        raise HTTPException(status_code=403, detail="Admin access required")
+    return {"subscribers": subscriber_count()}
 
 
 @api_router.post("/webhooks/postmark")
@@ -173,6 +238,7 @@ async def update_user_status(user_id: str, payload: dict = Depends(verify_token)
         raise HTTPException(status_code=404, detail="User not found")
     new_status = "blocked" if user.get("status", "active") == "active" else "active"
     await db.users.update_one({"id": user_id}, {"$set": {"status": new_status}})
+    await publish("invalidate", {"prefixes": ["/api/admin/users", "/api/admin/dashboard"]})
     return {"message": f"User {new_status}", "status": new_status}
 
 
@@ -184,6 +250,7 @@ async def delete_user(user_id: str, payload: dict = Depends(verify_token)) -> di
         raise HTTPException(status_code=400, detail="Cannot delete your own account")
     await db.users.delete_one({"id": user_id})
     await db.properties.delete_many({"owner_id": user_id})
+    await publish("invalidate", {"prefixes": ["/api/admin/users", "/api/admin/properties", "/api/admin/dashboard"]})
     return {"message": "User and their properties deleted"}
 
 
@@ -263,6 +330,7 @@ async def admin_mark_property_booked(
     }
     await db.admin_blocks.insert_one(block_doc)
     block_doc.pop("_id", None)
+    await publish("invalidate", {"prefixes": ["/api/admin/properties"]})
     return {"message": "Property marked as booked", "block": block_doc}
 
 
@@ -283,6 +351,7 @@ async def admin_remove_block(block_id: str, payload: dict = Depends(verify_token
     result = await db.admin_blocks.delete_one({"id": block_id})
     if result.deleted_count == 0:
         raise HTTPException(status_code=404, detail="Block not found")
+    await publish("invalidate", {"prefixes": ["/api/admin/properties"]})
     return {"message": "Block removed"}
 
 
@@ -331,6 +400,7 @@ async def admin_bulk_mark_booked(
     ]
     if docs:
         await db.admin_blocks.insert_many(docs)
+        await publish("invalidate", {"prefixes": ["/api/admin/properties"]})
     return {
         "message": f"{len(docs)} properties marked as booked",
         "created": len(docs),
@@ -347,6 +417,7 @@ async def toggle_property_status(property_id: str, payload: dict = Depends(verif
         raise HTTPException(status_code=404, detail="Property not found")
     new_status = "inactive" if prop.get("status") == "active" else "active"
     await db.properties.update_one({"id": property_id}, {"$set": {"status": new_status}})
+    await publish("invalidate", {"prefixes": ["/api/admin/properties", "/api/admin/dashboard"]})
     return {"message": f"Property {new_status}", "status": new_status}
 
 
@@ -402,6 +473,7 @@ async def update_service_status(service_id: str, status: str, payload: dict = De
     if status not in ["pending", "in_progress", "completed", "rejected"]:
         raise HTTPException(status_code=400, detail="Invalid status")
     await db.document_services.update_one({"id": service_id}, {"$set": {"status": status}})
+    await publish("invalidate", {"prefixes": ["/api/admin/document-services", "/api/admin/dashboard"]})
     return {"message": f"Service status updated to {status}"}
 
 
@@ -423,4 +495,5 @@ async def update_site_settings(settings: SiteSettings, payload: dict = Depends(v
     settings_doc["key"] = "global"
     settings_doc["updated_at"] = datetime.now(UTC).isoformat()
     await db.site_settings.update_one({"key": "global"}, {"$set": settings_doc}, upsert=True)
+    await publish("invalidate", {"prefixes": ["/api/admin/settings"]})
     return {"message": "Settings updated successfully"}

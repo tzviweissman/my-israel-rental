@@ -148,6 +148,16 @@ Build a bilingual (English/Hebrew) rental website named MyIsraelRental.com with 
   - Wired into all 6 admin tabs (Dashboard summary, Email Health, Listings, Users, Chats, Services, Settings). All mutations (mark-booked, unblock, toggle-user, delete-user, save-settings, service-status-change) call `refresh()` to force-revalidate.
   - **Verified in browser**: cold cache → 7 calls (one per resource). Warm cache, second pass through all tabs within dedupe window → **0 calls**. Mutation → exactly 1 force-refresh.
   - `AdminDashboard.js` shrunk further: **103 → 84 lines** thanks to dropped manual `useState` + `useEffect` boilerplate.
+- [x] **Live admin sync via SSE** (2026-04-26):
+  - New backend pub/sub broker `/app/backend/utils/events.py` (in-memory, bounded queues, max 100 subscribers, slow-client drop semantics).
+  - New SSE endpoint `GET /api/admin/events?token=…` streaming JSON cache-invalidation events. Token is in the query string because `EventSource` cannot set Authorization headers; verified via the new `decode_query_token()` helper. 20 s keep-alive ping prevents idle proxy disconnects.
+  - Health probe `GET /api/admin/events/health` returns the live subscriber count.
+  - Wired `await publish("invalidate", {"prefixes": [...]})` into 8 admin write handlers: `toggle-user-status`, `delete-user`, `mark-booked`, `bulk-mark-booked`, `delete-block`, `toggle-property-status`, `update-service-status`, `update-settings`.
+  - New frontend hook `/app/frontend/src/hooks/useAdminLiveEvents.js` opens one EventSource per dashboard mount; each event calls `invalidateAdminCache(prefix)`.
+  - Extended `useApiSWR` with a subscriber registry — when invalidation fires for a matching prefix, every mounted hook on that resource auto-refreshes immediately. **No tab switch / no user action required.**
+  - Initial bug found & fixed: cache keys are full URLs, but backend publishes path prefixes — flipped the matcher from `startsWith` to `includes` so e.g. `/api/admin/properties` matches `https://host/api/admin/properties|token`.
+  - **Verified end-to-end in the browser**: remote `mark-booked` → badge appears in our UI within ~1 s with zero user action. Remote unblock → badge disappears. SSE subscriber count goes 0 → 1 on dashboard mount, back to 0 on disconnect.
+  - All gates green: `scripts/check.sh` passes, 68/68 regression tests pass.
 - [ ] Manager bulk property upload + profile pages
 
 ### P2 - Lower Priority
