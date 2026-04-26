@@ -1,7 +1,7 @@
-import React, { useState, useEffect, useContext } from 'react';
-import axios from 'axios';
+import React, { useState, useContext } from 'react';
 import { Eye, Home, Users, MessageCircle, FileText, Settings } from 'lucide-react';
 import { API, AuthContext } from '../App';
+import { useApiSWR } from '../hooks/useApiSWR';
 import OverviewTab from '../components/admin/OverviewTab';
 import ListingsTab from '../components/admin/ListingsTab';
 import UsersTab from '../components/admin/UsersTab';
@@ -31,30 +31,11 @@ const TABS = [
 const AdminDashboard = () => {
   const { token } = useContext(AuthContext);
   const [activeTab, setActiveTab] = useState('overview');
-  const [dashboard, setDashboard] = useState(null);
-  const [emailHealth, setEmailHealth] = useState(null);
 
-  const headers = { Authorization: `Bearer ${token}` };
-
-  const fetchDashboard = async () => {
-    try {
-      const res = await axios.get(`${API}/admin/dashboard`, { headers });
-      setDashboard(res.data);
-    } catch (e) { console.error(e); }
-  };
-
-  const fetchEmailHealth = async () => {
-    try {
-      const res = await axios.get(`${API}/admin/email-health`, { headers });
-      setEmailHealth(res.data);
-    } catch (e) { console.error(e); }
-  };
-
-  useEffect(() => {
-    fetchDashboard();
-    fetchEmailHealth();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  const { data: dashboard, refresh: fetchDashboard } = useApiSWR(
+    `${API}/admin/dashboard`, token
+  );
+  const { data: emailHealth } = useApiSWR(`${API}/admin/email-health`, token);
 
   if (!dashboard) {
     return (

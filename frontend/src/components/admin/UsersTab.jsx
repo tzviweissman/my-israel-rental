@@ -1,8 +1,9 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState } from 'react';
 import axios from 'axios';
 import { toast } from 'sonner';
 import { Search, Ban, CheckCircle, Trash2 } from 'lucide-react';
 import { API } from '../../App';
+import { useApiSWR } from '../../hooks/useApiSWR';
 
 /**
  * Super Admin → Users tab.
@@ -12,18 +13,10 @@ import { API } from '../../App';
 export const UsersTab = ({ token, onStatsChange }) => {
   const headers = { Authorization: `Bearer ${token}` };
 
-  const [users, setUsers] = useState([]);
+  const { data: users, refresh: fetchUsers } = useApiSWR(
+    `${API}/admin/users`, token, { initial: [] }
+  );
   const [searchTerm, setSearchTerm] = useState('');
-
-  const fetchUsers = useCallback(async () => {
-    try {
-      const res = await axios.get(`${API}/admin/users`, { headers });
-      setUsers(res.data);
-    } catch (e) { console.error(e); }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [token]);
-
-  useEffect(() => { fetchUsers(); }, [fetchUsers]);
 
   const notifyStatsChange = () => { if (onStatsChange) onStatsChange(); };
 

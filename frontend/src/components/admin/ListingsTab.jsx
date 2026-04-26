@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState } from 'react';
 import axios from 'axios';
 import { toast } from 'sonner';
 import {
@@ -6,6 +6,7 @@ import {
   CalendarX, CalendarCheck, Lock,
 } from 'lucide-react';
 import { API } from '../../App';
+import { useApiSWR } from '../../hooks/useApiSWR';
 import MarkAsBookedModal from './MarkAsBookedModal';
 
 /**
@@ -19,25 +20,15 @@ import MarkAsBookedModal from './MarkAsBookedModal';
 export const ListingsTab = ({ token, onStatsChange }) => {
   const headers = { Authorization: `Bearer ${token}` };
 
-  const [properties, setProperties] = useState([]);
+  const { data: properties, refresh: fetchProperties } = useApiSWR(
+    `${API}/admin/properties`, token, { initial: [] }
+  );
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedPropIds, setSelectedPropIds] = useState(new Set());
   const [bookedModalOpen, setBookedModalOpen] = useState(false);
   // bookedTarget: null | { mode: 'single', id } | { mode: 'bulk' }
   const [bookedTarget, setBookedTarget] = useState(null);
   const [blockSaving, setBlockSaving] = useState(false);
-
-  const fetchProperties = useCallback(async () => {
-    try {
-      const res = await axios.get(`${API}/admin/properties`, { headers });
-      setProperties(res.data);
-    } catch (e) { console.error(e); }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [token]);
-
-  useEffect(() => {
-    fetchProperties();
-  }, [fetchProperties]);
 
   const notifyStatsChange = () => { if (onStatsChange) onStatsChange(); };
 

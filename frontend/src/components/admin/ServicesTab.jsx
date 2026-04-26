@@ -1,7 +1,8 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React from 'react';
 import axios from 'axios';
 import { toast } from 'sonner';
 import { API } from '../../App';
+import { useApiSWR } from '../../hooks/useApiSWR';
 
 /**
  * Super Admin → Document Services tab.
@@ -10,17 +11,9 @@ import { API } from '../../App';
 export const ServicesTab = ({ token, onStatsChange }) => {
   const headers = { Authorization: `Bearer ${token}` };
 
-  const [services, setServices] = useState([]);
-
-  const fetchServices = useCallback(async () => {
-    try {
-      const res = await axios.get(`${API}/admin/document-services`, { headers });
-      setServices(res.data);
-    } catch (e) { console.error(e); }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [token]);
-
-  useEffect(() => { fetchServices(); }, [fetchServices]);
+  const { data: services, refresh: fetchServices } = useApiSWR(
+    `${API}/admin/document-services`, token, { initial: [] }
+  );
 
   const updateServiceStatus = async (serviceId, status) => {
     try {

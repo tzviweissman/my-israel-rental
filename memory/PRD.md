@@ -142,6 +142,12 @@ Build a bilingual (English/Hebrew) rental website named MyIsraelRental.com with 
   - Flipped `check_untyped_defs = True` in `mypy.ini` — mypy now type-checks function bodies, not just signatures. Currently **0 errors**.
   - **Real bug caught immediately**: my over-tightening of `liked-property-ids` to `list[dict]` was rejected at runtime by FastAPI's response-validation (the endpoint actually returns `list[str]`). Fixed → `-> list[str]`. **This is a free integration check tightened types now buy us.**
   - Verified across 17 real endpoints (admin + renter + owner) — all 200. 110/110 pytest cases pass. `scripts/check.sh` all-green.
+- [x] **Stale-while-revalidate cache for admin tab fetches** (2026-04-26):
+  - Built `/app/frontend/src/hooks/useApiSWR.js` (~110 lines, no dependencies): module-level cache, in-flight dedup, per-key freshness check, optimistic `mutate`, force-`refresh()` after mutations.
+  - 30-second `dedupeMs` window: when an admin clicks back to a tab they viewed within the last 30 s, **zero** API calls happen — the cached data renders instantly.
+  - Wired into all 6 admin tabs (Dashboard summary, Email Health, Listings, Users, Chats, Services, Settings). All mutations (mark-booked, unblock, toggle-user, delete-user, save-settings, service-status-change) call `refresh()` to force-revalidate.
+  - **Verified in browser**: cold cache → 7 calls (one per resource). Warm cache, second pass through all tabs within dedupe window → **0 calls**. Mutation → exactly 1 force-refresh.
+  - `AdminDashboard.js` shrunk further: **103 → 84 lines** thanks to dropped manual `useState` + `useEffect` boilerplate.
 - [ ] Manager bulk property upload + profile pages
 
 ### P2 - Lower Priority

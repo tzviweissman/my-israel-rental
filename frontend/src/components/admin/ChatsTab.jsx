@@ -1,27 +1,17 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import axios from 'axios';
+import React, { useState } from 'react';
 import { ChevronDown, ChevronUp, MessageCircle } from 'lucide-react';
 import { API } from '../../App';
+import { useApiSWR } from '../../hooks/useApiSWR';
 
 /**
  * Super Admin → Chats tab.
  * Read-only conversation explorer. Owns its own fetch and expand/collapse state.
  */
 export const ChatsTab = ({ token }) => {
-  const headers = { Authorization: `Bearer ${token}` };
-
-  const [chats, setChats] = useState([]);
+  const { data: chats } = useApiSWR(
+    `${API}/admin/chats`, token, { initial: [] }
+  );
   const [expandedChat, setExpandedChat] = useState(null);
-
-  const fetchChats = useCallback(async () => {
-    try {
-      const res = await axios.get(`${API}/admin/chats`, { headers });
-      setChats(res.data);
-    } catch (e) { console.error(e); }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [token]);
-
-  useEffect(() => { fetchChats(); }, [fetchChats]);
 
   return (
     <div data-testid="admin-chats-section">

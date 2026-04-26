@@ -1,36 +1,34 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { toast } from 'sonner';
 import { API } from '../../App';
+import { useApiSWR } from '../../hooks/useApiSWR';
 
 /**
  * Super Admin → Site Settings tab.
- * Owns its own form state and fetch/save lifecycle.
+ * Owns its own form state. Fetched data is the *initial* value; the form is
+ * then editable locally until the user clicks Save.
  */
+const EMPTY = { whatsapp_number: '', contact_email: '', contact_phone: '', featured_property_ids: [] };
+
 export const SettingsTab = ({ token }) => {
   const headers = { Authorization: `Bearer ${token}` };
 
-  const [siteSettings, setSiteSettings] = useState({
-    whatsapp_number: '',
-    contact_email: '',
-    contact_phone: '',
-    featured_property_ids: [],
-  });
+  const { data: serverSettings, refresh } = useApiSWR(
+    `${API}/admin/settings`, token, { initial: EMPTY }
+  );
+  const [siteSettings, setSiteSettings] = useState(serverSettings || EMPTY);
 
-  const fetchSettings = useCallback(async () => {
-    try {
-      const res = await axios.get(`${API}/admin/settings`, { headers });
-      setSiteSettings(res.data);
-    } catch (e) { console.error(e); }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [token]);
-
-  useEffect(() => { fetchSettings(); }, [fetchSettings]);
+  // Sync form to incoming server data (e.g. on first load or background revalidation).
+  useEffect(() => {
+    if (serverSettings) setSiteSettings(serverSettings);
+  }, [serverSettings]);
 
   const saveSettings = async () => {
     try {
       await axios.put(`${API}/admin/settings`, siteSettings, { headers });
       toast.success('Settings saved');
+      refresh();
     } catch (e) { toast.error('Failed to save settings'); }
   };
 
