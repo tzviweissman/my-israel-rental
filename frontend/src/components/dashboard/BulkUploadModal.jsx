@@ -44,9 +44,13 @@ const blankProperty = () => ({
   is_shabbat_elevator: 'no',
   is_tama: 'no',
   sukkah_compatible: 'no',
+  has_agent_fee: 'no',
+  agent_fee_price: '',
+  agent_fee_currency: 'ILS',
   furniture_option: 'no_furniture',
   condition: 'good',
   cancellation_policy: 'flexible',
+  custom_cancellation_policy: '',
   amenities: '',
   minimum_booking_days: '',
 });
@@ -651,7 +655,7 @@ const PropertyRowCard = ({ index, row, error, onChange, onDuplicate, onRemove })
         className="mt-3 text-xs font-medium text-[#1E6A6A] hover:underline"
         data-testid={`toggle-more-${index}`}
       >
-        {showMore ? '↑ Hide extra fields' : '↓ More fields (amenities, elevator, sukkah, etc.)'}
+        {showMore ? '↑ Hide extra fields' : '↓ More fields (amenities, elevator, agent fee, sukkah, etc.)'}
       </button>
 
       {showMore && (
@@ -666,9 +670,39 @@ const PropertyRowCard = ({ index, row, error, onChange, onDuplicate, onRemove })
           <Select label="Shabbat elevator" value={row.is_shabbat_elevator} onChange={v => onChange('is_shabbat_elevator', v)} options={YESNO} testid={`r${index}-shabbat`} />
           <Select label="TAMA / earthquake reinforced" value={row.is_tama} onChange={v => onChange('is_tama', v)} options={YESNO} testid={`r${index}-tama`} />
           <Select label="Sukkah compatible" value={row.sukkah_compatible} onChange={v => onChange('sukkah_compatible', v)} options={YESNO} testid={`r${index}-sukkah`} />
+          <Select label="Agent fee" value={row.has_agent_fee} onChange={v => onChange('has_agent_fee', v)} options={YESNO} testid={`r${index}-agent_fee`} />
+          {row.has_agent_fee === 'yes' && (
+            <div className="grid grid-cols-[1fr_90px] gap-2 md:col-span-2">
+              <NumberInput
+                label="Agent fee amount"
+                value={row.agent_fee_price}
+                onChange={v => onChange('agent_fee_price', v)}
+                testid={`r${index}-agent_fee_price`}
+                placeholder="6500"
+              />
+              <Select
+                label="Currency"
+                value={row.agent_fee_currency}
+                onChange={v => onChange('agent_fee_currency', v)}
+                options={[{ v: 'ILS', label: '₪ ILS' }, { v: 'USD', label: '$ USD' }]}
+                testid={`r${index}-agent_fee_currency`}
+              />
+            </div>
+          )}
           <div className="md:col-span-3">
             <Input label="Amenities (comma-separated)" value={row.amenities} onChange={v => onChange('amenities', v)} placeholder="wifi, parking, AC" testid={`r${index}-amenities`} />
           </div>
+          {row.cancellation_policy === 'strict' && (
+            <div className="md:col-span-3">
+              <Textarea
+                label="Custom cancellation policy"
+                value={row.custom_cancellation_policy}
+                onChange={v => onChange('custom_cancellation_policy', v)}
+                placeholder="Optional: spell out a custom cancellation policy in your own words…"
+                testid={`r${index}-custom_cancel`}
+              />
+            </div>
+          )}
         </div>
       )}
     </div>

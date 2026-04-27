@@ -40,9 +40,11 @@ COLUMNS = [
     "bedrooms", "bathrooms", "floor", "area", "address",
     "square_meters", "porch_square_meters", "porches",
     "has_elevator", "is_shabbat_elevator", "is_tama", "sukkah_compatible",
+    "has_agent_fee", "agent_fee_price", "agent_fee_currency",
     "condition", "furniture_option", "amenities",
     "monthly_price", "nightly_price", "currency",
-    "cancellation_policy", "available_from", "starting_date", "minimum_booking_days",
+    "cancellation_policy", "custom_cancellation_policy",
+    "available_from", "starting_date", "minimum_booking_days",
     "image_filenames",
 ]
 
@@ -100,13 +102,13 @@ def _normalize_row(raw: dict) -> dict:
         raise ValueError(f"rental_type must be long-term/short-term/vacation/storage (got '{row['rental_type']}')")
     row["rental_type"] = rt
 
-    for bool_field in ("has_elevator", "is_shabbat_elevator", "is_tama", "sukkah_compatible"):
+    for bool_field in ("has_elevator", "is_shabbat_elevator", "is_tama", "sukkah_compatible", "has_agent_fee"):
         row[bool_field] = _parse_bool(row.get(bool_field))
 
     for int_field in ("bedrooms", "bathrooms", "floor", "porches", "minimum_booking_days"):
         row[int_field] = _parse_number(row.get(int_field), lambda v: int(float(v)), int_field)
 
-    for num_field in ("square_meters", "porch_square_meters", "monthly_price", "nightly_price"):
+    for num_field in ("square_meters", "porch_square_meters", "monthly_price", "nightly_price", "agent_fee_price"):
         row[num_field] = _parse_number(row.get(num_field), float, num_field)
 
     row["amenities"] = _split_list(row.get("amenities"))
@@ -117,6 +119,12 @@ def _normalize_row(raw: dict) -> dict:
         row["currency"] = str(row["currency"]).strip().upper()
     else:
         row["currency"] = "ILS"
+
+    # Agent fee currency default (only meaningful when has_agent_fee is True)
+    if row.get("agent_fee_currency"):
+        row["agent_fee_currency"] = str(row["agent_fee_currency"]).strip().upper()
+    else:
+        row["agent_fee_currency"] = "ILS"
 
     # Defaults that match PropertyCreate
     row.setdefault("property_type", "apartment")
@@ -195,10 +203,12 @@ async def download_template(fmt: str = "csv") -> StreamingResponse:
         "square_meters": "75", "porch_square_meters": "8", "porches": "1",
         "has_elevator": "yes", "is_shabbat_elevator": "no",
         "is_tama": "no", "sukkah_compatible": "yes",
+        "has_agent_fee": "yes", "agent_fee_price": "6500", "agent_fee_currency": "ILS",
         "condition": "good", "furniture_option": "furnished",
         "amenities": "WiFi;AC;Washing Machine",
         "monthly_price": "6500", "nightly_price": "", "currency": "ILS",
         "cancellation_policy": "flexible",
+        "custom_cancellation_policy": "",
         "available_from": "2026-09-01", "starting_date": "",
         "minimum_booking_days": "",
         "image_filenames": "apt1_front.jpg;apt1_kitchen.jpg",
@@ -492,7 +502,10 @@ Optional (emit when source mentions them):
     is_tama, sukkah_compatible, furniture_option (no_furniture | partial | full),
     condition (good | after_renovation | needs_renovation | new), amenities (comma-separated string),
     cancellation_policy (flexible | moderate | strict), available_from (ISO date if derivable, else string),
-    minimum_booking_days
+    minimum_booking_days,
+    has_agent_fee (yes | no -- emit "yes" if source mentions agent / broker / שכר טרחה / דמי תיווך),
+    agent_fee_price (number -- the agent / broker fee amount when stated),
+    agent_fee_currency (ILS | USD -- match the agent fee's currency)
 
 Booleans MUST be the literal strings "yes" or "no" (lower-case).
 
