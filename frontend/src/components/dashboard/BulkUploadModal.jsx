@@ -596,7 +596,7 @@ const PropertyRowCard = ({ index, row, error, onChange, onDuplicate, onRemove })
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
         <Input label="Title*" value={row.title} onChange={v => onChange('title', v)} placeholder="Cozy Tel Aviv 2BR" testid={`r${index}-title`} />
-        <Input label="Address*" value={row.address} onChange={v => onChange('address', v)} placeholder="King George 10" testid={`r${index}-address`} />
+        <Input label="Address" value={row.address} onChange={v => onChange('address', v)} placeholder="King George 10" testid={`r${index}-address`} />
         <LocationSelect label="Area / Neighborhood*" value={row.area} onChange={v => onChange('area', v)} testid={`r${index}-area`} />
         <Select label="Rental type*" value={row.rental_type} onChange={v => onChange('rental_type', v)} options={RENTAL_TYPES} testid={`r${index}-rental_type`} />
         <Select label="Property type" value={row.property_type} onChange={v => onChange('property_type', v)} options={PROPERTY_TYPES} testid={`r${index}-property_type`} />
@@ -624,7 +624,7 @@ const PropertyRowCard = ({ index, row, error, onChange, onDuplicate, onRemove })
 
         <div className="md:col-span-2">
           <Textarea
-            label="Description*"
+            label="Description"
             value={row.description}
             onChange={v => onChange('description', v)}
             placeholder="Bright, recently renovated 2-bedroom apartment with a balcony…"
