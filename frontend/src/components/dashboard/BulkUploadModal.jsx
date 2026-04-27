@@ -5,6 +5,7 @@ import {
   X, Plus, Trash2, Image as ImageIcon, FileSpreadsheet, ArrowLeft,
   CheckCircle2, AlertCircle, Sparkles, Download,
 } from 'lucide-react';
+import { LOCATION_OPTIONS } from '../../constants/locations';
 
 /**
  * Bulk-upload modal — friendly UX edition.
@@ -609,7 +610,7 @@ const PropertyRowCard = ({ index, row, error, onChange, onDuplicate, onRemove })
       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
         <Input label="Title*" value={row.title} onChange={v => onChange('title', v)} placeholder="Cozy Tel Aviv 2BR" testid={`r${index}-title`} />
         <Input label="Address*" value={row.address} onChange={v => onChange('address', v)} placeholder="King George 10" testid={`r${index}-address`} />
-        <Input label="Area / Neighborhood*" value={row.area} onChange={v => onChange('area', v)} placeholder="Jerusalem - Rehavia" testid={`r${index}-area`} />
+        <LocationSelect label="Area / Neighborhood*" value={row.area} onChange={v => onChange('area', v)} testid={`r${index}-area`} />
         <Select label="Rental type*" value={row.rental_type} onChange={v => onChange('rental_type', v)} options={RENTAL_TYPES} testid={`r${index}-rental_type`} />
         <Select label="Property type" value={row.property_type} onChange={v => onChange('property_type', v)} options={PROPERTY_TYPES} testid={`r${index}-property_type`} />
         <NumberInput label="Bedrooms" value={row.bedrooms} onChange={v => onChange('bedrooms', v)} testid={`r${index}-bedrooms`} />
@@ -718,6 +719,36 @@ const Select = ({ label, value, onChange, options, testid }) => (
     </select>
   </label>
 );
+
+// Area / Neighborhood select — grouped by Israeli city.
+// Falls back to a free-text option (kept as-is) when the smart-paste extracts
+// a value that isn't in the canonical list, so we never silently drop data.
+const LocationSelect = ({ label, value, onChange, testid }) => {
+  const isKnown =
+    !value ||
+    LOCATION_OPTIONS.some(g => g.neighborhoods.some(n => `${g.city} - ${n}` === value));
+  return (
+    <label className="block">
+      <span className="block text-[11px] font-semibold text-gray-600 uppercase tracking-wide mb-1">{label}</span>
+      <select
+        value={value || ''}
+        onChange={e => onChange(e.target.value)}
+        className="w-full px-3 py-2 rounded-lg border border-gray-200 bg-white focus:outline-none focus:ring-2 focus:ring-[#1E6A6A]/30 focus:border-[#1E6A6A] text-sm"
+        data-testid={testid}
+      >
+        <option value="">Select area…</option>
+        {!isKnown && <option value={value}>{value} (custom)</option>}
+        {LOCATION_OPTIONS.map(group => (
+          <optgroup key={group.city} label={group.city}>
+            {group.neighborhoods.map(n => (
+              <option key={`${group.city}-${n}`} value={`${group.city} - ${n}`}>{n}</option>
+            ))}
+          </optgroup>
+        ))}
+      </select>
+    </label>
+  );
+};
 
 const Textarea = ({ label, value, onChange, placeholder, testid }) => (
   <label className="block">
