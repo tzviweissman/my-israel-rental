@@ -605,20 +605,29 @@ const PropertyRowCard = ({ index, row, error, onChange, onDuplicate, onRemove })
         <NumberInput label="Floor" value={row.floor} onChange={v => onChange('floor', v)} testid={`r${index}-floor`} />
         <NumberInput label="Square meters" value={row.square_meters} onChange={v => onChange('square_meters', v)} testid={`r${index}-square_meters`} placeholder="e.g. 75" />
 
-        <div className="grid grid-cols-[1fr_90px] gap-2">
+        <div className="md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-3">
+          <div className="grid grid-cols-[1fr_90px] gap-2">
+            <NumberInput
+              label={`Monthly price${isPerNight ? '' : '*'}`}
+              value={row.monthly_price}
+              onChange={v => onChange('monthly_price', v)}
+              testid={`r${index}-monthly_price`}
+              placeholder="6500"
+            />
+            <Select
+              label="Currency"
+              value={row.currency}
+              onChange={v => onChange('currency', v)}
+              options={[{ v: 'ILS', label: '₪ ILS' }, { v: 'USD', label: '$ USD' }]}
+              testid={`r${index}-currency`}
+            />
+          </div>
           <NumberInput
-            label={isPerNight ? 'Nightly price*' : 'Monthly price*'}
-            value={isPerNight ? row.nightly_price : row.monthly_price}
-            onChange={v => onChange(isPerNight ? 'nightly_price' : 'monthly_price', v)}
-            testid={`r${index}-price`}
-            placeholder="100"
-          />
-          <Select
-            label="Currency"
-            value={row.currency}
-            onChange={v => onChange('currency', v)}
-            options={[{ v: 'ILS', label: '₪ ILS' }, { v: 'USD', label: '$ USD' }]}
-            testid={`r${index}-currency`}
+            label={`Nightly price${isPerNight ? '*' : ''}`}
+            value={row.nightly_price}
+            onChange={v => onChange('nightly_price', v)}
+            testid={`r${index}-nightly_price`}
+            placeholder="450"
           />
         </div>
 
