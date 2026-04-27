@@ -83,9 +83,7 @@ const BulkUploadModal = ({ isOpen, onClose, onDone, API, token }) => {
     const issues = [];
     rows.forEach((r, i) => {
       if (!r.title.trim()) issues.push({ i, msg: 'Title is required' });
-      else if (!r.address.trim()) issues.push({ i, msg: 'Address is required' });
       else if (!r.area.trim()) issues.push({ i, msg: 'Area is required' });
-      else if (!r.description.trim()) issues.push({ i, msg: 'Description is required' });
       else if ((r.rental_type === 'long-term' || r.rental_type === 'storage') && !r.monthly_price) issues.push({ i, msg: 'Monthly price is required' });
       else if ((r.rental_type === 'short-term' || r.rental_type === 'vacation') && !r.nightly_price) issues.push({ i, msg: 'Nightly price is required' });
     });
