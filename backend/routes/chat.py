@@ -5,13 +5,14 @@ from datetime import UTC, datetime
 from fastapi import APIRouter, Depends
 
 from models import ChatMessage
+from models_response import ConversationOut, IdMessageResponse, MessageOut
 from routes.deps import db, verify_token
 
 router = APIRouter()
 api_router = router  # alias so existing @api_router decorators work verbatim
 
 
-@api_router.post("/chat/messages")
+@api_router.post("/chat/messages", response_model=IdMessageResponse)
 async def send_message(chat_data: ChatMessage, payload: dict = Depends(verify_token)) -> dict:
     message_id = str(uuid.uuid4())
     message_doc = {
@@ -40,7 +41,7 @@ async def send_message(chat_data: ChatMessage, payload: dict = Depends(verify_to
     return {"id": message_id, "message": "Message sent successfully"}
 
 
-@api_router.get("/chat/messages/{property_id}")
+@api_router.get("/chat/messages/{property_id}", response_model=list[MessageOut])
 async def get_messages(property_id: str, payload: dict = Depends(verify_token)) -> list[dict]:
     messages = await db.messages.find(
         {
@@ -61,7 +62,7 @@ async def get_messages(property_id: str, payload: dict = Depends(verify_token)) 
     return messages
 
 
-@api_router.get("/chat/conversations")
+@api_router.get("/chat/conversations", response_model=list[ConversationOut])
 async def get_conversations(payload: dict = Depends(verify_token)) -> list[dict]:
     messages = await db.messages.find(
         {"$or": [{"sender_id": payload['user_id']}, {"receiver_id": payload['user_id']}]},

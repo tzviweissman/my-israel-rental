@@ -9,6 +9,16 @@ from fastapi import APIRouter, Depends, File, HTTPException, UploadFile
 from pydantic import BaseModel
 
 from models import PropertyCreate
+from models_response import (
+    BulkEditResponse,
+    ContractStatusResponse,
+    IdMessageResponse,
+    LikeToggleResponse,
+    ManagerPropertiesResponse,
+    MessageResponse,
+    PropertyContractUploadResponse,
+    PropertyOut,
+)
 from routes.deps import (
     ROOT_DIR,
     db,
@@ -26,7 +36,7 @@ router = APIRouter()
 api_router = router  # alias so existing @api_router decorators work verbatim
 
 
-@api_router.post("/properties")
+@api_router.post("/properties", response_model=IdMessageResponse)
 async def create_property(property_data: PropertyCreate, payload: dict = Depends(verify_token)) -> dict:
     property_id = str(uuid.uuid4())
     property_doc = property_data.model_dump()
@@ -49,7 +59,7 @@ async def create_property(property_data: PropertyCreate, payload: dict = Depends
     return {"id": property_id, "message": "Property created successfully"}
 
 
-@api_router.get("/properties")
+@api_router.get("/properties", response_model=list[PropertyOut])
 async def get_properties(
     rental_type: str | None = None,
     min_bedrooms: float | None = None,
@@ -150,7 +160,7 @@ async def get_properties(
     return properties
 
 
-@api_router.get("/properties/{property_id}")
+@api_router.get("/properties/{property_id}", response_model=PropertyOut)
 async def get_property(property_id: str) -> dict:
     property_data = await db.properties.find_one({"id": property_id}, {"_id": 0})
     if not property_data:
@@ -167,7 +177,7 @@ async def get_property(property_id: str) -> dict:
     return property_data
 
 
-@api_router.put("/properties/{property_id}")
+@api_router.put("/properties/{property_id}", response_model=MessageResponse)
 async def update_property(property_id: str, property_data: PropertyCreate, payload: dict = Depends(verify_token)) -> dict:
     existing = await db.properties.find_one({"id": property_id}, {"_id": 0})
     if not existing:
@@ -200,7 +210,7 @@ async def update_property(property_id: str, property_data: PropertyCreate, paylo
     return {"message": "Property updated successfully"}
 
 
-@api_router.delete("/properties/{property_id}")
+@api_router.delete("/properties/{property_id}", response_model=MessageResponse)
 async def delete_property(property_id: str, payload: dict = Depends(verify_token)) -> dict:
     existing = await db.properties.find_one({"id": property_id}, {"_id": 0})
     if not existing:
@@ -261,7 +271,7 @@ def _filter_updates(updates: dict) -> dict:
     return {k: v for k, v in updates.items() if k in _BULK_EDITABLE_FIELDS}
 
 
-@api_router.post("/properties/bulk-edit")
+@api_router.post("/properties/bulk-edit", response_model=BulkEditResponse)
 async def bulk_edit_properties(body: BulkEditBody, payload: dict = Depends(verify_token)) -> dict:
     """Patch a whitelisted set of fields across many owned properties.
 
@@ -325,7 +335,7 @@ async def bulk_edit_properties(body: BulkEditBody, payload: dict = Depends(verif
     return {"updated": updated, "skipped": skipped, "summary": {"updated": len(updated), "skipped": len(skipped)}}
 
 
-@api_router.post("/properties/bulk-images")
+@api_router.post("/properties/bulk-images", response_model=BulkEditResponse)
 async def bulk_attach_images(body: BulkImagesBody, payload: dict = Depends(verify_token)) -> dict:
     """Append already-uploaded image URLs to one or many owned properties.
 
@@ -373,7 +383,7 @@ async def bulk_attach_images(body: BulkImagesBody, payload: dict = Depends(verif
 # --- Saved Searches (renter availability alerts) ---
 
 
-@api_router.post("/properties/{property_id}/like")
+@api_router.post("/properties/{property_id}/like", response_model=LikeToggleResponse)
 async def toggle_like_property(property_id: str, payload: dict = Depends(verify_token)) -> dict:
     prop = await db.properties.find_one({"id": property_id}, {"_id": 0})
     if not prop:
@@ -398,7 +408,7 @@ async def toggle_like_property(property_id: str, payload: dict = Depends(verify_
 
 
 
-@api_router.get("/liked-properties")
+@api_router.get("/liked-properties", response_model=list[PropertyOut])
 async def get_liked_properties(payload: dict = Depends(verify_token)) -> list[dict]:
     likes = await db.liked_properties.find(
         {"user_id": payload['user_id']}, {"_id": 0}
@@ -423,7 +433,7 @@ async def get_liked_properties(payload: dict = Depends(verify_token)) -> list[di
 
 
 
-@api_router.get("/liked-property-ids")
+@api_router.get("/liked-property-ids", response_model=list[str])
 async def get_liked_property_ids(payload: dict = Depends(verify_token)) -> list[str]:
     likes = await db.liked_properties.find(
         {"user_id": payload['user_id']}, {"_id": 0, "property_id": 1}
@@ -431,7 +441,7 @@ async def get_liked_property_ids(payload: dict = Depends(verify_token)) -> list[
     return [like['property_id'] for like in likes]
 
 
-@api_router.post("/properties/{property_id}/contract")
+@api_router.post("/properties/{property_id}/contract", response_model=PropertyContractUploadResponse)
 async def upload_property_contract(
     property_id: str,
     file: UploadFile = File(...),
@@ -566,7 +576,7 @@ async def upload_property_contract(
 
 
 
-@api_router.get("/properties/{property_id}/contract")
+@api_router.get("/properties/{property_id}/contract", response_model=ContractStatusResponse)
 async def get_property_contract(property_id: str) -> dict:
     """Get contract details for a property"""
     property_data = await db.properties.find_one(
@@ -585,7 +595,7 @@ async def get_property_contract(property_id: str) -> dict:
 
 
 
-@api_router.delete("/properties/{property_id}/contract")
+@api_router.delete("/properties/{property_id}/contract", response_model=MessageResponse)
 async def delete_property_contract(property_id: str, payload: dict = Depends(verify_token)) -> dict:
     """Delete contract for a property"""
     property_data = await db.properties.find_one({"id": property_id}, {"_id": 0})
@@ -610,7 +620,7 @@ async def delete_property_contract(property_id: str, payload: dict = Depends(ver
     return {"message": "Contract deleted successfully"}
 
 
-@api_router.get("/manager/{manager_id}/properties")
+@api_router.get("/manager/{manager_id}/properties", response_model=ManagerPropertiesResponse)
 async def get_manager_properties(manager_id: str) -> dict:
     properties = await db.properties.find({"owner_id": manager_id}, {"_id": 0}).to_list(1000)
     manager = await db.users.find_one({"id": manager_id, "role": {"$in": ["manager", "owner"]}}, {"_id": 0, "password": 0})

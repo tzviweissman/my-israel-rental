@@ -11,6 +11,22 @@ from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 
 from models import SiteSettings
+from models_response import (
+    AdminBlockOut,
+    AdminBulkMarkBookedResponse,
+    AdminDashboardResponse,
+    AdminEmailHealthResponse,
+    AdminMarkBookedResponse,
+    AdminToggleStatusResponse,
+    AnyResponse,
+    ConversationOut,
+    MessageResponse,
+    OkResponse,
+    PropertyOut,
+    ServiceRequestOut,
+    SubscribersResponse,
+    UserPublic,
+)
 from routes.deps import POSTMARK_WEBHOOK_SECRET, db, logger, verify_token
 from utils.auth import decode_query_token
 from utils.events import publish, subscribe, subscriber_count, unsubscribe
@@ -70,7 +86,7 @@ async def admin_events_stream(token: str) -> StreamingResponse:
     )
 
 
-@api_router.get("/admin/events/health")
+@api_router.get("/admin/events/health", response_model=SubscribersResponse)
 async def admin_events_health(payload: dict = Depends(verify_token)) -> dict:
     """How many live admin SSE subscribers we currently have."""
     if payload.get("role") != "admin":
@@ -78,7 +94,7 @@ async def admin_events_health(payload: dict = Depends(verify_token)) -> dict:
     return {"subscribers": subscriber_count()}
 
 
-@api_router.post("/webhooks/postmark")
+@api_router.post("/webhooks/postmark", response_model=OkResponse)
 async def postmark_webhook(request: Request, token: str | None = None) -> dict:
     """Receive delivery / bounce / spam-complaint events from Postmark.
 
@@ -151,7 +167,7 @@ async def postmark_webhook(request: Request, token: str | None = None) -> dict:
 
 
 
-@api_router.get("/admin/email-health")
+@api_router.get("/admin/email-health", response_model=AdminEmailHealthResponse)
 async def admin_email_health(payload: dict = Depends(verify_token)) -> dict:
     """Admin-only: email deliverability stats + recent events."""
     if payload['role'] != 'admin':
@@ -195,7 +211,7 @@ async def admin_email_health(payload: dict = Depends(verify_token)) -> dict:
 _exchange_cache = {"rate": None, "fetched_at": None}
 
 
-@api_router.get("/admin/dashboard")
+@api_router.get("/admin/dashboard", response_model=AdminDashboardResponse)
 async def get_admin_dashboard(payload: dict = Depends(verify_token)) -> dict:
     if payload['role'] != 'admin':
         raise HTTPException(status_code=403, detail="Admin access required")
@@ -221,7 +237,7 @@ async def get_admin_dashboard(payload: dict = Depends(verify_token)) -> dict:
     }
 
 
-@api_router.get("/admin/users")
+@api_router.get("/admin/users", response_model=list[UserPublic])
 async def get_all_users(payload: dict = Depends(verify_token)) -> list[dict]:
     if payload['role'] != 'admin':
         raise HTTPException(status_code=403, detail="Admin access required")
@@ -229,7 +245,7 @@ async def get_all_users(payload: dict = Depends(verify_token)) -> list[dict]:
     return users
 
 
-@api_router.put("/admin/users/{user_id}/status")
+@api_router.put("/admin/users/{user_id}/status", response_model=AdminToggleStatusResponse)
 async def update_user_status(user_id: str, payload: dict = Depends(verify_token)) -> dict:
     if payload['role'] != 'admin':
         raise HTTPException(status_code=403, detail="Admin access required")
@@ -242,7 +258,7 @@ async def update_user_status(user_id: str, payload: dict = Depends(verify_token)
     return {"message": f"User {new_status}", "status": new_status}
 
 
-@api_router.delete("/admin/users/{user_id}")
+@api_router.delete("/admin/users/{user_id}", response_model=MessageResponse)
 async def delete_user(user_id: str, payload: dict = Depends(verify_token)) -> dict:
     if payload['role'] != 'admin':
         raise HTTPException(status_code=403, detail="Admin access required")
@@ -254,7 +270,7 @@ async def delete_user(user_id: str, payload: dict = Depends(verify_token)) -> di
     return {"message": "User and their properties deleted"}
 
 
-@api_router.get("/admin/properties")
+@api_router.get("/admin/properties", response_model=list[PropertyOut])
 async def get_all_properties_admin(payload: dict = Depends(verify_token)) -> list[dict]:
     if payload['role'] != 'admin':
         raise HTTPException(status_code=403, detail="Admin access required")
@@ -294,7 +310,7 @@ class AdminBlockIn(BaseModel):
     indefinite: bool | None = False
 
 
-@api_router.post("/admin/properties/{property_id}/mark-booked")
+@api_router.post("/admin/properties/{property_id}/mark-booked", response_model=AdminMarkBookedResponse)
 async def admin_mark_property_booked(
     property_id: str,
     block: AdminBlockIn,
@@ -334,7 +350,7 @@ async def admin_mark_property_booked(
     return {"message": "Property marked as booked", "block": block_doc}
 
 
-@api_router.get("/admin/properties/{property_id}/blocks")
+@api_router.get("/admin/properties/{property_id}/blocks", response_model=list[AdminBlockOut])
 async def admin_list_property_blocks(property_id: str, payload: dict = Depends(verify_token)) -> list[dict]:
     if payload['role'] != 'admin':
         raise HTTPException(status_code=403, detail="Admin access required")
@@ -344,7 +360,7 @@ async def admin_list_property_blocks(property_id: str, payload: dict = Depends(v
     return blocks
 
 
-@api_router.delete("/admin/properties/blocks/{block_id}")
+@api_router.delete("/admin/properties/blocks/{block_id}", response_model=MessageResponse)
 async def admin_remove_block(block_id: str, payload: dict = Depends(verify_token)) -> dict:
     if payload['role'] != 'admin':
         raise HTTPException(status_code=403, detail="Admin access required")
@@ -362,7 +378,7 @@ class BulkMarkBookedIn(BaseModel):
     indefinite: bool | None = False
 
 
-@api_router.post("/admin/properties/bulk-mark-booked")
+@api_router.post("/admin/properties/bulk-mark-booked", response_model=AdminBulkMarkBookedResponse)
 async def admin_bulk_mark_booked(
     data: BulkMarkBookedIn,
     payload: dict = Depends(verify_token),
@@ -408,7 +424,7 @@ async def admin_bulk_mark_booked(
     }
 
 
-@api_router.put("/admin/properties/{property_id}/status")
+@api_router.put("/admin/properties/{property_id}/status", response_model=AdminToggleStatusResponse)
 async def toggle_property_status(property_id: str, payload: dict = Depends(verify_token)) -> dict:
     if payload['role'] != 'admin':
         raise HTTPException(status_code=403, detail="Admin access required")
@@ -421,7 +437,7 @@ async def toggle_property_status(property_id: str, payload: dict = Depends(verif
     return {"message": f"Property {new_status}", "status": new_status}
 
 
-@api_router.get("/admin/chats")
+@api_router.get("/admin/chats", response_model=list[ConversationOut])
 async def get_all_chats(payload: dict = Depends(verify_token)) -> list[dict]:
     if payload['role'] != 'admin':
         raise HTTPException(status_code=403, detail="Admin access required")
@@ -454,7 +470,7 @@ async def get_all_chats(payload: dict = Depends(verify_token)) -> list[dict]:
     return list(conversations.values())
 
 
-@api_router.get("/admin/document-services")
+@api_router.get("/admin/document-services", response_model=list[ServiceRequestOut])
 async def get_all_document_services(payload: dict = Depends(verify_token)) -> list[dict]:
     if payload['role'] != 'admin':
         raise HTTPException(status_code=403, detail="Admin access required")
@@ -466,7 +482,7 @@ async def get_all_document_services(payload: dict = Depends(verify_token)) -> li
     return services
 
 
-@api_router.put("/admin/document-services/{service_id}/status")
+@api_router.put("/admin/document-services/{service_id}/status", response_model=MessageResponse)
 async def update_service_status(service_id: str, status: str, payload: dict = Depends(verify_token)) -> dict:
     if payload['role'] != 'admin':
         raise HTTPException(status_code=403, detail="Admin access required")
@@ -477,7 +493,7 @@ async def update_service_status(service_id: str, status: str, payload: dict = De
     return {"message": f"Service status updated to {status}"}
 
 
-@api_router.get("/admin/settings")
+@api_router.get("/admin/settings", response_model=AnyResponse)
 async def get_site_settings(payload: dict = Depends(verify_token)) -> dict:
     if payload['role'] != 'admin':
         raise HTTPException(status_code=403, detail="Admin access required")
@@ -487,7 +503,7 @@ async def get_site_settings(payload: dict = Depends(verify_token)) -> dict:
     return settings
 
 
-@api_router.put("/admin/settings")
+@api_router.put("/admin/settings", response_model=MessageResponse)
 async def update_site_settings(settings: SiteSettings, payload: dict = Depends(verify_token)) -> dict:
     if payload['role'] != 'admin':
         raise HTTPException(status_code=403, detail="Admin access required")

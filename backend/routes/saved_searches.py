@@ -5,13 +5,14 @@ from datetime import UTC, datetime, timedelta
 from fastapi import APIRouter, Depends, HTTPException
 
 from models import SavedSearchCreate
+from models_response import MessageResponse, SavedSearchCreateResponse, SavedSearchOut
 from routes.deps import db, verify_token
 
 router = APIRouter()
 api_router = router  # alias so existing @api_router decorators work verbatim
 
 
-@api_router.post("/saved-searches")
+@api_router.post("/saved-searches", response_model=SavedSearchCreateResponse)
 async def create_saved_search(body: SavedSearchCreate, payload: dict = Depends(verify_token)) -> dict:
     """Renter subscribes to an availability alert for a given criteria+dates.
     Auto-expires after 60 days. Requires sign-in."""
@@ -66,7 +67,7 @@ async def create_saved_search(body: SavedSearchCreate, payload: dict = Depends(v
 
 
 
-@api_router.get("/saved-searches")
+@api_router.get("/saved-searches", response_model=list[SavedSearchOut])
 async def list_saved_searches(payload: dict = Depends(verify_token)) -> list[dict]:
     """List the current user's active saved searches (newest first)."""
     now = datetime.now(UTC).isoformat()
@@ -78,7 +79,7 @@ async def list_saved_searches(payload: dict = Depends(verify_token)) -> list[dic
 
 
 
-@api_router.delete("/saved-searches/{search_id}")
+@api_router.delete("/saved-searches/{search_id}", response_model=MessageResponse)
 async def delete_saved_search(search_id: str, payload: dict = Depends(verify_token)) -> dict:
     """Renter deletes (deactivates) a saved search."""
     search = await db.saved_searches.find_one({"id": search_id}, {"_id": 0})

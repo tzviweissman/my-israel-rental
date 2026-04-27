@@ -8,6 +8,11 @@ from icalendar import Calendar as iCalCalendar
 from icalendar import Event as iCalEvent
 
 from models import ICalUrlInput
+from models_response import (
+    BlockedDatesResponse,
+    IcalAddResponse,
+    IcalSyncResponse,
+)
 from routes.deps import db, verify_token
 from utils.helpers import parse_ical_feed, sync_property_ical
 
@@ -15,7 +20,7 @@ router = APIRouter()
 api_router = router  # alias so existing @api_router decorators work verbatim
 
 
-@api_router.post("/properties/{property_id}/ical")
+@api_router.post("/properties/{property_id}/ical", response_model=IcalAddResponse)
 async def add_ical_url(property_id: str, data: ICalUrlInput, payload: dict = Depends(verify_token)) -> dict:
     prop = await db.properties.find_one({"id": property_id}, {"_id": 0})
     if not prop:
@@ -35,7 +40,7 @@ async def add_ical_url(property_id: str, data: ICalUrlInput, payload: dict = Dep
     return {"message": "iCal feed added and synced", "blocked_dates": len(dates), "ical_urls": ical_urls}
 
 
-@api_router.delete("/properties/{property_id}/ical")
+@api_router.delete("/properties/{property_id}/ical", response_model=IcalAddResponse)
 async def remove_ical_url(property_id: str, data: ICalUrlInput, payload: dict = Depends(verify_token)) -> dict:
     prop = await db.properties.find_one({"id": property_id}, {"_id": 0})
     if not prop:
@@ -76,7 +81,7 @@ async def export_ical(property_id: str) -> Response:
     return Response(content=cal.to_ical(), media_type="text/calendar", headers={"Content-Disposition": f"attachment; filename={property_id}.ics"})
 
 
-@api_router.get("/properties/{property_id}/blocked-dates")
+@api_router.get("/properties/{property_id}/blocked-dates", response_model=BlockedDatesResponse)
 async def get_blocked_dates(property_id: str) -> dict:
     # Internal bookings
     bookings = await db.bookings.find(
@@ -98,7 +103,7 @@ async def get_blocked_dates(property_id: str) -> dict:
     }
 
 
-@api_router.post("/properties/{property_id}/ical-sync")
+@api_router.post("/properties/{property_id}/ical-sync", response_model=IcalSyncResponse)
 async def manual_ical_sync(property_id: str, payload: dict = Depends(verify_token)) -> dict:
     prop = await db.properties.find_one({"id": property_id}, {"_id": 0})
     if not prop:

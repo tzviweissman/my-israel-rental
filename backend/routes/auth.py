@@ -8,6 +8,7 @@ import bcrypt
 from fastapi import APIRouter, Depends, HTTPException, Request
 
 from models import ChangePasswordRequest, ForgotPasswordRequest, ResetPasswordRequest, UserLogin, UserRegister
+from models_response import MessageResponse, PasswordResetResponse, TokenResponse, UserPublic
 from routes.deps import create_token, db, logger, verify_token
 from utils.email import (
     send_password_reset_email,
@@ -18,7 +19,7 @@ router = APIRouter()
 api_router = router  # alias so existing @api_router decorators work verbatim
 
 
-@api_router.post("/auth/register")
+@api_router.post("/auth/register", response_model=TokenResponse)
 async def register(user_data: UserRegister) -> dict:
     existing = await db.users.find_one({"email": user_data.email})
     if existing:
@@ -49,7 +50,7 @@ async def register(user_data: UserRegister) -> dict:
     return {"token": token, "user": {"id": user_id, "email": user_data.email, "name": user_data.name, "role": user_data.role}}
 
 
-@api_router.post("/auth/login")
+@api_router.post("/auth/login", response_model=TokenResponse)
 async def login(credentials: UserLogin) -> dict:
     user = await db.users.find_one({"email": credentials.email}, {"_id": 0})
     if not user:
@@ -62,7 +63,7 @@ async def login(credentials: UserLogin) -> dict:
     return {"token": token, "user": {"id": user['id'], "email": user['email'], "name": user['name'], "role": user['role']}}
 
 
-@api_router.get("/auth/me")
+@api_router.get("/auth/me", response_model=UserPublic)
 async def get_current_user(payload: dict = Depends(verify_token)) -> dict:
     user = await db.users.find_one({"id": payload['user_id']}, {"_id": 0, "password": 0})
     if not user:
@@ -71,7 +72,7 @@ async def get_current_user(payload: dict = Depends(verify_token)) -> dict:
 
 
 
-@api_router.post("/auth/forgot-password")
+@api_router.post("/auth/forgot-password", response_model=PasswordResetResponse)
 async def forgot_password(request: ForgotPasswordRequest, req: Request) -> dict:
     user = await db.users.find_one({"email": request.email}, {"_id": 0})
     if not user:
@@ -113,7 +114,7 @@ async def forgot_password(request: ForgotPasswordRequest, req: Request) -> dict:
 
 
 
-@api_router.post("/auth/reset-password")
+@api_router.post("/auth/reset-password", response_model=MessageResponse)
 async def reset_password(request: ResetPasswordRequest) -> dict:
     reset_doc = await db.password_resets.find_one({"token": request.token, "used": False}, {"_id": 0})
     if not reset_doc:
@@ -140,7 +141,7 @@ async def reset_password(request: ResetPasswordRequest) -> dict:
 
 
 
-@api_router.post("/auth/change-password")
+@api_router.post("/auth/change-password", response_model=MessageResponse)
 async def change_password(request: ChangePasswordRequest, payload: dict = Depends(verify_token)) -> dict:
     user = await db.users.find_one({"id": payload['user_id']}, {"_id": 0})
     if not user:

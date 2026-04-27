@@ -6,6 +6,13 @@ from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile
 from fastapi.responses import FileResponse
 
 from models import ContractSignature
+from models_response import (
+    ContractOut,
+    ContractSignResponse,
+    ContractTranslateResponse,
+    ContractUploadResponse,
+    MessageResponse,
+)
 from routes.deps import ALLOWED_CONTRACT_TYPES, CONTRACT_DIR, MAX_FILE_SIZE, ROOT_DIR, db, logger, verify_token
 from utils.contract_template import ensure_templates as ensure_contract_templates
 from utils.files import extract_text_from_docx, extract_text_from_image, extract_text_from_pdf
@@ -39,7 +46,7 @@ async def download_contract_template(lang: str) -> FileResponse:
 
 
 
-@api_router.post("/contracts/upload")
+@api_router.post("/contracts/upload", response_model=ContractUploadResponse)
 async def upload_contract(
     file: UploadFile = File(...),
     property_id: str = Form(...),
@@ -114,7 +121,7 @@ async def upload_contract(
 
 
 
-@api_router.get("/contracts")
+@api_router.get("/contracts", response_model=list[ContractOut])
 async def list_contracts(property_id: str | None = None, payload: dict = Depends(verify_token)) -> list[dict]:
     query = {}
     if payload.get('role') != 'admin':
@@ -153,7 +160,7 @@ async def download_contract(contract_id: str) -> FileResponse:
 
 
 
-@api_router.get("/contracts/{contract_id}")
+@api_router.get("/contracts/{contract_id}", response_model=ContractOut)
 async def get_contract(contract_id: str, payload: dict = Depends(verify_token)) -> dict:
     contract = await db.contracts.find_one({"id": contract_id}, {"_id": 0})
     if not contract:
@@ -167,7 +174,7 @@ async def get_contract(contract_id: str, payload: dict = Depends(verify_token)) 
 
 
 
-@api_router.post("/contracts/{contract_id}/translate")
+@api_router.post("/contracts/{contract_id}/translate", response_model=ContractTranslateResponse)
 async def translate_contract(contract_id: str, direction: str = Form("he-en"), payload: dict = Depends(verify_token)) -> dict:
     contract = await db.contracts.find_one({"id": contract_id}, {"_id": 0})
     if not contract:
@@ -197,7 +204,7 @@ async def translate_contract(contract_id: str, direction: str = Form("he-en"), p
 
 
 
-@api_router.post("/contracts/{contract_id}/sign")
+@api_router.post("/contracts/{contract_id}/sign", response_model=ContractSignResponse)
 async def sign_contract(contract_id: str, signature: ContractSignature, payload: dict = Depends(verify_token)) -> dict:
     contract = await db.contracts.find_one({"id": contract_id}, {"_id": 0})
     if not contract:
@@ -222,7 +229,7 @@ async def sign_contract(contract_id: str, signature: ContractSignature, payload:
 
 
 
-@api_router.delete("/contracts/{contract_id}")
+@api_router.delete("/contracts/{contract_id}", response_model=MessageResponse)
 async def delete_contract(contract_id: str, payload: dict = Depends(verify_token)) -> dict:
     contract = await db.contracts.find_one({"id": contract_id}, {"_id": 0})
     if not contract:

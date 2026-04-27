@@ -9,6 +9,14 @@ from typing import Any
 from fastapi import APIRouter, Body, Depends, HTTPException
 
 from models import BookingCreate
+from models_response import (
+    BookingAcceptResponse,
+    BookingCreateResponse,
+    BookingOut,
+    BookingSignContractResponse,
+    BookingTranslationResponse,
+    MessageResponse,
+)
 from routes.deps import ROOT_DIR, db, logger, verify_token
 from utils.email import (
     send_booking_confirmation_email,
@@ -23,7 +31,7 @@ router = APIRouter()
 api_router = router  # alias so existing @api_router decorators work verbatim
 
 
-@api_router.post("/bookings")
+@api_router.post("/bookings", response_model=BookingCreateResponse)
 async def create_booking(booking_data: BookingCreate, payload: dict = Depends(verify_token)) -> dict:
     property_data = await db.properties.find_one({"id": booking_data.property_id}, {"_id": 0})
     if not property_data:
@@ -128,7 +136,7 @@ async def create_booking(booking_data: BookingCreate, payload: dict = Depends(ve
     return {"id": booking_id, "status": booking_doc['status'], "message": "Booking confirmed!" if booking_doc['status'] == 'confirmed' else "Booking request sent successfully"}
 
 
-@api_router.get("/bookings")
+@api_router.get("/bookings", response_model=list[BookingOut])
 async def get_bookings(payload: dict = Depends(verify_token)) -> list[dict]:
     query = {}
     if payload['role'] == 'renter':
@@ -154,7 +162,7 @@ async def get_bookings(payload: dict = Depends(verify_token)) -> list[dict]:
 # Booking Cancellation Endpoints
 
 
-@api_router.post("/bookings/{booking_id}/accept")
+@api_router.post("/bookings/{booking_id}/accept", response_model=BookingAcceptResponse)
 async def accept_booking(booking_id: str, payload: dict = Depends(verify_token)) -> dict:
     """Owner/Manager accepts a pending booking"""
     booking = await db.bookings.find_one({"id": booking_id}, {"_id": 0})
@@ -267,7 +275,7 @@ async def accept_booking(booking_id: str, payload: dict = Depends(verify_token))
         }
 
 
-@api_router.post("/bookings/{booking_id}/cancel")
+@api_router.post("/bookings/{booking_id}/cancel", response_model=MessageResponse)
 async def cancel_booking(booking_id: str, reason: str = Body(..., embed=True), payload: dict = Depends(verify_token)) -> dict:
     """Owner/Manager direct cancellation"""
     booking = await db.bookings.find_one({"id": booking_id}, {"_id": 0})
@@ -312,7 +320,7 @@ async def cancel_booking(booking_id: str, reason: str = Body(..., embed=True), p
     return {"message": "Booking cancelled successfully"}
 
 
-@api_router.post("/bookings/{booking_id}/request-cancel")
+@api_router.post("/bookings/{booking_id}/request-cancel", response_model=MessageResponse)
 async def request_cancel_booking(booking_id: str, reason: str = Body(..., embed=True), payload: dict = Depends(verify_token)) -> dict:
     """Renter requests cancellation"""
     booking = await db.bookings.find_one({"id": booking_id}, {"_id": 0})
@@ -352,7 +360,7 @@ async def request_cancel_booking(booking_id: str, reason: str = Body(..., embed=
     return {"message": "Cancellation request submitted"}
 
 
-@api_router.post("/bookings/{booking_id}/sign-contract")
+@api_router.post("/bookings/{booking_id}/sign-contract", response_model=BookingSignContractResponse)
 async def sign_booking_contract(booking_id: str, body: dict = Body(...), payload: dict = Depends(verify_token)) -> dict:
     """Renter signs the rental contract after owner acceptance"""
     booking = await db.bookings.find_one({"id": booking_id}, {"_id": 0})
@@ -599,7 +607,7 @@ async def sign_booking_contract(booking_id: str, body: dict = Body(...), payload
     }
 
 
-@api_router.post("/bookings/{booking_id}/approve-cancel")
+@api_router.post("/bookings/{booking_id}/approve-cancel", response_model=MessageResponse)
 async def approve_cancel_request(booking_id: str, payload: dict = Depends(verify_token)) -> dict:
     """Owner approves cancellation request"""
     booking = await db.bookings.find_one({"id": booking_id}, {"_id": 0})
@@ -646,7 +654,7 @@ async def approve_cancel_request(booking_id: str, payload: dict = Depends(verify
     return {"message": "Cancellation approved"}
 
 
-@api_router.post("/bookings/{booking_id}/deny-cancel")
+@api_router.post("/bookings/{booking_id}/deny-cancel", response_model=MessageResponse)
 async def deny_cancel_request(booking_id: str, denial_reason: str = Body(..., embed=True), payload: dict = Depends(verify_token)) -> dict:
     """Owner denies cancellation request"""
     booking = await db.bookings.find_one({"id": booking_id}, {"_id": 0})
@@ -692,7 +700,7 @@ async def deny_cancel_request(booking_id: str, denial_reason: str = Body(..., em
 # --- Subleases ---
 
 
-@api_router.post("/bookings/{booking_id}/translate-contract")
+@api_router.post("/bookings/{booking_id}/translate-contract", response_model=BookingTranslationResponse)
 async def translate_booking_contract(booking_id: str, body: dict = Body(default={}), payload: dict = Depends(verify_token)) -> dict:
     """Translate the property contract associated with a booking.
 

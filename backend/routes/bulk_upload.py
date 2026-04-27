@@ -27,6 +27,12 @@ from fastapi.responses import StreamingResponse
 from pydantic import BaseModel, ValidationError
 
 from models import PropertyCreate
+from models_response import (
+    BulkCommitResponse,
+    BulkExtractResponse,
+    BulkImagesAttachResponse,
+    BulkParseResponse,
+)
 from routes.deps import UPLOAD_DIR, db, verify_token
 
 router = APIRouter()
@@ -241,7 +247,7 @@ async def download_template(fmt: str = "csv") -> StreamingResponse:
     )
 
 
-@api_router.post("/properties/bulk/parse")
+@api_router.post("/properties/bulk/parse", response_model=BulkParseResponse)
 async def parse_bulk(
     file: UploadFile | None = File(None),
     text: str | None = Form(None),
@@ -287,7 +293,7 @@ async def parse_bulk(
     return {"rows": preview, "summary": {"total": total, "valid": valid, "invalid": total - valid}}
 
 
-@api_router.post("/properties/bulk/commit")
+@api_router.post("/properties/bulk/commit", response_model=BulkCommitResponse)
 async def commit_bulk(body: BulkCommitBody, payload: dict = Depends(verify_token)) -> dict:
     """Create every row in `body.rows`. Rows must already be normalized (call /parse first)."""
     if payload.get("role") not in ("owner", "manager", "admin"):
@@ -326,7 +332,7 @@ async def commit_bulk(body: BulkCommitBody, payload: dict = Depends(verify_token
     return {"created": created, "skipped": skipped, "summary": {"created": len(created), "skipped": len(skipped)}}
 
 
-@api_router.post("/properties/bulk/images")
+@api_router.post("/properties/bulk/images", response_model=BulkImagesAttachResponse)
 async def attach_bulk_images(
     file: UploadFile = File(...),
     mapping: str = Form(...),
@@ -395,7 +401,7 @@ async def attach_bulk_images(
     return results
 
 
-@api_router.post("/properties/bulk/images/attach")
+@api_router.post("/properties/bulk/images/attach", response_model=BulkImagesAttachResponse)
 async def attach_bulk_images_flat(
     mapping: str = Form(...),
     files: List[UploadFile] = File(...),
@@ -534,7 +540,7 @@ Return ONLY raw JSON -- no markdown fences, no commentary.
 """
 
 
-@api_router.post("/properties/bulk/extract")
+@api_router.post("/properties/bulk/extract", response_model=BulkExtractResponse)
 async def smart_extract(
     body: SmartExtractIn,
     payload: dict = Depends(verify_token),

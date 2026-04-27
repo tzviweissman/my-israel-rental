@@ -5,6 +5,14 @@ from datetime import UTC, datetime
 from fastapi import APIRouter, Body, Depends, File, HTTPException, UploadFile
 
 from models import SubleaseCreate
+from models_response import (
+    ContractSignResponse,
+    IdMessageResponse,
+    MessageResponse,
+    PublicContractResponse,
+    SubleaseContractUploadResponse,
+    SubleaseOut,
+)
 from routes.deps import ALLOWED_CONTRACT_TYPES, CONTRACT_DIR, MAX_FILE_SIZE, db, verify_token
 from utils.files import extract_text_from_docx, extract_text_from_image, extract_text_from_pdf
 
@@ -12,7 +20,7 @@ router = APIRouter()
 api_router = router  # alias so existing @api_router decorators work verbatim
 
 
-@api_router.post("/subleases")
+@api_router.post("/subleases", response_model=IdMessageResponse)
 async def create_sublease(sublease_data: SubleaseCreate, payload: dict = Depends(verify_token)) -> dict:
     # Verify the renter has a booking for this property
     booking = await db.bookings.find_one({
@@ -59,7 +67,7 @@ async def create_sublease(sublease_data: SubleaseCreate, payload: dict = Depends
 
 
 
-@api_router.get("/subleases")
+@api_router.get("/subleases", response_model=list[SubleaseOut])
 async def list_subleases(area: str | None = None) -> list[dict]:
     query: dict = {"active": True}
     if area:
@@ -69,7 +77,7 @@ async def list_subleases(area: str | None = None) -> list[dict]:
 
 
 
-@api_router.get("/my-subleases")
+@api_router.get("/my-subleases", response_model=list[SubleaseOut])
 async def get_my_subleases(payload: dict = Depends(verify_token)) -> list[dict]:
     subleases = await db.subleases.find(
         {"subleasor_id": payload['user_id']}, {"_id": 0}
@@ -86,7 +94,7 @@ async def get_my_subleases(payload: dict = Depends(verify_token)) -> list[dict]:
 
 
 
-@api_router.put("/subleases/{sublease_id}")
+@api_router.put("/subleases/{sublease_id}", response_model=MessageResponse)
 async def update_sublease(sublease_id: str, updates: dict = Body(...), payload: dict = Depends(verify_token)) -> dict:
     sublease = await db.subleases.find_one({"id": sublease_id}, {"_id": 0})
     if not sublease:
@@ -103,7 +111,7 @@ async def update_sublease(sublease_id: str, updates: dict = Body(...), payload: 
 
 
 
-@api_router.post("/subleases/{sublease_id}/contract")
+@api_router.post("/subleases/{sublease_id}/contract", response_model=SubleaseContractUploadResponse)
 async def upload_sublease_contract(
     sublease_id: str,
     file: UploadFile = File(...),
@@ -179,7 +187,7 @@ async def upload_sublease_contract(
 
 
 
-@api_router.get("/contracts/sign/{sign_token}")
+@api_router.get("/contracts/sign/{sign_token}", response_model=PublicContractResponse)
 async def get_contract_for_signing(sign_token: str) -> dict:
     """Public endpoint - sublessee accesses contract via sign_token (no auth needed)"""
     contract = await db.contracts.find_one({"sign_token": sign_token}, {"_id": 0})
@@ -211,7 +219,7 @@ async def get_contract_for_signing(sign_token: str) -> dict:
 
 
 
-@api_router.post("/contracts/sign/{sign_token}")
+@api_router.post("/contracts/sign/{sign_token}", response_model=ContractSignResponse)
 async def sign_contract_public(sign_token: str, body: dict = Body(...)) -> dict:
     """Public endpoint - sublessee signs the contract via sign_token"""
     contract = await db.contracts.find_one({"sign_token": sign_token}, {"_id": 0})
@@ -264,7 +272,7 @@ async def sign_contract_public(sign_token: str, body: dict = Body(...)) -> dict:
 
 
 
-@api_router.delete("/subleases/{sublease_id}")
+@api_router.delete("/subleases/{sublease_id}", response_model=MessageResponse)
 async def delete_sublease(sublease_id: str, payload: dict = Depends(verify_token)) -> dict:
     sublease = await db.subleases.find_one({"id": sublease_id}, {"_id": 0})
     if not sublease:
