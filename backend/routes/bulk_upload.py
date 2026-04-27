@@ -489,7 +489,7 @@ Required fields (always emit):
   - area           (string, neighbourhood or city + neighbourhood, in English)
   - address        (string, best-guess address; empty string if not in source)
   - rental_type    (one of: long-term | short-term | vacation | storage; default long-term)
-  - property_type  (one of: apartment | house | studio | duplex | penthouse | cottage | storage; default apartment)
+  - property_type  (one of: apartment | house | villa; default apartment)
   - bedrooms       (number; if "1.5 bedroom" -> 1.5, if "studio" -> 0)
   - bathrooms      (number; default 1 if not mentioned)
   - floor          (integer; -1 = basement, 0 = ground; "ground floor" -> 0)
@@ -499,9 +499,17 @@ Required fields (always emit):
 
 Optional (emit when source mentions them):
   - square_meters, porch_square_meters, porches, has_elevator, is_shabbat_elevator,
-    is_tama, sukkah_compatible, furniture_option (no_furniture | partial | full),
-    condition (good | after_renovation | needs_renovation | new), amenities (comma-separated string),
-    cancellation_policy (flexible | moderate | strict), available_from (ISO date if derivable, else string),
+    is_tama, sukkah_compatible,
+    furniture_option (no_furniture | furniture_package | furniture_free),
+    condition (renovated | partially_renovated | good),
+    amenities (comma-separated string -- pick ONLY from this canonical list, exact spelling:
+      "Central AC / Heating", "In-unit washer and dryer", "Dishwasher",
+      "Walk in Closets", "High Ceilings", "Ensuite Bathroom", "Storage Space",
+      "Heated Floors", "Gym / Fitness center", "Swimming pool (indoor or outdoor)",
+      "Hot tub / Spa", "On-site parking (garage or lot)", "Wi-Fi included"),
+    cancellation_policy (flexible | moderate | strict | custom),
+    custom_cancellation_policy (string -- free text, only when cancellation_policy = custom),
+    available_from (ISO date if derivable, else string),
     minimum_booking_days,
     has_agent_fee (yes | no -- emit "yes" if source mentions agent / broker / שכר טרחה / דמי תיווך),
     agent_fee_price (number -- the agent / broker fee amount when stated),
@@ -512,9 +520,14 @@ Booleans MUST be the literal strings "yes" or "no" (lower-case).
 Important rules:
 - If unsure about a value, OMIT it rather than guess.
 - Hebrew month references (e.g. "ר"ח אייר" / "Rosh Chodesh Iyar") -> put the transliterated phrase into available_from as a string.
-- "Fully furnished" -> furniture_option: "full". "partially" -> "partial". "Unfurnished" -> "no_furniture".
-- "renovated" / "after renovation" -> condition: "after_renovation".
+- "Fully furnished" / "Furniture included" / "comes with furniture" -> furniture_option: "furniture_free".
+  "Furniture package available" / "furniture for sale" -> furniture_option: "furniture_package".
+  "Unfurnished" / "no furniture" -> furniture_option: "no_furniture".
+- "Renovated" / "after renovation" / "newly renovated" -> condition: "renovated".
+  "Partially renovated" / "partial reno" -> condition: "partially_renovated".
+  Otherwise -> condition: "good".
 - "approx 60" -> square_meters: 60.
+- For amenities, only emit values that match the canonical list above (case-sensitive). Skip anything you can't map.
 - Identify property boundaries: blank lines, "---", numbered prefixes (1., 2.), bold area headers, or repeated location lines.
 
 Return ONLY raw JSON -- no markdown fences, no commentary.

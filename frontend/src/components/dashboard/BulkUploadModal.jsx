@@ -6,6 +6,10 @@ import {
   CheckCircle2, AlertCircle, Sparkles, Download,
 } from 'lucide-react';
 import { LOCATION_OPTIONS } from '../../constants/locations';
+import {
+  RENTAL_TYPES, PROPERTY_TYPES, CONDITIONS, FURNITURE_OPTIONS,
+  CANCELLATION_POLICIES, AMENITY_OPTIONS,
+} from '../../constants/propertyEnums';
 
 /**
  * Bulk-upload modal — friendly UX edition.
@@ -51,45 +55,9 @@ const blankProperty = () => ({
   condition: 'good',
   cancellation_policy: 'flexible',
   custom_cancellation_policy: '',
-  amenities: '',
+  amenities: [],
   minimum_booking_days: '',
 });
-
-const RENTAL_TYPES = [
-  { v: 'long-term', label: 'Long-term rental' },
-  { v: 'short-term', label: 'Short-term rental' },
-  { v: 'vacation', label: 'Vacation / Airbnb' },
-  { v: 'storage', label: 'Storage' },
-];
-
-const PROPERTY_TYPES = [
-  { v: 'apartment', label: 'Apartment' },
-  { v: 'house', label: 'House' },
-  { v: 'studio', label: 'Studio' },
-  { v: 'duplex', label: 'Duplex' },
-  { v: 'penthouse', label: 'Penthouse' },
-  { v: 'cottage', label: 'Cottage' },
-  { v: 'storage', label: 'Storage unit' },
-];
-
-const FURNITURE = [
-  { v: 'no_furniture', label: 'Unfurnished' },
-  { v: 'partial', label: 'Partially furnished' },
-  { v: 'full', label: 'Fully furnished' },
-];
-
-const CONDITIONS = [
-  { v: 'good', label: 'Good' },
-  { v: 'after_renovation', label: 'After renovation' },
-  { v: 'needs_renovation', label: 'Needs renovation' },
-  { v: 'new', label: 'New' },
-];
-
-const CANCEL_POLICIES = [
-  { v: 'flexible', label: 'Flexible' },
-  { v: 'moderate', label: 'Moderate' },
-  { v: 'strict', label: 'Strict' },
-];
 
 const BulkUploadModal = ({ isOpen, onClose, onDone, API, token }) => {
   // 'editor' = visual rows | 'import' = spreadsheet path | 'images' | 'done'
@@ -227,12 +195,22 @@ const BulkUploadModal = ({ isOpen, onClose, onDone, API, token }) => {
       });
       const parsed = parseRes.data;
       // Surface every row in the visual editor for inline review
-      const editorRows = parsed.rows.map(p => ({
-        ...blankProperty(),
-        ...p.normalized,
-        // Coerce list / object fields back into strings the inputs expect
-        amenities: Array.isArray(p.normalized?.amenities) ? p.normalized.amenities.join(', ') : (p.normalized?.amenities || ''),
-      }));
+      const editorRows = parsed.rows.map(p => {
+        const merged = { ...blankProperty(), ...p.normalized };
+        // Coerce list / object fields back into the shape the editor expects
+        if (typeof merged.amenities === 'string') {
+          merged.amenities = merged.amenities
+            .split(/[,;]/).map(a => a.trim()).filter(Boolean);
+        } else if (!Array.isArray(merged.amenities)) {
+          merged.amenities = [];
+        }
+        // Booleans -> yes/no strings
+        for (const bf of ['has_elevator', 'is_shabbat_elevator', 'is_tama', 'sukkah_compatible', 'has_agent_fee']) {
+          if (typeof merged[bf] === 'boolean') merged[bf] = merged[bf] ? 'yes' : 'no';
+          if (!['yes', 'no'].includes(merged[bf])) merged[bf] = 'no';
+        }
+        return merged;
+      });
       setRows(editorRows.length ? editorRows : [blankProperty()]);
       const errMap = {};
       parsed.rows.forEach((p, i) => { if (p.errors.length) errMap[i] = p.errors[0]; });
@@ -280,12 +258,17 @@ const BulkUploadModal = ({ isOpen, onClose, onDone, API, token }) => {
           merged[k] = v;
         }
         // Normalise booleans the editor expects (yes/no strings)
-        for (const bf of ['has_elevator', 'is_shabbat_elevator', 'is_tama', 'sukkah_compatible']) {
+        for (const bf of ['has_elevator', 'is_shabbat_elevator', 'is_tama', 'sukkah_compatible', 'has_agent_fee']) {
           if (typeof merged[bf] === 'boolean') merged[bf] = merged[bf] ? 'yes' : 'no';
           if (!['yes', 'no'].includes(merged[bf])) merged[bf] = 'no';
         }
-        // amenities: ensure string
-        if (Array.isArray(merged.amenities)) merged.amenities = merged.amenities.join(', ');
+        // amenities: ensure array of canonical strings
+        if (typeof merged.amenities === 'string') {
+          merged.amenities = merged.amenities
+            .split(/[,;]/).map(a => a.trim()).filter(Boolean);
+        } else if (!Array.isArray(merged.amenities)) {
+          merged.amenities = [];
+        }
         return merged;
       });
       setRows(editorRows);
@@ -663,9 +646,9 @@ const PropertyRowCard = ({ index, row, error, onChange, onDuplicate, onRemove })
           <NumberInput label="Porches" value={row.porches} onChange={v => onChange('porches', v)} testid={`r${index}-porches`} />
           <NumberInput label="Porch sqm" value={row.porch_square_meters} onChange={v => onChange('porch_square_meters', v)} testid={`r${index}-porch_sqm`} />
           <NumberInput label="Min booking days" value={row.minimum_booking_days} onChange={v => onChange('minimum_booking_days', v)} testid={`r${index}-min_days`} />
-          <Select label="Furniture" value={row.furniture_option} onChange={v => onChange('furniture_option', v)} options={FURNITURE} testid={`r${index}-furniture`} />
+          <Select label="Furniture" value={row.furniture_option} onChange={v => onChange('furniture_option', v)} options={FURNITURE_OPTIONS} testid={`r${index}-furniture`} />
           <Select label="Condition" value={row.condition} onChange={v => onChange('condition', v)} options={CONDITIONS} testid={`r${index}-condition`} />
-          <Select label="Cancellation policy" value={row.cancellation_policy} onChange={v => onChange('cancellation_policy', v)} options={CANCEL_POLICIES} testid={`r${index}-cancel_policy`} />
+          <Select label="Cancellation policy" value={row.cancellation_policy} onChange={v => onChange('cancellation_policy', v)} options={CANCELLATION_POLICIES} testid={`r${index}-cancel_policy`} />
           <Select label="Elevator" value={row.has_elevator} onChange={v => onChange('has_elevator', v)} options={YESNO} testid={`r${index}-elevator`} />
           <Select label="Shabbat elevator" value={row.is_shabbat_elevator} onChange={v => onChange('is_shabbat_elevator', v)} options={YESNO} testid={`r${index}-shabbat`} />
           <Select label="TAMA / earthquake reinforced" value={row.is_tama} onChange={v => onChange('is_tama', v)} options={YESNO} testid={`r${index}-tama`} />
@@ -690,15 +673,19 @@ const PropertyRowCard = ({ index, row, error, onChange, onDuplicate, onRemove })
             </div>
           )}
           <div className="md:col-span-3">
-            <Input label="Amenities (comma-separated)" value={row.amenities} onChange={v => onChange('amenities', v)} placeholder="wifi, parking, AC" testid={`r${index}-amenities`} />
+            <AmenitiesGrid
+              value={Array.isArray(row.amenities) ? row.amenities : []}
+              onChange={v => onChange('amenities', v)}
+              testid={`r${index}-amenities`}
+            />
           </div>
-          {row.cancellation_policy === 'strict' && (
+          {row.cancellation_policy === 'custom' && (
             <div className="md:col-span-3">
               <Textarea
                 label="Custom cancellation policy"
                 value={row.custom_cancellation_policy}
                 onChange={v => onChange('custom_cancellation_policy', v)}
-                placeholder="Optional: spell out a custom cancellation policy in your own words…"
+                placeholder="Describe your cancellation policy in detail…"
                 testid={`r${index}-custom_cancel`}
               />
             </div>
@@ -797,5 +784,36 @@ const Textarea = ({ label, value, onChange, placeholder, testid }) => (
     />
   </label>
 );
+
+// Same 13-amenity grid as the regular Add/Edit form, rendered as a compact
+// checkbox cluster so bulk-upload rows stay readable.
+const AmenitiesGrid = ({ value, onChange, testid }) => {
+  const toggle = (amenity) => {
+    if (value.includes(amenity)) {
+      onChange(value.filter(a => a !== amenity));
+    } else {
+      onChange([...value, amenity]);
+    }
+  };
+  return (
+    <div data-testid={testid}>
+      <span className="block text-[11px] font-semibold text-gray-600 uppercase tracking-wide mb-2">Amenities</span>
+      <div className="grid grid-cols-2 md:grid-cols-3 gap-x-3 gap-y-1.5">
+        {AMENITY_OPTIONS.map(amenity => (
+          <label key={amenity} className="flex items-center gap-2 text-sm cursor-pointer">
+            <input
+              type="checkbox"
+              checked={value.includes(amenity)}
+              onChange={() => toggle(amenity)}
+              className="w-4 h-4 rounded border-gray-300 text-[#1E6A6A] focus:ring-[#1E6A6A]/30"
+              data-testid={`${testid}-${amenity.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')}`}
+            />
+            <span className="text-gray-700">{amenity}</span>
+          </label>
+        ))}
+      </div>
+    </div>
+  );
+};
 
 export default BulkUploadModal;
