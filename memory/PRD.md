@@ -175,6 +175,15 @@ Build a bilingual (English/Hebrew) rental website named MyIsraelRental.com with 
     - Belz / Kedushat Aharon → `floor=-1`, `square_meters=60`, `monthly_price=9500`, `condition=after_renovation`, `sukkah=yes`, `elevator=no`, address transliterated to "Kedushat Aharon Street".
   - Editor receives 3 rows (not 20), all required fields filled. User can review/edit/delete before saving. Spreadsheet import path still available below for power users.
   - 30 k char input cap; 50 properties max per extraction. Owners + managers + admins authorized.
+- [x] **Bulk Property Manager — host-side multi-edit + photos** (2026-04-27):
+  - New dashboard tab "Bulk Manager" for owners/managers/admins, hidden from renters.
+  - Multi-select with per-row checkboxes, "Select all visible", live-search (title/area/address), rental-type + area filters.
+  - **Bulk Edit Details**: every field has its own "Apply" toggle so untouched fields stay as-is on each property. Covers all canonical PropertyCreate fields: title prefix (prepended once, idempotent), description, rental_type/property_type/bedrooms/bathrooms/floor/sqm, monthly+nightly price, currency, min booking days, **checkin_time**/**checkout_time**, available_from/starting_date, elevator + Shabbat/TAMA/sukkah, condition + furniture, agent fee + amount + currency, cancellation policy + custom text, amenities (with **Append vs Replace** mode).
+  - **Bulk Add Photos**: drag/drop uploader with two modes — *Same to all* (one upload set fanned out) or *Different per property* (per-row drop zones). Live progress indicator + image previews.
+  - **Undo last bulk edit**: server returns per-property snapshots; one click reverts those exact fields. Stack keeps last 5 ops.
+  - New backend endpoints: `POST /api/properties/bulk-edit` (whitelist-filtered patch + ownership check + snapshots), `POST /api/properties/bulk-images` (shared or per_property URL fan-out). Both publish `events.publish("invalidate", ...)` so the admin dashboard auto-refreshes.
+  - Files: `backend/routes/properties.py` (+`_BULK_EDITABLE_FIELDS`, `BulkEditBody`, `BulkImagesBody`, 2 new endpoints), `models.py` (+checkin_time/checkout_time), `frontend/src/components/dashboard/BulkManagerTab.jsx` (new ~750-line file), `frontend/src/pages/Dashboard.js` (new tab), `frontend/src/constants/propertyEnums.js` + `locations.js` (shared canonical lists).
+  - Tested: 14/14 backend pytest + 13/13 frontend Playwright = 27/27 green (iteration_17.json). Verified ownership skips, admin override, snapshot-based undo, amenities append-no-dup, whitelist drops `owner_id`/`status`/`images`, no `_id` leakage.
 - [ ] Manager bulk property upload + profile pages
 
 ### P2 - Lower Priority
