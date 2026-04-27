@@ -42,12 +42,12 @@ const AccessibilityButton = () => {
     <>
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="fixed bottom-6 left-6 z-50 flex items-center justify-center w-16 h-16 rounded-full shadow-2xl transition-all duration-300 hover:scale-110"
+        className="fixed bottom-6 left-6 z-50 flex items-center justify-center w-11 h-11 rounded-full shadow-2xl transition-all duration-300 hover:scale-110"
         style={{ backgroundColor: '#4A90E2' }}
         data-testid="accessibility-button"
         aria-label="Accessibility Options"
       >
-        <Eye size={32} color="white" />
+        <Eye size={22} color="white" />
       </button>
 
       {isOpen && (
