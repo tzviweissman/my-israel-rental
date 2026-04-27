@@ -3,8 +3,10 @@ import asyncio
 import os
 import uuid
 from datetime import UTC, datetime
+from typing import Any
 
 from fastapi import APIRouter, Depends, File, HTTPException, UploadFile
+from pydantic import BaseModel
 
 from models import PropertyCreate
 from routes.deps import (
@@ -16,6 +18,7 @@ from routes.deps import (
 from utils.email import (
     send_email,
 )
+from utils.events import publish
 from utils.helpers import get_usd_ils_rate
 from utils.saved_search import match_property_against_searches
 
@@ -208,6 +211,163 @@ async def delete_property(property_id: str, payload: dict = Depends(verify_token
     
     await db.properties.delete_one({"id": property_id})
     return {"message": "Property deleted successfully"}
+
+
+# ---------------------------------------------------------------------------
+# Bulk Manager — host-side multi-property operations.
+# Used by the "Bulk Manager" dashboard tab to patch shared fields across many
+# owned listings at once, and to fan-out an uploaded photo set to several
+# properties in a single round-trip.
+# ---------------------------------------------------------------------------
+
+# Whitelist of fields the Bulk Manager is permitted to set/update. Mirrors the
+# editable surface of PropertyCreate; excludes server-managed fields like
+# owner_id, status, images, videos, created_at, etc.
+_BULK_EDITABLE_FIELDS: set[str] = {
+    "title", "description", "rental_type", "property_type",
+    "bedrooms", "bathrooms", "floor",
+    "area", "address",
+    "square_meters", "porch_square_meters", "porches",
+    "has_elevator", "is_shabbat_elevator", "is_tama", "sukkah_compatible",
+    "has_agent_fee", "agent_fee_price", "agent_fee_currency",
+    "condition", "furniture_option", "amenities",
+    "monthly_price", "nightly_price", "currency",
+    "cancellation_policy", "custom_cancellation_policy",
+    "available_from", "starting_date", "minimum_booking_days",
+    "checkin_time", "checkout_time",
+}
+
+
+class BulkEditBody(BaseModel):
+    property_ids: list[str]
+    updates: dict
+    # Optional: prefix to apply on top of each property's existing title.
+    title_prefix: str | None = None
+    # Optional: how to merge the `amenities` field — replace (default) or append.
+    amenities_mode: str | None = "replace"
+
+
+class BulkImagesBody(BaseModel):
+    property_ids: list[str]
+    image_urls: list[str]
+    # If present, scope each url-list to a specific property id; takes
+    # precedence over `image_urls` (which is the fan-out-to-all path).
+    per_property: dict[str, list[str]] | None = None
+
+
+def _filter_updates(updates: dict) -> dict:
+    """Drop keys not in the editable whitelist; keep ``None``/``""`` so callers
+    can intentionally clear a field."""
+    return {k: v for k, v in updates.items() if k in _BULK_EDITABLE_FIELDS}
+
+
+@api_router.post("/properties/bulk-edit")
+async def bulk_edit_properties(body: BulkEditBody, payload: dict = Depends(verify_token)) -> dict:
+    """Patch a whitelisted set of fields across many owned properties.
+
+    Returns ``snapshots`` for each successfully updated property so the
+    frontend can offer a one-click Undo (re-POST the snapshots back here).
+    """
+    updates = _filter_updates(body.updates or {})
+    has_prefix = bool((body.title_prefix or "").strip())
+    if not updates and not has_prefix:
+        raise HTTPException(status_code=400, detail="Nothing to update")
+    if not body.property_ids:
+        raise HTTPException(status_code=400, detail="No properties selected")
+
+    is_admin = payload.get("role") == "admin"
+    user_id = payload["user_id"]
+
+    updated: list[dict] = []
+    skipped: list[dict] = []
+
+    for pid in body.property_ids:
+        existing = await db.properties.find_one({"id": pid}, {"_id": 0})
+        if not existing:
+            skipped.append({"id": pid, "reason": "not_found"})
+            continue
+        if not is_admin and existing.get("owner_id") != user_id:
+            skipped.append({"id": pid, "reason": "forbidden"})
+            continue
+
+        patch: dict[str, Any] = dict(updates)
+
+        # Title prefix: prepended to the existing title once, idempotently.
+        if has_prefix:
+            prefix = (body.title_prefix or "").strip()
+            current_title = patch.get("title", existing.get("title", ""))
+            if not current_title.startswith(prefix):
+                patch["title"] = f"{prefix} {current_title}".strip()
+
+        # Amenities append-mode keeps existing amenities and unions the new set.
+        if (body.amenities_mode == "append") and ("amenities" in patch):
+            existing_amenities = existing.get("amenities") or []
+            incoming = patch["amenities"] or []
+            seen = set()
+            merged: list[str] = []
+            for a in [*existing_amenities, *incoming]:
+                if a and a not in seen:
+                    seen.add(a)
+                    merged.append(a)
+            patch["amenities"] = merged
+
+        # Build a snapshot of the fields we're touching so Undo can revert
+        # exactly those keys (and only those keys).
+        snapshot = {k: existing.get(k) for k in patch.keys()}
+
+        await db.properties.update_one({"id": pid}, {"$set": patch})
+
+        updated.append({"id": pid, "snapshot": snapshot})
+
+    if updated:
+        await publish("invalidate", {"prefixes": ["/api/properties", "/api/admin/properties"]})
+
+    return {"updated": updated, "skipped": skipped, "summary": {"updated": len(updated), "skipped": len(skipped)}}
+
+
+@api_router.post("/properties/bulk-images")
+async def bulk_attach_images(body: BulkImagesBody, payload: dict = Depends(verify_token)) -> dict:
+    """Append already-uploaded image URLs to one or many owned properties.
+
+    Two modes:
+      • ``image_urls``  – fan the same list out to every id in ``property_ids``.
+      • ``per_property`` – {pid: [url, url, …]} for distinct sets per property.
+    """
+    if not body.property_ids:
+        raise HTTPException(status_code=400, detail="No properties selected")
+
+    is_admin = payload.get("role") == "admin"
+    user_id = payload["user_id"]
+
+    updated: list[dict] = []
+    skipped: list[dict] = []
+
+    for pid in body.property_ids:
+        existing = await db.properties.find_one({"id": pid}, {"_id": 0})
+        if not existing:
+            skipped.append({"id": pid, "reason": "not_found"})
+            continue
+        if not is_admin and existing.get("owner_id") != user_id:
+            skipped.append({"id": pid, "reason": "forbidden"})
+            continue
+
+        urls: list[str] = []
+        if body.per_property and pid in body.per_property:
+            urls = [u for u in body.per_property[pid] if u]
+        else:
+            urls = [u for u in (body.image_urls or []) if u]
+
+        if not urls:
+            skipped.append({"id": pid, "reason": "no_urls"})
+            continue
+
+        await db.properties.update_one({"id": pid}, {"$push": {"images": {"$each": urls}}})
+        updated.append({"id": pid, "added": len(urls)})
+
+    if updated:
+        await publish("invalidate", {"prefixes": ["/api/properties", "/api/admin/properties"]})
+
+    return {"updated": updated, "skipped": skipped, "summary": {"updated": len(updated), "skipped": len(skipped)}}
 
 
 # --- Saved Searches (renter availability alerts) ---

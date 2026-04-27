@@ -65,6 +65,8 @@ class PropertyCreate(BaseModel):
     available_from: str | None = None
     starting_date: str | None = None
     minimum_booking_days: int | None = None
+    checkin_time: str | None = None
+    checkout_time: str | None = None
 
 
 class BookingCreate(BaseModel):

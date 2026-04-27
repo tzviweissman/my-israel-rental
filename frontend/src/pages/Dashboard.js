@@ -3,7 +3,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import axios from 'axios';
 import { API, AuthContext } from '../App';
-import { Plus, Edit, Trash2, Eye, MessageCircle, Upload, X, Image, Film, CalendarSync, Link2, Copy, Check, RefreshCw, FileText, KeyRound, EyeOff, Home, FileCheck, Sparkles, ClipboardList, ArrowRight, Send, Heart, MapPin, Bed, Bath, Loader2, Calendar, Filter, Move, Maximize2, Bell } from 'lucide-react';
+import { Plus, Edit, Trash2, Eye, MessageCircle, Upload, X, Image, Film, CalendarSync, Link2, Copy, Check, RefreshCw, FileText, KeyRound, EyeOff, Home, FileCheck, Sparkles, ClipboardList, ArrowRight, Send, Heart, MapPin, Bed, Bath, Loader2, Calendar, Filter, Move, Maximize2, Bell, Layers } from 'lucide-react';
 import { toast } from 'sonner';
 import ContractManager from '../components/ContractManager';
 import { Calendar as CalendarComponent } from '../components/ui/calendar';
@@ -18,6 +18,7 @@ import GovernmentServicesTab from '../components/dashboard/GovernmentServicesTab
 import PropertyList from '../components/dashboard/PropertyList';
 import AddPropertyModal from '../components/dashboard/AddPropertyModal';
 import BulkUploadModal from '../components/dashboard/BulkUploadModal';
+import BulkManagerTab from '../components/dashboard/BulkManagerTab';
 
 // Parse a 'YYYY-MM-DD' string as a LOCAL date. `new Date('2026-06-02')` parses
 // as UTC midnight, which shifts back a day when rendered in timezones east of
@@ -453,6 +454,16 @@ const Dashboard = () => {
             >
               {t('dashboard.myProperties')}
             </button>
+            {user && user.role !== 'renter' && (
+              <button
+                onClick={() => setActiveTab('bulk-manager')}
+                className={`flex-shrink-0 py-2.5 px-3 md:px-4 rounded-lg text-xs md:text-sm font-medium transition-all flex items-center justify-center gap-1.5 whitespace-nowrap ${activeTab === 'bulk-manager' ? 'bg-white text-[#1E6A6A] shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
+                data-testid="tab-bulk-manager"
+              >
+                <Layers size={14} />
+                Bulk Manager
+              </button>
+            )}
             <button
               onClick={() => setActiveTab('bookings')}
               className={`flex-shrink-0 py-2.5 px-3 md:px-4 rounded-lg text-xs md:text-sm font-medium transition-all whitespace-nowrap ${activeTab === 'bookings' ? 'bg-white text-[#1E6A6A] shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
@@ -580,6 +591,15 @@ const Dashboard = () => {
               token={token}
             />
           </>
+        )}
+
+        {activeTab === 'bulk-manager' && user && user.role !== 'renter' && (
+          <BulkManagerTab
+            properties={properties}
+            onRefresh={fetchProperties}
+            API={API}
+            token={token}
+          />
         )}
 
         {activeTab === 'bookings' && (
