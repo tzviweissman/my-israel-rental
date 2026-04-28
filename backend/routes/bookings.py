@@ -600,6 +600,11 @@ async def sign_booking_contract(booking_id: str, body: dict = Body(...), payload
         "contract_signed": True,
         "signature_data": signature_data,
         "signature_position": {"x": signature_x, "y": signature_y, "width": signature_width, "height": signature_height},
+        # Persist the signing-canvas dimensions so we can faithfully re-stamp
+        # this contract later (e.g. when stamping logic improves) without
+        # asking the renter to re-sign. Falls back to None on legacy clients
+        # that don't pass these values.
+        "signature_display": {"width": display_width, "height": display_height},
         "signer_legal_name": legal_name,
         "contract_signed_at": datetime.now(UTC).isoformat()
     }
