@@ -133,16 +133,17 @@ const Navigation = () => {
     markAsRead(notification.id);
     setShowNotifications(false);
     
-    // Navigate directly to the specific item based on notification type and entity ID
+    // Navigate directly to the specific item based on notification type and entity ID.
+    // The trailing `_t` cache-buster guarantees the deep-link useEffect fires every
+    // time, even when the user is already on the same booking/sublease.
+    const t = Date.now();
     if (notification.booking_id) {
-      // Navigate to dashboard bookings tab and scroll to specific booking
-      navigate(`/dashboard?tab=bookings&highlight=${notification.booking_id}`);
+      navigate(`/dashboard?tab=bookings&highlight=${notification.booking_id}&_t=${t}`);
     } else if (notification.property_id) {
       // Navigate directly to the property detail page
       navigate(`/property/${notification.property_id}`);
     } else if (notification.sublease_id) {
-      // Navigate to dashboard subleases tab and highlight sublease
-      navigate(`/dashboard?tab=subleases&highlight=${notification.sublease_id}`);
+      navigate(`/dashboard?tab=subleases&highlight=${notification.sublease_id}&_t=${t}`);
     } else {
       // Fallback to dashboard
       navigate('/dashboard');

@@ -84,6 +84,20 @@ const Dashboard = () => {
     }
   }, [searchParams]);
 
+  // Refetch bookings whenever the user lands on / re-enters the Bookings tab,
+  // and whenever a notification deep-links here with a `highlight=` param.
+  // The notification feed updates instantly via SSE, but the bookings list
+  // is fetched on mount only — without this hook the booking that just
+  // triggered the notification wouldn't appear when the user clicks through.
+  const highlightBookingId = searchParams.get('highlight');
+  useEffect(() => {
+    if (!user) return;
+    if (activeTab === 'bookings') {
+      fetchBookings();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeTab, highlightBookingId, user]);
+
   const fetchBusinessLogo = async () => {
     try {
       const response = await axios.get(`${API}/auth/me`, {
