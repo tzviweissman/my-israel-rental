@@ -175,6 +175,12 @@ Build a bilingual (English/Hebrew) rental website named MyIsraelRental.com with 
     - Belz / Kedushat Aharon → `floor=-1`, `square_meters=60`, `monthly_price=9500`, `condition=after_renovation`, `sukkah=yes`, `elevator=no`, address transliterated to "Kedushat Aharon Street".
   - Editor receives 3 rows (not 20), all required fields filled. User can review/edit/delete before saving. Spreadsheet import path still available below for power users.
   - 30 k char input cap; 50 properties max per extraction. Owners + managers + admins authorized.
+- [x] **Bulk Manager file split** (2026-04-28):
+  - Split `BulkManagerTab.jsx` (759 lines) into three single-responsibility files:
+    - `BulkManagerTab.jsx` (282 lines): toolbar, filters, table, undo stack
+    - `BulkEditModal.jsx` (277 lines): FieldRow/FieldEditor/FIELD_GROUPS/LABELS, save handler
+    - `BulkPhotosModal.jsx` (231 lines): DropZone, PhotoThumb, two upload modes
+  - All `data-testid`s preserved; exports unchanged. ESLint + 75/75 backend regression tests still green.
 - [x] **Phase-2: Promoted stable fields onto domain response models** (2026-04-27):
   - `PropertyOut`, `BookingOut`, `ContractOut`, `NotificationOut`, `SavedSearchOut`, `SubleaseOut`, `MessageOut`, `ConversationOut`, `ServiceRequestOut`, `EmailEventOut`, `AdminBlockOut` — every domain response model now declares its full canonical persisted shape (titles, prices, status, timestamps, foreign keys, etc.). `PropertyOut` alone went from 1 declared field → 38 typed fields; `BookingOut` 1 → 27; `SubleaseOut` 1 → 22.
   - `ConfigDict(extra='allow')` retained so handler-side enrichment (`owner_name`, `owner_email`, `admin_blocked_now`, `active_admin_block`, etc.) still flows through unchanged.
