@@ -208,21 +208,21 @@ const PropertyList = ({ properties, bookings = [], onEdit, onRefresh, API, token
   const bulkCount = properties.filter(isFreshBulkUpload).length;
   const needsImagesCount = properties.filter((p) => !p.images || p.images.length === 0).length;
 
-  // "Currently booked" — properties whose calendar is occupied today by a
-  // confirmed renter booking. We only count `confirmed` (paid + signed) so
-  // owners see at-a-glance which listings are truly off-market right now.
+  // "Booked" — properties with an active confirmed booking that hasn't ended
+  // yet (covers both already-running stays and confirmed future stays the
+  // owner has on the books). Owners think of these as off-market.
   const todayISO = new Date().toISOString().slice(0, 10);
-  const currentlyBookedIds = new Set(
+  const bookedIds = new Set(
     (bookings || [])
-      .filter((b) => b.status === 'confirmed' && b.start_date && b.end_date && b.start_date <= todayISO && b.end_date >= todayISO)
+      .filter((b) => b.status === 'confirmed' && b.end_date && b.end_date >= todayISO)
       .map((b) => b.property_id)
   );
-  const currentlyBookedCount = properties.filter((p) => currentlyBookedIds.has(p.id)).length;
+  const bookedCount = properties.filter((p) => bookedIds.has(p.id)).length;
 
   const displayedProperties =
     activeFilter === 'bulk' ? properties.filter(isFreshBulkUpload)
     : activeFilter === 'no_images' ? properties.filter((p) => !p.images || p.images.length === 0)
-    : activeFilter === 'currently_booked' ? properties.filter((p) => currentlyBookedIds.has(p.id))
+    : activeFilter === 'booked' ? properties.filter((p) => bookedIds.has(p.id))
     : properties;
   const toggleFilter = (f) => {
     setActiveFilter((prev) => (prev === f ? null : f));
@@ -365,23 +365,23 @@ const PropertyList = ({ properties, bookings = [], onEdit, onRefresh, API, token
               {activeFilter === 'no_images' && <X size={12} className="opacity-70" />}
             </button>
           )}
-          {currentlyBookedCount > 0 && (
+          {bookedCount > 0 && (
             <button
-              onClick={() => toggleFilter('currently_booked')}
+              onClick={() => toggleFilter('booked')}
               className={`inline-flex items-center gap-1.5 pl-2.5 pr-3 py-1.5 rounded-full text-xs font-semibold transition-all ${
-                activeFilter === 'currently_booked'
+                activeFilter === 'booked'
                   ? 'bg-emerald-600 text-white shadow-sm'
                   : 'bg-[#fafaf5] text-gray-600 hover:text-emerald-700 border border-[#E5E5E5]'
               }`}
-              data-testid="filter-currently-booked-btn"
-              title="Listings with a confirmed booking happening right now"
+              data-testid="filter-booked-btn"
+              title="Listings with a confirmed booking on the books (current or upcoming)"
             >
               <CalendarCheck size={12} />
-              Currently Booked
-              <span className={`ml-0.5 px-1.5 py-0.5 rounded-full text-[10px] ${activeFilter === 'currently_booked' ? 'bg-white text-emerald-700' : 'bg-white text-emerald-700'}`}>
-                {currentlyBookedCount}
+              Booked
+              <span className={`ml-0.5 px-1.5 py-0.5 rounded-full text-[10px] ${activeFilter === 'booked' ? 'bg-white text-emerald-700' : 'bg-white text-emerald-700'}`}>
+                {bookedCount}
               </span>
-              {activeFilter === 'currently_booked' && <X size={12} className="opacity-70" />}
+              {activeFilter === 'booked' && <X size={12} className="opacity-70" />}
             </button>
           )}
         </div>
