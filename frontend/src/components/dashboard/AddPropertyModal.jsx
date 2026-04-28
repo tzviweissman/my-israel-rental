@@ -220,7 +220,16 @@ const AddPropertyModal = ({ isOpen, onClose, editingProperty, onSaved, API, toke
     <>
     {isOpen && (
       <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-6" data-testid="add-property-modal">
-        <div className="bg-white rounded-2xl p-8 max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+        <div className="relative bg-white rounded-2xl p-8 max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+          <button
+            type="button"
+            onClick={onClose}
+            className="sticky top-0 float-right -mt-3 -mr-3 z-10 p-2 rounded-full bg-white/95 backdrop-blur-sm border border-gray-200 text-gray-500 hover:text-gray-900 hover:bg-gray-50 shadow-sm transition-colors"
+            aria-label="Close"
+            data-testid="add-property-close-x"
+          >
+            <X size={18} />
+          </button>
           <h2 className="text-3xl font-bold mb-6" style={{ fontFamily: 'Playfair Display' }}>{editingProperty && editingProperty.id ? t('dashboard.editProperty') : t('dashboard.addNewProperty')}</h2>
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>
