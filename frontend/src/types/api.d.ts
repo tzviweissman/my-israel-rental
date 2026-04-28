@@ -1551,10 +1551,25 @@ export interface components {
              */
             indefinite: boolean | null;
         };
-        /** AdminBlockOut */
+        /**
+         * AdminBlockOut
+         * @description Super-admin "mark as booked" block on a property.
+         */
         AdminBlockOut: {
             /** Id */
             id: string;
+            /** Property Id */
+            property_id: string;
+            /** Start Date */
+            start_date?: string | null;
+            /** End Date */
+            end_date?: string | null;
+            /** Indefinite */
+            indefinite: boolean;
+            /** Created By */
+            created_by: string;
+            /** Created At */
+            created_at: string;
         } & {
             [key: string]: unknown;
         };
@@ -1782,10 +1797,71 @@ export interface components {
         } & {
             [key: string]: unknown;
         };
-        /** BookingOut */
+        /**
+         * BookingOut
+         * @description Canonical booking shape returned by ``GET /api/bookings`` and friends.
+         *
+         *     The core fields below are written at create time; status mutates on the
+         *     accept / cancel / sign flows. ``property_title`` / ``property_location`` /
+         *     ``property_rental_type`` are GET-only enrichment from ``GET /api/bookings``.
+         */
         BookingOut: {
             /** Id */
             id: string;
+            /** Property Id */
+            property_id: string;
+            /** Renter Id */
+            renter_id?: string | null;
+            /** Owner Id */
+            owner_id?: string | null;
+            /** Start Date */
+            start_date: string;
+            /** End Date */
+            end_date: string;
+            /** Message */
+            message?: string | null;
+            /** Status */
+            status: string;
+            /** Created At */
+            created_at?: string | null;
+            /** Confirmed At */
+            confirmed_at?: string | null;
+            /** Cancelled At */
+            cancelled_at?: string | null;
+            /** Cancelled By */
+            cancelled_by?: string | null;
+            /** Cancellation Reason */
+            cancellation_reason?: string | null;
+            /** Cancellation Requested At */
+            cancellation_requested_at?: string | null;
+            /** Cancellation Denied */
+            cancellation_denied?: boolean | null;
+            /** Cancellation Denial Reason */
+            cancellation_denial_reason?: string | null;
+            /** Previous Status */
+            previous_status?: string | null;
+            /** Contract Signed */
+            contract_signed?: boolean | null;
+            /** Contract Sign Token */
+            contract_sign_token?: string | null;
+            /** Contract Sent At */
+            contract_sent_at?: string | null;
+            /** Contract Signed At */
+            contract_signed_at?: string | null;
+            /** Signature Data */
+            signature_data?: string | null;
+            /** Signed Contract Url */
+            signed_contract_url?: string | null;
+            /** Signer Legal Name */
+            signer_legal_name?: string | null;
+            /** Contract Translated Text */
+            contract_translated_text?: string | null;
+            /** Contract Original Text */
+            contract_original_text?: string | null;
+            /** Contract Translation Direction */
+            contract_translation_direction?: string | null;
+            /** Contract Translated At */
+            contract_translated_at?: string | null;
         } & {
             [key: string]: unknown;
         };
@@ -1976,10 +2052,53 @@ export interface components {
             /** Message */
             message: string;
         };
-        /** ContractOut */
+        /**
+         * ContractOut
+         * @description Persisted ``db.contracts`` document.
+         */
         ContractOut: {
             /** Id */
             id: string;
+            /** Property Id */
+            property_id?: string | null;
+            /** Sublease Id */
+            sublease_id?: string | null;
+            /** Owner Id */
+            owner_id: string;
+            /** Original Filename */
+            original_filename?: string | null;
+            /** Stored Filename */
+            stored_filename?: string | null;
+            /** File Type */
+            file_type?: string | null;
+            /** File Size */
+            file_size?: number | null;
+            /** Extracted Text */
+            extracted_text?: string | null;
+            /** Translated Text */
+            translated_text?: string | null;
+            /** Translation Direction */
+            translation_direction?: string | null;
+            /** Translation Status */
+            translation_status?: string | null;
+            /**
+             * Signatures
+             * @default []
+             */
+            signatures: {
+                [key: string]: unknown;
+            }[] | null;
+            /**
+             * Signed
+             * @default false
+             */
+            signed: boolean | null;
+            /** Sign Token */
+            sign_token?: string | null;
+            /** Created At */
+            created_at?: string | null;
+            /** Updated At */
+            updated_at?: string | null;
         } & {
             [key: string]: unknown;
         };
@@ -2040,10 +2159,33 @@ export interface components {
         } & {
             [key: string]: unknown;
         };
-        /** ConversationOut */
+        /**
+         * ConversationOut
+         * @description Aggregated chat conversation surface (bilingual list view).
+         */
         ConversationOut: {
             /** Property Id */
             property_id: string;
+            /** Property Title */
+            property_title: string;
+            /** Last Message */
+            last_message?: string | null;
+            /** Last Message Time */
+            last_message_time?: string | null;
+            /** Unread */
+            unread?: boolean | null;
+            /** Other User */
+            other_user?: {
+                [key: string]: unknown;
+            } | null;
+            /** Participants */
+            participants?: {
+                [key: string]: unknown;
+            }[] | null;
+            /** Messages */
+            messages?: {
+                [key: string]: unknown;
+            }[] | null;
         } & {
             [key: string]: unknown;
         };
@@ -2142,10 +2284,25 @@ export interface components {
         } & {
             [key: string]: unknown;
         };
-        /** MessageOut */
+        /**
+         * MessageOut
+         * @description One chat message between a property owner and a renter.
+         */
         MessageOut: {
             /** Id */
             id: string;
+            /** Property Id */
+            property_id: string;
+            /** Sender Id */
+            sender_id: string;
+            /** Receiver Id */
+            receiver_id: string;
+            /** Message */
+            message: string;
+            /** Read */
+            read: boolean;
+            /** Created At */
+            created_at: string;
         } & {
             [key: string]: unknown;
         };
@@ -2161,10 +2318,29 @@ export interface components {
         } & {
             [key: string]: unknown;
         };
-        /** NotificationOut */
+        /**
+         * NotificationOut
+         * @description Persisted ``db.notifications`` document.
+         */
         NotificationOut: {
             /** Id */
             id: string;
+            /** User Id */
+            user_id: string;
+            /** Type */
+            type: string;
+            /** Message */
+            message: string;
+            /** Read */
+            read: boolean;
+            /** Created At */
+            created_at: string;
+            /** Booking Id */
+            booking_id?: string | null;
+            /** Property Id */
+            property_id?: string | null;
+            /** Sublease Id */
+            sublease_id?: string | null;
         } & {
             [key: string]: unknown;
         };
@@ -2324,10 +2500,138 @@ export interface components {
             /** Checkout Time */
             checkout_time?: string | null;
         };
-        /** PropertyOut */
+        /**
+         * PropertyOut
+         * @description Canonical persisted shape of a property document.
+         *
+         *     Mirrors ``PropertyCreate`` plus the server-managed bookkeeping fields
+         *     written by ``create_property`` / ``bulk/commit`` (id, owner_id, status,
+         *     images, videos, views, created_at, etc.).
+         *
+         *     Detail-route handlers also tack on ``owner_name`` / ``owner_email`` and
+         *     ``admin_blocked_now`` / ``active_admin_block`` / ``admin_blocks``; those
+         *     are picked up via ``extra='allow'`` rather than declared, since they are
+         *     optional enrichments rather than guaranteed persisted fields.
+         */
         PropertyOut: {
             /** Id */
             id: string;
+            /** Owner Id */
+            owner_id?: string | null;
+            /** Title */
+            title: string;
+            /** Description */
+            description?: string | null;
+            /** Rental Type */
+            rental_type: string;
+            /** Property Type */
+            property_type: string;
+            /** Bedrooms */
+            bedrooms?: number | null;
+            /** Bathrooms */
+            bathrooms?: number | null;
+            /** Area */
+            area: string;
+            /** Address */
+            address?: string | null;
+            /** Square Meters */
+            square_meters?: number | null;
+            /** Porch Square Meters */
+            porch_square_meters?: number | null;
+            /**
+             * Porches
+             * @default 0
+             */
+            porches: number | null;
+            /** Floor */
+            floor?: number | null;
+            /**
+             * Has Elevator
+             * @default false
+             */
+            has_elevator: boolean | null;
+            /**
+             * Is Shabbat Elevator
+             * @default false
+             */
+            is_shabbat_elevator: boolean | null;
+            /**
+             * Is Tama
+             * @default false
+             */
+            is_tama: boolean | null;
+            /**
+             * Sukkah Compatible
+             * @default false
+             */
+            sukkah_compatible: boolean | null;
+            /**
+             * Has Agent Fee
+             * @default false
+             */
+            has_agent_fee: boolean | null;
+            /** Agent Fee Price */
+            agent_fee_price?: number | null;
+            /** Agent Fee Currency */
+            agent_fee_currency?: string | null;
+            /** Condition */
+            condition?: string | null;
+            /** Furniture Option */
+            furniture_option?: string | null;
+            /**
+             * Amenities
+             * @default []
+             */
+            amenities: string[] | null;
+            /** Monthly Price */
+            monthly_price?: number | null;
+            /** Nightly Price */
+            nightly_price?: number | null;
+            /** Currency */
+            currency?: string | null;
+            /**
+             * Images
+             * @default []
+             */
+            images: string[] | null;
+            /**
+             * Videos
+             * @default []
+             */
+            videos: string[] | null;
+            /** Cancellation Policy */
+            cancellation_policy?: string | null;
+            /** Custom Cancellation Policy */
+            custom_cancellation_policy?: string | null;
+            /** Available From */
+            available_from?: string | null;
+            /** Starting Date */
+            starting_date?: string | null;
+            /** Minimum Booking Days */
+            minimum_booking_days?: number | null;
+            /** Checkin Time */
+            checkin_time?: string | null;
+            /** Checkout Time */
+            checkout_time?: string | null;
+            /** Contract Url */
+            contract_url?: string | null;
+            /** Contract Uploaded At */
+            contract_uploaded_at?: string | null;
+            /** Ical Urls */
+            ical_urls?: string[] | null;
+            /** Ical Last Synced */
+            ical_last_synced?: string | null;
+            /** Status */
+            status?: string | null;
+            /**
+             * Views
+             * @default 0
+             */
+            views: number | null;
+            /** Created At */
+            created_at?: string | null;
+            /** Bulk Created */
+            bulk_created?: boolean | null;
         } & {
             [key: string]: unknown;
         };
@@ -2391,17 +2695,65 @@ export interface components {
             /** End Date */
             end_date?: string | null;
         };
-        /** SavedSearchOut */
+        /**
+         * SavedSearchOut
+         * @description Persisted renter availability alert.
+         */
         SavedSearchOut: {
             /** Id */
             id: string;
+            /** User Id */
+            user_id: string;
+            /** Email */
+            email?: string | null;
+            /** User Name */
+            user_name?: string | null;
+            /** Name */
+            name: string;
+            /** Filters */
+            filters: {
+                [key: string]: unknown;
+            };
+            /** Date Fuzziness Days */
+            date_fuzziness_days: number;
+            /** Active */
+            active: boolean;
+            /** Created At */
+            created_at: string;
+            /** Expires At */
+            expires_at: string;
         } & {
             [key: string]: unknown;
         };
-        /** ServiceRequestOut */
+        /**
+         * ServiceRequestOut
+         * @description Persisted ``db.service_requests`` / ``db.document_services`` row.
+         */
         ServiceRequestOut: {
             /** Id */
             id: string;
+            /** User Id */
+            user_id: string;
+            /** Service Type */
+            service_type?: string | null;
+            /** Status */
+            status: string;
+            /** Created At */
+            created_at: string;
+            /** Updated At */
+            updated_at?: string | null;
+            /** Details */
+            details?: {
+                [key: string]: unknown;
+            } | null;
+            /** Property Address */
+            property_address?: string | null;
+            /** Tenant Name */
+            tenant_name?: string | null;
+            /** Tenant Id */
+            tenant_id?: string | null;
+            /** Additional Info */
+            additional_info?: string | null;
         } & {
             [key: string]: unknown;
         };
@@ -2454,10 +2806,63 @@ export interface components {
             /** Notes */
             notes?: string | null;
         };
-        /** SubleaseOut */
+        /**
+         * SubleaseOut
+         * @description Persisted ``db.subleases`` document.
+         */
         SubleaseOut: {
             /** Id */
             id: string;
+            /** Original Property Id */
+            original_property_id: string;
+            /** Subleasor Id */
+            subleasor_id: string;
+            /** Available From */
+            available_from: string;
+            /** Available To */
+            available_to: string;
+            /** Price */
+            price: number;
+            /** Price Type */
+            price_type: string;
+            /** Bedrooms Available */
+            bedrooms_available?: number | null;
+            /** Notes */
+            notes?: string | null;
+            /** Title */
+            title: string;
+            /** Description */
+            description?: string | null;
+            /** Area */
+            area?: string | null;
+            /** Address */
+            address?: string | null;
+            /** Bathrooms */
+            bathrooms?: number | null;
+            /**
+             * Images
+             * @default []
+             */
+            images: string[] | null;
+            /**
+             * Amenities
+             * @default []
+             */
+            amenities: string[] | null;
+            /** Property Type */
+            property_type?: string | null;
+            /** Active */
+            active: boolean;
+            /** Contract Id */
+            contract_id?: string | null;
+            /** Sign Token */
+            sign_token?: string | null;
+            /** Contract Signed */
+            contract_signed?: boolean | null;
+            /** Created At */
+            created_at: string;
+            /** Updated At */
+            updated_at?: string | null;
         } & {
             [key: string]: unknown;
         };
