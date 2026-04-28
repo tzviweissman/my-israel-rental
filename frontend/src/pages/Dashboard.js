@@ -585,6 +585,7 @@ const Dashboard = () => {
             />
             <PropertyList
               properties={properties}
+              bookings={bookings}
               onEdit={(p) => { setEditingProperty(p); setShowAddProperty(true); }}
               onRefresh={fetchProperties}
               API={API}
