@@ -98,6 +98,36 @@ const Dashboard = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeTab, highlightBookingId, user]);
 
+  // Same idea for the Properties + Bulk-Manager tabs: keep them live whenever
+  // the user re-enters either view, so admin/manager edits made elsewhere
+  // (mark-as-booked, bulk-edit, photo top-up) appear without a hard reload.
+  // Also pulls fresh data when a deep-link notification flips the tab.
+  useEffect(() => {
+    if (!user) return;
+    if (activeTab === 'properties' || activeTab === 'bulk-manager') {
+      fetchProperties();
+      // Bookings drives the "Booked" / "Currently Booked" bubble counts on
+      // PropertyList, so refresh both together.
+      fetchBookings();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeTab, user]);
+
+  // Refetch when the user returns to the tab (visibilitychange) — covers the
+  // "edited on another browser tab / phone, came back to this one" case.
+  useEffect(() => {
+    if (!user) return;
+    const onVisible = () => {
+      if (document.visibilityState === 'visible') {
+        fetchProperties();
+        fetchBookings();
+      }
+    };
+    document.addEventListener('visibilitychange', onVisible);
+    return () => document.removeEventListener('visibilitychange', onVisible);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user]);
+
   const fetchBusinessLogo = async () => {
     try {
       const response = await axios.get(`${API}/auth/me`, {
