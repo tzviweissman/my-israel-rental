@@ -175,6 +175,12 @@ Build a bilingual (English/Hebrew) rental website named MyIsraelRental.com with 
     - Belz / Kedushat Aharon → `floor=-1`, `square_meters=60`, `monthly_price=9500`, `condition=after_renovation`, `sukkah=yes`, `elevator=no`, address transliterated to "Kedushat Aharon Street".
   - Editor receives 3 rows (not 20), all required fields filled. User can review/edit/delete before saving. Spreadsheet import path still available below for power users.
   - 30 k char input cap; 50 properties max per extraction. Owners + managers + admins authorized.
+- [x] **Choose cover photo** (2026-04-28):
+  - New `POST /api/properties/{id}/cover` endpoint (in `routes/properties.py`) — accepts `{image_url}` and reorders that URL to position 0 in the property's `images` array. Strict whitelist: refuses unknown URLs (400), enforces owner/admin (403). Publishes SSE invalidation so admin/grid views refresh instantly.
+  - **AddPropertyModal** (regular upload flow): every image thumbnail now exposes a hover-revealed star button (`Set as cover`) and the current cover gets a gold "COVER" badge + ring. Listers can also see a one-line hint above the grid explaining the feature. Reorders local `images` & `uploadedFiles` arrays so the badge follows immediately, no save round-trip.
+  - **BulkManagerTab**: the property list now shows a 48×48 cover preview thumbnail plus a `★ Cover` button per row. Clicking either opens the new `CoverPickerModal.jsx` (full-screen grid of all attached photos with a one-click promote action).
+  - Single source of truth: every existing read-site (`Properties.js`, `Home.js`, `PropertyCard`, dashboard tiles, `LikedTab`, `SubleasesTab`, `ManagerPage`) already reads `images[0]` for the thumbnail — zero changes needed downstream.
+  - 4 new pytest cases (`TestSetCover`: success reorder, unknown-URL 400, ownership 403, empty-URL 400). **21/21 bulk_manager** + 78/78 overall regression green. TS types regenerated.
 - [x] **Bulk-edit Undo: single-POST batched revert** (2026-04-28):
   - Extended `BulkEditBody` with `per_property_updates: dict[str, dict] | None` so callers can pass distinct values per id in one round-trip. Same whitelist filter applies — non-whitelisted fields like `owner_id` injected into a snapshot are silently dropped.
   - Backend behaviour matrix: per-property override beats global `updates` for matching id; ids not in the per-property map fall back to global; ids with neither (and no title prefix) skip cleanly with `reason="no_changes"` instead of fabricating an empty snapshot.

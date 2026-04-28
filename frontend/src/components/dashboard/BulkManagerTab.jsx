@@ -2,13 +2,14 @@ import React, { useState, useMemo } from 'react';
 import axios from 'axios';
 import { toast } from 'sonner';
 import {
-  Search, Layers, Image as ImageIcon, X, Undo2, Filter,
+  Search, Layers, Image as ImageIcon, X, Undo2, Filter, Star,
 } from 'lucide-react';
 
 import { LOCATION_OPTIONS } from '../../constants/locations';
 import { RENTAL_TYPES } from '../../constants/propertyEnums';
 import BulkEditModal from './BulkEditModal';
 import BulkPhotosModal from './BulkPhotosModal';
+import CoverPickerModal from './CoverPickerModal';
 
 /**
  * Bulk Manager — multi-select edit + bulk photo upload across owned properties.
@@ -33,6 +34,7 @@ const BulkManagerTab = ({ properties, onRefresh, API, token }) => {
 
   const [editOpen, setEditOpen] = useState(false);
   const [photoOpen, setPhotoOpen] = useState(false);
+  const [coverPickerProp, setCoverPickerProp] = useState(null);
   const [undoStack, setUndoStack] = useState([]); // [{ snapshots: [{id, snapshot}], at }]
 
   const filtered = useMemo(() => {
@@ -201,8 +203,9 @@ const BulkManagerTab = ({ properties, onRefresh, API, token }) => {
 
       {/* Property list */}
       <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden">
-        <div className="hidden md:grid grid-cols-[40px_1fr_140px_180px_120px_100px] gap-3 px-4 py-3 border-b border-gray-100 text-[11px] font-semibold text-gray-500 uppercase tracking-wider bg-gray-50">
+        <div className="hidden md:grid grid-cols-[40px_60px_1fr_140px_180px_120px_120px] gap-3 px-4 py-3 border-b border-gray-100 text-[11px] font-semibold text-gray-500 uppercase tracking-wider bg-gray-50">
           <div></div>
+          <div>Cover</div>
           <div>Title</div>
           <div>Type</div>
           <div>Area</div>
@@ -219,11 +222,13 @@ const BulkManagerTab = ({ properties, onRefresh, API, token }) => {
           const price = p.rental_type === 'short-term' || p.rental_type === 'vacation'
             ? (p.nightly_price ? `${p.currency === 'USD' ? '$' : '₪'}${p.nightly_price}/nt` : '—')
             : (p.monthly_price ? `${p.currency === 'USD' ? '$' : '₪'}${p.monthly_price}/mo` : '—');
+          const cover = p.images?.[0];
+          const coverSrc = cover && cover.startsWith('/api') ? `${API.replace('/api', '')}${cover}` : cover;
           return (
             <div
               key={p.id}
               onClick={() => toggleOne(p.id)}
-              className={`grid grid-cols-[40px_1fr] md:grid-cols-[40px_1fr_140px_180px_120px_100px] gap-3 px-4 py-3 border-b border-gray-50 last:border-0 cursor-pointer transition-colors ${
+              className={`grid grid-cols-[40px_60px_1fr] md:grid-cols-[40px_60px_1fr_140px_180px_120px_120px] gap-3 px-4 py-3 border-b border-gray-50 last:border-0 cursor-pointer transition-colors ${
                 isSelected ? 'bg-[#1E6A6A]/5' : 'hover:bg-gray-50'
               }`}
               data-testid={`bulk-row-${p.id}`}
@@ -237,6 +242,20 @@ const BulkManagerTab = ({ properties, onRefresh, API, token }) => {
                   data-testid={`bulk-checkbox-${p.id}`}
                 />
               </div>
+              <div
+                onClick={(e) => { e.stopPropagation(); if ((p.images?.length || 0) > 0) setCoverPickerProp(p); }}
+                className={`relative w-12 h-12 rounded-md overflow-hidden bg-gray-100 ${(p.images?.length || 0) > 0 ? 'cursor-pointer ring-1 ring-gray-200 hover:ring-[#D4AF37]' : ''}`}
+                data-testid={`bulk-cover-${p.id}`}
+                title={(p.images?.length || 0) > 0 ? 'Click to change cover' : 'No photos yet'}
+              >
+                {coverSrc ? (
+                  <img src={coverSrc} alt="" className="w-full h-full object-cover" />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center text-gray-300">
+                    <ImageIcon size={16} />
+                  </div>
+                )}
+              </div>
               <div className="min-w-0">
                 <div className="font-medium text-sm text-gray-900 truncate">{p.title || '(untitled)'}</div>
                 <div className="text-xs text-gray-500 truncate md:hidden">{p.area || '—'} · {price} · {(p.images?.length) || 0} photos</div>
@@ -244,7 +263,19 @@ const BulkManagerTab = ({ properties, onRefresh, API, token }) => {
               <div className="hidden md:block text-sm text-gray-700 capitalize">{p.rental_type?.replace('-', ' ')}</div>
               <div className="hidden md:block text-sm text-gray-700 truncate">{p.area || '—'}</div>
               <div className="hidden md:block text-sm text-gray-700 text-right">{price}</div>
-              <div className="hidden md:block text-sm text-gray-500 text-right">{(p.images?.length) || 0}</div>
+              <div onClick={(e) => e.stopPropagation()} className="hidden md:flex items-center justify-end gap-2 text-sm text-gray-500">
+                <span>{(p.images?.length) || 0}</span>
+                {(p.images?.length || 0) > 0 && (
+                  <button
+                    onClick={() => setCoverPickerProp(p)}
+                    className="px-2 py-0.5 rounded-md text-[11px] font-medium text-[#D4AF37] border border-[#D4AF37]/40 hover:bg-[#D4AF37]/10 flex items-center gap-1"
+                    data-testid={`bulk-set-cover-${p.id}`}
+                    title="Choose cover photo"
+                  >
+                    <Star size={11} /> Cover
+                  </button>
+                )}
+              </div>
             </div>
           );
         })}
@@ -283,6 +314,15 @@ const BulkManagerTab = ({ properties, onRefresh, API, token }) => {
           API={API}
           token={token}
           auth={auth}
+        />
+      )}
+      {coverPickerProp && (
+        <CoverPickerModal
+          property={coverPickerProp}
+          API={API}
+          auth={auth}
+          onClose={() => setCoverPickerProp(null)}
+          onSaved={() => { onRefresh && onRefresh(); }}
         />
       )}
     </div>

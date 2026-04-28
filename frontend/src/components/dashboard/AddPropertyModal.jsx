@@ -4,7 +4,7 @@ import axios from 'axios';
 import { toast } from 'sonner';
 
 import { Calendar as CalendarComponent } from '../ui/calendar';
-import { Calendar, Upload, X, Image, Film } from 'lucide-react';
+import { Calendar, Upload, X, Image, Film, Star } from 'lucide-react';
 import { LOCATION_OPTIONS } from '../../constants/locations';
 
 // Parse YYYY-MM-DD without UTC midnight drift (matches Dashboard.js helper)
@@ -130,6 +130,25 @@ const AddPropertyModal = ({ isOpen, onClose, editingProperty, onSaved, API, toke
       images: prev.images.filter((u) => u !== fileToRemove.url),
       videos: (prev.videos || []).filter((u) => u !== fileToRemove.url),
     }));
+  };
+
+  // Promote one image to "cover" by reordering it to index 0 of `images`.
+  // Every existing read-site uses `images[0]` as the thumbnail (Properties
+  // grid, Home featured, PropertyCard, dashboard tiles) so no other code
+  // needs to change. We also re-order `uploadedFiles` so the visual badge
+  // tracks the saved cover.
+  const setAsCover = (file) => {
+    if (file.file_type !== 'image') return;
+    setPropertyForm((prev) => {
+      if (!prev.images.includes(file.url)) return prev;
+      const next = [file.url, ...prev.images.filter((u) => u !== file.url)];
+      return { ...prev, images: next };
+    });
+    setUploadedFiles((prev) => {
+      const target = prev.find((f) => f.filename === file.filename);
+      if (!target) return prev;
+      return [target, ...prev.filter((f) => f.filename !== file.filename)];
+    });
   };
 
   const handleSubmit = async (e) => {
@@ -849,15 +868,38 @@ const AddPropertyModal = ({ isOpen, onClose, editingProperty, onSaved, API, toke
               )}
 
               {uploadedFiles.length > 0 && (
-                <div className="mt-4 grid grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3" data-testid="uploaded-files-grid">
-                  {uploadedFiles.map((file) => (
-                    <div key={file.filename} className="relative group rounded-lg overflow-hidden border border-[#E5E5E5]" data-testid={`uploaded-file-${file.filename}`}>
+                <>
+                  <p className="mt-4 text-xs text-gray-500 flex items-center gap-1.5">
+                    <Star size={12} className="text-[#D4AF37]" />
+                    Hover any image and click the star to set it as the cover photo (the one shown to renters first).
+                  </p>
+                <div className="mt-2 grid grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3" data-testid="uploaded-files-grid">
+                  {uploadedFiles.map((file) => {
+                    const isCover = file.file_type === 'image' && propertyForm.images[0] === file.url;
+                    return (
+                    <div key={file.filename} className={`relative group rounded-lg overflow-hidden border ${isCover ? 'border-[#D4AF37] ring-2 ring-[#D4AF37]/40' : 'border-[#E5E5E5]'}`} data-testid={`uploaded-file-${file.filename}`}>
                       {file.file_type === 'image' ? (
                         <img src={`${API.replace('/api', '')}${file.url}`} alt={file.original_name} className="w-full h-20 object-cover" />
                       ) : (
                         <div className="w-full h-20 bg-gray-900 flex items-center justify-center">
                           <Film size={24} className="text-white" />
                         </div>
+                      )}
+                      {isCover && (
+                        <div className="absolute top-1 left-1 bg-[#D4AF37] text-white rounded-md px-1.5 py-0.5 text-[10px] font-bold flex items-center gap-1 shadow" data-testid={`cover-badge-${file.filename}`}>
+                          <Star size={10} fill="white" /> COVER
+                        </div>
+                      )}
+                      {file.file_type === 'image' && !isCover && (
+                        <button
+                          type="button"
+                          onClick={() => setAsCover(file)}
+                          title="Set as cover image"
+                          className="absolute top-1 left-1 bg-black/70 hover:bg-[#D4AF37] text-white rounded-md p-1 opacity-0 group-hover:opacity-100 transition-all"
+                          data-testid={`set-cover-${file.filename}`}
+                        >
+                          <Star size={11} />
+                        </button>
                       )}
                       <button
                         type="button"
@@ -874,8 +916,10 @@ const AddPropertyModal = ({ isOpen, onClose, editingProperty, onSaved, API, toke
                         </div>
                       </div>
                     </div>
-                  ))}
+                    );
+                  })}
                 </div>
+                </>
               )}
             </div>
 

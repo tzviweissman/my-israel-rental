@@ -223,6 +223,41 @@ async def delete_property(property_id: str, payload: dict = Depends(verify_token
     return {"message": "Property deleted successfully"}
 
 
+@api_router.post("/properties/{property_id}/cover", response_model=MessageResponse)
+async def set_cover_image(
+    property_id: str,
+    body: dict,
+    payload: dict = Depends(verify_token),
+) -> dict:
+    """Promote a single image URL to the cover slot (``images[0]``).
+
+    Reorders the existing list — never adds, never deletes — so a malicious
+    or stale client can't smuggle in a new URL via this endpoint. Returns
+    400 if the URL isn't already attached to the property.
+    """
+    image_url = (body or {}).get("image_url")
+    if not image_url:
+        raise HTTPException(status_code=400, detail="image_url is required")
+
+    existing = await db.properties.find_one({"id": property_id}, {"_id": 0})
+    if not existing:
+        raise HTTPException(status_code=404, detail="Property not found")
+    if existing.get("owner_id") != payload["user_id"] and payload.get("role") != "admin":
+        raise HTTPException(status_code=403, detail="Not authorized")
+
+    images = list(existing.get("images") or [])
+    if image_url not in images:
+        raise HTTPException(status_code=400, detail="image_url is not attached to this property")
+
+    reordered = [image_url, *[u for u in images if u != image_url]]
+    if reordered == images:
+        return {"message": "Already the cover image"}
+
+    await db.properties.update_one({"id": property_id}, {"$set": {"images": reordered}})
+    await publish("invalidate", {"prefixes": ["/api/properties", "/api/admin/properties"]})
+    return {"message": "Cover image updated"}
+
+
 # ---------------------------------------------------------------------------
 # Bulk Manager — host-side multi-property operations.
 # Used by the "Bulk Manager" dashboard tab to patch shared fields across many

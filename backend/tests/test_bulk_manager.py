@@ -409,6 +409,66 @@ class TestBulkImages:
         assert r.status_code == 400
 
 
+class TestSetCover:
+    """POST /api/properties/{id}/cover — promote one image to images[0]."""
+
+    def test_set_cover_reorders(self, owner_token):
+        urls = ["https://x.test/a.jpg", "https://x.test/b.jpg", "https://x.test/c.jpg"]
+        pid = _create_prop(owner_token, f"TEST_Cover_{uuid.uuid4().hex[:6]}", {"images": urls})
+        try:
+            assert _get_prop(pid, owner_token)["images"] == urls
+            r = requests.post(
+                f"{API}/properties/{pid}/cover",
+                json={"image_url": "https://x.test/c.jpg"},
+                headers={"Authorization": f"Bearer {owner_token}"}, timeout=15,
+            )
+            assert r.status_code == 200, r.text
+            after = _get_prop(pid, owner_token)["images"]
+            assert after == ["https://x.test/c.jpg", "https://x.test/a.jpg", "https://x.test/b.jpg"]
+        finally:
+            _delete_prop(pid, owner_token)
+
+    def test_set_cover_rejects_unknown_url(self, owner_token):
+        pid = _create_prop(owner_token, f"TEST_Cover2_{uuid.uuid4().hex[:6]}", {"images": ["https://x.test/a.jpg"]})
+        try:
+            r = requests.post(
+                f"{API}/properties/{pid}/cover",
+                json={"image_url": "https://EVIL.test/hack.jpg"},
+                headers={"Authorization": f"Bearer {owner_token}"}, timeout=15,
+            )
+            assert r.status_code == 400
+            # Images list is unchanged (no smuggle)
+            assert _get_prop(pid, owner_token)["images"] == ["https://x.test/a.jpg"]
+        finally:
+            _delete_prop(pid, owner_token)
+
+    def test_set_cover_ownership_check(self, owner_token, other_owner_token):
+        pid = _create_prop(owner_token, f"TEST_Cover3_{uuid.uuid4().hex[:6]}", {"images": ["https://x.test/a.jpg", "https://x.test/b.jpg"]})
+        try:
+            r = requests.post(
+                f"{API}/properties/{pid}/cover",
+                json={"image_url": "https://x.test/b.jpg"},
+                headers={"Authorization": f"Bearer {other_owner_token}"}, timeout=15,
+            )
+            assert r.status_code == 403
+            # Order unchanged
+            assert _get_prop(pid, owner_token)["images"][0] == "https://x.test/a.jpg"
+        finally:
+            _delete_prop(pid, owner_token)
+
+    def test_set_cover_empty_url_rejected(self, owner_token):
+        pid = _create_prop(owner_token, f"TEST_Cover4_{uuid.uuid4().hex[:6]}", {"images": ["https://x.test/a.jpg"]})
+        try:
+            r = requests.post(
+                f"{API}/properties/{pid}/cover",
+                json={},
+                headers={"Authorization": f"Bearer {owner_token}"}, timeout=15,
+            )
+            assert r.status_code == 400
+        finally:
+            _delete_prop(pid, owner_token)
+
+
 # Quick smoke: no MongoDB _id leaks in bulk responses
 def test_no_mongo_id_leak(owner_token, two_owner_props):
     pid1, _ = two_owner_props
