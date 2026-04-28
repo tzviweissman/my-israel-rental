@@ -245,6 +245,86 @@ class TestBulkEdit:
         )
         assert r.status_code == 400
 
+    # 7b. Per-property updates path — single-POST Undo for many properties
+    # Each property gets its OWN values restored, in one round-trip, while
+    # the whitelist still drops malicious fields like owner_id.
+    def test_per_property_updates_single_post_undo(self, owner_token):
+        # Three properties with three distinct prior monthly_price values
+        a = _create_prop(owner_token, f"TEST_PPU_A_{uuid.uuid4().hex[:6]}", {"monthly_price": 1111})
+        b = _create_prop(owner_token, f"TEST_PPU_B_{uuid.uuid4().hex[:6]}", {"monthly_price": 2222})
+        c = _create_prop(owner_token, f"TEST_PPU_C_{uuid.uuid4().hex[:6]}", {"monthly_price": 3333})
+        try:
+            edit = requests.post(
+                f"{API}/properties/bulk-edit",
+                json={"property_ids": [a, b, c], "updates": {"monthly_price": 9999}},
+                headers={"Authorization": f"Bearer {owner_token}"}, timeout=15,
+            ).json()
+            assert edit["summary"]["updated"] == 3
+            for p, v in [(a, 9999), (b, 9999), (c, 9999)]:
+                assert _get_prop(p, owner_token)["monthly_price"] == v
+            # Build per_property_updates from snapshots and send ONE POST
+            ppu = {u["id"]: u["snapshot"] for u in edit["updated"]}
+            # Sneak a non-whitelisted field into one snapshot — must be dropped
+            ppu[a]["owner_id"] = "HACKED"
+            r = requests.post(
+                f"{API}/properties/bulk-edit",
+                json={"property_ids": list(ppu.keys()), "updates": {}, "per_property_updates": ppu},
+                headers={"Authorization": f"Bearer {owner_token}"}, timeout=15,
+            )
+            assert r.status_code == 200, r.text
+            data = r.json()
+            assert data["summary"]["updated"] == 3
+            assert data["summary"]["skipped"] == 0
+            # Each property is back to its OWN previous value
+            assert _get_prop(a, owner_token)["monthly_price"] == 1111
+            assert _get_prop(b, owner_token)["monthly_price"] == 2222
+            assert _get_prop(c, owner_token)["monthly_price"] == 3333
+            # And owner_id was NOT clobbered by the malicious snapshot
+            assert _get_prop(a, owner_token)["owner_id"] != "HACKED"
+        finally:
+            for p in (a, b, c):
+                _delete_prop(p, owner_token)
+
+    # 7c. per_property_updates only (no global updates, no prefix) is valid
+    def test_per_property_updates_only_valid(self, owner_token, two_owner_props):
+        pid1, pid2 = two_owner_props
+        r = requests.post(
+            f"{API}/properties/bulk-edit",
+            json={
+                "property_ids": [pid1, pid2],
+                "updates": {},
+                "per_property_updates": {
+                    pid1: {"monthly_price": 1234},
+                    pid2: {"monthly_price": 5678},
+                },
+            },
+            headers={"Authorization": f"Bearer {owner_token}"}, timeout=15,
+        )
+        assert r.status_code == 200
+        assert _get_prop(pid1, owner_token)["monthly_price"] == 1234
+        assert _get_prop(pid2, owner_token)["monthly_price"] == 5678
+
+    # 7d. id present in property_ids but missing from per_property_updates
+    # AND no global updates => skipped with reason="no_changes" (NOT 400).
+    def test_per_property_updates_falls_through_with_no_changes(self, owner_token, two_owner_props):
+        pid1, pid2 = two_owner_props
+        r = requests.post(
+            f"{API}/properties/bulk-edit",
+            json={
+                "property_ids": [pid1, pid2],
+                "updates": {},
+                "per_property_updates": {pid1: {"monthly_price": 4242}},
+            },
+            headers={"Authorization": f"Bearer {owner_token}"}, timeout=15,
+        )
+        assert r.status_code == 200, r.text
+        data = r.json()
+        # pid1 updated, pid2 has nothing -> skipped no_changes
+        assert data["summary"]["updated"] == 1
+        assert data["summary"]["skipped"] == 1
+        assert data["skipped"][0]["id"] == pid2
+        assert data["skipped"][0]["reason"] == "no_changes"
+
     # 8. No property_ids => 400
     def test_no_ids_rejected(self, owner_token):
         r = requests.post(

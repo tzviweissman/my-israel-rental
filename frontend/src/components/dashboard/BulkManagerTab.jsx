@@ -79,20 +79,30 @@ const BulkManagerTab = ({ properties, onRefresh, API, token }) => {
 
   const handleUndo = async () => {
     const last = undoStack[undoStack.length - 1];
-    if (!last) return;
+    if (!last || !last.snapshots?.length) return;
     try {
-      // All snapshots in one operation share the same fields, so we issue one
-      // bulk-edit per id (cheap; <= 5 per stack entry).
+      // ONE POST instead of N: we ship the per-property snapshot map and
+      // the backend applies each property's previous values in a single
+      // round-trip (see `BulkEditBody.per_property_updates`).
+      const per_property_updates = {};
       for (const item of last.snapshots) {
-        await axios.post(
-          `${API}/properties/bulk-edit`,
-          { property_ids: [item.id], updates: item.snapshot },
-          auth,
-        );
+        if (item?.id && item?.snapshot && Object.keys(item.snapshot).length) {
+          per_property_updates[item.id] = item.snapshot;
+        }
       }
+      const ids = Object.keys(per_property_updates);
+      if (!ids.length) {
+        setUndoStack(prev => prev.slice(0, -1));
+        return;
+      }
+      await axios.post(
+        `${API}/properties/bulk-edit`,
+        { property_ids: ids, updates: {}, per_property_updates },
+        auth,
+      );
       setUndoStack(prev => prev.slice(0, -1));
       onRefresh && onRefresh();
-      toast.success('Reverted last bulk edit');
+      toast.success(`Reverted last bulk edit (${ids.length} properties)`);
     } catch (e) {
       toast.error(e.response?.data?.detail || 'Undo failed');
     }

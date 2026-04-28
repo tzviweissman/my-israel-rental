@@ -255,6 +255,12 @@ class BulkEditBody(BaseModel):
     title_prefix: str | None = None
     # Optional: how to merge the `amenities` field — replace (default) or append.
     amenities_mode: str | None = "replace"
+    # Optional: per-property update map ``{pid: {field: value, …}}`` used by
+    # the Undo flow to restore each property's previous values in a single
+    # round-trip. When set, the per-property values OVERRIDE the global
+    # ``updates`` for that property; properties not listed fall back to the
+    # global ``updates`` (so callers can mix modes if they ever need to).
+    per_property_updates: dict[str, dict] | None = None
 
 
 class BulkImagesBody(BaseModel):
@@ -280,7 +286,13 @@ async def bulk_edit_properties(body: BulkEditBody, payload: dict = Depends(verif
     """
     updates = _filter_updates(body.updates or {})
     has_prefix = bool((body.title_prefix or "").strip())
-    if not updates and not has_prefix:
+    per_prop_raw = body.per_property_updates or {}
+    # Filter the per-property maps through the same whitelist; this keeps
+    # the Undo path immune to any drift between client- and server-side
+    # field lists, and stops malicious clients from sneaking in fields like
+    # ``owner_id`` via the per-property channel.
+    per_prop: dict[str, dict] = {pid: _filter_updates(d) for pid, d in per_prop_raw.items()}
+    if not updates and not has_prefix and not any(per_prop.values()):
         raise HTTPException(status_code=400, detail="Nothing to update")
     if not body.property_ids:
         raise HTTPException(status_code=400, detail="No properties selected")
@@ -300,7 +312,19 @@ async def bulk_edit_properties(body: BulkEditBody, payload: dict = Depends(verif
             skipped.append({"id": pid, "reason": "forbidden"})
             continue
 
-        patch: dict[str, Any] = dict(updates)
+        # Per-property override beats the global updates for the matching id.
+        # When the per-property map for this id is empty (or absent), fall
+        # back to the shared ``updates`` so call sites that mix modes still
+        # work as expected.
+        per_prop_patch = per_prop.get(pid)
+        patch: dict[str, Any] = dict(per_prop_patch) if per_prop_patch else dict(updates)
+
+        # If neither global nor per-property channel had anything for this
+        # id and there's no title prefix, skip cleanly so we don't issue an
+        # empty $set or fabricate an empty snapshot.
+        if not patch and not has_prefix:
+            skipped.append({"id": pid, "reason": "no_changes"})
+            continue
 
         # Title prefix: prepended to the existing title once, idempotently.
         if has_prefix:

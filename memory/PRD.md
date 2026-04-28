@@ -175,6 +175,11 @@ Build a bilingual (English/Hebrew) rental website named MyIsraelRental.com with 
     - Belz / Kedushat Aharon → `floor=-1`, `square_meters=60`, `monthly_price=9500`, `condition=after_renovation`, `sukkah=yes`, `elevator=no`, address transliterated to "Kedushat Aharon Street".
   - Editor receives 3 rows (not 20), all required fields filled. User can review/edit/delete before saving. Spreadsheet import path still available below for power users.
   - 30 k char input cap; 50 properties max per extraction. Owners + managers + admins authorized.
+- [x] **Bulk-edit Undo: single-POST batched revert** (2026-04-28):
+  - Extended `BulkEditBody` with `per_property_updates: dict[str, dict] | None` so callers can pass distinct values per id in one round-trip. Same whitelist filter applies — non-whitelisted fields like `owner_id` injected into a snapshot are silently dropped.
+  - Backend behaviour matrix: per-property override beats global `updates` for matching id; ids not in the per-property map fall back to global; ids with neither (and no title prefix) skip cleanly with `reason="no_changes"` instead of fabricating an empty snapshot.
+  - Frontend `BulkManagerTab.handleUndo` rewritten — N posts → 1 post. Builds `per_property_updates` from the snapshot stack and ships it as a single bulk-edit. Toast now reports "Reverted last bulk edit (N properties)".
+  - 3 new pytest cases (`test_per_property_updates_single_post_undo`, `_only_valid`, `_falls_through_with_no_changes`) lock in the contract; **78/78** regression tests still green. TS types regenerated (`yarn types:generate`).
 - [x] **Bulk Manager file split** (2026-04-28):
   - Split `BulkManagerTab.jsx` (759 lines) into three single-responsibility files:
     - `BulkManagerTab.jsx` (282 lines): toolbar, filters, table, undo stack

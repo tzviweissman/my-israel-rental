@@ -1928,6 +1928,12 @@ export interface components {
              * @default replace
              */
             amenities_mode: string | null;
+            /** Per Property Updates */
+            per_property_updates?: {
+                [key: string]: {
+                    [key: string]: unknown;
+                };
+            } | null;
         };
         /** BulkEditResponse */
         BulkEditResponse: {
