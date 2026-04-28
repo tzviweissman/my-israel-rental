@@ -469,11 +469,28 @@ async def sign_booking_contract(booking_id: str, body: dict = Body(...), payload
                            width=sig_w, height=sig_h,
                            mask='auto', preserveAspectRatio=True)
 
-                # Print the signer's legal name below the signature for legal clarity.
-                # Font size scaled with signature width, but clamped to a readable range.
+                # Print the signer's legal name immediately adjacent to the
+                # signature for legal clarity. Default placement is BELOW the
+                # signature (most common since renters typically sign in the
+                # middle/lower half of a contract). If there isn't enough
+                # vertical room below — e.g. the signature was dropped near
+                # the page bottom — fall back to ABOVE the signature so the
+                # name stays visually anchored to it instead of getting
+                # clamped to the page edge.
                 name_font_size = max(10.0, min(16.0, sig_w / 20.0))
                 pad = max(8.0, sig_h * 0.12)
-                name_y_pdf = max(0, pdf_y - pad - name_font_size)
+                # PDF origin is bottom-left, so "below" means LOWER y, "above"
+                # means HIGHER y. Bottom of the signature box = pdf_y.
+                name_y_below = pdf_y - pad - name_font_size
+                name_y_above = pdf_y + sig_h + pad
+                if name_y_below >= 0:
+                    name_y_pdf = name_y_below
+                elif name_y_above + name_font_size <= page_height:
+                    name_y_pdf = name_y_above
+                else:
+                    # Pathological case (signature consumes the whole page);
+                    # keep the original clamp so we never crash.
+                    name_y_pdf = max(0.0, name_y_below)
                 # Draw "Name: " bold-ish via two chars then regular name
                 c.setFillColorRGB(0.08, 0.08, 0.08)
                 c.setFont("Helvetica-Bold", name_font_size)
@@ -539,10 +556,22 @@ async def sign_booking_contract(booking_id: str, body: dict = Body(...), payload
 
                 # Padding between signature box and printed name (larger on big contracts)
                 pad = max(12, int(sig_h * 0.12))
-                name_y = sig_y + sig_h + pad
-                # If we'd overflow the page, stack the name just above the signature instead
-                if name_y + font_size + 4 > native_h:
-                    name_y = max(0, sig_y - font_size - pad)
+                # Default: render the legal name BELOW the signature. If
+                # there isn't enough room (signature dropped near the bottom
+                # edge of the contract image), fall back to ABOVE so the
+                # name stays visually anchored to the signature instead of
+                # being clamped to the top of the page.
+                name_y_below = sig_y + sig_h + pad
+                name_y_above = sig_y - font_size - pad
+                if name_y_below + font_size + 4 <= native_h:
+                    name_y = name_y_below
+                elif name_y_above >= 0:
+                    name_y = name_y_above
+                else:
+                    # Both directions overflow — pick whichever is closer to
+                    # the signature so the name remains adjacent rather than
+                    # getting clamped to a page edge far from the signature.
+                    name_y = name_y_below if name_y_below < native_h else max(0, name_y_above)
 
                 label = "Name: "
                 name_val = legal_name
