@@ -743,19 +743,27 @@ const PropertyDetail = () => {
                           numberOfMonths={1}
                           disabled={[
                             { before: new Date() },
-                            ...(property.rental_type === 'long-term' && property.starting_date && property.minimum_booking_days
-                              ? (() => {
-                                  // For long-term with fixed starting date and minimum months
-                                  // Disable all dates before the minimum checkout date
-                                  const startDate = parseLocalDate(property.starting_date);
+                            ...(() => {
+                              // Long-term with starting_date — always disable
+                              // dates before that, regardless of whether a
+                              // minimum_booking_days is set. (Without this
+                              // guard, we used to fall through to the past
+                              // `available_from` and let renters pick today
+                              // when starting_date was tomorrow.)
+                              if (property.rental_type === 'long-term' && property.starting_date) {
+                                const startDate = parseLocalDate(property.starting_date);
+                                if (property.minimum_booking_days) {
                                   const minCheckout = new Date(startDate);
                                   minCheckout.setMonth(minCheckout.getMonth() + parseInt(property.minimum_booking_days));
                                   return [{ before: minCheckout }];
-                                })()
-                              : property.available_from 
-                                ? [{ before: parseLocalDate(property.available_from) }] 
-                                : []
-                            ),
+                                }
+                                return [{ before: startDate }];
+                              }
+                              if (property.available_from) {
+                                return [{ before: parseLocalDate(property.available_from) }];
+                              }
+                              return [];
+                            })(),
                             ...blockedDates.map(d => new Date(d))
                           ]}
                           className="rounded-xl"
