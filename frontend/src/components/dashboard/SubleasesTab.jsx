@@ -405,6 +405,7 @@ const SubleasesTab = ({ API, token }) => {
                             <CalendarComponent
                               mode="single"
                               selected={parseLocalDate(form.available_from)}
+                              defaultMonth={parseLocalDate(form.available_from) || new Date()}
                               onSelect={(date) => {
                                 if (date) {
                                   const next = format(date, 'yyyy-MM-dd');

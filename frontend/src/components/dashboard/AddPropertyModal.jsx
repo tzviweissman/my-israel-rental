@@ -514,6 +514,7 @@ const AddPropertyModal = ({ isOpen, onClose, editingProperty, onSaved, API, toke
                     <CalendarComponent
                       mode="single"
                       selected={parseLocalDate(propertyForm.starting_date)}
+                      defaultMonth={parseLocalDate(propertyForm.starting_date) || new Date()}
                       onSelect={(date) => {
                         if (date) {
                           setPropertyForm({ ...propertyForm, starting_date: format(date, 'yyyy-MM-dd') });
@@ -567,6 +568,7 @@ const AddPropertyModal = ({ isOpen, onClose, editingProperty, onSaved, API, toke
                     <CalendarComponent
                       mode="single"
                       selected={parseLocalDate(propertyForm.available_from)}
+                      defaultMonth={parseLocalDate(propertyForm.available_from) || new Date()}
                       onSelect={(date) => {
                         if (date) {
                           setPropertyForm({ ...propertyForm, available_from: format(date, 'yyyy-MM-dd') });
