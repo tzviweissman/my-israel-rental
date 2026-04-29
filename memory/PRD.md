@@ -231,6 +231,11 @@ Build a bilingual (English/Hebrew) rental website named MyIsraelRental.com with 
   - Extracted `DashboardTabs.jsx` (116 lines): pure presentational, role-driven tab visibility (renter sees Subleases/Services/Alerts; owner sees Bulk Manager). Static Tailwind classes (`ACTIVE_TEAL`/`ACTIVE_GOLD`/`ACTIVE_RED`) so JIT picks them up.
   - **Dashboard.js: 665 → 232 lines (−65%)**. No prop or behavioral changes.
   - Tested: iteration_19.json — 16/16 frontend regression flows pass, zero React warnings, zero refactor-attributable console errors.
+- [x] **BookingsList.jsx refactor** (2026-04-29):
+  - Extracted `BookingRow.jsx` (189 lines): pure presentational per-row card with all status colors + role-derived action buttons (Accept / Cancel / Request Cancel / Approve / Deny / Sign Contract / View+Download Signed). Stable `data-testid`s on every action button.
+  - Extracted `useBookingActions.jsx` hook (207 lines): owns Accept / Cancel-Request-Deny / Approve-Cancel (sonner inline confirm) / Contract-Sign flows + their modal state. Centralised endpoint map keeps the cancel handler 1 line per branch.
+  - **BookingsList.jsx: 397 → 130 lines (−67%)**. Now purely composes the hook + maps rows + renders the 3 modals. Filtering moved to a `useMemo`.
+  - Smoke-tested: 66 booking rows render for owner@test.com, search filter works, Cancel Booking modal opens correctly.
 
 ### P2 - Lower Priority
 - [ ] Manager bulk property upload via text
