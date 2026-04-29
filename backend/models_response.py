@@ -118,6 +118,7 @@ class PropertyOut(BaseModel):
     minimum_booking_days: int | None = None
     checkin_time: str | None = None
     checkout_time: str | None = None
+    holiday_tags: list[str] | None = []
     contract_url: str | None = None
     contract_uploaded_at: str | None = None
     ical_urls: list[str] | None = None
@@ -228,6 +229,7 @@ class SubleaseOut(BaseModel):
     price: float
     price_type: str
     currency: str | None = 'ILS'
+    holiday_tags: list[str] | None = []
     bedrooms_available: int | None = None
     notes: str | None = None
     title: str

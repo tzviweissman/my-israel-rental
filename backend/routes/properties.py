@@ -62,6 +62,7 @@ async def create_property(property_data: PropertyCreate, payload: dict = Depends
 @api_router.get("/properties", response_model=list[PropertyOut])
 async def get_properties(
     rental_type: str | None = None,
+    holiday_tag: str | None = None,
     min_bedrooms: float | None = None,
     max_price: float | None = None,
     area: str | None = None,
@@ -79,6 +80,10 @@ async def get_properties(
     query: dict = {}
     if rental_type:
         query['rental_type'] = rental_type
+    if holiday_tag:
+        # Mongo array `$in`/contains — matches docs whose `holiday_tags`
+        # array contains the requested value (e.g. "sukkot" or "pesach").
+        query['holiday_tags'] = holiday_tag
     if min_bedrooms:
         query['bedrooms'] = {"$gte": min_bedrooms}
     if area:

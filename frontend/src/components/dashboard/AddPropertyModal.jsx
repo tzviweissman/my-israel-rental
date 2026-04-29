@@ -24,6 +24,7 @@ const EMPTY_FORM = {
   amenities: [], monthly_price: '', nightly_price: '', currency: 'ILS',
   images: [], videos: [], cancellation_policy: 'flexible', custom_cancellation_policy: '',
   available_from: '', starting_date: '', minimum_booking_days: '',
+  holiday_tags: [],
 };
 
 /**
@@ -79,6 +80,7 @@ const AddPropertyModal = ({ isOpen, onClose, editingProperty, onSaved, API, toke
         available_from: editingProperty.available_from || '',
         starting_date: editingProperty.starting_date || '',
         minimum_booking_days: editingProperty.minimum_booking_days ? String(editingProperty.minimum_booking_days) : '',
+        holiday_tags: editingProperty.holiday_tags || [],
       });
       setUploadedFiles([
         ...(editingProperty.images || []).map((url, i) => ({ url, file_type: 'image', filename: url.split('/').pop(), original_name: `Image ${i + 1}` })),
@@ -636,6 +638,49 @@ const AddPropertyModal = ({ isOpen, onClose, editingProperty, onSaved, API, toke
                       />
                     </div>
                   )}
+                </div>
+              </div>
+            )}
+
+            {/* Holiday Categories — vacation rentals only */}
+            {propertyForm.rental_type === 'vacation' && (
+              <div className="border-t border-gray-200 pt-6">
+                <h3 className="text-lg font-bold mb-1">Holiday Categories</h3>
+                <p className="text-sm text-gray-500 mb-4">
+                  Optional — tag this listing so it shows up under <span className="font-medium">Sukkot Rentals</span> or <span className="font-medium">Pesach Rentals</span> in the navigation menu.
+                </p>
+                <div className="flex flex-wrap gap-3">
+                  {[
+                    { key: 'sukkot', label: 'Sukkot Rental' },
+                    { key: 'pesach', label: 'Pesach Rental' },
+                  ].map(({ key, label }) => {
+                    const checked = (propertyForm.holiday_tags || []).includes(key);
+                    return (
+                      <label
+                        key={key}
+                        className={`flex items-center gap-2 px-4 py-2 rounded-xl border-2 cursor-pointer transition-all ${
+                          checked
+                            ? 'border-[#D4AF37] bg-[#D4AF37]/10 text-[#1E6A6A]'
+                            : 'border-gray-200 hover:border-[#D4AF37]/40 text-gray-600'
+                        }`}
+                        data-testid={`holiday-tag-${key}`}
+                      >
+                        <input
+                          type="checkbox"
+                          className="w-4 h-4 accent-[#1E6A6A]"
+                          checked={checked}
+                          onChange={(e) => {
+                            const current = propertyForm.holiday_tags || [];
+                            const next = e.target.checked
+                              ? [...current, key]
+                              : current.filter((t) => t !== key);
+                            setPropertyForm({ ...propertyForm, holiday_tags: next });
+                          }}
+                        />
+                        <span className="text-sm font-medium">{label}</span>
+                      </label>
+                    );
+                  })}
                 </div>
               </div>
             )}

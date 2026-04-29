@@ -2529,6 +2529,11 @@ export interface components {
             checkin_time?: string | null;
             /** Checkout Time */
             checkout_time?: string | null;
+            /**
+             * Holiday Tags
+             * @default []
+             */
+            holiday_tags: string[] | null;
         };
         /**
          * PropertyOut
@@ -2643,6 +2648,11 @@ export interface components {
             checkin_time?: string | null;
             /** Checkout Time */
             checkout_time?: string | null;
+            /**
+             * Holiday Tags
+             * @default []
+             */
+            holiday_tags: string[] | null;
             /** Contract Url */
             contract_url?: string | null;
             /** Contract Uploaded At */
@@ -2840,6 +2850,11 @@ export interface components {
             bedrooms_available?: number | null;
             /** Notes */
             notes?: string | null;
+            /**
+             * Holiday Tags
+             * @default []
+             */
+            holiday_tags: string[] | null;
         };
         /**
          * SubleaseOut
@@ -2865,6 +2880,11 @@ export interface components {
              * @default ILS
              */
             currency: string | null;
+            /**
+             * Holiday Tags
+             * @default []
+             */
+            holiday_tags: string[] | null;
             /** Bedrooms Available */
             bedrooms_available?: number | null;
             /** Notes */
@@ -3200,6 +3220,7 @@ export interface operations {
         parameters: {
             query?: {
                 rental_type?: string | null;
+                holiday_tag?: string | null;
                 min_bedrooms?: number | null;
                 max_price?: number | null;
                 area?: string | null;

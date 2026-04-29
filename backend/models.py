@@ -67,6 +67,9 @@ class PropertyCreate(BaseModel):
     minimum_booking_days: int | None = None
     checkin_time: str | None = None
     checkout_time: str | None = None
+    # Holiday categories — only meaningful when rental_type='vacation'.
+    # Empty list means "regular vacation". Allowed values: 'sukkot', 'pesach'.
+    holiday_tags: List[str] | None = []
 
 
 class BookingCreate(BaseModel):
@@ -112,6 +115,9 @@ class SubleaseCreate(BaseModel):
     currency: str | None = 'ILS'
     bedrooms_available: int | None = None
     notes: str | None = None
+    # Sublease categorisation. Empty list = treat as regular short-term sublease.
+    # Allowed values: 'sukkot', 'pesach'. (Short-term is the implicit default.)
+    holiday_tags: List[str] | None = []
 
 
 class DocumentServiceRequest(BaseModel):

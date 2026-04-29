@@ -235,6 +235,15 @@ Build a bilingual (English/Hebrew) rental website named MyIsraelRental.com with 
   - Root cause in `pages/Properties.js#fetchProperties`: it read the stale `filters.rental_type` (which lags one render behind `useParams().type`). The fetch effect depended on `[type]` only, so the first call after URL change used the previous render's filters closure.
   - Fix: derive `rental_type` directly from the URL `type` param inside `fetchProperties`, ignoring the lagging `filters.rental_type` (which has no independent source of truth — it's only ever set from the URL effect).
   - Verified via Playwright across vacation→short-term, short-term→vacation, vacation→long-term: each transition fires exactly one API call with the correct `rental_type` and the correct cards render.
+- [x] **Sukkot / Pesach holiday-rental categories** (2026-04-29):
+  - **Schema**: added `holiday_tags: list[str] | None = []` to `PropertyCreate`, `PropertyOut`, `SubleaseCreate`, `SubleaseOut`. Allowed values: `"sukkot"`, `"pesach"`. Empty = regular vacation / regular short-term sublease.
+  - **Backend filter**: `GET /api/properties?holiday_tag=<sukkot|pesach>` does Mongo array-contains filtering. Combines with `rental_type=vacation` for the Sukkot/Pesach pages.
+  - **Routes**: `/properties/sukkot` and `/properties/pesach` map to `rental_type=vacation` + `holiday_tag=<value>`. Header label switches to "Sukkot Rentals" / "Pesach Rentals".
+  - **Navigation menu**: indented "↳ Sukkot Rentals" + "↳ Pesach Rentals" sit beneath the Vacation entry.
+  - **AddPropertyModal**: when `rental_type === 'vacation'`, a new "Holiday Categories" section renders pill-style checkboxes (Sukkot Rental / Pesach Rental). Hydrates from existing `holiday_tags` on edit.
+  - **SubleasesTab**: form gets a "Sublease Type" chip group — "Short Term" (selected when `holiday_tags=[]`), "Sukkot", "Pesach". User can pick none, one, or both holidays. Listing card shows badge pills for tagged subleases.
+  - **TS types regenerated** via `node scripts/generate-types.mjs`.
+  - Verified end-to-end via curl: vacation property with `holiday_tags=["sukkot"]` shows up only on `holiday_tag=sukkot` query; sublease with `holiday_tags=["sukkot","pesach"]` persists both tags. Frontend smoke-tested: `/properties/sukkot` and `/properties/pesach` render correct titles and only the matching properties.
 - [x] **Dashboard.js refactor — phase 3** (2026-04-29):
   - Purged dead code: full contract-signing modal logic (canvas drawing, signature state, position/size, preview URL), unused cancellation handlers (`handleCancelBooking`, `handleRequestCancel`, `handleAcceptBooking`, `confirmAcceptBooking`, `handleDenyCancel`, `submitCancellation` and their `cancelModal` / `acceptModal` state) — all of which were superseded when `BookingsList` started owning its own modals. Plus dead state (`bookingsFilter`), unused `parseLocalDate` helper, and ~25 unused lucide icon imports.
   - Extracted `ManagerHeader.jsx` (156 lines): self-contained business-logo upload (POST/DELETE `/api/user/logo`) + shareable manager-page link with copy-to-clipboard fallback.

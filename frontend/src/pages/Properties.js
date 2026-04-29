@@ -117,8 +117,21 @@ const Properties = () => {
       // state lags one render behind `useParams`, so reading it here would
       // leak the previous page's value (e.g. clicking "Short Term" from
       // /properties/vacation would still send rental_type=vacation).
-      const rentalType = type && type !== 'all' ? type : '';
+      // Sukkot/Pesach are vacation sub-categories: they map to
+      // rental_type=vacation + holiday_tag=<sukkot|pesach>.
+      const HOLIDAY_TYPES = new Set(['sukkot', 'pesach']);
+      let rentalType = '';
+      let holidayTag = '';
+      if (type && type !== 'all') {
+        if (HOLIDAY_TYPES.has(type)) {
+          rentalType = 'vacation';
+          holidayTag = type;
+        } else {
+          rentalType = type;
+        }
+      }
       if (rentalType) params.append('rental_type', rentalType);
+      if (holidayTag) params.append('holiday_tag', holidayTag);
       if (filters.min_bedrooms) params.append('min_bedrooms', filters.min_bedrooms);
       if (filters.max_price) params.append('max_price', filters.max_price);
       if (filters.min_price) params.append('min_price', filters.min_price);
@@ -199,6 +212,8 @@ const Properties = () => {
     'short-term': t('property.shortTerm'),
     'vacation': t('property.vacationType'),
     'storage': t('property.storageType'),
+    'sukkot': 'Sukkot Rentals',
+    'pesach': 'Pesach Rentals',
     'all': t('filters.allProperties')
   };
 

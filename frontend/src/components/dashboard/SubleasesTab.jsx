@@ -29,6 +29,7 @@ const SubleasesTab = ({ API, token }) => {
     currency: 'ILS',
     bedrooms_available: '',
     notes: '',
+    holiday_tags: [],
   });
   const [myBookings, setMyBookings] = useState([]);
   const [mySubleases, setMySubleases] = useState([]);
@@ -103,6 +104,7 @@ const SubleasesTab = ({ API, token }) => {
       currency: 'ILS',
       bedrooms_available: '',
       notes: '',
+      holiday_tags: [],
     });
 
   const openForm = () => {
@@ -136,6 +138,7 @@ const SubleasesTab = ({ API, token }) => {
           price: parseFloat(form.price),
           price_type: form.price_type,
           currency: form.currency,
+          holiday_tags: form.holiday_tags,
           bedrooms_available: form.bedrooms_available ? parseInt(form.bedrooms_available) : null,
           notes: form.notes,
         },
@@ -529,6 +532,62 @@ const SubleasesTab = ({ API, token }) => {
                       />
                     </div>
                     <div>
+                      <label className="block text-xs font-medium text-gray-700 mb-1.5">
+                        Sublease Type
+                      </label>
+                      <p className="text-[11px] text-gray-500 mb-2">
+                        Defaults to Short Term. Tick Sukkot and/or Pesach to also list under those holiday categories.
+                      </p>
+                      <div className="flex flex-wrap gap-2">
+                        {(() => {
+                          const tags = form.holiday_tags || [];
+                          const isShortTerm = tags.length === 0;
+                          return (
+                            <>
+                              <button
+                                type="button"
+                                onClick={() => setForm({ ...form, holiday_tags: [] })}
+                                className={`px-3 py-1.5 rounded-full text-xs font-medium border-2 transition-all ${
+                                  isShortTerm
+                                    ? 'bg-[#1E6A6A] text-white border-[#1E6A6A]'
+                                    : 'bg-white text-gray-600 border-gray-200 hover:border-[#1E6A6A]/40'
+                                }`}
+                                data-testid="sublease-type-short-term"
+                              >
+                                Short Term
+                              </button>
+                              {[
+                                { key: 'sukkot', label: 'Sukkot' },
+                                { key: 'pesach', label: 'Pesach' },
+                              ].map(({ key, label }) => {
+                                const active = tags.includes(key);
+                                return (
+                                  <button
+                                    key={key}
+                                    type="button"
+                                    onClick={() => {
+                                      const next = active
+                                        ? tags.filter((t) => t !== key)
+                                        : [...tags, key];
+                                      setForm({ ...form, holiday_tags: next });
+                                    }}
+                                    className={`px-3 py-1.5 rounded-full text-xs font-medium border-2 transition-all ${
+                                      active
+                                        ? 'bg-[#D4AF37] text-white border-[#D4AF37]'
+                                        : 'bg-white text-gray-600 border-gray-200 hover:border-[#D4AF37]/40'
+                                    }`}
+                                    data-testid={`sublease-type-${key}`}
+                                  >
+                                    {label}
+                                  </button>
+                                );
+                              })}
+                            </>
+                          );
+                        })()}
+                      </div>
+                    </div>
+                    <div>
                       <label className="block text-xs font-medium text-gray-700 mb-1.5">Notes for Sublessee</label>
                       <textarea
                         value={form.notes}
@@ -582,6 +641,20 @@ const SubleasesTab = ({ API, token }) => {
                         {new Date(sub.available_from).toLocaleDateString()} —{' '}
                         {new Date(sub.available_to).toLocaleDateString()}
                       </p>
+                      {sub.holiday_tags && sub.holiday_tags.length > 0 && (
+                        <div className="flex gap-1 mt-1.5">
+                          {sub.holiday_tags.includes('sukkot') && (
+                            <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-[#D4AF37]/15 text-[#8a6d1d]">
+                              Sukkot
+                            </span>
+                          )}
+                          {sub.holiday_tags.includes('pesach') && (
+                            <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-[#D4AF37]/15 text-[#8a6d1d]">
+                              Pesach
+                            </span>
+                          )}
+                        </div>
+                      )}
                     </div>
                     <div className="text-right shrink-0">
                       <p className="text-base font-bold" style={{ color: '#D4AF37' }}>
