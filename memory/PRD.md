@@ -221,6 +221,10 @@ Build a bilingual (English/Hebrew) rental website named MyIsraelRental.com with 
   - Files: `backend/routes/properties.py` (+`_BULK_EDITABLE_FIELDS`, `BulkEditBody`, `BulkImagesBody`, 2 new endpoints), `models.py` (+checkin_time/checkout_time), `frontend/src/components/dashboard/BulkManagerTab.jsx` (new ~750-line file), `frontend/src/pages/Dashboard.js` (new tab), `frontend/src/constants/propertyEnums.js` + `locations.js` (shared canonical lists).
   - Tested: 14/14 backend pytest + 13/13 frontend Playwright = 27/27 green (iteration_17.json). Verified ownership skips, admin override, snapshot-based undo, amenities append-no-dup, whitelist drops `owner_id`/`status`/`images`, no `_id` leakage.
 - [ ] Manager bulk property upload + profile pages
+- [x] **Sublease Calendar Dropdown** (2026-04-29):
+  - Replaced plain `<input type="date">` for `available_from`/`available_to` in `SubleasesTab.jsx` with the same shadcn `Calendar` popup pattern used in `AddPropertyModal.jsx`.
+  - Pill-style trigger formats picked dates as "Month D, YYYY"; popover has X close, click-outside to dismiss, past dates disabled, end date constrained to ≥ start.
+  - Backend save format remains `yyyy-MM-dd`; verified end-to-end via curl on `POST /api/subleases`.
 
 ### P2 - Lower Priority
 - [ ] Manager bulk property upload via text

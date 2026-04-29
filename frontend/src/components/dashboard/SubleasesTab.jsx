@@ -1,7 +1,16 @@
 import React, { useEffect, useRef, useState } from 'react';
 import axios from 'axios';
-import { Plus, Home, Check, Send, FileText, Upload, Loader2, Copy } from 'lucide-react';
+import { format } from 'date-fns';
+import { Plus, Home, Check, Send, FileText, Upload, Loader2, Copy, Calendar, X } from 'lucide-react';
 import { toast } from 'sonner';
+import { Calendar as CalendarComponent } from '../ui/calendar';
+
+// Parse YYYY-MM-DD without UTC midnight drift (matches AddPropertyModal helper)
+const parseLocalDate = (dateStr) => {
+  if (!dateStr) return null;
+  const [y, m, d] = String(dateStr).split('T')[0].split('-').map(Number);
+  return new Date(y, m - 1, d);
+};
 
 /**
  * Renter "My Subleases" dashboard tab.
@@ -29,6 +38,24 @@ const SubleasesTab = ({ API, token }) => {
   // sublease triggered it so the onChange handler uploads to the correct row.
   const [uploadTargetId, setUploadTargetId] = useState(null);
   const fileRef = useRef(null);
+  const [showFromCalendar, setShowFromCalendar] = useState(false);
+  const [showToCalendar, setShowToCalendar] = useState(false);
+  const fromCalendarRef = useRef(null);
+  const toCalendarRef = useRef(null);
+
+  // Close calendar popovers when clicking outside
+  useEffect(() => {
+    const onClick = (e) => {
+      if (fromCalendarRef.current && !fromCalendarRef.current.contains(e.target)) {
+        setShowFromCalendar(false);
+      }
+      if (toCalendarRef.current && !toCalendarRef.current.contains(e.target)) {
+        setShowToCalendar(false);
+      }
+    };
+    document.addEventListener('mousedown', onClick);
+    return () => document.removeEventListener('mousedown', onClick);
+  }, []);
 
   const authHeaders = { headers: { Authorization: `Bearer ${token}` } };
 
@@ -336,27 +363,114 @@ const SubleasesTab = ({ API, token }) => {
 
                   <form onSubmit={handleCreate} className="space-y-4" data-testid="sublease-form">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div>
-                        <label className="block text-xs font-medium text-gray-700 mb-1.5">Available From</label>
-                        <input
-                          type="date"
-                          value={form.available_from}
-                          onChange={(e) => setForm({ ...form, available_from: e.target.value })}
-                          className={inputCls}
-                          required
+                      <div className="relative" ref={fromCalendarRef}>
+                        <label className="block text-xs font-medium text-gray-700 mb-1.5 flex items-center gap-1.5">
+                          <Calendar size={13} className="text-[#1E6A6A]" />
+                          Available From
+                        </label>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setShowFromCalendar((v) => !v);
+                            setShowToCalendar(false);
+                          }}
+                          className="w-full px-4 py-2.5 rounded-xl border border-gray-200 bg-white hover:border-[#1E6A6A]/40 focus:outline-none focus:ring-2 focus:ring-[#1E6A6A]/30 focus:border-[#1E6A6A] text-sm text-left flex items-center justify-between transition-all"
                           data-testid="sublease-from-date"
-                        />
+                        >
+                          <span className={form.available_from ? 'text-gray-700' : 'text-gray-400'}>
+                            {form.available_from
+                              ? format(parseLocalDate(form.available_from), 'MMMM d, yyyy')
+                              : 'Select start date'}
+                          </span>
+                          <Calendar size={16} className="text-[#1E6A6A]/50" />
+                        </button>
+                        {showFromCalendar && (
+                          <div className="absolute top-full mt-2 left-0 bg-white rounded-xl border-2 border-[#1E6A6A] shadow-2xl p-4 z-[100] w-[320px]">
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setShowFromCalendar(false);
+                              }}
+                              className="absolute top-2 right-2 p-1 rounded-full hover:bg-gray-100 z-[110]"
+                            >
+                              <X size={14} />
+                            </button>
+                            <CalendarComponent
+                              mode="single"
+                              selected={parseLocalDate(form.available_from)}
+                              onSelect={(date) => {
+                                if (date) {
+                                  const next = format(date, 'yyyy-MM-dd');
+                                  setForm((f) => ({
+                                    ...f,
+                                    available_from: next,
+                                    // Clear available_to if it's now before the new start
+                                    available_to:
+                                      f.available_to && f.available_to < next ? '' : f.available_to,
+                                  }));
+                                  setShowFromCalendar(false);
+                                }
+                              }}
+                              disabled={[{ before: new Date() }]}
+                              initialFocus
+                            />
+                          </div>
+                        )}
                       </div>
-                      <div>
-                        <label className="block text-xs font-medium text-gray-700 mb-1.5">Available To</label>
-                        <input
-                          type="date"
-                          value={form.available_to}
-                          onChange={(e) => setForm({ ...form, available_to: e.target.value })}
-                          className={inputCls}
-                          required
+                      <div className="relative" ref={toCalendarRef}>
+                        <label className="block text-xs font-medium text-gray-700 mb-1.5 flex items-center gap-1.5">
+                          <Calendar size={13} className="text-[#D4AF37]" />
+                          Available To
+                        </label>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setShowToCalendar((v) => !v);
+                            setShowFromCalendar(false);
+                          }}
+                          className="w-full px-4 py-2.5 rounded-xl border border-gray-200 bg-white hover:border-[#D4AF37]/40 focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/30 focus:border-[#D4AF37] text-sm text-left flex items-center justify-between transition-all"
                           data-testid="sublease-to-date"
-                        />
+                        >
+                          <span className={form.available_to ? 'text-gray-700' : 'text-gray-400'}>
+                            {form.available_to
+                              ? format(parseLocalDate(form.available_to), 'MMMM d, yyyy')
+                              : 'Select end date'}
+                          </span>
+                          <Calendar size={16} className="text-[#D4AF37]/60" />
+                        </button>
+                        {showToCalendar && (
+                          <div className="absolute top-full mt-2 right-0 bg-white rounded-xl border-2 border-[#D4AF37] shadow-2xl p-4 z-[100] w-[320px]">
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setShowToCalendar(false);
+                              }}
+                              className="absolute top-2 right-2 p-1 rounded-full hover:bg-gray-100 z-[110]"
+                            >
+                              <X size={14} />
+                            </button>
+                            <CalendarComponent
+                              mode="single"
+                              selected={parseLocalDate(form.available_to)}
+                              onSelect={(date) => {
+                                if (date) {
+                                  setForm({ ...form, available_to: format(date, 'yyyy-MM-dd') });
+                                  setShowToCalendar(false);
+                                }
+                              }}
+                              disabled={[
+                                {
+                                  before: form.available_from
+                                    ? parseLocalDate(form.available_from)
+                                    : new Date(),
+                                },
+                              ]}
+                              initialFocus
+                            />
+                          </div>
+                        )}
                       </div>
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
