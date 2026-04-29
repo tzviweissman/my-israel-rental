@@ -46,6 +46,7 @@ async def create_sublease(sublease_data: SubleaseCreate, payload: dict = Depends
         "available_to": sublease_data.available_to,
         "price": sublease_data.price,
         "price_type": sublease_data.price_type,
+        "currency": sublease_data.currency or 'ILS',
         "bedrooms_available": sublease_data.bedrooms_available if sublease_data.bedrooms_available is not None else property_data.get('bedrooms', 0),
         "notes": sublease_data.notes or "",
         # Copy key property details for the listing

@@ -127,7 +127,7 @@ const SignContract = () => {
                 {contract.sublease.price > 0 && (
                   <span className="flex items-center gap-1 font-semibold" style={{ color: '#D4AF37' }}>
                     <DollarSign size={12} />
-                    ₪{contract.sublease.price.toLocaleString()}{contract.sublease.price_type === 'per_night' ? '/night' : ' total'}
+                    {contract.sublease.currency === 'USD' ? '$' : '₪'}{contract.sublease.price.toLocaleString()}{contract.sublease.price_type === 'per_night' ? '/night' : ' total'}
                   </span>
                 )}
               </div>

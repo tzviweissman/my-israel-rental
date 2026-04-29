@@ -2831,6 +2831,11 @@ export interface components {
             price: number;
             /** Price Type */
             price_type: string;
+            /**
+             * Currency
+             * @default ILS
+             */
+            currency: string | null;
             /** Bedrooms Available */
             bedrooms_available?: number | null;
             /** Notes */
@@ -2855,6 +2860,11 @@ export interface components {
             price: number;
             /** Price Type */
             price_type: string;
+            /**
+             * Currency
+             * @default ILS
+             */
+            currency: string | null;
             /** Bedrooms Available */
             bedrooms_available?: number | null;
             /** Notes */

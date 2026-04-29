@@ -227,6 +227,7 @@ class SubleaseOut(BaseModel):
     available_to: str
     price: float
     price_type: str
+    currency: str | None = 'ILS'
     bedrooms_available: int | None = None
     notes: str | None = None
     title: str

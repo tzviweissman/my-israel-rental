@@ -26,6 +26,7 @@ const SubleasesTab = ({ API, token }) => {
     available_to: '',
     price: '',
     price_type: 'per_night',
+    currency: 'ILS',
     bedrooms_available: '',
     notes: '',
   });
@@ -99,6 +100,7 @@ const SubleasesTab = ({ API, token }) => {
       available_to: '',
       price: '',
       price_type: 'per_night',
+      currency: 'ILS',
       bedrooms_available: '',
       notes: '',
     });
@@ -133,6 +135,7 @@ const SubleasesTab = ({ API, token }) => {
           available_to: form.available_to,
           price: parseFloat(form.price),
           price_type: form.price_type,
+          currency: form.currency,
           bedrooms_available: form.bedrooms_available ? parseInt(form.bedrooms_available) : null,
           notes: form.notes,
         },
@@ -475,17 +478,28 @@ const SubleasesTab = ({ API, token }) => {
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
-                        <label className="block text-xs font-medium text-gray-700 mb-1.5">Price (₪)</label>
-                        <input
-                          type="number"
-                          value={form.price}
-                          onChange={(e) => setForm({ ...form, price: e.target.value })}
-                          placeholder="e.g. 200"
-                          className={inputCls}
-                          required
-                          min="1"
-                          data-testid="sublease-price"
-                        />
+                        <label className="block text-xs font-medium text-gray-700 mb-1.5">Price</label>
+                        <div className="flex gap-2">
+                          <input
+                            type="number"
+                            value={form.price}
+                            onChange={(e) => setForm({ ...form, price: e.target.value })}
+                            placeholder="e.g. 200"
+                            className={`${inputCls} flex-1`}
+                            required
+                            min="1"
+                            data-testid="sublease-price"
+                          />
+                          <select
+                            value={form.currency}
+                            onChange={(e) => setForm({ ...form, currency: e.target.value })}
+                            className={`${inputCls} w-28 shrink-0`}
+                            data-testid="sublease-currency"
+                          >
+                            <option value="ILS">₪ ILS</option>
+                            <option value="USD">$ USD</option>
+                          </select>
+                        </div>
                       </div>
                       <div>
                         <label className="block text-xs font-medium text-gray-700 mb-1.5">Price Type</label>
@@ -571,7 +585,8 @@ const SubleasesTab = ({ API, token }) => {
                     </div>
                     <div className="text-right shrink-0">
                       <p className="text-base font-bold" style={{ color: '#D4AF37' }}>
-                        ₪{sub.price?.toLocaleString()}
+                        {sub.currency === 'USD' ? '$' : '₪'}
+                        {sub.price?.toLocaleString()}
                         <span className="text-[10px] font-normal text-gray-500">
                           {sub.price_type === 'per_night' ? '/night' : ' total'}
                         </span>

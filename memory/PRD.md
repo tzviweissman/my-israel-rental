@@ -225,6 +225,11 @@ Build a bilingual (English/Hebrew) rental website named MyIsraelRental.com with 
   - Replaced plain `<input type="date">` for `available_from`/`available_to` in `SubleasesTab.jsx` with the same shadcn `Calendar` popup pattern used in `AddPropertyModal.jsx`.
   - Pill-style trigger formats picked dates as "Month D, YYYY"; popover has X close, click-outside to dismiss, past dates disabled, end date constrained to ≥ start.
   - Backend save format remains `yyyy-MM-dd`; verified end-to-end via curl on `POST /api/subleases`.
+- [x] **Sublease Currency selector (₪ ILS / $ USD)** (2026-04-29):
+  - Backend: `SubleaseCreate` + `SubleaseOut` gain `currency: str | None = 'ILS'`. `routes/subleases.py` persists it on `POST /api/subleases` (defaults to ILS).
+  - Frontend: Price input is now a flex group with a 28-px-wide currency `<select>` (₪ ILS / $ USD), matching the currency selector pattern used in `AddPropertyModal.jsx`. Listing card + `SignContract.js` price label render `$` when `currency === 'USD'`, `₪` otherwise (legacy rows fall through to ₪).
+  - TS types regenerated via `node scripts/generate-types.mjs`.
+  - Verified end-to-end via curl: USD + ILS subleases persist correctly with their currency in `db.subleases`.
 - [x] **Dashboard.js refactor — phase 3** (2026-04-29):
   - Purged dead code: full contract-signing modal logic (canvas drawing, signature state, position/size, preview URL), unused cancellation handlers (`handleCancelBooking`, `handleRequestCancel`, `handleAcceptBooking`, `confirmAcceptBooking`, `handleDenyCancel`, `submitCancellation` and their `cancelModal` / `acceptModal` state) — all of which were superseded when `BookingsList` started owning its own modals. Plus dead state (`bookingsFilter`), unused `parseLocalDate` helper, and ~25 unused lucide icon imports.
   - Extracted `ManagerHeader.jsx` (156 lines): self-contained business-logo upload (POST/DELETE `/api/user/logo`) + shareable manager-page link with copy-to-clipboard fallback.
