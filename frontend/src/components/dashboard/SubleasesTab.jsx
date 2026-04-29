@@ -488,26 +488,27 @@ const SubleasesTab = ({ API, token }) => {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
                         <label className="block text-xs font-medium text-gray-700 mb-1.5">Price</label>
-                        <div className="flex gap-2">
+                        <div className="flex items-stretch rounded-xl border border-gray-200 bg-white overflow-hidden focus-within:ring-2 focus-within:ring-[#1E6A6A]/30 focus-within:border-[#1E6A6A] transition-all">
+                          <select
+                            value={form.currency}
+                            onChange={(e) => setForm({ ...form, currency: e.target.value })}
+                            className="bg-gray-50 border-0 border-r border-gray-200 pl-3 pr-7 text-sm font-medium text-gray-700 focus:outline-none cursor-pointer hover:bg-gray-100 transition-colors"
+                            data-testid="sublease-currency"
+                            aria-label="Currency"
+                          >
+                            <option value="ILS">₪ ILS</option>
+                            <option value="USD">$ USD</option>
+                          </select>
                           <input
                             type="number"
                             value={form.price}
                             onChange={(e) => setForm({ ...form, price: e.target.value })}
                             placeholder="e.g. 200"
-                            className={`${inputCls} flex-1`}
+                            className="flex-1 min-w-0 px-3 py-2.5 text-sm bg-transparent border-0 focus:outline-none"
                             required
                             min="1"
                             data-testid="sublease-price"
                           />
-                          <select
-                            value={form.currency}
-                            onChange={(e) => setForm({ ...form, currency: e.target.value })}
-                            className={`${inputCls} w-28 shrink-0`}
-                            data-testid="sublease-currency"
-                          >
-                            <option value="ILS">₪ ILS</option>
-                            <option value="USD">$ USD</option>
-                          </select>
                         </div>
                       </div>
                       <div>
