@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import axios from 'axios';
 import { Plus, Upload, Home } from 'lucide-react';
@@ -22,7 +22,6 @@ import DashboardTabs from '../components/dashboard/DashboardTabs';
 const Dashboard = () => {
   const { t } = useTranslation();
   const { user, token } = useContext(AuthContext);
-  const navigate = useNavigate(); // eslint-disable-line no-unused-vars
   const [searchParams] = useSearchParams();
   const [properties, setProperties] = useState([]);
   const [bookings, setBookings] = useState([]);

@@ -225,13 +225,19 @@ Build a bilingual (English/Hebrew) rental website named MyIsraelRental.com with 
   - Replaced plain `<input type="date">` for `available_from`/`available_to` in `SubleasesTab.jsx` with the same shadcn `Calendar` popup pattern used in `AddPropertyModal.jsx`.
   - Pill-style trigger formats picked dates as "Month D, YYYY"; popover has X close, click-outside to dismiss, past dates disabled, end date constrained to ≥ start.
   - Backend save format remains `yyyy-MM-dd`; verified end-to-end via curl on `POST /api/subleases`.
+- [x] **Dashboard.js refactor — phase 3** (2026-04-29):
+  - Purged dead code: full contract-signing modal logic (canvas drawing, signature state, position/size, preview URL), unused cancellation handlers (`handleCancelBooking`, `handleRequestCancel`, `handleAcceptBooking`, `confirmAcceptBooking`, `handleDenyCancel`, `submitCancellation` and their `cancelModal` / `acceptModal` state) — all of which were superseded when `BookingsList` started owning its own modals. Plus dead state (`bookingsFilter`), unused `parseLocalDate` helper, and ~25 unused lucide icon imports.
+  - Extracted `ManagerHeader.jsx` (156 lines): self-contained business-logo upload (POST/DELETE `/api/user/logo`) + shareable manager-page link with copy-to-clipboard fallback.
+  - Extracted `DashboardTabs.jsx` (116 lines): pure presentational, role-driven tab visibility (renter sees Subleases/Services/Alerts; owner sees Bulk Manager). Static Tailwind classes (`ACTIVE_TEAL`/`ACTIVE_GOLD`/`ACTIVE_RED`) so JIT picks them up.
+  - **Dashboard.js: 665 → 232 lines (−65%)**. No prop or behavioral changes.
+  - Tested: iteration_19.json — 16/16 frontend regression flows pass, zero React warnings, zero refactor-attributable console errors.
 
 ### P2 - Lower Priority
 - [ ] Manager bulk property upload via text
 - [ ] Personal manager profile pages
 - [ ] LLM Integration (Claude Sonnet) for translation/chat enhancements
-- [ ] Dashboard.js refactoring (~900 lines)
-- [ ] server.py route extraction into /routes directory
+- [x] Dashboard.js refactoring (~900 lines) — done 2026-04-29 (now 232 lines)
+- [x] server.py route extraction into /routes directory — done 2026-04-23
 
 ## Test Credentials
 See /app/memory/test_credentials.md
