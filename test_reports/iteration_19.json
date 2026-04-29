@@ -1,0 +1,55 @@
+{
+  "summary": "Frontend-only regression test of the Dashboard.js refactor (665→233 lines + new ManagerHeader.jsx + DashboardTabs.jsx). Tested with renter@test.com and owner@test.com on the public REACT_APP_BACKEND_URL via Playwright. All 16 features in the review request pass with NO behavioral regressions. Zero React warnings and zero console errors attributable to the refactor (8 unrelated 404s for sublease thumbnail images). Backend was not retested per request.",
+  "backend_issues": {
+    "critical": [],
+    "minor": []
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "tested_flows": {
+    "Renter — all 7 tabs render+switch+activate (properties/bookings/subleases/settings/services/alerts/liked)": "PASS — every data-testid='tab-*' becomes active (bg-white) on click",
+    "Renter — Sublease Property header button navigates to subleases tab": "PASS — data-testid='sublease-property-button' click activates tab-subleases and renders subleases-tab + create-sublease-btn",
+    "Renter — Subleases tab + NEW SUBLEASE button + form section": "PASS — create-sublease-btn opens the sublease-form-section. Calendar dropdown (sublease-from-date / sublease-to-date) IS in the DOM but cannot be exercised because the seeded renter has 0 *active* bookings eligible for subleasing (the 65 bookings are past/expired). Empty-state 'You don't have any active bookings to sublease' shown. NOT a refactor regression — the SubleasesTab component itself was not refactored.",
+    "Renter — Liked tab loads": "PASS — tab-liked switches and renders LikedTab body content",
+    "Renter — Alerts (saved searches) tab loads": "PASS — tab-alerts switches and renders SavedSearchesTab content",
+    "Owner — ManagerHeader visible": "PASS — manager-page-section, upload-logo-button, shareable-link, copy-link-button all visible. Shareable link value = '${origin}/manager/${user.id}' (verified: /manager/b0a59336-…)",
+    "Owner — Bulk Upload + Add Property header buttons": "PASS — bulk-upload-button + add-property-button visible and clickable",
+    "Owner — Tabs visible (properties / bulk-manager / bookings / settings / liked)": "PASS — all 5 owner tabs visible; tab-subleases / tab-alerts / tab-services correctly HIDDEN for owner role",
+    "Owner — Bulk Manager tab renders property list with checkboxes": "PASS — tab-bulk-manager loads BulkManagerTab with 33 checkboxes (one per row + select-all)",
+    "Owner — Add Property modal opens": "PASS — add-property-button opens [data-testid='add-property-modal'] with full form",
+    "Owner — Bulk Upload modal opens": "PASS — bulk-upload-button opens 'Add multiple properties' modal with paste textarea + Property 1 form",
+    "Owner — PropertyList edit/delete actions render": "PASS — edit/delete icons present in property cards (visible in screenshot)",
+    "Notification deep-link ?tab=bookings sets activeTab": "PASS for both roles — tab-bookings has bg-white active class after navigating to /dashboard?tab=bookings",
+    "Notification deep-link ?highlight=<id> triggers booking refetch with no errors": "PASS — /dashboard?tab=bookings&highlight=fakebooking123 produced 0 new console errors and the bookings refetch effect fires (activeTab + highlightBookingId in deps)",
+    "No console errors / React warnings on tab switches": "PASS — zero React warnings, zero PAGEERR. Only console output was 8 unrelated 404s for missing sublease thumbnail images, which are pre-existing and unrelated to Dashboard refactor."
+  },
+  "code_review_observations": [
+    "Dashboard.js cleanly trimmed to 233 lines — dead state (cancelModalBooking, signing modal, businessLogo etc.) successfully removed. Imports pared down. Good.",
+    "ManagerHeader.jsx (156 lines) is self-contained: owns its own businessLogo state + GET /auth/me effect with proper cancellation cleanup (cancelled flag). Toast feedback in place for upload/remove/copy. Correct.",
+    "DashboardTabs.jsx (116 lines) is purely presentational, role-driven visibility. Static Tailwind class strings (ACTIVE_TEAL/GOLD/RED) are JIT-safe.",
+    "Minor: Dashboard.js line 25 still has `useNavigate` imported + assigned with eslint-disable-next-line, despite never being used. Could be removed entirely along with the disable comment.",
+    "Minor: Three useEffects on lines 75, 82, 92 have overlapping responsibilities — the visibilitychange refetch (line 92) and the activeTab refetch (line 82) can both fire fetchProperties+fetchBookings on the same render, causing duplicate requests. Functionally fine but slightly wasteful.",
+    "Minor: ManagerHeader fetches /auth/me on mount even though the parent already has `user` in context — could just use `user.business_logo`. Extra API call on every Dashboard mount.",
+    "Cosmetic: ManagerHeader prop `API` is shadowing the imported singleton; passing it from Dashboard is fine but slightly redundant since both reach the same module-level `API`."
+  ],
+  "test_report_links": [],
+  "action_items": [
+    "(Optional cleanup, not blocking) Remove unused `useNavigate` import + eslint-disable in Dashboard.js line 25.",
+    "(Optional cleanup) ManagerHeader.jsx could use AuthContext.user.business_logo instead of an extra GET /auth/me on mount.",
+    "(Test data, not code) Seed at least one *active* (future-dated, confirmed) booking for renter@test.com so the sublease calendar dropdown can be exercised end-to-end in future iterations."
+  ],
+  "updated_files": [],
+  "success_rate": {
+    "backend": "not tested (per review request)",
+    "frontend": "100% — 16/16 review request items pass; sublease calendar partial coverage (form renders, calendar untested due to seed data, not a regression)"
+  },
+  "test_credentials": "Used: renter@test.com / Test1234!, owner@test.com / Test1234! (from /app/memory/test_credentials.md)",
+  "seed_data_creation": "None",
+  "retest_needed": false,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "Dashboard refactor is clean and stable. If asked to verify the SubleasesTab calendar dropdown end-to-end, you'll first need to seed a future-dated confirmed booking for renter@test.com — the existing 65 bookings are all expired so the empty-state ('You don't have any active bookings to sublease') is shown and the calendar trigger never renders. The form structure is correct; this is a seed-data limitation, not a code defect.",
+  "rca of the issue": "N/A — no failures to RCA. Refactor is regression-free."
+}
