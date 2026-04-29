@@ -245,10 +245,15 @@ Build a bilingual (English/Hebrew) rental website named MyIsraelRental.com with 
   - **TS types regenerated** via `node scripts/generate-types.mjs`.
   - Verified end-to-end via curl: vacation property with `holiday_tags=["sukkot"]` shows up only on `holiday_tag=sukkot` query; sublease with `holiday_tags=["sukkot","pesach"]` persists both tags. Frontend smoke-tested: `/properties/sukkot` and `/properties/pesach` render correct titles and only the matching properties.
 - [x] **Holiday-window banner + one-click date filter** (2026-04-29):
-  - New `frontend/src/constants/holidayWindows.js` with upcoming Sukkot 5787 (Sep 25 – Oct 4 2026) and Pesach 5786 (Apr 1 – Apr 9 2026) windows. Update yearly via Hebcal.
+  - New `frontend/src/constants/holidayWindows.js` with upcoming Sukkot 5787 (Sep 25 – Oct 4 2026) and Pesach 5786 (Apr 1 – Apr 9 2026) windows. Used as **fallback only** since the auto-rolling Hebcal lookup runs at page load.
   - Banner card on `/properties/sukkot` and `/properties/pesach`: gold-tinted gradient, calendar icon, "SUKKOT 2026 / Sep 25 — Oct 4, 2026" headline, helper copy, and a teal CTA "Find homes available these dates".
   - CTA fetches with `rental_type=vacation&holiday_tag=<key>&date_from=<start>&date_to=<end>` and pre-fills the Filters panel's date range — toast confirms application.
-  - Smoke-tested: banner visible on both pages, CTA click correctly fires the date-bounded API call (`?rental_type=vacation&holiday_tag=sukkot&date_from=2026-09-25&date_to=2026-10-04`), Filters badge updates to show 2 active filters, results list narrows accordingly.
+  - Smoke-tested: banner visible on both pages, CTA click correctly fires the date-bounded API call, Filters badge updates to show 2 active filters, results list narrows accordingly.
+- [x] **Auto-rolling holiday windows via Hebcal API** (2026-04-29):
+  - New `frontend/src/utils/holidayWindows.js#loadHolidayWindows()` fetches `https://www.hebcal.com/hebcal?cfg=json&maj=on&i=on&year=YYYY` for the current year + next year, groups consecutive holiday days into runs (≤ 14-day gap), and returns the *next upcoming* run for Sukkot (Erev Sukkot → Simchat Torah) and Pesach (Erev Pesach → Pesach VII).
+  - Cached in `localStorage` for 30 days; falls back to the static `HOLIDAY_WINDOWS` constant on any network/CORS error.
+  - Properties page seeds `useState(HOLIDAY_WINDOWS)` then hydrates from `loadHolidayWindows()` on mount.
+  - Verified: today (Apr 29 2026) → banner correctly shows **Sukkot 2026** (Sep 25 – Oct 3, still upcoming) and **Pesach 2027** (Apr 21 – Apr 28, auto-rolled because Pesach 2026 ended Apr 9). Cache payload is properly persisted with `cachedAt` timestamp.
 - [x] **Calendar `defaultMonth` polish** (2026-04-29):
   - `AddPropertyModal.jsx` — Starting Date (long-term) and Date Available (short-term/vacation) calendars now open at the saved date's month when editing instead of today's. Falls back to today when no date is set.
   - `SubleasesTab.jsx` — same polish on Available From + previously-added Available To (which already opens at the from-date's month for new subleases).

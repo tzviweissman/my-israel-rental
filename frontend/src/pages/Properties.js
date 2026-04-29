@@ -11,6 +11,7 @@ import { format } from 'date-fns';
 import { toast } from 'sonner';
 import NotifyMeCard from '../components/NotifyMeCard';
 import { HOLIDAY_WINDOWS } from '../constants/holidayWindows';
+import { loadHolidayWindows } from '../utils/holidayWindows';
 
 const PRICE_MAX = 50000;
 
@@ -66,6 +67,18 @@ const Properties = () => {
   const [exchangeRate, setExchangeRate] = useState(null);
   const { user, token } = useContext(AuthContext);
   const [likedIds, setLikedIds] = useState(new Set());
+  // Auto-rolling holiday windows from Hebcal — falls back to static defaults
+  const [holidayWindows, setHolidayWindows] = useState(HOLIDAY_WINDOWS);
+
+  useEffect(() => {
+    let cancelled = false;
+    loadHolidayWindows().then((win) => {
+      if (!cancelled) setHolidayWindows(win);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   useEffect(() => {
     if (token) {
@@ -215,7 +228,7 @@ const Properties = () => {
     return new Date(y, m - 1, d);
   };
   const applyHolidayWindow = (winKey) => {
-    const win = HOLIDAY_WINDOWS[winKey];
+    const win = holidayWindows[winKey];
     if (!win) return;
     setFilters((prev) => ({ ...prev, date_from: win.start, date_to: win.end }));
     setDateRange({ from: parseLocalDate(win.start), to: parseLocalDate(win.end) });
@@ -275,7 +288,7 @@ const Properties = () => {
         </div>
 
         {/* Holiday window banner — only on /properties/sukkot and /properties/pesach */}
-        {(type === 'sukkot' || type === 'pesach') && HOLIDAY_WINDOWS[type] && (
+        {(type === 'sukkot' || type === 'pesach') && holidayWindows[type] && (
           <div
             className="mb-8 rounded-2xl overflow-hidden border border-[#D4AF37]/30 bg-gradient-to-br from-[#fffaee] via-white to-[#fffaee] shadow-sm"
             data-testid={`holiday-banner-${type}`}
@@ -287,11 +300,11 @@ const Properties = () => {
                 </div>
                 <div>
                   <p className="text-[11px] font-semibold tracking-[0.15em] uppercase text-[#8a6d1d] mb-1">
-                    {HOLIDAY_WINDOWS[type].label} {HOLIDAY_WINDOWS[type].year}
+                    {holidayWindows[type].label} {holidayWindows[type].year}
                   </p>
                   <h2 className="text-lg font-bold text-gray-900 mb-0.5">
-                    {format(parseLocalDate(HOLIDAY_WINDOWS[type].start), 'MMM d')} —{' '}
-                    {format(parseLocalDate(HOLIDAY_WINDOWS[type].end), 'MMM d, yyyy')}
+                    {format(parseLocalDate(holidayWindows[type].start), 'MMM d')} —{' '}
+                    {format(parseLocalDate(holidayWindows[type].end), 'MMM d, yyyy')}
                   </h2>
                   <p className="text-sm text-gray-600">
                     Find homes available throughout the holiday — one click pre-fills the date filter.
