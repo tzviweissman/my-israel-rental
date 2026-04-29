@@ -112,7 +112,13 @@ const Properties = () => {
   const fetchProperties = async () => {
     try {
       const params = new URLSearchParams();
-      if (filters.rental_type && filters.rental_type !== 'all') params.append('rental_type', filters.rental_type);
+      // The URL `type` segment is the source of truth for the rental_type
+      // filter when navigating between /properties/<type> pages — `filters`
+      // state lags one render behind `useParams`, so reading it here would
+      // leak the previous page's value (e.g. clicking "Short Term" from
+      // /properties/vacation would still send rental_type=vacation).
+      const rentalType = type && type !== 'all' ? type : '';
+      if (rentalType) params.append('rental_type', rentalType);
       if (filters.min_bedrooms) params.append('min_bedrooms', filters.min_bedrooms);
       if (filters.max_price) params.append('max_price', filters.max_price);
       if (filters.min_price) params.append('min_price', filters.min_price);

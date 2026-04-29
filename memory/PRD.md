@@ -230,6 +230,11 @@ Build a bilingual (English/Hebrew) rental website named MyIsraelRental.com with 
   - Frontend: Price input is now a flex group with a 28-px-wide currency `<select>` (₪ ILS / $ USD), matching the currency selector pattern used in `AddPropertyModal.jsx`. Listing card + `SignContract.js` price label render `$` when `currency === 'USD'`, `₪` otherwise (legacy rows fall through to ₪).
   - TS types regenerated via `node scripts/generate-types.mjs`.
   - Verified end-to-end via curl: USD + ILS subleases persist correctly with their currency in `db.subleases`.
+- [x] **Bug fix: rental_type filter leaked across SPA navigation** (2026-04-29):
+  - Reproduced: clicking "Short Term" from `/properties/vacation` (or any other type→type SPA nav) sent the previous `rental_type` to the backend, so the user saw vacation cards on the Short Term page.
+  - Root cause in `pages/Properties.js#fetchProperties`: it read the stale `filters.rental_type` (which lags one render behind `useParams().type`). The fetch effect depended on `[type]` only, so the first call after URL change used the previous render's filters closure.
+  - Fix: derive `rental_type` directly from the URL `type` param inside `fetchProperties`, ignoring the lagging `filters.rental_type` (which has no independent source of truth — it's only ever set from the URL effect).
+  - Verified via Playwright across vacation→short-term, short-term→vacation, vacation→long-term: each transition fires exactly one API call with the correct `rental_type` and the correct cards render.
 - [x] **Dashboard.js refactor — phase 3** (2026-04-29):
   - Purged dead code: full contract-signing modal logic (canvas drawing, signature state, position/size, preview URL), unused cancellation handlers (`handleCancelBooking`, `handleRequestCancel`, `handleAcceptBooking`, `confirmAcceptBooking`, `handleDenyCancel`, `submitCancellation` and their `cancelModal` / `acceptModal` state) — all of which were superseded when `BookingsList` started owning its own modals. Plus dead state (`bookingsFilter`), unused `parseLocalDate` helper, and ~25 unused lucide icon imports.
   - Extracted `ManagerHeader.jsx` (156 lines): self-contained business-logo upload (POST/DELETE `/api/user/logo`) + shareable manager-page link with copy-to-clipboard fallback.
