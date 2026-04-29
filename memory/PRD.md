@@ -244,6 +244,15 @@ Build a bilingual (English/Hebrew) rental website named MyIsraelRental.com with 
   - **SubleasesTab**: form gets a "Sublease Type" chip group — "Short Term" (selected when `holiday_tags=[]`), "Sukkot", "Pesach". User can pick none, one, or both holidays. Listing card shows badge pills for tagged subleases.
   - **TS types regenerated** via `node scripts/generate-types.mjs`.
   - Verified end-to-end via curl: vacation property with `holiday_tags=["sukkot"]` shows up only on `holiday_tag=sukkot` query; sublease with `holiday_tags=["sukkot","pesach"]` persists both tags. Frontend smoke-tested: `/properties/sukkot` and `/properties/pesach` render correct titles and only the matching properties.
+- [x] **Holiday-window banner + one-click date filter** (2026-04-29):
+  - New `frontend/src/constants/holidayWindows.js` with upcoming Sukkot 5787 (Sep 25 – Oct 4 2026) and Pesach 5786 (Apr 1 – Apr 9 2026) windows. Update yearly via Hebcal.
+  - Banner card on `/properties/sukkot` and `/properties/pesach`: gold-tinted gradient, calendar icon, "SUKKOT 2026 / Sep 25 — Oct 4, 2026" headline, helper copy, and a teal CTA "Find homes available these dates".
+  - CTA fetches with `rental_type=vacation&holiday_tag=<key>&date_from=<start>&date_to=<end>` and pre-fills the Filters panel's date range — toast confirms application.
+  - Smoke-tested: banner visible on both pages, CTA click correctly fires the date-bounded API call (`?rental_type=vacation&holiday_tag=sukkot&date_from=2026-09-25&date_to=2026-10-04`), Filters badge updates to show 2 active filters, results list narrows accordingly.
+- [x] **Calendar `defaultMonth` polish** (2026-04-29):
+  - `AddPropertyModal.jsx` — Starting Date (long-term) and Date Available (short-term/vacation) calendars now open at the saved date's month when editing instead of today's. Falls back to today when no date is set.
+  - `SubleasesTab.jsx` — same polish on Available From + previously-added Available To (which already opens at the from-date's month for new subleases).
+  - Verified via screenshot: editing a property with Starting Date `March 15, 2027` opens the picker directly at March 2027.
 - [x] **Dashboard.js refactor — phase 3** (2026-04-29):
   - Purged dead code: full contract-signing modal logic (canvas drawing, signature state, position/size, preview URL), unused cancellation handlers (`handleCancelBooking`, `handleRequestCancel`, `handleAcceptBooking`, `confirmAcceptBooking`, `handleDenyCancel`, `submitCancellation` and their `cancelModal` / `acceptModal` state) — all of which were superseded when `BookingsList` started owning its own modals. Plus dead state (`bookingsFilter`), unused `parseLocalDate` helper, and ~25 unused lucide icon imports.
   - Extracted `ManagerHeader.jsx` (156 lines): self-contained business-logo upload (POST/DELETE `/api/user/logo`) + shareable manager-page link with copy-to-clipboard fallback.

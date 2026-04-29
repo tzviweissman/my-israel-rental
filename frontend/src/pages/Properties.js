@@ -10,6 +10,7 @@ import { Slider } from '../components/ui/slider';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
 import NotifyMeCard from '../components/NotifyMeCard';
+import { HOLIDAY_WINDOWS } from '../constants/holidayWindows';
 
 const PRICE_MAX = 50000;
 
@@ -207,6 +208,35 @@ const Properties = () => {
 
   const activeFilterCount = Object.entries(filters).filter(([k, v]) => v && k !== 'rental_type').length;
 
+  // Apply a pre-defined holiday window (Sukkot/Pesach) to the date filter
+  // and immediately fetch — used by the banner CTA on the holiday pages.
+  const parseLocalDate = (s) => {
+    const [y, m, d] = String(s).split('-').map(Number);
+    return new Date(y, m - 1, d);
+  };
+  const applyHolidayWindow = (winKey) => {
+    const win = HOLIDAY_WINDOWS[winKey];
+    if (!win) return;
+    setFilters((prev) => ({ ...prev, date_from: win.start, date_to: win.end }));
+    setDateRange({ from: parseLocalDate(win.start), to: parseLocalDate(win.end) });
+    // Immediate fetch: build params from the URL `type` + the new dates,
+    // sidestepping the lagging `filters` closure.
+    (async () => {
+      try {
+        const params = new URLSearchParams();
+        params.append('rental_type', 'vacation');
+        params.append('holiday_tag', winKey);
+        params.append('date_from', win.start);
+        params.append('date_to', win.end);
+        const res = await axios.get(`${API}/properties?${params.toString()}`);
+        setProperties(res.data);
+        toast.success(`Showing homes available during ${win.label}`);
+      } catch (err) {
+        console.error('Failed to apply holiday filter', err);
+      }
+    })();
+  };
+
   const rentalTypeLabel = {
     'long-term': t('property.longTerm'),
     'short-term': t('property.shortTerm'),
@@ -243,6 +273,43 @@ const Properties = () => {
             )}
           </button>
         </div>
+
+        {/* Holiday window banner — only on /properties/sukkot and /properties/pesach */}
+        {(type === 'sukkot' || type === 'pesach') && HOLIDAY_WINDOWS[type] && (
+          <div
+            className="mb-8 rounded-2xl overflow-hidden border border-[#D4AF37]/30 bg-gradient-to-br from-[#fffaee] via-white to-[#fffaee] shadow-sm"
+            data-testid={`holiday-banner-${type}`}
+          >
+            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 px-6 py-5">
+              <div className="flex items-start gap-4">
+                <div className="shrink-0 w-12 h-12 rounded-xl bg-[#D4AF37]/15 flex items-center justify-center">
+                  <CalendarIcon size={22} style={{ color: '#8a6d1d' }} />
+                </div>
+                <div>
+                  <p className="text-[11px] font-semibold tracking-[0.15em] uppercase text-[#8a6d1d] mb-1">
+                    {HOLIDAY_WINDOWS[type].label} {HOLIDAY_WINDOWS[type].year}
+                  </p>
+                  <h2 className="text-lg font-bold text-gray-900 mb-0.5">
+                    {format(parseLocalDate(HOLIDAY_WINDOWS[type].start), 'MMM d')} —{' '}
+                    {format(parseLocalDate(HOLIDAY_WINDOWS[type].end), 'MMM d, yyyy')}
+                  </h2>
+                  <p className="text-sm text-gray-600">
+                    Find homes available throughout the holiday — one click pre-fills the date filter.
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={() => applyHolidayWindow(type)}
+                className="shrink-0 px-5 py-2.5 rounded-xl text-sm font-semibold transition-all hover:shadow-md active:scale-[0.98] flex items-center gap-2 self-start md:self-center"
+                style={{ backgroundColor: '#1E6A6A', color: '#D4AF37' }}
+                data-testid={`apply-holiday-window-${type}`}
+              >
+                <Filter size={14} />
+                Find homes available these dates
+              </button>
+            </div>
+          </div>
+        )}
 
         {showFilters && (
           <div className="mb-8 rounded-2xl overflow-hidden" style={{ border: '1px solid #e0dcd4', boxShadow: '0 8px 40px rgba(0,0,0,0.08), 0 1px 3px rgba(0,0,0,0.04)' }} data-testid="filters-panel">
