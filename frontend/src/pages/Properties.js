@@ -160,11 +160,52 @@ const Properties = () => {
       if (filters.min_price || filters.max_price) params.append('currency', priceCurrency);
 
       const response = await axios.get(`${API}/properties?${params.toString()}`);
-      setProperties(response.data);
+      let merged = response.data;
+
+      // On Sukkot/Pesach pages, also pull matching subleases and merge them
+      // into the grid. Subleases are a separate entity (not in the
+      // `properties` collection), so they'd otherwise be invisible here.
+      if (holidayTag) {
+        try {
+          const subRes = await axios.get(
+            `${API}/subleases?holiday_tag=${encodeURIComponent(holidayTag)}`,
+          );
+          const normalized = (subRes.data || []).map((s) => normalizeSublease(s));
+          merged = [...merged, ...normalized];
+        } catch (subErr) {
+          console.warn('Failed to fetch subleases', subErr);
+        }
+      }
+
+      setProperties(merged);
     } catch (error) {
       console.error('Failed to fetch properties', error);
     }
   };
+
+  // Shape a sublease doc into a property-card-compatible object so the
+  // existing grid renderer works unchanged. `isSublease=true` lets the card
+  // render a "Sublease" ribbon and navigate to the underlying property.
+  const normalizeSublease = (sub) => ({
+    id: `sub-${sub.id}`,
+    sublease_id: sub.id,
+    isSublease: true,
+    property_id: sub.property_id || sub.original_property_id,
+    title: sub.title || 'Sublease',
+    area: sub.area || '',
+    bedrooms: sub.bedrooms_available || 0,
+    bathrooms: 0,
+    floor: null,
+    square_meters: 0,
+    images: sub.images || [],
+    nightly_price: sub.price_type === 'per_night' ? sub.price : null,
+    monthly_price: sub.price_type !== 'per_night' ? sub.price : null,
+    currency: sub.currency || 'ILS',
+    rental_type: 'vacation',
+    holiday_tags: sub.holiday_tags || [],
+    available_from: sub.available_from,
+    available_to: sub.available_to,
+  });
 
   const handleFilterChange = (key, value) => {
     setFilters(prev => ({ ...prev, [key]: value }));
@@ -241,8 +282,20 @@ const Properties = () => {
         params.append('holiday_tag', winKey);
         params.append('date_from', win.start);
         params.append('date_to', win.end);
-        const res = await axios.get(`${API}/properties?${params.toString()}`);
-        setProperties(res.data);
+        const [propsRes, subsRes] = await Promise.all([
+          axios.get(`${API}/properties?${params.toString()}`),
+          axios
+            .get(`${API}/subleases?holiday_tag=${encodeURIComponent(winKey)}`)
+            .catch(() => ({ data: [] })),
+        ]);
+        // Client-side date-overlap filter for subleases (backend doesn't yet
+        // support date_from/date_to on /api/subleases).
+        const filteredSubs = (subsRes.data || []).filter((s) => {
+          if (!s.available_from || !s.available_to) return true;
+          return !(s.available_to < win.start || s.available_from > win.end);
+        });
+        const merged = [...propsRes.data, ...filteredSubs.map(normalizeSublease)];
+        setProperties(merged);
         toast.success(`Showing homes available during ${win.label}`);
       } catch (err) {
         console.error('Failed to apply holiday filter', err);
@@ -669,7 +722,11 @@ const Properties = () => {
               className="property-card"
               onClick={() => {
                 sessionStorage.setItem('previousPath', window.location.pathname);
-                navigate(`/property/${property.id}`);
+                // Sublease cards deep-link to the underlying property.
+                const targetId = property.isSublease && property.property_id
+                  ? property.property_id
+                  : property.id;
+                navigate(`/property/${targetId}`);
               }}
               data-testid={`property-card-${property.id}`}
             >
@@ -678,10 +735,20 @@ const Properties = () => {
                 backgroundSize: 'cover',
                 backgroundPosition: 'center'
               }}>
+                {property.isSublease && (
+                  <span
+                    className="absolute top-2 left-2 md:top-3 md:left-3 px-2.5 py-1 rounded-full text-[10px] md:text-xs font-bold uppercase tracking-wide shadow-md z-10"
+                    style={{ backgroundColor: '#D4AF37', color: '#1E6A6A' }}
+                    data-testid="sublease-ribbon"
+                  >
+                    Sublease
+                  </span>
+                )}
                 <button
                   onClick={(e) => toggleLike(e, property.id)}
                   className="absolute top-2 right-2 md:top-3 md:right-3 w-8 h-8 md:w-10 md:h-10 rounded-full bg-white/90 hover:bg-white flex items-center justify-center shadow-md transition-all hover:scale-110 active:scale-95 z-10"
                   data-testid={`like-btn-${property.id}`}
+                  style={{ display: property.isSublease ? 'none' : undefined }}
                 >
                   <Heart
                     size={16}

@@ -70,10 +70,12 @@ async def create_sublease(sublease_data: SubleaseCreate, payload: dict = Depends
 
 
 @api_router.get("/subleases", response_model=list[SubleaseOut])
-async def list_subleases(area: str | None = None) -> list[dict]:
+async def list_subleases(area: str | None = None, holiday_tag: str | None = None) -> list[dict]:
     query: dict = {"active": True}
     if area:
         query["area"] = {"$regex": area, "$options": "i"}
+    if holiday_tag:
+        query["holiday_tags"] = holiday_tag
     subleases = await db.subleases.find(query, {"_id": 0}).sort("created_at", -1).to_list(500)
     return subleases
 

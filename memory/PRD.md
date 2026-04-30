@@ -269,6 +269,14 @@ Build a bilingual (English/Hebrew) rental website named MyIsraelRental.com with 
   - Extracted `useBookingActions.jsx` hook (207 lines): owns Accept / Cancel-Request-Deny / Approve-Cancel (sonner inline confirm) / Contract-Sign flows + their modal state. Centralised endpoint map keeps the cancel handler 1 line per branch.
   - **BookingsList.jsx: 397 → 130 lines (−67%)**. Now purely composes the hook + maps rows + renders the 3 modals. Filtering moved to a `useMemo`.
   - Smoke-tested: 66 booking rows render for owner@test.com, search filter works, Cancel Booking modal opens correctly.
+- [x] **Bug fix: Sukkot/Pesach pages didn't include subleases** (2026-04-30):
+  - Reported: user tagged existing subleases with `holiday_tags` but they never appeared on `/properties/sukkot` or `/properties/pesach`.
+  - Root cause: those pages only queried `/api/properties` — subleases live in a separate collection (`db.subleases`), so they were invisible to public visitors.
+  - Fix: **Backend** `GET /api/subleases` now accepts `holiday_tag=<sukkot|pesach>` query param (Mongo array-contains filter). **Frontend** `Properties.js` on Sukkot/Pesach pages fetches both `/api/properties` AND `/api/subleases?holiday_tag=<tag>` in parallel and merges. Each sublease is normalized into a property-card-shaped object and gets a gold `"SUBLEASE"` ribbon on the card image. Clicking a sublease card deep-links to `/property/{property_id}` (the underlying property). Likes hidden for subleases. Holiday-window banner CTA merges both with a client-side date-overlap filter.
+  - Verified live: `/properties/sukkot` now shows all sukkot-tagged subleases (incl. the 2 pre-existing ones the user reported missing) with SUBLEASE ribbon and correct prices. `/properties/pesach` also confirmed.
+- [x] **Sublease Edit** (2026-04-30):
+  - Backend `PUT /api/subleases/{id}` now accepts `currency` and `holiday_tags` alongside existing fields.
+  - Frontend: each sublease card has an Edit button that hydrates the form with existing values and scrolls into view. Header/CTA switch to edit mode ("Save Changes"). Step-1 picker and "Change property" link hidden since the property is immutable.
 
 ### P2 - Lower Priority
 - [ ] Manager bulk property upload via text

@@ -4187,6 +4187,7 @@ export interface operations {
         parameters: {
             query?: {
                 area?: string | null;
+                holiday_tag?: string | null;
             };
             header?: never;
             path?: never;
