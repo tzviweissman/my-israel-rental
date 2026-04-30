@@ -104,7 +104,7 @@ async def update_sublease(sublease_id: str, updates: dict = Body(...), payload: 
     if sublease['subleasor_id'] != payload['user_id'] and payload.get('role') != 'admin':
         raise HTTPException(status_code=403, detail="Not authorized")
 
-    allowed = {"available_from", "available_to", "price", "price_type", "bedrooms_available", "notes", "active"}
+    allowed = {"available_from", "available_to", "price", "price_type", "currency", "holiday_tags", "bedrooms_available", "notes", "active"}
     update_fields = {k: v for k, v in updates.items() if k in allowed}
     update_fields["updated_at"] = datetime.now(UTC).isoformat()
 

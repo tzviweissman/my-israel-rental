@@ -20,6 +20,7 @@ const parseLocalDate = (dateStr) => {
  */
 const SubleasesTab = ({ API, token }) => {
   const [showForm, setShowForm] = useState(false);
+  const [editingId, setEditingId] = useState(null);
   const [form, setForm] = useState({
     property_id: '',
     available_from: '',
@@ -129,30 +130,79 @@ const SubleasesTab = ({ API, token }) => {
     }
     setSubmitting(true);
     try {
-      await axios.post(
-        `${API}/subleases`,
-        {
-          property_id: form.property_id,
-          available_from: form.available_from,
-          available_to: form.available_to,
-          price: parseFloat(form.price),
-          price_type: form.price_type,
-          currency: form.currency,
-          holiday_tags: form.holiday_tags,
-          bedrooms_available: form.bedrooms_available ? parseInt(form.bedrooms_available) : null,
-          notes: form.notes,
-        },
-        authHeaders,
-      );
-      toast.success('Sublease listed successfully!');
+      if (editingId) {
+        // Only these fields are persisted by PUT /api/subleases/{id}
+        await axios.put(
+          `${API}/subleases/${editingId}`,
+          {
+            available_from: form.available_from,
+            available_to: form.available_to,
+            price: parseFloat(form.price),
+            price_type: form.price_type,
+            currency: form.currency,
+            holiday_tags: form.holiday_tags,
+            bedrooms_available: form.bedrooms_available
+              ? parseInt(form.bedrooms_available)
+              : null,
+            notes: form.notes,
+          },
+          authHeaders,
+        );
+        toast.success('Sublease updated!');
+      } else {
+        await axios.post(
+          `${API}/subleases`,
+          {
+            property_id: form.property_id,
+            available_from: form.available_from,
+            available_to: form.available_to,
+            price: parseFloat(form.price),
+            price_type: form.price_type,
+            currency: form.currency,
+            holiday_tags: form.holiday_tags,
+            bedrooms_available: form.bedrooms_available ? parseInt(form.bedrooms_available) : null,
+            notes: form.notes,
+          },
+          authHeaders,
+        );
+        toast.success('Sublease listed successfully!');
+      }
       resetForm();
+      setEditingId(null);
       setShowForm(false);
       fetchMySubleases();
     } catch (err) {
-      toast.error(err.response?.data?.detail || 'Failed to create sublease.');
+      toast.error(err.response?.data?.detail || 'Failed to save sublease.');
     } finally {
       setSubmitting(false);
     }
+  };
+
+  const startEdit = (sub) => {
+    setEditingId(sub.id);
+    setForm({
+      property_id: sub.property_id || sub.original_property_id || '',
+      available_from: sub.available_from || '',
+      available_to: sub.available_to || '',
+      price: sub.price != null ? String(sub.price) : '',
+      price_type: sub.price_type || 'per_night',
+      currency: sub.currency || 'ILS',
+      bedrooms_available: sub.bedrooms_available != null ? String(sub.bedrooms_available) : '',
+      notes: sub.notes || '',
+      holiday_tags: sub.holiday_tags || [],
+    });
+    setShowForm(true);
+    // Scroll to the form
+    setTimeout(() => {
+      const el = document.querySelector('[data-testid="sublease-form-container"]');
+      if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 50);
+  };
+
+  const cancelEdit = () => {
+    setEditingId(null);
+    resetForm();
+    setShowForm(false);
   };
 
   // Use a sonner confirm toast instead of window.confirm (blocked in iframe)
@@ -277,13 +327,17 @@ const SubleasesTab = ({ API, token }) => {
               <div>
                 <h3 className="text-lg font-bold text-white flex items-center gap-2">
                   <Plus size={20} className="text-white" />
-                  Sublease Your Property
+                  {editingId ? 'Edit Your Sublease' : 'Sublease Your Property'}
                 </h3>
-                <p className="text-white/80 text-sm">Post your rental for others in just a few clicks</p>
+                <p className="text-white/80 text-sm">
+                  {editingId
+                    ? 'Update the details and save changes'
+                    : 'Post your rental for others in just a few clicks'}
+                </p>
               </div>
             </div>
             <button
-              onClick={openForm}
+              onClick={editingId ? cancelEdit : openForm}
               className="px-4 py-2 rounded-xl bg-white/20 hover:bg-white/30 text-white text-sm font-medium transition-all backdrop-blur-sm"
               data-testid="create-sublease-btn"
             >
@@ -294,7 +348,10 @@ const SubleasesTab = ({ API, token }) => {
 
         <div className="p-6">
           {showForm && (
-            <div className="mb-6 bg-gray-50 rounded-xl p-5" data-testid="sublease-form-section">
+            <div
+              className="mb-6 bg-gray-50 rounded-xl p-5"
+              data-testid="sublease-form-container"
+            >
               {!form.property_id ? (
                 <div>
                   <h4 className="text-sm font-bold text-gray-800 mb-3">Step 1: Select the property you're renting</h4>
@@ -337,30 +394,45 @@ const SubleasesTab = ({ API, token }) => {
               ) : (
                 <div>
                   <div className="flex items-center justify-between mb-4">
-                    <h4 className="text-sm font-bold text-gray-800">Step 2: Set your sublease details</h4>
-                    <button
-                      onClick={() => setForm({ ...form, property_id: '' })}
-                      className="text-xs text-gray-500 hover:text-[#1E6A6A]"
-                    >
-                      ← Change property
-                    </button>
+                    <h4 className="text-sm font-bold text-gray-800">
+                      {editingId ? 'Edit sublease details' : 'Step 2: Set your sublease details'}
+                    </h4>
+                    {!editingId && (
+                      <button
+                        onClick={() => setForm({ ...form, property_id: '' })}
+                        className="text-xs text-gray-500 hover:text-[#1E6A6A]"
+                      >
+                        ← Change property
+                      </button>
+                    )}
                   </div>
 
                   {(() => {
                     const selectedBooking = myBookings.find((b) => b.property_id === form.property_id);
-                    return selectedBooking?.property ? (
+                    // In edit mode, myBookings may not be loaded — fall back to
+                    // the sublease being edited so the user still sees context.
+                    const editedSub = editingId
+                      ? mySubleases.find((s) => s.id === editingId)
+                      : null;
+                    const title =
+                      selectedBooking?.property?.title || editedSub?.title || '';
+                    const area = selectedBooking?.property?.area || editedSub?.area || '';
+                    const img = imageUrl(
+                      selectedBooking?.property?.images || editedSub?.images,
+                    );
+                    return title ? (
                       <div className="flex items-center gap-3 p-3 rounded-xl bg-white border border-[#1E6A6A]/20 mb-4">
                         <div
                           className="w-12 h-12 rounded-lg bg-gray-200 shrink-0"
                           style={{
-                            backgroundImage: `url(${imageUrl(selectedBooking.property.images)})`,
+                            backgroundImage: `url(${img})`,
                             backgroundSize: 'cover',
                             backgroundPosition: 'center',
                           }}
                         />
                         <div>
-                          <p className="text-sm font-semibold text-gray-800">{selectedBooking.property.title}</p>
-                          <p className="text-xs text-gray-500">{selectedBooking.property.area}</p>
+                          <p className="text-sm font-semibold text-gray-800">{title}</p>
+                          <p className="text-xs text-gray-500">{area}</p>
                         </div>
                         <Check size={18} className="text-[#1E6A6A] ml-auto" />
                       </div>
@@ -613,7 +685,9 @@ const SubleasesTab = ({ API, token }) => {
                       data-testid="sublease-submit-btn"
                     >
                       <Send size={16} />
-                      {submitting ? 'Posting...' : 'Post Sublease Listing'}
+                      {submitting
+                        ? editingId ? 'Saving...' : 'Posting...'
+                        : editingId ? 'Save Changes' : 'Post Sublease Listing'}
                     </button>
                   </form>
                 </div>
@@ -680,6 +754,13 @@ const SubleasesTab = ({ API, token }) => {
                       </span>
                     </div>
                     <div className="flex flex-col gap-1 shrink-0">
+                      <button
+                        onClick={() => startEdit(sub)}
+                        className="text-xs px-2.5 py-1 rounded-lg border border-gray-200 hover:border-[#D4AF37] hover:text-[#D4AF37] transition-colors"
+                        data-testid={`edit-sublease-${sub.id}`}
+                      >
+                        Edit
+                      </button>
                       <button
                         onClick={() => toggleActive(sub.id, sub.active)}
                         className="text-xs px-2.5 py-1 rounded-lg border border-gray-200 hover:border-[#1E6A6A] hover:text-[#1E6A6A] transition-colors"
