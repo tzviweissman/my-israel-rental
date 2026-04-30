@@ -279,6 +279,16 @@ Build a bilingual (English/Hebrew) rental website named MyIsraelRental.com with 
   - `PropertyDetail.js` reads those params via `useSearchParams`, pre-fills `bookingData.start_date`/`end_date` + the date-picker range, opens the booking form automatically, and renders a gold "SUBLEASE LISTING — Booking dates pre-filled: Sep 1 — Sep 30, 2026" context banner above the form.
   - For long-term rentals, sublease params override the default `starting_date` pre-fill.
   - Verified live: navigating `/property/.../?from=2026-09-01&to=2026-09-30&sublease_id=...` → banner renders with correct dates, check-in pill = "Sep 1, 2026", check-out pill = "Sep 30, 2026", ready to reserve.
+- [x] **Sublease bookings fully decoupled from original property** (2026-04-30):
+  - **Backend**: `BookingCreate` gets an optional `sublease_id` field. When provided:
+    - `owner_id` of the new booking is set to the sublessor (sublease's `subleasor_id`), NOT the property owner.
+    - Sublease's own price/currency/price_type is used to compute `total_price` for the Postmark confirmation email.
+    - `property_title` in notifications + enriched `GET /bookings` uses the sublease's title (e.g. "Sublease: TEST_Flow").
+    - Sublease bookings auto-confirm (like vacation) — no manual owner approval needed.
+    - Sublessor receives notifications + emails; the underlying property owner is silent on this flow.
+  - **Role permissions**: `GET /bookings` now OR-matches `renter_id` and `owner_id` for renters so a renter-sublessor sees incoming bookings on their subleases. `POST /bookings/{id}/cancel` also accepts a sublessor cancelling their own sublease's booking.
+  - **Frontend**: `PropertyDetail.handleBooking` includes `sublease_id` in POST body when visiting via a sublease deep-link. `PropertyDetail.handleChat` preserves `sublease_id` in chat URL. `Chat.js` reads the param and sets `otherUserId` to the sublessor (not property owner) for all messaging.
+  - **Verified end-to-end with curl**: owner A seeds property → renter B books & gets confirmed → renter B creates sublease at different price+currency → admin C books via sublease_id → sublessor B sees the booking in `GET /bookings` with sublease title, while property owner A sees nothing. Sublessor B cancels the sublease booking successfully (status → cancelled).
 - [x] **Sublease Edit** (2026-04-30):
   - Backend `PUT /api/subleases/{id}` now accepts `currency` and `holiday_tags` alongside existing fields.
   - Frontend: each sublease card has an Edit button that hydrates the form with existing values and scrolls into view. Header/CTA switch to edit mode ("Save Changes"). Step-1 picker and "Change property" link hidden since the property is immutable.

@@ -1810,6 +1810,8 @@ export interface components {
             contract_signed: boolean | null;
             /** Signature Data */
             signature_data?: string | null;
+            /** Sublease Id */
+            sublease_id?: string | null;
         };
         /** BookingCreateResponse */
         BookingCreateResponse: {

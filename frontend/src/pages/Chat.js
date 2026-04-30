@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext, useRef } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import axios from 'axios';
 import { API, AuthContext } from '../App';
 import { Send, ArrowLeft, Home, User, Building2, Clock, MessageCircle, ChevronDown } from 'lucide-react';
@@ -7,6 +7,10 @@ import { toast } from 'sonner';
 
 const Chat = () => {
   const { propertyId } = useParams();
+  const [searchParams] = useSearchParams();
+  // When the user clicked a Sublease card, the chat should talk to the
+  // sublessor — not the underlying property owner.
+  const subleaseId = searchParams.get('sublease_id');
   const navigate = useNavigate();
   const { user, token } = useContext(AuthContext);
   const [messages, setMessages] = useState([]);
@@ -46,7 +50,17 @@ const Chat = () => {
     try {
       const response = await axios.get(`${API}/properties/${propertyId}`);
       setProperty(response.data);
-      setOtherUserId(response.data.owner_id);
+      if (subleaseId) {
+        // Route the conversation to the sublessor rather than the property owner
+        try {
+          const subRes = await axios.get(`${API}/subleases/${subleaseId}`);
+          setOtherUserId(subRes.data.subleasor_id || response.data.owner_id);
+        } catch {
+          setOtherUserId(response.data.owner_id);
+        }
+      } else {
+        setOtherUserId(response.data.owner_id);
+      }
     } catch (error) {
       console.error('Failed to fetch property', error);
     }

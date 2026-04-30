@@ -197,7 +197,10 @@ const PropertyDetail = () => {
         property_id: id,
         ...bookingData,
         contract_signed: false, // Will be signed after owner accepts
-        signature_data: null
+        signature_data: null,
+        // Tag sublease bookings so the backend routes the notification to
+        // the sublessor and uses the sublease's price.
+        sublease_id: sublease?.id || null,
       }, {
         headers: { Authorization: `Bearer ${token}` }
       });
@@ -270,7 +273,10 @@ const PropertyDetail = () => {
       navigate(`/auth/login?redirect=${encodeURIComponent(`/property/${id}`)}`);
       return;
     }
-    navigate(`/chat/${id}`);
+    // Preserve the sublease_id so the chat talks to the sublessor (if this
+    // visit came from a sublease card).
+    const qs = sublease?.id ? `?sublease_id=${sublease.id}` : '';
+    navigate(`/chat/${id}${qs}`);
   };
 
   const handleShare = () => {

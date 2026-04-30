@@ -36,20 +36,43 @@ async def create_booking(booking_data: BookingCreate, payload: dict = Depends(ve
     property_data = await db.properties.find_one({"id": booking_data.property_id}, {"_id": 0})
     if not property_data:
         raise HTTPException(status_code=404, detail="Property not found")
-    
+
+    # If this booking is tied to a sublease, route it to the sublessor and
+    # use the sublease's price/dates for downstream calculations. The
+    # underlying property owner is NOT notified.
+    sublease_data: dict | None = None
+    if booking_data.sublease_id:
+        sublease_data = await db.subleases.find_one(
+            {"id": booking_data.sublease_id}, {"_id": 0}
+        )
+        if not sublease_data:
+            raise HTTPException(status_code=404, detail="Sublease not found")
+        if not sublease_data.get("active", True):
+            raise HTTPException(status_code=400, detail="This sublease is no longer active")
+
     # No contract signature required at booking time
     # Contract will be sent after owner accepts for long-term/short-term rentals
-    
+
     booking_id = str(uuid.uuid4())
     booking_doc = booking_data.model_dump()
     booking_doc['id'] = booking_id
     booking_doc['renter_id'] = payload['user_id']
-    booking_doc['owner_id'] = property_data['owner_id']
-    
-    # Auto-confirm for vacation rentals, pending for long-term and short-term
-    if property_data.get('rental_type') == 'vacation':
+    # Route owner_id: sublessor for sublease bookings, property owner otherwise
+    booking_doc['owner_id'] = (
+        sublease_data['subleasor_id'] if sublease_data else property_data['owner_id']
+    )
+
+    # Auto-confirm for vacation rentals AND for subleases (subleases are
+    # short-window bookings that behave like vacation rentals).
+    is_instant_confirm = (
+        sublease_data is not None or property_data.get('rental_type') == 'vacation'
+    )
+    if is_instant_confirm:
         booking_doc['status'] = 'confirmed'
-        notification_message = f"Your booking for {property_data['title']} is confirmed!"
+        listing_title = (
+            sublease_data.get('title') if sublease_data else property_data['title']
+        )
+        notification_message = f"Your booking for {listing_title} is confirmed!"
         notification_type = "booking_confirmed"
         # Notify renter of confirmation
         renter_notification = {
@@ -67,18 +90,26 @@ async def create_booking(booking_data: BookingCreate, payload: dict = Depends(ve
         booking_doc['status'] = 'pending'
         notification_message = f"New booking request for {property_data['title']}"
         notification_type = "booking_request"
-    
+
     booking_doc['created_at'] = datetime.now(UTC).isoformat()
     await db.bookings.insert_one(booking_doc)
-    
-    # Notify owner of booking request (or confirmation for vacation)
+
+    # Notify the sublessor (sublease) or property owner (regular) of the new booking
+    target_user_id = booking_doc['owner_id']
+    target_listing_title = (
+        sublease_data.get('title') if sublease_data else property_data['title']
+    )
     owner_notification = {
         "id": str(uuid.uuid4()),
-        "user_id": property_data['owner_id'],
+        "user_id": target_user_id,
         "type": notification_type,
         "property_id": booking_data.property_id,
         "booking_id": booking_id,
-        "message": notification_message if booking_doc['status'] == 'pending' else f"New vacation rental booking for {property_data['title']}",
+        "message": (
+            notification_message
+            if booking_doc['status'] == 'pending'
+            else f"New booking for {target_listing_title}"
+        ),
         "read": False,
         "created_at": datetime.now(UTC).isoformat()
     }
@@ -87,26 +118,42 @@ async def create_booking(booking_data: BookingCreate, payload: dict = Depends(ve
     # --- Send transactional emails via Postmark (fire-and-forget) ---
     try:
         renter = await db.users.find_one({"id": payload['user_id']}, {"_id": 0, "email": 1, "name": 1})
-        owner = await db.users.find_one({"id": property_data['owner_id']}, {"_id": 0, "email": 1, "name": 1})
-        currency = property_data.get('currency', 'ILS')
+        owner = await db.users.find_one({"id": target_user_id}, {"_id": 0, "email": 1, "name": 1})
 
-        # Compute total for vacation rentals (nights * nightly_price)
-        total_price = None
-        if property_data.get('rental_type') == 'vacation' and property_data.get('nightly_price'):
-            try:
-                start = datetime.fromisoformat(booking_data.start_date.replace('Z', ''))
-                end = datetime.fromisoformat(booking_data.end_date.replace('Z', ''))
-                nights = max(1, (end - start).days)
-                total_price = float(property_data['nightly_price']) * nights
-            except Exception:
-                total_price = None
+        # Use sublease's currency/price/title when this is a sublease booking
+        currency = (
+            sublease_data.get('currency', 'ILS') if sublease_data
+            else property_data.get('currency', 'ILS')
+        )
+        listing_title = target_listing_title
+        listing_location = (
+            sublease_data.get('area', '') if sublease_data
+            else property_data.get('location', property_data.get('area', ''))
+        )
+
+        # Compute total
+        total_price: float | None = None
+        try:
+            start = datetime.fromisoformat(booking_data.start_date.replace('Z', ''))
+            end = datetime.fromisoformat(booking_data.end_date.replace('Z', ''))
+            nights = max(1, (end - start).days)
+        except Exception:
+            nights = 1
+        if sublease_data:
+            if sublease_data.get('price_type') == 'per_night':
+                total_price = float(sublease_data.get('price', 0)) * nights
+            else:
+                # Flat rate — one total
+                total_price = float(sublease_data.get('price', 0))
+        elif property_data.get('rental_type') == 'vacation' and property_data.get('nightly_price'):
+            total_price = float(property_data['nightly_price']) * nights
 
         if renter and renter.get('email'):
             asyncio.create_task(send_booking_confirmation_email(
                 to_email=renter['email'],
                 guest_name=renter.get('name', ''),
-                property_title=property_data.get('title', 'your rental'),
-                property_location=property_data.get('location', property_data.get('area', '')),
+                property_title=listing_title,
+                property_location=listing_location,
                 check_in=booking_data.start_date,
                 check_out=booking_data.end_date,
                 total_price=total_price,
@@ -121,8 +168,8 @@ async def create_booking(booking_data: BookingCreate, payload: dict = Depends(ve
                 owner_name=owner.get('name', ''),
                 guest_name=(renter or {}).get('name', 'A guest'),
                 guest_email=(renter or {}).get('email', ''),
-                property_title=property_data.get('title', 'your property'),
-                property_location=property_data.get('location', property_data.get('area', '')),
+                property_title=listing_title,
+                property_location=listing_location,
                 check_in=booking_data.start_date,
                 check_out=booking_data.end_date,
                 total_price=total_price,
@@ -138,19 +185,37 @@ async def create_booking(booking_data: BookingCreate, payload: dict = Depends(ve
 
 @api_router.get("/bookings", response_model=list[BookingOut])
 async def get_bookings(payload: dict = Depends(verify_token)) -> list[dict]:
-    query = {}
+    query: dict = {}
     if payload['role'] == 'renter':
-        query['renter_id'] = payload['user_id']
+        # Renters see bookings where they are the guest OR where they're
+        # the sublessor (owner_id on a sublease booking points to them).
+        query['$or'] = [
+            {'renter_id': payload['user_id']},
+            {'owner_id': payload['user_id']},
+        ]
     elif payload['role'] == 'owner' or payload['role'] == 'manager':
         query['owner_id'] = payload['user_id']
     
     bookings = await db.bookings.find(query, {"_id": 0}).to_list(1000)
     
-    # Enrich bookings with property details
+    # Enrich bookings with property details (or sublease details when the
+    # booking was for a sublease — sublessors should see the sublease title
+    # in their dashboard, not the underlying property's).
     for booking in bookings:
+        if booking.get('sublease_id'):
+            sub = await db.subleases.find_one(
+                {"id": booking['sublease_id']},
+                {"_id": 0, "title": 1, "area": 1},
+            )
+            if sub:
+                booking['property_title'] = sub.get('title', 'Sublease')
+                booking['property_location'] = sub.get('area', '')
+                booking['property_rental_type'] = 'sublease'
+                continue
+
         property_data = await db.properties.find_one(
-            {"id": booking['property_id']}, 
-            {"_id": 0, "title": 1, "location": 1, "rental_type": 1}
+            {"id": booking['property_id']},
+            {"_id": 0, "title": 1, "location": 1, "rental_type": 1},
         )
         if property_data:
             booking['property_title'] = property_data.get('title', 'Unknown Property')
@@ -282,8 +347,12 @@ async def cancel_booking(booking_id: str, reason: str = Body(..., embed=True), p
     if not booking:
         raise HTTPException(status_code=404, detail="Booking not found")
     
-    # Verify user is owner or manager
-    if payload['role'] not in ['owner', 'manager'] or booking['owner_id'] != payload['user_id']:
+    # Verify user is owner/manager OR the sublessor (when a renter owns a
+    # sublease's booking, owner_id is set to their user id).
+    is_sublessor = (
+        booking.get('sublease_id') is not None and booking['owner_id'] == payload['user_id']
+    )
+    if (payload['role'] not in ['owner', 'manager'] and not is_sublessor) or booking['owner_id'] != payload['user_id']:
         raise HTTPException(status_code=403, detail="Not authorized")
     
     # Update booking

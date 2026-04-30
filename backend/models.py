@@ -79,6 +79,10 @@ class BookingCreate(BaseModel):
     message: str | None = None
     contract_signed: bool | None = False
     signature_data: str | None = None
+    # When set, the booking is for a sublease — the sublessor (not the
+    # property owner) receives all notifications, and the sublease price is
+    # used for total-cost calculation.
+    sublease_id: str | None = None
 
 
 class ChatMessage(BaseModel):
