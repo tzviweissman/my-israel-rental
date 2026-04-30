@@ -722,11 +722,19 @@ const Properties = () => {
               className="property-card"
               onClick={() => {
                 sessionStorage.setItem('previousPath', window.location.pathname);
-                // Sublease cards deep-link to the underlying property.
-                const targetId = property.isSublease && property.property_id
-                  ? property.property_id
-                  : property.id;
-                navigate(`/property/${targetId}`);
+                // Sublease cards deep-link to the underlying property, passing
+                // the sublease window so the booking form pre-fills those
+                // exact dates (holiday rental conversion path).
+                if (property.isSublease && property.property_id) {
+                  const params = new URLSearchParams();
+                  if (property.available_from) params.append('from', property.available_from);
+                  if (property.available_to) params.append('to', property.available_to);
+                  if (property.sublease_id) params.append('sublease_id', property.sublease_id);
+                  const qs = params.toString();
+                  navigate(`/property/${property.property_id}${qs ? `?${qs}` : ''}`);
+                } else {
+                  navigate(`/property/${property.id}`);
+                }
               }}
               data-testid={`property-card-${property.id}`}
             >

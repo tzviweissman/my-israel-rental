@@ -274,6 +274,11 @@ Build a bilingual (English/Hebrew) rental website named MyIsraelRental.com with 
   - Root cause: those pages only queried `/api/properties` — subleases live in a separate collection (`db.subleases`), so they were invisible to public visitors.
   - Fix: **Backend** `GET /api/subleases` now accepts `holiday_tag=<sukkot|pesach>` query param (Mongo array-contains filter). **Frontend** `Properties.js` on Sukkot/Pesach pages fetches both `/api/properties` AND `/api/subleases?holiday_tag=<tag>` in parallel and merges. Each sublease is normalized into a property-card-shaped object and gets a gold `"SUBLEASE"` ribbon on the card image. Clicking a sublease card deep-links to `/property/{property_id}` (the underlying property). Likes hidden for subleases. Holiday-window banner CTA merges both with a client-side date-overlap filter.
   - Verified live: `/properties/sukkot` now shows all sukkot-tagged subleases (incl. the 2 pre-existing ones the user reported missing) with SUBLEASE ribbon and correct prices. `/properties/pesach` also confirmed.
+- [x] **Sublease deep-link → PropertyDetail booking pre-fill** (2026-04-30):
+  - Sublease cards on Sukkot/Pesach pages now append `?from=<available_from>&to=<available_to>&sublease_id=<id>` to the detail URL.
+  - `PropertyDetail.js` reads those params via `useSearchParams`, pre-fills `bookingData.start_date`/`end_date` + the date-picker range, opens the booking form automatically, and renders a gold "SUBLEASE LISTING — Booking dates pre-filled: Sep 1 — Sep 30, 2026" context banner above the form.
+  - For long-term rentals, sublease params override the default `starting_date` pre-fill.
+  - Verified live: navigating `/property/.../?from=2026-09-01&to=2026-09-30&sublease_id=...` → banner renders with correct dates, check-in pill = "Sep 1, 2026", check-out pill = "Sep 30, 2026", ready to reserve.
 - [x] **Sublease Edit** (2026-04-30):
   - Backend `PUT /api/subleases/{id}` now accepts `currency` and `holiday_tags` alongside existing fields.
   - Frontend: each sublease card has an Edit button that hydrates the form with existing values and scrolls into view. Header/CTA switch to edit mode ("Save Changes"). Step-1 picker and "Change property" link hidden since the property is immutable.

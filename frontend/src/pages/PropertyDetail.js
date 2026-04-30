@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import axios from 'axios';
 import { API, AuthContext } from '../App';
@@ -21,6 +21,13 @@ const parseLocalDate = (dateStr) => {
 
 const PropertyDetail = () => {
   const { id } = useParams();
+  const [searchParams] = useSearchParams();
+  // Sublease deep-link params (optional): visitor arrived from a Sukkot/
+  // Pesach sublease card and wants the booking form pre-filled with the
+  // sublease's date window.
+  const preFromParam = searchParams.get('from');
+  const preToParam = searchParams.get('to');
+  const preSubleaseId = searchParams.get('sublease_id');
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { user, token } = useContext(AuthContext);
@@ -133,8 +140,21 @@ const PropertyDetail = () => {
       });
       setBlockedDates(dates);
       
-      // For long-term rentals, set the starting date as check-in (read-only)
-      if (response.data.rental_type === 'long-term' && response.data.starting_date) {
+      // Sublease deep-link: pre-fill booking window from URL params.
+      if (preFromParam && preToParam) {
+        const from = parseLocalDate(preFromParam);
+        const to = parseLocalDate(preToParam);
+        if (from && to) {
+          setBookingData((prev) => ({
+            ...prev,
+            start_date: format(from, 'yyyy-MM-dd'),
+            end_date: format(to, 'yyyy-MM-dd'),
+          }));
+          setDateRange({ from, to });
+          setShowBooking(true);
+        }
+      } else if (response.data.rental_type === 'long-term' && response.data.starting_date) {
+        // For long-term rentals, set the starting date as check-in (read-only)
         const startDate = parseLocalDate(response.data.starting_date);
         setBookingData(prev => ({
           ...prev,
@@ -593,6 +613,22 @@ const PropertyDetail = () => {
                   );
                 })()}
               </div>
+
+              {/* Sublease deep-link banner — tells the visitor that these
+                  dates came from the sublease card they clicked. */}
+              {preSubleaseId && preFromParam && preToParam && (
+                <div
+                  className="mb-3 rounded-xl border border-[#D4AF37]/40 bg-gradient-to-br from-[#fffaee] to-white px-4 py-3"
+                  data-testid="sublease-context-banner"
+                >
+                  <p className="text-[10px] font-semibold tracking-[0.15em] uppercase text-[#8a6d1d] mb-0.5">
+                    Sublease listing
+                  </p>
+                  <p className="text-sm text-gray-800">
+                    Booking dates pre-filled: <span className="font-semibold">{format(parseLocalDate(preFromParam), 'MMM d')} — {format(parseLocalDate(preToParam), 'MMM d, yyyy')}</span>
+                  </p>
+                </div>
+              )}
 
               {/* Booking Form - Always Visible */}
               <div className="space-y-2.5" data-testid="booking-form">
