@@ -80,6 +80,14 @@ async def list_subleases(area: str | None = None, holiday_tag: str | None = None
     return subleases
 
 
+@api_router.get("/subleases/{sublease_id}", response_model=SubleaseOut)
+async def get_sublease_by_id(sublease_id: str) -> dict:
+    sublease = await db.subleases.find_one({"id": sublease_id}, {"_id": 0})
+    if not sublease:
+        raise HTTPException(status_code=404, detail="Sublease not found")
+    return sublease
+
+
 
 @api_router.get("/my-subleases", response_model=list[SubleaseOut])
 async def get_my_subleases(payload: dict = Depends(verify_token)) -> list[dict]:

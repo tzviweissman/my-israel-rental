@@ -617,6 +617,25 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/subleases/{sublease_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Sublease By Id */
+        get: operations["get_sublease_by_id_api_subleases__sublease_id__get"];
+        /** Update Sublease */
+        put: operations["update_sublease_api_subleases__sublease_id__put"];
+        post?: never;
+        /** Delete Sublease */
+        delete: operations["delete_sublease_api_subleases__sublease_id__delete"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/my-subleases": {
         parameters: {
             query?: never;
@@ -629,24 +648,6 @@ export interface paths {
         put?: never;
         post?: never;
         delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/subleases/{sublease_id}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        /** Update Sublease */
-        put: operations["update_sublease_api_subleases__sublease_id__put"];
-        post?: never;
-        /** Delete Sublease */
-        delete: operations["delete_sublease_api_subleases__sublease_id__delete"];
         options?: never;
         head?: never;
         patch?: never;
@@ -4248,11 +4249,13 @@ export interface operations {
             };
         };
     };
-    get_my_subleases_api_my_subleases_get: {
+    get_sublease_by_id_api_subleases__sublease_id__get: {
         parameters: {
             query?: never;
             header?: never;
-            path?: never;
+            path: {
+                sublease_id: string;
+            };
             cookie?: never;
         };
         requestBody?: never;
@@ -4263,7 +4266,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["SubleaseOut"][];
+                    "application/json": components["schemas"]["SubleaseOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
                 };
             };
         };
@@ -4332,6 +4344,26 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_my_subleases_api_my_subleases_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SubleaseOut"][];
                 };
             };
         };

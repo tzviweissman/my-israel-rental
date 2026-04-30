@@ -41,6 +41,10 @@ const PropertyDetail = () => {
     end_date: '',
     message: ''
   });
+  // Sublease being viewed (populated when ?sublease_id= is in URL). When
+  // present, its price/currency/price_type take precedence over the
+  // underlying property's price in the booking sidebar.
+  const [sublease, setSublease] = useState(null);
   const [showBooking, setShowBooking] = useState(false);
   const [exchangeRate, setExchangeRate] = useState(null);
   const [blockedDates, setBlockedDates] = useState([]);
@@ -152,6 +156,14 @@ const PropertyDetail = () => {
           }));
           setDateRange({ from, to });
           setShowBooking(true);
+        }
+        // Fetch the sublease itself so we can show its price instead of the
+        // underlying property's price in the sidebar.
+        if (preSubleaseId) {
+          axios
+            .get(`${API}/subleases/${preSubleaseId}`)
+            .then((r) => setSublease(r.data))
+            .catch(() => setSublease(null));
         }
       } else if (response.data.rental_type === 'long-term' && response.data.starting_date) {
         // For long-term rentals, set the starting date as check-in (read-only)
@@ -597,21 +609,46 @@ const PropertyDetail = () => {
           <div className="lg:col-span-1">
             <div className="bg-white p-4 rounded-2xl border border-[#E5E5E5] sticky top-20 max-h-[calc(100vh-100px)] overflow-y-auto">
               <div className="mb-3">
-                <span className="text-3xl font-bold" style={{ color: "#D4AF37" }} data-testid="property-detail-price">
-                  {property.currency === 'USD' ? '$' : '₪'}{(property.monthly_price || property.nightly_price || 0).toLocaleString()}
-                </span>
-                <span className="text-base text-gray-600">
-                  {property.rental_type === 'vacation' ? t('property.perNight') : t('property.perMonth')}
-                </span>
-                {(() => {
-                  const converted = convertPrice(property.monthly_price || property.nightly_price, property.currency);
-                  if (!converted) return null;
-                  return (
-                    <div className="text-xs text-gray-400 mt-1" data-testid="property-detail-converted-price">
-                      ≈ {converted.symbol}{converted.amount.toLocaleString()}{property.rental_type === 'vacation' ? t('property.perNight') : t('property.perMonth')}
-                    </div>
-                  );
-                })()}
+                {sublease ? (
+                  <>
+                    <span className="text-3xl font-bold" style={{ color: '#D4AF37' }} data-testid="property-detail-price">
+                      {sublease.currency === 'USD' ? '$' : '₪'}
+                      {(sublease.price || 0).toLocaleString()}
+                    </span>
+                    <span className="text-base text-gray-600">
+                      {sublease.price_type === 'per_night' ? t('property.perNight') : ' total'}
+                    </span>
+                    {(() => {
+                      const converted = convertPrice(sublease.price, sublease.currency);
+                      if (!converted) return null;
+                      return (
+                        <div className="text-xs text-gray-400 mt-1" data-testid="property-detail-converted-price">
+                          ≈ {converted.symbol}
+                          {converted.amount.toLocaleString()}
+                          {sublease.price_type === 'per_night' ? t('property.perNight') : ' total'}
+                        </div>
+                      );
+                    })()}
+                  </>
+                ) : (
+                  <>
+                    <span className="text-3xl font-bold" style={{ color: "#D4AF37" }} data-testid="property-detail-price">
+                      {property.currency === 'USD' ? '$' : '₪'}{(property.monthly_price || property.nightly_price || 0).toLocaleString()}
+                    </span>
+                    <span className="text-base text-gray-600">
+                      {property.rental_type === 'vacation' ? t('property.perNight') : t('property.perMonth')}
+                    </span>
+                    {(() => {
+                      const converted = convertPrice(property.monthly_price || property.nightly_price, property.currency);
+                      if (!converted) return null;
+                      return (
+                        <div className="text-xs text-gray-400 mt-1" data-testid="property-detail-converted-price">
+                          ≈ {converted.symbol}{converted.amount.toLocaleString()}{property.rental_type === 'vacation' ? t('property.perNight') : t('property.perMonth')}
+                        </div>
+                      );
+                    })()}
+                  </>
+                )}
               </div>
 
               {/* Sublease deep-link banner — tells the visitor that these
