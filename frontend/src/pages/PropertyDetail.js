@@ -89,6 +89,15 @@ const PropertyDetail = () => {
   };
 
   useEffect(() => {
+    // Kick off the sublease fetch in parallel with the property fetch so the
+    // sidebar never has to fall back to the underlying property's monthly
+    // price for a frame.
+    if (preSubleaseId) {
+      axios
+        .get(`${API}/subleases/${preSubleaseId}`)
+        .then((r) => setSublease(r.data))
+        .catch(() => setSublease(null));
+    }
     fetchProperty();
     if (token) {
       axios.get(`${API}/liked-property-ids`, { headers: { Authorization: `Bearer ${token}` } })
@@ -157,14 +166,8 @@ const PropertyDetail = () => {
           setDateRange({ from, to });
           setShowBooking(true);
         }
-        // Fetch the sublease itself so we can show its price instead of the
-        // underlying property's price in the sidebar.
-        if (preSubleaseId) {
-          axios
-            .get(`${API}/subleases/${preSubleaseId}`)
-            .then((r) => setSublease(r.data))
-            .catch(() => setSublease(null));
-        }
+        // Sublease itself is fetched in parallel on mount (see top-level
+        // useEffect) — no need to refetch here.
       } else if (response.data.rental_type === 'long-term' && response.data.starting_date) {
         // For long-term rentals, set the starting date as check-in (read-only)
         const startDate = parseLocalDate(response.data.starting_date);
@@ -630,6 +633,14 @@ const PropertyDetail = () => {
                       );
                     })()}
                   </>
+                ) : preSubleaseId ? (
+                  // URL has ?sublease_id= but the sublease fetch is still in
+                  // flight. Render a tiny skeleton instead of flashing the
+                  // underlying property's price for a frame.
+                  <div
+                    className="h-10 w-40 rounded-md bg-gray-100 animate-pulse"
+                    data-testid="property-detail-price-loading"
+                  />
                 ) : (
                   <>
                     <span className="text-3xl font-bold" style={{ color: "#D4AF37" }} data-testid="property-detail-price">
