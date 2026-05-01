@@ -31,13 +31,15 @@ const DashboardTabs = ({ activeTab, setActiveTab, role, unreadMessages = 0 }) =>
         className="flex gap-1 mb-6 bg-gray-100 rounded-xl p-1 overflow-x-auto scrollbar-hide"
         data-testid="dashboard-tabs"
       >
-        <button
-          onClick={() => setActiveTab('properties')}
-          className={cls(activeTab === 'properties')}
-          data-testid="tab-properties"
-        >
-          {t('dashboard.myProperties')}
-        </button>
+        {isOwnerLike && (
+          <button
+            onClick={() => setActiveTab('properties')}
+            className={cls(activeTab === 'properties')}
+            data-testid="tab-properties"
+          >
+            {t('dashboard.myProperties')}
+          </button>
+        )}
 
         {isOwnerLike && (
           <button

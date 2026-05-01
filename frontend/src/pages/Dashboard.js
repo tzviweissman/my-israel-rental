@@ -32,6 +32,14 @@ const Dashboard = () => {
   const [activeTab, setActiveTab] = useState('properties');
   const [unreadConversations, setUnreadConversations] = useState(0);
 
+  // Renters don't have a Properties tab — fall back to Bookings on first load.
+  useEffect(() => {
+    if (user?.role === 'renter' && activeTab === 'properties') {
+      setActiveTab('bookings');
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user]);
+
   const fetchUnreadConversations = async () => {
     if (!user) return;
     try {
