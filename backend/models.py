@@ -31,6 +31,10 @@ class ChangePasswordRequest(BaseModel):
     new_password: str
 
 
+class LanguagePreference(BaseModel):
+    language: str  # 'en' or 'he'
+
+
 class PropertyCreate(BaseModel):
     title: str
     description: str | None = None

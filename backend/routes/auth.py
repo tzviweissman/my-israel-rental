@@ -7,7 +7,14 @@ from datetime import UTC, datetime, timedelta
 import bcrypt
 from fastapi import APIRouter, Depends, HTTPException, Request
 
-from models import ChangePasswordRequest, ForgotPasswordRequest, ResetPasswordRequest, UserLogin, UserRegister
+from models import (
+    ChangePasswordRequest,
+    ForgotPasswordRequest,
+    LanguagePreference,
+    ResetPasswordRequest,
+    UserLogin,
+    UserRegister,
+)
 from models_response import MessageResponse, PasswordResetResponse, TokenResponse, UserPublic
 from routes.deps import create_token, db, logger, verify_token
 from utils.email import (
@@ -160,3 +167,16 @@ async def change_password(request: ChangePasswordRequest, payload: dict = Depend
     )
 
     return {"message": "Password changed successfully"}
+
+
+
+@api_router.put("/auth/language", response_model=MessageResponse)
+async def set_language(pref: LanguagePreference, payload: dict = Depends(verify_token)) -> dict:
+    """Persist the user's preferred UI language so it follows them across devices."""
+    if pref.language not in ("en", "he"):
+        raise HTTPException(status_code=400, detail="language must be 'en' or 'he'")
+    await db.users.update_one(
+        {"id": payload['user_id']},
+        {"$set": {"preferred_language": pref.language}},
+    )
+    return {"message": "Language preference saved"}

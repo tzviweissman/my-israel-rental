@@ -54,6 +54,11 @@ function App() {
         headers: { Authorization: `Bearer ${token}` }
       });
       setUser(response.data);
+      // Apply the user's saved UI language preference (cross-device).
+      const pref = response.data?.preferred_language;
+      if (pref && (pref === 'en' || pref === 'he') && !i18n.language.startsWith(pref)) {
+        i18n.changeLanguage(pref);
+      }
     } catch (error) {
       console.error('Failed to fetch user', error);
       logout();

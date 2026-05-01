@@ -1,9 +1,33 @@
 import React, { useState } from 'react';
-import { KeyRound, EyeOff, Eye } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
+import { KeyRound, EyeOff, Eye, Globe } from 'lucide-react';
 import { toast } from 'sonner';
 import axios from 'axios';
 
 const SettingsTab = ({ user, token, API }) => {
+  const { i18n } = useTranslation();
+  const [language, setLanguage] = useState(
+    user?.preferred_language || (i18n.language?.startsWith('he') ? 'he' : 'en')
+  );
+  const [savingLanguage, setSavingLanguage] = useState(false);
+
+  const handleSaveLanguage = async () => {
+    setSavingLanguage(true);
+    try {
+      await axios.put(
+        `${API}/auth/language`,
+        { language },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      i18n.changeLanguage(language);
+      toast.success('Default language saved');
+    } catch (error) {
+      toast.error(error.response?.data?.detail || 'Failed to save language');
+    } finally {
+      setSavingLanguage(false);
+    }
+  };
+
   const [passwordForm, setPasswordForm] = useState({
     current_password: '',
     new_password: '',
@@ -48,7 +72,60 @@ const SettingsTab = ({ user, token, API }) => {
   return (
     <div>
       <h2 className="text-2xl font-bold mb-6" style={{ fontFamily: 'Playfair Display' }}>Account Settings</h2>
-      
+
+      {/* Language preference */}
+      <div className="bg-white rounded-2xl border border-gray-200 p-6 max-w-2xl mb-6">
+        <div className="flex items-center gap-3 mb-6">
+          <div className="p-3 rounded-full bg-[#1E6A6A]/10">
+            <Globe size={24} className="text-[#1E6A6A]" />
+          </div>
+          <div>
+            <h3 className="text-lg font-bold text-gray-900">Default Language</h3>
+            <p className="text-sm text-gray-500">
+              The site will open in this language every time you sign in, on any device.
+            </p>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-2 gap-3 mb-4">
+          {[
+            { value: 'en', label: 'English', sub: 'EN' },
+            { value: 'he', label: 'עברית', sub: 'HE' },
+          ].map((opt) => {
+            const active = language === opt.value;
+            return (
+              <button
+                key={opt.value}
+                type="button"
+                onClick={() => setLanguage(opt.value)}
+                data-testid={`language-option-${opt.value}`}
+                className={`flex items-center justify-between px-4 py-3 rounded-xl border-2 transition-all ${
+                  active
+                    ? 'border-[#1E6A6A] bg-[#1E6A6A]/5 text-[#1E6A6A]'
+                    : 'border-gray-200 hover:border-gray-300 text-gray-700'
+                }`}
+              >
+                <span className="font-medium">{opt.label}</span>
+                <span className={`text-xs font-bold ${active ? 'text-[#D4AF37]' : 'text-gray-400'}`}>
+                  {opt.sub}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+
+        <button
+          type="button"
+          onClick={handleSaveLanguage}
+          disabled={savingLanguage}
+          className="w-full px-6 py-3 rounded-xl text-white font-medium hover:opacity-90 transition-all disabled:opacity-60"
+          style={{ backgroundColor: '#1E6A6A' }}
+          data-testid="save-language-btn"
+        >
+          {savingLanguage ? 'Saving…' : 'Save Default Language'}
+        </button>
+      </div>
+
       <div className="bg-white rounded-2xl border border-gray-200 p-6 max-w-2xl">
         <div className="flex items-center gap-3 mb-6">
           <div className="p-3 rounded-full bg-[#1E6A6A]/10">

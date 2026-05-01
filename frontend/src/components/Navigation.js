@@ -35,6 +35,18 @@ const Navigation = () => {
   const toggleLanguage = () => {
     const newLang = i18n.language.startsWith('he') ? 'en' : 'he';
     i18n.changeLanguage(newLang);
+    // Persist preference to backend so it follows the user across devices.
+    if (user && token) {
+      axios
+        .put(
+          `${API}/auth/language`,
+          { language: newLang },
+          { headers: { Authorization: `Bearer ${token}` } }
+        )
+        .catch(() => {
+          /* silent — local language change still applies */
+        });
+    }
   };
 
   const handleLogout = () => {

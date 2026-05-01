@@ -106,6 +106,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/auth/language": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * Set Language
+         * @description Persist the user's preferred UI language so it follows them across devices.
+         */
+        put: operations["set_language_api_auth_language_put"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/properties": {
         parameters: {
             query?: never;
@@ -2359,6 +2379,11 @@ export interface components {
         } & {
             [key: string]: unknown;
         };
+        /** LanguagePreference */
+        LanguagePreference: {
+            /** Language */
+            language: string;
+        };
         /** LikeToggleResponse */
         LikeToggleResponse: {
             /** Liked */
@@ -3299,6 +3324,39 @@ export interface operations {
         requestBody: {
             content: {
                 "application/json": components["schemas"]["ChangePasswordRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MessageResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    set_language_api_auth_language_put: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["LanguagePreference"];
             };
         };
         responses: {

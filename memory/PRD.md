@@ -314,6 +314,12 @@ Build a bilingual (English/Hebrew) rental website named MyIsraelRental.com with 
 - [x] **Top-nav Messages icon (always-visible inbox shortcut)** (2026-05-01):
   - Added a `MessageCircle` icon next to the bell in `Navigation.js`, visible site-wide whenever the user is logged in. Polls `GET /api/chat/conversations` every 20 s and renders a red unread-count badge (`9+` clamp). Click navigates to `/dashboard?tab=messages`.
   - Verified: with one new unread message, the badge shows "1"; clicking lands on Dashboard with the Messages tab active.
+- [x] **Hide "My Properties" tab from renters** (2026-05-01):
+  - `DashboardTabs.jsx`: `tab-properties` gated behind `isOwnerLike`. `Dashboard.js`: when a renter loads the dashboard, the active tab auto-switches to `bookings`.
+- [x] **User-level default language preference** (2026-05-01):
+  - **Backend**: new `LanguagePreference` request model + `PUT /api/auth/language` (validates `'en'|'he'` only) persists `preferred_language` on the user document. `GET /api/auth/me` already passes the field through (UserPublic uses `extra='allow'`).
+  - **Frontend**: `App.js` `fetchCurrentUser` reads `user.preferred_language` and calls `i18n.changeLanguage(pref)` so the site opens in the saved language on every device. `Navigation.js` toggle now also persists to the backend when logged in. New "Default Language" card in `SettingsTab.jsx` with EN/HE pill selector + Save button.
+  - **Verified**: curl PUT + reload as renter@test.com → page loads RTL with Hebrew tabs (`ההזמנות שלי`, etc.). Bad payload (`fr`) returns 400.
 
 ### P2 - Lower Priority
 - [ ] Manager bulk property upload via text
