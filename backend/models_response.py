@@ -44,6 +44,14 @@ class TypingStatusResponse(BaseModel):
     typing: bool
 
 
+class TranslatedMessageResponse(BaseModel):
+    """Result of a one-off chat-message translation."""
+    message_id: str
+    source_lang: str
+    target_lang: str
+    translated_text: str
+
+
 # ---------------------------------------------------------------------------
 # Auth
 # ---------------------------------------------------------------------------

@@ -307,6 +307,10 @@ Build a bilingual (English/Hebrew) rental website named MyIsraelRental.com with 
     - Read receipts: my own message bubbles now show a single white `Check` icon (sent / unread) which becomes a gold `CheckCheck` once `msg.read===true` (the receiver's `with_user`-scoped fetch flips the read flag, so this is consistent end-to-end with what's already persisted).
   - **Robustness**: `Chat.js` now honors a `?with=` deep-link even when the underlying property has been deleted (orphan conversations remain accessible from the Messages inbox).
   - Verified with curl + browser: typing endpoint flips true → false after the 5 s TTL; renter-side screenshot shows 2 sent ticks (white) + 1 read tick (gold) for an existing read message.
+- [x] **Bilingual chat: inline Claude-powered EN/HE message translation** (2026-05-01):
+  - **Backend**: new `utils/chat_translate.py` (Hebrew autodetection via Unicode range + `LlmChat` with `claude-4-sonnet-20250514` and a chat-tone system prompt that preserves emojis/prices/dates verbatim). New `POST /api/chat/messages/{message_id}/translate` (body `{target_lang: 'en'|'he'}`) returns `TranslatedMessageResponse {message_id, source_lang, target_lang, translated_text}` and **caches** results on the message doc (`translations.{lang}`) so repeat calls are instant (~100 ms vs LLM round-trip). Participant-only enforcement.
+  - **Frontend** `Chat.js`: each incoming message in the *opposite* script of the current UI language gets a "Translate to English/Hebrew" link with a `Languages` icon. Clicking shows "Translating…" → an inline divider block with the source→target pair label and the translated text. Clicking again toggles it off. State kept per-message in component state.
+  - Verified end-to-end: renter sends `שלום! האם הדירה עדיין פנויה?` → owner clicks Translate → renders "HEBREW → ENGLISH / Hello! Is the apartment still available?" inline. Cache hit on second call returned in 107 ms.
 
 ### P2 - Lower Priority
 - [ ] Manager bulk property upload via text

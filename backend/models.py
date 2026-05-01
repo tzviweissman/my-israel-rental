@@ -96,6 +96,10 @@ class TypingPing(BaseModel):
     with_user: str
 
 
+class TranslateMessageRequest(BaseModel):
+    target_lang: str  # 'en' or 'he'
+
+
 class NotificationPreferences(BaseModel):
     rental_type: str | None = None
     min_bedrooms: int | None = None

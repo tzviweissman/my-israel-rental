@@ -1,11 +1,16 @@
 import React, { useState, useEffect, useContext, useRef } from 'react';
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import axios from 'axios';
 import { API, AuthContext } from '../App';
-import { Send, ArrowLeft, Home, User, Building2, Clock, MessageCircle, ChevronDown, Check, CheckCheck } from 'lucide-react';
+import { Send, ArrowLeft, Home, User, Building2, Clock, MessageCircle, ChevronDown, Check, CheckCheck, Languages } from 'lucide-react';
 import { toast } from 'sonner';
 
+const HEBREW_RE = /[\u0590-\u05FF]/;
+
 const Chat = () => {
+  const { i18n } = useTranslation();
+  const uiLang = i18n.language?.startsWith('he') ? 'he' : 'en';
   const { propertyId } = useParams();
   const [searchParams] = useSearchParams();
   // When the user clicked a Sublease card, the chat should talk to the
@@ -28,6 +33,33 @@ const Chat = () => {
   const messagesEndRef = useRef(null);
   const messagesContainerRef = useRef(null);
   const lastTypingEmitRef = useRef(0);
+  // message_id -> { translated_text, target_lang } | 'loading'
+  const [translations, setTranslations] = useState({});
+
+  const translateMessage = async (msgId) => {
+    if (translations[msgId] === 'loading') return;
+    if (translations[msgId] && translations[msgId] !== 'hidden') {
+      // Toggle off — hide existing translation
+      setTranslations((prev) => ({ ...prev, [msgId]: 'hidden' }));
+      return;
+    }
+    setTranslations((prev) => ({ ...prev, [msgId]: 'loading' }));
+    try {
+      const res = await axios.post(
+        `${API}/chat/messages/${msgId}/translate`,
+        { target_lang: uiLang },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      setTranslations((prev) => ({ ...prev, [msgId]: res.data }));
+    } catch {
+      setTranslations((prev) => {
+        const next = { ...prev };
+        delete next[msgId];
+        return next;
+      });
+      toast.error('Translation failed');
+    }
+  };
 
   useEffect(() => {
     fetchProperty();
@@ -337,6 +369,53 @@ const Chat = () => {
                           }`}
                         >
                           <p className="text-[13.5px] leading-relaxed whitespace-pre-wrap break-words">{msg.message}</p>
+
+                          {/* Inline translation block */}
+                          {(() => {
+                            const tr = translations[msg.id];
+                            const looksLikeOtherLang =
+                              uiLang === 'en' ? HEBREW_RE.test(msg.message) : !HEBREW_RE.test(msg.message);
+                            const showTranslateBtn = !isMe && looksLikeOtherLang;
+                            if (tr === 'loading') {
+                              return (
+                                <p className={`text-[12px] mt-1.5 italic ${isMe ? 'text-white/70' : 'text-gray-500'}`}>
+                                  Translating…
+                                </p>
+                              );
+                            }
+                            if (tr && tr !== 'hidden' && tr !== 'loading') {
+                              return (
+                                <div
+                                  className={`mt-2 pt-2 border-t ${isMe ? 'border-white/20' : 'border-gray-200'}`}
+                                  data-testid={`translation-${msg.id}`}
+                                >
+                                  <p className={`text-[10px] uppercase tracking-wider mb-1 ${isMe ? 'text-white/60' : 'text-gray-400'}`}>
+                                    {tr.source_lang === 'he' ? 'Hebrew' : 'English'} → {tr.target_lang === 'he' ? 'Hebrew' : 'English'}
+                                  </p>
+                                  <p className="text-[13.5px] leading-relaxed whitespace-pre-wrap break-words">
+                                    {tr.translated_text}
+                                  </p>
+                                </div>
+                              );
+                            }
+                            if (showTranslateBtn) {
+                              return (
+                                <button
+                                  type="button"
+                                  onClick={() => translateMessage(msg.id)}
+                                  className={`flex items-center gap-1 mt-1.5 text-[11px] underline-offset-2 hover:underline ${
+                                    isMe ? 'text-white/70 hover:text-white' : 'text-[#1E6A6A] hover:text-[#155454]'
+                                  }`}
+                                  data-testid={`translate-btn-${msg.id}`}
+                                >
+                                  <Languages size={11} />
+                                  Translate to {uiLang === 'en' ? 'English' : 'Hebrew'}
+                                </button>
+                              );
+                            }
+                            return null;
+                          })()}
+
                           <div className={`flex items-center gap-1 mt-1 ${isMe ? 'justify-end' : 'justify-start'}`}>
                             <Clock size={10} className={isMe ? 'text-white/50' : 'text-gray-400'} />
                             <span className={`text-[10px] ${isMe ? 'text-white/50' : 'text-gray-400'}`}>

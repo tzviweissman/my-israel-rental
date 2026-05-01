@@ -914,6 +914,29 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/chat/messages/{message_id}/translate": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Translate Message
+         * @description Translate a single chat message into ``target_lang`` ('en' or 'he').
+         *
+         *     The result is cached on the message document so subsequent reads are
+         *     instant. Only participants in the conversation may call this.
+         */
+        post: operations["translate_message_api_chat_messages__message_id__translate_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/notifications/preferences": {
         parameters: {
             query?: never;
@@ -2988,6 +3011,25 @@ export interface components {
         } & {
             [key: string]: unknown;
         };
+        /** TranslateMessageRequest */
+        TranslateMessageRequest: {
+            /** Target Lang */
+            target_lang: string;
+        };
+        /**
+         * TranslatedMessageResponse
+         * @description Result of a one-off chat-message translation.
+         */
+        TranslatedMessageResponse: {
+            /** Message Id */
+            message_id: string;
+            /** Source Lang */
+            source_lang: string;
+            /** Target Lang */
+            target_lang: string;
+            /** Translated Text */
+            translated_text: string;
+        };
         /** TranslationRequest */
         TranslationRequest: {
             /** Text */
@@ -4931,6 +4973,41 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["TypingStatusResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    translate_message_api_chat_messages__message_id__translate_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                message_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["TranslateMessageRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TranslatedMessageResponse"];
                 };
             };
             /** @description Validation Error */
