@@ -985,9 +985,19 @@ const PropertyDetail = () => {
                     </button>
                   </div>
                   
-                  <button onClick={handleBooking} className="w-full primary-btn py-2.5" data-testid="confirm-booking-button">
-                    Reserve Booking
-                  </button>
+                  {(() => {
+                    const datesIncomplete = !bookingData.start_date || !bookingData.end_date;
+                    return (
+                      <button
+                        onClick={handleBooking}
+                        disabled={datesIncomplete}
+                        className="w-full primary-btn py-2.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+                        data-testid="confirm-booking-button"
+                      >
+                        {datesIncomplete ? 'Pick check-in & check-out dates' : 'Reserve Booking'}
+                      </button>
+                    );
+                  })()}
                 </div>
               </div>
             </div>
