@@ -1,15 +1,24 @@
 """Auto-extracted from server.py during the 2026-04 refactor."""
 import uuid
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
 
 from fastapi import APIRouter, Depends
 
-from models import ChatMessage
-from models_response import ConversationOut, IdMessageResponse, MessageOut
+from models import ChatMessage, TypingPing
+from models_response import (
+    ConversationOut,
+    IdMessageResponse,
+    MessageOut,
+    MessageResponse,
+    TypingStatusResponse,
+)
 from routes.deps import db, verify_token
 
 router = APIRouter()
 api_router = router  # alias so existing @api_router decorators work verbatim
+
+# How long a typing ping is considered "live" for the counterparty.
+_TYPING_TTL_SECONDS = 5
 
 
 @api_router.post("/chat/messages", response_model=IdMessageResponse)
@@ -106,3 +115,40 @@ async def get_conversations(payload: dict = Depends(verify_token)) -> list[dict]
             }
     
     return list(conversations.values())
+
+
+
+@api_router.post("/chat/typing", response_model=MessageResponse)
+async def post_typing(ping: TypingPing, payload: dict = Depends(verify_token)) -> dict:
+    """Record that the caller is typing in the (property, with_user) thread.
+    Upserted with the current timestamp; counterparty polls
+    ``GET /chat/typing/{property_id}?with_user=…`` and treats anything within
+    the TTL window as actively typing."""
+    user_id = payload['user_id']
+    await db.typing.update_one(
+        {"property_id": ping.property_id, "user_id": user_id, "target_user": ping.with_user},
+        {"$set": {"updated_at": datetime.now(UTC).isoformat()}},
+        upsert=True,
+    )
+    return {"message": "ok"}
+
+
+@api_router.get("/chat/typing/{property_id}", response_model=TypingStatusResponse)
+async def get_typing(
+    property_id: str,
+    with_user: str,
+    payload: dict = Depends(verify_token),
+) -> dict:
+    """Return whether ``with_user`` is currently typing to the caller in
+    ``property_id``. A ping older than ``_TYPING_TTL_SECONDS`` is ignored."""
+    cutoff = (datetime.now(UTC) - timedelta(seconds=_TYPING_TTL_SECONDS)).isoformat()
+    doc = await db.typing.find_one(
+        {
+            "property_id": property_id,
+            "user_id": with_user,
+            "target_user": payload['user_id'],
+            "updated_at": {"$gte": cutoff},
+        },
+        {"_id": 0, "updated_at": 1},
+    )
+    return {"typing": doc is not None}

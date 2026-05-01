@@ -2,7 +2,7 @@ import React, { useState, useEffect, useContext, useRef } from 'react';
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import axios from 'axios';
 import { API, AuthContext } from '../App';
-import { Send, ArrowLeft, Home, User, Building2, Clock, MessageCircle, ChevronDown } from 'lucide-react';
+import { Send, ArrowLeft, Home, User, Building2, Clock, MessageCircle, ChevronDown, Check, CheckCheck } from 'lucide-react';
 import { toast } from 'sonner';
 
 const Chat = () => {
@@ -24,8 +24,10 @@ const Chat = () => {
   const [otherUserId, setOtherUserId] = useState('');
   const [sending, setSending] = useState(false);
   const [showScrollBtn, setShowScrollBtn] = useState(false);
+  const [theyAreTyping, setTheyAreTyping] = useState(false);
   const messagesEndRef = useRef(null);
   const messagesContainerRef = useRef(null);
+  const lastTypingEmitRef = useRef(0);
 
   useEffect(() => {
     fetchProperty();
@@ -39,6 +41,47 @@ const Chat = () => {
     return () => clearInterval(interval);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [propertyId, otherUserId]);
+
+  // Poll the typing-indicator endpoint independently (faster cadence than
+  // the message poll so the bubble feels live).
+  useEffect(() => {
+    if (!otherUserId || !propertyId) return;
+    let cancelled = false;
+    const poll = async () => {
+      try {
+        const res = await axios.get(
+          `${API}/chat/typing/${propertyId}?with_user=${otherUserId}`,
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+        if (!cancelled) setTheyAreTyping(!!res.data?.typing);
+      } catch {
+        /* silent — endpoint is best-effort */
+      }
+    };
+    poll();
+    const interval = setInterval(poll, 2000);
+    return () => {
+      cancelled = true;
+      clearInterval(interval);
+    };
+  }, [propertyId, otherUserId, token]);
+
+  // Debounced typing-emit: at most one POST per 2 seconds while typing.
+  const emitTyping = () => {
+    if (!otherUserId) return;
+    const now = Date.now();
+    if (now - lastTypingEmitRef.current < 2000) return;
+    lastTypingEmitRef.current = now;
+    axios
+      .post(
+        `${API}/chat/typing`,
+        { property_id: propertyId, with_user: otherUserId },
+        { headers: { Authorization: `Bearer ${token}` } }
+      )
+      .catch(() => {
+        /* silent */
+      });
+  };
 
   useEffect(() => {
     scrollToBottom();
@@ -57,12 +100,15 @@ const Chat = () => {
   };
 
   const fetchProperty = async () => {
+    // Honor explicit `?with=` deep-links first so the chat works even if the
+    // underlying property has been deleted (orphan conversations).
+    if (counterpartyOverride) {
+      setOtherUserId(counterpartyOverride);
+    }
     try {
       const response = await axios.get(`${API}/properties/${propertyId}`);
       setProperty(response.data);
-      // Explicit ?with= override always wins (notification deep-link)
       if (counterpartyOverride) {
-        setOtherUserId(counterpartyOverride);
         if (subleaseId) {
           try {
             const subRes = await axios.get(`${API}/subleases/${subleaseId}`);
@@ -86,6 +132,8 @@ const Chat = () => {
         setOtherUserId(response.data.owner_id);
       }
     } catch (error) {
+      // Property may have been deleted — keep the override-derived
+      // counterparty if present so the conversation still loads.
       console.error('Failed to fetch property', error);
     }
   };
@@ -294,6 +342,21 @@ const Chat = () => {
                             <span className={`text-[10px] ${isMe ? 'text-white/50' : 'text-gray-400'}`}>
                               {formatTime(msg.created_at)}
                             </span>
+                            {isMe && (
+                              msg.read ? (
+                                <CheckCheck
+                                  size={12}
+                                  className="text-[#D4AF37]"
+                                  data-testid={`tick-read-${msg.id}`}
+                                />
+                              ) : (
+                                <Check
+                                  size={12}
+                                  className="text-white/60"
+                                  data-testid={`tick-sent-${msg.id}`}
+                                />
+                              )
+                            )}
                           </div>
                         </div>
 
@@ -310,6 +373,27 @@ const Chat = () => {
                   })}
                 </div>
               ))
+            )}
+            {theyAreTyping && (
+              <div
+                className="flex items-end gap-2 justify-start mb-3"
+                data-testid="typing-indicator"
+              >
+                <div className="w-7 h-7 shrink-0">
+                  <div className="w-7 h-7 rounded-full bg-gray-200 flex items-center justify-center">
+                    <span className="text-[10px] font-bold text-gray-500">
+                      {getInitials(sublease ? '' : property?.owner_name)}
+                    </span>
+                  </div>
+                </div>
+                <div className="bg-white border border-gray-200 text-gray-800 shadow-sm rounded-2xl rounded-bl-md px-4 py-2.5">
+                  <div className="flex items-center gap-1" aria-label="Typing">
+                    <span className="w-1.5 h-1.5 rounded-full bg-gray-400 animate-bounce" style={{ animationDelay: '0ms' }} />
+                    <span className="w-1.5 h-1.5 rounded-full bg-gray-400 animate-bounce" style={{ animationDelay: '150ms' }} />
+                    <span className="w-1.5 h-1.5 rounded-full bg-gray-400 animate-bounce" style={{ animationDelay: '300ms' }} />
+                  </div>
+                </div>
+              </div>
             )}
             <div ref={messagesEndRef} />
           </div>
@@ -333,7 +417,10 @@ const Chat = () => {
                 <input
                   type="text"
                   value={newMessage}
-                  onChange={(e) => setNewMessage(e.target.value)}
+                  onChange={(e) => {
+                    setNewMessage(e.target.value);
+                    if (e.target.value.trim()) emitTyping();
+                  }}
                   placeholder="Type your message..."
                   className="w-full pl-4 pr-4 py-3 rounded-xl bg-gray-50 border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#1E6A6A]/30 focus:border-[#1E6A6A] focus:bg-white text-sm transition-all placeholder:text-gray-400"
                   data-testid="chat-input"

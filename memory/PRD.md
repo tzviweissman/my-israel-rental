@@ -299,6 +299,14 @@ Build a bilingual (English/Hebrew) rental website named MyIsraelRental.com with 
   - **Real-time alerts** (2026-05-01): new `utils/messageAlerts.js` plays a Web Audio two-tone ping AND fires a desktop browser notification when a fresh `new_message` arrives via the existing 30 s notification poll. Permission is requested on bell click (user gesture). Alerted ids are tracked in a ref so each message only pings once.
   - **Unread Messages badge**: red counter pill on the new Messages tab in the Dashboard, hydrated from `chat/conversations` and updated optimistically when the user opens the tab.
   - Verified end-to-end with curl: renter sends message → owner notification carries `sender_id` → owner conversations list returns scoped pair → owner messages endpoint with `with_user` returns only that conversation. Live screenshot: red "1" badge on Messages tab after a new unread message lands.
+- [x] **Chat: typing indicator + read-receipt ticks** (2026-05-01):
+  - **Backend**: new `POST /api/chat/typing` (body `{property_id, with_user}`) upserts a typing record, and `GET /api/chat/typing/{property_id}?with_user=…` returns `{typing: bool}` based on a 5-second TTL window. Both pinned in `routes/chat.py` with `TypingPing` request model and `TypingStatusResponse`.
+  - **Frontend** `Chat.js`:
+    - On every keystroke, debounced 1-per-2-seconds POST to `/chat/typing`.
+    - Independent 2-second poll of `/chat/typing/{property_id}?with_user=…`; when truthy, animated three-dot bubble renders at the end of the message list (WhatsApp-style).
+    - Read receipts: my own message bubbles now show a single white `Check` icon (sent / unread) which becomes a gold `CheckCheck` once `msg.read===true` (the receiver's `with_user`-scoped fetch flips the read flag, so this is consistent end-to-end with what's already persisted).
+  - **Robustness**: `Chat.js` now honors a `?with=` deep-link even when the underlying property has been deleted (orphan conversations remain accessible from the Messages inbox).
+  - Verified with curl + browser: typing endpoint flips true → false after the 5 s TTL; renter-side screenshot shows 2 sent ticks (white) + 1 read tick (gold) for an existing read message.
 
 ### P2 - Lower Priority
 - [ ] Manager bulk property upload via text

@@ -870,6 +870,50 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/chat/typing": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Post Typing
+         * @description Record that the caller is typing in the (property, with_user) thread.
+         *     Upserted with the current timestamp; counterparty polls
+         *     ``GET /chat/typing/{property_id}?with_user=…`` and treats anything within
+         *     the TTL window as actively typing.
+         */
+        post: operations["post_typing_api_chat_typing_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/chat/typing/{property_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get Typing
+         * @description Return whether ``with_user`` is currently typing to the caller in
+         *     ``property_id``. A ping older than ``_TYPING_TTL_SECONDS`` is ignored.
+         */
+        get: operations["get_typing_api_chat_typing__property_id__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/notifications/preferences": {
         parameters: {
             query?: never;
@@ -2966,6 +3010,21 @@ export interface components {
         } & {
             [key: string]: unknown;
         };
+        /** TypingPing */
+        TypingPing: {
+            /** Property Id */
+            property_id: string;
+            /** With User */
+            with_user: string;
+        };
+        /**
+         * TypingStatusResponse
+         * @description Whether the chat counterparty is currently typing.
+         */
+        TypingStatusResponse: {
+            /** Typing */
+            typing: boolean;
+        };
         /** UploadResponse */
         UploadResponse: {
             /** Url */
@@ -4815,6 +4874,72 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ConversationOut"][];
+                };
+            };
+        };
+    };
+    post_typing_api_chat_typing_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["TypingPing"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MessageResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_typing_api_chat_typing__property_id__get: {
+        parameters: {
+            query: {
+                with_user: string;
+            };
+            header?: never;
+            path: {
+                property_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TypingStatusResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
                 };
             };
         };

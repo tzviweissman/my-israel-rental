@@ -39,6 +39,11 @@ class OkResponse(BaseModel):
     ok: bool
 
 
+class TypingStatusResponse(BaseModel):
+    """Whether the chat counterparty is currently typing."""
+    typing: bool
+
+
 # ---------------------------------------------------------------------------
 # Auth
 # ---------------------------------------------------------------------------

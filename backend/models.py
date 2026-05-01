@@ -91,6 +91,11 @@ class ChatMessage(BaseModel):
     receiver_id: str
 
 
+class TypingPing(BaseModel):
+    property_id: str
+    with_user: str
+
+
 class NotificationPreferences(BaseModel):
     rental_type: str | None = None
     min_bedrooms: int | None = None
