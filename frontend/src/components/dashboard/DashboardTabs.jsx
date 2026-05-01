@@ -60,6 +60,17 @@ const DashboardTabs = ({ activeTab, setActiveTab, role, unreadMessages = 0 }) =>
           {t('dashboard.myBookings')}
         </button>
 
+        {isRenter && (
+          <button
+            onClick={() => setActiveTab('subleases')}
+            className={`${cls(activeTab === 'subleases')} flex items-center justify-center gap-1.5`}
+            data-testid="tab-subleases"
+          >
+            <Home size={14} />
+            Subleases
+          </button>
+        )}
+
         <button
           onClick={() => setActiveTab('messages')}
           className={`${cls(activeTab === 'messages')} flex items-center justify-center gap-1.5 relative`}
@@ -79,37 +90,6 @@ const DashboardTabs = ({ activeTab, setActiveTab, role, unreadMessages = 0 }) =>
 
         {isRenter && (
           <button
-            onClick={() => setActiveTab('subleases')}
-            className={`${cls(activeTab === 'subleases')} flex items-center justify-center gap-1.5`}
-            data-testid="tab-subleases"
-          >
-            <Home size={14} />
-            Subleases
-          </button>
-        )}
-
-        <button
-          onClick={() => setActiveTab('settings')}
-          className={`${cls(activeTab === 'settings')} flex items-center justify-center gap-1.5`}
-          data-testid="tab-settings"
-        >
-          <KeyRound size={14} />
-          Settings
-        </button>
-
-        {isRenter && (
-          <button
-            onClick={() => setActiveTab('services')}
-            className={`${cls(activeTab === 'services', ACTIVE_GOLD)} flex items-center justify-center gap-1.5`}
-            data-testid="tab-services"
-          >
-            <Sparkles size={14} />
-            Services
-          </button>
-        )}
-
-        {isRenter && (
-          <button
             onClick={() => setActiveTab('alerts')}
             className={`${cls(activeTab === 'alerts', ACTIVE_GOLD)} flex items-center justify-center gap-1.5`}
             data-testid="tab-alerts"
@@ -126,6 +106,26 @@ const DashboardTabs = ({ activeTab, setActiveTab, role, unreadMessages = 0 }) =>
         >
           <Heart size={14} />
           Liked
+        </button>
+
+        {isRenter && (
+          <button
+            onClick={() => setActiveTab('services')}
+            className={`${cls(activeTab === 'services', ACTIVE_GOLD)} flex items-center justify-center gap-1.5`}
+            data-testid="tab-services"
+          >
+            <Sparkles size={14} />
+            Services
+          </button>
+        )}
+
+        <button
+          onClick={() => setActiveTab('settings')}
+          className={`${cls(activeTab === 'settings')} flex items-center justify-center gap-1.5`}
+          data-testid="tab-settings"
+        >
+          <KeyRound size={14} />
+          Settings
         </button>
       </div>
     </div>
