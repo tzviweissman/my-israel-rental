@@ -3,7 +3,7 @@ import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import axios from 'axios';
 import { API, AuthContext } from '../App';
-import { Bed, Bath, Home as HomeIcon, MapPin, Filter, Building2, X, ChevronDown, ChevronUp, Calendar as CalendarIcon, Minus, Plus, Heart } from 'lucide-react';
+import { Bed, Bath, Home as HomeIcon, MapPin, Filter, Building2, X, ChevronDown, ChevronUp, Calendar as CalendarIcon, Minus, Plus, Heart, Bell } from 'lucide-react';
 import { Calendar } from '../components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '../components/ui/popover';
 import { Slider } from '../components/ui/slider';
@@ -243,6 +243,40 @@ const Properties = () => {
   const applyFilters = () => {
     fetchProperties();
     setShowFilters(false);
+  };
+
+  // Save the currently-applied filters as an availability alert. Triggered by
+  // the "Save as alert" button in the filter drawer so renters don't have to
+  // wait for an empty search result.
+  const saveCurrentFiltersAsAlert = async () => {
+    if (!token) {
+      toast.error('Please sign in to save this alert.');
+      navigate('/auth?return=' + encodeURIComponent(window.location.pathname + window.location.search));
+      return;
+    }
+    try {
+      const body = {
+        filters: {
+          rental_type: filters.rental_type || (type && type !== 'all' ? type : null),
+          area: filters.area || null,
+          bedrooms_min: filters.min_bedrooms ? Number(filters.min_bedrooms) : null,
+          max_price: filters.max_price ? Number(filters.max_price) : null,
+          start_date: filters.date_from || null,
+          end_date: filters.date_to || null,
+        },
+        date_fuzziness_days: 30,
+      };
+      const res = await axios.post(`${API}/saved-searches`, body, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (res.data.existing) {
+        toast.success("Alert already active — we'll notify you.");
+      } else {
+        toast.success("Alert saved! We'll notify you when a match lists.");
+      }
+    } catch (err) {
+      toast.error(err.response?.data?.detail || 'Failed to save alert');
+    }
   };
 
   const convertPrice = (price, fromCurrency) => {
@@ -724,7 +758,7 @@ const Properties = () => {
             </div>
 
             {/* Bottom Action Bar */}
-            <div className="px-7 py-4 flex items-center justify-between" style={{ background: 'linear-gradient(135deg, #1E6A6A 0%, #2A8585 100%)' }}>
+            <div className="px-7 py-4 flex items-center justify-between gap-3 flex-wrap" style={{ background: 'linear-gradient(135deg, #1E6A6A 0%, #2A8585 100%)' }}>
               <button
                 onClick={clearFilters}
                 className="text-[13px] font-medium text-white/50 hover:text-white transition-colors underline underline-offset-4 decoration-white/20 hover:decoration-white/50"
@@ -732,14 +766,27 @@ const Properties = () => {
               >
                 {t('filters.clear')}
               </button>
-              <button
-                onClick={applyFilters}
-                className="px-7 py-2.5 rounded-lg text-[13px] font-bold tracking-wide text-[#1E6A6A] transition-all duration-200 hover:shadow-lg hover:scale-[1.02] active:scale-[0.98]"
-                style={{ backgroundColor: '#D4AF37' }}
-                data-testid="apply-filters-button"
-              >
-                {t('filters.showResults')} {properties.length} {t('filters.places')}
-              </button>
+              <div className="flex items-center gap-2">
+                {user && (
+                  <button
+                    onClick={saveCurrentFiltersAsAlert}
+                    className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-lg text-[12px] font-semibold tracking-wide text-white border border-white/30 hover:bg-white/10 transition-all"
+                    data-testid="save-as-alert-button"
+                    title="Get notified when a new match lists"
+                  >
+                    <Bell size={14} />
+                    Save as alert
+                  </button>
+                )}
+                <button
+                  onClick={applyFilters}
+                  className="px-7 py-2.5 rounded-lg text-[13px] font-bold tracking-wide text-[#1E6A6A] transition-all duration-200 hover:shadow-lg hover:scale-[1.02] active:scale-[0.98]"
+                  style={{ backgroundColor: '#D4AF37' }}
+                  data-testid="apply-filters-button"
+                >
+                  {t('filters.showResults')} {properties.length} {t('filters.places')}
+                </button>
+              </div>
             </div>
           </div>
         )}

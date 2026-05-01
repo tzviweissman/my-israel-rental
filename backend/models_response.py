@@ -232,6 +232,18 @@ class SavedSearchOut(BaseModel):
     expires_at: str
 
 
+class SavedSearchMatchOut(BaseModel):
+    """A property that fired against one of the renter's active alerts."""
+    model_config = ConfigDict(extra='allow')
+    id: str
+    search_id: str
+    search_name: str
+    property_id: str
+    reason: str
+    sent_at: str
+    property: dict | None = None
+
+
 class SubleaseOut(BaseModel):
     """Persisted ``db.subleases`` document."""
     model_config = ConfigDict(extra='allow')

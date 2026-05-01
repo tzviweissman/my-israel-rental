@@ -5,7 +5,7 @@ from datetime import UTC, datetime, timedelta
 from fastapi import APIRouter, Depends, HTTPException
 
 from models import SavedSearchCreate
-from models_response import MessageResponse, SavedSearchCreateResponse, SavedSearchOut
+from models_response import MessageResponse, SavedSearchCreateResponse, SavedSearchMatchOut, SavedSearchOut
 from routes.deps import db, verify_token
 
 router = APIRouter()
@@ -76,6 +76,70 @@ async def list_saved_searches(payload: dict = Depends(verify_token)) -> list[dic
         {"_id": 0},
     ).sort("created_at", -1).to_list(200)
     return rows
+
+
+@api_router.get("/saved-searches/matches", response_model=list[SavedSearchMatchOut])
+async def list_saved_search_matches(payload: dict = Depends(verify_token)) -> list[dict]:
+    """Return recent property matches for any of the renter's active alerts.
+
+    Joins ``saved_search_alerts`` to ``properties`` + ``saved_searches`` so the
+    UI can render one card per matching property with the alert name attached.
+    Deduped to the most-recent alert per (search, property) and capped to 100.
+    """
+    user_id = payload['user_id']
+    alerts = await db.saved_search_alerts.find(
+        {"user_id": user_id},
+        {"_id": 0},
+    ).sort("sent_at", -1).to_list(500)
+
+    # Dedupe by (search_id, property_id) keeping the newest record
+    seen: set[tuple[str, str]] = set()
+    deduped: list[dict] = []
+    for a in alerts:
+        key = (a.get('search_id', ''), a.get('property_id', ''))
+        if key in seen:
+            continue
+        seen.add(key)
+        deduped.append(a)
+        if len(deduped) >= 100:
+            break
+
+    # Batch-fetch search names and property details
+    search_ids = {a['search_id'] for a in deduped}
+    property_ids = {a['property_id'] for a in deduped}
+    searches = {
+        s['id']: s async for s in db.saved_searches.find(
+            {"id": {"$in": list(search_ids)}},
+            {"_id": 0, "id": 1, "name": 1, "active": 1},
+        )
+    }
+    properties = {
+        p['id']: p async for p in db.properties.find(
+            {"id": {"$in": list(property_ids)}},
+            {"_id": 0},
+        )
+    }
+
+    out: list[dict] = []
+    for a in deduped:
+        s = searches.get(a['search_id'])
+        # Skip matches whose underlying alert was deleted
+        if not s or not s.get('active', True):
+            continue
+        p = properties.get(a['property_id'])
+        # Skip matches whose property was deleted
+        if not p:
+            continue
+        out.append({
+            "id": a['id'],
+            "search_id": a['search_id'],
+            "search_name": s.get('name', 'Alert'),
+            "property_id": a['property_id'],
+            "reason": a.get('reason', 'new_listing'),
+            "sent_at": a['sent_at'],
+            "property": p,
+        })
+    return out
 
 
 

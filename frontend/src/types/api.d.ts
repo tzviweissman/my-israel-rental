@@ -1402,6 +1402,30 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/saved-searches/matches": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List Saved Search Matches
+         * @description Return recent property matches for any of the renter's active alerts.
+         *
+         *     Joins ``saved_search_alerts`` to ``properties`` + ``saved_searches`` so the
+         *     UI can render one card per matching property with the alert name attached.
+         *     Deduped to the most-recent alert per (search, property) and capped to 100.
+         */
+        get: operations["list_saved_search_matches_api_saved_searches_matches_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/saved-searches/{search_id}": {
         parameters: {
             query?: never;
@@ -2831,6 +2855,30 @@ export interface components {
             start_date?: string | null;
             /** End Date */
             end_date?: string | null;
+        };
+        /**
+         * SavedSearchMatchOut
+         * @description A property that fired against one of the renter's active alerts.
+         */
+        SavedSearchMatchOut: {
+            /** Id */
+            id: string;
+            /** Search Id */
+            search_id: string;
+            /** Search Name */
+            search_name: string;
+            /** Property Id */
+            property_id: string;
+            /** Reason */
+            reason: string;
+            /** Sent At */
+            sent_at: string;
+            /** Property */
+            property?: {
+                [key: string]: unknown;
+            } | null;
+        } & {
+            [key: string]: unknown;
         };
         /**
          * SavedSearchOut
@@ -5763,6 +5811,26 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_saved_search_matches_api_saved_searches_matches_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SavedSearchMatchOut"][];
                 };
             };
         };
