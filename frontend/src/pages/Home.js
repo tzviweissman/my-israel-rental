@@ -149,7 +149,7 @@ const Home = () => {
             {t('footer.contact')}
           </h2>
           <p className="text-lg mb-2">
-            {t('footer.phone')}: <a href="tel:+972553225141" className="font-bold hover:underline">+972 55 322 5141</a>
+            WhatsApp: <a href="https://wa.me/972553225141" target="_blank" rel="noopener noreferrer" className="font-bold hover:underline" data-testid="contact-whatsapp">+972 55 322 5141</a>
           </p>
           <p className="text-lg">
             {t('home.email')}: <a href="mailto:mir@myisraelrental.com" className="font-bold hover:underline">mir@myisraelrental.com</a>
