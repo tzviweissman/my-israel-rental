@@ -204,7 +204,7 @@ const Chat = () => {
                 </div>
                 <p className="text-gray-500 font-medium text-sm">No messages yet</p>
                 <p className="text-gray-400 text-xs mt-1 max-w-[260px]">
-                  Start the conversation about this property. Your messages are private between you and the owner.
+                  Start the conversation about this property.
                 </p>
               </div>
             ) : (
@@ -309,9 +309,6 @@ const Chat = () => {
                 <Send size={18} className={sending ? 'animate-pulse' : ''} />
               </button>
             </div>
-            <p className="text-[10px] text-gray-400 text-center mt-2">
-              Messages are private between you and the property owner
-            </p>
           </form>
         </div>
 
