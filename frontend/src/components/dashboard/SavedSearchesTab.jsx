@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { Bell, Trash2, Calendar, MapPin, Home as HomeIcon, DollarSign } from 'lucide-react';
 import { toast } from 'sonner';
@@ -11,6 +12,7 @@ import { toast } from 'sonner';
 const SavedSearchesTab = ({ API, token }) => {
   const [searches, setSearches] = useState([]);
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
 
   const fetchSearches = async () => {
     setLoading(true);
@@ -47,6 +49,38 @@ const SavedSearchesTab = ({ API, token }) => {
     if (!expiresAt) return null;
     const ms = new Date(expiresAt).getTime() - Date.now();
     return Math.max(0, Math.ceil(ms / (1000 * 60 * 60 * 24)));
+  };
+
+  // Deep-link to the Properties page with the saved filters applied, so the
+  // renter sees the matching listings immediately.
+  const openSearch = (s) => {
+    const f = s.filters || {};
+    const segment = (f.rental_type && f.rental_type !== 'all') ? f.rental_type : 'all';
+    const params = new URLSearchParams();
+    const passthrough = [
+      'area',
+      'bedrooms_min',
+      'max_price',
+      'min_price',
+      'min_bathrooms',
+      'max_floor',
+      'min_porches',
+      'has_elevator',
+      'condition',
+      'start_date',
+      'end_date',
+    ];
+    passthrough.forEach((k) => {
+      if (f[k] !== undefined && f[k] !== null && f[k] !== '') {
+        // Normalize field names between saved-search schema and Properties.js URL params
+        if (k === 'start_date') params.append('date_from', f[k]);
+        else if (k === 'end_date') params.append('date_to', f[k]);
+        else if (k === 'bedrooms_min') params.append('min_bedrooms', f[k]);
+        else params.append(k, f[k]);
+      }
+    });
+    const qs = params.toString();
+    navigate(`/properties/${segment}${qs ? `?${qs}` : ''}`);
   };
 
   return (
@@ -88,9 +122,18 @@ const SavedSearchesTab = ({ API, token }) => {
             return (
               <div
                 key={s.id}
-                className="rounded-2xl bg-white p-5 transition-all hover:shadow-md"
+                onClick={() => openSearch(s)}
+                className="rounded-2xl bg-white p-5 transition-all hover:shadow-md cursor-pointer"
                 style={{ border: '1px solid #e8e4dc' }}
                 data-testid={`saved-search-${s.id}`}
+                role="button"
+                tabIndex={0}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    openSearch(s);
+                  }
+                }}
               >
                 <div className="flex items-start justify-between mb-3">
                   <div className="flex items-center gap-2">
@@ -100,7 +143,10 @@ const SavedSearchesTab = ({ API, token }) => {
                     <h3 className="text-sm font-bold text-[#1E6A6A] line-clamp-1">{s.name}</h3>
                   </div>
                   <button
-                    onClick={() => handleDelete(s.id)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleDelete(s.id);
+                    }}
                     className="text-gray-400 hover:text-red-500 transition-colors p-1"
                     data-testid={`saved-search-delete-${s.id}`}
                     aria-label="Remove alert"

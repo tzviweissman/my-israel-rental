@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import axios from 'axios';
 import { API, AuthContext } from '../App';
@@ -45,25 +45,54 @@ const Properties = () => {
   const { type } = useParams();
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const [urlSearchParams] = useSearchParams();
   const [properties, setProperties] = useState([]);
-  const [filters, setFilters] = useState({
-    rental_type: type !== 'all' ? type : '',
-    min_bedrooms: '',
-    max_price: '',
-    min_price: '',
-    area: '',
-    min_bathrooms: '',
-    max_floor: '',
-    min_porches: '',
-    has_elevator: '',
-    condition: '',
-    date_from: '',
-    date_to: ''
+
+  // Initial filter state honors any URL query params so clicking a saved-search
+  // alert card deep-links directly to the matching results.
+  const initialFilters = (() => {
+    const base = {
+      rental_type: type !== 'all' ? type : '',
+      min_bedrooms: '',
+      max_price: '',
+      min_price: '',
+      area: '',
+      min_bathrooms: '',
+      max_floor: '',
+      min_porches: '',
+      has_elevator: '',
+      condition: '',
+      date_from: '',
+      date_to: '',
+    };
+    const allowed = Object.keys(base).filter((k) => k !== 'rental_type');
+    allowed.forEach((k) => {
+      const v = urlSearchParams.get(k);
+      if (v) base[k] = v;
+    });
+    return base;
+  })();
+  const [filters, setFilters] = useState(initialFilters);
+  const [showFilters, setShowFilters] = useState(
+    !!(urlSearchParams.get('area') || urlSearchParams.get('min_bedrooms') || urlSearchParams.get('max_price'))
+  );
+  const [dateRange, setDateRange] = useState(() => {
+    const df = urlSearchParams.get('date_from');
+    const dt = urlSearchParams.get('date_to');
+    if (df && dt) {
+      try {
+        return { from: new Date(df), to: new Date(dt) };
+      } catch {
+        /* noop */
+      }
+    }
+    return { from: undefined, to: undefined };
   });
-  const [showFilters, setShowFilters] = useState(false);
-  const [dateRange, setDateRange] = useState({ from: undefined, to: undefined });
   const [priceRange, setPriceRange] = useState([0, PRICE_MAX]);
-  const [priceCurrency, setPriceCurrency] = useState('ILS');
+  const [priceCurrency, setPriceCurrency] = useState(() => {
+    const c = urlSearchParams.get('currency');
+    return c === 'USD' ? 'USD' : 'ILS';
+  });
   const [exchangeRate, setExchangeRate] = useState(null);
   const { user, token } = useContext(AuthContext);
   const [likedIds, setLikedIds] = useState(new Set());
