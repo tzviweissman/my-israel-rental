@@ -16,6 +16,7 @@ const Chat = () => {
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState('');
   const [property, setProperty] = useState(null);
+  const [sublease, setSublease] = useState(null);
   const [otherUserId, setOtherUserId] = useState('');
   const [sending, setSending] = useState(false);
   const [showScrollBtn, setShowScrollBtn] = useState(false);
@@ -54,6 +55,7 @@ const Chat = () => {
         // Route the conversation to the sublessor rather than the property owner
         try {
           const subRes = await axios.get(`${API}/subleases/${subleaseId}`);
+          setSublease(subRes.data);
           setOtherUserId(subRes.data.subleasor_id || response.data.owner_id);
         } catch {
           setOtherUserId(response.data.owner_id);
@@ -166,22 +168,33 @@ const Chat = () => {
                 <Building2 size={20} className="text-[#1E6A6A]" />
               </div>
               <div className="min-w-0 flex-1">
-                <h3 className="text-sm font-bold text-gray-800 truncate">{property.title}</h3>
+                <h3 className="text-sm font-bold text-gray-800 truncate">
+                  {sublease?.title || property.title}
+                </h3>
                 <p className="text-xs text-gray-500 flex items-center gap-1">
-                  <span>{property.area}</span>
-                  {property.monthly_price && (
+                  <span>{sublease?.area || property.area}</span>
+                  {sublease ? (
+                    <>
+                      <span className="text-gray-300 mx-1">•</span>
+                      <span className="font-medium" style={{ color: '#D4AF37' }}>
+                        {sublease.currency === 'USD' ? '$' : '₪'}
+                        {sublease.price?.toLocaleString()}
+                        {sublease.price_type === 'per_night' ? '/night' : ' total'}
+                      </span>
+                    </>
+                  ) : property.monthly_price ? (
                     <>
                       <span className="text-gray-300 mx-1">•</span>
                       <span className="font-medium" style={{ color: '#D4AF37' }}>
                         {property.currency === 'USD' ? '$' : '₪'}{property.monthly_price?.toLocaleString()}/mo
                       </span>
                     </>
-                  )}
+                  ) : null}
                 </p>
               </div>
               <div className="text-right shrink-0">
                 <span className="inline-flex items-center gap-1 px-2 py-0.5 text-[10px] font-semibold rounded-full bg-[#1E6A6A]/10 text-[#1E6A6A] uppercase tracking-wider">
-                  {property.rental_type?.replace('-', ' ')}
+                  {sublease ? 'Sublease' : property.rental_type?.replace('-', ' ')}
                 </span>
               </div>
             </div>
