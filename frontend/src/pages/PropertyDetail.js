@@ -673,7 +673,24 @@ const PropertyDetail = () => {
                     <div className="grid grid-cols-2 gap-2">
                       <button
                         type="button"
-                        onClick={() => (sublease || property.rental_type !== 'long-term') && setShowCalendar(showCalendar === 'range' ? null : 'range')}
+                        onClick={() => {
+                          if (sublease || property.rental_type !== 'long-term') {
+                            // If a complete range is set, clear both on
+                            // calendar-open so the next two clicks pick a
+                            // brand-new range cleanly. (react-day-picker's
+                            // mode="range" otherwise no-ops or shrinks the
+                            // existing range when clicking inside it.)
+                            if (dateRange?.from && dateRange?.to) {
+                              setDateRange({ from: undefined, to: undefined });
+                              setBookingData((prev) => ({
+                                ...prev,
+                                start_date: '',
+                                end_date: '',
+                              }));
+                            }
+                            setShowCalendar(showCalendar === 'range' ? null : 'range');
+                          }
+                        }}
                         className={`flex items-center gap-2 px-3 py-2.5 rounded-lg border text-sm text-left transition-colors ${
                           !sublease && property.rental_type === 'long-term' 
                             ? 'border-gray-200 bg-gray-50 cursor-not-allowed' 
@@ -689,7 +706,19 @@ const PropertyDetail = () => {
                       </button>
                       <button
                         type="button"
-                        onClick={() => setShowCalendar(showCalendar === 'range' ? null : 'range')}
+                        onClick={() => {
+                          // Same reset-on-open as check-in pill so clicking
+                          // here also restarts the range cleanly when needed.
+                          if (dateRange?.from && dateRange?.to) {
+                            setDateRange({ from: undefined, to: undefined });
+                            setBookingData((prev) => ({
+                              ...prev,
+                              start_date: '',
+                              end_date: '',
+                            }));
+                          }
+                          setShowCalendar(showCalendar === 'range' ? null : 'range');
+                        }}
                         className="flex items-center gap-2 px-3 py-2.5 rounded-lg border border-[#E5E5E5] text-sm text-left hover:border-black/30 transition-colors"
                         data-testid="booking-end-date"
                       >
@@ -769,6 +798,44 @@ const PropertyDetail = () => {
                           mode="range"
                           selected={dateRange}
                           onSelect={(range) => {
+                            // If the user already had a complete range and is
+                            // now clicking ANY single date, treat it as a
+                            // fresh restart. react-day-picker's default for
+                            // mode="range" shrinks the range when the click
+                            // falls inside it (e.g. clicking May 3 inside
+                            // May 1 → Jun 1 yields {May 1, May 3}, which is
+                            // confusing UX). The clicked date becomes the
+                            // new check-in; check-out clears so the user
+                            // picks it next.
+                            const hadCompleteRange =
+                              dateRange?.from && dateRange?.to;
+                            if (hadCompleteRange) {
+                              // Identify the clicked date — react-day-picker
+                              // gives us {from, to}: if `from` shifted, that's
+                              // the new click; otherwise `to` was the click.
+                              const clicked =
+                                range?.from && range.from.getTime() !== dateRange.from.getTime()
+                                  ? range.from
+                                  : range?.to ?? null;
+                              if (clicked) {
+                                setDateRange({ from: clicked, to: undefined });
+                                setBookingData((prev) => ({
+                                  ...prev,
+                                  start_date: format(clicked, 'yyyy-MM-dd'),
+                                  end_date: '',
+                                }));
+                              } else {
+                                // user clicked the existing `from` — reset
+                                setDateRange({ from: undefined, to: undefined });
+                                setBookingData((prev) => ({
+                                  ...prev,
+                                  start_date: '',
+                                  end_date: '',
+                                }));
+                              }
+                              return;
+                            }
+
                             // Handle minimum booking days/months
                             if (range?.from && !range?.to && property.minimum_booking_days) {
                               const minValue = parseInt(property.minimum_booking_days);
@@ -812,31 +879,38 @@ const PropertyDetail = () => {
                             return new Date();
                           })()}
                           numberOfMonths={1}
-                          disabled={[
-                            { before: new Date() },
-                            ...(() => {
-                              // Long-term with starting_date — always disable
-                              // dates before that, regardless of whether a
-                              // minimum_booking_days is set. (Without this
-                              // guard, we used to fall through to the past
-                              // `available_from` and let renters pick today
-                              // when starting_date was tomorrow.)
-                              if (property.rental_type === 'long-term' && property.starting_date) {
-                                const startDate = parseLocalDate(property.starting_date);
-                                if (property.minimum_booking_days) {
-                                  const minCheckout = new Date(startDate);
-                                  minCheckout.setMonth(minCheckout.getMonth() + parseInt(property.minimum_booking_days));
-                                  return [{ before: minCheckout }];
+                          disabled={(() => {
+                            // Sublease view: restrict the picker entirely to
+                            // the sublease window and ignore the underlying
+                            // property's blocked-dates (one of which IS the
+                            // sublessor's own booking that this sublease was
+                            // carved out of — visitors should be free to
+                            // pick within the sublease's advertised window).
+                            if (sublease && sublease.available_from && sublease.available_to) {
+                              const winFrom = parseLocalDate(sublease.available_from);
+                              const winTo = parseLocalDate(sublease.available_to);
+                              return [{ before: winFrom }, { after: winTo }];
+                            }
+                            return [
+                              { before: new Date() },
+                              ...(() => {
+                                if (property.rental_type === 'long-term' && property.starting_date) {
+                                  const startDate = parseLocalDate(property.starting_date);
+                                  if (property.minimum_booking_days) {
+                                    const minCheckout = new Date(startDate);
+                                    minCheckout.setMonth(minCheckout.getMonth() + parseInt(property.minimum_booking_days));
+                                    return [{ before: minCheckout }];
+                                  }
+                                  return [{ before: startDate }];
                                 }
-                                return [{ before: startDate }];
-                              }
-                              if (property.available_from) {
-                                return [{ before: parseLocalDate(property.available_from) }];
-                              }
-                              return [];
-                            })(),
-                            ...blockedDates.map(d => new Date(d))
-                          ]}
+                                if (property.available_from) {
+                                  return [{ before: parseLocalDate(property.available_from) }];
+                                }
+                                return [];
+                              })(),
+                              ...blockedDates.map(d => new Date(d))
+                            ];
+                          })()}
                           className="rounded-xl"
                           style={{ pointerEvents: 'auto' }}
                           classNames={{
