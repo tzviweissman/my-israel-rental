@@ -16,6 +16,7 @@ import PropertyList from '../components/dashboard/PropertyList';
 import AddPropertyModal from '../components/dashboard/AddPropertyModal';
 import BulkUploadModal from '../components/dashboard/BulkUploadModal';
 import BulkManagerTab from '../components/dashboard/BulkManagerTab';
+import MessagesTab from '../components/dashboard/MessagesTab';
 import ManagerHeader from '../components/dashboard/ManagerHeader';
 import DashboardTabs from '../components/dashboard/DashboardTabs';
 
@@ -223,6 +224,10 @@ const Dashboard = () => {
             token={token}
             API={API}
           />
+        )}
+
+        {activeTab === 'messages' && (
+          <MessagesTab API={API} token={token} />
         )}
       </div>
     </div>

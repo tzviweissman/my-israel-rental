@@ -2374,6 +2374,8 @@ export interface components {
             property_id?: string | null;
             /** Sublease Id */
             sublease_id?: string | null;
+            /** Sender Id */
+            sender_id?: string | null;
         } & {
             [key: string]: unknown;
         };
@@ -4766,7 +4768,9 @@ export interface operations {
     };
     get_messages_api_chat_messages__property_id__get: {
         parameters: {
-            query?: never;
+            query?: {
+                with_user?: string | null;
+            };
             header?: never;
             path: {
                 property_id: string;

@@ -1,6 +1,6 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { Layers, KeyRound, Home, Sparkles, Bell, Heart } from 'lucide-react';
+import { Layers, KeyRound, Home, Sparkles, Bell, Heart, MessageCircle } from 'lucide-react';
 
 /**
  * Horizontal tab navigation for the Dashboard. Pure presentational —
@@ -56,6 +56,15 @@ const DashboardTabs = ({ activeTab, setActiveTab, role }) => {
           data-testid="tab-bookings"
         >
           {t('dashboard.myBookings')}
+        </button>
+
+        <button
+          onClick={() => setActiveTab('messages')}
+          className={`${cls(activeTab === 'messages')} flex items-center justify-center gap-1.5`}
+          data-testid="tab-messages"
+        >
+          <MessageCircle size={14} />
+          Messages
         </button>
 
         {isRenter && (

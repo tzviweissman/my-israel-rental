@@ -137,7 +137,14 @@ const Navigation = () => {
     // The trailing `_t` cache-buster guarantees the deep-link useEffect fires every
     // time, even when the user is already on the same booking/sublease.
     const t = Date.now();
-    if (notification.booking_id) {
+    if (notification.type === 'new_message' && notification.property_id) {
+      // Take the lister directly into the chat with the renter who messaged them.
+      const params = new URLSearchParams();
+      if (notification.sender_id) params.set('with', notification.sender_id);
+      if (notification.sublease_id) params.set('sublease_id', notification.sublease_id);
+      params.set('_t', String(t));
+      navigate(`/chat/${notification.property_id}?${params.toString()}`);
+    } else if (notification.booking_id) {
       navigate(`/dashboard?tab=bookings&highlight=${notification.booking_id}&_t=${t}`);
     } else if (notification.property_id) {
       // Navigate directly to the property detail page

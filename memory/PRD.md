@@ -292,6 +292,11 @@ Build a bilingual (English/Hebrew) rental website named MyIsraelRental.com with 
 - [x] **Sublease Edit** (2026-04-30):
   - Backend `PUT /api/subleases/{id}` now accepts `currency` and `holiday_tags` alongside existing fields.
   - Frontend: each sublease card has an Edit button that hydrates the form with existing values and scrolls into view. Header/CTA switch to edit mode ("Save Changes"). Step-1 picker and "Change property" link hidden since the property is immutable.
+- [x] **Chat notification deep-linking + Messages inbox tab** (2026-05-01):
+  - **Backend** `routes/chat.py`: `new_message` notifications now persist `sender_id` so the lister/owner can deep-link straight into the right conversation. `GET /api/chat/messages/{property_id}` accepts `with_user=` to scope output (and read-receipt updates) to a single counterparty pair, fixing the multi-renter inbox bleed-through. `GET /api/chat/conversations` includes `other_user.id` in each row.
+  - **Frontend** `Navigation.js`: `handleNotificationClick` now routes `new_message` notifications to `/chat/{property_id}?with={sender_id}&sublease_id=…` instead of the property page. `Chat.js` reads `?with=` and uses it as `otherUserId` (overrides owner_id when the lister is viewing); messages fetch is scoped per counterparty.
+  - **New `MessagesTab.jsx`** added to the Dashboard (`tab=messages`, MessageCircle icon) — pulls `GET /api/chat/conversations`, lists each conversation card with property title, counterparty, last message, unread dot, and deep-links to `/chat/{property_id}?with={other_user.id}`.
+  - Verified end-to-end with curl: renter sends message → owner notification carries `sender_id` → owner conversations list returns scoped pair → owner messages endpoint with `with_user` returns only that conversation. Smoke screenshot of the new Messages tab confirms it renders both conversations correctly.
 
 ### P2 - Lower Priority
 - [ ] Manager bulk property upload via text

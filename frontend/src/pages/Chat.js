@@ -11,6 +11,10 @@ const Chat = () => {
   // When the user clicked a Sublease card, the chat should talk to the
   // sublessor — not the underlying property owner.
   const subleaseId = searchParams.get('sublease_id');
+  // When a lister/owner deep-links from a notification, `with` carries the
+  // renter's id so we route messages to that specific person (not back to
+  // themselves, which is what would happen if we naively used owner_id).
+  const counterpartyOverride = searchParams.get('with');
   const navigate = useNavigate();
   const { user, token } = useContext(AuthContext);
   const [messages, setMessages] = useState([]);
@@ -25,11 +29,16 @@ const Chat = () => {
 
   useEffect(() => {
     fetchProperty();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [propertyId]);
+
+  useEffect(() => {
+    if (!otherUserId) return;
     fetchMessages();
     const interval = setInterval(fetchMessages, 3000);
     return () => clearInterval(interval);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [propertyId]);
+  }, [propertyId, otherUserId]);
 
   useEffect(() => {
     scrollToBottom();
@@ -51,6 +60,19 @@ const Chat = () => {
     try {
       const response = await axios.get(`${API}/properties/${propertyId}`);
       setProperty(response.data);
+      // Explicit ?with= override always wins (notification deep-link)
+      if (counterpartyOverride) {
+        setOtherUserId(counterpartyOverride);
+        if (subleaseId) {
+          try {
+            const subRes = await axios.get(`${API}/subleases/${subleaseId}`);
+            setSublease(subRes.data);
+          } catch {
+            /* sublease no longer exists — fall through */
+          }
+        }
+        return;
+      }
       if (subleaseId) {
         // Route the conversation to the sublessor rather than the property owner
         try {
@@ -70,7 +92,12 @@ const Chat = () => {
 
   const fetchMessages = async () => {
     try {
-      const response = await axios.get(`${API}/chat/messages/${propertyId}`, {
+      // When the lister deep-links via notification, scope to that single
+      // counterparty so multi-renter inboxes don't bleed into one another.
+      const url = otherUserId
+        ? `${API}/chat/messages/${propertyId}?with_user=${otherUserId}`
+        : `${API}/chat/messages/${propertyId}`;
+      const response = await axios.get(url, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setMessages(response.data);

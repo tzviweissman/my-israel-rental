@@ -201,6 +201,7 @@ class NotificationOut(BaseModel):
     booking_id: str | None = None
     property_id: str | None = None
     sublease_id: str | None = None
+    sender_id: str | None = None
 
 
 class SavedSearchOut(BaseModel):
