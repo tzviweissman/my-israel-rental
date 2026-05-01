@@ -30,6 +30,19 @@ const Dashboard = () => {
   const [showBulkUpload, setShowBulkUpload] = useState(false);
   const [editingProperty, setEditingProperty] = useState(null);
   const [activeTab, setActiveTab] = useState('properties');
+  const [unreadConversations, setUnreadConversations] = useState(0);
+
+  const fetchUnreadConversations = async () => {
+    if (!user) return;
+    try {
+      const res = await axios.get(`${API}/chat/conversations`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setUnreadConversations((res.data || []).filter((c) => c.unread).length);
+    } catch (err) {
+      console.error('Failed to fetch conversations', err);
+    }
+  };
 
   const fetchProperties = async () => {
     if (!user) return;
@@ -59,7 +72,16 @@ const Dashboard = () => {
     if (user) {
       fetchProperties();
       fetchBookings();
+      fetchUnreadConversations();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user]);
+
+  // Poll unread conversations badge while on the dashboard
+  useEffect(() => {
+    if (!user) return;
+    const interval = setInterval(fetchUnreadConversations, 20000);
+    return () => clearInterval(interval);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
 
@@ -149,7 +171,12 @@ const Dashboard = () => {
 
         {isOwnerLike && <ManagerHeader user={user} token={token} API={API} />}
 
-        <DashboardTabs activeTab={activeTab} setActiveTab={setActiveTab} role={user?.role} />
+        <DashboardTabs
+          activeTab={activeTab}
+          setActiveTab={setActiveTab}
+          role={user?.role}
+          unreadMessages={unreadConversations}
+        />
 
         {activeTab === 'contracts' && isOwnerLike && (
           <ContractManager properties={properties} />
@@ -227,7 +254,7 @@ const Dashboard = () => {
         )}
 
         {activeTab === 'messages' && (
-          <MessagesTab API={API} token={token} />
+          <MessagesTab API={API} token={token} onUnreadChange={setUnreadConversations} />
         )}
       </div>
     </div>

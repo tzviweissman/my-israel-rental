@@ -7,7 +7,7 @@ import { MessageCircle, Building2 } from 'lucide-react';
  * Inbox tab — lists every conversation the current user is part of and
  * deep-links into the matching `/chat/:propertyId?with=…` route.
  */
-const MessagesTab = ({ API, token }) => {
+const MessagesTab = ({ API, token, onUnreadChange }) => {
   const [conversations, setConversations] = useState([]);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
@@ -17,13 +17,15 @@ const MessagesTab = ({ API, token }) => {
       const res = await axios.get(`${API}/chat/conversations`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      setConversations(res.data || []);
+      const list = res.data || [];
+      setConversations(list);
+      if (onUnreadChange) onUnreadChange(list.filter((c) => c.unread).length);
     } catch (err) {
       console.error('Failed to fetch conversations', err);
     } finally {
       setLoading(false);
     }
-  }, [API, token]);
+  }, [API, token, onUnreadChange]);
 
   useEffect(() => {
     fetchConversations();

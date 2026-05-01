@@ -5,6 +5,7 @@ import { AuthContext, API } from '../App';
 import { Globe, LogOut, LayoutDashboard, Menu, X, Home, Building, Palmtree, Warehouse, ChevronRight, Search, Bell } from 'lucide-react';
 import axios from 'axios';
 import { toast } from 'sonner';
+import { playMessagePing, requestDesktopNotificationPermission, showDesktopNotification } from '../utils/messageAlerts';
 
 const Navigation = () => {
   const { t, i18n } = useTranslation();
@@ -24,6 +25,10 @@ const Navigation = () => {
   const [showNotifications, setShowNotifications] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
   const notificationRef = useRef(null);
+  // Track which message-notification ids we've already alerted on so the
+  // ping/desktop-popup only fires once per new arrival (not on every poll).
+  const alertedMessageIdsRef = useRef(new Set());
+  const initialFetchRef = useRef(true);
 
   const toggleLanguage = () => {
     const newLang = i18n.language.startsWith('he') ? 'en' : 'he';
@@ -54,8 +59,38 @@ const Navigation = () => {
       const response = await axios.get(`${API}/notifications`, {
         headers: { Authorization: `Bearer ${token}` }
       });
-      setNotifications(response.data);
-      setUnreadCount(response.data.filter(n => !n.read).length);
+      const data = response.data || [];
+
+      // Detect newly-arrived unread "new_message" notifications and fire
+      // one ping + desktop popup per id. Skip on the very first fetch so we
+      // don't blast the user with alerts for a backlog they already saw.
+      if (!initialFetchRef.current) {
+        const fresh = data.filter(
+          (n) =>
+            n.type === 'new_message' &&
+            !n.read &&
+            !alertedMessageIdsRef.current.has(n.id)
+        );
+        if (fresh.length > 0) {
+          playMessagePing();
+          fresh.forEach((n) => {
+            alertedMessageIdsRef.current.add(n.id);
+            showDesktopNotification(
+              'New message',
+              n.message || 'You have a new message',
+              () => handleNotificationClick(n)
+            );
+          });
+        }
+      } else {
+        data.forEach((n) => {
+          if (n.type === 'new_message') alertedMessageIdsRef.current.add(n.id);
+        });
+        initialFetchRef.current = false;
+      }
+
+      setNotifications(data);
+      setUnreadCount(data.filter(n => !n.read).length);
     } catch (error) {
       console.error('Failed to fetch notifications', error);
     }
@@ -245,7 +280,10 @@ const Navigation = () => {
             {user && (
               <div className="relative" ref={notificationRef}>
                 <button
-                  onClick={() => setShowNotifications(!showNotifications)}
+                  onClick={() => {
+                    setShowNotifications(!showNotifications);
+                    requestDesktopNotificationPermission();
+                  }}
                   className="relative p-2 rounded-full hover:bg-white/10 transition-colors"
                   data-testid="notification-bell"
                 >

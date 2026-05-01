@@ -16,7 +16,7 @@ const ACTIVE_RED = 'bg-white text-red-500 shadow-sm';
 const cls = (active, activeColor = ACTIVE_TEAL) =>
   `${BASE} ${active ? activeColor : INACTIVE}`;
 
-const DashboardTabs = ({ activeTab, setActiveTab, role }) => {
+const DashboardTabs = ({ activeTab, setActiveTab, role, unreadMessages = 0 }) => {
   const { t } = useTranslation();
   const isRenter = role === 'renter';
   const isOwnerLike = role && role !== 'renter';
@@ -60,11 +60,19 @@ const DashboardTabs = ({ activeTab, setActiveTab, role }) => {
 
         <button
           onClick={() => setActiveTab('messages')}
-          className={`${cls(activeTab === 'messages')} flex items-center justify-center gap-1.5`}
+          className={`${cls(activeTab === 'messages')} flex items-center justify-center gap-1.5 relative`}
           data-testid="tab-messages"
         >
           <MessageCircle size={14} />
           Messages
+          {unreadMessages > 0 && (
+            <span
+              className="ml-1 inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full bg-red-500 text-white text-[10px] font-bold leading-none"
+              data-testid="messages-unread-badge"
+            >
+              {unreadMessages > 9 ? '9+' : unreadMessages}
+            </span>
+          )}
         </button>
 
         {isRenter && (
