@@ -528,19 +528,9 @@ const PropertyDetail = () => {
               )}
             </div>
 
-            {/* Starting Date (Long-term) or Available From (Others) */}
-            {property.rental_type === 'long-term' && property.starting_date && (
-              <div className="bg-[#1E6A6A]/10 border border-[#1E6A6A]/30 p-4 rounded-xl mb-6">
-                <div className="flex items-center gap-2">
-                  <CalendarIcon size={20} style={{ color: '#1E6A6A' }} />
-                  <span className="font-medium text-gray-700">Starting Date (Fixed):</span>
-                  <span className="font-bold" style={{ color: '#1E6A6A' }}>
-                    {format(parseLocalDate(property.starting_date), 'MMMM d, yyyy')}
-                  </span>
-                </div>
-              </div>
-            )}
-            
+            {/* Available From (non-long-term only) — long-term listings used to
+                show a "Starting Date (Fixed)" card here, but renters don't need
+                to see internal scheduling so it's hidden now. */}
             {property.rental_type !== 'long-term' && property.available_from && (
               <div className="bg-[#D4AF37]/10 border border-[#D4AF37]/30 p-4 rounded-xl mb-6">
                 <div className="flex items-center gap-2">
@@ -676,9 +666,6 @@ const PropertyDetail = () => {
                   {(() => null)()}
                   <div>
                     <label className="block text-sm font-medium mb-1.5">{t('property.checkIn')} & {t('property.checkOut')}</label>
-                    {!sublease && property.rental_type === 'long-term' && property.starting_date && (
-                      <p className="text-xs text-[#D4AF37] mb-1.5">Starting date is fixed for this long-term rental</p>
-                    )}
                     <div className="grid grid-cols-2 gap-2">
                       <button
                         type="button"
