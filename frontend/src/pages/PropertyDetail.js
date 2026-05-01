@@ -543,8 +543,10 @@ const PropertyDetail = () => {
               </div>
             )}
 
-            {/* Minimum Booking Length */}
-            {property.minimum_booking_days && (
+            {/* Minimum Booking Length — hidden when viewing a sublease since
+                the underlying property's minimum-stay rule doesn't apply to
+                the sublessee's short-window booking. */}
+            {!sublease && property.minimum_booking_days && (
               <div className="bg-gray-50 border border-gray-200 p-3 rounded-xl mb-6">
                 <div className="flex items-center gap-2">
                   <CalendarIcon size={18} className="text-gray-600" />
