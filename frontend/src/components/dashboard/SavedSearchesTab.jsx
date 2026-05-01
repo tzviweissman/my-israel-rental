@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { Bell, Trash2, Calendar, MapPin, Home as HomeIcon, DollarSign } from 'lucide-react';
+import { Bell, Trash2, Calendar, MapPin, Home as HomeIcon, DollarSign, Link as LinkIcon } from 'lucide-react';
 import { toast } from 'sonner';
 
 /**
@@ -53,7 +53,7 @@ const SavedSearchesTab = ({ API, token }) => {
 
   // Deep-link to the Properties page with the saved filters applied, so the
   // renter sees the matching listings immediately.
-  const openSearch = (s) => {
+  const buildSearchPath = (s) => {
     const f = s.filters || {};
     const segment = (f.rental_type && f.rental_type !== 'all') ? f.rental_type : 'all';
     const params = new URLSearchParams();
@@ -72,7 +72,6 @@ const SavedSearchesTab = ({ API, token }) => {
     ];
     passthrough.forEach((k) => {
       if (f[k] !== undefined && f[k] !== null && f[k] !== '') {
-        // Normalize field names between saved-search schema and Properties.js URL params
         if (k === 'start_date') params.append('date_from', f[k]);
         else if (k === 'end_date') params.append('date_to', f[k]);
         else if (k === 'bedrooms_min') params.append('min_bedrooms', f[k]);
@@ -80,7 +79,34 @@ const SavedSearchesTab = ({ API, token }) => {
       }
     });
     const qs = params.toString();
-    navigate(`/properties/${segment}${qs ? `?${qs}` : ''}`);
+    return `/properties/${segment}${qs ? `?${qs}` : ''}`;
+  };
+
+  const openSearch = (s) => {
+    navigate(buildSearchPath(s));
+  };
+
+  const copySearchLink = async (s) => {
+    const url = `${window.location.origin}${buildSearchPath(s)}`;
+    try {
+      await navigator.clipboard.writeText(url);
+      toast.success('Search link copied');
+    } catch {
+      // Fallback: legacy execCommand
+      try {
+        const ta = document.createElement('textarea');
+        ta.value = url;
+        ta.style.position = 'fixed';
+        ta.style.opacity = '0';
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand('copy');
+        document.body.removeChild(ta);
+        toast.success('Search link copied');
+      } catch {
+        toast.error('Could not copy link');
+      }
+    }
   };
 
   return (
@@ -142,17 +168,31 @@ const SavedSearchesTab = ({ API, token }) => {
                     </div>
                     <h3 className="text-sm font-bold text-[#1E6A6A] line-clamp-1">{s.name}</h3>
                   </div>
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleDelete(s.id);
-                    }}
-                    className="text-gray-400 hover:text-red-500 transition-colors p-1"
-                    data-testid={`saved-search-delete-${s.id}`}
-                    aria-label="Remove alert"
-                  >
-                    <Trash2 size={15} />
-                  </button>
+                  <div className="flex items-center gap-1">
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        copySearchLink(s);
+                      }}
+                      className="text-gray-400 hover:text-[#1E6A6A] transition-colors p-1"
+                      data-testid={`saved-search-copy-${s.id}`}
+                      aria-label="Copy search link"
+                      title="Copy search link"
+                    >
+                      <LinkIcon size={15} />
+                    </button>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleDelete(s.id);
+                      }}
+                      className="text-gray-400 hover:text-red-500 transition-colors p-1"
+                      data-testid={`saved-search-delete-${s.id}`}
+                      aria-label="Remove alert"
+                    >
+                      <Trash2 size={15} />
+                    </button>
+                  </div>
                 </div>
 
                 <div className="space-y-1.5 text-xs text-gray-600 mb-3">
