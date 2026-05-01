@@ -668,40 +668,28 @@ const PropertyDetail = () => {
                 )}
               </div>
 
-              {/* Sublease deep-link banner — tells the visitor that these
-                  dates came from the sublease card they clicked. */}
-              {preSubleaseId && preFromParam && preToParam && (
-                <div
-                  className="mb-3 rounded-xl border border-[#D4AF37]/40 bg-gradient-to-br from-[#fffaee] to-white px-4 py-3"
-                  data-testid="sublease-context-banner"
-                >
-                  <p className="text-[10px] font-semibold tracking-[0.15em] uppercase text-[#8a6d1d] mb-0.5">
-                    Sublease listing
-                  </p>
-                  <p className="text-sm text-gray-800">
-                    Booking dates pre-filled: <span className="font-semibold">{format(parseLocalDate(preFromParam), 'MMM d')} — {format(parseLocalDate(preToParam), 'MMM d, yyyy')}</span>
-                  </p>
-                </div>
-              )}
-
               {/* Booking Form - Always Visible */}
               <div className="space-y-2.5" data-testid="booking-form">
+                  {/* When viewing a sublease, ignore long-term locked-date UX
+                      since the sublease is a short-window booking even when
+                      the underlying property is long-term. */}
+                  {(() => null)()}
                   <div>
                     <label className="block text-sm font-medium mb-1.5">{t('property.checkIn')} & {t('property.checkOut')}</label>
-                    {property.rental_type === 'long-term' && property.starting_date && (
+                    {!sublease && property.rental_type === 'long-term' && property.starting_date && (
                       <p className="text-xs text-[#D4AF37] mb-1.5">Starting date is fixed for this long-term rental</p>
                     )}
                     <div className="grid grid-cols-2 gap-2">
                       <button
                         type="button"
-                        onClick={() => property.rental_type !== 'long-term' && setShowCalendar(showCalendar === 'range' ? null : 'range')}
+                        onClick={() => (sublease || property.rental_type !== 'long-term') && setShowCalendar(showCalendar === 'range' ? null : 'range')}
                         className={`flex items-center gap-2 px-3 py-2.5 rounded-lg border text-sm text-left transition-colors ${
-                          property.rental_type === 'long-term' 
+                          !sublease && property.rental_type === 'long-term' 
                             ? 'border-gray-200 bg-gray-50 cursor-not-allowed' 
                             : 'border-[#E5E5E5] hover:border-black/30'
                         }`}
                         data-testid="booking-start-date"
-                        disabled={property.rental_type === 'long-term'}
+                        disabled={!sublease && property.rental_type === 'long-term'}
                       >
                         <CalendarIcon size={14} className="text-gray-400 flex-shrink-0" />
                         <span className={dateRange.from ? 'text-black' : 'text-gray-400'}>
@@ -721,7 +709,8 @@ const PropertyDetail = () => {
                       </button>
                     </div>
                     
-                    {/* Quick Select Buttons for Longer Stays */}
+                    {/* Quick Select Buttons for Longer Stays — hidden for subleases (short-window). */}
+                    {!sublease && (
                     <div className="mt-3">
                       <p className="text-xs text-gray-500 mb-2">Quick select:</p>
                       <div className="flex gap-2 flex-wrap">
@@ -775,6 +764,7 @@ const PropertyDetail = () => {
                         </button>
                       </div>
                     </div>
+                    )}
                     
                     {showCalendar === 'range' && (
                       <div className="mt-2 bg-white rounded-xl border-2 border-[#1E6A6A] shadow-2xl p-4 relative z-[100] w-[320px]" data-testid="booking-calendar" style={{ pointerEvents: 'auto' }}>
