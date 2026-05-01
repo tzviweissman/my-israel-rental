@@ -2,7 +2,7 @@ import React, { useContext, useState, useRef, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { AuthContext, API } from '../App';
-import { Globe, LogOut, LayoutDashboard, Menu, X, Home, Building, Palmtree, Warehouse, ChevronRight, Search, Bell } from 'lucide-react';
+import { Globe, LogOut, LayoutDashboard, Menu, X, Home, Building, Palmtree, Warehouse, ChevronRight, Search, Bell, MessageCircle } from 'lucide-react';
 import axios from 'axios';
 import { toast } from 'sonner';
 import { playMessagePing, requestDesktopNotificationPermission, showDesktopNotification } from '../utils/messageAlerts';
@@ -29,6 +29,8 @@ const Navigation = () => {
   // ping/desktop-popup only fires once per new arrival (not on every poll).
   const alertedMessageIdsRef = useRef(new Set());
   const initialFetchRef = useRef(true);
+  // Unread inbox count (for the dedicated chat icon next to the bell)
+  const [unreadConversations, setUnreadConversations] = useState(0);
 
   const toggleLanguage = () => {
     const newLang = i18n.language.startsWith('he') ? 'en' : 'he';
@@ -210,6 +212,24 @@ const Navigation = () => {
     }
   }, [user, token]);
 
+  // Poll unread inbox count for the chat-icon badge in the navbar
+  useEffect(() => {
+    if (!user || !token) return;
+    const fetchUnreadConversations = async () => {
+      try {
+        const res = await axios.get(`${API}/chat/conversations`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        setUnreadConversations((res.data || []).filter((c) => c.unread).length);
+      } catch (err) {
+        console.error('Failed to fetch conversations', err);
+      }
+    };
+    fetchUnreadConversations();
+    const interval = setInterval(fetchUnreadConversations, 20000);
+    return () => clearInterval(interval);
+  }, [user, token]);
+
   useEffect(() => {
     if (!isHome) return;
     const handleScroll = () => {
@@ -276,6 +296,27 @@ const Navigation = () => {
           )}
 
           <div className="flex items-center gap-3">
+            {/* Inbox / Messages shortcut */}
+            {user && (
+              <button
+                onClick={() => navigate('/dashboard?tab=messages')}
+                className="relative p-2 rounded-full hover:bg-white/10 transition-colors"
+                data-testid="nav-messages-icon"
+                aria-label="Messages"
+                title="Messages"
+              >
+                <MessageCircle size={scrolled ? 20 : 22} color="#D4AF37" />
+                {unreadConversations > 0 && (
+                  <span
+                    className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center"
+                    data-testid="nav-messages-badge"
+                  >
+                    {unreadConversations > 9 ? '9+' : unreadConversations}
+                  </span>
+                )}
+              </button>
+            )}
+
             {/* Notification Bell */}
             {user && (
               <div className="relative" ref={notificationRef}>

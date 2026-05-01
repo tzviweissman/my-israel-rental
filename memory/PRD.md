@@ -311,6 +311,9 @@ Build a bilingual (English/Hebrew) rental website named MyIsraelRental.com with 
   - **Backend**: new `utils/chat_translate.py` (Hebrew autodetection via Unicode range + `LlmChat` with `claude-4-sonnet-20250514` and a chat-tone system prompt that preserves emojis/prices/dates verbatim). New `POST /api/chat/messages/{message_id}/translate` (body `{target_lang: 'en'|'he'}`) returns `TranslatedMessageResponse {message_id, source_lang, target_lang, translated_text}` and **caches** results on the message doc (`translations.{lang}`) so repeat calls are instant (~100 ms vs LLM round-trip). Participant-only enforcement.
   - **Frontend** `Chat.js`: each incoming message in the *opposite* script of the current UI language gets a "Translate to English/Hebrew" link with a `Languages` icon. Clicking shows "Translating…" → an inline divider block with the source→target pair label and the translated text. Clicking again toggles it off. State kept per-message in component state.
   - Verified end-to-end: renter sends `שלום! האם הדירה עדיין פנויה?` → owner clicks Translate → renders "HEBREW → ENGLISH / Hello! Is the apartment still available?" inline. Cache hit on second call returned in 107 ms.
+- [x] **Top-nav Messages icon (always-visible inbox shortcut)** (2026-05-01):
+  - Added a `MessageCircle` icon next to the bell in `Navigation.js`, visible site-wide whenever the user is logged in. Polls `GET /api/chat/conversations` every 20 s and renders a red unread-count badge (`9+` clamp). Click navigates to `/dashboard?tab=messages`.
+  - Verified: with one new unread message, the badge shows "1"; clicking lands on Dashboard with the Messages tab active.
 
 ### P2 - Lower Priority
 - [ ] Manager bulk property upload via text
