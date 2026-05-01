@@ -45,6 +45,21 @@ const PropertyDetail = () => {
   // present, its price/currency/price_type take precedence over the
   // underlying property's price in the booking sidebar.
   const [sublease, setSublease] = useState(null);
+  const [calendarMonth, setCalendarMonth] = useState(new Date());
+
+  // Keep the calendar's opening month anchored to the most relevant date
+  // (sublease window start > property availability > today) so the user
+  // never has to scroll months to find the dates they need.
+  useEffect(() => {
+    if (sublease?.available_from) {
+      setCalendarMonth(parseLocalDate(sublease.available_from));
+    } else if (property?.available_from) {
+      setCalendarMonth(parseLocalDate(property.available_from));
+    } else if (property?.starting_date) {
+      setCalendarMonth(parseLocalDate(property.starting_date));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [sublease, property?.available_from, property?.starting_date]);
   const [showBooking, setShowBooking] = useState(false);
   const [exchangeRate, setExchangeRate] = useState(null);
   const [blockedDates, setBlockedDates] = useState([]);
@@ -797,6 +812,8 @@ const PropertyDetail = () => {
                         <Calendar
                           mode="range"
                           selected={dateRange}
+                          month={calendarMonth}
+                          onMonthChange={setCalendarMonth}
                           onSelect={(range) => {
                             // If the user already had a complete range and is
                             // now clicking ANY single date, treat it as a
