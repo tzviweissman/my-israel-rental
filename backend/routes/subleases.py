@@ -50,8 +50,10 @@ async def create_sublease(sublease_data: SubleaseCreate, payload: dict = Depends
         "holiday_tags": sublease_data.holiday_tags or [],
         "bedrooms_available": sublease_data.bedrooms_available if sublease_data.bedrooms_available is not None else property_data.get('bedrooms', 0),
         "notes": sublease_data.notes or "",
-        # Copy key property details for the listing
-        "title": f"Sublease: {property_data.get('title', '')}",
+        # Copy key property details for the listing. We don't prefix
+        # "Sublease:" — visitors don't need to see that distinction; the
+        # SUBLEASE ribbon on the card already conveys the type.
+        "title": property_data.get('title', ''),
         "description": property_data.get('description', ''),
         "area": property_data.get('area', ''),
         "address": property_data.get('address', ''),
