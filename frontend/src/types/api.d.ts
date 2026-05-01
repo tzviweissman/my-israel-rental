@@ -1446,6 +1446,29 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/saved-searches/matches/{match_id}/hide": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Hide Saved Search Match
+         * @description Hide a single match from the renter's Alerts grid.
+         *
+         *     The underlying ``saved_search_alerts`` row is kept for history — we just
+         *     flag ``hidden=True`` so the matches listing endpoint filters it out.
+         */
+        post: operations["hide_saved_search_match_api_saved_searches_matches__match_id__hide_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/properties/{property_id}/ical": {
         parameters: {
             query?: never;
@@ -5841,6 +5864,37 @@ export interface operations {
             header?: never;
             path: {
                 search_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MessageResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    hide_saved_search_match_api_saved_searches_matches__match_id__hide_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                match_id: string;
             };
             cookie?: never;
         };

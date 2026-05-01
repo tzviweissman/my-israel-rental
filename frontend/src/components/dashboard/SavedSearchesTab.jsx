@@ -15,6 +15,7 @@ import {
   Sparkles,
   Bed,
   Bath,
+  X,
 } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -66,6 +67,22 @@ const SavedSearchesTab = ({ API, token }) => {
       toast.success('Alert removed');
     } catch {
       toast.error('Failed to remove alert');
+    }
+  };
+
+  const handleHideMatch = async (matchId) => {
+    // Optimistic removal; restore on failure
+    const prev = matches;
+    setMatches((cur) => cur.filter((m) => m.id !== matchId));
+    try {
+      await axios.post(
+        `${API}/saved-searches/matches/${matchId}/hide`,
+        {},
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+    } catch {
+      setMatches(prev);
+      toast.error('Could not hide this match');
     }
   };
 
@@ -194,13 +211,33 @@ const SavedSearchesTab = ({ API, token }) => {
                 ? 'Back on market'
                 : 'Just listed';
             return (
-              <button
+              <div
                 key={m.id}
-                type="button"
                 onClick={() => navigate(`/property/${m.property_id}`)}
-                className="text-left rounded-2xl bg-white overflow-hidden border border-gray-100 transition-all hover:shadow-lg hover:border-[#D4AF37]/40"
+                className="text-left rounded-2xl bg-white overflow-hidden border border-gray-100 transition-all hover:shadow-lg hover:border-[#D4AF37]/40 cursor-pointer relative group"
                 data-testid={`alert-match-${m.property_id}`}
+                role="button"
+                tabIndex={0}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    navigate(`/property/${m.property_id}`);
+                  }
+                }}
               >
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleHideMatch(m.id);
+                  }}
+                  className="absolute top-2 right-2 z-10 w-7 h-7 rounded-full bg-white/90 backdrop-blur-sm text-gray-600 hover:text-red-500 hover:bg-white shadow-sm flex items-center justify-center transition-all opacity-0 group-hover:opacity-100 focus:opacity-100"
+                  data-testid={`alert-match-hide-${m.id}`}
+                  aria-label="Hide this match"
+                  title="Hide this match"
+                >
+                  <X size={14} />
+                </button>
                 <div className="relative h-40 bg-gray-100">
                   {Array.isArray(p.images) && p.images[0] ? (
                     <img
@@ -248,7 +285,7 @@ const SavedSearchesTab = ({ API, token }) => {
                     <p className="text-sm font-semibold text-[#1E6A6A] pt-1">{priceLabel}</p>
                   )}
                 </div>
-              </button>
+              </div>
             );
           })}
         </div>

@@ -88,7 +88,7 @@ async def list_saved_search_matches(payload: dict = Depends(verify_token)) -> li
     """
     user_id = payload['user_id']
     alerts = await db.saved_search_alerts.find(
-        {"user_id": user_id},
+        {"user_id": user_id, "hidden": {"$ne": True}},
         {"_id": 0},
     ).sort("sent_at", -1).to_list(500)
 
@@ -153,6 +153,25 @@ async def delete_saved_search(search_id: str, payload: dict = Depends(verify_tok
         raise HTTPException(status_code=403, detail="Not authorized")
     await db.saved_searches.delete_one({"id": search_id})
     return {"message": "Alert removed"}
+
+
+@api_router.post("/saved-searches/matches/{match_id}/hide", response_model=MessageResponse)
+async def hide_saved_search_match(
+    match_id: str, payload: dict = Depends(verify_token)
+) -> dict:
+    """Hide a single match from the renter's Alerts grid.
+
+    The underlying ``saved_search_alerts`` row is kept for history — we just
+    flag ``hidden=True`` so the matches listing endpoint filters it out.
+    """
+    result = await db.saved_search_alerts.update_one(
+        {"id": match_id, "user_id": payload['user_id']},
+        {"$set": {"hidden": True}},
+    )
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="Match not found")
+    return {"message": "Match hidden"}
+
 
 
 
