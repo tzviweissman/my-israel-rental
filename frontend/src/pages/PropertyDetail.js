@@ -457,7 +457,9 @@ const PropertyDetail = () => {
                 <MapPin size={20} />
                 <span className="text-lg">{property.address}, {property.area}</span>
               </div>
-              {property.has_agent_fee && property.agent_fee_price && (
+              {/* Agent fee is a long-term-rental concept; suppress on
+                  sublease views since it doesn't apply to sublessees. */}
+              {!sublease && property.has_agent_fee && property.agent_fee_price && (
                 <div className="flex flex-col gap-1 px-3 py-1.5 bg-[#D4AF37]/10 rounded-lg border border-[#D4AF37]/30">
                   <div className="flex items-center gap-2">
                     <span className="text-sm font-medium text-gray-700">Agent Fee:</span>
