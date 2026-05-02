@@ -325,6 +325,23 @@ const Navigation = () => {
           )}
 
           <div className="flex items-center gap-3">
+            {/* Language toggle */}
+            <button
+              onClick={toggleLanguage}
+              className="p-2 rounded-full hover:bg-white/10 transition-colors flex items-center gap-1"
+              data-testid="language-toggle"
+              aria-label="Toggle language"
+              title={i18n.language.startsWith('he') ? 'Switch to English' : 'Switch to Hebrew'}
+            >
+              <Globe size={scrolled ? 20 : 22} color="#D4AF37" />
+              <span
+                className="text-[10px] font-bold tracking-wide"
+                style={{ color: '#D4AF37' }}
+              >
+                {i18n.language.startsWith('he') ? 'EN' : 'עב'}
+              </span>
+            </button>
+
             {/* Inbox / Messages shortcut */}
             {user && (
               <button
@@ -523,11 +540,6 @@ const Navigation = () => {
 
                 {/* Settings */}
                 <div className="px-2 py-2">
-                  <button onClick={toggleLanguage} className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-150 hover:bg-white/5 group" style={{ color: '#D4AF37' }} data-testid="language-toggle">
-                    <Globe size={16} className="opacity-60 group-hover:opacity-100" />
-                    <span>{i18n.language.startsWith('he') ? 'English' : 'עברית'}</span>
-                  </button>
-
                   {user ? (
                     <>
                       <button onClick={() => handleNav(user.role === 'admin' ? '/admin' : '/dashboard')} className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-150 hover:bg-white/5 group" style={{ color: '#D4AF37' }} data-testid="nav-dashboard">
