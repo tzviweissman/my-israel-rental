@@ -45,7 +45,9 @@ function App() {
   }, [token]);
 
   useEffect(() => {
-    document.documentElement.dir = i18n.language.startsWith('he') ? 'rtl' : 'ltr';
+    // Keep the page direction LTR even when Hebrew strings are rendered.
+    // The user prefers translated text without the layout flipping sides.
+    document.documentElement.dir = 'ltr';
   }, [i18n.language]);
 
   const fetchCurrentUser = async () => {
