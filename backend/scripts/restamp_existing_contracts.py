@@ -101,8 +101,17 @@ def _stamp_image(
         if hasattr(draw, "textlength")
         else font_size * len(label) * 0.55
     )
-    draw.text((sig_x, name_y), label, fill=(20, 20, 20, 255), font=font_bold)
-    draw.text((sig_x + int(label_w), name_y), legal_name, fill=(20, 20, 20, 255), font=font_reg)
+    name_w = (
+        draw.textlength(legal_name, font=font_reg)
+        if hasattr(draw, "textlength")
+        else font_size * len(legal_name) * 0.55
+    )
+    total_w = label_w + name_w
+    name_x_start = sig_x + max(0, int((sig_w - total_w) / 2))
+    if name_x_start + int(total_w) > native_w:
+        name_x_start = max(0, native_w - int(total_w) - 4)
+    draw.text((name_x_start, name_y), label, fill=(20, 20, 20, 255), font=font_bold)
+    draw.text((name_x_start + int(label_w), name_y), legal_name, fill=(20, 20, 20, 255), font=font_reg)
 
     signed = Image.alpha_composite(contract_img, layer)
     if out_path.suffix.lower() in (".jpg", ".jpeg"):
@@ -165,11 +174,17 @@ def _stamp_pdf(
         name_y_pdf = max(0.0, name_y_below)
 
     c.setFillColorRGB(0.08, 0.08, 0.08)
+    label = "Name: "
+    label_w = c.stringWidth(label, "Helvetica-Bold", name_font_size)
+    name_w = c.stringWidth(legal_name, "Helvetica", name_font_size)
+    total_w = label_w + name_w
+    name_x = sig_x + max(0.0, (sig_w - total_w) / 2.0)
+    if name_x + total_w > page_w:
+        name_x = max(0.0, page_w - total_w - 4.0)
     c.setFont("Helvetica-Bold", name_font_size)
-    c.drawString(sig_x, name_y_pdf, "Name: ")
-    label_w = c.stringWidth("Name: ", "Helvetica-Bold", name_font_size)
+    c.drawString(name_x, name_y_pdf, label)
     c.setFont("Helvetica", name_font_size)
-    c.drawString(sig_x + label_w, name_y_pdf, legal_name)
+    c.drawString(name_x + label_w, name_y_pdf, legal_name)
     c.save()
     tmp.unlink(missing_ok=True)
 

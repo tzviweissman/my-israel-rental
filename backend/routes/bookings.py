@@ -598,13 +598,26 @@ async def sign_booking_contract(booking_id: str, body: dict = Body(...), payload
                     # Pathological case (signature consumes the whole page);
                     # keep the original clamp so we never crash.
                     name_y_pdf = max(0.0, name_y_below)
-                # Draw "Name: " bold-ish via two chars then regular name
+                # Horizontally CENTER the "Name: <legal_name>" string under
+                # the signature box. Starting at sig_x (the box's left edge)
+                # makes the name look offset from the visible scribble
+                # whenever the user drew it in the middle/right of the
+                # signature canvas — exactly what was reported as the name
+                # appearing "northwest" of the signature.
                 c.setFillColorRGB(0.08, 0.08, 0.08)
+                label = "Name: "
+                label_width = c.stringWidth(label, "Helvetica-Bold", name_font_size)
+                name_width = c.stringWidth(legal_name, "Helvetica", name_font_size)
+                total_width = label_width + name_width
+                # Center the combined label+name within the signature box.
+                # Clamp to the page so very long names don't run off.
+                name_x = sig_x + max(0.0, (sig_w - total_width) / 2.0)
+                if name_x + total_width > page_width:
+                    name_x = max(0.0, page_width - total_width - 4.0)
                 c.setFont("Helvetica-Bold", name_font_size)
-                c.drawString(sig_x, name_y_pdf, "Name: ")
-                label_width = c.stringWidth("Name: ", "Helvetica-Bold", name_font_size)
+                c.drawString(name_x, name_y_pdf, label)
                 c.setFont("Helvetica", name_font_size)
-                c.drawString(sig_x + label_width, name_y_pdf, legal_name)
+                c.drawString(name_x + label_width, name_y_pdf, legal_name)
                 c.save()
 
                 # Merge signature overlay with first page
@@ -682,10 +695,22 @@ async def sign_booking_contract(booking_id: str, body: dict = Body(...), payload
 
                 label = "Name: "
                 name_val = legal_name
+                # Horizontally center the "Name: <legal_name>" string under
+                # the signature box for the same reason as the PDF path.
+                if hasattr(draw, 'textlength'):
+                    label_w = draw.textlength(label, font=font_bold)
+                    name_w = draw.textlength(name_val, font=font_reg)
+                else:
+                    # Older Pillow fallback — approximate width
+                    label_w = font_size * len(label) * 0.55
+                    name_w = font_size * len(name_val) * 0.55
+                total_w = label_w + name_w
+                name_x_start = sig_x + max(0, int((sig_w - total_w) / 2))
+                if name_x_start + int(total_w) > native_w:
+                    name_x_start = max(0, native_w - int(total_w) - 4)
                 # Draw "Name: " in bold, then the actual legal name in regular for clarity
-                label_w = draw.textlength(label, font=font_bold) if hasattr(draw, 'textlength') else font_size * len(label) * 0.55
-                draw.text((sig_x, name_y), label, fill=(20, 20, 20, 255), font=font_bold)
-                draw.text((sig_x + int(label_w), name_y), name_val, fill=(20, 20, 20, 255), font=font_reg)
+                draw.text((name_x_start, name_y), label, fill=(20, 20, 20, 255), font=font_bold)
+                draw.text((name_x_start + int(label_w), name_y), name_val, fill=(20, 20, 20, 255), font=font_reg)
 
                 # Composite signature + legal-name onto contract
                 signed_image = Image.alpha_composite(contract_img, signature_layer)
