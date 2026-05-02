@@ -28,8 +28,13 @@ const BookingRow = ({
 }) => {
   const isOwner = user.role === 'owner' || user.role === 'manager';
   const isRenter = user.role === 'renter';
-  const canCancel = isOwner && ['pending', 'confirmed'].includes(booking.status);
-  const canRequestCancel = isRenter && ['pending', 'confirmed'].includes(booking.status);
+  const isSubleaseRenter = isRenter && !!booking.sublease_id;
+  const cancellableStatuses = ['pending', 'confirmed'];
+  // Sublease renters can cancel directly; regular renters request cancellation.
+  const canCancel =
+    (isOwner || isSubleaseRenter) && cancellableStatuses.includes(booking.status);
+  const canRequestCancel =
+    isRenter && !isSubleaseRenter && cancellableStatuses.includes(booking.status);
   const canApprove = isOwner && booking.status === 'cancellation_requested';
   const canAccept = isOwner && booking.status === 'pending';
   const needsSignature =
