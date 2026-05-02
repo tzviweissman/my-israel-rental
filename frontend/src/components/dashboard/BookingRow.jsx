@@ -39,7 +39,7 @@ const BookingRow = ({
     (isOwner || ownsBookingAsLister) && booking.status === 'cancellation_requested';
   const canAccept = (isOwner || ownsBookingAsLister) && booking.status === 'pending';
   const needsSignature =
-    isRenter &&
+    booking.renter_id === user.id &&
     booking.status === 'confirmed' &&
     booking.contract_sent_at &&
     !booking.contract_signed;
