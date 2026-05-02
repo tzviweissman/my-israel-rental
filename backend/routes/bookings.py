@@ -557,6 +557,23 @@ async def sign_booking_contract(booking_id: str, body: dict = Body(...), payload
                 sig_w = signature_width * scale_x
                 sig_h = signature_height * scale_y
 
+                # Trim transparent margin off the signature so we anchor the
+                # name to the actual visible scribble — when the user signs
+                # in a tiny corner of a huge canvas, the bounding-box-based
+                # name placement otherwise floats far away from the ink.
+                bbox = signature_img.getbbox()
+                if bbox is not None:
+                    bx0, by0, bx1, by1 = bbox
+                    iw, ih = signature_img.size
+                    if iw > 0 and ih > 0 and (bx0 > 0 or by0 > 0 or bx1 < iw or by1 < ih):
+                        signature_img = signature_img.crop(bbox)
+                        # Shift the box's top-left to where the scribble starts,
+                        # and shrink the box to the scribble's actual size.
+                        sig_x = sig_x + (bx0 / iw) * sig_w
+                        sig_y = sig_y + (by0 / ih) * sig_h
+                        sig_w = ((bx1 - bx0) / iw) * sig_w
+                        sig_h = ((by1 - by0) / ih) * sig_h
+
                 # Resize signature image to specified (scaled) dimensions
                 signature_img_scaled = signature_img.resize(
                     (max(1, int(sig_w)), max(1, int(sig_h))), Image.Resampling.LANCZOS
@@ -585,10 +602,11 @@ async def sign_booking_contract(booking_id: str, body: dict = Body(...), payload
                 # name stays visually anchored to it instead of getting
                 # clamped to the page edge.
                 # Name font scales with signature height so it reads at a
-                # similar visual weight to the handwritten scribble (was
-                # previously sig_w / 20 which produced tiny 10-16pt text).
-                name_font_size = max(14.0, min(28.0, sig_h * 0.55))
-                pad = max(8.0, sig_h * 0.18)
+                # similar visual weight to the handwritten scribble. We now
+                # work with the TRIMMED scribble height, so allow a generous
+                # upper cap (renders large enough on tablet & desktop).
+                name_font_size = max(16.0, min(40.0, sig_h * 0.65))
+                pad = max(6.0, sig_h * 0.18)
                 # PDF origin is bottom-left, so "below" means LOWER y, "above"
                 # means HIGHER y. Bottom of the signature box = pdf_y.
                 name_y_below = pdf_y - pad - name_font_size
@@ -656,6 +674,21 @@ async def sign_booking_contract(booking_id: str, body: dict = Body(...), payload
                 sig_w = max(1, int(signature_width * scale_x))
                 sig_h = max(1, int(signature_height * scale_y))
 
+                # Trim transparent margin off the signature so we anchor the
+                # name to the actual visible scribble (instead of the full
+                # canvas box, which tends to be huge with a tiny scribble in
+                # the corner).
+                bbox = signature_img.getbbox()
+                if bbox is not None:
+                    bx0, by0, bx1, by1 = bbox
+                    iw, ih = signature_img.size
+                    if iw > 0 and ih > 0 and (bx0 > 0 or by0 > 0 or bx1 < iw or by1 < ih):
+                        signature_img = signature_img.crop(bbox)
+                        sig_x = sig_x + int((bx0 / iw) * sig_w)
+                        sig_y = sig_y + int((by0 / ih) * sig_h)
+                        sig_w = max(1, int(((bx1 - bx0) / iw) * sig_w))
+                        sig_h = max(1, int(((by1 - by0) / ih) * sig_h))
+
                 # Resize signature to scaled dimensions
                 signature_img_scaled = signature_img.resize((sig_w, sig_h), Image.Resampling.LANCZOS)
 
@@ -667,11 +700,11 @@ async def sign_booking_contract(booking_id: str, body: dict = Body(...), payload
                 # same transparent layer so it composites cleanly.
                 from PIL import ImageDraw, ImageFont
                 draw = ImageDraw.Draw(signature_layer)
-                # Font size scaled with signature HEIGHT so the printed name
-                # reads at a similar visual weight to the handwritten scribble.
-                # Was previously sig_w / 16 capped at 32 — too small once the
-                # signature box was stretched horizontally.
-                font_size = max(20, min(56, int(sig_h * 0.55)))
+                # Font size scaled with TRIMMED signature height so the
+                # printed name reads at a similar visual weight to the
+                # actual handwritten scribble. Generous upper cap since
+                # we now anchor on the real ink region.
+                font_size = max(28, min(96, int(sig_h * 0.65)))
                 font_reg: Any
                 font_bold: Any
                 try:

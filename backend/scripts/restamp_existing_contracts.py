@@ -70,13 +70,26 @@ def _stamp_image(
 
     sig_data = signature_b64.split(",", 1)[1] if "," in signature_b64 else signature_b64
     sig_img = Image.open(BytesIO(base64.b64decode(sig_data))).convert("RGBA")
+
+    # Trim transparent margin so we anchor the name to the actual scribble.
+    bbox = sig_img.getbbox()
+    if bbox is not None:
+        bx0, by0, bx1, by1 = bbox
+        iw, ih = sig_img.size
+        if iw > 0 and ih > 0 and (bx0 > 0 or by0 > 0 or bx1 < iw or by1 < ih):
+            sig_img = sig_img.crop(bbox)
+            sig_x = sig_x + int((bx0 / iw) * sig_w)
+            sig_y = sig_y + int((by0 / ih) * sig_h)
+            sig_w = max(1, int(((bx1 - bx0) / iw) * sig_w))
+            sig_h = max(1, int(((by1 - by0) / ih) * sig_h))
+
     sig_img_scaled = sig_img.resize((sig_w, sig_h), Image.Resampling.LANCZOS)
 
     layer = Image.new("RGBA", contract_img.size, (255, 255, 255, 0))
     layer.paste(sig_img_scaled, (sig_x, sig_y), sig_img_scaled)
 
     draw = ImageDraw.Draw(layer)
-    font_size = max(20, min(56, int(sig_h * 0.55)))
+    font_size = max(28, min(96, int(sig_h * 0.65)))
     font_reg: Any
     font_bold: Any
     try:
@@ -153,6 +166,19 @@ def _stamp_pdf(
 
     sig_data = signature_b64.split(",", 1)[1] if "," in signature_b64 else signature_b64
     sig_img = Image.open(BytesIO(base64.b64decode(sig_data))).convert("RGBA")
+
+    # Trim transparent margin so we anchor name + draw box to the actual scribble.
+    bbox = sig_img.getbbox()
+    if bbox is not None:
+        bx0, by0, bx1, by1 = bbox
+        iw, ih = sig_img.size
+        if iw > 0 and ih > 0 and (bx0 > 0 or by0 > 0 or bx1 < iw or by1 < ih):
+            sig_img = sig_img.crop(bbox)
+            sig_x = sig_x + (bx0 / iw) * sig_w
+            sig_y = sig_y + (by0 / ih) * sig_h
+            sig_w = ((bx1 - bx0) / iw) * sig_w
+            sig_h = ((by1 - by0) / ih) * sig_h
+
     sig_img_scaled = sig_img.resize((max(1, int(sig_w)), max(1, int(sig_h))), Image.Resampling.LANCZOS)
 
     overlay = BytesIO()
@@ -162,8 +188,8 @@ def _stamp_pdf(
     pdf_y = page_h - sig_y - sig_h
     c.drawImage(str(tmp), sig_x, pdf_y, width=sig_w, height=sig_h, mask="auto", preserveAspectRatio=True)
 
-    name_font_size = max(14.0, min(28.0, sig_h * 0.55))
-    pad = max(8.0, sig_h * 0.18)
+    name_font_size = max(16.0, min(40.0, sig_h * 0.65))
+    pad = max(6.0, sig_h * 0.18)
     name_y_below = pdf_y - pad - name_font_size
     name_y_above = pdf_y + sig_h + pad
     if name_y_below >= 0:
