@@ -3,7 +3,7 @@ import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import axios from 'axios';
 import { API, AuthContext } from '../App';
-import { Send, ArrowLeft, Home, User, Building2, Clock, MessageCircle, ChevronDown, Check, CheckCheck, Languages, X, Pencil } from 'lucide-react';
+import { Send, ArrowLeft, Home, User, Building2, Clock, MessageCircle, ChevronDown, Check, CheckCheck, Languages, X, Pencil, Search, ChevronUp } from 'lucide-react';
 import { toast } from 'sonner';
 
 const HEBREW_RE = /[\u0590-\u05FF]/;
@@ -39,6 +39,11 @@ const Chat = () => {
   const [editingId, setEditingId] = useState(null);
   const [editingText, setEditingText] = useState('');
   const EDIT_WINDOW_MS = 5 * 60 * 1000;
+
+  // Chat search state — toggled from the chat header search icon.
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [activeMatchIndex, setActiveMatchIndex] = useState(0);
 
   const beginEdit = (msg) => {
     setEditingId(msg.id);
@@ -303,6 +308,63 @@ const Chat = () => {
     return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
   };
 
+  // Search matches: ids of messages containing the query (case-insensitive),
+  // plus a helper to render a message body with matches highlighted.
+  const normalizedQuery = searchQuery.trim().toLowerCase();
+  const matchIds = normalizedQuery
+    ? messages
+        .filter((m) => (m.message || '').toLowerCase().includes(normalizedQuery))
+        .map((m) => m.id)
+    : [];
+
+  // Clamp the active index whenever the matches change so it stays in range.
+  useEffect(() => {
+    if (matchIds.length === 0) {
+      if (activeMatchIndex !== 0) setActiveMatchIndex(0);
+      return;
+    }
+    if (activeMatchIndex >= matchIds.length) setActiveMatchIndex(0);
+    // Scroll the active match into view
+    const id = matchIds[Math.min(activeMatchIndex, matchIds.length - 1)];
+    const el = document.querySelector(`[data-testid="message-${id}"]`);
+    if (el && typeof el.scrollIntoView === 'function') {
+      el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchQuery, activeMatchIndex]);
+
+  const renderHighlighted = (text) => {
+    if (!normalizedQuery) return text;
+    const parts = [];
+    const lower = text.toLowerCase();
+    let cursor = 0;
+    while (cursor < text.length) {
+      const idx = lower.indexOf(normalizedQuery, cursor);
+      if (idx === -1) {
+        parts.push({ text: text.slice(cursor), match: false });
+        break;
+      }
+      if (idx > cursor) parts.push({ text: text.slice(cursor, idx), match: false });
+      parts.push({
+        text: text.slice(idx, idx + normalizedQuery.length),
+        match: true,
+      });
+      cursor = idx + normalizedQuery.length;
+    }
+    return parts.map((p, i) =>
+      p.match ? (
+        <mark
+          key={i}
+          className="bg-[#D4AF37] text-[#1E6A6A] rounded px-0.5"
+        >
+          {p.text}
+        </mark>
+      ) : (
+        <React.Fragment key={i}>{p.text}</React.Fragment>
+      )
+    );
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100" data-testid="chat-page">
       <div className="max-w-3xl mx-auto px-4 pt-20 pb-6 h-screen flex flex-col">
@@ -323,15 +385,114 @@ const Chat = () => {
               <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse" />
               <span className="text-white/80 text-xs font-medium">Live Chat</span>
             </div>
-            <button
-              onClick={() => navigate('/dashboard')}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/15 hover:bg-white/25 text-white text-sm font-medium transition-all backdrop-blur-sm"
-              data-testid="return-dashboard-btn"
-            >
-              <Home size={14} />
-              Dashboard
-            </button>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => {
+                  setSearchOpen((v) => {
+                    const next = !v;
+                    if (!next) {
+                      setSearchQuery('');
+                      setActiveMatchIndex(0);
+                    }
+                    return next;
+                  });
+                }}
+                className={`p-2 rounded-lg transition-all backdrop-blur-sm ${searchOpen ? 'bg-white/30' : 'bg-white/15 hover:bg-white/25'}`}
+                data-testid="chat-search-toggle"
+                aria-label="Search messages"
+                title="Search messages"
+              >
+                <Search size={14} className="text-white" />
+              </button>
+              <button
+                onClick={() => navigate('/dashboard')}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/15 hover:bg-white/25 text-white text-sm font-medium transition-all backdrop-blur-sm"
+                data-testid="return-dashboard-btn"
+              >
+                <Home size={14} />
+                Dashboard
+              </button>
+            </div>
           </div>
+
+          {/* Search bar (collapsible) */}
+          {searchOpen && (
+            <div
+              className="flex items-center gap-2 px-5 py-2.5 border-b border-gray-100 bg-gray-50"
+              data-testid="chat-search-bar"
+            >
+              <Search size={14} className="text-gray-400 flex-shrink-0" />
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => {
+                  setSearchQuery(e.target.value);
+                  setActiveMatchIndex(0);
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    e.preventDefault();
+                    if (matchIds.length > 0) {
+                      setActiveMatchIndex((i) => (i + 1) % matchIds.length);
+                    }
+                  } else if (e.key === 'Escape') {
+                    setSearchOpen(false);
+                    setSearchQuery('');
+                    setActiveMatchIndex(0);
+                  }
+                }}
+                placeholder="Search messages…"
+                autoFocus
+                className="flex-1 bg-transparent text-sm focus:outline-none placeholder:text-gray-400"
+                data-testid="chat-search-input"
+              />
+              {searchQuery && (
+                <span className="text-[11px] text-gray-500 flex-shrink-0" data-testid="chat-search-counter">
+                  {matchIds.length === 0 ? 'No matches' : `${activeMatchIndex + 1} of ${matchIds.length}`}
+                </span>
+              )}
+              <div className="flex items-center gap-1 flex-shrink-0">
+                <button
+                  type="button"
+                  onClick={() =>
+                    matchIds.length > 0 &&
+                    setActiveMatchIndex((i) => (i - 1 + matchIds.length) % matchIds.length)
+                  }
+                  disabled={matchIds.length === 0}
+                  className="p-1 rounded text-gray-500 hover:bg-gray-200 disabled:opacity-30 disabled:cursor-not-allowed"
+                  data-testid="chat-search-prev"
+                  aria-label="Previous match"
+                >
+                  <ChevronUp size={14} />
+                </button>
+                <button
+                  type="button"
+                  onClick={() =>
+                    matchIds.length > 0 && setActiveMatchIndex((i) => (i + 1) % matchIds.length)
+                  }
+                  disabled={matchIds.length === 0}
+                  className="p-1 rounded text-gray-500 hover:bg-gray-200 disabled:opacity-30 disabled:cursor-not-allowed"
+                  data-testid="chat-search-next"
+                  aria-label="Next match"
+                >
+                  <ChevronDown size={14} />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSearchOpen(false);
+                    setSearchQuery('');
+                    setActiveMatchIndex(0);
+                  }}
+                  className="p-1 rounded text-gray-500 hover:bg-gray-200"
+                  data-testid="chat-search-close"
+                  aria-label="Close search"
+                >
+                  <X size={14} />
+                </button>
+              </div>
+            </div>
+          )}
 
           {/* Property info bar */}
           {property && (
@@ -460,10 +621,14 @@ const Chat = () => {
 
                         {/* Message bubble */}
                         <div
-                          className={`max-w-[70%] px-4 py-2.5 ${
+                          className={`max-w-[70%] px-4 py-2.5 transition-all ${
                             isMe
                               ? `bg-gradient-to-br from-[#1E6A6A] to-[#1a5e5e] text-white ${isLast ? 'rounded-2xl rounded-br-md' : 'rounded-2xl'}`
                               : `bg-white border border-gray-200 text-gray-800 shadow-sm ${isLast ? 'rounded-2xl rounded-bl-md' : 'rounded-2xl'}`
+                          } ${
+                            normalizedQuery && matchIds[activeMatchIndex] === msg.id
+                              ? 'ring-2 ring-[#D4AF37] ring-offset-2 ring-offset-transparent'
+                              : ''
                           }`}
                         >
                           {editingId === msg.id ? (
@@ -506,7 +671,9 @@ const Chat = () => {
                               <p className="text-[10px] text-white/60">Enter to save · Esc to cancel</p>
                             </div>
                           ) : (
-                            <p className="text-[13.5px] leading-relaxed whitespace-pre-wrap break-words">{msg.message}</p>
+                            <p className="text-[13.5px] leading-relaxed whitespace-pre-wrap break-words">
+                              {normalizedQuery ? renderHighlighted(msg.message) : msg.message}
+                            </p>
                           )}
 
                           {/* Inline translation block */}
