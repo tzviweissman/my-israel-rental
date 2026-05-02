@@ -864,7 +864,14 @@ export interface paths {
             cookie?: never;
         };
         get?: never;
-        put?: never;
+        /**
+         * Edit Message
+         * @description Edit a single message body. Sender-only, within the 5-minute window.
+         *
+         *     Sets ``edited_at`` so the UI can render an *edited* tag. Stale cached
+         *     translations are wiped so the next translate request re-runs Claude.
+         */
+        put: operations["edit_message_api_chat_messages__message_id__put"];
         post?: never;
         /**
          * Delete Message
@@ -2391,6 +2398,11 @@ export interface components {
             tenant_id: string;
             /** Additional Info */
             additional_info?: string | null;
+        };
+        /** EditMessage */
+        EditMessage: {
+            /** Message */
+            message: string;
         };
         /** ExchangeRateResponse */
         ExchangeRateResponse: {
@@ -5006,6 +5018,41 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["IdMessageResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    edit_message_api_chat_messages__message_id__put: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                message_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["EditMessage"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MessageResponse"];
                 };
             };
             /** @description Validation Error */

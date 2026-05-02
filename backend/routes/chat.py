@@ -4,7 +4,7 @@ from datetime import UTC, datetime, timedelta
 
 from fastapi import APIRouter, Depends, HTTPException
 
-from models import ChatMessage, TranslateMessageRequest, TypingPing
+from models import ChatMessage, EditMessage, TranslateMessageRequest, TypingPing
 from models_response import (
     ConversationOut,
     IdMessageResponse,
@@ -70,6 +70,53 @@ async def delete_message(
         raise HTTPException(status_code=403, detail="You can only delete your own messages")
     await db.messages.delete_one({"id": message_id})
     return {"message": "Message deleted"}
+
+
+# Edit window (seconds): callers may amend their own message for the first 5
+# minutes after sending, mirroring WhatsApp/Slack-style etiquette.
+_EDIT_WINDOW_SECONDS = 5 * 60
+
+
+@api_router.put("/chat/messages/{message_id}", response_model=MessageResponse)
+async def edit_message(
+    message_id: str,
+    body: EditMessage,
+    payload: dict = Depends(verify_token),
+) -> dict:
+    """Edit a single message body. Sender-only, within the 5-minute window.
+
+    Sets ``edited_at`` so the UI can render an *edited* tag. Stale cached
+    translations are wiped so the next translate request re-runs Claude."""
+    if not body.message or not body.message.strip():
+        raise HTTPException(status_code=400, detail="Message cannot be empty")
+    msg = await db.messages.find_one(
+        {"id": message_id},
+        {"_id": 0, "sender_id": 1, "created_at": 1},
+    )
+    if not msg:
+        raise HTTPException(status_code=404, detail="Message not found")
+    if msg.get("sender_id") != payload['user_id']:
+        raise HTTPException(status_code=403, detail="You can only edit your own messages")
+    try:
+        created = datetime.fromisoformat(msg['created_at'])
+    except (KeyError, ValueError):
+        raise HTTPException(status_code=400, detail="Message timestamp invalid") from None
+    age = (datetime.now(UTC) - created).total_seconds()
+    if age > _EDIT_WINDOW_SECONDS:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Edit window expired ({_EDIT_WINDOW_SECONDS // 60} minutes after sending)",
+        )
+    now_iso = datetime.now(UTC).isoformat()
+    await db.messages.update_one(
+        {"id": message_id},
+        {
+            "$set": {"message": body.message.strip(), "edited_at": now_iso},
+            # Cached translations no longer match the new content
+            "$unset": {"translations": ""},
+        },
+    )
+    return {"message": "Message updated"}
 
 
 @api_router.get("/chat/messages/{property_id}", response_model=list[MessageOut])

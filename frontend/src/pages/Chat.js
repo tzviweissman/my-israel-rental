@@ -3,7 +3,7 @@ import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import axios from 'axios';
 import { API, AuthContext } from '../App';
-import { Send, ArrowLeft, Home, User, Building2, Clock, MessageCircle, ChevronDown, Check, CheckCheck, Languages, X } from 'lucide-react';
+import { Send, ArrowLeft, Home, User, Building2, Clock, MessageCircle, ChevronDown, Check, CheckCheck, Languages, X, Pencil } from 'lucide-react';
 import { toast } from 'sonner';
 
 const HEBREW_RE = /[\u0590-\u05FF]/;
@@ -35,6 +35,56 @@ const Chat = () => {
   const lastTypingEmitRef = useRef(0);
   // message_id -> { translated_text, target_lang } | 'loading'
   const [translations, setTranslations] = useState({});
+  // Edit mode state: id of message being edited + draft text.
+  const [editingId, setEditingId] = useState(null);
+  const [editingText, setEditingText] = useState('');
+  const EDIT_WINDOW_MS = 5 * 60 * 1000;
+
+  const beginEdit = (msg) => {
+    setEditingId(msg.id);
+    setEditingText(msg.message);
+  };
+
+  const cancelEdit = () => {
+    setEditingId(null);
+    setEditingText('');
+  };
+
+  const saveEdit = async (msgId) => {
+    const next = editingText.trim();
+    if (!next) {
+      toast.error('Message cannot be empty');
+      return;
+    }
+    const original = messages.find((m) => m.id === msgId);
+    if (original && original.message === next) {
+      cancelEdit();
+      return;
+    }
+    const prev = messages;
+    setMessages((cur) =>
+      cur.map((m) =>
+        m.id === msgId ? { ...m, message: next, edited_at: new Date().toISOString() } : m
+      )
+    );
+    cancelEdit();
+    try {
+      await axios.put(
+        `${API}/chat/messages/${msgId}`,
+        { message: next },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      // Bust any cached translation in component state
+      setTranslations((t) => {
+        const n = { ...t };
+        delete n[msgId];
+        return n;
+      });
+    } catch (err) {
+      setMessages(prev);
+      toast.error(err.response?.data?.detail || 'Failed to update message');
+    }
+  };
 
   const translateMessage = async (msgId) => {
     if (translations[msgId] === 'loading') return;
@@ -376,17 +426,36 @@ const Chat = () => {
                         )}
 
                         {/* Delete X — only on my own messages, fades in on row hover */}
-                        {isMe && (
-                          <button
-                            type="button"
-                            onClick={() => handleDeleteMessage(msg.id)}
-                            className="self-center w-6 h-6 rounded-full bg-white/90 backdrop-blur-sm text-gray-500 hover:text-red-500 hover:bg-white shadow-sm flex items-center justify-center transition-all opacity-0 group-hover:opacity-100 focus:opacity-100"
-                            data-testid={`delete-message-${msg.id}`}
-                            aria-label="Delete message"
-                            title="Delete message"
-                          >
-                            <X size={12} />
-                          </button>
+                        {isMe && editingId !== msg.id && (
+                          <div className="flex flex-col items-center gap-1 self-center opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-all">
+                            {(() => {
+                              const created = new Date(msg.created_at).getTime();
+                              const withinEditWindow = Number.isFinite(created) && Date.now() - created < EDIT_WINDOW_MS;
+                              if (!withinEditWindow) return null;
+                              return (
+                                <button
+                                  type="button"
+                                  onClick={() => beginEdit(msg)}
+                                  className="w-6 h-6 rounded-full bg-white/90 backdrop-blur-sm text-gray-500 hover:text-[#1E6A6A] hover:bg-white shadow-sm flex items-center justify-center transition-all"
+                                  data-testid={`edit-message-${msg.id}`}
+                                  aria-label="Edit message"
+                                  title="Edit (within 5 minutes)"
+                                >
+                                  <Pencil size={11} />
+                                </button>
+                              );
+                            })()}
+                            <button
+                              type="button"
+                              onClick={() => handleDeleteMessage(msg.id)}
+                              className="w-6 h-6 rounded-full bg-white/90 backdrop-blur-sm text-gray-500 hover:text-red-500 hover:bg-white shadow-sm flex items-center justify-center transition-all"
+                              data-testid={`delete-message-${msg.id}`}
+                              aria-label="Delete message"
+                              title="Delete message"
+                            >
+                              <X size={12} />
+                            </button>
+                          </div>
                         )}
 
                         {/* Message bubble */}
@@ -397,7 +466,48 @@ const Chat = () => {
                               : `bg-white border border-gray-200 text-gray-800 shadow-sm ${isLast ? 'rounded-2xl rounded-bl-md' : 'rounded-2xl'}`
                           }`}
                         >
-                          <p className="text-[13.5px] leading-relaxed whitespace-pre-wrap break-words">{msg.message}</p>
+                          {editingId === msg.id ? (
+                            <div className="space-y-2 min-w-[200px]">
+                              <textarea
+                                value={editingText}
+                                onChange={(e) => setEditingText(e.target.value)}
+                                onKeyDown={(e) => {
+                                  if (e.key === 'Enter' && !e.shiftKey) {
+                                    e.preventDefault();
+                                    saveEdit(msg.id);
+                                  } else if (e.key === 'Escape') {
+                                    e.preventDefault();
+                                    cancelEdit();
+                                  }
+                                }}
+                                rows={2}
+                                autoFocus
+                                className="w-full px-2 py-1.5 rounded-lg text-[13.5px] leading-relaxed bg-white/15 text-white placeholder-white/60 border border-white/30 focus:outline-none focus:ring-2 focus:ring-white/50 resize-none"
+                                data-testid={`edit-input-${msg.id}`}
+                              />
+                              <div className="flex items-center justify-end gap-2">
+                                <button
+                                  type="button"
+                                  onClick={cancelEdit}
+                                  className="text-[11px] text-white/70 hover:text-white underline underline-offset-2"
+                                  data-testid={`edit-cancel-${msg.id}`}
+                                >
+                                  Cancel
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => saveEdit(msg.id)}
+                                  className="px-3 py-1 rounded-md text-[11px] font-bold text-[#1E6A6A] bg-[#D4AF37] hover:opacity-90"
+                                  data-testid={`edit-save-${msg.id}`}
+                                >
+                                  Save
+                                </button>
+                              </div>
+                              <p className="text-[10px] text-white/60">Enter to save · Esc to cancel</p>
+                            </div>
+                          ) : (
+                            <p className="text-[13.5px] leading-relaxed whitespace-pre-wrap break-words">{msg.message}</p>
+                          )}
 
                           {/* Inline translation block */}
                           {(() => {
@@ -450,6 +560,14 @@ const Chat = () => {
                             <span className={`text-[10px] ${isMe ? 'text-white/50' : 'text-gray-400'}`}>
                               {formatTime(msg.created_at)}
                             </span>
+                            {msg.edited_at && (
+                              <span
+                                className={`text-[10px] italic ${isMe ? 'text-white/50' : 'text-gray-400'}`}
+                                title={`Edited at ${formatTime(msg.edited_at)}`}
+                              >
+                                · edited
+                              </span>
+                            )}
                             {isMe && (
                               msg.read ? (
                                 <CheckCheck

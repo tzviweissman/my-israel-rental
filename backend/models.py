@@ -95,6 +95,10 @@ class ChatMessage(BaseModel):
     receiver_id: str
 
 
+class EditMessage(BaseModel):
+    message: str
+
+
 class TypingPing(BaseModel):
     property_id: str
     with_user: str
