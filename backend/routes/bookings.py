@@ -53,6 +53,28 @@ async def create_booking(booking_data: BookingCreate, payload: dict = Depends(ve
     # No contract signature required at booking time
     # Contract will be sent after owner accepts for long-term/short-term rentals
 
+    # Reject overlapping bookings up front so we never end up with two
+    # confirmed/pending bookings on the same property for the same dates.
+    # Same overlap rule used by /properties search: start < new_end AND end > new_start.
+    overlap = await db.bookings.find_one(
+        {
+            "property_id": booking_data.property_id,
+            "status": {"$in": ["pending", "confirmed"]},
+            "start_date": {"$lt": booking_data.end_date},
+            "end_date": {"$gt": booking_data.start_date},
+        },
+        {"_id": 0, "id": 1, "start_date": 1, "end_date": 1},
+    )
+    if overlap:
+        raise HTTPException(
+            status_code=409,
+            detail=(
+                "These dates overlap an existing booking "
+                f"({overlap['start_date']} → {overlap['end_date']}). "
+                "Please pick dates outside that window."
+            ),
+        )
+
     booking_id = str(uuid.uuid4())
     booking_doc = booking_data.model_dump()
     booking_doc['id'] = booking_id
