@@ -56,13 +56,29 @@ async def create_booking(booking_data: BookingCreate, payload: dict = Depends(ve
     # Reject overlapping bookings up front so we never end up with two
     # confirmed/pending bookings on the same property for the same dates.
     # Same overlap rule used by /properties search: start < new_end AND end > new_start.
-    overlap = await db.bookings.find_one(
-        {
-            "property_id": booking_data.property_id,
+    # For SUBLEASE bookings, we deliberately scope the overlap check to OTHER
+    # bookings on the SAME sublease — the sublessor's own underlying long-term
+    # booking covers the entire sublease window, so a global property-level
+    # check would always reject (defeating the whole sublease feature).
+    if booking_data.sublease_id:
+        overlap_filter: dict = {
+            "sublease_id": booking_data.sublease_id,
             "status": {"$in": ["pending", "confirmed"]},
             "start_date": {"$lt": booking_data.end_date},
             "end_date": {"$gt": booking_data.start_date},
-        },
+        }
+    else:
+        overlap_filter = {
+            "property_id": booking_data.property_id,
+            # Ignore sublease-scoped bookings here — they live in a separate
+            # logical calendar (the sublease window).
+            "sublease_id": None,
+            "status": {"$in": ["pending", "confirmed"]},
+            "start_date": {"$lt": booking_data.end_date},
+            "end_date": {"$gt": booking_data.start_date},
+        }
+    overlap = await db.bookings.find_one(
+        overlap_filter,
         {"_id": 0, "id": 1, "start_date": 1, "end_date": 1},
     )
     if overlap:
@@ -84,16 +100,14 @@ async def create_booking(booking_data: BookingCreate, payload: dict = Depends(ve
         sublease_data['subleasor_id'] if sublease_data else property_data['owner_id']
     )
 
-    # Auto-confirm for vacation rentals AND for subleases (subleases are
-    # short-window bookings that behave like vacation rentals).
-    is_instant_confirm = (
-        sublease_data is not None or property_data.get('rental_type') == 'vacation'
-    )
+    # Auto-confirm for vacation rentals only. Sublease bookings now require
+    # the sublessor to accept/deny just like long-term/short-term bookings —
+    # the renter sends a request, the sublessor (the lister of the sublease)
+    # gets a "booking_request" notification and confirms it from their dashboard.
+    is_instant_confirm = property_data.get('rental_type') == 'vacation' and sublease_data is None
     if is_instant_confirm:
         booking_doc['status'] = 'confirmed'
-        listing_title = (
-            sublease_data.get('title') if sublease_data else property_data['title']
-        )
+        listing_title = property_data['title']
         notification_message = f"Your booking for {listing_title} is confirmed!"
         notification_type = "booking_confirmed"
         # Notify renter of confirmation
@@ -110,7 +124,10 @@ async def create_booking(booking_data: BookingCreate, payload: dict = Depends(ve
         await db.notifications.insert_one(renter_notification)
     else:
         booking_doc['status'] = 'pending'
-        notification_message = f"New booking request for {property_data['title']}"
+        listing_title = (
+            sublease_data.get('title') if sublease_data else property_data['title']
+        )
+        notification_message = f"New booking request for {listing_title}"
         notification_type = "booking_request"
 
     booking_doc['created_at'] = datetime.now(UTC).isoformat()
