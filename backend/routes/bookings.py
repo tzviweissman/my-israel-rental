@@ -584,8 +584,11 @@ async def sign_booking_contract(booking_id: str, body: dict = Body(...), payload
                 # the page bottom — fall back to ABOVE the signature so the
                 # name stays visually anchored to it instead of getting
                 # clamped to the page edge.
-                name_font_size = max(10.0, min(16.0, sig_w / 20.0))
-                pad = max(8.0, sig_h * 0.12)
+                # Name font scales with signature height so it reads at a
+                # similar visual weight to the handwritten scribble (was
+                # previously sig_w / 20 which produced tiny 10-16pt text).
+                name_font_size = max(14.0, min(28.0, sig_h * 0.55))
+                pad = max(8.0, sig_h * 0.18)
                 # PDF origin is bottom-left, so "below" means LOWER y, "above"
                 # means HIGHER y. Bottom of the signature box = pdf_y.
                 name_y_below = pdf_y - pad - name_font_size
@@ -664,8 +667,11 @@ async def sign_booking_contract(booking_id: str, body: dict = Body(...), payload
                 # same transparent layer so it composites cleanly.
                 from PIL import ImageDraw, ImageFont
                 draw = ImageDraw.Draw(signature_layer)
-                # Font size scaled with signature width; fall back to default if ttf missing
-                font_size = max(14, min(32, int(sig_w / 16)))
+                # Font size scaled with signature HEIGHT so the printed name
+                # reads at a similar visual weight to the handwritten scribble.
+                # Was previously sig_w / 16 capped at 32 — too small once the
+                # signature box was stretched horizontally.
+                font_size = max(20, min(56, int(sig_h * 0.55)))
                 font_reg: Any
                 font_bold: Any
                 try:

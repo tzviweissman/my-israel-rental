@@ -76,7 +76,7 @@ def _stamp_image(
     layer.paste(sig_img_scaled, (sig_x, sig_y), sig_img_scaled)
 
     draw = ImageDraw.Draw(layer)
-    font_size = max(14, min(32, int(sig_w / 16)))
+    font_size = max(20, min(56, int(sig_h * 0.55)))
     font_reg: Any
     font_bold: Any
     try:
@@ -162,8 +162,8 @@ def _stamp_pdf(
     pdf_y = page_h - sig_y - sig_h
     c.drawImage(str(tmp), sig_x, pdf_y, width=sig_w, height=sig_h, mask="auto", preserveAspectRatio=True)
 
-    name_font_size = max(10.0, min(16.0, sig_w / 20.0))
-    pad = max(8.0, sig_h * 0.12)
+    name_font_size = max(14.0, min(28.0, sig_h * 0.55))
+    pad = max(8.0, sig_h * 0.18)
     name_y_below = pdf_y - pad - name_font_size
     name_y_above = pdf_y + sig_h + pad
     if name_y_below >= 0:
