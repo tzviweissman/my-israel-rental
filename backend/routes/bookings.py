@@ -605,7 +605,7 @@ async def sign_booking_contract(booking_id: str, body: dict = Body(...), payload
                 # similar visual weight to the handwritten scribble. We now
                 # work with the TRIMMED scribble height, so allow a generous
                 # upper cap (renders large enough on tablet & desktop).
-                name_font_size = max(16.0, min(40.0, sig_h * 0.65))
+                name_font_size = max(24.0, min(64.0, sig_h * 0.95))
                 pad = max(6.0, sig_h * 0.18)
                 # PDF origin is bottom-left, so "below" means LOWER y, "above"
                 # means HIGHER y. Bottom of the signature box = pdf_y.
@@ -704,7 +704,7 @@ async def sign_booking_contract(booking_id: str, body: dict = Body(...), payload
                 # printed name reads at a similar visual weight to the
                 # actual handwritten scribble. Generous upper cap since
                 # we now anchor on the real ink region.
-                font_size = max(28, min(96, int(sig_h * 0.65)))
+                font_size = max(40, min(140, int(sig_h * 0.95)))
                 font_reg: Any
                 font_bold: Any
                 try:
