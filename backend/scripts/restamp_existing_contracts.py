@@ -89,7 +89,7 @@ def _stamp_image(
     layer.paste(sig_img_scaled, (sig_x, sig_y), sig_img_scaled)
 
     draw = ImageDraw.Draw(layer)
-    font_size = max(40, min(140, int(sig_h * 0.95)))
+    font_size = max(56, min(180, int(sig_h * 1.1)))
     font_reg: Any
     font_bold: Any
     try:
@@ -98,15 +98,11 @@ def _stamp_image(
     except Exception:
         font_reg = font_bold = ImageFont.load_default()
 
-    pad = max(12, int(sig_h * 0.12))
-    name_y_below = sig_y + sig_h + pad
-    name_y_above = sig_y - font_size - pad
-    if name_y_below + font_size + 4 <= native_h:
-        name_y = name_y_below
-    elif name_y_above >= 0:
-        name_y = name_y_above
-    else:
-        name_y = name_y_below if name_y_below < native_h else max(0, name_y_above)
+    pad = max(12, int(sig_h * 0.18))
+    # Always BELOW the signature, clamped to the page bottom.
+    name_y = min(sig_y + sig_h + pad, native_h - font_size - 4)
+    if name_y < 0:
+        name_y = 0
 
     label = "Name: "
     label_w = (
@@ -188,16 +184,10 @@ def _stamp_pdf(
     pdf_y = page_h - sig_y - sig_h
     c.drawImage(str(tmp), sig_x, pdf_y, width=sig_w, height=sig_h, mask="auto", preserveAspectRatio=True)
 
-    name_font_size = max(24.0, min(64.0, sig_h * 0.95))
+    name_font_size = max(32.0, min(80.0, sig_h * 1.1))
     pad = max(6.0, sig_h * 0.18)
-    name_y_below = pdf_y - pad - name_font_size
-    name_y_above = pdf_y + sig_h + pad
-    if name_y_below >= 0:
-        name_y_pdf = name_y_below
-    elif name_y_above + name_font_size <= page_h:
-        name_y_pdf = name_y_above
-    else:
-        name_y_pdf = max(0.0, name_y_below)
+    # Always render BELOW the signature, clamped to page bottom.
+    name_y_pdf = max(0.0, pdf_y - pad - name_font_size)
 
     c.setFillColorRGB(0.08, 0.08, 0.08)
     label = "Name: "

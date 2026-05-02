@@ -593,32 +593,16 @@ async def sign_booking_contract(booking_id: str, body: dict = Body(...), payload
                            width=sig_w, height=sig_h,
                            mask='auto', preserveAspectRatio=True)
 
-                # Print the signer's legal name immediately adjacent to the
-                # signature for legal clarity. Default placement is BELOW the
-                # signature (most common since renters typically sign in the
-                # middle/lower half of a contract). If there isn't enough
-                # vertical room below — e.g. the signature was dropped near
-                # the page bottom — fall back to ABOVE the signature so the
-                # name stays visually anchored to it instead of getting
-                # clamped to the page edge.
-                # Name font scales with signature height so it reads at a
-                # similar visual weight to the handwritten scribble. We now
-                # work with the TRIMMED scribble height, so allow a generous
-                # upper cap (renders large enough on tablet & desktop).
-                name_font_size = max(24.0, min(64.0, sig_h * 0.95))
+                # Print the signer's legal name DIRECTLY BELOW the signature.
+                # If there literally isn't a sliver of room, place it as low
+                # as possible (clamped to the page) — never above, since that
+                # caused the "northwest of the scribble" complaint.
+                # Font scales with scribble height for a similar visual weight.
+                name_font_size = max(32.0, min(80.0, sig_h * 1.1))
                 pad = max(6.0, sig_h * 0.18)
-                # PDF origin is bottom-left, so "below" means LOWER y, "above"
-                # means HIGHER y. Bottom of the signature box = pdf_y.
                 name_y_below = pdf_y - pad - name_font_size
-                name_y_above = pdf_y + sig_h + pad
-                if name_y_below >= 0:
-                    name_y_pdf = name_y_below
-                elif name_y_above + name_font_size <= page_height:
-                    name_y_pdf = name_y_above
-                else:
-                    # Pathological case (signature consumes the whole page);
-                    # keep the original clamp so we never crash.
-                    name_y_pdf = max(0.0, name_y_below)
+                # Clamp to bottom of page; we never go above the signature.
+                name_y_pdf = max(0.0, name_y_below)
                 # Horizontally CENTER the "Name: <legal_name>" string under
                 # the signature box. Starting at sig_x (the box's left edge)
                 # makes the name look offset from the visible scribble
@@ -704,7 +688,7 @@ async def sign_booking_contract(booking_id: str, body: dict = Body(...), payload
                 # printed name reads at a similar visual weight to the
                 # actual handwritten scribble. Generous upper cap since
                 # we now anchor on the real ink region.
-                font_size = max(40, min(140, int(sig_h * 0.95)))
+                font_size = max(56, min(180, int(sig_h * 1.1)))
                 font_reg: Any
                 font_bold: Any
                 try:
@@ -714,23 +698,13 @@ async def sign_booking_contract(booking_id: str, body: dict = Body(...), payload
                     font_reg = font_bold = ImageFont.load_default()
 
                 # Padding between signature box and printed name (larger on big contracts)
-                pad = max(12, int(sig_h * 0.12))
-                # Default: render the legal name BELOW the signature. If
-                # there isn't enough room (signature dropped near the bottom
-                # edge of the contract image), fall back to ABOVE so the
-                # name stays visually anchored to the signature instead of
-                # being clamped to the top of the page.
-                name_y_below = sig_y + sig_h + pad
-                name_y_above = sig_y - font_size - pad
-                if name_y_below + font_size + 4 <= native_h:
-                    name_y = name_y_below
-                elif name_y_above >= 0:
-                    name_y = name_y_above
-                else:
-                    # Both directions overflow — pick whichever is closer to
-                    # the signature so the name remains adjacent rather than
-                    # getting clamped to a page edge far from the signature.
-                    name_y = name_y_below if name_y_below < native_h else max(0, name_y_above)
+                pad = max(12, int(sig_h * 0.18))
+                # Always render the legal name BELOW the signature (clamped
+                # to the page bottom if needed). Never above — that caused
+                # the "northwest of the scribble" complaint.
+                name_y = min(sig_y + sig_h + pad, native_h - font_size - 4)
+                if name_y < 0:
+                    name_y = 0
 
                 label = "Name: "
                 name_val = legal_name
