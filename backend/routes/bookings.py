@@ -386,18 +386,11 @@ async def cancel_booking(booking_id: str, reason: str = Body(..., embed=True), p
     if not booking:
         raise HTTPException(status_code=404, detail="Booking not found")
     
-    # Authorization: owner/manager (the listing owner) OR the sublessor when
-    # a renter "owns" a sublease's booking (owner_id == sublessor_id).
-    # ALSO: the *sublessee* (renter) of a sublease may cancel their own
-    # sublease booking directly without owner approval — same as a vacation
-    # rental cancellation, since subleases are short-window bookings.
-    is_listing_owner = (
-        payload['role'] in ['owner', 'manager'] and booking['owner_id'] == payload['user_id']
-    )
-    is_sublease_renter = (
-        booking.get('sublease_id') is not None and booking.get('renter_id') == payload['user_id']
-    )
-    if not (is_listing_owner or is_sublease_renter):
+    # Authorization: the user identified by ``booking.owner_id`` may cancel —
+    # this is the listing owner/manager for regular bookings, OR the sublessor
+    # for sublease bookings (we re-write owner_id to the sublessor's id when
+    # creating sublease bookings so they own the calendar).
+    if booking['owner_id'] != payload['user_id']:
         raise HTTPException(status_code=403, detail="Not authorized")
     
     # Update booking
@@ -411,22 +404,13 @@ async def cancel_booking(booking_id: str, reason: str = Body(..., embed=True), p
         }}
     )
     
-    # Notify the counterparty:
-    # - If a renter cancelled their sublease booking → notify the sublessor.
-    # - Otherwise (owner cancelled) → notify the renter.
-    if is_sublease_renter:
-        notify_user_id = booking['owner_id']  # sublessor
-        notify_message = f"A sublease booking was cancelled by the renter. Reason: {reason}"
-    else:
-        notify_user_id = booking['renter_id']
-        notify_message = f"Your booking has been cancelled by the owner. Reason: {reason}"
-
+    # The lister (owner or sublessor) is cancelling — notify the renter.
     notification = {
         "id": str(uuid.uuid4()),
-        "user_id": notify_user_id,
+        "user_id": booking['renter_id'],
         "type": "booking_cancelled",
         "booking_id": booking_id,
-        "message": notify_message,
+        "message": f"Your booking has been cancelled by the lister. Reason: {reason}",
         "read": False,
         "created_at": datetime.now(UTC).isoformat()
     }

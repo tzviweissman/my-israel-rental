@@ -28,13 +28,13 @@ const BookingRow = ({
 }) => {
   const isOwner = user.role === 'owner' || user.role === 'manager';
   const isRenter = user.role === 'renter';
-  const isSubleaseRenter = isRenter && !!booking.sublease_id;
+  // The lister side of any booking owns the calendar via booking.owner_id.
+  // For sublease bookings, that is the sublessor (a renter-role user).
+  const ownsBookingAsLister = booking.owner_id === user.id;
   const cancellableStatuses = ['pending', 'confirmed'];
-  // Sublease renters can cancel directly; regular renters request cancellation.
-  const canCancel =
-    (isOwner || isSubleaseRenter) && cancellableStatuses.includes(booking.status);
+  const canCancel = (isOwner || ownsBookingAsLister) && cancellableStatuses.includes(booking.status);
   const canRequestCancel =
-    isRenter && !isSubleaseRenter && cancellableStatuses.includes(booking.status);
+    isRenter && !ownsBookingAsLister && cancellableStatuses.includes(booking.status);
   const canApprove = isOwner && booking.status === 'cancellation_requested';
   const canAccept = isOwner && booking.status === 'pending';
   const needsSignature =
