@@ -71,7 +71,7 @@ const SettingsTab = ({ user, token, API }) => {
 
   return (
     <div>
-      <h2 className="text-2xl font-bold mb-6" style={{ fontFamily: 'Playfair Display' }}>Account Settings</h2>
+      <h2 className="text-2xl font-bold mb-6" style={{ fontFamily: 'Playfair Display' }}>{i18n.t('dashboard.accountSettings')}</h2>
 
       {/* Language preference */}
       <div className="bg-white rounded-2xl border border-gray-200 p-6 max-w-2xl mb-6">
@@ -80,9 +80,9 @@ const SettingsTab = ({ user, token, API }) => {
             <Globe size={24} className="text-[#1E6A6A]" />
           </div>
           <div>
-            <h3 className="text-lg font-bold text-gray-900">Default Language</h3>
+            <h3 className="text-lg font-bold text-gray-900">{i18n.t('dashboard.defaultLanguage')}</h3>
             <p className="text-sm text-gray-500">
-              The site will open in this language every time you sign in, on any device.
+              {i18n.t('dashboard.defaultLanguageHint')}
             </p>
           </div>
         </div>
@@ -122,7 +122,7 @@ const SettingsTab = ({ user, token, API }) => {
           style={{ backgroundColor: '#1E6A6A' }}
           data-testid="save-language-btn"
         >
-          {savingLanguage ? 'Saving…' : 'Save Default Language'}
+          {savingLanguage ? i18n.t('dashboard.saving') : i18n.t('dashboard.saveDefaultLanguage')}
         </button>
       </div>
 

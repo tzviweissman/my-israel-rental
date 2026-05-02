@@ -1,4 +1,5 @@
 import React, { useState, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Filter, X } from 'lucide-react';
 import ContractSignModal from '../modals/ContractSignModal';
 import AcceptBookingModal from '../modals/AcceptBookingModal';
@@ -12,6 +13,7 @@ import useBookingActions from './useBookingActions';
  * lives in the `useBookingActions` hook.
  */
 const BookingsList = ({ bookings, onUpdate, user, token, API }) => {
+  const { t } = useTranslation();
   const [search, setSearch] = useState('');
   const actions = useBookingActions({ bookings, API, token, onUpdate });
 
@@ -34,7 +36,7 @@ const BookingsList = ({ bookings, onUpdate, user, token, API }) => {
     <div>
       <div className="flex items-center justify-between mb-6 gap-4">
         <h2 className="text-2xl font-bold" style={{ fontFamily: 'Playfair Display' }}>
-          My Bookings
+          {t('dashboard.myBookings')}
         </h2>
 
         {bookings.length > 0 && (
@@ -42,7 +44,7 @@ const BookingsList = ({ bookings, onUpdate, user, token, API }) => {
             <div className="relative">
               <input
                 type="text"
-                placeholder="Search bookings by property, location, or status..."
+                placeholder={t('dashboard.searchBookings')}
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 className="w-full px-4 py-2.5 pl-10 rounded-xl border-2 border-gray-200 focus:border-[#1E6A6A] focus:outline-none text-sm"

@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { FileText, FileCheck, Download } from 'lucide-react';
 
 const STATUS_COLORS = {
@@ -8,8 +9,6 @@ const STATUS_COLORS = {
   cancellation_requested: 'bg-orange-100 text-orange-700',
   cancelled: 'bg-gray-100 text-gray-700',
 };
-
-const statusLabel = (s) => (s === 'cancellation_requested' ? 'Cancellation Requested' : s);
 
 /**
  * Single booking card row. Pure presentational — all action handlers come
@@ -26,6 +25,14 @@ const BookingRow = ({
   onDenyCancel,
   onSignContract,
 }) => {
+  const { t } = useTranslation();
+  const statusLabel = (s) => {
+    if (s === 'confirmed') return t('dashboard.confirmed');
+    if (s === 'pending') return t('dashboard.pending');
+    if (s === 'cancelled') return t('dashboard.cancelled');
+    if (s === 'cancellation_requested') return t('dashboard.cancellationRequested');
+    return s;
+  };
   const isOwner = user.role === 'owner' || user.role === 'manager';
   const isRenter = user.role === 'renter';
   // The lister side of any booking owns the calendar via booking.owner_id.
@@ -71,11 +78,11 @@ const BookingRow = ({
           <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm text-gray-600">
             {booking.property_location && (
               <p>
-                <span className="font-medium">Location:</span> {booking.property_location}
+                <span className="font-medium">{t('dashboard.location')}:</span> {booking.property_location}
               </p>
             )}
             <p>
-              <span className="font-medium">Dates:</span>{' '}
+              <span className="font-medium">{t('dashboard.dates')}:</span>{' '}
               {new Date(booking.start_date).toLocaleDateString()} -{' '}
               {new Date(booking.end_date).toLocaleDateString()}
             </p>
@@ -114,7 +121,7 @@ const BookingRow = ({
               data-testid={`sign-contract-${booking.id}`}
             >
               <FileText size={16} />
-              Sign Contract
+              {t('dashboard.signContract')}
             </button>
           )}
           {booking.contract_signed && signedHref && (
@@ -127,7 +134,7 @@ const BookingRow = ({
                 data-testid={`view-signed-contract-${booking.id}`}
               >
                 <FileCheck size={16} />
-                View Signed Contract
+                {t('dashboard.viewSignedContract')}
               </a>
               <a
                 href={signedHref}
@@ -136,7 +143,7 @@ const BookingRow = ({
                 data-testid={`download-signed-contract-${booking.id}`}
               >
                 <Download size={16} />
-                Download
+                {t('dashboard.download')}
               </a>
             </>
           )}
@@ -147,7 +154,7 @@ const BookingRow = ({
               style={{ backgroundColor: '#1E6A6A' }}
               data-testid={`accept-booking-${booking.id}`}
             >
-              Accept Booking
+              {t('dashboard.accept')}
             </button>
           )}
           {canCancel && (
@@ -156,7 +163,7 @@ const BookingRow = ({
               className="px-4 py-2 rounded-lg text-sm font-medium bg-red-500 text-white hover:bg-red-600 transition-colors"
               data-testid={`cancel-booking-${booking.id}`}
             >
-              Cancel Booking
+              {t('dashboard.cancelBooking')}
             </button>
           )}
           {canRequestCancel && (
@@ -165,7 +172,7 @@ const BookingRow = ({
               className="px-4 py-2 rounded-lg text-sm font-medium bg-orange-500 text-white hover:bg-orange-600 transition-colors"
               data-testid={`request-cancel-${booking.id}`}
             >
-              Request Cancellation
+              {t('dashboard.requestCancellation')}
             </button>
           )}
           {canApprove && (
@@ -175,14 +182,14 @@ const BookingRow = ({
                 className="px-4 py-2 rounded-lg text-sm font-medium bg-green-500 text-white hover:bg-green-600 transition-colors"
                 data-testid={`approve-cancel-${booking.id}`}
               >
-                Approve
+                {t('dashboard.accept')}
               </button>
               <button
                 onClick={() => onDenyCancel(booking.id)}
                 className="px-4 py-2 rounded-lg text-sm font-medium bg-red-500 text-white hover:bg-red-600 transition-colors"
                 data-testid={`deny-cancel-${booking.id}`}
               >
-                Deny
+                {t('dashboard.deny')}
               </button>
             </>
           )}

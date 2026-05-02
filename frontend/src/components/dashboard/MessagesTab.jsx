@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { MessageCircle, Building2 } from 'lucide-react';
@@ -8,6 +9,7 @@ import { MessageCircle, Building2 } from 'lucide-react';
  * deep-links into the matching `/chat/:propertyId?with=…` route.
  */
 const MessagesTab = ({ API, token, onUnreadChange }) => {
+  const { t } = useTranslation();
   const [conversations, setConversations] = useState([]);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
@@ -44,7 +46,7 @@ const MessagesTab = ({ API, token, onUnreadChange }) => {
   if (loading) {
     return (
       <div className="text-center py-12 text-gray-400 text-sm" data-testid="messages-tab-loading">
-        Loading conversations…
+        {t('dashboard.loadingConversations')}
       </div>
     );
   }
@@ -56,9 +58,9 @@ const MessagesTab = ({ API, token, onUnreadChange }) => {
         data-testid="messages-tab-empty"
       >
         <MessageCircle size={36} className="mx-auto mb-3 text-gray-300" />
-        <p className="text-gray-500 text-sm">No conversations yet</p>
+        <p className="text-gray-500 text-sm">{t('dashboard.noConversations')}</p>
         <p className="text-gray-400 text-xs mt-1">
-          When someone messages you about a listing, it will show up here.
+          {t('dashboard.noConversationsHint')}
         </p>
       </div>
     );

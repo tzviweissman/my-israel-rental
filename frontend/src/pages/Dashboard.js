@@ -140,7 +140,7 @@ const Dashboard = () => {
       <div className="max-w-7xl mx-auto px-6 pt-28 pb-12">
         <div className="flex items-center justify-between mb-8">
           <h1 className="text-4xl font-bold" style={{ fontFamily: 'Playfair Display' }}>
-            Dashboard
+            {t('dashboard.title')}
           </h1>
           {isOwnerLike && (
             <div className="flex gap-2">
@@ -150,7 +150,7 @@ const Dashboard = () => {
                 data-testid="bulk-upload-button"
               >
                 <Upload size={18} />
-                Bulk Upload
+                {t('dashboard.bulkUpload')}
               </button>
               <button
                 onClick={() => {
@@ -172,7 +172,7 @@ const Dashboard = () => {
               data-testid="sublease-property-button"
             >
               <Home size={20} />
-              Sublease Property
+              {t('dashboard.subleaseProperty')}
             </button>
           )}
         </div>

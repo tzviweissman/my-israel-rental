@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import {
@@ -28,6 +29,7 @@ import { toast } from 'sonner';
  * alerts" drawer so the page's hero is *matching listings*, not settings.
  */
 const SavedSearchesTab = ({ API, token }) => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [searches, setSearches] = useState([]);
   const [matches, setMatches] = useState([]);
@@ -158,10 +160,10 @@ const SavedSearchesTab = ({ API, token }) => {
       <div className="flex items-start justify-between gap-3 flex-wrap">
         <div>
           <h2 className="text-2xl font-bold" style={{ fontFamily: 'Playfair Display' }}>
-            My Alerts
+            {t('dashboard.myAlerts')}
           </h2>
           <p className="text-sm text-gray-500 mt-1">
-            New listings that match your criteria show up here. You'll also get an email + in-app ping.
+            {t('dashboard.myAlertsHint')}
           </p>
         </div>
         <button
@@ -172,7 +174,7 @@ const SavedSearchesTab = ({ API, token }) => {
           title="Run a search, then tap 'Save as alert' in the filter drawer"
         >
           <Sparkles size={15} />
-          Create new alert
+          {t('dashboard.createNewAlert')}
         </button>
       </div>
 
@@ -187,12 +189,12 @@ const SavedSearchesTab = ({ API, token }) => {
             <Bell className="text-[#1E6A6A]" size={22} />
           </div>
           <p className="text-gray-700 font-medium mb-1">
-            {searches.length === 0 ? 'No alerts yet' : 'No new matches yet'}
+            {searches.length === 0 ? t('dashboard.noAlerts') : t('dashboard.noNewMatches')}
           </p>
           <p className="text-gray-500 text-sm max-w-md mx-auto">
             {searches.length === 0
-              ? 'Head to properties, pick your filters, and hit "Save as alert" — we\'ll watch new listings for you.'
-              : "We're watching for you. You'll be notified the moment a property matches one of your alerts."}
+              ? t('dashboard.noAlertsHint')
+              : t('dashboard.watchingForYou')}
           </p>
         </div>
       ) : (
@@ -206,10 +208,10 @@ const SavedSearchesTab = ({ API, token }) => {
               : '';
             const reasonLabel =
               m.reason === 'price_drop'
-                ? 'Price drop'
+                ? t('dashboard.priceDrop')
                 : m.reason === 'reactivated'
-                ? 'Back on market'
-                : 'Just listed';
+                ? t('dashboard.backOnMarket')
+                : t('dashboard.justListed');
             return (
               <div
                 key={m.id}
@@ -300,7 +302,7 @@ const SavedSearchesTab = ({ API, token }) => {
             data-testid="toggle-manage-alerts"
           >
             <Settings size={14} />
-            Manage my alerts ({searches.length})
+            {t('dashboard.manageMyAlerts')} ({searches.length})
             {showManage ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
           </button>
 
@@ -393,7 +395,9 @@ const SavedSearchesTab = ({ API, token }) => {
                     </div>
 
                     <div className="text-[10px] text-gray-400 pt-2 border-t border-[#f0ece4]">
-                      {days > 0 ? `Expires in ${days} day${days === 1 ? '' : 's'}` : 'Expired'}
+                      {days > 0
+                        ? `${t('dashboard.expiresIn')} ${days} ${days === 1 ? t('dashboard.day') : t('dashboard.days')}`
+                        : t('dashboard.expired')}
                     </div>
                   </div>
                 );

@@ -48,7 +48,7 @@ const DashboardTabs = ({ activeTab, setActiveTab, role, unreadMessages = 0 }) =>
             data-testid="tab-bulk-manager"
           >
             <Layers size={14} />
-            Bulk Manager
+            {t('dashboard.bulkManager')}
           </button>
         )}
 
@@ -67,7 +67,7 @@ const DashboardTabs = ({ activeTab, setActiveTab, role, unreadMessages = 0 }) =>
             data-testid="tab-subleases"
           >
             <Home size={14} />
-            Subleases
+            {t('dashboard.subleases')}
           </button>
         )}
 
@@ -77,7 +77,7 @@ const DashboardTabs = ({ activeTab, setActiveTab, role, unreadMessages = 0 }) =>
           data-testid="tab-messages"
         >
           <MessageCircle size={14} />
-          Messages
+          {t('dashboard.messages')}
           {unreadMessages > 0 && (
             <span
               className="ml-1 inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full bg-red-500 text-white text-[10px] font-bold leading-none"
@@ -95,7 +95,7 @@ const DashboardTabs = ({ activeTab, setActiveTab, role, unreadMessages = 0 }) =>
             data-testid="tab-alerts"
           >
             <Bell size={14} />
-            Alerts
+            {t('dashboard.alerts')}
           </button>
         )}
 
@@ -105,7 +105,7 @@ const DashboardTabs = ({ activeTab, setActiveTab, role, unreadMessages = 0 }) =>
           data-testid="tab-liked"
         >
           <Heart size={14} />
-          Liked
+          {t('dashboard.liked')}
         </button>
 
         {isRenter && (
@@ -115,7 +115,7 @@ const DashboardTabs = ({ activeTab, setActiveTab, role, unreadMessages = 0 }) =>
             data-testid="tab-services"
           >
             <Sparkles size={14} />
-            Services
+            {t('dashboard.services')}
           </button>
         )}
 
@@ -125,7 +125,7 @@ const DashboardTabs = ({ activeTab, setActiveTab, role, unreadMessages = 0 }) =>
           data-testid="tab-settings"
         >
           <KeyRound size={14} />
-          Settings
+          {t('dashboard.settings')}
         </button>
       </div>
     </div>
