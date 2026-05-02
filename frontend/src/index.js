@@ -8,6 +8,6 @@ const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
   <React.StrictMode>
     <App />
-    <Toaster position="top-right" />
+    <Toaster position="top-right" duration={1500} />
   </React.StrictMode>,
 );
