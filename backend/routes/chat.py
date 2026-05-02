@@ -55,6 +55,23 @@ async def send_message(chat_data: ChatMessage, payload: dict = Depends(verify_to
     return {"id": message_id, "message": "Message sent successfully"}
 
 
+@api_router.delete("/chat/messages/{message_id}", response_model=MessageResponse)
+async def delete_message(
+    message_id: str, payload: dict = Depends(verify_token)
+) -> dict:
+    """Hard-delete a single message. Only the sender may delete their own.
+
+    Both participants stop seeing the message after this. Notifications are
+    not affected — the recipient may have already opened the chat."""
+    msg = await db.messages.find_one({"id": message_id}, {"_id": 0, "sender_id": 1})
+    if not msg:
+        raise HTTPException(status_code=404, detail="Message not found")
+    if msg.get("sender_id") != payload['user_id']:
+        raise HTTPException(status_code=403, detail="You can only delete your own messages")
+    await db.messages.delete_one({"id": message_id})
+    return {"message": "Message deleted"}
+
+
 @api_router.get("/chat/messages/{property_id}", response_model=list[MessageOut])
 async def get_messages(
     property_id: str,

@@ -3,7 +3,7 @@ import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import axios from 'axios';
 import { API, AuthContext } from '../App';
-import { Send, ArrowLeft, Home, User, Building2, Clock, MessageCircle, ChevronDown, Check, CheckCheck, Languages } from 'lucide-react';
+import { Send, ArrowLeft, Home, User, Building2, Clock, MessageCircle, ChevronDown, Check, CheckCheck, Languages, X } from 'lucide-react';
 import { toast } from 'sonner';
 
 const HEBREW_RE = /[\u0590-\u05FF]/;
@@ -113,6 +113,21 @@ const Chat = () => {
       .catch(() => {
         /* silent */
       });
+  };
+
+  const handleDeleteMessage = async (msgId) => {
+    if (!window.confirm('Delete this message? This cannot be undone.')) return;
+    // Optimistic — remove from view immediately, restore on failure.
+    const prev = messages;
+    setMessages((cur) => cur.filter((m) => m.id !== msgId));
+    try {
+      await axios.delete(`${API}/chat/messages/${msgId}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+    } catch (err) {
+      setMessages(prev);
+      toast.error(err.response?.data?.detail || 'Failed to delete message');
+    }
   };
 
   useEffect(() => {
@@ -348,7 +363,7 @@ const Chat = () => {
                     return (
                       <div
                         key={msg.id}
-                        className={`flex items-end gap-2 ${isMe ? 'justify-end' : 'justify-start'} ${isLast ? 'mb-3' : 'mb-0.5'}`}
+                        className={`flex items-end gap-2 group ${isMe ? 'justify-end' : 'justify-start'} ${isLast ? 'mb-3' : 'mb-0.5'}`}
                         data-testid={`message-${msg.id}`}
                       >
                         {/* Avatar (other user) */}
@@ -358,6 +373,20 @@ const Chat = () => {
                               <span className="text-[10px] font-bold text-gray-500">{getInitials(msg.sender_name)}</span>
                             </div>
                           </div>
+                        )}
+
+                        {/* Delete X — only on my own messages, fades in on row hover */}
+                        {isMe && (
+                          <button
+                            type="button"
+                            onClick={() => handleDeleteMessage(msg.id)}
+                            className="self-center w-6 h-6 rounded-full bg-white/90 backdrop-blur-sm text-gray-500 hover:text-red-500 hover:bg-white shadow-sm flex items-center justify-center transition-all opacity-0 group-hover:opacity-100 focus:opacity-100"
+                            data-testid={`delete-message-${msg.id}`}
+                            aria-label="Delete message"
+                            title="Delete message"
+                          >
+                            <X size={12} />
+                          </button>
                         )}
 
                         {/* Message bubble */}

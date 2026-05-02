@@ -856,6 +856,29 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/chat/messages/{message_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /**
+         * Delete Message
+         * @description Hard-delete a single message. Only the sender may delete their own.
+         *
+         *     Both participants stop seeing the message after this. Notifications are
+         *     not affected — the recipient may have already opened the chat.
+         */
+        delete: operations["delete_message_api_chat_messages__message_id__delete"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/chat/messages/{property_id}": {
         parameters: {
             query?: never;
@@ -4983,6 +5006,37 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["IdMessageResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    delete_message_api_chat_messages__message_id__delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                message_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MessageResponse"];
                 };
             };
             /** @description Validation Error */
