@@ -722,13 +722,14 @@ const PropertyDetail = () => {
                       <button
                         type="button"
                         onClick={() => {
-                          // Same reset-on-open as check-in pill so clicking
-                          // here also restarts the range cleanly when needed.
+                          // Clicking the Check-out pill should only reset the
+                          // check-out side; check-in must be preserved so the
+                          // next calendar click sets the new check-out date,
+                          // not a brand-new check-in.
                           if (dateRange?.from && dateRange?.to) {
-                            setDateRange({ from: undefined, to: undefined });
+                            setDateRange({ from: dateRange.from, to: undefined });
                             setBookingData((prev) => ({
                               ...prev,
-                              start_date: '',
                               end_date: '',
                             }));
                           }
