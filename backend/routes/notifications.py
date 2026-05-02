@@ -64,3 +64,17 @@ async def clear_all_notifications(payload: dict = Depends(verify_token)) -> dict
         {"user_id": payload['user_id']}
     )
     return {"message": f"{result.deleted_count} notifications cleared"}
+
+
+@api_router.delete("/notifications/{notification_id}", response_model=MessageResponse)
+async def delete_notification(
+    notification_id: str, payload: dict = Depends(verify_token)
+) -> dict:
+    """Delete a single notification belonging to the current user."""
+    result = await db.notifications.delete_one(
+        {"id": notification_id, "user_id": payload['user_id']}
+    )
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Notification not found")
+    return {"message": "Notification deleted"}
+

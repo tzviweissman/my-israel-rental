@@ -123,6 +123,23 @@ const Navigation = () => {
       console.error('Failed to mark notification as read', error);
     }
   };
+
+  // Delete a single notification. We optimistically remove it from the panel
+  // and roll back if the request fails so the user always gets instant feedback.
+  const deleteNotification = async (notif) => {
+    const prev = notifications;
+    setNotifications((cur) => cur.filter((n) => n.id !== notif.id));
+    if (!notif.read) setUnreadCount((c) => Math.max(0, c - 1));
+    try {
+      await axios.delete(`${API}/notifications/${notif.id}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+    } catch (error) {
+      setNotifications(prev);
+      if (!notif.read) setUnreadCount((c) => c + 1);
+      toast.error(error?.response?.data?.detail || 'Failed to delete notification');
+    }
+  };
   
   const markAllAsRead = async () => {
     try {
@@ -389,28 +406,47 @@ const Navigation = () => {
                     ) : (
                       <div className="divide-y divide-white/10">
                         {notifications.map((notification) => (
-                          <button
+                          <div
                             key={notification.id}
-                            onClick={() => handleNotificationClick(notification)}
-                            className={`w-full text-left p-3 sm:p-4 hover:bg-white/5 transition-colors ${
+                            className={`group relative w-full text-left p-3 sm:p-4 hover:bg-white/5 transition-colors ${
                               !notification.read ? 'bg-white/10' : ''
                             }`}
                             data-testid={`notification-${notification.id}`}
                           >
-                            <div className="flex items-start gap-2 sm:gap-3">
-                              <div className={`w-2 h-2 rounded-full mt-2 flex-shrink-0 ${
-                                !notification.read ? 'bg-[#D4AF37]' : 'bg-transparent'
-                              }`} />
-                              <div className="flex-1 min-w-0">
-                                <p className={`text-xs sm:text-sm break-words ${!notification.read ? 'text-white font-medium' : 'text-white/70'}`}>
-                                  {notification.message}
-                                </p>
-                                <p className="text-[10px] sm:text-xs text-white/40 mt-1">
-                                  {new Date(notification.created_at).toLocaleString()}
-                                </p>
+                            <button
+                              type="button"
+                              onClick={() => handleNotificationClick(notification)}
+                              className="w-full text-left"
+                              data-testid={`notification-open-${notification.id}`}
+                            >
+                              <div className="flex items-start gap-2 sm:gap-3 pr-7">
+                                <div className={`w-2 h-2 rounded-full mt-2 flex-shrink-0 ${
+                                  !notification.read ? 'bg-[#D4AF37]' : 'bg-transparent'
+                                }`} />
+                                <div className="flex-1 min-w-0">
+                                  <p className={`text-xs sm:text-sm break-words ${!notification.read ? 'text-white font-medium' : 'text-white/70'}`}>
+                                    {notification.message}
+                                  </p>
+                                  <p className="text-[10px] sm:text-xs text-white/40 mt-1">
+                                    {new Date(notification.created_at).toLocaleString()}
+                                  </p>
+                                </div>
                               </div>
-                            </div>
-                          </button>
+                            </button>
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                deleteNotification(notification);
+                              }}
+                              className="absolute top-2 right-2 w-6 h-6 rounded-full bg-white/10 text-white/70 hover:bg-red-500 hover:text-white flex items-center justify-center transition-all opacity-0 group-hover:opacity-100 focus:opacity-100"
+                              data-testid={`notification-delete-${notification.id}`}
+                              aria-label="Delete notification"
+                              title="Delete notification"
+                            >
+                              <X size={12} />
+                            </button>
+                          </div>
                         ))}
                       </div>
                     )}
