@@ -35,8 +35,9 @@ const BookingRow = ({
   const canCancel = (isOwner || ownsBookingAsLister) && cancellableStatuses.includes(booking.status);
   const canRequestCancel =
     isRenter && !ownsBookingAsLister && cancellableStatuses.includes(booking.status);
-  const canApprove = isOwner && booking.status === 'cancellation_requested';
-  const canAccept = isOwner && booking.status === 'pending';
+  const canApprove =
+    (isOwner || ownsBookingAsLister) && booking.status === 'cancellation_requested';
+  const canAccept = (isOwner || ownsBookingAsLister) && booking.status === 'pending';
   const needsSignature =
     isRenter &&
     booking.status === 'confirmed' &&

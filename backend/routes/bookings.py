@@ -273,8 +273,8 @@ async def accept_booking(booking_id: str, payload: dict = Depends(verify_token))
     if not booking:
         raise HTTPException(status_code=404, detail="Booking not found")
     
-    # Verify user is owner or manager
-    if payload['role'] not in ['owner', 'manager'] or booking['owner_id'] != payload['user_id']:
+    # Authorization: the booking's "owner" (listing owner OR sublessor) accepts.
+    if booking['owner_id'] != payload['user_id']:
         raise HTTPException(status_code=403, detail="Not authorized")
     
     # Check if booking is pending
@@ -755,8 +755,8 @@ async def approve_cancel_request(booking_id: str, payload: dict = Depends(verify
     if not booking:
         raise HTTPException(status_code=404, detail="Booking not found")
     
-    # Verify user is owner or manager
-    if payload['role'] not in ['owner', 'manager'] or booking['owner_id'] != payload['user_id']:
+    # Authorization: the booking's "owner" (listing owner OR sublessor) approves.
+    if booking['owner_id'] != payload['user_id']:
         raise HTTPException(status_code=403, detail="Not authorized")
     
     if booking.get('status') != 'cancellation_requested':
@@ -802,8 +802,8 @@ async def deny_cancel_request(booking_id: str, denial_reason: str = Body(..., em
     if not booking:
         raise HTTPException(status_code=404, detail="Booking not found")
     
-    # Verify user is owner or manager
-    if payload['role'] not in ['owner', 'manager'] or booking['owner_id'] != payload['user_id']:
+    # Authorization: the booking's "owner" (listing owner OR sublessor) denies.
+    if booking['owner_id'] != payload['user_id']:
         raise HTTPException(status_code=403, detail="Not authorized")
     
     if booking.get('status') != 'cancellation_requested':
