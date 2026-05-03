@@ -9,7 +9,7 @@ import { toast } from 'sonner';
 const HEBREW_RE = /[\u0590-\u05FF]/;
 
 const Chat = () => {
-  const { i18n } = useTranslation();
+  const { i18n, t } = useTranslation();
   const uiLang = i18n.language?.startsWith('he') ? 'he' : 'en';
   const { propertyId } = useParams();
   const [searchParams] = useSearchParams();
@@ -379,11 +379,11 @@ const Chat = () => {
               data-testid="chat-back-btn"
             >
               <ArrowLeft size={16} />
-              Back
+              {t('chat.back')}
             </button>
             <div className="flex items-center gap-2">
               <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse" />
-              <span className="text-white/80 text-xs font-medium">Live Chat</span>
+              <span className="text-white/80 text-xs font-medium">{t('chat.liveChat')}</span>
             </div>
             <div className="flex items-center gap-2">
               <button
@@ -399,8 +399,8 @@ const Chat = () => {
                 }}
                 className={`p-2 rounded-lg transition-all backdrop-blur-sm ${searchOpen ? 'bg-white/30' : 'bg-white/15 hover:bg-white/25'}`}
                 data-testid="chat-search-toggle"
-                aria-label="Search messages"
-                title="Search messages"
+                aria-label={t('chat.searchMessages')}
+                title={t('chat.searchMessages')}
               >
                 <Search size={14} className="text-white" />
               </button>
@@ -410,7 +410,7 @@ const Chat = () => {
                 data-testid="return-dashboard-btn"
               >
                 <Home size={14} />
-                Dashboard
+                {t('chat.dashboard')}
               </button>
             </div>
           </div>
@@ -441,14 +441,14 @@ const Chat = () => {
                     setActiveMatchIndex(0);
                   }
                 }}
-                placeholder="Search messages…"
+                placeholder={t('chat.searchPlaceholder')}
                 autoFocus
                 className="flex-1 bg-transparent text-sm focus:outline-none placeholder:text-gray-400"
                 data-testid="chat-search-input"
               />
               {searchQuery && (
                 <span className="text-[11px] text-gray-500 flex-shrink-0" data-testid="chat-search-counter">
-                  {matchIds.length === 0 ? 'No matches' : `${activeMatchIndex + 1} of ${matchIds.length}`}
+                  {matchIds.length === 0 ? t('chat.noMatches') : t('chat.matchCounter', { current: activeMatchIndex + 1, total: matchIds.length })}
                 </span>
               )}
               <div className="flex items-center gap-1 flex-shrink-0">
@@ -461,7 +461,7 @@ const Chat = () => {
                   disabled={matchIds.length === 0}
                   className="p-1 rounded text-gray-500 hover:bg-gray-200 disabled:opacity-30 disabled:cursor-not-allowed"
                   data-testid="chat-search-prev"
-                  aria-label="Previous match"
+                  aria-label={t('chat.previousMatch')}
                 >
                   <ChevronUp size={14} />
                 </button>
@@ -473,7 +473,7 @@ const Chat = () => {
                   disabled={matchIds.length === 0}
                   className="p-1 rounded text-gray-500 hover:bg-gray-200 disabled:opacity-30 disabled:cursor-not-allowed"
                   data-testid="chat-search-next"
-                  aria-label="Next match"
+                  aria-label={t('chat.nextMatch')}
                 >
                   <ChevronDown size={14} />
                 </button>
@@ -486,7 +486,7 @@ const Chat = () => {
                   }}
                   className="p-1 rounded text-gray-500 hover:bg-gray-200"
                   data-testid="chat-search-close"
-                  aria-label="Close search"
+                  aria-label={t('chat.closeSearch')}
                 >
                   <X size={14} />
                 </button>
@@ -527,7 +527,7 @@ const Chat = () => {
               </div>
               <div className="text-right shrink-0">
                 <span className="inline-flex items-center gap-1 px-2 py-0.5 text-[10px] font-semibold rounded-full bg-[#1E6A6A]/10 text-[#1E6A6A] uppercase tracking-wider">
-                  {sublease ? 'Sublease' : property.rental_type?.replace('-', ' ')}
+                  {sublease ? t('chat.subleaseLabel') : property.rental_type?.replace('-', ' ')}
                 </span>
               </div>
             </div>
@@ -548,9 +548,9 @@ const Chat = () => {
                 <div className="w-16 h-16 rounded-full bg-[#1E6A6A]/10 flex items-center justify-center mb-4">
                   <MessageCircle size={28} className="text-[#1E6A6A]" />
                 </div>
-                <p className="text-gray-500 font-medium text-sm">No messages yet</p>
+                <p className="text-gray-500 font-medium text-sm">{t('chat.noMessages')}</p>
                 <p className="text-gray-400 text-xs mt-1 max-w-[260px]">
-                  Start the conversation about this property.
+                  {t('chat.startConversation')}
                 </p>
               </div>
             ) : (
@@ -599,8 +599,8 @@ const Chat = () => {
                                   onClick={() => beginEdit(msg)}
                                   className="w-6 h-6 rounded-full bg-white/90 backdrop-blur-sm text-gray-500 hover:text-[#1E6A6A] hover:bg-white shadow-sm flex items-center justify-center transition-all"
                                   data-testid={`edit-message-${msg.id}`}
-                                  aria-label="Edit message"
-                                  title="Edit (within 5 minutes)"
+                                  aria-label={t('chat.editMessage')}
+                                  title={t('chat.editWindow')}
                                 >
                                   <Pencil size={11} />
                                 </button>
@@ -611,8 +611,8 @@ const Chat = () => {
                               onClick={() => handleDeleteMessage(msg.id)}
                               className="w-6 h-6 rounded-full bg-white/90 backdrop-blur-sm text-gray-500 hover:text-red-500 hover:bg-white shadow-sm flex items-center justify-center transition-all"
                               data-testid={`delete-message-${msg.id}`}
-                              aria-label="Delete message"
-                              title="Delete message"
+                              aria-label={t('chat.deleteMessage')}
+                              title={t('chat.deleteMessage')}
                             >
                               <X size={12} />
                             </button>
@@ -657,7 +657,7 @@ const Chat = () => {
                                   className="text-[11px] text-white/70 hover:text-white underline underline-offset-2"
                                   data-testid={`edit-cancel-${msg.id}`}
                                 >
-                                  Cancel
+                                  {t('chat.cancel')}
                                 </button>
                                 <button
                                   type="button"
@@ -665,10 +665,10 @@ const Chat = () => {
                                   className="px-3 py-1 rounded-md text-[11px] font-bold text-[#1E6A6A] bg-[#D4AF37] hover:opacity-90"
                                   data-testid={`edit-save-${msg.id}`}
                                 >
-                                  Save
+                                  {t('chat.save')}
                                 </button>
                               </div>
-                              <p className="text-[10px] text-white/60">Enter to save · Esc to cancel</p>
+                              <p className="text-[10px] text-white/60">{t('chat.editHint')}</p>
                             </div>
                           ) : (
                             <p className="text-[13.5px] leading-relaxed whitespace-pre-wrap break-words">
@@ -685,7 +685,7 @@ const Chat = () => {
                             if (tr === 'loading') {
                               return (
                                 <p className={`text-[12px] mt-1.5 italic ${isMe ? 'text-white/70' : 'text-gray-500'}`}>
-                                  Translating…
+                                  {t('chat.translating')}
                                 </p>
                               );
                             }
@@ -696,7 +696,7 @@ const Chat = () => {
                                   data-testid={`translation-${msg.id}`}
                                 >
                                   <p className={`text-[10px] uppercase tracking-wider mb-1 ${isMe ? 'text-white/60' : 'text-gray-400'}`}>
-                                    {tr.source_lang === 'he' ? 'Hebrew' : 'English'} → {tr.target_lang === 'he' ? 'Hebrew' : 'English'}
+                                    {tr.source_lang === 'he' ? t('chat.hebrewLabel') : t('chat.englishLabel')} → {tr.target_lang === 'he' ? t('chat.hebrewLabel') : t('chat.englishLabel')}
                                   </p>
                                   <p className="text-[13.5px] leading-relaxed whitespace-pre-wrap break-words">
                                     {tr.translated_text}
@@ -715,7 +715,7 @@ const Chat = () => {
                                   data-testid={`translate-btn-${msg.id}`}
                                 >
                                   <Languages size={11} />
-                                  Translate to {uiLang === 'en' ? 'English' : 'Hebrew'}
+                                  {uiLang === 'en' ? t('chat.translateToEnglish') : t('chat.translateToHebrew')}
                                 </button>
                               );
                             }
@@ -732,7 +732,7 @@ const Chat = () => {
                                 className={`text-[10px] italic ${isMe ? 'text-white/50' : 'text-gray-400'}`}
                                 title={`Edited at ${formatTime(msg.edited_at)}`}
                               >
-                                · edited
+                                · {t('chat.edited')}
                               </span>
                             )}
                             {isMe && (
@@ -814,7 +814,7 @@ const Chat = () => {
                     setNewMessage(e.target.value);
                     if (e.target.value.trim()) emitTyping();
                   }}
-                  placeholder="Type your message..."
+                  placeholder={t('chat.messagePlaceholder')}
                   className="w-full pl-4 pr-4 py-3 rounded-xl bg-gray-50 border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#1E6A6A]/30 focus:border-[#1E6A6A] focus:bg-white text-sm transition-all placeholder:text-gray-400"
                   data-testid="chat-input"
                 />
@@ -840,7 +840,7 @@ const Chat = () => {
             data-testid="return-dashboard-footer-btn"
           >
             <Home size={16} />
-            Return to Dashboard
+            {t('chat.returnToDashboard')}
           </button>
         </div>
       </div>

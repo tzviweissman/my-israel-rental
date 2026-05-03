@@ -333,6 +333,13 @@ Build a bilingual (English/Hebrew) rental website named MyIsraelRental.com with 
   - Added ~35 new keys in EN + HE under `property.*`, `filters.*`, `home.*` sections of `i18n.js`.
   - Verified via browser screenshots on all 4 pages (Home, /properties/all, /properties/sukkot, PropertyDetail): every visible static string now renders correctly in Hebrew (e.g. `מצא את השכירות המושלמת`, `השכרות לסוכות`, `דמי תיווך:`, `שהייה מינימלית:`, `+ שנה אחת`, `בחר תאריכי צ׳ק-אין וצ׳ק-אאוט`, `השכרת משנה` ribbon).
   - ESLint clean.
+- [x] **Secondary pages Hebrew translation — zero-English coverage** (2026-05-03):
+  - **Auth.js**: Forgot-password view (`Check Your Email`, `Back to Login`, `Forgot Password?`, hint, `Email Address` label + placeholder, `Sending...` / `Reset Password`), Reset-password view (`Password Reset!`, success message, `Go to Login`, `Set New Password`, hint, `New Password` label + placeholder `At least 6 characters`, `Confirm New Password` + placeholder `Repeat your new password`, `Resetting...`), Login-form `Forgot your password?` link. Full `resetLinkSent` supports `{{email}}` interpolation with `dangerouslySetInnerHTML` so the `<strong>` wrapping still renders.
+  - **Chat.js**: Added `t` to `useTranslation()` destructure. Translated `Back`, `Live Chat`, `Dashboard`, search bar (`Search messages…`, `No matches`, `{current} of {total}`, `Previous/Next/Close match`), property-type `Sublease` badge, empty-state (`No messages yet`, `Start the conversation about this property.`), per-message `Edit message` / `Delete message` / `Edit (within 5 minutes)` a11y labels, inline-edit buttons (`Cancel`, `Save`, `Enter to save · Esc to cancel`), translation block (`Translating…`, `Hebrew → English` language labels, `Translate to English/Hebrew`), `· edited` indicator, message input `Type your message...`, footer `Return to Dashboard`.
+  - **SignContract.js**: Added `useTranslation` import. Translated `Invalid Link`, `Sublease Contract` / `Sublease Agreement` headers, `View/Hide Contract Text` toggle, `Download Contract`, `Signed by:` / `Signed` date prefix, full signing panel (`Sign This Contract`, `Your Full Legal Name` + placeholder, `Draw Your Signature`, `Clear signature`, `Signing...` / `Confirm & Sign Contract`, legal disclaimer), `Contract Signed!` success state, footer, and `/night` / ` total` price suffixes.
+  - Added ~70 new EN+HE keys under `auth.*`, `chat.*`, `sign.*` sections of `i18n.js`.
+  - Verified via browser screenshots: `/auth/forgot-password` renders `שכחת סיסמה?`, `כתובת אימייל`, `אפס סיסמה`, `חזרה להתחברות` correctly.
+  - ESLint clean across all 4 edited files.
 
 ### P2 - Lower Priority
 - [ ] Manager bulk property upload via text

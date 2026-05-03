@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useParams } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import axios from 'axios';
 import SignatureCanvas from 'react-signature-canvas';
 import { FileText, PenTool, Check, Download, Loader2, AlertCircle, X, MapPin, Calendar, DollarSign } from 'lucide-react';
@@ -8,6 +9,7 @@ import { toast } from 'sonner';
 const API = process.env.REACT_APP_BACKEND_URL || '/api';
 
 const SignContract = () => {
+  const { t } = useTranslation();
   const { signToken } = useParams();
   const [contract, setContract] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -79,7 +81,7 @@ const SignContract = () => {
       <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
         <div className="bg-white rounded-2xl p-8 border border-red-200 max-w-md text-center shadow-sm">
           <AlertCircle size={48} className="mx-auto mb-4 text-red-400" />
-          <h2 className="text-xl font-bold text-gray-800 mb-2">Invalid Link</h2>
+          <h2 className="text-xl font-bold text-gray-800 mb-2">{t('sign.invalidLink')}</h2>
           <p className="text-gray-600 text-sm">{error}</p>
         </div>
       </div>
@@ -92,7 +94,7 @@ const SignContract = () => {
         {/* Header */}
         <div className="text-center mb-6">
           <h1 className="text-2xl font-bold text-[#1E6A6A]" style={{ fontFamily: 'Playfair Display' }}>MyIsraelRental</h1>
-          <p className="text-xs text-[#D4AF37] tracking-widest uppercase mt-1">Sublease Contract</p>
+          <p className="text-xs text-[#D4AF37] tracking-widest uppercase mt-1">{t('sign.subleaseContract')}</p>
         </div>
 
         {/* Contract Card */}
@@ -104,7 +106,7 @@ const SignContract = () => {
                 <FileText size={22} className="text-white" />
               </div>
               <div>
-                <h2 className="text-lg font-bold text-white">Sublease Agreement</h2>
+                <h2 className="text-lg font-bold text-white">{t('sign.subleaseAgreement')}</h2>
                 <p className="text-white/70 text-sm">{contract.original_filename}</p>
               </div>
             </div>
@@ -127,7 +129,7 @@ const SignContract = () => {
                 {contract.sublease.price > 0 && (
                   <span className="flex items-center gap-1 font-semibold" style={{ color: '#D4AF37' }}>
                     <DollarSign size={12} />
-                    {contract.sublease.currency === 'USD' ? '$' : '₪'}{contract.sublease.price.toLocaleString()}{contract.sublease.price_type === 'per_night' ? '/night' : ' total'}
+                    {contract.sublease.currency === 'USD' ? '$' : '₪'}{contract.sublease.price.toLocaleString()}{contract.sublease.price_type === 'per_night' ? t('sign.perNightSuffix') : t('sign.totalSuffix')}
                   </span>
                 )}
               </div>
@@ -143,7 +145,7 @@ const SignContract = () => {
                   className="flex items-center gap-2 text-sm font-medium text-[#1E6A6A] hover:underline mb-2"
                 >
                   <FileText size={14} />
-                  {showText ? 'Hide Contract Text' : 'View Contract Text'}
+                  {showText ? t('sign.hideText') : t('sign.viewText')}
                 </button>
                 {showText && (
                   <div className="bg-gray-50 rounded-xl border border-gray-200 p-4 max-h-72 overflow-y-auto">
@@ -159,14 +161,14 @@ const SignContract = () => {
               className="flex items-center gap-2 px-4 py-2 rounded-xl border border-gray-200 text-sm font-medium text-gray-700 hover:border-[#1E6A6A] hover:text-[#1E6A6A] transition-colors"
               data-testid="download-contract-btn"
             >
-              <Download size={16} /> Download Contract
+              <Download size={16} /> {t('sign.downloadContract')}
             </button>
 
             {/* Existing Signatures */}
             {contract.signatures && contract.signatures.length > 0 && (
               <div className="bg-green-50 rounded-xl p-4">
                 <h4 className="text-sm font-semibold text-green-800 mb-3 flex items-center gap-2">
-                  <Check size={16} /> Signed by:
+                  <Check size={16} /> {t('sign.signedBy')}
                 </h4>
                 <div className="space-y-2">
                   {contract.signatures.map((sig) => (
@@ -174,7 +176,7 @@ const SignContract = () => {
                       <img src={sig.signature_data} alt="Signature" className="h-10 w-auto border border-gray-100 rounded" />
                       <div>
                         <p className="text-sm font-medium text-gray-800">{sig.signer_name}</p>
-                        <p className="text-xs text-gray-500">Signed {new Date(sig.signed_at).toLocaleDateString()}</p>
+                        <p className="text-xs text-gray-500">{t('sign.signedOn')} {new Date(sig.signed_at).toLocaleDateString()}</p>
                       </div>
                     </div>
                   ))}
@@ -187,24 +189,24 @@ const SignContract = () => {
               <div className="bg-gray-50 rounded-xl p-5 border border-gray-200" data-testid="signing-section">
                 <div className="flex items-center gap-2 mb-4">
                   <PenTool size={18} className="text-[#D4AF37]" />
-                  <h4 className="text-base font-bold text-gray-800">Sign This Contract</h4>
+                  <h4 className="text-base font-bold text-gray-800">{t('sign.signThisContract')}</h4>
                 </div>
 
                 <div className="space-y-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1.5">Your Full Legal Name</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1.5">{t('sign.fullLegalName')}</label>
                     <input
                       type="text"
                       value={signerName}
                       onChange={(e) => setSignerName(e.target.value)}
-                      placeholder="Enter your full name as it appears on your ID"
+                      placeholder={t('sign.fullLegalNamePlaceholder')}
                       className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/30 focus:border-[#D4AF37] text-sm"
                       data-testid="signer-name-input"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1.5">Draw Your Signature</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1.5">{t('sign.drawSignature')}</label>
                     <div className="bg-white rounded-xl border-2 border-dashed border-gray-300 overflow-hidden">
                       <SignatureCanvas
                         ref={sigCanvasRef}
@@ -221,7 +223,7 @@ const SignContract = () => {
                       onClick={() => sigCanvasRef.current?.clear()}
                       className="text-xs text-gray-400 hover:text-red-500 mt-1.5 transition-colors"
                     >
-                      Clear signature
+                      {t('sign.clearSignature')}
                     </button>
                   </div>
 
@@ -233,15 +235,14 @@ const SignContract = () => {
                     data-testid="confirm-sign-btn"
                   >
                     {signing ? (
-                      <><Loader2 size={16} className="animate-spin" /> Signing...</>
+                      <><Loader2 size={16} className="animate-spin" /> {t('sign.signing')}</>
                     ) : (
-                      <><Check size={16} /> Confirm & Sign Contract</>
+                      <><Check size={16} /> {t('sign.confirmAndSign')}</>
                     )}
                   </button>
 
                   <p className="text-[10px] text-gray-400 text-center leading-relaxed">
-                    By signing, you agree to the terms outlined in this sublease agreement.
-                    Your signature is legally binding.
+                    {t('sign.signingDisclaimer')}
                   </p>
                 </div>
               </div>
@@ -250,14 +251,14 @@ const SignContract = () => {
                 <div className="w-14 h-14 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-3">
                   <Check size={28} className="text-green-600" />
                 </div>
-                <h4 className="text-lg font-bold text-green-800">Contract Signed!</h4>
-                <p className="text-sm text-green-600 mt-1">This contract has been signed successfully.</p>
+                <h4 className="text-lg font-bold text-green-800">{t('sign.contractSigned')}</h4>
+                <p className="text-sm text-green-600 mt-1">{t('sign.contractSignedMsg')}</p>
               </div>
             )}
           </div>
         </div>
 
-        <p className="text-center text-xs text-gray-400 mt-6">&copy; MyIsraelRental.com — Secure Document Signing</p>
+        <p className="text-center text-xs text-gray-400 mt-6">{t('sign.footer')}</p>
       </div>
     </div>
   );

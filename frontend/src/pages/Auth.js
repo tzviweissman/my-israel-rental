@@ -124,15 +124,13 @@ const Auth = () => {
                 <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
                   <CheckCircle size={32} className="text-green-600" />
                 </div>
-                <h2 className="text-2xl font-bold mb-3" style={{ fontFamily: 'Playfair Display' }}>Check Your Email</h2>
-                <p className="text-gray-600 text-sm mb-6">
-                  We've sent a password reset link to <strong>{forgotEmail}</strong>. Check your inbox (and spam folder) and click the link to reset your password.
-                </p>
+                <h2 className="text-2xl font-bold mb-3" style={{ fontFamily: 'Playfair Display' }}>{t('auth.checkYourEmail')}</h2>
+                <p className="text-gray-600 text-sm mb-6" dangerouslySetInnerHTML={{ __html: t('auth.resetLinkSent', { email: `<strong>${forgotEmail}</strong>` }) }} />
                 <button
                   onClick={() => navigate('/auth/login')}
                   className="w-full primary-btn"
                 >
-                  Back to Login
+                  {t('auth.backToLogin')}
                 </button>
               </div>
             ) : (
@@ -142,25 +140,25 @@ const Auth = () => {
                   className="flex items-center gap-1 text-sm text-gray-500 hover:text-[#1E6A6A] mb-6 transition-colors"
                 >
                   <ArrowLeft size={16} />
-                  Back to Login
+                  {t('auth.backToLogin')}
                 </button>
                 <div className="text-center mb-6">
                   <div className="w-14 h-14 bg-[#1E6A6A]/10 rounded-full flex items-center justify-center mx-auto mb-3">
                     <KeyRound size={24} className="text-[#1E6A6A]" />
                   </div>
-                  <h2 className="text-2xl font-bold" style={{ fontFamily: 'Playfair Display' }}>Forgot Password?</h2>
-                  <p className="text-sm text-gray-500 mt-2">Enter your email and we'll help you reset your password.</p>
+                  <h2 className="text-2xl font-bold" style={{ fontFamily: 'Playfair Display' }}>{t('auth.forgotPasswordTitle')}</h2>
+                  <p className="text-sm text-gray-500 mt-2">{t('auth.forgotPasswordHint')}</p>
                 </div>
                 <form onSubmit={handleForgotPassword} className="space-y-5" data-testid="forgot-password-form">
                   <div>
-                    <label className="block text-sm font-medium mb-2">Email Address</label>
+                    <label className="block text-sm font-medium mb-2">{t('auth.emailAddress')}</label>
                     <div className="relative">
                       <Mail size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
                       <input
                         type="email"
                         value={forgotEmail}
                         onChange={(e) => setForgotEmail(e.target.value)}
-                        placeholder="Enter your email"
+                        placeholder={t('auth.emailPlaceholder')}
                         className="w-full pl-10 pr-4 py-3 rounded-lg border border-[#E5E5E5] focus:outline-none focus:ring-2 focus:ring-[#1E6A6A]/50"
                         required
                         data-testid="forgot-email-input"
@@ -173,7 +171,7 @@ const Auth = () => {
                     className="w-full primary-btn disabled:opacity-50"
                     data-testid="forgot-submit-btn"
                   >
-                    {forgotSending ? 'Sending...' : 'Reset Password'}
+                    {forgotSending ? t('auth.sending') : t('auth.resetPasswordBtn')}
                   </button>
                 </form>
               </>
@@ -195,14 +193,14 @@ const Auth = () => {
                 <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
                   <CheckCircle size={32} className="text-green-600" />
                 </div>
-                <h2 className="text-2xl font-bold mb-3" style={{ fontFamily: 'Playfair Display' }}>Password Reset!</h2>
-                <p className="text-gray-600 text-sm mb-6">Your password has been successfully reset. You can now log in with your new password.</p>
+                <h2 className="text-2xl font-bold mb-3" style={{ fontFamily: 'Playfair Display' }}>{t('auth.passwordResetTitle')}</h2>
+                <p className="text-gray-600 text-sm mb-6">{t('auth.passwordResetSuccess')}</p>
                 <button
                   onClick={() => navigate('/auth/login')}
                   className="w-full primary-btn"
                   data-testid="back-to-login-btn"
                 >
-                  Go to Login
+                  {t('auth.goToLogin')}
                 </button>
               </div>
             ) : (
@@ -211,18 +209,18 @@ const Auth = () => {
                   <div className="w-14 h-14 bg-[#D4AF37]/10 rounded-full flex items-center justify-center mx-auto mb-3">
                     <KeyRound size={24} className="text-[#D4AF37]" />
                   </div>
-                  <h2 className="text-2xl font-bold" style={{ fontFamily: 'Playfair Display' }}>Set New Password</h2>
-                  <p className="text-sm text-gray-500 mt-2">Enter your new password below.</p>
+                  <h2 className="text-2xl font-bold" style={{ fontFamily: 'Playfair Display' }}>{t('auth.setNewPassword')}</h2>
+                  <p className="text-sm text-gray-500 mt-2">{t('auth.setNewPasswordHint')}</p>
                 </div>
                 <form onSubmit={handleResetPassword} className="space-y-5" data-testid="reset-password-form">
                   <div>
-                    <label className="block text-sm font-medium mb-2">New Password</label>
+                    <label className="block text-sm font-medium mb-2">{t('auth.newPassword')}</label>
                     <div className="relative">
                       <input
                         type={showResetPassword ? 'text' : 'password'}
                         value={resetPassword}
                         onChange={(e) => setResetPassword(e.target.value)}
-                        placeholder="At least 6 characters"
+                        placeholder={t('auth.newPasswordPlaceholderShort')}
                         className="w-full px-4 py-3 pr-12 rounded-lg border border-[#E5E5E5] focus:outline-none focus:ring-2 focus:ring-[#1E6A6A]/50"
                         required
                         minLength={6}
@@ -238,18 +236,18 @@ const Auth = () => {
                     </div>
                   </div>
                   <div>
-                    <label className="block text-sm font-medium mb-2">Confirm New Password</label>
+                    <label className="block text-sm font-medium mb-2">{t('auth.confirmNewPassword')}</label>
                     <input
                       type="password"
                       value={resetConfirmPassword}
                       onChange={(e) => setResetConfirmPassword(e.target.value)}
-                      placeholder="Repeat your new password"
+                      placeholder={t('auth.confirmNewPasswordPlaceholder')}
                       className={`w-full px-4 py-3 rounded-lg border focus:outline-none focus:ring-2 focus:ring-[#1E6A6A]/50 ${resetConfirmPassword && resetConfirmPassword !== resetPassword ? 'border-red-400' : 'border-[#E5E5E5]'}`}
                       required
                       data-testid="reset-confirm-password-input"
                     />
                     {resetConfirmPassword && resetConfirmPassword !== resetPassword && (
-                      <p className="text-xs text-red-500 mt-1">Passwords do not match</p>
+                      <p className="text-xs text-red-500 mt-1">{t('auth.passwordMismatch')}</p>
                     )}
                   </div>
                   <button
@@ -258,7 +256,7 @@ const Auth = () => {
                     className="w-full primary-btn disabled:opacity-50"
                     data-testid="reset-submit-btn"
                   >
-                    {resetting ? 'Resetting...' : 'Set New Password'}
+                    {resetting ? t('auth.resetting') : t('auth.setNewPassword')}
                   </button>
                 </form>
               </>
@@ -334,7 +332,7 @@ const Auth = () => {
                     style={{ color: '#D4AF37' }}
                     data-testid="forgot-password-link"
                   >
-                    Forgot your password?
+                    {t('auth.forgotPassword')}
                   </a>
                 </div>
               )}
