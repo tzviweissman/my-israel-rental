@@ -132,15 +132,15 @@ const SettingsTab = ({ user, token, API }) => {
             <KeyRound size={24} className="text-[#1E6A6A]" />
           </div>
           <div>
-            <h3 className="text-lg font-bold text-gray-900">Change Password</h3>
-            <p className="text-sm text-gray-500">Update your password to keep your account secure</p>
+            <h3 className="text-lg font-bold text-gray-900">{i18n.t('dashboard.changePassword')}</h3>
+            <p className="text-sm text-gray-500">{i18n.t('dashboard.changePasswordHint')}</p>
           </div>
         </div>
 
         <form onSubmit={handleChangePassword} className="space-y-4">
           {/* Current Password */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Current Password</label>
+            <label className="block text-sm font-medium text-gray-700 mb-2">{i18n.t('dashboard.currentPassword')}</label>
             <div className="relative">
               <input
                 type={showCurrentPassword ? 'text' : 'password'}
@@ -148,7 +148,7 @@ const SettingsTab = ({ user, token, API }) => {
                 onChange={(e) => setPasswordForm({ ...passwordForm, current_password: e.target.value })}
                 className="w-full px-4 py-2.5 pr-10 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#1E6A6A]/30 focus:border-[#1E6A6A]"
                 required
-                placeholder="Enter current password"
+                placeholder={i18n.t('dashboard.currentPasswordPlaceholder')}
               />
               <button
                 type="button"
@@ -162,7 +162,7 @@ const SettingsTab = ({ user, token, API }) => {
 
           {/* New Password */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">New Password</label>
+            <label className="block text-sm font-medium text-gray-700 mb-2">{i18n.t('dashboard.newPassword')}</label>
             <div className="relative">
               <input
                 type={showNewPassword ? 'text' : 'password'}
@@ -170,7 +170,7 @@ const SettingsTab = ({ user, token, API }) => {
                 onChange={(e) => setPasswordForm({ ...passwordForm, new_password: e.target.value })}
                 className="w-full px-4 py-2.5 pr-10 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#1E6A6A]/30 focus:border-[#1E6A6A]"
                 required
-                placeholder="Enter new password (min 6 characters)"
+                placeholder={i18n.t('dashboard.newPasswordPlaceholder')}
               />
               <button
                 type="button"
@@ -184,7 +184,7 @@ const SettingsTab = ({ user, token, API }) => {
 
           {/* Confirm Password */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Confirm New Password</label>
+            <label className="block text-sm font-medium text-gray-700 mb-2">{i18n.t('dashboard.confirmNewPassword')}</label>
             <div className="relative">
               <input
                 type={showConfirmPassword ? 'text' : 'password'}
@@ -192,7 +192,7 @@ const SettingsTab = ({ user, token, API }) => {
                 onChange={(e) => setPasswordForm({ ...passwordForm, confirm_password: e.target.value })}
                 className="w-full px-4 py-2.5 pr-10 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#1E6A6A]/30 focus:border-[#1E6A6A]"
                 required
-                placeholder="Confirm new password"
+                placeholder={i18n.t('dashboard.confirmNewPasswordPlaceholder')}
               />
               <button
                 type="button"
@@ -209,7 +209,7 @@ const SettingsTab = ({ user, token, API }) => {
             className="w-full px-6 py-3 rounded-xl text-white font-medium hover:opacity-90 transition-all"
             style={{ backgroundColor: '#1E6A6A' }}
           >
-            Update Password
+            {i18n.t('dashboard.updatePassword')}
           </button>
         </form>
       </div>

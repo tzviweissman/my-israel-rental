@@ -88,7 +88,7 @@ const BookingRow = ({
             </p>
             {booking.message && (
               <p>
-                <span className="font-medium">Message:</span> {booking.message}
+                <span className="font-medium">{t('dashboard.message')}:</span> {booking.message}
               </p>
             )}
           </div>
@@ -97,7 +97,7 @@ const BookingRow = ({
             ['cancelled', 'cancellation_requested'].includes(booking.status) && (
               <div className="mt-3 p-3 bg-gray-50 rounded-lg">
                 <p className="text-sm">
-                  <span className="font-medium text-gray-700">Cancellation Reason:</span>{' '}
+                  <span className="font-medium text-gray-700">{t('dashboard.cancellationReason')}:</span>{' '}
                   {booking.cancellation_reason}
                 </p>
               </div>
@@ -105,7 +105,7 @@ const BookingRow = ({
           {booking.cancellation_denial_reason && (
             <div className="mt-3 p-3 bg-red-50 rounded-lg">
               <p className="text-sm">
-                <span className="font-medium text-red-700">Denial Reason:</span>{' '}
+                <span className="font-medium text-red-700">{t('dashboard.denialReason')}:</span>{' '}
                 {booking.cancellation_denial_reason}
               </p>
             </div>

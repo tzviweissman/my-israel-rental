@@ -169,10 +169,18 @@ const resources = {
         saving: 'Saving…',
         accountSettings: 'Account Settings',
         changePassword: 'Change Password',
+        changePasswordHint: 'Update your password to keep your account secure',
         currentPassword: 'Current Password',
+        currentPasswordPlaceholder: 'Enter current password',
         newPassword: 'New Password',
+        newPasswordPlaceholder: 'Enter new password (min 6 characters)',
         confirmNewPassword: 'Confirm New Password',
-        update: 'Update'
+        confirmNewPasswordPlaceholder: 'Confirm new password',
+        updatePassword: 'Update Password',
+        update: 'Update',
+        cancellationReason: 'Cancellation Reason',
+        denialReason: 'Denial Reason',
+        message: 'Message'
       },
       home: {
         featuredProperties: 'Featured Properties',
@@ -444,10 +452,18 @@ const resources = {
         saving: 'שומר…',
         accountSettings: 'הגדרות חשבון',
         changePassword: 'שנה סיסמה',
+        changePasswordHint: 'עדכן את הסיסמה שלך כדי לשמור על אבטחת החשבון',
         currentPassword: 'סיסמה נוכחית',
+        currentPasswordPlaceholder: 'הזן סיסמה נוכחית',
         newPassword: 'סיסמה חדשה',
+        newPasswordPlaceholder: 'הזן סיסמה חדשה (לפחות 6 תווים)',
         confirmNewPassword: 'אימות סיסמה חדשה',
-        update: 'עדכן'
+        confirmNewPasswordPlaceholder: 'אשר סיסמה חדשה',
+        updatePassword: 'עדכן סיסמה',
+        update: 'עדכן',
+        cancellationReason: 'סיבת ביטול',
+        denialReason: 'סיבת דחייה',
+        message: 'הודעה'
       },
       home: {
         featuredProperties: 'נכסים מומלצים',

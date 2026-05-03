@@ -320,6 +320,12 @@ Build a bilingual (English/Hebrew) rental website named MyIsraelRental.com with 
   - **Backend**: new `LanguagePreference` request model + `PUT /api/auth/language` (validates `'en'|'he'` only) persists `preferred_language` on the user document. `GET /api/auth/me` already passes the field through (UserPublic uses `extra='allow'`).
   - **Frontend**: `App.js` `fetchCurrentUser` reads `user.preferred_language` and calls `i18n.changeLanguage(pref)` so the site opens in the saved language on every device. `Navigation.js` toggle now also persists to the backend when logged in. New "Default Language" card in `SettingsTab.jsx` with EN/HE pill selector + Save button.
   - **Verified**: curl PUT + reload as renter@test.com → page loads RTL with Hebrew tabs (`ההזמנות שלי`, etc.). Bad payload (`fr`) returns 400.
+- [x] **Dashboard Hebrew translation completeness** (2026-05-03):
+  - Wrapped Settings → Change Password section (title, hint, labels, placeholders, Update button) with `t()` — previously hardcoded English.
+  - Wrapped Bookings → Cancellation/Denial Reason + Message labels with `t()`.
+  - Added new keys to `i18n.js` (`changePasswordHint`, `*PasswordPlaceholder`, `updatePassword`, `cancellationReason`, `denialReason`, `message`) in both EN and HE blocks.
+  - Verified via browser screenshots: Hebrew dashboard now shows `שנה סיסמה` / `עדכן את הסיסמה שלך` / `סיסמה נוכחית` / `הזן סיסמה נוכחית` / `עדכן סיסמה` and `סיבת ביטול:` on cancellations.
+  - Layout stays LTR per user request; only text is swapped.
 
 ### P2 - Lower Priority
 - [ ] Manager bulk property upload via text
