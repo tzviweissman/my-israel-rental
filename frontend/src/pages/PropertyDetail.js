@@ -86,8 +86,8 @@ const PropertyDetail = () => {
   };
   
   const getBackButtonText = () => {
-    if (isFromDashboard) return 'Back to Dashboard';
-    return 'Back to Listings';
+    if (isFromDashboard) return t('property.backToDashboard');
+    return t('property.backToListings');
   };
 
   useEffect(() => {
@@ -305,7 +305,7 @@ const PropertyDetail = () => {
   if (!property) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <p className="text-xl">Loading...</p>
+        <p className="text-xl">{t('property.loading')}</p>
       </div>
     );
   }
@@ -327,7 +327,7 @@ const PropertyDetail = () => {
             data-testid="share-button"
           >
             {shareCopied ? <Check size={16} /> : <Share2 size={16} />}
-            {shareCopied ? 'Copied!' : 'Share Property'}
+            {shareCopied ? t('property.copied') : t('property.shareProperty')}
           </button>
         </div>
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -462,7 +462,7 @@ const PropertyDetail = () => {
                   className={`transition-colors ${isLiked ? 'fill-red-500 text-red-500' : 'text-gray-400'}`}
                 />
                 <span className={`text-sm font-medium ${isLiked ? 'text-red-500' : 'text-gray-500'}`}>
-                  {isLiked ? 'Saved' : 'Save'}
+                  {isLiked ? t('property.saved') : t('property.save')}
                 </span>
               </button>
             </div>
@@ -477,7 +477,7 @@ const PropertyDetail = () => {
               {!sublease && property.has_agent_fee && property.agent_fee_price && (
                 <div className="flex flex-col gap-1 px-3 py-1.5 bg-[#D4AF37]/10 rounded-lg border border-[#D4AF37]/30">
                   <div className="flex items-center gap-2">
-                    <span className="text-sm font-medium text-gray-700">Agent Fee:</span>
+                    <span className="text-sm font-medium text-gray-700">{t('property.agentFeeLabel')}</span>
                     <span className="text-sm font-bold" style={{ color: '#D4AF37' }}>
                       {property.agent_fee_currency === 'USD' ? '$' : '₪'}{property.agent_fee_price.toLocaleString()}
                     </span>
@@ -552,7 +552,7 @@ const PropertyDetail = () => {
               <div className="bg-[#D4AF37]/10 border border-[#D4AF37]/30 p-4 rounded-xl mb-6">
                 <div className="flex items-center gap-2">
                   <CalendarIcon size={20} style={{ color: '#D4AF37' }} />
-                  <span className="font-medium text-gray-700">Available from:</span>
+                  <span className="font-medium text-gray-700">{t('property.availableFromLabel')}</span>
                   <span className="font-bold" style={{ color: '#1E6A6A' }}>
                     {format(parseLocalDate(property.available_from), 'MMMM d, yyyy')}
                   </span>
@@ -567,11 +567,11 @@ const PropertyDetail = () => {
               <div className="bg-gray-50 border border-gray-200 p-3 rounded-xl mb-6">
                 <div className="flex items-center gap-2">
                   <CalendarIcon size={18} className="text-gray-600" />
-                  <span className="text-sm font-medium text-gray-700">Minimum Stay:</span>
+                  <span className="text-sm font-medium text-gray-700">{t('property.minimumStay')}</span>
                   <span className="text-sm font-bold text-gray-900">
                     {property.rental_type === 'vacation' 
-                      ? `${property.minimum_booking_days} ${property.minimum_booking_days === 1 ? 'day' : 'days'}`
-                      : `${property.minimum_booking_days} ${property.minimum_booking_days === 1 ? 'month' : 'months'}`
+                      ? `${property.minimum_booking_days} ${property.minimum_booking_days === 1 ? t('property.day') : t('property.days')}`
+                      : `${property.minimum_booking_days} ${property.minimum_booking_days === 1 ? t('property.month') : t('property.months')}`
                     }
                   </span>
                 </div>
@@ -748,7 +748,7 @@ const PropertyDetail = () => {
                     {/* Quick Select Buttons for Longer Stays — hidden for subleases (short-window). */}
                     {!sublease && (
                     <div className="mt-3">
-                      <p className="text-xs text-gray-500 mb-2">Quick select:</p>
+                      <p className="text-xs text-gray-500 mb-2">{t('property.quickSelect')}</p>
                       <div className="flex gap-2 flex-wrap">
                         <button
                           type="button"
@@ -769,7 +769,7 @@ const PropertyDetail = () => {
                           }}
                           className="px-3 py-1.5 rounded-lg border border-[#1E6A6A] text-[#1E6A6A] hover:bg-[#1E6A6A] hover:text-white text-xs font-medium transition-colors"
                         >
-                          + 1 Year
+                          {t('property.plusOneYear')}
                         </button>
                         <button
                           type="button"
@@ -796,7 +796,7 @@ const PropertyDetail = () => {
                           }}
                           className="px-3 py-1.5 rounded-lg border border-gray-300 text-gray-600 hover:bg-gray-50 text-xs font-medium transition-colors"
                         >
-                          Clear
+                          {t('property.clearBtn')}
                         </button>
                       </div>
                     </div>
@@ -995,7 +995,7 @@ const PropertyDetail = () => {
                         className="w-full primary-btn py-2.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
                         data-testid="confirm-booking-button"
                       >
-                        {datesIncomplete ? 'Pick check-in & check-out dates' : 'Reserve Booking'}
+                        {datesIncomplete ? t('property.pickDates') : t('property.reserveBooking')}
                       </button>
                     );
                   })()}
@@ -1009,9 +1009,9 @@ const PropertyDetail = () => {
       {showSignatureModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-6">
           <div className="bg-white rounded-2xl p-8 max-w-2xl w-full">
-            <h2 className="text-2xl font-bold mb-4">Sign Contract</h2>
+            <h2 className="text-2xl font-bold mb-4">{t('property.signContract')}</h2>
             <p className="text-sm text-gray-600 mb-4">
-              This property requires a signed contract. Please sign below or upload your signature.
+              {t('property.signContractIntro')}
             </p>
             
             {propertyContract?.contract_url && (
@@ -1021,7 +1021,7 @@ const PropertyDetail = () => {
                 rel="noopener noreferrer"
                 className="text-sm text-[#1E6A6A] hover:text-[#D4AF37] underline mb-4 block"
               >
-                View Contract (PDF)
+                {t('property.viewContractPdf')}
               </a>
             )}
 
@@ -1036,17 +1036,17 @@ const PropertyDetail = () => {
                 onMouseUp={stopDrawing}
                 onMouseLeave={stopDrawing}
               />
-              <p className="text-xs text-gray-500 mt-2 text-center">Draw your signature above</p>
+              <p className="text-xs text-gray-500 mt-2 text-center">{t('property.drawSignatureAbove')}</p>
             </div>
 
             <div className="flex items-center gap-3 mb-4">
               <div className="flex-1 border-t border-gray-300"></div>
-              <span className="text-xs text-gray-500">OR</span>
+              <span className="text-xs text-gray-500">{t('property.orDivider')}</span>
               <div className="flex-1 border-t border-gray-300"></div>
             </div>
 
             <label className="block w-full px-4 py-3 rounded-lg border-2 border-dashed border-gray-300 text-center text-sm font-medium cursor-pointer hover:border-[#1E6A6A] transition-colors mb-4">
-              Upload Signature Image
+              {t('property.uploadSignature')}
               <input
                 type="file"
                 accept="image/*"
@@ -1060,20 +1060,20 @@ const PropertyDetail = () => {
                 onClick={clearSignature}
                 className="px-4 py-2 rounded-lg border border-gray-300 text-sm font-medium hover:bg-gray-50"
               >
-                Clear
+                {t('property.clearBtn')}
               </button>
               <button
                 onClick={saveSignature}
                 className="flex-1 px-4 py-2 rounded-lg text-sm font-medium text-white"
                 style={{ backgroundColor: '#1E6A6A' }}
               >
-                Sign & Continue
+                {t('property.signContinue')}
               </button>
               <button
                 onClick={() => setShowSignatureModal(false)}
                 className="px-4 py-2 rounded-lg border border-gray-300 text-sm font-medium hover:bg-gray-50"
               >
-                Cancel
+                {t('property.cancel')}
               </button>
             </div>
           </div>

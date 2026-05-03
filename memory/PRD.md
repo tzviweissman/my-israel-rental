@@ -326,6 +326,13 @@ Build a bilingual (English/Hebrew) rental website named MyIsraelRental.com with 
   - Added new keys to `i18n.js` (`changePasswordHint`, `*PasswordPlaceholder`, `updatePassword`, `cancellationReason`, `denialReason`, `message`) in both EN and HE blocks.
   - Verified via browser screenshots: Hebrew dashboard now shows `שנה סיסמה` / `עדכן את הסיסמה שלך` / `סיסמה נוכחית` / `הזן סיסמה נוכחית` / `עדכן סיסמה` and `סיבת ביטול:` on cancellations.
   - Layout stays LTR per user request; only text is swapped.
+- [x] **Public pages Hebrew translation** (2026-05-03):
+  - **Home.js**: `WhatsApp:` label now uses `t('home.whatsapp')`.
+  - **Properties.js**: `Sukkot Rentals` / `Pesach Rentals` page titles, holiday-window banner description + CTA (`Find homes available these dates`), `Save as alert` button + tooltip, and `Sublease` ribbon now all use i18n keys.
+  - **PropertyDetail.js**: `Back to Dashboard` / `Back to Listings`, `Loading...`, `Share Property` / `Copied!`, `Save` / `Saved`, `Agent Fee:`, `Available from:`, `Minimum Stay:` (+ day/days/month/months pluralization), `Quick select:`, `+ 1 Year`, `Clear`, `Pick check-in & check-out dates` / `Reserve Booking`, and the entire contract-signing modal (`Sign Contract`, intro text, `View Contract (PDF)`, `Draw your signature above`, `OR`, `Upload Signature Image`, `Sign & Continue`, `Cancel`) all wrapped with `t()`.
+  - Added ~35 new keys in EN + HE under `property.*`, `filters.*`, `home.*` sections of `i18n.js`.
+  - Verified via browser screenshots on all 4 pages (Home, /properties/all, /properties/sukkot, PropertyDetail): every visible static string now renders correctly in Hebrew (e.g. `מצא את השכירות המושלמת`, `השכרות לסוכות`, `דמי תיווך:`, `שהייה מינימלית:`, `+ שנה אחת`, `בחר תאריכי צ׳ק-אין וצ׳ק-אאוט`, `השכרת משנה` ribbon).
+  - ESLint clean.
 
 ### P2 - Lower Priority
 - [ ] Manager bulk property upload via text

@@ -371,8 +371,8 @@ const Properties = () => {
     'short-term': t('property.shortTerm'),
     'vacation': t('property.vacationType'),
     'storage': t('property.storageType'),
-    'sukkot': 'Sukkot Rentals',
-    'pesach': 'Pesach Rentals',
+    'sukkot': t('filters.sukkotRentals'),
+    'pesach': t('filters.pesachRentals'),
     'all': t('filters.allProperties')
   };
 
@@ -423,7 +423,7 @@ const Properties = () => {
                     {format(parseLocalDate(holidayWindows[type].end), 'MMM d, yyyy')}
                   </h2>
                   <p className="text-sm text-gray-600">
-                    Find homes available throughout the holiday — one click pre-fills the date filter.
+                    {t('filters.holidayBannerDesc')}
                   </p>
                 </div>
               </div>
@@ -434,7 +434,7 @@ const Properties = () => {
                 data-testid={`apply-holiday-window-${type}`}
               >
                 <Filter size={14} />
-                Find homes available these dates
+                {t('filters.findHomesThisDates')}
               </button>
             </div>
           </div>
@@ -772,10 +772,10 @@ const Properties = () => {
                     onClick={saveCurrentFiltersAsAlert}
                     className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-lg text-[12px] font-semibold tracking-wide text-white border border-white/30 hover:bg-white/10 transition-all"
                     data-testid="save-as-alert-button"
-                    title="Get notified when a new match lists"
+                    title={t('filters.saveAsAlertTooltip')}
                   >
                     <Bell size={14} />
-                    Save as alert
+                    {t('filters.saveAsAlert')}
                   </button>
                 )}
                 <button
@@ -825,7 +825,7 @@ const Properties = () => {
                     style={{ backgroundColor: '#D4AF37', color: '#1E6A6A' }}
                     data-testid="sublease-ribbon"
                   >
-                    Sublease
+                    {t('property.subleaseRibbon')}
                   </span>
                 )}
                 <button

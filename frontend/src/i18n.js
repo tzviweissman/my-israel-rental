@@ -105,7 +105,33 @@ const resources = {
         vacationType: 'Vacation',
         storageType: 'Storage',
         apartment: 'Apartment',
-        house: 'House'
+        house: 'House',
+        loading: 'Loading...',
+        shareProperty: 'Share Property',
+        copied: 'Copied!',
+        save: 'Save',
+        saved: 'Saved',
+        agentFeeLabel: 'Agent Fee:',
+        availableFromLabel: 'Available from:',
+        minimumStay: 'Minimum Stay:',
+        day: 'day',
+        days: 'days',
+        month: 'month',
+        months: 'months',
+        quickSelect: 'Quick select:',
+        plusOneYear: '+ 1 Year',
+        clearBtn: 'Clear',
+        pickDates: 'Pick check-in & check-out dates',
+        reserveBooking: 'Reserve Booking',
+        signContract: 'Sign Contract',
+        signContractIntro: 'This property requires a signed contract. Please sign below or upload your signature.',
+        viewContractPdf: 'View Contract (PDF)',
+        drawSignatureAbove: 'Draw your signature above',
+        orDivider: 'OR',
+        uploadSignature: 'Upload Signature Image',
+        signContinue: 'Sign & Continue',
+        cancel: 'Cancel',
+        subleaseRibbon: 'Sublease'
       },
       dashboard: {
         myProperties: 'My Properties',
@@ -189,7 +215,8 @@ const resources = {
         aboutPara2: 'Inspired by the success of platforms like Airbnb and Zillow, <span style="color:#D4AF37;font-weight:700">My Israel Rental LLC</span> is designed to cater specifically to the Israeli market, providing long-term rentals, short-term rentals, vacation rentals, and even machsan (storage space) rentals. We aim to make the process fluid, user-friendly, and free, creating a hassle-free experience for everyone involved.',
         contactUs: 'Contact Us',
         phone: 'Phone',
-        email: 'Email'
+        email: 'Email',
+        whatsapp: 'WhatsApp'
       },
       auth: {
         loginTitle: 'Login to Your Account',
@@ -278,7 +305,13 @@ const resources = {
         yes: 'Yes',
         datesAvailable: 'Dates Available',
         startDate: 'Start Date',
-        endDate: 'End Date'
+        endDate: 'End Date',
+        sukkotRentals: 'Sukkot Rentals',
+        pesachRentals: 'Pesach Rentals',
+        holidayBannerDesc: 'Find homes available throughout the holiday — one click pre-fills the date filter.',
+        findHomesThisDates: 'Find homes available these dates',
+        saveAsAlert: 'Save as alert',
+        saveAsAlertTooltip: 'Get notified when a new match lists'
       },
       footer: {
         contact: 'Contact Us',
@@ -388,7 +421,33 @@ const resources = {
         vacationType: 'נופש',
         storageType: 'אחסון',
         apartment: 'דירה',
-        house: 'בית'
+        house: 'בית',
+        loading: 'טוען...',
+        shareProperty: 'שתף נכס',
+        copied: 'הועתק!',
+        save: 'שמור',
+        saved: 'נשמר',
+        agentFeeLabel: 'דמי תיווך:',
+        availableFromLabel: 'זמין מ-:',
+        minimumStay: 'שהייה מינימלית:',
+        day: 'יום',
+        days: 'ימים',
+        month: 'חודש',
+        months: 'חודשים',
+        quickSelect: 'בחירה מהירה:',
+        plusOneYear: '+ שנה אחת',
+        clearBtn: 'נקה',
+        pickDates: 'בחר תאריכי צ׳ק-אין וצ׳ק-אאוט',
+        reserveBooking: 'הזמן עכשיו',
+        signContract: 'חתום על החוזה',
+        signContractIntro: 'הנכס דורש חוזה חתום. אנא חתום כאן או העלה את חתימתך.',
+        viewContractPdf: 'צפה בחוזה (PDF)',
+        drawSignatureAbove: 'צייר את חתימתך למעלה',
+        orDivider: 'או',
+        uploadSignature: 'העלה תמונת חתימה',
+        signContinue: 'חתום והמשך',
+        cancel: 'ביטול',
+        subleaseRibbon: 'השכרת משנה'
       },
       dashboard: {
         myProperties: 'הנכסים שלי',
@@ -472,7 +531,8 @@ const resources = {
         aboutPara2: 'בהשראת ההצלחה של פלטפורמות כמו Airbnb ו-Zillow, <span style="color:#D4AF37;font-weight:700">My Israel Rental LLC</span> מעוצבת במיוחד עבור השוק הישראלי, ומספקת השכרות לטווח ארוך, טווח קצר, נופש ואפילו השכרת מחסנים. אנו שואפים להפוך את התהליך לזורם, ידידותי למשתמש וחינמי, וליצור חוויה ללא טרחה לכל המעורבים.',
         contactUs: 'צור קשר',
         phone: 'טלפון',
-        email: 'אימייל'
+        email: 'אימייל',
+        whatsapp: 'וואטסאפ'
       },
       auth: {
         loginTitle: 'התחבר לחשבון שלך',
@@ -561,7 +621,13 @@ const resources = {
         yes: 'כן',
         datesAvailable: 'תאריכים זמינים',
         startDate: 'תאריך התחלה',
-        endDate: 'תאריך סיום'
+        endDate: 'תאריך סיום',
+        sukkotRentals: 'השכרות לסוכות',
+        pesachRentals: 'השכרות לפסח',
+        holidayBannerDesc: 'מצא בתים הזמינים לאורך כל החג — בקליק אחד יתמלא סינון התאריכים.',
+        findHomesThisDates: 'מצא בתים זמינים בתאריכים אלו',
+        saveAsAlert: 'שמור כהתראה',
+        saveAsAlertTooltip: 'קבל התראה כשרישום חדש מתאים'
       },
       footer: {
         contact: 'צור קשר',
