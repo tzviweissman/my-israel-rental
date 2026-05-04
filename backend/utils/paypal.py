@@ -109,7 +109,12 @@ async def create_order(
 
 
 async def capture_order(order_id: str) -> dict[str, Any]:
-    """Capture funds for an approved order."""
+    """Capture funds for an approved order.
+
+    Returns the parsed JSON body on success (2xx). On any non-2xx response,
+    raises :class:`httpx.HTTPStatusError` so the caller can inspect the
+    PayPal error details (e.g. ORDER_NOT_APPROVED, ORDER_ALREADY_CAPTURED).
+    """
     token = await get_access_token()
     async with httpx.AsyncClient(timeout=30.0) as client:
         res = await client.post(
@@ -119,8 +124,17 @@ async def capture_order(order_id: str) -> dict[str, Any]:
                 "Content-Type": "application/json",
             },
         )
-    if res.status_code not in (200, 201):
+    if res.status_code >= 300:
         logger.error("PayPal capture_order failed: %s %s", res.status_code, res.text)
+        res.raise_for_status()
+    try:
+        body = res.json()
+    except Exception as e:  # noqa: BLE001
+        logger.error("PayPal capture_order non-JSON body: %s", res.text)
+        raise RuntimeError("PayPal returned an empty body") from e
+    if not isinstance(body, dict):
+        raise RuntimeError(f"PayPal returned unexpected body type: {type(body).__name__}")
+    return body
 
 
 # --- Webhook signature verification ---------------------------------------

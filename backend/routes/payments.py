@@ -27,6 +27,7 @@ from datetime import UTC, datetime
 from typing import Any
 
 from fastapi import APIRouter, Body, Depends, HTTPException, Request
+import httpx
 
 from routes.deps import db, verify_token
 from utils import paypal
@@ -277,6 +278,39 @@ async def capture_payment_order(
 
     try:
         capture = await paypal.capture_order(order["paypal_order_id"])
+    except httpx.HTTPStatusError as http_err:
+        # Parse PayPal's structured error body so we can surface the right HTTP
+        # status to the frontend.
+        try:
+            body = http_err.response.json() or {}
+        except Exception:  # noqa: BLE001
+            body = {}
+        details = body.get("details") or []
+        issues = [d.get("issue") for d in details if isinstance(d, dict)]
+
+        if "ORDER_ALREADY_CAPTURED" in issues:
+            # Reconcile: fetch the PayPal order (which now has the capture info)
+            # and run our idempotent finalizer so the DB + emails catch up.
+            try:
+                pp_order = await paypal.get_order(order["paypal_order_id"])
+                finalized = await _finalize_captured_order(order_id, pp_order)
+                return {"status": "captured", "order": finalized}
+            except Exception:  # noqa: BLE001
+                logger.exception("ORDER_ALREADY_CAPTURED reconciliation failed")
+                raise HTTPException(502, "PayPal says this order is already captured, but we couldn't reconcile.") from http_err
+
+        if "ORDER_NOT_APPROVED" in issues:
+            # User opened the popup but didn't finish the approval. Keep the
+            # order in 'created' state so they can retry.
+            logger.info("Capture attempted before approval for order %s", order_id)
+            raise HTTPException(
+                409,
+                "You haven't finished approving this payment at PayPal yet. Please click the PayPal button again and complete the approval.",
+            ) from http_err
+
+        logger.error("PayPal capture failed (%s): %s", http_err.response.status_code, http_err.response.text)
+        await db.orders.update_one({"id": order_id}, {"$set": {"status": "failed"}})
+        raise HTTPException(502, f"PayPal capture failed: {issues or http_err.response.status_code}") from http_err
     except Exception as e:  # noqa: BLE001
         logger.exception("PayPal capture failed for order %s", order_id)
         await db.orders.update_one({"id": order_id}, {"$set": {"status": "failed"}})

@@ -86,7 +86,13 @@ const PayPalCheckout = ({ productType, metadata, currency = 'USD', disabled, onC
                 toast.error('Payment did not complete');
               }
             } catch (e) {
-              toast.error(e.response?.data?.detail || e.message || 'Capture failed');
+              const code = e.response?.status;
+              const detail = e.response?.data?.detail;
+              if (code === 409 && typeof detail === 'string') {
+                toast.error(detail);
+              } else {
+                toast.error(detail || e.message || 'Capture failed');
+              }
             }
           }}
           onError={(err) => {
