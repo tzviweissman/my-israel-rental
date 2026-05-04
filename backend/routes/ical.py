@@ -83,9 +83,11 @@ async def export_ical(property_id: str) -> Response:
 
 @api_router.get("/properties/{property_id}/blocked-dates", response_model=BlockedDatesResponse)
 async def get_blocked_dates(property_id: str) -> dict:
-    # Internal bookings
+    # Internal bookings — include any status that still holds the calendar
+    # (cancellation_requested is NOT cancelled yet; the owner has to approve).
+    active_statuses = ["pending", "confirmed", "cancellation_requested"]
     bookings = await db.bookings.find(
-        {"property_id": property_id, "status": {"$in": ["pending", "confirmed"]}},
+        {"property_id": property_id, "status": {"$in": active_statuses}},
         {"_id": 0, "start_date": 1, "end_date": 1}
     ).to_list(1000)
     # External iCal bookings

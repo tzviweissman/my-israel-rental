@@ -63,7 +63,7 @@ async def create_booking(booking_data: BookingCreate, payload: dict = Depends(ve
     if booking_data.sublease_id:
         overlap_filter: dict = {
             "sublease_id": booking_data.sublease_id,
-            "status": {"$in": ["pending", "confirmed"]},
+            "status": {"$in": ["pending", "confirmed", "cancellation_requested"]},
             "start_date": {"$lt": booking_data.end_date},
             "end_date": {"$gt": booking_data.start_date},
         }
@@ -73,7 +73,7 @@ async def create_booking(booking_data: BookingCreate, payload: dict = Depends(ve
             # Ignore sublease-scoped bookings here — they live in a separate
             # logical calendar (the sublease window).
             "sublease_id": None,
-            "status": {"$in": ["pending", "confirmed"]},
+            "status": {"$in": ["pending", "confirmed", "cancellation_requested"]},
             "start_date": {"$lt": booking_data.end_date},
             "end_date": {"$gt": booking_data.start_date},
         }
