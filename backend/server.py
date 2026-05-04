@@ -89,6 +89,11 @@ async def startup_tasks() -> None:
         logger.info("Contract templates ready")
     except Exception as e:
         logger.warning(f"Contract template generation failed (non-fatal): {e}")
+    # Ensure PayPal webhook event idempotency index
+    try:
+        await db.paypal_webhook_events.create_index("id", unique=True)
+    except Exception as e:  # noqa: BLE001
+        logger.warning(f"paypal_webhook_events index creation failed (non-fatal): {e}")
 
 
 @app.on_event("shutdown")

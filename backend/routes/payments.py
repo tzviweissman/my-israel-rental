@@ -5,6 +5,7 @@ Endpoints (all /api-prefixed by the global api_router):
     POST   /payments/orders/{id}/capture — capture an approved order
     GET    /payments/orders/{id}         — fetch the order (for the success page)
     GET    /payments/my                  — list the caller's paid orders
+    POST   /payments/webhooks/paypal     — PayPal webhook receiver (signed)
 
 Two product types are supported in the same flow:
     1. product_type="document_service"
@@ -25,7 +26,7 @@ import uuid
 from datetime import UTC, datetime
 from typing import Any
 
-from fastapi import APIRouter, Body, Depends, HTTPException
+from fastapi import APIRouter, Body, Depends, HTTPException, Request
 
 from routes.deps import db, verify_token
 from utils import paypal
@@ -36,6 +37,7 @@ router = APIRouter()
 
 FRONTEND_URL = os.environ.get("FRONTEND_URL", "").rstrip("/")
 PAYPAL_ADMIN_EMAIL = os.environ.get("PAYPAL_ADMIN_EMAIL", "admin@rental.com")
+PAYPAL_WEBHOOK_ID = os.environ.get("PAYPAL_WEBHOOK_ID", "")
 
 # Flat prices for document services (USD)
 DOCUMENT_SERVICE_PRICE_SINGLE = 150.0
@@ -188,31 +190,22 @@ async def _apply_business_side_effects(order: dict[str, Any]) -> None:
             )
 
 
-@router.post("/payments/orders/{order_id}/capture")
-async def capture_payment_order(
-    order_id: str,
-    auth: dict = Depends(verify_token),
-) -> dict:
+async def _finalize_captured_order(order_id: str, capture_payload: dict[str, Any]) -> dict[str, Any] | None:
+    """Idempotent finalizer invoked both by the user-facing capture endpoint
+    and the PayPal webhook.
+
+    - Updates the order status → captured.
+    - Runs domain side-effects (insert document_services rows / flag booking).
+    - Sends confirmation emails (customer + admin), non-fatal on failure.
+
+    If the order is already ``captured``, returns the existing order unchanged.
+    Returns the fresh order document on success, or None if not found.
+    """
     order = await db.orders.find_one({"id": order_id}, {"_id": 0})
     if not order:
-        raise HTTPException(404, "Order not found")
-    if order["user_id"] != auth["user_id"] and auth.get("role") != "admin":
-        raise HTTPException(403, "Not your order")
-
-    if order["status"] == "captured":
-        return {"status": "captured", "order": order}
-
-    try:
-        capture = await paypal.capture_order(order["paypal_order_id"])
-    except Exception as e:  # noqa: BLE001
-        logger.exception("PayPal capture failed for order %s", order_id)
-        await db.orders.update_one({"id": order_id}, {"$set": {"status": "failed"}})
-        raise HTTPException(502, f"PayPal capture failed: {e}") from e
-
-    pp_status = capture.get("status")
-    if pp_status != "COMPLETED":
-        await db.orders.update_one({"id": order_id}, {"$set": {"status": pp_status.lower() if pp_status else "failed"}})
-        raise HTTPException(502, f"Capture did not complete: {pp_status}")
+        return None
+    if order.get("status") == "captured":
+        return order
 
     captured_at = datetime.now(UTC).isoformat()
     await db.orders.update_one(
@@ -220,16 +213,14 @@ async def capture_payment_order(
         {"$set": {
             "status": "captured",
             "captured_at": captured_at,
-            "paypal_capture": capture,
+            "paypal_capture": capture_payload,
         }},
     )
-
-    # Re-fetch + run side effects
     order = await db.orders.find_one({"id": order_id}, {"_id": 0})
     await _apply_business_side_effects(order)
 
-    # Send confirmation emails (non-fatal if they fail — the payment already captured)
-    user = await db.users.find_one({"id": auth["user_id"]}, {"_id": 0})
+    # Look up the buyer for the confirmation email
+    user = await db.users.find_one({"id": order["user_id"]}, {"_id": 0})
     customer_email = (user or {}).get("email")
     customer_name = (user or {}).get("name", "")
     try:
@@ -259,6 +250,36 @@ async def capture_payment_order(
     except Exception as e:  # noqa: BLE001
         logger.warning("Payment confirmation email failed (non-fatal): %s", e)
 
+    return order
+
+
+@router.post("/payments/orders/{order_id}/capture")
+async def capture_payment_order(
+    order_id: str,
+    auth: dict = Depends(verify_token),
+) -> dict:
+    order = await db.orders.find_one({"id": order_id}, {"_id": 0})
+    if not order:
+        raise HTTPException(404, "Order not found")
+    if order["user_id"] != auth["user_id"] and auth.get("role") != "admin":
+        raise HTTPException(403, "Not your order")
+
+    if order["status"] == "captured":
+        return {"status": "captured", "order": order}
+
+    try:
+        capture = await paypal.capture_order(order["paypal_order_id"])
+    except Exception as e:  # noqa: BLE001
+        logger.exception("PayPal capture failed for order %s", order_id)
+        await db.orders.update_one({"id": order_id}, {"$set": {"status": "failed"}})
+        raise HTTPException(502, f"PayPal capture failed: {e}") from e
+
+    pp_status = capture.get("status")
+    if pp_status != "COMPLETED":
+        await db.orders.update_one({"id": order_id}, {"$set": {"status": pp_status.lower() if pp_status else "failed"}})
+        raise HTTPException(502, f"Capture did not complete: {pp_status}")
+
+    order = await _finalize_captured_order(order_id, capture)
     return {"status": "captured", "order": order}
 
 
@@ -283,3 +304,107 @@ async def list_my_orders(auth: dict = Depends(verify_token)) -> list[dict]:
         .to_list(200)
     )
     return orders
+
+
+# --- Webhook receiver ------------------------------------------------------
+# Configure this endpoint in the PayPal developer dashboard:
+#   Sandbox:  https://developer.paypal.com/dashboard/applications/sandbox
+#       → your app → Webhooks → Add Webhook
+#       URL:   {FRONTEND_URL}/api/payments/webhooks/paypal
+#       Event types:
+#           PAYMENT.CAPTURE.COMPLETED
+#           PAYMENT.CAPTURE.REFUNDED
+#           PAYMENT.CAPTURE.REVERSED
+#           PAYMENT.CAPTURE.DENIED
+#   After creation, copy the Webhook ID into PAYPAL_WEBHOOK_ID in .env.
+#
+# The endpoint fail-closes: a bad signature or missing webhook id is treated
+# as "ignore" (200 OK with reason) to prevent forged webhooks marking orders
+# as paid. Every handler is idempotent.
+@router.post("/payments/webhooks/paypal")
+async def paypal_webhook(request: Request) -> dict:
+    headers = request.headers
+
+    # PayPal signs the raw body; re-parse for forwarding to verify-webhook-signature
+    try:
+        event = await request.json()
+    except Exception:  # noqa: BLE001
+        logger.warning("PayPal webhook: malformed JSON body")
+        return {"status": "ignored", "reason": "malformed"}
+
+    if not PAYPAL_WEBHOOK_ID:
+        # Without a configured webhook id we cannot verify — reject loudly.
+        logger.error("PAYPAL_WEBHOOK_ID env var not set; ignoring webhook")
+        return {"status": "ignored", "reason": "webhook_id_unset"}
+
+    verified = await paypal.verify_webhook_signature(
+        transmission_id=headers.get("paypal-transmission-id", ""),
+        transmission_time=headers.get("paypal-transmission-time", ""),
+        cert_url=headers.get("paypal-cert-url", ""),
+        auth_algo=headers.get("paypal-auth-algo", ""),
+        transmission_sig=headers.get("paypal-transmission-sig", ""),
+        webhook_id=PAYPAL_WEBHOOK_ID,
+        webhook_event=event,
+    )
+    if not verified:
+        logger.warning("PayPal webhook signature verification failed")
+        return {"status": "ignored", "reason": "bad_signature"}
+
+    event_type = event.get("event_type", "")
+    resource = event.get("resource", {}) or {}
+    event_id = event.get("id")
+
+    # Idempotency: record the event id so we don't reprocess on retry
+    try:
+        await db.paypal_webhook_events.insert_one({
+            "id": event_id,
+            "event_type": event_type,
+            "received_at": datetime.now(UTC).isoformat(),
+            "resource_id": resource.get("id"),
+        })
+    except Exception:  # noqa: BLE001
+        # duplicate id (unique index) or any other error → already processed
+        logger.info("PayPal webhook event %s already processed; skipping", event_id)
+        return {"status": "ignored", "reason": "duplicate"}
+
+    # Most capture/refund events carry supplementary_data.related_ids.order_id
+    supp = (resource.get("supplementary_data") or {}).get("related_ids") or {}
+    paypal_order_id = supp.get("order_id") or resource.get("id")
+
+    order = None
+    if paypal_order_id:
+        order = await db.orders.find_one(
+            {"paypal_order_id": paypal_order_id}, {"_id": 0}
+        )
+
+    if not order:
+        logger.info("PayPal webhook %s: no matching order for %s", event_type, paypal_order_id)
+        return {"status": "ignored", "reason": "unknown_order"}
+
+    if event_type == "PAYMENT.CAPTURE.COMPLETED":
+        finalized = await _finalize_captured_order(order["id"], resource)
+        return {"status": "captured", "order_id": finalized.get("id") if finalized else None}
+
+    if event_type in {"PAYMENT.CAPTURE.REFUNDED", "PAYMENT.CAPTURE.REVERSED"}:
+        await db.orders.update_one(
+            {"id": order["id"]},
+            {"$set": {
+                "status": "refunded" if event_type.endswith("REFUNDED") else "reversed",
+                "refunded_at": datetime.now(UTC).isoformat(),
+                "paypal_refund": resource,
+            }},
+        )
+        logger.info("PayPal webhook: order %s marked %s", order["id"], event_type)
+        return {"status": "refunded", "order_id": order["id"]}
+
+    if event_type == "PAYMENT.CAPTURE.DENIED":
+        await db.orders.update_one(
+            {"id": order["id"]},
+            {"$set": {"status": "denied", "paypal_denial": resource}},
+        )
+        return {"status": "denied", "order_id": order["id"]}
+
+    # Unhandled event type — acknowledged so PayPal stops retrying
+    logger.info("PayPal webhook: unhandled event_type=%s", event_type)
+    return {"status": "ignored", "reason": "unhandled_event"}
+

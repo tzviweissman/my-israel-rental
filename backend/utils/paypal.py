@@ -121,6 +121,54 @@ async def capture_order(order_id: str) -> dict[str, Any]:
         )
     if res.status_code not in (200, 201):
         logger.error("PayPal capture_order failed: %s %s", res.status_code, res.text)
+
+
+# --- Webhook signature verification ---------------------------------------
+async def verify_webhook_signature(
+    *,
+    transmission_id: str,
+    transmission_time: str,
+    cert_url: str,
+    auth_algo: str,
+    transmission_sig: str,
+    webhook_id: str,
+    webhook_event: dict[str, Any],
+) -> bool:
+    """Verify a PayPal webhook signature via the Verify Webhook Signature API.
+
+    Returns True if PayPal confirms the signature. Any failure returns False
+    (fail-closed) so a bad/forged webhook is ignored.
+    """
+    if not all([transmission_id, transmission_time, cert_url, auth_algo, transmission_sig, webhook_id]):
+        return False
+    token = await get_access_token()
+    body = {
+        "transmission_id": transmission_id,
+        "transmission_time": transmission_time,
+        "cert_url": cert_url,
+        "auth_algo": auth_algo,
+        "transmission_sig": transmission_sig,
+        "webhook_id": webhook_id,
+        "webhook_event": webhook_event,
+    }
+    try:
+        async with httpx.AsyncClient(timeout=15.0) as client:
+            res = await client.post(
+                f"{_base_url()}/v1/notifications/verify-webhook-signature",
+                headers={
+                    "Authorization": f"Bearer {token}",
+                    "Content-Type": "application/json",
+                },
+                json=body,
+            )
+        if res.status_code != 200:
+            logger.warning("PayPal verify-webhook-signature HTTP %s: %s", res.status_code, res.text)
+            return False
+        return res.json().get("verification_status") == "SUCCESS"
+    except Exception as e:  # noqa: BLE001
+        logger.exception("PayPal verify-webhook-signature call failed: %s", e)
+        return False
+
         res.raise_for_status()
     return res.json()
 
