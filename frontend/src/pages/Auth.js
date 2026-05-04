@@ -73,15 +73,15 @@ const Auth = () => {
     }
     setForgotSending(true);
     try {
-      const res = await axios.post(`${API}/auth/forgot-password`, { email: forgotEmail });
-      // Always redirect to reset page with the token
-      navigate(`/auth/reset-password?token=${res.data.reset_token}`);
-      if (res.data.email_sent) {
-        toast.success('Password reset email sent! Also redirecting you now...');
-      } else {
-        toast.success('Redirecting to password reset...');
-      }
+      await axios.post(`${API}/auth/forgot-password`, { email: forgotEmail });
+      // For security we never expose the reset token in the response — the
+      // user MUST receive it via the emailed link. Always show the same
+      // generic "check your email" confirmation regardless of whether the
+      // email exists.
+      setForgotSent(true);
     } catch (err) {
+      // The backend now only errors on malformed requests. Show a generic
+      // failure so we never leak whether the email existed.
       toast.error(err.response?.data?.detail || 'Something went wrong. Please try again.');
     } finally {
       setForgotSending(false);
@@ -184,6 +184,32 @@ const Auth = () => {
 
   // --- Reset Password View ---
   if (mode === 'reset-password') {
+    // Require a token in the URL — the whole point of the email-link flow is
+    // that only someone with the emailed token can reach this form.
+    if (!resetToken && !resetDone) {
+      return (
+        <div className="min-h-screen flex items-center justify-center px-6 pt-20 pb-12" data-testid="reset-password-invalid">
+          <div className="w-full max-w-md">
+            <div className="bg-white rounded-2xl p-8 border border-[#E5E5E5] text-center">
+              <div className="w-14 h-14 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-3">
+                <KeyRound size={24} className="text-red-500" />
+              </div>
+              <h2 className="text-2xl font-bold mb-2" style={{ fontFamily: 'Playfair Display' }}>Invalid reset link</h2>
+              <p className="text-sm text-gray-500 mb-6">
+                This page can only be opened from the secure link in your password-reset email. Please start from “Forgot your password?”.
+              </p>
+              <button
+                onClick={() => navigate('/auth/forgot-password')}
+                className="w-full primary-btn"
+                data-testid="reset-password-restart"
+              >
+                Request a reset email
+              </button>
+            </div>
+          </div>
+        </div>
+      );
+    }
     return (
       <div className="min-h-screen flex items-center justify-center px-6 pt-20 pb-12">
         <div className="w-full max-w-md">

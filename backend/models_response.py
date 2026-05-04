@@ -72,7 +72,6 @@ class TokenResponse(BaseModel):
 class PasswordResetResponse(BaseModel):
     model_config = ConfigDict(extra='allow')
     message: str
-    reset_token: str
     email_sent: bool
 
 

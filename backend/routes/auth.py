@@ -81,9 +81,26 @@ async def get_current_user(payload: dict = Depends(verify_token)) -> dict:
 
 @api_router.post("/auth/forgot-password", response_model=PasswordResetResponse)
 async def forgot_password(request: ForgotPasswordRequest, req: Request) -> dict:
+    """Generate a reset token and email it to the user.
+
+    For security, the token is *never* returned in the HTTP response — it is
+    only deliverable via the email link. We also respond with a generic
+    success message even when the email is not registered, to prevent
+    account-enumeration attacks.
+    """
     user = await db.users.find_one({"email": request.email}, {"_id": 0})
+
+    # Generic public-facing response used in both the "user found" and
+    # "user not found" branches so attackers cannot probe which emails exist.
+    generic_response = {
+        "message": "If an account exists for that email, a reset link has been sent.",
+        "email_sent": True,
+    }
+
     if not user:
-        raise HTTPException(status_code=404, detail="No account found with that email address.")
+        # Return the same shape without touching the DB — same latency cost is
+        # fine for a non-hot-path endpoint.
+        return generic_response
 
     reset_token = str(uuid.uuid4())
     expires_at = (datetime.now(UTC) + timedelta(hours=1)).isoformat()
@@ -111,13 +128,13 @@ async def forgot_password(request: ForgotPasswordRequest, req: Request) -> dict:
 
     reset_link = f"{origin}/auth/reset-password?token={reset_token}"
 
-    email_sent = await send_password_reset_email(request.email, user.get('name', ''), reset_link)
+    try:
+        await send_password_reset_email(request.email, user.get('name', ''), reset_link)
+    except Exception:  # noqa: BLE001
+        # Don't reveal delivery failures to the caller
+        pass
 
-    return {
-        "message": "Password reset link has been generated.",
-        "reset_token": reset_token,
-        "email_sent": email_sent
-    }
+    return generic_response
 
 
 
