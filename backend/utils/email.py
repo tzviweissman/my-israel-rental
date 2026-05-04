@@ -382,3 +382,63 @@ async def send_booking_notification_email(
         _wrap(inner, preheader=f"{guest_name} · {check_in} → {check_out}"),
         tag="booking-notification",
     )
+
+
+async def send_payment_confirmation_email(
+    to_email: str,
+    name: str,
+    order_id: str,
+    paypal_order_id: str,
+    description: str,
+    amount: float,
+    currency: str,
+    captured_at: str,
+    *,
+    is_admin_copy: bool = False,
+) -> bool:
+    """Confirmation email after a successful PayPal capture.
+
+    Sent to the paying customer (is_admin_copy=False) and to the admin mailbox
+    (is_admin_copy=True) for internal bookkeeping.
+    """
+    currency_symbol = "₪" if currency == "ILS" else "$"
+    headline = (
+        "New paid order" if is_admin_copy else "Payment received — thank you! 🎉"
+    )
+    subhead = (
+        "A customer has just completed a PayPal payment."
+        if is_admin_copy
+        else f"Hi {name or 'there'}, your PayPal payment has been processed successfully."
+    )
+
+    inner = f"""
+    <h2 style="color:#222;font-size:22px;margin:0 0 8px;">{headline}</h2>
+    <p style="color:#555;font-size:14px;line-height:1.7;margin:0 0 18px;">
+      {subhead}
+    </p>
+    <div style="background:#f7f7f4;border-radius:10px;padding:18px 20px;margin:10px 0 20px;border-left:4px solid {BRAND_TEAL};">
+      <div style="color:{BRAND_TEAL};font-size:15px;font-weight:700;margin-bottom:10px;">{description}</div>
+      <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0">
+        {_detail_row("Order ID", order_id[:8].upper())}
+        {_detail_row("PayPal Order", paypal_order_id)}
+        {_detail_row("Amount", f"{currency_symbol}{amount:,.2f} {currency}")}
+        {_detail_row("Paid at", captured_at)}
+        {_detail_row("Customer", name or to_email) if is_admin_copy else ''}
+      </table>
+    </div>
+    {_button("View in Dashboard", f"{FRONTEND_URL}/dashboard")}
+    <p style="color:#888;font-size:12px;line-height:1.6;margin-top:10px;">
+      Keep this email as your receipt. Questions? Reply to this message or contact us at {CONTACT_EMAIL}.
+    </p>
+    """
+    subject = (
+        f"[Admin] New paid order — {currency_symbol}{amount:,.2f}"
+        if is_admin_copy
+        else f"Payment receipt — {currency_symbol}{amount:,.2f} {currency}"
+    )
+    return await send_email(
+        to_email,
+        subject,
+        _wrap(inner, preheader=f"{description} · {currency_symbol}{amount:,.2f}"),
+        tag="payment-confirmation",
+    )

@@ -32,6 +32,7 @@ from routes import (  # noqa: E402
     ical,
     misc,
     notifications,
+    payments,
     properties,
     saved_searches,
     subleases,
@@ -62,6 +63,7 @@ for mod in (
     saved_searches,
     ical,
     misc,
+    payments,
 ):
     api_router.include_router(mod.router)
 

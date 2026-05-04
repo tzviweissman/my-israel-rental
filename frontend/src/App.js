@@ -24,6 +24,8 @@ import ManagerPage from './pages/ManagerPage';
 import Chat from './pages/Chat';
 import DocumentService from './pages/DocumentService';
 import SignContract from './pages/SignContract';
+import PaymentSuccess from './pages/PaymentSuccess';
+import PaymentCancel from './pages/PaymentCancel';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 export const API = `${BACKEND_URL}/api`;
@@ -111,6 +113,8 @@ function App() {
             <Route path="/chat/:propertyId" element={user ? <Chat /> : <Navigate to="/auth/login" />} />
             <Route path="/document-service" element={user ? <DocumentService /> : <Navigate to="/auth/login" />} />
             <Route path="/sign/:signToken" element={<SignContract />} />
+            <Route path="/payment/success" element={user ? <PaymentSuccess /> : <Navigate to="/auth/login" />} />
+            <Route path="/payment/cancel" element={<PaymentCancel />} />
           </Routes>
         </div>
       </BrowserRouter>
