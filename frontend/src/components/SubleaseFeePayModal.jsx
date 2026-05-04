@@ -25,11 +25,11 @@ const SubleaseFeePayModal = ({ open, onClose, booking, bookingAmount, currency =
 
   return (
     <div
-      className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4"
+      className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4 overflow-y-auto"
       data-testid="sublease-fee-modal"
     >
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden">
-        <div className="px-6 py-5 border-b border-gray-100 flex items-center justify-between">
+      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden my-auto max-h-[calc(100vh-2rem)] flex flex-col">
+        <div className="px-6 py-5 border-b border-gray-100 flex items-center justify-between flex-shrink-0">
           <div className="flex items-center gap-2">
             <ShieldCheck size={20} className="text-[#D4AF37]" />
             <h2 className="text-lg font-bold text-gray-900">Sublease service fee</h2>
@@ -38,7 +38,7 @@ const SubleaseFeePayModal = ({ open, onClose, booking, bookingAmount, currency =
             <X size={18} />
           </button>
         </div>
-        <div className="p-6">
+        <div className="p-6 overflow-y-auto">
           <p className="text-sm text-gray-600 mb-4">
             Your booking request has been sent to the sublessor. To confirm it, please pay the <strong>2.5% service fee</strong>.
           </p>

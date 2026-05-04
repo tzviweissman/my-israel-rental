@@ -156,8 +156,9 @@ const DocumentService = () => {
             </form>
           </div>
 
-          {/* Right: payment summary */}
-          <aside className="bg-white rounded-2xl p-7 border border-gray-100 h-fit sticky top-24" data-testid="payment-panel">
+          {/* Right: payment summary — allowed to flow with the page so long
+              forms scroll normally; on taller screens it stays near the top. */}
+          <aside className="bg-white rounded-2xl p-7 border border-gray-100 h-fit md:sticky md:top-24 md:max-h-[calc(100vh-120px)] md:overflow-y-auto" data-testid="payment-panel">
             <div className="flex items-center gap-2 mb-4">
               <FileText size={18} className="text-[#D4AF37]" />
               <h2 className="text-base font-semibold">3. Review & pay</h2>
