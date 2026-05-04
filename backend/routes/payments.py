@@ -228,33 +228,36 @@ async def capture_payment_order(
     order = await db.orders.find_one({"id": order_id}, {"_id": 0})
     await _apply_business_side_effects(order)
 
-    # Send confirmation emails
+    # Send confirmation emails (non-fatal if they fail — the payment already captured)
     user = await db.users.find_one({"id": auth["user_id"]}, {"_id": 0})
     customer_email = (user or {}).get("email")
     customer_name = (user or {}).get("name", "")
-    if customer_email:
-        await send_payment_confirmation_email(
-            customer_email,
-            customer_name,
-            order_id=order["id"],
-            paypal_order_id=order["paypal_order_id"],
-            description=order["description"],
-            amount=order["amount"],
-            currency=order["currency"],
-            captured_at=captured_at.split("T")[0],
-        )
-    if PAYPAL_ADMIN_EMAIL:
-        await send_payment_confirmation_email(
-            PAYPAL_ADMIN_EMAIL,
-            customer_name or customer_email or "unknown",
-            order_id=order["id"],
-            paypal_order_id=order["paypal_order_id"],
-            description=order["description"],
-            amount=order["amount"],
-            currency=order["currency"],
-            captured_at=captured_at.split("T")[0],
-            is_admin_copy=True,
-        )
+    try:
+        if customer_email:
+            await send_payment_confirmation_email(
+                customer_email,
+                customer_name,
+                order_id=order["id"],
+                paypal_order_id=order["paypal_order_id"],
+                description=order["description"],
+                amount=order["amount"],
+                currency=order["currency"],
+                captured_at=captured_at.split("T")[0],
+            )
+        if PAYPAL_ADMIN_EMAIL:
+            await send_payment_confirmation_email(
+                PAYPAL_ADMIN_EMAIL,
+                customer_name or customer_email or "unknown",
+                order_id=order["id"],
+                paypal_order_id=order["paypal_order_id"],
+                description=order["description"],
+                amount=order["amount"],
+                currency=order["currency"],
+                captured_at=captured_at.split("T")[0],
+                is_admin_copy=True,
+            )
+    except Exception as e:  # noqa: BLE001
+        logger.warning("Payment confirmation email failed (non-fatal): %s", e)
 
     return {"status": "captured", "order": order}
 
