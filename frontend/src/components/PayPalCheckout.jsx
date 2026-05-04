@@ -1,7 +1,8 @@
-import React, { useContext } from 'react';
+import React, { useContext, useState } from 'react';
 import { PayPalScriptProvider, PayPalButtons } from '@paypal/react-paypal-js';
 import axios from 'axios';
 import { toast } from 'sonner';
+import { ExternalLink, Loader2 } from 'lucide-react';
 import { API, AuthContext } from '../App';
 
 const PAYPAL_CLIENT_ID = process.env.REACT_APP_PAYPAL_CLIENT_ID;
@@ -19,6 +20,7 @@ const PAYPAL_CLIENT_ID = process.env.REACT_APP_PAYPAL_CLIENT_ID;
  */
 const PayPalCheckout = ({ productType, metadata, currency = 'USD', disabled, onCaptured }) => {
   const { token } = useContext(AuthContext);
+  const [redirecting, setRedirecting] = useState(false);
 
   if (!PAYPAL_CLIENT_ID) {
     return (
@@ -29,6 +31,25 @@ const PayPalCheckout = ({ productType, metadata, currency = 'USD', disabled, onC
   }
 
   const auth = { headers: { Authorization: `Bearer ${token}` } };
+
+  const payOnPaypalFullPage = async () => {
+    setRedirecting(true);
+    try {
+      const res = await axios.post(
+        `${API}/payments/orders`,
+        { product_type: productType, metadata },
+        auth,
+      );
+      const url = res.data?.approve_url;
+      if (!url) throw new Error('No approve URL returned');
+      // Full-page redirect — PayPal will send the user back to /payment/success
+      // with ?token=<paypal_order_id>, and PaymentSuccess will auto-capture.
+      window.location.href = url;
+    } catch (e) {
+      setRedirecting(false);
+      toast.error(e.response?.data?.detail || 'Unable to open PayPal checkout');
+    }
+  };
 
   return (
     <div className={disabled ? 'opacity-50 pointer-events-none' : ''} data-testid="paypal-buttons-wrapper">
@@ -78,6 +99,25 @@ const PayPalCheckout = ({ productType, metadata, currency = 'USD', disabled, onC
           }}
         />
       </PayPalScriptProvider>
+
+      {/* Fallback: full-page redirect for users whose PayPal popup is cut
+          off / blocked / mis-rendered on Windows high-DPI zoom. */}
+      <button
+        type="button"
+        onClick={payOnPaypalFullPage}
+        disabled={redirecting || disabled}
+        className="w-full mt-3 flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg border border-gray-200 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 transition-colors"
+        data-testid="paypal-fullpage-fallback"
+      >
+        {redirecting ? (
+          <><Loader2 size={14} className="animate-spin" /> Opening PayPal…</>
+        ) : (
+          <>Having trouble? Pay on PayPal.com <ExternalLink size={14} /></>
+        )}
+      </button>
+      <p className="text-[10px] text-gray-400 text-center mt-1.5 leading-relaxed">
+        The full-page option is easier on mobile or if the PayPal popup is cut off on your screen.
+      </p>
     </div>
   );
 };

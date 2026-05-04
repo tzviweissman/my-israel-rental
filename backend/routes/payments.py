@@ -129,6 +129,13 @@ async def create_payment_order(
     }
     await db.orders.insert_one(doc)
 
+    # Extract the approve URL so the frontend can offer a full-page redirect
+    # checkout as an alternative to the in-page Smart Buttons popup.
+    approve_url = next(
+        (link.get("href") for link in (pp_order.get("links") or []) if link.get("rel") == "approve"),
+        None,
+    )
+
     return {
         "id": order_id,
         "paypal_order_id": pp_order["id"],
@@ -136,6 +143,7 @@ async def create_payment_order(
         "currency": currency,
         "description": description,
         "status": "created",
+        "approve_url": approve_url,
     }
 
 
