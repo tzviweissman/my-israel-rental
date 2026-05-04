@@ -340,6 +340,24 @@ Build a bilingual (English/Hebrew) rental website named MyIsraelRental.com with 
   - Added ~70 new EN+HE keys under `auth.*`, `chat.*`, `sign.*` sections of `i18n.js`.
   - Verified via browser screenshots: `/auth/forgot-password` renders `שכחת סיסמה?`, `כתובת אימייל`, `אפס סיסמה`, `חזרה להתחברות` correctly.
   - ESLint clean across all 4 edited files.
+- [x] **Admin Dashboard + Bulk Manager full Hebrew sweep** (2026-05-04):
+  - **AdminDashboard.js**: Added `useTranslation`. Converted `TABS` → `TAB_KEYS` with `labelKey` so each tab uses `t(tab.labelKey)`. Dashboard heading now `t('admin.title')` → `לוח בקרה ראשי`.
+  - **OverviewTab.jsx**: Stat cards use `t('admin.activeListings/totalViews/inquiries/totalUsers/pendingServices')`, `Recent Listings` → `t('admin.recentListings')`. Table headers renamed to `admin.colTitle/colArea/colType/colPrice/colViews` (to avoid shadowing `admin.title`). Full `Email Deliverability` block (`lastNDays`, `delivered`, `bounced`, `spamComplaints`, `deliveryRate`, `usersSuppressed`, `recentEvents`) translated.
+  - **ListingsTab.jsx**: Search placeholder, `listingsCount`, `selectedCount`, `Mark selected as booked`, `Clear` button, `Admin blocked` badge + its range tooltip, per-row `Mark as booked` / `Remove admin block` / `Activate` / `Deactivate` / `Delete` tooltips, delete-listing confirm toast, unblock confirm toast, `No listings found` empty state.
+  - **UsersTab.jsx**: Search placeholder, `usersCount`, column headers (`colName/colEmail/colRole/status/colJoined/actions`), `Block` / `Unblock` tooltips, `Delete` tooltip, delete-user confirm toast, `Protected` label, `No users found` empty.
+  - **ChatsTab.jsx**: `No conversations yet`, per-conversation `{n} messages` suffix, `Unknown` sender fallback, `No messages` branch.
+  - **ServicesTab.jsx**: Column headers + 4 status dropdown options translated.
+  - **SettingsTab.jsx**: Heading, WhatsApp/Email/Phone labels, `Featured Property IDs` + help hint + placeholder, `Save Settings` button.
+  - **MarkAsBookedModal.jsx**: Title, single/bulk description (with `{{count}}`/`{{noun}}` interpolation using translated `property` / `properties`), `Block indefinitely`, `Start/End date` labels, footer buttons.
+  - **BulkManagerTab.jsx**: Search placeholder, rental/area dropdown firstrow (`All types` / `All areas`), `Select/Clear all visible`, `Undo last`, selected/visible/total counters, `Bulk Edit Details`, `Bulk Add Photos`, column headers, empty-filter state, `(untitled)` fallback, cover-picker tooltips, mobile floating bar actions.
+  - **BulkEditModal.jsx**: All 9 `FIELD_GROUPS` labels and 28 `LABELS` field labels moved to `t('bulk.fieldGroups.*')` / `t('bulk.fieldLabels.*')`. Yes/No boolean selects, amenities Append/Replace radio, Save & Apply button, toast messages.
+  - **BulkPhotosModal.jsx**: Title + subtitle, `Same photos to all` / `Different per property` mode tabs, drop-zone placeholders, progress indicator, validation toasts, `Cancel` / `Save & Apply` buttons.
+  - **CoverPickerModal.jsx**: `Choose cover photo`, `COVER` badge, `Set as cover` / `Saving…` hover overlay, `This property has no photos yet.` empty state, toast messages.
+  - Added ~180 new EN+HE keys under `admin.*` + new `bulk.*` namespace (with nested `fieldGroups`, `fieldLabels`, `yesNo`).
+  - Renamed conflicting keys `admin.title/area/type/price/views/name/email/role/joined/owner` → `admin.colTitle/colArea/...` to prevent shadowing the dashboard heading.
+  - Verified via browser screenshots: admin overview/listings/settings and owner bulk-manager all render in Hebrew (`לוח בקרה ראשי`, `נכסי פעילים`, `מסירת אימייל`, `עריכה מרובה של פרטים`, Hebrew column headers, etc.).
+  - Left untranslated intentionally: RENTAL_TYPES/PROPERTY_TYPES/CONDITIONS/FURNITURE_OPTIONS/CANCELLATION_POLICIES enum labels (shared with Add/Edit forms; touching them would require a global refactor).
+  - ESLint clean across all 12+ files.
 
 ### P2 - Lower Priority
 - [ ] Manager bulk property upload via text

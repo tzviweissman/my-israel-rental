@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import axios from 'axios';
 import { toast } from 'sonner';
 import {
@@ -11,13 +12,9 @@ import MarkAsBookedModal from './MarkAsBookedModal';
 
 /**
  * Super Admin → Listings tab.
- * Owns its own state: properties, search, selection, modal state.
- *
- * Props:
- *  - token: string (auth)
- *  - onStatsChange?: () => void   (called after actions that change dashboard counts)
  */
 export const ListingsTab = ({ token, onStatsChange }) => {
+  const { t } = useTranslation();
   const headers = { Authorization: `Bearer ${token}` };
 
   const { data: properties, refresh: fetchProperties } = useApiSWR(
@@ -45,11 +42,11 @@ export const ListingsTab = ({ token, onStatsChange }) => {
   const deleteProperty = (propertyId) => {
     toast.custom((tid) => (
       <div className="bg-white rounded-xl shadow-xl border border-gray-200 p-4 w-80">
-        <p className="text-sm font-semibold text-gray-800 mb-1">Delete this listing?</p>
-        <p className="text-xs text-gray-500 mb-3">Permanently removes the property. This cannot be undone.</p>
+        <p className="text-sm font-semibold text-gray-800 mb-1">{t('admin.deleteListingTitle')}</p>
+        <p className="text-xs text-gray-500 mb-3">{t('admin.deleteListingDesc')}</p>
         <div className="flex gap-2 justify-end">
           <button onClick={() => toast.dismiss(tid)} className="px-3 py-1.5 rounded-lg text-xs font-medium text-gray-600 hover:bg-gray-100">
-            Cancel
+            {t('admin.cancel')}
           </button>
           <button
             onClick={async () => {
@@ -64,7 +61,7 @@ export const ListingsTab = ({ token, onStatsChange }) => {
             className="px-3 py-1.5 rounded-lg text-xs font-semibold text-white bg-red-500 hover:bg-red-600"
             data-testid={`confirm-delete-listing-${propertyId}`}
           >
-            Delete
+            {t('admin.deleteAction')}
           </button>
         </div>
       </div>
@@ -117,14 +114,15 @@ export const ListingsTab = ({ token, onStatsChange }) => {
     if (!block) return;
     toast.custom((tid) => (
       <div className="bg-white rounded-xl shadow-xl border border-gray-200 p-4 w-80">
-        <p className="text-sm font-semibold text-gray-800 mb-1">Remove admin block?</p>
+        <p className="text-sm font-semibold text-gray-800 mb-1">{t('admin.removeBlockTitle')}</p>
         <p className="text-xs text-gray-500 mb-3">
-          The property will become available for renters again
-          {block.indefinite ? '' : ` during ${block.start_date?.slice(0, 10)} → ${block.end_date?.slice(0, 10)}`}.
+          {block.indefinite
+            ? t('admin.removeBlockDesc')
+            : t('admin.removeBlockDescRange', { start: block.start_date?.slice(0, 10), end: block.end_date?.slice(0, 10) })}
         </p>
         <div className="flex gap-2 justify-end">
           <button onClick={() => toast.dismiss(tid)} className="px-3 py-1.5 rounded-lg text-xs font-medium text-gray-600 hover:bg-gray-100">
-            Cancel
+            {t('admin.cancel')}
           </button>
           <button
             onClick={async () => {
@@ -138,7 +136,7 @@ export const ListingsTab = ({ token, onStatsChange }) => {
             className="px-3 py-1.5 rounded-lg text-xs font-semibold text-white bg-black hover:bg-gray-800"
             data-testid={`confirm-unblock-${property.id}`}
           >
-            Remove block
+            {t('admin.removeBlock')}
           </button>
         </div>
       </div>
@@ -169,30 +167,30 @@ export const ListingsTab = ({ token, onStatsChange }) => {
             type="text"
             value={searchTerm}
             onChange={e => setSearchTerm(e.target.value)}
-            placeholder="Search listings by title, area, or owner..."
+            placeholder={t('admin.searchListings')}
             className="w-full pl-9 pr-4 py-2 rounded-lg border border-[#E5E5E5] text-sm focus:outline-none focus:ring-2 focus:ring-black/20"
             data-testid="listings-search-input"
           />
         </div>
-        <span className="text-sm text-gray-500">{filteredProperties.length} listings</span>
+        <span className="text-sm text-gray-500">{t('admin.listingsCount', { count: filteredProperties.length })}</span>
         {selectedPropIds.size > 0 && (
           <div className="flex items-center gap-2 ml-auto">
             <span className="text-xs font-medium text-gray-700" data-testid="selected-count">
-              {selectedPropIds.size} selected
+              {t('admin.selectedCount', { count: selectedPropIds.size })}
             </span>
             <button
               onClick={() => openMarkBookedModal({ mode: 'bulk' })}
               className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-black text-white text-xs font-semibold hover:bg-gray-800"
               data-testid="bulk-mark-booked-btn"
             >
-              <CalendarX size={14} /> Mark selected as booked
+              <CalendarX size={14} /> {t('admin.markSelectedBooked')}
             </button>
             <button
               onClick={() => setSelectedPropIds(new Set())}
               className="px-2 py-1.5 rounded-lg text-xs font-medium text-gray-600 hover:bg-gray-100"
               data-testid="clear-selection-btn"
             >
-              Clear
+              {t('admin.clear')}
             </button>
           </div>
         )}
@@ -216,13 +214,13 @@ export const ListingsTab = ({ token, onStatsChange }) => {
                   data-testid="select-all-listings"
                 />
               </th>
-              <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Title</th>
-              <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Owner</th>
-              <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Area</th>
-              <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Type</th>
-              <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Price</th>
-              <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Status</th>
-              <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Actions</th>
+              <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">{t('admin.colTitle')}</th>
+              <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">{t('admin.colOwner')}</th>
+              <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">{t('admin.colArea')}</th>
+              <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">{t('admin.colType')}</th>
+              <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">{t('admin.colPrice')}</th>
+              <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">{t('admin.status')}</th>
+              <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">{t('admin.actions')}</th>
             </tr>
           </thead>
           <tbody>
@@ -242,10 +240,10 @@ export const ListingsTab = ({ token, onStatsChange }) => {
                     {p.admin_blocked_now && (
                       <span
                         className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-amber-100 text-amber-800"
-                        title={p.active_admin_block?.indefinite ? 'Blocked indefinitely by admin' : `Blocked ${p.active_admin_block?.start_date?.slice(0,10)} → ${p.active_admin_block?.end_date?.slice(0,10)}`}
+                        title={p.active_admin_block?.indefinite ? t('admin.adminBlockedIndefinite') : t('admin.adminBlockedRange', { start: p.active_admin_block?.start_date?.slice(0,10), end: p.active_admin_block?.end_date?.slice(0,10) })}
                         data-testid={`admin-blocked-badge-${p.id}`}
                       >
-                        <Lock size={10} /> Admin blocked
+                        <Lock size={10} /> {t('admin.adminBlocked')}
                       </span>
                     )}
                   </div>
@@ -268,7 +266,7 @@ export const ListingsTab = ({ token, onStatsChange }) => {
                       <button
                         onClick={() => unmarkBooked(p)}
                         className="p-1.5 rounded hover:bg-green-50 text-green-600"
-                        title="Remove admin block"
+                        title={t('admin.removeAdminBlock')}
                         data-testid={`unmark-booked-${p.id}`}
                       >
                         <CalendarCheck size={18} />
@@ -277,7 +275,7 @@ export const ListingsTab = ({ token, onStatsChange }) => {
                       <button
                         onClick={() => openMarkBookedModal({ mode: 'single', id: p.id })}
                         className="p-1.5 rounded hover:bg-amber-50 text-amber-600"
-                        title="Mark as booked"
+                        title={t('admin.markAsBooked')}
                         data-testid={`mark-booked-${p.id}`}
                       >
                         <CalendarX size={18} />
@@ -286,7 +284,7 @@ export const ListingsTab = ({ token, onStatsChange }) => {
                     <button
                       onClick={() => togglePropertyStatus(p.id)}
                       className="p-1.5 rounded hover:bg-gray-100"
-                      title={p.status === 'active' ? 'Deactivate' : 'Activate'}
+                      title={p.status === 'active' ? t('admin.deactivate') : t('admin.activate')}
                       data-testid={`toggle-property-${p.id}`}
                     >
                       {p.status === 'active'
@@ -296,7 +294,7 @@ export const ListingsTab = ({ token, onStatsChange }) => {
                     <button
                       onClick={() => deleteProperty(p.id)}
                       className="p-1.5 rounded hover:bg-red-50 text-red-500"
-                      title="Delete"
+                      title={t('admin.deleteTooltip')}
                       data-testid={`delete-property-${p.id}`}
                     >
                       <Trash2 size={16} />
@@ -308,7 +306,7 @@ export const ListingsTab = ({ token, onStatsChange }) => {
           </tbody>
         </table>
         {filteredProperties.length === 0 && (
-          <p className="text-center text-gray-400 py-8 text-sm">No listings found</p>
+          <p className="text-center text-gray-400 py-8 text-sm">{t('admin.noListings')}</p>
         )}
       </div>
 

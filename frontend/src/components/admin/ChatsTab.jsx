@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { ChevronDown, ChevronUp, MessageCircle } from 'lucide-react';
 import { API } from '../../App';
 import { useApiSWR } from '../../hooks/useApiSWR';
@@ -8,6 +9,7 @@ import { useApiSWR } from '../../hooks/useApiSWR';
  * Read-only conversation explorer. Owns its own fetch and expand/collapse state.
  */
 export const ChatsTab = ({ token }) => {
+  const { t } = useTranslation();
   const { data: chats } = useApiSWR(
     `${API}/admin/chats`, token, { initial: [] }
   );
@@ -15,7 +17,7 @@ export const ChatsTab = ({ token }) => {
 
   return (
     <div data-testid="admin-chats-section">
-      {chats.length === 0 && <p className="text-center text-gray-400 py-12 text-sm">No conversations yet</p>}
+      {chats.length === 0 && <p className="text-center text-gray-400 py-12 text-sm">{t('admin.noConversations')}</p>}
       <div className="space-y-3">
         {chats.map((conv, idx) => (
           <div key={conv.property_id || conv.property_title || idx} className="bg-white rounded-xl border border-[#E5E5E5] overflow-hidden" data-testid={`chat-conv-${idx}`}>
@@ -36,7 +38,7 @@ export const ChatsTab = ({ token }) => {
                 </div>
               </div>
               <div className="flex items-center gap-3">
-                <span className="text-xs text-gray-400">{conv.messages?.length || 0} messages</span>
+                <span className="text-xs text-gray-400">{conv.messages?.length || 0} {t('admin.messages')}</span>
                 {expandedChat === idx ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
               </div>
             </button>
@@ -47,14 +49,14 @@ export const ChatsTab = ({ token }) => {
                   return (
                     <div key={mIdx} className="mb-3" data-testid={`chat-message-${idx}-${mIdx}`}>
                       <div className="flex items-center gap-2 mb-1">
-                        <span className="text-xs font-semibold">{sender?.name || 'Unknown'}</span>
+                        <span className="text-xs font-semibold">{sender?.name || t('admin.unknown')}</span>
                         <span className="text-xs text-gray-400">{new Date(msg.created_at).toLocaleString()}</span>
                       </div>
                       <p className="text-sm text-gray-700 bg-white rounded-lg px-3 py-2 border border-[#E5E5E5] inline-block">{msg.message}</p>
                     </div>
                   );
                 })}
-                {(!conv.messages || conv.messages.length === 0) && <p className="text-sm text-gray-400">No messages</p>}
+                {(!conv.messages || conv.messages.length === 0) && <p className="text-sm text-gray-400">{t('admin.noMessages')}</p>}
               </div>
             )}
           </div>

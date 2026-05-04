@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import axios from 'axios';
 import { toast } from 'sonner';
 import {
@@ -77,6 +78,7 @@ const DropZone = ({ label, files, onFiles, onRemove, compact, testid }) => {
 // Public modal component.
 // ---------------------------------------------------------------------------
 const BulkPhotosModal = ({ properties, onClose, onSaved, API, token, auth }) => {
+  const { t } = useTranslation();
   const [mode, setMode] = useState('shared'); // 'shared' | 'per_property'
   const [sharedFiles, setSharedFiles] = useState([]);
   const [perPropFiles, setPerPropFiles] = useState({}); // { pid: File[] }
@@ -109,7 +111,7 @@ const BulkPhotosModal = ({ properties, onClose, onSaved, API, token, auth }) => 
     setSaving(true);
     try {
       if (mode === 'shared') {
-        if (!sharedFiles.length) { toast.error('Add at least one photo'); setSaving(false); return; }
+        if (!sharedFiles.length) { toast.error(t('bulk.addOnePhoto')); setSaving(false); return; }
         setProgress({ current: 0, total: 1 });
         const urls = await uploadFiles(sharedFiles);
         setProgress({ current: 1, total: 1 });
@@ -118,10 +120,10 @@ const BulkPhotosModal = ({ properties, onClose, onSaved, API, token, auth }) => 
           { property_ids: properties.map(p => p.id), image_urls: urls },
           auth,
         );
-        toast.success(`Added ${urls.length} photos to ${properties.length} properties`);
+        toast.success(t('bulk.addedPhotos', { count: urls.length, props: properties.length }));
       } else {
         const pids = Object.keys(perPropFiles).filter(pid => (perPropFiles[pid] || []).length);
-        if (!pids.length) { toast.error('Drop photos onto at least one property'); setSaving(false); return; }
+        if (!pids.length) { toast.error(t('bulk.dropOntoOne')); setSaving(false); return; }
         setProgress({ current: 0, total: pids.length });
         const per_property = {};
         let i = 0;
@@ -135,11 +137,11 @@ const BulkPhotosModal = ({ properties, onClose, onSaved, API, token, auth }) => 
           { property_ids: pids, image_urls: [], per_property },
           auth,
         );
-        toast.success(`Added photos to ${pids.length} properties`);
+        toast.success(t('bulk.addedPhotosPerProp', { count: pids.length }));
       }
       onSaved();
     } catch (e) {
-      toast.error(e.response?.data?.detail || 'Photo upload failed');
+      toast.error(e.response?.data?.detail || t('bulk.photoUploadFailed'));
     } finally {
       setSaving(false);
       setProgress(null);
@@ -151,8 +153,8 @@ const BulkPhotosModal = ({ properties, onClose, onSaved, API, token, auth }) => 
       <div className="bg-white w-full md:max-w-3xl md:rounded-2xl shadow-2xl max-h-[92vh] flex flex-col">
         <div className="flex items-center justify-between p-5 border-b border-gray-100">
           <div>
-            <h2 className="text-lg font-bold text-gray-900">Bulk Add Photos</h2>
-            <p className="text-xs text-gray-500 mt-0.5">{properties.length} properties selected</p>
+            <h2 className="text-lg font-bold text-gray-900">{t('bulk.bulkAddPhotos')}</h2>
+            <p className="text-xs text-gray-500 mt-0.5">{t('bulk.photosPropertiesSelected', { count: properties.length })}</p>
           </div>
           <button onClick={onClose} className="p-2 rounded-lg hover:bg-gray-100" data-testid="bulk-photos-close"><X size={18} /></button>
         </div>
@@ -165,14 +167,14 @@ const BulkPhotosModal = ({ properties, onClose, onSaved, API, token, auth }) => 
               data-testid="bulk-photos-mode-shared"
             >
               <Sparkles size={12} className="inline -mt-0.5 mr-1" />
-              Same photos to all
+              {t('bulk.photosSamePhotos')}
             </button>
             <button
               onClick={() => setMode('per_property')}
               className={`px-3 py-1.5 rounded-md font-medium transition-colors ${mode === 'per_property' ? 'bg-white text-[#1E6A6A] shadow-sm' : 'text-gray-500'}`}
               data-testid="bulk-photos-mode-per"
             >
-              Different per property
+              {t('bulk.photosDifferentPerProp')}
             </button>
           </div>
         </div>
@@ -180,7 +182,7 @@ const BulkPhotosModal = ({ properties, onClose, onSaved, API, token, auth }) => 
         <div className="flex-1 overflow-y-auto p-5">
           {mode === 'shared' ? (
             <DropZone
-              label="Drop photos here or click to browse"
+              label={t('bulk.dropHere')}
               files={sharedFiles}
               onFiles={(f) => onDropFiles(f)}
               onRemove={removeShared}
@@ -192,7 +194,7 @@ const BulkPhotosModal = ({ properties, onClose, onSaved, API, token, auth }) => 
                 <div key={p.id} className="rounded-xl border border-gray-200 p-3" data-testid={`bulk-photos-row-${p.id}`}>
                   <div className="font-medium text-sm mb-2">{p.title}</div>
                   <DropZone
-                    label="Drop this property's photos here"
+                    label={t('bulk.dropPerProp')}
                     files={perPropFiles[p.id] || []}
                     onFiles={(f) => onDropFiles(f, p.id)}
                     onRemove={(i) => removePer(p.id, i)}
@@ -206,13 +208,13 @@ const BulkPhotosModal = ({ properties, onClose, onSaved, API, token, auth }) => 
           {progress && (
             <div className="mt-4 text-xs text-gray-600 flex items-center gap-2">
               <Loader2 size={14} className="animate-spin text-[#1E6A6A]" />
-              Uploading {progress.current}/{progress.total}…
+              {t('bulk.uploadingProgress', { current: progress.current, total: progress.total })}
             </div>
           )}
         </div>
 
         <div className="p-5 border-t border-gray-100 flex items-center justify-end gap-2 bg-gray-50">
-          <button onClick={onClose} className="px-4 py-2 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-100" data-testid="bulk-photos-cancel">Cancel</button>
+          <button onClick={onClose} className="px-4 py-2 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-100" data-testid="bulk-photos-cancel">{t('admin.cancel')}</button>
           <button
             onClick={handleSave}
             disabled={saving}
@@ -220,7 +222,7 @@ const BulkPhotosModal = ({ properties, onClose, onSaved, API, token, auth }) => 
             data-testid="bulk-photos-save"
           >
             {saving ? <Loader2 size={14} className="animate-spin" /> : <CheckCircle2 size={14} />}
-            Save & Apply
+            {t('bulk.saveAndApplyShort')}
           </button>
         </div>
       </div>

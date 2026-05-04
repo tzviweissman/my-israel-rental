@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import axios from 'axios';
 import { toast } from 'sonner';
 import { API } from '../../App';
@@ -9,6 +10,7 @@ import { useApiSWR } from '../../hooks/useApiSWR';
  * Lists service requests and lets admin update their status inline.
  */
 export const ServicesTab = ({ token, onStatsChange }) => {
+  const { t } = useTranslation();
   const headers = { Authorization: `Bearer ${token}` };
 
   const { data: services, refresh: fetchServices } = useApiSWR(
@@ -30,13 +32,13 @@ export const ServicesTab = ({ token, onStatsChange }) => {
         <table className="w-full">
           <thead className="bg-gray-50">
             <tr>
-              <th className="px-5 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Service</th>
-              <th className="px-5 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Requested By</th>
-              <th className="px-5 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Address</th>
-              <th className="px-5 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Tenant</th>
-              <th className="px-5 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Date</th>
-              <th className="px-5 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Status</th>
-              <th className="px-5 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Actions</th>
+              <th className="px-5 py-3 text-left text-xs font-semibold text-gray-600 uppercase">{t('admin.service')}</th>
+              <th className="px-5 py-3 text-left text-xs font-semibold text-gray-600 uppercase">{t('admin.requestedBy')}</th>
+              <th className="px-5 py-3 text-left text-xs font-semibold text-gray-600 uppercase">{t('admin.address')}</th>
+              <th className="px-5 py-3 text-left text-xs font-semibold text-gray-600 uppercase">{t('admin.tenant')}</th>
+              <th className="px-5 py-3 text-left text-xs font-semibold text-gray-600 uppercase">{t('admin.date')}</th>
+              <th className="px-5 py-3 text-left text-xs font-semibold text-gray-600 uppercase">{t('admin.status')}</th>
+              <th className="px-5 py-3 text-left text-xs font-semibold text-gray-600 uppercase">{t('admin.actions')}</th>
             </tr>
           </thead>
           <tbody>
@@ -59,17 +61,17 @@ export const ServicesTab = ({ token, onStatsChange }) => {
                     className="text-xs px-2 py-1 rounded border border-[#E5E5E5] focus:outline-none"
                     data-testid={`service-status-${svc.id}`}
                   >
-                    <option value="pending">Pending</option>
-                    <option value="in_progress">In Progress</option>
-                    <option value="completed">Completed</option>
-                    <option value="rejected">Rejected</option>
+                    <option value="pending">{t('admin.pending')}</option>
+                    <option value="in_progress">{t('admin.inProgress')}</option>
+                    <option value="completed">{t('admin.completed')}</option>
+                    <option value="rejected">{t('admin.rejected')}</option>
                   </select>
                 </td>
               </tr>
             ))}
           </tbody>
         </table>
-        {services.length === 0 && <p className="text-center text-gray-400 py-8 text-sm">No document service requests</p>}
+        {services.length === 0 && <p className="text-center text-gray-400 py-8 text-sm">{t('admin.noServices')}</p>}
       </div>
     </div>
   );

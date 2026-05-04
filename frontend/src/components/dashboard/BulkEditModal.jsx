@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import axios from 'axios';
 import { toast } from 'sonner';
 import { X, CheckCircle2, Loader2 } from 'lucide-react';
@@ -11,75 +12,44 @@ import {
 /**
  * Bulk Edit Modal — pick a group of selected properties, tick the fields
  * you want to apply, and a single POST patches them all atomically.
- *
- * Every field has its own "Apply" checkbox so untouched fields stay as-is
- * on each property. The server returns per-property snapshots which the
- * parent stores on an undo stack.
  */
 
 const FIELD_GROUPS = [
-  { label: 'Listing copy', fields: ['title_prefix', 'description'] },
-  { label: 'Type & layout', fields: ['rental_type', 'property_type', 'bedrooms', 'bathrooms', 'floor', 'square_meters'] },
-  { label: 'Pricing', fields: ['monthly_price', 'nightly_price', 'currency'] },
-  { label: 'Stay rules', fields: ['minimum_booking_days', 'checkin_time', 'checkout_time', 'available_from', 'starting_date'] },
-  { label: 'Building', fields: ['has_elevator', 'is_shabbat_elevator', 'is_tama', 'sukkah_compatible'] },
-  { label: 'Quality', fields: ['condition', 'furniture_option'] },
-  { label: 'Agent fee', fields: ['has_agent_fee', 'agent_fee_price', 'agent_fee_currency'] },
-  { label: 'Cancellation', fields: ['cancellation_policy', 'custom_cancellation_policy'] },
-  { label: 'Amenities', fields: ['amenities'] },
+  { labelKey: 'listingCopy', fields: ['title_prefix', 'description'] },
+  { labelKey: 'typeLayout', fields: ['rental_type', 'property_type', 'bedrooms', 'bathrooms', 'floor', 'square_meters'] },
+  { labelKey: 'pricing', fields: ['monthly_price', 'nightly_price', 'currency'] },
+  { labelKey: 'stayRules', fields: ['minimum_booking_days', 'checkin_time', 'checkout_time', 'available_from', 'starting_date'] },
+  { labelKey: 'building', fields: ['has_elevator', 'is_shabbat_elevator', 'is_tama', 'sukkah_compatible'] },
+  { labelKey: 'quality', fields: ['condition', 'furniture_option'] },
+  { labelKey: 'agentFee', fields: ['has_agent_fee', 'agent_fee_price', 'agent_fee_currency'] },
+  { labelKey: 'cancellation', fields: ['cancellation_policy', 'custom_cancellation_policy'] },
+  { labelKey: 'amenities', fields: ['amenities'] },
 ];
-
-const LABELS = {
-  title_prefix: 'Title prefix (prepended)',
-  description: 'Description',
-  rental_type: 'Rental type',
-  property_type: 'Property type',
-  bedrooms: 'Bedrooms',
-  bathrooms: 'Bathrooms',
-  floor: 'Floor',
-  square_meters: 'Square meters',
-  monthly_price: 'Monthly price',
-  nightly_price: 'Nightly price',
-  currency: 'Currency',
-  minimum_booking_days: 'Min booking days',
-  checkin_time: 'Check-in time',
-  checkout_time: 'Check-out time',
-  available_from: 'Available from',
-  starting_date: 'Starting date',
-  has_elevator: 'Elevator',
-  is_shabbat_elevator: 'Shabbat elevator',
-  is_tama: 'TAMA',
-  sukkah_compatible: 'Sukkah compatible',
-  condition: 'Condition',
-  furniture_option: 'Furniture',
-  has_agent_fee: 'Agent fee',
-  agent_fee_price: 'Agent fee amount',
-  agent_fee_currency: 'Agent fee currency',
-  cancellation_policy: 'Cancellation policy',
-  custom_cancellation_policy: 'Custom cancellation policy',
-  amenities: 'Amenities',
-};
 
 // ---------------------------------------------------------------------------
 // Single-field row + its inline editor.
 // ---------------------------------------------------------------------------
-const FieldRow = ({ field, apply, onToggleApply, value, onChange, amenitiesMode, setAmenitiesMode }) => (
-  <div className={`rounded-xl border p-3 transition-colors ${apply ? 'border-[#1E6A6A]/40 bg-[#1E6A6A]/5' : 'border-gray-200 bg-white'}`}>
-    <label className="flex items-center gap-2 cursor-pointer mb-2">
-      <input
-        type="checkbox"
-        checked={apply}
-        onChange={onToggleApply}
-        className="w-4 h-4 rounded border-gray-300 text-[#1E6A6A] focus:ring-[#1E6A6A]/30"
-        data-testid={`bulk-edit-apply-${field}`}
-      />
-      <span className="text-xs font-bold text-gray-700 uppercase tracking-wider">{LABELS[field] || field}</span>
-    </label>
-    <FieldEditor field={field} value={value} onChange={onChange} amenitiesMode={amenitiesMode} setAmenitiesMode={setAmenitiesMode} />
-  </div>
-);
+const FieldRow = ({ field, apply, onToggleApply, value, onChange, amenitiesMode, setAmenitiesMode }) => {
+  const { t } = useTranslation();
+  return (
+    <div className={`rounded-xl border p-3 transition-colors ${apply ? 'border-[#1E6A6A]/40 bg-[#1E6A6A]/5' : 'border-gray-200 bg-white'}`}>
+      <label className="flex items-center gap-2 cursor-pointer mb-2">
+        <input
+          type="checkbox"
+          checked={apply}
+          onChange={onToggleApply}
+          className="w-4 h-4 rounded border-gray-300 text-[#1E6A6A] focus:ring-[#1E6A6A]/30"
+          data-testid={`bulk-edit-apply-${field}`}
+        />
+        <span className="text-xs font-bold text-gray-700 uppercase tracking-wider">{t(`bulk.fieldLabels.${field}`, { defaultValue: field })}</span>
+      </label>
+      <FieldEditor field={field} value={value} onChange={onChange} amenitiesMode={amenitiesMode} setAmenitiesMode={setAmenitiesMode} />
+    </div>
+  );
+};
 
 const FieldEditor = ({ field, value, onChange, amenitiesMode, setAmenitiesMode }) => {
+  const { t } = useTranslation();
   const cls = 'w-full px-3 py-2 rounded-lg border border-gray-200 bg-white focus:outline-none focus:ring-2 focus:ring-[#1E6A6A]/30 focus:border-[#1E6A6A] text-sm';
 
   if (field === 'description' || field === 'custom_cancellation_policy') {
@@ -117,7 +87,7 @@ const FieldEditor = ({ field, value, onChange, amenitiesMode, setAmenitiesMode }
   }
   if (['has_elevator', 'is_shabbat_elevator', 'is_tama', 'sukkah_compatible', 'has_agent_fee'].includes(field)) {
     return <select value={value === true || value === 'yes' ? 'yes' : 'no'} onChange={(e) => onChange(e.target.value === 'yes')} className={cls} data-testid={`bulk-edit-${field}`}>
-      <option value="no">No</option><option value="yes">Yes</option>
+      <option value="no">{t('bulk.yesNo.no')}</option><option value="yes">{t('bulk.yesNo.yes')}</option>
     </select>;
   }
   if (field === 'amenities') {
@@ -126,14 +96,14 @@ const FieldEditor = ({ field, value, onChange, amenitiesMode, setAmenitiesMode }
     return (
       <div data-testid={`bulk-edit-${field}`}>
         <div className="flex items-center gap-3 mb-2 text-xs">
-          <span className="text-gray-500">Mode:</span>
+          <span className="text-gray-500">{t('bulk.mode')}</span>
           <label className="flex items-center gap-1 cursor-pointer">
             <input type="radio" checked={amenitiesMode === 'append'} onChange={() => setAmenitiesMode('append')} />
-            <span>Append (add to existing)</span>
+            <span>{t('bulk.append')}</span>
           </label>
           <label className="flex items-center gap-1 cursor-pointer">
             <input type="radio" checked={amenitiesMode === 'replace'} onChange={() => setAmenitiesMode('replace')} />
-            <span>Replace</span>
+            <span>{t('bulk.replace')}</span>
           </label>
         </div>
         <div className="grid grid-cols-2 gap-1.5 max-h-40 overflow-y-auto pr-1">
@@ -163,6 +133,7 @@ const FieldEditor = ({ field, value, onChange, amenitiesMode, setAmenitiesMode }
 // Public modal component — drives the field state + the bulk-edit POST.
 // ---------------------------------------------------------------------------
 const BulkEditModal = ({ properties, onClose, onSaved, API, auth }) => {
+  const { t } = useTranslation();
   const [titlePrefix, setTitlePrefix] = useState('');
   const [updates, setUpdates] = useState({});
   const [applyMap, setApplyMap] = useState({}); // field => bool
@@ -193,17 +164,17 @@ const BulkEditModal = ({ properties, onClose, onSaved, API, auth }) => {
   const handleSave = async () => {
     const payload = buildPayload();
     if (!payload.title_prefix && Object.keys(payload.updates).length === 0) {
-      toast.error('Pick at least one field to apply');
+      toast.error(t('bulk.pickField'));
       return;
     }
     setSaving(true);
     try {
       const res = await axios.post(`${API}/properties/bulk-edit`, payload, auth);
       const summary = res.data?.summary || {};
-      toast.success(`Updated ${summary.updated || 0} properties`);
+      toast.success(t('bulk.updatedCount', { count: summary.updated || 0 }));
       onSaved(res.data);
     } catch (e) {
-      toast.error(e.response?.data?.detail || 'Bulk edit failed');
+      toast.error(e.response?.data?.detail || t('bulk.bulkEditFailed'));
     } finally {
       setSaving(false);
     }
@@ -214,8 +185,8 @@ const BulkEditModal = ({ properties, onClose, onSaved, API, auth }) => {
       <div className="bg-white w-full md:max-w-3xl md:rounded-2xl shadow-2xl max-h-[92vh] flex flex-col">
         <div className="flex items-center justify-between p-5 border-b border-gray-100">
           <div>
-            <h2 className="text-lg font-bold text-gray-900">Bulk Edit Details</h2>
-            <p className="text-xs text-gray-500 mt-0.5">{properties.length} properties · only ticked fields are applied</p>
+            <h2 className="text-lg font-bold text-gray-900">{t('bulk.bulkEditDetails')}</h2>
+            <p className="text-xs text-gray-500 mt-0.5">{t('bulk.selectedPropertiesHint', { count: properties.length })}</p>
           </div>
           <button onClick={onClose} className="p-2 rounded-lg hover:bg-gray-100" data-testid="bulk-edit-close">
             <X size={18} />
@@ -224,8 +195,8 @@ const BulkEditModal = ({ properties, onClose, onSaved, API, auth }) => {
 
         <div className="flex-1 overflow-y-auto p-5 space-y-6">
           {FIELD_GROUPS.map(group => (
-            <div key={group.label}>
-              <h3 className="text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-3">{group.label}</h3>
+            <div key={group.labelKey}>
+              <h3 className="text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-3">{t(`bulk.fieldGroups.${group.labelKey}`)}</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 {group.fields.map(f => (
                   <FieldRow
@@ -257,7 +228,7 @@ const BulkEditModal = ({ properties, onClose, onSaved, API, auth }) => {
             className="px-4 py-2 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-100"
             data-testid="bulk-edit-cancel"
           >
-            Cancel
+            {t('admin.cancel')}
           </button>
           <button
             onClick={handleSave}
@@ -266,7 +237,7 @@ const BulkEditModal = ({ properties, onClose, onSaved, API, auth }) => {
             data-testid="bulk-edit-save"
           >
             {saving ? <Loader2 size={14} className="animate-spin" /> : <CheckCircle2 size={14} />}
-            Save & Apply to {properties.length}
+            {t('bulk.saveAndApply', { count: properties.length })}
           </button>
         </div>
       </div>

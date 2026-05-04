@@ -1,4 +1,5 @@
 import React, { useState, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import axios from 'axios';
 import { toast } from 'sonner';
 import {
@@ -13,19 +14,13 @@ import CoverPickerModal from './CoverPickerModal';
 
 /**
  * Bulk Manager — multi-select edit + bulk photo upload across owned properties.
- *
- * Two principal flows, each in its own file for clarity:
- *   • {@link BulkEditModal} — pick a group, choose fields to apply, save once.
- *   • {@link BulkPhotosModal} — fan-out OR per-property photo uploads.
- *
- * After every successful bulk edit we keep the per-property snapshots returned
- * by the backend so the host can hit "Undo" to revert exactly those fields.
  */
 
-const RT_FILTERS = [{ v: '', label: 'All types' }, ...RENTAL_TYPES];
-
 const BulkManagerTab = ({ properties, onRefresh, API, token }) => {
+  const { t } = useTranslation();
   const auth = useMemo(() => ({ headers: { Authorization: `Bearer ${token}` } }), [token]);
+
+  const RT_FILTERS = useMemo(() => [{ v: '', label: t('bulk.allTypes') }, ...RENTAL_TYPES], [t]);
 
   const [search, setSearch] = useState('');
   const [rentalFilter, setRentalFilter] = useState('');
@@ -104,9 +99,9 @@ const BulkManagerTab = ({ properties, onRefresh, API, token }) => {
       );
       setUndoStack(prev => prev.slice(0, -1));
       onRefresh && onRefresh();
-      toast.success(`Reverted last bulk edit (${ids.length} properties)`);
+      toast.success(t('bulk.revertLast', { count: ids.length }));
     } catch (e) {
-      toast.error(e.response?.data?.detail || 'Undo failed');
+      toast.error(e.response?.data?.detail || t('bulk.undoFailed'));
     }
   };
 
@@ -124,7 +119,7 @@ const BulkManagerTab = ({ properties, onRefresh, API, token }) => {
                 type="text"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                placeholder="Search title, area, address…"
+                placeholder={t('bulk.searchPlaceholder')}
                 className="w-full pl-9 pr-3 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#1E6A6A]/30 focus:border-[#1E6A6A] text-sm"
                 data-testid="bulk-search-input"
               />
@@ -143,7 +138,7 @@ const BulkManagerTab = ({ properties, onRefresh, API, token }) => {
               className="hidden md:block px-3 py-2 rounded-lg border border-gray-200 bg-white focus:outline-none focus:ring-2 focus:ring-[#1E6A6A]/30 text-sm max-w-[200px]"
               data-testid="bulk-area-filter"
             >
-              <option value="">All areas</option>
+              <option value="">{t('bulk.allAreas')}</option>
               {LOCATION_OPTIONS.map(g => (
                 <optgroup key={g.city} label={g.city}>
                   {g.neighborhoods.map(n => (
@@ -159,7 +154,7 @@ const BulkManagerTab = ({ properties, onRefresh, API, token }) => {
               className="text-sm font-medium px-3 py-2 rounded-lg text-[#1E6A6A] hover:bg-[#1E6A6A]/5 transition-colors"
               data-testid="bulk-select-all"
             >
-              {allFilteredSelected ? 'Clear all visible' : 'Select all visible'}
+              {allFilteredSelected ? t('bulk.clearAllVisible') : t('bulk.selectAllVisible')}
             </button>
             {undoStack.length > 0 && (
               <button
@@ -167,7 +162,7 @@ const BulkManagerTab = ({ properties, onRefresh, API, token }) => {
                 className="text-sm font-medium px-3 py-2 rounded-lg flex items-center gap-1.5 text-amber-700 bg-amber-50 hover:bg-amber-100 border border-amber-200"
                 data-testid="bulk-undo-button"
               >
-                <Undo2 size={14} /> Undo last
+                <Undo2 size={14} /> {t('bulk.undoLast')}
               </button>
             )}
           </div>
@@ -176,9 +171,9 @@ const BulkManagerTab = ({ properties, onRefresh, API, token }) => {
         <div className="flex items-center justify-between mt-4 pt-4 border-t border-gray-100">
           <div className="text-sm text-gray-600">
             <span className="font-semibold text-[#1E6A6A]" data-testid="bulk-selected-count">{selected.size}</span>
-            {' '}selected{filtered.length !== (properties || []).length ? ` · ${filtered.length} visible` : ''}
+            {' '}{t('bulk.selected')}{filtered.length !== (properties || []).length ? ` · ${t('bulk.visibleCount', { count: filtered.length })}` : ''}
             {' · '}
-            <span className="text-gray-400">{(properties || []).length} total</span>
+            <span className="text-gray-400">{t('bulk.totalCount', { count: (properties || []).length })}</span>
           </div>
           <div className="flex items-center gap-2">
             <button
@@ -187,7 +182,7 @@ const BulkManagerTab = ({ properties, onRefresh, API, token }) => {
               className="text-sm font-semibold px-4 py-2 rounded-lg flex items-center gap-2 bg-[#1E6A6A] text-white hover:bg-[#155454] disabled:bg-gray-200 disabled:text-gray-400 disabled:cursor-not-allowed transition-colors"
               data-testid="bulk-open-edit"
             >
-              <Layers size={16} /> Bulk Edit Details
+              <Layers size={16} /> {t('bulk.bulkEditDetails')}
             </button>
             <button
               onClick={() => setPhotoOpen(true)}
@@ -195,7 +190,7 @@ const BulkManagerTab = ({ properties, onRefresh, API, token }) => {
               className="text-sm font-semibold px-4 py-2 rounded-lg flex items-center gap-2 bg-[#D4AF37] text-white hover:bg-[#b8962f] disabled:bg-gray-200 disabled:text-gray-400 disabled:cursor-not-allowed transition-colors"
               data-testid="bulk-open-photos"
             >
-              <ImageIcon size={16} /> Bulk Add Photos
+              <ImageIcon size={16} /> {t('bulk.bulkAddPhotos')}
             </button>
           </div>
         </div>
@@ -205,17 +200,17 @@ const BulkManagerTab = ({ properties, onRefresh, API, token }) => {
       <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden">
         <div className="hidden md:grid grid-cols-[40px_60px_1fr_140px_180px_120px_120px] gap-3 px-4 py-3 border-b border-gray-100 text-[11px] font-semibold text-gray-500 uppercase tracking-wider bg-gray-50">
           <div></div>
-          <div>Cover</div>
-          <div>Title</div>
-          <div>Type</div>
-          <div>Area</div>
-          <div className="text-right">Price</div>
-          <div className="text-right">Photos</div>
+          <div>{t('bulk.cover')}</div>
+          <div>{t('bulk.title')}</div>
+          <div>{t('bulk.type')}</div>
+          <div>{t('bulk.area')}</div>
+          <div className="text-right">{t('bulk.price')}</div>
+          <div className="text-right">{t('bulk.photosColumn')}</div>
         </div>
         {filtered.length === 0 ? (
           <div className="px-6 py-16 text-center text-gray-500">
             <Filter size={28} className="mx-auto mb-2 text-gray-300" />
-            <p className="text-sm">No properties match these filters.</p>
+            <p className="text-sm">{t('bulk.noMatches')}</p>
           </div>
         ) : filtered.map(p => {
           const isSelected = selected.has(p.id);
@@ -246,7 +241,7 @@ const BulkManagerTab = ({ properties, onRefresh, API, token }) => {
                 onClick={(e) => { e.stopPropagation(); if ((p.images?.length || 0) > 0) setCoverPickerProp(p); }}
                 className={`relative w-12 h-12 rounded-md overflow-hidden bg-gray-100 ${(p.images?.length || 0) > 0 ? 'cursor-pointer ring-1 ring-gray-200 hover:ring-[#D4AF37]' : ''}`}
                 data-testid={`bulk-cover-${p.id}`}
-                title={(p.images?.length || 0) > 0 ? 'Click to change cover' : 'No photos yet'}
+                title={(p.images?.length || 0) > 0 ? t('bulk.chooseCover') : t('bulk.noPhotos')}
               >
                 {coverSrc ? (
                   <img src={coverSrc} alt="" className="w-full h-full object-cover" />
@@ -257,11 +252,11 @@ const BulkManagerTab = ({ properties, onRefresh, API, token }) => {
                 )}
               </div>
               <div className="min-w-0">
-                <div className="font-medium text-sm text-gray-900 truncate">{p.title || '(untitled)'}</div>
-                <div className="text-xs text-gray-500 truncate md:hidden">{p.area || '—'} · {price} · {(p.images?.length) || 0} photos</div>
+                <div className="font-medium text-sm text-gray-900 truncate">{p.title || t('bulk.untitled')}</div>
+                <div className="text-xs text-gray-500 truncate md:hidden">{p.area || t('bulk.emDash')} · {price} · {(p.images?.length) || 0} {t('bulk.photos').toLowerCase()}</div>
               </div>
               <div className="hidden md:block text-sm text-gray-700 capitalize">{p.rental_type?.replace('-', ' ')}</div>
-              <div className="hidden md:block text-sm text-gray-700 truncate">{p.area || '—'}</div>
+              <div className="hidden md:block text-sm text-gray-700 truncate">{p.area || t('bulk.emDash')}</div>
               <div className="hidden md:block text-sm text-gray-700 text-right">{price}</div>
               <div onClick={(e) => e.stopPropagation()} className="hidden md:flex items-center justify-end gap-2 text-sm text-gray-500">
                 <span>{(p.images?.length) || 0}</span>
@@ -270,9 +265,9 @@ const BulkManagerTab = ({ properties, onRefresh, API, token }) => {
                     onClick={() => setCoverPickerProp(p)}
                     className="px-2 py-0.5 rounded-md text-[11px] font-medium text-[#D4AF37] border border-[#D4AF37]/40 hover:bg-[#D4AF37]/10 flex items-center gap-1"
                     data-testid={`bulk-set-cover-${p.id}`}
-                    title="Choose cover photo"
+                    title={t('bulk.chooseCoverPhoto')}
                   >
-                    <Star size={11} /> Cover
+                    <Star size={11} /> {t('bulk.cover')}
                   </button>
                 )}
               </div>
@@ -284,15 +279,15 @@ const BulkManagerTab = ({ properties, onRefresh, API, token }) => {
       {/* Floating selection bar (mobile) */}
       {selected.size > 0 && (
         <div className="fixed bottom-4 left-4 right-4 md:hidden z-40 bg-[#1E6A6A] text-white rounded-2xl shadow-2xl p-3 flex items-center gap-2">
-          <span className="text-sm font-semibold flex-1">{selected.size} selected</span>
-          <button onClick={clearSelection} className="p-2 rounded-lg hover:bg-white/10" aria-label="Clear">
+          <span className="text-sm font-semibold flex-1">{t('bulk.selectedCount', { count: selected.size })}</span>
+          <button onClick={clearSelection} className="p-2 rounded-lg hover:bg-white/10" aria-label={t('bulk.clear')}>
             <X size={16} />
           </button>
           <button onClick={() => setEditOpen(true)} className="px-3 py-2 rounded-lg bg-white text-[#1E6A6A] text-sm font-semibold flex items-center gap-1">
-            <Layers size={14} /> Edit
+            <Layers size={14} /> {t('bulk.edit')}
           </button>
           <button onClick={() => setPhotoOpen(true)} className="px-3 py-2 rounded-lg bg-[#D4AF37] text-white text-sm font-semibold flex items-center gap-1">
-            <ImageIcon size={14} /> Photos
+            <ImageIcon size={14} /> {t('bulk.photos')}
           </button>
         </div>
       )}

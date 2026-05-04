@@ -1,4 +1,5 @@
 import React, { useState, useContext } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Eye, Home, Users, MessageCircle, FileText, Settings } from 'lucide-react';
 import { API, AuthContext } from '../App';
 import { useApiSWR } from '../hooks/useApiSWR';
@@ -10,26 +11,20 @@ import ChatsTab from '../components/admin/ChatsTab';
 import ServicesTab from '../components/admin/ServicesTab';
 import SettingsTab from '../components/admin/SettingsTab';
 
-const TABS = [
-  { key: 'overview', label: 'Overview', icon: Eye },
-  { key: 'listings', label: 'Listings', icon: Home },
-  { key: 'users', label: 'Users', icon: Users },
-  { key: 'chats', label: 'Chats', icon: MessageCircle },
-  { key: 'services', label: 'Document Services', icon: FileText },
-  { key: 'settings', label: 'Site Settings', icon: Settings },
+const TAB_KEYS = [
+  { key: 'overview', labelKey: 'admin.overview', icon: Eye },
+  { key: 'listings', labelKey: 'admin.listings', icon: Home },
+  { key: 'users', labelKey: 'admin.users', icon: Users },
+  { key: 'chats', labelKey: 'admin.chats', icon: MessageCircle },
+  { key: 'services', labelKey: 'admin.services', icon: FileText },
+  { key: 'settings', labelKey: 'admin.settings', icon: Settings },
 ];
 
 /**
  * Super Admin Dashboard — top-level shell.
- * Owns:
- *  - the `dashboard` summary used by the loading gate + Overview tab
- *  - the `emailHealth` summary used by the Overview tab
- *  - the active-tab state
- *
- * Each tab is a self-contained component under /components/admin/ that owns
- * its own data fetching, state, and actions.
  */
 const AdminDashboard = () => {
+  const { t } = useTranslation();
   const { token } = useContext(AuthContext);
   const [activeTab, setActiveTab] = useState('overview');
 
@@ -38,9 +33,6 @@ const AdminDashboard = () => {
   );
   const { data: emailHealth } = useApiSWR(`${API}/admin/email-health`, token);
 
-  // Open one SSE channel for the lifetime of this page; remote admin writes
-  // (mark-booked, delete-user, save-settings, etc.) push invalidation events
-  // that auto-refresh the matching tab in this browser.
   useAdminLiveEvents(token);
 
   if (!dashboard) {
@@ -55,12 +47,12 @@ const AdminDashboard = () => {
     <div className="min-h-screen bg-[#fafafa]" data-testid="admin-dashboard-page">
       <div className="max-w-7xl mx-auto px-6 pt-20 pb-8">
         <h1 className="text-4xl font-bold mb-8" style={{ fontFamily: 'Playfair Display' }} data-testid="admin-title">
-          Super Admin Dashboard
+          {t('admin.title')}
         </h1>
 
         {/* Tab navigation */}
         <div className="flex flex-wrap gap-2 mb-8 border-b border-[#E5E5E5] pb-4" data-testid="admin-tabs">
-          {TABS.map(tab => {
+          {TAB_KEYS.map(tab => {
             const Icon = tab.icon;
             return (
               <button
@@ -70,7 +62,7 @@ const AdminDashboard = () => {
                 data-testid={`admin-tab-${tab.key}`}
               >
                 <Icon size={16} />
-                {tab.label}
+                {t(tab.labelKey)}
               </button>
             );
           })}

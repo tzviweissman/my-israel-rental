@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { Home, Eye, FileText, Users, MessageCircle, Mail, CheckCircle, AlertTriangle, Ban } from 'lucide-react';
 
 /**
@@ -7,19 +8,20 @@ import { Home, Eye, FileText, Users, MessageCircle, Mail, CheckCircle, AlertTria
  * `dashboard` for its initial loading-spinner gate.
  */
 export const OverviewTab = ({ dashboard, emailHealth }) => {
+  const { t } = useTranslation();
   return (
     <div data-testid="admin-overview-section">
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-10">
         {[
-          { label: 'Active Listings', value: dashboard.active_listings, icon: Home },
-          { label: 'Total Views', value: dashboard.total_views, icon: Eye },
-          { label: 'Inquiries', value: dashboard.total_inquiries, icon: FileText },
-          { label: 'Total Users', value: dashboard.total_users, icon: Users },
-          { label: 'Pending Services', value: dashboard.pending_services || 0, icon: MessageCircle },
+          { label: t('admin.activeListings'), key: 'active-listings', value: dashboard.active_listings, icon: Home },
+          { label: t('admin.totalViews'), key: 'total-views', value: dashboard.total_views, icon: Eye },
+          { label: t('admin.inquiries'), key: 'inquiries', value: dashboard.total_inquiries, icon: FileText },
+          { label: t('admin.totalUsers'), key: 'total-users', value: dashboard.total_users, icon: Users },
+          { label: t('admin.pendingServices'), key: 'pending-services', value: dashboard.pending_services || 0, icon: MessageCircle },
         ].map(stat => {
           const Icon = stat.icon;
           return (
-            <div key={stat.label} className="bg-white p-5 rounded-xl border border-[#E5E5E5]" data-testid={`stat-${stat.label.toLowerCase().replace(/\s/g, '-')}`}>
+            <div key={stat.key} className="bg-white p-5 rounded-xl border border-[#E5E5E5]" data-testid={`stat-${stat.key}`}>
               <div className="flex items-center gap-3">
                 <div className="p-2 rounded-lg" style={{ backgroundColor: '#1E6A6A' }}>
                   <Icon size={18} color="#D4AF37" />
@@ -34,16 +36,16 @@ export const OverviewTab = ({ dashboard, emailHealth }) => {
         })}
       </div>
 
-      <h2 className="text-xl font-bold mb-4" style={{ fontFamily: 'Playfair Display' }}>Recent Listings</h2>
+      <h2 className="text-xl font-bold mb-4" style={{ fontFamily: 'Playfair Display' }}>{t('admin.recentListings')}</h2>
       <div className="bg-white rounded-xl border border-[#E5E5E5] overflow-hidden">
         <table className="w-full">
           <thead className="bg-gray-50">
             <tr>
-              <th className="px-5 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Title</th>
-              <th className="px-5 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Area</th>
-              <th className="px-5 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Type</th>
-              <th className="px-5 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Price</th>
-              <th className="px-5 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Views</th>
+              <th className="px-5 py-3 text-left text-xs font-semibold text-gray-600 uppercase">{t('admin.colTitle')}</th>
+              <th className="px-5 py-3 text-left text-xs font-semibold text-gray-600 uppercase">{t('admin.colArea')}</th>
+              <th className="px-5 py-3 text-left text-xs font-semibold text-gray-600 uppercase">{t('admin.colType')}</th>
+              <th className="px-5 py-3 text-left text-xs font-semibold text-gray-600 uppercase">{t('admin.colPrice')}</th>
+              <th className="px-5 py-3 text-left text-xs font-semibold text-gray-600 uppercase">{t('admin.colViews')}</th>
             </tr>
           </thead>
           <tbody>
@@ -65,40 +67,40 @@ export const OverviewTab = ({ dashboard, emailHealth }) => {
           <div className="flex items-center gap-2 mb-4">
             <Mail size={18} className="text-[#1E6A6A]" />
             <h2 className="text-xl font-bold" style={{ fontFamily: 'Playfair Display' }}>
-              Email Deliverability <span className="text-sm font-normal text-gray-500">(last {emailHealth.window_days} days)</span>
+              {t('admin.emailDeliverability')} <span className="text-sm font-normal text-gray-500">{t('admin.lastNDays', { days: emailHealth.window_days })}</span>
             </h2>
           </div>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
             <div className="bg-white p-4 rounded-xl border border-[#E5E5E5]" data-testid="email-delivered">
               <div className="flex items-center gap-2 mb-1">
                 <CheckCircle size={14} className="text-green-600" />
-                <span className="text-xs text-gray-500 uppercase tracking-wide">Delivered</span>
+                <span className="text-xs text-gray-500 uppercase tracking-wide">{t('admin.delivered')}</span>
               </div>
               <p className="text-2xl font-bold">{emailHealth.delivered}</p>
             </div>
             <div className="bg-white p-4 rounded-xl border border-[#E5E5E5]" data-testid="email-bounced">
               <div className="flex items-center gap-2 mb-1">
                 <AlertTriangle size={14} className="text-amber-600" />
-                <span className="text-xs text-gray-500 uppercase tracking-wide">Bounced</span>
+                <span className="text-xs text-gray-500 uppercase tracking-wide">{t('admin.bounced')}</span>
               </div>
               <p className="text-2xl font-bold">{emailHealth.bounced}</p>
             </div>
             <div className="bg-white p-4 rounded-xl border border-[#E5E5E5]" data-testid="email-complained">
               <div className="flex items-center gap-2 mb-1">
                 <Ban size={14} className="text-red-600" />
-                <span className="text-xs text-gray-500 uppercase tracking-wide">Spam complaints</span>
+                <span className="text-xs text-gray-500 uppercase tracking-wide">{t('admin.spamComplaints')}</span>
               </div>
               <p className="text-2xl font-bold">{emailHealth.complained}</p>
             </div>
             <div className="bg-white p-4 rounded-xl border border-[#E5E5E5]" data-testid="email-delivery-rate">
               <div className="flex items-center gap-2 mb-1">
-                <span className="text-xs text-gray-500 uppercase tracking-wide">Delivery rate</span>
+                <span className="text-xs text-gray-500 uppercase tracking-wide">{t('admin.deliveryRate')}</span>
               </div>
               <p className="text-2xl font-bold">
                 {emailHealth.delivery_rate_pct !== null ? `${emailHealth.delivery_rate_pct}%` : '—'}
               </p>
               {emailHealth.suppressed_users > 0 && (
-                <p className="text-xs text-red-500 mt-1">{emailHealth.suppressed_users} user(s) suppressed</p>
+                <p className="text-xs text-red-500 mt-1">{t('admin.usersSuppressed', { count: emailHealth.suppressed_users })}</p>
               )}
             </div>
           </div>
@@ -106,7 +108,7 @@ export const OverviewTab = ({ dashboard, emailHealth }) => {
           {emailHealth.recent_events?.length > 0 && (
             <div className="bg-white rounded-xl border border-[#E5E5E5] overflow-hidden">
               <div className="px-5 py-3 border-b border-[#E5E5E5] bg-gray-50">
-                <p className="text-xs font-semibold text-gray-600 uppercase">Recent events</p>
+                <p className="text-xs font-semibold text-gray-600 uppercase">{t('admin.recentEvents')}</p>
               </div>
               <div className="divide-y divide-[#E5E5E5] max-h-80 overflow-y-auto">
                 {emailHealth.recent_events.slice(0, 15).map(ev => {

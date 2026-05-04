@@ -1,19 +1,13 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { CalendarX, X } from 'lucide-react';
 import { toast } from 'sonner';
 
 /**
  * Modal for the super-admin "Mark as booked" action.
- *
- * Props:
- *  - open: bool
- *  - target: null | { mode: 'single', id } | { mode: 'bulk' }
- *  - selectedCount: number (only used in bulk mode copy)
- *  - saving: bool
- *  - onClose(): void
- *  - onSubmit({ start_date, end_date, indefinite }): Promise<void>
  */
 export const MarkAsBookedModal = ({ open, target, selectedCount = 0, saving = false, onClose, onSubmit }) => {
+  const { t } = useTranslation();
   const [blockStart, setBlockStart] = useState('');
   const [blockEnd, setBlockEnd] = useState('');
   const [blockIndefinite, setBlockIndefinite] = useState(false);
@@ -47,6 +41,8 @@ export const MarkAsBookedModal = ({ open, target, selectedCount = 0, saving = fa
     });
   };
 
+  const noun = selectedCount === 1 ? t('admin.propertyWord') : t('admin.propertiesWord');
+
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4"
@@ -62,12 +58,12 @@ export const MarkAsBookedModal = ({ open, target, selectedCount = 0, saving = fa
         </button>
         <div className="flex items-center gap-2 mb-1">
           <CalendarX size={20} className="text-amber-600" />
-          <h2 className="text-lg font-bold">Mark as booked</h2>
+          <h2 className="text-lg font-bold">{t('admin.markAsBookedTitle')}</h2>
         </div>
         <p className="text-xs text-gray-500 mb-5">
           {target?.mode === 'bulk'
-            ? `Block ${selectedCount} selected propert${selectedCount === 1 ? 'y' : 'ies'} from appearing in renter date searches.`
-            : 'Block this property from appearing in renter date searches. Existing bookings are kept unchanged.'}
+            ? t('admin.markBookedDescBulk', { count: selectedCount, noun })
+            : t('admin.markBookedDescSingle')}
         </p>
 
         <label className="flex items-center gap-2 mb-4 cursor-pointer">
@@ -77,12 +73,12 @@ export const MarkAsBookedModal = ({ open, target, selectedCount = 0, saving = fa
             onChange={e => setBlockIndefinite(e.target.checked)}
             data-testid="block-indefinite-checkbox"
           />
-          <span className="text-sm font-medium">Block indefinitely (until removed)</span>
+          <span className="text-sm font-medium">{t('admin.blockIndefinitely')}</span>
         </label>
 
         <div className={`grid grid-cols-2 gap-3 mb-5 ${blockIndefinite ? 'opacity-40' : ''}`}>
           <div>
-            <label className="block text-xs font-medium text-gray-600 mb-1">Start date</label>
+            <label className="block text-xs font-medium text-gray-600 mb-1">{t('admin.startDate')}</label>
             <input
               type="date"
               value={blockStart}
@@ -93,7 +89,7 @@ export const MarkAsBookedModal = ({ open, target, selectedCount = 0, saving = fa
             />
           </div>
           <div>
-            <label className="block text-xs font-medium text-gray-600 mb-1">End date</label>
+            <label className="block text-xs font-medium text-gray-600 mb-1">{t('admin.endDate')}</label>
             <input
               type="date"
               value={blockEnd}
@@ -111,7 +107,7 @@ export const MarkAsBookedModal = ({ open, target, selectedCount = 0, saving = fa
             className="px-4 py-2 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-100"
             data-testid="cancel-mark-booked-btn"
           >
-            Cancel
+            {t('admin.cancel')}
           </button>
           <button
             onClick={handleSubmit}
@@ -119,7 +115,7 @@ export const MarkAsBookedModal = ({ open, target, selectedCount = 0, saving = fa
             className="px-4 py-2 rounded-lg text-sm font-semibold text-white bg-black hover:bg-gray-800 disabled:opacity-50"
             data-testid="confirm-mark-booked-btn"
           >
-            {saving ? 'Saving…' : 'Mark as booked'}
+            {saving ? t('admin.saving') : t('admin.markAsBooked')}
           </button>
         </div>
       </div>

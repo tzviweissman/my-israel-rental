@@ -1,16 +1,13 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import axios from 'axios';
 import { toast } from 'sonner';
 import { Search, Ban, CheckCircle, Trash2 } from 'lucide-react';
 import { API } from '../../App';
 import { useApiSWR } from '../../hooks/useApiSWR';
 
-/**
- * Super Admin → Users tab.
- * Owns its own state: users list, search, row actions.
- * Calls onStatsChange after mutations so the Overview tab counts refresh.
- */
 export const UsersTab = ({ token, onStatsChange }) => {
+  const { t } = useTranslation();
   const headers = { Authorization: `Bearer ${token}` };
 
   const { data: users, refresh: fetchUsers } = useApiSWR(
@@ -32,11 +29,11 @@ export const UsersTab = ({ token, onStatsChange }) => {
   const deleteUser = (userId) => {
     toast.custom((tid) => (
       <div className="bg-white rounded-xl shadow-xl border border-gray-200 p-4 w-80">
-        <p className="text-sm font-semibold text-gray-800 mb-1">Delete this user?</p>
-        <p className="text-xs text-gray-500 mb-3">All of their properties will be deleted too. This cannot be undone.</p>
+        <p className="text-sm font-semibold text-gray-800 mb-1">{t('admin.deleteUserTitle')}</p>
+        <p className="text-xs text-gray-500 mb-3">{t('admin.deleteUserDesc')}</p>
         <div className="flex gap-2 justify-end">
           <button onClick={() => toast.dismiss(tid)} className="px-3 py-1.5 rounded-lg text-xs font-medium text-gray-600 hover:bg-gray-100">
-            Cancel
+            {t('admin.cancel')}
           </button>
           <button
             onClick={async () => {
@@ -51,7 +48,7 @@ export const UsersTab = ({ token, onStatsChange }) => {
             className="px-3 py-1.5 rounded-lg text-xs font-semibold text-white bg-red-500 hover:bg-red-600"
             data-testid={`confirm-delete-user-${userId}`}
           >
-            Delete
+            {t('admin.deleteAction')}
           </button>
         </div>
       </div>
@@ -71,23 +68,23 @@ export const UsersTab = ({ token, onStatsChange }) => {
             type="text"
             value={searchTerm}
             onChange={e => setSearchTerm(e.target.value)}
-            placeholder="Search users by name or email..."
+            placeholder={t('admin.searchUsers')}
             className="w-full pl-9 pr-4 py-2 rounded-lg border border-[#E5E5E5] text-sm focus:outline-none focus:ring-2 focus:ring-black/20"
             data-testid="users-search-input"
           />
         </div>
-        <span className="text-sm text-gray-500">{filteredUsers.length} users</span>
+        <span className="text-sm text-gray-500">{t('admin.usersCount', { count: filteredUsers.length })}</span>
       </div>
       <div className="bg-white rounded-xl border border-[#E5E5E5] overflow-hidden">
         <table className="w-full">
           <thead className="bg-gray-50">
             <tr>
-              <th className="px-5 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Name</th>
-              <th className="px-5 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Email</th>
-              <th className="px-5 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Role</th>
-              <th className="px-5 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Status</th>
-              <th className="px-5 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Joined</th>
-              <th className="px-5 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Actions</th>
+              <th className="px-5 py-3 text-left text-xs font-semibold text-gray-600 uppercase">{t('admin.colName')}</th>
+              <th className="px-5 py-3 text-left text-xs font-semibold text-gray-600 uppercase">{t('admin.colEmail')}</th>
+              <th className="px-5 py-3 text-left text-xs font-semibold text-gray-600 uppercase">{t('admin.colRole')}</th>
+              <th className="px-5 py-3 text-left text-xs font-semibold text-gray-600 uppercase">{t('admin.status')}</th>
+              <th className="px-5 py-3 text-left text-xs font-semibold text-gray-600 uppercase">{t('admin.colJoined')}</th>
+              <th className="px-5 py-3 text-left text-xs font-semibold text-gray-600 uppercase">{t('admin.actions')}</th>
             </tr>
           </thead>
           <tbody>
@@ -109,21 +106,21 @@ export const UsersTab = ({ token, onStatsChange }) => {
                 <td className="px-5 py-3">
                   {u.role !== 'admin' && (
                     <div className="flex items-center gap-1">
-                      <button onClick={() => toggleUserStatus(u.id)} className="p-1.5 rounded hover:bg-gray-100" title={(u.status || 'active') === 'active' ? 'Block' : 'Unblock'} data-testid={`toggle-user-${u.id}`}>
+                      <button onClick={() => toggleUserStatus(u.id)} className="p-1.5 rounded hover:bg-gray-100" title={(u.status || 'active') === 'active' ? t('admin.block') : t('admin.unblock')} data-testid={`toggle-user-${u.id}`}>
                         {(u.status || 'active') === 'active' ? <Ban size={16} className="text-orange-500" /> : <CheckCircle size={16} className="text-green-500" />}
                       </button>
-                      <button onClick={() => deleteUser(u.id)} className="p-1.5 rounded hover:bg-red-50 text-red-500" title="Delete" data-testid={`delete-user-${u.id}`}>
+                      <button onClick={() => deleteUser(u.id)} className="p-1.5 rounded hover:bg-red-50 text-red-500" title={t('admin.deleteTooltip')} data-testid={`delete-user-${u.id}`}>
                         <Trash2 size={16} />
                       </button>
                     </div>
                   )}
-                  {u.role === 'admin' && <span className="text-xs text-gray-400">Protected</span>}
+                  {u.role === 'admin' && <span className="text-xs text-gray-400">{t('admin.protected')}</span>}
                 </td>
               </tr>
             ))}
           </tbody>
         </table>
-        {filteredUsers.length === 0 && <p className="text-center text-gray-400 py-8 text-sm">No users found</p>}
+        {filteredUsers.length === 0 && <p className="text-center text-gray-400 py-8 text-sm">{t('admin.noUsers')}</p>}
       </div>
     </div>
   );
