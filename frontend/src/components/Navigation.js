@@ -521,12 +521,12 @@ const Navigation = () => {
                   {/* Sukkot/Pesach are vacation sub-categories — indented under Vacation */}
                   <button onClick={() => handleNav('/properties/sukkot')} className="w-full flex items-center gap-3 pl-9 pr-3 py-2 rounded-lg text-xs font-medium transition-all duration-150 hover:bg-white/5 group" style={{ color: 'rgba(212,175,55,0.85)' }} data-testid="nav-sukkot">
                     <span className="opacity-60">↳</span>
-                    <span>Sukkot Rentals</span>
+                    <span>{t('filters.sukkotRentals')}</span>
                     <ChevronRight size={12} className="ml-auto opacity-0 group-hover:opacity-60 transition-opacity" />
                   </button>
                   <button onClick={() => handleNav('/properties/pesach')} className="w-full flex items-center gap-3 pl-9 pr-3 py-2 rounded-lg text-xs font-medium transition-all duration-150 hover:bg-white/5 group" style={{ color: 'rgba(212,175,55,0.85)' }} data-testid="nav-pesach">
                     <span className="opacity-60">↳</span>
-                    <span>Pesach Rentals</span>
+                    <span>{t('filters.pesachRentals')}</span>
                     <ChevronRight size={12} className="ml-auto opacity-0 group-hover:opacity-60 transition-opacity" />
                   </button>
                   <button onClick={() => handleNav('/properties/storage')} className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-150 hover:bg-white/5 group" style={{ color: '#D4AF37' }} data-testid="nav-storage">
