@@ -7,13 +7,10 @@ Endpoints (all /api-prefixed by the global api_router):
     GET    /payments/my                  — list the caller's paid orders
     POST   /payments/webhooks/paypal     — PayPal webhook receiver (signed)
 
-Two product types are supported in the same flow:
-    1. product_type="document_service"
-         metadata = { "services": ["arnona_discount", "property_name_change"], "details": {...} }
-         Amount is computed server-side: $150 per single service, $250 for both.
-    2. product_type="sublease_booking"
-         metadata = { "sublease_id": "...", "booking_amount": 1234.56, "currency": "USD" }
-         Amount is computed server-side: 2.5% of booking_amount.
+Only one product type is supported:
+    product_type="document_service"
+        metadata = { "services": ["arnona_discount", "property_name_change"], "details": {...} }
+        Amount is computed server-side: $150 per single service, $250 for both.
 
 All money math is server-authoritative — the frontend cannot dictate the
 capture amount.
@@ -45,9 +42,6 @@ DOCUMENT_SERVICE_PRICE_SINGLE = 150.0
 DOCUMENT_SERVICE_PRICE_BOTH = 250.0
 VALID_DOC_SERVICES = {"arnona_discount", "property_name_change"}
 
-# Sublease service fee rate
-SUBLEASE_SERVICE_FEE_RATE = 0.025  # 2.5 %
-
 
 def _compute_amount(product_type: str, metadata: dict[str, Any]) -> tuple[float, str, str]:
     """Return (amount, currency, description) computed server-side."""
@@ -68,21 +62,6 @@ def _compute_amount(product_type: str, metadata: dict[str, Any]) -> tuple[float,
             amount = DOCUMENT_SERVICE_PRICE_BOTH
             desc = "Document services — Arnona discount + Property name change"
         return amount, "USD", desc
-
-    if product_type == "sublease_booking":
-        try:
-            booking_amount = float(metadata.get("booking_amount") or 0.0)
-        except (TypeError, ValueError):
-            raise HTTPException(400, "Invalid booking_amount") from None
-        currency = str(metadata.get("currency") or "USD").upper()
-        if currency not in {"USD", "ILS"}:
-            raise HTTPException(400, "Unsupported currency")
-        if booking_amount <= 0:
-            raise HTTPException(400, "booking_amount must be positive")
-        fee = round(booking_amount * SUBLEASE_SERVICE_FEE_RATE, 2)
-        if fee < 0.01:
-            raise HTTPException(400, "Computed service fee below minimum")
-        return fee, currency, f"Sublease service fee (2.5%) — order {metadata.get('sublease_id', '')[:8]}"
 
     raise HTTPException(400, f"Unknown product_type: {product_type}")
 
@@ -174,29 +153,6 @@ async def _apply_business_side_effects(order: dict[str, Any]) -> None:
                 "created_at": now_iso,
             }
             await db.document_services.insert_one(service_doc)
-
-    elif product_type == "sublease_booking":
-        booking_id = metadata.get("booking_id")
-        sublease_id = metadata.get("sublease_id")
-        if booking_id:
-            await db.bookings.update_one(
-                {"id": booking_id},
-                {"$set": {
-                    "service_fee_paid": True,
-                    "service_fee_order_id": order["id"],
-                    "service_fee_amount": order["amount"],
-                    "service_fee_currency": order["currency"],
-                }},
-            )
-        elif sublease_id:
-            # Fallback for older flows that only track sublease_id
-            await db.subleases.update_one(
-                {"id": sublease_id},
-                {"$set": {
-                    "service_fee_paid": True,
-                    "service_fee_order_id": order["id"],
-                }},
-            )
 
 
 async def _finalize_captured_order(order_id: str, capture_payload: dict[str, Any]) -> dict[str, Any] | None:

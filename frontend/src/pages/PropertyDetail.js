@@ -19,8 +19,6 @@ const parseLocalDate = (dateStr) => {
   return new Date(y, m - 1, d);
 };
 
-import SubleaseFeePayModal from '../components/SubleaseFeePayModal';
-
 const PropertyDetail = () => {
   const { id } = useParams();
   const [searchParams] = useSearchParams();
@@ -48,8 +46,6 @@ const PropertyDetail = () => {
   // underlying property's price in the booking sidebar.
   const [sublease, setSublease] = useState(null);
   const [calendarMonth, setCalendarMonth] = useState(new Date());
-  // Post-booking sublease-fee modal state
-  const [feeModal, setFeeModal] = useState({ open: false, booking: null, total: 0, currency: 'USD' });
 
   // Keep the calendar's opening month anchored to the most relevant date
   // (sublease window start > property availability > today) so the user
@@ -212,7 +208,7 @@ const PropertyDetail = () => {
     // Contract will be sent after owner accepts the booking
 
     try {
-      const res = await axios.post(`${API}/bookings`, {
+      await axios.post(`${API}/bookings`, {
         property_id: id,
         ...bookingData,
         contract_signed: false, // Will be signed after owner accepts
@@ -227,23 +223,6 @@ const PropertyDetail = () => {
       setShowBooking(false);
       setSignatureData(null);
       setShowSignatureModal(false);
-
-      // For sublease bookings, prompt the user to pay the 2.5% service fee.
-      const createdBooking = res.data;
-      if (sublease && createdBooking?.id) {
-        const nights = dateRange?.from && dateRange?.to
-          ? Math.max(1, Math.ceil((dateRange.to - dateRange.from) / (1000 * 60 * 60 * 24)))
-          : 1;
-        const total = sublease.price_type === 'per_night'
-          ? Number(sublease.price || 0) * nights
-          : Number(sublease.price || 0);
-        setFeeModal({
-          open: true,
-          booking: { id: createdBooking.id, sublease_id: sublease.id },
-          total,
-          currency: sublease.currency || 'USD',
-        });
-      }
     } catch (error) {
       toast.error(error.response?.data?.detail || 'Failed to create booking');
     }
@@ -1100,18 +1079,6 @@ const PropertyDetail = () => {
           </div>
         </div>
       )}
-      <SubleaseFeePayModal
-        open={feeModal.open}
-        booking={feeModal.booking}
-        bookingAmount={feeModal.total}
-        currency={feeModal.currency}
-        onClose={(result) => {
-          setFeeModal((f) => ({ ...f, open: false }));
-          if (result?.captured) {
-            toast.success('Service fee paid — your booking is fully secured.');
-          }
-        }}
-      />
     </div>
   );
 };
