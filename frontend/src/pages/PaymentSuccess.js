@@ -1,8 +1,66 @@
 import React, { useContext, useEffect, useState } from 'react';
 import { useSearchParams, useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
-import { CheckCircle2, Loader2, ArrowRight, Receipt } from 'lucide-react';
+import { CheckCircle2, Loader2, ArrowRight, Receipt, MessageCircle } from 'lucide-react';
 import { API, AuthContext } from '../App';
+
+// Same number the global floating WhatsAppButton uses.
+const WHATSAPP_NUMBER = '972553225141';
+
+// Per-service info we ask the customer to send so we can file the form.
+// Mirrors backend SERVICE_REQUIRED_INFO in routes/payments.py.
+const SERVICE_CHECKLIST = {
+  kitzvat_yeladim: {
+    label: 'Kitzvat Yeladim (Child Stipend)',
+    items: [
+      "Parent's full name and Teudat Zehut (ID)",
+      "Each child's full name and date of birth",
+      'Bank account details (bank, branch, account number) for the deposit',
+      "A clear photo of the parent's Teudat Zehut",
+    ],
+  },
+  maanak_leidah: {
+    label: 'Maanak Leidah (Birth Grant)',
+    items: [
+      "Mother's full name and Teudat Zehut (ID)",
+      'Hospital discharge / birth confirmation document',
+      'Bank account details (bank, branch, account number)',
+    ],
+  },
+  birth_expenses: {
+    label: 'Birth expenses',
+    items: [
+      "Claimant's full name and Teudat Zehut (ID)",
+      "Proof of the baby's birth (birth certificate or hospital discharge)",
+      "Receipts / invoices for the birth-related expenses you're claiming",
+      'Bank account details (bank, branch, account number)',
+    ],
+  },
+};
+
+function buildWhatsAppMessage(order) {
+  const services = (order.metadata?.services || []).filter(s => SERVICE_CHECKLIST[s]);
+  if (!services.length) return '';
+  const orderShort = order.id.slice(0, 8).toUpperCase();
+  const lines = [
+    `Hi! I just completed payment for Bituach Leumi services.`,
+    `Order ID: ${orderShort}`,
+    `Amount: $${Number(order.amount).toFixed(2)} ${order.currency}`,
+    '',
+    `Services purchased:`,
+    ...services.map(s => `• ${SERVICE_CHECKLIST[s].label}`),
+    '',
+    `Here are the details you need from me:`,
+  ];
+  services.forEach(s => {
+    lines.push('');
+    lines.push(`*${SERVICE_CHECKLIST[s].label}*`);
+    SERVICE_CHECKLIST[s].items.forEach(item => {
+      lines.push(`- ${item}: `);
+    });
+  });
+  return lines.join('\n');
+}
 
 /**
  * Shown after a PayPal redirect (return_url).
@@ -79,6 +137,15 @@ const PaymentSuccess = () => {
   const currencySymbol = order.currency === 'ILS' ? '₪' : '$';
   const statusLabel = order.status === 'captured' ? 'Paid' : (order.status || 'Pending').replace(/_/g, ' ');
 
+  // For Bituach Leumi orders show a 1-tap WhatsApp deeplink pre-filled with
+  // the order id + per-service checklist so the customer can hand off the
+  // info to us right away.
+  const isDocumentService = order.product_type === 'document_service';
+  const services = (order.metadata?.services || []).filter(s => SERVICE_CHECKLIST[s]);
+  const whatsappUrl = isDocumentService && services.length
+    ? `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(buildWhatsAppMessage(order))}`
+    : null;
+
   return (
     <div className="min-h-screen bg-[#fafafa] pt-24 pb-16 px-4" data-testid="payment-success-page">
       <div className="max-w-xl mx-auto">
@@ -136,6 +203,36 @@ const PaymentSuccess = () => {
             >
               Back to Dashboard <ArrowRight size={16} />
             </button>
+
+            {whatsappUrl && (
+              <div className="mt-6 rounded-2xl border border-[#25D366]/30 bg-gradient-to-br from-[#25D366]/5 to-emerald-50 p-5" data-testid="whatsapp-cta">
+                <div className="flex items-start gap-3 mb-3">
+                  <div className="w-10 h-10 rounded-xl bg-[#25D366] text-white flex items-center justify-center flex-shrink-0">
+                    <MessageCircle size={20} />
+                  </div>
+                  <div>
+                    <h3 className="text-sm font-bold text-gray-900">Next step — send us your details on WhatsApp</h3>
+                    <p className="text-xs text-gray-600 mt-0.5">
+                      Tap below — your order ID and a checklist will be pre-filled. Just fill in the values and hit send.
+                    </p>
+                  </div>
+                </div>
+                <a
+                  href={whatsappUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-[#25D366] hover:bg-[#1fb558] text-white font-semibold text-sm transition-colors"
+                  data-testid="whatsapp-handoff-btn"
+                >
+                  <MessageCircle size={18} />
+                  Open WhatsApp with my checklist
+                </a>
+                <p className="text-[11px] text-gray-500 text-center mt-2.5">
+                  We've also emailed you the full checklist as a backup.
+                </p>
+              </div>
+            )}
+
             <p className="text-center text-xs text-gray-400 mt-4">
               Need help? <Link to="/" className="text-[#1E6A6A] hover:underline">Contact us</Link>
             </p>
