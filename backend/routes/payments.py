@@ -37,10 +37,22 @@ FRONTEND_URL = os.environ.get("FRONTEND_URL", "").rstrip("/")
 PAYPAL_ADMIN_EMAIL = os.environ.get("PAYPAL_ADMIN_EMAIL", "admin@rental.com")
 PAYPAL_WEBHOOK_ID = os.environ.get("PAYPAL_WEBHOOK_ID", "")
 
-# Flat prices for document services (USD)
+# Flat prices for Bituach Leumi benefit services (USD)
+# - 1 service  = $150
+# - 2 services = $250
+# - 3 services = $250 (same bundle cap)
 DOCUMENT_SERVICE_PRICE_SINGLE = 150.0
-DOCUMENT_SERVICE_PRICE_BOTH = 250.0
-VALID_DOC_SERVICES = {"arnona_discount", "property_name_change"}
+DOCUMENT_SERVICE_PRICE_BUNDLE = 250.0
+VALID_DOC_SERVICES = {
+    "kitzvat_yeladim",
+    "maanak_leidah",
+    "birth_expenses",
+}
+SERVICE_PRETTY = {
+    "kitzvat_yeladim": "Kitzvat Yeladim (Child Stipend)",
+    "maanak_leidah": "Maanak Leidah (Birth Grant)",
+    "birth_expenses": "Birth expenses",
+}
 
 
 def _compute_amount(product_type: str, metadata: dict[str, Any]) -> tuple[float, str, str]:
@@ -53,14 +65,10 @@ def _compute_amount(product_type: str, metadata: dict[str, Any]) -> tuple[float,
             raise HTTPException(400, "At least one valid service required")
         if len(services) == 1:
             amount = DOCUMENT_SERVICE_PRICE_SINGLE
-            pretty = {
-                "arnona_discount": "Arnona discount",
-                "property_name_change": "Property name change",
-            }[services[0]]
-            desc = f"Document service — {pretty}"
+            desc = f"Bituach Leumi — {SERVICE_PRETTY[services[0]]}"
         else:
-            amount = DOCUMENT_SERVICE_PRICE_BOTH
-            desc = "Document services — Arnona discount + Property name change"
+            amount = DOCUMENT_SERVICE_PRICE_BUNDLE
+            desc = "Bituach Leumi benefits — " + " + ".join(SERVICE_PRETTY[s] for s in services)
         return amount, "USD", desc
 
     raise HTTPException(400, f"Unknown product_type: {product_type}")
