@@ -383,6 +383,13 @@ Build a bilingual (English/Hebrew) rental website named MyIsraelRental.com with 
   - **Frontend** (`pages/DocumentService.js` + `components/dashboard/GovernmentServicesTab.jsx`): replaced 2-service picker with the 3 Bituach Leumi services, removed property/tenant form fields (info now collected via post-payment WhatsApp), added "How it works" 3-step (pay → emailed checklist → WhatsApp it back) panel. Bundle-savings banner now dynamic ($50+ saved). Dashboard tab is now a fully embedded paid checkout instead of a free request form.
   - **Verified**: curl on `/api/payments/orders` returns $150 / $250 / $250 with correct Bituach Leumi descriptions for 1/2/3 services; old keys `arnona_discount` rejected with HTTP 400. Frontend smoke screenshot confirms the new copy renders with PayPal buttons.
 
+- [x] **Expand to 5 Document Services + Pair-Discount Pricing** (2026-05-05):
+  - Added back `arnona_discount` and `name_change` alongside the 3 Bituach Leumi services → **5 total services** at $150 each.
+  - **New pricing formula** (server-authoritative): `total = n*150 - floor(n/2)*50` (every completed pair saves $50). Yields 1=$150, 2=$250, 3=$400, 4=$500, 5=$650.
+  - **Backend** (`routes/payments.py`): added `arnona_discount` + `name_change` to `VALID_DOC_SERVICES`, `SERVICE_PRETTY`, and `SERVICE_REQUIRED_INFO` (with appropriate per-service checklists — Arnona bill/eligibility for Arnona; lease + utility account numbers for name change). Replaced the flat single/bundle constants with `DOCUMENT_SERVICE_PRICE_PER` + `DOCUMENT_SERVICE_PAIR_DISCOUNT`. Description pretty-printed as "Document service — X" or "Document services — X + Y + Z".
+  - **Frontend**: introduced shared catalog `frontend/src/lib/documentServices.js` (DOC_SERVICES list, SERVICE_BY_KEY map, computeTotal/computeSavings helpers). `DocumentService.js`, `GovernmentServicesTab.jsx`, and `PaymentSuccess.js` all consume it — single source of truth keeps the WhatsApp deeplink checklist, the price ladder, and the service labels in sync. Headline copy generalized from "Bituach Leumi Benefits" → "Document Filing Services". Bundle banner now dynamic and works for any pair count.
+  - **Verified end-to-end**: curl confirms all 5 prices ($150/$250/$400/$500/$650) on the backend; Playwright run progressively selects all 5 service buttons and asserts the live total updates to exactly the expected price at every step. Bundle banner correctly displays "you saved $100" when 4–5 services are selected.
+
 
 
 ### P2 - Lower Priority

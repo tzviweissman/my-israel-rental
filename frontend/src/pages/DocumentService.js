@@ -3,29 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { FileText, Check, Info, MessageCircle } from 'lucide-react';
 import { AuthContext } from '../App';
 import PayPalCheckout from '../components/PayPalCheckout';
-
-const SERVICES = [
-  {
-    key: 'kitzvat_yeladim',
-    label: 'Kitzvat Yeladim (Child Stipend)',
-    hint: 'We register and file your monthly child allowance claim with Bituach Leumi.',
-    price: 150,
-  },
-  {
-    key: 'maanak_leidah',
-    label: 'Maanak Leidah (Birth Grant)',
-    hint: 'We file your one-time birth grant claim with Bituach Leumi.',
-    price: 150,
-  },
-  {
-    key: 'birth_expenses',
-    label: 'Birth expenses',
-    hint: 'We submit your reimbursement claim for hospitalization and birth-related expenses.',
-    price: 150,
-  },
-];
-
-const BUNDLE_PRICE = 250; // any 2 or more
+import { DOC_SERVICES, computeTotal, computeSavings } from '../lib/documentServices';
 
 const DocumentService = () => {
   const { user } = useContext(AuthContext);
@@ -33,12 +11,8 @@ const DocumentService = () => {
 
   const [selected, setSelected] = useState(['kitzvat_yeladim']);
 
-  const total = useMemo(() => {
-    if (selected.length >= 2) return BUNDLE_PRICE;
-    if (selected.length === 1) return 150;
-    return 0;
-  }, [selected]);
-
+  const total = useMemo(() => computeTotal(selected), [selected]);
+  const savings = useMemo(() => computeSavings(selected), [selected]);
   const valid = selected.length >= 1;
 
   const toggle = (key) => {
@@ -55,10 +29,10 @@ const DocumentService = () => {
     <div className="min-h-screen bg-[#fafafa] pt-20 pb-16" data-testid="document-service-page">
       <div className="max-w-4xl mx-auto px-6">
         <h1 className="text-4xl font-bold mb-2" style={{ fontFamily: 'Playfair Display' }}>
-          Bituach Leumi Benefits
+          Document Filing Services
         </h1>
         <p className="text-gray-500 mb-8">
-          Pick the benefits you need. Pay securely with PayPal — we'll email you exactly what info to send us on WhatsApp so we can file the forms for you.
+          Pick the services you need. Pay securely with PayPal — we'll email you exactly what info to send us on WhatsApp so we can file the forms for you.
         </p>
 
         <div className="grid grid-cols-1 md:grid-cols-[1fr_360px] gap-8">
@@ -66,7 +40,7 @@ const DocumentService = () => {
           <div className="bg-white rounded-2xl p-7 border border-gray-100">
             <h2 className="text-base font-semibold mb-4">1. Choose your services</h2>
             <div className="space-y-3 mb-8">
-              {SERVICES.map(svc => {
+              {DOC_SERVICES.map(svc => {
                 const isOn = selected.includes(svc.key);
                 return (
                   <button
@@ -89,10 +63,15 @@ const DocumentService = () => {
                   </button>
                 );
               })}
-              {selected.length >= 2 && (
+              {savings > 0 ? (
                 <div className="flex items-start gap-2 px-3 py-2 rounded-lg bg-amber-50 border border-amber-200 text-xs text-amber-800" data-testid="bundle-notice">
                   <Info size={14} className="mt-0.5 shrink-0" />
-                  <span>Bundle discount applied: any 2 or more services for <strong>$250</strong> — you save $50+.</span>
+                  <span>Bundle discount applied — you saved <strong>${savings}</strong>. Every additional pair saves another $50.</span>
+                </div>
+              ) : (
+                <div className="flex items-start gap-2 px-3 py-2 rounded-lg bg-gray-50 border border-gray-200 text-xs text-gray-600">
+                  <Info size={14} className="mt-0.5 shrink-0" />
+                  <span>Add another service to unlock <strong>$50 off</strong> — every pair you bundle saves $50.</span>
                 </div>
               )}
             </div>
@@ -101,7 +80,7 @@ const DocumentService = () => {
             <ol className="space-y-3 text-sm text-gray-600">
               <li className="flex items-start gap-3" data-testid="how-it-works-step-1">
                 <span className="flex-shrink-0 w-6 h-6 rounded-full bg-[#1E6A6A]/10 text-[#1E6A6A] text-xs font-bold flex items-center justify-center">1</span>
-                <span>Pick your benefits and pay securely with PayPal.</span>
+                <span>Pick your services and pay securely with PayPal.</span>
               </li>
               <li className="flex items-start gap-3" data-testid="how-it-works-step-2">
                 <span className="flex-shrink-0 w-6 h-6 rounded-full bg-[#1E6A6A]/10 text-[#1E6A6A] text-xs font-bold flex items-center justify-center">2</span>
@@ -110,7 +89,7 @@ const DocumentService = () => {
               <li className="flex items-start gap-3" data-testid="how-it-works-step-3">
                 <span className="flex-shrink-0 w-6 h-6 rounded-full bg-[#1E6A6A]/10 text-[#1E6A6A] text-xs font-bold flex items-center justify-center">3</span>
                 <span className="flex items-center gap-1.5">
-                  Send everything to us on WhatsApp <MessageCircle size={14} className="text-[#25D366]" /> and we file the forms with Bituach Leumi.
+                  Send everything to us on WhatsApp <MessageCircle size={14} className="text-[#25D366]" /> and we file the forms for you.
                 </span>
               </li>
             </ol>
@@ -124,18 +103,18 @@ const DocumentService = () => {
             </div>
             <dl className="space-y-2 text-sm mb-4">
               {selected.map(k => {
-                const svc = SERVICES.find(s => s.key === k);
+                const svc = DOC_SERVICES.find(s => s.key === k);
                 return (
                   <div key={k} className="flex justify-between">
-                    <dt className="text-gray-600">{svc.label}</dt>
+                    <dt className="text-gray-600 truncate pr-2">{svc.label}</dt>
                     <dd className="text-gray-900">${svc.price}</dd>
                   </div>
                 );
               })}
-              {selected.length >= 2 && (
+              {savings > 0 && (
                 <div className="flex justify-between text-amber-700">
                   <dt>Bundle discount</dt>
-                  <dd>-${selected.length * 150 - BUNDLE_PRICE}</dd>
+                  <dd>-${savings}</dd>
                 </div>
               )}
             </dl>

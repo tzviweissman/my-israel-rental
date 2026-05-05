@@ -3,32 +3,10 @@ import { useNavigate } from 'react-router-dom';
 import { FileCheck, Check, Info, MessageCircle } from 'lucide-react';
 import { AuthContext } from '../../App';
 import PayPalCheckout from '../PayPalCheckout';
-
-const SERVICES = [
-  {
-    key: 'kitzvat_yeladim',
-    label: 'Kitzvat Yeladim (Child Stipend)',
-    hint: 'We file your monthly child allowance claim with Bituach Leumi.',
-    price: 150,
-  },
-  {
-    key: 'maanak_leidah',
-    label: 'Maanak Leidah (Birth Grant)',
-    hint: 'We file your one-time birth grant claim with Bituach Leumi.',
-    price: 150,
-  },
-  {
-    key: 'birth_expenses',
-    label: 'Birth expenses',
-    hint: 'We submit your reimbursement claim for hospitalization & birth expenses.',
-    price: 150,
-  },
-];
-
-const BUNDLE_PRICE = 250;
+import { DOC_SERVICES, computeTotal, computeSavings } from '../../lib/documentServices';
 
 /**
- * Renter dashboard tab: Bituach Leumi benefit filings. The renter picks the
+ * Renter dashboard tab: paid document services. The renter picks the
  * services they want, pays via PayPal, and we email them a checklist of the
  * info to send us via WhatsApp so we can complete the filings.
  */
@@ -37,12 +15,8 @@ const GovernmentServicesTab = () => {
   const navigate = useNavigate();
   const [selected, setSelected] = useState(['kitzvat_yeladim']);
 
-  const total = useMemo(() => {
-    if (selected.length >= 2) return BUNDLE_PRICE;
-    if (selected.length === 1) return 150;
-    return 0;
-  }, [selected]);
-
+  const total = useMemo(() => computeTotal(selected), [selected]);
+  const savings = useMemo(() => computeSavings(selected), [selected]);
   const valid = selected.length >= 1;
 
   const toggle = (key) => {
@@ -68,7 +42,7 @@ const GovernmentServicesTab = () => {
               <FileCheck size={24} className="text-white" />
             </div>
             <div>
-              <h3 className="text-lg font-bold text-white">Bituach Leumi Benefits</h3>
+              <h3 className="text-lg font-bold text-white">Document Filing Services</h3>
               <p className="text-white/80 text-sm">We file the forms — you keep the benefits</p>
             </div>
           </div>
@@ -76,8 +50,8 @@ const GovernmentServicesTab = () => {
 
         <div className="p-6">
           <p className="text-gray-600 text-sm mb-5 leading-relaxed">
-            Pick the benefits you'd like us to handle. After payment we'll email you a
-            checklist of details to send us on WhatsApp, then we file the forms with Bituach Leumi for you.
+            Pick the filings you'd like us to handle — Bituach Leumi benefits, Arnona discount, or apartment name change.
+            After payment we'll email you a checklist of details to send us on WhatsApp, then we file the forms for you.
           </p>
 
           <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-6">
@@ -85,7 +59,7 @@ const GovernmentServicesTab = () => {
             <div>
               <h4 className="text-sm font-semibold text-gray-700 mb-3">1. Choose your services</h4>
               <div className="space-y-2.5 mb-4">
-                {SERVICES.map(svc => {
+                {DOC_SERVICES.map(svc => {
                   const isOn = selected.includes(svc.key);
                   return (
                     <button
@@ -110,15 +84,15 @@ const GovernmentServicesTab = () => {
                 })}
               </div>
 
-              {selected.length >= 2 ? (
+              {savings > 0 ? (
                 <div className="flex items-start gap-2 px-3 py-2 rounded-lg bg-amber-50 border border-amber-200 text-xs text-amber-800" data-testid="bundle-notice">
                   <Info size={14} className="mt-0.5 shrink-0" />
-                  <span>Bundle discount applied: any 2 or more services for <strong>$250</strong> — you save $50+.</span>
+                  <span>Bundle discount applied — you saved <strong>${savings}</strong>. Every additional pair saves another $50.</span>
                 </div>
               ) : (
                 <div className="flex items-start gap-2 px-3 py-2 rounded-lg bg-gray-50 border border-gray-200 text-xs text-gray-600">
                   <Info size={14} className="mt-0.5 shrink-0" />
-                  <span>Add a 2nd or 3rd service to unlock the <strong>$250 bundle</strong> — saves you $50+.</span>
+                  <span>Add another service to unlock <strong>$50 off</strong> — every pair you bundle saves $50.</span>
                 </div>
               )}
 
@@ -140,7 +114,7 @@ const GovernmentServicesTab = () => {
               <h4 className="text-sm font-semibold text-gray-700 mb-3">2. Review & pay</h4>
               <dl className="space-y-1.5 text-sm mb-3">
                 {selected.map(k => {
-                  const svc = SERVICES.find(s => s.key === k);
+                  const svc = DOC_SERVICES.find(s => s.key === k);
                   return (
                     <div key={k} className="flex justify-between">
                       <dt className="text-gray-600 truncate pr-2">{svc.label}</dt>
@@ -148,10 +122,10 @@ const GovernmentServicesTab = () => {
                     </div>
                   );
                 })}
-                {selected.length >= 2 && (
+                {savings > 0 && (
                   <div className="flex justify-between text-amber-700">
                     <dt>Bundle discount</dt>
-                    <dd>-${selected.length * 150 - BUNDLE_PRICE}</dd>
+                    <dd>-${savings}</dd>
                   </div>
                 )}
               </dl>

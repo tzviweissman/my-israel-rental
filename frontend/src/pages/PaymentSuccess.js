@@ -3,59 +3,29 @@ import { useSearchParams, useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
 import { CheckCircle2, Loader2, ArrowRight, Receipt, MessageCircle } from 'lucide-react';
 import { API, AuthContext } from '../App';
+import { SERVICE_BY_KEY } from '../lib/documentServices';
 
 // Same number the global floating WhatsAppButton uses.
 const WHATSAPP_NUMBER = '972553225141';
 
-// Per-service info we ask the customer to send so we can file the form.
-// Mirrors backend SERVICE_REQUIRED_INFO in routes/payments.py.
-const SERVICE_CHECKLIST = {
-  kitzvat_yeladim: {
-    label: 'Kitzvat Yeladim (Child Stipend)',
-    items: [
-      "Parent's full name and Teudat Zehut (ID)",
-      "Each child's full name and date of birth",
-      'Bank account details (bank, branch, account number) for the deposit',
-      "A clear photo of the parent's Teudat Zehut",
-    ],
-  },
-  maanak_leidah: {
-    label: 'Maanak Leidah (Birth Grant)',
-    items: [
-      "Mother's full name and Teudat Zehut (ID)",
-      'Hospital discharge / birth confirmation document',
-      'Bank account details (bank, branch, account number)',
-    ],
-  },
-  birth_expenses: {
-    label: 'Birth expenses',
-    items: [
-      "Claimant's full name and Teudat Zehut (ID)",
-      "Proof of the baby's birth (birth certificate or hospital discharge)",
-      "Receipts / invoices for the birth-related expenses you're claiming",
-      'Bank account details (bank, branch, account number)',
-    ],
-  },
-};
-
 function buildWhatsAppMessage(order) {
-  const services = (order.metadata?.services || []).filter(s => SERVICE_CHECKLIST[s]);
+  const services = (order.metadata?.services || []).filter(s => SERVICE_BY_KEY[s]);
   if (!services.length) return '';
   const orderShort = order.id.slice(0, 8).toUpperCase();
   const lines = [
-    `Hi! I just completed payment for Bituach Leumi services.`,
+    `Hi! I just completed payment for my document filing services.`,
     `Order ID: ${orderShort}`,
     `Amount: $${Number(order.amount).toFixed(2)} ${order.currency}`,
     '',
     `Services purchased:`,
-    ...services.map(s => `• ${SERVICE_CHECKLIST[s].label}`),
+    ...services.map(s => `• ${SERVICE_BY_KEY[s].label}`),
     '',
     `Here are the details you need from me:`,
   ];
   services.forEach(s => {
     lines.push('');
-    lines.push(`*${SERVICE_CHECKLIST[s].label}*`);
-    SERVICE_CHECKLIST[s].items.forEach(item => {
+    lines.push(`*${SERVICE_BY_KEY[s].label}*`);
+    SERVICE_BY_KEY[s].items.forEach(item => {
       lines.push(`- ${item}: `);
     });
   });
@@ -141,7 +111,7 @@ const PaymentSuccess = () => {
   // the order id + per-service checklist so the customer can hand off the
   // info to us right away.
   const isDocumentService = order.product_type === 'document_service';
-  const services = (order.metadata?.services || []).filter(s => SERVICE_CHECKLIST[s]);
+  const services = (order.metadata?.services || []).filter(s => SERVICE_BY_KEY[s]);
   const whatsappUrl = isDocumentService && services.length
     ? `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(buildWhatsAppMessage(order))}`
     : null;

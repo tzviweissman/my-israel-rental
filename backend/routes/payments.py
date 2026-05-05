@@ -37,21 +37,29 @@ FRONTEND_URL = os.environ.get("FRONTEND_URL", "").rstrip("/")
 PAYPAL_ADMIN_EMAIL = os.environ.get("PAYPAL_ADMIN_EMAIL", "admin@rental.com")
 PAYPAL_WEBHOOK_ID = os.environ.get("PAYPAL_WEBHOOK_ID", "")
 
-# Flat prices for Bituach Leumi benefit services (USD)
+# Bituach Leumi & municipal/utility document services (USD).
+# Each service is $150. Customers save $50 for every completed pair, so the
+# server-authoritative formula is:  total = n*150 - floor(n/2)*50
 # - 1 service  = $150
-# - 2 services = $250
-# - 3 services = $250 (same bundle cap)
-DOCUMENT_SERVICE_PRICE_SINGLE = 150.0
-DOCUMENT_SERVICE_PRICE_BUNDLE = 250.0
+# - 2 services = $250 (save $50)
+# - 3 services = $400 (save $50)
+# - 4 services = $500 (save $100)
+# - 5 services = $650 (save $100)
+DOCUMENT_SERVICE_PRICE_PER = 150.0
+DOCUMENT_SERVICE_PAIR_DISCOUNT = 50.0
 VALID_DOC_SERVICES = {
     "kitzvat_yeladim",
     "maanak_leidah",
     "birth_expenses",
+    "arnona_discount",
+    "name_change",
 }
 SERVICE_PRETTY = {
     "kitzvat_yeladim": "Kitzvat Yeladim (Child Stipend)",
     "maanak_leidah": "Maanak Leidah (Birth Grant)",
     "birth_expenses": "Birth expenses",
+    "arnona_discount": "Arnona discount filing",
+    "name_change": "Apartment name change",
 }
 
 # What we ask the customer to send us on WhatsApp so we can file the form.
@@ -72,6 +80,20 @@ SERVICE_REQUIRED_INFO = {
         "Proof of the baby's birth (birth certificate or hospital discharge)",
         "Receipts / invoices for the birth-related expenses you're claiming",
         "Bank account details (bank, branch, account number)",
+    ],
+    "arnona_discount": [
+        "Full name and Teudat Zehut (ID) of the lease holder",
+        "Full property address (city, street, number, apartment)",
+        "A clear photo of your most recent Arnona bill",
+        "Eligibility proof (student ID, pensioner card, income statement, etc.)",
+        "Bank account details for any refund",
+    ],
+    "name_change": [
+        "Full name and Teudat Zehut of the previous lease holder",
+        "Full name and Teudat Zehut of the new lease holder",
+        "Full property address",
+        "A photo of the signed lease agreement",
+        "Account numbers for electricity, water, and Arnona (if known)",
     ],
 }
 
@@ -98,19 +120,23 @@ def _build_required_info_html(services: list[str]) -> str:
 
 
 def _compute_amount(product_type: str, metadata: dict[str, Any]) -> tuple[float, str, str]:
-    """Return (amount, currency, description) computed server-side."""
+    """Return (amount, currency, description) computed server-side.
+
+    Document service pricing: $150 per service, with $50 off for every
+    completed pair (formula: ``n*150 - (n//2)*50``).
+    """
     if product_type == "document_service":
         services = metadata.get("services") or []
         services = [s for s in services if s in VALID_DOC_SERVICES]
         services = list(dict.fromkeys(services))  # de-dupe, preserve order
         if not services:
             raise HTTPException(400, "At least one valid service required")
-        if len(services) == 1:
-            amount = DOCUMENT_SERVICE_PRICE_SINGLE
-            desc = f"Bituach Leumi — {SERVICE_PRETTY[services[0]]}"
+        n = len(services)
+        amount = n * DOCUMENT_SERVICE_PRICE_PER - (n // 2) * DOCUMENT_SERVICE_PAIR_DISCOUNT
+        if n == 1:
+            desc = f"Document service — {SERVICE_PRETTY[services[0]]}"
         else:
-            amount = DOCUMENT_SERVICE_PRICE_BUNDLE
-            desc = "Bituach Leumi benefits — " + " + ".join(SERVICE_PRETTY[s] for s in services)
+            desc = "Document services — " + " + ".join(SERVICE_PRETTY[s] for s in services)
         return amount, "USD", desc
 
     raise HTTPException(400, f"Unknown product_type: {product_type}")
