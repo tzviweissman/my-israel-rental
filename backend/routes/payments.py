@@ -210,10 +210,19 @@ async def _apply_business_side_effects(order: dict[str, Any]) -> None:
 
     if product_type == "document_service":
         # Create a document_services row (one per service) in 'pending' state.
+        # Distribute the order total evenly across services for admin reporting.
+        # We round each share to 2dp and absorb any rounding remainder in the
+        # last row so the per-row totals always sum back to order.amount.
         now_iso = datetime.now(UTC).isoformat()
-        for svc in (metadata.get("services") or []):
-            if svc not in VALID_DOC_SERVICES:
-                continue
+        services = [s for s in (metadata.get("services") or []) if s in VALID_DOC_SERVICES]
+        services = list(dict.fromkeys(services))  # de-dupe, preserve order
+        n = len(services)
+        per_service_share = round(order["amount"] / n, 2) if n else 0.0
+        running_total = 0.0
+        for idx, svc in enumerate(services):
+            is_last = idx == n - 1
+            paid_share = round(order["amount"] - running_total, 2) if is_last else per_service_share
+            running_total += paid_share
             service_doc = {
                 "id": str(uuid.uuid4()),
                 "user_id": order["user_id"],
@@ -225,7 +234,7 @@ async def _apply_business_side_effects(order: dict[str, Any]) -> None:
                 "status": "pending",
                 "paid": True,
                 "order_id": order["id"],
-                "paid_amount_usd": order["amount"] if len(metadata.get("services") or []) == 1 else None,
+                "paid_amount_usd": paid_share,
                 "created_at": now_iso,
             }
             await db.document_services.insert_one(service_doc)
