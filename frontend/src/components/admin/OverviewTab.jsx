@@ -1,13 +1,14 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Home, Eye, FileText, Users, MessageCircle, Mail, CheckCircle, AlertTriangle, Ban } from 'lucide-react';
+import ServiceRevenueWidget from './ServiceRevenueWidget';
 
 /**
  * Super Admin → Overview tab. Pure presentational; the parent owns the
  * `dashboard` and `emailHealth` fetches because the parent already needs
  * `dashboard` for its initial loading-spinner gate.
  */
-export const OverviewTab = ({ dashboard, emailHealth }) => {
+export const OverviewTab = ({ dashboard, emailHealth, token }) => {
   const { t } = useTranslation();
   return (
     <div data-testid="admin-overview-section">
@@ -137,6 +138,8 @@ export const OverviewTab = ({ dashboard, emailHealth }) => {
           )}
         </div>
       )}
+
+      <ServiceRevenueWidget token={token} />
     </div>
   );
 };

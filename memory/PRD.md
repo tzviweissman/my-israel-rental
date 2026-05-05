@@ -390,6 +390,12 @@ Build a bilingual (English/Hebrew) rental website named MyIsraelRental.com with 
   - **Frontend**: introduced shared catalog `frontend/src/lib/documentServices.js` (DOC_SERVICES list, SERVICE_BY_KEY map, computeTotal/computeSavings helpers). `DocumentService.js`, `GovernmentServicesTab.jsx`, and `PaymentSuccess.js` all consume it — single source of truth keeps the WhatsApp deeplink checklist, the price ladder, and the service labels in sync. Headline copy generalized from "Bituach Leumi Benefits" → "Document Filing Services". Bundle banner now dynamic and works for any pair count.
   - **Verified end-to-end**: curl confirms all 5 prices ($150/$250/$400/$500/$650) on the backend; Playwright run progressively selects all 5 service buttons and asserts the live total updates to exactly the expected price at every step. Bundle banner correctly displays "you saved $100" when 4–5 services are selected.
 
+- [x] **Per-Service Revenue Split + Admin Revenue Widget** (2026-05-05):
+  - **Backend** `_apply_business_side_effects`: bundle orders now distribute the captured total evenly across services (`paid_amount_usd` per row, last row absorbs rounding remainder). Verified 1/2/3/4/5-service bundles all reconcile to the order total exactly.
+  - **New endpoint** `GET /api/admin/document-services/revenue?window_days=N` (admin-only, 403 for renters): returns `{window_days, total_revenue_usd, total_filings, rows: [{service_type, label, count, revenue_usd}]}`. Supports `window_days=0` for all-time. Catalog services with $0 still appear in the response so the widget can render the full ladder. Response model `ServiceRevenueResponse` added to `models_response.py`.
+  - **Frontend**: new `components/admin/ServiceRevenueWidget.jsx` — compact bar chart sorted by revenue with a 30d / 90d / All-time pill toggle. Wired into `OverviewTab.jsx` (token piped through from `AdminDashboard.js`). Empty-state copy when no filings have been paid yet.
+  - **Verified**: seeded 9 rows (5-service bundle 5d ago + 2-service bundle 12d ago + single 25d ago + one 60d ago); 30d window correctly shows $1,050.00 / 8 filings; 90d correctly shows $1,200.00 / 9 filings (picks up the older row). Playwright assertion confirms the widget renders the totals, the per-row breakdown, and the window toggle.
+
 
 
 ### P2 - Lower Priority

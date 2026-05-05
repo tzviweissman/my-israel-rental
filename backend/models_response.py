@@ -585,3 +585,24 @@ class SavedSearchCreateResponse(BaseModel):
 # too dynamic to model; still gives OpenAPI a name).
 class AnyResponse(BaseModel):
     model_config = ConfigDict(extra='allow')
+
+
+# --- Admin: revenue breakdown by document service type ---------------------
+class ServiceRevenueRow(BaseModel):
+    """One row of the admin revenue-by-service widget.
+
+    ``service_type`` is the catalog key (e.g. ``kitzvat_yeladim``).
+    ``label`` is a human-readable label suitable for direct display.
+    """
+    service_type: str
+    label: str
+    count: int
+    revenue_usd: float
+
+
+class ServiceRevenueResponse(BaseModel):
+    window_days: int
+    total_revenue_usd: float
+    total_filings: int
+    rows: list[ServiceRevenueRow]
+

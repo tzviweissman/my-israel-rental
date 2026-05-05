@@ -24,10 +24,12 @@ from models_response import (
     OkResponse,
     PropertyOut,
     ServiceRequestOut,
+    ServiceRevenueResponse,
     SubscribersResponse,
     UserPublic,
 )
 from routes.deps import POSTMARK_WEBHOOK_SECRET, db, logger, verify_token
+from routes.payments import SERVICE_PRETTY, VALID_DOC_SERVICES
 from utils.auth import decode_query_token
 from utils.events import publish, subscribe, subscriber_count, unsubscribe
 
@@ -491,6 +493,61 @@ async def update_service_status(service_id: str, status: str, payload: dict = De
     await db.document_services.update_one({"id": service_id}, {"$set": {"status": status}})
     await publish("invalidate", {"prefixes": ["/api/admin/document-services", "/api/admin/dashboard"]})
     return {"message": f"Service status updated to {status}"}
+
+
+@api_router.get("/admin/document-services/revenue", response_model=ServiceRevenueResponse)
+async def get_document_services_revenue(
+    window_days: int = 30,
+    payload: dict = Depends(verify_token),
+) -> dict:
+    """Per-service revenue breakdown for the admin dashboard widget.
+
+    Sums the per-row ``paid_amount_usd`` field on ``document_services``
+    entries created within the last ``window_days``. Pass ``window_days=0``
+    to get the all-time total.
+    """
+    if payload['role'] != 'admin':
+        raise HTTPException(status_code=403, detail="Admin access required")
+    window_days = max(0, min(window_days, 3650))
+
+    match: dict = {"paid": True}
+    if window_days > 0:
+        cutoff = (datetime.now(UTC) - timedelta(days=window_days)).isoformat()
+        match["created_at"] = {"$gte": cutoff}
+
+    pipeline = [
+        {"$match": match},
+        {
+            "$group": {
+                "_id": "$service_type",
+                "count": {"$sum": 1},
+                "revenue_usd": {"$sum": {"$ifNull": ["$paid_amount_usd", 0]}},
+            }
+        },
+    ]
+    cursor = db.document_services.aggregate(pipeline)
+    raw = await cursor.to_list(100)
+
+    # Make sure every catalog service is represented (even if it earned $0
+    # this window) so the widget can always render the full ladder.
+    by_type = {row["_id"]: row for row in raw if row.get("_id")}
+    rows = []
+    for service_type in VALID_DOC_SERVICES:
+        agg = by_type.get(service_type) or {}
+        rows.append({
+            "service_type": service_type,
+            "label": SERVICE_PRETTY.get(service_type, service_type),
+            "count": int(agg.get("count", 0)),
+            "revenue_usd": round(float(agg.get("revenue_usd", 0.0)), 2),
+        })
+    rows.sort(key=lambda r: r["revenue_usd"], reverse=True)
+
+    return {
+        "window_days": window_days,
+        "total_revenue_usd": round(sum(r["revenue_usd"] for r in rows), 2),
+        "total_filings": sum(r["count"] for r in rows),
+        "rows": rows,
+    }
 
 
 @api_router.get("/admin/settings", response_model=AnyResponse)

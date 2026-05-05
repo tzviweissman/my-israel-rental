@@ -68,7 +68,7 @@ const AdminDashboard = () => {
           })}
         </div>
 
-        {activeTab === 'overview' && <OverviewTab dashboard={dashboard} emailHealth={emailHealth} />}
+        {activeTab === 'overview' && <OverviewTab dashboard={dashboard} emailHealth={emailHealth} token={token} />}
         {activeTab === 'listings' && <ListingsTab token={token} onStatsChange={fetchDashboard} />}
         {activeTab === 'users' && <UsersTab token={token} onStatsChange={fetchDashboard} />}
         {activeTab === 'chats' && <ChatsTab token={token} />}
