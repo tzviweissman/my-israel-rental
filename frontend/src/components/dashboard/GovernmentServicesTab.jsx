@@ -1,42 +1,59 @@
-import React, { useState } from 'react';
-import axios from 'axios';
-import { FileCheck, Check, Send } from 'lucide-react';
-import { toast } from 'sonner';
+import React, { useContext, useMemo, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { FileCheck, Check, Info, MessageCircle } from 'lucide-react';
+import { AuthContext } from '../../App';
+import PayPalCheckout from '../PayPalCheckout';
+
+const SERVICES = [
+  {
+    key: 'kitzvat_yeladim',
+    label: 'Kitzvat Yeladim (Child Stipend)',
+    hint: 'We file your monthly child allowance claim with Bituach Leumi.',
+    price: 150,
+  },
+  {
+    key: 'maanak_leidah',
+    label: 'Maanak Leidah (Birth Grant)',
+    hint: 'We file your one-time birth grant claim with Bituach Leumi.',
+    price: 150,
+  },
+  {
+    key: 'birth_expenses',
+    label: 'Birth expenses',
+    hint: 'We submit your reimbursement claim for hospitalization & birth expenses.',
+    price: 150,
+  },
+];
+
+const BUNDLE_PRICE = 250;
 
 /**
- * Renter services tab: submit requests for Arnona discounts, property name
- * changes, etc. Posts to /api/service-requests. Self-contained.
+ * Renter dashboard tab: Bituach Leumi benefit filings. The renter picks the
+ * services they want, pays via PayPal, and we email them a checklist of the
+ * info to send us via WhatsApp so we can complete the filings.
  */
-const GovernmentServicesTab = ({ API, token }) => {
-  const [form, setForm] = useState({
-    full_name: '',
-    id_number: '',
-    address: '',
-    service_type: 'arnona_discount',
-    notes: '',
-  });
-  const [submitting, setSubmitting] = useState(false);
+const GovernmentServicesTab = () => {
+  const { user } = useContext(AuthContext);
+  const navigate = useNavigate();
+  const [selected, setSelected] = useState(['kitzvat_yeladim']);
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setSubmitting(true);
-    try {
-      await axios.post(
-        `${API}/service-requests`,
-        { service_type: 'government', ...form },
-        { headers: { Authorization: `Bearer ${token}` } },
-      );
-      toast.success('Service request submitted! We will contact you shortly.');
-      setForm({ full_name: '', id_number: '', address: '', service_type: 'arnona_discount', notes: '' });
-    } catch (err) {
-      toast.error(err.response?.data?.detail || 'Failed to submit request.');
-    } finally {
-      setSubmitting(false);
-    }
+  const total = useMemo(() => {
+    if (selected.length >= 2) return BUNDLE_PRICE;
+    if (selected.length === 1) return 150;
+    return 0;
+  }, [selected]);
+
+  const valid = selected.length >= 1;
+
+  const toggle = (key) => {
+    setSelected((prev) => prev.includes(key) ? prev.filter(k => k !== key) : [...prev, key]);
   };
 
-  const inputCls =
-    'w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/30 focus:border-[#D4AF37] text-sm';
+  const metadata = {
+    services: selected,
+    contact_name: user?.name || '',
+    contact_email: user?.email || '',
+  };
 
   return (
     <div className="space-y-6" data-testid="services-tab">
@@ -51,107 +68,116 @@ const GovernmentServicesTab = ({ API, token }) => {
               <FileCheck size={24} className="text-white" />
             </div>
             <div>
-              <h3 className="text-lg font-bold text-white">Government Document Services</h3>
-              <p className="text-white/80 text-sm">Let us handle the hassle for you</p>
+              <h3 className="text-lg font-bold text-white">Bituach Leumi Benefits</h3>
+              <p className="text-white/80 text-sm">We file the forms — you keep the benefits</p>
             </div>
           </div>
         </div>
 
         <div className="p-6">
-          <p className="text-gray-600 text-sm mb-4 leading-relaxed">
-            We take care of all government documents, your{' '}
-            <strong className="text-[#1E6A6A]">Arnona discount</strong>, and the{' '}
-            <strong className="text-[#1E6A6A]">property name change</strong> — quickly and professionally.
+          <p className="text-gray-600 text-sm mb-5 leading-relaxed">
+            Pick the benefits you'd like us to handle. After payment we'll email you a
+            checklist of details to send us on WhatsApp, then we file the forms with Bituach Leumi for you.
           </p>
 
-          <div className="flex flex-wrap gap-2 mb-5">
-            <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#1E6A6A]/10 text-[#1E6A6A] text-xs font-medium">
-              <Check size={12} /> Arnona Discount
-            </span>
-            <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#D4AF37]/10 text-[#D4AF37] text-xs font-medium">
-              <Check size={12} /> Property Name Change
-            </span>
-            <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-gray-100 text-gray-600 text-xs font-medium">
-              <Check size={12} /> Government Forms
-            </span>
-          </div>
+          <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-6">
+            {/* Left: service picker */}
+            <div>
+              <h4 className="text-sm font-semibold text-gray-700 mb-3">1. Choose your services</h4>
+              <div className="space-y-2.5 mb-4">
+                {SERVICES.map(svc => {
+                  const isOn = selected.includes(svc.key);
+                  return (
+                    <button
+                      key={svc.key}
+                      type="button"
+                      onClick={() => toggle(svc.key)}
+                      className={`w-full text-left flex items-start gap-3 rounded-xl border p-4 transition-all ${isOn ? 'border-[#1E6A6A] bg-[#1E6A6A]/5' : 'border-gray-200 hover:border-gray-300'}`}
+                      data-testid={`service-option-${svc.key}`}
+                    >
+                      <div className={`mt-0.5 w-5 h-5 rounded-md flex items-center justify-center flex-shrink-0 ${isOn ? 'bg-[#1E6A6A] text-white' : 'border-2 border-gray-300 bg-white'}`}>
+                        {isOn && <Check size={12} strokeWidth={3} />}
+                      </div>
+                      <div className="flex-1">
+                        <div className="flex items-center justify-between gap-3">
+                          <p className="text-sm font-semibold text-gray-900">{svc.label}</p>
+                          <span className="text-sm font-semibold text-[#1E6A6A]">${svc.price}</span>
+                        </div>
+                        <p className="text-xs text-gray-500 mt-1">{svc.hint}</p>
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
 
-          <form onSubmit={handleSubmit} className="space-y-4" data-testid="government-service-form">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1.5">Full Legal Name</label>
-                <input
-                  type="text"
-                  value={form.full_name}
-                  onChange={(e) => setForm({ ...form, full_name: e.target.value })}
-                  placeholder="As it appears on your ID"
-                  className={inputCls}
-                  required
-                  data-testid="gov-fullname-input"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1.5">ID / Passport Number</label>
-                <input
-                  type="text"
-                  value={form.id_number}
-                  onChange={(e) => setForm({ ...form, id_number: e.target.value })}
-                  placeholder="ID or Teudat Zehut number"
-                  className={inputCls}
-                  required
-                  data-testid="gov-id-input"
-                />
+              {selected.length >= 2 ? (
+                <div className="flex items-start gap-2 px-3 py-2 rounded-lg bg-amber-50 border border-amber-200 text-xs text-amber-800" data-testid="bundle-notice">
+                  <Info size={14} className="mt-0.5 shrink-0" />
+                  <span>Bundle discount applied: any 2 or more services for <strong>$250</strong> — you save $50+.</span>
+                </div>
+              ) : (
+                <div className="flex items-start gap-2 px-3 py-2 rounded-lg bg-gray-50 border border-gray-200 text-xs text-gray-600">
+                  <Info size={14} className="mt-0.5 shrink-0" />
+                  <span>Add a 2nd or 3rd service to unlock the <strong>$250 bundle</strong> — saves you $50+.</span>
+                </div>
+              )}
+
+              <div className="mt-6 rounded-xl border border-gray-100 bg-gray-50/60 p-4">
+                <h4 className="text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
+                  <MessageCircle size={14} className="text-[#25D366]" />
+                  How it works
+                </h4>
+                <ol className="space-y-1.5 text-xs text-gray-600">
+                  <li data-testid="how-it-works-step-1">1. Pick your services and pay with PayPal.</li>
+                  <li data-testid="how-it-works-step-2">2. We email you a checklist of documents and details.</li>
+                  <li data-testid="how-it-works-step-3">3. Send the info to us on WhatsApp — we file the forms.</li>
+                </ol>
               </div>
             </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">Property Address</label>
-              <input
-                type="text"
-                value={form.address}
-                onChange={(e) => setForm({ ...form, address: e.target.value })}
-                placeholder="Full property address"
-                className={inputCls}
-                required
-                data-testid="gov-address-input"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">Service Needed</label>
-              <select
-                value={form.service_type}
-                onChange={(e) => setForm({ ...form, service_type: e.target.value })}
-                className={inputCls}
-                required
-                data-testid="gov-service-type-select"
-              >
-                <option value="arnona_discount">Arnona Discount Application</option>
-                <option value="name_change">Property Name Change</option>
-                <option value="both">Both — Arnona Discount + Name Change</option>
-                <option value="other">Other Government Documents</option>
-              </select>
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">Additional Notes</label>
-              <textarea
-                value={form.notes}
-                onChange={(e) => setForm({ ...form, notes: e.target.value })}
-                placeholder="Any specific details about your request"
-                rows={3}
-                className={`${inputCls} resize-none`}
-                data-testid="gov-notes-input"
-              />
-            </div>
-            <button
-              type="submit"
-              disabled={submitting}
-              className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-white text-sm font-medium disabled:opacity-50 transition-all hover:shadow-md"
-              style={{ backgroundColor: '#D4AF37' }}
-              data-testid="gov-submit-btn"
-            >
-              <Send size={16} />
-              {submitting ? 'Submitting...' : 'Submit Request'}
-            </button>
-          </form>
+
+            {/* Right: pay panel */}
+            <aside className="bg-white rounded-xl border border-gray-200 p-5 h-fit" data-testid="payment-panel">
+              <h4 className="text-sm font-semibold text-gray-700 mb-3">2. Review & pay</h4>
+              <dl className="space-y-1.5 text-sm mb-3">
+                {selected.map(k => {
+                  const svc = SERVICES.find(s => s.key === k);
+                  return (
+                    <div key={k} className="flex justify-between">
+                      <dt className="text-gray-600 truncate pr-2">{svc.label}</dt>
+                      <dd className="text-gray-900">${svc.price}</dd>
+                    </div>
+                  );
+                })}
+                {selected.length >= 2 && (
+                  <div className="flex justify-between text-amber-700">
+                    <dt>Bundle discount</dt>
+                    <dd>-${selected.length * 150 - BUNDLE_PRICE}</dd>
+                  </div>
+                )}
+              </dl>
+              <div className="border-t border-gray-100 pt-3 mb-4 flex justify-between items-baseline">
+                <span className="text-sm font-semibold text-gray-700">Total</span>
+                <span className="text-2xl font-bold text-[#1E6A6A]" data-testid="service-total">${total}</span>
+              </div>
+              {!valid ? (
+                <p className="text-xs text-gray-500 text-center" data-testid="fill-form-hint">
+                  Select at least one service to continue.
+                </p>
+              ) : (
+                <PayPalCheckout
+                  productType="document_service"
+                  metadata={metadata}
+                  currency="USD"
+                  onCaptured={(order) => {
+                    navigate(`/payment/success?orderId=${order.id}`);
+                  }}
+                />
+              )}
+              <p className="text-[11px] text-gray-400 text-center mt-3 leading-relaxed">
+                Secure PayPal checkout. You'll receive a receipt + checklist by email.
+              </p>
+            </aside>
+          </div>
         </div>
       </div>
     </div>

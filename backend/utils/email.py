@@ -395,11 +395,17 @@ async def send_payment_confirmation_email(
     captured_at: str,
     *,
     is_admin_copy: bool = False,
+    required_info_html: str = "",
+    whatsapp_number: str = "",
 ) -> bool:
     """Confirmation email after a successful PayPal capture.
 
     Sent to the paying customer (is_admin_copy=False) and to the admin mailbox
     (is_admin_copy=True) for internal bookkeeping.
+
+    For document/Bituach Leumi service orders, pass ``required_info_html`` and
+    ``whatsapp_number`` so the customer email tells the buyer exactly what
+    personal info they need to WhatsApp us for us to process their filing.
     """
     currency_symbol = "₪" if currency == "ILS" else "$"
     headline = (
@@ -410,6 +416,30 @@ async def send_payment_confirmation_email(
         if is_admin_copy
         else f"Hi {name or 'there'}, your PayPal payment has been processed successfully."
     )
+
+    # "Next steps" block (customer copy only) — what to send on WhatsApp so we
+    # can actually file the forms. Skipped for admin copies and for orders
+    # with no required_info_html.
+    next_steps_block = ""
+    if required_info_html and not is_admin_copy:
+        wa_digits = "".join(c for c in (whatsapp_number or "") if c.isdigit())
+        wa_link = f"https://wa.me/{wa_digits}" if wa_digits else ""
+        wa_button = _button("Open WhatsApp", wa_link) if wa_link else ""
+        wa_text = (
+            f"WhatsApp: <a href=\"{wa_link}\" style=\"color:{BRAND_TEAL};text-decoration:none;\"><strong>{whatsapp_number}</strong></a>"
+            if wa_link
+            else f"<strong>{whatsapp_number or CONTACT_PHONE}</strong>"
+        )
+        next_steps_block = f"""
+        <div style="background:#fff8e6;border-radius:10px;padding:18px 20px;margin:10px 0 20px;border-left:4px solid {BRAND_GOLD};">
+          <div style="color:#8a6d0b;font-size:15px;font-weight:700;margin-bottom:10px;">Next step — send us your details on WhatsApp</div>
+          <p style="color:#555;font-size:13px;line-height:1.7;margin:0 0 10px;">
+            To process your filing, please send the following information to {wa_text}. Include your Order ID: <strong>{order_id[:8].upper()}</strong>.
+          </p>
+          {required_info_html}
+          {wa_button}
+        </div>
+        """
 
     inner = f"""
     <h2 style="color:#222;font-size:22px;margin:0 0 8px;">{headline}</h2>
@@ -426,6 +456,7 @@ async def send_payment_confirmation_email(
         {_detail_row("Customer", name or to_email) if is_admin_copy else ''}
       </table>
     </div>
+    {next_steps_block}
     {_button("View in Dashboard", f"{FRONTEND_URL}/dashboard")}
     <p style="color:#888;font-size:12px;line-height:1.6;margin-top:10px;">
       Keep this email as your receipt. Questions? Reply to this message or contact us at {CONTACT_EMAIL}.

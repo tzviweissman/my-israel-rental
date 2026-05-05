@@ -1,37 +1,37 @@
 import React, { useContext, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { FileText, Check, Info } from 'lucide-react';
+import { FileText, Check, Info, MessageCircle } from 'lucide-react';
 import { AuthContext } from '../App';
 import PayPalCheckout from '../components/PayPalCheckout';
 
 const SERVICES = [
   {
-    key: 'arnona_discount',
-    label: 'Arnona discount filing',
-    hint: 'We prepare and file your Arnona (municipal tax) discount request with the city.',
+    key: 'kitzvat_yeladim',
+    label: 'Kitzvat Yeladim (Child Stipend)',
+    hint: 'We register and file your monthly child allowance claim with Bituach Leumi.',
     price: 150,
   },
   {
-    key: 'property_name_change',
-    label: 'Property name change',
-    hint: 'Officially change the name on record for electricity, water, and Arnona.',
+    key: 'maanak_leidah',
+    label: 'Maanak Leidah (Birth Grant)',
+    hint: 'We file your one-time birth grant claim with Bituach Leumi.',
+    price: 150,
+  },
+  {
+    key: 'birth_expenses',
+    label: 'Birth expenses',
+    hint: 'We submit your reimbursement claim for hospitalization and birth-related expenses.',
     price: 150,
   },
 ];
 
-const BUNDLE_PRICE = 250; // both together
+const BUNDLE_PRICE = 250; // any 2 or more
 
 const DocumentService = () => {
   const { user } = useContext(AuthContext);
   const navigate = useNavigate();
 
-  const [selected, setSelected] = useState(['arnona_discount']);
-  const [form, setForm] = useState({
-    property_address: '',
-    tenant_name: user?.name || '',
-    tenant_id: '',
-    additional_info: '',
-  });
+  const [selected, setSelected] = useState(['kitzvat_yeladim']);
 
   const total = useMemo(() => {
     if (selected.length >= 2) return BUNDLE_PRICE;
@@ -39,12 +39,7 @@ const DocumentService = () => {
     return 0;
   }, [selected]);
 
-  const valid = useMemo(() => (
-    selected.length >= 1 &&
-    form.property_address.trim() &&
-    form.tenant_name.trim() &&
-    form.tenant_id.trim()
-  ), [selected, form]);
+  const valid = selected.length >= 1;
 
   const toggle = (key) => {
     setSelected((prev) => prev.includes(key) ? prev.filter(k => k !== key) : [...prev, key]);
@@ -52,26 +47,22 @@ const DocumentService = () => {
 
   const metadata = {
     services: selected,
-    property_address: form.property_address,
-    tenant_name: form.tenant_name,
-    details: {
-      tenant_id: form.tenant_id,
-      additional_info: form.additional_info,
-    },
+    contact_name: user?.name || '',
+    contact_email: user?.email || '',
   };
 
   return (
     <div className="min-h-screen bg-[#fafafa] pt-20 pb-16" data-testid="document-service-page">
       <div className="max-w-4xl mx-auto px-6">
         <h1 className="text-4xl font-bold mb-2" style={{ fontFamily: 'Playfair Display' }}>
-          Document Filing Service
+          Bituach Leumi Benefits
         </h1>
         <p className="text-gray-500 mb-8">
-          Pick a service, enter the property details, and pay securely with PayPal. We'll handle the filing.
+          Pick the benefits you need. Pay securely with PayPal — we'll email you exactly what info to send us on WhatsApp so we can file the forms for you.
         </p>
 
         <div className="grid grid-cols-1 md:grid-cols-[1fr_360px] gap-8">
-          {/* Left: form */}
+          {/* Left: services + how-it-works */}
           <div className="bg-white rounded-2xl p-7 border border-gray-100">
             <h2 className="text-base font-semibold mb-4">1. Choose your services</h2>
             <div className="space-y-3 mb-8">
@@ -101,63 +92,31 @@ const DocumentService = () => {
               {selected.length >= 2 && (
                 <div className="flex items-start gap-2 px-3 py-2 rounded-lg bg-amber-50 border border-amber-200 text-xs text-amber-800" data-testid="bundle-notice">
                   <Info size={14} className="mt-0.5 shrink-0" />
-                  <span>Bundle discount applied: both services for <strong>$250</strong> instead of $300.</span>
+                  <span>Bundle discount applied: any 2 or more services for <strong>$250</strong> — you save $50+.</span>
                 </div>
               )}
             </div>
 
-            <h2 className="text-base font-semibold mb-4">2. Property & tenant details</h2>
-            <form className="space-y-4" onSubmit={(e) => e.preventDefault()} data-testid="document-service-form">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1.5">Property Address</label>
-                <input
-                  type="text"
-                  value={form.property_address}
-                  onChange={(e) => setForm({ ...form, property_address: e.target.value })}
-                  className="w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#1E6A6A]/30 focus:border-[#1E6A6A]"
-                  placeholder="e.g. Dizengoff 10, Tel Aviv"
-                  required
-                  data-testid="property-address-input"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1.5">Tenant Name</label>
-                <input
-                  type="text"
-                  value={form.tenant_name}
-                  onChange={(e) => setForm({ ...form, tenant_name: e.target.value })}
-                  className="w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#1E6A6A]/30 focus:border-[#1E6A6A]"
-                  required
-                  data-testid="tenant-name-input"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1.5">Tenant ID</label>
-                <input
-                  type="text"
-                  value={form.tenant_id}
-                  onChange={(e) => setForm({ ...form, tenant_id: e.target.value })}
-                  className="w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#1E6A6A]/30 focus:border-[#1E6A6A]"
-                  required
-                  data-testid="tenant-id-input"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1.5">Additional Information</label>
-                <textarea
-                  value={form.additional_info}
-                  onChange={(e) => setForm({ ...form, additional_info: e.target.value })}
-                  rows={3}
-                  className="w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#1E6A6A]/30 focus:border-[#1E6A6A]"
-                  placeholder="Any context we should know (optional)"
-                  data-testid="additional-info-input"
-                />
-              </div>
-            </form>
+            <h2 className="text-base font-semibold mb-4">2. How it works</h2>
+            <ol className="space-y-3 text-sm text-gray-600">
+              <li className="flex items-start gap-3" data-testid="how-it-works-step-1">
+                <span className="flex-shrink-0 w-6 h-6 rounded-full bg-[#1E6A6A]/10 text-[#1E6A6A] text-xs font-bold flex items-center justify-center">1</span>
+                <span>Pick your benefits and pay securely with PayPal.</span>
+              </li>
+              <li className="flex items-start gap-3" data-testid="how-it-works-step-2">
+                <span className="flex-shrink-0 w-6 h-6 rounded-full bg-[#1E6A6A]/10 text-[#1E6A6A] text-xs font-bold flex items-center justify-center">2</span>
+                <span>We email you a checklist of the documents and details we need.</span>
+              </li>
+              <li className="flex items-start gap-3" data-testid="how-it-works-step-3">
+                <span className="flex-shrink-0 w-6 h-6 rounded-full bg-[#1E6A6A]/10 text-[#1E6A6A] text-xs font-bold flex items-center justify-center">3</span>
+                <span className="flex items-center gap-1.5">
+                  Send everything to us on WhatsApp <MessageCircle size={14} className="text-[#25D366]" /> and we file the forms with Bituach Leumi.
+                </span>
+              </li>
+            </ol>
           </div>
 
-          {/* Right: payment summary — allowed to flow with the page so long
-              forms scroll normally; on taller screens it stays near the top. */}
+          {/* Right: payment summary */}
           <aside className="bg-white rounded-2xl p-7 border border-gray-100 h-fit md:sticky md:top-24 md:max-h-[calc(100vh-120px)] md:overflow-y-auto" data-testid="payment-panel">
             <div className="flex items-center gap-2 mb-4">
               <FileText size={18} className="text-[#D4AF37]" />
@@ -176,7 +135,7 @@ const DocumentService = () => {
               {selected.length >= 2 && (
                 <div className="flex justify-between text-amber-700">
                   <dt>Bundle discount</dt>
-                  <dd>-$50</dd>
+                  <dd>-${selected.length * 150 - BUNDLE_PRICE}</dd>
                 </div>
               )}
             </dl>
@@ -186,7 +145,7 @@ const DocumentService = () => {
             </div>
             {!valid ? (
               <p className="text-xs text-gray-500 text-center" data-testid="fill-form-hint">
-                Select at least one service and fill in the property + tenant details to continue.
+                Select at least one service to continue.
               </p>
             ) : (
               <PayPalCheckout

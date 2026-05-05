@@ -54,6 +54,48 @@ SERVICE_PRETTY = {
     "birth_expenses": "Birth expenses",
 }
 
+# What we ask the customer to send us on WhatsApp so we can file the form.
+SERVICE_REQUIRED_INFO = {
+    "kitzvat_yeladim": [
+        "Parent's full name and Teudat Zehut (ID)",
+        "Each child's full name and date of birth",
+        "Bank account details (bank, branch, account number) for the deposit",
+        "A clear photo of the parent's Teudat Zehut",
+    ],
+    "maanak_leidah": [
+        "Mother's full name and Teudat Zehut (ID)",
+        "Hospital discharge / birth confirmation document",
+        "Bank account details (bank, branch, account number)",
+    ],
+    "birth_expenses": [
+        "Claimant's full name and Teudat Zehut (ID)",
+        "Proof of the baby's birth (birth certificate or hospital discharge)",
+        "Receipts / invoices for the birth-related expenses you're claiming",
+        "Bank account details (bank, branch, account number)",
+    ],
+}
+
+
+def _build_required_info_html(services: list[str]) -> str:
+    """Build an inline-styled HTML block listing what the customer must send
+    via WhatsApp for each purchased Bituach Leumi service."""
+    sections: list[str] = []
+    for svc in services:
+        items = SERVICE_REQUIRED_INFO.get(svc) or []
+        if not items:
+            continue
+        bullets = "".join(
+            f'<li style="margin:0 0 6px;color:#555;font-size:13px;line-height:1.6;">{item}</li>'
+            for item in items
+        )
+        sections.append(
+            f'<div style="margin-bottom:12px;">'
+            f'<div style="color:#222;font-size:13px;font-weight:700;margin-bottom:6px;">{SERVICE_PRETTY.get(svc, svc)}</div>'
+            f'<ul style="margin:0 0 0 18px;padding:0;">{bullets}</ul>'
+            f'</div>'
+        )
+    return "".join(sections)
+
 
 def _compute_amount(product_type: str, metadata: dict[str, Any]) -> tuple[float, str, str]:
     """Return (amount, currency, description) computed server-side."""
@@ -196,6 +238,22 @@ async def _finalize_captured_order(order_id: str, capture_payload: dict[str, Any
     user = await db.users.find_one({"id": order["user_id"]}, {"_id": 0})
     customer_email = (user or {}).get("email")
     customer_name = (user or {}).get("name", "")
+
+    # For Bituach Leumi (document_service) orders, the customer email also
+    # needs the "what to send us on WhatsApp" block + the WhatsApp number
+    # taken from the global site settings.
+    required_info_html = ""
+    whatsapp_number = ""
+    if order["product_type"] == "document_service":
+        services = [
+            s for s in (order.get("metadata") or {}).get("services", [])
+            if s in VALID_DOC_SERVICES
+        ]
+        services = list(dict.fromkeys(services))
+        required_info_html = _build_required_info_html(services)
+        site_settings = await db.site_settings.find_one({"key": "global"}, {"_id": 0}) or {}
+        whatsapp_number = site_settings.get("whatsapp_number") or ""
+
     try:
         if customer_email:
             await send_payment_confirmation_email(
@@ -207,6 +265,8 @@ async def _finalize_captured_order(order_id: str, capture_payload: dict[str, Any
                 amount=order["amount"],
                 currency=order["currency"],
                 captured_at=captured_at.split("T")[0],
+                required_info_html=required_info_html,
+                whatsapp_number=whatsapp_number,
             )
         if PAYPAL_ADMIN_EMAIL:
             await send_payment_confirmation_email(
