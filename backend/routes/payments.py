@@ -67,15 +67,25 @@ SERVICE_PRETTY = {
 # What we ask the customer to send us on WhatsApp so we can file the form.
 SERVICE_REQUIRED_INFO = {
     "kitzvat_yeladim": [
-        "Parent's full name and Teudat Zehut (ID)",
-        "Each child's full name and date of birth",
-        "Bank account details (bank, branch, account number) for the deposit",
-        "A clear photo of the parent's Teudat Zehut",
+        "Parents' passports",
+        "Proof of bank account in the mother's name (e.g. a void check)",
+        "A copy of the child's passport and visa",
+        "Daf knisot v'yitziot for the child and one parent",
+        "Mother's Teudat Zehut / Bituach Leumi number",
+        "Father's Teudat Zehut / Bituach Leumi number",
+        "Child's Teudat Zehut / Bituach Leumi number",
     ],
     "maanak_leidah": [
-        "Mother's full name and Teudat Zehut (ID)",
-        "Hospital discharge / birth confirmation document",
-        "Bank account details (bank, branch, account number)",
+        "Mother's full name",
+        "Mother's Teudat Zehut / Bituach Leumi number",
+        "Address",
+        "Employment status",
+        "Husband's full name",
+        "Husband's Teudat Zehut / Bituach Leumi number",
+        "Child's date of birth",
+        "Hospital of birth",
+        "Proof of payment to hospital and amount paid",
+        "Bank details",
     ],
     "birth_expenses": [
         "Claimant's full name and Teudat Zehut (ID)",
