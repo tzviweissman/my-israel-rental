@@ -1,7 +1,7 @@
 import React, { useContext, useEffect, useState } from 'react';
 import { useSearchParams, useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
-import { CheckCircle2, Loader2, ArrowRight, Receipt, MessageCircle } from 'lucide-react';
+import { CheckCircle2, Loader2, ArrowRight, ArrowLeft, Receipt, MessageCircle } from 'lucide-react';
 import { API, AuthContext } from '../App';
 import { SERVICE_BY_KEY } from '../lib/documentServices';
 
@@ -119,6 +119,14 @@ const PaymentSuccess = () => {
   return (
     <div className="min-h-screen bg-[#fafafa] pt-24 pb-16 px-4" data-testid="payment-success-page">
       <div className="max-w-xl mx-auto">
+        <button
+          type="button"
+          onClick={() => navigate('/dashboard')}
+          className="inline-flex items-center gap-1.5 text-sm font-medium text-gray-600 hover:text-[#1E6A6A] mb-4 transition-colors"
+          data-testid="payment-success-back-link"
+        >
+          <ArrowLeft size={16} /> Back to Dashboard
+        </button>
         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
           <div className="bg-gradient-to-br from-[#1E6A6A] to-[#155454] px-8 py-10 text-white text-center">
             <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-4">
