@@ -53,6 +53,7 @@ VALID_DOC_SERVICES = {
     "birth_expenses",
     "arnona_discount",
     "name_change",
+    "bituach_leumi_registration",
 }
 SERVICE_PRETTY = {
     "kitzvat_yeladim": "Kitzvat Yeladim (Child Stipend)",
@@ -60,6 +61,7 @@ SERVICE_PRETTY = {
     "birth_expenses": "Birth expenses",
     "arnona_discount": "Arnona discount filing",
     "name_change": "Apartment name change",
+    "bituach_leumi_registration": "Bituach Leumi registration",
 }
 
 # What we ask the customer to send us on WhatsApp so we can file the form.
@@ -94,6 +96,15 @@ SERVICE_REQUIRED_INFO = {
         "Full property address",
         "A photo of the signed lease agreement",
         "Account numbers for electricity, water, and Arnona (if known)",
+    ],
+    "bituach_leumi_registration": [
+        "Full name and Teudat Zehut (ID) — or passport number if not yet issued",
+        "Date of arrival in Israel and visa / immigration status",
+        "Current address in Israel",
+        "Marital status (and spouse's full name + Teudat Zehut if married)",
+        "Children's full names and dates of birth (if applicable)",
+        "Employment / income status (employed, self-employed, student, etc.)",
+        "Bank account details (bank, branch, account number)",
     ],
 }
 

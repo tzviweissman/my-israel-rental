@@ -67,6 +67,21 @@ export const DOC_SERVICES = [
       'Account numbers for electricity, water, and Arnona (if known)',
     ],
   },
+  {
+    key: 'bituach_leumi_registration',
+    label: 'Bituach Leumi registration',
+    hint: 'New-resident registration with Bituach Leumi (the National Insurance Institute) — required to access any benefit.',
+    price: PRICE_PER,
+    items: [
+      'Full name and Teudat Zehut (ID) — or passport number if not yet issued',
+      'Date of arrival in Israel and visa / immigration status',
+      'Current address in Israel',
+      "Marital status (and spouse's full name + Teudat Zehut if married)",
+      "Children's full names and dates of birth (if applicable)",
+      'Employment / income status (employed, self-employed, student, etc.)',
+      'Bank account details (bank, branch, account number)',
+    ],
+  },
 ];
 
 export const SERVICE_BY_KEY = Object.fromEntries(DOC_SERVICES.map(s => [s.key, s]));
