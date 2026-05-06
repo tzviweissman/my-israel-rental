@@ -17,8 +17,250 @@ import {
   Bed,
   Bath,
   X,
+  Search,
 } from 'lucide-react';
 import { toast } from 'sonner';
+
+// Same neighborhood groupings used by /properties — keeping them in sync.
+const AREA_GROUPS = [
+  {
+    label: 'Jerusalem',
+    cities: ['Abu Tor','Arnona','Arzei HaBira','Baka','Bayit VeGan','Beit HaKerem','French Hill','Geula','German Colony','Gilo','Givat HaMivtar','Givat Shaul','Har Nof','Jewish Quarter','Katamon','Kiryat HaYovel','Kiryat Moshe','Maalot Dafna','Mamilla','Mea Shearim','Nachlaot','Neve Yaakov','Old City','Pisgat Zeev','Ramat Eshkol','Ramat Shlomo','Ramot','Rehavia','Sanhedria','Talbiya','Talpiot'],
+    prefix: 'Jerusalem - ',
+  },
+  {
+    label: 'Tel Aviv',
+    cities: ['City Center','Florentin','Jaffa (Yafo)','Neve Tzedek','Old North','Ramat Aviv','Ramat HaHayal','Sarona','Shapira','White City','Yad Eliyahu'],
+    prefix: 'Tel Aviv - ',
+  },
+  {
+    label: 'Haifa',
+    cities: ['Ahuza','Carmel Center','German Colony','Hadar HaCarmel',"Neve Sha'anan",'Stella Maris','Wadi Nisnas'],
+    prefix: 'Haifa - ',
+  },
+  {
+    label: 'Other',
+    cities: ['Ashdod','Ashkelon','Bat Yam','Beersheba','Beit Shemesh','Bnei Brak','Eilat','Herzliya','Kfar Saba','Modiin','Netanya','Petah Tikva','Raanana','Ramat Gan','Rehovot','Rishon LeZion'],
+    prefix: '',
+  },
+];
+
+const RENTAL_TYPES = [
+  { value: 'all', label: 'Any type' },
+  { value: 'long-term', label: 'Long-term' },
+  { value: 'short-term', label: 'Short-term' },
+  { value: 'vacation', label: 'Vacation' },
+  { value: 'storage', label: 'Storage' },
+];
+
+const EMPTY_FILTERS = {
+  name: '',
+  rental_type: 'all',
+  area: '',
+  bedrooms_min: '',
+  max_price: '',
+  start_date: '',
+  end_date: '',
+};
+
+/**
+ * Inline form for creating a saved-search alert. Lets the renter pick
+ * filters directly inside the Alerts tab — no need to bounce to the
+ * properties page. Mirrors the backend SavedSearchFilters schema.
+ */
+const CreateAlertForm = ({ API, token, onCreated, onCancel }) => {
+  const [form, setForm] = useState(EMPTY_FILTERS);
+  const [submitting, setSubmitting] = useState(false);
+
+  const update = (k, v) => setForm((prev) => ({ ...prev, [k]: v }));
+
+  const submit = async (e) => {
+    e.preventDefault();
+    if (!form.area && !form.max_price && !form.bedrooms_min && form.rental_type === 'all') {
+      toast.error('Please add at least one filter so we know what to watch for.');
+      return;
+    }
+    if (form.start_date && form.end_date && form.start_date > form.end_date) {
+      toast.error('End date must be after start date.');
+      return;
+    }
+    setSubmitting(true);
+    try {
+      const filters = {
+        rental_type: form.rental_type !== 'all' ? form.rental_type : null,
+        area: form.area || null,
+        bedrooms_min: form.bedrooms_min ? Number(form.bedrooms_min) : null,
+        max_price: form.max_price ? Number(form.max_price) : null,
+        start_date: form.start_date || null,
+        end_date: form.end_date || null,
+      };
+      await axios.post(
+        `${API}/saved-searches`,
+        { name: form.name?.trim() || null, filters },
+        { headers: { Authorization: `Bearer ${token}` } },
+      );
+      toast.success('Alert created — we\'ll email you when matches show up.');
+      setForm(EMPTY_FILTERS);
+      onCreated?.();
+    } catch (err) {
+      toast.error(err.response?.data?.detail || 'Failed to create alert');
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const inputCls = 'w-full px-3.5 py-2.5 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#1E6A6A]/20 focus:border-[#1E6A6A] transition-all border border-gray-200';
+
+  return (
+    <form
+      onSubmit={submit}
+      className="rounded-2xl border border-[#1E6A6A]/20 bg-gradient-to-br from-white to-[#f7faf9] p-5 md:p-6 space-y-4"
+      data-testid="create-alert-form"
+    >
+      <div className="flex items-start justify-between gap-3 mb-1">
+        <div>
+          <h3 className="text-base font-bold text-gray-900 flex items-center gap-2">
+            <Sparkles size={16} className="text-[#D4AF37]" /> New alert
+          </h3>
+          <p className="text-xs text-gray-500 mt-0.5">
+            We'll watch for new matches and email you when something fits.
+          </p>
+        </div>
+        <button
+          type="button"
+          onClick={onCancel}
+          className="text-gray-400 hover:text-gray-600 p-1"
+          aria-label="Close"
+          data-testid="create-alert-close"
+        >
+          <X size={18} />
+        </button>
+      </div>
+
+      <div>
+        <label className="text-[11px] font-semibold text-gray-500 uppercase tracking-wider mb-1.5 block">Alert name (optional)</label>
+        <input
+          type="text"
+          value={form.name}
+          onChange={(e) => update('name', e.target.value)}
+          placeholder="e.g. 3BR in Jerusalem under ₪7,000"
+          className={inputCls}
+          data-testid="alert-name-input"
+        />
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
+        <div>
+          <label className="text-[11px] font-semibold text-gray-500 uppercase tracking-wider mb-1.5 block">Rental type</label>
+          <select
+            value={form.rental_type}
+            onChange={(e) => update('rental_type', e.target.value)}
+            className={inputCls}
+            data-testid="alert-rental-type"
+          >
+            {RENTAL_TYPES.map((rt) => (
+              <option key={rt.value} value={rt.value}>{rt.label}</option>
+            ))}
+          </select>
+        </div>
+
+        <div>
+          <label className="text-[11px] font-semibold text-gray-500 uppercase tracking-wider mb-1.5 block">Area</label>
+          <select
+            value={form.area}
+            onChange={(e) => update('area', e.target.value)}
+            className={inputCls}
+            data-testid="alert-area"
+          >
+            <option value="">Anywhere</option>
+            {AREA_GROUPS.map((g) => (
+              <optgroup key={g.label} label={g.label}>
+                {g.cities.map((c) => (
+                  <option key={`${g.prefix}${c}`} value={`${g.prefix}${c}`}>{c}</option>
+                ))}
+              </optgroup>
+            ))}
+          </select>
+        </div>
+
+        <div>
+          <label className="text-[11px] font-semibold text-gray-500 uppercase tracking-wider mb-1.5 block">Min bedrooms</label>
+          <input
+            type="number"
+            min="0"
+            step="0.5"
+            value={form.bedrooms_min}
+            onChange={(e) => update('bedrooms_min', e.target.value)}
+            placeholder="Any"
+            className={inputCls}
+            data-testid="alert-bedrooms"
+          />
+        </div>
+
+        <div>
+          <label className="text-[11px] font-semibold text-gray-500 uppercase tracking-wider mb-1.5 block">Max price (₪/$)</label>
+          <input
+            type="number"
+            min="0"
+            value={form.max_price}
+            onChange={(e) => update('max_price', e.target.value)}
+            placeholder="No max"
+            className={inputCls}
+            data-testid="alert-max-price"
+          />
+        </div>
+
+        <div>
+          <label className="text-[11px] font-semibold text-gray-500 uppercase tracking-wider mb-1.5 block">Available from</label>
+          <input
+            type="date"
+            value={form.start_date}
+            onChange={(e) => update('start_date', e.target.value)}
+            className={inputCls}
+            data-testid="alert-start-date"
+          />
+        </div>
+
+        <div>
+          <label className="text-[11px] font-semibold text-gray-500 uppercase tracking-wider mb-1.5 block">Available to</label>
+          <input
+            type="date"
+            value={form.end_date}
+            onChange={(e) => update('end_date', e.target.value)}
+            className={inputCls}
+            data-testid="alert-end-date"
+          />
+        </div>
+      </div>
+
+      <div className="flex items-center justify-between gap-3 pt-1">
+        <p className="text-[11px] text-gray-400">
+          Tip: leave any field blank to match anything.
+        </p>
+        <div className="flex gap-2">
+          <button
+            type="button"
+            onClick={onCancel}
+            className="px-4 py-2 rounded-xl text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors"
+            data-testid="alert-cancel-btn"
+          >
+            Cancel
+          </button>
+          <button
+            type="submit"
+            disabled={submitting}
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold text-white transition-all hover:shadow-md disabled:opacity-50"
+            style={{ backgroundColor: '#1E6A6A' }}
+            data-testid="alert-submit-btn"
+          >
+            <Bell size={14} />
+            {submitting ? 'Saving…' : 'Create alert'}
+          </button>
+        </div>
+      </div>
+    </form>
+  );
+};
 
 /**
  * Renter dashboard — "Alerts" tab.
@@ -35,6 +277,7 @@ const SavedSearchesTab = ({ API, token }) => {
   const [matches, setMatches] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showManage, setShowManage] = useState(false);
+  const [showCreate, setShowCreate] = useState(false);
 
   const fetchAll = useCallback(async () => {
     setLoading(true);
@@ -167,16 +410,27 @@ const SavedSearchesTab = ({ API, token }) => {
           </p>
         </div>
         <button
-          onClick={() => navigate('/properties/all')}
+          onClick={() => setShowCreate((v) => !v)}
           className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold text-white transition-all hover:shadow-md"
           style={{ backgroundColor: '#1E6A6A' }}
           data-testid="create-alert-cta"
-          title="Run a search, then tap 'Save as alert' in the filter drawer"
         >
           <Sparkles size={15} />
-          {t('dashboard.createNewAlert')}
+          {showCreate ? 'Close' : t('dashboard.createNewAlert')}
         </button>
       </div>
+
+      {showCreate && (
+        <CreateAlertForm
+          API={API}
+          token={token}
+          onCancel={() => setShowCreate(false)}
+          onCreated={() => {
+            setShowCreate(false);
+            fetchAll();
+          }}
+        />
+      )}
 
       {/* Primary: matching properties */}
       {matches.length === 0 ? (
