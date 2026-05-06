@@ -1,9 +1,10 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useContext, useEffect, useRef, useState } from 'react';
 import axios from 'axios';
 import { format } from 'date-fns';
 import { Plus, Home, Check, Send, FileText, Upload, Loader2, Copy, Calendar, X } from 'lucide-react';
 import { toast } from 'sonner';
 import { Calendar as CalendarComponent } from '../ui/calendar';
+import { AuthContext } from '../../App';
 
 // Parse YYYY-MM-DD without UTC midnight drift (matches AddPropertyModal helper)
 const parseLocalDate = (dateStr) => {
@@ -19,6 +20,7 @@ const parseLocalDate = (dateStr) => {
  * Self-contained (owns all state + fetches).
  */
 const SubleasesTab = ({ API, token }) => {
+  const { user } = useContext(AuthContext);
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState(null);
   const [form, setForm] = useState({
@@ -74,8 +76,22 @@ const SubleasesTab = ({ API, token }) => {
   const fetchRenterBookings = async () => {
     try {
       const res = await axios.get(`${API}/bookings`, authHeaders);
+      // The /bookings endpoint returns bookings where the user is either
+      // the guest (renter_id) OR the sublessor (owner_id on a sublease
+      // booking). For the sublease picker we only want their OWN rentals
+      // — i.e. they were the guest, the booking is for the underlying
+      // property (not a sublease), and the booking is still active
+      // (pending|confirmed). Cancelled/cancellation_requested/expired
+      // bookings can never be sublet, mirroring the backend's
+      // create_sublease guard.
+      const eligible = (res.data || []).filter(
+        (b) =>
+          b.renter_id === user?.id &&
+          !b.sublease_id &&
+          (b.status === 'pending' || b.status === 'confirmed'),
+      );
       const bookingsWithProps = await Promise.all(
-        res.data.map(async (b) => {
+        eligible.map(async (b) => {
           try {
             const propRes = await axios.get(`${API}/properties/${b.property_id}`);
             return { ...b, property: propRes.data };
@@ -84,7 +100,18 @@ const SubleasesTab = ({ API, token }) => {
           }
         }),
       );
-      setMyBookings(bookingsWithProps.filter((b) => b.property));
+      // De-duplicate by property — a renter who's stayed at the same place
+      // multiple times only needs one row in the picker. Keep the most
+      // recent booking (largest check_in) so the dates feel current.
+      const byProperty = new Map();
+      for (const b of bookingsWithProps) {
+        if (!b.property) continue;
+        const existing = byProperty.get(b.property_id);
+        if (!existing || (b.check_in || '') > (existing.check_in || '')) {
+          byProperty.set(b.property_id, b);
+        }
+      }
+      setMyBookings(Array.from(byProperty.values()));
     } catch (err) {
       console.error('Failed to fetch bookings', err);
     }
