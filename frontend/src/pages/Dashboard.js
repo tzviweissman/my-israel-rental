@@ -2,7 +2,7 @@ import React, { useState, useEffect, useContext } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import axios from 'axios';
-import { Plus, Upload, Home } from 'lucide-react';
+import { Plus, Upload, Home, Sparkles } from 'lucide-react';
 import { API, AuthContext } from '../App';
 
 import ContractManager from '../components/ContractManager';
@@ -179,6 +179,23 @@ const Dashboard = () => {
         </div>
 
         {isOwnerLike && <ManagerHeader user={user} token={token} API={API} />}
+
+        {isRenter && !DOCUMENT_SERVICES_ENABLED && (
+          <div
+            className="mb-5 flex items-start gap-3 rounded-2xl border border-[#D4AF37]/30 bg-gradient-to-r from-[#fff8e6] to-[#fffaf0] px-5 py-3.5"
+            data-testid="services-coming-soon-banner"
+          >
+            <div className="flex-shrink-0 w-8 h-8 rounded-full bg-[#D4AF37]/15 text-[#a37d10] flex items-center justify-center">
+              <Sparkles size={16} />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-semibold text-gray-900">Document filing services — launching soon</p>
+              <p className="text-xs text-gray-600 mt-0.5">
+                Bituach Leumi benefits, Arnona discount, apartment name change, and more. We'll handle the paperwork so you don't have to.
+              </p>
+            </div>
+          </div>
+        )}
 
         <DashboardTabs
           activeTab={activeTab}
