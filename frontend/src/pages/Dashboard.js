@@ -19,6 +19,7 @@ import BulkManagerTab from '../components/dashboard/BulkManagerTab';
 import MessagesTab from '../components/dashboard/MessagesTab';
 import ManagerHeader from '../components/dashboard/ManagerHeader';
 import DashboardTabs from '../components/dashboard/DashboardTabs';
+import { DOCUMENT_SERVICES_ENABLED } from '../config/features';
 
 const Dashboard = () => {
   const { t } = useTranslation();
@@ -204,7 +205,7 @@ const Dashboard = () => {
           <SubleasesTab API={API} token={token} />
         )}
 
-        {activeTab === 'services' && isRenter && (
+        {activeTab === 'services' && isRenter && DOCUMENT_SERVICES_ENABLED && (
           <GovernmentServicesTab API={API} token={token} />
         )}
 

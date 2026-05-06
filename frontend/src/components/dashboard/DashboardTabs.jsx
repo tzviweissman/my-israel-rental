@@ -1,6 +1,7 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Layers, KeyRound, Home, Sparkles, Bell, Heart, MessageCircle } from 'lucide-react';
+import { DOCUMENT_SERVICES_ENABLED } from '../../config/features';
 
 /**
  * Horizontal tab navigation for the Dashboard. Pure presentational —
@@ -108,7 +109,7 @@ const DashboardTabs = ({ activeTab, setActiveTab, role, unreadMessages = 0 }) =>
           {t('dashboard.liked')}
         </button>
 
-        {isRenter && (
+        {isRenter && DOCUMENT_SERVICES_ENABLED && (
           <button
             onClick={() => setActiveTab('services')}
             className={`${cls(activeTab === 'services', ACTIVE_GOLD)} flex items-center justify-center gap-1.5`}
