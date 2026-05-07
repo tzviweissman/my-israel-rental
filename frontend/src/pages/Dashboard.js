@@ -138,19 +138,19 @@ const Dashboard = () => {
 
   return (
     <div className="min-h-screen" data-testid="dashboard-page">
-      <div className="max-w-7xl mx-auto px-6 pt-28 pb-12">
-        <div className="flex items-center justify-between mb-8">
-          <h1 className="text-4xl font-bold" style={{ fontFamily: 'Playfair Display' }}>
+      <div className="max-w-7xl mx-auto px-4 md:px-6 pt-24 md:pt-28 pb-12">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 mb-6 md:mb-8">
+          <h1 className="text-3xl md:text-4xl font-bold" style={{ fontFamily: 'Playfair Display' }}>
             {t('dashboard.title')}
           </h1>
           {isOwnerLike && (
-            <div className="flex gap-2">
+            <div className="flex gap-2 w-full sm:w-auto">
               <button
                 onClick={() => setShowBulkUpload(true)}
-                className="secondary-btn flex items-center gap-2"
+                className="secondary-btn flex flex-1 sm:flex-none items-center justify-center gap-2 whitespace-nowrap"
                 data-testid="bulk-upload-button"
               >
-                <Upload size={18} />
+                <Upload size={16} />
                 {t('dashboard.bulkUpload')}
               </button>
               <button
@@ -158,10 +158,10 @@ const Dashboard = () => {
                   setEditingProperty(null);
                   setShowAddProperty(true);
                 }}
-                className="primary-btn flex items-center gap-2"
+                className="primary-btn flex flex-1 sm:flex-none items-center justify-center gap-2 whitespace-nowrap"
                 data-testid="add-property-button"
               >
-                <Plus size={20} />
+                <Plus size={18} />
                 {t('dashboard.addProperty')}
               </button>
             </div>
@@ -169,10 +169,10 @@ const Dashboard = () => {
           {isRenter && (
             <button
               onClick={() => setActiveTab('subleases')}
-              className="primary-btn flex items-center gap-2"
+              className="primary-btn flex items-center justify-center gap-2 whitespace-nowrap w-full sm:w-auto"
               data-testid="sublease-property-button"
             >
-              <Home size={20} />
+              <Home size={18} />
               {t('dashboard.subleaseProperty')}
             </button>
           )}
