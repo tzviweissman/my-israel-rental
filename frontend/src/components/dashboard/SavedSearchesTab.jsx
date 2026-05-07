@@ -478,6 +478,122 @@ const SavedSearchesTab = ({ API, token }) => {
         />
       )}
 
+      {/* Manage existing alerts — sits right under create so the controls
+          live together; the matched-listings hero stays below. */}
+      {searches.length > 0 && (
+        <div>
+          <button
+            onClick={() => setShowManage((v) => !v)}
+            className="inline-flex items-center gap-2 text-sm font-semibold text-[#1E6A6A] hover:text-[#155454] transition-colors"
+            data-testid="toggle-manage-alerts"
+          >
+            <Settings size={14} />
+            {t('dashboard.manageMyAlerts')} ({searches.length})
+            {showManage ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+          </button>
+
+          {showManage && (
+            <div
+              className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2.5 mt-3"
+              data-testid="manage-alerts-panel"
+            >
+              {searches.map((s) => {
+                const f = s.filters || {};
+                const days = daysRemaining(s.expires_at);
+                return (
+                  <div
+                    key={s.id}
+                    onClick={() => navigate(buildSearchPath(s))}
+                    className="rounded-xl bg-white p-3 transition-all hover:shadow-md cursor-pointer"
+                    style={{ border: '1px solid #e8e4dc' }}
+                    data-testid={`saved-search-${s.id}`}
+                    role="button"
+                    tabIndex={0}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        navigate(buildSearchPath(s));
+                      }
+                    }}
+                  >
+                    <div className="flex items-start justify-between mb-1.5 gap-2">
+                      <div className="flex items-center gap-1.5 min-w-0 flex-1">
+                        <Bell className="text-[#D4AF37] flex-shrink-0" size={12} />
+                        <h3 className="text-xs font-bold text-[#1E6A6A] line-clamp-1">{s.name}</h3>
+                      </div>
+                      <div className="flex items-center gap-0.5 flex-shrink-0">
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            copySearchLink(s);
+                          }}
+                          className="text-gray-400 hover:text-[#1E6A6A] transition-colors p-0.5"
+                          data-testid={`saved-search-copy-${s.id}`}
+                          aria-label="Copy search link"
+                          title="Copy search link"
+                        >
+                          <LinkIcon size={12} />
+                        </button>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleDelete(s.id);
+                          }}
+                          className="text-gray-400 hover:text-red-500 transition-colors p-0.5"
+                          data-testid={`saved-search-delete-${s.id}`}
+                          aria-label="Remove alert"
+                        >
+                          <Trash2 size={12} />
+                        </button>
+                      </div>
+                    </div>
+
+                    <div className="space-y-0.5 text-[11px] text-gray-600">
+                      {f.area && (
+                        <div className="flex items-center gap-1 truncate">
+                          <MapPin size={10} className="text-[#1E6A6A] flex-shrink-0" />
+                          <span className="truncate">{f.area}</span>
+                        </div>
+                      )}
+                      {f.rental_type && (
+                        <div className="flex items-center gap-1">
+                          <HomeIcon size={10} className="text-[#1E6A6A] flex-shrink-0" />
+                          <span className="capitalize truncate">{String(f.rental_type).replace('-', ' ')}</span>
+                        </div>
+                      )}
+                      {(f.bedrooms_min || f.max_price) && (
+                        <div className="flex items-center gap-1">
+                          <DollarSign size={10} className="text-[#1E6A6A] flex-shrink-0" />
+                          <span className="truncate">
+                            {f.bedrooms_min ? `${f.bedrooms_min}+ BR` : ''}
+                            {f.bedrooms_min && f.max_price ? ' · ' : ''}
+                            {f.max_price
+                              ? `≤ ${(f.max_price_currency || 'ILS') === 'USD' ? '$' : '₪'}${Number(f.max_price).toLocaleString()}`
+                              : ''}
+                          </span>
+                        </div>
+                      )}
+                      {f.start_date && f.end_date && (
+                        <div className="flex items-center gap-1">
+                          <Calendar size={10} className="text-[#1E6A6A] flex-shrink-0" />
+                          <span className="truncate">{f.start_date} → {f.end_date}</span>
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="text-[10px] text-gray-400 mt-2 pt-1.5 border-t border-[#f0ece4]">
+                      {days > 0
+                        ? `${days}${days === 1 ? 'd' : 'd'} left`
+                        : t('dashboard.expired')}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      )}
+
       {/* Primary: matching properties */}
       {matches.length === 0 ? (
         <div
@@ -594,120 +710,6 @@ const SavedSearchesTab = ({ API, token }) => {
       )}
 
       {/* Secondary: collapsible alert management */}
-      {searches.length > 0 && (
-        <div className="pt-2">
-          <button
-            onClick={() => setShowManage((v) => !v)}
-            className="inline-flex items-center gap-2 text-sm font-semibold text-[#1E6A6A] hover:text-[#155454] transition-colors"
-            data-testid="toggle-manage-alerts"
-          >
-            <Settings size={14} />
-            {t('dashboard.manageMyAlerts')} ({searches.length})
-            {showManage ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
-          </button>
-
-          {showManage && (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-4" data-testid="manage-alerts-panel">
-              {searches.map((s) => {
-                const f = s.filters || {};
-                const days = daysRemaining(s.expires_at);
-                return (
-                  <div
-                    key={s.id}
-                    onClick={() => navigate(buildSearchPath(s))}
-                    className="rounded-2xl bg-white p-4 transition-all hover:shadow-md cursor-pointer"
-                    style={{ border: '1px solid #e8e4dc' }}
-                    data-testid={`saved-search-${s.id}`}
-                    role="button"
-                    tabIndex={0}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter' || e.key === ' ') {
-                        e.preventDefault();
-                        navigate(buildSearchPath(s));
-                      }
-                    }}
-                  >
-                    <div className="flex items-start justify-between mb-2">
-                      <div className="flex items-center gap-2 min-w-0">
-                        <div className="w-7 h-7 rounded-lg bg-[#D4AF37]/15 flex items-center justify-center flex-shrink-0">
-                          <Bell className="text-[#D4AF37]" size={13} />
-                        </div>
-                        <h3 className="text-sm font-bold text-[#1E6A6A] line-clamp-1">{s.name}</h3>
-                      </div>
-                      <div className="flex items-center gap-1 flex-shrink-0">
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            copySearchLink(s);
-                          }}
-                          className="text-gray-400 hover:text-[#1E6A6A] transition-colors p-1"
-                          data-testid={`saved-search-copy-${s.id}`}
-                          aria-label="Copy search link"
-                          title="Copy search link"
-                        >
-                          <LinkIcon size={14} />
-                        </button>
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleDelete(s.id);
-                          }}
-                          className="text-gray-400 hover:text-red-500 transition-colors p-1"
-                          data-testid={`saved-search-delete-${s.id}`}
-                          aria-label="Remove alert"
-                        >
-                          <Trash2 size={14} />
-                        </button>
-                      </div>
-                    </div>
-
-                    <div className="space-y-1 text-[11px] text-gray-600 mb-2">
-                      {f.area && (
-                        <div className="flex items-center gap-1.5">
-                          <MapPin size={11} className="text-[#1E6A6A]" />
-                          <span>{f.area}</span>
-                        </div>
-                      )}
-                      {f.rental_type && (
-                        <div className="flex items-center gap-1.5">
-                          <HomeIcon size={11} className="text-[#1E6A6A]" />
-                          <span className="capitalize">{String(f.rental_type).replace('-', ' ')}</span>
-                        </div>
-                      )}
-                      {(f.bedrooms_min || f.max_price) && (
-                        <div className="flex items-center gap-1.5">
-                          <DollarSign size={11} className="text-[#1E6A6A]" />
-                          <span>
-                            {f.bedrooms_min ? `${f.bedrooms_min}+ BR` : ''}
-                            {f.bedrooms_min && f.max_price ? ' · ' : ''}
-                            {f.max_price
-                              ? `≤ ${(f.max_price_currency || 'ILS') === 'USD' ? '$' : '₪'}${Number(f.max_price).toLocaleString()}`
-                              : ''}
-                          </span>
-                        </div>
-                      )}
-                      {f.start_date && f.end_date && (
-                        <div className="flex items-center gap-1.5">
-                          <Calendar size={11} className="text-[#1E6A6A]" />
-                          <span>
-                            {f.start_date} → {f.end_date}
-                          </span>
-                        </div>
-                      )}
-                    </div>
-
-                    <div className="text-[10px] text-gray-400 pt-2 border-t border-[#f0ece4]">
-                      {days > 0
-                        ? `${t('dashboard.expiresIn')} ${days} ${days === 1 ? t('dashboard.day') : t('dashboard.days')}`
-                        : t('dashboard.expired')}
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          )}
-        </div>
-      )}
     </div>
   );
 };
