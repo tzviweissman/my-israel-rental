@@ -19,6 +19,8 @@ import uuid
 from datetime import UTC, datetime, timedelta
 from typing import Any
 
+from utils.fx import convert_amount
+
 logger = logging.getLogger(__name__)
 
 
@@ -64,7 +66,7 @@ def _property_available_for(
     return True
 
 
-def _price_matches(prop: dict, search: dict) -> bool:
+async def _price_matches(prop: dict, search: dict) -> bool:
     max_price = search.get("max_price")
     if max_price is None:
         return True
@@ -76,18 +78,22 @@ def _price_matches(prop: dict, search: dict) -> bool:
         candidate = prop.get("monthly_price")
     if candidate is None:
         return True  # no price listed — don't block
-    # If the renter pinned a currency, only consider properties priced in
-    # that same currency. Comparing ₪ vs $ numerically would be nonsense
-    # ("₪10,000 ≤ $4,000" → True is obviously wrong).
-    target_currency = search.get("max_price_currency")
-    if target_currency:
-        prop_currency = (prop.get("currency") or "ILS").upper()
-        if prop_currency != target_currency.upper():
-            return False
     try:
-        return float(candidate) <= float(max_price)
+        candidate_amount = float(candidate)
     except (TypeError, ValueError):
         return True
+
+    target_currency = (search.get("max_price_currency") or "").upper() or None
+    prop_currency = (prop.get("currency") or "ILS").upper()
+
+    # If the renter pinned a target currency and the property is priced in a
+    # different one, convert the property's price into the renter's currency
+    # using the live USD↔ILS rate. This way "≤ $4,000" correctly catches a
+    # ₪10,500 listing (≈ $2,800 at 3.75 ILS/USD).
+    if target_currency and target_currency != prop_currency:
+        candidate_amount = await convert_amount(candidate_amount, prop_currency, target_currency)
+
+    return candidate_amount <= float(max_price)
 
 
 def _text_matches(prop_val: str | None, search_val: str | None) -> bool:
@@ -96,8 +102,8 @@ def _text_matches(prop_val: str | None, search_val: str | None) -> bool:
     return (prop_val or "").lower().find(str(search_val).lower()) != -1
 
 
-def property_matches_search(prop: dict, search: dict, bookings: list[dict]) -> bool:
-    """Pure predicate — no I/O. Used by match_property_against_searches."""
+async def property_matches_search(prop: dict, search: dict, bookings: list[dict]) -> bool:
+    """Async predicate — small FX I/O when comparing across currencies."""
     if prop.get("status") and prop["status"] not in ("active", "available"):
         return False
 
@@ -121,7 +127,7 @@ def property_matches_search(prop: dict, search: dict, bookings: list[dict]) -> b
             pass
 
     # Max price
-    if not _price_matches(prop, filters):
+    if not await _price_matches(prop, filters):
         return False
 
     # Date availability
@@ -193,7 +199,7 @@ async def match_property_against_searches(
         if already:
             continue
 
-        if not property_matches_search(prop, s, bookings):
+        if not await property_matches_search(prop, s, bookings):
             continue
 
         # Record alert
