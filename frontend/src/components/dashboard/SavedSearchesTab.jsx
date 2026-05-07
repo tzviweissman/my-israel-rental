@@ -60,7 +60,6 @@ const EMPTY_FILTERS = {
   bedrooms_min: '',
   max_price: '',
   start_date: '',
-  end_date: '',
 };
 
 /**
@@ -80,10 +79,6 @@ const CreateAlertForm = ({ API, token, onCreated, onCancel }) => {
       toast.error('Please add at least one filter so we know what to watch for.');
       return;
     }
-    if (form.start_date && form.end_date && form.start_date > form.end_date) {
-      toast.error('End date must be after start date.');
-      return;
-    }
     setSubmitting(true);
     try {
       const filters = {
@@ -92,7 +87,7 @@ const CreateAlertForm = ({ API, token, onCreated, onCancel }) => {
         bedrooms_min: form.bedrooms_min ? Number(form.bedrooms_min) : null,
         max_price: form.max_price ? Number(form.max_price) : null,
         start_date: form.start_date || null,
-        end_date: form.end_date || null,
+        end_date: null,
       };
       await axios.post(
         `${API}/saved-searches`,
@@ -218,17 +213,6 @@ const CreateAlertForm = ({ API, token, onCreated, onCancel }) => {
             onChange={(e) => update('start_date', e.target.value)}
             className={inputCls}
             data-testid="alert-start-date"
-          />
-        </div>
-
-        <div>
-          <label className="text-[11px] font-semibold text-gray-500 uppercase tracking-wider mb-1.5 block">Available to</label>
-          <input
-            type="date"
-            value={form.end_date}
-            onChange={(e) => update('end_date', e.target.value)}
-            className={inputCls}
-            data-testid="alert-end-date"
           />
         </div>
       </div>
