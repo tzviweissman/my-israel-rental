@@ -32,7 +32,8 @@ async def create_saved_search(body: SavedSearchCreate, payload: dict = Depends(v
         if filters.get("bedrooms_min"):
             parts.append(f"{filters['bedrooms_min']}+ BR")
         if filters.get("max_price"):
-            parts.append(f"≤ {int(filters['max_price']):,}")
+            symbol = "$" if (filters.get("max_price_currency") or "ILS").upper() == "USD" else "₪"
+            parts.append(f"≤ {symbol}{int(filters['max_price']):,}")
         if filters.get("start_date") and filters.get("end_date"):
             parts.append(f"{filters['start_date']} → {filters['end_date']}")
         name = " · ".join(parts) or "My alert"

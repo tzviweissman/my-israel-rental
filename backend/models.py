@@ -173,6 +173,7 @@ class SavedSearchFilters(BaseModel):
     area: str | None = None
     bedrooms_min: float | None = None
     max_price: float | None = None
+    max_price_currency: str | None = None  # 'ILS' or 'USD'
     start_date: str | None = None  # YYYY-MM-DD
     end_date: str | None = None    # YYYY-MM-DD
 

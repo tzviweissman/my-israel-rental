@@ -76,6 +76,14 @@ def _price_matches(prop: dict, search: dict) -> bool:
         candidate = prop.get("monthly_price")
     if candidate is None:
         return True  # no price listed — don't block
+    # If the renter pinned a currency, only consider properties priced in
+    # that same currency. Comparing ₪ vs $ numerically would be nonsense
+    # ("₪10,000 ≤ $4,000" → True is obviously wrong).
+    target_currency = search.get("max_price_currency")
+    if target_currency:
+        prop_currency = (prop.get("currency") or "ILS").upper()
+        if prop_currency != target_currency.upper():
+            return False
     try:
         return float(candidate) <= float(max_price)
     except (TypeError, ValueError):

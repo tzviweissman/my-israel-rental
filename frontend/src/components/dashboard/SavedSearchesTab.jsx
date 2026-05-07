@@ -59,6 +59,7 @@ const EMPTY_FILTERS = {
   area: '',
   bedrooms_min: '',
   max_price: '',
+  max_price_currency: 'ILS',
   start_date: '',
   flexible_dates: false,
 };
@@ -98,6 +99,7 @@ const CreateAlertForm = ({ API, token, onCreated, onCancel }) => {
         area: form.area || null,
         bedrooms_min: form.bedrooms_min ? Number(form.bedrooms_min) : null,
         max_price: form.max_price ? Number(form.max_price) : null,
+        max_price_currency: form.max_price ? form.max_price_currency : null,
         start_date: form.start_date || null,
         end_date: null,
       };
@@ -209,16 +211,28 @@ const CreateAlertForm = ({ API, token, onCreated, onCancel }) => {
         </div>
 
         <div>
-          <label className="text-[11px] font-semibold text-gray-500 uppercase tracking-wider mb-1.5 block">Max price (₪/$)</label>
-          <input
-            type="number"
-            min="0"
-            value={form.max_price}
-            onChange={(e) => update('max_price', e.target.value)}
-            placeholder="No max"
-            className={inputCls}
-            data-testid="alert-max-price"
-          />
+          <label className="text-[11px] font-semibold text-gray-500 uppercase tracking-wider mb-1.5 block">Max price</label>
+          <div className="flex">
+            <select
+              value={form.max_price_currency}
+              onChange={(e) => update('max_price_currency', e.target.value)}
+              className="px-2.5 py-2.5 rounded-l-lg text-sm bg-gray-50 border border-r-0 border-gray-200 text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#1E6A6A]/20 focus:border-[#1E6A6A] cursor-pointer"
+              data-testid="alert-currency"
+              aria-label="Currency"
+            >
+              <option value="ILS">₪ ILS</option>
+              <option value="USD">$ USD</option>
+            </select>
+            <input
+              type="number"
+              min="0"
+              value={form.max_price}
+              onChange={(e) => update('max_price', e.target.value)}
+              placeholder="No max"
+              className={`${inputCls} rounded-l-none border-l-0 flex-1`}
+              data-testid="alert-max-price"
+            />
+          </div>
         </div>
 
         <div>
@@ -666,7 +680,9 @@ const SavedSearchesTab = ({ API, token }) => {
                           <span>
                             {f.bedrooms_min ? `${f.bedrooms_min}+ BR` : ''}
                             {f.bedrooms_min && f.max_price ? ' · ' : ''}
-                            {f.max_price ? `≤ ${Number(f.max_price).toLocaleString()}` : ''}
+                            {f.max_price
+                              ? `≤ ${(f.max_price_currency || 'ILS') === 'USD' ? '$' : '₪'}${Number(f.max_price).toLocaleString()}`
+                              : ''}
                           </span>
                         </div>
                       )}
