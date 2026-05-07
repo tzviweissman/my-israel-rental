@@ -355,7 +355,7 @@ const AddPropertyModal = ({ isOpen, onClose, editingProperty, onSaved, API, toke
                   onChange={(e) => setPropertyForm({ ...propertyForm, square_meters: parseFloat(e.target.value) || '' })}
                   min="0"
                   step="0.1"
-                  placeholder="Total apartment size"
+                  placeholder={propertyForm.rental_type === 'storage' ? 'Storage area size' : 'Total apartment size'}
                   className="w-full px-4 py-2 rounded-lg border border-[#E5E5E5] focus:outline-none focus:ring-2 focus:ring-[#1E6A6A]/50"
                   data-testid="property-sqm-input"
                 />
