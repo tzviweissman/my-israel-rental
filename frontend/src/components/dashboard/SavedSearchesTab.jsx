@@ -60,7 +60,19 @@ const EMPTY_FILTERS = {
   bedrooms_min: '',
   max_price: '',
   start_date: '',
+  flexible_dates: false,
 };
+
+// Fuzziness window applied to start_date when matching properties.
+// Long-term & storage searches are inherently fuzzy (people move on flexible
+// dates); short-term/vacation only fuzz when the renter opts in.
+function fuzzinessForFilters({ rental_type, flexible_dates }) {
+  if (rental_type === 'short-term' || rental_type === 'vacation') {
+    return flexible_dates ? 7 : 0;
+  }
+  // long-term, storage, or "all" → default 30-day window
+  return 30;
+}
 
 /**
  * Inline form for creating a saved-search alert. Lets the renter pick
@@ -91,7 +103,11 @@ const CreateAlertForm = ({ API, token, onCreated, onCancel }) => {
       };
       await axios.post(
         `${API}/saved-searches`,
-        { name: form.name?.trim() || null, filters },
+        {
+          name: form.name?.trim() || null,
+          filters,
+          date_fuzziness_days: fuzzinessForFilters(form),
+        },
         { headers: { Authorization: `Bearer ${token}` } },
       );
       toast.success('Alert created — we\'ll email you when matches show up.');
@@ -214,8 +230,40 @@ const CreateAlertForm = ({ API, token, onCreated, onCancel }) => {
             className={inputCls}
             data-testid="alert-start-date"
           />
+          {form.start_date && (
+            <p className="text-[11px] text-gray-500 mt-1.5" data-testid="alert-fuzziness-hint">
+              {form.rental_type === 'short-term' || form.rental_type === 'vacation'
+                ? form.flexible_dates
+                  ? 'Including listings ±7 days around this date.'
+                  : 'Only exact-date matches. Toggle "Flexible dates" to widen.'
+                : 'Including listings ±30 days around this date.'}
+            </p>
+          )}
         </div>
       </div>
+
+      {(form.rental_type === 'short-term' || form.rental_type === 'vacation') && (
+        <div className="flex items-center justify-between gap-3 rounded-xl border border-gray-200 bg-white px-4 py-3" data-testid="flexible-dates-toggle">
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-semibold text-gray-800">Flexible dates</p>
+            <p className="text-xs text-gray-500 mt-0.5">
+              Also notify me about listings starting within 7 days of my move-in date.
+            </p>
+          </div>
+          <button
+            type="button"
+            role="switch"
+            aria-checked={form.flexible_dates}
+            onClick={() => update('flexible_dates', !form.flexible_dates)}
+            className={`relative inline-flex h-6 w-11 flex-shrink-0 items-center rounded-full transition-colors ${form.flexible_dates ? 'bg-[#1E6A6A]' : 'bg-gray-300'}`}
+            data-testid="flexible-dates-switch"
+          >
+            <span
+              className={`inline-block h-5 w-5 transform rounded-full bg-white transition-transform ${form.flexible_dates ? 'translate-x-5' : 'translate-x-0.5'}`}
+            />
+          </button>
+        </div>
+      )}
 
       <div className="flex items-center justify-between gap-3 pt-1">
         <p className="text-[11px] text-gray-400">

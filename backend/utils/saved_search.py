@@ -119,9 +119,27 @@ def property_matches_search(prop: dict, search: dict, bookings: list[dict]) -> b
     # Date availability
     start = _date_from_iso(filters.get("start_date"))
     end = _date_from_iso(filters.get("end_date"))
-    fuzz = int(search.get("date_fuzziness_days") or 30)
+    fuzz_raw = search.get("date_fuzziness_days")
+    # Use 30 as default only when the value is missing/None — *not* when 0
+    # (renter explicitly opted out of fuzzy matching for short-term/vacation).
+    fuzz = int(fuzz_raw) if fuzz_raw is not None else 30
     if start and end and not _property_available_for(prop, start, end, bookings, fuzz):
         return False
+
+    # When the renter only specified a move-in date (no end_date), match
+    # against the property's own ``available_from`` within the fuzziness
+    # window. e.g. for a long-term alert (30-day fuzz) starting Sep 1, a
+    # property available from Aug 5 or Oct 15 still qualifies.
+    # Properties with no ``available_from`` set are assumed flexible and
+    # always pass.
+    if start and not end:
+        prop_available = _date_from_iso(
+            prop.get("available_from") or prop.get("starting_date")
+        )
+        if prop_available is not None:
+            fuzz_td = timedelta(days=fuzz)
+            if not (start - fuzz_td <= prop_available <= start + fuzz_td):
+                return False
 
     return True
 
