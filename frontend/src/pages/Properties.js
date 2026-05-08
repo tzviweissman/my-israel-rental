@@ -822,15 +822,6 @@ const Properties = () => {
                 backgroundSize: 'cover',
                 backgroundPosition: 'center'
               }}>
-                {property.isSublease && (
-                  <span
-                    className="absolute top-2 left-2 md:top-3 md:left-3 px-2.5 py-1 rounded-full text-[10px] md:text-xs font-bold uppercase tracking-wide shadow-md z-10"
-                    style={{ backgroundColor: '#D4AF37', color: '#1E6A6A' }}
-                    data-testid="sublease-ribbon"
-                  >
-                    {t('property.subleaseRibbon')}
-                  </span>
-                )}
                 <button
                   onClick={(e) => toggleLike(e, property.id)}
                   className="absolute top-2 right-2 md:top-3 md:right-3 w-8 h-8 md:w-10 md:h-10 rounded-full bg-white/90 hover:bg-white flex items-center justify-center shadow-md transition-all hover:scale-110 active:scale-95 z-10"
