@@ -325,10 +325,10 @@ const Navigation = () => {
           )}
 
           <div className="flex items-center gap-3">
-            {/* Language toggle */}
+            {/* Language toggle — desktop only; mobile users get it inside the menu drawer */}
             <button
               onClick={toggleLanguage}
-              className="p-2 rounded-full hover:bg-white/10 transition-colors flex items-center gap-1"
+              className="hidden sm:flex p-2 rounded-full hover:bg-white/10 transition-colors items-center gap-1"
               data-testid="language-toggle"
               aria-label="Toggle language"
               title={i18n.language.startsWith('he') ? 'Switch to English' : 'Switch to Hebrew'}
@@ -537,6 +537,22 @@ const Navigation = () => {
                 </div>
 
                 <div className="mx-4 border-t" style={{ borderColor: 'rgba(212,175,55,0.15)' }} />
+
+                {/* Language switch — mobile only (desktop has the icon in the top nav) */}
+                <div className="sm:hidden px-2 py-2">
+                  <button
+                    onClick={() => { toggleLanguage(); setMenuOpen(false); }}
+                    className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-150 hover:bg-white/5 group"
+                    style={{ color: '#D4AF37' }}
+                    data-testid="nav-language-toggle-mobile"
+                  >
+                    <Globe size={16} className="opacity-60 group-hover:opacity-100" />
+                    <span>{i18n.language.startsWith('he') ? 'Switch to English' : 'עברית'}</span>
+                    <ChevronRight size={14} className="ml-auto opacity-0 group-hover:opacity-60 transition-opacity" />
+                  </button>
+                </div>
+
+                <div className="sm:hidden mx-4 border-t" style={{ borderColor: 'rgba(212,175,55,0.15)' }} />
 
                 {/* Settings */}
                 <div className="px-2 py-2">
