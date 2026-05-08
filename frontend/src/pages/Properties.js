@@ -200,7 +200,10 @@ const Properties = () => {
             `${API}/subleases?holiday_tag=${encodeURIComponent(holidayTag)}`,
           );
           const normalized = (subRes.data || []).map((s) => normalizeSublease(s));
-          merged = [...merged, ...normalized];
+          // Subleases come from /api/subleases (no price filter), so apply it
+          // client-side here using the same currency-aware logic the backend
+          // uses for /api/properties.
+          merged = [...merged, ...applyPriceFilter(normalized)];
         } catch (subErr) {
           console.warn('Failed to fetch subleases', subErr);
         }
@@ -235,6 +238,35 @@ const Properties = () => {
     available_from: sub.available_from,
     available_to: sub.available_to,
   });
+
+  // Apply the active min/max price filter to a collection of property-shaped
+  // objects (works for both real properties AND normalized subleases).
+  // Subleases come from a separate endpoint that doesn't honor the price
+  // query params, so without this they'd silently bypass the filter — which
+  // is how a ₪3,000 sublease was showing up for a "max $400" search.
+  const applyPriceFilter = (items, opts = {}) => {
+    const minP = opts.min_price ?? filters.min_price;
+    const maxP = opts.max_price ?? filters.max_price;
+    const targetCurrency = opts.currency ?? priceCurrency;
+    if (!minP && !maxP) return items;
+    const FX_USD_TO_ILS = 3.65; // matches backend fallback in utils/helpers.py
+    return items.filter((p) => {
+      const raw = p.monthly_price || p.nightly_price || 0;
+      if (!raw) return true; // no price listed — don't block
+      const propCurrency = p.currency || 'ILS';
+      let priceInTarget = raw;
+      if (propCurrency !== targetCurrency) {
+        if (targetCurrency === 'USD' && propCurrency === 'ILS') {
+          priceInTarget = raw / FX_USD_TO_ILS;
+        } else if (targetCurrency === 'ILS' && propCurrency === 'USD') {
+          priceInTarget = raw * FX_USD_TO_ILS;
+        }
+      }
+      if (minP && priceInTarget < Number(minP)) return false;
+      if (maxP && priceInTarget > Number(maxP)) return false;
+      return true;
+    });
+  };
 
   const handleFilterChange = (key, value) => {
     setFilters(prev => ({ ...prev, [key]: value }));
@@ -357,7 +389,7 @@ const Properties = () => {
           if (!s.available_from || !s.available_to) return true;
           return !(s.available_to < win.start || s.available_from > win.end);
         });
-        const merged = [...propsRes.data, ...filteredSubs.map(normalizeSublease)];
+        const merged = [...propsRes.data, ...applyPriceFilter(filteredSubs.map(normalizeSublease))];
         setProperties(merged);
         toast.success(`Showing homes available during ${win.label}`);
       } catch (err) {
