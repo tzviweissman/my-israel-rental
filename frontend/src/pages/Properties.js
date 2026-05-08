@@ -403,8 +403,11 @@ const Properties = () => {
           </button>
         </div>
 
-        {/* Holiday window banner — only on /properties/sukkot and /properties/pesach */}
-        {(type === 'sukkot' || type === 'pesach') && holidayWindows[type] && (
+        {/* Holiday window banner — only on /properties/pesach. The Sukkot
+            page no longer auto-prefills its date range (per request) so the
+            banner is suppressed there; renters can still pick the dates
+            themselves from the filters panel. */}
+        {type === 'pesach' && holidayWindows[type] && (
           <div
             className="mb-8 rounded-2xl overflow-hidden border border-[#D4AF37]/30 bg-gradient-to-br from-[#fffaee] via-white to-[#fffaee] shadow-sm"
             data-testid={`holiday-banner-${type}`}
