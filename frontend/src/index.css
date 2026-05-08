@@ -10,6 +10,14 @@ body {
         sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    /* Lock horizontal scrolling globally — vertical scrolling is unaffected.
+       Prevents stray wide elements (carousels, marketing imagery, full-bleed
+       sections) from making the entire page swipeable side-to-side on mobile. */
+    overflow-x: hidden;
+}
+
+html {
+    overflow-x: hidden;
 }
 
 code {
