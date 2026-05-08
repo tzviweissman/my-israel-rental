@@ -191,7 +191,14 @@ const Chat = () => {
   }, [messages]);
 
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    // Scroll *only* the messages container, never the page itself.
+    // Using messagesEndRef.scrollIntoView() would bubble up and pull the
+    // whole window down on mobile (~1s after the messages list rendered),
+    // which felt like "the screen automatically lowered" to the user.
+    const container = messagesContainerRef.current;
+    if (container) {
+      container.scrollTo({ top: container.scrollHeight, behavior: 'smooth' });
+    }
   };
 
   const handleScroll = () => {
