@@ -382,10 +382,13 @@ const Navigation = () => {
                   )}
                 </button>
 
-                {/* Notification Dropdown */}
+                {/* Notification Dropdown — fixed on mobile so it always
+                    sits with safe insets from BOTH viewport edges (anchoring
+                    via the bell's parent could push the panel off-screen
+                    when the menu button took up the right-side space). */}
                 {showNotifications && (
                   <div
-                    className="absolute right-0 top-full mt-3 w-[calc(100vw-2rem)] sm:w-96 max-w-md max-h-[70vh] sm:max-h-[500px] overflow-y-auto rounded-2xl"
+                    className="fixed sm:absolute left-4 right-4 sm:left-auto sm:right-0 top-[64px] sm:top-full sm:mt-3 sm:w-96 max-w-md max-h-[70vh] sm:max-h-[500px] overflow-y-auto rounded-2xl z-50"
                     style={{
                       backgroundColor: '#1E6A6A',
                       border: '1.5px solid rgba(212,175,55,0.25)',
