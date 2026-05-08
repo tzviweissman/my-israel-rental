@@ -48,19 +48,24 @@ const Home = () => {
           <p className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-8" style={{ fontFamily: 'Playfair Display', color: '#D4AF37' }}>
           {t('hero.anyDuration')}
           </p>
-          <div className="flex gap-2 max-w-2xl mx-auto">
+          <div className="flex gap-2 max-w-2xl mx-auto px-2 sm:px-0">
             <input
               type="text"
               placeholder={t('hero.searchPlaceholder')}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
-              className="flex-1 px-6 py-4 rounded-full text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#1E6A6A]"
+              className="flex-1 min-w-0 px-4 sm:px-6 py-3 sm:py-4 rounded-full text-sm sm:text-base text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#1E6A6A]"
               data-testid="hero-search-input"
             />
-            <button onClick={handleSearch} className="primary-btn flex items-center gap-2" style={{ color: '#FFFFFF' }} data-testid="hero-search-button">
-              <Search size={20} />
-              {t('hero.search')}
+            <button
+              onClick={handleSearch}
+              className="primary-btn flex flex-shrink-0 items-center justify-center gap-1.5 sm:gap-2 px-4 sm:px-6 py-3 sm:py-4 text-sm sm:text-base"
+              style={{ color: '#FFFFFF' }}
+              data-testid="hero-search-button"
+            >
+              <Search size={18} className="flex-shrink-0" />
+              <span className="hidden sm:inline">{t('hero.search')}</span>
             </button>
           </div>
         </div>
