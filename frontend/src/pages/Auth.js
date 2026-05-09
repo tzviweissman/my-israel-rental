@@ -6,6 +6,7 @@ import { API, AuthContext } from '../App';
 import { toast } from 'sonner';
 import { Eye, EyeOff, ArrowLeft, Mail, KeyRound, CheckCircle } from 'lucide-react';
 import WelcomePopups from '../components/WelcomePopups';
+import OwnerManagementOfferModal from '../components/OwnerManagementOfferModal';
 
 const Auth = () => {
   const { mode } = useParams();
@@ -39,6 +40,7 @@ const Auth = () => {
   const [resetDone, setResetDone] = useState(false);
   const [showResetPassword, setShowResetPassword] = useState(false);
   const [showWelcomePopups, setShowWelcomePopups] = useState(false);
+  const [showOwnerOffer, setShowOwnerOffer] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -57,6 +59,10 @@ const Auth = () => {
       toast.success(mode === 'login' ? t('auth.welcomeBack') : t('auth.accountCreated'));
       if (mode === 'signup' && formData.role === 'renter') {
         setShowWelcomePopups(true);
+      } else if (mode === 'signup' && formData.role === 'owner') {
+        // Pitch our property-management service the moment a fresh owner
+        // lands on the platform — they're most receptive right after signup.
+        setShowOwnerOffer(true);
       } else {
         navigate(redirectUrl);
       }
@@ -297,6 +303,13 @@ const Auth = () => {
   return (
     <div className="min-h-screen flex items-center justify-center px-6 pt-20 pb-12">
       {showWelcomePopups && <WelcomePopups onDismiss={() => { setShowWelcomePopups(false); navigate(redirectUrl); }} />}
+      <OwnerManagementOfferModal
+        open={showOwnerOffer}
+        onDismiss={() => {
+          setShowOwnerOffer(false);
+          navigate(redirectUrl);
+        }}
+      />
       <div className="w-full max-w-md">
         <div className="bg-white rounded-2xl p-8 border border-[#E5E5E5]">
           <h2 className="text-3xl font-bold mb-8 text-center" style={{ fontFamily: 'Playfair Display' }}>
