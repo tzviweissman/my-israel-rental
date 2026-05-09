@@ -412,6 +412,7 @@ const Auth = () => {
                   >
                     <option value="renter">{t('auth.renter')}</option>
                     <option value="owner">{t('auth.owner')}</option>
+                    <option value="manager">{t('auth.manager')}</option>
                   </select>
                 </div>
               </>
