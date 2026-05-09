@@ -18,6 +18,7 @@ import BulkUploadModal from '../components/dashboard/BulkUploadModal';
 import BulkManagerTab from '../components/dashboard/BulkManagerTab';
 import MessagesTab from '../components/dashboard/MessagesTab';
 import ManagerHeader from '../components/dashboard/ManagerHeader';
+import ShareLinkRow from '../components/dashboard/ShareLinkRow';
 import DashboardTabs from '../components/dashboard/DashboardTabs';
 import { DOCUMENT_SERVICES_ENABLED } from '../config/features';
 
@@ -182,6 +183,22 @@ const Dashboard = () => {
             business logo since they typically list a single property. */}
         {(user?.role === 'manager' || user?.role === 'admin') && (
           <ManagerHeader user={user} token={token} API={API} />
+        )}
+
+        {/* Owners get just the share-link control — same `/manager/{id}`
+            URL serves their public listings page, without the business-logo
+            header. */}
+        {user?.role === 'owner' && (
+          <div
+            className="bg-white p-5 rounded-2xl border border-[#E5E5E5] mb-8"
+            data-testid="owner-share-section"
+          >
+            <ShareLinkRow
+              userId={user.id}
+              label="Share your listings"
+              testidPrefix="owner-share-link"
+            />
+          </div>
         )}
 
         {isRenter && !DOCUMENT_SERVICES_ENABLED && (
