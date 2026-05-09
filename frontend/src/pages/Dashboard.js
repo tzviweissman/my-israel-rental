@@ -178,7 +178,11 @@ const Dashboard = () => {
           )}
         </div>
 
-        {isOwnerLike && <ManagerHeader user={user} token={token} API={API} />}
+        {/* Manager-only — owners don't need a public manager page or
+            business logo since they typically list a single property. */}
+        {(user?.role === 'manager' || user?.role === 'admin') && (
+          <ManagerHeader user={user} token={token} API={API} />
+        )}
 
         {isRenter && !DOCUMENT_SERVICES_ENABLED && (
           <div
