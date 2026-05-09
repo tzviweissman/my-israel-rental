@@ -144,13 +144,13 @@ const Dashboard = () => {
             {t('dashboard.title')}
           </h1>
           {isOwnerLike && (
-            <div className="flex gap-2 w-full sm:w-auto">
+            <div className="flex gap-2 justify-end sm:justify-start sm:w-auto">
               <button
                 onClick={() => setShowBulkUpload(true)}
-                className="secondary-btn flex flex-1 sm:flex-none items-center justify-center gap-2 whitespace-nowrap"
+                className="secondary-btn flex items-center justify-center gap-1.5 sm:gap-2 whitespace-nowrap !px-3.5 sm:!px-8 !py-2 sm:!py-3 text-xs sm:text-sm"
                 data-testid="bulk-upload-button"
               >
-                <Upload size={16} />
+                <Upload size={14} className="sm:w-4 sm:h-4" />
                 {t('dashboard.bulkUpload')}
               </button>
               <button
@@ -158,10 +158,10 @@ const Dashboard = () => {
                   setEditingProperty(null);
                   setShowAddProperty(true);
                 }}
-                className="primary-btn flex flex-1 sm:flex-none items-center justify-center gap-2 whitespace-nowrap"
+                className="primary-btn flex items-center justify-center gap-1.5 sm:gap-2 whitespace-nowrap !px-3.5 sm:!px-8 !py-2 sm:!py-3 text-xs sm:text-sm"
                 data-testid="add-property-button"
               >
-                <Plus size={18} />
+                <Plus size={14} className="sm:w-[18px] sm:h-[18px]" />
                 {t('dashboard.addProperty')}
               </button>
             </div>
