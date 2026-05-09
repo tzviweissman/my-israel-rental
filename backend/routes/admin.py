@@ -306,6 +306,40 @@ async def get_all_properties_admin(payload: dict = Depends(verify_token)) -> lis
     return properties
 
 
+@api_router.put("/admin/properties/{property_id}/managed", response_model=AdminToggleStatusResponse)
+async def toggle_property_admin_managed(
+    property_id: str,
+    payload: dict = Depends(verify_token),
+) -> dict:
+    """Super-admin: flip the `managed_by_admin` flag on a property.
+
+    This is the "I'm managing this property for the owner" marker. It does
+    not change ownership or permissions — admins already have full control.
+    It just lets us filter the listings table to "Properties I manage" so
+    super-admins can find them quickly when handling the day-to-day
+    (renters, maintenance, contracts) on the owner's behalf.
+    """
+    if payload['role'] != 'admin':
+        raise HTTPException(status_code=403, detail="Admin access required")
+    prop = await db.properties.find_one({"id": property_id}, {"_id": 0, "id": 1, "managed_by_admin": 1})
+    if prop is None:
+        raise HTTPException(status_code=404, detail="Property not found")
+    new_value = not bool(prop.get("managed_by_admin"))
+    await db.properties.update_one(
+        {"id": property_id},
+        {"$set": {
+            "managed_by_admin": new_value,
+            "managed_by_admin_id": payload["user_id"] if new_value else None,
+            "managed_by_admin_at": datetime.now(UTC).isoformat() if new_value else None,
+        }},
+    )
+    await publish("invalidate", {"prefixes": ["/api/admin/properties", "/api/admin/dashboard"]})
+    return {
+        "message": "Managing this property" if new_value else "No longer managing",
+        "status": "managed" if new_value else "unmanaged",
+    }
+
+
 class AdminBlockIn(BaseModel):
     start_date: str | None = None  # ISO string; None => starts now
     end_date: str | None = None    # ISO string; None => indefinite

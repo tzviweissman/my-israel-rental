@@ -4,7 +4,7 @@ import axios from 'axios';
 import { toast } from 'sonner';
 import {
   Trash2, ToggleLeft, ToggleRight, Search,
-  CalendarX, CalendarCheck, Lock,
+  CalendarX, CalendarCheck, Lock, Briefcase,
 } from 'lucide-react';
 import { API } from '../../App';
 import { useApiSWR } from '../../hooks/useApiSWR';
@@ -21,6 +21,7 @@ export const ListingsTab = ({ token, onStatsChange }) => {
     `${API}/admin/properties`, token, { initial: [] }
   );
   const [searchTerm, setSearchTerm] = useState('');
+  const [managedFilter, setManagedFilter] = useState('all'); // 'all' | 'managed'
   const [selectedPropIds, setSelectedPropIds] = useState(new Set());
   const [bookedModalOpen, setBookedModalOpen] = useState(false);
   // bookedTarget: null | { mode: 'single', id } | { mode: 'bulk' }
@@ -37,6 +38,19 @@ export const ListingsTab = ({ token, onStatsChange }) => {
       fetchProperties();
       notifyStatsChange();
     } catch (e) { toast.error('Failed to update property'); }
+  };
+
+  /**
+   * Flip the "I'm managing this for the owner" flag. Pure marker — admins
+   * already have full control over every property, but this lets us filter
+   * the giant listings table to just the ones we're personally handling.
+   */
+  const toggleAdminManaged = async (propertyId) => {
+    try {
+      const res = await axios.put(`${API}/admin/properties/${propertyId}/managed`, {}, { headers });
+      toast.success(res.data.message);
+      fetchProperties();
+    } catch (e) { toast.error('Failed to update managed status'); }
   };
 
   const deleteProperty = (propertyId) => {
@@ -151,12 +165,17 @@ export const ListingsTab = ({ token, onStatsChange }) => {
     });
   };
 
-  const filteredProperties = properties.filter(p =>
-    !searchTerm ||
-    p.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    p.area?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    p.owner_name?.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredProperties = properties.filter(p => {
+    if (managedFilter === 'managed' && !p.managed_by_admin) return false;
+    if (!searchTerm) return true;
+    const t = searchTerm.toLowerCase();
+    return (
+      p.title?.toLowerCase().includes(t) ||
+      p.area?.toLowerCase().includes(t) ||
+      p.owner_name?.toLowerCase().includes(t)
+    );
+  });
+  const managedCount = properties.filter(p => p.managed_by_admin).length;
 
   return (
     <div data-testid="admin-listings-section">
@@ -173,6 +192,23 @@ export const ListingsTab = ({ token, onStatsChange }) => {
           />
         </div>
         <span className="text-sm text-gray-500">{t('admin.listingsCount', { count: filteredProperties.length })}</span>
+        {/* Quick chip toggle: All vs "Properties I manage" */}
+        <div className="inline-flex bg-white rounded-lg border border-[#E5E5E5] p-0.5 ml-1" data-testid="managed-filter">
+          <button
+            onClick={() => setManagedFilter('all')}
+            className={`px-2.5 py-1 rounded-md text-xs font-semibold transition-colors ${managedFilter === 'all' ? 'bg-[#1E6A6A] text-white' : 'text-gray-600 hover:bg-gray-50'}`}
+            data-testid="managed-filter-all"
+          >
+            All
+          </button>
+          <button
+            onClick={() => setManagedFilter('managed')}
+            className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-semibold transition-colors ${managedFilter === 'managed' ? 'bg-[#1E6A6A] text-white' : 'text-gray-600 hover:bg-gray-50'}`}
+            data-testid="managed-filter-managed"
+          >
+            <Briefcase size={12} /> I manage ({managedCount})
+          </button>
+        </div>
         {selectedPropIds.size > 0 && (
           <div className="flex items-center gap-2 ml-auto">
             <span className="text-xs font-medium text-gray-700" data-testid="selected-count">
@@ -235,8 +271,17 @@ export const ListingsTab = ({ token, onStatsChange }) => {
                   />
                 </td>
                 <td className="px-4 py-3 font-medium text-sm">
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 flex-wrap">
                     <span>{p.title}</span>
+                    {p.managed_by_admin && (
+                      <span
+                        className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-[#1E6A6A]/10 text-[#1E6A6A]"
+                        title="Admin-managed for the owner"
+                        data-testid={`managed-badge-${p.id}`}
+                      >
+                        <Briefcase size={10} /> Managing
+                      </span>
+                    )}
                     {p.admin_blocked_now && (
                       <span
                         className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-amber-100 text-amber-800"
@@ -281,6 +326,14 @@ export const ListingsTab = ({ token, onStatsChange }) => {
                         <CalendarX size={18} />
                       </button>
                     )}
+                    <button
+                      onClick={() => toggleAdminManaged(p.id)}
+                      className={`p-1.5 rounded transition-colors ${p.managed_by_admin ? 'bg-[#1E6A6A]/10 text-[#1E6A6A] hover:bg-[#1E6A6A]/15' : 'hover:bg-gray-100 text-gray-400'}`}
+                      title={p.managed_by_admin ? 'Stop managing this property' : 'Start managing this property for the owner'}
+                      data-testid={`toggle-managed-${p.id}`}
+                    >
+                      <Briefcase size={16} />
+                    </button>
                     <button
                       onClick={() => togglePropertyStatus(p.id)}
                       className="p-1.5 rounded hover:bg-gray-100"
