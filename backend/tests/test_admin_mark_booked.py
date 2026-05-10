@@ -110,7 +110,7 @@ class TestMarkBookedSingle:
         assert "block" in data
         b = data["block"]
         assert b["property_id"] == TEST_PROPERTY_ID
-        assert b["indefinite"] is True
+        assert b["indefinite"] == True
         assert b["end_date"] is None
         assert "id" in b
         # verify via list
@@ -126,7 +126,7 @@ class TestMarkBookedSingle:
         b = r.json()["block"]
         assert b["start_date"] == "2030-01-01"
         assert b["end_date"] == "2030-01-10"
-        assert b["indefinite"] is False
+        assert b["indefinite"] == False
 
     def test_invalid_end_before_start(self, admin_headers):
         r = requests.post(f"{API}/admin/properties/{TEST_PROPERTY_ID}/mark-booked",
@@ -141,7 +141,7 @@ class TestMarkBookedSingle:
         assert r.status_code == 200
         b = r.json()["block"]
         assert b["end_date"] is None
-        assert b["indefinite"] is True  # end is None => indefinite True
+        assert b["indefinite"] == True  # end is None => indefinite True
 
     def test_nonexistent_property_returns_404(self, admin_headers):
         r = requests.post(f"{API}/admin/properties/does-not-exist/mark-booked",
@@ -188,7 +188,7 @@ class TestBulkMarkBooked:
                 lst = requests.get(f"{API}/admin/properties/{pid}/blocks",
                                    headers=admin_headers, timeout=15).json()
                 assert len(lst) >= 1
-                assert any(b["indefinite"] is True for b in lst)
+                assert any(b["indefinite"] == True for b in lst)
         finally:
             # cleanup second property's blocks (first is handled by fixture)
             lst2 = requests.get(f"{API}/admin/properties/{second_property_id}/blocks",
@@ -229,7 +229,7 @@ class TestAdminPropertiesEnrichment:
         assert "admin_blocks" in target
         assert "admin_blocked_now" in target
         assert "active_admin_block" in target
-        assert target["admin_blocked_now"] is True
+        assert target["admin_blocked_now"] == True
         assert len(target["admin_blocks"]) >= 1
         assert target["active_admin_block"] is not None
 

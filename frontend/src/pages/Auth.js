@@ -2,6 +2,7 @@ import React, { useState, useContext } from 'react';
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import axios from 'axios';
+import DOMPurify from 'dompurify';
 import { API, AuthContext } from '../App';
 import { toast } from 'sonner';
 import { Eye, EyeOff, ArrowLeft, Mail, KeyRound, CheckCircle } from 'lucide-react';
@@ -131,7 +132,7 @@ const Auth = () => {
                   <CheckCircle size={32} className="text-green-600" />
                 </div>
                 <h2 className="text-2xl font-bold mb-3" style={{ fontFamily: 'Playfair Display' }}>{t('auth.checkYourEmail')}</h2>
-                <p className="text-gray-600 text-sm mb-6" dangerouslySetInnerHTML={{ __html: t('auth.resetLinkSent', { email: `<strong>${forgotEmail}</strong>` }) }} />
+                <p className="text-gray-600 text-sm mb-6" dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(t('auth.resetLinkSent', { email: `<strong>${forgotEmail}</strong>` })) }} />
                 <button
                   onClick={() => navigate('/auth/login')}
                   className="w-full primary-btn"

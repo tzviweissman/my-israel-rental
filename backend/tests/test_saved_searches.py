@@ -121,7 +121,7 @@ class TestSavedSearchCRUD:
         r2 = requests.post(f"{API}/saved-searches", json=body, headers=renter_auth["headers"])
         assert r2.status_code == 200
         d2 = r2.json()
-        assert d2.get("existing") is True
+        assert d2.get("existing") == True
         assert d2["id"] == id1
 
     def test_list_saved_searches_excludes_id(self, renter_auth):

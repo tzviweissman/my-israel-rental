@@ -112,7 +112,7 @@ class TestBulkEdit:
             assert "_id" not in item
         # Verify persistence
         p1 = _get_prop(pid1, owner_token)
-        assert p1["has_elevator"] is True
+        assert p1["has_elevator"] == True
         assert p1["monthly_price"] == 7777
         assert p1["checkin_time"] == "15:00"
 
