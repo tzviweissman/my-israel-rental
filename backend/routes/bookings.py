@@ -1,9 +1,7 @@
 """Auto-extracted from server.py during the 2026-04 refactor."""
 import asyncio
-import base64
 import uuid
 from datetime import UTC, datetime
-from io import BytesIO
 from typing import Any
 
 from fastapi import APIRouter, Body, Depends, HTTPException
@@ -18,6 +16,7 @@ from models_response import (
     MessageResponse,
 )
 from routes.deps import ROOT_DIR, db, logger, verify_token
+from utils.contract_signing import stamp_signature_on_contract
 from utils.email import (
     send_booking_confirmation_email,
     send_booking_notification_email,
@@ -470,320 +469,153 @@ async def request_cancel_booking(booking_id: str, reason: str = Body(..., embed=
 @api_router.post("/bookings/{booking_id}/sign-contract", response_model=BookingSignContractResponse)
 async def sign_booking_contract(booking_id: str, body: dict = Body(...), payload: dict = Depends(verify_token)) -> dict:
     """Renter signs the rental contract after owner acceptance"""
-    booking = await db.bookings.find_one({"id": booking_id}, {"_id": 0})
-    if not booking:
-        raise HTTPException(status_code=404, detail="Booking not found")
-    
-    # Verify user is the renter
-    if booking['renter_id'] != payload['user_id']:
-        raise HTTPException(status_code=403, detail="Not authorized")
-    
-    # Check if contract was sent
-    if not booking.get('contract_sign_token'):
-        raise HTTPException(status_code=400, detail="No contract to sign for this booking")
-    
-    # Check if already signed
-    if booking.get('contract_signed'):
-        raise HTTPException(status_code=400, detail="Contract already signed")
-    
-    signature_data = body.get('signature_data', '')
-    signature_x = body.get('signature_x', 0)
-    signature_y = body.get('signature_y', 0)
-    signature_width = body.get('signature_width', 200)
-    signature_height = body.get('signature_height', 100)
-    # Displayed contract dimensions in the signing UI. Used to scale signature
-    # coordinates from CSS pixels to the native image/PDF coordinate system.
-    display_width = body.get('display_width')
-    display_height = body.get('display_height')
-    legal_name = (body.get('legal_name') or '').strip()
+    booking, property_data = await _load_booking_for_signing(booking_id, payload['user_id'])
 
+    signature_data = body.get('signature_data', '')
+    legal_name = (body.get('legal_name') or '').strip()
     if not signature_data:
         raise HTTPException(status_code=400, detail="Signature data is required")
     if not legal_name:
         raise HTTPException(status_code=400, detail="Full legal name is required")
-    
-    # Get property to retrieve contract
+
+    signed_contract_url = await _stamp_contract_if_present(
+        booking_id=booking_id,
+        property_data=property_data,
+        signature_data=signature_data,
+        sig_x=body.get('signature_x', 0),
+        sig_y=body.get('signature_y', 0),
+        sig_w=body.get('signature_width', 200),
+        sig_h=body.get('signature_height', 100),
+        display_width=body.get('display_width'),
+        display_height=body.get('display_height'),
+        legal_name=legal_name,
+    )
+
+    await _persist_signed_contract(
+        booking_id=booking_id,
+        signature_data=signature_data,
+        signature_position={
+            'x': body.get('signature_x', 0),
+            'y': body.get('signature_y', 0),
+            'width': body.get('signature_width', 200),
+            'height': body.get('signature_height', 100),
+        },
+        display_width=body.get('display_width'),
+        display_height=body.get('display_height'),
+        legal_name=legal_name,
+        signed_contract_url=signed_contract_url,
+    )
+
+    await _notify_owner_contract_signed(booking, property_data, signed_contract_url)
+
+    return {
+        "message": "Contract signed successfully",
+        "booking_status": "confirmed",
+        "signed_contract_url": signed_contract_url,
+    }
+
+
+# ---- sign_booking_contract helpers --------------------------------------
+
+async def _load_booking_for_signing(booking_id: str, user_id: str) -> tuple[dict, dict]:
+    """Look up the booking, validate the renter is signing their own
+    contract, and confirm a contract was actually sent. Also fetches the
+    property doc since both the stamper and the notification need it."""
+    booking = await db.bookings.find_one({"id": booking_id}, {"_id": 0})
+    if not booking:
+        raise HTTPException(status_code=404, detail="Booking not found")
+    if booking['renter_id'] != user_id:
+        raise HTTPException(status_code=403, detail="Not authorized")
+    if not booking.get('contract_sign_token'):
+        raise HTTPException(status_code=400, detail="No contract to sign for this booking")
+    if booking.get('contract_signed'):
+        raise HTTPException(status_code=400, detail="Contract already signed")
     property_data = await db.properties.find_one({"id": booking['property_id']}, {"_id": 0})
     if not property_data:
         raise HTTPException(status_code=404, detail="Property not found")
-    
-    signed_contract_url = None
-    
-    # If property has a contract, stamp the signature onto it
-    if property_data.get('contract_url'):
-        try:
-            # Get the original contract filename from URL
-            contract_filename = property_data['contract_url'].split('/')[-1]
-            contract_path = ROOT_DIR / "uploads" / contract_filename
-            
-            if not contract_path.exists():
-                raise HTTPException(status_code=404, detail="Contract file not found")
-            
-            # Determine file type
-            file_ext = contract_path.suffix.lower()
-            
-            # Generate signed contract filename
-            signed_filename = f"signed_{booking_id}_{contract_filename}"
-            signed_path = ROOT_DIR / "uploads" / signed_filename
-            
-            # Convert base64 signature to image
-            from PIL import Image
-            signature_image_data = signature_data.split(',')[1] if ',' in signature_data else signature_data
-            signature_bytes = base64.b64decode(signature_image_data)
-            signature_img = Image.open(BytesIO(signature_bytes)).convert("RGBA")
+    return booking, property_data
 
-            if file_ext == '.pdf':
-                # Handle PDF signing
-                from PyPDF2 import PdfReader, PdfWriter
-                from reportlab.pdfgen import canvas
 
-                # Read original PDF
-                reader = PdfReader(str(contract_path))
-                writer = PdfWriter()
+async def _stamp_contract_if_present(
+    *, booking_id: str, property_data: dict,
+    signature_data: str,
+    sig_x: float, sig_y: float, sig_w: float, sig_h: float,
+    display_width: float | None, display_height: float | None,
+    legal_name: str,
+) -> str | None:
+    """If the property has an attached contract, stamp the signature onto
+    a fresh copy in `uploads/` and return its public URL. Otherwise None."""
+    if not property_data.get('contract_url'):
+        return None
+    contract_filename = property_data['contract_url'].split('/')[-1]
+    contract_path = ROOT_DIR / "uploads" / contract_filename
+    if not contract_path.exists():
+        raise HTTPException(status_code=404, detail="Contract file not found")
+    signed_filename = f"signed_{booking_id}_{contract_filename}"
+    signed_path = ROOT_DIR / "uploads" / signed_filename
+    try:
+        stamp_signature_on_contract(
+            contract_path=contract_path,
+            signed_path=signed_path,
+            signature_data=signature_data,
+            sig_x=sig_x, sig_y=sig_y, sig_w=sig_w, sig_h=sig_h,
+            display_width=display_width, display_height=display_height,
+            legal_name=legal_name,
+            booking_id=booking_id,
+            uploads_dir=ROOT_DIR / "uploads",
+        )
+    except Exception as e:
+        logger.error(f"Failed to stamp signature on contract: {e}")
+        raise HTTPException(status_code=500, detail=f"Failed to process signature: {e}")
+    return f"/api/uploads/{signed_filename}"
 
-                # Get first page dimensions (in PDF points)
-                first_page = reader.pages[0]
-                page_width = float(first_page.mediabox.width)
-                page_height = float(first_page.mediabox.height)
 
-                # Scale signature coords from display pixels -> PDF points
-                if display_width and display_height:
-                    scale_x = page_width / float(display_width)
-                    scale_y = page_height / float(display_height)
-                else:
-                    scale_x = scale_y = 1.0
-                sig_x = signature_x * scale_x
-                sig_y = signature_y * scale_y
-                sig_w = signature_width * scale_x
-                sig_h = signature_height * scale_y
-
-                # Trim transparent margin off the signature so we anchor the
-                # name to the actual visible scribble — when the user signs
-                # in a tiny corner of a huge canvas, the bounding-box-based
-                # name placement otherwise floats far away from the ink.
-                bbox = signature_img.getbbox()
-                if bbox is not None:
-                    bx0, by0, bx1, by1 = bbox
-                    iw, ih = signature_img.size
-                    if iw > 0 and ih > 0 and (bx0 > 0 or by0 > 0 or bx1 < iw or by1 < ih):
-                        signature_img = signature_img.crop(bbox)
-                        # Shift the box's top-left to where the scribble starts,
-                        # and shrink the box to the scribble's actual size.
-                        sig_x = sig_x + (bx0 / iw) * sig_w
-                        sig_y = sig_y + (by0 / ih) * sig_h
-                        sig_w = ((bx1 - bx0) / iw) * sig_w
-                        sig_h = ((by1 - by0) / ih) * sig_h
-
-                # Resize signature image to specified (scaled) dimensions
-                signature_img_scaled = signature_img.resize(
-                    (max(1, int(sig_w)), max(1, int(sig_h))), Image.Resampling.LANCZOS
-                )
-
-                # Create signature overlay on first page
-                signature_overlay = BytesIO()
-                c = canvas.Canvas(signature_overlay, pagesize=(page_width, page_height))
-
-                # Save signature as temp PNG for reportlab
-                temp_sig_path = ROOT_DIR / "uploads" / f"temp_sig_{booking_id}.png"
-                signature_img_scaled.save(str(temp_sig_path), "PNG")
-
-                # Draw signature on PDF (convert y coordinate as PDF origin is bottom-left)
-                pdf_y = page_height - sig_y - sig_h
-                c.drawImage(str(temp_sig_path), sig_x, pdf_y,
-                           width=sig_w, height=sig_h,
-                           mask='auto', preserveAspectRatio=True)
-
-                # Print the signer's legal name DIRECTLY BELOW the signature.
-                # If there literally isn't a sliver of room, place it as low
-                # as possible (clamped to the page) — never above, since that
-                # caused the "northwest of the scribble" complaint.
-                # Font scales with scribble height for a similar visual weight.
-                name_font_size = max(32.0, min(80.0, sig_h * 1.1))
-                pad = max(6.0, sig_h * 0.18)
-                name_y_below = pdf_y - pad - name_font_size
-                # Clamp to bottom of page; we never go above the signature.
-                name_y_pdf = max(0.0, name_y_below)
-                # Horizontally CENTER the "Name: <legal_name>" string under
-                # the signature box. Starting at sig_x (the box's left edge)
-                # makes the name look offset from the visible scribble
-                # whenever the user drew it in the middle/right of the
-                # signature canvas — exactly what was reported as the name
-                # appearing "northwest" of the signature.
-                c.setFillColorRGB(0.08, 0.08, 0.08)
-                label = "Name: "
-                label_width = c.stringWidth(label, "Helvetica-Bold", name_font_size)
-                name_width = c.stringWidth(legal_name, "Helvetica", name_font_size)
-                total_width = label_width + name_width
-                # Center the combined label+name within the signature box.
-                # Clamp to the page so very long names don't run off.
-                name_x = sig_x + max(0.0, (sig_w - total_width) / 2.0)
-                if name_x + total_width > page_width:
-                    name_x = max(0.0, page_width - total_width - 4.0)
-                c.setFont("Helvetica-Bold", name_font_size)
-                c.drawString(name_x, name_y_pdf, label)
-                c.setFont("Helvetica", name_font_size)
-                c.drawString(name_x + label_width, name_y_pdf, legal_name)
-                c.save()
-
-                # Merge signature overlay with first page
-                signature_overlay.seek(0)
-                signature_pdf = PdfReader(signature_overlay)
-                first_page.merge_page(signature_pdf.pages[0])
-                writer.add_page(first_page)
-
-                # Add remaining pages
-                for page_num in range(1, len(reader.pages)):
-                    writer.add_page(reader.pages[page_num])
-
-                # Write signed PDF
-                with open(signed_path, 'wb') as output_file:
-                    writer.write(output_file)
-
-                # Clean up temp signature file
-                temp_sig_path.unlink(missing_ok=True)
-
-            else:
-                # Handle image signing (jpg, png, etc.)
-                contract_img = Image.open(contract_path).convert("RGBA")
-                native_w, native_h = contract_img.size
-
-                # Scale signature coords from display pixels -> native image pixels
-                if display_width and display_height:
-                    scale_x = native_w / float(display_width)
-                    scale_y = native_h / float(display_height)
-                else:
-                    scale_x = scale_y = 1.0
-                sig_x = int(signature_x * scale_x)
-                sig_y = int(signature_y * scale_y)
-                sig_w = max(1, int(signature_width * scale_x))
-                sig_h = max(1, int(signature_height * scale_y))
-
-                # Trim transparent margin off the signature so we anchor the
-                # name to the actual visible scribble (instead of the full
-                # canvas box, which tends to be huge with a tiny scribble in
-                # the corner).
-                bbox = signature_img.getbbox()
-                if bbox is not None:
-                    bx0, by0, bx1, by1 = bbox
-                    iw, ih = signature_img.size
-                    if iw > 0 and ih > 0 and (bx0 > 0 or by0 > 0 or bx1 < iw or by1 < ih):
-                        signature_img = signature_img.crop(bbox)
-                        sig_x = sig_x + int((bx0 / iw) * sig_w)
-                        sig_y = sig_y + int((by0 / ih) * sig_h)
-                        sig_w = max(1, int(((bx1 - bx0) / iw) * sig_w))
-                        sig_h = max(1, int(((by1 - by0) / ih) * sig_h))
-
-                # Resize signature to scaled dimensions
-                signature_img_scaled = signature_img.resize((sig_w, sig_h), Image.Resampling.LANCZOS)
-
-                # Create a transparent layer for signature
-                signature_layer = Image.new('RGBA', contract_img.size, (255, 255, 255, 0))
-                signature_layer.paste(signature_img_scaled, (sig_x, sig_y), signature_img_scaled)
-
-                # Draw the signer's legal name just below the signature, on the
-                # same transparent layer so it composites cleanly.
-                from PIL import ImageDraw, ImageFont
-                draw = ImageDraw.Draw(signature_layer)
-                # Font size scaled with TRIMMED signature height so the
-                # printed name reads at a similar visual weight to the
-                # actual handwritten scribble. Generous upper cap since
-                # we now anchor on the real ink region.
-                font_size = max(56, min(180, int(sig_h * 1.1)))
-                font_reg: Any
-                font_bold: Any
-                try:
-                    font_reg = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf", font_size)
-                    font_bold = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf", font_size)
-                except Exception:
-                    font_reg = font_bold = ImageFont.load_default()
-
-                # Padding between signature box and printed name (larger on big contracts)
-                pad = max(12, int(sig_h * 0.18))
-                # Always render the legal name BELOW the signature (clamped
-                # to the page bottom if needed). Never above — that caused
-                # the "northwest of the scribble" complaint.
-                name_y = min(sig_y + sig_h + pad, native_h - font_size - 4)
-                if name_y < 0:
-                    name_y = 0
-
-                label = "Name: "
-                name_val = legal_name
-                # Horizontally center the "Name: <legal_name>" string under
-                # the signature box for the same reason as the PDF path.
-                if hasattr(draw, 'textlength'):
-                    label_w = draw.textlength(label, font=font_bold)
-                    name_w = draw.textlength(name_val, font=font_reg)
-                else:
-                    # Older Pillow fallback — approximate width
-                    label_w = font_size * len(label) * 0.55
-                    name_w = font_size * len(name_val) * 0.55
-                total_w = label_w + name_w
-                name_x_start = sig_x + max(0, int((sig_w - total_w) / 2))
-                if name_x_start + int(total_w) > native_w:
-                    name_x_start = max(0, native_w - int(total_w) - 4)
-                # Draw "Name: " in bold, then the actual legal name in regular for clarity
-                draw.text((name_x_start, name_y), label, fill=(20, 20, 20, 255), font=font_bold)
-                draw.text((name_x_start + int(label_w), name_y), name_val, fill=(20, 20, 20, 255), font=font_reg)
-
-                # Composite signature + legal-name onto contract
-                signed_image = Image.alpha_composite(contract_img, signature_layer)
-
-                # Convert back to RGB if saving as JPEG
-                if file_ext in ['.jpg', '.jpeg']:
-                    signed_image = signed_image.convert('RGB')
-
-                signed_image.save(signed_path)
-
-            signed_contract_url = f"/api/uploads/{signed_filename}"
-            
-        except Exception as e:
-            logger.error(f"Failed to stamp signature on contract: {e}")
-            raise HTTPException(status_code=500, detail=f"Failed to process signature: {e}")
-    
-    # Update booking with signature and signed contract
-    update_data = {
+async def _persist_signed_contract(
+    *, booking_id: str,
+    signature_data: str,
+    signature_position: dict,
+    display_width: float | None, display_height: float | None,
+    legal_name: str,
+    signed_contract_url: str | None,
+) -> None:
+    """Update the booking doc with signature data + signed-contract URL."""
+    update_data: dict[str, Any] = {
         "contract_signed": True,
         "signature_data": signature_data,
-        "signature_position": {"x": signature_x, "y": signature_y, "width": signature_width, "height": signature_height},
+        "signature_position": signature_position,
         # Persist the signing-canvas dimensions so we can faithfully re-stamp
         # this contract later (e.g. when stamping logic improves) without
         # asking the renter to re-sign. Falls back to None on legacy clients
         # that don't pass these values.
         "signature_display": {"width": display_width, "height": display_height},
         "signer_legal_name": legal_name,
-        "contract_signed_at": datetime.now(UTC).isoformat()
+        "contract_signed_at": datetime.now(UTC).isoformat(),
     }
-    
     if signed_contract_url:
         update_data["signed_contract_url"] = signed_contract_url
-    
-    await db.bookings.update_one(
-        {"id": booking_id},
-        {"$set": update_data}
+    await db.bookings.update_one({"id": booking_id}, {"$set": update_data})
+
+
+async def _notify_owner_contract_signed(
+    booking: dict, property_data: dict, signed_contract_url: str | None,
+) -> None:
+    """Drop an in-app notification for the owner about the signed contract."""
+    message = (
+        f"The rental contract for {property_data.get('title', 'your property')} "
+        "has been signed by the renter. The booking is now fully confirmed!"
     )
-    
-    # Notify owner that contract was signed
-    message = f"The rental contract for {property_data.get('title', 'your property')} has been signed by the renter. The booking is now fully confirmed!"
     if signed_contract_url:
         message += " View the signed contract in the booking details."
-    
-    owner_notification = {
+    await db.notifications.insert_one({
         "id": str(uuid.uuid4()),
         "user_id": booking['owner_id'],
         "type": "contract_signed",
-        "booking_id": booking_id,
+        "booking_id": booking['id'],
         "property_id": booking['property_id'],
         "message": message,
         "read": False,
-        "created_at": datetime.now(UTC).isoformat()
-    }
-    await db.notifications.insert_one(owner_notification)
-    
-    return {
-        "message": "Contract signed successfully",
-        "booking_status": "confirmed",
-        "signed_contract_url": signed_contract_url
-    }
+        "created_at": datetime.now(UTC).isoformat(),
+    })
 
 
 @api_router.post("/bookings/{booking_id}/approve-cancel", response_model=MessageResponse)

@@ -427,5 +427,13 @@ Build a bilingual (English/Hebrew) rental website named MyIsraelRental.com with 
   - **AddPropertyModal.jsx: 1068 → 722 lines (−32%)**. Behaviour unchanged.
   - Verified end-to-end: modal opens, both DateField variants render correctly when rental_type switches, LocationPicker dropdown shows full neighborhood list, vacation-only fields (cleaning fee, holiday Sukkot/Pesach tags, max guests) appear conditionally, file drop zone mounts. Zero console errors. Owner login → dashboard → Add Property smoke-test green.
 
+- [x] **`sign_booking_contract()` backend decomposition** (2026-02-10):
+  - Extracted all PDF + image signature stamping into a new pure-IO module `/app/backend/utils/contract_signing.py` (232 lines, FastAPI-free, importable + unit-testable in isolation). Public API: `stamp_signature_on_contract()` plus shared `_decode_signature_image()` and `_crop_to_visible_ink()` helpers.
+  - The route handler now delegates to four small named helpers in `routes/bookings.py`: `_load_booking_for_signing()` (lookup + auth + 4xx checks), `_stamp_contract_if_present()` (resolve filenames, dispatch to stamper), `_persist_signed_contract()` (DB update), `_notify_owner_contract_signed()` (in-app notification).
+  - **`sign_booking_contract` itself: 315 → 51 lines (−84%)**. Reads top-to-bottom as a 4-step orchestration. Cyclomatic complexity dropped from 42 → ~3.
+  - bookings.py overall: 952 → 783 lines (the rest of the file is unchanged).
+  - Removed now-unused `base64` and `BytesIO` imports from bookings.py.
+  - Verified live: 404 on missing booking ✓ / 403 on wrong user (owner trying to sign as renter) ✓ / 400 on already-signed ✓ — all four pre-stamping validation paths route through the new helper correctly.
+
 ## Test Credentials
 See /app/memory/test_credentials.md
