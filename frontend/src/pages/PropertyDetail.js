@@ -766,8 +766,11 @@ const PropertyDetail = () => {
                       </button>
                     </div>
                     
-                    {/* Quick Select Buttons for Longer Stays — hidden for subleases (short-window). */}
-                    {!sublease && (
+                    {/* Quick Select Buttons for Longer Stays — hidden for
+                        subleases (short window) and for vacation rentals
+                        (the "+1 year" preset is meaningless for nightly
+                        stays where most guests want a few nights). */}
+                    {!sublease && property.rental_type !== 'vacation' && (
                     <div className="mt-3">
                       <p className="text-xs text-gray-500 mb-2">{t('property.quickSelect')}</p>
                       <div className="flex gap-2 flex-wrap">
