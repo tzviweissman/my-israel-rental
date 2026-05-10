@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import axios from 'axios';
 import { toast } from 'sonner';
@@ -21,7 +22,17 @@ export const ListingsTab = ({ token, onStatsChange }) => {
     `${API}/admin/properties`, token, { initial: [] }
   );
   const [searchTerm, setSearchTerm] = useState('');
-  const [managedFilter, setManagedFilter] = useState('all'); // 'all' | 'managed'
+  // Keep filters + search in the URL so browser back/forward preserves them
+  // when the admin clicks into a property and returns. Without this, the
+  // filter resets to "all" because the listings tab unmounts on navigation.
+  const [searchParams, setSearchParams] = useSearchParams();
+  const managedFilter = searchParams.get('managed') === '1' ? 'managed' : 'all';
+  const setManagedFilter = (val) => {
+    const next = new URLSearchParams(searchParams);
+    if (val === 'managed') next.set('managed', '1');
+    else next.delete('managed');
+    setSearchParams(next, { replace: true });
+  };
   const [selectedPropIds, setSelectedPropIds] = useState(new Set());
   const [bookedModalOpen, setBookedModalOpen] = useState(false);
   // bookedTarget: null | { mode: 'single', id } | { mode: 'bulk' }
