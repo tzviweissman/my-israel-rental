@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ChevronDown, MessageCircle, Calendar, DollarSign, RotateCcw, ArrowLeft } from 'lucide-react';
+import { ChevronDown, MessageCircle, Calendar, DollarSign, RotateCcw, ArrowLeft, Search, X } from 'lucide-react';
 
 const SECTIONS = [
   {
@@ -87,7 +87,7 @@ const SECTIONS = [
   },
 ];
 
-const FAQItem = ({ q, a, isOpen, onToggle, testid }) => (
+const FAQItem = ({ q, a, isOpen, onToggle, testid, highlight }) => (
   <div className="border-b border-[#E5E5E5] last:border-b-0" data-testid={testid}>
     <button
       onClick={onToggle}
@@ -95,7 +95,7 @@ const FAQItem = ({ q, a, isOpen, onToggle, testid }) => (
       aria-expanded={isOpen}
     >
       <span className="text-sm md:text-base font-semibold text-gray-900 group-hover:text-[#1E6A6A] transition-colors">
-        {q}
+        {highlight ? highlightText(q, highlight) : q}
       </span>
       <ChevronDown
         size={18}
@@ -114,13 +114,64 @@ const FAQItem = ({ q, a, isOpen, onToggle, testid }) => (
   </div>
 );
 
+// Pull plain searchable text out of an answer that may be a string or JSX.
+const answerToText = (a) => {
+  if (typeof a === 'string') return a;
+  // Walk React children to extract any string content.
+  const walk = (node) => {
+    if (node == null || typeof node === 'boolean') return '';
+    if (typeof node === 'string' || typeof node === 'number') return String(node);
+    if (Array.isArray(node)) return node.map(walk).join(' ');
+    if (node.props && node.props.children) return walk(node.props.children);
+    return '';
+  };
+  return walk(a);
+};
+
+// Wrap occurrences of `query` in <mark> for visible match highlighting.
+const highlightText = (text, query) => {
+  if (!query) return text;
+  const safe = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const parts = String(text).split(new RegExp(`(${safe})`, 'gi'));
+  return parts.map((part, i) =>
+    part.toLowerCase() === query.toLowerCase() ? (
+      <mark key={i} className="bg-[#D4AF37]/30 text-gray-900 rounded px-0.5">{part}</mark>
+    ) : (
+      <React.Fragment key={i}>{part}</React.Fragment>
+    )
+  );
+};
+
 const FAQ = () => {
   const navigate = useNavigate();
   // Default first question of first section open so the page never
   // looks like a wall of cold accordions.
   const [openKey, setOpenKey] = useState('booking-0');
+  const [query, setQuery] = useState('');
 
   const toggle = (key) => setOpenKey((prev) => (prev === key ? null : key));
+
+  const trimmedQuery = query.trim();
+  const isSearching = trimmedQuery.length > 0;
+
+  // Filter sections + items by query. When searching, every match is
+  // pre-expanded so the user sees their answer immediately.
+  const filteredSections = useMemo(() => {
+    if (!isSearching) return SECTIONS;
+    const q = trimmedQuery.toLowerCase();
+    return SECTIONS
+      .map((section) => ({
+        ...section,
+        items: section.items.filter(
+          (item) =>
+            item.q.toLowerCase().includes(q) ||
+            answerToText(item.a).toLowerCase().includes(q)
+        ),
+      }))
+      .filter((section) => section.items.length > 0);
+  }, [trimmedQuery, isSearching]);
+
+  const totalMatches = filteredSections.reduce((n, s) => n + s.items.length, 0);
 
   return (
     <div className="min-h-screen bg-[#fafafa] pt-24 pb-20 px-4" data-testid="faq-page">
@@ -133,7 +184,7 @@ const FAQ = () => {
           <ArrowLeft size={16} /> Back
         </button>
 
-        <header className="mb-10">
+        <header className="mb-8">
           <p className="text-xs font-semibold text-[#D4AF37] uppercase tracking-[0.2em] mb-2">
             Help center
           </p>
@@ -150,45 +201,105 @@ const FAQ = () => {
           </p>
         </header>
 
-        <div className="space-y-6">
-          {SECTIONS.map((section) => {
-            const Icon = section.icon;
-            return (
-              <section
-                key={section.id}
-                className="bg-white rounded-2xl border border-[#E5E5E5] overflow-hidden"
-                data-testid={`faq-section-${section.id}`}
-              >
-                <div className="flex items-center gap-3 px-5 md:px-7 py-4 border-b border-[#f0ece4] bg-gradient-to-r from-[#fffaf0] to-white">
-                  <div className="w-9 h-9 rounded-lg bg-[#D4AF37]/15 text-[#D4AF37] flex items-center justify-center flex-shrink-0">
-                    <Icon size={17} />
-                  </div>
-                  <h2
-                    className="text-lg md:text-xl font-bold text-gray-900"
-                    style={{ fontFamily: 'Playfair Display' }}
-                  >
-                    {section.title}
-                  </h2>
-                </div>
-                <div className="px-5 md:px-7">
-                  {section.items.map((item, idx) => {
-                    const key = `${section.id}-${idx}`;
-                    return (
-                      <FAQItem
-                        key={key}
-                        q={item.q}
-                        a={item.a}
-                        isOpen={openKey === key}
-                        onToggle={() => toggle(key)}
-                        testid={`faq-item-${key}`}
-                      />
-                    );
-                  })}
-                </div>
-              </section>
-            );
-          })}
+        {/* Search bar */}
+        <div className="relative mb-8" data-testid="faq-search-wrapper">
+          <Search
+            size={18}
+            className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none"
+          />
+          <input
+            type="text"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="Search questions…"
+            className="w-full pl-11 pr-10 py-3.5 rounded-xl border border-[#E5E5E5] bg-white text-sm md:text-[15px] text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#1E6A6A]/20 focus:border-[#1E6A6A] transition-all shadow-sm"
+            data-testid="faq-search-input"
+          />
+          {isSearching && (
+            <button
+              onClick={() => setQuery('')}
+              className="absolute right-3 top-1/2 -translate-y-1/2 p-1 rounded-full text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-colors"
+              aria-label="Clear search"
+              data-testid="faq-search-clear"
+            >
+              <X size={14} />
+            </button>
+          )}
         </div>
+
+        {isSearching && (
+          <p className="text-xs text-gray-500 mb-5 -mt-3" data-testid="faq-results-count">
+            {totalMatches === 0
+              ? 'No matches'
+              : `${totalMatches} ${totalMatches === 1 ? 'match' : 'matches'} for "${trimmedQuery}"`}
+          </p>
+        )}
+
+        {filteredSections.length === 0 ? (
+          <div
+            className="bg-white rounded-2xl border border-[#E5E5E5] p-10 text-center"
+            data-testid="faq-no-results"
+          >
+            <p className="text-sm text-gray-700 font-medium mb-1">
+              We couldn't find an answer for that.
+            </p>
+            <p className="text-xs text-gray-500 mb-5">
+              Try different keywords, or message our team directly on WhatsApp.
+            </p>
+            <a
+              href="https://wa.me/972553225141"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-bold bg-[#25D366] hover:bg-[#1fb558] text-white transition-colors"
+            >
+              <MessageCircle size={14} /> Ask on WhatsApp
+            </a>
+          </div>
+        ) : (
+          <div className="space-y-6">
+            {filteredSections.map((section) => {
+              const Icon = section.icon;
+              return (
+                <section
+                  key={section.id}
+                  className="bg-white rounded-2xl border border-[#E5E5E5] overflow-hidden"
+                  data-testid={`faq-section-${section.id}`}
+                >
+                  <div className="flex items-center gap-3 px-5 md:px-7 py-4 border-b border-[#f0ece4] bg-gradient-to-r from-[#fffaf0] to-white">
+                    <div className="w-9 h-9 rounded-lg bg-[#D4AF37]/15 text-[#D4AF37] flex items-center justify-center flex-shrink-0">
+                      <Icon size={17} />
+                    </div>
+                    <h2
+                      className="text-lg md:text-xl font-bold text-gray-900"
+                      style={{ fontFamily: 'Playfair Display' }}
+                    >
+                      {section.title}
+                    </h2>
+                  </div>
+                  <div className="px-5 md:px-7">
+                    {section.items.map((item, idx) => {
+                      const key = `${section.id}-${idx}`;
+                      // While searching, force every matching row open so the
+                      // user can read the answer without an extra tap.
+                      const isOpen = isSearching ? true : openKey === key;
+                      return (
+                        <FAQItem
+                          key={key}
+                          q={item.q}
+                          a={item.a}
+                          isOpen={isOpen}
+                          onToggle={() => toggle(key)}
+                          testid={`faq-item-${key}`}
+                          highlight={isSearching ? trimmedQuery : ''}
+                        />
+                      );
+                    })}
+                  </div>
+                </section>
+              );
+            })}
+          </div>
+        )}
 
         <div
           className="mt-12 rounded-2xl bg-gradient-to-br from-[#1E6A6A] to-[#155454] text-white p-6 md:p-8"
