@@ -32,33 +32,76 @@ api_router = router  # alias so existing @api_router decorators work verbatim
 
 @api_router.post("/bookings", response_model=BookingCreateResponse)
 async def create_booking(booking_data: BookingCreate, payload: dict = Depends(verify_token)) -> dict:
-    property_data = await db.properties.find_one({"id": booking_data.property_id}, {"_id": 0})
+    property_data, sublease_data = await _load_property_and_sublease(booking_data)
+    await _assert_no_booking_overlap(booking_data)
+
+    booking_doc = _build_booking_doc(
+        booking_data=booking_data,
+        property_data=property_data,
+        sublease_data=sublease_data,
+        renter_id=payload['user_id'],
+    )
+    await db.bookings.insert_one(booking_doc)
+
+    await _send_booking_notifications(
+        booking_doc=booking_doc,
+        booking_data=booking_data,
+        property_data=property_data,
+        sublease_data=sublease_data,
+    )
+
+    _queue_booking_emails(
+        booking_doc=booking_doc,
+        booking_data=booking_data,
+        property_data=property_data,
+        sublease_data=sublease_data,
+    )
+
+    return {
+        "id": booking_doc['id'],
+        "status": booking_doc['status'],
+        "message": (
+            "Booking confirmed!" if booking_doc['status'] == 'confirmed'
+            else "Booking request sent successfully"
+        ),
+    }
+
+
+# ---- create_booking helpers ----------------------------------------------
+
+async def _load_property_and_sublease(
+    booking_data: BookingCreate,
+) -> tuple[dict, dict | None]:
+    """Look up the target property and (if applicable) the sublease.
+    For sublease bookings the property still loads, but downstream pricing
+    + routing prefers the sublease's data over the property's."""
+    property_data = await db.properties.find_one(
+        {"id": booking_data.property_id}, {"_id": 0},
+    )
     if not property_data:
         raise HTTPException(status_code=404, detail="Property not found")
-
-    # If this booking is tied to a sublease, route it to the sublessor and
-    # use the sublease's price/dates for downstream calculations. The
-    # underlying property owner is NOT notified.
     sublease_data: dict | None = None
     if booking_data.sublease_id:
         sublease_data = await db.subleases.find_one(
-            {"id": booking_data.sublease_id}, {"_id": 0}
+            {"id": booking_data.sublease_id}, {"_id": 0},
         )
         if not sublease_data:
             raise HTTPException(status_code=404, detail="Sublease not found")
         if not sublease_data.get("active", True):
-            raise HTTPException(status_code=400, detail="This sublease is no longer active")
+            raise HTTPException(
+                status_code=400, detail="This sublease is no longer active",
+            )
+    return property_data, sublease_data
 
-    # No contract signature required at booking time
-    # Contract will be sent after owner accepts for long-term/short-term rentals
 
-    # Reject overlapping bookings up front so we never end up with two
-    # confirmed/pending bookings on the same property for the same dates.
-    # Same overlap rule used by /properties search: start < new_end AND end > new_start.
-    # For SUBLEASE bookings, we deliberately scope the overlap check to OTHER
-    # bookings on the SAME sublease — the sublessor's own underlying long-term
-    # booking covers the entire sublease window, so a global property-level
-    # check would always reject (defeating the whole sublease feature).
+async def _assert_no_booking_overlap(booking_data: BookingCreate) -> None:
+    """Reject overlapping bookings up front so we never end up with two
+    confirmed/pending bookings on the same property for the same dates.
+    Same overlap rule used by /properties search: start < new_end AND end > new_start.
+    For SUBLEASE bookings, we deliberately scope the overlap check to OTHER
+    bookings on the SAME sublease — the sublessor's own underlying long-term
+    booking covers the entire sublease window, so a global property-level
+    check would always reject (defeating the whole sublease feature)."""
     if booking_data.sublease_id:
         overlap_filter: dict = {
             "sublease_id": booking_data.sublease_id,
@@ -90,135 +133,162 @@ async def create_booking(booking_data: BookingCreate, payload: dict = Depends(ve
             ),
         )
 
-    booking_id = str(uuid.uuid4())
-    booking_doc = booking_data.model_dump()
-    booking_doc['id'] = booking_id
-    booking_doc['renter_id'] = payload['user_id']
-    # Route owner_id: sublessor for sublease bookings, property owner otherwise
-    booking_doc['owner_id'] = (
-        sublease_data['subleasor_id'] if sublease_data else property_data['owner_id']
+
+def _build_booking_doc(
+    *,
+    booking_data: BookingCreate,
+    property_data: dict,
+    sublease_data: dict | None,
+    renter_id: str,
+) -> dict:
+    """Assemble the booking document with id, owner routing, and the
+    auto-confirm/pending status decision baked in.
+    Auto-confirm only for vacation rentals (and never for sublease bookings,
+    which always require sublessor accept/deny)."""
+    is_instant_confirm = (
+        property_data.get('rental_type') == 'vacation' and sublease_data is None
     )
+    booking_doc = booking_data.model_dump()
+    booking_doc.update({
+        'id': str(uuid.uuid4()),
+        'renter_id': renter_id,
+        # Route owner_id: sublessor for sublease bookings, property owner otherwise
+        'owner_id': (
+            sublease_data['subleasor_id'] if sublease_data
+            else property_data['owner_id']
+        ),
+        'status': 'confirmed' if is_instant_confirm else 'pending',
+        'created_at': datetime.now(UTC).isoformat(),
+    })
+    return booking_doc
 
-    # Auto-confirm for vacation rentals only. Sublease bookings now require
-    # the sublessor to accept/deny just like long-term/short-term bookings —
-    # the renter sends a request, the sublessor (the lister of the sublease)
-    # gets a "booking_request" notification and confirms it from their dashboard.
-    is_instant_confirm = property_data.get('rental_type') == 'vacation' and sublease_data is None
-    if is_instant_confirm:
-        booking_doc['status'] = 'confirmed'
-        listing_title = property_data['title']
-        notification_message = f"Your booking for {listing_title} is confirmed!"
-        notification_type = "booking_confirmed"
-        # Notify renter of confirmation
-        renter_notification = {
-            "id": str(uuid.uuid4()),
-            "user_id": payload['user_id'],
-            "type": notification_type,
-            "property_id": booking_data.property_id,
-            "booking_id": booking_id,
-            "message": notification_message,
-            "read": False,
-            "created_at": datetime.now(UTC).isoformat()
-        }
-        await db.notifications.insert_one(renter_notification)
-    else:
-        booking_doc['status'] = 'pending'
-        listing_title = (
-            sublease_data.get('title') if sublease_data else property_data['title']
-        )
-        notification_message = f"New booking request for {listing_title}"
-        notification_type = "booking_request"
 
-    booking_doc['created_at'] = datetime.now(UTC).isoformat()
-    await db.bookings.insert_one(booking_doc)
-
-    # Notify the sublessor (sublease) or property owner (regular) of the new booking
-    target_user_id = booking_doc['owner_id']
-    target_listing_title = (
+async def _send_booking_notifications(
+    *,
+    booking_doc: dict,
+    booking_data: BookingCreate,
+    property_data: dict,
+    sublease_data: dict | None,
+) -> None:
+    """In-app notifications: confirmation to renter for instant-confirm
+    bookings, plus a notification to the sublessor/owner in every case."""
+    listing_title = (
         sublease_data.get('title') if sublease_data else property_data['title']
     )
-    owner_notification = {
+    is_confirmed = booking_doc['status'] == 'confirmed'
+
+    if is_confirmed:
+        # Notify renter of the auto-confirmed booking
+        await db.notifications.insert_one({
+            "id": str(uuid.uuid4()),
+            "user_id": booking_doc['renter_id'],
+            "type": "booking_confirmed",
+            "property_id": booking_data.property_id,
+            "booking_id": booking_doc['id'],
+            "message": f"Your booking for {listing_title} is confirmed!",
+            "read": False,
+            "created_at": datetime.now(UTC).isoformat(),
+        })
+
+    # Always notify the sublessor (sublease) or property owner (regular)
+    await db.notifications.insert_one({
         "id": str(uuid.uuid4()),
-        "user_id": target_user_id,
-        "type": notification_type,
+        "user_id": booking_doc['owner_id'],
+        "type": "booking_confirmed" if is_confirmed else "booking_request",
         "property_id": booking_data.property_id,
-        "booking_id": booking_id,
+        "booking_id": booking_doc['id'],
         "message": (
-            notification_message
-            if booking_doc['status'] == 'pending'
-            else f"New booking for {target_listing_title}"
+            f"New booking for {listing_title}" if is_confirmed
+            else f"New booking request for {listing_title}"
         ),
         "read": False,
-        "created_at": datetime.now(UTC).isoformat()
-    }
-    await db.notifications.insert_one(owner_notification)
+        "created_at": datetime.now(UTC).isoformat(),
+    })
 
-    # --- Send transactional emails via Postmark (fire-and-forget) ---
+
+def _compute_booking_total(
+    booking_data: BookingCreate,
+    property_data: dict,
+    sublease_data: dict | None,
+) -> float | None:
+    """Best-effort total for the confirmation email. Sublease pricing wins
+    when set; otherwise vacation rentals get nightly × N. Long-term/short-term
+    rentals don't expose a single total, so we leave it as None."""
     try:
-        renter = await db.users.find_one({"id": payload['user_id']}, {"_id": 0, "email": 1, "name": 1})
-        owner = await db.users.find_one({"id": target_user_id}, {"_id": 0, "email": 1, "name": 1})
+        start = datetime.fromisoformat(booking_data.start_date.replace('Z', ''))
+        end = datetime.fromisoformat(booking_data.end_date.replace('Z', ''))
+        nights = max(1, (end - start).days)
+    except Exception:
+        nights = 1
+    if sublease_data:
+        price = float(sublease_data.get('price', 0))
+        return price * nights if sublease_data.get('price_type') == 'per_night' else price
+    if property_data.get('rental_type') == 'vacation' and property_data.get('nightly_price'):
+        return float(property_data['nightly_price']) * nights
+    return None
 
-        # Use sublease's currency/price/title when this is a sublease booking
-        currency = (
-            sublease_data.get('currency', 'ILS') if sublease_data
-            else property_data.get('currency', 'ILS')
-        )
-        listing_title = target_listing_title
-        listing_location = (
-            sublease_data.get('area', '') if sublease_data
-            else property_data.get('location', property_data.get('area', ''))
-        )
 
-        # Compute total
-        total_price: float | None = None
-        try:
-            start = datetime.fromisoformat(booking_data.start_date.replace('Z', ''))
-            end = datetime.fromisoformat(booking_data.end_date.replace('Z', ''))
-            nights = max(1, (end - start).days)
-        except Exception:
-            nights = 1
-        if sublease_data:
-            if sublease_data.get('price_type') == 'per_night':
-                total_price = float(sublease_data.get('price', 0)) * nights
-            else:
-                # Flat rate — one total
-                total_price = float(sublease_data.get('price', 0))
-        elif property_data.get('rental_type') == 'vacation' and property_data.get('nightly_price'):
-            total_price = float(property_data['nightly_price']) * nights
+def _queue_booking_emails(
+    *,
+    booking_doc: dict,
+    booking_data: BookingCreate,
+    property_data: dict,
+    sublease_data: dict | None,
+) -> None:
+    """Fire-and-forget Postmark dispatch. Wrapped in try/except so an email
+    outage never 500s a successful booking."""
+    try:
+        async def _send() -> None:
+            renter = await db.users.find_one(
+                {"id": booking_doc['renter_id']}, {"_id": 0, "email": 1, "name": 1},
+            )
+            owner = await db.users.find_one(
+                {"id": booking_doc['owner_id']}, {"_id": 0, "email": 1, "name": 1},
+            )
+            currency = (
+                sublease_data.get('currency', 'ILS') if sublease_data
+                else property_data.get('currency', 'ILS')
+            )
+            listing_title = (
+                sublease_data.get('title') if sublease_data else property_data['title']
+            )
+            listing_location = (
+                sublease_data.get('area', '') if sublease_data
+                else property_data.get('location', property_data.get('area', ''))
+            )
+            total_price = _compute_booking_total(booking_data, property_data, sublease_data)
 
-        if renter and renter.get('email'):
-            asyncio.create_task(send_booking_confirmation_email(
-                to_email=renter['email'],
-                guest_name=renter.get('name', ''),
-                property_title=listing_title,
-                property_location=listing_location,
-                check_in=booking_data.start_date,
-                check_out=booking_data.end_date,
-                total_price=total_price,
-                currency=currency,
-                booking_id=booking_id,
-                status=booking_doc['status'],
-            ))
-
-        if owner and owner.get('email'):
-            asyncio.create_task(send_booking_notification_email(
-                to_email=owner['email'],
-                owner_name=owner.get('name', ''),
-                guest_name=(renter or {}).get('name', 'A guest'),
-                guest_email=(renter or {}).get('email', ''),
-                property_title=listing_title,
-                property_location=listing_location,
-                check_in=booking_data.start_date,
-                check_out=booking_data.end_date,
-                total_price=total_price,
-                currency=currency,
-                booking_id=booking_id,
-                is_pending=(booking_doc['status'] == 'pending'),
-            ))
+            if renter and renter.get('email'):
+                await send_booking_confirmation_email(
+                    to_email=renter['email'],
+                    guest_name=renter.get('name', ''),
+                    property_title=listing_title,
+                    property_location=listing_location,
+                    check_in=booking_data.start_date,
+                    check_out=booking_data.end_date,
+                    total_price=total_price,
+                    currency=currency,
+                    booking_id=booking_doc['id'],
+                    status=booking_doc['status'],
+                )
+            if owner and owner.get('email'):
+                await send_booking_notification_email(
+                    to_email=owner['email'],
+                    owner_name=owner.get('name', ''),
+                    guest_name=(renter or {}).get('name', 'A guest'),
+                    guest_email=(renter or {}).get('email', ''),
+                    property_title=listing_title,
+                    property_location=listing_location,
+                    check_in=booking_data.start_date,
+                    check_out=booking_data.end_date,
+                    total_price=total_price,
+                    currency=currency,
+                    booking_id=booking_doc['id'],
+                    is_pending=(booking_doc['status'] == 'pending'),
+                )
+        asyncio.create_task(_send())
     except Exception as e:
-        logger.warning(f"Failed to queue booking emails for booking {booking_id}: {e}")
-
-    return {"id": booking_id, "status": booking_doc['status'], "message": "Booking confirmed!" if booking_doc['status'] == 'confirmed' else "Booking request sent successfully"}
+        logger.warning(f"Failed to queue booking emails for booking {booking_doc['id']}: {e}")
 
 
 @api_router.get("/bookings", response_model=list[BookingOut])

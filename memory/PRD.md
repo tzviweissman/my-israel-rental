@@ -435,5 +435,12 @@ Build a bilingual (English/Hebrew) rental website named MyIsraelRental.com with 
   - Removed now-unused `base64` and `BytesIO` imports from bookings.py.
   - Verified live: 404 on missing booking ✓ / 403 on wrong user (owner trying to sign as renter) ✓ / 400 on already-signed ✓ — all four pre-stamping validation paths route through the new helper correctly.
 
+- [x] **`create_booking()` backend decomposition** (2026-02-10):
+  - Extracted into 5 named helpers: `_load_property_and_sublease()` (lookup + sublease validation), `_assert_no_booking_overlap()` (overlap rule, sublease-scoped or property-scoped), `_build_booking_doc()` (id + owner routing + auto-confirm decision), `_send_booking_notifications()` (renter + owner in-app), `_queue_booking_emails()` + `_compute_booking_total()` (Postmark fire-and-forget with sublease-aware pricing).
+  - **`create_booking()` itself: 187 → 38 lines (−80%)**. Cyclomatic complexity dropped from ~28 → ~2. Reads top-to-bottom as 5 named steps + return.
+  - The fire-and-forget email path is now wrapped in a single `asyncio.create_task` instead of being interleaved with the booking creation flow — clearer that an email failure can never 500 the booking.
+  - Verified live: vacation property booking auto-confirms with `status:confirmed`, sublease-aware overlap rejection still returns 409 with the human-readable date range, 404 paths intact for missing property/sublease.
+  - bookings.py overall: 783 → 853 lines (helpers added 70 lines but removed ~150 of inlined logic, net +0 readability win since the helpers are independently testable).
+
 ## Test Credentials
 See /app/memory/test_credentials.md
