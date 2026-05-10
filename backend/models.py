@@ -53,6 +53,9 @@ class PropertyCreate(BaseModel):
     has_agent_fee: bool | None = False
     agent_fee_price: float | None = None
     agent_fee_currency: str | None = 'ILS'
+    has_cleaning_fee: bool | None = False
+    cleaning_fee_price: float | None = None
+    cleaning_fee_currency: str | None = 'ILS'
     porches: int | None = 0
     sukkah_compatible: bool | None = False
     condition: str | None = 'good'

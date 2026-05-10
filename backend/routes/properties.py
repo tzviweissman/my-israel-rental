@@ -280,6 +280,7 @@ _BULK_EDITABLE_FIELDS: set[str] = {
     "square_meters", "porch_square_meters", "porches",
     "has_elevator", "is_shabbat_elevator", "is_tama", "sukkah_compatible",
     "has_agent_fee", "agent_fee_price", "agent_fee_currency",
+    "has_cleaning_fee", "cleaning_fee_price", "cleaning_fee_currency",
     "condition", "furniture_option", "amenities",
     "monthly_price", "nightly_price", "currency",
     "cancellation_policy", "custom_cancellation_policy",

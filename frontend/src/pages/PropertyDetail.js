@@ -472,9 +472,30 @@ const PropertyDetail = () => {
                 <MapPin size={20} />
                 <span className="text-lg">{property.address}, {property.area}</span>
               </div>
-              {/* Agent fee is a long-term-rental concept; suppress on
-                  sublease views since it doesn't apply to sublessees. */}
-              {!sublease && property.has_agent_fee && property.agent_fee_price && (
+              {/* Vacation rentals show a Cleaning fee badge in the same
+                  place where long/short-term rentals show the Agent fee.
+                  Both are mutually exclusive — the form gates the toggles
+                  by rental_type. */}
+              {!sublease && property.rental_type === 'vacation' && property.has_cleaning_fee && property.cleaning_fee_price && (
+                <div className="flex flex-col gap-1 px-3 py-1.5 bg-[#D4AF37]/10 rounded-lg border border-[#D4AF37]/30">
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm font-medium text-gray-700">{t('property.cleaningFeeLabel', 'Cleaning fee:')}</span>
+                    <span className="text-sm font-bold" style={{ color: '#D4AF37' }}>
+                      {property.cleaning_fee_currency === 'USD' ? '$' : '₪'}{property.cleaning_fee_price.toLocaleString()}
+                    </span>
+                  </div>
+                  {(() => {
+                    const converted = convertPrice(property.cleaning_fee_price, property.cleaning_fee_currency);
+                    if (!converted) return null;
+                    return (
+                      <div className="text-xs text-gray-500">
+                        ≈ {converted.symbol}{converted.amount.toLocaleString()}
+                      </div>
+                    );
+                  })()}
+                </div>
+              )}
+              {!sublease && property.rental_type !== 'vacation' && property.has_agent_fee && property.agent_fee_price && (
                 <div className="flex flex-col gap-1 px-3 py-1.5 bg-[#D4AF37]/10 rounded-lg border border-[#D4AF37]/30">
                   <div className="flex items-center gap-2">
                     <span className="text-sm font-medium text-gray-700">{t('property.agentFeeLabel')}</span>

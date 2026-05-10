@@ -20,6 +20,7 @@ const EMPTY_FORM = {
   bedrooms: 1, bathrooms: 1, area: '', address: '', square_meters: '', porch_square_meters: '',
   floor: 1, has_elevator: false, is_shabbat_elevator: false, is_tama: false,
   has_agent_fee: false, agent_fee_price: '', agent_fee_currency: 'ILS',
+  has_cleaning_fee: false, cleaning_fee_price: '', cleaning_fee_currency: 'ILS',
   porches: 0, sukkah_compatible: false, condition: 'good', furniture_option: 'no_furniture',
   amenities: [], monthly_price: '', nightly_price: '', currency: 'ILS',
   images: [], videos: [], cancellation_policy: 'flexible', custom_cancellation_policy: '',
@@ -65,6 +66,9 @@ const AddPropertyModal = ({ isOpen, onClose, editingProperty, onSaved, API, toke
         has_agent_fee: editingProperty.has_agent_fee || false,
         agent_fee_price: editingProperty.agent_fee_price || '',
         agent_fee_currency: editingProperty.agent_fee_currency || 'ILS',
+        has_cleaning_fee: editingProperty.has_cleaning_fee || false,
+        cleaning_fee_price: editingProperty.cleaning_fee_price || '',
+        cleaning_fee_currency: editingProperty.cleaning_fee_currency || 'ILS',
         porches: editingProperty.porches || 0,
         sukkah_compatible: editingProperty.sukkah_compatible || false,
         condition: editingProperty.condition || 'good',
@@ -167,6 +171,7 @@ const AddPropertyModal = ({ isOpen, onClose, editingProperty, onSaved, API, toke
       square_meters: toNumOrNull(propertyForm.square_meters),
       porch_square_meters: toNumOrNull(propertyForm.porch_square_meters),
       agent_fee_price: toNumOrNull(propertyForm.agent_fee_price),
+      cleaning_fee_price: toNumOrNull(propertyForm.cleaning_fee_price),
       monthly_price: toNumOrNull(propertyForm.monthly_price),
       nightly_price: toNumOrNull(propertyForm.nightly_price),
       bedrooms: toNumOrNull(propertyForm.bedrooms),
@@ -797,39 +802,80 @@ const AddPropertyModal = ({ isOpen, onClose, editingProperty, onSaved, API, toke
                 </label>
               </div>
               <div className="flex flex-col gap-2">
-                <label className="flex items-center gap-2">
-                  <input
-                    type="checkbox"
-                    checked={propertyForm.has_agent_fee}
-                    onChange={(e) => setPropertyForm({ ...propertyForm, has_agent_fee: e.target.checked, agent_fee_price: e.target.checked ? propertyForm.agent_fee_price : '' })}
-                    className="w-5 h-5 rounded border-[#E5E5E5]"
-                    data-testid="property-agent-fee-checkbox"
-                  />
-                  <span>{t('property.agentFee')}</span>
-                </label>
-                {propertyForm.has_agent_fee && (
-                  <div className="ml-7">
-                    <div className="flex gap-2">
+                {propertyForm.rental_type === 'vacation' ? (
+                  <>
+                    <label className="flex items-center gap-2">
                       <input
-                        type="number"
-                        value={propertyForm.agent_fee_price}
-                        onChange={(e) => setPropertyForm({ ...propertyForm, agent_fee_price: parseFloat(e.target.value) })}
-                        placeholder="Fee amount"
-                        min="0"
-                        className="flex-1 px-3 py-2 rounded-lg border border-[#E5E5E5] focus:outline-none focus:ring-2 focus:ring-[#1E6A6A]/50 text-sm"
-                        data-testid="property-agent-fee-input"
+                        type="checkbox"
+                        checked={propertyForm.has_cleaning_fee}
+                        onChange={(e) => setPropertyForm({ ...propertyForm, has_cleaning_fee: e.target.checked, cleaning_fee_price: e.target.checked ? propertyForm.cleaning_fee_price : '' })}
+                        className="w-5 h-5 rounded border-[#E5E5E5]"
+                        data-testid="property-cleaning-fee-checkbox"
                       />
-                      <select
-                        value={propertyForm.agent_fee_currency}
-                        onChange={(e) => setPropertyForm({ ...propertyForm, agent_fee_currency: e.target.value })}
-                        className="px-3 py-2 rounded-lg border border-[#E5E5E5] focus:outline-none focus:ring-2 focus:ring-[#1E6A6A]/50 text-sm"
-                        data-testid="property-agent-fee-currency-select"
-                      >
-                        <option value="ILS">₪</option>
-                        <option value="USD">$</option>
-                      </select>
-                    </div>
-                  </div>
+                      <span>{t('property.cleaningFee', 'Cleaning fee')}</span>
+                    </label>
+                    {propertyForm.has_cleaning_fee && (
+                      <div className="ml-7">
+                        <div className="flex gap-2">
+                          <input
+                            type="number"
+                            value={propertyForm.cleaning_fee_price}
+                            onChange={(e) => setPropertyForm({ ...propertyForm, cleaning_fee_price: parseFloat(e.target.value) })}
+                            placeholder="Fee amount"
+                            min="0"
+                            className="flex-1 px-3 py-2 rounded-lg border border-[#E5E5E5] focus:outline-none focus:ring-2 focus:ring-[#1E6A6A]/50 text-sm"
+                            data-testid="property-cleaning-fee-input"
+                          />
+                          <select
+                            value={propertyForm.cleaning_fee_currency}
+                            onChange={(e) => setPropertyForm({ ...propertyForm, cleaning_fee_currency: e.target.value })}
+                            className="px-3 py-2 rounded-lg border border-[#E5E5E5] focus:outline-none focus:ring-2 focus:ring-[#1E6A6A]/50 text-sm"
+                            data-testid="property-cleaning-fee-currency-select"
+                          >
+                            <option value="ILS">₪</option>
+                            <option value="USD">$</option>
+                          </select>
+                        </div>
+                      </div>
+                    )}
+                  </>
+                ) : (
+                  <>
+                    <label className="flex items-center gap-2">
+                      <input
+                        type="checkbox"
+                        checked={propertyForm.has_agent_fee}
+                        onChange={(e) => setPropertyForm({ ...propertyForm, has_agent_fee: e.target.checked, agent_fee_price: e.target.checked ? propertyForm.agent_fee_price : '' })}
+                        className="w-5 h-5 rounded border-[#E5E5E5]"
+                        data-testid="property-agent-fee-checkbox"
+                      />
+                      <span>{t('property.agentFee')}</span>
+                    </label>
+                    {propertyForm.has_agent_fee && (
+                      <div className="ml-7">
+                        <div className="flex gap-2">
+                          <input
+                            type="number"
+                            value={propertyForm.agent_fee_price}
+                            onChange={(e) => setPropertyForm({ ...propertyForm, agent_fee_price: parseFloat(e.target.value) })}
+                            placeholder="Fee amount"
+                            min="0"
+                            className="flex-1 px-3 py-2 rounded-lg border border-[#E5E5E5] focus:outline-none focus:ring-2 focus:ring-[#1E6A6A]/50 text-sm"
+                            data-testid="property-agent-fee-input"
+                          />
+                          <select
+                            value={propertyForm.agent_fee_currency}
+                            onChange={(e) => setPropertyForm({ ...propertyForm, agent_fee_currency: e.target.value })}
+                            className="px-3 py-2 rounded-lg border border-[#E5E5E5] focus:outline-none focus:ring-2 focus:ring-[#1E6A6A]/50 text-sm"
+                            data-testid="property-agent-fee-currency-select"
+                          >
+                            <option value="ILS">₪</option>
+                            <option value="USD">$</option>
+                          </select>
+                        </div>
+                      </div>
+                    )}
+                  </>
                 )}
               </div>
             </div>
