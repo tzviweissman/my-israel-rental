@@ -208,7 +208,7 @@ const PropertyDetail = () => {
     // Contract will be sent after owner accepts the booking
 
     try {
-      await axios.post(`${API}/bookings`, {
+      const res = await axios.post(`${API}/bookings`, {
         property_id: id,
         ...bookingData,
         contract_signed: false, // Will be signed after owner accepts
@@ -219,7 +219,15 @@ const PropertyDetail = () => {
       }, {
         headers: { Authorization: `Bearer ${token}` }
       });
-      toast.success('Booking request sent successfully!');
+      // Vacation rentals (non-sublease) auto-confirm server-side. Use the
+      // backend's status to pick the right toast so the renter knows
+      // whether they're confirmed or waiting on owner approval.
+      const confirmed = res.data?.status === 'confirmed';
+      toast.success(
+        confirmed
+          ? 'Booked! Your reservation is confirmed.'
+          : 'Booking request sent successfully!',
+      );
       setShowBooking(false);
       setSignatureData(null);
       setShowSignatureModal(false);
@@ -1012,6 +1020,16 @@ const PropertyDetail = () => {
                   
                   {(() => {
                     const datesIncomplete = !bookingData.start_date || !bookingData.end_date;
+                    // Vacation listings (non-sublease) auto-confirm on the
+                    // backend, so the CTA reads "Book now" — there's no
+                    // owner approval step. Subleases and other rental types
+                    // still send a request that the owner/sublessor accepts.
+                    const isInstantBook = property.rental_type === 'vacation' && !sublease;
+                    const ctaLabel = datesIncomplete
+                      ? t('property.pickDates')
+                      : isInstantBook
+                        ? t('property.bookNow', 'Book now')
+                        : t('property.reserveBooking');
                     return (
                       <button
                         onClick={handleBooking}
@@ -1019,7 +1037,7 @@ const PropertyDetail = () => {
                         className="w-full primary-btn py-2.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
                         data-testid="confirm-booking-button"
                       >
-                        {datesIncomplete ? t('property.pickDates') : t('property.reserveBooking')}
+                        {ctaLabel}
                       </button>
                     );
                   })()}
