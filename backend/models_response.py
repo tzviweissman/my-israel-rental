@@ -118,6 +118,7 @@ class PropertyOut(BaseModel):
     has_cleaning_fee: bool | None = False
     cleaning_fee_price: float | None = None
     cleaning_fee_currency: str | None = None
+    max_guests: int | None = None
     condition: str | None = None
     furniture_option: str | None = None
     amenities: list[str] | None = []

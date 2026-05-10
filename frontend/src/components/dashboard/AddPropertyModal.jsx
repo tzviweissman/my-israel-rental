@@ -21,6 +21,7 @@ const EMPTY_FORM = {
   floor: 1, has_elevator: false, is_shabbat_elevator: false, is_tama: false,
   has_agent_fee: false, agent_fee_price: '', agent_fee_currency: 'ILS',
   has_cleaning_fee: false, cleaning_fee_price: '', cleaning_fee_currency: 'ILS',
+  max_guests: '',
   porches: 0, sukkah_compatible: false, condition: 'good', furniture_option: 'no_furniture',
   amenities: [], monthly_price: '', nightly_price: '', currency: 'ILS',
   images: [], videos: [], cancellation_policy: 'flexible', custom_cancellation_policy: '',
@@ -69,6 +70,7 @@ const AddPropertyModal = ({ isOpen, onClose, editingProperty, onSaved, API, toke
         has_cleaning_fee: editingProperty.has_cleaning_fee || false,
         cleaning_fee_price: editingProperty.cleaning_fee_price || '',
         cleaning_fee_currency: editingProperty.cleaning_fee_currency || 'ILS',
+        max_guests: editingProperty.max_guests || '',
         porches: editingProperty.porches || 0,
         sukkah_compatible: editingProperty.sukkah_compatible || false,
         condition: editingProperty.condition || 'good',
@@ -172,6 +174,7 @@ const AddPropertyModal = ({ isOpen, onClose, editingProperty, onSaved, API, toke
       porch_square_meters: toNumOrNull(propertyForm.porch_square_meters),
       agent_fee_price: toNumOrNull(propertyForm.agent_fee_price),
       cleaning_fee_price: toNumOrNull(propertyForm.cleaning_fee_price),
+      max_guests: toNumOrNull(propertyForm.max_guests),
       monthly_price: toNumOrNull(propertyForm.monthly_price),
       nightly_price: toNumOrNull(propertyForm.nightly_price),
       bedrooms: toNumOrNull(propertyForm.bedrooms),
@@ -838,6 +841,24 @@ const AddPropertyModal = ({ isOpen, onClose, editingProperty, onSaved, API, toke
                         </div>
                       </div>
                     )}
+                    {/* Vacation-only optional guest cap. Leave blank → no
+                        upper limit (renters self-report headcount in the
+                        booking message). */}
+                    <div className="mt-1">
+                      <label className="text-sm text-gray-600 block mb-1">
+                        {t('property.maxGuests', 'Max guests (optional)')}
+                      </label>
+                      <input
+                        type="number"
+                        min="1"
+                        max="50"
+                        value={propertyForm.max_guests}
+                        onChange={(e) => setPropertyForm({ ...propertyForm, max_guests: e.target.value })}
+                        placeholder="No limit"
+                        className="w-32 px-3 py-2 rounded-lg border border-[#E5E5E5] focus:outline-none focus:ring-2 focus:ring-[#1E6A6A]/50 text-sm"
+                        data-testid="property-max-guests-input"
+                      />
+                    </div>
                   </>
                 ) : (
                   <>

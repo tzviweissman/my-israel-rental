@@ -56,6 +56,9 @@ class PropertyCreate(BaseModel):
     has_cleaning_fee: bool | None = False
     cleaning_fee_price: float | None = None
     cleaning_fee_currency: str | None = 'ILS'
+    # Vacation-rentals only — optional cap on how many guests can stay.
+    # Hidden from the form for non-vacation rental types.
+    max_guests: int | None = None
     porches: int | None = 0
     sukkah_compatible: bool | None = False
     condition: str | None = 'good'

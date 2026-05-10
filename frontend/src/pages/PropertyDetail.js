@@ -572,6 +572,15 @@ const PropertyDetail = () => {
                   {property.sukkah_compatible && <p className="text-xs mt-1" style={{ color: '#345C45', fontWeight: 600 }}>{t('property.sukkah')}</p>}
                 </div>
               )}
+              {property.rental_type === 'vacation' && property.max_guests && (
+                <div className="bg-white p-4 rounded-xl border border-[#E5E5E5]" data-testid="property-max-guests">
+                  <div className="flex items-center gap-2 mb-1">
+                    <Users size={20} style={{ color: "#D4AF37" }} />
+                    <span className="text-sm text-gray-600">{t('property.maxGuestsLabel', 'Max guests')}</span>
+                  </div>
+                  <p className="text-2xl font-bold">{property.max_guests}</p>
+                </div>
+              )}
             </div>
 
             {/* Available From (non-long-term only) — long-term listings used to
