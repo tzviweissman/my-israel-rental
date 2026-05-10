@@ -453,5 +453,14 @@ Build a bilingual (English/Hebrew) rental website named MyIsraelRental.com with 
   - Verified end-to-end on a 4-image vacation property: gallery carousel works (prev/next/thumb clicks all flip the counter correctly), 5 stat cards render, amenities heading renders, agent-fee badge unchanged, booking sidebar (calendar, quick-select, email/message owner, CTA) all intact, zero console errors, mobile (390×844) layout clean.
   - The big remaining piece (the ~390-line booking sidebar with date picker, quick-select presets, calendar visibility, sublease pre-fill) was deliberately left in PropertyDetail.js — its state is too tangled with the parent for a low-risk extract in this session.
 
+- [x] **Properties.js component split** (2026-02-10):
+  - Created `/app/frontend/src/components/property/`:
+    - `PropertyCard.jsx` (119 lines) — grid card with hero, like button, stats row, price + FX conversion. Pure presentational, parent owns navigation + like-toggling.
+    - `FiltersPanel.jsx` (539 lines) — full two-column filter drawer (Price / Rooms & Details / Property / Dates Available). Includes the `StepperControl` helper. Exports `PRICE_MAX` constant. Receives all filter state + callbacks from parent.
+    - `HolidayBanner.jsx` (54 lines) — Pesach window banner with one-click pre-fill CTA. Pure presentational.
+  - **Properties.js: 941 → 490 lines (−48%)**. ESLint clean across all 4 edited files.
+  - The page now reads as ~330 lines of state/handlers + ~160 lines of orchestration JSX (header → banner → drawer → grid → empty-state), instead of one 940-line megafile.
+  - Verified end-to-end on `/properties/all`: 13 cards render, filter drawer opens, bedrooms stepper increments to `0.5` correctly (half-bedroom step), currency toggle USD/ILS clears price filters as before, Apply Filters refetches (13 cards intact), card hero + price + FX-converted subtext (`≈ ₪1,450/night`) all rendering. `/properties/pesach` shows the Pesach holiday banner with the "Find homes available these dates" CTA. Zero console errors.
+
 ## Test Credentials
 See /app/memory/test_credentials.md
