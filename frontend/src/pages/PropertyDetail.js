@@ -3,12 +3,16 @@ import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import axios from 'axios';
 import { API, AuthContext } from '../App';
-import { Bed, Bath, Home as HomeIcon, MapPin, Building2, MessageCircle, Calendar as CalendarIcon, ChevronLeft, ChevronRight, Film, Snowflake, WashingMachine, UtensilsCrossed, DoorOpen, ArrowUpFromLine, ShowerHead, Warehouse, Flame, Dumbbell, Waves, Sparkles, Car, Wifi, Mail, Users, X, Heart, Share2, Copy, Check, Play } from 'lucide-react';
+import { MapPin, MessageCircle, Calendar as CalendarIcon, Mail, X, Heart, Share2, Check } from 'lucide-react';
 import { Calendar } from '../components/ui/calendar';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
 
 import { ArrowLeft } from 'lucide-react';
+
+import ImageGallery from '../components/property/ImageGallery';
+import PropertyStats from '../components/property/PropertyStats';
+import AmenitiesList from '../components/property/AmenitiesList';
 
 // Parse 'YYYY-MM-DD' as a LOCAL date (avoids the UTC-shift bug where
 // selecting June 2 displays as June 1 in timezones east of UTC).
@@ -33,7 +37,6 @@ const PropertyDetail = () => {
   const { user, token } = useContext(AuthContext);
   const [property, setProperty] = useState(null);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
-  const videoRefs = React.useRef({});
   const [showCalendar, setShowCalendar] = useState(null);
   const [dateRange, setDateRange] = useState({ from: undefined, to: undefined });
   const [bookingData, setBookingData] = useState({
@@ -65,11 +68,6 @@ const PropertyDetail = () => {
   const [blockedDates, setBlockedDates] = useState([]);
   const [isLiked, setIsLiked] = useState(false);
   const [shareCopied, setShareCopied] = useState(false);
-  const [propertyContract, setPropertyContract] = useState(null);
-  const [showSignatureModal, setShowSignatureModal] = useState(false);
-  const [signatureData, setSignatureData] = useState(null);
-  const [isDrawing, setIsDrawing] = useState(false);
-  const signatureCanvasRef = React.useRef(null);
   
   // Determine where user came from
   const previousPath = sessionStorage.getItem('previousPath') || '/';
@@ -144,17 +142,7 @@ const PropertyDetail = () => {
     try {
       const response = await axios.get(`${API}/properties/${id}`);
       setProperty(response.data);
-      
-      // Fetch contract if property is long-term or short-term
-      if (response.data.rental_type === 'long-term' || response.data.rental_type === 'short-term') {
-        try {
-          const contractRes = await axios.get(`${API}/properties/${id}/contract`);
-          setPropertyContract(contractRes.data);
-        } catch (err) {
-          setPropertyContract(null);
-        }
-      }
-      
+
       // Fetch blocked dates
       const blockedRes = await axios.get(`${API}/properties/${id}/blocked-dates`);
       const allBlocked = [...(blockedRes.data.internal || []), ...(blockedRes.data.external || [])];
@@ -229,66 +217,9 @@ const PropertyDetail = () => {
           : 'Booking request sent successfully!',
       );
       setShowBooking(false);
-      setSignatureData(null);
-      setShowSignatureModal(false);
     } catch (error) {
       toast.error(error.response?.data?.detail || 'Failed to create booking');
     }
-  };
-
-  // Signature canvas handlers
-  const startDrawing = (e) => {
-    const canvas = signatureCanvasRef.current;
-    const rect = canvas.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
-    const ctx = canvas.getContext('2d');
-    ctx.beginPath();
-    ctx.moveTo(x, y);
-    setIsDrawing(true);
-  };
-
-  const draw = (e) => {
-    if (!isDrawing) return;
-    const canvas = signatureCanvasRef.current;
-    const rect = canvas.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
-    const ctx = canvas.getContext('2d');
-    ctx.lineTo(x, y);
-    ctx.stroke();
-  };
-
-  const stopDrawing = () => {
-    setIsDrawing(false);
-  };
-
-  const clearSignature = () => {
-    const canvas = signatureCanvasRef.current;
-    const ctx = canvas.getContext('2d');
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    setSignatureData(null);
-  };
-
-  const saveSignature = () => {
-    const canvas = signatureCanvasRef.current;
-    const dataUrl = canvas.toDataURL('image/png');
-    setSignatureData(dataUrl);
-    setShowSignatureModal(false);
-    handleBooking(); // Proceed with booking after signature
-  };
-
-  const handleSignatureImageUpload = (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-    
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      setSignatureData(reader.result);
-      setShowSignatureModal(false);
-      handleBooking(); // Proceed with booking after signature
-    };
-    reader.readAsDataURL(file);
   };
 
   const handleChat = () => {
@@ -341,119 +272,16 @@ const PropertyDetail = () => {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <div className="lg:col-span-2">
             <div className="mb-6">
-              {(() => {
-                const media = [
-                  ...(property.images || []).map(url => ({ type: 'image', url })),
-                  ...(property.videos || []).map(url => ({ type: 'video', url })),
-                ];
-                const toSrc = (url) => (url.startsWith('/api') ? `${API.replace('/api', '')}${url}` : url);
-                const goTo = (newIdx) => {
-                  // Pause any video that was playing before navigating
-                  Object.values(videoRefs.current).forEach(v => { try { v && v.pause(); } catch (_) {} });
-                  setCurrentImageIndex(newIdx);
-                };
-                if (media.length === 0) {
-                  return (
-                    <div
-                      className="w-full h-96 rounded-2xl"
-                      style={{
-                        backgroundImage: 'url(https://images.pexels.com/photos/1669799/pexels-photo-1669799.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940)',
-                        backgroundSize: 'cover',
-                        backgroundPosition: 'center'
-                      }}
-                    ></div>
-                  );
-                }
-                return (
-                  <div className="relative" data-testid="image-gallery">
-                    <div className="overflow-hidden rounded-2xl bg-black">
-                      <div
-                        className="flex transition-transform duration-500 ease-in-out"
-                        style={{ transform: `translateX(-${currentImageIndex * 100}%)` }}
-                      >
-                        {media.map((m, idx) => (
-                          m.type === 'image' ? (
-                            <img
-                              key={m.url}
-                              src={toSrc(m.url)}
-                              alt={`${property.title} - ${idx + 1}`}
-                              className="w-full h-96 object-cover flex-shrink-0"
-                              data-testid={idx === currentImageIndex ? 'gallery-main-image' : undefined}
-                            />
-                          ) : (
-                            <video
-                              key={m.url}
-                              ref={el => { videoRefs.current[idx] = el; }}
-                              src={toSrc(m.url)}
-                              controls
-                              playsInline
-                              preload="metadata"
-                              className="w-full h-96 object-contain flex-shrink-0 bg-black"
-                              data-testid={`gallery-video-${idx}`}
-                            />
-                          )
-                        ))}
-                      </div>
-                    </div>
-                    {media.length > 1 && (
-                      <>
-                        <button
-                          onClick={() => goTo(currentImageIndex === 0 ? media.length - 1 : currentImageIndex - 1)}
-                          className="absolute left-3 top-1/2 -translate-y-1/2 bg-black/60 text-white p-2 rounded-full hover:bg-black/80 transition-colors z-10"
-                          data-testid="gallery-prev"
-                        >
-                          <ChevronLeft size={20} />
-                        </button>
-                        <button
-                          onClick={() => goTo(currentImageIndex === media.length - 1 ? 0 : currentImageIndex + 1)}
-                          className="absolute right-3 top-1/2 -translate-y-1/2 bg-black/60 text-white p-2 rounded-full hover:bg-black/80 transition-colors z-10"
-                          data-testid="gallery-next"
-                        >
-                          <ChevronRight size={20} />
-                        </button>
-                        <div className="absolute bottom-3 left-1/2 -translate-x-1/2 bg-black/60 text-white text-xs px-3 py-1 rounded-full pointer-events-none">
-                          {currentImageIndex + 1} / {media.length}
-                          {media[currentImageIndex]?.type === 'video' && (
-                            <span className="ml-2 inline-flex items-center gap-1"><Film size={11} /> video</span>
-                          )}
-                        </div>
-                      </>
-                    )}
-                    {media.length > 1 && (
-                      <div className="flex gap-2 mt-3 overflow-x-auto pb-2" data-testid="gallery-thumbnails">
-                        {media.map((m, idx) => (
-                          <div
-                            key={`thumb-${m.url}`}
-                            onClick={() => goTo(idx)}
-                            className={`relative w-20 h-14 rounded-lg cursor-pointer flex-shrink-0 transition-all overflow-hidden ${idx === currentImageIndex ? 'ring-2 ring-black opacity-100' : 'opacity-60 hover:opacity-100'}`}
-                            data-testid={`gallery-thumb-${idx}`}
-                          >
-                            {m.type === 'image' ? (
-                              <img
-                                src={toSrc(m.url)}
-                                alt={`Thumb ${idx + 1}`}
-                                className="w-full h-full object-cover"
-                              />
-                            ) : (
-                              <>
-                                <video
-                                  src={toSrc(m.url)}
-                                  preload="metadata"
-                                  muted
-                                  className="w-full h-full object-cover bg-black"
-                                />
-                                <div className="absolute inset-0 flex items-center justify-center bg-black/30 pointer-events-none">
-                                  <Play size={18} className="text-white drop-shadow" fill="white" />
-                                </div>
-                              </>
-                            )}
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                );
-              })()}
+              <ImageGallery
+                media={[
+                  ...(property.images || []).map((url) => ({ type: 'image', url })),
+                  ...(property.videos || []).map((url) => ({ type: 'video', url })),
+                ]}
+                currentIndex={currentImageIndex}
+                onIndexChange={setCurrentImageIndex}
+                alt={property.title}
+                apiBase={API}
+              />
             </div>
 
             <div className="flex items-center justify-between mb-4">
@@ -524,64 +352,7 @@ const PropertyDetail = () => {
               )}
             </div>
 
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-              {property.bedrooms && (
-                <div className="bg-white p-4 rounded-xl border border-[#E5E5E5]">
-                  <div className="flex items-center gap-2 mb-1">
-                    <Bed size={20} style={{ color: "#D4AF37" }} />
-                    <span className="text-sm text-gray-600">{t('property.bedrooms')}</span>
-                  </div>
-                  <p className="text-2xl font-bold">{property.bedrooms}</p>
-                </div>
-              )}
-              {property.bathrooms && (
-                <div className="bg-white p-4 rounded-xl border border-[#E5E5E5]">
-                  <div className="flex items-center gap-2 mb-1">
-                    <Bath size={20} style={{ color: "#D4AF37" }} />
-                    <span className="text-sm text-gray-600">{t('property.bathrooms')}</span>
-                  </div>
-                  <p className="text-2xl font-bold">{property.bathrooms}</p>
-                </div>
-              )}
-              {property.square_meters && (
-                <div className="bg-white p-4 rounded-xl border border-[#E5E5E5]">
-                  <div className="flex items-center gap-2 mb-1">
-                    <HomeIcon size={20} style={{ color: "#D4AF37" }} />
-                    <span className="text-sm text-gray-600">{t('property.sqm')}</span>
-                  </div>
-                  <p className="text-2xl font-bold">{property.square_meters}</p>
-                </div>
-              )}
-              {property.floor !== null && (
-                <div className="bg-white p-4 rounded-xl border border-[#E5E5E5]">
-                  <div className="flex items-center gap-2 mb-1">
-                    <Building2 size={20} style={{ color: "#D4AF37" }} />
-                    <span className="text-sm text-gray-600">{t('property.floor')}</span>
-                  </div>
-                  <p className="text-2xl font-bold">{property.floor}</p>
-                  {property.has_elevator && <p className="text-xs mt-1 font-semibold text-gray-600">{t('property.elevator')}{property.is_shabbat_elevator ? ` (${t('property.shabbatElevator')})` : ''}</p>}
-                </div>
-              )}
-              {property.porches > 0 && (
-                <div className="bg-white p-4 rounded-xl border border-[#E5E5E5]">
-                  <div className="flex items-center gap-2 mb-1">
-                    <HomeIcon size={20} style={{ color: "#D4AF37" }} />
-                    <span className="text-sm text-gray-600">{property.porches === 1 ? t('property.porch') : t('property.porches')}</span>
-                  </div>
-                  <p className="text-2xl font-bold">{property.porches}{property.porch_square_meters ? <span className="text-sm font-normal text-gray-500 ml-1">({property.porch_square_meters} sqm)</span> : ''}</p>
-                  {property.sukkah_compatible && <p className="text-xs mt-1" style={{ color: '#345C45', fontWeight: 600 }}>{t('property.sukkah')}</p>}
-                </div>
-              )}
-              {property.rental_type === 'vacation' && property.max_guests && (
-                <div className="bg-white p-4 rounded-xl border border-[#E5E5E5]" data-testid="property-max-guests">
-                  <div className="flex items-center gap-2 mb-1">
-                    <Users size={20} style={{ color: "#D4AF37" }} />
-                    <span className="text-sm text-gray-600">{t('property.maxGuestsLabel', 'Max guests')}</span>
-                  </div>
-                  <p className="text-2xl font-bold">{property.max_guests}</p>
-                </div>
-              )}
-            </div>
+            <PropertyStats property={property} />
 
             {/* Available From (non-long-term only) — long-term listings used to
                 show a "Starting Date (Fixed)" card here, but renters don't need
@@ -621,37 +392,7 @@ const PropertyDetail = () => {
               <p className="text-gray-700 leading-relaxed">{property.description}</p>
             </div>
 
-            {property.amenities && property.amenities.length > 0 && (
-              <div className="bg-white p-6 rounded-2xl border border-[#E5E5E5] mb-8">
-                <h2 className="text-2xl font-bold mb-4" style={{ fontFamily: 'Playfair Display' }}>{t('property.amenities')}</h2>
-                <div className="grid grid-cols-2 gap-3">
-                  {property.amenities.map((amenity) => {
-                    const iconMap = {
-                      'Central AC / Heating': Snowflake,
-                      'In-unit washer and dryer': WashingMachine,
-                      'Dishwasher': UtensilsCrossed,
-                      'Walk in Closets': DoorOpen,
-                      'High Ceilings': ArrowUpFromLine,
-                      'Ensuite Bathroom': ShowerHead,
-                      'Storage Space': Warehouse,
-                      'Heated Floors': Flame,
-                      'Gym / Fitness center': Dumbbell,
-                      'Swimming pool (indoor or outdoor)': Waves,
-                      'Hot tub / Spa': Sparkles,
-                      'On-site parking (garage or lot)': Car,
-                      'Wi-Fi included': Wifi,
-                    };
-                    const Icon = iconMap[amenity] || HomeIcon;
-                    return (
-                      <div key={amenity} className="flex items-center gap-2">
-                        <Icon size={16} style={{ color: "#D4AF37" }} />
-                        <span>{amenity}</span>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            )}
+            <AmenitiesList amenities={property.amenities} />
 
             <div className="flex flex-wrap gap-3">
               {property.furniture_package && (
@@ -1055,81 +796,6 @@ const PropertyDetail = () => {
             </div>
           </div>
         </div>
-
-      {/* Signature Modal */}
-      {showSignatureModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-6">
-          <div className="bg-white rounded-2xl p-8 max-w-2xl w-full">
-            <h2 className="text-2xl font-bold mb-4">{t('property.signContract')}</h2>
-            <p className="text-sm text-gray-600 mb-4">
-              {t('property.signContractIntro')}
-            </p>
-            
-            {propertyContract?.contract_url && (
-              <a
-                href={`${API.replace('/api', '')}${propertyContract.contract_url}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-sm text-[#1E6A6A] hover:text-[#D4AF37] underline mb-4 block"
-              >
-                {t('property.viewContractPdf')}
-              </a>
-            )}
-
-            <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 mb-4">
-              <canvas
-                ref={signatureCanvasRef}
-                width={600}
-                height={200}
-                className="w-full cursor-crosshair bg-gray-50 rounded"
-                onMouseDown={startDrawing}
-                onMouseMove={draw}
-                onMouseUp={stopDrawing}
-                onMouseLeave={stopDrawing}
-              />
-              <p className="text-xs text-gray-500 mt-2 text-center">{t('property.drawSignatureAbove')}</p>
-            </div>
-
-            <div className="flex items-center gap-3 mb-4">
-              <div className="flex-1 border-t border-gray-300"></div>
-              <span className="text-xs text-gray-500">{t('property.orDivider')}</span>
-              <div className="flex-1 border-t border-gray-300"></div>
-            </div>
-
-            <label className="block w-full px-4 py-3 rounded-lg border-2 border-dashed border-gray-300 text-center text-sm font-medium cursor-pointer hover:border-[#1E6A6A] transition-colors mb-4">
-              {t('property.uploadSignature')}
-              <input
-                type="file"
-                accept="image/*"
-                className="hidden"
-                onChange={handleSignatureImageUpload}
-              />
-            </label>
-
-            <div className="flex gap-3">
-              <button
-                onClick={clearSignature}
-                className="px-4 py-2 rounded-lg border border-gray-300 text-sm font-medium hover:bg-gray-50"
-              >
-                {t('property.clearBtn')}
-              </button>
-              <button
-                onClick={saveSignature}
-                className="flex-1 px-4 py-2 rounded-lg text-sm font-medium text-white"
-                style={{ backgroundColor: '#1E6A6A' }}
-              >
-                {t('property.signContinue')}
-              </button>
-              <button
-                onClick={() => setShowSignatureModal(false)}
-                className="px-4 py-2 rounded-lg border border-gray-300 text-sm font-medium hover:bg-gray-50"
-              >
-                {t('property.cancel')}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 };

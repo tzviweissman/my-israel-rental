@@ -442,5 +442,16 @@ Build a bilingual (English/Hebrew) rental website named MyIsraelRental.com with 
   - Verified live: vacation property booking auto-confirms with `status:confirmed`, sublease-aware overlap rejection still returns 409 with the human-readable date range, 404 paths intact for missing property/sublease.
   - bookings.py overall: 783 → 853 lines (helpers added 70 lines but removed ~150 of inlined logic, net +0 readability win since the helpers are independently testable).
 
+- [x] **PropertyDetail.js component split + dead-code removal** (2026-02-10):
+  - Created `/app/frontend/src/components/property/`:
+    - `ImageGallery.jsx` (142 lines) — image+video carousel with prev/next, thumbnail strip, video autopause-on-nav, controlled `currentIndex`. Pure presentational.
+    - `PropertyStats.jsx` (92 lines) — bedrooms/bathrooms/sqm/floor/porches/max-guests stat-card grid. Pure presentational.
+    - `AmenitiesList.jsx` (52 lines) — 2-col amenity list with the 13-icon lookup map. Pure presentational.
+  - **Deleted dead signature modal flow** (~150 lines): `setShowSignatureModal(true)` was never called anywhere in the file — booking flow was decoupled when contracts moved to `/sign/:token` post-acceptance. Removed: the modal, 5 unused state vars (`signatureData`, `isDrawing`, `signatureCanvasRef`, `showSignatureModal`, `propertyContract`), 6 dead handlers (`startDrawing`/`draw`/`stopDrawing`/`clearSignature`/`saveSignature`/`handleSignatureImageUpload`), and the `/properties/{id}/contract` fetch that only fed the dead modal.
+  - Pruned 18 unused lucide imports that the inlined gallery/stats/amenities had pulled in.
+  - **PropertyDetail.js: 1137 → 802 lines (−30%)**. Behaviour unchanged, ESLint clean.
+  - Verified end-to-end on a 4-image vacation property: gallery carousel works (prev/next/thumb clicks all flip the counter correctly), 5 stat cards render, amenities heading renders, agent-fee badge unchanged, booking sidebar (calendar, quick-select, email/message owner, CTA) all intact, zero console errors, mobile (390×844) layout clean.
+  - The big remaining piece (the ~390-line booking sidebar with date picker, quick-select presets, calendar visibility, sublease pre-fill) was deliberately left in PropertyDetail.js — its state is too tangled with the parent for a low-risk extract in this session.
+
 ## Test Credentials
 See /app/memory/test_credentials.md
