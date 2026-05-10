@@ -462,5 +462,15 @@ Build a bilingual (English/Hebrew) rental website named MyIsraelRental.com with 
   - The page now reads as ~330 lines of state/handlers + ~160 lines of orchestration JSX (header → banner → drawer → grid → empty-state), instead of one 940-line megafile.
   - Verified end-to-end on `/properties/all`: 13 cards render, filter drawer opens, bedrooms stepper increments to `0.5` correctly (half-bedroom step), currency toggle USD/ILS clears price filters as before, Apply Filters refetches (13 cards intact), card hero + price + FX-converted subtext (`≈ ₪1,450/night`) all rendering. `/properties/pesach` shows the Pesach holiday banner with the "Find homes available these dates" CTA. Zero console errors.
 
+- [x] **PropertyDetail.js booking-sidebar Phase 2** (2026-02-10):
+  - Created `/app/frontend/src/components/property/BookingSidebar.jsx` (431 lines) with three internal sub-components (kept private since they're tightly coupled):
+    - `PriceBlock` — renders sublease price | loading skeleton | property price (with FX conversion).
+    - `QuickSelectRow` — "+1 Year" / "Clear" preset buttons for long-term + short-term.
+    - `BookingCalendar` — full popover with the complete-range-restart logic, minimum-booking-days auto-checkout, sublease-window confinement, and blocked-dates filtering.
+  - Removed unused imports from PropertyDetail.js (`Calendar`, `MessageCircle`, `Mail`, `X`).
+  - **PropertyDetail.js: 802 → 430 lines (−46% in this phase, −62% from the original 1137 across both phases)**. ESLint clean.
+  - The handler functions (`handleBooking`, `handleChat`) and the parent state (`bookingData`, `dateRange`, `showCalendar`, `calendarMonth`) stay in PropertyDetail.js since they're also read by the deep-link prefill `useEffect` and the share handler. The component receives them as props.
+  - Verified end-to-end on a real long-term property (booking pill correctly DISABLED for `longTermLocked`, +1 Year/Clear quick-select pills visible, Email/Message Owner buttons work, $3,000/month price + agent fee badge intact) AND a vacation property (calendar opens cleanly, today highlighted gold, past dates struck-through, X close button, Email/Message Owner all wired). Zero console errors.
+
 ## Test Credentials
 See /app/memory/test_credentials.md
