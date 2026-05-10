@@ -516,7 +516,17 @@ const PropertyList = ({ properties, bookings = [], onEdit, onRefresh, API, token
                   <button onClick={() => onEdit(property)} className="p-2 hover:bg-gray-100 rounded-lg" data-testid={`edit-property-${property.id}`}>
                     <Edit size={18} />
                   </button>
-                  <button onClick={() => navigate(`/property/${property.id}`)} className="p-2 hover:bg-gray-100 rounded-lg" data-testid={`view-property-${property.id}`}>
+                  <button
+                    onClick={() => {
+                      // Persist where we came from so PropertyDetail's
+                      // "Back to Dashboard" button can route back here
+                      // instead of dumping the user onto /properties/all.
+                      sessionStorage.setItem('previousPath', window.location.pathname);
+                      navigate(`/property/${property.id}`);
+                    }}
+                    className="p-2 hover:bg-gray-100 rounded-lg"
+                    data-testid={`view-property-${property.id}`}
+                  >
                     <Eye size={18} />
                   </button>
                   <button onClick={() => handleDeleteProperty(property.id)} className="p-2 hover:bg-red-50 rounded-lg text-red-600" data-testid={`delete-property-${property.id}`}>
