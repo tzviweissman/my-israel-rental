@@ -411,5 +411,21 @@ Build a bilingual (English/Hebrew) rental website named MyIsraelRental.com with 
   - Full Hebrew translation block added for the OwnerManagementOfferModal (`ownerOffer.tag/title/subtitle/findTenants/findTenantsCopy/handleIssues/handleIssuesCopy/fullService/fullServiceCopy/dismiss/contactCta`) — was previously rendering English fallbacks.
   - Verified mobile (390×844): FAQ accordion expands/collapses, menu drawer shows FAQ link, footer link navigates to `/faq`.
 
+- [x] **FAQ search bar + match highlighting** (2026-02-10):
+  - Added a real-time client-side search input above the accordion sections in `pages/FAQ.js`. Filters both questions and answer text (handles JSX answers via a small `answerToText` walker), auto-expands every match so users read the answer without an extra tap, gold-highlights the matched substring inline.
+  - "No results" state with WhatsApp escape hatch; live match-count pill ("1 match for 'cancel'"); X button to clear and restore default state.
+
+- [x] **Code review fix sweep** (2026-02-10):
+  - Genuine fixes: Auth.js `dangerouslySetInnerHTML` now wrapped with `DOMPurify.sanitize()` (forgotEmail interpolation hardened); 7 actual `is True/False` boolean comparisons in test files normalized to `==`.
+  - Refused with documented reasoning: Home.js DOMPurify "fix" (already there), i18n.js "hardcoded API keys" (translation strings, mechanically impossible to env-var), test fixture passwords ("Test1234!"), 5 "empty catch" blocks (all have intent comments + wrap calls that don't throw), FAQ.js index keys (ephemeral split-array, React docs allow it).
+
+- [x] **AddPropertyModal refactor — phase 1: extract reusable pieces** (2026-02-10):
+  - Created `/app/frontend/src/components/dashboard/propertyForm/`:
+    - `DateField.jsx` (128 lines): reusable single-date picker with teal/gold variants. Removes ~110 lines of duplication that previously existed for `starting_date` and `available_from`.
+    - `LocationPicker.jsx` (90 lines): self-contained city-neighborhood combobox with type-ahead, click-outside dismiss, hydrate-on-edit.
+    - `MediaUploadSection.jsx` (215 lines): drag/drop uploader, progress bar, gallery thumbnails, set-as-cover promotion. Owns its own uploading/progress state.
+  - **AddPropertyModal.jsx: 1068 → 722 lines (−32%)**. Behaviour unchanged.
+  - Verified end-to-end: modal opens, both DateField variants render correctly when rental_type switches, LocationPicker dropdown shows full neighborhood list, vacation-only fields (cleaning fee, holiday Sukkot/Pesach tags, max guests) appear conditionally, file drop zone mounts. Zero console errors. Owner login → dashboard → Add Property smoke-test green.
+
 ## Test Credentials
 See /app/memory/test_credentials.md
