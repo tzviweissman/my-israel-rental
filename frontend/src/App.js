@@ -26,6 +26,7 @@ import DocumentService from './pages/DocumentService';
 import SignContract from './pages/SignContract';
 import PaymentSuccess from './pages/PaymentSuccess';
 import PaymentCancel from './pages/PaymentCancel';
+import FAQ from './pages/FAQ';
 import { DOCUMENT_SERVICES_ENABLED } from './config/features';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
@@ -116,6 +117,7 @@ function App() {
             <Route path="/sign/:signToken" element={<SignContract />} />
             <Route path="/payment/success" element={user ? <PaymentSuccess /> : <Navigate to="/auth/login" />} />
             <Route path="/payment/cancel" element={<PaymentCancel />} />
+            <Route path="/faq" element={<FAQ />} />
           </Routes>
         </div>
       </BrowserRouter>

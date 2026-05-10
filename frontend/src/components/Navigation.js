@@ -2,7 +2,7 @@ import React, { useContext, useState, useRef, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { AuthContext, API } from '../App';
-import { Globe, LogOut, LayoutDashboard, Menu, X, Home, Building, Palmtree, Warehouse, ChevronRight, Search, Bell, MessageCircle } from 'lucide-react';
+import { Globe, LogOut, LayoutDashboard, Menu, X, Home, Building, Palmtree, Warehouse, ChevronRight, Search, Bell, MessageCircle, HelpCircle } from 'lucide-react';
 import axios from 'axios';
 import { toast } from 'sonner';
 import { playMessagePing, requestDesktopNotificationPermission, showDesktopNotification } from '../utils/messageAlerts';
@@ -535,6 +535,17 @@ const Navigation = () => {
                   <button onClick={() => handleNav('/properties/storage')} className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-150 hover:bg-white/5 group" style={{ color: '#D4AF37' }} data-testid="nav-storage">
                     <Warehouse size={16} className="opacity-60 group-hover:opacity-100" />
                     <span>{t('nav.storage')}</span>
+                    <ChevronRight size={14} className="ml-auto opacity-0 group-hover:opacity-60 transition-opacity" />
+                  </button>
+                </div>
+
+                <div className="mx-4 border-t" style={{ borderColor: 'rgba(212,175,55,0.15)' }} />
+
+                {/* Help / FAQ */}
+                <div className="px-2 py-2">
+                  <button onClick={() => handleNav('/faq')} className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-150 hover:bg-white/5 group" style={{ color: '#D4AF37' }} data-testid="nav-faq">
+                    <HelpCircle size={16} className="opacity-60 group-hover:opacity-100" />
+                    <span>{t('nav.faq')}</span>
                     <ChevronRight size={14} className="ml-auto opacity-0 group-hover:opacity-60 transition-opacity" />
                   </button>
                 </div>

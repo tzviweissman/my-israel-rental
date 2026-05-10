@@ -159,6 +159,16 @@ const Home = () => {
           <p className="text-lg">
             {t('home.email')}: <a href="mailto:mir@myisraelrental.com" className="font-bold hover:underline">mir@myisraelrental.com</a>
           </p>
+          <div className="mt-6 pt-6 border-t" style={{ borderColor: 'rgba(212,175,55,0.25)' }}>
+            <a
+              href="/faq"
+              onClick={(e) => { e.preventDefault(); navigate('/faq'); }}
+              className="inline-flex items-center gap-1.5 text-sm font-medium hover:underline transition-opacity hover:opacity-80"
+              data-testid="footer-faq-link"
+            >
+              {t('footer.faq')} →
+            </a>
+          </div>
         </div>
       </div>
     </div>

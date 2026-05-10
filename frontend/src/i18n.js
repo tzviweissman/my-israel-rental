@@ -15,7 +15,8 @@ const resources = {
         login: 'Login',
         signup: 'Sign Up',
         dashboard: 'Dashboard',
-        logout: 'Logout'
+        logout: 'Logout',
+        faq: 'FAQs'
       },
       hero: {
         title: 'Find Your Perfect Rental',
@@ -547,7 +548,21 @@ const resources = {
       },
       footer: {
         contact: 'Contact Us',
-        phone: 'Phone'
+        phone: 'Phone',
+        faq: 'Frequently Asked Questions'
+      },
+      ownerOffer: {
+        tag: 'Owner perk',
+        title: 'Want us to manage your property for you?',
+        subtitle: "Owning a rental shouldn't feel like a second job. Let our team take it off your plate end-to-end.",
+        findTenants: 'We find your tenants',
+        findTenantsCopy: 'We list your property, screen renters, and run viewings — you just approve who moves in.',
+        handleIssues: 'We handle every issue',
+        handleIssuesCopy: 'Plumbing, electricity, neighbour disputes — your tenants call us, not you.',
+        fullService: 'You stay hands-off',
+        fullServiceCopy: 'Rent collection, contract renewals, end-of-stay walkthroughs — we run it. You get the income.',
+        dismiss: 'Maybe later',
+        contactCta: 'Chat with us on WhatsApp'
       }
     }
   },
@@ -563,7 +578,8 @@ const resources = {
         login: 'התחברות',
         signup: 'הרשמה',
         dashboard: 'לוח בקרה',
-        logout: 'התנתקות'
+        logout: 'התנתקות',
+        faq: 'שאלות נפוצות'
       },
       hero: {
         title: 'מצא את השכירות המושלמת',
@@ -1095,7 +1111,21 @@ const resources = {
       },
       footer: {
         contact: 'צור קשר',
-        phone: 'טלפון'
+        phone: 'טלפון',
+        faq: 'שאלות נפוצות'
+      },
+      ownerOffer: {
+        tag: 'הטבה לבעלים',
+        title: 'רוצים שננהל את הנכס בשבילכם?',
+        subtitle: 'בעלות על נכס להשכרה לא צריכה להרגיש כמו עבודה שנייה. תנו לצוות שלנו לקחת את כל זה על עצמו, מקצה לקצה.',
+        findTenants: 'אנחנו מוצאים לכם שוכרים',
+        findTenantsCopy: 'אנחנו מפרסמים את הנכס, סוקרים שוכרים פוטנציאליים ומקיימים סיורים — אתם רק מאשרים מי נכנס.',
+        handleIssues: 'אנחנו מטפלים בכל תקלה',
+        handleIssuesCopy: 'אינסטלציה, חשמל, סכסוכי שכנים — השוכרים מתקשרים אלינו, לא אליכם.',
+        fullService: 'אתם נשארים בלי כאב ראש',
+        fullServiceCopy: 'גבייה, חידושי חוזה, בדיקות סיום שכירות — אנחנו על זה. אתם פשוט מקבלים את ההכנסה.',
+        dismiss: 'אולי בפעם אחרת',
+        contactCta: 'דברו איתנו בוואטסאפ'
       }
     }
   }

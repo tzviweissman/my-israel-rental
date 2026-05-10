@@ -404,6 +404,12 @@ Build a bilingual (English/Hebrew) rental website named MyIsraelRental.com with 
 - [ ] LLM Integration (Claude Sonnet) for translation/chat enhancements
 - [x] Dashboard.js refactoring (~900 lines) — done 2026-04-29 (now 232 lines)
 - [x] server.py route extraction into /routes directory — done 2026-04-23
+- [x] **FAQ page wired + Owner Management Offer i18n** (2026-02-10):
+  - `/faq` route added to `App.js`. Static FAQ page (`pages/FAQ.js`) with 4 Shadcn-style accordion sections (Booking, Fees, Cancellations, Hosts & Support), gold "Help Center" eyebrow, teal-gradient WhatsApp CTA at the bottom.
+  - Discoverable from two places: nav drawer ("FAQs" with `HelpCircle` icon between Storage and the Language toggle) **and** the Home page footer (link below the email line).
+  - i18n keys added in EN+HE: `nav.faq` (`FAQs` / `שאלות נפוצות`), `footer.faq` (`Frequently Asked Questions` / `שאלות נפוצות`).
+  - Full Hebrew translation block added for the OwnerManagementOfferModal (`ownerOffer.tag/title/subtitle/findTenants/findTenantsCopy/handleIssues/handleIssuesCopy/fullService/fullServiceCopy/dismiss/contactCta`) — was previously rendering English fallbacks.
+  - Verified mobile (390×844): FAQ accordion expands/collapses, menu drawer shows FAQ link, footer link navigates to `/faq`.
 
 ## Test Credentials
 See /app/memory/test_credentials.md
