@@ -292,6 +292,13 @@ Build a bilingual (English/Hebrew) rental website named MyIsraelRental.com with 
 - [x] **Sublease Edit** (2026-04-30):
   - Backend `PUT /api/subleases/{id}` now accepts `currency` and `holiday_tags` alongside existing fields.
   - Frontend: each sublease card has an Edit button that hydrates the form with existing values and scrolls into view. Header/CTA switch to edit mode ("Save Changes"). Step-1 picker and "Change property" link hidden since the property is immutable.
+- [x] **SubleasesTab.jsx refactor** (2026-05-11):
+  - Split the 859-line `SubleasesTab.jsx` into 3 focused components:
+    - `SubleasesTab.jsx` (~360 lines): owns all state, API calls (fetch/create/update/delete/upload-contract/toggle-active), and orchestrates the form + list.
+    - `dashboard/sublease/SubleaseForm.jsx` (~340 lines): pure form panel (step-1 booking picker + step-2 details with the shadcn Calendar popover, price+currency, holiday tags, notes). Hydrates from parent state.
+    - `dashboard/sublease/SubleaseListItem.jsx` (~155 lines): pure presentational sublease row card with image, badges, action buttons, and contract-upload/copy-link affordances.
+  - All `data-testid`s preserved (`subleases-tab`, `create-sublease-btn`, `sublease-form-container`, `sublease-{id}`, `edit-sublease-{id}`, `toggle-sublease-{id}`, `delete-sublease-{id}`, `upload-contract-{id}`, `copy-sign-link-{id}`).
+  - Verified end-to-end (renter@test.com): list renders existing sublease (Cozy Tel Aviv Apartment), "+ New Sublease" opens the step-1 picker, Edit hydrates all fields (dates, price=250, currency=ILS, bedrooms=1, holiday tags, notes), submit button correctly switches to "Save Changes". Zero console errors. ESLint clean.
 - [x] **Chat notification deep-linking + Messages inbox tab** (2026-05-01):
   - **Backend** `routes/chat.py`: `new_message` notifications now persist `sender_id` so the lister/owner can deep-link straight into the right conversation. `GET /api/chat/messages/{property_id}` accepts `with_user=` to scope output (and read-receipt updates) to a single counterparty pair, fixing the multi-renter inbox bleed-through. `GET /api/chat/conversations` includes `other_user.id` in each row.
   - **Frontend** `Navigation.js`: `handleNotificationClick` now routes `new_message` notifications to `/chat/{property_id}?with={sender_id}&sublease_id=…` instead of the property page. `Chat.js` reads `?with=` and uses it as `otherUserId` (overrides owner_id when the lister is viewing); messages fetch is scoped per counterparty.
