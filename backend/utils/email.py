@@ -384,6 +384,62 @@ async def send_booking_notification_email(
     )
 
 
+async def send_mention_notification_email(
+    to_email: str,
+    receiver_name: str,
+    sender_name: str,
+    role_mentioned: str,
+    message_snippet: str,
+    property_id: str,
+    property_title: str,
+    sender_id: str,
+) -> bool:
+    """Email a recipient who was @-mentioned in chat but hasn't opened it.
+
+    Sent ~10 minutes after the unread @-mention. Deep-links straight into
+    the conversation with the sender.
+    """
+    # Cap the message preview so subject/body stay sane.
+    snippet = (message_snippet or "").strip()
+    if len(snippet) > 240:
+        snippet = snippet[:237] + "…"
+    # HTML-escape for safety, but keep simple.
+    import html as _html
+    safe_snippet = _html.escape(snippet)
+    safe_sender = _html.escape(sender_name)
+    safe_property = _html.escape(property_title)
+    safe_receiver = _html.escape(receiver_name or "there")
+    role_label = role_mentioned.capitalize()
+
+    deep_link = f"{FRONTEND_URL}/chat/{property_id}"
+    if sender_id:
+        deep_link += f"?with={sender_id}"
+
+    inner = f"""
+    <h2 style="color:#222;font-size:22px;margin:0 0 8px;">You were mentioned in a chat 👋</h2>
+    <p style="color:#555;font-size:14px;line-height:1.7;margin:0 0 18px;">
+      Hi {safe_receiver},<br />
+      <strong>{safe_sender}</strong> mentioned you as <strong>@{role_label.lower()}</strong>
+      in a conversation about <strong style="color:{BRAND_TEAL};">{safe_property}</strong>.
+    </p>
+    <div style="background:#f7f7f4;border-left:4px solid {BRAND_GOLD};border-radius:8px;padding:16px 18px;margin:18px 0;color:#444;font-size:14px;line-height:1.6;font-style:italic;">
+      "{safe_snippet}"
+    </div>
+    {_button("Open Conversation", deep_link)}
+    <p style="color:#888;font-size:12px;line-height:1.6;margin-top:10px;">
+      You're receiving this because the message has been waiting for you for
+      a few minutes. Open the chat to mark it as read — we won't email you
+      again for this same message.
+    </p>
+    """
+    return await send_email(
+        to_email,
+        f"@{role_label.lower()} — new mention from {sender_name}",
+        _wrap(inner, preheader=f"{sender_name} mentioned you about {property_title}"),
+        tag="mention-notification",
+    )
+
+
 async def send_payment_confirmation_email(
     to_email: str,
     name: str,

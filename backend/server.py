@@ -40,6 +40,7 @@ from routes import (  # noqa: E402
 from routes.deps import UPLOAD_DIR, client, db  # noqa: E402  (import after load_dotenv on purpose)
 from utils.contract_template import ensure_templates as ensure_contract_templates  # noqa: E402
 from utils.helpers import sync_all_ical_feeds  # noqa: E402
+from utils.mention_email import mention_email_loop  # noqa: E402
 
 logging.basicConfig(
     level=logging.INFO,
@@ -84,6 +85,7 @@ async def startup_tasks() -> None:
     """Kick off the iCal background sync and make sure the blank-contract
     PDF templates exist on disk."""
     asyncio.create_task(sync_all_ical_feeds())
+    asyncio.create_task(mention_email_loop())
     try:
         ensure_contract_templates(ROOT_DIR / "uploads")
         logger.info("Contract templates ready")

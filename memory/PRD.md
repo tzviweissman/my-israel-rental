@@ -292,6 +292,13 @@ Build a bilingual (English/Hebrew) rental website named MyIsraelRental.com with 
 - [x] **Sublease Edit** (2026-04-30):
   - Backend `PUT /api/subleases/{id}` now accepts `currency` and `holiday_tags` alongside existing fields.
   - Frontend: each sublease card has an Edit button that hydrates the form with existing values and scrolls into view. Header/CTA switch to edit mode ("Save Changes"). Step-1 picker and "Change property" link hidden since the property is immutable.
+- [x] **Email ping for unread @-mentions** (2026-05-11):
+  - New background task `utils/mention_email.py::mention_email_loop()` (kicked off in `server.py` startup alongside `sync_all_ical_feeds`). Scans every 2 minutes.
+  - Eligibility filter: `mentions` array non-empty AND `read=False` AND `created_at` older than 10 minutes AND no `mention_email_sent` flag yet.
+  - Resolves the receiver's role via `current_user_role_in_property` (sublease-aware: sublessor of an active sublease on the property is treated as `owner`). Only emails when the receiver's role appears in the message's `mentions` list; role mismatches are flagged-and-skipped so we never re-scan them.
+  - New `send_mention_notification_email()` helper in `utils/email.py` — branded teal/gold template with HTML-escaped sender name + property title + 240-char message snippet + "Open Conversation" button deep-linked to `/chat/{property_id}?with={sender_id}`. Tagged `mention-notification`.
+  - Idempotent: every processed message gets `mention_email_sent: True` + `mention_email_sent_at` + `mention_email_delivered` so a second loop pass never re-sends, even if Postmark returned False (suppressed recipient).
+  - Tested: 5/5 pytest in `tests/test_mention_email.py` (eligible → emails + flags; <10 min → skipped; already read → skipped; role mismatch → flag-no-email; already-flagged → skipped). Email-body smoke test verifies XSS escaping, branded subject (`@owner — new mention from {sender}`), and the conversation deep-link.
 - [x] **SubleasesTab.jsx refactor** (2026-05-11):
   - Split the 859-line `SubleasesTab.jsx` into 3 focused components:
     - `SubleasesTab.jsx` (~360 lines): owns all state, API calls (fetch/create/update/delete/upload-contract/toggle-active), and orchestrates the form + list.
