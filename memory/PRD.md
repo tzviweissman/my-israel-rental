@@ -472,5 +472,20 @@ Build a bilingual (English/Hebrew) rental website named MyIsraelRental.com with 
   - The handler functions (`handleBooking`, `handleChat`) and the parent state (`bookingData`, `dateRange`, `showCalendar`, `calendarMonth`) stay in PropertyDetail.js since they're also read by the deep-link prefill `useEffect` and the share handler. The component receives them as props.
   - Verified end-to-end on a real long-term property (booking pill correctly DISABLED for `longTermLocked`, +1 Year/Clear quick-select pills visible, Email/Message Owner buttons work, $3,000/month price + agent fee badge intact) AND a vacation property (calendar opens cleanly, today highlighted gold, past dates struck-through, X close button, Email/Message Owner all wired). Zero console errors.
 
+- [x] **Chat.js component split** (2026-02-10):
+  - Created `/app/frontend/src/components/chat/`:
+    - `ChatHeader.jsx` (207 lines) — top bar (back / live indicator / search / dashboard), collapsible search bar with prev/next + match counter, property/sublease info bar.
+    - `MessageList.jsx` (395 lines) — scrollable messages area with day-grouped date separators, empty state, typing indicator, scroll-to-bottom button. Includes private `MessageBubble`, `EditPanel`, `InlineTranslation` sub-components plus pure helpers (`formatTime`, `formatDateHeader`, `getInitials`, `renderHighlighted`).
+    - `MessageInput.jsx` (43 lines) — sticky input form with send button, fires `onTyping` per keystroke.
+  - **Chat.js: 859 → 386 lines (−55%)**. ESLint clean across all 4 files.
+  - Parent still owns all state + handlers (`messages`, `translations`, `editingId/editingText`, search state, `emitTyping`, `handleScroll`, etc.) since they're all interlocked with the polling/typing/scroll effects. Components are pure presentational — only render + dispatch back to parent.
+  - Removed unused imports from Chat.js (`Send`, `ArrowLeft`, `User`, `Building2`, `Clock`, `MessageCircle`, `ChevronDown`, `Check`, `CheckCheck`, `Languages`, `X`, `Pencil`, `Search`, `ChevronUp`, `HEBREW_RE`).
+  - Verified end-to-end on a real chat (renter → vacation property owner):
+    - Header renders with property pill ("Booking-overlap test apt · Tel Aviv · VACATION") ✓
+    - Date separator ("TODAY") + message bubble with teal gradient + 11:48 AM timestamp + sent tick + TR gold avatar ✓
+    - Search toggle opens the bar, typing "hello" shows the match counter, close button hides it ✓
+    - Sent a real message ("refactor smoke test message") → appeared instantly in the bubble grid ✓
+    - Zero console errors
+
 ## Test Credentials
 See /app/memory/test_credentials.md
