@@ -177,6 +177,7 @@ async def get_conversations(payload: dict = Depends(verify_token)) -> list[dict]
                 "other_user": other_user if other_user else {},
                 "last_message": msg['message'],
                 "last_message_time": msg['created_at'],
+                "last_message_from_me": msg['sender_id'] == payload['user_id'],
                 "unread": not msg['read'] and msg['receiver_id'] == payload['user_id']
             }
     

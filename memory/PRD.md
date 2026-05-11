@@ -487,5 +487,11 @@ Build a bilingual (English/Hebrew) rental website named MyIsraelRental.com with 
     - Sent a real message ("refactor smoke test message") → appeared instantly in the bubble grid ✓
     - Zero console errors
 
+- [x] **Inbox preview-as-bubble upgrade** (2026-02-10):
+  - Extended `ConversationOut` model + `GET /api/chat/conversations` route with a new `last_message_from_me: bool` field so the inbox can render preview bubbles aligned correctly.
+  - Updated `components/dashboard/MessagesTab.jsx`: each conversation row's last-message preview is now a mini chat bubble — teal-gradient + right-aligned + "You:" prefix when the current user sent it last; gray + left-aligned when the counterparty sent it last. Unread + counterparty-last gets bold text for emphasis.
+  - The inbox now visually matches the in-conversation view at a glance — you can tell who sent the last message without clicking in. Reuses the same color tokens and rounded-tail pattern as `MessageBubble.jsx`.
+  - Verified live: backend returns `last_message_from_me: True` for both renter test conversations; frontend renders both rows with teal "You: refactor smoke test message" + "You: Badge visibility test" bubbles right-aligned. Zero console errors.
+
 ## Test Credentials
 See /app/memory/test_credentials.md

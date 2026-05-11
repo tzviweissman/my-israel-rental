@@ -296,6 +296,9 @@ class ConversationOut(BaseModel):
     property_title: str
     last_message: str | None = None
     last_message_time: str | None = None
+    # True iff the last message in the thread was sent by the *current user*.
+    # Drives the inbox preview-bubble alignment (right for me, left for them).
+    last_message_from_me: bool | None = None
     unread: bool | None = None
     other_user: dict | None = None
     participants: list[dict] | None = None

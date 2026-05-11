@@ -71,6 +71,10 @@ const MessagesTab = ({ API, token, onUnreadChange }) => {
       {conversations.map((conv) => {
         const key = `${conv.property_id}-${conv.other_user?.id || conv.other_user?.email || 'x'}`;
         const isUnread = !!conv.unread;
+        const fromMe = !!conv.last_message_from_me;
+        const previewTime = conv.last_message_time
+          ? new Date(conv.last_message_time).toLocaleDateString([], { month: 'short', day: 'numeric' })
+          : null;
         return (
           <button
             key={key}
@@ -88,25 +92,33 @@ const MessagesTab = ({ API, token, onUnreadChange }) => {
                 <p className={`text-sm truncate ${isUnread ? 'font-bold text-gray-900' : 'font-semibold text-gray-800'}`}>
                   {conv.property_title || 'Property'}
                 </p>
-                {conv.last_message_time && (
-                  <span className="text-[11px] text-gray-400 flex-shrink-0">
-                    {new Date(conv.last_message_time).toLocaleDateString([], {
-                      month: 'short',
-                      day: 'numeric',
-                    })}
-                  </span>
+                {previewTime && (
+                  <span className="text-[11px] text-gray-400 flex-shrink-0">{previewTime}</span>
                 )}
               </div>
               <p className="text-xs text-gray-500 mt-0.5 truncate">
                 {conv.other_user?.name || conv.other_user?.email || 'Unknown sender'}
               </p>
-              <p
-                className={`text-sm mt-1 truncate ${
-                  isUnread ? 'text-gray-900' : 'text-gray-500'
-                }`}
-              >
-                {conv.last_message || '—'}
-              </p>
+              {/* Mini chat-bubble preview — shifted left/right with teal/white
+                  styling so the inbox row matches the conversation view at a
+                  glance. */}
+              {conv.last_message ? (
+                <div className={`mt-1.5 flex ${fromMe ? 'justify-end' : 'justify-start'}`}>
+                  <span
+                    className={`inline-block max-w-[85%] truncate rounded-2xl px-3 py-1.5 text-xs leading-relaxed ${
+                      fromMe
+                        ? 'bg-gradient-to-br from-[#1E6A6A] to-[#1a5e5e] text-white rounded-br-md'
+                        : 'bg-gray-100 text-gray-800 rounded-bl-md'
+                    } ${isUnread && !fromMe ? 'font-semibold' : ''}`}
+                    data-testid={`conversation-preview-${conv.property_id}`}
+                  >
+                    {fromMe && <span className="opacity-70 mr-1">You:</span>}
+                    {conv.last_message}
+                  </span>
+                </div>
+              ) : (
+                <p className="text-sm mt-1 text-gray-400 italic">—</p>
+              )}
             </div>
             {isUnread && (
               <span
