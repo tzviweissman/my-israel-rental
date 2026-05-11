@@ -2,7 +2,7 @@ import React, { useEffect, useState, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { MessageCircle, Building2 } from 'lucide-react';
+import { MessageCircle, Building2, AtSign } from 'lucide-react';
 
 /**
  * Inbox tab — lists every conversation the current user is part of and
@@ -72,6 +72,7 @@ const MessagesTab = ({ API, token, onUnreadChange }) => {
         const key = `${conv.property_id}-${conv.other_user?.id || conv.other_user?.email || 'x'}`;
         const isUnread = !!conv.unread;
         const fromMe = !!conv.last_message_from_me;
+        const mentionsMe = !!conv.last_message_mentions_me;
         const previewTime = conv.last_message_time
           ? new Date(conv.last_message_time).toLocaleDateString([], { month: 'short', day: 'numeric' })
           : null;
@@ -80,7 +81,11 @@ const MessagesTab = ({ API, token, onUnreadChange }) => {
             key={key}
             onClick={() => openConversation(conv)}
             className={`w-full text-left bg-white rounded-2xl border transition-all hover:shadow-md p-4 flex items-start gap-3 ${
-              isUnread ? 'border-[#D4AF37] ring-1 ring-[#D4AF37]/30' : 'border-gray-100'
+              mentionsMe
+                ? 'border-[#D4AF37] ring-2 ring-[#D4AF37]/40 shadow-sm'
+                : isUnread
+                ? 'border-[#D4AF37] ring-1 ring-[#D4AF37]/30'
+                : 'border-gray-100'
             }`}
             data-testid={`conversation-${conv.property_id}`}
           >
@@ -89,8 +94,18 @@ const MessagesTab = ({ API, token, onUnreadChange }) => {
             </div>
             <div className="flex-1 min-w-0">
               <div className="flex items-center justify-between gap-2">
-                <p className={`text-sm truncate ${isUnread ? 'font-bold text-gray-900' : 'font-semibold text-gray-800'}`}>
-                  {conv.property_title || 'Property'}
+                <p className={`text-sm truncate flex items-center gap-1.5 ${isUnread ? 'font-bold text-gray-900' : 'font-semibold text-gray-800'}`}>
+                  <span className="truncate">{conv.property_title || 'Property'}</span>
+                  {mentionsMe && (
+                    <span
+                      className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-md text-[10px] font-bold bg-[#D4AF37] text-[#1E6A6A] shrink-0"
+                      data-testid={`mention-badge-${conv.property_id}`}
+                      title="You were mentioned"
+                    >
+                      <AtSign size={10} />
+                      Mentioned you
+                    </span>
+                  )}
                 </p>
                 {previewTime && (
                   <span className="text-[11px] text-gray-400 flex-shrink-0">{previewTime}</span>

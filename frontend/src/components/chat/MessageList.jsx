@@ -1,9 +1,13 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { Clock, Check, CheckCheck, Pencil, X, MessageCircle, Languages, ChevronDown } from 'lucide-react';
+import { Clock, Check, CheckCheck, Pencil, X, MessageCircle, Languages, ChevronDown, AtSign } from 'lucide-react';
 
 const HEBREW_RE = /[\u0590-\u05FF]/;
 const EDIT_WINDOW_MS = 5 * 60 * 1000;
+
+// Match the same `@owner|@renter|@manager` word-boundary tokens the backend
+// stores. Used to render the @-pill chips inline inside a message bubble.
+const MENTION_TOKEN_RE = /(?<![A-Za-z0-9_])@(owner|renter|manager)\b/gi;
 
 // ---------- pure helpers --------------------------------------------------
 
@@ -51,6 +55,55 @@ const renderHighlighted = (text, normalizedQuery) => {
       <React.Fragment key={i}>{p.text}</React.Fragment>
     ),
   );
+};
+
+// Convert plain text into React nodes where @-mentions are rendered as
+// pill chips. Works on already-highlighted output too (the chips wrap
+// around any inner mark from the search highlighter).
+const renderWithMentions = (textOrNodes, isMe) => {
+  // If we already got React nodes (from highlight pass), only walk string
+  // children; leave existing React elements untouched.
+  const walkString = (str, keyPrefix) => {
+    if (!MENTION_TOKEN_RE.test(str)) {
+      MENTION_TOKEN_RE.lastIndex = 0;
+      return [str];
+    }
+    MENTION_TOKEN_RE.lastIndex = 0;
+    const out = [];
+    let last = 0;
+    let match;
+    let i = 0;
+    while ((match = MENTION_TOKEN_RE.exec(str)) !== null) {
+      const before = str.slice(last, match.index);
+      if (before) out.push(before);
+      out.push(
+        <span
+          key={`${keyPrefix}-m-${i}`}
+          className={`inline-flex items-center gap-0.5 px-1.5 rounded-md font-semibold text-[12px] ${
+            isMe ? 'bg-white/20 text-white' : 'bg-[#D4AF37]/15 text-[#8a6d1d]'
+          }`}
+        >
+          <AtSign size={10} className="opacity-80" />
+          {match[1]}
+        </span>,
+      );
+      last = match.index + match[0].length;
+      i += 1;
+    }
+    if (last < str.length) out.push(str.slice(last));
+    return out;
+  };
+
+  if (typeof textOrNodes === 'string') {
+    return walkString(textOrNodes, 't');
+  }
+  if (Array.isArray(textOrNodes)) {
+    return textOrNodes.flatMap((node, idx) => {
+      if (typeof node === 'string') return walkString(node, `n${idx}`);
+      return [node];
+    });
+  }
+  return textOrNodes;
 };
 
 // ---------- internal sub-components --------------------------------------
@@ -223,7 +276,12 @@ const MessageBubble = ({
           />
         ) : (
           <p className="text-[13.5px] leading-relaxed whitespace-pre-wrap break-words">
-            {normalizedQuery ? renderHighlighted(msg.message, normalizedQuery) : msg.message}
+            {renderWithMentions(
+              normalizedQuery
+                ? renderHighlighted(msg.message, normalizedQuery)
+                : msg.message,
+              isMe,
+            )}
           </p>
         )}
 

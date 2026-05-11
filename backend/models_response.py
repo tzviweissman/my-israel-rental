@@ -299,6 +299,10 @@ class ConversationOut(BaseModel):
     # True iff the last message in the thread was sent by the *current user*.
     # Drives the inbox preview-bubble alignment (right for me, left for them).
     last_message_from_me: bool | None = None
+    # True iff the counterparty @-mentioned the current user's role in the
+    # last message. Lets the inbox flag actionable mentions with a bell +
+    # gold ring without re-scanning message text on the client.
+    last_message_mentions_me: bool | None = None
     unread: bool | None = None
     other_user: dict | None = None
     participants: list[dict] | None = None

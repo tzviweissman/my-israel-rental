@@ -493,5 +493,13 @@ Build a bilingual (English/Hebrew) rental website named MyIsraelRental.com with 
   - The inbox now visually matches the in-conversation view at a glance — you can tell who sent the last message without clicking in. Reuses the same color tokens and rounded-tail pattern as `MessageBubble.jsx`.
   - Verified live: backend returns `last_message_from_me: True` for both renter test conversations; frontend renders both rows with teal "You: refactor smoke test message" + "You: Badge visibility test" bubbles right-aligned. Zero console errors.
 
+- [x] **@-mention system** (2026-02-10):
+  - New backend module `/app/backend/utils/mentions.py` with `extract_mentions()` (regex with negative lookbehind so `@owner` matches but `email@owner.com` doesn't) and `current_user_role_in_property()` helpers. Three known role tokens: `@owner`, `@renter`, `@manager`.
+  - `POST /api/chat/messages` now persists `mentions: ["owner"]` on each message at write-time so the inbox can flag actionable mentions without re-scanning text on every fetch. Same on `PUT /api/chat/messages/{id}` (edits re-extract).
+  - `GET /api/chat/conversations` now stamps `last_message_mentions_me: bool` on each conversation — true only when the counterparty (not me) mentioned my role (self-mention guard, so I don't get a bell for messages I sent).
+  - Frontend `MessageBubble` renders `@owner`/`@renter`/`@manager` tokens inside the bubble body as gold/teal pill chips with an AtSign icon (white/translucent on my messages, gold-tinted on theirs).
+  - Frontend `MessagesTab` shows a gold "**@ Mentioned you**" badge inline with the property title on mentioned rows, plus a thicker `ring-2 ring-[#D4AF37]/40 shadow-sm` highlight on the row.
+  - **End-to-end verified live**: renter sent "hey @owner please confirm the move-in date" → backend stored `mentions: ['owner']` → owner's inbox API returned `last_message_mentions_me: true` → owner's dashboard rendered the gold badge + ring on the correct row. Zero console errors, ruff + ESLint clean.
+
 ## Test Credentials
 See /app/memory/test_credentials.md

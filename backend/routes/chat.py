@@ -15,6 +15,7 @@ from models_response import (
 )
 from routes.deps import db, verify_token
 from utils.chat_translate import detect_language, translate_chat_message
+from utils.mentions import current_user_role_in_property, extract_mentions
 
 router = APIRouter()
 api_router = router  # alias so existing @api_router decorators work verbatim
@@ -26,12 +27,16 @@ _TYPING_TTL_SECONDS = 5
 @api_router.post("/chat/messages", response_model=IdMessageResponse)
 async def send_message(chat_data: ChatMessage, payload: dict = Depends(verify_token)) -> dict:
     message_id = str(uuid.uuid4())
+    mentions = extract_mentions(chat_data.message)
     message_doc = {
         "id": message_id,
         "property_id": chat_data.property_id,
         "sender_id": payload['user_id'],
         "receiver_id": chat_data.receiver_id,
         "message": chat_data.message,
+        # Stored at write-time so the inbox can flag unread @-mentions of the
+        # current user without re-scanning every message body on each fetch.
+        "mentions": mentions,
         "created_at": datetime.now(UTC).isoformat(),
         "read": False
     }
@@ -108,10 +113,17 @@ async def edit_message(
             detail=f"Edit window expired ({_EDIT_WINDOW_SECONDS // 60} minutes after sending)",
         )
     now_iso = datetime.now(UTC).isoformat()
+    new_text = body.message.strip()
     await db.messages.update_one(
         {"id": message_id},
         {
-            "$set": {"message": body.message.strip(), "edited_at": now_iso},
+            "$set": {
+                "message": new_text,
+                "edited_at": now_iso,
+                # Re-extract mentions on edit so removing/adding "@owner" in
+                # an edit is reflected in the inbox flag.
+                "mentions": extract_mentions(new_text),
+            },
             # Cached translations no longer match the new content
             "$unset": {"translations": ""},
         },
@@ -166,21 +178,32 @@ async def get_conversations(payload: dict = Depends(verify_token)) -> list[dict]
     for msg in messages:
         other_user_id = msg['receiver_id'] if msg['sender_id'] == payload['user_id'] else msg['sender_id']
         conv_key = f"{msg['property_id']}_{other_user_id}"
-        
+
         if conv_key not in conversations:
-            property_data = await db.properties.find_one({"id": msg['property_id']}, {"_id": 0, "title": 1})
+            property_data = await db.properties.find_one({"id": msg['property_id']}, {"_id": 0, "title": 1, "owner_id": 1})
             other_user = await db.users.find_one({"id": other_user_id}, {"_id": 0, "id": 1, "name": 1, "email": 1})
-            
+
+            # Was the CURRENT user @-mentioned by their counterpart in the
+            # last message? Only true when (a) the message wasn't sent by
+            # me and (b) my role-token appears in the message's stored
+            # mentions list. Drives the inbox bell + gold ring.
+            my_role = current_user_role_in_property(payload['user_id'], property_data)
+            sent_by_me = msg['sender_id'] == payload['user_id']
+            mentions_me = bool(
+                not sent_by_me and my_role and my_role in (msg.get('mentions') or [])
+            )
+
             conversations[conv_key] = {
                 "property_id": msg['property_id'],
                 "property_title": property_data.get('title', 'Unknown') if property_data else 'Unknown',
                 "other_user": other_user if other_user else {},
                 "last_message": msg['message'],
                 "last_message_time": msg['created_at'],
-                "last_message_from_me": msg['sender_id'] == payload['user_id'],
+                "last_message_from_me": sent_by_me,
+                "last_message_mentions_me": mentions_me,
                 "unread": not msg['read'] and msg['receiver_id'] == payload['user_id']
             }
-    
+
     return list(conversations.values())
 
 
