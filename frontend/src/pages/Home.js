@@ -15,6 +15,8 @@ const HERO_IMAGES = [
   'https://images.unsplash.com/photo-1547483036-24bc77c79804?auto=format&fit=crop&w=1920&q=80',
   // Kotel + Dome of the Rock — wide majestic view, golden hour
   'https://images.pexels.com/photos/2087387/pexels-photo-2087387.jpeg?auto=compress&cs=tinysrgb&w=1920&q=80',
+  // Haifa coastline aerial — Mediterranean + Mount Carmel, sunny day
+  'https://images.pexels.com/photos/27638436/pexels-photo-27638436.jpeg?auto=compress&cs=tinysrgb&w=1920&q=80',
 ];
 
 const Home = () => {
