@@ -17,6 +17,8 @@ const HERO_IMAGES = [
   'https://images.pexels.com/photos/2087387/pexels-photo-2087387.jpeg?auto=compress&cs=tinysrgb&w=1920&q=80',
   // Haifa coastline aerial — Mediterranean + Mount Carmel, sunny day
   'https://images.pexels.com/photos/27638436/pexels-photo-27638436.jpeg?auto=compress&cs=tinysrgb&w=1920&q=80',
+  // Modern open-plan apartment living + kitchen with urban skyline view
+  'https://images.pexels.com/photos/32178051/pexels-photo-32178051.png?auto=compress&cs=tinysrgb&w=1920&q=80',
 ];
 
 const Home = () => {
