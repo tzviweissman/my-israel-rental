@@ -291,7 +291,11 @@ const resources = {
         deleteMessage: 'Delete message',
         editWindow: 'Edit (within 5 minutes)',
         messagePlaceholder: 'Type your message...',
-        returnToDashboard: 'Return to Dashboard'
+        returnToDashboard: 'Return to Dashboard',
+        mentionHint: 'Mention someone (they get notified)',
+        mentionOwner: 'the property owner',
+        mentionRenter: 'the renter / tenant',
+        mentionManager: 'a property manager'
       },
       sign: {
         invalidLink: 'Invalid Link',
@@ -854,7 +858,11 @@ const resources = {
         deleteMessage: 'מחק הודעה',
         editWindow: 'ערוך (תוך 5 דקות)',
         messagePlaceholder: 'הקלד את ההודעה שלך...',
-        returnToDashboard: 'חזור ללוח הבקרה'
+        returnToDashboard: 'חזור ללוח הבקרה',
+        mentionHint: 'אזכר משתמש (הוא יקבל התראה)',
+        mentionOwner: 'בעל הנכס',
+        mentionRenter: 'השוכר / הדייר',
+        mentionManager: 'מנהל הנכס'
       },
       sign: {
         invalidLink: 'קישור לא תקין',

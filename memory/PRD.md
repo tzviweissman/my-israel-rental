@@ -292,6 +292,12 @@ Build a bilingual (English/Hebrew) rental website named MyIsraelRental.com with 
 - [x] **Sublease Edit** (2026-04-30):
   - Backend `PUT /api/subleases/{id}` now accepts `currency` and `holiday_tags` alongside existing fields.
   - Frontend: each sublease card has an Edit button that hydrates the form with existing values and scrolls into view. Header/CTA switch to edit mode ("Save Changes"). Step-1 picker and "Change property" link hidden since the property is immutable.
+- [x] **Role-aware @-mention autocomplete in chat input** (2026-05-11):
+  - Rewrote `frontend/src/components/chat/MessageInput.jsx` with a `findMentionContext()` helper that detects an in-progress `@partial` at the caret. Lookbehind requires `@` to follow whitespace or sit at the start of the input — so `email@owner.com` never triggers (matches the backend `utils/mentions.py` regex exactly).
+  - Popover renders the 3 backend-recognized roles (`@owner`, `@renter`, `@manager`) as chips with brand-color icons (Home / User / Briefcase) and localized one-line descriptions. Filters live as the user types more characters.
+  - Keyboard nav: `ArrowUp`/`ArrowDown` to walk, `Enter` or `Tab` to insert, `Esc` to dismiss. Mouse click also inserts. Insert injects `@<role> ` (trailing space) and restores caret right after the token.
+  - Added EN+HE keys `chat.mentionHint`/`mentionOwner`/`mentionRenter`/`mentionManager`.
+  - Verified end-to-end in browser: typing `@` shows all 3 options → typing `ow` filters to just `@owner` → `Enter` injects `hello @owner ` → typing `foo@own` (after non-whitespace) does NOT show popover. ESLint clean.
 - [x] **Email ping for unread @-mentions** (2026-05-11):
   - New background task `utils/mention_email.py::mention_email_loop()` (kicked off in `server.py` startup alongside `sync_all_ical_feeds`). Scans every 2 minutes.
   - Eligibility filter: `mentions` array non-empty AND `read=False` AND `created_at` older than 10 minutes AND no `mention_email_sent` flag yet.
