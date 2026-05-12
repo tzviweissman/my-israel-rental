@@ -5,6 +5,17 @@ import axios from 'axios';
 import DOMPurify from 'dompurify';
 import { API } from '../App';
 import { Search, Bed, Bath, Home as HomeIcon, MapPin } from 'lucide-react';
+import HeroSlideshow from '../components/HeroSlideshow';
+
+// Hero background rotation. Keep widths consistent so the cross-fade is
+// imperceptible at the image edges (browser caches the second slide while
+// the first is showing).
+const HERO_IMAGES = [
+  // Tel Aviv coastline at sunset (original hero)
+  'https://images.unsplash.com/photo-1547483036-24bc77c79804?auto=format&fit=crop&w=1920&q=80',
+  // Kotel + Dome of the Rock — wide majestic view, golden hour
+  'https://images.pexels.com/photos/2087387/pexels-photo-2087387.jpeg?auto=compress&cs=tinysrgb&w=1920&q=80',
+];
 
 const Home = () => {
   const { t } = useTranslation();
@@ -31,45 +42,43 @@ const Home = () => {
 
   return (
     <div className="min-h-screen">
-      <div
-        className="relative h-[600px] flex items-center justify-center -mt-[210px] pt-[210px]"
-        style={{
-          backgroundImage: 'url(https://images.unsplash.com/photo-1547483036-24bc77c79804?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjA2MjJ8MHwxfHNlYXJjaHwyfHxUZWwlMjBBdml2JTIwc2t5bGluZSUyMGNvYXN0bGluZSUyMGFlcmlhbCUyMHBhbm9yYW1pYyUyMHN1bnNldCUyMGRpc3RhbnQlMjB2aWV3fGVufDB8fHx8MTc3NDk5NTExMHww&ixlib=rb-4.1.0&q=85)',
-          backgroundSize: 'cover',
-          backgroundPosition: 'center'
-        }}
-        data-testid="hero-section"
+      <HeroSlideshow
+        images={HERO_IMAGES}
+        holdMs={6000}
+        fadeMs={1500}
+        className="h-[600px] flex items-center justify-center -mt-[210px] pt-[210px]"
       >
-        <div className="absolute inset-0 bg-black/30"></div>
-        <div className="relative z-10 text-center text-white px-6 max-w-4xl mt-24 md:mt-0">
-          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold mb-2" style={{ fontFamily: 'Playfair Display', color: 'white' }}>
-            {t('hero.title')}
-          </h1>
-          <p className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-8" style={{ fontFamily: 'Playfair Display', color: '#D4AF37' }}>
-          {t('hero.anyDuration')}
-          </p>
-          <div className="flex gap-2 max-w-2xl mx-auto px-2 sm:px-0">
-            <input
-              type="text"
-              placeholder={t('hero.searchPlaceholder')}
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
-              className="flex-1 min-w-0 px-4 sm:px-6 py-3 sm:py-4 rounded-full text-sm sm:text-base text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#1E6A6A]"
-              data-testid="hero-search-input"
-            />
-            <button
-              onClick={handleSearch}
-              className="primary-btn flex flex-shrink-0 items-center justify-center gap-1.5 sm:gap-2 px-4 sm:px-6 py-3 sm:py-4 text-sm sm:text-base"
-              style={{ color: '#FFFFFF' }}
-              data-testid="hero-search-button"
-            >
-              <Search size={18} className="flex-shrink-0" />
-              <span className="hidden sm:inline">{t('hero.search')}</span>
-            </button>
+        <div data-testid="hero-section" className="h-full flex items-center justify-center">
+          <div className="relative z-10 text-center text-white px-6 max-w-4xl mt-24 md:mt-0">
+            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold mb-2" style={{ fontFamily: 'Playfair Display', color: 'white' }}>
+              {t('hero.title')}
+            </h1>
+            <p className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-8" style={{ fontFamily: 'Playfair Display', color: '#D4AF37' }}>
+              {t('hero.anyDuration')}
+            </p>
+            <div className="flex gap-2 max-w-2xl mx-auto px-2 sm:px-0">
+              <input
+                type="text"
+                placeholder={t('hero.searchPlaceholder')}
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
+                className="flex-1 min-w-0 px-4 sm:px-6 py-3 sm:py-4 rounded-full text-sm sm:text-base text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#1E6A6A]"
+                data-testid="hero-search-input"
+              />
+              <button
+                onClick={handleSearch}
+                className="primary-btn flex flex-shrink-0 items-center justify-center gap-1.5 sm:gap-2 px-4 sm:px-6 py-3 sm:py-4 text-sm sm:text-base"
+                style={{ color: '#FFFFFF' }}
+                data-testid="hero-search-button"
+              >
+                <Search size={18} className="flex-shrink-0" />
+                <span className="hidden sm:inline">{t('hero.search')}</span>
+              </button>
+            </div>
           </div>
         </div>
-      </div>
+      </HeroSlideshow>
 
       <div className="max-w-7xl mx-auto px-6 py-16">
         <h2 className="text-3xl sm:text-4xl font-bold mb-12 text-center" style={{ fontFamily: 'Playfair Display' }}>
