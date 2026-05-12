@@ -820,49 +820,16 @@ async def translate_booking_contract(booking_id: str, body: dict = Body(default=
     The translation is cached on the booking so repeat calls are free.
     Request body: { "direction": "he-en" | "en-he" }  (default "he-en")
     """
-    booking = await db.bookings.find_one({"id": booking_id}, {"_id": 0})
-    if not booking:
-        raise HTTPException(status_code=404, detail="Booking not found")
-    # Renter (signing party) or the booking owner can request a translation
-    if booking['renter_id'] != payload['user_id'] and booking['owner_id'] != payload['user_id']:
-        raise HTTPException(status_code=403, detail="Not authorized")
+    booking = await _load_translatable_booking(booking_id, payload["user_id"])
+    direction = (body.get("direction") or "he-en").lower()
 
-    direction = (body.get('direction') or 'he-en').lower()
+    cached = _cached_translation(booking, direction)
+    if cached:
+        return cached
 
-    # Return cached translation if direction matches
-    if booking.get('contract_translated_text') and booking.get('contract_translation_direction') == direction:
-        return {
-            "translated_text": booking['contract_translated_text'],
-            "direction": direction,
-            "status": "completed",
-            "cached": True,
-        }
-
-    property_data = await db.properties.find_one({"id": booking['property_id']}, {"_id": 0})
-    if not property_data or not property_data.get('contract_url'):
-        raise HTTPException(status_code=404, detail="No contract available for this booking")
-
-    contract_filename = property_data['contract_url'].split('/')[-1]
-    contract_path = ROOT_DIR / "uploads" / contract_filename
-    if not contract_path.exists():
-        raise HTTPException(status_code=404, detail="Contract file not found on server")
-
-    ext = contract_path.suffix.lower()
-    if ext == '.pdf':
-        text = extract_text_from_pdf(str(contract_path))
-    elif ext in ('.jpg', '.jpeg', '.png', '.webp', '.heic', '.heif'):
-        text = extract_text_from_image(str(contract_path))
-    else:
-        raise HTTPException(status_code=400, detail="Unsupported contract format")
-
-    if not text or len(text.strip()) < 10:
-        raise HTTPException(status_code=400, detail="Could not extract readable text from the contract. It may be a low-quality scan.")
-
-    try:
-        translated = await _translate_text(text, direction)
-    except Exception as e:
-        logger.error(f"Booking contract translation failed for {booking_id}: {e}")
-        raise HTTPException(status_code=500, detail=f"Translation failed: {str(e)}")
+    contract_path = await _resolve_contract_path(booking)
+    text = _extract_contract_text(contract_path)
+    translated = await _do_translate(text, direction, booking_id)
 
     # Cache on booking to avoid repeated LLM calls
     await db.bookings.update_one(
@@ -872,7 +839,7 @@ async def translate_booking_contract(booking_id: str, body: dict = Body(default=
             "contract_translated_text": translated,
             "contract_translation_direction": direction,
             "contract_translated_at": datetime.now(UTC).isoformat(),
-        }}
+        }},
     )
 
     return {
@@ -882,3 +849,71 @@ async def translate_booking_contract(booking_id: str, body: dict = Body(default=
         "status": "completed",
         "cached": False,
     }
+
+
+async def _load_translatable_booking(booking_id: str, user_id: str) -> dict:
+    """Fetch the booking, asserting the caller is one of its two parties."""
+    booking = await db.bookings.find_one({"id": booking_id}, {"_id": 0})
+    if not booking:
+        raise HTTPException(status_code=404, detail="Booking not found")
+    # Renter (signing party) or the booking owner can request a translation
+    if booking["renter_id"] != user_id and booking["owner_id"] != user_id:
+        raise HTTPException(status_code=403, detail="Not authorized")
+    return booking
+
+
+def _cached_translation(booking: dict, direction: str) -> dict | None:
+    """Return a ready-to-send response if a matching translation is stored."""
+    if (
+        booking.get("contract_translated_text")
+        and booking.get("contract_translation_direction") == direction
+    ):
+        return {
+            "translated_text": booking["contract_translated_text"],
+            "direction": direction,
+            "status": "completed",
+            "cached": True,
+        }
+    return None
+
+
+async def _resolve_contract_path(booking: dict):
+    """Locate the contract file on disk, raising 404 if missing."""
+    property_data = await db.properties.find_one({"id": booking["property_id"]}, {"_id": 0})
+    if not property_data or not property_data.get("contract_url"):
+        raise HTTPException(status_code=404, detail="No contract available for this booking")
+    contract_filename = property_data["contract_url"].split("/")[-1]
+    contract_path = ROOT_DIR / "uploads" / contract_filename
+    if not contract_path.exists():
+        raise HTTPException(status_code=404, detail="Contract file not found on server")
+    return contract_path
+
+
+# File extensions we know how to OCR / extract text from.
+_IMAGE_EXTS = (".jpg", ".jpeg", ".png", ".webp", ".heic", ".heif")
+
+
+def _extract_contract_text(contract_path) -> str:
+    """Run extension-specific extraction and ensure the result is meaningful."""
+    ext = contract_path.suffix.lower()
+    if ext == ".pdf":
+        text = extract_text_from_pdf(str(contract_path))
+    elif ext in _IMAGE_EXTS:
+        text = extract_text_from_image(str(contract_path))
+    else:
+        raise HTTPException(status_code=400, detail="Unsupported contract format")
+    if not text or len(text.strip()) < 10:
+        raise HTTPException(
+            status_code=400,
+            detail="Could not extract readable text from the contract. It may be a low-quality scan.",
+        )
+    return text
+
+
+async def _do_translate(text: str, direction: str, booking_id: str) -> str:
+    """Invoke the LLM translator, mapping any failure to a 500."""
+    try:
+        return await _translate_text(text, direction)
+    except Exception as e:
+        logger.error(f"Booking contract translation failed for {booking_id}: {e}")
+        raise HTTPException(status_code=500, detail=f"Translation failed: {str(e)}") from None

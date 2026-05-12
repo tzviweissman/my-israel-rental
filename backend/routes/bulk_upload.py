@@ -92,55 +92,70 @@ def _split_list(val: Any) -> list:
     return [x.strip() for x in str(val).split(";") if x.strip()]
 
 
-def _normalize_row(raw: dict) -> dict:
-    """Turn one input-dict (string-valued) into a PropertyCreate-ready dict.
-    Raises ValueError with a friendly message on the first bad field."""
-    row = {k: (raw.get(k) if raw.get(k) not in (None, "") else None) for k in COLUMNS}
+_VALID_RENTAL_TYPES = {"long-term", "short-term", "vacation", "storage"}
+_BOOL_FIELDS = ("has_elevator", "is_shabbat_elevator", "is_tama", "sukkah_compatible", "has_agent_fee")
+_INT_FIELDS = ("bedrooms", "bathrooms", "floor", "porches", "minimum_booking_days")
+_FLOAT_FIELDS = ("square_meters", "porch_square_meters", "monthly_price", "nightly_price", "agent_fee_price")
+_LIST_FIELDS = ("amenities", "image_filenames")
+_DEFAULTS = {
+    "property_type": "apartment",
+    "bathrooms": 1,
+    "floor": 1,
+    "porches": 0,
+    "condition": "good",
+    "furniture_option": "no_furniture",
+    "cancellation_policy": "flexible",
+}
 
-    # Required fields
+
+def _project_columns(raw: dict) -> dict:
+    """Restrict the input to known columns + null out empty strings."""
+    return {k: (raw.get(k) if raw.get(k) not in (None, "") else None) for k in COLUMNS}
+
+
+def _assert_required_present(row: dict) -> None:
     for field in REQUIRED:
         if not row.get(field):
             raise ValueError(f"'{field}' is required")
 
-    # Enums (soft-validate — backend Pydantic will hard-enforce)
+
+def _normalize_rental_type(row: dict) -> None:
     rt = str(row["rental_type"]).strip().lower().replace(" ", "-")
-    if rt not in {"long-term", "short-term", "vacation", "storage"}:
-        raise ValueError(f"rental_type must be long-term/short-term/vacation/storage (got '{row['rental_type']}')")
+    if rt not in _VALID_RENTAL_TYPES:
+        raise ValueError(
+            f"rental_type must be long-term/short-term/vacation/storage (got '{row['rental_type']}')"
+        )
     row["rental_type"] = rt
 
-    for bool_field in ("has_elevator", "is_shabbat_elevator", "is_tama", "sukkah_compatible", "has_agent_fee"):
-        row[bool_field] = _parse_bool(row.get(bool_field))
 
-    for int_field in ("bedrooms", "bathrooms", "floor", "porches", "minimum_booking_days"):
-        row[int_field] = _parse_number(row.get(int_field), lambda v: int(float(v)), int_field)
+def _coerce_numeric_and_bool(row: dict) -> None:
+    for f in _BOOL_FIELDS:
+        row[f] = _parse_bool(row.get(f))
+    for f in _INT_FIELDS:
+        row[f] = _parse_number(row.get(f), lambda v: int(float(v)), f)
+    for f in _FLOAT_FIELDS:
+        row[f] = _parse_number(row.get(f), float, f)
+    for f in _LIST_FIELDS:
+        row[f] = _split_list(row.get(f))
 
-    for num_field in ("square_meters", "porch_square_meters", "monthly_price", "nightly_price", "agent_fee_price"):
-        row[num_field] = _parse_number(row.get(num_field), float, num_field)
 
-    row["amenities"] = _split_list(row.get("amenities"))
-    row["image_filenames"] = _split_list(row.get("image_filenames"))
+def _apply_defaults_and_currency(row: dict) -> None:
+    row["currency"] = str(row["currency"]).strip().upper() if row.get("currency") else "ILS"
+    row["agent_fee_currency"] = (
+        str(row["agent_fee_currency"]).strip().upper() if row.get("agent_fee_currency") else "ILS"
+    )
+    for key, default in _DEFAULTS.items():
+        row[key] = row.get(key) or default
 
-    # Currency default
-    if row.get("currency"):
-        row["currency"] = str(row["currency"]).strip().upper()
-    else:
-        row["currency"] = "ILS"
 
-    # Agent fee currency default (only meaningful when has_agent_fee is True)
-    if row.get("agent_fee_currency"):
-        row["agent_fee_currency"] = str(row["agent_fee_currency"]).strip().upper()
-    else:
-        row["agent_fee_currency"] = "ILS"
-
-    # Defaults that match PropertyCreate
-    row.setdefault("property_type", "apartment")
-    row["bathrooms"] = row.get("bathrooms") or 1
-    row["floor"] = row.get("floor") or 1
-    row["porches"] = row.get("porches") or 0
-    row["condition"] = row.get("condition") or "good"
-    row["furniture_option"] = row.get("furniture_option") or "no_furniture"
-    row["cancellation_policy"] = row.get("cancellation_policy") or "flexible"
-
+def _normalize_row(raw: dict) -> dict:
+    """Turn one input-dict (string-valued) into a PropertyCreate-ready dict.
+    Raises ValueError with a friendly message on the first bad field."""
+    row = _project_columns(raw)
+    _assert_required_present(row)
+    _normalize_rental_type(row)
+    _coerce_numeric_and_bool(row)
+    _apply_defaults_and_currency(row)
     return row
 
 
@@ -332,6 +347,96 @@ async def commit_bulk(body: BulkCommitBody, payload: dict = Depends(verify_token
     return {"created": created, "skipped": skipped, "summary": {"created": len(created), "skipped": len(skipped)}}
 
 
+_ALLOWED_IMAGE_EXTS = (".jpg", ".jpeg", ".png", ".webp", ".gif", ".heic", ".heif")
+
+
+def _assert_bulk_role(payload: dict) -> None:
+    if payload.get("role") not in ("owner", "manager", "admin"):
+        raise HTTPException(status_code=403, detail="Only owners and managers can bulk-upload")
+
+
+def _parse_mapping_json(mapping: str) -> dict:
+    try:
+        return json.loads(mapping)
+    except Exception:
+        raise HTTPException(
+            status_code=400, detail="mapping must be JSON: {property_id: [filenames]}"
+        ) from None
+
+
+async def _load_owned_property(prop_id: str, payload: dict) -> dict | None:
+    """Return the property doc if the caller owns it (or is admin), else None."""
+    prop = await db.properties.find_one(
+        {"id": prop_id}, {"_id": 0, "owner_id": 1, "images": 1}
+    )
+    if not prop:
+        return None
+    if prop.get("owner_id") != payload["user_id"] and payload.get("role") != "admin":
+        return None
+    return prop
+
+
+def _persist_uploaded_image(data: bytes, ext: str) -> str:
+    """Write one image file to disk and return the public URL."""
+    safe_name = f"{uuid.uuid4().hex}{ext}"
+    (UPLOAD_DIR / safe_name).write_bytes(data)
+    return f"/api/uploads/{safe_name}"
+
+
+def _attach_one(
+    prop_id: str,
+    fname: str,
+    data: bytes | None,
+    images: list,
+    results: dict,
+) -> bool:
+    """Attach a single (filename, bytes) pair to ``images``. Returns True on success.
+
+    Tracks misses/unsupported types in ``results['missing']`` so the caller
+    can surface them to the UI.
+    """
+    if data is None:
+        results["missing"].append({"property_id": prop_id, "filename": fname})
+        return False
+    ext = Path(fname).suffix.lower() or ".jpg"
+    if ext not in _ALLOWED_IMAGE_EXTS:
+        results["missing"].append({"property_id": prop_id, "filename": fname, "reason": "unsupported type"})
+        return False
+    url = _persist_uploaded_image(data, ext)
+    images.append(url)
+    results["attached"].append({"property_id": prop_id, "filename": fname, "url": url})
+    return True
+
+
+async def _fanout_images(
+    property_map: dict, file_source: dict, payload: dict
+) -> dict:
+    """Shared core for both bulk-image endpoints.
+
+    ``file_source`` maps basename → bytes; the caller decides how to fill it
+    (from a zip vs from a flat ``UploadFile`` list). Owners/admins only; only
+    patches a property document if at least one image actually attached.
+    """
+    results: dict[str, list] = {"attached": [], "missing": [], "not_owned": []}
+    for prop_id, filenames in property_map.items():
+        prop = await _load_owned_property(prop_id, payload)
+        if not prop:
+            results["not_owned"].append(prop_id)
+            continue
+        new_images = list(prop.get("images") or [])
+        attached_any = False
+        for fname in filenames:
+            data = file_source.get(Path(fname).name)
+            if _attach_one(prop_id, fname, data, new_images, results):
+                attached_any = True
+        if attached_any:
+            await db.properties.update_one(
+                {"id": prop_id},
+                {"$set": {"images": new_images}, "$unset": {"pending_image_filenames": ""}},
+            )
+    return results
+
+
 @api_router.post("/properties/bulk/images", response_model=BulkImagesAttachResponse)
 async def attach_bulk_images(
     file: UploadFile = File(...),
@@ -343,62 +448,18 @@ async def attach_bulk_images(
     `mapping` is a JSON string: {property_id: [filename1, filename2, ...]}.
     Owner must own each property_id.
     """
-    if payload.get("role") not in ("owner", "manager", "admin"):
-        raise HTTPException(status_code=403, detail="Only owners and managers can bulk-upload")
-
-    try:
-        property_map: dict = json.loads(mapping)
-    except Exception:
-        raise HTTPException(status_code=400, detail="mapping must be JSON: {property_id: [filenames]}")
-
+    _assert_bulk_role(payload)
+    property_map = _parse_mapping_json(mapping)
     content = await file.read()
     try:
         zf = zipfile.ZipFile(io.BytesIO(content))
     except zipfile.BadZipFile:
-        raise HTTPException(status_code=400, detail="file is not a valid .zip")
-
-    # Build filename → zip-entry lookup (basename only; owners often zip a folder)
-    entries = {Path(n).name: n for n in zf.namelist() if not n.endswith("/")}
-
-    results: dict[str, list] = {"attached": [], "missing": [], "not_owned": []}
-    for prop_id, filenames in property_map.items():
-        prop = await db.properties.find_one({"id": prop_id}, {"_id": 0, "owner_id": 1, "images": 1})
-        if not prop:
-            results["not_owned"].append(prop_id)
-            continue
-        if prop.get("owner_id") != payload["user_id"] and payload.get("role") != "admin":
-            results["not_owned"].append(prop_id)
-            continue
-
-        new_image_urls = list(prop.get("images") or [])
-        attached_any = False
-        for fname in filenames:
-            entry = entries.get(Path(fname).name)
-            if entry is None:
-                results["missing"].append({"property_id": prop_id, "filename": fname})
-                continue
-            # Extract to uploads/
-            data = zf.read(entry)
-            ext = Path(fname).suffix.lower() or ".jpg"
-            if ext not in (".jpg", ".jpeg", ".png", ".webp", ".gif", ".heic", ".heif"):
-                results["missing"].append({"property_id": prop_id, "filename": fname, "reason": "unsupported type"})
-                continue
-            safe_name = f"{uuid.uuid4().hex}{ext}"
-            out_path = UPLOAD_DIR / safe_name
-            out_path.write_bytes(data)
-            new_image_urls.append(f"/api/uploads/{safe_name}")
-            results["attached"].append({"property_id": prop_id, "filename": fname, "url": f"/api/uploads/{safe_name}"})
-            attached_any = True
-
-        # Only patch the doc if we actually attached something — otherwise preserve
-        # `pending_image_filenames` so the owner can re-try with a different zip.
-        if attached_any:
-            await db.properties.update_one(
-                {"id": prop_id},
-                {"$set": {"images": new_image_urls}, "$unset": {"pending_image_filenames": ""}},
-            )
-
-    return results
+        raise HTTPException(status_code=400, detail="file is not a valid .zip") from None
+    # Build filename → bytes map (basename only; owners often zip a folder)
+    file_source = {
+        Path(n).name: zf.read(n) for n in zf.namelist() if not n.endswith("/")
+    }
+    return await _fanout_images(property_map, file_source, payload)
 
 
 @api_router.post("/properties/bulk/images/attach", response_model=BulkImagesAttachResponse)
@@ -413,58 +474,14 @@ async def attach_bulk_images_flat(
     loose files (from the "Needs Images" filter drop-zone) instead of zipping
     first — the frontend just sends the raw File objects alongside a mapping.
     """
-    if payload.get("role") not in ("owner", "manager", "admin"):
-        raise HTTPException(status_code=403, detail="Only owners and managers can bulk-upload")
-
-    try:
-        property_map: dict = json.loads(mapping)
-    except Exception:
-        raise HTTPException(status_code=400, detail="mapping must be JSON: {property_id: [filenames]}")
-
-    # Read every uploaded file into a dict keyed by basename (matches the zip path)
-    file_bytes: dict = {}
+    _assert_bulk_role(payload)
+    property_map = _parse_mapping_json(mapping)
+    file_source: dict = {}
     for f in files:
         name = Path(f.filename or "").name
         if name:
-            file_bytes[name] = await f.read()
-
-    allowed_exts = (".jpg", ".jpeg", ".png", ".webp", ".gif", ".heic", ".heif")
-    results: dict[str, list] = {"attached": [], "missing": [], "not_owned": []}
-    for prop_id, filenames in property_map.items():
-        prop = await db.properties.find_one({"id": prop_id}, {"_id": 0, "owner_id": 1, "images": 1})
-        if not prop:
-            results["not_owned"].append(prop_id)
-            continue
-        if prop.get("owner_id") != payload["user_id"] and payload.get("role") != "admin":
-            results["not_owned"].append(prop_id)
-            continue
-
-        new_image_urls = list(prop.get("images") or [])
-        attached_any = False
-        for fname in filenames:
-            basename = Path(fname).name
-            data = file_bytes.get(basename)
-            if data is None:
-                results["missing"].append({"property_id": prop_id, "filename": fname})
-                continue
-            ext = Path(basename).suffix.lower() or ".jpg"
-            if ext not in allowed_exts:
-                results["missing"].append({"property_id": prop_id, "filename": fname, "reason": "unsupported type"})
-                continue
-            safe_name = f"{uuid.uuid4().hex}{ext}"
-            out_path = UPLOAD_DIR / safe_name
-            out_path.write_bytes(data)
-            new_image_urls.append(f"/api/uploads/{safe_name}")
-            results["attached"].append({"property_id": prop_id, "filename": fname, "url": f"/api/uploads/{safe_name}"})
-            attached_any = True
-
-        if attached_any:
-            await db.properties.update_one(
-                {"id": prop_id},
-                {"$set": {"images": new_image_urls}, "$unset": {"pending_image_filenames": ""}},
-            )
-
-    return results
+            file_source[name] = await f.read()
+    return await _fanout_images(property_map, file_source, payload)
 
 
 # ---------------------------------------------------------------------------

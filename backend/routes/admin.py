@@ -104,68 +104,92 @@ async def postmark_webhook(request: Request, token: str | None = None) -> dict:
     Webhooks as: {BACKEND_URL}/api/webhooks/postmark?token={POSTMARK_WEBHOOK_SECRET}
     Enable Delivery, Bounce, and SpamComplaint events.
     """
-    # Optional shared-secret check (query param). If secret env is unset we accept anything.
+    _assert_webhook_token(token)
+    payload = await _read_postmark_json(request)
+    event_doc = _build_email_event(payload)
+    await db.email_events.insert_one(event_doc)
+
+    update = _user_email_update_from(event_doc, payload)
+    if update and event_doc["email"]:
+        await db.users.update_one({"email": event_doc["email"]}, {"$set": update})
+
+    logger.info(
+        "Postmark webhook: %s for %s (tag=%s, msg=%s)",
+        event_doc["record_type"],
+        event_doc["email"],
+        event_doc["tag"],
+        event_doc["message_id"],
+    )
+    return {"ok": True}
+
+
+def _assert_webhook_token(token: str | None) -> None:
+    """401 if a shared secret is configured and the caller did not match."""
     if POSTMARK_WEBHOOK_SECRET and token != POSTMARK_WEBHOOK_SECRET:
         raise HTTPException(status_code=401, detail="Invalid webhook token")
 
+
+async def _read_postmark_json(request: Request) -> dict:
+    """Parse the JSON body or raise 400."""
     try:
-        payload = await request.json()
+        return await request.json()
     except Exception:
-        raise HTTPException(status_code=400, detail="Invalid JSON body")
+        raise HTTPException(status_code=400, detail="Invalid JSON body") from None
 
+
+def _build_email_event(payload: dict) -> dict:
+    """Snapshot the inbound webhook into our ``email_events`` collection."""
     record_type = payload.get("RecordType", "Unknown")
-    message_id = payload.get("MessageID")
-    tag = payload.get("Tag")
-
     # Postmark uses "Email" on Bounce/Complaint, "Recipient" on Delivery
-    email = payload.get("Email") or payload.get("Recipient") or ""
-
-    event_doc = {
+    raw_email = payload.get("Email") or payload.get("Recipient") or ""
+    return {
         "id": str(uuid.uuid4()),
         "record_type": record_type,
-        "email": email.lower() if email else "",
-        "message_id": message_id,
-        "tag": tag,
+        "email": raw_email.lower() if raw_email else "",
+        "message_id": payload.get("MessageID"),
+        "tag": payload.get("Tag"),
         "bounce_type": payload.get("Type"),  # HardBounce, SoftBounce, Transient, etc.
         "description": payload.get("Description") or payload.get("Details"),
         "raw": payload,
         "received_at": datetime.now(UTC).isoformat(),
     }
-    await db.email_events.insert_one(event_doc)
 
-    # Update the user's email health flag so admins can see deliverability state
-    if email:
-        status_map = {
-            "Bounce": "bounced",
-            "SpamComplaint": "complained",
-            "Delivery": "delivered",
-        }
-        user_status = status_map.get(record_type)
-        if user_status:
-            update = {
-                "email_status": user_status,
-                "last_email_event_at": event_doc["received_at"],
-                "last_email_event_type": record_type,
-            }
-            # Hard bounces and complaints should suppress future sends — track it
-            if record_type in ("Bounce", "SpamComplaint"):
-                update["email_suppressed"] = True
-                if payload.get("Type") == "HardBounce" or record_type == "SpamComplaint":
-                    update["email_suppressed_reason"] = (
-                        payload.get("Description")
-                        or payload.get("Details")
-                        or f"{record_type} ({payload.get('Type', '')})".strip()
-                    )
-            elif record_type == "Delivery":
-                # Clear suppression if a later delivery succeeds (rare but possible)
-                update["email_suppressed"] = False
-            await db.users.update_one({"email": email.lower()}, {"$set": update})
 
-    logger.info(
-        "Postmark webhook: %s for %s (tag=%s, msg=%s)",
-        record_type, email, tag, message_id
-    )
-    return {"ok": True}
+# Maps Postmark's RecordType → our internal user.email_status value.
+_EMAIL_STATUS_MAP = {
+    "Bounce": "bounced",
+    "SpamComplaint": "complained",
+    "Delivery": "delivered",
+}
+
+
+def _user_email_update_from(event: dict, payload: dict) -> dict | None:
+    """Derive the ``users`` update doc for an inbound event, or None to skip.
+
+    Hard bounces and spam complaints suppress future sends; deliveries clear
+    suppression so a recovered mailbox can be reached again.
+    """
+    record_type = event["record_type"]
+    user_status = _EMAIL_STATUS_MAP.get(record_type)
+    if not user_status:
+        return None
+    update = {
+        "email_status": user_status,
+        "last_email_event_at": event["received_at"],
+        "last_email_event_type": record_type,
+    }
+    if record_type in ("Bounce", "SpamComplaint"):
+        update["email_suppressed"] = True
+        if payload.get("Type") == "HardBounce" or record_type == "SpamComplaint":
+            update["email_suppressed_reason"] = (
+                payload.get("Description")
+                or payload.get("Details")
+                or f"{record_type} ({payload.get('Type', '')})".strip()
+            )
+    elif record_type == "Delivery":
+        # Clear suppression if a later delivery succeeds (rare but possible)
+        update["email_suppressed"] = False
+    return update
 
 
 
