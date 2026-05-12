@@ -27,6 +27,9 @@ import {
 
 // Default values for a brand-new property card.
 const blankProperty = () => ({
+  // Stable id for React keys — never sent to the server (filtered out in
+  // both the TSV serialize path and the visual /commit payload).
+  _id: (typeof crypto !== 'undefined' && crypto.randomUUID) ? crypto.randomUUID() : `r-${Date.now()}-${Math.random()}`,
   // Required by the backend
   title: '',
   address: '',
@@ -114,7 +117,7 @@ const BulkUploadModal = ({ isOpen, onClose, onDone, API, token }) => {
   };
 
   const addRow = () => setRows(prev => [...prev, blankProperty()]);
-  const duplicateRow = (i) => setRows(prev => [...prev.slice(0, i + 1), { ...prev[i] }, ...prev.slice(i + 1)]);
+  const duplicateRow = (i) => setRows(prev => [...prev.slice(0, i + 1), { ...prev[i], _id: blankProperty()._id }, ...prev.slice(i + 1)]);
   const removeRow = (i) => setRows(prev => prev.length === 1 ? [blankProperty()] : prev.filter((_, idx) => idx !== i));
 
   const handleSaveAll = async () => {
@@ -128,8 +131,9 @@ const BulkUploadModal = ({ isOpen, onClose, onDone, API, token }) => {
     setSaving(true);
     try {
       // Send the rows as TSV pasted text — the backend's /parse can read that
-      // path without our needing a new endpoint.
-      const headers = Object.keys(rows[0]);
+      // path without our needing a new endpoint. Strip the local `_id` (used
+      // only for React keys) so it never reaches the backend.
+      const headers = Object.keys(rows[0]).filter(h => h !== '_id');
       const tsv = [
         headers.join('\t'),
         ...rows.map(r => headers.map(h => {
@@ -434,7 +438,7 @@ const BulkUploadModal = ({ isOpen, onClose, onDone, API, token }) => {
             <div className="space-y-3" data-testid="bulk-rows">
               {rows.map((row, i) => (
                 <PropertyRowCard
-                  key={i}
+                  key={row._id || i}
                   index={i}
                   row={row}
                   error={rowErrors[i]}

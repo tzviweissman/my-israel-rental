@@ -292,6 +292,11 @@ Build a bilingual (English/Hebrew) rental website named MyIsraelRental.com with 
 - [x] **Sublease Edit** (2026-04-30):
   - Backend `PUT /api/subleases/{id}` now accepts `currency` and `holiday_tags` alongside existing fields.
   - Frontend: each sublease card has an Edit button that hydrates the form with existing values and scrolls into view. Header/CTA switch to edit mode ("Save Changes"). Step-1 picker and "Change property" link hidden since the property is immutable.
+- [x] **Code-review wins: stable React keys + accept_booking() refactor** (2026-05-12):
+  - **`BulkUploadModal.jsx`**: rows now carry a `_id` minted via `crypto.randomUUID()` in `blankProperty()`. `duplicateRow` mints a fresh `_id` per clone. The TSV serializer filters `_id` out of `Object.keys(rows[0])` so it never reaches the backend. Prevents React state bleeding between rows when duplicating/removing.
+  - **`PropertyList.jsx`**: bulk-image `imageAssignments` rows also gain a stable `_id` (used for `key`). Removing row 0 no longer shifts dropdown state onto remaining rows.
+  - **`routes/bookings.py::accept_booking()` refactor**: 109-line function decomposed into a 27-line orchestrator + 4 named helpers: `_load_and_authorize_pending()` (auth + pending guard), `_queue_acceptance_email()` (fire-and-forget Postmark), `_attach_contract_signing()` (mint token + dual notification), `_notify_renter_accepted()` (no-contract path), plus a shared `_notification()` builder. Behavior unchanged.
+  - **Verified**: 4 new pytest cases (`tests/test_accept_booking_refactor.py`) cover both control paths + auth rejection (403 wrong-owner, 400 non-pending status). All 56 tests in `mention_email + accept_booking_refactor + refactor_regression` pass.
 - [x] **Role-aware @-mention autocomplete in chat input** (2026-05-11):
   - Rewrote `frontend/src/components/chat/MessageInput.jsx` with a `findMentionContext()` helper that detects an in-progress `@partial` at the caret. Lookbehind requires `@` to follow whitespace or sit at the start of the input — so `email@owner.com` never triggers (matches the backend `utils/mentions.py` regex exactly).
   - Popover renders the 3 backend-recognized roles (`@owner`, `@renter`, `@manager`) as chips with brand-color icons (Home / User / Briefcase) and localized one-line descriptions. Filters live as the user types more characters.

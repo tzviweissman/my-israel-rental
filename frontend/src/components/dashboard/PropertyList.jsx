@@ -273,7 +273,12 @@ const PropertyList = ({ properties, bookings = [], onEdit, onRefresh, API, token
         const hit = slugged.find((x) => fslug.includes(x.titleSlug));
         if (hit) matchedCount += 1;
         const propertyId = hit ? hit.id : pending[(base.length + i) % pending.length].id;
-        base.push({ file: f, propertyId });
+        // Stable id for React keys — needed because rows can be removed
+        // out of order, which would shift index-based keys and bleed
+        // state (e.g. the dropdown selection) onto wrong rows.
+        const _id = (typeof crypto !== 'undefined' && crypto.randomUUID)
+          ? crypto.randomUUID() : `a-${Date.now()}-${i}`;
+        base.push({ _id, file: f, propertyId });
       });
       // Flash a tiny hint if smart-match actually helped
       if (matchedCount > 0 && matchedCount < incoming.length) {
@@ -449,7 +454,7 @@ const PropertyList = ({ properties, bookings = [], onEdit, onRefresh, API, token
               </div>
               <div className="divide-y divide-gray-100 max-h-[320px] overflow-auto">
                 {imageAssignments.map((a, i) => (
-                  <div key={i} className="flex items-center gap-3 px-4 py-2 hover:bg-gray-50" data-testid={`bulk-image-row-${i}`}>
+                  <div key={a._id || i} className="flex items-center gap-3 px-4 py-2 hover:bg-gray-50" data-testid={`bulk-image-row-${i}`}>
                     <img
                       src={URL.createObjectURL(a.file)}
                       alt={a.file.name}
