@@ -524,7 +524,7 @@ const Navigation = () => {
 
             {menuOpen && (
               <div
-                className="absolute right-0 top-full mt-3 w-72 rounded-2xl overflow-hidden"
+                className="absolute right-0 top-full mt-3 w-72 rounded-2xl overflow-hidden z-[60]"
                 style={{
                   backgroundColor: '#1E6A6A',
                   border: '1.5px solid rgba(212,175,55,0.25)',
