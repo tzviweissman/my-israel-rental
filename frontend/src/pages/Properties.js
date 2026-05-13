@@ -400,9 +400,9 @@ const Properties = () => {
   return (
     <div className="min-h-screen">
       <div className="max-w-7xl mx-auto px-6 pt-28 pb-12">
-        <div className="flex items-center justify-between mb-8">
+        <div className="flex items-center justify-between mb-8 gap-3">
           <h1
-            className="text-4xl font-bold"
+            className="text-2xl sm:text-3xl md:text-4xl font-bold truncate"
             style={{ fontFamily: 'Playfair Display' }}
             data-testid="properties-title"
           >
@@ -410,7 +410,7 @@ const Properties = () => {
           </h1>
           <button
             onClick={() => setShowFilters(!showFilters)}
-            className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold tracking-wide transition-all duration-200 hover:shadow-md active:scale-[0.98]"
+            className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-5 py-2 sm:py-2.5 rounded-xl text-xs sm:text-sm font-semibold tracking-wide transition-all duration-200 hover:shadow-md active:scale-[0.98] shrink-0"
             style={{
               backgroundColor: showFilters ? '#1E6A6A' : '#fafaf8',
               color: showFilters ? '#D4AF37' : '#1E6A6A',
