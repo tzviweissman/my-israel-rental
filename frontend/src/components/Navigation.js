@@ -285,24 +285,28 @@ const Navigation = () => {
     >
       <div className="max-w-7xl mx-auto px-6" style={{ padding: scrolled ? '4px 24px' : '0 24px' }}>
         <div className="flex items-center justify-between relative">
-          <Link to="/" className="flex items-center" data-testid="nav-logo" onClick={() => window.scrollTo(0, 0)}>
+          <Link to="/" className="flex items-center shrink-0" data-testid="nav-logo" onClick={() => window.scrollTo(0, 0)}>
             <img
               src="https://customer-assets.emergentagent.com/job_listing-manager-pro-2/artifacts/hx4hc6hw_IMG_1745%20%281%29.PNG"
               alt="MyIsraelRental"
-              className="w-auto transition-all duration-300"
-              style={{ height: scrolled ? '70px' : '200px', marginTop: scrolled ? '0' : '-16px' }}
+              className="w-auto transition-all duration-300 h-[60px] sm:h-[80px] md:h-[200px]"
+              style={{
+                height: scrolled ? '50px' : undefined,
+                marginTop: scrolled ? '0' : '-8px',
+              }}
             />
           </Link>
 
           {/* Category pill row — Airbnb-style rental-type tabs.
               Absolutely centered on the page so the logo/menu width
-              doesn't shift the row off-axis. */}
+              doesn't shift the row off-axis. Shown on all viewports;
+              mobile uses tighter gap + compact sizing via NavCategoryItem. */}
           <div
-            className="hidden md:flex items-end justify-center gap-8 pointer-events-none absolute left-1/2 top-1/2"
+            className="flex items-end justify-center gap-3 sm:gap-6 md:gap-8 pointer-events-none absolute left-1/2 top-1/2"
             style={{ transform: 'translate(-50%, -50%)' }}
             data-testid="nav-rental-categories"
           >
-            <div className="flex items-end gap-8 pointer-events-auto">
+            <div className="flex items-end gap-3 sm:gap-6 md:gap-8 pointer-events-auto scale-[0.78] sm:scale-[0.92] md:scale-100 origin-center">
             {[
               { type: 'long-term', icon: Home, label: t('nav.longTerm') },
               { type: 'short-term', icon: Building, label: t('nav.shortTerm') },
@@ -516,7 +520,7 @@ const Navigation = () => {
               data-testid="nav-menu-button"
             >
               {menuOpen ? <X size={scrolled ? 16 : 18} color="#D4AF37" /> : <Menu size={scrolled ? 16 : 18} color="#D4AF37" />}
-              <span className="font-semibold tracking-wide" style={{ color: '#D4AF37', fontSize: scrolled ? '12px' : '14px' }}>Menu</span>
+              <span className="hidden sm:inline font-semibold tracking-wide" style={{ color: '#D4AF37', fontSize: scrolled ? '12px' : '14px' }}>Menu</span>
             </button>
 
             {menuOpen && (
@@ -626,31 +630,6 @@ const Navigation = () => {
             )}
           </div>
           </div>
-        </div>
-
-        {/* Mobile-only category row — hidden on md+ (desktop has the centered
-            overlay above). Sits below the logo+menu row in normal flow.
-            Tight compact sizing keeps it readable without crowding. */}
-        <div
-          className="md:hidden flex items-end justify-around pb-2 pt-1"
-          data-testid="nav-rental-categories-mobile"
-        >
-          {[
-            { type: 'long-term', icon: Home, label: t('nav.longTerm') },
-            { type: 'short-term', icon: Building, label: t('nav.shortTerm') },
-            { type: 'vacation', icon: Palmtree, label: t('nav.vacation') },
-            { type: 'storage', icon: Warehouse, label: t('nav.storage') },
-          ].map(({ type, icon: Icon, label }) => (
-            <NavCategoryItem
-              key={type}
-              type={type}
-              Icon={Icon}
-              label={label}
-              active={location.pathname === `/properties/${type}`}
-              scrolled
-              testidSuffix="-mobile"
-            />
-          ))}
         </div>
       </div>
     </nav>

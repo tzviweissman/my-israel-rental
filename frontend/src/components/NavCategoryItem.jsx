@@ -43,7 +43,7 @@ const NavCategoryItem = ({ type, Icon, label, active, scrolled, testidSuffix = '
         }}
       />
       <span
-        className="font-semibold tracking-wide"
+        className="font-semibold tracking-wide whitespace-nowrap"
         style={{
           color,
           textShadow: scrolled ? 'none' : '0 1px 3px rgba(0,0,0,0.5)',
