@@ -22,7 +22,9 @@ const resources = {
         title: 'Find Your Perfect Rental',
         anyDuration: 'Any Duration',
         searchPlaceholder: 'Search by area, city, or address...',
-        search: 'Search'
+        search: 'Search',
+        noFeesTagline: 'No service fees',
+        noFeesDetail: 'Free for renters. Free for owners. Always.'
       },
       property: {
         bedrooms: 'Bedrooms',
@@ -589,7 +591,9 @@ const resources = {
         title: 'מצא את השכירות המושלמת',
         anyDuration: 'לכל תקופה',
         searchPlaceholder: 'חיפוש לפי שכונה, עיר או כתובת...',
-        search: 'חיפוש'
+        search: 'חיפוש',
+        noFeesTagline: 'ללא דמי שירות',
+        noFeesDetail: 'חינם לשוכרים. חינם לבעלי דירות. תמיד.'
       },
       property: {
         bedrooms: 'חדרי שינה',

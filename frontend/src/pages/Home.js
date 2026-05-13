@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import DOMPurify from 'dompurify';
 import { API } from '../App';
-import { Search, Bed, Bath, Home as HomeIcon, MapPin } from 'lucide-react';
+import { Search, Bed, Bath, Home as HomeIcon, MapPin, Check } from 'lucide-react';
 import HeroSlideshow from '../components/HeroSlideshow';
 
 // Hero background rotation. Keep widths consistent so the cross-fade is
@@ -60,6 +60,32 @@ const Home = () => {
             <p className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-8" style={{ fontFamily: 'Playfair Display', color: '#D4AF37' }}>
               {t('hero.anyDuration')}
             </p>
+
+            {/* No-fees badge — subtle gold border, glass background, gold checkmark.
+                Sits between the headline and the search bar. */}
+            <div className="flex flex-col items-center mb-6" data-testid="no-fees-badge">
+              <div
+                className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full backdrop-blur-md border"
+                style={{
+                  backgroundColor: 'rgba(255, 255, 255, 0.12)',
+                  borderColor: 'rgba(212, 175, 55, 0.55)',
+                }}
+              >
+                <Check size={14} strokeWidth={3} style={{ color: '#D4AF37' }} />
+                <span
+                  className="text-xs sm:text-sm font-semibold uppercase tracking-wider"
+                  style={{ color: '#D4AF37', letterSpacing: '0.12em' }}
+                >
+                  {t('hero.noFeesTagline')}
+                </span>
+              </div>
+              <p
+                className="mt-2 text-xs sm:text-sm text-white/85"
+                style={{ fontWeight: 400 }}
+              >
+                {t('hero.noFeesDetail')}
+              </p>
+            </div>
             <div className="flex gap-2 max-w-2xl mx-auto px-2 sm:px-0">
               <input
                 type="text"
