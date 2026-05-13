@@ -24,7 +24,7 @@ const resources = {
         searchPlaceholder: 'Search by area, city, or address...',
         search: 'Search',
         noFeesTagline: 'No service fees',
-        noFeesDetail: 'Free for renters. Free for owners. Always.'
+        noFeesDetail: 'Free for renters. Free for owners.'
       },
       property: {
         bedrooms: 'Bedrooms',
@@ -593,7 +593,7 @@ const resources = {
         searchPlaceholder: 'חיפוש לפי שכונה, עיר או כתובת...',
         search: 'חיפוש',
         noFeesTagline: 'ללא דמי שירות',
-        noFeesDetail: 'חינם לשוכרים. חינם לבעלי דירות. תמיד.'
+        noFeesDetail: 'חינם לשוכרים. חינם לבעלי דירות.'
       },
       property: {
         bedrooms: 'חדרי שינה',

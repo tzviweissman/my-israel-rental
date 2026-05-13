@@ -53,7 +53,7 @@ const Home = () => {
         className="h-[600px] flex items-center justify-center -mt-[210px] pt-[210px]"
       >
         <div data-testid="hero-section" className="h-full flex items-center justify-center">
-          <div className="relative z-10 text-center text-white px-6 max-w-4xl mt-24 md:mt-0">
+          <div className="relative z-10 text-center text-white px-6 max-w-4xl mt-44 sm:mt-40 md:mt-16 lg:mt-20">
             <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold mb-2" style={{ fontFamily: 'Playfair Display', color: 'white' }}>
               {t('hero.title')}
             </h1>
