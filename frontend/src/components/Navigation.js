@@ -289,24 +289,23 @@ const Navigation = () => {
             <img
               src="https://customer-assets.emergentagent.com/job_listing-manager-pro-2/artifacts/hx4hc6hw_IMG_1745%20%281%29.PNG"
               alt="MyIsraelRental"
-              className="w-auto transition-all duration-300 h-[60px] sm:h-[80px] md:h-[200px]"
+              className="w-auto transition-all duration-300 h-[110px] sm:h-[140px] md:h-[200px]"
               style={{
-                height: scrolled ? '50px' : undefined,
+                height: scrolled ? '60px' : undefined,
                 marginTop: scrolled ? '0' : '-8px',
               }}
             />
           </Link>
 
           {/* Category pill row — Airbnb-style rental-type tabs.
-              Absolutely centered on the page so the logo/menu width
-              doesn't shift the row off-axis. Shown on all viewports;
-              mobile uses tighter gap + compact sizing via NavCategoryItem. */}
+              Desktop: absolutely centered overlay in the same flex row.
+              Mobile: handled separately below the main row. */}
           <div
-            className="flex items-end justify-center gap-3 sm:gap-6 md:gap-8 pointer-events-none absolute left-1/2 top-1/2"
+            className="hidden md:flex items-end justify-center gap-8 pointer-events-none absolute left-1/2 top-1/2"
             style={{ transform: 'translate(-50%, -50%)' }}
             data-testid="nav-rental-categories"
           >
-            <div className="flex items-end gap-3 sm:gap-6 md:gap-8 pointer-events-auto scale-[0.78] sm:scale-[0.92] md:scale-100 origin-center">
+            <div className="flex items-end gap-8 pointer-events-auto">
             {[
               { type: 'long-term', icon: Home, label: t('nav.longTerm') },
               { type: 'short-term', icon: Building, label: t('nav.shortTerm') },
@@ -630,6 +629,30 @@ const Navigation = () => {
             )}
           </div>
           </div>
+        </div>
+
+        {/* Mobile-only category row — sits below the logo+menu row.
+            Compact icons with full text labels (no wrap), evenly spaced. */}
+        <div
+          className="md:hidden flex items-end justify-around pb-2 pt-1"
+          data-testid="nav-rental-categories-mobile"
+        >
+          {[
+            { type: 'long-term', icon: Home, label: t('nav.longTerm') },
+            { type: 'short-term', icon: Building, label: t('nav.shortTerm') },
+            { type: 'vacation', icon: Palmtree, label: t('nav.vacation') },
+            { type: 'storage', icon: Warehouse, label: t('nav.storage') },
+          ].map(({ type, icon: Icon, label }) => (
+            <NavCategoryItem
+              key={type}
+              type={type}
+              Icon={Icon}
+              label={label}
+              active={location.pathname === `/properties/${type}`}
+              scrolled
+              testidSuffix="-mobile"
+            />
+          ))}
         </div>
       </div>
     </nav>
