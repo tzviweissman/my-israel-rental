@@ -9,7 +9,7 @@ import { Link } from 'react-router-dom';
  *   - active (route matches): brand-gold + underline + heavier stroke
  * Scaling shrinks for the compact (scrolled) navbar.
  */
-const NavCategoryItem = ({ type, Icon, label, active, scrolled }) => {
+const NavCategoryItem = ({ type, Icon, label, active, scrolled, testidSuffix = '' }) => {
   const [hover, setHover] = useState(false);
   const isGold = active || hover;
   const color = isGold ? '#D4AF37' : '#FFFFFF';
@@ -29,7 +29,7 @@ const NavCategoryItem = ({ type, Icon, label, active, scrolled }) => {
             : '2px solid transparent',
         opacity: active ? 1 : 0.95,
       }}
-      data-testid={`nav-category-${type}`}
+      data-testid={`nav-category-${type}${testidSuffix}`}
     >
       <Icon
         size={scrolled ? 18 : 22}

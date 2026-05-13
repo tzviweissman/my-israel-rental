@@ -627,6 +627,31 @@ const Navigation = () => {
           </div>
           </div>
         </div>
+
+        {/* Mobile-only category row — hidden on md+ (desktop has the centered
+            overlay above). Sits below the logo+menu row in normal flow.
+            Tight compact sizing keeps it readable without crowding. */}
+        <div
+          className="md:hidden flex items-end justify-around pb-2 pt-1"
+          data-testid="nav-rental-categories-mobile"
+        >
+          {[
+            { type: 'long-term', icon: Home, label: t('nav.longTerm') },
+            { type: 'short-term', icon: Building, label: t('nav.shortTerm') },
+            { type: 'vacation', icon: Palmtree, label: t('nav.vacation') },
+            { type: 'storage', icon: Warehouse, label: t('nav.storage') },
+          ].map(({ type, icon: Icon, label }) => (
+            <NavCategoryItem
+              key={type}
+              type={type}
+              Icon={Icon}
+              label={label}
+              active={location.pathname === `/properties/${type}`}
+              scrolled
+              testidSuffix="-mobile"
+            />
+          ))}
+        </div>
       </div>
     </nav>
   );
