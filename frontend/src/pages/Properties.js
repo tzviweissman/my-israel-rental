@@ -3,7 +3,7 @@ import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import axios from 'axios';
 import { API, AuthContext } from '../App';
-import { Filter } from 'lucide-react';
+import { Filter, Palmtree, Sun, Sparkles } from 'lucide-react';
 import { toast } from 'sonner';
 import NotifyMeCard from '../components/NotifyMeCard';
 import { HOLIDAY_WINDOWS } from '../constants/holidayWindows';
@@ -427,6 +427,47 @@ const Properties = () => {
             )}
           </button>
         </div>
+
+        {/* Holiday quick-filter pills — only visible on the vacation
+            family of pages (vacation / sukkot / pesach). Lets renters
+            jump between "all vacation rentals" and the two big holiday
+            windows without opening the full filters drawer. */}
+        {['vacation', 'sukkot', 'pesach'].includes(type) && (
+          <div
+            className="flex flex-wrap items-center gap-2 -mt-3 mb-6"
+            data-testid="vacation-quick-filters"
+          >
+            <span className="text-xs font-semibold tracking-wider uppercase text-gray-500 mr-1">
+              {t('filters.quickPick') || 'Quick pick'}:
+            </span>
+            {[
+              { slug: 'vacation', label: t('property.vacationType'), Icon: Palmtree },
+              { slug: 'sukkot', label: t('filters.sukkotRentals'), Icon: Sparkles },
+              { slug: 'pesach', label: t('filters.pesachRentals'), Icon: Sun },
+            ].map(({ slug, label, Icon }) => {
+              const active = type === slug;
+              return (
+                <button
+                  key={slug}
+                  onClick={() => {
+                    sessionStorage.setItem('previousPath', window.location.pathname);
+                    navigate(`/properties/${slug}`);
+                  }}
+                  className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold transition-all hover:shadow-md active:scale-[0.97]"
+                  style={{
+                    backgroundColor: active ? '#1E6A6A' : '#ffffff',
+                    color: active ? '#D4AF37' : '#1E6A6A',
+                    border: `1.5px solid ${active ? '#1E6A6A' : '#e0dcd4'}`,
+                  }}
+                  data-testid={`quick-filter-${slug}`}
+                >
+                  <Icon size={15} />
+                  {label}
+                </button>
+              );
+            })}
+          </div>
+        )}
 
         {/* Holiday window banner — only on /properties/pesach. The Sukkot
             page no longer auto-prefills its date range (per request) so the
