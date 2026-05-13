@@ -284,7 +284,7 @@ const Navigation = () => {
       }}
     >
       <div className="max-w-7xl mx-auto px-6" style={{ padding: scrolled ? '4px 24px' : '0 24px' }}>
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between relative">
           <Link to="/" className="flex items-center" data-testid="nav-logo" onClick={() => window.scrollTo(0, 0)}>
             <img
               src="https://customer-assets.emergentagent.com/job_listing-manager-pro-2/artifacts/hx4hc6hw_IMG_1745%20%281%29.PNG"
@@ -295,12 +295,14 @@ const Navigation = () => {
           </Link>
 
           {/* Category pill row — Airbnb-style rental-type tabs.
-              Sits in the same flex row as the logo so it never overlaps
-              the hero. Shown on all pages; sized down on the compact bar. */}
+              Absolutely centered on the page so the logo/menu width
+              doesn't shift the row off-axis. */}
           <div
-            className="hidden md:flex items-end justify-center gap-8 flex-1"
+            className="hidden md:flex items-end justify-center gap-8 pointer-events-none absolute left-1/2 top-1/2"
+            style={{ transform: 'translate(-50%, -50%)' }}
             data-testid="nav-rental-categories"
           >
+            <div className="flex items-end gap-8 pointer-events-auto">
             {[
               { type: 'long-term', icon: Home, label: t('nav.longTerm') },
               { type: 'short-term', icon: Building, label: t('nav.shortTerm') },
@@ -316,6 +318,7 @@ const Navigation = () => {
                 scrolled={scrolled}
               />
             ))}
+            </div>
           </div>
 
           {scrolled && (
