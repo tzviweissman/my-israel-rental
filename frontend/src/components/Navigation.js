@@ -293,6 +293,54 @@ const Navigation = () => {
             />
           </Link>
 
+          {/* Category pill row — Airbnb-style rental-type tabs.
+              Sits in the same flex row as the logo so it never overlaps
+              the hero. Shown on all pages; sized down on the compact bar. */}
+          <div
+            className="hidden md:flex items-end justify-center gap-8 flex-1"
+            data-testid="nav-rental-categories"
+          >
+            {[
+              { type: 'long-term', icon: Home, label: t('nav.longTerm') },
+              { type: 'short-term', icon: Building, label: t('nav.shortTerm') },
+              { type: 'vacation', icon: Palmtree, label: t('nav.vacation') },
+              { type: 'storage', icon: Warehouse, label: t('nav.storage') },
+            ].map(({ type, icon: Icon, label }) => {
+              const active = location.pathname === `/properties/${type}`;
+              return (
+                <Link
+                  key={type}
+                  to={`/properties/${type}`}
+                  onClick={() => window.scrollTo(0, 0)}
+                  className="group flex flex-col items-center px-3 pb-1 transition-all"
+                  style={{
+                    borderBottom: active ? '2px solid #D4AF37' : '2px solid transparent',
+                    opacity: active ? 1 : 0.9,
+                  }}
+                  data-testid={`nav-category-${type}`}
+                >
+                  <Icon
+                    size={scrolled ? 18 : 22}
+                    className="mb-1 transition-transform group-hover:scale-110"
+                    color={active ? '#D4AF37' : '#FFFFFF'}
+                    strokeWidth={active ? 2.4 : 1.8}
+                    style={{ filter: scrolled ? 'none' : 'drop-shadow(0 1px 3px rgba(0,0,0,0.5))' }}
+                  />
+                  <span
+                    className="font-semibold tracking-wide"
+                    style={{
+                      color: active ? '#D4AF37' : '#FFFFFF',
+                      textShadow: scrolled ? 'none' : '0 1px 3px rgba(0,0,0,0.5)',
+                      fontSize: scrolled ? '10px' : '12px',
+                    }}
+                  >
+                    {label}
+                  </span>
+                </Link>
+              );
+            })}
+          </div>
+
           {scrolled && (
             <div
               className="flex-1 max-w-md mx-6 transition-all duration-500 overflow-hidden"
