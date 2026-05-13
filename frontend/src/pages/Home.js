@@ -50,7 +50,7 @@ const Home = () => {
         images={HERO_IMAGES}
         holdMs={6000}
         fadeMs={1500}
-        className="h-[600px] flex items-center justify-center -mt-[210px] pt-[210px]"
+        className="h-[640px] flex items-center justify-center -mt-[210px] pt-[300px]"
       >
         <div data-testid="hero-section" className="h-full flex items-center justify-center">
           <div className="relative z-10 text-center text-white px-6 max-w-4xl mt-44 sm:mt-40 md:mt-16 lg:mt-20">

@@ -6,6 +6,7 @@ import { Globe, LogOut, LayoutDashboard, Menu, X, Home, Building, Palmtree, Ware
 import axios from 'axios';
 import { toast } from 'sonner';
 import { playMessagePing, requestDesktopNotificationPermission, showDesktopNotification } from '../utils/messageAlerts';
+import NavCategoryItem from './NavCategoryItem';
 
 const Navigation = () => {
   const { t, i18n } = useTranslation();
@@ -305,40 +306,16 @@ const Navigation = () => {
               { type: 'short-term', icon: Building, label: t('nav.shortTerm') },
               { type: 'vacation', icon: Palmtree, label: t('nav.vacation') },
               { type: 'storage', icon: Warehouse, label: t('nav.storage') },
-            ].map(({ type, icon: Icon, label }) => {
-              const active = location.pathname === `/properties/${type}`;
-              return (
-                <Link
-                  key={type}
-                  to={`/properties/${type}`}
-                  onClick={() => window.scrollTo(0, 0)}
-                  className="group flex flex-col items-center px-3 pb-1 transition-all"
-                  style={{
-                    borderBottom: active ? '2px solid #D4AF37' : '2px solid transparent',
-                    opacity: active ? 1 : 0.9,
-                  }}
-                  data-testid={`nav-category-${type}`}
-                >
-                  <Icon
-                    size={scrolled ? 18 : 22}
-                    className="mb-1 transition-transform group-hover:scale-110"
-                    color={active ? '#D4AF37' : '#FFFFFF'}
-                    strokeWidth={active ? 2.4 : 1.8}
-                    style={{ filter: scrolled ? 'none' : 'drop-shadow(0 1px 3px rgba(0,0,0,0.5))' }}
-                  />
-                  <span
-                    className="font-semibold tracking-wide"
-                    style={{
-                      color: active ? '#D4AF37' : '#FFFFFF',
-                      textShadow: scrolled ? 'none' : '0 1px 3px rgba(0,0,0,0.5)',
-                      fontSize: scrolled ? '10px' : '12px',
-                    }}
-                  >
-                    {label}
-                  </span>
-                </Link>
-              );
-            })}
+            ].map(({ type, icon: Icon, label }) => (
+              <NavCategoryItem
+                key={type}
+                type={type}
+                Icon={Icon}
+                label={label}
+                active={location.pathname === `/properties/${type}`}
+                scrolled={scrolled}
+              />
+            ))}
           </div>
 
           {scrolled && (
