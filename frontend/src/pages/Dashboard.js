@@ -139,9 +139,9 @@ const Dashboard = () => {
 
   return (
     <div className="min-h-screen" data-testid="dashboard-page">
-      <div className="max-w-7xl mx-auto px-4 md:px-6 pt-24 md:pt-28 pb-12">
+      <div className="max-w-7xl mx-auto px-4 md:px-6 pt-36 sm:pt-28 md:pt-28 pb-12">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 mb-6 md:mb-8">
-          <h1 className="text-3xl md:text-4xl font-bold" style={{ fontFamily: 'Playfair Display' }}>
+          <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold" style={{ fontFamily: 'Playfair Display' }}>
             {t('dashboard.title')}
           </h1>
           {isOwnerLike && (
