@@ -87,8 +87,8 @@ const BulkUploadModal = ({ isOpen, onClose, onDone, API, token }) => {
     rows.forEach((r, i) => {
       if (!r.title.trim()) issues.push({ i, msg: 'Title is required' });
       else if (!r.area.trim()) issues.push({ i, msg: 'Area is required' });
-      else if ((r.rental_type === 'long-term' || r.rental_type === 'storage') && !r.monthly_price) issues.push({ i, msg: 'Monthly price is required' });
-      else if ((r.rental_type === 'short-term' || r.rental_type === 'vacation') && !r.nightly_price) issues.push({ i, msg: 'Nightly price is required' });
+      else if (r.rental_type !== 'vacation' && !r.monthly_price) issues.push({ i, msg: 'Monthly price is required' });
+      else if (r.rental_type === 'vacation' && !r.nightly_price) issues.push({ i, msg: 'Nightly price is required' });
     });
     return issues;
   }, [rows]);
@@ -112,7 +112,18 @@ const BulkUploadModal = ({ isOpen, onClose, onDone, API, token }) => {
 
   // -------------------------------------------------------------- editor ---
   const updateRow = (i, key, value) => {
-    setRows(prev => prev.map((r, idx) => idx === i ? { ...r, [key]: value } : r));
+    setRows(prev => prev.map((r, idx) => {
+      if (idx !== i) return r;
+      const next = { ...r, [key]: value };
+      // When switching rental_type, drop the price for the *other* mode so a
+      // stale value (e.g. a "monthly" price typed before switching to vacation)
+      // can't sneak into the backend payload.
+      if (key === 'rental_type') {
+        if (value === 'vacation') next.monthly_price = '';
+        else next.nightly_price = '';
+      }
+      return next;
+    }));
     if (rowErrors[i]) setRowErrors(prev => { const n = { ...prev }; delete n[i]; return n; });
   };
 
@@ -560,7 +571,7 @@ const BulkUploadModal = ({ isOpen, onClose, onDone, API, token }) => {
 // ===========================================================================
 const PropertyRowCard = ({ index, row, error, onChange, onDuplicate, onRemove }) => {
   const [showMore, setShowMore] = useState(false);
-  const isPerNight = row.rental_type === 'short-term' || row.rental_type === 'vacation';
+  const isPerNight = row.rental_type === 'vacation';
 
   return (
     <div
@@ -608,29 +619,43 @@ const PropertyRowCard = ({ index, row, error, onChange, onDuplicate, onRemove })
         <NumberInput label="Square meters" value={row.square_meters} onChange={v => onChange('square_meters', v)} testid={`r${index}-square_meters`} placeholder="e.g. 75" />
 
         <div className="md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-3">
-          <div className="grid grid-cols-[1fr_90px] gap-2">
-            <NumberInput
-              label={`Monthly price${isPerNight ? '' : '*'}`}
-              value={row.monthly_price}
-              onChange={v => onChange('monthly_price', v)}
-              testid={`r${index}-monthly_price`}
-              placeholder="6500"
-            />
-            <Select
-              label="Currency"
-              value={row.currency}
-              onChange={v => onChange('currency', v)}
-              options={[{ v: 'ILS', label: '₪ ILS' }, { v: 'USD', label: '$ USD' }]}
-              testid={`r${index}-currency`}
-            />
-          </div>
-          <NumberInput
-            label={`Nightly price${isPerNight ? '*' : ''}`}
-            value={row.nightly_price}
-            onChange={v => onChange('nightly_price', v)}
-            testid={`r${index}-nightly_price`}
-            placeholder="450"
-          />
+          {isPerNight ? (
+            // Vacation rentals → nightly price only
+            <div className="grid grid-cols-[1fr_90px] gap-2 md:col-span-2">
+              <NumberInput
+                label="Nightly price*"
+                value={row.nightly_price}
+                onChange={v => onChange('nightly_price', v)}
+                testid={`r${index}-nightly_price`}
+                placeholder="450"
+              />
+              <Select
+                label="Currency"
+                value={row.currency}
+                onChange={v => onChange('currency', v)}
+                options={[{ v: 'ILS', label: '₪ ILS' }, { v: 'USD', label: '$ USD' }]}
+                testid={`r${index}-currency`}
+              />
+            </div>
+          ) : (
+            // Long-term / Short-term / Storage → monthly price only
+            <div className="grid grid-cols-[1fr_90px] gap-2 md:col-span-2">
+              <NumberInput
+                label="Monthly price*"
+                value={row.monthly_price}
+                onChange={v => onChange('monthly_price', v)}
+                testid={`r${index}-monthly_price`}
+                placeholder="6500"
+              />
+              <Select
+                label="Currency"
+                value={row.currency}
+                onChange={v => onChange('currency', v)}
+                options={[{ v: 'ILS', label: '₪ ILS' }, { v: 'USD', label: '$ USD' }]}
+                testid={`r${index}-currency`}
+              />
+            </div>
+          )}
         </div>
 
         <div className="md:col-span-2">
