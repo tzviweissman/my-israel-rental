@@ -459,16 +459,32 @@ const AddPropertyModal = ({ isOpen, onClose, editingProperty, onSaved, API, toke
                 <input
                   type="number"
                   value={propertyForm.porches}
-                  onChange={(e) => setPropertyForm({
-                    ...propertyForm,
-                    porches: parseInt(e.target.value) || 0,
-                    sukkah_compatible: (parseInt(e.target.value) || 0) > 0 ? propertyForm.sukkah_compatible : false,
-                  })}
+                  onChange={(e) => {
+                    // Preserve an empty string while the user is editing so
+                    // they can backspace away the "0" — otherwise React snaps
+                    // it back instantly. Final coercion to int happens at
+                    // submit (see propertyForm payload below).
+                    const raw = e.target.value;
+                    const parsed = raw === '' ? '' : parseInt(raw, 10);
+                    const safe = Number.isNaN(parsed) ? '' : parsed;
+                    setPropertyForm({
+                      ...propertyForm,
+                      porches: safe,
+                      sukkah_compatible: typeof safe === 'number' && safe > 0
+                        ? propertyForm.sukkah_compatible
+                        : false,
+                    });
+                  }}
+                  onBlur={() => {
+                    if (propertyForm.porches === '' || propertyForm.porches == null) {
+                      setPropertyForm({ ...propertyForm, porches: 0 });
+                    }
+                  }}
                   min="0"
                   className="w-full px-4 py-2 rounded-lg border border-[#E5E5E5] focus:outline-none focus:ring-2 focus:ring-[#1E6A6A]/50"
                   data-testid="property-porches-input"
                 />
-                {propertyForm.porches > 0 && (
+                {typeof propertyForm.porches === 'number' && propertyForm.porches > 0 && (
                   <>
                     <div className="ml-2 mt-2">
                       <label className="block text-sm text-gray-600 mb-1">{t('property.parchSqm')}</label>
