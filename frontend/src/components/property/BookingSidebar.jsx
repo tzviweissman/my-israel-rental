@@ -37,13 +37,31 @@ const PriceBlock = ({ property, sublease, preSubleaseId, convertPrice }) => {
     // underlying property's price for a frame.
     return <div className="h-10 w-40 rounded-md bg-gray-100 animate-pulse" data-testid="property-detail-price-loading" />;
   }
-  const rawPrice = property.monthly_price || property.nightly_price || 0;
-  const converted = convertPrice(rawPrice, property.currency);
-  const perLabel = property.rental_type === 'vacation' ? t('property.perNight') : t('property.perMonth');
+  // Holiday lump-sum override: when a vacation listing has set a flat
+  // "whole holiday" price, surface that instead of the nightly rate.
+  const hasHolidayLump =
+    property.rental_type === 'vacation' &&
+    property.holiday_lump_price != null &&
+    property.holiday_lump_price > 0 &&
+    (property.holiday_tags || []).length > 0;
+  const displayCurrency = hasHolidayLump
+    ? (property.holiday_lump_currency || property.currency)
+    : property.currency;
+  const rawPrice = hasHolidayLump
+    ? property.holiday_lump_price
+    : property.monthly_price || property.nightly_price || 0;
+  const converted = convertPrice(rawPrice, displayCurrency);
+  const holidayLabelMap = {
+    sukkot: t('property.perSukkot') || '/ Sukkot',
+    pesach: t('property.perPesach') || '/ Pesach',
+  };
+  const perLabel = hasHolidayLump
+    ? holidayLabelMap[property.holiday_tags[0]] || '/ holiday'
+    : property.rental_type === 'vacation' ? t('property.perNight') : t('property.perMonth');
   return (
     <>
       <span className="text-3xl font-bold" style={{ color: '#D4AF37' }} data-testid="property-detail-price">
-        {property.currency === 'USD' ? '$' : '₪'}{rawPrice.toLocaleString()}
+        {displayCurrency === 'USD' ? '$' : '₪'}{rawPrice.toLocaleString()}
       </span>
       <span className="text-base text-gray-600">{perLabel}</span>
       {converted && (

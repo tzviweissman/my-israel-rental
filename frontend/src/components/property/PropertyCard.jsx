@@ -21,11 +21,32 @@ const PropertyCard = ({ property, isLiked, onClick, onToggleLike, convertPrice, 
     vacation: t('property.vacationType'),
     storage: t('property.storageType'),
   };
-  const rawPrice = property.monthly_price || property.nightly_price || 0;
-  const converted = convertPrice(rawPrice, property.currency);
-  const perLabel = property.rental_type === 'vacation'
-    ? t('property.perNight')
-    : t('property.perMonth');
+  // Pricing display: vacation listings tagged with a holiday tag can carry
+  // a lump-sum "whole holiday" price. When set, surface that instead of the
+  // nightly rate so the renter immediately sees the holiday option.
+  const hasHolidayLump =
+    property.rental_type === 'vacation' &&
+    property.holiday_lump_price != null &&
+    property.holiday_lump_price > 0 &&
+    (property.holiday_tags || []).length > 0;
+
+  const priceCurrency = hasHolidayLump
+    ? (property.holiday_lump_currency || property.currency)
+    : property.currency;
+  const rawPrice = hasHolidayLump
+    ? property.holiday_lump_price
+    : property.monthly_price || property.nightly_price || 0;
+  const converted = convertPrice(rawPrice, priceCurrency);
+
+  const holidayLabelMap = {
+    sukkot: t('property.perSukkot') || '/ Sukkot',
+    pesach: t('property.perPesach') || '/ Pesach',
+  };
+  const perLabel = hasHolidayLump
+    ? holidayLabelMap[property.holiday_tags[0]] || '/ holiday'
+    : property.rental_type === 'vacation'
+      ? t('property.perNight')
+      : t('property.perMonth');
 
   return (
     <div
