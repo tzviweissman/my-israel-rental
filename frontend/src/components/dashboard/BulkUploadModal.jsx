@@ -328,7 +328,7 @@ const BulkUploadModal = ({ isOpen, onClose, onDone, API, token }) => {
 
   // =========================================================================
   return (
-    <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-start justify-center overflow-y-auto p-4 sm:p-8" data-testid="bulk-upload-modal">
+    <div className="fixed inset-0 z-[70] bg-black/50 backdrop-blur-sm flex items-start justify-center overflow-y-auto p-4 sm:p-8" data-testid="bulk-upload-modal">
       <div className="bg-white rounded-2xl shadow-2xl w-full max-w-5xl my-auto">
         {/* Header */}
         <div className="flex items-start justify-between gap-4 px-6 py-5 border-b border-gray-100">

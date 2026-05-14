@@ -149,7 +149,7 @@ const BulkPhotosModal = ({ properties, onClose, onSaved, API, token, auth }) => 
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/50 flex items-end md:items-center justify-center" data-testid="bulk-photos-modal">
+    <div className="fixed inset-0 z-[70] bg-black/50 flex items-end md:items-center justify-center" data-testid="bulk-photos-modal">
       <div className="bg-white w-full md:max-w-3xl md:rounded-2xl shadow-2xl max-h-[92vh] flex flex-col">
         <div className="flex items-center justify-between p-5 border-b border-gray-100">
           <div>

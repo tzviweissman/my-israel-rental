@@ -45,7 +45,7 @@ export const MarkAsBookedModal = ({ open, target, selectedCount = 0, saving = fa
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4"
+      className="fixed inset-0 z-[70] flex items-center justify-center bg-black/40 backdrop-blur-sm p-4"
       data-testid="mark-booked-modal"
     >
       <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6 relative">

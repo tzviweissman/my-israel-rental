@@ -140,7 +140,7 @@ const AddPropertyModal = ({ isOpen, onClose, editingProperty, onSaved, API, toke
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-6" data-testid="add-property-modal">
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[70] p-6" data-testid="add-property-modal">
       <div className="relative bg-white rounded-2xl p-8 max-w-4xl w-full max-h-[90vh] overflow-y-auto">
         <button
           type="button"

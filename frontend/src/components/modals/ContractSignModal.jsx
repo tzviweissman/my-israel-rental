@@ -146,7 +146,7 @@ const ContractSignModal = ({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" onClick={handleClose}>
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[70] p-4" onClick={handleClose}>
       <div className="bg-white rounded-2xl p-6 max-w-6xl w-full max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
         <div className="flex items-center justify-between mb-6">
           <h3 className="text-2xl font-bold text-[#1E6A6A]">Sign Rental Contract</h3>

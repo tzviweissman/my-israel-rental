@@ -4,7 +4,7 @@ const AcceptBookingModal = ({ isOpen, onConfirm, onCancel }) => {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50" onClick={onCancel}>
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[70]" onClick={onCancel}>
       <div className="bg-white rounded-2xl p-6 max-w-md w-full mx-4" onClick={(e) => e.stopPropagation()}>
         <h3 className="text-xl font-bold mb-4 text-[#1E6A6A]">Accept Booking Request</h3>
         
