@@ -21,6 +21,8 @@ const EMPTY_FORM = {
   images: [], videos: [], cancellation_policy: 'flexible', custom_cancellation_policy: '',
   available_from: '', starting_date: '', minimum_booking_days: '',
   holiday_tags: [],
+  holiday_lump_price: '',
+  holiday_lump_currency: 'ILS',
 };
 
 /**
@@ -74,6 +76,8 @@ const AddPropertyModal = ({ isOpen, onClose, editingProperty, onSaved, API, toke
         starting_date: editingProperty.starting_date || '',
         minimum_booking_days: editingProperty.minimum_booking_days ? String(editingProperty.minimum_booking_days) : '',
         holiday_tags: editingProperty.holiday_tags || [],
+        holiday_lump_price: editingProperty.holiday_lump_price || '',
+        holiday_lump_currency: editingProperty.holiday_lump_currency || 'ILS',
       });
       setUploadedFiles([
         ...(editingProperty.images || []).map((url, i) => ({ url, file_type: 'image', filename: url.split('/').pop(), original_name: `Image ${i + 1}` })),
@@ -109,6 +113,7 @@ const AddPropertyModal = ({ isOpen, onClose, editingProperty, onSaved, API, toke
       floor: toNumOrNull(propertyForm.floor),
       porches: toIntOrNull(propertyForm.porches) ?? 0,
       minimum_booking_days: toIntOrNull(propertyForm.minimum_booking_days),
+      holiday_lump_price: toNumOrNull(propertyForm.holiday_lump_price),
     };
     try {
       if (editingProperty?.id) {
@@ -281,6 +286,60 @@ const AddPropertyModal = ({ isOpen, onClose, editingProperty, onSaved, API, toke
                 <option value="20">20+</option>
               </select>
             </div>
+
+            {/* Holiday Categories — vacation rentals only.
+                Placed BETWEEN floor and price so owners decide holiday tagging
+                first (which can unlock the lump-sum price option below). */}
+            {propertyForm.rental_type === 'vacation' && (
+              <div className="md:col-span-2 bg-[#FBF8F2] rounded-xl p-4 border border-[#D4AF37]/30">
+                <h3 className="text-base font-bold mb-1 text-[#1E6A6A]">Holiday Categories</h3>
+                <p className="text-xs text-gray-500 mb-3">
+                  Optional — tag this listing so it shows under <span className="font-medium">Sukkot Rentals</span> or <span className="font-medium">Pesach Rentals</span> in the nav and unlocks a one-price-for-the-whole-holiday rate below.
+                </p>
+                <div className="flex flex-wrap gap-2">
+                  {[
+                    { key: 'sukkot', label: 'Sukkot Rental' },
+                    { key: 'pesach', label: 'Pesach Rental' },
+                  ].map(({ key, label }) => {
+                    const checked = (propertyForm.holiday_tags || []).includes(key);
+                    return (
+                      <label
+                        key={key}
+                        className={`flex items-center gap-2 px-3 py-2 rounded-lg border-2 cursor-pointer transition-all text-sm ${
+                          checked
+                            ? 'border-[#D4AF37] bg-[#D4AF37]/15 text-[#1E6A6A]'
+                            : 'bg-white border-gray-200 hover:border-[#D4AF37]/40 text-gray-600'
+                        }`}
+                        data-testid={`holiday-tag-${key}`}
+                      >
+                        <input
+                          type="checkbox"
+                          className="w-4 h-4 accent-[#1E6A6A]"
+                          checked={checked}
+                          onChange={(e) => {
+                            const current = propertyForm.holiday_tags || [];
+                            const next = e.target.checked
+                              ? [...current, key]
+                              : current.filter((tag) => tag !== key);
+                            // If clearing all holiday tags, also clear the lump-sum price
+                            // so the renter UI doesn't show a stale value.
+                            setPropertyForm({
+                              ...propertyForm,
+                              holiday_tags: next,
+                              ...(next.length === 0
+                                ? { holiday_lump_price: '', holiday_lump_currency: 'ILS' }
+                                : {}),
+                            });
+                          }}
+                        />
+                        <span className="font-medium">{label}</span>
+                      </label>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
             <div>
               <label className="block text-sm font-medium mb-2">
                 Price {propertyForm.rental_type === 'vacation' ? '(per night)' : '(monthly)'}
@@ -312,6 +371,49 @@ const AddPropertyModal = ({ isOpen, onClose, editingProperty, onSaved, API, toke
                 </select>
               </div>
             </div>
+
+            {/* Holiday lump-sum price — only when a holiday tag is chosen on a
+                vacation listing. Lets owners offer a "book the whole holiday
+                for X" alternative to the nightly rate. Optional — empty means
+                renters can still book nightly. */}
+            {propertyForm.rental_type === 'vacation' &&
+              (propertyForm.holiday_tags || []).length > 0 && (
+              <div className="md:col-span-2 bg-[#FBF8F2] rounded-xl p-4 border border-[#D4AF37]/30">
+                <label className="block text-sm font-bold mb-1 text-[#1E6A6A]">
+                  Holiday Price (whole window){' '}
+                  <span className="font-normal text-gray-400">— optional</span>
+                </label>
+                <p className="text-xs text-gray-500 mb-3">
+                  One flat price covering the entire{' '}
+                  {(propertyForm.holiday_tags || []).map((t) => t.charAt(0).toUpperCase() + t.slice(1)).join(' / ')}{' '}
+                  window. Renters will see this as a "Book the whole holiday" option alongside the per-night rate.
+                </p>
+                <div className="flex gap-2">
+                  <input
+                    type="number"
+                    value={propertyForm.holiday_lump_price}
+                    onChange={(e) =>
+                      setPropertyForm({ ...propertyForm, holiday_lump_price: e.target.value })
+                    }
+                    min="0"
+                    placeholder="e.g. 4500"
+                    className="flex-1 px-4 py-2 rounded-lg border border-[#E5E5E5] focus:outline-none focus:ring-2 focus:ring-[#1E6A6A]/50"
+                    data-testid="property-holiday-lump-price-input"
+                  />
+                  <select
+                    value={propertyForm.holiday_lump_currency}
+                    onChange={(e) =>
+                      setPropertyForm({ ...propertyForm, holiday_lump_currency: e.target.value })
+                    }
+                    className="px-4 py-2 rounded-lg border border-[#E5E5E5] focus:outline-none focus:ring-2 focus:ring-[#1E6A6A]/50"
+                    data-testid="property-holiday-lump-currency-select"
+                  >
+                    <option value="ILS">₪ ILS</option>
+                    <option value="USD">$ USD</option>
+                  </select>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Date picker — Starting Date for long-term, Date Available for everything else */}
@@ -390,49 +492,6 @@ const AddPropertyModal = ({ isOpen, onClose, editingProperty, onSaved, API, toke
                     />
                   </div>
                 )}
-              </div>
-            </div>
-          )}
-
-          {/* Holiday Categories — vacation rentals only */}
-          {propertyForm.rental_type === 'vacation' && (
-            <div className="border-t border-gray-200 pt-6">
-              <h3 className="text-lg font-bold mb-1">Holiday Categories</h3>
-              <p className="text-sm text-gray-500 mb-4">
-                Optional — tag this listing so it shows up under <span className="font-medium">Sukkot Rentals</span> or <span className="font-medium">Pesach Rentals</span> in the navigation menu.
-              </p>
-              <div className="flex flex-wrap gap-3">
-                {[
-                  { key: 'sukkot', label: 'Sukkot Rental' },
-                  { key: 'pesach', label: 'Pesach Rental' },
-                ].map(({ key, label }) => {
-                  const checked = (propertyForm.holiday_tags || []).includes(key);
-                  return (
-                    <label
-                      key={key}
-                      className={`flex items-center gap-2 px-4 py-2 rounded-xl border-2 cursor-pointer transition-all ${
-                        checked
-                          ? 'border-[#D4AF37] bg-[#D4AF37]/10 text-[#1E6A6A]'
-                          : 'border-gray-200 hover:border-[#D4AF37]/40 text-gray-600'
-                      }`}
-                      data-testid={`holiday-tag-${key}`}
-                    >
-                      <input
-                        type="checkbox"
-                        className="w-4 h-4 accent-[#1E6A6A]"
-                        checked={checked}
-                        onChange={(e) => {
-                          const current = propertyForm.holiday_tags || [];
-                          const next = e.target.checked
-                            ? [...current, key]
-                            : current.filter((tag) => tag !== key);
-                          setPropertyForm({ ...propertyForm, holiday_tags: next });
-                        }}
-                      />
-                      <span className="text-sm font-medium">{label}</span>
-                    </label>
-                  );
-                })}
               </div>
             </div>
           )}

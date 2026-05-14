@@ -80,6 +80,13 @@ class PropertyCreate(BaseModel):
     # Holiday categories — only meaningful when rental_type='vacation'.
     # Empty list means "regular vacation". Allowed values: 'sukkot', 'pesach'.
     holiday_tags: List[str] | None = []
+    # Optional lump-sum price for the entire holiday window (e.g. all of
+    # Sukkot or Pesach). When set, the listing page surfaces it as an
+    # alternative to the nightly rate so renters can book the whole holiday
+    # in one click. Only meaningful when at least one `holiday_tags` value
+    # is set.
+    holiday_lump_price: float | None = None
+    holiday_lump_currency: str | None = 'ILS'
 
 
 class BookingCreate(BaseModel):

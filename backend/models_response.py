@@ -135,6 +135,8 @@ class PropertyOut(BaseModel):
     checkin_time: str | None = None
     checkout_time: str | None = None
     holiday_tags: list[str] | None = []
+    holiday_lump_price: float | None = None
+    holiday_lump_currency: str | None = None
     contract_url: str | None = None
     contract_uploaded_at: str | None = None
     ical_urls: list[str] | None = None
