@@ -1,5 +1,6 @@
 import React, { useRef } from 'react';
 import { ChevronLeft, ChevronRight, Film, Play } from 'lucide-react';
+import { sizedImage, srcSet } from '../../utils/cdnImage';
 
 const HERO_FALLBACK_URL = 'https://images.pexels.com/photos/1669799/pexels-photo-1669799.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940';
 
@@ -53,7 +54,9 @@ const ImageGallery = ({ media, currentIndex, onIndexChange, alt, apiBase }) => {
             m.type === 'image' ? (
               <img
                 key={m.url}
-                src={toSrc(m.url)}
+                src={sizedImage(toSrc(m.url), 1200)}
+                srcSet={srcSet(toSrc(m.url), 1200)}
+                sizes="(max-width: 1024px) 100vw, 1200px"
                 alt={`${alt} - ${idx + 1}`}
                 className="w-full h-96 object-cover flex-shrink-0"
                 data-testid={idx === currentIndex ? 'gallery-main-image' : undefined}
@@ -114,7 +117,7 @@ const ImageGallery = ({ media, currentIndex, onIndexChange, alt, apiBase }) => {
             >
               {m.type === 'image' ? (
                 <img
-                  src={toSrc(m.url)}
+                  src={sizedImage(toSrc(m.url), 160)}
                   alt={`Thumb ${idx + 1}`}
                   className="w-full h-full object-cover"
                 />

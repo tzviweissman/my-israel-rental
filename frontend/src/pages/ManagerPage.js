@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import axios from 'axios';
 import { API, AuthContext } from '../App';
 import { Bed, Bath, Home as HomeIcon, MapPin, User, LogIn } from 'lucide-react';
+import { sizedImage } from '../utils/cdnImage';
 
 const RENTAL_TYPES = [
   { key: 'all', label: 'All' },
@@ -129,7 +130,7 @@ const ManagerPage = () => {
               data-testid={`manager-property-${property.id}`}
             >
               <div className="h-36 md:h-64 bg-gray-200" style={{
-                backgroundImage: `url(${property.images?.[0] || 'https://images.pexels.com/photos/1669799/pexels-photo-1669799.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940'})`,
+                backgroundImage: `url(${sizedImage(property.images?.[0], 600) || 'https://images.pexels.com/photos/1669799/pexels-photo-1669799.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940'})`,
                 backgroundSize: 'cover',
                 backgroundPosition: 'center'
               }}></div>

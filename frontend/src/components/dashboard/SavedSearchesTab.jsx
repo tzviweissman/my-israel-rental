@@ -20,6 +20,7 @@ import {
   Search,
 } from 'lucide-react';
 import { toast } from 'sonner';
+import { sizedImage, srcSet } from '../../utils/cdnImage';
 
 // Same neighborhood groupings used by /properties — keeping them in sync.
 const AREA_GROUPS = [
@@ -659,7 +660,9 @@ const SavedSearchesTab = ({ API, token }) => {
                 <div className="relative h-40 bg-gray-100">
                   {Array.isArray(p.images) && p.images[0] ? (
                     <img
-                      src={p.images[0]}
+                      src={sizedImage(p.images[0], 400)}
+                      srcSet={srcSet(p.images[0], 400)}
+                      sizes="(max-width: 768px) 50vw, 400px"
                       alt={p.title || 'Property'}
                       className="w-full h-full object-cover"
                     />

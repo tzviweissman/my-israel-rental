@@ -6,6 +6,7 @@ import DOMPurify from 'dompurify';
 import { API } from '../App';
 import { Search, Bed, Bath, Home as HomeIcon, MapPin, Check } from 'lucide-react';
 import HeroSlideshow from '../components/HeroSlideshow';
+import { sizedImage } from '../utils/cdnImage';
 
 // Hero background rotation. Keep widths consistent so the cross-fade is
 // imperceptible at the image edges (browser caches the second slide while
@@ -127,7 +128,7 @@ const Home = () => {
               data-testid={`property-card-${property.id}`}
             >
               <div className="h-36 md:h-64 bg-gray-200" style={{
-                backgroundImage: `url(${property.images?.[0] || 'https://images.pexels.com/photos/1669799/pexels-photo-1669799.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940'})`,
+                backgroundImage: `url(${sizedImage(property.images?.[0], 600) || 'https://images.pexels.com/photos/1669799/pexels-photo-1669799.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940'})`,
                 backgroundSize: 'cover',
                 backgroundPosition: 'center'
               }}></div>

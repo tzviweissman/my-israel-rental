@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import axios from 'axios';
 import { Edit, Eye, Trash2, Upload, FileText, CalendarSync, Link2, X, RefreshCw, Copy, Check, Sparkles, Image as ImageIcon, Loader2, CalendarCheck } from 'lucide-react';
 import { toast } from 'sonner';
+import { sizedImage } from '../../utils/cdnImage';
 
 /**
  * Owner-facing property card grid with edit / delete / contract-upload /
@@ -190,12 +191,14 @@ const PropertyList = ({ properties, bookings = [], onEdit, onRefresh, API, token
     setTimeout(() => setCopiedExport(false), 3000);
   };
 
-  const propImage = (property) =>
-    property.images?.[0]
+  const propImage = (property) => {
+    const raw = property.images?.[0]
       ? property.images[0].startsWith('/api')
         ? `${API.replace('/api', '')}${property.images[0]}`
         : property.images[0]
       : 'https://images.pexels.com/photos/1669799/pexels-photo-1669799.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940';
+    return sizedImage(raw, 480);
+  };
 
   // "NEW" badge on bulk-created listings, fades out after 24h so managers
   // can spot the ones they just uploaded without scrolling.
