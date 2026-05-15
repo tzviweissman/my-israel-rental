@@ -82,3 +82,36 @@ def test_cloudinary_disabled_returns_false_on_delete() -> None:
         pytest.skip("Cloudinary enabled, can't test disabled path here")
 
     assert cloud_storage.delete_from_cloudinary("anything") is False
+
+
+def test_with_auto_transforms_injects_image_params() -> None:
+    from utils.cloud_storage import _with_auto_transforms
+
+    url = "https://res.cloudinary.com/x/image/upload/v1234/myisraelrental/abc.png"
+    out = _with_auto_transforms(url, is_video=False)
+    assert out == "https://res.cloudinary.com/x/image/upload/f_auto,q_auto/v1234/myisraelrental/abc.png"
+
+
+def test_with_auto_transforms_video_uses_q_auto_only() -> None:
+    from utils.cloud_storage import _with_auto_transforms
+
+    url = "https://res.cloudinary.com/x/video/upload/v1234/myisraelrental/clip.mp4"
+    out = _with_auto_transforms(url, is_video=True)
+    assert "q_auto" in out
+    assert "f_auto" not in out
+
+
+def test_with_auto_transforms_idempotent() -> None:
+    from utils.cloud_storage import _with_auto_transforms
+
+    url = "https://res.cloudinary.com/x/image/upload/f_auto,q_auto/v1234/myisraelrental/abc.png"
+    assert _with_auto_transforms(url, is_video=False) == url
+
+
+def test_public_id_from_url_strips_transforms() -> None:
+    from utils.cloud_storage import public_id_from_url
+
+    pid, _ = public_id_from_url(
+        "https://res.cloudinary.com/dirvyboe9/image/upload/f_auto,q_auto/v1234/myisraelrental/abc.png"
+    )
+    assert pid == "myisraelrental/abc"

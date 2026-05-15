@@ -35,6 +35,26 @@ def _resource_type(is_video: bool) -> str:
     return "video" if is_video else "image"
 
 
+def _with_auto_transforms(secure_url: str, is_video: bool) -> str:
+    """Inject Cloudinary auto-format/auto-quality transformations into the URL.
+
+    Cuts image bandwidth 30-60% by serving WebP/AVIF to modern browsers and
+    auto-tuning quality. For videos `f_auto` is unsafe (codec/container
+    compatibility), so only `q_auto` is applied.
+
+    Idempotent: refuses to double-inject if the URL already has the transform.
+    """
+    if not secure_url or "/upload/" not in secure_url:
+        return secure_url
+    transform = "q_auto" if is_video else "f_auto,q_auto"
+    head, tail = secure_url.split("/upload/", 1)
+    # Don't double-inject if our marker is already there
+    first_seg = tail.split("/", 1)[0]
+    if "q_auto" in first_seg or "f_auto" in first_seg:
+        return secure_url
+    return f"{head}/upload/{transform}/{tail}"
+
+
 async def upload_bytes_to_cloudinary(
     content: bytes,
     *,
@@ -53,8 +73,9 @@ async def upload_bytes_to_cloudinary(
         use_filename=False,
         unique_filename=False,
     )
+    secure_url = res.get("secure_url", "")
     return {
-        "url": res.get("secure_url"),
+        "url": _with_auto_transforms(secure_url, is_video),
         "public_id": res.get("public_id"),
         "bytes": res.get("bytes", len(content)),
         "format": res.get("format"),
@@ -93,8 +114,14 @@ def public_id_from_url(url: str) -> tuple[str | None, bool]:
             return None, False
         is_video = "/video/upload/" in url
         tail = parts[1]
-        # Strip the version segment (v1234567890/) if present
         segments = tail.split("/")
+        # Strip leading transformation segments (e.g. "f_auto,q_auto", "w_400,c_fill")
+        # Heuristic: transform segments contain "_" and no "." and aren't a version tag
+        while segments and "_" in segments[0] and "." not in segments[0]:
+            if segments[0].startswith("v") and segments[0][1:].isdigit():
+                break
+            segments = segments[1:]
+        # Strip the version segment (v1234567890/) if present
         if segments and segments[0].startswith("v") and segments[0][1:].isdigit():
             segments = segments[1:]
         # Drop file extension from the last segment
