@@ -23,7 +23,14 @@ from routes.deps import (
     MAX_FILE_SIZE,
     UPLOAD_DIR,
     db,
+    logger,
     verify_token,
+)
+from utils.cloud_storage import (
+    CLOUDINARY_ENABLED,
+    delete_from_cloudinary,
+    public_id_from_url,
+    upload_bytes_to_cloudinary,
 )
 from utils.helpers import get_usd_ils_rate
 
@@ -117,72 +124,97 @@ async def submit_contact_form(request: ContactRequest) -> dict:
 # --- Property Contracts ---
 
 
-@api_router.post("/upload", response_model=UploadResponse)
-async def upload_file(file: UploadFile = File(...), payload: dict = Depends(verify_token)) -> dict:
+async def _read_validated_upload(file: UploadFile) -> tuple[bytes, bool]:
+    """Read an UploadFile fully, enforcing type + size limits.
+
+    Returns (content_bytes, is_video). Raises HTTPException on rejection.
+    """
     if not file.content_type:
         raise HTTPException(status_code=400, detail="Could not determine file type")
-
     is_image = file.content_type in ALLOWED_IMAGE_TYPES
     is_video = file.content_type in ALLOWED_VIDEO_TYPES
     if not is_image and not is_video:
-        raise HTTPException(status_code=400, detail=f"Unsupported file type: {file.content_type}. Allowed: JPEG, PNG, WebP, GIF, MP4, MOV, WebM")
+        raise HTTPException(
+            status_code=400,
+            detail=f"Unsupported file type: {file.content_type}. Allowed: JPEG, PNG, WebP, GIF, MP4, MOV, WebM",
+        )
 
-    ext = (file.filename or "").rsplit(".", 1)[-1].lower() if "." in (file.filename or "") else "bin"
+    chunks: list[bytes] = []
+    size = 0
+    while chunk := await file.read(1024 * 256):
+        size += len(chunk)
+        if size > MAX_FILE_SIZE:
+            raise HTTPException(status_code=413, detail="File too large. Max 50MB")
+        chunks.append(chunk)
+    return b"".join(chunks), is_video
+
+
+async def _store_upload(content: bytes, is_video: bool, original_filename: str | None) -> dict:
+    """Persist a validated upload to Cloudinary (if configured) or local disk.
+
+    Returns dict with `url`, `filename` (public_id or local name), `size`, `file_type`.
+    """
+    file_type = "video" if is_video else "image"
+
+    if CLOUDINARY_ENABLED:
+        try:
+            res = await upload_bytes_to_cloudinary(content, is_video=is_video)
+            return {
+                "url": res["url"],
+                "file_type": file_type,
+                "filename": res["public_id"],
+                "size": res["bytes"],
+            }
+        except Exception as e:
+            logger.error(f"Cloudinary upload failed, falling back to local: {e}")
+
+    # Local-disk fallback (preview env without Cloudinary creds, or upload error)
+    ext = (original_filename or "").rsplit(".", 1)[-1].lower() if "." in (original_filename or "") else "bin"
     file_id = str(uuid.uuid4())
     filename = f"{file_id}.{ext}"
     file_path = UPLOAD_DIR / filename
-
-    size = 0
     with open(file_path, "wb") as f:
-        while chunk := await file.read(1024 * 256):
-            size += len(chunk)
-            if size > MAX_FILE_SIZE:
-                f.close()
-                file_path.unlink(missing_ok=True)
-                raise HTTPException(status_code=413, detail="File too large. Max 50MB")
-            f.write(chunk)
+        f.write(content)
+    return {
+        "url": f"/api/uploads/{filename}",
+        "file_type": file_type,
+        "filename": filename,
+        "size": len(content),
+    }
 
-    file_type = "image" if is_image else "video"
-    url = f"/api/uploads/{filename}"
 
-    return {"url": url, "file_type": file_type, "filename": filename, "size": size}
+@api_router.post("/upload", response_model=UploadResponse)
+async def upload_file(file: UploadFile = File(...), payload: dict = Depends(verify_token)) -> dict:
+    content, is_video = await _read_validated_upload(file)
+    return await _store_upload(content, is_video, file.filename)
 
 
 @api_router.post("/upload/multiple", response_model=list[UploadResponse])
 async def upload_multiple_files(files: List[UploadFile] = File(...), payload: dict = Depends(verify_token)) -> list[dict]:
     results: list[dict] = []
     for file in files:
-        is_image = file.content_type in ALLOWED_IMAGE_TYPES
-        is_video = file.content_type in ALLOWED_VIDEO_TYPES
-        if not is_image and not is_video:
-            results.append({"filename": file.filename, "error": f"Unsupported type: {file.content_type}"})
-            continue
-
-        ext = (file.filename or "").rsplit(".", 1)[-1].lower() if "." in (file.filename or "") else "bin"
-        file_id = str(uuid.uuid4())
-        filename = f"{file_id}.{ext}"
-        file_path = UPLOAD_DIR / filename
-
-        size = 0
         try:
-            with open(file_path, "wb") as f:
-                while chunk := await file.read(1024 * 256):
-                    size += len(chunk)
-                    if size > MAX_FILE_SIZE:
-                        raise HTTPException(status_code=413, detail="File too large")
-                    f.write(chunk)
-            file_type = "image" if is_image else "video"
-            url = f"/api/uploads/{filename}"
-            results.append({"url": url, "file_type": file_type, "filename": filename, "size": size, "original_name": file.filename})
+            content, is_video = await _read_validated_upload(file)
+            stored = await _store_upload(content, is_video, file.filename)
+            stored["original_name"] = file.filename
+            results.append(stored)
+        except HTTPException as e:
+            results.append({"filename": file.filename, "error": e.detail})
         except Exception as e:
-            file_path.unlink(missing_ok=True)
             results.append({"filename": file.filename, "error": str(e)})
-
     return results
 
 
-@api_router.delete("/upload/{filename}", response_model=MessageResponse)
+@api_router.delete("/upload/{filename:path}", response_model=MessageResponse)
 async def delete_upload(filename: str, payload: dict = Depends(verify_token)) -> dict:
+    # Cloudinary public_ids look like "myisraelrental/abc123" (contains slash).
+    # Local fallback filenames look like "{uuid}.{ext}" (no slash).
+    if CLOUDINARY_ENABLED and ("/" in filename or not (UPLOAD_DIR / filename).exists()):
+        # Try image first, then video
+        if not delete_from_cloudinary(filename, is_video=False):
+            delete_from_cloudinary(filename, is_video=True)
+        return {"message": "File deleted"}
+
     file_path = UPLOAD_DIR / filename
     if file_path.exists():
         file_path.unlink()
@@ -194,13 +226,45 @@ async def delete_upload(filename: str, payload: dict = Depends(verify_token)) ->
 async def upload_user_logo(file: UploadFile = File(...), payload: dict = Depends(verify_token)) -> dict:
     if not (file.content_type or "").startswith("image/"):
         raise HTTPException(status_code=400, detail="File must be an image")
-    ext = (file.filename or "").split(".")[-1] if "." in (file.filename or "") else "png"
-    filename = f"logo_{payload['user_id']}_{uuid.uuid4().hex[:8]}.{ext}"
-    filepath = UPLOAD_DIR / filename
     content = await file.read()
-    with open(filepath, "wb") as f:
-        f.write(content)
-    logo_url = f"/api/uploads/{filename}"
+    if len(content) > MAX_FILE_SIZE:
+        raise HTTPException(status_code=413, detail="File too large. Max 50MB")
+
+    # Clean up old logo first
+    user = await db.users.find_one({"id": payload["user_id"]}, {"_id": 0})
+    old_logo_url = (user or {}).get("business_logo")
+    if old_logo_url:
+        old_public_id, old_is_video = public_id_from_url(old_logo_url)
+        if old_public_id:
+            delete_from_cloudinary(old_public_id, is_video=old_is_video)
+        else:
+            old_file = UPLOAD_DIR / old_logo_url.split("/")[-1]
+            if old_file.exists():
+                old_file.unlink()
+
+    if CLOUDINARY_ENABLED:
+        try:
+            res = await upload_bytes_to_cloudinary(
+                content,
+                is_video=False,
+                folder=f"myisraelrental/logos",
+                public_id_hint=f"logo_{payload['user_id']}_{uuid.uuid4().hex[:8]}",
+            )
+            logo_url = res["url"]
+        except Exception as e:
+            logger.error(f"Cloudinary logo upload failed: {e}")
+            logo_url = None
+    else:
+        logo_url = None
+
+    if not logo_url:
+        ext = (file.filename or "").split(".")[-1] if "." in (file.filename or "") else "png"
+        filename = f"logo_{payload['user_id']}_{uuid.uuid4().hex[:8]}.{ext}"
+        filepath = UPLOAD_DIR / filename
+        with open(filepath, "wb") as f:
+            f.write(content)
+        logo_url = f"/api/uploads/{filename}"
+
     await db.users.update_one({"id": payload["user_id"]}, {"$set": {"business_logo": logo_url}})
     return {"logo_url": logo_url}
 
@@ -209,8 +273,13 @@ async def upload_user_logo(file: UploadFile = File(...), payload: dict = Depends
 async def delete_user_logo(payload: dict = Depends(verify_token)) -> dict:
     user = await db.users.find_one({"id": payload["user_id"]}, {"_id": 0})
     if user and user.get("business_logo"):
-        old_file = UPLOAD_DIR / user["business_logo"].split("/")[-1]
-        if old_file.exists():
-            old_file.unlink()
+        logo_url = user["business_logo"]
+        public_id, is_video = public_id_from_url(logo_url)
+        if public_id:
+            delete_from_cloudinary(public_id, is_video=is_video)
+        else:
+            old_file = UPLOAD_DIR / logo_url.split("/")[-1]
+            if old_file.exists():
+                old_file.unlink()
     await db.users.update_one({"id": payload["user_id"]}, {"$unset": {"business_logo": ""}})
     return {"message": "Logo removed"}

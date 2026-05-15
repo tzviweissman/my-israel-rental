@@ -539,6 +539,15 @@ Build a bilingual (English/Hebrew) rental website named MyIsraelRental.com with 
   - Frontend `MessageBubble` renders `@owner`/`@renter`/`@manager` tokens inside the bubble body as gold/teal pill chips with an AtSign icon (white/translucent on my messages, gold-tinted on theirs).
   - Frontend `MessagesTab` shows a gold "**@ Mentioned you**" badge inline with the property title on mentioned rows, plus a thicker `ring-2 ring-[#D4AF37]/40 shadow-sm` highlight on the row.
   - **End-to-end verified live**: renter sent "hey @owner please confirm the move-in date" → backend stored `mentions: ['owner']` → owner's inbox API returned `last_message_mentions_me: true` → owner's dashboard rendered the gold badge + ring on the correct row. Zero console errors, ruff + ESLint clean.
+- [x] **Cloudinary-backed durable image/video uploads** (2026-05-15):
+  - **Problem solved**: production deploys on Emergent/Kubernetes wipe the local container disk on restart — property images written by `routes/misc.py` to `UPLOAD_DIR` (`/app/backend/uploads/`) vanished, breaking the live site (e.g. user reported missing photos for "Maalot Dafna Sukkot").
+  - New module `backend/utils/cloud_storage.py`: `upload_bytes_to_cloudinary()`, `delete_from_cloudinary()`, `public_id_from_url()` parser, and a module-level `CLOUDINARY_ENABLED` flag.
+  - Refactored `routes/misc.py` upload handlers (`POST /api/upload`, `POST /api/upload/multiple`, `DELETE /api/upload/{filename:path}`, `POST/DELETE /api/user/logo`) around two shared helpers: `_read_validated_upload()` (size/type guard, in-memory buffer) and `_store_upload()` (Cloudinary-first, graceful local-disk fallback when env vars missing or Cloudinary errors).
+  - Response shape preserved (`{url, file_type, filename, size}`) — `filename` is now the Cloudinary `public_id` (e.g. `myisraelrental/abc123`); frontend stores the URL verbatim in property `images[]`, so no frontend changes needed.
+  - DELETE route widened from `/upload/{filename}` to `/upload/{filename:path}` so public_ids with slashes route correctly. Logo upload also cleans up the previous logo on Cloudinary before replacing.
+  - Folder layout on Cloudinary: `myisraelrental/{uuid}` for property media, `myisraelrental/logos/logo_{user_id}_{rand}` for business logos.
+  - **Env vars** (in `backend/.env` and **MUST be added to production deploy env**): `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`, `CLOUDINARY_API_SECRET`. Without them the system silently falls back to local-disk uploads (preview env still works for dev).
+  - **Verified end-to-end with curl**: single upload returns `https://res.cloudinary.com/dirvyboe9/image/upload/v.../myisraelrental/{id}.png` (200 OK, publicly accessible, no auth needed for `<img src>`); multi-upload returns array of CDN URLs; delete by public_id removes the asset from Cloudinary (admin API confirms 404). 3/3 + 1 skipped pytest cases pass in `tests/test_cloudinary_upload.py`.
 
 ## Test Credentials
 See /app/memory/test_credentials.md
