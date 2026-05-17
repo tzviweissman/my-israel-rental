@@ -28,12 +28,12 @@ const PropertyCard = ({ property, isLiked, onClick, onToggleLike, convertPrice, 
   };
   // Pricing display: vacation listings tagged with a holiday tag can carry
   // a lump-sum "whole holiday" price. When set, surface that instead of the
-  // nightly rate so the renter immediately sees the holiday option.
+  // nightly rate so the renter immediately sees the holiday option. Tags
+  // (Sukkot/Pesach) are optional metadata — a lump price alone activates.
   const hasHolidayLump =
     property.rental_type === 'vacation' &&
     property.holiday_lump_price != null &&
-    property.holiday_lump_price > 0 &&
-    (property.holiday_tags || []).length > 0;
+    property.holiday_lump_price > 0;
 
   const priceCurrency = hasHolidayLump
     ? (property.holiday_lump_currency || property.currency)
@@ -47,8 +47,9 @@ const PropertyCard = ({ property, isLiked, onClick, onToggleLike, convertPrice, 
     sukkot: t('property.perSukkot') || '/ Sukkot',
     pesach: t('property.perPesach') || '/ Pesach',
   };
+  const firstTag = (property.holiday_tags || [])[0];
   const perLabel = hasHolidayLump
-    ? holidayLabelMap[property.holiday_tags[0]] || '/ holiday'
+    ? (firstTag && holidayLabelMap[firstTag]) || (t('property.perHoliday') || '/ holiday')
     : property.rental_type === 'vacation'
       ? t('property.perNight')
       : t('property.perMonth');

@@ -347,26 +347,31 @@ const AddPropertyModal = ({ isOpen, onClose, editingProperty, onSaved, API, toke
                   Saving in the chosen mode clears the other side's value
                   so only one price ships to the backend. */}
             {(() => {
-              const isVacationHoliday =
-                propertyForm.rental_type === 'vacation' &&
-                (propertyForm.holiday_tags || []).length > 0;
+              // Whole-Holiday pricing toggle is now available for any vacation
+              // rental — holiday tags (Sukkot/Pesach) are optional metadata.
+              const isVacation = propertyForm.rental_type === 'vacation';
               // Mode is derived from data: a non-empty lump price means
               // we're in "whole holiday" mode.
-              const mode = isVacationHoliday && propertyForm.holiday_lump_price !== '' &&
+              const mode = isVacation && propertyForm.holiday_lump_price !== '' &&
                 propertyForm.holiday_lump_price != null
                 ? 'lump'
                 : 'night';
 
+              const tagsLabel = (propertyForm.holiday_tags || [])
+                .map((tag) => tag.charAt(0).toUpperCase() + tag.slice(1))
+                .join(' / ');
               const labelText =
-                propertyForm.rental_type === 'vacation'
+                isVacation
                   ? mode === 'lump'
-                    ? `Price for the whole ${(propertyForm.holiday_tags || []).map((tag) => tag.charAt(0).toUpperCase() + tag.slice(1)).join(' / ')} window`
+                    ? tagsLabel
+                      ? `Price for the whole ${tagsLabel} window`
+                      : 'Price for the whole holiday'
                     : 'Price (per night)'
                   : 'Price (monthly)';
 
               const inputValue = mode === 'lump'
                 ? propertyForm.holiday_lump_price
-                : propertyForm.rental_type === 'vacation'
+                : isVacation
                   ? propertyForm.nightly_price
                   : propertyForm.monthly_price;
 
@@ -374,7 +379,7 @@ const AddPropertyModal = ({ isOpen, onClose, editingProperty, onSaved, API, toke
                 const raw = e.target.value;
                 if (mode === 'lump') {
                   setPropertyForm({ ...propertyForm, holiday_lump_price: raw });
-                } else if (propertyForm.rental_type === 'vacation') {
+                } else if (isVacation) {
                   setPropertyForm({ ...propertyForm, nightly_price: raw === '' ? '' : parseFloat(raw) });
                 } else {
                   setPropertyForm({ ...propertyForm, monthly_price: raw === '' ? '' : parseFloat(raw) });
@@ -394,7 +399,7 @@ const AddPropertyModal = ({ isOpen, onClose, editingProperty, onSaved, API, toke
 
               return (
                 <div className="md:col-span-2">
-                  {isVacationHoliday && (
+                  {isVacation && (
                     <div
                       className="flex items-center gap-1 mb-2 p-1 rounded-xl bg-[#FBF8F2] border border-[#D4AF37]/30 w-fit"
                       data-testid="vacation-price-mode-toggle"
