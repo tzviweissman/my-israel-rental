@@ -607,10 +607,16 @@ const PropertyRowCard = ({ index, row, error, onChange, onDuplicate, onRemove })
         </div>
       )}
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-        <Input label="Title*" value={row.title} onChange={v => onChange('title', v)} placeholder="Cozy Tel Aviv 2BR" testid={`r${index}-title`} />
-        <Input label="Address" value={row.address} onChange={v => onChange('address', v)} placeholder="King George 10" testid={`r${index}-address`} />
-        <LocationSelect label="Area / Neighborhood*" value={row.area} onChange={v => onChange('area', v)} testid={`r${index}-area`} />
+      <div className="grid grid-cols-2 md:grid-cols-2 gap-3">
+        <div className="col-span-2 md:col-span-1">
+          <Input label="Title*" value={row.title} onChange={v => onChange('title', v)} placeholder="Cozy Tel Aviv 2BR" testid={`r${index}-title`} />
+        </div>
+        <div className="col-span-2 md:col-span-1">
+          <Input label="Address" value={row.address} onChange={v => onChange('address', v)} placeholder="King George 10" testid={`r${index}-address`} />
+        </div>
+        <div className="col-span-2 md:col-span-1">
+          <LocationSelect label="Area / Neighborhood*" value={row.area} onChange={v => onChange('area', v)} testid={`r${index}-area`} />
+        </div>
         <Select label="Rental type*" value={row.rental_type} onChange={v => onChange('rental_type', v)} options={RENTAL_TYPES} testid={`r${index}-rental_type`} />
         <Select label="Property type" value={row.property_type} onChange={v => onChange('property_type', v)} options={PROPERTY_TYPES} testid={`r${index}-property_type`} />
         <NumberInput label="Bedrooms" value={row.bedrooms} onChange={v => onChange('bedrooms', v)} testid={`r${index}-bedrooms`} />
@@ -618,7 +624,7 @@ const PropertyRowCard = ({ index, row, error, onChange, onDuplicate, onRemove })
         <NumberInput label="Floor" value={row.floor} onChange={v => onChange('floor', v)} testid={`r${index}-floor`} />
         <NumberInput label="Square meters" value={row.square_meters} onChange={v => onChange('square_meters', v)} testid={`r${index}-square_meters`} placeholder="e.g. 75" />
 
-        <div className="md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-3">
+        <div className="col-span-2 grid grid-cols-1 md:grid-cols-2 gap-3">
           {isPerNight ? (
             // Vacation rentals → nightly price only
             <div className="grid grid-cols-[1fr_90px] gap-2 md:col-span-2">
@@ -658,7 +664,7 @@ const PropertyRowCard = ({ index, row, error, onChange, onDuplicate, onRemove })
           )}
         </div>
 
-        <div className="md:col-span-2">
+        <div className="col-span-2">
           <Textarea
             label="Description"
             value={row.description}
@@ -678,7 +684,7 @@ const PropertyRowCard = ({ index, row, error, onChange, onDuplicate, onRemove })
       </button>
 
       {showMore && (
-        <div className="mt-3 pt-3 border-t border-gray-100 grid grid-cols-1 md:grid-cols-3 gap-3">
+        <div className="mt-3 pt-3 border-t border-gray-100 grid grid-cols-2 md:grid-cols-3 gap-3">
           <NumberInput label="Porches" value={row.porches} onChange={v => onChange('porches', v)} testid={`r${index}-porches`} />
           <NumberInput label="Porch sqm" value={row.porch_square_meters} onChange={v => onChange('porch_square_meters', v)} testid={`r${index}-porch_sqm`} />
           <NumberInput label="Min booking days" value={row.minimum_booking_days} onChange={v => onChange('minimum_booking_days', v)} testid={`r${index}-min_days`} />
@@ -688,7 +694,7 @@ const PropertyRowCard = ({ index, row, error, onChange, onDuplicate, onRemove })
             <Select label="Cancellation policy" value={row.cancellation_policy} onChange={v => onChange('cancellation_policy', v)} options={CANCELLATION_POLICIES} testid={`r${index}-cancel_policy`} />
           )}
           {(row.rental_type === 'vacation' || row.rental_type === 'short-term') && row.cancellation_policy === 'custom' && (
-            <div className="md:col-span-3">
+            <div className="col-span-2 md:col-span-3">
               <label className="block">
                 <span className="block text-[11px] font-semibold text-gray-600 uppercase tracking-wide mb-1">Custom cancellation policy</span>
                 <textarea
@@ -708,7 +714,7 @@ const PropertyRowCard = ({ index, row, error, onChange, onDuplicate, onRemove })
           <Select label="Sukkah compatible" value={row.sukkah_compatible} onChange={v => onChange('sukkah_compatible', v)} options={YESNO} testid={`r${index}-sukkah`} />
           <Select label="Agent fee" value={row.has_agent_fee} onChange={v => onChange('has_agent_fee', v)} options={YESNO} testid={`r${index}-agent_fee`} />
           {row.has_agent_fee === 'yes' && (
-            <div className="grid grid-cols-[1fr_90px] gap-2 md:col-span-2">
+            <div className="col-span-2 grid grid-cols-[1fr_90px] gap-2 md:col-span-2">
               <NumberInput
                 label="Agent fee amount"
                 value={row.agent_fee_price}
@@ -725,7 +731,7 @@ const PropertyRowCard = ({ index, row, error, onChange, onDuplicate, onRemove })
               />
             </div>
           )}
-          <div className="md:col-span-3">
+          <div className="col-span-2 md:col-span-3">
             <AmenitiesGrid
               value={Array.isArray(row.amenities) ? row.amenities : []}
               onChange={v => onChange('amenities', v)}
