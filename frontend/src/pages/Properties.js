@@ -464,17 +464,8 @@ const Properties = () => {
           </div>
         )}
 
-        {/* Holiday window banner — only on /properties/pesach. The Sukkot
-            page no longer auto-prefills its date range (per request) so the
-            banner is suppressed there; renters can still pick the dates
-            themselves from the filters panel. */}
-        {type === 'pesach' && (
-          <HolidayBanner
-            window={holidayWindows[type]}
-            type={type}
-            onApply={applyHolidayWindow}
-          />
-        )}
+        {/* Holiday window banner suppressed on both Sukkot and Pesach pages
+            (per user request). Renters can still pick dates from filters. */}
 
         {showFilters && (
           <FiltersPanel
