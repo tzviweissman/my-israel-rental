@@ -684,7 +684,9 @@ const PropertyRowCard = ({ index, row, error, onChange, onDuplicate, onRemove })
           <NumberInput label="Min booking days" value={row.minimum_booking_days} onChange={v => onChange('minimum_booking_days', v)} testid={`r${index}-min_days`} />
           <Select label="Furniture" value={row.furniture_option} onChange={v => onChange('furniture_option', v)} options={FURNITURE_OPTIONS} testid={`r${index}-furniture`} />
           <Select label="Condition" value={row.condition} onChange={v => onChange('condition', v)} options={CONDITIONS} testid={`r${index}-condition`} />
-          <Select label="Cancellation policy" value={row.cancellation_policy} onChange={v => onChange('cancellation_policy', v)} options={CANCELLATION_POLICIES} testid={`r${index}-cancel_policy`} />
+          {(row.rental_type === 'vacation' || row.rental_type === 'short-term') && (
+            <Select label="Cancellation policy" value={row.cancellation_policy} onChange={v => onChange('cancellation_policy', v)} options={CANCELLATION_POLICIES} testid={`r${index}-cancel_policy`} />
+          )}
           <Select label="Elevator" value={row.has_elevator} onChange={v => onChange('has_elevator', v)} options={YESNO} testid={`r${index}-elevator`} />
           <Select label="Shabbat elevator" value={row.is_shabbat_elevator} onChange={v => onChange('is_shabbat_elevator', v)} options={YESNO} testid={`r${index}-shabbat`} />
           <Select label="TAMA / earthquake reinforced" value={row.is_tama} onChange={v => onChange('is_tama', v)} options={YESNO} testid={`r${index}-tama`} />
@@ -715,7 +717,7 @@ const PropertyRowCard = ({ index, row, error, onChange, onDuplicate, onRemove })
               testid={`r${index}-amenities`}
             />
           </div>
-          {row.cancellation_policy === 'custom' && (
+          {(row.rental_type === 'vacation' || row.rental_type === 'short-term') && row.cancellation_policy === 'custom' && (
             <div className="md:col-span-3">
               <Textarea
                 label="Custom cancellation policy"
