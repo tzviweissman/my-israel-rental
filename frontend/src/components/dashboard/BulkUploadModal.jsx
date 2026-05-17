@@ -687,6 +687,21 @@ const PropertyRowCard = ({ index, row, error, onChange, onDuplicate, onRemove })
           {(row.rental_type === 'vacation' || row.rental_type === 'short-term') && (
             <Select label="Cancellation policy" value={row.cancellation_policy} onChange={v => onChange('cancellation_policy', v)} options={CANCELLATION_POLICIES} testid={`r${index}-cancel_policy`} />
           )}
+          {(row.rental_type === 'vacation' || row.rental_type === 'short-term') && row.cancellation_policy === 'custom' && (
+            <div className="md:col-span-3">
+              <label className="block">
+                <span className="block text-[11px] font-semibold text-gray-600 uppercase tracking-wide mb-1">Custom cancellation policy</span>
+                <textarea
+                  value={row.custom_cancellation_policy || ''}
+                  onChange={e => onChange('custom_cancellation_policy', e.target.value)}
+                  placeholder="Describe your cancellation policy in detail…"
+                  rows={3}
+                  className="w-full px-3 py-2 rounded-lg border-2 border-[#D4AF37] focus:outline-none focus:ring-2 focus:ring-[#1E6A6A]/30 text-sm"
+                  data-testid={`r${index}-custom_cancel`}
+                />
+              </label>
+            </div>
+          )}
           <Select label="Elevator" value={row.has_elevator} onChange={v => onChange('has_elevator', v)} options={YESNO} testid={`r${index}-elevator`} />
           <Select label="Shabbat elevator" value={row.is_shabbat_elevator} onChange={v => onChange('is_shabbat_elevator', v)} options={YESNO} testid={`r${index}-shabbat`} />
           <Select label="TAMA / earthquake reinforced" value={row.is_tama} onChange={v => onChange('is_tama', v)} options={YESNO} testid={`r${index}-tama`} />
@@ -717,17 +732,6 @@ const PropertyRowCard = ({ index, row, error, onChange, onDuplicate, onRemove })
               testid={`r${index}-amenities`}
             />
           </div>
-          {(row.rental_type === 'vacation' || row.rental_type === 'short-term') && row.cancellation_policy === 'custom' && (
-            <div className="md:col-span-3">
-              <Textarea
-                label="Custom cancellation policy"
-                value={row.custom_cancellation_policy}
-                onChange={v => onChange('custom_cancellation_policy', v)}
-                placeholder="Describe your cancellation policy in detail…"
-                testid={`r${index}-custom_cancel`}
-              />
-            </div>
-          )}
         </div>
       )}
     </div>
