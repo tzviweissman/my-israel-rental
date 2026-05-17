@@ -535,8 +535,8 @@ const AddPropertyModal = ({ isOpen, onClose, editingProperty, onSaved, API, toke
             </p>
           </div>
 
-          {/* Cancellation Policy - Vacation Rentals Only */}
-          {propertyForm.rental_type === 'vacation' && (
+          {/* Cancellation Policy - Vacation + Short-Term Rentals */}
+          {(propertyForm.rental_type === 'vacation' || propertyForm.rental_type === 'short-term') && (
             <div className="border-t border-gray-200 pt-6">
               <h3 className="text-lg font-bold mb-4">Cancellation Policy</h3>
               <div className="space-y-4">
