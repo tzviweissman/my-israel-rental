@@ -79,7 +79,7 @@ const DropZone = ({ label, files, onFiles, onRemove, compact, testid }) => {
 // ---------------------------------------------------------------------------
 const BulkPhotosModal = ({ properties, onClose, onSaved, API, token, auth }) => {
   const { t } = useTranslation();
-  const [mode, setMode] = useState('shared'); // 'shared' | 'per_property'
+  const [mode, setMode] = useState('per_property'); // 'shared' | 'per_property'
   const [sharedFiles, setSharedFiles] = useState([]);
   const [perPropFiles, setPerPropFiles] = useState({}); // { pid: File[] }
   const [progress, setProgress] = useState(null); // { current, total }
