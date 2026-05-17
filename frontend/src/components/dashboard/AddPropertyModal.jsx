@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import axios from 'axios';
 import { toast } from 'sonner';
@@ -33,6 +33,22 @@ const AddPropertyModal = ({ isOpen, onClose, editingProperty, onSaved, API, toke
   const { t } = useTranslation();
   const [propertyForm, setPropertyForm] = useState(EMPTY_FORM);
   const [uploadedFiles, setUploadedFiles] = useState([]);
+  // Ref to the custom cancellation policy textarea so we can scroll it into
+  // view + auto-focus when the owner picks "Custom" — otherwise it renders
+  // below the visible modal area and users assume it's missing.
+  const customCancelRef = useRef(null);
+
+  // Scroll + focus the custom cancellation textarea the moment it appears.
+  useEffect(() => {
+    if (propertyForm.cancellation_policy === 'custom' && customCancelRef.current) {
+      // Wait a tick so the textarea is in the DOM
+      const id = window.setTimeout(() => {
+        customCancelRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        customCancelRef.current?.focus();
+      }, 50);
+      return () => window.clearTimeout(id);
+    }
+  }, [propertyForm.cancellation_policy]);
 
   // Hydrate form whenever the caller supplies an editingProperty
   useEffect(() => {
@@ -541,11 +557,13 @@ const AddPropertyModal = ({ isOpen, onClose, editingProperty, onSaved, API, toke
                   <div>
                     <label className="block text-sm font-medium mb-2">Custom Cancellation Policy</label>
                     <textarea
+                      ref={customCancelRef}
                       value={propertyForm.custom_cancellation_policy}
                       onChange={(e) => setPropertyForm({ ...propertyForm, custom_cancellation_policy: e.target.value })}
                       placeholder="Describe your cancellation policy in detail..."
                       rows={3}
-                      className="w-full px-4 py-2 rounded-lg border border-[#E5E5E5] focus:outline-none focus:ring-2 focus:ring-[#1E6A6A]/50"
+                      className="w-full px-4 py-2 rounded-lg border-2 border-[#D4AF37] focus:outline-none focus:ring-2 focus:ring-[#1E6A6A]/50"
+                      data-testid="custom-cancellation-policy-textarea"
                     />
                   </div>
                 )}
