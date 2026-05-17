@@ -254,19 +254,23 @@ const PropertyDetail = () => {
       {/* White spacing area between nav bar and content - ALL DEVICES */}
       <div className="h-[90px] bg-white"></div>
       
-      <div className="max-w-7xl mx-auto px-6 pb-12 bg-white">
-        <div className="flex items-center justify-between mb-6">
-          <button onClick={() => navigate(getBackDestination())} className="flex items-center gap-2 text-sm font-medium hover:text-[#D4AF37] transition-colors" data-testid="back-button">
-            <ArrowLeft size={18} />
-            {getBackButtonText()}
+      <div className="max-w-7xl mx-auto px-4 md:px-6 pb-12 bg-white">
+        <div className="flex items-center justify-between gap-2 mb-6">
+          <button
+            onClick={() => navigate(getBackDestination())}
+            className="flex items-center gap-1.5 md:gap-2 text-xs md:text-sm font-medium hover:text-[#D4AF37] transition-colors min-w-0"
+            data-testid="back-button"
+          >
+            <ArrowLeft size={16} className="md:w-[18px] md:h-[18px] shrink-0" />
+            <span className="truncate">{getBackButtonText()}</span>
           </button>
-          <button 
+          <button
             onClick={handleShare}
-            className="flex items-center gap-2 px-4 py-2 rounded-lg border border-[#1E6A6A] text-[#1E6A6A] hover:bg-[#1E6A6A]/10 transition-colors text-sm font-medium"
+            className="flex items-center gap-1.5 md:gap-2 px-2.5 md:px-4 py-1.5 md:py-2 rounded-lg border border-[#1E6A6A] text-[#1E6A6A] hover:bg-[#1E6A6A]/10 transition-colors text-xs md:text-sm font-medium shrink-0"
             data-testid="share-button"
           >
-            {shareCopied ? <Check size={16} /> : <Share2 size={16} />}
-            {shareCopied ? t('property.copied') : t('property.shareProperty')}
+            {shareCopied ? <Check size={14} className="md:w-4 md:h-4" /> : <Share2 size={14} className="md:w-4 md:h-4" />}
+            <span>{shareCopied ? t('property.copied') : t('property.shareProperty')}</span>
           </button>
         </div>
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
