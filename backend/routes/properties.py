@@ -224,6 +224,13 @@ async def delete_property(property_id: str, payload: dict = Depends(verify_token
     if existing['owner_id'] != payload['user_id'] and payload['role'] != 'admin':
         raise HTTPException(status_code=403, detail="Not authorized")
     
+    # Cascade: detach any active subleases that referenced this property so
+    # they don't become dead links pointing to /property/<deleted-id>. They
+    # remain visible as standalone listings on /sublease/<id>.
+    await db.subleases.update_many(
+        {"original_property_id": property_id},
+        {"$set": {"original_property_id": None}},
+    )
     await db.properties.delete_one({"id": property_id})
     return {"message": "Property deleted successfully"}
 

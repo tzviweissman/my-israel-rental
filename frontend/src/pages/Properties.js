@@ -382,16 +382,11 @@ const Properties = () => {
 
   const handleCardClick = (property) => {
     sessionStorage.setItem('previousPath', window.location.pathname);
-    // Sublease cards deep-link to the underlying property, passing
-    // the sublease window so the booking form pre-fills those
-    // exact dates (holiday rental conversion path).
-    if (property.isSublease && property.property_id) {
-      const params = new URLSearchParams();
-      if (property.available_from) params.append('from', property.available_from);
-      if (property.available_to) params.append('to', property.available_to);
-      if (property.sublease_id) params.append('sublease_id', property.sublease_id);
-      const qs = params.toString();
-      navigate(`/property/${property.property_id}${qs ? `?${qs}` : ''}`);
+    // Sublease cards route to the standalone sublease detail page. This is
+    // independent of the underlying property — if the original was deleted,
+    // the sublease still has a working detail view (option-b detach).
+    if (property.isSublease && property.sublease_id) {
+      navigate(`/sublease/${property.sublease_id}`);
     } else {
       navigate(`/property/${property.id}`);
     }

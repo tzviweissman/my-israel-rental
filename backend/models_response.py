@@ -253,7 +253,7 @@ class SubleaseOut(BaseModel):
     """Persisted ``db.subleases`` document."""
     model_config = ConfigDict(extra='allow')
     id: str
-    original_property_id: str
+    original_property_id: str | None = None
     subleasor_id: str
     available_from: str
     available_to: str
