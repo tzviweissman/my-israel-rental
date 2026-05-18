@@ -50,7 +50,7 @@ const SECTIONS = [
         q: 'What is your cancellation policy?',
         a: (
           <>
-            <p className="mb-3">We offer four policy types:</p>
+            <p className="mb-3">Policies are chosen by the lister. Common options include:</p>
             <ul className="space-y-2 list-none">
               <li className="flex gap-2">
                 <span className="font-semibold text-[#1E6A6A] flex-shrink-0">Flexible —</span>
