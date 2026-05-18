@@ -75,8 +75,11 @@ const SingleDatePopover = ({ value, onChange, anchor, accent, minDate, label, te
 
 /**
  * Renter-facing sublease form: step-1 booking picker + step-2 details
- * (dates, price, type tags, notes). All state lives in the parent
- * (SubleasesTab.jsx) so an edit flow can hydrate the same form.
+ * (dates, price, type tags, notes). Two paths in step 1:
+ *  - Pick one of your active in-app bookings (auto-fills title/area/images)
+ *  - "Booked elsewhere?" — enter property details manually
+ * All state lives in the parent (SubleasesTab.jsx) so an edit flow can
+ * hydrate the same form.
  */
 const SubleaseForm = ({
   form, setForm,
@@ -87,29 +90,47 @@ const SubleaseForm = ({
   onSubmit,
   imageUrl,
 }) => {
+  // 'booking' = property_id linked to an in-app booking
+  // 'manual'  = renter typed in their own title/area (booked elsewhere)
+  const isManual = form.manual === true;
+
   const selectPropertyForSublease = (booking) => {
     setForm({
       ...form,
+      manual: false,
       property_id: booking.property_id,
       bedrooms_available: booking.property?.bedrooms?.toString() || '',
     });
   };
 
-  if (!form.property_id) {
+  const startManualEntry = () => {
+    setForm({
+      ...form,
+      manual: true,
+      property_id: '',
+      title: '',
+      area: '',
+      address: '',
+      bedrooms: '',
+      bathrooms: '',
+    });
+  };
+
+  if (!form.property_id && !isManual) {
     return (
       <div data-testid="sublease-form-container">
         <h4 className="text-sm font-bold text-gray-800 mb-3">
           Step 1: Select the property you're renting
         </h4>
         {myBookings.length === 0 ? (
-          <div className="text-center py-6">
-            <p className="text-gray-500 text-sm">You don't have any active bookings to sublease.</p>
+          <div className="text-center py-4">
+            <p className="text-gray-500 text-sm">You don't have any active bookings on MyIsraelRental.</p>
             <p className="text-gray-400 text-xs mt-1">
-              Book a property first, then you can sublease it here.
+              That's fine — use the option below if you booked your place elsewhere.
             </p>
           </div>
         ) : (
-          <div className="space-y-2">
+          <div className="space-y-2 mb-4">
             {myBookings.map((b) => (
               <button
                 key={b.id}
@@ -136,6 +157,16 @@ const SubleaseForm = ({
             ))}
           </div>
         )}
+        <div className="border-t border-gray-200 pt-3">
+          <button
+            type="button"
+            onClick={startManualEntry}
+            className="w-full px-4 py-3 rounded-xl border-2 border-dashed border-[#D4AF37] hover:bg-[#D4AF37]/5 text-sm font-semibold text-[#1E6A6A] transition-all"
+            data-testid="sublease-manual-entry-btn"
+          >
+            Booked elsewhere? Enter property details manually
+          </button>
+        </div>
       </div>
     );
   }
@@ -152,18 +183,94 @@ const SubleaseForm = ({
     <div data-testid="sublease-form-container">
       <div className="flex items-center justify-between mb-4">
         <h4 className="text-sm font-bold text-gray-800">
-          {editingId ? 'Edit sublease details' : 'Step 2: Set your sublease details'}
+          {editingId ? 'Edit sublease details' : (isManual ? 'Step 2: Enter property details' : 'Step 2: Set your sublease details')}
         </h4>
         {!editingId && (
           <button
-            onClick={() => setForm({ ...form, property_id: '' })}
+            onClick={() => setForm({ ...form, manual: false, property_id: '' })}
             className="text-xs text-gray-500 hover:text-[#1E6A6A]"
           >
-            ← Change property
+            ← {isManual ? 'Use an in-app booking instead' : 'Change property'}
           </button>
         )}
       </div>
-      {title && (
+      {isManual ? (
+        <div className="p-3 rounded-xl bg-[#FBF8F2] border border-[#D4AF37]/30 mb-4 grid grid-cols-1 md:grid-cols-2 gap-3" data-testid="sublease-manual-fields">
+          <div className="md:col-span-2">
+            <label className="block text-xs font-medium text-gray-700 mb-1.5">Listing title *</label>
+            <input
+              type="text"
+              value={form.title || ''}
+              onChange={(e) => setForm({ ...form, title: e.target.value })}
+              placeholder="e.g. Cozy 2BR near Machane Yehuda"
+              className={inputCls}
+              required
+              data-testid="sublease-manual-title"
+            />
+          </div>
+          <div>
+            <label className="block text-xs font-medium text-gray-700 mb-1.5">Area / Neighborhood *</label>
+            <input
+              type="text"
+              value={form.area || ''}
+              onChange={(e) => setForm({ ...form, area: e.target.value })}
+              placeholder="e.g. Jerusalem - Nachlaot"
+              className={inputCls}
+              required
+              data-testid="sublease-manual-area"
+            />
+          </div>
+          <div>
+            <label className="block text-xs font-medium text-gray-700 mb-1.5">Street address (optional)</label>
+            <input
+              type="text"
+              value={form.address || ''}
+              onChange={(e) => setForm({ ...form, address: e.target.value })}
+              placeholder="e.g. King George 10"
+              className={inputCls}
+              data-testid="sublease-manual-address"
+            />
+          </div>
+          <div>
+            <label className="block text-xs font-medium text-gray-700 mb-1.5">Bedrooms</label>
+            <input
+              type="number"
+              min="0"
+              value={form.bedrooms || ''}
+              onChange={(e) => setForm({ ...form, bedrooms: e.target.value })}
+              placeholder="2"
+              className={inputCls}
+              data-testid="sublease-manual-bedrooms"
+            />
+          </div>
+          <div>
+            <label className="block text-xs font-medium text-gray-700 mb-1.5">Bathrooms</label>
+            <input
+              type="number"
+              min="0"
+              value={form.bathrooms || ''}
+              onChange={(e) => setForm({ ...form, bathrooms: e.target.value })}
+              placeholder="1"
+              className={inputCls}
+              data-testid="sublease-manual-bathrooms"
+            />
+          </div>
+          <div className="md:col-span-2">
+            <label className="block text-xs font-medium text-gray-700 mb-1.5">Description (optional)</label>
+            <textarea
+              value={form.description || ''}
+              onChange={(e) => setForm({ ...form, description: e.target.value })}
+              placeholder="Tell renters about the space, the neighborhood, what's nearby…"
+              rows={2}
+              className={`${inputCls} resize-none`}
+              data-testid="sublease-manual-description"
+            />
+          </div>
+          <p className="md:col-span-2 text-[11px] text-gray-500">
+            Tip: you can add photos after posting by editing the sublease.
+          </p>
+        </div>
+      ) : title && (
         <div className="flex items-center gap-3 p-3 rounded-xl bg-white border border-[#1E6A6A]/20 mb-4">
           <div
             className="w-12 h-12 rounded-lg bg-gray-200 shrink-0"

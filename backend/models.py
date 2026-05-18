@@ -141,7 +141,11 @@ class ContractSignature(BaseModel):
 
 
 class SubleaseCreate(BaseModel):
-    property_id: str
+    # When the renter booked through MyIsraelRental, property_id references
+    # the in-DB property and we copy its title/area/images automatically.
+    # When the renter booked elsewhere, property_id is omitted and the user
+    # supplies title/area/images themselves (manual sublease).
+    property_id: str | None = None
     available_from: str
     available_to: str
     price: float
@@ -152,6 +156,16 @@ class SubleaseCreate(BaseModel):
     # Sublease categorisation. Empty list = treat as regular short-term sublease.
     # Allowed values: 'sukkot', 'pesach'. (Short-term is the implicit default.)
     holiday_tags: List[str] | None = []
+    # Manual-sublease fields (only used when property_id is None)
+    title: str | None = None
+    description: str | None = None
+    area: str | None = None
+    address: str | None = None
+    bedrooms: int | None = None
+    bathrooms: int | None = None
+    property_type: str | None = None
+    amenities: List[str] | None = []
+    images: List[str] | None = []
 
 
 class DocumentServiceRequest(BaseModel):

@@ -22,25 +22,41 @@ api_router = router  # alias so existing @api_router decorators work verbatim
 
 @api_router.post("/subleases", response_model=IdMessageResponse)
 async def create_sublease(sublease_data: SubleaseCreate, payload: dict = Depends(verify_token)) -> dict:
-    # Verify the renter has a booking for this property
-    booking = await db.bookings.find_one({
-        "property_id": sublease_data.property_id,
-        "renter_id": payload['user_id'],
-        "status": {"$in": ["pending", "confirmed"]}
-    }, {"_id": 0})
+    # Two flows:
+    #  (a) Linked sublease — renter booked through us. property_id is set,
+    #      we verify the booking exists, and copy the property's title /
+    #      area / images so the listing looks consistent with the original.
+    #  (b) Manual sublease — renter booked elsewhere. property_id is None,
+    #      the renter supplies title / area / images themselves. We skip
+    #      the booking guard and just require the minimum metadata.
+    linked = bool(sublease_data.property_id)
+    property_data = None
 
-    if not booking:
-        raise HTTPException(status_code=403, detail="You can only sublease properties you have an active booking for")
+    if linked:
+        booking = await db.bookings.find_one({
+            "property_id": sublease_data.property_id,
+            "renter_id": payload['user_id'],
+            "status": {"$in": ["pending", "confirmed"]}
+        }, {"_id": 0})
+        if not booking:
+            raise HTTPException(status_code=403, detail="You can only sublease properties you have an active booking for")
 
-    # Get the original property details
-    property_data = await db.properties.find_one({"id": sublease_data.property_id}, {"_id": 0})
-    if not property_data:
-        raise HTTPException(status_code=404, detail="Property not found")
+        property_data = await db.properties.find_one({"id": sublease_data.property_id}, {"_id": 0})
+        if not property_data:
+            raise HTTPException(status_code=404, detail="Property not found")
+    else:
+        # Manual sublease requires at least a title + area so the public
+        # listing is recognisable. Everything else falls back to sane defaults.
+        if not (sublease_data.title or "").strip():
+            raise HTTPException(status_code=400, detail="Title is required when subleasing a property booked elsewhere")
+        if not (sublease_data.area or "").strip():
+            raise HTTPException(status_code=400, detail="Area is required when subleasing a property booked elsewhere")
 
     sublease_id = str(uuid.uuid4())
+    base_bedrooms = (property_data or {}).get('bedrooms', 0) if linked else (sublease_data.bedrooms or 0)
     sublease_doc = {
         "id": sublease_id,
-        "original_property_id": sublease_data.property_id,
+        "original_property_id": sublease_data.property_id,  # None for manual
         "subleasor_id": payload['user_id'],
         "available_from": sublease_data.available_from,
         "available_to": sublease_data.available_to,
@@ -48,19 +64,21 @@ async def create_sublease(sublease_data: SubleaseCreate, payload: dict = Depends
         "price_type": sublease_data.price_type,
         "currency": sublease_data.currency or 'ILS',
         "holiday_tags": sublease_data.holiday_tags or [],
-        "bedrooms_available": sublease_data.bedrooms_available if sublease_data.bedrooms_available is not None else property_data.get('bedrooms', 0),
+        "bedrooms_available": (
+            sublease_data.bedrooms_available
+            if sublease_data.bedrooms_available is not None
+            else base_bedrooms
+        ),
         "notes": sublease_data.notes or "",
-        # Copy key property details for the listing. We don't prefix
-        # "Sublease:" — visitors don't need to see that distinction; the
-        # SUBLEASE ribbon on the card already conveys the type.
-        "title": property_data.get('title', ''),
-        "description": property_data.get('description', ''),
-        "area": property_data.get('area', ''),
-        "address": property_data.get('address', ''),
-        "bathrooms": property_data.get('bathrooms', 0),
-        "images": property_data.get('images', []),
-        "amenities": property_data.get('amenities', []),
-        "property_type": property_data.get('property_type', ''),
+        # Linked: copy from property record. Manual: take from request body.
+        "title": (property_data.get('title', '') if linked else (sublease_data.title or '')),
+        "description": (property_data.get('description', '') if linked else (sublease_data.description or '')),
+        "area": (property_data.get('area', '') if linked else (sublease_data.area or '')),
+        "address": (property_data.get('address', '') if linked else (sublease_data.address or '')),
+        "bathrooms": (property_data.get('bathrooms', 0) if linked else (sublease_data.bathrooms or 0)),
+        "images": (property_data.get('images', []) if linked else (sublease_data.images or [])),
+        "amenities": (property_data.get('amenities', []) if linked else (sublease_data.amenities or [])),
+        "property_type": (property_data.get('property_type', '') if linked else (sublease_data.property_type or 'apartment')),
         "active": True,
         "created_at": datetime.now(UTC).isoformat(),
         "updated_at": datetime.now(UTC).isoformat()

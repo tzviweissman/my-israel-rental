@@ -9,6 +9,14 @@ import SubleaseListItem from './sublease/SubleaseListItem';
 
 const EMPTY_FORM = {
   property_id: '',
+  manual: false,           // true when subleasing a property booked elsewhere
+  // Manual-only fields (ignored when property_id is set)
+  title: '',
+  description: '',
+  area: '',
+  address: '',
+  bedrooms: '',
+  bathrooms: '',
   available_from: '',
   available_to: '',
   price: '',
@@ -103,8 +111,17 @@ const SubleasesTab = ({ API, token }) => {
 
   const handleCreate = async (e) => {
     e.preventDefault();
-    if (!form.property_id || !form.available_from || !form.available_to || !form.price) {
+    const isManual = form.manual === true;
+    if (!form.available_from || !form.available_to || !form.price) {
       toast.error('Please fill in all required fields.');
+      return;
+    }
+    if (!isManual && !form.property_id) {
+      toast.error('Please select a property first.');
+      return;
+    }
+    if (isManual && (!form.title?.trim() || !form.area?.trim())) {
+      toast.error('Title and area are required for manual subleases.');
       return;
     }
     setSubmitting(true);
@@ -123,6 +140,22 @@ const SubleasesTab = ({ API, token }) => {
       if (editingId) {
         await axios.put(`${API}/subleases/${editingId}`, payload, authHeaders);
         toast.success('Sublease updated!');
+      } else if (isManual) {
+        // Manual sublease — renter booked elsewhere, supply listing details
+        await axios.post(
+          `${API}/subleases`,
+          {
+            ...payload,
+            title: form.title,
+            description: form.description,
+            area: form.area,
+            address: form.address,
+            bedrooms: form.bedrooms ? parseInt(form.bedrooms, 10) : null,
+            bathrooms: form.bathrooms ? parseInt(form.bathrooms, 10) : null,
+          },
+          authHeaders,
+        );
+        toast.success('Sublease listed successfully!');
       } else {
         await axios.post(`${API}/subleases`, { ...payload, property_id: form.property_id }, authHeaders);
         toast.success('Sublease listed successfully!');
