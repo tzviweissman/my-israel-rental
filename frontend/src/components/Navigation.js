@@ -326,7 +326,7 @@ const Navigation = () => {
 
           {scrolled && (
             <div
-              className="flex-1 max-w-md mx-6 transition-all duration-500 overflow-hidden"
+              className="flex-1 max-w-md mx-6 transition-all duration-500 overflow-hidden md:hidden"
               style={{
                 opacity: showSearch ? 1 : 0,
                 maxWidth: showSearch ? '28rem' : '0',
