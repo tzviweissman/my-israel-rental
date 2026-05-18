@@ -827,32 +827,83 @@ const Select = ({ label, value, onChange, options, testid }) => (
 );
 
 // Area / Neighborhood select — grouped by Israeli city.
-// Falls back to a free-text option (kept as-is) when the smart-paste extracts
-// a value that isn't in the canonical list, so we never silently drop data.
+// LocationSelect — combobox with type-ahead. Same UX as the regular Add
+// Property form's LocationPicker, just compact for the bulk row layout.
+// Free typing also stores whatever the user types so custom areas survive.
 const LocationSelect = ({ label, value, onChange, testid }) => {
-  const isKnown =
-    !value ||
-    LOCATION_OPTIONS.some(g => g.neighborhoods.some(n => `${g.city} - ${n}` === value));
+  const [search, setSearch] = React.useState('');
+  const [open, setOpen] = React.useState(false);
+  const ref = React.useRef(null);
+
+  React.useEffect(() => {
+    if (!open) return;
+    const handler = (e) => {
+      if (ref.current && !ref.current.contains(e.target)) setOpen(false);
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, [open]);
+
+  const matches = LOCATION_OPTIONS.flatMap((group) =>
+    group.neighborhoods
+      .filter((n) => {
+        if (!search.trim()) return true;
+        const s = search.toLowerCase();
+        return (
+          n.toLowerCase().includes(s) ||
+          group.city.toLowerCase().includes(s) ||
+          `${group.city} - ${n}`.toLowerCase().includes(s)
+        );
+      })
+      .map((n) => ({ value: `${group.city} - ${n}`, city: group.city, neighborhood: n }))
+  );
+
   return (
-    <label className="block">
-      <span className="block text-[11px] font-semibold text-gray-600 uppercase tracking-wide mb-1">{label}</span>
-      <select
-        value={value || ''}
-        onChange={e => onChange(e.target.value)}
-        className="w-full px-3 py-2 rounded-lg border border-gray-200 bg-white focus:outline-none focus:ring-2 focus:ring-[#1E6A6A]/30 focus:border-[#1E6A6A] text-sm"
-        data-testid={testid}
-      >
-        <option value="">Select area…</option>
-        {!isKnown && <option value={value}>{value} (custom)</option>}
-        {LOCATION_OPTIONS.map(group => (
-          <optgroup key={group.city} label={group.city}>
-            {group.neighborhoods.map(n => (
-              <option key={`${group.city}-${n}`} value={`${group.city} - ${n}`}>{n}</option>
-            ))}
-          </optgroup>
-        ))}
-      </select>
-    </label>
+    <div className="relative" ref={ref}>
+      <label className="block">
+        <span className="block text-[11px] font-semibold text-gray-600 uppercase tracking-wide mb-1">{label}</span>
+        <input
+          type="text"
+          value={open ? search : (value || '')}
+          onChange={(e) => {
+            setSearch(e.target.value);
+            // Mirror typed text into the row value so users can save a
+            // non-canonical area name (matches LocationPicker semantics).
+            onChange(e.target.value);
+            setOpen(true);
+          }}
+          onFocus={() => {
+            setSearch('');
+            setOpen(true);
+          }}
+          placeholder="Type to search…"
+          className="w-full px-3 py-2 rounded-lg border border-gray-200 bg-white focus:outline-none focus:ring-2 focus:ring-[#1E6A6A]/30 focus:border-[#1E6A6A] text-sm"
+          data-testid={testid}
+        />
+      </label>
+      {open && (
+        <div className="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+          {matches.length === 0 ? (
+            <div className="px-3 py-2 text-xs text-gray-500">No matches — typed value will be saved as-is</div>
+          ) : (
+            matches.map((loc) => (
+              <div
+                key={loc.value}
+                onClick={() => {
+                  onChange(loc.value);
+                  setSearch('');
+                  setOpen(false);
+                }}
+                className="px-3 py-2 hover:bg-[#1E6A6A]/10 cursor-pointer text-sm transition-colors"
+              >
+                <span className="font-medium text-gray-700">{loc.neighborhood}</span>
+                <span className="text-gray-500 text-xs ml-2">({loc.city})</span>
+              </div>
+            ))
+          )}
+        </div>
+      )}
+    </div>
   );
 };
 
