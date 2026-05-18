@@ -3,6 +3,7 @@ import axios from 'axios';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
 import { Upload, X, Image as ImageIcon, Film, Star } from 'lucide-react';
+import { uploadFilesFast } from '../../../utils/fastUpload';
 
 /**
  * Drag/drop upload, progress bar, gallery thumbnails, and "set as cover"
@@ -28,30 +29,25 @@ const MediaUploadSection = ({
     if (files.length === 0) return;
     setUploading(true);
     setProgress(0);
-    const uploaded = [];
-    for (let i = 0; i < files.length; i++) {
-      const formData = new FormData();
-      formData.append('file', files[i]);
-      try {
-        const res = await axios.post(`${API}/upload`, formData, {
-          headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'multipart/form-data' },
-        });
-        uploaded.push({ ...res.data, original_name: files[i].name });
-      } catch (err) {
-        toast.error(`Failed to upload ${files[i].name}: ${err.response?.data?.detail || 'Error'}`);
-      }
-      setProgress(Math.round(((i + 1) / files.length) * 100));
-    }
-    const newImages = uploaded.filter((f) => f.file_type === 'image').map((f) => f.url);
-    const newVideos = uploaded.filter((f) => f.file_type === 'video').map((f) => f.url);
-    setUploadedFiles((prev) => [...prev, ...uploaded]);
+
+    const results = await uploadFilesFast(files, API, token, (fraction) => {
+      setProgress(Math.round(fraction * 100));
+    });
+
+    const ok = results.filter((r) => !r.error);
+    const failed = results.filter((r) => r.error);
+    failed.forEach((f) => toast.error(`Failed to upload ${f.original_name}: ${f.error}`));
+
+    const newImages = ok.filter((f) => f.file_type === 'image').map((f) => f.url);
+    const newVideos = ok.filter((f) => f.file_type === 'video').map((f) => f.url);
+    setUploadedFiles((prev) => [...prev, ...ok]);
     setForm((prev) => ({
       ...prev,
       images: [...prev.images, ...newImages],
       videos: [...(prev.videos || []), ...newVideos],
     }));
     setUploading(false);
-    if (uploaded.length > 0) toast.success(`${uploaded.length} file(s) uploaded`);
+    if (ok.length > 0) toast.success(`${ok.length} file(s) uploaded`);
   };
 
   const removeUploadedFile = async (fileToRemove) => {

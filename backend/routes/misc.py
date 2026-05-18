@@ -44,6 +44,45 @@ async def get_exchange_rate() -> dict:
     return {"usd_to_ils": round(rate, 4), "ils_to_usd": round(1 / rate, 4)}
 
 
+@api_router.get("/cloudinary/signature")
+async def get_cloudinary_signature(
+    resource_type: str = "image",
+    folder: str = "myisraelrental",
+    payload: dict = Depends(verify_token),
+) -> dict:
+    """Sign a direct-to-Cloudinary upload from the browser.
+
+    The browser POSTs the file straight to Cloudinary's CDN edge with this
+    signature — bypassing our backend entirely. This is ~2× faster for
+    photos and 5–10× faster for big videos, plus our server stays out of
+    the upload bandwidth path.
+
+    Auth-gated so anonymous visitors can't sign arbitrary uploads.
+    """
+    if not CLOUDINARY_ENABLED:
+        raise HTTPException(status_code=503, detail="Cloudinary not configured")
+    if resource_type not in ("image", "video"):
+        raise HTTPException(status_code=400, detail="resource_type must be image or video")
+    if not folder.startswith("myisraelrental"):
+        raise HTTPException(status_code=400, detail="invalid folder")
+
+    import time
+    import cloudinary
+    import cloudinary.utils
+
+    timestamp = int(time.time())
+    params = {"timestamp": timestamp, "folder": folder}
+    signature = cloudinary.utils.api_sign_request(params, cloudinary.config().api_secret)
+    return {
+        "signature": signature,
+        "timestamp": timestamp,
+        "cloud_name": cloudinary.config().cloud_name,
+        "api_key": cloudinary.config().api_key,
+        "folder": folder,
+        "resource_type": resource_type,
+    }
+
+
 @api_router.post("/translate", response_model=TranslationResponse)
 async def translate_text(request: TranslationRequest) -> dict:
     try:
