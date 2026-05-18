@@ -356,10 +356,12 @@ const Navigation = () => {
           )}
 
           <div className="flex items-center gap-3">
-            {/* Language toggle — desktop only; mobile users get it inside the menu drawer */}
+            {/* Language toggle — desktop always, mobile shown only when
+                signed out (signed-in users have bell + chat in this slot
+                and can switch language inside the menu drawer). */}
             <button
               onClick={toggleLanguage}
-              className="hidden sm:flex p-2 rounded-full hover:bg-white/10 transition-colors items-center gap-1"
+              className={`${user ? 'hidden sm:flex' : 'flex'} p-2 rounded-full hover:bg-white/10 transition-colors items-center gap-1`}
               data-testid="language-toggle"
               aria-label="Toggle language"
               title={i18n.language.startsWith('he') ? 'Switch to English' : 'Switch to Hebrew'}
