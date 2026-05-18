@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import axios from 'axios';
 import { toast } from 'sonner';
 
-import { X } from 'lucide-react';
+import { Sparkles, X } from 'lucide-react';
 
 import DateField from './propertyForm/DateField';
 import LocationPicker from './propertyForm/LocationPicker';
@@ -53,6 +53,54 @@ const AddPropertyModal = ({ isOpen, onClose, editingProperty, onSaved, API, toke
       return () => window.clearTimeout(id);
     }
   }, [propertyForm.cancellation_policy]);
+
+  // Smart paste — paste a free-form description (WhatsApp, email, etc.)
+  // and let Claude extract structured fields. Only shown for new properties,
+  // never for edits (we don't want to silently clobber a saved listing).
+  const [smartPaste, setSmartPaste] = useState('');
+  const [smartPasting, setSmartPasting] = useState(false);
+
+  const handleSmartPaste = async () => {
+    if (!smartPaste.trim()) {
+      toast.error('Paste some property text first');
+      return;
+    }
+    setSmartPasting(true);
+    try {
+      const res = await axios.post(
+        `${API}/properties/bulk/extract`,
+        { text: smartPaste },
+        { headers: { Authorization: `Bearer ${token}` } },
+      );
+      const extracted = (res.data.properties || [])[0];
+      if (!extracted) {
+        toast.error('Could not find a property in that text');
+        return;
+      }
+      // Merge extracted fields into the current form, keeping defaults for
+      // anything Claude didn't populate.
+      const merged = { ...propertyForm };
+      for (const [k, v] of Object.entries(extracted)) {
+        if (v === null || v === undefined) continue;
+        merged[k] = v;
+      }
+      if (typeof merged.amenities === 'string') {
+        merged.amenities = merged.amenities.split(/[,;]/).map(a => a.trim()).filter(Boolean);
+      } else if (!Array.isArray(merged.amenities)) {
+        merged.amenities = [];
+      }
+      // Shabbat elevator implies regular elevator (backend does this for
+      // bulk uploads — replicate here so the UI stays consistent pre-save).
+      if (merged.is_shabbat_elevator) merged.has_elevator = true;
+      setPropertyForm(merged);
+      setSmartPaste('');
+      toast.success('Filled in fields — review and save');
+    } catch (e) {
+      toast.error(e.response?.data?.detail || 'AI extraction failed');
+    } finally {
+      setSmartPasting(false);
+    }
+  };
 
   // Hydrate form whenever the caller supplies an editingProperty
   useEffect(() => {
@@ -183,6 +231,44 @@ const AddPropertyModal = ({ isOpen, onClose, editingProperty, onSaved, API, toke
           {editingProperty && editingProperty.id ? t('dashboard.editProperty') : t('dashboard.addNewProperty')}
         </h2>
         <form onSubmit={handleSubmit} className="space-y-6">
+          {!editingProperty?.id && (
+            <div
+              className="p-4 rounded-xl bg-gradient-to-br from-[#1E6A6A]/5 to-[#D4AF37]/10 border border-[#1E6A6A]/20"
+              data-testid="smart-paste-panel"
+            >
+              <div className="flex items-start gap-2 mb-2">
+                <Sparkles size={18} className="text-[#D4AF37] mt-0.5 shrink-0" />
+                <div>
+                  <h3 className="text-sm font-semibold">AI smart paste</h3>
+                  <p className="text-xs text-gray-600">
+                    Paste a property description from WhatsApp, email, a listing site — anything. Claude reads it and pre-fills the form below.
+                  </p>
+                </div>
+              </div>
+              <textarea
+                value={smartPaste}
+                onChange={(e) => setSmartPaste(e.target.value)}
+                placeholder='e.g. "2BR for rent in Rechavia, 4th floor, shabbat elevator, fully furnished, 7,500₪/mo, available October 1. Great area, near supermarket. WhatsApp 050-XXX-XXXX."'
+                rows={smartPaste ? 5 : 2}
+                className="w-full px-3 py-2 rounded-lg border border-[#E5E5E5] focus:outline-none focus:ring-2 focus:ring-[#1E6A6A]/50 text-sm bg-white/80"
+                maxLength={30000}
+                data-testid="smart-paste-input"
+              />
+              <div className="flex items-center justify-between mt-2">
+                <p className="text-[11px] text-gray-500">{smartPaste.length.toLocaleString()} / 30,000 characters</p>
+                <button
+                  type="button"
+                  onClick={handleSmartPaste}
+                  disabled={smartPasting || !smartPaste.trim()}
+                  className="px-4 py-1.5 rounded-lg bg-[#1E6A6A] text-white text-sm font-semibold hover:bg-[#175757] transition-colors disabled:opacity-50 disabled:cursor-not-allowed inline-flex items-center gap-1.5"
+                  data-testid="smart-paste-btn"
+                >
+                  <Sparkles size={14} />
+                  {smartPasting ? 'Reading…' : 'Extract & fill'}
+                </button>
+              </div>
+            </div>
+          )}
           <div>
             <label className="block text-sm font-medium mb-2">Title</label>
             <input
