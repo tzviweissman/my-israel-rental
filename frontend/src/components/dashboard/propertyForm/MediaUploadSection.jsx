@@ -156,7 +156,7 @@ const MediaUploadSection = ({
                 >
                   {file.file_type === 'image' ? (
                     <img
-                      src={`${API.replace('/api', '')}${file.url}`}
+                      src={file.url.startsWith('/api') ? `${API.replace('/api', '')}${file.url}` : file.url}
                       alt={file.original_name}
                       className="w-full h-20 object-cover"
                     />
