@@ -13,7 +13,7 @@ const resources = {
         storage: 'Storage',
         properties: 'Properties',
         login: 'Login',
-        signup: 'Sign Up',
+        signup: 'Sign Up / Add Property',
         dashboard: 'Dashboard',
         logout: 'Logout',
         faq: 'FAQs'
@@ -586,7 +586,7 @@ const resources = {
         storage: 'אחסון',
         properties: 'נכסים',
         login: 'התחברות',
-        signup: 'הרשמה',
+        signup: 'הרשמה / הוספת נכס',
         dashboard: 'לוח בקרה',
         logout: 'התנתקות',
         faq: 'שאלות נפוצות'
