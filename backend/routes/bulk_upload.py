@@ -139,6 +139,14 @@ def _coerce_numeric_and_bool(row: dict) -> None:
         row[f] = _split_list(row.get(f))
 
 
+def _apply_implied_flags(row: dict) -> None:
+    """Owners often only mention 'Shabbat elevator' in a paste, but that
+    implies the building has an elevator at all. Set the parent flag so the
+    listing doesn't show inconsistent metadata."""
+    if row.get("is_shabbat_elevator"):
+        row["has_elevator"] = True
+
+
 def _apply_defaults_and_currency(row: dict) -> None:
     row["currency"] = str(row["currency"]).strip().upper() if row.get("currency") else "ILS"
     row["agent_fee_currency"] = (
@@ -155,6 +163,7 @@ def _normalize_row(raw: dict) -> dict:
     _assert_required_present(row)
     _normalize_rental_type(row)
     _coerce_numeric_and_bool(row)
+    _apply_implied_flags(row)
     _apply_defaults_and_currency(row)
     return row
 

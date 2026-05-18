@@ -712,7 +712,20 @@ const PropertyRowCard = ({ index, row, error, onChange, onDuplicate, onRemove })
             </div>
           )}
           <Select label="Elevator" value={row.has_elevator} onChange={v => onChange('has_elevator', v)} options={YESNO} testid={`r${index}-elevator`} />
-          <Select label="Shabbat elevator" value={row.is_shabbat_elevator} onChange={v => onChange('is_shabbat_elevator', v)} options={YESNO} testid={`r${index}-shabbat`} />
+          <Select
+            label="Shabbat elevator"
+            value={row.is_shabbat_elevator}
+            onChange={v => {
+              // Shabbat elevator implies the building has an elevator; auto-set
+              // the parent flag so the listing stays consistent.
+              if (v === 'yes' && row.has_elevator !== 'yes') {
+                onChange('has_elevator', 'yes');
+              }
+              onChange('is_shabbat_elevator', v);
+            }}
+            options={YESNO}
+            testid={`r${index}-shabbat`}
+          />
           <Select label="TAMA / earthquake reinforced" value={row.is_tama} onChange={v => onChange('is_tama', v)} options={YESNO} testid={`r${index}-tama`} />
           <Select label="Sukkah compatible" value={row.sukkah_compatible} onChange={v => onChange('sukkah_compatible', v)} options={YESNO} testid={`r${index}-sukkah`} />
           <Select label="Agent fee" value={row.has_agent_fee} onChange={v => onChange('has_agent_fee', v)} options={YESNO} testid={`r${index}-agent_fee`} />
