@@ -174,7 +174,7 @@ const FAQ = () => {
   const totalMatches = filteredSections.reduce((n, s) => n + s.items.length, 0);
 
   return (
-    <div className="min-h-screen bg-[#fafafa] pt-24 pb-20 px-4" data-testid="faq-page">
+    <div className="min-h-screen bg-[#fafafa] pt-[140px] sm:pt-[160px] md:pt-[220px] pb-20 px-4" data-testid="faq-page">
       <div className="max-w-3xl mx-auto">
         <button
           onClick={() => navigate(-1)}
