@@ -33,6 +33,10 @@ const AddPropertyModal = ({ isOpen, onClose, editingProperty, onSaved, API, toke
   const { t } = useTranslation();
   const [propertyForm, setPropertyForm] = useState(EMPTY_FORM);
   const [uploadedFiles, setUploadedFiles] = useState([]);
+  // Explicit vacation-price mode: 'night' (per-night) | 'lump' (whole holiday).
+  // Kept in state instead of derived from `holiday_lump_price` so users can
+  // clear the input to retype without the UI flipping back to per-night.
+  const [vacationPriceMode, setVacationPriceMode] = useState('night');
   // Ref to the custom cancellation policy textarea so we can scroll it into
   // view + auto-focus when the owner picks "Custom" — otherwise it renders
   // below the visible modal area and users assume it's missing.
@@ -99,9 +103,17 @@ const AddPropertyModal = ({ isOpen, onClose, editingProperty, onSaved, API, toke
         ...(editingProperty.images || []).map((url, i) => ({ url, file_type: 'image', filename: url.split('/').pop(), original_name: `Image ${i + 1}` })),
         ...(editingProperty.videos || []).map((url, i) => ({ url, file_type: 'video', filename: url.split('/').pop(), original_name: `Video ${i + 1}` })),
       ]);
+      // Seed vacation-price mode from saved data: any non-zero lump price
+      // means the listing is in "whole holiday" mode.
+      setVacationPriceMode(
+        (editingProperty.rental_type === 'vacation' && Number(editingProperty.holiday_lump_price) > 0)
+          ? 'lump'
+          : 'night'
+      );
     } else {
       setPropertyForm(EMPTY_FORM);
       setUploadedFiles([]);
+      setVacationPriceMode('night');
     }
   }, [isOpen, editingProperty]);
 
@@ -366,12 +378,10 @@ const AddPropertyModal = ({ isOpen, onClose, editingProperty, onSaved, API, toke
               // Whole-Holiday pricing toggle is now available for any vacation
               // rental — holiday tags (Sukkot/Pesach) are optional metadata.
               const isVacation = propertyForm.rental_type === 'vacation';
-              // Mode is derived from data: a non-empty lump price means
-              // we're in "whole holiday" mode.
-              const mode = isVacation && propertyForm.holiday_lump_price !== '' &&
-                propertyForm.holiday_lump_price != null
-                ? 'lump'
-                : 'night';
+              // Mode comes from explicit state, NOT from the price value, so
+              // clearing the input to retype doesn't flip the UI back to
+              // per-night.
+              const mode = isVacation ? vacationPriceMode : 'night';
 
               const tagsLabel = (propertyForm.holiday_tags || [])
                 .map((tag) => tag.charAt(0).toUpperCase() + tag.slice(1))
@@ -423,7 +433,8 @@ const AddPropertyModal = ({ isOpen, onClose, editingProperty, onSaved, API, toke
                       <button
                         type="button"
                         onClick={() => {
-                          // Switch to per-night: clear lump-sum
+                          // Switch to per-night: clear lump-sum + flip mode.
+                          setVacationPriceMode('night');
                           setPropertyForm({
                             ...propertyForm,
                             holiday_lump_price: '',
@@ -441,13 +452,11 @@ const AddPropertyModal = ({ isOpen, onClose, editingProperty, onSaved, API, toke
                       <button
                         type="button"
                         onClick={() => {
-                          // Switch to whole-holiday: clear nightly,
-                          // initialize lump as "0" so the input is editable
-                          // and mode resolves to 'lump'.
+                          // Switch to whole-holiday: clear nightly + flip mode.
+                          setVacationPriceMode('lump');
                           setPropertyForm({
                             ...propertyForm,
                             nightly_price: '',
-                            holiday_lump_price: propertyForm.holiday_lump_price || 0,
                           });
                         }}
                         className="px-4 py-1.5 rounded-lg text-xs font-semibold transition-all"
