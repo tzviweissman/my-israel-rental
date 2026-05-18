@@ -30,6 +30,35 @@ export function sizedImage(url, width) {
 }
 
 /**
+ * Build a Cloudinary video-frame poster URL.
+ *
+ *   videoPoster('https://res.cloudinary.com/.../video/upload/v123/foo.mp4', 1200)
+ *     -> 'https://res.cloudinary.com/.../video/upload/so_auto,w_1200,c_limit,f_jpg,q_auto/v123/foo.jpg'
+ *
+ * `so_auto` picks the most "interesting" frame; `f_jpg` rasterizes it.
+ * Non-Cloudinary URLs return undefined so the <video> element falls back
+ * to its native first-frame behavior.
+ */
+export function videoPoster(url, width = 1200) {
+  if (!url || !url.includes('res.cloudinary.com') || !url.includes('/video/upload/')) {
+    return undefined;
+  }
+  const [head, tail] = url.split('/upload/', 2);
+  // Strip any leading transform segment we already injected (e.g. q_auto)
+  const segs = tail.split('/');
+  while (segs.length && segs[0].includes('_') && !segs[0].includes('.')) {
+    if (/^v\d+$/.test(segs[0])) break;
+    segs.shift();
+  }
+  // Swap the file extension to .jpg so Cloudinary returns a still frame
+  const last = segs[segs.length - 1];
+  if (last.includes('.')) {
+    segs[segs.length - 1] = last.replace(/\.[^.]+$/, '.jpg');
+  }
+  return `${head}/upload/so_auto,w_${width},c_limit,f_jpg,q_auto/${segs.join('/')}`;
+}
+
+/**
  * Build a `srcset` string with 1x / 2x descriptors for a given base width.
  * Use with `<img srcset={...} sizes={...} />`.
  */

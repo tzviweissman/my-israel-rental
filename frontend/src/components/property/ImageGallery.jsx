@@ -1,6 +1,6 @@
 import React, { useRef } from 'react';
 import { ChevronLeft, ChevronRight, Film, Play } from 'lucide-react';
-import { sizedImage, srcSet } from '../../utils/cdnImage';
+import { sizedImage, srcSet, videoPoster } from '../../utils/cdnImage';
 
 const HERO_FALLBACK_URL = 'https://images.pexels.com/photos/1669799/pexels-photo-1669799.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940';
 
@@ -68,6 +68,7 @@ const ImageGallery = ({ media, currentIndex, onIndexChange, alt, apiBase }) => {
                   videoRefs.current[idx] = el;
                 }}
                 src={toSrc(m.url)}
+                poster={videoPoster(toSrc(m.url), 1200)}
                 controls
                 playsInline
                 preload="metadata"
@@ -123,12 +124,20 @@ const ImageGallery = ({ media, currentIndex, onIndexChange, alt, apiBase }) => {
                 />
               ) : (
                 <>
-                  <video
-                    src={toSrc(m.url)}
-                    preload="metadata"
-                    muted
-                    className="w-full h-full object-cover bg-black"
-                  />
+                  {videoPoster(toSrc(m.url), 160) ? (
+                    <img
+                      src={videoPoster(toSrc(m.url), 160)}
+                      alt={`Video thumb ${idx + 1}`}
+                      className="w-full h-full object-cover bg-black"
+                    />
+                  ) : (
+                    <video
+                      src={toSrc(m.url)}
+                      preload="metadata"
+                      muted
+                      className="w-full h-full object-cover bg-black"
+                    />
+                  )}
                   <div className="absolute inset-0 flex items-center justify-center bg-black/30 pointer-events-none">
                     <Play size={18} className="text-white drop-shadow" fill="white" />
                   </div>
