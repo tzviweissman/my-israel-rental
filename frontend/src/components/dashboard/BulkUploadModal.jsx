@@ -54,6 +54,9 @@ const blankProperty = () => ({
   has_agent_fee: 'no',
   agent_fee_price: '',
   agent_fee_currency: 'ILS',
+  has_cleaning_fee: 'no',
+  cleaning_fee_price: '',
+  cleaning_fee_currency: 'ILS',
   furniture_option: 'no_furniture',
   condition: 'good',
   cancellation_policy: 'flexible',
@@ -218,7 +221,7 @@ const BulkUploadModal = ({ isOpen, onClose, onDone, API, token }) => {
           merged.amenities = [];
         }
         // Booleans -> yes/no strings
-        for (const bf of ['has_elevator', 'is_shabbat_elevator', 'is_tama', 'sukkah_compatible', 'has_agent_fee']) {
+        for (const bf of ['has_elevator', 'is_shabbat_elevator', 'is_tama', 'sukkah_compatible', 'has_agent_fee', 'has_cleaning_fee']) {
           if (typeof merged[bf] === 'boolean') merged[bf] = merged[bf] ? 'yes' : 'no';
           if (!['yes', 'no'].includes(merged[bf])) merged[bf] = 'no';
         }
@@ -271,7 +274,7 @@ const BulkUploadModal = ({ isOpen, onClose, onDone, API, token }) => {
           merged[k] = v;
         }
         // Normalise booleans the editor expects (yes/no strings)
-        for (const bf of ['has_elevator', 'is_shabbat_elevator', 'is_tama', 'sukkah_compatible', 'has_agent_fee']) {
+        for (const bf of ['has_elevator', 'is_shabbat_elevator', 'is_tama', 'sukkah_compatible', 'has_agent_fee', 'has_cleaning_fee']) {
           if (typeof merged[bf] === 'boolean') merged[bf] = merged[bf] ? 'yes' : 'no';
           if (!['yes', 'no'].includes(merged[bf])) merged[bf] = 'no';
         }
@@ -728,6 +731,27 @@ const PropertyRowCard = ({ index, row, error, onChange, onDuplicate, onRemove })
                 onChange={v => onChange('agent_fee_currency', v)}
                 options={[{ v: 'ILS', label: '₪ ILS' }, { v: 'USD', label: '$ USD' }]}
                 testid={`r${index}-agent_fee_currency`}
+              />
+            </div>
+          )}
+          {(row.rental_type === 'vacation' || row.rental_type === 'short-term') && (
+            <Select label="Cleaning fee" value={row.has_cleaning_fee} onChange={v => onChange('has_cleaning_fee', v)} options={YESNO} testid={`r${index}-cleaning_fee`} />
+          )}
+          {(row.rental_type === 'vacation' || row.rental_type === 'short-term') && row.has_cleaning_fee === 'yes' && (
+            <div className="col-span-2 grid grid-cols-[1fr_90px] gap-2 md:col-span-2">
+              <NumberInput
+                label="Cleaning fee amount"
+                value={row.cleaning_fee_price}
+                onChange={v => onChange('cleaning_fee_price', v)}
+                testid={`r${index}-cleaning_fee_price`}
+                placeholder="250"
+              />
+              <Select
+                label="Currency"
+                value={row.cleaning_fee_currency}
+                onChange={v => onChange('cleaning_fee_currency', v)}
+                options={[{ v: 'ILS', label: '₪ ILS' }, { v: 'USD', label: '$ USD' }]}
+                testid={`r${index}-cleaning_fee_currency`}
               />
             </div>
           )}
