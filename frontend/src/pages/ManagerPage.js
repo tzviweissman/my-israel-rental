@@ -22,10 +22,27 @@ const ManagerPage = () => {
   const { user } = useContext(AuthContext);
   const [data, setData] = useState(null);
   const [activeType, setActiveType] = useState('all');
+  const [activeArea, setActiveArea] = useState('all');
 
   useEffect(() => {
     fetchManagerData();
   }, [managerId]);
+
+  // When the rental-type filter changes, the lister may not have any
+  // properties in the previously-selected area for the new type. Reset to
+  // "all" instead of showing an empty grid.
+  useEffect(() => {
+    if (!data) return;
+    const validAreas = new Set(
+      data.properties
+        .filter(p => activeType === 'all' || p.rental_type === activeType)
+        .map(p => p.area)
+        .filter(Boolean)
+    );
+    if (activeArea !== 'all' && !validAreas.has(activeArea)) {
+      setActiveArea('all');
+    }
+  }, [activeType, data, activeArea]);
 
   const fetchManagerData = async () => {
     try {
@@ -44,14 +61,37 @@ const ManagerPage = () => {
     );
   }
 
-  const filteredProperties = activeType === 'all'
-    ? data.properties
-    : data.properties.filter(p => p.rental_type === activeType);
+  const filteredProperties = data.properties.filter(p =>
+    (activeType === 'all' || p.rental_type === activeType) &&
+    (activeArea === 'all' || p.area === activeArea)
+  );
 
   // Only show tabs that have properties
   const availableTypes = RENTAL_TYPES.filter(
     rt => rt.key === 'all' || data.properties.some(p => p.rental_type === rt.key)
   );
+
+  // Area dropdown options are derived from this lister's actual listings,
+  // scoped to the currently-selected rental type so the user never sees
+  // an area that would yield zero results.
+  const areasForActiveType = Array.from(new Set(
+    data.properties
+      .filter(p => activeType === 'all' || p.rental_type === activeType)
+      .map(p => p.area)
+      .filter(Boolean)
+  )).sort((a, b) => a.localeCompare(b));
+
+  // If the previously-selected area is no longer valid (e.g. user
+  // switched rental type), silently reset to "all".
+  if (activeArea !== 'all' && !areasForActiveType.includes(activeArea)) {
+    setActiveArea('all');
+  }
+
+  // If the previously-selected area is no longer valid (e.g. user
+  // switched rental type), silently reset to "all".
+  if (activeArea !== 'all' && !areasForActiveType.includes(activeArea)) {
+    setActiveArea('all');
+  }
 
   const rentalTypeLabels = {
     'long-term': t('property.longTerm'),
@@ -90,7 +130,7 @@ const ManagerPage = () => {
 
         {/* Rental Type Tabs */}
         {availableTypes.length > 2 && (
-          <div className="flex flex-wrap gap-3 mb-8" data-testid="rental-type-tabs">
+          <div className="flex flex-wrap gap-3 mb-4" data-testid="rental-type-tabs">
             {availableTypes.map(rt => (
               <button
                 key={rt.key}
@@ -111,6 +151,33 @@ const ManagerPage = () => {
                 )}
               </button>
             ))}
+          </div>
+        )}
+
+        {/* Area filter — only rendered when this lister has properties in
+            more than one distinct area for the active rental type. */}
+        {areasForActiveType.length > 1 && (
+          <div className="flex items-center gap-3 mb-8" data-testid="area-filter-row">
+            <MapPin size={16} className="text-[#1E6A6A]" />
+            <label htmlFor="manager-area-filter" className="text-sm font-medium text-[#1E6A6A]">
+              Area:
+            </label>
+            <select
+              id="manager-area-filter"
+              value={activeArea}
+              onChange={(e) => setActiveArea(e.target.value)}
+              className="px-4 py-2 rounded-lg border border-[#1E6A6A]/30 text-sm font-medium bg-white focus:outline-none focus:ring-2 focus:ring-[#1E6A6A]/40"
+              data-testid="manager-area-filter"
+            >
+              <option value="all">All areas ({areasForActiveType.length})</option>
+              {areasForActiveType.map((area) => (
+                <option key={area} value={area}>
+                  {area} ({data.properties.filter(p =>
+                    (activeType === 'all' || p.rental_type === activeType) && p.area === area
+                  ).length})
+                </option>
+              ))}
+            </select>
           </div>
         )}
 
