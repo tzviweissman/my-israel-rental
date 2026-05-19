@@ -25,6 +25,7 @@ const ManagerPage = () => {
   const [data, setData] = useState(null);
   const [activeType, setActiveType] = useState('all');
   const [activeArea, setActiveArea] = useState('all');
+  const [activeBedrooms, setActiveBedrooms] = useState('all');
 
   useEffect(() => {
     fetchManagerData();
@@ -32,7 +33,7 @@ const ManagerPage = () => {
 
   // When the rental-type filter changes, the lister may not have any
   // properties in the previously-selected area for the new type. Reset to
-  // "all" instead of showing an empty grid.
+  // "all" instead of showing an empty grid. Same for bedrooms.
   useEffect(() => {
     if (!data) return;
     const validAreas = new Set(
@@ -44,7 +45,18 @@ const ManagerPage = () => {
     if (activeArea !== 'all' && !validAreas.has(activeArea)) {
       setActiveArea('all');
     }
-  }, [activeType, data, activeArea]);
+    const validBedrooms = new Set(
+      data.properties
+        .filter(p =>
+          (activeType === 'all' || p.rental_type === activeType) &&
+          (activeArea === 'all' || p.area === activeArea)
+        )
+        .map(p => String(p.bedrooms ?? ''))
+    );
+    if (activeBedrooms !== 'all' && !validBedrooms.has(activeBedrooms)) {
+      setActiveBedrooms('all');
+    }
+  }, [activeType, activeArea, data, activeBedrooms]);
 
   const fetchManagerData = async () => {
     try {
@@ -65,7 +77,8 @@ const ManagerPage = () => {
 
   const filteredProperties = data.properties.filter(p =>
     (activeType === 'all' || p.rental_type === activeType) &&
-    (activeArea === 'all' || p.area === activeArea)
+    (activeArea === 'all' || p.area === activeArea) &&
+    (activeBedrooms === 'all' || String(p.bedrooms ?? '') === activeBedrooms)
   );
 
   // Only show tabs that have properties
@@ -83,17 +96,16 @@ const ManagerPage = () => {
       .filter(Boolean)
   )).sort((a, b) => a.localeCompare(b));
 
-  // If the previously-selected area is no longer valid (e.g. user
-  // switched rental type), silently reset to "all".
-  if (activeArea !== 'all' && !areasForActiveType.includes(activeArea)) {
-    setActiveArea('all');
-  }
-
-  // If the previously-selected area is no longer valid (e.g. user
-  // switched rental type), silently reset to "all".
-  if (activeArea !== 'all' && !areasForActiveType.includes(activeArea)) {
-    setActiveArea('all');
-  }
+  // Bedroom counts available for the active type+area slice. Sorted numerically.
+  const bedroomsForActiveSlice = Array.from(new Set(
+    data.properties
+      .filter(p =>
+        (activeType === 'all' || p.rental_type === activeType) &&
+        (activeArea === 'all' || p.area === activeArea)
+      )
+      .map(p => p.bedrooms)
+      .filter(b => b !== null && b !== undefined)
+  )).sort((a, b) => Number(a) - Number(b));
 
   const rentalTypeLabels = {
     'long-term': t('property.longTerm'),
@@ -156,30 +168,61 @@ const ManagerPage = () => {
           </div>
         )}
 
-        {/* Area filter — only rendered when this lister has properties in
-            more than one distinct area for the active rental type. */}
-        {areasForActiveType.length > 1 && (
-          <div className="flex items-center gap-3 mb-8" data-testid="area-filter-row">
-            <MapPin size={16} className="text-[#1E6A6A]" />
-            <label htmlFor="manager-area-filter" className="text-sm font-medium text-[#1E6A6A]">
-              Area:
-            </label>
-            <select
-              id="manager-area-filter"
-              value={activeArea}
-              onChange={(e) => setActiveArea(e.target.value)}
-              className="px-4 py-2 rounded-lg border border-[#1E6A6A]/30 text-sm font-medium bg-white focus:outline-none focus:ring-2 focus:ring-[#1E6A6A]/40"
-              data-testid="manager-area-filter"
-            >
-              <option value="all">All areas ({areasForActiveType.length})</option>
-              {areasForActiveType.map((area) => (
-                <option key={area} value={area}>
-                  {area} ({data.properties.filter(p =>
-                    (activeType === 'all' || p.rental_type === activeType) && p.area === area
-                  ).length})
-                </option>
-              ))}
-            </select>
+        {/* Area + Bedrooms filters — each only rendered when the active
+            slice contains more than one option (no useless single-choice
+            dropdowns). */}
+        {(areasForActiveType.length > 1 || bedroomsForActiveSlice.length > 1) && (
+          <div className="flex flex-wrap items-center gap-x-5 gap-y-2 mb-8" data-testid="filters-row">
+            {areasForActiveType.length > 1 && (
+              <div className="flex items-center gap-2" data-testid="area-filter-row">
+                <MapPin size={16} className="text-[#1E6A6A]" />
+                <label htmlFor="manager-area-filter" className="text-sm font-medium text-[#1E6A6A]">
+                  Area:
+                </label>
+                <select
+                  id="manager-area-filter"
+                  value={activeArea}
+                  onChange={(e) => setActiveArea(e.target.value)}
+                  className="px-4 py-2 rounded-lg border border-[#1E6A6A]/30 text-sm font-medium bg-white focus:outline-none focus:ring-2 focus:ring-[#1E6A6A]/40"
+                  data-testid="manager-area-filter"
+                >
+                  <option value="all">All areas ({areasForActiveType.length})</option>
+                  {areasForActiveType.map((area) => (
+                    <option key={area} value={area}>
+                      {area} ({data.properties.filter(p =>
+                        (activeType === 'all' || p.rental_type === activeType) && p.area === area
+                      ).length})
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
+            {bedroomsForActiveSlice.length > 1 && (
+              <div className="flex items-center gap-2" data-testid="bedrooms-filter-row">
+                <Bed size={16} className="text-[#1E6A6A]" />
+                <label htmlFor="manager-bedrooms-filter" className="text-sm font-medium text-[#1E6A6A]">
+                  Bedrooms:
+                </label>
+                <select
+                  id="manager-bedrooms-filter"
+                  value={activeBedrooms}
+                  onChange={(e) => setActiveBedrooms(e.target.value)}
+                  className="px-4 py-2 rounded-lg border border-[#1E6A6A]/30 text-sm font-medium bg-white focus:outline-none focus:ring-2 focus:ring-[#1E6A6A]/40"
+                  data-testid="manager-bedrooms-filter"
+                >
+                  <option value="all">Any</option>
+                  {bedroomsForActiveSlice.map((b) => (
+                    <option key={b} value={String(b)}>
+                      {b} {Number(b) === 1 ? 'bedroom' : 'bedrooms'} ({data.properties.filter(p =>
+                        (activeType === 'all' || p.rental_type === activeType) &&
+                        (activeArea === 'all' || p.area === activeArea) &&
+                        p.bedrooms === b
+                      ).length})
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
           </div>
         )}
 
