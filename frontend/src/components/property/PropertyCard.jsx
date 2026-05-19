@@ -1,9 +1,8 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Bed, Bath, Home as HomeIcon, MapPin, Building2, Heart } from 'lucide-react';
-import { sizedImage } from '../../utils/cdnImage';
-
-const FALLBACK_HERO = 'https://images.pexels.com/photos/1669799/pexels-photo-1669799.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940';
+import { getCoverImage } from '../../utils/coverImage';
+import DefaultImageBadge from './DefaultImageBadge';
 
 /**
  * Property card used on the /properties/<type> grid. Pure presentational —
@@ -11,15 +10,10 @@ const FALLBACK_HERO = 'https://images.pexels.com/photos/1669799/pexels-photo-166
  */
 const PropertyCard = ({ property, isLiked, onClick, onToggleLike, convertPrice, apiBase }) => {
   const { t } = useTranslation();
-  const rawHero = property.images?.[0]
-    ? (property.images[0].startsWith('/api')
-        ? `${apiBase.replace('/api', '')}${property.images[0]}`
-        : property.images[0])
-    : FALLBACK_HERO;
   // Grid cards render at ~470px wide on desktop, ~360px on mobile.
   // Request 600px from Cloudinary so 2x-DPR displays stay crisp without
   // overpaying. Non-Cloudinary URLs pass through untouched.
-  const heroSrc = sizedImage(rawHero, 600);
+  const { url: heroSrc, isDefault: isDefaultImage } = getCoverImage(property.images, 600, apiBase);
   const rentalLabelMap = {
     'long-term': t('property.longTerm'),
     'short-term': t('property.shortTerm'),
@@ -68,6 +62,7 @@ const PropertyCard = ({ property, isLiked, onClick, onToggleLike, convertPrice, 
           backgroundPosition: 'center',
         }}
       >
+        {isDefaultImage && <DefaultImageBadge />}
         <button
           onClick={(e) => onToggleLike(e, property.id)}
           className="absolute top-2 right-2 md:top-3 md:right-3 w-8 h-8 md:w-10 md:h-10 rounded-full bg-white/90 hover:bg-white flex items-center justify-center shadow-md transition-all hover:scale-110 active:scale-95 z-10"

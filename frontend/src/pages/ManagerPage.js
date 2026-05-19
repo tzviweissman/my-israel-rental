@@ -4,6 +4,8 @@ import { useTranslation } from 'react-i18next';
 import axios from 'axios';
 import { API, AuthContext } from '../App';
 import { Bed, Bath, Home as HomeIcon, MapPin, User, LogIn } from 'lucide-react';
+import DefaultImageBadge from '../components/property/DefaultImageBadge';
+import { getCoverImage } from '../utils/coverImage';
 import { sizedImage } from '../utils/cdnImage';
 
 const RENTAL_TYPES = [
@@ -196,11 +198,13 @@ const ManagerPage = () => {
               }}
               data-testid={`manager-property-${property.id}`}
             >
-              <div className="h-36 md:h-64 bg-gray-200" style={{
-                backgroundImage: `url(${sizedImage(property.images?.[0], 600) || 'https://images.pexels.com/photos/1669799/pexels-photo-1669799.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940'})`,
+              <div className="relative h-36 md:h-64 bg-gray-200" style={{
+                backgroundImage: `url(${getCoverImage(property.images, 600).url})`,
                 backgroundSize: 'cover',
                 backgroundPosition: 'center'
-              }}></div>
+              }}>
+                {getCoverImage(property.images).isDefault && <DefaultImageBadge />}
+              </div>
               <div className="p-3 md:p-6">
                 <h3 className="text-sm md:text-xl font-bold mb-1 md:mb-2 line-clamp-1">{property.title}</h3>
                 <div className="flex items-center gap-2 text-gray-600 mb-2 md:mb-3">

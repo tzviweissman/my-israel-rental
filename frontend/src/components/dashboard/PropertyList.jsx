@@ -5,6 +5,7 @@ import axios from 'axios';
 import { Edit, Eye, Trash2, Upload, FileText, CalendarSync, Link2, X, RefreshCw, Copy, Check, Sparkles, Image as ImageIcon, Loader2, CalendarCheck } from 'lucide-react';
 import { toast } from 'sonner';
 import { sizedImage } from '../../utils/cdnImage';
+import DefaultImageBadge from '../property/DefaultImageBadge';
 
 /**
  * Owner-facing property card grid with edit / delete / contract-upload /
@@ -501,9 +502,12 @@ const PropertyList = ({ properties, bookings = [], onEdit, onRefresh, API, token
               className="h-48 bg-gray-200 relative"
               style={{ backgroundImage: `url(${propImage(property)})`, backgroundSize: 'cover', backgroundPosition: 'center' }}
             >
+              {(!property.images || property.images.length === 0) && (
+                <DefaultImageBadge className="!top-3 !left-3" />
+              )}
               {isFreshBulkUpload(property) && (
                 <span
-                  className="absolute top-3 left-3 px-2.5 py-1 rounded-full text-[10px] font-bold tracking-[0.1em] uppercase shadow-md"
+                  className="absolute top-3 right-3 px-2.5 py-1 rounded-full text-[10px] font-bold tracking-[0.1em] uppercase shadow-md"
                   style={{ backgroundColor: '#D4AF37', color: '#1E6A6A' }}
                   data-testid={`new-badge-${property.id}`}
                   title="Added in the last 24 hours via bulk upload"

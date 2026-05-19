@@ -32,14 +32,19 @@ const ImageGallery = ({ media, currentIndex, onIndexChange, alt, apiBase }) => {
 
   if (!media || media.length === 0) {
     return (
-      <div
-        className="w-full h-96 rounded-2xl"
-        style={{
-          backgroundImage: `url(${HERO_FALLBACK_URL})`,
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-        }}
-      />
+      <div className="relative">
+        <div
+          className="w-full h-96 rounded-2xl"
+          style={{
+            backgroundImage: `url(${HERO_FALLBACK_URL})`,
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+          }}
+        />
+        <div className="absolute top-3 left-3 inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-black/60 backdrop-blur-sm text-white text-xs font-semibold uppercase tracking-wide">
+          Default image — lister hasn't added photos yet
+        </div>
+      </div>
     );
   }
 
