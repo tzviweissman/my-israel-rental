@@ -1,6 +1,6 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { Layers, KeyRound, Home, Sparkles, Bell, Heart, MessageCircle } from 'lucide-react';
+import { Layers, KeyRound, Home, Sparkles, Bell, Heart, MessageCircle, CalendarClock } from 'lucide-react';
 import { DOCUMENT_SERVICES_ENABLED } from '../../config/features';
 
 /**
@@ -50,6 +50,17 @@ const DashboardTabs = ({ activeTab, setActiveTab, role, unreadMessages = 0 }) =>
           >
             <Layers size={14} />
             {t('dashboard.bulkManager')}
+          </button>
+        )}
+
+        {isOwnerLike && (
+          <button
+            onClick={() => setActiveTab('availability')}
+            className={`${cls(activeTab === 'availability')} flex items-center justify-center gap-1.5`}
+            data-testid="tab-availability"
+          >
+            <CalendarClock size={14} />
+            Availability
           </button>
         )}
 
