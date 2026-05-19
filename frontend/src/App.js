@@ -18,6 +18,7 @@ import Home from './pages/Home';
 import Properties from './pages/Properties';
 import PropertyDetail from './pages/PropertyDetail';
 import SubleaseDetail from './pages/SubleaseDetail';
+import MergePreview from './pages/_preview/MergePreview';
 import Auth from './pages/Auth';
 import Dashboard from './pages/Dashboard';
 import AdminDashboard from './pages/AdminDashboard';
@@ -110,6 +111,7 @@ function App() {
             <Route path="/properties/:type" element={<Properties />} />
             <Route path="/property/:id" element={<PropertyDetail />} />
             <Route path="/sublease/:id" element={<SubleaseDetail />} />
+            <Route path="/preview/merge/:layout" element={<MergePreview />} />
             <Route path="/auth/:mode" element={<Auth />} />
             <Route path="/dashboard" element={user ? <Dashboard /> : <Navigate to="/auth/login" />} />
             <Route path="/admin" element={user?.role === 'admin' ? <AdminDashboard /> : <Navigate to="/" />} />
