@@ -304,10 +304,8 @@ const BookingSidebar = ({
   onBook, onChat,
 }) => {
   const { t } = useTranslation();
-  const longTermLocked = !sublease && property.rental_type === 'long-term';
 
   const onCheckInClick = () => {
-    if (!sublease && property.rental_type === 'long-term') return;
     // If a complete range is set, clear both on calendar-open so the next
     // two clicks pick a brand-new range cleanly. (react-day-picker's
     // mode="range" otherwise no-ops or shrinks the existing range when
@@ -358,12 +356,7 @@ const BookingSidebar = ({
             <button
               type="button"
               onClick={onCheckInClick}
-              disabled={longTermLocked}
-              className={`flex items-center gap-2 px-3 py-2.5 rounded-lg border text-sm text-left transition-colors ${
-                longTermLocked
-                  ? 'border-gray-200 bg-gray-50 cursor-not-allowed'
-                  : 'border-[#E5E5E5] hover:border-black/30'
-              }`}
+              className="flex items-center gap-2 px-3 py-2.5 rounded-lg border border-[#E5E5E5] text-sm text-left hover:border-black/30 transition-colors"
               data-testid="booking-start-date"
             >
               <CalendarIcon size={14} className="text-gray-400 flex-shrink-0" />
