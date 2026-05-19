@@ -240,6 +240,16 @@ const Properties = () => {
     });
   };
 
+  // Live-refresh results as the user tweaks filters (debounced 300ms) so
+  // the "Show N places" button text stays accurate. The Apply button is now
+  // really just "close panel" — but the count it shows always matches what
+  // the user will get when they close it. No more "28 places → 0 results".
+  useEffect(() => {
+    const id = setTimeout(() => fetchProperties(), 300);
+    return () => clearTimeout(id);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [filters, priceCurrency, dateRange]);
+
   const handleFilterChange = (key, value) => {
     setFilters(prev => ({ ...prev, [key]: value }));
   };
