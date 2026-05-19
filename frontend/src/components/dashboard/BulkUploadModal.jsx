@@ -125,6 +125,29 @@ const BulkUploadModal = ({ isOpen, onClose, onDone, API, token }) => {
         if (value === 'vacation') next.monthly_price = '';
         else next.nightly_price = '';
       }
+      // Israeli convention: long-term rentals' agent fee equals one month's
+      // rent. Auto-fill the agent fee whenever the user types a monthly price
+      // on a long-term row — but only if they haven't manually set the fee
+      // themselves (treat blank or untouched 'no' as untouched).
+      if (key === 'monthly_price' && next.rental_type === 'long-term') {
+        const userTouchedFee =
+          next.has_agent_fee === 'yes' && next.agent_fee_price !== ''
+            && Number(next.agent_fee_price) !== Number(r.monthly_price);
+        if (!userTouchedFee && value !== '') {
+          next.has_agent_fee = 'yes';
+          next.agent_fee_price = value;
+          next.agent_fee_currency = next.currency || 'ILS';
+        }
+      }
+      // Same idea when the user switches rental_type → long-term after
+      // already typing a monthly price.
+      if (key === 'rental_type' && value === 'long-term' && next.monthly_price) {
+        if (next.has_agent_fee !== 'yes' || !next.agent_fee_price) {
+          next.has_agent_fee = 'yes';
+          next.agent_fee_price = next.monthly_price;
+          next.agent_fee_currency = next.currency || 'ILS';
+        }
+      }
       return next;
     }));
     if (rowErrors[i]) setRowErrors(prev => { const n = { ...prev }; delete n[i]; return n; });
