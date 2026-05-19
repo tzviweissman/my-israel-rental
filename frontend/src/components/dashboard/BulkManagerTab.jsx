@@ -6,7 +6,8 @@ import {
   Search, Layers, Image as ImageIcon, X, Undo2, Filter, Star,
 } from 'lucide-react';
 
-import { LOCATION_OPTIONS } from '../../constants/locations';
+// LOCATION_OPTIONS removed — area dropdown is now built from the
+// manager's own properties (see optgroup builder below).
 import { RENTAL_TYPES } from '../../constants/propertyEnums';
 import BulkEditModal from './BulkEditModal';
 import BulkPhotosModal from './BulkPhotosModal';
@@ -132,6 +133,9 @@ const BulkManagerTab = ({ properties, onRefresh, API, token }) => {
             >
               {RT_FILTERS.map(o => <option key={o.v} value={o.v}>{o.label}</option>)}
             </select>
+            {/* Area dropdown — scoped to the manager's own listings so they
+                never see Israel-wide options that yield zero matches. Areas
+                are extracted from each property and sorted by city group. */}
             <select
               value={areaFilter}
               onChange={(e) => setAreaFilter(e.target.value)}
@@ -139,13 +143,28 @@ const BulkManagerTab = ({ properties, onRefresh, API, token }) => {
               data-testid="bulk-area-filter"
             >
               <option value="">{t('bulk.allAreas')}</option>
-              {LOCATION_OPTIONS.map(g => (
-                <optgroup key={g.city} label={g.city}>
-                  {g.neighborhoods.map(n => (
-                    <option key={`${g.city}-${n}`} value={`${g.city} - ${n}`}>{n}</option>
-                  ))}
-                </optgroup>
-              ))}
+              {(() => {
+                // Group areas by their "City -" prefix so the dropdown
+                // mirrors the LOCATION_OPTIONS optgroup layout. Areas
+                // without a recognizable prefix go under "Other".
+                const buckets = {};
+                for (const a of [...new Set(properties.map(p => p.area).filter(Boolean))]) {
+                  const [city, ...rest] = a.split(' - ');
+                  const groupKey = rest.length ? city : 'Other';
+                  const label = rest.length ? rest.join(' - ') : a;
+                  if (!buckets[groupKey]) buckets[groupKey] = [];
+                  buckets[groupKey].push({ value: a, label });
+                }
+                const groups = Object.entries(buckets).sort(([a], [b]) => a.localeCompare(b));
+                for (const [, items] of groups) items.sort((a, b) => a.label.localeCompare(b.label));
+                return groups.map(([city, items]) => (
+                  <optgroup key={city} label={city}>
+                    {items.map(({ value, label }) => (
+                      <option key={value} value={value}>{label}</option>
+                    ))}
+                  </optgroup>
+                ));
+              })()}
             </select>
           </div>
           <div className="flex items-center gap-2">
