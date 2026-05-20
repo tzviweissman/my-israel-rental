@@ -166,9 +166,71 @@ const OptionToggle = () => {
   );
 };
 
+// Tiny calendar visualization — renders a single month grid with booked
+// days highlighted. Used inside the expanded property card so the lister
+// sees the booked-date pattern at a glance.
+const MiniCalendar = ({ year, month, bookings }) => {
+  const firstOfMonth = new Date(year, month, 1);
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  const startOffset = firstOfMonth.getDay(); // 0 = Sun
+  const monthLabel = firstOfMonth.toLocaleString('en-US', { month: 'short', year: 'numeric' });
+
+  const isBookedOn = (day) => {
+    const d = new Date(year, month, day);
+    for (const b of bookings) {
+      const bs = new Date(b.start);
+      const be = new Date(b.end);
+      if (d >= bs && d <= be) return b.status;
+    }
+    return null;
+  };
+
+  const cells = [];
+  for (let i = 0; i < startOffset; i++) cells.push(null);
+  for (let d = 1; d <= daysInMonth; d++) cells.push(d);
+
+  const colorFor = (s) => s === 'confirmed' ? COLORS.green : s === 'pending' ? COLORS.blue : null;
+
+  return (
+    <div className="bg-white rounded-lg border border-gray-200 p-2">
+      <div className="text-[11px] font-semibold text-gray-700 mb-1 text-center">{monthLabel}</div>
+      <div className="grid grid-cols-7 gap-0.5 text-[9px] text-gray-400 text-center mb-0.5">
+        {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map((d, i) => <div key={i}>{d}</div>)}
+      </div>
+      <div className="grid grid-cols-7 gap-0.5">
+        {cells.map((day, i) => {
+          if (day == null) return <div key={i} />;
+          const status = isBookedOn(day);
+          const bg = colorFor(status);
+          return (
+            <div
+              key={i}
+              className="aspect-square flex items-center justify-center text-[9px] rounded transition-colors"
+              style={{
+                backgroundColor: bg ? `${bg}` : 'transparent',
+                color: bg ? '#fff' : '#6B7280',
+                fontWeight: bg ? 600 : 400,
+              }}
+              title={status ? `${status} booking` : undefined}
+            >
+              {day}
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+};
+
 // ─── Option B: Stacked / Expandable ─────────────────────────────────────
 const OptionStacked = () => {
   const [open, setOpen] = useState(new Set(['p1']));
+  // Pin the visual to May-Jul 2026 so the mock bookings actually line up.
+  const VISIBLE_MONTHS = [
+    { year: 2026, month: 4 },   // May
+    { year: 2026, month: 5 },   // June
+    { year: 2026, month: 6 },   // July
+  ];
   return (
     <div className="max-w-5xl mx-auto p-6">
       <h1 className="text-2xl font-bold mb-1">My Bookings</h1>
@@ -186,9 +248,7 @@ const OptionStacked = () => {
                 </div>
                 <div className="flex-1 min-w-0">
                   <h3 className="font-semibold text-gray-800 mb-0.5">{p.title}</h3>
-                  <p className="text-xs text-gray-500 mb-2"><MapPin size={11} className="inline" /> {p.area} · <Bed size={11} className="inline" /> {p.bedrooms}bd · {p.bookings.length} booking{p.bookings.length !== 1 ? 's' : ''}</p>
-                  <OccupancyBar pct={p.occupancy} />
-                  <p className="text-[11px] text-gray-500 mt-1">{p.booked_days} of 90 days booked</p>
+                  <p className="text-xs text-gray-500"><MapPin size={11} className="inline" /> {p.area} · <Bed size={11} className="inline" /> {p.bedrooms}bd · {p.bookings.length} booking{p.bookings.length !== 1 ? 's' : ''}</p>
                 </div>
                 <div className="text-right shrink-0">
                   <StatusBadge status={p.status} />
@@ -199,10 +259,35 @@ const OptionStacked = () => {
                 <ChevronRight size={18} className={`text-gray-400 shrink-0 transition-transform ${isOpen ? 'rotate-90' : ''}`} />
               </button>
               {isOpen && (
-                <div className="border-t border-gray-100 px-4 py-3 bg-gray-50/60 space-y-2">
-                  {p.bookings.length === 0
-                    ? <p className="text-sm text-gray-500 text-center py-2">No bookings yet — open to take new reservations.</p>
-                    : p.bookings.map(b => <BookingChip key={b.id} b={b} />)}
+                <div className="border-t border-gray-100 px-4 py-3 bg-gray-50/60 space-y-3">
+                  {p.bookings.length === 0 ? (
+                    <p className="text-sm text-gray-500 text-center py-2">No bookings yet — open to take new reservations.</p>
+                  ) : (
+                    <>
+                      <div className="space-y-2">
+                        {p.bookings.map(b => <BookingChip key={b.id} b={b} />)}
+                      </div>
+                      <div>
+                        <div className="flex items-center justify-between mb-1.5">
+                          <p className="text-[11px] font-semibold uppercase tracking-wide text-gray-500">Booked dates</p>
+                          <div className="flex items-center gap-2 text-[10px]">
+                            <span className="inline-flex items-center gap-1"><span className="w-2.5 h-2.5 rounded" style={{ background: COLORS.green }} />Confirmed</span>
+                            <span className="inline-flex items-center gap-1"><span className="w-2.5 h-2.5 rounded" style={{ background: COLORS.blue }} />Pending</span>
+                          </div>
+                        </div>
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                          {VISIBLE_MONTHS.map(m => (
+                            <MiniCalendar
+                              key={`${m.year}-${m.month}`}
+                              year={m.year}
+                              month={m.month}
+                              bookings={p.bookings}
+                            />
+                          ))}
+                        </div>
+                      </div>
+                    </>
+                  )}
                 </div>
               )}
             </div>
