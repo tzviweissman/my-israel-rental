@@ -12,8 +12,8 @@ import React, { useState } from 'react';
 import { useParams } from 'react-router-dom';
 import {
   Calendar as CalendarIcon, Home, MapPin, Clock, CheckCircle2,
-  FileSignature, FileText, FileCheck, Download, XCircle, ChevronRight,
-  Bed, MessageCircle,
+  FileSignature, FileText, FileCheck, Download, XCircle,
+  ChevronRight, ChevronLeft, Bed, MessageCircle,
 } from 'lucide-react';
 
 const COLORS = {
@@ -291,27 +291,18 @@ const MiniCalendar = ({ year, month, bookings }) => {
           if (isTurnover) {
             const outColor = colorFor(outgoing.status);
             const inColor = colorFor(incoming.status);
+            // Split the cell vertically (out on left, in on right) with a
+            // thick white middle bar. Works even when both bookings are the
+            // same color — the bright white separator + dark outline make
+            // the handover unmistakable.
             return (
               <Cell key={i}>
-                {/* Two triangles meeting along a diagonal — outgoing top-left, incoming bottom-right */}
-                <div
-                  className="absolute inset-0"
-                  style={{ background: outColor, clipPath: 'polygon(0 0, 100% 0, 0 100%)' }}
-                  title={`Check-out: ${outgoing.renter}`}
-                />
-                <div
-                  className="absolute inset-0"
-                  style={{ background: inColor, clipPath: 'polygon(100% 0, 100% 100%, 0 100%)' }}
-                  title={`Check-in: ${incoming.renter}`}
-                />
-                {/* White diagonal separator line */}
-                <div
-                  className="absolute inset-0"
-                  style={{
-                    background: 'linear-gradient(to top right, transparent calc(50% - 1px), #fff calc(50% - 1px), #fff calc(50% + 1px), transparent calc(50% + 1px))'
-                  }}
-                />
-                <span className="relative text-white text-[9px] font-bold">{day}</span>
+                <div className="absolute inset-0 rounded ring-1 ring-gray-700/40">
+                  <div className="absolute inset-y-0 left-0 w-[44%]" style={{ background: outColor }} title={`Check-out: ${outgoing.renter}`} />
+                  <div className="absolute inset-y-0 right-0 w-[44%]" style={{ background: inColor }} title={`Check-in: ${incoming.renter}`} />
+                  <div className="absolute inset-y-0 left-[44%] w-[12%] bg-white" />
+                </div>
+                <span className="relative text-[8px] font-bold text-gray-700">{day}</span>
               </Cell>
             );
           }
@@ -342,12 +333,25 @@ const MiniCalendar = ({ year, month, bookings }) => {
 // ─── Option B: Stacked / Expandable ─────────────────────────────────────
 const OptionStacked = () => {
   const [open, setOpen] = useState(new Set(['p1']));
-  // Pin the visual to May-Jul 2026 so the mock bookings actually line up.
-  const VISIBLE_MONTHS = [
-    { year: 2026, month: 4 },   // May
-    { year: 2026, month: 5 },   // June
-    { year: 2026, month: 6 },   // July
-  ];
+  // Anchor month per property — defaults to current month. Lister can step
+  // ±1 month with arrow buttons. We render 3 months starting from anchor.
+  const [anchors, setAnchors] = useState({});
+  const getAnchor = (pid) => {
+    if (anchors[pid]) return anchors[pid];
+    // Default to May 2026 for the mock so handovers are immediately visible
+    return { year: 2026, month: 4 };
+  };
+  const shiftAnchor = (pid, delta) => {
+    setAnchors(prev => {
+      const cur = prev[pid] || { year: 2026, month: 4 };
+      const d = new Date(cur.year, cur.month + delta, 1);
+      return { ...prev, [pid]: { year: d.getFullYear(), month: d.getMonth() } };
+    });
+  };
+  const monthsFrom = (anchor) => Array.from({ length: 3 }, (_, i) => {
+    const d = new Date(anchor.year, anchor.month + i, 1);
+    return { year: d.getFullYear(), month: d.getMonth() };
+  });
   return (
     <div className="max-w-5xl mx-auto p-6">
       <h1 className="text-2xl font-bold mb-1">My Bookings</h1>
@@ -355,6 +359,8 @@ const OptionStacked = () => {
       <div className="space-y-3">
         {PROPERTIES.map(p => {
           const isOpen = open.has(p.id);
+          const anchor = getAnchor(p.id);
+          const months = monthsFrom(anchor);
           return (
             <div key={p.id} className="bg-white border border-gray-200 rounded-xl overflow-hidden">
               <button onClick={() => setOpen(prev => {
@@ -385,22 +391,42 @@ const OptionStacked = () => {
                         {p.bookings.map(b => <BookingChip key={b.id} b={b} />)}
                       </div>
                       <div>
-                        <div className="flex items-center justify-between mb-1.5">
+                        <div className="flex items-center justify-between mb-1.5 flex-wrap gap-2">
                           <p className="text-[11px] font-semibold uppercase tracking-wide text-gray-500">Booked dates</p>
-                          <div className="flex items-center gap-2 text-[10px]">
+                          <div className="flex items-center gap-2 text-[10px] flex-wrap">
                             <span className="inline-flex items-center gap-1"><span className="w-2.5 h-2.5 rounded" style={{ background: COLORS.green }} />Confirmed</span>
                             <span className="inline-flex items-center gap-1"><span className="w-2.5 h-2.5 rounded" style={{ background: COLORS.blue }} />Pending</span>
                             <span className="inline-flex items-center gap-1">
-                              <span className="w-2.5 h-2.5 rounded relative overflow-hidden">
-                                <span className="absolute inset-0" style={{ background: COLORS.green, clipPath: 'polygon(0 0, 100% 0, 0 100%)' }} />
-                                <span className="absolute inset-0" style={{ background: COLORS.blue, clipPath: 'polygon(100% 0, 100% 100%, 0 100%)' }} />
+                              <span className="w-3 h-2.5 rounded relative overflow-hidden border border-gray-400">
+                                <span className="absolute inset-y-0 left-0 w-[44%]" style={{ background: COLORS.green }} />
+                                <span className="absolute inset-y-0 right-0 w-[44%]" style={{ background: COLORS.green }} />
+                                <span className="absolute inset-y-0 left-[44%] w-[12%] bg-white" />
                               </span>
                               Handover day
                             </span>
                           </div>
                         </div>
+                        <div className="flex items-center justify-between mb-2">
+                          <button
+                            onClick={() => shiftAnchor(p.id, -1)}
+                            className="p-1.5 rounded-md hover:bg-white border border-gray-200 transition-colors inline-flex items-center gap-1 text-xs font-medium text-gray-600"
+                          >
+                            <ChevronLeft size={14} />Prev
+                          </button>
+                          <span className="text-xs text-gray-500">
+                            {new Date(months[0].year, months[0].month, 1).toLocaleString('en-US', { month: 'short', year: 'numeric' })}
+                            {' — '}
+                            {new Date(months[2].year, months[2].month, 1).toLocaleString('en-US', { month: 'short', year: 'numeric' })}
+                          </span>
+                          <button
+                            onClick={() => shiftAnchor(p.id, 1)}
+                            className="p-1.5 rounded-md hover:bg-white border border-gray-200 transition-colors inline-flex items-center gap-1 text-xs font-medium text-gray-600"
+                          >
+                            Next<ChevronRight size={14} />
+                          </button>
+                        </div>
                         <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
-                          {VISIBLE_MONTHS.map(m => (
+                          {months.map(m => (
                             <MiniCalendar
                               key={`${m.year}-${m.month}`}
                               year={m.year}
