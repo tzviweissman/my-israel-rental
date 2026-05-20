@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 
 /**
  * Renders a single month grid with booked days highlighted, including
@@ -8,12 +9,24 @@ import React from 'react';
  *
  * `bookings` is an array of `{ id, start_date, end_date, status, renter_name }`.
  */
-const STATUS_COLOR = { confirmed: '#16A34A', pending: '#0EA5E9' };
+const STATUS_COLOR = {
+  confirmed: '#16A34A',
+  pending: '#0EA5E9',
+  cancellation_requested: '#F59E0B',
+};
 
-const colorFor = (status) => STATUS_COLOR[status] || null;
+const colorFor = (status) => STATUS_COLOR[status] || '#9CA3AF';
+
+// Build YYYY-MM-DD from local-time components so we don't slip into the
+// previous day for users east of UTC (Israel is UTC+2/+3).
+const localIso = (year, month, day) => {
+  const m = String(month + 1).padStart(2, '0');
+  const d = String(day).padStart(2, '0');
+  return `${year}-${m}-${d}`;
+};
 
 const dayInfo = (year, month, day, bookings) => {
-  const d = new Date(year, month, day).toISOString().slice(0, 10);
+  const d = localIso(year, month, day);
   let outgoing = null;
   let incoming = null;
   let middle = null;
@@ -32,11 +45,16 @@ const Cell = ({ children }) => (
 );
 
 const MiniCalendar = ({ year, month, bookings = [] }) => {
+  const { i18n } = useTranslation();
   const firstOfMonth = new Date(year, month, 1);
   const daysInMonth = new Date(year, month + 1, 0).getDate();
   const startOffset = firstOfMonth.getDay();
-  const monthLabel = firstOfMonth.toLocaleString('en-US', { month: 'short', year: 'numeric' });
-  const todayIso = new Date().toISOString().slice(0, 10);
+  const locale = i18n.language === 'he' ? 'he-IL' : undefined;
+  const monthLabel = firstOfMonth.toLocaleString(locale, { month: 'short', year: 'numeric' });
+  const todayIso = (() => {
+    const t = new Date();
+    return localIso(t.getFullYear(), t.getMonth(), t.getDate());
+  })();
 
   const cells = [];
   for (let i = 0; i < startOffset; i++) cells.push(null);
@@ -53,7 +71,7 @@ const MiniCalendar = ({ year, month, bookings = [] }) => {
           if (day == null) return <div key={i} />;
           const { outgoing, incoming, middle } = dayInfo(year, month, day, bookings);
           const isTurnover = outgoing && incoming;
-          const dayIso = new Date(year, month, day).toISOString().slice(0, 10);
+          const dayIso = localIso(year, month, day);
           const isToday = dayIso === todayIso;
           const todayRing = isToday ? 'ring-2 ring-[#D4AF37]' : '';
 

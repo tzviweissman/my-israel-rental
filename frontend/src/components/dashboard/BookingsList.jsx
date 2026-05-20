@@ -342,7 +342,11 @@ const RenterBookingsList = ({ bookings, user, API, actions }) => {
 
       {bookings.length > 0 && isFiltering && (
         <p className="text-xs text-gray-500 mb-3" data-testid="bookings-result-count">
-          {filtered.length} {filtered.length === 1 ? 'booking' : 'bookings'} found
+          {filtered.length}{' '}
+          {filtered.length === 1
+            ? t('dashboard.booking', 'booking')
+            : t('dashboard.bookings', 'bookings')}{' '}
+          {t('dashboard.found', 'found')}
         </p>
       )}
 
@@ -350,13 +354,15 @@ const RenterBookingsList = ({ bookings, user, API, actions }) => {
         <div className="bg-white rounded-2xl border border-gray-200 p-12 text-center">
           {isFiltering ? (
             <>
-              <p className="text-gray-500 mb-2">No bookings match your filter</p>
+              <p className="text-gray-500 mb-2">
+                {t('dashboard.noBookingsMatchFilter', 'No bookings match your filter')}
+              </p>
               <button onClick={clearAll} className="text-[#1E6A6A] hover:underline text-sm" data-testid="bookings-empty-clear">
-                Clear filters
+                {t('dashboard.clearFilters', 'Clear filters')}
               </button>
             </>
           ) : (
-            <p className="text-gray-500">No bookings yet</p>
+            <p className="text-gray-500">{t('dashboard.noBookings', 'No bookings yet')}</p>
           )}
         </div>
       ) : (

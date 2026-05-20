@@ -545,6 +545,16 @@ Build a bilingual (English/Hebrew) rental website named MyIsraelRental.com with 
   - Wired into the 5 highest-volume image render points: `PropertyCard.jsx` (grid cards, 600px), `Home.js` featured grid (600px), `ManagerPage.js` property grid (600px), `dashboard/PropertyList.jsx` owner grid (480px), `SavedSearchesTab.jsx` match thumbnails (400px with srcset), and `ImageGallery.jsx` property detail hero (1200px with srcset) + thumbnail strip (160px).
   - **Multiplicative bandwidth win verified end-to-end**: 2400×1600 JPG source (60 KB) → 206-byte WebP at full-res → **54-byte WebP at 600px** (74% additional reduction on top of WebP). Real listing photos typically drop 80-95% vs original.
   - 8/8 pytest cases pass (`tests/test_cloudinary_upload.py`): 4 new tests cover image transform injection, video q_auto-only, idempotency, and transform-aware public_id parsing. Frontend lint clean across all 7 edited files.
+- [x] **Merged Bookings + Availability tab** (2026-05-20):
+  - Per the user's approved Option B (Stacked) mockup, the dashboard's standalone "Availability" tab is gone; "My Bookings" is now the single source of truth for lister-side reservation management.
+  - **Owners/managers** see a stacked list of expandable property cards. Each card shows: cover thumbnail, area + bedroom count + total booking count, status pill (Available now / Booked upcoming / Currently booked) + next-available date. Expanding reveals one `BookingChip` per booking with role-aware action buttons (pending → red "Cancel booking"; confirmed → orange outlined "Request cancellation"; cancellation_requested → green Approve + red Deny) plus a 3-month mini-calendar with prev/next month arrows and Airbnb-style handover-day vertical white-split visualization (so back-to-back same-color bookings are still distinguishable).
+  - **Renters** keep the existing flat `BookingRow` list — the stacked view only makes sense for listers with multiple properties.
+  - Sublessors (role=renter who own a sublease) keep the flat list with lister-side actions (`ownsBookingAsLister` branch in `BookingRow`).
+  - A "Trips I've booked" section appears below the stacked properties for any owner who has also booked someone else's place.
+  - Calendar dates use a TZ-safe local `YYYY-MM-DD` formatter (not `toISOString().slice(0,10)`) so Israel users don't get off-by-one. Month labels respect the user's `i18nextLng` locale.
+  - New files: `components/dashboard/MiniCalendar.jsx`, `components/dashboard/BookingChip.jsx`. Deleted: `pages/_preview/MergePreview.jsx`, `components/dashboard/AvailabilityTab.jsx`, and the `/preview/merge/:layout` route in `App.js`. `BookingsList.jsx` rewritten role-aware.
+  - Backend reuses existing `GET /api/owner/availability` endpoint (no schema changes).
+  - **Tested**: 5/5 backend pytest + 9/9 frontend Playwright = 14/14 green (iteration_21.json). Verified: availability gone, stacked view renders for owner with correct status badges, 3 mini-calendars per expanded card, prev/next arrows shift the month range, all 4 booking-status action variants render correctly, cancel modal opens & dismisses cleanly, renter still sees the flat list, `/preview/merge/stacked` 404s.
 
 ## Test Credentials
 See /app/memory/test_credentials.md
