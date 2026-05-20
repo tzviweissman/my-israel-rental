@@ -16,7 +16,6 @@ import PropertyList from '../components/dashboard/PropertyList';
 import AddPropertyModal from '../components/dashboard/AddPropertyModal';
 import BulkUploadModal from '../components/dashboard/BulkUploadModal';
 import BulkManagerTab from '../components/dashboard/BulkManagerTab';
-import AvailabilityTab from '../components/dashboard/AvailabilityTab';
 import MessagesTab from '../components/dashboard/MessagesTab';
 import ManagerHeader from '../components/dashboard/ManagerHeader';
 import ShareLinkRow from '../components/dashboard/ShareLinkRow';
@@ -289,10 +288,6 @@ const Dashboard = () => {
             API={API}
             token={token}
           />
-        )}
-
-        {activeTab === 'availability' && isOwnerLike && (
-          <AvailabilityTab API={API} token={token} />
         )}
 
         {activeTab === 'bookings' && (

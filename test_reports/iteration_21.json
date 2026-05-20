@@ -1,0 +1,53 @@
+{
+  "summary": "Full e2e validation of the merged Availability + My Bookings tab. All 5 backend pytest cases pass (owner_availability owner OK, renter 403, unauth, /preview/merge/stacked route removed, /api/bookings sanity). All 9 frontend assertions pass on owner@test.com and renter@test.com.",
+  "backend_issues": { "critical": [], "minor": [] },
+  "frontend_issues": { "ui_bugs": [], "integration_issues": [], "design_issues": [] },
+  "tested_flows": {
+    "OWNER tab-availability removed": "PASS (data-testid tab-availability absent)",
+    "OWNER expected tabs (properties/bulk-manager/bookings/messages/liked/settings) present": "PASS — all 6 OK",
+    "OWNER properties-stacked + 6 property cards render": "PASS (6 property-card-toggle-* elements)",
+    "OWNER properties-search filters list": "PASS — 'zzznomatchxyz' → 0 cards",
+    "OWNER expand card → 3 mini-calendars": "PASS (mini-calendar count = 3)",
+    "OWNER calendar-prev / calendar-next / calendar-range present": "PASS",
+    "OWNER calendar-next shifts forward 1 month": "PASS — 'May 2026 — Jul 2026' → 'Jun 2026 — Aug 2026'",
+    "OWNER calendar-prev (2x) shifts back 2 months": "PASS — → 'Apr 2026 — Jun 2026'",
+    "OWNER booking chips with all action variants": "PASS — 8 booking-row chips, 3 cancel-booking, 2 request-cancel, 1 approve-cancel, 1 deny-cancel, 8 booking-message",
+    "OWNER cancel modal opens & closes via Escape": "PASS (modal mounted with role=dialog and dismissed cleanly)",
+    "RENTER stacked view NOT rendered": "PASS — properties-stacked absent",
+    "RENTER flat BookingRow list + filters + search": "PASS — 88 booking-row entries, bookings-status-filters + bookings-search work, 'zzznomatch' filters to 0",
+    "ROUTE /preview/merge/stacked removed": "PASS — no MergePreview/Stacked Preview marker in body; falls into SPA wrapper",
+    "BACKEND GET /api/owner/availability (owner)": "PASS — returns {properties, total} with all 10 required per-property fields; status ∈ {available, upcoming, booked}",
+    "BACKEND GET /api/owner/availability (renter)": "PASS — 403",
+    "BACKEND GET /api/owner/availability unauthenticated": "PASS — 401",
+    "BACKEND GET /api/bookings (owner sanity)": "PASS"
+  },
+  "code_review_observations": [
+    "BookingsList.jsx is now ~620 lines and contains four logical components (PropertyAvailabilityCard, RenterBookingsList, OwnerStackedView, BookingsList shell). Consider splitting PropertyAvailabilityCard and OwnerStackedView into their own files for maintainability (approaches the 700-line threshold).",
+    "OwnerStackedView has a duplicated fetchAvailability effect: useEffect(...) on mount AND a second useEffect on bookings.length, plus a wrapped handleUpdate that is defined but never actually injected into the actions hook. This causes one extra fetch on first render. The dev comment block (lines ~416-429, ~460-463) acknowledges the workaround — clean this up.",
+    "MiniCalendar.dayInfo iterates ALL bookings for every cell of every month — O(days × bookings) per render. With 8 bookings/3 months it's fine, but if a power-host has hundreds of bookings this gets expensive. Pre-index bookings by ISO date once per month.",
+    "MiniCalendar uses hardcoded English month label ('en-US' locale on line 38) which inconsistently mixes with Hebrew UI when i18nextLng=he. Use the user's locale or i18n month names.",
+    "MiniCalendar.dayInfo uses new Date(year, month, day).toISOString().slice(0,10) — this is timezone-sensitive. For users east of UTC the ISO date can roll back to the previous day. Prefer constructing the YYYY-MM-DD string manually.",
+    "STATUS_COLOR in MiniCalendar only covers 'confirmed' and 'pending'; cancellation_requested is filtered IN to liveBookings (BookingsList.jsx:86) but colorFor returns null, so the cell renders with empty bg + 'undefined' style. Add a color for cancellation_requested (e.g., amber) or exclude it from liveBookings.",
+    "RenterBookingsList still has 'No bookings match your filter' / 'No bookings yet' as hardcoded English strings — should use t() like the rest of the file.",
+    "OwnerStackedView filters bookingsByProp by b.owner_id === user.id but the OwnerStackedView shows availability for ALL properties the user owns — including ones with 0 bookings. This is fine, but the 'myTrips' section will not appear for an owner who also rents elsewhere unless they have non-self-listed bookings. Verified in the UI."
+  ],
+  "test_report_links": [
+    "/app/backend/tests/test_owner_availability.py",
+    "/app/test_reports/pytest/owner_availability_results.xml"
+  ],
+  "action_items": [
+    "(MINOR) Add a color entry to MiniCalendar.STATUS_COLOR for 'cancellation_requested' (or exclude it from liveBookings in BookingsList.jsx). Currently those days render with no background.",
+    "(MINOR) i18n MiniCalendar month label and the two remaining hardcoded English strings in RenterBookingsList ('No bookings match your filter', 'X booking(s) found').",
+    "(MINOR) Replace toISOString().slice(0,10) in MiniCalendar.dayInfo with a TZ-safe local YYYY-MM-DD formatter to avoid off-by-one on positive UTC offsets.",
+    "(OPTIONAL) Extract PropertyAvailabilityCard + OwnerStackedView from BookingsList.jsx into their own files; the file is ~620 lines and growing.",
+    "(OPTIONAL) Remove the redundant second useEffect on bookings.length and the now-unused handleUpdate wrapper in OwnerStackedView."
+  ],
+  "updated_files": [ "/app/backend/tests/test_owner_availability.py (new)" ],
+  "success_rate": { "backend": "100% — 5/5 pytest pass", "frontend": "100% — all assertions pass" },
+  "test_credentials": "owner@test.com / Test1234! and renter@test.com / Test1234! per /app/memory/test_credentials.md. Login response uses key 'token' (NOT 'access_token').",
+  "seed_data_creation": "None. Used the data the main agent relinked: owner@test.com → 6 properties, 8 bookings on property 7927f009-44e9-4e0f-9d06-21d50ee0cf43 ('ss', Jerusalem - American Colony) covering all 4 statuses (3 pending, 2 confirmed, 1 cancellation_requested → both approve+deny rendered, 1 cancelled, 1 completed). Renter sees 88 booking-row entries (all/pending=28/confirmed=24/cancellation_requested=6/cancelled=30).",
+  "retest_needed": false,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "Backend regression: pytest /app/backend/tests/test_owner_availability.py. Login API at POST /api/auth/login returns {token, user} (not access_token). Only one of the 6 owner properties has bookings in the relinked test data; iterate property-bookings-count-{id} to find one with non-zero before testing expand+chip flows. Hebrew is the default UI language for both test accounts — set localStorage.i18nextLng='en' before nav to keep selectors stable. /preview/merge/stacked route is removed but the SPA renders the global Header/Footer chrome before falling through — assert on absence of 'MergePreview' marker, not on URL redirect or 404.",
+  "rca of the issue": "N/A — no functional defects found. Only minor cosmetic/i18n/code-quality items listed under action_items."
+}
