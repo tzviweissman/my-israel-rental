@@ -24,11 +24,16 @@ const COLORS = {
 // ─── Mock data ────────────────────────────────────────────────────────────
 const PROPERTIES = [
   { id: 'p1', title: 'Sunny 2BR · Rechavia', area: 'Jerusalem - Rechavia', bedrooms: 2, rental_type: 'vacation',
-    status: 'booked', current_until: '2026-05-24', next_available: '2026-05-24', occupancy: 67,
+    status: 'booked', current_until: '2026-05-24', next_available: '2026-06-08', occupancy: 67,
     booked_days: 60, vacant_days: 30,
     bookings: [
+      // Back-to-back vacation bookings — Sarah's checkout (May 24) is
+      // also David's check-in (May 24). Then David checks out May 31 and
+      // Miriam checks in the same day. Three handovers in two weeks.
       { id: 'b1', renter: 'Sarah Cohen', start: '2026-05-17', end: '2026-05-24', status: 'confirmed', contract_signed: true, cancellation_requested: false, is_current: true },
-      { id: 'b2', renter: 'David Levi', start: '2026-06-10', end: '2026-06-25', status: 'pending', contract_signed: false, cancellation_requested: false, is_current: false },
+      { id: 'b1b', renter: 'David Levi', start: '2026-05-24', end: '2026-05-31', status: 'confirmed', contract_signed: true, cancellation_requested: false, is_current: false },
+      { id: 'b1c', renter: 'Miriam Frank', start: '2026-05-31', end: '2026-06-07', status: 'pending', contract_signed: false, cancellation_requested: false, is_current: false },
+      { id: 'b2', renter: 'Yael Greenberg', start: '2026-06-10', end: '2026-06-25', status: 'pending', contract_signed: false, cancellation_requested: false, is_current: false },
     ] },
   { id: 'p2', title: '3BR Family · Sanhedria', area: 'Jerusalem - Sanhedria Murchevet', bedrooms: 3, rental_type: 'long-term',
     status: 'upcoming', current_until: null, next_available: '2026-06-01', occupancy: 33,
@@ -131,9 +136,17 @@ const BookingChip = ({ b }) => (
             <XCircle size={12} />Deny cancel
           </button>
         </>
-      ) : (
+      ) : b.status === 'pending' ? (
+        // Direct cancel only allowed while booking is still pending.
+        // Once accepted (confirmed), the owner must use a cancellation
+        // request — protects renters from being kicked out unilaterally
+        // after they've planned the trip / signed the contract.
         <button className="px-2.5 py-1.5 rounded-md text-[11px] font-semibold text-white bg-red-500 inline-flex items-center gap-1 ml-auto">
           <XCircle size={12} />Cancel booking
+        </button>
+      ) : (
+        <button className="px-2.5 py-1.5 rounded-md text-[11px] font-semibold text-orange-700 border border-orange-500 hover:bg-orange-50 inline-flex items-center gap-1 ml-auto">
+          <XCircle size={12} />Request cancellation
         </button>
       )}
     </div>
@@ -221,27 +234,39 @@ const OptionToggle = () => {
 // Tiny calendar visualization — renders a single month grid with booked
 // days highlighted. Used inside the expanded property card so the lister
 // sees the booked-date pattern at a glance.
+//
+// Back-to-back vacation handovers are the highlight here: when the same
+// day is the checkout of one booking AND the check-in of another, the
+// cell is rendered as a diagonal split (top-left = outgoing booking
+// color, bottom-right = incoming booking color) with a tiny "→" handover
+// marker. This is the Airbnb / Booking.com convention and instantly
+// tells the lister "you have a cleaning turnover this day".
 const MiniCalendar = ({ year, month, bookings }) => {
   const firstOfMonth = new Date(year, month, 1);
   const daysInMonth = new Date(year, month + 1, 0).getDate();
-  const startOffset = firstOfMonth.getDay(); // 0 = Sun
+  const startOffset = firstOfMonth.getDay();
   const monthLabel = firstOfMonth.toLocaleString('en-US', { month: 'short', year: 'numeric' });
 
-  const isBookedOn = (day) => {
-    const d = new Date(year, month, day);
+  const colorFor = (s) => s === 'confirmed' ? COLORS.green : s === 'pending' ? COLORS.blue : null;
+
+  // Returns { outgoing, incoming } for a given day. If both are present
+  // it's a turnover; if only one, render solid; if neither, vacant.
+  const dayInfo = (day) => {
+    const d = new Date(year, month, day).toISOString().slice(0, 10);
+    let outgoing = null;   // booking whose end_date is this day
+    let incoming = null;   // booking whose start_date is this day
+    let middle = null;     // booking that fully covers this day (start < d < end)
     for (const b of bookings) {
-      const bs = new Date(b.start);
-      const be = new Date(b.end);
-      if (d >= bs && d <= be) return b.status;
+      if (b.end === d) outgoing = b;
+      if (b.start === d) incoming = b;
+      if (b.start < d && d < b.end) middle = b;
     }
-    return null;
+    return { outgoing, incoming, middle };
   };
 
   const cells = [];
   for (let i = 0; i < startOffset; i++) cells.push(null);
   for (let d = 1; d <= daysInMonth; d++) cells.push(d);
-
-  const colorFor = (s) => s === 'confirmed' ? COLORS.green : s === 'pending' ? COLORS.blue : null;
 
   return (
     <div className="bg-white rounded-lg border border-gray-200 p-2">
@@ -252,21 +277,61 @@ const MiniCalendar = ({ year, month, bookings }) => {
       <div className="grid grid-cols-7 gap-0.5">
         {cells.map((day, i) => {
           if (day == null) return <div key={i} />;
-          const status = isBookedOn(day);
-          const bg = colorFor(status);
-          return (
-            <div
-              key={i}
-              className="aspect-square flex items-center justify-center text-[9px] rounded transition-colors"
-              style={{
-                backgroundColor: bg ? `${bg}` : 'transparent',
-                color: bg ? '#fff' : '#6B7280',
-                fontWeight: bg ? 600 : 400,
-              }}
-              title={status ? `${status} booking` : undefined}
-            >
-              {day}
+          const { outgoing, incoming, middle } = dayInfo(day);
+          const isTurnover = outgoing && incoming;
+
+          // Helper: build the cell. We use absolutely-positioned diagonal
+          // halves on turnover days so checkout/checkin are both visible.
+          const Cell = ({ children }) => (
+            <div className="aspect-square relative rounded overflow-hidden flex items-center justify-center text-[9px] font-medium">
+              {children}
             </div>
+          );
+
+          if (isTurnover) {
+            const outColor = colorFor(outgoing.status);
+            const inColor = colorFor(incoming.status);
+            return (
+              <Cell key={i}>
+                {/* Two triangles meeting along a diagonal — outgoing top-left, incoming bottom-right */}
+                <div
+                  className="absolute inset-0"
+                  style={{ background: outColor, clipPath: 'polygon(0 0, 100% 0, 0 100%)' }}
+                  title={`Check-out: ${outgoing.renter}`}
+                />
+                <div
+                  className="absolute inset-0"
+                  style={{ background: inColor, clipPath: 'polygon(100% 0, 100% 100%, 0 100%)' }}
+                  title={`Check-in: ${incoming.renter}`}
+                />
+                {/* White diagonal separator line */}
+                <div
+                  className="absolute inset-0"
+                  style={{
+                    background: 'linear-gradient(to top right, transparent calc(50% - 1px), #fff calc(50% - 1px), #fff calc(50% + 1px), transparent calc(50% + 1px))'
+                  }}
+                />
+                <span className="relative text-white text-[9px] font-bold">{day}</span>
+              </Cell>
+            );
+          }
+
+          if (middle || outgoing || incoming) {
+            const b = middle || outgoing || incoming;
+            const bg = colorFor(b.status);
+            return (
+              <Cell key={i}>
+                <div className="absolute inset-0 rounded" style={{ background: bg }} />
+                <span className="relative text-white font-semibold">{day}</span>
+              </Cell>
+            );
+          }
+
+          // Vacant day
+          return (
+            <Cell key={i}>
+              <span className="text-gray-500">{day}</span>
+            </Cell>
           );
         })}
       </div>
@@ -325,6 +390,13 @@ const OptionStacked = () => {
                           <div className="flex items-center gap-2 text-[10px]">
                             <span className="inline-flex items-center gap-1"><span className="w-2.5 h-2.5 rounded" style={{ background: COLORS.green }} />Confirmed</span>
                             <span className="inline-flex items-center gap-1"><span className="w-2.5 h-2.5 rounded" style={{ background: COLORS.blue }} />Pending</span>
+                            <span className="inline-flex items-center gap-1">
+                              <span className="w-2.5 h-2.5 rounded relative overflow-hidden">
+                                <span className="absolute inset-0" style={{ background: COLORS.green, clipPath: 'polygon(0 0, 100% 0, 0 100%)' }} />
+                                <span className="absolute inset-0" style={{ background: COLORS.blue, clipPath: 'polygon(100% 0, 100% 100%, 0 100%)' }} />
+                              </span>
+                              Handover day
+                            </span>
                           </div>
                         </div>
                         <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
