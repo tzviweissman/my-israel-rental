@@ -12,7 +12,8 @@ import React, { useState } from 'react';
 import { useParams } from 'react-router-dom';
 import {
   Calendar as CalendarIcon, Home, MapPin, Clock, CheckCircle2,
-  FileSignature, XCircle, ChevronRight, Bed, MessageCircle,
+  FileSignature, FileText, FileCheck, Download, XCircle, ChevronRight,
+  Bed, MessageCircle,
 } from 'lucide-react';
 
 const COLORS = {
@@ -72,18 +73,69 @@ const OccupancyBar = ({ pct }) => (
 );
 
 const BookingChip = ({ b }) => (
-  <div className="flex items-center justify-between bg-white border border-gray-200 rounded-lg px-3 py-2 text-sm">
-    <div className="min-w-0 flex-1">
-      <div className="font-medium text-gray-700">{b.renter}</div>
-      <div className="text-xs text-gray-500">{b.start} → {b.end}</div>
+  <div className="bg-white border border-gray-200 rounded-lg px-3 py-2.5">
+    <div className="flex items-start justify-between gap-2">
+      <div className="min-w-0 flex-1">
+        <div className="flex items-center gap-2 flex-wrap mb-0.5">
+          <span className="font-medium text-gray-800 text-sm">{b.renter}</span>
+          {b.is_current && <span className="px-2 py-0.5 rounded text-[10px] font-bold" style={{ backgroundColor: '#FEF3C7', color: '#A16207' }}>IN PROGRESS</span>}
+          <span className="px-2 py-0.5 rounded text-[10px] font-semibold uppercase"
+            style={{
+              backgroundColor: b.status === 'confirmed' ? '#DCFCE7' : '#E0F2FE',
+              color: b.status === 'confirmed' ? COLORS.green : COLORS.blue,
+            }}>{b.status}</span>
+        </div>
+        <div className="text-xs text-gray-600">{b.start} → {b.end}</div>
+        {b.cancellation_requested && (
+          <div className="mt-1.5 inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-semibold" style={{ backgroundColor: '#FEE2E2', color: COLORS.red }}>
+            <XCircle size={10} />Renter requested cancellation
+          </div>
+        )}
+      </div>
     </div>
-    <div className="flex items-center gap-1.5 flex-wrap shrink-0">
-      {b.contract_signed
-        ? <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-semibold" style={{ backgroundColor: '#DCFCE7', color: COLORS.green }}><FileSignature size={10} />Signed</span>
-        : <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-semibold" style={{ backgroundColor: '#FEF3C7', color: COLORS.amber }}><FileSignature size={10} />Contract due</span>}
-      {b.cancellation_requested && <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-semibold" style={{ backgroundColor: '#FEE2E2', color: COLORS.red }}><XCircle size={10} />Cancel request</span>}
-      {b.is_current && <span className="px-2 py-0.5 rounded text-[10px] font-bold" style={{ backgroundColor: '#FEF3C7', color: '#A16207' }}>IN PROGRESS</span>}
-      <ChevronRight size={14} className="text-gray-300" />
+
+    {/* Contextual action buttons — exactly mirror the existing BookingRow logic */}
+    <div className="flex flex-wrap gap-1.5 mt-2.5 pt-2.5 border-t border-gray-100">
+      <button className="px-2.5 py-1.5 rounded-md text-[11px] font-semibold text-[#1E6A6A] border border-[#1E6A6A] hover:bg-[#1E6A6A]/5 inline-flex items-center gap-1">
+        <MessageCircle size={12} />Message
+      </button>
+
+      {!b.contract_signed && (
+        <button className="px-2.5 py-1.5 rounded-md text-[11px] font-semibold text-white inline-flex items-center gap-1" style={{ backgroundColor: COLORS.gold }}>
+          <FileText size={12} />Upload / sign contract
+        </button>
+      )}
+      {b.contract_signed && (
+        <>
+          <button className="px-2.5 py-1.5 rounded-md text-[11px] font-semibold text-white bg-green-500 inline-flex items-center gap-1">
+            <FileCheck size={12} />View contract
+          </button>
+          <button className="px-2.5 py-1.5 rounded-md text-[11px] font-semibold text-white bg-[#1E6A6A] inline-flex items-center gap-1">
+            <Download size={12} />Download
+          </button>
+        </>
+      )}
+
+      {b.status === 'pending' && !b.cancellation_requested && (
+        <button className="px-2.5 py-1.5 rounded-md text-[11px] font-semibold text-white inline-flex items-center gap-1" style={{ backgroundColor: COLORS.teal }}>
+          <CheckCircle2 size={12} />Accept booking
+        </button>
+      )}
+
+      {b.cancellation_requested ? (
+        <>
+          <button className="px-2.5 py-1.5 rounded-md text-[11px] font-semibold text-white bg-green-500 inline-flex items-center gap-1">
+            <CheckCircle2 size={12} />Approve cancel
+          </button>
+          <button className="px-2.5 py-1.5 rounded-md text-[11px] font-semibold text-white bg-red-500 inline-flex items-center gap-1">
+            <XCircle size={12} />Deny cancel
+          </button>
+        </>
+      ) : (
+        <button className="px-2.5 py-1.5 rounded-md text-[11px] font-semibold text-white bg-red-500 inline-flex items-center gap-1 ml-auto">
+          <XCircle size={12} />Cancel booking
+        </button>
+      )}
     </div>
   </div>
 );
