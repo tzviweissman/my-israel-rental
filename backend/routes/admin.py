@@ -370,6 +370,60 @@ async def toggle_property_admin_managed(
     }
 
 
+class BulkFeaturedBody(BaseModel):
+    property_ids: list[str]
+    featured: bool
+
+
+@api_router.post("/admin/properties/bulk-featured", response_model=AdminToggleStatusResponse)
+async def bulk_set_featured(
+    body: BulkFeaturedBody,
+    payload: dict = Depends(verify_token),
+) -> dict:
+    """Super-admin: add or remove many properties from the Featured grid
+    in a single round-trip. Idempotent — adding an already-featured
+    property (or removing a non-featured one) is a no-op.
+    """
+    if payload['role'] != 'admin':
+        raise HTTPException(status_code=403, detail="Admin access required")
+    if not body.property_ids:
+        raise HTTPException(status_code=400, detail="No properties provided")
+
+    # Validate every id exists so we don't silently inject ghost ids
+    existing = await db.properties.find(
+        {"id": {"$in": body.property_ids}}, {"_id": 0, "id": 1}
+    ).to_list(len(body.property_ids))
+    valid_ids = {p["id"] for p in existing}
+    missing = [pid for pid in body.property_ids if pid not in valid_ids]
+    if missing:
+        raise HTTPException(status_code=404, detail=f"Properties not found: {missing}")
+
+    settings = await db.site_settings.find_one({"key": "global"}, {"_id": 0, "featured_property_ids": 1}) or {}
+    current = list(settings.get("featured_property_ids") or [])
+    if body.featured:
+        for pid in body.property_ids:
+            if pid not in current:
+                current.append(pid)
+        verb = "added to"
+    else:
+        current = [pid for pid in current if pid not in set(body.property_ids)]
+        verb = "removed from"
+
+    await db.site_settings.update_one(
+        {"key": "global"},
+        {"$set": {
+            "featured_property_ids": current,
+            "updated_at": datetime.now(UTC).isoformat(),
+        }},
+        upsert=True,
+    )
+    await publish("invalidate", {"prefixes": ["/api/admin/properties", "/api/admin/settings"]})
+    return {
+        "message": f"{len(body.property_ids)} properties {verb} featured listings",
+        "status": "featured" if body.featured else "unfeatured",
+    }
+
+
 @api_router.put("/admin/properties/{property_id}/featured", response_model=AdminToggleStatusResponse)
 async def toggle_property_featured(
     property_id: str,

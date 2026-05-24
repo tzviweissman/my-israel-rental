@@ -78,6 +78,30 @@ export const ListingsTab = ({ token, onStatsChange }) => {
     } catch (e) { toast.error('Failed to update featured status'); }
   };
 
+  /**
+   * Bulk add or remove the currently-selected properties from the
+   * homepage Featured grid in a single round-trip.
+   */
+  const bulkSetFeatured = async (featured) => {
+    const ids = Array.from(selectedPropIds);
+    if (ids.length === 0) {
+      toast.error('No properties selected');
+      return;
+    }
+    try {
+      const res = await axios.post(
+        `${API}/admin/properties/bulk-featured`,
+        { property_ids: ids, featured },
+        { headers },
+      );
+      toast.success(res.data.message);
+      setSelectedPropIds(new Set());
+      fetchProperties();
+    } catch (e) {
+      toast.error(e.response?.data?.detail || 'Failed to update featured status');
+    }
+  };
+
   const deleteProperty = (propertyId) => {
     toast.custom((tid) => (
       <div className="bg-white rounded-xl shadow-xl border border-gray-200 p-4 w-80">
@@ -235,10 +259,24 @@ export const ListingsTab = ({ token, onStatsChange }) => {
           </button>
         </div>
         {selectedPropIds.size > 0 && (
-          <div className="flex items-center gap-2 ml-auto">
+          <div className="flex items-center gap-2 ml-auto flex-wrap">
             <span className="text-xs font-medium text-gray-700" data-testid="selected-count">
               {t('admin.selectedCount', { count: selectedPropIds.size })}
             </span>
+            <button
+              onClick={() => bulkSetFeatured(true)}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-amber-500 text-white text-xs font-semibold hover:bg-amber-600"
+              data-testid="bulk-feature-btn"
+            >
+              <Star size={14} fill="currentColor" /> {t('admin.featureSelected', 'Feature selected')}
+            </button>
+            <button
+              onClick={() => bulkSetFeatured(false)}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white border border-amber-500 text-amber-600 text-xs font-semibold hover:bg-amber-50"
+              data-testid="bulk-unfeature-btn"
+            >
+              <Star size={14} /> {t('admin.unfeatureSelected', 'Unfeature selected')}
+            </button>
             <button
               onClick={() => openMarkBookedModal({ mode: 'bulk' })}
               className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-black text-white text-xs font-semibold hover:bg-gray-800"
@@ -405,7 +443,29 @@ export const ListingsTab = ({ token, onStatsChange }) => {
         {/* Mobile card list — visible on small screens only.
             Each card shows all the same info + actions in a stacked layout
             so admins can manage listings without a sideways-scrolling table. */}
-        <div className="md:hidden divide-y divide-[#E5E5E5]">
+        <div className="md:hidden">
+          {filteredProperties.length > 0 && (
+            <div className="flex items-center justify-between px-3 py-2 bg-gray-50 border-b border-[#E5E5E5] text-xs font-medium text-gray-600">
+              <label className="inline-flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  checked={filteredProperties.every(p => selectedPropIds.has(p.id))}
+                  onChange={e => {
+                    if (e.target.checked) setSelectedPropIds(new Set(filteredProperties.map(p => p.id)));
+                    else setSelectedPropIds(new Set());
+                  }}
+                  data-testid="select-all-listings-mobile"
+                />
+                {t('admin.selectAllVisible', 'Select all visible')}
+              </label>
+              {selectedPropIds.size > 0 && (
+                <span className="text-[#1E6A6A] font-semibold" data-testid="selected-count-mobile">
+                  {t('admin.selectedCount', { count: selectedPropIds.size })}
+                </span>
+              )}
+            </div>
+          )}
+          <div className="divide-y divide-[#E5E5E5]">
           {filteredProperties.map(p => (
             <div key={p.id} className="p-3" data-testid={`listing-card-${p.id}`}>
               <div className="flex items-start gap-2 mb-2">
@@ -506,6 +566,7 @@ export const ListingsTab = ({ token, onStatsChange }) => {
               </div>
             </div>
           ))}
+          </div>
         </div>
 
         {filteredProperties.length === 0 && (
