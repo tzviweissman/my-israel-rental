@@ -5,7 +5,7 @@ import axios from 'axios';
 import { toast } from 'sonner';
 import {
   Trash2, ToggleLeft, ToggleRight, Search,
-  CalendarX, CalendarCheck, Lock, Briefcase,
+  CalendarX, CalendarCheck, Lock, Briefcase, Star,
 } from 'lucide-react';
 import { API } from '../../App';
 import { useApiSWR } from '../../hooks/useApiSWR';
@@ -62,6 +62,20 @@ export const ListingsTab = ({ token, onStatsChange }) => {
       toast.success(res.data.message);
       fetchProperties();
     } catch (e) { toast.error('Failed to update managed status'); }
+  };
+
+  /**
+   * Add/remove a property from the homepage Featured grid. Hits the new
+   * `/admin/properties/{id}/featured` endpoint which mutates the global
+   * `site_settings.featured_property_ids` array atomically — no more
+   * pasting IDs into a textarea on the Settings tab.
+   */
+  const toggleFeatured = async (propertyId) => {
+    try {
+      const res = await axios.put(`${API}/admin/properties/${propertyId}/featured`, {}, { headers });
+      toast.success(res.data.message);
+      fetchProperties();
+    } catch (e) { toast.error('Failed to update featured status'); }
   };
 
   const deleteProperty = (propertyId) => {
@@ -244,7 +258,8 @@ export const ListingsTab = ({ token, onStatsChange }) => {
       </div>
 
       <div className="bg-white rounded-xl border border-[#E5E5E5] overflow-hidden">
-        <table className="w-full">
+        {/* Desktop table — hidden on small screens */}
+        <table className="w-full hidden md:table">
           <thead className="bg-gray-50">
             <tr>
               <th className="px-3 py-3 w-8">
@@ -284,6 +299,15 @@ export const ListingsTab = ({ token, onStatsChange }) => {
                 <td className="px-4 py-3 font-medium text-sm">
                   <div className="flex items-center gap-2 flex-wrap">
                     <span>{p.title}</span>
+                    {p.is_featured && (
+                      <span
+                        className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-amber-100 text-amber-800"
+                        title={t('admin.featuredOnHome', 'Featured on homepage')}
+                        data-testid={`featured-badge-${p.id}`}
+                      >
+                        <Star size={10} fill="currentColor" /> {t('admin.featured', 'Featured')}
+                      </span>
+                    )}
                     {p.managed_by_admin && (
                       <span
                         className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-[#1E6A6A]/10 text-[#1E6A6A]"
@@ -318,6 +342,14 @@ export const ListingsTab = ({ token, onStatsChange }) => {
                 </td>
                 <td className="px-4 py-3">
                   <div className="flex items-center gap-1">
+                    <button
+                      onClick={() => toggleFeatured(p.id)}
+                      className={`p-1.5 rounded transition-colors ${p.is_featured ? 'bg-amber-100 text-amber-600 hover:bg-amber-200' : 'hover:bg-gray-100 text-gray-400'}`}
+                      title={p.is_featured ? t('admin.removeFromFeatured', 'Remove from featured listings') : t('admin.addToFeatured', 'Add to featured listings')}
+                      data-testid={`toggle-featured-${p.id}`}
+                    >
+                      <Star size={16} fill={p.is_featured ? 'currentColor' : 'none'} />
+                    </button>
                     {p.admin_blocked_now ? (
                       <button
                         onClick={() => unmarkBooked(p)}
@@ -369,6 +401,113 @@ export const ListingsTab = ({ token, onStatsChange }) => {
             ))}
           </tbody>
         </table>
+
+        {/* Mobile card list — visible on small screens only.
+            Each card shows all the same info + actions in a stacked layout
+            so admins can manage listings without a sideways-scrolling table. */}
+        <div className="md:hidden divide-y divide-[#E5E5E5]">
+          {filteredProperties.map(p => (
+            <div key={p.id} className="p-3" data-testid={`listing-card-${p.id}`}>
+              <div className="flex items-start gap-2 mb-2">
+                <input
+                  type="checkbox"
+                  checked={selectedPropIds.has(p.id)}
+                  onChange={() => togglePropSelected(p.id)}
+                  className="mt-1 shrink-0"
+                  data-testid={`select-listing-mobile-${p.id}`}
+                />
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-1.5 flex-wrap">
+                    <p className="font-semibold text-sm break-words">{p.title || '—'}</p>
+                    <span className={`px-1.5 py-0.5 rounded-full text-[10px] font-medium ${p.status === 'active' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
+                      {p.status}
+                    </span>
+                  </div>
+                  <p className="text-xs text-gray-500 mt-0.5">{p.owner_name} · {p.area}</p>
+                  <p className="text-xs text-gray-700 mt-0.5">
+                    <span className="font-semibold">{p.currency === 'USD' ? '$' : '₪'}{p.monthly_price || p.nightly_price || 0}</span>
+                    <span className="text-gray-400"> · {p.rental_type}</span>
+                  </p>
+                  <div className="flex items-center gap-1 flex-wrap mt-1.5">
+                    {p.is_featured && (
+                      <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[9px] font-semibold bg-amber-100 text-amber-800">
+                        <Star size={9} fill="currentColor" /> {t('admin.featured', 'Featured')}
+                      </span>
+                    )}
+                    {p.managed_by_admin && (
+                      <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[9px] font-semibold bg-[#1E6A6A]/10 text-[#1E6A6A]">
+                        <Briefcase size={9} /> Managing
+                      </span>
+                    )}
+                    {p.admin_blocked_now && (
+                      <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[9px] font-semibold bg-amber-100 text-amber-800">
+                        <Lock size={9} /> {t('admin.adminBlocked')}
+                      </span>
+                    )}
+                  </div>
+                </div>
+              </div>
+              {/* Actions row — full-width grid so every button is reachable
+                  on a small screen without horizontal scroll. */}
+              <div className="grid grid-cols-5 gap-1 mt-2">
+                <button
+                  onClick={() => toggleFeatured(p.id)}
+                  className={`flex flex-col items-center justify-center gap-0.5 py-2 rounded text-[10px] font-medium transition-colors ${p.is_featured ? 'bg-amber-100 text-amber-700' : 'bg-gray-50 text-gray-500 hover:bg-gray-100'}`}
+                  data-testid={`toggle-featured-mobile-${p.id}`}
+                >
+                  <Star size={16} fill={p.is_featured ? 'currentColor' : 'none'} />
+                  {p.is_featured ? t('admin.unfeature', 'Unfeature') : t('admin.feature', 'Feature')}
+                </button>
+                {p.admin_blocked_now ? (
+                  <button
+                    onClick={() => unmarkBooked(p)}
+                    className="flex flex-col items-center justify-center gap-0.5 py-2 rounded text-[10px] font-medium bg-green-50 text-green-700 hover:bg-green-100"
+                    data-testid={`unmark-booked-mobile-${p.id}`}
+                  >
+                    <CalendarCheck size={16} />
+                    {t('admin.unblock', 'Unblock')}
+                  </button>
+                ) : (
+                  <button
+                    onClick={() => openMarkBookedModal({ mode: 'single', id: p.id })}
+                    className="flex flex-col items-center justify-center gap-0.5 py-2 rounded text-[10px] font-medium bg-amber-50 text-amber-700 hover:bg-amber-100"
+                    data-testid={`mark-booked-mobile-${p.id}`}
+                  >
+                    <CalendarX size={16} />
+                    {t('admin.block', 'Block')}
+                  </button>
+                )}
+                <button
+                  onClick={() => toggleAdminManaged(p.id)}
+                  className={`flex flex-col items-center justify-center gap-0.5 py-2 rounded text-[10px] font-medium ${p.managed_by_admin ? 'bg-[#1E6A6A]/10 text-[#1E6A6A]' : 'bg-gray-50 text-gray-500 hover:bg-gray-100'}`}
+                  data-testid={`toggle-managed-mobile-${p.id}`}
+                >
+                  <Briefcase size={16} />
+                  {p.managed_by_admin ? t('admin.unmanage', 'Unmanage') : t('admin.manage', 'Manage')}
+                </button>
+                <button
+                  onClick={() => togglePropertyStatus(p.id)}
+                  className="flex flex-col items-center justify-center gap-0.5 py-2 rounded text-[10px] font-medium bg-gray-50 text-gray-700 hover:bg-gray-100"
+                  data-testid={`toggle-property-mobile-${p.id}`}
+                >
+                  {p.status === 'active'
+                    ? <ToggleRight size={16} className="text-green-600" />
+                    : <ToggleLeft size={16} className="text-gray-400" />}
+                  {p.status === 'active' ? t('admin.deactivate') : t('admin.activate')}
+                </button>
+                <button
+                  onClick={() => deleteProperty(p.id)}
+                  className="flex flex-col items-center justify-center gap-0.5 py-2 rounded text-[10px] font-medium bg-red-50 text-red-600 hover:bg-red-100"
+                  data-testid={`delete-property-mobile-${p.id}`}
+                >
+                  <Trash2 size={14} />
+                  {t('admin.deleteAction', 'Delete')}
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+
         {filteredProperties.length === 0 && (
           <p className="text-center text-gray-400 py-8 text-sm">{t('admin.noListings')}</p>
         )}

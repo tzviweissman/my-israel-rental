@@ -307,6 +307,11 @@ async def get_all_properties_admin(payload: dict = Depends(verify_token)) -> lis
     async for block in db.admin_blocks.find({}, {"_id": 0}):
         blocks_by_prop.setdefault(block["property_id"], []).append(block)
 
+    # Fetch featured-property-ids set once; used to stamp `is_featured`
+    # on every row so the admin UI can show a ★ toggle inline.
+    settings = await db.site_settings.find_one({"key": "global"}, {"_id": 0, "featured_property_ids": 1})
+    featured_ids = set((settings or {}).get("featured_property_ids") or [])
+
     now_iso = datetime.now(UTC).isoformat()
 
     for prop in properties:
@@ -326,6 +331,7 @@ async def get_all_properties_admin(payload: dict = Depends(verify_token)) -> lis
         prop["admin_blocks"] = prop_blocks
         prop["admin_blocked_now"] = len(active_blocks) > 0
         prop["active_admin_block"] = active_blocks[0] if active_blocks else None
+        prop["is_featured"] = prop["id"] in featured_ids
 
     return properties
 
@@ -361,6 +367,47 @@ async def toggle_property_admin_managed(
     return {
         "message": "Managing this property" if new_value else "No longer managing",
         "status": "managed" if new_value else "unmanaged",
+    }
+
+
+@api_router.put("/admin/properties/{property_id}/featured", response_model=AdminToggleStatusResponse)
+async def toggle_property_featured(
+    property_id: str,
+    payload: dict = Depends(verify_token),
+) -> dict:
+    """Super-admin: add/remove a property from the homepage Featured grid.
+
+    Mutates `site_settings.featured_property_ids`. Idempotent in both
+    directions — clicking the toggle twice ends up at the same state.
+    Publishes cache-invalidation so admin dashboards refresh instantly.
+    """
+    if payload['role'] != 'admin':
+        raise HTTPException(status_code=403, detail="Admin access required")
+    prop = await db.properties.find_one({"id": property_id}, {"_id": 0, "id": 1})
+    if prop is None:
+        raise HTTPException(status_code=404, detail="Property not found")
+
+    settings = await db.site_settings.find_one({"key": "global"}, {"_id": 0, "featured_property_ids": 1}) or {}
+    current = list(settings.get("featured_property_ids") or [])
+    if property_id in current:
+        current.remove(property_id)
+        new_state = False
+    else:
+        current.append(property_id)
+        new_state = True
+
+    await db.site_settings.update_one(
+        {"key": "global"},
+        {"$set": {
+            "featured_property_ids": current,
+            "updated_at": datetime.now(UTC).isoformat(),
+        }},
+        upsert=True,
+    )
+    await publish("invalidate", {"prefixes": ["/api/admin/properties", "/api/admin/settings"]})
+    return {
+        "message": "Added to featured listings" if new_state else "Removed from featured listings",
+        "status": "featured" if new_state else "unfeatured",
     }
 
 
