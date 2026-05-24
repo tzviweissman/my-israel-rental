@@ -27,7 +27,7 @@ const resources = {
         noFeesDetail: 'Free for renters. Free for owners.'
       },
       property: {
-        reachOutForPictures: 'Reach out to lister for pictures',
+        messageListerForPictures: 'Message lister for pictures',
         bedrooms: 'Bedrooms',
         bathrooms: 'Bathrooms',
         area: 'Area',
@@ -624,7 +624,7 @@ const resources = {
         noFeesDetail: 'חינם לשוכרים. חינם לבעלי דירות.'
       },
       property: {
-        reachOutForPictures: 'פנו למשכיר לקבלת תמונות',
+        messageListerForPictures: 'שלח הודעה למשכיר לקבלת תמונות',
         bedrooms: 'חדרי שינה',
         bathrooms: 'חדרי רחצה',
         area: 'אזור',
