@@ -640,7 +640,7 @@ const AddPropertyModal = ({ isOpen, onClose, editingProperty, onSaved, API, toke
               type="number"
               value={propertyForm.minimum_booking_days}
               onChange={(e) => setPropertyForm({ ...propertyForm, minimum_booking_days: e.target.value })}
-              placeholder={propertyForm.rental_type === 'vacation' ? '7' : '12'}
+              placeholder={propertyForm.rental_type === 'vacation' ? 'e.g. 7' : 'e.g. 12'}
               className="w-full px-4 py-2 rounded-lg border border-[#E5E5E5] focus:outline-none focus:ring-2 focus:ring-[#1E6A6A]/50"
               min="1"
             />
