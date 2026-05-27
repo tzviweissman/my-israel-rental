@@ -382,7 +382,11 @@ const PropertyDetail = () => {
               <div className="bg-gray-50 border border-gray-200 p-3 rounded-xl mb-6">
                 <div className="flex items-center gap-2">
                   <CalendarIcon size={18} className="text-gray-600" />
-                  <span className="text-sm font-medium text-gray-700">{t('property.minimumStay')}</span>
+                  <span className="text-sm font-medium text-gray-700">
+                    {property.rental_type === 'vacation'
+                      ? t('property.minimumStayVacation', 'Minimum Booking Length:')
+                      : t('property.minimumStay')}
+                  </span>
                   <span className="text-sm font-bold text-gray-900">
                     {property.rental_type === 'vacation' 
                       ? `${property.minimum_booking_days} ${property.minimum_booking_days === 1 ? t('property.day') : t('property.days')}`

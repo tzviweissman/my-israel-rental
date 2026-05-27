@@ -629,11 +629,11 @@ const AddPropertyModal = ({ isOpen, onClose, editingProperty, onSaved, API, toke
             />
           )}
 
-          {/* Minimum Rental Period */}
+          {/* Minimum Rental Period (long/short-term) or Minimum Booking Length (vacation) */}
           <div>
             <label className="block text-sm font-medium mb-2">
               {propertyForm.rental_type === 'vacation'
-                ? 'Minimum Rental Period (Days)'
+                ? 'Minimum Booking Length (Days)'
                 : 'Minimum Rental Period (Months)'}
             </label>
             <input
