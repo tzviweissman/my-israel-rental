@@ -830,7 +830,7 @@ const PropertyRowCard = ({ index, row, error, onChange, onDuplicate, onRemove, A
         <div className="mt-3 pt-3 border-t border-gray-100 grid grid-cols-2 md:grid-cols-3 gap-3">
           <NumberInput label="Porches" value={row.porches} onChange={v => onChange('porches', v)} testid={`r${index}-porches`} />
           <NumberInput label="Porch sqm" value={row.porch_square_meters} onChange={v => onChange('porch_square_meters', v)} testid={`r${index}-porch_sqm`} />
-          <NumberInput label="Min booking days" value={row.minimum_booking_days} onChange={v => onChange('minimum_booking_days', v)} testid={`r${index}-min_days`} />
+          <NumberInput label="Min rental period" value={row.minimum_booking_days} onChange={v => onChange('minimum_booking_days', v)} testid={`r${index}-min_days`} />
           <Select label="Furniture" value={row.furniture_option} onChange={v => onChange('furniture_option', v)} options={FURNITURE_OPTIONS} testid={`r${index}-furniture`} />
           <Select label="Condition" value={row.condition} onChange={v => onChange('condition', v)} options={CONDITIONS} testid={`r${index}-condition`} />
           {(row.rental_type === 'vacation' || row.rental_type === 'short-term') && (
