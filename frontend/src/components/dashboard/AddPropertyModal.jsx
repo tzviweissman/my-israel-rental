@@ -773,6 +773,7 @@ const AddPropertyModal = ({ isOpen, onClose, editingProperty, onSaved, API, toke
                 >
                   <option value="no_furniture">{t('property.noFurniture')}</option>
                   <option value="furniture_package">{t('property.furniturePackage')}</option>
+                  <option value="partially_furnished">{t('property.partiallyFurnished', 'Partially furnished')}</option>
                   <option value="furniture_free">{t('property.furnitureFree')}</option>
                 </select>
               </div>

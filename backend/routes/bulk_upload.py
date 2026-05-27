@@ -539,7 +539,7 @@ Required fields (always emit):
 Optional (emit when source mentions them):
   - square_meters, porch_square_meters, porches, has_elevator, is_shabbat_elevator,
     is_tama, sukkah_compatible,
-    furniture_option (no_furniture | furniture_package | furniture_free),
+    furniture_option (no_furniture | furniture_package | partially_furnished | furniture_free),
     condition (renovated | partially_renovated | good),
     amenities (comma-separated string -- pick ONLY from this canonical list, exact spelling:
       "Central AC / Heating", "In-unit washer and dryer", "Dishwasher",
@@ -561,6 +561,7 @@ Important rules:
 - Hebrew month references (e.g. "ר"ח אייר" / "Rosh Chodesh Iyar") -> put the transliterated phrase into available_from as a string.
 - "Fully furnished" / "Furniture included" / "comes with furniture" -> furniture_option: "furniture_free".
   "Furniture package available" / "furniture for sale" -> furniture_option: "furniture_package".
+  "Partially furnished" / "semi-furnished" / "some furniture" / "few pieces" -> furniture_option: "partially_furnished".
   "Unfurnished" / "no furniture" -> furniture_option: "no_furniture".
 - "Renovated" / "after renovation" / "newly renovated" -> condition: "renovated".
   "Partially renovated" / "partial reno" -> condition: "partially_renovated".

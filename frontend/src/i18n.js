@@ -61,6 +61,7 @@ const resources = {
         furnitureOption: 'Furniture Option',
         noFurniture: 'No Furniture',
         furniturePackage: 'Furniture Package',
+        partiallyFurnished: 'Partially Furnished',
         furnitureFree: 'Furniture Free',
         agentFee: 'Agent Fee',
         ical: {
@@ -658,6 +659,7 @@ const resources = {
         furnitureOption: 'אפשרות ריהוט',
         noFurniture: 'ללא ריהוט',
         furniturePackage: 'חבילת ריהוט',
+        partiallyFurnished: 'מרוהט חלקית',
         furnitureFree: 'ריהוט חינם',
         agentFee: 'דמי תיווך',
         ical: {

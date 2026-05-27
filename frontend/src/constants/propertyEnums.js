@@ -25,6 +25,7 @@ export const CONDITIONS = [
 export const FURNITURE_OPTIONS = [
   { v: 'no_furniture', label: 'No furniture' },
   { v: 'furniture_package', label: 'Furniture package available' },
+  { v: 'partially_furnished', label: 'Partially furnished' },
   { v: 'furniture_free', label: 'Furniture included' },
 ];
 
