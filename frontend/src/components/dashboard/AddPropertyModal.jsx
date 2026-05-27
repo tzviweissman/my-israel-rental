@@ -159,7 +159,16 @@ const AddPropertyModal = ({ isOpen, onClose, editingProperty, onSaved, API, toke
           : 'night'
       );
     } else {
-      setPropertyForm(EMPTY_FORM);
+      // Default starting/available date to today on a fresh add. The user
+      // can override it via the calendar picker; this just removes a step
+      // for the common case of "list it now, available immediately".
+      const today = new Date();
+      const todayIso = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+      setPropertyForm({
+        ...EMPTY_FORM,
+        available_from: todayIso,
+        starting_date: todayIso,
+      });
       setUploadedFiles([]);
       setVacationPriceMode('night');
     }
