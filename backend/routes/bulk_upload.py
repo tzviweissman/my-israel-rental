@@ -102,7 +102,7 @@ _DEFAULTS = {
     "bathrooms": 1,
     "floor": 1,
     "porches": 0,
-    "condition": "good",
+    "condition": "renovated",
     "furniture_option": "no_furniture",
     "cancellation_policy": "flexible",
 }

@@ -193,7 +193,7 @@ class TestNormalizeRowPipeline:
         assert out["property_type"] == "apartment"
         assert out["bathrooms"] == 1
         assert out["floor"] == 1
-        assert out["condition"] == "good"
+        assert out["condition"] == "renovated"
         assert out["furniture_option"] == "no_furniture"
         assert out["cancellation_policy"] == "flexible"
 

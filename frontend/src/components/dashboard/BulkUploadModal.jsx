@@ -60,7 +60,7 @@ const blankProperty = () => ({
   cleaning_fee_price: '',
   cleaning_fee_currency: 'ILS',
   furniture_option: 'no_furniture',
-  condition: 'good',
+  condition: 'renovated',
   cancellation_policy: 'flexible',
   custom_cancellation_policy: '',
   amenities: [],
