@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import axios from 'axios';
 import { Edit, Eye, Trash2, Upload, FileText, CalendarSync, Link2, X, RefreshCw, Copy, Check, Sparkles, Image as ImageIcon, Loader2, CalendarCheck } from 'lucide-react';
 import { toast } from 'sonner';
-import { sizedImage } from '../../utils/cdnImage';
+import { getCoverImage } from '../../utils/coverImage';
 import DefaultImageBadge from '../property/DefaultImageBadge';
 
 /**
@@ -193,13 +193,11 @@ const PropertyList = ({ properties, bookings = [], onEdit, onRefresh, API, token
   };
 
   const propImage = (property) => {
-    const raw = property.images?.[0]
-      ? property.images[0].startsWith('/api')
-        ? `${API.replace('/api', '')}${property.images[0]}`
-        : property.images[0]
-      : 'https://images.pexels.com/photos/1669799/pexels-photo-1669799.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940';
-    return sizedImage(raw, 480);
+    const { url } = getCoverImage(property.images, 480, API, property.videos);
+    return url;
   };
+
+  const propIsDefault = (property) => getCoverImage(property.images, 480, API, property.videos).isDefault;
 
   // "NEW" badge on bulk-created listings, fades out after 24h so managers
   // can spot the ones they just uploaded without scrolling.
@@ -502,7 +500,7 @@ const PropertyList = ({ properties, bookings = [], onEdit, onRefresh, API, token
               className="h-48 bg-gray-200 relative"
               style={{ backgroundImage: `url(${propImage(property)})`, backgroundSize: 'cover', backgroundPosition: 'center' }}
             >
-              {(!property.images || property.images.length === 0) && (
+              {propIsDefault(property) && (
                 <DefaultImageBadge className="!top-3 !left-3" />
               )}
               {isFreshBulkUpload(property) && (

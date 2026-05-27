@@ -242,11 +242,11 @@ const ManagerPage = () => {
               data-testid={`manager-property-${property.id}`}
             >
               <div className="relative h-36 md:h-64 bg-gray-200" style={{
-                backgroundImage: `url(${getCoverImage(property.images, 600).url})`,
+                backgroundImage: `url(${getCoverImage(property.images, 600, '', property.videos).url})`,
                 backgroundSize: 'cover',
                 backgroundPosition: 'center'
               }}>
-                {getCoverImage(property.images).isDefault && <DefaultImageBadge />}
+                {getCoverImage(property.images, 600, '', property.videos).isDefault && <DefaultImageBadge />}
               </div>
               <div className="p-3 md:p-6">
                 <h3 className="text-sm md:text-xl font-bold mb-1 md:mb-2 line-clamp-1">{property.title}</h3>
