@@ -706,34 +706,24 @@ const AddPropertyModal = ({ isOpen, onClose, editingProperty, onSaved, API, toke
             {propertyForm.rental_type !== 'storage' && (
               <div>
                 <label className="block text-sm font-medium mb-2">{t('property.numberOfPorches')}</label>
-                <input
-                  type="number"
-                  value={propertyForm.porches}
+                <select
+                  value={typeof propertyForm.porches === 'number' ? propertyForm.porches : 0}
                   onChange={(e) => {
-                    // Preserve an empty string while the user is editing so
-                    // they can backspace away the "0" — otherwise React snaps
-                    // it back instantly. Final coercion to int happens at
-                    // submit (see propertyForm payload below).
-                    const raw = e.target.value;
-                    const parsed = raw === '' ? '' : parseInt(raw, 10);
-                    const safe = Number.isNaN(parsed) ? '' : parsed;
+                    const next = parseInt(e.target.value, 10);
                     setPropertyForm({
                       ...propertyForm,
-                      porches: safe,
-                      sukkah_compatible: typeof safe === 'number' && safe > 0
-                        ? propertyForm.sukkah_compatible
-                        : false,
+                      porches: next,
+                      sukkah_compatible: next > 0 ? propertyForm.sukkah_compatible : false,
                     });
                   }}
-                  onBlur={() => {
-                    if (propertyForm.porches === '' || propertyForm.porches == null) {
-                      setPropertyForm({ ...propertyForm, porches: 0 });
-                    }
-                  }}
-                  min="0"
                   className="w-full px-4 py-2 rounded-lg border border-[#E5E5E5] focus:outline-none focus:ring-2 focus:ring-[#1E6A6A]/50"
                   data-testid="property-porches-input"
-                />
+                >
+                  {[0, 1, 2, 3, 4, 5].map((n) => (
+                    <option key={n} value={n}>{n}</option>
+                  ))}
+                  <option value="6">6+</option>
+                </select>
                 {typeof propertyForm.porches === 'number' && propertyForm.porches > 0 && (
                   <>
                     <div className="ml-2 mt-2">
