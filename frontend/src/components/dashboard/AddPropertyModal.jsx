@@ -231,6 +231,17 @@ const AddPropertyModal = ({ isOpen, onClose, editingProperty, onSaved, API, toke
           {editingProperty && editingProperty.id ? t('dashboard.editProperty') : t('dashboard.addNewProperty')}
         </h2>
         <form onSubmit={handleSubmit} className="space-y-6">
+          {/* Photos/videos first so users see the most engaging step at the
+              top of the form, then fill in the remaining details below. */}
+          <MediaUploadSection
+            form={propertyForm}
+            setForm={setPropertyForm}
+            uploadedFiles={uploadedFiles}
+            setUploadedFiles={setUploadedFiles}
+            API={API}
+            token={token}
+          />
+
           {!editingProperty?.id && (
             <div
               className="p-4 rounded-xl bg-gradient-to-br from-[#1E6A6A]/5 to-[#D4AF37]/10 border border-[#1E6A6A]/20"
@@ -269,17 +280,6 @@ const AddPropertyModal = ({ isOpen, onClose, editingProperty, onSaved, API, toke
               </div>
             </div>
           )}
-
-          {/* Photos/videos first so users see the most engaging step at the
-              top of the form, then fill in the remaining details below. */}
-          <MediaUploadSection
-            form={propertyForm}
-            setForm={setPropertyForm}
-            uploadedFiles={uploadedFiles}
-            setUploadedFiles={setUploadedFiles}
-            API={API}
-            token={token}
-          />
 
           <div>
             <label className="block text-sm font-medium mb-2">Title</label>
