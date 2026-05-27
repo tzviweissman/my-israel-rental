@@ -336,12 +336,19 @@ async def commit_bulk(body: BulkCommitBody, payload: dict = Depends(verify_token
                 continue
             property_id = str(uuid.uuid4())
             image_filenames = normalized.pop("image_filenames", [])
+            # Per-row pre-uploaded media URLs (Cloudinary direct-upload from
+            # the bulk modal). Frontend lifts these from row["_media_images"] /
+            # row["_media_videos"]; backend stores them as the property's
+            # initial images/videos so users don't need to re-upload at the
+            # /bulk/images step.
+            preuploaded_images = [u for u in (row.get("_media_images") or []) if isinstance(u, str) and u]
+            preuploaded_videos = [u for u in (row.get("_media_videos") or []) if isinstance(u, str) and u]
             doc = PropertyCreate(**{k: v for k, v in normalized.items() if k != "image_filenames"}).model_dump()
             doc.update({
                 "id": property_id,
                 "owner_id": payload["user_id"],
-                "images": [],
-                "videos": [],
+                "images": preuploaded_images,
+                "videos": preuploaded_videos,
                 "created_at": datetime.now(UTC).isoformat(),
                 "status": "active",
                 "liked_by": [],

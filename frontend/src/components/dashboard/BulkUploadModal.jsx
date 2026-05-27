@@ -3,13 +3,15 @@ import axios from 'axios';
 import { toast } from 'sonner';
 import {
   X, Plus, Trash2, Image as ImageIcon, FileSpreadsheet, ArrowLeft,
-  CheckCircle2, AlertCircle, Sparkles, Download,
+  CheckCircle2, AlertCircle, Sparkles, Download, Loader2,
 } from 'lucide-react';
 import { LOCATION_OPTIONS } from '../../constants/locations';
 import {
   RENTAL_TYPES, PROPERTY_TYPES, CONDITIONS, FURNITURE_OPTIONS,
   CANCELLATION_POLICIES, AMENITY_OPTIONS,
 } from '../../constants/propertyEnums';
+import { uploadFilesFast } from '../../utils/fastUpload';
+import { sizedImage, videoPoster } from '../../utils/cdnImage';
 
 /**
  * Bulk-upload modal — friendly UX edition.
@@ -63,6 +65,12 @@ const blankProperty = () => ({
   custom_cancellation_policy: '',
   amenities: [],
   minimum_booking_days: '',
+  // Per-row pre-uploaded Cloudinary URLs. Local-only — stripped from
+  // the TSV payload sent to /parse, but re-merged into rows POSTed
+  // to /commit so each property keeps its own photos.
+  _media_images: [],
+  _media_videos: [],
+  _media_uploading: false,
 });
 
 const BulkUploadModal = ({ isOpen, onClose, onDone, API, token }) => {
@@ -169,8 +177,10 @@ const BulkUploadModal = ({ isOpen, onClose, onDone, API, token }) => {
     try {
       // Send the rows as TSV pasted text — the backend's /parse can read that
       // path without our needing a new endpoint. Strip the local `_id` (used
-      // only for React keys) so it never reaches the backend.
-      const headers = Object.keys(rows[0]).filter(h => h !== '_id');
+      // only for React keys) and the per-row media arrays (sent separately
+      // in the /commit payload) so they never reach the backend parser.
+      const LOCAL_ONLY = new Set(['_id', '_media_images', '_media_videos', '_media_uploading']);
+      const headers = Object.keys(rows[0]).filter(h => !LOCAL_ONLY.has(h));
       const tsv = [
         headers.join('\t'),
         ...rows.map(r => headers.map(h => {
@@ -205,7 +215,15 @@ const BulkUploadModal = ({ isOpen, onClose, onDone, API, token }) => {
 
       const commitRes = await axios.post(
         `${API}/properties/bulk/commit`,
-        { rows: parsed.rows.map(r => r.normalized) },
+        {
+          rows: parsed.rows.map((r, idx) => ({
+            ...r.normalized,
+            // Re-merge per-row media URLs that were stripped before /parse.
+            // `parsed.rows` mirrors the input order so we can match by index.
+            _media_images: rows[idx]?._media_images || [],
+            _media_videos: rows[idx]?._media_videos || [],
+          })),
+        },
         authHeaders,
       );
       setCommitResult(commitRes.data);
@@ -482,6 +500,8 @@ const BulkUploadModal = ({ isOpen, onClose, onDone, API, token }) => {
                   onChange={(k, v) => updateRow(i, k, v)}
                   onDuplicate={() => duplicateRow(i)}
                   onRemove={() => removeRow(i)}
+                  API={API}
+                  token={token}
                 />
               ))}
             </div>
@@ -595,9 +615,43 @@ const BulkUploadModal = ({ isOpen, onClose, onDone, API, token }) => {
 // ===========================================================================
 // Property card — used inside the visual editor.
 // ===========================================================================
-const PropertyRowCard = ({ index, row, error, onChange, onDuplicate, onRemove }) => {
+const PropertyRowCard = ({ index, row, error, onChange, onDuplicate, onRemove, API, token }) => {
   const [showMore, setShowMore] = useState(false);
+  const [uploading, setUploading] = useState(false);
   const isPerNight = row.rental_type === 'vacation';
+
+  const mediaImages = row._media_images || [];
+  const mediaVideos = row._media_videos || [];
+  const hasMedia = mediaImages.length + mediaVideos.length > 0;
+
+  const onPickFiles = async (e) => {
+    const files = Array.from(e.target.files || []);
+    e.target.value = '';
+    if (!files.length) return;
+    setUploading(true);
+    try {
+      const results = await uploadFilesFast(files, API, token);
+      const newImgs = [...mediaImages];
+      const newVids = [...mediaVideos];
+      for (const r of results) {
+        if (r.error) {
+          toast.error(`${r.original_name || r.filename}: ${r.error}`);
+          continue;
+        }
+        if (r.file_type === 'video') newVids.push(r.url);
+        else newImgs.push(r.url);
+      }
+      onChange('_media_images', newImgs);
+      onChange('_media_videos', newVids);
+    } catch (err) {
+      toast.error('Upload failed');
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const removeImage = (url) => onChange('_media_images', mediaImages.filter(u => u !== url));
+  const removeVideo = (url) => onChange('_media_videos', mediaVideos.filter(u => u !== url));
 
   return (
     <div
@@ -624,6 +678,69 @@ const PropertyRowCard = ({ index, row, error, onChange, onDuplicate, onRemove })
             <Trash2 size={14} />
           </button>
         </div>
+      </div>
+
+      {/* Per-property media uploader. Sits right at the top of the card so
+          a user pasting N properties via smart paste can walk down the
+          list and drop photos into each one without leaving the modal. */}
+      <div className="mb-3">
+        <label
+          className={`flex items-center gap-2 px-3 py-2.5 rounded-lg border-2 border-dashed cursor-pointer transition-colors ${uploading ? 'border-gray-200 bg-gray-50 text-gray-400 cursor-wait' : 'border-[#1E6A6A]/30 bg-[#1E6A6A]/5 hover:bg-[#1E6A6A]/10 text-[#1E6A6A]'}`}
+          data-testid={`row-media-upload-${index}`}
+        >
+          {uploading ? <Loader2 size={16} className="animate-spin" /> : <ImageIcon size={16} />}
+          <span className="text-xs font-semibold">
+            {uploading
+              ? 'Uploading…'
+              : hasMedia
+                ? `Add more photos / videos (${mediaImages.length + mediaVideos.length} attached)`
+                : 'Add photos / videos for this property'}
+          </span>
+          <input
+            type="file"
+            accept="image/*,video/*"
+            multiple
+            className="hidden"
+            disabled={uploading}
+            onChange={onPickFiles}
+            data-testid={`row-media-input-${index}`}
+          />
+        </label>
+        {hasMedia && (
+          <div className="grid grid-cols-4 md:grid-cols-6 gap-1.5 mt-2" data-testid={`row-media-grid-${index}`}>
+            {mediaImages.map((url) => (
+              <div key={url} className="relative aspect-square rounded-md overflow-hidden bg-gray-100 group">
+                <img src={sizedImage(url, 160)} alt="" className="w-full h-full object-cover" loading="lazy" />
+                <button
+                  type="button"
+                  onClick={() => removeImage(url)}
+                  className="absolute top-0.5 right-0.5 w-5 h-5 rounded-full bg-black/60 text-white opacity-0 group-hover:opacity-100 transition-opacity inline-flex items-center justify-center"
+                  title="Remove photo"
+                  data-testid={`remove-row-media-${index}-${mediaImages.indexOf(url)}`}
+                >
+                  <X size={12} />
+                </button>
+              </div>
+            ))}
+            {mediaVideos.map((url) => (
+              <div key={url} className="relative aspect-square rounded-md overflow-hidden bg-gray-900 group">
+                {videoPoster(url, 160)
+                  ? <img src={videoPoster(url, 160)} alt="" className="w-full h-full object-cover opacity-80" loading="lazy" />
+                  : <div className="absolute inset-0 flex items-center justify-center text-white text-[10px]">Video</div>}
+                <span className="absolute bottom-0.5 left-0.5 bg-black/70 text-white text-[9px] px-1.5 py-0.5 rounded">▶ Video</span>
+                <button
+                  type="button"
+                  onClick={() => removeVideo(url)}
+                  className="absolute top-0.5 right-0.5 w-5 h-5 rounded-full bg-black/60 text-white opacity-0 group-hover:opacity-100 transition-opacity inline-flex items-center justify-center"
+                  title="Remove video"
+                  data-testid={`remove-row-video-${index}-${mediaVideos.indexOf(url)}`}
+                >
+                  <X size={12} />
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
 
       {error && (
