@@ -269,6 +269,18 @@ const AddPropertyModal = ({ isOpen, onClose, editingProperty, onSaved, API, toke
               </div>
             </div>
           )}
+
+          {/* Photos/videos first so users see the most engaging step at the
+              top of the form, then fill in the remaining details below. */}
+          <MediaUploadSection
+            form={propertyForm}
+            setForm={setPropertyForm}
+            uploadedFiles={uploadedFiles}
+            setUploadedFiles={setUploadedFiles}
+            API={API}
+            token={token}
+          />
+
           <div>
             <label className="block text-sm font-medium mb-2">Title</label>
             <input
@@ -940,15 +952,6 @@ const AddPropertyModal = ({ isOpen, onClose, editingProperty, onSaved, API, toke
               </div>
             </div>
           )}
-
-          <MediaUploadSection
-            form={propertyForm}
-            setForm={setPropertyForm}
-            uploadedFiles={uploadedFiles}
-            setUploadedFiles={setUploadedFiles}
-            API={API}
-            token={token}
-          />
 
           <div className="flex gap-4">
             <button type="submit" className="flex-1 primary-btn" data-testid="submit-property-button">
