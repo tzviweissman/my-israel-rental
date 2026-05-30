@@ -97,6 +97,20 @@ async def startup_tasks() -> None:
     except Exception as e:  # noqa: BLE001
         logger.warning(f"paypal_webhook_events index creation failed (non-fatal): {e}")
 
+    # One-time grandfather migration: any pre-existing user that does not
+    # carry the new `email_verified` field is treated as verified. This
+    # keeps the door open for everyone who signed up before we shipped
+    # email verification while still hard-blocking unverified new signups.
+    try:
+        res = await db.users.update_many(
+            {"email_verified": {"$exists": False}},
+            {"$set": {"email_verified": True}},
+        )
+        if res.modified_count:
+            logger.info(f"Grandfathered {res.modified_count} existing users as email_verified=True")
+    except Exception as e:  # noqa: BLE001
+        logger.warning(f"email_verified migration failed (non-fatal): {e}")
+
 
 @app.on_event("shutdown")
 async def shutdown_db_client() -> None:

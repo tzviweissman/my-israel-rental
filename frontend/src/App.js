@@ -19,6 +19,8 @@ import Properties from './pages/Properties';
 import PropertyDetail from './pages/PropertyDetail';
 import SubleaseDetail from './pages/SubleaseDetail';
 import Auth from './pages/Auth';
+import VerifyPending from './pages/VerifyPending';
+import VerifyEmail from './pages/VerifyEmail';
 import Dashboard from './pages/Dashboard';
 import AdminDashboard from './pages/AdminDashboard';
 import ManagerPage from './pages/ManagerPage';
@@ -111,6 +113,8 @@ function App() {
             <Route path="/property/:id" element={<PropertyDetail />} />
             <Route path="/sublease/:id" element={<SubleaseDetail />} />
             <Route path="/auth/:mode" element={<Auth />} />
+            <Route path="/verify-pending" element={<VerifyPending />} />
+            <Route path="/verify-email" element={<VerifyEmail />} />
             <Route path="/dashboard" element={user ? <Dashboard /> : <Navigate to="/auth/login" />} />
             <Route path="/admin" element={user?.role === 'admin' ? <AdminDashboard /> : <Navigate to="/" />} />
             <Route path="/manager/:managerId" element={<ManagerPage />} />

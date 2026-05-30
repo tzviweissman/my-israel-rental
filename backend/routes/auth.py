@@ -1,11 +1,14 @@
 """Auto-extracted from server.py during the 2026-04 refactor."""
 import asyncio
+import hashlib
 import os
+import secrets
 import uuid
 from datetime import UTC, datetime, timedelta
 
 import bcrypt
 from fastapi import APIRouter, Depends, HTTPException, Request
+from fastapi.responses import RedirectResponse
 
 from models import (
     ChangePasswordRequest,
@@ -26,15 +29,58 @@ router = APIRouter()
 api_router = router  # alias so existing @api_router decorators work verbatim
 
 
+# --- Email verification helpers -------------------------------------------
+VERIFY_TOKEN_TTL = timedelta(hours=24)
+RESEND_COOLDOWN = timedelta(seconds=60)
+
+
+def _hash_token(raw: str) -> str:
+    """Hash a verification token before persisting. Mirrors how we'd
+    hash a password reset token — we never store the raw value at rest."""
+    return hashlib.sha256(raw.encode("utf-8")).hexdigest()
+
+
+def _frontend_origin(req: Request | None = None) -> str:
+    """Resolve the frontend origin for building absolute links inside
+    transactional emails. Prefers FRONTEND_URL, falls back to Referer."""
+    origin = os.environ.get("FRONTEND_URL", "")
+    if not origin and req is not None:
+        referer = req.headers.get("referer", "")
+        if referer:
+            from urllib.parse import urlparse
+            parsed = urlparse(referer)
+            origin = f"{parsed.scheme}://{parsed.netloc}"
+    return origin or "https://myisraelrental.com"
+
+
+def _new_verification_token() -> tuple[str, str, str]:
+    """Return (raw_token, hashed_token, expires_at_iso) for a brand-new
+    email verification token."""
+    raw = secrets.token_urlsafe(32)
+    return raw, _hash_token(raw), (datetime.now(UTC) + VERIFY_TOKEN_TTL).isoformat()
+
+
+async def _send_verification_email(user: dict, raw_token: str, req: Request | None) -> None:
+    link = f"{_frontend_origin(req)}/verify-email?token={raw_token}"
+    try:
+        await send_welcome_email(
+            user["email"], user.get("name", ""), user.get("role", "renter"),
+            verification_link=link,
+        )
+    except Exception as e:  # noqa: BLE001
+        logger.warning(f"Failed to send verification email to {user['email']}: {e}")
+
+
 @api_router.post("/auth/register", response_model=TokenResponse)
-async def register(user_data: UserRegister) -> dict:
+async def register(user_data: UserRegister, req: Request) -> dict:
     existing = await db.users.find_one({"email": user_data.email})
     if existing:
         raise HTTPException(status_code=400, detail="Email already registered")
-    
+
     hashed_password = bcrypt.hashpw(user_data.password.encode('utf-8'), bcrypt.gensalt())
     user_id = str(uuid.uuid4())
-    
+    raw_token, token_hash, expires_at = _new_verification_token()
+
     user_doc = {
         "id": user_id,
         "email": user_data.email,
@@ -42,19 +88,30 @@ async def register(user_data: UserRegister) -> dict:
         "name": user_data.name,
         "role": user_data.role,
         "phone": user_data.phone,
-        "created_at": datetime.now(UTC).isoformat()
+        "created_at": datetime.now(UTC).isoformat(),
+        # Email verification fields — new signups must verify before they
+        # can log in. Existing users were grandfathered to True at the
+        # one-time migration on backend startup.
+        "email_verified": False,
+        "verification_token_hash": token_hash,
+        "verification_token_expires_at": expires_at,
+        "verification_email_last_sent_at": datetime.now(UTC).isoformat(),
     }
-    
+
     await db.users.insert_one(user_doc)
     token = create_token(user_id, user_data.role)
 
-    # Send welcome email via Postmark (fire and forget — don't block registration)
-    try:
-        asyncio.create_task(send_welcome_email(user_data.email, user_data.name, user_data.role))
-    except Exception as e:
-        logger.warning(f"Failed to queue welcome email for {user_data.email}: {e}")
+    # Send the verification email asynchronously so registration latency
+    # isn't dragged down by an outbound HTTP call to Postmark.
+    asyncio.create_task(_send_verification_email(user_doc, raw_token, req))
 
-    return {"token": token, "user": {"id": user_id, "email": user_data.email, "name": user_data.name, "role": user_data.role}}
+    return {
+        "token": token,
+        "user": {
+            "id": user_id, "email": user_data.email, "name": user_data.name,
+            "role": user_data.role, "email_verified": False,
+        },
+    }
 
 
 @api_router.post("/auth/login", response_model=TokenResponse)
@@ -62,12 +119,103 @@ async def login(credentials: UserLogin) -> dict:
     user = await db.users.find_one({"email": credentials.email}, {"_id": 0})
     if not user:
         raise HTTPException(status_code=401, detail="Invalid credentials")
-    
+
     if not bcrypt.checkpw(credentials.password.encode('utf-8'), user['password'].encode('utf-8')):
         raise HTTPException(status_code=401, detail="Invalid credentials")
-    
+
+    # Block unverified post-feature accounts. Pre-existing accounts are
+    # grandfathered (email_verified=True from the one-time migration).
+    if user.get("email_verified") is False:
+        raise HTTPException(status_code=403, detail="EMAIL_NOT_VERIFIED")
+
     token = create_token(user['id'], user['role'])
-    return {"token": token, "user": {"id": user['id'], "email": user['email'], "name": user['name'], "role": user['role']}}
+    return {
+        "token": token,
+        "user": {
+            "id": user['id'], "email": user['email'], "name": user['name'],
+            "role": user['role'], "email_verified": user.get('email_verified', True),
+        },
+    }
+
+
+@api_router.get("/auth/verify-email")
+async def verify_email(token: str, req: Request):
+    """Mark a user as verified and redirect them to the frontend.
+
+    The link in the welcome email points here; on success we 302 to
+    /verify-email?status=success on the frontend so the SPA can show a
+    confirmation. Failure modes redirect with `?status=invalid` or
+    `?status=expired` so the UI can show the right copy + a resend CTA.
+    """
+    frontend = _frontend_origin(req)
+    if not token:
+        return RedirectResponse(url=f"{frontend}/verify-email?status=invalid")
+
+    token_hash = _hash_token(token)
+    user = await db.users.find_one(
+        {"verification_token_hash": token_hash},
+        {"_id": 0, "id": 1, "email_verified": 1, "verification_token_expires_at": 1},
+    )
+    if user is None:
+        return RedirectResponse(url=f"{frontend}/verify-email?status=invalid")
+
+    if user.get("email_verified"):
+        return RedirectResponse(url=f"{frontend}/verify-email?status=already")
+
+    try:
+        if datetime.fromisoformat(user["verification_token_expires_at"]) < datetime.now(UTC):
+            return RedirectResponse(url=f"{frontend}/verify-email?status=expired")
+    except (KeyError, ValueError, TypeError):
+        return RedirectResponse(url=f"{frontend}/verify-email?status=invalid")
+
+    await db.users.update_one(
+        {"id": user["id"]},
+        {
+            "$set": {"email_verified": True},
+            "$unset": {"verification_token_hash": "", "verification_token_expires_at": ""},
+        },
+    )
+    return RedirectResponse(url=f"{frontend}/verify-email?status=success")
+
+
+@api_router.post("/auth/resend-verification", response_model=MessageResponse)
+async def resend_verification(request: ForgotPasswordRequest, req: Request) -> dict:
+    """Re-send the verification email by email address.
+
+    Public (no JWT required) so a user who's been blocked at /auth/login
+    can recover. Uses the same anti-enumeration pattern as
+    /auth/forgot-password: always responds with the same generic message
+    regardless of whether the email exists, and rate-limits per-user via
+    `verification_email_last_sent_at` (60s cooldown).
+    """
+    generic = {"message": "If an account exists for that email, a verification link has been re-sent. Please check your inbox (and spam folder)."}
+    user = await db.users.find_one({"email": request.email}, {"_id": 0})
+    if not user:
+        return generic
+    if user.get("email_verified"):
+        return generic
+
+    last = user.get("verification_email_last_sent_at")
+    if last:
+        try:
+            if datetime.now(UTC) - datetime.fromisoformat(last) < RESEND_COOLDOWN:
+                # Don't reveal cooldown info to enumeration attackers;
+                # return the generic message anyway.
+                return generic
+        except (ValueError, TypeError):
+            pass
+
+    raw_token, token_hash, expires_at = _new_verification_token()
+    await db.users.update_one(
+        {"id": user["id"]},
+        {"$set": {
+            "verification_token_hash": token_hash,
+            "verification_token_expires_at": expires_at,
+            "verification_email_last_sent_at": datetime.now(UTC).isoformat(),
+        }},
+    )
+    asyncio.create_task(_send_verification_email(user, raw_token, req))
+    return generic
 
 
 @api_router.get("/auth/me", response_model=UserPublic)
