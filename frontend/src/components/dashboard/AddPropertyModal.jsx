@@ -213,6 +213,12 @@ const AddPropertyModal = ({ isOpen, onClose, editingProperty, onSaved, API, toke
     } catch (error) {
       const detail = error?.response?.data?.detail;
       let msg = editingProperty?.id ? 'Failed to update property' : 'Failed to add property';
+      // Duplicate-listing 409 returns a structured detail object with a
+      // human message we can surface directly — no need to wrap it.
+      if (detail && typeof detail === 'object' && detail.code === 'DUPLICATE_LISTING') {
+        toast.error(detail.message, { duration: 7000 });
+        return;
+      }
       if (Array.isArray(detail) && detail[0]?.msg) {
         msg = `${msg}: ${detail[0].loc?.slice(1).join('.') || 'field'} — ${detail[0].msg}`;
       } else if (typeof detail === 'string') {

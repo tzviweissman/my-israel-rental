@@ -25,6 +25,7 @@ from routes.deps import (
     logger,
     verify_token,
 )
+from utils.dedupe import find_duplicate
 from utils.email import (
     send_email,
 )
@@ -38,6 +39,26 @@ api_router = router  # alias so existing @api_router decorators work verbatim
 
 @api_router.post("/properties", response_model=IdMessageResponse)
 async def create_property(property_data: PropertyCreate, payload: dict = Depends(verify_token)) -> dict:
+    # Block duplicate listings: same owner + same address + same rental_type
+    # is a copy-paste mistake. Same address with a different rental_type
+    # (e.g. long-term + vacation of the same flat) is intentionally allowed.
+    dup = await find_duplicate(
+        db,
+        owner_id=payload['user_id'],
+        address=property_data.address,
+        rental_type=property_data.rental_type,
+    )
+    if dup:
+        raise HTTPException(status_code=409, detail={
+            "code": "DUPLICATE_LISTING",
+            "message": (
+                f"You already have this address listed as {property_data.rental_type}. "
+                "Edit the existing listing, or list this apartment under a different rental type."
+            ),
+            "existing_property_id": dup["id"],
+            "existing_title": dup.get("title"),
+        })
+
     property_id = str(uuid.uuid4())
     property_doc = property_data.model_dump()
     property_doc['id'] = property_id
@@ -190,7 +211,27 @@ async def update_property(property_id: str, property_data: PropertyCreate, paylo
     
     if existing['owner_id'] != payload['user_id'] and payload['role'] != 'admin':
         raise HTTPException(status_code=403, detail="Not authorized")
-    
+
+    # Re-run dedupe in case the user changed the address or rental_type
+    # of an existing row into something that collides with another listing
+    # they own. Exclude the row being edited so it doesn't match itself.
+    dup = await find_duplicate(
+        db,
+        owner_id=existing['owner_id'],
+        address=property_data.address,
+        rental_type=property_data.rental_type,
+        exclude_property_id=property_id,
+    )
+    if dup:
+        raise HTTPException(status_code=409, detail={
+            "code": "DUPLICATE_LISTING",
+            "message": (
+                f"Another of your listings already uses this address as {property_data.rental_type}."
+            ),
+            "existing_property_id": dup["id"],
+            "existing_title": dup.get("title"),
+        })
+
     update_doc = property_data.model_dump()
     await db.properties.update_one({"id": property_id}, {"$set": update_doc})
 

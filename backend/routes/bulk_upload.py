@@ -325,6 +325,10 @@ async def commit_bulk(body: BulkCommitBody, payload: dict = Depends(verify_token
 
     created = []
     skipped = []
+    # Track addresses already created in *this* batch so two consecutive
+    # rows in the same upload that share (address, rental_type) also dedupe
+    # against each other — not just against pre-existing DB rows.
+    seen_in_batch: set[tuple[str, str]] = set()
     for i, row in enumerate(body.rows, start=1):
         # Always re-normalize + re-validate. Coercions are idempotent so it's safe
         # to run even if the caller already sent clean values.
@@ -334,6 +338,36 @@ async def commit_bulk(body: BulkCommitBody, payload: dict = Depends(verify_token
             if err:
                 skipped.append({"index": i, "title": row.get("title"), "error": err})
                 continue
+
+            # Dedupe vs existing DB rows + earlier rows in this batch.
+            from utils.dedupe import find_duplicate, normalize_address
+            norm_addr = normalize_address(normalized.get("address"))
+            rt = normalized.get("rental_type")
+            if norm_addr and rt:
+                batch_key = (norm_addr, rt)
+                if batch_key in seen_in_batch:
+                    skipped.append({
+                        "index": i, "title": row.get("title"),
+                        "error": f"Duplicate of an earlier row in this upload (same address + {rt}).",
+                    })
+                    continue
+                dup = await find_duplicate(
+                    db,
+                    owner_id=payload["user_id"],
+                    address=normalized.get("address"),
+                    rental_type=rt,
+                )
+                if dup:
+                    skipped.append({
+                        "index": i, "title": row.get("title"),
+                        "error": (
+                            f"You already have this address listed as {rt} "
+                            f"(\"{dup.get('title') or dup['id']}\"). Use a different rental type or edit the existing listing."
+                        ),
+                    })
+                    continue
+                seen_in_batch.add(batch_key)
+
             property_id = str(uuid.uuid4())
             image_filenames = normalized.pop("image_filenames", [])
             # Per-row pre-uploaded media URLs (Cloudinary direct-upload from

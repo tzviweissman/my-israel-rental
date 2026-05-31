@@ -5,11 +5,12 @@ import axios from 'axios';
 import { toast } from 'sonner';
 import {
   Trash2, ToggleLeft, ToggleRight, Search,
-  CalendarX, CalendarCheck, Lock, Briefcase, Star,
+  CalendarX, CalendarCheck, Lock, Briefcase, Star, Copy,
 } from 'lucide-react';
 import { API } from '../../App';
 import { useApiSWR } from '../../hooks/useApiSWR';
 import MarkAsBookedModal from './MarkAsBookedModal';
+import DuplicatesModal from './DuplicatesModal';
 
 /**
  * Super Admin → Listings tab.
@@ -22,6 +23,7 @@ export const ListingsTab = ({ token, onStatsChange }) => {
     `${API}/admin/properties`, token, { initial: [] }
   );
   const [searchTerm, setSearchTerm] = useState('');
+  const [showDuplicates, setShowDuplicates] = useState(false);
   // Keep filters + search in the URL so browser back/forward preserves them
   // when the admin clicks into a property and returns. Without this, the
   // filter resets to "all" because the listings tab unmounts on navigation.
@@ -241,6 +243,14 @@ export const ListingsTab = ({ token, onStatsChange }) => {
           />
         </div>
         <span className="text-sm text-gray-500">{t('admin.listingsCount', { count: filteredProperties.length })}</span>
+        <button
+          onClick={() => setShowDuplicates(true)}
+          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-amber-50 text-amber-700 border border-amber-200 hover:bg-amber-100"
+          title="Find owners with multiple listings at the same address + rental type"
+          data-testid="find-duplicates-btn"
+        >
+          <Copy size={14} /> Find duplicates
+        </button>
         {/* Quick chip toggle: All vs "Properties I manage" */}
         <div className="inline-flex bg-white rounded-lg border border-[#E5E5E5] p-0.5 ml-1" data-testid="managed-filter">
           <button
@@ -582,6 +592,14 @@ export const ListingsTab = ({ token, onStatsChange }) => {
         onClose={closeMarkBookedModal}
         onSubmit={submitMarkBooked}
       />
+
+      {showDuplicates && (
+        <DuplicatesModal
+          token={token}
+          onClose={() => setShowDuplicates(false)}
+          onDeleted={fetchProperties}
+        />
+      )}
     </div>
   );
 };

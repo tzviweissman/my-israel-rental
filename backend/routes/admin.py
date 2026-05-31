@@ -296,6 +296,53 @@ async def delete_user(user_id: str, payload: dict = Depends(verify_token)) -> di
     return {"message": "User and their properties deleted"}
 
 
+@api_router.get("/admin/duplicates")
+async def list_duplicate_listings(payload: dict = Depends(verify_token)) -> dict:
+    """Return groups of properties that share (owner_id, normalized address,
+    rental_type) so the admin can review and clean up legacy duplicates.
+
+    Each group has 2+ properties. Useful as a one-shot audit after we
+    shipped the dedupe gate — pre-existing dupes weren't blocked at the
+    door, so admins need a way to find them.
+    """
+    if payload['role'] != 'admin':
+        raise HTTPException(status_code=403, detail="Admin access required")
+    from utils.dedupe import normalize_address
+    # Pull only the fields we need to group by — keeps the payload small.
+    rows = await db.properties.find(
+        {"status": {"$in": ["active", "pending", "draft"]}},
+        {"_id": 0, "id": 1, "owner_id": 1, "title": 1, "address": 1, "rental_type": 1, "created_at": 1},
+    ).to_list(5000)
+
+    # Group by (owner_id, normalized_address, rental_type)
+    groups: dict[tuple[str, str, str], list[dict]] = {}
+    for r in rows:
+        addr = normalize_address(r.get("address"))
+        rt = r.get("rental_type")
+        if not addr or not rt or not r.get("owner_id"):
+            continue
+        key = (r["owner_id"], addr, rt)
+        groups.setdefault(key, []).append(r)
+
+    # Keep only groups with 2+ properties
+    out = []
+    for (owner_id, addr, rt), props in groups.items():
+        if len(props) < 2:
+            continue
+        owner = await db.users.find_one({"id": owner_id}, {"_id": 0, "name": 1, "email": 1})
+        out.append({
+            "owner_id": owner_id,
+            "owner_name": owner.get("name") if owner else None,
+            "owner_email": owner.get("email") if owner else None,
+            "address": addr,
+            "rental_type": rt,
+            "properties": sorted(props, key=lambda p: p.get("created_at", "")),
+        })
+    # Newest collisions first — they're the freshest cleanup targets.
+    out.sort(key=lambda g: max(p.get("created_at", "") for p in g["properties"]), reverse=True)
+    return {"groups": out, "total_groups": len(out)}
+
+
 @api_router.get("/admin/properties", response_model=list[PropertyOut])
 async def get_all_properties_admin(payload: dict = Depends(verify_token)) -> list[dict]:
     if payload['role'] != 'admin':

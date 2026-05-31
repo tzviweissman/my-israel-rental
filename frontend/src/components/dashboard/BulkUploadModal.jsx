@@ -227,8 +227,21 @@ const BulkUploadModal = ({ isOpen, onClose, onDone, API, token }) => {
         authHeaders,
       );
       setCommitResult(commitRes.data);
-      toast.success(`${commitRes.data.summary.created} properties created`);
-      setStage('images');
+      const skipped = commitRes.data.skipped || [];
+      if (skipped.length > 0) {
+        // Map server-side row index (1-based) -> editor row index (0-based)
+        // so dedupe errors show inline on the offending card.
+        const errs = {};
+        for (const s of skipped) {
+          errs[s.index - 1] = s.error || 'Failed to create';
+        }
+        setRowErrors(errs);
+        toast.error(`${skipped.length} row${skipped.length === 1 ? '' : 's'} skipped — see inline errors.`, { duration: 6000 });
+      }
+      if (commitRes.data.summary.created > 0) {
+        toast.success(`${commitRes.data.summary.created} properties created`);
+        setStage('images');
+      }
     } catch (e) {
       toast.error(e.response?.data?.detail || 'Save failed');
     } finally {
