@@ -108,7 +108,16 @@ async def get_properties(
     if min_bedrooms:
         query['bedrooms'] = {"$gte": min_bedrooms}
     if area:
-        query['area'] = {"$regex": area, "$options": "i"}
+        # Match on the neighborhood only — the filter dropdown sends values
+        # like "Jerusalem - Sanhedria" but properties may be stored without
+        # the city prefix or under a transliteration variant. Stripping the
+        # prefix + escaping regex specials makes "Sanhedria" find every
+        # listing whose area contains it — including "Sanhedria Murhevet"
+        # and "Sanhedria Murchevet".
+        import re as _re
+        neighborhood = area.split(" - ", 1)[-1].strip() if " - " in area else area.strip()
+        if neighborhood:
+            query['area'] = {"$regex": _re.escape(neighborhood), "$options": "i"}
     if owner_id:
         query['owner_id'] = owner_id
     if min_bathrooms:

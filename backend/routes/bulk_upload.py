@@ -554,10 +554,10 @@ Return a JSON object with a single key "properties" — an array. Each entry mus
 property using EXACTLY these field names (snake_case). Translate any Hebrew values into English
 prose for the human-readable fields (title, description, area, address). Do NOT translate
 proper-noun place names beyond what an Anglophone Israeli would recognize (e.g. keep
-"Sanhedria Murchevet" or "Belz" as transliteration; "רחוב קדושת אהרון" -> "Kedushat Aharon Street").
+"Sanhedria Murhevet" or "Belz" as transliteration; "רחוב קדושת אהרון" -> "Kedushat Aharon Street").
 
 Required fields (always emit):
-  - title          (string, <= 80 chars, generated if not present -- e.g. "Ground-floor 1.5 BR in Sanhedria Murchevet")
+  - title          (string, <= 80 chars, generated if not present -- e.g. "Ground-floor 1.5 BR in Sanhedria Murhevet")
   - description    (string, 1-3 sentences summarising what's in the source text, in English)
   - area           (string, neighbourhood or city + neighbourhood, in English)
   - address        (string, best-guess address; empty string if not in source)

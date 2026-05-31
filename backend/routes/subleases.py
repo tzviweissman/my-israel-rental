@@ -93,7 +93,12 @@ async def create_sublease(sublease_data: SubleaseCreate, payload: dict = Depends
 async def list_subleases(area: str | None = None, holiday_tag: str | None = None) -> list[dict]:
     query: dict = {"active": True}
     if area:
-        query["area"] = {"$regex": area, "$options": "i"}
+        # Mirror the /properties filter: match the neighborhood only so
+        # "Sanhedria" finds "Sanhedria Murhevet" listings too.
+        import re as _re
+        neighborhood = area.split(" - ", 1)[-1].strip() if " - " in area else area.strip()
+        if neighborhood:
+            query["area"] = {"$regex": _re.escape(neighborhood), "$options": "i"}
     if holiday_tag:
         query["holiday_tags"] = holiday_tag
     subleases = await db.subleases.find(query, {"_id": 0}).sort("created_at", -1).to_list(500)
