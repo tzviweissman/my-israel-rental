@@ -58,26 +58,17 @@ const Auth = () => {
       const response = await axios.post(`${API}${endpoint}`, formData);
       login(response.data.token, response.data.user);
       toast.success(mode === 'login' ? t('auth.welcomeBack') : t('auth.accountCreated'));
-      if (mode === 'signup') {
-        // Brand-new accounts always land on the verification-pending screen
-        // first. The role-specific popups / property-management offer fire
-        // after they verify (handled via the AuthContext-level guard).
-        navigate(`/verify-pending?email=${encodeURIComponent(formData.email)}`);
-        return;
+      if (mode === 'signup' && formData.role === 'renter') {
+        setShowWelcomePopups(true);
+      } else if (mode === 'signup' && formData.role === 'owner') {
+        // Pitch our property-management service the moment a fresh owner
+        // lands on the platform — they're most receptive right after signup.
+        setShowOwnerOffer(true);
+      } else {
+        navigate(redirectUrl);
       }
-      navigate(redirectUrl);
     } catch (error) {
-      const detail = error.response?.data?.detail;
-      // EMAIL_NOT_VERIFIED is a soft auth error: the credentials are
-      // correct but the user hasn't clicked the verify link yet. Keep the
-      // (still-valid) JWT from the prior signup and ship them to the
-      // resend page so they can finish the flow.
-      if (detail === 'EMAIL_NOT_VERIFIED') {
-        toast.error(t('auth.emailNotVerified', 'Please verify your email before logging in. Check your inbox (and spam folder).'));
-        navigate(`/verify-pending?email=${encodeURIComponent(formData.email)}`);
-        return;
-      }
-      toast.error(detail || t('auth.failed'));
+      toast.error(error.response?.data?.detail || t('auth.failed'));
     }
   };
 

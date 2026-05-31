@@ -79,7 +79,6 @@ async def register(user_data: UserRegister, req: Request) -> dict:
 
     hashed_password = bcrypt.hashpw(user_data.password.encode('utf-8'), bcrypt.gensalt())
     user_id = str(uuid.uuid4())
-    raw_token, token_hash, expires_at = _new_verification_token()
 
     user_doc = {
         "id": user_id,
@@ -89,27 +88,27 @@ async def register(user_data: UserRegister, req: Request) -> dict:
         "role": user_data.role,
         "phone": user_data.phone,
         "created_at": datetime.now(UTC).isoformat(),
-        # Email verification fields — new signups must verify before they
-        # can log in. Existing users were grandfathered to True at the
-        # one-time migration on backend startup.
-        "email_verified": False,
-        "verification_token_hash": token_hash,
-        "verification_token_expires_at": expires_at,
-        "verification_email_last_sent_at": datetime.now(UTC).isoformat(),
+        # Email verification was rolled back on 2026-06 at the user's
+        # request. New signups are marked verified immediately so they
+        # can log in straight away. The verification helpers below remain
+        # in place behind dormant endpoints in case we re-enable later.
+        "email_verified": True,
     }
 
     await db.users.insert_one(user_doc)
     token = create_token(user_id, user_data.role)
 
-    # Send the verification email asynchronously so registration latency
-    # isn't dragged down by an outbound HTTP call to Postmark.
-    asyncio.create_task(_send_verification_email(user_doc, raw_token, req))
+    # Fire-and-forget welcome email (no verification link).
+    try:
+        asyncio.create_task(send_welcome_email(user_data.email, user_data.name, user_data.role))
+    except Exception as e:  # noqa: BLE001
+        logger.warning(f"Failed to queue welcome email for {user_data.email}: {e}")
 
     return {
         "token": token,
         "user": {
             "id": user_id, "email": user_data.email, "name": user_data.name,
-            "role": user_data.role, "email_verified": False,
+            "role": user_data.role, "email_verified": True,
         },
     }
 
@@ -122,11 +121,6 @@ async def login(credentials: UserLogin) -> dict:
 
     if not bcrypt.checkpw(credentials.password.encode('utf-8'), user['password'].encode('utf-8')):
         raise HTTPException(status_code=401, detail="Invalid credentials")
-
-    # Block unverified post-feature accounts. Pre-existing accounts are
-    # grandfathered (email_verified=True from the one-time migration).
-    if user.get("email_verified") is False:
-        raise HTTPException(status_code=403, detail="EMAIL_NOT_VERIFIED")
 
     token = create_token(user['id'], user['role'])
     return {
