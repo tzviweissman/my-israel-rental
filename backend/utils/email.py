@@ -20,7 +20,7 @@ POSTMARK_SERVER_TOKEN = os.environ.get("POSTMARK_SERVER_TOKEN", "")
 EMAIL_FROM = os.environ.get("EMAIL_FROM", "no-reply@myisraelrental.com")
 EMAIL_FROM_NAME = os.environ.get("EMAIL_FROM_NAME", "My Israel Rental")
 FRONTEND_URL = os.environ.get("FRONTEND_URL", "https://myisraelrental.com")
-CONTACT_EMAIL = "mir@myisraelrental.com"
+CONTACT_EMAIL = "support@myisraelrental.com"
 CONTACT_PHONE = os.environ.get("CONTACT_PHONE", "+972 55 322 5141")
 
 # Brand palette
