@@ -225,8 +225,13 @@ async def match_property_against_searches(
 
         # Email via Postmark (injected to avoid circular imports)
         if send_email_fn and s.get("email"):
-            frontend = os.environ.get("FRONTEND_URL", "").rstrip("/")
-            link = f"{frontend}/property/{property_id}" if frontend else f"/property/{property_id}"
+            # Reuse the canonical FRONTEND_URL from email.py — that module
+            # already defaults to https://myisraelrental.com when the env
+            # var is missing. Importing locally to avoid a circular import
+            # at module load.
+            from utils.email import FRONTEND_URL as _FE
+            frontend = (_FE or "https://myisraelrental.com").rstrip("/")
+            link = f"{frontend}/property/{property_id}"
             reason_label = {
                 "new_listing": "just listed",
                 "reactivated": "became available again",
