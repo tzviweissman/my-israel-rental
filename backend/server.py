@@ -24,6 +24,7 @@ load_dotenv(ROOT_DIR / ".env")
 # Domain routers — order doesn't matter (all share the /api prefix)
 from routes import (  # noqa: E402
     admin,
+    admin_import,
     auth,
     bookings,
     bulk_upload,
@@ -61,6 +62,7 @@ for mod in (
     chat,
     notifications,
     admin,
+    admin_import,
     saved_searches,
     ical,
     misc,

@@ -83,6 +83,42 @@ async def upload_bytes_to_cloudinary(
     }
 
 
+async def mirror_url_to_cloudinary(url: str, *, is_video: bool = False, folder: str = "myisraelrental/imported") -> dict[str, Any] | None:
+    """Pull an external image/video URL into Cloudinary so the asset
+    survives even if the source host goes away. Returns the same shape
+    as `upload_bytes_to_cloudinary` on success, or None on failure.
+
+    Cloudinary's `upload()` accepts a URL directly as the first argument
+    — it fetches the asset server-side, which is far faster than us
+    downloading + re-uploading bytes.
+    """
+    if not CLOUDINARY_ENABLED or not url:
+        return None
+    try:
+        res = cloudinary.uploader.upload(
+            url,
+            resource_type=_resource_type(is_video),
+            folder=folder,
+            public_id=uuid.uuid4().hex,
+            overwrite=False,
+            use_filename=False,
+            unique_filename=False,
+        )
+        secure_url = res.get("secure_url", "")
+        return {
+            "url": _with_auto_transforms(secure_url, is_video),
+            "public_id": res.get("public_id"),
+            "bytes": res.get("bytes", 0),
+            "format": res.get("format"),
+            "resource_type": res.get("resource_type"),
+        }
+    except Exception:  # noqa: BLE001
+        # Swallow Cloudinary errors and let the caller record the URL
+        # as failed — we don't want one broken image URL to kill the
+        # whole bulk import.
+        return None
+
+
 def delete_from_cloudinary(public_id: str, *, is_video: bool = False) -> bool:
     """Delete an asset from Cloudinary. Returns True on success."""
     if not CLOUDINARY_ENABLED:

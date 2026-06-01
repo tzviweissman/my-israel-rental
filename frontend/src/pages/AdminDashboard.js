@@ -1,6 +1,6 @@
 import React, { useState, useContext } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Eye, Home, Users, MessageCircle, FileText, Settings } from 'lucide-react';
+import { Eye, Home, Users, MessageCircle, FileText, Settings, Upload } from 'lucide-react';
 import { API, AuthContext } from '../App';
 import { useApiSWR } from '../hooks/useApiSWR';
 import { useAdminLiveEvents } from '../hooks/useAdminLiveEvents';
@@ -10,6 +10,7 @@ import UsersTab from '../components/admin/UsersTab';
 import ChatsTab from '../components/admin/ChatsTab';
 import ServicesTab from '../components/admin/ServicesTab';
 import SettingsTab from '../components/admin/SettingsTab';
+import ImportTab from '../components/admin/ImportTab';
 import { DOCUMENT_SERVICES_ENABLED } from '../config/features';
 
 const TAB_KEYS = [
@@ -17,6 +18,7 @@ const TAB_KEYS = [
   { key: 'listings', labelKey: 'admin.listings', icon: Home },
   { key: 'users', labelKey: 'admin.users', icon: Users },
   { key: 'chats', labelKey: 'admin.chats', icon: MessageCircle },
+  { key: 'import', labelKey: 'admin.import', icon: Upload },
   ...(DOCUMENT_SERVICES_ENABLED ? [{ key: 'services', labelKey: 'admin.services', icon: FileText }] : []),
   { key: 'settings', labelKey: 'admin.settings', icon: Settings },
 ];
@@ -73,6 +75,7 @@ const AdminDashboard = () => {
         {activeTab === 'listings' && <ListingsTab token={token} onStatsChange={fetchDashboard} />}
         {activeTab === 'users' && <UsersTab token={token} onStatsChange={fetchDashboard} />}
         {activeTab === 'chats' && <ChatsTab token={token} />}
+        {activeTab === 'import' && <ImportTab token={token} />}
         {activeTab === 'services' && DOCUMENT_SERVICES_ENABLED && <ServicesTab token={token} onStatsChange={fetchDashboard} />}
         {activeTab === 'settings' && <SettingsTab token={token} />}
       </div>
