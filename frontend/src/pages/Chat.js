@@ -265,19 +265,22 @@ const Chat = () => {
     }
   };
 
-  const sendMessage = async (e) => {
-    e.preventDefault();
-    if (!newMessage.trim() || sending) return;
+  const sendMessage = async (e, opts = {}) => {
+    if (e && typeof e.preventDefault === 'function') e.preventDefault();
+    const imageUrl = opts.imageUrl || null;
+    if (!imageUrl && !newMessage.trim()) return;
+    if (sending) return;
     setSending(true);
     try {
       await axios.post(`${API}/chat/messages`, {
         property_id: propertyId,
-        message: newMessage,
-        receiver_id: otherUserId
+        message: imageUrl ? '' : newMessage,
+        receiver_id: otherUserId,
+        image_url: imageUrl,
       }, {
         headers: { Authorization: `Bearer ${token}` }
       });
-      setNewMessage('');
+      if (!imageUrl) setNewMessage('');
       fetchMessages();
     } catch (error) {
       toast.error('Failed to send message');
@@ -364,6 +367,8 @@ const Chat = () => {
           onSend={sendMessage}
           sending={sending}
           onTyping={emitTyping}
+          API={API}
+          token={token}
         />
 
         {/* Return to Dashboard Footer */}

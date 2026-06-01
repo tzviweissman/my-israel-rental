@@ -28,12 +28,17 @@ _TYPING_TTL_SECONDS = 5
 async def send_message(chat_data: ChatMessage, payload: dict = Depends(verify_token)) -> dict:
     message_id = str(uuid.uuid4())
     mentions = extract_mentions(chat_data.message)
+    # Image-only messages are allowed — but message must be non-empty if no image.
+    if not chat_data.message.strip() and not chat_data.image_url:
+        from fastapi import HTTPException
+        raise HTTPException(status_code=400, detail="Message cannot be empty")
     message_doc = {
         "id": message_id,
         "property_id": chat_data.property_id,
         "sender_id": payload['user_id'],
         "receiver_id": chat_data.receiver_id,
         "message": chat_data.message,
+        "image_url": chat_data.image_url,
         # Stored at write-time so the inbox can flag unread @-mentions of the
         # current user without re-scanning every message body on each fetch.
         "mentions": mentions,
@@ -51,7 +56,7 @@ async def send_message(chat_data: ChatMessage, payload: dict = Depends(verify_to
         # Capture the sender so the lister can deep-link straight into the
         # conversation (knowing who they are replying to).
         "sender_id": payload['user_id'],
-        "message": "You have a new message",
+        "message": "You have a new message" if not chat_data.image_url or chat_data.message.strip() else "Sent you a photo 📷",
         "read": False,
         "created_at": datetime.now(UTC).isoformat()
     }

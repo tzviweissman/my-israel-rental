@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Send, AtSign, User, Home, Briefcase } from 'lucide-react';
+import { Send, AtSign, User, Home, Briefcase, Paperclip, Loader2, X } from 'lucide-react';
+import { uploadFilesFast } from '../../utils/fastUpload';
 
 // Role tokens recognised by the backend mention parser (utils/mentions.py).
 // Keep this list in sync — adding one here without backend support means the
@@ -40,11 +41,40 @@ const findMentionContext = (text, caret) => {
  * descriptions. Selecting one (mouse or Enter on the keyboard-highlighted
  * row) injects the canonical token at the cursor.
  */
-const MessageInput = ({ newMessage, setNewMessage, onSend, sending, onTyping }) => {
+const MessageInput = ({ newMessage, setNewMessage, onSend, sending, onTyping, API, token }) => {
   const { t } = useTranslation();
   const inputRef = useRef(null);
+  const fileRef = useRef(null);
   const [mention, setMention] = useState(null); // { start, partial }
   const [hoverIdx, setHoverIdx] = useState(0);
+  const [pendingImage, setPendingImage] = useState(null); // { url, preview }
+  const [uploading, setUploading] = useState(false);
+
+  const pickPhoto = () => fileRef.current?.click();
+  const onPickFile = async (e) => {
+    const file = e.target.files?.[0];
+    e.target.value = '';
+    if (!file) return;
+    setUploading(true);
+    try {
+      const results = await uploadFilesFast([file], API, token);
+      const first = results?.[0];
+      if (!first || first.error) {
+        // toast surfaced by caller; just bail.
+        return;
+      }
+      // Show a local preview chip before send.
+      setPendingImage({ url: first.url, preview: URL.createObjectURL(file) });
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const sendPhoto = async () => {
+    if (!pendingImage) return;
+    await onSend(null, { imageUrl: pendingImage.url });
+    setPendingImage(null);
+  };
 
   const matches = mention
     ? ROLES.filter((r) => r.key.startsWith(mention.partial))
@@ -114,8 +144,55 @@ const MessageInput = ({ newMessage, setNewMessage, onSend, sending, onTyping }) 
 
   return (
     <div className="bg-white rounded-b-2xl border border-t-0 border-gray-200 shadow-sm flex-shrink-0">
+      {pendingImage && (
+        <div className="px-4 pt-3 flex items-center gap-3" data-testid="pending-image-preview">
+          <div className="relative shrink-0">
+            <img
+              src={pendingImage.preview}
+              alt="To send"
+              className="w-16 h-16 rounded-lg object-cover border border-gray-200"
+            />
+            <button
+              type="button"
+              onClick={() => setPendingImage(null)}
+              className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-black/70 text-white flex items-center justify-center hover:bg-black"
+              data-testid="cancel-pending-image"
+              aria-label="Cancel"
+            >
+              <X size={11} />
+            </button>
+          </div>
+          <button
+            type="button"
+            onClick={sendPhoto}
+            disabled={sending}
+            className="px-4 py-2 rounded-xl bg-[#1E6A6A] text-white text-sm font-semibold disabled:opacity-40 hover:bg-[#175555]"
+            data-testid="send-pending-image"
+          >
+            {sending ? t('common.sending', 'Sending…') : t('chat.sendPhoto', 'Send photo')}
+          </button>
+        </div>
+      )}
       <form onSubmit={onSend} className="p-4" data-testid="chat-form">
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={pickPhoto}
+            disabled={uploading || sending}
+            className="w-11 h-11 rounded-xl flex items-center justify-center text-[#1E6A6A] bg-gray-50 border border-gray-200 hover:bg-gray-100 disabled:opacity-50 transition-all shrink-0"
+            title={t('chat.attachPhoto', 'Attach a photo')}
+            data-testid="attach-photo-btn"
+          >
+            {uploading ? <Loader2 size={18} className="animate-spin" /> : <Paperclip size={18} />}
+          </button>
+          <input
+            ref={fileRef}
+            type="file"
+            accept="image/*"
+            className="hidden"
+            onChange={onPickFile}
+            data-testid="chat-photo-input"
+          />
           <div className="flex-1 relative">
             <input
               ref={inputRef}

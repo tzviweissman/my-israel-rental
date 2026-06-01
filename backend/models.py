@@ -106,6 +106,9 @@ class ChatMessage(BaseModel):
     property_id: str
     message: str
     receiver_id: str
+    # Optional Cloudinary URL(s) attached to this message. When set, the
+    # `message` text may be empty (image-only messages are allowed).
+    image_url: str | None = None
 
 
 class EditMessage(BaseModel):

@@ -275,14 +275,34 @@ const MessageBubble = ({
             onCancel={onCancelEdit}
           />
         ) : (
-          <p className="text-[13.5px] leading-relaxed whitespace-pre-wrap break-words">
-            {renderWithMentions(
-              normalizedQuery
-                ? renderHighlighted(msg.message, normalizedQuery)
-                : msg.message,
-              isMe,
+          <>
+            {msg.image_url && (
+              <a
+                href={msg.image_url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="block mb-1"
+                data-testid={`chat-image-${msg.id}`}
+              >
+                <img
+                  src={msg.image_url}
+                  alt="Shared"
+                  loading="lazy"
+                  className="rounded-xl max-w-full max-h-72 object-cover border border-black/10 cursor-zoom-in hover:opacity-95 transition-opacity"
+                />
+              </a>
             )}
-          </p>
+            {msg.message && (
+              <p className="text-[13.5px] leading-relaxed whitespace-pre-wrap break-words">
+                {renderWithMentions(
+                  normalizedQuery
+                    ? renderHighlighted(msg.message, normalizedQuery)
+                    : msg.message,
+                  isMe,
+                )}
+              </p>
+            )}
+          </>
         )}
 
         <InlineTranslation
