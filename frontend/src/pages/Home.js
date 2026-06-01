@@ -130,11 +130,11 @@ const Home = () => {
               data-testid={`property-card-${property.id}`}
             >
               <div className="relative h-36 md:h-64 bg-gray-200" style={{
-                backgroundImage: `url(${getCoverImage(property.images, 600, '', property.videos).url})`,
+                backgroundImage: `url(${getCoverImage(property.images, 600, '', property.videos, property.id).url})`,
                 backgroundSize: 'cover',
                 backgroundPosition: 'center'
               }}>
-                {getCoverImage(property.images, 600, '', property.videos).isDefault && <DefaultImageBadge />}
+                {getCoverImage(property.images, 600, '', property.videos, property.id).isDefault && <DefaultImageBadge />}
               </div>
               <div className="p-3 md:p-6">
                 <h3 className="text-sm md:text-xl font-bold mb-1 md:mb-2 line-clamp-1">{property.title}</h3>

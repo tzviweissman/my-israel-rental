@@ -13,7 +13,7 @@ const PropertyCard = ({ property, isLiked, onClick, onToggleLike, convertPrice, 
   // Grid cards render at ~470px wide on desktop, ~360px on mobile.
   // Request 600px from Cloudinary so 2x-DPR displays stay crisp without
   // overpaying. Non-Cloudinary URLs pass through untouched.
-  const { url: heroSrc, isDefault: isDefaultImage } = getCoverImage(property.images, 600, apiBase, property.videos);
+  const { url: heroSrc, isDefault: isDefaultImage } = getCoverImage(property.images, 600, apiBase, property.videos, property.id);
   const rentalLabelMap = {
     'long-term': t('property.longTerm'),
     'short-term': t('property.shortTerm'),

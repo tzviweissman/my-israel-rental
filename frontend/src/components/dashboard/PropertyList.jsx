@@ -193,11 +193,11 @@ const PropertyList = ({ properties, bookings = [], onEdit, onRefresh, API, token
   };
 
   const propImage = (property) => {
-    const { url } = getCoverImage(property.images, 480, API, property.videos);
+    const { url } = getCoverImage(property.images, 480, API, property.videos, property.id);
     return url;
   };
 
-  const propIsDefault = (property) => getCoverImage(property.images, 480, API, property.videos).isDefault;
+  const propIsDefault = (property) => getCoverImage(property.images, 480, API, property.videos, property.id).isDefault;
 
   // "NEW" badge on bulk-created listings, fades out after 24h so managers
   // can spot the ones they just uploaded without scrolling.
