@@ -15,7 +15,7 @@ const DefaultImageBadge = ({ className = '' }) => {
       data-testid="default-image-badge"
     >
       <ImageOff size={10} className="shrink-0" />
-      <span className="truncate">{t('property.messageListerForPictures', 'Message lister for pictures')}</span>
+      <span className="truncate">{t('property.messageListerForPictures', 'For illustration only — message lister for pictures')}</span>
     </div>
   );
 };
