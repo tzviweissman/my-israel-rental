@@ -14,8 +14,19 @@ const Auth = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const { login } = useContext(AuthContext);
-  const redirectUrl = searchParams.get('redirect') || '/';
+  const { login, user: currentUser } = useContext(AuthContext);
+  // After auth, honor an explicit ?redirect=… (set when the user was trying
+  // to book or message from a property page) — otherwise drop them on their
+  // dashboard. Admins go to /admin.
+  const redirectParam = searchParams.get('redirect');
+  const postAuthDestination = (u) => {
+    if (redirectParam) return redirectParam;
+    if (u?.role === 'admin') return '/admin';
+    return '/dashboard';
+  };
+  // Keep `redirectUrl` for the existing modal flows (they fall back to home
+  // only when no other destination is known).
+  const redirectUrl = redirectParam || (currentUser?.role === 'admin' ? '/admin' : '/dashboard');
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -58,6 +69,7 @@ const Auth = () => {
       const response = await axios.post(`${API}${endpoint}`, formData);
       login(response.data.token, response.data.user);
       toast.success(mode === 'login' ? t('auth.welcomeBack') : t('auth.accountCreated'));
+      const destination = postAuthDestination(response.data.user);
       if (mode === 'signup' && formData.role === 'renter') {
         setShowWelcomePopups(true);
       } else if (mode === 'signup' && formData.role === 'owner') {
@@ -65,7 +77,7 @@ const Auth = () => {
         // lands on the platform — they're most receptive right after signup.
         setShowOwnerOffer(true);
       } else {
-        navigate(redirectUrl);
+        navigate(destination);
       }
     } catch (error) {
       toast.error(error.response?.data?.detail || t('auth.failed'));
@@ -457,21 +469,27 @@ const Auth = () => {
           </form>
 
           <div className="mt-6 text-center">
-            {mode === 'login' ? (
-              <p className="text-sm text-gray-600">
-                {t('auth.noAccount')}{' '}
-                <a href="/auth/signup" className="font-medium" style={{ color: '#1E6A6A' }} data-testid="auth-toggle-link">
-                  {t('auth.signUpHere')}
-                </a>
-              </p>
-            ) : (
-              <p className="text-sm text-gray-600">
-                {t('auth.haveAccount')}{' '}
-                <a href="/auth/login" className="font-medium" style={{ color: '#1E6A6A' }} data-testid="auth-toggle-link">
-                  {t('auth.loginHere')}
-                </a>
-              </p>
-            )}
+            {(() => {
+              // Preserve ?redirect=… across the login↔signup toggle so a user
+              // who came from "Book" or "Message Owner" on a property still
+              // returns to that property after auth.
+              const qs = redirectParam ? `?redirect=${encodeURIComponent(redirectParam)}` : '';
+              return mode === 'login' ? (
+                <p className="text-sm text-gray-600">
+                  {t('auth.noAccount')}{' '}
+                  <a href={`/auth/signup${qs}`} className="font-medium" style={{ color: '#1E6A6A' }} data-testid="auth-toggle-link">
+                    {t('auth.signUpHere')}
+                  </a>
+                </p>
+              ) : (
+                <p className="text-sm text-gray-600">
+                  {t('auth.haveAccount')}{' '}
+                  <a href={`/auth/login${qs}`} className="font-medium" style={{ color: '#1E6A6A' }} data-testid="auth-toggle-link">
+                    {t('auth.loginHere')}
+                  </a>
+                </p>
+              );
+            })()}
           </div>
         </div>
       </div>
