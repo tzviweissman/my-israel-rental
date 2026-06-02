@@ -25,6 +25,7 @@ from routes.deps import (
     logger,
     verify_token,
 )
+from utils.area_filter import area_mongo_query
 from utils.dedupe import find_duplicate
 from utils.email import (
     send_email,
@@ -108,16 +109,13 @@ async def get_properties(
     if min_bedrooms:
         query['bedrooms'] = {"$gte": min_bedrooms}
     if area:
-        # Match on the neighborhood only — the filter dropdown sends values
-        # like "Jerusalem - Sanhedria" but properties may be stored without
-        # the city prefix or under a transliteration variant. Stripping the
-        # prefix + escaping regex specials makes "Sanhedria" find every
-        # listing whose area contains it — including "Sanhedria Murhevet"
-        # and "Sanhedria Murchevet".
-        import re as _re
-        neighborhood = area.split(" - ", 1)[-1].strip() if " - " in area else area.strip()
-        if neighborhood:
-            query['area'] = {"$regex": _re.escape(neighborhood), "$options": "i"}
+        # Build a city-scoped, prefix-anchored regex that handles legacy bare
+        # neighborhoods and transliteration variants while preventing cross-city
+        # bleed (e.g. "Jerusalem - Old City" must not match "Beersheba - Old City").
+        # See utils/area_filter.py for the full reasoning.
+        area_q = area_mongo_query(area)
+        if area_q is not None:
+            query['area'] = area_q
     if owner_id:
         query['owner_id'] = owner_id
     if min_bathrooms:

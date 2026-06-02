@@ -19,6 +19,7 @@ import uuid
 from datetime import UTC, datetime, timedelta
 from typing import Any
 
+from utils.area_filter import area_matches
 from utils.fx import convert_amount
 
 logger = logging.getLogger(__name__)
@@ -113,8 +114,8 @@ async def property_matches_search(prop: dict, search: dict, bookings: list[dict]
     if filters.get("rental_type") and prop.get("rental_type") != filters["rental_type"]:
         return False
 
-    # Area (substring, case-insensitive)
-    if not _text_matches(prop.get("area") or prop.get("location"), filters.get("area")):
+    # Area — city-scoped, prefix-anchored match (see utils/area_filter.py)
+    if not area_matches(prop.get("area") or prop.get("location"), filters.get("area")):
         return False
 
     # Min bedrooms

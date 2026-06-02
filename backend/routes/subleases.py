@@ -14,6 +14,7 @@ from models_response import (
     SubleaseOut,
 )
 from routes.deps import ALLOWED_CONTRACT_TYPES, CONTRACT_DIR, MAX_FILE_SIZE, db, verify_token
+from utils.area_filter import area_mongo_query
 from utils.files import extract_text_from_docx, extract_text_from_image, extract_text_from_pdf
 
 router = APIRouter()
@@ -93,12 +94,11 @@ async def create_sublease(sublease_data: SubleaseCreate, payload: dict = Depends
 async def list_subleases(area: str | None = None, holiday_tag: str | None = None) -> list[dict]:
     query: dict = {"active": True}
     if area:
-        # Mirror the /properties filter: match the neighborhood only so
-        # "Sanhedria" finds "Sanhedria Murhevet" listings too.
-        import re as _re
-        neighborhood = area.split(" - ", 1)[-1].strip() if " - " in area else area.strip()
-        if neighborhood:
-            query["area"] = {"$regex": _re.escape(neighborhood), "$options": "i"}
+        # Mirror the /properties area filter: city-scoped, prefix-anchored
+        # match. See utils/area_filter.py for the full reasoning.
+        area_q = area_mongo_query(area)
+        if area_q is not None:
+            query["area"] = area_q
     if holiday_tag:
         query["holiday_tags"] = holiday_tag
     subleases = await db.subleases.find(query, {"_id": 0}).sort("created_at", -1).to_list(500)

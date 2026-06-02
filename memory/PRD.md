@@ -51,6 +51,12 @@ Build a bilingual (English/Hebrew) rental website named MyIsraelRental.com with 
   - Helpers: `send_welcome_email`, `send_password_reset_email`, `send_booking_confirmation_email`, `send_booking_notification_email`
   - Verified end-to-end: all 4 flows returned `MessageID` from Postmark API
 
+- [x] **Area Filter: City-Scoped Anchored Match** (2026-02-26):
+  - Replaced the substring regex in `/api/properties`, `/api/subleases`, and saved-search matching with a shared helper `utils/area_filter.py` (`area_mongo_query`, `area_matches`).
+  - Pattern is anchored at the start of the stored value, accepts both the canonical `"<City> - <Neighborhood>"` form and legacy bare neighborhood data, keeps the Sanhedria special case (matches `Sanhedria Murhevet` / `Sanhedria Murchevet`), and uses a `(?!\w)` look-ahead so prefix overlaps like `Talpiot` vs `East Talpiot` or `Ramot` vs `Ramot Bet` no longer over-match.
+  - Prevents cross-city bleed for the ~25 neighborhood names that repeat across cities (`Old City`, `City Center`, `Ramat Eshkol`, `Romema`, `German Colony`, `Kiryat Shmuel`, `Ramot`, `Neve Sha'anan`, `Ramat Chen`, Hebrew-letter wards `Dalet/Gimmel/Hey`, etc.).
+  - Locked in by 20-case pytest suite at `/app/backend/tests/test_area_filter.py`.
+
 ### Key API Endpoints
 - Auth: POST /api/auth/register, /api/auth/login, GET /api/auth/me
 - Properties: GET /api/properties (with 13 filter params), POST/PUT/DELETE /api/properties
