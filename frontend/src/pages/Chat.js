@@ -320,7 +320,10 @@ const Chat = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100" data-testid="chat-page">
-      <div className="max-w-3xl mx-auto px-4 pt-20 pb-6 h-screen flex flex-col">
+      {/* Mobile nav is taller (top bar + category strip = ~123px); desktop
+          nav is ~80px. Pad enough on mobile so the chat header (Back / Live
+          Chat / Search / Dashboard) isn't hidden under the nav. */}
+      <div className="max-w-3xl mx-auto px-4 pt-32 md:pt-20 pb-6 h-screen flex flex-col">
         <ChatHeader
           property={property}
           sublease={sublease}
