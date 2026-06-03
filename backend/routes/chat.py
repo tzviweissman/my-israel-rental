@@ -83,6 +83,45 @@ async def send_message(chat_data: ChatMessage, payload: dict = Depends(verify_to
     return {"id": message_id, "message": "Message sent successfully"}
 
 
+async def _recipient_is_actively_in_chat(
+    *, sender_id: str, receiver_id: str, property_id: str, window_seconds: int = 120
+) -> bool:
+    """Did the recipient open/read a message from this sender in the last N
+    seconds? If so they're already inside the conversation and we shouldn't
+    pile on with a "new message" email."""
+    cutoff = (datetime.now(UTC) - timedelta(seconds=window_seconds)).isoformat()
+    recent = await db.messages.find_one(
+        {
+            "property_id": property_id,
+            "sender_id": sender_id,
+            "receiver_id": receiver_id,
+            "read": True,
+            "read_at": {"$gte": cutoff},
+        },
+        {"_id": 0, "id": 1},
+    )
+    return bool(recent)
+
+
+async def _was_recently_emailed(
+    *, sender_id: str, receiver_id: str, property_id: str, window_seconds: int = 300
+) -> bool:
+    """Did we already email this recipient for this conversation in the last
+    N seconds? Throttles bursts so a 20-message exchange doesn't generate
+    20 emails."""
+    cutoff = (datetime.now(UTC) - timedelta(seconds=window_seconds)).isoformat()
+    last = await db.chat_email_throttle.find_one(
+        {
+            "receiver_id": receiver_id,
+            "sender_id": sender_id,
+            "property_id": property_id,
+            "sent_at": {"$gte": cutoff},
+        },
+        {"_id": 0, "sent_at": 1},
+    )
+    return bool(last)
+
+
 async def _send_chat_email_safe(
     *,
     sender_id: str,
@@ -96,6 +135,19 @@ async def _send_chat_email_safe(
     try:
         if not receiver_id or sender_id == receiver_id:
             return
+
+        # Rule A: throttle so a rapid back-and-forth doesn't spam inboxes.
+        if await _was_recently_emailed(
+            sender_id=sender_id, receiver_id=receiver_id, property_id=property_id
+        ):
+            return
+
+        # Rule B: skip if the recipient is actively reading this conversation.
+        if await _recipient_is_actively_in_chat(
+            sender_id=sender_id, receiver_id=receiver_id, property_id=property_id
+        ):
+            return
+
         receiver = await db.users.find_one(
             {"id": receiver_id}, {"_id": 0, "email": 1, "name": 1}
         )
@@ -110,7 +162,7 @@ async def _send_chat_email_safe(
         )
         property_title = (prop or {}).get("title") or "your conversation"
 
-        await send_chat_message_email(
+        sent = await send_chat_message_email(
             to_email=receiver["email"],
             receiver_name=receiver.get("name") or "",
             sender_name=sender_name,
@@ -119,6 +171,23 @@ async def _send_chat_email_safe(
             property_id=property_id,
             property_title=property_title,
             sender_id=sender_id,
+        )
+
+        # Record the send (even on Postmark failure) so we still throttle —
+        # otherwise a permanently-bouncing inbox would retry every message.
+        await db.chat_email_throttle.update_one(
+            {
+                "receiver_id": receiver_id,
+                "sender_id": sender_id,
+                "property_id": property_id,
+            },
+            {
+                "$set": {
+                    "sent_at": datetime.now(UTC).isoformat(),
+                    "delivered": bool(sent),
+                }
+            },
+            upsert=True,
         )
     except Exception as e:  # noqa: BLE001 - never let chat sends fail
         logger.error("chat email task failed: %s", e)
@@ -226,7 +295,12 @@ async def get_messages(
     mark_filter: dict = {"property_id": property_id, "receiver_id": user_id}
     if with_user:
         mark_filter["sender_id"] = with_user
-    await db.messages.update_many(mark_filter, {"$set": {"read": True}})
+    # Stamp read_at so the chat-email throttle can detect "recipient is
+    # actively in the chat" and suppress noisy emails on fast exchanges.
+    await db.messages.update_many(
+        {**mark_filter, "read": {"$ne": True}},
+        {"$set": {"read": True, "read_at": datetime.now(UTC).isoformat()}},
+    )
     
     return messages
 

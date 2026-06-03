@@ -9,7 +9,7 @@ from __future__ import annotations
 import asyncio
 import sys
 from pathlib import Path
-from unittest.mock import patch
+from unittest.mock import patch, AsyncMock
 
 ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
@@ -109,3 +109,55 @@ class TestChatRouteTriggersEmail:
                     image_url=None,
                 )
             )
+
+
+def _async(value):
+    fut = asyncio.Future()
+    fut.set_result(value)
+    return fut
+
+
+class TestChatEmailThrottle:
+    """Two-rule throttle around _send_chat_email_safe:
+      A. Skip if we already emailed this conversation in the last 5 min.
+      B. Skip if the recipient is actively reading the chat (read_at within 2 min).
+    """
+
+    def _run(self, **overrides):
+        """Run _send_chat_email_safe with controllable db helpers."""
+        from routes import chat as chat_module
+
+        was_recently_emailed = overrides.get("was_recently_emailed", False)
+        recipient_active = overrides.get("recipient_active", False)
+        receiver_doc = overrides.get("receiver_doc", {"email": "x@example.com", "name": "Rx"})
+
+        with patch.object(chat_module, "_was_recently_emailed", new=AsyncMock(return_value=was_recently_emailed)), \
+             patch.object(chat_module, "_recipient_is_actively_in_chat", new=AsyncMock(return_value=recipient_active)), \
+             patch.object(chat_module, "send_chat_message_email", new=AsyncMock(return_value=True)) as mock_send, \
+             patch.object(chat_module, "db") as mock_db:
+            mock_db.users.find_one = AsyncMock(side_effect=[receiver_doc, {"name": "Sx"}])
+            mock_db.properties.find_one = AsyncMock(return_value={"title": "Sunny"})
+            mock_db.chat_email_throttle.update_one = AsyncMock(return_value=None)
+
+            asyncio.get_event_loop().run_until_complete(
+                chat_module._send_chat_email_safe(
+                    sender_id="s",
+                    receiver_id="r",
+                    property_id="p",
+                    message_body="hi",
+                    image_url=None,
+                )
+            )
+            return mock_send
+
+    def test_throttle_skips_email_when_recently_emailed(self):
+        mock_send = self._run(was_recently_emailed=True)
+        mock_send.assert_not_called()
+
+    def test_throttle_skips_email_when_recipient_actively_in_chat(self):
+        mock_send = self._run(recipient_active=True)
+        mock_send.assert_not_called()
+
+    def test_throttle_allows_email_when_quiet(self):
+        mock_send = self._run()
+        mock_send.assert_called_once()
