@@ -440,6 +440,80 @@ async def send_mention_notification_email(
     )
 
 
+async def send_chat_message_email(
+    to_email: str,
+    receiver_name: str,
+    sender_name: str,
+    message_snippet: str,
+    has_image: bool,
+    property_id: str,
+    property_title: str,
+    sender_id: str,
+) -> bool:
+    """Email the recipient as soon as a chat message lands in their inbox.
+
+    Fired from POST /api/chat/messages immediately after the message row is
+    persisted. Deep-links straight into the conversation with the sender so
+    the recipient can reply with one tap.
+
+    For image-only messages the snippet line is replaced with a 📷 placeholder
+    so the email body still reads naturally.
+    """
+    import html as _html
+    snippet = (message_snippet or "").strip()
+    if len(snippet) > 240:
+        snippet = snippet[:237] + "…"
+
+    safe_sender = _html.escape(sender_name or "Someone")
+    safe_property = _html.escape(property_title or "your property")
+    safe_receiver = _html.escape(receiver_name or "there")
+
+    if snippet:
+        safe_snippet = _html.escape(snippet)
+        body_block = (
+            f'<div style="background:#f7f7f4;border-left:4px solid {BRAND_TEAL};'
+            f'border-radius:8px;padding:16px 18px;margin:18px 0;color:#444;'
+            f'font-size:14px;line-height:1.6;">"{safe_snippet}"</div>'
+        )
+        subject_tail = snippet if len(snippet) <= 60 else snippet[:57] + "…"
+    elif has_image:
+        body_block = (
+            f'<div style="background:#f7f7f4;border-left:4px solid {BRAND_GOLD};'
+            f'border-radius:8px;padding:16px 18px;margin:18px 0;color:#666;'
+            f'font-size:14px;line-height:1.6;font-style:italic;">'
+            f'📷 Sent you a photo</div>'
+        )
+        subject_tail = "Sent you a photo"
+    else:
+        body_block = ""
+        subject_tail = "New message"
+
+    deep_link = f"{FRONTEND_URL}/chat/{property_id}"
+    if sender_id:
+        deep_link += f"?with={sender_id}"
+
+    inner = f"""
+    <h2 style="color:#222;font-size:22px;margin:0 0 8px;">New chat message 💬</h2>
+    <p style="color:#555;font-size:14px;line-height:1.7;margin:0 0 4px;">
+      Hi {safe_receiver},<br />
+      <strong>{safe_sender}</strong> sent you a message about
+      <strong style="color:{BRAND_TEAL};">{safe_property}</strong>.
+    </p>
+    {body_block}
+    {_button("Open Conversation", deep_link)}
+    <p style="color:#888;font-size:12px;line-height:1.6;margin-top:10px;">
+      You're receiving this because someone messaged you on My Israel Rental.
+      Reply directly inside the conversation.
+    </p>
+    """
+    return await send_email(
+        to_email,
+        f"{sender_name}: {subject_tail}",
+        _wrap(inner, preheader=f"{safe_sender} · {safe_property}"),
+        tag="chat-message",
+    )
+
+
 async def send_payment_confirmation_email(
     to_email: str,
     name: str,

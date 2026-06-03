@@ -1,4 +1,6 @@
 """Auto-extracted from server.py during the 2026-04 refactor."""
+import asyncio
+import logging
 import uuid
 from datetime import UTC, datetime, timedelta
 
@@ -15,10 +17,13 @@ from models_response import (
 )
 from routes.deps import db, verify_token
 from utils.chat_translate import detect_language, translate_chat_message
+from utils.email import send_chat_message_email
 from utils.mentions import current_user_role_in_property, extract_mentions
 
 router = APIRouter()
 api_router = router  # alias so existing @api_router decorators work verbatim
+
+logger = logging.getLogger(__name__)
 
 # How long a typing ping is considered "live" for the counterparty.
 _TYPING_TTL_SECONDS = 5
@@ -61,8 +66,62 @@ async def send_message(chat_data: ChatMessage, payload: dict = Depends(verify_to
         "created_at": datetime.now(UTC).isoformat()
     }
     await db.notifications.insert_one(notification)
-    
+
+    # Fire-and-forget email to the recipient. We don't await it so the HTTP
+    # response stays snappy; Postmark calls run on a worker thread inside
+    # send_email() itself.
+    asyncio.create_task(
+        _send_chat_email_safe(
+            sender_id=payload["user_id"],
+            receiver_id=chat_data.receiver_id,
+            property_id=chat_data.property_id,
+            message_body=chat_data.message,
+            image_url=chat_data.image_url,
+        )
+    )
+
     return {"id": message_id, "message": "Message sent successfully"}
+
+
+async def _send_chat_email_safe(
+    *,
+    sender_id: str,
+    receiver_id: str,
+    property_id: str,
+    message_body: str,
+    image_url: str | None,
+) -> None:
+    """Resolve sender/receiver/property and email the recipient. Swallows all
+    errors — chat sends must never fail because of an email problem."""
+    try:
+        if not receiver_id or sender_id == receiver_id:
+            return
+        receiver = await db.users.find_one(
+            {"id": receiver_id}, {"_id": 0, "email": 1, "name": 1}
+        )
+        if not receiver or not receiver.get("email"):
+            return
+        sender = await db.users.find_one(
+            {"id": sender_id}, {"_id": 0, "name": 1}
+        )
+        sender_name = (sender or {}).get("name") or "Someone"
+        prop = await db.properties.find_one(
+            {"id": property_id}, {"_id": 0, "title": 1}
+        )
+        property_title = (prop or {}).get("title") or "your conversation"
+
+        await send_chat_message_email(
+            to_email=receiver["email"],
+            receiver_name=receiver.get("name") or "",
+            sender_name=sender_name,
+            message_snippet=message_body or "",
+            has_image=bool(image_url),
+            property_id=property_id,
+            property_title=property_title,
+            sender_id=sender_id,
+        )
+    except Exception as e:  # noqa: BLE001 - never let chat sends fail
+        logger.error("chat email task failed: %s", e)
 
 
 @api_router.delete("/chat/messages/{message_id}", response_model=MessageResponse)
