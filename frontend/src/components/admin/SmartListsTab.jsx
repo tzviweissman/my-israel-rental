@@ -1,0 +1,454 @@
+/**
+ * Smart Lists tab — super-admin tool for generating shareable property
+ * shortlists by location + max monthly rent (ILS) + availability window.
+ *
+ * Owns its own state; mounted from AdminDashboard. Saved lists live in the
+ * `smart_lists` Mongo collection (private to the super admin).
+ */
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import axios from 'axios';
+import { toast } from 'sonner';
+import {
+  Search,
+  Copy,
+  Save,
+  Trash2,
+  Sparkles,
+  MapPin,
+  Calendar,
+  ExternalLink,
+  Banknote,
+  Check,
+} from 'lucide-react';
+import { API } from '../../App';
+import { LOCATION_OPTIONS, ALL_AREA_VALUES } from '../../constants/locations';
+
+const AVAILABILITY_OPTIONS = [
+  { value: 'next_month', label: 'Available within the next month' },
+  { value: 'next_3_months', label: 'Available within the next 3 months' },
+  { value: 'next_6_months', label: 'Available within the next 6 months' },
+  { value: 'anytime', label: 'Available anytime (no date restriction)' },
+];
+
+const formatPrice = (amount, currency) => {
+  if (amount == null) return '—';
+  const sym = currency === 'USD' ? '$' : '₪';
+  return `${sym}${Number(amount).toLocaleString()}`;
+};
+
+const formatDate = (iso) => {
+  if (!iso) return 'Available now';
+  try {
+    return new Date(iso).toLocaleDateString(undefined, {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+    });
+  } catch {
+    return iso;
+  }
+};
+
+const buildCopyText = (properties) =>
+  properties
+    .map((p) =>
+      [
+        p.area || 'Israel',
+        formatPrice(p.price, p.currency),
+        formatDate(p.available_from),
+        p.listing_url,
+      ].join('\n'),
+    )
+    .join('\n\n');
+
+const SmartListsTab = ({ token }) => {
+  const [location, setLocation] = useState('');
+  const [maxRent, setMaxRent] = useState('');
+  const [availability, setAvailability] = useState('anytime');
+  const [results, setResults] = useState(null); // { properties, count, usd_to_ils_rate }
+  const [loading, setLoading] = useState(false);
+  const [saved, setSaved] = useState([]);
+  const [savingName, setSavingName] = useState('');
+  const [showSaveBox, setShowSaveBox] = useState(false);
+  const [copyOk, setCopyOk] = useState(false);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+
+  const headers = useMemo(() => ({ Authorization: `Bearer ${token}` }), [token]);
+
+  const fetchSaved = useCallback(async () => {
+    try {
+      const res = await axios.get(`${API}/admin/smart-lists`, { headers });
+      setSaved(res.data || []);
+    } catch {
+      /* non-fatal */
+    }
+  }, [headers]);
+
+  useEffect(() => {
+    fetchSaved();
+  }, [fetchSaved]);
+
+  const generate = async () => {
+    setLoading(true);
+    setResults(null);
+    try {
+      const res = await axios.post(
+        `${API}/admin/smart-lists/generate`,
+        {
+          location: location.trim() || null,
+          max_monthly_rent_ils: maxRent === '' ? null : Number(maxRent),
+          availability,
+        },
+        { headers },
+      );
+      setResults(res.data);
+    } catch (err) {
+      toast.error(err.response?.data?.detail || 'Failed to generate list');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const saveList = async () => {
+    if (!savingName.trim()) {
+      toast.error('Please name this list');
+      return;
+    }
+    try {
+      await axios.post(
+        `${API}/admin/smart-lists`,
+        {
+          name: savingName.trim(),
+          location: location.trim() || null,
+          max_monthly_rent_ils: maxRent === '' ? null : Number(maxRent),
+          availability,
+        },
+        { headers },
+      );
+      toast.success('List saved');
+      setSavingName('');
+      setShowSaveBox(false);
+      fetchSaved();
+    } catch (err) {
+      toast.error(err.response?.data?.detail || 'Failed to save list');
+    }
+  };
+
+  const openSavedList = async (id) => {
+    try {
+      const res = await axios.get(`${API}/admin/smart-lists/${id}`, { headers });
+      const { filters } = res.data;
+      setLocation(filters?.location || '');
+      setMaxRent(filters?.max_monthly_rent_ils ?? '');
+      setAvailability(filters?.availability || 'anytime');
+      setResults({
+        properties: res.data.properties,
+        count: res.data.properties.length,
+        usd_to_ils_rate: res.data.usd_to_ils_rate,
+      });
+    } catch (err) {
+      toast.error(err.response?.data?.detail || 'Failed to load list');
+    }
+  };
+
+  const deleteSaved = async (id) => {
+    if (!window.confirm('Delete this saved list?')) return;
+    try {
+      await axios.delete(`${API}/admin/smart-lists/${id}`, { headers });
+      fetchSaved();
+      toast.success('List deleted');
+    } catch (err) {
+      toast.error(err.response?.data?.detail || 'Failed to delete');
+    }
+  };
+
+  const copyToClipboard = async () => {
+    if (!results?.properties?.length) return;
+    const text = buildCopyText(results.properties);
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopyOk(true);
+      setTimeout(() => setCopyOk(false), 2000);
+    } catch {
+      // Fallback: select text in a hidden textarea
+      const ta = document.createElement('textarea');
+      ta.value = text;
+      document.body.appendChild(ta);
+      ta.select();
+      try {
+        document.execCommand('copy');
+        setCopyOk(true);
+        setTimeout(() => setCopyOk(false), 2000);
+      } catch {
+        toast.error('Copy failed — please select manually.');
+      }
+      document.body.removeChild(ta);
+    }
+  };
+
+  // Autocomplete suggestions: prefix match on the canonical area values.
+  const suggestions = useMemo(() => {
+    const q = location.trim().toLowerCase();
+    if (!q) return [];
+    return ALL_AREA_VALUES.filter((a) => a.toLowerCase().includes(q)).slice(0, 8);
+  }, [location]);
+
+  return (
+    <div className="space-y-6" data-testid="smart-lists-tab">
+      <div className="flex items-start gap-3">
+        <div className="w-11 h-11 rounded-xl bg-[#D4AF37]/15 flex items-center justify-center shrink-0">
+          <Sparkles size={20} className="text-[#D4AF37]" />
+        </div>
+        <div>
+          <h2 className="text-2xl font-bold text-gray-900">Smart Lists</h2>
+          <p className="text-sm text-gray-500 mt-1">
+            Generate a shareable list of active rentals by location, price ceiling, and
+            availability — then copy it for WhatsApp, email, or Telegram.
+          </p>
+        </div>
+      </div>
+
+      {/* ---------------- Filters ---------------- */}
+      <div className="bg-white rounded-2xl border border-gray-200 p-6 grid grid-cols-1 md:grid-cols-3 gap-4">
+        {/* Location */}
+        <div className="relative">
+          <label className="text-xs font-semibold text-gray-600 uppercase tracking-wide flex items-center gap-1.5">
+            <MapPin size={12} /> Location
+          </label>
+          <input
+            type="text"
+            value={location}
+            onChange={(e) => {
+              setLocation(e.target.value);
+              setShowSuggestions(true);
+            }}
+            onFocus={() => setShowSuggestions(true)}
+            onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
+            placeholder="e.g. Jerusalem - Sanhedria"
+            className="mt-2 w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#1E6A6A]/30 focus:border-[#1E6A6A] text-sm"
+            data-testid="smart-list-location-input"
+            autoComplete="off"
+          />
+          {showSuggestions && suggestions.length > 0 && (
+            <ul
+              className="absolute z-20 mt-1 w-full bg-white border border-gray-200 rounded-lg shadow-lg max-h-56 overflow-auto"
+              data-testid="smart-list-location-suggestions"
+            >
+              {suggestions.map((s) => (
+                <li
+                  key={s}
+                  onMouseDown={(e) => {
+                    e.preventDefault();
+                    setLocation(s);
+                    setShowSuggestions(false);
+                  }}
+                  className="px-3 py-2 text-sm hover:bg-gray-50 cursor-pointer"
+                  data-testid={`smart-list-suggestion-${s}`}
+                >
+                  {s}
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+
+        {/* Max rent */}
+        <div>
+          <label className="text-xs font-semibold text-gray-600 uppercase tracking-wide flex items-center gap-1.5">
+            <Banknote size={12} /> Max monthly rent (₪)
+          </label>
+          <input
+            type="number"
+            value={maxRent}
+            onChange={(e) => setMaxRent(e.target.value)}
+            placeholder="e.g. 10000"
+            className="mt-2 w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#1E6A6A]/30 focus:border-[#1E6A6A] text-sm"
+            data-testid="smart-list-max-rent-input"
+            min="0"
+          />
+          <p className="text-[11px] text-gray-400 mt-1">
+            USD listings are auto-converted to ILS before filtering.
+          </p>
+        </div>
+
+        {/* Availability */}
+        <div>
+          <label className="text-xs font-semibold text-gray-600 uppercase tracking-wide flex items-center gap-1.5">
+            <Calendar size={12} /> Availability
+          </label>
+          <select
+            value={availability}
+            onChange={(e) => setAvailability(e.target.value)}
+            className="mt-2 w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#1E6A6A]/30 focus:border-[#1E6A6A] text-sm bg-white"
+            data-testid="smart-list-availability-select"
+          >
+            {AVAILABILITY_OPTIONS.map((o) => (
+              <option key={o.value} value={o.value}>
+                {o.label}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div className="md:col-span-3 flex flex-wrap items-center gap-3 pt-2">
+          <button
+            type="button"
+            onClick={generate}
+            disabled={loading}
+            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#1E6A6A] text-white text-sm font-semibold hover:bg-[#175555] disabled:opacity-50 transition-colors"
+            data-testid="smart-list-generate-btn"
+          >
+            <Search size={16} />
+            {loading ? 'Generating…' : 'Generate List'}
+          </button>
+          {results && (
+            <>
+              <button
+                type="button"
+                onClick={copyToClipboard}
+                disabled={!results.properties?.length}
+                className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white border border-gray-200 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-40"
+                data-testid="smart-list-copy-btn"
+              >
+                {copyOk ? <Check size={16} className="text-green-600" /> : <Copy size={16} />}
+                {copyOk ? 'Copied' : 'Copy list'}
+              </button>
+              <button
+                type="button"
+                onClick={() => setShowSaveBox((v) => !v)}
+                className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white border border-gray-200 text-sm font-medium text-gray-700 hover:bg-gray-50"
+                data-testid="smart-list-save-toggle"
+              >
+                <Save size={16} /> Save this list
+              </button>
+            </>
+          )}
+        </div>
+
+        {showSaveBox && (
+          <div className="md:col-span-3 flex flex-wrap items-center gap-2 pt-2">
+            <input
+              type="text"
+              value={savingName}
+              onChange={(e) => setSavingName(e.target.value)}
+              placeholder='e.g. "Ramat Eshkol Under 10k – June 2026"'
+              className="flex-1 min-w-[260px] px-4 py-2.5 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#1E6A6A]/30 focus:border-[#1E6A6A] text-sm"
+              data-testid="smart-list-save-name-input"
+            />
+            <button
+              type="button"
+              onClick={saveList}
+              className="px-4 py-2.5 rounded-xl bg-[#D4AF37] text-[#1E6A6A] text-sm font-semibold hover:opacity-90"
+              data-testid="smart-list-save-confirm-btn"
+            >
+              Save
+            </button>
+          </div>
+        )}
+      </div>
+
+      {/* ---------------- Results ---------------- */}
+      {results && (
+        <div className="bg-white rounded-2xl border border-gray-200 p-6" data-testid="smart-list-results">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-lg font-bold text-gray-900">
+              {results.count} {results.count === 1 ? 'property' : 'properties'} matched
+            </h3>
+            {results.usd_to_ils_rate && (
+              <span className="text-xs text-gray-400">
+                USD→ILS rate: {Number(results.usd_to_ils_rate).toFixed(3)}
+              </span>
+            )}
+          </div>
+          {results.properties.length === 0 ? (
+            <p className="text-sm text-gray-500">No properties match — try widening the filters.</p>
+          ) : (
+            <ul className="divide-y divide-gray-100">
+              {results.properties.map((p) => (
+                <li key={p.id} className="py-4 flex items-start justify-between gap-4" data-testid={`smart-list-row-${p.id}`}>
+                  <div className="min-w-0">
+                    <p className="font-semibold text-gray-900 text-sm flex items-center gap-2">
+                      <MapPin size={13} className="text-[#1E6A6A] shrink-0" />
+                      <span className="truncate">{p.area || 'Israel'}</span>
+                    </p>
+                    <p className="text-sm text-gray-600 mt-0.5">
+                      <span className="font-medium" style={{ color: '#D4AF37' }}>
+                        {formatPrice(p.price, p.currency)}
+                      </span>
+                      {p.currency === 'USD' && p.price_ils_equivalent != null && (
+                        <span className="text-xs text-gray-400 ml-1.5">
+                          (≈ ₪{Math.round(p.price_ils_equivalent).toLocaleString()})
+                        </span>
+                      )}
+                      <span className="text-gray-300 mx-1.5">·</span>
+                      <span className="text-gray-500">{formatDate(p.available_from)}</span>
+                    </p>
+                    <a
+                      href={p.listing_url}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="inline-flex items-center gap-1 mt-1 text-xs text-[#1E6A6A] hover:underline"
+                      data-testid={`smart-list-link-${p.id}`}
+                    >
+                      <ExternalLink size={11} />
+                      <span className="truncate max-w-[460px]">{p.listing_url}</span>
+                    </a>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      )}
+
+      {/* ---------------- Saved lists ---------------- */}
+      <div className="bg-white rounded-2xl border border-gray-200 p-6" data-testid="smart-list-saved-section">
+        <h3 className="text-lg font-bold text-gray-900 mb-4">Saved lists</h3>
+        {saved.length === 0 ? (
+          <p className="text-sm text-gray-500">
+            No saved lists yet. Generate a list and click <strong>Save this list</strong> to keep it.
+          </p>
+        ) : (
+          <ul className="divide-y divide-gray-100">
+            {saved.map((s) => (
+              <li
+                key={s.id}
+                className="py-3 flex items-center justify-between gap-3"
+                data-testid={`smart-list-saved-${s.id}`}
+              >
+                <button
+                  type="button"
+                  onClick={() => openSavedList(s.id)}
+                  className="flex-1 min-w-0 text-left"
+                >
+                  <p className="text-sm font-semibold text-gray-900 truncate hover:text-[#1E6A6A]">
+                    {s.name}
+                  </p>
+                  <p className="text-xs text-gray-500 mt-0.5">
+                    {s.filters?.location || 'Any location'} ·{' '}
+                    {s.filters?.max_monthly_rent_ils
+                      ? `≤ ₪${Number(s.filters.max_monthly_rent_ils).toLocaleString()}`
+                      : 'Any price'}
+                    {' · '}
+                    {s.snapshot_count} match{s.snapshot_count === 1 ? '' : 'es'} when saved
+                  </p>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => deleteSaved(s.id)}
+                  className="p-2 rounded-lg text-gray-400 hover:text-red-600 hover:bg-red-50 transition-colors"
+                  data-testid={`smart-list-delete-${s.id}`}
+                  aria-label="Delete saved list"
+                >
+                  <Trash2 size={15} />
+                </button>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+    </div>
+  );
+};
+
+export default SmartListsTab;

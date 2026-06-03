@@ -25,6 +25,7 @@ load_dotenv(ROOT_DIR / ".env")
 from routes import (  # noqa: E402
     admin,
     admin_import,
+    admin_smart_lists,
     auth,
     bookings,
     bulk_upload,
@@ -63,6 +64,7 @@ for mod in (
     notifications,
     admin,
     admin_import,
+    admin_smart_lists,
     saved_searches,
     ical,
     misc,
