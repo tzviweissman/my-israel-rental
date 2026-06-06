@@ -18,10 +18,10 @@ import {
   Calendar,
   ExternalLink,
   Banknote,
+  Bed,
   Check,
 } from 'lucide-react';
 import { API } from '../../App';
-import { LOCATION_OPTIONS, ALL_AREA_VALUES } from '../../constants/locations';
 
 const AVAILABILITY_OPTIONS = [
   { value: 'next_month', label: 'Available within the next month' },
@@ -64,14 +64,15 @@ const buildCopyText = (properties) =>
 const SmartListsTab = ({ token }) => {
   const [location, setLocation] = useState('');
   const [maxRent, setMaxRent] = useState('');
+  const [minBedrooms, setMinBedrooms] = useState('');
   const [availability, setAvailability] = useState('anytime');
   const [results, setResults] = useState(null); // { properties, count, usd_to_ils_rate }
   const [loading, setLoading] = useState(false);
   const [saved, setSaved] = useState([]);
+  const [availableLocations, setAvailableLocations] = useState([]);
   const [savingName, setSavingName] = useState('');
   const [showSaveBox, setShowSaveBox] = useState(false);
   const [copyOk, setCopyOk] = useState(false);
-  const [showSuggestions, setShowSuggestions] = useState(false);
 
   const headers = useMemo(() => ({ Authorization: `Bearer ${token}` }), [token]);
 
@@ -84,9 +85,19 @@ const SmartListsTab = ({ token }) => {
     }
   }, [headers]);
 
+  const fetchLocations = useCallback(async () => {
+    try {
+      const res = await axios.get(`${API}/admin/smart-lists/locations`, { headers });
+      setAvailableLocations(res.data || []);
+    } catch {
+      /* non-fatal — dropdown just stays empty */
+    }
+  }, [headers]);
+
   useEffect(() => {
     fetchSaved();
-  }, [fetchSaved]);
+    fetchLocations();
+  }, [fetchSaved, fetchLocations]);
 
   const generate = async () => {
     setLoading(true);
@@ -97,6 +108,7 @@ const SmartListsTab = ({ token }) => {
         {
           location: location.trim() || null,
           max_monthly_rent_ils: maxRent === '' ? null : Number(maxRent),
+          min_bedrooms: minBedrooms === '' ? null : Number(minBedrooms),
           availability,
         },
         { headers },
@@ -121,6 +133,7 @@ const SmartListsTab = ({ token }) => {
           name: savingName.trim(),
           location: location.trim() || null,
           max_monthly_rent_ils: maxRent === '' ? null : Number(maxRent),
+          min_bedrooms: minBedrooms === '' ? null : Number(minBedrooms),
           availability,
         },
         { headers },
@@ -140,6 +153,7 @@ const SmartListsTab = ({ token }) => {
       const { filters } = res.data;
       setLocation(filters?.location || '');
       setMaxRent(filters?.max_monthly_rent_ils ?? '');
+      setMinBedrooms(filters?.min_bedrooms ?? '');
       setAvailability(filters?.availability || 'anytime');
       setResults({
         properties: res.data.properties,
@@ -187,11 +201,8 @@ const SmartListsTab = ({ token }) => {
   };
 
   // Autocomplete suggestions: prefix match on the canonical area values.
-  const suggestions = useMemo(() => {
-    const q = location.trim().toLowerCase();
-    if (!q) return [];
-    return ALL_AREA_VALUES.filter((a) => a.toLowerCase().includes(q)).slice(0, 8);
-  }, [location]);
+  // (Removed — location is now a dropdown of areas that actually have
+  // active listings.)
 
   return (
     <div className="space-y-6" data-testid="smart-lists-tab">
@@ -209,47 +220,28 @@ const SmartListsTab = ({ token }) => {
       </div>
 
       {/* ---------------- Filters ---------------- */}
-      <div className="bg-white rounded-2xl border border-gray-200 p-6 grid grid-cols-1 md:grid-cols-3 gap-4">
-        {/* Location */}
-        <div className="relative">
+      <div className="bg-white rounded-2xl border border-gray-200 p-6 grid grid-cols-1 md:grid-cols-4 gap-4">
+        {/* Location — dropdown of areas with at least one active listing */}
+        <div>
           <label className="text-xs font-semibold text-gray-600 uppercase tracking-wide flex items-center gap-1.5">
             <MapPin size={12} /> Location
           </label>
-          <input
-            type="text"
+          <select
             value={location}
-            onChange={(e) => {
-              setLocation(e.target.value);
-              setShowSuggestions(true);
-            }}
-            onFocus={() => setShowSuggestions(true)}
-            onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
-            placeholder="e.g. Jerusalem - Sanhedria"
-            className="mt-2 w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#1E6A6A]/30 focus:border-[#1E6A6A] text-sm"
-            data-testid="smart-list-location-input"
-            autoComplete="off"
-          />
-          {showSuggestions && suggestions.length > 0 && (
-            <ul
-              className="absolute z-20 mt-1 w-full bg-white border border-gray-200 rounded-lg shadow-lg max-h-56 overflow-auto"
-              data-testid="smart-list-location-suggestions"
-            >
-              {suggestions.map((s) => (
-                <li
-                  key={s}
-                  onMouseDown={(e) => {
-                    e.preventDefault();
-                    setLocation(s);
-                    setShowSuggestions(false);
-                  }}
-                  className="px-3 py-2 text-sm hover:bg-gray-50 cursor-pointer"
-                  data-testid={`smart-list-suggestion-${s}`}
-                >
-                  {s}
-                </li>
-              ))}
-            </ul>
-          )}
+            onChange={(e) => setLocation(e.target.value)}
+            className="mt-2 w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#1E6A6A]/30 focus:border-[#1E6A6A] text-sm bg-white"
+            data-testid="smart-list-location-select"
+          >
+            <option value="">All locations</option>
+            {availableLocations.map((a) => (
+              <option key={a} value={a}>
+                {a}
+              </option>
+            ))}
+          </select>
+          <p className="text-[11px] text-gray-400 mt-1">
+            Only areas with at least one active listing are shown.
+          </p>
         </div>
 
         {/* Max rent */}
@@ -267,8 +259,29 @@ const SmartListsTab = ({ token }) => {
             min="0"
           />
           <p className="text-[11px] text-gray-400 mt-1">
-            USD listings are auto-converted to ILS before filtering.
+            USD listings auto-converted to ILS before filtering.
           </p>
+        </div>
+
+        {/* Bedrooms (minimum) */}
+        <div>
+          <label className="text-xs font-semibold text-gray-600 uppercase tracking-wide flex items-center gap-1.5">
+            <Bed size={12} /> Bedrooms (min)
+          </label>
+          <select
+            value={minBedrooms}
+            onChange={(e) => setMinBedrooms(e.target.value)}
+            className="mt-2 w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#1E6A6A]/30 focus:border-[#1E6A6A] text-sm bg-white"
+            data-testid="smart-list-bedrooms-select"
+          >
+            <option value="">Any</option>
+            <option value="1">1+</option>
+            <option value="2">2+</option>
+            <option value="3">3+</option>
+            <option value="4">4+</option>
+            <option value="5">5+</option>
+            <option value="6">6+</option>
+          </select>
         </div>
 
         {/* Availability */}
@@ -290,7 +303,7 @@ const SmartListsTab = ({ token }) => {
           </select>
         </div>
 
-        <div className="md:col-span-3 flex flex-wrap items-center gap-3 pt-2">
+        <div className="md:col-span-4 flex flex-wrap items-center gap-3 pt-2">
           <button
             type="button"
             onClick={generate}
@@ -326,7 +339,7 @@ const SmartListsTab = ({ token }) => {
         </div>
 
         {showSaveBox && (
-          <div className="md:col-span-3 flex flex-wrap items-center gap-2 pt-2">
+          <div className="md:col-span-4 flex flex-wrap items-center gap-2 pt-2">
             <input
               type="text"
               value={savingName}
@@ -380,6 +393,12 @@ const SmartListsTab = ({ token }) => {
                           (≈ ₪{Math.round(p.price_ils_equivalent).toLocaleString()})
                         </span>
                       )}
+                      {p.bedrooms != null && (
+                        <>
+                          <span className="text-gray-300 mx-1.5">·</span>
+                          <span className="text-gray-500">{p.bedrooms} bed{p.bedrooms === 1 ? '' : 's'}</span>
+                        </>
+                      )}
                       <span className="text-gray-300 mx-1.5">·</span>
                       <span className="text-gray-500">{formatDate(p.available_from)}</span>
                     </p>
@@ -429,6 +448,9 @@ const SmartListsTab = ({ token }) => {
                     {s.filters?.max_monthly_rent_ils
                       ? `≤ ₪${Number(s.filters.max_monthly_rent_ils).toLocaleString()}`
                       : 'Any price'}
+                    {s.filters?.min_bedrooms
+                      ? ` · ${s.filters.min_bedrooms}+ beds`
+                      : ''}
                     {' · '}
                     {s.snapshot_count} match{s.snapshot_count === 1 ? '' : 'es'} when saved
                   </p>
@@ -452,3 +474,4 @@ const SmartListsTab = ({ token }) => {
 };
 
 export default SmartListsTab;
+

@@ -59,6 +59,7 @@ _ALLOWED_RENTAL_TYPES = {"long-term", "short-term"}
 class SmartListFilters(BaseModel):
     location: str | None = None
     max_monthly_rent_ils: float | None = Field(default=None, ge=0)
+    min_bedrooms: float | None = Field(default=None, ge=0)
     availability: Availability = "anytime"
 
 
@@ -74,6 +75,7 @@ class SmartListPropertyOut(BaseModel):
     price: float | None = None
     currency: str
     price_ils_equivalent: float | None = None
+    bedrooms: float | None = None
     available_from: str | None = None
     rental_type: str
     listing_url: str
@@ -148,6 +150,9 @@ async def _apply_filters(filters: SmartListFilters) -> tuple[list[dict], float |
                 "$options": "i",
             }
 
+    if filters.min_bedrooms is not None:
+        query["bedrooms"] = {"$gte": filters.min_bedrooms}
+
     docs = await db.properties.find(query, {"_id": 0}).to_list(1000)
 
     # Currency conversion + availability filter happen in Python.
@@ -202,6 +207,7 @@ def _shape_for_output(prop: dict) -> SmartListPropertyOut:
         price=prop.get("monthly_price"),
         currency=(prop.get("currency") or "ILS").upper(),
         price_ils_equivalent=prop.get("_price_ils"),
+        bedrooms=prop.get("bedrooms"),
         available_from=prop.get(date_field) or None,
         rental_type=rental_type,
         listing_url=_public_listing_url(prop["id"]),
@@ -211,6 +217,25 @@ def _shape_for_output(prop: dict) -> SmartListPropertyOut:
 # ---------------------------------------------------------------------------
 # Endpoints
 # ---------------------------------------------------------------------------
+@api_router.get("/admin/smart-lists/locations", response_model=list[str])
+async def list_smart_list_locations(
+    payload: dict = Depends(verify_token),
+) -> list[str]:
+    """Distinct list of area values backed by at least one active long-term
+    or short-term listing. Powers the location dropdown so admins only see
+    options that will actually produce matches."""
+    _require_admin(payload)
+    areas = await db.properties.distinct(
+        "area",
+        {
+            "status": "active",
+            "rental_type": {"$in": list(_ALLOWED_RENTAL_TYPES)},
+            "area": {"$nin": [None, ""]},
+        },
+    )
+    return sorted([a for a in areas if a], key=lambda s: s.lower())
+
+
 @api_router.post("/admin/smart-lists/generate", response_model=SmartListGenerateResponse)
 async def generate_smart_list(
     filters: SmartListFilters,
@@ -265,22 +290,30 @@ async def save_smart_list(
     filters = SmartListFilters(
         location=body.location,
         max_monthly_rent_ils=body.max_monthly_rent_ils,
+        min_bedrooms=body.min_bedrooms,
         availability=body.availability,
     )
     matches, _ = await _apply_filters(filters)
 
     list_id = str(uuid.uuid4())
+    created_at = datetime.now(UTC).isoformat()
     doc = {
         "id": list_id,
         "owner_id": payload["user_id"],
         "name": body.name.strip(),
         "filters": filters.model_dump(),
         "snapshot_count": len(matches),
-        "created_at": datetime.now(UTC).isoformat(),
+        "created_at": created_at,
     }
     await db.smart_lists.insert_one(doc)
-    doc.pop("owner_id", None)
-    return doc
+    # Return a fresh dict (Mongo mutated `doc` by injecting `_id`).
+    return {
+        "id": list_id,
+        "name": doc["name"],
+        "filters": doc["filters"],
+        "snapshot_count": doc["snapshot_count"],
+        "created_at": created_at,
+    }
 
 
 @api_router.get("/admin/smart-lists/{list_id}", response_model=SavedSmartListDetail)
