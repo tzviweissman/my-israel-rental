@@ -5,7 +5,7 @@
  * Owns its own state; mounted from AdminDashboard. Saved lists live in the
  * `smart_lists` Mongo collection (private to the super admin).
  */
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useMemo } from 'react';
 import axios from 'axios';
 import { toast } from 'sonner';
 import {
@@ -21,8 +21,10 @@ import {
   Bed,
   Home,
   Check,
+  MessageCircle,
 } from 'lucide-react';
 import { API } from '../../App';
+import { useApiSWR } from '../../hooks/useApiSWR';
 
 const AVAILABILITY_OPTIONS = [
   { value: 'next_month', label: 'Available within the next month' },
@@ -48,30 +50,74 @@ const RENTAL_CATEGORY_OPTIONS = [
 
 const VACATION_LIKE_CATEGORIES = new Set(['vacation', 'sukkot', 'pesach']);
 
-const formatDate = (iso) => {
+const formatAvailable = (iso) => {
   if (!iso) return 'Available now';
   try {
-    return new Date(iso).toLocaleDateString(undefined, {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-    });
+    const d = new Date(iso);
+    if (Number.isNaN(d.getTime())) return `Available ${iso}`;
+    return `Available ${d.toLocaleDateString('en-US', { month: 'long', day: 'numeric' })}`;
   } catch {
-    return iso;
+    return `Available ${iso}`;
   }
 };
 
-const buildCopyText = (properties) =>
-  properties
-    .map((p) =>
-      [
-        p.area || 'Israel',
+const formatBedrooms = (n) => {
+  if (n == null) return null;
+  const v = Number(n);
+  if (!Number.isFinite(v)) return null;
+  // 2.5 BR etc. — round to 1 decimal but drop trailing ".0".
+  const display = v % 1 === 0 ? `${v}` : v.toFixed(1);
+  return `${display} bedroom${v === 1 ? '' : 's'}`;
+};
+
+const stripCity = (loc) => {
+  if (!loc) return '';
+  const trimmed = loc.trim();
+  return trimmed.includes(' - ') ? trimmed.split(' - ', 2)[1].trim() : trimmed;
+};
+
+const CATEGORY_TITLE = {
+  any: 'rentals',
+  'long-term': 'long-term rentals',
+  'short-term': 'short-term rentals',
+  vacation: 'vacation rentals',
+  sukkot: 'Sukkot rentals',
+  pesach: 'Pesach rentals',
+};
+
+const buildHeader = (filters) => {
+  // Headline broker-style: "MyIsraelRental.com" big, then "<Neighborhood>
+  // <category> rentals" subtitle. WhatsApp/email recipients should know in
+  // two seconds where the list came from and what's in it.
+  const neighborhood = stripCity(filters?.location);
+  const categoryLabel = CATEGORY_TITLE[filters?.rental_category] || 'rentals';
+  const subtitle = neighborhood
+    ? `${neighborhood} ${categoryLabel}`
+    : categoryLabel.charAt(0).toUpperCase() + categoryLabel.slice(1);
+  return ['MyIsraelRental.com', subtitle];
+};
+
+const buildCopyText = (properties, filters = {}) => {
+  const [brand, subtitle] = buildHeader(filters);
+  const body = properties
+    .map((p) => {
+      // When the admin picked a specific location, force every row to that
+      // canonical form so the list never mixes "Maalot Dafna" with
+      // "Jerusalem - Maalot Dafna".
+      const area = filters?.location || p.area || 'Israel';
+      const beds = formatBedrooms(p.bedrooms);
+      const lines = [
+        area,
         `${formatPrice(p.price, p.currency)}${p.price_label || ''}`,
-        formatDate(p.available_from),
-        p.listing_url,
-      ].join('\n'),
-    )
+      ];
+      if (beds) lines.push(beds);
+      lines.push(formatAvailable(p.available_from));
+      lines.push(p.listing_url);
+      return lines.join('\n');
+    })
     .join('\n\n');
+  return `${brand}\n${subtitle}\n\n${body}`;
+};
 
 const SmartListsTab = ({ token }) => {
   const [location, setLocation] = useState('');
@@ -80,54 +126,48 @@ const SmartListsTab = ({ token }) => {
   const [rentalCategory, setRentalCategory] = useState('any');
   const [availability, setAvailability] = useState('anytime');
   const [results, setResults] = useState(null); // { properties, count, usd_to_ils_rate }
+  // Snapshot of filters used to generate ``results`` so the display + copy
+  // text stay consistent even if the admin changes the filter inputs after
+  // generating but before clicking Share/Copy.
+  const [appliedFilters, setAppliedFilters] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [saved, setSaved] = useState([]);
-  const [availableLocations, setAvailableLocations] = useState([]);
   const [savingName, setSavingName] = useState('');
   const [showSaveBox, setShowSaveBox] = useState(false);
   const [copyOk, setCopyOk] = useState(false);
 
   const headers = useMemo(() => ({ Authorization: `Bearer ${token}` }), [token]);
 
-  const fetchSaved = useCallback(async () => {
-    try {
-      const res = await axios.get(`${API}/admin/smart-lists`, { headers });
-      setSaved(res.data || []);
-    } catch {
-      /* non-fatal */
-    }
-  }, [headers]);
-
-  const fetchLocations = useCallback(async () => {
-    try {
-      const res = await axios.get(`${API}/admin/smart-lists/locations`, { headers });
-      setAvailableLocations(res.data || []);
-    } catch {
-      /* non-fatal — dropdown just stays empty */
-    }
-  }, [headers]);
-
-  useEffect(() => {
-    fetchSaved();
-    fetchLocations();
-  }, [fetchSaved, fetchLocations]);
+  // SWR-style fetches — keep setState OUT of useEffect so the
+  // react-hooks/set-state-in-effect rule stays happy.
+  const { data: saved = [], refresh: refreshSaved } = useApiSWR(
+    `${API}/admin/smart-lists`,
+    token,
+    { initial: [] },
+  );
+  const { data: availableLocations = [] } = useApiSWR(
+    `${API}/admin/smart-lists/locations`,
+    token,
+    { initial: [] },
+  );
 
   const generate = async () => {
     setLoading(true);
     setResults(null);
+    const snapshot = {
+      location: location.trim() || null,
+      max_monthly_rent_ils: maxRent === '' ? null : Number(maxRent),
+      min_bedrooms: minBedrooms === '' ? null : Number(minBedrooms),
+      availability,
+      rental_category: rentalCategory,
+    };
     try {
       const res = await axios.post(
         `${API}/admin/smart-lists/generate`,
-        {
-          location: location.trim() || null,
-          max_monthly_rent_ils: maxRent === '' ? null : Number(maxRent),
-          min_bedrooms: minBedrooms === '' ? null : Number(minBedrooms),
-          availability,
-          rental_category: rentalCategory,
-        },
+        snapshot,
         { headers },
       );
       setResults(res.data);
+      setAppliedFilters(snapshot);
     } catch (err) {
       toast.error(err.response?.data?.detail || 'Failed to generate list');
     } finally {
@@ -156,7 +196,7 @@ const SmartListsTab = ({ token }) => {
       toast.success('List saved');
       setSavingName('');
       setShowSaveBox(false);
-      fetchSaved();
+      refreshSaved();
     } catch (err) {
       toast.error(err.response?.data?.detail || 'Failed to save list');
     }
@@ -176,6 +216,7 @@ const SmartListsTab = ({ token }) => {
         count: res.data.properties.length,
         usd_to_ils_rate: res.data.usd_to_ils_rate,
       });
+      setAppliedFilters(filters || {});
     } catch (err) {
       toast.error(err.response?.data?.detail || 'Failed to load list');
     }
@@ -185,7 +226,7 @@ const SmartListsTab = ({ token }) => {
     if (!window.confirm('Delete this saved list?')) return;
     try {
       await axios.delete(`${API}/admin/smart-lists/${id}`, { headers });
-      fetchSaved();
+      refreshSaved();
       toast.success('List deleted');
     } catch (err) {
       toast.error(err.response?.data?.detail || 'Failed to delete');
@@ -194,7 +235,7 @@ const SmartListsTab = ({ token }) => {
 
   const copyToClipboard = async () => {
     if (!results?.properties?.length) return;
-    const text = buildCopyText(results.properties);
+    const text = buildCopyText(results.properties, appliedFilters || {});
     try {
       await navigator.clipboard.writeText(text);
       setCopyOk(true);
@@ -214,6 +255,19 @@ const SmartListsTab = ({ token }) => {
       }
       document.body.removeChild(ta);
     }
+  };
+
+  const shareToWhatsApp = () => {
+    if (!results?.properties?.length) return;
+    // wa.me supports a single ?text param; WhatsApp's URL length cap is
+    // roughly 4000 chars, so we truncate gracefully if a list gets huge.
+    let text = buildCopyText(results.properties, appliedFilters || {});
+    const MAX = 3900;
+    if (text.length > MAX) {
+      text = text.slice(0, MAX) + '\n\n…(list truncated — full list copied separately)';
+    }
+    const url = `https://wa.me/?text=${encodeURIComponent(text)}`;
+    window.open(url, '_blank', 'noopener,noreferrer');
   };
 
   // Autocomplete suggestions: prefix match on the canonical area values.
@@ -371,6 +425,15 @@ const SmartListsTab = ({ token }) => {
               </button>
               <button
                 type="button"
+                onClick={shareToWhatsApp}
+                disabled={!results.properties?.length}
+                className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#25D366] text-white text-sm font-semibold hover:bg-[#1ebe57] disabled:opacity-40 transition-colors"
+                data-testid="smart-list-whatsapp-btn"
+              >
+                <MessageCircle size={16} /> Share on WhatsApp
+              </button>
+              <button
+                type="button"
                 onClick={() => setShowSaveBox((v) => !v)}
                 className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white border border-gray-200 text-sm font-medium text-gray-700 hover:bg-gray-50"
                 data-testid="smart-list-save-toggle"
@@ -406,7 +469,7 @@ const SmartListsTab = ({ token }) => {
       {/* ---------------- Results ---------------- */}
       {results && (
         <div className="bg-white rounded-2xl border border-gray-200 p-6" data-testid="smart-list-results">
-          <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center justify-between mb-2">
             <h3 className="text-lg font-bold text-gray-900">
               {results.count} {results.count === 1 ? 'property' : 'properties'} matched
             </h3>
@@ -416,16 +479,31 @@ const SmartListsTab = ({ token }) => {
               </span>
             )}
           </div>
+          {/* Live preview of the title block recipients will see in the
+              WhatsApp/copy output. Keeps the broker confident that the share
+              text is going to read right before they hit send. */}
+          {appliedFilters && (
+            <div className="mb-4 pb-3 border-b border-gray-100">
+              <p className="text-xs uppercase tracking-wider text-gray-400">List header</p>
+              <p className="text-xl font-extrabold text-[#1E6A6A] mt-1">MyIsraelRental.com</p>
+              <p className="text-sm font-semibold text-gray-700">
+                {buildHeader(appliedFilters)[1]}
+              </p>
+            </div>
+          )}
           {results.properties.length === 0 ? (
             <p className="text-sm text-gray-500">No properties match — try widening the filters.</p>
           ) : (
             <ul className="divide-y divide-gray-100">
-              {results.properties.map((p) => (
+              {results.properties.map((p) => {
+                const displayArea = appliedFilters?.location || p.area || 'Israel';
+                const beds = formatBedrooms(p.bedrooms);
+                return (
                 <li key={p.id} className="py-4 flex items-start justify-between gap-4" data-testid={`smart-list-row-${p.id}`}>
                   <div className="min-w-0">
                     <p className="font-semibold text-gray-900 text-sm flex items-center gap-2">
                       <MapPin size={13} className="text-[#1E6A6A] shrink-0" />
-                      <span className="truncate">{p.area || 'Israel'}</span>
+                      <span className="truncate">{displayArea}</span>
                     </p>
                     <p className="text-sm text-gray-600 mt-0.5">
                       <span className="font-medium" style={{ color: '#D4AF37' }}>
@@ -437,14 +515,14 @@ const SmartListsTab = ({ token }) => {
                           (≈ ₪{Math.round(p.price_ils_equivalent).toLocaleString()})
                         </span>
                       )}
-                      {p.bedrooms != null && (
+                      {beds && (
                         <>
                           <span className="text-gray-300 mx-1.5">·</span>
-                          <span className="text-gray-500">{p.bedrooms} bed{p.bedrooms === 1 ? '' : 's'}</span>
+                          <span className="text-gray-500">{beds}</span>
                         </>
                       )}
                       <span className="text-gray-300 mx-1.5">·</span>
-                      <span className="text-gray-500">{formatDate(p.available_from)}</span>
+                      <span className="text-gray-500">{formatAvailable(p.available_from)}</span>
                     </p>
                     <a
                       href={p.listing_url}
@@ -458,7 +536,7 @@ const SmartListsTab = ({ token }) => {
                     </a>
                   </div>
                 </li>
-              ))}
+              );})}
             </ul>
           )}
         </div>
