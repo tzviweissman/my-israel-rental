@@ -223,7 +223,14 @@ async def list_smart_list_locations(
 ) -> list[str]:
     """Distinct list of area values backed by at least one active long-term
     or short-term listing. Powers the location dropdown so admins only see
-    options that will actually produce matches."""
+    options that will actually produce matches.
+
+    Bare neighborhood values (``Maalot Dafna``) are folded into their
+    canonical ``City - Neighborhood`` sibling when one exists, so the
+    dropdown never shows the same place twice. The area-filter regex
+    already matches both stored forms, so selecting the canonical entry
+    still finds the legacy bare-named listings.
+    """
     _require_admin(payload)
     areas = await db.properties.distinct(
         "area",
@@ -233,7 +240,28 @@ async def list_smart_list_locations(
             "area": {"$nin": [None, ""]},
         },
     )
-    return sorted([a for a in areas if a], key=lambda s: s.lower())
+
+    canonical: dict[str, str] = {}  # neighborhood.lower() -> "City - Neighborhood"
+    bare: list[str] = []
+    for raw in areas:
+        if not raw:
+            continue
+        if " - " in raw:
+            _, neighborhood = raw.split(" - ", 1)
+            key = neighborhood.strip().lower()
+            # First canonical wins — list is later sorted alphabetically anyway.
+            canonical.setdefault(key, raw)
+        else:
+            bare.append(raw)
+
+    result: set[str] = set(canonical.values())
+    for b in bare:
+        key = b.strip().lower()
+        # If a canonical "City - Neighborhood" sibling exists, fold the bare
+        # value into it. Otherwise keep the bare name as-is.
+        result.add(canonical.get(key, b))
+
+    return sorted(result, key=lambda s: s.lower())
 
 
 @api_router.post("/admin/smart-lists/generate", response_model=SmartListGenerateResponse)
