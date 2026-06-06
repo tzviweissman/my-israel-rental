@@ -19,6 +19,7 @@ import {
   ExternalLink,
   Banknote,
   Bed,
+  Home,
   Check,
 } from 'lucide-react';
 import { API } from '../../App';
@@ -35,6 +36,17 @@ const formatPrice = (amount, currency) => {
   const sym = currency === 'USD' ? '$' : '₪';
   return `${sym}${Number(amount).toLocaleString()}`;
 };
+
+const RENTAL_CATEGORY_OPTIONS = [
+  { value: 'any', label: 'Any type' },
+  { value: 'long-term', label: 'Long-term' },
+  { value: 'short-term', label: 'Short-term' },
+  { value: 'vacation', label: 'Vacation' },
+  { value: 'sukkot', label: 'Sukkot rental' },
+  { value: 'pesach', label: 'Pesach rental' },
+];
+
+const VACATION_LIKE_CATEGORIES = new Set(['vacation', 'sukkot', 'pesach']);
 
 const formatDate = (iso) => {
   if (!iso) return 'Available now';
@@ -54,7 +66,7 @@ const buildCopyText = (properties) =>
     .map((p) =>
       [
         p.area || 'Israel',
-        formatPrice(p.price, p.currency),
+        `${formatPrice(p.price, p.currency)}${p.price_label || ''}`,
         formatDate(p.available_from),
         p.listing_url,
       ].join('\n'),
@@ -65,6 +77,7 @@ const SmartListsTab = ({ token }) => {
   const [location, setLocation] = useState('');
   const [maxRent, setMaxRent] = useState('');
   const [minBedrooms, setMinBedrooms] = useState('');
+  const [rentalCategory, setRentalCategory] = useState('any');
   const [availability, setAvailability] = useState('anytime');
   const [results, setResults] = useState(null); // { properties, count, usd_to_ils_rate }
   const [loading, setLoading] = useState(false);
@@ -110,6 +123,7 @@ const SmartListsTab = ({ token }) => {
           max_monthly_rent_ils: maxRent === '' ? null : Number(maxRent),
           min_bedrooms: minBedrooms === '' ? null : Number(minBedrooms),
           availability,
+          rental_category: rentalCategory,
         },
         { headers },
       );
@@ -135,6 +149,7 @@ const SmartListsTab = ({ token }) => {
           max_monthly_rent_ils: maxRent === '' ? null : Number(maxRent),
           min_bedrooms: minBedrooms === '' ? null : Number(minBedrooms),
           availability,
+          rental_category: rentalCategory,
         },
         { headers },
       );
@@ -154,6 +169,7 @@ const SmartListsTab = ({ token }) => {
       setLocation(filters?.location || '');
       setMaxRent(filters?.max_monthly_rent_ils ?? '');
       setMinBedrooms(filters?.min_bedrooms ?? '');
+      setRentalCategory(filters?.rental_category || 'any');
       setAvailability(filters?.availability || 'anytime');
       setResults({
         properties: res.data.properties,
@@ -220,7 +236,7 @@ const SmartListsTab = ({ token }) => {
       </div>
 
       {/* ---------------- Filters ---------------- */}
-      <div className="bg-white rounded-2xl border border-gray-200 p-6 grid grid-cols-1 md:grid-cols-4 gap-4">
+      <div className="bg-white rounded-2xl border border-gray-200 p-6 grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4">
         {/* Location — dropdown of areas with at least one active listing */}
         <div>
           <label className="text-xs font-semibold text-gray-600 uppercase tracking-wide flex items-center gap-1.5">
@@ -244,24 +260,51 @@ const SmartListsTab = ({ token }) => {
           </p>
         </div>
 
-        {/* Max rent */}
+        {/* Rental type */}
         <div>
           <label className="text-xs font-semibold text-gray-600 uppercase tracking-wide flex items-center gap-1.5">
-            <Banknote size={12} /> Max monthly rent (₪)
+            <Home size={12} /> Rental type
           </label>
-          <input
-            type="number"
-            value={maxRent}
-            onChange={(e) => setMaxRent(e.target.value)}
-            placeholder="e.g. 10000"
-            className="mt-2 w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#1E6A6A]/30 focus:border-[#1E6A6A] text-sm"
-            data-testid="smart-list-max-rent-input"
-            min="0"
-          />
-          <p className="text-[11px] text-gray-400 mt-1">
-            USD listings auto-converted to ILS before filtering.
-          </p>
+          <select
+            value={rentalCategory}
+            onChange={(e) => setRentalCategory(e.target.value)}
+            className="mt-2 w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#1E6A6A]/30 focus:border-[#1E6A6A] text-sm bg-white"
+            data-testid="smart-list-rental-category-select"
+          >
+            {RENTAL_CATEGORY_OPTIONS.map((o) => (
+              <option key={o.value} value={o.value}>
+                {o.label}
+              </option>
+            ))}
+          </select>
         </div>
+
+        {/* Max rent — disabled for vacation / sukkot / pesach */}
+        {(() => {
+          const isVacationLike = VACATION_LIKE_CATEGORIES.has(rentalCategory);
+          return (
+            <div>
+              <label className="text-xs font-semibold text-gray-600 uppercase tracking-wide flex items-center gap-1.5">
+                <Banknote size={12} /> Max monthly rent (₪)
+              </label>
+              <input
+                type="number"
+                value={isVacationLike ? '' : maxRent}
+                onChange={(e) => setMaxRent(e.target.value)}
+                disabled={isVacationLike}
+                placeholder={isVacationLike ? 'N/A for vacation' : 'e.g. 10000'}
+                className="mt-2 w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#1E6A6A]/30 focus:border-[#1E6A6A] text-sm disabled:bg-gray-50 disabled:text-gray-400"
+                data-testid="smart-list-max-rent-input"
+                min="0"
+              />
+              <p className="text-[11px] text-gray-400 mt-1">
+                {isVacationLike
+                  ? 'Price filter disabled for vacation rentals.'
+                  : 'USD listings auto-converted to ILS before filtering.'}
+              </p>
+            </div>
+          );
+        })()}
 
         {/* Bedrooms (minimum) */}
         <div>
@@ -303,7 +346,7 @@ const SmartListsTab = ({ token }) => {
           </select>
         </div>
 
-        <div className="md:col-span-4 flex flex-wrap items-center gap-3 pt-2">
+        <div className="md:col-span-3 lg:col-span-5 flex flex-wrap items-center gap-3 pt-2">
           <button
             type="button"
             onClick={generate}
@@ -339,7 +382,7 @@ const SmartListsTab = ({ token }) => {
         </div>
 
         {showSaveBox && (
-          <div className="md:col-span-4 flex flex-wrap items-center gap-2 pt-2">
+          <div className="md:col-span-3 lg:col-span-5 flex flex-wrap items-center gap-2 pt-2">
             <input
               type="text"
               value={savingName}
@@ -387,6 +430,7 @@ const SmartListsTab = ({ token }) => {
                     <p className="text-sm text-gray-600 mt-0.5">
                       <span className="font-medium" style={{ color: '#D4AF37' }}>
                         {formatPrice(p.price, p.currency)}
+                        {p.price_label || ''}
                       </span>
                       {p.currency === 'USD' && p.price_ils_equivalent != null && (
                         <span className="text-xs text-gray-400 ml-1.5">
@@ -445,6 +489,9 @@ const SmartListsTab = ({ token }) => {
                   </p>
                   <p className="text-xs text-gray-500 mt-0.5">
                     {s.filters?.location || 'Any location'} ·{' '}
+                    {s.filters?.rental_category && s.filters.rental_category !== 'any'
+                      ? `${s.filters.rental_category} · `
+                      : ''}
                     {s.filters?.max_monthly_rent_ils
                       ? `≤ ₪${Number(s.filters.max_monthly_rent_ils).toLocaleString()}`
                       : 'Any price'}
