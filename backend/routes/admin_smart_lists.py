@@ -35,7 +35,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, Field
 
 from routes.deps import db, verify_token
-from utils.area_filter import area_mongo_query
+from utils.area_filter import area_mongo_query, canonicalize_area
 from utils.fx import convert_amount
 
 router = APIRouter()
@@ -127,7 +127,13 @@ def _require_admin(payload: dict) -> None:
 
 
 def _public_listing_url(property_id: str) -> str:
-    base = (os.environ.get("FRONTEND_URL") or "https://myisraelrental.com").rstrip("/")
+    base = (os.environ.get("FRONTEND_URL") or "").strip().rstrip("/")
+    # If FRONTEND_URL is unset OR still points at the Emergent preview
+    # domain (a known production misconfig), fall back to the public
+    # marketing domain. This protects WhatsApp/email shares from leaking
+    # the internal preview URL.
+    if not base or "emergentagent.com" in base or "preview." in base:
+        base = "https://myisraelrental.com"
     return f"{base}/property/{property_id}"
 
 
@@ -258,7 +264,10 @@ def _shape_for_output(prop: dict) -> SmartListPropertyOut:
     return SmartListPropertyOut(
         id=prop["id"],
         title=prop.get("title") or "Untitled listing",
-        area=prop.get("area") or "",
+        # Display the canonical "<City> - <Neighborhood>" whenever we can
+        # recognize the stored value (covers bare names + known aliases),
+        # so a saved list mixing variants reads cleanly.
+        area=canonicalize_area(prop.get("area")) or (prop.get("area") or ""),
         address=prop.get("address"),
         price=price_value,
         currency=price_currency,
@@ -278,15 +287,14 @@ def _shape_for_output(prop: dict) -> SmartListPropertyOut:
 async def list_smart_list_locations(
     payload: dict = Depends(verify_token),
 ) -> list[str]:
-    """Distinct list of area values backed by at least one active long-term
-    or short-term listing. Powers the location dropdown so admins only see
-    options that will actually produce matches.
+    """Distinct list of canonical area values backed by at least one active
+    long-term, short-term, or vacation listing.
 
-    Bare neighborhood values (``Maalot Dafna``) are folded into their
-    canonical ``City - Neighborhood`` sibling when one exists, so the
-    dropdown never shows the same place twice. The area-filter regex
-    already matches both stored forms, so selecting the canonical entry
-    still finds the legacy bare-named listings.
+    All known variants of a single neighborhood are collapsed into one entry:
+    ``"Ramat Eshkol"``, ``"Jerusalem - Ramat Eshkol"``, and the street-name
+    alias ``"Levi Eshkol"`` all map to ``"Jerusalem - Ramat Eshkol"`` here.
+    Unknown freeform area strings (rare) are kept verbatim so admins can
+    still find them rather than silently disappearing from the dropdown.
     """
     _require_admin(payload)
     areas = await db.properties.distinct(
@@ -298,27 +306,18 @@ async def list_smart_list_locations(
         },
     )
 
-    canonical: dict[str, str] = {}  # neighborhood.lower() -> "City - Neighborhood"
-    bare: list[str] = []
+    canonical_set: set[str] = set()
+    unknown: set[str] = set()
     for raw in areas:
         if not raw:
             continue
-        if " - " in raw:
-            _, neighborhood = raw.split(" - ", 1)
-            key = neighborhood.strip().lower()
-            # First canonical wins — list is later sorted alphabetically anyway.
-            canonical.setdefault(key, raw)
+        canon = canonicalize_area(raw)
+        if canon:
+            canonical_set.add(canon)
         else:
-            bare.append(raw)
+            unknown.add(raw.strip())
 
-    result: set[str] = set(canonical.values())
-    for b in bare:
-        key = b.strip().lower()
-        # If a canonical "City - Neighborhood" sibling exists, fold the bare
-        # value into it. Otherwise keep the bare name as-is.
-        result.add(canonical.get(key, b))
-
-    return sorted(result, key=lambda s: s.lower())
+    return sorted(canonical_set | unknown, key=lambda s: s.lower())
 
 
 @api_router.post("/admin/smart-lists/generate", response_model=SmartListGenerateResponse)

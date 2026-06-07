@@ -18,7 +18,7 @@ ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from utils.area_filter import area_matches, area_mongo_query  # noqa: E402
+from utils.area_filter import area_matches, area_mongo_query, canonicalize_area  # noqa: E402
 
 
 class TestAreaFilter:
@@ -109,3 +109,52 @@ class TestAreaFilter:
         assert q is not None
         assert "$regex" in q and "$options" in q
         assert q["$options"] == "i"
+
+
+class TestCanonicalizeArea:
+    """canonicalize_area folds variants → canonical "<City> - <Neighborhood>".
+
+    Drives the Smart Lists locations dropdown: we don't want "Ramat Eshkol",
+    "Jerusalem - Ramat Eshkol", and "Levi Eshkol" each as separate entries.
+    """
+
+    def test_bare_neighborhood_folded_to_canonical(self):
+        assert canonicalize_area("Ramat Eshkol") == "Jerusalem - Ramat Eshkol"
+        assert canonicalize_area("Sanhedria") == "Jerusalem - Sanhedria"
+
+    def test_canonical_input_returned_unchanged(self):
+        assert canonicalize_area("Jerusalem - Ramat Eshkol") == "Jerusalem - Ramat Eshkol"
+
+    def test_levi_eshkol_alias_folds_to_ramat_eshkol(self):
+        # Real-world signal: owners type the street name "Levi Eshkol" instead
+        # of the neighborhood "Ramat Eshkol". The dropdown should still show
+        # one entry and the filter should match both.
+        assert canonicalize_area("Levi Eshkol") == "Jerusalem - Ramat Eshkol"
+
+    def test_case_insensitive(self):
+        assert canonicalize_area("levi eshkol") == "Jerusalem - Ramat Eshkol"
+        assert canonicalize_area("RAMAT ESHKOL") == "Jerusalem - Ramat Eshkol"
+
+    def test_unknown_value_returns_none(self):
+        assert canonicalize_area("Atlantis") is None
+        assert canonicalize_area("") is None
+        assert canonicalize_area(None) is None
+
+
+class TestAreaFilterWithAliases:
+    """When the admin picks 'Jerusalem - Ramat Eshkol' the regex must also
+    match listings stored under any known alias / bare variant."""
+
+    def test_picking_ramat_eshkol_matches_levi_eshkol_listings(self):
+        assert area_matches("Levi Eshkol", "Jerusalem - Ramat Eshkol")
+        assert area_matches("Levi Eshkol 12", "Jerusalem - Ramat Eshkol")
+
+    def test_picking_ramat_eshkol_matches_bare_ramat_eshkol(self):
+        assert area_matches("Ramat Eshkol", "Jerusalem - Ramat Eshkol")
+
+    def test_picking_ramat_eshkol_matches_canonical_jerusalem_ramat_eshkol(self):
+        assert area_matches("Jerusalem - Ramat Eshkol", "Jerusalem - Ramat Eshkol")
+
+    def test_picking_ramat_eshkol_still_excludes_haifa_ramat_eshkol(self):
+        # Alias support must not collapse across cities.
+        assert not area_matches("Haifa - Ramat Eshkol", "Jerusalem - Ramat Eshkol")
