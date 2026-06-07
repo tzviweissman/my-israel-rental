@@ -13,9 +13,14 @@ DB rows here) is used by ``utils/area_filter`` to widen the regex
 match for the regular property search, Smart Lists, and saved-search
 matching — so adding an alias here immediately affects all three
 without a redeploy.
+
+The ``GET .../suggestions`` endpoint scans the catalog for area values
+that aren't recognised and proposes closest-match aliases, so admins
+can clean up dozens of typos with one-click confirmations.
 """
 from __future__ import annotations
 
+import difflib
 import uuid
 from datetime import UTC, datetime
 
@@ -23,7 +28,12 @@ from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, Field
 
 from routes.deps import db, verify_token
-from utils.area_filter import invalidate_db_aliases, refresh_db_aliases
+from utils.area_filter import (
+    canonicalize_area,
+    invalidate_db_aliases,
+    refresh_db_aliases,
+)
+from utils.locations_catalog import NEIGHBORHOOD_INDEX
 
 router = APIRouter()
 api_router = router
@@ -130,3 +140,85 @@ async def delete_area_alias(
     invalidate_db_aliases()
     await refresh_db_aliases(db, force=True)
     return {"message": "Alias deleted"}
+
+
+# ---------------------------------------------------------------------------
+# Suggestions — scan catalog for unrecognised area values
+# ---------------------------------------------------------------------------
+class AliasSuggestion(BaseModel):
+    unknown_value: str
+    suggested_alias: str
+    suggested_canonical: str
+    suggested_canonical_full: str
+    listing_count: int
+    confidence: float
+
+
+@api_router.get(
+    "/admin/area-aliases/suggestions", response_model=list[AliasSuggestion]
+)
+async def suggest_area_aliases(
+    payload: dict = Depends(verify_token),
+    cutoff: float = 0.6,
+) -> list[dict]:
+    """Scan active properties and propose alias mappings for any ``area``
+    value that doesn't currently resolve to a canonical neighborhood.
+
+    Uses ``difflib`` for fuzzy matching against the canonical neighborhood
+    list. Returns one suggestion per unique unknown value, sorted by listing
+    count desc (so the most impactful fixes float to the top).
+    """
+    _require_admin(payload)
+
+    areas = await db.properties.distinct(
+        "area", {"status": "active", "area": {"$nin": [None, ""]}}
+    )
+
+    canonical_keys = list(NEIGHBORHOOD_INDEX.keys())
+    suggestions: list[dict] = []
+    seen: set[str] = set()
+    for raw in areas:
+        if not raw or raw in seen:
+            continue
+        seen.add(raw)
+        # Already resolves cleanly (canonical, bare-known, or alias) → skip.
+        if canonicalize_area(raw):
+            continue
+
+        # Strip city prefix if present so we fuzzy-match against neighborhood
+        # names only.
+        bare = raw.split(" - ", 1)[1].strip() if " - " in raw else raw.strip()
+        bare_lower = bare.lower()
+        # Strip trailing numbers (street addresses like "Levi Eshkol 12").
+        # Helps "Jaffa Street 14" fuzzy-match "Jaffa Road".
+        bare_clean = " ".join(
+            tok for tok in bare_lower.split() if not tok.isdigit()
+        )
+        if not bare_clean:
+            continue
+
+        match = difflib.get_close_matches(
+            bare_clean, canonical_keys, n=1, cutoff=cutoff
+        )
+        if not match:
+            continue
+
+        canon_key = match[0]
+        city, neighborhood = NEIGHBORHOOD_INDEX[canon_key]
+        confidence = difflib.SequenceMatcher(None, bare_clean, canon_key).ratio()
+        count = await db.properties.count_documents(
+            {"area": raw, "status": "active"}
+        )
+        suggestions.append(
+            {
+                "unknown_value": raw,
+                "suggested_alias": bare,
+                "suggested_canonical": neighborhood,
+                "suggested_canonical_full": f"{city} - {neighborhood}",
+                "listing_count": count,
+                "confidence": round(confidence, 2),
+            }
+        )
+
+    suggestions.sort(key=lambda s: (-s["listing_count"], -s["confidence"]))
+    return suggestions

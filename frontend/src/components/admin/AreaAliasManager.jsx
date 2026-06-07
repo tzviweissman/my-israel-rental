@@ -14,7 +14,7 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import { toast } from 'sonner';
-import { Plus, Trash2, ArrowRight, Tags } from 'lucide-react';
+import { Plus, Trash2, ArrowRight, Tags, Wand2, Check, X } from 'lucide-react';
 import { API } from '../../App';
 import { useApiSWR } from '../../hooks/useApiSWR';
 
@@ -23,6 +23,8 @@ const AreaAliasManager = ({ token }) => {
   const [canonical, setCanonical] = useState('');
   const [expanded, setExpanded] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [suggestions, setSuggestions] = useState(null);
+  const [scanning, setScanning] = useState(false);
 
   const { data: aliases = [], refresh } = useApiSWR(
     `${API}/admin/area-aliases`,
@@ -65,6 +67,45 @@ const AreaAliasManager = ({ token }) => {
     } catch (err) {
       toast.error(err.response?.data?.detail || 'Failed to delete');
     }
+  };
+
+  const scanForSuggestions = async () => {
+    setScanning(true);
+    try {
+      const res = await axios.get(`${API}/admin/area-aliases/suggestions`, { headers });
+      setSuggestions(res.data || []);
+      if ((res.data || []).length === 0) {
+        toast.success('No new suggestions — your catalog looks clean!');
+      }
+    } catch (err) {
+      toast.error(err.response?.data?.detail || 'Failed to scan');
+    } finally {
+      setScanning(false);
+    }
+  };
+
+  const acceptSuggestion = async (s) => {
+    try {
+      await axios.post(
+        `${API}/admin/area-aliases`,
+        { alias: s.suggested_alias, canonical: s.suggested_canonical },
+        { headers },
+      );
+      toast.success(`Mapped ${s.suggested_alias} → ${s.suggested_canonical}`);
+      // Drop accepted from the visible suggestions list (faster than re-scanning).
+      setSuggestions((prev) =>
+        (prev || []).filter((x) => x.unknown_value !== s.unknown_value),
+      );
+      refresh();
+    } catch (err) {
+      toast.error(err.response?.data?.detail || 'Failed to map');
+    }
+  };
+
+  const dismissSuggestion = (s) => {
+    setSuggestions((prev) =>
+      (prev || []).filter((x) => x.unknown_value !== s.unknown_value),
+    );
   };
 
   return (
@@ -169,6 +210,92 @@ const AreaAliasManager = ({ token }) => {
                     </button>
                   </li>
                 ))}
+              </ul>
+            )}
+          </div>
+
+          {/* ----- Suggestions: scan catalog for unknown area variants ----- */}
+          <div className="border-t border-gray-100 pt-4">
+            <div className="flex items-center justify-between gap-3 mb-3">
+              <div>
+                <h4 className="text-sm font-bold text-gray-900">Suggest aliases</h4>
+                <p className="text-xs text-gray-500 mt-0.5">
+                  Scans every listing for unrecognised neighborhood values and proposes
+                  the closest canonical match.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={scanForSuggestions}
+                disabled={scanning}
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-[#D4AF37] text-[#1E6A6A] text-sm font-semibold hover:opacity-90 disabled:opacity-50 transition-opacity shrink-0"
+                data-testid="area-alias-scan-btn"
+              >
+                <Wand2 size={14} /> {scanning ? 'Scanning…' : 'Scan catalog'}
+              </button>
+            </div>
+
+            {suggestions !== null && suggestions.length === 0 && (
+              <p className="text-sm text-gray-500" data-testid="area-alias-no-suggestions">
+                ✨ Catalog is clean — every listing&rsquo;s neighborhood resolves correctly.
+              </p>
+            )}
+
+            {suggestions !== null && suggestions.length > 0 && (
+              <ul className="divide-y divide-gray-100 mt-2" data-testid="area-alias-suggestions">
+                {suggestions.map((s) => {
+                  const confColor =
+                    s.confidence >= 0.85
+                      ? 'bg-emerald-50 text-emerald-700'
+                      : s.confidence >= 0.7
+                        ? 'bg-amber-50 text-amber-700'
+                        : 'bg-gray-100 text-gray-600';
+                  return (
+                    <li
+                      key={s.unknown_value}
+                      className="py-3 flex items-center justify-between gap-3 flex-wrap"
+                      data-testid={`area-alias-suggestion-${s.unknown_value}`}
+                    >
+                      <div className="flex items-center gap-3 text-sm min-w-0 flex-1">
+                        <span className="font-medium text-gray-900 truncate">
+                          {s.unknown_value}
+                        </span>
+                        <ArrowRight size={13} className="text-gray-300 shrink-0" />
+                        <span className="text-[#1E6A6A] font-semibold truncate">
+                          {s.suggested_canonical_full}
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-2 shrink-0">
+                        <span
+                          className={`px-2 py-0.5 text-[11px] rounded-full font-semibold ${confColor}`}
+                          title={`${Math.round(s.confidence * 100)}% similarity`}
+                        >
+                          {Math.round(s.confidence * 100)}%
+                        </span>
+                        <span className="text-[11px] text-gray-400">
+                          {s.listing_count} listing{s.listing_count === 1 ? '' : 's'}
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => acceptSuggestion(s)}
+                          className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-[#1E6A6A] text-white text-xs font-semibold hover:bg-[#175555] transition-colors"
+                          data-testid={`area-alias-accept-${s.unknown_value}`}
+                        >
+                          <Check size={12} /> Map
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => dismissSuggestion(s)}
+                          className="p-1.5 rounded-lg text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-colors"
+                          aria-label="Skip suggestion"
+                          data-testid={`area-alias-skip-${s.unknown_value}`}
+                        >
+                          <X size={14} />
+                        </button>
+                      </div>
+                    </li>
+                  );
+                })}
               </ul>
             )}
           </div>
