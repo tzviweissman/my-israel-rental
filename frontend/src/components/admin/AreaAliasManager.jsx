@@ -14,7 +14,7 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import { toast } from 'sonner';
-import { Plus, Trash2, ArrowRight, Tags, Wand2, Check, X } from 'lucide-react';
+import { Plus, Trash2, ArrowRight, Tags, Wand2, Check, X, Undo2 } from 'lucide-react';
 import { API } from '../../App';
 import { useApiSWR } from '../../hooks/useApiSWR';
 
@@ -25,6 +25,11 @@ const AreaAliasManager = ({ token }) => {
   const [saving, setSaving] = useState(false);
   const [suggestions, setSuggestions] = useState(null);
   const [scanning, setScanning] = useState(false);
+  // Confidence threshold for "Bulk map" (percent, 60-95).
+  const [bulkThreshold, setBulkThreshold] = useState(90);
+  const [bulkBusy, setBulkBusy] = useState(false);
+  // Last batch of alias IDs we created — used by Undo.
+  const [lastBulkIds, setLastBulkIds] = useState([]);
 
   const { data: aliases = [], refresh } = useApiSWR(
     `${API}/admin/area-aliases`,
@@ -106,6 +111,68 @@ const AreaAliasManager = ({ token }) => {
     setSuggestions((prev) =>
       (prev || []).filter((x) => x.unknown_value !== s.unknown_value),
     );
+  };
+
+  const bulkAcceptAboveThreshold = async () => {
+    if (!suggestions?.length) return;
+    const min = bulkThreshold / 100;
+    const eligible = suggestions.filter((s) => s.confidence >= min);
+    if (!eligible.length) {
+      toast.info(`No suggestions at ≥ ${bulkThreshold}% confidence`);
+      return;
+    }
+    setBulkBusy(true);
+    try {
+      const res = await axios.post(
+        `${API}/admin/area-aliases/bulk`,
+        {
+          items: eligible.map((s) => ({
+            alias: s.suggested_alias,
+            canonical: s.suggested_canonical,
+          })),
+        },
+        { headers },
+      );
+      const created = res.data?.created || [];
+      const skipped = res.data?.skipped || [];
+      if (created.length) {
+        toast.success(`Mapped ${created.length} alias${created.length === 1 ? '' : 'es'}`);
+      }
+      if (skipped.length) {
+        toast.message(`Skipped ${skipped.length} (duplicates / invalid)`);
+      }
+      setLastBulkIds(created.map((c) => c.id));
+      // Drop accepted rows from the visible suggestions list.
+      const acceptedAliases = new Set(created.map((c) => c.alias.toLowerCase()));
+      setSuggestions((prev) =>
+        (prev || []).filter(
+          (s) => !acceptedAliases.has(s.suggested_alias.toLowerCase()),
+        ),
+      );
+      refresh();
+    } catch (err) {
+      toast.error(err.response?.data?.detail || 'Bulk map failed');
+    } finally {
+      setBulkBusy(false);
+    }
+  };
+
+  const undoBulk = async () => {
+    if (!lastBulkIds.length) return;
+    try {
+      await axios.post(
+        `${API}/admin/area-aliases/bulk-delete`,
+        { ids: lastBulkIds },
+        { headers },
+      );
+      toast.success(`Reverted ${lastBulkIds.length} alias${lastBulkIds.length === 1 ? '' : 'es'}`);
+      setLastBulkIds([]);
+      refresh();
+      // Re-run the scan so the previously-accepted suggestions come back.
+      await scanForSuggestions();
+    } catch (err) {
+      toast.error(err.response?.data?.detail || 'Undo failed');
+    }
   };
 
   return (
@@ -242,7 +309,55 @@ const AreaAliasManager = ({ token }) => {
             )}
 
             {suggestions !== null && suggestions.length > 0 && (
-              <ul className="divide-y divide-gray-100 mt-2" data-testid="area-alias-suggestions">
+              <>
+                <div className="mt-2 flex flex-wrap items-center gap-2 mb-3 p-3 rounded-lg bg-gray-50 border border-gray-100">
+                  <span className="text-xs font-semibold text-gray-700">Bulk map all at</span>
+                  <select
+                    value={bulkThreshold}
+                    onChange={(e) => setBulkThreshold(Number(e.target.value))}
+                    className="text-xs px-2 py-1.5 rounded-md border border-gray-200 bg-white focus:outline-none focus:ring-2 focus:ring-[#1E6A6A]/30"
+                    data-testid="area-alias-bulk-threshold"
+                  >
+                    <option value={95}>≥ 95% (very safe)</option>
+                    <option value={90}>≥ 90% (recommended)</option>
+                    <option value={85}>≥ 85%</option>
+                    <option value={80}>≥ 80%</option>
+                  </select>
+                  <span className="text-xs text-gray-500">
+                    ({suggestions.filter((s) => s.confidence >= bulkThreshold / 100).length} eligible)
+                  </span>
+                  <button
+                    type="button"
+                    onClick={bulkAcceptAboveThreshold}
+                    disabled={bulkBusy}
+                    className="ml-auto inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-[#1E6A6A] text-white text-xs font-semibold hover:bg-[#175555] disabled:opacity-50 transition-colors"
+                    data-testid="area-alias-bulk-accept-btn"
+                  >
+                    <Check size={12} /> {bulkBusy ? 'Mapping…' : 'Bulk map'}
+                  </button>
+                </div>
+
+                {lastBulkIds.length > 0 && (
+                  <div
+                    className="mb-3 p-3 rounded-lg bg-amber-50 border border-amber-200 flex items-center justify-between gap-3"
+                    data-testid="area-alias-undo-banner"
+                  >
+                    <span className="text-sm text-amber-900">
+                      Just mapped {lastBulkIds.length} alias
+                      {lastBulkIds.length === 1 ? '' : 'es'} in bulk.
+                    </span>
+                    <button
+                      type="button"
+                      onClick={undoBulk}
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-white border border-amber-300 text-amber-900 text-xs font-semibold hover:bg-amber-100 transition-colors"
+                      data-testid="area-alias-undo-btn"
+                    >
+                      <Undo2 size={12} /> Undo last bulk
+                    </button>
+                  </div>
+                )}
+
+                <ul className="divide-y divide-gray-100" data-testid="area-alias-suggestions">
                 {suggestions.map((s) => {
                   const confColor =
                     s.confidence >= 0.85
@@ -297,6 +412,7 @@ const AreaAliasManager = ({ token }) => {
                   );
                 })}
               </ul>
+              </>
             )}
           </div>
         </div>

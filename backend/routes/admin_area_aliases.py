@@ -51,6 +51,19 @@ class AreaAliasCreate(BaseModel):
     canonical: str = Field(min_length=1, max_length=120)
 
 
+class AreaAliasBulkCreate(BaseModel):
+    items: list[AreaAliasCreate] = Field(min_length=1)
+
+
+class AreaAliasBulkResult(BaseModel):
+    created: list[AreaAlias]
+    skipped: list[dict]  # {alias, reason}
+
+
+class AreaAliasBulkDelete(BaseModel):
+    ids: list[str] = Field(min_length=1)
+
+
 def _require_admin(payload: dict) -> None:
     if payload.get("role") != "admin":
         raise HTTPException(status_code=403, detail="Admin access required")
@@ -140,6 +153,84 @@ async def delete_area_alias(
     invalidate_db_aliases()
     await refresh_db_aliases(db, force=True)
     return {"message": "Alias deleted"}
+
+
+@api_router.post(
+    "/admin/area-aliases/bulk", response_model=AreaAliasBulkResult
+)
+async def bulk_create_area_aliases(
+    body: AreaAliasBulkCreate,
+    payload: dict = Depends(verify_token),
+) -> dict:
+    """Create many aliases at once. Powers the "Bulk Map ≥ 90%" button on
+    the dashboard. Skips duplicates and same-alias-as-canonical rows
+    silently (reported in ``skipped``) so a partially-clean batch still
+    succeeds without an error toast for every conflict."""
+    _require_admin(payload)
+    created: list[dict] = []
+    skipped: list[dict] = []
+    now = datetime.now(UTC).isoformat()
+    for item in body.items:
+        alias = item.alias.strip()
+        canonical = item.canonical.strip()
+        if not alias or not canonical:
+            skipped.append({"alias": alias, "reason": "empty"})
+            continue
+        if alias.lower() == canonical.lower():
+            skipped.append({"alias": alias, "reason": "alias matches canonical"})
+            continue
+        canon_bare = (
+            canonical.split(" - ", 1)[1].strip() if " - " in canonical else canonical
+        )
+        existing = await db.area_aliases.find_one(
+            {"alias": alias.lower()}, {"_id": 0, "id": 1}
+        )
+        if existing:
+            skipped.append({"alias": alias, "reason": "duplicate"})
+            continue
+        alias_id = str(uuid.uuid4())
+        doc = {
+            "id": alias_id,
+            "alias_display": alias,
+            "canonical_display": canon_bare,
+            "alias": alias.lower(),
+            "canonical": canon_bare.lower(),
+            "created_at": now,
+            "created_by": payload.get("user_id"),
+        }
+        await db.area_aliases.insert_one(doc)
+        created.append(
+            {
+                "id": alias_id,
+                "alias": alias,
+                "canonical": canon_bare,
+                "created_at": now,
+            }
+        )
+
+    if created:
+        invalidate_db_aliases()
+        await refresh_db_aliases(db, force=True)
+
+    return {"created": created, "skipped": skipped}
+
+
+@api_router.post("/admin/area-aliases/bulk-delete")
+async def bulk_delete_area_aliases(
+    body: AreaAliasBulkDelete,
+    payload: dict = Depends(verify_token),
+) -> dict:
+    """Undo for the bulk-create endpoint. Deletes only ids passed in — never
+    touches anything else, so an undo can't accidentally wipe a long-standing
+    alias the admin added manually."""
+    _require_admin(payload)
+    if not body.ids:
+        return {"deleted": 0}
+    res = await db.area_aliases.delete_many({"id": {"$in": body.ids}})
+    if res.deleted_count:
+        invalidate_db_aliases()
+        await refresh_db_aliases(db, force=True)
+    return {"deleted": res.deleted_count}
 
 
 # ---------------------------------------------------------------------------
