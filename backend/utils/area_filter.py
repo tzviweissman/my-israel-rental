@@ -26,9 +26,50 @@ from __future__ import annotations
 import re
 
 from utils.locations_catalog import (
-    NEIGHBORHOOD_ALIASES,
     NEIGHBORHOOD_INDEX,
+    STATIC_NEIGHBORHOOD_ALIASES,
 )
+
+# Runtime alias cache — admins add/remove via the dashboard at any time
+# (see ``routes/admin_area_aliases.py``). Reads are sync because regex
+# building is sync; the cache is refreshed by route handlers that have DB
+# access (admin mutations always invalidate; other routes piggy-back on the
+# TTL refresh helper).
+_DB_ALIASES: dict[str, str] = {}
+_DB_ALIASES_LOADED_AT: float = 0.0
+DB_ALIASES_TTL_SECONDS: float = 60.0
+
+
+def all_aliases() -> dict[str, str]:
+    """Merged alias map (static seed + DB overrides), lower-cased on both
+    sides — the DB layer enforces this on write."""
+    return {**STATIC_NEIGHBORHOOD_ALIASES, **_DB_ALIASES}
+
+
+async def refresh_db_aliases(db, *, force: bool = False) -> dict[str, str]:
+    """Pull aliases from ``db.area_aliases`` if the cache is stale (or
+    ``force=True``). Returns the merged dict for convenience."""
+    import time as _time
+
+    global _DB_ALIASES_LOADED_AT
+    now = _time.time()
+    if not force and (now - _DB_ALIASES_LOADED_AT) < DB_ALIASES_TTL_SECONDS:
+        return all_aliases()
+    docs = await db.area_aliases.find({}, {"_id": 0}).to_list(500)
+    _DB_ALIASES.clear()
+    for d in docs:
+        alias = (d.get("alias") or "").strip().lower()
+        canon = (d.get("canonical") or "").strip().lower()
+        if alias and canon:
+            _DB_ALIASES[alias] = canon
+    _DB_ALIASES_LOADED_AT = now
+    return all_aliases()
+
+
+def invalidate_db_aliases() -> None:
+    """Force the next ``refresh_db_aliases`` to hit the DB."""
+    global _DB_ALIASES_LOADED_AT
+    _DB_ALIASES_LOADED_AT = 0.0
 
 
 def _aliases_for_neighborhood(neighborhood: str) -> list[str]:
@@ -36,7 +77,7 @@ def _aliases_for_neighborhood(neighborhood: str) -> list[str]:
     (case-insensitive). Used to widen the regex so picking ``Ramat Eshkol``
     also matches listings stored under ``Levi Eshkol`` etc."""
     target = neighborhood.strip().lower()
-    return [alias for alias, canon in NEIGHBORHOOD_ALIASES.items() if canon == target]
+    return [alias for alias, canon in all_aliases().items() if canon == target]
 
 
 def canonicalize_area(area: str | None) -> str | None:
@@ -66,7 +107,7 @@ def canonicalize_area(area: str | None) -> str | None:
         return f"{city} - {neighborhood}"
 
     # Alias hit (e.g. "Levi Eshkol" → "Ramat Eshkol").
-    alias_canon = NEIGHBORHOOD_ALIASES.get(key)
+    alias_canon = all_aliases().get(key)
     if alias_canon:
         hit = NEIGHBORHOOD_INDEX.get(alias_canon)
         if hit:

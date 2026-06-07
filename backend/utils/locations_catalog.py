@@ -66,12 +66,17 @@ for _g in LOCATION_OPTIONS:
         NEIGHBORHOOD_INDEX.setdefault(_n.strip().lower(), (_g["city"], _n))
 
 # Street-name / colloquial / typo aliases → canonical neighborhood (lowercase).
-# Keep narrow on purpose — only obvious mappings that come up in real listings.
-# Add more as the catalogue grows.
-NEIGHBORHOOD_ALIASES: dict[str, str] = {
+# Seed values shipped with the code — runtime additions live in the
+# ``area_aliases`` Mongo collection (see ``routes/admin_area_aliases.py``)
+# and are merged in at request time via ``area_filter.all_aliases()``.
+STATIC_NEIGHBORHOOD_ALIASES: dict[str, str] = {
     # Levi Eshkol Blvd runs through the Ramat Eshkol neighborhood — owners
     # frequently list the street name instead of the neighborhood.
     "levi eshkol": "ramat eshkol",
     "levi eshkol blvd": "ramat eshkol",
     "levi eshkol boulevard": "ramat eshkol",
 }
+
+# Backwards-compat alias: existing callers import ``NEIGHBORHOOD_ALIASES``.
+# Kept as a reference to the static seed so tests can still pin it.
+NEIGHBORHOOD_ALIASES = STATIC_NEIGHBORHOOD_ALIASES
