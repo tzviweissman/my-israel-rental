@@ -140,7 +140,12 @@ def _parse_iso_date(value: str | None) -> datetime | None:
     if not value:
         return None
     try:
-        return datetime.fromisoformat(str(value).replace("Z", "").split("T")[0])
+        # Strip a trailing "Z" and anything after a "T" so we just compare
+        # midnight-to-midnight in UTC. Returning a timezone-aware datetime
+        # matches the ``cutoff`` calc below — Python refuses to compare
+        # naive vs aware values and raises TypeError otherwise.
+        d = datetime.fromisoformat(str(value).replace("Z", "").split("T")[0])
+        return d.replace(tzinfo=UTC)
     except (TypeError, ValueError):
         return None
 
