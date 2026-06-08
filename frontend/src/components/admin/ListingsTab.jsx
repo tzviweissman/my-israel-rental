@@ -35,6 +35,13 @@ export const ListingsTab = ({ token, onStatsChange }) => {
     else next.delete('managed');
     setSearchParams(next, { replace: true });
   };
+  const featuredFilter = searchParams.get('featured') === '1' ? 'featured' : 'all';
+  const setFeaturedFilter = (val) => {
+    const next = new URLSearchParams(searchParams);
+    if (val === 'featured') next.set('featured', '1');
+    else next.delete('featured');
+    setSearchParams(next, { replace: true });
+  };
   const [selectedPropIds, setSelectedPropIds] = useState(new Set());
   const [bookedModalOpen, setBookedModalOpen] = useState(false);
   // bookedTarget: null | { mode: 'single', id } | { mode: 'bulk' }
@@ -218,6 +225,7 @@ export const ListingsTab = ({ token, onStatsChange }) => {
 
   const filteredProperties = properties.filter(p => {
     if (managedFilter === 'managed' && !p.managed_by_admin) return false;
+    if (featuredFilter === 'featured' && !p.is_featured) return false;
     if (!searchTerm) return true;
     const t = searchTerm.toLowerCase();
     return (
@@ -227,6 +235,7 @@ export const ListingsTab = ({ token, onStatsChange }) => {
     );
   });
   const managedCount = properties.filter(p => p.managed_by_admin).length;
+  const featuredCount = properties.filter(p => p.is_featured).length;
 
   return (
     <div data-testid="admin-listings-section">
@@ -266,6 +275,21 @@ export const ListingsTab = ({ token, onStatsChange }) => {
             data-testid="managed-filter-managed"
           >
             <Briefcase size={12} /> I manage ({managedCount})
+          </button>
+        </div>
+        {/* Quick chip toggle: show only featured listings — clicking the
+            chip below restricts the table to just the ones surfaced on
+            the home page. Disabled state when there's nothing featured
+            so the admin doesn't get confused by an empty view. */}
+        <div className="inline-flex bg-white rounded-lg border border-[#E5E5E5] p-0.5" data-testid="featured-filter">
+          <button
+            onClick={() => setFeaturedFilter('featured')}
+            disabled={featuredCount === 0}
+            className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-semibold transition-colors disabled:opacity-40 disabled:cursor-not-allowed ${featuredFilter === 'featured' ? 'bg-amber-500 text-white' : 'text-gray-600 hover:bg-gray-50'}`}
+            data-testid="featured-filter-on"
+            title={featuredCount === 0 ? "Nothing featured yet — toggle a property's star to mark it" : 'Show only featured listings'}
+          >
+            <Star size={12} fill={featuredFilter === 'featured' ? 'currentColor' : 'none'} /> Featured ({featuredCount})
           </button>
         </div>
         {selectedPropIds.size > 0 && (
