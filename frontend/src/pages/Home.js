@@ -1,10 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import DOMPurify from 'dompurify';
 import { API } from '../App';
-import { Search, Bed, Bath, Home as HomeIcon, MapPin, Check } from 'lucide-react';
+import { Search, Bed, Bath, Home as HomeIcon, MapPin, Check, ChevronLeft, ChevronRight } from 'lucide-react';
 import HeroSlideshow from '../components/HeroSlideshow';
 import DefaultImageBadge from '../components/property/DefaultImageBadge';
 import { getCoverImage } from '../utils/coverImage';
@@ -29,6 +29,7 @@ const Home = () => {
   const navigate = useNavigate();
   const [featuredProperties, setFeaturedProperties] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
+  const scrollerRef = useRef(null);
 
   useEffect(() => {
     fetchFeaturedProperties();
@@ -37,16 +38,19 @@ const Home = () => {
   const fetchFeaturedProperties = async () => {
     try {
       // The backend stamps `is_featured` on every property based on
-      // site_settings.featured_property_ids — pick those first, and fall
-      // back to the most-recent listings only if the admin hasn't featured
-      // enough to fill the strip.
+      // site_settings.featured_property_ids — surface every admin-curated
+      // pick, and only top up with recent non-featured listings when
+      // the admin has selected fewer than the minimum (so the strip
+      // never looks empty on a fresh install).
       const response = await axios.get(`${API}/properties`);
       const all = response.data || [];
       const featured = all.filter((p) => p.is_featured);
       const others = all.filter((p) => !p.is_featured);
-      const SHOW = 6;
+      const MIN_FILLER = 6; // top up when there's almost nothing featured
       const combined =
-        featured.length >= SHOW ? featured.slice(0, SHOW) : [...featured, ...others].slice(0, SHOW);
+        featured.length >= MIN_FILLER
+          ? featured
+          : [...featured, ...others.slice(0, MIN_FILLER - featured.length)];
       setFeaturedProperties(combined);
     } catch (error) {
       console.error('Failed to fetch properties', error);
@@ -55,6 +59,17 @@ const Home = () => {
 
   const handleSearch = () => {
     navigate(`/properties/all?search=${searchQuery}`);
+  };
+
+  // Scroller helpers — used by the desktop arrow buttons. Mobile users can
+  // just swipe; we hide the arrows below md.
+  const scrollByCards = (direction) => {
+    const el = scrollerRef.current;
+    if (!el) return;
+    // One screenful at a time feels more useful than 1 card; falls back to
+    // the container width so it adapts to whatever card size is in effect.
+    const distance = el.clientWidth * 0.9 * (direction === 'left' ? -1 : 1);
+    el.scrollBy({ left: distance, behavior: 'smooth' });
   };
 
   return (
@@ -128,50 +143,77 @@ const Home = () => {
           {t('home.featuredProperties')}
         </h2>
 
-        <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-8">
-          {featuredProperties.map((property) => (
-            <div
-              key={property.id}
-              className="property-card"
-              onClick={() => {
-                sessionStorage.setItem('previousPath', window.location.pathname);
-                navigate(`/property/${property.id}`);
-              }}
-              data-testid={`property-card-${property.id}`}
-            >
-              <div className="relative h-36 md:h-64 bg-gray-200" style={{
-                backgroundImage: `url(${getCoverImage(property.images, 600, '', property.videos, property.id).url})`,
-                backgroundSize: 'cover',
-                backgroundPosition: 'center'
-              }}>
-                {getCoverImage(property.images, 600, '', property.videos, property.id).isDefault && <DefaultImageBadge />}
-              </div>
-              <div className="p-3 md:p-6">
-                <h3 className="text-sm md:text-xl font-bold mb-1 md:mb-2 line-clamp-1">{property.title}</h3>
-                <div className="flex items-center gap-2 text-gray-600 mb-2 md:mb-3">
-                  <MapPin size={14} className="md:w-4 md:h-4 shrink-0" />
-                  <span className="text-xs md:text-sm truncate">{property.area}</span>
+        {/* Horizontal scroller — every admin-curated featured listing is
+            kept in the strip. On desktop we show arrow buttons; mobile
+            users swipe. snap-x keeps cards from stopping mid-image. */}
+        <div className="relative" data-testid="featured-strip">
+          <button
+            type="button"
+            onClick={() => scrollByCards('left')}
+            aria-label="Scroll left"
+            className="hidden md:flex absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 z-10 w-11 h-11 rounded-full bg-white border border-gray-200 shadow-md items-center justify-center text-gray-700 hover:bg-gray-50 hover:shadow-lg transition-all"
+            data-testid="featured-scroll-left"
+          >
+            <ChevronLeft size={20} />
+          </button>
+          <button
+            type="button"
+            onClick={() => scrollByCards('right')}
+            aria-label="Scroll right"
+            className="hidden md:flex absolute right-0 top-1/2 -translate-y-1/2 translate-x-4 z-10 w-11 h-11 rounded-full bg-white border border-gray-200 shadow-md items-center justify-center text-gray-700 hover:bg-gray-50 hover:shadow-lg transition-all"
+            data-testid="featured-scroll-right"
+          >
+            <ChevronRight size={20} />
+          </button>
+
+          <div
+            ref={scrollerRef}
+            className="flex gap-3 md:gap-6 overflow-x-auto snap-x snap-mandatory scroll-smooth pb-3 -mx-6 px-6 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+            data-testid="featured-scroller"
+          >
+            {featuredProperties.map((property) => (
+              <div
+                key={property.id}
+                className="property-card snap-start shrink-0 w-[78vw] sm:w-[44vw] md:w-[340px] lg:w-[360px]"
+                onClick={() => {
+                  sessionStorage.setItem('previousPath', window.location.pathname);
+                  navigate(`/property/${property.id}`);
+                }}
+                data-testid={`property-card-${property.id}`}
+              >
+                <div className="relative h-44 md:h-60 bg-gray-200" style={{
+                  backgroundImage: `url(${getCoverImage(property.images, 600, '', property.videos, property.id).url})`,
+                  backgroundSize: 'cover',
+                  backgroundPosition: 'center'
+                }}>
+                  {getCoverImage(property.images, 600, '', property.videos, property.id).isDefault && <DefaultImageBadge />}
                 </div>
-                <div className="hidden md:flex items-center gap-4 mb-4 text-sm text-gray-700">
-                  {property.bedrooms && (
-                    <div className="flex items-center gap-1">
-                      <Bed size={16} />
-                      <span>{property.bedrooms}</span>
-                    </div>
-                  )}
-                  {property.bathrooms && (
-                    <div className="flex items-center gap-1">
-                      <Bath size={16} />
-                      <span>{property.bathrooms}</span>
-                    </div>
-                  )}
-                  {property.square_meters && (
-                    <div className="flex items-center gap-1">
-                      <HomeIcon size={16} />
-                      <span>{property.square_meters} m²</span>
-                    </div>
-                  )}
-                </div>
+                <div className="p-3 md:p-5">
+                  <h3 className="text-sm md:text-lg font-bold mb-1 md:mb-2 line-clamp-1">{property.title}</h3>
+                  <div className="flex items-center gap-2 text-gray-600 mb-2 md:mb-3">
+                    <MapPin size={14} className="md:w-4 md:h-4 shrink-0" />
+                    <span className="text-xs md:text-sm truncate">{property.area}</span>
+                  </div>
+                  <div className="hidden md:flex items-center gap-4 mb-4 text-sm text-gray-700">
+                    {property.bedrooms && (
+                      <div className="flex items-center gap-1">
+                        <Bed size={16} />
+                        <span>{property.bedrooms}</span>
+                      </div>
+                    )}
+                    {property.bathrooms && (
+                      <div className="flex items-center gap-1">
+                        <Bath size={16} />
+                        <span>{property.bathrooms}</span>
+                      </div>
+                    )}
+                    {property.square_meters && (
+                      <div className="flex items-center gap-1">
+                        <HomeIcon size={16} />
+                        <span>{property.square_meters} m²</span>
+                      </div>
+                    )}
+                  </div>
                 <div className="flex items-center justify-between">
                   <span className="text-base md:text-2xl font-bold" style={{ color: "#D4AF37" }}>
                     ₪{property.monthly_price || property.nightly_price}
@@ -186,6 +228,7 @@ const Home = () => {
               </div>
             </div>
           ))}
+          </div>
         </div>
       </div>
 
