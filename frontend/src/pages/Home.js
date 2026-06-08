@@ -36,8 +36,18 @@ const Home = () => {
 
   const fetchFeaturedProperties = async () => {
     try {
+      // The backend stamps `is_featured` on every property based on
+      // site_settings.featured_property_ids — pick those first, and fall
+      // back to the most-recent listings only if the admin hasn't featured
+      // enough to fill the strip.
       const response = await axios.get(`${API}/properties`);
-      setFeaturedProperties(response.data.slice(0, 6));
+      const all = response.data || [];
+      const featured = all.filter((p) => p.is_featured);
+      const others = all.filter((p) => !p.is_featured);
+      const SHOW = 6;
+      const combined =
+        featured.length >= SHOW ? featured.slice(0, SHOW) : [...featured, ...others].slice(0, SHOW);
+      setFeaturedProperties(combined);
     } catch (error) {
       console.error('Failed to fetch properties', error);
     }

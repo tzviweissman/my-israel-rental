@@ -130,7 +130,19 @@ async def get_properties(
         query['condition'] = condition
     
     properties = await db.properties.find(query, {"_id": 0}).to_list(1000)
-    
+
+    # Stamp `is_featured` on every property so the home page / cards can
+    # surface admin-curated picks. The list of featured ids lives in a
+    # single ``site_settings`` doc (key='global'), edited via the admin
+    # ``PUT /admin/properties/{id}/featured`` toggle. Reading it here keeps
+    # the public endpoint as the single source of truth for that flag.
+    settings = await db.site_settings.find_one(
+        {"key": "global"}, {"_id": 0, "featured_property_ids": 1}
+    )
+    featured_ids = set((settings or {}).get("featured_property_ids") or [])
+    for p in properties:
+        p["is_featured"] = p["id"] in featured_ids
+
     # Cross-currency price filtering
     if min_price or max_price:
         rate = await get_usd_ils_rate()
@@ -206,7 +218,15 @@ async def get_property(property_id: str) -> dict:
     if owner:
         property_data['owner_name'] = owner.get('name', '')
         property_data['owner_email'] = owner.get('email', '')
-    
+
+    # Stamp is_featured the same way the list endpoint does, so the property
+    # detail page can render the "Featured" badge consistently.
+    settings = await db.site_settings.find_one(
+        {"key": "global"}, {"_id": 0, "featured_property_ids": 1}
+    )
+    featured_ids = set((settings or {}).get("featured_property_ids") or [])
+    property_data['is_featured'] = property_id in featured_ids
+
     return property_data
 
 
