@@ -303,10 +303,14 @@ const SmartListsTab = ({ token }) => {
             className="mt-2 w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#1E6A6A]/30 focus:border-[#1E6A6A] text-sm bg-white"
             data-testid="smart-list-location-select"
           >
-            <option value="">All locations</option>
+            <option value="">
+              All locations
+              {availableLocations.length > 0 &&
+                ` (${availableLocations.reduce((sum, a) => sum + (a.count || 0), 0)})`}
+            </option>
             {availableLocations.map((a) => (
-              <option key={a} value={a}>
-                {a}
+              <option key={a.value} value={a.value}>
+                {a.value} ({a.count})
               </option>
             ))}
           </select>

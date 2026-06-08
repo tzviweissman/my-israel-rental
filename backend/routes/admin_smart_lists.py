@@ -283,41 +283,57 @@ def _shape_for_output(prop: dict) -> SmartListPropertyOut:
 # ---------------------------------------------------------------------------
 # Endpoints
 # ---------------------------------------------------------------------------
-@api_router.get("/admin/smart-lists/locations", response_model=list[str])
+class SmartListLocation(BaseModel):
+    value: str
+    count: int
+
+
+@api_router.get(
+    "/admin/smart-lists/locations", response_model=list[SmartListLocation]
+)
 async def list_smart_list_locations(
     payload: dict = Depends(verify_token),
-) -> list[str]:
-    """Distinct list of canonical area values backed by at least one active
-    long-term, short-term, or vacation listing.
+) -> list[dict]:
+    """Distinct canonical area values backed by at least one active long-term,
+    short-term, or vacation listing — paired with a listing count so the
+    dropdown can read ``Jerusalem - Sanhedria (4)``.
 
     All known variants of a single neighborhood are collapsed into one entry:
     ``"Ramat Eshkol"``, ``"Jerusalem - Ramat Eshkol"``, and the street-name
-    alias ``"Levi Eshkol"`` all map to ``"Jerusalem - Ramat Eshkol"`` here.
-    Unknown freeform area strings (rare) are kept verbatim so admins can
-    still find them rather than silently disappearing from the dropdown.
+    alias ``"Levi Eshkol"`` all add to the count of
+    ``"Jerusalem - Ramat Eshkol"``.
     """
     _require_admin(payload)
-    areas = await db.properties.distinct(
-        "area",
+    pipeline = [
         {
-            "status": "active",
-            "rental_type": {"$in": ["long-term", "short-term", "vacation"]},
-            "area": {"$nin": [None, ""]},
+            "$match": {
+                "status": "active",
+                "rental_type": {"$in": ["long-term", "short-term", "vacation"]},
+                "area": {"$nin": [None, ""]},
+            }
         },
-    )
+        {"$group": {"_id": "$area", "count": {"$sum": 1}}},
+    ]
+    rows = await db.properties.aggregate(pipeline).to_list(2000)
 
-    canonical_set: set[str] = set()
-    unknown: set[str] = set()
-    for raw in areas:
-        if not raw:
+    # Roll up variants (bare names, aliases) into their canonical entry so
+    # the dropdown shows one row per real-world neighborhood with the
+    # combined count.
+    grouped: dict[str, int] = {}
+    for r in rows:
+        raw = r.get("_id")
+        count = int(r.get("count") or 0)
+        canon = canonicalize_area(raw) or (raw.strip() if raw else None)
+        if not canon:
             continue
-        canon = canonicalize_area(raw)
-        if canon:
-            canonical_set.add(canon)
-        else:
-            unknown.add(raw.strip())
+        grouped[canon] = grouped.get(canon, 0) + count
 
-    return sorted(canonical_set | unknown, key=lambda s: s.lower())
+    out = [
+        {"value": value, "count": count}
+        for value, count in grouped.items()
+    ]
+    out.sort(key=lambda r: r["value"].lower())
+    return out
 
 
 @api_router.post("/admin/smart-lists/generate", response_model=SmartListGenerateResponse)
