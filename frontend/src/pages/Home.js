@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import DOMPurify from 'dompurify';
 import { API } from '../App';
-import { Search, Bed, Bath, Home as HomeIcon, MapPin, Check, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Search, Bed, Bath, Home as HomeIcon, MapPin, Check, ArrowLeft, ArrowRight } from 'lucide-react';
 import HeroSlideshow from '../components/HeroSlideshow';
 import DefaultImageBadge from '../components/property/DefaultImageBadge';
 import { getCoverImage } from '../utils/coverImage';
@@ -30,6 +30,10 @@ const Home = () => {
   const [featuredProperties, setFeaturedProperties] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
   const scrollerRef = useRef(null);
+  // Track which scroll directions are still possible so we can dim/hide
+  // the "Scroll" pills when the user has reached either end.
+  const [canScrollLeft, setCanScrollLeft] = useState(false);
+  const [canScrollRight, setCanScrollRight] = useState(true);
 
   useEffect(() => {
     fetchFeaturedProperties();
@@ -61,8 +65,8 @@ const Home = () => {
     navigate(`/properties/all?search=${searchQuery}`);
   };
 
-  // Scroller helpers — used by the desktop arrow buttons. Mobile users can
-  // just swipe; we hide the arrows below md.
+  // Scroller helpers — used by the desktop "Scroll" pills. Mobile users can
+  // just swipe; we hide the pills below md.
   const scrollByCards = (direction) => {
     const el = scrollerRef.current;
     if (!el) return;
@@ -71,6 +75,28 @@ const Home = () => {
     const distance = el.clientWidth * 0.9 * (direction === 'left' ? -1 : 1);
     el.scrollBy({ left: distance, behavior: 'smooth' });
   };
+
+  // Recalculate which directions are scrollable whenever the user scrolls,
+  // the strip is resized, or the property list changes. Using a small
+  // tolerance (4px) avoids flicker at the exact edge.
+  const updateScrollEdges = () => {
+    const el = scrollerRef.current;
+    if (!el) return;
+    setCanScrollLeft(el.scrollLeft > 4);
+    setCanScrollRight(el.scrollLeft + el.clientWidth < el.scrollWidth - 4);
+  };
+
+  useEffect(() => {
+    const el = scrollerRef.current;
+    if (!el) return;
+    updateScrollEdges();
+    el.addEventListener('scroll', updateScrollEdges, { passive: true });
+    window.addEventListener('resize', updateScrollEdges);
+    return () => {
+      el.removeEventListener('scroll', updateScrollEdges);
+      window.removeEventListener('resize', updateScrollEdges);
+    };
+  }, [featuredProperties]);
 
   return (
     <div className="min-h-screen">
@@ -139,33 +165,47 @@ const Home = () => {
       </HeroSlideshow>
 
       <div className="max-w-7xl mx-auto px-6 py-16">
-        <h2 className="text-3xl sm:text-4xl font-bold mb-12 text-center" style={{ fontFamily: 'Playfair Display' }}>
-          {t('home.featuredProperties')}
-        </h2>
+        {/* Title row — on desktop we anchor labeled "Scroll" pills to the
+            right of the title so users immediately see how to advance the
+            carousel. Mobile users swipe, so the pills stay hidden. */}
+        <div className="flex items-center justify-between mb-8 md:mb-10 gap-4">
+          <h2 className="text-3xl sm:text-4xl font-bold text-center md:text-left flex-1 md:flex-none" style={{ fontFamily: 'Playfair Display' }}>
+            {t('home.featuredProperties')}
+          </h2>
+          <div className="hidden md:flex items-center gap-2" data-testid="featured-scroll-controls">
+            <button
+              type="button"
+              onClick={() => scrollByCards('left')}
+              disabled={!canScrollLeft}
+              aria-label="Scroll to previous properties"
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-full border text-sm font-semibold transition-all disabled:opacity-30 disabled:cursor-not-allowed hover:shadow-md"
+              style={{ borderColor: '#1E6A6A', color: '#1E6A6A', backgroundColor: 'white' }}
+              data-testid="featured-scroll-left"
+            >
+              <ArrowLeft size={16} />
+              <span>Previous</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => scrollByCards('right')}
+              disabled={!canScrollRight}
+              aria-label="Scroll to more properties"
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold transition-all disabled:opacity-30 disabled:cursor-not-allowed hover:shadow-lg"
+              style={{ backgroundColor: '#1E6A6A', color: 'white' }}
+              data-testid="featured-scroll-right"
+            >
+              <span>Scroll for more</span>
+              <ArrowRight size={16} />
+            </button>
+          </div>
+        </div>
 
         {/* Horizontal scroller — every admin-curated featured listing is
-            kept in the strip. On desktop we show arrow buttons; mobile
-            users swipe. snap-x keeps cards from stopping mid-image. */}
+            kept in the strip. Desktop users click the labeled "Scroll" pills
+            above; mobile users swipe. snap-x keeps cards from stopping
+            mid-image. A gradient fade on the right edge hints that there's
+            more content when more cards exist offscreen. */}
         <div className="relative" data-testid="featured-strip">
-          <button
-            type="button"
-            onClick={() => scrollByCards('left')}
-            aria-label="Scroll left"
-            className="hidden md:flex absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 z-10 w-11 h-11 rounded-full bg-white border border-gray-200 shadow-md items-center justify-center text-gray-700 hover:bg-gray-50 hover:shadow-lg transition-all"
-            data-testid="featured-scroll-left"
-          >
-            <ChevronLeft size={20} />
-          </button>
-          <button
-            type="button"
-            onClick={() => scrollByCards('right')}
-            aria-label="Scroll right"
-            className="hidden md:flex absolute right-0 top-1/2 -translate-y-1/2 translate-x-4 z-10 w-11 h-11 rounded-full bg-white border border-gray-200 shadow-md items-center justify-center text-gray-700 hover:bg-gray-50 hover:shadow-lg transition-all"
-            data-testid="featured-scroll-right"
-          >
-            <ChevronRight size={20} />
-          </button>
-
           <div
             ref={scrollerRef}
             className="flex gap-3 md:gap-6 overflow-x-auto snap-x snap-mandatory scroll-smooth pb-3 -mx-6 px-6 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"

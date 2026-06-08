@@ -564,3 +564,13 @@ Build a bilingual (English/Hebrew) rental website named MyIsraelRental.com with 
 
 ## Test Credentials
 See /app/memory/test_credentials.md
+
+## Recent Updates (2026-02)
+
+- [x] **Featured Properties carousel — labeled "Scroll" pills** (2026-02-12):
+  - Replaced the subtle round `◀ ▶` floating chevron buttons with two prominent, clearly labeled pills anchored to the right of the "Featured Properties" heading: **"← Previous"** (white with teal border) and **"Scroll for more →"** (solid teal with white text + arrow).
+  - Added `canScrollLeft` / `canScrollRight` state tracking via a `scroll`+`resize` listener on the strip; the buttons dim to `opacity-30` + `cursor-not-allowed` at the natural ends, so users instantly see how many directions remain.
+  - Pills only render on `md:` and up; mobile users still swipe.
+  - Verified live on preview — the "Scroll for more →" pill is unmistakably visible, clicking it advances the strip by ~one screenful, and the "Previous" pill activates on the second click.
+  - Files: `frontend/src/pages/Home.js`.
+
