@@ -100,6 +100,13 @@ const buildHeader = (filters) => {
 
 const buildCopyText = (properties, filters = {}) => {
   const [brand, subtitle] = buildHeader(filters);
+  // Leading the message with the bare homepage URL on its own line is the
+  // trick that gets messaging apps (WhatsApp, iMessage, Telegram) to fetch
+  // the site's Open Graph metadata and render the MyIsraelRental logo as
+  // the preview card at the very top of the message. Without this, the
+  // first URL in the message would be a property listing URL and WhatsApp
+  // would show that property's photo as the preview instead of the logo.
+  const SITE_URL = 'https://myisraelrental.com';
   const body = properties
     .map((p) => {
       // When the admin picked a specific location, force every row to that
@@ -117,7 +124,7 @@ const buildCopyText = (properties, filters = {}) => {
       return lines.join('\n');
     })
     .join('\n\n');
-  return `${brand}\n${subtitle}\n\n${body}`;
+  return `${SITE_URL}\n\n${brand}\n${subtitle}\n\n${body}`;
 };
 
 const SmartListsTab = ({ token }) => {
@@ -490,7 +497,21 @@ const SmartListsTab = ({ token }) => {
           {appliedFilters && (
             <div className="mb-4 pb-3 border-b border-gray-100">
               <p className="text-xs uppercase tracking-wider text-gray-400">List header</p>
-              <p className="text-xl font-extrabold text-[#1E6A6A] mt-1">MyIsraelRental.com</p>
+              {/* Mock WhatsApp link-preview card so the admin can see the
+                  MyIsraelRental logo will sit on top of the shared list. */}
+              <div className="mt-2 mb-3 inline-flex items-center gap-3 px-3 py-2 rounded-xl border border-gray-200 bg-gray-50 max-w-md">
+                <img
+                  src="https://customer-assets.emergentagent.com/job_listing-manager-pro-2/artifacts/hx4hc6hw_IMG_1745%20%281%29.PNG"
+                  alt="MyIsraelRental logo"
+                  className="w-12 h-12 rounded-lg object-contain bg-white shrink-0"
+                />
+                <div className="min-w-0">
+                  <p className="text-[11px] text-gray-400 uppercase tracking-wide">WhatsApp preview</p>
+                  <p className="text-sm font-bold text-gray-900 truncate">MyIsraelRental — Rentals across Israel</p>
+                  <p className="text-[11px] text-gray-500 truncate">myisraelrental.com</p>
+                </div>
+              </div>
+              <p className="text-xl font-extrabold text-[#1E6A6A]">MyIsraelRental.com</p>
               <p className="text-sm font-semibold text-gray-700">
                 {buildHeader(appliedFilters)[1]}
               </p>

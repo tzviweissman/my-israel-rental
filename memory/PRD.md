@@ -567,6 +567,14 @@ See /app/memory/test_credentials.md
 
 ## Recent Updates (2026-02)
 
+- [x] **Smart List shares now show MyIsraelRental logo in WhatsApp preview** (2026-02-12):
+  - Added `og:title`, `og:description`, `og:image`, `og:url`, `og:site_name`, `og:type`, plus Twitter Card variants to `frontend/public/index.html` — the `og:image` points to the existing MyIsraelRental brand logo.
+  - Replaced the generic `<title>Emergent | Fullstack App</title>` with `MyIsraelRental — Rentals across Israel`, plus updated `theme-color` to `#1E6A6A`.
+  - Updated `SmartListsTab.jsx` `buildCopyText()`: the shared message now leads with a bare `https://myisraelrental.com` URL on its own line so WhatsApp/iMessage/Telegram fetch the homepage's OG metadata and render the logo as a preview card on top of the message text. Without this, the first URL in the message would be a property listing URL and WhatsApp would preview the *property photo* instead of the logo.
+  - Added a "WhatsApp preview" mock card to the in-page List header preview block so the admin can see — at a glance — that the logo will sit on top of their shared list before they hit Share on WhatsApp.
+  - **Note on production rollout**: WhatsApp/iMessage cache OG previews aggressively (sometimes weeks). After the user redeploys, the very first share to a new recipient will fetch the new card; previously-shared links may still show the old (no-image) preview until cache TTL expires.
+  - Files: `frontend/public/index.html`, `frontend/src/components/admin/SmartListsTab.jsx`.
+
 - [x] **Featured Properties carousel — labeled "Scroll" pills** (2026-02-12):
   - Replaced the subtle round `◀ ▶` floating chevron buttons with two prominent, clearly labeled pills anchored to the right of the "Featured Properties" heading: **"← Previous"** (white with teal border) and **"Scroll for more →"** (solid teal with white text + arrow).
   - Added `canScrollLeft` / `canScrollRight` state tracking via a `scroll`+`resize` listener on the strip; the buttons dim to `opacity-30` + `cursor-not-allowed` at the natural ends, so users instantly see how many directions remain.
