@@ -567,6 +567,14 @@ See /app/memory/test_credentials.md
 
 ## Recent Updates (2026-02)
 
+- [x] **Admin Import: unified into a single flow with auto-detect** (2026-02-12):
+  - Removed the separate "Properties" vs "Users" mode-picker buttons from `ImportTab.jsx`. Admin pastes any CSV — the system now auto-detects which canonical schema (property or user) it should be mapped against, from the column headers.
+  - **Backend** (`routes/admin_import.py`): added `_detect_schema_kind(headers)` heuristic + new `schema_kind="auto"` mode on `POST /admin/import/preview`. A `role` column + email is a strong user signal (promoted ahead of property-shaped substring matches like "Email Address" containing "address"). Otherwise property-shaped columns (bed/bath/rent/price/sqm/area/neighborhood/owner_email/etc.) classify as property. Preview response now includes `detected_schema_kind` so the frontend can route the commit to the right endpoint.
+  - **Frontend** (`components/admin/ImportTab.jsx`): dropped the mode picker; preview button always sends `schema_kind="auto"`. After preview, a "DETECTED: [Properties] | [Users]" badge appears next to "Column mapping (N rows)" — the detected kind is highlighted teal, and the admin can click the other pill to override the heuristic (re-runs preview with the manual override). Commit URL is chosen from the live `schemaKind` state.
+  - **Test coverage**: new `tests/test_admin_import_autodetect.py` (8/8 passing) covers property/user/ambiguous header sets including the "Email Address contains 'address'" edge case.
+  - **End-to-end verified live**: admin login → Import tab → paste property CSV → detected "Properties" with correct mapping; paste user CSV → toast "Detected users", badge flips to "Users", mapping switches to user schema. Both flows produce the correct canonical column map.
+  - Files: `backend/routes/admin_import.py`, `backend/tests/test_admin_import_autodetect.py`, `frontend/src/components/admin/ImportTab.jsx`.
+
 - [x] **Chat: multi-image + video attachments** (2026-02-12):
   - Owners (and any chat user) can now attach multiple photos AND/OR a video in a single picker tap.
   - **Backend**: added `video_url: str | None` to `models.ChatMessage`; `chat.py` POST `/chat/messages` persists it alongside `image_url`, with a "Sent you a video 🎬" notification body when the message is video-only. `_send_chat_email_safe` accepts `video_url` so the chat-email throttle still treats it as media.

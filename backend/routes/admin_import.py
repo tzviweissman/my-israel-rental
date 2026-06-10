@@ -52,6 +52,47 @@ PROPERTY_FIELDS = {
 USER_FIELDS = {"email", "name", "phone", "role"}
 
 
+# Header substrings that strongly signal a CSV is a property list vs a
+# user list. Used by ``_detect_schema_kind`` when the admin sends
+# ``schema_kind="auto"`` from the unified Import UI.
+_PROPERTY_HEADER_HINTS = (
+    "bed", "bath", "rent", "price", "monthly", "nightly", "sqm", "sq m",
+    "m2", "m²", "square", "address", "neighborhood", "area", "location",
+    "property", "apt", "apartment", "title", "rooms", "amenit",
+    "furnish", "floor", "available", "image", "photo", "picture", "video",
+    "owner email", "landlord", "rental",
+)
+_USER_HEADER_HINTS = ("role",)
+
+
+def _detect_schema_kind(headers: list[str]) -> str:
+    """Heuristic: is this CSV a list of properties or a list of users?
+
+    Returns ``"property"`` or ``"user"``. Defaults to ``"property"`` when
+    the signal is ambiguous (properties are the much more common import).
+    """
+    lowered = [h.lower() for h in headers]
+    has_email = any("email" in h for h in lowered)
+    has_role = any(h in {"role", "user role", "user_role"} for h in lowered)
+    # A "role" column is a strong user-import signal; promote it over any
+    # property-shaped substring matches (e.g. "Email Address" contains
+    # "address", which would otherwise wrongly trip the property branch).
+    if has_email and has_role:
+        return "user"
+    has_property_signal = any(
+        any(hint in h for hint in _PROPERTY_HEADER_HINTS) for h in lowered
+    )
+    if has_property_signal:
+        return "property"
+    # Tiny user-only header set ({email,name,phone}) with no property hints.
+    user_only = lowered and all(
+        any(u in h for u in ("email", "name", "phone")) for h in lowered
+    )
+    if user_only:
+        return "user"
+    return "property"
+
+
 # --- AI column mapping ---------------------------------------------------
 
 _PROPERTY_SYSTEM = (
@@ -267,7 +308,10 @@ def _frontend_origin() -> str:
 
 class CsvPreviewRequest(BaseModel):
     csv_text: str
-    schema_kind: str = "property"  # "property" | "user"
+    # "property" | "user" | "auto" — when "auto" the backend inspects the
+    # CSV headers and decides which canonical schema to map against. The
+    # unified Import tab in the admin UI always sends "auto".
+    schema_kind: str = "auto"
 
 
 @api_router.post("/admin/import/preview")
@@ -281,6 +325,7 @@ async def preview_import(req: CsvPreviewRequest, payload: dict = Depends(verify_
         sample_rows: [ first 5 rows, remapped to canonical fields ],
         warnings: [ "Column 'foo' has no canonical mapping" ],
         total_rows: 23,
+        detected_schema_kind: "property" | "user",
       }
     """
     if payload['role'] != 'admin':
@@ -292,7 +337,12 @@ async def preview_import(req: CsvPreviewRequest, payload: dict = Depends(verify_
     if not headers:
         raise HTTPException(status_code=400, detail="No headers detected in CSV")
 
-    column_map = await _ai_map_columns(headers, schema=req.schema_kind)
+    # Auto-detection runs only when the admin didn't pin a schema explicitly.
+    schema_kind = req.schema_kind
+    if schema_kind == "auto":
+        schema_kind = _detect_schema_kind(headers)
+
+    column_map = await _ai_map_columns(headers, schema=schema_kind)
 
     # Re-map a sample for the preview UI
     def remap_row(row: dict) -> dict:
@@ -309,6 +359,7 @@ async def preview_import(req: CsvPreviewRequest, payload: dict = Depends(verify_
         "sample_rows": sample,
         "warnings": warnings,
         "total_rows": len(rows),
+        "detected_schema_kind": schema_kind,
     }
 
 

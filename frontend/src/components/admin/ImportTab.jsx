@@ -2,8 +2,8 @@ import React, { useState } from 'react';
 import axios from 'axios';
 import { toast } from 'sonner';
 import {
-  Upload, FileSpreadsheet, Users, Home as HomeIcon, ArrowRight, AlertTriangle,
-  CheckCircle2, Loader2, Wand2,
+  Upload, FileSpreadsheet, ArrowRight, AlertTriangle,
+  CheckCircle2, Loader2, Wand2, Users, Home as HomeIcon,
 } from 'lucide-react';
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
@@ -11,18 +11,27 @@ const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 /**
  * Admin → Import tab.
  *
+ * Single unified workflow — paste any CSV (properties OR users) and the
+ * backend auto-detects which canonical schema it should be mapped against.
+ * No more separate "Import Properties" vs "Import Users" buttons.
+ *
  * Two-step workflow:
  *   1. Paste CSV or upload .csv file → click Preview. Backend AI-maps the
- *      columns to our canonical schema and returns a preview without
- *      writing anything.
- *   2. Admin tweaks the column mapping if necessary, then clicks Commit.
- *      Backend creates owners/users/properties, mirrors images to
- *      Cloudinary, dedupes, and emails "set your password" links.
+ *      columns to our canonical schema (auto-classifying property vs user
+ *      from the headers), and returns the detected kind alongside the
+ *      column map.
+ *   2. Admin reviews the mapping (the detected kind is shown as a small
+ *      badge — clickable to override if the heuristic guessed wrong), then
+ *      clicks Commit. Backend creates owners/users/properties, mirrors
+ *      images to Cloudinary, dedupes, and emails "set your password" links.
  */
 export const ImportTab = ({ token }) => {
-  const [mode, setMode] = useState('properties'); // properties | users
   const [csvText, setCsvText] = useState('');
   const [preview, setPreview] = useState(null);
+  // The schema kind currently in effect for this preview. Starts as
+  // whatever the backend detected; the admin can flip it without
+  // re-uploading the CSV (we just re-run preview with the override).
+  const [schemaKind, setSchemaKind] = useState(null); // "property" | "user" | null
   const [loading, setLoading] = useState(false);
   const [committing, setCommitting] = useState(false);
   const [result, setResult] = useState(null);
@@ -32,23 +41,26 @@ export const ImportTab = ({ token }) => {
     if (!file) return;
     setCsvText(await file.text());
     setPreview(null);
+    setSchemaKind(null);
     setResult(null);
   };
 
-  const runPreview = async () => {
+  const runPreview = async (overrideKind = null) => {
     if (!csvText.trim()) return toast.error('Paste a CSV first');
     setLoading(true); setResult(null);
     try {
       const res = await axios.post(
         `${API}/admin/import/preview`,
-        { csv_text: csvText, schema_kind: mode === 'users' ? 'user' : 'property' },
+        { csv_text: csvText, schema_kind: overrideKind || 'auto' },
         { headers: { Authorization: `Bearer ${token}` } },
       );
       setPreview(res.data);
+      setSchemaKind(res.data.detected_schema_kind || 'property');
       if (res.data.warnings?.length) {
         toast.warning(res.data.warnings.join(' '), { duration: 6000 });
       } else {
-        toast.success(`${res.data.total_rows} rows ready to import`);
+        const kind = res.data.detected_schema_kind === 'user' ? 'users' : 'properties';
+        toast.success(`Detected ${kind} — ${res.data.total_rows} rows ready to import`);
       }
     } catch (e) {
       toast.error(e.response?.data?.detail || 'Preview failed');
@@ -60,10 +72,10 @@ export const ImportTab = ({ token }) => {
   };
 
   const commit = async () => {
-    if (!preview) return;
+    if (!preview || !schemaKind) return;
     setCommitting(true); setResult(null);
     try {
-      const url = mode === 'users'
+      const url = schemaKind === 'user'
         ? `${API}/admin/import/users/commit`
         : `${API}/admin/import/properties/commit`;
       const res = await axios.post(
@@ -72,8 +84,9 @@ export const ImportTab = ({ token }) => {
         { headers: { Authorization: `Bearer ${token}` }, timeout: 600000 },  // 10 min for Cloudinary mirroring
       );
       setResult(res.data);
+      const kindLabel = schemaKind === 'user' ? 'users' : 'properties';
       const { created, skipped } = res.data.summary;
-      if (created > 0 && skipped === 0) toast.success(`Imported ${created} ${mode}`);
+      if (created > 0 && skipped === 0) toast.success(`Imported ${created} ${kindLabel}`);
       else if (created > 0) toast.success(`Imported ${created}, skipped ${skipped} — see report below`);
       else toast.error(`No rows imported — ${skipped} skipped, see report`);
     } catch (e) {
@@ -81,8 +94,15 @@ export const ImportTab = ({ token }) => {
     } finally { setCommitting(false); }
   };
 
+  const overrideKind = (newKind) => {
+    if (newKind === schemaKind) return;
+    // Re-run preview with the manual override so column mapping switches
+    // to the right canonical schema.
+    runPreview(newKind);
+  };
+
   const reset = () => {
-    setCsvText(''); setPreview(null); setResult(null);
+    setCsvText(''); setPreview(null); setSchemaKind(null); setResult(null);
   };
 
   const propertyTargets = [
@@ -94,7 +114,7 @@ export const ImportTab = ({ token }) => {
     'owner_email','owner_name','owner_phone',
   ];
   const userTargets = ['email','name','phone','role'];
-  const targets = mode === 'users' ? userTargets : propertyTargets;
+  const targets = schemaKind === 'user' ? userTargets : propertyTargets;
 
   return (
     <div data-testid="admin-import-section">
@@ -102,36 +122,19 @@ export const ImportTab = ({ token }) => {
         <h2 className="text-2xl font-bold" style={{ fontFamily: 'Playfair Display' }}>Import data</h2>
       </div>
 
-      {/* Mode picker */}
-      <div className="flex gap-2 mb-5">
-        {[
-          { v: 'properties', label: 'Properties', Icon: HomeIcon },
-          { v: 'users', label: 'Users', Icon: Users },
-        ].map(({ v, label, Icon }) => (
-          <button
-            key={v}
-            onClick={() => { setMode(v); setPreview(null); setResult(null); }}
-            className={`inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold border transition-colors ${
-              mode === v
-                ? 'bg-[#1E6A6A] text-white border-[#1E6A6A]'
-                : 'bg-white text-gray-700 border-gray-200 hover:bg-gray-50'
-            }`}
-            data-testid={`import-mode-${v}`}
-          >
-            <Icon size={14} /> {label}
-          </button>
-        ))}
-      </div>
-
       <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-4 text-xs text-blue-900 leading-relaxed">
         <div className="flex items-start gap-2">
           <Wand2 size={14} className="shrink-0 mt-0.5" />
           <div>
             <p className="font-semibold mb-0.5">How this works</p>
-            <p>Paste a CSV (or upload a .csv file). AI auto-maps source columns to our schema. You review the mapping, then click Commit.
-              {mode === 'properties' && ' Owners are auto-created and emailed a "set password" link. Images are mirrored to Cloudinary.'}
-              {mode === 'users' && ' New users get an autogenerated password and a "set password" email.'}
-              {' '}Duplicates (same owner+address+rental_type) are skipped automatically.
+            <p>
+              Paste a CSV (or upload a .csv file). The system auto-detects whether
+              the file is a list of <strong>properties</strong> or <strong>users</strong> from its
+              column headers, AI-maps the source columns to our canonical schema,
+              and shows you a preview. You review the detection and mapping, then
+              click Commit. Property owners are auto-created and emailed a
+              &quot;set password&quot; link; images are mirrored to Cloudinary. Duplicates
+              (same owner+address+rental_type) are skipped automatically.
             </p>
           </div>
         </div>
@@ -142,10 +145,8 @@ export const ImportTab = ({ token }) => {
         <label className="block text-sm font-medium mb-2">Paste CSV</label>
         <textarea
           value={csvText}
-          onChange={(e) => { setCsvText(e.target.value); setPreview(null); setResult(null); }}
-          placeholder={mode === 'users'
-            ? 'email,name,phone,role\njane@example.com,Jane Doe,054-1234567,renter'
-            : 'Property Name,Neighborhood,Beds,Rent/month,Owner Email\n"3BR in Sanhedria","Sanhedria",3,8500,owner@example.com'}
+          onChange={(e) => { setCsvText(e.target.value); setPreview(null); setSchemaKind(null); setResult(null); }}
+          placeholder={'Properties: "3BR in Sanhedria","Sanhedria",3,8500,owner@example.com\nUsers:      jane@example.com,Jane Doe,054-1234567,renter'}
           className="w-full px-3 py-2 rounded-lg border border-gray-200 font-mono text-xs h-40 focus:border-[#1E6A6A] focus:outline-none focus:ring-1 focus:ring-[#1E6A6A]/40"
           data-testid="import-csv-textarea"
         />
@@ -155,7 +156,7 @@ export const ImportTab = ({ token }) => {
             <input type="file" accept=".csv,text/csv" className="hidden" onChange={onPickFile} data-testid="import-file-input" />
           </label>
           <button
-            onClick={runPreview}
+            onClick={() => runPreview()}
             disabled={loading || !csvText.trim()}
             className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-[#1E6A6A] text-white text-sm font-semibold disabled:opacity-50 hover:bg-[#175555]"
             data-testid="import-preview-btn"
@@ -170,9 +171,41 @@ export const ImportTab = ({ token }) => {
       </div>
 
       {/* Preview & mapping */}
-      {preview && (
+      {preview && schemaKind && (
         <div className="bg-white border border-gray-200 rounded-xl p-4 mb-4" data-testid="import-preview">
-          <h3 className="font-bold mb-3">Column mapping ({preview.total_rows} rows)</h3>
+          <div className="flex items-center justify-between flex-wrap gap-2 mb-3">
+            <h3 className="font-bold">Column mapping ({preview.total_rows} rows)</h3>
+            {/* Detected-kind badge with a click-to-flip override. Lets the
+                admin correct the heuristic if it guessed wrong without
+                re-uploading the CSV. */}
+            <div className="flex items-center gap-1.5" data-testid="import-detected-kind">
+              <span className="text-[11px] uppercase tracking-wider text-gray-500 mr-1">Detected:</span>
+              <button
+                type="button"
+                onClick={() => overrideKind('property')}
+                className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold border transition-colors ${
+                  schemaKind === 'property'
+                    ? 'bg-[#1E6A6A] text-white border-[#1E6A6A]'
+                    : 'bg-white text-gray-600 border-gray-200 hover:bg-gray-50'
+                }`}
+                data-testid="import-kind-properties"
+              >
+                <HomeIcon size={12} /> Properties
+              </button>
+              <button
+                type="button"
+                onClick={() => overrideKind('user')}
+                className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold border transition-colors ${
+                  schemaKind === 'user'
+                    ? 'bg-[#1E6A6A] text-white border-[#1E6A6A]'
+                    : 'bg-white text-gray-600 border-gray-200 hover:bg-gray-50'
+                }`}
+                data-testid="import-kind-users"
+              >
+                <Users size={12} /> Users
+              </button>
+            </div>
+          </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mb-4 max-h-72 overflow-y-auto">
             {preview.headers.map((h) => (
               <label key={h} className="flex items-center gap-2 text-xs">
@@ -216,7 +249,7 @@ export const ImportTab = ({ token }) => {
             {committing ? <Loader2 size={14} className="animate-spin" /> : <CheckCircle2 size={14} />}
             {committing ? 'Importing…' : `Commit import (${preview.total_rows} rows)`}
           </button>
-          {mode === 'properties' && (
+          {schemaKind === 'property' && (
             <p className="text-[11px] text-gray-500 mt-2">
               Image mirroring may take a minute or two on rows with many photos.
             </p>
@@ -232,7 +265,7 @@ export const ImportTab = ({ token }) => {
             <Stat label="Total" value={result.summary.total} />
             <Stat label="Created" value={result.summary.created} positive />
             <Stat label="Skipped" value={result.summary.skipped} negative={result.summary.skipped > 0} />
-            {mode === 'properties' && (
+            {schemaKind === 'property' && (
               <Stat label="New owners" value={result.summary.owners_created || 0} />
             )}
           </div>
@@ -254,7 +287,7 @@ export const ImportTab = ({ token }) => {
               <ul className="mt-2 space-y-1">
                 {result.owners_created.map((o, i) => (
                   <li key={i} className="border border-green-100 bg-green-50 rounded px-2 py-1.5">
-                    {o.email} — sent "set password" email
+                    {o.email} — sent &quot;set password&quot; email
                   </li>
                 ))}
               </ul>
