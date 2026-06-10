@@ -3,29 +3,31 @@ import axios from 'axios';
 import { toast } from 'sonner';
 import {
   Upload, FileSpreadsheet, ArrowRight, AlertTriangle,
-  CheckCircle2, Loader2, Wand2, Users, Home as HomeIcon,
+  CheckCircle2, Loader2, Wand2, Users, Home as HomeIcon, Plus,
 } from 'lucide-react';
+import QuickAddPropertyForm from './QuickAddPropertyForm';
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 
 /**
  * Admin → Import tab.
  *
- * Single unified workflow — paste any CSV (properties OR users) and the
- * backend auto-detects which canonical schema it should be mapped against.
- * No more separate "Import Properties" vs "Import Users" buttons.
+ * Two flows live here:
  *
- * Two-step workflow:
- *   1. Paste CSV or upload .csv file → click Preview. Backend AI-maps the
- *      columns to our canonical schema (auto-classifying property vs user
- *      from the headers), and returns the detected kind alongside the
- *      column map.
- *   2. Admin reviews the mapping (the detected kind is shown as a small
- *      badge — clickable to override if the heuristic guessed wrong), then
- *      clicks Commit. Backend creates owners/users/properties, mirrors
- *      images to Cloudinary, dedupes, and emails "set your password" links.
+ *  • Quick Add (default) — a friendly form for adding ONE listing at a
+ *    time. Admin fills in email, location, bedrooms, price, etc. and
+ *    drops in photos / a short video; the backend creates the owner
+ *    account (if new) and attaches the listing under it. Re-submissions
+ *    with the same email accumulate under the same owner, so adding
+ *    five listings for one landlord takes ~5 form fills.
+ *
+ *  • Bulk CSV — unified property/user CSV importer. Paste a CSV, the
+ *    backend auto-detects whether it's a list of properties or users
+ *    from the headers, AI-maps the columns to our canonical schema,
+ *    and the admin reviews + commits.
  */
 export const ImportTab = ({ token }) => {
+  const [flow, setFlow] = useState('quick'); // 'quick' | 'bulk'
   const [csvText, setCsvText] = useState('');
   const [preview, setPreview] = useState(null);
   // The schema kind currently in effect for this preview. Starts as
@@ -122,6 +124,56 @@ export const ImportTab = ({ token }) => {
         <h2 className="text-2xl font-bold" style={{ fontFamily: 'Playfair Display' }}>Import data</h2>
       </div>
 
+      {/* Flow toggle — Quick Add (one listing + photos) vs Bulk CSV */}
+      <div className="flex gap-2 mb-5" data-testid="import-flow-toggle">
+        <button
+          type="button"
+          onClick={() => setFlow('quick')}
+          className={`inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold border transition-colors ${
+            flow === 'quick'
+              ? 'bg-[#1E6A6A] text-white border-[#1E6A6A]'
+              : 'bg-white text-gray-700 border-gray-200 hover:bg-gray-50'
+          }`}
+          data-testid="import-flow-quick"
+        >
+          <Plus size={14} /> Quick Add (one listing + photos)
+        </button>
+        <button
+          type="button"
+          onClick={() => setFlow('bulk')}
+          className={`inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold border transition-colors ${
+            flow === 'bulk'
+              ? 'bg-[#1E6A6A] text-white border-[#1E6A6A]'
+              : 'bg-white text-gray-700 border-gray-200 hover:bg-gray-50'
+          }`}
+          data-testid="import-flow-bulk"
+        >
+          <FileSpreadsheet size={14} /> Bulk CSV
+        </button>
+      </div>
+
+      {flow === 'quick' && (
+        <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-4 text-xs text-blue-900 leading-relaxed">
+          <div className="flex items-start gap-2">
+            <Wand2 size={14} className="shrink-0 mt-0.5" />
+            <div>
+              <p className="font-semibold mb-0.5">How this works</p>
+              <p>
+                Fill in the listing details and drop in the photos. If the email
+                doesn&apos;t already have an account, one is created automatically and
+                the owner gets a &quot;set your password&quot; email. Re-submit with the
+                same email to add another listing under the same owner — handy
+                when a landlord has several units to add at once.
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {flow === 'quick' && <QuickAddPropertyForm token={token} />}
+
+      {flow === 'bulk' && (
+        <>
       <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-4 text-xs text-blue-900 leading-relaxed">
         <div className="flex items-start gap-2">
           <Wand2 size={14} className="shrink-0 mt-0.5" />
@@ -306,6 +358,8 @@ export const ImportTab = ({ token }) => {
             </details>
           )}
         </div>
+      )}
+        </>
       )}
     </div>
   );

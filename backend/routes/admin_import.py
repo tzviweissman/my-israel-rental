@@ -304,6 +304,62 @@ def _frontend_origin() -> str:
     return (FRONTEND_URL or "https://myisraelrental.com").rstrip("/")
 
 
+async def _resolve_or_create_owner(
+    *, email: str, name: str | None, phone: str | None
+) -> tuple[str, bool]:
+    """Look up the user by email; if missing, create a placeholder owner
+    account and fire-and-forget the "set your password" email so the new
+    owner can finish onboarding without an admin handoff.
+
+    Returns ``(owner_id, was_created)``. The caller decides what to do
+    with the ``was_created`` flag (typically: log it in an import report).
+    """
+    email_lc = (email or "").strip().lower()
+    if not email_lc:
+        raise ValueError("Missing owner email")
+
+    owner = await db.users.find_one({"email": email_lc}, {"_id": 0, "id": 1})
+    if owner is not None:
+        return owner["id"], False
+
+    # Brand-new account — generate a throwaway hash, the owner picks the
+    # real password via the reset link.
+    tmp_password = secrets.token_urlsafe(20)
+    pwd_hash = bcrypt.hashpw(tmp_password.encode(), bcrypt.gensalt()).decode()
+    new_user_id = str(uuid.uuid4())
+    display_name = (name or email_lc).strip() or email_lc
+    await db.users.insert_one({
+        "id": new_user_id,
+        "email": email_lc,
+        "password": pwd_hash,
+        "name": display_name,
+        "role": "owner",
+        "phone": (phone or "").strip(),
+        "created_at": datetime.now(UTC).isoformat(),
+        "email_verified": True,
+        "admin_imported": True,
+    })
+
+    raw_token = await _issue_reset_token(new_user_id, email_lc)
+    link = f"{_frontend_origin()}/auth/reset-password?token={raw_token}"
+    asyncio.create_task(send_email(
+        to_email=email_lc,
+        subject="Your MyIsraelRental account is ready — set your password",
+        html_body=(
+            f"<p>Hi {display_name},</p>"
+            "<p>An administrator has set up your account on <b>MyIsraelRental.com</b> "
+            "and added your listing(s).</p>"
+            "<p>To get started, please set your password using the link below "
+            "(valid for 24 hours):</p>"
+            f"<p><a href=\"{link}\" style='background:#1E6A6A;color:#fff;padding:10px 18px;border-radius:8px;text-decoration:none;'>Set my password</a></p>"
+            f"<p>Or copy and paste: {link}</p>"
+        ),
+        tag="admin-imported-owner",
+        skip_suppression_check=True,
+    ))
+    return new_user_id, True
+
+
 # --- Preview endpoint ----------------------------------------------------
 
 class CsvPreviewRequest(BaseModel):
@@ -414,47 +470,11 @@ async def commit_property_import(req: PropertyCommitRequest, payload: dict = Dep
                 skipped.append({"index": i, "title": raw.get("title") or raw.get("Name"), "error": "Missing owner_email — can't attribute this listing."})
                 continue
 
-            owner = await db.users.find_one({"email": owner_email}, {"_id": 0, "id": 1})
-            if owner is None:
-                # Create a placeholder account; send a "set your password" email
-                # so the new owner can finish onboarding without an admin handoff.
-                tmp_password = secrets.token_urlsafe(20)
-                pwd_hash = bcrypt.hashpw(tmp_password.encode(), bcrypt.gensalt()).decode()
-                new_user_id = str(uuid.uuid4())
-                await db.users.insert_one({
-                    "id": new_user_id,
-                    "email": owner_email,
-                    "password": pwd_hash,
-                    "name": owner_name,
-                    "role": "owner",
-                    "phone": owner_phone,
-                    "created_at": datetime.now(UTC).isoformat(),
-                    "email_verified": True,
-                    "admin_imported": True,
-                })
-                # Issue a password-reset token + email so the owner can
-                # claim the account immediately.
-                raw_token = await _issue_reset_token(new_user_id, owner_email)
-                link = f"{_frontend_origin()}/auth/reset-password?token={raw_token}"
-                asyncio.create_task(send_email(
-                    to_email=owner_email,
-                    subject="Your MyIsraelRental account is ready — set your password",
-                    html_body=(
-                        f"<p>Hi {owner_name},</p>"
-                        "<p>An administrator has set up your account on <b>MyIsraelRental.com</b> "
-                        "and imported your listings.</p>"
-                        f"<p>To get started, please set your password using the link below "
-                        "(valid for 24 hours):</p>"
-                        f"<p><a href=\"{link}\" style='background:#1E6A6A;color:#fff;padding:10px 18px;border-radius:8px;text-decoration:none;'>Set my password</a></p>"
-                        f"<p>Or copy and paste: {link}</p>"
-                    ),
-                    tag="admin-imported-owner",
-                    skip_suppression_check=True,
-                ))
-                owner_id = new_user_id
-                owners_created.append({"email": owner_email, "id": new_user_id})
-            else:
-                owner_id = owner["id"]
+            owner_id, was_created = await _resolve_or_create_owner(
+                email=owner_email, name=owner_name, phone=owner_phone,
+            )
+            if was_created:
+                owners_created.append({"email": owner_email, "id": owner_id})
 
             # Dedupe — same rule as the manual create endpoint
             dup = await find_duplicate(
@@ -594,4 +614,113 @@ async def commit_user_import(req: UserCommitRequest, payload: dict = Depends(ver
         "summary": {"total": len(rows), "created": len(created), "skipped": len(skipped)},
         "created": created,
         "skipped": skipped,
+    }
+
+
+
+# --- Quick Add: single property via inline form -------------------------
+
+class QuickAddPropertyRequest(BaseModel):
+    """Single-property "quick add" request used by the admin Import tab.
+
+    Differs from the bulk CSV flow in that:
+      * Image / video URLs come from the frontend after the admin uploads
+        the actual files via the existing Cloudinary signed-upload path
+        (``uploadFilesFast``) — no CSV column needed.
+      * Owner is auto-created from ``owner_email`` (with optional name /
+        phone) if not already in the DB, and emailed a "set password"
+        link, exactly like the bulk CSV flow.
+      * Re-submissions with the same ``owner_email`` accumulate under
+        the same owner account — perfect for "I have 5 listings from one
+        landlord, add them one at a time" workflows.
+    """
+    owner_email: str
+    owner_name: str | None = None
+    owner_phone: str | None = None
+    title: str
+    area: str | None = None
+    address: str | None = None
+    description: str | None = None
+    rental_type: str | None = "long-term"
+    property_type: str | None = "apartment"
+    bedrooms: int | None = None
+    bathrooms: int | None = None
+    floor: int | None = None
+    square_meters: int | None = None
+    monthly_price: float | None = None
+    nightly_price: float | None = None
+    currency: str | None = "ILS"
+    available_from: str | None = None
+    image_urls: list[str] = []
+    video_urls: list[str] = []
+
+
+@api_router.post("/admin/import/quick-add")
+async def quick_add_property(
+    req: QuickAddPropertyRequest, payload: dict = Depends(verify_token)
+) -> dict:
+    """Create one property under an auto-resolved owner account.
+
+    Returns ``{owner: {id, email, was_created}, property: {id, title}}``
+    so the frontend can show a friendly confirmation and offer to "Add
+    another listing for this same owner" without re-typing the email.
+    """
+    if payload['role'] != 'admin':
+        raise HTTPException(status_code=403, detail="Admin access required")
+
+    email = (req.owner_email or "").strip().lower()
+    if not email:
+        raise HTTPException(status_code=400, detail="owner_email is required")
+    if not req.title or not req.title.strip():
+        raise HTTPException(status_code=400, detail="title is required")
+
+    try:
+        owner_id, was_created = await _resolve_or_create_owner(
+            email=email, name=req.owner_name, phone=req.owner_phone,
+        )
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e)) from e
+
+    # Reuse the same canonical-row → property doc builder so coercions /
+    # defaults stay identical to the CSV path.
+    remapped = {
+        "title": req.title,
+        "description": req.description or "",
+        "area": req.area or "",
+        "address": req.address or "",
+        "rental_type": req.rental_type or "long-term",
+        "property_type": req.property_type or "apartment",
+        "bedrooms": req.bedrooms,
+        "bathrooms": req.bathrooms,
+        "floor": req.floor,
+        "square_meters": req.square_meters,
+        "monthly_price": req.monthly_price,
+        "nightly_price": req.nightly_price,
+        "currency": req.currency or "ILS",
+        "available_from": req.available_from or "",
+    }
+    doc = _build_property_doc(remapped, owner_id)
+    # Photos / videos arrive already-Cloudinary-hosted from the frontend
+    # uploader, so no mirroring step is needed.
+    doc["images"] = [u for u in req.image_urls if u and isinstance(u, str)]
+    doc["videos"] = [u for u in req.video_urls if u and isinstance(u, str)]
+
+    # Dedupe (same rule as bulk path) — skip if a collision exists.
+    dup = await find_duplicate(
+        db, owner_id=owner_id, address=doc["address"], rental_type=doc["rental_type"],
+    )
+    if dup:
+        raise HTTPException(
+            status_code=409,
+            detail=(
+                f"This owner already has a listing at the same address with "
+                f"rental_type='{doc['rental_type']}' (title: \"{dup.get('title')}\"). "
+                "Pick a different address or rental_type."
+            ),
+        )
+
+    await db.properties.insert_one(doc)
+    return {
+        "owner": {"id": owner_id, "email": email, "was_created": was_created},
+        "property": {"id": doc["id"], "title": doc["title"], "area": doc["area"]},
     }
