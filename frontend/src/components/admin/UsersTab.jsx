@@ -6,14 +6,17 @@ import { Search, Ban, CheckCircle, Trash2 } from 'lucide-react';
 import { API } from '../../App';
 import { useApiSWR } from '../../hooks/useApiSWR';
 
-export const UsersTab = ({ token, onStatsChange }) => {
+export const UsersTab = ({ token, onStatsChange, prefilter }) => {
   const { t } = useTranslation();
   const headers = { Authorization: `Bearer ${token}` };
 
   const { data: users, refresh: fetchUsers } = useApiSWR(
     `${API}/admin/users`, token, { initial: [] }
   );
-  const [searchTerm, setSearchTerm] = useState('');
+  // Tab is conditionally mounted in AdminDashboard, so any deep-linked
+  // `prefilter` (e.g. from the Quick Add Owner shortcut) takes effect via
+  // the initial-state argument — no useEffect needed.
+  const [searchTerm, setSearchTerm] = useState(prefilter || '');
 
   const notifyStatsChange = () => { if (onStatsChange) onStatsChange(); };
 

@@ -32,6 +32,10 @@ const AdminDashboard = () => {
   const { t } = useTranslation();
   const { token } = useContext(AuthContext);
   const [activeTab, setActiveTab] = useState('overview');
+  // Optional search-term prefilter applied to the Users tab on mount.
+  // Cleared after the Users tab consumes it, so re-clicking the Users
+  // tab in the nav resets to a blank search.
+  const [usersPrefilter, setUsersPrefilter] = useState('');
 
   const { data: dashboard, refresh: fetchDashboard } = useApiSWR(
     `${API}/admin/dashboard`, token
@@ -39,6 +43,13 @@ const AdminDashboard = () => {
   const { data: emailHealth } = useApiSWR(`${API}/admin/email-health`, token);
 
   useAdminLiveEvents(token);
+
+  // Deep-link helper used by the Quick Add form's success chip — lets the
+  // admin jump to the Users tab pre-filtered to the just-imported owner.
+  const jumpToUser = (email) => {
+    setUsersPrefilter(email || '');
+    setActiveTab('users');
+  };
 
   if (!dashboard) {
     return (
@@ -62,7 +73,12 @@ const AdminDashboard = () => {
             return (
               <button
                 key={tab.key}
-                onClick={() => setActiveTab(tab.key)}
+                onClick={() => {
+                  // A manual click on the Users tab should start blank —
+                  // any leftover prefilter from a Quick Add jump is stale.
+                  if (tab.key === 'users') setUsersPrefilter('');
+                  setActiveTab(tab.key);
+                }}
                 className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${activeTab === tab.key ? 'bg-black text-[#D4AF37]' : 'bg-white text-gray-700 border border-[#E5E5E5] hover:bg-gray-50'}`}
                 data-testid={`admin-tab-${tab.key}`}
               >
@@ -75,10 +91,10 @@ const AdminDashboard = () => {
 
         {activeTab === 'overview' && <OverviewTab dashboard={dashboard} emailHealth={emailHealth} token={token} />}
         {activeTab === 'listings' && <ListingsTab token={token} onStatsChange={fetchDashboard} />}
-        {activeTab === 'users' && <UsersTab token={token} onStatsChange={fetchDashboard} />}
+        {activeTab === 'users' && <UsersTab token={token} onStatsChange={fetchDashboard} prefilter={usersPrefilter} />}
         {activeTab === 'chats' && <ChatsTab token={token} />}
         {activeTab === 'smart-lists' && <SmartListsTab token={token} />}
-        {activeTab === 'import' && <ImportTab token={token} />}
+        {activeTab === 'import' && <ImportTab token={token} onJumpToOwner={jumpToUser} />}
         {activeTab === 'services' && DOCUMENT_SERVICES_ENABLED && <ServicesTab token={token} onStatsChange={fetchDashboard} />}
         {activeTab === 'settings' && <SettingsTab token={token} />}
       </div>

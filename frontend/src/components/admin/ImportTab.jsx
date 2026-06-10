@@ -26,7 +26,7 @@ const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
  *    from the headers, AI-maps the columns to our canonical schema,
  *    and the admin reviews + commits.
  */
-export const ImportTab = ({ token }) => {
+export const ImportTab = ({ token, onJumpToOwner }) => {
   const [flow, setFlow] = useState('quick'); // 'quick' | 'bulk'
   const [csvText, setCsvText] = useState('');
   const [preview, setPreview] = useState(null);
@@ -170,7 +170,7 @@ export const ImportTab = ({ token }) => {
         </div>
       )}
 
-      {flow === 'quick' && <QuickAddPropertyForm token={token} />}
+      {flow === 'quick' && <QuickAddPropertyForm token={token} onJumpToOwner={onJumpToOwner} />}
 
       {flow === 'bulk' && (
         <>

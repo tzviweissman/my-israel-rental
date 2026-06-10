@@ -14,7 +14,7 @@ import axios from 'axios';
 import { toast } from 'sonner';
 import {
   Mail, User, Phone, MapPin, Home as HomeIcon, Bed, Bath, Banknote,
-  ImageIcon, Loader2, CheckCircle2, X, Upload, Plus,
+  ImageIcon, Loader2, CheckCircle2, X, Upload, Plus, ExternalLink,
 } from 'lucide-react';
 import { uploadFilesFast } from '../../utils/fastUpload';
 
@@ -48,7 +48,7 @@ const blankForm = {
   description: '',
 };
 
-const QuickAddPropertyForm = ({ token }) => {
+const QuickAddPropertyForm = ({ token, onJumpToOwner }) => {
   const [form, setForm] = useState(blankForm);
   const [photos, setPhotos] = useState([]); // [{url, preview, kind, name}]
   const [uploading, setUploading] = useState(false);
@@ -386,7 +386,7 @@ const QuickAddPropertyForm = ({ token }) => {
           data-testid="quick-add-last-result"
         >
           <CheckCircle2 size={16} className="text-emerald-600 shrink-0 mt-0.5" />
-          <div className="text-sm">
+          <div className="text-sm flex-1 min-w-0">
             <p className="font-semibold text-emerald-900">
               {lastResult.owner.was_created ? 'New owner created + listing added' : 'Listing added to existing owner'}
             </p>
@@ -397,6 +397,17 @@ const QuickAddPropertyForm = ({ token }) => {
             <p className="text-emerald-700/80 text-[11px] mt-1.5">
               The owner contact info is kept in the form so you can add another listing for the same landlord in seconds.
             </p>
+            {onJumpToOwner && (
+              <button
+                type="button"
+                onClick={() => onJumpToOwner(lastResult.owner.email)}
+                className="mt-2 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white border border-emerald-300 text-emerald-800 hover:bg-emerald-100 text-xs font-semibold transition-colors"
+                data-testid="quick-add-jump-to-owner"
+              >
+                <ExternalLink size={11} />
+                View {lastResult.owner.email} &amp; their listings →
+              </button>
+            )}
           </div>
         </div>
       )}

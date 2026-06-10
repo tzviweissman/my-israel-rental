@@ -567,6 +567,14 @@ See /app/memory/test_credentials.md
 
 ## Recent Updates (2026-02)
 
+- [x] **Admin Import: "View owner & their listings" shortcut** (2026-02-12):
+  - After a successful Quick Add, the green confirmation chip now exposes a `[↗ View landlord@example.com & their listings →]` pill button. Clicking it jumps to the admin Users tab pre-filtered to that owner's email — perfect for spot-checking that all of a broker's listings landed correctly after a batch add.
+  - **Frontend** (`pages/AdminDashboard.js`): added a `usersPrefilter` state + `jumpToUser(email)` callback that sets `activeTab='users'` and `usersPrefilter=email` atomically. A manual click on the Users tab in the nav clears the prefilter so the next visit starts blank.
+  - **Frontend** (`components/admin/UsersTab.jsx`): accepts a new `prefilter` prop, used as the initial value of `searchTerm`. Because the tab is conditionally rendered in AdminDashboard, the component freshly mounts each visit — no useEffect needed (avoiding the platform-lint `set-state-in-effect` false-positive).
+  - **Frontend** (`components/admin/ImportTab.jsx` + `QuickAddPropertyForm.jsx`): plumbed `onJumpToOwner` callback through.
+  - **End-to-end verified live**: filled Quick Add for an existing owner, submitted → green chip rendered → clicked "View owner@test.com & their listings →" → automatically navigated to Users tab, search box pre-filled with the email, exactly one matching row visible.
+  - Files: `frontend/src/pages/AdminDashboard.js`, `frontend/src/components/admin/UsersTab.jsx`, `frontend/src/components/admin/ImportTab.jsx`, `frontend/src/components/admin/QuickAddPropertyForm.jsx`.
+
 - [x] **Admin Import: Quick Add (single listing + native photo upload)** (2026-02-12):
   - Added a new "Quick Add (one listing + photos)" flow as the default mode of the admin Import tab. Bulk CSV moves to a secondary toggle.
   - **Backend** (`routes/admin_import.py`): extracted the owner-resolve/create logic into reusable `_resolve_or_create_owner(email, name, phone) -> (owner_id, was_created)` (refactored the bulk CSV path to use it too). New endpoint `POST /admin/import/quick-add` accepts `{owner_email, owner_name?, owner_phone?, title, area?, address?, rental_type, bedrooms?, bathrooms?, monthly_price?/nightly_price?, currency, image_urls[], video_urls[], ...}`. Returns `{owner: {id, email, was_created}, property: {id, title, area}}`. Photos arrive already on Cloudinary (uploaded via the existing signed-upload path), so no mirroring needed. Same dedupe rule as bulk CSV.
