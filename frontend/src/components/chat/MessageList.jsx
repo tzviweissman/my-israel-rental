@@ -292,6 +292,20 @@ const MessageBubble = ({
                 />
               </a>
             )}
+            {msg.video_url && (
+              <video
+                src={msg.video_url}
+                controls
+                preload="metadata"
+                playsInline
+                className="rounded-xl max-w-full max-h-72 mb-1 border border-black/10 bg-black"
+                data-testid={`chat-video-${msg.id}`}
+              >
+                <a href={msg.video_url} target="_blank" rel="noopener noreferrer">
+                  Open video
+                </a>
+              </video>
+            )}
             {msg.message && (
               <p className="text-[13.5px] leading-relaxed whitespace-pre-wrap break-words">
                 {renderWithMentions(

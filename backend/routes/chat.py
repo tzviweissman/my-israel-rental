@@ -33,8 +33,10 @@ _TYPING_TTL_SECONDS = 5
 async def send_message(chat_data: ChatMessage, payload: dict = Depends(verify_token)) -> dict:
     message_id = str(uuid.uuid4())
     mentions = extract_mentions(chat_data.message)
-    # Image-only messages are allowed — but message must be non-empty if no image.
-    if not chat_data.message.strip() and not chat_data.image_url:
+    # Image-only / video-only messages are allowed — but message must be
+    # non-empty if no media is attached.
+    has_media = bool(chat_data.image_url or chat_data.video_url)
+    if not chat_data.message.strip() and not has_media:
         from fastapi import HTTPException
         raise HTTPException(status_code=400, detail="Message cannot be empty")
     message_doc = {
@@ -44,6 +46,7 @@ async def send_message(chat_data: ChatMessage, payload: dict = Depends(verify_to
         "receiver_id": chat_data.receiver_id,
         "message": chat_data.message,
         "image_url": chat_data.image_url,
+        "video_url": chat_data.video_url,
         # Stored at write-time so the inbox can flag unread @-mentions of the
         # current user without re-scanning every message body on each fetch.
         "mentions": mentions,
@@ -53,6 +56,15 @@ async def send_message(chat_data: ChatMessage, payload: dict = Depends(verify_to
     
     await db.messages.insert_one(message_doc)
     
+    # Notification body adapts to what was sent — image vs video vs text.
+    if chat_data.message.strip():
+        notif_body = "You have a new message"
+    elif chat_data.video_url:
+        notif_body = "Sent you a video 🎬"
+    elif chat_data.image_url:
+        notif_body = "Sent you a photo 📷"
+    else:
+        notif_body = "You have a new message"
     notification = {
         "id": str(uuid.uuid4()),
         "user_id": chat_data.receiver_id,
@@ -61,7 +73,7 @@ async def send_message(chat_data: ChatMessage, payload: dict = Depends(verify_to
         # Capture the sender so the lister can deep-link straight into the
         # conversation (knowing who they are replying to).
         "sender_id": payload['user_id'],
-        "message": "You have a new message" if not chat_data.image_url or chat_data.message.strip() else "Sent you a photo 📷",
+        "message": notif_body,
         "read": False,
         "created_at": datetime.now(UTC).isoformat()
     }
@@ -77,6 +89,7 @@ async def send_message(chat_data: ChatMessage, payload: dict = Depends(verify_to
             property_id=chat_data.property_id,
             message_body=chat_data.message,
             image_url=chat_data.image_url,
+            video_url=chat_data.video_url,
         )
     )
 
@@ -129,6 +142,7 @@ async def _send_chat_email_safe(
     property_id: str,
     message_body: str,
     image_url: str | None,
+    video_url: str | None = None,
 ) -> None:
     """Resolve sender/receiver/property and email the recipient. Swallows all
     errors — chat sends must never fail because of an email problem."""
@@ -167,7 +181,7 @@ async def _send_chat_email_safe(
             receiver_name=receiver.get("name") or "",
             sender_name=sender_name,
             message_snippet=message_body or "",
-            has_image=bool(image_url),
+            has_image=bool(image_url) or bool(video_url),
             property_id=property_id,
             property_title=property_title,
             sender_id=sender_id,

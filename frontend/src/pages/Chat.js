@@ -268,19 +268,22 @@ const Chat = () => {
   const sendMessage = async (e, opts = {}) => {
     if (e && typeof e.preventDefault === 'function') e.preventDefault();
     const imageUrl = opts.imageUrl || null;
-    if (!imageUrl && !newMessage.trim()) return;
+    const videoUrl = opts.videoUrl || null;
+    const hasMedia = !!(imageUrl || videoUrl);
+    if (!hasMedia && !newMessage.trim()) return;
     if (sending) return;
     setSending(true);
     try {
       await axios.post(`${API}/chat/messages`, {
         property_id: propertyId,
-        message: imageUrl ? '' : newMessage,
+        message: hasMedia ? '' : newMessage,
         receiver_id: otherUserId,
         image_url: imageUrl,
+        video_url: videoUrl,
       }, {
         headers: { Authorization: `Bearer ${token}` }
       });
-      if (!imageUrl) setNewMessage('');
+      if (!hasMedia) setNewMessage('');
       fetchMessages();
     } catch (error) {
       toast.error('Failed to send message');

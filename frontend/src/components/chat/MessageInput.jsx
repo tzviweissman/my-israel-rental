@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Send, AtSign, User, Home, Briefcase, Paperclip, Loader2, X } from 'lucide-react';
+import { toast } from 'sonner';
+import { Send, AtSign, User, Home, Briefcase, Paperclip, Loader2, X, PlayCircle } from 'lucide-react';
 import { uploadFilesFast } from '../../utils/fastUpload';
 
 // Role tokens recognised by the backend mention parser (utils/mentions.py).
@@ -47,33 +48,72 @@ const MessageInput = ({ newMessage, setNewMessage, onSend, sending, onTyping, AP
   const fileRef = useRef(null);
   const [mention, setMention] = useState(null); // { start, partial }
   const [hoverIdx, setHoverIdx] = useState(0);
-  const [pendingImage, setPendingImage] = useState(null); // { url, preview }
+  // Pending attachments waiting to be sent. Each entry is
+  // { url, preview, kind: 'image'|'video' }. The user can queue up many
+  // photos/videos in a single picker tap and we'll fan-out one chat message
+  // per attachment when they hit Send.
+  const [pending, setPending] = useState([]);
   const [uploading, setUploading] = useState(false);
 
   const pickPhoto = () => fileRef.current?.click();
+
   const onPickFile = async (e) => {
-    const file = e.target.files?.[0];
+    const files = Array.from(e.target.files || []);
     e.target.value = '';
-    if (!file) return;
+    if (files.length === 0) return;
     setUploading(true);
     try {
-      const results = await uploadFilesFast([file], API, token);
-      const first = results?.[0];
-      if (!first || first.error) {
-        // toast surfaced by caller; just bail.
-        return;
-      }
-      // Show a local preview chip before send.
-      setPendingImage({ url: first.url, preview: URL.createObjectURL(file) });
+      const results = await uploadFilesFast(files, API, token);
+      // Build local previews aligned to source files (uploads run in parallel
+      // but uploadFilesFast preserves order).
+      const next = [];
+      results.forEach((r, idx) => {
+        const src = files[idx];
+        if (!r || r.error) {
+          toast.error(`Couldn't upload ${src?.name || 'file'}: ${r?.error || 'unknown error'}`);
+          return;
+        }
+        const kind = (src?.type || '').startsWith('video/') ? 'video' : 'image';
+        next.push({
+          url: r.url,
+          preview: URL.createObjectURL(src),
+          kind,
+          name: src?.name || '',
+        });
+      });
+      if (next.length) setPending((p) => [...p, ...next]);
     } finally {
       setUploading(false);
     }
   };
 
-  const sendPhoto = async () => {
-    if (!pendingImage) return;
-    await onSend(null, { imageUrl: pendingImage.url });
-    setPendingImage(null);
+  const removePending = (idx) => {
+    setPending((p) => {
+      const removed = p[idx];
+      if (removed?.preview) URL.revokeObjectURL(removed.preview);
+      return p.filter((_, i) => i !== idx);
+    });
+  };
+
+  const sendAttachments = async () => {
+    if (pending.length === 0) return;
+    // Snapshot + clear up-front so the user can't double-tap Send while the
+    // batch is mid-flight.
+    const batch = pending;
+    setPending([]);
+    for (const item of batch) {
+      try {
+        if (item.kind === 'video') {
+          await onSend(null, { videoUrl: item.url });
+        } else {
+          await onSend(null, { imageUrl: item.url });
+        }
+      } catch {
+        // onSend already surfaces a toast; keep firing the remaining ones.
+      } finally {
+        if (item.preview) URL.revokeObjectURL(item.preview);
+      }
+    }
   };
 
   const matches = mention
@@ -144,33 +184,53 @@ const MessageInput = ({ newMessage, setNewMessage, onSend, sending, onTyping, AP
 
   return (
     <div className="bg-white rounded-b-2xl border border-t-0 border-gray-200 shadow-sm flex-shrink-0">
-      {pendingImage && (
-        <div className="px-4 pt-3 flex items-center gap-3" data-testid="pending-image-preview">
-          <div className="relative shrink-0">
-            <img
-              src={pendingImage.preview}
-              alt="To send"
-              className="w-16 h-16 rounded-lg object-cover border border-gray-200"
-            />
+      {pending.length > 0 && (
+        <div className="px-4 pt-3 pb-1" data-testid="pending-attachments">
+          <div className="flex items-center gap-2 overflow-x-auto pb-2 [scrollbar-width:thin]">
+            {pending.map((item, idx) => (
+              <div key={idx} className="relative shrink-0" data-testid={`pending-attachment-${idx}`}>
+                {item.kind === 'video' ? (
+                  <div className="w-16 h-16 rounded-lg border border-gray-200 bg-black flex items-center justify-center overflow-hidden">
+                    <video
+                      src={item.preview}
+                      className="w-full h-full object-cover opacity-70"
+                      muted
+                      playsInline
+                    />
+                    <PlayCircle size={22} className="absolute text-white drop-shadow-md" />
+                  </div>
+                ) : (
+                  <img
+                    src={item.preview}
+                    alt={item.name || 'To send'}
+                    className="w-16 h-16 rounded-lg object-cover border border-gray-200"
+                  />
+                )}
+                <button
+                  type="button"
+                  onClick={() => removePending(idx)}
+                  className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-black/70 text-white flex items-center justify-center hover:bg-black"
+                  data-testid={`cancel-pending-attachment-${idx}`}
+                  aria-label="Remove"
+                >
+                  <X size={11} />
+                </button>
+              </div>
+            ))}
             <button
               type="button"
-              onClick={() => setPendingImage(null)}
-              className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-black/70 text-white flex items-center justify-center hover:bg-black"
-              data-testid="cancel-pending-image"
-              aria-label="Cancel"
+              onClick={sendAttachments}
+              disabled={sending}
+              className="ml-1 px-4 py-2 rounded-xl bg-[#1E6A6A] text-white text-sm font-semibold disabled:opacity-40 hover:bg-[#175555] shrink-0"
+              data-testid="send-pending-attachments"
             >
-              <X size={11} />
+              {sending
+                ? t('common.sending', 'Sending…')
+                : pending.length === 1
+                  ? t('chat.sendPhoto', 'Send')
+                  : t('chat.sendAll', `Send all (${pending.length})`).replace('{count}', pending.length)}
             </button>
           </div>
-          <button
-            type="button"
-            onClick={sendPhoto}
-            disabled={sending}
-            className="px-4 py-2 rounded-xl bg-[#1E6A6A] text-white text-sm font-semibold disabled:opacity-40 hover:bg-[#175555]"
-            data-testid="send-pending-image"
-          >
-            {sending ? t('common.sending', 'Sending…') : t('chat.sendPhoto', 'Send photo')}
-          </button>
         </div>
       )}
       <form onSubmit={onSend} className="p-4" data-testid="chat-form">
@@ -180,7 +240,7 @@ const MessageInput = ({ newMessage, setNewMessage, onSend, sending, onTyping, AP
             onClick={pickPhoto}
             disabled={uploading || sending}
             className="w-11 h-11 rounded-xl flex items-center justify-center text-[#1E6A6A] bg-gray-50 border border-gray-200 hover:bg-gray-100 disabled:opacity-50 transition-all shrink-0"
-            title={t('chat.attachPhoto', 'Attach a photo')}
+            title={t('chat.attachPhoto', 'Attach photos or a video')}
             data-testid="attach-photo-btn"
           >
             {uploading ? <Loader2 size={18} className="animate-spin" /> : <Paperclip size={18} />}
@@ -188,7 +248,8 @@ const MessageInput = ({ newMessage, setNewMessage, onSend, sending, onTyping, AP
           <input
             ref={fileRef}
             type="file"
-            accept="image/*"
+            accept="image/*,video/*"
+            multiple
             className="hidden"
             onChange={onPickFile}
             data-testid="chat-photo-input"

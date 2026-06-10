@@ -567,6 +567,15 @@ See /app/memory/test_credentials.md
 
 ## Recent Updates (2026-02)
 
+- [x] **Chat: multi-image + video attachments** (2026-02-12):
+  - Owners (and any chat user) can now attach multiple photos AND/OR a video in a single picker tap.
+  - **Backend**: added `video_url: str | None` to `models.ChatMessage`; `chat.py` POST `/chat/messages` persists it alongside `image_url`, with a "Sent you a video 🎬" notification body when the message is video-only. `_send_chat_email_safe` accepts `video_url` so the chat-email throttle still treats it as media.
+  - **Frontend `MessageInput.jsx`**: replaced the single `pendingImage` state with a `pending[]` array of `{ url, preview, kind: 'image'|'video', name }`. The file input is now `<input multiple accept="image/*,video/*">`. Picked files upload in parallel via `uploadFilesFast`, render as a horizontal strip of thumbnails (videos get a play-icon overlay), each thumbnail has an X to remove. The send button dynamically reads "Send" (1 attachment) or "Send all (N)" (multiple); clicking fires one chat message per attachment in sequence so each renders as its own bubble.
+  - **Frontend `MessageList.jsx`**: added `<video controls preload="metadata" playsInline>` rendering when `msg.video_url` is set, mirroring the existing image-bubble treatment.
+  - **Frontend `Chat.js`**: `sendMessage` now accepts `{ imageUrl, videoUrl }` and forwards both to the backend.
+  - **End-to-end verified live**: logged in as owner, opened chat with renter, used `set_input_files(['/tmp/test1.png','/tmp/test2.png'])` → two thumbnails rendered in the pending strip with X cancel + "Send all (2)" button → click sent both images as separate chat bubbles, pending strip cleared, two `chat-image-*` bubbles rendered in the thread. Backend round-trip for `video_url`: POST → GET returns the persisted `video_url`. 9/9 `tests/test_chat_email.py` pytest still green.
+  - Files: `backend/models.py`, `backend/routes/chat.py`, `frontend/src/pages/Chat.js`, `frontend/src/components/chat/MessageInput.jsx`, `frontend/src/components/chat/MessageList.jsx`.
+
 - [x] **Smart List shares now show MyIsraelRental logo in WhatsApp preview** (2026-02-12):
   - Added `og:title`, `og:description`, `og:image`, `og:url`, `og:site_name`, `og:type`, plus Twitter Card variants to `frontend/public/index.html` — the `og:image` points to the existing MyIsraelRental brand logo.
   - Replaced the generic `<title>Emergent | Fullstack App</title>` with `MyIsraelRental — Rentals across Israel`, plus updated `theme-color` to `#1E6A6A`.

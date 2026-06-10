@@ -109,6 +109,10 @@ class ChatMessage(BaseModel):
     # Optional Cloudinary URL(s) attached to this message. When set, the
     # `message` text may be empty (image-only messages are allowed).
     image_url: str | None = None
+    # Optional Cloudinary video URL. Same rules as image_url — when set,
+    # the message text may be empty. Listers attach short property walk-
+    # throughs / inspection clips this way.
+    video_url: str | None = None
 
 
 class EditMessage(BaseModel):
