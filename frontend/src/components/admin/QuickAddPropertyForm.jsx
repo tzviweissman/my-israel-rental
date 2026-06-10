@@ -54,22 +54,33 @@ const QuickAddPropertyForm = ({ token, onJumpToOwner }) => {
   const [uploading, setUploading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [lastResult, setLastResult] = useState(null);
+  // Tracks an in-progress drag of files over the dropzone so we can
+  // give the user a visual "release here" affordance.
+  const [isDragOver, setIsDragOver] = useState(false);
   const fileRef = useRef(null);
 
   const onField = (k, v) => setForm((f) => ({ ...f, [k]: v }));
 
   const pickPhotos = () => fileRef.current?.click();
 
-  const onPickFile = async (e) => {
-    const files = Array.from(e.target.files || []);
-    e.target.value = '';
-    if (files.length === 0) return;
+  // Shared upload pipeline used by both the "Add photos" button and the
+  // drag-and-drop zone. Filters out anything that isn't an image/video
+  // (so the user can safely drag a mixed folder).
+  const processFiles = async (files) => {
+    const accepted = files.filter((f) => {
+      const t = (f?.type || '').toLowerCase();
+      return t.startsWith('image/') || t.startsWith('video/');
+    });
+    if (accepted.length < files.length) {
+      toast.warning(`Skipped ${files.length - accepted.length} non-image/video file(s)`);
+    }
+    if (accepted.length === 0) return;
     setUploading(true);
     try {
-      const results = await uploadFilesFast(files, API, token);
+      const results = await uploadFilesFast(accepted, API, token);
       const next = [];
       results.forEach((r, idx) => {
-        const src = files[idx];
+        const src = accepted[idx];
         if (!r || r.error) {
           toast.error(`Couldn't upload ${src?.name || 'file'}: ${r?.error || 'unknown error'}`);
           return;
@@ -86,6 +97,35 @@ const QuickAddPropertyForm = ({ token, onJumpToOwner }) => {
     } finally {
       setUploading(false);
     }
+  };
+
+  const onPickFile = async (e) => {
+    const files = Array.from(e.target.files || []);
+    e.target.value = '';
+    if (files.length) await processFiles(files);
+  };
+
+  // Drag-and-drop handlers — we have to call preventDefault on dragOver
+  // for the drop event to fire at all. dragEnter/dragLeave drive the
+  // visual highlight.
+  const onDragOver = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (!isDragOver) setIsDragOver(true);
+  };
+  const onDragLeave = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    // Only clear when leaving the dropzone itself, not when crossing
+    // between its children (relatedTarget will be null on real exit).
+    if (!e.currentTarget.contains(e.relatedTarget)) setIsDragOver(false);
+  };
+  const onDrop = async (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragOver(false);
+    const files = Array.from(e.dataTransfer?.files || []);
+    if (files.length) await processFiles(files);
   };
 
   const removePhoto = (idx) => {
@@ -317,7 +357,18 @@ const QuickAddPropertyForm = ({ token, onJumpToOwner }) => {
 
       {/* Photos */}
       <Section title="3. Photos & videos">
-        <div className="col-span-full">
+        <div
+          className={`col-span-full rounded-xl border-2 border-dashed transition-all p-4 ${
+            isDragOver
+              ? 'border-[#1E6A6A] bg-[#1E6A6A]/5 ring-2 ring-[#1E6A6A]/20'
+              : 'border-gray-200 bg-white'
+          }`}
+          onDragOver={onDragOver}
+          onDragEnter={onDragOver}
+          onDragLeave={onDragLeave}
+          onDrop={onDrop}
+          data-testid="quick-add-dropzone"
+        >
           <div className="flex items-center gap-2 flex-wrap mb-3">
             <button
               type="button"
@@ -339,7 +390,11 @@ const QuickAddPropertyForm = ({ token, onJumpToOwner }) => {
               data-testid="quick-add-photo-input"
             />
             <span className="text-xs text-gray-500">
-              {photos.length === 0 ? 'No photos yet' : `${photos.length} attached`}
+              {isDragOver
+                ? 'Release to upload'
+                : photos.length === 0
+                  ? 'No photos yet — or drag a folder of photos onto this card'
+                  : `${photos.length} attached · drag more here to add`}
             </span>
           </div>
 
@@ -373,7 +428,7 @@ const QuickAddPropertyForm = ({ token, onJumpToOwner }) => {
           )}
           {photos.length === 0 && (
             <p className="text-xs text-gray-400 mt-2 flex items-center gap-1">
-              <ImageIcon size={12} /> Tip: you can pick many photos (and a short MP4) in one go — they all go to this listing.
+              <ImageIcon size={12} /> Tip: drag a folder of photos right onto this card — they&apos;ll all go to this listing.
             </p>
           )}
         </div>

@@ -567,6 +567,13 @@ See /app/memory/test_credentials.md
 
 ## Recent Updates (2026-02)
 
+- [x] **Quick Add: drag-and-drop photo uploads** (2026-02-12):
+  - The "Photos & videos" section of the Quick Add form now accepts files via drag-and-drop. Drag a folder of 12 photos from the desktop straight onto the card and they all upload to Cloudinary in parallel via the same `uploadFilesFast` pipeline as the button picker.
+  - Dropzone shows a clear teal highlight + "Release to upload" copy while a drag is over it; non-image/video files in the drop are filtered out with a friendly toast.
+  - Refactored `processFiles(files)` into a shared helper used by both the file picker (`onPickFile`) and the drop handler (`onDrop`).
+  - **End-to-end verified live**: dispatched a synthetic drop of 3 PNG files onto `[data-testid="quick-add-dropzone"]` → 3 photos uploaded and rendered in the strip with X cancel buttons; teal-highlighted state confirmed mid-drag.
+  - Files: `frontend/src/components/admin/QuickAddPropertyForm.jsx`.
+
 - [x] **Admin Import: "View owner & their listings" shortcut** (2026-02-12):
   - After a successful Quick Add, the green confirmation chip now exposes a `[↗ View landlord@example.com & their listings →]` pill button. Clicking it jumps to the admin Users tab pre-filtered to that owner's email — perfect for spot-checking that all of a broker's listings landed correctly after a batch add.
   - **Frontend** (`pages/AdminDashboard.js`): added a `usersPrefilter` state + `jumpToUser(email)` callback that sets `activeTab='users'` and `usersPrefilter=email` atomically. A manual click on the Users tab in the nav clears the prefilter so the next visit starts blank.
