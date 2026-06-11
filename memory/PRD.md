@@ -567,6 +567,17 @@ See /app/memory/test_credentials.md
 
 ## Recent Updates (2026-02)
 
+- [x] **🔒 CORS hardened: explicit production origins + spec-compliant credentials** (2026-02-12):
+  - **Root cause of the previous setup**: `allow_credentials=True` paired with `allow_origins=["*"]` is **forbidden by the CORS spec** — browsers refuse to send credentials when the server replies with the wildcard. The preview Kubernetes ingress was masking this by injecting its own wildcard headers, so it "worked" in dev but production was broken.
+  - **Backend** (`server.py`): replaced wildcard with an explicit allowlist driven by `CORS_ORIGINS` env (with a safe production-baked default). Added `allow_origin_regex=r"https://.*\.preview\.emergentagent\.com"` so any preview URL keeps working without needing env updates. Also strips trailing slashes and tolerates whitespace in the comma-separated env value. Exposes `Content-Disposition` so file downloads (CSV exports, contracts) work cross-origin.
+  - **Backend** (`backend/.env`): `CORS_ORIGINS` now lists `https://myisraelrental.com`, `https://www.myisraelrental.com`, the current preview URL, and `http://localhost:3000`.
+  - **Verified live (direct backend, bypassing ingress)**:
+    - Preflight from `https://myisraelrental.com` → `Access-Control-Allow-Origin: https://myisraelrental.com` + `Allow-Credentials: true` ✅
+    - Preflight from `https://www.myisraelrental.com` → `Access-Control-Allow-Origin: https://www.myisraelrental.com` ✅
+    - Preflight from `https://evil.example.com` → **HTTP 400 + no Allow-Origin header** (properly blocked) ✅
+    - Real GET from the production origin → 200 + correct echo ✅
+  - Files: `backend/server.py`, `backend/.env`.
+
 - [x] **🐛 BUG FIX: bulk-import was silently dropping listing photos** (2026-02-12):
   - **Root cause**: `_split_list` was splitting image-URL cells on every comma. Cloudinary transformation URLs (`c_fill,w_400,h_300`) contain commas internally and were being shredded into 2-3 broken pieces. Each piece then failed Cloudinary mirroring and the failures were silently dropped (`mirror_url_to_cloudinary` swallowed exceptions and `commit_property_import` filtered `None` results without logging). Net effect: dozens of real imports created listings with empty `images: []` arrays — the symptom the user reported.
   - **Fix 1 — URL-aware splitter**: introduced `_split_urls()` that splits on `;` `|` and newlines, plus commas/whitespace ONLY when followed by `https?://`. So a single Cloudinary URL stays intact. `_split_list()` kept as-is for amenities.

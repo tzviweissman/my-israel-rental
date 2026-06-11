@@ -77,12 +77,26 @@ for mod in (
 app.include_router(api_router)
 app.mount("/api/uploads", StaticFiles(directory=str(UPLOAD_DIR)), name="uploads")
 
+_DEFAULT_CORS = (
+    "https://myisraelrental.com,"
+    "https://www.myisraelrental.com,"
+    "http://localhost:3000"
+)
+_raw_origins = os.environ.get("CORS_ORIGINS", _DEFAULT_CORS)
+# Tolerate trailing slashes, accidental whitespace, and empty entries —
+# easy to introduce when editing the env via a control panel.
+_cors_origins = [o.strip().rstrip("/") for o in _raw_origins.split(",") if o.strip()]
+
 app.add_middleware(
     CORSMiddleware,
     allow_credentials=True,
-    allow_origins=os.environ.get("CORS_ORIGINS", "*").split(","),
+    allow_origins=_cors_origins,
+    # Also allow any *.preview.emergentagent.com domain so preview URLs
+    # always work even if the env var doesn't list this specific run.
+    allow_origin_regex=r"https://.*\.preview\.emergentagent\.com",
     allow_methods=["*"],
     allow_headers=["*"],
+    expose_headers=["Content-Disposition"],
 )
 
 
