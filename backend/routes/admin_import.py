@@ -424,7 +424,19 @@ async def preview_import(req: CsvPreviewRequest, payload: dict = Depends(verify_
     if not req.csv_text.strip():
         raise HTTPException(status_code=400, detail="Empty CSV")
 
-    headers, rows = _parse_csv(req.csv_text)
+    # Wrap CSV parse + AI mapping in a try/except so any unexpected
+    # parse error (weird encoding, malformed quoting, etc.) surfaces as
+    # a useful 400 with a message — instead of a bare 500 that the
+    # frontend can only render as a generic "Preview failed".
+    try:
+        headers, rows = _parse_csv(req.csv_text)
+    except Exception as e:  # noqa: BLE001
+        logger.exception("admin import preview: CSV parse failed")
+        raise HTTPException(
+            status_code=400,
+            detail=f"Couldn't parse CSV: {type(e).__name__}: {str(e)[:160]}. "
+                   "Check the file is valid CSV and try again.",
+        ) from e
     if not headers:
         raise HTTPException(status_code=400, detail="No headers detected in CSV")
 
@@ -433,7 +445,14 @@ async def preview_import(req: CsvPreviewRequest, payload: dict = Depends(verify_
     if schema_kind == "auto":
         schema_kind = _detect_schema_kind(headers)
 
-    column_map = await _ai_map_columns(headers, schema=schema_kind)
+    try:
+        column_map = await _ai_map_columns(headers, schema=schema_kind)
+    except Exception:  # noqa: BLE001
+        # _ai_map_columns already has an internal try/except + fallback,
+        # but belt-and-braces in case the fallback itself raises.
+        logger.exception("admin import preview: column mapping failed entirely")
+        column_map = {h: None for h in headers}
+        # Don't raise — the admin can still set the mapping manually.
 
     # Re-map a sample for the preview UI
     def remap_row(row: dict) -> dict:

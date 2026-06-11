@@ -65,7 +65,29 @@ export const ImportTab = ({ token, onJumpToOwner }) => {
         toast.success(`Detected ${kind} — ${res.data.total_rows} rows ready to import`);
       }
     } catch (e) {
-      toast.error(e.response?.data?.detail || 'Preview failed');
+      // Build a maximally informative error message so we don't leave the
+      // admin staring at a generic "Preview failed". We surface the HTTP
+      // status, the server's `detail` if present, or a short snippet of
+      // the response body — covers backend 4xx/5xx, ingress 502/504,
+      // and total network failures with separate copy.
+      const resp = e.response;
+      let msg;
+      if (!resp) {
+        msg = `Couldn't reach the server (${e.message || 'network error'}). Check your connection and try again.`;
+      } else {
+        const detail = typeof resp.data?.detail === 'string' ? resp.data.detail : null;
+        const bodySnippet = !detail && typeof resp.data === 'string'
+          ? resp.data.slice(0, 160)
+          : null;
+        msg = `Preview failed (HTTP ${resp.status})${detail ? `: ${detail}` : bodySnippet ? `: ${bodySnippet}` : ''}`;
+        if (resp.status === 401) msg = 'Preview failed (HTTP 401) — your session expired. Please log out and back in.';
+        if (resp.status === 413) msg = 'Preview failed (HTTP 413) — your CSV is too large for the server. Try splitting it into smaller batches.';
+        if (resp.status === 502 || resp.status === 504) msg = `Preview failed (HTTP ${resp.status}) — the server took too long. Try a smaller CSV or retry in a moment.`;
+      }
+      toast.error(msg, { duration: 10000 });
+      // Also log so the admin can paste from devtools if asked.
+      // eslint-disable-next-line no-console
+      console.error('[admin import] preview failed:', { status: resp?.status, data: resp?.data, error: e.message });
     } finally { setLoading(false); }
   };
 
