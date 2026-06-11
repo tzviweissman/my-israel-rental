@@ -567,6 +567,13 @@ See /app/memory/test_credentials.md
 
 ## Recent Updates (2026-02)
 
+- [x] **Admin Listings: price-range filter** (2026-02-12):
+  - Added a `Price [min] – [max] · clear` row to the Listings filter bar. Numeric inputs that match the same effective price the table renders (`monthly_price` first, `nightly_price` as fallback). Currency mixing is intentional — admin sees a single sortable number column.
+  - URL-synced (`?min=5000&max=8000`) like the other filters, so deep-links & back/forward preserve the range.
+  - Combines with rental-type / managed / featured / search.
+  - **Live verified**: 10 → min=5000 → 3 rows → max=8000 → 3 rows (₪5500, ₪5000, ₪5000) → clear → 10 rows restored. URL flips correctly through each step.
+  - Files: `frontend/src/components/admin/ListingsTab.jsx`.
+
 - [x] **Admin Listings: rental-type filter chips** (2026-02-12):
   - Added a new chip group on the Listings tab — **All types · Long-term · Short-term · Vacation · Storage** — so the super admin can slice the table down to just one rental type in a click.
   - Each chip shows a live count (`Long-term (6)`, `Vacation (4)`…) and empty types auto-disable so the admin doesn't get an empty view by accident.

@@ -51,6 +51,23 @@ export const ListingsTab = ({ token, onStatsChange }) => {
     else next.delete('rt');
     setSearchParams(next, { replace: true });
   };
+  // Price-range filter — URL-synced. Compares against the same effective
+  // price the table renders (monthly_price ?? nightly_price). Currency
+  // mixing is intentional: we match what the admin sees in the column.
+  const minPrice = searchParams.get('min') || '';
+  const maxPrice = searchParams.get('max') || '';
+  const setPriceParam = (key, val) => {
+    const next = new URLSearchParams(searchParams);
+    if (val) next.set(key, val);
+    else next.delete(key);
+    setSearchParams(next, { replace: true });
+  };
+  const clearPriceRange = () => {
+    const next = new URLSearchParams(searchParams);
+    next.delete('min');
+    next.delete('max');
+    setSearchParams(next, { replace: true });
+  };
   const [selectedPropIds, setSelectedPropIds] = useState(new Set());
   const [bookedModalOpen, setBookedModalOpen] = useState(false);
   // bookedTarget: null | { mode: 'single', id } | { mode: 'bulk' }
@@ -236,6 +253,14 @@ export const ListingsTab = ({ token, onStatsChange }) => {
     if (managedFilter === 'managed' && !p.managed_by_admin) return false;
     if (featuredFilter === 'featured' && !p.is_featured) return false;
     if (rentalTypeFilter !== 'all' && p.rental_type !== rentalTypeFilter) return false;
+    // Effective price = whatever the table column shows: monthly first,
+    // nightly as fallback. Keeps the filter result consistent with what
+    // the admin sees on screen.
+    const price = p.monthly_price || p.nightly_price || 0;
+    const minN = minPrice ? Number(minPrice) : null;
+    const maxN = maxPrice ? Number(maxPrice) : null;
+    if (minN !== null && !Number.isNaN(minN) && price < minN) return false;
+    if (maxN !== null && !Number.isNaN(maxN) && price > maxN) return false;
     if (!searchTerm) return true;
     const t = searchTerm.toLowerCase();
     return (
@@ -340,6 +365,44 @@ export const ListingsTab = ({ token, onStatsChange }) => {
               </button>
             );
           })}
+        </div>
+        {/* Price range filter — raw numeric compare against the same
+            effective price the table column shows (monthly first,
+            nightly as fallback). Currency mixing is intentional. */}
+        <div className="inline-flex items-center gap-1.5 bg-white rounded-lg border border-[#E5E5E5] px-2 py-1" data-testid="price-range-filter">
+          <span className="text-xs font-semibold text-gray-500">Price</span>
+          <input
+            type="number"
+            inputMode="numeric"
+            min="0"
+            value={minPrice}
+            onChange={(e) => setPriceParam('min', e.target.value)}
+            placeholder="min"
+            className="w-20 px-2 py-1 rounded border border-transparent hover:border-gray-200 focus:border-[#1E6A6A] focus:outline-none focus:ring-1 focus:ring-[#1E6A6A]/30 text-xs"
+            data-testid="price-min-input"
+          />
+          <span className="text-xs text-gray-400">–</span>
+          <input
+            type="number"
+            inputMode="numeric"
+            min="0"
+            value={maxPrice}
+            onChange={(e) => setPriceParam('max', e.target.value)}
+            placeholder="max"
+            className="w-20 px-2 py-1 rounded border border-transparent hover:border-gray-200 focus:border-[#1E6A6A] focus:outline-none focus:ring-1 focus:ring-[#1E6A6A]/30 text-xs"
+            data-testid="price-max-input"
+          />
+          {(minPrice || maxPrice) && (
+            <button
+              type="button"
+              onClick={clearPriceRange}
+              className="text-[10px] uppercase tracking-wider text-gray-400 hover:text-gray-700 ml-0.5"
+              data-testid="price-clear-btn"
+              title="Clear price range"
+            >
+              clear
+            </button>
+          )}
         </div>
         {selectedPropIds.size > 0 && (
           <div className="flex items-center gap-2 ml-auto flex-wrap">
