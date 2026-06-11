@@ -567,6 +567,14 @@ See /app/memory/test_credentials.md
 
 ## Recent Updates (2026-02)
 
+- [x] **Admin Listings: rental-type filter chips** (2026-02-12):
+  - Added a new chip group on the Listings tab — **All types · Long-term · Short-term · Vacation · Storage** — so the super admin can slice the table down to just one rental type in a click.
+  - Each chip shows a live count (`Long-term (6)`, `Vacation (4)`…) and empty types auto-disable so the admin doesn't get an empty view by accident.
+  - URL-synced via the same pattern as `managed` / `featured` (`?rt=long-term`) so deep-links and browser back/forward preserve the filter.
+  - Combines with existing managed/featured/search filters — e.g. "Long-term + Featured + 'sanhedria' search" all stack.
+  - **Live verified**: All=10 rows → Long-term=6 → Vacation=4 → All=10 again. URL flips to `?rt=long-term` correctly.
+  - Files: `frontend/src/components/admin/ListingsTab.jsx`.
+
 - [x] **Quick Add: drag-and-drop photo uploads** (2026-02-12):
   - The "Photos & videos" section of the Quick Add form now accepts files via drag-and-drop. Drag a folder of 12 photos from the desktop straight onto the card and they all upload to Cloudinary in parallel via the same `uploadFilesFast` pipeline as the button picker.
   - Dropzone shows a clear teal highlight + "Release to upload" copy while a drag is over it; non-image/video files in the drop are filtered out with a friendly toast.

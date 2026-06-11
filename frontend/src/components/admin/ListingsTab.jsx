@@ -42,6 +42,15 @@ export const ListingsTab = ({ token, onStatsChange }) => {
     else next.delete('featured');
     setSearchParams(next, { replace: true });
   };
+  // Rental-type filter — URL-synced so deep links + back/forward keep it.
+  // Valid values: 'all' | 'long-term' | 'short-term' | 'vacation' | 'storage'.
+  const rentalTypeFilter = searchParams.get('rt') || 'all';
+  const setRentalTypeFilter = (val) => {
+    const next = new URLSearchParams(searchParams);
+    if (val && val !== 'all') next.set('rt', val);
+    else next.delete('rt');
+    setSearchParams(next, { replace: true });
+  };
   const [selectedPropIds, setSelectedPropIds] = useState(new Set());
   const [bookedModalOpen, setBookedModalOpen] = useState(false);
   // bookedTarget: null | { mode: 'single', id } | { mode: 'bulk' }
@@ -226,6 +235,7 @@ export const ListingsTab = ({ token, onStatsChange }) => {
   const filteredProperties = properties.filter(p => {
     if (managedFilter === 'managed' && !p.managed_by_admin) return false;
     if (featuredFilter === 'featured' && !p.is_featured) return false;
+    if (rentalTypeFilter !== 'all' && p.rental_type !== rentalTypeFilter) return false;
     if (!searchTerm) return true;
     const t = searchTerm.toLowerCase();
     return (
@@ -236,6 +246,15 @@ export const ListingsTab = ({ token, onStatsChange }) => {
   });
   const managedCount = properties.filter(p => p.managed_by_admin).length;
   const featuredCount = properties.filter(p => p.is_featured).length;
+  // Per-rental-type counts surfaced on each filter chip so the admin can
+  // tell at a glance how many vacation rentals vs long-term leases exist
+  // before clicking. The four canonical rental types match what
+  // /app/backend ships in the `rental_type` enum.
+  const rentalTypeCounts = properties.reduce((acc, p) => {
+    const key = p.rental_type || 'long-term';
+    acc[key] = (acc[key] || 0) + 1;
+    return acc;
+  }, {});
 
   return (
     <div data-testid="admin-listings-section">
@@ -291,6 +310,36 @@ export const ListingsTab = ({ token, onStatsChange }) => {
           >
             <Star size={12} fill={featuredFilter === 'featured' ? 'currentColor' : 'none'} /> Featured ({featuredCount})
           </button>
+        </div>
+        {/* Rental-type filter — lets the admin slice the table down to
+            just Long-term / Short-term / Vacation / Storage. Combines
+            with the other filters (managed, featured, search). */}
+        <div className="inline-flex bg-white rounded-lg border border-[#E5E5E5] p-0.5 flex-wrap" data-testid="rental-type-filter">
+          {[
+            { v: 'all',        label: 'All types' },
+            { v: 'long-term',  label: 'Long-term' },
+            { v: 'short-term', label: 'Short-term' },
+            { v: 'vacation',   label: 'Vacation' },
+            { v: 'storage',    label: 'Storage' },
+          ].map((opt) => {
+            const count = opt.v === 'all'
+              ? properties.length
+              : (rentalTypeCounts[opt.v] || 0);
+            const isActive = rentalTypeFilter === opt.v;
+            const isEmpty = opt.v !== 'all' && count === 0;
+            return (
+              <button
+                key={opt.v}
+                onClick={() => setRentalTypeFilter(opt.v)}
+                disabled={isEmpty}
+                className={`px-2.5 py-1 rounded-md text-xs font-semibold transition-colors disabled:opacity-30 disabled:cursor-not-allowed ${isActive ? 'bg-[#1E6A6A] text-white' : 'text-gray-600 hover:bg-gray-50'}`}
+                data-testid={`rental-type-${opt.v}`}
+                title={isEmpty ? `No ${opt.label.toLowerCase()} listings yet` : `Show only ${opt.label.toLowerCase()}`}
+              >
+                {opt.label} ({count})
+              </button>
+            );
+          })}
         </div>
         {selectedPropIds.size > 0 && (
           <div className="flex items-center gap-2 ml-auto flex-wrap">
