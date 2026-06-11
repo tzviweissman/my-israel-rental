@@ -345,13 +345,59 @@ export const ImportTab = ({ token, onJumpToOwner }) => {
               </ul>
             </details>
           )}
+          {/* Photos issue report — only relevant for property imports.
+              Surfaces partial-mirror failures so the admin can re-upload
+              by hand or fix the source URLs. */}
+          {result.media_issues?.length > 0 && (
+            <details open className="text-xs mb-3">
+              <summary className="cursor-pointer font-semibold text-amber-700">
+                {result.media_issues.length} {result.media_issues.length === 1 ? 'listing' : 'listings'} created with missing photos
+              </summary>
+              <ul className="mt-2 space-y-1">
+                {result.media_issues.map((m, i) => (
+                  <li key={i} className="border border-amber-100 bg-amber-50 rounded px-2 py-1.5">
+                    <span className="font-semibold">Row {m.index}{m.title ? ` (${m.title})` : ''}:</span>
+                    {' '}saved {m.saved_image_count} of {m.csv_image_count} photo URLs.
+                    {m.failed_urls?.length > 0 && (
+                      <ul className="mt-1 pl-4 list-disc text-[10px] font-mono text-amber-900">
+                        {m.failed_urls.map((u, j) => (
+                          <li key={j} className="truncate" title={u}>{u}</li>
+                        ))}
+                      </ul>
+                    )}
+                  </li>
+                ))}
+              </ul>
+            </details>
+          )}
+          {result.summary?.cloudinary_enabled === false && (
+            <div className="text-[11px] bg-amber-50 border border-amber-200 text-amber-800 rounded px-2 py-1.5 mb-3">
+              Cloudinary isn&apos;t configured on the server — photo URLs were saved as-is (no mirroring).
+              If a source host disappears, the photos will too. Ask an admin to set
+              <code className="bg-white px-1 mx-1 rounded font-mono">CLOUDINARY_*</code>
+              env vars.
+            </div>
+          )}
           {result.created?.length > 0 && (
             <details className="text-xs">
               <summary className="cursor-pointer font-semibold text-gray-700">{result.created.length} created</summary>
               <ul className="mt-2 space-y-1 max-h-60 overflow-y-auto">
                 {result.created.map((c, i) => (
-                  <li key={i} className="text-gray-600">
-                    {c.title || c.email} <span className="font-mono text-[10px] text-gray-400">{c.id?.slice(0, 8)}</span>
+                  <li key={i} className="text-gray-600 flex items-center gap-2">
+                    <span className="flex-1 truncate">{c.title || c.email}</span>
+                    {typeof c.images_count === 'number' && (
+                      <span
+                        className={`text-[10px] px-1.5 py-0.5 rounded-full font-semibold ${
+                          c.images_count === 0
+                            ? 'bg-amber-100 text-amber-800'
+                            : 'bg-gray-100 text-gray-700'
+                        }`}
+                        title={c.images_count === 0 ? 'No photos saved — see above' : `${c.images_count} photos saved`}
+                      >
+                        {c.images_count} 📷
+                      </span>
+                    )}
+                    <span className="font-mono text-[10px] text-gray-400">{c.id?.slice(0, 8)}</span>
                   </li>
                 ))}
               </ul>

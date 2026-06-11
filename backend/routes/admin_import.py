@@ -232,12 +232,47 @@ def _coerce_bool(v: Any) -> bool:
 
 
 def _split_list(v: Any) -> list[str]:
+    """Generic comma/semicolon/pipe splitter for short string lists
+    like amenities. Do NOT use for URL lists — Cloudinary transformation
+    URLs (``c_fill,w_400,h_300``) get shredded. Use ``_split_urls``
+    instead for image/video columns.
+    """
     if v in (None, ""):
         return []
+    if isinstance(v, list):
+        return [str(p).strip() for p in v if str(p).strip()]
     s = str(v)
-    # Accept ;, |, or comma-separated. Commas inside URLs are rare; semicolon is most common in exports.
     parts = re.split(r"\s*[;|]\s*|\s*,\s*", s)
     return [p.strip() for p in parts if p.strip()]
+
+
+def _split_urls(v: Any) -> list[str]:
+    """URL-aware splitter for image/video columns.
+
+    Splits on ``;``, ``|``, and newlines. Splits on commas (and whitespace)
+    ONLY when the next chunk looks like a new URL — this protects
+    Cloudinary transformation URLs which use commas internally
+    (``c_fill,w_400,h_300``). Without this guard, a single transform URL
+    would be shredded into 3 broken pieces and every mirror call would
+    fail silently, leaving the listing with no photos. This is exactly
+    the symptom several real imports have shown.
+    """
+    if v in (None, ""):
+        return []
+    if isinstance(v, list):
+        return [str(p).strip() for p in v if str(p).strip()]
+    s = str(v)
+    # Hard separators first: ; | newline.
+    # Then: ", " (comma + whitespace) ONLY when followed by http(s)://.
+    # Then: whitespace before http(s):// (handles space-separated URL lists).
+    pattern = r"\s*[;|\n]\s*|,\s*(?=https?://)|\s+(?=https?://)"
+    parts = re.split(pattern, s)
+    out = []
+    for p in parts:
+        p = p.strip().strip(",")
+        if p:
+            out.append(p)
+    return out
 
 
 def _build_property_doc(row_remapped: dict, owner_id: str) -> dict:
@@ -455,6 +490,12 @@ async def commit_property_import(req: PropertyCommitRequest, payload: dict = Dep
     created: list[dict] = []
     skipped: list[dict] = []
     owners_created: list[dict] = []
+    # Per-row tally of image/video URLs that arrived in the CSV vs. how
+    # many actually landed on the property after Cloudinary mirroring.
+    # Surfaces silent failures (Cloudinary off, bad URLs, rate limits)
+    # that were previously dropping photos with no warning.
+    media_report: list[dict] = []
+    from utils.cloud_storage import CLOUDINARY_ENABLED
 
     for i, raw in enumerate(rows, start=1):
         try:
@@ -495,25 +536,56 @@ async def commit_property_import(req: PropertyCommitRequest, payload: dict = Dep
             doc = _build_property_doc(remapped, owner_id)
 
             # Mirror images to Cloudinary so we don't depend on the source host
-            image_urls = _split_list(remapped.get("images"))
-            video_urls = _split_list(remapped.get("videos"))
-            if req.mirror_images and image_urls:
+            image_urls = _split_urls(remapped.get("images"))
+            video_urls = _split_urls(remapped.get("videos"))
+            mirror_failures = []
+            if req.mirror_images and image_urls and CLOUDINARY_ENABLED:
                 results = await asyncio.gather(*[
                     mirror_url_to_cloudinary(u, is_video=False) for u in image_urls[:30]
                 ], return_exceptions=False)
-                doc["images"] = [r["url"] for r in results if r and r.get("url")]
+                mirrored = []
+                for src_url, r in zip(image_urls[:30], results):
+                    if r and r.get("url"):
+                        mirrored.append(r["url"])
+                    else:
+                        mirror_failures.append(src_url)
+                doc["images"] = mirrored
             else:
+                # Either mirroring is off, or Cloudinary isn't configured —
+                # keep the original URLs so the listing still has pictures
+                # instead of silently dropping them.
                 doc["images"] = image_urls
-            if req.mirror_images and video_urls:
+            if req.mirror_images and video_urls and CLOUDINARY_ENABLED:
                 results = await asyncio.gather(*[
                     mirror_url_to_cloudinary(u, is_video=True) for u in video_urls[:5]
                 ], return_exceptions=False)
-                doc["videos"] = [r["url"] for r in results if r and r.get("url")]
+                mirrored_vids = []
+                for src_url, r in zip(video_urls[:5], results):
+                    if r and r.get("url"):
+                        mirrored_vids.append(r["url"])
+                    else:
+                        mirror_failures.append(src_url)
+                doc["videos"] = mirrored_vids
             else:
                 doc["videos"] = video_urls
 
             await db.properties.insert_one(doc)
-            created.append({"id": doc["id"], "title": doc["title"]})
+            created.append({
+                "id": doc["id"],
+                "title": doc["title"],
+                "images_count": len(doc.get("images", [])),
+                "videos_count": len(doc.get("videos", [])),
+            })
+            # Track partial failures so the admin sees "12 listings created,
+            # 4 with missing photos" instead of being told it all worked.
+            if mirror_failures or (not doc.get("images") and image_urls):
+                media_report.append({
+                    "index": i,
+                    "title": doc.get("title"),
+                    "csv_image_count": len(image_urls),
+                    "saved_image_count": len(doc.get("images", [])),
+                    "failed_urls": mirror_failures[:5],
+                })
         except Exception as e:  # noqa: BLE001
             skipped.append({"index": i, "title": raw.get("title") or raw.get("Name"), "error": f"Unexpected error: {e}"})
 
@@ -523,10 +595,13 @@ async def commit_property_import(req: PropertyCommitRequest, payload: dict = Dep
             "created": len(created),
             "skipped": len(skipped),
             "owners_created": len(owners_created),
+            "with_missing_photos": len(media_report),
+            "cloudinary_enabled": bool(CLOUDINARY_ENABLED),
         },
         "created": created,
         "skipped": skipped,
         "owners_created": owners_created,
+        "media_issues": media_report,
     }
 
 

@@ -567,6 +567,16 @@ See /app/memory/test_credentials.md
 
 ## Recent Updates (2026-02)
 
+- [x] **🐛 BUG FIX: bulk-import was silently dropping listing photos** (2026-02-12):
+  - **Root cause**: `_split_list` was splitting image-URL cells on every comma. Cloudinary transformation URLs (`c_fill,w_400,h_300`) contain commas internally and were being shredded into 2-3 broken pieces. Each piece then failed Cloudinary mirroring and the failures were silently dropped (`mirror_url_to_cloudinary` swallowed exceptions and `commit_property_import` filtered `None` results without logging). Net effect: dozens of real imports created listings with empty `images: []` arrays — the symptom the user reported.
+  - **Fix 1 — URL-aware splitter**: introduced `_split_urls()` that splits on `;` `|` and newlines, plus commas/whitespace ONLY when followed by `https?://`. So a single Cloudinary URL stays intact. `_split_list()` kept as-is for amenities.
+  - **Fix 2 — partial-success reporting**: the property-commit endpoint now tracks which URLs failed to mirror per row and surfaces them in a new `media_issues` array of `{index, title, csv_image_count, saved_image_count, failed_urls}`. Summary gains `with_missing_photos` and `cloudinary_enabled` flags. Each `created` row reports `images_count` / `videos_count`.
+  - **Fix 3 — fail-safe when Cloudinary is off**: instead of silently dropping all photos when `CLOUDINARY_ENABLED=False`, the importer now saves the source URLs as-is and the frontend shows a yellow "Cloudinary isn't configured — photos saved as-is" banner in the report.
+  - **Frontend** (`components/admin/ImportTab.jsx`): import report now shows a "N listings created with missing photos" expander listing per-row counts and the first 5 failed URLs, plus per-row 📷 image-count chips on the Created list (amber when zero).
+  - **Tests**: 11 new tests in `tests/test_admin_import_split_list.py` covering Cloudinary transform URLs, mixed lists, separators, list inputs, trailing commas, and the amenities split path. 19/19 import tests green.
+  - **Live verified**: bulk-imported a CSV containing `c_fill,w_400,h_300/sample.jpg,https://example.com/b.jpg` → got `images_count: 2` and both URLs landed intact in the DB (previously this would have given `images: []`).
+  - Files: `backend/routes/admin_import.py`, `backend/tests/test_admin_import_split_list.py`, `frontend/src/components/admin/ImportTab.jsx`.
+
 - [x] **Admin Listings: cover-image thumbnail per row** (2026-02-12):
   - Added a new `<CoverThumb>` cell to each row of the desktop table (~56×56) and to each mobile card (~48×48). Shows `images[0]` (the listing's cover) with rounded corners and a soft border. Clicking opens the full-size image in a new tab so the admin can sanity-check without leaving the table.
   - When a listing has no photos yet, the thumb collapses to a gray placeholder with an `ImageOff` icon — instant visual cue for "this listing needs photos" while scanning the table.
