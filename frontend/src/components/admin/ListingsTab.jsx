@@ -5,12 +5,53 @@ import axios from 'axios';
 import { toast } from 'sonner';
 import {
   Trash2, ToggleLeft, ToggleRight, Search,
-  CalendarX, CalendarCheck, Lock, Briefcase, Star, Copy,
+  CalendarX, CalendarCheck, Lock, Briefcase, Star, Copy, ImageOff,
 } from 'lucide-react';
 import { API } from '../../App';
 import { useApiSWR } from '../../hooks/useApiSWR';
 import MarkAsBookedModal from './MarkAsBookedModal';
 import DuplicatesModal from './DuplicatesModal';
+
+/**
+ * Tiny cover-image thumbnail for each listing row. Falls back to a
+ * placeholder tile when the property has no images so the admin can
+ * still see at a glance "this listing needs photos". The image opens
+ * in a new tab on click so the admin can sanity-check the full-size
+ * shot without leaving the table.
+ */
+const CoverThumb = ({ property, size = 'md' }) => {
+  const src = property.images?.[0];
+  const dim = size === 'sm' ? 'w-12 h-12' : 'w-14 h-14';
+  if (!src) {
+    return (
+      <div
+        className={`${dim} rounded-md border border-gray-200 bg-gray-50 flex items-center justify-center text-gray-400 shrink-0`}
+        title="No photos yet"
+        data-testid={`cover-thumb-empty-${property.id}`}
+      >
+        <ImageOff size={14} />
+      </div>
+    );
+  }
+  return (
+    <a
+      href={src}
+      target="_blank"
+      rel="noopener noreferrer"
+      className={`${dim} rounded-md overflow-hidden border border-gray-200 shrink-0 block hover:ring-2 hover:ring-[#1E6A6A]/40 transition-shadow`}
+      title="Open full-size cover image"
+      data-testid={`cover-thumb-${property.id}`}
+      onClick={(e) => e.stopPropagation()}
+    >
+      <img
+        src={src}
+        alt={property.title || 'Cover'}
+        loading="lazy"
+        className="w-full h-full object-cover"
+      />
+    </a>
+  );
+};
 
 /**
  * Super Admin → Listings tab.
@@ -460,6 +501,7 @@ export const ListingsTab = ({ token, onStatsChange }) => {
                   data-testid="select-all-listings"
                 />
               </th>
+              <th className="px-3 py-3 w-16"></th>
               <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">{t('admin.colTitle')}</th>
               <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">{t('admin.colOwner')}</th>
               <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">{t('admin.colArea')}</th>
@@ -479,6 +521,9 @@ export const ListingsTab = ({ token, onStatsChange }) => {
                     onChange={() => togglePropSelected(p.id)}
                     data-testid={`select-listing-${p.id}`}
                   />
+                </td>
+                <td className="px-3 py-2 w-16">
+                  <CoverThumb property={p} />
                 </td>
                 <td className="px-4 py-3 font-medium text-sm">
                   <div className="flex items-center gap-2 flex-wrap">
@@ -622,6 +667,7 @@ export const ListingsTab = ({ token, onStatsChange }) => {
                   className="mt-1 shrink-0"
                   data-testid={`select-listing-mobile-${p.id}`}
                 />
+                <CoverThumb property={p} size="sm" />
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-1.5 flex-wrap">
                     <p className="font-semibold text-sm break-words">{p.title || '—'}</p>

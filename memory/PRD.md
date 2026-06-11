@@ -567,6 +567,13 @@ See /app/memory/test_credentials.md
 
 ## Recent Updates (2026-02)
 
+- [x] **Admin Listings: cover-image thumbnail per row** (2026-02-12):
+  - Added a new `<CoverThumb>` cell to each row of the desktop table (~56×56) and to each mobile card (~48×48). Shows `images[0]` (the listing's cover) with rounded corners and a soft border. Clicking opens the full-size image in a new tab so the admin can sanity-check without leaving the table.
+  - When a listing has no photos yet, the thumb collapses to a gray placeholder with an `ImageOff` icon — instant visual cue for "this listing needs photos" while scanning the table.
+  - Lazy-loaded (`loading="lazy"`) so the table stays snappy even with 100s of rows.
+  - **Live verified**: 10-row table renders 10 thumbs in desktop + 10 in the mobile view. "Media Test" row shows the actual colourful cover image; the rest correctly fall back to the placeholder.
+  - Files: `frontend/src/components/admin/ListingsTab.jsx`.
+
 - [x] **Admin Listings: price-range filter** (2026-02-12):
   - Added a `Price [min] – [max] · clear` row to the Listings filter bar. Numeric inputs that match the same effective price the table renders (`monthly_price` first, `nightly_price` as fallback). Currency mixing is intentional — admin sees a single sortable number column.
   - URL-synced (`?min=5000&max=8000`) like the other filters, so deep-links & back/forward preserve the range.
