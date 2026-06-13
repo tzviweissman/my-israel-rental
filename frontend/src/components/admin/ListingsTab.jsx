@@ -11,6 +11,7 @@ import { API } from '../../App';
 import { useApiSWR } from '../../hooks/useApiSWR';
 import MarkAsBookedModal from './MarkAsBookedModal';
 import DuplicatesModal from './DuplicatesModal';
+import UndoBulkDeleteSnackbar from './UndoBulkDeleteSnackbar';
 
 
 // Backend already returns properties sorted by created_at desc, so the
@@ -210,16 +211,34 @@ export const ListingsTab = ({ token, onStatsChange }) => {
                   `${API}/admin/properties/bulk`,
                   { headers, data: { property_ids: ids } },
                 );
-                const { deleted = 0, messages_deleted = 0, bookings_deleted = 0 } = res.data || {};
-                toast.success(
-                  t('admin.bulkDeleteSuccess', `${deleted} listing${deleted === 1 ? '' : 's'} deleted`)
-                  + (messages_deleted || bookings_deleted
-                    ? ` (cleaned ${messages_deleted} message${messages_deleted === 1 ? '' : 's'}, ${bookings_deleted} booking${bookings_deleted === 1 ? '' : 's'})`
-                    : '')
-                );
+                const { deleted = 0, messages_deleted = 0, bookings_deleted = 0, snapshot_id } = res.data || {};
                 setSelectedPropIds(new Set());
                 fetchProperties();
                 notifyStatsChange();
+
+                // Show an Undo snackbar with a 10s countdown. The backend
+                // tombstone outlives the snackbar (so even a slow click
+                // through it still works), but visually we make the
+                // "safety window" explicit so the admin knows it's there.
+                const summary = `${deleted} ${deleted === 1 ? t('admin.listingDeletedOne', 'listing deleted') : t('admin.listingDeletedMany', 'listings deleted')}`;
+                const cleanup = (messages_deleted || bookings_deleted)
+                  ? ` (${messages_deleted} ${t('admin.messages', 'messages')}, ${bookings_deleted} ${t('admin.bookings', 'bookings')})`
+                  : '';
+                if (snapshot_id) {
+                  // eslint-disable-next-line react/no-unstable-nested-components
+                  toast.custom((undoTid) => (
+                    <UndoBulkDeleteSnackbar
+                      tid={undoTid}
+                      message={summary + cleanup}
+                      snapshotId={snapshot_id}
+                      headers={headers}
+                      onRestored={fetchProperties}
+                      notifyStatsChange={notifyStatsChange}
+                    />
+                  ), { duration: 10000, position: 'bottom-center' });
+                } else {
+                  toast.success(summary + cleanup);
+                }
               } catch (e) {
                 toast.error(e.response?.data?.detail || 'Failed to delete listings');
               }

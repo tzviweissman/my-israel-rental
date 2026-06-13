@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { ChevronDown, MessageCircle, Calendar, DollarSign, RotateCcw, ArrowLeft, Search, X } from 'lucide-react';
 
 const SECTIONS = [
@@ -144,6 +145,7 @@ const highlightText = (text, query) => {
 
 const FAQ = () => {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   // Default first question of first section open so the page never
   // looks like a wall of cold accordions.
   const [openKey, setOpenKey] = useState('booking-0');
@@ -181,7 +183,7 @@ const FAQ = () => {
           className="inline-flex items-center gap-1.5 text-sm font-medium text-gray-600 hover:text-[#1E6A6A] mb-4 transition-colors"
           data-testid="faq-back"
         >
-          <ArrowLeft size={16} /> Back
+          <ArrowLeft size={16} /> {t('common.back')}
         </button>
 
         <header className="mb-8">
@@ -219,7 +221,7 @@ const FAQ = () => {
             <button
               onClick={() => setQuery('')}
               className="absolute right-3 top-1/2 -translate-y-1/2 p-1 rounded-full text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-colors"
-              aria-label="Clear search"
+              aria-label={t('faqExtra.clearSearch')}
               data-testid="faq-search-clear"
             >
               <X size={14} />

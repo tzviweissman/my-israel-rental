@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Home, FileCheck, ArrowRight, X, Sparkles } from 'lucide-react';
 
 const WelcomePopups = ({ onDismiss }) => {
+  const { t } = useTranslation();
   const [currentPopup, setCurrentPopup] = useState(0); // 0 = first, 1 = second, 2 = done
   const [animating, setAnimating] = useState(false);
   const [visible, setVisible] = useState(true);
@@ -70,7 +72,7 @@ const WelcomePopups = ({ onDismiss }) => {
                 </div>
                 <div className="flex items-center justify-center gap-2 mb-2">
                   <Sparkles size={16} className="text-[#D4AF37]" />
-                  <span className="text-xs font-semibold text-[#D4AF37] uppercase tracking-wider">New Feature</span>
+                  <span className="text-xs font-semibold text-[#D4AF37] uppercase tracking-wider">{t('welcome.newFeature')}</span>
                   <Sparkles size={16} className="text-[#D4AF37]" />
                 </div>
               </div>
@@ -80,10 +82,10 @@ const WelcomePopups = ({ onDismiss }) => {
             <div className="px-8 py-8 text-center -mt-6">
               <div className="bg-white rounded-2xl shadow-sm border border-gray-100 px-6 py-6">
                 <h2 className="text-2xl font-bold text-gray-900 mb-2" style={{ fontFamily: 'Playfair Display' }}>
-                  Sublease Your Property
+                  {t('welcome.subleaseTitle')}
                 </h2>
                 <p className="text-lg text-gray-600">
-                  in just a few clicks
+                  {t('welcome.subleaseSub')}
                 </p>
                 <div className="mt-4 flex justify-center">
                   <button
@@ -91,7 +93,7 @@ const WelcomePopups = ({ onDismiss }) => {
                     className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-medium text-white transition-all hover:shadow-lg active:scale-95"
                     style={{ backgroundColor: '#D4AF37' }}
                   >
-                    Learn More <ArrowRight size={16} />
+                    {t('welcome.learnMore')} <ArrowRight size={16} />
                   </button>
                 </div>
               </div>
@@ -123,7 +125,7 @@ const WelcomePopups = ({ onDismiss }) => {
                 </div>
                 <div className="flex items-center justify-center gap-2 mb-2">
                   <Sparkles size={16} className="text-white" />
-                  <span className="text-xs font-semibold text-white uppercase tracking-wider">Premium Service</span>
+                  <span className="text-xs font-semibold text-white uppercase tracking-wider">{t('welcome.premiumService')}</span>
                   <Sparkles size={16} className="text-white" />
                 </div>
               </div>
@@ -133,18 +135,19 @@ const WelcomePopups = ({ onDismiss }) => {
             <div className="px-8 py-8 text-center -mt-6">
               <div className="bg-white rounded-2xl shadow-sm border border-gray-100 px-6 py-6">
                 <h2 className="text-2xl font-bold text-gray-900 mb-3" style={{ fontFamily: 'Playfair Display' }}>
-                  Let Us Handle the Hassle for You
+                  {t('welcome.servicesTitle')}
                 </h2>
-                <p className="text-sm text-gray-600 leading-relaxed">
-                  We take care of all government documents, your <strong className="text-[#1E6A6A]">Arnona discount</strong>, and the <strong className="text-[#1E6A6A]">property name change</strong> — quickly and professionally.
-                </p>
+                <p
+                  className="text-sm text-gray-600 leading-relaxed"
+                  dangerouslySetInnerHTML={{ __html: t('welcome.servicesDesc') }}
+                />
                 <div className="mt-5 flex justify-center">
                   <button
                     onClick={dismissAll}
                     className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-medium text-white transition-all hover:shadow-lg active:scale-95"
                     style={{ backgroundColor: '#1E6A6A' }}
                   >
-                    Go to Dashboard <ArrowRight size={16} />
+                    {t('welcome.goToDashboard')} <ArrowRight size={16} />
                   </button>
                 </div>
               </div>

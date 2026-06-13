@@ -16,7 +16,14 @@ const resources = {
         signup: 'Sign Up / Add Property',
         dashboard: 'Dashboard',
         logout: 'Logout',
-        faq: 'FAQs'
+        faq: 'FAQs',
+        menu: 'Menu',
+        toggleLanguage: 'Toggle language',
+        noNotifications: 'No notifications yet',
+        clearAllNotifications: 'Clear all notifications?',
+        cannotBeUndone: 'This cannot be undone.',
+        deleteNotification: 'Delete notification',
+        clearAll: 'Clear all'
       },
       hero: {
         title: 'Find Your Perfect Rental',
@@ -248,7 +255,11 @@ const resources = {
         contactUs: 'Contact Us',
         phone: 'Phone',
         email: 'Email',
-        whatsapp: 'WhatsApp'
+        whatsapp: 'WhatsApp',
+        previous: 'Previous',
+        scrollForMore: 'Scroll for more',
+        scrollToPrevAria: 'Scroll to previous properties',
+        scrollToMoreAria: 'Scroll to more properties'
       },
       auth: {
         loginTitle: 'Login to Your Account',
@@ -589,6 +600,217 @@ const resources = {
         phone: 'Phone',
         faq: 'Frequently Asked Questions'
       },
+      common: {
+        cancel: 'Cancel',
+        confirm: 'Confirm',
+        save: 'Save',
+        delete: 'Delete',
+        edit: 'Edit',
+        close: 'Close',
+        loading: 'Loading...',
+        saving: 'Saving...',
+        uploading: 'Uploading...',
+        submit: 'Submit',
+        back: 'Back',
+        next: 'Next',
+        optional: 'optional',
+        required: 'required',
+        none: 'None',
+        all: 'All',
+        yes: 'Yes',
+        no: 'No',
+        undo: 'Undo',
+        retry: 'Retry'
+      },
+      paymentSuccess: {
+        title: 'Payment successful',
+        contactUs: 'Contact us',
+        orderId: 'Order ID',
+        paidAt: 'Paid at',
+        paypalTxn: 'PayPal Transaction',
+        couldNotLoad: "We couldn't load your order",
+        thankYou: 'Thank you for your purchase. A confirmation email is on its way.',
+        backHome: 'Back to home',
+        viewDashboard: 'View dashboard'
+      },
+      welcome: {
+        newFeature: 'New Feature',
+        premiumService: 'Premium Service',
+        arnonaDiscount: 'Arnona discount',
+        subleaseTitle: 'Sublease Your Property',
+        subleaseSub: 'in just a few clicks',
+        learnMore: 'Learn More',
+        servicesTitle: 'Let Us Handle the Hassle for You',
+        servicesDesc: 'We take care of all government documents, your <strong>Arnona discount</strong>, and the <strong>property name change</strong> — quickly and professionally.',
+        goToDashboard: 'Go to Dashboard'
+      },
+      cancelBooking: {
+        selectReason: 'Select a reason',
+        changeOfPlans: 'Change of plans',
+        financialReasons: 'Financial reasons',
+        foundBetter: 'Found a better option',
+        scheduling: 'Scheduling conflict',
+        propertyIssues: 'Property issues',
+        otherSpecify: 'Please specify the reason...',
+        titleCancel: 'Cancel Booking',
+        titleRequest: 'Request Cancellation',
+        titleDeny: 'Deny Cancellation Request',
+        btnDeny: 'Deny Request',
+        denialLabel: 'Reason for denial:',
+        cancellationLabel: 'Cancellation reason:',
+        otherLabel: 'Other',
+        processing: 'Processing...'
+      },
+      contractSign: {
+        title: 'Sign Rental Contract',
+        preview: 'Contract Preview',
+        cantRead: "Can't read the contract?",
+        originalIs: 'The original-language document is what you sign.',
+        signaturePreview: 'Signature Preview:',
+        signaturePreviewAlt: 'Signature preview',
+        uploadSignature: 'Click to upload signature image',
+        asItAppearsOnId: 'As it appears on your ID'
+      },
+      contractList: {
+        digitalSignature: 'Digital Signature',
+        drawYourSig: 'Draw Your Signature',
+        enterFullName: 'Enter your full legal name',
+        fullName: 'Full Name',
+        originalText: 'Original Extracted Text'
+      },
+      contractUpload: {
+        chooseProperty: 'Choose a property...',
+        dropContract: 'Drop your contract here or click to browse',
+        selectProperty: 'Select Property',
+        uploadNew: 'Upload New Contract'
+      },
+      contractManager: {
+        deleteContract: 'Delete this contract?',
+        noContracts: 'No contracts yet',
+        uploadFirst: 'Upload your first rental contract to get started.'
+      },
+      docService: {
+        title: 'Document Filing Services',
+        addAnother: 'Add another service to unlock',
+        bundleDiscount: 'Bundle discount',
+        pickAndPay: 'Pick your services and pay securely with PayPal.',
+        emailChecklist: 'We email you a checklist of the documents and details we need.'
+      },
+      sublease: {
+        listingsTitle: 'Your Sublease Listings',
+        noActive: 'No active subleases',
+        removeListing: 'Remove sublease listing?',
+        cannotUndo: 'This action cannot be undone.',
+        allRooms: 'All rooms',
+        availableFrom: 'Available From',
+        availableTo: 'Available To',
+        descriptionOptional: 'Description (optional)',
+        flatRate: 'Flat Rate (Total)',
+        notesFor: 'Notes for Sublessee',
+        perNight: 'Per Night',
+        priceType: 'Price Type',
+        streetOptional: 'Street address (optional)',
+        subleaseType: 'Sublease Type',
+        tellRenters: 'Tell renters about the space, the neighborhood, what to expect.',
+        noActiveBookings: "You don't have any active bookings on MyIsraelRental."
+      },
+      addProperty: {
+        aiSmartPaste: 'AI smart paste',
+        cancellationPolicy: 'Cancellation Policy',
+        customWriteOwn: 'Custom - Write your own policy',
+        customPolicy: 'Custom Cancellation Policy',
+        dateAvailable: 'Date Available',
+        describePolicy: 'Describe your cancellation policy in detail...',
+        feeAmount: 'Fee amount',
+        holidayCategories: 'Holiday Categories',
+        noLimit: 'No limit',
+        pesachRentals: 'Pesach Rentals',
+        policyType: 'Policy Type',
+        startingDate: 'Starting Date',
+        strictNoRefunds: 'Strict - No refunds after booking',
+        sukkotRentals: 'Sukkot Rentals',
+        tamaConstruction: 'Tama (Under Construction)'
+      },
+      bulkUpload: {
+        agentFee: 'Agent fee',
+        agentFeeAmount: 'Agent fee amount',
+        allSet: 'All set!',
+        haveSpreadsheet: 'Already have your properties in a spreadsheet?',
+        csvTemplate: 'CSV template',
+        cancellationPolicy: 'Cancellation policy',
+        cleaningFee: 'Cleaning fee',
+        cleaningFeeAmount: 'Cleaning fee amount',
+        customPolicy: 'Custom cancellation policy',
+        duplicateRow: 'Duplicate this row',
+        gotListingsFrom: 'Got listings from WhatsApp, email, or a colleague?',
+        importFromSheet: 'Import from a spreadsheet',
+        minRentalPeriod: 'Min rental period',
+        porchSqm: 'Porch sqm',
+        propertyType: 'Property type',
+        removePhoto: 'Remove photo',
+        removeRow: 'Remove this row',
+        removeVideo: 'Remove video',
+        shabbatElevator: 'Shabbat elevator',
+        squareMeters: 'Square meters',
+        sukkahCompatible: 'Sukkah compatible',
+        tabOrComma: 'Tab- or comma-separated rows, headers in first line',
+        uploadCsvXlsx: 'Upload .csv or .xlsx',
+        addPhotosLater: 'You can add photos to each property later from your dashboard.'
+      },
+      propertyList: {
+        deleteContract: 'Delete this contract?',
+        deleteProperty: 'Delete this property?',
+        dropImagesHere: 'Drop images here',
+        confirmedBookingsTooltip: 'Listings with a confirmed booking on the books (current or upcoming)',
+        needTemplate: 'Need a template?',
+        propertyContract: 'Property Contract',
+        rentersWillNotSee: 'Renters with pending bookings will no longer see it.',
+        cannotUndo: 'This cannot be undone. All bookings and images will be unlinked.'
+      },
+      savedSearches: {
+        alertName: 'Alert name (optional)',
+        availableFrom: 'Available from',
+        copyLink: 'Copy search link',
+        flexibleDates: 'Flexible dates',
+        hideMatch: 'Hide this match',
+        maxPrice: 'Max price',
+        minBedrooms: 'Min bedrooms',
+        noMax: 'No max',
+        removeAlert: 'Remove alert',
+        rentalType: 'Rental type'
+      },
+      faqExtra: {
+        chosenByLister: 'Chosen by the lister.',
+        clearSearch: 'Clear search',
+        policiesIntro: 'Policies are chosen by the lister. Common options include:'
+      },
+      smartLists: {
+        deleteList: 'Delete saved list',
+        listHeader: 'List header',
+        logoAlt: 'MyIsraelRental logo',
+        saveList: 'Save this list',
+        savedLists: 'Saved lists',
+        title: 'Smart Lists',
+        waPreview: 'WhatsApp preview'
+      },
+      accessibility: {
+        title: 'Accessibility Options',
+        displayMode: 'Display Mode',
+        textSize: 'Text Size',
+        helpText: 'These settings help improve readability for users with vision impairments.'
+      },
+      managerHeader: {
+        appearsOnPage: 'Appears on your public manager page',
+        businessLogo: 'Business Logo',
+        sharePage: 'Share your manager page',
+        yourPage: 'Your Manager Page'
+      },
+      duplicatesUi: {
+        deleteListing: 'Delete this listing',
+        title: 'Duplicate listings',
+        noneFound: 'No duplicates found',
+        openCover: 'Open full-size cover'
+      },
       ownerOffer: {
         tag: 'Owner perk',
         title: 'Want us to manage your property for you?',
@@ -617,7 +839,14 @@ const resources = {
         signup: 'הרשמה / הוספת נכס',
         dashboard: 'לוח בקרה',
         logout: 'התנתקות',
-        faq: 'שאלות נפוצות'
+        faq: 'שאלות נפוצות',
+        menu: 'תפריט',
+        toggleLanguage: 'החלפת שפה',
+        noNotifications: 'אין התראות חדשות',
+        clearAllNotifications: 'לנקות את כל ההתראות?',
+        cannotBeUndone: 'לא ניתן לבטל פעולה זו.',
+        deleteNotification: 'מחיקת התראה',
+        clearAll: 'נקה הכל'
       },
       hero: {
         title: 'מצא את השכירות המושלמת',
@@ -849,7 +1078,11 @@ const resources = {
         contactUs: 'צור קשר',
         phone: 'טלפון',
         email: 'אימייל',
-        whatsapp: 'וואטסאפ'
+        whatsapp: 'וואטסאפ',
+        previous: 'הקודם',
+        scrollForMore: 'גלול לעוד',
+        scrollToPrevAria: 'גלול לנכסים הקודמים',
+        scrollToMoreAria: 'גלול לעוד נכסים'
       },
       auth: {
         loginTitle: 'התחבר לחשבון שלך',
@@ -1189,6 +1422,217 @@ const resources = {
         contact: 'צור קשר',
         phone: 'טלפון',
         faq: 'שאלות נפוצות'
+      },
+      common: {
+        cancel: 'ביטול',
+        confirm: 'אישור',
+        save: 'שמור',
+        delete: 'מחק',
+        edit: 'ערוך',
+        close: 'סגור',
+        loading: '...טוען',
+        saving: '...שומר',
+        uploading: '...מעלה',
+        submit: 'שלח',
+        back: 'חזור',
+        next: 'הבא',
+        optional: 'אופציונלי',
+        required: 'חובה',
+        none: 'אין',
+        all: 'הכל',
+        yes: 'כן',
+        no: 'לא',
+        undo: 'בטל פעולה',
+        retry: 'נסה שוב'
+      },
+      paymentSuccess: {
+        title: 'התשלום בוצע בהצלחה',
+        contactUs: 'צור קשר',
+        orderId: 'מספר הזמנה',
+        paidAt: 'תאריך תשלום',
+        paypalTxn: 'עסקת PayPal',
+        couldNotLoad: 'לא הצלחנו לטעון את ההזמנה',
+        thankYou: '.תודה על הרכישה. מייל אישור בדרך אליכם',
+        backHome: 'חזרה לדף הבית',
+        viewDashboard: 'לוח הבקרה'
+      },
+      welcome: {
+        newFeature: 'תכונה חדשה',
+        premiumService: 'שירות פרימיום',
+        arnonaDiscount: 'הנחה בארנונה',
+        subleaseTitle: 'תת-השכרת הנכס שלך',
+        subleaseSub: 'בכמה לחיצות בלבד',
+        learnMore: 'למידע נוסף',
+        servicesTitle: 'אנחנו נטפל בבירוקרטיה בשבילך',
+        servicesDesc: 'אנחנו מטפלים בכל מסמכי הממשלה, ב<strong>הנחת ארנונה</strong> וב<strong>שינוי שם בנכס</strong> — במהירות ובמקצועיות.',
+        goToDashboard: 'מעבר ללוח בקרה'
+      },
+      cancelBooking: {
+        selectReason: 'בחר סיבה',
+        changeOfPlans: 'שינוי תוכניות',
+        financialReasons: 'סיבות כלכליות',
+        foundBetter: 'נמצאה אפשרות טובה יותר',
+        scheduling: 'התנגשות תאריכים',
+        propertyIssues: 'בעיות בנכס',
+        otherSpecify: '...נא לפרט את הסיבה',
+        titleCancel: 'ביטול הזמנה',
+        titleRequest: 'בקשת ביטול',
+        titleDeny: 'דחיית בקשת ביטול',
+        btnDeny: 'דחה בקשה',
+        denialLabel: ':סיבת הדחייה',
+        cancellationLabel: ':סיבת הביטול',
+        otherLabel: 'אחר',
+        processing: '...מעבד'
+      },
+      contractSign: {
+        title: 'חתימה על חוזה שכירות',
+        preview: 'תצוגה מקדימה של החוזה',
+        cantRead: '?אינך מצליח לקרוא את החוזה',
+        originalIs: '.מסמך השפה המקורית הוא זה שאתה חותם עליו',
+        signaturePreview: ':תצוגה מקדימה של החתימה',
+        signaturePreviewAlt: 'תצוגה מקדימה של חתימה',
+        uploadSignature: 'לחץ להעלאת תמונת חתימה',
+        asItAppearsOnId: 'כפי שמופיע בתעודת הזהות שלך'
+      },
+      contractList: {
+        digitalSignature: 'חתימה דיגיטלית',
+        drawYourSig: 'צייר את חתימתך',
+        enterFullName: 'הזן את שמך המלא',
+        fullName: 'שם מלא',
+        originalText: 'טקסט מקורי שחולץ'
+      },
+      contractUpload: {
+        chooseProperty: '...בחר נכס',
+        dropContract: 'גרור את החוזה לכאן או לחץ לעיון',
+        selectProperty: 'בחר נכס',
+        uploadNew: 'העלה חוזה חדש'
+      },
+      contractManager: {
+        deleteContract: '?למחוק חוזה זה',
+        noContracts: 'אין חוזים עדיין',
+        uploadFirst: '.העלה את חוזה השכירות הראשון שלך כדי להתחיל'
+      },
+      docService: {
+        title: 'שירותי הגשת מסמכים',
+        addAnother: 'הוסף שירות נוסף לפתיחת',
+        bundleDiscount: 'הנחת חבילה',
+        pickAndPay: '.בחר את השירותים ושלם בבטחה דרך PayPal',
+        emailChecklist: '.נשלח לך במייל רשימה של המסמכים והפרטים שאנו צריכים'
+      },
+      sublease: {
+        listingsTitle: 'רישומי תת-שכירות שלך',
+        noActive: 'אין תת-שכירויות פעילות',
+        removeListing: '?הסר רישום תת-שכירות',
+        cannotUndo: '.לא ניתן לבטל פעולה זו',
+        allRooms: 'כל החדרים',
+        availableFrom: 'זמין מתאריך',
+        availableTo: 'זמין עד תאריך',
+        descriptionOptional: '(אופציונלי) תיאור',
+        flatRate: '(סה"כ) תעריף קבוע',
+        notesFor: 'הערות לשוכר המשנה',
+        perNight: 'ללילה',
+        priceType: 'סוג תמחור',
+        streetOptional: '(אופציונלי) כתובת רחוב',
+        subleaseType: 'סוג תת-שכירות',
+        tellRenters: '.ספר לשוכרים על המקום, השכונה ומה לצפות',
+        noActiveBookings: '.אין לך הזמנות פעילות ב-MyIsraelRental'
+      },
+      addProperty: {
+        aiSmartPaste: 'הדבקה חכמה (AI)',
+        cancellationPolicy: 'מדיניות ביטולים',
+        customWriteOwn: 'מותאם אישית - כתוב את המדיניות שלך',
+        customPolicy: 'מדיניות ביטולים מותאמת אישית',
+        dateAvailable: 'תאריך זמינות',
+        describePolicy: '...תאר את מדיניות הביטולים בפירוט',
+        feeAmount: 'סכום עמלה',
+        holidayCategories: 'קטגוריות חגים',
+        noLimit: 'ללא הגבלה',
+        pesachRentals: 'השכרות לפסח',
+        policyType: 'סוג מדיניות',
+        startingDate: 'תאריך התחלה',
+        strictNoRefunds: 'מחמירה - אין החזרים אחרי הזמנה',
+        sukkotRentals: 'השכרות לסוכות',
+        tamaConstruction: '(בבנייה) תמ"א'
+      },
+      bulkUpload: {
+        agentFee: 'דמי תיווך',
+        agentFeeAmount: 'סכום דמי תיווך',
+        allSet: '!הכל מוכן',
+        haveSpreadsheet: '?כבר יש לך את הנכסים בגיליון אלקטרוני',
+        csvTemplate: 'תבנית CSV',
+        cancellationPolicy: 'מדיניות ביטולים',
+        cleaningFee: 'דמי ניקיון',
+        cleaningFeeAmount: 'סכום דמי ניקיון',
+        customPolicy: 'מדיניות ביטולים מותאמת',
+        duplicateRow: 'שכפל שורה זו',
+        gotListingsFrom: '?קיבלת רישומים מוואטסאפ, מייל או עמית',
+        importFromSheet: 'ייבוא מגיליון אלקטרוני',
+        minRentalPeriod: 'תקופת שכירות מינימלית',
+        porchSqm: 'מ"ר מרפסת',
+        propertyType: 'סוג נכס',
+        removePhoto: 'הסר תמונה',
+        removeRow: 'הסר שורה זו',
+        removeVideo: 'הסר וידאו',
+        shabbatElevator: 'מעלית שבת',
+        squareMeters: 'מ"ר',
+        sukkahCompatible: 'מתאים לסוכה',
+        tabOrComma: 'שורות מופרדות בטאב או פסיק, כותרות בשורה הראשונה',
+        uploadCsvXlsx: 'העלה .csv או .xlsx',
+        addPhotosLater: '.תוכל להוסיף תמונות לכל נכס מאוחר יותר מלוח הבקרה'
+      },
+      propertyList: {
+        deleteContract: '?למחוק חוזה זה',
+        deleteProperty: '?למחוק נכס זה',
+        dropImagesHere: 'גרור תמונות לכאן',
+        confirmedBookingsTooltip: 'רישומים עם הזמנה מאושרת (נוכחית או עתידית)',
+        needTemplate: '?צריך תבנית',
+        propertyContract: 'חוזה נכס',
+        rentersWillNotSee: '.שוכרים עם הזמנות ממתינות לא יראו אותו יותר',
+        cannotUndo: '.לא ניתן לבטל פעולה זו. כל ההזמנות והתמונות ינותקו'
+      },
+      savedSearches: {
+        alertName: '(אופציונלי) שם התראה',
+        availableFrom: 'זמין מתאריך',
+        copyLink: 'העתק קישור חיפוש',
+        flexibleDates: 'תאריכים גמישים',
+        hideMatch: 'הסתר התאמה זו',
+        maxPrice: 'מחיר מקסימלי',
+        minBedrooms: 'מינימום חדרי שינה',
+        noMax: 'ללא מקסימום',
+        removeAlert: 'הסר התראה',
+        rentalType: 'סוג שכירות'
+      },
+      faqExtra: {
+        chosenByLister: '.נבחר על ידי המשכיר',
+        clearSearch: 'נקה חיפוש',
+        policiesIntro: ':המדיניות נבחרת על ידי המשכיר. אפשרויות נפוצות כוללות'
+      },
+      smartLists: {
+        deleteList: 'מחק רשימה שמורה',
+        listHeader: 'כותרת רשימה',
+        logoAlt: 'לוגו MyIsraelRental',
+        saveList: 'שמור רשימה זו',
+        savedLists: 'רשימות שמורות',
+        title: 'רשימות חכמות',
+        waPreview: 'תצוגה מקדימה של וואטסאפ'
+      },
+      accessibility: {
+        title: 'אפשרויות נגישות',
+        displayMode: 'מצב תצוגה',
+        textSize: 'גודל טקסט',
+        helpText: '.הגדרות אלו מסייעות לשיפור הקריאות עבור משתמשים עם ליקויי ראייה'
+      },
+      managerHeader: {
+        appearsOnPage: 'מופיע בדף המנהל הציבורי שלך',
+        businessLogo: 'לוגו עסק',
+        sharePage: 'שתף את דף המנהל שלך',
+        yourPage: 'דף המנהל שלך'
+      },
+      duplicatesUi: {
+        deleteListing: 'מחק רישום זה',
+        title: 'רישומים כפולים',
+        noneFound: 'לא נמצאו רישומים כפולים',
+        openCover: 'פתח תמונה ראשית בגודל מלא'
       },
       ownerOffer: {
         tag: 'הטבה לבעלים',

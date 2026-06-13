@@ -182,14 +182,14 @@ const Navigation = () => {
             className="flex-1 px-3 py-1.5 rounded-md bg-red-500 text-white text-xs hover:bg-red-600"
             data-testid="confirm-clear-notifications-btn"
           >
-            Clear All
+            {t('nav.clearAll')}
           </button>
           <button
             type="button"
             onClick={() => toast.dismiss(tInst)}
             className="flex-1 px-3 py-1.5 rounded-md bg-gray-200 text-gray-700 text-xs hover:bg-gray-300"
           >
-            Cancel
+            {t('common.cancel')}
           </button>
         </div>
       </div>
@@ -363,7 +363,7 @@ const Navigation = () => {
               onClick={toggleLanguage}
               className={`${user ? 'hidden sm:flex' : 'flex'} p-2 rounded-full hover:bg-white/10 transition-colors items-center gap-1`}
               data-testid="language-toggle"
-              aria-label="Toggle language"
+              aria-label={t('nav.toggleLanguage')}
               title={i18n.language.startsWith('he') ? 'Switch to English' : 'Switch to Hebrew'}
             >
               <Globe size={scrolled ? 20 : 22} color="#D4AF37" />
@@ -454,7 +454,7 @@ const Navigation = () => {
                     {notifications.length === 0 ? (
                       <div className="p-6 sm:p-8 text-center">
                         <Bell size={32} className="mx-auto mb-3 text-white/30" />
-                        <p className="text-white/60 text-sm">No notifications yet</p>
+                        <p className="text-white/60 text-sm">{t('nav.noNotifications')}</p>
                       </div>
                     ) : (
                       <div className="divide-y divide-white/10">
@@ -494,8 +494,8 @@ const Navigation = () => {
                               }}
                               className="absolute top-2 right-2 w-6 h-6 rounded-full bg-white/10 text-white/70 hover:bg-red-500 hover:text-white flex items-center justify-center transition-all opacity-0 group-hover:opacity-100 focus:opacity-100"
                               data-testid={`notification-delete-${notification.id}`}
-                              aria-label="Delete notification"
-                              title="Delete notification"
+                              aria-label={t('nav.deleteNotification')}
+                              title={t('nav.deleteNotification')}
                             >
                               <X size={12} />
                             </button>
@@ -521,7 +521,7 @@ const Navigation = () => {
               data-testid="nav-menu-button"
             >
               {menuOpen ? <X size={scrolled ? 16 : 18} color="#D4AF37" /> : <Menu size={scrolled ? 16 : 18} color="#D4AF37" />}
-              <span className="hidden sm:inline font-semibold tracking-wide" style={{ color: '#D4AF37', fontSize: scrolled ? '12px' : '14px' }}>Menu</span>
+              <span className="hidden sm:inline font-semibold tracking-wide" style={{ color: '#D4AF37', fontSize: scrolled ? '12px' : '14px' }}>{t('nav.menu')}</span>
             </button>
 
             {menuOpen && (

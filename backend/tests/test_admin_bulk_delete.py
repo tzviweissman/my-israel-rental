@@ -209,3 +209,107 @@ def test_bulk_delete_with_cascade(admin_headers):
                 {"$pull": {"featured_property_ids": {"$in": [prop_keep]}}},
             )
         asyncio.run(cleanup())
+
+
+
+def test_bulk_delete_then_restore_brings_back_property_and_messages(admin_headers):
+    """Bulk-delete with snapshot_id, then call /bulk-restore — assert the
+    properties + related messages are back exactly as they were."""
+    async def setup_seed():
+        db = _db()
+        owner_id = f"undo-owner-{uuid.uuid4().hex[:8]}"
+        renter_id = f"undo-renter-{uuid.uuid4().hex[:8]}"
+        prop_id = str(uuid.uuid4())
+        await db.properties.insert_one({
+            "id": prop_id, "owner_id": owner_id, "title": "Undo test",
+            "area": "TLV", "rental_type": "long-term", "status": "active",
+            "monthly_price": 5000, "currency": "ILS", "images": [],
+            "description": "Will be undone",
+        })
+        msg_id = str(uuid.uuid4())
+        await db.messages.insert_one({
+            "id": msg_id, "property_id": prop_id,
+            "sender_id": renter_id, "receiver_id": owner_id,
+            "message": "Pre-delete inquiry", "created_at": "2026-02-01T00:00:00+00:00",
+        })
+        # Mark as featured so we can verify featured-list restore too.
+        await db.site_settings.update_one(
+            {"key": "global"},
+            {"$addToSet": {"featured_property_ids": prop_id}},
+            upsert=True,
+        )
+        return prop_id, msg_id
+
+    prop_id, msg_id = asyncio.run(setup_seed())
+
+    try:
+        # 1. Delete
+        r = requests.request(
+            "DELETE", f"{API}/admin/properties/bulk",
+            json={"property_ids": [prop_id]},
+            headers=admin_headers, timeout=20,
+        )
+        assert r.status_code == 200, r.text
+        body = r.json()
+        assert body["deleted"] == 1
+        snapshot_id = body.get("snapshot_id")
+        assert snapshot_id, "Expected snapshot_id in delete response"
+
+        async def verify_gone():
+            db = _db()
+            assert await db.properties.find_one({"id": prop_id}) is None
+            assert await db.messages.find_one({"id": msg_id}) is None
+            settings = await db.site_settings.find_one({"key": "global"}, {"_id": 0})
+            assert prop_id not in (settings.get("featured_property_ids") or [])
+        asyncio.run(verify_gone())
+
+        # 2. Restore
+        r2 = requests.post(
+            f"{API}/admin/properties/bulk-restore",
+            json={"snapshot_id": snapshot_id},
+            headers=admin_headers, timeout=20,
+        )
+        assert r2.status_code == 200, r2.text
+        assert r2.json()["restored"] == 1
+
+        # 3. Verify everything is back, including featured-list membership.
+        async def verify_back():
+            db = _db()
+            prop = await db.properties.find_one({"id": prop_id}, {"_id": 0})
+            assert prop is not None
+            assert prop["title"] == "Undo test"
+            msg = await db.messages.find_one({"id": msg_id}, {"_id": 0})
+            assert msg is not None
+            assert msg["message"] == "Pre-delete inquiry"
+            settings = await db.site_settings.find_one({"key": "global"}, {"_id": 0})
+            assert prop_id in (settings.get("featured_property_ids") or [])
+            # Tombstone consumed
+            assert await db.property_tombstones.find_one({"id": snapshot_id}) is None
+        asyncio.run(verify_back())
+
+        # 4. Re-using the same snapshot id returns 404 (tombstone consumed)
+        r3 = requests.post(
+            f"{API}/admin/properties/bulk-restore",
+            json={"snapshot_id": snapshot_id},
+            headers=admin_headers, timeout=15,
+        )
+        assert r3.status_code == 404
+    finally:
+        async def cleanup():
+            db = _db()
+            await db.properties.delete_one({"id": prop_id})
+            await db.messages.delete_one({"id": msg_id})
+            await db.site_settings.update_one(
+                {"key": "global"},
+                {"$pull": {"featured_property_ids": prop_id}},
+            )
+        asyncio.run(cleanup())
+
+
+def test_bulk_restore_unknown_snapshot_returns_404(admin_headers):
+    r = requests.post(
+        f"{API}/admin/properties/bulk-restore",
+        json={"snapshot_id": "does-not-exist"},
+        headers=admin_headers, timeout=15,
+    )
+    assert r.status_code == 404

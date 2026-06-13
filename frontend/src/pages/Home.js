@@ -177,24 +177,24 @@ const Home = () => {
               type="button"
               onClick={() => scrollByCards('left')}
               disabled={!canScrollLeft}
-              aria-label="Scroll to previous properties"
+              aria-label={t('home.scrollToPrevAria')}
               className="inline-flex items-center gap-2 px-4 py-2 rounded-full border text-sm font-semibold transition-all disabled:opacity-30 disabled:cursor-not-allowed hover:shadow-md"
               style={{ borderColor: '#1E6A6A', color: '#1E6A6A', backgroundColor: 'white' }}
               data-testid="featured-scroll-left"
             >
               <ArrowLeft size={16} />
-              <span>Previous</span>
+              <span>{t('home.previous')}</span>
             </button>
             <button
               type="button"
               onClick={() => scrollByCards('right')}
               disabled={!canScrollRight}
-              aria-label="Scroll to more properties"
+              aria-label={t('home.scrollToMoreAria')}
               className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold transition-all disabled:opacity-30 disabled:cursor-not-allowed hover:shadow-lg"
               style={{ backgroundColor: '#1E6A6A', color: 'white' }}
               data-testid="featured-scroll-right"
             >
-              <span>Scroll for more</span>
+              <span>{t('home.scrollForMore')}</span>
               <ArrowRight size={16} />
             </button>
           </div>

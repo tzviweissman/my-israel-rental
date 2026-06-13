@@ -1,5 +1,6 @@
 import React, { useContext, useEffect, useState } from 'react';
 import { useSearchParams, useNavigate, Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import axios from 'axios';
 import { CheckCircle2, Loader2, ArrowRight, ArrowLeft, Receipt, MessageCircle } from 'lucide-react';
 import { API, AuthContext } from '../App';
@@ -42,6 +43,7 @@ function buildWhatsAppMessage(order) {
  *      which is the PayPal order id. We look it up and capture if needed.
  */
 const PaymentSuccess = () => {
+  const { t } = useTranslation();
   const [searchParams] = useSearchParams();
   const { token } = useContext(AuthContext);
   const navigate = useNavigate();
@@ -94,10 +96,10 @@ const PaymentSuccess = () => {
     return (
       <div className="min-h-screen flex items-center justify-center px-6" data-testid="payment-success-error">
         <div className="max-w-md w-full bg-white rounded-2xl p-8 border border-red-100 text-center">
-          <h1 className="text-xl font-bold text-red-600 mb-2">We couldn't load your order</h1>
-          <p className="text-sm text-gray-500 mb-6">{error || 'Unknown error'}</p>
+          <h1 className="text-xl font-bold text-red-600 mb-2">{t('paymentSuccess.couldNotLoad')}</h1>
+          <p className="text-sm text-gray-500 mb-6">{error || t('common.loading')}</p>
           <button onClick={() => navigate('/dashboard')} className="primary-btn" data-testid="payment-success-back-dashboard">
-            Back to Dashboard
+            {t('paymentSuccess.viewDashboard')}
           </button>
         </div>
       </div>
@@ -125,15 +127,15 @@ const PaymentSuccess = () => {
           className="inline-flex items-center gap-1.5 text-sm font-medium text-gray-600 hover:text-[#1E6A6A] mb-4 transition-colors"
           data-testid="payment-success-back-link"
         >
-          <ArrowLeft size={16} /> Back to Dashboard
+          <ArrowLeft size={16} /> {t('paymentSuccess.viewDashboard')}
         </button>
         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
           <div className="bg-gradient-to-br from-[#1E6A6A] to-[#155454] px-8 py-10 text-white text-center">
             <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-4">
               <CheckCircle2 size={36} />
             </div>
-            <h1 className="text-3xl font-bold mb-1" style={{ fontFamily: 'Playfair Display' }}>Payment successful</h1>
-            <p className="text-white/80 text-sm">Thank you — a receipt has been sent to your email.</p>
+            <h1 className="text-3xl font-bold mb-1" style={{ fontFamily: 'Playfair Display' }}>{t('paymentSuccess.title')}</h1>
+            <p className="text-white/80 text-sm">{t('paymentSuccess.thankYou')}</p>
           </div>
           <div className="p-8">
             <h2 className="text-base font-semibold text-gray-700 mb-4 flex items-center gap-2">
@@ -145,11 +147,11 @@ const PaymentSuccess = () => {
                 <dd className="text-gray-900 font-medium text-right max-w-[60%]" data-testid="order-description">{order.description}</dd>
               </div>
               <div className="flex justify-between border-b border-gray-100 pb-2.5">
-                <dt className="text-gray-500">Order ID</dt>
+                <dt className="text-gray-500">{t('paymentSuccess.orderId')}</dt>
                 <dd className="text-gray-900 font-mono text-xs" data-testid="order-id">{order.id.slice(0, 8).toUpperCase()}</dd>
               </div>
               <div className="flex justify-between border-b border-gray-100 pb-2.5">
-                <dt className="text-gray-500">PayPal Transaction</dt>
+                <dt className="text-gray-500">{t('paymentSuccess.paypalTxn')}</dt>
                 <dd className="text-gray-900 font-mono text-xs" data-testid="order-paypal-id">{order.paypal_order_id}</dd>
               </div>
               <div className="flex justify-between border-b border-gray-100 pb-2.5">
@@ -168,7 +170,7 @@ const PaymentSuccess = () => {
               </div>
               {order.captured_at && (
                 <div className="flex justify-between pb-2.5">
-                  <dt className="text-gray-500">Paid at</dt>
+                  <dt className="text-gray-500">{t('paymentSuccess.paidAt')}</dt>
                   <dd className="text-gray-900" data-testid="order-captured-at">{new Date(order.captured_at).toLocaleString()}</dd>
                 </div>
               )}
@@ -179,7 +181,7 @@ const PaymentSuccess = () => {
               className="w-full mt-8 primary-btn flex items-center justify-center gap-2"
               data-testid="payment-success-dashboard-btn"
             >
-              Back to Dashboard <ArrowRight size={16} />
+              {t('paymentSuccess.viewDashboard')} <ArrowRight size={16} />
             </button>
 
             {whatsappUrl && (
@@ -206,13 +208,13 @@ const PaymentSuccess = () => {
                   Open WhatsApp with my checklist
                 </a>
                 <p className="text-[11px] text-gray-500 text-center mt-2.5">
-                  We've also emailed you the full checklist as a backup.
+                  We&apos;ve also emailed you the full checklist as a backup.
                 </p>
               </div>
             )}
 
             <p className="text-center text-xs text-gray-400 mt-4">
-              Need help? <Link to="/" className="text-[#1E6A6A] hover:underline">Contact us</Link>
+              Need help? <Link to="/" className="text-[#1E6A6A] hover:underline">{t('paymentSuccess.contactUs')}</Link>
             </p>
           </div>
         </div>
