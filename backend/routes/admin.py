@@ -8,7 +8,7 @@ from typing import List
 
 from fastapi import APIRouter, Depends, HTTPException, Request
 from fastapi.responses import StreamingResponse
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 from models import SiteSettings
 from models_response import (
@@ -477,7 +477,7 @@ class BulkDeletePropertiesRequest(BaseModel):
     properties are detached (set ``original_property_id`` to None) so
     they survive as standalone listings.
     """
-    property_ids: list[str]
+    property_ids: list[str] = Field(..., max_length=500)
 
 
 @api_router.delete("/admin/properties/bulk")

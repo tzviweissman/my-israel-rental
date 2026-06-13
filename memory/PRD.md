@@ -695,3 +695,10 @@ See /app/memory/test_credentials.md
   - Verified live on preview — the "Scroll for more →" pill is unmistakably visible, clicking it advances the strip by ~one screenful, and the "Previous" pill activates on the second click.
   - Files: `frontend/src/pages/Home.js`.
 
+
+- [x] **Super Admin → Bulk Delete Listings** (2026-02-13):
+  - Backend: new `DELETE /api/admin/properties/bulk` endpoint (`/app/backend/routes/admin.py`) accepts `{property_ids: list[str]}` (capped at 500 ids), admin-only, and cascades cleanup across `db.messages`, `db.bookings`, `db.admin_blocks`, `db.chat_nudges`, `db.liked_properties`, pulls deleted ids from `site_settings.featured_property_ids`, and detaches subleases (`original_property_id` → None). Returns `{deleted, skipped, messages_deleted, bookings_deleted}` so the toast can confirm the cascade.
+  - Frontend: `ListingsTab.jsx` `bulkDelete()` handler + a red "Delete selected (N)" pill (`data-testid=bulk-delete-btn`) in the existing bulk-action bar; opens a custom Sonner confirmation toast with `cancel-bulk-delete-btn` / `confirm-bulk-delete-btn` testids. Works on both the desktop table (already had row checkboxes) and the mobile card list (already had `select-listing-mobile-{id}` checkboxes).
+  - Testing: 4/4 backend pytest pass (`tests/test_admin_bulk_delete.py` — auth, empty body, ghost ids, full cascade). Testing-agent verified 13/13 frontend Playwright assertions on desktop 1920x1080 + mobile 414x900 + an additional HTTP smoke suite against the live preview (`tests/test_admin_bulk_delete_http.py`).
+  - Files: `backend/routes/admin.py`, `frontend/src/components/admin/ListingsTab.jsx`, `backend/tests/test_admin_bulk_delete.py`.
+
