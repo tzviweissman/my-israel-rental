@@ -567,6 +567,19 @@ See /app/memory/test_credentials.md
 
 ## Recent Updates (2026-02)
 
+- [x] **Admin: Listings "Added" column + Chats unresponsive-owner nudge** (2026-02-13):
+  - **Listings tab**: backend already returned properties `created_at DESC`, but the table didn't surface this. Added a new **Added** column (desktop) + an "added {relative}" line (mobile) showing `5min ago / 3h ago / 17d ago / 2mo ago` with the absolute timestamp on hover. Newest listings now sit on top.
+  - **Chats tab**: completely rebuilt. Conversations sorted newest-first, each row now shows a `Clock + relative time` stamp. Messages inside the expanded view are sorted **chronologically** (oldest → newest, top → bottom) — they were previously reversed.
+  - **New: 24h owner-unresponsive alert + nudge**:
+    - Backend `/admin/chats` now tags each conversation with `last_sender_role`, `hours_since_last_message`, `owner_unresponsive` (true when the latest message is from the renter AND it's been ≥24h with no owner reply), and `last_nudge_sent_at`.
+    - New endpoint `POST /admin/chats/nudge-owner` sends a Postmark courtesy email to the property owner ("X is waiting to hear from you about Y — reply within 24h dramatically improves conversion") with a one-click link back to the conversation.
+    - **24h throttle** per conversation via a new `chat_nudges` collection — second click within 24h returns 429 with "A nudge was already sent Xh ago".
+    - Email is fire-and-forget (`asyncio.create_task`) so the admin sees a 200 in ~100ms even when Postmark is slow — prevents the Cloudflare 502 timeout we hit while testing the original synchronous version.
+    - Frontend: red banner at the top *"N conversations waiting more than 24h for the owner to reply"*, per-row red border + `OWNER UNRESPONSIVE · 80h` badge, inline "**Nudge owner**" button with loading state and "Last nudge sent Xh ago" once fired.
+    - **N+1 query fix**: the admin chats endpoint was previously doing `find_one` per message for users + properties. Replaced with two bulk `find({id: {$in: [...]}})` queries — meaningful speedup when there are many messages.
+  - **Live verified**: inserted a 25h-old renter→owner message → admin chats endpoint returned `owner_unresponsive: true, hours_since_last_message: 25.0` → POST nudge returned 200 in 111ms → second POST within seconds returned 429. Throttle row in `chat_nudges` confirms.
+  - Files: `backend/routes/admin.py`, `frontend/src/components/admin/ListingsTab.jsx`, `frontend/src/components/admin/ChatsTab.jsx`.
+
 - [x] **Duplicates: bulk auto-resolve + richer modal** (2026-02-13):
   - **Import dedupe already in place** — the bulk CSV importer was already skipping duplicates (same `owner_email + address + rental_type`) and reporting them in the skipped list. Confirmed working in `commit_property_import`.
   - **New backend endpoint** `POST /admin/duplicates/resolve` with three modes:

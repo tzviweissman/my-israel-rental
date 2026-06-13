@@ -12,6 +12,24 @@ import { useApiSWR } from '../../hooks/useApiSWR';
 import MarkAsBookedModal from './MarkAsBookedModal';
 import DuplicatesModal from './DuplicatesModal';
 
+
+// Backend already returns properties sorted by created_at desc, so the
+// table reads newest-first. Helper used to render "5h ago" / "3d ago"
+// strings on both desktop and mobile rows.
+const relativeAdded = (iso) => {
+  if (!iso) return '—';
+  const d = typeof iso === 'string' ? new Date(iso) : iso;
+  if (Number.isNaN(d.getTime())) return '—';
+  const mins = Math.floor((Date.now() - d.getTime()) / 60000);
+  if (mins < 1) return 'just now';
+  if (mins < 60) return `${mins} min ago`;
+  const hrs = Math.floor(mins / 60);
+  if (hrs < 24) return `${hrs}h ago`;
+  const days = Math.floor(hrs / 24);
+  if (days < 30) return `${days}d ago`;
+  const months = Math.floor(days / 30);
+  return `${months}mo ago`;
+};
 /**
  * Tiny cover-image thumbnail for each listing row. Falls back to a
  * placeholder tile when the property has no images so the admin can
@@ -507,6 +525,7 @@ export const ListingsTab = ({ token, onStatsChange }) => {
               <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">{t('admin.colArea')}</th>
               <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">{t('admin.colType')}</th>
               <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">{t('admin.colPrice')}</th>
+              <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Added</th>
               <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">{t('admin.status')}</th>
               <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">{t('admin.actions')}</th>
             </tr>
@@ -564,6 +583,9 @@ export const ListingsTab = ({ token, onStatsChange }) => {
                 <td className="px-4 py-3 text-sm">{p.area}</td>
                 <td className="px-4 py-3"><span className="px-2 py-1 rounded-full text-xs bg-[#E5E5E5]">{p.rental_type}</span></td>
                 <td className="px-4 py-3 font-bold text-sm">{p.currency === 'USD' ? '$' : '₪'}{p.monthly_price || p.nightly_price || 0}</td>
+                <td className="px-4 py-3 text-xs text-gray-500" title={p.created_at ? new Date(p.created_at).toLocaleString() : ''}>
+                  {p.created_at ? relativeAdded(p.created_at) : '—'}
+                </td>
                 <td className="px-4 py-3">
                   <span className={`px-2 py-1 rounded-full text-xs font-medium ${p.status === 'active' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
                     {p.status}
@@ -679,6 +701,12 @@ export const ListingsTab = ({ token, onStatsChange }) => {
                   <p className="text-xs text-gray-700 mt-0.5">
                     <span className="font-semibold">{p.currency === 'USD' ? '$' : '₪'}{p.monthly_price || p.nightly_price || 0}</span>
                     <span className="text-gray-400"> · {p.rental_type}</span>
+                    {p.created_at && (
+                      <span
+                        className="text-gray-400"
+                        title={new Date(p.created_at).toLocaleString()}
+                      > · added {relativeAdded(p.created_at)}</span>
+                    )}
                   </p>
                   <div className="flex items-center gap-1 flex-wrap mt-1.5">
                     {p.is_featured && (

@@ -774,33 +774,228 @@ async def toggle_property_status(property_id: str, payload: dict = Depends(verif
 async def get_all_chats(payload: dict = Depends(verify_token)) -> list[dict]:
     if payload['role'] != 'admin':
         raise HTTPException(status_code=403, detail="Admin access required")
-    
+
     messages = await db.messages.find({}, {"_id": 0}).sort("created_at", -1).to_list(1000)
-    
-    conversations = {}
+
+    # Pre-fetch every user + property referenced by these messages in a
+    # couple of bulk queries — avoids the per-message find_one round-trips
+    # that used to dominate the runtime for large message sets.
+    user_ids = {m["sender_id"] for m in messages} | {m["receiver_id"] for m in messages}
+    prop_ids = {m["property_id"] for m in messages}
+    users_by_id = {
+        u["id"]: u
+        for u in await db.users.find(
+            {"id": {"$in": list(user_ids)}},
+            {"_id": 0, "id": 1, "name": 1, "role": 1, "email": 1},
+        ).to_list(len(user_ids) + 1)
+    }
+    props_by_id = {
+        p["id"]: p
+        for p in await db.properties.find(
+            {"id": {"$in": list(prop_ids)}},
+            {"_id": 0, "id": 1, "title": 1, "owner_id": 1},
+        ).to_list(len(prop_ids) + 1)
+    }
+
+    conversations: dict[str, dict] = {}
     for msg in messages:
         conv_key = f"{msg['property_id']}_{min(msg['sender_id'], msg['receiver_id'])}_{max(msg['sender_id'], msg['receiver_id'])}"
         if conv_key not in conversations:
-            prop = await db.properties.find_one({"id": msg["property_id"]}, {"_id": 0, "title": 1})
-            sender = await db.users.find_one({"id": msg["sender_id"]}, {"_id": 0, "name": 1, "role": 1})
-            receiver = await db.users.find_one({"id": msg["receiver_id"]}, {"_id": 0, "name": 1, "role": 1})
+            prop = props_by_id.get(msg["property_id"])
+            sender = users_by_id.get(msg["sender_id"]) or {}
+            receiver = users_by_id.get(msg["receiver_id"]) or {}
             conversations[conv_key] = {
+                "conv_key": conv_key,
                 "property_id": msg["property_id"],
-                "property_title": prop.get("title", "Unknown") if prop else "Unknown",
+                "property_title": (prop or {}).get("title", "Unknown"),
+                "owner_id": (prop or {}).get("owner_id"),
                 "participants": [
-                    {"id": msg["sender_id"], "name": sender.get("name", "Unknown") if sender else "Unknown", "role": sender.get("role", "") if sender else ""},
-                    {"id": msg["receiver_id"], "name": receiver.get("name", "Unknown") if receiver else "Unknown", "role": receiver.get("role", "") if receiver else ""}
+                    {"id": msg["sender_id"], "name": sender.get("name", "Unknown"), "role": sender.get("role", ""), "email": sender.get("email", "")},
+                    {"id": msg["receiver_id"], "name": receiver.get("name", "Unknown"), "role": receiver.get("role", ""), "email": receiver.get("email", "")},
                 ],
                 "messages": [],
-                "last_message_time": msg["created_at"]
+                # Filled in below — `messages` is iterated newest-first so
+                # the first encountered message is the latest one.
+                "last_message_time": msg["created_at"],
+                "last_message_sender_id": msg["sender_id"],
+                "last_message_preview": (msg.get("message") or "")[:160],
             }
         conversations[conv_key]["messages"].append({
             "sender_id": msg["sender_id"],
             "message": msg["message"],
-            "created_at": msg["created_at"]
+            "image_url": msg.get("image_url"),
+            "video_url": msg.get("video_url"),
+            "created_at": msg["created_at"],
         })
-    
-    return list(conversations.values())
+
+    # Sort each conv's messages chronologically (oldest → newest) so the UI
+    # reads top-to-bottom like a normal chat thread. Then compute the
+    # "owner unresponsive" signal: the *renter* sent the latest message
+    # AND it's been > 24h with no owner reply. Per-conv metadata also
+    # carries last_nudge_sent_at so the frontend can hide the nudge
+    # button after a recent email was sent.
+    now = datetime.now(UTC)
+    out: list[dict] = []
+    for conv in conversations.values():
+        conv["messages"].sort(key=lambda m: m.get("created_at") or "")
+        owner_id = conv.get("owner_id")
+        # Identify the renter participant — whichever participant isn't the owner.
+        renter = next(
+            (p for p in conv["participants"] if p["id"] != owner_id),
+            None,
+        )
+        last_sender_role = "owner" if conv["last_message_sender_id"] == owner_id else "renter"
+        # Hours since the most recent message, only if last sender is the
+        # renter (we don't nudge owners who've already replied).
+        hours_since = None
+        unresponsive = False
+        try:
+            last_dt = datetime.fromisoformat(conv["last_message_time"].replace("Z", "+00:00"))
+            if last_dt.tzinfo is None:
+                last_dt = last_dt.replace(tzinfo=UTC)
+            hours_since = (now - last_dt).total_seconds() / 3600.0
+        except Exception:
+            hours_since = None
+        if last_sender_role == "renter" and hours_since is not None and hours_since >= 24:
+            unresponsive = True
+
+        # Read throttle: when was the last nudge email sent for this conv?
+        nudge_doc = await db.chat_nudges.find_one({"conv_key": conv["conv_key"]}, {"_id": 0, "sent_at": 1})
+        last_nudge_at = (nudge_doc or {}).get("sent_at")
+
+        conv["last_sender_role"] = last_sender_role
+        conv["hours_since_last_message"] = round(hours_since, 1) if hours_since is not None else None
+        conv["owner_unresponsive"] = unresponsive
+        conv["renter_id"] = (renter or {}).get("id")
+        conv["last_nudge_sent_at"] = last_nudge_at
+        out.append(conv)
+
+    # Sort the whole list newest-first so the admin sees the active
+    # conversations at the top of the page.
+    out.sort(key=lambda c: c.get("last_message_time") or "", reverse=True)
+    return out
+
+
+class NudgeOwnerRequest(BaseModel):
+    """Sends a courtesy email reminding the property owner to reply to a
+    renter inquiry. Throttled to one nudge per ``conv_key`` per 24h to
+    avoid spamming owners after the admin auto-batches a scan."""
+    conv_key: str
+
+
+@api_router.post("/admin/chats/nudge-owner")
+async def nudge_owner(req: NudgeOwnerRequest, payload: dict = Depends(verify_token)) -> dict:
+    if payload['role'] != 'admin':
+        raise HTTPException(status_code=403, detail="Admin access required")
+
+    # conv_key shape from get_all_chats: "<property_id>_<user_a>_<user_b>"
+    try:
+        property_id, user_a, user_b = req.conv_key.split("_", 2)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail="Malformed conv_key") from e
+
+    prop = await db.properties.find_one({"id": property_id}, {"_id": 0, "title": 1, "owner_id": 1})
+    if not prop:
+        raise HTTPException(status_code=404, detail="Property not found")
+    owner_id = prop.get("owner_id")
+    renter_id = user_b if user_a == owner_id else (user_a if user_b == owner_id else None)
+    if not owner_id or not renter_id:
+        raise HTTPException(status_code=400, detail="Couldn't identify owner / renter for this conversation")
+
+    owner = await db.users.find_one({"id": owner_id}, {"_id": 0, "name": 1, "email": 1})
+    renter = await db.users.find_one({"id": renter_id}, {"_id": 0, "name": 1})
+    if not owner or not owner.get("email"):
+        raise HTTPException(status_code=400, detail="Owner has no email on file")
+
+    # Re-verify the conversation is still actually waiting on the owner —
+    # don't send a nudge if they've replied in the interim (UI may be stale).
+    latest = await db.messages.find_one(
+        {
+            "property_id": property_id,
+            "$or": [
+                {"sender_id": owner_id, "receiver_id": renter_id},
+                {"sender_id": renter_id, "receiver_id": owner_id},
+            ],
+        },
+        {"_id": 0, "sender_id": 1, "created_at": 1},
+        sort=[("created_at", -1)],
+    )
+    if not latest or latest["sender_id"] == owner_id:
+        raise HTTPException(
+            status_code=409,
+            detail="Owner has already replied — no nudge needed.",
+        )
+
+    # 24h throttle.
+    now = datetime.now(UTC)
+    existing = await db.chat_nudges.find_one({"conv_key": req.conv_key}, {"_id": 0, "sent_at": 1})
+    if existing and existing.get("sent_at"):
+        try:
+            sent_dt = datetime.fromisoformat(existing["sent_at"].replace("Z", "+00:00"))
+            if sent_dt.tzinfo is None:
+                sent_dt = sent_dt.replace(tzinfo=UTC)
+            hours_since = (now - sent_dt).total_seconds() / 3600.0
+            if hours_since < 24:
+                raise HTTPException(
+                    status_code=429,
+                    detail=f"A nudge was already sent {round(hours_since, 1)}h ago — try again after 24h.",
+                )
+        except HTTPException:
+            raise
+        except Exception:
+            pass
+
+    # Compose the courtesy email. We deliberately keep it gentle — these
+    # owners are usually individual landlords, not staff.
+    # Fire-and-forget the actual Postmark call so the admin gets a snappy
+    # response — Postmark API latency through some regions can exceed the
+    # Cloudflare 30s edge timeout and we don't want the request to fail
+    # *after* doing all the DB work.
+    from utils.email import send_email, FRONTEND_URL
+    inbox_link = f"{(FRONTEND_URL or 'https://myisraelrental.com').rstrip('/')}/chat/{property_id}"
+    renter_name = (renter or {}).get("name") or "a prospective renter"
+    prop_title = prop.get("title") or "your listing"
+
+    # Record the throttle row BEFORE dispatching so a second click within
+    # seconds gets 429'd (the response hasn't returned yet).
+    await db.chat_nudges.update_one(
+        {"conv_key": req.conv_key},
+        {"$set": {
+            "conv_key": req.conv_key,
+            "property_id": property_id,
+            "owner_id": owner_id,
+            "renter_id": renter_id,
+            "sent_at": now.isoformat(),
+            "sent_by_admin": payload.get("user_id"),
+            "email_status": "queued",
+        }},
+        upsert=True,
+    )
+
+    asyncio.create_task(send_email(
+        to_email=owner["email"],
+        subject=f"Reminder: {renter_name} is waiting to hear from you about {prop_title}",
+        html_body=(
+            f"<p>Hi {owner.get('name') or ''},</p>"
+            f"<p><b>{renter_name}</b> messaged you about <b>{prop_title}</b> on MyIsraelRental "
+            f"more than 24 hours ago and hasn't heard back yet.</p>"
+            f"<p>Replies within a day dramatically increase the chance the listing gets rented — "
+            f"prospective tenants usually message several owners in parallel and lock in with whoever replies first.</p>"
+            f"<p style='margin:24px 0;'>"
+            f"<a href=\"{inbox_link}\" style='background:#1E6A6A;color:#fff;padding:10px 18px;border-radius:8px;text-decoration:none;font-weight:600;'>Open the conversation</a>"
+            f"</p>"
+            f"<p style='color:#888;font-size:13px;'>If you no longer have this listing available, "
+            f"please mark it as unavailable in your dashboard so we stop showing it.</p>"
+        ),
+        tag="admin-owner-nudge",
+        skip_suppression_check=False,
+    ))
+
+    return {
+        "owner_email": owner["email"],
+        "owner_name": owner.get("name"),
+        "sent_at": now.isoformat(),
+    }
 
 
 @api_router.get("/admin/document-services", response_model=list[ServiceRequestOut])
