@@ -468,6 +468,73 @@ async def resolve_duplicates(
     }
 
 
+class BulkDeletePropertiesRequest(BaseModel):
+    """Super-admin: hard-delete many properties at once.
+
+    Cascades cleanup across collections that reference the property by
+    ``property_id`` so we don't leave orphan chats / blocks / bookings
+    pointing at deleted listings. Subleases that referenced the deleted
+    properties are detached (set ``original_property_id`` to None) so
+    they survive as standalone listings.
+    """
+    property_ids: list[str]
+
+
+@api_router.delete("/admin/properties/bulk")
+async def admin_bulk_delete_properties(
+    req: BulkDeletePropertiesRequest, payload: dict = Depends(verify_token),
+) -> dict:
+    if payload['role'] != 'admin':
+        raise HTTPException(status_code=403, detail="Admin access required")
+    if not req.property_ids:
+        raise HTTPException(status_code=400, detail="property_ids must not be empty")
+
+    # Only operate on ids that actually exist so the count we report back
+    # to the UI is honest (not "deleted 50" when 30 of them never existed).
+    existing = await db.properties.find(
+        {"id": {"$in": req.property_ids}}, {"_id": 0, "id": 1}
+    ).to_list(len(req.property_ids))
+    valid_ids = [p["id"] for p in existing]
+    if not valid_ids:
+        return {"deleted": 0, "skipped": len(req.property_ids), "messages_deleted": 0, "bookings_deleted": 0}
+
+    # Detach any subleases that referenced these properties (keep them as
+    # standalone listings — same behavior as the single-property delete).
+    await db.subleases.update_many(
+        {"original_property_id": {"$in": valid_ids}},
+        {"$set": {"original_property_id": None}},
+    )
+
+    # Cascade cleanup of everything tied to these property ids.
+    msgs_res = await db.messages.delete_many({"property_id": {"$in": valid_ids}})
+    bookings_res = await db.bookings.delete_many({"property_id": {"$in": valid_ids}})
+    await db.admin_blocks.delete_many({"property_id": {"$in": valid_ids}})
+    await db.chat_nudges.delete_many({"property_id": {"$in": valid_ids}})
+    await db.liked_properties.delete_many({"property_id": {"$in": valid_ids}})
+
+    # Pull the deleted ids out of the global featured list so the homepage
+    # stops trying to render ghost cards.
+    await db.site_settings.update_one(
+        {"key": "global"},
+        {"$pull": {"featured_property_ids": {"$in": valid_ids}}},
+    )
+
+    props_res = await db.properties.delete_many({"id": {"$in": valid_ids}})
+
+    await publish("invalidate", {
+        "prefixes": [
+            "/api/admin/properties", "/api/admin/dashboard", "/api/admin/chats",
+            "/api/properties",
+        ],
+    })
+    return {
+        "deleted": props_res.deleted_count,
+        "skipped": len(req.property_ids) - len(valid_ids),
+        "messages_deleted": msgs_res.deleted_count,
+        "bookings_deleted": bookings_res.deleted_count,
+    }
+
+
 @api_router.get("/admin/properties", response_model=list[PropertyOut])
 async def get_all_properties_admin(payload: dict = Depends(verify_token)) -> list[dict]:
     if payload['role'] != 'admin':

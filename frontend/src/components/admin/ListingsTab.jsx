@@ -173,6 +173,68 @@ export const ListingsTab = ({ token, onStatsChange }) => {
   };
 
   /**
+   * Bulk hard-delete the currently-selected properties. Backend cascades
+   * cleanup across chats, bookings, admin blocks, featured list, etc.
+   * Wrapped in a confirmation toast — destructive + cannot be undone.
+   */
+  const bulkDelete = () => {
+    const ids = Array.from(selectedPropIds);
+    if (ids.length === 0) {
+      toast.error('No properties selected');
+      return;
+    }
+    toast.custom((tid) => (
+      <div className="bg-white rounded-xl shadow-xl border border-gray-200 p-4 w-96">
+        <p className="text-sm font-semibold text-gray-800 mb-1">
+          {t('admin.bulkDeleteTitle', `Delete ${ids.length} listing${ids.length === 1 ? '' : 's'}?`)}
+        </p>
+        <p className="text-xs text-gray-500 mb-3">
+          {t(
+            'admin.bulkDeleteDesc',
+            'This permanently removes the properties and their related chats, bookings and admin blocks. This cannot be undone.'
+          )}
+        </p>
+        <div className="flex gap-2 justify-end">
+          <button
+            onClick={() => toast.dismiss(tid)}
+            className="px-3 py-1.5 rounded-lg text-xs font-medium text-gray-600 hover:bg-gray-100"
+            data-testid="cancel-bulk-delete-btn"
+          >
+            {t('admin.cancel')}
+          </button>
+          <button
+            onClick={async () => {
+              toast.dismiss(tid);
+              try {
+                const res = await axios.delete(
+                  `${API}/admin/properties/bulk`,
+                  { headers, data: { property_ids: ids } },
+                );
+                const { deleted = 0, messages_deleted = 0, bookings_deleted = 0 } = res.data || {};
+                toast.success(
+                  t('admin.bulkDeleteSuccess', `${deleted} listing${deleted === 1 ? '' : 's'} deleted`)
+                  + (messages_deleted || bookings_deleted
+                    ? ` (cleaned ${messages_deleted} message${messages_deleted === 1 ? '' : 's'}, ${bookings_deleted} booking${bookings_deleted === 1 ? '' : 's'})`
+                    : '')
+                );
+                setSelectedPropIds(new Set());
+                fetchProperties();
+                notifyStatsChange();
+              } catch (e) {
+                toast.error(e.response?.data?.detail || 'Failed to delete listings');
+              }
+            }}
+            className="px-3 py-1.5 rounded-lg text-xs font-semibold text-white bg-red-500 hover:bg-red-600"
+            data-testid="confirm-bulk-delete-btn"
+          >
+            {t('admin.deleteAction', 'Delete')} ({ids.length})
+          </button>
+        </div>
+      </div>
+    ), { duration: 12000 });
+  };
+
+  /**
    * Bulk add or remove the currently-selected properties from the
    * homepage Featured grid in a single round-trip.
    */
@@ -488,6 +550,14 @@ export const ListingsTab = ({ token, onStatsChange }) => {
               data-testid="bulk-mark-booked-btn"
             >
               <CalendarX size={14} /> {t('admin.markSelectedBooked')}
+            </button>
+            <button
+              onClick={bulkDelete}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-red-500 text-white text-xs font-semibold hover:bg-red-600"
+              data-testid="bulk-delete-btn"
+              title={t('admin.deleteSelectedTooltip', 'Permanently delete selected listings and their related data')}
+            >
+              <Trash2 size={14} /> {t('admin.deleteSelected', 'Delete selected')} ({selectedPropIds.size})
             </button>
             <button
               onClick={() => setSelectedPropIds(new Set())}
