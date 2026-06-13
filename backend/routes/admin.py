@@ -308,10 +308,15 @@ async def list_duplicate_listings(payload: dict = Depends(verify_token)) -> dict
     if payload['role'] != 'admin':
         raise HTTPException(status_code=403, detail="Admin access required")
     from utils.dedupe import normalize_address
-    # Pull only the fields we need to group by — keeps the payload small.
+    # Pull the fields needed to group AND to help the admin decide which
+    # copy to keep (image count, cover URL, age).
     rows = await db.properties.find(
         {"status": {"$in": ["active", "pending", "draft"]}},
-        {"_id": 0, "id": 1, "owner_id": 1, "title": 1, "address": 1, "rental_type": 1, "created_at": 1},
+        {
+            "_id": 0, "id": 1, "owner_id": 1, "title": 1, "address": 1,
+            "rental_type": 1, "created_at": 1, "images": 1,
+            "description": 1, "monthly_price": 1, "nightly_price": 1,
+        },
     ).to_list(5000)
 
     # Group by (owner_id, normalized_address, rental_type)
@@ -322,7 +327,19 @@ async def list_duplicate_listings(payload: dict = Depends(verify_token)) -> dict
         if not addr or not rt or not r.get("owner_id"):
             continue
         key = (r["owner_id"], addr, rt)
-        groups.setdefault(key, []).append(r)
+        # Trim each property to the shape the admin UI needs — keeps the
+        # response payload small even when there are dozens of groups.
+        images = r.get("images") or []
+        groups.setdefault(key, []).append({
+            "id": r["id"],
+            "title": r.get("title"),
+            "created_at": r.get("created_at"),
+            "image_count": len(images),
+            "cover_url": images[0] if images else None,
+            "description_length": len(r.get("description") or ""),
+            "monthly_price": r.get("monthly_price"),
+            "nightly_price": r.get("nightly_price"),
+        })
 
     # Keep only groups with 2+ properties
     out = []
@@ -341,6 +358,114 @@ async def list_duplicate_listings(payload: dict = Depends(verify_token)) -> dict
     # Newest collisions first — they're the freshest cleanup targets.
     out.sort(key=lambda g: max(p.get("created_at", "") for p in g["properties"]), reverse=True)
     return {"groups": out, "total_groups": len(out)}
+
+
+class DuplicateResolveRequest(BaseModel):
+    """Bulk-resolve duplicate groups.
+
+    `mode`:
+      - "keep_newest"  → delete all but the most recently created listing in each group
+      - "keep_oldest"  → delete all but the earliest-created (preserves booking history)
+      - "keep_richest" → delete all but the one with the most images + longest description
+
+    `keys` (optional) restricts the action to specific groups. Each key is
+    "<owner_id>|<normalized_address>|<rental_type>". When omitted, all
+    groups returned by `/admin/duplicates` are resolved.
+    """
+    mode: str = "keep_richest"
+    keys: list[str] | None = None
+
+
+@api_router.post("/admin/duplicates/resolve")
+async def resolve_duplicates(
+    req: DuplicateResolveRequest, payload: dict = Depends(verify_token)
+) -> dict:
+    """Bulk-delete the redundant listings in each duplicate group based on a
+    chosen "keep" strategy. Returns the count of properties deleted and a
+    brief report keyed by group.
+    """
+    if payload['role'] != 'admin':
+        raise HTTPException(status_code=403, detail="Admin access required")
+    if req.mode not in {"keep_newest", "keep_oldest", "keep_richest"}:
+        raise HTTPException(
+            status_code=400,
+            detail="mode must be one of: keep_newest, keep_oldest, keep_richest",
+        )
+
+    from utils.dedupe import normalize_address
+    rows = await db.properties.find(
+        {"status": {"$in": ["active", "pending", "draft"]}},
+        {
+            "_id": 0, "id": 1, "owner_id": 1, "address": 1, "rental_type": 1,
+            "created_at": 1, "images": 1, "description": 1,
+        },
+    ).to_list(5000)
+
+    # Same grouping logic as /admin/duplicates.
+    groups: dict[tuple[str, str, str], list[dict]] = {}
+    for r in rows:
+        addr = normalize_address(r.get("address"))
+        rt = r.get("rental_type")
+        if not addr or not rt or not r.get("owner_id"):
+            continue
+        groups.setdefault((r["owner_id"], addr, rt), []).append(r)
+
+    target_keys = (
+        set(req.keys) if req.keys is not None else None
+    )
+
+    def score_richness(p: dict) -> tuple[int, int, str]:
+        # Bigger is better: image count first, then description length,
+        # then created_at as a stable tie-breaker (newer wins ties).
+        return (
+            len(p.get("images") or []),
+            len(p.get("description") or ""),
+            p.get("created_at") or "",
+        )
+
+    deleted_total = 0
+    report: list[dict] = []
+    for (owner_id, addr, rt), props in groups.items():
+        if len(props) < 2:
+            continue
+        key_str = f"{owner_id}|{addr}|{rt}"
+        if target_keys is not None and key_str not in target_keys:
+            continue
+
+        if req.mode == "keep_newest":
+            sorted_props = sorted(props, key=lambda p: p.get("created_at") or "")
+            keeper = sorted_props[-1]
+            losers = sorted_props[:-1]
+        elif req.mode == "keep_oldest":
+            sorted_props = sorted(props, key=lambda p: p.get("created_at") or "")
+            keeper = sorted_props[0]
+            losers = sorted_props[1:]
+        else:  # keep_richest
+            sorted_props = sorted(props, key=score_richness)
+            keeper = sorted_props[-1]
+            losers = sorted_props[:-1]
+
+        loser_ids = [p["id"] for p in losers]
+        if loser_ids:
+            res = await db.properties.delete_many({"id": {"$in": loser_ids}})
+            deleted_total += res.deleted_count
+            report.append({
+                "key": key_str,
+                "kept_id": keeper["id"],
+                "deleted_ids": loser_ids,
+                "deleted_count": res.deleted_count,
+            })
+
+    if deleted_total:
+        await publish("invalidate", {
+            "prefixes": ["/api/admin/properties", "/api/admin/dashboard", "/api/properties"],
+        })
+    return {
+        "mode": req.mode,
+        "deleted": deleted_total,
+        "groups_resolved": len(report),
+        "report": report,
+    }
 
 
 @api_router.get("/admin/properties", response_model=list[PropertyOut])

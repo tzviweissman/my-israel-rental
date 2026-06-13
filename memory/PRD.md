@@ -567,6 +567,23 @@ See /app/memory/test_credentials.md
 
 ## Recent Updates (2026-02)
 
+- [x] **Duplicates: bulk auto-resolve + richer modal** (2026-02-13):
+  - **Import dedupe already in place** — the bulk CSV importer was already skipping duplicates (same `owner_email + address + rental_type`) and reporting them in the skipped list. Confirmed working in `commit_property_import`.
+  - **New backend endpoint** `POST /admin/duplicates/resolve` with three modes:
+    - `keep_richest` (default) — keeps the listing with the most images, then longest description (safest pick)
+    - `keep_newest` — keeps the most-recently-created
+    - `keep_oldest` — keeps the original (preserves booking history)
+    Accepts an optional `keys[]` list to scope to specific groups; otherwise resolves all. Publishes invalidation events for the admin listings cache.
+  - **Extended `GET /admin/duplicates`** to include `image_count`, `cover_url`, `description_length`, `monthly_price`, `nightly_price` per listing so the modal can show thumbnails and let the admin compare richness at a glance.
+  - **Frontend `DuplicatesModal.jsx`** completely redesigned:
+    - Sticky amber bulk action bar at the top: "N redundant listings across M groups. Auto-resolve all: [Keep richest in each] [newest] [oldest]" — one click resolves every group.
+    - Per-group inline actions: `[keep richest] [newest] [oldest]` next to each group header.
+    - Each listing row now has a cover thumbnail (or `ImageOff` placeholder), image count, ID, created date, and **RICHEST / NEWEST / OLDEST** highlight badges showing in real time which copy each mode would keep.
+    - The richest row gets a soft emerald background so the safest target stands out.
+    - Confirmation prompts before any destructive action.
+  - **Verified live**: inserted 3 demo duplicates (owner@test.com + same address + long-term, with 0/3/1 images). Modal correctly tagged RICHEST/NEWEST/OLDEST; `POST resolve mode=keep_richest` deleted 2 redundant listings and kept the 3-photo copy. Repeat call returned `total_groups: 0`.
+  - Files: `backend/routes/admin.py`, `frontend/src/components/admin/DuplicatesModal.jsx`.
+
 - [x] **🔒 CORS hardened: explicit production origins + spec-compliant credentials** (2026-02-12):
   - **Root cause of the previous setup**: `allow_credentials=True` paired with `allow_origins=["*"]` is **forbidden by the CORS spec** — browsers refuse to send credentials when the server replies with the wildcard. The preview Kubernetes ingress was masking this by injecting its own wildcard headers, so it "worked" in dev but production was broken.
   - **Backend** (`server.py`): replaced wildcard with an explicit allowlist driven by `CORS_ORIGINS` env (with a safe production-baked default). Added `allow_origin_regex=r"https://.*\.preview\.emergentagent\.com"` so any preview URL keeps working without needing env updates. Also strips trailing slashes and tolerates whitespace in the comma-separated env value. Exposes `Content-Disposition` so file downloads (CSV exports, contracts) work cross-origin.
