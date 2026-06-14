@@ -52,8 +52,11 @@ function App() {
   }, [token]);
 
   useEffect(() => {
-    // Keep the page direction LTR even when Hebrew strings are rendered.
-    // The user prefers translated text without the layout flipping sides.
+    // Update <html lang> on language change so screen readers / search
+    // engines / spell-checkers know what language the page is in.
+    // We deliberately keep `dir` pinned to LTR — the user's preference
+    // is translated Hebrew text without flipping the entire layout.
+    document.documentElement.lang = i18n.language.startsWith('he') ? 'he' : 'en';
     document.documentElement.dir = 'ltr';
   }, [i18n.language]);
 

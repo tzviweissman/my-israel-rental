@@ -709,3 +709,11 @@ See /app/memory/test_credentials.md
   - Testing: 6/6 backend pytest pass (`tests/test_admin_bulk_delete.py` now includes restore happy-path + idempotency + 404 cases). Testing-agent verified 100% backend (9 new HTTP-level tests) + 100% frontend (snackbar mount, Undo click, restore round-trip, 4 Hebrew strings rendering).
   - Files: `backend/routes/admin.py`, `backend/tests/test_admin_bulk_delete.py`, `frontend/src/components/admin/ListingsTab.jsx`, `frontend/src/components/admin/UndoBulkDeleteSnackbar.jsx` (new), `frontend/src/i18n.js`, plus six user-facing components.
 
+- [x] **Language-preference indicator pill in navigation** (2026-02-14):
+  - Added a compact pill at the top of the navigation dropdown menu (visible only for logged-in users) showing the current language label, a "Switch to {other}" hint, a small green sync indicator dot, and "Synced across your devices" caption.
+  - Clicking the pill toggles the UI language AND persists the choice to the user's account via the pre-existing `PUT /api/auth/language` endpoint, so the preference follows them across devices/browsers.
+  - Also updates `<html lang>` on every language change for screen-reader and search-engine correctness. `dir` stays pinned to LTR per the user's prior preference (translated Hebrew text without flipping the layout).
+  - Testing: 100% backend (5/5 pytest cases for the PUT endpoint) + 100% frontend (6/6 Playwright scenarios — hidden when logged out, visible above Properties when logged in, click toggles UI, PUT fires, persists across reload, cross-device sync simulated via second login session).
+  - Files: `frontend/src/components/Navigation.js`, `frontend/src/i18n.js` (new nav keys), `frontend/src/App.js` (lang attribute sync).
+
+
