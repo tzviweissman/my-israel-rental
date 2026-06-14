@@ -360,7 +360,7 @@ const SubleasesTab = ({ API, token }) => {
 
           {mySubleases.length > 0 ? (
             <div className="space-y-3">
-              <h4 className="text-sm font-semibold text-gray-700">Your Sublease Listings</h4>
+              <h4 className="text-sm font-semibold text-gray-700">{t('sublease.listingsTitle')}</h4>
               {mySubleases.map((sub) => (
                 <SubleaseListItem
                   key={sub.id}

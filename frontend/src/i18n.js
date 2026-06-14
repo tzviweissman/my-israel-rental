@@ -838,7 +838,17 @@ const resources = {
         longTermLabel: 'Long-term',
         shortTermLabel: 'Short-term',
         vacationLabel: 'Vacation',
-        storageLabel: 'Storage'
+        storageLabel: 'Storage',
+        newAlertHeading: 'New alert',
+        newAlertSub: "We'll watch for new matches and email you when something fits.",
+        area: 'Area',
+        anywhere: 'Anywhere',
+        leaveBlankTip: 'Tip: leave any field blank to match anything.',
+        cancelBtn: 'Cancel',
+        savingDots: 'Saving…',
+        createAlert: 'Create alert',
+        toastCreated: "Alert created — we'll email you when matches show up.",
+        toastFailed: 'Failed to create alert'
       },
       faqExtra: {
         chosenByLister: 'Chosen by the lister.',
@@ -1722,7 +1732,17 @@ const resources = {
         longTermLabel: 'טווח ארוך',
         shortTermLabel: 'טווח קצר',
         vacationLabel: 'נופש',
-        storageLabel: 'אחסון'
+        storageLabel: 'אחסון',
+        newAlertHeading: 'התראה חדשה',
+        newAlertSub: '.נשמור על העין כדי לאתר התאמות חדשות ונשלח אליך מייל כשמשהו מתאים',
+        area: 'אזור',
+        anywhere: 'בכל מקום',
+        leaveBlankTip: '.טיפ: השאר כל שדה ריק כדי להתאים לכל אפשרות',
+        cancelBtn: 'ביטול',
+        savingDots: '...שומר',
+        createAlert: 'צור התראה',
+        toastCreated: '.התראה נוצרה — נשלח לך מייל כשיהיו התאמות',
+        toastFailed: 'יצירת ההתראה נכשלה'
       },
       faqExtra: {
         chosenByLister: '.נבחר על ידי המשכיר',

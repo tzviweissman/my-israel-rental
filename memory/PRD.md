@@ -717,3 +717,11 @@ See /app/memory/test_credentials.md
   - Files: `frontend/src/components/Navigation.js`, `frontend/src/i18n.js` (new nav keys), `frontend/src/App.js` (lang attribute sync).
 
 
+- [x] **Hebrew localization round 2 — dashboard tabs** (2026-02-14):
+  - Wired `t()` calls into the three remaining high-traffic dashboard screens that were still rendering English in Hebrew mode: **SubleasesTab.jsx**, **sublease/SubleaseForm.jsx**, **SavedSearchesTab.jsx** (incl. its CreateAlertForm chrome + RENTAL_TYPES dropdown), and **BulkUploadModal.jsx**.
+  - Extended `frontend/src/i18n.js` from 734 → **819 matched keys** per language (en + he in parity). New keys mostly live under `sublease.*`, `savedSearches.*`, and `bulkUpload.*` sections.
+  - Verified end-to-end: the saved-search create form now renders form chrome ("התראה חדשה", "סוג שכירות", "מינימום חדרי שינה", "מחיר מקסימלי", "זמן מתאריך", "אזור", "בכל מקום", "ביטול", "צור התראה") and the rental-type dropdown options ("כל סוג", "טווח ארוך", "טווח קצר", "נופש", "אחסון") all in Hebrew.
+  - Testing-agent run #25 surfaced 3 issues — all fixed in the same session: (1) RENTAL_TYPES dropdown showed `savedSearches.undefined` because the constant still had `label:` instead of `tk:` keys — fixed; (2) `Your Sublease Listings` h4 was missed in the first edit — fixed; (3) CreateAlertForm chrome strings were also out-of-scope-of-original-keys — added keys + wired them.
+  - Files: `frontend/src/components/dashboard/SubleasesTab.jsx`, `frontend/src/components/dashboard/sublease/SubleaseForm.jsx`, `frontend/src/components/dashboard/SavedSearchesTab.jsx`, `frontend/src/components/dashboard/BulkUploadModal.jsx`, `frontend/src/i18n.js`.
+
+

@@ -47,11 +47,11 @@ const AREA_GROUPS = [
 ];
 
 const RENTAL_TYPES = [
-  { value: 'all', label: 'Any type' },
-  { value: 'long-term', label: 'Long-term' },
-  { value: 'short-term', label: 'Short-term' },
-  { value: 'vacation', label: 'Vacation' },
-  { value: 'storage', label: 'Storage' },
+  { value: 'all', tk: 'anyType' },
+  { value: 'long-term', tk: 'longTermLabel' },
+  { value: 'short-term', tk: 'shortTermLabel' },
+  { value: 'vacation', tk: 'vacationLabel' },
+  { value: 'storage', tk: 'storageLabel' },
 ];
 
 const EMPTY_FILTERS = {
@@ -114,11 +114,11 @@ const CreateAlertForm = ({ API, token, onCreated, onCancel }) => {
         },
         { headers: { Authorization: `Bearer ${token}` } },
       );
-      toast.success('Alert created — we\'ll email you when matches show up.');
+      toast.success(t('savedSearches.toastCreated'));
       setForm(EMPTY_FILTERS);
       onCreated?.();
     } catch (err) {
-      toast.error(err.response?.data?.detail || 'Failed to create alert');
+      toast.error(err.response?.data?.detail || t('savedSearches.toastFailed'));
     } finally {
       setSubmitting(false);
     }
@@ -135,10 +135,10 @@ const CreateAlertForm = ({ API, token, onCreated, onCancel }) => {
       <div className="flex items-start justify-between gap-3 mb-1">
         <div>
           <h3 className="text-base font-bold text-gray-900 flex items-center gap-2">
-            <Sparkles size={16} className="text-[#D4AF37]" /> New alert
+            <Sparkles size={16} className="text-[#D4AF37]" /> {t('savedSearches.newAlertHeading')}
           </h3>
           <p className="text-xs text-gray-500 mt-0.5">
-            We&apos;ll watch for new matches and email you when something fits.
+            {t('savedSearches.newAlertSub')}
           </p>
         </div>
         <button
@@ -180,14 +180,14 @@ const CreateAlertForm = ({ API, token, onCreated, onCancel }) => {
         </div>
 
         <div>
-          <label className="text-[11px] font-semibold text-gray-500 uppercase tracking-wider mb-1.5 block">Area</label>
+          <label className="text-[11px] font-semibold text-gray-500 uppercase tracking-wider mb-1.5 block">{t('savedSearches.area')}</label>
           <select
             value={form.area}
             onChange={(e) => update('area', e.target.value)}
             className={inputCls}
             data-testid="alert-area"
           >
-            <option value="">Anywhere</option>
+            <option value="">{t('savedSearches.anywhere')}</option>
             {AREA_GROUPS.map((g) => (
               <optgroup key={g.label} label={g.label}>
                 {g.cities.map((c) => (
@@ -283,7 +283,7 @@ const CreateAlertForm = ({ API, token, onCreated, onCancel }) => {
 
       <div className="flex items-center justify-between gap-3 pt-1">
         <p className="text-[11px] text-gray-400">
-          Tip: leave any field blank to match anything.
+          {t('savedSearches.leaveBlankTip')}
         </p>
         <div className="flex gap-2">
           <button
@@ -292,7 +292,7 @@ const CreateAlertForm = ({ API, token, onCreated, onCancel }) => {
             className="px-4 py-2 rounded-xl text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors"
             data-testid="alert-cancel-btn"
           >
-            Cancel
+            {t('savedSearches.cancelBtn')}
           </button>
           <button
             type="submit"
@@ -302,7 +302,7 @@ const CreateAlertForm = ({ API, token, onCreated, onCancel }) => {
             data-testid="alert-submit-btn"
           >
             <Bell size={14} />
-            {submitting ? 'Saving…' : 'Create alert'}
+            {submitting ? t('savedSearches.savingDots') : t('savedSearches.createAlert')}
           </button>
         </div>
       </div>
