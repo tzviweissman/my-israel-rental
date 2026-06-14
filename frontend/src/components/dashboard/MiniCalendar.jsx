@@ -64,11 +64,13 @@ const MiniCalendar = ({ year, month, bookings = [] }) => {
     <div className="bg-white rounded-lg border border-gray-200 p-2" data-testid={`mini-calendar-${year}-${month}`}>
       <div className="text-[11px] font-semibold text-gray-700 mb-1 text-center">{monthLabel}</div>
       <div className="grid grid-cols-7 gap-0.5 text-[9px] text-gray-400 text-center mb-0.5">
-        {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map((d, i) => <div key={i}>{d}</div>)}
+        {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map((d, i) => <div key={`dow-${i}`}>{d}</div>)}
       </div>
       <div className="grid grid-cols-7 gap-0.5">
         {cells.map((day, i) => {
-          if (day == null) return <div key={i} />;
+          // Cells before the 1st of the month are empty padding — they can't
+          // use an ISO date so we fall back to a stable padding-index key.
+          if (day == null) return <div key={`pad-${i}`} />;
           const { outgoing, incoming, middle } = dayInfo(year, month, day, bookings);
           const isTurnover = outgoing && incoming;
           const dayIso = localIso(year, month, day);
@@ -77,7 +79,7 @@ const MiniCalendar = ({ year, month, bookings = [] }) => {
 
           if (isTurnover) {
             return (
-              <Cell key={i}>
+              <Cell key={dayIso}>
                 <div className={`absolute inset-0 rounded ring-1 ring-gray-700/40 ${todayRing}`}>
                   <div
                     className="absolute inset-y-0 left-0 w-[44%]"
@@ -100,7 +102,7 @@ const MiniCalendar = ({ year, month, bookings = [] }) => {
             const b = middle || outgoing || incoming;
             const bg = colorFor(b.status);
             return (
-              <Cell key={i}>
+              <Cell key={dayIso}>
                 <div className={`absolute inset-0 rounded ${todayRing}`} style={{ background: bg }} />
                 <span className="relative text-white font-semibold">{day}</span>
               </Cell>
@@ -108,7 +110,7 @@ const MiniCalendar = ({ year, month, bookings = [] }) => {
           }
 
           return (
-            <Cell key={i}>
+            <Cell key={dayIso}>
               <span className={`text-gray-500 ${isToday ? 'font-bold text-[#D4AF37]' : ''}`}>{day}</span>
             </Cell>
           );

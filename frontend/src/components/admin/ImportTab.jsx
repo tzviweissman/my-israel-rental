@@ -302,7 +302,7 @@ export const ImportTab = ({ token, onJumpToOwner }) => {
             <div className="flex items-start gap-2 text-xs bg-amber-50 border border-amber-200 rounded-lg p-3 mb-3">
               <AlertTriangle size={14} className="text-amber-600 shrink-0 mt-0.5" />
               <ul className="text-amber-800 list-disc pl-4 space-y-0.5">
-                {preview.warnings.map((w, i) => <li key={i}>{w}</li>)}
+                {preview.warnings.map((w, i) => <li key={`${i}-${w}`}>{w}</li>)}
               </ul>
             </div>
           )}
@@ -347,8 +347,8 @@ export const ImportTab = ({ token, onJumpToOwner }) => {
             <details open className="text-xs mb-3">
               <summary className="cursor-pointer font-semibold text-red-700">{result.skipped.length} rows skipped</summary>
               <ul className="mt-2 space-y-1">
-                {result.skipped.map((s, i) => (
-                  <li key={i} className="border border-red-100 bg-red-50 rounded px-2 py-1.5">
+                {result.skipped.map((s) => (
+                  <li key={`skip-${s.index}-${s.title || ''}`} className="border border-red-100 bg-red-50 rounded px-2 py-1.5">
                     <span className="font-semibold">Row {s.index}{s.title ? ` (${s.title})` : ''}:</span> {s.error}
                   </li>
                 ))}
@@ -359,8 +359,8 @@ export const ImportTab = ({ token, onJumpToOwner }) => {
             <details className="text-xs mb-3">
               <summary className="cursor-pointer font-semibold text-green-700">{result.owners_created.length} new owner accounts created</summary>
               <ul className="mt-2 space-y-1">
-                {result.owners_created.map((o, i) => (
-                  <li key={i} className="border border-green-100 bg-green-50 rounded px-2 py-1.5">
+                {result.owners_created.map((o) => (
+                  <li key={o.email} className="border border-green-100 bg-green-50 rounded px-2 py-1.5">
                     {o.email} — sent &quot;set password&quot; email
                   </li>
                 ))}
@@ -376,14 +376,14 @@ export const ImportTab = ({ token, onJumpToOwner }) => {
                 {result.media_issues.length} {result.media_issues.length === 1 ? 'listing' : 'listings'} created with missing photos
               </summary>
               <ul className="mt-2 space-y-1">
-                {result.media_issues.map((m, i) => (
-                  <li key={i} className="border border-amber-100 bg-amber-50 rounded px-2 py-1.5">
+                {result.media_issues.map((m) => (
+                  <li key={`media-${m.index}-${m.title || ''}`} className="border border-amber-100 bg-amber-50 rounded px-2 py-1.5">
                     <span className="font-semibold">Row {m.index}{m.title ? ` (${m.title})` : ''}:</span>
                     {' '}saved {m.saved_image_count} of {m.csv_image_count} photo URLs.
                     {m.failed_urls?.length > 0 && (
                       <ul className="mt-1 pl-4 list-disc text-[10px] font-mono text-amber-900">
                         {m.failed_urls.map((u, j) => (
-                          <li key={j} className="truncate" title={u}>{u}</li>
+                          <li key={`${m.index}-${j}-${u}`} className="truncate" title={u}>{u}</li>
                         ))}
                       </ul>
                     )}
@@ -405,7 +405,7 @@ export const ImportTab = ({ token, onJumpToOwner }) => {
               <summary className="cursor-pointer font-semibold text-gray-700">{result.created.length} created</summary>
               <ul className="mt-2 space-y-1 max-h-60 overflow-y-auto">
                 {result.created.map((c, i) => (
-                  <li key={i} className="text-gray-600 flex items-center gap-2">
+                  <li key={c.id || c.email || `created-${i}`} className="text-gray-600 flex items-center gap-2">
                     <span className="flex-1 truncate">{c.title || c.email}</span>
                     {typeof c.images_count === 'number' && (
                       <span
