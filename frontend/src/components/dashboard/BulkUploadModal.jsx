@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import axios from 'axios';
 import { toast } from 'sonner';
+import { useTranslation } from 'react-i18next';
 import {
   X, Plus, Trash2, Image as ImageIcon, FileSpreadsheet, ArrowLeft,
   CheckCircle2, AlertCircle, Sparkles, Download, Loader2,
@@ -74,6 +75,7 @@ const blankProperty = () => ({
 });
 
 const BulkUploadModal = ({ isOpen, onClose, onDone, API, token }) => {
+  const { t } = useTranslation();
   // 'editor' = visual rows | 'import' = spreadsheet path | 'images' | 'done'
   const [stage, setStage] = useState('editor');
   const [rows, setRows] = useState([blankProperty()]);
@@ -395,7 +397,7 @@ const BulkUploadModal = ({ isOpen, onClose, onDone, API, token }) => {
               Add multiple properties
             </h2>
             <p className="text-sm text-gray-500 mt-0.5">
-              Add as many properties as you want — they're all created in one click.
+              Add as many properties as you want — they&apos;re all created in one click.
             </p>
           </div>
           <button onClick={close} className="p-1.5 rounded-lg hover:bg-gray-100" data-testid="close-bulk-modal">
@@ -411,9 +413,9 @@ const BulkUploadModal = ({ isOpen, onClose, onDone, API, token }) => {
               <div className="flex items-start gap-2 mb-2">
                 <Sparkles size={16} className="text-[#1E6A6A] mt-0.5 shrink-0" />
                 <div className="flex-1">
-                  <p className="text-sm font-semibold text-gray-900">Got listings from WhatsApp, email, or a colleague?</p>
+                  <p className="text-sm font-semibold text-gray-900">{t('bulkUpload.gotListingsFrom')}</p>
                   <p className="text-xs text-gray-600 mt-0.5">
-                    Paste anything — English, Hebrew, mixed — and we'll extract every property automatically.
+                    Paste anything — English, Hebrew, mixed — and we&apos;ll extract every property automatically.
                   </p>
                 </div>
               </div>
@@ -444,7 +446,7 @@ const BulkUploadModal = ({ isOpen, onClose, onDone, API, token }) => {
               <div className="flex items-center justify-between mb-4 p-3 rounded-lg bg-amber-50 border border-amber-100">
                 <div className="flex items-center gap-2 text-sm text-amber-900">
                   <FileSpreadsheet size={16} />
-                  <span>Already have your properties in a spreadsheet?</span>
+                  <span>{t('bulkUpload.haveSpreadsheet')}</span>
                 </div>
                 <button
                   onClick={() => setShowImportPanel(true)}
@@ -459,7 +461,7 @@ const BulkUploadModal = ({ isOpen, onClose, onDone, API, token }) => {
             {showImportPanel && (
               <div className="mb-5 p-4 rounded-xl border-2 border-dashed border-amber-300 bg-amber-50/50" data-testid="spreadsheet-import-panel">
                 <div className="flex items-center justify-between mb-3">
-                  <p className="text-sm font-semibold text-gray-800">Import from a spreadsheet</p>
+                  <p className="text-sm font-semibold text-gray-800">{t('bulkUpload.importFromSheet')}</p>
                   <button onClick={() => setShowImportPanel(false)} className="text-xs text-gray-500 hover:text-gray-800" data-testid="close-import-panel">
                     Close
                   </button>
@@ -469,7 +471,7 @@ const BulkUploadModal = ({ isOpen, onClose, onDone, API, token }) => {
                 </p>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                   <label className="block">
-                    <span className="text-xs font-medium text-gray-700">Upload .csv or .xlsx</span>
+                    <span className="text-xs font-medium text-gray-700">{t('bulkUpload.uploadCsvXlsx')}</span>
                     <input
                       type="file"
                       accept=".csv,.xlsx"
@@ -483,7 +485,7 @@ const BulkUploadModal = ({ isOpen, onClose, onDone, API, token }) => {
                     <textarea
                       value={pasteText}
                       onChange={e => setPasteText(e.target.value)}
-                      placeholder="Tab- or comma-separated rows, headers in first line"
+                      placeholder={t('bulkUpload.tabOrComma')}
                       rows={3}
                       className="mt-1 block w-full text-xs px-2 py-1.5 rounded border border-gray-300 focus:outline-none focus:ring-1 focus:ring-amber-400"
                       data-testid="bulk-paste-text"
@@ -540,7 +542,7 @@ const BulkUploadModal = ({ isOpen, onClose, onDone, API, token }) => {
             {propertiesWithImageRefs.length > 0 ? (
               <>
                 <p className="text-sm text-gray-600 mb-4">
-                  Some rows referenced image filenames. Drop a ZIP file containing those images and we'll match them automatically.
+                  Some rows referenced image filenames. Drop a ZIP file containing those images and we&apos;ll match them automatically.
                 </p>
                 <input
                   type="file"
@@ -565,7 +567,7 @@ const BulkUploadModal = ({ isOpen, onClose, onDone, API, token }) => {
               </>
             ) : (
               <>
-                <p className="text-sm text-gray-600">You can add photos to each property later from your dashboard.</p>
+                <p className="text-sm text-gray-600">{t('bulkUpload.addPhotosLater')}</p>
                 <div className="mt-4 flex justify-end">
                   <button onClick={() => setStage('done')} className="px-4 py-2 rounded-lg bg-black text-[#D4AF37] text-sm font-semibold" data-testid="continue-to-done-btn">
                     Continue
@@ -582,7 +584,7 @@ const BulkUploadModal = ({ isOpen, onClose, onDone, API, token }) => {
             <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-green-100 mb-4">
               <CheckCircle2 size={32} className="text-green-600" />
             </div>
-            <p className="text-2xl font-bold mb-2" style={{ fontFamily: 'Playfair Display' }}>All set!</p>
+            <p className="text-2xl font-bold mb-2" style={{ fontFamily: 'Playfair Display' }}>{t('bulkUpload.allSet')}</p>
             <p className="text-sm text-gray-600 mb-6">
               {commitResult.summary.created} properties added to your account.
             </p>
@@ -629,6 +631,7 @@ const BulkUploadModal = ({ isOpen, onClose, onDone, API, token }) => {
 // Property card — used inside the visual editor.
 // ===========================================================================
 const PropertyRowCard = ({ index, row, error, onChange, onDuplicate, onRemove, API, token }) => {
+  const { t } = useTranslation();
   const [showMore, setShowMore] = useState(false);
   const [uploading, setUploading] = useState(false);
   const isPerNight = row.rental_type === 'vacation';
@@ -677,7 +680,7 @@ const PropertyRowCard = ({ index, row, error, onChange, onDuplicate, onRemove, A
           <button
             onClick={onDuplicate}
             className="text-xs font-medium text-gray-500 hover:text-[#1E6A6A] px-2 py-1 rounded hover:bg-gray-50"
-            title="Duplicate this row"
+            title={t('bulkUpload.duplicateRow')}
             data-testid={`duplicate-row-${index}`}
           >
             Duplicate
@@ -685,7 +688,7 @@ const PropertyRowCard = ({ index, row, error, onChange, onDuplicate, onRemove, A
           <button
             onClick={onRemove}
             className="p-1.5 rounded text-red-500 hover:bg-red-50"
-            title="Remove this row"
+            title={t('bulkUpload.removeRow')}
             data-testid={`remove-row-${index}`}
           >
             <Trash2 size={14} />
@@ -728,7 +731,7 @@ const PropertyRowCard = ({ index, row, error, onChange, onDuplicate, onRemove, A
                   type="button"
                   onClick={() => removeImage(url)}
                   className="absolute top-0.5 right-0.5 w-5 h-5 rounded-full bg-black/60 text-white opacity-0 group-hover:opacity-100 transition-opacity inline-flex items-center justify-center"
-                  title="Remove photo"
+                  title={t('bulkUpload.removePhoto')}
                   data-testid={`remove-row-media-${index}-${mediaImages.indexOf(url)}`}
                 >
                   <X size={12} />
@@ -745,7 +748,7 @@ const PropertyRowCard = ({ index, row, error, onChange, onDuplicate, onRemove, A
                   type="button"
                   onClick={() => removeVideo(url)}
                   className="absolute top-0.5 right-0.5 w-5 h-5 rounded-full bg-black/60 text-white opacity-0 group-hover:opacity-100 transition-opacity inline-flex items-center justify-center"
-                  title="Remove video"
+                  title={t('bulkUpload.removeVideo')}
                   data-testid={`remove-row-video-${index}-${mediaVideos.indexOf(url)}`}
                 >
                   <X size={12} />

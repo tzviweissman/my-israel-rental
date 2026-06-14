@@ -1,5 +1,6 @@
 import React, { useContext, useEffect, useRef, useState } from 'react';
 import axios from 'axios';
+import { useTranslation } from 'react-i18next';
 import { Plus, Home } from 'lucide-react';
 import { toast } from 'sonner';
 import { AuthContext } from '../../App';
@@ -33,6 +34,7 @@ const EMPTY_FORM = {
  * dedicated sublease/ components.
  */
 const SubleasesTab = ({ API, token }) => {
+  const { t } = useTranslation();
   const { user } = useContext(AuthContext);
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState(null);
@@ -202,14 +204,14 @@ const SubleasesTab = ({ API, token }) => {
     toast.custom(
       (tid) => (
         <div className="bg-white rounded-xl shadow-xl border border-gray-200 p-4 w-80">
-          <p className="text-sm font-semibold text-gray-800 mb-1">Remove sublease listing?</p>
-          <p className="text-xs text-gray-500 mb-3">This action cannot be undone.</p>
+          <p className="text-sm font-semibold text-gray-800 mb-1">{t('sublease.removeListing')}</p>
+          <p className="text-xs text-gray-500 mb-3">{t('sublease.cannotUndo')}</p>
           <div className="flex gap-2 justify-end">
             <button
               onClick={() => toast.dismiss(tid)}
               className="px-3 py-1.5 rounded-lg text-xs font-medium text-gray-600 hover:bg-gray-100"
             >
-              Cancel
+              {t('sublease.cancel')}
             </button>
             <button
               onClick={() => {
@@ -219,7 +221,7 @@ const SubleasesTab = ({ API, token }) => {
               className="px-3 py-1.5 rounded-lg text-xs font-semibold text-white bg-red-500 hover:bg-red-600"
               data-testid={`confirm-delete-sublease-${subleaseId}`}
             >
-              Remove
+              {t('sublease.remove')}
             </button>
           </div>
         </div>
@@ -321,12 +323,12 @@ const SubleasesTab = ({ API, token }) => {
               <div>
                 <h3 className="text-lg font-bold text-white flex items-center gap-2">
                   <Plus size={20} className="text-white" />
-                  {editingId ? 'Edit Your Sublease' : 'Sublease Your Property'}
+                  {editingId ? t('sublease.editYour') : t('sublease.subleaseYour')}
                 </h3>
                 <p className="text-white/80 text-sm">
                   {editingId
-                    ? 'Update the details and save changes'
-                    : 'Post your rental for others in just a few clicks'}
+                    ? t('sublease.updateDetailsCta')
+                    : t('sublease.postYourRentalCta')}
                 </p>
               </div>
             </div>
@@ -335,7 +337,7 @@ const SubleasesTab = ({ API, token }) => {
               className="px-4 py-2 rounded-xl bg-white/20 hover:bg-white/30 text-white text-sm font-medium transition-all backdrop-blur-sm"
               data-testid="create-sublease-btn"
             >
-              {showForm ? 'Cancel' : '+ New Sublease'}
+              {showForm ? t('sublease.cancel') : t('sublease.newSublease')}
             </button>
           </div>
         </div>
@@ -377,9 +379,9 @@ const SubleasesTab = ({ API, token }) => {
           ) : !showForm ? (
             <div className="text-center py-6">
               <Home size={32} className="mx-auto mb-3 text-gray-300" />
-              <p className="text-gray-500 text-sm font-medium">No active subleases</p>
+              <p className="text-gray-500 text-sm font-medium">{t('sublease.noActive')}</p>
               <p className="text-gray-400 text-xs mt-1">
-                Click "+ New Sublease" to post your rental for others.
+                {t('sublease.clickNewToPost')}
               </p>
             </div>
           ) : null}

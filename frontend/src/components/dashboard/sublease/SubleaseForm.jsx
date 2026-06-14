@@ -1,4 +1,5 @@
 import React, { useRef, useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { format } from 'date-fns';
 import { Calendar, X, Check, Send } from 'lucide-react';
 import { Calendar as CalendarComponent } from '../../ui/calendar';
@@ -14,6 +15,7 @@ const inputCls =
   'w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#1E6A6A]/30 focus:border-[#1E6A6A] text-sm';
 
 const SingleDatePopover = ({ value, onChange, anchor, accent, minDate, label, testId }) => {
+  const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const ref = useRef(null);
   useEffect(() => {
@@ -38,7 +40,7 @@ const SingleDatePopover = ({ value, onChange, anchor, accent, minDate, label, te
         data-testid={testId}
       >
         <span className={value ? 'text-gray-700' : 'text-gray-400'}>
-          {value ? format(parseLocalDate(value), 'MMMM d, yyyy') : `Select ${label.toLowerCase()}`}
+          {value ? format(parseLocalDate(value), 'MMMM d, yyyy') : t('sublease.selectDate')}
         </span>
         <Calendar size={16} style={{ color: borderColor, opacity: 0.55 }} />
       </button>
@@ -90,6 +92,7 @@ const SubleaseForm = ({
   onSubmit,
   imageUrl,
 }) => {
+  const { t } = useTranslation();
   // 'booking' = property_id linked to an in-app booking
   // 'manual'  = renter typed in their own title/area (booked elsewhere)
   const isManual = form.manual === true;
@@ -120,13 +123,13 @@ const SubleaseForm = ({
     return (
       <div data-testid="sublease-form-container">
         <h4 className="text-sm font-bold text-gray-800 mb-3">
-          Step 1: Select the property you're renting
+          {t('sublease.step1Title')}
         </h4>
         {myBookings.length === 0 ? (
           <div className="text-center py-4">
-            <p className="text-gray-500 text-sm">You don't have any active bookings on MyIsraelRental.</p>
+            <p className="text-gray-500 text-sm">{t('sublease.noActiveBookings')}</p>
             <p className="text-gray-400 text-xs mt-1">
-              That's fine — use the option below if you booked your place elsewhere.
+              {t('sublease.bookedElsewhereHint')}
             </p>
           </div>
         ) : (
@@ -152,7 +155,7 @@ const SubleaseForm = ({
                     {b.property?.area} • {b.property?.bedrooms} bed • {b.property?.bathrooms} bath
                   </p>
                 </div>
-                <span className="text-xs font-medium text-[#1E6A6A]">Select →</span>
+                <span className="text-xs font-medium text-[#1E6A6A]">{t('sublease.selectArrow')}</span>
               </button>
             ))}
           </div>
@@ -164,7 +167,7 @@ const SubleaseForm = ({
             className="w-full px-4 py-3 rounded-xl border-2 border-dashed border-[#D4AF37] hover:bg-[#D4AF37]/5 text-sm font-semibold text-[#1E6A6A] transition-all"
             data-testid="sublease-manual-entry-btn"
           >
-            Booked elsewhere? Enter property details manually
+            {t('sublease.bookedElsewhereBtn')}
           </button>
         </div>
       </div>
@@ -183,56 +186,56 @@ const SubleaseForm = ({
     <div data-testid="sublease-form-container">
       <div className="flex items-center justify-between mb-4">
         <h4 className="text-sm font-bold text-gray-800">
-          {editingId ? 'Edit sublease details' : (isManual ? 'Step 2: Enter property details' : 'Step 2: Set your sublease details')}
+          {editingId ? t('sublease.editDetails') : (isManual ? t('sublease.step2Manual') : t('sublease.step2Title'))}
         </h4>
         {!editingId && (
           <button
             onClick={() => setForm({ ...form, manual: false, property_id: '' })}
             className="text-xs text-gray-500 hover:text-[#1E6A6A]"
           >
-            ← {isManual ? 'Use an in-app booking instead' : 'Change property'}
+            ← {isManual ? t('sublease.useInAppInstead') : t('sublease.changeProperty')}
           </button>
         )}
       </div>
       {isManual ? (
         <div className="p-3 rounded-xl bg-[#FBF8F2] border border-[#D4AF37]/30 mb-4 grid grid-cols-1 md:grid-cols-2 gap-3" data-testid="sublease-manual-fields">
           <div className="md:col-span-2">
-            <label className="block text-xs font-medium text-gray-700 mb-1.5">Listing title *</label>
+            <label className="block text-xs font-medium text-gray-700 mb-1.5">{t('sublease.listingTitleReq')}</label>
             <input
               type="text"
               value={form.title || ''}
               onChange={(e) => setForm({ ...form, title: e.target.value })}
-              placeholder="e.g. Cozy 2BR near Machane Yehuda"
+              placeholder={t('sublease.listingTitlePlaceholder')}
               className={inputCls}
               required
               data-testid="sublease-manual-title"
             />
           </div>
           <div>
-            <label className="block text-xs font-medium text-gray-700 mb-1.5">Area / Neighborhood *</label>
+            <label className="block text-xs font-medium text-gray-700 mb-1.5">{t('sublease.areaReq')}</label>
             <input
               type="text"
               value={form.area || ''}
               onChange={(e) => setForm({ ...form, area: e.target.value })}
-              placeholder="e.g. Jerusalem - Nachlaot"
+              placeholder={t('sublease.areaPlaceholder')}
               className={inputCls}
               required
               data-testid="sublease-manual-area"
             />
           </div>
           <div>
-            <label className="block text-xs font-medium text-gray-700 mb-1.5">Street address (optional)</label>
+            <label className="block text-xs font-medium text-gray-700 mb-1.5">{t('sublease.streetOptional')}</label>
             <input
               type="text"
               value={form.address || ''}
               onChange={(e) => setForm({ ...form, address: e.target.value })}
-              placeholder="e.g. King George 10"
+              placeholder={t('sublease.addressPlaceholder')}
               className={inputCls}
               data-testid="sublease-manual-address"
             />
           </div>
           <div>
-            <label className="block text-xs font-medium text-gray-700 mb-1.5">Bedrooms</label>
+            <label className="block text-xs font-medium text-gray-700 mb-1.5">{t('sublease.bedroomsLabel')}</label>
             <input
               type="number"
               min="0"
@@ -244,7 +247,7 @@ const SubleaseForm = ({
             />
           </div>
           <div>
-            <label className="block text-xs font-medium text-gray-700 mb-1.5">Bathrooms</label>
+            <label className="block text-xs font-medium text-gray-700 mb-1.5">{t('sublease.bathroomsLabel')}</label>
             <input
               type="number"
               min="0"
@@ -256,18 +259,18 @@ const SubleaseForm = ({
             />
           </div>
           <div className="md:col-span-2">
-            <label className="block text-xs font-medium text-gray-700 mb-1.5">Description (optional)</label>
+            <label className="block text-xs font-medium text-gray-700 mb-1.5">{t('sublease.descriptionOptional')}</label>
             <textarea
               value={form.description || ''}
               onChange={(e) => setForm({ ...form, description: e.target.value })}
-              placeholder="Tell renters about the space, the neighborhood, what's nearby…"
+              placeholder={t('sublease.descPlaceholder')}
               rows={2}
               className={`${inputCls} resize-none`}
               data-testid="sublease-manual-description"
             />
           </div>
           <p className="md:col-span-2 text-[11px] text-gray-500">
-            Tip: you can add photos after posting by editing the sublease.
+            {t('sublease.photosTip')}
           </p>
         </div>
       ) : title && (
@@ -298,7 +301,7 @@ const SubleaseForm = ({
             }
             accent="teal"
             anchor="left"
-            label="Available From"
+            label={t('sublease.availableFrom')}
             testId="sublease-from-date"
           />
           <SingleDatePopover
@@ -306,7 +309,7 @@ const SubleaseForm = ({
             onChange={(next) => setForm((f) => ({ ...f, available_to: next }))}
             accent="gold"
             anchor="right"
-            label="Available To"
+            label={t('sublease.availableTo')}
             testId="sublease-to-date"
             minDate={form.available_from ? parseLocalDate(form.available_from) : new Date()}
           />
@@ -314,14 +317,14 @@ const SubleaseForm = ({
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <label className="block text-xs font-medium text-gray-700 mb-1.5">Price</label>
+            <label className="block text-xs font-medium text-gray-700 mb-1.5">{t('sublease.price')}</label>
             <div className="flex items-stretch rounded-xl border border-gray-200 bg-white overflow-hidden focus-within:ring-2 focus-within:ring-[#1E6A6A]/30 focus-within:border-[#1E6A6A] transition-all">
               <select
                 value={form.currency}
                 onChange={(e) => setForm({ ...form, currency: e.target.value })}
                 className="bg-gray-50 border-0 border-r border-gray-200 pl-3 pr-7 text-sm font-medium text-gray-700 focus:outline-none cursor-pointer hover:bg-gray-100 transition-colors"
                 data-testid="sublease-currency"
-                aria-label="Currency"
+                aria-label={t('sublease.currency')}
               >
                 <option value="ILS">₪ ILS</option>
                 <option value="USD">$ USD</option>
@@ -339,15 +342,15 @@ const SubleaseForm = ({
             </div>
           </div>
           <div>
-            <label className="block text-xs font-medium text-gray-700 mb-1.5">Price Type</label>
+            <label className="block text-xs font-medium text-gray-700 mb-1.5">{t('sublease.priceType')}</label>
             <select
               value={form.price_type}
               onChange={(e) => setForm({ ...form, price_type: e.target.value })}
               className={inputCls}
               data-testid="sublease-price-type"
             >
-              <option value="per_night">Per Night</option>
-              <option value="flat">Flat Rate (Total)</option>
+              <option value="per_night">{t('sublease.perNight')}</option>
+              <option value="flat">{t('sublease.flatRate')}</option>
             </select>
           </div>
         </div>
@@ -366,9 +369,9 @@ const SubleaseForm = ({
           />
         </div>
         <div>
-          <label className="block text-xs font-medium text-gray-700 mb-1.5">Sublease Type</label>
+          <label className="block text-xs font-medium text-gray-700 mb-1.5">{t('sublease.subleaseType')}</label>
           <p className="text-[11px] text-gray-500 mb-2">
-            Defaults to Short Term. Tick Sukkot and/or Pesach to also list under those holiday categories.
+            {t('sublease.subleaseTypeHelp')}
           </p>
           <div className="flex flex-wrap gap-2">
             {(() => {
@@ -434,8 +437,8 @@ const SubleaseForm = ({
         >
           <Send size={16} />
           {submitting
-            ? editingId ? 'Saving...' : 'Posting...'
-            : editingId ? 'Save Changes' : 'Post Sublease Listing'}
+            ? editingId ? t('sublease.saving') : t('sublease.posting')
+            : editingId ? t('sublease.saveChanges') : t('sublease.postListing')}
         </button>
       </form>
     </div>
@@ -443,3 +446,4 @@ const SubleaseForm = ({
 };
 
 export default SubleaseForm;
+;

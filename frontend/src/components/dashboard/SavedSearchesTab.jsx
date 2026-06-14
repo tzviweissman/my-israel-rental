@@ -82,6 +82,7 @@ function fuzzinessForFilters({ rental_type, flexible_dates }) {
  * properties page. Mirrors the backend SavedSearchFilters schema.
  */
 const CreateAlertForm = ({ API, token, onCreated, onCancel }) => {
+  const { t } = useTranslation();
   const [form, setForm] = useState(EMPTY_FILTERS);
   const [submitting, setSubmitting] = useState(false);
 
@@ -137,14 +138,14 @@ const CreateAlertForm = ({ API, token, onCreated, onCancel }) => {
             <Sparkles size={16} className="text-[#D4AF37]" /> New alert
           </h3>
           <p className="text-xs text-gray-500 mt-0.5">
-            We'll watch for new matches and email you when something fits.
+            We&apos;ll watch for new matches and email you when something fits.
           </p>
         </div>
         <button
           type="button"
           onClick={onCancel}
           className="text-gray-400 hover:text-gray-600 p-1"
-          aria-label="Close"
+          aria-label={t('savedSearches.close')}
           data-testid="create-alert-close"
         >
           <X size={18} />
@@ -152,7 +153,7 @@ const CreateAlertForm = ({ API, token, onCreated, onCancel }) => {
       </div>
 
       <div>
-        <label className="text-[11px] font-semibold text-gray-500 uppercase tracking-wider mb-1.5 block">Alert name (optional)</label>
+        <label className="text-[11px] font-semibold text-gray-500 uppercase tracking-wider mb-1.5 block">{t('savedSearches.alertName')}</label>
         <input
           type="text"
           value={form.name}
@@ -165,7 +166,7 @@ const CreateAlertForm = ({ API, token, onCreated, onCancel }) => {
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
         <div>
-          <label className="text-[11px] font-semibold text-gray-500 uppercase tracking-wider mb-1.5 block">Rental type</label>
+          <label className="text-[11px] font-semibold text-gray-500 uppercase tracking-wider mb-1.5 block">{t('savedSearches.rentalType')}</label>
           <select
             value={form.rental_type}
             onChange={(e) => update('rental_type', e.target.value)}
@@ -173,7 +174,7 @@ const CreateAlertForm = ({ API, token, onCreated, onCancel }) => {
             data-testid="alert-rental-type"
           >
             {RENTAL_TYPES.map((rt) => (
-              <option key={rt.value} value={rt.value}>{rt.label}</option>
+              <option key={rt.value} value={rt.value}>{t(`savedSearches.${rt.tk}`)}</option>
             ))}
           </select>
         </div>
@@ -198,7 +199,7 @@ const CreateAlertForm = ({ API, token, onCreated, onCancel }) => {
         </div>
 
         <div>
-          <label className="text-[11px] font-semibold text-gray-500 uppercase tracking-wider mb-1.5 block">Min bedrooms</label>
+          <label className="text-[11px] font-semibold text-gray-500 uppercase tracking-wider mb-1.5 block">{t('savedSearches.minBedrooms')}</label>
           <input
             type="number"
             min="0"
@@ -212,14 +213,14 @@ const CreateAlertForm = ({ API, token, onCreated, onCancel }) => {
         </div>
 
         <div>
-          <label className="text-[11px] font-semibold text-gray-500 uppercase tracking-wider mb-1.5 block">Max price</label>
+          <label className="text-[11px] font-semibold text-gray-500 uppercase tracking-wider mb-1.5 block">{t('savedSearches.maxPrice')}</label>
           <div className="flex">
             <select
               value={form.max_price_currency}
               onChange={(e) => update('max_price_currency', e.target.value)}
               className="px-2.5 py-2.5 rounded-l-lg text-sm bg-gray-50 border border-r-0 border-gray-200 text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#1E6A6A]/20 focus:border-[#1E6A6A] cursor-pointer"
               data-testid="alert-currency"
-              aria-label="Currency"
+              aria-label={t('savedSearches.currency')}
             >
               <option value="ILS">₪ ILS</option>
               <option value="USD">$ USD</option>
@@ -237,7 +238,7 @@ const CreateAlertForm = ({ API, token, onCreated, onCancel }) => {
         </div>
 
         <div>
-          <label className="text-[11px] font-semibold text-gray-500 uppercase tracking-wider mb-1.5 block">Available from</label>
+          <label className="text-[11px] font-semibold text-gray-500 uppercase tracking-wider mb-1.5 block">{t('savedSearches.availableFrom')}</label>
           <input
             type="date"
             value={form.start_date}
@@ -260,7 +261,7 @@ const CreateAlertForm = ({ API, token, onCreated, onCancel }) => {
       {(form.rental_type === 'short-term' || form.rental_type === 'vacation') && (
         <div className="flex items-center justify-between gap-3 rounded-xl border border-gray-200 bg-white px-4 py-3" data-testid="flexible-dates-toggle">
           <div className="flex-1 min-w-0">
-            <p className="text-sm font-semibold text-gray-800">Flexible dates</p>
+            <p className="text-sm font-semibold text-gray-800">{t('savedSearches.flexibleDates')}</p>
             <p className="text-xs text-gray-500 mt-0.5">
               Also notify me about listings starting within 7 days of my move-in date.
             </p>
@@ -530,7 +531,7 @@ const SavedSearchesTab = ({ API, token }) => {
                           }}
                           className="text-gray-400 hover:text-[#1E6A6A] transition-colors p-0.5"
                           data-testid={`saved-search-copy-${s.id}`}
-                          aria-label="Copy search link"
+                          aria-label={t('savedSearches.copyLink')}
                           title="Copy search link"
                         >
                           <LinkIcon size={12} />
@@ -542,7 +543,7 @@ const SavedSearchesTab = ({ API, token }) => {
                           }}
                           className="text-gray-400 hover:text-red-500 transition-colors p-0.5"
                           data-testid={`saved-search-delete-${s.id}`}
-                          aria-label="Remove alert"
+                          aria-label={t('savedSearches.removeAlert')}
                         >
                           <Trash2 size={12} />
                         </button>
@@ -652,7 +653,7 @@ const SavedSearchesTab = ({ API, token }) => {
                   }}
                   className="absolute top-2 right-2 z-10 w-7 h-7 rounded-full bg-white/90 backdrop-blur-sm text-gray-600 hover:text-red-500 hover:bg-white shadow-sm flex items-center justify-center transition-all opacity-0 group-hover:opacity-100 focus:opacity-100"
                   data-testid={`alert-match-hide-${m.id}`}
-                  aria-label="Hide this match"
+                  aria-label={t('savedSearches.hideMatch')}
                   title="Hide this match"
                 >
                   <X size={14} />
