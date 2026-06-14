@@ -23,7 +23,11 @@ const resources = {
         clearAllNotifications: 'Clear all notifications?',
         cannotBeUndone: 'This cannot be undone.',
         deleteNotification: 'Delete notification',
-        clearAll: 'Clear all'
+        clearAll: 'Clear all',
+        languageSynced: 'Synced across your devices',
+        english: 'English',
+        hebrew: 'עברית',
+        switchTo: 'Switch to'
       },
       hero: {
         title: 'Find Your Perfect Rental',
@@ -846,7 +850,11 @@ const resources = {
         clearAllNotifications: 'לנקות את כל ההתראות?',
         cannotBeUndone: 'לא ניתן לבטל פעולה זו.',
         deleteNotification: 'מחיקת התראה',
-        clearAll: 'נקה הכל'
+        clearAll: 'נקה הכל',
+        languageSynced: 'מסונכרן בכל המכשירים שלך',
+        english: 'English',
+        hebrew: 'עברית',
+        switchTo: 'עבור ל-'
       },
       hero: {
         title: 'מצא את השכירות המושלמת',

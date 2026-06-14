@@ -534,6 +534,45 @@ const Navigation = () => {
                 }}
                 data-testid="nav-menu-dropdown"
               >
+                {/* Language sync pill — visible only for logged-in users.
+                    Reassures them their language preference is saved to
+                    their account and follows them across devices. Click
+                    to toggle to the other language. The actual /auth/language
+                    PUT happens inside toggleLanguage() so the badge is also
+                    the action. */}
+                {user && (
+                  <button
+                    onClick={() => { toggleLanguage(); setMenuOpen(false); }}
+                    className="w-full flex items-center gap-2.5 px-4 py-2.5 border-b transition-colors hover:bg-white/5"
+                    style={{ borderColor: 'rgba(212,175,55,0.15)' }}
+                    data-testid="nav-language-sync-pill"
+                    title={t('nav.toggleLanguage')}
+                  >
+                    <div
+                      className="w-7 h-7 rounded-full flex items-center justify-center"
+                      style={{ backgroundColor: 'rgba(212,175,55,0.18)' }}
+                    >
+                      <Globe size={14} style={{ color: '#D4AF37' }} />
+                    </div>
+                    <div className="flex-1 text-left">
+                      <p className="text-xs font-semibold" style={{ color: '#D4AF37' }}>
+                        {i18n.language.startsWith('he') ? t('nav.hebrew') : t('nav.english')}
+                        <span className="ml-1.5 opacity-50 font-normal">
+                          · {t('nav.switchTo')}{i18n.language.startsWith('he') ? ' English' : ' עברית'}
+                        </span>
+                      </p>
+                      <p className="text-[10px] flex items-center gap-1 mt-0.5" style={{ color: 'rgba(212,175,55,0.55)' }}>
+                        <span
+                          className="inline-block w-1.5 h-1.5 rounded-full"
+                          style={{ backgroundColor: '#10B981' }}
+                          aria-hidden
+                        />
+                        {t('nav.languageSynced')}
+                      </p>
+                    </div>
+                  </button>
+                )}
+
                 {/* Rental Types */}
                 <div className="px-2 pt-3 pb-1">
                   <p className="px-3 mb-1.5 text-[10px] font-bold tracking-[0.1em] uppercase" style={{ color: 'rgba(212,175,55,0.45)' }}>
