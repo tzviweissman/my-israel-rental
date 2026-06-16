@@ -725,3 +725,17 @@ See /app/memory/test_credentials.md
   - Files: `frontend/src/components/dashboard/SubleasesTab.jsx`, `frontend/src/components/dashboard/sublease/SubleaseForm.jsx`, `frontend/src/components/dashboard/SavedSearchesTab.jsx`, `frontend/src/components/dashboard/BulkUploadModal.jsx`, `frontend/src/i18n.js`.
 
 
+- [x] **Smart Lists — sortable WhatsApp share** (2026-02-16):
+  - Added a "Sort by" dropdown to the Super Admin → Smart Lists panel with 5 options: Default order, Cheapest first, Most expensive first, Fewest bedrooms first, Most bedrooms first.
+  - Single sort applies to all three outputs simultaneously (on-screen results, Copy list clipboard, Share on WhatsApp text) — they can never disagree, even after the admin changes filters.
+  - Currency-normalizes USD-priced listings to ILS-equivalent for sort using the backend's `usd_to_ils_rate` when available, or a sensible 3.7 fallback so mixed-currency Sukkot/Pesach lists order roughly correctly. Display values stay untouched.
+  - Stable sort: rows with null price/bedrooms are pushed to the end regardless of direction (so a "cheapest first" sort doesn't bubble priceless rows to the top).
+  - Files: `frontend/src/components/admin/SmartListsTab.jsx`.
+
+- [x] **Index-key React anti-pattern fixes** (2026-02-15):
+  - `ImportTab.jsx`: replaced 6 `key={i}` uses with stable composite keys (`${i}-${w}` for warnings, `skip-${s.index}-${s.title}` for skipped rows, `o.email` for owner accounts, `media-${m.index}-${m.title}` for media issues, `${m.index}-${j}-${u}` for failed URL nestings, `c.id || c.email || created-${i}` for created rows).
+  - `MiniCalendar.jsx`: day cells now use the ISO date as key; padding cells use `pad-${i}`; day-of-week labels keep `dow-${i}` (7 fixed labels never reorder).
+  - Zero behavior change — purely defensive against potential state-leak bugs if rows ever reorder.
+  - Files: `frontend/src/components/admin/ImportTab.jsx`, `frontend/src/components/dashboard/MiniCalendar.jsx`.
+
+

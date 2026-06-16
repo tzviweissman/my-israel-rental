@@ -127,6 +127,66 @@ const buildCopyText = (properties, filters = {}) => {
   return `${SITE_URL}\n\n${brand}\n${subtitle}\n\n${body}`;
 };
 
+const SORT_OPTIONS = [
+  { value: 'default',       label: 'Default order' },
+  { value: 'price_asc',     label: 'Cheapest first' },
+  { value: 'price_desc',    label: 'Most expensive first' },
+  { value: 'bedrooms_asc',  label: 'Fewest bedrooms first' },
+  { value: 'bedrooms_desc', label: 'Most bedrooms first' },
+];
+
+/**
+ * Sort the generated property list by the chosen criterion. Returns a
+ * new array — never mutates the original. Properties with missing fields
+ * are pushed to the end regardless of sort direction (so a price-asc
+ * sort won't bubble priceless rows to the top just because `null < 1`).
+ *
+ * Currency normalization: if the smart-list endpoint included a
+ * usd_to_ils_rate, USD-priced rows are converted to an ILS-equivalent
+ * for sort purposes only. Display values stay untouched.
+ */
+const applySort = (properties, sortOrder, usdToIlsRate) => {
+  if (!sortOrder || sortOrder === 'default' || !properties?.length) return properties;
+  const sorted = [...properties];
+
+  const priceInIls = (p) => {
+    if (p.price == null) return null;
+    const v = Number(p.price);
+    if (!Number.isFinite(v)) return null;
+    // Fall back to a sensible USD→ILS rate when the backend doesn't
+    // include one (e.g. no live FX in the response). Keeps a mixed-
+    // currency list ordered roughly correctly. Display values are
+    // untouched — this conversion is for sort only.
+    const fallbackRate = 3.7;
+    if (p.currency === 'USD') return v * (usdToIlsRate || fallbackRate);
+    return v;
+  };
+  const bedrooms = (p) => {
+    if (p.bedrooms == null) return null;
+    const v = Number(p.bedrooms);
+    return Number.isFinite(v) ? v : null;
+  };
+
+  // Stable sort that pushes nulls to the end no matter the direction.
+  const cmp = (asc, getter) => (a, b) => {
+    const av = getter(a);
+    const bv = getter(b);
+    if (av == null && bv == null) return 0;
+    if (av == null) return 1;
+    if (bv == null) return -1;
+    return asc ? av - bv : bv - av;
+  };
+
+  switch (sortOrder) {
+    case 'price_asc':     sorted.sort(cmp(true,  priceInIls)); break;
+    case 'price_desc':    sorted.sort(cmp(false, priceInIls)); break;
+    case 'bedrooms_asc':  sorted.sort(cmp(true,  bedrooms));   break;
+    case 'bedrooms_desc': sorted.sort(cmp(false, bedrooms));   break;
+    default: break;
+  }
+  return sorted;
+};
+
 const SmartListsTab = ({ token }) => {
   const [location, setLocation] = useState('');
   const [maxRent, setMaxRent] = useState('');
@@ -142,6 +202,17 @@ const SmartListsTab = ({ token }) => {
   const [savingName, setSavingName] = useState('');
   const [showSaveBox, setShowSaveBox] = useState(false);
   const [copyOk, setCopyOk] = useState(false);
+  // Sort order applied to the generated list before copy / share / render.
+  // Lives next to results state so it survives until a new list is generated.
+  const [sortOrder, setSortOrder] = useState('default');
+
+  // Sorted view of ``results.properties`` — single source of truth so the
+  // visible cards, the clipboard payload and the WhatsApp link can never
+  // disagree.
+  const sortedProperties = useMemo(
+    () => applySort(results?.properties, sortOrder, results?.usd_to_ils_rate),
+    [results, sortOrder],
+  );
 
   const headers = useMemo(() => ({ Authorization: `Bearer ${token}` }), [token]);
 
@@ -243,7 +314,7 @@ const SmartListsTab = ({ token }) => {
 
   const copyToClipboard = async () => {
     if (!results?.properties?.length) return;
-    const text = buildCopyText(results.properties, appliedFilters || {});
+    const text = buildCopyText(sortedProperties, appliedFilters || {});
     try {
       await navigator.clipboard.writeText(text);
       setCopyOk(true);
@@ -269,7 +340,7 @@ const SmartListsTab = ({ token }) => {
     if (!results?.properties?.length) return;
     // wa.me supports a single ?text param; WhatsApp's URL length cap is
     // roughly 4000 chars, so we truncate gracefully if a list gets huge.
-    let text = buildCopyText(results.properties, appliedFilters || {});
+    let text = buildCopyText(sortedProperties, appliedFilters || {});
     const MAX = 3900;
     if (text.length > MAX) {
       text = text.slice(0, MAX) + '\n\n…(list truncated — full list copied separately)';
@@ -435,6 +506,24 @@ const SmartListsTab = ({ token }) => {
                 {copyOk ? <Check size={16} className="text-green-600" /> : <Copy size={16} />}
                 {copyOk ? 'Copied' : 'Copy list'}
               </button>
+              {/* Sort selector — applies to copy / WhatsApp / on-screen
+                  list together so all three views always agree. Only
+                  relevant once a list has been generated, hence the
+                  ``results &&`` guard above. */}
+              <label className="inline-flex items-center gap-2 px-3 py-2.5 rounded-xl bg-white border border-gray-200 text-sm text-gray-700">
+                <span className="text-xs text-gray-500 font-medium">Sort by</span>
+                <select
+                  value={sortOrder}
+                  onChange={(e) => setSortOrder(e.target.value)}
+                  className="bg-transparent text-sm font-semibold text-gray-800 focus:outline-none cursor-pointer"
+                  data-testid="smart-list-sort-select"
+                  aria-label="Sort list by"
+                >
+                  {SORT_OPTIONS.map((opt) => (
+                    <option key={opt.value} value={opt.value}>{opt.label}</option>
+                  ))}
+                </select>
+              </label>
               <button
                 type="button"
                 onClick={shareToWhatsApp}
@@ -517,11 +606,11 @@ const SmartListsTab = ({ token }) => {
               </p>
             </div>
           )}
-          {results.properties.length === 0 ? (
+          {sortedProperties.length === 0 ? (
             <p className="text-sm text-gray-500">No properties match — try widening the filters.</p>
           ) : (
             <ul className="divide-y divide-gray-100">
-              {results.properties.map((p) => {
+              {sortedProperties.map((p) => {
                 const displayArea = appliedFilters?.location || p.area || 'Israel';
                 const beds = formatBedrooms(p.bedrooms);
                 return (
