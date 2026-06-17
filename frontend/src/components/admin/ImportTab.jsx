@@ -392,6 +392,13 @@ export const ImportTab = ({ token, onJumpToOwner }) => {
               </ul>
             </details>
           )}
+          {result.summary?.mirror_pending_count > 0 && (
+            <div className="text-[11px] bg-blue-50 border border-blue-200 text-blue-800 rounded px-2 py-1.5 mb-3">
+              Listings are live with their original photo URLs. We&apos;re mirroring
+              {' '}<strong>{result.summary.mirror_pending_count}</strong>{' '}
+              {result.summary.mirror_pending_count === 1 ? 'listing\'s photos' : 'listings\' photos'} to Cloudinary in the background — refresh in a minute to see the CDN-hosted versions.
+            </div>
+          )}
           {result.summary?.cloudinary_enabled === false && (
             <div className="text-[11px] bg-amber-50 border border-amber-200 text-amber-800 rounded px-2 py-1.5 mb-3">
               Cloudinary isn&apos;t configured on the server — photo URLs were saved as-is (no mirroring).

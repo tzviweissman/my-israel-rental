@@ -491,11 +491,12 @@ async def commit_property_import(req: PropertyCommitRequest, payload: dict = Dep
          them a "set password" reset link).
       2. Apply dedupe (same owner + address + rental_type) — skip with
          a clear error in the report if a collision is found.
-      3. Mirror images to Cloudinary (best-effort, partial success ok).
-      4. Insert.
-
-    Image mirroring is fire-and-forget per URL — one broken URL can't
-    break the whole row.
+      3. Insert with the source URLs immediately (so the listing is
+         live and looks complete right away).
+      4. Kick off a background task per row to mirror images to
+         Cloudinary and patch the doc — keeps the response fast so the
+         60s edge-proxy timeout doesn't trip on large imports (37 rows
+         × 20 images = 700 mirror calls).
     """
     if payload['role'] != 'admin':
         raise HTTPException(status_code=403, detail="Admin access required")
@@ -509,12 +510,10 @@ async def commit_property_import(req: PropertyCommitRequest, payload: dict = Dep
     created: list[dict] = []
     skipped: list[dict] = []
     owners_created: list[dict] = []
-    # Per-row tally of image/video URLs that arrived in the CSV vs. how
-    # many actually landed on the property after Cloudinary mirroring.
-    # Surfaces silent failures (Cloudinary off, bad URLs, rate limits)
-    # that were previously dropping photos with no warning.
-    media_report: list[dict] = []
     from utils.cloud_storage import CLOUDINARY_ENABLED
+
+    # Collect (doc_id, image_urls, video_urls) for post-response mirroring.
+    to_mirror: list[tuple[str, list[str], list[str]]] = []
 
     for i, raw in enumerate(rows, start=1):
         try:
@@ -554,39 +553,15 @@ async def commit_property_import(req: PropertyCommitRequest, payload: dict = Dep
 
             doc = _build_property_doc(remapped, owner_id)
 
-            # Mirror images to Cloudinary so we don't depend on the source host
+            # Always save with the source URLs first so the listing has
+            # photos immediately. Background task below will swap them
+            # for Cloudinary-hosted URLs without blocking the response.
             image_urls = _split_urls(remapped.get("images"))
             video_urls = _split_urls(remapped.get("videos"))
-            mirror_failures = []
-            if req.mirror_images and image_urls and CLOUDINARY_ENABLED:
-                results = await asyncio.gather(*[
-                    mirror_url_to_cloudinary(u, is_video=False) for u in image_urls[:30]
-                ], return_exceptions=False)
-                mirrored = []
-                for src_url, r in zip(image_urls[:30], results):
-                    if r and r.get("url"):
-                        mirrored.append(r["url"])
-                    else:
-                        mirror_failures.append(src_url)
-                doc["images"] = mirrored
-            else:
-                # Either mirroring is off, or Cloudinary isn't configured —
-                # keep the original URLs so the listing still has pictures
-                # instead of silently dropping them.
-                doc["images"] = image_urls
-            if req.mirror_images and video_urls and CLOUDINARY_ENABLED:
-                results = await asyncio.gather(*[
-                    mirror_url_to_cloudinary(u, is_video=True) for u in video_urls[:5]
-                ], return_exceptions=False)
-                mirrored_vids = []
-                for src_url, r in zip(video_urls[:5], results):
-                    if r and r.get("url"):
-                        mirrored_vids.append(r["url"])
-                    else:
-                        mirror_failures.append(src_url)
-                doc["videos"] = mirrored_vids
-            else:
-                doc["videos"] = video_urls
+            doc["images"] = image_urls
+            doc["videos"] = video_urls
+            if req.mirror_images and CLOUDINARY_ENABLED and (image_urls or video_urls):
+                doc["mirror_pending"] = True
 
             await db.properties.insert_one(doc)
             created.append({
@@ -594,19 +569,20 @@ async def commit_property_import(req: PropertyCommitRequest, payload: dict = Dep
                 "title": doc["title"],
                 "images_count": len(doc.get("images", [])),
                 "videos_count": len(doc.get("videos", [])),
+                "mirror_pending": doc.get("mirror_pending", False),
             })
-            # Track partial failures so the admin sees "12 listings created,
-            # 4 with missing photos" instead of being told it all worked.
-            if mirror_failures or (not doc.get("images") and image_urls):
-                media_report.append({
-                    "index": i,
-                    "title": doc.get("title"),
-                    "csv_image_count": len(image_urls),
-                    "saved_image_count": len(doc.get("images", [])),
-                    "failed_urls": mirror_failures[:5],
-                })
+
+            if req.mirror_images and CLOUDINARY_ENABLED and (image_urls or video_urls):
+                to_mirror.append((doc["id"], image_urls[:30], video_urls[:5]))
         except Exception as e:  # noqa: BLE001
             skipped.append({"index": i, "title": raw.get("title") or raw.get("Name"), "error": f"Unexpected error: {e}"})
+
+    # Kick off background mirroring AFTER the response data is finalized.
+    # Each property gets one task that mirrors all its images concurrently
+    # via to_thread + gather, then patches the doc in-place. We do NOT
+    # await — the HTTP response returns immediately.
+    if to_mirror:
+        asyncio.create_task(_background_mirror_properties(to_mirror))
 
     return {
         "summary": {
@@ -614,14 +590,62 @@ async def commit_property_import(req: PropertyCommitRequest, payload: dict = Dep
             "created": len(created),
             "skipped": len(skipped),
             "owners_created": len(owners_created),
-            "with_missing_photos": len(media_report),
+            "with_missing_photos": 0,
             "cloudinary_enabled": bool(CLOUDINARY_ENABLED),
+            "mirror_pending_count": len(to_mirror),
         },
         "created": created,
         "skipped": skipped,
         "owners_created": owners_created,
-        "media_issues": media_report,
+        "media_issues": [],
     }
+
+
+async def _background_mirror_properties(
+    items: list[tuple[str, list[str], list[str]]],
+) -> None:
+    """Mirror images for already-inserted properties in the background.
+
+    Runs after the HTTP response is sent. For each property:
+      • Mirror all image URLs to Cloudinary in parallel (gather).
+      • Mirror videos similarly.
+      • Patch the doc with the new URLs and clear ``mirror_pending``.
+    Failures fall back to the source URL so the listing never loses photos.
+    """
+    for prop_id, image_urls, video_urls in items:
+        try:
+            img_results = []
+            vid_results = []
+            if image_urls:
+                img_results = await asyncio.gather(*[
+                    mirror_url_to_cloudinary(u, is_video=False) for u in image_urls
+                ], return_exceptions=False)
+            if video_urls:
+                vid_results = await asyncio.gather(*[
+                    mirror_url_to_cloudinary(u, is_video=True) for u in video_urls
+                ], return_exceptions=False)
+            final_images = [
+                (r["url"] if r and r.get("url") else src)
+                for src, r in zip(image_urls, img_results)
+            ] if image_urls else []
+            final_videos = [
+                (r["url"] if r and r.get("url") else src)
+                for src, r in zip(video_urls, vid_results)
+            ] if video_urls else []
+            await db.properties.update_one(
+                {"id": prop_id},
+                {"$set": {
+                    "images": final_images,
+                    "videos": final_videos,
+                    "mirror_pending": False,
+                }},
+            )
+        except Exception as e:  # noqa: BLE001
+            logger.exception(f"Background mirror failed for property {prop_id}: {e}")
+            await db.properties.update_one(
+                {"id": prop_id},
+                {"$set": {"mirror_pending": False}},
+            )
 
 
 # --- Commit: users -------------------------------------------------------

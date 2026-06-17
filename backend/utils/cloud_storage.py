@@ -8,6 +8,7 @@ preview envs), we fall back to the legacy local-disk path so dev still works.
 """
 from __future__ import annotations
 
+import asyncio
 import os
 import uuid
 from pathlib import Path
@@ -91,32 +92,40 @@ async def mirror_url_to_cloudinary(url: str, *, is_video: bool = False, folder: 
     Cloudinary's `upload()` accepts a URL directly as the first argument
     — it fetches the asset server-side, which is far faster than us
     downloading + re-uploading bytes.
+
+    The Cloudinary SDK call is synchronous and blocks until the remote
+    fetch + upload completes. We run it in a worker thread via
+    ``asyncio.to_thread`` so callers using ``asyncio.gather`` over many
+    URLs actually get concurrency — without this, a 700-image bulk
+    import takes 10+ minutes and trips edge-proxy 60s timeouts.
     """
     if not CLOUDINARY_ENABLED or not url:
         return None
-    try:
-        res = cloudinary.uploader.upload(
-            url,
-            resource_type=_resource_type(is_video),
-            folder=folder,
-            public_id=uuid.uuid4().hex,
-            overwrite=False,
-            use_filename=False,
-            unique_filename=False,
-        )
-        secure_url = res.get("secure_url", "")
-        return {
-            "url": _with_auto_transforms(secure_url, is_video),
-            "public_id": res.get("public_id"),
-            "bytes": res.get("bytes", 0),
-            "format": res.get("format"),
-            "resource_type": res.get("resource_type"),
-        }
-    except Exception:  # noqa: BLE001
-        # Swallow Cloudinary errors and let the caller record the URL
-        # as failed — we don't want one broken image URL to kill the
-        # whole bulk import.
-        return None
+    def _do_upload() -> dict[str, Any] | None:
+        try:
+            res = cloudinary.uploader.upload(
+                url,
+                resource_type=_resource_type(is_video),
+                folder=folder,
+                public_id=uuid.uuid4().hex,
+                overwrite=False,
+                use_filename=False,
+                unique_filename=False,
+            )
+            secure_url = res.get("secure_url", "")
+            return {
+                "url": _with_auto_transforms(secure_url, is_video),
+                "public_id": res.get("public_id"),
+                "bytes": res.get("bytes", 0),
+                "format": res.get("format"),
+                "resource_type": res.get("resource_type"),
+            }
+        except Exception:  # noqa: BLE001
+            # Swallow Cloudinary errors and let the caller record the URL
+            # as failed — we don't want one broken image URL to kill the
+            # whole bulk import.
+            return None
+    return await asyncio.to_thread(_do_upload)
 
 
 def delete_from_cloudinary(public_id: str, *, is_video: bool = False) -> bool:

@@ -12,6 +12,12 @@ Build a bilingual (English/Hebrew) rental website named MyIsraelRental.com with 
 
 ## What's Been Implemented
 
+
+- [x] **CSV Bulk Import — Edge-Timeout Fix (2026-06-17)**: Large CSV imports (37 rows × ~20 images each = ~700 Cloudinary mirror calls) were tripping the Cloudflare edge proxy's 60s timeout, returning a 502 to the admin even though the frontend itself set a 10-min timeout. Root cause: `mirror_url_to_cloudinary` declared `async def` but called the SYNC `cloudinary.uploader.upload()`, so `asyncio.gather` provided zero concurrency — every mirror ran sequentially on the event loop.
+  - **Fixes**: (1) `utils/cloud_storage.py::mirror_url_to_cloudinary` now runs the Cloudinary SDK call in a worker thread via `asyncio.to_thread()`, restoring real parallelism for `asyncio.gather`. (2) `routes/admin_import.py::commit_property_import` now inserts each property with its source URLs immediately (so the listing is live and looks complete right away), tags the doc with `mirror_pending: true`, and kicks off a background `asyncio.create_task` that mirrors to Cloudinary and patches the doc via `update_one`. HTTP response returns in ~2.4s for the 37-row CSV (was 60s+ → 502). (3) New response field `summary.mirror_pending_count` so the frontend can show a friendly "we're moving photos to our CDN in the background" banner.
+  - **Test coverage**: new `tests/test_admin_import_background_mirror.py` (2 tests) — fast-response regression using a 1s-sleep stub mirror to prove `gather` parallelizes and the endpoint returns BEFORE mirroring completes; Pydantic-payload schema test. 21/21 admin-import tests green.
+  - Files: `backend/utils/cloud_storage.py`, `backend/routes/admin_import.py`, `backend/tests/test_admin_import_background_mirror.py`, `frontend/src/components/admin/ImportTab.jsx`.
+
 ### Completed Features
 - [x] Full auth with confirm password, terms checkbox, password visibility
 - [x] Dark grey and gold theme across all components
