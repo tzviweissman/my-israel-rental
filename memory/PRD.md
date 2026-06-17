@@ -739,3 +739,18 @@ See /app/memory/test_credentials.md
   - Files: `frontend/src/components/admin/ImportTab.jsx`, `frontend/src/components/dashboard/MiniCalendar.jsx`.
 
 
+- [x] **WhatsApp notifications (Twilio) — Phase 1 shipped, Phase 2 awaits credentials** (2026-02-17):
+  - **Signup rename**: `Auth.js` signup form's "Phone Number" field is now "WhatsApp number (recommended, optional)" with a help line "We'll text you when a renter messages you or signs a contract." Backed by the existing `phone` column so all other call sites (email signatures, lister contact info) still work.
+  - **Settings tab editing**: `SettingsTab.jsx` now has a dedicated WhatsApp section with a tel-input and Save button. Backend `PUT /api/auth/whatsapp` (auth-required) normalizes the input to E.164 (`+972 50-123 45 67` → `+972501234567`), rejects numbers shorter than 6 digits, and stores in `db.users.phone`. Empty string clears the number.
+  - **Twilio send module**: `backend/utils/whatsapp.py` is a graceful-no-op send layer. Two modes auto-detected from env vars:
+    - **Sandbox / free-form body** (dev) — set `TWILIO_ACCOUNT_SID` + `TWILIO_AUTH_TOKEN` + `TWILIO_WHATSAPP_FROM` (e.g. `whatsapp:+14155238886`). Recipient must opt in via Twilio Sandbox.
+    - **Production templates** (live) — additionally set `TWILIO_CONTENT_SID_RENTER_MESSAGE` + `TWILIO_CONTENT_SID_CONTRACT_SIGNED` (`HX…` from Twilio Content Template Builder, WABA-approved). Uses `content_sid` + `content_variables` so business-initiated sends work outside the 24h window.
+  - **Wiring**:
+    - `routes/chat.py::_send_chat_email_safe()` now fires WhatsApp alongside the existing email — inside the same throttle gate so the lister isn't spammed. Deep link: `/chat?property_id=X&peer_id=Y`.
+    - `routes/bookings.py::_notify_owner_contract_signed()` now WhatsApps the owner with a deep link to `/dashboard?tab=bookings&booking_id=Z`.
+    - Both gracefully swallow any Twilio exception via the module's logged-and-return-False pattern.
+  - **Tests**: 12 pytest cases pass (5 settings/HTTP tests + 7 send-module unit tests with mocked `twilio.rest.Client`): no-op when unconfigured, no-op when phone missing, free-form body path, content-template path, Hebrew body, error swallowed, from-number prefix normalization.
+  - **Pending**: User to provide Twilio Account SID + Auth Token + Sandbox `whatsapp:+...` number (free trial, ~5 min). Production cutover later requires approved Content Templates and a purchased Twilio WhatsApp number.
+  - Files: `backend/utils/whatsapp.py`, `backend/routes/auth.py`, `backend/routes/chat.py`, `backend/routes/bookings.py`, `backend/models.py`, `backend/tests/test_whatsapp_settings.py`, `backend/tests/test_whatsapp_send.py`, `frontend/src/pages/Auth.js`, `frontend/src/components/dashboard/SettingsTab.jsx`, `frontend/src/i18n.js`.
+
+

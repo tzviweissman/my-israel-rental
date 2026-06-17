@@ -1,153 +1,191 @@
-"""Meta WhatsApp Cloud API client — outbound transactional notifications.
+"""Twilio WhatsApp client — outbound transactional notifications.
 
-This module sends pre-approved templated WhatsApp messages from the
-platform's verified business number. It is **graceful when not
-configured**: if any of the required env vars are missing the helpers
-log a warning and return ``False`` instead of raising, so unrelated
-flows (chat send, contract signing) never break on platforms that
-haven't finished Meta Business verification yet.
+Why this module exists
+----------------------
+We send two business-initiated WhatsApp notifications from the
+platform's verified Twilio number:
 
-Required env vars (all four must be present for sends to actually go out):
+  1. A renter messaged you on your listing.
+  2. Your tenant signed the rental contract.
 
-  WHATSAPP_ACCESS_TOKEN          System User long-lived token from Meta
-                                 Business Manager → System Users → Generate Token.
-                                 Scopes: whatsapp_business_messaging,
-                                         whatsapp_business_management.
-  WHATSAPP_PHONE_NUMBER_ID       Phone Number ID from WhatsApp Manager.
-  WHATSAPP_API_VERSION           Graph API version, e.g. v20.0. Default: v20.0.
-  PLATFORM_PUBLIC_URL            Public base URL used in the deep-link
-                                 inside the template (e.g.
-                                 https://myisraelrental.com). No trailing
-                                 slash.
+Each message includes a deep link back to the website so the recipient
+can land on the exact conversation / contract page with one tap.
 
-Templates (must exist + be approved in WhatsApp Manager → Message Templates):
+Modes
+-----
+The module supports two run-modes, chosen automatically by which env
+vars are set, so the same code-path works in dev (Twilio Sandbox) and
+in production (approved business templates):
 
-  Name:     renter_message_notification
-  Category: UTILITY
-  Body:     "Hi {{1}}, you got a new message from {{2}} about your
-             listing on MyIsraelRental. Tap below to read and reply."
-  Button:   URL — dynamic, params: {{1}} = relative path (e.g.
-            /chat/<conversation_id>). Base URL configured in template
-            header should be PLATFORM_PUBLIC_URL.
-  Languages: en, he
+* **Sandbox / free-form body** (dev). Set ``TWILIO_ACCOUNT_SID``,
+  ``TWILIO_AUTH_TOKEN`` and ``TWILIO_WHATSAPP_FROM`` only (the latter
+  is e.g. ``whatsapp:+14155238886``). The recipient must have opted-in
+  to your Sandbox (Twilio Console gives them a "join <word>" message
+  to send first). Outside the 24h conversation window Twilio will
+  refuse, so this is dev-only.
 
-  Name:     contract_signed_notification
-  Category: UTILITY
-  Body:     "Hi {{1}}, {{2}} just signed the rental contract for your
-             property. Tap below to view it."
-  Button:   URL — dynamic, params: {{1}} = relative path.
-  Languages: en, he
+* **Production templates** (live). Additionally set
+  ``TWILIO_CONTENT_SID_RENTER_MESSAGE`` and
+  ``TWILIO_CONTENT_SID_CONTRACT_SIGNED`` to the Content Template SIDs
+  (``HX…``) of the two pre-approved WhatsApp Business templates.
+  When these are present the helpers use ``content_sid`` +
+  ``content_variables`` instead of the free-form body, so messages go
+  through Meta's approval system and can be business-initiated at any
+  time.
+
+The module is **graceful when not configured** — if ``TWILIO_ACCOUNT_SID``
+or ``TWILIO_AUTH_TOKEN`` or ``TWILIO_WHATSAPP_FROM`` is missing, the
+helpers log once and return ``False``. Chat send + contract signing
+flows must NEVER break because WhatsApp creds are missing.
 """
 from __future__ import annotations
 
+import asyncio
+import json
 import logging
 import os
 from typing import Optional
 
-import httpx
-
 log = logging.getLogger(__name__)
 
-_API_BASE = "https://graph.facebook.com"
+# Cached Client — created lazily on first send.
+_client_singleton = None  # type: ignore[var-annotated]
 
 
 def _config() -> Optional[dict]:
-    """Return a dict of WhatsApp creds, or None if the integration is
-    not configured (missing token or phone id). Callers MUST handle
-    None — they should log and skip the send."""
-    token = os.environ.get("WHATSAPP_ACCESS_TOKEN")
-    phone_id = os.environ.get("WHATSAPP_PHONE_NUMBER_ID")
-    if not token or not phone_id:
+    """Return creds dict, or None when the integration isn't configured."""
+    sid = os.environ.get("TWILIO_ACCOUNT_SID")
+    token = os.environ.get("TWILIO_AUTH_TOKEN")
+    sender = os.environ.get("TWILIO_WHATSAPP_FROM")
+    if not (sid and token and sender):
         return None
+    # Some users paste the bare number; tolerate either form.
+    if not sender.startswith("whatsapp:"):
+        sender = f"whatsapp:{sender}"
     return {
+        "sid": sid,
         "token": token,
-        "phone_id": phone_id,
-        "version": os.environ.get("WHATSAPP_API_VERSION", "v20.0"),
+        "sender": sender,
         "public_url": (os.environ.get("PLATFORM_PUBLIC_URL") or "").rstrip("/"),
+        "tpl_renter_message": os.environ.get("TWILIO_CONTENT_SID_RENTER_MESSAGE"),
+        "tpl_contract_signed": os.environ.get("TWILIO_CONTENT_SID_CONTRACT_SIGNED"),
     }
 
 
-def _normalize_number(raw: str) -> str:
-    """Meta requires E.164 without the leading ``+``. Strip everything
-    that isn't a digit. Empty string returned for empty/None input."""
+def _client(cfg: dict):
+    """Lazy Twilio Client. Importing twilio at module import time would
+    slow every other unrelated test, so we defer it to first send."""
+    global _client_singleton
+    if _client_singleton is None:
+        from twilio.rest import Client
+        _client_singleton = Client(cfg["sid"], cfg["token"])
+    return _client_singleton
+
+
+def _to_whatsapp_address(raw: str) -> str:
+    """Normalize a user-entered number to Twilio's ``whatsapp:+E.164``
+    address form. Returns empty string for an empty/invalid input so
+    the caller can short-circuit."""
     if not raw:
         return ""
-    return "".join(ch for ch in raw if ch.isdigit())
+    digits = "".join(ch for ch in raw if ch.isdigit())
+    if not digits:
+        return ""
+    # If the user saved a leading + already, preserve it. Otherwise
+    # assume E.164 with no prefix; Twilio still requires the +.
+    return f"whatsapp:+{digits}"
 
 
-async def _send_template(
-    *, to: str, template_name: str, language: str,
-    body_params: list[str], button_url_param: Optional[str] = None,
+def _build_deep_link(cfg: dict, path: str) -> str:
+    """Build a full https URL from a relative path. If the caller
+    forgot to set ``PLATFORM_PUBLIC_URL`` we still ship the relative
+    path — better a click that fails than a message that never goes
+    out."""
+    path = path.lstrip("/")
+    base = cfg.get("public_url") or ""
+    return f"{base}/{path}" if base else f"/{path}"
+
+
+def _send_blocking(
+    *, to_address: str, body: Optional[str],
+    content_sid: Optional[str], content_variables: Optional[dict], cfg: dict,
 ) -> bool:
-    """Low-level Graph API call. Returns True on 200, False on any
-    failure (logged). Never raises."""
+    """Synchronous Twilio call. We wrap this in ``asyncio.to_thread``
+    from the async helpers so we don't block the FastAPI event loop."""
+    client = _client(cfg)
+    try:
+        kwargs = {"from_": cfg["sender"], "to": to_address}
+        if content_sid:
+            kwargs["content_sid"] = content_sid
+            if content_variables:
+                # Twilio expects a JSON string here.
+                kwargs["content_variables"] = json.dumps(content_variables)
+        else:
+            kwargs["body"] = body or ""
+        msg = client.messages.create(**kwargs)
+        log.info(
+            "WhatsApp sent via Twilio: sid=%s to=%s status=%s",
+            msg.sid, to_address.split("+")[-1][:6] + "***", msg.status,
+        )
+        return True
+    except Exception as exc:  # noqa: BLE001
+        log.warning("Twilio WhatsApp send failed: %s", exc)
+        return False
+
+
+async def _send(
+    *, recipient_phone: str, free_form_body: str,
+    content_sid_env_key: str, content_variables: dict,
+) -> bool:
+    """Shared async dispatch — picks template mode or free-form body
+    based on env-var configuration."""
     cfg = _config()
     if not cfg:
-        log.info("WhatsApp send skipped: integration not configured (no token/phone id)")
+        log.info("WhatsApp send skipped: Twilio not configured (missing SID/token/from)")
         return False
-    to_norm = _normalize_number(to)
-    if not to_norm:
-        log.info("WhatsApp send skipped: recipient has no phone number on file")
+    to_address = _to_whatsapp_address(recipient_phone)
+    if not to_address:
+        log.info("WhatsApp send skipped: no phone number on file")
         return False
+    content_sid = cfg.get(content_sid_env_key)
+    return await asyncio.to_thread(
+        _send_blocking,
+        to_address=to_address,
+        body=free_form_body if not content_sid else None,
+        content_sid=content_sid,
+        content_variables=content_variables if content_sid else None,
+        cfg=cfg,
+    )
 
-    components: list[dict] = [{
-        "type": "body",
-        "parameters": [{"type": "text", "text": p} for p in body_params],
-    }]
-    if button_url_param is not None:
-        components.append({
-            "type": "button",
-            "sub_type": "url",
-            "index": "0",
-            "parameters": [{"type": "text", "text": button_url_param}],
-        })
 
-    payload = {
-        "messaging_product": "whatsapp",
-        "to": to_norm,
-        "type": "template",
-        "template": {
-            "name": template_name,
-            "language": {"code": "he" if language == "he" else "en"},
-            "components": components,
-        },
-    }
-
-    url = f"{_API_BASE}/{cfg['version']}/{cfg['phone_id']}/messages"
-    try:
-        async with httpx.AsyncClient(timeout=10.0) as client:
-            r = await client.post(
-                url,
-                json=payload,
-                headers={"Authorization": f"Bearer {cfg['token']}"},
-            )
-        if r.status_code >= 400:
-            log.warning(
-                "WhatsApp send failed: status=%s template=%s body=%s",
-                r.status_code, template_name, r.text[:300],
-            )
-            return False
-        log.info("WhatsApp sent: template=%s to=%s", template_name, to_norm[:6] + "***")
-        return True
-    except httpx.RequestError as exc:
-        log.warning("WhatsApp send error: %s", exc)
-        return False
-
+# --------------------------------------------------------------------- #
+# Public helpers — keep the names stable; chat.py and bookings.py import #
+# these directly and we don't want to churn those call sites.            #
+# --------------------------------------------------------------------- #
 
 async def send_renter_message_notification(
     *, recipient_phone: str, recipient_name: str, sender_name: str,
     conversation_path: str, language: str = "en",
 ) -> bool:
-    """Notify a lister that a renter messaged them. The deep link
-    points to the in-app chat. ``conversation_path`` should be a
-    relative URL like ``/chat/<conversation_id>`` (the template appends
-    it to the configured base URL)."""
-    return await _send_template(
-        to=recipient_phone,
-        template_name="renter_message_notification",
-        language=language,
-        body_params=[recipient_name or "there", sender_name or "a renter"],
-        button_url_param=conversation_path.lstrip("/"),
+    """Notify a lister that a renter messaged them."""
+    cfg = _config()
+    if not cfg:
+        return False
+    link = _build_deep_link(cfg, conversation_path)
+    name = recipient_name or ("שלום" if language == "he" else "there")
+    sender = sender_name or ("שוכר" if language == "he" else "a renter")
+    body = (
+        f"שלום {name}, קיבלת הודעה חדשה מ-{sender} בנוגע למודעה שלך ב-MyIsraelRental. "
+        f"לקריאה ולתגובה: {link}"
+        if language == "he"
+        else f"Hi {name}, you got a new message from {sender} about your listing "
+             f"on MyIsraelRental. Tap to read and reply: {link}"
+    )
+    return await _send(
+        recipient_phone=recipient_phone,
+        free_form_body=body,
+        content_sid_env_key="tpl_renter_message",
+        content_variables={"1": name, "2": sender, "3": link},
     )
 
 
@@ -155,12 +193,23 @@ async def send_contract_signed_notification(
     *, recipient_phone: str, recipient_name: str, tenant_name: str,
     contract_path: str, language: str = "en",
 ) -> bool:
-    """Notify a lister that a tenant signed the rental contract. The
-    deep link points to the contract view page."""
-    return await _send_template(
-        to=recipient_phone,
-        template_name="contract_signed_notification",
-        language=language,
-        body_params=[recipient_name or "there", tenant_name or "your tenant"],
-        button_url_param=contract_path.lstrip("/"),
+    """Notify a lister that a tenant signed the rental contract."""
+    cfg = _config()
+    if not cfg:
+        return False
+    link = _build_deep_link(cfg, contract_path)
+    name = recipient_name or ("שלום" if language == "he" else "there")
+    tenant = tenant_name or ("השוכר שלך" if language == "he" else "your tenant")
+    body = (
+        f"שלום {name}, {tenant} חתם זה עתה על חוזה השכירות לנכס שלך. "
+        f"לצפייה: {link}"
+        if language == "he"
+        else f"Hi {name}, {tenant} just signed the rental contract for your "
+             f"property. View it: {link}"
+    )
+    return await _send(
+        recipient_phone=recipient_phone,
+        free_form_body=body,
+        content_sid_env_key="tpl_contract_signed",
+        content_variables={"1": name, "2": tenant, "3": link},
     )
