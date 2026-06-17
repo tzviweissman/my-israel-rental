@@ -117,6 +117,28 @@ async def startup_tasks() -> None:
     except Exception as e:  # noqa: BLE001
         logger.warning(f"paypal_webhook_events index creation failed (non-fatal): {e}")
 
+    # Hot-path indexes. Without these every public listings query and
+    # owner-dashboard fetch does a full collection scan — fine at 8
+    # properties, painful at 100+. `background=True` so a long-running
+    # build never blocks startup on a large prod collection.
+    try:
+        await db.properties.create_index([("rental_type", 1), ("status", 1)], background=True)
+        await db.properties.create_index("owner_id", background=True)
+        await db.properties.create_index("area", background=True)
+        await db.properties.create_index("id", unique=True, background=True)
+        await db.properties.create_index("created_at", background=True)
+        await db.bookings.create_index([("property_id", 1), ("status", 1)], background=True)
+        await db.bookings.create_index([("start_date", 1), ("end_date", 1)], background=True)
+        await db.external_bookings.create_index([("start_date", 1), ("end_date", 1)], background=True)
+        await db.admin_blocks.create_index("property_id", background=True)
+        await db.users.create_index("email", unique=True, background=True)
+        await db.users.create_index("id", unique=True, background=True)
+        await db.messages.create_index([("property_id", 1), ("created_at", -1)], background=True)
+        await db.liked_properties.create_index([("user_id", 1), ("property_id", 1)], background=True)
+        logger.info("Hot-path indexes ensured")
+    except Exception as e:  # noqa: BLE001
+        logger.warning(f"hot-path index creation failed (non-fatal): {e}")
+
     # One-time grandfather migration: any pre-existing user that does not
     # carry the new `email_verified` field is treated as verified. This
     # keeps the door open for everyone who signed up before we shipped

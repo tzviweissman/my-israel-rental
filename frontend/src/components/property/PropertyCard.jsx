@@ -2,6 +2,7 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Bed, Bath, Home as HomeIcon, MapPin, Building2, Heart } from 'lucide-react';
 import { getCoverImage } from '../../utils/coverImage';
+import { srcSet } from '../../utils/cdnImage';
 import DefaultImageBadge from './DefaultImageBadge';
 
 /**
@@ -54,14 +55,23 @@ const PropertyCard = ({ property, isLiked, onClick, onToggleLike, convertPrice, 
       onClick={onClick}
       data-testid={`property-card-${property.id}`}
     >
-      <div
-        className="h-36 md:h-64 bg-gray-200 relative"
-        style={{
-          backgroundImage: `url(${heroSrc})`,
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-        }}
-      >
+      <div className="h-36 md:h-64 bg-gray-200 relative overflow-hidden">
+        {/*
+         * Native lazy-loading + srcset. Switching from CSS background-image
+         * to <img loading="lazy"> means off-screen cards no longer download
+         * their hero until the browser is near them — eliminates 30+
+         * simultaneous full-resolution downloads on listing pages with many
+         * results. `decoding="async"` keeps decode off the main thread.
+         */}
+        <img
+          src={heroSrc}
+          srcSet={srcSet(heroSrc, 600)}
+          sizes="(max-width: 768px) 50vw, 33vw"
+          alt={property.title || ''}
+          loading="lazy"
+          decoding="async"
+          className="absolute inset-0 w-full h-full object-cover"
+        />
         {isDefaultImage && <DefaultImageBadge />}
         <button
           onClick={(e) => onToggleLike(e, property.id)}

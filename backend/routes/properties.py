@@ -131,6 +131,18 @@ async def get_properties(
     
     properties = await db.properties.find(query, {"_id": 0}).to_list(1000)
 
+    # Slim the list payload: the public listing grid renders only the
+    # cover image per card, so shipping all 20-30 image URLs per
+    # property is pure waste. A 100-property page with 25 imgs each
+    # would otherwise carry 2500 URLs in the JSON response — trimming
+    # to just the cover drops the response size 20-30x. The detail
+    # endpoint still returns the full array.
+    for p in properties:
+        if p.get("images"):
+            p["images"] = p["images"][:1]
+        # videos are tiny in count (usually 0-1) — leave intact so the
+        # card can still synthesize a video poster when no image exists.
+
     # Stamp `is_featured` on every property so the home page / cards can
     # surface admin-curated picks. The list of featured ids lives in a
     # single ``site_settings`` doc (key='global'), edited via the admin
