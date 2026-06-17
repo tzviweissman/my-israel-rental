@@ -35,6 +35,11 @@ class LanguagePreference(BaseModel):
     language: str  # 'en' or 'he'
 
 
+class WhatsAppNumberUpdate(BaseModel):
+    """Payload for PUT /auth/whatsapp — empty string clears the number."""
+    whatsapp_number: str
+
+
 class PropertyCreate(BaseModel):
     title: str
     description: str | None = None

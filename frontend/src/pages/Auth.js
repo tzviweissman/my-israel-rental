@@ -418,14 +418,23 @@ const Auth = () => {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium mb-2">{t('auth.phone')}</label>
+                  <label className="block text-sm font-medium mb-2">
+                    {t('auth.whatsappNumber', 'WhatsApp number')}
+                    <span className="text-gray-500 font-normal ml-2 text-xs">
+                      ({t('auth.recommendedOptional', 'recommended, optional')})
+                    </span>
+                  </label>
                   <input
                     type="tel"
                     value={formData.phone}
                     onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                    placeholder="+972 50 123 4567"
                     className="w-full px-4 py-3 rounded-lg border border-[#E5E5E5] focus:outline-none focus:ring-2 focus:ring-[#1E6A6A]/50"
                     data-testid="auth-phone-input"
                   />
+                  <p className="text-[11px] text-gray-500 mt-1">
+                    {t('auth.whatsappHelp', "We'll text you when a renter messages you or signs a contract.")}
+                  </p>
                 </div>
 
                 <div>

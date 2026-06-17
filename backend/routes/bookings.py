@@ -1,5 +1,6 @@
 """Auto-extracted from server.py during the 2026-04 refactor."""
 import asyncio
+import logging
 import uuid
 from datetime import UTC, datetime
 from typing import Any
@@ -700,7 +701,9 @@ async def _persist_signed_contract(
 async def _notify_owner_contract_signed(
     booking: dict, property_data: dict, signed_contract_url: str | None,
 ) -> None:
-    """Drop an in-app notification for the owner about the signed contract."""
+    """Drop an in-app notification + WhatsApp ping for the owner about
+    the signed contract. WhatsApp gracefully no-ops when the integration
+    isn't configured or the owner has no phone on file."""
     message = (
         f"The rental contract for {property_data.get('title', 'your property')} "
         "has been signed by the renter. The booking is now fully confirmed!"
@@ -717,6 +720,32 @@ async def _notify_owner_contract_signed(
         "read": False,
         "created_at": datetime.now(UTC).isoformat(),
     })
+
+    # WhatsApp the owner. Best-effort — failure must not break the
+    # contract-signed response. Fetched separately so we don't keep
+    # phone numbers cached in the booking doc.
+    try:
+        owner = await db.users.find_one(
+            {"id": booking['owner_id']},
+            {"_id": 0, "name": 1, "phone": 1, "preferred_language": 1},
+        )
+        renter = await db.users.find_one(
+            {"id": booking['renter_id']}, {"_id": 0, "name": 1},
+        )
+        if owner and owner.get("phone"):
+            from utils.whatsapp import send_contract_signed_notification
+            await send_contract_signed_notification(
+                recipient_phone=owner["phone"],
+                recipient_name=owner.get("name") or "",
+                tenant_name=(renter or {}).get("name") or "your tenant",
+                # Deep link: the owner dashboard booking-detail view.
+                contract_path=f"dashboard?tab=bookings&booking_id={booking['id']}",
+                language=owner.get("preferred_language") or "en",
+            )
+    except Exception as exc:  # noqa: BLE001
+        logging.getLogger(__name__).warning(
+            "WhatsApp notify failed (contract signed): %s", exc
+        )
 
 
 @api_router.post("/bookings/{booking_id}/approve-cancel", response_model=MessageResponse)

@@ -17,6 +17,7 @@ from models import (
     ResetPasswordRequest,
     UserLogin,
     UserRegister,
+    WhatsAppNumberUpdate,
 )
 from models_response import MessageResponse, PasswordResetResponse, TokenResponse, UserPublic
 from routes.deps import create_token, db, logger, verify_token
@@ -339,3 +340,30 @@ async def set_language(pref: LanguagePreference, payload: dict = Depends(verify_
         {"$set": {"preferred_language": pref.language}},
     )
     return {"message": "Language preference saved"}
+
+
+@api_router.put("/auth/whatsapp", response_model=MessageResponse)
+async def set_whatsapp_number(
+    payload_in: WhatsAppNumberUpdate,
+    payload: dict = Depends(verify_token),
+) -> dict:
+    """Update the user's WhatsApp/phone number. Empty string clears it.
+
+    We store this in the same ``phone`` column the rest of the codebase
+    already uses so existing callers (email signatures, chat lister
+    contact info, etc.) keep working without changes. New WhatsApp-send
+    code reads the same field.
+    """
+    raw = (payload_in.whatsapp_number or '').strip()
+    # Light normalisation: collapse internal whitespace, strip everything
+    # except digits and a leading +. We don't try to validate country
+    # codes — that's a job for the WhatsApp provider on send.
+    cleaned = '+' if raw.startswith('+') else ''
+    cleaned += ''.join(ch for ch in raw if ch.isdigit())
+    if cleaned and len(cleaned.lstrip('+')) < 6:
+        raise HTTPException(status_code=400, detail="WhatsApp number looks too short")
+    await db.users.update_one(
+        {"id": payload['user_id']},
+        {"$set": {"phone": cleaned}},
+    )
+    return {"message": "WhatsApp number saved"}

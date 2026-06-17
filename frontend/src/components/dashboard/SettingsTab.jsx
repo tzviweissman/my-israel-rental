@@ -1,15 +1,38 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { KeyRound, EyeOff, Eye, Globe } from 'lucide-react';
+import { KeyRound, EyeOff, Eye, Globe, MessageCircle, Check } from 'lucide-react';
 import { toast } from 'sonner';
 import axios from 'axios';
 
 const SettingsTab = ({ user, token, API }) => {
-  const { i18n } = useTranslation();
+  const { i18n, t } = useTranslation();
   const [language, setLanguage] = useState(
     user?.preferred_language || (i18n.language?.startsWith('he') ? 'he' : 'en')
   );
   const [savingLanguage, setSavingLanguage] = useState(false);
+
+  // WhatsApp number editing — backed by the existing ``phone`` column
+  // (see PUT /auth/whatsapp). We seed from the current user document so
+  // the field shows what we already have on file.
+  const [whatsappNumber, setWhatsappNumber] = useState(user?.phone || '');
+  const [savingWhatsapp, setSavingWhatsapp] = useState(false);
+
+  const handleSaveWhatsapp = async (e) => {
+    e?.preventDefault?.();
+    setSavingWhatsapp(true);
+    try {
+      await axios.put(
+        `${API}/auth/whatsapp`,
+        { whatsapp_number: whatsappNumber },
+        { headers: { Authorization: `Bearer ${token}` } },
+      );
+      toast.success(t('settings.whatsappSaved', 'WhatsApp number saved'));
+    } catch (err) {
+      toast.error(err.response?.data?.detail || 'Failed to save WhatsApp number');
+    } finally {
+      setSavingWhatsapp(false);
+    }
+  };
 
   const handleSaveLanguage = async () => {
     setSavingLanguage(true);
@@ -124,6 +147,49 @@ const SettingsTab = ({ user, token, API }) => {
         >
           {savingLanguage ? i18n.t('dashboard.saving') : i18n.t('dashboard.saveDefaultLanguage')}
         </button>
+      </div>
+
+      {/* WhatsApp number — used for renter-message + contract-signed
+          notifications. Same field powers the public profile / email
+          signature, so editing here updates both contexts. */}
+      <div className="bg-white rounded-2xl border border-gray-200 p-6 max-w-2xl mb-6">
+        <div className="flex items-center gap-3 mb-6">
+          <div className="p-3 rounded-full bg-emerald-50">
+            <MessageCircle size={24} className="text-emerald-600" />
+          </div>
+          <div>
+            <h3 className="text-lg font-bold text-gray-900">
+              {t('settings.whatsappTitle', 'WhatsApp number')}
+            </h3>
+            <p className="text-sm text-gray-500">
+              {t('settings.whatsappHint', "We'll text you when a renter messages you or signs a contract.")}
+            </p>
+          </div>
+        </div>
+        <form onSubmit={handleSaveWhatsapp} className="flex flex-col sm:flex-row gap-3">
+          <input
+            type="tel"
+            value={whatsappNumber}
+            onChange={(e) => setWhatsappNumber(e.target.value)}
+            placeholder="+972 50 123 4567"
+            className="flex-1 px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500"
+            data-testid="settings-whatsapp-input"
+            inputMode="tel"
+            autoComplete="tel"
+          />
+          <button
+            type="submit"
+            disabled={savingWhatsapp}
+            className="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl text-white font-medium hover:opacity-90 transition-all disabled:opacity-60"
+            style={{ backgroundColor: '#1E6A6A' }}
+            data-testid="settings-whatsapp-save-btn"
+          >
+            <Check size={16} /> {savingWhatsapp ? i18n.t('dashboard.saving') : t('common.save', 'Save')}
+          </button>
+        </form>
+        <p className="text-[11px] text-gray-400 mt-2">
+          {t('settings.whatsappLeaveBlank', 'Leave blank to opt out of WhatsApp notifications. International format recommended (+country code).')}
+        </p>
       </div>
 
       <div className="bg-white rounded-2xl border border-gray-200 p-6 max-w-2xl">

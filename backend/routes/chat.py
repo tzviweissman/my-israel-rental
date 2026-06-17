@@ -19,6 +19,7 @@ from routes.deps import db, verify_token
 from utils.chat_translate import detect_language, translate_chat_message
 from utils.email import send_chat_message_email
 from utils.mentions import current_user_role_in_property, extract_mentions
+from utils.whatsapp import send_renter_message_notification
 
 router = APIRouter()
 api_router = router  # alias so existing @api_router decorators work verbatim
@@ -163,7 +164,8 @@ async def _send_chat_email_safe(
             return
 
         receiver = await db.users.find_one(
-            {"id": receiver_id}, {"_id": 0, "email": 1, "name": 1}
+            {"id": receiver_id},
+            {"_id": 0, "email": 1, "name": 1, "phone": 1, "preferred_language": 1},
         )
         if not receiver or not receiver.get("email"):
             return
@@ -203,6 +205,23 @@ async def _send_chat_email_safe(
             },
             upsert=True,
         )
+
+        # Fire WhatsApp ping alongside the email. Uses the same throttle
+        # gate (we're inside it) so a back-and-forth burst doesn't spam
+        # the lister. Graceful no-op when WhatsApp env vars aren't set.
+        if receiver.get("phone"):
+            try:
+                await send_renter_message_notification(
+                    recipient_phone=receiver["phone"],
+                    recipient_name=receiver.get("name") or "",
+                    sender_name=sender_name,
+                    # Deep link: the in-app chat page expects a property_id
+                    # query param so the conversation opens directly.
+                    conversation_path=f"chat?property_id={property_id}&peer_id={sender_id}",
+                    language=receiver.get("preferred_language") or "en",
+                )
+            except Exception as exc:  # noqa: BLE001
+                logger.warning("WhatsApp notify failed (chat): %s", exc)
     except Exception as e:  # noqa: BLE001 - never let chat sends fail
         logger.error("chat email task failed: %s", e)
 
