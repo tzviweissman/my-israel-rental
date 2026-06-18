@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import axios from 'axios';
 import { toast } from 'sonner';
 import {
-  ChevronDown, ChevronUp, MessageCircle, AlertTriangle, BellRing, Loader2, Clock,
+  ChevronDown, ChevronUp, MessageCircle, AlertTriangle, BellRing, Loader2, Clock, Link2,
 } from 'lucide-react';
 import { API } from '../../App';
 import { useApiSWR } from '../../hooks/useApiSWR';
@@ -39,8 +39,39 @@ export const ChatsTab = ({ token }) => {
   );
   const [expandedChat, setExpandedChat] = useState(null);
   const [nudgingKey, setNudgingKey] = useState(null);
+  // Per-conv "Re-attach to surviving listing" inline form: tracks which
+  // row is in input mode, the target property id being typed, and whether
+  // the reattach API call is in flight.
+  const [reattachingKey, setReattachingKey] = useState(null);
+  const [reattachTarget, setReattachTarget] = useState('');
+  const [reattachLoading, setReattachLoading] = useState(false);
 
   const unresponsiveCount = chats.filter((c) => c.owner_unresponsive).length;
+  const orphanCount = chats.filter((c) => c.property_missing).length;
+
+  const submitReattach = async (conv) => {
+    const dst = (reattachTarget || '').trim();
+    if (!dst) return toast.error('Paste the surviving property id');
+    setReattachLoading(true);
+    try {
+      const res = await axios.post(
+        `${API}/admin/chats/reattach`,
+        { from_property_id: conv.property_id, to_property_id: dst },
+        { headers: { Authorization: `Bearer ${token}` } },
+      );
+      const r = res.data.reattached || {};
+      toast.success(
+        `Re-attached to "${res.data.to_property_title}" — ${r.messages} messages, ${r.bookings} bookings moved`,
+      );
+      setReattachingKey(null);
+      setReattachTarget('');
+      refresh();
+    } catch (e) {
+      toast.error(e.response?.data?.detail || 'Re-attach failed');
+    } finally {
+      setReattachLoading(false);
+    }
+  };
 
   const nudgeOwner = async (conv) => {
     setNudgingKey(conv.conv_key);
@@ -62,6 +93,23 @@ export const ChatsTab = ({ token }) => {
 
   return (
     <div data-testid="admin-chats-section">
+      {/* Top alert: count of conversations whose referenced property has
+          been deleted (orphaned chats). The inline re-attach UI on each
+          row fixes them one at a time. */}
+      {orphanCount > 0 && (
+        <div className="mb-4 bg-amber-50 border border-amber-200 rounded-xl p-3 flex items-start gap-3" data-testid="orphan-banner">
+          <Link2 size={18} className="text-amber-700 shrink-0 mt-0.5" />
+          <div className="flex-1">
+            <p className="text-sm font-bold text-amber-900">
+              {orphanCount} {orphanCount === 1 ? 'conversation' : 'conversations'} pointing at deleted listings
+            </p>
+            <p className="text-xs text-amber-800 mt-0.5">
+              These chats open to &quot;Property not found&quot;. Use the <b>Re-attach</b> button on each row to move the messages onto a surviving listing (typically the duplicate&apos;s twin).
+            </p>
+          </div>
+        </div>
+      )}
+
       {/* Top alert: count of conversations where the owner hasn't replied
           for >24h. Clicking expands the first one to make triage fast. */}
       {unresponsiveCount > 0 && (
@@ -156,6 +204,59 @@ export const ChatsTab = ({ token }) => {
                     {nudgingKey === conv.conv_key ? <Loader2 size={12} className="animate-spin" /> : <BellRing size={12} />}
                     Nudge owner
                   </button>
+                </div>
+              )}
+
+              {/* Orphan-listing recovery: when the referenced property was
+                  deleted (e.g. old duplicate cleanup) the chat opens to
+                  "Property not found". This inline form lets an admin
+                  re-point the entire conversation at the surviving twin
+                  via the new POST /admin/chats/reattach endpoint. */}
+              {conv.property_missing && (
+                <div className="border-t border-amber-100 bg-amber-50/60 px-5 py-2.5" data-testid={`orphan-bar-${idx}`}>
+                  {reattachingKey === conv.conv_key ? (
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="text-xs text-amber-900 font-semibold shrink-0">Re-attach to listing id:</span>
+                      <input
+                        type="text"
+                        value={reattachTarget}
+                        onChange={(e) => setReattachTarget(e.target.value)}
+                        placeholder="surviving property id (uuid)"
+                        className="flex-1 min-w-[200px] text-xs font-mono px-2 py-1.5 rounded border border-amber-300 focus:border-amber-500 focus:outline-none"
+                        data-testid={`reattach-input-${idx}`}
+                      />
+                      <button
+                        type="button"
+                        onClick={(e) => { e.stopPropagation(); submitReattach(conv); }}
+                        disabled={reattachLoading || !reattachTarget.trim()}
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-amber-600 text-white text-xs font-semibold hover:bg-amber-700 disabled:opacity-50"
+                        data-testid={`reattach-submit-${idx}`}
+                      >
+                        {reattachLoading ? <Loader2 size={12} className="animate-spin" /> : <Link2 size={12} />}
+                        Re-attach
+                      </button>
+                      <button
+                        type="button"
+                        onClick={(e) => { e.stopPropagation(); setReattachingKey(null); setReattachTarget(''); }}
+                        className="text-xs text-gray-600 hover:text-gray-800"
+                      >Cancel</button>
+                    </div>
+                  ) : (
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <p className="text-xs text-amber-900 flex-1 min-w-[180px]">
+                        <b>Listing removed.</b> Chat is orphaned — clicking through opens &quot;Property not found&quot;.
+                        Original id: <code className="bg-white px-1 rounded font-mono text-[10px]">{conv.property_id}</code>
+                      </p>
+                      <button
+                        type="button"
+                        onClick={(e) => { e.stopPropagation(); setReattachingKey(conv.conv_key); setReattachTarget(''); }}
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-amber-600 text-white text-xs font-semibold hover:bg-amber-700"
+                        data-testid={`reattach-open-${idx}`}
+                      >
+                        <Link2 size={12} /> Re-attach to surviving listing
+                      </button>
+                    </div>
+                  )}
                 </div>
               )}
 

@@ -424,6 +424,7 @@ async def resolve_duplicates(
         )
 
     deleted_total = 0
+    reattached_total = {"messages": 0, "bookings": 0, "likes": 0, "nudges": 0, "blocks": 0, "subleases": 0}
     report: list[dict] = []
     for (owner_id, addr, rt), props in groups.items():
         if len(props) < 2:
@@ -446,15 +447,79 @@ async def resolve_duplicates(
             losers = sorted_props[:-1]
 
         loser_ids = [p["id"] for p in losers]
-        if loser_ids:
-            res = await db.properties.delete_many({"id": {"$in": loser_ids}})
-            deleted_total += res.deleted_count
-            report.append({
-                "key": key_str,
-                "kept_id": keeper["id"],
-                "deleted_ids": loser_ids,
-                "deleted_count": res.deleted_count,
+        if not loser_ids:
+            continue
+
+        keeper_id = keeper["id"]
+        # Re-attach everything that was hanging off the losers to the keeper
+        # BEFORE we delete the loser docs. Without this, a renter's
+        # inquiry about the deleted twin becomes a dead chat that opens
+        # to "Property not found". Duplicates are by definition the
+        # same physical apartment (same owner + same address + same
+        # rental_type), so moving the chats/bookings/likes is safe.
+        msgs_r = await db.messages.update_many(
+            {"property_id": {"$in": loser_ids}},
+            {"$set": {"property_id": keeper_id}},
+        )
+        bookings_r = await db.bookings.update_many(
+            {"property_id": {"$in": loser_ids}},
+            {"$set": {"property_id": keeper_id}},
+        )
+        nudges_r = await db.chat_nudges.update_many(
+            {"property_id": {"$in": loser_ids}},
+            {"$set": {"property_id": keeper_id}},
+        )
+        blocks_r = await db.admin_blocks.update_many(
+            {"property_id": {"$in": loser_ids}},
+            {"$set": {"property_id": keeper_id}},
+        )
+        subleases_r = await db.subleases.update_many(
+            {"original_property_id": {"$in": loser_ids}},
+            {"$set": {"original_property_id": keeper_id}},
+        )
+        # Likes need extra care: a user might have liked BOTH the keeper
+        # and a loser. Re-pointing would create a duplicate row. Drop the
+        # loser-side likes for any user who already liked the keeper, then
+        # re-point the rest.
+        keeper_likers = {
+            row["user_id"]
+            async for row in db.liked_properties.find(
+                {"property_id": keeper_id}, {"_id": 0, "user_id": 1}
+            )
+        }
+        if keeper_likers:
+            await db.liked_properties.delete_many({
+                "property_id": {"$in": loser_ids},
+                "user_id": {"$in": list(keeper_likers)},
             })
+        likes_r = await db.liked_properties.update_many(
+            {"property_id": {"$in": loser_ids}},
+            {"$set": {"property_id": keeper_id}},
+        )
+
+        reattached_total["messages"] += msgs_r.modified_count
+        reattached_total["bookings"] += bookings_r.modified_count
+        reattached_total["likes"] += likes_r.modified_count
+        reattached_total["nudges"] += nudges_r.modified_count
+        reattached_total["blocks"] += blocks_r.modified_count
+        reattached_total["subleases"] += subleases_r.modified_count
+
+        res = await db.properties.delete_many({"id": {"$in": loser_ids}})
+        deleted_total += res.deleted_count
+        report.append({
+            "key": key_str,
+            "kept_id": keeper_id,
+            "deleted_ids": loser_ids,
+            "deleted_count": res.deleted_count,
+            "reattached": {
+                "messages": msgs_r.modified_count,
+                "bookings": bookings_r.modified_count,
+                "likes": likes_r.modified_count,
+                "nudges": nudges_r.modified_count,
+                "blocks": blocks_r.modified_count,
+                "subleases": subleases_r.modified_count,
+            },
+        })
 
     if deleted_total:
         await publish("invalidate", {
@@ -464,8 +529,101 @@ async def resolve_duplicates(
         "mode": req.mode,
         "deleted": deleted_total,
         "groups_resolved": len(report),
+        "reattached": reattached_total,
         "report": report,
     }
+
+
+
+class ReattachChatsRequest(BaseModel):
+    """Move every chat / booking / like / block that points at one
+    property_id over to another. Used to rescue orphan conversations
+    when a duplicate listing was deleted in the past without re-linking.
+    """
+    from_property_id: str
+    to_property_id: str
+
+
+@api_router.post("/admin/chats/reattach")
+async def admin_reattach_chats(
+    req: ReattachChatsRequest, payload: dict = Depends(verify_token),
+) -> dict:
+    """Manually re-point all references from one property_id to another.
+
+    Use case: a duplicate was deleted before we shipped the
+    auto-reattach on duplicate-resolve. The renter's chat now opens
+    "Property not found"; pasting the dead id + the surviving twin's id
+    here fixes it. Validates the target exists. Source must NOT exist
+    (we don't merge two live listings via this API)."""
+    if payload['role'] != 'admin':
+        raise HTTPException(status_code=403, detail="Admin access required")
+
+    src = (req.from_property_id or "").strip()
+    dst = (req.to_property_id or "").strip()
+    if not src or not dst:
+        raise HTTPException(status_code=400, detail="Both property ids are required")
+    if src == dst:
+        raise HTTPException(status_code=400, detail="Source and target must differ")
+
+    dst_doc = await db.properties.find_one({"id": dst}, {"_id": 0, "id": 1, "title": 1})
+    if not dst_doc:
+        raise HTTPException(status_code=404, detail=f"Target property '{dst}' not found")
+    src_doc = await db.properties.find_one({"id": src}, {"_id": 0, "id": 1})
+    if src_doc:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Source property '{src}' still exists — use the duplicate resolver to merge two live listings",
+        )
+
+    msgs_r = await db.messages.update_many(
+        {"property_id": src}, {"$set": {"property_id": dst}},
+    )
+    bookings_r = await db.bookings.update_many(
+        {"property_id": src}, {"$set": {"property_id": dst}},
+    )
+    nudges_r = await db.chat_nudges.update_many(
+        {"property_id": src}, {"$set": {"property_id": dst}},
+    )
+    blocks_r = await db.admin_blocks.update_many(
+        {"property_id": src}, {"$set": {"property_id": dst}},
+    )
+    subleases_r = await db.subleases.update_many(
+        {"original_property_id": src}, {"$set": {"original_property_id": dst}},
+    )
+    # Likes need the same de-dupe pass as the duplicate resolver: a user
+    # who already liked the destination would otherwise end up with a
+    # second row that points at the same property.
+    keeper_likers = {
+        row["user_id"]
+        async for row in db.liked_properties.find(
+            {"property_id": dst}, {"_id": 0, "user_id": 1}
+        )
+    }
+    if keeper_likers:
+        await db.liked_properties.delete_many({
+            "property_id": src, "user_id": {"$in": list(keeper_likers)},
+        })
+    likes_r = await db.liked_properties.update_many(
+        {"property_id": src}, {"$set": {"property_id": dst}},
+    )
+
+    await publish("invalidate", {
+        "prefixes": ["/api/chat", "/api/admin/chats", "/api/properties"],
+    })
+    return {
+        "from_property_id": src,
+        "to_property_id": dst,
+        "to_property_title": dst_doc.get("title"),
+        "reattached": {
+            "messages": msgs_r.modified_count,
+            "bookings": bookings_r.modified_count,
+            "likes": likes_r.modified_count,
+            "nudges": nudges_r.modified_count,
+            "blocks": blocks_r.modified_count,
+            "subleases": subleases_r.modified_count,
+        },
+    }
+
 
 
 class BulkDeletePropertiesRequest(BaseModel):
@@ -1004,6 +1162,10 @@ async def get_all_chats(payload: dict = Depends(verify_token)) -> list[dict]:
                 "property_id": msg["property_id"],
                 "property_title": (prop or {}).get("title", "Unknown"),
                 "owner_id": (prop or {}).get("owner_id"),
+                # True when the referenced property has been deleted — lets
+                # the admin UI render a "Listing removed — re-attach to a
+                # surviving listing?" badge with a one-click resolver.
+                "property_missing": prop is None,
                 "participants": [
                     {"id": msg["sender_id"], "name": sender.get("name", "Unknown"), "role": sender.get("role", ""), "email": sender.get("email", "")},
                     {"id": msg["receiver_id"], "name": receiver.get("name", "Unknown"), "role": receiver.get("role", ""), "email": receiver.get("email", "")},

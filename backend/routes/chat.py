@@ -367,6 +367,7 @@ async def get_conversations(payload: dict = Depends(verify_token)) -> list[dict]
             conversations[conv_key] = {
                 "property_id": msg['property_id'],
                 "property_title": property_data.get('title', 'Unknown') if property_data else 'Unknown',
+                "property_missing": property_data is None,
                 "other_user": other_user if other_user else {},
                 "last_message": msg['message'],
                 "last_message_time": msg['created_at'],
