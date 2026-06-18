@@ -1,9 +1,9 @@
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useState, useEffect, useContext, useRef, useCallback } from 'react';
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import axios from 'axios';
 import { API, AuthContext } from '../App';
-import { Filter, Palmtree, Sun, Sparkles } from 'lucide-react';
+import { Filter, Palmtree, Sun, Sparkles, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import NotifyMeCard from '../components/NotifyMeCard';
 import { HOLIDAY_WINDOWS } from '../constants/holidayWindows';
@@ -45,6 +45,13 @@ const Properties = () => {
     return base;
   })();
   const [filters, setFilters] = useState(initialFilters);
+  // Pagination — `properties` accumulates pages 1..N as the user scrolls.
+  // `hasMore` flips false when the latest fetch returns < PAGE_SIZE rows;
+  // `loadingMore` gates the IntersectionObserver to one inflight request.
+  const PAGE_SIZE = 24;
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
   const [showFilters, setShowFilters] = useState(
     !!(urlSearchParams.get('area') || urlSearchParams.get('min_bedrooms') || urlSearchParams.get('max_price'))
   );
@@ -124,8 +131,9 @@ const Properties = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [type]);
 
-  const fetchProperties = async () => {
+  const fetchProperties = async (pageOverride = 1, append = false) => {
     try {
+      if (append) setLoadingMore(true);
       const params = new URLSearchParams();
       // The URL `type` segment is the source of truth for the rental_type
       // filter when navigating between /properties/<type> pages — `filters`
@@ -159,6 +167,11 @@ const Properties = () => {
       if (filters.date_from) params.append('date_from', filters.date_from);
       if (filters.date_to) params.append('date_to', filters.date_to);
       if (filters.min_price || filters.max_price) params.append('currency', priceCurrency);
+      // Server-side pagination — keeps first paint fast no matter how
+      // many listings the catalog grows to. Subleases are merged in
+      // client-side on the holiday pages (separate endpoint, no paging).
+      params.append('page', String(pageOverride));
+      params.append('limit', String(PAGE_SIZE));
 
       const response = await axios.get(`${API}/properties?${params.toString()}`);
       let merged = response.data;
@@ -166,7 +179,9 @@ const Properties = () => {
       // On Sukkot/Pesach pages, also pull matching subleases and merge them
       // into the grid. Subleases are a separate entity (not in the
       // `properties` collection), so they'd otherwise be invisible here.
-      if (holidayTag) {
+      // Only attach subleases on page 1 — they're a fixed-size sidecar
+      // list, not paginated alongside properties.
+      if (holidayTag && pageOverride === 1) {
         try {
           const subRes = await axios.get(
             `${API}/subleases?holiday_tag=${encodeURIComponent(holidayTag)}`,
@@ -181,11 +196,42 @@ const Properties = () => {
         }
       }
 
-      setProperties(merged);
+      // "Less than a full page" is the signal that we've hit the tail.
+      setHasMore(response.data.length === PAGE_SIZE);
+      setPage(pageOverride);
+      if (append) {
+        setProperties((prev) => [...prev, ...merged]);
+      } else {
+        setProperties(merged);
+      }
     } catch (error) {
       console.error('Failed to fetch properties', error);
+    } finally {
+      if (append) setLoadingMore(false);
     }
   };
+
+  // IntersectionObserver-backed "load more when sentinel scrolls into
+  // view". Attached via the callback ref below on the empty <div> we
+  // render right under the grid. Using a ref-callback rather than a
+  // useRef + useEffect lets the observer rebind whenever the sentinel
+  // unmounts (filter change clears results) or remounts (results come back).
+  const loadingSentinelRef = useRef(null);
+  const observerRef = useRef(null);
+  const sentinelRefCb = useCallback((node) => {
+    if (observerRef.current) observerRef.current.disconnect();
+    if (!node) return;
+    observerRef.current = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && hasMore && !loadingMore) {
+          fetchProperties(page + 1, true);
+        }
+      },
+      { rootMargin: '400px' },  // start fetching ~one viewport before reaching the sentinel
+    );
+    observerRef.current.observe(node);
+    loadingSentinelRef.current = node;
+  }, [hasMore, loadingMore, page]);  // eslint-disable-line react-hooks/exhaustive-deps
 
   // Shape a sublease doc into a property-card-compatible object so the
   // existing grid renderer works unchanged. `isSublease=true` lets the card
@@ -318,9 +364,16 @@ const Properties = () => {
     setDateRange({ from: undefined, to: undefined });
     setPriceRange([0, PRICE_MAX]);
     setPriceCurrency('ILS');
+    setPage(1);
+    setHasMore(true);
     const params = new URLSearchParams();
     if (cleared.rental_type && cleared.rental_type !== 'all') params.append('rental_type', cleared.rental_type);
-    axios.get(`${API}/properties?${params.toString()}`).then(res => setProperties(res.data)).catch(() => {});
+    params.append('page', '1');
+    params.append('limit', String(PAGE_SIZE));
+    axios.get(`${API}/properties?${params.toString()}`).then(res => {
+      setProperties(res.data);
+      setHasMore(res.data.length === PAGE_SIZE);
+    }).catch(() => {});
   };
 
   const handlePriceSliderChange = (values) => {
@@ -359,6 +412,8 @@ const Properties = () => {
         params.append('holiday_tag', winKey);
         params.append('date_from', win.start);
         params.append('date_to', win.end);
+        params.append('page', '1');
+        params.append('limit', String(PAGE_SIZE));
         const [propsRes, subsRes] = await Promise.all([
           axios.get(`${API}/properties?${params.toString()}`),
           axios
@@ -373,6 +428,8 @@ const Properties = () => {
         });
         const merged = [...propsRes.data, ...applyPriceFilter(filteredSubs.map(normalizeSublease))];
         setProperties(merged);
+        setPage(1);
+        setHasMore(propsRes.data.length === PAGE_SIZE);
         toast.success(`Showing homes available during ${win.label}`);
       } catch (err) {
         console.error('Failed to apply holiday filter', err);
@@ -512,6 +569,24 @@ const Properties = () => {
             />
           ))}
         </div>
+
+        {/* Infinite-scroll sentinel + loading spinner. Sits below the grid;
+            IntersectionObserver triggers the next page fetch ~one viewport
+            before it actually scrolls into view (rootMargin: 400px). */}
+        {properties.length > 0 && hasMore && (
+          <div
+            ref={sentinelRefCb}
+            className="flex items-center justify-center py-8 text-gray-400 text-sm"
+            data-testid="properties-infinite-sentinel"
+          >
+            {loadingMore ? (
+              <span className="inline-flex items-center gap-2">
+                <Loader2 size={16} className="animate-spin" />
+                {t('filters.loadingMore') || 'Loading more…'}
+              </span>
+            ) : null}
+          </div>
+        )}
 
         {properties.length === 0 && (
           <div className="text-center py-16" data-testid="no-results-empty-state">

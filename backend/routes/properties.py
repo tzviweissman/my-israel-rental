@@ -97,7 +97,9 @@ async def get_properties(
     has_elevator: bool | None = None,
     condition: str | None = None,
     date_from: str | None = None,
-    date_to: str | None = None
+    date_to: str | None = None,
+    page: int = 1,
+    limit: int | None = None,
 ) -> list[dict]:
     query: dict = {}
     if rental_type:
@@ -214,6 +216,16 @@ async def get_properties(
                 booked_property_ids.add(b['property_id'])
         properties = [p for p in properties if p['id'] not in booked_property_ids]
     
+    # Pagination — applied AFTER all filters (price + date overlap filters
+    # are post-query in Python, so DB-level skip/limit would slice the wrong
+    # set). When `limit` is omitted, behavior is unchanged: return everything
+    # (capped at the original 1000) so existing callers (Home, Dashboard,
+    # admin tooling) don't break. The frontend infers "no more pages" when
+    # the returned slice is shorter than `limit`.
+    if limit is not None and limit > 0:
+        start = max(0, (page - 1) * limit)
+        properties = properties[start:start + limit]
+
     return properties
 
 
