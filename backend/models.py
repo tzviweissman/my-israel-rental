@@ -40,6 +40,16 @@ class WhatsAppNumberUpdate(BaseModel):
     whatsapp_number: str
 
 
+class RoleUpdate(BaseModel):
+    """Payload for PUT /auth/role — self-service role switch for users
+    who picked the wrong role at signup (e.g. accidentally chose Renter
+    when they meant Lister/Owner). Only the renter→owner upgrade path
+    is allowed via this endpoint; downgrades or admin promotion would
+    orphan listings / leak permissions.
+    """
+    role: str  # 'owner' (only valid value for now)
+
+
 class PropertyCreate(BaseModel):
     title: str
     description: str | None = None

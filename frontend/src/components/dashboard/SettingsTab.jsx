@@ -1,11 +1,13 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import { useTranslation } from 'react-i18next';
-import { KeyRound, EyeOff, Eye, Globe, MessageCircle, Check } from 'lucide-react';
+import { KeyRound, EyeOff, Eye, Globe, MessageCircle, Check, Home as HomeIcon } from 'lucide-react';
 import { toast } from 'sonner';
 import axios from 'axios';
+import { AuthContext } from '../../App';
 
 const SettingsTab = ({ user, token, API }) => {
   const { i18n, t } = useTranslation();
+  const { login } = useContext(AuthContext);
   const [language, setLanguage] = useState(
     user?.preferred_language || (i18n.language?.startsWith('he') ? 'he' : 'en')
   );
@@ -16,6 +18,35 @@ const SettingsTab = ({ user, token, API }) => {
   // the field shows what we already have on file.
   const [whatsappNumber, setWhatsappNumber] = useState(user?.phone || '');
   const [savingWhatsapp, setSavingWhatsapp] = useState(false);
+
+  // Role switch: renters who accidentally picked the wrong role at
+  // signup can upgrade to lister in one click. Owners/managers/admins
+  // never see this card — the upgrade is one-way (downgrades would
+  // orphan listings, admin promotion is a privilege boundary).
+  const [switchingRole, setSwitchingRole] = useState(false);
+  const canSwitchToLister = user?.role === 'renter';
+
+  const handleSwitchToLister = async () => {
+    if (!window.confirm(
+      t('settings.switchRoleConfirm', 'Switch your account from Renter to Lister? Your dashboard will change to show listing management tools. (This cannot be undone from settings — contact support to switch back.)'),
+    )) return;
+    setSwitchingRole(true);
+    try {
+      const res = await axios.put(
+        `${API}/auth/role`,
+        { role: 'owner' },
+        { headers: { Authorization: `Bearer ${token}` } },
+      );
+      // Swap the new JWT + user into the auth context so the rest of the
+      // app (Navigation, Dashboard, gating) sees the new role immediately.
+      login(res.data.token, res.data.user);
+      toast.success(res.data.message || 'You are now a lister');
+    } catch (err) {
+      toast.error(err.response?.data?.detail || 'Failed to switch role');
+    } finally {
+      setSwitchingRole(false);
+    }
+  };
 
   const handleSaveWhatsapp = async (e) => {
     e?.preventDefault?.();
@@ -95,6 +126,39 @@ const SettingsTab = ({ user, token, API }) => {
   return (
     <div>
       <h2 className="text-2xl font-bold mb-6" style={{ fontFamily: 'Playfair Display' }}>{i18n.t('dashboard.accountSettings')}</h2>
+
+      {/* Renter → Lister upgrade card. Only renders when role === 'renter'
+          so existing owners/managers/admins don't see a no-op control. */}
+      {canSwitchToLister && (
+        <div className="bg-white rounded-2xl border border-gray-200 p-6 max-w-2xl mb-6" data-testid="role-switch-card">
+          <div className="flex items-center gap-3 mb-4">
+            <div className="p-3 rounded-full bg-[#D4AF37]/15">
+              <HomeIcon size={24} className="text-[#D4AF37]" />
+            </div>
+            <div>
+              <h3 className="text-lg font-bold text-gray-900">
+                {t('settings.becomeListerTitle', 'Have a place to list?')}
+              </h3>
+              <p className="text-sm text-gray-500">
+                {t('settings.becomeListerHint', 'Switch your account from Renter to Lister to start posting properties for rent.')}
+              </p>
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={handleSwitchToLister}
+            disabled={switchingRole}
+            className="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl text-white font-medium hover:opacity-90 transition-all disabled:opacity-60"
+            style={{ backgroundColor: '#1E6A6A' }}
+            data-testid="switch-to-lister-btn"
+          >
+            <HomeIcon size={16} /> {switchingRole ? t('dashboard.saving', 'Saving…') : t('settings.becomeListerCta', 'Switch to lister')}
+          </button>
+          <p className="text-[11px] text-gray-400 mt-2">
+            {t('settings.becomeListerNote', "We'll keep your saved searches and favorites. To switch back to Renter, contact support.")}
+          </p>
+        </div>
+      )}
 
       {/* Language preference */}
       <div className="bg-white rounded-2xl border border-gray-200 p-6 max-w-2xl mb-6">

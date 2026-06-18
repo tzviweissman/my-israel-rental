@@ -15,6 +15,7 @@ from models import (
     ForgotPasswordRequest,
     LanguagePreference,
     ResetPasswordRequest,
+    RoleUpdate,
     UserLogin,
     UserRegister,
     WhatsAppNumberUpdate,
@@ -367,3 +368,44 @@ async def set_whatsapp_number(
         {"$set": {"phone": cleaned}},
     )
     return {"message": "WhatsApp number saved"}
+
+
+
+@api_router.put("/auth/role")
+async def set_user_role(payload_in: RoleUpdate, payload: dict = Depends(verify_token)) -> dict:
+    """Self-service "I picked the wrong role at signup" fix.
+
+    Only the renter → owner upgrade is permitted. Owners cannot
+    downgrade (would orphan their listings under a role that doesn't
+    own the dashboard); admins cannot self-promote/demote (privilege
+    boundary). Returns a fresh JWT with the new role embedded so the
+    frontend can swap it in without a logout/login cycle.
+    """
+    target = (payload_in.role or "").strip().lower()
+    if target != "owner":
+        raise HTTPException(status_code=400, detail="Only the renter → owner switch is supported here")
+
+    current_role = payload.get("role")
+    if current_role == "owner":
+        raise HTTPException(status_code=400, detail="You are already a lister")
+    if current_role != "renter":
+        # Managers / admins must not be flipped via this endpoint.
+        raise HTTPException(status_code=403, detail=f"Cannot switch role from '{current_role}' here")
+
+    res = await db.users.update_one(
+        {"id": payload["user_id"], "role": "renter"},
+        {"$set": {"role": "owner"}},
+    )
+    if res.matched_count == 0:
+        raise HTTPException(status_code=404, detail="User not found or role already changed")
+
+    user = await db.users.find_one(
+        {"id": payload["user_id"]},
+        {"_id": 0, "id": 1, "email": 1, "name": 1, "role": 1, "email_verified": 1, "phone": 1, "preferred_language": 1},
+    )
+    new_token = create_token(user["id"], user["role"])
+    return {
+        "token": new_token,
+        "user": user,
+        "message": "You're now set up as a lister. Welcome aboard!",
+    }

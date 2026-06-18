@@ -13,6 +13,13 @@ Build a bilingual (English/Hebrew) rental website named MyIsraelRental.com with 
 ## What's Been Implemented
 
 
+- [x] **Renter → Lister Self-Service Role Switch (2026-06-17)**: User requested an option for renters who accidentally picked the wrong role at signup to switch themselves to Lister without contacting support.
+  - **Backend** (`routes/auth.py::set_user_role` + new `RoleUpdate` model): new `PUT /auth/role {role: "owner"}` endpoint. Only the renter→owner direction is permitted — owners can't downgrade (would orphan their listings), admins/managers can't self-flip (privilege boundary). Returns a fresh JWT with the new role embedded so the frontend can swap auth state without a logout/login cycle.
+  - **Frontend** (`components/dashboard/SettingsTab.jsx`): new "Have a place to list?" card at the top of Settings, rendered only when `user.role === 'renter'`. One-click upgrade with confirm prompt; on success, calls `login(newToken, newUser)` from `AuthContext` so the rest of the app (Navigation, Dashboard tabs, gating) sees the new role immediately. Strings are i18n-ready with English fallbacks (Hebrew can be filled in later).
+  - **Test coverage**: new `tests/test_role_switch.py` (5 tests) — happy path (role flips, new token issued, /auth/me reflects new role), double-upgrade rejected, only `owner` target accepted, admins can't self-flip, auth required. 5/5 green.
+  - Files: `backend/models.py`, `backend/routes/auth.py`, `backend/tests/test_role_switch.py`, `frontend/src/components/dashboard/SettingsTab.jsx`.
+
+
 - [x] **CSV Importer "Sync Photos" Recovery Mode (2026-06-17)**: User reported many vacation rentals showing no photos on production after a half-finished import (background mirror was killed by a backend restart, leaving listings with empty `images` or partial source-URL state). Re-uploading the CSV in default mode just skipped them as duplicates.
   - **Backend** (`routes/admin_import.py::commit_property_import`): added `mode: str = "create"` field to `PropertyCommitRequest`. When `mode="sync_photos"`, a duplicate listing is NOT skipped — instead its `images`/`videos` are replaced with the CSV's and `mirror_pending=True` is set so the background task re-mirrors to Cloudinary. Listings already 100% on Cloudinary are skipped to avoid duplicate uploads; mixed/empty/source-only listings are re-synced. Default `mode="create"` keeps the original skip-duplicates behavior so existing flows are unchanged.
   - **Frontend** (`components/admin/ImportTab.jsx`): new amber-themed radio toggle right above the Commit button — "Skip duplicates (default)" vs "Sync photos onto existing listings". Commit button label flips to "Sync photos (N rows)" when the recovery mode is active.
