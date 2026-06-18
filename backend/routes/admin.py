@@ -307,7 +307,7 @@ async def list_duplicate_listings(payload: dict = Depends(verify_token)) -> dict
     """
     if payload['role'] != 'admin':
         raise HTTPException(status_code=403, detail="Admin access required")
-    from utils.dedupe import normalize_address
+    from utils.dedupe import dedupe_signature
     # Pull the fields needed to group AND to help the admin decide which
     # copy to keep (image count, cover URL, age).
     rows = await db.properties.find(
@@ -316,21 +316,28 @@ async def list_duplicate_listings(payload: dict = Depends(verify_token)) -> dict
             "_id": 0, "id": 1, "owner_id": 1, "title": 1, "address": 1,
             "rental_type": 1, "created_at": 1, "images": 1,
             "description": 1, "monthly_price": 1, "nightly_price": 1,
+            "bedrooms": 1, "floor": 1,
         },
     ).to_list(5000)
 
-    # Group by (owner_id, normalized_address, rental_type)
-    groups: dict[tuple[str, str, str], list[dict]] = {}
+    # Group by composite dedupe signature (owner_id, normalized_address,
+    # rental_type, bedrooms, floor). Distinct units in the same building
+    # — common in Jerusalem — no longer collapse into a single bogus group.
+    groups: dict[tuple, list[dict]] = {}
     for r in rows:
-        addr = normalize_address(r.get("address"))
-        rt = r.get("rental_type")
-        if not addr or not rt or not r.get("owner_id"):
+        sig = dedupe_signature(
+            owner_id=r.get("owner_id"),
+            address=r.get("address"),
+            rental_type=r.get("rental_type"),
+            bedrooms=r.get("bedrooms"),
+            floor=r.get("floor"),
+        )
+        if sig is None:
             continue
-        key = (r["owner_id"], addr, rt)
         # Trim each property to the shape the admin UI needs — keeps the
         # response payload small even when there are dozens of groups.
         images = r.get("images") or []
-        groups.setdefault(key, []).append({
+        groups.setdefault(sig, []).append({
             "id": r["id"],
             "title": r.get("title"),
             "created_at": r.get("created_at"),
@@ -339,13 +346,16 @@ async def list_duplicate_listings(payload: dict = Depends(verify_token)) -> dict
             "description_length": len(r.get("description") or ""),
             "monthly_price": r.get("monthly_price"),
             "nightly_price": r.get("nightly_price"),
+            "bedrooms": r.get("bedrooms"),
+            "floor": r.get("floor"),
         })
 
     # Keep only groups with 2+ properties
     out = []
-    for (owner_id, addr, rt), props in groups.items():
+    for sig, props in groups.items():
         if len(props) < 2:
             continue
+        owner_id, addr, rt, bedrooms, floor = sig
         owner = await db.users.find_one({"id": owner_id}, {"_id": 0, "name": 1, "email": 1})
         out.append({
             "owner_id": owner_id,
@@ -353,6 +363,8 @@ async def list_duplicate_listings(payload: dict = Depends(verify_token)) -> dict
             "owner_email": owner.get("email") if owner else None,
             "address": addr,
             "rental_type": rt,
+            "bedrooms": bedrooms,
+            "floor": floor,
             "properties": sorted(props, key=lambda p: p.get("created_at", "")),
         })
     # Newest collisions first — they're the freshest cleanup targets.
@@ -392,23 +404,30 @@ async def resolve_duplicates(
             detail="mode must be one of: keep_newest, keep_oldest, keep_richest",
         )
 
-    from utils.dedupe import normalize_address
+    from utils.dedupe import dedupe_signature
     rows = await db.properties.find(
         {"status": {"$in": ["active", "pending", "draft"]}},
         {
             "_id": 0, "id": 1, "owner_id": 1, "address": 1, "rental_type": 1,
             "created_at": 1, "images": 1, "description": 1,
+            "bedrooms": 1, "floor": 1,
         },
     ).to_list(5000)
 
-    # Same grouping logic as /admin/duplicates.
-    groups: dict[tuple[str, str, str], list[dict]] = {}
+    # Same grouping logic as /admin/duplicates — composite signature so
+    # distinct units at the same building address don't collide.
+    groups: dict[tuple, list[dict]] = {}
     for r in rows:
-        addr = normalize_address(r.get("address"))
-        rt = r.get("rental_type")
-        if not addr or not rt or not r.get("owner_id"):
+        sig = dedupe_signature(
+            owner_id=r.get("owner_id"),
+            address=r.get("address"),
+            rental_type=r.get("rental_type"),
+            bedrooms=r.get("bedrooms"),
+            floor=r.get("floor"),
+        )
+        if sig is None:
             continue
-        groups.setdefault((r["owner_id"], addr, rt), []).append(r)
+        groups.setdefault(sig, []).append(r)
 
     target_keys = (
         set(req.keys) if req.keys is not None else None
@@ -446,10 +465,13 @@ async def resolve_duplicates(
     deleted_total = 0
     reattached_total = {"messages": 0, "bookings": 0, "likes": 0, "nudges": 0, "blocks": 0, "subleases": 0}
     report: list[dict] = []
-    for (owner_id, addr, rt), props in groups.items():
+    for sig, props in groups.items():
         if len(props) < 2:
             continue
-        key_str = f"{owner_id}|{addr}|{rt}"
+        owner_id, addr, rt, bedrooms, floor = sig
+        # Group key string: matches the shape returned by /admin/duplicates
+        # so the frontend can target specific groups via `keys`.
+        key_str = f"{owner_id}|{addr}|{rt}|{bedrooms or ''}|{floor or ''}"
         if target_keys is not None and key_str not in target_keys:
             continue
 

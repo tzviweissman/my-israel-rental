@@ -41,13 +41,15 @@ api_router = router  # alias so existing @api_router decorators work verbatim
 @api_router.post("/properties", response_model=IdMessageResponse)
 async def create_property(property_data: PropertyCreate, payload: dict = Depends(verify_token)) -> dict:
     # Block duplicate listings: same owner + same address + same rental_type
-    # is a copy-paste mistake. Same address with a different rental_type
-    # (e.g. long-term + vacation of the same flat) is intentionally allowed.
+    # + same bedrooms + same floor is a copy-paste mistake. Different bedroom
+    # counts or floor numbers indicate distinct units in the same building.
     dup = await find_duplicate(
         db,
         owner_id=payload['user_id'],
         address=property_data.address,
         rental_type=property_data.rental_type,
+        bedrooms=property_data.bedrooms,
+        floor=getattr(property_data, "floor", None),
     )
     if dup:
         raise HTTPException(status_code=409, detail={
@@ -271,6 +273,8 @@ async def update_property(property_id: str, property_data: PropertyCreate, paylo
         owner_id=existing['owner_id'],
         address=property_data.address,
         rental_type=property_data.rental_type,
+        bedrooms=property_data.bedrooms,
+        floor=getattr(property_data, "floor", None),
         exclude_property_id=property_id,
     )
     if dup:

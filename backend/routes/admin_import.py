@@ -547,6 +547,8 @@ async def commit_property_import(req: PropertyCommitRequest, payload: dict = Dep
                 db, owner_id=owner_id,
                 address=remapped.get("address"),
                 rental_type=remapped.get("rental_type"),
+                bedrooms=remapped.get("bedrooms"),
+                floor=remapped.get("floor"),
             )
             if dup:
                 # "sync_photos" mode: a duplicate is not an error — it's
@@ -883,6 +885,7 @@ async def quick_add_property(
     # Dedupe (same rule as bulk path) — skip if a collision exists.
     dup = await find_duplicate(
         db, owner_id=owner_id, address=doc["address"], rental_type=doc["rental_type"],
+        bedrooms=doc.get("bedrooms"), floor=doc.get("floor"),
     )
     if dup:
         raise HTTPException(

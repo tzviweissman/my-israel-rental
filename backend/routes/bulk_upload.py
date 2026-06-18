@@ -343,12 +343,17 @@ async def commit_bulk(body: BulkCommitBody, payload: dict = Depends(verify_token
             from utils.dedupe import find_duplicate, normalize_address
             norm_addr = normalize_address(normalized.get("address"))
             rt = normalized.get("rental_type")
+            bedrooms = normalized.get("bedrooms")
+            floor = normalized.get("floor")
             if norm_addr and rt:
-                batch_key = (norm_addr, rt)
+                # Batch key now includes bedrooms + floor so two distinct
+                # units in the same building uploaded in one batch don't
+                # collide on each other.
+                batch_key = (norm_addr, rt, bedrooms, floor)
                 if batch_key in seen_in_batch:
                     skipped.append({
                         "index": i, "title": row.get("title"),
-                        "error": f"Duplicate of an earlier row in this upload (same address + {rt}).",
+                        "error": f"Duplicate of an earlier row in this upload (same address + {rt} + bedrooms + floor).",
                     })
                     continue
                 dup = await find_duplicate(
@@ -356,12 +361,14 @@ async def commit_bulk(body: BulkCommitBody, payload: dict = Depends(verify_token
                     owner_id=payload["user_id"],
                     address=normalized.get("address"),
                     rental_type=rt,
+                    bedrooms=bedrooms,
+                    floor=floor,
                 )
                 if dup:
                     skipped.append({
                         "index": i, "title": row.get("title"),
                         "error": (
-                            f"You already have this address listed as {rt} "
+                            f"You already have this address listed as {rt} with the same bedroom/floor "
                             f"(\"{dup.get('title') or dup['id']}\"). Use a different rental type or edit the existing listing."
                         ),
                     })
