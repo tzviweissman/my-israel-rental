@@ -115,46 +115,107 @@ def dup_pair():
     _cleanup(ids)
 
 
-def test_resolve_duplicates_reattaches_chat_and_booking(dup_pair):
-    """Resolver moves messages + bookings from the loser to the keeper
-    BEFORE deleting the loser, so renters don't end up with broken chats."""
+def test_resolve_duplicates_prefers_listing_with_chat_history(dup_pair):
+    """When exactly one twin has chat/booking history, the resolver MUST
+    keep THAT one regardless of mode — so the renter's bookmarked URL
+    stays valid (and no re-attach is needed)."""
     token = _login_token()
-    addr = dup_pair["address"]
     keeper_id, loser_id = dup_pair["keeper_id"], dup_pair["loser_id"]
-
-    # Run the resolver with keep_oldest so the keeper (older
-    # created_at) deterministically survives, and the message we
-    # attached to the loser must be moved.
+    # The fixture seeded message + booking + like on `loser_id`. Even
+    # though `loser_id` was created LATER, the active-prop preference
+    # must override `keep_oldest` and make it the survivor.
     r = requests.post(f"{BASE_URL}/api/admin/duplicates/resolve",
         json={"mode": "keep_oldest"},
         headers={"Authorization": f"Bearer {token}"})
     assert r.status_code == 200, f"resolve: {r.status_code} {r.text}"
     body = r.json()
-
     relevant = [g for g in body["report"]
                 if set(g["deleted_ids"] + [g["kept_id"]]) == {keeper_id, loser_id}]
     assert relevant, f"Test pair not in report. Got: {body['report']}"
     entry = relevant[0]
-    kept = entry["kept_id"]
-    assert entry["reattached"]["messages"] >= 1
-    assert entry["reattached"]["bookings"] >= 1
-    assert entry["reattached"]["likes"] >= 1
+    # The one with activity wins — that's `loser_id` in our seed.
+    assert entry["kept_id"] == loser_id, (
+        f"Resolver kept {entry['kept_id']} but should have kept the listing "
+        f"with chat history ({loser_id}). keep_oldest must yield to active-prop preference."
+    )
+    # And because the active twin already had the data, NO reattach was
+    # necessary — the messages/bookings/likes never moved.
+    assert entry["reattached"]["messages"] == 0
+    assert entry["reattached"]["bookings"] == 0
+    assert entry["reattached"]["likes"] == 0
 
-    # Verify in Mongo: the original loser-side rows now point at kept
+    # Verify the seeded message + booking + like still reference loser_id
+    # (which is now the keeper).
     env = _backend_env()
     async def verify():
         c = AsyncIOMotorClient(env["MONGO_URL"])
         db = c[env["DB_NAME"]]
-        msgs_kept = await db.messages.count_documents({"property_id": kept, "sender_id": dup_pair["renter_id"]})
-        msgs_lost = await db.messages.count_documents({"property_id": {"$in": [keeper_id, loser_id]} if kept == keeper_id else [loser_id]})
-        bookings_kept = await db.bookings.count_documents({"property_id": kept, "renter_id": dup_pair["renter_id"]})
-        likes_kept = await db.liked_properties.count_documents({"property_id": kept, "user_id": dup_pair["renter_id"]})
+        msgs = await db.messages.count_documents({"property_id": loser_id, "sender_id": dup_pair["renter_id"]})
+        bookings = await db.bookings.count_documents({"property_id": loser_id, "renter_id": dup_pair["renter_id"]})
+        likes = await db.liked_properties.count_documents({"property_id": loser_id, "user_id": dup_pair["renter_id"]})
+        # The other twin (the supposed "keeper" by name) is gone.
+        survivor = await db.properties.find_one({"id": keeper_id}, {"_id": 0, "id": 1})
         c.close()
-        return msgs_kept, bookings_kept, likes_kept
-    msgs, bookings, likes = asyncio.run(verify())
-    assert msgs >= 1, "Message should now point at the kept property"
-    assert bookings >= 1, "Booking should now point at the kept property"
-    assert likes >= 1, "Like should now point at the kept property"
+        return msgs, bookings, likes, survivor
+    msgs, bookings, likes, survivor = asyncio.run(verify())
+    assert msgs >= 1 and bookings >= 1 and likes >= 1
+    assert survivor is None, "The chat-less twin should have been deleted"
+
+
+def test_resolve_duplicates_falls_back_to_mode_when_no_activity():
+    """When NEITHER twin has chats/bookings/likes, the mode tiebreaker
+    (keep_oldest in this test) picks the survivor as before."""
+    if not BASE_URL:
+        pytest.skip("REACT_APP_BACKEND_URL not set")
+    env = _backend_env()
+    addr = f"DupTest-Inactive {uuid.uuid4().hex[:8]}"
+    owner_id = f"dup-test-owner-{uuid.uuid4().hex[:8]}"
+    older_id = str(uuid.uuid4())
+    newer_id = str(uuid.uuid4())
+    base = {
+        "owner_id": owner_id, "title": "Twin",
+        "description": "x", "area": "Jerusalem - American Colony",
+        "address": addr, "rental_type": "vacation",
+        "property_type": "apartment", "bedrooms": 2, "bathrooms": 1,
+        "nightly_price": 100, "currency": "ILS", "status": "active",
+        "images": [],
+    }
+
+    async def seed():
+        c = AsyncIOMotorClient(env["MONGO_URL"])
+        db = c[env["DB_NAME"]]
+        await db.properties.insert_one({**base, "id": older_id, "created_at": "2026-01-01T10:00:00+00:00", "title": "OLDER"})
+        await db.properties.insert_one({**base, "id": newer_id, "created_at": "2026-01-02T10:00:00+00:00", "title": "NEWER"})
+        await db.users.insert_one({
+            "id": owner_id, "email": f"{owner_id}@dup-test.local",
+            "password": "x", "name": "x", "role": "owner",
+            "email_verified": True,
+        })
+        c.close()
+
+    asyncio.run(seed())
+
+    try:
+        token = _login_token()
+        r = requests.post(f"{BASE_URL}/api/admin/duplicates/resolve",
+            json={"mode": "keep_oldest"},
+            headers={"Authorization": f"Bearer {token}"})
+        assert r.status_code == 200
+        body = r.json()
+        relevant = [g for g in body["report"]
+                    if set(g["deleted_ids"] + [g["kept_id"]]) == {older_id, newer_id}]
+        assert relevant
+        entry = relevant[0]
+        # Older wins by mode since neither had activity.
+        assert entry["kept_id"] == older_id
+    finally:
+        async def cleanup():
+            c = AsyncIOMotorClient(env["MONGO_URL"])
+            db = c[env["DB_NAME"]]
+            await db.properties.delete_many({"id": {"$in": [older_id, newer_id]}})
+            await db.users.delete_many({"id": owner_id})
+            c.close()
+        asyncio.run(cleanup())
 
 
 def test_manual_reattach_endpoint_validates_inputs():

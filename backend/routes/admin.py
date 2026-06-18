@@ -414,6 +414,26 @@ async def resolve_duplicates(
         set(req.keys) if req.keys is not None else None
     )
 
+    # Bulk-prefetch per-property activity counts (messages + bookings)
+    # in one round-trip each. Used below to bias keeper-selection toward
+    # the twin that already has chat history — that way the renter's
+    # bookmarked URL keeps working instead of pointing at a deleted id.
+    all_prop_ids = [r["id"] for r in rows]
+    activity: dict[str, int] = {pid: 0 for pid in all_prop_ids}
+    if all_prop_ids:
+        async for row in db.messages.aggregate([
+            {"$match": {"property_id": {"$in": all_prop_ids}}},
+            {"$group": {"_id": "$property_id", "n": {"$sum": 1}}},
+        ]):
+            activity[row["_id"]] = activity.get(row["_id"], 0) + row["n"]
+        async for row in db.bookings.aggregate([
+            {"$match": {"property_id": {"$in": all_prop_ids}}},
+            {"$group": {"_id": "$property_id", "n": {"$sum": 1}}},
+        ]):
+            # Bookings count as activity too — they're even more valuable
+            # to preserve a stable property_id for than chats.
+            activity[row["_id"]] = activity.get(row["_id"], 0) + row["n"]
+
     def score_richness(p: dict) -> tuple[int, int, str]:
         # Bigger is better: image count first, then description length,
         # then created_at as a stable tie-breaker (newer wins ties).
@@ -433,18 +453,32 @@ async def resolve_duplicates(
         if target_keys is not None and key_str not in target_keys:
             continue
 
+        # When at least one twin already has chat/booking history,
+        # restrict the keeper candidates to ONLY those. This keeps the
+        # renter's bookmarked URL alive (no re-attach needed) and beats
+        # the requested mode for ties. If multiple twins have history,
+        # the requested mode picks between them; if exactly one has
+        # history, it always wins.
+        active_props = [p for p in props if activity.get(p["id"], 0) > 0]
+        keeper_candidates = active_props if active_props else props
+        # All non-candidates become losers regardless of mode — we never
+        # delete a property with chat history when an inactive twin
+        # exists to absorb the delete.
+        forced_losers = [p for p in props if p not in keeper_candidates]
+
         if req.mode == "keep_newest":
-            sorted_props = sorted(props, key=lambda p: p.get("created_at") or "")
-            keeper = sorted_props[-1]
-            losers = sorted_props[:-1]
+            sorted_candidates = sorted(keeper_candidates, key=lambda p: p.get("created_at") or "")
+            keeper = sorted_candidates[-1]
+            mode_losers = sorted_candidates[:-1]
         elif req.mode == "keep_oldest":
-            sorted_props = sorted(props, key=lambda p: p.get("created_at") or "")
-            keeper = sorted_props[0]
-            losers = sorted_props[1:]
+            sorted_candidates = sorted(keeper_candidates, key=lambda p: p.get("created_at") or "")
+            keeper = sorted_candidates[0]
+            mode_losers = sorted_candidates[1:]
         else:  # keep_richest
-            sorted_props = sorted(props, key=score_richness)
-            keeper = sorted_props[-1]
-            losers = sorted_props[:-1]
+            sorted_candidates = sorted(keeper_candidates, key=score_richness)
+            keeper = sorted_candidates[-1]
+            mode_losers = sorted_candidates[:-1]
+        losers = forced_losers + mode_losers
 
         loser_ids = [p["id"] for p in losers]
         if not loser_ids:
