@@ -707,6 +707,90 @@ async def _background_mirror_properties(
             )
 
 
+@api_router.post("/admin/properties/remirror")
+async def admin_remirror_properties(payload: dict = Depends(verify_token)) -> dict:
+    """Scan the entire properties collection and re-mirror every listing
+    whose photos are still on source URLs (not Cloudinary).
+
+    Use when a previous import / mirror pass got interrupted (background
+    task killed by a backend restart, edge timeout, etc.) and left
+    listings pointing at non-CDN URLs. No CSV upload required — we just
+    use the URLs already on each doc.
+
+    Outcomes per property:
+      • `queued`       — has at least one source URL, mirror task fired.
+      • `already_cdn`  — every image is already on Cloudinary, skipped.
+      • `no_images`    — empty `images` array, nothing to mirror.
+
+    For `no_images` listings, the admin must re-upload the CSV with
+    "Sync photos onto existing listings" mode — we don't have the
+    original URLs anywhere to pull from.
+    """
+    if payload['role'] != 'admin':
+        raise HTTPException(status_code=403, detail="Admin access required")
+
+    from utils.cloud_storage import CLOUDINARY_ENABLED
+    if not CLOUDINARY_ENABLED:
+        raise HTTPException(
+            status_code=503,
+            detail="Cloudinary is not configured — set CLOUDINARY_URL in backend/.env to enable mirroring.",
+        )
+
+    # Pull every property (we only need id + image + video URLs).
+    rows = await db.properties.find(
+        {}, {"_id": 0, "id": 1, "images": 1, "videos": 1, "title": 1},
+    ).to_list(10000)
+
+    queued: list[dict] = []  # property summaries we fired mirror tasks for
+    already_cdn = 0
+    no_images: list[dict] = []  # listings the admin still needs to re-import
+
+    to_mirror: list[tuple[str, list[str], list[str]]] = []
+    for r in rows:
+        imgs = r.get("images") or []
+        vids = r.get("videos") or []
+        if not imgs and not vids:
+            no_images.append({"id": r["id"], "title": r.get("title")})
+            continue
+        # "Already fully on Cloudinary" = every image URL is a CDN URL.
+        # Videos are checked the same way. If both arrays are entirely
+        # on Cloudinary, skip — re-mirroring would just burn quota.
+        all_cdn_imgs = all("cloudinary.com" in (u or "") for u in imgs)
+        all_cdn_vids = all("cloudinary.com" in (u or "") for u in vids) if vids else True
+        if all_cdn_imgs and all_cdn_vids:
+            already_cdn += 1
+            continue
+        # Mark mirror_pending immediately so the admin UI can show a
+        # spinner without waiting for the background task to start.
+        await db.properties.update_one(
+            {"id": r["id"]}, {"$set": {"mirror_pending": True}},
+        )
+        # Cap per-listing to the same limits the importer uses so a
+        # rogue 200-image row can't starve the others.
+        to_mirror.append((r["id"], imgs[:30], vids[:5]))
+        queued.append({"id": r["id"], "title": r.get("title"), "image_count": len(imgs)})
+
+    if to_mirror:
+        # Fire-and-forget — response returns immediately. Background task
+        # patches each doc with Cloudinary URLs as it finishes.
+        asyncio.create_task(_background_mirror_properties(to_mirror))
+
+    return {
+        "scanned": len(rows),
+        "queued": len(queued),
+        "already_cdn": already_cdn,
+        "no_images": len(no_images),
+        "queued_sample": queued[:20],
+        "no_images_sample": no_images[:20],
+        "message": (
+            f"Queued {len(queued)} listings for re-mirroring. "
+            f"{already_cdn} already on Cloudinary. "
+            f"{len(no_images)} have no photo URLs — re-upload the CSV with "
+            f'"Sync photos onto existing listings" to backfill those.'
+        ),
+    }
+
+
 # --- Commit: users -------------------------------------------------------
 
 class UserCommitRequest(BaseModel):

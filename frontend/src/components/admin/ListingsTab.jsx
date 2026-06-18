@@ -5,7 +5,7 @@ import axios from 'axios';
 import { toast } from 'sonner';
 import {
   Trash2, ToggleLeft, ToggleRight, Search,
-  CalendarX, CalendarCheck, Lock, Briefcase, Star, Copy, ImageOff,
+  CalendarX, CalendarCheck, Lock, Briefcase, Star, Copy, ImageOff, Camera,
 } from 'lucide-react';
 import { API } from '../../App';
 import { useApiSWR } from '../../hooks/useApiSWR';
@@ -129,6 +129,38 @@ export const ListingsTab = ({ token, onStatsChange }) => {
     setSearchParams(next, { replace: true });
   };
   const [selectedPropIds, setSelectedPropIds] = useState(new Set());
+  // Re-mirror photos: scans every listing and queues background mirroring
+  // for the ones still pointing at non-Cloudinary URLs. Recovery path for
+  // imports that landed but whose mirror task was killed before finishing.
+  const [remirroring, setRemirroring] = useState(false);
+
+  const handleRemirrorPhotos = async () => {
+    if (!window.confirm(
+      'Scan every listing and re-mirror photos that are still on source URLs (not Cloudinary)? '
+      + "Listings already on Cloudinary won't be touched. Listings with no photos at all will be reported "
+      + 'so you can re-upload the CSV in "Sync photos" mode for those.',
+    )) return;
+    setRemirroring(true);
+    try {
+      const res = await axios.post(`${API}/admin/properties/remirror`, {}, { headers });
+      const d = res.data;
+      toast.success(d.message, { duration: 8000 });
+      if (d.no_images > 0) {
+        // Surface the listings that need a CSV re-upload in a separate toast
+        // so the admin doesn't miss them in the green success message.
+        toast.warning(
+          `${d.no_images} listings have no photo URLs at all — re-upload the CSV with "Sync photos" mode to fix those. `
+          + `Sample: ${(d.no_images_sample || []).slice(0, 3).map(x => x.title || x.id).join(', ')}`,
+          { duration: 12000 },
+        );
+      }
+      fetchProperties();
+    } catch (e) {
+      toast.error(e.response?.data?.detail || 'Re-mirror failed');
+    } finally {
+      setRemirroring(false);
+    }
+  };
   const [bookedModalOpen, setBookedModalOpen] = useState(false);
   // bookedTarget: null | { mode: 'single', id } | { mode: 'bulk' }
   const [bookedTarget, setBookedTarget] = useState(null);
@@ -443,6 +475,15 @@ export const ListingsTab = ({ token, onStatsChange }) => {
           data-testid="find-duplicates-btn"
         >
           <Copy size={14} /> Find duplicates
+        </button>
+        <button
+          onClick={handleRemirrorPhotos}
+          disabled={remirroring}
+          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-sky-50 text-sky-700 border border-sky-200 hover:bg-sky-100 disabled:opacity-50"
+          title="Move every listing's photos onto Cloudinary. Use after a half-finished import."
+          data-testid="remirror-photos-btn"
+        >
+          <Camera size={14} /> {remirroring ? 'Re-mirroring…' : 'Re-mirror photos'}
         </button>
         {/* Quick chip toggle: All vs "Properties I manage" */}
         <div className="inline-flex bg-white rounded-lg border border-[#E5E5E5] p-0.5 ml-1" data-testid="managed-filter">
