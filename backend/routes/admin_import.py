@@ -479,6 +479,13 @@ class PropertyCommitRequest(BaseModel):
     csv_text: str
     column_map: dict[str, str | None] | None = None  # admin overrides
     mirror_images: bool = True
+    # "create" (default) → skip rows whose (owner + address + rental_type)
+    #   already exists, insert the rest.
+    # "sync_photos" → when a duplicate is found, REPLACE its images/videos
+    #   with the CSV's and re-trigger mirroring. New rows still create.
+    #   Use after a failed/partial import to backfill missing photos
+    #   without re-creating the listings.
+    mode: str = "create"
 
 
 @api_router.post("/admin/import/properties/commit")
@@ -542,6 +549,56 @@ async def commit_property_import(req: PropertyCommitRequest, payload: dict = Dep
                 rental_type=remapped.get("rental_type"),
             )
             if dup:
+                # "sync_photos" mode: a duplicate is not an error — it's
+                # the WHOLE point. Replace this listing's photos with the
+                # CSV's and re-mirror in the background. Lets the admin
+                # recover from a half-mirrored import without recreating
+                # the listings (which would lose chat history etc).
+                if req.mode == "sync_photos":
+                    image_urls = _split_urls(remapped.get("images"))
+                    video_urls = _split_urls(remapped.get("videos"))
+                    if not image_urls and not video_urls:
+                        skipped.append({
+                            "index": i, "title": dup.get("title"),
+                            "error": "No image_urls in this CSV row — nothing to sync.",
+                        })
+                        continue
+                    existing_imgs = dup.get("images") or []
+                    # Only skip if EVERY existing image is already on
+                    # Cloudinary — a partial mirror (mix of CDN + source
+                    # URLs) is still a sync target so we can finish the
+                    # job. Empty images is always a sync target.
+                    all_cdn = (
+                        len(existing_imgs) > 0
+                        and all("cloudinary.com" in (u or "") for u in existing_imgs)
+                    )
+                    if all_cdn and image_urls:
+                        # Already fully on Cloudinary — skip to avoid
+                        # paying for a duplicate mirror pass.
+                        skipped.append({
+                            "index": i, "title": dup.get("title"),
+                            "error": "Listing already fully on Cloudinary — skipped.",
+                        })
+                        continue
+                    update_set: dict = {
+                        "images": image_urls, "videos": video_urls,
+                    }
+                    if req.mirror_images and CLOUDINARY_ENABLED and (image_urls or video_urls):
+                        update_set["mirror_pending"] = True
+                    await db.properties.update_one(
+                        {"id": dup["id"]}, {"$set": update_set},
+                    )
+                    created.append({
+                        "id": dup["id"],
+                        "title": dup.get("title"),
+                        "images_count": len(image_urls),
+                        "videos_count": len(video_urls),
+                        "mirror_pending": update_set.get("mirror_pending", False),
+                        "synced": True,
+                    })
+                    if req.mirror_images and CLOUDINARY_ENABLED and (image_urls or video_urls):
+                        to_mirror.append((dup["id"], image_urls[:30], video_urls[:5]))
+                    continue
                 skipped.append({
                     "index": i, "title": raw.get("title") or raw.get("Name"),
                     "error": (

@@ -37,6 +37,11 @@ export const ImportTab = ({ token, onJumpToOwner }) => {
   const [loading, setLoading] = useState(false);
   const [committing, setCommitting] = useState(false);
   const [result, setResult] = useState(null);
+  // "create" (default): skip existing rows. "sync_photos": when a row
+  // matches an existing listing, refresh its photos instead of skipping —
+  // recovery path after a half-finished import left some listings
+  // photo-less.
+  const [commitMode, setCommitMode] = useState('create');
 
   const onPickFile = async (e) => {
     const file = e.target.files?.[0];
@@ -104,7 +109,7 @@ export const ImportTab = ({ token, onJumpToOwner }) => {
         : `${API}/admin/import/properties/commit`;
       const res = await axios.post(
         url,
-        { csv_text: csvText, column_map: preview.column_map, mirror_images: true },
+        { csv_text: csvText, column_map: preview.column_map, mirror_images: true, mode: commitMode },
         { headers: { Authorization: `Bearer ${token}` }, timeout: 600000 },  // 10 min for Cloudinary mirroring
       );
       setResult(res.data);
@@ -314,6 +319,33 @@ export const ImportTab = ({ token, onJumpToOwner }) => {
             </pre>
           </details>
 
+          {schemaKind === 'property' && (
+            <div className="mb-3 bg-amber-50 border border-amber-200 rounded-lg p-3" data-testid="commit-mode-toggle">
+              <p className="text-xs font-semibold text-amber-900 mb-2">On rows that already exist (same owner + address):</p>
+              <div className="flex flex-wrap gap-2">
+                <label className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs cursor-pointer border ${
+                  commitMode === 'create' ? 'bg-white border-amber-400 text-amber-900 font-semibold' : 'bg-transparent border-amber-200 text-amber-800'
+                }`}>
+                  <input type="radio" name="commit-mode" value="create" checked={commitMode === 'create'}
+                    onChange={() => setCommitMode('create')} className="accent-amber-600" data-testid="commit-mode-create" />
+                  Skip duplicates (default)
+                </label>
+                <label className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs cursor-pointer border ${
+                  commitMode === 'sync_photos' ? 'bg-white border-amber-400 text-amber-900 font-semibold' : 'bg-transparent border-amber-200 text-amber-800'
+                }`}>
+                  <input type="radio" name="commit-mode" value="sync_photos" checked={commitMode === 'sync_photos'}
+                    onChange={() => setCommitMode('sync_photos')} className="accent-amber-600" data-testid="commit-mode-sync" />
+                  Sync photos onto existing listings
+                </label>
+              </div>
+              {commitMode === 'sync_photos' && (
+                <p className="text-[11px] text-amber-800 mt-2 leading-snug">
+                  Recovery mode: use this when a previous import left listings without photos. Existing listings will get their <code className="bg-white px-1 rounded">images</code>/<code className="bg-white px-1 rounded">videos</code> replaced with the CSV&apos;s and re-mirrored to Cloudinary. Listings already fully on Cloudinary are skipped.
+                </p>
+              )}
+            </div>
+          )}
+
           <button
             onClick={commit}
             disabled={committing}
@@ -321,7 +353,7 @@ export const ImportTab = ({ token, onJumpToOwner }) => {
             data-testid="import-commit-btn"
           >
             {committing ? <Loader2 size={14} className="animate-spin" /> : <CheckCircle2 size={14} />}
-            {committing ? 'Importing…' : `Commit import (${preview.total_rows} rows)`}
+            {committing ? 'Importing…' : commitMode === 'sync_photos' ? `Sync photos (${preview.total_rows} rows)` : `Commit import (${preview.total_rows} rows)`}
           </button>
           {schemaKind === 'property' && (
             <p className="text-[11px] text-gray-500 mt-2">
