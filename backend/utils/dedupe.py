@@ -48,6 +48,24 @@ def _norm_int(v: Any) -> int | None:
     return n
 
 
+def _norm_tags(tags: Any) -> tuple:
+    """Normalize a holiday-tags input into a hashable, order-stable tuple.
+
+    Accepts a list (`['sukkot']`), a comma-separated string (`'sukkot,pesach'`)
+    or None. Returns `()` for "no holiday tags" so a listing without tags
+    matches another tag-less listing but never matches a tagged one.
+    """
+    if tags is None:
+        return ()
+    if isinstance(tags, str):
+        items = [t.strip().lower() for t in tags.split(",") if t.strip()]
+    elif isinstance(tags, (list, tuple, set)):
+        items = [str(t).strip().lower() for t in tags if str(t).strip()]
+    else:
+        return ()
+    return tuple(sorted(set(items)))
+
+
 def dedupe_signature(
     *,
     owner_id: str | None,
@@ -55,6 +73,7 @@ def dedupe_signature(
     rental_type: str | None,
     bedrooms: Any = None,
     floor: Any = None,
+    holiday_tags: Any = None,
 ) -> tuple | None:
     """Composite key that two property docs must share to be considered
     duplicates. Returns None when the address / rental_type / owner
@@ -64,6 +83,13 @@ def dedupe_signature(
     the same street address (different unit in the same building) don't
     collide. ``None`` means "this listing didn't specify" — two such
     listings still match each other but never match a concrete value.
+
+    `holiday_tags` (e.g. `['sukkot']`, `['pesach']`) splits a single
+    vacation apartment into separate sale events: an owner who lists the
+    same flat at $400/night for normal vacation periods AND at $10K total
+    for Sukkot is doing that on purpose, so the two shouldn't collide.
+    A regular-vacation listing (empty tags) and a sukkot listing of the
+    same apartment are distinct.
     """
     norm = normalize_address(address)
     if not norm or not owner_id or not rental_type:
@@ -74,6 +100,7 @@ def dedupe_signature(
         rental_type,
         _norm_int(bedrooms),
         _norm_int(floor),
+        _norm_tags(holiday_tags),
     )
 
 
@@ -85,6 +112,7 @@ async def find_duplicate(
     rental_type: str | None,
     bedrooms: Any = None,
     floor: Any = None,
+    holiday_tags: Any = None,
     exclude_property_id: str | None = None,
 ) -> dict | None:
     """Return the existing property document that would collide with the
@@ -93,7 +121,7 @@ async def find_duplicate(
     """
     sig = dedupe_signature(
         owner_id=owner_id, address=address, rental_type=rental_type,
-        bedrooms=bedrooms, floor=floor,
+        bedrooms=bedrooms, floor=floor, holiday_tags=holiday_tags,
     )
     if sig is None:
         return None
@@ -112,12 +140,13 @@ async def find_duplicate(
     candidates = await db.properties.find(
         query,
         {"_id": 0, "id": 1, "address": 1, "title": 1, "rental_type": 1,
-         "bedrooms": 1, "floor": 1},
+         "bedrooms": 1, "floor": 1, "holiday_tags": 1},
     ).to_list(500)
     for c in candidates:
         cand_sig = dedupe_signature(
             owner_id=owner_id, address=c.get("address"), rental_type=rental_type,
             bedrooms=c.get("bedrooms"), floor=c.get("floor"),
+            holiday_tags=c.get("holiday_tags"),
         )
         if cand_sig == sig:
             return c

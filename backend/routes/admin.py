@@ -316,13 +316,14 @@ async def list_duplicate_listings(payload: dict = Depends(verify_token)) -> dict
             "_id": 0, "id": 1, "owner_id": 1, "title": 1, "address": 1,
             "rental_type": 1, "created_at": 1, "images": 1,
             "description": 1, "monthly_price": 1, "nightly_price": 1,
-            "bedrooms": 1, "floor": 1,
+            "bedrooms": 1, "floor": 1, "holiday_tags": 1,
         },
     ).to_list(5000)
 
     # Group by composite dedupe signature (owner_id, normalized_address,
-    # rental_type, bedrooms, floor). Distinct units in the same building
-    # — common in Jerusalem — no longer collapse into a single bogus group.
+    # rental_type, bedrooms, floor, holiday_tags). Distinct units in the
+    # same building, AND sukkot/pesach events on the same apartment, no
+    # longer collapse into a single bogus group.
     groups: dict[tuple, list[dict]] = {}
     for r in rows:
         sig = dedupe_signature(
@@ -331,6 +332,7 @@ async def list_duplicate_listings(payload: dict = Depends(verify_token)) -> dict
             rental_type=r.get("rental_type"),
             bedrooms=r.get("bedrooms"),
             floor=r.get("floor"),
+            holiday_tags=r.get("holiday_tags"),
         )
         if sig is None:
             continue
@@ -348,6 +350,7 @@ async def list_duplicate_listings(payload: dict = Depends(verify_token)) -> dict
             "nightly_price": r.get("nightly_price"),
             "bedrooms": r.get("bedrooms"),
             "floor": r.get("floor"),
+            "holiday_tags": r.get("holiday_tags"),
         })
 
     # Keep only groups with 2+ properties
@@ -355,7 +358,7 @@ async def list_duplicate_listings(payload: dict = Depends(verify_token)) -> dict
     for sig, props in groups.items():
         if len(props) < 2:
             continue
-        owner_id, addr, rt, bedrooms, floor = sig
+        owner_id, addr, rt, bedrooms, floor, holiday_tags = sig
         owner = await db.users.find_one({"id": owner_id}, {"_id": 0, "name": 1, "email": 1})
         out.append({
             "owner_id": owner_id,
@@ -365,6 +368,7 @@ async def list_duplicate_listings(payload: dict = Depends(verify_token)) -> dict
             "rental_type": rt,
             "bedrooms": bedrooms,
             "floor": floor,
+            "holiday_tags": list(holiday_tags),
             "properties": sorted(props, key=lambda p: p.get("created_at", "")),
         })
     # Newest collisions first — they're the freshest cleanup targets.
@@ -410,12 +414,14 @@ async def resolve_duplicates(
         {
             "_id": 0, "id": 1, "owner_id": 1, "address": 1, "rental_type": 1,
             "created_at": 1, "images": 1, "description": 1,
-            "bedrooms": 1, "floor": 1,
+            "bedrooms": 1, "floor": 1, "holiday_tags": 1,
         },
     ).to_list(5000)
 
     # Same grouping logic as /admin/duplicates — composite signature so
-    # distinct units at the same building address don't collide.
+    # distinct units at the same building address don't collide, and
+    # sukkot/pesach + normal-vacation listings of the same apartment
+    # remain separate sale events.
     groups: dict[tuple, list[dict]] = {}
     for r in rows:
         sig = dedupe_signature(
@@ -424,6 +430,7 @@ async def resolve_duplicates(
             rental_type=r.get("rental_type"),
             bedrooms=r.get("bedrooms"),
             floor=r.get("floor"),
+            holiday_tags=r.get("holiday_tags"),
         )
         if sig is None:
             continue
@@ -468,10 +475,10 @@ async def resolve_duplicates(
     for sig, props in groups.items():
         if len(props) < 2:
             continue
-        owner_id, addr, rt, bedrooms, floor = sig
+        owner_id, addr, rt, bedrooms, floor, holiday_tags = sig
         # Group key string: matches the shape returned by /admin/duplicates
         # so the frontend can target specific groups via `keys`.
-        key_str = f"{owner_id}|{addr}|{rt}|{bedrooms or ''}|{floor or ''}"
+        key_str = f"{owner_id}|{addr}|{rt}|{bedrooms or ''}|{floor or ''}|{','.join(holiday_tags)}"
         if target_keys is not None and key_str not in target_keys:
             continue
 

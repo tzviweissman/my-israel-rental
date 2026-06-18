@@ -340,20 +340,21 @@ async def commit_bulk(body: BulkCommitBody, payload: dict = Depends(verify_token
                 continue
 
             # Dedupe vs existing DB rows + earlier rows in this batch.
-            from utils.dedupe import find_duplicate, normalize_address
+            from utils.dedupe import find_duplicate, normalize_address, _norm_tags
             norm_addr = normalize_address(normalized.get("address"))
             rt = normalized.get("rental_type")
             bedrooms = normalized.get("bedrooms")
             floor = normalized.get("floor")
+            holiday_tags = _norm_tags(normalized.get("holiday_tags"))
             if norm_addr and rt:
-                # Batch key now includes bedrooms + floor so two distinct
-                # units in the same building uploaded in one batch don't
-                # collide on each other.
-                batch_key = (norm_addr, rt, bedrooms, floor)
+                # Batch key now includes bedrooms + floor + holiday_tags so
+                # distinct units in the same building, AND sukkot/pesach
+                # sale events on the same apartment, don't collide.
+                batch_key = (norm_addr, rt, bedrooms, floor, holiday_tags)
                 if batch_key in seen_in_batch:
                     skipped.append({
                         "index": i, "title": row.get("title"),
-                        "error": f"Duplicate of an earlier row in this upload (same address + {rt} + bedrooms + floor).",
+                        "error": f"Duplicate of an earlier row in this upload (same address + {rt} + bedrooms + floor + holiday).",
                     })
                     continue
                 dup = await find_duplicate(
@@ -363,12 +364,13 @@ async def commit_bulk(body: BulkCommitBody, payload: dict = Depends(verify_token
                     rental_type=rt,
                     bedrooms=bedrooms,
                     floor=floor,
+                    holiday_tags=normalized.get("holiday_tags"),
                 )
                 if dup:
                     skipped.append({
                         "index": i, "title": row.get("title"),
                         "error": (
-                            f"You already have this address listed as {rt} with the same bedroom/floor "
+                            f"You already have this address listed as {rt} with the same bedroom/floor/holiday "
                             f"(\"{dup.get('title') or dup['id']}\"). Use a different rental type or edit the existing listing."
                         ),
                     })
