@@ -375,26 +375,48 @@ async def set_whatsapp_number(
 async def set_user_role(payload_in: RoleUpdate, payload: dict = Depends(verify_token)) -> dict:
     """Self-service "I picked the wrong role at signup" fix.
 
-    Only the renter → owner upgrade is permitted. Owners cannot
-    downgrade (would orphan their listings under a role that doesn't
-    own the dashboard); admins cannot self-promote/demote (privilege
-    boundary). Returns a fresh JWT with the new role embedded so the
-    frontend can swap it in without a logout/login cycle.
+    Allowed transitions:
+      • renter ↔ owner  — owners can demote back to renter (their
+        listings stay in the DB but no longer manageable via the
+        dashboard until they re-promote).
+      • manager → renter — managers can step down to renter.
+
+    Blocked:
+      • Admin self-flips of any kind (privilege boundary).
+      • Any target other than 'renter' or 'owner' (no self-promotion
+        to manager or admin).
     """
     target = (payload_in.role or "").strip().lower()
-    if target != "owner":
-        raise HTTPException(status_code=400, detail="Only the renter → owner switch is supported here")
+    if target not in {"renter", "owner"}:
+        raise HTTPException(
+            status_code=400,
+            detail="Target role must be 'renter' or 'owner' — promotion to manager/admin requires admin help",
+        )
 
     current_role = payload.get("role")
-    if current_role == "owner":
-        raise HTTPException(status_code=400, detail="You are already a lister")
-    if current_role != "renter":
-        # Managers / admins must not be flipped via this endpoint.
+    if current_role == "admin":
+        # Admins must not be flippable via a self-service endpoint —
+        # privilege boundary. They can only be changed by another admin
+        # through the user-management UI.
         raise HTTPException(status_code=403, detail=f"Cannot switch role from '{current_role}' here")
+    if current_role == target:
+        raise HTTPException(status_code=400, detail=f"You are already a {target}")
+
+    # Allowed transition set
+    allowed = {
+        ("renter", "owner"),
+        ("owner", "renter"),
+        ("manager", "renter"),
+    }
+    if (current_role, target) not in allowed:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Switching from '{current_role}' to '{target}' is not allowed via this endpoint",
+        )
 
     res = await db.users.update_one(
-        {"id": payload["user_id"], "role": "renter"},
-        {"$set": {"role": "owner"}},
+        {"id": payload["user_id"], "role": current_role},
+        {"$set": {"role": target}},
     )
     if res.matched_count == 0:
         raise HTTPException(status_code=404, detail="User not found or role already changed")
@@ -404,8 +426,8 @@ async def set_user_role(payload_in: RoleUpdate, payload: dict = Depends(verify_t
         {"_id": 0, "id": 1, "email": 1, "name": 1, "role": 1, "email_verified": 1, "phone": 1, "preferred_language": 1},
     )
     new_token = create_token(user["id"], user["role"])
-    return {
-        "token": new_token,
-        "user": user,
-        "message": "You're now set up as a lister. Welcome aboard!",
-    }
+    message = (
+        "You're now set up as a lister. Welcome aboard!" if target == "owner"
+        else "Switched back to renter. You can switch to lister again any time from Settings."
+    )
+    return {"token": new_token, "user": user, "message": message}

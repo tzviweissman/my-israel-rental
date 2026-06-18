@@ -19,28 +19,39 @@ const SettingsTab = ({ user, token, API }) => {
   const [whatsappNumber, setWhatsappNumber] = useState(user?.phone || '');
   const [savingWhatsapp, setSavingWhatsapp] = useState(false);
 
-  // Role switch: renters who accidentally picked the wrong role at
-  // signup can upgrade to lister in one click. Owners/managers/admins
-  // never see this card — the upgrade is one-way (downgrades would
-  // orphan listings, admin promotion is a privilege boundary).
+  // Role switch: users can flip between renter ↔ owner self-service.
+  // Managers can also step down to renter. Admins never see this card —
+  // privilege boundary enforced both server-side and here.
   const [switchingRole, setSwitchingRole] = useState(false);
-  const canSwitchToLister = user?.role === 'renter';
+  const role = user?.role;
+  // Each entry is one rendered "switch role" CTA. `from` is the user's
+  // current role (we already know it), so we only need to declare the
+  // target + UI copy. This list is filtered by `role` below.
+  const ROLE_OPTIONS = {
+    renter: { target: 'owner', title: t('settings.becomeListerTitle', 'Have a place to list?'), hint: t('settings.becomeListerHint', 'Switch your account from Renter to Lister to start posting properties for rent.'), cta: t('settings.becomeListerCta', 'Switch to lister'), note: t('settings.becomeListerNote', "We'll keep your saved searches and favorites.") },
+    owner:  { target: 'renter', title: t('settings.becomeRenterTitle', 'Switch back to Renter?'), hint: t('settings.becomeRenterHint', 'Your listings stay safe in the database. You won\'t see the listing-management tools until you switch back to Lister.'), cta: t('settings.becomeRenterCta', 'Switch to renter'), note: t('settings.becomeRenterNote', 'You can switch back to Lister any time from this page.') },
+    manager: { target: 'renter', title: t('settings.managerToRenterTitle', 'Step down to Renter?'), hint: t('settings.managerToRenterHint', 'You\'ll lose your manager privileges. Your listings stay safe.'), cta: t('settings.managerToRenterCta', 'Switch to renter'), note: t('settings.managerToRenterNote', 'Contact support if you change your mind — manager role can only be restored by an admin.') },
+  };
+  const switchOption = ROLE_OPTIONS[role] || null;
 
-  const handleSwitchToLister = async () => {
+  const handleSwitchRole = async (targetRole) => {
+    const labelTo = targetRole === 'owner' ? t('settings.role.lister', 'Lister') : t('settings.role.renter', 'Renter');
+    const labelFrom = role === 'owner' ? t('settings.role.lister', 'Lister') : role === 'manager' ? t('settings.role.manager', 'Manager') : t('settings.role.renter', 'Renter');
     if (!window.confirm(
-      t('settings.switchRoleConfirm', 'Switch your account from Renter to Lister? Your dashboard will change to show listing management tools. (This cannot be undone from settings — contact support to switch back.)'),
+      t('settings.switchRoleConfirm', `Switch from ${labelFrom} to ${labelTo}? Your dashboard will update to reflect the new role.`)
+        .replace('{from}', labelFrom).replace('{to}', labelTo),
     )) return;
     setSwitchingRole(true);
     try {
       const res = await axios.put(
         `${API}/auth/role`,
-        { role: 'owner' },
+        { role: targetRole },
         { headers: { Authorization: `Bearer ${token}` } },
       );
       // Swap the new JWT + user into the auth context so the rest of the
       // app (Navigation, Dashboard, gating) sees the new role immediately.
       login(res.data.token, res.data.user);
-      toast.success(res.data.message || 'You are now a lister');
+      toast.success(res.data.message || 'Role updated');
     } catch (err) {
       toast.error(err.response?.data?.detail || 'Failed to switch role');
     } finally {
@@ -127,36 +138,32 @@ const SettingsTab = ({ user, token, API }) => {
     <div>
       <h2 className="text-2xl font-bold mb-6" style={{ fontFamily: 'Playfair Display' }}>{i18n.t('dashboard.accountSettings')}</h2>
 
-      {/* Renter → Lister upgrade card. Only renders when role === 'renter'
-          so existing owners/managers/admins don't see a no-op control. */}
-      {canSwitchToLister && (
+      {/* Self-service role switch. The exact CTA depends on the user's
+          current role — renter sees "Switch to lister", owner sees
+          "Switch to renter", manager sees "Step down to renter". Admins
+          never get this card (privilege boundary). */}
+      {switchOption && (
         <div className="bg-white rounded-2xl border border-gray-200 p-6 max-w-2xl mb-6" data-testid="role-switch-card">
           <div className="flex items-center gap-3 mb-4">
             <div className="p-3 rounded-full bg-[#D4AF37]/15">
               <HomeIcon size={24} className="text-[#D4AF37]" />
             </div>
             <div>
-              <h3 className="text-lg font-bold text-gray-900">
-                {t('settings.becomeListerTitle', 'Have a place to list?')}
-              </h3>
-              <p className="text-sm text-gray-500">
-                {t('settings.becomeListerHint', 'Switch your account from Renter to Lister to start posting properties for rent.')}
-              </p>
+              <h3 className="text-lg font-bold text-gray-900">{switchOption.title}</h3>
+              <p className="text-sm text-gray-500">{switchOption.hint}</p>
             </div>
           </div>
           <button
             type="button"
-            onClick={handleSwitchToLister}
+            onClick={() => handleSwitchRole(switchOption.target)}
             disabled={switchingRole}
             className="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl text-white font-medium hover:opacity-90 transition-all disabled:opacity-60"
             style={{ backgroundColor: '#1E6A6A' }}
-            data-testid="switch-to-lister-btn"
+            data-testid="switch-role-btn"
           >
-            <HomeIcon size={16} /> {switchingRole ? t('dashboard.saving', 'Saving…') : t('settings.becomeListerCta', 'Switch to lister')}
+            <HomeIcon size={16} /> {switchingRole ? t('dashboard.saving', 'Saving…') : switchOption.cta}
           </button>
-          <p className="text-[11px] text-gray-400 mt-2">
-            {t('settings.becomeListerNote', "We'll keep your saved searches and favorites. To switch back to Renter, contact support.")}
-          </p>
+          <p className="text-[11px] text-gray-400 mt-2">{switchOption.note}</p>
         </div>
       )}
 
