@@ -73,7 +73,6 @@ def dedupe_signature(
     rental_type: str | None,
     bedrooms: Any = None,
     floor: Any = None,
-    holiday_tags: Any = None,
 ) -> tuple | None:
     """Composite key that two property docs must share to be considered
     duplicates. Returns None when the address / rental_type / owner
@@ -84,12 +83,12 @@ def dedupe_signature(
     collide. ``None`` means "this listing didn't specify" — two such
     listings still match each other but never match a concrete value.
 
-    `holiday_tags` (e.g. `['sukkot']`, `['pesach']`) splits a single
-    vacation apartment into separate sale events: an owner who lists the
-    same flat at $400/night for normal vacation periods AND at $10K total
-    for Sukkot is doing that on purpose, so the two shouldn't collide.
-    A regular-vacation listing (empty tags) and a sukkot listing of the
-    same apartment are distinct.
+    NOTE: `holiday_tags` is intentionally NOT part of the signature.
+    A single vacation listing can carry holiday pricing AND a regular
+    nightly rate — the UI shows the right one based on whether the
+    renter is browsing /vacation vs /sukkot. We don't want owners to
+    end up with two near-identical listings just to capture holiday
+    premium pricing.
     """
     norm = normalize_address(address)
     if not norm or not owner_id or not rental_type:
@@ -100,7 +99,6 @@ def dedupe_signature(
         rental_type,
         _norm_int(bedrooms),
         _norm_int(floor),
-        _norm_tags(holiday_tags),
     )
 
 
@@ -112,7 +110,6 @@ async def find_duplicate(
     rental_type: str | None,
     bedrooms: Any = None,
     floor: Any = None,
-    holiday_tags: Any = None,
     exclude_property_id: str | None = None,
 ) -> dict | None:
     """Return the existing property document that would collide with the
@@ -121,7 +118,7 @@ async def find_duplicate(
     """
     sig = dedupe_signature(
         owner_id=owner_id, address=address, rental_type=rental_type,
-        bedrooms=bedrooms, floor=floor, holiday_tags=holiday_tags,
+        bedrooms=bedrooms, floor=floor,
     )
     if sig is None:
         return None
@@ -134,19 +131,15 @@ async def find_duplicate(
     if exclude_property_id:
         query["id"] = {"$ne": exclude_property_id}
 
-    # We can't store the normalized signature pre-computed on every existing
-    # doc without a migration, so we compare in-app. Properties-per-owner
-    # is small (tens, not thousands), so the scan cost is negligible.
     candidates = await db.properties.find(
         query,
         {"_id": 0, "id": 1, "address": 1, "title": 1, "rental_type": 1,
-         "bedrooms": 1, "floor": 1, "holiday_tags": 1},
+         "bedrooms": 1, "floor": 1},
     ).to_list(500)
     for c in candidates:
         cand_sig = dedupe_signature(
             owner_id=owner_id, address=c.get("address"), rental_type=rental_type,
             bedrooms=c.get("bedrooms"), floor=c.get("floor"),
-            holiday_tags=c.get("holiday_tags"),
         )
         if cand_sig == sig:
             return c

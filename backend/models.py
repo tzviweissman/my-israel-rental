@@ -102,6 +102,12 @@ class PropertyCreate(BaseModel):
     # is set.
     holiday_lump_price: float | None = None
     holiday_lump_currency: str | None = 'ILS'
+    # When True, `holiday_lump_price` is interpreted as a PER-NIGHT rate
+    # during the holiday window (instead of the default "whole-holiday
+    # total"). Lets owners set a holiday-night premium without committing
+    # to a fixed lump (useful when stay length varies). UI uses this to
+    # render the right suffix ("/night" vs "/Sukkot").
+    holiday_lump_is_per_night: bool | None = False
 
 
 class BookingCreate(BaseModel):

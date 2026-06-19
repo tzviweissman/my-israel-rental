@@ -455,7 +455,10 @@ const Properties = () => {
     if (property.isSublease && property.sublease_id) {
       navigate(`/sublease/${property.sublease_id}`);
     } else {
-      navigate(`/property/${property.id}`);
+      // Propagate the current holiday context to the detail page so the
+      // booking sidebar lands on the matching holiday rate by default.
+      const holidayQS = ['sukkot', 'pesach'].includes(type) ? `?holiday=${type}` : '';
+      navigate(`/property/${property.id}${holidayQS}`);
     }
   };
 
@@ -566,6 +569,11 @@ const Properties = () => {
               onToggleLike={toggleLike}
               convertPrice={convertPrice}
               apiBase={API}
+              // When the user is on /properties/sukkot or /properties/pesach,
+              // tell the card which holiday context they're browsing in so
+              // the price switches to the matching holiday rate. /vacation
+              // and /all keep the regular nightly rate visible.
+              holidayContext={['sukkot', 'pesach'].includes(type) ? type : null}
             />
           ))}
         </div>

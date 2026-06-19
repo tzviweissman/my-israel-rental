@@ -13,7 +13,7 @@ const parseLocalDate = (dateStr) => {
   return new Date(y, m - 1, d);
 };
 
-const PriceBlock = ({ property, sublease, preSubleaseId, convertPrice }) => {
+const PriceBlock = ({ property, sublease, preSubleaseId, convertPrice, holidayContext, setHolidayContext }) => {
   const { t } = useTranslation();
   if (sublease) {
     const converted = convertPrice(sublease.price, sublease.currency);
@@ -37,29 +37,41 @@ const PriceBlock = ({ property, sublease, preSubleaseId, convertPrice }) => {
     // underlying property's price for a frame.
     return <div className="h-10 w-40 rounded-md bg-gray-100 animate-pulse" data-testid="property-detail-price-loading" />;
   }
-  // Holiday lump-sum override: when a vacation listing has set a flat
-  // "whole holiday" price, surface that instead of the nightly rate. Tags
-  // (Sukkot/Pesach) are optional metadata — a lump price alone is enough
-  // to activate this display.
-  const hasHolidayLump =
+  // Two-price model: a vacation listing can carry BOTH a regular nightly
+  // rate AND a holiday rate (lump or per-night). We display the holiday
+  // rate only when the renter is in a holiday context (linked from
+  // /sukkot or /pesach, OR they clicked the toggle below). Browsing the
+  // detail page directly → regular nightly rate by default.
+  const tags = property.holiday_tags || [];
+  const hasHolidayPrice =
     property.rental_type === 'vacation' &&
     property.holiday_lump_price != null &&
     property.holiday_lump_price > 0;
-  const displayCurrency = hasHolidayLump
+  const matchingHolidayTags = tags.filter((tg) => ['sukkot', 'pesach'].includes(tg));
+  const showHolidayPrice =
+    hasHolidayPrice &&
+    holidayContext != null &&
+    matchingHolidayTags.includes(holidayContext);
+
+  const displayCurrency = showHolidayPrice
     ? (property.holiday_lump_currency || property.currency)
     : property.currency;
-  const rawPrice = hasHolidayLump
+  const rawPrice = showHolidayPrice
     ? property.holiday_lump_price
-    : property.monthly_price || property.nightly_price || 0;
+    : property.rental_type === 'vacation'
+      ? (property.nightly_price || 0)
+      : (property.monthly_price || 0);
   const converted = convertPrice(rawPrice, displayCurrency);
   const holidayLabelMap = {
     sukkot: t('property.perSukkot') || '/ Sukkot',
     pesach: t('property.perPesach') || '/ Pesach',
   };
-  const firstTag = (property.holiday_tags || [])[0];
-  const perLabel = hasHolidayLump
-    ? (firstTag && holidayLabelMap[firstTag]) || (t('property.perHoliday') || '/ holiday')
+  const perLabel = showHolidayPrice
+    ? (property.holiday_lump_is_per_night
+        ? `${t('property.perNight')} (${(holidayContext || '').charAt(0).toUpperCase() + (holidayContext || '').slice(1)})`
+        : holidayLabelMap[holidayContext] || (t('property.perHoliday') || '/ holiday'))
     : property.rental_type === 'vacation' ? t('property.perNight') : t('property.perMonth');
+
   return (
     <>
       <span className="text-3xl font-bold" style={{ color: '#D4AF37' }} data-testid="property-detail-price">
@@ -69,6 +81,36 @@ const PriceBlock = ({ property, sublease, preSubleaseId, convertPrice }) => {
       {converted && (
         <div className="text-xs text-gray-400 mt-1" data-testid="property-detail-converted-price">
           ≈ {converted.symbol}{converted.amount.toLocaleString()}{perLabel}
+        </div>
+      )}
+      {/* Rate toggle: lets the renter switch between regular and holiday
+          pricing when both are available on this listing. Surfaces the
+          dual-price model without forcing two separate listings. */}
+      {hasHolidayPrice && matchingHolidayTags.length > 0 && (
+        <div className="mt-3 inline-flex items-center gap-1 p-1 rounded-lg bg-[#FBF8F2] border border-[#D4AF37]/30" data-testid="rate-toggle">
+          <button
+            type="button"
+            onClick={() => setHolidayContext(null)}
+            className="px-3 py-1 rounded-md text-xs font-semibold transition-all"
+            style={{
+              backgroundColor: !holidayContext ? '#1E6A6A' : 'transparent',
+              color: !holidayContext ? '#FFFFFF' : '#1E6A6A',
+            }}
+            data-testid="rate-toggle-regular"
+          >Regular</button>
+          {matchingHolidayTags.map((tg) => (
+            <button
+              key={tg}
+              type="button"
+              onClick={() => setHolidayContext(tg)}
+              className="px-3 py-1 rounded-md text-xs font-semibold transition-all capitalize"
+              style={{
+                backgroundColor: holidayContext === tg ? '#1E6A6A' : 'transparent',
+                color: holidayContext === tg ? '#FFFFFF' : '#1E6A6A',
+              }}
+              data-testid={`rate-toggle-${tg}`}
+            >{tg} rate</button>
+          ))}
         </div>
       )}
     </>
@@ -336,6 +378,16 @@ const BookingSidebar = ({
       ? t('property.bookNow', 'Book now')
       : t('property.reserveBooking');
 
+  // Holiday context — read once from `?holiday=sukkot|pesach` so a renter
+  // who clicked through from the /properties/sukkot grid lands on the
+  // Sukkot rate. State, not derived, so the in-sidebar Regular/Sukkot
+  // toggle below can flip it without leaving the URL.
+  const [holidayContext, setHolidayContext] = React.useState(() => {
+    if (typeof window === 'undefined') return null;
+    const qs = new URLSearchParams(window.location.search).get('holiday');
+    return ['sukkot', 'pesach'].includes(qs) ? qs : null;
+  });
+
   return (
     <div className="bg-white p-4 rounded-2xl border border-[#E5E5E5] sticky top-20 max-h-[calc(100vh-100px)] overflow-y-auto">
       <div className="mb-3">
@@ -344,6 +396,8 @@ const BookingSidebar = ({
           sublease={sublease}
           preSubleaseId={preSubleaseId}
           convertPrice={convertPrice}
+          holidayContext={holidayContext}
+          setHolidayContext={setHolidayContext}
         />
       </div>
 

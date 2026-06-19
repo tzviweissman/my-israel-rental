@@ -9,7 +9,14 @@ import DefaultImageBadge from './DefaultImageBadge';
  * Property card used on the /properties/<type> grid. Pure presentational —
  * the parent owns navigation, like-toggling, and FX conversion.
  */
-const PropertyCard = ({ property, isLiked, onClick, onToggleLike, convertPrice, apiBase }) => {
+const PropertyCard = ({
+  property, isLiked, onClick, onToggleLike, convertPrice, apiBase,
+  // `holidayContext` (e.g. 'sukkot' / 'pesach') tells the card the user is
+  // browsing a holiday page — switches the displayed price to the
+  // holiday rate. Browsing /vacation or /all keeps the regular nightly
+  // rate visible. Default null = no context (regular browsing).
+  holidayContext = null,
+}) => {
   const { t } = useTranslation();
   // Grid cards render at ~470px wide on desktop, ~360px on mobile.
   // Request 600px from Cloudinary so 2x-DPR displays stay crisp without
@@ -21,30 +28,44 @@ const PropertyCard = ({ property, isLiked, onClick, onToggleLike, convertPrice, 
     vacation: t('property.vacationType'),
     storage: t('property.storageType'),
   };
-  // Pricing display: vacation listings tagged with a holiday tag can carry
-  // a lump-sum "whole holiday" price. When set, surface that instead of the
-  // nightly rate so the renter immediately sees the holiday option. Tags
-  // (Sukkot/Pesach) are optional metadata — a lump price alone activates.
-  const hasHolidayLump =
+  // Pricing display rules:
+  //   • Browsing /sukkot or /pesach AND the listing has the matching tag +
+  //     a holiday_lump_price → show the holiday rate (lump or per-night
+  //     suffix decided by holiday_lump_is_per_night).
+  //   • Browsing /vacation or /all → ALWAYS show the regular nightly rate.
+  //     The lump only surfaces from a holiday-page context, so a single
+  //     listing can carry both prices without confusing renters.
+  //   • Non-vacation rentals always show the monthly rate.
+  const hasHolidayPrice =
     property.rental_type === 'vacation' &&
     property.holiday_lump_price != null &&
     property.holiday_lump_price > 0;
+  const tags = property.holiday_tags || [];
+  const showHolidayPrice =
+    hasHolidayPrice &&
+    holidayContext != null &&
+    tags.includes(holidayContext);
 
-  const priceCurrency = hasHolidayLump
+  const priceCurrency = showHolidayPrice
     ? (property.holiday_lump_currency || property.currency)
     : property.currency;
-  const rawPrice = hasHolidayLump
+  const rawPrice = showHolidayPrice
     ? property.holiday_lump_price
-    : property.monthly_price || property.nightly_price || 0;
+    : property.rental_type === 'vacation'
+      ? (property.nightly_price || 0)
+      : (property.monthly_price || 0);
   const converted = convertPrice(rawPrice, priceCurrency);
 
   const holidayLabelMap = {
     sukkot: t('property.perSukkot') || '/ Sukkot',
     pesach: t('property.perPesach') || '/ Pesach',
   };
-  const firstTag = (property.holiday_tags || [])[0];
-  const perLabel = hasHolidayLump
-    ? (firstTag && holidayLabelMap[firstTag]) || (t('property.perHoliday') || '/ holiday')
+  const perLabel = showHolidayPrice
+    ? (property.holiday_lump_is_per_night
+        // Holiday-mode + per-night → still "per night" but tag-aware label
+        // so the renter knows it's the holiday rate, not the regular one.
+        ? `${t('property.perNight')} (${(holidayContext || '').charAt(0).toUpperCase() + (holidayContext || '').slice(1)})`
+        : holidayLabelMap[holidayContext] || (t('property.perHoliday') || '/ holiday'))
     : property.rental_type === 'vacation'
       ? t('property.perNight')
       : t('property.perMonth');

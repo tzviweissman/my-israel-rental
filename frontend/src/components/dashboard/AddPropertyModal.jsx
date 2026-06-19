@@ -23,6 +23,10 @@ const EMPTY_FORM = {
   holiday_tags: [],
   holiday_lump_price: '',
   holiday_lump_currency: 'ILS',
+  // When true, `holiday_lump_price` is a per-night rate during the holiday
+  // window rather than the lump total. Lets owners charge a holiday-night
+  // premium without committing to a fixed package price.
+  holiday_lump_is_per_night: false,
 };
 
 /**
@@ -33,10 +37,6 @@ const AddPropertyModal = ({ isOpen, onClose, editingProperty, onSaved, API, toke
   const { t } = useTranslation();
   const [propertyForm, setPropertyForm] = useState(EMPTY_FORM);
   const [uploadedFiles, setUploadedFiles] = useState([]);
-  // Explicit vacation-price mode: 'night' (per-night) | 'lump' (whole holiday).
-  // Kept in state instead of derived from `holiday_lump_price` so users can
-  // clear the input to retype without the UI flipping back to per-night.
-  const [vacationPriceMode, setVacationPriceMode] = useState('night');
   // Ref to the custom cancellation policy textarea so we can scroll it into
   // view + auto-focus when the owner picks "Custom" — otherwise it renders
   // below the visible modal area and users assume it's missing.
@@ -146,18 +146,12 @@ const AddPropertyModal = ({ isOpen, onClose, editingProperty, onSaved, API, toke
         holiday_tags: editingProperty.holiday_tags || [],
         holiday_lump_price: editingProperty.holiday_lump_price || '',
         holiday_lump_currency: editingProperty.holiday_lump_currency || 'ILS',
+        holiday_lump_is_per_night: !!editingProperty.holiday_lump_is_per_night,
       });
       setUploadedFiles([
         ...(editingProperty.images || []).map((url, i) => ({ url, file_type: 'image', filename: url.split('/').pop(), original_name: `Image ${i + 1}` })),
         ...(editingProperty.videos || []).map((url, i) => ({ url, file_type: 'video', filename: url.split('/').pop(), original_name: `Video ${i + 1}` })),
       ]);
-      // Seed vacation-price mode from saved data: any non-zero lump price
-      // means the listing is in "whole holiday" mode.
-      setVacationPriceMode(
-        (editingProperty.rental_type === 'vacation' && Number(editingProperty.holiday_lump_price) > 0)
-          ? 'lump'
-          : 'night'
-      );
     } else {
       // Default starting/available date to today on a fresh add. The user
       // can override it via the calendar picker; this just removes a step
@@ -170,7 +164,6 @@ const AddPropertyModal = ({ isOpen, onClose, editingProperty, onSaved, API, toke
         starting_date: todayIso,
       });
       setUploadedFiles([]);
-      setVacationPriceMode('night');
     }
   }, [isOpen, editingProperty]);
 
@@ -199,6 +192,7 @@ const AddPropertyModal = ({ isOpen, onClose, editingProperty, onSaved, API, toke
       porches: toIntOrNull(propertyForm.porches) ?? 0,
       minimum_booking_days: toIntOrNull(propertyForm.minimum_booking_days),
       holiday_lump_price: toNumOrNull(propertyForm.holiday_lump_price),
+      holiday_lump_is_per_night: !!propertyForm.holiday_lump_is_per_night,
     };
     try {
       if (editingProperty?.id) {
@@ -481,126 +475,96 @@ const AddPropertyModal = ({ isOpen, onClose, editingProperty, onSaved, API, toke
               </div>
             )}
 
-            {/* Price section.
-                - Default: simple "Price (per night)" / "Price (monthly)" input.
-                - Vacation + holiday tag selected: switches to a Per-Night /
-                  Whole-Holiday toggle so the owner picks ONE pricing mode.
-                  Saving in the chosen mode clears the other side's value
-                  so only one price ships to the backend. */}
-            {(() => {
-              // Whole-Holiday pricing toggle is now available for any vacation
-              // rental — holiday tags (Sukkot/Pesach) are optional metadata.
-              const isVacation = propertyForm.rental_type === 'vacation';
-              // Mode comes from explicit state, NOT from the price value, so
-              // clearing the input to retype doesn't flip the UI back to
-              // per-night.
-              const mode = isVacation ? vacationPriceMode : 'night';
+            {/* Price section — always a single nightly/monthly input, with an
+                optional additive holiday-rate block below when one or more
+                holiday tags are selected. Owners enter BOTH a regular vacation
+                price and (optionally) a holiday premium — the UI/UX on the
+                listing pages picks the right one based on whether the renter
+                is browsing /vacation vs /sukkot. */}
+            <div className="md:col-span-2">
+              <label className="block text-sm font-medium mb-2">
+                {propertyForm.rental_type === 'vacation' ? 'Price (per night)' : 'Price (monthly)'}
+              </label>
+              <div className="flex gap-2">
+                <input
+                  type="number"
+                  value={propertyForm.rental_type === 'vacation' ? propertyForm.nightly_price : propertyForm.monthly_price}
+                  onChange={(e) => {
+                    const raw = e.target.value;
+                    const parsed = raw === '' ? '' : parseFloat(raw);
+                    if (propertyForm.rental_type === 'vacation') {
+                      setPropertyForm({ ...propertyForm, nightly_price: parsed });
+                    } else {
+                      setPropertyForm({ ...propertyForm, monthly_price: parsed });
+                    }
+                  }}
+                  min="0"
+                  className="flex-1 px-4 py-2 rounded-lg border border-[#E5E5E5] focus:outline-none focus:ring-2 focus:ring-[#1E6A6A]/50"
+                  required
+                  data-testid="property-price-input"
+                />
+                <select
+                  value={propertyForm.currency}
+                  onChange={(e) => setPropertyForm({ ...propertyForm, currency: e.target.value })}
+                  className="px-4 py-2 rounded-lg border border-[#E5E5E5] focus:outline-none focus:ring-2 focus:ring-[#1E6A6A]/50"
+                  data-testid="property-currency-select"
+                >
+                  <option value="ILS">₪ ILS</option>
+                  <option value="USD">$ USD</option>
+                </select>
+              </div>
+            </div>
 
+            {propertyForm.rental_type === 'vacation' && (propertyForm.holiday_tags || []).length > 0 && (() => {
               const tagsLabel = (propertyForm.holiday_tags || [])
                 .map((tag) => tag.charAt(0).toUpperCase() + tag.slice(1))
                 .join(' / ');
-              const labelText =
-                isVacation
-                  ? mode === 'lump'
-                    ? tagsLabel
-                      ? `Price for the whole ${tagsLabel} window`
-                      : 'Price for the whole holiday'
-                    : 'Price (per night)'
-                  : 'Price (monthly)';
-
-              const inputValue = mode === 'lump'
-                ? propertyForm.holiday_lump_price
-                : isVacation
-                  ? propertyForm.nightly_price
-                  : propertyForm.monthly_price;
-
-              const onPriceChange = (e) => {
-                const raw = e.target.value;
-                if (mode === 'lump') {
-                  setPropertyForm({ ...propertyForm, holiday_lump_price: raw });
-                } else if (isVacation) {
-                  setPropertyForm({ ...propertyForm, nightly_price: raw === '' ? '' : parseFloat(raw) });
-                } else {
-                  setPropertyForm({ ...propertyForm, monthly_price: raw === '' ? '' : parseFloat(raw) });
-                }
-              };
-
-              const currencyValue = mode === 'lump'
-                ? propertyForm.holiday_lump_currency
-                : propertyForm.currency;
-              const onCurrencyChange = (e) => {
-                if (mode === 'lump') {
-                  setPropertyForm({ ...propertyForm, holiday_lump_currency: e.target.value });
-                } else {
-                  setPropertyForm({ ...propertyForm, currency: e.target.value });
-                }
-              };
-
+              const isPerNight = !!propertyForm.holiday_lump_is_per_night;
               return (
-                <div className="md:col-span-2">
-                  {isVacation && (
-                    <div
-                      className="flex items-center gap-1 mb-2 p-1 rounded-xl bg-[#FBF8F2] border border-[#D4AF37]/30 w-fit"
-                      data-testid="vacation-price-mode-toggle"
-                    >
-                      <button
-                        type="button"
-                        onClick={() => {
-                          // Switch to per-night: clear lump-sum + flip mode.
-                          setVacationPriceMode('night');
-                          setPropertyForm({
-                            ...propertyForm,
-                            holiday_lump_price: '',
-                          });
-                        }}
-                        className="px-4 py-1.5 rounded-lg text-xs font-semibold transition-all"
-                        style={{
-                          backgroundColor: mode === 'night' ? '#1E6A6A' : 'transparent',
-                          color: mode === 'night' ? '#FFFFFF' : '#1E6A6A',
-                        }}
-                        data-testid="price-mode-night-btn"
-                      >
-                        Per Night
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          // Switch to whole-holiday: clear nightly + flip mode.
-                          setVacationPriceMode('lump');
-                          setPropertyForm({
-                            ...propertyForm,
-                            nightly_price: '',
-                          });
-                        }}
-                        className="px-4 py-1.5 rounded-lg text-xs font-semibold transition-all"
-                        style={{
-                          backgroundColor: mode === 'lump' ? '#1E6A6A' : 'transparent',
-                          color: mode === 'lump' ? '#FFFFFF' : '#1E6A6A',
-                        }}
-                        data-testid="price-mode-lump-btn"
-                      >
-                        Whole Holiday
-                      </button>
+                <div className="md:col-span-2 p-4 rounded-xl bg-[#FBF8F2] border border-[#D4AF37]/30" data-testid="holiday-rate-block">
+                  <div className="flex items-start justify-between gap-3 flex-wrap mb-3">
+                    <div className="min-w-0">
+                      <h4 className="text-sm font-bold text-[#1E6A6A]">{tagsLabel} rate</h4>
+                      <p className="text-xs text-gray-500 mt-0.5">Renters browsing {tagsLabel} see this price; everyone else sees the regular per-night rate above.</p>
                     </div>
-                  )}
-
-                  <label className="block text-sm font-medium mb-2">{labelText}</label>
+                    <div className="inline-flex items-center gap-1 p-1 rounded-lg bg-white border border-[#D4AF37]/30" data-testid="holiday-price-mode-toggle">
+                      <button
+                        type="button"
+                        onClick={() => setPropertyForm({ ...propertyForm, holiday_lump_is_per_night: false })}
+                        className="px-3 py-1 rounded-md text-xs font-semibold transition-all"
+                        style={{
+                          backgroundColor: !isPerNight ? '#1E6A6A' : 'transparent',
+                          color: !isPerNight ? '#FFFFFF' : '#1E6A6A',
+                        }}
+                        data-testid="holiday-mode-lump-btn"
+                      >Total for whole holiday</button>
+                      <button
+                        type="button"
+                        onClick={() => setPropertyForm({ ...propertyForm, holiday_lump_is_per_night: true })}
+                        className="px-3 py-1 rounded-md text-xs font-semibold transition-all"
+                        style={{
+                          backgroundColor: isPerNight ? '#1E6A6A' : 'transparent',
+                          color: isPerNight ? '#FFFFFF' : '#1E6A6A',
+                        }}
+                        data-testid="holiday-mode-night-btn"
+                      >Per night during holiday</button>
+                    </div>
+                  </div>
                   <div className="flex gap-2">
                     <input
                       type="number"
-                      value={inputValue}
-                      onChange={onPriceChange}
+                      value={propertyForm.holiday_lump_price}
+                      onChange={(e) => setPropertyForm({ ...propertyForm, holiday_lump_price: e.target.value })}
                       min="0"
-                      placeholder={mode === 'lump' ? 'e.g. 4500' : ''}
+                      placeholder={isPerNight ? 'e.g. 800 (per night during the holiday)' : 'e.g. 10000 (total for whole holiday window)'}
                       className="flex-1 px-4 py-2 rounded-lg border border-[#E5E5E5] focus:outline-none focus:ring-2 focus:ring-[#1E6A6A]/50"
-                      required={mode !== 'lump'}
-                      data-testid="property-price-input"
+                      data-testid="holiday-price-input"
                     />
                     <select
-                      value={currencyValue}
-                      onChange={onCurrencyChange}
+                      value={propertyForm.holiday_lump_currency}
+                      onChange={(e) => setPropertyForm({ ...propertyForm, holiday_lump_currency: e.target.value })}
                       className="px-4 py-2 rounded-lg border border-[#E5E5E5] focus:outline-none focus:ring-2 focus:ring-[#1E6A6A]/50"
-                      data-testid="property-currency-select"
+                      data-testid="holiday-price-currency-select"
                     >
                       <option value="ILS">₪ ILS</option>
                       <option value="USD">$ USD</option>

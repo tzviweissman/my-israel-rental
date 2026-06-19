@@ -41,10 +41,10 @@ api_router = router  # alias so existing @api_router decorators work verbatim
 @api_router.post("/properties", response_model=IdMessageResponse)
 async def create_property(property_data: PropertyCreate, payload: dict = Depends(verify_token)) -> dict:
     # Block duplicate listings: same owner + same address + same rental_type
-    # + same bedrooms + same floor + same holiday_tag is a copy-paste mistake.
-    # Different bedroom/floor → distinct units in the same building.
-    # Different holiday_tag → same apartment listed at different prices for
-    # different periods (e.g. $400/night normally vs $10K total for Sukkot).
+    # + same bedrooms + same floor is a copy-paste mistake. Different
+    # bedroom counts or floor numbers indicate distinct units in the same
+    # building. Holiday pricing lives on the SAME listing (lump + per-night
+    # toggle on the listing's edit page) so we don't split on holiday_tags.
     dup = await find_duplicate(
         db,
         owner_id=payload['user_id'],
@@ -52,7 +52,6 @@ async def create_property(property_data: PropertyCreate, payload: dict = Depends
         rental_type=property_data.rental_type,
         bedrooms=property_data.bedrooms,
         floor=getattr(property_data, "floor", None),
-        holiday_tags=getattr(property_data, "holiday_tags", None),
     )
     if dup:
         raise HTTPException(status_code=409, detail={
@@ -278,7 +277,6 @@ async def update_property(property_id: str, property_data: PropertyCreate, paylo
         rental_type=property_data.rental_type,
         bedrooms=property_data.bedrooms,
         floor=getattr(property_data, "floor", None),
-        holiday_tags=getattr(property_data, "holiday_tags", None),
         exclude_property_id=property_id,
     )
     if dup:
