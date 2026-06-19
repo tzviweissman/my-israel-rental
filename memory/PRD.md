@@ -13,6 +13,13 @@ Build a bilingual (English/Hebrew) rental website named MyIsraelRental.com with 
 ## What's Been Implemented
 
 
+- [x] **One-Click "Save as Alert" Next to Live Counter (2026-06-19)**: Building on the live result counter, added a gold-outlined "Save as alert" pill button right next to the counter. Visible whenever the renter has any filter active (`activeFilterCount > 0`). Reuses the existing `saveCurrentFiltersAsAlert` flow + `POST /api/saved-searches` endpoint — no backend change. Converts "I see 0 matches, oh well" moments into saved-search subscriptions without forcing renters to scroll into the filter panel.
+  - New i18n keys: `filters.saveAsAlert`, `filters.saveAsAlertTooltip` (EN + HE).
+  - Verified live as renter@test.com on `/properties/all?min_bedrooms=2&max_price=5000`: button visible, clicking it persisted the alert and showed the success toast.
+  - Files: `frontend/src/pages/Properties.js`, `frontend/src/i18n.js`.
+
+
+
 - [x] **Live Result Counter + Closed Panel on Back-Nav (2026-06-19)**: User reported (a) the listings page felt like filters weren't applying live — the count seemed correct only after clicking "Show N places", and (b) when returning to listings from a property detail, the filter panel re-opened automatically instead of staying closed.
   - **Root cause (a)**: Filtering DID happen live (debounced refetch on every filter change), but the only visible live count lived inside the "Show N places" button at the bottom of the filter panel — easy to miss when the panel covers the grid. Renters perceived "nothing happens until I click the button".
   - **Root cause (b)**: The `showFilters` state was initialized via `useState(!!(urlSearchParams.get('area') || ...))` — and after the previous URL-sync fix, the URL always carries filter params when filters are active. So returning to listings re-opened the panel.

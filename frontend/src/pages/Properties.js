@@ -3,7 +3,7 @@ import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import axios from 'axios';
 import { API, AuthContext } from '../App';
-import { Filter, Palmtree, Sun, Sparkles, Loader2 } from 'lucide-react';
+import { Filter, Palmtree, Sun, Sparkles, Loader2, Bell } from 'lucide-react';
 import { toast } from 'sonner';
 import NotifyMeCard from '../components/NotifyMeCard';
 import { HOLIDAY_WINDOWS } from '../constants/holidayWindows';
@@ -540,28 +540,52 @@ const Properties = () => {
             counter shows a pulsing dot so the renter gets immediate
             feedback that the system is recomputing. */}
         <div
-          className="flex items-center gap-2 mb-6 text-sm text-gray-600"
+          className="flex items-center justify-between gap-2 mb-6 text-sm text-gray-600 flex-wrap"
           data-testid="live-result-count"
         >
-          {filtering ? (
-            <>
-              <Loader2 size={14} className="animate-spin text-[#D4AF37]" />
-              <span>{t('filters.updating') || 'Updating results...'}</span>
-            </>
-          ) : (
-            <span>
-              <span className="font-semibold text-[#1E6A6A]" data-testid="live-result-count-number">
-                {properties.length}
-              </span>{' '}
-              {properties.length === 1
-                ? (t('filters.placeSingular') || 'place')
-                : (t('filters.places') || 'places')}
-              {activeFilterCount > 0 && (
-                <span className="text-gray-400">
-                  {' '}· {t('filters.matchingFilters') || 'matching your filters'}
-                </span>
-              )}
-            </span>
+          <div className="flex items-center gap-2">
+            {filtering ? (
+              <>
+                <Loader2 size={14} className="animate-spin text-[#D4AF37]" />
+                <span>{t('filters.updating') || 'Updating results...'}</span>
+              </>
+            ) : (
+              <span>
+                <span className="font-semibold text-[#1E6A6A]" data-testid="live-result-count-number">
+                  {properties.length}
+                </span>{' '}
+                {properties.length === 1
+                  ? (t('filters.placeSingular') || 'place')
+                  : (t('filters.places') || 'places')}
+                {activeFilterCount > 0 && (
+                  <span className="text-gray-400">
+                    {' '}· {t('filters.matchingFilters') || 'matching your filters'}
+                  </span>
+                )}
+              </span>
+            )}
+          </div>
+          {/* Inline "Save as alert" CTA — only appears once the renter has
+              applied a filter or two. Reuses the existing saved-search
+              infrastructure so renters never have to wait for an empty
+              result page to be prompted (especially handy when the live
+              count drops to 0 and they want notification when something
+              lists). */}
+          {activeFilterCount > 0 && (
+            <button
+              onClick={saveCurrentFiltersAsAlert}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold transition-all hover:shadow-sm active:scale-[0.97]"
+              style={{
+                backgroundColor: '#fafaf0',
+                color: '#1E6A6A',
+                border: '1px solid #D4AF37',
+              }}
+              data-testid="save-as-alert-inline-btn"
+              title={t('filters.saveAsAlertTooltip') || "We'll email you when a new place matches your filters"}
+            >
+              <Bell size={12} />
+              {t('filters.saveAsAlert') || 'Save as alert'}
+            </button>
           )}
         </div>
 
