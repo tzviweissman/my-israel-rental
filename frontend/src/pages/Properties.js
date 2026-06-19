@@ -17,7 +17,7 @@ const Properties = () => {
   const { type } = useParams();
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const [urlSearchParams] = useSearchParams();
+  const [urlSearchParams, setUrlSearchParams] = useSearchParams();
   const [properties, setProperties] = useState([]);
 
   // Initial filter state honors any URL query params so clicking a saved-search
@@ -296,6 +296,33 @@ const Properties = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filters, priceCurrency, dateRange]);
 
+  // Mirror the current filter state into the URL query string so the page is
+  // shareable, refreshable, and — crucially — survives a round-trip through
+  // a property-detail page. PropertyDetail's "Back to Listings" reads the
+  // saved `previousPath` (now path+search), which lands us here with the
+  // URL still carrying the filters; the initialFilters block hydrates state
+  // from URL on mount, so the renter sees their previous filtered results.
+  // `replace: true` keeps the browser history clean while typing.
+  useEffect(() => {
+    const next = new URLSearchParams();
+    const passthrough = [
+      'min_bedrooms', 'max_price', 'min_price', 'area', 'min_bathrooms',
+      'max_floor', 'min_porches', 'has_elevator', 'condition',
+      'date_from', 'date_to',
+    ];
+    passthrough.forEach((k) => {
+      const v = filters[k];
+      if (v != null && v !== '') next.set(k, String(v));
+    });
+    if (priceCurrency && priceCurrency !== 'ILS') next.set('currency', priceCurrency);
+    // Avoid spamming the URL when nothing changed.
+    const currentStr = urlSearchParams.toString();
+    const nextStr = next.toString();
+    if (currentStr !== nextStr) {
+      setUrlSearchParams(next, { replace: true });
+    }
+  }, [filters, priceCurrency]);
+
   const handleFilterChange = (key, value) => {
     setFilters(prev => ({ ...prev, [key]: value }));
   };
@@ -448,7 +475,10 @@ const Properties = () => {
   };
 
   const handleCardClick = (property) => {
-    sessionStorage.setItem('previousPath', window.location.pathname);
+    // Persist BOTH pathname and search so PropertyDetail's "Back to Listings"
+    // returns the renter to the exact filtered view they came from — not
+    // just /properties/<type> with all filters wiped.
+    sessionStorage.setItem('previousPath', window.location.pathname + window.location.search);
     // Sublease cards route to the standalone sublease detail page. This is
     // independent of the underlying property — if the original was deleted,
     // the sublease still has a working detail view (option-b detach).
