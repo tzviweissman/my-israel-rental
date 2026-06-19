@@ -13,6 +13,83 @@ import DefaultImageBadge from '../property/DefaultImageBadge';
  * handlers. Uses toast-confirms for destructive actions (window.confirm is
  * blocked inside the Emergent preview iframe).
  */
+
+// Stacked price renderer for owner dashboard cards. A single listing can carry
+// both a regular nightly/monthly rate AND a holiday lump (Sukkot/Pesach) rate,
+// so we show whichever are set rather than the old `monthly || nightly` fall-
+// through (which left holiday-only listings displaying just a bare currency
+// glyph with no number).
+const PriceBlock = ({ property, t }) => {
+  const isVacation = property.rental_type === 'vacation';
+  const regularPrice = isVacation ? property.nightly_price : property.monthly_price;
+  const regularSym = property.currency === 'USD' ? '$' : '₪';
+  const regularLabel = isVacation ? t('property.perNight') : t('property.perMonth');
+
+  const hasHoliday =
+    isVacation && property.holiday_lump_price != null && property.holiday_lump_price > 0;
+  const holidaySym =
+    (property.holiday_lump_currency || property.currency) === 'USD' ? '$' : '₪';
+  const tags = property.holiday_tags || [];
+  // Pick the suffix label. Existing i18n keys are full suffixes (e.g. '/ Sukkot'),
+  // so we use them directly for the lump-sum case. For per-night holiday pricing
+  // we tag onto `/night` so renters know it's the holiday rate variant.
+  let holidaySuffix;
+  if (property.holiday_lump_is_per_night) {
+    const tagName = tags.includes('sukkot') && tags.includes('pesach')
+      ? 'Sukkot/Pesach'
+      : tags.includes('pesach') ? 'Pesach' : 'Sukkot';
+    holidaySuffix = `${t('property.perNight')} (${tagName})`;
+  } else if (tags.includes('sukkot') && tags.includes('pesach')) {
+    holidaySuffix = `${t('property.perSukkot')} / ${t('property.perPesach').replace(/^\/\s*/, '')}`;
+  } else if (tags.includes('pesach')) {
+    holidaySuffix = t('property.perPesach');
+  } else if (tags.includes('sukkot')) {
+    holidaySuffix = t('property.perSukkot');
+  } else {
+    holidaySuffix = t('property.perHoliday');
+  }
+
+  const hasRegular = regularPrice != null && regularPrice > 0;
+
+  if (!hasRegular && !hasHoliday) {
+    return (
+      <span
+        className="text-sm text-gray-400 italic"
+        data-testid={`dashboard-no-price-${property.id}`}
+      >
+        No price set
+      </span>
+    );
+  }
+
+  return (
+    <div className="flex flex-col gap-0.5 min-w-0">
+      {hasRegular && (
+        <span
+          className="text-lg font-bold leading-tight"
+          style={{ color: '#1E6A6A' }}
+          data-testid={`dashboard-regular-price-${property.id}`}
+        >
+          {regularSym}
+          {Number(regularPrice).toLocaleString()}
+          <span className="text-[11px] font-normal text-gray-500 ml-1">{regularLabel}</span>
+        </span>
+      )}
+      {hasHoliday && (
+        <span
+          className="text-sm font-semibold leading-tight"
+          style={{ color: '#D4AF37' }}
+          data-testid={`dashboard-holiday-price-${property.id}`}
+        >
+          {holidaySym}
+          {Number(property.holiday_lump_price).toLocaleString()}
+          <span className="text-[10px] font-normal text-gray-500 ml-1">{holidaySuffix}</span>
+        </span>
+      )}
+    </div>
+  );
+};
+
 const PropertyList = ({ properties, bookings = [], onEdit, onRefresh, API, token }) => {
   const { t } = useTranslation();
   const navigate = useNavigate();
@@ -517,12 +594,9 @@ const PropertyList = ({ properties, bookings = [], onEdit, onRefresh, API, token
             <div className="p-4">
               <h3 className="text-lg font-bold mb-2">{property.title}</h3>
               <p className="text-gray-600 text-sm mb-4">{property.area}</p>
-              <div className="flex items-center justify-between">
-                <span className="text-xl font-bold" style={{ color: '#1E6A6A' }}>
-                  {property.currency === 'USD' ? '$' : '₪'}
-                  {property.monthly_price || property.nightly_price}
-                </span>
-                <div className="flex gap-2">
+              <div className="flex items-start justify-between gap-2">
+                <PriceBlock property={property} t={t} />
+                <div className="flex gap-2 shrink-0">
                   <button onClick={() => onEdit(property)} className="p-2 hover:bg-gray-100 rounded-lg" data-testid={`edit-property-${property.id}`}>
                     <Edit size={18} />
                   </button>
