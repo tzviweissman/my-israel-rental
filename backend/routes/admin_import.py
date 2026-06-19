@@ -221,8 +221,20 @@ def _coerce_int(v: Any) -> int | None:
 def _coerce_float(v: Any) -> float | None:
     if v in (None, ""):
         return None
+    s = str(v)
+    # Strip currency symbols + tokens so cells like "$1,200", "5000 USD",
+    # "₪ 4,500/month", "NIS 3500" all coerce cleanly. The per-row currency
+    # sniff happens separately on the original string.
+    for token in ("$", "₪", "€"):
+        s = s.replace(token, "")
+    for token in ("USD", "usd", "NIS", "nis", "ILS", "ils", "EUR", "eur",
+                  "shekel", "Shekel", "SHEKEL", "dollar", "Dollar", "DOLLAR",
+                  "/month", "/Month", "/MONTH", "/night", "/Night", "/NIGHT",
+                  "per month", "per night"):
+        s = s.replace(token, "")
+    s = s.replace(",", "").strip()
     try:
-        return float(str(v).replace(",", "").replace("$", "").replace("₪", "").strip())
+        return float(s)
     except (ValueError, TypeError):
         return None
 
@@ -244,6 +256,49 @@ def _split_list(v: Any) -> list[str]:
     s = str(v)
     parts = re.split(r"\s*[;|]\s*|\s*,\s*", s)
     return [p.strip() for p in parts if p.strip()]
+
+
+def _sniff_currency(remapped: dict, raw: dict, default: str = "ILS") -> str:
+    """Look across the price cells + any explicit currency cell to decide
+    what currency this row is in. Lets a CSV with no currency column
+    (or a mixed one) classify each row correctly instead of dumping
+    every vacation listing priced in dollars into ILS.
+
+    Order of preference:
+      1. Explicit currency cell — accept ``ILS``/``NIS``/``₪`` → ILS,
+         ``USD``/``$`` → USD, ``EUR``/``€`` → EUR.
+      2. Symbols anywhere in monthly_price / nightly_price / price cells.
+      3. The provided default.
+    """
+    def _norm(token: Any) -> str | None:
+        t = str(token or "").strip().lower()
+        if not t:
+            return None
+        if "₪" in t or "ils" in t or "nis" in t or "shekel" in t or "שח" in t or "ש״ח" in t:
+            return "ILS"
+        if "$" in t or "usd" in t or "dollar" in t:
+            return "USD"
+        if "€" in t or "eur" in t:
+            return "EUR"
+        return None
+
+    # 1. Explicit currency cell on the remapped row.
+    explicit = _norm(remapped.get("currency"))
+    if explicit:
+        return explicit
+    # 2. Price cells — peek at the raw value for symbols/words. Check
+    #    canonical monthly/nightly first, then any source column whose
+    #    name contains "price".
+    for key in ("monthly_price", "nightly_price"):
+        sym = _norm(remapped.get(key))
+        if sym:
+            return sym
+    for col, val in raw.items():
+        if "price" in (col or "").lower():
+            sym = _norm(val)
+            if sym:
+                return sym
+    return default
 
 
 def _split_urls(v: Any) -> list[str]:
@@ -540,6 +595,11 @@ async def commit_property_import(req: PropertyCommitRequest, payload: dict = Dep
                 column_map.get(k): v for k, v in raw.items()
                 if column_map.get(k) is not None
             }
+            # Per-row currency sniff: lets a CSV without a currency column
+            # — or with a mix of NIS/USD prices — classify each listing on
+            # its own price-cell symbols ($, ₪, USD, NIS, …) instead of
+            # defaulting every row to ILS.
+            remapped["currency"] = _sniff_currency(remapped, raw)
             owner_email = (remapped.get("owner_email") or "").strip().lower()
             owner_name = remapped.get("owner_name") or remapped.get("owner_email") or "Owner"
             owner_phone = remapped.get("owner_phone") or ""

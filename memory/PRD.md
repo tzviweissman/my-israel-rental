@@ -13,6 +13,13 @@ Build a bilingual (English/Hebrew) rental website named MyIsraelRental.com with 
 ## What's Been Implemented
 
 
+- [x] **Per-Row Currency Sniff for CSV Import (2026-06-19)**: Added `_sniff_currency` in `admin_import.py` that decides each row's currency from its own price-cell symbols instead of defaulting every row to ILS. Lookup order: (1) explicit `currency` cell (accepts `ILS`/`NIS`/`₪`/`shekel`/`USD`/`$`/`dollar`/`EUR`/`€`), (2) symbols inside `monthly_price` / `nightly_price`, (3) symbols inside any raw column whose name contains "price", (4) the default. Runs in the commit loop AFTER remap but BEFORE doc-build, overriding `remapped["currency"]` so `_build_property_doc` picks it up.
+  - **Companion fix**: `_coerce_float` now strips `USD` / `NIS` / `ILS` / `EUR` / `€` / `shekel` / `dollar` / `/month` / `/night` / `per month` / `per night` tokens before parsing, so cells like `"$1,200"`, `"5000 USD"`, `"₪ 4,500/month"`, `"NIS 3500"` all coerce cleanly.
+  - **Tests** (`tests/test_currency_sniff.py`, 4 new): explicit-currency-wins, sniff-from-price, raw-price-column fallback, coerce-strips-tokens. All 45 import/duplicate/dedupe tests still pass — no regressions.
+  - Files: `backend/routes/admin_import.py`, `backend/tests/test_currency_sniff.py` (new).
+
+
+
 - [x] **Auto-Detect Rental Type for CSV Import (2026-06-19)**: Building on the default-rental-type fix, added two auto-detect heuristics so admins rarely have to think about the dropdown:
   - **Filename sniff**: when the file is picked via the input, the filename is lowercased and matched against `/vacation|holiday|חופ|נופש/` → "vacation", `/short[_\-\s]?term|nightly/` → "short-term", `/long[_\-\s]?term|monthly|annual/` → "long-term". Hebrew variants supported.
   - **Column sniff**: after the preview returns, if the CSV has no per-row `rental_type` mapping AND we're still at the conservative "long-term" default, sniff the column map — `nightly_price` mapped without `monthly_price` → bumps default to "vacation". Triggers for paste-CSV-text users who don't go through the file picker. Doesn't override an admin choice; only nudges from the default.
