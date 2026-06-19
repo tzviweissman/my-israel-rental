@@ -566,12 +566,12 @@ const Properties = () => {
             )}
           </div>
           {/* Inline "Save as alert" CTA — only appears once the renter has
-              applied a filter or two. Reuses the existing saved-search
-              infrastructure so renters never have to wait for an empty
-              result page to be prompted (especially handy when the live
-              count drops to 0 and they want notification when something
-              lists). */}
-          {activeFilterCount > 0 && (
+              applied a filter or two, AND there are still results to show.
+              When results hit 0, the larger banner below replaces this pill
+              (no point showing two CTAs side by side). Reuses the existing
+              saved-search infrastructure so renters never have to wait for
+              an empty result page to be prompted. */}
+          {activeFilterCount > 0 && properties.length > 0 && (
             <button
               onClick={saveCurrentFiltersAsAlert}
               className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold transition-all hover:shadow-sm active:scale-[0.97]"
@@ -588,6 +588,55 @@ const Properties = () => {
             </button>
           )}
         </div>
+
+        {/* Prominent zero-results rescue banner — visible the moment the live
+            counter hits 0 with at least one filter active. Empty-result
+            moments are the highest-churn point in a search session; this
+            converts them into saved alerts before the renter bounces to a
+            competitor. The original bottom-of-page NotifyMeCard is still
+            rendered as a secondary placement for non-filtered empty
+            states. */}
+        {properties.length === 0 && activeFilterCount > 0 && !filtering && (
+          <div
+            className="mb-6 rounded-2xl p-5 sm:p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4"
+            style={{
+              backgroundColor: '#1E6A6A',
+              color: '#fafaf0',
+              border: '1.5px solid #D4AF37',
+            }}
+            data-testid="zero-results-alert-cta"
+          >
+            <div className="flex items-start gap-3">
+              <div
+                className="shrink-0 w-10 h-10 rounded-full flex items-center justify-center"
+                style={{ backgroundColor: 'rgba(212,175,55,0.15)' }}
+              >
+                <Bell size={18} style={{ color: '#D4AF37' }} />
+              </div>
+              <div>
+                <h3
+                  className="text-base sm:text-lg font-semibold mb-0.5"
+                  style={{ color: '#D4AF37', fontFamily: 'Playfair Display' }}
+                >
+                  {t('filters.zeroResultsHeading') || 'No matches right now'}
+                </h3>
+                <p className="text-xs sm:text-sm opacity-90 leading-snug">
+                  {t('filters.zeroResultsBody') ||
+                    "We'll email you the moment a new place matches your filters — usually within 24h of a fresh listing."}
+                </p>
+              </div>
+            </div>
+            <button
+              onClick={saveCurrentFiltersAsAlert}
+              className="shrink-0 inline-flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-semibold transition-all hover:shadow-md active:scale-[0.97]"
+              style={{ backgroundColor: '#D4AF37', color: '#1E6A6A' }}
+              data-testid="zero-results-save-alert-btn"
+            >
+              <Bell size={14} />
+              {t('filters.notifyMe') || 'Notify me'}
+            </button>
+          </div>
+        )}
 
         {/* Holiday quick-filter pills — only visible on the vacation
             family of pages (vacation / sukkot / pesach). Lets renters

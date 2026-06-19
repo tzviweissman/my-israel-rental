@@ -13,6 +13,15 @@ Build a bilingual (English/Hebrew) rental website named MyIsraelRental.com with 
 ## What's Been Implemented
 
 
+- [x] **Zero-Results Rescue Banner (2026-06-19)**: Building on the "Save as alert" pill, added a prominent teal+gold banner that REPLACES the small pill the moment the live counter drops to 0 places (with at least one filter active). Empty-result moments are the highest-churn point in a search session — this banner converts them into saved-search subscriptions before the renter bounces.
+  - **UX**: gold bell icon, "No matches right now" heading + body "We'll email you the moment a new place matches your filters — usually within 24h of a fresh listing.", and a large gold "Notify me" CTA on the right.
+  - **Logic**: visible only when `properties.length === 0 && activeFilterCount > 0 && !filtering`. The small "Save as alert" pill auto-hides when results=0 to avoid two competing CTAs side-by-side. The bottom-of-page NotifyMeCard remains as a secondary placement for non-filtered empty states (e.g. empty Sukkot/Pesach catalog).
+  - **i18n**: 3 new keys (`filters.zeroResultsHeading`, `filters.zeroResultsBody`, `filters.notifyMe`) EN + HE.
+  - **Verified live** as `renter@test.com`: `/properties/all?min_bedrooms=10` → 0 results → banner visible with gold CTA, pill hidden, bottom NotifyMeCard also rendered for comprehensive coverage.
+  - Files: `frontend/src/pages/Properties.js`, `frontend/src/i18n.js`.
+
+
+
 - [x] **One-Click "Save as Alert" Next to Live Counter (2026-06-19)**: Building on the live result counter, added a gold-outlined "Save as alert" pill button right next to the counter. Visible whenever the renter has any filter active (`activeFilterCount > 0`). Reuses the existing `saveCurrentFiltersAsAlert` flow + `POST /api/saved-searches` endpoint — no backend change. Converts "I see 0 matches, oh well" moments into saved-search subscriptions without forcing renters to scroll into the filter panel.
   - New i18n keys: `filters.saveAsAlert`, `filters.saveAsAlertTooltip` (EN + HE).
   - Verified live as renter@test.com on `/properties/all?min_bedrooms=2&max_price=5000`: button visible, clicking it persisted the alert and showed the success toast.
