@@ -77,7 +77,11 @@ const DuplicatesModal = ({ token, onClose, onDeleted }) => {
         { mode, keys: [keyOf(g)] },
         { headers: { Authorization: `Bearer ${token}` } },
       );
-      toast.success(`Deleted ${res.data.deleted} duplicate${res.data.deleted === 1 ? '' : 's'}`);
+      const merged = (res.data.report || []).reduce((acc, row) => acc + (row.images_merged || 0), 0);
+      toast.success(
+        `Deleted ${res.data.deleted} duplicate${res.data.deleted === 1 ? '' : 's'}` +
+        (merged > 0 ? ` · rescued ${merged} photo URL${merged === 1 ? '' : 's'} into the keeper` : ''),
+      );
       onDeleted?.();
       fetchGroups();
     } catch (e) {
@@ -102,7 +106,11 @@ const DuplicatesModal = ({ token, onClose, onDeleted }) => {
         { mode }, // no keys → resolve all
         { headers: { Authorization: `Bearer ${token}` } },
       );
-      toast.success(`Auto-resolved ${res.data.groups_resolved} groups · deleted ${res.data.deleted} listings`);
+      const merged = (res.data.report || []).reduce((acc, row) => acc + (row.images_merged || 0), 0);
+      toast.success(
+        `Auto-resolved ${res.data.groups_resolved} groups · deleted ${res.data.deleted} listings` +
+        (merged > 0 ? ` · rescued ${merged} photo URLs into surviving listings` : ''),
+      );
       onDeleted?.();
       fetchGroups();
     } catch (e) {

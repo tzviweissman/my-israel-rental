@@ -13,6 +13,16 @@ Build a bilingual (English/Hebrew) rental website named MyIsraelRental.com with 
 ## What's Been Implemented
 
 
+- [x] **Fix: Duplicate Resolver Wiped Image URLs From Losers (2026-06-19)**: User reported the "Re-mirror photos" admin tool was claiming many apartments had no image URLs, even though the original imported CSV definitely had them. Root cause confirmed: when `/admin/duplicates/resolve` picked a keeper that had no images (typically an "active twin" preferred because it carried chat history), the loser duplicates' image URLs were deleted along with the loser docs — the resolver had no image-merging step.
+  - **Fix** (`backend/routes/admin.py::resolve_duplicates`): added an image+video merge step BEFORE the loser delete_many. For each duplicate group, the keeper now inherits the union of `images` and `videos` from all losers (dedupe by URL string, keeper's own URLs come first to preserve cover-photo choice, cap 30 imgs / 5 vids matching the importer). When any merged URL is a non-CDN source URL, the keeper's `mirror_pending=True` flag is set so the next `/admin/properties/remirror` sweep uploads them to Cloudinary automatically.
+  - Also fixed an underlying projection bug: the resolver query was projecting `images` but NOT `videos`, so loser videos were silently dropped even before this fix.
+  - Admin UI feedback (`DuplicatesModal.jsx`): the per-group and bulk "Auto-resolve" toasts now include a "rescued N photo URLs into surviving listings" suffix when any images were merged, so admins see the rescue happening.
+  - **Tests**: 2 new regression tests in `tests/test_duplicate_image_merge.py` — (1) empty keeper with chat history inherits 3 images + 1 video + `mirror_pending=True` flag from a loser, (2) overlapping URLs dedupe to a single entry. All 12 existing dedupe-related tests still pass — no regressions.
+  - **For listings that ALREADY lost images** (this fix only protects future resolutions): user should re-upload the original CSV via Admin → Import with the "Sync photos onto existing listings" toggle ON, which the existing pipeline supports. The "Re-mirror photos" toast also surfaces this recovery hint.
+  - Files: `backend/routes/admin.py`, `backend/tests/test_duplicate_image_merge.py` (new), `frontend/src/components/admin/DuplicatesModal.jsx`.
+
+
+
 - [x] **"X new" Unread Badge on My-Alerts Popover (2026-06-19)**: Extended `MyAlertsPopover.jsx` with an unread-matches indicator. Renters now see at a glance which of their saved searches have hit new properties since the last time they checked.
   - **Trigger badge**: small orange pill (`#E07A2C`) next to the "(N)" count showing e.g. "3 new". Compact "99+" cap. Visible only when `newCount > 0`. Clears the moment the renter opens the popover (writes "now" to `localStorage.alertsLastSeenAt:<token-tail>`).
   - **Inside popover**: a soft-amber bar under the heading shows "N new properties matched · View in Dashboard →" deep-linking to `/dashboard?tab=alerts` where the matched property cards live. The popover itself stays focused on managing saved-search definitions.

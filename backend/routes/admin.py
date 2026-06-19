@@ -409,7 +409,7 @@ async def resolve_duplicates(
         {"status": {"$in": ["active", "pending", "draft"]}},
         {
             "_id": 0, "id": 1, "owner_id": 1, "address": 1, "rental_type": 1,
-            "created_at": 1, "images": 1, "description": 1,
+            "created_at": 1, "images": 1, "videos": 1, "description": 1,
             "bedrooms": 1, "floor": 1,
         },
     ).to_list(5000)
@@ -562,6 +562,44 @@ async def resolve_duplicates(
         reattached_total["blocks"] += blocks_r.modified_count
         reattached_total["subleases"] += subleases_r.modified_count
 
+        # Merge images + videos from losers into the keeper BEFORE we
+        # delete them. Without this step, picking a keeper with chat
+        # history (active_props preference) or a newer-but-empty twin
+        # would wipe out photo URLs that lived on the loser docs — the
+        # admin re-mirror tool would then report "no image URLs" for
+        # listings the admin is sure had photos at import time.
+        # Order: keeper's images first (so its preferred cover stays
+        # the cover), then any new URLs from each loser in turn.
+        # Dedupe is by exact URL string. Cap matches the importer.
+        keeper_imgs = list(keeper.get("images") or [])
+        keeper_vids = list(keeper.get("videos") or [])
+        seen_img_urls = {u for u in keeper_imgs if u}
+        seen_vid_urls = {u for u in keeper_vids if u}
+        for loser in losers:
+            for u in (loser.get("images") or []):
+                if u and u not in seen_img_urls:
+                    keeper_imgs.append(u)
+                    seen_img_urls.add(u)
+            for u in (loser.get("videos") or []):
+                if u and u not in seen_vid_urls:
+                    keeper_vids.append(u)
+                    seen_vid_urls.add(u)
+        merged_imgs = keeper_imgs[:30]
+        merged_vids = keeper_vids[:5]
+        merged_image_count_delta = len(merged_imgs) - len(keeper.get("images") or [])
+        if merged_image_count_delta > 0 or len(merged_vids) > len(keeper.get("videos") or []):
+            # Some merged URLs may be raw source URLs (not on Cloudinary);
+            # mark the keeper for the re-mirror sweep so a subsequent
+            # /admin/properties/remirror call (or the next import pass)
+            # uploads them to the CDN.
+            needs_mirror = any(
+                "cloudinary.com" not in (u or "") for u in merged_imgs + merged_vids
+            )
+            update_doc = {"images": merged_imgs, "videos": merged_vids}
+            if needs_mirror:
+                update_doc["mirror_pending"] = True
+            await db.properties.update_one({"id": keeper_id}, {"$set": update_doc})
+
         res = await db.properties.delete_many({"id": {"$in": loser_ids}})
         deleted_total += res.deleted_count
         report.append({
@@ -569,6 +607,7 @@ async def resolve_duplicates(
             "kept_id": keeper_id,
             "deleted_ids": loser_ids,
             "deleted_count": res.deleted_count,
+            "images_merged": max(0, merged_image_count_delta),
             "reattached": {
                 "messages": msgs_r.modified_count,
                 "bookings": bookings_r.modified_count,
