@@ -3,6 +3,8 @@ import { useTranslation } from 'react-i18next';
 import { Calendar as CalendarIcon, Mail, MessageCircle, X } from 'lucide-react';
 import { Calendar } from '../ui/calendar';
 import { format } from 'date-fns';
+import { HOLIDAY_WINDOWS } from '../../constants/holidayWindows';
+import { loadHolidayWindows } from '../../utils/holidayWindows';
 
 // Parse 'YYYY-MM-DD' as a LOCAL date (avoids the UTC-shift bug where
 // selecting June 2 displays as June 1 in timezones east of UTC).
@@ -87,30 +89,40 @@ const PriceBlock = ({ property, sublease, preSubleaseId, convertPrice, holidayCo
           pricing when both are available on this listing. Surfaces the
           dual-price model without forcing two separate listings. */}
       {hasHolidayPrice && matchingHolidayTags.length > 0 && (
-        <div className="mt-3 inline-flex items-center gap-1 p-1 rounded-lg bg-[#FBF8F2] border border-[#D4AF37]/30" data-testid="rate-toggle">
-          <button
-            type="button"
-            onClick={() => setHolidayContext(null)}
-            className="px-3 py-1 rounded-md text-xs font-semibold transition-all"
-            style={{
-              backgroundColor: !holidayContext ? '#1E6A6A' : 'transparent',
-              color: !holidayContext ? '#FFFFFF' : '#1E6A6A',
-            }}
-            data-testid="rate-toggle-regular"
-          >Regular</button>
-          {matchingHolidayTags.map((tg) => (
+        <div className="mt-3" data-testid="rate-toggle-wrap">
+          <div className="inline-flex items-center gap-1 p-1 rounded-lg bg-[#FBF8F2] border border-[#D4AF37]/30" data-testid="rate-toggle">
             <button
-              key={tg}
               type="button"
-              onClick={() => setHolidayContext(tg)}
-              className="px-3 py-1 rounded-md text-xs font-semibold transition-all capitalize"
+              onClick={() => setHolidayContext(null)}
+              className="px-3 py-1 rounded-md text-xs font-semibold transition-all"
               style={{
-                backgroundColor: holidayContext === tg ? '#1E6A6A' : 'transparent',
-                color: holidayContext === tg ? '#FFFFFF' : '#1E6A6A',
+                backgroundColor: !holidayContext ? '#1E6A6A' : 'transparent',
+                color: !holidayContext ? '#FFFFFF' : '#1E6A6A',
               }}
-              data-testid={`rate-toggle-${tg}`}
-            >{tg} rate</button>
-          ))}
+              data-testid="rate-toggle-regular"
+            >Regular</button>
+            {matchingHolidayTags.map((tg) => (
+              <button
+                key={tg}
+                type="button"
+                onClick={() => setHolidayContext(tg)}
+                className="px-3 py-1 rounded-md text-xs font-semibold transition-all capitalize"
+                style={{
+                  backgroundColor: holidayContext === tg ? '#1E6A6A' : 'transparent',
+                  color: holidayContext === tg ? '#FFFFFF' : '#1E6A6A',
+                }}
+                data-testid={`rate-toggle-${tg}`}
+              >{tg} rate</button>
+            ))}
+          </div>
+          {/* Auto-applied hint: only shows when the holiday rate was
+              selected by the date-driven effect (still active toggle +
+              this listing's check-in falls in the holiday window). */}
+          {holidayContext && (
+            <p className="text-[11px] text-[#1E6A6A] mt-1.5 ml-1" data-testid="rate-auto-hint">
+              {(t('property.holidayRateApplied') || 'Holiday rate applied — switch to Regular if you prefer.')}
+            </p>
+          )}
         </div>
       )}
     </>
@@ -387,6 +399,74 @@ const BookingSidebar = ({
     const qs = new URLSearchParams(window.location.search).get('holiday');
     return ['sukkot', 'pesach'].includes(qs) ? qs : null;
   });
+  // True once the user has manually flipped the rate toggle — pauses
+  // date-driven auto-switching so we don't override their explicit choice.
+  const [holidayManuallySet, setHolidayManuallySet] = React.useState(false);
+
+  // Auto-rolling holiday windows from Hebcal (cached 30 days in
+  // localStorage; falls back to the static dates if the API is
+  // unreachable). One fetch per page load — windows rarely change.
+  const [resolvedWindows, setResolvedWindows] = React.useState(HOLIDAY_WINDOWS);
+  React.useEffect(() => {
+    let cancelled = false;
+    loadHolidayWindows()
+      .then((w) => { if (!cancelled && w) setResolvedWindows(w); })
+      .catch(() => {});  // static fallback already in state
+    return () => { cancelled = true; };
+  }, []);
+
+  // Date-aware rate auto-switch: if the renter's check-in lands inside
+  // Sukkot/Pesach AND this listing has the matching holiday tag + a
+  // holiday rate set, flip to the holiday rate automatically. So a
+  // renter who wandered in from /vacation but picked Sukkot dates gets
+  // the holiday price without having to find the toggle.
+  //
+  // Skipped once the user has flipped the toggle manually so we never
+  // override an explicit choice; resets when they clear dates.
+  const checkInISO = bookingData?.start_date;
+  React.useEffect(() => {
+    if (holidayManuallySet || !checkInISO) return;
+    const tags = property.holiday_tags || [];
+    const hasHolidayRate =
+      property.rental_type === 'vacation' &&
+      property.holiday_lump_price != null &&
+      property.holiday_lump_price > 0;
+    if (!hasHolidayRate || tags.length === 0) return;
+
+    let matchedTag = null;
+    for (const tag of ['sukkot', 'pesach']) {
+      if (!tags.includes(tag)) continue;
+      const win = resolvedWindows?.[tag];
+      if (!win) continue;
+      // String-compare ISO dates (YYYY-MM-DD) — both ends inclusive.
+      if (checkInISO >= win.start && checkInISO <= win.end) {
+        matchedTag = tag;
+        break;
+      }
+    }
+    if (matchedTag && holidayContext !== matchedTag) {
+      setHolidayContext(matchedTag);
+    } else if (!matchedTag && holidayContext != null) {
+      // Date moved OUT of any holiday window → fall back to the regular
+      // rate. (Still respects manual override via the `holidayManuallySet`
+      // guard above.)
+      setHolidayContext(null);
+    }
+  }, [checkInISO, resolvedWindows, holidayManuallySet, property.holiday_tags, property.rental_type, property.holiday_lump_price, holidayContext]);
+
+  // Reset the manual-override flag when the user clears dates entirely
+  // — they're essentially starting fresh, so auto-switching should
+  // resume on the next date pick.
+  React.useEffect(() => {
+    if (!checkInISO && holidayManuallySet) setHolidayManuallySet(false);
+  }, [checkInISO, holidayManuallySet]);
+
+  // Wrap the toggle setter so any UI click is treated as a manual choice
+  // and locks the date-driven auto-switch until the renter clears dates.
+  const setHolidayContextManual = (next) => {
+    setHolidayManuallySet(true);
+    setHolidayContext(next);
+  };
 
   return (
     <div className="bg-white p-4 rounded-2xl border border-[#E5E5E5] sticky top-20 max-h-[calc(100vh-100px)] overflow-y-auto">
@@ -397,7 +477,7 @@ const BookingSidebar = ({
           preSubleaseId={preSubleaseId}
           convertPrice={convertPrice}
           holidayContext={holidayContext}
-          setHolidayContext={setHolidayContext}
+          setHolidayContext={setHolidayContextManual}
         />
       </div>
 

@@ -13,6 +13,13 @@ Build a bilingual (English/Hebrew) rental website named MyIsraelRental.com with 
 ## What's Been Implemented
 
 
+- [x] **Date-Aware Auto-Switch of Holiday Rate (2026-06-17)**: Closing the loop on dual-price listings — when a renter wandered in from `/vacation` but picked check-in dates that fall inside Sukkot or Pesach, they were stuck with the regular nightly rate unless they spotted the toggle. Now the booking sidebar auto-flips to the matching holiday rate whenever their selected check-in lands in the holiday window.
+  - **Frontend** (`components/property/BookingSidebar.jsx`): new effect watches `bookingData.start_date` and matches against `loadHolidayWindows()` (Hebcal-backed, 30-day localStorage cache, static fallback). If the date lands in a window AND the listing has the matching `holiday_tags` entry AND a `holiday_lump_price` is set, `holidayContext` flips to `sukkot`/`pesach`. A new `holidayManuallySet` guard pauses auto-switching once the renter explicitly clicks Regular/Sukkot/Pesach — so we never override an explicit choice. The flag resets when the renter clears dates entirely so the next pick re-engages auto-switch.
+  - **UX hint**: a small teal "Holiday rate applied — switch to Regular if you prefer" caption appears under the rate toggle whenever a non-Regular rate is active, so the renter knows what's happening and how to undo it.
+  - **Test coverage**: new `tests/test_holiday_window_pick.py` (7 tests) mirrors the React decision in Python — boundary-inclusive matching, listing-must-have-the-tag, empty inputs, both holiday types. 14/14 dedupe + holiday-window tests green.
+  - Files: `frontend/src/components/property/BookingSidebar.jsx`, `backend/tests/test_holiday_window_pick.py`.
+
+
 - [x] **Dual-Price Listings: Regular Nightly + Holiday Rate (2026-06-17)**: User wanted one apartment to be listable at $400/night for general vacation AND $10K (or $X/night) for Sukkot/Pesach — without creating two separate listings. Reverted the previous dedupe-tags split and implemented true dual pricing on a single listing.
   - **Backend** model: added `holiday_lump_is_per_night: bool = False` on `Property` + `PropertyOut`. When True, `holiday_lump_price` is interpreted as a holiday-night premium rather than the lump total. Owners now save BOTH `nightly_price` AND `holiday_lump_price` on the same doc; UI picks which to display.
   - **Backend** dedupe: reverted `holiday_tags` from the signature in `utils/dedupe.py`. A single listing per (owner, address, rental_type, bedrooms, floor) is now the only correct shape. Holiday pricing lives on that same listing.
