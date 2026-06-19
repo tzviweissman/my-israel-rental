@@ -13,6 +13,19 @@ Build a bilingual (English/Hebrew) rental website named MyIsraelRental.com with 
 ## What's Been Implemented
 
 
+- [x] **Live Result Counter + Closed Panel on Back-Nav (2026-06-19)**: User reported (a) the listings page felt like filters weren't applying live — the count seemed correct only after clicking "Show N places", and (b) when returning to listings from a property detail, the filter panel re-opened automatically instead of staying closed.
+  - **Root cause (a)**: Filtering DID happen live (debounced refetch on every filter change), but the only visible live count lived inside the "Show N places" button at the bottom of the filter panel — easy to miss when the panel covers the grid. Renters perceived "nothing happens until I click the button".
+  - **Root cause (b)**: The `showFilters` state was initialized via `useState(!!(urlSearchParams.get('area') || ...))` — and after the previous URL-sync fix, the URL always carries filter params when filters are active. So returning to listings re-opened the panel.
+  - **Fix** (`pages/Properties.js`):
+    - Added a prominent live result counter right under the page title, e.g. **"6 places · matching your filters"**. When a refetch is in flight (filter tweak, slider drag, typing in price input) it shows a spinning loader + "Updating results...". Renters now see filters taking effect WITHOUT scrolling past the panel or guessing.
+    - Added a subtle 60% opacity fade on the grid while `filtering=true` so the cards visually "blink" during the refetch — extra confirmation that the system is recomputing.
+    - Defaulted `showFilters = false` always. Saved-search deep links and back-nav both land with the panel collapsed. The "Filters N" badge on the toggle button still tells the renter what's applied.
+  - New i18n keys: `filters.updating`, `filters.placeSingular`, `filters.matchingFilters` (EN + HE).
+  - **Verified live**: arriving at `/properties/all?min_bedrooms=2` (back-from-detail) lands with panel closed, chip showing "6 places · matching your filters", grid showing 6 cards. Opening filters and clicking Bedrooms+ three times flipped chip to "6 places" live (was 13) with grid fade during refetch.
+  - Files: `frontend/src/pages/Properties.js`, `frontend/src/i18n.js`.
+
+
+
 - [x] **Fix: Smart Paste AI Extraction Failing (2026-06-19)**: User reported "AI extraction failed" on live site when using Smart Paste in the Bulk Upload modal. Backend logs showed Anthropic returning `not_found_error: model: claude-4-sonnet-20250514` — that model identifier was deprecated.
   - **Fix**: Migrated all backend Claude callers from the dead `claude-4-sonnet-20250514` / `claude-sonnet-4-20250514` identifiers to the current recommended `claude-sonnet-4-6`. Four files updated: `routes/bulk_upload.py::smart_extract` (Smart Paste), `utils/translate.py` (rental-contract translation), `utils/chat_translate.py` (chat-message live translation), `routes/misc.py::translate_text` (generic /translate endpoint).
   - **Verified**: `POST /api/properties/bulk/extract` now returns HTTP 200 with two correctly-extracted rows from a mixed Hebrew/English 2-property paste — title generated, "Rosh Chodesh Iyar" preserved into `available_from`, basement → `floor=-1`, currency inferred from `$`/NIS, `condition=renovated`, `sukkah_compatible=yes`. `POST /api/translate` smoke-tested HE→EN ("שלום" → "Hello") also returns 200.

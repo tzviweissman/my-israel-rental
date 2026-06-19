@@ -52,9 +52,17 @@ const Properties = () => {
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
-  const [showFilters, setShowFilters] = useState(
-    !!(urlSearchParams.get('area') || urlSearchParams.get('min_bedrooms') || urlSearchParams.get('max_price'))
-  );
+  // Filter panel stays closed by default — even when the URL carries filter
+  // params (e.g. user returning from a property detail with filters intact,
+  // or a saved-search deep link). The "Filters N" badge on the toggle
+  // button + the live result count below the page heading already tell the
+  // user what's applied; auto-opening the panel was disorienting on every
+  // back-navigation.
+  const [showFilters, setShowFilters] = useState(false);
+  // True while a filter-change refetch is in flight. Lets us dim the grid
+  // so renters get visible feedback that their filter tweak is taking
+  // effect, even when the panel is open and the grid is partially obscured.
+  const [filtering, setFiltering] = useState(false);
   const [dateRange, setDateRange] = useState(() => {
     const df = urlSearchParams.get('date_from');
     const dt = urlSearchParams.get('date_to');
@@ -134,6 +142,7 @@ const Properties = () => {
   const fetchProperties = async (pageOverride = 1, append = false) => {
     try {
       if (append) setLoadingMore(true);
+      else setFiltering(true);
       const params = new URLSearchParams();
       // The URL `type` segment is the source of truth for the rental_type
       // filter when navigating between /properties/<type> pages — `filters`
@@ -208,6 +217,7 @@ const Properties = () => {
       console.error('Failed to fetch properties', error);
     } finally {
       if (append) setLoadingMore(false);
+      else setFiltering(false);
     }
   };
 
@@ -495,7 +505,7 @@ const Properties = () => {
   return (
     <div className="min-h-screen">
       <div className="max-w-7xl mx-auto px-6 pt-36 sm:pt-32 md:pt-28 pb-12">
-        <div className="flex items-center justify-between mb-8 gap-3">
+        <div className="flex items-center justify-between mb-3 gap-3">
           <h1
             className="text-2xl sm:text-3xl md:text-4xl font-bold truncate"
             style={{ fontFamily: 'Playfair Display' }}
@@ -521,6 +531,38 @@ const Properties = () => {
               </span>
             )}
           </button>
+        </div>
+
+        {/* Live result counter — always visible just below the page title so
+            renters can see their filter tweaks taking effect WITHOUT having
+            to scroll past the filter panel or click "Show N places". When a
+            fetch is in flight (typing in price field, dragging slider) the
+            counter shows a pulsing dot so the renter gets immediate
+            feedback that the system is recomputing. */}
+        <div
+          className="flex items-center gap-2 mb-6 text-sm text-gray-600"
+          data-testid="live-result-count"
+        >
+          {filtering ? (
+            <>
+              <Loader2 size={14} className="animate-spin text-[#D4AF37]" />
+              <span>{t('filters.updating') || 'Updating results...'}</span>
+            </>
+          ) : (
+            <span>
+              <span className="font-semibold text-[#1E6A6A]" data-testid="live-result-count-number">
+                {properties.length}
+              </span>{' '}
+              {properties.length === 1
+                ? (t('filters.placeSingular') || 'place')
+                : (t('filters.places') || 'places')}
+              {activeFilterCount > 0 && (
+                <span className="text-gray-400">
+                  {' '}· {t('filters.matchingFilters') || 'matching your filters'}
+                </span>
+              )}
+            </span>
+          )}
         </div>
 
         {/* Holiday quick-filter pills — only visible on the vacation
@@ -589,7 +631,12 @@ const Properties = () => {
           />
         )}
 
-        <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-8">
+        <div
+          className={`grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-8 transition-opacity duration-200 ${
+            filtering ? 'opacity-60' : 'opacity-100'
+          }`}
+          data-testid="properties-grid"
+        >
           {properties.map((property) => (
             <PropertyCard
               key={property.id}
