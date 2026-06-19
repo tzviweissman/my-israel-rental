@@ -6,6 +6,7 @@ import { API, AuthContext } from '../App';
 import { Filter, Palmtree, Sun, Sparkles, Loader2, Bell } from 'lucide-react';
 import { toast } from 'sonner';
 import NotifyMeCard from '../components/NotifyMeCard';
+import MyAlertsPopover from '../components/MyAlertsPopover';
 import { HOLIDAY_WINDOWS } from '../constants/holidayWindows';
 import { loadHolidayWindows } from '../utils/holidayWindows';
 
@@ -63,6 +64,10 @@ const Properties = () => {
   // so renters get visible feedback that their filter tweak is taking
   // effect, even when the panel is open and the grid is partially obscured.
   const [filtering, setFiltering] = useState(false);
+  // Bumps each time a saved-search alert is created so the inline
+  // MyAlertsPopover can re-fetch its list (keeps the "(N)" count fresh
+  // without forcing the renter to close + reopen).
+  const [alertsRefreshKey, setAlertsRefreshKey] = useState(0);
   const [dateRange, setDateRange] = useState(() => {
     const df = urlSearchParams.get('date_from');
     const dt = urlSearchParams.get('date_to');
@@ -371,6 +376,9 @@ const Properties = () => {
       } else {
         toast.success("Alert saved! We'll notify you when a match lists.");
       }
+      // Signal the inline MyAlertsPopover to re-fetch so its "(N)" count
+      // reflects the new alert without forcing a manual reopen.
+      setAlertsRefreshKey((k) => k + 1);
     } catch (err) {
       toast.error(err.response?.data?.detail || 'Failed to save alert');
     }
@@ -565,28 +573,29 @@ const Properties = () => {
               </span>
             )}
           </div>
-          {/* Inline "Save as alert" CTA — only appears once the renter has
-              applied a filter or two, AND there are still results to show.
-              When results hit 0, the larger banner below replaces this pill
-              (no point showing two CTAs side by side). Reuses the existing
-              saved-search infrastructure so renters never have to wait for
-              an empty result page to be prompted. */}
-          {activeFilterCount > 0 && properties.length > 0 && (
-            <button
-              onClick={saveCurrentFiltersAsAlert}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold transition-all hover:shadow-sm active:scale-[0.97]"
-              style={{
-                backgroundColor: '#fafaf0',
-                color: '#1E6A6A',
-                border: '1px solid #D4AF37',
-              }}
-              data-testid="save-as-alert-inline-btn"
-              title={t('filters.saveAsAlertTooltip') || "We'll email you when a new place matches your filters"}
-            >
-              <Bell size={12} />
-              {t('filters.saveAsAlert') || 'Save as alert'}
-            </button>
-          )}
+          {/* Right-side cluster: My Alerts popover (always visible when
+              signed in) + Save-as-alert pill (only when filters are
+              applied AND there are still results — the zero-results banner
+              replaces this when results=0). */}
+          <div className="flex items-center gap-2">
+            <MyAlertsPopover refreshSignal={alertsRefreshKey} />
+            {activeFilterCount > 0 && properties.length > 0 && (
+              <button
+                onClick={saveCurrentFiltersAsAlert}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold transition-all hover:shadow-sm active:scale-[0.97]"
+                style={{
+                  backgroundColor: '#fafaf0',
+                  color: '#1E6A6A',
+                  border: '1px solid #D4AF37',
+                }}
+                data-testid="save-as-alert-inline-btn"
+                title={t('filters.saveAsAlertTooltip') || "We'll email you when a new place matches your filters"}
+              >
+                <Bell size={12} />
+                {t('filters.saveAsAlert') || 'Save as alert'}
+              </button>
+            )}
+          </div>
         </div>
 
         {/* Prominent zero-results rescue banner — visible the moment the live

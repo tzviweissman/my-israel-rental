@@ -13,6 +13,15 @@ Build a bilingual (English/Hebrew) rental website named MyIsraelRental.com with 
 ## What's Been Implemented
 
 
+- [x] **Inline "My Alerts" Popover on Listings Page (2026-06-19)**: Built `components/MyAlertsPopover.jsx` that lives next to the live counter row. Shows a compact trigger "My alerts (N)" with chevron — click opens a 320px popover listing every active saved-search with its filter chips (rental_type, area, bedrooms_min, max_price, date window) and expiry date. Trash icon on each row deletes via `DELETE /api/saved-searches/{id}` with optimistic UI + toast.
+  - **Why**: until now the only way to manage saved alerts was Dashboard → Alerts. Renters create alerts on the search page, so they should also be able to see/prune them there without losing their filtered view.
+  - Lazy-loads on first sign-in mount (no fetch when logged out). Auto-closes on outside-click + ESC. `refreshSignal` prop bumps after every new alert save so the "(N)" count stays accurate without a manual reopen.
+  - **i18n**: 10 new keys (`filters.myAlerts`, `myAlertsHeading`, `alertSingular`, `alertPlural`, `noAlerts`, `anyMatch`, `alertExpiresOn`, `removeAlert`, `alertDeleted`, `myAlertsTooltip`) — EN + HE.
+  - **Verified live** as `renter@test.com` on `/properties/all?min_bedrooms=2`: trigger renders showing "(3)", popover opens with 3 rows (each with proper chips: `10+ BR` / `2+ BR · ≤ 5,000` / `long term · Tel Aviv · ≤ 8,000`), trash-click drops to 2.
+  - Files: `frontend/src/components/MyAlertsPopover.jsx` (new, ~200 lines), `frontend/src/pages/Properties.js`, `frontend/src/i18n.js`.
+
+
+
 - [x] **Zero-Results Rescue Banner (2026-06-19)**: Building on the "Save as alert" pill, added a prominent teal+gold banner that REPLACES the small pill the moment the live counter drops to 0 places (with at least one filter active). Empty-result moments are the highest-churn point in a search session — this banner converts them into saved-search subscriptions before the renter bounces.
   - **UX**: gold bell icon, "No matches right now" heading + body "We'll email you the moment a new place matches your filters — usually within 24h of a fresh listing.", and a large gold "Notify me" CTA on the right.
   - **Logic**: visible only when `properties.length === 0 && activeFilterCount > 0 && !filtering`. The small "Save as alert" pill auto-hides when results=0 to avoid two competing CTAs side-by-side. The bottom-of-page NotifyMeCard remains as a secondary placement for non-filtered empty states (e.g. empty Sukkot/Pesach catalog).
