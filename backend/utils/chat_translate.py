@@ -31,5 +31,5 @@ async def translate_chat_message(text: str, target_lang: str) -> str:
             f"Output only the translation — no quotes, prefixes, or notes."
         ),
     )
-    chat.with_model("anthropic", "claude-4-sonnet-20250514")
+    chat.with_model("anthropic", "claude-sonnet-4-6")
     return (await chat.send_message(UserMessage(text=text))).strip()

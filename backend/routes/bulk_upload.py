@@ -639,7 +639,7 @@ async def smart_extract(
         session_id=str(uuid.uuid4()),
         system_message=_EXTRACT_SYSTEM_PROMPT,
     )
-    chat.with_model("anthropic", "claude-4-sonnet-20250514")
+    chat.with_model("anthropic", "claude-sonnet-4-6")
     raw = await chat.send_message(UserMessage(text=text))
 
     parsed: Any

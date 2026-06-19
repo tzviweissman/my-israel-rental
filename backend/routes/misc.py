@@ -91,7 +91,7 @@ async def translate_text(request: TranslationRequest) -> dict:
             session_id=str(uuid.uuid4()),
             system_message=f"You are a professional translator. Translate the following text from {request.from_lang} to {request.to_lang}. Only provide the translation, no explanations."
         )
-        chat.with_model("anthropic", "claude-sonnet-4-20250514")
+        chat.with_model("anthropic", "claude-sonnet-4-6")
         
         message = UserMessage(text=request.text)
         response = await chat.send_message(message)
