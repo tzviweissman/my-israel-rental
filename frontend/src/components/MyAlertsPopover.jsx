@@ -38,17 +38,37 @@ const MyAlertsPopover = ({ refreshSignal }) => {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [alerts, setAlerts] = useState([]);
+  // Recent matches (alerts where the system flagged a property as a fit). Used
+  // ONLY to compute the unread badge — the popover itself stays focused on
+  // managing the saved-search definitions; the matched listings live in
+  // Dashboard → Alerts.
+  const [matches, setMatches] = useState([]);
   const [deletingId, setDeletingId] = useState(null);
   const wrapRef = useRef(null);
 
   const authHeaders = { headers: { Authorization: `Bearer ${token}` } };
 
+  // Per-user localStorage key — keeps "last seen" pointer scoped so two
+  // accounts on the same browser don't clobber each other's unread state.
+  const lastSeenKey = `alertsLastSeenAt:${token ? token.slice(-12) : 'anon'}`;
+  const [lastSeenAt, setLastSeenAt] = useState(() => {
+    try {
+      return localStorage.getItem(lastSeenKey) || null;
+    } catch {
+      return null;
+    }
+  });
+
   const fetchAlerts = async () => {
     if (!token) return;
     setLoading(true);
     try {
-      const res = await axios.get(`${API}/saved-searches`, authHeaders);
-      setAlerts(res.data || []);
+      const [defsRes, matchesRes] = await Promise.all([
+        axios.get(`${API}/saved-searches`, authHeaders),
+        axios.get(`${API}/saved-searches/matches`, authHeaders).catch(() => ({ data: [] })),
+      ]);
+      setAlerts(defsRes.data || []);
+      setMatches(matchesRes.data || []);
     } catch {
       // Soft-fail — we don't want a saved-search hiccup to break the page.
     } finally {
@@ -95,12 +115,36 @@ const MyAlertsPopover = ({ refreshSignal }) => {
   if (!token) return null;
 
   const count = alerts.length;
+  // Compute unread matches — properties the system flagged for one of this
+  // renter's searches AFTER they last opened the popover. Capped to 99 in
+  // the badge to keep it visually compact ("99+").
+  const newCount = lastSeenAt
+    ? matches.filter((m) => m.sent_at && new Date(m.sent_at) > new Date(lastSeenAt)).length
+    : matches.length;
+
+  const handleTriggerClick = () => {
+    setOpen((v) => {
+      const next = !v;
+      // When transitioning to OPEN, persist "now" as last-seen so the badge
+      // clears immediately. The renter has visibly engaged with the list.
+      if (next && newCount > 0) {
+        const now = new Date().toISOString();
+        try {
+          localStorage.setItem(lastSeenKey, now);
+        } catch {
+          /* localStorage may be unavailable in private mode */
+        }
+        setLastSeenAt(now);
+      }
+      return next;
+    });
+  };
 
   return (
     <div ref={wrapRef} className="relative inline-block" data-testid="my-alerts-popover-wrap">
       <button
         type="button"
-        onClick={() => setOpen((v) => !v)}
+        onClick={handleTriggerClick}
         className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium transition-all hover:bg-gray-100 text-gray-500 hover:text-[#1E6A6A]"
         data-testid="my-alerts-trigger"
         title={t('filters.myAlertsTooltip') || 'Manage your saved alerts'}
@@ -110,6 +154,16 @@ const MyAlertsPopover = ({ refreshSignal }) => {
           {t('filters.myAlerts') || 'My alerts'}{' '}
           <span className="font-semibold text-[#1E6A6A]">({count})</span>
         </span>
+        {newCount > 0 && (
+          <span
+            className="inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full text-[10px] font-bold text-white"
+            style={{ backgroundColor: '#E07A2C' }}
+            data-testid="my-alerts-new-badge"
+            title={t('filters.newMatchesTooltip') || 'New matches since you last looked'}
+          >
+            {newCount > 99 ? '99+' : `${newCount} ${t('filters.newShort') || 'new'}`}
+          </span>
+        )}
         <ChevronDown size={11} className={`transition-transform ${open ? 'rotate-180' : ''}`} />
       </button>
 
@@ -130,6 +184,27 @@ const MyAlertsPopover = ({ refreshSignal }) => {
               </span>
             )}
           </div>
+          {/* Unread-matches hint — only renders if there are recent matches
+              the renter hasn't reviewed yet. Deep-links into Dashboard →
+              Alerts where the matched property cards live. */}
+          {matches.length > 0 && (
+            <a
+              href="/dashboard?tab=alerts"
+              className="block px-4 py-2.5 text-xs border-b border-gray-100 transition-colors"
+              style={{ backgroundColor: '#fff8e8', color: '#7a5a14' }}
+              data-testid="my-alerts-view-matches-link"
+            >
+              <span className="font-semibold">
+                {matches.length}{' '}
+                {matches.length === 1
+                  ? (t('filters.matchSingular') || 'new property matched')
+                  : (t('filters.matchPlural') || 'new properties matched')}
+              </span>{' '}
+              <span className="opacity-80">
+                · {t('filters.viewInDashboard') || 'View in Dashboard →'}
+              </span>
+            </a>
+          )}
           <div className="max-h-72 overflow-y-auto">
             {loading ? (
               <div className="flex items-center justify-center py-8 text-gray-400">

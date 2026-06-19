@@ -13,6 +13,16 @@ Build a bilingual (English/Hebrew) rental website named MyIsraelRental.com with 
 ## What's Been Implemented
 
 
+- [x] **"X new" Unread Badge on My-Alerts Popover (2026-06-19)**: Extended `MyAlertsPopover.jsx` with an unread-matches indicator. Renters now see at a glance which of their saved searches have hit new properties since the last time they checked.
+  - **Trigger badge**: small orange pill (`#E07A2C`) next to the "(N)" count showing e.g. "3 new". Compact "99+" cap. Visible only when `newCount > 0`. Clears the moment the renter opens the popover (writes "now" to `localStorage.alertsLastSeenAt:<token-tail>`).
+  - **Inside popover**: a soft-amber bar under the heading shows "N new properties matched · View in Dashboard →" deep-linking to `/dashboard?tab=alerts` where the matched property cards live. The popover itself stays focused on managing saved-search definitions.
+  - **Data**: fetches both `GET /saved-searches` (definitions) AND `GET /saved-searches/matches` (recent alerts) in parallel on mount. Unread count = `matches.filter(m => new Date(m.sent_at) > lastSeenAt).length`. Per-user localStorage key scoped via token tail.
+  - **i18n**: 6 new keys (`newShort`, `newMatchesTooltip`, `matchSingular`, `matchPlural`, `viewInDashboard`) — EN + HE.
+  - **Verified live** as `renter@test.com`: seeded 3 distinct property matches → trigger renders "(2) ההתראות שלי" + orange "3 חדש" badge. Click → popover opens with amber "3 נכסים חדשים תואמים" bar → close → badge disappears (localStorage updated).
+  - Files: `frontend/src/components/MyAlertsPopover.jsx`, `frontend/src/i18n.js`.
+
+
+
 - [x] **Inline "My Alerts" Popover on Listings Page (2026-06-19)**: Built `components/MyAlertsPopover.jsx` that lives next to the live counter row. Shows a compact trigger "My alerts (N)" with chevron — click opens a 320px popover listing every active saved-search with its filter chips (rental_type, area, bedrooms_min, max_price, date window) and expiry date. Trash icon on each row deletes via `DELETE /api/saved-searches/{id}` with optimistic UI + toast.
   - **Why**: until now the only way to manage saved alerts was Dashboard → Alerts. Renters create alerts on the search page, so they should also be able to see/prune them there without losing their filtered view.
   - Lazy-loads on first sign-in mount (no fetch when logged out). Auto-closes on outside-click + ESC. `refreshSignal` prop bumps after every new alert save so the "(N)" count stays accurate without a manual reopen.
