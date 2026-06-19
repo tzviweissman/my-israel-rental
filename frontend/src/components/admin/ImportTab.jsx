@@ -42,6 +42,11 @@ export const ImportTab = ({ token, onJumpToOwner }) => {
   // recovery path after a half-finished import left some listings
   // photo-less.
   const [commitMode, setCommitMode] = useState('create');
+  // Default rental_type applied to property rows whose CSV doesn't carry
+  // an explicit value. Without this, vacation CSV exports (which often
+  // lack a rental_type column) silently became long-term listings that
+  // never appeared under the Vacation filter.
+  const [defaultRentalType, setDefaultRentalType] = useState('long-term');
 
   const onPickFile = async (e) => {
     const file = e.target.files?.[0];
@@ -109,7 +114,7 @@ export const ImportTab = ({ token, onJumpToOwner }) => {
         : `${API}/admin/import/properties/commit`;
       const res = await axios.post(
         url,
-        { csv_text: csvText, column_map: preview.column_map, mirror_images: true, mode: commitMode },
+        { csv_text: csvText, column_map: preview.column_map, mirror_images: true, mode: commitMode, default_rental_type: defaultRentalType },
         { headers: { Authorization: `Bearer ${token}` }, timeout: 600000 },  // 10 min for Cloudinary mirroring
       );
       setResult(res.data);
@@ -318,6 +323,57 @@ export const ImportTab = ({ token, onJumpToOwner }) => {
               {JSON.stringify(preview.sample_rows, null, 2)}
             </pre>
           </details>
+
+          {schemaKind === 'property' && (
+            <div className="mb-3 bg-amber-50 border border-amber-200 rounded-lg p-3" data-testid="default-rental-type-section">
+              {/* Detect whether the CSV provides rental_type per row. If
+                  not, force the admin to pick a default — a missing
+                  rental_type column silently defaulted every row to
+                  long-term, hiding e.g. an entire vacation_rentals.csv
+                  on the Vacation tab. */}
+              {(() => {
+                const mappedTargets = Object.values(preview.column_map || {});
+                const hasPerRow = mappedTargets.includes('rental_type');
+                return (
+                  <>
+                    <p className="text-xs font-semibold text-amber-900 mb-2">
+                      {hasPerRow
+                        ? 'Default rental type (used only on rows missing a value):'
+                        : '⚠ Your CSV has no rental_type column — pick the rental type to apply to every row:'}
+                    </p>
+                    <div className="flex flex-wrap gap-2">
+                      {['long-term', 'short-term', 'vacation'].map((t) => (
+                        <label
+                          key={t}
+                          className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs cursor-pointer border ${
+                            defaultRentalType === t
+                              ? 'bg-white border-amber-400 text-amber-900 font-semibold'
+                              : 'bg-transparent border-amber-200 text-amber-800'
+                          }`}
+                        >
+                          <input
+                            type="radio"
+                            name="default-rental-type"
+                            value={t}
+                            checked={defaultRentalType === t}
+                            onChange={() => setDefaultRentalType(t)}
+                            className="accent-amber-600"
+                            data-testid={`default-rental-type-${t}`}
+                          />
+                          {t === 'long-term' ? 'Long-term' : t === 'short-term' ? 'Short-term' : 'Vacation'}
+                        </label>
+                      ))}
+                    </div>
+                    {!hasPerRow && (
+                      <p className="text-[11px] text-amber-800 mt-2 leading-snug">
+                        Tip: filename hints (e.g. <code className="bg-white px-1 rounded">vacation_rentals.csv</code>) often tell you which to pick.
+                      </p>
+                    )}
+                  </>
+                );
+              })()}
+            </div>
+          )}
 
           {schemaKind === 'property' && (
             <div className="mb-3 bg-amber-50 border border-amber-200 rounded-lg p-3" data-testid="commit-mode-toggle">

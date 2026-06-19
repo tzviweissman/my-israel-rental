@@ -275,10 +275,16 @@ def _split_urls(v: Any) -> list[str]:
     return out
 
 
-def _build_property_doc(row_remapped: dict, owner_id: str) -> dict:
+def _build_property_doc(row_remapped: dict, owner_id: str, default_rental_type: str = "long-term") -> dict:
     """Convert a remapped row (canonical-field keyed) into a property doc
     ready to insert. Applies defaults + coercions identical to the manual
-    create flow."""
+    create flow.
+
+    ``default_rental_type`` is used when the CSV row has no rental_type
+    value of its own. Critical when the file is e.g. ``vacation_rentals.csv``
+    without an explicit column — previously every such row silently fell
+    through to ``long-term`` and then sat invisible on the Vacation tab.
+    """
     doc = {
         "id": str(uuid.uuid4()),
         "owner_id": owner_id,
@@ -286,7 +292,7 @@ def _build_property_doc(row_remapped: dict, owner_id: str) -> dict:
         "description": row_remapped.get("description") or "",
         "area": row_remapped.get("area") or "",
         "address": row_remapped.get("address") or "",
-        "rental_type": (row_remapped.get("rental_type") or "long-term").lower(),
+        "rental_type": (row_remapped.get("rental_type") or default_rental_type or "long-term").lower(),
         "property_type": (row_remapped.get("property_type") or "apartment").lower(),
         "bedrooms": _coerce_int(row_remapped.get("bedrooms")) or 1,
         "bathrooms": _coerce_int(row_remapped.get("bathrooms")) or 1,
@@ -479,6 +485,12 @@ class PropertyCommitRequest(BaseModel):
     csv_text: str
     column_map: dict[str, str | None] | None = None  # admin overrides
     mirror_images: bool = True
+    # Default rental_type applied to every row whose CSV doesn't carry one.
+    # Critical when the file is e.g. "vacation_rentals.csv" without a
+    # rental_type column — previously every row silently defaulted to
+    # "long-term", which then sat invisible on the Vacation tab. The
+    # importer UI now surfaces this as a required dropdown.
+    default_rental_type: str = "long-term"
     # "create" (default) → skip rows whose (owner + address + rental_type)
     #   already exists, insert the rest.
     # "sync_photos" → when a duplicate is found, REPLACE its images/videos
@@ -542,11 +554,19 @@ async def commit_property_import(req: PropertyCommitRequest, payload: dict = Dep
             if was_created:
                 owners_created.append({"email": owner_email, "id": owner_id})
 
-            # Dedupe — same rule as the manual create endpoint
+            # Dedupe — same rule as the manual create endpoint. Apply the
+            # admin-selected default rental_type when the CSV row omits one,
+            # so an import without a rental_type column matches existing
+            # vacation/long-term listings correctly (otherwise the importer
+            # creates duplicate "long-term" stubs instead of finding their
+            # vacation twins).
+            effective_rental_type = (
+                remapped.get("rental_type") or req.default_rental_type or "long-term"
+            ).lower()
             dup = await find_duplicate(
                 db, owner_id=owner_id,
                 address=remapped.get("address"),
-                rental_type=remapped.get("rental_type"),
+                rental_type=effective_rental_type,
                 bedrooms=remapped.get("bedrooms"),
                 floor=remapped.get("floor"),
             )
@@ -610,7 +630,7 @@ async def commit_property_import(req: PropertyCommitRequest, payload: dict = Dep
                 })
                 continue
 
-            doc = _build_property_doc(remapped, owner_id)
+            doc = _build_property_doc(remapped, owner_id, default_rental_type=req.default_rental_type)
 
             # Always save with the source URLs first so the listing has
             # photos immediately. Background task below will swap them
