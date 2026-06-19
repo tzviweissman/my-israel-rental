@@ -55,6 +55,15 @@ export const ImportTab = ({ token, onJumpToOwner }) => {
     setPreview(null);
     setSchemaKind(null);
     setResult(null);
+    // Auto-detect rental_type from the filename so admins don't have to
+    // re-pick every time. "vacation_rentals.csv" → vacation, "short_term.csv"
+    // → short-term, anything else stays at the long-term default. The
+    // admin can still override before clicking Commit; this just removes
+    // a fiddly mandatory click for the common case.
+    const name = (file.name || '').toLowerCase();
+    if (/vacation|holiday|חופ|נופש/.test(name)) setDefaultRentalType('vacation');
+    else if (/short[\s_-]?term|nightly/.test(name)) setDefaultRentalType('short-term');
+    else if (/long[\s_-]?term|monthly|annual/.test(name)) setDefaultRentalType('long-term');
   };
 
   const runPreview = async (overrideKind = null) => {
@@ -68,6 +77,20 @@ export const ImportTab = ({ token, onJumpToOwner }) => {
       );
       setPreview(res.data);
       setSchemaKind(res.data.detected_schema_kind || 'property');
+      // If the file picker didn't already pick a rental_type AND the CSV
+      // doesn't map a per-row rental_type column, sniff the column map:
+      // `nightly_price` strongly implies vacation/short-term, while
+      // `monthly_price` implies long-term. Only nudges when we're still
+      // at the conservative "long-term" default — admin choices win.
+      if (res.data.detected_schema_kind === 'property') {
+        const targets = Object.values(res.data.column_map || {});
+        const hasPerRow = targets.includes('rental_type');
+        if (!hasPerRow && defaultRentalType === 'long-term') {
+          const hasNightly = targets.includes('nightly_price');
+          const hasMonthly = targets.includes('monthly_price');
+          if (hasNightly && !hasMonthly) setDefaultRentalType('vacation');
+        }
+      }
       if (res.data.warnings?.length) {
         toast.warning(res.data.warnings.join(' '), { duration: 6000 });
       } else {

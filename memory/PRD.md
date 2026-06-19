@@ -13,6 +13,13 @@ Build a bilingual (English/Hebrew) rental website named MyIsraelRental.com with 
 ## What's Been Implemented
 
 
+- [x] **Auto-Detect Rental Type for CSV Import (2026-06-19)**: Building on the default-rental-type fix, added two auto-detect heuristics so admins rarely have to think about the dropdown:
+  - **Filename sniff**: when the file is picked via the input, the filename is lowercased and matched against `/vacation|holiday|חופ|נופש/` → "vacation", `/short[_\-\s]?term|nightly/` → "short-term", `/long[_\-\s]?term|monthly|annual/` → "long-term". Hebrew variants supported.
+  - **Column sniff**: after the preview returns, if the CSV has no per-row `rental_type` mapping AND we're still at the conservative "long-term" default, sniff the column map — `nightly_price` mapped without `monthly_price` → bumps default to "vacation". Triggers for paste-CSV-text users who don't go through the file picker. Doesn't override an admin choice; only nudges from the default.
+  - Files: `frontend/src/components/admin/ImportTab.jsx`.
+
+
+
 - [x] **Fix: CSV Import Silently Defaulted Every Row to long-term (2026-06-19)**: User reported their `vacation_rentals.csv` (37 rows) was importing without photos. Root cause investigation showed the CSV had **no `rental_type` column** — so every row defaulted to `long-term` in `_build_property_doc` (line 289). The listings were imported correctly WITH photos, but classified as `long-term` — invisible on the user's Vacation tab. They concluded "vacation rentals don't have photos" when in fact the listings just weren't being categorised as vacation.
   - Confirmed images themselves were fine: `_split_urls` correctly handles the ` | ` separator the file uses, the AI mapper correctly maps `image_urls → images` / `broker_email → owner_email`, and the Supabase storage host returns 200 OK with public CORS. A clean test commit imported all 37 rows with 5-55 images each. The data was never the problem — the categorization was.
   - **Fix** (`backend/routes/admin_import.py`): added `default_rental_type` field (default `"long-term"`) to `PropertyCommitRequest`. `_build_property_doc` accepts it as a third parameter and applies it whenever a row lacks an explicit rental_type. The dedupe lookup (`find_duplicate`) now uses the same effective rental_type, so the importer can finally match an existing vacation listing instead of creating a long-term duplicate.
