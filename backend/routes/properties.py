@@ -321,16 +321,125 @@ async def delete_property(property_id: str, payload: dict = Depends(verify_token
     
     if existing['owner_id'] != payload['user_id'] and payload['role'] != 'admin':
         raise HTTPException(status_code=403, detail="Not authorized")
-    
-    # Cascade: detach any active subleases that referenced this property so
-    # they don't become dead links pointing to /property/<deleted-id>. They
-    # remain visible as standalone listings on /sublease/<id>.
-    await db.subleases.update_many(
-        {"original_property_id": property_id},
-        {"$set": {"original_property_id": None}},
+
+    # If a surviving duplicate twin exists (same owner + address + rental_type
+    # + bedrooms + floor), reattach every chat / booking / like / nudge /
+    # block / sublease pointer to it BEFORE we delete this row. Without this,
+    # deleting one of two duplicate listings would leave existing chats
+    # opening to "Property not found" and lose any booking history. Same
+    # logic the bulk dedupe resolver runs — extracted here so the everyday
+    # "owner deletes one of their two duplicate cards" path is safe too.
+    twin = await find_duplicate(
+        db,
+        owner_id=existing["owner_id"],
+        address=existing.get("address"),
+        rental_type=existing.get("rental_type"),
+        bedrooms=existing.get("bedrooms"),
+        floor=existing.get("floor"),
+        exclude_property_id=property_id,
     )
+    reattached = {"to": None, "messages": 0, "bookings": 0, "likes": 0,
+                  "nudges": 0, "blocks": 0, "subleases": 0, "images_merged": 0}
+    if twin:
+        twin_id = twin["id"]
+        reattached["to"] = twin_id
+        # If both the loser and the twin have likes from the same user,
+        # drop the loser-side like first so the update_many below doesn't
+        # try to create a (user_id, property_id) pair that already exists.
+        twin_likers = {
+            row["user_id"]
+            async for row in db.liked_properties.find(
+                {"property_id": twin_id}, {"_id": 0, "user_id": 1}
+            )
+        }
+        if twin_likers:
+            await db.liked_properties.delete_many({
+                "property_id": property_id,
+                "user_id": {"$in": list(twin_likers)},
+            })
+        msgs_r = await db.messages.update_many(
+            {"property_id": property_id}, {"$set": {"property_id": twin_id}}
+        )
+        bookings_r = await db.bookings.update_many(
+            {"property_id": property_id}, {"$set": {"property_id": twin_id}}
+        )
+        likes_r = await db.liked_properties.update_many(
+            {"property_id": property_id}, {"$set": {"property_id": twin_id}}
+        )
+        nudges_r = await db.chat_nudges.update_many(
+            {"property_id": property_id}, {"$set": {"property_id": twin_id}}
+        )
+        blocks_r = await db.admin_blocks.update_many(
+            {"property_id": property_id}, {"$set": {"property_id": twin_id}}
+        )
+        subleases_r = await db.subleases.update_many(
+            {"original_property_id": property_id},
+            {"$set": {"original_property_id": twin_id}},
+        )
+        reattached.update({
+            "messages": msgs_r.modified_count,
+            "bookings": bookings_r.modified_count,
+            "likes": likes_r.modified_count,
+            "nudges": nudges_r.modified_count,
+            "blocks": blocks_r.modified_count,
+            "subleases": subleases_r.modified_count,
+        })
+
+        # Rescue this row's images + videos into the twin (dedupe by URL,
+        # twin's URLs first to preserve its cover choice, cap matches the
+        # importer). Same pattern as the bulk duplicate resolver.
+        twin_full = await db.properties.find_one(
+            {"id": twin_id}, {"_id": 0, "images": 1, "videos": 1}
+        ) or {}
+        twin_imgs = list(twin_full.get("images") or [])
+        twin_vids = list(twin_full.get("videos") or [])
+        seen_imgs = {u for u in twin_imgs if u}
+        seen_vids = {u for u in twin_vids if u}
+        new_imgs = 0
+        for u in (existing.get("images") or []):
+            if u and u not in seen_imgs:
+                twin_imgs.append(u)
+                seen_imgs.add(u)
+                new_imgs += 1
+        for u in (existing.get("videos") or []):
+            if u and u not in seen_vids:
+                twin_vids.append(u)
+                seen_vids.add(u)
+        merged_imgs = twin_imgs[:30]
+        merged_vids = twin_vids[:5]
+        reattached["images_merged"] = max(0, len(merged_imgs) - len(twin_full.get("images") or []))
+        if reattached["images_merged"] > 0 or len(merged_vids) > len(twin_full.get("videos") or []):
+            needs_mirror = any(
+                "cloudinary.com" not in (u or "") for u in merged_imgs + merged_vids
+            )
+            patch = {"images": merged_imgs, "videos": merged_vids}
+            if needs_mirror:
+                patch["mirror_pending"] = True
+            await db.properties.update_one({"id": twin_id}, {"$set": patch})
+    else:
+        # No twin → detach subleases so they live on as standalone listings.
+        # Matches the long-standing behavior; only changes when we DO find
+        # a twin (above), where we re-point the subleases instead.
+        await db.subleases.update_many(
+            {"original_property_id": property_id},
+            {"$set": {"original_property_id": None}},
+        )
+
     await db.properties.delete_one({"id": property_id})
-    return {"message": "Property deleted successfully"}
+    msg = "Property deleted successfully"
+    if reattached["to"]:
+        bits = []
+        if reattached["messages"]:
+            bits.append(f"{reattached['messages']} chats")
+        if reattached["bookings"]:
+            bits.append(f"{reattached['bookings']} bookings")
+        if reattached["likes"]:
+            bits.append(f"{reattached['likes']} likes")
+        if reattached["images_merged"]:
+            bits.append(f"{reattached['images_merged']} photos")
+        if bits:
+            msg = f"Deleted — moved {', '.join(bits)} to the duplicate twin."
+    return {"message": msg, "reattached": reattached}
 
 
 @api_router.post("/properties/{property_id}/cover", response_model=MessageResponse)

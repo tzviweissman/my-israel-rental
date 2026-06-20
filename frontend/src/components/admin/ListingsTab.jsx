@@ -322,8 +322,8 @@ export const ListingsTab = ({ token, onStatsChange }) => {
             onClick={async () => {
               toast.dismiss(tid);
               try {
-                await axios.delete(`${API}/properties/${propertyId}`, { headers });
-                toast.success('Property deleted');
+                const res = await axios.delete(`${API}/properties/${propertyId}`, { headers });
+                toast.success(res.data?.message || 'Property deleted');
                 fetchProperties();
                 notifyStatsChange();
               } catch (e) { toast.error('Failed to delete property'); }

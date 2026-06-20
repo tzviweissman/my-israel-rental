@@ -123,8 +123,8 @@ const PropertyList = ({ properties, bookings = [], onEdit, onRefresh, API, token
               onClick={async () => {
                 toast.dismiss(tid);
                 try {
-                  await axios.delete(`${API}/properties/${propertyId}`, authHeaders);
-                  toast.success('Property deleted');
+                  const res = await axios.delete(`${API}/properties/${propertyId}`, authHeaders);
+                  toast.success(res.data?.message || 'Property deleted');
                   onRefresh && onRefresh();
                 } catch (err) {
                   toast.error(err?.response?.data?.detail || 'Failed to delete property');

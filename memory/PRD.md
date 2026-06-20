@@ -13,6 +13,20 @@ Build a bilingual (English/Hebrew) rental website named MyIsraelRental.com with 
 ## What's Been Implemented
 
 
+- [x] **Auto-Reattach Chats/Bookings/Images When Deleting a Duplicate (2026-06-19)**: User asked for the everyday "delete one of two duplicates" path to behave like the bulk dedupe resolver — chats should automatically follow the surviving twin instead of going dead.
+  - **Before**: `DELETE /api/properties/{id}` just dropped the property. If a chat existed on the deleted twin it became a "Property not found" dead end. Only the admin bulk dedupe resolver (`/admin/duplicates/resolve`) preserved chats.
+  - **Fix** (`backend/routes/properties.py::delete_property`): before deletion, look up the dedupe twin (`find_duplicate` with `exclude_property_id`). If a twin exists:
+    1. Re-point every `messages`, `bookings`, `liked_properties`, `chat_nudges`, `admin_blocks`, `subleases` row from the loser to the twin (with twin-side likes-collision guard so we don't crash on a `(user_id, property_id)` clash).
+    2. Merge loser's `images` + `videos` into the twin (dedupe by URL, twin's URLs first, cap 30/5 — same pattern as the bulk resolver). Sets `mirror_pending=True` when non-CDN URLs are merged.
+    3. Delete the loser. Toast surfaces "Deleted — moved N chats, M photos to the duplicate twin."
+  - When no twin exists, the legacy behavior is preserved (subleases detach to standalone).
+  - **Frontend toast** (`PropertyList.jsx` + admin `ListingsTab.jsx`): now reads `res.data.message` instead of a hardcoded "Property deleted" so the rescue summary is visible to the user.
+  - **Tests** (`tests/test_delete_reattaches_to_twin.py`, 2 new): (1) twin with 1 image + 3 chats receives all of them after loser delete with `images_merged=2`, `mirror_pending=True`, message+booking docs now point to twin. (2) lone-property delete preserves legacy sublease detach behavior. All 38 dedupe/duplicate/delete tests pass.
+  - **End-to-end verified**: deleted a duplicate vacation listing with 3 chats — response `{reattached: {to: <twin_id>, messages: 3, images_merged: 1}}`, toast "Deleted — moved 3 chats, 1 photos to the duplicate twin."
+  - Files: `backend/routes/properties.py`, `backend/tests/test_delete_reattaches_to_twin.py` (new), `frontend/src/components/dashboard/PropertyList.jsx`, `frontend/src/components/admin/ListingsTab.jsx`.
+
+
+
 - [x] **Per-Row Currency Sniff for CSV Import (2026-06-19)**: Added `_sniff_currency` in `admin_import.py` that decides each row's currency from its own price-cell symbols instead of defaulting every row to ILS. Lookup order: (1) explicit `currency` cell (accepts `ILS`/`NIS`/`₪`/`shekel`/`USD`/`$`/`dollar`/`EUR`/`€`), (2) symbols inside `monthly_price` / `nightly_price`, (3) symbols inside any raw column whose name contains "price", (4) the default. Runs in the commit loop AFTER remap but BEFORE doc-build, overriding `remapped["currency"]` so `_build_property_doc` picks it up.
   - **Companion fix**: `_coerce_float` now strips `USD` / `NIS` / `ILS` / `EUR` / `€` / `shekel` / `dollar` / `/month` / `/night` / `per month` / `per night` tokens before parsing, so cells like `"$1,200"`, `"5000 USD"`, `"₪ 4,500/month"`, `"NIS 3500"` all coerce cleanly.
   - **Tests** (`tests/test_currency_sniff.py`, 4 new): explicit-currency-wins, sniff-from-price, raw-price-column fallback, coerce-strips-tokens. All 45 import/duplicate/dedupe tests still pass — no regressions.
