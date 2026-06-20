@@ -13,6 +13,11 @@ Build a bilingual (English/Hebrew) rental website named MyIsraelRental.com with 
 ## What's Been Implemented
 
 
+- [x] **Fix Mark-Booked Test Suite (2026-06-19)**: Repaired `tests/test_admin_mark_booked.py` — the suite hardcoded a `TEST_PROPERTY_ID` that no longer existed in the DB, so all 20 tests cascaded through `KeyError: 'block'` / 404s / 500s. Replaced with a module-scoped autouse fixture that idempotently upserts the test property (correct schema including the required `property_type` field) before the suite runs. Result: **20/20 pass**. Re-running the broader `duplicate / dedupe / delete / reattach / mark_booked / currency / import` regression scope now reports **88 passed, 0 failed**.
+  - Files: `backend/tests/test_admin_mark_booked.py`.
+
+
+
 - [x] **Auto-Reattach Chats/Bookings/Images When Deleting a Duplicate (2026-06-19)**: User asked for the everyday "delete one of two duplicates" path to behave like the bulk dedupe resolver — chats should automatically follow the surviving twin instead of going dead.
   - **Before**: `DELETE /api/properties/{id}` just dropped the property. If a chat existed on the deleted twin it became a "Property not found" dead end. Only the admin bulk dedupe resolver (`/admin/duplicates/resolve`) preserved chats.
   - **Fix** (`backend/routes/properties.py::delete_property`): before deletion, look up the dedupe twin (`find_duplicate` with `exclude_property_id`). If a twin exists:

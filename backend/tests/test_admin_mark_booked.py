@@ -9,9 +9,14 @@ Covers:
 - Public GET /api/properties filter behaviour with/without date range
 - 403 behaviour for non-admin tokens
 """
+import asyncio
 import os
+from datetime import datetime, timezone
+
 import pytest
 import requests
+from dotenv import dotenv_values
+from motor.motor_asyncio import AsyncIOMotorClient
 
 BASE_URL = os.environ.get("REACT_APP_BACKEND_URL", "https://where-am-i-project.preview.emergentagent.com").rstrip("/")
 API = f"{BASE_URL}/api"
@@ -20,6 +25,58 @@ ADMIN = {"email": "admin@rental.com", "password": "Admin1234!"}
 OWNER = {"email": "owner@test.com", "password": "Test1234!"}
 RENTER = {"email": "renter@test.com", "password": "Test1234!"}
 TEST_PROPERTY_ID = "86c6e09c-b1e0-4705-a86c-91cd9ce13765"
+
+
+@pytest.fixture(scope="module", autouse=True)
+def _ensure_test_property_exists():
+    """Seed the hardcoded test property if it's missing from the DB.
+
+    The mark-booked suite assumes a known property ID to attach blocks to.
+    Without this seed, every test in the file fails with 404 "Property not
+    found". Cleanup is intentionally NOT performed — the row is reused by
+    other regression suites, and re-creating it on each run is harmless
+    (motor upsert).
+    """
+    env = dotenv_values("/app/backend/.env")
+    mongo_url = env.get("MONGO_URL") or os.environ["MONGO_URL"]
+    db_name = env.get("DB_NAME") or os.environ["DB_NAME"]
+
+    async def _seed():
+        db = AsyncIOMotorClient(mongo_url)[db_name]
+        owner = await db.users.find_one({"email": OWNER["email"]})
+        if not owner:
+            pytest.skip(f"seed user {OWNER['email']} missing — skipping mark-booked suite")
+        await db.properties.update_one(
+            {"id": TEST_PROPERTY_ID},
+            {"$set": {
+                "id": TEST_PROPERTY_ID,
+                "owner_id": owner["id"],
+                "title": "Booking-overlap test apt",
+                "description": "Auto-seeded for the mark-booked regression suite.",
+                "address": "Test Property Way 1",
+                "area": "Jerusalem",
+                "country": "IL",
+                "rental_type": "vacation",
+                "property_type": "apartment",
+                "bedrooms": 2,
+                "floor": 1,
+                "nightly_price": 250.0,
+                "currency": "ILS",
+                "status": "active",
+                "images": [],
+                "videos": [],
+                "created_at": datetime.now(timezone.utc).isoformat(),
+            }},
+            upsert=True,
+        )
+
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)
+    try:
+        loop.run_until_complete(_seed())
+    finally:
+        loop.close()
+    yield
 
 
 def _login(creds):
