@@ -13,6 +13,15 @@ Build a bilingual (English/Hebrew) rental website named MyIsraelRental.com with 
 ## What's Been Implemented
 
 
+- [x] **Auto-Rescue Duplicates on Admin Bulk Delete (2026-06-19)**: Extended the bulk-delete flow with an opt-in "Auto-rescue duplicates" mode that mirrors the single-delete behavior the user got earlier. Best of both worlds — rare bulk-purge Undo when you actually want it, smart per-row twin-merging when you're just clearing out known dupes.
+  - **Backend** (`backend/routes/admin.py::admin_bulk_delete_properties`): new `auto_rescue_duplicates: bool = False` field on the request. When true, for each property scheduled for deletion the resolver looks up a duplicate twin (`find_duplicate`, excluding any id in the same batch) and BEFORE the snapshot/cascade runs: (a) re-attaches messages / bookings / liked_properties / chat_nudges / admin_blocks / subleases from loser → twin (with likes-collision guard), (b) merges loser's images + videos into the twin (dedupe by URL, cap 30/5, `mirror_pending=True` for non-CDN). Rescued ids are EXCLUDED from the tombstone; only the lonely losers are snapshotted, keeping the Undo button working for them.
+  - Response now includes `rescued_count` and `rescue_totals: {messages, bookings, likes, nudges, blocks, subleases, images_merged}`.
+  - **Frontend** (`components/admin/BulkDeleteConfirmToast.jsx`, new): the confirmation toast is now a small stateful component instead of inline JSX. Houses a checkbox (default **on**) labelled "Auto-rescue duplicates" with help text "If any deleted row has a surviving duplicate twin, move its chats, bookings & photos there instead of throwing them away." The Undo snackbar still appears whenever the tombstone is non-empty.
+  - **Tests** (`tests/test_bulk_delete_auto_rescue.py`, 2 new): (1) mixed batch of "loser with twin" + "lonely loser" → rescue moves chats/images to twin, tombstone covers only the lonely one. (2) sanity test: checkbox OFF → legacy tombstone-all behavior preserved. Full regression scope (`duplicate / dedupe / delete / reattach / mark_booked / bulk / rescue`): **105 passed, 0 failed**.
+  - Files: `backend/routes/admin.py`, `frontend/src/components/admin/ListingsTab.jsx`, `frontend/src/components/admin/BulkDeleteConfirmToast.jsx` (new), `backend/tests/test_bulk_delete_auto_rescue.py` (new).
+
+
+
 - [x] **Fix Mark-Booked Test Suite (2026-06-19)**: Repaired `tests/test_admin_mark_booked.py` — the suite hardcoded a `TEST_PROPERTY_ID` that no longer existed in the DB, so all 20 tests cascaded through `KeyError: 'block'` / 404s / 500s. Replaced with a module-scoped autouse fixture that idempotently upserts the test property (correct schema including the required `property_type` field) before the suite runs. Result: **20/20 pass**. Re-running the broader `duplicate / dedupe / delete / reattach / mark_booked / currency / import` regression scope now reports **88 passed, 0 failed**.
   - Files: `backend/tests/test_admin_mark_booked.py`.
 

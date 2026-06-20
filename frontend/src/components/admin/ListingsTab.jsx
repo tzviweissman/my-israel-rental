@@ -11,7 +11,7 @@ import { API } from '../../App';
 import { useApiSWR } from '../../hooks/useApiSWR';
 import MarkAsBookedModal from './MarkAsBookedModal';
 import DuplicatesModal from './DuplicatesModal';
-import UndoBulkDeleteSnackbar from './UndoBulkDeleteSnackbar';
+import BulkDeleteConfirmToast from './BulkDeleteConfirmToast';
 
 
 // Backend already returns properties sorted by created_at desc, so the
@@ -217,71 +217,16 @@ export const ListingsTab = ({ token, onStatsChange }) => {
       return;
     }
     toast.custom((tid) => (
-      <div className="bg-white rounded-xl shadow-xl border border-gray-200 p-4 w-96">
-        <p className="text-sm font-semibold text-gray-800 mb-1">
-          {t('admin.bulkDeleteTitle', `Delete ${ids.length} listing${ids.length === 1 ? '' : 's'}?`)}
-        </p>
-        <p className="text-xs text-gray-500 mb-3">
-          {t(
-            'admin.bulkDeleteDesc',
-            'This permanently removes the properties and their related chats, bookings and admin blocks. This cannot be undone.'
-          )}
-        </p>
-        <div className="flex gap-2 justify-end">
-          <button
-            onClick={() => toast.dismiss(tid)}
-            className="px-3 py-1.5 rounded-lg text-xs font-medium text-gray-600 hover:bg-gray-100"
-            data-testid="cancel-bulk-delete-btn"
-          >
-            {t('admin.cancel')}
-          </button>
-          <button
-            onClick={async () => {
-              toast.dismiss(tid);
-              try {
-                const res = await axios.delete(
-                  `${API}/admin/properties/bulk`,
-                  { headers, data: { property_ids: ids } },
-                );
-                const { deleted = 0, messages_deleted = 0, bookings_deleted = 0, snapshot_id } = res.data || {};
-                setSelectedPropIds(new Set());
-                fetchProperties();
-                notifyStatsChange();
-
-                // Show an Undo snackbar with a 10s countdown. The backend
-                // tombstone outlives the snackbar (so even a slow click
-                // through it still works), but visually we make the
-                // "safety window" explicit so the admin knows it's there.
-                const summary = `${deleted} ${deleted === 1 ? t('admin.listingDeletedOne', 'listing deleted') : t('admin.listingDeletedMany', 'listings deleted')}`;
-                const cleanup = (messages_deleted || bookings_deleted)
-                  ? ` (${messages_deleted} ${t('admin.messages', 'messages')}, ${bookings_deleted} ${t('admin.bookings', 'bookings')})`
-                  : '';
-                if (snapshot_id) {
-                  // eslint-disable-next-line react/no-unstable-nested-components
-                  toast.custom((undoTid) => (
-                    <UndoBulkDeleteSnackbar
-                      tid={undoTid}
-                      message={summary + cleanup}
-                      snapshotId={snapshot_id}
-                      headers={headers}
-                      onRestored={fetchProperties}
-                      notifyStatsChange={notifyStatsChange}
-                    />
-                  ), { duration: 10000, position: 'bottom-center' });
-                } else {
-                  toast.success(summary + cleanup);
-                }
-              } catch (e) {
-                toast.error(e.response?.data?.detail || 'Failed to delete listings');
-              }
-            }}
-            className="px-3 py-1.5 rounded-lg text-xs font-semibold text-white bg-red-500 hover:bg-red-600"
-            data-testid="confirm-bulk-delete-btn"
-          >
-            {t('admin.deleteAction', 'Delete')} ({ids.length})
-          </button>
-        </div>
-      </div>
+      <BulkDeleteConfirmToast
+        tid={tid}
+        ids={ids}
+        t={t}
+        API={API}
+        headers={headers}
+        setSelectedPropIds={setSelectedPropIds}
+        fetchProperties={fetchProperties}
+        notifyStatsChange={notifyStatsChange}
+      />
     ), { duration: 12000 });
   };
 
