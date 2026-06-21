@@ -5,7 +5,7 @@ import axios from 'axios';
 import { toast } from 'sonner';
 import {
   Trash2, ToggleLeft, ToggleRight, Search,
-  CalendarX, CalendarCheck, Lock, Briefcase, Star, Copy, ImageOff, Camera,
+  CalendarX, CalendarCheck, Lock, Briefcase, Star, Copy, ImageOff, Camera, DollarSign,
 } from 'lucide-react';
 import { API } from '../../App';
 import { useApiSWR } from '../../hooks/useApiSWR';
@@ -133,6 +133,35 @@ export const ListingsTab = ({ token, onStatsChange }) => {
   // for the ones still pointing at non-Cloudinary URLs. Recovery path for
   // imports that landed but whose mirror task was killed before finishing.
   const [remirroring, setRemirroring] = useState(false);
+  // Repair-prices: one-shot tool for listings whose nightly vs monthly
+  // price landed in the wrong field (older imports that mapped the CSV
+  // ``price`` column to monthly_price for every row, leaving vacation
+  // listings showing ₪0/night). Safe to re-run — idempotent.
+  const [repairingPrices, setRepairingPrices] = useState(false);
+
+  const handleRepairPrices = async () => {
+    if (!window.confirm(
+      'Move misplaced prices into the right field for each listing? '
+      + 'Vacation/short-term listings with only a monthly price will have it moved to nightly_price. '
+      + 'Long-term listings with only a nightly price will have it moved to monthly_price. '
+      + 'Safe to run multiple times.',
+    )) return;
+    setRepairingPrices(true);
+    try {
+      const res = await axios.post(`${API}/admin/properties/repair-prices`, {}, { headers });
+      const d = res.data;
+      if (d.total_repaired === 0) {
+        toast.success('All listing prices are already in the correct field — nothing to repair.');
+      } else {
+        toast.success(d.message, { duration: 8000 });
+      }
+      fetchProperties();
+    } catch (e) {
+      toast.error(e.response?.data?.detail || 'Price repair failed');
+    } finally {
+      setRepairingPrices(false);
+    }
+  };
 
   const handleRemirrorPhotos = async () => {
     if (!window.confirm(
@@ -429,6 +458,15 @@ export const ListingsTab = ({ token, onStatsChange }) => {
           data-testid="remirror-photos-btn"
         >
           <Camera size={14} /> {remirroring ? 'Re-mirroring…' : 'Re-mirror photos'}
+        </button>
+        <button
+          onClick={handleRepairPrices}
+          disabled={repairingPrices}
+          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-amber-50 text-amber-800 border border-amber-200 hover:bg-amber-100 disabled:opacity-50"
+          title="Move misplaced prices to the right field (vacation→nightly, long-term→monthly). Safe to re-run."
+          data-testid="repair-prices-btn"
+        >
+          <DollarSign size={14} /> {repairingPrices ? 'Repairing…' : 'Repair prices'}
         </button>
         {/* Quick chip toggle: All vs "Properties I manage" */}
         <div className="inline-flex bg-white rounded-lg border border-[#E5E5E5] p-0.5 ml-1" data-testid="managed-filter">

@@ -340,6 +340,19 @@ def _build_property_doc(row_remapped: dict, owner_id: str, default_rental_type: 
     without an explicit column — previously every such row silently fell
     through to ``long-term`` and then sat invisible on the Vacation tab.
     """
+    # Decide which rental_type this row ends up as so we can route a
+    # generic "price" column to the correct nightly/monthly field. A
+    # vacation_rentals.csv with a single ``price`` column was previously
+    # mapped to ``monthly_price``, leaving every imported vacation card
+    # showing ₪0/night because ``nightly_price`` was empty.
+    effective_rt = (row_remapped.get("rental_type") or default_rental_type or "long-term").lower()
+    mp = _coerce_float(row_remapped.get("monthly_price"))
+    np = _coerce_float(row_remapped.get("nightly_price"))
+    if effective_rt in ("vacation", "short-term") and (mp and mp > 0) and not (np and np > 0):
+        np, mp = mp, None  # treat the generic price as a nightly rate
+    elif effective_rt == "long-term" and (np and np > 0) and not (mp and mp > 0):
+        mp, np = np, None  # treat the generic price as a monthly rate
+
     doc = {
         "id": str(uuid.uuid4()),
         "owner_id": owner_id,
@@ -347,16 +360,15 @@ def _build_property_doc(row_remapped: dict, owner_id: str, default_rental_type: 
         "description": row_remapped.get("description") or "",
         "area": row_remapped.get("area") or "",
         "address": row_remapped.get("address") or "",
-        "rental_type": (row_remapped.get("rental_type") or default_rental_type or "long-term").lower(),
+        "rental_type": effective_rt,
         "property_type": (row_remapped.get("property_type") or "apartment").lower(),
         "bedrooms": _coerce_int(row_remapped.get("bedrooms")) or 1,
         "bathrooms": _coerce_int(row_remapped.get("bathrooms")) or 1,
         "floor": _coerce_int(row_remapped.get("floor")) or 0,
         "square_meters": _coerce_int(row_remapped.get("square_meters")) or 0,
-        "monthly_price": _coerce_float(row_remapped.get("monthly_price")) or 0,
-        "nightly_price": _coerce_float(row_remapped.get("nightly_price")) or 0,
-        "currency": (row_remapped.get("currency") or "ILS").upper(),
-        "available_from": row_remapped.get("available_from") or "",
+        "monthly_price": mp or 0,
+        "nightly_price": np or 0,
+        "currency": (row_remapped.get("currency") or "ILS").upper(),        "available_from": row_remapped.get("available_from") or "",
         "starting_date": row_remapped.get("starting_date") or "",
         "minimum_booking_days": _coerce_int(row_remapped.get("minimum_booking_days")),
         "condition": (row_remapped.get("condition") or "renovated").lower(),
@@ -867,6 +879,79 @@ async def admin_remirror_properties(payload: dict = Depends(verify_token)) -> di
             f"{already_cdn} already on Cloudinary. "
             f"{len(no_images)} have no photo URLs — re-upload the CSV with "
             f'"Sync photos onto existing listings" to backfill those.'
+        ),
+    }
+
+
+@api_router.post("/admin/properties/repair-prices")
+async def admin_repair_misplaced_prices(payload: dict = Depends(verify_token)) -> dict:
+    """One-shot data fix for listings whose price landed in the wrong field.
+
+    Earlier CSV imports without explicit ``nightly_price`` / ``monthly_price``
+    columns mapped the generic ``price`` column to ``monthly_price`` for
+    every row — vacation listings then displayed ₪0/night on the property
+    card. The importer now routes correctly (see ``_build_property_doc``),
+    but listings that were already imported need a one-time swap.
+
+    Repair rules:
+      • ``rental_type='vacation'`` (or ``short-term``) + ``monthly_price>0`` +
+        ``nightly_price`` empty → move monthly_price → nightly_price.
+      • ``rental_type='long-term'`` + ``nightly_price>0`` + ``monthly_price``
+        empty → move nightly_price → monthly_price.
+      • Anything else is left untouched.
+
+    Idempotent — running it twice on a healthy DB is a no-op.
+    """
+    if payload['role'] != 'admin':
+        raise HTTPException(status_code=403, detail="Admin access required")
+
+    # Vacation / short-term: monthly was the only one set → move to nightly.
+    vacation_q = {
+        "rental_type": {"$in": ["vacation", "short-term"]},
+        "monthly_price": {"$gt": 0},
+        "$or": [{"nightly_price": {"$exists": False}},
+                {"nightly_price": None},
+                {"nightly_price": 0}],
+    }
+    long_q = {
+        "rental_type": "long-term",
+        "nightly_price": {"$gt": 0},
+        "$or": [{"monthly_price": {"$exists": False}},
+                {"monthly_price": None},
+                {"monthly_price": 0}],
+    }
+    vac_swapped = 0
+    long_swapped = 0
+    samples_vac = []
+    samples_long = []
+    async for p in db.properties.find(vacation_q, {"_id": 0, "id": 1, "title": 1, "monthly_price": 1}):
+        await db.properties.update_one(
+            {"id": p["id"]},
+            {"$set": {"nightly_price": p["monthly_price"], "monthly_price": 0}},
+        )
+        vac_swapped += 1
+        if len(samples_vac) < 10:
+            samples_vac.append({"id": p["id"], "title": p.get("title"),
+                                "moved": p["monthly_price"]})
+    async for p in db.properties.find(long_q, {"_id": 0, "id": 1, "title": 1, "nightly_price": 1}):
+        await db.properties.update_one(
+            {"id": p["id"]},
+            {"$set": {"monthly_price": p["nightly_price"], "nightly_price": 0}},
+        )
+        long_swapped += 1
+        if len(samples_long) < 10:
+            samples_long.append({"id": p["id"], "title": p.get("title"),
+                                 "moved": p["nightly_price"]})
+
+    return {
+        "vacation_short_term_swapped": vac_swapped,
+        "long_term_swapped": long_swapped,
+        "total_repaired": vac_swapped + long_swapped,
+        "samples_vacation": samples_vac,
+        "samples_long_term": samples_long,
+        "message": (
+            f"Repaired {vac_swapped} vacation/short-term listings (monthly → nightly) "
+            f"and {long_swapped} long-term listings (nightly → monthly)."
         ),
     }
 

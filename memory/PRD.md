@@ -13,6 +13,15 @@ Build a bilingual (English/Hebrew) rental website named MyIsraelRental.com with 
 ## What's Been Implemented
 
 
+- [x] **Fix: Many Imported Listings Show $0/night (2026-06-19)**: User reported "many of the new listings I uploaded say $0 per night or zero shekel". Root cause: the user's CSV uses a generic `price` column. Both the AI mapper and fallback mapper route `price → monthly_price` regardless of rental_type. So every vacation row got `monthly_price=1450`, `nightly_price=null` — and the dashboard/property card both display the nightly_price for vacation listings → renders ₪0.
+  - **Fix #1** (`backend/routes/admin_import.py::_build_property_doc`): added rental-type-aware price routing — when only ONE of `monthly_price` / `nightly_price` is set AND it doesn't match the rental_type, swap. Specifically: vacation/short-term + monthly only → move to nightly_price. Long-term + nightly only → move to monthly_price. When both are explicitly set the values are left alone.
+  - **Fix #2** (`backend/routes/admin_import.py::admin_repair_misplaced_prices`): new `POST /api/admin/properties/repair-prices` endpoint that retroactively fixes already-imported listings. Idempotent — returns 0 repaired on a clean DB. Surfaces `vacation_short_term_swapped`, `long_term_swapped`, and sample rows for admin visibility.
+  - **UI** (`frontend/src/components/admin/ListingsTab.jsx`): new "Repair prices" button (amber, DollarSign icon) sits next to "Re-mirror photos" in the admin Listings toolbar. Same confirmation-toast UX as Re-mirror.
+  - **Tests** (`tests/test_repair_prices.py`, 2 new): (1) unit-style check on `_build_property_doc` routing for vacation/long-term/both-set cases. (2) end-to-end repair endpoint test that swaps misplaced rows and leaves a healthy control row untouched. All pass.
+  - Files: `backend/routes/admin_import.py`, `backend/tests/test_repair_prices.py` (new), `frontend/src/components/admin/ListingsTab.jsx`.
+
+
+
 - [x] **Auto-Rescue Duplicates on Admin Bulk Delete (2026-06-19)**: Extended the bulk-delete flow with an opt-in "Auto-rescue duplicates" mode that mirrors the single-delete behavior the user got earlier. Best of both worlds — rare bulk-purge Undo when you actually want it, smart per-row twin-merging when you're just clearing out known dupes.
   - **Backend** (`backend/routes/admin.py::admin_bulk_delete_properties`): new `auto_rescue_duplicates: bool = False` field on the request. When true, for each property scheduled for deletion the resolver looks up a duplicate twin (`find_duplicate`, excluding any id in the same batch) and BEFORE the snapshot/cascade runs: (a) re-attaches messages / bookings / liked_properties / chat_nudges / admin_blocks / subleases from loser → twin (with likes-collision guard), (b) merges loser's images + videos into the twin (dedupe by URL, cap 30/5, `mirror_pending=True` for non-CDN). Rescued ids are EXCLUDED from the tombstone; only the lonely losers are snapshotted, keeping the Undo button working for them.
   - Response now includes `rescued_count` and `rescue_totals: {messages, bookings, likes, nudges, blocks, subleases, images_merged}`.
