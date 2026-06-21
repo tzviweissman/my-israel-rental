@@ -13,6 +13,14 @@ Build a bilingual (English/Hebrew) rental website named MyIsraelRental.com with 
 ## What's Been Implemented
 
 
+- [x] **Stale Build Detector (2026-06-19)**: New global axios response interceptor that catches the post-deploy race where a freshly-shipped frontend button calls an API route the backend rollout hasn't reached yet. Pops a single "A newer version of the site is available. Please refresh." toast with a "Refresh" action button. Per-session dedup via `sessionStorage` so it doesn't spam.
+  - **Detection rule**: 404 + URL contains `/api/` + response detail is literally `"Not Found"` (FastAPI's default for missing-route). Custom 404s like `"Property not found"` from valid routes pass through untouched.
+  - Wired in once from `App.js` at module-load — idempotent if re-imported.
+  - **Why this matters**: the user just hit "Price repair failed" right after deploying; my code was fine but the frontend reached prod before the backend route did. This banner gives every future "I clicked too soon after Deploy" moment a graceful escape hatch instead of an "X failed" toast.
+  - Files: `frontend/src/utils/staleBuildInterceptor.js` (new), `frontend/src/App.js`.
+
+
+
 - [x] **Fix: Many Imported Listings Show $0/night (2026-06-19)**: User reported "many of the new listings I uploaded say $0 per night or zero shekel". Root cause: the user's CSV uses a generic `price` column. Both the AI mapper and fallback mapper route `price → monthly_price` regardless of rental_type. So every vacation row got `monthly_price=1450`, `nightly_price=null` — and the dashboard/property card both display the nightly_price for vacation listings → renders ₪0.
   - **Fix #1** (`backend/routes/admin_import.py::_build_property_doc`): added rental-type-aware price routing — when only ONE of `monthly_price` / `nightly_price` is set AND it doesn't match the rental_type, swap. Specifically: vacation/short-term + monthly only → move to nightly_price. Long-term + nightly only → move to monthly_price. When both are explicitly set the values are left alone.
   - **Fix #2** (`backend/routes/admin_import.py::admin_repair_misplaced_prices`): new `POST /api/admin/properties/repair-prices` endpoint that retroactively fixes already-imported listings. Idempotent — returns 0 repaired on a clean DB. Surfaces `vacation_short_term_swapped`, `long_term_swapped`, and sample rows for admin visibility.

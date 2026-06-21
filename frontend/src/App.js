@@ -8,6 +8,14 @@ import '@/App.css';
 import Navigation from './components/Navigation';
 import WhatsAppButton from './components/WhatsAppButton';
 import AccessibilityButton from './components/AccessibilityButton';
+import { installStaleBuildInterceptor } from './utils/staleBuildInterceptor';
+
+// Install the "backend hasn't caught up with this build" detector exactly
+// once at module-load. Surfaces a single "Please refresh" toast when a
+// freshly-deployed frontend hits an API route the backend rollout hasn't
+// reached yet — catches the post-deploy race that previously made users
+// think a feature was broken when it was just stale.
+installStaleBuildInterceptor();
 
 function ScrollToTop() {
   const { pathname } = useLocation();
