@@ -13,6 +13,14 @@ Build a bilingual (English/Hebrew) rental website named MyIsraelRental.com with 
 ## What's Been Implemented
 
 
+- [x] **Backend Build-ID Drift Detection (2026-06-19)**: Extended the stale-build interceptor to also catch the mirror case — when the BACKEND gets redeployed mid-session while the frontend bundle is still the older one (response shapes may have changed).
+  - **Backend** (`server.py`): new `stamp_build_id` HTTP middleware adds an `X-Build-Id: <process-startup-ISO>` header to every response. The value is stable for the lifetime of one backend process — when the process restarts (redeploy / hot reload), the value changes. Header also added to CORS `expose_headers` so the browser actually sees it cross-origin.
+  - **Frontend** (`utils/staleBuildInterceptor.js`): on every response (success OR error) the interceptor reads `x-build-id`. The first value seen in a session is stored in `sessionStorage.__backend_build_id` as the baseline. Subsequent responses with a different value trigger the same "refresh" toast as the 404 path. `console.warn` logs the drift transition for support tickets.
+  - **Verified end-to-end**: tampered with the sessionStorage baseline to simulate a drift event, navigated to a different page → toast popped instantly at top-center with the "Refresh" action button. Real backend restart also confirmed to mint a new build-id (`20260621T120959Z`).
+  - Files: `backend/server.py`, `frontend/src/utils/staleBuildInterceptor.js`.
+
+
+
 - [x] **Stale Build Detector (2026-06-19)**: New global axios response interceptor that catches the post-deploy race where a freshly-shipped frontend button calls an API route the backend rollout hasn't reached yet. Pops a single "A newer version of the site is available. Please refresh." toast with a "Refresh" action button. Per-session dedup via `sessionStorage` so it doesn't spam.
   - **Detection rule**: 404 + URL contains `/api/` + response detail is literally `"Not Found"` (FastAPI's default for missing-route). Custom 404s like `"Property not found"` from valid routes pass through untouched.
   - Wired in once from `App.js` at module-load — idempotent if re-imported.

@@ -1,15 +1,20 @@
 /**
- * Global axios response interceptor that detects "the backend doesn't yet
- * know about an endpoint this build of the frontend just called" — i.e.
- * the classic post-deploy race where the user clicks a freshly-shipped
- * button before the backend rollout has propagated to their edge.
+ * Global axios response interceptor that detects two kinds of post-deploy
+ * version skew and pops a single "please refresh" toast (per session):
  *
- * Behaviour:
- *  - 404 on a `/api/...` URL → pop a single one-time toast asking the
- *    user to refresh. Cached per session so we don't spam them.
- *  - Anything else: pass through untouched (existing handlers still see
- *    the same axios error object).
+ *  1. FRONTEND ahead of BACKEND — frontend calls a fresh API route the
+ *     backend rollout hasn't propagated yet → FastAPI returns 404 with
+ *     `detail: "Not Found"`. Catches the "I clicked Deploy and the next
+ *     click immediately said 'failed'" race.
  *
+ *  2. BACKEND redeployed mid-session — every response carries an
+ *     `X-Build-Id` header stamped at backend boot. The interceptor
+ *     captures the first one it sees as the session's baseline and
+ *     toasts if a later response carries a different value (worker
+ *     swapped under the user, possibly serving response shapes the
+ *     loaded bundle wasn't built against).
+ *
+ * Cached per session via `sessionStorage` so we don't spam either way.
  * Wired in once from App.js. Idempotent — re-registering is safe.
  */
 import axios from 'axios';
@@ -17,15 +22,17 @@ import { toast } from 'sonner';
 
 let installed = false;
 
-const SESSION_FLAG = '__stale_build_toast_shown';
+const STALE_FLAG = '__stale_build_toast_shown';
+const BUILD_ID_KEY = '__backend_build_id';
 
-const showStaleBuildToast = () => {
+const showStaleBuildToast = (reason) => {
   try {
-    if (sessionStorage.getItem(SESSION_FLAG)) return;
-    sessionStorage.setItem(SESSION_FLAG, '1');
+    if (sessionStorage.getItem(STALE_FLAG)) return;
+    sessionStorage.setItem(STALE_FLAG, '1');
   } catch {
     /* private mode — fall through and just show the toast once per page */
   }
+  console.warn('[stale-build-detector]', reason);
   toast(
     'A newer version of the site is available. Please refresh to get the latest features.',
     {
@@ -39,23 +46,47 @@ const showStaleBuildToast = () => {
   );
 };
 
+/** Compare the X-Build-Id header on the response against the first one
+ *  we observed in this session. A change means the backend got
+ *  redeployed (worker swapped under us) — the frontend bundle is now
+ *  potentially talking to API shapes it wasn't built against. */
+const checkBuildIdDrift = (response) => {
+  // axios lowercases headers in v1+, but be defensive for older configs.
+  const headers = response?.headers || {};
+  const incoming = headers['x-build-id'] || headers['X-Build-Id'];
+  if (!incoming) return;
+  let baseline;
+  try {
+    baseline = sessionStorage.getItem(BUILD_ID_KEY);
+  } catch {
+    baseline = null;
+  }
+  if (!baseline) {
+    try { sessionStorage.setItem(BUILD_ID_KEY, incoming); } catch { /* noop */ }
+    return;
+  }
+  if (incoming !== baseline) {
+    showStaleBuildToast(`build-id drift: ${baseline} → ${incoming}`);
+  }
+};
+
 export const installStaleBuildInterceptor = () => {
   if (installed) return;
   installed = true;
   axios.interceptors.response.use(
-    (resp) => resp,
+    (resp) => {
+      checkBuildIdDrift(resp);
+      return resp;
+    },
     (err) => {
+      // Drift can also leak through on error responses (e.g. 500). The
+      // interceptor inspects the X-Build-Id even on rejected calls.
+      if (err?.response) checkBuildIdDrift(err.response);
       const status = err?.response?.status;
       const url = err?.config?.url || '';
-      // Only fire on API calls — never on static asset 404s or third-party
-      // requests. The detail-body of a real 404 from FastAPI is "Not Found"
-      // (and "Property not found" / similar custom messages from valid
-      // routes). Show the banner ONLY when the detail is literally
-      // "Not Found" — that's what FastAPI returns when the *route itself*
-      // is missing, vs the route running and returning a custom 404.
       const detail = err?.response?.data?.detail;
       if (status === 404 && url.includes('/api/') && detail === 'Not Found') {
-        showStaleBuildToast();
+        showStaleBuildToast(`route missing: ${url}`);
       }
       return Promise.reject(err);
     },

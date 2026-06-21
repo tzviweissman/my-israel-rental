@@ -10,7 +10,10 @@ This file owns:
 import asyncio
 import logging
 import os
+from datetime import datetime, timezone
 from pathlib import Path
+
+UTC = timezone.utc
 
 from dotenv import load_dotenv
 from fastapi import APIRouter, FastAPI
@@ -96,8 +99,25 @@ app.add_middleware(
     allow_origin_regex=r"https://.*\.preview\.emergentagent\.com",
     allow_methods=["*"],
     allow_headers=["*"],
-    expose_headers=["Content-Disposition"],
+    expose_headers=["Content-Disposition", "X-Build-Id"],
 )
+
+
+# Stable build-id stamp for the lifetime of THIS backend process. The
+# frontend reads the first X-Build-Id header it sees on a session as the
+# expected baseline; if subsequent responses carry a different value
+# (because the backend got redeployed and the worker swapped under
+# them), it pops the "newer version of the site is available" toast.
+# We use the process startup ISO timestamp because we don't have a
+# commit SHA readily available in this env — any monotonic value works.
+BACKEND_BUILD_ID = datetime.now(UTC).strftime("%Y%m%dT%H%M%SZ")
+
+
+@app.middleware("http")
+async def stamp_build_id(request, call_next):
+    response = await call_next(request)
+    response.headers["X-Build-Id"] = BACKEND_BUILD_ID
+    return response
 
 
 @app.on_event("startup")
