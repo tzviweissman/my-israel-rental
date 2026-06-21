@@ -33,9 +33,14 @@ export function sizedImage(url, width) {
  * Build a Cloudinary video-frame poster URL.
  *
  *   videoPoster('https://res.cloudinary.com/.../video/upload/v123/foo.mp4', 1200)
- *     -> 'https://res.cloudinary.com/.../video/upload/so_auto,w_1200,c_limit,f_jpg,q_auto/v123/foo.jpg'
+ *     -> 'https://res.cloudinary.com/.../video/upload/so_0,w_1200,c_limit,f_jpg,q_auto/v123/foo.jpg'
  *
- * `so_auto` picks the most "interesting" frame; `f_jpg` rasterizes it.
+ * `so_0` locks the poster to the very first frame of the video. We used to
+ * rely on `so_auto`, which Cloudinary resolves to the "most interesting"
+ * frame — that produced unpredictable mid-video stills (e.g. a blurry pan
+ * halfway through a tour) and made the grid look broken. The first frame is
+ * always under the lister's control (they pick how the video opens), so
+ * locking to `so_0` gives them a deterministic, intentional cover image.
  * Non-Cloudinary URLs return undefined so the <video> element falls back
  * to its native first-frame behavior.
  */
@@ -55,7 +60,7 @@ export function videoPoster(url, width = 1200) {
   if (last.includes('.')) {
     segs[segs.length - 1] = last.replace(/\.[^.]+$/, '.jpg');
   }
-  return `${head}/upload/so_auto,w_${width},c_limit,f_jpg,q_auto/${segs.join('/')}`;
+  return `${head}/upload/so_0,w_${width},c_limit,f_jpg,q_auto/${segs.join('/')}`;
 }
 
 /**

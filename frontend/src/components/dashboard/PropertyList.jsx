@@ -6,6 +6,7 @@ import { Edit, Eye, Trash2, Upload, FileText, CalendarSync, Link2, X, RefreshCw,
 import { toast } from 'sonner';
 import { getCoverImage } from '../../utils/coverImage';
 import DefaultImageBadge from '../property/DefaultImageBadge';
+import VideoCoverBadge from '../property/VideoCoverBadge';
 
 /**
  * Owner-facing property card grid with edit / delete / contract-upload /
@@ -275,6 +276,7 @@ const PropertyList = ({ properties, bookings = [], onEdit, onRefresh, API, token
   };
 
   const propIsDefault = (property) => getCoverImage(property.images, 480, API, property.videos, property.id).isDefault;
+  const propIsVideoCover = (property) => getCoverImage(property.images, 480, API, property.videos, property.id).fromVideo;
 
   // "NEW" badge on bulk-created listings, fades out after 24h so managers
   // can spot the ones they just uploaded without scrolling.
@@ -580,6 +582,7 @@ const PropertyList = ({ properties, bookings = [], onEdit, onRefresh, API, token
               {propIsDefault(property) && (
                 <DefaultImageBadge className="!top-3 !left-3" />
               )}
+              {propIsVideoCover(property) && <VideoCoverBadge />}
               {isFreshBulkUpload(property) && (
                 <span
                   className="absolute top-3 right-3 px-2.5 py-1 rounded-full text-[10px] font-bold tracking-[0.1em] uppercase shadow-md"

@@ -12,6 +12,14 @@ Build a bilingual (English/Hebrew) rental website named MyIsraelRental.com with 
 
 ## What's Been Implemented
 
+- [x] **Video Cover Image: First-Frame Lock + Play Overlay (2026-06-21)**: User reported that listings with only a video (no still photos) were showing weird mid-video stills as their cover image, and renters couldn't tell the card represented playable content. Two-part fix:
+  - **First-frame poster** (`frontend/src/utils/cdnImage.js::videoPoster`): swapped Cloudinary's `so_auto` (which picks the "most interesting" frame and is essentially random) for `so_0`, locking the poster to the very first frame of the video. Listers now control how their card opens by trimming the start of their clip — fully deterministic. Verified via node smoke test that the output URL contains `so_0` and no longer `so_auto`. Same transform feeds the `<video poster>` on the detail-page gallery, so the still you see before pressing play now matches the start of the video.
+  - **Play-button overlay** (`frontend/src/components/property/VideoCoverBadge.jsx`, new): purely-presentational overlay rendered absolutely over any card whose cover was synthesized from a video. Centered translucent play button (`bg-black/55 + ring-2 ring-white/80`) for instant recognition, plus a bottom-left "Video" pill so the signal survives on small mobile cards. `pointer-events: none` so it never blocks the card's click target. Driven off the existing `getCoverImage(...).fromVideo` flag.
+  - **Wired into all four grid surfaces**: `PropertyCard.jsx` (main /properties/* listings), `dashboard/PropertyList.jsx` (owner dashboard), `pages/Home.js` (featured-on-home carousel), `pages/ManagerPage.js` (manager view). Refactored the inline `getCoverImage()` double-calls in Home / ManagerPage to a single per-property destructure to keep things clean.
+  - Files: `frontend/src/utils/cdnImage.js`, `frontend/src/components/property/VideoCoverBadge.jsx` (new), `frontend/src/components/property/PropertyCard.jsx`, `frontend/src/components/dashboard/PropertyList.jsx`, `frontend/src/pages/Home.js`, `frontend/src/pages/ManagerPage.js`.
+
+
+
 
 - [x] **Backend Build-ID Drift Detection (2026-06-19)**: Extended the stale-build interceptor to also catch the mirror case — when the BACKEND gets redeployed mid-session while the frontend bundle is still the older one (response shapes may have changed).
   - **Backend** (`server.py`): new `stamp_build_id` HTTP middleware adds an `X-Build-Id: <process-startup-ISO>` header to every response. The value is stable for the lifetime of one backend process — when the process restarts (redeploy / hot reload), the value changes. Header also added to CORS `expose_headers` so the browser actually sees it cross-origin.

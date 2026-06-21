@@ -7,6 +7,7 @@ import { API } from '../App';
 import { Search, Bed, Bath, Home as HomeIcon, MapPin, Check, ArrowLeft, ArrowRight } from 'lucide-react';
 import HeroSlideshow from '../components/HeroSlideshow';
 import DefaultImageBadge from '../components/property/DefaultImageBadge';
+import VideoCoverBadge from '../components/property/VideoCoverBadge';
 import { getCoverImage } from '../utils/coverImage';
 import { sizedImage } from '../utils/cdnImage';
 
@@ -211,7 +212,9 @@ const Home = () => {
             className="flex gap-3 md:gap-6 overflow-x-auto snap-x snap-mandatory scroll-smooth pb-3 -mx-6 px-6 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
             data-testid="featured-scroller"
           >
-            {featuredProperties.map((property) => (
+            {featuredProperties.map((property) => {
+              const cover = getCoverImage(property.images, 600, '', property.videos, property.id);
+              return (
               <div
                 key={property.id}
                 className="property-card snap-start shrink-0 w-[78vw] sm:w-[44vw] md:w-[340px] lg:w-[360px]"
@@ -222,11 +225,12 @@ const Home = () => {
                 data-testid={`property-card-${property.id}`}
               >
                 <div className="relative h-44 md:h-60 bg-gray-200" style={{
-                  backgroundImage: `url(${getCoverImage(property.images, 600, '', property.videos, property.id).url})`,
+                  backgroundImage: `url(${cover.url})`,
                   backgroundSize: 'cover',
                   backgroundPosition: 'center'
                 }}>
-                  {getCoverImage(property.images, 600, '', property.videos, property.id).isDefault && <DefaultImageBadge />}
+                  {cover.isDefault && <DefaultImageBadge />}
+                  {cover.fromVideo && <VideoCoverBadge />}
                 </div>
                 <div className="p-3 md:p-5">
                   <h3 className="text-sm md:text-lg font-bold mb-1 md:mb-2 line-clamp-1">{property.title}</h3>
@@ -267,7 +271,8 @@ const Home = () => {
                 </div>
               </div>
             </div>
-          ))}
+            );
+          })}
           </div>
         </div>
       </div>

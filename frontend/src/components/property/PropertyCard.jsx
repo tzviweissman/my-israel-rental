@@ -4,6 +4,7 @@ import { Bed, Bath, Home as HomeIcon, MapPin, Building2, Heart } from 'lucide-re
 import { getCoverImage } from '../../utils/coverImage';
 import { srcSet } from '../../utils/cdnImage';
 import DefaultImageBadge from './DefaultImageBadge';
+import VideoCoverBadge from './VideoCoverBadge';
 
 /**
  * Property card used on the /properties/<type> grid. Pure presentational —
@@ -21,7 +22,7 @@ const PropertyCard = ({
   // Grid cards render at ~470px wide on desktop, ~360px on mobile.
   // Request 600px from Cloudinary so 2x-DPR displays stay crisp without
   // overpaying. Non-Cloudinary URLs pass through untouched.
-  const { url: heroSrc, isDefault: isDefaultImage } = getCoverImage(property.images, 600, apiBase, property.videos, property.id);
+  const { url: heroSrc, isDefault: isDefaultImage, fromVideo: isVideoCover } = getCoverImage(property.images, 600, apiBase, property.videos, property.id);
   const rentalLabelMap = {
     'long-term': t('property.longTerm'),
     'short-term': t('property.shortTerm'),
@@ -94,6 +95,7 @@ const PropertyCard = ({
           className="absolute inset-0 w-full h-full object-cover"
         />
         {isDefaultImage && <DefaultImageBadge />}
+        {isVideoCover && <VideoCoverBadge />}
         <button
           onClick={(e) => onToggleLike(e, property.id)}
           className="absolute top-2 right-2 md:top-3 md:right-3 w-8 h-8 md:w-10 md:h-10 rounded-full bg-white/90 hover:bg-white flex items-center justify-center shadow-md transition-all hover:scale-110 active:scale-95 z-10"

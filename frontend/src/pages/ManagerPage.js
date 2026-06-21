@@ -5,6 +5,7 @@ import axios from 'axios';
 import { API, AuthContext } from '../App';
 import { Bed, Bath, Home as HomeIcon, MapPin, User, LogIn } from 'lucide-react';
 import DefaultImageBadge from '../components/property/DefaultImageBadge';
+import VideoCoverBadge from '../components/property/VideoCoverBadge';
 import { getCoverImage } from '../utils/coverImage';
 import { sizedImage } from '../utils/cdnImage';
 
@@ -231,7 +232,9 @@ const ManagerPage = () => {
         </h2>
 
         <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-8">
-          {filteredProperties.map((property) => (
+          {filteredProperties.map((property) => {
+            const cover = getCoverImage(property.images, 600, '', property.videos, property.id);
+            return (
             <div
               key={property.id}
               className="property-card"
@@ -242,11 +245,12 @@ const ManagerPage = () => {
               data-testid={`manager-property-${property.id}`}
             >
               <div className="relative h-36 md:h-64 bg-gray-200" style={{
-                backgroundImage: `url(${getCoverImage(property.images, 600, '', property.videos, property.id).url})`,
+                backgroundImage: `url(${cover.url})`,
                 backgroundSize: 'cover',
                 backgroundPosition: 'center'
               }}>
-                {getCoverImage(property.images, 600, '', property.videos, property.id).isDefault && <DefaultImageBadge />}
+                {cover.isDefault && <DefaultImageBadge />}
+                {cover.fromVideo && <VideoCoverBadge />}
               </div>
               <div className="p-3 md:p-6">
                 <h3 className="text-sm md:text-xl font-bold mb-1 md:mb-2 line-clamp-1">{property.title}</h3>
@@ -287,7 +291,8 @@ const ManagerPage = () => {
                 </div>
               </div>
             </div>
-          ))}
+            );
+          })}
         </div>
 
         {filteredProperties.length === 0 && (
