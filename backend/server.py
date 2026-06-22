@@ -41,6 +41,7 @@ from routes import (  # noqa: E402
     payments,
     properties,
     saved_searches,
+    smart_pricing,
     subleases,
 )
 from routes.deps import UPLOAD_DIR, client, db  # noqa: E402  (import after load_dotenv on purpose)
@@ -71,6 +72,7 @@ for mod in (
     admin_import,
     admin_smart_lists,
     saved_searches,
+    smart_pricing,
     ical,
     misc,
     payments,
@@ -126,6 +128,9 @@ async def startup_tasks() -> None:
     PDF templates exist on disk."""
     asyncio.create_task(sync_all_ical_feeds())
     asyncio.create_task(mention_email_loop())
+    # Daily Smart Pricing refresh — sleeps until 03:00 UTC, then loops.
+    # Cheap (only runs against properties with smart_pricing.enabled=true).
+    asyncio.create_task(smart_pricing.smart_pricing_daily_loop())
     try:
         ensure_contract_templates(ROOT_DIR / "uploads")
         logger.info("Contract templates ready")
@@ -155,6 +160,13 @@ async def startup_tasks() -> None:
         await db.users.create_index("id", unique=True, background=True)
         await db.messages.create_index([("property_id", 1), ("created_at", -1)], background=True)
         await db.liked_properties.create_index([("user_id", 1), ("property_id", 1)], background=True)
+        # Smart Pricing — composite key for per-property daily overrides, and
+        # a time index on the view events so 14-day demand queries don't scan.
+        await db.nightly_price_overrides.create_index(
+            [("property_id", 1), ("date", 1)], unique=True, background=True,
+        )
+        await db.property_view_events.create_index("at", background=True)
+        await db.property_view_events.create_index("property_id", background=True)
         logger.info("Hot-path indexes ensured")
     except Exception as e:  # noqa: BLE001
         logger.warning(f"hot-path index creation failed (non-fatal): {e}")

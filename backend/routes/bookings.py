@@ -2,7 +2,7 @@
 import asyncio
 import logging
 import uuid
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
 from typing import Any
 
 from fastapi import APIRouter, Body, Depends, HTTPException
@@ -207,25 +207,55 @@ async def _send_booking_notifications(
     })
 
 
-def _compute_booking_total(
+async def _compute_booking_total(
     booking_data: BookingCreate,
     property_data: dict,
     sublease_data: dict | None,
 ) -> float | None:
     """Best-effort total for the confirmation email. Sublease pricing wins
-    when set; otherwise vacation rentals get nightly × N. Long-term/short-term
-    rentals don't expose a single total, so we leave it as None."""
+    when set; otherwise vacation rentals get nightly × N — with per-date
+    Smart Pricing overrides applied when present (the host can dynamically
+    price specific nights via the Smart Pricing engine; each applied
+    override REPLACES the base nightly rate for that night). Long-term/
+    short-term rentals don't expose a single total, so we leave it as
+    None."""
     try:
         start = datetime.fromisoformat(booking_data.start_date.replace('Z', ''))
         end = datetime.fromisoformat(booking_data.end_date.replace('Z', ''))
         nights = max(1, (end - start).days)
     except Exception:
         nights = 1
+        start = None
+        end = None
     if sublease_data:
         price = float(sublease_data.get('price', 0))
         return price * nights if sublease_data.get('price_type') == 'per_night' else price
     if property_data.get('rental_type') == 'vacation' and property_data.get('nightly_price'):
-        return float(property_data['nightly_price']) * nights
+        base = float(property_data['nightly_price'])
+        # Layer in any applied Smart-Pricing overrides for the night window.
+        if start is not None and end is not None:
+            try:
+                overrides = await db.nightly_price_overrides.find(
+                    {
+                        "property_id": property_data.get('id'),
+                        "applied": True,
+                        "date": {
+                            "$gte": start.date().isoformat(),
+                            "$lt": end.date().isoformat(),
+                        },
+                    },
+                    {"_id": 0, "date": 1, "price": 1},
+                ).to_list(length=400)
+            except Exception:  # noqa: BLE001
+                overrides = []
+            override_map = {o["date"]: float(o.get("price") or base) for o in overrides}
+            total = 0.0
+            d = start.date()
+            for _ in range(nights):
+                total += override_map.get(d.isoformat(), base)
+                d += timedelta(days=1)
+            return total
+        return base * nights
     return None
 
 
@@ -257,7 +287,7 @@ def _queue_booking_emails(
                 sublease_data.get('area', '') if sublease_data
                 else property_data.get('location', property_data.get('area', ''))
             )
-            total_price = _compute_booking_total(booking_data, property_data, sublease_data)
+            total_price = await _compute_booking_total(booking_data, property_data, sublease_data)
 
             if renter and renter.get('email'):
                 await send_booking_confirmation_email(

@@ -2,11 +2,12 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import axios from 'axios';
-import { Edit, Eye, Trash2, Upload, FileText, CalendarSync, Link2, X, RefreshCw, Copy, Check, Sparkles, Image as ImageIcon, Loader2, CalendarCheck } from 'lucide-react';
+import { Edit, Eye, Trash2, Upload, FileText, CalendarSync, Link2, X, RefreshCw, Copy, Check, Sparkles, Image as ImageIcon, Loader2, CalendarCheck, TrendingUp } from 'lucide-react';
 import { toast } from 'sonner';
 import { getCoverImage } from '../../utils/coverImage';
 import DefaultImageBadge from '../property/DefaultImageBadge';
 import VideoCoverBadge from '../property/VideoCoverBadge';
+import SmartPricingModal from './SmartPricingModal';
 
 /**
  * Owner-facing property card grid with edit / delete / contract-upload /
@@ -106,6 +107,9 @@ const PropertyList = ({ properties, bookings = [], onEdit, onRefresh, API, token
   const [bulkImgUploading, setBulkImgUploading] = useState(false);
   const [icalData, setIcalData] = useState({});
   const [copiedExport, setCopiedExport] = useState(false);
+  // Smart Pricing modal — single instance, opened with whichever property's
+  // button was clicked. Vacation-only (button is hidden on other types).
+  const [smartPricingProperty, setSmartPricingProperty] = useState(null);
 
   const authHeaders = { headers: { Authorization: `Bearer ${token}` } };
 
@@ -681,7 +685,25 @@ const PropertyList = ({ properties, bookings = [], onEdit, onRefresh, API, token
 
               {/* iCal Sync for Vacation Properties */}
               {property.rental_type === 'vacation' && (
-                <div className="mt-3 pt-3 border-t border-gray-100">
+                <div className="mt-3 pt-3 border-t border-gray-100 space-y-2">
+                  {/* Smart Pricing — opens the rules + calendar + forecast modal */}
+                  <button
+                    onClick={() => setSmartPricingProperty(property)}
+                    className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-all"
+                    style={{
+                      backgroundColor: property.smart_pricing?.enabled ? '#1E6A6A' : '#f5f5f0',
+                      color: property.smart_pricing?.enabled ? '#D4AF37' : '#1E6A6A',
+                    }}
+                    data-testid={`smart-pricing-btn-${property.id}`}
+                  >
+                    <TrendingUp size={15} />
+                    Smart Pricing
+                    {property.smart_pricing?.enabled && (
+                      <span className="text-[10px] font-bold uppercase tracking-wide px-1.5 py-0.5 rounded bg-[#D4AF37] text-white">
+                        {property.smart_pricing?.auto_apply ? 'Auto' : 'On'}
+                      </span>
+                    )}
+                  </button>
                   <button
                     onClick={() => openIcalPanel(property.id)}
                     className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-all"
@@ -769,6 +791,18 @@ const PropertyList = ({ properties, bookings = [], onEdit, onRefresh, API, token
           </div>
         ))}
       </div>
+      <SmartPricingModal
+        isOpen={!!smartPricingProperty}
+        onClose={() => {
+          setSmartPricingProperty(null);
+          // Re-fetch so the "On / Auto" pill flips immediately after the
+          // user toggles Smart Pricing in the modal.
+          onRefresh && onRefresh();
+        }}
+        property={smartPricingProperty}
+        API={API}
+        token={token}
+      />
     </div>
   );
 };

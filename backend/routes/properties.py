@@ -241,6 +241,13 @@ async def get_property(property_id: str) -> dict:
     
     await db.properties.update_one({"id": property_id}, {"$inc": {"views": 1}})
     property_data['views'] = property_data.get('views', 0) + 1
+    # Fire-and-forget timestamped view event — drives the Smart Pricing
+    # demand signal (rolling 14d). Never blocks the page render.
+    try:
+        from routes.smart_pricing import record_view_event
+        asyncio.create_task(record_view_event(property_id))
+    except Exception:  # noqa: BLE001
+        pass
     
     owner = await db.users.find_one({"id": property_data.get("owner_id")}, {"_id": 0, "name": 1, "email": 1})
     if owner:
