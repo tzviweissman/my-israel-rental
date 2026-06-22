@@ -12,6 +12,28 @@ Build a bilingual (English/Hebrew) rental website named MyIsraelRental.com with 
 
 ## What's Been Implemented
 
+- [x] **Smart Pricing — Internal Dynamic-Pricing Rules Engine (2026-06-22)**: Shipped a fully internal Smart/Dynamic Pricing engine for vacation rentals — the user explicitly opted OUT of third-party APIs (PriceLabs / Beyond / Wheelhouse) because the per-listing fees are incompatible with our zero-fee promise. Six rule families, all per-property tunable, fully deterministic and explainable.
+  - **Backend** (`backend/routes/smart_pricing.py`, new, ~680 lines):
+    - `SmartPricingSettings` Pydantic model — toggle, auto_apply, base/min/max nightly, six rule percentages (weekend, holiday, last-minute, lead-time, high-demand, low-demand, comparable-blend).
+    - `compute_suggestion(prop, settings, target_date, signals)` — pure function, applies rules multiplicatively (premiums compound), clamps to [min, max], records every factor that fired for the "why" UI. 100% unit-testable.
+    - `_gather_signals` — async one-shot per batch: Hebcal holiday lookup (cached per year, in-process), comparable-rentals median (Mongo aggregate, currency-normalized), 14-day view count vs area median, booked-date set.
+    - Endpoints: `GET/PATCH /smart-pricing/settings`, `POST /smart-pricing/calculate?days=N`, `POST /smart-pricing/apply`, `DELETE /smart-pricing/apply/{day}` (revert). All gated on vacation-only + ownership.
+    - Daily cron `smart_pricing_daily_loop()` — sleeps until 03:00 UTC, refreshes next-60-days for every enabled property; respects `auto_apply` for per-property auto-write.
+  - **View-event tracking** (`routes/properties.py`): every detail-page GET now fires `record_view_event(property_id)` into a new `property_view_events` collection (fire-and-forget asyncio.create_task). Drives the 14-day demand signal.
+  - **Booking total integration** (`routes/bookings.py`): `_compute_booking_total` is now `async` and layers `applied=True` smart overrides on top of the base nightly_price, night-by-night — so confirmation emails reflect per-night dynamic pricing rather than the flat base × N.
+  - **Server wiring** (`server.py`): new router registered, cron started, indexes on `nightly_price_overrides(property_id, date)` (unique) + `property_view_events(at, property_id)`.
+  - **Frontend modal** (`components/dashboard/SmartPricingModal.jsx`, new, ~640 lines):
+    - 3-tab UI — **Rules** (master toggle, auto-apply toggle, min/base/max numeric inputs, seven rule sliders with help tooltips), **Calendar** (color-coded 60-night grid: green=premium, amber=discount, gray=booked; per-day Apply / Apply-All / Revert; hover tooltip shows the factor breakdown), **Forecast** (base_total vs smart_total cards, delta + delta_pct, open/booked night counts).
+    - Solid useCallback/useMemo plumbing — no effect thrash on token changes.
+    - `data-testid` on every interactive element + every day cell (`smart-pricing-day-YYYY-MM-DD`).
+  - **PropertyList wiring**: "Smart Pricing" button rendered above the iCal button on every vacation property card. Shows "On" or "Auto" pill when active. Hidden on long-term / short-term / storage rentals.
+  - **Hebcal source**: same `https://www.hebcal.com/hebcal?v=1&cfg=json&maj=on&i=on&year=YYYY` feed the frontend already uses for holiday windows.
+  - **Tests** (`backend/tests/test_smart_pricing.py` + `test_smart_pricing_extra.py`, 16 total): pure-function unit tests for each rule (weekend, holiday, lead-time, last-minute, demand, blend, clamp, past-date short-circuit), HTTP round-trip (settings → calculate → apply → revert), non-vacation 400 guard, cross-account 403 guard, applied-override-feeds-booking-total integration. **16/16 pass**.
+  - **Testing agent verification**: full end-to-end frontend smoke confirmed — 9 vacation cards each show the button, modal opens with three tabs, Rules save persists, Calendar renders 60 color-coded cells, Apply All works, Forecast totals render. No critical or P0 issues found.
+  - Files: `backend/routes/smart_pricing.py` (new), `backend/routes/properties.py`, `backend/routes/bookings.py`, `backend/server.py`, `frontend/src/components/dashboard/SmartPricingModal.jsx` (new), `frontend/src/components/dashboard/PropertyList.jsx`, `backend/tests/test_smart_pricing.py` (new), `backend/tests/test_smart_pricing_extra.py` (new, written by testing agent).
+
+
+
 - [x] **Video Cover Image: First-Frame Lock + Play Overlay (2026-06-21)**: User reported that listings with only a video (no still photos) were showing weird mid-video stills as their cover image, and renters couldn't tell the card represented playable content. Two-part fix:
   - **First-frame poster** (`frontend/src/utils/cdnImage.js::videoPoster`): swapped Cloudinary's `so_auto` (which picks the "most interesting" frame and is essentially random) for `so_0`, locking the poster to the very first frame of the video. Listers now control how their card opens by trimming the start of their clip — fully deterministic. Verified via node smoke test that the output URL contains `so_0` and no longer `so_auto`. Same transform feeds the `<video poster>` on the detail-page gallery, so the still you see before pressing play now matches the start of the video.
   - **Play-button overlay** (`frontend/src/components/property/VideoCoverBadge.jsx`, new): purely-presentational overlay rendered absolutely over any card whose cover was synthesized from a video. Centered translucent play button (`bg-black/55 + ring-2 ring-white/80`) for instant recognition, plus a bottom-left "Video" pill so the signal survives on small mobile cards. `pointer-events: none` so it never blocks the card's click target. Driven off the existing `getCoverImage(...).fromVideo` flag.
