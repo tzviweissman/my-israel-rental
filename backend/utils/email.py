@@ -603,3 +603,101 @@ async def send_payment_confirmation_email(
         _wrap(inner, preheader=f"{description} · {currency_symbol}{amount:,.2f}"),
         tag="payment-confirmation",
     )
+
+
+
+async def send_pricing_insights_email(
+    to_email: str,
+    owner_name: str,
+    properties_data: list[dict],
+    week_summary: dict,
+) -> bool:
+    """Weekly Smart-Pricing digest sent to vacation-rental owners with
+    Smart Pricing enabled on at least one listing.
+
+    Layout:
+      - Hero stat: total projected delta across all enabled properties
+      - Per-property card: title, applied-this-week count, biggest bump, biggest discount, projected delta
+      - CTA back to dashboard
+
+    No-op if the owner has ``pricing_insights_optout`` flag set — that
+    check is the caller's responsibility (the weekly cron filters those
+    users out before calling this function).
+    """
+    currency_symbol = lambda c: "₪" if (c or "ILS") == "ILS" else "$"  # noqa: E731
+    total_delta = week_summary.get("total_delta", 0)
+    total_ccy = week_summary.get("currency", "ILS")
+    total_props = week_summary.get("property_count", 0)
+    total_applied = week_summary.get("applied_this_week", 0)
+    direction_color = BRAND_TEAL if total_delta >= 0 else BRAND_GOLD
+    arrow = "↑" if total_delta >= 0 else "↓"
+
+    # Per-property cards
+    property_blocks = []
+    for p in properties_data:
+        sym = currency_symbol(p.get("currency"))
+        delta = p.get("delta", 0)
+        delta_pct = p.get("delta_pct", 0)
+        delta_color = "#166534" if delta >= 0 else "#92400e"
+        delta_bg = "#dcfce7" if delta >= 0 else "#fef3c7"
+        notable = p.get("notable_adjustment")
+        notable_html = ""
+        if notable:
+            notable_html = (
+                f'<div style="margin-top:8px;color:#555;font-size:12px;line-height:1.5;">'
+                f'<strong>This week:</strong> {notable}</div>'
+            )
+        property_blocks.append(f"""
+        <div style="background:#fafaf7;border-radius:10px;padding:16px 18px;margin:10px 0;border-left:4px solid {BRAND_TEAL};">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+            <div style="flex:1;min-width:0;">
+              <div style="color:{BRAND_TEAL};font-size:15px;font-weight:700;margin-bottom:2px;">{p.get('title', 'Untitled')}</div>
+              <div style="color:#888;font-size:12px;">{p.get('area', '')}</div>
+            </div>
+            <div style="background:{delta_bg};color:{delta_color};padding:4px 10px;border-radius:8px;font-size:12px;font-weight:700;white-space:nowrap;">
+              {arrow if delta != 0 else '·'} {sym}{abs(delta):,.0f} ({delta_pct:+.1f}%)
+            </div>
+          </div>
+          {notable_html}
+        </div>
+        """)
+
+    properties_html = "".join(property_blocks) if property_blocks else (
+        '<p style="color:#888;font-size:13px;text-align:center;padding:18px 0;">'
+        'No Smart-Pricing activity this week.</p>'
+    )
+
+    inner = f"""
+    <h2 style="color:#222;font-size:22px;margin:0 0 8px;">Your weekly Pricing Insights 📊</h2>
+    <p style="color:#555;font-size:14px;line-height:1.7;margin:0 0 18px;">
+      Hi {owner_name or 'there'},<br />
+      Here's how Smart Pricing performed across your {total_props} active listing{'' if total_props == 1 else 's'} this past week.
+    </p>
+    <div style="background:linear-gradient(135deg,#fff8e6,#ffffff);border-radius:12px;padding:22px 24px;margin:14px 0 22px;border:1px solid {BRAND_GOLD}40;text-align:center;">
+      <div style="color:#888;font-size:11px;letter-spacing:2px;text-transform:uppercase;margin-bottom:4px;">Projected next 30 days</div>
+      <div style="color:{direction_color};font-size:30px;font-weight:800;letter-spacing:-0.5px;">
+        {arrow} {currency_symbol(total_ccy)}{abs(total_delta):,.0f}
+      </div>
+      <div style="color:#666;font-size:12px;margin-top:4px;">
+        vs flat base-rate pricing &nbsp;·&nbsp; {total_applied} night{'' if total_applied == 1 else 's'} applied this week
+      </div>
+    </div>
+    <h3 style="color:#333;font-size:15px;font-weight:700;margin:24px 0 8px;">Per-property breakdown</h3>
+    {properties_html}
+    {_button("Open Dashboard", f"{FRONTEND_URL}/dashboard")}
+    <p style="color:#888;font-size:12px;line-height:1.6;margin-top:12px;">
+      Don't want these weekly digests? Manage your email preferences in your
+      <a href="{FRONTEND_URL}/dashboard?tab=settings" style="color:{BRAND_TEAL};">dashboard settings</a>.
+    </p>
+    """
+    subject = (
+        f"Pricing Insights — {arrow} {currency_symbol(total_ccy)}{abs(total_delta):,.0f} projected this month"
+        if total_delta != 0
+        else "Pricing Insights — your weekly Smart Pricing digest"
+    )
+    return await send_email(
+        to_email,
+        subject,
+        _wrap(inner, preheader=f"{total_props} listing{'' if total_props == 1 else 's'} · {arrow}{currency_symbol(total_ccy)}{abs(total_delta):,.0f} projected"),
+        tag="pricing-insights",
+    )

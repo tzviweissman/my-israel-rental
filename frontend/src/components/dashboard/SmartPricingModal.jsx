@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import axios from 'axios';
 import { toast } from 'sonner';
-import { X, Sparkles, RefreshCw, Loader2, Check, Info, TrendingUp, TrendingDown } from 'lucide-react';
+import { X, Sparkles, RefreshCw, Loader2, Check, Info, TrendingUp, TrendingDown, Mail } from 'lucide-react';
 
 /**
  * Smart Pricing modal — opened from each VACATION PropertyCard on the
@@ -205,6 +205,48 @@ const SmartPricingModal = ({ isOpen, onClose, property, API, token }) => {
     }
   };
 
+  // ---- Weekly digest controls (Pricing Insights email) ----
+  const [digestPref, setDigestPref] = useState({ optout: false, last_sent_at: null });
+  const [sendingSample, setSendingSample] = useState(false);
+
+  useEffect(() => {
+    if (!isOpen) return;
+    axios
+      .get(`${API}/smart-pricing/insights/preferences`, authHeaders)
+      .then((r) => setDigestPref(r.data))
+      .catch(() => {});
+  }, [isOpen, API, authHeaders]);
+
+  const toggleDigestOptout = async (next) => {
+    try {
+      await axios.patch(
+        `${API}/smart-pricing/insights/preferences`,
+        { optout: next },
+        authHeaders,
+      );
+      setDigestPref((p) => ({ ...p, optout: next }));
+      toast.success(next ? 'Weekly digest paused' : 'Weekly digest resumed');
+    } catch (err) {
+      toast.error(err.response?.data?.detail || 'Failed to update preference');
+    }
+  };
+
+  const sendSampleDigest = async () => {
+    setSendingSample(true);
+    try {
+      const r = await axios.post(
+        `${API}/smart-pricing/insights/send-sample`,
+        {},
+        authHeaders,
+      );
+      toast.success(`Sample digest sent to ${r.data.sent_to}`);
+    } catch (err) {
+      toast.error(err.response?.data?.detail || 'Could not send sample');
+    } finally {
+      setSendingSample(false);
+    }
+  };
+
   if (!isOpen || !property) return null;
 
   return (
@@ -276,6 +318,10 @@ const SmartPricingModal = ({ isOpen, onClose, property, API, token }) => {
               setSettings={setSettings}
               sym={sym}
               baseFallback={baseFallback}
+              digestPref={digestPref}
+              onToggleDigestOptout={toggleDigestOptout}
+              onSendSampleDigest={sendSampleDigest}
+              sendingSample={sendingSample}
             />
           ) : tab === 'calendar' ? (
             <CalendarTab
@@ -322,7 +368,16 @@ const SmartPricingModal = ({ isOpen, onClose, property, API, token }) => {
 // ---------------------------------------------------------------------------
 // Tab: Rules
 // ---------------------------------------------------------------------------
-const RulesTab = ({ settings, setSettings, sym, baseFallback }) => {
+const RulesTab = ({
+  settings,
+  setSettings,
+  sym,
+  baseFallback,
+  digestPref,
+  onToggleDigestOptout,
+  onSendSampleDigest,
+  sendingSample,
+}) => {
   const set = (k, v) => setSettings((s) => ({ ...s, [k]: v }));
   return (
     <div className="space-y-6">
@@ -450,6 +505,47 @@ const RulesTab = ({ settings, setSettings, sym, baseFallback }) => {
             testid="smart-pricing-blend"
           />
         </div>
+      </div>
+
+      {/* Weekly Pricing Insights digest controls */}
+      <div className="p-4 rounded-xl border border-gray-200 bg-white">
+        <div className="flex items-start justify-between gap-4">
+          <div className="flex-1">
+            <p className="text-sm font-semibold text-gray-900 flex items-center gap-1.5">
+              <Mail size={14} className="text-[#1E6A6A]" />
+              Weekly Pricing Insights digest
+            </p>
+            <p className="text-xs text-gray-600 mt-1 leading-relaxed">
+              Every Sunday morning we email you a roundup across ALL your Smart-Pricing
+              listings — projected next-30-day revenue vs flat base rate, nights applied
+              this week, and the biggest single adjustment per property.
+            </p>
+            {digestPref?.last_sent_at && (
+              <p className="text-[11px] text-gray-400 mt-1">
+                Last sent: {new Date(digestPref.last_sent_at).toLocaleDateString('en-US', { dateStyle: 'medium' })}
+              </p>
+            )}
+          </div>
+          <label className="relative inline-flex items-center cursor-pointer shrink-0">
+            <input
+              type="checkbox"
+              checked={!digestPref?.optout}
+              onChange={(e) => onToggleDigestOptout(!e.target.checked)}
+              className="sr-only peer"
+              data-testid="pricing-insights-toggle"
+            />
+            <div className="w-11 h-6 bg-gray-300 rounded-full peer-checked:bg-[#1E6A6A] transition-colors after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-transform peer-checked:after:translate-x-5" />
+          </label>
+        </div>
+        <button
+          onClick={onSendSampleDigest}
+          disabled={sendingSample}
+          className="mt-3 text-xs font-semibold text-[#1E6A6A] hover:underline disabled:opacity-50 flex items-center gap-1"
+          data-testid="pricing-insights-send-sample"
+        >
+          {sendingSample ? <Loader2 size={12} className="animate-spin" /> : <Mail size={12} />}
+          Email me a sample now
+        </button>
       </div>
     </div>
   );

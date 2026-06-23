@@ -131,6 +131,9 @@ async def startup_tasks() -> None:
     # Daily Smart Pricing refresh — sleeps until 03:00 UTC, then loops.
     # Cheap (only runs against properties with smart_pricing.enabled=true).
     asyncio.create_task(smart_pricing.smart_pricing_daily_loop())
+    # Weekly Pricing Insights digest — every Sunday 07:00 UTC. No-op for
+    # owners without smart_pricing-enabled vacation listings.
+    asyncio.create_task(smart_pricing.pricing_insights_weekly_loop())
     try:
         ensure_contract_templates(ROOT_DIR / "uploads")
         logger.info("Contract templates ready")

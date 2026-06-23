@@ -12,6 +12,21 @@ Build a bilingual (English/Hebrew) rental website named MyIsraelRental.com with 
 
 ## What's Been Implemented
 
+- [x] **Weekly Pricing Insights Email Digest (2026-06-22)**: Built on top of the freshly-shipped Smart Pricing engine — sends owners a Sunday-morning email digest summarizing their dynamic-pricing activity. Drives sustained dashboard engagement and gives owners a concrete reason to return weekly.
+  - **Email template** (`backend/utils/email.py::send_pricing_insights_email`): branded HTML email matching the existing Postmark templates (teal header + gold accent). Hero block shows total projected next-30-day delta vs flat base, plus "X nights applied this week". Per-property cards list title + area + delta pill (green when up, amber when down) + the single biggest weekly adjustment ("↑ ₪750 on 2026-07-04 — holiday: pesach"). Unsubscribe link in footer.
+  - **Aggregator** (`smart_pricing.py::_build_owner_digest`): per-owner async fn that walks every SP-enabled vacation listing, runs 30-day forecasts, picks the biggest |delta| from base in the next 14 days as "notable_adjustment", sums deltas only when currencies match (multi-currency portfolios just show the dominant). Returns `None` for owners with zero enabled listings so the cron short-circuits.
+  - **Weekly cron** (`smart_pricing.py::pricing_insights_weekly_loop`): wall-clock-pegged to Sunday 07:00 UTC (~10:00 Israel time — Sunday morning is the start of the Israeli work week, when hosts naturally check earnings). Skips opt-out users, suppressed emails, and zero-activity weeks to avoid noise. Persists `last_pricing_insights_sent_at` on the user doc.
+  - **Owner controls** (3 new endpoints in `smart_pricing.py`):
+    - `GET /smart-pricing/insights/preferences` — current opt-out flag + last_sent_at timestamp.
+    - `PATCH /smart-pricing/insights/preferences` `{optout: bool}` — toggle subscription.
+    - `POST /smart-pricing/insights/send-sample` — preview the email in your own inbox without waiting until Sunday. Bypasses the zero-delta cron-skip guard so the host always sees a real email; returns 400 if no SP-enabled vacation listing exists yet.
+  - **UI** (Rules tab in `SmartPricingModal.jsx`): new "Weekly Pricing Insights digest" section at the bottom — Mail-icon header, descriptive copy, on/off toggle (`data-testid='pricing-insights-toggle'`, defaults ON), last-sent date display, "Email me a sample now" button (`data-testid='pricing-insights-send-sample'`).
+  - **Tests** (`tests/test_pricing_insights.py`, 4 new): preferences round-trip, opt-out skip path, suppressed-email skip path, send-sample 400 for accounts without enabled SP. All 20 Smart Pricing tests still pass.
+  - **Why this matters**: hosts who set up Smart Pricing once would otherwise have no recurring touchpoint with the dashboard. The Sunday digest creates a weekly habit loop — they open the email, see "₪3,400 projected this month" or "₪480 weekend bump on July 4", and click through to review. Zero new Emergent credit cost (deterministic engine), zero new third-party dependency (Postmark is already wired).
+  - Files: `backend/utils/email.py`, `backend/routes/smart_pricing.py`, `backend/server.py` (weekly cron task), `frontend/src/components/dashboard/SmartPricingModal.jsx`, `backend/tests/test_pricing_insights.py` (new).
+
+
+
 - [x] **Smart Pricing — Internal Dynamic-Pricing Rules Engine (2026-06-22)**: Shipped a fully internal Smart/Dynamic Pricing engine for vacation rentals — the user explicitly opted OUT of third-party APIs (PriceLabs / Beyond / Wheelhouse) because the per-listing fees are incompatible with our zero-fee promise. Six rule families, all per-property tunable, fully deterministic and explainable.
   - **Backend** (`backend/routes/smart_pricing.py`, new, ~680 lines):
     - `SmartPricingSettings` Pydantic model — toggle, auto_apply, base/min/max nightly, six rule percentages (weekend, holiday, last-minute, lead-time, high-demand, low-demand, comparable-blend).
