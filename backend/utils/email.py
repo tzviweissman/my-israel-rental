@@ -701,3 +701,55 @@ async def send_pricing_insights_email(
         _wrap(inner, preheader=f"{total_props} listing{'' if total_props == 1 else 's'} · {arrow}{currency_symbol(total_ccy)}{abs(total_delta):,.0f} projected"),
         tag="pricing-insights",
     )
+
+
+async def send_availability_expiring_email(
+    to_email: str,
+    owner_name: str,
+    property_title: str,
+    available_to: str,
+    extend_url: str,
+    dashboard_url: str,
+) -> bool:
+    """5-day-out nudge for owners whose ``available_to`` cap is about to
+    roll past. Two CTAs:
+      • "Extend by 1 month" — primary button, hits the token-signed URL
+        that bumps available_to forward without a login flow.
+      • "Open dashboard" — secondary link for everything else (set a new
+        explicit window, clear the cap, etc.).
+
+    The subject line includes the date so it shows up as a self-contained
+    actionable nudge in a busy inbox.
+    """
+    inner = f"""
+    <h2 style="color:#222;font-size:22px;margin:0 0 8px;">Your listing is winding down 🪟</h2>
+    <p style="color:#555;font-size:14px;line-height:1.7;margin:0 0 18px;">
+      Hi {owner_name or 'there'},<br />
+      <strong>{property_title}</strong> is set to stop accepting new bookings on
+      <strong style="color:{BRAND_TEAL};">{available_to}</strong> — that's just 5 days from now.
+    </p>
+    <p style="color:#555;font-size:14px;line-height:1.7;margin:0 0 18px;">
+      If you'd like to keep renting it out, just tap <em>Extend by one month</em>
+      below — we'll push your availability cap forward in one click, no login needed.
+      Otherwise, open the dashboard to set a new specific window, clear the cap entirely,
+      or pause the listing.
+    </p>
+    {_button("Extend by one month", extend_url)}
+    <p style="text-align:center;margin:6px 0 22px;">
+      <a href="{dashboard_url}" style="color:{BRAND_TEAL};font-size:13px;font-weight:600;text-decoration:none;">
+        Open dashboard → edit listing
+      </a>
+    </p>
+    <p style="color:#888;font-size:12px;line-height:1.6;">
+      Don't want availability-expiry reminders? Pause them in your
+      <a href="{FRONTEND_URL}/dashboard?tab=settings" style="color:{BRAND_TEAL};">dashboard settings</a>.
+    </p>
+    """
+    subject = f"Heads up — {property_title} stops taking bookings on {available_to}"
+    return await send_email(
+        to_email,
+        subject,
+        _wrap(inner, preheader="Tap to extend by a month, or open your dashboard to set a new window."),
+        tag="availability-expiry",
+    )
+

@@ -37,6 +37,7 @@ import DocumentService from './pages/DocumentService';
 import SignContract from './pages/SignContract';
 import PaymentSuccess from './pages/PaymentSuccess';
 import PaymentCancel from './pages/PaymentCancel';
+import AvailabilityExtended from './pages/AvailabilityExtended';
 import FAQ from './pages/FAQ';
 import { DOCUMENT_SERVICES_ENABLED } from './config/features';
 
@@ -134,6 +135,7 @@ function App() {
             <Route path="/sign/:signToken" element={<SignContract />} />
             <Route path="/payment/success" element={user ? <PaymentSuccess /> : <Navigate to="/auth/login" />} />
             <Route path="/payment/cancel" element={<PaymentCancel />} />
+            <Route path="/availability-extended" element={<AvailabilityExtended />} />
             <Route path="/faq" element={<FAQ />} />
           </Routes>
         </div>

@@ -31,6 +31,7 @@ from routes import (  # noqa: E402
     admin_import,
     admin_smart_lists,
     auth,
+    availability_reminders,
     bookings,
     bulk_upload,
     chat,
@@ -73,6 +74,7 @@ for mod in (
     admin_smart_lists,
     saved_searches,
     smart_pricing,
+    availability_reminders,
     ical,
     misc,
     payments,
@@ -134,6 +136,9 @@ async def startup_tasks() -> None:
     # Weekly Pricing Insights digest — every Sunday 07:00 UTC. No-op for
     # owners without smart_pricing-enabled vacation listings.
     asyncio.create_task(smart_pricing.pricing_insights_weekly_loop())
+    # Availability-expiry reminders — daily at 06:00 UTC. Nudges hosts
+    # whose available_to is rolling past in the next 4-6 days.
+    asyncio.create_task(availability_reminders.availability_reminders_daily_loop())
     try:
         ensure_contract_templates(ROOT_DIR / "uploads")
         logger.info("Contract templates ready")
