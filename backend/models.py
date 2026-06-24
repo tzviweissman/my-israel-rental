@@ -88,6 +88,11 @@ class PropertyCreate(BaseModel):
     cancellation_policy: str | None = 'flexible'
     custom_cancellation_policy: str | None = None
     available_from: str | None = None
+    # Optional cap on availability — for owners renting out their place for
+    # just a window of time (e.g. one week while they're abroad). When set,
+    # the booking flow rejects any night past this date. Leave None for
+    # open-ended availability.
+    available_to: str | None = None
     starting_date: str | None = None
     minimum_booking_days: int | None = None
     checkin_time: str | None = None

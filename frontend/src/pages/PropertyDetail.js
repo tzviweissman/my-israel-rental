@@ -365,12 +365,23 @@ const PropertyDetail = () => {
                 to see internal scheduling so it's hidden now. */}
             {property.rental_type !== 'long-term' && property.available_from && (
               <div className="bg-[#D4AF37]/10 border border-[#D4AF37]/30 p-4 rounded-xl mb-6">
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 flex-wrap">
                   <CalendarIcon size={20} style={{ color: '#D4AF37' }} />
                   <span className="font-medium text-gray-700">{t('property.availableFromLabel')}</span>
                   <span className="font-bold" style={{ color: '#1E6A6A' }}>
                     {format(parseLocalDate(property.available_from), 'MMMM d, yyyy')}
                   </span>
+                  {property.available_to && (
+                    <>
+                      <span className="text-gray-500">→</span>
+                      <span className="font-medium text-gray-700">
+                        {t('property.availableUntilLabel', 'Until')}
+                      </span>
+                      <span className="font-bold" style={{ color: '#1E6A6A' }}>
+                        {format(parseLocalDate(property.available_to), 'MMMM d, yyyy')}
+                      </span>
+                    </>
+                  )}
                 </div>
               </div>
             )}

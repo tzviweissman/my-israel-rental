@@ -130,6 +130,7 @@ class PropertyOut(BaseModel):
     cancellation_policy: str | None = None
     custom_cancellation_policy: str | None = None
     available_from: str | None = None
+    available_to: str | None = None
     starting_date: str | None = None
     minimum_booking_days: int | None = None
     checkin_time: str | None = None

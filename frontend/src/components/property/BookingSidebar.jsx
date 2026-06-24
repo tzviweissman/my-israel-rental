@@ -205,7 +205,12 @@ const computeDisabled = ({ sublease, property, blockedDates }) => {
     }
     return [];
   })();
-  return [{ before: new Date() }, ...minStart, ...blockedDates.map((d) => new Date(d))];
+  // Owners can cap the availability window (e.g. only renting their place
+  // out for a week while travelling). When set, disable every date after.
+  const maxEnd = property.available_to
+    ? [{ after: parseLocalDate(property.available_to) }]
+    : [];
+  return [{ before: new Date() }, ...minStart, ...maxEnd, ...blockedDates.map((d) => new Date(d))];
 };
 
 const computeDefaultMonth = ({ property, dateRange }) => {

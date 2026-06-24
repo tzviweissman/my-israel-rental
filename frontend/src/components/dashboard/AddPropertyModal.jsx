@@ -19,7 +19,7 @@ const EMPTY_FORM = {
   porches: 0, sukkah_compatible: false, condition: 'renovated', furniture_option: 'no_furniture',
   amenities: [], monthly_price: '', nightly_price: '', currency: 'ILS',
   images: [], videos: [], cancellation_policy: 'flexible', custom_cancellation_policy: '',
-  available_from: '', starting_date: '', minimum_booking_days: '',
+  available_from: '', available_to: '', starting_date: '', minimum_booking_days: '',
   holiday_tags: [],
   holiday_lump_price: '',
   holiday_lump_currency: 'ILS',
@@ -141,6 +141,7 @@ const AddPropertyModal = ({ isOpen, onClose, editingProperty, onSaved, API, toke
         cancellation_policy: editingProperty.cancellation_policy || 'flexible',
         custom_cancellation_policy: editingProperty.custom_cancellation_policy || '',
         available_from: editingProperty.available_from || '',
+        available_to: editingProperty.available_to || '',
         starting_date: editingProperty.starting_date || '',
         minimum_booking_days: editingProperty.minimum_booking_days ? String(editingProperty.minimum_booking_days) : '',
         holiday_tags: editingProperty.holiday_tags || [],
@@ -588,15 +589,30 @@ const AddPropertyModal = ({ isOpen, onClose, editingProperty, onSaved, API, toke
               testid="property-starting-date"
             />
           ) : (
-            <DateField
-              label="Date Available"
-              value={propertyForm.available_from}
-              onChange={(available_from) => setPropertyForm({ ...propertyForm, available_from })}
-              variant="gold"
-              emoji="ℹ️"
-              helperText="The earliest date this property can be booked from"
-              testid="property-available-from"
-            />
+            <>
+              <DateField
+                label="Date Available From"
+                value={propertyForm.available_from}
+                onChange={(available_from) => setPropertyForm({ ...propertyForm, available_from })}
+                variant="gold"
+                emoji="ℹ️"
+                helperText="The earliest date this property can be booked from"
+                testid="property-available-from"
+              />
+              {/* Optional cap on availability — for owners who only rent
+                  for a fixed window (e.g. a single week while travelling).
+                  Renters' calendar disables anything after this date and
+                  the booking API rejects overflowing checkouts. */}
+              <DateField
+                label="Date Available Until (optional)"
+                value={propertyForm.available_to}
+                onChange={(available_to) => setPropertyForm({ ...propertyForm, available_to })}
+                variant="gold"
+                emoji="🗓️"
+                helperText="Leave blank for open-ended availability. Set this if you're only renting for a fixed window (e.g. one week while travelling)."
+                testid="property-available-to"
+              />
+            </>
           )}
 
           {/* Minimum Rental Period (long/short-term) or Minimum Booking Length (vacation) */}

@@ -34,6 +34,7 @@ api_router = router  # alias so existing @api_router decorators work verbatim
 @api_router.post("/bookings", response_model=BookingCreateResponse)
 async def create_booking(booking_data: BookingCreate, payload: dict = Depends(verify_token)) -> dict:
     property_data, sublease_data = await _load_property_and_sublease(booking_data)
+    _assert_within_availability_window(booking_data, property_data, sublease_data)
     await _assert_no_booking_overlap(booking_data)
 
     booking_doc = _build_booking_doc(
@@ -93,6 +94,59 @@ async def _load_property_and_sublease(
                 status_code=400, detail="This sublease is no longer active",
             )
     return property_data, sublease_data
+
+
+def _assert_within_availability_window(
+    booking_data: BookingCreate,
+    property_data: dict,
+    sublease_data: dict | None,
+) -> None:
+    """Reject bookings that fall outside the lister's availability window.
+
+    Two windows can apply:
+      • ``property.available_from`` / ``property.available_to`` — the owner
+        explicitly capped their listing's availability (e.g. "I'm only
+        renting for one week while I travel"). Both ends inclusive.
+      • ``sublease.available_from`` / ``sublease.available_to`` — the
+        sublessor's stricter window for that specific sublease. Sublease
+        bounds override the property's own window because the sublessor
+        is the de-facto owner during that period.
+
+    Past dates are NOT validated here — the calendar UI hides them and the
+    overlap check would reject any meaningfully-conflicting historical
+    booking anyway.
+    """
+    # Sublease window wins when the booking is sublease-scoped.
+    if sublease_data:
+        sub_from = sublease_data.get("available_from")
+        sub_to = sublease_data.get("available_to")
+        if sub_from and booking_data.start_date < sub_from:
+            raise HTTPException(
+                status_code=400,
+                detail=f"This sublease is only available from {sub_from} onwards.",
+            )
+        if sub_to and booking_data.end_date > sub_to:
+            raise HTTPException(
+                status_code=400,
+                detail=f"This sublease is only available until {sub_to}.",
+            )
+        return  # sublease window fully governs sublease bookings
+
+    avail_from = property_data.get("available_from")
+    avail_to = property_data.get("available_to")
+    if avail_from and booking_data.start_date < avail_from:
+        raise HTTPException(
+            status_code=400,
+            detail=f"This property is only available from {avail_from} onwards.",
+        )
+    if avail_to and booking_data.end_date > avail_to:
+        raise HTTPException(
+            status_code=400,
+            detail=(
+                f"This property is only available until {avail_to}. "
+                "Please pick checkout dates within the window."
+            ),
+        )
 
 
 async def _assert_no_booking_overlap(booking_data: BookingCreate) -> None:
