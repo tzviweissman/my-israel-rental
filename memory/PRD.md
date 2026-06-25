@@ -12,6 +12,20 @@ Build a bilingual (English/Hebrew) rental website named MyIsraelRental.com with 
 
 ## What's Been Implemented
 
+- [x] **Super Admin → Total Bookings stat + dedicated Bookings tab (2026-06-25)**: User asked to track total bookings on the platform with a stat card next to Total Users + a way to scan each booking visually with the property thumbnail.
+  - **Backend**:
+    - `GET /api/admin/dashboard` — added `total_bookings` field alongside the legacy `total_inquiries` alias (both contain the same count; legacy key kept for backwards-compat with cached frontends).
+    - `GET /api/admin/bookings` (new): paginated list with status filter + status counts. Single MongoDB aggregation pipeline joins `properties` collection in via `$lookup` on `property_id` so each row arrives with property title/area/rental_type/currency/images/videos/owner_id pre-populated. No N+1 fetches. 500-row hard cap. Admin-gated (403 for non-admins so guest PII doesn't leak).
+  - **Frontend**:
+    - `OverviewTab.jsx`: new "Total Bookings" stat card with `Calendar` icon, rendered as a **clickable button** that navigates to the new Bookings tab (parent-provided `onNavigate` callback). Lay out as a 6-column grid (was 5) so all stats stay in one row on lg+ screens.
+    - `BookingsTab.jsx` (new, ~250 LOC): each booking renders as a 2-column card — property thumbnail on the left (uses the same `getCoverImage` utility the renter-side cards use, so video-only listings show the first-frame Cloudinary poster), booking details on the right (title, area, color-coded status pill, date range with night count, guest name/email/phone, computed total price, "Open listing" external-link CTA). Status filter chips at the top double as count badges and toggle filters. Client-side search across guest name/email/property title/area. Loading + empty + no-results states all handled.
+  - **i18n** (`i18n.js`): EN/HE keys for `admin.totalBookings` ("Total Bookings" / "סה\"כ הזמנות") and `admin.bookings` ("Bookings" / "הזמנות").
+  - **Tests** (`backend/tests/test_admin_bookings.py`, 4 new): dashboard exposes `total_bookings`, list endpoint joins property fields correctly, status filter works, admin role required (403 for owner). All 4 pass.
+  - **Screenshot-verified**: stat card shows "Total Bookings: 124" next to Total Users, clicks through to a populated Bookings tab with thumbnails, status pills, dates, and search.
+  - Files: `backend/routes/admin.py` (dashboard + new endpoint), `frontend/src/components/admin/OverviewTab.jsx`, `frontend/src/components/admin/BookingsTab.jsx` (new), `frontend/src/pages/AdminDashboard.js` (tab wiring + Calendar icon), `frontend/src/i18n.js`, `backend/tests/test_admin_bookings.py` (new).
+
+
+
 - [x] **"Re-list when window expires" smart reminder (2026-06-24)**: Hosts who set an `available_to` cap on their listing now get a friendly nudge 5 days before that cap rolls past, with a true one-tap "Extend by one month" button in the email — turns a one-shot rental into a renewable revenue stream without putting any work on the host's plate.
   - **Backend module** (`backend/routes/availability_reminders.py`, new): JWT-signed extension tokens (30-day TTL, kind-scoped, owner-scoped), daily cron loop pegged to 06:00 UTC (~09:00 Israel), 14-day re-alert cooldown via `availability_expiry_alerted_at` marker on the property doc, idempotent within-60-seconds double-click defense via `last_extended_at`.
   - **One-tap GET endpoint** (`GET /api/properties/availability/extend?token=...&days=30`): public, no login required (token is the auth). Anchors the extension on `max(current_cap, today)` so a missed cap snaps forward to a useful future date instead of compounding into a useless past one. Defenses: 400 on invalid/expired token, 404 on cross-owner token (confused-deputy), 302 to a friendly confirmation page on success.

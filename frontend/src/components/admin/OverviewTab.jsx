@@ -1,6 +1,6 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { Home, Eye, FileText, Users, MessageCircle, Mail, CheckCircle, AlertTriangle, Ban } from 'lucide-react';
+import { Home, Eye, FileText, Users, MessageCircle, Mail, CheckCircle, AlertTriangle, Ban, Calendar } from 'lucide-react';
 import ServiceRevenueWidget from './ServiceRevenueWidget';
 import { DOCUMENT_SERVICES_ENABLED } from '../../config/features';
 
@@ -8,22 +8,47 @@ import { DOCUMENT_SERVICES_ENABLED } from '../../config/features';
  * Super Admin → Overview tab. Pure presentational; the parent owns the
  * `dashboard` and `emailHealth` fetches because the parent already needs
  * `dashboard` for its initial loading-spinner gate.
+ *
+ * The Bookings stat card is clickable — it jumps the admin to the new
+ * dedicated Bookings tab via the parent-provided ``onNavigate`` callback,
+ * matching the pattern other dashboards use for drill-down. Non-clickable
+ * cards just render as plain divs so a misclick on Total Views doesn't
+ * navigate anywhere.
  */
-export const OverviewTab = ({ dashboard, emailHealth, token }) => {
+export const OverviewTab = ({ dashboard, emailHealth, token, onNavigate }) => {
   const { t } = useTranslation();
   return (
     <div data-testid="admin-overview-section">
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-10">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4 mb-10">
         {[
           { label: t('admin.activeListings'), key: 'active-listings', value: dashboard.active_listings, icon: Home },
           { label: t('admin.totalViews'), key: 'total-views', value: dashboard.total_views, icon: Eye },
           { label: t('admin.inquiries'), key: 'inquiries', value: dashboard.total_inquiries, icon: FileText },
           { label: t('admin.totalUsers'), key: 'total-users', value: dashboard.total_users, icon: Users },
+          // Clickable — drills into the dedicated Bookings tab. The new
+          // card sits *next to* Total Users as the user explicitly asked.
+          {
+            label: t('admin.totalBookings', 'Total Bookings'),
+            key: 'total-bookings',
+            value: dashboard.total_bookings ?? dashboard.total_inquiries ?? 0,
+            icon: Calendar,
+            onClick: () => onNavigate && onNavigate('bookings'),
+          },
           ...(DOCUMENT_SERVICES_ENABLED ? [{ label: t('admin.pendingServices'), key: 'pending-services', value: dashboard.pending_services || 0, icon: MessageCircle }] : []),
         ].map(stat => {
           const Icon = stat.icon;
+          const clickable = !!stat.onClick;
           return (
-            <div key={stat.key} className="bg-white p-5 rounded-xl border border-[#E5E5E5]" data-testid={`stat-${stat.key}`}>
+            <button
+              type={clickable ? 'button' : undefined}
+              key={stat.key}
+              onClick={stat.onClick}
+              disabled={!clickable}
+              className={`bg-white p-5 rounded-xl border border-[#E5E5E5] text-left w-full ${
+                clickable ? 'cursor-pointer hover:border-[#D4AF37] hover:shadow-md transition-all' : 'cursor-default'
+              }`}
+              data-testid={`stat-${stat.key}`}
+            >
               <div className="flex items-center gap-3">
                 <div className="p-2 rounded-lg" style={{ backgroundColor: '#1E6A6A' }}>
                   <Icon size={18} color="#D4AF37" />
@@ -33,7 +58,7 @@ export const OverviewTab = ({ dashboard, emailHealth, token }) => {
                   <p className="text-xs text-gray-500">{stat.label}</p>
                 </div>
               </div>
-            </div>
+            </button>
           );
         })}
       </div>

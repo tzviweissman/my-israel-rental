@@ -1,6 +1,6 @@
 import React, { useState, useContext } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Eye, Home, Users, MessageCircle, FileText, Settings, Upload, Sparkles } from 'lucide-react';
+import { Eye, Home, Users, MessageCircle, FileText, Settings, Upload, Sparkles, Calendar } from 'lucide-react';
 import { API, AuthContext } from '../App';
 import { useApiSWR } from '../hooks/useApiSWR';
 import { useAdminLiveEvents } from '../hooks/useAdminLiveEvents';
@@ -12,11 +12,13 @@ import ServicesTab from '../components/admin/ServicesTab';
 import SettingsTab from '../components/admin/SettingsTab';
 import ImportTab from '../components/admin/ImportTab';
 import SmartListsTab from '../components/admin/SmartListsTab';
+import BookingsTab from '../components/admin/BookingsTab';
 import { DOCUMENT_SERVICES_ENABLED } from '../config/features';
 
 const TAB_KEYS = [
   { key: 'overview', labelKey: 'admin.overview', icon: Eye },
   { key: 'listings', labelKey: 'admin.listings', icon: Home },
+  { key: 'bookings', labelKey: 'admin.bookings', icon: Calendar },
   { key: 'users', labelKey: 'admin.users', icon: Users },
   { key: 'chats', labelKey: 'admin.chats', icon: MessageCircle },
   { key: 'smart-lists', labelKey: 'admin.smartLists', icon: Sparkles },
@@ -89,8 +91,9 @@ const AdminDashboard = () => {
           })}
         </div>
 
-        {activeTab === 'overview' && <OverviewTab dashboard={dashboard} emailHealth={emailHealth} token={token} />}
+        {activeTab === 'overview' && <OverviewTab dashboard={dashboard} emailHealth={emailHealth} token={token} onNavigate={setActiveTab} />}
         {activeTab === 'listings' && <ListingsTab token={token} onStatsChange={fetchDashboard} />}
+        {activeTab === 'bookings' && <BookingsTab token={token} />}
         {activeTab === 'users' && <UsersTab token={token} onStatsChange={fetchDashboard} prefilter={usersPrefilter} />}
         {activeTab === 'chats' && <ChatsTab token={token} />}
         {activeTab === 'smart-lists' && <SmartListsTab token={token} />}

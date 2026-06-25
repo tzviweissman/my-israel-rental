@@ -256,11 +256,94 @@ async def get_admin_dashboard(payload: dict = Depends(verify_token)) -> dict:
     return {
         "active_listings": total_properties,
         "total_views": total_views[0]['total'] if total_views else 0,
+        # Legacy alias — older versions of the dashboard rendered this as
+        # "Inquiries". We now also surface it under the clearer
+        # `total_bookings` key so the new Overview card can read it without
+        # mislabeling the data.
         "total_inquiries": total_bookings,
+        "total_bookings": total_bookings,
         "total_users": total_users,
         "pending_services": pending_services,
         "recent_properties": recent_properties
     }
+
+
+@api_router.get("/admin/bookings")
+async def get_admin_bookings(
+    payload: dict = Depends(verify_token),
+    status: str | None = None,
+    limit: int = 200,
+    skip: int = 0,
+) -> dict:
+    """Paginated bookings list for the Super Admin → Bookings tab. Joins
+    in the property thumbnail + title + area so the admin can scan visually
+    instead of resolving each `property_id` against the listings tab.
+
+    Filters:
+      • ``status`` — confirmed / pending / cancelled / completed (omit for all).
+    """
+    if payload.get("role") != "admin":
+        raise HTTPException(status_code=403, detail="Admin access required")
+
+    match: dict = {}
+    if status:
+        match["status"] = status
+
+    # Single aggregate — newest first, with property fields joined in.
+    # `$lookup` runs on the bookings collection's own index (no sub-find
+    # per row), so this scales fine for tens of thousands of rows.
+    pipeline = [
+        {"$match": match},
+        {"$sort": {"created_at": -1}},
+        {"$skip": skip},
+        {"$limit": min(limit, 500)},  # hard cap so a bad URL can't OOM us
+        {"$lookup": {
+            "from": "properties",
+            "localField": "property_id",
+            "foreignField": "id",
+            "as": "property",
+        }},
+        {"$unwind": {"path": "$property", "preserveNullAndEmptyArrays": True}},
+        {"$project": {
+            "_id": 0,
+            "id": 1,
+            "property_id": 1,
+            "start_date": 1,
+            "end_date": 1,
+            "status": 1,
+            "created_at": 1,
+            "guest_name": 1,
+            "guest_email": 1,
+            "guest_phone": 1,
+            "number_of_guests": 1,
+            "sublease_id": 1,
+            # Property fields surfaced for the admin's visual scan
+            "property_title": "$property.title",
+            "property_area": "$property.area",
+            "property_rental_type": "$property.rental_type",
+            "property_nightly_price": "$property.nightly_price",
+            "property_monthly_price": "$property.monthly_price",
+            "property_currency": "$property.currency",
+            "property_images": "$property.images",
+            "property_videos": "$property.videos",
+            "property_owner_id": "$property.owner_id",
+        }},
+    ]
+    rows = await db.bookings.aggregate(pipeline).to_list(length=500)
+    total = await db.bookings.count_documents(match)
+    # Status counts — drives the filter chip badges in the UI
+    status_counts_raw = await db.bookings.aggregate([
+        {"$group": {"_id": "$status", "count": {"$sum": 1}}},
+    ]).to_list(length=20)
+    status_counts = {row["_id"] or "unknown": row["count"] for row in status_counts_raw}
+    return {
+        "bookings": rows,
+        "total": total,
+        "limit": limit,
+        "skip": skip,
+        "status_counts": status_counts,
+    }
+
 
 
 @api_router.get("/admin/users", response_model=list[UserPublic])
