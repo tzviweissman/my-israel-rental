@@ -2,7 +2,7 @@ import React, { useContext, useState, useRef, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { AuthContext, API } from '../App';
-import { Globe, LogOut, LayoutDashboard, Menu, X, Home, Building, Palmtree, Warehouse, ChevronRight, Search, Bell, MessageCircle, HelpCircle } from 'lucide-react';
+import { Globe, LogOut, LayoutDashboard, Menu, X, Home, Building, Palmtree, Warehouse, ChevronRight, Search, Bell, MessageCircle, HelpCircle, Bed, Briefcase } from 'lucide-react';
 import axios from 'axios';
 import { toast } from 'sonner';
 import { playMessagePing, requestDesktopNotificationPermission, showDesktopNotification } from '../utils/messageAlerts';
@@ -306,18 +306,21 @@ const Navigation = () => {
             data-testid="nav-rental-categories"
           >
             <div className="flex items-end gap-8 pointer-events-auto">
+            {/* Top-level pills — replaces the old 4-rental-type strip with
+                the simpler Stays vs Services duality (Airbnb-style). The
+                rental-type sub-filter now lives inside the Stays page
+                Filters modal. */}
             {[
-              { type: 'long-term', icon: Home, label: t('nav.longTerm') },
-              { type: 'short-term', icon: Building, label: t('nav.shortTerm') },
-              { type: 'vacation', icon: Palmtree, label: t('nav.vacation') },
-              { type: 'storage', icon: Warehouse, label: t('nav.storage') },
-            ].map(({ type, icon: Icon, label }) => (
+              { type: 'stays', icon: Bed, label: t('nav.stays', 'Stays'), to: '/stays' },
+              { type: 'services', icon: Briefcase, label: t('nav.services', 'Services'), to: '/services' },
+            ].map(({ type, icon: Icon, label, to }) => (
               <NavCategoryItem
                 key={type}
                 type={type}
                 Icon={Icon}
                 label={label}
-                active={location.pathname === `/properties/${type}`}
+                to={to}
+                active={location.pathname.startsWith(to)}
                 scrolled={scrolled}
               />
             ))}
@@ -573,27 +576,25 @@ const Navigation = () => {
                   </button>
                 )}
 
-                {/* Rental Types */}
+                {/* Stays + Services + Holiday quick-links (mobile drawer).
+                    Storage rentals have been retired so the entry is gone. */}
                 <div className="px-2 pt-3 pb-1">
                   <p className="px-3 mb-1.5 text-[10px] font-bold tracking-[0.1em] uppercase" style={{ color: 'rgba(212,175,55,0.45)' }}>
-                    {t('nav.properties') || 'Properties'}
+                    {t('nav.browse', 'Browse')}
                   </p>
-                  <button onClick={() => handleNav('/properties/long-term')} className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-150 hover:bg-white/5 group" style={{ color: '#D4AF37' }} data-testid="nav-long-term">
-                    <Home size={16} className="opacity-60 group-hover:opacity-100" />
-                    <span>{t('nav.longTerm')}</span>
+                  <button onClick={() => handleNav('/stays')} className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-150 hover:bg-white/5 group" style={{ color: '#D4AF37' }} data-testid="nav-stays">
+                    <Bed size={16} className="opacity-60 group-hover:opacity-100" />
+                    <span>{t('nav.stays', 'Stays')}</span>
                     <ChevronRight size={14} className="ml-auto opacity-0 group-hover:opacity-60 transition-opacity" />
                   </button>
-                  <button onClick={() => handleNav('/properties/short-term')} className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-150 hover:bg-white/5 group" style={{ color: '#D4AF37' }} data-testid="nav-short-term">
-                    <Building size={16} className="opacity-60 group-hover:opacity-100" />
-                    <span>{t('nav.shortTerm')}</span>
+                  <button onClick={() => handleNav('/services')} className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-150 hover:bg-white/5 group" style={{ color: '#D4AF37' }} data-testid="nav-services">
+                    <Briefcase size={16} className="opacity-60 group-hover:opacity-100" />
+                    <span>{t('nav.services', 'Services')}</span>
                     <ChevronRight size={14} className="ml-auto opacity-0 group-hover:opacity-60 transition-opacity" />
                   </button>
-                  <button onClick={() => handleNav('/properties/vacation')} className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-150 hover:bg-white/5 group" style={{ color: '#D4AF37' }} data-testid="nav-vacation">
-                    <Palmtree size={16} className="opacity-60 group-hover:opacity-100" />
-                    <span>{t('nav.vacation')}</span>
-                    <ChevronRight size={14} className="ml-auto opacity-0 group-hover:opacity-60 transition-opacity" />
-                  </button>
-                  {/* Sukkot/Pesach are vacation sub-categories — indented under Vacation */}
+                  {/* Holiday-window quick links — kept as sub-shortcuts
+                      under the main pills since renters search for them
+                      by season name. */}
                   <button onClick={() => handleNav('/properties/sukkot')} className="w-full flex items-center gap-3 pl-9 pr-3 py-2 rounded-lg text-xs font-medium transition-all duration-150 hover:bg-white/5 group" style={{ color: 'rgba(212,175,55,0.85)' }} data-testid="nav-sukkot">
                     <span className="opacity-60">↳</span>
                     <span>{t('filters.sukkotRentals')}</span>
@@ -603,11 +604,6 @@ const Navigation = () => {
                     <span className="opacity-60">↳</span>
                     <span>{t('filters.pesachRentals')}</span>
                     <ChevronRight size={12} className="ml-auto opacity-0 group-hover:opacity-60 transition-opacity" />
-                  </button>
-                  <button onClick={() => handleNav('/properties/storage')} className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-150 hover:bg-white/5 group" style={{ color: '#D4AF37' }} data-testid="nav-storage">
-                    <Warehouse size={16} className="opacity-60 group-hover:opacity-100" />
-                    <span>{t('nav.storage')}</span>
-                    <ChevronRight size={14} className="ml-auto opacity-0 group-hover:opacity-60 transition-opacity" />
                   </button>
                 </div>
 
@@ -678,18 +674,20 @@ const Navigation = () => {
           className="md:hidden flex items-end justify-around pb-2 pt-1"
           data-testid="nav-rental-categories-mobile"
         >
+          {/* Mobile mirror of the desktop pill row — same Stays/Services
+              duality, kept here so the bottom strip on small screens
+              matches the top one on lg+. */}
           {[
-            { type: 'long-term', icon: Home, label: t('nav.longTerm') },
-            { type: 'short-term', icon: Building, label: t('nav.shortTerm') },
-            { type: 'vacation', icon: Palmtree, label: t('nav.vacation') },
-            { type: 'storage', icon: Warehouse, label: t('nav.storage') },
-          ].map(({ type, icon: Icon, label }) => (
+            { type: 'stays', icon: Bed, label: t('nav.stays', 'Stays'), to: '/stays' },
+            { type: 'services', icon: Briefcase, label: t('nav.services', 'Services'), to: '/services' },
+          ].map(({ type, icon: Icon, label, to }) => (
             <NavCategoryItem
               key={type}
               type={type}
               Icon={Icon}
               label={label}
-              active={location.pathname === `/properties/${type}`}
+              to={to}
+              active={location.pathname.startsWith(to)}
               scrolled
               testidSuffix="-mobile"
             />

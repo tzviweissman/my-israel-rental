@@ -326,7 +326,6 @@ const AddPropertyModal = ({ isOpen, onClose, editingProperty, onSaved, API, toke
                 <option value="long-term">{t('property.longTerm')}</option>
                 <option value="short-term">{t('property.shortTerm')}</option>
                 <option value="vacation">{t('property.vacationType')}</option>
-                <option value="storage">{t('property.storageType')}</option>
               </select>
             </div>
             {propertyForm.rental_type !== 'storage' && (

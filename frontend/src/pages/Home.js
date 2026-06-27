@@ -62,8 +62,36 @@ const Home = () => {
     }
   };
 
+  // Where + When — power the new home search bar. Tapping the search
+  // button passes them as URL params to /stays so the listing page
+  // hydrates with the same filters the user just typed.
+  const [whereArea, setWhereArea] = useState('');
+  const [checkin, setCheckin] = useState('');
+  const [checkout, setCheckout] = useState('');
+
+  const [areaOptions, setAreaOptions] = useState([]);
+  useEffect(() => {
+    // Populate the area dropdown from real listings — never show an
+    // option the renter can't actually click through to.
+    axios
+      .get(`${process.env.REACT_APP_BACKEND_URL}/api/properties`, { params: { limit: 1000 } })
+      .then((r) => {
+        const set = new Set();
+        (r.data || []).forEach((p) => {
+          if (p.area && p.rental_type !== 'storage') set.add(p.area);
+        });
+        setAreaOptions(Array.from(set).sort());
+      })
+      .catch(() => {});
+  }, []);
+
   const handleSearch = () => {
-    navigate(`/properties/all?search=${searchQuery}`);
+    const qs = new URLSearchParams();
+    if (whereArea) qs.set('area', whereArea);
+    if (checkin) qs.set('checkin', checkin);
+    if (checkout) qs.set('checkout', checkout);
+    if (searchQuery.trim()) qs.set('q', searchQuery.trim());
+    navigate(`/stays?${qs.toString()}`);
   };
 
   // Scroller helpers — used by the desktop "Scroll" pills. Mobile users can
@@ -141,25 +169,63 @@ const Home = () => {
                 {t('hero.noFeesDetail')}
               </p>
             </div>
-            <div className="flex gap-2 max-w-2xl mx-auto px-2 sm:px-0">
-              <input
-                type="text"
-                placeholder={t('hero.searchPlaceholder')}
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
-                className="flex-1 min-w-0 px-4 sm:px-6 py-3 sm:py-4 rounded-full text-sm sm:text-base text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#1E6A6A]"
-                data-testid="hero-search-input"
-              />
-              <button
-                onClick={handleSearch}
-                className="primary-btn flex flex-shrink-0 items-center justify-center gap-1.5 sm:gap-2 px-4 sm:px-6 py-3 sm:py-4 text-sm sm:text-base"
-                style={{ color: '#FFFFFF' }}
-                data-testid="hero-search-button"
-              >
-                <Search size={18} className="flex-shrink-0" />
-                <span className="hidden sm:inline">{t('hero.search')}</span>
-              </button>
+            {/* Search bar — 3-segment pill mirrors the screenshot the user
+                shared. Where + Check in + Check out, then a single search
+                button that jumps to the new /stays page with the filters
+                pre-hydrated from the URL. */}
+            <div className="max-w-3xl mx-auto px-2 sm:px-0">
+              <div className="flex items-stretch gap-2" data-testid="hero-search-bar">
+                <div className="flex-1 flex items-stretch bg-white rounded-full overflow-hidden shadow-lg">
+                  {/* Where */}
+                  <div className="flex-1 px-4 py-2 min-w-0 hover:bg-gray-50 transition-colors">
+                    <p className="text-[10px] font-bold uppercase tracking-wide text-gray-400">{t('stays.where', 'Where')}</p>
+                    <select
+                      value={whereArea}
+                      onChange={(e) => setWhereArea(e.target.value)}
+                      className="w-full bg-transparent text-sm font-medium text-gray-800 outline-none cursor-pointer truncate"
+                      data-testid="hero-where-select"
+                    >
+                      <option value="">{t('stays.anywhere', 'Anywhere')}</option>
+                      {areaOptions.map((a) => (
+                        <option key={a} value={a}>{a}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="w-px bg-gray-200 my-2" />
+                  {/* Check in */}
+                  <div className="hidden sm:block flex-1 px-4 py-2 min-w-0 hover:bg-gray-50 transition-colors">
+                    <p className="text-[10px] font-bold uppercase tracking-wide text-gray-400">{t('stays.checkIn', 'Check in')}</p>
+                    <input
+                      type="date"
+                      value={checkin}
+                      onChange={(e) => setCheckin(e.target.value)}
+                      className="w-full bg-transparent text-sm font-medium text-gray-800 outline-none cursor-pointer"
+                      data-testid="hero-checkin-input"
+                    />
+                  </div>
+                  <div className="hidden sm:block w-px bg-gray-200 my-2" />
+                  {/* Check out */}
+                  <div className="hidden sm:block flex-1 px-4 py-2 min-w-0 hover:bg-gray-50 transition-colors">
+                    <p className="text-[10px] font-bold uppercase tracking-wide text-gray-400">{t('stays.checkOut', 'Check out')}</p>
+                    <input
+                      type="date"
+                      value={checkout}
+                      onChange={(e) => setCheckout(e.target.value)}
+                      className="w-full bg-transparent text-sm font-medium text-gray-800 outline-none cursor-pointer"
+                      data-testid="hero-checkout-input"
+                    />
+                  </div>
+                </div>
+                <button
+                  onClick={handleSearch}
+                  className="primary-btn flex flex-shrink-0 items-center justify-center gap-1.5 sm:gap-2 px-5 sm:px-7 py-3 sm:py-4 text-sm sm:text-base rounded-full shadow-lg"
+                  style={{ color: '#FFFFFF' }}
+                  data-testid="hero-search-button"
+                >
+                  <Search size={18} className="flex-shrink-0" />
+                  <span className="hidden sm:inline">{t('hero.search')}</span>
+                </button>
+              </div>
             </div>
           </div>
         </div>

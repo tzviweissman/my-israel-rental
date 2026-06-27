@@ -9,14 +9,20 @@ import { Link } from 'react-router-dom';
  *   - active (route matches): brand-gold + underline + heavier stroke
  * Scaling shrinks for the compact (scrolled) navbar.
  */
-const NavCategoryItem = ({ type, Icon, label, active, scrolled, testidSuffix = '' }) => {
+const NavCategoryItem = ({ type, Icon, label, active, scrolled, testidSuffix = '', to }) => {
   const [hover, setHover] = useState(false);
   const isGold = active || hover;
   const color = isGold ? '#D4AF37' : '#FFFFFF';
 
+  // Default route falls back to the legacy /properties/<rental-type> path
+  // for backwards compat (rental-type pills still using this component),
+  // but a custom `to` lets the new Stays/Services pills target their
+  // dedicated pages without polluting the rental-type routing convention.
+  const href = to || `/properties/${type}`;
+
   return (
     <Link
-      to={`/properties/${type}`}
+      to={href}
       onClick={() => window.scrollTo(0, 0)}
       onMouseEnter={() => setHover(true)}
       onMouseLeave={() => setHover(false)}

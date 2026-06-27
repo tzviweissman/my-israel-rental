@@ -42,6 +42,7 @@ from routes import (  # noqa: E402
     payments,
     properties,
     saved_searches,
+    services_waitlist,
     smart_pricing,
     subleases,
 )
@@ -73,6 +74,7 @@ for mod in (
     admin_import,
     admin_smart_lists,
     saved_searches,
+    services_waitlist,
     smart_pricing,
     availability_reminders,
     ical,
