@@ -129,14 +129,80 @@ const Home = () => {
 
   return (
     <div className="min-h-screen">
+      {/* Search bar — pinned directly under the Stays/Services pills in the
+          nav (per user request). Frosted-glass band that overlays the very
+          top of the slideshow so the 3-segment pill is the first thing a
+          renter sees AFTER the category pills. The slideshow image continues
+          to fill the hero behind it. */}
+      <div
+        className="relative z-20 pt-32 sm:pt-36 pb-4 px-4 backdrop-blur-md border-b border-white/10"
+        style={{ background: 'linear-gradient(180deg, rgba(15,58,58,0.85) 0%, rgba(15,58,58,0.55) 60%, rgba(15,58,58,0) 100%)' }}
+        data-testid="home-search-band"
+      >
+        <div className="max-w-3xl mx-auto">
+          <div className="flex items-stretch gap-2" data-testid="hero-search-bar">
+            <div className="flex-1 flex items-stretch bg-white rounded-full overflow-hidden shadow-lg">
+              {/* Where */}
+              <div className="flex-1 px-4 py-2 min-w-0 hover:bg-gray-50 transition-colors">
+                <p className="text-[10px] font-bold uppercase tracking-wide text-gray-400">{t('stays.where', 'Where')}</p>
+                <select
+                  value={whereArea}
+                  onChange={(e) => setWhereArea(e.target.value)}
+                  className="w-full bg-transparent text-sm font-medium text-gray-800 outline-none cursor-pointer truncate"
+                  data-testid="hero-where-select"
+                >
+                  <option value="">{t('stays.anywhere', 'Anywhere')}</option>
+                  {areaOptions.map((a) => (
+                    <option key={a} value={a}>{a}</option>
+                  ))}
+                </select>
+              </div>
+              <div className="w-px bg-gray-200 my-2" />
+              {/* Check in */}
+              <div className="hidden sm:block flex-1 px-4 py-2 min-w-0 hover:bg-gray-50 transition-colors">
+                <p className="text-[10px] font-bold uppercase tracking-wide text-gray-400">{t('stays.checkIn', 'Check in')}</p>
+                <input
+                  type="date"
+                  value={checkin}
+                  onChange={(e) => setCheckin(e.target.value)}
+                  className="w-full bg-transparent text-sm font-medium text-gray-800 outline-none cursor-pointer"
+                  data-testid="hero-checkin-input"
+                />
+              </div>
+              <div className="hidden sm:block w-px bg-gray-200 my-2" />
+              {/* Check out */}
+              <div className="hidden sm:block flex-1 px-4 py-2 min-w-0 hover:bg-gray-50 transition-colors">
+                <p className="text-[10px] font-bold uppercase tracking-wide text-gray-400">{t('stays.checkOut', 'Check out')}</p>
+                <input
+                  type="date"
+                  value={checkout}
+                  onChange={(e) => setCheckout(e.target.value)}
+                  className="w-full bg-transparent text-sm font-medium text-gray-800 outline-none cursor-pointer"
+                  data-testid="hero-checkout-input"
+                />
+              </div>
+            </div>
+            <button
+              onClick={handleSearch}
+              className="primary-btn flex flex-shrink-0 items-center justify-center gap-1.5 sm:gap-2 px-5 sm:px-7 py-3 sm:py-4 text-sm sm:text-base rounded-full shadow-lg"
+              style={{ color: '#FFFFFF' }}
+              data-testid="hero-search-button"
+            >
+              <Search size={18} className="flex-shrink-0" />
+              <span className="hidden sm:inline">{t('hero.search')}</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
       <HeroSlideshow
         images={HERO_IMAGES}
         holdMs={6000}
         fadeMs={1500}
-        className="h-[760px] flex items-center justify-center -mt-[210px] pt-[280px]"
+        className="h-[560px] flex items-center justify-center -mt-[140px]"
       >
         <div data-testid="hero-section" className="h-full flex items-center justify-center">
-          <div className="relative z-10 text-center text-white px-6 max-w-4xl mt-44 sm:mt-40 md:mt-16 lg:mt-20">
+          <div className="relative z-10 text-center text-white px-6 max-w-4xl mt-32 sm:mt-28 md:mt-20">
             <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold mb-2" style={{ fontFamily: 'Playfair Display', color: 'white' }}>
               {t('hero.title')}
             </h1>
@@ -144,9 +210,10 @@ const Home = () => {
               {t('hero.anyDuration')}
             </p>
 
-            {/* No-fees badge — subtle gold border, glass background, gold checkmark.
-                Sits between the headline and the search bar. */}
-            <div className="flex flex-col items-center mb-6" data-testid="no-fees-badge">
+            {/* No-fees badge stays in the hero, but the search bar moved
+                up into its own band directly under the Stays/Services
+                pills (per user request, matches Airbnb screenshot). */}
+            <div className="flex flex-col items-center" data-testid="no-fees-badge">
               <div
                 className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full backdrop-blur-md border"
                 style={{
@@ -168,64 +235,6 @@ const Home = () => {
               >
                 {t('hero.noFeesDetail')}
               </p>
-            </div>
-            {/* Search bar — 3-segment pill mirrors the screenshot the user
-                shared. Where + Check in + Check out, then a single search
-                button that jumps to the new /stays page with the filters
-                pre-hydrated from the URL. */}
-            <div className="max-w-3xl mx-auto px-2 sm:px-0">
-              <div className="flex items-stretch gap-2" data-testid="hero-search-bar">
-                <div className="flex-1 flex items-stretch bg-white rounded-full overflow-hidden shadow-lg">
-                  {/* Where */}
-                  <div className="flex-1 px-4 py-2 min-w-0 hover:bg-gray-50 transition-colors">
-                    <p className="text-[10px] font-bold uppercase tracking-wide text-gray-400">{t('stays.where', 'Where')}</p>
-                    <select
-                      value={whereArea}
-                      onChange={(e) => setWhereArea(e.target.value)}
-                      className="w-full bg-transparent text-sm font-medium text-gray-800 outline-none cursor-pointer truncate"
-                      data-testid="hero-where-select"
-                    >
-                      <option value="">{t('stays.anywhere', 'Anywhere')}</option>
-                      {areaOptions.map((a) => (
-                        <option key={a} value={a}>{a}</option>
-                      ))}
-                    </select>
-                  </div>
-                  <div className="w-px bg-gray-200 my-2" />
-                  {/* Check in */}
-                  <div className="hidden sm:block flex-1 px-4 py-2 min-w-0 hover:bg-gray-50 transition-colors">
-                    <p className="text-[10px] font-bold uppercase tracking-wide text-gray-400">{t('stays.checkIn', 'Check in')}</p>
-                    <input
-                      type="date"
-                      value={checkin}
-                      onChange={(e) => setCheckin(e.target.value)}
-                      className="w-full bg-transparent text-sm font-medium text-gray-800 outline-none cursor-pointer"
-                      data-testid="hero-checkin-input"
-                    />
-                  </div>
-                  <div className="hidden sm:block w-px bg-gray-200 my-2" />
-                  {/* Check out */}
-                  <div className="hidden sm:block flex-1 px-4 py-2 min-w-0 hover:bg-gray-50 transition-colors">
-                    <p className="text-[10px] font-bold uppercase tracking-wide text-gray-400">{t('stays.checkOut', 'Check out')}</p>
-                    <input
-                      type="date"
-                      value={checkout}
-                      onChange={(e) => setCheckout(e.target.value)}
-                      className="w-full bg-transparent text-sm font-medium text-gray-800 outline-none cursor-pointer"
-                      data-testid="hero-checkout-input"
-                    />
-                  </div>
-                </div>
-                <button
-                  onClick={handleSearch}
-                  className="primary-btn flex flex-shrink-0 items-center justify-center gap-1.5 sm:gap-2 px-5 sm:px-7 py-3 sm:py-4 text-sm sm:text-base rounded-full shadow-lg"
-                  style={{ color: '#FFFFFF' }}
-                  data-testid="hero-search-button"
-                >
-                  <Search size={18} className="flex-shrink-0" />
-                  <span className="hidden sm:inline">{t('hero.search')}</span>
-                </button>
-              </div>
             </div>
           </div>
         </div>
