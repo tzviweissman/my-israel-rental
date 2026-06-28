@@ -1155,3 +1155,13 @@ See /app/memory/test_credentials.md
   - Verified by testing_agent iteration_34: 100% PASS, no regressions on WherePicker / QuickChips / calendar flows.
   - Files: `frontend/src/components/search/WhenPicker.jsx`, `frontend/src/pages/Stays.jsx`.
 
+
+- [x] **Refactor: `--nav-h` CSS var + ResizeObserver — search bar always flush with nav** (2026-02-28):
+  - User reported a 21px gap appearing between the nav and the fixed search bar when scrolling on mobile. RCA: nav shrinks on mobileScrolled (103 → 82 on <sm, 123 → 102 on sm-md), but the bar was pinned to hard-coded `top-[103px]/sm:top-[128px]/md:top-[68px]` so it stayed put while the nav shrunk.
+  - New `useElementHeight` hook (`frontend/src/hooks/useElementHeight.js`) — reusable ResizeObserver-based height tracker.
+  - `Navigation.js` now attaches a `ResizeObserver` to the `<nav>` and publishes its live `offsetHeight` to `document.documentElement.style.--nav-h` in pixels.
+  - `Stays.jsx`: the bar uses `style={{ top: 'var(--nav-h, 68px)' }}` and the page wrapper uses `paddingTop: calc(var(--nav-h) + ${barHeight}px)` where `barHeight` comes from `useElementHeight(barRef)`. Zero magic numbers.
+  - `Home.js`: the `home-search-band` paddingTop is `calc(var(--nav-h, 68px) + 12px)` — same dynamic approach.
+  - Verified by testing_agent iteration_35: gap = 0.0px at rest, 0.5px (sub-pixel) when scrolled, across 7 viewports (390-1280). ResizeObserver correctly re-fires on viewport resize sequences AND on QuickChips async holiday-data load. All regressions pass.
+  - Files: `frontend/src/hooks/useElementHeight.js`, `frontend/src/components/Navigation.js`, `frontend/src/pages/Stays.jsx`, `frontend/src/pages/Home.js`.
+
