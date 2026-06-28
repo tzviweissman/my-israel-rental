@@ -1096,3 +1096,13 @@ See /app/memory/test_credentials.md
   - Verified end-to-end by testing_agent iteration_28: 14 → 13 cards on /stays after selecting Jun 30 – Jul 7, layout switches from grouped area-rows to flat grid, URL persists with `?checkin=&checkout=`.
   - Files: `frontend/src/components/search/WhenPicker.jsx`, `frontend/src/components/search/whenpicker.css`, `frontend/src/pages/Home.js`, `frontend/src/pages/Stays.jsx`.
 
+
+- [x] **Typeable Where autocomplete + 2-month mobile calendar** (2026-02-28):
+  - New reusable `WherePicker` (`frontend/src/components/search/WherePicker.jsx`) replaces the read-only `<select>` on Home and `/stays`. Users can type freely; matching areas appear in a click-to-pick suggestion dropdown with pin icons (limited to 12). Focusing the empty input shows all available areas as a discoverability hint.
+  - `/stays` filter switched from strict equality to case-insensitive substring match — typing 'jeru' or 'ame' returns the right Jerusalem / American Colony listings. URL syncs as `?area=<raw>` and survives reload.
+  - Search pill's `overflow-hidden` was removed so the suggestion dropdown can extend below the pill without being clipped.
+  - WhenPicker now ALWAYS renders 2 months side-by-side, including on mobile. CSS scoped via `@media (max-width: 639px)` shrinks `--rdp-cell-size` to 26px and tightens caption/day fonts so the two months fit a 367px popover on a 390px viewport without horizontal overflow (verified bbox.width = 367).
+  - `/stays` mobile pill also now exposes the When trigger (previously hidden via `sm:flex`) so mobile users can pick dates from the visible pill, not just the Filters modal. Three-segment Where + When + Filters icon fits cleanly.
+  - Verified end-to-end by testing_agent iteration_29: 11/11 acceptance criteria pass on desktop and mobile across Home and Stays.
+  - Files: `frontend/src/components/search/WherePicker.jsx`, `WhenPicker.jsx`, `whenpicker.css`, `Home.js`, `Stays.jsx`.
+

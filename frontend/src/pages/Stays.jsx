@@ -289,12 +289,15 @@ const StaysSearchBar = ({ where, setWhere, checkin, setCheckin, checkout, setChe
           testidPrefix="stays-where"
         />
       </div>
-      <div className="hidden sm:block w-px bg-[#E5E5E5] my-2" />
-      <div className="hidden sm:flex flex-1">
+      <div className="w-px bg-[#E5E5E5] my-2" />
+      <div className="flex flex-1">
         {/* When — single segment opening a range calendar popover that
             sets both check-in and check-out. Matches the Airbnb-style
             screenshot the user shared (label "When", value "Add dates"
-            → range like "Jun 5 – Jul 12"). */}
+            → range like "Jun 5 – Jul 12"). Visible on every viewport so
+            mobile users can pick dates without opening the Filters
+            modal — the calendar popover itself is portal-rendered and
+            shows 2 months side-by-side on mobile too. */}
         <WhenPicker
           checkin={checkin}
           checkout={checkout}
