@@ -1,0 +1,24 @@
+{
+  "summary": "Frontend-only regression testing on iteration_33 fixes for (1) nav vs search-bar overlap across viewports on /stays and (2) WhenPicker trigger hit-area on /stays and /home. All 8 viewports (390,540,640,720,768,900,1024,1280) show gap >= 0 between nav.bottom and stays-search-bar fixed-wrapper top. WhenPicker triggers now span the full WHEN segment width (stays desktop 570px, stays mobile 152.5px, hero desktop 307px) — far-left AND far-right edge clicks both open the popover on /stays (desktop+mobile) and /home (desktop). WherePicker suggestions and QuickChips URL-sync / home->stays navigation still work. No regressions found.",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": ["/app/test_reports/iteration_34.json"],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "Both fixes are minimal and well-scoped. WhenPicker wrapper now correctly fills flex parent via w-full h-full; trigger button has h-full so vertical click area is also full segment height (~51px).",
+    "Stays.jsx responsive top values (top-[103px] sm:top-[128px] md:top-[68px]) match the empirically observed nav heights. Container pt offsets (pt-[220px] sm:pt-[210px] md:pt-[152px]) prevent content from being hidden under the fixed bar.",
+    "Suggestion (non-blocking): the magic numbers 103/128/68 are duplicated between the fixed bar's `top` and the container's `pt`. A small refactor to derive these from a single Nav-height source (e.g. CSS var --nav-h) would prevent future drift if nav padding changes again."
+  ],
+  "updated_files": [],
+  "success_rate": {"backend": "n/a", "frontend": "100%"},
+  "test_credentials": "none required (public pages only)",
+  "seed_data_creation": "none",
+  "retest_needed": false,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "Viewport overlap measured by comparing document.querySelector('nav').getBoundingClientRect().bottom against the closest('.fixed') of [data-testid=stays-search-bar].getBoundingClientRect().top. Gap was 0 at 390/540/768/900/1024/1280, and 5px at 640/720 — all non-negative. WhenPicker click hit-test required fresh navigation between far-left and far-right clicks because clicking the backdrop and immediately mouse.click()ing the trigger again could be flaky due to portal transition timing; with fresh nav, both edges open consistently.",
+  "rca of the issue": "Iteration_33 root cause: (a) WhenPicker wrapper div had only `relative` class so it shrink-wrapped to the trigger button's content (~80-120px around 'Add dates'), leaving the rest of the WHEN segment as unclickable empty flex space. Fix: add `w-full h-full` on wrapper + `w-full h-full` on inner <button>. (b) Stays fixed bar's `top` only had mobile and md breakpoints (top-[95px] md:top-[68px]) so the sm range (640-767px), where the nav grows to ~123px due to the Stays/Services tab strip, was uncovered — bar sat at 107px (above nav.bottom=123px), causing -16px overlap. Fix: introduce sm-specific top (top-[128px]) and matching pt-[210px] offset."
+}

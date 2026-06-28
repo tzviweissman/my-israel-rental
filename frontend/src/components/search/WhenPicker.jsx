@@ -121,11 +121,11 @@ const WhenPicker = ({
   const applyDisabled = mode === 'flexible' ? !flexMonth : !(range.from && range.to);
 
   return (
-    <div className="relative" ref={wrapRef} data-testid={`${testidPrefix}-wrapper`}>
+    <div className="relative w-full h-full" ref={wrapRef} data-testid={`${testidPrefix}-wrapper`}>
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
-        className="w-full text-left px-4 py-2 hover:bg-black/5 transition-colors min-w-0"
+        className="w-full h-full text-left px-4 py-2 hover:bg-black/5 transition-colors min-w-0"
         data-testid={`${testidPrefix}-trigger`}
       >
         <p className={`text-[10px] font-bold uppercase tracking-wide ${labelClassName || 'text-gray-400'}`}>

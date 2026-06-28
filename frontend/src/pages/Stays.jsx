@@ -163,14 +163,15 @@ const Stays = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#FAFAF7] pt-[220px] md:pt-[152px]" data-testid="stays-page">
+    <div className="min-h-screen bg-[#FAFAF7] pt-[220px] sm:pt-[210px] md:pt-[152px]" data-testid="stays-page">
       {/* Fixed top search bar — sits just below the global Navigation.
-          With the new compact mobile nav, the bar is at 95px on small
-          screens (logo + Stays/Services icon strip) and 68px on md+.
-          On mobile, the bar contains both the search pill (~75px) and
-          the QuickChips preset strip (~36px) so total cleared height
-          is 95 + 110 + a small buffer = 220px. md+ is unchanged. */}
-      <div className="fixed top-[95px] md:top-[68px] left-0 right-0 z-30 bg-white border-b border-[#E5E5E5] shadow-sm">
+          Nav heights observed empirically:
+            - mobile (<sm): ~95-103px (compact 40px logo + tab strip)
+            - sm  (640-767): ~123px (60px logo + tab strip, larger padding)
+            - md+ (>=768):   ~68px  (60px logo only, no strip)
+          Responsive `top` keeps the bar pinned just below the nav at
+          every breakpoint without ever overlapping. */}
+      <div className="fixed top-[103px] sm:top-[128px] md:top-[68px] left-0 right-0 z-30 bg-white border-b border-[#E5E5E5] shadow-sm">
         <div className="max-w-7xl mx-auto px-4 py-3">
           <StaysSearchBar
             where={where} setWhere={setWhere}
