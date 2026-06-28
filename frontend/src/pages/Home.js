@@ -133,9 +133,15 @@ const Home = () => {
           nav (per user request). Frosted-glass band that overlays the very
           top of the slideshow so the 3-segment pill is the first thing a
           renter sees AFTER the category pills. The slideshow image continues
-          to fill the hero behind it. */}
+          to fill the hero behind it.
+
+          Top padding clears the global Navigation which is ~157px on
+          mobile (logo + Stays/Services tab strip), ~190px on sm screens
+          (taller logo), and ~200px on md+ (largest logo, no tab strip).
+          Without this clearance the white pill visibly covers the
+          Stays/Services icons in the nav above. */}
       <div
-        className="relative z-20 pt-32 sm:pt-36 pb-4 px-4 backdrop-blur-md border-b border-white/10"
+        className="relative z-20 pt-[170px] sm:pt-[200px] md:pt-[210px] pb-4 px-4 backdrop-blur-md border-b border-white/10"
         style={{ background: 'linear-gradient(180deg, rgba(15,58,58,0.85) 0%, rgba(15,58,58,0.55) 60%, rgba(15,58,58,0) 100%)' }}
         data-testid="home-search-band"
       >
