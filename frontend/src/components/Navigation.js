@@ -22,6 +22,24 @@ const Navigation = () => {
   // mobile chrome where the icon strip disappears as you scroll into
   // the content, leaving just compact "Stays / Services" labels.
   const [mobileScrolled, setMobileScrolled] = useState(false);
+  const navRef = useRef(null);
+  // Publish the live nav height as a global CSS variable so pages with
+  // a fixed bar (Stays, Home) can sit flush against it via
+  // `style={{ top: 'var(--nav-h)' }}`. ResizeObserver keeps the value
+  // in sync as the nav shrinks/expands (e.g. mobileScrolled collapsing
+  // the bottom strip).
+  useEffect(() => {
+    const el = navRef.current;
+    if (!el) return undefined;
+    const apply = () => {
+      const h = el.offsetHeight || 0;
+      document.documentElement.style.setProperty('--nav-h', `${h}px`);
+    };
+    apply();
+    const ro = new ResizeObserver(apply);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
   const navSearch_ref = useRef('');
   const [navSearch, setNavSearch] = useState('');
   const menuRef = useRef(null);
@@ -293,6 +311,7 @@ const Navigation = () => {
 
   return (
     <nav
+      ref={navRef}
       className="fixed top-0 left-0 right-0 z-50 transition-all duration-300"
       style={{
         background: scrolled ? '#1E6A6A' : 'transparent',

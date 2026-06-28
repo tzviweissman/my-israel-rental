@@ -1,0 +1,50 @@
+{
+  "summary": "Certified the ResizeObserver/--nav-h CSS-variable fix for the sticky search bar gap bug on /stays and /home. The fixed search bar is now perfectly flush with the nav at every viewport (gap=0px at rest, 0.5px sub-pixel after scroll) AND correctly tracks the nav as it shrinks on mobile scroll (103px→81.5px) and sm scroll (123px→101.5px). The previous 21px white gap is GONE. All regression checks (WhenPicker width, WherePicker autocomplete, QuickChips mobile, Home pill 12px offset) pass.",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_results": {
+    "viewport_flush_at_rest": {
+      "390": "gap=0.00px (navH=103, --nav-h=103px)",
+      "540": "gap=0.00px (navH=103, --nav-h=103px)",
+      "640": "gap=0.00px (navH=123, --nav-h=123px)",
+      "720": "gap=0.00px (navH=123, --nav-h=123px)",
+      "768": "gap=0.00px (navH=68,  --nav-h=68px)",
+      "900": "gap=0.00px (navH=68,  --nav-h=68px)",
+      "1280": "gap=0.00px (navH=68, --nav-h=68px)"
+    },
+    "viewport_flush_after_scroll_300px": {
+      "390": "TOP gap=0.00 navH=103 → SCROLLED gap=0.50 navH=81.5 (nav shrunk 21.5px, bar followed)",
+      "540": "TOP gap=0.00 navH=103 → SCROLLED gap=0.50 navH=81.5 (nav shrunk, bar followed)",
+      "640": "TOP gap=0.00 navH=123 → SCROLLED gap=0.50 navH=101.5 (nav shrunk 21.5px, bar followed)",
+      "720": "TOP gap=0.00 navH=123 → SCROLLED gap=0.50 navH=101.5 (nav shrunk, bar followed)"
+    },
+    "content_clearance_no_overlap": {
+      "390": "24px below bar (heading 'Stays in Jerusalem - American Colony')",
+      "768": "24px below bar",
+      "1280": "24px below bar"
+    },
+    "resize_observer_sequence_390_1280_390_768": "all gap=0.00, --nav-h updates correctly (103→68→103→68)",
+    "css_var_nav_h_present": {"stays": "68px", "home": "68px"},
+    "home_band_pill_offset_below_nav": {"desktop": "12px (gap nav→pill)", "mobile": "12px"},
+    "regression_when_picker_width_desktop": "570px (>=400 required)",
+    "regression_where_jeru_suggestions": ["Jerusalem", "Jerusalem - American Colony", "Jerusalem - Arzei HaBira", "Jerusalem - Beit Yisrael", "Jerusalem - Maalot Dafna", "Jerusalem - Ramat Eshkol"],
+    "regression_quick_chips_mobile_visible_count": 9
+  },
+  "test_report_links": [],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "Implementation is clean: useElementHeight hook properly seeds height to avoid 0-height first paint, ResizeObserver disconnect is wired in cleanup, and the --nav-h CSS variable is published from a single source (Navigation). The 'magic numbers' anti-pattern from prior iterations has been fully eliminated.",
+    "Minor: barRef on Stays.jsx targets a div wrapping StaysSearchBar — this is fine, but consider that if QuickChips loads holiday data async and renders new chips after first paint, the ResizeObserver inside useElementHeight will correctly re-fire and adjust paddingTop. No issue, just noted for future regression awareness."
+  ],
+  "updated_files": [],
+  "success_rate": {"backend": "N/A (frontend only)", "frontend": "100%"},
+  "seed_data_creation": "None",
+  "retest_needed": false,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "Bug fix certified. Initial gap = 0.0px and scrolled gap = 0.5px (sub-pixel) across all tested viewports (390/540/640/720/768/900/1280). Nav-shrink-on-mobile-scroll behavior confirmed (103→81.5 on <sm, 123→101.5 on sm-md) and the fixed search bar correctly follows via the --nav-h CSS variable + ResizeObserver. Home page pill sits exactly 12px below nav bottom per spec (calc(var(--nav-h) + 12px)). Content clearance from bar to first listing heading is 24px on every viewport — no hidden content. All regression checks (WhenPicker 570px wide, WherePicker autocomplete returning 6 Jerusalem options for 'jeru', 9 QuickChips visible on mobile <768px) pass.",
+  "rca of the issue": "RCA: prior iteration hard-coded `top-[103px] sm:top-[128px] md:top-[68px]` on the fixed search bar, but Navigation.js dynamically shrinks the nav on scroll via the mobileScrolled state (icon strip collapse) — nav went 103→82 on mobile and 123→102 on sm-md, while the bar stayed pinned to 103/128. This left a 21px gap. Fix: Navigation now publishes its live offsetHeight to document.documentElement.style.--nav-h via ResizeObserver; Stays.jsx and Home.js consume the variable via `style={{ top: 'var(--nav-h)' }}` and `paddingTop: 'calc(var(--nav-h) + Npx)'`. Stays.jsx additionally uses a useElementHeight hook on the bar wrapper so the page paddingTop tracks barHeight dynamically. Mitigation verified: scrolled gap stays at 0.5px (sub-pixel rounding) instead of the previous 21px."
+}

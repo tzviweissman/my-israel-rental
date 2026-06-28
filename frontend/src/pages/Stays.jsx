@@ -17,7 +17,7 @@
  * storage was retired from the platform). Long-term / short-term /
  * vacation all live under the same "Stays" umbrella.
  */
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import axios from 'axios';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
@@ -30,6 +30,7 @@ import VideoCoverBadge from '../components/property/VideoCoverBadge';
 import WhenPicker from '../components/search/WhenPicker';
 import WherePicker from '../components/search/WherePicker';
 import QuickChips from '../components/search/QuickChips';
+import useElementHeight from '../hooks/useElementHeight';
 
 const API = process.env.REACT_APP_BACKEND_URL + '/api';
 
@@ -162,16 +163,30 @@ const Stays = () => {
     setSubType(''); setBedrooms(''); setPriceMin(''); setPriceMax(''); setAmenities([]);
   };
 
+  // Live-measure the fixed search-bar container so the page wrapper's
+  // padding-top always matches its actual height, even as the bar's
+  // contents grow/shrink (e.g. QuickChips loading async holiday data).
+  // Combined with the global `--nav-h` CSS variable published by
+  // Navigation, this kills every "magic-number top padding" we used to
+  // hard-code per breakpoint.
+  const barRef = useRef(null);
+  const barHeight = useElementHeight(barRef);
+
   return (
-    <div className="min-h-screen bg-[#FAFAF7] pt-[220px] sm:pt-[210px] md:pt-[152px]" data-testid="stays-page">
-      {/* Fixed top search bar — sits just below the global Navigation.
-          Nav heights observed empirically:
-            - mobile (<sm): ~95-103px (compact 40px logo + tab strip)
-            - sm  (640-767): ~123px (60px logo + tab strip, larger padding)
-            - md+ (>=768):   ~68px  (60px logo only, no strip)
-          Responsive `top` keeps the bar pinned just below the nav at
-          every breakpoint without ever overlapping. */}
-      <div className="fixed top-[103px] sm:top-[128px] md:top-[68px] left-0 right-0 z-30 bg-white border-b border-[#E5E5E5] shadow-sm">
+    <div
+      className="min-h-screen bg-[#FAFAF7]"
+      style={{ paddingTop: `calc(var(--nav-h, 68px) + ${barHeight}px)` }}
+      data-testid="stays-page"
+    >
+      {/* Fixed top search bar — uses the live `--nav-h` CSS var (published
+          by <Navigation> via ResizeObserver) so the bar is always flush
+          against the bottom of the nav, regardless of breakpoint or
+          mobileScrolled state. */}
+      <div
+        ref={barRef}
+        className="fixed left-0 right-0 z-30 bg-white border-b border-[#E5E5E5] shadow-sm"
+        style={{ top: 'var(--nav-h, 68px)' }}
+      >
         <div className="max-w-7xl mx-auto px-4 py-3">
           <StaysSearchBar
             where={where} setWhere={setWhere}
