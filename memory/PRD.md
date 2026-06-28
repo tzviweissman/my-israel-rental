@@ -1086,3 +1086,13 @@ See /app/memory/test_credentials.md
   - Switched from `sticky` to `fixed` positioning because `html`/`body` already have `overflow-x: hidden` which can break sticky in Chrome.
   - Files: `frontend/src/pages/Stays.jsx`.
 
+
+- [x] **Airbnb-style "When / Add dates" search segment + range calendar popover** (2026-02-28):
+  - New reusable `WhenPicker` (`frontend/src/components/search/WhenPicker.jsx`) replaces the two separate `Check in` / `Check out` native date inputs in the search pill on both Home (`/`) and `/stays`. Single segment reads `When / Add dates` until a range is picked, then `When / Jun 30 – Jul 7`.
+  - Click opens a centered Airbnb-style range calendar (react-day-picker v8.10.1) with **2 months side-by-side on ≥md (768px)**, **1 month on mobile**. Past dates greyed + line-through. Teal range endpoints with soft teal range-middle highlight.
+  - Popover is **portal-rendered to `document.body`** so the search pill's `rounded-full + overflow-hidden` background can never clip it. Dark backdrop, Escape + backdrop-click close.
+  - Style overrides scoped via `.rdp-airbnb` class in `frontend/src/components/search/whenpicker.css` so other DayPickers in the codebase (admin dashboard) stay untouched.
+  - State contract: parent owns `checkin` / `checkout` as ISO `YYYY-MM-DD` strings, unchanged from before, so URL params, live filters on `/stays`, and the Home Search button's navigation all keep working.
+  - Verified end-to-end by testing_agent iteration_28: 14 → 13 cards on /stays after selecting Jun 30 – Jul 7, layout switches from grouped area-rows to flat grid, URL persists with `?checkin=&checkout=`.
+  - Files: `frontend/src/components/search/WhenPicker.jsx`, `frontend/src/components/search/whenpicker.css`, `frontend/src/pages/Home.js`, `frontend/src/pages/Stays.jsx`.
+
