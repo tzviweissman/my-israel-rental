@@ -10,6 +10,7 @@ import DefaultImageBadge from '../components/property/DefaultImageBadge';
 import VideoCoverBadge from '../components/property/VideoCoverBadge';
 import WhenPicker from '../components/search/WhenPicker';
 import WherePicker from '../components/search/WherePicker';
+import QuickChips from '../components/search/QuickChips';
 import { getCoverImage } from '../utils/coverImage';
 import { sizedImage } from '../utils/cdnImage';
 
@@ -187,6 +188,25 @@ const Home = () => {
               <Search size={18} className="flex-shrink-0" />
               <span className="hidden sm:inline">{t('hero.search')}</span>
             </button>
+          </div>
+          {/* Mobile-only one-tap date presets — turns the freshly-freed
+              real estate under the compact nav into a conversion lift.
+              Tap a chip → checkin/checkout set → handleSearch navigates
+              the renter straight to /stays with those dates pre-applied. */}
+          <div className="mt-2">
+            <QuickChips
+              variant="dark"
+              onPick={({ checkin: ci, checkout: co }) => {
+                setCheckin(ci);
+                setCheckout(co);
+                const qs = new URLSearchParams();
+                if (whereArea) qs.set('area', whereArea);
+                qs.set('checkin', ci);
+                qs.set('checkout', co);
+                navigate(`/stays?${qs.toString()}`);
+              }}
+              testidPrefix="hero-quick-chips"
+            />
           </div>
         </div>
       </div>

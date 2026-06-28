@@ -29,6 +29,7 @@ import DefaultImageBadge from '../components/property/DefaultImageBadge';
 import VideoCoverBadge from '../components/property/VideoCoverBadge';
 import WhenPicker from '../components/search/WhenPicker';
 import WherePicker from '../components/search/WherePicker';
+import QuickChips from '../components/search/QuickChips';
 
 const API = process.env.REACT_APP_BACKEND_URL + '/api';
 
@@ -162,12 +163,13 @@ const Stays = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#FAFAF7] pt-[170px] md:pt-[152px]" data-testid="stays-page">
+    <div className="min-h-screen bg-[#FAFAF7] pt-[220px] md:pt-[152px]" data-testid="stays-page">
       {/* Fixed top search bar — sits just below the global Navigation.
           With the new compact mobile nav, the bar is at 95px on small
           screens (logo + Stays/Services icon strip) and 68px on md+.
-          A few pixels gap is visible when the nav shrinks on scroll —
-          that's acceptable and keeps the bar from ever overlapping. */}
+          On mobile, the bar contains both the search pill (~75px) and
+          the QuickChips preset strip (~36px) so total cleared height
+          is 95 + 110 + a small buffer = 220px. md+ is unchanged. */}
       <div className="fixed top-[95px] md:top-[68px] left-0 right-0 z-30 bg-white border-b border-[#E5E5E5] shadow-sm">
         <div className="max-w-7xl mx-auto px-4 py-3">
           <StaysSearchBar
@@ -179,6 +181,17 @@ const Stays = () => {
             filterCount={activeFilterCount}
             t={t}
           />
+          {/* Mobile-only one-tap date presets — sit inside the fixed
+              bar so they're always reachable while scrolling. */}
+          <div className="mt-2">
+            <QuickChips
+              variant="light"
+              onPick={({ checkin: ci, checkout: co }) => {
+                setCheckin(ci); setCheckout(co);
+              }}
+              testidPrefix="stays-quick-chips"
+            />
+          </div>
         </div>
       </div>
 

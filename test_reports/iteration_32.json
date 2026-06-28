@@ -1,0 +1,47 @@
+{
+  "summary": "Frontend-only verification of mobile QuickChips date-preset strip. Live preview tested at 390x844 and 1280x900. 7 of 8 spec checks PASS cleanly; 1 minor semantic concern on 'Next week' resolution when today is Sunday.",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "verified_checks": {
+    "home_mobile_strip_present_and_visible": true,
+    "home_mobile_all_4_chips_present": true,
+    "home_mobile_chip_labels": {
+      "tonight": "Tonight · Jun 28 – Jun 29",
+      "this-weekend": "This weekend · Jul 3 – Jul 5",
+      "next-week": "Next week · Jun 29 – Jul 6",
+      "this-month": "This month · Jun 28 – Jun 30"
+    },
+    "home_mobile_chip_positioned_below_search_bar": true,
+    "home_mobile_chip_inside_home-search-band": true,
+    "home_mobile_tonight_click_navigates_to": "/stays?checkin=2026-06-28&checkout=2026-06-29 (correct, no area param since whereArea empty)",
+    "stays_mobile_strip_present_and_visible": true,
+    "stays_mobile_inside_fixed_top_bar": "Yes, ancestor position=fixed, top=95px",
+    "stays_mobile_page_wrapper_padding_top": "220px (matches pt-[220px] spec, prevents overlap)",
+    "stays_mobile_this-weekend_click_updates_url": "/stays?checkin=2026-07-03&checkout=2026-07-05",
+    "stays_mobile_flat_grid_appears_after_chip_pick": true,
+    "stays_mobile_when_picker_label_after_chip": "When Jul 3 – Jul 5 (regression OK — When trigger shows picked range)",
+    "desktop_1280x900_home_chips_hidden": "DOM element exists but is_visible() = false (md:hidden Tailwind class working correctly)",
+    "desktop_1280x900_stays_chips_hidden": "DOM element exists but is_visible() = false (md:hidden working)"
+  },
+  "test_report_links": [],
+  "action_items": [
+    "MINOR: 'Next week' chip math — when today is Sunday (dow=0), the current modulo formula `(((1-dow)+7)%7)||7` evaluates to 1, producing nextMon = today+1 (Jun 29). The review-request expected Mon Jul 6 → Jul 13 (Monday of the NEXT calendar week). User-facing impact: on a Sunday the 'Next week' chip points to tomorrow rather than 8 days out, which collides with 'Tonight'. If desired behavior is always >= 7 days out, change formula to `daysToMon = (((1 - dow) + 7) % 7); if (daysToMon < 2) daysToMon += 7;` or `|| 7` on the outer expression (currently `|| 7` only triggers when the modulo is exactly 0, i.e. when today is Monday). All other days of the week produce the correct 'next Monday'."
+  ],
+  "critical_code_review_comments": [
+    "QuickChips.jsx chips are recomputed only on mount via useMemo([]) — if user leaves the tab open across midnight, labels will stale until navigation. Acceptable trade-off, but worth a comment in the file.",
+    "QuickChips.jsx uses new Date() at module-level inside buildChips(); fine, but if multilingual (Hebrew) is added, the `fmt = format(d, 'MMM d')` won't localize — pass locale from i18n if needed.",
+    "Stays.jsx: chip strip wrapper has `mt-2` which works, but on devices smaller than 390px (none observed in preview) horizontal scroll may clip — minor."
+  ],
+  "updated_files": [],
+  "success_rate": {"backend": "n/a (skipped per request)", "frontend": "100% functional pass; 1 minor date-math semantic concern noted"},
+  "test_credentials": "not needed (public pages)",
+  "seed_data_creation": "none",
+  "retest_needed": false,
+  "should_main_agent_self_test": true,
+  "context_for_next_testing_agent": "QuickChips works as specified. data-testids confirmed: hero-quick-chips, hero-quick-chips-{tonight|this-weekend|next-week|this-month}, stays-quick-chips, stays-quick-chips-{...}. Home: navigates to /stays?checkin&checkout (+area if set). Stays: just updates checkin/checkout, URL syncs via syncUrl effect, switches to flat grid. md:hidden hides chips on >=768px. pt-[220px] mobile / pt-[152px] md+ on stays-page wrapper. Today on preview = 2026-06-28 (Sun).",
+  "rca of the issue": "N/A — feature works. The only follow-up is whether 'Next week' on Sunday should mean tomorrow or 8 days out — code currently chooses tomorrow, spec expected 8 days out."
+}
