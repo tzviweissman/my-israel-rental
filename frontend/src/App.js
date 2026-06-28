@@ -122,7 +122,13 @@ function App() {
           <WhatsAppButton />
           <AccessibilityButton />
           <Routes>
-            <Route path="/" element={<Home />} />
+            {/* `/stays` is the Airbnb-style default landing page — renters
+                land directly on the listings grid + search pill, matching
+                how Airbnb's homepage works. The old hero/featured-properties
+                Home page remains accessible at `/home` for marketing /
+                campaign links and link-juice from external sites. */}
+            <Route path="/" element={<Navigate to="/stays" replace />} />
+            <Route path="/home" element={<Home />} />
             <Route path="/properties/:type" element={<Properties />} />
             <Route path="/property/:id" element={<PropertyDetail />} />
             <Route path="/sublease/:id" element={<SubleaseDetail />} />

@@ -8,7 +8,7 @@
 
 import { HOLIDAY_WINDOWS as FALLBACK } from '../constants/holidayWindows';
 
-const CACHE_KEY = 'mir_holiday_windows_v1';
+const CACHE_KEY = 'mir_holiday_windows_v2';
 const CACHE_TTL_MS = 30 * 24 * 60 * 60 * 1000; // 30 days
 
 const HEBCAL = (year) =>
@@ -16,8 +16,12 @@ const HEBCAL = (year) =>
 
 // Sukkot covers everything from Erev Sukkot through Shmini Atzeret /
 // Simchat Torah. Pesach covers Erev Pesach through Pesach VIII.
+// Shavuot is short (1 day in Israel) but we add an Erev. Rosh Hashana
+// is 2 days; Erev Rosh Hashana is the eve.
 const SUKKOT_PREFIXES = ['Erev Sukkot', 'Sukkot', 'Shmini Atzeret', 'Simchat Torah'];
 const PESACH_PREFIXES = ['Erev Pesach', 'Pesach'];
+const SHAVUOT_PREFIXES = ['Erev Shavuot', 'Shavuot'];
+const ROSH_HASHANA_PREFIXES = ['Erev Rosh Hashana', 'Rosh Hashana'];
 
 const fetchYear = async (year) => {
   const r = await fetch(HEBCAL(year), { mode: 'cors' });
@@ -93,6 +97,8 @@ export async function loadHolidayWindows() {
 
     const sukkotRun = pickNextRun(items, SUKKOT_PREFIXES, today);
     const pesachRun = pickNextRun(items, PESACH_PREFIXES, today);
+    const shavuotRun = pickNextRun(items, SHAVUOT_PREFIXES, today);
+    const roshHashanaRun = pickNextRun(items, ROSH_HASHANA_PREFIXES, today);
 
     const out = {
       sukkot: sukkotRun
@@ -111,6 +117,24 @@ export async function loadHolidayWindows() {
             label: 'Pesach',
           }
         : FALLBACK.pesach,
+      // Newly-added holidays — fallback is null so callers can skip
+      // when Hebcal is unreachable rather than render stale dates.
+      shavuot: shavuotRun
+        ? {
+            start: shavuotRun.start,
+            end: shavuotRun.end,
+            year: parseInt(shavuotRun.start.slice(0, 4), 10),
+            label: 'Shavuot',
+          }
+        : null,
+      roshHashana: roshHashanaRun
+        ? {
+            start: roshHashanaRun.start,
+            end: roshHashanaRun.end,
+            year: parseInt(roshHashanaRun.start.slice(0, 4), 10),
+            label: 'Rosh Hashana',
+          }
+        : null,
     };
 
     writeCache(out);
