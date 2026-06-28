@@ -1135,3 +1135,12 @@ See /app/memory/test_credentials.md
   - Verified by testing_agent iteration_32 (7/8 PASS) + a self-screenshot retest after the Sunday "Next week" fix landed.
   - Files: `frontend/src/components/search/QuickChips.jsx`, `Home.js`, `Stays.jsx`.
 
+
+- [x] **`/stays` is the new default landing + Israeli holiday QuickChips** (2026-02-28):
+  - Visiting `/` now redirects (replace) to `/stays` — Airbnb-style direct-to-listings landing.
+  - The legacy hero/featured-properties Home page remains accessible at `/home` for marketing campaigns / link juice (hero-search-band testid preserved).
+  - Extended `loadHolidayWindows()` to resolve Sukkot, Pesach, Shavuot, Rosh Hashana (was: Sukkot + Pesach only). Cache key bumped `v1 → v2` so old 2-holiday cached payloads can't poison new consumers.
+  - `QuickChips.jsx` now merges 4 generic + 4 Israeli holiday chips. Holiday chips render with a gold `border-[#D4AF37]` to signal seasonality; past holidays are filtered (today is Jun 28 2026 → Pesach + Shavuot auto-roll to 2027).
+  - Verified by testing_agent iteration_33 — 21/21 checks PASS on mobile + desktop. Hebcal returns the expected dates: Sukkot 2026-09-25→10-03, Rosh Hashana 2026-09-11→09-13, Pesach 2027-04-21→04-28, Shavuot 2027-06-10→06-11. Hebcal-down fallback still surfaces the 4 generic chips.
+  - Files: `frontend/src/App.js`, `frontend/src/utils/holidayWindows.js`, `frontend/src/components/search/QuickChips.jsx`.
+
