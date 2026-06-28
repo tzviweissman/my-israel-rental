@@ -1125,3 +1125,13 @@ See /app/memory/test_credentials.md
   - Verified by testing_agent iteration_31: 8/8 spec checks pass on mobile (390x844) and desktop (1280x900). Calendar / WhenPicker / WherePicker have no regressions. svg-count assertion confirms icons present (1 each) before scroll and absent (0 each) after.
   - Files: `frontend/src/components/Navigation.js`, `frontend/src/components/NavCategoryItem.jsx`, `frontend/src/pages/Home.js`, `frontend/src/pages/Stays.jsx`.
 
+
+- [x] **Mobile QuickChips date-preset strip** (2026-02-28):
+  - New `QuickChips` component (`frontend/src/components/search/QuickChips.jsx`) — Airbnb-iOS-style one-tap date-preset row that appears below the search pill on mobile (`md:hidden`).
+  - 4 chips, each labeled + sub-labeled with the resolved date range: **Tonight** (today → +1), **This weekend** (next Fri → +2 nights), **Next week** (Mon of next calendar week → +7 nights — Sun/Mon clamp keeps it ≥7 days out), **This month** (today → last day of month).
+  - Two variants: `dark` (Home hero — white-on-translucent backdrop-blur) and `light` (/stays — white pill with gray border on white bg).
+  - **Home**: tapping a chip navigates to `/stays?checkin=&checkout=&area=` so the renter lands on filtered results with the dates pre-applied.
+  - **Stays**: chips sit inside the `fixed` top bar (always reachable while scrolling). Tapping sets `checkin`/`checkout` → live filter + URL sync + layout switches to flat grid. Page top padding bumped from `pt-[170px]` to `pt-[220px]` on mobile to clear the chip strip.
+  - Verified by testing_agent iteration_32 (7/8 PASS) + a self-screenshot retest after the Sunday "Next week" fix landed.
+  - Files: `frontend/src/components/search/QuickChips.jsx`, `Home.js`, `Stays.jsx`.
+

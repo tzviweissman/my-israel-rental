@@ -27,8 +27,11 @@ const buildChips = () => {
   const daysToFri = ((5 - dow) + 7) % 7;
   const nextFri = addDays(today, daysToFri || 0);
   const sun = addDays(nextFri, 2);
-  // Next Monday (skip today if already Mon, jump to next week instead).
-  const daysToMon = (((1 - dow) + 7) % 7) || 7;
+  // Next Monday — but "Next week" should always mean a future calendar
+  // week, so on Sun (dow=0) or Mon (dow=1) we jump an extra 7 days
+  // ahead. Otherwise the chip would collide with "Tonight" on Sunday.
+  let daysToMon = ((1 - dow) + 7) % 7;
+  if (daysToMon < 2) daysToMon += 7;
   const nextMon = addDays(today, daysToMon);
   const weekEnd = addDays(nextMon, 7);
   const tomorrow = addDays(today, 1);
