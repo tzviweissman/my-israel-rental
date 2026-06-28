@@ -1,0 +1,84 @@
+{
+  "summary": "End-to-end verified the new Airbnb-style 'When / Add dates' search segment + react-day-picker range calendar popover on both Home (/) and Stays (/stays). All 9 acceptance criteria pass on desktop (1280x900), tablet (768x1024) and mobile (390x844). The popover is portal-rendered to <body>, has a non-zero bbox, is never clipped by the search pill's overflow-hidden, and the calendar is fully visible on every viewport. Live date-range filtering on /stays works: applying Jun 30 – Jul 7 reduced listings from 14 to 13 and switched the page from grouped layout (6 'Stays in ...' headings) to a flat grid (0 headings) with the URL updated to ?checkin=2026-06-30&checkout=2026-07-07.",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "verification_details": {
+    "home_when_segment": {
+      "label": "WHEN (uppercase)",
+      "placeholder": "Add dates",
+      "old_checkin_checkout_triggers_removed": true
+    },
+    "home_popover_desktop_1280x900": {
+      "data_testid": "hero-when-popover",
+      "bbox": {"x": 260, "y": 226.5, "width": 760, "height": 447},
+      "portal_parent": "BODY",
+      "months_rendered": 2,
+      "backdrop_present": true,
+      "past_dates_disabled_count": 27
+    },
+    "home_popover_tablet_768x1024": {
+      "bbox": {"x": 23, "y": 288, "width": 722, "height": 447},
+      "months_rendered": 2,
+      "clipped": false
+    },
+    "home_popover_mobile_390x844": {
+      "bbox_w": 367, "bbox_h": 447,
+      "months_rendered": 1,
+      "clipped": false
+    },
+    "home_range_selection": {
+      "selected_range": "Jun 30 – Jul 7",
+      "range_endpoints_with_teal": 2,
+      "range_middle_cells_highlighted": 6,
+      "trigger_after_apply": "WHEN / Jun 30 – Jul 7",
+      "search_url": "https://where-am-i-project.preview.emergentagent.com/stays?checkin=2026-06-30&checkout=2026-07-07"
+    },
+    "home_clear_link": "After selecting range and clicking hero-when-clear, trigger reverted to 'Add dates' — PASS",
+    "home_escape_key": "Closes hero-when-popover — PASS",
+    "home_backdrop_click": "Closes hero-when-popover — PASS",
+    "stays_when_segment": {
+      "label": "WHEN",
+      "placeholder": "Add dates",
+      "popover_data_testid": "stays-when-popover",
+      "portal_parent": "BODY",
+      "months_desktop": 2,
+      "months_tablet": 2,
+      "popover_tablet_bbox": {"x": 23, "y": 288, "width": 722, "height": 447},
+      "clipped_anywhere": false,
+      "mobile_trigger_hidden_in_pill": true
+    },
+    "stays_live_filter": {
+      "cards_before_range": 14,
+      "cards_after_range": 13,
+      "group_headings_before": 6,
+      "group_headings_after": 0,
+      "layout_switched_to_flat_grid": true,
+      "url_after_apply": "https://where-am-i-project.preview.emergentagent.com/stays?checkin=2026-06-30&checkout=2026-07-07"
+    },
+    "stays_regression": {
+      "stays-where-select_present": true,
+      "stays-filters-btn_present": true,
+      "stays-filters-modal_opens": true
+    }
+  },
+  "test_report_links": [],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "WhenPicker.jsx line 141 reads window.matchMedia('(min-width: 768px)') only at mount of the popover render. If a user opens the popover, resizes the window across the 768px breakpoint, and re-interacts, the calendar may keep the old numberOfMonths until next open. Acceptable for now (popover usually closes on resize-like interactions) but consider wiring matchMedia + addEventListener('change') to a state to make it reactive.",
+    "Past-date disabling uses `disabled={ before: new Date() }` (line 142). new Date() is captured each render but only when the popover is open — fine. However, a user who keeps the popover open across midnight could see yesterday still selectable for ~1ms after midnight; not a practical concern.",
+    "Stays.jsx hides the When trigger on mobile (<sm) inside the pill. Acceptable per the requirement, but mobile users currently have NO way to set dates from the visible search pill — they must open Filters. Consider adding a small calendar icon in the mobile pill that opens the Filters modal directly to the dates section, to improve discoverability.",
+    "The popover uses z-[60] backdrop and z-[61] popover. The site's WhatsApp floating widget (bottom-right) sits at a similar z range; verified visually it is behind the backdrop, so OK. Worth a code comment noting the z-index contract."
+  ],
+  "updated_files": [],
+  "success_rate": {"backend": "n/a (frontend-only request)", "frontend": "100%"},
+  "test_credentials": "n/a",
+  "seed_data_creation": "none",
+  "retest_needed": false,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "WhenPicker (react-day-picker v8.10.1, portal-rendered) is working end-to-end on Home & Stays. Notes for future testing: (1) live env's 'today' is around Jun 28 2026 (NOT Feb 2026 as the request hint claimed), so future dates begin Jun 28+. Pick Jun 30 – Jul 7 in tests (those are visible in the default month view). (2) DayPicker day buttons have no aria-label; select them via 'button.rdp-day:not([disabled]):has-text(\"N\")'. (3) Range start/end cells get classes .rdp-day_range_start / .rdp-day_range_end and middle cells .rdp-day_range_middle for visual assertions. (4) Stays cards have data-testid pattern 'stays-card-{uuid}'. (5) Applying a date range on /stays switches the page from grouped 'Stays in {area}' headings to a flat single grid — assert by counting group headings dropping to 0. (6) Regression from iteration_27 (search-bar / nav overlap) still holds — no new overlap introduced.",
+  "rca_of_the_issue": "n/a — no bugs found. Feature was implemented correctly: createPortal(..., document.body) properly escapes the search pill's overflow-hidden clipping; portal popover is anchored to viewport center via fixed inset positioning; backdrop and Escape both close; Clear empties state; Apply propagates ISO YYYY-MM-DD strings back to parent which feeds URL params and live filter."
+}

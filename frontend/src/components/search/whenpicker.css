@@ -1,0 +1,66 @@
+/* Airbnb-style overrides on top of react-day-picker's default stylesheet.
+   Scoped via the .rdp-airbnb class on our <DayPicker> so we don't affect
+   any other DayPicker instances elsewhere in the app. */
+
+.rdp-airbnb {
+  --rdp-cell-size: 44px;
+  --rdp-accent-color: #1E6A6A;
+  --rdp-background-color: #F1F1F1;
+  margin: 0;
+}
+
+.rdp-airbnb .rdp-month {
+  margin: 0 0.5rem;
+}
+
+.rdp-airbnb .rdp-caption_label {
+  font-weight: 700;
+  font-size: 1rem;
+  color: #111;
+}
+
+.rdp-airbnb .rdp-head_cell {
+  font-weight: 600;
+  color: #717171;
+  text-transform: uppercase;
+  font-size: 11px;
+}
+
+.rdp-airbnb .rdp-day {
+  border-radius: 999px;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.rdp-airbnb .rdp-day:hover:not([disabled]) {
+  background: #F1F1F1;
+}
+
+.rdp-airbnb .rdp-day_selected,
+.rdp-airbnb .rdp-day_selected:focus-visible {
+  background: #1E6A6A !important;
+  color: #fff !important;
+}
+
+.rdp-airbnb .rdp-day_range_start,
+.rdp-airbnb .rdp-day_range_end {
+  background: #1E6A6A !important;
+  color: #fff !important;
+}
+
+.rdp-airbnb .rdp-day_range_middle {
+  background: #E6F0F0 !important;
+  color: #1E6A6A !important;
+  border-radius: 0 !important;
+}
+
+.rdp-airbnb .rdp-day_disabled {
+  color: #C8C8C8;
+  text-decoration: line-through;
+}
+
+.rdp-airbnb .rdp-nav_button {
+  color: #111;
+}
+
+/* Hide bottom black bar present in some Tailwind globals (just safety). */
+.rdp-airbnb .rdp-tfoot { display: none; }

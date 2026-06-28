@@ -27,6 +27,7 @@ import {
 import { getCoverImage } from '../utils/coverImage';
 import DefaultImageBadge from '../components/property/DefaultImageBadge';
 import VideoCoverBadge from '../components/property/VideoCoverBadge';
+import WhenPicker from '../components/search/WhenPicker';
 
 const API = process.env.REACT_APP_BACKEND_URL + '/api';
 
@@ -288,28 +289,19 @@ const StaysSearchBar = ({ where, setWhere, checkin, setCheckin, checkout, setChe
       </SearchSegment>
       <div className="hidden sm:block w-px bg-[#E5E5E5] my-2" />
       <div className="hidden sm:flex flex-1">
-        <SearchSegment label={t('stays.checkIn', 'Check in')} icon={Calendar} testid="stays-checkin">
-          <input
-            type="date"
-            value={checkin}
-            onChange={(e) => setCheckin(e.target.value)}
-            className="bg-transparent text-sm font-medium text-gray-800 outline-none w-full cursor-pointer"
-            data-testid="stays-checkin-input"
-          />
-        </SearchSegment>
-      </div>
-      <div className="hidden sm:block w-px bg-[#E5E5E5] my-2" />
-      <div className="hidden sm:flex flex-1">
-        <SearchSegment label={t('stays.checkOut', 'Check out')} icon={Calendar} testid="stays-checkout">
-          <input
-            type="date"
-            value={checkout}
-            min={checkin || undefined}
-            onChange={(e) => setCheckout(e.target.value)}
-            className="bg-transparent text-sm font-medium text-gray-800 outline-none w-full cursor-pointer"
-            data-testid="stays-checkout-input"
-          />
-        </SearchSegment>
+        {/* When — single segment opening a range calendar popover that
+            sets both check-in and check-out. Matches the Airbnb-style
+            screenshot the user shared (label "When", value "Add dates"
+            → range like "Jun 5 – Jul 12"). */}
+        <WhenPicker
+          checkin={checkin}
+          checkout={checkout}
+          onChange={({ checkin: ci, checkout: co }) => {
+            setCheckin(ci);
+            setCheckout(co);
+          }}
+          testidPrefix="stays-when"
+        />
       </div>
     </div>
     {/* Filters button (with badge count when active) — opens the modal */}

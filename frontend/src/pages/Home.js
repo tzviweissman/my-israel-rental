@@ -8,6 +8,7 @@ import { Search, Bed, Bath, Home as HomeIcon, MapPin, Check, ArrowLeft, ArrowRig
 import HeroSlideshow from '../components/HeroSlideshow';
 import DefaultImageBadge from '../components/property/DefaultImageBadge';
 import VideoCoverBadge from '../components/property/VideoCoverBadge';
+import WhenPicker from '../components/search/WhenPicker';
 import { getCoverImage } from '../utils/coverImage';
 import { sizedImage } from '../utils/cdnImage';
 
@@ -164,27 +165,18 @@ const Home = () => {
                 </select>
               </div>
               <div className="w-px bg-gray-200 my-2" />
-              {/* Check in */}
-              <div className="hidden sm:block flex-1 px-4 py-2 min-w-0 hover:bg-gray-50 transition-colors">
-                <p className="text-[10px] font-bold uppercase tracking-wide text-gray-400">{t('stays.checkIn', 'Check in')}</p>
-                <input
-                  type="date"
-                  value={checkin}
-                  onChange={(e) => setCheckin(e.target.value)}
-                  className="w-full bg-transparent text-sm font-medium text-gray-800 outline-none cursor-pointer"
-                  data-testid="hero-checkin-input"
-                />
-              </div>
-              <div className="hidden sm:block w-px bg-gray-200 my-2" />
-              {/* Check out */}
-              <div className="hidden sm:block flex-1 px-4 py-2 min-w-0 hover:bg-gray-50 transition-colors">
-                <p className="text-[10px] font-bold uppercase tracking-wide text-gray-400">{t('stays.checkOut', 'Check out')}</p>
-                <input
-                  type="date"
-                  value={checkout}
-                  onChange={(e) => setCheckout(e.target.value)}
-                  className="w-full bg-transparent text-sm font-medium text-gray-800 outline-none cursor-pointer"
-                  data-testid="hero-checkout-input"
+              {/* When — single segment opening a range calendar popover.
+                  Replaces the previous two native date inputs so the bar
+                  matches the Airbnb-style screenshot the user shared. */}
+              <div className="flex-1 min-w-0">
+                <WhenPicker
+                  checkin={checkin}
+                  checkout={checkout}
+                  onChange={({ checkin: ci, checkout: co }) => {
+                    setCheckin(ci);
+                    setCheckout(co);
+                  }}
+                  testidPrefix="hero-when"
                 />
               </div>
             </div>
