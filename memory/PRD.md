@@ -1116,3 +1116,12 @@ See /app/memory/test_credentials.md
   - Verified by testing_agent iteration_30: 9/9 criteria pass, resolver math correct for all three presets.
   - Files: `frontend/src/components/search/WhenPicker.jsx` (parent contract unchanged — still `checkin`/`checkout` ISO strings).
 
+
+- [x] **Airbnb-style compact mobile nav** (2026-02-28):
+  - Mobile global nav slimmed dramatically. Logo height dropped from `h-[110px]` (110px) → `h-10` (40px) on mobile. Mobile nav total: **157px → 95px** in the initial state, **123px → 81.5px** when scrolled. Desktop nav unchanged.
+  - New `mobileScrolled` state tracks `window.scrollY > 40` on every page (not just home). When true, the bottom Stays/Services tab strip collapses to text-only — the Bed/Briefcase icons disappear and labels render horizontally at 13px, matching Airbnb's compact mobile chrome from the user-shared screenshots.
+  - `NavCategoryItem` gained an `iconHidden` prop that controls the icon visibility and the layout direction (flex-col → flex-row gap-2).
+  - Page top paddings recalibrated: `Home.js` `pt-[170px]` → `pt-[110px]` on mobile; `Stays.jsx` `pt-[200px]` → `pt-[170px]` and `top-[123px]` → `top-[95px]` for the fixed search bar.
+  - Verified by testing_agent iteration_31: 8/8 spec checks pass on mobile (390x844) and desktop (1280x900). Calendar / WhenPicker / WherePicker have no regressions. svg-count assertion confirms icons present (1 each) before scroll and absent (0 each) after.
+  - Files: `frontend/src/components/Navigation.js`, `frontend/src/components/NavCategoryItem.jsx`, `frontend/src/pages/Home.js`, `frontend/src/pages/Stays.jsx`.
+
