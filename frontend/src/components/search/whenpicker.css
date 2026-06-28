@@ -9,6 +9,35 @@
   margin: 0;
 }
 
+/* Mobile: pack two months side-by-side by shrinking cells, margins and
+   the inter-month gap. 7 days × 26px ≈ 182px per month; two months +
+   2px gap ≈ 366px, which fits a 367px (94vw on 390px viewport) popover. */
+@media (max-width: 639px) {
+  .rdp-airbnb {
+    --rdp-cell-size: 26px;
+  }
+  .rdp-airbnb .rdp-months {
+    gap: 4px;
+  }
+  .rdp-airbnb .rdp-month {
+    margin: 0 !important;
+  }
+  .rdp-airbnb .rdp-caption_label {
+    font-size: 0.8rem !important;
+  }
+  .rdp-airbnb .rdp-head_cell {
+    font-size: 9px !important;
+  }
+  .rdp-airbnb .rdp-day {
+    font-size: 12px;
+  }
+}
+
+.rdp-airbnb .rdp-months {
+  display: flex;
+  flex-direction: row;
+}
+
 .rdp-airbnb .rdp-month {
   margin: 0 0.5rem;
 }

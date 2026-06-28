@@ -9,6 +9,7 @@ import HeroSlideshow from '../components/HeroSlideshow';
 import DefaultImageBadge from '../components/property/DefaultImageBadge';
 import VideoCoverBadge from '../components/property/VideoCoverBadge';
 import WhenPicker from '../components/search/WhenPicker';
+import WherePicker from '../components/search/WherePicker';
 import { getCoverImage } from '../utils/coverImage';
 import { sizedImage } from '../utils/cdnImage';
 
@@ -148,21 +149,18 @@ const Home = () => {
       >
         <div className="max-w-3xl mx-auto">
           <div className="flex items-stretch gap-2" data-testid="hero-search-bar">
-            <div className="flex-1 flex items-stretch bg-white rounded-full overflow-hidden shadow-lg">
-              {/* Where */}
-              <div className="flex-1 px-4 py-2 min-w-0 hover:bg-gray-50 transition-colors">
-                <p className="text-[10px] font-bold uppercase tracking-wide text-gray-400">{t('stays.where', 'Where')}</p>
-                <select
+            <div className="flex-1 flex items-stretch bg-white rounded-full shadow-lg">
+              {/* Where — typeable text input with area suggestions.
+                  Note: the parent wrapper deliberately omits
+                  `overflow-hidden` so the suggestion dropdown can extend
+                  below the pill. The rounded children clip themselves. */}
+              <div className="flex-1 min-w-0 rounded-l-full overflow-visible">
+                <WherePicker
                   value={whereArea}
-                  onChange={(e) => setWhereArea(e.target.value)}
-                  className="w-full bg-transparent text-sm font-medium text-gray-800 outline-none cursor-pointer truncate"
-                  data-testid="hero-where-select"
-                >
-                  <option value="">{t('stays.anywhere', 'Anywhere')}</option>
-                  {areaOptions.map((a) => (
-                    <option key={a} value={a}>{a}</option>
-                  ))}
-                </select>
+                  onChange={setWhereArea}
+                  options={areaOptions}
+                  testidPrefix="hero-where"
+                />
               </div>
               <div className="w-px bg-gray-200 my-2" />
               {/* When — single segment opening a range calendar popover.

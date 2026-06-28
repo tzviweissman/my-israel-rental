@@ -28,6 +28,7 @@ import { getCoverImage } from '../utils/coverImage';
 import DefaultImageBadge from '../components/property/DefaultImageBadge';
 import VideoCoverBadge from '../components/property/VideoCoverBadge';
 import WhenPicker from '../components/search/WhenPicker';
+import WherePicker from '../components/search/WherePicker';
 
 const API = process.env.REACT_APP_BACKEND_URL + '/api';
 
@@ -97,7 +98,12 @@ const Stays = () => {
   // Master filter chain — runs in-memory across every active criterion.
   const filtered = useMemo(() => {
     return allProperties.filter((p) => {
-      if (where && p.area !== where) return false;
+      if (where) {
+        // Case-insensitive substring match so partial names ("tel",
+        // "jeru") return the right listings.
+        const needle = where.toLowerCase().trim();
+        if (!(p.area || '').toLowerCase().includes(needle)) return false;
+      }
       if (subType && p.rental_type !== subType) return false;
       if (bedrooms) {
         const b = parseInt(bedrooms, 10);
@@ -270,23 +276,19 @@ const Stays = () => {
 
 const StaysSearchBar = ({ where, setWhere, checkin, setCheckin, checkout, setCheckout, areaOptions, onOpenFilters, filterCount, t }) => (
   <div className="flex items-stretch gap-2" data-testid="stays-search-bar">
-    {/* 3-segment pill: Where | Check in | Check out — Airbnb-style.
-        Date segments are hidden on mobile to keep the bar uncluttered;
-        users access them from the Filters modal instead. */}
-    <div className="flex-1 flex items-stretch bg-[#F5F5F0] rounded-full overflow-hidden border border-[#E5E5E5] hover:border-[#D4AF37] transition-colors">
-      <SearchSegment label={t('stays.where', 'Where')} icon={MapPin} testid="stays-where">
-        <select
+    {/* 3-segment pill: Where | When | (Filters). Note: no `overflow-hidden`
+        here — the children handle their own rounded corners, and we need
+        suggestion dropdowns (Where) plus the calendar popover (When) to
+        extend beyond the pill. */}
+    <div className="flex-1 flex items-stretch bg-[#F5F5F0] rounded-full border border-[#E5E5E5] hover:border-[#D4AF37] transition-colors">
+      <div className="flex-1 min-w-0 rounded-l-full">
+        <WherePicker
           value={where}
-          onChange={(e) => setWhere(e.target.value)}
-          className="bg-transparent text-sm font-medium text-gray-800 outline-none w-full cursor-pointer"
-          data-testid="stays-where-select"
-        >
-          <option value="">{t('stays.anywhere', 'Anywhere')}</option>
-          {areaOptions.map((a) => (
-            <option key={a} value={a}>{a}</option>
-          ))}
-        </select>
-      </SearchSegment>
+          onChange={setWhere}
+          options={areaOptions}
+          testidPrefix="stays-where"
+        />
+      </div>
       <div className="hidden sm:block w-px bg-[#E5E5E5] my-2" />
       <div className="hidden sm:flex flex-1">
         {/* When — single segment opening a range calendar popover that
