@@ -1106,3 +1106,13 @@ See /app/memory/test_credentials.md
   - Verified end-to-end by testing_agent iteration_29: 11/11 acceptance criteria pass on desktop and mobile across Home and Stays.
   - Files: `frontend/src/components/search/WherePicker.jsx`, `WhenPicker.jsx`, `whenpicker.css`, `Home.js`, `Stays.jsx`.
 
+
+- [x] **Airbnb-style "Flexible" tab inside the WhenPicker** (2026-02-28):
+  - Added a `Dates | Flexible` pill toggle at the top of the WhenPicker popover, mirroring the Airbnb screenshot the user shared.
+  - **Dates** mode = existing 2-month range calendar (unchanged).
+  - **Flexible** mode shows: "How long would you like to stay?" with 3 length pills (Weekend / Week / Month, Week selected by default) → "Go anytime" → horizontally-scrollable row of the next 12 month cards (each with calendar icon + month name + year). Selecting a card highlights it (`border-black + bg-gray-50`).
+  - On Apply, the Flexible selection is resolved to concrete check-in/check-out dates so the rest of the app needs no changes: **Weekend** → first Friday on/after month start, +2 nights; **Week** → 1st of month (or today if month is current), +7 nights; **Month** → 1st to last day of the month. Result: trigger label updates ('Jul 3 – Jul 5', 'Jul 1 – Jul 8', 'Jul 1 – Jul 31'), URL syncs to `?checkin=&checkout=`, and `/stays` live-filters / switches to flat grid as before.
+  - Reachable on both Home (`/`) and `/stays` and both desktop (1280x900) and mobile (390x844) — month row scrolls horizontally on mobile (scrollWidth 1468 in a 349 viewport).
+  - Verified by testing_agent iteration_30: 9/9 criteria pass, resolver math correct for all three presets.
+  - Files: `frontend/src/components/search/WhenPicker.jsx` (parent contract unchanged — still `checkin`/`checkout` ISO strings).
+
