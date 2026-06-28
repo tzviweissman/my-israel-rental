@@ -107,9 +107,17 @@ const Stays = () => {
       if (priceMin && (price || 0) < parseFloat(priceMin)) return false;
       if (priceMax && (price || 0) > parseFloat(priceMax)) return false;
       if (amenities.length && !amenities.every((a) => (p.amenities || []).includes(a))) return false;
+      // Availability window — checkin must be on/after the listing's
+      // available_from, and checkout must be on/before its available_to
+      // (if set). Listings with no window are treated as always available.
+      if (checkin && p.available_from && checkin < p.available_from) return false;
+      if (checkout && p.available_to && checkout > p.available_to) return false;
+      // Sanity: if a checkout is provided without a check-in, ensure the
+      // listing's available_from doesn't already overshoot the checkout.
+      if (checkout && !checkin && p.available_from && checkout < p.available_from) return false;
       return true;
     });
-  }, [allProperties, where, subType, bedrooms, priceMin, priceMax, amenities]);
+  }, [allProperties, where, subType, bedrooms, priceMin, priceMax, amenities, checkin, checkout]);
 
   // Group filtered properties by area for the per-area row layout.
   const grouped = useMemo(() => {
@@ -134,10 +142,24 @@ const Stays = () => {
     (priceMin ? 1 : 0) + (priceMax ? 1 : 0) + (bedrooms ? 1 : 0) +
     (subType ? 1 : 0) + amenities.length;
 
+  // Any active search OR filter collapses the per-area rows into a single
+  // flat results grid — that mirrors Airbnb's behavior once a user starts
+  // narrowing down what they want.
+  const isSearchActive = Boolean(
+    where || checkin || checkout || priceMin || priceMax || bedrooms || subType || amenities.length,
+  );
+
+  const clearAllFilters = () => {
+    setWhere(''); setCheckin(''); setCheckout('');
+    setSubType(''); setBedrooms(''); setPriceMin(''); setPriceMax(''); setAmenities([]);
+  };
+
   return (
-    <div className="min-h-screen bg-[#FAFAF7]" data-testid="stays-page">
-      {/* Sticky top bar — search + filters */}
-      <div className="sticky top-0 z-30 bg-white border-b border-[#E5E5E5] shadow-sm">
+    <div className="min-h-screen bg-[#FAFAF7] pt-[200px] md:pt-[152px]" data-testid="stays-page">
+      {/* Fixed top search bar — sits just below the global Navigation.
+          The nav is 123px tall on mobile (logo row + Stays/Services tab
+          strip) and 68px on md+ screens, so we use a responsive `top`. */}
+      <div className="fixed top-[123px] md:top-[68px] left-0 right-0 z-30 bg-white border-b border-[#E5E5E5] shadow-sm">
         <div className="max-w-7xl mx-auto px-4 py-3">
           <StaysSearchBar
             where={where} setWhere={setWhere}
@@ -155,18 +177,55 @@ const Stays = () => {
         <div className="flex items-center justify-center py-24">
           <Loader2 className="animate-spin text-[#1E6A6A]" size={32} />
         </div>
-      ) : grouped.length === 0 ? (
+      ) : filtered.length === 0 ? (
         <div className="max-w-3xl mx-auto px-6 py-24 text-center">
           <p className="text-2xl font-bold text-gray-800 mb-2">{t('stays.noResultsTitle', 'No stays match those filters')}</p>
           <p className="text-gray-500 mb-6">{t('stays.noResultsBody', 'Try widening your search or clearing a filter.')}</p>
           <button
-            onClick={() => { setWhere(''); setSubType(''); setBedrooms(''); setPriceMin(''); setPriceMax(''); setAmenities([]); }}
+            onClick={clearAllFilters}
             className="px-5 py-2.5 rounded-lg text-sm font-semibold text-white"
             style={{ backgroundColor: '#1E6A6A' }}
             data-testid="stays-clear-filters"
           >
             {t('stays.clearAll', 'Clear all filters')}
           </button>
+        </div>
+      ) : isSearchActive ? (
+        // Flat results grid — Airbnb-style, shown once any search/filter is active
+        <div className="max-w-7xl mx-auto px-4 py-6" data-testid="stays-results-grid">
+          <div className="flex items-end justify-between mb-4">
+            <div>
+              <h2 className="text-xl md:text-2xl font-bold" style={{ fontFamily: 'Playfair Display' }}>
+                {filtered.length} {filtered.length === 1 ? t('stays.stay', 'stay') : t('stays.staysLabel', 'stays')}
+                {where ? ` ${t('stays.in', 'in')} ${where}` : ''}
+              </h2>
+              {(checkin || checkout) && (
+                <p className="text-xs text-gray-500 mt-0.5">
+                  {checkin || '—'} → {checkout || '—'}
+                </p>
+              )}
+            </div>
+            <button
+              onClick={clearAllFilters}
+              className="text-xs font-semibold text-[#1E6A6A] hover:underline"
+              data-testid="stays-grid-clear"
+            >
+              {t('stays.clearAll', 'Clear all')}
+            </button>
+          </div>
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+            {filtered.map((p) => (
+              <StaysCard
+                key={p.id}
+                property={p}
+                fullWidth
+                onClick={() => {
+                  sessionStorage.setItem('previousPath', '/stays' + window.location.search);
+                  navigate(`/property/${p.id}`);
+                }}
+              />
+            ))}
+          </div>
         </div>
       ) : (
         <div className="max-w-7xl mx-auto px-4 py-6 space-y-10">
@@ -194,6 +253,8 @@ const Stays = () => {
           bedrooms={bedrooms} setBedrooms={setBedrooms}
           subType={subType} setSubType={setSubType}
           amenities={amenities} setAmenities={setAmenities}
+          checkin={checkin} setCheckin={setCheckin}
+          checkout={checkout} setCheckout={setCheckout}
           totalCount={filtered.length}
           t={t}
         />
@@ -208,7 +269,9 @@ const Stays = () => {
 
 const StaysSearchBar = ({ where, setWhere, checkin, setCheckin, checkout, setCheckout, areaOptions, onOpenFilters, filterCount, t }) => (
   <div className="flex items-stretch gap-2" data-testid="stays-search-bar">
-    {/* 3-segment pill: Where | Check in | Check out — Airbnb-style */}
+    {/* 3-segment pill: Where | Check in | Check out — Airbnb-style.
+        Date segments are hidden on mobile to keep the bar uncluttered;
+        users access them from the Filters modal instead. */}
     <div className="flex-1 flex items-stretch bg-[#F5F5F0] rounded-full overflow-hidden border border-[#E5E5E5] hover:border-[#D4AF37] transition-colors">
       <SearchSegment label={t('stays.where', 'Where')} icon={MapPin} testid="stays-where">
         <select
@@ -223,35 +286,40 @@ const StaysSearchBar = ({ where, setWhere, checkin, setCheckin, checkout, setChe
           ))}
         </select>
       </SearchSegment>
-      <div className="w-px bg-[#E5E5E5] my-2" />
-      <SearchSegment label={t('stays.checkIn', 'Check in')} icon={Calendar} testid="stays-checkin">
-        <input
-          type="date"
-          value={checkin}
-          onChange={(e) => setCheckin(e.target.value)}
-          className="bg-transparent text-sm font-medium text-gray-800 outline-none w-full cursor-pointer"
-          data-testid="stays-checkin-input"
-        />
-      </SearchSegment>
-      <div className="w-px bg-[#E5E5E5] my-2" />
-      <SearchSegment label={t('stays.checkOut', 'Check out')} icon={Calendar} testid="stays-checkout">
-        <input
-          type="date"
-          value={checkout}
-          onChange={(e) => setCheckout(e.target.value)}
-          className="bg-transparent text-sm font-medium text-gray-800 outline-none w-full cursor-pointer"
-          data-testid="stays-checkout-input"
-        />
-      </SearchSegment>
+      <div className="hidden sm:block w-px bg-[#E5E5E5] my-2" />
+      <div className="hidden sm:flex flex-1">
+        <SearchSegment label={t('stays.checkIn', 'Check in')} icon={Calendar} testid="stays-checkin">
+          <input
+            type="date"
+            value={checkin}
+            onChange={(e) => setCheckin(e.target.value)}
+            className="bg-transparent text-sm font-medium text-gray-800 outline-none w-full cursor-pointer"
+            data-testid="stays-checkin-input"
+          />
+        </SearchSegment>
+      </div>
+      <div className="hidden sm:block w-px bg-[#E5E5E5] my-2" />
+      <div className="hidden sm:flex flex-1">
+        <SearchSegment label={t('stays.checkOut', 'Check out')} icon={Calendar} testid="stays-checkout">
+          <input
+            type="date"
+            value={checkout}
+            min={checkin || undefined}
+            onChange={(e) => setCheckout(e.target.value)}
+            className="bg-transparent text-sm font-medium text-gray-800 outline-none w-full cursor-pointer"
+            data-testid="stays-checkout-input"
+          />
+        </SearchSegment>
+      </div>
     </div>
     {/* Filters button (with badge count when active) — opens the modal */}
     <button
       onClick={onOpenFilters}
-      className="flex items-center gap-2 px-4 rounded-full border border-[#E5E5E5] hover:border-[#D4AF37] bg-white font-semibold text-sm text-gray-800 relative transition-colors"
+      className="flex items-center gap-2 px-3 sm:px-4 rounded-full border border-[#E5E5E5] hover:border-[#D4AF37] bg-white font-semibold text-sm text-gray-800 relative transition-colors shrink-0"
       data-testid="stays-filters-btn"
     >
       <SlidersHorizontal size={16} />
-      <span>{t('stays.filters', 'Filters')}</span>
+      <span className="hidden sm:inline">{t('stays.filters', 'Filters')}</span>
       {filterCount > 0 && (
         <span className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-[#D4AF37] text-white text-[10px] font-bold flex items-center justify-center">
           {filterCount}
@@ -317,15 +385,18 @@ const AreaRow = ({ area, properties, onCardClick, onSeeAll, t }) => {
   );
 };
 
-const StaysCard = ({ property, onClick }) => {
+const StaysCard = ({ property, onClick, fullWidth = false }) => {
   const cover = getCoverImage(property.images, 400, '', property.videos, property.id);
   const sym = (property.currency || 'ILS') === 'ILS' ? '₪' : '$';
   const price = property.rental_type === 'vacation' ? property.nightly_price : property.monthly_price;
   const unit = property.rental_type === 'vacation' ? 'night' : 'month';
+  const sizeClasses = fullWidth
+    ? 'w-full'
+    : 'snap-start shrink-0 w-[260px] sm:w-[280px]';
   return (
     <button
       onClick={onClick}
-      className="snap-start shrink-0 w-[260px] sm:w-[280px] bg-white rounded-xl border border-[#E5E5E5] overflow-hidden hover:border-[#D4AF37] hover:shadow-md transition-all text-left"
+      className={`${sizeClasses} bg-white rounded-xl border border-[#E5E5E5] overflow-hidden hover:border-[#D4AF37] hover:shadow-md transition-all text-left`}
       data-testid={`stays-card-${property.id}`}
     >
       <div
@@ -360,12 +431,13 @@ const ALL_AMENITIES = [
   'Workspace', 'Pet-friendly', 'Sea view', 'Balcony', 'Elevator', 'Gym',
 ];
 
-const FiltersModal = ({ onClose, priceMin, setPriceMin, priceMax, setPriceMax, bedrooms, setBedrooms, subType, setSubType, amenities, setAmenities, totalCount, t }) => {
+const FiltersModal = ({ onClose, priceMin, setPriceMin, priceMax, setPriceMax, bedrooms, setBedrooms, subType, setSubType, amenities, setAmenities, checkin, setCheckin, checkout, setCheckout, totalCount, t }) => {
   const toggleAmenity = (a) => {
     setAmenities((prev) => prev.includes(a) ? prev.filter((x) => x !== a) : [...prev, a]);
   };
   const clearAll = () => {
     setPriceMin(''); setPriceMax(''); setBedrooms(''); setSubType(''); setAmenities([]);
+    setCheckin(''); setCheckout('');
   };
   return (
     <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4" onClick={onClose} data-testid="stays-filters-modal">
@@ -377,6 +449,28 @@ const FiltersModal = ({ onClose, priceMin, setPriceMin, priceMax, setPriceMax, b
           </button>
         </div>
         <div className="flex-1 overflow-y-auto p-6 space-y-6">
+          {/* Dates — surfaced inside the modal so mobile users (where the
+              search bar's date segments are hidden) can still set them. */}
+          <div className="sm:hidden">
+            <h3 className="text-sm font-bold mb-2">{t('stays.dates', 'Dates')}</h3>
+            <div className="flex gap-3">
+              <input
+                type="date"
+                value={checkin}
+                onChange={(e) => setCheckin(e.target.value)}
+                className="flex-1 px-3 py-2 rounded-lg border border-gray-200 text-sm focus:outline-none focus:border-[#D4AF37]"
+                data-testid="stays-filter-checkin"
+              />
+              <input
+                type="date"
+                value={checkout}
+                min={checkin || undefined}
+                onChange={(e) => setCheckout(e.target.value)}
+                className="flex-1 px-3 py-2 rounded-lg border border-gray-200 text-sm focus:outline-none focus:border-[#D4AF37]"
+                data-testid="stays-filter-checkout"
+              />
+            </div>
+          </div>
           {/* Sub-type — vacation / short-term / long-term */}
           <div>
             <h3 className="text-sm font-bold mb-2">{t('stays.stayType', 'Stay type')}</h3>

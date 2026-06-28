@@ -1077,3 +1077,12 @@ See /app/memory/test_credentials.md
   - Files: `backend/utils/whatsapp.py`, `backend/routes/auth.py`, `backend/routes/chat.py`, `backend/routes/bookings.py`, `backend/models.py`, `backend/tests/test_whatsapp_settings.py`, `backend/tests/test_whatsapp_send.py`, `frontend/src/pages/Auth.js`, `frontend/src/components/dashboard/SettingsTab.jsx`, `frontend/src/i18n.js`.
 
 
+
+- [x] **`/stays` — persistent search bar + live filter results** (2026-02-28):
+  - `Stays.jsx` now has a fixed top search bar (Where / Check in / Check out / Filters) that stays visible as the user scrolls.
+  - Where, Check-in and Check-out inputs filter the results live — listings are intersected against `available_from`/`available_to` listing windows.
+  - Layout adapts: area-grouped horizontal rows by default; once ANY filter is active (`where`/`checkin`/`checkout`/`subType`/`bedrooms`/`priceMin`/`priceMax`/`amenities`), the page collapses into a single flat 2-4 col grid with an Airbnb-style "N stays in <area>" header and a Clear-all link.
+  - Mobile responsive: nav is 123px on small screens, 68px on md+, so the search bar uses `top-[123px] md:top-[68px]`. Date segments are hidden on mobile and exposed inside the Filters modal instead so the pill stays clean.
+  - Switched from `sticky` to `fixed` positioning because `html`/`body` already have `overflow-x: hidden` which can break sticky in Chrome.
+  - Files: `frontend/src/pages/Stays.jsx`.
+
