@@ -1,0 +1,28 @@
+{
+  "summary": "Frontend-only verification of Airbnb-style compact mobile nav (iteration 31). All 8 requested checks passed on the live preview URL. Mobile home nav non-scrolled = 95px (<=100), scrolled = 81.5px (<=85). Mobile stays nav non-scrolled = 103px (<=105), scrolled = 81.5px (<=85). Stays/Services svg icons: 1 before scroll, 0 after scroll (>40px), on both Home and Stays. Logo height collapses to 40px on mobile, retains 200px on desktop home initial / 60px on desktop scrolled. Search bar never overlaps nav. Routing nav-category-stays-mobile -> /stays and nav-category-services-mobile -> /services works. Calendar/WhenPicker regression OK: opens with Dates|Flexible toggle, 2-month grid, range selection updates trigger label to 'Jul 15 - Jul 20'.",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": [
+      {"screen": "/stays mobile nav active tab", "issues": ["Active Stays tab text color computed = rgb(26,26,26) (dark), not gold (#D4AF37). The spec mentioned 'gold underline AND gold text color'. Gold underline IS rendered correctly (border-bottom: 2px solid rgb(212,175,55)). This may be intentional on the white-bg state but worth confirming with design."]}
+    ]
+  },
+  "test_report_links": [],
+  "action_items": [
+    "(Optional) Confirm with design whether active tab text on /stays mobile should be gold (#D4AF37) instead of #1A1A1A — underline is gold, text is dark gray."
+  ],
+  "critical_code_review_comments": [
+    "Navigation.js has two scroll listeners (homeScrolled effect + mobileScrolled effect). Consider merging to a single scroll handler to reduce listener overhead, though both are passive so impact is negligible.",
+    "Navigation.js is 725 lines — exceeds the 700-line guideline. Could be split into Navigation, NotificationsDropdown, and MobileMenu submodules.",
+    "Mobile scroll effect (line 283-288) runs on EVERY page including desktop viewports where the bottom strip is hidden — wasted state updates on desktop. Could be gated by a matchMedia check, but not blocking."
+  ],
+  "updated_files": [],
+  "success_rate": {"backend": "n/a (skipped per request)", "frontend": "100% (8/8 spec checks pass; 1 minor design observation)"},
+  "test_credentials": "not needed (public pages only)",
+  "seed_data_creation": "none",
+  "retest_needed": false,
+  "should_main_agent_self_test": true,
+  "context_for_next_testing_agent": "Iteration 31 verified the compact mobile nav (Airbnb style). Key measurements captured: Home mobile nav 95px initial / 81.5px scrolled; Stays mobile nav 103px / 81.5px; Desktop unchanged (192px home-hero, 68px scrolled/non-home). The mobile bottom strip data-testid is 'nav-rental-categories-mobile' with children 'nav-category-stays-mobile' / 'nav-category-services-mobile'. svg count inside each is the cleanest signal of icon hide/show (1 before scroll > 40px, 0 after). Calendar uses data-testid 'when-trigger-mobile' and trigger label is 'When' + range like 'Jul 15 - Jul 20'.",
+  "rca of the issue": "N/A — feature works as specified."
+}

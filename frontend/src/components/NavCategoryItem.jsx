@@ -9,7 +9,7 @@ import { Link } from 'react-router-dom';
  *   - active (route matches): brand-gold + underline + heavier stroke
  * Scaling shrinks for the compact (scrolled) navbar.
  */
-const NavCategoryItem = ({ type, Icon, label, active, scrolled, testidSuffix = '', to }) => {
+const NavCategoryItem = ({ type, Icon, label, active, scrolled, iconHidden = false, testidSuffix = '', to }) => {
   const [hover, setHover] = useState(false);
   const isGold = active || hover;
   const color = isGold ? '#D4AF37' : '#FFFFFF';
@@ -26,7 +26,7 @@ const NavCategoryItem = ({ type, Icon, label, active, scrolled, testidSuffix = '
       onClick={() => window.scrollTo(0, 0)}
       onMouseEnter={() => setHover(true)}
       onMouseLeave={() => setHover(false)}
-      className="flex flex-col items-center px-3 pb-1 transition-all"
+      className={`${iconHidden ? 'flex-row gap-2 px-3 py-1' : 'flex-col px-3 pb-1'} flex items-center transition-all`}
       style={{
         borderBottom: active
           ? '2px solid #D4AF37'
@@ -37,23 +37,25 @@ const NavCategoryItem = ({ type, Icon, label, active, scrolled, testidSuffix = '
       }}
       data-testid={`nav-category-${type}${testidSuffix}`}
     >
-      <Icon
-        size={scrolled ? 18 : 22}
-        color={color}
-        strokeWidth={isGold ? 2.4 : 1.8}
-        className="mb-1 transition-transform"
-        style={{
-          transform: hover ? 'scale(1.12)' : 'scale(1)',
-          filter: scrolled ? 'none' : 'drop-shadow(0 1px 3px rgba(0,0,0,0.5))',
-          transition: 'transform 0.18s ease, color 0.18s ease',
-        }}
-      />
+      {!iconHidden && (
+        <Icon
+          size={scrolled ? 18 : 22}
+          color={color}
+          strokeWidth={isGold ? 2.4 : 1.8}
+          className="mb-1 transition-transform"
+          style={{
+            transform: hover ? 'scale(1.12)' : 'scale(1)',
+            filter: scrolled ? 'none' : 'drop-shadow(0 1px 3px rgba(0,0,0,0.5))',
+            transition: 'transform 0.18s ease, color 0.18s ease',
+          }}
+        />
+      )}
       <span
         className="font-semibold tracking-wide whitespace-nowrap"
         style={{
           color,
           textShadow: scrolled ? 'none' : '0 1px 3px rgba(0,0,0,0.5)',
-          fontSize: scrolled ? '10px' : '12px',
+          fontSize: scrolled ? (iconHidden ? '13px' : '10px') : '12px',
           transition: 'color 0.18s ease',
         }}
       >

@@ -17,6 +17,11 @@ const Navigation = () => {
   const [menuOpen, setMenuOpen] = useState(false);
   const [homeScrolled, setHomeScrolled] = useState(false);
   const [homeShowSearch, setHomeShowSearch] = useState(false);
+  // Mobile-only: collapse the bottom tab strip to text-only once the
+  // user scrolls past a tiny threshold, on every page. Mirrors Airbnb's
+  // mobile chrome where the icon strip disappears as you scroll into
+  // the content, leaving just compact "Stays / Services" labels.
+  const [mobileScrolled, setMobileScrolled] = useState(false);
   const navSearch_ref = useRef('');
   const [navSearch, setNavSearch] = useState('');
   const menuRef = useRef(null);
@@ -271,6 +276,17 @@ const Navigation = () => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, [isHome]);
 
+  // Mobile-only scroll watcher — fires on every page so the bottom tab
+  // strip collapses to text-only on any scroll, matching the Airbnb
+  // mobile chrome. Threshold kept tiny (40px) so the collapse is
+  // noticeable as soon as the user starts reading content.
+  useEffect(() => {
+    const onScroll = () => setMobileScrolled(window.scrollY > 40);
+    onScroll();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
+
   // Non-home pages always compact; home page depends on scroll
   const scrolled = isHome ? homeScrolled : true;
   const showSearch = isHome ? homeShowSearch : false;
@@ -289,11 +305,12 @@ const Navigation = () => {
             <img
               src="https://customer-assets.emergentagent.com/job_listing-manager-pro-2/artifacts/hx4hc6hw_IMG_1745%20%281%29.PNG"
               alt="MyIsraelRental"
-              className="w-auto transition-all duration-300 h-[110px] sm:h-[140px] md:h-[200px]"
-              style={{
-                height: scrolled ? '60px' : undefined,
-                marginTop: scrolled ? '0' : '-8px',
-              }}
+              className={`w-auto transition-all duration-300 ${
+                scrolled
+                  ? 'h-10 sm:h-[60px] md:h-[60px]'
+                  : 'h-10 sm:h-[140px] md:h-[200px]'
+              }`}
+              style={{ marginTop: scrolled ? '0' : '-8px' }}
             />
           </Link>
 
@@ -669,9 +686,14 @@ const Navigation = () => {
         </div>
 
         {/* Mobile-only category row — sits below the logo+menu row.
-            Compact icons with full text labels (no wrap), evenly spaced. */}
+            Compact icons with full text labels (no wrap), evenly spaced.
+            When the user scrolls past the threshold, the icons hide and
+            only the text labels remain — matches Airbnb's compact mobile
+            chrome from the screenshots. */}
         <div
-          className="md:hidden flex items-end justify-around pb-2 pt-1"
+          className={`md:hidden flex items-end justify-around transition-all duration-200 ${
+            mobileScrolled ? 'pb-1 pt-0' : 'pb-2 pt-1'
+          }`}
           data-testid="nav-rental-categories-mobile"
         >
           {/* Mobile mirror of the desktop pill row — same Stays/Services
@@ -689,6 +711,7 @@ const Navigation = () => {
               to={to}
               active={location.pathname.startsWith(to)}
               scrolled
+              iconHidden={mobileScrolled}
               testidSuffix="-mobile"
             />
           ))}
