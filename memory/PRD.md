@@ -1144,3 +1144,14 @@ See /app/memory/test_credentials.md
   - Verified by testing_agent iteration_33 — 21/21 checks PASS on mobile + desktop. Hebcal returns the expected dates: Sukkot 2026-09-25→10-03, Rosh Hashana 2026-09-11→09-13, Pesach 2027-04-21→04-28, Shavuot 2027-06-10→06-11. Hebcal-down fallback still surfaces the 4 generic chips.
   - Files: `frontend/src/App.js`, `frontend/src/utils/holidayWindows.js`, `frontend/src/components/search/QuickChips.jsx`.
 
+
+- [x] **Bug fix: nav overlap at sm viewport + tiny WhenPicker click area** (2026-02-28):
+  - Two bugs surfaced from user screenshot. Root causes:
+    1. `Stays.jsx` fixed bar's responsive `top` jumped straight from mobile (`top-[95px]`) to md+ (`md:top-[68px]`), leaving the Tailwind `sm` range (640-767px) uncovered. At sm the nav grows to ~123px (60px scrolled logo + Stays/Services tab strip), so the bar at y=107 OVERLAPPED the nav by 16px → labels clipped.
+    2. `WhenPicker.jsx`'s outer wrapper was just `<div className="relative">` with no width — it shrink-wrapped to the trigger button's content (~80px around "Add dates") rather than filling the flex parent. Most of the WHEN segment area was unclickable empty space.
+  - Fixes:
+    1. Added sm-specific top + container padding: `top-[103px] sm:top-[128px] md:top-[68px]` and `pt-[220px] sm:pt-[210px] md:pt-[152px]`. Verified gap ≥ 12px at every viewport from 390 to 1280.
+    2. WhenPicker wrapper now `relative w-full h-full`, trigger button `w-full h-full`. Clickable area grew from ~80×30 to 570×51 on desktop / 152×51 on mobile. Far-left and far-right edge clicks both open the popover.
+  - Verified by testing_agent iteration_34: 100% PASS, no regressions on WherePicker / QuickChips / calendar flows.
+  - Files: `frontend/src/components/search/WhenPicker.jsx`, `frontend/src/pages/Stays.jsx`.
+
