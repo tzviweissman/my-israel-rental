@@ -923,6 +923,63 @@ const resources = {
         fullServiceCopy: 'Rent collection, contract renewals, end-of-stay walkthroughs — we run it. You get the income.',
         dismiss: 'Maybe later',
         contactCta: 'Chat with us on WhatsApp'
+      },
+      // ---------------------------------------------------------------
+      // Stays — strings for the Stays page + the search pill, calendar
+      // popover, and mobile QuickChips strip. Keep keys flat (no deep
+      // nesting) since the i18n lookups in code use `stays.<key>`.
+      // ---------------------------------------------------------------
+      stays: {
+        // Search pill
+        where: 'Where',
+        anywhere: 'Anywhere',
+        when: 'When',
+        addDates: 'Add dates',
+        filters: 'Filters',
+        // WhenPicker popover
+        selectDates: 'Select dates',
+        tabDates: 'Dates',
+        tabFlexible: 'Flexible',
+        howLong: 'How long would you like to stay?',
+        goAnytime: 'Go anytime',
+        lengthWeekend: 'Weekend',
+        lengthWeek: 'Week',
+        lengthMonth: 'Month',
+        apply: 'Apply',
+        close: 'Close',
+        clear: 'Clear',
+        pickAMonth: 'Pick a month',
+        // QuickChips (mobile preset strip)
+        chipTonight: 'Tonight',
+        chipThisWeekend: 'This weekend',
+        chipNextWeek: 'Next week',
+        chipThisMonth: 'This month',
+        chipSukkotWeek: 'Sukkot week',
+        chipPesachWeek: 'Pesach week',
+        chipShavuot: 'Shavuot',
+        chipRoshHashana: 'Rosh Hashana',
+        // Existing inline-defaulted keys are still used elsewhere in the
+        // file — including them here makes them real i18n keys and stops
+        // them from depending on the default-string fallback.
+        noResultsTitle: 'No stays match those filters',
+        noResultsBody: 'Try widening your search or clearing a filter.',
+        clearAll: 'Clear all',
+        stay: 'stay',
+        staysLabel: 'stays',
+        in: 'in',
+        staysIn: 'Stays in',
+        listing: 'listing',
+        listings: 'listings',
+        seeAll: 'See all',
+        dates: 'Dates',
+        stayType: 'Stay type',
+        any: 'Any',
+        priceRange: 'Price range',
+        min: 'Min',
+        max: 'Max',
+        bedrooms: 'Bedrooms',
+        amenities: 'Amenities',
+        showCount: 'Show {{count}} stays'
       }
     }
   },
@@ -1846,6 +1903,59 @@ const resources = {
         fullServiceCopy: 'גבייה, חידושי חוזה, בדיקות סיום שכירות — אנחנו על זה. אתם פשוט מקבלים את ההכנסה.',
         dismiss: 'אולי בפעם אחרת',
         contactCta: 'דברו איתנו בוואטסאפ'
+      },
+      // ---------------------------------------------------------------
+      // Stays (Hebrew) — mirrors the English `stays` namespace above.
+      // ---------------------------------------------------------------
+      stays: {
+        // Search pill
+        where: 'איפה',
+        anywhere: 'כל מקום',
+        when: 'מתי',
+        addDates: 'בחרו תאריכים',
+        filters: 'סינון',
+        // WhenPicker popover
+        selectDates: 'בחרו תאריכים',
+        tabDates: 'תאריכים',
+        tabFlexible: 'גמיש',
+        howLong: 'לכמה זמן תרצו להישאר?',
+        goAnytime: 'מתי שנוח',
+        lengthWeekend: 'סוף שבוע',
+        lengthWeek: 'שבוע',
+        lengthMonth: 'חודש',
+        apply: 'אישור',
+        close: 'סגור',
+        clear: 'ניקוי',
+        pickAMonth: 'בחרו חודש',
+        // QuickChips
+        chipTonight: 'הלילה',
+        chipThisWeekend: 'סוף השבוע הזה',
+        chipNextWeek: 'שבוע הבא',
+        chipThisMonth: 'החודש',
+        chipSukkotWeek: 'חופשת סוכות',
+        chipPesachWeek: 'חופשת פסח',
+        chipShavuot: 'שבועות',
+        chipRoshHashana: 'ראש השנה',
+        // Other Stays-page strings
+        noResultsTitle: 'אין נכסים שמתאימים לסינון הזה',
+        noResultsBody: 'נסו להרחיב את החיפוש או לבטל סינון.',
+        clearAll: 'נקה הכל',
+        stay: 'נכס',
+        staysLabel: 'נכסים',
+        in: 'ב',
+        staysIn: 'נכסים ב',
+        listing: 'נכס',
+        listings: 'נכסים',
+        seeAll: 'הצג הכל',
+        dates: 'תאריכים',
+        stayType: 'סוג שהייה',
+        any: 'הכל',
+        priceRange: 'טווח מחירים',
+        min: 'מינ׳',
+        max: 'מקס׳',
+        bedrooms: 'חדרי שינה',
+        amenities: 'מאפיינים',
+        showCount: 'הצג {{count}} נכסים'
       }
     }
   }

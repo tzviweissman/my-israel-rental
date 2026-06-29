@@ -10,16 +10,19 @@
  * city names ("tel", "jeru") return the right listings.
  */
 import React, { useState, useRef, useEffect, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { MapPin, X } from 'lucide-react';
 
 const WherePicker = ({
   value,
   onChange,
   options = [],
-  placeholder = 'Anywhere',
+  placeholder,
   labelClassName = '',
   testidPrefix = 'where',
 }) => {
+  const { t } = useTranslation();
+  const effectivePlaceholder = placeholder ?? t('stays.anywhere', 'Anywhere');
   const [open, setOpen] = useState(false);
   const wrapRef = useRef(null);
   const inputRef = useRef(null);
@@ -54,7 +57,7 @@ const WherePicker = ({
     <div className="relative w-full" ref={wrapRef} data-testid={`${testidPrefix}-wrapper`}>
       <div className="px-4 py-2 min-w-0">
         <p className={`text-[10px] font-bold uppercase tracking-wide ${labelClassName || 'text-gray-400'}`}>
-          Where
+          {t('stays.where', 'Where')}
         </p>
         <div className="flex items-center">
           <input
@@ -63,7 +66,7 @@ const WherePicker = ({
             value={value}
             onChange={(e) => { onChange(e.target.value); setOpen(true); }}
             onFocus={() => setOpen(true)}
-            placeholder={placeholder}
+            placeholder={effectivePlaceholder}
             className="w-full bg-transparent text-sm font-medium text-gray-800 outline-none placeholder:text-gray-400"
             data-testid={`${testidPrefix}-input`}
             autoComplete="off"

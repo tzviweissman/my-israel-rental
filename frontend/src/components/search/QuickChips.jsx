@@ -20,13 +20,14 @@
  *   - Sukkot week, Pesach week, Shavuot, Rosh Hashana
  */
 import React, { useEffect, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { format, addDays, getDay, endOfMonth, parseISO } from 'date-fns';
 import { loadHolidayWindows } from '../../utils/holidayWindows';
 
 const toIso = (d) => format(d, 'yyyy-MM-dd');
 const fmt = (d) => format(d, 'MMM d');
 
-const buildGenericChips = () => {
+const buildGenericChips = (t) => {
   const today = new Date();
   const dow = getDay(today);
   const daysToFri = ((5 - dow) + 7) % 7;
@@ -43,34 +44,34 @@ const buildGenericChips = () => {
   const monthLast = endOfMonth(today);
 
   return [
-    { key: 'tonight',      label: 'Tonight',      sub: `${fmt(today)} – ${fmt(tomorrow)}`,  checkin: toIso(today),   checkout: toIso(tomorrow) },
-    { key: 'this-weekend', label: 'This weekend', sub: `${fmt(nextFri)} – ${fmt(sun)}`,     checkin: toIso(nextFri), checkout: toIso(sun) },
-    { key: 'next-week',    label: 'Next week',    sub: `${fmt(nextMon)} – ${fmt(weekEnd)}`, checkin: toIso(nextMon), checkout: toIso(weekEnd) },
-    { key: 'this-month',   label: 'This month',   sub: `${fmt(today)} – ${fmt(monthLast)}`, checkin: toIso(today),   checkout: toIso(monthLast) },
+    { key: 'tonight',      label: t('stays.chipTonight', 'Tonight'),          sub: `${fmt(today)} – ${fmt(tomorrow)}`,  checkin: toIso(today),   checkout: toIso(tomorrow) },
+    { key: 'this-weekend', label: t('stays.chipThisWeekend', 'This weekend'), sub: `${fmt(nextFri)} – ${fmt(sun)}`,     checkin: toIso(nextFri), checkout: toIso(sun) },
+    { key: 'next-week',    label: t('stays.chipNextWeek', 'Next week'),       sub: `${fmt(nextMon)} – ${fmt(weekEnd)}`, checkin: toIso(nextMon), checkout: toIso(weekEnd) },
+    { key: 'this-month',   label: t('stays.chipThisMonth', 'This month'),     sub: `${fmt(today)} – ${fmt(monthLast)}`, checkin: toIso(today),   checkout: toIso(monthLast) },
   ];
 };
 
-// Holiday → chip definition. Only chips whose `end` is on/after today
-// are surfaced. Labels add "week" for the multi-day chagim so they read
-// naturally as a search intent ("Sukkot week · Oct 6 – 13").
-const HOLIDAY_LABEL = {
-  sukkot: 'Sukkot week',
-  pesach: 'Pesach week',
-  shavuot: 'Shavuot',
-  roshHashana: 'Rosh Hashana',
+// Holiday → translation key. Labels resolved through `t()` so Hebrew /
+// other locales render correctly. Only chips whose `end` is on/after
+// today are surfaced.
+const HOLIDAY_LABEL_KEY = {
+  sukkot:      { key: 'stays.chipSukkotWeek',  fallback: 'Sukkot week' },
+  pesach:      { key: 'stays.chipPesachWeek',  fallback: 'Pesach week' },
+  shavuot:     { key: 'stays.chipShavuot',     fallback: 'Shavuot' },
+  roshHashana: { key: 'stays.chipRoshHashana', fallback: 'Rosh Hashana' },
 };
 
-const buildHolidayChips = (windows) => {
+const buildHolidayChips = (windows, t) => {
   if (!windows) return [];
   const todayIso = new Date().toISOString().slice(0, 10);
-  return Object.entries(HOLIDAY_LABEL)
-    .map(([key, label]) => {
+  return Object.entries(HOLIDAY_LABEL_KEY)
+    .map(([key, { key: i18nKey, fallback }]) => {
       const w = windows[key];
       if (!w || !w.start || !w.end) return null;
-      if (w.end < todayIso) return null; // already past — don't surface
+      if (w.end < todayIso) return null;
       return {
         key: `holiday-${key}`,
-        label,
+        label: t(i18nKey, fallback),
         sub: `${fmt(parseISO(w.start))} – ${fmt(parseISO(w.end))}`,
         checkin: w.start,
         checkout: w.end,
@@ -85,19 +86,20 @@ const QuickChips = ({
   variant = 'light',
   testidPrefix = 'quick-chips',
 }) => {
-  const genericChips = useMemo(buildGenericChips, []);
+  const { t, i18n } = useTranslation();
+  // Re-build chip labels when the language changes so users switching
+  // between English and Hebrew see the translated labels immediately.
+  const genericChips = useMemo(() => buildGenericChips(t), [t, i18n.language]);
   const [holidayChips, setHolidayChips] = useState([]);
 
-  // Pull upcoming holiday windows once on mount. The util is cached for
-  // 30 days in localStorage, falls back to static defaults if Hebcal is
-  // unreachable, and resolves with `{sukkot, pesach, shavuot?, roshHashana?}`.
   useEffect(() => {
     let cancelled = false;
     loadHolidayWindows().then((w) => {
-      if (!cancelled) setHolidayChips(buildHolidayChips(w));
+      if (!cancelled) setHolidayChips(buildHolidayChips(w, t));
     });
     return () => { cancelled = true; };
-  }, []);
+    // Re-run when locale changes so translated holiday labels reflect.
+  }, [t, i18n.language]);
 
   const chips = useMemo(() => [...genericChips, ...holidayChips], [genericChips, holidayChips]);
 

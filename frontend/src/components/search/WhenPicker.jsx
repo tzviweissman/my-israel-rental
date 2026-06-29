@@ -14,6 +14,7 @@
  */
 import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { createPortal } from 'react-dom';
+import { useTranslation } from 'react-i18next';
 import { Calendar as CalendarIcon, X } from 'lucide-react';
 import { DayPicker } from 'react-day-picker';
 import {
@@ -70,6 +71,7 @@ const WhenPicker = ({
   const [stayLength, setStayLength] = useState('week');
   const [flexMonth, setFlexMonth] = useState(null); // Date or null
   const wrapRef = useRef(null);
+  const { t } = useTranslation();
 
   useEffect(() => {
     if (!open) return;
@@ -86,7 +88,7 @@ const WhenPicker = ({
   } else if (range.from) {
     displayValue = `${formatShort(range.from)} – ?`;
   } else {
-    displayValue = 'Add dates';
+    displayValue = t('stays.addDates', 'Add dates');
   }
   const isPlaceholder = !range.from;
 
@@ -129,7 +131,7 @@ const WhenPicker = ({
         data-testid={`${testidPrefix}-trigger`}
       >
         <p className={`text-[10px] font-bold uppercase tracking-wide ${labelClassName || 'text-gray-400'}`}>
-          When
+          {t('stays.when', 'When')}
         </p>
         <p
           className={`text-sm font-medium truncate ${
@@ -167,7 +169,7 @@ const WhenPicker = ({
                   }`}
                   data-testid={`${testidPrefix}-tab-dates`}
                 >
-                  Dates
+                  {t('stays.tabDates', 'Dates')}
                 </button>
                 <button
                   type="button"
@@ -177,7 +179,7 @@ const WhenPicker = ({
                   }`}
                   data-testid={`${testidPrefix}-tab-flexible`}
                 >
-                  Flexible
+                  {t('stays.tabFlexible', 'Flexible')}
                 </button>
               </div>
               <button
@@ -208,6 +210,7 @@ const WhenPicker = ({
                 flexMonth={flexMonth}
                 setFlexMonth={setFlexMonth}
                 testidPrefix={testidPrefix}
+                t={t}
               />
             )}
 
@@ -217,7 +220,7 @@ const WhenPicker = ({
                 className="text-sm font-semibold text-gray-700 underline hover:text-black"
                 data-testid={`${testidPrefix}-clear`}
               >
-                Clear
+                {t('stays.clear', 'Clear')}
               </button>
               <button
                 onClick={handleApply}
@@ -229,8 +232,8 @@ const WhenPicker = ({
                 data-testid={`${testidPrefix}-apply`}
               >
                 {mode === 'flexible'
-                  ? (flexMonth ? 'Apply' : 'Pick a month')
-                  : (range.from && range.to ? 'Apply' : 'Close')}
+                  ? (flexMonth ? t('stays.apply', 'Apply') : t('stays.pickAMonth', 'Pick a month'))
+                  : (range.from && range.to ? t('stays.apply', 'Apply') : t('stays.close', 'Close'))}
               </button>
             </div>
           </div>
@@ -244,18 +247,18 @@ const WhenPicker = ({
 // ---------------------------------------------------------------------------
 // Flexible panel — "How long" + "Go anytime" month cards.
 // ---------------------------------------------------------------------------
-const FlexiblePanel = ({ stayLength, setStayLength, monthCards, flexMonth, setFlexMonth, testidPrefix }) => {
+const FlexiblePanel = ({ stayLength, setStayLength, monthCards, flexMonth, setFlexMonth, testidPrefix, t }) => {
   const lengths = [
-    { v: 'weekend', label: 'Weekend' },
-    { v: 'week', label: 'Week' },
-    { v: 'month', label: 'Month' },
+    { v: 'weekend', label: t('stays.lengthWeekend', 'Weekend') },
+    { v: 'week',    label: t('stays.lengthWeek', 'Week') },
+    { v: 'month',   label: t('stays.lengthMonth', 'Month') },
   ];
   return (
     <div className="space-y-5" data-testid={`${testidPrefix}-flexible-panel`}>
       {/* "How long would you like to stay?" */}
       <div className="text-center">
         <h3 className="text-base font-bold text-gray-900 mb-3">
-          How long would you like to stay?
+          {t('stays.howLong', 'How long would you like to stay?')}
         </h3>
         <div className="inline-flex flex-wrap items-center justify-center gap-2">
           {lengths.map(({ v, label }) => (
@@ -279,7 +282,7 @@ const FlexiblePanel = ({ stayLength, setStayLength, monthCards, flexMonth, setFl
       {/* "Go anytime" — horizontal scrollable month cards */}
       <div>
         <h3 className="text-base font-bold text-gray-900 text-center mb-3">
-          Go anytime
+          {t('stays.goAnytime', 'Go anytime')}
         </h3>
         <div
           className="flex gap-3 overflow-x-auto pb-2 -mx-2 px-2 snap-x snap-mandatory"
