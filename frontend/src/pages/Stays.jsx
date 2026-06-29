@@ -403,10 +403,10 @@ const AreaRow = ({ area, properties, onCardClick, onSeeAll, t }) => {
           {properties.length > 3 && (
             <>
               <button onClick={() => scroll(-1)} className="hidden md:flex w-8 h-8 rounded-full border border-[#E5E5E5] items-center justify-center hover:border-[#D4AF37]" aria-label="Scroll back">
-                <ChevronLeft size={14} />
+                {isRtl ? <ChevronRight size={14} /> : <ChevronLeft size={14} />}
               </button>
               <button onClick={() => scroll(1)} className="hidden md:flex w-8 h-8 rounded-full border border-[#E5E5E5] items-center justify-center hover:border-[#D4AF37]" aria-label="Scroll forward">
-                <ChevronRight size={14} />
+                {isRtl ? <ChevronLeft size={14} /> : <ChevronRight size={14} />}
               </button>
             </>
           )}

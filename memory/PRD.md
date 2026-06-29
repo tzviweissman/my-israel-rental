@@ -1188,3 +1188,13 @@ See /app/memory/test_credentials.md
   - Verified by testing_agent iteration_39: **11/11 PASS** on mobile (390x844), desktop (1280x800), Home + Stays, LTR + RTL. Zero console errors. FAB positioning is direction-agnostic (right/left properties pin to physical edges regardless of `dir=rtl`).
   - Files: `frontend/src/components/WhatsAppButton.js`, `frontend/src/components/AccessibilityButton.js`, `frontend/src/pages/Stays.jsx`.
 
+
+- [x] **RTL visual audit pass** (2026-02-29):
+  - New `useIsRtl` hook (`frontend/src/hooks/useIsRtl.js`) — wraps `i18n.dir() === 'rtl'`, auto re-fires on locale toggle.
+  - **Stays AreaRow** (`Stays.jsx`): "See all" chevron now uses `ForwardChevron = isRtl ? ChevronLeft : ChevronRight` so it points in the reading direction. Left/right scroll-back/forward buttons swap their icons in RTL too. `ml-1` → `ms-1` for logical margin. `scroll(dir)` flips sign in RTL so the "back" arrow still scrolls back regardless of physical scroll direction.
+  - **ImageGallery** (`property/ImageGallery.jsx`): prev/next buttons use logical `start-3` / `end-3` for positioning AND swap icons (`PrevIcon`/`NextIcon`) based on `useIsRtl()`. Click handlers unchanged.
+  - **WherePicker**: clear-X `ml-1` → `ms-1`.
+  - **WhenPicker**: close-X `right-4 top-4` → `end-4 top-4`, so in RTL it sits on the trailing (left) edge.
+  - Verified by testing_agent iteration_40: **100% PASS**, computed styles confirm physical sides flip correctly per locale (LTR see-all marginLeft=4px, RTL marginRight=4px; LTR close-X right:16px, RTL left:16px), gallery icons swap, no console errors, no regressions.
+  - Files: `frontend/src/hooks/useIsRtl.js`, `frontend/src/pages/Stays.jsx`, `frontend/src/components/property/ImageGallery.jsx`, `frontend/src/components/search/WherePicker.jsx`, `frontend/src/components/search/WhenPicker.jsx`.
+
