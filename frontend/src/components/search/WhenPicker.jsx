@@ -19,7 +19,7 @@ import { Calendar as CalendarIcon, X, ChevronLeft, ChevronRight } from 'lucide-r
 import { DayPicker } from 'react-day-picker';
 import {
   format, parseISO, isValid,
-  addDays, addMonths, startOfMonth, endOfMonth, getDay,
+  addMonths, startOfMonth,
 } from 'date-fns';
 import 'react-day-picker/dist/style.css';
 import './whenpicker.css';
@@ -33,33 +33,29 @@ const fromIso = (s) => {
 
 const formatShort = (d) => (d ? format(d, 'MMM d') : '');
 
-// Resolve a Flexible-mode selection into concrete check-in / check-out
-// dates. Returns ISO strings the parent can store as if the user had
-// picked them on the calendar — keeps downstream filters identical.
-const resolveFlexible = (stayLength, monthDate) => {
-  const monthStart = startOfMonth(monthDate);
-  const today = new Date();
-  // Never resolve to a check-in in the past (for the current month).
-  const base = monthStart < today ? today : monthStart;
-  if (stayLength === 'weekend') {
-    // First Friday >= base. If base is already Fri (5) we use it.
-    const d = new Date(base);
-    while (getDay(d) !== 5) d.setDate(d.getDate() + 1);
-    return { checkin: toIso(d), checkout: toIso(addDays(d, 2)) };
-  }
-  if (stayLength === 'week') {
-    return { checkin: toIso(base), checkout: toIso(addDays(base, 7)) };
-  }
-  // month
-  return { checkin: toIso(base), checkout: toIso(endOfMonth(monthDate)) };
-};
-
 const MONTH_LABEL = (d) => format(d, 'MMMM');
 const YEAR_LABEL = (d) => format(d, 'yyyy');
+
+// Friendly label for a Flexible-mode selection — mirrors Airbnb's
+// "A week in October" / "A month in July" copy. Returned from the
+// picker so the search-bar segment can render the same text without
+// needing to know the date math.
+const flexLabel = (flex, t) => {
+  if (!flex) return '';
+  const [year, month] = (flex.monthIso || '').split('-').map(Number);
+  if (!year || !month) return '';
+  const monthName = format(new Date(year, month - 1, 1), 'MMMM');
+  if (flex.stayLength === 'weekend') return t('stays.flexLabelWeekend', { month: monthName, defaultValue: `A weekend in ${monthName}` });
+  if (flex.stayLength === 'month') return t('stays.flexLabelMonth', { month: monthName, defaultValue: `A month in ${monthName}` });
+  return t('stays.flexLabelWeek', { month: monthName, defaultValue: `A week in ${monthName}` });
+};
+
+export { flexLabel };
 
 const WhenPicker = ({
   checkin,
   checkout,
+  flexible = null,
   onChange,
   variant = 'light',
   labelClassName = '',
@@ -67,9 +63,20 @@ const WhenPicker = ({
   testidPrefix = 'when',
 }) => {
   const [open, setOpen] = useState(false);
-  const [mode, setMode] = useState('dates'); // 'dates' | 'flexible'
-  const [stayLength, setStayLength] = useState('week');
-  const [flexMonth, setFlexMonth] = useState(null); // Date or null
+  // Open into whichever tab the parent's value already corresponds to.
+  // If `flexible` is set we land on the Flexible tab; otherwise Dates.
+  const [mode, setMode] = useState(flexible ? 'flexible' : 'dates');
+  const [stayLength, setStayLength] = useState(flexible?.stayLength || 'week');
+  // Flex month is a Date pointing to the chosen month's 1st. Seeded
+  // from the parent's `flexible.monthIso` so the popover reopens with
+  // the right card selected.
+  const [flexMonth, setFlexMonth] = useState(() => {
+    if (flexible?.monthIso) {
+      const [y, m] = flexible.monthIso.split('-').map(Number);
+      if (y && m) return new Date(y, m - 1, 1);
+    }
+    return null;
+  });
   const wrapRef = useRef(null);
   const { t } = useTranslation();
 
@@ -83,14 +90,17 @@ const WhenPicker = ({
   const range = { from: fromIso(checkin), to: fromIso(checkout) };
 
   let displayValue;
-  if (range.from && range.to) {
+  if (flexible) {
+    // Flexible-mode display — Airbnb-style "A week in October".
+    displayValue = flexLabel(flexible, t);
+  } else if (range.from && range.to) {
     displayValue = `${formatShort(range.from)} – ${formatShort(range.to)}`;
   } else if (range.from) {
     displayValue = `${formatShort(range.from)} – ?`;
   } else {
     displayValue = t('stays.addDates', 'Add dates');
   }
-  const isPlaceholder = !range.from;
+  const isPlaceholder = !range.from && !flexible;
 
   // Lazy-extending month list — start with 24 cards (2 years out)
   // and lengthen by 12 each time the user clicks the "next" chevron
@@ -106,21 +116,29 @@ const WhenPicker = ({
 
   const handleCalendarSelect = (selected) => {
     if (!selected) {
-      onChange({ checkin: '', checkout: '' });
+      onChange({ checkin: '', checkout: '', flexible: null });
       return;
     }
-    onChange({ checkin: toIso(selected.from), checkout: toIso(selected.to) });
+    // Picking precise dates clears any prior flexible selection.
+    onChange({ checkin: toIso(selected.from), checkout: toIso(selected.to), flexible: null });
   };
 
   const handleApply = () => {
     if (mode === 'flexible' && flexMonth) {
-      onChange(resolveFlexible(stayLength, flexMonth));
+      // Airbnb-style: emit the flexible window itself, NOT resolved
+      // dates. The parent (/stays) widens its availability filter to
+      // any N-night sub-window within the chosen month.
+      onChange({
+        checkin: '',
+        checkout: '',
+        flexible: { stayLength, monthIso: format(flexMonth, 'yyyy-MM') },
+      });
     }
     setOpen(false);
   };
 
   const handleClear = () => {
-    onChange({ checkin: '', checkout: '' });
+    onChange({ checkin: '', checkout: '', flexible: null });
     setFlexMonth(null);
   };
 

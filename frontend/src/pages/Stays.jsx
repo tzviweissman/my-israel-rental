@@ -21,13 +21,14 @@ import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react'
 import axios from 'axios';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { format } from 'date-fns';
 import {
   Search, SlidersHorizontal, MapPin, Calendar, X, ChevronRight, ChevronLeft, Loader2, Heart,
 } from 'lucide-react';
 import { getCoverImage } from '../utils/coverImage';
 import DefaultImageBadge from '../components/property/DefaultImageBadge';
 import VideoCoverBadge from '../components/property/VideoCoverBadge';
-import WhenPicker from '../components/search/WhenPicker';
+import WhenPicker, { flexLabel } from '../components/search/WhenPicker';
 import WherePicker from '../components/search/WherePicker';
 import StayTypePicker from '../components/search/StayTypePicker';
 import QuickChips from '../components/search/QuickChips';
@@ -53,6 +54,17 @@ const Stays = () => {
   const [where, setWhere] = useState(searchParams.get('area') || '');
   const [checkin, setCheckin] = useState(searchParams.get('checkin') || '');
   const [checkout, setCheckout] = useState(searchParams.get('checkout') || '');
+  // Flexible-mode window — Airbnb-style "A week in October". Persists
+  // to the URL as `?flex=week:2026-10`. When set, `checkin`/`checkout`
+  // are blanked; the filter widens to any N-night sub-window of the
+  // chosen month.
+  const [flexible, setFlexible] = useState(() => {
+    const raw = searchParams.get('flex');
+    if (!raw) return null;
+    const [stayLength, monthIso] = raw.split(':');
+    if (!stayLength || !monthIso) return null;
+    return { stayLength, monthIso };
+  });
   const [priceMin, setPriceMin] = useState(searchParams.get('priceMin') || '');
   const [priceMax, setPriceMax] = useState(searchParams.get('priceMax') || '');
   const [bedrooms, setBedrooms] = useState(searchParams.get('bedrooms') || '');
@@ -80,15 +92,19 @@ const Stays = () => {
   const syncUrl = useCallback(() => {
     const next = new URLSearchParams();
     if (where) next.set('area', where);
-    if (checkin) next.set('checkin', checkin);
-    if (checkout) next.set('checkout', checkout);
+    if (flexible) {
+      next.set('flex', `${flexible.stayLength}:${flexible.monthIso}`);
+    } else {
+      if (checkin) next.set('checkin', checkin);
+      if (checkout) next.set('checkout', checkout);
+    }
     if (priceMin) next.set('priceMin', priceMin);
     if (priceMax) next.set('priceMax', priceMax);
     if (bedrooms) next.set('bedrooms', bedrooms);
     if (subType) next.set('subType', subType);
     if (amenities.length) next.set('amenities', amenities.join(','));
     setSearchParams(next, { replace: true });
-  }, [where, checkin, checkout, priceMin, priceMax, bedrooms, subType, amenities, setSearchParams]);
+  }, [where, checkin, checkout, flexible, priceMin, priceMax, bedrooms, subType, amenities, setSearchParams]);
 
   useEffect(() => { syncUrl(); }, [syncUrl]);
 
@@ -102,6 +118,33 @@ const Stays = () => {
 
   // Master filter chain — runs in-memory across every active criterion.
   const filtered = useMemo(() => {
+    // Pre-compute the flexible window's edges so we don't recompute
+    // them per property. A flexible "week in October" matches any
+    // property whose `available_from` allows at least one N-night
+    // sub-window within that month, AND whose `available_to` (if
+    // set) extends past at least one such window. We use a simple
+    // overlap test that holds for any contiguous N-night stay.
+    let flexBounds = null;
+    if (flexible) {
+      const [y, m] = flexible.monthIso.split('-').map(Number);
+      if (y && m) {
+        const N = flexible.stayLength === 'weekend' ? 2 : flexible.stayLength === 'month' ? 28 : 7;
+        const monthStart = `${y}-${String(m).padStart(2, '0')}-01`;
+        const lastDay = new Date(y, m, 0).getDate();
+        const monthEnd = `${y}-${String(m).padStart(2, '0')}-${String(lastDay).padStart(2, '0')}`;
+        // For an N-night stay to fit somewhere in the month, the
+        // property must be available by `monthEnd - N + 1` and stay
+        // available past `monthStart + N - 1`.
+        const latestPossibleCheckin = new Date(y, m - 1, lastDay - N + 1);
+        const earliestPossibleCheckout = new Date(y, m - 1, N);
+        flexBounds = {
+          monthStart,
+          monthEnd,
+          latestPossibleCheckin: format(latestPossibleCheckin, 'yyyy-MM-dd'),
+          earliestPossibleCheckout: format(earliestPossibleCheckout, 'yyyy-MM-dd'),
+        };
+      }
+    }
     return allProperties.filter((p) => {
       if (where) {
         // Case-insensitive substring match so partial names ("tel",
@@ -119,17 +162,23 @@ const Stays = () => {
       if (priceMin && (price || 0) < parseFloat(priceMin)) return false;
       if (priceMax && (price || 0) > parseFloat(priceMax)) return false;
       if (amenities.length && !amenities.every((a) => (p.amenities || []).includes(a))) return false;
-      // Availability window — checkin must be on/after the listing's
-      // available_from, and checkout must be on/before its available_to
-      // (if set). Listings with no window are treated as always available.
-      if (checkin && p.available_from && checkin < p.available_from) return false;
-      if (checkout && p.available_to && checkout > p.available_to) return false;
-      // Sanity: if a checkout is provided without a check-in, ensure the
-      // listing's available_from doesn't already overshoot the checkout.
-      if (checkout && !checkin && p.available_from && checkout < p.available_from) return false;
+      // Flexible-mode availability — property must allow at least one
+      // N-night sub-window anywhere in the chosen month.
+      if (flexBounds) {
+        if (p.available_from && p.available_from > flexBounds.latestPossibleCheckin) return false;
+        if (p.available_to && p.available_to < flexBounds.earliestPossibleCheckout) return false;
+      } else {
+        // Precise-dates availability — checkin must be on/after the
+        // listing's available_from, checkout on/before available_to.
+        if (checkin && p.available_from && checkin < p.available_from) return false;
+        if (checkout && p.available_to && checkout > p.available_to) return false;
+        // Sanity: checkout without a check-in shouldn't undercut
+        // available_from either.
+        if (checkout && !checkin && p.available_from && checkout < p.available_from) return false;
+      }
       return true;
     });
-  }, [allProperties, where, subType, bedrooms, priceMin, priceMax, amenities, checkin, checkout]);
+  }, [allProperties, where, subType, bedrooms, priceMin, priceMax, amenities, checkin, checkout, flexible]);
 
   // Group filtered properties by area for the per-area row layout.
   const grouped = useMemo(() => {
@@ -162,11 +211,11 @@ const Stays = () => {
   // flat results grid — that mirrors Airbnb's behavior once a user starts
   // narrowing down what they want.
   const isSearchActive = Boolean(
-    where || checkin || checkout || priceMin || priceMax || bedrooms || subType || amenities.length,
+    where || checkin || checkout || flexible || priceMin || priceMax || bedrooms || subType || amenities.length,
   );
 
   const clearAllFilters = () => {
-    setWhere(''); setCheckin(''); setCheckout('');
+    setWhere(''); setCheckin(''); setCheckout(''); setFlexible(null);
     setSubType(''); setBedrooms(''); setPriceMin(''); setPriceMax(''); setAmenities([]);
   };
 
@@ -208,6 +257,7 @@ const Stays = () => {
             where={where} setWhere={setWhere}
             checkin={checkin} setCheckin={setCheckin}
             checkout={checkout} setCheckout={setCheckout}
+            flexible={flexible} setFlexible={setFlexible}
             subType={subType} setSubType={setSubType}
             areaOptions={areaOptions}
             onOpenFilters={() => setShowFilters(true)}
@@ -215,12 +265,13 @@ const Stays = () => {
             t={t}
           />
           {/* Mobile-only one-tap date presets — sit inside the fixed
-              bar so they're always reachable while scrolling. */}
+              bar so they're always reachable while scrolling. Setting
+              a preset date range implicitly clears Flexible mode. */}
           <div className="mt-2">
             <QuickChips
               variant="light"
               onPick={({ checkin: ci, checkout: co }) => {
-                setCheckin(ci); setCheckout(co);
+                setCheckin(ci); setCheckout(co); setFlexible(null);
               }}
               testidPrefix="stays-quick-chips"
             />
@@ -254,7 +305,11 @@ const Stays = () => {
                 {filtered.length} {filtered.length === 1 ? t('stays.stay', 'stay') : t('stays.staysLabel', 'stays')}
                 {where ? ` ${t('stays.in', 'in')} ${where}` : ''}
               </h2>
-              {(checkin || checkout) && (
+              {flexible ? (
+                <p className="text-xs text-gray-500 mt-0.5">
+                  {flexLabel(flexible, t)}
+                </p>
+              ) : (checkin || checkout) && (
                 <p className="text-xs text-gray-500 mt-0.5">
                   {checkin || '—'} → {checkout || '—'}
                 </p>
@@ -326,7 +381,7 @@ const Stays = () => {
 // Sub-components
 // ---------------------------------------------------------------------------
 
-const StaysSearchBar = ({ where, setWhere, checkin, setCheckin, checkout, setCheckout, subType, setSubType, areaOptions, onOpenFilters, filterCount, t }) => (
+const StaysSearchBar = ({ where, setWhere, checkin, setCheckin, checkout, setCheckout, flexible, setFlexible, subType, setSubType, areaOptions, onOpenFilters, filterCount, t }) => (
   <div className="flex items-stretch gap-2" data-testid="stays-search-bar">
     {/* 3-segment pill: Where | Stay type | When. The Filters button on
         the far end keeps the more-granular controls (price, bedrooms,
@@ -359,9 +414,11 @@ const StaysSearchBar = ({ where, setWhere, checkin, setCheckin, checkout, setChe
         <WhenPicker
           checkin={checkin}
           checkout={checkout}
-          onChange={({ checkin: ci, checkout: co }) => {
-            setCheckin(ci);
-            setCheckout(co);
+          flexible={flexible}
+          onChange={({ checkin: ci, checkout: co, flexible: fx }) => {
+            setCheckin(ci || '');
+            setCheckout(co || '');
+            setFlexible(fx || null);
           }}
           testidPrefix="stays-when"
         />
