@@ -29,6 +29,7 @@ import DefaultImageBadge from '../components/property/DefaultImageBadge';
 import VideoCoverBadge from '../components/property/VideoCoverBadge';
 import WhenPicker from '../components/search/WhenPicker';
 import WherePicker from '../components/search/WherePicker';
+import StayTypePicker from '../components/search/StayTypePicker';
 import QuickChips from '../components/search/QuickChips';
 import useElementHeight from '../hooks/useElementHeight';
 import useIsRtl from '../hooks/useIsRtl';
@@ -149,9 +150,13 @@ const Stays = () => {
       });
   }, [filtered]);
 
+  // Filter count badge — counts only the filters that live in the
+  // modal (price, bedrooms, amenities). Where / Stay type / When are
+  // already visible in the search bar itself so showing them as a
+  // "filter pill count" would be redundant.
   const activeFilterCount =
     (priceMin ? 1 : 0) + (priceMax ? 1 : 0) + (bedrooms ? 1 : 0) +
-    (subType ? 1 : 0) + amenities.length;
+    amenities.length;
 
   // Any active search OR filter collapses the per-area rows into a single
   // flat results grid — that mirrors Airbnb's behavior once a user starts
@@ -203,6 +208,7 @@ const Stays = () => {
             where={where} setWhere={setWhere}
             checkin={checkin} setCheckin={setCheckin}
             checkout={checkout} setCheckout={setCheckout}
+            subType={subType} setSubType={setSubType}
             areaOptions={areaOptions}
             onOpenFilters={() => setShowFilters(true)}
             filterCount={activeFilterCount}
@@ -320,12 +326,14 @@ const Stays = () => {
 // Sub-components
 // ---------------------------------------------------------------------------
 
-const StaysSearchBar = ({ where, setWhere, checkin, setCheckin, checkout, setCheckout, areaOptions, onOpenFilters, filterCount, t }) => (
+const StaysSearchBar = ({ where, setWhere, checkin, setCheckin, checkout, setCheckout, subType, setSubType, areaOptions, onOpenFilters, filterCount, t }) => (
   <div className="flex items-stretch gap-2" data-testid="stays-search-bar">
-    {/* 3-segment pill: Where | When | (Filters). Note: no `overflow-hidden`
-        here — the children handle their own rounded corners, and we need
-        suggestion dropdowns (Where) plus the calendar popover (When) to
-        extend beyond the pill. */}
+    {/* 3-segment pill: Where | Stay type | When. The Filters button on
+        the far end keeps the more-granular controls (price, bedrooms,
+        amenities) inside the modal. We deliberately omit
+        `overflow-hidden` on the pill wrapper so each segment's popover
+        (Where suggestions, StayType menu, When calendar) can extend
+        beyond the pill boundary. */}
     <div className="flex-1 flex items-stretch bg-[#F5F5F0] rounded-full border border-[#E5E5E5] hover:border-[#D4AF37] transition-colors">
       <div className="flex-1 min-w-0 rounded-l-full">
         <WherePicker
@@ -336,14 +344,18 @@ const StaysSearchBar = ({ where, setWhere, checkin, setCheckin, checkout, setChe
         />
       </div>
       <div className="w-px bg-[#E5E5E5] my-2" />
-      <div className="flex flex-1">
+      {/* Stay type — Vacation / Short-term / Long-term. Storage retired. */}
+      <div className="flex-1 min-w-0">
+        <StayTypePicker
+          value={subType}
+          onChange={setSubType}
+          testidPrefix="stays-type"
+        />
+      </div>
+      <div className="w-px bg-[#E5E5E5] my-2" />
+      <div className="flex-1 min-w-0">
         {/* When — single segment opening a range calendar popover that
-            sets both check-in and check-out. Matches the Airbnb-style
-            screenshot the user shared (label "When", value "Add dates"
-            → range like "Jun 5 – Jul 12"). Visible on every viewport so
-            mobile users can pick dates without opening the Filters
-            modal — the calendar popover itself is portal-rendered and
-            shows 2 months side-by-side on mobile too. */}
+            sets both check-in and check-out. */}
         <WhenPicker
           checkin={checkin}
           checkout={checkout}

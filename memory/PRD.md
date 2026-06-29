@@ -11,6 +11,14 @@ Build a bilingual (English/Hebrew) rental website named MyIsraelRental.com with 
 - **i18n**: i18next with English and Hebrew (RTL) support
 
 ## What's Been Implemented
+- [x] **3-segment search pill: Where | Stay type | When (2026-06-29)**: User asked for a third segment in the bubble for stay-type selection (Vacation / Short-term / Long-term — storage retired). Previously the bar only had Where + When, with stay type buried in the Filters modal.
+  - **New component** `frontend/src/components/search/StayTypePicker.jsx`: same visual contract as `WherePicker` / `WhenPicker` (tiny uppercase label + value below, popover anchored under the segment, outside-click dismissal). Renders four options — Any / Vacation / Short-term / Long-term — each with a Lucide icon (Palmtree / Home / Briefcase). Inline X clear when a value is picked. `data-testid`s: `stays-type-toggle`, `stays-type-menu`, `stays-type-option-{v}`.
+  - **Stays.jsx**: imported `StayTypePicker`, added a `subType`/`setSubType` segment between Where and When. Wired to the same state that powers the client-side `rental_type` filter and the modal's stay-type chips, so picking from either place stays in sync and persists to the URL as `?subType=vacation|short-term|long-term`.
+  - **Filter badge logic**: removed `subType` from `activeFilterCount` since it's now first-class in the bar (showing "+1 filter" just because the user picked a stay type would be misleading). Modal chips kept as a backup UX.
+  - **Verified** via desktop screenshots + click flow: dropdown shows 4 options; picking Vacation → segment renders "Vacation", URL becomes `?subType=vacation`, grid filters down to 10 vacation properties. No ResizeObserver warnings during interaction.
+  - Files: `frontend/src/components/search/StayTypePicker.jsx` (new), `frontend/src/pages/Stays.jsx`.
+
+
 - [x] **Removed search bar from Home, only shows after Stays/Services selected (2026-06-29)**: User wanted the home page to focus on the hero + featured strip — the search bar should appear only once a category (Stays / Services) is chosen.
   - **Home.js**: dropped the entire frosted-glass "home-search-band" (which previously held the 3-segment Where/When pill, search button, and QuickChips presets) along with its supporting state (`searchQuery`, `whereArea`, `checkin`, `checkout`, `areaOptions`) and helper (`handleSearch`). Removed unused imports (`Search`, `WhenPicker`, `WherePicker`, `QuickChips`, `sizedImage`). The HeroSlideshow no longer needs its `-mt-[140px]` overlap or the `mt-32 sm:mt-28 md:mt-20` push-down on hero copy — replaced with a single `marginTop: var(--nav-h, 68px)` on the centered hero text so the title naturally clears the fixed nav at any breakpoint.
   - **Stays.jsx**: unchanged — its sticky search bar already renders only when the user is on `/stays`. Services has no search bar (intentional). So the search experience is now strictly category-gated.
