@@ -1165,3 +1165,11 @@ See /app/memory/test_credentials.md
   - Verified by testing_agent iteration_35: gap = 0.0px at rest, 0.5px (sub-pixel) when scrolled, across 7 viewports (390-1280). ResizeObserver correctly re-fires on viewport resize sequences AND on QuickChips async holiday-data load. All regressions pass.
   - Files: `frontend/src/hooks/useElementHeight.js`, `frontend/src/components/Navigation.js`, `frontend/src/pages/Stays.jsx`, `frontend/src/pages/Home.js`.
 
+
+- [x] **i18n pass for search-pill strings (EN + HE)** (2026-02-29):
+  - Added a new `stays:` namespace under both `en.translation` and `he.translation` in `i18n.js` covering 36+ keys: where / anywhere / when / addDates / filters, popover (selectDates, tabDates, tabFlexible, howLong, goAnytime, lengthWeekend/Week/Month, apply, close, clear, pickAMonth), and QuickChips labels (chipTonight, chipThisWeekend, chipNextWeek, chipThisMonth, chipSukkotWeek, chipPesachWeek, chipShavuot, chipRoshHashana).
+  - `WhenPicker.jsx`, `WherePicker.jsx`, `QuickChips.jsx` now consume the keys via `useTranslation`. Chip-label builders take `t` as a parameter and include `i18n.language` in their useMemo/useEffect dependencies so labels re-translate **without a page reload** when the user toggles the language via the globe.
+  - Hebrew labels verified: איפה / כל מקום / מתי / בחרו תאריכים / סינון / תאריכים / גמיש / סגור / ניקוי / בחרו חודש / לכמה זמן תרצו להישאר? / מתי שנוח / סוף שבוע / שבוע / חודש / הלילה / סוף השבוע הזה / שבוע הבא / החודש / חופשת סוכות / חופשת פסח / שבועות / ראש השנה.
+  - Verified by testing_agent iteration_36: 100% PASS in both locales on desktop + mobile. Globe toggle is reactive (no reload needed). All regressions (jeru autocomplete, chip URL sync, holiday chip gold borders, --nav-h flush, md+ chip hiding) still pass.
+  - Files: `frontend/src/i18n.js`, `frontend/src/components/search/WhenPicker.jsx`, `WherePicker.jsx`, `QuickChips.jsx`.
+
