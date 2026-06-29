@@ -1198,3 +1198,11 @@ See /app/memory/test_credentials.md
   - Verified by testing_agent iteration_40: **100% PASS**, computed styles confirm physical sides flip correctly per locale (LTR see-all marginLeft=4px, RTL marginRight=4px; LTR close-X right:16px, RTL left:16px), gallery icons swap, no console errors, no regressions.
   - Files: `frontend/src/hooks/useIsRtl.js`, `frontend/src/pages/Stays.jsx`, `frontend/src/components/property/ImageGallery.jsx`, `frontend/src/components/search/WherePicker.jsx`, `frontend/src/components/search/WhenPicker.jsx`.
 
+
+- [x] **Bulk RTL polish for dashboard + admin** (2026-02-29):
+  - One-shot Perl regex transform across **23 files** in `components/dashboard` + `components/admin`: `\b(ml|mr|pl|pr)-` → `(ms|me|ps|pe)-`. Tailwind 3.4 logical utilities flip automatically based on `dir`, so LTR layouts stay pixel-identical while RTL inherits correct trailing/leading sides.
+  - 5 targeted `left-`/`right-` → `start-`/`end-` flips on the most visible inset offenders: BulkManager search icon, SmartPricing currency suffix, ManagerHeader notification badge, LikedTab card close-button + bottom 'Default' badge.
+  - Verified by testing_agent iteration_41: **100% PASS**. Runtime evidence — BulkManager magnifier at physical right in RTL (`side=PHYS-RIGHT`), SmartPricingModal currency suffix at physical left in RTL (`side=PHYS-LEFT`), dashboard + admin both render `dir=rtl` cleanly. Zero console errors. No regressions on /stays + /home.
+  - Note from testing agent: `localStorage.setItem('i18nextLng','en') + reload` is sometimes insufficient to fully reset i18next (the in-memory cache wins); the visible globe toggle is the reliable way. Not introduced by this iteration.
+  - Files: 23 files in `components/dashboard/*` + `components/admin/*` (Perl-rewritten), plus `BulkManagerTab.jsx`, `SmartPricingModal.jsx`, `ManagerHeader.jsx`, `LikedTab.jsx` (5 targeted positional flips).
+
