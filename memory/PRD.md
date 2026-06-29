@@ -11,6 +11,11 @@ Build a bilingual (English/Hebrew) rental website named MyIsraelRental.com with 
 - **i18n**: i18next with English and Hebrew (RTL) support
 
 ## What's Been Implemented
+- [x] **Removed mobile-on-scroll search bar (2026-06-29)**: On the home page, scrolling past 450px on mobile used to slide a small search input into the top nav. User asked for it gone.
+  - **`Navigation.js`**: dropped the entire `scrolled && showSearch` branch (input + button + container), the `homeShowSearch` state, the `navSearch` / `navSearch_ref` state, and the `handleNavSearch` handler. The home-scroll effect still updates `homeScrolled` (drives the nav background) but no longer triggers a search reveal.
+  - **Verified** on iPhone viewport (393×852): scrolling to 700px → only the global nav (logo + Stays/Services + lang/menu) is visible, no search input rendered. `nav-search-input` DOM element is gone.
+  - Files: `frontend/src/components/Navigation.js`.
+
 - [x] **/stays search bar no longer sticks on scroll (2026-06-29)**: User asked that the search bar not follow the page when scrolling down.
   - **`Stays.jsx`**: switched the search-bar wrapper from `position: fixed` → in-flow. Dropped the `barRef` + `useElementHeight(barRef)` measurement + the dynamic `paddingTop: calc(var(--nav-h) + ${barHeight}px)` compensation (page wrapper now uses just `var(--nav-h)` so the page content sits flush under the global nav and the search bar lives in the normal document flow below it).
   - Removed the now-unused `useRef` + `useElementHeight` imports.

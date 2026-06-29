@@ -16,7 +16,6 @@ const Navigation = () => {
   const isHome = location.pathname === '/';
   const [menuOpen, setMenuOpen] = useState(false);
   const [homeScrolled, setHomeScrolled] = useState(false);
-  const [homeShowSearch, setHomeShowSearch] = useState(false);
   // Mobile-only: collapse the bottom tab strip to text-only once the
   // user scrolls past a tiny threshold, on every page. Mirrors Airbnb's
   // mobile chrome where the icon strip disappears as you scroll into
@@ -52,8 +51,6 @@ const Navigation = () => {
       ro.disconnect();
     };
   }, []);
-  const navSearch_ref = useRef('');
-  const [navSearch, setNavSearch] = useState('');
   const menuRef = useRef(null);
   
   // Notification states
@@ -94,12 +91,6 @@ const Navigation = () => {
   const handleNav = (path) => {
     navigate(path);
     setMenuOpen(false);
-  };
-
-  const handleNavSearch = () => {
-    if (navSearch.trim()) {
-      navigate(`/properties/all?search=${navSearch}`);
-    }
   };
   
   // Fetch notifications
@@ -299,7 +290,6 @@ const Navigation = () => {
     if (!isHome) return;
     const handleScroll = () => {
       setHomeScrolled(window.scrollY > 120);
-      setHomeShowSearch(window.scrollY > 450);
     };
     handleScroll();
     window.addEventListener('scroll', handleScroll, { passive: true });
@@ -319,7 +309,6 @@ const Navigation = () => {
 
   // Non-home pages always compact; home page depends on scroll
   const scrolled = isHome ? homeScrolled : true;
-  const showSearch = isHome ? homeShowSearch : false;
 
   return (
     <nav
@@ -375,36 +364,9 @@ const Navigation = () => {
             </div>
           </div>
 
-          {scrolled && (
-            <div
-              className="flex-1 max-w-md mx-6 transition-all duration-500 overflow-hidden md:hidden"
-              style={{
-                opacity: showSearch ? 1 : 0,
-                maxWidth: showSearch ? '28rem' : '0',
-                transform: showSearch ? 'scaleX(1)' : 'scaleX(0)',
-                transformOrigin: 'center'
-              }}
-            >
-              <div className="flex items-center bg-white/15 rounded-full border border-[#D4AF37]/30 overflow-hidden">
-                <input
-                  type="text"
-                  placeholder={t('hero.searchPlaceholder')}
-                  value={navSearch}
-                  onChange={(e) => setNavSearch(e.target.value)}
-                  onKeyPress={(e) => e.key === 'Enter' && handleNavSearch()}
-                  className="flex-1 px-4 py-2 bg-transparent text-white placeholder-white/60 text-sm focus:outline-none"
-                  data-testid="nav-search-input"
-                />
-                <button
-                  onClick={handleNavSearch}
-                  className="px-3 py-2 text-white/80 hover:text-white transition-colors"
-                  data-testid="nav-search-button"
-                >
-                  <Search size={16} />
-                </button>
-              </div>
-            </div>
-          )}
+          {/* Mobile-on-scroll search bar was removed per user request —
+              the global nav stays clean on scroll, and dedicated
+              category pages (/stays) own their own search experience. */}
 
           <div className="flex items-center gap-3">
             {/* Language toggle — desktop always, mobile shown only when
