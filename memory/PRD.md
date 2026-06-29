@@ -11,12 +11,18 @@ Build a bilingual (English/Hebrew) rental website named MyIsraelRental.com with 
 - **i18n**: i18next with English and Hebrew (RTL) support
 
 ## What's Been Implemented
+- [x] **/stays search bar no longer sticks on scroll (2026-06-29)**: User asked that the search bar not follow the page when scrolling down.
+  - **`Stays.jsx`**: switched the search-bar wrapper from `position: fixed` → in-flow. Dropped the `barRef` + `useElementHeight(barRef)` measurement + the dynamic `paddingTop: calc(var(--nav-h) + ${barHeight}px)` compensation (page wrapper now uses just `var(--nav-h)` so the page content sits flush under the global nav and the search bar lives in the normal document flow below it).
+  - Removed the now-unused `useRef` + `useElementHeight` imports.
+  - Verified: at the top of /stays the search bar is visible directly below the global nav; after scrolling ~700px down, only the global nav stays sticky and the search bar is gone, giving the cards the full viewport.
+  - Files: `frontend/src/pages/Stays.jsx`.
+
 - [x] **Mobile logo size restored to prominent ratio (2026-06-29)**: User noted the mobile logo had become too small after recent compact-nav work and asked to bring it back to a larger size like the earlier version.
   - **`Navigation.js`**: bumped the mobile logo height from `h-10` (40px) to `h-20` (80px) when not scrolled, and from `h-10` to `h-12` (48px) when scrolled. Desktop sizes (`sm:h-[140px]` / `sm:h-[60px]`) unchanged. Single tailwind class swap — no layout side effects since the logo is `shrink-0` and the rest of the row uses `flex-1`.
   - **Verified** on a 393×852 iPhone viewport: not-scrolled state shows the city/buildings logo at a comfortable visible size; scrolled state shrinks it to 48px so it still reads but frees up vertical space.
   - Files: `frontend/src/components/Navigation.js`.
 
- User flagged that picking "Week in October" was resolving to concrete dates (Oct 1–8). Airbnb instead keeps the label literal ("A week in October") and widens the availability filter to any N-night sub-window inside that month.
+- [x] **Flexible Dates: Airbnb-style "A week in October" (2026-06-29)**: User flagged that picking "Week in October" was resolving to concrete dates (Oct 1–8). Airbnb instead keeps the label literal ("A week in October") and widens the availability filter to any N-night sub-window inside that month.
   - **`WhenPicker.jsx`**: now accepts a `flexible` prop and emits `onChange({ checkin, checkout, flexible })`. Flexible mode stores `{ stayLength, monthIso }` instead of resolving to dates. Picking precise dates on the Dates tab clears `flexible`, and vice versa. Exported a `flexLabel(flex, t)` helper so the search bar + results header can render "A week in October" / "A weekend in July" / "A month in March" without duplicating the date math. Removed dead `resolveFlexible` helper + its `date-fns` imports (`addDays`, `endOfMonth`, `getDay`).
   - **`Stays.jsx`**: new `flexible` state hydrated from / persisted to `?flex=stayLength:YYYY-MM`. Filter chain widened — when `flexible` is set, a property matches if its `available_from` ≤ `last_day_of_month - N + 1` AND `available_to` (if set) ≥ `first_day_of_month + N - 1`, so any N-night sub-window inside the month is valid. N = 2 (weekend) / 7 (week) / 28 (month). When precise dates aren't set, `isSearchActive` and `clearAllFilters` both honor the flexible value. Results header shows the flexible label as the subtitle. `QuickChips` and Dates picks now also clear `flexible` so the user can never end up in a hybrid state.
   - **Verified**: opened Flexible → Week → picked October 2026 → Apply. Search bar segment shows "A week in October". URL: `?flex=week%3A2026-10`. Heading: "14 stays" + "A week in October" subtitle. Results grid populated. No ResizeObserver warnings.

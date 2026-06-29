@@ -17,7 +17,7 @@
  * storage was retired from the platform). Long-term / short-term /
  * vacation all live under the same "Stays" umbrella.
  */
-import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import axios from 'axios';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
@@ -32,7 +32,6 @@ import WhenPicker, { flexLabel } from '../components/search/WhenPicker';
 import WherePicker from '../components/search/WherePicker';
 import StayTypePicker from '../components/search/StayTypePicker';
 import QuickChips from '../components/search/QuickChips';
-import useElementHeight from '../hooks/useElementHeight';
 import useIsRtl from '../hooks/useIsRtl';
 import useFavorites from '../hooks/useFavorites';
 
@@ -219,15 +218,6 @@ const Stays = () => {
     setSubType(''); setBedrooms(''); setPriceMin(''); setPriceMax(''); setAmenities([]);
   };
 
-  // Live-measure the fixed search-bar container so the page wrapper's
-  // padding-top always matches its actual height, even as the bar's
-  // contents grow/shrink (e.g. QuickChips loading async holiday data).
-  // Combined with the global `--nav-h` CSS variable published by
-  // Navigation, this kills every "magic-number top padding" we used to
-  // hard-code per breakpoint.
-  const barRef = useRef(null);
-  const barHeight = useElementHeight(barRef);
-
   // Shared favorites state — drives the interactive heart on every card.
   const { likedIds, toggleLike } = useFavorites();
 
@@ -235,7 +225,9 @@ const Stays = () => {
     <div
       className="min-h-screen bg-[#FAFAF7]"
       style={{
-        paddingTop: `calc(var(--nav-h, 68px) + ${barHeight}px)`,
+        // Only the global nav stays fixed — the search bar scrolls
+        // away with the page so the cards have the full viewport.
+        paddingTop: 'var(--nav-h, 68px)',
         // Leave room at the bottom so the floating WhatsApp + a11y FABs
         // (~64px tall + their 24px safe-area offset) never cover the
         // last row of property cards on mobile.
@@ -243,14 +235,12 @@ const Stays = () => {
       }}
       data-testid="stays-page"
     >
-      {/* Fixed top search bar — uses the live `--nav-h` CSS var (published
-          by <Navigation> via ResizeObserver) so the bar is always flush
-          against the bottom of the nav, regardless of breakpoint or
-          mobileScrolled state. */}
+      {/* Inline (non-sticky) search bar — sits flush below the global
+          nav at the top of the page and scrolls away with the rest of
+          the content as the user explores. Previously this was
+          `position: fixed`; user asked for it not to follow on scroll. */}
       <div
-        ref={barRef}
-        className="fixed left-0 right-0 z-30 bg-white border-b border-[#E5E5E5] shadow-sm"
-        style={{ top: 'var(--nav-h, 68px)' }}
+        className="bg-white border-b border-[#E5E5E5]"
       >
         <div className="max-w-7xl mx-auto px-4 py-3">
           <StaysSearchBar
