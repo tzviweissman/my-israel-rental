@@ -11,6 +11,14 @@ Build a bilingual (English/Hebrew) rental website named MyIsraelRental.com with 
 - **i18n**: i18next with English and Hebrew (RTL) support
 
 ## What's Been Implemented
+- [x] **Interactive Favorites/Wishlist on Stays cards (2026-06-29)**: User asked for the new Airbnb-style heart icon on Stays cards to become real (persist per user). Backend (`liked_properties` collection + 3 endpoints) and the dashboard `LikedTab` already existed — needed to wire the heart on the new compact cards.
+  - **New hook** `frontend/src/hooks/useFavorites.js`: wraps `GET /api/liked-property-ids` + `POST /api/properties/{id}/like` into `{ likedIds: Set, toggleLike(id, e), isLoggedIn }`. Hydrates on mount when a token exists, clears on logout. `toggleLike` calls `e.stopPropagation()`/`preventDefault()` so the heart never bubbles into the card's navigation. Signed-out users see a "Please log in to save properties" sonner toast instead of an API call.
+  - **Stays.jsx**: consumes the hook at the page level and passes `liked` + `onToggleLike` props down through `AreaRow` to every `StaysCard`. Heart is now a real `<button>` with `aria-pressed`, `aria-label`, and a `data-testid` (`stays-card-like-{id}`). Liked state fills the SVG with Airbnb's `#FF385C` red; unliked uses the subtle white-on-shadow look. Hover gives a `scale-110` micro-animation. Card root switched from `<button>` to `<div role="button">` so the nested heart `<button>` is valid HTML.
+  - **Tests** (`backend/tests/test_favorites.py`, new via testing agent, all pass): toggle cycle, 404 on missing property, 401/403 without auth.
+  - **Verified flows** (testing agent, iteration_43, 100% pass): signed-out heart → sign-in toast (no navigation); signed-in heart → fills red, persists, second click un-likes; card body click → still navigates to `/property/{id}`; dashboard Liked tab reflects the new like.
+  - Files: `frontend/src/hooks/useFavorites.js` (new), `frontend/src/pages/Stays.jsx`, `backend/tests/test_favorites.py` (new).
+
+
 - [x] **Stays page Airbnb-style compact card refresh (2026-06-29)**: User shared an Airbnb screenshot and asked for the Stays page to look "more compact and clean." Cards redesigned to match.
   - **StaysCard** (`pages/Stays.jsx`): borderless/shadowless, flat background. Square aspect-ratio cover image with `rounded-xl`, decorative `Heart` icon overlay top-end. Smaller carousel cards (`w-[180px] sm:w-[200px] lg:w-[220px]`) so ~5–6 are visible per row. Title (`font-semibold text-sm`), area subline, single-line price with `/ night` or `/ month`.
   - **AreaRow header**: single-line title with inline forward chevron (clickable → opens area-specific listing). Tighter `mb-3` spacing. Carousel prev/next buttons shrunk to `w-7 h-7` with subtle border.
