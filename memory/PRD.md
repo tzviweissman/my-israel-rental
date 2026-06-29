@@ -11,6 +11,14 @@ Build a bilingual (English/Hebrew) rental website named MyIsraelRental.com with 
 - **i18n**: i18next with English and Hebrew (RTL) support
 
 ## What's Been Implemented
+- [x] **Stays page Airbnb-style compact card refresh (2026-06-29)**: User shared an Airbnb screenshot and asked for the Stays page to look "more compact and clean." Cards redesigned to match.
+  - **StaysCard** (`pages/Stays.jsx`): borderless/shadowless, flat background. Square aspect-ratio cover image with `rounded-xl`, decorative `Heart` icon overlay top-end. Smaller carousel cards (`w-[180px] sm:w-[200px] lg:w-[220px]`) so ~5–6 are visible per row. Title (`font-semibold text-sm`), area subline, single-line price with `/ night` or `/ month`.
+  - **AreaRow header**: single-line title with inline forward chevron (clickable → opens area-specific listing). Tighter `mb-3` spacing. Carousel prev/next buttons shrunk to `w-7 h-7` with subtle border.
+  - **Grid view** (search-active): now `grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6` with `gap-x-5 gap-y-8`. Container max-width bumped to `1760px` with responsive padding, matching Airbnb's edge-to-edge feel on wide screens.
+  - **Screenshot-verified** on desktop (1920×1080): grid mode renders 6 cards per row matching the reference; carousel mode shows 5 compact cards with clean section headers.
+  - Files: `frontend/src/pages/Stays.jsx`.
+
+
 
 - [x] **Home redesign: Stays + Services + Airbnb-style search bar (2026-06-27)**: Major IA shift. User wanted to replace the 4-rental-type strip (long-term / short-term / vacation / storage) with two top-level categories — **Stays** and **Services** — matching the Airbnb screenshots they shared. Storage rentals retired entirely from the platform.
   - **Navigation pills** (`components/Navigation.js`, `NavCategoryItem.jsx`): desktop and mobile pill rows both replaced with Stays (Bed icon → /stays) and Services (Briefcase icon → /services). The hamburger drawer also gets the same 2-item structure plus Sukkot/Pesach holiday sub-shortcuts indented underneath. Storage drawer entry removed.

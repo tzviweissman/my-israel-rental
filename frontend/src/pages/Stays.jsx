@@ -22,7 +22,7 @@ import axios from 'axios';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import {
-  Search, SlidersHorizontal, MapPin, Calendar, X, ChevronRight, ChevronLeft, Loader2,
+  Search, SlidersHorizontal, MapPin, Calendar, X, ChevronRight, ChevronLeft, Loader2, Heart,
 } from 'lucide-react';
 import { getCoverImage } from '../utils/coverImage';
 import DefaultImageBadge from '../components/property/DefaultImageBadge';
@@ -237,10 +237,10 @@ const Stays = () => {
         </div>
       ) : isSearchActive ? (
         // Flat results grid — Airbnb-style, shown once any search/filter is active
-        <div className="max-w-7xl mx-auto px-4 py-6" data-testid="stays-results-grid">
+        <div className="max-w-[1760px] mx-auto px-4 sm:px-6 lg:px-10 py-6" data-testid="stays-results-grid">
           <div className="flex items-end justify-between mb-4">
             <div>
-              <h2 className="text-xl md:text-2xl font-bold" style={{ fontFamily: 'Playfair Display' }}>
+              <h2 className="text-lg md:text-xl font-semibold text-gray-900">
                 {filtered.length} {filtered.length === 1 ? t('stays.stay', 'stay') : t('stays.staysLabel', 'stays')}
                 {where ? ` ${t('stays.in', 'in')} ${where}` : ''}
               </h2>
@@ -258,7 +258,7 @@ const Stays = () => {
               {t('stays.clearAll', 'Clear all')}
             </button>
           </div>
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-x-5 gap-y-8">
             {filtered.map((p) => (
               <StaysCard
                 key={p.id}
@@ -273,7 +273,7 @@ const Stays = () => {
           </div>
         </div>
       ) : (
-        <div className="max-w-7xl mx-auto px-4 py-6 space-y-10">
+        <div className="max-w-[1760px] mx-auto px-4 sm:px-6 lg:px-10 py-6 space-y-8">
           {grouped.map(([area, props]) => (
             <AreaRow
               key={area}
@@ -390,34 +390,41 @@ const AreaRow = ({ area, properties, onCardClick, onSeeAll, t }) => {
   const ForwardChevron = isRtl ? ChevronLeft : ChevronRight;
   return (
     <section data-testid={`stays-area-section-${area}`}>
-      <div className="flex items-end justify-between mb-3">
-        <div>
-          <h2 className="text-xl md:text-2xl font-bold" style={{ fontFamily: 'Playfair Display' }}>
+      {/* Compact Airbnb-style header: single-line title with inline arrow,
+          carousel chevrons sit on the far end. */}
+      <div className="flex items-center justify-between mb-3">
+        <button
+          onClick={onSeeAll}
+          className="group flex items-center gap-1.5 text-left"
+          data-testid={`stays-see-all-${area}`}
+        >
+          <h2 className="text-base md:text-lg font-semibold text-gray-900 group-hover:underline">
             {t('stays.staysIn', 'Stays in')} {area}
           </h2>
-          <p className="text-xs text-gray-500 mt-0.5">
-            {properties.length} {properties.length === 1 ? t('stays.listing', 'listing') : t('stays.listings', 'listings')}
-          </p>
-        </div>
-        <div className="flex items-center gap-1">
-          {properties.length > 3 && (
-            <>
-              <button onClick={() => scroll(-1)} className="hidden md:flex w-8 h-8 rounded-full border border-[#E5E5E5] items-center justify-center hover:border-[#D4AF37]" aria-label="Scroll back">
-                {isRtl ? <ChevronRight size={14} /> : <ChevronLeft size={14} />}
-              </button>
-              <button onClick={() => scroll(1)} className="hidden md:flex w-8 h-8 rounded-full border border-[#E5E5E5] items-center justify-center hover:border-[#D4AF37]" aria-label="Scroll forward">
-                {isRtl ? <ChevronLeft size={14} /> : <ChevronRight size={14} />}
-              </button>
-            </>
-          )}
-          <button onClick={onSeeAll} className="ms-1 text-xs font-semibold text-[#1E6A6A] hover:underline flex items-center gap-1" data-testid={`stays-see-all-${area}`}>
-            {t('stays.seeAll', 'See all')} <ForwardChevron size={12} />
-          </button>
-        </div>
+          <ForwardChevron size={16} className="text-gray-900" />
+        </button>
+        {properties.length > 3 && (
+          <div className="hidden md:flex items-center gap-1.5">
+            <button
+              onClick={() => scroll(-1)}
+              className="w-7 h-7 rounded-full border border-gray-300 flex items-center justify-center text-gray-700 hover:border-gray-900 transition-colors"
+              aria-label="Scroll back"
+            >
+              {isRtl ? <ChevronRight size={14} /> : <ChevronLeft size={14} />}
+            </button>
+            <button
+              onClick={() => scroll(1)}
+              className="w-7 h-7 rounded-full border border-gray-300 flex items-center justify-center text-gray-700 hover:border-gray-900 transition-colors"
+              aria-label="Scroll forward"
+            >
+              {isRtl ? <ChevronLeft size={14} /> : <ChevronRight size={14} />}
+            </button>
+          </div>
+        )}
       </div>
       <div
         ref={scrollRef}
-        className="flex gap-3 overflow-x-auto snap-x snap-mandatory scrollbar-hide pb-2 -mx-2 px-2"
+        className="flex gap-3 sm:gap-4 overflow-x-auto snap-x snap-mandatory scrollbar-hide pb-2 -mx-2 px-2"
         style={{ scrollbarWidth: 'none' }}
       >
         {properties.slice(0, 12).map((p) => (
@@ -433,32 +440,45 @@ const StaysCard = ({ property, onClick, fullWidth = false }) => {
   const sym = (property.currency || 'ILS') === 'ILS' ? '₪' : '$';
   const price = property.rental_type === 'vacation' ? property.nightly_price : property.monthly_price;
   const unit = property.rental_type === 'vacation' ? 'night' : 'month';
+  // Compact carousel card sizing — smaller on mobile so ~2 are visible
+  // at a glance, bumping up on tablet/desktop. Mirrors Airbnb's density.
   const sizeClasses = fullWidth
     ? 'w-full'
-    : 'snap-start shrink-0 w-[260px] sm:w-[280px]';
+    : 'snap-start shrink-0 w-[180px] sm:w-[200px] lg:w-[220px]';
   return (
     <button
       onClick={onClick}
-      className={`${sizeClasses} bg-white rounded-xl border border-[#E5E5E5] overflow-hidden hover:border-[#D4AF37] hover:shadow-md transition-all text-left`}
+      className={`${sizeClasses} bg-transparent text-left group`}
       data-testid={`stays-card-${property.id}`}
     >
+      {/* Flat, borderless image with rounded corners + favorite heart.
+          Square aspect matches Airbnb's grid density better than the
+          previous 16:11 cards. */}
       <div
-        className="relative h-44 bg-gray-100"
+        className="relative aspect-square w-full bg-gray-100 rounded-xl overflow-hidden"
         style={{ backgroundImage: `url(${cover.url})`, backgroundSize: 'cover', backgroundPosition: 'center' }}
       >
         {cover.isDefault && <DefaultImageBadge />}
         {cover.fromVideo && <VideoCoverBadge />}
+        {/* Decorative-only heart overlay (no favorites backend yet) —
+            matches the visual rhythm of Airbnb cards. */}
+        <span
+          className="absolute top-2 end-2 text-white/90 drop-shadow-[0_1px_2px_rgba(0,0,0,0.35)] pointer-events-none"
+          aria-hidden="true"
+        >
+          <Heart size={20} strokeWidth={2} fill="rgba(0,0,0,0.35)" />
+        </span>
       </div>
-      <div className="p-3">
-        <p className="font-bold text-sm truncate">{property.title}</p>
+      <div className="pt-2 px-0.5">
+        <p className="font-semibold text-sm text-gray-900 truncate">{property.title}</p>
         <p className="text-xs text-gray-500 truncate">{property.area}</p>
         {price ? (
-          <p className="text-sm mt-1">
-            <span className="font-bold">{sym}{price.toLocaleString()}</span>
-            <span className="text-xs text-gray-500"> / {unit}</span>
+          <p className="text-xs mt-0.5 text-gray-900">
+            <span className="font-semibold">{sym}{price.toLocaleString()}</span>
+            <span className="text-gray-500"> / {unit}</span>
           </p>
         ) : (
-          <p className="text-xs text-gray-400 mt-1">Price on request</p>
+          <p className="text-xs text-gray-400 mt-0.5">Price on request</p>
         )}
       </div>
     </button>
