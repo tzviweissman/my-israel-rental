@@ -1173,3 +1173,10 @@ See /app/memory/test_credentials.md
   - Verified by testing_agent iteration_36: 100% PASS in both locales on desktop + mobile. Globe toggle is reactive (no reload needed). All regressions (jeru autocomplete, chip URL sync, holiday chip gold borders, --nav-h flush, md+ chip hiding) still pass.
   - Files: `frontend/src/i18n.js`, `frontend/src/components/search/WhenPicker.jsx`, `WherePicker.jsx`, `QuickChips.jsx`.
 
+
+- [x] **RTL layout flip on Hebrew locale** (2026-02-29):
+  - `i18n.js`: added `applyLocaleDir(lng)` bound to `i18n.on('languageChanged', ...)` plus a one-shot init call. `RTL_LOCALES = {'he','ar','fa','ur'}`. Writes both `lang` and `dir` to `<html>`.
+  - First attempt (iteration_37) failed because a stale `useEffect` in `App.js` lines 65-72 was hard-pinning `dir='ltr'` on every i18n.language change, racing the new handler. Testing agent's RCA caught it; fix was removing the conflicting effect (iteration_38).
+  - Verified by testing_agent iteration_38: **7/7 RTL cases PASS**. Initial load with `localStorage.i18nextLng='he'` → `dir='rtl'`; reactive globe toggle flips both attributes in < 1s without reload; visual layout reverses on desktop and mobile (Menu on left, chevrons mirrored, QuickChips right-to-left). No regressions to i18n strings or --nav-h refactor.
+  - Files: `frontend/src/i18n.js`, `frontend/src/App.js`.
+
