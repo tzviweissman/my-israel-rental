@@ -32,6 +32,7 @@ import WherePicker from '../components/search/WherePicker';
 import QuickChips from '../components/search/QuickChips';
 import useElementHeight from '../hooks/useElementHeight';
 import useIsRtl from '../hooks/useIsRtl';
+import useFavorites from '../hooks/useFavorites';
 
 const API = process.env.REACT_APP_BACKEND_URL + '/api';
 
@@ -173,6 +174,9 @@ const Stays = () => {
   const barRef = useRef(null);
   const barHeight = useElementHeight(barRef);
 
+  // Shared favorites state — drives the interactive heart on every card.
+  const { likedIds, toggleLike } = useFavorites();
+
   return (
     <div
       className="min-h-screen bg-[#FAFAF7]"
@@ -264,6 +268,8 @@ const Stays = () => {
                 key={p.id}
                 property={p}
                 fullWidth
+                liked={likedIds.has(p.id)}
+                onToggleLike={(e) => toggleLike(p.id, e)}
                 onClick={() => {
                   sessionStorage.setItem('previousPath', '/stays' + window.location.search);
                   navigate(`/property/${p.id}`);
@@ -279,6 +285,8 @@ const Stays = () => {
               key={area}
               area={area}
               properties={props}
+              likedIds={likedIds}
+              onToggleLike={toggleLike}
               onCardClick={(id) => {
                 sessionStorage.setItem('previousPath', '/stays' + window.location.search);
                 navigate(`/property/${id}`);
@@ -374,7 +382,7 @@ const SearchSegment = ({ label, icon: Icon, children, testid }) => (
   </div>
 );
 
-const AreaRow = ({ area, properties, onCardClick, onSeeAll, t }) => {
+const AreaRow = ({ area, properties, onCardClick, onSeeAll, likedIds, onToggleLike, t }) => {
   const scrollRef = React.useRef(null);
   const isRtl = useIsRtl();
   // In RTL the container's scrollLeft is reversed by the browser, so
@@ -428,14 +436,20 @@ const AreaRow = ({ area, properties, onCardClick, onSeeAll, t }) => {
         style={{ scrollbarWidth: 'none' }}
       >
         {properties.slice(0, 12).map((p) => (
-          <StaysCard key={p.id} property={p} onClick={() => onCardClick(p.id)} />
+          <StaysCard
+            key={p.id}
+            property={p}
+            liked={likedIds?.has(p.id)}
+            onToggleLike={(e) => onToggleLike?.(p.id, e)}
+            onClick={() => onCardClick(p.id)}
+          />
         ))}
       </div>
     </section>
   );
 };
 
-const StaysCard = ({ property, onClick, fullWidth = false }) => {
+const StaysCard = ({ property, onClick, fullWidth = false, liked = false, onToggleLike }) => {
   const cover = getCoverImage(property.images, 400, '', property.videos, property.id);
   const sym = (property.currency || 'ILS') === 'ILS' ? '₪' : '$';
   const price = property.rental_type === 'vacation' ? property.nightly_price : property.monthly_price;
@@ -446,9 +460,12 @@ const StaysCard = ({ property, onClick, fullWidth = false }) => {
     ? 'w-full'
     : 'snap-start shrink-0 w-[180px] sm:w-[200px] lg:w-[220px]';
   return (
-    <button
+    <div
       onClick={onClick}
-      className={`${sizeClasses} bg-transparent text-left group`}
+      role="button"
+      tabIndex={0}
+      onKeyDown={(e) => { if (e.key === 'Enter') onClick?.(); }}
+      className={`${sizeClasses} bg-transparent text-left group cursor-pointer`}
       data-testid={`stays-card-${property.id}`}
     >
       {/* Flat, borderless image with rounded corners + favorite heart.
@@ -460,14 +477,22 @@ const StaysCard = ({ property, onClick, fullWidth = false }) => {
       >
         {cover.isDefault && <DefaultImageBadge />}
         {cover.fromVideo && <VideoCoverBadge />}
-        {/* Decorative-only heart overlay (no favorites backend yet) —
-            matches the visual rhythm of Airbnb cards. */}
-        <span
-          className="absolute top-2 end-2 text-white/90 drop-shadow-[0_1px_2px_rgba(0,0,0,0.35)] pointer-events-none"
-          aria-hidden="true"
+        {/* Interactive favorite heart — fills red when liked. */}
+        <button
+          type="button"
+          onClick={(e) => onToggleLike?.(e)}
+          className="absolute top-2 end-2 p-1.5 rounded-full hover:scale-110 active:scale-95 transition-transform"
+          aria-label={liked ? 'Remove from favorites' : 'Save to favorites'}
+          aria-pressed={liked}
+          data-testid={`stays-card-like-${property.id}`}
         >
-          <Heart size={20} strokeWidth={2} fill="rgba(0,0,0,0.35)" />
-        </span>
+          <Heart
+            size={22}
+            strokeWidth={2}
+            className={liked ? 'text-[#FF385C]' : 'text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.45)]'}
+            fill={liked ? '#FF385C' : 'rgba(0,0,0,0.35)'}
+          />
+        </button>
       </div>
       <div className="pt-2 px-0.5">
         <p className="font-semibold text-sm text-gray-900 truncate">{property.title}</p>
@@ -481,7 +506,7 @@ const StaysCard = ({ property, onClick, fullWidth = false }) => {
           <p className="text-xs text-gray-400 mt-0.5">Price on request</p>
         )}
       </div>
-    </button>
+    </div>
   );
 };
 
