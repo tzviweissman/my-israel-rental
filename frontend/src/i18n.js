@@ -1972,4 +1972,24 @@ i18n
     }
   });
 
+// ---------------------------------------------------------------------------
+// RTL / LTR direction sync — flip the document direction whenever the user
+// switches to Hebrew (or any other RTL locale we may add later). Without
+// this, the strings render in Hebrew but the layout stays LTR — search
+// pills, chips, calendars all read left-to-right, which feels wrong to a
+// native Hebrew speaker. Setting `dir="rtl"` on <html> tells the browser
+// to flip text-alignment, flex/grid order, and even animation direction
+// for everything downstream automatically.
+// ---------------------------------------------------------------------------
+const RTL_LOCALES = new Set(['he', 'ar', 'fa', 'ur']);
+const applyLocaleDir = (lng) => {
+  if (typeof document === 'undefined') return;
+  const lang = (lng || 'en').split('-')[0];
+  const dir = RTL_LOCALES.has(lang) ? 'rtl' : 'ltr';
+  document.documentElement.setAttribute('lang', lang);
+  document.documentElement.setAttribute('dir', dir);
+};
+applyLocaleDir(i18n.language);
+i18n.on('languageChanged', applyLocaleDir);
+
 export default i18n;
