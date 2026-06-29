@@ -4,15 +4,11 @@ import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import DOMPurify from 'dompurify';
 import { API } from '../App';
-import { Search, Bed, Bath, Home as HomeIcon, MapPin, Check, ArrowLeft, ArrowRight } from 'lucide-react';
+import { Bed, Bath, Home as HomeIcon, MapPin, Check, ArrowLeft, ArrowRight } from 'lucide-react';
 import HeroSlideshow from '../components/HeroSlideshow';
 import DefaultImageBadge from '../components/property/DefaultImageBadge';
 import VideoCoverBadge from '../components/property/VideoCoverBadge';
-import WhenPicker from '../components/search/WhenPicker';
-import WherePicker from '../components/search/WherePicker';
-import QuickChips from '../components/search/QuickChips';
 import { getCoverImage } from '../utils/coverImage';
-import { sizedImage } from '../utils/cdnImage';
 
 // Hero background rotation. Keep widths consistent so the cross-fade is
 // imperceptible at the image edges (browser caches the second slide while
@@ -32,7 +28,6 @@ const Home = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const [featuredProperties, setFeaturedProperties] = useState([]);
-  const [searchQuery, setSearchQuery] = useState('');
   const scrollerRef = useRef(null);
   // Track which scroll directions are still possible so we can dim/hide
   // the "Scroll" pills when the user has reached either end.
@@ -63,38 +58,6 @@ const Home = () => {
     } catch (error) {
       console.error('Failed to fetch properties', error);
     }
-  };
-
-  // Where + When — power the new home search bar. Tapping the search
-  // button passes them as URL params to /stays so the listing page
-  // hydrates with the same filters the user just typed.
-  const [whereArea, setWhereArea] = useState('');
-  const [checkin, setCheckin] = useState('');
-  const [checkout, setCheckout] = useState('');
-
-  const [areaOptions, setAreaOptions] = useState([]);
-  useEffect(() => {
-    // Populate the area dropdown from real listings — never show an
-    // option the renter can't actually click through to.
-    axios
-      .get(`${process.env.REACT_APP_BACKEND_URL}/api/properties`, { params: { limit: 1000 } })
-      .then((r) => {
-        const set = new Set();
-        (r.data || []).forEach((p) => {
-          if (p.area && p.rental_type !== 'storage') set.add(p.area);
-        });
-        setAreaOptions(Array.from(set).sort());
-      })
-      .catch(() => {});
-  }, []);
-
-  const handleSearch = () => {
-    const qs = new URLSearchParams();
-    if (whereArea) qs.set('area', whereArea);
-    if (checkin) qs.set('checkin', checkin);
-    if (checkout) qs.set('checkout', checkout);
-    if (searchQuery.trim()) qs.set('q', searchQuery.trim());
-    navigate(`/stays?${qs.toString()}`);
   };
 
   // Scroller helpers — used by the desktop "Scroll" pills. Mobile users can
@@ -132,94 +95,22 @@ const Home = () => {
 
   return (
     <div className="min-h-screen">
-      {/* Search bar — pinned directly under the Stays/Services pills in the
-          nav (per user request). Frosted-glass band that overlays the very
-          top of the slideshow so the 3-segment pill is the first thing a
-          renter sees AFTER the category pills. The slideshow image continues
-          to fill the hero behind it.
-
-          Top spacing comes from the global `--nav-h` CSS var (published
-          by <Navigation> via ResizeObserver) plus a tiny breathing-room
-          buffer, so the band auto-recalibrates if the nav size changes. */}
-      <div
-        className="relative z-20 pb-4 px-4 backdrop-blur-md border-b border-white/10"
-        style={{
-          background: 'linear-gradient(180deg, rgba(15,58,58,0.85) 0%, rgba(15,58,58,0.55) 60%, rgba(15,58,58,0) 100%)',
-          paddingTop: 'calc(var(--nav-h, 68px) + 12px)',
-        }}
-        data-testid="home-search-band"
-      >
-        <div className="max-w-3xl mx-auto">
-          <div className="flex items-stretch gap-2" data-testid="hero-search-bar">
-            <div className="flex-1 flex items-stretch bg-white rounded-full shadow-lg">
-              {/* Where — typeable text input with area suggestions.
-                  Note: the parent wrapper deliberately omits
-                  `overflow-hidden` so the suggestion dropdown can extend
-                  below the pill. The rounded children clip themselves. */}
-              <div className="flex-1 min-w-0 rounded-l-full overflow-visible">
-                <WherePicker
-                  value={whereArea}
-                  onChange={setWhereArea}
-                  options={areaOptions}
-                  testidPrefix="hero-where"
-                />
-              </div>
-              <div className="w-px bg-gray-200 my-2" />
-              {/* When — single segment opening a range calendar popover.
-                  Replaces the previous two native date inputs so the bar
-                  matches the Airbnb-style screenshot the user shared. */}
-              <div className="flex-1 min-w-0">
-                <WhenPicker
-                  checkin={checkin}
-                  checkout={checkout}
-                  onChange={({ checkin: ci, checkout: co }) => {
-                    setCheckin(ci);
-                    setCheckout(co);
-                  }}
-                  testidPrefix="hero-when"
-                />
-              </div>
-            </div>
-            <button
-              onClick={handleSearch}
-              className="primary-btn flex flex-shrink-0 items-center justify-center gap-1.5 sm:gap-2 px-5 sm:px-7 py-3 sm:py-4 text-sm sm:text-base rounded-full shadow-lg"
-              style={{ color: '#FFFFFF' }}
-              data-testid="hero-search-button"
-            >
-              <Search size={18} className="flex-shrink-0" />
-              <span className="hidden sm:inline">{t('hero.search')}</span>
-            </button>
-          </div>
-          {/* Mobile-only one-tap date presets — turns the freshly-freed
-              real estate under the compact nav into a conversion lift.
-              Tap a chip → checkin/checkout set → handleSearch navigates
-              the renter straight to /stays with those dates pre-applied. */}
-          <div className="mt-2">
-            <QuickChips
-              variant="dark"
-              onPick={({ checkin: ci, checkout: co }) => {
-                setCheckin(ci);
-                setCheckout(co);
-                const qs = new URLSearchParams();
-                if (whereArea) qs.set('area', whereArea);
-                qs.set('checkin', ci);
-                qs.set('checkout', co);
-                navigate(`/stays?${qs.toString()}`);
-              }}
-              testidPrefix="hero-quick-chips"
-            />
-          </div>
-        </div>
-      </div>
+      {/* Search bar was removed per user request — it now only appears
+          once a category (Stays / Services) is chosen, so the home page
+          stays focused on the hero + featured listings. The 3-segment
+          search lives at the top of /stays. */}
 
       <HeroSlideshow
         images={HERO_IMAGES}
         holdMs={6000}
         fadeMs={1500}
-        className="h-[560px] flex items-center justify-center -mt-[140px]"
+        className="h-[560px] flex items-center justify-center"
       >
         <div data-testid="hero-section" className="h-full flex items-center justify-center">
-          <div className="relative z-10 text-center text-white px-6 max-w-4xl mt-32 sm:mt-28 md:mt-20">
+          <div
+            className="relative z-10 text-center text-white px-6 max-w-4xl"
+            style={{ marginTop: 'var(--nav-h, 68px)' }}
+          >
             <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold mb-2" style={{ fontFamily: 'Playfair Display', color: 'white' }}>
               {t('hero.title')}
             </h1>
