@@ -42,8 +42,12 @@ const AccessibilityButton = () => {
     <>
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="fixed bottom-6 left-6 z-50 flex items-center justify-center w-11 h-11 rounded-full shadow-2xl transition-all duration-300 hover:scale-110"
-        style={{ backgroundColor: '#4A90E2' }}
+        className="fixed left-6 z-50 flex items-center justify-center w-11 h-11 rounded-full shadow-2xl transition-all duration-300 hover:scale-110"
+        style={{
+          backgroundColor: '#4A90E2',
+          // Stay above iOS home-indicator + any future bottom-nav.
+          bottom: 'calc(env(safe-area-inset-bottom, 0px) + var(--bottom-nav-h, 0px) + 1.5rem)',
+        }}
         data-testid="accessibility-button"
         aria-label="Accessibility Options"
       >
@@ -52,8 +56,12 @@ const AccessibilityButton = () => {
 
       {isOpen && (
         <div
-          className="fixed bottom-24 left-6 z-50 bg-white rounded-2xl shadow-2xl p-6 w-80"
-          style={{ border: '2px solid #4A90E2' }}
+          className="fixed left-6 z-50 bg-white rounded-2xl shadow-2xl p-6 w-80"
+          style={{
+            border: '2px solid #4A90E2',
+            // Sit above the FAB button (44px + 24px FAB-bottom + 8px gap = ~76px).
+            bottom: 'calc(env(safe-area-inset-bottom, 0px) + var(--bottom-nav-h, 0px) + 5.5rem)',
+          }}
           data-testid="accessibility-panel"
         >
           <h3 className="text-xl font-bold mb-4" style={{ fontFamily: 'Playfair Display' }}>

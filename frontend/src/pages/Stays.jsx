@@ -175,7 +175,13 @@ const Stays = () => {
   return (
     <div
       className="min-h-screen bg-[#FAFAF7]"
-      style={{ paddingTop: `calc(var(--nav-h, 68px) + ${barHeight}px)` }}
+      style={{
+        paddingTop: `calc(var(--nav-h, 68px) + ${barHeight}px)`,
+        // Leave room at the bottom so the floating WhatsApp + a11y FABs
+        // (~64px tall + their 24px safe-area offset) never cover the
+        // last row of property cards on mobile.
+        paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 6rem)',
+      }}
       data-testid="stays-page"
     >
       {/* Fixed top search bar — uses the live `--nav-h` CSS var (published
