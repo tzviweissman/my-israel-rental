@@ -75,7 +75,7 @@ const WherePicker = ({
             <button
               type="button"
               onClick={() => { onChange(''); inputRef.current?.focus(); }}
-              className="ml-1 p-0.5 text-gray-400 hover:text-gray-700"
+              className="ms-1 p-0.5 text-gray-400 hover:text-gray-700"
               aria-label="Clear"
               data-testid={`${testidPrefix}-clear`}
             >

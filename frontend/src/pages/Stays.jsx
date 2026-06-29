@@ -31,6 +31,7 @@ import WhenPicker from '../components/search/WhenPicker';
 import WherePicker from '../components/search/WherePicker';
 import QuickChips from '../components/search/QuickChips';
 import useElementHeight from '../hooks/useElementHeight';
+import useIsRtl from '../hooks/useIsRtl';
 
 const API = process.env.REACT_APP_BACKEND_URL + '/api';
 
@@ -375,10 +376,18 @@ const SearchSegment = ({ label, icon: Icon, children, testid }) => (
 
 const AreaRow = ({ area, properties, onCardClick, onSeeAll, t }) => {
   const scrollRef = React.useRef(null);
+  const isRtl = useIsRtl();
+  // In RTL the container's scrollLeft is reversed by the browser, so
+  // we flip the direction parameter — clicking the LEFT chevron still
+  // moves the visual flow "back" one card regardless of locale.
   const scroll = (dir) => {
     if (!scrollRef.current) return;
-    scrollRef.current.scrollBy({ left: dir * 320, behavior: 'smooth' });
+    const sign = isRtl ? -1 : 1;
+    scrollRef.current.scrollBy({ left: dir * sign * 320, behavior: 'smooth' });
   };
+  // Pick a chevron that visually points "forward" in the current
+  // reading direction — RTL "next/see-more" is on the LEFT.
+  const ForwardChevron = isRtl ? ChevronLeft : ChevronRight;
   return (
     <section data-testid={`stays-area-section-${area}`}>
       <div className="flex items-end justify-between mb-3">
@@ -393,16 +402,16 @@ const AreaRow = ({ area, properties, onCardClick, onSeeAll, t }) => {
         <div className="flex items-center gap-1">
           {properties.length > 3 && (
             <>
-              <button onClick={() => scroll(-1)} className="hidden md:flex w-8 h-8 rounded-full border border-[#E5E5E5] items-center justify-center hover:border-[#D4AF37]" aria-label="Scroll left">
+              <button onClick={() => scroll(-1)} className="hidden md:flex w-8 h-8 rounded-full border border-[#E5E5E5] items-center justify-center hover:border-[#D4AF37]" aria-label="Scroll back">
                 <ChevronLeft size={14} />
               </button>
-              <button onClick={() => scroll(1)} className="hidden md:flex w-8 h-8 rounded-full border border-[#E5E5E5] items-center justify-center hover:border-[#D4AF37]" aria-label="Scroll right">
+              <button onClick={() => scroll(1)} className="hidden md:flex w-8 h-8 rounded-full border border-[#E5E5E5] items-center justify-center hover:border-[#D4AF37]" aria-label="Scroll forward">
                 <ChevronRight size={14} />
               </button>
             </>
           )}
-          <button onClick={onSeeAll} className="ml-1 text-xs font-semibold text-[#1E6A6A] hover:underline flex items-center gap-1" data-testid={`stays-see-all-${area}`}>
-            {t('stays.seeAll', 'See all')} <ChevronRight size={12} />
+          <button onClick={onSeeAll} className="ms-1 text-xs font-semibold text-[#1E6A6A] hover:underline flex items-center gap-1" data-testid={`stays-see-all-${area}`}>
+            {t('stays.seeAll', 'See all')} <ForwardChevron size={12} />
           </button>
         </div>
       </div>

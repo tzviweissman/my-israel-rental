@@ -1,6 +1,7 @@
 import React, { useRef } from 'react';
 import { ChevronLeft, ChevronRight, Film, Play } from 'lucide-react';
 import { sizedImage, srcSet, videoPoster } from '../../utils/cdnImage';
+import useIsRtl from '../../hooks/useIsRtl';
 
 const HERO_FALLBACK_URL = 'https://images.pexels.com/photos/1669799/pexels-photo-1669799.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940';
 
@@ -15,6 +16,13 @@ const HERO_FALLBACK_URL = 'https://images.pexels.com/photos/1669799/pexels-photo
  */
 const ImageGallery = ({ media, currentIndex, onIndexChange, alt, apiBase }) => {
   const videoRefs = useRef({});
+  const isRtl = useIsRtl();
+  // In RTL: Prev sits on the right edge (start in RTL = right), with
+  // an arrow that POINTS right; Next sits on the left edge (end), with
+  // an arrow that points left. Logical Tailwind utilities (start-/end-)
+  // handle the positioning; the icons swap explicitly.
+  const PrevIcon = isRtl ? ChevronRight : ChevronLeft;
+  const NextIcon = isRtl ? ChevronLeft : ChevronRight;
 
   const toSrc = (url) => (url.startsWith('/api') ? `${apiBase.replace('/api', '')}${url}` : url);
 
@@ -88,17 +96,17 @@ const ImageGallery = ({ media, currentIndex, onIndexChange, alt, apiBase }) => {
         <>
           <button
             onClick={() => goTo(currentIndex === 0 ? media.length - 1 : currentIndex - 1)}
-            className="absolute left-3 top-1/2 -translate-y-1/2 bg-black/60 text-white p-2 rounded-full hover:bg-black/80 transition-colors z-10"
+            className="absolute start-3 top-1/2 -translate-y-1/2 bg-black/60 text-white p-2 rounded-full hover:bg-black/80 transition-colors z-10"
             data-testid="gallery-prev"
           >
-            <ChevronLeft size={20} />
+            <PrevIcon size={20} />
           </button>
           <button
             onClick={() => goTo(currentIndex === media.length - 1 ? 0 : currentIndex + 1)}
-            className="absolute right-3 top-1/2 -translate-y-1/2 bg-black/60 text-white p-2 rounded-full hover:bg-black/80 transition-colors z-10"
+            className="absolute end-3 top-1/2 -translate-y-1/2 bg-black/60 text-white p-2 rounded-full hover:bg-black/80 transition-colors z-10"
             data-testid="gallery-next"
           >
-            <ChevronRight size={20} />
+            <NextIcon size={20} />
           </button>
           <div className="absolute bottom-3 left-1/2 -translate-x-1/2 bg-black/60 text-white text-xs px-3 py-1 rounded-full pointer-events-none">
             {currentIndex + 1} / {media.length}

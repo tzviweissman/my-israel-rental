@@ -184,7 +184,7 @@ const WhenPicker = ({
               </div>
               <button
                 onClick={() => setOpen(false)}
-                className="absolute right-4 top-4 p-1.5 hover:bg-gray-100 rounded-full"
+                className="absolute end-4 top-4 p-1.5 hover:bg-gray-100 rounded-full"
                 data-testid={`${testidPrefix}-close`}
                 aria-label="Close"
               >
