@@ -31,14 +31,26 @@ const Navigation = () => {
   useEffect(() => {
     const el = navRef.current;
     if (!el) return undefined;
+    let rafId = 0;
     const apply = () => {
       const h = el.offsetHeight || 0;
       document.documentElement.style.setProperty('--nav-h', `${h}px`);
     };
     apply();
-    const ro = new ResizeObserver(apply);
+    // Defer the apply() write to the next animation frame so writing
+    // `--nav-h` (which can affect downstream layout) never happens
+    // inside the ResizeObserver callback — that's what triggers the
+    // benign "ResizeObserver loop completed with undelivered
+    // notifications" warning in Chrome / webpack-dev-server overlay.
+    const ro = new ResizeObserver(() => {
+      if (rafId) cancelAnimationFrame(rafId);
+      rafId = requestAnimationFrame(apply);
+    });
     ro.observe(el);
-    return () => ro.disconnect();
+    return () => {
+      if (rafId) cancelAnimationFrame(rafId);
+      ro.disconnect();
+    };
   }, []);
   const navSearch_ref = useRef('');
   const [navSearch, setNavSearch] = useState('');

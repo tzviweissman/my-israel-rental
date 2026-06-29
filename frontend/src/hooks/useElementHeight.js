@@ -24,12 +24,26 @@ export default function useElementHeight(ref) {
     // Seed with the current height so consumers don't paint a 0-height
     // first frame before ResizeObserver fires.
     setHeight(el.offsetHeight || 0);
+    // Defer state updates to the next animation frame to break the
+    // "ResizeObserver loop completed with undelivered notifications"
+    // warning that fires when the callback triggers a layout change
+    // synchronously (e.g. setState → re-render → resize → observer
+    // queues another callback before the current one returns).
+    let rafId = 0;
     const ro = new ResizeObserver((entries) => {
-      const next = entries[0]?.target?.offsetHeight ?? 0;
-      setHeight((prev) => (prev === next ? prev : next));
+      const target = entries[0]?.target;
+      if (!target) return;
+      if (rafId) cancelAnimationFrame(rafId);
+      rafId = requestAnimationFrame(() => {
+        const next = target.offsetHeight ?? 0;
+        setHeight((prev) => (prev === next ? prev : next));
+      });
     });
     ro.observe(el);
-    return () => ro.disconnect();
+    return () => {
+      if (rafId) cancelAnimationFrame(rafId);
+      ro.disconnect();
+    };
   }, [ref]);
 
   return height;
