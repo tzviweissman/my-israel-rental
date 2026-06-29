@@ -62,14 +62,10 @@ function App() {
     }
   }, [token]);
 
-  useEffect(() => {
-    // Update <html lang> on language change so screen readers / search
-    // engines / spell-checkers know what language the page is in.
-    // We deliberately keep `dir` pinned to LTR — the user's preference
-    // is translated Hebrew text without flipping the entire layout.
-    document.documentElement.lang = i18n.language.startsWith('he') ? 'he' : 'en';
-    document.documentElement.dir = 'ltr';
-  }, [i18n.language]);
+  // Note: <html lang> and <html dir> are managed centrally inside
+  // src/i18n.js — it binds a `languageChanged` listener that sets both
+  // attributes (LTR for default locales, RTL for he/ar/fa/ur). Don't
+  // duplicate the writes here or it'll race the i18n handler.
 
   const fetchCurrentUser = async () => {
     try {
