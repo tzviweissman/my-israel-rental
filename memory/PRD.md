@@ -11,7 +11,14 @@ Build a bilingual (English/Hebrew) rental website named MyIsraelRental.com with 
 - **i18n**: i18next with English and Hebrew (RTL) support
 
 ## What's Been Implemented
-- [x] **3-segment search pill: Where | Stay type | When (2026-06-29)**: User asked for a third segment in the bubble for stay-type selection (Vacation / Short-term / Long-term — storage retired). Previously the bar only had Where + When, with stay type buried in the Filters modal.
+- [x] **Flexible Dates: scroll further into the future (2026-06-29)**: User noted they couldn't scroll to later dates in the Flexible mode of the WhenPicker. Previously hard-capped at 12 upcoming months.
+  - **`WhenPicker.jsx`**: bumped initial month count from 12 → 24, added a `monthCount` state that grows in +12 increments up to a 60-month (5-year) cap.
+  - **New scroll affordances** on the FlexiblePanel: prev/next chevron buttons absolutely-positioned at the left/right edges of the month strip (desktop only — mobile keeps using swipe). The next button triggers `onExtend()` when the user is near the right edge so additional months load before the scroll hits the boundary.
+  - **Touch / wheel scroll** also triggers lazy-extend via a `scroll` event listener (passive) — Apple-style infinite-feel without rendering 60 cards upfront.
+  - **Verified**: opened Flexible tab, clicked next arrow 8 times → strip extended from 24 → 36 months (Jun 2026 → May 2029). All previous data-testids still work; new testids added for the arrows (`stays-when-month-prev`, `stays-when-month-next`).
+  - Files: `frontend/src/components/search/WhenPicker.jsx`.
+
+ User asked for a third segment in the bubble for stay-type selection (Vacation / Short-term / Long-term — storage retired). Previously the bar only had Where + When, with stay type buried in the Filters modal.
   - **New component** `frontend/src/components/search/StayTypePicker.jsx`: same visual contract as `WherePicker` / `WhenPicker` (tiny uppercase label + value below, popover anchored under the segment, outside-click dismissal). Renders four options — Any / Vacation / Short-term / Long-term — each with a Lucide icon (Palmtree / Home / Briefcase). Inline X clear when a value is picked. `data-testid`s: `stays-type-toggle`, `stays-type-menu`, `stays-type-option-{v}`.
   - **Stays.jsx**: imported `StayTypePicker`, added a `subType`/`setSubType` segment between Where and When. Wired to the same state that powers the client-side `rental_type` filter and the modal's stay-type chips, so picking from either place stays in sync and persists to the URL as `?subType=vacation|short-term|long-term`.
   - **Filter badge logic**: removed `subType` from `activeFilterCount` since it's now first-class in the bar (showing "+1 filter" just because the user picked a stay type would be misleading). Modal chips kept as a backup UX.

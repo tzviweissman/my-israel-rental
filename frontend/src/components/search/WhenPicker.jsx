@@ -15,7 +15,7 @@
 import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
-import { Calendar as CalendarIcon, X } from 'lucide-react';
+import { Calendar as CalendarIcon, X, ChevronLeft, ChevronRight } from 'lucide-react';
 import { DayPicker } from 'react-day-picker';
 import {
   format, parseISO, isValid,
@@ -92,13 +92,17 @@ const WhenPicker = ({
   }
   const isPlaceholder = !range.from;
 
-  // 12 upcoming month cards, starting from the current month.
+  // Lazy-extending month list — start with 24 cards (2 years out)
+  // and lengthen by 12 each time the user clicks the "next" chevron
+  // past the current end. Caps at 60 months (5 years) to keep the
+  // popover snappy.
+  const [monthCount, setMonthCount] = useState(24);
   const monthCards = useMemo(() => {
     const out = [];
     const first = startOfMonth(new Date());
-    for (let i = 0; i < 12; i += 1) out.push(addMonths(first, i));
+    for (let i = 0; i < monthCount; i += 1) out.push(addMonths(first, i));
     return out;
-  }, []);
+  }, [monthCount]);
 
   const handleCalendarSelect = (selected) => {
     if (!selected) {
@@ -209,6 +213,8 @@ const WhenPicker = ({
                 monthCards={monthCards}
                 flexMonth={flexMonth}
                 setFlexMonth={setFlexMonth}
+                onExtend={() => setMonthCount((n) => Math.min(n + 12, 60))}
+                canExtend={monthCount < 60}
                 testidPrefix={testidPrefix}
                 t={t}
               />
@@ -247,12 +253,41 @@ const WhenPicker = ({
 // ---------------------------------------------------------------------------
 // Flexible panel — "How long" + "Go anytime" month cards.
 // ---------------------------------------------------------------------------
-const FlexiblePanel = ({ stayLength, setStayLength, monthCards, flexMonth, setFlexMonth, testidPrefix, t }) => {
+const FlexiblePanel = ({ stayLength, setStayLength, monthCards, flexMonth, setFlexMonth, onExtend, canExtend, testidPrefix, t }) => {
   const lengths = [
     { v: 'weekend', label: t('stays.lengthWeekend', 'Weekend') },
     { v: 'week',    label: t('stays.lengthWeek', 'Week') },
     { v: 'month',   label: t('stays.lengthMonth', 'Month') },
   ];
+  // Programmatic horizontal scroller — drives both the prev/next arrows
+  // and the lazy-extend on reaching the right edge. Using `scrollBy` so
+  // we move ~3 cards at a time which matches the snap stride.
+  const rowRef = useRef(null);
+  const SCROLL_STEP = 360; // ~3 cards × 110px + gap
+  const scroll = (dir) => {
+    const el = rowRef.current;
+    if (!el) return;
+    // If user scrolled near the right end and we can still extend, load
+    // more months before scrolling so the scroll keeps revealing new
+    // cards rather than slamming into the boundary.
+    if (dir === 1 && canExtend) {
+      const nearEnd = el.scrollLeft + el.clientWidth >= el.scrollWidth - SCROLL_STEP;
+      if (nearEnd) onExtend?.();
+    }
+    el.scrollBy({ left: dir * SCROLL_STEP, behavior: 'smooth' });
+  };
+  // Auto-extend when the user reaches the right edge via touch / wheel.
+  useEffect(() => {
+    const el = rowRef.current;
+    if (!el || !canExtend) return undefined;
+    const onScroll = () => {
+      if (el.scrollLeft + el.clientWidth >= el.scrollWidth - 80) {
+        onExtend?.();
+      }
+    };
+    el.addEventListener('scroll', onScroll, { passive: true });
+    return () => el.removeEventListener('scroll', onScroll);
+  }, [canExtend, onExtend]);
   return (
     <div className="space-y-5" data-testid={`${testidPrefix}-flexible-panel`}>
       {/* "How long would you like to stay?" */}
@@ -279,39 +314,63 @@ const FlexiblePanel = ({ stayLength, setStayLength, monthCards, flexMonth, setFl
         </div>
       </div>
 
-      {/* "Go anytime" — horizontal scrollable month cards */}
+      {/* "Go anytime" — horizontal scrollable month strip with arrow
+          affordances and lazy-extend on scroll to reveal later months. */}
       <div>
         <h3 className="text-base font-bold text-gray-900 text-center mb-3">
           {t('stays.goAnytime', 'Go anytime')}
         </h3>
-        <div
-          className="flex gap-3 overflow-x-auto pb-2 -mx-2 px-2 snap-x snap-mandatory"
-          style={{ scrollbarWidth: 'none' }}
-          data-testid={`${testidPrefix}-month-row`}
-        >
-          {monthCards.map((d) => {
-            const key = format(d, 'yyyy-MM');
-            const selected = flexMonth && format(flexMonth, 'yyyy-MM') === key;
-            return (
-              <button
-                key={key}
-                type="button"
-                onClick={() => setFlexMonth(d)}
-                className={`snap-start shrink-0 w-[110px] flex flex-col items-center justify-center gap-1 px-3 py-4 rounded-xl border-2 transition-colors ${
-                  selected
-                    ? 'border-black bg-gray-50'
-                    : 'border-gray-200 hover:border-gray-400'
-                }`}
-                data-testid={`${testidPrefix}-month-${key}`}
-              >
-                <CalendarIcon size={22} className="text-gray-600" strokeWidth={1.5} />
-                <p className="text-sm font-semibold text-gray-900 mt-1">
-                  {MONTH_LABEL(d)}
-                </p>
-                <p className="text-xs text-gray-500">{YEAR_LABEL(d)}</p>
-              </button>
-            );
-          })}
+        <div className="relative">
+          {/* Prev arrow */}
+          <button
+            type="button"
+            onClick={() => scroll(-1)}
+            aria-label="Scroll to earlier months"
+            className="hidden sm:flex absolute left-0 top-1/2 -translate-y-1/2 z-10 w-8 h-8 rounded-full bg-white border border-gray-300 shadow items-center justify-center text-gray-700 hover:border-gray-900 transition-colors"
+            data-testid={`${testidPrefix}-month-prev`}
+          >
+            <ChevronLeft size={16} />
+          </button>
+          {/* Next arrow — also triggers lazy extend when near the end */}
+          <button
+            type="button"
+            onClick={() => scroll(1)}
+            aria-label="Scroll to later months"
+            className="hidden sm:flex absolute right-0 top-1/2 -translate-y-1/2 z-10 w-8 h-8 rounded-full bg-white border border-gray-300 shadow items-center justify-center text-gray-700 hover:border-gray-900 transition-colors"
+            data-testid={`${testidPrefix}-month-next`}
+          >
+            <ChevronRight size={16} />
+          </button>
+          <div
+            ref={rowRef}
+            className="flex gap-3 overflow-x-auto pb-2 px-2 sm:px-10 snap-x snap-mandatory scrollbar-hide"
+            style={{ scrollbarWidth: 'none' }}
+            data-testid={`${testidPrefix}-month-row`}
+          >
+            {monthCards.map((d) => {
+              const key = format(d, 'yyyy-MM');
+              const selected = flexMonth && format(flexMonth, 'yyyy-MM') === key;
+              return (
+                <button
+                  key={key}
+                  type="button"
+                  onClick={() => setFlexMonth(d)}
+                  className={`snap-start shrink-0 w-[110px] flex flex-col items-center justify-center gap-1 px-3 py-4 rounded-xl border-2 transition-colors ${
+                    selected
+                      ? 'border-black bg-gray-50'
+                      : 'border-gray-200 hover:border-gray-400'
+                  }`}
+                  data-testid={`${testidPrefix}-month-${key}`}
+                >
+                  <CalendarIcon size={22} className="text-gray-600" strokeWidth={1.5} />
+                  <p className="text-sm font-semibold text-gray-900 mt-1">
+                    {MONTH_LABEL(d)}
+                  </p>
+                  <p className="text-xs text-gray-500">{YEAR_LABEL(d)}</p>
+                </button>
+              );
+            })}
+          </div>
         </div>
       </div>
     </div>
