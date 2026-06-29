@@ -1180,3 +1180,11 @@ See /app/memory/test_credentials.md
   - Verified by testing_agent iteration_38: **7/7 RTL cases PASS**. Initial load with `localStorage.i18nextLng='he'` → `dir='rtl'`; reactive globe toggle flips both attributes in < 1s without reload; visual layout reverses on desktop and mobile (Menu on left, chevrons mirrored, QuickChips right-to-left). No regressions to i18n strings or --nav-h refactor.
   - Files: `frontend/src/i18n.js`, `frontend/src/App.js`.
 
+
+- [x] **Floating FABs respect safe-area + future bottom-nav** (2026-02-29):
+  - Refactored `WhatsAppButton` + `AccessibilityButton` to use `bottom: calc(env(safe-area-inset-bottom, 0px) + var(--bottom-nav-h, 0px) + 1.5rem)` instead of hard-coded `bottom-6`. Both FABs now sit 24px above the iOS home indicator AND will lift automatically the moment any page sets `--bottom-nav-h` for a sticky bottom-bar.
+  - `Stays.jsx` page wrapper gained `paddingBottom: calc(env() + 6rem)` so the last property card always clears the FAB stack — measured 40px gap between the last card bottom and the WhatsApp FAB top on a 14-card listing.
+  - `AccessibilityPanel` (popup) now anchors to `+ 5.5rem` so it floats cleanly above its FAB.
+  - Verified by testing_agent iteration_39: **11/11 PASS** on mobile (390x844), desktop (1280x800), Home + Stays, LTR + RTL. Zero console errors. FAB positioning is direction-agnostic (right/left properties pin to physical edges regardless of `dir=rtl`).
+  - Files: `frontend/src/components/WhatsAppButton.js`, `frontend/src/components/AccessibilityButton.js`, `frontend/src/pages/Stays.jsx`.
+
