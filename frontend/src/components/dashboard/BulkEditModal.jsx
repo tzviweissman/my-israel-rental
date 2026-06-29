@@ -106,7 +106,7 @@ const FieldEditor = ({ field, value, onChange, amenitiesMode, setAmenitiesMode }
             <span>{t('bulk.replace')}</span>
           </label>
         </div>
-        <div className="grid grid-cols-2 gap-1.5 max-h-40 overflow-y-auto pr-1">
+        <div className="grid grid-cols-2 gap-1.5 max-h-40 overflow-y-auto pe-1">
           {AMENITY_OPTIONS.map(a => (
             <label key={a} className="flex items-center gap-2 text-sm cursor-pointer">
               <input type="checkbox" checked={arr.includes(a)} onChange={() => toggle(a)} className="w-3.5 h-3.5 rounded border-gray-300 text-[#1E6A6A] focus:ring-[#1E6A6A]/30" />

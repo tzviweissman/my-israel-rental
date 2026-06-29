@@ -74,7 +74,7 @@ const PriceBlock = ({ property, t }) => {
         >
           {regularSym}
           {Number(regularPrice).toLocaleString()}
-          <span className="text-[11px] font-normal text-gray-500 ml-1">{regularLabel}</span>
+          <span className="text-[11px] font-normal text-gray-500 ms-1">{regularLabel}</span>
         </span>
       )}
       {hasHoliday && (
@@ -85,7 +85,7 @@ const PriceBlock = ({ property, t }) => {
         >
           {holidaySym}
           {Number(property.holiday_lump_price).toLocaleString()}
-          <span className="text-[10px] font-normal text-gray-500 ml-1">{holidaySuffix}</span>
+          <span className="text-[10px] font-normal text-gray-500 ms-1">{holidaySuffix}</span>
         </span>
       )}
     </div>
@@ -420,7 +420,7 @@ const PropertyList = ({ properties, bookings = [], onEdit, onRefresh, API, token
           {bulkCount > 0 && (
             <button
               onClick={() => toggleFilter('bulk')}
-              className={`inline-flex items-center gap-1.5 pl-2.5 pr-3 py-1.5 rounded-full text-xs font-semibold transition-all ${
+              className={`inline-flex items-center gap-1.5 ps-2.5 pe-3 py-1.5 rounded-full text-xs font-semibold transition-all ${
                 activeFilter === 'bulk'
                   ? 'bg-[#D4AF37] text-[#1E6A6A] shadow-sm'
                   : 'bg-[#fafaf5] text-gray-600 hover:text-[#1E6A6A] border border-[#E5E5E5]'
@@ -430,7 +430,7 @@ const PropertyList = ({ properties, bookings = [], onEdit, onRefresh, API, token
             >
               <Sparkles size={12} />
               Recently Bulk-Uploaded
-              <span className={`ml-0.5 px-1.5 py-0.5 rounded-full text-[10px] ${activeFilter === 'bulk' ? 'bg-[#1E6A6A] text-[#D4AF37]' : 'bg-white text-[#1E6A6A]'}`}>
+              <span className={`ms-0.5 px-1.5 py-0.5 rounded-full text-[10px] ${activeFilter === 'bulk' ? 'bg-[#1E6A6A] text-[#D4AF37]' : 'bg-white text-[#1E6A6A]'}`}>
                 {bulkCount}
               </span>
               {activeFilter === 'bulk' && <X size={12} className="opacity-70" />}
@@ -439,7 +439,7 @@ const PropertyList = ({ properties, bookings = [], onEdit, onRefresh, API, token
           {needsImagesCount > 0 && (
             <button
               onClick={() => toggleFilter('no_images')}
-              className={`inline-flex items-center gap-1.5 pl-2.5 pr-3 py-1.5 rounded-full text-xs font-semibold transition-all ${
+              className={`inline-flex items-center gap-1.5 ps-2.5 pe-3 py-1.5 rounded-full text-xs font-semibold transition-all ${
                 activeFilter === 'no_images'
                   ? 'bg-[#1E6A6A] text-[#D4AF37] shadow-sm'
                   : 'bg-[#fafaf5] text-gray-600 hover:text-[#1E6A6A] border border-[#E5E5E5]'
@@ -449,7 +449,7 @@ const PropertyList = ({ properties, bookings = [], onEdit, onRefresh, API, token
             >
               <ImageIcon size={12} />
               Needs Images
-              <span className={`ml-0.5 px-1.5 py-0.5 rounded-full text-[10px] ${activeFilter === 'no_images' ? 'bg-[#D4AF37] text-[#1E6A6A]' : 'bg-white text-[#1E6A6A]'}`}>
+              <span className={`ms-0.5 px-1.5 py-0.5 rounded-full text-[10px] ${activeFilter === 'no_images' ? 'bg-[#D4AF37] text-[#1E6A6A]' : 'bg-white text-[#1E6A6A]'}`}>
                 {needsImagesCount}
               </span>
               {activeFilter === 'no_images' && <X size={12} className="opacity-70" />}
@@ -458,7 +458,7 @@ const PropertyList = ({ properties, bookings = [], onEdit, onRefresh, API, token
           {bookedCount > 0 && (
             <button
               onClick={() => toggleFilter('booked')}
-              className={`inline-flex items-center gap-1.5 pl-2.5 pr-3 py-1.5 rounded-full text-xs font-semibold transition-all ${
+              className={`inline-flex items-center gap-1.5 ps-2.5 pe-3 py-1.5 rounded-full text-xs font-semibold transition-all ${
                 activeFilter === 'booked'
                   ? 'bg-emerald-600 text-white shadow-sm'
                   : 'bg-[#fafaf5] text-gray-600 hover:text-emerald-700 border border-[#E5E5E5]'
@@ -468,7 +468,7 @@ const PropertyList = ({ properties, bookings = [], onEdit, onRefresh, API, token
             >
               <CalendarCheck size={12} />
               Booked
-              <span className={`ml-0.5 px-1.5 py-0.5 rounded-full text-[10px] ${activeFilter === 'booked' ? 'bg-white text-emerald-700' : 'bg-white text-emerald-700'}`}>
+              <span className={`ms-0.5 px-1.5 py-0.5 rounded-full text-[10px] ${activeFilter === 'booked' ? 'bg-white text-emerald-700' : 'bg-white text-emerald-700'}`}>
                 {bookedCount}
               </span>
               {activeFilter === 'booked' && <X size={12} className="opacity-70" />}

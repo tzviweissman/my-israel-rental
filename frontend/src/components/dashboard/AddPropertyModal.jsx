@@ -231,7 +231,7 @@ const AddPropertyModal = ({ isOpen, onClose, editingProperty, onSaved, API, toke
         <button
           type="button"
           onClick={onClose}
-          className="sticky top-0 float-right -mt-3 -mr-3 z-10 p-2 rounded-full bg-white/95 backdrop-blur-sm border border-gray-200 text-gray-500 hover:text-gray-900 hover:bg-gray-50 shadow-sm transition-colors"
+          className="sticky top-0 float-right -mt-3 -me-3 z-10 p-2 rounded-full bg-white/95 backdrop-blur-sm border border-gray-200 text-gray-500 hover:text-gray-900 hover:bg-gray-50 shadow-sm transition-colors"
           aria-label="Close"
           data-testid="add-property-close-x"
         >
@@ -711,7 +711,7 @@ const AddPropertyModal = ({ isOpen, onClose, editingProperty, onSaved, API, toke
                 </select>
                 {typeof propertyForm.porches === 'number' && propertyForm.porches > 0 && (
                   <>
-                    <div className="ml-2 mt-2">
+                    <div className="ms-2 mt-2">
                       <label className="block text-sm text-gray-600 mb-1">{t('property.parchSqm')}</label>
                       <input
                         type="number"
@@ -723,7 +723,7 @@ const AddPropertyModal = ({ isOpen, onClose, editingProperty, onSaved, API, toke
                         data-testid="property-porch-sqm-input"
                       />
                     </div>
-                    <label className="flex items-center gap-2 ml-2 mt-2">
+                    <label className="flex items-center gap-2 ms-2 mt-2">
                       <input
                         type="checkbox"
                         checked={propertyForm.sukkah_compatible}
@@ -772,7 +772,7 @@ const AddPropertyModal = ({ isOpen, onClose, editingProperty, onSaved, API, toke
                 <span>{t('property.elevator')}</span>
               </label>
               {propertyForm.has_elevator && (
-                <label className="flex items-center gap-2 ml-7">
+                <label className="flex items-center gap-2 ms-7">
                   <input
                     type="checkbox"
                     checked={propertyForm.is_shabbat_elevator}
@@ -814,7 +814,7 @@ const AddPropertyModal = ({ isOpen, onClose, editingProperty, onSaved, API, toke
                     <span>{t('property.cleaningFee', 'Cleaning fee')}</span>
                   </label>
                   {propertyForm.has_cleaning_fee && (
-                    <div className="ml-7">
+                    <div className="ms-7">
                       <div className="flex gap-2">
                         <input
                           type="number"
@@ -871,7 +871,7 @@ const AddPropertyModal = ({ isOpen, onClose, editingProperty, onSaved, API, toke
                     <span>{t('property.agentFee')}</span>
                   </label>
                   {propertyForm.has_agent_fee && (
-                    <div className="ml-7">
+                    <div className="ms-7">
                       <div className="flex gap-2">
                         <input
                           type="number"

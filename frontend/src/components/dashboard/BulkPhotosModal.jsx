@@ -166,7 +166,7 @@ const BulkPhotosModal = ({ properties, onClose, onSaved, API, token, auth }) => 
               className={`px-3 py-1.5 rounded-md font-medium transition-colors ${mode === 'shared' ? 'bg-white text-[#1E6A6A] shadow-sm' : 'text-gray-500'}`}
               data-testid="bulk-photos-mode-shared"
             >
-              <Sparkles size={12} className="inline -mt-0.5 mr-1" />
+              <Sparkles size={12} className="inline -mt-0.5 me-1" />
               {t('bulk.photosSamePhotos')}
             </button>
             <button

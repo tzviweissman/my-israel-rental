@@ -88,7 +88,7 @@ const ManagerHeader = ({ user, token, API }) => {
               />
               <button
                 onClick={handleLogoRemove}
-                className="absolute -top-2 -right-2 w-6 h-6 rounded-full bg-red-500 text-white flex items-center justify-center text-xs hover:bg-red-600"
+                className="absolute -top-2 -end-2 w-6 h-6 rounded-full bg-red-500 text-white flex items-center justify-center text-xs hover:bg-red-600"
                 data-testid="remove-logo-button"
               >
                 <X size={12} />

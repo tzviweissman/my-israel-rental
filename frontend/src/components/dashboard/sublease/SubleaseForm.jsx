@@ -283,7 +283,7 @@ const SubleaseForm = ({
             <p className="text-sm font-semibold text-gray-800">{title}</p>
             <p className="text-xs text-gray-500">{area}</p>
           </div>
-          <Check size={18} className="text-[#1E6A6A] ml-auto" />
+          <Check size={18} className="text-[#1E6A6A] ms-auto" />
         </div>
       )}
 
@@ -322,7 +322,7 @@ const SubleaseForm = ({
               <select
                 value={form.currency}
                 onChange={(e) => setForm({ ...form, currency: e.target.value })}
-                className="bg-gray-50 border-0 border-r border-gray-200 pl-3 pr-7 text-sm font-medium text-gray-700 focus:outline-none cursor-pointer hover:bg-gray-100 transition-colors"
+                className="bg-gray-50 border-0 border-r border-gray-200 ps-3 pe-7 text-sm font-medium text-gray-700 focus:outline-none cursor-pointer hover:bg-gray-100 transition-colors"
                 data-testid="sublease-currency"
                 aria-label={t('sublease.currency')}
               >

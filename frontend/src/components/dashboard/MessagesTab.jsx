@@ -127,7 +127,7 @@ const MessagesTab = ({ API, token, onUnreadChange }) => {
                     } ${isUnread && !fromMe ? 'font-semibold' : ''}`}
                     data-testid={`conversation-preview-${conv.property_id}`}
                   >
-                    {fromMe && <span className="opacity-70 mr-1">You:</span>}
+                    {fromMe && <span className="opacity-70 me-1">You:</span>}
                     {conv.last_message}
                   </span>
                 </div>

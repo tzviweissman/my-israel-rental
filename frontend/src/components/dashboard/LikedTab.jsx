@@ -100,12 +100,12 @@ const LikedTab = ({ API, token }) => {
                     e.stopPropagation();
                     unlikeProperty(property.id);
                   }}
-                  className="absolute top-3 right-3 w-10 h-10 rounded-full bg-white/90 hover:bg-white flex items-center justify-center shadow-md transition-all hover:scale-110 active:scale-95 z-10"
+                  className="absolute top-3 end-3 w-10 h-10 rounded-full bg-white/90 hover:bg-white flex items-center justify-center shadow-md transition-all hover:scale-110 active:scale-95 z-10"
                   data-testid={`unlike-btn-${property.id}`}
                 >
                   <Heart size={18} className="fill-red-500 text-red-500" />
                 </button>
-                <div className="absolute bottom-3 left-3">
+                <div className="absolute bottom-3 start-3">
                   <span className="px-2.5 py-1 rounded-full text-[10px] font-semibold uppercase tracking-wider bg-white/90 text-gray-700 backdrop-blur-sm">
                     {property.rental_type?.replace('-', ' ')}
                   </span>

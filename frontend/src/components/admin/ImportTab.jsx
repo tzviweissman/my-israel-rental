@@ -286,7 +286,7 @@ export const ImportTab = ({ token, onJumpToOwner }) => {
                 admin correct the heuristic if it guessed wrong without
                 re-uploading the CSV. */}
             <div className="flex items-center gap-1.5" data-testid="import-detected-kind">
-              <span className="text-[11px] uppercase tracking-wider text-gray-500 mr-1">Detected:</span>
+              <span className="text-[11px] uppercase tracking-wider text-gray-500 me-1">Detected:</span>
               <button
                 type="button"
                 onClick={() => overrideKind('property')}
@@ -334,7 +334,7 @@ export const ImportTab = ({ token, onJumpToOwner }) => {
           {preview.warnings?.length > 0 && (
             <div className="flex items-start gap-2 text-xs bg-amber-50 border border-amber-200 rounded-lg p-3 mb-3">
               <AlertTriangle size={14} className="text-amber-600 shrink-0 mt-0.5" />
-              <ul className="text-amber-800 list-disc pl-4 space-y-0.5">
+              <ul className="text-amber-800 list-disc ps-4 space-y-0.5">
                 {preview.warnings.map((w, i) => <li key={`${i}-${w}`}>{w}</li>)}
               </ul>
             </div>
@@ -492,7 +492,7 @@ export const ImportTab = ({ token, onJumpToOwner }) => {
                     <span className="font-semibold">Row {m.index}{m.title ? ` (${m.title})` : ''}:</span>
                     {' '}saved {m.saved_image_count} of {m.csv_image_count} photo URLs.
                     {m.failed_urls?.length > 0 && (
-                      <ul className="mt-1 pl-4 list-disc text-[10px] font-mono text-amber-900">
+                      <ul className="mt-1 ps-4 list-disc text-[10px] font-mono text-amber-900">
                         {m.failed_urls.map((u, j) => (
                           <li key={`${m.index}-${j}-${u}`} className="truncate" title={u}>{u}</li>
                         ))}

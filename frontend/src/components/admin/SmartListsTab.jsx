@@ -626,7 +626,7 @@ const SmartListsTab = ({ token }) => {
                         {p.price_label || ''}
                       </span>
                       {p.currency === 'USD' && p.price_ils_equivalent != null && (
-                        <span className="text-xs text-gray-400 ml-1.5">
+                        <span className="text-xs text-gray-400 ms-1.5">
                           (≈ ₪{Math.round(p.price_ils_equivalent).toLocaleString()})
                         </span>
                       )}

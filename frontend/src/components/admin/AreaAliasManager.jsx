@@ -330,7 +330,7 @@ const AreaAliasManager = ({ token }) => {
                     type="button"
                     onClick={bulkAcceptAboveThreshold}
                     disabled={bulkBusy}
-                    className="ml-auto inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-[#1E6A6A] text-white text-xs font-semibold hover:bg-[#175555] disabled:opacity-50 transition-colors"
+                    className="ms-auto inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-[#1E6A6A] text-white text-xs font-semibold hover:bg-[#175555] disabled:opacity-50 transition-colors"
                     data-testid="area-alias-bulk-accept-btn"
                   >
                     <Check size={12} /> {bulkBusy ? 'Mapping…' : 'Bulk map'}

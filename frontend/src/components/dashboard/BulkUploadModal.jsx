@@ -476,7 +476,7 @@ const BulkUploadModal = ({ isOpen, onClose, onDone, API, token }) => {
                       type="file"
                       accept=".csv,.xlsx"
                       onChange={e => setFile(e.target.files?.[0] || null)}
-                      className="mt-1 block w-full text-xs text-gray-700 file:mr-2 file:px-3 file:py-1.5 file:rounded file:border-0 file:bg-black file:text-[#D4AF37] file:text-xs file:font-semibold"
+                      className="mt-1 block w-full text-xs text-gray-700 file:me-2 file:px-3 file:py-1.5 file:rounded file:border-0 file:bg-black file:text-[#D4AF37] file:text-xs file:font-semibold"
                       data-testid="bulk-upload-file"
                     />
                   </label>
@@ -548,7 +548,7 @@ const BulkUploadModal = ({ isOpen, onClose, onDone, API, token }) => {
                   type="file"
                   accept=".zip"
                   onChange={e => setZipFile(e.target.files?.[0] || null)}
-                  className="block w-full text-sm text-gray-700 file:mr-3 file:px-4 file:py-2 file:rounded-lg file:border-0 file:bg-black file:text-[#D4AF37] file:font-semibold"
+                  className="block w-full text-sm text-gray-700 file:me-3 file:px-4 file:py-2 file:rounded-lg file:border-0 file:bg-black file:text-[#D4AF37] file:font-semibold"
                   data-testid="bulk-zip-file"
                 />
                 <div className="mt-4 flex justify-end gap-2">
@@ -604,7 +604,7 @@ const BulkUploadModal = ({ isOpen, onClose, onDone, API, token }) => {
             <div className="text-xs text-gray-500">
               {rows.length} propert{rows.length === 1 ? 'y' : 'ies'}
               {Object.keys(rowErrors).length > 0 && (
-                <span className="ml-2 text-red-600 font-medium">· {Object.keys(rowErrors).length} need fixing</span>
+                <span className="ms-2 text-red-600 font-medium">· {Object.keys(rowErrors).length} need fixing</span>
               )}
             </div>
             <div className="flex gap-2">
@@ -1053,7 +1053,7 @@ const LocationSelect = ({ label, value, onChange, testid }) => {
                 className="px-3 py-2 hover:bg-[#1E6A6A]/10 cursor-pointer text-sm transition-colors"
               >
                 <span className="font-medium text-gray-700">{loc.neighborhood}</span>
-                <span className="text-gray-500 text-xs ml-2">({loc.city})</span>
+                <span className="text-gray-500 text-xs ms-2">({loc.city})</span>
               </div>
             ))
           )}

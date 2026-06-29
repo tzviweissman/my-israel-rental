@@ -117,7 +117,7 @@ const GovernmentServicesTab = () => {
                   const svc = DOC_SERVICES.find(s => s.key === k);
                   return (
                     <div key={k} className="flex justify-between">
-                      <dt className="text-gray-600 truncate pr-2">{svc.label}</dt>
+                      <dt className="text-gray-600 truncate pe-2">{svc.label}</dt>
                       <dd className="text-gray-900">${svc.price}</dd>
                     </div>
                   );

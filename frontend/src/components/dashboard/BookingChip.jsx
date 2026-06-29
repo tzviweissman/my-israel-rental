@@ -171,7 +171,7 @@ const BookingChip = ({
         {canDirectCancel && (
           <button
             onClick={() => onCancel(b.id)}
-            className="ml-auto px-2.5 py-1.5 rounded-md text-[11px] font-semibold text-white bg-red-500 hover:bg-red-600 inline-flex items-center gap-1"
+            className="ms-auto px-2.5 py-1.5 rounded-md text-[11px] font-semibold text-white bg-red-500 hover:bg-red-600 inline-flex items-center gap-1"
             data-testid={`cancel-booking-${b.id}`}
           >
             <XCircle size={12} />
@@ -182,7 +182,7 @@ const BookingChip = ({
         {canRequestCancelAsLister && (
           <button
             onClick={() => onRequestCancel(b.id)}
-            className="ml-auto px-2.5 py-1.5 rounded-md text-[11px] font-semibold text-orange-700 border border-orange-500 hover:bg-orange-50 inline-flex items-center gap-1"
+            className="ms-auto px-2.5 py-1.5 rounded-md text-[11px] font-semibold text-orange-700 border border-orange-500 hover:bg-orange-50 inline-flex items-center gap-1"
             data-testid={`request-cancel-${b.id}`}
           >
             <XCircle size={12} />
@@ -193,7 +193,7 @@ const BookingChip = ({
         {canRequestCancelAsRenter && (
           <button
             onClick={() => onRequestCancel(b.id)}
-            className="ml-auto px-2.5 py-1.5 rounded-md text-[11px] font-semibold text-white bg-orange-500 hover:bg-orange-600 inline-flex items-center gap-1"
+            className="ms-auto px-2.5 py-1.5 rounded-md text-[11px] font-semibold text-white bg-orange-500 hover:bg-orange-600 inline-flex items-center gap-1"
             data-testid={`request-cancel-${b.id}`}
           >
             <XCircle size={12} />

@@ -283,7 +283,7 @@ const SettingsTab = ({ user, token, API }) => {
                 type={showCurrentPassword ? 'text' : 'password'}
                 value={passwordForm.current_password}
                 onChange={(e) => setPasswordForm({ ...passwordForm, current_password: e.target.value })}
-                className="w-full px-4 py-2.5 pr-10 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#1E6A6A]/30 focus:border-[#1E6A6A]"
+                className="w-full px-4 py-2.5 pe-10 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#1E6A6A]/30 focus:border-[#1E6A6A]"
                 required
                 placeholder={i18n.t('dashboard.currentPasswordPlaceholder')}
               />
@@ -305,7 +305,7 @@ const SettingsTab = ({ user, token, API }) => {
                 type={showNewPassword ? 'text' : 'password'}
                 value={passwordForm.new_password}
                 onChange={(e) => setPasswordForm({ ...passwordForm, new_password: e.target.value })}
-                className="w-full px-4 py-2.5 pr-10 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#1E6A6A]/30 focus:border-[#1E6A6A]"
+                className="w-full px-4 py-2.5 pe-10 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#1E6A6A]/30 focus:border-[#1E6A6A]"
                 required
                 placeholder={i18n.t('dashboard.newPasswordPlaceholder')}
               />
@@ -327,7 +327,7 @@ const SettingsTab = ({ user, token, API }) => {
                 type={showConfirmPassword ? 'text' : 'password'}
                 value={passwordForm.confirm_password}
                 onChange={(e) => setPasswordForm({ ...passwordForm, confirm_password: e.target.value })}
-                className="w-full px-4 py-2.5 pr-10 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#1E6A6A]/30 focus:border-[#1E6A6A]"
+                className="w-full px-4 py-2.5 pe-10 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#1E6A6A]/30 focus:border-[#1E6A6A]"
                 required
                 placeholder={i18n.t('dashboard.confirmNewPasswordPlaceholder')}
               />

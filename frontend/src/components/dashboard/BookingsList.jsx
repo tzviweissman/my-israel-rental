@@ -287,7 +287,7 @@ const RenterBookingsList = ({ bookings, user, API, actions }) => {
               placeholder={t('dashboard.searchBookingsHint', 'Search by property, guest, dates…')}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full px-4 py-2.5 pl-10 rounded-xl border-2 border-gray-200 focus:border-[#1E6A6A] focus:outline-none text-sm"
+              className="w-full px-4 py-2.5 ps-10 rounded-xl border-2 border-gray-200 focus:border-[#1E6A6A] focus:outline-none text-sm"
               data-testid="bookings-search"
             />
             <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
@@ -330,7 +330,7 @@ const RenterBookingsList = ({ bookings, user, API, actions }) => {
           {isFiltering && (
             <button
               onClick={clearAll}
-              className="ml-auto inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-medium text-[#1E6A6A] hover:bg-[#1E6A6A]/5 transition-colors"
+              className="ms-auto inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-medium text-[#1E6A6A] hover:bg-[#1E6A6A]/5 transition-colors"
               data-testid="bookings-clear-filters"
             >
               <X size={12} />
@@ -487,7 +487,7 @@ const OwnerStackedView = ({ bookings, user, token, API, actions, onUpdate }) => 
               placeholder={t('dashboard.searchPropertyHint', 'Search by property or area…')}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full px-4 py-2.5 pl-10 rounded-xl border-2 border-gray-200 focus:border-[#1E6A6A] focus:outline-none text-sm"
+              className="w-full px-4 py-2.5 ps-10 rounded-xl border-2 border-gray-200 focus:border-[#1E6A6A] focus:outline-none text-sm"
               data-testid="properties-search"
             />
             <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />

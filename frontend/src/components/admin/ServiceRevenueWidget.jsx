@@ -79,7 +79,7 @@ export const ServiceRevenueWidget = ({ token }) => {
               return (
                 <div key={r.service_type} className="space-y-1.5" data-testid={`revenue-row-${r.service_type}`}>
                   <div className="flex justify-between items-baseline text-sm">
-                    <span className="font-medium text-gray-800 truncate pr-3">{r.label}</span>
+                    <span className="font-medium text-gray-800 truncate pe-3">{r.label}</span>
                     <span className="flex items-baseline gap-2 flex-shrink-0">
                       <span className="text-xs text-gray-500">{r.count} filing{r.count === 1 ? '' : 's'}</span>
                       <span className="font-semibold text-gray-900">

@@ -165,7 +165,7 @@ const BookingsTab = ({ token }) => {
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           placeholder="Search by guest, email, property, or area…"
-          className="w-full pl-9 pr-3 py-2 rounded-lg border border-gray-200 text-sm focus:outline-none focus:border-[#D4AF37]"
+          className="w-full ps-9 pe-3 py-2 rounded-lg border border-gray-200 text-sm focus:outline-none focus:border-[#D4AF37]"
           data-testid="bookings-search"
         />
       </div>

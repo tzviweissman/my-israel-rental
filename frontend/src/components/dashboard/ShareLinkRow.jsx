@@ -51,7 +51,7 @@ const ShareLinkRow = ({
         className="flex items-stretch rounded-xl border border-[#E5E5E5] bg-gray-50 overflow-hidden focus-within:border-[#1E6A6A] focus-within:ring-2 focus-within:ring-[#1E6A6A]/15 transition-all"
         data-testid={`${testidPrefix}-row`}
       >
-        <span className="flex items-center pl-3 pr-2 text-gray-400 flex-shrink-0">
+        <span className="flex items-center ps-3 pe-2 text-gray-400 flex-shrink-0">
           <Link2 size={14} />
         </span>
         <input
@@ -59,7 +59,7 @@ const ShareLinkRow = ({
           value={shareableLink}
           readOnly
           onFocus={(e) => e.target.select()}
-          className="flex-1 min-w-0 py-2 pr-2 bg-transparent text-sm text-gray-700 focus:outline-none truncate"
+          className="flex-1 min-w-0 py-2 pe-2 bg-transparent text-sm text-gray-700 focus:outline-none truncate"
           data-testid={testidPrefix}
         />
         <button

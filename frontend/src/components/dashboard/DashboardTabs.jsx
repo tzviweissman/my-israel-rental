@@ -81,7 +81,7 @@ const DashboardTabs = ({ activeTab, setActiveTab, role, unreadMessages = 0 }) =>
           {t('dashboard.messages')}
           {unreadMessages > 0 && (
             <span
-              className="ml-1 inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full bg-red-500 text-white text-[10px] font-bold leading-none"
+              className="ms-1 inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full bg-red-500 text-white text-[10px] font-bold leading-none"
               data-testid="messages-unread-badge"
             >
               {unreadMessages > 9 ? '9+' : unreadMessages}

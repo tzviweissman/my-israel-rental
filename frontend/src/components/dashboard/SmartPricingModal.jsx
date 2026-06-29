@@ -55,7 +55,7 @@ const NumericInput = ({ label, value, onChange, suffix, testid }) => (
         data-testid={testid}
       />
       {suffix && (
-        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gray-400">
+        <span className="absolute end-3 top-1/2 -translate-y-1/2 text-xs text-gray-400">
           {suffix}
         </span>
       )}
@@ -355,7 +355,7 @@ const SmartPricingModal = ({ isOpen, onClose, property, API, token }) => {
               style={{ backgroundColor: '#1E6A6A' }}
               data-testid="smart-pricing-save"
             >
-              {saving ? <Loader2 className="animate-spin inline mr-1" size={14} /> : null}
+              {saving ? <Loader2 className="animate-spin inline me-1" size={14} /> : null}
               Save Settings
             </button>
           </div>
@@ -390,7 +390,7 @@ const RulesTab = ({
             lead time, demand, and comparable rentals in your area.
           </p>
         </div>
-        <label className="relative inline-flex items-center cursor-pointer ml-4">
+        <label className="relative inline-flex items-center cursor-pointer ms-4">
           <input
             type="checkbox"
             checked={settings.enabled}
@@ -411,7 +411,7 @@ const RulesTab = ({
             calendar every night at 03:00.
           </p>
         </div>
-        <label className="relative inline-flex items-center cursor-pointer ml-4">
+        <label className="relative inline-flex items-center cursor-pointer ms-4">
           <input
             type="checkbox"
             checked={settings.auto_apply}

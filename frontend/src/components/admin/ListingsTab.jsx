@@ -437,7 +437,7 @@ export const ListingsTab = ({ token, onStatsChange }) => {
             value={searchTerm}
             onChange={e => setSearchTerm(e.target.value)}
             placeholder={t('admin.searchListings')}
-            className="w-full pl-9 pr-4 py-2 rounded-lg border border-[#E5E5E5] text-sm focus:outline-none focus:ring-2 focus:ring-black/20"
+            className="w-full ps-9 pe-4 py-2 rounded-lg border border-[#E5E5E5] text-sm focus:outline-none focus:ring-2 focus:ring-black/20"
             data-testid="listings-search-input"
           />
         </div>
@@ -469,7 +469,7 @@ export const ListingsTab = ({ token, onStatsChange }) => {
           <DollarSign size={14} /> {repairingPrices ? 'Repairing…' : 'Repair prices'}
         </button>
         {/* Quick chip toggle: All vs "Properties I manage" */}
-        <div className="inline-flex bg-white rounded-lg border border-[#E5E5E5] p-0.5 ml-1" data-testid="managed-filter">
+        <div className="inline-flex bg-white rounded-lg border border-[#E5E5E5] p-0.5 ms-1" data-testid="managed-filter">
           <button
             onClick={() => setManagedFilter('all')}
             className={`px-2.5 py-1 rounded-md text-xs font-semibold transition-colors ${managedFilter === 'all' ? 'bg-[#1E6A6A] text-white' : 'text-gray-600 hover:bg-gray-50'}`}
@@ -560,7 +560,7 @@ export const ListingsTab = ({ token, onStatsChange }) => {
             <button
               type="button"
               onClick={clearPriceRange}
-              className="text-[10px] uppercase tracking-wider text-gray-400 hover:text-gray-700 ml-0.5"
+              className="text-[10px] uppercase tracking-wider text-gray-400 hover:text-gray-700 ms-0.5"
               data-testid="price-clear-btn"
               title="Clear price range"
             >
@@ -569,7 +569,7 @@ export const ListingsTab = ({ token, onStatsChange }) => {
           )}
         </div>
         {selectedPropIds.size > 0 && (
-          <div className="flex items-center gap-2 ml-auto flex-wrap">
+          <div className="flex items-center gap-2 ms-auto flex-wrap">
             <span className="text-xs font-medium text-gray-700" data-testid="selected-count">
               {t('admin.selectedCount', { count: selectedPropIds.size })}
             </span>
