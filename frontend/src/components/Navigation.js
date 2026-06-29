@@ -338,8 +338,8 @@ const Navigation = () => {
               alt="MyIsraelRental"
               className={`w-auto transition-all duration-300 ${
                 scrolled
-                  ? 'h-10 sm:h-[60px] md:h-[60px]'
-                  : 'h-10 sm:h-[140px] md:h-[200px]'
+                  ? 'h-12 sm:h-[60px] md:h-[60px]'
+                  : 'h-20 sm:h-[140px] md:h-[200px]'
               }`}
               style={{ marginTop: scrolled ? '0' : '-8px' }}
             />
