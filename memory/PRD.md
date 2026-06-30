@@ -11,6 +11,12 @@ Build a bilingual (English/Hebrew) rental website named MyIsraelRental.com with 
 - **i18n**: i18next with English and Hebrew (RTL) support
 
 ## What's Been Implemented
+- [x] **SEO P1 fix (c): real text content on Home page (2026-06-29)**: Home was flagged in the SEO audit at only 172 rendered words. Target was 300+ for healthy SEO signal.
+  - **New `<section data-testid="home-seo-content">`** added to `Home.js` between About Us and Contact: "Renting in Israel, made simple." 2-column "For renters / For owners" copy explaining the no-fee model, the contract-signing flow, and how to use Stays + Services. Adds 3 internal links (→ /stays, /services, /faq) so PageRank flows into the priority pages. A "Cities we cover" sub-section lists 19 Israeli urban centres (Jerusalem, Tel Aviv, Haifa, Beit Shemesh, Modi'in, Ra'anana, Netanya, Herzliya, Rishon LeZion, Petah Tikva, Ramat Gan, Givatayim, Rehovot, Ashdod, Be'er Sheva, Eilat, Tiberias, Tzfat, Nahariya) — pure long-tail keyword content that helps city-name searches.
+  - Pure marketing copy, no interactive state. i18n keys deliberately deferred so the section ships immediately — Hebrew version can be added later via translation keys without touching structure.
+  - **Verified**: home page rendered word count jumped from 172 → **488** (target 300+ comfortably exceeded). Section screenshot looks clean on desktop, matches existing page typography (Playfair display heading, gray body text).
+  - Files: `frontend/src/pages/Home.js`.
+
 - [x] **SEO P1 fix: JSON-LD Organization + WebSite + SearchAction (2026-06-29)**: Added rich-result structured data to the home page so Google can show a knowledge-panel-style brand card AND a sitelinks search box for `MyIsraelRental` brand searches.
   - **`PageMeta.jsx`** extended with an optional `jsonLd` prop (array or single object) — emits one `<script type="application/ld+json">` block per item, all scoped under Helmet so they stay in `<head>`.
   - **`Home.js`** passes two structured-data blocks:

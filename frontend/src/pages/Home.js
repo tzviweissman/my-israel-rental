@@ -313,6 +313,94 @@ const Home = () => {
         </div>
       </div>
 
+      {/* SEO content section — bumps Home from ~170 words to ~450,
+          adds three internal links (to /stays, /services, /faq), and
+          enumerates the cities we serve. Pure marketing copy; no
+          interactive state. Skipped in i18n for now — Hebrew version
+          can be added later via translation keys without touching
+          structure. */}
+      <section
+        className="py-20 bg-white"
+        aria-labelledby="why-myisraelrental-heading"
+        data-testid="home-seo-content"
+      >
+        <div className="max-w-5xl mx-auto px-6">
+          <h2
+            id="why-myisraelrental-heading"
+            className="text-3xl sm:text-4xl font-bold mb-12 text-center"
+            style={{ fontFamily: 'Playfair Display', color: '#1E6A6A' }}
+          >
+            Renting in Israel, made simple.
+          </h2>
+
+          <div className="grid md:grid-cols-2 gap-10 text-base leading-relaxed text-gray-700 mb-12">
+            <div>
+              <h3 className="text-xl font-bold text-gray-900 mb-3">For renters</h3>
+              <p>
+                Whether you&apos;re moving to Israel for a year, planning a holiday in Jerusalem, or
+                spending a few months working remotely from Tel Aviv, MyIsraelRental gives you a single
+                place to compare apartments, vacation homes, and short-stay flats — without the broker
+                fees and back-and-forth that usually come with renting here. Every listing is posted by
+                the owner or their authorised representative, so you talk directly to the person who
+                holds the keys.
+              </p>
+              <p className="mt-4">
+                Use our{' '}
+                <a href="/stays" onClick={(e) => { e.preventDefault(); navigate('/stays'); }} className="text-[#1E6A6A] font-semibold hover:underline">
+                  Stays search
+                </a>{' '}
+                to filter by area, dates, bedrooms, budget and amenities. Save favourites with one tap,
+                message owners through the built-in chat, and sign your rental contract digitally — all
+                from your browser.
+              </p>
+            </div>
+
+            <div>
+              <h3 className="text-xl font-bold text-gray-900 mb-3">For owners</h3>
+              <p>
+                Listing on MyIsraelRental is free for owners too — no commission, no payout fees, no
+                lock-in. Add photos in minutes, set your nightly or monthly price, choose your
+                availability, and let renters reach out to you directly. We handle the contract
+                templates, calendar sync, and email/WhatsApp delivery so you can focus on welcoming
+                guests instead of chasing paperwork.
+              </p>
+              <p className="mt-4">
+                Need help cleaning, photographing, or managing turnovers? Browse trusted local{' '}
+                <a href="/services" onClick={(e) => { e.preventDefault(); navigate('/services'); }} className="text-[#1E6A6A] font-semibold hover:underline">
+                  service providers
+                </a>{' '}
+                — or list your own business and reach every owner on the platform.
+              </p>
+            </div>
+          </div>
+
+          <div className="border-t border-gray-200 pt-10">
+            <h3 className="text-xl font-bold text-gray-900 mb-3 text-center">Cities we cover</h3>
+            <p className="text-center text-gray-700 mb-6 max-w-3xl mx-auto">
+              From the beaches of Tel Aviv to the alleys of the Old City of Jerusalem, MyIsraelRental
+              hosts listings in every major Israeli urban centre — plus dozens of neighbourhoods that
+              don&apos;t usually show up on global rental sites.
+            </p>
+            <p className="text-center text-gray-600 text-sm leading-loose">
+              Jerusalem · Tel Aviv · Haifa · Beit Shemesh · Modi&apos;in · Ra&apos;anana · Netanya ·
+              Herzliya · Rishon LeZion · Petah Tikva · Ramat Gan · Givatayim · Rehovot · Ashdod ·
+              Be&apos;er Sheva · Eilat · Tiberias · Tzfat · Nahariya
+            </p>
+            <p className="text-center mt-8 text-sm">
+              <a
+                href="/faq"
+                onClick={(e) => { e.preventDefault(); navigate('/faq'); }}
+                className="text-[#1E6A6A] font-semibold hover:underline"
+              >
+                Read our FAQ
+              </a>{' '}
+              to learn more about deposits, cancellations, and how we keep MyIsraelRental free for
+              everyone.
+            </p>
+          </div>
+        </div>
+      </section>
+
       <div className="py-16" style={{ backgroundColor: '#1E6A6A' }}>
         <div className="max-w-7xl mx-auto px-6 text-center" style={{ color: '#D4AF37' }}>
           <h2 className="text-3xl font-bold mb-4" style={{ fontFamily: 'Playfair Display' }}>
