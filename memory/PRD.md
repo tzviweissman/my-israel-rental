@@ -11,6 +11,12 @@ Build a bilingual (English/Hebrew) rental website named MyIsraelRental.com with 
 - **i18n**: i18next with English and Hebrew (RTL) support
 
 ## What's Been Implemented
+- [x] **/services page top clipping fix (2026-06-29)**: User reported the top of the Services page was being cut off behind the fixed global navigation.
+  - **Root cause**: `pages/Services.jsx` wrapper had no `padding-top`. Every other page uses `style={{ paddingTop: 'var(--nav-h, 68px)' }}` to clear the fixed nav, but Services slipped through.
+  - **Fix**: added the same inline style to the root `<div data-testid="services-page">`.
+  - **Verified** by testing agent (iteration_44, 100% pass): desktop (nav_h=68px, icon_top=164px), mobile (nav_h=111px due to secondary tab row, icon_top=175px). Hero, "What you'll find here", categories grid, and contact form all render correctly with no extra gap.
+  - Files: `frontend/src/pages/Services.jsx`.
+
 - [x] **SEO P1 fix (c): real text content on Home page (2026-06-29)**: Home was flagged in the SEO audit at only 172 rendered words. Target was 300+ for healthy SEO signal.
   - **New `<section data-testid="home-seo-content">`** added to `Home.js` between About Us and Contact: "Renting in Israel, made simple." 2-column "For renters / For owners" copy explaining the no-fee model, the contract-signing flow, and how to use Stays + Services. Adds 3 internal links (→ /stays, /services, /faq) so PageRank flows into the priority pages. A "Cities we cover" sub-section lists 19 Israeli urban centres (Jerusalem, Tel Aviv, Haifa, Beit Shemesh, Modi'in, Ra'anana, Netanya, Herzliya, Rishon LeZion, Petah Tikva, Ramat Gan, Givatayim, Rehovot, Ashdod, Be'er Sheva, Eilat, Tiberias, Tzfat, Nahariya) — pure long-tail keyword content that helps city-name searches.
   - Pure marketing copy, no interactive state. i18n keys deliberately deferred so the section ships immediately — Hebrew version can be added later via translation keys without touching structure.
