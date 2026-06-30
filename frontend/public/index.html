@@ -4,28 +4,17 @@
         <meta charset="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <meta name="theme-color" content="#1E6A6A" />
-        <meta name="description" content="MyIsraelRental — find long-term, short-term, vacation, and storage rentals across Israel. Free for renters. Free for owners." />
-
-        <!-- Open Graph / Facebook / WhatsApp link previews.
-             WhatsApp/iMessage/Telegram fetch these tags when a recipient
-             receives a message containing a URL to this site. og:image is
-             the brand logo so every shared smart-list opens with the
-             MyIsraelRental logo as the preview card. -->
+        <!-- NOTE: per-route <title>, <meta name="description">, og:* and
+             twitter:* tags are now injected by react-helmet-async on each
+             page (see /src/components/PageMeta.jsx). The site_name +
+             og:type stay here because they're constant across routes
+             and Helmet won't duplicate them. -->
         <meta property="og:type" content="website" />
         <meta property="og:site_name" content="MyIsraelRental" />
-        <meta property="og:title" content="MyIsraelRental — Rentals across Israel" />
-        <meta property="og:description" content="Find long-term, short-term, vacation, and storage rentals across Israel. Free for renters. Free for owners." />
-        <meta property="og:url" content="https://myisraelrental.com" />
-        <meta property="og:image" content="https://customer-assets.emergentagent.com/job_listing-manager-pro-2/artifacts/hx4hc6hw_IMG_1745%20%281%29.PNG" />
         <meta property="og:image:alt" content="MyIsraelRental logo" />
         <meta property="og:image:width" content="1200" />
         <meta property="og:image:height" content="630" />
-
-        <!-- Twitter Card — same logo used as the preview image. -->
         <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content="MyIsraelRental — Rentals across Israel" />
-        <meta name="twitter:description" content="Find long-term, short-term, vacation, and storage rentals across Israel." />
-        <meta name="twitter:image" content="https://customer-assets.emergentagent.com/job_listing-manager-pro-2/artifacts/hx4hc6hw_IMG_1745%20%281%29.PNG" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@600&display=swap" rel="stylesheet" />
@@ -42,6 +31,9 @@
         work correctly both with client-side routing and a non-root public URL.
         Learn how to configure a non-root public URL by running `npm run build`.
         -->
+        <!-- Fallback title for the brief window before React hydrates +
+             for crawlers that don't execute JS. Per-route titles come
+             from PageMeta. -->
         <title>MyIsraelRental — Rentals across Israel</title>
         <script>window.addEventListener("error",function(e){if(e.error instanceof DOMException&&e.error.name==="DataCloneError"&&e.message&&e.message.includes("PerformanceServerTiming")){e.stopImmediatePropagation();e.preventDefault()}},true);</script>
         <script src="https://assets.emergent.sh/scripts/emergent-main.js"></script>

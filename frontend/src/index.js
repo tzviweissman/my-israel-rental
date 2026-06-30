@@ -1,5 +1,6 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
+import { HelmetProvider } from "react-helmet-async";
 import "@/index.css";
 import App from "@/App";
 import { Toaster } from "sonner";
@@ -27,7 +28,9 @@ window.addEventListener('unhandledrejection', (e) => {
 const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
   <React.StrictMode>
-    <App />
-    <Toaster position="top-right" duration={1500} />
+    <HelmetProvider>
+      <App />
+      <Toaster position="top-right" duration={1500} />
+    </HelmetProvider>
   </React.StrictMode>,
 );

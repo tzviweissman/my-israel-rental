@@ -8,6 +8,7 @@ import { Bed, Bath, Home as HomeIcon, MapPin, Check, ArrowLeft, ArrowRight } fro
 import HeroSlideshow from '../components/HeroSlideshow';
 import DefaultImageBadge from '../components/property/DefaultImageBadge';
 import VideoCoverBadge from '../components/property/VideoCoverBadge';
+import PageMeta from '../components/PageMeta';
 import { getCoverImage } from '../utils/coverImage';
 
 // Hero background rotation. Keep widths consistent so the cross-fade is
@@ -95,6 +96,11 @@ const Home = () => {
 
   return (
     <div className="min-h-screen">
+      <PageMeta
+        title="MyIsraelRental — Find your perfect rental in Israel | No service fees"
+        description="Browse long-term, short-term, and vacation rentals across Israel. Free for renters, free for owners. Search Jerusalem, Tel Aviv, Haifa and more — no broker fees."
+        path="/"
+      />
       {/* Search bar was removed per user request — it now only appears
           once a category (Stays / Services) is chosen, so the home page
           stays focused on the hero + featured listings. The 3-segment

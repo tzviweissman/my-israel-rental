@@ -13,6 +13,36 @@ import { loadHolidayWindows } from '../utils/holidayWindows';
 import PropertyCard from '../components/property/PropertyCard';
 import HolidayBanner from '../components/property/HolidayBanner';
 import FiltersPanel, { PRICE_MAX } from '../components/property/FiltersPanel';
+import PageMeta from '../components/PageMeta';
+
+// Per-rental-type SEO copy. Each entry maps the URL segment (e.g.
+// `long-term`) to a unique title + meta description so search engines
+// see a distinct snippet for every listing page and no longer flag
+// duplicate-title errors (audit error #6 / #15).
+const RENTAL_TYPE_META = {
+  'all': {
+    title: 'All rentals in Israel — apartments, vacation, long & short term | MyIsraelRental',
+    description: 'Search every rental on MyIsraelRental — long-term apartments, short-term lets, vacation homes — across Jerusalem, Tel Aviv, Haifa and more. Free for renters.',
+  },
+  'long-term': {
+    title: 'Long-term apartment rentals in Israel | MyIsraelRental',
+    description: '12-month and longer apartment rentals across Israel. Browse verified listings in Jerusalem, Tel Aviv, Haifa, Beit Shemesh and more. No broker fees.',
+  },
+  'short-term': {
+    title: 'Short-term rentals in Israel (1–6 months) | MyIsraelRental',
+    description: 'Furnished short-term rentals across Israel — perfect for olim, students, and remote workers. Browse 1-to-6 month stays in Jerusalem, Tel Aviv, Haifa and more.',
+  },
+  'vacation': {
+    title: 'Vacation rentals in Israel — nightly stays | MyIsraelRental',
+    description: 'Nightly vacation rentals across Israel. Find apartments and homes for Pesach, Sukkot, summer holidays and weekend getaways — Jerusalem, Tel Aviv, Eilat and beyond.',
+  },
+  // Storage retired but legacy URL still resolves — keep a real
+  // (non-promoted) title so it isn't a duplicate of the others.
+  'storage': {
+    title: 'Storage rentals in Israel (legacy) | MyIsraelRental',
+    description: 'Legacy storage rentals page. The storage category is being retired; please browse our apartment rentals instead.',
+  },
+};
 
 const Properties = () => {
   const { type } = useParams();
@@ -512,6 +542,11 @@ const Properties = () => {
 
   return (
     <div className="min-h-screen">
+      <PageMeta
+        title={(RENTAL_TYPE_META[type] || RENTAL_TYPE_META['all']).title}
+        description={(RENTAL_TYPE_META[type] || RENTAL_TYPE_META['all']).description}
+        path={`/properties/${type || 'all'}`}
+      />
       <div className="max-w-7xl mx-auto px-6 pt-36 sm:pt-32 md:pt-28 pb-12">
         <div className="flex items-center justify-between mb-3 gap-3">
           <h1

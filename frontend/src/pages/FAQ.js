@@ -2,6 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { ChevronDown, MessageCircle, Calendar, DollarSign, RotateCcw, ArrowLeft, Search, X } from 'lucide-react';
+import PageMeta from '../components/PageMeta';
 
 const SECTIONS = [
   {
@@ -177,6 +178,11 @@ const FAQ = () => {
 
   return (
     <div className="min-h-screen bg-[#fafafa] pt-[140px] sm:pt-[160px] md:pt-[220px] pb-20 px-4" data-testid="faq-page">
+      <PageMeta
+        title="FAQ — Renting in Israel made simple | MyIsraelRental"
+        description="Answers about booking, payments, cancellations, deposits and contracts when renting in Israel. Learn how MyIsraelRental keeps it free for renters and owners."
+        path="/faq"
+      />
       <div className="max-w-3xl mx-auto">
         <button
           onClick={() => navigate(-1)}

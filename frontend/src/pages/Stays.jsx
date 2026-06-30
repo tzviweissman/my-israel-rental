@@ -32,6 +32,7 @@ import WhenPicker, { flexLabel } from '../components/search/WhenPicker';
 import WherePicker from '../components/search/WherePicker';
 import StayTypePicker from '../components/search/StayTypePicker';
 import QuickChips from '../components/search/QuickChips';
+import PageMeta from '../components/PageMeta';
 import useIsRtl from '../hooks/useIsRtl';
 import useFavorites from '../hooks/useFavorites';
 
@@ -235,6 +236,11 @@ const Stays = () => {
       }}
       data-testid="stays-page"
     >
+      <PageMeta
+        title="Stays in Israel — Long-term, short-term & vacation rentals | MyIsraelRental"
+        description="Discover stays across Israel — vacation apartments, short-term lets and long-term rentals in Jerusalem, Tel Aviv, Haifa and beyond. Filter by area, dates, price and amenities."
+        path="/stays"
+      />
       {/* Inline (non-sticky) search bar — sits flush below the global
           nav at the top of the page and scrolls away with the rest of
           the content as the user explores. Previously this was

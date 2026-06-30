@@ -21,6 +21,7 @@ import axios from 'axios';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
 import { Briefcase, Sparkles, Camera, Key, Wrench, Car, Brush, Loader2, Mail, CheckCircle } from 'lucide-react';
+import PageMeta from '../components/PageMeta';
 
 const API = process.env.REACT_APP_BACKEND_URL + '/api';
 
@@ -65,6 +66,11 @@ const Services = () => {
 
   return (
     <div className="min-h-screen bg-[#FAFAF7]" data-testid="services-page">
+      <PageMeta
+        title="Local services for hosts & guests in Israel | MyIsraelRental Services"
+        description="Trusted local services for Israeli rentals — cleaning, key handoff, photography, maintenance, airport pickup and concierge. List your business on MyIsraelRental."
+        path="/services"
+      />
       {/* Hero */}
       <div className="relative py-16 md:py-24 px-4 overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-[#1E6A6A] to-[#0F3A3A]" />

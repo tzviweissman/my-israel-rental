@@ -11,6 +11,20 @@ Build a bilingual (English/Hebrew) rental website named MyIsraelRental.com with 
 - **i18n**: i18next with English and Hebrew (RTL) support
 
 ## What's Been Implemented
+- [x] **SEO P1 fix (b): per-route titles + meta descriptions (2026-06-29)**: Followed up on the SEO audit's 2 remaining red errors (#6 duplicate titles, #15 duplicate descriptions across 6 pages) by giving every public route its own SEO-optimised metadata.
+  - Installed `react-helmet-async` and wrapped the app in `<HelmetProvider>` (in `index.js`).
+  - **New `components/PageMeta.jsx`**: declarative `<title>` + `<meta name="description">` + canonical + Open Graph + Twitter Card all from a single drop-in component. Canonical always points to `https://myisraelrental.com{path}` so preview/dev hits don't become canonical.
+  - Added `<PageMeta>` to the 5 top-level routes with unique copy:
+    - `/` → "Find your perfect rental in Israel | No service fees"
+    - `/stays` → "Stays in Israel — Long-term, short-term & vacation rentals"
+    - `/services` → "Local services for hosts & guests in Israel"
+    - `/faq` → "FAQ — Renting in Israel made simple"
+    - `/properties/{type}` → dynamic from a `RENTAL_TYPE_META` map covering all / long-term / short-term / vacation / (legacy) storage — each with its own targeted keyword-rich title and 150-character description.
+  - **`public/index.html`** stripped of the static `description`, `og:title`, `og:description`, `og:url`, `og:image`, `twitter:title`, `twitter:description`, `twitter:image` tags so Helmet's are the *only* ones in the head (previously Helmet appended a second `meta[name=description]` rather than replacing the static one). Constant tags (`og:type`, `og:site_name`, `og:image:alt/width/height`, `twitter:card`) stay in index.html since they don't change per route.
+  - **Verified** across 8 routes: every page now has a unique `<title>`, a unique `<meta name="description">`, and a unique canonical pointing to the production URL. Counts confirmed via JS: exactly **1** `meta[name=description]` and **1** `og:description` per page.
+  - **SEO impact**: errors #6 + #15 will resolve on next production deploy → projected health score 83 → ~95.
+  - Files: `frontend/src/components/PageMeta.jsx` (new), `frontend/src/index.js`, `frontend/src/pages/Home.js`, `frontend/src/pages/Stays.jsx`, `frontend/src/pages/Services.jsx`, `frontend/src/pages/FAQ.js`, `frontend/src/pages/Properties.js`, `frontend/public/index.html`, `frontend/package.json`.
+
 - [x] **SEO P1 fixes: robots.txt + sitemap.xml (2026-06-29)**: SEO audit (health 83/100) flagged 3 critical errors — duplicate titles, duplicate meta descriptions, and an invalid robots.txt (serving HTML instead of plain text). Started with fix (a): the robots/sitemap files.
   - **New `frontend/public/robots.txt`**: real plain-text file. Allow all UAs by default, disallow authenticated surfaces (`/dashboard`, `/admin`, `/add-property`, `/properties/manage`, `/messages`, `/wishlist`, `/verify-email`, `/reset-password`, `/set-password`) so crawlers stop wasting budget on pages that redirect for anonymous visitors. Includes `Sitemap: https://myisraelrental.com/sitemap.xml` so search engines discover it.
   - **New `frontend/public/sitemap.xml`**: 8 canonical URLs — Home, /stays, /services, /properties/all, /properties/{long-term,short-term,vacation}, /faq. Storage retired (not listed). Priorities reflect commerce intent (Home = 1.0, Stays = 0.9, Vacation listings = 0.7, FAQ = 0.5). Property-detail pages intentionally omitted — they're dynamic and crawlers discover them via internal links once rendered.
