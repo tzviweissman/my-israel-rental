@@ -67,6 +67,11 @@ const Stays = () => {
   });
   const [priceMin, setPriceMin] = useState(searchParams.get('priceMin') || '');
   const [priceMax, setPriceMax] = useState(searchParams.get('priceMax') || '');
+  // Currency the price-range numbers are typed in. Defaults to ILS
+  // since most listings on the platform are Israeli. URL-persisted as
+  // `?cur=USD` when the renter flips to dollars so the conversion is
+  // reproducible across shares.
+  const [priceCurrency, setPriceCurrency] = useState(searchParams.get('cur') === 'USD' ? 'USD' : 'ILS');
   const [bedrooms, setBedrooms] = useState(searchParams.get('bedrooms') || '');
   const [bathrooms, setBathrooms] = useState(searchParams.get('bathrooms') || '');
   const [porches, setPorches] = useState(searchParams.get('porches') || '');
@@ -105,6 +110,9 @@ const Stays = () => {
     }
     if (priceMin) next.set('priceMin', priceMin);
     if (priceMax) next.set('priceMax', priceMax);
+    // Only write `cur` when it diverges from the ILS default so URLs
+    // stay clean for the typical Israeli renter.
+    if (priceCurrency === 'USD') next.set('cur', 'USD');
     if (bedrooms) next.set('bedrooms', bedrooms);
     if (bathrooms) next.set('bathrooms', bathrooms);
     if (porches) next.set('porches', porches);
@@ -114,7 +122,7 @@ const Stays = () => {
     if (subType) next.set('subType', subType);
     if (amenities.length) next.set('amenities', amenities.join(','));
     setSearchParams(next, { replace: true });
-  }, [where, checkin, checkout, flexible, priceMin, priceMax, bedrooms, bathrooms, porches, condition, furnished, hasElevator, subType, amenities, setSearchParams]);
+  }, [where, checkin, checkout, flexible, priceMin, priceMax, priceCurrency, bedrooms, bathrooms, porches, condition, furnished, hasElevator, subType, amenities, setSearchParams]);
 
   useEffect(() => { syncUrl(); }, [syncUrl]);
 
@@ -181,8 +189,22 @@ const Stays = () => {
       if (furnished && !p.furnished) return false;
       if (hasElevator && !p.has_elevator) return false;
       const price = p.rental_type === 'vacation' ? p.nightly_price : p.monthly_price;
-      if (priceMin && (price || 0) < parseFloat(priceMin)) return false;
-      if (priceMax && (price || 0) > parseFloat(priceMax)) return false;
+      // Convert the listing's price into the renter's chosen filter
+      // currency before comparing. FX rate matches the constant used by
+      // Properties.js / backend fallback so all conversions stay in
+      // sync. Properties with no `currency` field default to ILS.
+      let priceInFilterCurrency = price || 0;
+      if (price && (p.currency || 'ILS') !== priceCurrency) {
+        const FX_USD_TO_ILS = 3.65;
+        const propCur = p.currency || 'ILS';
+        if (priceCurrency === 'USD' && propCur === 'ILS') {
+          priceInFilterCurrency = price / FX_USD_TO_ILS;
+        } else if (priceCurrency === 'ILS' && propCur === 'USD') {
+          priceInFilterCurrency = price * FX_USD_TO_ILS;
+        }
+      }
+      if (priceMin && priceInFilterCurrency < parseFloat(priceMin)) return false;
+      if (priceMax && priceInFilterCurrency > parseFloat(priceMax)) return false;
       if (amenities.length && !amenities.every((a) => (p.amenities || []).includes(a))) return false;
       // Flexible-mode availability — property must allow at least one
       // N-night sub-window anywhere in the chosen month.
@@ -200,7 +222,7 @@ const Stays = () => {
       }
       return true;
     });
-  }, [allProperties, where, subType, bedrooms, bathrooms, porches, condition, furnished, hasElevator, priceMin, priceMax, amenities, checkin, checkout, flexible]);
+  }, [allProperties, where, subType, bedrooms, bathrooms, porches, condition, furnished, hasElevator, priceMin, priceMax, priceCurrency, amenities, checkin, checkout, flexible]);
 
   // Group filtered properties by area for the per-area row layout.
   const grouped = useMemo(() => {
@@ -387,6 +409,7 @@ const Stays = () => {
           onClose={() => setShowFilters(false)}
           priceMin={priceMin} setPriceMin={setPriceMin}
           priceMax={priceMax} setPriceMax={setPriceMax}
+          priceCurrency={priceCurrency} setPriceCurrency={setPriceCurrency}
           bedrooms={bedrooms} setBedrooms={setBedrooms}
           bathrooms={bathrooms} setBathrooms={setBathrooms}
           porches={porches} setPorches={setPorches}
@@ -645,6 +668,7 @@ const ChipRow = ({ value, onChange, options, testidPrefix }) => (
 const FiltersModal = ({
   onClose,
   priceMin, setPriceMin, priceMax, setPriceMax,
+  priceCurrency, setPriceCurrency,
   bedrooms, setBedrooms,
   bathrooms, setBathrooms,
   porches, setPorches,
@@ -722,22 +746,64 @@ const FiltersModal = ({
           </div>
           {/* Price range */}
           <div>
-            <h3 className="text-sm font-bold mb-2">{t('stays.priceRange', 'Price range')}</h3>
-            <div className="flex gap-3">
-              <input
-                type="number" placeholder={t('stays.min', 'Min')}
-                value={priceMin}
-                onChange={(e) => setPriceMin(e.target.value)}
-                className="flex-1 px-3 py-2 rounded-lg border border-gray-200 text-sm focus:outline-none focus:border-[#D4AF37]"
-                data-testid="stays-filter-price-min"
-              />
-              <input
-                type="number" placeholder={t('stays.max', 'Max')}
-                value={priceMax}
-                onChange={(e) => setPriceMax(e.target.value)}
-                className="flex-1 px-3 py-2 rounded-lg border border-gray-200 text-sm focus:outline-none focus:border-[#D4AF37]"
-                data-testid="stays-filter-price-max"
-              />
+            <div className="flex items-center justify-between mb-2">
+              <h3 className="text-sm font-bold">{t('stays.priceRange', 'Price range')}</h3>
+              {/* Currency segmented control — flipping it does NOT
+                  reconvert the typed numbers (renters usually retype to
+                  a "round" budget in the new currency anyway). It only
+                  changes how listings are converted before the
+                  comparison. */}
+              <div
+                className="flex bg-gray-100 rounded-full p-0.5 text-[11px] font-bold"
+                data-testid="stays-filter-currency"
+              >
+                <button
+                  type="button"
+                  onClick={() => setPriceCurrency('ILS')}
+                  className={`px-3 py-1 rounded-full transition-colors ${
+                    priceCurrency === 'ILS' ? 'bg-black text-[#D4AF37]' : 'text-gray-600'
+                  }`}
+                  data-testid="stays-filter-currency-ils"
+                >
+                  ₪ ILS
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setPriceCurrency('USD')}
+                  className={`px-3 py-1 rounded-full transition-colors ${
+                    priceCurrency === 'USD' ? 'bg-black text-[#D4AF37]' : 'text-gray-600'
+                  }`}
+                  data-testid="stays-filter-currency-usd"
+                >
+                  $ USD
+                </button>
+              </div>
+            </div>
+            <div className="flex gap-3 items-stretch">
+              <div className="flex-1 flex items-center rounded-lg border border-gray-200 focus-within:border-[#D4AF37] overflow-hidden">
+                <span className="ps-3 text-gray-500 text-sm select-none">
+                  {priceCurrency === 'ILS' ? '₪' : '$'}
+                </span>
+                <input
+                  type="number" placeholder={t('stays.min', 'Min')}
+                  value={priceMin}
+                  onChange={(e) => setPriceMin(e.target.value)}
+                  className="flex-1 px-2 py-2 text-sm focus:outline-none bg-transparent"
+                  data-testid="stays-filter-price-min"
+                />
+              </div>
+              <div className="flex-1 flex items-center rounded-lg border border-gray-200 focus-within:border-[#D4AF37] overflow-hidden">
+                <span className="ps-3 text-gray-500 text-sm select-none">
+                  {priceCurrency === 'ILS' ? '₪' : '$'}
+                </span>
+                <input
+                  type="number" placeholder={t('stays.max', 'Max')}
+                  value={priceMax}
+                  onChange={(e) => setPriceMax(e.target.value)}
+                  className="flex-1 px-2 py-2 text-sm focus:outline-none bg-transparent"
+                  data-testid="stays-filter-price-max"
+                />
+              </div>
             </div>
           </div>
           {/* Bedrooms */}

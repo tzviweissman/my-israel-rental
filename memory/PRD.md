@@ -11,6 +11,15 @@ Build a bilingual (English/Hebrew) rental website named MyIsraelRental.com with 
 - **i18n**: i18next with English and Hebrew (RTL) support
 
 ## What's Been Implemented
+- [x] **Stays price-range currency toggle: ILS ↔ USD (2026-06-29)**: User asked to add a currency picker to the price-range filter.
+  - **`Stays.jsx`**:
+    - New `priceCurrency` state (default `ILS`), persisted to URL as `?cur=USD` only when it diverges from the default.
+    - Filter chain now converts each listing's price into the renter's chosen currency before comparing against min/max, using `FX_USD_TO_ILS = 3.65` to match `Properties.js` and the backend fallback in `utils/helpers.py`.
+    - Properties.js and Stays.jsx now share the same conversion math, so a renter who flips currency on either page gets identical results.
+  - **`FiltersModal` Price range section**: pill-style segmented control (`₪ ILS` / `$ USD`) inline with the section heading. Inputs gained an in-field symbol prefix (`₪` or `$`) that switches with the toggle so the unit is always visible. Toggling the currency intentionally does NOT auto-convert the typed numbers — renters typically re-enter a clean budget in the new currency.
+  - **Verified**: toggle to USD, type 500–3000 → URL becomes `?priceMin=500&priceMax=3000&cur=USD`, results filter from 14 stays → 4 stays (FX-converted). Lint clean.
+  - Files: `frontend/src/pages/Stays.jsx`.
+
 - [x] **Restored detailed filters in Stays modal (2026-06-29)**: User asked to keep the new pill-style Filters look but bring back the older detailed filters — bedrooms (already there), bathrooms, porches/balcony, property condition, furnished, elevator.
   - **`Stays.jsx`** — added 5 new state hooks (`bathrooms`, `porches`, `condition`, `furnished`, `hasElevator`), wired them into URL persistence (`?bathrooms=2&porches=1&condition=renovated&furnished=1&elevator=1`), into the client-side filter chain (min-N for bathrooms/porches, exact match for condition, boolean for furnished/has_elevator), into `clearAllFilters`, and into `activeFilterCount` so the badge correctly counts them.
   - **`FiltersModal`** — added 4 new sections under Bedrooms: **Bathrooms** (Any/1+/2+/3+), **Porches / Balcony** (Any/1+/2+), **Property condition** (Any / Renovated / Partially Renovated / Good Condition), **Features** (Furnished + Elevator toggle pills). All use the same chip-pill design as Bedrooms / Stay Type.
