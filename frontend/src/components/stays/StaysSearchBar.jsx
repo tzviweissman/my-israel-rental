@@ -27,7 +27,12 @@ const StaysSearchBar = ({
 }) => (
   <div className="flex items-stretch gap-2" data-testid="stays-search-bar">
     <div className="flex-1 flex items-stretch bg-[#F5F5F0] rounded-full border border-[#E5E5E5] hover:border-[#D4AF37] transition-colors">
-      <div className="flex-1 min-w-0 rounded-l-full">
+      {/* On mobile the pill collapses to just Where — Stay type and
+          When are hidden because they're available inside the Filters
+          modal (Stay type as chips, Dates as a mobile-only section).
+          This stops the segments from being squeezed to ~100px each
+          and clipping their labels at viewports <640px. */}
+      <div className="flex-1 min-w-0 rounded-l-full sm:rounded-l-full rounded-full sm:rounded-r-none">
         <WherePicker
           value={where}
           onChange={setWhere}
@@ -35,16 +40,16 @@ const StaysSearchBar = ({
           testidPrefix="stays-where"
         />
       </div>
-      <div className="w-px bg-[#E5E5E5] my-2" />
-      <div className="flex-1 min-w-0">
+      <div className="hidden sm:block w-px bg-[#E5E5E5] my-2" />
+      <div className="hidden sm:block flex-1 min-w-0">
         <StayTypePicker
           value={subType}
           onChange={setSubType}
           testidPrefix="stays-type"
         />
       </div>
-      <div className="w-px bg-[#E5E5E5] my-2" />
-      <div className="flex-1 min-w-0">
+      <div className="hidden sm:block w-px bg-[#E5E5E5] my-2" />
+      <div className="hidden sm:block flex-1 min-w-0">
         <WhenPicker
           checkin={checkin}
           checkout={checkout}
