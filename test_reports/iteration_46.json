@@ -1,0 +1,47 @@
+{
+  "summary": "Post-refactor regression test of /stays after Stays.jsx was split into 4 sub-components (StaysCard, AreaRow, StaysSearchBar, FiltersModal). 9 of 10 scenarios PASS — refactor is essentially invisible to the user. One pre-existing/regression bug found: Clear-all does NOT reset price-currency back to ILS, leaving `?cur=USD` in the URL.",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {
+    "ui_bugs": [
+      {
+        "component": "Stays.jsx → clearAllFilters",
+        "issue": "Clear-all (both `stays-filters-clear` inside the modal AND `stays-grid-clear` in the results header) wipes every filter EXCEPT `priceCurrency`. After clearing, the URL retains `?cur=USD` and the priceCurrency state stays on 'USD'. Spec test #8 explicitly requires currency to revert to ILS default. One-line fix: add `setPriceCurrency('ILS');` to the clearAllFilters function in /app/frontend/src/pages/Stays.jsx (around line 260-265).",
+        "selector": "[data-testid=\"stays-filters-clear\"], [data-testid=\"stays-grid-clear\"]",
+        "priority": "MEDIUM"
+      }
+    ],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_results": {
+    "search_bar_renders_3_segments_plus_filters": "PASS — `stays-search-bar` shows `stays-where-input`, `stays-type-toggle`, `stays-when-trigger` and `stays-filters-btn` (Note: the request mentioned `stays-where-toggle`/`stays-when-toggle` testids but the actual preserved ids are `-input` and `-trigger` — no regression, just naming).",
+    "area_rows_and_cards_render": "PASS — 6 area sections, 29 cards, 6 `stays-see-all-{area}` chevrons. AreaRow prev/next arrows render where >3 listings.",
+    "anonymous_heart_toast_no_navigation": "PASS — clicking `stays-card-like-{id}` while signed out shows sonner toast 'Please log in to save properties.' and the URL stays on /stays (no navigation to /property/{id}).",
+    "stay_type_vacation_collapses_to_grid": "PASS — choosing `stays-type-option-vacation` sets `?subType=vacation` and renders `stays-results-grid`.",
+    "filters_modal_sections_order": "PASS — order on desktop: Dates (rendered but `sm:hidden` on >=sm), Stay type, Price range, Bedrooms, Bathrooms, Porches / Balcony, Property condition, Features (Furnished+Elevator), Amenities. `stays-filter-currency`, `stays-filter-furnished`, `stays-filter-elevator` all present.",
+    "currency_toggle_url_persistence": "PASS — ILS Min=2000/Max=10000 filters; switching to USD via `stays-filter-currency-usd` and Min=500/Max=3000 yields URL `?priceMin=500&priceMax=3000&cur=USD`.",
+    "fx_hint_on_ils_cards": "PASS — when filter currency=USD, 4/12 cards render `stays-card-fx-{id}` line like '≈ $1,218 / month'. Native-USD cards omit the hint.",
+    "flexible_dates_week_october": "PASS — Flexible tab → Week → October 2026 → Apply produces URL `?flex=week%3A2026-10`, search bar When segment reads 'A week in October', results collapse to flat grid.",
+    "clear_all_returns_to_area_grouped_view": "PASS — `stays-grid-clear` (when only standard filters are set) returns to 6 area-grouped rows and clears URL params.",
+    "clear_all_resets_currency": "FAIL — both clear paths leave `?cur=USD` in URL when currency was changed (see bug above)."
+  },
+  "test_report_links": [],
+  "action_items": [
+    "Add `setPriceCurrency('ILS');` inside Stays.jsx clearAllFilters so Clear-all fully resets state per spec scenario #8. Without it, the URL still carries `?cur=USD` and downstream conversions remain in USD mode."
+  ],
+  "critical_code_review_comments": [
+    "Refactor is clean: Stays.jsx is now 430 LOC (down from ~970), each new component under /components/stays/ stays under ~310 LOC.",
+    "All `data-testid` attributes are preserved — selectors used by previous test iterations continue to work without modification.",
+    "FX rate constant `FX_USD_TO_ILS = 3.65` is duplicated in two places (Stays.jsx filter chain + StaysCard.jsx hint). Consider extracting to /utils/fx.js to keep them from drifting.",
+    "FiltersModal.jsx is a single 304-line file — within guidelines, but the ChipRow helper + ALL_AMENITIES export could be split into a shared `stays/filterPrimitives.js` if the modal grows further.",
+    "Minor: `clearAllFilters` does not reset `priceCurrency` — see action item above. This is the single behavioral gap introduced (or surfaced) by the refactor relative to spec."
+  ],
+  "updated_files": [],
+  "success_rate": {"backend": "n/a (skipped per request)", "frontend": "90% (9/10 scenarios)"},
+  "test_credentials": "renter@test.com / Test1234! provided but authenticated favorites flow was not exercised — login page on /login renders blank (no email input visible). Since the favorites hook (useFavorites) is unchanged by the refactor and the anonymous heart→toast path works, the authenticated path is highly likely intact. Main agent or next iteration can self-verify.",
+  "seed_data_creation": "none",
+  "retest_needed": true,
+  "should_main_agent_self_test": true,
+  "context_for_next_testing_agent": "The Stays page refactor is functionally invisible except for one behavioral gap: clearAllFilters does not reset priceCurrency. After main agent adds setPriceCurrency('ILS') to that function, retest by: (1) opening /stays, (2) Filters → switch to USD → Apply, (3) clicking either stays-filters-clear (in modal) or stays-grid-clear — URL must end exactly with /stays (no ?cur=USD). All other 9 scenarios already verified PASS. Important: search bar testids are `stays-where-input` (not -toggle) and `stays-when-trigger` (not -toggle).",
+  "rca of the issue": "Bug: Clear-all leaves ?cur=USD in URL. RCA: In /app/frontend/src/pages/Stays.jsx around line 260, the `clearAllFilters` callback resets where/checkin/checkout/flexible/subType/bedrooms/bathrooms/porches/condition/furnished/hasElevator/priceMin/priceMax/amenities — but priceCurrency is omitted. The syncUrl effect then re-writes `?cur=USD` because priceCurrency still === 'USD'. Reproduction: visit /stays, open Filters, click stays-filter-currency-usd, set priceMin=100, Apply, then click stays-grid-clear → URL becomes /stays?cur=USD instead of /stays. Mitigation: add `setPriceCurrency('ILS');` to clearAllFilters."
+}
