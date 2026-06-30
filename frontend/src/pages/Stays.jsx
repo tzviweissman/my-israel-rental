@@ -376,6 +376,7 @@ const Stays = () => {
                 fullWidth
                 liked={likedIds.has(p.id)}
                 onToggleLike={(e) => toggleLike(p.id, e)}
+                displayCurrency={priceCurrency}
                 onClick={() => {
                   sessionStorage.setItem('previousPath', '/stays' + window.location.search);
                   navigate(`/property/${p.id}`);
@@ -393,6 +394,7 @@ const Stays = () => {
               properties={props}
               likedIds={likedIds}
               onToggleLike={toggleLike}
+              displayCurrency={priceCurrency}
               onCardClick={(id) => {
                 sessionStorage.setItem('previousPath', '/stays' + window.location.search);
                 navigate(`/property/${id}`);
@@ -502,7 +504,7 @@ const SearchSegment = ({ label, icon: Icon, children, testid }) => (
   </div>
 );
 
-const AreaRow = ({ area, properties, onCardClick, onSeeAll, likedIds, onToggleLike, t }) => {
+const AreaRow = ({ area, properties, onCardClick, onSeeAll, likedIds, onToggleLike, displayCurrency, t }) => {
   const scrollRef = React.useRef(null);
   const isRtl = useIsRtl();
   // In RTL the container's scrollLeft is reversed by the browser, so
@@ -561,6 +563,7 @@ const AreaRow = ({ area, properties, onCardClick, onSeeAll, likedIds, onToggleLi
             property={p}
             liked={likedIds?.has(p.id)}
             onToggleLike={(e) => onToggleLike?.(p.id, e)}
+            displayCurrency={displayCurrency}
             onClick={() => onCardClick(p.id)}
           />
         ))}
@@ -569,11 +572,26 @@ const AreaRow = ({ area, properties, onCardClick, onSeeAll, likedIds, onToggleLi
   );
 };
 
-const StaysCard = ({ property, onClick, fullWidth = false, liked = false, onToggleLike }) => {
+const StaysCard = ({ property, onClick, fullWidth = false, liked = false, onToggleLike, displayCurrency = null }) => {
   const cover = getCoverImage(property.images, 400, '', property.videos, property.id);
-  const sym = (property.currency || 'ILS') === 'ILS' ? '₪' : '$';
+  const propCur = property.currency || 'ILS';
+  const sym = propCur === 'ILS' ? '₪' : '$';
   const price = property.rental_type === 'vacation' ? property.nightly_price : property.monthly_price;
   const unit = property.rental_type === 'vacation' ? 'night' : 'month';
+  // When the renter has flipped the search bar's currency toggle to
+  // something different from the listing's native currency, show a
+  // small "≈ $X" hint underneath the headline price so they can
+  // mentally compare against their own budget without doing FX math.
+  // Uses the same constant the filter chain uses (3.65 ILS per USD).
+  let convertedHint = null;
+  if (price && displayCurrency && displayCurrency !== propCur) {
+    const FX_USD_TO_ILS = 3.65;
+    let converted = price;
+    if (displayCurrency === 'USD' && propCur === 'ILS') converted = price / FX_USD_TO_ILS;
+    else if (displayCurrency === 'ILS' && propCur === 'USD') converted = price * FX_USD_TO_ILS;
+    const convSym = displayCurrency === 'ILS' ? '₪' : '$';
+    convertedHint = `≈ ${convSym}${Math.round(converted).toLocaleString()}`;
+  }
   // Compact carousel card sizing — smaller on mobile so ~2 are visible
   // at a glance, bumping up on tablet/desktop. Mirrors Airbnb's density.
   const sizeClasses = fullWidth
@@ -618,10 +636,17 @@ const StaysCard = ({ property, onClick, fullWidth = false, liked = false, onTogg
         <p className="font-semibold text-sm text-gray-900 truncate">{property.title}</p>
         <p className="text-xs text-gray-500 truncate">{property.area}</p>
         {price ? (
-          <p className="text-xs mt-0.5 text-gray-900">
-            <span className="font-semibold">{sym}{price.toLocaleString()}</span>
-            <span className="text-gray-500"> / {unit}</span>
-          </p>
+          <>
+            <p className="text-xs mt-0.5 text-gray-900">
+              <span className="font-semibold">{sym}{price.toLocaleString()}</span>
+              <span className="text-gray-500"> / {unit}</span>
+            </p>
+            {convertedHint && (
+              <p className="text-[11px] text-gray-400" data-testid={`stays-card-fx-${property.id}`}>
+                {convertedHint} / {unit}
+              </p>
+            )}
+          </>
         ) : (
           <p className="text-xs text-gray-400 mt-0.5">Price on request</p>
         )}

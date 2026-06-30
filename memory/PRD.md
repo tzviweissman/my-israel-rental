@@ -11,6 +11,12 @@ Build a bilingual (English/Hebrew) rental website named MyIsraelRental.com with 
 - **i18n**: i18next with English and Hebrew (RTL) support
 
 ## What's Been Implemented
+- [x] **Converted-price hint on Stays cards (2026-06-29)**: When the renter flips the filter currency, every card whose native currency differs now renders a small "≈ $X / unit" (or "≈ ₪Y / unit") line directly beneath the headline price so they can mentally compare against their typed budget without doing FX math.
+  - **`Stays.jsx`**: `priceCurrency` now propagates from Stays → AreaRow → StaysCard via a new `displayCurrency` prop. StaysCard renders the conversion using the same `FX_USD_TO_ILS = 3.65` constant the filter chain uses, with `Math.round` to keep the hint clean. Hint is hidden when the listing is already in the display currency (no "$400 ≈ $400" noise).
+  - **`data-testid="stays-card-fx-{id}"`** added for testing.
+  - **Visual verified**: ILS-only seed data — switching to USD shows hints `≈ $6 / night`, `≈ $27 / night`, `≈ $1,218 / month`, etc. The native-USD listing ("property in arzei" $400/night) correctly shows no hint.
+  - Files: `frontend/src/pages/Stays.jsx`.
+
 - [x] **Stays price-range currency toggle: ILS ↔ USD (2026-06-29)**: User asked to add a currency picker to the price-range filter.
   - **`Stays.jsx`**:
     - New `priceCurrency` state (default `ILS`), persisted to URL as `?cur=USD` only when it diverges from the default.
