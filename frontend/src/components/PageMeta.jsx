@@ -17,7 +17,7 @@ import { Helmet } from 'react-helmet-async';
 
 const CANONICAL_ORIGIN = 'https://myisraelrental.com';
 
-const PageMeta = ({ title, description, path, image }) => {
+const PageMeta = ({ title, description, path, image, jsonLd }) => {
   // Prefer the explicit `path` prop so server-rendered crawlers and
   // navigations both resolve to the same canonical. Fallback to the
   // browser path if the caller didn't pass one in.
@@ -27,6 +27,9 @@ const PageMeta = ({ title, description, path, image }) => {
   const ogImage =
     image ??
     'https://customer-assets.emergentagent.com/job_listing-manager-pro-2/artifacts/hx4hc6hw_IMG_1745%20%281%29.PNG';
+  // Normalise jsonLd into an array so callers can pass a single object
+  // or a list of structured-data blocks (Organization + WebSite, etc.)
+  const ldBlocks = jsonLd ? (Array.isArray(jsonLd) ? jsonLd : [jsonLd]) : [];
   return (
     <Helmet prioritizeSeoTags>
       <title>{title}</title>
@@ -41,6 +44,14 @@ const PageMeta = ({ title, description, path, image }) => {
       <meta name="twitter:title" content={title} />
       <meta name="twitter:description" content={description} />
       <meta name="twitter:image" content={ogImage} />
+      {/* JSON-LD structured data — emits one <script> per block so
+          Google can pick out Organization, WebSite, Product, etc.
+          independently. */}
+      {ldBlocks.map((block, i) => (
+        <script key={i} type="application/ld+json">
+          {JSON.stringify(block)}
+        </script>
+      ))}
     </Helmet>
   );
 };

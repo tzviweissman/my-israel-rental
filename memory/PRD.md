@@ -11,6 +11,15 @@ Build a bilingual (English/Hebrew) rental website named MyIsraelRental.com with 
 - **i18n**: i18next with English and Hebrew (RTL) support
 
 ## What's Been Implemented
+- [x] **SEO P1 fix: JSON-LD Organization + WebSite + SearchAction (2026-06-29)**: Added rich-result structured data to the home page so Google can show a knowledge-panel-style brand card AND a sitelinks search box for `MyIsraelRental` brand searches.
+  - **`PageMeta.jsx`** extended with an optional `jsonLd` prop (array or single object) — emits one `<script type="application/ld+json">` block per item, all scoped under Helmet so they stay in `<head>`.
+  - **`Home.js`** passes two structured-data blocks:
+    1. **`Organization`** (`@id: #organization`) — name, url, logo, description, `areaServed: Israel`.
+    2. **`WebSite`** (`@id: #website`) — `publisher` references the org by id (so Google merges them into one entity), `inLanguage: [en, he]`, and a `SearchAction` whose `target` URL template is `https://myisraelrental.com/stays?area={search_term_string}`. That tells Google "if a user searches for our brand, show them a search box that takes them straight to /stays for any query".
+  - **Verified**: opened `/` in Playwright, parsed all `script[type=application/ld+json]` blocks → exactly 2 items returned, both valid JSON, correctly typed (Organization + WebSite), publisher reference resolves, target URL template parses correctly.
+  - **Will activate on next production deploy.** Will need a few weeks for Google to crawl + apply the SearchAction widget in SERPs.
+  - Files: `frontend/src/components/PageMeta.jsx`, `frontend/src/pages/Home.js`.
+
 - [x] **SEO P1 fix (b): per-route titles + meta descriptions (2026-06-29)**: Followed up on the SEO audit's 2 remaining red errors (#6 duplicate titles, #15 duplicate descriptions across 6 pages) by giving every public route its own SEO-optimised metadata.
   - Installed `react-helmet-async` and wrapped the app in `<HelmetProvider>` (in `index.js`).
   - **New `components/PageMeta.jsx`**: declarative `<title>` + `<meta name="description">` + canonical + Open Graph + Twitter Card all from a single drop-in component. Canonical always points to `https://myisraelrental.com{path}` so preview/dev hits don't become canonical.

@@ -100,6 +100,40 @@ const Home = () => {
         title="MyIsraelRental — Find your perfect rental in Israel | No service fees"
         description="Browse long-term, short-term, and vacation rentals across Israel. Free for renters, free for owners. Search Jerusalem, Tel Aviv, Haifa and more — no broker fees."
         path="/"
+        jsonLd={[
+          // Organization — surfaces the brand name + logo in Google's
+          // knowledge-panel-style rich results.
+          {
+            '@context': 'https://schema.org',
+            '@type': 'Organization',
+            '@id': 'https://myisraelrental.com/#organization',
+            name: 'MyIsraelRental',
+            url: 'https://myisraelrental.com',
+            logo: 'https://customer-assets.emergentagent.com/job_listing-manager-pro-2/artifacts/hx4hc6hw_IMG_1745%20%281%29.PNG',
+            description: 'Find long-term, short-term, and vacation rentals across Israel. Free for renters, free for owners.',
+            areaServed: { '@type': 'Country', name: 'Israel' },
+          },
+          // WebSite — lets Google show a sitelinks search box that
+          // points straight into the /stays results page, dramatically
+          // improving direct-from-SERP discoverability for brand searches.
+          {
+            '@context': 'https://schema.org',
+            '@type': 'WebSite',
+            '@id': 'https://myisraelrental.com/#website',
+            name: 'MyIsraelRental',
+            url: 'https://myisraelrental.com',
+            publisher: { '@id': 'https://myisraelrental.com/#organization' },
+            potentialAction: {
+              '@type': 'SearchAction',
+              target: {
+                '@type': 'EntryPoint',
+                urlTemplate: 'https://myisraelrental.com/stays?area={search_term_string}',
+              },
+              'query-input': 'required name=search_term_string',
+            },
+            inLanguage: ['en', 'he'],
+          },
+        ]}
       />
       {/* Search bar was removed per user request — it now only appears
           once a category (Stays / Services) is chosen, so the home page
