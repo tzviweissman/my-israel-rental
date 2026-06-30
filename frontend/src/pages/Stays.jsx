@@ -331,18 +331,10 @@ const Stays = () => {
         </div>
       ) : filtered.length === 0 ? (
         <div className="max-w-3xl mx-auto px-6 py-12 text-center">
-          <p className="text-2xl font-bold text-gray-800 mb-2">{t('stays.noResultsTitle', 'No stays match those filters')}</p>
-          <p className="text-gray-500 mb-6">{t('stays.noResultsBody', 'Try widening your search or clearing a filter — or have us notify you when something matches.')}</p>
-          <button
-            onClick={clearAllFilters}
-            className="px-5 py-2.5 rounded-lg text-sm font-semibold text-white"
-            style={{ backgroundColor: '#1E6A6A' }}
-            data-testid="stays-clear-filters"
-          >
-            {t('stays.clearAll', 'Clear all filters')}
-          </button>
-          {/* High-intent moment — promote the alert flow to convert
-              "no inventory yet" searches into subscribed renters. */}
+          {/* Notify-me card is hoisted to the top of the empty-state so
+              users see the alert CTA before the "try again" copy — this
+              is the highest-intent moment for converting a fruitless
+              search into a subscribed renter. */}
           <NotifyMeCard
             filters={{
               rental_type: subType,
@@ -358,6 +350,16 @@ const Stays = () => {
                 : null
             }
           />
+          <p className="text-2xl font-bold text-gray-800 mt-12 mb-2">{t('stays.noResultsTitle', 'No stays match those filters')}</p>
+          <p className="text-gray-500 mb-6">{t('stays.noResultsBody', 'Try widening your search or clearing a filter — or have us notify you when something matches.')}</p>
+          <button
+            onClick={clearAllFilters}
+            className="px-5 py-2.5 rounded-lg text-sm font-semibold text-white"
+            style={{ backgroundColor: '#1E6A6A' }}
+            data-testid="stays-clear-filters"
+          >
+            {t('stays.clearAll', 'Clear all filters')}
+          </button>
         </div>
       ) : isSearchActive ? (
         // Flat results grid — Airbnb-style, shown once any search/filter is active
