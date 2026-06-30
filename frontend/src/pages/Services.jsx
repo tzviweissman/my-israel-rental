@@ -65,7 +65,11 @@ const Services = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#FAFAF7]" data-testid="services-page">
+    <div
+      className="min-h-screen bg-[#FAFAF7]"
+      style={{ paddingTop: 'var(--nav-h, 68px)' }}
+      data-testid="services-page"
+    >
       <PageMeta
         title="Local services for hosts & guests in Israel | MyIsraelRental Services"
         description="Trusted local services for Israeli rentals — cleaning, key handoff, photography, maintenance, airport pickup and concierge. List your business on MyIsraelRental."
