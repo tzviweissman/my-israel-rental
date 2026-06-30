@@ -11,6 +11,14 @@ Build a bilingual (English/Hebrew) rental website named MyIsraelRental.com with 
 - **i18n**: i18next with English and Hebrew (RTL) support
 
 ## What's Been Implemented
+- [x] **Restored detailed filters in Stays modal (2026-06-29)**: User asked to keep the new pill-style Filters look but bring back the older detailed filters — bedrooms (already there), bathrooms, porches/balcony, property condition, furnished, elevator.
+  - **`Stays.jsx`** — added 5 new state hooks (`bathrooms`, `porches`, `condition`, `furnished`, `hasElevator`), wired them into URL persistence (`?bathrooms=2&porches=1&condition=renovated&furnished=1&elevator=1`), into the client-side filter chain (min-N for bathrooms/porches, exact match for condition, boolean for furnished/has_elevator), into `clearAllFilters`, and into `activeFilterCount` so the badge correctly counts them.
+  - **`FiltersModal`** — added 4 new sections under Bedrooms: **Bathrooms** (Any/1+/2+/3+), **Porches / Balcony** (Any/1+/2+), **Property condition** (Any / Renovated / Partially Renovated / Good Condition), **Features** (Furnished + Elevator toggle pills). All use the same chip-pill design as Bedrooms / Stay Type.
+  - **`ChipRow` helper** hoisted out of FiltersModal (per react/no-unstable-nested-components lint) — used by Bathrooms / Porches / Condition rows.
+  - **`ALL_AMENITIES` cleanup**: removed `Elevator` and `Balcony` from the amenities list since they're now first-class chips in Features / Porches (testing agent flagged the dual-filter UX).
+  - **Verified by testing agent (iteration_45, 100% frontend pass)**: modal renders sections in correct order, every chip persists to URL, badge increments correctly (5 active = badge "5"), Clear all wipes everything, direct URL hydration restores the chip active states.
+  - Files: `frontend/src/pages/Stays.jsx`.
+
 - [x] **/services page top clipping fix (2026-06-29)**: User reported the top of the Services page was being cut off behind the fixed global navigation.
   - **Root cause**: `pages/Services.jsx` wrapper had no `padding-top`. Every other page uses `style={{ paddingTop: 'var(--nav-h, 68px)' }}` to clear the fixed nav, but Services slipped through.
   - **Fix**: added the same inline style to the root `<div data-testid="services-page">`.

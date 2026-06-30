@@ -611,9 +611,14 @@ const StaysCard = ({ property, onClick, fullWidth = false, liked = false, onTogg
 // Filters modal
 // ---------------------------------------------------------------------------
 
+// Amenities the renter can multi-select. `Elevator` + `Balcony` were
+// removed from this list because they now live as first-class chips
+// in the Features / Porches sections of the modal (where they filter
+// against typed property fields rather than the loose amenities[]
+// string array — avoiding two competing filters for the same concept).
 const ALL_AMENITIES = [
   'WiFi', 'Pool', 'AC', 'Kitchen', 'Parking', 'Washer', 'Dryer', 'TV',
-  'Workspace', 'Pet-friendly', 'Sea view', 'Balcony', 'Elevator', 'Gym',
+  'Workspace', 'Pet-friendly', 'Sea view', 'Gym',
 ];
 
 // Small chip-row helper used inside FiltersModal — renders a row of
