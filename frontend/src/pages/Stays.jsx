@@ -68,6 +68,11 @@ const Stays = () => {
   const [priceMin, setPriceMin] = useState(searchParams.get('priceMin') || '');
   const [priceMax, setPriceMax] = useState(searchParams.get('priceMax') || '');
   const [bedrooms, setBedrooms] = useState(searchParams.get('bedrooms') || '');
+  const [bathrooms, setBathrooms] = useState(searchParams.get('bathrooms') || '');
+  const [porches, setPorches] = useState(searchParams.get('porches') || '');
+  const [condition, setCondition] = useState(searchParams.get('condition') || '');
+  const [furnished, setFurnished] = useState(searchParams.get('furnished') === '1');
+  const [hasElevator, setHasElevator] = useState(searchParams.get('elevator') === '1');
   const [subType, setSubType] = useState(searchParams.get('subType') || '');
   const [amenities, setAmenities] = useState((searchParams.get('amenities') || '').split(',').filter(Boolean));
 
@@ -101,10 +106,15 @@ const Stays = () => {
     if (priceMin) next.set('priceMin', priceMin);
     if (priceMax) next.set('priceMax', priceMax);
     if (bedrooms) next.set('bedrooms', bedrooms);
+    if (bathrooms) next.set('bathrooms', bathrooms);
+    if (porches) next.set('porches', porches);
+    if (condition) next.set('condition', condition);
+    if (furnished) next.set('furnished', '1');
+    if (hasElevator) next.set('elevator', '1');
     if (subType) next.set('subType', subType);
     if (amenities.length) next.set('amenities', amenities.join(','));
     setSearchParams(next, { replace: true });
-  }, [where, checkin, checkout, flexible, priceMin, priceMax, bedrooms, subType, amenities, setSearchParams]);
+  }, [where, checkin, checkout, flexible, priceMin, priceMax, bedrooms, bathrooms, porches, condition, furnished, hasElevator, subType, amenities, setSearchParams]);
 
   useEffect(() => { syncUrl(); }, [syncUrl]);
 
@@ -158,6 +168,18 @@ const Stays = () => {
         if (b === 4) { if (!p.bedrooms || p.bedrooms < 4) return false; }
         else if ((p.bedrooms || 0) !== b) return false;
       }
+      // Bathrooms / porches use min-N semantics so "1+" matches any.
+      if (bathrooms) {
+        const n = parseInt(bathrooms, 10);
+        if ((p.bathrooms || 0) < n) return false;
+      }
+      if (porches) {
+        const n = parseInt(porches, 10);
+        if ((p.porches || 0) < n) return false;
+      }
+      if (condition && p.condition !== condition) return false;
+      if (furnished && !p.furnished) return false;
+      if (hasElevator && !p.has_elevator) return false;
       const price = p.rental_type === 'vacation' ? p.nightly_price : p.monthly_price;
       if (priceMin && (price || 0) < parseFloat(priceMin)) return false;
       if (priceMax && (price || 0) > parseFloat(priceMax)) return false;
@@ -178,7 +200,7 @@ const Stays = () => {
       }
       return true;
     });
-  }, [allProperties, where, subType, bedrooms, priceMin, priceMax, amenities, checkin, checkout, flexible]);
+  }, [allProperties, where, subType, bedrooms, bathrooms, porches, condition, furnished, hasElevator, priceMin, priceMax, amenities, checkin, checkout, flexible]);
 
   // Group filtered properties by area for the per-area row layout.
   const grouped = useMemo(() => {
@@ -205,18 +227,23 @@ const Stays = () => {
   // "filter pill count" would be redundant.
   const activeFilterCount =
     (priceMin ? 1 : 0) + (priceMax ? 1 : 0) + (bedrooms ? 1 : 0) +
+    (bathrooms ? 1 : 0) + (porches ? 1 : 0) + (condition ? 1 : 0) +
+    (furnished ? 1 : 0) + (hasElevator ? 1 : 0) +
     amenities.length;
 
   // Any active search OR filter collapses the per-area rows into a single
   // flat results grid — that mirrors Airbnb's behavior once a user starts
   // narrowing down what they want.
   const isSearchActive = Boolean(
-    where || checkin || checkout || flexible || priceMin || priceMax || bedrooms || subType || amenities.length,
+    where || checkin || checkout || flexible || priceMin || priceMax || bedrooms ||
+    bathrooms || porches || condition || furnished || hasElevator || subType || amenities.length,
   );
 
   const clearAllFilters = () => {
     setWhere(''); setCheckin(''); setCheckout(''); setFlexible(null);
-    setSubType(''); setBedrooms(''); setPriceMin(''); setPriceMax(''); setAmenities([]);
+    setSubType(''); setBedrooms(''); setBathrooms(''); setPorches('');
+    setCondition(''); setFurnished(false); setHasElevator(false);
+    setPriceMin(''); setPriceMax(''); setAmenities([]);
   };
 
   // Shared favorites state — drives the interactive heart on every card.
@@ -361,6 +388,11 @@ const Stays = () => {
           priceMin={priceMin} setPriceMin={setPriceMin}
           priceMax={priceMax} setPriceMax={setPriceMax}
           bedrooms={bedrooms} setBedrooms={setBedrooms}
+          bathrooms={bathrooms} setBathrooms={setBathrooms}
+          porches={porches} setPorches={setPorches}
+          condition={condition} setCondition={setCondition}
+          furnished={furnished} setFurnished={setFurnished}
+          hasElevator={hasElevator} setHasElevator={setHasElevator}
           subType={subType} setSubType={setSubType}
           amenities={amenities} setAmenities={setAmenities}
           checkin={checkin} setCheckin={setCheckin}
@@ -584,12 +616,48 @@ const ALL_AMENITIES = [
   'Workspace', 'Pet-friendly', 'Sea view', 'Balcony', 'Elevator', 'Gym',
 ];
 
-const FiltersModal = ({ onClose, priceMin, setPriceMin, priceMax, setPriceMax, bedrooms, setBedrooms, subType, setSubType, amenities, setAmenities, checkin, setCheckin, checkout, setCheckout, totalCount, t }) => {
+// Small chip-row helper used inside FiltersModal — renders a row of
+// pill chips for a min-N or value-match style filter. Hoisted out of
+// the modal so React doesn't unmount its subtree on every parent render.
+const ChipRow = ({ value, onChange, options, testidPrefix }) => (
+  <div className="flex flex-wrap gap-2">
+    {options.map((o) => (
+      <button
+        key={o.v || 'any'}
+        type="button"
+        onClick={() => onChange(o.v)}
+        className={`px-3 py-1.5 rounded-full text-xs font-semibold border transition-colors ${
+          value === o.v ? 'bg-black text-[#D4AF37] border-black' : 'bg-white text-gray-700 border-gray-200 hover:border-[#D4AF37]'
+        }`}
+        data-testid={`${testidPrefix}-${o.v || 'any'}`}
+      >
+        {o.label}
+      </button>
+    ))}
+  </div>
+);
+
+const FiltersModal = ({
+  onClose,
+  priceMin, setPriceMin, priceMax, setPriceMax,
+  bedrooms, setBedrooms,
+  bathrooms, setBathrooms,
+  porches, setPorches,
+  condition, setCondition,
+  furnished, setFurnished,
+  hasElevator, setHasElevator,
+  subType, setSubType,
+  amenities, setAmenities,
+  checkin, setCheckin, checkout, setCheckout,
+  totalCount, t,
+}) => {
   const toggleAmenity = (a) => {
     setAmenities((prev) => prev.includes(a) ? prev.filter((x) => x !== a) : [...prev, a]);
   };
   const clearAll = () => {
-    setPriceMin(''); setPriceMax(''); setBedrooms(''); setSubType(''); setAmenities([]);
+    setPriceMin(''); setPriceMax(''); setBedrooms(''); setBathrooms('');
+    setPorches(''); setCondition(''); setFurnished(false); setHasElevator(false);
+    setSubType(''); setAmenities([]);
     setCheckin(''); setCheckout('');
   };
   return (
@@ -689,6 +757,78 @@ const FiltersModal = ({ onClose, priceMin, setPriceMin, priceMax, setPriceMax, b
                   {o.label}
                 </button>
               ))}
+            </div>
+          </div>
+          {/* Bathrooms — min-N semantics. "2+" matches 2, 3, 4. */}
+          <div>
+            <h3 className="text-sm font-bold mb-2">{t('stays.bathrooms', 'Bathrooms')}</h3>
+            <ChipRow
+              value={bathrooms}
+              onChange={setBathrooms}
+              testidPrefix="stays-filter-bathrooms"
+              options={[
+                { v: '', label: t('stays.any', 'Any') },
+                { v: '1', label: '1+' },
+                { v: '2', label: '2+' },
+                { v: '3', label: '3+' },
+              ]}
+            />
+          </div>
+          {/* Porches / balconies — counts as "outdoor space" filter. */}
+          <div>
+            <h3 className="text-sm font-bold mb-2">{t('stays.porches', 'Porches / Balcony')}</h3>
+            <ChipRow
+              value={porches}
+              onChange={setPorches}
+              testidPrefix="stays-filter-porches"
+              options={[
+                { v: '', label: t('stays.any', 'Any') },
+                { v: '1', label: '1+' },
+                { v: '2', label: '2+' },
+              ]}
+            />
+          </div>
+          {/* Property condition */}
+          <div>
+            <h3 className="text-sm font-bold mb-2">{t('stays.condition', 'Property condition')}</h3>
+            <ChipRow
+              value={condition}
+              onChange={setCondition}
+              testidPrefix="stays-filter-condition"
+              options={[
+                { v: '', label: t('stays.any', 'Any') },
+                { v: 'renovated', label: t('property.renovated', 'Renovated') },
+                { v: 'partially_renovated', label: t('property.partiallyRenovated', 'Partially renovated') },
+                { v: 'good', label: t('property.goodCondition', 'Good condition') },
+              ]}
+            />
+          </div>
+          {/* Features — furnished + elevator render as on/off toggle pills
+              instead of a separate switch widget, matching the rest of
+              the modal's chip vocabulary. */}
+          <div>
+            <h3 className="text-sm font-bold mb-2">{t('stays.features', 'Features')}</h3>
+            <div className="flex flex-wrap gap-2">
+              <button
+                type="button"
+                onClick={() => setFurnished((v) => !v)}
+                className={`px-3 py-1.5 rounded-full text-xs font-semibold border transition-colors ${
+                  furnished ? 'bg-black text-[#D4AF37] border-black' : 'bg-white text-gray-700 border-gray-200 hover:border-[#D4AF37]'
+                }`}
+                data-testid="stays-filter-furnished"
+              >
+                {t('property.furnished', 'Furnished')}
+              </button>
+              <button
+                type="button"
+                onClick={() => setHasElevator((v) => !v)}
+                className={`px-3 py-1.5 rounded-full text-xs font-semibold border transition-colors ${
+                  hasElevator ? 'bg-black text-[#D4AF37] border-black' : 'bg-white text-gray-700 border-gray-200 hover:border-[#D4AF37]'
+                }`}
+                data-testid="stays-filter-elevator"
+              >
+                {t('property.elevator', 'Elevator')}
+              </button>
             </div>
           </div>
           {/* Amenities */}
