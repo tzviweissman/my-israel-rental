@@ -11,6 +11,15 @@ Build a bilingual (English/Hebrew) rental website named MyIsraelRental.com with 
 - **i18n**: i18next with English and Hebrew (RTL) support
 
 ## What's Been Implemented
+- [x] **"Create alert" / Notify-me on Stays (2026-06-29)**: User asked where the create-alert option went — it existed on the legacy `/properties` page but wasn't wired into the new `/stays` page after the redesign. Added back.
+  - **`Stays.jsx`** now imports and renders `<NotifyMeCard>` in 3 places:
+    1. **Empty-state** (`filtered.length === 0`): card appears under the "No stays match" copy as the primary conversion path. Updated empty-state body copy to mention "have us notify you when something matches."
+    2. **Header CTA** alongside Clear-all: small `🔔 Create alert` button (`data-testid="stays-create-alert-btn"`) — gold border, swaps to filled gold on hover.
+    3. **Inline summon** below the grid when user clicks the header CTA on a populated search (`showNotifyCard` state, reset implicitly when the user navigates away).
+  - All three carry the active filters into the alert payload (`rental_type`, `area`, `min_bedrooms`, `max_price`, `date_from`, `date_to`) so a saved alert exactly mirrors what the user was browsing.
+  - **Verified visually**: empty state ✓, header CTA on `/stays?area=Jerusalem` ✓, populated state inline card after click ✓. Backend `/api/saved-searches` endpoint already exists and is unchanged.
+  - Files: `frontend/src/pages/Stays.jsx`.
+
 - [x] **Stays.jsx refactor: 968 LOC → 430 LOC, 4 component files (2026-06-29)**: P3 backlog item — split the page into testable, focused units.
   - **New files under `frontend/src/components/stays/`**:
     - `StaysCard.jsx` (~105 LOC) — flat Airbnb-style card with interactive heart + FX hint.

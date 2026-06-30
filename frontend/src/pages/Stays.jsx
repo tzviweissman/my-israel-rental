@@ -22,13 +22,14 @@ import axios from 'axios';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { format } from 'date-fns';
-import { X, Loader2 } from 'lucide-react';
+import { X, Loader2, Bell } from 'lucide-react';
 import StaysCard from '../components/stays/StaysCard';
 import AreaRow from '../components/stays/AreaRow';
 import StaysSearchBar from '../components/stays/StaysSearchBar';
 import FiltersModal from '../components/stays/FiltersModal';
 import { flexLabel } from '../components/search/WhenPicker';
 import QuickChips from '../components/search/QuickChips';
+import NotifyMeCard from '../components/NotifyMeCard';
 import PageMeta from '../components/PageMeta';
 import useFavorites from '../hooks/useFavorites';
 
@@ -45,6 +46,10 @@ const Stays = () => {
   const [allProperties, setAllProperties] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showFilters, setShowFilters] = useState(false);
+  // Toggles the inline "Notify me" card the renter can summon from
+  // the header even when there are matches. Reset on every filter
+  // change so the card doesn't linger after the search changes.
+  const [showNotifyCard, setShowNotifyCard] = useState(false);
 
   // Hydrate filters from URL so a shared link preserves state
   const [where, setWhere] = useState(searchParams.get('area') || '');
@@ -325,9 +330,9 @@ const Stays = () => {
           <Loader2 className="animate-spin text-[#1E6A6A]" size={32} />
         </div>
       ) : filtered.length === 0 ? (
-        <div className="max-w-3xl mx-auto px-6 py-24 text-center">
+        <div className="max-w-3xl mx-auto px-6 py-12 text-center">
           <p className="text-2xl font-bold text-gray-800 mb-2">{t('stays.noResultsTitle', 'No stays match those filters')}</p>
-          <p className="text-gray-500 mb-6">{t('stays.noResultsBody', 'Try widening your search or clearing a filter.')}</p>
+          <p className="text-gray-500 mb-6">{t('stays.noResultsBody', 'Try widening your search or clearing a filter — or have us notify you when something matches.')}</p>
           <button
             onClick={clearAllFilters}
             className="px-5 py-2.5 rounded-lg text-sm font-semibold text-white"
@@ -336,6 +341,23 @@ const Stays = () => {
           >
             {t('stays.clearAll', 'Clear all filters')}
           </button>
+          {/* High-intent moment — promote the alert flow to convert
+              "no inventory yet" searches into subscribed renters. */}
+          <NotifyMeCard
+            filters={{
+              rental_type: subType,
+              area: where,
+              min_bedrooms: bedrooms,
+              max_price: priceMax,
+              date_from: checkin,
+              date_to: checkout,
+            }}
+            dateRange={
+              checkin && checkout
+                ? { from: new Date(checkin), to: new Date(checkout) }
+                : null
+            }
+          />
         </div>
       ) : isSearchActive ? (
         // Flat results grid — Airbnb-style, shown once any search/filter is active
@@ -356,13 +378,26 @@ const Stays = () => {
                 </p>
               )}
             </div>
-            <button
-              onClick={clearAllFilters}
-              className="text-xs font-semibold text-[#1E6A6A] hover:underline"
-              data-testid="stays-grid-clear"
-            >
-              {t('stays.clearAll', 'Clear all')}
-            </button>
+            <div className="flex items-center gap-3">
+              {/* Quick "save this search" CTA always available when the
+                  renter is narrowing — high-intent moment for converting
+                  them into a logged-in user with an alert subscription. */}
+              <button
+                onClick={() => setShowNotifyCard(true)}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold border border-[#D4AF37] bg-white text-[#1E6A6A] hover:bg-[#D4AF37] hover:text-white transition-colors"
+                data-testid="stays-create-alert-btn"
+              >
+                <Bell size={12} />
+                {t('stays.createAlert', 'Create alert')}
+              </button>
+              <button
+                onClick={clearAllFilters}
+                className="text-xs font-semibold text-[#1E6A6A] hover:underline"
+                data-testid="stays-grid-clear"
+              >
+                {t('stays.clearAll', 'Clear all')}
+              </button>
+            </div>
           </div>
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-x-5 gap-y-8">
             {filtered.map((p) => (
@@ -380,6 +415,27 @@ const Stays = () => {
               />
             ))}
           </div>
+          {/* Inline alert card the user can summon from the header CTA
+              when results > 0 — sits below the grid. */}
+          {showNotifyCard && (
+            <div className="mt-10">
+              <NotifyMeCard
+                filters={{
+                  rental_type: subType,
+                  area: where,
+                  min_bedrooms: bedrooms,
+                  max_price: priceMax,
+                  date_from: checkin,
+                  date_to: checkout,
+                }}
+                dateRange={
+                  checkin && checkout
+                    ? { from: new Date(checkin), to: new Date(checkout) }
+                    : null
+                }
+              />
+            </div>
+          )}
         </div>
       ) : (
         <div className="max-w-[1760px] mx-auto px-4 sm:px-6 lg:px-10 py-6 space-y-8">
