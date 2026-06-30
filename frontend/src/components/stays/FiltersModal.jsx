@@ -61,7 +61,8 @@ const FiltersModal = ({
     setAmenities((prev) => (prev.includes(a) ? prev.filter((x) => x !== a) : [...prev, a]));
   };
   const clearAll = () => {
-    setPriceMin(''); setPriceMax(''); setBedrooms(''); setBathrooms('');
+    setPriceMin(''); setPriceMax(''); setPriceCurrency('ILS');
+    setBedrooms(''); setBathrooms('');
     setPorches(''); setCondition(''); setFurnished(false); setHasElevator(false);
     setSubType(''); setAmenities([]);
     setCheckin(''); setCheckout('');

@@ -261,7 +261,7 @@ const Stays = () => {
     setWhere(''); setCheckin(''); setCheckout(''); setFlexible(null);
     setSubType(''); setBedrooms(''); setBathrooms(''); setPorches('');
     setCondition(''); setFurnished(false); setHasElevator(false);
-    setPriceMin(''); setPriceMax(''); setAmenities([]);
+    setPriceMin(''); setPriceMax(''); setPriceCurrency('ILS'); setAmenities([]);
   };
 
   // Shared favorites state — drives the interactive heart on every card.

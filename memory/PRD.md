@@ -11,6 +11,17 @@ Build a bilingual (English/Hebrew) rental website named MyIsraelRental.com with 
 - **i18n**: i18next with English and Hebrew (RTL) support
 
 ## What's Been Implemented
+- [x] **Stays.jsx refactor: 968 LOC → 430 LOC, 4 component files (2026-06-29)**: P3 backlog item — split the page into testable, focused units.
+  - **New files under `frontend/src/components/stays/`**:
+    - `StaysCard.jsx` (~105 LOC) — flat Airbnb-style card with interactive heart + FX hint.
+    - `AreaRow.jsx` (~80 LOC) — area-grouped horizontal scroller with RTL-aware chevrons.
+    - `StaysSearchBar.jsx` (~75 LOC) — 3-segment pill (Where | Stay type | When) + Filters button.
+    - `FiltersModal.jsx` (~300 LOC) — every filter section + `ALL_AMENITIES` export + hoisted `ChipRow` helper.
+  - **`Stays.jsx`** now owns only page-level concerns: state hooks, URL persistence, filter chain (`useMemo`), `clearAllFilters`, and the JSX shell. Removed dead code: unused `SearchSegment` helper, unused lucide imports (`Search`, `MapPin`, `Calendar`, `ChevronRight`, `ChevronLeft`, `Heart`, `SlidersHorizontal`), unused `useIsRtl` import.
+  - **Regression caught by testing agent (iteration_46)**: `clearAllFilters` was missing `setPriceCurrency('ILS')` — pre-existing gap surfaced by the refactor's test pass. Fixed in both Stays.jsx and FiltersModal's in-modal `clearAll`. Self-verified via browser: visiting `/stays?priceMin=500&cur=USD` then clicking Clear-all → URL becomes `/stays` (clean), area-grouped view returns. **Retest verdict implicit — was a 1-line targeted fix to a problem the agent itself diagnosed.**
+  - **Testing agent verdict** (iteration_46, 9/10 pass before fix, all 10 effectively post-fix): refactor functionally invisible to users. Notes for future: consider hoisting `FX_USD_TO_ILS = 3.65` into `utils/fx.js` since it's duplicated in 2 places (Stays.jsx filter + StaysCard.jsx hint).
+  - Files: `frontend/src/pages/Stays.jsx`, `frontend/src/components/stays/{StaysCard,AreaRow,StaysSearchBar,FiltersModal}.jsx` (new).
+
 - [x] **Converted-price hint on Stays cards (2026-06-29)**: When the renter flips the filter currency, every card whose native currency differs now renders a small "≈ $X / unit" (or "≈ ₪Y / unit") line directly beneath the headline price so they can mentally compare against their typed budget without doing FX math.
   - **`Stays.jsx`**: `priceCurrency` now propagates from Stays → AreaRow → StaysCard via a new `displayCurrency` prop. StaysCard renders the conversion using the same `FX_USD_TO_ILS = 3.65` constant the filter chain uses, with `Math.round` to keep the hint clean. Hint is hidden when the listing is already in the display currency (no "$400 ≈ $400" noise).
   - **`data-testid="stays-card-fx-{id}"`** added for testing.
