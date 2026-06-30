@@ -1,0 +1,21 @@
+# robots.txt for MyIsraelRental
+# Allow all reputable crawlers, surface the sitemap so they can index
+# every public page without depending on JS rendering.
+
+User-agent: *
+Allow: /
+
+# Keep crawlers out of authenticated dashboards and one-off admin /
+# owner-side surfaces — these pages would 404 or redirect for an
+# anonymous crawler and just waste crawl budget.
+Disallow: /dashboard
+Disallow: /admin
+Disallow: /add-property
+Disallow: /properties/manage
+Disallow: /messages
+Disallow: /wishlist
+Disallow: /verify-email
+Disallow: /reset-password
+Disallow: /set-password
+
+Sitemap: https://myisraelrental.com/sitemap.xml

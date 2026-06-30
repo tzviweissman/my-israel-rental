@@ -11,6 +11,13 @@ Build a bilingual (English/Hebrew) rental website named MyIsraelRental.com with 
 - **i18n**: i18next with English and Hebrew (RTL) support
 
 ## What's Been Implemented
+- [x] **SEO P1 fixes: robots.txt + sitemap.xml (2026-06-29)**: SEO audit (health 83/100) flagged 3 critical errors — duplicate titles, duplicate meta descriptions, and an invalid robots.txt (serving HTML instead of plain text). Started with fix (a): the robots/sitemap files.
+  - **New `frontend/public/robots.txt`**: real plain-text file. Allow all UAs by default, disallow authenticated surfaces (`/dashboard`, `/admin`, `/add-property`, `/properties/manage`, `/messages`, `/wishlist`, `/verify-email`, `/reset-password`, `/set-password`) so crawlers stop wasting budget on pages that redirect for anonymous visitors. Includes `Sitemap: https://myisraelrental.com/sitemap.xml` so search engines discover it.
+  - **New `frontend/public/sitemap.xml`**: 8 canonical URLs — Home, /stays, /services, /properties/all, /properties/{long-term,short-term,vacation}, /faq. Storage retired (not listed). Priorities reflect commerce intent (Home = 1.0, Stays = 0.9, Vacation listings = 0.7, FAQ = 0.5). Property-detail pages intentionally omitted — they're dynamic and crawlers discover them via internal links once rendered.
+  - **Verified** on preview: `/robots.txt` now returns `Content-Type: text/plain` (was `text/html`) and the Sitemap reference is reachable; `/sitemap.xml` returns `application/xml` with all 8 URLs. Cloudflare auto-prepends its content-signal block but appends our content underneath.
+  - **Once redeployed to production** this fixes SEO error #3 (robots.txt format) and warning #124 (sitemap reference) — health score should rise immediately. Errors #6 + #15 (duplicate title/meta) are next in queue (P1 fix b).
+  - Files: `frontend/public/robots.txt` (new), `frontend/public/sitemap.xml` (new).
+
 - [x] **Removed mobile-on-scroll search bar (2026-06-29)**: On the home page, scrolling past 450px on mobile used to slide a small search input into the top nav. User asked for it gone.
   - **`Navigation.js`**: dropped the entire `scrolled && showSearch` branch (input + button + container), the `homeShowSearch` state, the `navSearch` / `navSearch_ref` state, and the `handleNavSearch` handler. The home-scroll effect still updates `homeScrolled` (drives the nav background) but no longer triggers a search reveal.
   - **Verified** on iPhone viewport (393×852): scrolling to 700px → only the global nav (logo + Stays/Services + lang/menu) is visible, no search input rendered. `nav-search-input` DOM element is gone.
