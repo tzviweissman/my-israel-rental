@@ -9,6 +9,7 @@ import { toast } from 'sonner';
 import { Loader2, BadgeCheck, ArrowLeft } from 'lucide-react';
 import { API } from '../App';
 import PageMeta from '../components/PageMeta';
+import StarRating from '../components/marketplace/StarRating';
 
 const ProviderProfile = () => {
   const { userId } = useParams();
@@ -59,6 +60,11 @@ const ProviderProfile = () => {
               <button key={g.id} onClick={() => navigate(`/services/gig/${g.id}`)} className="text-left" data-testid={`provider-gig-${g.id}`}>
                 <div className="aspect-square bg-gray-100 rounded-xl overflow-hidden mb-2" style={cover ? { backgroundImage: `url(${cover})`, backgroundSize: 'cover', backgroundPosition: 'center' } : {}} />
                 <p className="font-semibold text-sm truncate">{g.title}</p>
+                {g.rating_count > 0 && (
+                  <div className="mt-0.5">
+                    <StarRating value={g.rating_avg || 0} count={g.rating_count} size={12} testidPrefix={`provider-gig-stars-${g.id}`} />
+                  </div>
+                )}
                 {cheap != null && <p className="text-xs text-gray-900"><span className="text-gray-500">from </span><span className="font-semibold">{sym}{cheap.toLocaleString()}</span></p>}
               </button>
             );

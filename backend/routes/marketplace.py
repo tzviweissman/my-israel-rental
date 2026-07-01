@@ -105,6 +105,11 @@ class BookingIn(BaseModel):
     preferred_date: Optional[str] = None                  # ISO YYYY-MM-DD
 
 
+class ReviewIn(BaseModel):
+    rating: int = Field(..., ge=1, le=5)
+    comment: str = ""
+
+
 # --------------------------- Helpers --------------------------- #
 
 def _validate_category(cat: str) -> None:
@@ -155,6 +160,40 @@ def _clean_gig(gig: dict[str, Any]) -> dict[str, Any]:
     return gig
 
 
+async def _rating_aggregate(gig_id: str) -> dict[str, Any]:
+    """Compute {rating_avg, rating_count} for one gig. Small scale — a
+    single `$group` over the reviews collection. `rating_avg` is rounded
+    to 1 decimal so the UI can render '4.7' without runtime math."""
+    pipeline = [
+        {"$match": {"gig_id": gig_id}},
+        {"$group": {"_id": None, "avg": {"$avg": "$rating"}, "count": {"$sum": 1}}},
+    ]
+    async for row in db.marketplace_reviews.aggregate(pipeline):
+        return {
+            "rating_avg": round(row["avg"], 1) if row.get("avg") is not None else None,
+            "rating_count": row.get("count", 0),
+        }
+    return {"rating_avg": None, "rating_count": 0}
+
+
+async def _batch_rating_aggregate(gig_ids: list[str]) -> dict[str, dict[str, Any]]:
+    """Batched version — single aggregation across many gigs at once so
+    the public browse route doesn't fire N+1 review queries."""
+    if not gig_ids:
+        return {}
+    pipeline = [
+        {"$match": {"gig_id": {"$in": gig_ids}}},
+        {"$group": {"_id": "$gig_id", "avg": {"$avg": "$rating"}, "count": {"$sum": 1}}},
+    ]
+    result: dict[str, dict[str, Any]] = {}
+    async for row in db.marketplace_reviews.aggregate(pipeline):
+        result[row["_id"]] = {
+            "rating_avg": round(row["avg"], 1) if row.get("avg") is not None else None,
+            "rating_count": row.get("count", 0),
+        }
+    return result
+
+
 # --------------------------- Routes --------------------------- #
 
 @router.get("/categories")
@@ -178,9 +217,10 @@ async def list_gigs(
             {"description": {"$regex": q, "$options": "i"}},
         ]
     cursor = db.marketplace_gigs.find(query).sort("created_at", -1).limit(limit)
-    out = []
-    async for gig in cursor:
-        # Attach provider snapshot for the card UI (name, avatar, status).
+    raw = [g async for g in cursor]
+    # Filter to active providers first, then batch-load ratings in one query.
+    kept: list[dict[str, Any]] = []
+    for gig in raw:
         prov = await db.marketplace_providers.find_one({"user_id": gig.get("provider_user_id")})
         if not prov or not _provider_is_active(prov):
             continue  # Hide expired-trial providers from public browse.
@@ -192,8 +232,13 @@ async def list_gigs(
             "avatar": prov.get("avatar"),
             "tagline": prov.get("tagline"),
         }
-        out.append(_clean_gig(gig))
-    return out
+        kept.append(gig)
+    ratings = await _batch_rating_aggregate([g["_id"] for g in kept])
+    for gig in kept:
+        agg = ratings.get(gig["_id"], {"rating_avg": None, "rating_count": 0})
+        gig["rating_avg"] = agg["rating_avg"]
+        gig["rating_count"] = agg["rating_count"]
+    return [_clean_gig(g) for g in kept]
 
 
 @router.post("/gigs")
@@ -242,6 +287,9 @@ async def get_gig(gig_id: str):
         "bio": (prov or {}).get("bio"),
         "active": _provider_is_active(prov or {}),
     }
+    agg = await _rating_aggregate(gig_id)
+    gig["rating_avg"] = agg["rating_avg"]
+    gig["rating_count"] = agg["rating_count"]
     return _clean_gig(gig)
 
 
@@ -322,7 +370,13 @@ async def public_provider(user_id: str):
         raise HTTPException(status_code=404, detail="Provider not found")
     user = await db.users.find_one({"_id": user_id}) or await db.users.find_one({"id": user_id})
     cursor = db.marketplace_gigs.find({"provider_user_id": user_id, "status": "published"}).sort("created_at", -1)
-    gigs = [_clean_gig(g) async for g in cursor]
+    raw = [g async for g in cursor]
+    ratings = await _batch_rating_aggregate([g["_id"] for g in raw])
+    for g in raw:
+        agg = ratings.get(g["_id"], {"rating_avg": None, "rating_count": 0})
+        g["rating_avg"] = agg["rating_avg"]
+        g["rating_count"] = agg["rating_count"]
+    gigs = [_clean_gig(g) for g in raw]
     return {
         "user_id": user_id,
         "name": (user or {}).get("name", "Provider"),
@@ -359,3 +413,76 @@ async def upgrade_subscription(user=Depends(verify_token)):
         }},
     )
     return {"ok": True, "active_until": (now + timedelta(days=30)).isoformat()}
+
+
+# --------------------------- Reviews --------------------------- #
+
+@router.get("/gigs/{gig_id}/reviews")
+async def list_reviews(gig_id: str):
+    """Public list of reviews for one gig. Attaches a lightweight
+    reviewer snapshot (name) so the UI can render '★ 5.0 — from Sarah'
+    without a second round-trip per row."""
+    gig = await db.marketplace_gigs.find_one({"_id": gig_id})
+    if not gig:
+        raise HTTPException(status_code=404, detail="Gig not found")
+    cursor = db.marketplace_reviews.find({"gig_id": gig_id}).sort("created_at", -1)
+    reviews = []
+    async for r in cursor:
+        client = await db.users.find_one({"_id": r["client_user_id"]}) \
+            or await db.users.find_one({"id": r["client_user_id"]})
+        reviews.append({
+            "id": r["_id"],
+            "gig_id": r["gig_id"],
+            "client_user_id": r["client_user_id"],
+            "client_name": (client or {}).get("name", "Client"),
+            "rating": r["rating"],
+            "comment": r.get("comment", ""),
+            "created_at": r.get("created_at"),
+            "updated_at": r.get("updated_at"),
+        })
+    agg = await _rating_aggregate(gig_id)
+    return {"reviews": reviews, **agg}
+
+
+@router.post("/gigs/{gig_id}/reviews")
+async def upsert_review(gig_id: str, payload: ReviewIn, user=Depends(verify_token)):
+    """Create or update the caller's review for a gig. Providers can't
+    review their own gigs. One review per user per gig — a second POST
+    updates the existing row (upsert semantics)."""
+    gig = await db.marketplace_gigs.find_one({"_id": gig_id})
+    if not gig:
+        raise HTTPException(status_code=404, detail="Gig not found")
+    if gig["provider_user_id"] == user["user_id"]:
+        raise HTTPException(status_code=400, detail="You cannot review your own gig")
+    now = datetime.now(UTC).isoformat()
+    existing = await db.marketplace_reviews.find_one({"gig_id": gig_id, "client_user_id": user["user_id"]})
+    if existing:
+        await db.marketplace_reviews.update_one(
+            {"_id": existing["_id"]},
+            {"$set": {"rating": payload.rating, "comment": payload.comment, "updated_at": now}},
+        )
+        review_id = existing["_id"]
+    else:
+        review_id = str(uuid.uuid4())
+        await db.marketplace_reviews.insert_one({
+            "_id": review_id,
+            "gig_id": gig_id,
+            "provider_user_id": gig["provider_user_id"],
+            "client_user_id": user["user_id"],
+            "rating": payload.rating,
+            "comment": payload.comment,
+            "created_at": now,
+            "updated_at": now,
+        })
+    return {"ok": True, "review_id": review_id}
+
+
+@router.delete("/gigs/{gig_id}/reviews/mine")
+async def delete_my_review(gig_id: str, user=Depends(verify_token)):
+    """Let the caller withdraw their review."""
+    res = await db.marketplace_reviews.delete_one(
+        {"gig_id": gig_id, "client_user_id": user["user_id"]},
+    )
+    if res.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="No review to delete")
+    return {"ok": True}

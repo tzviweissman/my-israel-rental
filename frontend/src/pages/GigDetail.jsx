@@ -10,13 +10,149 @@ import React, { useContext, useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import axios from 'axios';
 import { toast } from 'sonner';
-import { MessageCircle, Send, Loader2, ArrowLeft, Star } from 'lucide-react';
+import { MessageCircle, Send, Loader2, ArrowLeft } from 'lucide-react';
 import { API, AuthContext } from '../App';
 import PageMeta from '../components/PageMeta';
+import StarRating from '../components/marketplace/StarRating';
 
 const buildWhatsAppUrl = (raw, message) => {
   const digits = (raw || '').replace(/[^\d]/g, '');
   return `https://wa.me/${digits}?text=${encodeURIComponent(message)}`;
+};
+
+const ReviewSection = ({ gig, token, user, onRatingChange }) => {
+  const [reviews, setReviews] = useState([]);
+  const [avg, setAvg] = useState(null);
+  const [count, setCount] = useState(0);
+  const [loading, setLoading] = useState(true);
+  const [myRating, setMyRating] = useState(0);
+  const [myComment, setMyComment] = useState('');
+  const [saving, setSaving] = useState(false);
+
+  const load = async () => {
+    setLoading(true);
+    try {
+      const res = await axios.get(`${API}/marketplace/gigs/${gig.id}/reviews`);
+      setReviews(res.data.reviews || []);
+      setAvg(res.data.rating_avg);
+      setCount(res.data.rating_count || 0);
+      onRatingChange?.(res.data.rating_avg, res.data.rating_count || 0);
+      // Pre-populate the caller's own review if they have one.
+      const mine = (res.data.reviews || []).find((r) => r.client_user_id === user?.id);
+      if (mine) {
+        setMyRating(mine.rating);
+        setMyComment(mine.comment || '');
+      }
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => { load(); }, [gig.id]);
+
+  const submit = async (e) => {
+    e.preventDefault();
+    if (!token) return toast.error('Please sign in to review');
+    if (myRating < 1) return toast.error('Pick a star rating');
+    setSaving(true);
+    try {
+      await axios.post(
+        `${API}/marketplace/gigs/${gig.id}/reviews`,
+        { rating: myRating, comment: myComment },
+        { headers: { Authorization: `Bearer ${token}` } },
+      );
+      toast.success('Review posted');
+      load();
+    } catch (err) {
+      toast.error(err.response?.data?.detail || 'Failed to post review');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const deleteMine = async () => {
+    if (!window.confirm('Withdraw your review?')) return;
+    try {
+      await axios.delete(`${API}/marketplace/gigs/${gig.id}/reviews/mine`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setMyRating(0);
+      setMyComment('');
+      toast.success('Review withdrawn');
+      load();
+    } catch (err) {
+      toast.error(err.response?.data?.detail || 'Failed to delete');
+    }
+  };
+
+  const isProvider = user?.id && gig.provider?.user_id === user.id;
+  const myReview = reviews.find((r) => r.client_user_id === user?.id);
+
+  return (
+    <div data-testid="gig-reviews-section">
+      <div className="flex items-baseline justify-between mb-3">
+        <h2 className="text-lg font-bold">Reviews</h2>
+        <StarRating value={avg || 0} count={count} size={16} testidPrefix="gig-avg-stars" />
+      </div>
+
+      {token && !isProvider && (
+        <form onSubmit={submit} className="border border-gray-200 rounded-2xl p-4 mb-4 space-y-3" data-testid="gig-review-form">
+          <div className="flex items-center gap-3">
+            <span className="text-sm font-semibold text-gray-700">{myReview ? 'Your rating' : 'Rate this service'}</span>
+            <StarRating value={myRating} onChange={setMyRating} size={22} showCount={false} testidPrefix="gig-review-star" />
+          </div>
+          <textarea
+            value={myComment}
+            onChange={(e) => setMyComment(e.target.value)}
+            rows={3}
+            placeholder="Share how it went (optional)"
+            className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm"
+            data-testid="gig-review-comment"
+            maxLength={500}
+          />
+          <div className="flex justify-end gap-2">
+            {myReview && (
+              <button type="button" onClick={deleteMine} className="px-3 py-1.5 rounded-lg text-xs font-semibold text-red-500 hover:bg-red-50" data-testid="gig-review-delete">
+                Withdraw
+              </button>
+            )}
+            <button type="submit" disabled={saving || myRating < 1} className="px-4 py-2 rounded-lg text-sm font-semibold text-white bg-[#1E6A6A] disabled:opacity-50 flex items-center gap-1" data-testid="gig-review-submit">
+              {saving ? <Loader2 className="animate-spin" size={12} /> : (myReview ? 'Update review' : 'Post review')}
+            </button>
+          </div>
+        </form>
+      )}
+      {!token && (
+        <p className="text-sm text-gray-500 mb-3">Sign in to leave a review.</p>
+      )}
+      {isProvider && (
+        <p className="text-xs text-gray-500 mb-3">You cannot review your own gig.</p>
+      )}
+
+      {loading ? (
+        <div className="flex items-center py-4"><Loader2 className="animate-spin text-[#1E6A6A]" size={18} /></div>
+      ) : reviews.length === 0 ? (
+        <p className="text-sm text-gray-500" data-testid="gig-reviews-empty">No reviews yet. Be the first!</p>
+      ) : (
+        <div className="space-y-3">
+          {reviews.map((r) => (
+            <div key={r.id} className="border border-gray-100 rounded-xl p-3" data-testid={`gig-review-${r.id}`}>
+              <div className="flex items-center gap-2 mb-1">
+                <StarRating value={r.rating} showCount={false} size={12} testidPrefix={`gig-review-stars-${r.id}`} />
+                <span className="text-xs font-semibold text-gray-700">{r.client_name}</span>
+                <span className="text-[11px] text-gray-400">
+                  {r.created_at ? new Date(r.created_at).toLocaleDateString() : ''}
+                </span>
+              </div>
+              {r.comment && <p className="text-sm text-gray-700 whitespace-pre-line">{r.comment}</p>}
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
 };
 
 const BookingForm = ({ gig, tier, onClose, token }) => {
@@ -57,7 +193,7 @@ const BookingForm = ({ gig, tier, onClose, token }) => {
         className="bg-white rounded-2xl w-full max-w-md p-6 space-y-4"
         data-testid="gig-booking-form"
       >
-        <h3 className="text-lg font-bold">Request "{tier.name}" — ₪{tier.price.toLocaleString()}</h3>
+        <h3 className="text-lg font-bold">Request &quot;{tier.name}&quot; — ₪{tier.price.toLocaleString()}</h3>
         <input required type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Your email" className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm" data-testid="gig-booking-email" />
         <input type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="Phone (optional)" className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm" />
         <input type="date" value={date} onChange={(e) => setDate(e.target.value)} className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm" />
@@ -142,6 +278,11 @@ const GigDetail = () => {
             <div>
               <h1 className="text-2xl md:text-3xl font-bold text-gray-900" style={{ fontFamily: 'Playfair Display' }}>{gig.title}</h1>
               <p className="text-gray-600 mt-1">{gig.provider?.name}{gig.area ? ` · ${gig.area}` : ''}</p>
+              {(gig.rating_count > 0) && (
+                <div className="mt-2">
+                  <StarRating value={gig.rating_avg || 0} count={gig.rating_count} size={14} testidPrefix="gig-header-stars" />
+                </div>
+              )}
             </div>
 
             <div>
@@ -162,6 +303,13 @@ const GigDetail = () => {
                 </div>
               </div>
             )}
+
+            <ReviewSection
+              gig={gig}
+              token={token}
+              user={user}
+              onRatingChange={(avg, count) => setGig((prev) => prev ? { ...prev, rating_avg: avg, rating_count: count } : prev)}
+            />
 
             {/* Provider mini-profile */}
             <div className="border border-gray-200 rounded-2xl p-4 flex items-center gap-4">

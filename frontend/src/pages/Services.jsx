@@ -21,6 +21,7 @@ import {
 } from 'lucide-react';
 import { API } from '../App';
 import PageMeta from '../components/PageMeta';
+import StarRating from '../components/marketplace/StarRating';
 
 const ICON_BY_SLUG = {
   sparkles: Sparkles, truck: Truck, key: Key, wrench: Wrench,
@@ -76,6 +77,11 @@ const GigCard = ({ gig, onClick }) => {
       <p className="text-xs text-gray-500 truncate">
         {gig.provider?.name}{gig.area ? ` · ${gig.area}` : ''}
       </p>
+      {(gig.rating_count > 0) && (
+        <div className="mt-0.5">
+          <StarRating value={gig.rating_avg || 0} count={gig.rating_count} size={12} testidPrefix={`gig-stars-${gig.id}`} />
+        </div>
+      )}
       {cheapest != null && (
         <p className="text-xs mt-0.5 text-gray-900">
           <span className="text-gray-500">from </span>
