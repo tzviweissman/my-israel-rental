@@ -40,6 +40,9 @@ import PaymentCancel from './pages/PaymentCancel';
 import AvailabilityExtended from './pages/AvailabilityExtended';
 import Stays from './pages/Stays';
 import Services from './pages/Services';
+import GigDetail from './pages/GigDetail';
+import CreateGig from './pages/CreateGig';
+import ProviderProfile from './pages/ProviderProfile';
 import FAQ from './pages/FAQ';
 import { DOCUMENT_SERVICES_ENABLED } from './config/features';
 
@@ -145,6 +148,9 @@ function App() {
             <Route path="/availability-extended" element={<AvailabilityExtended />} />
             <Route path="/stays" element={<Stays />} />
             <Route path="/services" element={<Services />} />
+            <Route path="/services/gig/:id" element={<GigDetail />} />
+            <Route path="/services/create-gig" element={user ? <CreateGig /> : <Navigate to="/auth/login" />} />
+            <Route path="/services/provider/:userId" element={<ProviderProfile />} />
             <Route path="/faq" element={<FAQ />} />
           </Routes>
         </div>

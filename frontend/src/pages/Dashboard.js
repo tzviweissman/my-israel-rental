@@ -17,6 +17,7 @@ import AddPropertyModal from '../components/dashboard/AddPropertyModal';
 import BulkUploadModal from '../components/dashboard/BulkUploadModal';
 import BulkManagerTab from '../components/dashboard/BulkManagerTab';
 import MessagesTab from '../components/dashboard/MessagesTab';
+import MyGigsTab from '../components/dashboard/MyGigsTab';
 import ManagerHeader from '../components/dashboard/ManagerHeader';
 import ShareLinkRow from '../components/dashboard/ShareLinkRow';
 import DashboardTabs from '../components/dashboard/DashboardTabs';
@@ -302,6 +303,10 @@ const Dashboard = () => {
 
         {activeTab === 'messages' && (
           <MessagesTab API={API} token={token} onUnreadChange={setUnreadConversations} />
+        )}
+
+        {activeTab === 'my-gigs' && isOwnerLike && (
+          <MyGigsTab API={API} token={token} />
         )}
       </div>
     </div>

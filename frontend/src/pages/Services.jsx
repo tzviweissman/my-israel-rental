@@ -202,7 +202,7 @@ const Services = () => {
               {t('services.emptyBody', 'Be the first to list your service in this category — free 30-day trial.')}
             </p>
             <button
-              onClick={() => navigate('/dashboard?tab=my-gigs')}
+              onClick={() => navigate('/services/create-gig')}
               className="px-5 py-2.5 rounded-lg text-sm font-semibold text-white bg-[#1E6A6A] hover:bg-[#0F3A3A]"
               data-testid="services-empty-cta"
             >

@@ -1,0 +1,47 @@
+{
+  "summary": "Phase 1a Services Marketplace tested end-to-end. Backend: 19/19 pytest cases pass covering categories, auth guards, gig CRUD, category+search filters, single-gig provider block, ownership 403/404, WhatsApp vs in_platform booking gate, provider profile PATCH, and subscription upgrade flow. Frontend: full owner lifecycle verified (login -> Dashboard 'My Gigs' tab -> 5-step wizard -> published gig -> gig detail page -> provider profile). tab-my-gigs correctly hidden for renter and visible for owner. Unauthenticated /services/create-gig redirects to /auth/login. Subscription upgrade correctly flips the pill to 'Pro - active' in the UI.",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": [
+      {"screen": "Services hub / hero", "issues": ["Hero currently shows Hebrew labels alongside English testids — verify copy consistency for the marketplace hub in RTL mode; new files were built with logical properties as noted by main agent, so this is copy-review only, not a layout bug."]}
+    ]
+  },
+  "tests_executed": [
+    {"id": "BE-1..19", "desc": "pytest /app/backend/tests/test_marketplace.py (19 cases: categories, auth, CRUD, filters, booking modes, provider PATCH, subscription upgrade)", "result": "PASS 19/19"},
+    {"id": "FE-T1", "desc": "GET /services renders services-page with search-input and category tiles + seeded gig cards", "result": "PASS (services-page + services-search-input rendered; category chips confirmed clickable in T2)"},
+    {"id": "FE-T2", "desc": "Click category chip filters, then click 'All' un-filters", "result": "PASS"},
+    {"id": "FE-T3", "desc": "Type 'deep' in services-search-input filters gig grid in-memory", "result": "PASS"},
+    {"id": "FE-T4", "desc": "Unauth visit /services/create-gig -> redirect to /auth/login", "result": "PASS"},
+    {"id": "FE-T5", "desc": "renter@test.com dashboard does NOT show tab-my-gigs", "result": "PASS"},
+    {"id": "FE-T6", "desc": "owner@test.com dashboard shows tab-my-gigs", "result": "PASS"},
+    {"id": "FE-T7", "desc": "Click tab-my-gigs -> my-gigs-tab renders with status pill + my-gigs-create-btn", "result": "PASS (pill='Pro - active' after backend upgrade test ran)"},
+    {"id": "FE-T8", "desc": "my-gigs-create-btn navigates to /services/create-gig with 5-step wizard progress", "result": "PASS (create-gig-page rendered)"},
+    {"id": "FE-T9", "desc": "Complete wizard (title+cleaning -> description -> tier price 350 -> gallery skip -> whatsapp mode +972500011122) -> wizard-publish creates gig and navigates to /services/gig/{id}", "result": "PASS (gig 3ebe0636-... created, gig-detail-page rendered)"},
+    {"id": "FE-T10", "desc": "Gig detail has gig-book-btn and gig-view-provider", "result": "PASS"},
+    {"id": "FE-T11", "desc": "gig-view-provider -> /services/provider/{user_id} renders provider-profile", "result": "PASS"},
+    {"id": "FE-T12", "desc": "Subscription active pill visible after backend upgrade endpoint was called", "result": "PASS"}
+  ],
+  "test_report_links": [
+    "/app/backend/tests/test_marketplace.py",
+    "/app/test_reports/pytest/marketplace_iter49.xml"
+  ],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "routes/marketplace.py returns Mongo internals: create_gig and patch_gig both call _clean_gig which pops _id -> id. Good. But my_gigs uses `_clean_gig(g)` inside an async list comp — also fine. Confirmed no raw ObjectId leaks (all _id are string uuid4 anyway).",
+    "PATCH /api/marketplace/gigs/{id}: patched fields validated only for 'category'. Consider validating booking_mode + whatsapp requirement on PATCH too — currently an owner can PATCH booking_mode='whatsapp' with empty whatsapp and bypass the create-time guard. Low priority for Phase 1a.",
+    "POST /api/marketplace/gigs/{id}/book allows a provider to book their own gig (no self-book check). Low priority but worth guarding in Phase 1b.",
+    "GET /api/marketplace/gigs (public browse) fetches provider+user per gig in a loop -> N+1 queries. Fine for MVP but consider batching for scale.",
+    "wizard-publish flow: gallery step was skipped in test (only optional), and price was entered but not delivery_days. All optional per model — publish worked. If UX requires gallery in Phase 1b, add validation.",
+    "MyGigsTab does not appear to expose the delete-with-confirm test (my-gigs-delete-{id} testid present in code but delete flow was not exercised in this run because the just-published gig list was long). Recommend adding an inline confirm modal + testid so E1 can regression-test delete."
+  ],
+  "updated_files": ["/app/backend/tests/test_marketplace.py"],
+  "success_rate": {"backend": "100% (19/19)", "frontend": "12/12 tests pass; delete-with-confirm not exercised end-to-end"},
+  "test_credentials": "owner@test.com / Test1234!, renter@test.com / Test1234!, admin@rental.com / Admin1234!",
+  "seed_data_creation": "Created several TEST_-prefixed gigs (Deep Cleaning, Deep browse, owned_gig, wa_only, in_platform, UI Deep Clean 49) under owner@test.com. Owner marketplace_providers row was upgraded to subscription_status='active' by the upgrade endpoint test — this is intentional and matches the requested lifecycle verification. To reset for future iterations, either delete the owner's marketplace_providers doc or flip subscription_status back to 'trial'.",
+  "retest_needed": false,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "Backend tests live at /app/backend/tests/test_marketplace.py — 19 pytest cases, JUnit at /app/test_reports/pytest/marketplace_iter49.xml. Key frontend testids: services-page, services-search-input, services-category-{slug}|all, services-gig-{id}, gig-detail-page, gig-book-btn, gig-view-provider, gig-tier-{name}, create-gig-page, wizard-{title|description|cat-{slug}|tier-name-{i}|tier-price-{i}|tier-add|gallery|booking-{whatsapp|in_platform}|whatsapp|area|back|next|publish}, provider-profile, my-gigs-tab, my-gigs-create-btn, my-gigs-upgrade-btn, my-gigs-status-{trial|active|expired}, my-gigs-item-{id}, my-gigs-view-{id}, my-gigs-delete-{id}, tab-my-gigs. Owner has ~6 TEST_ gigs seeded from this run; subscription_status is 'active' (upgraded).",
+  "rca of the issue": "N/A — no bugs found. Main agent's prior fix (user['user_id'] instead of user['id']) is verified working across all authenticated marketplace endpoints."
+}

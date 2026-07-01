@@ -203,11 +203,11 @@ async def create_gig(payload: GigIn, user=Depends(verify_token)):
         raise HTTPException(status_code=400, detail="booking_mode must be 'whatsapp' or 'in_platform'")
     if payload.booking_mode == "whatsapp" and not (payload.whatsapp or "").strip():
         raise HTTPException(status_code=400, detail="WhatsApp number required for WhatsApp booking mode")
-    prov = await _ensure_provider_record(user["id"])
+    prov = await _ensure_provider_record(user["user_id"])
     now = datetime.now(UTC).isoformat()
     gig = {
         "_id": str(uuid.uuid4()),
-        "provider_user_id": user["id"],
+        "provider_user_id": user["user_id"],
         "provider_id": prov["_id"],
         "title": payload.title.strip(),
         "category": payload.category,
@@ -250,7 +250,7 @@ async def patch_gig(gig_id: str, payload: GigPatch, user=Depends(verify_token)):
     gig = await db.marketplace_gigs.find_one({"_id": gig_id})
     if not gig:
         raise HTTPException(status_code=404, detail="Gig not found")
-    if gig["provider_user_id"] != user["id"]:
+    if gig["provider_user_id"] != user["user_id"]:
         raise HTTPException(status_code=403, detail="Not your gig")
     update = {k: v for k, v in payload.model_dump(exclude_none=True).items()}
     if "tiers" in update:
@@ -268,7 +268,7 @@ async def delete_gig(gig_id: str, user=Depends(verify_token)):
     gig = await db.marketplace_gigs.find_one({"_id": gig_id})
     if not gig:
         raise HTTPException(status_code=404, detail="Gig not found")
-    if gig["provider_user_id"] != user["id"]:
+    if gig["provider_user_id"] != user["user_id"]:
         raise HTTPException(status_code=403, detail="Not your gig")
     await db.marketplace_gigs.delete_one({"_id": gig_id})
     return {"ok": True}
@@ -276,9 +276,9 @@ async def delete_gig(gig_id: str, user=Depends(verify_token)):
 
 @router.get("/my-gigs")
 async def my_gigs(user=Depends(verify_token)):
-    cursor = db.marketplace_gigs.find({"provider_user_id": user["id"]}).sort("created_at", -1)
+    cursor = db.marketplace_gigs.find({"provider_user_id": user["user_id"]}).sort("created_at", -1)
     out = [_clean_gig(g) async for g in cursor]
-    prov = await db.marketplace_providers.find_one({"user_id": user["id"]})
+    prov = await db.marketplace_providers.find_one({"user_id": user["user_id"]})
     return {
         "gigs": out,
         "provider": {
@@ -301,7 +301,7 @@ async def book_gig(gig_id: str, payload: BookingIn, user=Depends(verify_token)):
         "_id": str(uuid.uuid4()),
         "gig_id": gig_id,
         "provider_user_id": gig["provider_user_id"],
-        "client_user_id": user["id"],
+        "client_user_id": user["user_id"],
         "tier_name": payload.tier_name,
         "message": payload.message,
         "contact_email": payload.contact_email,
@@ -311,7 +311,7 @@ async def book_gig(gig_id: str, payload: BookingIn, user=Depends(verify_token)):
         "created_at": datetime.now(UTC).isoformat(),
     }
     await db.marketplace_bookings.insert_one(booking)
-    logger.info("[marketplace] booking created: gig=%s client=%s tier=%s", gig_id, user["id"], payload.tier_name)
+    logger.info("[marketplace] booking created: gig=%s client=%s tier=%s", gig_id, user["user_id"], payload.tier_name)
     return {"ok": True, "booking_id": booking["_id"]}
 
 
@@ -336,10 +336,10 @@ async def public_provider(user_id: str):
 
 @router.patch("/providers/me")
 async def update_provider(payload: ProviderPatch, user=Depends(verify_token)):
-    await _ensure_provider_record(user["id"])
+    await _ensure_provider_record(user["user_id"])
     update = {k: v for k, v in payload.model_dump(exclude_none=True).items()}
-    await db.marketplace_providers.update_one({"user_id": user["id"]}, {"$set": update})
-    prov = await db.marketplace_providers.find_one({"user_id": user["id"]})
+    await db.marketplace_providers.update_one({"user_id": user["user_id"]}, {"$set": update})
+    prov = await db.marketplace_providers.find_one({"user_id": user["user_id"]})
     prov["id"] = prov.pop("_id")
     return prov
 
@@ -349,10 +349,10 @@ async def upgrade_subscription(user=Depends(verify_token)):
     """Placeholder — real Stripe/PayPal wiring lands in Phase 1b. Today
     this just flips the provider to `active` for 30 days so the flow
     can be exercised end-to-end without live billing."""
-    await _ensure_provider_record(user["id"])
+    await _ensure_provider_record(user["user_id"])
     now = datetime.now(UTC)
     await db.marketplace_providers.update_one(
-        {"user_id": user["id"]},
+        {"user_id": user["user_id"]},
         {"$set": {
             "subscription_status": "active",
             "subscribed_until": (now + timedelta(days=30)).isoformat(),
