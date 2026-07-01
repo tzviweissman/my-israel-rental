@@ -11,6 +11,22 @@ Build a bilingual (English/Hebrew) rental website named MyIsraelRental.com with 
 - **i18n**: i18next with English and Hebrew (RTL) support
 
 ## What's Been Implemented
+- [x] **Services Marketplace Phase 2a — Reviews & 5-star Ratings (2026-07-01)**: Renters can rate & review any gig they didn't publish themselves. Star averages surface on Services hub cards, gig detail header, gig detail Reviews section, and provider profile gig cards.
+  - **Backend** (`routes/marketplace.py`):
+    - `POST /api/marketplace/gigs/{id}/reviews` — upsert (one review per user per gig; second POST updates the row). Blocks provider self-review (400).
+    - `GET  /api/marketplace/gigs/{id}/reviews` — public list with `{reviews, rating_avg, rating_count}`. Each row includes `client_name`.
+    - `DELETE /api/marketplace/gigs/{id}/reviews/mine` — withdraw own review; 404 if none.
+    - New collection `marketplace_reviews` (`{_id, gig_id, provider_user_id, client_user_id, rating(1-5), comment, created_at, updated_at}`).
+    - New helpers `_rating_aggregate` (single-gig) and `_batch_rating_aggregate` (public browse — one $group covers all gigs, no N+1).
+    - `list_gigs`, `get_gig`, and `public_provider` all now embed `rating_avg` (rounded to 1 decimal) + `rating_count` inline on every gig response.
+  - **Frontend**:
+    - `components/marketplace/StarRating.jsx` (new): reusable star row. Interactive mode (buttons + hover preview) for the "Leave a review" form; read-only mode with "X.X (N)" label or "No reviews yet" fallback.
+    - `pages/GigDetail.jsx`: header shows avg stars when `rating_count > 0`; new `ReviewSection` mounts after FAQs with the leave-a-review form (hidden for the provider themselves, replaced with "Sign in to leave a review" for anon users) + reviews list. Local state re-syncs after post/delete.
+    - `pages/Services.jsx` + `pages/ProviderProfile.jsx`: gig cards render compact `⭐ 4.7 (12)` under the provider name when `rating_count > 0`.
+  - **Verified by testing agent (iteration_51, 8 new backend pytest + 19 regression + 9 frontend UI scenarios = 27/27 backend + 9/9 frontend, 100% pass)**: upsert semantics, self-review 400, 422 on out-of-range rating, aggregates propagate to list/detail/provider endpoints, delete-then-aggregate returns null, anon POST 401, missing gig 404. Frontend: interactive stars, submit/update/withdraw, provider-hidden form, empty state.
+  - **Testids**: `gig-reviews-section`, `gig-review-form`, `gig-review-star-1..5`, `gig-review-comment`, `gig-review-submit`, `gig-review-delete`, `gig-reviews-empty`, `gig-review-{id}`, `gig-header-stars-row/-label`, `gig-avg-stars-row/-label`, `gig-stars-{id}-row`, `provider-gig-stars-{id}-row`.
+  - Files: `backend/routes/marketplace.py`, `backend/tests/test_marketplace_reviews.py` (new, 8 tests), `frontend/src/components/marketplace/StarRating.jsx` (new), `frontend/src/pages/{GigDetail,Services,ProviderProfile}.jsx`.
+
 - [x] **Services Marketplace — Cloudinary avatar + gallery uploads (2026-07-01)**: Enhancement on top of the Phase 1a MVP. Replaced the URL-paste gallery step with a real Cloudinary upload dropzone in the CreateGig wizard, and added a new "Edit profile" modal in the My Gigs dashboard tab with avatar upload + tagline/bio/WhatsApp editing.
   - **`CreateGig.jsx` step 4**: dropzone button with progress %, thumb grid (with "Cover" badge on the first image + X-to-remove on hover), 10-image cap. Uses the same `uploadFilesFast` helper as the property media upload — client-side image compression → signed direct-to-Cloudinary upload → `f_auto,q_auto` transform auto-injected.
   - **`MyGigsTab.jsx` — new `ProfileEditModal`**: avatar upload (single image, direct to Cloudinary), tagline (80 char), bio (600 char), WhatsApp — all PATCHed to `/api/marketplace/providers/me`. Provider details pre-hydrate from `GET /marketplace/providers/{first_gig.provider_user_id}` on tab mount.
