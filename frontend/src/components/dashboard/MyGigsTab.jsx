@@ -6,13 +6,120 @@
  * `/subscription/upgrade` endpoint (Phase 1a: just flips the flag —
  * real Stripe/PayPal billing lands in Phase 1b).
  */
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { toast } from 'sonner';
 import {
   Plus, Loader2, ExternalLink, Trash2, BadgeCheck, Clock, Sparkles,
+  Pencil, Upload, X,
 } from 'lucide-react';
+import { uploadFilesFast } from '../../utils/fastUpload';
+
+const ProfileEditModal = ({ API, token, initial, onClose, onSaved }) => {
+  const [bio, setBio] = useState(initial?.bio || '');
+  const [tagline, setTagline] = useState(initial?.tagline || '');
+  const [whatsapp, setWhatsapp] = useState(initial?.whatsapp || '');
+  const [avatar, setAvatar] = useState(initial?.avatar || '');
+  const [saving, setSaving] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const fileRef = useRef(null);
+
+  const pickAvatar = async (files) => {
+    const file = files?.[0];
+    if (!file || !file.type.startsWith('image/')) return;
+    setUploading(true);
+    try {
+      const results = await uploadFilesFast([file], API, token);
+      const good = results.find((r) => r.url && !r.error);
+      if (good) {
+        setAvatar(good.url);
+        toast.success('Avatar uploaded');
+      } else {
+        toast.error(results[0]?.error || 'Upload failed');
+      }
+    } finally {
+      setUploading(false);
+      if (fileRef.current) fileRef.current.value = '';
+    }
+  };
+
+  const save = async (e) => {
+    e.preventDefault();
+    setSaving(true);
+    try {
+      await axios.patch(
+        `${API}/marketplace/providers/me`,
+        { bio, tagline, whatsapp, avatar },
+        { headers: { Authorization: `Bearer ${token}` } },
+      );
+      toast.success('Profile updated');
+      onSaved();
+      onClose();
+    } catch (err) {
+      toast.error(err.response?.data?.detail || 'Failed to save');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4" onClick={onClose}>
+      <form
+        onSubmit={save}
+        onClick={(e) => e.stopPropagation()}
+        className="bg-white rounded-2xl w-full max-w-md p-6 space-y-4 max-h-[90vh] overflow-y-auto"
+        data-testid="provider-profile-modal"
+      >
+        <div className="flex justify-between items-center">
+          <h3 className="text-lg font-bold">Edit provider profile</h3>
+          <button type="button" onClick={onClose} className="text-gray-400 hover:text-gray-700" data-testid="provider-profile-close">
+            <X size={18} />
+          </button>
+        </div>
+
+        {/* Avatar */}
+        <div className="flex items-center gap-3">
+          <div
+            className="w-16 h-16 rounded-full bg-gray-100 shrink-0"
+            style={avatar ? { backgroundImage: `url(${avatar})`, backgroundSize: 'cover', backgroundPosition: 'center' } : {}}
+          />
+          <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={(e) => pickAvatar(e.target.files)} data-testid="provider-avatar-input" />
+          <button
+            type="button"
+            onClick={() => fileRef.current?.click()}
+            disabled={uploading}
+            className="px-3 py-2 rounded-lg text-xs font-semibold text-[#1E6A6A] border border-[#1E6A6A] hover:bg-[#1E6A6A]/5 flex items-center gap-1.5 disabled:opacity-60"
+            data-testid="provider-avatar-btn"
+          >
+            {uploading ? <Loader2 className="animate-spin" size={12} /> : <Upload size={12} />}
+            {avatar ? 'Change avatar' : 'Upload avatar'}
+          </button>
+        </div>
+
+        <div>
+          <label className="text-xs font-semibold text-gray-700">Tagline</label>
+          <input value={tagline} onChange={(e) => setTagline(e.target.value)} placeholder="e.g. Eco-friendly cleaning in Tel Aviv" className="w-full mt-1 px-3 py-2 rounded-lg border border-gray-200 text-sm" data-testid="provider-tagline-input" maxLength={80} />
+        </div>
+        <div>
+          <label className="text-xs font-semibold text-gray-700">Bio</label>
+          <textarea value={bio} onChange={(e) => setBio(e.target.value)} rows={4} placeholder="Tell clients about your experience…" className="w-full mt-1 px-3 py-2 rounded-lg border border-gray-200 text-sm" data-testid="provider-bio-input" maxLength={600} />
+        </div>
+        <div>
+          <label className="text-xs font-semibold text-gray-700">WhatsApp (with country code)</label>
+          <input value={whatsapp} onChange={(e) => setWhatsapp(e.target.value)} placeholder="+972…" className="w-full mt-1 px-3 py-2 rounded-lg border border-gray-200 text-sm" data-testid="provider-whatsapp-input" />
+        </div>
+
+        <div className="flex justify-end gap-2 pt-2">
+          <button type="button" onClick={onClose} className="px-4 py-2 rounded-lg text-sm font-semibold text-gray-600">Cancel</button>
+          <button type="submit" disabled={saving} className="px-5 py-2 rounded-lg text-sm font-semibold text-white bg-[#1E6A6A] disabled:opacity-60" data-testid="provider-profile-save">
+            {saving ? <Loader2 className="animate-spin" size={14} /> : 'Save'}
+          </button>
+        </div>
+      </form>
+    </div>
+  );
+};
 
 const StatusPill = ({ provider }) => {
   if (provider.subscription_status === 'active') {
@@ -53,7 +160,9 @@ const MyGigsTab = ({ API, token }) => {
   const [loading, setLoading] = useState(true);
   const [gigs, setGigs] = useState([]);
   const [provider, setProvider] = useState(null);
+  const [providerDetails, setProviderDetails] = useState(null);
   const [upgrading, setUpgrading] = useState(false);
+  const [showProfile, setShowProfile] = useState(false);
 
   const load = async () => {
     setLoading(true);
@@ -63,6 +172,14 @@ const MyGigsTab = ({ API, token }) => {
       });
       setGigs(res.data.gigs || []);
       setProvider(res.data.provider || null);
+      // If we have any gig, load full provider details for the edit modal.
+      const firstGig = res.data.gigs?.[0];
+      if (firstGig) {
+        try {
+          const pr = await axios.get(`${API}/marketplace/providers/${firstGig.provider_user_id}`);
+          setProviderDetails(pr.data);
+        } catch (_) { /* non-fatal */ }
+      }
     } catch (err) {
       console.error(err);
       toast.error('Failed to load your gigs');
@@ -122,7 +239,14 @@ const MyGigsTab = ({ API, token }) => {
             </span>
           </div>
         </div>
-        <div className="flex gap-2">
+        <div className="flex gap-2 flex-wrap">
+          <button
+            onClick={() => setShowProfile(true)}
+            className="px-3 py-2.5 rounded-lg text-sm font-semibold text-gray-700 border border-gray-300 hover:bg-gray-50 flex items-center gap-1.5"
+            data-testid="my-gigs-edit-profile-btn"
+          >
+            <Pencil size={14} /> Edit profile
+          </button>
           {provider && provider.subscription_status !== 'active' && (
             <button
               onClick={upgrade}
@@ -216,6 +340,16 @@ const MyGigsTab = ({ API, token }) => {
             );
           })}
         </div>
+      )}
+
+      {showProfile && (
+        <ProfileEditModal
+          API={API}
+          token={token}
+          initial={providerDetails || {}}
+          onClose={() => setShowProfile(false)}
+          onSaved={load}
+        />
       )}
     </div>
   );

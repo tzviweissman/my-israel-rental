@@ -12,13 +12,14 @@
  * navigates to the fresh gig detail page. All state is local — we
  * only POST on the final step's "Publish" click.
  */
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useContext, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { toast } from 'sonner';
-import { Loader2, Plus, Trash2, ArrowLeft, ArrowRight } from 'lucide-react';
+import { Loader2, Plus, Trash2, ArrowLeft, ArrowRight, Upload, X } from 'lucide-react';
 import { API, AuthContext } from '../App';
 import PageMeta from '../components/PageMeta';
+import { uploadFilesFast } from '../utils/fastUpload';
 
 const CreateGig = () => {
   const { token } = useContext(AuthContext);
@@ -38,6 +39,41 @@ const CreateGig = () => {
     whatsapp: '',
     area: '',
   });
+  const [uploading, setUploading] = useState(false);
+  const [uploadPct, setUploadPct] = useState(0);
+  const fileInputRef = useRef(null);
+
+  const handleFilesPicked = async (files) => {
+    const arr = Array.from(files || []).filter((f) => f.type.startsWith('image/'));
+    if (arr.length === 0) return;
+    if (form.gallery.length + arr.length > 10) {
+      toast.error('Max 10 images per gig');
+      return;
+    }
+    setUploading(true);
+    setUploadPct(0);
+    try {
+      const results = await uploadFilesFast(arr, API, token, (p) => setUploadPct(Math.round(p * 100)));
+      const good = results.filter((r) => r.url && !r.error);
+      if (good.length < results.length) {
+        toast.error(`${results.length - good.length} upload(s) failed`);
+      }
+      if (good.length > 0) {
+        set({ gallery: [...form.gallery, ...good.map((r) => r.url)] });
+        toast.success(`Added ${good.length} image${good.length > 1 ? 's' : ''}`);
+      }
+    } catch (err) {
+      toast.error(err.message || 'Upload failed');
+    } finally {
+      setUploading(false);
+      setUploadPct(0);
+      if (fileInputRef.current) fileInputRef.current.value = '';
+    }
+  };
+
+  const removeImage = (url) => {
+    set({ gallery: form.gallery.filter((u) => u !== url) });
+  };
 
   useEffect(() => {
     if (!token) { navigate('/auth'); return; }
@@ -157,12 +193,61 @@ const CreateGig = () => {
 
         {step === 4 && (
           <div className="space-y-3">
-            <p className="text-sm text-gray-600">Paste image URLs (one per line). Direct upload arrives in Phase 1b.</p>
-            <textarea rows={5} value={form.gallery.join('\n')} onChange={(e) => set({ gallery: e.target.value.split('\n').map((s) => s.trim()).filter(Boolean) })} placeholder="https://…" className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm font-mono" data-testid="wizard-gallery" />
+            <p className="text-sm text-gray-600">
+              Add up to 10 photos of your work. First image becomes the cover.
+            </p>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              multiple
+              className="hidden"
+              onChange={(e) => handleFilesPicked(e.target.files)}
+              data-testid="wizard-gallery-file-input"
+            />
+            <button
+              type="button"
+              onClick={() => fileInputRef.current?.click()}
+              disabled={uploading || form.gallery.length >= 10}
+              className="w-full py-8 rounded-xl border-2 border-dashed border-gray-300 hover:border-[#1E6A6A] hover:bg-[#1E6A6A]/5 transition-colors flex flex-col items-center gap-2 disabled:opacity-50"
+              data-testid="wizard-gallery-upload"
+            >
+              {uploading ? (
+                <>
+                  <Loader2 className="animate-spin text-[#1E6A6A]" size={24} />
+                  <span className="text-sm text-gray-700">Uploading… {uploadPct}%</span>
+                </>
+              ) : (
+                <>
+                  <Upload size={24} className="text-[#1E6A6A]" />
+                  <span className="text-sm font-semibold text-gray-700">Click to upload photos</span>
+                  <span className="text-xs text-gray-500">JPG / PNG / WebP · max 10 images</span>
+                </>
+              )}
+            </button>
+
             {form.gallery.length > 0 && (
-              <div className="grid grid-cols-4 gap-2">
-                {form.gallery.map((u) => (
-                  <div key={u} className="aspect-square rounded-lg bg-gray-100" style={{ backgroundImage: `url(${u})`, backgroundSize: 'cover' }} />
+              <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
+                {form.gallery.map((u, i) => (
+                  <div key={u} className="relative aspect-square rounded-lg bg-gray-100 group overflow-hidden" data-testid={`wizard-gallery-item-${i}`}>
+                    <div
+                      className="absolute inset-0"
+                      style={{ backgroundImage: `url(${u})`, backgroundSize: 'cover', backgroundPosition: 'center' }}
+                    />
+                    {i === 0 && (
+                      <span className="absolute top-1 start-1 px-1.5 py-0.5 rounded bg-black/70 text-white text-[10px] font-semibold">
+                        Cover
+                      </span>
+                    )}
+                    <button
+                      type="button"
+                      onClick={() => removeImage(u)}
+                      className="absolute top-1 end-1 w-6 h-6 rounded-full bg-black/70 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                      data-testid={`wizard-gallery-remove-${i}`}
+                    >
+                      <X size={12} />
+                    </button>
+                  </div>
                 ))}
               </div>
             )}
