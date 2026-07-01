@@ -11,6 +11,20 @@ Build a bilingual (English/Hebrew) rental website named MyIsraelRental.com with 
 - **i18n**: i18next with English and Hebrew (RTL) support
 
 ## What's Been Implemented
+- [x] **Services Marketplace Phase 1a MVP — COMPLETE (2026-07-01)**: Fiverr-style marketplace fully replacing the legacy /services page. Provider signup + 30-day trial + monthly subscription (payment mocked in Phase 1a).
+  - **Backend** (`routes/marketplace.py`, ~360 lines): 11 endpoints — categories list (12 seed slugs), public browse with category + full-text filters, gig CRUD, in-platform booking + WhatsApp-only guard, provider profile GET/PATCH, subscription upgrade (mocked), my-gigs owner hub. All ownership checks 403-safe. **Fixed a critical bug where every authenticated endpoint 500-ed because the code referenced `user["id"]` instead of `user["user_id"]` — verify_token payload uses `user_id`. All 8 references corrected.**
+  - **Frontend pages**:
+    - `Services.jsx` — hub with hero, search, 12-category tile grid, gig cards grid (2/3/4/5/6 responsive columns).
+    - `GigDetail.jsx` — Fiverr-style tier picker + WhatsApp deep-link or in-platform booking modal.
+    - `CreateGig.jsx` — 5-step wizard (Overview → Description → Pricing tiers → Gallery → Booking mode).
+    - `ProviderProfile.jsx` — public provider bio + gigs grid.
+    - `MyGigsTab.jsx` — new Dashboard tab (owner-like only) — subscription pill (trial/active/expired), create/delete gigs, one-click Upgrade to Pro.
+  - **App.js routes**: `/services/gig/:id`, `/services/create-gig` (auth-gated), `/services/provider/:userId`. DashboardTabs.jsx adds a Briefcase-icon "My Gigs" tab visible only for non-renter roles.
+  - **Verified by testing agent (iteration_49, 19/19 backend pytest + 12/12 frontend E2E)**: complete provider lifecycle — login as owner → land on My Gigs tab → wizard → publish gig → visit public gig detail → view provider profile → upgrade to Pro. tab-my-gigs correctly hidden for renter. Unauth /services/create-gig redirects to /auth/login.
+  - **Data models**: `marketplace_gigs`, `marketplace_providers`, `marketplace_bookings` collections. UUID string ids throughout — no ObjectId serialisation risk.
+  - **Payment intentionally MOCKED** — `POST /api/marketplace/subscription/upgrade` flips `subscription_status='active'` and sets `subscribed_until = now + 30d`. Real Stripe/PayPal wiring lands in Phase 1b.
+  - Files: `backend/routes/marketplace.py`, `backend/server.py` (router registered), `backend/tests/test_marketplace.py` (19 tests, new), `frontend/src/App.js`, `frontend/src/pages/{Services,GigDetail,CreateGig,ProviderProfile}.jsx`, `frontend/src/components/dashboard/MyGigsTab.jsx` (new), `frontend/src/components/dashboard/DashboardTabs.jsx`, `frontend/src/pages/Dashboard.js`.
+
 - [x] **Unified filter UI on every entry point — no more legacy Properties page (2026-06-30)**: User reported clicking "Stays in Jerusalem - American Colony" (the AreaRow See-all header) dropped them on `/properties/all` with a different filter bar and different filter chip styling.
   - **Root cause**: 3 hardcoded routes still pointed to the legacy `/properties/all` — AreaRow See-all callback, LikedTab empty-state CTA, and PropertyDetail's back-button default.
   - **Fixes**:
