@@ -80,7 +80,7 @@ const PropertyDetail = () => {
     if (isFromDashboard) return '/dashboard';
     if (isFromManager) return previousPath;
     if (isFromListings) return previousPath; // Return to the specific listings page
-    return '/properties/all'; // Default to all properties listings instead of home
+    return '/stays'; // Default to the new unified search UI
   };
   
   const getBackButtonText = () => {

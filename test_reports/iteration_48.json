@@ -1,0 +1,31 @@
+{
+  "summary": "Verified fix for legacy /properties/all leak on 3 flows: (1) /stays AreaRow 'See all' header, (2) LikedTab 'Browse Properties' empty-state CTA, (3) PropertyDetail back-button default. All targeted flows now stay on the new unified /stays UI (stays-search-bar + stays-filters-btn) with the legacy properties-search-input never appearing.",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "tests_executed": [
+    {"id": "T1", "desc": "/stays loads with unified UI (stays-search-bar + stays-filters-btn), no legacy properties-search-input", "result": "PASS"},
+    {"id": "T2", "desc": "Click 'Stays in Jerusalem - American Colony' -> URL=/stays?area=Jerusalem+-+American+Colony, Where pill input value='Jerusalem - American Colony', heading='5 stays in Jerusalem - American Colony', unified UI intact, legacy absent", "result": "PASS"},
+    {"id": "T3", "desc": "Click 'Stays in Jerusalem - Arzei HaBira' -> URL=/stays?area=Jerusalem+-+Arzei+HaBira, pill='Jerusalem - Arzei HaBira', unified UI intact", "result": "PASS"},
+    {"id": "T4", "desc": "Click 'Clear all' -> URL loses area param, Where pill empty, area-grouped view restored (6 area sections visible)", "result": "PASS"},
+    {"id": "T5", "desc": "LikedTab empty-state 'Browse Properties' button navigates to /stays (unified). Test user renter@test.com already has liked properties so the empty-state CTA does not render at runtime; verified via code inspection at /app/frontend/src/components/dashboard/LikedTab.jsx line 73 (navigate('/stays'))", "result": "PASS (code-verified; empty-state not reachable with this test user's data)"},
+    {"id": "T6", "desc": "Navigate directly to /property/{id} with sessionStorage.previousPath cleared -> click 'Back to listings' -> lands on /stays with unified UI, no legacy properties-search-input", "result": "PASS"}
+  ],
+  "test_report_links": [],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "Stays.jsx onSeeAll works via direct setWhere state update (comment explains why navigate() would strip the query due to no remount). This is functional but a bit surprising — consider adding a small util or hook to encapsulate this pattern if more callers need it.",
+    "LikedTab empty-state CTA could not be exercised end-to-end because the seeded renter@test.com already has likes. If empty-state coverage is important, either add a fixture that clears likes or add a second seeded user with an empty likes list."
+  ],
+  "updated_files": [],
+  "success_rate": {"backend": "N/A (frontend-only per request)", "frontend": "100% (6/6 including code-verified T5)"},
+  "test_credentials": "renter@test.com / Test1234! (login successful, dashboard loaded)",
+  "seed_data_creation": "None",
+  "retest_needed": false,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "The unified /stays UI uses data-testid='stays-search-bar' (contains input with WHERE value) and 'stays-filters-btn'. Legacy Properties page has data-testid='properties-search-input' — its presence anywhere in the /stays flow is a regression. Area 'See all' testids follow pattern 'stays-see-all-{area name}' e.g. 'stays-see-all-Jerusalem - American Colony'. Stays cards use 'stays-card-{uuid}'. PropertyDetail back button is data-testid='back-button' with label 'Back to listings'.",
+  "rca of the issue": "Root cause of original bug: AreaRow 'See all' was calling navigate('/properties/all?area=X'), landing on the legacy Properties page which has its own filter UI (properties-search-input). Similar hardcoded '/properties/all' routes existed in LikedTab and PropertyDetail's back-fallback. Fix: (1) Stays.jsx onSeeAll now calls setWhere(area) directly instead of navigate — because /stays->/stays w/ different query doesn't remount, so a navigate would leave state stale and syncUrl would wipe the area param. Setting state triggers syncUrl to write ?area=X and grouped view collapses to filtered flat grid. (2) LikedTab and PropertyDetail fallbacks now point to /stays. All three flows verified end-to-end via Playwright + one via code inspection."
+}

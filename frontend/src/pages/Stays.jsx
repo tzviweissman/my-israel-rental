@@ -8,7 +8,9 @@
  *   2. **Area-grouped sections** — one horizontally-scrollable row per
  *      area, capped at ~12 cards per row. "See all 47 in Tel Aviv-Yafo"
  *      link at the right header of each row jumps to the legacy
- *      `/properties/all?area=...` listing.
+ *      `/stays?area=...` search page (which uses the same unified
+ *      filter UI as the parent page — no more jumping into the legacy
+ *      Properties layout).
  *   3. **Filters modal** — price range, bedrooms, rental sub-type
  *      (vacation / short-term / long-term), and amenities. Applies
  *      client-side because we already have all properties in memory.
@@ -453,7 +455,17 @@ const Stays = () => {
                 sessionStorage.setItem('previousPath', '/stays' + window.location.search);
                 navigate(`/property/${id}`);
               }}
-              onSeeAll={() => navigate(`/properties/all?area=${encodeURIComponent(area)}`)}
+              onSeeAll={() => {
+                // Just set the area state — Stays is already the page
+                // we're on, so navigating to /stays?area=X hits the
+                // same route and React Router doesn't remount, leaving
+                // state empty and letting syncUrl wipe the query. Set
+                // state directly instead; syncUrl will write ?area=X
+                // for us and the grouped view collapses to the flat
+                // filtered grid.
+                setWhere(area);
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+              }}
               t={t}
             />
           ))}

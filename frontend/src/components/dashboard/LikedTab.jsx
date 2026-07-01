@@ -70,7 +70,7 @@ const LikedTab = ({ API, token }) => {
             Browse listings and tap the heart to save your favorites.
           </p>
           <button
-            onClick={() => navigate('/properties/all')}
+            onClick={() => navigate('/stays')}
             className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-white text-sm font-medium transition-all hover:shadow-md"
             style={{ backgroundColor: '#1E6A6A' }}
             data-testid="browse-properties-btn"

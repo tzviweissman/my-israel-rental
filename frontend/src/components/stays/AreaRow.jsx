@@ -3,7 +3,7 @@
  * ("Stays in Jerusalem", "Stays in Tel Aviv", …).
  *
  * Header is a clickable title + inline forward chevron that jumps to
- * the legacy /properties/all?area=… listing for that area. Carousel
+ * the /stays?area=… search page (same unified filter UI). Carousel
  * chevrons on the right (desktop only) scroll ~3 cards at a time, and
  * we flip the direction sign in RTL because browser scrollLeft is
  * reversed under `dir="rtl"`.

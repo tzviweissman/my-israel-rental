@@ -11,6 +11,15 @@ Build a bilingual (English/Hebrew) rental website named MyIsraelRental.com with 
 - **i18n**: i18next with English and Hebrew (RTL) support
 
 ## What's Been Implemented
+- [x] **Mobile: Stays search bar information getting clipped — fixed (2026-06-30)**: User reported the search bar's labels and inputs were being cut off on mobile viewports.
+  - **Root cause**: at 390px viewport, the 3-segment pill (Where | Stay type | When + Filters btn) split horizontal space roughly equally, giving Where only ~69px wide — too narrow to fit the "Anywhere" placeholder, and the same squeeze affected the Stay-type and When labels.
+  - **Fix** in `frontend/src/components/stays/StaysSearchBar.jsx`: applied `hidden sm:block` to the Stay Type segment, When segment, and their two vertical dividers. On mobile (`<640px`) the pill now collapses to just Where (full-width) + icon-only Filters button. Users still get full filter access through the Filters modal which has the mobile-only Dates section and the always-visible Stay-type chip row.
+  - **Verified by testing agent (iteration_47, 100% pass, no regressions)**:
+    - Mobile 393×852: Where input grew from 69px → **277px**, "Anywhere" placeholder fully visible. Stay Type & When hidden. Filters button icon-only. Modal opens, Dates inputs render, stay-type chips render — picking Vacation persists to URL.
+    - Desktop 1440×900: full 3-segment pill intact, "Filters" label still visible. No regression.
+    - QuickChips strip below the pill still horizontally scrollable and functional.
+  - Files: `frontend/src/components/stays/StaysSearchBar.jsx`.
+
 - [x] **"Create alert" / Notify-me on Stays (2026-06-29)**: User asked where the create-alert option went — it existed on the legacy `/properties` page but wasn't wired into the new `/stays` page after the redesign. Added back.
   - **`Stays.jsx`** now imports and renders `<NotifyMeCard>` in 3 places:
     1. **Empty-state** (`filtered.length === 0`): card appears under the "No stays match" copy as the primary conversion path. Updated empty-state body copy to mention "have us notify you when something matches."

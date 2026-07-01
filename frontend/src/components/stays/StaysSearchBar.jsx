@@ -32,7 +32,7 @@ const StaysSearchBar = ({
           modal (Stay type as chips, Dates as a mobile-only section).
           This stops the segments from being squeezed to ~100px each
           and clipping their labels at viewports <640px. */}
-      <div className="flex-1 min-w-0 rounded-l-full sm:rounded-l-full rounded-full sm:rounded-r-none">
+      <div className="flex-1 min-w-0 rounded-full sm:rounded-l-full sm:rounded-r-none">
         <WherePicker
           value={where}
           onChange={setWhere}
