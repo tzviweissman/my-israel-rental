@@ -11,6 +11,15 @@ Build a bilingual (English/Hebrew) rental website named MyIsraelRental.com with 
 - **i18n**: i18next with English and Hebrew (RTL) support
 
 ## What's Been Implemented
+- [x] **Unified filter UI on every entry point — no more legacy Properties page (2026-06-30)**: User reported clicking "Stays in Jerusalem - American Colony" (the AreaRow See-all header) dropped them on `/properties/all` with a different filter bar and different filter chip styling.
+  - **Root cause**: 3 hardcoded routes still pointed to the legacy `/properties/all` — AreaRow See-all callback, LikedTab empty-state CTA, and PropertyDetail's back-button default.
+  - **Fixes**:
+    1. **`Stays.jsx` onSeeAll**: replaced `navigate('/properties/all?area=X')` with a direct `setWhere(area)` state update + smooth-scroll to top. Naive `navigate('/stays?area=X')` doesn't work because /stays→/stays with a new query doesn't remount, so state stays stale and `syncUrl` wipes the just-added area param.
+    2. **`LikedTab.jsx`**: 'Browse Properties' empty-state CTA → `/stays`.
+    3. **`PropertyDetail.js`**: `getBackDestination` fallback → `/stays`.
+  - **Verified by testing agent (iteration_48, 6/6 pass, 100%, no regressions)**: clicking any area's See-all correctly hits `/stays?area=…`, Where pill populates, heading updates to "N stays in {area}", unified `stays-search-bar` + `stays-filters-btn` present, legacy `properties-search-input` never renders. Clear-all restores the grouped view. PropertyDetail back-button lands on unified UI.
+  - Files: `frontend/src/pages/Stays.jsx`, `frontend/src/components/stays/AreaRow.jsx` (docstring only), `frontend/src/components/dashboard/LikedTab.jsx`, `frontend/src/pages/PropertyDetail.js`.
+
 - [x] **Mobile: Stays search bar information getting clipped — fixed (2026-06-30)**: User reported the search bar's labels and inputs were being cut off on mobile viewports.
   - **Root cause**: at 390px viewport, the 3-segment pill (Where | Stay type | When + Filters btn) split horizontal space roughly equally, giving Where only ~69px wide — too narrow to fit the "Anywhere" placeholder, and the same squeeze affected the Stay-type and When labels.
   - **Fix** in `frontend/src/components/stays/StaysSearchBar.jsx`: applied `hidden sm:block` to the Stay Type segment, When segment, and their two vertical dividers. On mobile (`<640px`) the pill now collapses to just Where (full-width) + icon-only Filters button. Users still get full filter access through the Filters modal which has the mobile-only Dates section and the always-visible Stay-type chip row.
