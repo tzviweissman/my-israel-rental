@@ -11,6 +11,13 @@ Build a bilingual (English/Hebrew) rental website named MyIsraelRental.com with 
 - **i18n**: i18next with English and Hebrew (RTL) support
 
 ## What's Been Implemented
+- [x] **Services Marketplace — Cloudinary avatar + gallery uploads (2026-07-01)**: Enhancement on top of the Phase 1a MVP. Replaced the URL-paste gallery step with a real Cloudinary upload dropzone in the CreateGig wizard, and added a new "Edit profile" modal in the My Gigs dashboard tab with avatar upload + tagline/bio/WhatsApp editing.
+  - **`CreateGig.jsx` step 4**: dropzone button with progress %, thumb grid (with "Cover" badge on the first image + X-to-remove on hover), 10-image cap. Uses the same `uploadFilesFast` helper as the property media upload — client-side image compression → signed direct-to-Cloudinary upload → `f_auto,q_auto` transform auto-injected.
+  - **`MyGigsTab.jsx` — new `ProfileEditModal`**: avatar upload (single image, direct to Cloudinary), tagline (80 char), bio (600 char), WhatsApp — all PATCHed to `/api/marketplace/providers/me`. Provider details pre-hydrate from `GET /marketplace/providers/{first_gig.provider_user_id}` on tab mount.
+  - **Testids added**: `wizard-gallery-upload`, `wizard-gallery-file-input`, `wizard-gallery-item-{i}`, `wizard-gallery-remove-{i}`, `my-gigs-edit-profile-btn`, `provider-profile-modal`, `provider-profile-close`, `provider-avatar-input`, `provider-avatar-btn`, `provider-tagline-input`, `provider-bio-input`, `provider-whatsapp-input`, `provider-profile-save`.
+  - **Verified by testing agent (iteration_50, 10/10 pass)**: uploaded 1 image → cover badge shows → publish → gig detail shows Cloudinary image; uploaded 10 images then 11th blocked with toast; avatar PATCH persists and appears on public /services/provider/{user_id}.
+  - Files: `frontend/src/pages/CreateGig.jsx`, `frontend/src/components/dashboard/MyGigsTab.jsx`.
+
 - [x] **Services Marketplace Phase 1a MVP — COMPLETE (2026-07-01)**: Fiverr-style marketplace fully replacing the legacy /services page. Provider signup + 30-day trial + monthly subscription (payment mocked in Phase 1a).
   - **Backend** (`routes/marketplace.py`, ~360 lines): 11 endpoints — categories list (12 seed slugs), public browse with category + full-text filters, gig CRUD, in-platform booking + WhatsApp-only guard, provider profile GET/PATCH, subscription upgrade (mocked), my-gigs owner hub. All ownership checks 403-safe. **Fixed a critical bug where every authenticated endpoint 500-ed because the code referenced `user["id"]` instead of `user["user_id"]` — verify_token payload uses `user_id`. All 8 references corrected.**
   - **Frontend pages**:
