@@ -37,6 +37,7 @@ from routes import (  # noqa: E402
     chat,
     contracts,
     ical,
+    marketplace,
     misc,
     notifications,
     payments,
@@ -78,6 +79,7 @@ for mod in (
     smart_pricing,
     availability_reminders,
     ical,
+    marketplace,
     misc,
     payments,
 ):
