@@ -206,15 +206,33 @@ const MyGigsTab = ({ API, token }) => {
   const upgrade = async () => {
     setUpgrading(true);
     try {
-      await axios.post(`${API}/marketplace/subscription/upgrade`, {}, {
+      const res = await axios.post(`${API}/marketplace/subscription/upgrade`, {}, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      toast.success('Upgraded to Pro — active for 30 days');
-      load();
+      if (res.data?.approval_url) {
+        // Redirect to PayPal for approval. PayPal will return the user
+        // to /payment/success?flow=marketplace-subscription which activates.
+        window.location.assign(res.data.approval_url);
+        return;
+      }
+      toast.error('PayPal approval URL missing');
     } catch (err) {
       toast.error(err.response?.data?.detail || 'Upgrade failed');
     } finally {
       setUpgrading(false);
+    }
+  };
+
+  const cancelPro = async () => {
+    if (!window.confirm('Cancel your Pro subscription? You keep access until the current period ends.')) return;
+    try {
+      await axios.post(`${API}/marketplace/subscription/cancel`, {}, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      toast.success('Subscription cancelled');
+      load();
+    } catch (err) {
+      toast.error(err.response?.data?.detail || 'Cancel failed');
     }
   };
 
@@ -255,7 +273,16 @@ const MyGigsTab = ({ API, token }) => {
               data-testid="my-gigs-upgrade-btn"
             >
               {upgrading ? <Loader2 className="animate-spin" size={14} /> : <Sparkles size={14} />}
-              Upgrade to Pro
+              Upgrade — $25/mo
+            </button>
+          )}
+          {provider && provider.subscription_status === 'active' && (
+            <button
+              onClick={cancelPro}
+              className="px-3 py-2.5 rounded-lg text-xs font-semibold text-red-600 border border-red-200 hover:bg-red-50"
+              data-testid="my-gigs-cancel-pro-btn"
+            >
+              Cancel Pro
             </button>
           )}
           <button

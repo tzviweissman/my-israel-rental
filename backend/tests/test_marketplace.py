@@ -294,14 +294,15 @@ class TestProviderAndSubscription:
         assert body["user_id"] == user_id
         assert "gigs" in body and isinstance(body["gigs"], list)
 
-    def test_subscription_upgrade_flips_status(self, owner_token):
-        r = requests.post(f"{API}/subscription/upgrade", headers=_h(owner_token), timeout=15)
+    def test_subscription_upgrade_returns_paypal_approval_url(self, owner_token):
+        """Phase 1b: /upgrade now returns a real PayPal approval URL. The
+        provider row is NOT flipped to active until /activate is called
+        AFTER the provider approves the sub on paypal.com."""
+        r = requests.post(f"{API}/subscription/upgrade", headers=_h(owner_token), timeout=30)
         assert r.status_code == 200, r.text
-        assert r.json()["active_until"]
-
-        mg = requests.get(f"{API}/my-gigs", headers=_h(owner_token), timeout=15)
-        assert mg.status_code == 200
-        prov = mg.json()["provider"]
-        assert prov["subscription_status"] == "active"
-        assert prov["subscribed_until"]
-        assert prov["active"] is True
+        body = r.json()
+        assert body.get("ok") is True
+        assert body.get("subscription_id", "").startswith("I-")
+        assert "sandbox.paypal.com" in body.get("approval_url", "")
+        assert body.get("amount") == 25.0
+        assert body.get("currency") == "USD"

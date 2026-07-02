@@ -493,6 +493,17 @@ async def paypal_webhook(request: Request) -> dict:
     supp = (resource.get("supplementary_data") or {}).get("related_ids") or {}
     paypal_order_id = supp.get("order_id") or resource.get("id")
 
+    # Subscription-scoped events don't have a matching row in the `orders`
+    # collection — route them to the marketplace handler and bail out.
+    if event_type.startswith("BILLING.SUBSCRIPTION.") or event_type == "PAYMENT.SALE.COMPLETED":
+        try:
+            from routes.marketplace import handle_subscription_webhook_event
+            await handle_subscription_webhook_event(event)
+            return {"status": "handled", "event_type": event_type}
+        except Exception as e:  # noqa: BLE001
+            logger.exception("Subscription webhook handler error: %s", e)
+            return {"status": "error", "reason": "handler_exception"}
+
     order = None
     if paypal_order_id:
         order = await db.orders.find_one(

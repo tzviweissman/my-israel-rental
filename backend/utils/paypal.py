@@ -196,3 +196,144 @@ async def get_order(order_id: str) -> dict[str, Any]:
         )
     res.raise_for_status()
     return res.json()
+
+
+# --- Subscriptions (recurring billing) -------------------------------------
+async def create_product(name: str, description: str) -> dict[str, Any]:
+    """Create a PayPal catalog product — required before creating a plan."""
+    token = await get_access_token()
+    body = {
+        "name": name,
+        "description": description[:256],
+        "type": "SERVICE",
+        "category": "SOFTWARE",
+    }
+    async with httpx.AsyncClient(timeout=20.0) as client:
+        res = await client.post(
+            f"{_base_url()}/v1/catalogs/products",
+            headers={
+                "Authorization": f"Bearer {token}",
+                "Content-Type": "application/json",
+            },
+            json=body,
+        )
+    if res.status_code not in (200, 201):
+        logger.error("PayPal create_product failed: %s %s", res.status_code, res.text)
+        res.raise_for_status()
+    return res.json()
+
+
+async def create_plan(
+    *,
+    product_id: str,
+    name: str,
+    amount: float,
+    currency: str,
+    interval_unit: str = "MONTH",
+    interval_count: int = 1,
+) -> dict[str, Any]:
+    """Create a monthly billing plan tied to a product. Infinite total_cycles
+    (0) so it renews indefinitely until cancelled."""
+    token = await get_access_token()
+    body = {
+        "product_id": product_id,
+        "name": name[:127],
+        "status": "ACTIVE",
+        "billing_cycles": [{
+            "frequency": {"interval_unit": interval_unit, "interval_count": interval_count},
+            "tenure_type": "REGULAR",
+            "sequence": 1,
+            "total_cycles": 0,  # 0 = renew forever
+            "pricing_scheme": {"fixed_price": {"value": f"{amount:.2f}", "currency_code": currency}},
+        }],
+        "payment_preferences": {
+            "auto_bill_outstanding": True,
+            "setup_fee": {"value": "0", "currency_code": currency},
+            "setup_fee_failure_action": "CONTINUE",
+            "payment_failure_threshold": 3,
+        },
+    }
+    async with httpx.AsyncClient(timeout=20.0) as client:
+        res = await client.post(
+            f"{_base_url()}/v1/billing/plans",
+            headers={
+                "Authorization": f"Bearer {token}",
+                "Content-Type": "application/json",
+                "Prefer": "return=representation",
+            },
+            json=body,
+        )
+    if res.status_code not in (200, 201):
+        logger.error("PayPal create_plan failed: %s %s", res.status_code, res.text)
+        res.raise_for_status()
+    return res.json()
+
+
+async def create_subscription(
+    *,
+    plan_id: str,
+    custom_id: str,
+    return_url: str,
+    cancel_url: str,
+    subscriber_email: str | None = None,
+) -> dict[str, Any]:
+    """Start a subscription approval flow. Returns the PayPal subscription
+    payload with an `id` (I-XXX) and a `links[rel=approve].href` for the
+    frontend to redirect the user to."""
+    token = await get_access_token()
+    body: dict[str, Any] = {
+        "plan_id": plan_id,
+        "custom_id": custom_id,
+        "application_context": {
+            "brand_name": "My Israel Rental",
+            "user_action": "SUBSCRIBE_NOW",
+            "shipping_preference": "NO_SHIPPING",
+            "return_url": return_url,
+            "cancel_url": cancel_url,
+        },
+    }
+    if subscriber_email:
+        body["subscriber"] = {"email_address": subscriber_email}
+    async with httpx.AsyncClient(timeout=30.0) as client:
+        res = await client.post(
+            f"{_base_url()}/v1/billing/subscriptions",
+            headers={
+                "Authorization": f"Bearer {token}",
+                "Content-Type": "application/json",
+                "Prefer": "return=representation",
+            },
+            json=body,
+        )
+    if res.status_code not in (200, 201):
+        logger.error("PayPal create_subscription failed: %s %s", res.status_code, res.text)
+        res.raise_for_status()
+    return res.json()
+
+
+async def get_subscription(subscription_id: str) -> dict[str, Any]:
+    """Fetch a subscription's current status + billing_info."""
+    token = await get_access_token()
+    async with httpx.AsyncClient(timeout=20.0) as client:
+        res = await client.get(
+            f"{_base_url()}/v1/billing/subscriptions/{subscription_id}",
+            headers={"Authorization": f"Bearer {token}"},
+        )
+    res.raise_for_status()
+    return res.json()
+
+
+async def cancel_subscription(subscription_id: str, reason: str = "User requested cancel") -> None:
+    """Cancel a subscription. PayPal returns 204 No Content on success."""
+    token = await get_access_token()
+    async with httpx.AsyncClient(timeout=20.0) as client:
+        res = await client.post(
+            f"{_base_url()}/v1/billing/subscriptions/{subscription_id}/cancel",
+            headers={
+                "Authorization": f"Bearer {token}",
+                "Content-Type": "application/json",
+            },
+            json={"reason": reason[:127]},
+        )
+    if res.status_code not in (204, 200):
+        logger.error("PayPal cancel_subscription failed: %s %s", res.status_code, res.text)
+        res.raise_for_status()

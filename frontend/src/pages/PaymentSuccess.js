@@ -53,10 +53,31 @@ const PaymentSuccess = () => {
 
   const internalId = searchParams.get('orderId');
   const paypalToken = searchParams.get('token'); // PayPal order id when they redirect us
+  const flow = searchParams.get('flow'); // e.g. 'marketplace-subscription'
+  const [subState, setSubState] = useState(null); // {status, subscribed_until}
 
   useEffect(() => {
     let cancelled = false;
     const auth = { headers: { Authorization: `Bearer ${token}` } };
+
+    // --- Marketplace subscription flow ---
+    // PayPal redirects here after the provider approves the subscription.
+    // We hit /marketplace/subscription/activate which re-fetches the
+    // subscription from PayPal and flips the provider row to 'active'.
+    if (flow === 'marketplace-subscription') {
+      (async () => {
+        try {
+          const res = await axios.post(`${API}/marketplace/subscription/activate`, {}, auth);
+          if (!cancelled) setSubState(res.data);
+        } catch (e) {
+          if (!cancelled) setError(e.response?.data?.detail || e.message || 'Activation failed');
+        } finally {
+          if (!cancelled) setLoading(false);
+        }
+      })();
+      return () => { cancelled = true; };
+    }
+
     const load = async () => {
       try {
         let orderId = internalId;
@@ -82,12 +103,56 @@ const PaymentSuccess = () => {
     };
     load();
     return () => { cancelled = true; };
-  }, [internalId, paypalToken, token]);
+  }, [internalId, paypalToken, token, flow]);
 
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center" data-testid="payment-success-loading">
         <Loader2 size={32} className="animate-spin text-[#1E6A6A]" />
+      </div>
+    );
+  }
+
+  // --- Marketplace subscription success screen ---
+  if (flow === 'marketplace-subscription') {
+    return (
+      <div className="min-h-screen bg-[#fafafa] pt-24 pb-16 px-4" data-testid="subscription-success-page">
+        <div className="max-w-md mx-auto bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+          <div className="bg-gradient-to-br from-[#1E6A6A] to-[#155454] px-8 py-10 text-white text-center">
+            <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-4">
+              <CheckCircle2 size={36} />
+            </div>
+            <h1 className="text-2xl font-bold mb-1" style={{ fontFamily: 'Playfair Display' }}>
+              {subState?.ok ? 'You\u2019re now Pro!' : 'Subscription pending'}
+            </h1>
+            <p className="text-white/80 text-sm">
+              {subState?.ok
+                ? 'Your MyIsraelRental Pro subscription is active.'
+                : (subState?.message || 'PayPal is still processing your approval.')}
+            </p>
+          </div>
+          <div className="p-8 space-y-4 text-sm">
+            {subState?.subscribed_until && (
+              <div className="flex justify-between border-b border-gray-100 pb-2.5">
+                <dt className="text-gray-500">Next billing</dt>
+                <dd className="text-gray-900 font-medium" data-testid="subscription-next-billing">
+                  {new Date(subState.subscribed_until).toLocaleDateString()}
+                </dd>
+              </div>
+            )}
+            <p className="text-gray-600">
+              Your Pro benefits are live now — publish unlimited gigs, appear in category browse, and get a Pro badge on your provider profile.
+            </p>
+            <button
+              onClick={() => navigate('/dashboard?tab=my-gigs')}
+              className="w-full mt-4 primary-btn flex items-center justify-center gap-2"
+              data-testid="subscription-goto-my-gigs"
+            >
+              Go to My Gigs <ArrowRight size={16} />
+            </button>
+            {error && <p className="text-xs text-red-500 text-center">{error}</p>}
+          </div>
+        </div>
       </div>
     );
   }

@@ -1,0 +1,31 @@
+{
+  "summary": "Phase 1b real PayPal Recurring Subscription tested end-to-end. Backend: 11 new pytest cases (test_marketplace_subscription.py) covering /upgrade + plan-cache + /activate + /cancel + handle_subscription_webhook_event helper — all pass against live PayPal Sandbox. Fixed 1 stale regression test in test_marketplace.py (test_subscription_upgrade_flips_status → test_subscription_upgrade_returns_paypal_approval_url) so full 27/27 regression stays green. Frontend: MyGigsTab shows Cancel Pro pill for active subscribers with upgrade hidden; PaymentSuccess subscription branch renders subscription-success-page with proper heading + goto-my-gigs button; old orderId flow unaffected (renders payment-success-error).",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {"ui_bugs": [], "integration_issues": [], "design_issues": []},
+  "test_report_links": [
+    "/app/backend/tests/test_marketplace_subscription.py",
+    "/app/backend/tests/test_marketplace.py",
+    "/app/test_reports/pytest/marketplace_subscription_iter52.xml",
+    "/app/test_reports/pytest/marketplace_regression_iter52.xml"
+  ],
+  "action_items": [
+    "PAYPAL_WEBHOOK_ID is still unset in backend/.env — the /api/payments/webhooks/paypal endpoint fail-closes on missing env, so real PayPal webhooks won't flow to handle_subscription_webhook_event in prod until this is configured post-deploy (author-noted, tracked)."
+  ],
+  "critical_code_review_comments": [
+    "utils/paypal.py: dead code after verify_webhook_signature — lines 186-187 (`res.raise_for_status(); return res.json()`) are unreachable because the function returns on line 184. Harmless but confusing; consider removing.",
+    "routes/marketplace.py /subscription/cancel: after PayPal 404 branch, subscription_status stays 'active' by design (period_end handling deferred to webhook EXPIRED). This means the UI keeps showing 'Cancel Pro' after a click on a still-pending sub — user experience: clicking Cancel Pro is idempotent but the pill doesn't visibly change until the EXPIRED webhook fires. Consider a UI toast + refresh so the provider knows the intent was recorded.",
+    "backend/routes/payments.py: PAYMENT.SALE.COMPLETED short-circuits BEFORE the paypal_webhook_events idempotency insert check — that check happens above (line 480). Confirmed OK.",
+    "MyGigsTab.jsx: after successful window.location.assign(approval_url), setUpgrading(false) still runs in finally — no user-visible effect since page unloads, but tighter to `return` before finally."
+  ],
+  "updated_files": [
+    "/app/backend/tests/test_marketplace_subscription.py",
+    "/app/backend/tests/test_marketplace.py"
+  ],
+  "success_rate": {"backend": "100% (11/11 new + 27/27 regression)", "frontend": "100% (5/5 UI scenarios validated)"},
+  "test_credentials": "owner@test.com / Test1234! (from /app/memory/test_credentials.md)",
+  "seed_data_creation": "None new. Existing owner-owned TEST_ gigs reused. Tests directly manipulate marketplace_providers row via sync pymongo to reset subscription state between cases; a module-scoped teardown restores owner to subscription_status='active' so downstream test suites continue to see an active provider.",
+  "retest_needed": false,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "Phase 1b subscription flow is production-ready pending PAYPAL_WEBHOOK_ID env config. Key test IDs — MyGigsTab: my-gigs-tab, my-gigs-status-active, my-gigs-status-trial, my-gigs-cancel-pro-btn, my-gigs-upgrade-btn (text: 'Upgrade — $25/mo'). PaymentSuccess subscription branch: subscription-success-page, subscription-goto-my-gigs, subscription-next-billing. Old flow untouched: payment-success-page, payment-success-error. Backend endpoints: POST /api/marketplace/subscription/upgrade (401 unauth, 200 with {ok, subscription_id: 'I-...', approval_url: sandbox.paypal.com URL, amount: 25.0, currency: 'USD'}), POST /activate (200 ok:false APPROVAL_PENDING before real approval; 400 if no pending), POST /cancel (400 if no active, 200 idempotent even when PayPal 404s). Plan cache: db.marketplace_settings._id='paypal_plan' — plan_id + product_id stable across upgrade calls. Webhook helper: handle_subscription_webhook_event routes BILLING.SUBSCRIPTION.* events by resource.id and PAYMENT.SALE.COMPLETED by resource.billing_agreement_id. Owner user_id: b0a59336-f059-4d91-b608-6bbedc63a775. Note for future frontend testing: to force the UI to show Upgrade button, must manually flip marketplace_providers.subscription_status back to 'trial' via direct DB write — the /cancel endpoint only flips paypal_subscription_status='CANCELLED' (period-end handling is deferred to the EXPIRED webhook by design).",
+  "rca of the issue": "No issues found. Phase 1b real PayPal Recurring Subscription integration is complete and verified against live Sandbox."
+}
