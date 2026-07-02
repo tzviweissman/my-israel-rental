@@ -11,6 +11,23 @@ Build a bilingual (English/Hebrew) rental website named MyIsraelRental.com with 
 - **i18n**: i18next with English and Hebrew (RTL) support
 
 ## What's Been Implemented
+- [x] **Services Marketplace Phase 1b — Real PayPal Recurring Subscription (2026-07-02)**: Replaced the mocked upgrade endpoint with a live PayPal Sandbox integration. Providers pay **$25/month USD** on a recurring subscription to keep listing gigs after the 30-day trial.
+  - **Backend `utils/paypal.py`**: added 5 new helpers on top of the existing Orders API client — `create_product`, `create_plan`, `create_subscription`, `get_subscription`, `cancel_subscription`. All talk to PayPal REST v1 Billing Plans + Subscriptions API via httpx (no SDK).
+  - **Backend `routes/marketplace.py`**:
+    - Rewrote `POST /api/marketplace/subscription/upgrade` to create a real PayPal subscription and return `{approval_url, subscription_id, amount, currency}`. Client redirects to `approval_url`.
+    - `_get_or_create_billing_plan()`: idempotent product + plan creation. Cached in `marketplace_settings._id='paypal_plan'` so repeated deploys don't create duplicates.
+    - New `POST /subscription/activate`: called after the PayPal redirect returns. Re-fetches the subscription, flips provider row to `active` when PayPal reports ACTIVE/APPROVED, stores `subscribed_until = next_billing_time`. Returns `{ok:false, status:'APPROVAL_PENDING'}` if PayPal hasn't finished.
+    - New `POST /subscription/cancel`: cancels via PayPal, idempotent (PayPal 404 on an APPROVAL_PENDING or already-cancelled subscription is caught + treated as success).
+    - New `handle_subscription_webhook_event(event)`: called by the shared PayPal webhook to react to `BILLING.SUBSCRIPTION.ACTIVATED/CANCELLED/SUSPENDED/EXPIRED` + `PAYMENT.SALE.COMPLETED` events. Refreshes `subscribed_until` on renewals.
+  - **Backend `routes/payments.py`**: extended the existing `/api/payments/webhooks/paypal` endpoint to route subscription events to the marketplace handler (one webhook URL on PayPal side handles both order + subscription events).
+  - **Frontend**:
+    - `MyGigsTab.jsx`: upgrade button now reads **"Upgrade — $25/mo"** and `window.location.assign()`s to the PayPal approval URL. Active subscribers see a red **"Cancel Pro"** button in place of Upgrade.
+    - `PaymentSuccess.js`: new branch for `?flow=marketplace-subscription`. Hits `/activate` and renders a dedicated subscription-success screen with next-billing date + a "Go to My Gigs" CTA. Existing document-service order flow untouched.
+  - **Verified by testing agent (iteration_52, 11 new pytest + 27/27 regression + 5/5 frontend UI, 100% pass against live Sandbox)**: `/upgrade` returns a real `I-XXX` subscription ID + PayPal approval URL; plan is cached across calls; `/activate` correctly reports APPROVAL_PENDING before the buyer approves; `/cancel` is idempotent even against a 404; webhook helper routes events by `resource.id` or `resource.billing_agreement_id`.
+  - **Testids**: `my-gigs-upgrade-btn`, `my-gigs-cancel-pro-btn`, `subscription-success-page`, `subscription-goto-my-gigs`, `subscription-next-billing`.
+  - **Post-deploy TODO** (backlog): set `PAYPAL_WEBHOOK_ID` env var to the value from the PayPal Developer Dashboard webhook config so the signed webhook events (renewals, cancellations) can flow into `handle_subscription_webhook_event` in production.
+  - Files: `backend/utils/paypal.py`, `backend/routes/marketplace.py`, `backend/routes/payments.py`, `backend/tests/test_marketplace_subscription.py` (new, 11 tests), `frontend/src/components/dashboard/MyGigsTab.jsx`, `frontend/src/pages/PaymentSuccess.js`.
+
 - [x] **Services Marketplace Phase 2a — Reviews & 5-star Ratings (2026-07-01)**: Renters can rate & review any gig they didn't publish themselves. Star averages surface on Services hub cards, gig detail header, gig detail Reviews section, and provider profile gig cards.
   - **Backend** (`routes/marketplace.py`):
     - `POST /api/marketplace/gigs/{id}/reviews` — upsert (one review per user per gig; second POST updates the row). Blocks provider self-review (400).
