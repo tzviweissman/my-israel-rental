@@ -11,6 +11,28 @@ Build a bilingual (English/Hebrew) rental website named MyIsraelRental.com with 
 - **i18n**: i18next with English and Hebrew (RTL) support
 
 ## What's Been Implemented
+- [x] **Services Marketplace — Fiverr-style category carousel (2026-07-02)**: Replaced the small 6-column grid of icon tiles with a horizontally-scrollable row of tall Fiverr-style cards (dark colored header slab on top, pastel body with either a category photo OR a large lucide icon on the bottom).
+  - **New `components/marketplace/categoryTheme.js`**: per-category theme map (`{header, body, image | icon, iconColor}`). 12 categories, each with a bespoke color palette and either a verified Unsplash CDN image or a large lucide icon (Truck, Key, Map, Wind used where category-specific stock photos weren't reliable — matches Fiverr's own mixed illustration/photo aesthetic).
+  - **New `components/marketplace/CategoryCarousel.jsx`**: horizontal snap-scroll strip with left/right chevron buttons on desktop (auto-hides at scroll ends), touch-swipe on mobile. Cards `w=168-212px × h=280-352px` responsive. Selected card gets a gold 4px ring.
+  - **`pages/Services.jsx`**: dropped the icon-only `CategoryTile` grid; replaced with `<CategoryCarousel>`. Added a "Show all ×" clear-filter chip visible only when a category is selected.
+  - Verified via smoke screenshot: 6 cards visible at 1440×900, right chevron scrolls to the rest, image + icon cards render cleanly, filter still works via `data-testid="services-category-{slug}"` (unchanged from before so E2E tests keep passing).
+  - Files: `frontend/src/components/marketplace/{categoryTheme.js,CategoryCarousel.jsx}` (new), `frontend/src/pages/Services.jsx`.
+
+- [x] **Security Audit — full remediation (2026-07-02)**: Read-only security audit surfaced 1 CRITICAL + 3 MEDIUM + 4 P3 hardening items. All 8 findings fixed and verified by testing agent (iteration_54: 29 security + 38 regression = **67/67 tests pass, 0 outstanding**).
+  - **SEC-001 CRITICAL — Privilege escalation via self-signup (FIXED)**: `POST /api/auth/register` used to accept `role` verbatim, so `{"role":"admin"}` minted an admin JWT. Now allowlisted to `{renter, owner}` — admin/manager provisioned only via the existing admin-only role-grant endpoint.
+  - **SEC-002 MEDIUM — Blind SSRF via iCal URL (FIXED)**: `utils/helpers.py::parse_ical_feed` used `follow_redirects=True` with no host validation. Added `_is_public_ical_url()` that resolves DNS, rejects private/loopback/link-local/reserved IP ranges (including cloud metadata `169.254.169.254`), rejects non-http(s) schemes, and disables redirect-following.
+  - **SEC-003 MEDIUM — ReDoS via unescaped $regex (FIXED)**: `routes/marketplace.py::list_gigs` `q` param now `re.escape()`-ed and capped at 80 chars — treats input as literal substring, kills catastrophic backtracking.
+  - **SEC-004 MEDIUM — Path traversal on delete_upload (FIXED, defence-in-depth)**: `routes/misc.py::delete_upload` now (a) rejects any `..` segment / backslash / NULL byte in the raw filename BEFORE the Cloudinary branch, then (b) resolves the final path on the local-disk branch to confirm it lives inside `UPLOAD_DIR`. Both encoded (`..%2F`, `..%5C`, `foo%2F%2E%2E%2Fbar`) and NULL-byte payloads return 400.
+  - **P3-1 — JWT_SECRET fail-closed (FIXED)**: `utils/auth.py` + `routes/deps.py` now raise on startup if `JWT_SECRET` is missing or matches the `your-secret-key…` placeholder. `.env` rotated to a fresh 64-char urlsafe token.
+  - **P3-2 — Security headers (FIXED)**: New global middleware in `server.py` sets `X-Frame-Options: DENY`, `X-Content-Type-Options: nosniff`, `Referrer-Policy: strict-origin-when-cross-origin`, `Permissions-Policy: geolocation=(), microphone=(), camera=()` on every response. HSTS `max-age=15552000; includeSubDomains` on HTTPS responses only. CSP intentionally deferred (Cloudinary + PayPal + Stripe iframes need per-page audit).
+  - **P3-3 — Rate limiting (FIXED)**: New `utils/rate_limit.py` sliding-window limiter with `ip_agnostic=True` flag for authenticated / identity-keyed buckets (the preview ingress rotates egress IPs, so per-IP alone was defeated). Applied:
+    - `/auth/login`: 10 attempts / 5min per email (ip_agnostic) + 30 / 5min per IP.
+    - `/auth/register`: 5 / 10min per IP.
+    - `/auth/forgot-password`: 5 / 10min per email (ip_agnostic) + 15 / 10min per IP.
+    - `/cloudinary/signature`: 60 / min per user_id (ip_agnostic).
+  - **P3-4 — Review comment length cap (FIXED)**: `ReviewIn.comment` now `Field("", max_length=1000)` — Pydantic returns 422 for oversized payloads.
+  - Files: `backend/routes/{auth,marketplace,misc}.py`, `backend/utils/{auth,helpers,rate_limit,paypal}.py`, `backend/routes/deps.py`, `backend/server.py`, `backend/.env` (JWT_SECRET rotated), `backend/tests/test_security_audit.py` (new, 29 tests).
+
 - [x] **Services Marketplace Phase 1b — Real PayPal Recurring Subscription (2026-07-02)**: Replaced the mocked upgrade endpoint with a live PayPal Sandbox integration. Providers pay **$25/month USD** on a recurring subscription to keep listing gigs after the 30-day trial.
   - **Backend `utils/paypal.py`**: added 5 new helpers on top of the existing Orders API client — `create_product`, `create_plan`, `create_subscription`, `get_subscription`, `cancel_subscription`. All talk to PayPal REST v1 Billing Plans + Subscriptions API via httpx (no SDK).
   - **Backend `routes/marketplace.py`**:

@@ -1,0 +1,144 @@
+/**
+ * CategoryCarousel — Fiverr-style tall-card horizontal scroller.
+ *
+ * Renders each marketplace category as a rounded card with a dark
+ * colored top-half (category label in white) and a pastel bottom-half
+ * with a representative photo. Cards snap-scroll horizontally.
+ *
+ * Left/right chevron buttons appear on desktop for pointer users;
+ * touch users can just swipe. Buttons hide themselves at the ends
+ * of the scroll range to avoid dead clicks.
+ */
+import React, { useCallback, useEffect, useRef, useState } from 'react';
+import {
+  ChevronLeft, ChevronRight, Truck, Key, Map, Wind,
+  Sparkles, Wrench, Hammer, Camera, Palette, Scissors, Droplet, Zap,
+} from 'lucide-react';
+import { themeForCategory } from './categoryTheme';
+
+const ICONS = {
+  Truck, Key, Map, Wind, Sparkles, Wrench, Hammer, Camera,
+  Palette, Scissors, Droplet, Zap,
+};
+
+const CategoryCard = ({ category, active, onClick }) => {
+  const theme = themeForCategory(category.slug);
+  const IconEl = theme.icon ? ICONS[theme.icon] : null;
+  return (
+    <button
+      onClick={onClick}
+      className={`
+        relative shrink-0 snap-start overflow-hidden rounded-2xl text-left
+        transition-transform duration-200 will-change-transform
+        w-[168px] h-[280px] sm:w-[196px] sm:h-[320px] md:w-[212px] md:h-[352px]
+        ${active ? 'ring-4 ring-[#D4AF37] scale-[0.98]' : 'hover:-translate-y-1'}
+      `}
+      style={{ backgroundColor: theme.header }}
+      data-testid={`services-category-${category.slug}`}
+      data-active={active ? '1' : '0'}
+    >
+      {/* Header — dark slab with the category name */}
+      <div className="relative h-[38%] px-4 pt-4 pb-2 flex items-start">
+        <span
+          className="text-white font-semibold leading-tight text-base sm:text-lg md:text-xl"
+          style={{ fontFamily: 'Playfair Display, serif' }}
+        >
+          {category.label}
+        </span>
+      </div>
+      {/* Body — pastel background with either a photo or a large icon */}
+      <div
+        className="relative h-[62%] w-full flex items-center justify-center overflow-hidden"
+        style={{ backgroundColor: theme.body }}
+      >
+        {IconEl ? (
+          <div className="w-[70%] aspect-square bg-white/70 rounded-2xl shadow-lg flex items-center justify-center -mt-4">
+            <IconEl size={72} strokeWidth={1.5} color={theme.iconColor || theme.header} />
+          </div>
+        ) : (
+          <img
+            src={theme.image}
+            alt={category.label}
+            loading="lazy"
+            className="w-[78%] h-[80%] object-cover rounded-xl shadow-lg -mt-4"
+            draggable={false}
+            onError={(e) => { e.currentTarget.style.opacity = '0'; }}
+          />
+        )}
+      </div>
+    </button>
+  );
+};
+
+const CategoryCarousel = ({ categories, selectedCat, onSelect }) => {
+  const scrollerRef = useRef(null);
+  const [canScrollLeft, setCanScrollLeft] = useState(false);
+  const [canScrollRight, setCanScrollRight] = useState(true);
+
+  const updateEdges = useCallback(() => {
+    const el = scrollerRef.current;
+    if (!el) return;
+    setCanScrollLeft(el.scrollLeft > 4);
+    setCanScrollRight(el.scrollLeft + el.clientWidth < el.scrollWidth - 4);
+  }, []);
+
+  useEffect(() => {
+    updateEdges();
+    const el = scrollerRef.current;
+    if (!el) return;
+    el.addEventListener('scroll', updateEdges, { passive: true });
+    window.addEventListener('resize', updateEdges);
+    return () => {
+      el.removeEventListener('scroll', updateEdges);
+      window.removeEventListener('resize', updateEdges);
+    };
+  }, [updateEdges, categories.length]);
+
+  const scrollBy = (delta) => {
+    scrollerRef.current?.scrollBy({ left: delta, behavior: 'smooth' });
+  };
+
+  return (
+    <div className="relative" data-testid="services-category-carousel">
+      {/* Left chevron */}
+      {canScrollLeft && (
+        <button
+          onClick={() => scrollBy(-320)}
+          className="hidden md:flex absolute start-0 top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-white shadow-md border border-gray-200 items-center justify-center hover:shadow-lg hover:scale-105 transition-all"
+          aria-label="Scroll categories left"
+          data-testid="services-carousel-prev"
+        >
+          <ChevronLeft size={18} />
+        </button>
+      )}
+      {/* Right chevron */}
+      {canScrollRight && (
+        <button
+          onClick={() => scrollBy(320)}
+          className="hidden md:flex absolute end-0 top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-white shadow-md border border-gray-200 items-center justify-center hover:shadow-lg hover:scale-105 transition-all"
+          aria-label="Scroll categories right"
+          data-testid="services-carousel-next"
+        >
+          <ChevronRight size={18} />
+        </button>
+      )}
+
+      <div
+        ref={scrollerRef}
+        className="flex gap-3 sm:gap-4 overflow-x-auto scroll-smooth snap-x snap-mandatory pb-3 px-1 -mx-1 scrollbar-hide"
+        style={{ scrollbarWidth: 'none' }}
+      >
+        {categories.map((c) => (
+          <CategoryCard
+            key={c.slug}
+            category={c}
+            active={selectedCat === c.slug}
+            onClick={() => onSelect(c.slug === selectedCat ? '' : c.slug)}
+          />
+        ))}
+      </div>
+    </div>
+  );
+};
+
+export default CategoryCarousel;

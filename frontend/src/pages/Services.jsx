@@ -15,39 +15,11 @@ import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
-import {
-  Sparkles, Truck, Key, Wrench, Camera, Palette, Map, Hammer,
-  Scissors, Wind, Droplet, Zap, Search, ArrowRight, Loader2,
-} from 'lucide-react';
+import { Search, ArrowRight, Loader2 } from 'lucide-react';
 import { API } from '../App';
 import PageMeta from '../components/PageMeta';
 import StarRating from '../components/marketplace/StarRating';
-
-const ICON_BY_SLUG = {
-  sparkles: Sparkles, truck: Truck, key: Key, wrench: Wrench,
-  camera: Camera, palette: Palette, map: Map, hammer: Hammer,
-  scissors: Scissors, wind: Wind, droplet: Droplet, zap: Zap,
-};
-
-const CategoryTile = ({ slug, label, icon, active, onClick }) => {
-  const Icon = ICON_BY_SLUG[icon] || Wrench;
-  return (
-    <button
-      onClick={onClick}
-      className={`group flex flex-col items-center gap-2 rounded-xl border p-4 transition-all ${
-        active
-          ? 'bg-[#1E6A6A] text-white border-[#1E6A6A]'
-          : 'bg-white text-gray-700 border-gray-200 hover:border-[#D4AF37] hover:shadow-sm'
-      }`}
-      data-testid={`services-category-${slug}`}
-    >
-      <span className={`w-10 h-10 rounded-lg flex items-center justify-center ${active ? 'bg-white/15' : 'bg-[#FAFAF7]'}`}>
-        <Icon size={20} className={active ? 'text-white' : 'text-[#1E6A6A]'} />
-      </span>
-      <span className="text-xs font-semibold text-center leading-tight">{label}</span>
-    </button>
-  );
-};
+import CategoryCarousel from '../components/marketplace/CategoryCarousel';
 
 const GigCard = ({ gig, onClick }) => {
   const cover = gig.gallery?.[0];
@@ -159,30 +131,27 @@ const Services = () => {
         </div>
       </div>
 
-      {/* Categories */}
-      <div className="max-w-6xl mx-auto px-4 py-10">
-        <h2 className="text-xl font-bold text-gray-900 mb-4">{t('services.browse', 'Browse by category')}</h2>
-        <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-3">
-          <button
-            onClick={() => setSelectedCat('')}
-            className={`flex flex-col items-center justify-center gap-2 rounded-xl border p-4 transition-all ${
-              !selectedCat ? 'bg-[#1E6A6A] text-white border-[#1E6A6A]' : 'bg-white text-gray-700 border-gray-200 hover:border-[#D4AF37]'
-            }`}
-            data-testid="services-category-all"
-          >
-            <span className="text-xs font-semibold">{t('services.all', 'All')}</span>
-          </button>
-          {categories.map((c) => (
-            <CategoryTile
-              key={c.slug}
-              slug={c.slug}
-              label={c.label}
-              icon={c.icon}
-              active={selectedCat === c.slug}
-              onClick={() => setSelectedCat(c.slug === selectedCat ? '' : c.slug)}
-            />
-          ))}
+      {/* Categories — Fiverr-style horizontal carousel of tall cards */}
+      <div className="max-w-7xl mx-auto px-4 md:px-6 py-10">
+        <div className="flex items-center justify-between mb-5">
+          <h2 className="text-xl md:text-2xl font-bold text-gray-900" style={{ fontFamily: 'Playfair Display' }}>
+            {t('services.browse', 'Browse by category')}
+          </h2>
+          {selectedCat && (
+            <button
+              onClick={() => setSelectedCat('')}
+              className="text-xs font-semibold text-[#1E6A6A] hover:underline"
+              data-testid="services-category-clear"
+            >
+              {t('services.showAll', 'Show all')} ×
+            </button>
+          )}
         </div>
+        <CategoryCarousel
+          categories={categories}
+          selectedCat={selectedCat}
+          onSelect={setSelectedCat}
+        />
       </div>
 
       {/* Gigs grid */}
