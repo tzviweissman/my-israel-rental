@@ -4,10 +4,13 @@ These are the authoritative versions (previously also duplicated inside
 server.py). Any router that needs iCal or USD/ILS pulls from here.
 """
 import asyncio
+import ipaddress
 import logging
+import socket
 import uuid
 from datetime import UTC, datetime
 from typing import Any
+from urllib.parse import urlparse
 
 import httpx
 from icalendar import Calendar as iCalCalendar
@@ -18,6 +21,41 @@ logger = logging.getLogger("server")
 
 # Exchange rate cache (module-level, 1-hour TTL)
 _exchange_cache: dict[str, Any] = {"rate": None, "fetched_at": None}
+
+
+def _is_public_ical_url(url: str) -> bool:
+    """SEC-002 SSRF guard: only allow https public hosts for iCal fetch.
+
+    Blocks:
+      - non-http(s) schemes (file://, gopher://, ftp://, …)
+      - hosts that resolve to private, loopback, link-local, or
+        reserved IP ranges (RFC1918, 169.254/16, ::1, fc00::/7, etc.)
+      - cloud metadata endpoints (169.254.169.254)
+
+    Returns True only when every resolved A/AAAA record is public.
+    """
+    try:
+        parsed = urlparse(url)
+    except Exception:  # noqa: BLE001
+        return False
+    if parsed.scheme not in ("http", "https"):
+        return False
+    host = parsed.hostname
+    if not host:
+        return False
+    try:
+        infos = socket.getaddrinfo(host, None)
+    except socket.gaierror:
+        return False
+    for info in infos:
+        addr = info[4][0]
+        try:
+            ip = ipaddress.ip_address(addr)
+        except ValueError:
+            return False
+        if ip.is_private or ip.is_loopback or ip.is_link_local or ip.is_multicast or ip.is_reserved or ip.is_unspecified:
+            return False
+    return True
 
 
 async def get_usd_ils_rate() -> float:
@@ -44,8 +82,13 @@ async def get_usd_ils_rate() -> float:
 async def parse_ical_feed(url: str) -> list[dict]:
     """Fetch and parse an iCal feed. Returns list of {start, end, summary}."""
     blocked = []
+    # SEC-002: guard against SSRF — reject any URL that resolves to a
+    # private / loopback / metadata range or uses a non-http(s) scheme.
+    if not _is_public_ical_url(url):
+        logger.warning("iCal fetch blocked (SSRF guard): %s", url)
+        return blocked
     try:
-        async with httpx.AsyncClient(timeout=15, follow_redirects=True) as http:
+        async with httpx.AsyncClient(timeout=15, follow_redirects=False) as http:
             resp = await http.get(url)
             resp.raise_for_status()
             cal = iCalCalendar.from_ical(resp.text)

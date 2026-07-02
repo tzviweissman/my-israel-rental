@@ -125,6 +125,23 @@ BACKEND_BUILD_ID = datetime.now(UTC).strftime("%Y%m%dT%H%M%SZ")
 async def stamp_build_id(request, call_next):
     response = await call_next(request)
     response.headers["X-Build-Id"] = BACKEND_BUILD_ID
+    # SEC hardening: security headers on every response so intermediary
+    # scrubbers, browsers, and search-engines get consistent guidance.
+    # We intentionally keep CSP off (SPA loads Cloudinary + PayPal +
+    # Stripe iframes; enforcing here would break the app until it's
+    # audited end-to-end). Everything else is safe to apply globally.
+    response.headers.setdefault("X-Frame-Options", "DENY")
+    response.headers.setdefault("X-Content-Type-Options", "nosniff")
+    response.headers.setdefault("Referrer-Policy", "strict-origin-when-cross-origin")
+    response.headers.setdefault("Permissions-Policy", "geolocation=(), microphone=(), camera=()")
+    # HSTS: only send on HTTPS responses. FastAPI/Starlette exposes the
+    # scheme via `request.url.scheme`. 6-month max-age keeps browsers
+    # locked to HTTPS well past the next deploy cycle.
+    if request.url.scheme == "https":
+        response.headers.setdefault(
+            "Strict-Transport-Security",
+            "max-age=15552000; includeSubDomains",
+        )
     return response
 
 

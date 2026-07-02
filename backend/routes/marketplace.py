@@ -24,6 +24,7 @@ Endpoints:
   GET  /api/marketplace/my-gigs                   — auth: gigs I own
 """
 import os
+import re
 import uuid
 from datetime import datetime, timedelta, timezone
 from typing import Any, Optional
@@ -117,7 +118,9 @@ class BookingIn(BaseModel):
 
 class ReviewIn(BaseModel):
     rating: int = Field(..., ge=1, le=5)
-    comment: str = ""
+    # Cap at 1000 chars so an attacker can't post 10 MB of text to the
+    # public reviews collection (bandwidth + storage DoS).
+    comment: str = Field("", max_length=1000)
 
 
 # --------------------------- Helpers --------------------------- #
@@ -257,9 +260,14 @@ async def list_gigs(
         _validate_category(category)
         query["category"] = category
     if q:
+        # SEC-003: escape the user input so it's treated as a literal
+        # substring, not a regex — prevents catastrophic-backtracking DoS
+        # on this unauthenticated endpoint. Also cap the length to keep
+        # the query size sane.
+        needle = re.escape(q[:80])
         query["$or"] = [
-            {"title": {"$regex": q, "$options": "i"}},
-            {"description": {"$regex": q, "$options": "i"}},
+            {"title": {"$regex": needle, "$options": "i"}},
+            {"description": {"$regex": needle, "$options": "i"}},
         ]
     cursor = db.marketplace_gigs.find(query).sort("created_at", -1).limit(limit)
     raw = [g async for g in cursor]

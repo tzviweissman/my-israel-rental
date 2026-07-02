@@ -26,6 +26,7 @@ from utils.email import (
     send_password_reset_email,
     send_welcome_email,
 )
+from utils.rate_limit import check_rate
 
 router = APIRouter()
 api_router = router  # alias so existing @api_router decorators work verbatim
@@ -75,6 +76,21 @@ async def _send_verification_email(user: dict, raw_token: str, req: Request | No
 
 @api_router.post("/auth/register", response_model=TokenResponse)
 async def register(user_data: UserRegister, req: Request) -> dict:
+    # Rate-limit signups per IP to slow bulk account creation abuse.
+    check_rate(req, bucket="auth-register", limit=5, window_seconds=600)
+
+    # SEC-001 fix: reject any attempt to self-register as admin/manager.
+    # Only renter/owner may be created via the public signup form; admin
+    # and manager accounts are provisioned by an existing admin via the
+    # admin user-management endpoints. Falls back to 'renter' if a client
+    # sends something unexpected (e.g. empty string).
+    requested_role = (user_data.role or "").strip().lower()
+    if requested_role not in {"renter", "owner"}:
+        raise HTTPException(
+            status_code=400,
+            detail="Registration role must be 'renter' or 'owner'",
+        )
+
     existing = await db.users.find_one({"email": user_data.email})
     if existing:
         raise HTTPException(status_code=400, detail="Email already registered")
@@ -87,7 +103,7 @@ async def register(user_data: UserRegister, req: Request) -> dict:
         "email": user_data.email,
         "password": hashed_password.decode('utf-8'),
         "name": user_data.name,
-        "role": user_data.role,
+        "role": requested_role,
         "phone": user_data.phone,
         "created_at": datetime.now(UTC).isoformat(),
         # Email verification was rolled back on 2026-06 at the user's
@@ -98,11 +114,11 @@ async def register(user_data: UserRegister, req: Request) -> dict:
     }
 
     await db.users.insert_one(user_doc)
-    token = create_token(user_id, user_data.role)
+    token = create_token(user_id, requested_role)
 
     # Fire-and-forget welcome email (no verification link).
     try:
-        asyncio.create_task(send_welcome_email(user_data.email, user_data.name, user_data.role))
+        asyncio.create_task(send_welcome_email(user_data.email, user_data.name, requested_role))
     except Exception as e:  # noqa: BLE001
         logger.warning(f"Failed to queue welcome email for {user_data.email}: {e}")
 
@@ -110,13 +126,19 @@ async def register(user_data: UserRegister, req: Request) -> dict:
         "token": token,
         "user": {
             "id": user_id, "email": user_data.email, "name": user_data.name,
-            "role": user_data.role, "email_verified": True,
+            "role": requested_role, "email_verified": True,
         },
     }
 
 
 @api_router.post("/auth/login", response_model=TokenResponse)
-async def login(credentials: UserLogin) -> dict:
+async def login(credentials: UserLogin, req: Request) -> dict:
+    # Rate-limit per (IP, email) so an attacker can't brute-force one
+    # account by rotating IPs OR one IP by rotating emails: 10 attempts
+    # per 5 minutes keyed to email, 30 per 5 minutes keyed to IP alone.
+    check_rate(req, bucket="auth-login-email", limit=10, window_seconds=300, key_extra=credentials.email.lower())
+    check_rate(req, bucket="auth-login-ip", limit=30, window_seconds=300)
+
     user = await db.users.find_one({"email": credentials.email}, {"_id": 0})
     if not user:
         raise HTTPException(status_code=401, detail="Invalid credentials")
@@ -232,6 +254,10 @@ async def forgot_password(request: ForgotPasswordRequest, req: Request) -> dict:
     success message even when the email is not registered, to prevent
     account-enumeration attacks.
     """
+    # Rate-limit password-reset requests to slow enumeration + email-flood.
+    check_rate(req, bucket="auth-forgot", limit=5, window_seconds=600, key_extra=request.email.lower())
+    check_rate(req, bucket="auth-forgot-ip", limit=15, window_seconds=600)
+
     user = await db.users.find_one({"email": request.email}, {"_id": 0})
 
     # Generic public-facing response used in both the "user found" and

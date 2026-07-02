@@ -1,10 +1,11 @@
 """Auto-extracted from server.py during the 2026-04 refactor."""
+import os
 import uuid
 from datetime import UTC, datetime
 from typing import List
 
 from emergentintegrations.llm.chat import LlmChat, UserMessage
-from fastapi import APIRouter, Body, Depends, File, HTTPException, UploadFile
+from fastapi import APIRouter, Body, Depends, File, HTTPException, Request, UploadFile
 
 from models import ContactRequest, DocumentServiceRequest, TranslationRequest
 from models_response import (
@@ -26,6 +27,7 @@ from routes.deps import (
     logger,
     verify_token,
 )
+from utils.rate_limit import check_rate
 from utils.cloud_storage import (
     CLOUDINARY_ENABLED,
     delete_from_cloudinary,
@@ -46,6 +48,7 @@ async def get_exchange_rate() -> dict:
 
 @api_router.get("/cloudinary/signature")
 async def get_cloudinary_signature(
+    req: Request,
     resource_type: str = "image",
     folder: str = "myisraelrental",
     payload: dict = Depends(verify_token),
@@ -59,6 +62,9 @@ async def get_cloudinary_signature(
 
     Auth-gated so anonymous visitors can't sign arbitrary uploads.
     """
+    # Rate-limit per user id — 60 signatures / minute is plenty for a
+    # legitimate 10-image gallery upload, tight enough to blunt abuse.
+    check_rate(req, bucket="cloudinary-sign", limit=60, window_seconds=60, key_extra=payload.get("user_id", ""))
     if not CLOUDINARY_ENABLED:
         raise HTTPException(status_code=503, detail="Cloudinary not configured")
     if resource_type not in ("image", "video"):
@@ -254,8 +260,16 @@ async def delete_upload(filename: str, payload: dict = Depends(verify_token)) ->
             delete_from_cloudinary(filename, is_video=True)
         return {"message": "File deleted"}
 
-    file_path = UPLOAD_DIR / filename
-    if file_path.exists():
+    # SEC-004 fix: resolve to an absolute path and confirm it's strictly
+    # inside UPLOAD_DIR so a caller can't traverse out with ../
+    upload_root = UPLOAD_DIR.resolve()
+    try:
+        file_path = (UPLOAD_DIR / filename).resolve()
+    except (RuntimeError, OSError):
+        raise HTTPException(status_code=400, detail="Invalid filename")
+    if not str(file_path).startswith(str(upload_root) + os.sep) and file_path != upload_root:
+        raise HTTPException(status_code=400, detail="Invalid filename")
+    if file_path.exists() and file_path.is_file():
         file_path.unlink()
     return {"message": "File deleted"}
 

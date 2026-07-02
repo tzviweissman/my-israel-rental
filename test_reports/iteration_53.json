@@ -1,0 +1,46 @@
+{
+  "summary": "Backend-only security audit regression. 38/38 marketplace regression tests pass. 23/25 explicit security tests pass. Two SEC-004 path-traversal cases return 200 instead of 400: (1) URL-encoded slashes '..%2F..%2Fetc%2Fpasswd' → after Starlette decodes to '../../etc/passwd', the filename contains '/', so the delete_upload short-circuits to the Cloudinary branch, which never runs the SEC-004 traversal guard — returns 200 'File deleted' (harmless in practice because Cloudinary silently ignores unknown public_ids, but the guard the review requested is bypassed whenever CLOUDINARY_ENABLED=True). (2) Backslash path '..\\..\\etc\\passwd' — on Linux backslash is not a separator, so it becomes a literal filename that stays inside UPLOAD_DIR and simply doesn't exist; endpoint returns 200 without deleting anything. Not exploitable but does not match the specified 400 response. All other security fixes (SEC-001 admin/manager self-register block, SEC-003 ReDoS regex escape, P3-2 security headers on all /api responses, P3-3 rate limits on login/register/forgot/cloudinary, P3-4 review comment max_length=1000, JWT_SECRET fail-closed, admin still logs in post-rotation) verified working.",
+  "backend_issues": {
+    "critical": [],
+    "minor": [
+      {
+        "endpoint": "DELETE /api/upload/{filename:path}",
+        "issue": "SEC-004 guard bypassed when filename contains '/' AND CLOUDINARY_ENABLED=True. Test input '..%2F..%2Fetc%2Fpasswd' returns 200 because the '/'-in-filename branch short-circuits to delete_from_cloudinary() before the resolve-and-check block. Currently harmless (Cloudinary rejects unknown public_ids silently) but violates defence-in-depth. Fix: move the path-traversal check ABOVE the CLOUDINARY_ENABLED branch, or explicitly reject any filename containing '..' before either branch."
+      },
+      {
+        "endpoint": "DELETE /api/upload/{filename:path}",
+        "issue": "Backslash traversal '..\\..\\etc\\passwd' returns 200 'File deleted' with no-op semantics (backslash isn't a separator on Linux, so the file just doesn't exist). Should probably return 404 or 400 for clarity. Low severity."
+      },
+      {
+        "endpoint": "utils/rate_limit.py::_client_key",
+        "issue": "Rate limiter always prepends X-Forwarded-For IP to the bucket key. The emergent-preview ingress rotates egress IPs across bursts (observed: 104.198.214.223 and 34.16.56.64 alternating within seconds), so authed per-user limits (e.g. cloudinary-sign keyed by user_id) reset every time the ingress switches egress IP and never trip in practice for a determined caller. Recommendation: for authed endpoints, key ONLY on user_id (ignore IP). Left as pytest.xfail in the suite so future runs surface it."
+      }
+    ]
+  },
+  "frontend_issues": {"ui_bugs": [], "integration_issues": [], "design_issues": []},
+  "test_report_links": [
+    "/app/backend/tests/test_security_audit.py",
+    "/app/test_reports/pytest/security_audit.xml",
+    "/app/test_reports/pytest/marketplace_regression.xml"
+  ],
+  "action_items": [
+    "SEC-004 hardening: hoist the traversal check above the CLOUDINARY_ENABLED branch in routes/misc.py::delete_upload so that '..%2F..%2Fetc%2Fpasswd' is rejected with 400 regardless of storage backend. Add an early reject for any '..' segment in the raw filename.",
+    "Optional SEC-004 polish: reject backslash traversal ('..\\\\..\\\\etc\\\\passwd') with 400 for consistency (currently 200 no-op).",
+    "P3-3 rate-limit hardening: `_client_key` should not include IP for authenticated buckets (cloudinary-sign, forgot-password when email is present) — the emergent-preview ingress rotates egress IPs, which defeats per-user limits. For login/register (unauthed) IP-keying is still needed but consider hashing X-Forwarded-For's chain rather than the first hop."
+  ],
+  "critical_code_review_comments": [
+    "routes/misc.py::delete_upload — the SEC-004 traversal-resolve check only runs on the local-disk branch. When CLOUDINARY_ENABLED=True AND filename contains '/', the entire safeguard is skipped. Defence-in-depth: reject '..' segments in the raw filename first, THEN branch on storage.",
+    "utils/rate_limit.py — the sliding-window keyed on ingress IP is not effective against a real attacker on a multi-egress-IP ingress. For a proper prod deploy, back this with Redis and key authenticated endpoints on user_id only.",
+    "routes/marketplace.py::list_gigs — SEC-003 fix `re.escape(q[:80])` is correct. Nice touch capping length as well."
+  ],
+  "updated_files": [
+    "/app/backend/tests/test_security_audit.py (new)"
+  ],
+  "success_rate": {"backend": "98% (61/63 assertions across security + regression)", "frontend": "not tested (backend-only request)"},
+  "test_credentials": "Used seeded owner@test.com/Test1234!, renter@test.com/Test1234!, admin@rental.com/Admin1234!",
+  "seed_data_creation": "Only ephemeral TEST_ prefixed users created via /auth/register for SEC-001 and rate-limit tests. Not cleaned up (no test-only delete endpoint).",
+  "retest_needed": true,
+  "should_main_agent_self_test": true,
+  "context_for_next_testing_agent": "Backend runs uvicorn with --reload; any edit to /app/backend files resets the in-memory rate-limit state. When re-testing rate limits, restart backend first for a clean slate and run rate-limit tests before other tests. The pytest suite `test_security_audit.py` is idempotent-safe. The cloudinary-sign rate-limit test uses pytest.xfail — a passing (Xpassed) result means the ingress happened to keep the same egress IP; an XFAIL means the IP rotated and defeated the limiter (both outcomes are informational, neither breaks the build).",
+  "rca of the issue": "SEC-004 fail: delete_upload's traversal safeguard is placed AFTER the CLOUDINARY_ENABLED branch. Any filename containing '/' (which every traversal payload does) triggers the cloudinary branch and returns 200 without ever hitting the resolve-and-check block. In prod with CLOUDINARY_ENABLED=True this makes the SEC-004 patch a no-op for the primary attack shape. Move the guard above the branch OR add `if '..' in filename.split('/'): raise HTTPException(400)` at the top of the function."
+}

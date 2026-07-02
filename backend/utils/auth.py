@@ -13,7 +13,16 @@ ROOT_DIR = Path(__file__).parent.parent
 load_dotenv(ROOT_DIR / '.env')
 
 security = HTTPBearer()
-JWT_SECRET = os.environ.get('JWT_SECRET', 'your-secret-key-change-in-production-12345')
+# SEC hardening: fail-closed if the JWT signing secret isn't set. A weak
+# default (like "your-secret-key-change-in-production-…") means any
+# attacker who reads this file's history can forge any user's JWT — so
+# we refuse to start rather than silently accept it.
+JWT_SECRET = os.environ.get('JWT_SECRET')
+if not JWT_SECRET or JWT_SECRET.startswith('your-secret-key'):
+    raise RuntimeError(
+        "JWT_SECRET env var must be set to a strong random value "
+        "(never use the placeholder). Refusing to start."
+    )
 
 
 def create_token(user_id: str, role: str) -> str:
