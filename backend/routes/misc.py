@@ -64,7 +64,12 @@ async def get_cloudinary_signature(
     """
     # Rate-limit per user id — 60 signatures / minute is plenty for a
     # legitimate 10-image gallery upload, tight enough to blunt abuse.
-    check_rate(req, bucket="cloudinary-sign", limit=60, window_seconds=60, key_extra=payload.get("user_id", ""))
+    # ip_agnostic=True because the ingress rotates egress IPs; keying
+    # on user_id alone is what actually enforces the limit.
+    check_rate(
+        req, bucket="cloudinary-sign", limit=60, window_seconds=60,
+        key_extra=payload.get("user_id", ""), ip_agnostic=True,
+    )
     if not CLOUDINARY_ENABLED:
         raise HTTPException(status_code=503, detail="Cloudinary not configured")
     if resource_type not in ("image", "video"):
@@ -252,6 +257,13 @@ async def upload_multiple_files(files: List[UploadFile] = File(...), payload: di
 
 @api_router.delete("/upload/{filename:path}", response_model=MessageResponse)
 async def delete_upload(filename: str, payload: dict = Depends(verify_token)) -> dict:
+    # SEC-004 defence-in-depth: reject any traversal payload BEFORE we
+    # branch on storage backend. Any legit local-disk filename or
+    # Cloudinary public_id we generate cannot contain '..' segments or
+    # backslashes, so refusing them here is a zero-risk hardening.
+    if ".." in filename.replace("\\", "/").split("/") or "\x00" in filename:
+        raise HTTPException(status_code=400, detail="Invalid filename")
+
     # Cloudinary public_ids look like "myisraelrental/abc123" (contains slash).
     # Local fallback filenames look like "{uuid}.{ext}" (no slash).
     if CLOUDINARY_ENABLED and ("/" in filename or not (UPLOAD_DIR / filename).exists()):
@@ -260,8 +272,8 @@ async def delete_upload(filename: str, payload: dict = Depends(verify_token)) ->
             delete_from_cloudinary(filename, is_video=True)
         return {"message": "File deleted"}
 
-    # SEC-004 fix: resolve to an absolute path and confirm it's strictly
-    # inside UPLOAD_DIR so a caller can't traverse out with ../
+    # Second-layer path-traversal guard: even after the '..' filter above,
+    # resolve the final path and confirm it lives strictly inside UPLOAD_DIR.
     upload_root = UPLOAD_DIR.resolve()
     try:
         file_path = (UPLOAD_DIR / filename).resolve()

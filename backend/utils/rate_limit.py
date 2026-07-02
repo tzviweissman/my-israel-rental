@@ -30,10 +30,24 @@ def _client_key(request: Request, extra: str = "") -> str:
     return f"{ip}|{extra}"
 
 
-def check_rate(request: Request, *, bucket: str, limit: int, window_seconds: int, key_extra: str = "") -> None:
+def check_rate(
+    request: Request,
+    *,
+    bucket: str,
+    limit: int,
+    window_seconds: int,
+    key_extra: str = "",
+    ip_agnostic: bool = False,
+) -> None:
     """Raise 429 if the caller has exceeded `limit` requests to `bucket`
-    within the sliding `window_seconds`. Otherwise, record this hit."""
-    key = f"{bucket}:{_client_key(request, key_extra)}"
+    within the sliding `window_seconds`. Otherwise, record this hit.
+
+    `ip_agnostic=True` skips the IP in the key — use it for authenticated
+    endpoints where the caller identity (user_id) is already stable and
+    the ingress may rotate egress IPs (defeating per-IP limits).
+    """
+    ident = key_extra if ip_agnostic else _client_key(request, key_extra)
+    key = f"{bucket}:{ident}"
     now = time.monotonic()
     q = _hits[key]
     cutoff = now - window_seconds

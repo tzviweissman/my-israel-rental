@@ -117,6 +117,10 @@ class TestSEC004PathTraversal:
         "..%2F..%2Fetc%2Fpasswd",
         "..\\..\\etc\\passwd",
         "../../../root/.ssh/id_rsa",
+        # iteration_54 retest payloads
+        "foo%2F%2E%2E%2Fbar",       # URL-encoded '../' inside path
+        "..%5C..%5Cetc%5Cpasswd",   # URL-encoded backslash traversal
+        "foo%00.jpg",               # NULL-byte injection
     ])
     def test_traversal_rejected(self, owner_token, path):
         r = requests.delete(
@@ -124,14 +128,30 @@ class TestSEC004PathTraversal:
             headers={"Authorization": f"Bearer {owner_token}"},
             timeout=10,
         )
-        # The behaviour we want: NEVER a 2xx that succeeded in unlinking
-        # something outside UPLOAD_DIR. Accept 400 (rejected) or 404
-        # (route treated it as a cloudinary public_id / non-existent).
-        # But NOT 200 with "File deleted" when the path clearly targets
-        # /etc/passwd.
-        assert r.status_code in (400, 404, 422), f"path={path!r} status={r.status_code}"
-        if r.status_code == 400:
+        # Must NOT be 2xx. Accept 400 (backend guard) or 404 (some clients
+        # / ingress normalize `../` segments away per RFC 3986 before the
+        # request ever hits the backend; Cloudflare returns 400 HTML on
+        # NULL-byte). The critical invariant is: never a 200 "File deleted".
+        assert r.status_code in (400, 404), (
+            f"path={path!r} status={r.status_code} body={r.text[:200]}"
+        )
+        # If it's JSON from our backend, confirm the detail is meaningful.
+        ct = r.headers.get("content-type", "")
+        if r.status_code == 400 and "application/json" in ct:
             assert "invalid" in r.json().get("detail", "").lower()
+
+    def test_legit_cloudinary_style_public_id_passes(self, owner_token):
+        # A public_id with '/' but no '..' should reach the cloudinary
+        # delete branch. If cloudinary isn't wired we still expect 200
+        # because the delete branch swallows failures.
+        r = requests.delete(
+            f"{API}/upload/myisraelrental/some-legit-public-id",
+            headers={"Authorization": f"Bearer {owner_token}"},
+            timeout=10,
+        )
+        # Accept 200 (cloudinary branch) or 404 (local branch, not found).
+        # The critical thing is: NOT 400 — the guard must not false-positive.
+        assert r.status_code in (200, 404), f"unexpected {r.status_code}: {r.text[:200]}"
 
     def test_legit_local_delete_still_works(self, owner_token):
         # Upload a tiny image, then delete it via the returned filename.
@@ -229,12 +249,8 @@ class TestP3RateLimits:
     def test_cloudinary_signature_rate_limit(self, owner_token):
         """61st signature request from same user in a minute should return 429.
 
-        NOTE (known limitation): the emergent ingress rotates its egress
-        IP across bursts, and `_client_key` prepends that IP to the
-        limiter key. In this preview env that means the limiter often
-        resets mid-burst and NEVER trips at 61 requests. We record the
-        outcome for the report rather than hard-fail this test — the
-        code path is exercised via debug logs during audit.
+        iteration_54: bucket now uses ip_agnostic=True keyed on user_id,
+        so the ingress egress-IP rotation should no longer defeat it.
         """
         codes = []
         for _ in range(61):
@@ -245,14 +261,11 @@ class TestP3RateLimits:
             )
             codes.append(r.status_code)
             if r.status_code == 429:
+                assert "retry-after" in {k.lower() for k in r.headers}, "Retry-After missing"
                 break
-        # Soft assertion: report but don't fail. See action items.
-        if 429 not in codes:
-            pytest.xfail(
-                "Rate limit did not trip in 61 requests — likely because "
-                "the emergent ingress rotates egress IP and `_client_key` "
-                "keys on IP. Consider keying by user_id only for authed endpoints."
-            )
+        assert 429 in codes, (
+            f"expected 429 within 61 requests, got last 10={codes[-10:]}"
+        )
 
     def test_register_ip_rate_limit(self):
         """6th register from same IP in 10min returns 429. Run LAST because

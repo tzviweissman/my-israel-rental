@@ -134,9 +134,10 @@ async def register(user_data: UserRegister, req: Request) -> dict:
 @api_router.post("/auth/login", response_model=TokenResponse)
 async def login(credentials: UserLogin, req: Request) -> dict:
     # Rate-limit per (IP, email) so an attacker can't brute-force one
-    # account by rotating IPs OR one IP by rotating emails: 10 attempts
-    # per 5 minutes keyed to email, 30 per 5 minutes keyed to IP alone.
-    check_rate(req, bucket="auth-login-email", limit=10, window_seconds=300, key_extra=credentials.email.lower())
+    # account by rotating IPs OR one IP by rotating emails. The email
+    # bucket is ip_agnostic because the ingress rotates egress IPs and
+    # an attacker on multiple hosts would defeat a per-(IP,email) limit.
+    check_rate(req, bucket="auth-login-email", limit=10, window_seconds=300, key_extra=credentials.email.lower(), ip_agnostic=True)
     check_rate(req, bucket="auth-login-ip", limit=30, window_seconds=300)
 
     user = await db.users.find_one({"email": credentials.email}, {"_id": 0})
@@ -255,7 +256,9 @@ async def forgot_password(request: ForgotPasswordRequest, req: Request) -> dict:
     account-enumeration attacks.
     """
     # Rate-limit password-reset requests to slow enumeration + email-flood.
-    check_rate(req, bucket="auth-forgot", limit=5, window_seconds=600, key_extra=request.email.lower())
+    # Email is ip_agnostic (attacker rotates IPs, but they target one email
+    # at a time); IP is kept as a secondary check for pure-enumeration.
+    check_rate(req, bucket="auth-forgot-email", limit=5, window_seconds=600, key_extra=request.email.lower(), ip_agnostic=True)
     check_rate(req, bucket="auth-forgot-ip", limit=15, window_seconds=600)
 
     user = await db.users.find_one({"email": request.email}, {"_id": 0})
