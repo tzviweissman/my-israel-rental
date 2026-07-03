@@ -11,7 +11,7 @@
  * intact from day 1.
  */
 import React, { useEffect, useMemo, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import axios from 'axios';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
@@ -68,13 +68,17 @@ const GigCard = ({ gig, onClick }) => {
 const Services = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  // Two-way URL sync so `/services?category=home-repair&location=jerusalem`
+  // opens the hub already filtered — enables sharable links and per-
+  // category-per-city Google indexing.
+  const [searchParams, setSearchParams] = useSearchParams();
   const [categories, setCategories] = useState([]);
   const [locations, setLocations] = useState([]);
   const [gigs, setGigs] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [selectedCat, setSelectedCat] = useState('');
-  const [selectedLoc, setSelectedLoc] = useState('');
-  const [q, setQ] = useState('');
+  const [selectedCat, setSelectedCat] = useState(searchParams.get('category') || '');
+  const [selectedLoc, setSelectedLoc] = useState(searchParams.get('location') || '');
+  const [q, setQ] = useState(searchParams.get('q') || '');
 
   useEffect(() => {
     Promise.all([
@@ -85,6 +89,16 @@ const Services = () => {
       console.error(e); toast.error('Failed to load marketplace');
     }).finally(() => setLoading(false));
   }, []);
+
+  // Push state into the URL whenever a filter changes. `replace: true`
+  // so the browser back-button skips over intermediate filter states.
+  useEffect(() => {
+    const next = {};
+    if (selectedCat) next.category = selectedCat;
+    if (selectedLoc) next.location = selectedLoc;
+    if (q) next.q = q;
+    setSearchParams(next, { replace: true });
+  }, [selectedCat, selectedLoc, q, setSearchParams]);
 
   const filtered = useMemo(() => {
     const locLabel = locations.find((l) => l.slug === selectedLoc)?.label.toLowerCase();
@@ -102,11 +116,30 @@ const Services = () => {
       style={{ paddingTop: 'var(--nav-h, 68px)' }}
       data-testid="services-page"
     >
-      <PageMeta
-        title="Services Marketplace in Israel — Cleaners, Movers, Plumbers & more | MyIsraelRental"
-        description="Book trusted local services in Israel — cleaning, movers, plumbers, electricians, photographers, barbers, tour guides and more. Zero booking fees, direct chat, WhatsApp-ready."
-        path="/services"
-      />
+      {(() => {
+        // Compose an SEO-friendly title + description based on active filters.
+        // Falls back to the generic hub copy when no filter is applied.
+        const catLbl = categories.find((c) => c.slug === selectedCat)?.label;
+        const locLbl = locations.find((l) => l.slug === selectedLoc)?.label;
+        let title = 'Services Marketplace in Israel — Cleaners, Movers, Plumbers & more | MyIsraelRental';
+        let description = 'Book trusted local services in Israel — cleaning, movers, plumbers, electricians, photographers, barbers, tour guides and more. Zero booking fees, direct chat, WhatsApp-ready.';
+        if (catLbl && locLbl) {
+          title = `${catLbl} in ${locLbl} — Services Marketplace | MyIsraelRental`;
+          description = `Find and book trusted ${catLbl.toLowerCase()} providers in ${locLbl}. Direct chat, WhatsApp booking, zero renter fees.`;
+        } else if (catLbl) {
+          title = `${catLbl} in Israel — Services Marketplace | MyIsraelRental`;
+          description = `Book trusted ${catLbl.toLowerCase()} providers across Israel — direct chat, WhatsApp-ready, no booking fees.`;
+        } else if (locLbl) {
+          title = `Local Services in ${locLbl} — Services Marketplace | MyIsraelRental`;
+          description = `Discover trusted local service providers in ${locLbl} — cleaning, home repair, tours, and more.`;
+        }
+        const qs = [
+          selectedCat ? `category=${selectedCat}` : null,
+          selectedLoc ? `location=${selectedLoc}` : null,
+        ].filter(Boolean).join('&');
+        const path = qs ? `/services?${qs}` : '/services';
+        return <PageMeta title={title} description={description} path={path} />;
+      })()}
 
       {/* Hero + search */}
       <div className="relative bg-gradient-to-br from-[#1E6A6A] to-[#0F3A3A] text-white py-14 md:py-20 px-4">

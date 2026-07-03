@@ -11,6 +11,16 @@ Build a bilingual (English/Hebrew) rental website named MyIsraelRental.com with 
 - **i18n**: i18next with English and Hebrew (RTL) support
 
 ## What's Been Implemented
+- [x] **Services Marketplace — category tweaks + shareable filter URLs (2026-07-03)**:
+  - **Category tweaks**: renamed slug `musicians-entertainment` → `music-entertainment` with label "Music & Entertainment"; renamed label "Graphic Designer" → "Graphic Design"; removed the "Renovation Contractors" category entirely. Final count: **12 categories**.
+  - **Shareable filter URLs**: `pages/Services.jsx` now uses `useSearchParams` for two-way sync between UI state and URL. Deep-links like `/services?category=home-repair&location=jerusalem&q=painter` open the hub already filtered. Every category chip / location chip click updates the URL with `replace: true` (browser back button skips over intermediate filter states).
+  - **SEO**: the `<PageMeta>` title + description are computed from the active filters. Examples:
+    - `/services?category=home-repair&location=jerusalem` → title "Home Service / Repair in Jerusalem — Services Marketplace | MyIsraelRental"
+    - `/services?category=photography` → title "Photography in Israel — Services Marketplace | MyIsraelRental"
+    - `/services?location=tel-aviv` → title "Local Services in Tel Aviv — Services Marketplace | MyIsraelRental"
+  - Unlocks per-category-per-city Google indexing (e.g. "handyman jerusalem" landing directly on a pre-filtered page).
+  - Files: `backend/routes/marketplace.py`, `frontend/src/components/marketplace/categoryTheme.js`, `frontend/src/pages/Services.jsx`.
+
 - [x] **Services Marketplace — "Browse by location" row (2026-07-03)**: Added a second discovery axis below the category carousel — a horizontally-scrollable pill-chip row of 12 curated Israeli cities (Jerusalem, Tel Aviv, Bet Shemesh, Modiin, Netanya, Haifa, Ashdod, Beersheba, Herzliya, Ra'anana, Rishon LeZion, Petah Tikva). Filtering by location AND category composes correctly.
   - **Backend `routes/marketplace.py`**:
     - New `LOCATIONS` constant with 12 curated cities + `_LOCATION_BY_SLUG` lookup.

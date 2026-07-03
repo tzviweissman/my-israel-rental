@@ -19,7 +19,7 @@ const CATEGORY_THEME = {
     header: '#3E5A2A', body: '#DCE9B8',
     icon: 'Map', iconColor: '#3E5A2A',
   },
-  'musicians-entertainment': {
+  'music-entertainment': {
     header: '#4A1D5B', body: '#E4CFEC',
     icon: 'Music', iconColor: '#4A1D5B',
   },
@@ -54,10 +54,6 @@ const CATEGORY_THEME = {
   bookkeeping: {
     header: '#22405C', body: '#C6D6E6',
     icon: 'BookOpen', iconColor: '#22405C',
-  },
-  renovation: {
-    header: '#3B2312', body: '#EDCBA6',
-    icon: 'Hammer', iconColor: '#3B2312',
   },
   photography: {
     header: '#1A1A1A', body: '#EAE3D7',

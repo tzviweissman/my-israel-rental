@@ -48,7 +48,7 @@ FRONTEND_URL = os.environ.get("FRONTEND_URL", "https://myisraelrental.com").rstr
 # 12 seed categories per user's Phase 1 scope (2026-07-01).
 CATEGORIES = [
     {"slug": "tours-activities",     "label": "Tours & Activities",       "icon": "map"},
-    {"slug": "musicians-entertainment", "label": "Musicians & Entertainment", "icon": "music"},
+    {"slug": "music-entertainment",  "label": "Music & Entertainment",    "icon": "music"},
     {"slug": "real-estate-services", "label": "Real Estate Services",     "icon": "home"},
     {"slug": "health-fitness",       "label": "Health & Fitness",         "icon": "dumbbell"},
     {"slug": "transportation",       "label": "Transportation",           "icon": "car"},
@@ -57,9 +57,8 @@ CATEGORIES = [
     {"slug": "home-repair",          "label": "Home Service / Repair",    "icon": "wrench"},
     {"slug": "womens-spa",           "label": "Women's Spa / Care",       "icon": "flower"},
     {"slug": "bookkeeping",          "label": "Bookkeeping",              "icon": "book"},
-    {"slug": "renovation",           "label": "Renovation Contractors",   "icon": "hammer"},
     {"slug": "photography",          "label": "Photography",              "icon": "camera"},
-    {"slug": "graphic-design",       "label": "Graphic Designer",         "icon": "palette"},
+    {"slug": "graphic-design",       "label": "Graphic Design",           "icon": "palette"},
 ]
 _CATEGORY_SLUGS = {c["slug"] for c in CATEGORIES}
 
