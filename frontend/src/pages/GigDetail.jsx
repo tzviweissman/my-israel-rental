@@ -225,6 +225,53 @@ const GigDetail = () => {
       .finally(() => setLoading(false));
   }, [id]);
 
+  // JSON-LD Service schema — declared BEFORE the early returns so React
+  // hooks ordering stays stable across renders. Falls back to null when
+  // the gig is still loading; PageMeta drops the tag when jsonLd is null.
+  const gigJsonLd = React.useMemo(() => {
+    if (!gig) return null;
+    // Service schema: describes what's on offer + who provides it. We
+    // include an AggregateRating so Google can show ★4.7 (12) in the
+    // search snippet, plus an Offer with a price range from the tiers.
+    const prices = (gig.tiers || []).map((t) => t.price).filter((p) => typeof p === 'number');
+    const currency = gig.tiers?.[0]?.currency || 'ILS';
+    const block = {
+      '@context': 'https://schema.org',
+      '@type': 'Service',
+      name: gig.title,
+      description: (gig.description || '').slice(0, 500),
+      serviceType: gig.category,
+      areaServed: gig.area || 'Israel',
+      image: gig.gallery?.[0],
+      url: `https://myisraelrental.com/services/gig/${gig.id}`,
+      provider: {
+        '@type': 'LocalBusiness',
+        name: gig.provider?.name,
+        image: gig.provider?.avatar,
+        '@id': `https://myisraelrental.com/services/provider/${gig.provider?.user_id}`,
+      },
+    };
+    if (prices.length > 0) {
+      block.offers = {
+        '@type': 'AggregateOffer',
+        lowPrice: Math.min(...prices),
+        highPrice: Math.max(...prices),
+        priceCurrency: currency,
+        offerCount: prices.length,
+      };
+    }
+    if (gig.rating_count > 0 && gig.rating_avg) {
+      block.aggregateRating = {
+        '@type': 'AggregateRating',
+        ratingValue: gig.rating_avg,
+        reviewCount: gig.rating_count,
+        bestRating: 5,
+        worstRating: 1,
+      };
+    }
+    return block;
+  }, [gig]);
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center" style={{ paddingTop: 'var(--nav-h, 68px)' }}>
@@ -255,7 +302,7 @@ const GigDetail = () => {
 
   return (
     <div className="min-h-screen bg-[#FAFAF7]" style={{ paddingTop: 'var(--nav-h, 68px)' }} data-testid="gig-detail-page">
-      <PageMeta title={`${gig.title} — MyIsraelRental Services`} description={gig.description?.slice(0, 155) || `Book ${gig.title} on MyIsraelRental.`} path={`/services/gig/${id}`} />
+      <PageMeta title={`${gig.title} — MyIsraelRental Services`} description={gig.description?.slice(0, 155) || `Book ${gig.title} on MyIsraelRental.`} path={`/services/gig/${id}`} jsonLd={gigJsonLd} />
       <div className="max-w-5xl mx-auto px-4 py-8">
         <button onClick={() => navigate('/services')} className="text-sm text-gray-600 flex items-center gap-1 mb-4 hover:text-[#1E6A6A]" data-testid="gig-back">
           <ArrowLeft size={14} /> Back to services

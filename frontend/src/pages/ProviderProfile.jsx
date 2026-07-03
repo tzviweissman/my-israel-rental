@@ -27,9 +27,42 @@ const ProviderProfile = () => {
   if (loading) return <div className="min-h-screen flex items-center justify-center pt-32"><Loader2 className="animate-spin text-[#1E6A6A]" size={28} /></div>;
   if (!data) return null;
 
+  // LocalBusiness schema: emits enough structured data for Google to show
+  // avatar, aggregate rating, and price ranges directly in the search
+  // snippet. Aggregate rating is computed across all this provider's gigs.
+  const ratedGigs = (data.gigs || []).filter((g) => g.rating_count > 0);
+  const totalReviews = ratedGigs.reduce((n, g) => n + g.rating_count, 0);
+  const weightedRating = totalReviews > 0
+    ? ratedGigs.reduce((n, g) => n + (g.rating_avg * g.rating_count), 0) / totalReviews
+    : null;
+  const priceValues = (data.gigs || []).flatMap((g) => (g.tiers || []).map((t) => t.price)).filter((p) => typeof p === 'number');
+  const providerJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'LocalBusiness',
+    '@id': `https://myisraelrental.com/services/provider/${userId}`,
+    name: data.name,
+    image: data.avatar,
+    description: (data.bio || data.tagline || '').slice(0, 500),
+    url: `https://myisraelrental.com/services/provider/${userId}`,
+    telephone: data.whatsapp,
+    areaServed: 'Israel',
+    ...(priceValues.length > 0 && {
+      priceRange: `${Math.min(...priceValues)}–${Math.max(...priceValues)} ILS`,
+    }),
+    ...(totalReviews > 0 && weightedRating && {
+      aggregateRating: {
+        '@type': 'AggregateRating',
+        ratingValue: Math.round(weightedRating * 10) / 10,
+        reviewCount: totalReviews,
+        bestRating: 5,
+        worstRating: 1,
+      },
+    }),
+  };
+
   return (
     <div className="min-h-screen bg-[#FAFAF7]" style={{ paddingTop: 'var(--nav-h, 68px)' }} data-testid="provider-profile">
-      <PageMeta title={`${data.name} — Services on MyIsraelRental`} description={data.tagline || data.bio?.slice(0, 155) || `Services from ${data.name}`} path={`/services/provider/${userId}`} />
+      <PageMeta title={`${data.name} — Services on MyIsraelRental`} description={data.tagline || data.bio?.slice(0, 155) || `Services from ${data.name}`} path={`/services/provider/${userId}`} jsonLd={providerJsonLd} />
       <div className="max-w-5xl mx-auto px-4 py-8">
         <button onClick={() => navigate('/services')} className="text-sm text-gray-600 flex items-center gap-1 mb-4 hover:text-[#1E6A6A]">
           <ArrowLeft size={14} /> Back to services

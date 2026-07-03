@@ -11,6 +11,15 @@ Build a bilingual (English/Hebrew) rental website named MyIsraelRental.com with 
 - **i18n**: i18next with English and Hebrew (RTL) support
 
 ## What's Been Implemented
+- [x] **Services Marketplace — JSON-LD schema on gig + provider pages (2026-07-03)**: Emitted Rich Result-eligible structured data on the two marketplace detail pages so Google can render star ratings, price ranges, and business snippets directly in search results.
+  - **GigDetail** (`Service` schema): includes provider (sub-object `LocalBusiness` with canonical `@id`), `AggregateOffer` (lowPrice/highPrice/currency/offerCount from tiers), `AggregateRating` when `rating_count > 0`, `serviceType` (category), `areaServed`, image, canonical URL.
+  - **ProviderProfile** (`LocalBusiness` schema): includes canonical `@id`, name, avatar, bio, WhatsApp `telephone`, `priceRange` computed across all gigs, `AggregateRating` weighted across all gigs (avg × count summed then divided by total reviews).
+  - Verified via Playwright DOM extraction on the live preview — both pages ship exactly one `<script type="application/ld+json">` block per page with the correct schema fields populated from live backend data.
+  - Files: `frontend/src/pages/GigDetail.jsx`, `frontend/src/pages/ProviderProfile.jsx`.
+
+- [x] **Google Search Console — setup doc + verification env hook (2026-07-03)**: Wrote a 3-minute-setup guide at `/app/docs/google-search-console-setup.md` covering property registration → DNS OR HTML-tag verification → sitemap submission → day 1/7/30 expectations. Added a `REACT_APP_GOOGLE_VERIFICATION` env var hook in `PageMeta.jsx` — set once in `/app/frontend/.env`, restart frontend, and the `<meta name="google-site-verification">` tag ships site-wide.
+  - Files: `docs/google-search-console-setup.md` (new), `frontend/src/components/PageMeta.jsx`.
+
 - [x] **Services Marketplace — 144 category+city URLs added to sitemap.xml (2026-07-03)**: Regenerated `/frontend/public/sitemap.xml` with **176 URLs** — 8 base pages + 12 category-only + 12 location-only + 144 category×city intersections (12 × 12). Every faceted URL uses the same `/services?category=…&location=…` shape the frontend already syncs to via `useSearchParams`, so search-engine crawlers landing on any of the 144 long-tail URLs (e.g. "handyman jerusalem", "photography tel aviv") arrive on a pre-filtered page with a correct `<title>` + description.
   - `robots.txt` already points to `https://myisraelrental.com/sitemap.xml` — no changes needed there.
   - Sitemap regenerable in-place: the top of the file is a Python one-liner that re-emits the whole XML from the current `CATEGORIES` + `LOCATIONS` constants; when we add/remove a category or city, re-run the generator to refresh.
