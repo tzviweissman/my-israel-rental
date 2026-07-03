@@ -147,6 +147,17 @@ function App() {
             <Route path="/payment/cancel" element={<PaymentCancel />} />
             <Route path="/availability-extended" element={<AvailabilityExtended />} />
             <Route path="/stays" element={<Stays />} />
+            <Route
+              path="/kosher-stays-in-israel"
+              element={<Stays landing={{
+                path: '/kosher-stays-in-israel',
+                title: 'Kosher Stays in Israel — Sabbath-observant vacation rentals & apartments | MyIsraelRental',
+                description: 'Browse kosher stays in Israel with kosher-certified kitchens, Shabbat elevators, and synagogues + mikvehs nearby. Long-term, short-term & vacation rentals for observant travelers in Jerusalem, Tel Aviv, Bnei Brak, Beit Shemesh and more.',
+                heroTitle: 'Kosher stays in Israel',
+                heroLede: 'Sabbath-observant vacation rentals & apartments — every listing below has a kosher-certified kitchen, Shabbat elevator, and synagogue + mikveh nearby. Adjust the filters to widen or narrow the match.',
+                defaultAmenities: ['Kosher-certified kitchen', 'Shabbat elevator', 'Synagogue nearby', 'Mikveh nearby'],
+              }} />}
+            />
             <Route path="/services" element={<Services />} />
             <Route path="/services/gig/:id" element={<GigDetail />} />
             <Route path="/services/create-gig" element={user ? <CreateGig /> : <Navigate to="/auth/login" />} />

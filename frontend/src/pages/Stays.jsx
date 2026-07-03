@@ -28,7 +28,7 @@ import { X, Loader2, Bell } from 'lucide-react';
 import StaysCard from '../components/stays/StaysCard';
 import AreaRow from '../components/stays/AreaRow';
 import StaysSearchBar from '../components/stays/StaysSearchBar';
-import FiltersModal from '../components/stays/FiltersModal';
+import FiltersModal, { AMENITY_PRESETS } from '../components/stays/FiltersModal';
 import { flexLabel } from '../components/search/WhenPicker';
 import QuickChips from '../components/search/QuickChips';
 import NotifyMeCard from '../components/NotifyMeCard';
@@ -40,7 +40,7 @@ const API = process.env.REACT_APP_BACKEND_URL + '/api';
 // Stays = everything that's not storage. Storage was retired this session.
 const STAY_RENTAL_TYPES = ['vacation', 'short-term', 'long-term'];
 
-const Stays = () => {
+const Stays = ({ landing = null }) => {
   const navigate = useNavigate();
   const { t } = useTranslation();
   const [searchParams, setSearchParams] = useSearchParams();
@@ -82,7 +82,21 @@ const Stays = () => {
   const [furnished, setFurnished] = useState(searchParams.get('furnished') === '1');
   const [hasElevator, setHasElevator] = useState(searchParams.get('elevator') === '1');
   const [subType, setSubType] = useState(searchParams.get('subType') || '');
-  const [amenities, setAmenities] = useState((searchParams.get('amenities') || '').split(',').filter(Boolean));
+  // Resolve initial amenities by merging three inputs (highest wins):
+  //   1. `?amenities=` explicit URL param
+  //   2. `?preset=<id>` URL param — expanded from AMENITY_PRESETS
+  //   3. `landing.defaultAmenities` — hard-coded on SEO landing routes
+  // The preset param is consumed (removed from URL) after expansion so
+  // subsequent chip toggles don't fight the preset every render.
+  const [amenities, setAmenities] = useState(() => {
+    const fromParam = (searchParams.get('amenities') || '').split(',').filter(Boolean);
+    if (fromParam.length) return fromParam;
+    const presetId = searchParams.get('preset');
+    const preset = presetId ? AMENITY_PRESETS.find((p) => p.id === presetId) : null;
+    if (preset) return [...preset.items];
+    if (landing?.defaultAmenities?.length) return [...landing.defaultAmenities];
+    return [];
+  });
 
   // Load every non-storage property once. Volume is in the low thousands
   // so a single fetch + client-side filter beats round-tripping each query.
@@ -289,10 +303,31 @@ const Stays = () => {
       data-testid="stays-page"
     >
       <PageMeta
-        title="Stays in Israel — Long-term, short-term & vacation rentals | MyIsraelRental"
-        description="Discover stays across Israel — vacation apartments, short-term lets and long-term rentals in Jerusalem, Tel Aviv, Haifa and beyond. Filter by area, dates, price and amenities."
-        path="/stays"
+        title={landing?.title || 'Stays in Israel — Long-term, short-term & vacation rentals | MyIsraelRental'}
+        description={landing?.description || 'Discover stays across Israel — vacation apartments, short-term lets and long-term rentals in Jerusalem, Tel Aviv, Haifa and beyond. Filter by area, dates, price and amenities.'}
+        path={landing?.path || '/stays'}
       />
+      {/* SEO landing hero — rendered only on dedicated landing routes
+          (e.g. /kosher-stays-in-israel). Gives Google a crawlable H1 +
+          intro paragraph so the URL indexes for its target long-tail. */}
+      {landing?.heroTitle && (
+        <div className="bg-[#F5F1E8] border-b border-[#E5E5E5]">
+          <div className="max-w-7xl mx-auto px-4 py-8 sm:py-10">
+            <h1
+              className="text-3xl sm:text-4xl lg:text-5xl font-bold text-[#1E6A6A]"
+              style={{ fontFamily: 'Playfair Display' }}
+              data-testid="stays-landing-h1"
+            >
+              {landing.heroTitle}
+            </h1>
+            {landing.heroLede && (
+              <p className="mt-3 max-w-2xl text-sm sm:text-base text-gray-700" data-testid="stays-landing-lede">
+                {landing.heroLede}
+              </p>
+            )}
+          </div>
+        </div>
+      )}
       {/* Inline (non-sticky) search bar — sits flush below the global
           nav at the top of the page and scrolls away with the rest of
           the content as the user explores. Previously this was

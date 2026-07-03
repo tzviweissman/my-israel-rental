@@ -11,6 +11,16 @@ Build a bilingual (English/Hebrew) rental website named MyIsraelRental.com with 
 - **i18n**: i18next with English and Hebrew (RTL) support
 
 ## What's Been Implemented
+- [x] **SEO Landing Page — /kosher-stays-in-israel + shareable preset URLs (2026-07-03)**: Turned the "Observant traveler" preset into a two-part discovery lever — one shareable, one indexable.
+  - **Shareable link**: `/stays?preset=<id>` — the Stays page now reads `?preset=observant-traveler`, expands the preset into `?amenities=...`, and drops the preset key from the URL on first render. Ready for kosher-travel newsletter / Facebook group promotion.
+  - **SEO landing route**: `/kosher-stays-in-israel` — a dedicated crawlable URL with kosher-optimized `<title>`, meta description, and an H1 + lede hero rendered above the search bar. Uses the same `<Stays />` component with a new `landing` prop (path + title + description + heroTitle + heroLede + defaultAmenities). Target long-tail: "kosher rentals israel", "sabbath observant vacation rental jerusalem", "shabbat elevator apartment tel aviv".
+  - Added the landing URL to `frontend/public/sitemap.xml` at priority 0.9 (equal to /stays).
+  - Fully extensible — adding new preset landing pages (e.g. `/family-friendly-stays-in-israel`, `/beach-vacation-rentals-israel`) is now a single `<Route>` entry with a matching `landing` prop.
+  - Verified via Playwright on live preview: `/kosher-stays-in-israel` shows H1 "Kosher stays in Israel" + lede, page title = "Kosher Stays in Israel — Sabbath-observant vacation rentals & apartments | MyIsraelRental", 4 amenities pre-applied. `/stays?preset=observant-traveler` rewrites to `?amenities=...` and shows no landing H1.
+  - Files: `frontend/src/pages/Stays.jsx`, `frontend/src/App.js`, `frontend/public/sitemap.xml`.
+  - Testids: `stays-landing-h1`, `stays-landing-lede`.
+
+
 - [x] **Stays FiltersModal — "Observant traveler" signature preset (2026-07-03)**: Added a one-click preset chip above the amenity accordion that bundles four catalog strings — `Kosher-certified kitchen`, `Shabbat elevator`, `Synagogue nearby`, `Mikveh nearby` — into a single toggle. When active, the chip fills teal (`#1E6A6A`) and all 4 items appear as selected chips in the summary strip; toggling off removes exactly those 4 without touching other user-selected amenities. Presets are declared as a top-level `AMENITY_PRESETS` array in `FiltersModal.jsx`, so adding more (Family-friendly, Digital nomad, Beach lover…) is a 4-line change. i18n key format: `stays.preset.{id}`.
   - **Differentiator**: no generic OTA (Airbnb, Booking) surfaces a kosher-observant preset — this is a signature filter for our target audience.
   - Verified via Playwright on live preview: click preset → 4 selected chips appear + "Show 14 stays" count refreshes; click again → 0 chips, preset returns to outline state.
