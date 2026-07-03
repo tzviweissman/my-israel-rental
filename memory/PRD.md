@@ -11,6 +11,16 @@ Build a bilingual (English/Hebrew) rental website named MyIsraelRental.com with 
 - **i18n**: i18next with English and Hebrew (RTL) support
 
 ## What's Been Implemented
+- [x] **Property listing form — categorized services selector with custom services (2026-07-03)**: Replaced the flat 13-item amenity checkbox grid in `AddPropertyModal` with a full-featured selector that meets every point of the host's spec.
+  - **Category accordion**: 7 collapsible sections — Essentials (9 services), Kitchen & dining (9), Family-friendly (6), Home comforts (7), Building & access (7), Outdoors & wellness (8), Location perks (6). Total: **52 predefined services**. Each header shows `(3 / 9)` selected count.
+  - **"Add custom service" modal**: gold-accented CTA opens a clean modal with Name (required, 80 char), Description (optional, 200 char), best-fit category dropdown. Adds the free-text service to the listing with a ★ prefix so it stays visually distinct.
+  - **Selected chips summary**: sticky at top of the section. Predefined items show a category badge (`· Kitchen & dining`); customs show a gold star + amber pill. Every chip has an × for removal. "Clear all" trashes everything.
+  - **Smart pre-selection**: first-edit only (never re-triggers on existing edits). Vacation → WiFi + AC + Fresh linens + Cleaning + Coffee maker. Short-term → WiFi + AC + Full kitchen + Fresh linens. Long-term → WiFi + AC + Full kitchen + Elevator. Sukkot properties auto-add "Sukkah balcony"; Pesach properties auto-add "Kosher-certified kitchen".
+  - **Zero backend migration**: everything flows through the existing `property.amenities: string[]` field. Predefined items match strings from the frontend catalog; anything else is treated as a custom service (rendered with a ★). Confirmed via curl — a real property created with 5 predefined + 1 ★-custom item saved cleanly and round-tripped through `GET /api/properties/{id}` with all 6 strings intact.
+  - **Fully responsive**: 1-col checkboxes on mobile, 2-col on ≥sm, big hit-targets, no horizontal scroll. Meets the "60 seconds to complete" bar.
+  - **Testids**: `property-services-selector`, `add-custom-service-btn`, `custom-svc-modal`, `custom-svc-{name,desc,category,add,close}`, `svc-cat-{slug}`, `svc-cat-toggle-{slug}`, `svc-opt-{normalized-name}`, `svc-selected-summary`, `svc-chip`, `svc-chip-remove`, `svc-clear-all`.
+  - Files: `frontend/src/components/property/services/{servicesCatalog.js,PropertyServicesSelector.jsx}` (new), `frontend/src/components/dashboard/AddPropertyModal.jsx` (single-block swap).
+
 - [x] **Services Marketplace — JSON-LD schema on gig + provider pages (2026-07-03)**: Emitted Rich Result-eligible structured data on the two marketplace detail pages so Google can render star ratings, price ranges, and business snippets directly in search results.
   - **GigDetail** (`Service` schema): includes provider (sub-object `LocalBusiness` with canonical `@id`), `AggregateOffer` (lowPrice/highPrice/currency/offerCount from tiers), `AggregateRating` when `rating_count > 0`, `serviceType` (category), `areaServed`, image, canonical URL.
   - **ProviderProfile** (`LocalBusiness` schema): includes canonical `@id`, name, avatar, bio, WhatsApp `telephone`, `priceRange` computed across all gigs, `AggregateRating` weighted across all gigs (avg × count summed then divided by total reviews).

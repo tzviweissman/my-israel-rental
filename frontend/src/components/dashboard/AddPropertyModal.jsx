@@ -8,6 +8,7 @@ import { Sparkles, X } from 'lucide-react';
 import DateField from './propertyForm/DateField';
 import LocationPicker from './propertyForm/LocationPicker';
 import MediaUploadSection from './propertyForm/MediaUploadSection';
+import PropertyServicesSelector from '../property/services/PropertyServicesSelector';
 
 const EMPTY_FORM = {
   title: '', description: '', rental_type: 'long-term', property_type: 'apartment',
@@ -901,40 +902,13 @@ const AddPropertyModal = ({ isOpen, onClose, editingProperty, onSaved, API, toke
 
           {propertyForm.rental_type !== 'storage' && (
             <div>
-              <label className="block text-sm font-medium mb-4">{t('property.amenities')}</label>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-                {[
-                  'Central AC / Heating',
-                  'In-unit washer and dryer',
-                  'Dishwasher',
-                  'Walk in Closets',
-                  'High Ceilings',
-                  'Ensuite Bathroom',
-                  'Storage Space',
-                  'Heated Floors',
-                  'Gym / Fitness center',
-                  'Swimming pool (indoor or outdoor)',
-                  'Hot tub / Spa',
-                  'On-site parking (garage or lot)',
-                  'Wi-Fi included',
-                ].map((amenity) => (
-                  <label key={amenity} className="flex items-center gap-2">
-                    <input
-                      type="checkbox"
-                      checked={propertyForm.amenities.includes(amenity)}
-                      onChange={(e) => {
-                        if (e.target.checked) {
-                          setPropertyForm({ ...propertyForm, amenities: [...propertyForm.amenities, amenity] });
-                        } else {
-                          setPropertyForm({ ...propertyForm, amenities: propertyForm.amenities.filter((a) => a !== amenity) });
-                        }
-                      }}
-                      className="w-4 h-4 rounded border-[#E5E5E5]"
-                    />
-                    <span className="text-sm">{amenity}</span>
-                  </label>
-                ))}
-              </div>
+              <PropertyServicesSelector
+                value={propertyForm.amenities}
+                onChange={(next) => setPropertyForm({ ...propertyForm, amenities: next })}
+                rentalType={propertyForm.rental_type}
+                holidayContext={propertyForm.holiday_context}
+                firstEdit={!(editingProperty && editingProperty.id)}
+              />
             </div>
           )}
 
