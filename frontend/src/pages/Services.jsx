@@ -20,6 +20,7 @@ import { API } from '../App';
 import PageMeta from '../components/PageMeta';
 import StarRating from '../components/marketplace/StarRating';
 import CategoryCarousel from '../components/marketplace/CategoryCarousel';
+import LocationChipsRow from '../components/marketplace/LocationChipsRow';
 
 const GigCard = ({ gig, onClick }) => {
   const cover = gig.gallery?.[0];
@@ -68,25 +69,32 @@ const Services = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const [categories, setCategories] = useState([]);
+  const [locations, setLocations] = useState([]);
   const [gigs, setGigs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedCat, setSelectedCat] = useState('');
+  const [selectedLoc, setSelectedLoc] = useState('');
   const [q, setQ] = useState('');
 
   useEffect(() => {
     Promise.all([
       axios.get(`${API}/marketplace/categories`).then((r) => setCategories(r.data)),
+      axios.get(`${API}/marketplace/locations`).then((r) => setLocations(r.data)),
       axios.get(`${API}/marketplace/gigs`).then((r) => setGigs(r.data)),
     ]).catch((e) => {
       console.error(e); toast.error('Failed to load marketplace');
     }).finally(() => setLoading(false));
   }, []);
 
-  const filtered = useMemo(() => gigs.filter((g) => {
-    if (selectedCat && g.category !== selectedCat) return false;
-    if (q && !(`${g.title} ${g.description}`).toLowerCase().includes(q.toLowerCase())) return false;
-    return true;
-  }), [gigs, selectedCat, q]);
+  const filtered = useMemo(() => {
+    const locLabel = locations.find((l) => l.slug === selectedLoc)?.label.toLowerCase();
+    return gigs.filter((g) => {
+      if (selectedCat && g.category !== selectedCat) return false;
+      if (locLabel && !(g.area || '').toLowerCase().includes(locLabel)) return false;
+      if (q && !(`${g.title} ${g.description}`).toLowerCase().includes(q.toLowerCase())) return false;
+      return true;
+    });
+  }, [gigs, selectedCat, selectedLoc, q, locations]);
 
   return (
     <div
@@ -152,6 +160,31 @@ const Services = () => {
           selectedCat={selectedCat}
           onSelect={setSelectedCat}
         />
+
+        {/* Location filter — sits below categories as a secondary axis
+            since a lot of services (Home Repair, Renovation, Transport)
+            are location-first decisions. */}
+        <div className="mt-8">
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="text-sm md:text-base font-bold text-gray-900" style={{ fontFamily: 'Playfair Display' }}>
+              {t('services.byLocation', 'Browse by location')}
+            </h3>
+            {selectedLoc && (
+              <button
+                onClick={() => setSelectedLoc('')}
+                className="text-xs font-semibold text-[#1E6A6A] hover:underline"
+                data-testid="services-location-clear"
+              >
+                {t('services.clearLocation', 'Clear location')} ×
+              </button>
+            )}
+          </div>
+          <LocationChipsRow
+            locations={locations}
+            selectedLoc={selectedLoc}
+            onSelect={setSelectedLoc}
+          />
+        </div>
       </div>
 
       {/* Gigs grid */}

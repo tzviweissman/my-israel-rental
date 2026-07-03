@@ -11,6 +11,18 @@ Build a bilingual (English/Hebrew) rental website named MyIsraelRental.com with 
 - **i18n**: i18next with English and Hebrew (RTL) support
 
 ## What's Been Implemented
+- [x] **Services Marketplace — "Browse by location" row (2026-07-03)**: Added a second discovery axis below the category carousel — a horizontally-scrollable pill-chip row of 12 curated Israeli cities (Jerusalem, Tel Aviv, Bet Shemesh, Modiin, Netanya, Haifa, Ashdod, Beersheba, Herzliya, Ra'anana, Rishon LeZion, Petah Tikva). Filtering by location AND category composes correctly.
+  - **Backend `routes/marketplace.py`**:
+    - New `LOCATIONS` constant with 12 curated cities + `_LOCATION_BY_SLUG` lookup.
+    - New `GET /api/marketplace/locations` endpoint returns `[{slug, label, count}]` with live counts of active-provider published gigs per city (case-insensitive `area` substring match). Cities with zero listings still ship.
+    - Extended `GET /api/marketplace/gigs` with a `location=<slug>` param that adds an `area: {$regex, i}` filter to the Mongo query. Unknown slug → 400.
+  - **Frontend**:
+    - New `components/marketplace/LocationChipsRow.jsx` — horizontal snap-scroll pill row with MapPin icon, count badge, active state (filled teal), left/right chevrons on desktop.
+    - `pages/Services.jsx`: fetches `/locations` alongside `/categories` + `/gigs`, adds `selectedLoc` state, composes with `selectedCat` in the in-memory filter, mounts row below the CategoryCarousel with a "Browse by location" heading and "Clear location ×" button.
+  - **Testids**: `services-location-row`, `services-location-{slug}` (12), `services-location-prev/next`, `services-location-clear`.
+  - Verified: `GET /locations` returns 12 rows with counts; filter composes with `?category=` correctly; UI renders 12 pill chips with pins + counts and horizontal scroll.
+  - Files: `backend/routes/marketplace.py`, `frontend/src/components/marketplace/LocationChipsRow.jsx` (new), `frontend/src/pages/Services.jsx`.
+
 - [x] **Services Marketplace — swapped category list to match The Jerusalem Butler taxonomy (2026-07-03)**: Replaced the previous 12 gig-style categories (cleaning, moving, locksmith, handyman, etc.) with the 13 service categories from the reference site.
   - **New categories**: Tours & Activities, Musicians & Entertainment, Real Estate Services, Health & Fitness, Transportation, Home Organizers, Hotels / Travel Agencies, Home Service / Repair, Women's Spa / Care, Bookkeeping, Renovation Contractors, Photography, Graphic Designer.
   - **Backend `routes/marketplace.py`**: rewrote `CATEGORIES` constant with the new 13 slugs + labels + icon hints; `_CATEGORY_SLUGS` derived automatically. Stale gigs with old slugs (`cleaning`, `moving`, …) purged from `db.marketplace_gigs` (23 test gigs removed).

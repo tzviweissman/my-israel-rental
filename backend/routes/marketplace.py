@@ -63,6 +63,25 @@ CATEGORIES = [
 ]
 _CATEGORY_SLUGS = {c["slug"] for c in CATEGORIES}
 
+# Curated Israeli cities most likely to host marketplace providers. The
+# `label` is the matcher — a case-insensitive substring against the gig's
+# `area` field. `slug` is only used for the URL query param.
+LOCATIONS = [
+    {"slug": "jerusalem",    "label": "Jerusalem"},
+    {"slug": "tel-aviv",     "label": "Tel Aviv"},
+    {"slug": "bet-shemesh",  "label": "Bet Shemesh"},
+    {"slug": "modiin",       "label": "Modiin"},
+    {"slug": "netanya",      "label": "Netanya"},
+    {"slug": "haifa",        "label": "Haifa"},
+    {"slug": "ashdod",       "label": "Ashdod"},
+    {"slug": "beersheba",    "label": "Beersheba"},
+    {"slug": "herzliya",     "label": "Herzliya"},
+    {"slug": "raanana",      "label": "Ra'anana"},
+    {"slug": "rishon",       "label": "Rishon LeZion"},
+    {"slug": "petah-tikva",  "label": "Petah Tikva"},
+]
+_LOCATION_BY_SLUG = {loc["slug"]: loc for loc in LOCATIONS}
+
 router = APIRouter(prefix="/marketplace", tags=["marketplace"])
 
 
@@ -250,9 +269,36 @@ async def list_categories():
     return CATEGORIES
 
 
+@router.get("/locations")
+async def list_locations():
+    """Return curated locations with a live count of published gigs
+    matching each city (case-insensitive `area` substring). Cities with
+    zero listings still ship so providers can see them as valid targets."""
+    counts: dict[str, int] = {loc["slug"]: 0 for loc in LOCATIONS}
+    # One aggregation across all published gigs — filter to active
+    # providers inline so the counts match what the browse page shows.
+    active_ids = {
+        p["user_id"] async for p in db.marketplace_providers.find({}, {"user_id": 1, "subscription_status": 1, "trial_ends_at": 1, "active": 1})
+        if _provider_is_active(p)
+    }
+    async for gig in db.marketplace_gigs.find(
+        {"status": "published", "provider_user_id": {"$in": list(active_ids)}},
+        {"area": 1},
+    ):
+        area = (gig.get("area") or "").lower()
+        if not area:
+            continue
+        for loc in LOCATIONS:
+            if loc["label"].lower() in area:
+                counts[loc["slug"]] += 1
+                break
+    return [{**loc, "count": counts[loc["slug"]]} for loc in LOCATIONS]
+
+
 @router.get("/gigs")
 async def list_gigs(
     category: Optional[str] = None,
+    location: Optional[str] = None,
     q: Optional[str] = None,
     limit: int = Query(60, ge=1, le=200),
 ):
@@ -260,6 +306,13 @@ async def list_gigs(
     if category:
         _validate_category(category)
         query["category"] = category
+    if location:
+        # Case-insensitive substring match on the `area` field so a gig
+        # tagged "Jerusalem, Old City" matches the "jerusalem" slug.
+        loc = _LOCATION_BY_SLUG.get(location)
+        if not loc:
+            raise HTTPException(status_code=400, detail=f"Unknown location '{location}'")
+        query["area"] = {"$regex": re.escape(loc["label"]), "$options": "i"}
     if q:
         # SEC-003: escape the user input so it's treated as a literal
         # substring, not a regex — prevents catastrophic-backtracking DoS
