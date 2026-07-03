@@ -25,6 +25,19 @@ export const AMENITY_CATEGORIES = SERVICE_CATEGORIES.map((c) => ({
   services: c.services.filter((s) => !DEDUPED_AMENITY_KEYS.has(s)),
 })).filter((c) => c.services.length > 0);
 
+// Signature "one-click" presets that bundle several catalog strings.
+// These are our differentiator vs generic OTAs — no Airbnb / Booking
+// exposes a "kosher kitchen + Shabbat elevator + synagogue nearby" combo.
+// Keys map to translation IDs so we can localize the labels later.
+export const AMENITY_PRESETS = [
+  {
+    id: 'observant-traveler',
+    label: 'Observant traveler',
+    icon: '✡',
+    items: ['Kosher-certified kitchen', 'Shabbat elevator', 'Synagogue nearby', 'Mikveh nearby'],
+  },
+];
+
 // Pill-chip row helper used for several filter sections. Hoisted to
 // module scope so React doesn't unmount its subtree on every parent
 // render (`react/no-unstable-nested-components`).
@@ -284,6 +297,37 @@ const FiltersModal = ({
                   {t('stays.clearAmenities', `Clear (${amenities.length})`)}
                 </button>
               )}
+            </div>
+
+            {/* Signature presets — one-click bundles that no generic OTA
+                surfaces (kosher kitchen + Shabbat elevator + synagogue
+                + mikveh). Clicking toggles the whole set at once. */}
+            <div className="mb-3 flex flex-wrap gap-1.5">
+              {AMENITY_PRESETS.map((preset) => {
+                const active = preset.items.every((s) => amenities.includes(s));
+                return (
+                  <button
+                    key={preset.id}
+                    type="button"
+                    onClick={() => {
+                      setAmenities((prev) => {
+                        if (active) return prev.filter((a) => !preset.items.includes(a));
+                        return Array.from(new Set([...prev, ...preset.items]));
+                      });
+                    }}
+                    className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-semibold border transition-colors ${
+                      active
+                        ? 'bg-[#1E6A6A] text-white border-[#1E6A6A]'
+                        : 'bg-white text-[#1E6A6A] border-[#1E6A6A]/40 hover:border-[#1E6A6A]'
+                    }`}
+                    data-testid={`stays-filter-preset-${preset.id}`}
+                    title={preset.items.join(' + ')}
+                  >
+                    <span aria-hidden="true">{preset.icon}</span>
+                    {t(`stays.preset.${preset.id}`, preset.label)}
+                  </button>
+                );
+              })}
             </div>
 
             {/* Selected summary strip — makes it obvious what's active

@@ -11,6 +11,13 @@ Build a bilingual (English/Hebrew) rental website named MyIsraelRental.com with 
 - **i18n**: i18next with English and Hebrew (RTL) support
 
 ## What's Been Implemented
+- [x] **Stays FiltersModal — "Observant traveler" signature preset (2026-07-03)**: Added a one-click preset chip above the amenity accordion that bundles four catalog strings — `Kosher-certified kitchen`, `Shabbat elevator`, `Synagogue nearby`, `Mikveh nearby` — into a single toggle. When active, the chip fills teal (`#1E6A6A`) and all 4 items appear as selected chips in the summary strip; toggling off removes exactly those 4 without touching other user-selected amenities. Presets are declared as a top-level `AMENITY_PRESETS` array in `FiltersModal.jsx`, so adding more (Family-friendly, Digital nomad, Beach lover…) is a 4-line change. i18n key format: `stays.preset.{id}`.
+  - **Differentiator**: no generic OTA (Airbnb, Booking) surfaces a kosher-observant preset — this is a signature filter for our target audience.
+  - Verified via Playwright on live preview: click preset → 4 selected chips appear + "Show 14 stays" count refreshes; click again → 0 chips, preset returns to outline state.
+  - Testids: `stays-filter-preset-observant-traveler` (pattern: `stays-filter-preset-{id}`).
+  - Files: `frontend/src/components/stays/FiltersModal.jsx`.
+
+
 - [x] **Stays FiltersModal — categorized amenities taxonomy (2026-07-03)**: Replaced the flat 12-chip amenity row in `FiltersModal.jsx` with a categorized accordion driven by the shared `servicesCatalog.js` — same 7 categories & 51 amenity strings hosts pick from when creating a listing (Elevator deduped since it's a first-class Feature chip). This finally makes the amenity filter useful for high-value queries like "Kosher-certified kitchen", "Sukkah balcony", "Kosher restaurants nearby", "Shabbat elevator", etc.
   - **UX**: each category renders as a native `<details>` accordion with a "N / total" or plain "total" count badge. Categories with any selected item auto-open on modal open. A sticky "Selected" strip at the top shows every active chip with an inline × for quick removal, plus a "Clear (N)" link in the section header.
   - **Zero backend change**: amenities are still exact-string matched against `property.amenities: string[]` in the Stays page filter chain (`amenities.every((a) => (p.amenities || []).includes(a))`) — same code path as before, now with a taxonomy shared with hosts so strings actually match.
