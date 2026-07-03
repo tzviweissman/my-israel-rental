@@ -170,6 +170,26 @@ const QuickChips = ({
         ))}
       </div>
 
+      {/* Edge fade — a soft background-to-transparent gradient on each
+          side where content overflows. Non-interactive so it never
+          intercepts chip clicks. Sits behind the arrows. */}
+      {edges.left && (
+        <div
+          aria-hidden="true"
+          className={`hidden md:block absolute start-0 top-0 bottom-0 w-12 pointer-events-none bg-gradient-to-r ${
+            variant === 'dark' ? 'from-black/40 to-transparent' : 'from-white via-white/80 to-transparent'
+          } z-0`}
+        />
+      )}
+      {edges.right && (
+        <div
+          aria-hidden="true"
+          className={`hidden md:block absolute end-0 top-0 bottom-0 w-12 pointer-events-none bg-gradient-to-l ${
+            variant === 'dark' ? 'from-black/40 to-transparent' : 'from-white via-white/80 to-transparent'
+          } z-0`}
+        />
+      )}
+
       {/* Desktop-only scroll arrows — hidden on mobile (touch users can
           swipe). Fade in on parent hover, and only when the corresponding
           edge is actually scrollable. Positioned as absolute overlays
