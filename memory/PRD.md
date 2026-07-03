@@ -11,6 +11,11 @@ Build a bilingual (English/Hebrew) rental website named MyIsraelRental.com with 
 - **i18n**: i18next with English and Hebrew (RTL) support
 
 ## What's Been Implemented
+- [x] **Property Detail — ★ prefix for custom amenities (2026-07-03)**: Updated `AmenitiesList.jsx` to visually distinguish custom (free-text) amenities from predefined catalog items on the public property page. Any amenity string not in `ALL_PREDEFINED` (from `servicesCatalog.js`) now renders with a filled gold `Star` icon; predefined items keep their category icon (Snowflake for AC, Wifi for internet, etc.). Matches the ★-prefix experience hosts see in `PropertyServicesSelector`. Verified via Playwright on live preview — a test property with 3 predefined + 3 custom amenities showed exactly 3 star icons and 3 category icons.
+  - Files: `frontend/src/components/property/AmenitiesList.jsx`.
+  - Testids: `amenity-custom`, `amenity-predefined`.
+
+
 - [x] **Property listing form — categorized services selector with custom services (2026-07-03)**: Replaced the flat 13-item amenity checkbox grid in `AddPropertyModal` with a full-featured selector that meets every point of the host's spec.
   - **Category accordion**: 7 collapsible sections — Essentials (9 services), Kitchen & dining (9), Family-friendly (6), Home comforts (7), Building & access (7), Outdoors & wellness (8), Location perks (6). Total: **52 predefined services**. Each header shows `(3 / 9)` selected count.
   - **"Add custom service" modal**: gold-accented CTA opens a clean modal with Name (required, 80 char), Description (optional, 200 char), best-fit category dropdown. Adds the free-text service to the listing with a ★ prefix so it stays visually distinct.
