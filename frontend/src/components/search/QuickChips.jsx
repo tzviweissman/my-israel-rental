@@ -115,7 +115,7 @@ const QuickChips = ({
 
   return (
     <div
-      className="md:hidden flex gap-2 overflow-x-auto pb-1 -mx-1 px-1 snap-x"
+      className="flex flex-nowrap md:flex-wrap gap-2 overflow-x-auto md:overflow-visible pb-1 -mx-1 px-1 snap-x md:snap-none"
       data-testid={testidPrefix}
       style={{ scrollbarWidth: 'none' }}
     >
