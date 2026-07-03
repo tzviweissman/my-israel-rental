@@ -11,6 +11,12 @@ Build a bilingual (English/Hebrew) rental website named MyIsraelRental.com with 
 - **i18n**: i18next with English and Hebrew (RTL) support
 
 ## What's Been Implemented
+- [x] **Services Marketplace — 144 category+city URLs added to sitemap.xml (2026-07-03)**: Regenerated `/frontend/public/sitemap.xml` with **176 URLs** — 8 base pages + 12 category-only + 12 location-only + 144 category×city intersections (12 × 12). Every faceted URL uses the same `/services?category=…&location=…` shape the frontend already syncs to via `useSearchParams`, so search-engine crawlers landing on any of the 144 long-tail URLs (e.g. "handyman jerusalem", "photography tel aviv") arrive on a pre-filtered page with a correct `<title>` + description.
+  - `robots.txt` already points to `https://myisraelrental.com/sitemap.xml` — no changes needed there.
+  - Sitemap regenerable in-place: the top of the file is a Python one-liner that re-emits the whole XML from the current `CATEGORIES` + `LOCATIONS` constants; when we add/remove a category or city, re-run the generator to refresh.
+  - Validated: `xml.etree.ElementTree.parse()` accepts it cleanly, no `&amp;amp;` double-encoding, live fetch returns HTTP 200 + `content-type: application/xml`.
+  - Files: `frontend/public/sitemap.xml`.
+
 - [x] **Services Marketplace — category tweaks + shareable filter URLs (2026-07-03)**:
   - **Category tweaks**: renamed slug `musicians-entertainment` → `music-entertainment` with label "Music & Entertainment"; renamed label "Graphic Designer" → "Graphic Design"; removed the "Renovation Contractors" category entirely. Final count: **12 categories**.
   - **Shareable filter URLs**: `pages/Services.jsx` now uses `useSearchParams` for two-way sync between UI state and URL. Deep-links like `/services?category=home-repair&location=jerusalem&q=painter` open the hub already filtered. Every category chip / location chip click updates the URL with `replace: true` (browser back button skips over intermediate filter states).
