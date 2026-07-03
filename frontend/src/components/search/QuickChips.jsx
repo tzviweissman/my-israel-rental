@@ -19,9 +19,10 @@
  * year to year:
  *   - Sukkot week, Pesach week, Shavuot, Rosh Hashana
  */
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { format, addDays, getDay, endOfMonth, parseISO } from 'date-fns';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { loadHolidayWindows } from '../../utils/holidayWindows';
 
 const toIso = (d) => format(d, 'yyyy-MM-dd');
@@ -113,26 +114,88 @@ const QuickChips = ({
     ? 'bg-white/20 border-[#D4AF37] text-white hover:bg-white/30 backdrop-blur-sm'
     : 'bg-white border-[#D4AF37] text-gray-900 hover:border-[#B98F1F] shadow-sm';
 
+  // Scroll-arrow affordance for desktop hover — the chip row overflows
+  // horizontally, but a hidden scrollbar leaves no visual cue that more
+  // content exists. Arrows fade in on hover when the corresponding edge
+  // has overflow, mirroring the Airbnb / Fiverr carousel pattern.
+  const scrollerRef = useRef(null);
+  const [edges, setEdges] = useState({ left: false, right: false });
+  const recomputeEdges = useCallback(() => {
+    const el = scrollerRef.current;
+    if (!el) return;
+    const maxScroll = el.scrollWidth - el.clientWidth;
+    setEdges({
+      left: el.scrollLeft > 4,
+      right: maxScroll > 4 && el.scrollLeft < maxScroll - 4,
+    });
+  }, []);
+  useEffect(() => {
+    recomputeEdges();
+    const el = scrollerRef.current;
+    if (!el) return undefined;
+    el.addEventListener('scroll', recomputeEdges, { passive: true });
+    window.addEventListener('resize', recomputeEdges);
+    return () => {
+      el.removeEventListener('scroll', recomputeEdges);
+      window.removeEventListener('resize', recomputeEdges);
+    };
+  }, [recomputeEdges, chips.length]);
+  const scrollBy = (dir) => {
+    const el = scrollerRef.current;
+    if (!el) return;
+    el.scrollBy({ left: dir * Math.round(el.clientWidth * 0.7), behavior: 'smooth' });
+  };
+
   return (
-    <div
-      className="flex flex-nowrap gap-2 overflow-x-auto pb-1 -mx-1 px-1 snap-x [&::-webkit-scrollbar]:hidden"
-      data-testid={testidPrefix}
-      style={{ scrollbarWidth: 'none' }}
-    >
-      {chips.map((c) => (
+    <div className="relative group" data-testid={`${testidPrefix}-wrap`}>
+      <div
+        ref={scrollerRef}
+        className="flex flex-nowrap gap-2 overflow-x-auto pb-1 -mx-1 px-1 snap-x [&::-webkit-scrollbar]:hidden"
+        data-testid={testidPrefix}
+        style={{ scrollbarWidth: 'none' }}
+      >
+        {chips.map((c) => (
+          <button
+            key={c.key}
+            type="button"
+            onClick={() => onPick({ checkin: c.checkin, checkout: c.checkout })}
+            className={`snap-start shrink-0 px-3 py-1.5 rounded-full border text-xs font-semibold flex items-center gap-1.5 transition-colors ${
+              c.holiday ? holidayBase : base
+            }`}
+            data-testid={`${testidPrefix}-${c.key}`}
+          >
+            <span>{c.label}</span>
+            <span className={variant === 'dark' ? 'opacity-75' : 'text-gray-500'}>· {c.sub}</span>
+          </button>
+        ))}
+      </div>
+
+      {/* Desktop-only scroll arrows — hidden on mobile (touch users can
+          swipe). Fade in on parent hover, and only when the corresponding
+          edge is actually scrollable. Positioned as absolute overlays
+          with a soft gradient fade so they don't clip a chip label. */}
+      {edges.left && (
         <button
-          key={c.key}
           type="button"
-          onClick={() => onPick({ checkin: c.checkin, checkout: c.checkout })}
-          className={`snap-start shrink-0 px-3 py-1.5 rounded-full border text-xs font-semibold flex items-center gap-1.5 transition-colors ${
-            c.holiday ? holidayBase : base
-          }`}
-          data-testid={`${testidPrefix}-${c.key}`}
+          onClick={() => scrollBy(-1)}
+          aria-label="Scroll chips left"
+          className="hidden md:flex absolute start-0 top-1/2 -translate-y-1/2 z-10 h-8 w-8 items-center justify-center rounded-full bg-white shadow-md border border-gray-200 text-gray-700 opacity-0 group-hover:opacity-100 transition-opacity hover:border-[#D4AF37]"
+          data-testid={`${testidPrefix}-arrow-left`}
         >
-          <span>{c.label}</span>
-          <span className={variant === 'dark' ? 'opacity-75' : 'text-gray-500'}>· {c.sub}</span>
+          <ChevronLeft size={16} />
         </button>
-      ))}
+      )}
+      {edges.right && (
+        <button
+          type="button"
+          onClick={() => scrollBy(1)}
+          aria-label="Scroll chips right"
+          className="hidden md:flex absolute end-0 top-1/2 -translate-y-1/2 z-10 h-8 w-8 items-center justify-center rounded-full bg-white shadow-md border border-gray-200 text-gray-700 opacity-0 group-hover:opacity-100 transition-opacity hover:border-[#D4AF37]"
+          data-testid={`${testidPrefix}-arrow-right`}
+        >
+          <ChevronRight size={16} />
+        </button>
+      )}
     </div>
   );
 };
