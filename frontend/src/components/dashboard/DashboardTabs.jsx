@@ -21,6 +21,9 @@ const DashboardTabs = ({ activeTab, setActiveTab, role, unreadMessages = 0 }) =>
   const { t } = useTranslation();
   const isRenter = role === 'renter';
   const isOwnerLike = role && role !== 'renter';
+  // Property-listing tabs are hidden for pure service providers — they
+  // only need bookings + messages + My Gigs.
+  const isPropertyLister = ['owner', 'manager', 'admin'].includes(role);
 
   return (
     <div className="relative">
@@ -32,7 +35,7 @@ const DashboardTabs = ({ activeTab, setActiveTab, role, unreadMessages = 0 }) =>
         className="flex gap-1 mb-6 bg-gray-100 rounded-xl p-1 overflow-x-auto scrollbar-hide"
         data-testid="dashboard-tabs"
       >
-        {isOwnerLike && (
+        {isPropertyLister && (
           <button
             onClick={() => setActiveTab('properties')}
             className={cls(activeTab === 'properties')}
@@ -42,7 +45,7 @@ const DashboardTabs = ({ activeTab, setActiveTab, role, unreadMessages = 0 }) =>
           </button>
         )}
 
-        {isOwnerLike && (
+        {isPropertyLister && (
           <button
             onClick={() => setActiveTab('bulk-manager')}
             className={`${cls(activeTab === 'bulk-manager')} flex items-center justify-center gap-1.5`}

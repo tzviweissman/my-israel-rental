@@ -137,6 +137,10 @@ const Dashboard = () => {
 
   const isRenter = user?.role === 'renter';
   const isOwnerLike = user && user.role !== 'renter';
+  // Providers only interact with the marketplace (My Gigs). Hide all the
+  // property-listing / contract / bulk-import UI from them so their
+  // dashboard stays focused. Owner/manager/admin still see everything.
+  const isPropertyLister = user && ['owner', 'manager', 'admin'].includes(user.role);
 
   return (
     <div className="min-h-screen" data-testid="dashboard-page">
@@ -145,7 +149,7 @@ const Dashboard = () => {
           <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold" style={{ fontFamily: 'Playfair Display' }}>
             {t('dashboard.title')}
           </h1>
-          {isOwnerLike && (
+          {isPropertyLister && (
             <div className="flex gap-2 justify-end sm:justify-start sm:w-auto">
               <button
                 onClick={() => setShowBulkUpload(true)}
@@ -226,7 +230,7 @@ const Dashboard = () => {
           unreadMessages={unreadConversations}
         />
 
-        {activeTab === 'contracts' && isOwnerLike && (
+        {activeTab === 'contracts' && isPropertyLister && (
           <ContractManager properties={properties} />
         )}
 
@@ -248,7 +252,7 @@ const Dashboard = () => {
           <GovernmentServicesTab API={API} token={token} />
         )}
 
-        {activeTab === 'properties' && isOwnerLike && (
+        {activeTab === 'properties' && isPropertyLister && (
           <>
             <AddPropertyModal
               isOpen={showAddProperty}
@@ -282,7 +286,7 @@ const Dashboard = () => {
           </>
         )}
 
-        {activeTab === 'bulk-manager' && isOwnerLike && (
+        {activeTab === 'bulk-manager' && isPropertyLister && (
           <BulkManagerTab
             properties={properties}
             onRefresh={fetchProperties}

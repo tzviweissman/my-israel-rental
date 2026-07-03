@@ -11,6 +11,14 @@ Build a bilingual (English/Hebrew) rental website named MyIsraelRental.com with 
 - **i18n**: i18next with English and Hebrew (RTL) support
 
 ## What's Been Implemented
+- [x] **Signup — added "Service Provider" role option (2026-07-02)**: The registration form was missing a signup path for marketplace service providers. Added a 3rd role card ("Offer services") alongside Renter and Lister.
+  - **Backend `routes/auth.py`**: SEC-001 allowlist extended from `{renter, owner}` to `{renter, owner, provider}`. `manager` still blocked from self-registration (only admin-provisioned).
+  - **Frontend `pages/Auth.js`**: dropped the `<select>` dropdown in favor of a 3-column grid of role cards, each with an icon (Home/Building2/Briefcase), a label, and a one-line helper subtext. Selected card highlights with teal border + ring. On successful provider signup, user is redirected straight into `/services/create-gig` (no property-management upsell — they came here to list services).
+  - **`pages/Dashboard.js` + `DashboardTabs.jsx`**: added `isPropertyLister = role in {owner, manager, admin}` guard. Property-only UI (Properties tab, Contracts tab, Bulk Manager tab, Add Property + Bulk Upload header buttons) hidden for pure `provider` role. My Gigs, Bookings, Messages tabs still visible.
+  - **Testids**: `auth-role-{renter|owner|provider}` on each card; existing `auth-role-select` preserved on the grid wrapper for compat.
+  - Verified end-to-end: `POST /api/auth/register` with `role=provider` returns 200 + token; `manager` and `admin` still 400; UI shows 3 cards; provider selection highlights correctly.
+  - Files: `backend/routes/auth.py`, `frontend/src/pages/{Auth.js,Dashboard.js}`, `frontend/src/components/dashboard/DashboardTabs.jsx`.
+
 - [x] **Services Marketplace — Fiverr-style category carousel (2026-07-02)**: Replaced the small 6-column grid of icon tiles with a horizontally-scrollable row of tall Fiverr-style cards (dark colored header slab on top, pastel body with either a category photo OR a large lucide icon on the bottom).
   - **New `components/marketplace/categoryTheme.js`**: per-category theme map (`{header, body, image | icon, iconColor}`). 12 categories, each with a bespoke color palette and either a verified Unsplash CDN image or a large lucide icon (Truck, Key, Map, Wind used where category-specific stock photos weren't reliable — matches Fiverr's own mixed illustration/photo aesthetic).
   - **New `components/marketplace/CategoryCarousel.jsx`**: horizontal snap-scroll strip with left/right chevron buttons on desktop (auto-hides at scroll ends), touch-swipe on mobile. Cards `w=168-212px × h=280-352px` responsive. Selected card gets a gold 4px ring.

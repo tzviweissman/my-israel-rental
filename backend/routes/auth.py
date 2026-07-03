@@ -80,15 +80,15 @@ async def register(user_data: UserRegister, req: Request) -> dict:
     check_rate(req, bucket="auth-register", limit=5, window_seconds=600)
 
     # SEC-001 fix: reject any attempt to self-register as admin/manager.
-    # Only renter/owner may be created via the public signup form; admin
-    # and manager accounts are provisioned by an existing admin via the
-    # admin user-management endpoints. Falls back to 'renter' if a client
-    # sends something unexpected (e.g. empty string).
+    # Only renter, owner, and service-provider may be created via the
+    # public signup form; admin and manager accounts are provisioned by
+    # an existing admin via the admin user-management endpoints. Falls
+    # back to a hard 400 if a client sends anything unexpected.
     requested_role = (user_data.role or "").strip().lower()
-    if requested_role not in {"renter", "owner"}:
+    if requested_role not in {"renter", "owner", "provider"}:
         raise HTTPException(
             status_code=400,
-            detail="Registration role must be 'renter' or 'owner'",
+            detail="Registration role must be 'renter', 'owner', or 'provider'",
         )
 
     existing = await db.users.find_one({"email": user_data.email})

@@ -5,7 +5,7 @@ import axios from 'axios';
 import DOMPurify from 'dompurify';
 import { API, AuthContext } from '../App';
 import { toast } from 'sonner';
-import { Eye, EyeOff, ArrowLeft, Mail, KeyRound, CheckCircle } from 'lucide-react';
+import { Eye, EyeOff, ArrowLeft, Mail, KeyRound, CheckCircle, Home, Building2, Briefcase } from 'lucide-react';
 import WelcomePopups from '../components/WelcomePopups';
 import OwnerManagementOfferModal from '../components/OwnerManagementOfferModal';
 
@@ -76,6 +76,10 @@ const Auth = () => {
         // Pitch our property-management service the moment a fresh owner
         // lands on the platform — they're most receptive right after signup.
         setShowOwnerOffer(true);
+      } else if (mode === 'signup' && formData.role === 'provider') {
+        // Service providers land straight in the gig-creation wizard —
+        // no property-management upsell, they're here to list services.
+        navigate('/services/create-gig');
       } else {
         navigate(destination);
       }
@@ -438,17 +442,34 @@ const Auth = () => {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium mb-2">{t('auth.role')}</label>
-                  <select
-                    value={formData.role}
-                    onChange={(e) => setFormData({ ...formData, role: e.target.value })}
-                    className="w-full px-4 py-3 rounded-lg border border-[#E5E5E5] focus:outline-none focus:ring-2 focus:ring-[#1E6A6A]/50"
-                    data-testid="auth-role-select"
-                  >
-                    <option value="renter">{t('auth.renter')}</option>
-                    <option value="owner">{t('auth.owner')}</option>
-                    <option value="manager">{t('auth.manager')}</option>
-                  </select>
+                  <label className="block text-sm font-medium mb-2">{t('auth.role', 'I want to')}</label>
+                  <div className="grid grid-cols-3 gap-2" data-testid="auth-role-select">
+                    {[
+                      { value: 'renter', label: t('auth.renter', 'Rent'), sub: t('auth.renterSub', 'Find a home'), Icon: Home },
+                      { value: 'owner', label: t('auth.owner', 'List a home'), sub: t('auth.ownerSub', 'Rent out property'), Icon: Building2 },
+                      { value: 'provider', label: t('auth.provider', 'Offer services'), sub: t('auth.providerSub', 'Cleaner, mover, etc.'), Icon: Briefcase },
+                    ].map(({ value, label, sub, Icon }) => {
+                      const active = formData.role === value;
+                      return (
+                        <button
+                          type="button"
+                          key={value}
+                          onClick={() => setFormData({ ...formData, role: value })}
+                          className={`flex flex-col items-start gap-1 rounded-lg border p-3 text-left transition-all ${
+                            active
+                              ? 'border-[#1E6A6A] bg-[#1E6A6A]/5 ring-2 ring-[#1E6A6A]/25'
+                              : 'border-[#E5E5E5] hover:border-[#1E6A6A]/50'
+                          }`}
+                          data-testid={`auth-role-${value}`}
+                          aria-pressed={active}
+                        >
+                          <Icon size={18} className={active ? 'text-[#1E6A6A]' : 'text-gray-500'} />
+                          <span className="text-sm font-semibold text-gray-900 leading-tight">{label}</span>
+                          <span className="text-[11px] text-gray-500 leading-tight">{sub}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
                 </div>
               </>
             )}
