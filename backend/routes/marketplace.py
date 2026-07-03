@@ -47,18 +47,19 @@ FRONTEND_URL = os.environ.get("FRONTEND_URL", "https://myisraelrental.com").rstr
 
 # 12 seed categories per user's Phase 1 scope (2026-07-01).
 CATEGORIES = [
-    {"slug": "cleaning",           "label": "Cleaning",           "icon": "sparkles"},
-    {"slug": "moving",             "label": "Moving",             "icon": "truck"},
-    {"slug": "locksmith",          "label": "Locksmith",          "icon": "key"},
-    {"slug": "handyman",           "label": "Handyman",           "icon": "wrench"},
-    {"slug": "photography",        "label": "Photography",        "icon": "camera"},
-    {"slug": "interior-design",    "label": "Interior design",    "icon": "palette"},
-    {"slug": "tour-guide",         "label": "Tour guide",         "icon": "map"},
-    {"slug": "furniture-assembly", "label": "Furniture assembly", "icon": "hammer"},
-    {"slug": "barber",             "label": "Barber",             "icon": "scissors"},
-    {"slug": "ac-cleaner",         "label": "AC cleaner",         "icon": "wind"},
-    {"slug": "plumber",            "label": "Plumber",            "icon": "droplet"},
-    {"slug": "electrician",        "label": "Electrician",        "icon": "zap"},
+    {"slug": "tours-activities",     "label": "Tours & Activities",       "icon": "map"},
+    {"slug": "musicians-entertainment", "label": "Musicians & Entertainment", "icon": "music"},
+    {"slug": "real-estate-services", "label": "Real Estate Services",     "icon": "home"},
+    {"slug": "health-fitness",       "label": "Health & Fitness",         "icon": "dumbbell"},
+    {"slug": "transportation",       "label": "Transportation",           "icon": "car"},
+    {"slug": "home-organizers",      "label": "Home Organizers",          "icon": "boxes"},
+    {"slug": "hotels-travel",        "label": "Hotels / Travel Agencies", "icon": "plane"},
+    {"slug": "home-repair",          "label": "Home Service / Repair",    "icon": "wrench"},
+    {"slug": "womens-spa",           "label": "Women's Spa / Care",       "icon": "flower"},
+    {"slug": "bookkeeping",          "label": "Bookkeeping",              "icon": "book"},
+    {"slug": "renovation",           "label": "Renovation Contractors",   "icon": "hammer"},
+    {"slug": "photography",          "label": "Photography",              "icon": "camera"},
+    {"slug": "graphic-design",       "label": "Graphic Designer",         "icon": "palette"},
 ]
 _CATEGORY_SLUGS = {c["slug"] for c in CATEGORIES}
 
@@ -457,7 +458,8 @@ async def upgrade_subscription(user=Depends(verify_token)):
     the client must redirect the provider to. PayPal will redirect the
     user back to `{FRONTEND_URL}/payment/success?subscription_id=I-XXX`
     (see `/subscription/activate` for the completion step)."""
-    prov = await _ensure_provider_record(user["user_id"])
+    # Ensure the provider row exists (creates a fresh trial on first call).
+    await _ensure_provider_record(user["user_id"])
     plan_id = await _get_or_create_billing_plan()
 
     # Look up provider email for a smoother PayPal checkout prefill.

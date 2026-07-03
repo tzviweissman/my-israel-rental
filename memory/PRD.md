@@ -11,6 +11,14 @@ Build a bilingual (English/Hebrew) rental website named MyIsraelRental.com with 
 - **i18n**: i18next with English and Hebrew (RTL) support
 
 ## What's Been Implemented
+- [x] **Services Marketplace — swapped category list to match The Jerusalem Butler taxonomy (2026-07-03)**: Replaced the previous 12 gig-style categories (cleaning, moving, locksmith, handyman, etc.) with the 13 service categories from the reference site.
+  - **New categories**: Tours & Activities, Musicians & Entertainment, Real Estate Services, Health & Fitness, Transportation, Home Organizers, Hotels / Travel Agencies, Home Service / Repair, Women's Spa / Care, Bookkeeping, Renovation Contractors, Photography, Graphic Designer.
+  - **Backend `routes/marketplace.py`**: rewrote `CATEGORIES` constant with the new 13 slugs + labels + icon hints; `_CATEGORY_SLUGS` derived automatically. Stale gigs with old slugs (`cleaning`, `moving`, …) purged from `db.marketplace_gigs` (23 test gigs removed).
+  - **Frontend `components/marketplace/categoryTheme.js`**: rewrote the theme map with 13 bespoke (header/body/icon) triples. Each category gets a distinct dark header color + coordinated pastel body. Only `photography` still uses a real Unsplash photo (Canon camera); the rest use large lucide icons in a white rounded plate for visual consistency.
+  - **`CategoryCarousel.jsx`**: extended the ICONS map to include the 8 new lucide icons (Music, Home, Dumbbell, Car, Boxes, Plane, Flower, BookOpen). Ring + scroll behavior unchanged.
+  - Verified: `GET /api/marketplace/categories` returns 13 correctly-named categories; the hub renders them cleanly with the same Fiverr-style tall-card layout.
+  - Files: `backend/routes/marketplace.py`, `frontend/src/components/marketplace/{categoryTheme.js,CategoryCarousel.jsx}`.
+
 - [x] **Signup — added "Service Provider" role option (2026-07-02)**: The registration form was missing a signup path for marketplace service providers. Added a 3rd role card ("Offer services") alongside Renter and Lister.
   - **Backend `routes/auth.py`**: SEC-001 allowlist extended from `{renter, owner}` to `{renter, owner, provider}`. `manager` still blocked from self-registration (only admin-provisioned).
   - **Frontend `pages/Auth.js`**: dropped the `<select>` dropdown in favor of a 3-column grid of role cards, each with an icon (Home/Building2/Briefcase), a label, and a one-line helper subtext. Selected card highlights with teal border + ring. On successful provider signup, user is redirected straight into `/services/create-gig` (no property-management upsell — they came here to list services).

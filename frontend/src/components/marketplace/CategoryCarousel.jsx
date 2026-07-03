@@ -11,14 +11,17 @@
  */
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
-  ChevronLeft, ChevronRight, Truck, Key, Map, Wind,
-  Sparkles, Wrench, Hammer, Camera, Palette, Scissors, Droplet, Zap,
+  ChevronLeft, ChevronRight,
+  Truck, Key, Map, Wind, Sparkles, Wrench, Hammer, Camera,
+  Palette, Scissors, Droplet, Zap,
+  Music, Home, Dumbbell, Car, Boxes, Plane, Flower, BookOpen,
 } from 'lucide-react';
 import { themeForCategory } from './categoryTheme';
 
 const ICONS = {
   Truck, Key, Map, Wind, Sparkles, Wrench, Hammer, Camera,
   Palette, Scissors, Droplet, Zap,
+  Music, Home, Dumbbell, Car, Boxes, Plane, Flower, BookOpen,
 };
 
 const CategoryCard = ({ category, active, onClick }) => {
