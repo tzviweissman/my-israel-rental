@@ -16,6 +16,9 @@ import React from 'react';
 import { Helmet } from 'react-helmet-async';
 
 const CANONICAL_ORIGIN = 'https://myisraelrental.com';
+// Read once at module load — CRA inlines env vars at build time so the
+// tag ships on every rendered page without a runtime lookup per mount.
+const GOOGLE_VERIFICATION = process.env.REACT_APP_GOOGLE_VERIFICATION;
 
 const PageMeta = ({ title, description, path, image, jsonLd }) => {
   // Prefer the explicit `path` prop so server-rendered crawlers and
@@ -35,6 +38,12 @@ const PageMeta = ({ title, description, path, image, jsonLd }) => {
       <title>{title}</title>
       <meta name="description" content={description} />
       <link rel="canonical" href={canonical} />
+      {/* Google Search Console verification. Ships site-wide when the
+          REACT_APP_GOOGLE_VERIFICATION env var is set — see
+          /app/docs/google-search-console-setup.md */}
+      {GOOGLE_VERIFICATION && (
+        <meta name="google-site-verification" content={GOOGLE_VERIFICATION} />
+      )}
       {/* Open Graph */}
       <meta property="og:title" content={title} />
       <meta property="og:description" content={description} />
