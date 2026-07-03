@@ -11,6 +11,12 @@ Build a bilingual (English/Hebrew) rental website named MyIsraelRental.com with 
 - **i18n**: i18next with English and Hebrew (RTL) support
 
 ## What's Been Implemented
+- [x] **Stays FiltersModal — categorized amenities taxonomy (2026-07-03)**: Replaced the flat 12-chip amenity row in `FiltersModal.jsx` with a categorized accordion driven by the shared `servicesCatalog.js` — same 7 categories & 51 amenity strings hosts pick from when creating a listing (Elevator deduped since it's a first-class Feature chip). This finally makes the amenity filter useful for high-value queries like "Kosher-certified kitchen", "Sukkah balcony", "Kosher restaurants nearby", "Shabbat elevator", etc.
+  - **UX**: each category renders as a native `<details>` accordion with a "N / total" or plain "total" count badge. Categories with any selected item auto-open on modal open. A sticky "Selected" strip at the top shows every active chip with an inline × for quick removal, plus a "Clear (N)" link in the section header.
+  - **Zero backend change**: amenities are still exact-string matched against `property.amenities: string[]` in the Stays page filter chain (`amenities.every((a) => (p.amenities || []).includes(a))`) — same code path as before, now with a taxonomy shared with hosts so strings actually match.
+  - **Testids**: `stays-filter-amenities`, `stays-filter-amenities-clear`, `stays-filter-amenities-selected`, `stays-filter-amenity-cat-{slug}`, `stays-filter-amenity-{normalized-name}`, `stays-filter-amenity-selected-{normalized-name}`.
+  - Files: `frontend/src/components/stays/FiltersModal.jsx`.
+
 - [x] **Property Detail — ★ prefix for custom amenities (2026-07-03)**: Updated `AmenitiesList.jsx` to visually distinguish custom (free-text) amenities from predefined catalog items on the public property page. Any amenity string not in `ALL_PREDEFINED` (from `servicesCatalog.js`) now renders with a filled gold `Star` icon; predefined items keep their category icon (Snowflake for AC, Wifi for internet, etc.). Matches the ★-prefix experience hosts see in `PropertyServicesSelector`. Verified via Playwright on live preview — a test property with 3 predefined + 3 custom amenities showed exactly 3 star icons and 3 category icons.
   - Files: `frontend/src/components/property/AmenitiesList.jsx`.
   - Testids: `amenity-custom`, `amenity-predefined`.

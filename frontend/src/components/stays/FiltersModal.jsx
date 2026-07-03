@@ -12,14 +12,18 @@
  */
 import React from 'react';
 import { X } from 'lucide-react';
+import { SERVICE_CATEGORIES } from '../property/services/servicesCatalog';
 
-// Amenities the renter can multi-select. `Elevator` and `Balcony` live
-// as first-class chips in Features / Porches instead, so they're not
-// duplicated here.
-export const ALL_AMENITIES = [
-  'WiFi', 'Pool', 'AC', 'Kitchen', 'Parking', 'Washer', 'Dryer', 'TV',
-  'Workspace', 'Pet-friendly', 'Sea view', 'Gym',
-];
+// Amenity taxonomy comes from the shared services catalog so hosts and
+// renters see the exact same strings — enabling exact-string match on
+// `property.amenities: string[]`. `Elevator` and porches/balconies are
+// filtered out here because they're surfaced as first-class chips in
+// Features and Porches, so we don't want to duplicate them.
+const DEDUPED_AMENITY_KEYS = new Set(['Elevator']);
+export const AMENITY_CATEGORIES = SERVICE_CATEGORIES.map((c) => ({
+  ...c,
+  services: c.services.filter((s) => !DEDUPED_AMENITY_KEYS.has(s)),
+})).filter((c) => c.services.length > 0);
 
 // Pill-chip row helper used for several filter sections. Hoisted to
 // module scope so React doesn't unmount its subtree on every parent
@@ -265,22 +269,86 @@ const FiltersModal = ({
             </div>
           </div>
 
-          {/* Free-form amenities */}
-          <div>
-            <h3 className="text-sm font-bold mb-2">{t('stays.amenities', 'Amenities')}</h3>
-            <div className="flex flex-wrap gap-2">
-              {ALL_AMENITIES.map((a) => (
+          {/* Amenities — categorized accordion (taxonomy shared with hosts
+              via servicesCatalog.js so strings match exactly). */}
+          <div data-testid="stays-filter-amenities">
+            <div className="flex items-center justify-between mb-2">
+              <h3 className="text-sm font-bold">{t('stays.amenities', 'Amenities')}</h3>
+              {amenities.length > 0 && (
                 <button
-                  key={a}
-                  onClick={() => toggleAmenity(a)}
-                  className={`px-3 py-1.5 rounded-full text-xs font-semibold border ${
-                    amenities.includes(a) ? 'bg-[#D4AF37] text-white border-[#D4AF37]' : 'bg-white text-gray-700 border-gray-200 hover:border-[#D4AF37]'
-                  }`}
-                  data-testid={`stays-filter-amenity-${a.replace(/\s/g, '-')}`}
+                  type="button"
+                  onClick={() => setAmenities([])}
+                  className="text-[11px] font-semibold text-gray-500 hover:text-gray-900 underline"
+                  data-testid="stays-filter-amenities-clear"
                 >
-                  {a}
+                  {t('stays.clearAmenities', `Clear (${amenities.length})`)}
                 </button>
-              ))}
+              )}
+            </div>
+
+            {/* Selected summary strip — makes it obvious what's active
+                without having to open every category. */}
+            {amenities.length > 0 && (
+              <div className="mb-3 flex flex-wrap gap-1.5" data-testid="stays-filter-amenities-selected">
+                {amenities.map((a) => (
+                  <button
+                    key={a}
+                    type="button"
+                    onClick={() => toggleAmenity(a)}
+                    className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-[#D4AF37] text-white hover:bg-[#b8951f]"
+                    data-testid={`stays-filter-amenity-selected-${a.replace(/[^a-z0-9]+/gi, '-').toLowerCase()}`}
+                  >
+                    {a}
+                    <X size={11} />
+                  </button>
+                ))}
+              </div>
+            )}
+
+            <div className="space-y-2">
+              {AMENITY_CATEGORIES.map((cat) => {
+                const selectedInCat = cat.services.filter((s) => amenities.includes(s)).length;
+                return (
+                  <details
+                    key={cat.slug}
+                    open={selectedInCat > 0}
+                    className="group border border-gray-200 rounded-lg overflow-hidden"
+                    data-testid={`stays-filter-amenity-cat-${cat.slug}`}
+                  >
+                    <summary
+                      className="flex items-center justify-between cursor-pointer px-3 py-2 text-sm font-semibold hover:bg-gray-50 list-none [&::-webkit-details-marker]:hidden"
+                    >
+                      <span className="flex items-center gap-2">
+                        <span className={`text-[11px] leading-none transition-transform ${''}`}>▸</span>
+                        {cat.label}
+                      </span>
+                      <span className="text-[11px] font-bold text-gray-500">
+                        {selectedInCat > 0 ? `${selectedInCat} / ${cat.services.length}` : cat.services.length}
+                      </span>
+                    </summary>
+                    <div className="px-3 py-2 flex flex-wrap gap-2 border-t border-gray-100 bg-gray-50/50">
+                      {cat.services.map((a) => {
+                        const active = amenities.includes(a);
+                        return (
+                          <button
+                            key={a}
+                            type="button"
+                            onClick={() => toggleAmenity(a)}
+                            className={`px-3 py-1.5 rounded-full text-xs font-semibold border transition-colors ${
+                              active
+                                ? 'bg-[#D4AF37] text-white border-[#D4AF37]'
+                                : 'bg-white text-gray-700 border-gray-200 hover:border-[#D4AF37]'
+                            }`}
+                            data-testid={`stays-filter-amenity-${a.replace(/[^a-z0-9]+/gi, '-').toLowerCase()}`}
+                          >
+                            {a}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </details>
+                );
+              })}
             </div>
           </div>
         </div>
