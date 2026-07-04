@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import axios from 'axios';
 import { toast } from 'sonner';
-import { Loader2, Search, RefreshCw, Calendar, Mail, Phone, Users as UsersIcon, ExternalLink } from 'lucide-react';
+import { Loader2, Search, RefreshCw, Calendar, Mail, Phone, Users as UsersIcon, ExternalLink, Home as HomeIcon, MessageCircle } from 'lucide-react';
 import { getCoverImage } from '../../utils/coverImage';
 
 /**
@@ -227,26 +227,66 @@ const BookingsTab = ({ token }) => {
                   </div>
 
                   {(b.guest_name || b.guest_email) && (
-                    <div className="mt-1.5 text-xs text-gray-600 space-y-0.5">
-                      {b.guest_name && (
-                        <div className="flex items-center gap-1.5 truncate">
-                          <UsersIcon size={11} className="text-gray-400 shrink-0" />
-                          <span className="font-medium">{b.guest_name}</span>
-                          {b.number_of_guests > 0 && <span className="text-gray-400">· {b.number_of_guests} guest{b.number_of_guests === 1 ? '' : 's'}</span>}
-                        </div>
-                      )}
-                      {b.guest_email && (
-                        <div className="flex items-center gap-1.5 truncate">
-                          <Mail size={11} className="text-gray-400 shrink-0" />
-                          <a href={`mailto:${b.guest_email}`} className="text-[#1E6A6A] hover:underline truncate">{b.guest_email}</a>
-                        </div>
-                      )}
-                      {b.guest_phone && (
-                        <div className="flex items-center gap-1.5">
-                          <Phone size={11} className="text-gray-400 shrink-0" />
-                          <a href={`tel:${b.guest_phone}`} className="text-gray-700 hover:text-[#1E6A6A]">{b.guest_phone}</a>
-                        </div>
-                      )}
+                    <div className="mt-2 pt-2 border-t border-gray-100">
+                      <p className="text-[10px] font-bold uppercase tracking-wide text-gray-400 mb-1">Booked by</p>
+                      <div className="text-xs text-gray-600 space-y-0.5">
+                        {b.guest_name && (
+                          <div className="flex items-center gap-1.5 truncate">
+                            <UsersIcon size={11} className="text-gray-400 shrink-0" />
+                            <span className="font-medium">{b.guest_name}</span>
+                            {b.number_of_guests > 0 && <span className="text-gray-400">· {b.number_of_guests} guest{b.number_of_guests === 1 ? '' : 's'}</span>}
+                          </div>
+                        )}
+                        {b.guest_email && (
+                          <div className="flex items-center gap-1.5 truncate">
+                            <Mail size={11} className="text-gray-400 shrink-0" />
+                            <a href={`mailto:${b.guest_email}`} className="text-[#1E6A6A] hover:underline truncate">{b.guest_email}</a>
+                          </div>
+                        )}
+                        {b.guest_phone && (
+                          <div className="flex items-center gap-1.5">
+                            <Phone size={11} className="text-gray-400 shrink-0" />
+                            <a href={`tel:${b.guest_phone}`} className="text-gray-700 hover:text-[#1E6A6A]">{b.guest_phone}</a>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
+
+                  {(b.manager_email || b.manager_whatsapp) && (
+                    <div className="mt-2 pt-2 border-t border-gray-100" data-testid={`booking-manager-${b.id}`}>
+                      <p className="text-[10px] font-bold uppercase tracking-wide text-gray-400 mb-1">Property manager</p>
+                      <div className="text-xs text-gray-600 space-y-0.5">
+                        {b.manager_name && (
+                          <div className="flex items-center gap-1.5 truncate">
+                            <HomeIcon size={11} className="text-gray-400 shrink-0" />
+                            <span className="font-medium">{b.manager_name}</span>
+                            {b.manager_role && b.manager_role !== 'owner' && (
+                              <span className="text-gray-400">· {b.manager_role}</span>
+                            )}
+                          </div>
+                        )}
+                        {b.manager_email && (
+                          <div className="flex items-center gap-1.5 truncate">
+                            <Mail size={11} className="text-gray-400 shrink-0" />
+                            <a href={`mailto:${b.manager_email}`} className="text-[#1E6A6A] hover:underline truncate" data-testid={`booking-manager-email-${b.id}`}>{b.manager_email}</a>
+                          </div>
+                        )}
+                        {b.manager_whatsapp && (
+                          <div className="flex items-center gap-1.5">
+                            <MessageCircle size={11} className="text-[#25D366] shrink-0" />
+                            <a
+                              href={`https://wa.me/${b.manager_whatsapp.replace(/[^\d+]/g, '')}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-gray-700 hover:text-[#1E6A6A]"
+                              data-testid={`booking-manager-whatsapp-${b.id}`}
+                            >
+                              {b.manager_whatsapp}
+                            </a>
+                          </div>
+                        )}
+                      </div>
                     </div>
                   )}
 

@@ -304,6 +304,17 @@ async def get_admin_bookings(
             "as": "property",
         }},
         {"$unwind": {"path": "$property", "preserveNullAndEmptyArrays": True}},
+        # Join in the property owner (manager) so the admin can reach out
+        # directly from the bookings tab without cross-referencing the
+        # Users table. Owner is optional — deleted-owner rows keep
+        # rendering the guest info gracefully.
+        {"$lookup": {
+            "from": "users",
+            "localField": "property.owner_id",
+            "foreignField": "id",
+            "as": "owner",
+        }},
+        {"$unwind": {"path": "$owner", "preserveNullAndEmptyArrays": True}},
         {"$project": {
             "_id": 0,
             "id": 1,
@@ -327,6 +338,13 @@ async def get_admin_bookings(
             "property_images": "$property.images",
             "property_videos": "$property.videos",
             "property_owner_id": "$property.owner_id",
+            # Manager (owner) contact — email is always present; the
+            # WhatsApp number lives in the `phone` field per our
+            # /auth/whatsapp write path (auth.py).
+            "manager_name": "$owner.name",
+            "manager_email": "$owner.email",
+            "manager_whatsapp": "$owner.phone",
+            "manager_role": "$owner.role",
         }},
     ]
     rows = await db.bookings.aggregate(pipeline).to_list(length=500)
