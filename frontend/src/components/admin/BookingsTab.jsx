@@ -110,6 +110,25 @@ const BookingsTab = ({ token }) => {
     return '—';
   };
 
+  // Build a one-click message to the property manager pre-filled with
+  // every piece of context from the booking row (guest, dates, listing,
+  // short ID). Used by both the mailto and wa.me (?text=) links so the
+  // admin doesn't retype anything.
+  const buildManagerMessage = (b) => {
+    const shortId = String(b.id || '').slice(0, 8);
+    const first = (b.manager_name || 'there').split(' ')[0];
+    const dateRange = `${new Date(b.start_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} → ${new Date(b.end_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}`;
+    const propLabel = b.property_title || 'your listing';
+    const guest = b.guest_name ? ` for guest ${b.guest_name}` : '';
+    const subject = `Regarding booking #${shortId} — ${propLabel}`;
+    const body =
+      `Hi ${first},\n\n` +
+      `I'm reaching out from MyIsraelRental about booking #${shortId} at ${propLabel}${guest}, for ${dateRange}.\n\n` +
+      `Could you let me know if there's anything you'd like us to help with?\n\n` +
+      `Thanks,\nMyIsraelRental Admin`;
+    return { subject, body };
+  };
+
   return (
     <div data-testid="admin-bookings-section">
       {/* Header strip */}
@@ -287,6 +306,38 @@ const BookingsTab = ({ token }) => {
                           </div>
                         )}
                       </div>
+                      {/* Pre-filled composer buttons — one click drops the
+                          admin into email (or WhatsApp) with subject + body
+                          already populated from the booking context. */}
+                      {(b.manager_email || b.manager_whatsapp) && (() => {
+                        const msg = buildManagerMessage(b);
+                        return (
+                          <div className="mt-2 flex flex-wrap gap-2">
+                            {b.manager_email && (
+                              <a
+                                href={`mailto:${b.manager_email}?subject=${encodeURIComponent(msg.subject)}&body=${encodeURIComponent(msg.body)}`}
+                                className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-semibold border border-[#1E6A6A] text-[#1E6A6A] hover:bg-[#1E6A6A] hover:text-white transition-colors"
+                                data-testid={`booking-message-manager-email-${b.id}`}
+                              >
+                                <Mail size={11} />
+                                Email manager
+                              </a>
+                            )}
+                            {b.manager_whatsapp && (
+                              <a
+                                href={`https://wa.me/${b.manager_whatsapp.replace(/[^\d+]/g, '')}?text=${encodeURIComponent(msg.body)}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-semibold border border-[#25D366] text-[#25D366] hover:bg-[#25D366] hover:text-white transition-colors"
+                                data-testid={`booking-message-manager-whatsapp-${b.id}`}
+                              >
+                                <MessageCircle size={11} />
+                                WhatsApp manager
+                              </a>
+                            )}
+                          </div>
+                        );
+                      })()}
                     </div>
                   )}
 
