@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Upload, X, Image as ImageIcon } from 'lucide-react';
+import { Upload, X, Image as ImageIcon, ExternalLink } from 'lucide-react';
 import { toast } from 'sonner';
 import ShareLinkRow from './ShareLinkRow';
 
@@ -131,7 +131,7 @@ const ManagerHeader = ({ user, token, API }) => {
           />
         </div>
 
-        <WhiteLabelSettings API={API} token={token} initial={user?.white_label || {}} />
+        <WhiteLabelSettings API={API} token={token} initial={user?.white_label || {}} managerId={user?.id} />
       </div>
     </div>
   );
@@ -141,7 +141,7 @@ const ManagerHeader = ({ user, token, API }) => {
 // contact email. Extra services are a lightweight list (title + optional
 // description) meant for things like "Cleaning", "Airport pickup",
 // "Concierge" that don't warrant a full marketplace gig.
-const WhiteLabelSettings = ({ API, token, initial }) => {
+const WhiteLabelSettings = ({ API, token, initial, managerId }) => {
   const [bio, setBio] = useState(initial.bio || '');
   const [services, setServices] = useState(
     Array.isArray(initial.services) && initial.services.length
@@ -277,15 +277,32 @@ const WhiteLabelSettings = ({ API, token, initial }) => {
         />
       </label>
 
-      <button
-        type="button"
-        onClick={save}
-        disabled={saving}
-        className="px-4 py-2 rounded-lg bg-[#1E6A6A] text-white text-xs font-semibold hover:bg-[#164a4a] disabled:opacity-60"
-        data-testid="wl-save-btn"
-      >
-        {saving ? 'Saving…' : 'Save'}
-      </button>
+      <div className="flex flex-wrap items-center gap-3">
+        <button
+          type="button"
+          onClick={save}
+          disabled={saving}
+          className="px-4 py-2 rounded-lg bg-[#1E6A6A] text-white text-xs font-semibold hover:bg-[#164a4a] disabled:opacity-60"
+          data-testid="wl-save-btn"
+        >
+          {saving ? 'Saving…' : 'Save'}
+        </button>
+        {managerId && (
+          <a
+            href={`/manager/${managerId}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg border border-[#D4AF37] text-[#1E6A6A] text-xs font-semibold hover:bg-[#D4AF37]/10 transition-colors"
+            data-testid="wl-open-public-page"
+          >
+            <ExternalLink size={12} />
+            Open public page
+          </a>
+        )}
+        <span className="text-[11px] text-gray-400 ms-auto hidden sm:inline">
+          See exactly how it looks to renters
+        </span>
+      </div>
     </div>
   );
 };
