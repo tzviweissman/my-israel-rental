@@ -1,35 +1,48 @@
 /**
- * Services Marketplace hub — Phase 1a MVP.
+ * Services Marketplace hub — Phase 2 (Trust & Discovery UI).
  *
- * Fiverr-style category grid + gig cards on the left, "How it works"
- * + provider CTA on the right. Filtering (search + category chip)
- * happens in-memory over the initial `/api/marketplace/gigs` fetch
- * to keep the UX snappy without a second round-trip per keystroke.
+ * All filtering is now server-side: category, location, free-text query,
+ * min/max price, min rating, response time, languages, booking mode, and
+ * sort order are pushed straight to `/api/marketplace/gigs` so the
+ * backend applies the same logic that powers server-side sort ties,
+ * top-rated boosts, and rating-count floors.
  *
- * When no gigs exist yet (fresh install), the page still shows the
- * 12 categories and the "Become a provider" CTA so the funnel is
- * intact from day 1.
+ * URL state persists every filter so a screenshot-worthy filtered view
+ * is always deep-linkable (e.g. shareable /services?category=photography&min_rating=4&sort=rating).
  */
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import axios from 'axios';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
-import { Search, ArrowRight, Loader2 } from 'lucide-react';
+import { Search, ArrowRight, Loader2, SlidersHorizontal, Award, Zap } from 'lucide-react';
 import { API } from '../App';
 import PageMeta from '../components/PageMeta';
 import StarRating from '../components/marketplace/StarRating';
 import CategoryCarousel from '../components/marketplace/CategoryCarousel';
 import LocationChipsRow from '../components/marketplace/LocationChipsRow';
+import ServicesFiltersModal from '../components/marketplace/ServicesFiltersModal';
+import { localizedTitle } from '../utils/gigLocale';
 
-const GigCard = ({ gig, onClick }) => {
+const TEAL = '#1E6A6A';
+const GOLD = '#D4AF37';
+
+// Sort options the dropdown surfaces — keys map 1:1 to the backend
+// `sort` query param (see `list_gigs` in routes/marketplace.py).
+const SORT_OPTIONS = [
+  { value: 'match',     labelKey: 'services.sort.match',     fallback: 'Best match' },
+  { value: 'rating',    labelKey: 'services.sort.rating',    fallback: 'Highest rated' },
+  { value: 'reviews',   labelKey: 'services.sort.reviews',   fallback: 'Most reviewed' },
+  { value: 'newest',    labelKey: 'services.sort.newest',    fallback: 'Newest first' },
+  { value: 'price_asc', labelKey: 'services.sort.priceAsc',  fallback: 'Price: low to high' },
+];
+
+const GigCard = ({ gig, onClick, i18n, t }) => {
   const cover = gig.gallery?.[0];
-  const cheapest = (gig.tiers || []).reduce(
-    (acc, t) => (acc == null || t.price < acc ? t.price : acc),
-    null,
-  );
+  const cheapest = gig.cheapest_price;
   const currency = gig.tiers?.[0]?.currency || 'ILS';
   const sym = currency === 'ILS' ? '₪' : '$';
+  const bucket = gig.provider?.response_bucket;
   return (
     <button
       onClick={onClick}
@@ -37,7 +50,7 @@ const GigCard = ({ gig, onClick }) => {
       data-testid={`services-gig-${gig.id}`}
     >
       <div
-        className="aspect-square w-full bg-gray-100 rounded-xl overflow-hidden mb-2"
+        className="relative aspect-square w-full bg-gray-100 rounded-xl overflow-hidden mb-2"
         style={cover ? { backgroundImage: `url(${cover})`, backgroundSize: 'cover', backgroundPosition: 'center' } : {}}
       >
         {!cover && (
@@ -45,8 +58,33 @@ const GigCard = ({ gig, onClick }) => {
             No image
           </div>
         )}
+        {/* Top-Rated overlay pill */}
+        {gig.is_top_rated && (
+          <span
+            className="absolute top-2 start-2 inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wide shadow"
+            style={{ background: GOLD, color: '#1E6A6A' }}
+            data-testid={`gig-top-rated-${gig.id}`}
+          >
+            <Award size={10} />
+            {t('services.topRated', 'Top rated')}
+          </span>
+        )}
+        {/* Response-time chip */}
+        {bucket && (
+          <span
+            className="absolute bottom-2 end-2 inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-white/95 text-emerald-700 shadow"
+            data-testid={`gig-response-${gig.id}`}
+          >
+            <Zap size={10} />
+            {bucket === '1h'
+              ? t('services.replies1h', 'Replies in 1h')
+              : t('services.replies24h', 'Replies in 24h')}
+          </span>
+        )}
       </div>
-      <p className="font-semibold text-sm text-gray-900 truncate">{gig.title}</p>
+      <p className="font-semibold text-sm text-gray-900 truncate">
+        {localizedTitle(gig, i18n)}
+      </p>
       <p className="text-xs text-gray-500 truncate">
         {gig.provider?.name}{gig.area ? ` · ${gig.area}` : ''}
       </p>
@@ -57,7 +95,7 @@ const GigCard = ({ gig, onClick }) => {
       )}
       {cheapest != null && (
         <p className="text-xs mt-0.5 text-gray-900">
-          <span className="text-gray-500">from </span>
+          <span className="text-gray-500">{t('services.from', 'from')} </span>
           <span className="font-semibold">{sym}{cheapest.toLocaleString()}</span>
         </p>
       )}
@@ -65,50 +103,144 @@ const GigCard = ({ gig, onClick }) => {
   );
 };
 
+// Convert the URL params snapshot into the same shape the FiltersModal
+// consumes. Kept at module scope so the identity is stable.
+const readFilters = (params) => ({
+  selectedCat: params.get('category') || '',
+  selectedLoc: params.get('location') || '',
+  q: params.get('q') || '',
+  minRating: params.get('min_rating') || '',
+  minPrice: params.get('min_price') || '',
+  maxPrice: params.get('max_price') || '',
+  responseTime: params.get('response_time') || '',
+  languages: (params.get('languages') || '').split(',').filter(Boolean),
+  bookingMode: params.get('booking_mode') || '',
+  sort: params.get('sort') || 'match',
+});
+
 const Services = () => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const navigate = useNavigate();
-  // Two-way URL sync so `/services?category=home-repair&location=jerusalem`
-  // opens the hub already filtered — enables sharable links and per-
-  // category-per-city Google indexing.
   const [searchParams, setSearchParams] = useSearchParams();
+
   const [categories, setCategories] = useState([]);
   const [locations, setLocations] = useState([]);
+  const [languagesList, setLanguagesList] = useState([]);
   const [gigs, setGigs] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [selectedCat, setSelectedCat] = useState(searchParams.get('category') || '');
-  const [selectedLoc, setSelectedLoc] = useState(searchParams.get('location') || '');
-  const [q, setQ] = useState(searchParams.get('q') || '');
+  const [filtersOpen, setFiltersOpen] = useState(false);
 
+  const state = readFilters(searchParams);
+  const {
+    selectedCat, selectedLoc, q,
+    minRating, minPrice, maxPrice, responseTime, languages, bookingMode, sort,
+  } = state;
+
+  // One-shot fetches — categories/locations/languages don't change.
   useEffect(() => {
     Promise.all([
       axios.get(`${API}/marketplace/categories`).then((r) => setCategories(r.data)),
       axios.get(`${API}/marketplace/locations`).then((r) => setLocations(r.data)),
-      axios.get(`${API}/marketplace/gigs`).then((r) => setGigs(r.data)),
+      axios.get(`${API}/marketplace/languages`).then((r) => setLanguagesList(r.data)),
     ]).catch((e) => {
-      console.error(e); toast.error('Failed to load marketplace');
-    }).finally(() => setLoading(false));
+      console.error(e);
+      toast.error(t('services.loadError', 'Failed to load marketplace'));
+    });
   }, []);
 
-  // Push state into the URL whenever a filter changes. `replace: true`
-  // so the browser back-button skips over intermediate filter states.
+  // Re-fetch gigs whenever any server-side filter changes. Backend does
+  // all the heavy lifting so the client is a thin cache.
   useEffect(() => {
-    const next = {};
-    if (selectedCat) next.category = selectedCat;
-    if (selectedLoc) next.location = selectedLoc;
-    if (q) next.q = q;
-    setSearchParams(next, { replace: true });
-  }, [selectedCat, selectedLoc, q, setSearchParams]);
+    const params = new URLSearchParams();
+    if (selectedCat)   params.set('category', selectedCat);
+    if (selectedLoc)   params.set('location', selectedLoc);
+    if (q)             params.set('q', q);
+    if (minRating)     params.set('min_rating', minRating);
+    if (minPrice)      params.set('min_price', minPrice);
+    if (maxPrice)      params.set('max_price', maxPrice);
+    if (responseTime)  params.set('response_time', responseTime);
+    if (languages.length) params.set('languages', languages.join(','));
+    if (bookingMode)   params.set('booking_mode', bookingMode);
+    if (sort && sort !== 'match') params.set('sort', sort);
+    setLoading(true);
+    axios.get(`${API}/marketplace/gigs?${params.toString()}`)
+      .then((r) => setGigs(r.data))
+      .catch((e) => { console.error(e); toast.error(t('services.loadError', 'Failed to load')); })
+      .finally(() => setLoading(false));
+  }, [
+    selectedCat, selectedLoc, q,
+    minRating, minPrice, maxPrice, responseTime,
+    // Joined to a primitive so the effect doesn't fire on identity change alone.
+    languages.join(','), bookingMode, sort, t,
+  ]);
 
-  const filtered = useMemo(() => {
-    const locLabel = locations.find((l) => l.slug === selectedLoc)?.label.toLowerCase();
-    return gigs.filter((g) => {
-      if (selectedCat && g.category !== selectedCat) return false;
-      if (locLabel && !(g.area || '').toLowerCase().includes(locLabel)) return false;
-      if (q && !(`${g.title} ${g.description}`).toLowerCase().includes(q.toLowerCase())) return false;
-      return true;
+  // Centralised URL sync — every setter goes through this so the URL is
+  // always the single source of truth and back/forward buttons work.
+  const patchUrl = useCallback((next) => {
+    setSearchParams((prev) => {
+      const params = new URLSearchParams(prev);
+      Object.entries(next).forEach(([k, v]) => {
+        if (v === '' || v == null || (Array.isArray(v) && v.length === 0)) {
+          params.delete(k);
+        } else if (Array.isArray(v)) {
+          params.set(k, v.join(','));
+        } else {
+          params.set(k, String(v));
+        }
+      });
+      return params;
+    }, { replace: true });
+  }, [setSearchParams]);
+
+  const applyFilters = (draft) => {
+    patchUrl({
+      min_rating:    draft.minRating,
+      min_price:     draft.minPrice,
+      max_price:     draft.maxPrice,
+      response_time: draft.responseTime,
+      languages:     draft.languages,
+      booking_mode:  draft.bookingMode,
     });
-  }, [gigs, selectedCat, selectedLoc, q, locations]);
+  };
+
+  const clearAdvancedFilters = () => {
+    patchUrl({
+      min_rating: '', min_price: '', max_price: '',
+      response_time: '', languages: [], booking_mode: '',
+    });
+  };
+
+  // How many "More filters" chips are active — drives the badge on
+  // the Filters button so users can see filters are on at a glance.
+  const advCount =
+    (minRating ? 1 : 0) +
+    (minPrice || maxPrice ? 1 : 0) +
+    (responseTime ? 1 : 0) +
+    (languages.length ? 1 : 0) +
+    (bookingMode ? 1 : 0);
+
+  const seo = useMemo(() => {
+    const catLbl = categories.find((c) => c.slug === selectedCat)?.label;
+    const locLbl = locations.find((l) => l.slug === selectedLoc)?.label;
+    let title = 'Services Marketplace in Israel — Cleaners, Movers, Plumbers & more | MyIsraelRental';
+    let description = 'Book trusted local services in Israel — cleaning, movers, plumbers, electricians, photographers, barbers, tour guides and more. Zero booking fees, direct chat, WhatsApp-ready.';
+    if (catLbl && locLbl) {
+      title = `${catLbl} in ${locLbl} — Services Marketplace | MyIsraelRental`;
+      description = `Find and book trusted ${catLbl.toLowerCase()} providers in ${locLbl}. Direct chat, WhatsApp booking, zero renter fees.`;
+    } else if (catLbl) {
+      title = `${catLbl} in Israel — Services Marketplace | MyIsraelRental`;
+      description = `Book trusted ${catLbl.toLowerCase()} providers across Israel — direct chat, WhatsApp-ready, no booking fees.`;
+    } else if (locLbl) {
+      title = `Local Services in ${locLbl} — Services Marketplace | MyIsraelRental`;
+      description = `Discover trusted local service providers in ${locLbl} — cleaning, home repair, tours, and more.`;
+    }
+    const qs = [
+      selectedCat ? `category=${selectedCat}` : null,
+      selectedLoc ? `location=${selectedLoc}` : null,
+    ].filter(Boolean).join('&');
+    const path = qs ? `/services?${qs}` : '/services';
+    return { title, description, path };
+  }, [categories, locations, selectedCat, selectedLoc]);
 
   return (
     <div
@@ -116,30 +248,7 @@ const Services = () => {
       style={{ paddingTop: 'var(--nav-h, 68px)' }}
       data-testid="services-page"
     >
-      {(() => {
-        // Compose an SEO-friendly title + description based on active filters.
-        // Falls back to the generic hub copy when no filter is applied.
-        const catLbl = categories.find((c) => c.slug === selectedCat)?.label;
-        const locLbl = locations.find((l) => l.slug === selectedLoc)?.label;
-        let title = 'Services Marketplace in Israel — Cleaners, Movers, Plumbers & more | MyIsraelRental';
-        let description = 'Book trusted local services in Israel — cleaning, movers, plumbers, electricians, photographers, barbers, tour guides and more. Zero booking fees, direct chat, WhatsApp-ready.';
-        if (catLbl && locLbl) {
-          title = `${catLbl} in ${locLbl} — Services Marketplace | MyIsraelRental`;
-          description = `Find and book trusted ${catLbl.toLowerCase()} providers in ${locLbl}. Direct chat, WhatsApp booking, zero renter fees.`;
-        } else if (catLbl) {
-          title = `${catLbl} in Israel — Services Marketplace | MyIsraelRental`;
-          description = `Book trusted ${catLbl.toLowerCase()} providers across Israel — direct chat, WhatsApp-ready, no booking fees.`;
-        } else if (locLbl) {
-          title = `Local Services in ${locLbl} — Services Marketplace | MyIsraelRental`;
-          description = `Discover trusted local service providers in ${locLbl} — cleaning, home repair, tours, and more.`;
-        }
-        const qs = [
-          selectedCat ? `category=${selectedCat}` : null,
-          selectedLoc ? `location=${selectedLoc}` : null,
-        ].filter(Boolean).join('&');
-        const path = qs ? `/services?${qs}` : '/services';
-        return <PageMeta title={title} description={description} path={path} />;
-      })()}
+      <PageMeta title={seo.title} description={seo.description} path={seo.path} />
 
       {/* Hero + search */}
       <div className="relative bg-gradient-to-br from-[#1E6A6A] to-[#0F3A3A] text-white py-14 md:py-20 px-4">
@@ -155,7 +264,7 @@ const Services = () => {
               <Search size={16} className="text-gray-400 shrink-0" />
               <input
                 value={q}
-                onChange={(e) => setQ(e.target.value)}
+                onChange={(e) => patchUrl({ q: e.target.value })}
                 placeholder={t('services.searchPlaceholder', 'Search cleaners, movers, plumbers…')}
                 className="flex-1 px-3 py-3 text-sm text-gray-800 focus:outline-none"
                 data-testid="services-search-input"
@@ -172,7 +281,7 @@ const Services = () => {
         </div>
       </div>
 
-      {/* Categories — Fiverr-style horizontal carousel of tall cards */}
+      {/* Categories */}
       <div className="max-w-7xl mx-auto px-4 md:px-6 py-10">
         <div className="flex items-center justify-between mb-5">
           <h2 className="text-xl md:text-2xl font-bold text-gray-900" style={{ fontFamily: 'Playfair Display' }}>
@@ -180,7 +289,7 @@ const Services = () => {
           </h2>
           {selectedCat && (
             <button
-              onClick={() => setSelectedCat('')}
+              onClick={() => patchUrl({ category: '' })}
               className="text-xs font-semibold text-[#1E6A6A] hover:underline"
               data-testid="services-category-clear"
             >
@@ -191,12 +300,10 @@ const Services = () => {
         <CategoryCarousel
           categories={categories}
           selectedCat={selectedCat}
-          onSelect={setSelectedCat}
+          onSelect={(v) => patchUrl({ category: v })}
         />
 
-        {/* Location filter — sits below categories as a secondary axis
-            since a lot of services (Home Repair, Renovation, Transport)
-            are location-first decisions. */}
+        {/* Locations */}
         <div className="mt-8">
           <div className="flex items-center justify-between mb-3">
             <h3 className="text-sm md:text-base font-bold text-gray-900" style={{ fontFamily: 'Playfair Display' }}>
@@ -204,7 +311,7 @@ const Services = () => {
             </h3>
             {selectedLoc && (
               <button
-                onClick={() => setSelectedLoc('')}
+                onClick={() => patchUrl({ location: '' })}
                 className="text-xs font-semibold text-[#1E6A6A] hover:underline"
                 data-testid="services-location-clear"
               >
@@ -215,49 +322,181 @@ const Services = () => {
           <LocationChipsRow
             locations={locations}
             selectedLoc={selectedLoc}
-            onSelect={setSelectedLoc}
+            onSelect={(v) => patchUrl({ location: v })}
           />
         </div>
       </div>
 
-      {/* Gigs grid */}
-      <div className="max-w-6xl mx-auto px-4 pb-16">
-        <div className="flex items-center justify-between mb-4">
+      {/* Results header — Sort + Filters button + count */}
+      <div className="max-w-6xl mx-auto px-4">
+        <div className="flex items-center justify-between mb-4 gap-3 flex-wrap">
           <h2 className="text-xl font-bold text-gray-900">
             {selectedCat
               ? categories.find((c) => c.slug === selectedCat)?.label
               : t('services.allServices', 'All services')}
-            <span className="text-sm text-gray-500 font-normal ms-2">({filtered.length})</span>
+            <span className="text-sm text-gray-500 font-normal ms-2" data-testid="services-count">
+              ({gigs.length})
+            </span>
           </h2>
+          <div className="flex items-center gap-2">
+            {/* Sort dropdown */}
+            <label className="text-xs text-gray-500 me-1 hidden sm:inline">
+              {t('services.sortBy', 'Sort by')}
+            </label>
+            <select
+              value={sort}
+              onChange={(e) => patchUrl({ sort: e.target.value === 'match' ? '' : e.target.value })}
+              className="text-xs sm:text-sm px-3 py-2 rounded-full border border-gray-200 bg-white hover:border-gray-400 focus:outline-none focus:border-[#1E6A6A] font-semibold"
+              data-testid="services-sort-select"
+            >
+              {SORT_OPTIONS.map((o) => (
+                <option key={o.value} value={o.value}>
+                  {t(o.labelKey, o.fallback)}
+                </option>
+              ))}
+            </select>
+            {/* Filters button */}
+            <button
+              onClick={() => setFiltersOpen(true)}
+              className="relative inline-flex items-center gap-2 px-4 py-2 rounded-full text-xs sm:text-sm border border-gray-200 bg-white hover:border-gray-400 font-semibold text-gray-800"
+              data-testid="services-filters-btn"
+            >
+              <SlidersHorizontal size={14} />
+              {t('services.filters', 'Filters')}
+              {advCount > 0 && (
+                <span
+                  className="ms-1 inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full text-[10px] font-bold text-white"
+                  style={{ background: TEAL }}
+                  data-testid="services-filters-badge"
+                >
+                  {advCount}
+                </span>
+              )}
+            </button>
+          </div>
         </div>
+
+        {/* Chip strip showing active advanced filters — one-tap remove. */}
+        {advCount > 0 && (
+          <div className="flex flex-wrap items-center gap-2 mb-4 text-xs" data-testid="services-active-filters">
+            {minRating && (
+              <button
+                onClick={() => patchUrl({ min_rating: '' })}
+                className="px-2.5 py-1 rounded-full bg-[#1E6A6A] text-white font-semibold"
+                data-testid="active-filter-rating"
+              >
+                ★ {minRating}+ ×
+              </button>
+            )}
+            {(minPrice || maxPrice) && (
+              <button
+                onClick={() => patchUrl({ min_price: '', max_price: '' })}
+                className="px-2.5 py-1 rounded-full bg-[#1E6A6A] text-white font-semibold"
+                data-testid="active-filter-price"
+              >
+                ₪{minPrice || 0}–{maxPrice || '∞'} ×
+              </button>
+            )}
+            {responseTime && (
+              <button
+                onClick={() => patchUrl({ response_time: '' })}
+                className="px-2.5 py-1 rounded-full bg-[#1E6A6A] text-white font-semibold"
+                data-testid="active-filter-response"
+              >
+                {responseTime === '1h'
+                  ? t('services.replies1h', 'Replies in 1h')
+                  : t('services.replies24h', 'Replies in 24h')} ×
+              </button>
+            )}
+            {languages.map((lang) => (
+              <button
+                key={lang}
+                onClick={() => patchUrl({ languages: languages.filter((l) => l !== lang) })}
+                className="px-2.5 py-1 rounded-full bg-[#1E6A6A] text-white font-semibold"
+                data-testid={`active-filter-lang-${lang.toLowerCase()}`}
+              >
+                {lang} ×
+              </button>
+            ))}
+            {bookingMode && (
+              <button
+                onClick={() => patchUrl({ booking_mode: '' })}
+                className="px-2.5 py-1 rounded-full bg-[#1E6A6A] text-white font-semibold"
+                data-testid="active-filter-booking"
+              >
+                {bookingMode === 'in_platform'
+                  ? t('services.bookOnPlatform', 'On-platform')
+                  : t('services.bookWhatsApp', 'WhatsApp')} ×
+              </button>
+            )}
+            <button
+              onClick={clearAdvancedFilters}
+              className="text-[#1E6A6A] font-semibold underline"
+              data-testid="services-clear-adv"
+            >
+              {t('common.clearAll', 'Clear all')}
+            </button>
+          </div>
+        )}
+      </div>
+
+      {/* Gigs grid */}
+      <div className="max-w-6xl mx-auto px-4 pb-16">
         {loading ? (
           <div className="flex items-center justify-center py-24">
             <Loader2 className="animate-spin text-[#1E6A6A]" size={28} />
           </div>
-        ) : filtered.length === 0 ? (
+        ) : gigs.length === 0 ? (
           <div className="bg-white border border-gray-200 rounded-2xl p-10 text-center">
             <p className="text-gray-700 font-semibold mb-2">
-              {t('services.emptyTitle', 'No services listed here yet')}
+              {t('services.emptyTitle', 'No services match your filters')}
             </p>
             <p className="text-gray-500 text-sm mb-5">
-              {t('services.emptyBody', 'Be the first to list your service in this category — free 30-day trial.')}
+              {advCount > 0
+                ? t('services.emptyBodyFiltered', 'Try loosening the filters, or clear them all to see everything.')
+                : t('services.emptyBody', 'Be the first to list your service in this category — free 30-day trial.')}
             </p>
-            <button
-              onClick={() => navigate('/services/create-gig')}
-              className="px-5 py-2.5 rounded-lg text-sm font-semibold text-white bg-[#1E6A6A] hover:bg-[#0F3A3A]"
-              data-testid="services-empty-cta"
-            >
-              {t('services.listYourService', 'List your service')} <ArrowRight size={14} className="inline-block ms-1" />
-            </button>
+            {advCount > 0 ? (
+              <button
+                onClick={clearAdvancedFilters}
+                className="px-5 py-2.5 rounded-lg text-sm font-semibold text-white bg-[#1E6A6A] hover:bg-[#0F3A3A]"
+                data-testid="services-empty-clear"
+              >
+                {t('common.clearAll', 'Clear all filters')}
+              </button>
+            ) : (
+              <button
+                onClick={() => navigate('/services/create-gig')}
+                className="px-5 py-2.5 rounded-lg text-sm font-semibold text-white bg-[#1E6A6A] hover:bg-[#0F3A3A]"
+                data-testid="services-empty-cta"
+              >
+                {t('services.listYourService', 'List your service')} <ArrowRight size={14} className="inline-block ms-1" />
+              </button>
+            )}
           </div>
         ) : (
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-x-5 gap-y-8">
-            {filtered.map((gig) => (
-              <GigCard key={gig.id} gig={gig} onClick={() => navigate(`/services/gig/${gig.id}`)} />
+            {gigs.map((gig) => (
+              <GigCard
+                key={gig.id}
+                gig={gig}
+                onClick={() => navigate(`/services/gig/${gig.id}`)}
+                i18n={i18n}
+                t={t}
+              />
             ))}
           </div>
         )}
       </div>
+
+      <ServicesFiltersModal
+        open={filtersOpen}
+        onClose={() => setFiltersOpen(false)}
+        initial={{ minRating, minPrice, maxPrice, responseTime, languages, bookingMode }}
+        languages={languagesList}
+        onApply={applyFilters}
+        onClearAll={clearAdvancedFilters}
+      />
     </div>
   );
 };

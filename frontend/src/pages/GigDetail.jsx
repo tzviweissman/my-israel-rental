@@ -8,12 +8,14 @@
  */
 import React, { useContext, useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import axios from 'axios';
 import { toast } from 'sonner';
-import { MessageCircle, Send, Loader2, ArrowLeft } from 'lucide-react';
+import { MessageCircle, Send, Loader2, ArrowLeft, Award, Zap } from 'lucide-react';
 import { API, AuthContext } from '../App';
 import PageMeta from '../components/PageMeta';
 import StarRating from '../components/marketplace/StarRating';
+import { localizedTitle, localizedDescription } from '../utils/gigLocale';
 
 const buildWhatsAppUrl = (raw, message) => {
   const digits = (raw || '').replace(/[^\d]/g, '');
@@ -212,6 +214,7 @@ const BookingForm = ({ gig, tier, onClose, token }) => {
 const GigDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { t, i18n } = useTranslation();
   const { token, user } = useContext(AuthContext);
   const [gig, setGig] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -283,12 +286,17 @@ const GigDetail = () => {
 
   const cover = gig.gallery?.[0];
   const sym = tier?.currency === 'USD' ? '$' : '₪';
+  // Bilingual fallbacks — Hebrew renders when i18n.language starts with `he`
+  // AND the provider actually supplied the Hebrew copy, otherwise primary.
+  const displayTitle = localizedTitle(gig, i18n);
+  const displayDescription = localizedDescription(gig, i18n);
+  const bucket = gig.provider?.response_bucket;
 
   const handleBookClick = () => {
     if (!tier) return toast.error('Pick a tier first');
     if (gig.booking_mode === 'whatsapp') {
       if (!gig.whatsapp) return toast.error('Provider has no WhatsApp set');
-      const msg = `Hi! I'd like to book your "${gig.title}" — ${tier.name} tier (${sym}${tier.price}) from MyIsraelRental.`;
+      const msg = `Hi! I'd like to book your "${displayTitle}" — ${tier.name} tier (${sym}${tier.price}) from MyIsraelRental.`;
       window.open(buildWhatsAppUrl(gig.whatsapp, msg), '_blank');
       return;
     }
@@ -302,7 +310,7 @@ const GigDetail = () => {
 
   return (
     <div className="min-h-screen bg-[#FAFAF7]" style={{ paddingTop: 'var(--nav-h, 68px)' }} data-testid="gig-detail-page">
-      <PageMeta title={`${gig.title} — MyIsraelRental Services`} description={gig.description?.slice(0, 155) || `Book ${gig.title} on MyIsraelRental.`} path={`/services/gig/${id}`} jsonLd={gigJsonLd} />
+      <PageMeta title={`${displayTitle} — MyIsraelRental Services`} description={displayDescription?.slice(0, 155) || `Book ${displayTitle} on MyIsraelRental.`} path={`/services/gig/${id}`} jsonLd={gigJsonLd} />
       <div className="max-w-5xl mx-auto px-4 py-8">
         <button onClick={() => navigate('/services')} className="text-sm text-gray-600 flex items-center gap-1 mb-4 hover:text-[#1E6A6A]" data-testid="gig-back">
           <ArrowLeft size={14} /> Back to services
@@ -323,7 +331,29 @@ const GigDetail = () => {
             )}
 
             <div>
-              <h1 className="text-2xl md:text-3xl font-bold text-gray-900" style={{ fontFamily: 'Playfair Display' }}>{gig.title}</h1>
+              <div className="flex flex-wrap items-center gap-2 mb-1">
+                {gig.is_top_rated && (
+                  <span
+                    className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold uppercase tracking-wide"
+                    style={{ background: '#D4AF37', color: '#1E6A6A' }}
+                    data-testid="gig-top-rated"
+                  >
+                    <Award size={12} /> {t('services.topRated', 'Top rated')}
+                  </span>
+                )}
+                {bucket && (
+                  <span
+                    className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-semibold text-emerald-700 bg-emerald-50 border border-emerald-100"
+                    data-testid="gig-response-badge"
+                  >
+                    <Zap size={12} />
+                    {bucket === '1h'
+                      ? t('services.replies1h', 'Replies in 1h')
+                      : t('services.replies24h', 'Replies in 24h')}
+                  </span>
+                )}
+              </div>
+              <h1 className="text-2xl md:text-3xl font-bold text-gray-900" style={{ fontFamily: 'Playfair Display' }}>{displayTitle}</h1>
               <p className="text-gray-600 mt-1">{gig.provider?.name}{gig.area ? ` · ${gig.area}` : ''}</p>
               {(gig.rating_count > 0) && (
                 <div className="mt-2">
@@ -334,7 +364,7 @@ const GigDetail = () => {
 
             <div>
               <h2 className="text-lg font-bold mb-2">About this service</h2>
-              <p className="text-gray-700 whitespace-pre-line">{gig.description || 'No description provided.'}</p>
+              <p className="text-gray-700 whitespace-pre-line">{displayDescription || 'No description provided.'}</p>
             </div>
 
             {gig.faqs?.length > 0 && (
