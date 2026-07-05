@@ -433,15 +433,33 @@ class ServicesPitchActionRequest(BaseModel):
 async def act_on_services_pitch(
     req: ServicesPitchActionRequest, payload: dict = Depends(verify_token),
 ) -> dict:
+    """Idempotent record of the user's decision on the "Take Your Services
+    to the Next Level" upsell modal.
+
+    - `accepted=false`: just stamp `services_pitch_seen_at` so the modal
+      never opens again.
+    - `accepted=true`: same stamp, PLUS provision a real $0 provider
+      subscription — a `marketplace_providers` row with a 30-day trial
+      (idempotent via `_ensure_provider_record`) so the user can
+      immediately publish gigs. The trial window is also mirrored onto
+      the `users.provider_trial` field so the frontend can unlock the
+      "My Gigs" tab without needing a separate marketplace round-trip.
+    """
+    user_id = payload["user_id"]
     now = datetime.now(UTC)
     update: dict = {"services_pitch_seen_at": now.isoformat()}
+
     if req.accepted:
-        trial_end = now + timedelta(days=30)
+        # Lazy-import to avoid an import cycle between misc and marketplace.
+        from routes.marketplace import _ensure_provider_record
+
+        prov = await _ensure_provider_record(user_id)
+        trial_ends_at = prov.get("trial_ends_at") or (now + timedelta(days=30)).isoformat()
         update["provider_trial"] = {
-            "started_at": now.isoformat(),
-            "ends_at": trial_end.isoformat(),
+            "started_at": prov.get("created_at", now.isoformat()),
+            "ends_at": trial_ends_at,
             "source": "services-popup",
-            "status": "trial",
+            "status": prov.get("subscription_status", "trial"),
         }
-    await db.users.update_one({"id": payload["user_id"]}, {"$set": update})
+    await db.users.update_one({"id": user_id}, {"$set": update})
     return {"message": "OK"}

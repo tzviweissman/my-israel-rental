@@ -11,6 +11,15 @@ Build a bilingual (English/Hebrew) rental website named MyIsraelRental.com with 
 - **i18n**: i18next with English and Hebrew (RTL) support
 
 ## What's Been Implemented
+- [x] **"Take Your Services to the Next Level" upsell modal + $0 provider trial (2026-07-05)**: One-time promotional popup surfaced to every logged-in non-admin user until they either accept (→ $0 30-day provider trial + immediate redirect to My Gigs) or dismiss (→ stamped as seen, never shown again).
+  - **Backend `routes/misc.py`**: `POST /api/user/services-pitch/action` now (on accept) lazy-imports `_ensure_provider_record` from marketplace, creates/reuses the `marketplace_providers` row with a 30-day trial, and mirrors `{started_at, ends_at, source, status}` onto `users.provider_trial` so the frontend can gate My Gigs without an extra round-trip. Dismiss just stamps `services_pitch_seen_at`. Fully idempotent — repeated accepts don't duplicate the provider row.
+  - **Frontend `App.js`**: mounts `<ServicesUpsellModal />` when `user && !user.services_pitch_seen_at && user.role !== 'admin'`. After accept, modal calls `/auth/me` and pushes the refreshed user into AuthContext, which auto-hides the modal and unlocks the My Gigs tab.
+  - **Frontend `utils/providerTrial.js` + `DashboardTabs.jsx` + `Dashboard.js`**: new `canPublishGigs(user)` helper — true when `role === 'provider' | 'admin'` OR `provider_trial.ends_at` is in the future. My Gigs tab visibility and render check now both consult this helper, so renters/owners/managers who accepted the trial see the tab without a role change.
+  - **Verified live end-to-end**: reset renter@test.com → login shows modal → click "Start my free month" → API creates `marketplace_providers` row + writes `provider_trial` → redirect to `/dashboard?tab=my-gigs` → "Free trial — 30 days left" badge + "Create your first gig" empty state. Dismiss path: modal closes, no tab unlocked, modal does not reappear on reload. Idempotency: 2nd accept reuses same provider row (`providers count: 1` after two accepts).
+  - Files: `backend/routes/misc.py`, `frontend/src/App.js`, `frontend/src/components/ServicesUpsellModal.jsx`, `frontend/src/utils/providerTrial.js` (new), `frontend/src/components/dashboard/DashboardTabs.jsx`, `frontend/src/pages/Dashboard.js`.
+  - Testids: `services-upsell-modal`, `services-upsell-accept`, `services-upsell-dismiss`, `services-upsell-close`, `tab-my-gigs`.
+
+
 - [x] **White-label toggle for manager agency pages (2026-07-05)**: Managers can now brand their public `/manager/{id}` page to look like a standalone agency microsite instead of a MyIsraelRental subpage.
   - **Backend**: `PATCH /api/user/white-label` (manager/admin only). Persists `{white_label_mode, hero_color, tagline, contact_email, contact_phone}` under `users.white_label`. Hex validated with `#RRGGBB` regex; mode restricted to `'attribution' | 'off'`. Automatically included in the existing `GET /api/manager/{id}/properties` response (single field read).
   - **Public page** (`ManagerPage.js`):

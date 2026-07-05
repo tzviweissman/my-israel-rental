@@ -7,6 +7,7 @@ import '@/App.css';
 
 import Navigation from './components/Navigation';
 import ImpersonationBanner from './components/ImpersonationBanner';
+import ServicesUpsellModal from './components/ServicesUpsellModal';
 import WhatsAppButton from './components/WhatsAppButton';
 import AccessibilityButton from './components/AccessibilityButton';
 import { installStaleBuildInterceptor } from './utils/staleBuildInterceptor';
@@ -148,6 +149,15 @@ function App() {
         <div className="App">
           <ImpersonationBanner />
           <Navigation />
+          {/* One-time services marketplace upsell — shown to every logged-in
+              user until they either accept (→ $0 provider trial + My Gigs
+              redirect) or dismiss. Admins are exempt so the internal team
+              never gets nagged. `services_pitch_seen_at` is stamped on the
+              user doc by /api/user/services-pitch/action so the modal
+              never reappears once actioned. */}
+          {user && !user.services_pitch_seen_at && user.role !== 'admin' && (
+            <ServicesUpsellModal />
+          )}
           <WhatsAppButton />
           <AccessibilityButton />
           <Routes>

@@ -21,6 +21,7 @@ import MyGigsTab from '../components/dashboard/MyGigsTab';
 import ManagerHeader from '../components/dashboard/ManagerHeader';
 import ShareLinkRow from '../components/dashboard/ShareLinkRow';
 import DashboardTabs from '../components/dashboard/DashboardTabs';
+import { canPublishGigs } from '../utils/providerTrial';
 import { DOCUMENT_SERVICES_ENABLED } from '../config/features';
 
 const Dashboard = () => {
@@ -227,6 +228,7 @@ const Dashboard = () => {
           activeTab={activeTab}
           setActiveTab={setActiveTab}
           role={user?.role}
+          user={user}
           unreadMessages={unreadConversations}
         />
 
@@ -309,7 +311,7 @@ const Dashboard = () => {
           <MessagesTab API={API} token={token} onUnreadChange={setUnreadConversations} />
         )}
 
-        {activeTab === 'my-gigs' && user?.role === 'provider' && (
+        {activeTab === 'my-gigs' && canPublishGigs(user) && (
           <MyGigsTab API={API} token={token} />
         )}
       </div>

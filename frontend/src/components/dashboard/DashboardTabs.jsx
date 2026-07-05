@@ -2,6 +2,7 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Layers, KeyRound, Home, Sparkles, Bell, Heart, MessageCircle, Briefcase } from 'lucide-react';
 import { DOCUMENT_SERVICES_ENABLED } from '../../config/features';
+import { canPublishGigs } from '../../utils/providerTrial';
 
 /**
  * Horizontal tab navigation for the Dashboard. Pure presentational —
@@ -17,12 +18,16 @@ const ACTIVE_RED = 'bg-white text-red-500 shadow-sm';
 const cls = (active, activeColor = ACTIVE_TEAL) =>
   `${BASE} ${active ? activeColor : INACTIVE}`;
 
-const DashboardTabs = ({ activeTab, setActiveTab, role, unreadMessages = 0 }) => {
+const DashboardTabs = ({ activeTab, setActiveTab, role, user, unreadMessages = 0 }) => {
   const { t } = useTranslation();
   const isRenter = role === 'renter';
   // Property-listing tabs are hidden for pure service providers — they
   // only need bookings + messages + My Gigs.
   const isPropertyLister = ['owner', 'manager', 'admin'].includes(role);
+  // My Gigs is unlocked for pure providers AND for anyone else (owner /
+  // manager / renter / admin) who accepted the $0 provider trial from
+  // the "Take Your Services to the Next Level" upsell modal.
+  const canPublish = canPublishGigs(user);
 
   return (
     <div className="relative">
@@ -55,7 +60,7 @@ const DashboardTabs = ({ activeTab, setActiveTab, role, unreadMessages = 0 }) =>
           </button>
         )}
 
-        {role === 'provider' && (
+        {canPublish && (
           <button
             onClick={() => setActiveTab('my-gigs')}
             className={`${cls(activeTab === 'my-gigs', ACTIVE_GOLD)} flex items-center justify-center gap-1.5`}
