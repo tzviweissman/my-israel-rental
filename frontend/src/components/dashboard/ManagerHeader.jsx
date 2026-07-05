@@ -130,22 +130,41 @@ const ManagerHeader = ({ user, token, API }) => {
   );
 };
 
-// Simple public-page settings — just the two fields the manager can
-// override: a tagline (replaces the default "N Properties Available"
-// subtitle) and a public contact email that renders as a small footer
-// link on their /manager/{id} page. Everything else on that page is
-// unchanged.
+// Public agency-page overrides — bio, extra services, and public
+// contact email. Extra services are a lightweight list (title + optional
+// description) meant for things like "Cleaning", "Airport pickup",
+// "Concierge" that don't warrant a full marketplace gig.
 const WhiteLabelSettings = ({ API, token, initial }) => {
-  const [tagline, setTagline] = useState(initial.tagline || '');
+  const [bio, setBio] = useState(initial.bio || '');
+  const [services, setServices] = useState(
+    Array.isArray(initial.services) && initial.services.length
+      ? initial.services
+      : [],
+  );
   const [contactEmail, setContactEmail] = useState(initial.contact_email || '');
   const [saving, setSaving] = useState(false);
+
+  const updateService = (i, key, value) => {
+    setServices((prev) => prev.map((s, idx) => (idx === i ? { ...s, [key]: value } : s)));
+  };
+  const removeService = (i) => {
+    setServices((prev) => prev.filter((_, idx) => idx !== i));
+  };
+  const addService = () => {
+    if (services.length >= 20) return;
+    setServices((prev) => [...prev, { title: '', description: '' }]);
+  };
 
   const save = async () => {
     setSaving(true);
     try {
+      // Strip empty rows client-side so the "0 saved" state is intuitive.
+      const cleanServices = services
+        .map((s) => ({ title: (s.title || '').trim(), description: (s.description || '').trim() }))
+        .filter((s) => s.title);
       await axios.patch(
         `${API}/user/white-label`,
-        { tagline, contact_email: contactEmail },
+        { bio, services: cleanServices, contact_email: contactEmail },
         { headers: { Authorization: `Bearer ${token}` } },
       );
       toast.success('Settings saved');
@@ -161,46 +180,102 @@ const WhiteLabelSettings = ({ API, token, initial }) => {
       <div className="mb-3">
         <h3 className="text-sm font-bold text-gray-900">Public page details</h3>
         <p className="text-[11px] text-gray-500 leading-snug">
-          Optional overrides for your public agency page. Leave blank to keep the defaults.
+          Personalize your public agency page. Leave any field blank to keep the default look.
         </p>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-        <label className="text-xs">
-          <span className="block text-gray-700 font-medium mb-1">Tagline (replaces "N Properties Available")</span>
-          <input
-            type="text"
-            value={tagline}
-            onChange={(e) => setTagline(e.target.value)}
-            placeholder="Boutique management · Est. 2019 · Jerusalem"
-            className="w-full h-9 px-2 rounded border border-gray-200 text-xs"
-            data-testid="wl-tagline"
-          />
-        </label>
-        <label className="text-xs">
-          <span className="block text-gray-700 font-medium mb-1">Public contact email</span>
-          <input
-            type="email"
-            value={contactEmail}
-            onChange={(e) => setContactEmail(e.target.value)}
-            placeholder="hello@youragency.com"
-            className="w-full h-9 px-2 rounded border border-gray-200 text-xs"
-            data-testid="wl-contact-email"
-          />
-        </label>
+      <label className="text-xs block mb-4">
+        <span className="flex items-center justify-between text-gray-700 font-medium mb-1">
+          <span>About / bio</span>
+          <span className="text-[10px] text-gray-400">{bio.length}/2000</span>
+        </span>
+        <textarea
+          value={bio}
+          maxLength={2000}
+          onChange={(e) => setBio(e.target.value)}
+          rows={5}
+          placeholder="Tell renters who you are — years in the business, what neighborhoods you specialize in, the extra care you bring to your listings…"
+          className="w-full px-2 py-2 rounded border border-gray-200 text-xs leading-snug"
+          data-testid="wl-bio"
+        />
+      </label>
+
+      <div className="mb-4">
+        <div className="flex items-center justify-between mb-2">
+          <span className="text-xs text-gray-700 font-medium">Other services you offer</span>
+          <button
+            type="button"
+            onClick={addService}
+            disabled={services.length >= 20}
+            className="text-[11px] font-semibold text-[#1E6A6A] hover:underline disabled:opacity-50 disabled:no-underline"
+            data-testid="wl-add-service"
+          >
+            + Add service
+          </button>
+        </div>
+        {services.length === 0 && (
+          <p className="text-[11px] text-gray-400 italic">
+            e.g. Cleaning between guests · Airport pickup · Shabbat concierge · Rental contracts in English
+          </p>
+        )}
+        <div className="space-y-2">
+          {services.map((s, i) => (
+            <div key={i} className="flex gap-2" data-testid={`wl-service-row-${i}`}>
+              <div className="flex-1 grid grid-cols-1 sm:grid-cols-[minmax(0,180px)_1fr] gap-2">
+                <input
+                  type="text"
+                  value={s.title || ''}
+                  onChange={(e) => updateService(i, 'title', e.target.value)}
+                  placeholder="Service name"
+                  className="h-9 px-2 rounded border border-gray-200 text-xs"
+                  maxLength={80}
+                  data-testid={`wl-service-title-${i}`}
+                />
+                <input
+                  type="text"
+                  value={s.description || ''}
+                  onChange={(e) => updateService(i, 'description', e.target.value)}
+                  placeholder="Short description (optional)"
+                  className="h-9 px-2 rounded border border-gray-200 text-xs"
+                  maxLength={400}
+                  data-testid={`wl-service-desc-${i}`}
+                />
+              </div>
+              <button
+                type="button"
+                onClick={() => removeService(i)}
+                className="shrink-0 h-9 w-9 rounded border border-gray-200 text-red-500 hover:bg-red-50 flex items-center justify-center"
+                aria-label="Remove service"
+                data-testid={`wl-service-remove-${i}`}
+              >
+                ×
+              </button>
+            </div>
+          ))}
+        </div>
       </div>
 
-      <div className="mt-4">
-        <button
-          type="button"
-          onClick={save}
-          disabled={saving}
-          className="px-4 py-2 rounded-lg bg-[#1E6A6A] text-white text-xs font-semibold hover:bg-[#164a4a] disabled:opacity-60"
-          data-testid="wl-save-btn"
-        >
-          {saving ? 'Saving…' : 'Save'}
-        </button>
-      </div>
+      <label className="text-xs block mb-4">
+        <span className="block text-gray-700 font-medium mb-1">Public contact email</span>
+        <input
+          type="email"
+          value={contactEmail}
+          onChange={(e) => setContactEmail(e.target.value)}
+          placeholder="hello@youragency.com"
+          className="w-full h-9 px-2 rounded border border-gray-200 text-xs"
+          data-testid="wl-contact-email"
+        />
+      </label>
+
+      <button
+        type="button"
+        onClick={save}
+        disabled={saving}
+        className="px-4 py-2 rounded-lg bg-[#1E6A6A] text-white text-xs font-semibold hover:bg-[#164a4a] disabled:opacity-60"
+        data-testid="wl-save-btn"
+      >
+        {saving ? 'Saving…' : 'Save'}
+      </button>
     </div>
   );
 };

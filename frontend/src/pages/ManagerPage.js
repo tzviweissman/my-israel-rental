@@ -142,12 +142,50 @@ const ManagerPage = () => {
               <h1 className="text-4xl font-bold mb-2 text-white" style={{ fontFamily: 'Playfair Display' }} data-testid="manager-name">
                 {data.manager.name}
               </h1>
-              <p className="mt-2 text-sm" style={{ color: '#D4AF37' }} data-testid="manager-tagline">
-                {wl.tagline || `${data.properties.length} ${data.properties.length === 1 ? 'Property' : 'Properties'} Available`}
+              <p className="mt-2 text-sm" style={{ color: '#D4AF37' }}>
+                {data.properties.length} {data.properties.length === 1 ? 'Property' : 'Properties'} Available
               </p>
             </div>
           </div>
         </div>
+
+        {/* Bio — manager's own words about themselves / their agency. */}
+        {wl.bio && (
+          <div
+            className="mb-8 p-5 rounded-xl bg-white border border-[#E5E5E5]"
+            data-testid="manager-bio"
+          >
+            <h2 className="text-lg font-bold mb-2" style={{ fontFamily: 'Playfair Display', color: '#1E6A6A' }}>
+              About {data.manager.name}
+            </h2>
+            <p className="text-sm text-gray-700 leading-relaxed whitespace-pre-line">{wl.bio}</p>
+          </div>
+        )}
+
+        {/* Other services — free-form list of extra offerings beyond
+            properties (cleaning, airport pickup, concierge, etc.). Each
+            entry is a title + optional description. */}
+        {Array.isArray(wl.services) && wl.services.length > 0 && (
+          <div className="mb-8" data-testid="manager-services">
+            <h2 className="text-lg font-bold mb-3" style={{ fontFamily: 'Playfair Display', color: '#1E6A6A' }}>
+              Other services offered
+            </h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+              {wl.services.map((s, i) => (
+                <div
+                  key={i}
+                  className="p-4 rounded-xl bg-white border border-[#E5E5E5] hover:border-[#D4AF37] transition-colors"
+                  data-testid={`manager-service-${i}`}
+                >
+                  <p className="text-sm font-semibold text-gray-900">{s.title}</p>
+                  {s.description && (
+                    <p className="text-xs text-gray-600 mt-1 leading-snug">{s.description}</p>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* Rental Type Tabs */}
         {availableTypes.length > 2 && (

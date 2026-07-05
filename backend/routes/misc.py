@@ -363,12 +363,20 @@ async def delete_user_logo(payload: dict = Depends(verify_token)) -> dict:
 # behind a paid agency tier later; for now it's simply available to any
 # manager or admin.
 
+class ManagerServiceItem(BaseModel):
+    title: str
+    description: str | None = None
+
+
 class WhiteLabelRequest(BaseModel):
-    # Kept minimal per product decision: only a public tagline (overrides
-    # the "N Properties Available" line) and an optional public contact
-    # email. No hero recolor, no mode toggle, no nav-hiding — the manager
-    # page stays visually consistent with the rest of the site.
-    tagline: str | None = None
+    # Public-page overrides for the manager's /manager/{id} agency page.
+    # `bio` renders as a paragraph under the hero. `services` is a small
+    # list of extra offerings (cleaning, airport pickup, concierge…) each
+    # with an optional description. Kept intentionally lightweight — no
+    # pricing, no images; if managers want richer offerings they can
+    # publish real Gigs in the Services Marketplace.
+    bio: str | None = None
+    services: list[ManagerServiceItem] | None = None
     contact_email: str | None = None
 
 
@@ -382,8 +390,25 @@ async def update_white_label(
             status_code=403,
             detail="These controls are available on manager and admin accounts.",
         )
+
+    # Normalize services: strip whitespace, drop empties, cap at 20 rows
+    # to keep the manager page from turning into an ad-wall.
+    services_clean: list[dict] = []
+    for s in (req.services or []):
+        title = (s.title or "").strip()
+        if not title:
+            continue
+        desc = (s.description or "").strip()
+        services_clean.append({
+            "title": title[:80],
+            "description": desc[:400] if desc else None,
+        })
+        if len(services_clean) >= 20:
+            break
+
     doc = {
-        "tagline": (req.tagline or "").strip() or None,
+        "bio": (req.bio or "").strip()[:2000] or None,
+        "services": services_clean,
         "contact_email": (req.contact_email or "").strip() or None,
         "updated_at": datetime.now(UTC).isoformat(),
     }
