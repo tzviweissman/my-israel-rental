@@ -6,7 +6,7 @@ from typing import List
 
 from emergentintegrations.llm.chat import LlmChat, UserMessage
 from fastapi import APIRouter, Body, Depends, File, HTTPException, Request, UploadFile
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
 
 from models import ContactRequest, DocumentServiceRequest, TranslationRequest
 from models_response import (
@@ -363,18 +363,13 @@ async def delete_user_logo(payload: dict = Depends(verify_token)) -> dict:
 # behind a paid agency tier later; for now it's simply available to any
 # manager or admin.
 
-_WL_HEX_RE = __import__("re").compile(r"^#[0-9a-fA-F]{6}$")
-
-
 class WhiteLabelRequest(BaseModel):
-    # 'attribution' keeps a small "Powered by MyIsraelRental" pill on the
-    # hero; 'off' removes it and hides the global site nav entirely on
-    # the /manager/{id} page.
-    white_label_mode: str = Field(default="attribution")
-    hero_color: str | None = None            # e.g. "#8b3a2b"
-    tagline: str | None = None               # replaces "N Properties Available"
+    # Kept minimal per product decision: only a public tagline (overrides
+    # the "N Properties Available" line) and an optional public contact
+    # email. No hero recolor, no mode toggle, no nav-hiding — the manager
+    # page stays visually consistent with the rest of the site.
+    tagline: str | None = None
     contact_email: str | None = None
-    contact_phone: str | None = None
 
 
 @api_router.patch("/user/white-label", response_model=MessageResponse)
@@ -385,25 +380,12 @@ async def update_white_label(
     if role not in {"manager", "admin"}:
         raise HTTPException(
             status_code=403,
-            detail="White-label controls are available on manager and admin accounts.",
+            detail="These controls are available on manager and admin accounts.",
         )
-    mode = req.white_label_mode.lower().strip()
-    if mode not in {"attribution", "off"}:
-        raise HTTPException(status_code=400, detail="mode must be 'attribution' or 'off'")
-    if req.hero_color and not _WL_HEX_RE.match(req.hero_color):
-        raise HTTPException(status_code=400, detail="hero_color must be a #RRGGBB hex string")
-
-    # We store the whole struct under a single sub-doc so serving the
-    # public /manager/{id} endpoint stays a single field read and adding
-    # a new sub-field later (custom domain, favicon, etc.) doesn't need
-    # a migration.
     doc = {
-        "white_label_mode": mode,
-        "hero_color": (req.hero_color or "").strip() or None,
         "tagline": (req.tagline or "").strip() or None,
         "contact_email": (req.contact_email or "").strip() or None,
-        "contact_phone": (req.contact_phone or "").strip() or None,
         "updated_at": datetime.now(UTC).isoformat(),
     }
     await db.users.update_one({"id": payload["user_id"]}, {"$set": {"white_label": doc}})
-    return {"message": "White-label settings saved"}
+    return {"message": "Settings saved"}
