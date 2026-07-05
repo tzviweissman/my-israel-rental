@@ -179,6 +179,23 @@ async def startup_tasks() -> None:
             await asyncio.sleep(1800)  # 30 minutes
 
     asyncio.create_task(duplicate_auto_cleanup_loop())
+
+    # Auto owner-nudge loop — every 30 min, email owners whose renter
+    # inbound message has been unanswered for 12h+. Reuses the same
+    # `chat_nudges` throttle collection as the admin-manual nudge so
+    # neither surface double-emails owners.
+    from routes.admin import run_auto_owner_nudge_pass, AUTO_NUDGE_LOOP_INTERVAL_SEC
+
+    async def auto_owner_nudge_loop() -> None:
+        await asyncio.sleep(180)  # Wait for indexes + templates.
+        while True:
+            try:
+                await run_auto_owner_nudge_pass(logger_prefix="auto-nudge-loop")
+            except Exception as e:  # noqa: BLE001
+                logger.warning("auto_owner_nudge_loop iteration failed: %s", e)
+            await asyncio.sleep(AUTO_NUDGE_LOOP_INTERVAL_SEC)
+
+    asyncio.create_task(auto_owner_nudge_loop())
     try:
         ensure_contract_templates(ROOT_DIR / "uploads")
         logger.info("Contract templates ready")

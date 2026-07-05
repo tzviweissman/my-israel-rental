@@ -6,7 +6,7 @@ from collections.abc import AsyncGenerator
 from datetime import UTC, datetime, timedelta
 
 import jwt
-from typing import List
+from typing import List, Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Request
 from fastapi.responses import StreamingResponse
@@ -1727,7 +1727,7 @@ async def get_all_chats(payload: dict = Depends(verify_token)) -> list[dict]:
             hours_since = (now - last_dt).total_seconds() / 3600.0
         except Exception:
             hours_since = None
-        if last_sender_role == "renter" and hours_since is not None and hours_since >= 24:
+        if last_sender_role == "renter" and hours_since is not None and hours_since >= 12:
             unresponsive = True
 
         # Read throttle: when was the last nudge email sent for this conv?
@@ -1816,15 +1816,8 @@ async def nudge_owner(req: NudgeOwnerRequest, payload: dict = Depends(verify_tok
         except Exception:
             pass
 
-    # Compose the courtesy email. We deliberately keep it gentle — these
-    # owners are usually individual landlords, not staff.
-    # Fire-and-forget the actual Postmark call so the admin gets a snappy
-    # response — Postmark API latency through some regions can exceed the
-    # Cloudflare 30s edge timeout and we don't want the request to fail
-    # *after* doing all the DB work.
-    from utils.email import send_email, FRONTEND_URL
-    inbox_link = f"{(FRONTEND_URL or 'https://myisraelrental.com').rstrip('/')}/chat/{property_id}"
-    renter_name = (renter or {}).get("name") or "a prospective renter"
+    # Compose the courtesy email — shared helper drives the copy so the
+    # admin-manual and auto-loop nudges stay in lockstep.
     prop_title = prop.get("title") or "your listing"
 
     # Record the throttle row BEFORE dispatching so a second click within
@@ -1838,28 +1831,18 @@ async def nudge_owner(req: NudgeOwnerRequest, payload: dict = Depends(verify_tok
             "renter_id": renter_id,
             "sent_at": now.isoformat(),
             "sent_by_admin": payload.get("user_id"),
+            "source": "admin",
             "email_status": "queued",
         }},
         upsert=True,
     )
 
-    asyncio.create_task(send_email(
-        to_email=owner["email"],
-        subject=f"Reminder: {renter_name} is waiting to hear from you about {prop_title}",
-        html_body=(
-            f"<p>Hi {owner.get('name') or ''},</p>"
-            f"<p><b>{renter_name}</b> messaged you about <b>{prop_title}</b> on MyIsraelRental "
-            f"more than 24 hours ago and hasn't heard back yet.</p>"
-            f"<p>Replies within a day dramatically increase the chance the listing gets rented — "
-            f"prospective tenants usually message several owners in parallel and lock in with whoever replies first.</p>"
-            f"<p style='margin:24px 0;'>"
-            f"<a href=\"{inbox_link}\" style='background:#1E6A6A;color:#fff;padding:10px 18px;border-radius:8px;text-decoration:none;font-weight:600;'>Open the conversation</a>"
-            f"</p>"
-            f"<p style='color:#888;font-size:13px;'>If you no longer have this listing available, "
-            f"please mark it as unavailable in your dashboard so we stop showing it.</p>"
-        ),
-        tag="admin-owner-nudge",
-        skip_suppression_check=False,
+    asyncio.create_task(_send_owner_nudge_email(
+        property_id=property_id,
+        owner=owner,
+        renter=renter,
+        prop_title=prop_title,
+        source="admin",
     ))
 
     return {
@@ -1867,6 +1850,224 @@ async def nudge_owner(req: NudgeOwnerRequest, payload: dict = Depends(verify_tok
         "owner_name": owner.get("name"),
         "sent_at": now.isoformat(),
     }
+
+
+# ---------------------------------------------------------------------------
+# Auto owner-nudge — background pass that emails owners whose renter-inbound
+# conversation has been unanswered for AUTO_NUDGE_STALE_HOURS. Same email
+# body + throttle collection as the admin-triggered version, so:
+#   * the admin UI's "Nudge sent Xh ago" pill stays accurate,
+#   * an admin click will 429 if the auto-pass fired within 24h,
+#   * and vice versa (auto skips if an admin nudge already fired).
+# ---------------------------------------------------------------------------
+
+AUTO_NUDGE_STALE_HOURS = 12
+AUTO_NUDGE_THROTTLE_HOURS = 24
+AUTO_NUDGE_LOOP_INTERVAL_SEC = 1800  # 30 min
+
+
+async def _send_owner_nudge_email(
+    *,
+    property_id: str,
+    owner: dict,
+    renter: Optional[dict],
+    prop_title: str,
+    source: str,
+) -> None:
+    """Compose + dispatch the courtesy email. Shared by the admin-manual
+    route and the auto-pass runner. Copy references the 12h delay so it
+    matches the automated cadence."""
+    from utils.email import send_email, FRONTEND_URL
+
+    inbox_link = f"{(FRONTEND_URL or 'https://myisraelrental.com').rstrip('/')}/chat/{property_id}"
+    renter_name = (renter or {}).get("name") or "a prospective renter"
+    tag = "auto-owner-nudge" if source == "auto" else "admin-owner-nudge"
+
+    await send_email(
+        to_email=owner["email"],
+        subject=f"Reminder: {renter_name} is waiting to hear from you about {prop_title}",
+        html_body=(
+            f"<p>Hi {owner.get('name') or ''},</p>"
+            f"<p><b>{renter_name}</b> messaged you about <b>{prop_title}</b> on MyIsraelRental "
+            f"more than 12 hours ago and hasn't heard back yet.</p>"
+            f"<p>Replies within a day dramatically increase the chance the listing gets rented — "
+            f"prospective tenants usually message several owners in parallel and lock in with whoever replies first.</p>"
+            f"<p style='margin:24px 0;'>"
+            f"<a href=\"{inbox_link}\" style='background:#1E6A6A;color:#fff;padding:10px 18px;border-radius:8px;text-decoration:none;font-weight:600;'>Open the conversation</a>"
+            f"</p>"
+            f"<p style='color:#888;font-size:13px;'>If you no longer have this listing available, "
+            f"please mark it as unavailable in your dashboard so we stop showing it. "
+            f"You can turn these reminders off from Dashboard → Settings.</p>"
+        ),
+        tag=tag,
+        skip_suppression_check=False,
+    )
+
+
+async def run_auto_owner_nudge_pass(logger_prefix: str = "auto-nudge") -> dict:
+    """Single pass: find every conversation whose latest message is from a
+    renter and has been sitting unanswered for ``AUTO_NUDGE_STALE_HOURS``,
+    then send a throttled email to the owner. Returns a small stats blob
+    for the log entry so admins can see what the last run did."""
+    now = datetime.now(UTC)
+    cutoff = now - timedelta(hours=AUTO_NUDGE_STALE_HOURS)
+    cutoff_iso = cutoff.isoformat()
+
+    # Aggregate the newest message per (property, participant-pair) —
+    # matches the same key shape used by the admin chats view so both
+    # feeds converge on the same conv_key namespace.
+    stats = {"scanned": 0, "sent": 0, "throttled": 0, "already_replied": 0, "no_email": 0, "opted_out": 0, "errors": 0}
+    async for msg in db.messages.aggregate([
+        {"$match": {"created_at": {"$lte": cutoff_iso}}},
+        {"$sort": {"created_at": -1}},
+        {"$group": {
+            "_id": {
+                "property_id": "$property_id",
+                "pair": {"$cond": [
+                    {"$lt": ["$sender_id", "$receiver_id"]},
+                    ["$sender_id", "$receiver_id"],
+                    ["$receiver_id", "$sender_id"],
+                ]},
+            },
+            "latest": {"$first": "$$ROOT"},
+        }},
+    ]):
+        stats["scanned"] += 1
+        latest = msg.get("latest") or {}
+        property_id = latest.get("property_id")
+        sender_id = latest.get("sender_id")
+        receiver_id = latest.get("receiver_id")
+        created_iso = latest.get("created_at")
+        if not (property_id and sender_id and receiver_id and created_iso):
+            continue
+
+        # Skip if the freshest message is already newer than the cutoff.
+        try:
+            created_dt = datetime.fromisoformat(created_iso.replace("Z", "+00:00"))
+            if created_dt.tzinfo is None:
+                created_dt = created_dt.replace(tzinfo=UTC)
+        except Exception:  # noqa: BLE001
+            continue
+        if created_dt > cutoff:
+            continue
+
+        prop = await db.properties.find_one(
+            {"id": property_id}, {"_id": 0, "title": 1, "owner_id": 1},
+        )
+        if not prop:
+            continue
+        owner_id = prop.get("owner_id")
+        if not owner_id:
+            continue
+
+        # We only nudge when the renter is the *latest* sender.
+        if sender_id == owner_id:
+            stats["already_replied"] += 1
+            continue
+        renter_id = sender_id if receiver_id == owner_id else (receiver_id if sender_id == owner_id else None)
+        if not renter_id or renter_id == owner_id:
+            continue
+
+        conv_key = f"{property_id}_{min(owner_id, renter_id)}_{max(owner_id, renter_id)}"
+
+        # Throttle — one nudge (of any source) per conv per 24h.
+        existing = await db.chat_nudges.find_one({"conv_key": conv_key}, {"_id": 0, "sent_at": 1})
+        if existing and existing.get("sent_at"):
+            try:
+                sent_dt = datetime.fromisoformat(existing["sent_at"].replace("Z", "+00:00"))
+                if sent_dt.tzinfo is None:
+                    sent_dt = sent_dt.replace(tzinfo=UTC)
+                if (now - sent_dt).total_seconds() / 3600.0 < AUTO_NUDGE_THROTTLE_HOURS:
+                    stats["throttled"] += 1
+                    continue
+            except Exception:  # noqa: BLE001
+                pass
+
+        owner = await db.users.find_one({"id": owner_id}, {"_id": 0, "name": 1, "email": 1, "auto_nudge_opt_out": 1})
+        if not owner or not owner.get("email"):
+            stats["no_email"] += 1
+            continue
+        # Explicit opt-out — a single boolean under users.auto_nudge_opt_out.
+        # Absent field defaults to False so this is opt-in-to-quiet.
+        if owner.get("auto_nudge_opt_out"):
+            stats["opted_out"] += 1
+            continue
+
+        renter = await db.users.find_one({"id": renter_id}, {"_id": 0, "name": 1})
+
+        # Write the throttle row BEFORE emailing so a concurrent second
+        # pass (or an admin click) inside the same second can't double-fire.
+        await db.chat_nudges.update_one(
+            {"conv_key": conv_key},
+            {"$set": {
+                "conv_key": conv_key,
+                "property_id": property_id,
+                "owner_id": owner_id,
+                "renter_id": renter_id,
+                "sent_at": now.isoformat(),
+                "sent_by_admin": None,
+                "source": "auto",
+                "email_status": "queued",
+            }},
+            upsert=True,
+        )
+        try:
+            await _send_owner_nudge_email(
+                property_id=property_id,
+                owner=owner,
+                renter=renter,
+                prop_title=prop.get("title") or "your listing",
+                source="auto",
+            )
+            stats["sent"] += 1
+        except Exception as e:  # noqa: BLE001
+            stats["errors"] += 1
+            logger.warning("[%s] send_email failed for conv=%s: %s", logger_prefix, conv_key, e)
+
+    # Persist a run log so admins can see the last runs from the Chats tab.
+    await db.admin_auto_nudge_log.insert_one({
+        "_id": str(uuid.uuid4()),
+        "ran_at": now.isoformat(),
+        **stats,
+    })
+    logger.info("[%s] pass complete: %s", logger_prefix, stats)
+    return stats
+
+
+@api_router.get("/admin/auto-owner-nudge/status")
+async def auto_owner_nudge_status(payload: dict = Depends(verify_token)) -> dict:
+    """Return the last 20 auto-nudge runs so the admin Chats tab can render
+    a "auto-nudges on · 12h threshold" strip with counts."""
+    if payload['role'] != 'admin':
+        raise HTTPException(status_code=403, detail="Admin access required")
+    runs = await db.admin_auto_nudge_log.find({}, {"_id": 0}).sort("ran_at", -1).to_list(20)
+    return {
+        "enabled": True,
+        "stale_hours": AUTO_NUDGE_STALE_HOURS,
+        "throttle_hours": AUTO_NUDGE_THROTTLE_HOURS,
+        "runs": runs,
+    }
+
+
+@api_router.post("/admin/auto-owner-nudge/run-now")
+async def auto_owner_nudge_run_now(payload: dict = Depends(verify_token)) -> dict:
+    """Admin escape hatch — triggers a scan on demand. Same code path as
+    the background loop, so any bug shows up here without waiting 30 min."""
+    if payload['role'] != 'admin':
+        raise HTTPException(status_code=403, detail="Admin access required")
+    stats = await run_auto_owner_nudge_pass(logger_prefix="auto-nudge-manual")
+    return stats
+
+
+@api_router.put("/user/auto-nudge-opt-out", response_model=MessageResponse)
+async def set_auto_nudge_opt_out(request: Request, payload: dict = Depends(verify_token)) -> dict:
+    """Owner-facing toggle. Owners who don't want the 12h auto-reminder
+    can flip this flag from Dashboard → Settings. Doesn't affect the
+    admin-triggered nudge (admins can still push a reminder manually)."""
+    body = await request.json()
+    opt_out = bool(body.get("opt_out", False))
+    await db.users.update_one({"id": payload["user_id"]}, {"$set": {"auto_nudge_opt_out": opt_out}})
+    return {"message": "Auto-nudge preference saved"}
 
 
 @api_router.get("/admin/document-services", response_model=list[ServiceRequestOut])

@@ -1,6 +1,6 @@
 import React, { useState, useContext } from 'react';
 import { useTranslation } from 'react-i18next';
-import { KeyRound, EyeOff, Eye, Globe, MessageCircle, Check, Home as HomeIcon } from 'lucide-react';
+import { KeyRound, EyeOff, Eye, Globe, MessageCircle, Check, Home as HomeIcon, Bell } from 'lucide-react';
 import { toast } from 'sonner';
 import axios from 'axios';
 import { AuthContext } from '../../App';
@@ -18,6 +18,32 @@ const SettingsTab = ({ user, token, API }) => {
   // the field shows what we already have on file.
   const [whatsappNumber, setWhatsappNumber] = useState(user?.phone || '');
   const [savingWhatsapp, setSavingWhatsapp] = useState(false);
+
+  // Owner-only opt-out for the automated 12h chat nudge. Absent field
+  // treated as enabled (opt-in-to-quiet) — matches the backend default.
+  const [autoNudgeOptOut, setAutoNudgeOptOut] = useState(!!user?.auto_nudge_opt_out);
+  const [savingAutoNudge, setSavingAutoNudge] = useState(false);
+  const isPropertyLister = ['owner', 'manager', 'admin'].includes(user?.role);
+
+  const handleToggleAutoNudge = async () => {
+    const next = !autoNudgeOptOut;
+    setSavingAutoNudge(true);
+    try {
+      await axios.put(
+        `${API}/user/auto-nudge-opt-out`,
+        { opt_out: next },
+        { headers: { Authorization: `Bearer ${token}` } },
+      );
+      setAutoNudgeOptOut(next);
+      toast.success(next
+        ? t('settings.autoNudgeOff', 'Auto reminders turned off')
+        : t('settings.autoNudgeOn', 'Auto reminders turned on'));
+    } catch (err) {
+      toast.error(err.response?.data?.detail || 'Failed to save preference');
+    } finally {
+      setSavingAutoNudge(false);
+    }
+  };
 
   // Role switch: users can flip between renter ↔ owner self-service.
   // Managers can also step down to renter. Admins never see this card —
@@ -262,6 +288,57 @@ const SettingsTab = ({ user, token, API }) => {
           {t('settings.whatsappLeaveBlank', 'Leave blank to opt out of WhatsApp notifications. International format recommended (+country code).')}
         </p>
       </div>
+
+      {/* Auto chat-reminder toggle — visible only for owner/manager/admin
+          since renters aren't the ones being nudged. Backed by
+          PUT /api/user/auto-nudge-opt-out. */}
+      {isPropertyLister && (
+        <div
+          className="bg-white rounded-2xl border border-gray-200 p-6 max-w-2xl mb-6"
+          data-testid="auto-nudge-card"
+        >
+          <div className="flex items-center gap-3 mb-4">
+            <div className="p-3 rounded-full bg-amber-500/15">
+              <Bell size={24} className="text-amber-600" />
+            </div>
+            <div className="flex-1">
+              <h3 className="text-lg font-bold text-gray-900">
+                {t('settings.autoNudgeTitle', 'Auto reply reminders')}
+              </h3>
+              <p className="text-sm text-gray-500">
+                {t('settings.autoNudgeHint', "We'll email you if a renter's message has been sitting in your inbox for 12+ hours without a reply. Replies within a day dramatically increase booking rates.")}
+              </p>
+            </div>
+          </div>
+          <label className="flex items-center gap-3 cursor-pointer" data-testid="auto-nudge-toggle-row">
+            <button
+              type="button"
+              role="switch"
+              aria-checked={!autoNudgeOptOut}
+              onClick={handleToggleAutoNudge}
+              disabled={savingAutoNudge}
+              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                autoNudgeOptOut ? 'bg-gray-300' : 'bg-[#1E6A6A]'
+              } disabled:opacity-60`}
+              data-testid="auto-nudge-toggle"
+            >
+              <span
+                className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                  autoNudgeOptOut ? 'translate-x-1' : 'translate-x-6'
+                }`}
+              />
+            </button>
+            <span className="text-sm font-medium text-gray-800">
+              {autoNudgeOptOut
+                ? t('settings.autoNudgeOffLabel', 'Off — no auto reminders')
+                : t('settings.autoNudgeOnLabel', 'On — remind me after 12h')}
+            </span>
+          </label>
+          <p className="text-[11px] text-gray-400 mt-2">
+            {t('settings.autoNudgeThrottle', 'One reminder per conversation every 24 hours. Admins can still send manual reminders.')}
+          </p>
+        </div>
+      )}
 
       <div className="bg-white rounded-2xl border border-gray-200 p-6 max-w-2xl">
         <div className="flex items-center gap-3 mb-6">
