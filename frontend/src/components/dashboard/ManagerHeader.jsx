@@ -71,61 +71,68 @@ const ManagerHeader = ({ user, token, API }) => {
     >
       <h2 className="text-xl font-bold mb-4">Your Manager Page</h2>
 
-      <div className="mb-6">
-        <label className="block text-sm font-medium mb-2">Business Logo</label>
-        <div className="flex items-center gap-4">
-          {businessLogo ? (
-            <div className="relative">
-              <img
-                src={
-                  businessLogo.startsWith('/api')
-                    ? `${API.replace('/api', '')}${businessLogo}`
-                    : businessLogo
-                }
-                alt="Business Logo"
-                className="w-20 h-20 rounded-xl object-cover border-2 border-[#D4AF37]"
-                data-testid="business-logo-preview"
-              />
-              <button
-                onClick={handleLogoRemove}
-                className="absolute -top-2 -end-2 w-6 h-6 rounded-full bg-red-500 text-white flex items-center justify-center text-xs hover:bg-red-600"
-                data-testid="remove-logo-button"
-              >
-                <X size={12} />
-              </button>
-            </div>
-          ) : (
-            <div className="w-20 h-20 rounded-xl border-2 border-dashed border-gray-300 flex items-center justify-center text-gray-400">
-              <ImageIcon size={24} />
-            </div>
-          )}
+      {/* Two-column layout on md+ so the Public-page details editor sits
+          next to the business logo + share link instead of stacking below
+          — keeps the whole card above the fold on typical desktops. */}
+      <div className="grid gap-6 md:grid-cols-[minmax(0,280px)_minmax(0,1fr)] md:items-start">
+        <div className="space-y-4">
           <div>
-            <label
-              className="cursor-pointer inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors"
-              style={{ backgroundColor: '#1E6A6A', color: '#D4AF37' }}
-              data-testid="upload-logo-button"
-            >
-              <Upload size={16} />
-              {logoUploading ? 'Uploading...' : businessLogo ? 'Change Logo' : 'Upload Logo'}
-              <input
-                type="file"
-                accept="image/*"
-                onChange={handleLogoUpload}
-                className="hidden"
-                disabled={logoUploading}
-              />
-            </label>
-            <p className="text-xs text-gray-500 mt-1">Appears on your public manager page</p>
+            <label className="block text-sm font-medium mb-2">Business Logo</label>
+            <div className="flex items-center gap-4">
+              {businessLogo ? (
+                <div className="relative">
+                  <img
+                    src={
+                      businessLogo.startsWith('/api')
+                        ? `${API.replace('/api', '')}${businessLogo}`
+                        : businessLogo
+                    }
+                    alt="Business Logo"
+                    className="w-20 h-20 rounded-xl object-cover border-2 border-[#D4AF37]"
+                    data-testid="business-logo-preview"
+                  />
+                  <button
+                    onClick={handleLogoRemove}
+                    className="absolute -top-2 -end-2 w-6 h-6 rounded-full bg-red-500 text-white flex items-center justify-center text-xs hover:bg-red-600"
+                    data-testid="remove-logo-button"
+                  >
+                    <X size={12} />
+                  </button>
+                </div>
+              ) : (
+                <div className="w-20 h-20 rounded-xl border-2 border-dashed border-gray-300 flex items-center justify-center text-gray-400">
+                  <ImageIcon size={24} />
+                </div>
+              )}
+              <div>
+                <label
+                  className="cursor-pointer inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors"
+                  style={{ backgroundColor: '#1E6A6A', color: '#D4AF37' }}
+                  data-testid="upload-logo-button"
+                >
+                  <Upload size={16} />
+                  {logoUploading ? 'Uploading...' : businessLogo ? 'Change' : 'Upload'}
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleLogoUpload}
+                    className="hidden"
+                    disabled={logoUploading}
+                  />
+                </label>
+                <p className="text-xs text-gray-500 mt-1">Appears on your public page</p>
+              </div>
+            </div>
           </div>
+
+          <ShareLinkRow
+            link={shareableLink}
+            label="Share your manager page"
+          />
         </div>
+
+        <WhiteLabelSettings API={API} token={token} initial={user?.white_label || {}} />
       </div>
-
-      <ShareLinkRow
-        link={shareableLink}
-        label="Share your manager page"
-      />
-
-      <WhiteLabelSettings API={API} token={token} initial={user?.white_label || {}} />
     </div>
   );
 };
@@ -176,7 +183,10 @@ const WhiteLabelSettings = ({ API, token, initial }) => {
   };
 
   return (
-    <div className="mt-6 pt-6 border-t border-gray-200" data-testid="white-label-settings">
+    <div
+      className="md:border-s md:border-gray-200 md:ps-6 pt-6 md:pt-0 border-t md:border-t-0 border-gray-200"
+      data-testid="white-label-settings"
+    >
       <div className="mb-3">
         <h3 className="text-sm font-bold text-gray-900">Public page details</h3>
         <p className="text-[11px] text-gray-500 leading-snug">
@@ -193,7 +203,7 @@ const WhiteLabelSettings = ({ API, token, initial }) => {
           value={bio}
           maxLength={2000}
           onChange={(e) => setBio(e.target.value)}
-          rows={5}
+          rows={3}
           placeholder="Tell renters who you are — years in the business, what neighborhoods you specialize in, the extra care you bring to your listings…"
           className="w-full px-2 py-2 rounded border border-gray-200 text-xs leading-snug"
           data-testid="wl-bio"
