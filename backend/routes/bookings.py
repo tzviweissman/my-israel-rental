@@ -35,6 +35,7 @@ api_router = router  # alias so existing @api_router decorators work verbatim
 async def create_booking(booking_data: BookingCreate, payload: dict = Depends(verify_token)) -> dict:
     property_data, sublease_data = await _load_property_and_sublease(booking_data)
     _assert_within_availability_window(booking_data, property_data, sublease_data)
+    _assert_not_in_holiday_window(booking_data, property_data, sublease_data)
     await _assert_no_booking_overlap(booking_data)
 
     booking_doc = _build_booking_doc(
@@ -147,6 +148,40 @@ def _assert_within_availability_window(
                 "Please pick checkout dates within the window."
             ),
         )
+
+def _assert_not_in_holiday_window(
+    booking_data: BookingCreate,
+    property_data: dict,
+    sublease_data: dict | None,
+) -> None:
+    """Owners can reserve a specific date window (typically Sukkot / Pesach)
+    for their holiday lump-sum price. Bookings hitting that window under
+    the primary monthly/nightly rate are rejected with an explicit steer
+    to the holiday flow. Sublease bookings are exempt — the sublease
+    already carries its own price + window."""
+    if sublease_data:
+        return
+    hs = (property_data.get("holiday_start_date") or "").strip()
+    he = (property_data.get("holiday_end_date") or "").strip()
+    if not hs or not he:
+        return
+    # Booking end_date is checkout (exclusive); overlap iff
+    # booking.start_date <= he AND booking.end_date > hs.
+    if booking_data.start_date <= he and booking_data.end_date > hs:
+        tags = property_data.get("holiday_tags") or []
+        holiday_label = (
+            " / ".join(t.capitalize() for t in tags) if tags else "the holiday period"
+        )
+        raise HTTPException(
+            status_code=400,
+            detail=(
+                f"These dates fall inside the owner's {holiday_label} window "
+                f"({hs} → {he}). Please book the holiday rate instead — "
+                "see the holiday price card on the listing."
+            ),
+        )
+
+
 
 
 async def _assert_no_booking_overlap(booking_data: BookingCreate) -> None:

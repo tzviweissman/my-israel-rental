@@ -113,6 +113,19 @@ class PropertyCreate(BaseModel):
     # to a fixed lump (useful when stay length varies). UI uses this to
     # render the right suffix ("/night" vs "/Sukkot").
     holiday_lump_is_per_night: bool | None = False
+    # Multi-list — when set, the same physical apartment appears in more
+    # than one Stays category. Primary `rental_type` is always included
+    # implicitly; e.g. `rental_type='short-term'` + `rental_types=['short-term','vacation']`
+    # makes the listing surface in BOTH the short-term feed AND vacation
+    # (typically to capture Sukkot/Pesach travelers). If missing/empty on
+    # read, callers should treat it as `[rental_type]`.
+    rental_types: List[str] | None = None
+    # Optional holiday window — when set, any booking whose date range
+    # overlaps this window under the primary (monthly/nightly) rate is
+    # rejected, and renters are steered to the `holiday_lump_price`. ISO
+    # YYYY-MM-DD. Both inclusive.
+    holiday_start_date: str | None = None
+    holiday_end_date: str | None = None
 
 
 class BookingCreate(BaseModel):

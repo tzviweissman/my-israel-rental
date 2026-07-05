@@ -139,6 +139,11 @@ class PropertyOut(BaseModel):
     holiday_lump_price: float | None = None
     holiday_lump_currency: str | None = None
     holiday_lump_is_per_night: bool | None = False
+    # Multi-list support (see PropertyCreate). When missing/empty on read,
+    # clients should treat it as [rental_type].
+    rental_types: list[str] | None = None
+    holiday_start_date: str | None = None
+    holiday_end_date: str | None = None
     contract_url: str | None = None
     contract_uploaded_at: str | None = None
     ical_urls: list[str] | None = None

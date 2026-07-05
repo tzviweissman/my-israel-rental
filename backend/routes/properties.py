@@ -38,6 +38,28 @@ router = APIRouter()
 api_router = router  # alias so existing @api_router decorators work verbatim
 
 
+# Set of rental_type values that Stays browses. Kept here so
+# `_normalize_rental_types` can drop bad enum values before they land in
+# the query filter.
+_VALID_RENTAL_TYPES = {"long-term", "short-term", "vacation", "sublease"}
+
+
+def _normalize_rental_types(doc: dict) -> None:
+    """Rewrite `rental_types` in-place so it's a de-duplicated list that
+    always includes the primary `rental_type`. Empty / missing input →
+    single-element list. Filters out unknown enum values silently."""
+    primary = doc.get("rental_type")
+    incoming = doc.get("rental_types") or []
+    merged = [primary] + [t for t in incoming if t != primary]
+    seen: set[str] = set()
+    cleaned: list[str] = []
+    for t in merged:
+        if t and t in _VALID_RENTAL_TYPES and t not in seen:
+            seen.add(t)
+            cleaned.append(t)
+    doc["rental_types"] = cleaned or ([primary] if primary else [])
+
+
 @api_router.post("/properties", response_model=IdMessageResponse)
 async def create_property(property_data: PropertyCreate, payload: dict = Depends(verify_token)) -> dict:
     # Block duplicate listings: same owner + same address + same rental_type
@@ -71,7 +93,10 @@ async def create_property(property_data: PropertyCreate, payload: dict = Depends
     property_doc['created_at'] = datetime.now(UTC).isoformat()
     property_doc['views'] = 0
     property_doc['status'] = 'active'
-    
+    # Normalize rental_types: always include the primary rental_type so
+    # `rental_types` can be a single truth source for the multi-list filter.
+    _normalize_rental_types(property_doc)
+
     await db.properties.insert_one(property_doc)
 
     # Fire saved-search alerts (non-blocking)
@@ -107,7 +132,15 @@ async def get_properties(
 ) -> list[dict]:
     query: dict = {}
     if rental_type:
-        query['rental_type'] = rental_type
+        # Multi-list: match the primary `rental_type` field OR the newer
+        # `rental_types` array (property is available under multiple
+        # categories, e.g. a short-term listing that's also bookable for
+        # Sukkot as vacation). Legacy docs without `rental_types` still
+        # match via the primary field.
+        query['$or'] = [
+            {'rental_type': rental_type},
+            {'rental_types': rental_type},
+        ]
     if holiday_tag:
         # Mongo array `$in`/contains — matches docs whose `holiday_tags`
         # array contains the requested value (e.g. "sukkot" or "pesach").
@@ -297,6 +330,7 @@ async def update_property(property_id: str, property_data: PropertyCreate, paylo
         })
 
     update_doc = property_data.model_dump()
+    _normalize_rental_types(update_doc)
     await db.properties.update_one({"id": property_id}, {"$set": update_doc})
 
     # Fire saved-search alerts when price drops or listing re-activates

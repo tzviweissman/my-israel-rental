@@ -9,6 +9,7 @@ import DateField from './propertyForm/DateField';
 import LocationPicker from './propertyForm/LocationPicker';
 import MediaUploadSection from './propertyForm/MediaUploadSection';
 import PropertyServicesSelector from '../property/services/PropertyServicesSelector';
+import { nextHolidayWindow } from '../../utils/holidayCalendar';
 
 const EMPTY_FORM = {
   title: '', description: '', rental_type: 'long-term', property_type: 'apartment',
@@ -28,6 +29,16 @@ const EMPTY_FORM = {
   // window rather than the lump total. Lets owners charge a holiday-night
   // premium without committing to a fixed package price.
   holiday_lump_is_per_night: false,
+  // Multi-list — extra rental types this same apartment surfaces under.
+  // Primary `rental_type` is always included implicitly by the backend.
+  // Example: `rental_type='short-term', rental_types=['short-term','vacation']`
+  // → shows in Short-term AND in Vacation feeds (for Sukkot travelers).
+  rental_types: [],
+  // Holiday window — when set, the primary monthly/nightly booking flow
+  // rejects overlaps with these dates and steers renters to the holiday
+  // lump price. Owners can auto-fill this from the Jewish calendar.
+  holiday_start_date: '',
+  holiday_end_date: '',
 };
 
 /**
@@ -149,6 +160,11 @@ const AddPropertyModal = ({ isOpen, onClose, editingProperty, onSaved, API, toke
         holiday_lump_price: editingProperty.holiday_lump_price || '',
         holiday_lump_currency: editingProperty.holiday_lump_currency || 'ILS',
         holiday_lump_is_per_night: !!editingProperty.holiday_lump_is_per_night,
+        // Multi-list + holiday window hydration — legacy rows won't have
+        // these so default to a safe empty state.
+        rental_types: editingProperty.rental_types || [],
+        holiday_start_date: editingProperty.holiday_start_date || '',
+        holiday_end_date: editingProperty.holiday_end_date || '',
       });
       setUploadedFiles([
         ...(editingProperty.images || []).map((url, i) => ({ url, file_type: 'image', filename: url.split('/').pop(), original_name: `Image ${i + 1}` })),
@@ -423,14 +439,17 @@ const AddPropertyModal = ({ isOpen, onClose, editingProperty, onSaved, API, toke
               </select>
             </div>
 
-            {/* Holiday Categories — vacation rentals only.
-                Placed BETWEEN floor and price so owners decide holiday tagging
-                first (which can unlock the lump-sum price option below). */}
-            {propertyForm.rental_type === 'vacation' && (
+            {/* Holiday Categories — available on ANY rental_type so a
+                short-term monthly listing can ALSO surface under vacation
+                for Sukkot / Pesach at a different lump price. When any
+                tag is checked we implicitly add `vacation` to the
+                property's `rental_types` array so the same physical
+                apartment appears in BOTH feeds. */}
+            {propertyForm.rental_type !== 'sublease' && (
               <div className="md:col-span-2 bg-[#FBF8F2] rounded-xl p-4 border border-[#D4AF37]/30">
                 <h3 className="text-base font-bold mb-1 text-[#1E6A6A]">Holiday Categories</h3>
                 <p className="text-xs text-gray-500 mb-3">
-                  Optional — tag this listing so it shows under <span className="font-medium">Sukkot Rentals</span> or <span className="font-medium">Pesach Rentals</span> in the nav and unlocks a one-price-for-the-whole-holiday rate below.
+                  Optional — tag this listing so it also shows under <span className="font-medium">Sukkot Rentals</span> or <span className="font-medium">Pesach Rentals</span>. Unlocks a separate one-price-for-the-whole-holiday rate below AND auto-lists this apartment under Vacation Rentals during the holiday window.
                 </p>
                 <div className="flex flex-wrap gap-2">
                   {[
@@ -457,15 +476,35 @@ const AddPropertyModal = ({ isOpen, onClose, editingProperty, onSaved, API, toke
                             const next = e.target.checked
                               ? [...current, key]
                               : current.filter((tag) => tag !== key);
-                            // If clearing all holiday tags, also clear the lump-sum price
-                            // so the renter UI doesn't show a stale value.
-                            setPropertyForm({
-                              ...propertyForm,
-                              holiday_tags: next,
-                              ...(next.length === 0
-                                ? { holiday_lump_price: '', holiday_lump_currency: 'ILS' }
-                                : {}),
-                            });
+                            // Auto-fill dates + auto-add 'vacation' to
+                            // rental_types when a tag is added. When all
+                            // tags cleared, also clear the lump price and
+                            // the date window so the listing UI doesn't
+                            // show a stale holiday card.
+                            const patch = { holiday_tags: next };
+                            if (next.length === 0) {
+                              patch.holiday_lump_price = '';
+                              patch.holiday_lump_currency = 'ILS';
+                              patch.holiday_start_date = '';
+                              patch.holiday_end_date = '';
+                              patch.rental_types = (propertyForm.rental_types || [])
+                                .filter((t) => t !== 'vacation');
+                            } else {
+                              const win = nextHolidayWindow(next);
+                              if (win) {
+                                // Only auto-fill blanks — never overwrite an
+                                // owner's explicit choice (e.g. they included
+                                // extra Chol HaMoed days on purpose).
+                                if (!propertyForm.holiday_start_date) patch.holiday_start_date = win.start;
+                                if (!propertyForm.holiday_end_date)   patch.holiday_end_date   = win.end;
+                              }
+                              // Merge 'vacation' into rental_types so the
+                              // listing appears in the vacation feed too.
+                              const existing = new Set(propertyForm.rental_types || []);
+                              if (propertyForm.rental_type !== 'vacation') existing.add('vacation');
+                              patch.rental_types = [...existing];
+                            }
+                            setPropertyForm({ ...propertyForm, ...patch });
                           }}
                         />
                         <span className="font-medium">{label}</span>
@@ -473,8 +512,48 @@ const AddPropertyModal = ({ isOpen, onClose, editingProperty, onSaved, API, toke
                     );
                   })}
                 </div>
+
+                {(propertyForm.holiday_tags || []).length > 0 && (
+                  <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-3" data-testid="holiday-window-row">
+                    <DateField
+                      label="Holiday window — start"
+                      value={propertyForm.holiday_start_date}
+                      onChange={(v) => setPropertyForm({ ...propertyForm, holiday_start_date: v })}
+                      variant="gold"
+                      emoji="🕎"
+                      helperText="Auto-filled from the Jewish calendar. Adjust to include Chol HaMoed if you like."
+                      testid="property-holiday-start"
+                    />
+                    <DateField
+                      label="Holiday window — end"
+                      value={propertyForm.holiday_end_date}
+                      onChange={(v) => setPropertyForm({ ...propertyForm, holiday_end_date: v })}
+                      variant="gold"
+                      emoji="🍯"
+                      helperText="Bookings under the regular rate will be blocked during this window."
+                      testid="property-holiday-end"
+                    />
+                    <button
+                      type="button"
+                      className="sm:col-span-2 self-start text-[11px] font-semibold text-[#1E6A6A] hover:underline"
+                      onClick={() => {
+                        const win = nextHolidayWindow(propertyForm.holiday_tags);
+                        if (!win) return;
+                        setPropertyForm({
+                          ...propertyForm,
+                          holiday_start_date: win.start,
+                          holiday_end_date: win.end,
+                        });
+                      }}
+                      data-testid="holiday-autofill-btn"
+                    >
+                      Reset to Jewish-calendar defaults →
+                    </button>
+                  </div>
+                )}
               </div>
             )}
+
 
             {/* Price section — always a single nightly/monthly input, with an
                 optional additive holiday-rate block below when one or more
@@ -516,7 +595,7 @@ const AddPropertyModal = ({ isOpen, onClose, editingProperty, onSaved, API, toke
               </div>
             </div>
 
-            {propertyForm.rental_type === 'vacation' && (propertyForm.holiday_tags || []).length > 0 && (() => {
+            {(propertyForm.holiday_tags || []).length > 0 && (() => {
               const tagsLabel = (propertyForm.holiday_tags || [])
                 .map((tag) => tag.charAt(0).toUpperCase() + tag.slice(1))
                 .join(' / ');
@@ -526,7 +605,12 @@ const AddPropertyModal = ({ isOpen, onClose, editingProperty, onSaved, API, toke
                   <div className="flex items-start justify-between gap-3 flex-wrap mb-3">
                     <div className="min-w-0">
                       <h4 className="text-sm font-bold text-[#1E6A6A]">{tagsLabel} rate</h4>
-                      <p className="text-xs text-gray-500 mt-0.5">Renters browsing {tagsLabel} see this price; everyone else sees the regular per-night rate above.</p>
+                      <p className="text-xs text-gray-500 mt-0.5">
+                        Renters browsing {tagsLabel} rentals see this price.
+                        {propertyForm.rental_type === 'vacation'
+                          ? ' Other vacation renters see the regular per-night rate above.'
+                          : ` During the holiday window (${propertyForm.holiday_start_date || '—'} → ${propertyForm.holiday_end_date || '—'}), the regular ${propertyForm.rental_type === 'long-term' ? 'monthly' : 'per-night'} rate is blocked so nobody grabs a bargain over the holidays.`}
+                      </p>
                     </div>
                     <div className="inline-flex items-center gap-1 p-1 rounded-lg bg-white border border-[#D4AF37]/30" data-testid="holiday-price-mode-toggle">
                       <button
