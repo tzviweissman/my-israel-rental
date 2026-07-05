@@ -1,7 +1,7 @@
 """Auto-extracted from server.py during the 2026-04 refactor."""
 import os
 import uuid
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
 from typing import List
 
 from emergentintegrations.llm.chat import LlmChat, UserMessage
@@ -414,3 +414,34 @@ async def update_white_label(
     }
     await db.users.update_one({"id": payload["user_id"]}, {"$set": {"white_label": doc}})
     return {"message": "Settings saved"}
+
+
+# ---------------------------------------------------------------------------
+# Services Marketplace upsell — one-time popup shown to every existing user
+# on their next sign-in and to every new signup. Accepting the offer starts
+# a 30-day free provider trial ($0). We store `services_pitch_seen_at` so
+# the modal is never shown twice, and `provider_trial` so any downstream
+# gating (e.g. My Gigs tab unlock) can check for an active trial.
+# ---------------------------------------------------------------------------
+
+
+class ServicesPitchActionRequest(BaseModel):
+    accepted: bool
+
+
+@api_router.post("/user/services-pitch/action", response_model=MessageResponse)
+async def act_on_services_pitch(
+    req: ServicesPitchActionRequest, payload: dict = Depends(verify_token),
+) -> dict:
+    now = datetime.now(UTC)
+    update: dict = {"services_pitch_seen_at": now.isoformat()}
+    if req.accepted:
+        trial_end = now + timedelta(days=30)
+        update["provider_trial"] = {
+            "started_at": now.isoformat(),
+            "ends_at": trial_end.isoformat(),
+            "source": "services-popup",
+            "status": "trial",
+        }
+    await db.users.update_one({"id": payload["user_id"]}, {"$set": update})
+    return {"message": "OK"}
