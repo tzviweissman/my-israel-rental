@@ -72,11 +72,11 @@ const Auth = () => {
       const destination = postAuthDestination(response.data.user);
       if (mode === 'signup' && formData.role === 'renter') {
         setShowWelcomePopups(true);
-      } else if (mode === 'signup' && (formData.role === 'owner' || formData.role === 'manager')) {
-        // Pitch our property-management service the moment a fresh
-        // owner/manager lands on the platform — they're most receptive
-        // right after signup. Managers land on the same offer so they
-        // can immediately kick off bulk-import if they choose.
+      } else if (mode === 'signup' && formData.role === 'owner') {
+        // Pitch our property-management service the moment a fresh owner
+        // lands on the platform — they're most receptive right after signup.
+        // Managers already run their own property portfolio and don't need
+        // this offer, and renters get a different modal (see above).
         setShowOwnerOffer(true);
       } else if (mode === 'signup' && formData.role === 'provider') {
         // Service providers land straight in the gig-creation wizard —
