@@ -296,7 +296,7 @@ const WhiteLabelSettings = ({ API, token, initial, managerId }) => {
             data-testid="wl-open-public-page"
           >
             <ExternalLink size={12} />
-            Open public page
+            Preview public page
           </a>
         )}
         <span className="text-[11px] text-gray-400 ms-auto hidden sm:inline">
