@@ -3,7 +3,7 @@ import axios from 'axios';
 import { toast } from 'sonner';
 import {
   X, Copy, AlertTriangle, Trash2, ImageOff, Sparkles, Loader2,
-  ChevronUp, ChevronDown, ImageIcon,
+  ChevronUp, ChevronDown, ImageIcon, Bot, RefreshCw,
 } from 'lucide-react';
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
@@ -30,6 +30,7 @@ const DuplicatesModal = ({ token, onClose, onDeleted }) => {
   const [groups, setGroups] = useState([]);
   const [busyGroupKey, setBusyGroupKey] = useState(null); // group being auto-resolved
   const [bulkBusy, setBulkBusy] = useState(false);
+  const [autoStatus, setAutoStatus] = useState(null); // { runs: [{at, deleted, groups_resolved, ...}] }
 
   const fetchGroups = async () => {
     setLoading(true);
@@ -44,7 +45,16 @@ const DuplicatesModal = ({ token, onClose, onDeleted }) => {
       setLoading(false);
     }
   };
-  useEffect(() => { fetchGroups(); /* eslint-disable-next-line */ }, []);
+
+  const fetchAutoStatus = async () => {
+    try {
+      const res = await axios.get(`${API}/admin/duplicates/auto-status`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setAutoStatus(res.data);
+    } catch { /* non-fatal */ }
+  };
+  useEffect(() => { fetchGroups(); fetchAutoStatus(); /* eslint-disable-next-line */ }, []);
 
   // Group key string mirrors the backend format owner|address|rental_type.
   const keyOf = (g) => `${g.owner_id}|${g.address}|${g.rental_type}`;
@@ -159,6 +169,42 @@ const DuplicatesModal = ({ token, onClose, onDeleted }) => {
             data-testid="duplicates-close"
           >
             <X size={18} />
+          </button>
+        </div>
+
+        {/* Auto-cleanup status strip — always shown so the admin knows
+            the background task is on and can trigger a manual sweep.
+            The task deletes ONLY groups where every user-visible field
+            is identical, so it's safe to leave running unattended. */}
+        <div className="bg-blue-50 border-b border-blue-200 px-5 py-2.5 flex items-center gap-2 flex-wrap" data-testid="dup-auto-status">
+          <Bot size={14} className="text-blue-700 shrink-0" />
+          <div className="text-[11px] text-blue-900 flex-1 min-w-[180px] leading-snug">
+            <p><strong>Auto-cleanup on</strong> — every 30 min, listings with 100% identical fields (title, description, prices, photos, amenities) are merged automatically. Chats & bookings are re-attached to the survivor.</p>
+            {autoStatus?.runs?.[0] && (
+              <p className="text-blue-700 mt-0.5">
+                Last run {new Date(autoStatus.runs[0].at).toLocaleString(undefined, { dateStyle: 'short', timeStyle: 'short' })} —{' '}
+                <strong>{autoStatus.runs[0].deleted}</strong> deleted, <strong>{autoStatus.runs[0].groups_resolved}</strong> {autoStatus.runs[0].groups_resolved === 1 ? 'group' : 'groups'} resolved.
+              </p>
+            )}
+          </div>
+          <button
+            onClick={async () => {
+              try {
+                const res = await axios.post(`${API}/admin/duplicates/auto-resolve`, {}, {
+                  headers: { Authorization: `Bearer ${token}` },
+                });
+                toast.success(`Auto-merged ${res.data.deleted} identical ${res.data.deleted === 1 ? 'twin' : 'twins'} across ${res.data.groups_resolved} ${res.data.groups_resolved === 1 ? 'group' : 'groups'}`);
+                fetchGroups(); fetchAutoStatus();
+                if (res.data.deleted > 0 && onDeleted) onDeleted();
+              } catch (e) {
+                toast.error(e.response?.data?.detail || 'Auto-resolve failed');
+              }
+            }}
+            className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-blue-600 text-white text-xs font-semibold hover:bg-blue-700"
+            data-testid="dup-auto-resolve-now"
+            title="Run the strict-identical dedupe pass immediately"
+          >
+            <RefreshCw size={12} /> Run now
           </button>
         </div>
 

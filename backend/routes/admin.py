@@ -536,6 +536,52 @@ class DuplicateResolveRequest(BaseModel):
     """
     mode: str = "keep_richest"
     keys: list[str] | None = None
+    # When True, only resolve groups where every duplicate has functionally
+    # identical user-facing data (title, description, amenities, prices,
+    # image URLs). Used by the auto-cleanup endpoint / background task so
+    # we never silently delete a listing that's only "similar" to another.
+    strict_only: bool = False
+
+
+def _norm_str(s: str | None) -> str:
+    """Case-insensitive, whitespace-collapsed string comparator."""
+    if not s:
+        return ""
+    return " ".join(s.strip().lower().split())
+
+
+def _group_is_strictly_identical(props: list[dict]) -> bool:
+    """True when every property in the group agrees on every field a
+    renter would see. Used by the auto-resolve path — we only auto-delete
+    listings that are pixel-for-pixel the same twin, never merely
+    "similar" listings (different price, different title, missing photos)
+    which need human judgement.
+    """
+    if len(props) < 2:
+        return False
+    # Numeric / categorical fields: exact equality.
+    numeric_fields = (
+        "monthly_price", "nightly_price", "currency", "bathrooms",
+        "square_meters", "property_type",
+    )
+    for f in numeric_fields:
+        vals = {p.get(f) for p in props}
+        # None + missing collapse to a single value, which is fine.
+        if len(vals) > 1:
+            return False
+    # Text fields: normalized comparison (case / whitespace tolerant).
+    for f in ("title", "description"):
+        vals = {_norm_str(p.get(f)) for p in props}
+        if len(vals) > 1:
+            return False
+    # Set-valued fields: order-independent equality.
+    amenity_sets = {frozenset(p.get("amenities") or []) for p in props}
+    if len(amenity_sets) > 1:
+        return False
+    image_sets = {frozenset(p.get("images") or []) for p in props}
+    if len(image_sets) > 1:
+        return False
+    return True
 
 
 @api_router.post("/admin/duplicates/resolve")
@@ -561,6 +607,11 @@ async def resolve_duplicates(
             "_id": 0, "id": 1, "owner_id": 1, "address": 1, "rental_type": 1,
             "created_at": 1, "images": 1, "videos": 1, "description": 1,
             "bedrooms": 1, "floor": 1,
+            # Extra fields loaded so `strict_only` can compare every
+            # user-visible piece of data. Small overhead when strict_only
+            # is off — worth it to keep both paths using the same query.
+            "title": 1, "amenities": 1, "monthly_price": 1, "nightly_price": 1,
+            "currency": 1, "bathrooms": 1, "square_meters": 1, "property_type": 1,
         },
     ).to_list(5000)
 
@@ -625,6 +676,15 @@ async def resolve_duplicates(
         # so the frontend can target specific groups via `keys`.
         key_str = f"{owner_id}|{addr}|{rt}|{bedrooms or ''}|{floor or ''}"
         if target_keys is not None and key_str not in target_keys:
+            continue
+
+        # Strict-only guardrail: skip groups where properties differ on
+        # any user-visible field. Used by the auto-cleanup path so we
+        # only ever silently delete an EXACT twin — never a listing
+        # that's only "similar". Any group that fails this check gets
+        # surfaced for manual review via the normal /admin/duplicates
+        # endpoint instead.
+        if req.strict_only and not _group_is_strictly_identical(props):
             continue
 
         # When at least one twin already has chat/booking history,
@@ -779,6 +839,76 @@ async def resolve_duplicates(
         "reattached": reattached_total,
         "report": report,
     }
+
+
+# ---------------------------------------------------------------------------
+# Auto-cleanup — safe autopilot for perfectly-identical twins
+# ---------------------------------------------------------------------------
+#
+# Every 30 minutes (see `server.py` startup hook) and on demand from the
+# admin UI, we scan for property groups whose members agree on every
+# user-visible field (title, description, amenities, prices, image set)
+# and merge them into one, re-attaching all chats / bookings / likes to
+# the surviving listing. This is the "if all information is the same,
+# just clean it up" behaviour the admin asked for — no clicks needed.
+#
+# The strict-identity check lives in `_group_is_strictly_identical` and
+# is enforced in the shared resolve loop via `req.strict_only=True`. Any
+# group that fails the strict check is left alone for the admin to
+# resolve manually via the Duplicates modal.
+
+
+async def run_duplicate_auto_cleanup(logger_prefix: str = "auto-cleanup") -> dict:
+    """Run one pass of strict-identical duplicate resolution. Returns
+    the same shape as `/admin/duplicates/resolve` so the background task
+    and the admin endpoint can share formatting. Records the summary in
+    `db.admin_auto_cleanup_log` for the "last run" widget.
+    """
+    req = DuplicateResolveRequest(mode="keep_richest", strict_only=True)
+    # Reuse the existing resolver — it already knows how to re-attach
+    # chats, bookings, likes, nudges, blocks, subleases and to merge
+    # images across the losers. We fake a payload of {'role': 'admin'}
+    # because this function is invoked from trusted server-side callers.
+    result = await resolve_duplicates(req, payload={"role": "admin", "user_id": "system"})
+    await db.admin_auto_cleanup_log.insert_one({
+        "at": datetime.now(UTC).isoformat(),
+        "deleted": result.get("deleted", 0),
+        "groups_resolved": result.get("groups_resolved", 0),
+        "reattached": result.get("reattached", {}),
+    })
+    logger.info(
+        "[%s] deleted=%d groups_resolved=%d reattached=%s",
+        logger_prefix,
+        result.get("deleted", 0),
+        result.get("groups_resolved", 0),
+        result.get("reattached", {}),
+    )
+    return result
+
+
+@api_router.post("/admin/duplicates/auto-resolve")
+async def auto_resolve_duplicates(payload: dict = Depends(verify_token)) -> dict:
+    """Admin-triggered strict-identical dedupe. Deletes only twins that
+    match on every user-visible field; anything else is left for manual
+    review. Chats, bookings, likes and photos are re-attached to the
+    survivor before deletion.
+    """
+    if payload.get("role") != "admin":
+        raise HTTPException(status_code=403, detail="Admin access required")
+    return await run_duplicate_auto_cleanup(logger_prefix="admin-triggered")
+
+
+@api_router.get("/admin/duplicates/auto-status")
+async def get_auto_cleanup_status(payload: dict = Depends(verify_token)) -> dict:
+    """Return the last N auto-cleanup runs so the Duplicates modal can
+    show "Last run: X min ago · Y properties merged" and give the admin
+    a sense of what the background task has been doing.
+    """
+    if payload.get("role") != "admin":
+        raise HTTPException(status_code=403, detail="Admin access required")
+    cursor = db.admin_auto_cleanup_log.find({}, {"_id": 0}).sort("at", -1).limit(20)
+    runs = await cursor.to_list(20)
+    return {"runs": runs}
 
 
 

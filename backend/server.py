@@ -160,6 +160,25 @@ async def startup_tasks() -> None:
     # Availability-expiry reminders — daily at 06:00 UTC. Nudges hosts
     # whose available_to is rolling past in the next 4-6 days.
     asyncio.create_task(availability_reminders.availability_reminders_daily_loop())
+    # Auto-dedupe loop — every 30 minutes, silently merge property groups
+    # where every user-visible field is identical. Re-attaches chats /
+    # bookings / likes / photos to the surviving twin before deleting
+    # the losers, so bookmarked URLs and inbox conversations survive.
+    from routes.admin import run_duplicate_auto_cleanup
+
+    async def duplicate_auto_cleanup_loop() -> None:
+        # Small initial delay so startup completes cleanly (and gives
+        # the DB indexes above time to finish building) before we run
+        # the first pass.
+        await asyncio.sleep(120)
+        while True:
+            try:
+                await run_duplicate_auto_cleanup(logger_prefix="dedupe-loop")
+            except Exception as e:  # noqa: BLE001
+                logger.warning("duplicate_auto_cleanup_loop iteration failed: %s", e)
+            await asyncio.sleep(1800)  # 30 minutes
+
+    asyncio.create_task(duplicate_auto_cleanup_loop())
     try:
         ensure_contract_templates(ROOT_DIR / "uploads")
         logger.info("Contract templates ready")

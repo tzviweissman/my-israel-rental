@@ -11,6 +11,17 @@ Build a bilingual (English/Hebrew) rental website named MyIsraelRental.com with 
 - **i18n**: i18next with English and Hebrew (RTL) support
 
 ## What's Been Implemented
+- [x] **Auto-duplicate cleanup with chat/booking re-attachment (2026-07-05)**: The site now finds strict-identical property twins and merges them automatically — no admin clicks required.
+  - **Detection**: `_group_is_strictly_identical()` compares every user-visible field across a group (title, description, monthly/nightly price, currency, bathrooms, square_meters, property_type, amenity set, image URL set). Any group where all members agree on all fields is safe to auto-merge; anything else is left for manual review.
+  - **Re-attachment**: The existing resolve logic already migrates `messages`, `bookings`, `chat_nudges`, `admin_blocks`, `subleases`, and `liked_properties` from the losers to the survivor (which is preferentially the twin with chat/booking activity). Photos & videos are merged onto the survivor with de-dupe by URL — so no chat opens to a "Property not found" and no bookmarked URL breaks.
+  - **New endpoints**: `POST /api/admin/duplicates/auto-resolve` (admin-triggered strict pass) and `GET /api/admin/duplicates/auto-status` (last 20 runs from `db.admin_auto_cleanup_log`).
+  - **Background task**: `server.py` startup now spawns a 30-min loop that runs the strict pass silently. Every run is logged for audit + surfaced in the UI.
+  - **UI**: `DuplicatesModal.jsx` gained a blue "Auto-cleanup on" status strip explaining the policy, showing the last-run timestamp + count, and offering a **Run now** button.
+  - **Verified**: seeded 3 identical twins under owner@test.com with a chat on one of them → auto-resolve deleted 2, kept the one with the chat, chat property_id preserved. Also seeded 2 "same address, different price" listings → auto-resolve deleted 0 (strict guardrail works).
+  - Files: `backend/routes/admin.py`, `backend/server.py`, `frontend/src/components/admin/DuplicatesModal.jsx`.
+  - Testids: `dup-auto-status`, `dup-auto-resolve-now`.
+
+
 - [x] **SEO Landing Page — /kosher-stays-in-israel + shareable preset URLs (2026-07-03)**: Turned the "Observant traveler" preset into a two-part discovery lever — one shareable, one indexable.
   - **Shareable link**: `/stays?preset=<id>` — the Stays page now reads `?preset=observant-traveler`, expands the preset into `?amenities=...`, and drops the preset key from the URL on first render. Ready for kosher-travel newsletter / Facebook group promotion.
   - **SEO landing route**: `/kosher-stays-in-israel` — a dedicated crawlable URL with kosher-optimized `<title>`, meta description, and an H1 + lede hero rendered above the search bar. Uses the same `<Stays />` component with a new `landing` prop (path + title + description + heroTitle + heroLede + defaultAmenities). Target long-tail: "kosher rentals israel", "sabbath observant vacation rental jerusalem", "shabbat elevator apartment tel aviv".
