@@ -370,6 +370,31 @@ const Navigation = () => {
               category pages (/stays) own their own search experience. */}
 
           <div className="flex items-center gap-3">
+            {/* Sign In / Sign Up — visible only when signed out, always
+                to the LEFT of the language + menu icons so first-time
+                visitors can act on the CTA without opening the drawer.
+                Kept compact so they don't crowd the top-right cluster. */}
+            {!user && (
+              <div className="hidden sm:flex items-center gap-2" data-testid="nav-auth-cluster">
+                <button
+                  onClick={() => navigate('/auth/login')}
+                  className="text-xs sm:text-sm font-semibold px-3 py-1.5 rounded-full hover:bg-white/10 transition-colors"
+                  style={{ color: '#D4AF37' }}
+                  data-testid="nav-login-top"
+                >
+                  {t('nav.login', 'Sign In')}
+                </button>
+                <button
+                  onClick={() => navigate('/auth/signup')}
+                  className="text-xs sm:text-sm font-bold px-3 py-1.5 rounded-full transition-all hover:shadow-md"
+                  style={{ backgroundColor: '#D4AF37', color: '#1E6A6A' }}
+                  data-testid="nav-signup-top"
+                >
+                  {t('nav.signup', 'Sign Up')}
+                </button>
+              </div>
+            )}
+
             {/* Language toggle — desktop always, mobile shown only when
                 signed out (signed-in users have bell + chat in this slot
                 and can switch language inside the menu drawer). */}
