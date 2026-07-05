@@ -309,7 +309,7 @@ const Dashboard = () => {
           <MessagesTab API={API} token={token} onUnreadChange={setUnreadConversations} />
         )}
 
-        {activeTab === 'my-gigs' && isOwnerLike && (
+        {activeTab === 'my-gigs' && user?.role === 'provider' && (
           <MyGigsTab API={API} token={token} />
         )}
       </div>

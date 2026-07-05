@@ -11,6 +11,17 @@ Build a bilingual (English/Hebrew) rental website named MyIsraelRental.com with 
 - **i18n**: i18next with English and Hebrew (RTL) support
 
 ## What's Been Implemented
+- [x] **Signup: Owner vs Manager sub-picker + tab gating (2026-07-05)**: Reworked the "List a home" role selection so a first-time signer picks the right persona.
+  - **UX**: Top-level picker stays at 3 tiles (Renter / **List a home** / Offer services). Selecting "List a home" reveals a second row with **Owner** ("1-2 personal properties") and **Manager** ("Multiple listings · bulk import · agency page"). Auth submit sends the concrete role (`owner` or `manager`) directly to `/auth/register`.
+  - **Backend**: `routes/auth.py` role allowlist now permits `manager` in addition to `renter/owner/provider` (admin still gated). SEC-001 fix comment updated.
+  - **Manager-only bulk import**: `isPropertyLister` (owner/manager/admin) already gates the Bulk Upload button — unchanged.
+  - **Manager-only business logo**: `ManagerHeader.jsx` (with logo upload + share link) is already conditionally rendered for `role === 'manager' || 'admin'` in Dashboard.js. Owners see only the share-link row (no logo). Public `ManagerPage.js` renders the logo when `business_logo` is set.
+  - **My Gigs tab lock-down**: Both the tab pill (`DashboardTabs.jsx`) and the active-tab render (`Dashboard.js`) now check `role === 'provider'` strictly — owners and managers no longer see "My Gigs". Providers keep their gig-management flow untouched.
+  - **Verified**: registered a manager via `/api/auth/register` with `role='manager'` — success, `/auth/me` returns `role: manager`. Signup UI drill-down shows both sub-cards; screenshot confirms copy reads "Owner · 1-2 personal properties" and "Manager · Multiple listings · bulk import · agency page".
+  - Files: `frontend/src/pages/Auth.js`, `frontend/src/pages/Dashboard.js`, `frontend/src/components/dashboard/DashboardTabs.jsx`, `backend/routes/auth.py`.
+  - Testids: `auth-role-list`, `auth-subrole-owner`, `auth-subrole-manager`.
+
+
 - [x] **Auto-duplicate cleanup with chat/booking re-attachment (2026-07-05)**: The site now finds strict-identical property twins and merges them automatically — no admin clicks required.
   - **Detection**: `_group_is_strictly_identical()` compares every user-visible field across a group (title, description, monthly/nightly price, currency, bathrooms, square_meters, property_type, amenity set, image URL set). Any group where all members agree on all fields is safe to auto-merge; anything else is left for manual review.
   - **Re-attachment**: The existing resolve logic already migrates `messages`, `bookings`, `chat_nudges`, `admin_blocks`, `subleases`, and `liked_properties` from the losers to the survivor (which is preferentially the twin with chat/booking activity). Photos & videos are merged onto the survivor with de-dupe by URL — so no chat opens to a "Property not found" and no bookmarked URL breaks.

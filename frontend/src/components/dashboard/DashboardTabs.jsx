@@ -20,7 +20,6 @@ const cls = (active, activeColor = ACTIVE_TEAL) =>
 const DashboardTabs = ({ activeTab, setActiveTab, role, unreadMessages = 0 }) => {
   const { t } = useTranslation();
   const isRenter = role === 'renter';
-  const isOwnerLike = role && role !== 'renter';
   // Property-listing tabs are hidden for pure service providers — they
   // only need bookings + messages + My Gigs.
   const isPropertyLister = ['owner', 'manager', 'admin'].includes(role);
@@ -56,7 +55,7 @@ const DashboardTabs = ({ activeTab, setActiveTab, role, unreadMessages = 0 }) =>
           </button>
         )}
 
-        {isOwnerLike && (
+        {role === 'provider' && (
           <button
             onClick={() => setActiveTab('my-gigs')}
             className={`${cls(activeTab === 'my-gigs', ACTIVE_GOLD)} flex items-center justify-center gap-1.5`}

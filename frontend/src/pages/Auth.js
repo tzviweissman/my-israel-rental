@@ -72,9 +72,11 @@ const Auth = () => {
       const destination = postAuthDestination(response.data.user);
       if (mode === 'signup' && formData.role === 'renter') {
         setShowWelcomePopups(true);
-      } else if (mode === 'signup' && formData.role === 'owner') {
-        // Pitch our property-management service the moment a fresh owner
-        // lands on the platform — they're most receptive right after signup.
+      } else if (mode === 'signup' && (formData.role === 'owner' || formData.role === 'manager')) {
+        // Pitch our property-management service the moment a fresh
+        // owner/manager lands on the platform — they're most receptive
+        // right after signup. Managers land on the same offer so they
+        // can immediately kick off bulk-import if they choose.
         setShowOwnerOffer(true);
       } else if (mode === 'signup' && formData.role === 'provider') {
         // Service providers land straight in the gig-creation wizard —
@@ -446,15 +448,31 @@ const Auth = () => {
                   <div className="grid grid-cols-3 gap-2" data-testid="auth-role-select">
                     {[
                       { value: 'renter', label: t('auth.renter', 'Rent'), sub: t('auth.renterSub', 'Find a home'), Icon: Home },
-                      { value: 'owner', label: t('auth.owner', 'List a home'), sub: t('auth.ownerSub', 'Rent out property'), Icon: Building2 },
+                      // Group `owner` and `manager` under one "List" card
+                      // so the top-level picker stays at three tiles.
+                      // Clicking it either selects owner OR expands a
+                      // secondary picker (below) — see `listGroupActive`.
+                      { value: 'list', label: t('auth.list', 'List a home'), sub: t('auth.listSub', 'Owner or manager'), Icon: Building2 },
                       { value: 'provider', label: t('auth.provider', 'Offer services'), sub: t('auth.providerSub', 'Cleaner, mover, etc.'), Icon: Briefcase },
                     ].map(({ value, label, sub, Icon }) => {
-                      const active = formData.role === value;
+                      const listGroupActive = value === 'list' && (formData.role === 'owner' || formData.role === 'manager');
+                      const active = value === 'list' ? listGroupActive : formData.role === value;
                       return (
                         <button
                           type="button"
                           key={value}
-                          onClick={() => setFormData({ ...formData, role: value })}
+                          onClick={() => {
+                            if (value === 'list') {
+                              // Default to `owner` when the group is first
+                              // opened; the secondary picker below lets
+                              // the user toggle to `manager` if they run
+                              // multiple listings and want bulk-import
+                              // + a public agency page with a logo.
+                              if (!listGroupActive) setFormData({ ...formData, role: 'owner' });
+                            } else {
+                              setFormData({ ...formData, role: value });
+                            }
+                          }}
                           className={`flex flex-col items-start gap-1 rounded-lg border p-3 text-left transition-all ${
                             active
                               ? 'border-[#1E6A6A] bg-[#1E6A6A]/5 ring-2 ring-[#1E6A6A]/25'
@@ -470,6 +488,39 @@ const Auth = () => {
                       );
                     })}
                   </div>
+
+                  {/* Secondary picker — appears only when the "List a
+                      home" group is active. Owner keeps the flow simple
+                      (one or two personal properties, no logo). Manager
+                      unlocks bulk CSV/paste import and a public agency
+                      page with a custom logo. */}
+                  {(formData.role === 'owner' || formData.role === 'manager') && (
+                    <div className="mt-3 grid grid-cols-2 gap-2" data-testid="auth-list-subrole">
+                      {[
+                        { value: 'owner', label: t('auth.ownerSubroleLabel', 'Owner'), sub: t('auth.ownerSub', '1-2 personal properties') },
+                        { value: 'manager', label: t('auth.manager', 'Manager'), sub: t('auth.managerSub', 'Multiple listings · bulk import · agency page') },
+                      ].map(({ value, label, sub }) => {
+                        const isActive = formData.role === value;
+                        return (
+                          <button
+                            type="button"
+                            key={value}
+                            onClick={() => setFormData({ ...formData, role: value })}
+                            className={`flex flex-col items-start gap-0.5 rounded-lg border p-2.5 text-left transition-all ${
+                              isActive
+                                ? 'border-[#1E6A6A] bg-[#1E6A6A]/5 ring-2 ring-[#1E6A6A]/25'
+                                : 'border-[#E5E5E5] hover:border-[#1E6A6A]/50'
+                            }`}
+                            data-testid={`auth-subrole-${value}`}
+                            aria-pressed={isActive}
+                          >
+                            <span className="text-xs font-semibold text-gray-900 leading-tight">{label}</span>
+                            <span className="text-[10px] text-gray-500 leading-tight">{sub}</span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  )}
                 </div>
               </>
             )}

@@ -79,16 +79,19 @@ async def register(user_data: UserRegister, req: Request) -> dict:
     # Rate-limit signups per IP to slow bulk account creation abuse.
     check_rate(req, bucket="auth-register", limit=5, window_seconds=600)
 
-    # SEC-001 fix: reject any attempt to self-register as admin/manager.
-    # Only renter, owner, and service-provider may be created via the
-    # public signup form; admin and manager accounts are provisioned by
-    # an existing admin via the admin user-management endpoints. Falls
-    # back to a hard 400 if a client sends anything unexpected.
+    # SEC-001 fix: reject any attempt to self-register as admin.
+    # Renter, owner, manager, and service-provider may be created via
+    # the public signup form. Manager was added here because that role
+    # is the "I run multiple listings on behalf of clients" persona —
+    # it powers bulk-import and public agency pages, and is functionally
+    # equivalent to `owner` from an authorization standpoint (the app's
+    # permission checks treat manager the same as owner for property
+    # CRUD; admin promotion still requires an admin).
     requested_role = (user_data.role or "").strip().lower()
-    if requested_role not in {"renter", "owner", "provider"}:
+    if requested_role not in {"renter", "owner", "provider", "manager"}:
         raise HTTPException(
             status_code=400,
-            detail="Registration role must be 'renter', 'owner', or 'provider'",
+            detail="Registration role must be 'renter', 'owner', 'manager', or 'provider'",
         )
 
     existing = await db.users.find_one({"email": user_data.email})
