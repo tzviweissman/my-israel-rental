@@ -6,6 +6,7 @@ import './i18n';
 import '@/App.css';
 
 import Navigation from './components/Navigation';
+import ImpersonationBanner from './components/ImpersonationBanner';
 import WhatsAppButton from './components/WhatsAppButton';
 import AccessibilityButton from './components/AccessibilityButton';
 import { installStaleBuildInterceptor } from './utils/staleBuildInterceptor';
@@ -97,6 +98,34 @@ function App() {
     setUser(userData);
   };
 
+  // Admin-only helper: swap into a target user's session while stashing the
+  // current admin's token so we can restore it in one click. The banner
+  // rendered in App reads `sessionStorage.impersonate_admin_token` to know
+  // we're in impersonation mode and offer a "Return to admin" affordance.
+  const impersonate = (targetToken, targetUser) => {
+    // Stash BEFORE overwriting `token` so we don't lose the admin session.
+    // Only stash if we're not already impersonating (nested impersonations
+    // would obliterate the original admin token).
+    if (!sessionStorage.getItem('impersonate_admin_token') && token && user) {
+      sessionStorage.setItem('impersonate_admin_token', token);
+      sessionStorage.setItem('impersonate_admin_user', JSON.stringify(user));
+    }
+    login(targetToken, targetUser);
+  };
+
+  const endImpersonation = async () => {
+    const adminToken = sessionStorage.getItem('impersonate_admin_token');
+    const adminUserJson = sessionStorage.getItem('impersonate_admin_user');
+    if (!adminToken || !adminUserJson) return;
+    sessionStorage.removeItem('impersonate_admin_token');
+    sessionStorage.removeItem('impersonate_admin_user');
+    try {
+      login(adminToken, JSON.parse(adminUserJson));
+    } catch {
+      logout();
+    }
+  };
+
   const logout = () => {
     sessionStorage.removeItem('token');
     setToken(null);
@@ -113,10 +142,11 @@ function App() {
   }
 
   return (
-    <AuthContext.Provider value={{ user, token, login, logout }}>
+    <AuthContext.Provider value={{ user, token, login, logout, impersonate, endImpersonation }}>
       <BrowserRouter>
         <ScrollToTop />
         <div className="App">
+          <ImpersonationBanner />
           <Navigation />
           <WhatsAppButton />
           <AccessibilityButton />

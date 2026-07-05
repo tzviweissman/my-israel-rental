@@ -249,11 +249,34 @@ export const ImportTab = ({ token, onJumpToOwner }) => {
 
       {/* CSV input */}
       <div className="bg-white border border-gray-200 rounded-xl p-4 mb-4">
-        <label className="block text-sm font-medium mb-2">Paste CSV</label>
+        <label className="block text-sm font-medium mb-1">
+          Paste CSV, or copy rows directly from Excel / Google Sheets
+        </label>
+        <p className="text-[11px] text-gray-500 mb-2 leading-snug">
+          Tab-separated (⌘/Ctrl+C from a spreadsheet), comma-, semicolon-, and pipe-separated data are auto-detected. Header row optional — the AI will map any column names.
+        </p>
         <textarea
           value={csvText}
           onChange={(e) => { setCsvText(e.target.value); setPreview(null); setSchemaKind(null); setResult(null); }}
-          placeholder={'Properties: "3BR in Sanhedria","Sanhedria",3,8500,owner@example.com\nUsers:      jane@example.com,Jane Doe,054-1234567,renter'}
+          onPaste={(e) => {
+            // "Smart paste": the browser sometimes hands us HTML when the
+            // source is Google Sheets / Excel Online. Prefer text/plain
+            // so we don't dump `<table>` markup into the textarea.
+            const plain = e.clipboardData?.getData('text/plain');
+            if (plain && e.clipboardData?.types?.includes('text/html')) {
+              e.preventDefault();
+              const insert = plain;
+              // Splice at the current selection to preserve any manual
+              // edits the admin made before pasting.
+              const ta = e.currentTarget;
+              const before = csvText.slice(0, ta.selectionStart || 0);
+              const after = csvText.slice(ta.selectionEnd || 0);
+              const merged = `${before}${insert}${after}`;
+              setCsvText(merged);
+              setPreview(null); setSchemaKind(null); setResult(null);
+            }
+          }}
+          placeholder={'From CSV:\n"3BR in Sanhedria","Sanhedria",3,8500,owner@example.com\n\nFrom Excel/Sheets (⌘+C then ⌘+V here — tabs preserved):\n3BR in Sanhedria\tSanhedria\t3\t8500\towner@example.com'}
           className="w-full px-3 py-2 rounded-lg border border-gray-200 font-mono text-xs h-40 focus:border-[#1E6A6A] focus:outline-none focus:ring-1 focus:ring-[#1E6A6A]/40"
           data-testid="import-csv-textarea"
         />

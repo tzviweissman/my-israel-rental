@@ -1,13 +1,16 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { toast } from 'sonner';
-import { Search, Ban, CheckCircle, Trash2 } from 'lucide-react';
-import { API } from '../../App';
+import { Search, Ban, CheckCircle, Trash2, LogIn } from 'lucide-react';
+import { API, AuthContext } from '../../App';
 import { useApiSWR } from '../../hooks/useApiSWR';
 
 export const UsersTab = ({ token, onStatsChange, prefilter }) => {
   const { t } = useTranslation();
+  const navigate = useNavigate();
+  const { impersonate } = React.useContext(AuthContext);
   const headers = { Authorization: `Bearer ${token}` };
 
   const { data: users, refresh: fetchUsers } = useApiSWR(
@@ -62,6 +65,20 @@ export const UsersTab = ({ token, onStatsChange, prefilter }) => {
     !searchTerm || u.name?.toLowerCase().includes(searchTerm.toLowerCase()) || u.email?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
+  const impersonateUser = async (u) => {
+    try {
+      const res = await axios.post(`${API}/admin/users/${u.id}/impersonate`, {}, { headers });
+      // impersonate() stashes the current admin token so the banner can
+      // offer a one-click "Return to admin". Then we jump to /dashboard —
+      // exactly what the target user would see after their own login.
+      impersonate(res.data.token, res.data.user);
+      toast.success(`Now viewing as ${u.name || u.email}`);
+      navigate('/dashboard');
+    } catch (e) {
+      toast.error(e.response?.data?.detail || 'Impersonation failed');
+    }
+  };
+
   return (
     <div data-testid="admin-users-section">
       <div className="flex items-center gap-4 mb-6">
@@ -109,6 +126,9 @@ export const UsersTab = ({ token, onStatsChange, prefilter }) => {
                 <td className="px-5 py-3">
                   {u.role !== 'admin' && (
                     <div className="flex items-center gap-1">
+                      <button onClick={() => impersonateUser(u)} className="p-1.5 rounded hover:bg-blue-50 text-blue-600" title={t('admin.impersonate', 'Log in as this user')} data-testid={`impersonate-user-${u.id}`}>
+                        <LogIn size={16} />
+                      </button>
                       <button onClick={() => toggleUserStatus(u.id)} className="p-1.5 rounded hover:bg-gray-100" title={(u.status || 'active') === 'active' ? t('admin.block') : t('admin.unblock')} data-testid={`toggle-user-${u.id}`}>
                         {(u.status || 'active') === 'active' ? <Ban size={16} className="text-orange-500" /> : <CheckCircle size={16} className="text-green-500" />}
                       </button>

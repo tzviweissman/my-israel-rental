@@ -4,6 +4,8 @@ import json
 import uuid
 from collections.abc import AsyncGenerator
 from datetime import UTC, datetime, timedelta
+
+import jwt
 from typing import List
 
 from fastapi import APIRouter, Depends, HTTPException, Request
@@ -30,7 +32,7 @@ from models_response import (
 )
 from routes.deps import POSTMARK_WEBHOOK_SECRET, db, logger, verify_token
 from routes.payments import SERVICE_PRETTY, VALID_DOC_SERVICES
-from utils.auth import decode_query_token
+from utils.auth import JWT_SECRET, decode_query_token
 from utils.events import publish, subscribe, subscriber_count, unsubscribe
 
 router = APIRouter()
@@ -395,6 +397,53 @@ async def delete_user(user_id: str, payload: dict = Depends(verify_token)) -> di
     await db.properties.delete_many({"owner_id": user_id})
     await publish("invalidate", {"prefixes": ["/api/admin/users", "/api/admin/properties", "/api/admin/dashboard"]})
     return {"message": "User and their properties deleted"}
+
+
+@api_router.post("/admin/users/{user_id}/impersonate")
+async def impersonate_user(user_id: str, payload: dict = Depends(verify_token)) -> dict:
+    """Return a short-lived JWT for the target user so the admin can drive
+    that user's dashboard directly (support flows: add properties on the
+    owner's behalf, reproduce bugs, etc.).
+
+    Guardrails:
+      • Admin-only; another admin cannot be impersonated (privilege boundary).
+      • JWT TTL is 4h — much shorter than a normal 30-day token — so an
+        impersonation session doesn't linger past its intent.
+      • Every impersonation is written to `db.admin_impersonation_log`
+        for audit. Admin never sees the target's password.
+    """
+    if payload.get('role') != 'admin':
+        raise HTTPException(status_code=403, detail="Admin access required")
+    if user_id == payload['user_id']:
+        raise HTTPException(status_code=400, detail="Cannot impersonate yourself")
+
+    target = await db.users.find_one({"id": user_id}, {"_id": 0, "password": 0})
+    if not target:
+        raise HTTPException(status_code=404, detail="User not found")
+    if target.get('role') == 'admin':
+        raise HTTPException(status_code=403, detail="Cannot impersonate another admin")
+
+    # Short-lived token that carries an `impersonated_by` claim. The
+    # existing verify_token doesn't look at this field so all existing
+    # authorization checks continue to work using the target user's role
+    # — exactly what we need for the admin to act as them.
+    token_payload = {
+        'user_id': target['id'],
+        'role': target.get('role', 'renter'),
+        'impersonated_by': payload['user_id'],
+        'exp': datetime.now(UTC) + timedelta(hours=4),
+    }
+    token = jwt.encode(token_payload, JWT_SECRET, algorithm='HS256')
+
+    # Audit trail — never delete these rows; they're the only record that
+    # a given action was performed by an admin acting-as another user.
+    await db.admin_impersonation_log.insert_one({
+        'admin_id': payload['user_id'],
+        'target_user_id': target['id'],
+        'target_email': target.get('email'),
+        'started_at': datetime.now(UTC).isoformat(),
+    })
+    return {"token": token, "user": target}
 
 
 @api_router.get("/admin/duplicates")
