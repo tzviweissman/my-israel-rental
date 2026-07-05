@@ -83,6 +83,27 @@ _LOCATION_BY_SLUG = {loc["slug"]: loc for loc in LOCATIONS}
 
 router = APIRouter(prefix="/marketplace", tags=["marketplace"])
 
+# Supported provider languages for the "spoken languages" filter/facet.
+# Ordered by relevance in Israel — English + Hebrew are the two most common
+# so they render first in multi-selects. Kept as a top-level constant so
+# tests and the frontend can import the same list.
+SUPPORTED_LANGUAGES = [
+    "English", "Hebrew", "Russian", "French",
+    "Arabic", "Spanish", "Amharic", "Yiddish",
+]
+_LANGUAGE_SET = set(SUPPORTED_LANGUAGES)
+
+# Response-time badge thresholds. Providers with fewer than
+# MIN_RESPONSES_FOR_BADGE recorded responses show no badge (statistical
+# floor — one lucky quick reply shouldn't earn "Replies in 1h" forever).
+MIN_RESPONSES_FOR_BADGE = 3
+RESPONSE_FAST_HOURS = 1.0
+RESPONSE_MED_HOURS = 24.0
+
+# Top-Rated thresholds — mirrors the values shown in the plan doc.
+TOP_RATED_MIN_AVG = 4.7
+TOP_RATED_MIN_COUNT = 10
+
 
 # --------------------------- Models --------------------------- #
 
@@ -99,6 +120,8 @@ class GigIn(BaseModel):
     title: str
     category: str
     description: str = ""
+    title_he: Optional[str] = None
+    description_he: Optional[str] = None
     tiers: list[PricingTier] = Field(default_factory=list)
     gallery: list[str] = Field(default_factory=list)      # image URLs
     booking_mode: str = "whatsapp"                        # "whatsapp" | "in_platform"
@@ -111,6 +134,8 @@ class GigPatch(BaseModel):
     title: Optional[str] = None
     category: Optional[str] = None
     description: Optional[str] = None
+    title_he: Optional[str] = None
+    description_he: Optional[str] = None
     tiers: Optional[list[PricingTier]] = None
     gallery: Optional[list[str]] = None
     booking_mode: Optional[str] = None
@@ -120,11 +145,20 @@ class GigPatch(BaseModel):
     status: Optional[str] = None      # "draft" | "published" | "paused"
 
 
+class CredentialDoc(BaseModel):
+    url: str
+    label: str = ""
+
+
 class ProviderPatch(BaseModel):
     bio: Optional[str] = None
     whatsapp: Optional[str] = None
     avatar: Optional[str] = None
     tagline: Optional[str] = None
+    # Trust & Discovery extensions — all optional, no admin review.
+    languages: Optional[list[str]] = None
+    credentials: Optional[str] = None
+    credential_docs: Optional[list[CredentialDoc]] = None
 
 
 class BookingIn(BaseModel):
@@ -133,6 +167,13 @@ class BookingIn(BaseModel):
     contact_email: str
     contact_phone: Optional[str] = None
     preferred_date: Optional[str] = None                  # ISO YYYY-MM-DD
+
+
+class BookingPatch(BaseModel):
+    # Provider action on an in-platform booking. Transitions from `pending`
+    # feed the response-time EMA on the provider record.
+    status: str = Field(..., pattern="^(accepted|declined|completed|cancelled)$")
+    reply: str = ""
 
 
 class ReviewIn(BaseModel):
@@ -168,9 +209,84 @@ async def _ensure_provider_record(user_id: str) -> dict[str, Any]:
         "trial_ends_at": (now + timedelta(days=30)).isoformat(),
         "subscribed_until": None,
         "created_at": now.isoformat(),
+        # Trust & Discovery defaults — all optional/empty. Populated via
+        # PATCH /providers/me + the booking status EMA hook below.
+        "languages": [],
+        "credentials": "",
+        "credential_docs": [],
+        "avg_response_hours": None,
+        "response_count": 0,
     }
     await db.marketplace_providers.insert_one(prov)
     return prov
+
+
+def _response_bucket(prov: dict[str, Any]) -> Optional[str]:
+    """Bucket the provider's rolling response-time EMA into one of the
+    UI badge tiers. Returns None below the statistical floor so we never
+    show a badge from a single lucky reply."""
+    count = prov.get("response_count") or 0
+    avg = prov.get("avg_response_hours")
+    if count < MIN_RESPONSES_FOR_BADGE or avg is None:
+        return None
+    if avg <= RESPONSE_FAST_HOURS:
+        return "1h"
+    if avg <= RESPONSE_MED_HOURS:
+        return "24h"
+    return None
+
+
+def _member_since_year(user: Optional[dict[str, Any]], prov: Optional[dict[str, Any]]) -> Optional[int]:
+    """Parse the ISO created_at from either the user or provider record.
+    Prefer the user's account age (more meaningful) with the provider
+    record as a fallback for legacy rows."""
+    for source in (user, prov):
+        if not source:
+            continue
+        created = source.get("created_at")
+        if isinstance(created, str) and len(created) >= 4:
+            try:
+                return int(created[:4])
+            except ValueError:
+                continue
+    return None
+
+
+def _cheapest_tier_price(gig: dict[str, Any]) -> Optional[float]:
+    """Lowest tier price on a gig, coerced to a float. Used by the price
+    filter + price_asc sort."""
+    tiers = gig.get("tiers") or []
+    prices: list[float] = []
+    for t in tiers:
+        p = t.get("price") if isinstance(t, dict) else None
+        try:
+            prices.append(float(p))
+        except (TypeError, ValueError):
+            continue
+    return min(prices) if prices else None
+
+
+async def _update_response_ema(provider_user_id: str, elapsed_hours: float) -> None:
+    """Update the provider's rolling response-time on a booking status
+    transition out of 'pending'. Uses a simple EMA with alpha=0.4 so
+    recent replies weigh a bit more than the historical average — new
+    behavior (getting faster/slower) shows up in ~3-4 responses."""
+    if elapsed_hours < 0:
+        return
+    prov = await db.marketplace_providers.find_one({"user_id": provider_user_id})
+    if not prov:
+        return
+    prev_avg = prov.get("avg_response_hours")
+    prev_count = prov.get("response_count") or 0
+    if prev_avg is None or prev_count == 0:
+        new_avg = elapsed_hours
+    else:
+        alpha = 0.4
+        new_avg = alpha * elapsed_hours + (1 - alpha) * float(prev_avg)
+    await db.marketplace_providers.update_one(
+        {"user_id": provider_user_id},
+        {"$set": {"avg_response_hours": round(new_avg, 2), "response_count": prev_count + 1}},
+    )
 
 
 def _provider_is_active(prov: dict[str, Any]) -> bool:
@@ -299,6 +415,14 @@ async def list_gigs(
     category: Optional[str] = None,
     location: Optional[str] = None,
     q: Optional[str] = None,
+    # Trust & Discovery filters — all optional. Defaults to previous behavior.
+    min_rating: Optional[float] = Query(None, ge=0, le=5),
+    min_price: Optional[float] = Query(None, ge=0),
+    max_price: Optional[float] = Query(None, ge=0),
+    response_time: Optional[str] = Query(None, pattern="^(1h|24h)$"),
+    languages: Optional[str] = None,                       # csv, e.g. "English,Hebrew"
+    booking_mode: Optional[str] = Query(None, pattern="^(whatsapp|in_platform)$"),
+    sort: Optional[str] = Query("match", pattern="^(match|rating|reviews|newest|price_asc)$"),
     limit: int = Query(60, ge=1, le=200),
 ):
     query: dict[str, Any] = {"status": "published"}
@@ -316,35 +440,119 @@ async def list_gigs(
         # SEC-003: escape the user input so it's treated as a literal
         # substring, not a regex — prevents catastrophic-backtracking DoS
         # on this unauthenticated endpoint. Also cap the length to keep
-        # the query size sane.
+        # the query size sane. Search across bilingual fields too so
+        # Hebrew queries match `title_he` / `description_he`.
         needle = re.escape(q[:80])
         query["$or"] = [
-            {"title": {"$regex": needle, "$options": "i"}},
-            {"description": {"$regex": needle, "$options": "i"}},
+            {"title":          {"$regex": needle, "$options": "i"}},
+            {"description":    {"$regex": needle, "$options": "i"}},
+            {"title_he":       {"$regex": needle, "$options": "i"}},
+            {"description_he": {"$regex": needle, "$options": "i"}},
         ]
-    cursor = db.marketplace_gigs.find(query).sort("created_at", -1).limit(limit)
+    if booking_mode:
+        query["booking_mode"] = booking_mode
+
+    # Fetch more than `limit` because the post-filters (rating floor,
+    # price band, response bucket, languages) may prune the initial page
+    # down below the requested count.
+    fetch_multiplier = 3 if any(v is not None for v in (min_rating, min_price, max_price, response_time, languages)) else 1
+    cursor = db.marketplace_gigs.find(query).sort("created_at", -1).limit(limit * fetch_multiplier)
     raw = [g async for g in cursor]
-    # Filter to active providers first, then batch-load ratings in one query.
+
+    # One providers lookup covers every gig, dedup'd by user_id.
+    provider_ids = list({g.get("provider_user_id") for g in raw if g.get("provider_user_id")})
+    provs = {
+        p["user_id"]: p
+        async for p in db.marketplace_providers.find({"user_id": {"$in": provider_ids}})
+    }
+    users = {
+        (u.get("id") or u.get("_id")): u
+        async for u in db.users.find({"$or": [{"id": {"$in": provider_ids}}, {"_id": {"$in": provider_ids}}]})
+    }
+    ratings = await _batch_rating_aggregate([g["_id"] for g in raw])
+
+    language_filter = None
+    if languages:
+        wanted = {s.strip() for s in languages.split(",") if s.strip()}
+        # Silently drop unknown languages so a stale frontend build doesn't 400.
+        language_filter = wanted & _LANGUAGE_SET or None
+
     kept: list[dict[str, Any]] = []
     for gig in raw:
-        prov = await db.marketplace_providers.find_one({"user_id": gig.get("provider_user_id")})
+        prov = provs.get(gig.get("provider_user_id"))
         if not prov or not _provider_is_active(prov):
             continue  # Hide expired-trial providers from public browse.
-        user = await db.users.find_one({"_id": gig.get("provider_user_id")}) \
-            or await db.users.find_one({"id": gig.get("provider_user_id")})
+
+        agg = ratings.get(gig["_id"], {"rating_avg": None, "rating_count": 0})
+        # Rating floor — providers with 0 reviews are treated as passing
+        # any min_rating filter set to 0, but pruned when min_rating > 0.
+        if min_rating and (agg["rating_avg"] is None or agg["rating_avg"] < min_rating):
+            continue
+
+        cheapest = _cheapest_tier_price(gig)
+        if min_price is not None and (cheapest is None or cheapest < min_price):
+            continue
+        if max_price is not None and (cheapest is None or cheapest > max_price):
+            continue
+
+        bucket = _response_bucket(prov)
+        if response_time == "1h" and bucket != "1h":
+            continue
+        if response_time == "24h" and bucket not in ("1h", "24h"):
+            continue
+
+        prov_langs = prov.get("languages") or []
+        if language_filter and not (language_filter & set(prov_langs)):
+            continue
+
+        user = users.get(gig.get("provider_user_id"))
         gig["provider"] = {
             "user_id": gig.get("provider_user_id"),
             "name": (user or {}).get("name", "Provider"),
             "avatar": prov.get("avatar"),
             "tagline": prov.get("tagline"),
+            "languages": prov_langs,
+            "response_bucket": bucket,
+            "member_since_year": _member_since_year(user, prov),
         }
-        kept.append(gig)
-    ratings = await _batch_rating_aggregate([g["_id"] for g in kept])
-    for gig in kept:
-        agg = ratings.get(gig["_id"], {"rating_avg": None, "rating_count": 0})
         gig["rating_avg"] = agg["rating_avg"]
         gig["rating_count"] = agg["rating_count"]
-    return [_clean_gig(g) for g in kept]
+        gig["cheapest_price"] = cheapest
+        gig["is_top_rated"] = (
+            agg["rating_avg"] is not None
+            and agg["rating_avg"] >= TOP_RATED_MIN_AVG
+            and agg["rating_count"] >= TOP_RATED_MIN_COUNT
+        )
+        kept.append(gig)
+
+    # Sort strategy — all sorts happen in Python since rating & price
+    # aren't stored in the base gig doc.
+    def _match_score(g: dict[str, Any]) -> tuple:
+        # Higher score first → we negate so tuple sort ascending == best first.
+        top = 1 if g.get("is_top_rated") else 0
+        avg = g.get("rating_avg") or 0
+        count = g.get("rating_count") or 0
+        return (-top, -avg, -count, -_iso_ts(g.get("created_at")))
+
+    def _iso_ts(iso: Any) -> float:
+        try:
+            return datetime.fromisoformat(iso).timestamp()
+        except (TypeError, ValueError):
+            return 0.0
+
+    if sort == "rating":
+        kept.sort(key=lambda g: (-(g.get("rating_avg") or 0), -(g.get("rating_count") or 0)))
+    elif sort == "reviews":
+        kept.sort(key=lambda g: -(g.get("rating_count") or 0))
+    elif sort == "newest":
+        kept.sort(key=lambda g: -_iso_ts(g.get("created_at")))
+    elif sort == "price_asc":
+        # Gigs without any pricing float to the end.
+        kept.sort(key=lambda g: (g.get("cheapest_price") is None, g.get("cheapest_price") or 0))
+    else:
+        kept.sort(key=_match_score)
+
+    return [_clean_gig(g) for g in kept[:limit]]
 
 
 @router.post("/gigs")
@@ -361,8 +569,10 @@ async def create_gig(payload: GigIn, user=Depends(verify_token)):
         "provider_user_id": user["user_id"],
         "provider_id": prov["_id"],
         "title": payload.title.strip(),
+        "title_he": (payload.title_he or "").strip() or None,
         "category": payload.category,
         "description": payload.description,
+        "description_he": (payload.description_he or "").strip() or None,
         "tiers": [t.model_dump() for t in payload.tiers],
         "gallery": payload.gallery,
         "booking_mode": payload.booking_mode,
@@ -392,10 +602,22 @@ async def get_gig(gig_id: str):
         "tagline": (prov or {}).get("tagline"),
         "bio": (prov or {}).get("bio"),
         "active": _provider_is_active(prov or {}),
+        # Trust & Discovery fields (Phase 3 UI consumes these).
+        "languages": (prov or {}).get("languages") or [],
+        "response_bucket": _response_bucket(prov or {}),
+        "member_since_year": _member_since_year(user, prov),
+        "credentials": (prov or {}).get("credentials", ""),
+        "credential_docs": (prov or {}).get("credential_docs") or [],
     }
     agg = await _rating_aggregate(gig_id)
     gig["rating_avg"] = agg["rating_avg"]
     gig["rating_count"] = agg["rating_count"]
+    gig["cheapest_price"] = _cheapest_tier_price(gig)
+    gig["is_top_rated"] = (
+        agg["rating_avg"] is not None
+        and agg["rating_avg"] >= TOP_RATED_MIN_AVG
+        and agg["rating_count"] >= TOP_RATED_MIN_COUNT
+    )
     return _clean_gig(gig)
 
 
@@ -469,6 +691,45 @@ async def book_gig(gig_id: str, payload: BookingIn, user=Depends(verify_token)):
     return {"ok": True, "booking_id": booking["_id"]}
 
 
+@router.patch("/bookings/{booking_id}")
+async def update_booking(booking_id: str, payload: BookingPatch, user=Depends(verify_token)):
+    """Provider action on a pending booking. Feeds the response-time EMA
+    on the first transition out of `pending`. Idempotent for subsequent
+    updates (completed/cancelled don't re-fire the EMA)."""
+    booking = await db.marketplace_bookings.find_one({"_id": booking_id})
+    if not booking:
+        raise HTTPException(status_code=404, detail="Booking not found")
+    if booking["provider_user_id"] != user["user_id"]:
+        raise HTTPException(status_code=403, detail="Not your booking")
+
+    now = datetime.now(UTC)
+    was_pending = booking.get("status") == "pending"
+    update: dict[str, Any] = {"status": payload.status, "updated_at": now.isoformat()}
+    if payload.reply:
+        update["provider_reply"] = payload.reply[:2000]
+    if was_pending and payload.status in ("accepted", "declined"):
+        try:
+            created = datetime.fromisoformat(booking["created_at"])
+        except (KeyError, ValueError):
+            created = now
+        elapsed = (now - created).total_seconds() / 3600.0
+        await _update_response_ema(user["user_id"], elapsed)
+        update["responded_at"] = now.isoformat()
+
+    await db.marketplace_bookings.update_one({"_id": booking_id}, {"$set": update})
+    fresh = await db.marketplace_bookings.find_one({"_id": booking_id})
+    fresh["id"] = fresh.pop("_id")
+    return fresh
+
+
+@router.get("/languages")
+async def list_languages():
+    """Return the closed set of provider-language options — the frontend
+    filter modal + edit-profile chips read from this to guarantee they
+    stay in sync with the backend allowlist."""
+    return SUPPORTED_LANGUAGES
+
+
 @router.get("/providers/{user_id}")
 async def public_provider(user_id: str):
     prov = await db.marketplace_providers.find_one({"user_id": user_id})
@@ -482,6 +743,12 @@ async def public_provider(user_id: str):
         agg = ratings.get(g["_id"], {"rating_avg": None, "rating_count": 0})
         g["rating_avg"] = agg["rating_avg"]
         g["rating_count"] = agg["rating_count"]
+        g["cheapest_price"] = _cheapest_tier_price(g)
+        g["is_top_rated"] = (
+            agg["rating_avg"] is not None
+            and agg["rating_avg"] >= TOP_RATED_MIN_AVG
+            and agg["rating_count"] >= TOP_RATED_MIN_COUNT
+        )
     gigs = [_clean_gig(g) for g in raw]
     return {
         "user_id": user_id,
@@ -491,6 +758,12 @@ async def public_provider(user_id: str):
         "avatar": prov.get("avatar"),
         "active": _provider_is_active(prov),
         "gigs": gigs,
+        # Trust & Discovery
+        "languages": prov.get("languages") or [],
+        "credentials": prov.get("credentials", ""),
+        "credential_docs": prov.get("credential_docs") or [],
+        "response_bucket": _response_bucket(prov),
+        "member_since_year": _member_since_year(user, prov),
     }
 
 
@@ -498,6 +771,20 @@ async def public_provider(user_id: str):
 async def update_provider(payload: ProviderPatch, user=Depends(verify_token)):
     await _ensure_provider_record(user["user_id"])
     update = {k: v for k, v in payload.model_dump(exclude_none=True).items()}
+    if "languages" in update:
+        # Drop unknown language strings silently so a stale UI can't 400.
+        update["languages"] = [lang for lang in update["languages"] if lang in _LANGUAGE_SET]
+    if "credentials" in update:
+        # Match the ReviewIn cap philosophy — cheap DoS protection on a
+        # free-text field that renders publicly.
+        update["credentials"] = update["credentials"][:2000]
+    if "credential_docs" in update:
+        # Coerce Pydantic → dict for Mongo, and cap at 8 docs so nobody
+        # can dump their whole Google Drive here.
+        update["credential_docs"] = [
+            d if isinstance(d, dict) else d.model_dump()
+            for d in update["credential_docs"][:8]
+        ]
     await db.marketplace_providers.update_one({"user_id": user["user_id"]}, {"$set": update})
     prov = await db.marketplace_providers.find_one({"user_id": user["user_id"]})
     prov["id"] = prov.pop("_id")
