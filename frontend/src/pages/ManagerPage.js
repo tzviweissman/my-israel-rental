@@ -3,7 +3,7 @@ import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import axios from 'axios';
 import { API, AuthContext } from '../App';
-import { Bed, Bath, Home as HomeIcon, MapPin, User, LogIn } from 'lucide-react';
+import { Bed, Bath, Home as HomeIcon, MapPin, User, LogIn, Mail, Phone } from 'lucide-react';
 import DefaultImageBadge from '../components/property/DefaultImageBadge';
 import VideoCoverBadge from '../components/property/VideoCoverBadge';
 import { getCoverImage } from '../utils/coverImage';
@@ -31,6 +31,20 @@ const ManagerPage = () => {
   useEffect(() => {
     fetchManagerData();
   }, [managerId]);
+
+  // White-label toggle: when the manager has opted into full white-label
+  // ('off' mode), hide the site-wide navigation so their /manager/{id}
+  // page reads like a standalone microsite. We toggle a body class so
+  // the fixed <nav data-testid="global-nav"> element in Navigation.js
+  // disappears without any prop-drilling / context refactor.
+  const wl = data?.manager?.white_label || {};
+  const wlOff = wl.white_label_mode === 'off';
+  useEffect(() => {
+    if (wlOff) {
+      document.body.classList.add('wl-hide-global-nav');
+    }
+    return () => document.body.classList.remove('wl-hide-global-nav');
+  }, [wlOff]);
 
   // When the rental-type filter changes, the lister may not have any
   // properties in the previously-selected area for the new type. Reset to
@@ -116,9 +130,31 @@ const ManagerPage = () => {
   };
 
   return (
-    <div className="min-h-screen" data-testid="manager-page">
-      <div className="max-w-7xl mx-auto px-6 pt-28 pb-12">
-        <div className="rounded-2xl p-8 border border-[#E5E5E5] mb-10" style={{ background: 'linear-gradient(135deg, #1E6A6A 0%, #2A8585 100%)' }}>
+    <div
+      className="min-h-screen"
+      data-testid="manager-page"
+      data-white-label-mode={wl.white_label_mode || 'attribution'}
+    >
+      <div className={`max-w-7xl mx-auto px-6 pb-12 ${wlOff ? 'pt-6' : 'pt-28'}`}>
+        <div
+          className="rounded-2xl p-8 border border-[#E5E5E5] mb-10 relative"
+          style={{
+            background: wl.hero_color
+              ? `linear-gradient(135deg, ${wl.hero_color} 0%, ${wl.hero_color}CC 100%)`
+              : 'linear-gradient(135deg, #1E6A6A 0%, #2A8585 100%)',
+          }}
+        >
+          {/* Attribution pill — visible unless white-label is fully off. */}
+          {!wlOff && (
+            <div
+              className="absolute top-3 end-4 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-semibold"
+              style={{ background: 'rgba(255,255,255,0.15)', color: '#D4AF37', backdropFilter: 'blur(4px)' }}
+              data-testid="manager-attribution-pill"
+            >
+              <span className="w-1.5 h-1.5 rounded-full" style={{ background: '#D4AF37' }} />
+              Powered by MyIsraelRental
+            </div>
+          )}
           <div className="flex items-center gap-6">
             {data.manager.business_logo ? (
               <img
@@ -136,8 +172,8 @@ const ManagerPage = () => {
               <h1 className="text-4xl font-bold mb-2 text-white" style={{ fontFamily: 'Playfair Display' }} data-testid="manager-name">
                 {data.manager.name}
               </h1>
-              <p className="mt-2 text-sm" style={{ color: '#D4AF37' }}>
-                {data.properties.length} {data.properties.length === 1 ? 'Property' : 'Properties'} Available
+              <p className="mt-2 text-sm" style={{ color: '#D4AF37' }} data-testid="manager-tagline">
+                {wl.tagline || `${data.properties.length} ${data.properties.length === 1 ? 'Property' : 'Properties'} Available`}
               </p>
             </div>
           </div>
@@ -300,6 +336,41 @@ const ManagerPage = () => {
             <p className="text-xl text-gray-600">
               {activeType === 'all' ? 'No properties available at the moment.' : `No ${rentalTypeLabels[activeType] || activeType} properties available.`}
             </p>
+          </div>
+        )}
+
+        {/* Footer — attribution mode shows MyIsraelRental branding + a
+            Learn more link, white-label 'off' shows the agency's own
+            contact block instead. Only render if the manager filled at
+            least one contact field in 'off' mode; otherwise show nothing. */}
+        {wlOff ? (
+          (wl.contact_email || wl.contact_phone) && (
+            <div
+              className="mt-12 pt-6 border-t border-gray-200 text-center text-xs text-gray-500 flex flex-wrap justify-center items-center gap-3"
+              data-testid="manager-agency-footer"
+            >
+              <span>© {new Date().getFullYear()} {data.manager.name}</span>
+              {wl.contact_email && (
+                <a href={`mailto:${wl.contact_email}`} className="inline-flex items-center gap-1 hover:text-gray-800">
+                  <Mail size={11} />{wl.contact_email}
+                </a>
+              )}
+              {wl.contact_phone && (
+                <a href={`tel:${wl.contact_phone}`} className="inline-flex items-center gap-1 hover:text-gray-800">
+                  <Phone size={11} />{wl.contact_phone}
+                </a>
+              )}
+            </div>
+          )
+        ) : (
+          <div
+            className="mt-12 pt-6 border-t border-gray-200 text-center text-xs text-gray-500"
+            data-testid="manager-brand-footer"
+          >
+            This agency page runs on{' '}
+            <strong style={{ color: '#1E6A6A' }}>MyIsraelRental</strong>
+            {' '}— instant kosher-friendly rental listings, chats and contracts.{' '}
+            <a href="/" style={{ color: '#D4AF37' }} className="hover:underline">Learn more →</a>
           </div>
         )}
       </div>

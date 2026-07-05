@@ -11,6 +11,18 @@ Build a bilingual (English/Hebrew) rental website named MyIsraelRental.com with 
 - **i18n**: i18next with English and Hebrew (RTL) support
 
 ## What's Been Implemented
+- [x] **White-label toggle for manager agency pages (2026-07-05)**: Managers can now brand their public `/manager/{id}` page to look like a standalone agency microsite instead of a MyIsraelRental subpage.
+  - **Backend**: `PATCH /api/user/white-label` (manager/admin only). Persists `{white_label_mode, hero_color, tagline, contact_email, contact_phone}` under `users.white_label`. Hex validated with `#RRGGBB` regex; mode restricted to `'attribution' | 'off'`. Automatically included in the existing `GET /api/manager/{id}/properties` response (single field read).
+  - **Public page** (`ManagerPage.js`):
+    - `attribution` mode → gold "● Powered by MyIsraelRental" pill on the hero corner + branded footer with "Learn more →" link. Global nav intact.
+    - `off` mode → attribution pill hidden, hero recolored to `hero_color`, subtitle swapped for the custom `tagline`, MyIsraelRental global nav hidden (via `body.wl-hide-global-nav` class targeting `[data-testid="global-nav"]`), and an agency-owned footer with the manager's email/phone.
+  - **Dashboard config UI**: `ManagerHeader.jsx` grew a new "Agency page appearance" section with a mode toggle, color picker (native `<input type="color">` + hex text), tagline field, and public contact email/phone inputs. One `Save appearance` button.
+  - **Verified live**: end-to-end HTTP flow (login → PATCH → GET manager) confirmed both modes; screenshots captured for both.
+  - Files: `backend/routes/misc.py`, `frontend/src/pages/ManagerPage.js`, `frontend/src/components/dashboard/ManagerHeader.jsx`, `frontend/src/components/Navigation.js` (added `data-testid="global-nav"`), `frontend/src/index.css` (single hide rule).
+  - Testids: `wl-mode-toggle`, `wl-mode-attribution`, `wl-mode-off`, `wl-hero-color`, `wl-tagline`, `wl-contact-email`, `wl-contact-phone`, `wl-save-btn`, `manager-attribution-pill`, `manager-tagline`, `manager-brand-footer`, `manager-agency-footer`.
+  - **Monetization hook (future)**: `off` mode is currently free for all managers. Simple upgrade path — gate it behind a Pro tier in `WhiteLabelSettings.save()` when we roll out manager subscriptions.
+
+
 - [x] **Signup: Owner vs Manager sub-picker + tab gating (2026-07-05)**: Reworked the "List a home" role selection so a first-time signer picks the right persona.
   - **UX**: Top-level picker stays at 3 tiles (Renter / **List a home** / Offer services). Selecting "List a home" reveals a second row with **Owner** ("1-2 personal properties") and **Manager** ("Multiple listings · bulk import · agency page"). Auth submit sends the concrete role (`owner` or `manager`) directly to `/auth/register`.
   - **Backend**: `routes/auth.py` role allowlist now permits `manager` in addition to `renter/owner/provider` (admin still gated). SEC-001 fix comment updated.

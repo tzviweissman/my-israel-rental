@@ -124,6 +124,142 @@ const ManagerHeader = ({ user, token, API }) => {
         link={shareableLink}
         label="Share your manager page"
       />
+
+      <WhiteLabelSettings API={API} token={token} initial={user?.white_label || {}} />
+    </div>
+  );
+};
+
+// White-label settings — nested here (rather than a separate file) so
+// the whole "manager dashboard card" lives in one place and future
+// tweaks stay obvious. Only rendered as part of ManagerHeader which is
+// already gated to role === 'manager' || admin.
+const WhiteLabelSettings = ({ API, token, initial }) => {
+  const [mode, setMode] = useState(initial.white_label_mode || 'attribution');
+  const [heroColor, setHeroColor] = useState(initial.hero_color || '#1E6A6A');
+  const [tagline, setTagline] = useState(initial.tagline || '');
+  const [contactEmail, setContactEmail] = useState(initial.contact_email || '');
+  const [contactPhone, setContactPhone] = useState(initial.contact_phone || '');
+  const [saving, setSaving] = useState(false);
+
+  const save = async () => {
+    setSaving(true);
+    try {
+      await axios.patch(
+        `${API}/user/white-label`,
+        { white_label_mode: mode, hero_color: heroColor, tagline, contact_email: contactEmail, contact_phone: contactPhone },
+        { headers: { Authorization: `Bearer ${token}` } },
+      );
+      toast.success('White-label settings saved');
+    } catch (e) {
+      toast.error(e.response?.data?.detail || 'Save failed');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <div className="mt-6 pt-6 border-t border-gray-200" data-testid="white-label-settings">
+      <div className="flex items-center justify-between mb-3">
+        <div>
+          <h3 className="text-sm font-bold text-gray-900">Agency page appearance</h3>
+          <p className="text-[11px] text-gray-500 leading-snug">
+            Fully brand your public <code>/manager/{`{your-id}`}</code> page. "Attribution" keeps a subtle "Powered by" pill; "Full white-label" hides our nav + branding entirely.
+          </p>
+        </div>
+      </div>
+
+      {/* Mode toggle */}
+      <div className="grid grid-cols-2 gap-2 mb-4" data-testid="wl-mode-toggle">
+        {[
+          { value: 'attribution', label: 'Attribution', sub: 'Small "Powered by" pill · site nav visible' },
+          { value: 'off', label: 'Full white-label', sub: 'Hide MyIsraelRental branding + global nav' },
+        ].map(({ value, label, sub }) => {
+          const active = mode === value;
+          return (
+            <button
+              key={value}
+              type="button"
+              onClick={() => setMode(value)}
+              className={`flex flex-col items-start gap-0.5 rounded-lg border p-3 text-left transition-all ${
+                active ? 'border-[#1E6A6A] bg-[#1E6A6A]/5 ring-2 ring-[#1E6A6A]/25' : 'border-gray-200 hover:border-[#1E6A6A]/50'
+              }`}
+              data-testid={`wl-mode-${value}`}
+            >
+              <span className="text-xs font-semibold text-gray-900">{label}</span>
+              <span className="text-[10px] text-gray-500 leading-tight">{sub}</span>
+            </button>
+          );
+        })}
+      </div>
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <label className="text-xs">
+          <span className="block text-gray-700 font-medium mb-1">Hero color</span>
+          <div className="flex items-center gap-2">
+            <input
+              type="color"
+              value={heroColor}
+              onChange={(e) => setHeroColor(e.target.value)}
+              className="h-9 w-12 rounded border border-gray-200 cursor-pointer"
+              data-testid="wl-hero-color"
+            />
+            <input
+              type="text"
+              value={heroColor}
+              onChange={(e) => setHeroColor(e.target.value)}
+              placeholder="#1E6A6A"
+              className="flex-1 h-9 px-2 rounded border border-gray-200 text-xs font-mono"
+            />
+          </div>
+        </label>
+        <label className="text-xs">
+          <span className="block text-gray-700 font-medium mb-1">Tagline (replaces "N Properties Available")</span>
+          <input
+            type="text"
+            value={tagline}
+            onChange={(e) => setTagline(e.target.value)}
+            placeholder="Boutique management · Est. 2019 · Jerusalem"
+            className="w-full h-9 px-2 rounded border border-gray-200 text-xs"
+            data-testid="wl-tagline"
+          />
+        </label>
+        <label className="text-xs">
+          <span className="block text-gray-700 font-medium mb-1">Public contact email</span>
+          <input
+            type="email"
+            value={contactEmail}
+            onChange={(e) => setContactEmail(e.target.value)}
+            placeholder="hello@youragency.com"
+            className="w-full h-9 px-2 rounded border border-gray-200 text-xs"
+            data-testid="wl-contact-email"
+          />
+        </label>
+        <label className="text-xs">
+          <span className="block text-gray-700 font-medium mb-1">Public contact phone</span>
+          <input
+            type="tel"
+            value={contactPhone}
+            onChange={(e) => setContactPhone(e.target.value)}
+            placeholder="+972 2 555 1234"
+            className="w-full h-9 px-2 rounded border border-gray-200 text-xs"
+            data-testid="wl-contact-phone"
+          />
+        </label>
+      </div>
+
+      <div className="mt-4 flex items-center gap-2">
+        <button
+          type="button"
+          onClick={save}
+          disabled={saving}
+          className="px-4 py-2 rounded-lg bg-[#1E6A6A] text-white text-xs font-semibold hover:bg-[#164a4a] disabled:opacity-60"
+          data-testid="wl-save-btn"
+        >
+          {saving ? 'Saving…' : 'Save appearance'}
+        </button>
+        <p className="text-[10px] text-gray-500">Preview your changes on your public manager page after saving.</p>
+      </div>
     </div>
   );
 };

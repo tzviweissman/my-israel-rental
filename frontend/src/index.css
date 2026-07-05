@@ -2,6 +2,15 @@
 @tailwind components;
 @tailwind utilities;
 
+/* White-label mode: hide the global MyIsraelRental navigation on
+   /manager/{id} pages when the manager has opted for the "off" mode.
+   Applied via body.wl-hide-global-nav from ManagerPage.js — no prop
+   drilling needed, cleaned up on unmount. */
+body.wl-hide-global-nav [data-testid="global-nav"] {
+    display: none !important;
+}
+
+
 body {
     margin: 0;
     font-family:

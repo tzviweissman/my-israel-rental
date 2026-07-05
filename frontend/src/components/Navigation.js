@@ -313,6 +313,7 @@ const Navigation = () => {
   return (
     <nav
       ref={navRef}
+      data-testid="global-nav"
       className="fixed top-0 left-0 right-0 z-50 transition-all duration-300"
       style={{
         background: scrolled ? '#1E6A6A' : 'transparent',

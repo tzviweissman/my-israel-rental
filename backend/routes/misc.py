@@ -6,6 +6,7 @@ from typing import List
 
 from emergentintegrations.llm.chat import LlmChat, UserMessage
 from fastapi import APIRouter, Body, Depends, File, HTTPException, Request, UploadFile
+from pydantic import BaseModel, Field
 
 from models import ContactRequest, DocumentServiceRequest, TranslationRequest
 from models_response import (
@@ -312,7 +313,7 @@ async def upload_user_logo(file: UploadFile = File(...), payload: dict = Depends
             res = await upload_bytes_to_cloudinary(
                 content,
                 is_video=False,
-                folder=f"myisraelrental/logos",
+                folder="myisraelrental/logos",
                 public_id_hint=f"logo_{payload['user_id']}_{uuid.uuid4().hex[:8]}",
             )
             logo_url = res["url"]
@@ -348,3 +349,61 @@ async def delete_user_logo(payload: dict = Depends(verify_token)) -> dict:
                 old_file.unlink()
     await db.users.update_one({"id": payload["user_id"]}, {"$unset": {"business_logo": ""}})
     return {"message": "Logo removed"}
+
+
+# ---------------------------------------------------------------------------
+# White-label configuration for the public /manager/{id} page
+# ---------------------------------------------------------------------------
+#
+# Managers can hide the MyIsraelRental global nav, recolor their hero,
+# swap the "N Properties Available" subtitle for a custom tagline, and
+# render their own contact footer — turning their agency page into a
+# quasi-branded microsite. Attribution mode keeps the corner pill on
+# so we still get a subtle brand-lift. "off" mode is meant to be gated
+# behind a paid agency tier later; for now it's simply available to any
+# manager or admin.
+
+_WL_HEX_RE = __import__("re").compile(r"^#[0-9a-fA-F]{6}$")
+
+
+class WhiteLabelRequest(BaseModel):
+    # 'attribution' keeps a small "Powered by MyIsraelRental" pill on the
+    # hero; 'off' removes it and hides the global site nav entirely on
+    # the /manager/{id} page.
+    white_label_mode: str = Field(default="attribution")
+    hero_color: str | None = None            # e.g. "#8b3a2b"
+    tagline: str | None = None               # replaces "N Properties Available"
+    contact_email: str | None = None
+    contact_phone: str | None = None
+
+
+@api_router.patch("/user/white-label", response_model=MessageResponse)
+async def update_white_label(
+    req: WhiteLabelRequest, payload: dict = Depends(verify_token),
+) -> dict:
+    role = (payload.get("role") or "").lower()
+    if role not in {"manager", "admin"}:
+        raise HTTPException(
+            status_code=403,
+            detail="White-label controls are available on manager and admin accounts.",
+        )
+    mode = req.white_label_mode.lower().strip()
+    if mode not in {"attribution", "off"}:
+        raise HTTPException(status_code=400, detail="mode must be 'attribution' or 'off'")
+    if req.hero_color and not _WL_HEX_RE.match(req.hero_color):
+        raise HTTPException(status_code=400, detail="hero_color must be a #RRGGBB hex string")
+
+    # We store the whole struct under a single sub-doc so serving the
+    # public /manager/{id} endpoint stays a single field read and adding
+    # a new sub-field later (custom domain, favicon, etc.) doesn't need
+    # a migration.
+    doc = {
+        "white_label_mode": mode,
+        "hero_color": (req.hero_color or "").strip() or None,
+        "tagline": (req.tagline or "").strip() or None,
+        "contact_email": (req.contact_email or "").strip() or None,
+        "contact_phone": (req.contact_phone or "").strip() or None,
+        "updated_at": datetime.now(UTC).isoformat(),
+    }
+    await db.users.update_one({"id": payload["user_id"]}, {"$set": {"white_label": doc}})
+    return {"message": "White-label settings saved"}
