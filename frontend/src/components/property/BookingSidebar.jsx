@@ -39,16 +39,21 @@ const PriceBlock = ({ property, sublease, preSubleaseId, convertPrice, holidayCo
     // underlying property's price for a frame.
     return <div className="h-10 w-40 rounded-md bg-gray-100 animate-pulse" data-testid="property-detail-price-loading" />;
   }
-  // Two-price model: a vacation listing can carry BOTH a regular nightly
+  // Two-price model: a listing can carry BOTH a regular monthly/nightly
   // rate AND a holiday rate (lump or per-night). We display the holiday
   // rate only when the renter is in a holiday context (linked from
-  // /sukkot or /pesach, OR they clicked the toggle below). Browsing the
-  // detail page directly → regular nightly rate by default.
+  // /sukkot or /pesach, clicked the toggle below, OR the auto-switch
+  // effect matched their check-in date). Browsing the detail page
+  // directly → regular rate by default.
+  //
+  // Applies to any `rental_type` (short-term or long-term listings can
+  // dual-list for Sukkot/Pesach via the multi-rental-types feature) as
+  // long as the owner has actually configured a holiday_lump_price.
   const tags = property.holiday_tags || [];
   const hasHolidayPrice =
-    property.rental_type === 'vacation' &&
     property.holiday_lump_price != null &&
-    property.holiday_lump_price > 0;
+    property.holiday_lump_price > 0 &&
+    tags.length > 0;
   const matchingHolidayTags = tags.filter((tg) => ['sukkot', 'pesach'].includes(tg));
   const showHolidayPrice =
     hasHolidayPrice &&
@@ -432,11 +437,13 @@ const BookingSidebar = ({
   React.useEffect(() => {
     if (holidayManuallySet || !checkInISO) return;
     const tags = property.holiday_tags || [];
+    // Match the relaxed gate in PriceDisplay — any rental_type qualifies
+    // as long as the owner set a holiday lump price + tag.
     const hasHolidayRate =
-      property.rental_type === 'vacation' &&
       property.holiday_lump_price != null &&
-      property.holiday_lump_price > 0;
-    if (!hasHolidayRate || tags.length === 0) return;
+      property.holiday_lump_price > 0 &&
+      tags.length > 0;
+    if (!hasHolidayRate) return;
 
     let matchedTag = null;
     for (const tag of ['sukkot', 'pesach']) {
@@ -473,6 +480,47 @@ const BookingSidebar = ({
     setHolidayContext(next);
   };
 
+  // Big renter-facing CTA card: "Book Sukkot / Pesach at $X →". Only
+  // shown when the listing has a holiday rate configured AND we're
+  // currently on the regular rate. One tap: pre-fills the date range
+  // with the owner's holiday window + flips to the holiday rate context.
+  const holidayCTA = React.useMemo(() => {
+    const t2 = property.holiday_tags || [];
+    if (!(property.holiday_lump_price > 0) || t2.length === 0) return null;
+    // Prefer the owner-defined holiday_start/end_date window; fall back
+    // to the shared Jewish calendar lookup if the owner never set one.
+    const ownerStart = property.holiday_start_date;
+    const ownerEnd = property.holiday_end_date;
+    const primaryTag = t2.find((tg) => ['sukkot', 'pesach'].includes(tg)) || t2[0];
+    const win = ownerStart && ownerEnd
+      ? { start: ownerStart, end: ownerEnd }
+      : resolvedWindows?.[primaryTag];
+    if (!win) return null;
+    return { tag: primaryTag, win };
+  }, [property.holiday_tags, property.holiday_lump_price, property.holiday_start_date, property.holiday_end_date, resolvedWindows]);
+
+  const applyHolidayCTA = () => {
+    if (!holidayCTA) return;
+    const parseIso = (s) => {
+      const [y, m, d] = s.split('-').map(Number);
+      // Local-noon anchor prevents DST edge-cases from moving the day.
+      return new Date(y, m - 1, d, 12, 0, 0);
+    };
+    // End is inclusive on the owner's side but bookings treat end as
+    // checkout (exclusive), so add one day so the renter checks out the
+    // morning after the last holiday night.
+    const startDate = parseIso(holidayCTA.win.start);
+    const endInclusive = parseIso(holidayCTA.win.end);
+    const checkoutDate = new Date(endInclusive.getTime() + 24 * 3600 * 1000);
+    setDateRange({ from: startDate, to: checkoutDate });
+    setBookingData((prev) => ({
+      ...prev,
+      start_date: format(startDate, 'yyyy-MM-dd'),
+      end_date: format(checkoutDate, 'yyyy-MM-dd'),
+    }));
+    setHolidayContextManual(holidayCTA.tag);
+  };
+
   return (
     <div className="bg-white p-4 rounded-2xl border border-[#E5E5E5] sticky top-20 max-h-[calc(100vh-100px)] overflow-y-auto">
       <div className="mb-3">
@@ -485,6 +533,44 @@ const BookingSidebar = ({
           setHolidayContext={setHolidayContextManual}
         />
       </div>
+
+      {/* Prominent holiday CTA — pushes the alternative rate to the
+          renter without hiding the primary one. Auto-hides once the
+          renter is already in the holiday context. */}
+      {holidayCTA && holidayContext !== holidayCTA.tag && (
+        <button
+          type="button"
+          onClick={applyHolidayCTA}
+          className="w-full mb-4 group relative overflow-hidden rounded-xl border-2 border-[#D4AF37] bg-gradient-to-br from-[#FBF8F2] to-[#F7EFDD] p-3 text-left hover:shadow-md transition-shadow"
+          data-testid="holiday-cta-card"
+        >
+          <div className="flex items-start justify-between gap-2">
+            <div className="min-w-0">
+              <p className="text-[10px] font-bold uppercase tracking-wider text-[#D4AF37]">
+                {t('property.availableFor', 'Also available for')} {holidayCTA.tag.charAt(0).toUpperCase() + holidayCTA.tag.slice(1)}
+              </p>
+              <p className="mt-0.5 text-lg font-bold text-[#1E6A6A] leading-tight" data-testid="holiday-cta-price">
+                {property.holiday_lump_currency === 'USD' ? '$' : '₪'}
+                {property.holiday_lump_price.toLocaleString()}
+                <span className="text-xs font-medium text-gray-500 ms-1">
+                  {property.holiday_lump_is_per_night
+                    ? t('property.perNight', '/ night')
+                    : t('property.perHoliday', '/ holiday')}
+                </span>
+              </p>
+              <p className="text-[11px] text-gray-600 mt-0.5">
+                {holidayCTA.win.start} → {holidayCTA.win.end}
+              </p>
+            </div>
+            <span className="shrink-0 text-[#1E6A6A] text-base font-bold group-hover:translate-x-0.5 transition-transform">
+              →
+            </span>
+          </div>
+          <p className="text-[11px] text-[#1E6A6A]/80 mt-1.5 font-medium">
+            {t('property.holidayCTAHint', 'Tap to book the holiday window at this rate')}
+          </p>
+        </button>
+      )}
 
       <div className="space-y-2.5" data-testid="booking-form">
         <div>
