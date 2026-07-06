@@ -1,4 +1,5 @@
 import React from 'react';
+import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
 import { Calendar as CalendarIcon, Mail, MessageCircle, X } from 'lucide-react';
 import { Calendar } from '../ui/calendar';
@@ -250,8 +251,50 @@ const BookingCalendar = ({
   property, sublease, blockedDates,
   dateRange, setDateRange, setBookingData,
   calendarMonth, setCalendarMonth, setShowCalendar,
+  anchorRef,
 }) => {
   const { t } = useTranslation();
+  // Airbnb-style responsive month count: two side-by-side on tablet+ so
+  // renters can scan a full booking window without clicking Next twice;
+  // single month on mobile so it fits inside the sidebar popover.
+  const [numMonths, setNumMonths] = React.useState(() => (
+    typeof window !== 'undefined' && window.matchMedia('(min-width: 640px)').matches ? 2 : 1
+  ));
+  React.useEffect(() => {
+    if (typeof window === 'undefined' || !window.matchMedia) return undefined;
+    const mq = window.matchMedia('(min-width: 640px)');
+    const onChange = (e) => setNumMonths(e.matches ? 2 : 1);
+    mq.addEventListener?.('change', onChange);
+    return () => mq.removeEventListener?.('change', onChange);
+  }, []);
+
+  // Position the popover relative to the check-in trigger via fixed
+  // coordinates so it escapes the sidebar's `overflow-y-auto` (which
+  // would clip the 660px-wide two-month layout otherwise). Re-measures
+  // on scroll + resize so the popover stays glued to the trigger.
+  const CALENDAR_WIDTH = numMonths === 2 ? 660 : 320;
+  const [pos, setPos] = React.useState(() => ({ top: 0, left: 0 }));
+  React.useLayoutEffect(() => {
+    const compute = () => {
+      const anchor = anchorRef?.current;
+      if (!anchor) return;
+      const r = anchor.getBoundingClientRect();
+      // Right-align the popover with the anchor's right edge so it can
+      // grow leftward on desktop instead of overflowing the viewport;
+      // clamp to 8px from the left edge on narrow screens.
+      let left = r.right - CALENDAR_WIDTH;
+      if (left < 8) left = 8;
+      setPos({ top: r.bottom + 8, left });
+    };
+    compute();
+    window.addEventListener('scroll', compute, true);
+    window.addEventListener('resize', compute);
+    return () => {
+      window.removeEventListener('scroll', compute, true);
+      window.removeEventListener('resize', compute);
+    };
+  }, [anchorRef, numMonths, CALENDAR_WIDTH]);
+
   const onSelect = (range) => {
     // If the user already had a complete range and is now clicking ANY
     // single date, treat it as a fresh restart. react-day-picker's default
@@ -306,18 +349,62 @@ const BookingCalendar = ({
     }
   };
 
-  return (
+  const nights = dateRange.from && dateRange.to
+    ? Math.ceil((dateRange.to - dateRange.from) / (1000 * 60 * 60 * 24))
+    : 0;
+
+  return createPortal(
     <div
-      className="mt-2 bg-white rounded-xl border-2 border-[#1E6A6A] shadow-2xl p-4 relative z-[100] w-[320px]"
+      className="bg-white rounded-2xl border border-gray-200 shadow-2xl p-5 sm:p-6 fixed z-[100]"
+      style={{ top: pos.top, left: pos.left, width: CALENDAR_WIDTH, pointerEvents: 'auto' }}
       data-testid="booking-calendar"
-      style={{ pointerEvents: 'auto' }}
     >
       <button
         onClick={() => setShowCalendar(null)}
-        className="absolute top-2 right-2 p-1 rounded-full hover:bg-gray-100 z-[110]"
+        className="absolute top-3 right-3 p-1.5 rounded-full hover:bg-gray-100 z-[110]"
+        aria-label={t('property.close', 'Close')}
       >
         <X size={14} />
       </button>
+
+      {/* Airbnb-style summary header — nights + range on the left, inline
+          check-in / checkout pills on the right (desktop only; the pills
+          would crowd the popover on mobile). */}
+      <div className="flex flex-wrap items-center justify-between gap-3 mb-5 pe-8">
+        <div className="min-w-0">
+          <div className="text-base sm:text-lg font-bold text-gray-900" data-testid="calendar-nights-header">
+            {nights > 0
+              ? `${nights} ${t('property.nights', 'nights')}`
+              : t('property.selectDates', 'Select dates')}
+          </div>
+          <div className="text-xs text-gray-500 mt-0.5" data-testid="calendar-range-summary">
+            {dateRange.from && dateRange.to
+              ? `${format(dateRange.from, 'MMM d, yyyy')} — ${format(dateRange.to, 'MMM d, yyyy')}`
+              : t('property.addYourDates', 'Add your travel dates for exact pricing')}
+          </div>
+        </div>
+        {numMonths === 2 && (
+          <div className="flex items-stretch gap-2 text-xs" data-testid="calendar-inline-pills">
+            <div className="rounded-lg border border-gray-900 px-3 py-1.5">
+              <div className="text-[9px] font-bold uppercase tracking-widest text-gray-500">
+                {t('property.checkIn', 'Check-in')}
+              </div>
+              <div className="text-sm text-gray-900 font-medium" data-testid="calendar-pill-checkin">
+                {dateRange.from ? format(dateRange.from, 'M/d/yyyy') : t('property.addDate', 'Add date')}
+              </div>
+            </div>
+            <div className="rounded-lg border border-gray-200 px-3 py-1.5">
+              <div className="text-[9px] font-bold uppercase tracking-widest text-gray-500">
+                {t('property.checkOut', 'Checkout')}
+              </div>
+              <div className="text-sm text-gray-900 font-medium" data-testid="calendar-pill-checkout">
+                {dateRange.to ? format(dateRange.to, 'M/d/yyyy') : t('property.addDate', 'Add date')}
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+
       <Calendar
         mode="range"
         selected={dateRange}
@@ -325,42 +412,37 @@ const BookingCalendar = ({
         onMonthChange={setCalendarMonth}
         onSelect={onSelect}
         defaultMonth={computeDefaultMonth({ property, dateRange })}
-        numberOfMonths={1}
+        numberOfMonths={numMonths}
         disabled={computeDisabled({ sublease, property, blockedDates })}
         className="rounded-xl"
         style={{ pointerEvents: 'auto' }}
         classNames={{
-          months: 'flex flex-col w-[280px]',
+          months: numMonths === 2
+            ? 'flex flex-row gap-8'
+            : 'flex flex-col w-[280px]',
           month: 'space-y-3 w-[280px]',
           caption: 'flex justify-center pt-1 relative items-center h-8 w-[280px]',
-          caption_label: 'text-sm font-bold w-[150px] text-center',
+          caption_label: 'text-sm font-bold w-[180px] text-center text-gray-900',
           nav: 'space-x-1 flex items-center',
-          nav_button: 'h-7 w-7 bg-transparent p-0 opacity-50 hover:opacity-100 inline-flex items-center justify-center rounded-md border border-[#E5E5E5]',
-          nav_button_previous: 'absolute left-1',
-          nav_button_next: 'absolute right-1',
+          nav_button: 'h-7 w-7 bg-transparent p-0 opacity-70 hover:opacity-100 inline-flex items-center justify-center rounded-full hover:bg-gray-100',
+          nav_button_previous: 'absolute left-0',
+          nav_button_next: 'absolute right-0',
           table: 'w-[280px] border-collapse',
           head_row: 'flex w-[280px]',
-          head_cell: 'text-gray-500 rounded-md w-10 font-medium text-[0.75rem] uppercase flex-shrink-0',
+          head_cell: 'text-gray-500 rounded-md w-10 font-medium text-[0.7rem] uppercase tracking-wider flex-shrink-0',
           row: 'flex w-[280px] mt-1',
           cell: 'relative p-0 text-center text-sm w-10 flex-shrink-0',
-          day: 'h-10 w-10 p-0 font-bold rounded-full hover:bg-[#1E6A6A] hover:text-white inline-flex items-center justify-center text-gray-900 transition-all text-base',
+          day: 'h-10 w-10 p-0 font-semibold rounded-full hover:bg-[#1E6A6A] hover:text-white inline-flex items-center justify-center text-gray-900 transition-all text-base',
           day_range_start: 'day-range-start !bg-black !text-white rounded-full hover:!bg-black',
           day_range_end: 'day-range-end !bg-black !text-white rounded-full hover:!bg-black',
           day_selected: '!bg-black !text-white hover:!bg-black focus:!bg-black',
           day_today: 'font-bold text-[#D4AF37] border-2 border-[#D4AF37]',
           day_outside: 'text-gray-300 opacity-50',
-          day_disabled: 'text-gray-200 opacity-30 line-through',
-          day_range_middle: 'aria-selected:bg-black/10 aria-selected:text-black',
+          day_disabled: 'text-gray-300 opacity-40 line-through',
+          day_range_middle: 'aria-selected:bg-black/5 aria-selected:text-black rounded-none',
           day_hidden: 'invisible',
         }}
       />
-      {dateRange.from && dateRange.to && (
-        <div className="px-3 pb-2 pt-1 text-center">
-          <span className="text-xs text-gray-500">
-            {Math.ceil((dateRange.to - dateRange.from) / (1000 * 60 * 60 * 24))} {t('property.nights')}
-          </span>
-        </div>
-      )}
       {/* Availability hint — when the owner capped `available_to` (and/or
           `available_from`), surface the boundary right under the calendar
           so renters instantly understand why later dates are greyed out.
@@ -368,7 +450,7 @@ const BookingCalendar = ({
           renders the sublease window prominently elsewhere. */}
       {!sublease && (property.available_from || property.available_to) && (
         <div
-          className="mt-2 px-3 py-2 rounded-lg bg-[#FBF8F2] border border-[#D4AF37]/40 text-[11px] text-[#1E6A6A] leading-snug"
+          className="mt-4 px-3 py-2 rounded-lg bg-[#FBF8F2] border border-[#D4AF37]/40 text-[11px] text-[#1E6A6A] leading-snug"
           data-testid="calendar-availability-hint"
         >
           {property.available_from && property.available_to ? (
@@ -386,7 +468,35 @@ const BookingCalendar = ({
           )}
         </div>
       )}
-    </div>
+
+      {/* Footer actions — Clear dates on the left, Close on the right.
+          Only rendered on desktop where the Airbnb-style two-month view
+          gives us the horizontal room. */}
+      {numMonths === 2 && (
+        <div className="flex items-center justify-between mt-5 pt-4 border-t border-gray-100">
+          <button
+            type="button"
+            onClick={() => {
+              setDateRange({ from: undefined, to: undefined });
+              setBookingData((prev) => ({ ...prev, start_date: '', end_date: '' }));
+            }}
+            className="text-sm font-semibold text-gray-900 hover:text-gray-600 underline underline-offset-2"
+            data-testid="calendar-clear-dates"
+          >
+            {t('property.clearDates', 'Clear dates')}
+          </button>
+          <button
+            type="button"
+            onClick={() => setShowCalendar(null)}
+            className="px-5 py-2 rounded-lg bg-gray-900 text-white text-sm font-semibold hover:bg-black"
+            data-testid="calendar-close-btn"
+          >
+            {t('common.close', 'Close')}
+          </button>
+        </div>
+      )}
+    </div>,
+    document.body,
   );
 };
 
@@ -409,6 +519,10 @@ const BookingSidebar = ({
   onBook, onChat,
 }) => {
   const { t } = useTranslation();
+  // Anchor ref for the date-picker popover — used by the portalled
+  // BookingCalendar to align its top-right corner with the check-in /
+  // checkout row so it can escape the sidebar's `overflow-y-auto`.
+  const dateRowRef = React.useRef(null);
 
   const onCheckInClick = () => {
     // If a complete range is set, clear both on calendar-open so the next
@@ -618,7 +732,7 @@ const BookingSidebar = ({
           <label className="block text-sm font-medium mb-1.5">
             {t('property.checkIn')} & {t('property.checkOut')}
           </label>
-          <div className="grid grid-cols-2 gap-2">
+          <div className="grid grid-cols-2 gap-2" ref={dateRowRef}>
             <button
               type="button"
               onClick={onCheckInClick}
@@ -667,6 +781,7 @@ const BookingSidebar = ({
               calendarMonth={calendarMonth}
               setCalendarMonth={setCalendarMonth}
               setShowCalendar={setShowCalendar}
+              anchorRef={dateRowRef}
             />
           )}
         </div>
