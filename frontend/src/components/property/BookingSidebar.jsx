@@ -272,25 +272,63 @@ const BookingCalendar = ({
   // coordinates so it escapes the sidebar's `overflow-y-auto` (which
   // would clip the 660px-wide two-month layout otherwise). Re-measures
   // on scroll + resize so the popover stays glued to the trigger.
+  //
+  // Also flips above the trigger + clamps to viewport when the trigger
+  // sits close to the bottom of the screen, so the calendar never gets
+  // cut off. Falls back to top-pinned + internal scroll on very short
+  // viewports where the calendar is taller than the screen.
   const CALENDAR_WIDTH = numMonths === 2 ? 660 : 320;
-  const [pos, setPos] = React.useState(() => ({ top: 0, left: 0 }));
+  const [pos, setPos] = React.useState(() => ({ top: 0, left: 0, maxHeight: undefined }));
   const popoverRef = React.useRef(null);
   React.useLayoutEffect(() => {
     const compute = () => {
       const anchor = anchorRef?.current;
       if (!anchor) return;
       const r = anchor.getBoundingClientRect();
+      const vh = window.innerHeight;
+      const GAP = 8;
+      const PAD = 8;
+      // Measured height when the popover is mounted; on first paint we
+      // don't have it yet — assume the two-month layout worst case so we
+      // still pick a sensible slot before the correction pass fires.
+      const calH = popoverRef.current?.offsetHeight || (numMonths === 2 ? 620 : 480);
+      const belowRoom = vh - r.bottom - GAP - PAD;
+      const aboveRoom = r.top - GAP - PAD;
+      let top;
+      let maxHeight;
+      if (calH <= belowRoom) {
+        // Preferred: sits below the trigger, like most date pickers.
+        top = r.bottom + GAP;
+      } else if (calH <= aboveRoom) {
+        // Not enough room below → flip above the trigger.
+        top = r.top - GAP - calH;
+      } else {
+        // Doesn't fit either way (short viewport) — pin near the top of
+        // the screen and let the popover scroll internally.
+        top = PAD;
+        maxHeight = vh - 2 * PAD;
+      }
+      // Final safety clamp so nothing peeks off-screen.
+      if (maxHeight == null) {
+        top = Math.max(PAD, Math.min(top, vh - calH - PAD));
+      }
+
       // Right-align the popover with the anchor's right edge so it can
       // grow leftward on desktop instead of overflowing the viewport;
       // clamp to 8px from the left edge on narrow screens.
       let left = r.right - CALENDAR_WIDTH;
-      if (left < 8) left = 8;
-      setPos({ top: r.bottom + 8, left });
+      if (left < PAD) left = PAD;
+      setPos({ top, left, maxHeight });
     };
     compute();
+    // Second pass on the next frame so we can re-measure once the
+    // popover is actually in the DOM (first-open cases where the fallback
+    // height was wrong).
+    const rafId = window.requestAnimationFrame(compute);
     window.addEventListener('scroll', compute, true);
     window.addEventListener('resize', compute);
     return () => {
+      window.cancelAnimationFrame(rafId);
       window.removeEventListener('scroll', compute, true);
       window.removeEventListener('resize', compute);
     };
@@ -381,7 +419,14 @@ const BookingCalendar = ({
     <div
       ref={popoverRef}
       className="bg-white rounded-2xl border border-gray-200 shadow-2xl p-5 sm:p-6 fixed z-[100]"
-      style={{ top: pos.top, left: pos.left, width: CALENDAR_WIDTH, pointerEvents: 'auto' }}
+      style={{
+        top: pos.top,
+        left: pos.left,
+        width: CALENDAR_WIDTH,
+        maxHeight: pos.maxHeight,
+        overflowY: pos.maxHeight ? 'auto' : undefined,
+        pointerEvents: 'auto',
+      }}
       data-testid="booking-calendar"
     >
       <button
