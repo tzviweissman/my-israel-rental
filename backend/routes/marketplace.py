@@ -793,6 +793,29 @@ async def list_languages():
     return SUPPORTED_LANGUAGES
 
 
+@router.get("/nearest-city")
+async def nearest_city(
+    lat: float = Query(..., ge=-90, le=90),
+    lng: float = Query(..., ge=-180, le=180),
+):
+    """Given renter coords, return the closest supported city from the
+    LOCATIONS table. Frontend calls this right after the "Show nearby"
+    opt-in so it can pre-select the corresponding location chip and
+    give first-time visitors a zero-click browsing anchor. Returns
+    `null` (204-ish) semantics via a small payload — cheaper than
+    handling a 404 client-side."""
+    best = None
+    best_d = None
+    for loc in LOCATIONS:
+        d = _haversine_km((lat, lng), (loc["lat"], loc["lng"]))
+        if best_d is None or d < best_d:
+            best_d = d
+            best = loc
+    if not best:
+        return {"slug": None, "label": None, "distance_km": None}
+    return {"slug": best["slug"], "label": best["label"], "distance_km": best_d}
+
+
 @router.get("/providers/{user_id}")
 async def public_provider(user_id: str):
     prov = await db.marketplace_providers.find_one({"user_id": user_id})

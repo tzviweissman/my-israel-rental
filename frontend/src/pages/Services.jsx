@@ -235,15 +235,41 @@ const Services = () => {
     }
     setGeoBusy(true);
     navigator.geolocation.getCurrentPosition(
-      (pos) => {
-        setCoords({ lat: pos.coords.latitude, lng: pos.coords.longitude });
+      async (pos) => {
+        const nextCoords = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+        setCoords(nextCoords);
         setGeoBusy(false);
+        // Zero-click discovery boost: if the renter hasn't yet chosen a
+        // location chip, resolve their coords to the closest supported
+        // city and pre-select it. Fully silent on failure — worst case
+        // we just leave the chip empty.
+        let nearestSlug = '';
+        if (!selectedLoc) {
+          try {
+            const r = await axios.get(`${API}/marketplace/nearest-city`, {
+              params: { lat: nextCoords.lat, lng: nextCoords.lng },
+            });
+            if (r.data?.slug) nearestSlug = r.data.slug;
+          } catch (e) {
+            // Non-fatal — don't block the nearby flow if the city lookup
+            // hiccups. The distance sort + chips already carry the value.
+            console.warn('nearest-city lookup failed', e);
+          }
+        }
         // sort=distance implicitly when nearby turns on so results
         // immediately re-order by proximity. Users can still switch back
         // to any other sort while keeping nearby active — the distance
         // chip stays on the card either way.
-        patchUrl({ nearby: '1', sort: 'distance' });
-        toast.success(t('services.nearbyOn', 'Showing services near you'));
+        patchUrl({
+          nearby: '1',
+          sort: 'distance',
+          ...(nearestSlug ? { location: nearestSlug } : {}),
+        });
+        toast.success(
+          nearestSlug
+            ? t('services.nearbyOnCity', 'Showing services near you')
+            : t('services.nearbyOn', 'Showing services near you'),
+        );
       },
       (err) => {
         setGeoBusy(false);
