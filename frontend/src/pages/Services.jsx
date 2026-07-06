@@ -15,7 +15,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import axios from 'axios';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
-import { Search, ArrowRight, Loader2, SlidersHorizontal, Award, Zap } from 'lucide-react';
+import { Search, ArrowRight, Loader2, SlidersHorizontal, Award, Zap, MapPin } from 'lucide-react';
 import { API } from '../App';
 import PageMeta from '../components/PageMeta';
 import StarRating from '../components/marketplace/StarRating';
@@ -35,6 +35,7 @@ const SORT_OPTIONS = [
   { value: 'reviews',   labelKey: 'services.sort.reviews',   fallback: 'Most reviewed' },
   { value: 'newest',    labelKey: 'services.sort.newest',    fallback: 'Newest first' },
   { value: 'price_asc', labelKey: 'services.sort.priceAsc',  fallback: 'Price: low to high' },
+  { value: 'distance',  labelKey: 'services.sort.distance',  fallback: 'Nearest to me', requiresCoords: true },
 ];
 
 const GigCard = ({ gig, onClick, i18n, t }) => {
@@ -87,6 +88,13 @@ const GigCard = ({ gig, onClick, i18n, t }) => {
       </p>
       <p className="text-xs text-gray-500 truncate">
         {gig.provider?.name}{gig.area ? ` · ${gig.area}` : ''}
+        {typeof gig.distance_km === 'number' && (
+          <span className="ms-1 inline-flex items-center gap-0.5 text-[10px] text-[#1E6A6A] font-semibold">
+            · {gig.distance_km < 1
+              ? `${Math.round(gig.distance_km * 1000)} m`
+              : `${gig.distance_km.toFixed(gig.distance_km < 10 ? 1 : 0)} km`}
+          </span>
+        )}
       </p>
       {(gig.rating_count > 0) && (
         <div className="mt-0.5">
@@ -116,6 +124,10 @@ const readFilters = (params) => ({
   languages: (params.get('languages') || '').split(',').filter(Boolean),
   bookingMode: params.get('booking_mode') || '',
   sort: params.get('sort') || 'match',
+  // Nearby-mode: only active when both lat/lng are present. Coords aren't
+  // persisted to the URL so a shared /services link never leaks anyone's
+  // location — nearby always requires a fresh geolocation opt-in.
+  nearby: params.get('nearby') === '1',
 });
 
 const Services = () => {
@@ -129,11 +141,15 @@ const Services = () => {
   const [gigs, setGigs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filtersOpen, setFiltersOpen] = useState(false);
+  // Nearby-mode local state — coords live in memory only, never on the
+  // URL, so shared links can't leak location. Cleared on tab close.
+  const [coords, setCoords] = useState(null);
+  const [geoBusy, setGeoBusy] = useState(false);
 
   const state = readFilters(searchParams);
   const {
     selectedCat, selectedLoc, q,
-    minRating, minPrice, maxPrice, responseTime, languages, bookingMode, sort,
+    minRating, minPrice, maxPrice, responseTime, languages, bookingMode, sort, nearby,
   } = state;
 
   // One-shot fetches — categories/locations/languages don't change.
@@ -162,6 +178,13 @@ const Services = () => {
     if (languages.length) params.set('languages', languages.join(','));
     if (bookingMode)   params.set('booking_mode', bookingMode);
     if (sort && sort !== 'match') params.set('sort', sort);
+    // Nearby-mode: only send lat/lng when both the toggle is on AND
+    // coords are available. The backend will silently degrade sort to
+    // `match` if coords are absent when sort=distance was requested.
+    if (nearby && coords) {
+      params.set('lat', coords.lat.toFixed(4));
+      params.set('lng', coords.lng.toFixed(4));
+    }
     setLoading(true);
     axios.get(`${API}/marketplace/gigs?${params.toString()}`)
       .then((r) => setGigs(r.data))
@@ -172,6 +195,7 @@ const Services = () => {
     minRating, minPrice, maxPrice, responseTime,
     // Joined to a primitive so the effect doesn't fire on identity change alone.
     languages.join(','), bookingMode, sort, t,
+    nearby, coords?.lat, coords?.lng,
   ]);
 
   // Centralised URL sync — every setter goes through this so the URL is
@@ -191,6 +215,44 @@ const Services = () => {
       return params;
     }, { replace: true });
   }, [setSearchParams]);
+
+  // Nearby toggle — asks the browser for the current position on first
+  // click, wires the coords into memory, and flips `nearby=1` in the URL
+  // + swaps sort to `distance`. Turning it off clears both nearby and
+  // the distance sort so shared links go back to a coords-free state.
+  const toggleNearby = () => {
+    if (nearby) {
+      setCoords(null);
+      patchUrl({ nearby: '', sort: sort === 'distance' ? '' : sort });
+      return;
+    }
+    if (!navigator?.geolocation) {
+      toast.error(t('services.geoUnavailable', 'Geolocation is not supported by your browser'));
+      return;
+    }
+    setGeoBusy(true);
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        setCoords({ lat: pos.coords.latitude, lng: pos.coords.longitude });
+        setGeoBusy(false);
+        // sort=distance implicitly when nearby turns on so results
+        // immediately re-order by proximity. Users can still switch back
+        // to any other sort while keeping nearby active — the distance
+        // chip stays on the card either way.
+        patchUrl({ nearby: '1', sort: 'distance' });
+        toast.success(t('services.nearbyOn', 'Showing services near you'));
+      },
+      (err) => {
+        setGeoBusy(false);
+        if (err.code === err.PERMISSION_DENIED) {
+          toast.error(t('services.geoDenied', 'Location permission denied. You can re-enable it in your browser settings.'));
+        } else {
+          toast.error(t('services.geoFailed', 'Could not fetch your location — please try again.'));
+        }
+      },
+      { enableHighAccuracy: false, timeout: 8000, maximumAge: 5 * 60 * 1000 },
+    );
+  };
 
   const applyFilters = (draft) => {
     patchUrl({
@@ -339,6 +401,28 @@ const Services = () => {
             </span>
           </h2>
           <div className="flex items-center gap-2">
+            {/* Nearby toggle — opts into browser geolocation. Coords live
+                in memory only (never in the URL) so shared links can't
+                leak location. */}
+            <button
+              type="button"
+              onClick={toggleNearby}
+              disabled={geoBusy}
+              className={`inline-flex items-center gap-1.5 px-3 py-2 rounded-full text-xs sm:text-sm border font-semibold transition-colors ${
+                nearby && coords
+                  ? 'bg-[#1E6A6A] text-white border-[#1E6A6A]'
+                  : 'bg-white text-gray-800 border-gray-200 hover:border-gray-400'
+              } disabled:opacity-60`}
+              data-testid="services-nearby-btn"
+              aria-pressed={nearby && !!coords}
+            >
+              {geoBusy
+                ? <Loader2 size={14} className="animate-spin" />
+                : <MapPin size={14} />}
+              {nearby && coords
+                ? t('services.nearbyOn', 'Nearby you')
+                : t('services.showNearby', 'Show nearby')}
+            </button>
             {/* Sort dropdown */}
             <label className="text-xs text-gray-500 me-1 hidden sm:inline">
               {t('services.sortBy', 'Sort by')}
@@ -349,7 +433,7 @@ const Services = () => {
               className="text-xs sm:text-sm px-3 py-2 rounded-full border border-gray-200 bg-white hover:border-gray-400 focus:outline-none focus:border-[#1E6A6A] font-semibold"
               data-testid="services-sort-select"
             >
-              {SORT_OPTIONS.map((o) => (
+              {SORT_OPTIONS.filter((o) => !o.requiresCoords || (nearby && coords)).map((o) => (
                 <option key={o.value} value={o.value}>
                   {t(o.labelKey, o.fallback)}
                 </option>

@@ -66,20 +66,55 @@ _CATEGORY_SLUGS = {c["slug"] for c in CATEGORIES}
 # `label` is the matcher — a case-insensitive substring against the gig's
 # `area` field. `slug` is only used for the URL query param.
 LOCATIONS = [
-    {"slug": "jerusalem",    "label": "Jerusalem"},
-    {"slug": "tel-aviv",     "label": "Tel Aviv"},
-    {"slug": "bet-shemesh",  "label": "Bet Shemesh"},
-    {"slug": "modiin",       "label": "Modiin"},
-    {"slug": "netanya",      "label": "Netanya"},
-    {"slug": "haifa",        "label": "Haifa"},
-    {"slug": "ashdod",       "label": "Ashdod"},
-    {"slug": "beersheba",    "label": "Beersheba"},
-    {"slug": "herzliya",     "label": "Herzliya"},
-    {"slug": "raanana",      "label": "Ra'anana"},
-    {"slug": "rishon",       "label": "Rishon LeZion"},
-    {"slug": "petah-tikva",  "label": "Petah Tikva"},
+    {"slug": "jerusalem",    "label": "Jerusalem",     "lat": 31.784, "lng": 35.217},
+    {"slug": "tel-aviv",     "label": "Tel Aviv",      "lat": 32.084, "lng": 34.782},
+    {"slug": "bet-shemesh",  "label": "Bet Shemesh",   "lat": 31.744, "lng": 34.986},
+    {"slug": "modiin",       "label": "Modiin",        "lat": 31.899, "lng": 35.010},
+    {"slug": "netanya",      "label": "Netanya",       "lat": 32.328, "lng": 34.856},
+    {"slug": "haifa",        "label": "Haifa",         "lat": 32.794, "lng": 34.989},
+    {"slug": "ashdod",       "label": "Ashdod",        "lat": 31.802, "lng": 34.643},
+    {"slug": "beersheba",    "label": "Beersheba",     "lat": 31.252, "lng": 34.791},
+    {"slug": "herzliya",     "label": "Herzliya",      "lat": 32.166, "lng": 34.844},
+    {"slug": "raanana",      "label": "Ra'anana",      "lat": 32.185, "lng": 34.870},
+    {"slug": "rishon",       "label": "Rishon LeZion", "lat": 31.973, "lng": 34.789},
+    {"slug": "petah-tikva",  "label": "Petah Tikva",   "lat": 32.088, "lng": 34.886},
 ]
 _LOCATION_BY_SLUG = {loc["slug"]: loc for loc in LOCATIONS}
+# label → coords fallback so gigs whose `area` is a free-text city name
+# (e.g. "Tel Aviv, Florentin") still resolve without a slug rewrite.
+_LOCATION_BY_LABEL = {loc["label"].lower(): loc for loc in LOCATIONS}
+
+
+def _resolve_gig_coords(gig: dict[str, Any]) -> Optional[tuple[float, float]]:
+    """Best-effort lat/lng for a gig. Prefers an explicit `lat`/`lng` on
+    the gig doc (future-proof for providers who set precise coordinates),
+    falls back to city-center coords parsed from `area`."""
+    lat = gig.get("lat")
+    lng = gig.get("lng")
+    if isinstance(lat, (int, float)) and isinstance(lng, (int, float)):
+        return (float(lat), float(lng))
+    area = (gig.get("area") or "").strip()
+    if not area:
+        return None
+    head = area.split(",", 1)[0].strip().lower()
+    loc = _LOCATION_BY_LABEL.get(head)
+    if loc:
+        return (loc["lat"], loc["lng"])
+    return None
+
+
+def _haversine_km(a: tuple[float, float], b: tuple[float, float]) -> float:
+    """Great-circle distance between two lat/lng pairs in kilometers.
+    Cheap enough to run on the whole gig list — even a full Israel-wide
+    catalog is only a few hundred docs post-filter."""
+    from math import radians, sin, cos, asin, sqrt
+    lat1, lon1 = a
+    lat2, lon2 = b
+    dlat = radians(lat2 - lat1)
+    dlon = radians(lon2 - lon1)
+    h = sin(dlat / 2) ** 2 + cos(radians(lat1)) * cos(radians(lat2)) * sin(dlon / 2) ** 2
+    return round(2 * 6371.0088 * asin(sqrt(h)), 2)
+
 
 router = APIRouter(prefix="/marketplace", tags=["marketplace"])
 
@@ -422,7 +457,11 @@ async def list_gigs(
     response_time: Optional[str] = Query(None, pattern="^(1h|24h)$"),
     languages: Optional[str] = None,                       # csv, e.g. "English,Hebrew"
     booking_mode: Optional[str] = Query(None, pattern="^(whatsapp|in_platform)$"),
-    sort: Optional[str] = Query("match", pattern="^(match|rating|reviews|newest|price_asc)$"),
+    sort: Optional[str] = Query("match", pattern="^(match|rating|reviews|newest|price_asc|distance)$"),
+    # Nearby-mode inputs. When both `lat` and `lng` are provided we embed
+    # `distance_km` on each card + unlock the `sort=distance` option.
+    lat: Optional[float] = Query(None, ge=-90, le=90),
+    lng: Optional[float] = Query(None, ge=-180, le=180),
     limit: int = Query(60, ge=1, le=200),
 ):
     query: dict[str, Any] = {"status": "published"}
@@ -523,6 +562,12 @@ async def list_gigs(
             and agg["rating_avg"] >= TOP_RATED_MIN_AVG
             and agg["rating_count"] >= TOP_RATED_MIN_COUNT
         )
+        # Distance from the renter's coords — only computed when both
+        # lat/lng were provided so we don't waste cycles on non-nearby
+        # requests. Gigs without resolvable coords get `None`.
+        if lat is not None and lng is not None:
+            coords = _resolve_gig_coords(gig)
+            gig["distance_km"] = _haversine_km((lat, lng), coords) if coords else None
         kept.append(gig)
 
     # Sort strategy — all sorts happen in Python since rating & price
@@ -549,6 +594,14 @@ async def list_gigs(
     elif sort == "price_asc":
         # Gigs without any pricing float to the end.
         kept.sort(key=lambda g: (g.get("cheapest_price") is None, g.get("cheapest_price") or 0))
+    elif sort == "distance":
+        # Silently degrades to `match` when no coords were supplied.
+        if lat is not None and lng is not None:
+            # Gigs whose area we couldn't resolve (distance_km == None)
+            # bubble to the bottom of the nearby list.
+            kept.sort(key=lambda g: (g.get("distance_km") is None, g.get("distance_km") or 0))
+        else:
+            kept.sort(key=_match_score)
     else:
         kept.sort(key=_match_score)
 
