@@ -144,6 +144,14 @@ const QuickSelectRow = ({ property, dateRange, setDateRange, setBookingData }) =
       end_date: format(to, 'yyyy-MM-dd'),
     }));
   };
+  // When the owner set an `available_to` cap and it lands inside the +1
+  // year window, clamp the quick-select checkout to that cap. Otherwise
+  // the renter builds a range the backend will reject at submit time
+  // (see routes/bookings.py::_assert_within_availability_window) — and
+  // in the worst case they'd contact the owner about impossible dates.
+  const availableTo = property.available_to
+    ? parseLocalDate(property.available_to)
+    : null;
   return (
     <div className="mt-3">
       <p className="text-xs text-gray-500 mb-2">{t('property.quickSelect')}</p>
@@ -156,13 +164,21 @@ const QuickSelectRow = ({ property, dateRange, setDateRange, setBookingData }) =
             const from = (property.rental_type === 'long-term' && property.starting_date)
               ? parseLocalDate(property.starting_date)
               : (() => { const d = new Date(); d.setDate(d.getDate() + 1); return d; })();
-            const to = new Date(from);
+            let to = new Date(from);
             to.setFullYear(to.getFullYear() + 1);
+            // Clamp to the owner's availability cap when it's earlier
+            // than the raw +1-year target.
+            if (availableTo && availableTo < to) {
+              to = availableTo;
+            }
             setRange(from, to);
           }}
           className="px-3 py-1.5 rounded-lg border border-[#1E6A6A] text-[#1E6A6A] hover:bg-[#1E6A6A] hover:text-white text-xs font-medium transition-colors"
+          data-testid="quick-select-plus-year"
         >
-          {t('property.plusOneYear')}
+          {availableTo
+            ? t('property.untilAvailability', 'Until {{date}}').replace('{{date}}', format(availableTo, 'MMM d'))
+            : t('property.plusOneYear')}
         </button>
         <button
           type="button"
