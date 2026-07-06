@@ -12,7 +12,7 @@ import axios from 'axios';
 import { toast } from 'sonner';
 import {
   Plus, Loader2, ExternalLink, Trash2, BadgeCheck, Clock, Sparkles,
-  Pencil, Upload, X,
+  Pencil, Upload, X, FileText, Globe, Award,
 } from 'lucide-react';
 import { uploadFilesFast } from '../../utils/fastUpload';
 
@@ -21,9 +21,55 @@ const ProfileEditModal = ({ API, token, initial, onClose, onSaved }) => {
   const [tagline, setTagline] = useState(initial?.tagline || '');
   const [whatsapp, setWhatsapp] = useState(initial?.whatsapp || '');
   const [avatar, setAvatar] = useState(initial?.avatar || '');
+  // Trust UI additions (Phase 3): spoken languages (multi-select),
+  // free-text credentials, optional Cloudinary-hosted document links.
+  // Empty arrays mean "not set" — backend treats absent same as empty.
+  const [languages, setLanguages] = useState(initial?.languages || []);
+  const [credentials, setCredentials] = useState(initial?.credentials || '');
+  const [credentialDocs, setCredentialDocs] = useState(initial?.credential_docs || []);
+  const [languageList, setLanguageList] = useState([]);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [docUploading, setDocUploading] = useState(false);
   const fileRef = useRef(null);
+  const docRef = useRef(null);
+
+  // Load the closed set of supported languages once so the chip row
+  // always mirrors the backend allowlist (`/marketplace/languages`).
+  useEffect(() => {
+    axios.get(`${API}/marketplace/languages`)
+      .then((r) => setLanguageList(r.data))
+      .catch(() => setLanguageList([]));
+  }, [API]);
+
+  const toggleLanguage = (lang) => {
+    setLanguages((prev) =>
+      prev.includes(lang) ? prev.filter((l) => l !== lang) : [...prev, lang],
+    );
+  };
+
+  const pickCredentialDoc = async (files) => {
+    const file = files?.[0];
+    if (!file) return;
+    if (credentialDocs.length >= 8) {
+      toast.error('Maximum 8 credential documents');
+      return;
+    }
+    setDocUploading(true);
+    try {
+      const results = await uploadFilesFast([file], API, token);
+      const good = results.find((r) => r.url && !r.error);
+      if (good) {
+        setCredentialDocs((prev) => [...prev, { url: good.url, label: file.name }]);
+        toast.success('Document uploaded');
+      } else {
+        toast.error(results[0]?.error || 'Upload failed');
+      }
+    } finally {
+      setDocUploading(false);
+      if (docRef.current) docRef.current.value = '';
+    }
+  };
 
   const pickAvatar = async (files) => {
     const file = files?.[0];
@@ -50,7 +96,7 @@ const ProfileEditModal = ({ API, token, initial, onClose, onSaved }) => {
     try {
       await axios.patch(
         `${API}/marketplace/providers/me`,
-        { bio, tagline, whatsapp, avatar },
+        { bio, tagline, whatsapp, avatar, languages, credentials, credential_docs: credentialDocs },
         { headers: { Authorization: `Bearer ${token}` } },
       );
       toast.success('Profile updated');
@@ -108,6 +154,97 @@ const ProfileEditModal = ({ API, token, initial, onClose, onSaved }) => {
         <div>
           <label className="text-xs font-semibold text-gray-700">WhatsApp (with country code)</label>
           <input value={whatsapp} onChange={(e) => setWhatsapp(e.target.value)} placeholder="+972…" className="w-full mt-1 px-3 py-2 rounded-lg border border-gray-200 text-sm" data-testid="provider-whatsapp-input" />
+        </div>
+
+        {/* Spoken languages — feeds the /services filter modal. Empty
+            allowed; unknown values are silently stripped by the backend
+            (validated against the `/marketplace/languages` allowlist). */}
+        <div data-testid="provider-languages-section">
+          <label className="text-xs font-semibold text-gray-700 flex items-center gap-1.5">
+            <Globe size={12} className="text-[#1E6A6A]" />
+            Languages you speak
+            <span className="text-[10px] font-normal text-gray-400 ms-1">— shows on your public profile</span>
+          </label>
+          <div className="mt-2 flex flex-wrap gap-1.5">
+            {languageList.map((lang) => {
+              const active = languages.includes(lang);
+              return (
+                <button
+                  key={lang}
+                  type="button"
+                  onClick={() => toggleLanguage(lang)}
+                  className={`px-3 py-1 rounded-full text-xs font-semibold border transition-colors ${
+                    active
+                      ? 'bg-[#1E6A6A] text-white border-[#1E6A6A]'
+                      : 'bg-white text-gray-700 border-gray-200 hover:border-gray-400'
+                  }`}
+                  data-testid={`provider-lang-${lang.toLowerCase()}`}
+                >
+                  {lang}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Credentials & licenses — free-text professional details that
+            render verbatim on the public provider profile. No admin
+            review (per Phase 3 spec) — providers add their own social
+            proof and it shows immediately. */}
+        <div data-testid="provider-credentials-section">
+          <label className="text-xs font-semibold text-gray-700 flex items-center gap-1.5">
+            <Award size={12} className="text-[#D4AF37]" />
+            Credentials &amp; licenses
+            <span className="text-[10px] font-normal text-gray-400 ms-1">— optional</span>
+          </label>
+          <textarea
+            value={credentials}
+            onChange={(e) => setCredentials(e.target.value)}
+            rows={3}
+            maxLength={2000}
+            placeholder="e.g. Licensed tour guide since 2019 (Ministry of Tourism #12345). CPR certified. 200+ five-star reviews."
+            className="w-full mt-1 px-3 py-2 rounded-lg border border-gray-200 text-sm"
+            data-testid="provider-credentials-input"
+          />
+
+          {/* Optional PDF/image uploads for licenses, certificates,
+              insurance docs. Cap at 8 per provider server-side. */}
+          <div className="mt-2 space-y-1.5">
+            {credentialDocs.map((doc, i) => (
+              <div key={i} className="flex items-center gap-2 text-xs bg-gray-50 rounded-lg px-3 py-1.5" data-testid={`credential-doc-row-${i}`}>
+                <FileText size={12} className="text-[#1E6A6A] shrink-0" />
+                <input
+                  value={doc.label || ''}
+                  onChange={(e) => setCredentialDocs((prev) => prev.map((d, idx) => idx === i ? { ...d, label: e.target.value } : d))}
+                  placeholder="Document name"
+                  className="flex-1 bg-transparent focus:outline-none text-gray-900"
+                  data-testid={`credential-doc-label-${i}`}
+                />
+                <a href={doc.url} target="_blank" rel="noopener noreferrer" className="text-[#1E6A6A] hover:underline">View</a>
+                <button
+                  type="button"
+                  onClick={() => setCredentialDocs((prev) => prev.filter((_, idx) => idx !== i))}
+                  className="text-red-500 p-0.5 hover:bg-red-50 rounded"
+                  data-testid={`credential-doc-remove-${i}`}
+                >
+                  <X size={12} />
+                </button>
+              </div>
+            ))}
+            <input ref={docRef} type="file" accept="image/*,application/pdf" className="hidden" onChange={(e) => pickCredentialDoc(e.target.files)} />
+            {credentialDocs.length < 8 && (
+              <button
+                type="button"
+                onClick={() => docRef.current?.click()}
+                disabled={docUploading}
+                className="text-xs font-semibold text-[#1E6A6A] hover:underline inline-flex items-center gap-1 disabled:opacity-60"
+                data-testid="add-credential-doc-btn"
+              >
+                {docUploading ? <Loader2 className="animate-spin" size={11} /> : <Plus size={11} />}
+                Add document
+              </button>
+            )}
+          </div>
         </div>
 
         <div className="flex justify-end gap-2 pt-2">

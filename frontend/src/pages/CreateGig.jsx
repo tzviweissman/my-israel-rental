@@ -31,8 +31,10 @@ const CreateGig = () => {
 
   const [form, setForm] = useState({
     title: '',
+    title_he: '',
     category: '',
     description: '',
+    description_he: '',
     faqs: [],
     tiers: [{ name: 'Basic', price: '', currency: 'ILS', delivery_days: '', description: '', features: [] }],
     gallery: [],
@@ -154,6 +156,23 @@ const CreateGig = () => {
               <label className="text-sm font-semibold text-gray-700">Title</label>
               <input value={form.title} onChange={(e) => set({ title: e.target.value })} placeholder="e.g. Deep apartment cleaning" className="w-full mt-1 px-3 py-2 rounded-lg border border-gray-200 text-sm" data-testid="wizard-title" />
             </div>
+            {/* Optional Hebrew title — surfaces on the gig card + detail
+                page for renters browsing in Hebrew. Leave blank to fall
+                back to the primary title. Directional dir="rtl" flips
+                the input to right-to-left as they type. */}
+            <div>
+              <label className="text-sm font-semibold text-gray-700">
+                Title (Hebrew) <span className="text-[11px] font-normal text-gray-400">— optional, for Hebrew browsers</span>
+              </label>
+              <input
+                value={form.title_he}
+                onChange={(e) => set({ title_he: e.target.value })}
+                dir="rtl"
+                placeholder="לדוגמה: ניקיון דירה עמוק"
+                className="w-full mt-1 px-3 py-2 rounded-lg border border-gray-200 text-sm"
+                data-testid="wizard-title-he"
+              />
+            </div>
             <div>
               <label className="text-sm font-semibold text-gray-700">Category</label>
               <div className="mt-2 grid grid-cols-2 sm:grid-cols-3 gap-2">
@@ -171,6 +190,25 @@ const CreateGig = () => {
           <div className="space-y-4">
             <textarea value={form.description} onChange={(e) => set({ description: e.target.value })} rows={8} placeholder="Describe what you offer, who it's for, and what's included…" className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm" data-testid="wizard-description" />
             <p className="text-xs text-gray-500">Min 10 characters. You can add FAQs on the gig later.</p>
+            {/* Optional Hebrew description — shown to Hebrew-locale
+                renters on the detail page. Empty falls back to English. */}
+            <div>
+              <label className="text-sm font-semibold text-gray-700">
+                Description (Hebrew) <span className="text-[11px] font-normal text-gray-400">— optional</span>
+              </label>
+              <textarea
+                value={form.description_he}
+                onChange={(e) => set({ description_he: e.target.value })}
+                dir="rtl"
+                rows={6}
+                placeholder="תיאור השירות בעברית — למי הוא מתאים, מה כלול, מה תקבלו…"
+                className="w-full mt-1 px-3 py-2 rounded-lg border border-gray-200 text-sm"
+                data-testid="wizard-description-he"
+              />
+              <p className="text-[11px] text-gray-500 mt-1 leading-snug">
+                Doubles your reach — Hebrew-speaking renters see this instead of the English copy automatically.
+              </p>
+            </div>
           </div>
         )}
 

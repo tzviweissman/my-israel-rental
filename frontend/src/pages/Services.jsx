@@ -375,48 +375,48 @@ const Services = () => {
         </div>
       </div>
 
-      {/* Categories */}
+      {/* Locations + Categories */}
       <div className="max-w-7xl mx-auto px-4 md:px-6 py-10">
-        <div className="flex items-center justify-between mb-5">
+        <div className="flex items-center justify-between mb-3">
           <h2 className="text-xl md:text-2xl font-bold text-gray-900" style={{ fontFamily: 'Playfair Display' }}>
-            {t('services.browse', 'Browse by category')}
+            {t('services.byLocation', 'Browse by location')}
           </h2>
-          {selectedCat && (
+          {selectedLoc && (
             <button
-              onClick={() => patchUrl({ category: '' })}
+              onClick={() => patchUrl({ location: '' })}
               className="text-xs font-semibold text-[#1E6A6A] hover:underline"
-              data-testid="services-category-clear"
+              data-testid="services-location-clear"
             >
-              {t('services.showAll', 'Show all')} ×
+              {t('services.clearLocation', 'Clear location')} ×
             </button>
           )}
         </div>
-        <CategoryCarousel
-          categories={categories}
-          selectedCat={selectedCat}
-          onSelect={(v) => patchUrl({ category: v })}
+        <LocationChipsRow
+          locations={locations}
+          selectedLoc={selectedLoc}
+          onSelect={(v) => patchUrl({ location: v })}
         />
 
-        {/* Locations */}
+        {/* Categories */}
         <div className="mt-8">
-          <div className="flex items-center justify-between mb-3">
-            <h3 className="text-sm md:text-base font-bold text-gray-900" style={{ fontFamily: 'Playfair Display' }}>
-              {t('services.byLocation', 'Browse by location')}
+          <div className="flex items-center justify-between mb-5">
+            <h3 className="text-lg md:text-xl font-bold text-gray-900" style={{ fontFamily: 'Playfair Display' }}>
+              {t('services.browse', 'Browse by category')}
             </h3>
-            {selectedLoc && (
+            {selectedCat && (
               <button
-                onClick={() => patchUrl({ location: '' })}
+                onClick={() => patchUrl({ category: '' })}
                 className="text-xs font-semibold text-[#1E6A6A] hover:underline"
-                data-testid="services-location-clear"
+                data-testid="services-category-clear"
               >
-                {t('services.clearLocation', 'Clear location')} ×
+                {t('services.showAll', 'Show all')} ×
               </button>
             )}
           </div>
-          <LocationChipsRow
-            locations={locations}
-            selectedLoc={selectedLoc}
-            onSelect={(v) => patchUrl({ location: v })}
+          <CategoryCarousel
+            categories={categories}
+            selectedCat={selectedCat}
+            onSelect={(v) => patchUrl({ category: v })}
           />
         </div>
       </div>
