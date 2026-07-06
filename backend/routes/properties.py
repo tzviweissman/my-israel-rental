@@ -28,6 +28,7 @@ from routes.deps import (
 from utils.area_filter import area_mongo_query
 from utils.dedupe import find_duplicate
 from utils.email import (
+    notify_renters_of_property_deletion,
     send_email,
 )
 from utils.events import publish
@@ -465,6 +466,23 @@ async def delete_property(property_id: str, payload: dict = Depends(verify_token
             {"original_property_id": property_id},
             {"$set": {"original_property_id": None}},
         )
+
+        # Property is truly going away — send a courtesy heads-up to any
+        # renter left mid-conversation or with a pending booking, so
+        # they're not stuck refreshing an inbox waiting on a reply that
+        # will never come. Best-effort: failures are logged but never
+        # block the delete. Only fires in the no-twin branch because
+        # the twin branch above re-attaches every chat + booking, so
+        # renters can still transact — nothing to notify about.
+        try:
+            summary = await notify_renters_of_property_deletion(existing)
+            if summary["notified"]:
+                logger.info(
+                    "property-removed notice: emailed %d renter(s) after delete of %s",
+                    summary["notified"], property_id,
+                )
+        except Exception as e:  # noqa: BLE001
+            logger.error("property-removed notice failed for %s: %s", property_id, e)
 
     await db.properties.delete_one({"id": property_id})
     msg = "Property deleted successfully"

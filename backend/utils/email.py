@@ -753,3 +753,189 @@ async def send_availability_expiring_email(
         tag="availability-expiry",
     )
 
+
+
+# --- Property-deletion notifications --------------------------------------
+async def send_property_removed_email(
+    to_email: str,
+    renter_name: str,
+    property_title: str,
+    property_area: str | None,
+    *,
+    had_booking: bool,
+    had_chat: bool,
+) -> bool:
+    """Send a professional "the property you inquired about has been
+    removed" email so a renter with a pending booking request or an
+    open chat thread isn't left refreshing the page waiting for a
+    reply that will never come.
+
+    Called from the property-delete paths (single owner delete + admin
+    bulk delete) — only for renters whose listing has truly gone away
+    (no duplicate twin absorbed the chat/booking).
+    """
+    # Personalize the opening line based on what the renter had going.
+    if had_booking and had_chat:
+        reason_line = (
+            "You had an open message thread and a pending booking request "
+            "with the owner, so we wanted to reach out directly rather than "
+            "leave you waiting on a reply."
+        )
+    elif had_booking:
+        reason_line = (
+            "You had a pending booking request on this listing, so we "
+            "wanted to let you know directly instead of leaving you "
+            "waiting on the owner."
+        )
+    else:
+        reason_line = (
+            "You had an open message thread with the owner on this "
+            "listing, so we wanted to reach out directly rather than "
+            "leave you waiting on a reply."
+        )
+
+    location = f' in {property_area}' if property_area else ''
+    # Deep-link to comparable listings — falls back to the browse page
+    # if we don't have a specific area to filter on.
+    browse_url = f"{FRONTEND_URL}/properties/vacation"
+    if property_area:
+        # URL-encode a leading area filter so the "See similar" CTA
+        # actually shows nearby homes rather than the full catalog.
+        from urllib.parse import quote_plus
+        browse_url = f"{FRONTEND_URL}/properties/vacation?area={quote_plus(property_area)}"
+
+    inner = f"""
+    <h2 style="color:#222;font-size:22px;margin:0 0 12px;">
+      About your inquiry on <em>{property_title}</em>
+    </h2>
+    <p style="color:#555;font-size:14px;line-height:1.7;margin:0 0 14px;">
+      Hi {renter_name or 'there'},
+    </p>
+    <p style="color:#555;font-size:14px;line-height:1.7;margin:0 0 14px;">
+      We're sorry to share that the listing <strong>{property_title}</strong>{location}
+      has been removed by the owner and is no longer available for booking on
+      My Israel Rental.
+    </p>
+    <p style="color:#555;font-size:14px;line-height:1.7;margin:0 0 14px;">
+      {reason_line} <strong>You don't need to wait for a response</strong> — the
+      listing is gone and the owner won't be replying through the platform.
+    </p>
+    <div style="background:#f7f7f4;border-left:4px solid {BRAND_TEAL};border-radius:8px;padding:16px 18px;margin:22px 0;">
+      <div style="color:#333;font-size:13px;font-weight:600;margin-bottom:6px;">
+        What you can do next
+      </div>
+      <ul style="margin:6px 0 0 0;padding-left:18px;color:#555;font-size:13px;line-height:1.7;">
+        <li>Browse similar homes{location} — we've got many great alternatives.</li>
+        <li>Save a search alert so we email you the moment a matching listing goes live.</li>
+        <li>Message our team if you'd like a hand shortlisting alternatives.</li>
+      </ul>
+    </div>
+    {_button("See similar listings", browse_url)}
+    <p style="color:#666;font-size:13px;line-height:1.6;margin:22px 0 0;">
+      Thank you for your patience — we truly appreciate you giving My Israel
+      Rental a try, and we hope you find your perfect home soon.
+    </p>
+    <p style="color:#666;font-size:13px;line-height:1.6;margin:14px 0 0;">
+      Warmly,<br />
+      The My Israel Rental Team
+    </p>
+    """
+    subject = f"About your inquiry — {property_title} is no longer available"
+    return await send_email(
+        to_email,
+        subject,
+        _wrap(inner, preheader="The listing you were inquiring about has been removed. No need to wait for a reply — here are your options."),
+        tag="property-removed-notice",
+    )
+
+
+async def notify_renters_of_property_deletion(property_doc: dict) -> dict:
+    """Find every renter with a pending booking or an open chat on the
+    given property and email them a professional heads-up so they're
+    not left waiting on a reply that will never come.
+
+    Called from the property-delete paths **before** the messages/
+    bookings rows are wiped by the cascade, so we can still resolve
+    renter identities. Silent on the caller side — the function
+    swallows individual send failures and returns a summary dict for
+    logging: ``{"notified": N, "with_booking": B, "with_chat": C}``.
+    """
+    # Late import to avoid a circular dependency at module load time
+    # (utils/email.py must stay importable from routes/*, which in
+    # turn imports models etc.).
+    _db = _get_db()
+    if _db is None:
+        return {"notified": 0, "with_booking": 0, "with_chat": 0}
+
+    property_id = property_doc.get("id")
+    owner_id = property_doc.get("owner_id")
+    property_title = property_doc.get("title") or "your saved listing"
+    property_area = property_doc.get("area")
+    if not property_id:
+        return {"notified": 0, "with_booking": 0, "with_chat": 0}
+
+    # 1) Renters with an *outstanding* booking request. Confirmed +
+    #    pending + cancellation-requested are all statuses where the
+    #    renter is actively expecting the owner to do something, so
+    #    they all get the courtesy email.
+    booking_renter_ids: set[str] = set()
+    async for row in _db.bookings.find(
+        {
+            "property_id": property_id,
+            "status": {"$in": ["pending", "confirmed", "cancellation_requested"]},
+        },
+        {"_id": 0, "renter_id": 1},
+    ):
+        rid = row.get("renter_id")
+        if rid:
+            booking_renter_ids.add(rid)
+
+    # 2) Anyone who sent a message on this property's chat and *isn't*
+    #    the owner is a renter with an open thread. We look at both
+    #    sides of the conversation (sender OR receiver != owner) to
+    #    cover the case where the owner replied last — the renter is
+    #    still the one holding the conversation open.
+    chat_user_ids: set[str] = set()
+    async for row in _db.messages.find(
+        {"property_id": property_id},
+        {"_id": 0, "sender_id": 1, "receiver_id": 1},
+    ):
+        for uid in (row.get("sender_id"), row.get("receiver_id")):
+            if uid and uid != owner_id:
+                chat_user_ids.add(uid)
+
+    all_renter_ids = booking_renter_ids | chat_user_ids
+    if not all_renter_ids:
+        return {"notified": 0, "with_booking": 0, "with_chat": 0}
+
+    # Resolve emails/names in a single round-trip.
+    users_cursor = _db.users.find(
+        {"id": {"$in": list(all_renter_ids)}},
+        {"_id": 0, "id": 1, "email": 1, "name": 1},
+    )
+    notified = 0
+    async for user in users_cursor:
+        email = (user.get("email") or "").strip().lower()
+        if not email:
+            continue
+        try:
+            ok = await send_property_removed_email(
+                email,
+                user.get("name") or "",
+                property_title,
+                property_area,
+                had_booking=(user["id"] in booking_renter_ids),
+                had_chat=(user["id"] in chat_user_ids),
+            )
+            if ok:
+                notified += 1
+        except Exception as e:  # noqa: BLE001
+            # Never let a single send failure block the delete flow —
+            # the caller only wants a best-effort courtesy.
+            logger.error("property-removed notice failed for %s: %s", email, e)
+
+    return {
+        "notified": notified,
+        "with_booking": len(booking_renter_ids),
+        "with_chat": len(chat_user_ids),
+    }

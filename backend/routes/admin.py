@@ -1268,6 +1268,24 @@ async def admin_bulk_delete_properties(
             {"$set": {"original_property_id": None}},
         )
 
+        # Courtesy heads-up to renters left mid-conversation or with a
+        # pending booking on any tombstoned property. Runs BEFORE the
+        # messages/bookings cascade below so we can still resolve renter
+        # identities. Best-effort — failures are logged, never blocking.
+        # Only tombstoned rows get the notice; rescued ones had their
+        # chats + bookings moved to the twin and don't need alerting.
+        from utils.email import notify_renters_of_property_deletion
+        for prop in tombstone_props:
+            try:
+                summary = await notify_renters_of_property_deletion(prop)
+                if summary["notified"]:
+                    logger.info(
+                        "property-removed notice: emailed %d renter(s) after bulk delete of %s",
+                        summary["notified"], prop.get("id"),
+                    )
+            except Exception as e:  # noqa: BLE001
+                logger.error("property-removed notice failed for %s: %s", prop.get("id"), e)
+
     # Cascade cleanup of everything tied to the tombstoned ids only.
     # Rescued rows already had their related rows moved to the twin so
     # they shouldn't be wiped here.
