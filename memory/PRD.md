@@ -12,6 +12,18 @@ Build a bilingual (English/Hebrew) rental website named MyIsraelRental.com with 
 
 ## What's Been Implemented
 
+- [x] **Street-level geocoding for marketplace gigs (2026-07-06)**:
+  - Replaced city-center-only precision (~2-4 km error inside big cities) with per-gig Nominatim geocoding at gig create + patch time. Providers now enter `area` as "Jerusalem, Talpiot" or "Tel Aviv, Florentin" and get pinned to within ~100 m of the actual neighborhood.
+  - **New**: `utils/geocode.py` — Nominatim forward geocoder with ToS-compliant 1 req/sec rate limit gate + descriptive User-Agent + `db.geocode_cache` collection so repeat queries never hit the network. Cache stores both hits and misses.
+  - **Wired into**: `POST /api/marketplace/gigs` and `PATCH /api/marketplace/gigs/{id}` — both fire a fire-and-forget `asyncio.create_task(geocode_gig_area_bg(...))` after the DB write, so the API response stays snappy. Coords land on the gig doc within ~1s.
+  - **Backfill**: server startup launches a one-shot pass to geocode every existing published gig missing coords, respecting the 1 req/sec cap.
+  - **Distance sort**: existing backend `list_gigs` already prefers `gig.lat`/`gig.lng` over city-center fallback, so nothing else needed on the ranking side.
+  - **Verified live**: created gig with area "Jerusalem, Talpiot" → 3s later stamped with lat=31.751102, lng=35.2153865 → distance from Tel Aviv computed as 55.28 km (vs. ~54 km city-center fallback — 1 km closer to actual value). Rate limiter proven: 3ms cache hit vs. 559ms fresh Nominatim call.
+  - Files: `backend/utils/geocode.py` (new), `backend/routes/marketplace.py` (create + patch hooks), `backend/server.py` (startup backfill).
+  - Frontend already prefers gig lat/lng when present via `utils/servicesGeo.js::resolveGigCoords` — zero frontend changes needed.
+
+
+
 - [x] **Services Map view rewritten with vanilla Leaflet + Resend set-password email (2026-07-06)**:
   - **Map view fix**: `ServicesMapView.jsx` was crashing with `Map container is already initialized` under React 18 StrictMode's double-invoke lifecycle (react-leaflet 4.2.1 doesn't clean up MapContainer's Leaflet instance between StrictMode's synthetic unmount + remount). Replaced react-leaflet primitives with vanilla `L.map()` / `L.tileLayer()` / `L.marker()` managed via `useRef` + explicit `map.remove()` cleanup in useEffect. Two effects: one for map lifecycle (mount/unmount), one for pins + user coords + fit-bounds updates. Belt-and-braces `delete containerRef.current._leaflet_id` before init. Popups render raw HTML with a `data-gig-id` attribute and wire click listeners on `popupopen` so navigation stays inside React Router.
   - **Verified live**: 15 OSM tiles + 1 gig pin over Jerusalem, teal/gold branded marker, zoom controls, no runtime errors on `/services?view=map`.

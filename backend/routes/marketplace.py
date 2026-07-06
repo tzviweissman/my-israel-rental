@@ -26,6 +26,7 @@ Endpoints:
 import os
 import re
 import uuid
+import asyncio
 from datetime import datetime, timedelta, timezone
 from typing import Any, Optional
 
@@ -653,6 +654,15 @@ async def create_gig(payload: GigIn, user=Depends(verify_token)):
         "updated_at": now,
     }
     await db.marketplace_gigs.insert_one(gig)
+    # Kick off Nominatim geocoding in the background so /services?nearby=1
+    # can sort/pin this gig with street-level precision rather than the
+    # ~2 km city-center fallback. Fire-and-forget: the create response
+    # returns immediately; the coords land on the doc within ~1s. If
+    # Nominatim is down / rate-limited, the frontend simply falls back
+    # to `resolveGigCoords` city-center pin.
+    if (payload.area or "").strip():
+        from utils.geocode import geocode_gig_area_bg
+        asyncio.create_task(geocode_gig_area_bg(gig["_id"], payload.area))
     return _clean_gig(gig)
 
 
@@ -704,6 +714,12 @@ async def patch_gig(gig_id: str, payload: GigPatch, user=Depends(verify_token)):
         _validate_category(update["category"])
     update["updated_at"] = datetime.now(UTC).isoformat()
     await db.marketplace_gigs.update_one({"_id": gig_id}, {"$set": update})
+    # If area changed, re-geocode in the background so distance sort
+    # stays accurate. Compare against the pre-update value to skip the
+    # network call when the field is unchanged.
+    if "area" in update and (update["area"] or "").strip() and update["area"] != gig.get("area"):
+        from utils.geocode import geocode_gig_area_bg
+        asyncio.create_task(geocode_gig_area_bg(gig_id, update["area"]))
     fresh = await db.marketplace_gigs.find_one({"_id": gig_id})
     return _clean_gig(fresh)
 

@@ -1,0 +1,169 @@
+"""OpenStreetMap Nominatim forward geocoder for marketplace gigs.
+
+Nominatim's Terms of Use require:
+  • A descriptive `User-Agent` — no anonymous bots.
+  • Absolute max 1 request per second.
+  • Caching whenever possible to reduce load on the shared servers.
+
+We honour all three: every request goes out with our contact email in
+the UA, the module holds an asyncio.Lock+timestamp gate so concurrent
+callers can't burst past 1 rps, and every result lands in
+`db.geocode_cache` so identical queries never re-hit Nominatim.
+
+Public surface: ``geocode_area(area_text)`` — returns ``(lat, lng)`` or
+``None`` if the query didn't resolve. Silent on network / rate errors
+so callers can fall back gracefully to city-center coords.
+"""
+from __future__ import annotations
+
+import asyncio
+import logging
+import time
+from typing import Optional
+
+import httpx
+
+from routes.deps import db
+
+logger = logging.getLogger(__name__)
+
+# Nominatim ToS: max 1 req/sec. We add a tiny margin.
+_MIN_REQUEST_INTERVAL_SEC = 1.1
+_last_request_ts = 0.0
+_rate_lock = asyncio.Lock()
+
+# Descriptive UA per ToS. `support@` is a real inbox monitored by the
+# team — Nominatim admins occasionally reach out about high-volume users.
+_USER_AGENT = "MyIsraelRental/1.0 (support@myisraelrental.com)"
+_NOMINATIM_URL = "https://nominatim.openstreetmap.org/search"
+
+
+async def _cached_lookup(query: str) -> Optional[tuple[float, float]]:
+    """Return cached (lat, lng) for a normalized query, if we've asked
+    Nominatim about this exact string before. Cache is permanent — city
+    boundaries don't move. Callers pass an already-normalized query."""
+    doc = await db.geocode_cache.find_one({"_id": query}, {"_id": 0, "lat": 1, "lng": 1, "miss": 1})
+    if not doc:
+        return None
+    # Cached miss — don't re-hit Nominatim for a query that already didn't resolve.
+    if doc.get("miss"):
+        return None
+    lat = doc.get("lat")
+    lng = doc.get("lng")
+    if isinstance(lat, (int, float)) and isinstance(lng, (int, float)):
+        return (float(lat), float(lng))
+    return None
+
+
+async def _cache_hit(query: str, coords: tuple[float, float]) -> None:
+    await db.geocode_cache.update_one(
+        {"_id": query},
+        {"$set": {"lat": coords[0], "lng": coords[1], "miss": False}},
+        upsert=True,
+    )
+
+
+async def _cache_miss(query: str) -> None:
+    # Store misses too so a repeated bad query (typo, obscure area) doesn't
+    # keep hitting the network.
+    await db.geocode_cache.update_one(
+        {"_id": query},
+        {"$set": {"miss": True}},
+        upsert=True,
+    )
+
+
+def _normalize(area_text: str) -> str:
+    """Collapse whitespace + lowercase so 'Tel Aviv , Florentin' and
+    'tel aviv, florentin' hit the same cache row."""
+    parts = [p.strip() for p in (area_text or "").split(",") if p.strip()]
+    return ", ".join(parts).lower()
+
+
+async def geocode_area(area_text: str) -> Optional[tuple[float, float]]:
+    """Forward-geocode a free-text service area to (lat, lng).
+
+    Always appends ", Israel" to the query so a US "Bethesda" doesn't
+    swipe pins away from Bet Shemesh. Returns None on any failure —
+    callers should just skip storing coords and fall back to the
+    city-center lookup that already ships on the frontend.
+    """
+    query = _normalize(area_text)
+    if not query:
+        return None
+
+    cached = await _cached_lookup(query)
+    if cached:
+        return cached
+    # Cached miss: `_cached_lookup` returns None whether it's an unseen
+    # query or a stored miss. Distinguish by re-checking the raw doc.
+    miss_doc = await db.geocode_cache.find_one({"_id": query}, {"_id": 0, "miss": 1})
+    if miss_doc and miss_doc.get("miss"):
+        return None
+
+    # Rate-limit — Nominatim TOS is strict. Serialize via a lock so
+    # even concurrent gig creates can't burst.
+    global _last_request_ts
+    async with _rate_lock:
+        elapsed = time.monotonic() - _last_request_ts
+        if elapsed < _MIN_REQUEST_INTERVAL_SEC:
+            await asyncio.sleep(_MIN_REQUEST_INTERVAL_SEC - elapsed)
+        _last_request_ts = time.monotonic()
+
+    params = {
+        "q": f"{area_text}, Israel",
+        "format": "json",
+        "limit": 1,
+        # Restrict to Israel country code so obscure neighborhood names
+        # don't get plucked from other countries.
+        "countrycodes": "il",
+    }
+    headers = {"User-Agent": _USER_AGENT, "Accept-Language": "en"}
+    try:
+        async with httpx.AsyncClient(timeout=6.0) as client:
+            r = await client.get(_NOMINATIM_URL, params=params, headers=headers)
+            if r.status_code != 200:
+                logger.warning("Nominatim %s for %s: %s", r.status_code, query, r.text[:200])
+                return None
+            data = r.json()
+    except Exception as e:  # noqa: BLE001
+        logger.warning("Nominatim network error for %s: %s", query, e)
+        return None
+
+    if not data:
+        await _cache_miss(query)
+        return None
+
+    try:
+        lat = float(data[0]["lat"])
+        lng = float(data[0]["lon"])
+    except (KeyError, ValueError, TypeError):
+        await _cache_miss(query)
+        return None
+
+    await _cache_hit(query, (lat, lng))
+    logger.info("Nominatim resolved %r → (%.4f, %.4f)", area_text, lat, lng)
+    return (lat, lng)
+
+
+async def geocode_gig_area_bg(gig_id: str, area_text: str) -> None:
+    """Fire-and-forget helper: forward-geocode `area_text` and stamp
+    `lat`/`lng` (or `lat=None, lng=None, geocode_miss=True`) on the gig
+    doc when done. Intended to be launched via `asyncio.create_task`
+    from the create/patch handlers so the API response stays snappy —
+    Nominatim's 1s rate limit shouldn't gate the user's UX.
+    """
+    try:
+        coords = await geocode_area(area_text)
+        patch: dict = {"geocoded_at": time.time()}
+        if coords:
+            patch["lat"] = coords[0]
+            patch["lng"] = coords[1]
+            patch["geocode_miss"] = False
+        else:
+            patch["geocode_miss"] = True
+            patch["lat"] = None
+            patch["lng"] = None
+        await db.marketplace_gigs.update_one({"_id": gig_id}, {"$set": patch})
+    except Exception as e:  # noqa: BLE001
+        logger.error("geocode_gig_area_bg(%s) failed: %s", gig_id, e)

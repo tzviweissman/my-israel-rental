@@ -196,6 +196,39 @@ async def startup_tasks() -> None:
             await asyncio.sleep(AUTO_NUDGE_LOOP_INTERVAL_SEC)
 
     asyncio.create_task(auto_owner_nudge_loop())
+
+    # One-shot backfill: geocode any published gig that doesn't yet
+    # carry per-gig (lat, lng). Sleeps a bit so startup indexes finish
+    # first, then trickles through Nominatim at ~1 req/sec — the ToS
+    # cap. Since this only runs against gigs missing coords, it becomes
+    # a no-op after the first pass. Wrapped so exceptions don't kill
+    # unrelated startup tasks.
+    async def backfill_gig_geocoding() -> None:
+        await asyncio.sleep(60)
+        try:
+            from utils.geocode import geocode_gig_area_bg
+            cursor = db.marketplace_gigs.find(
+                {
+                    "status": "published",
+                    "area": {"$exists": True, "$ne": ""},
+                    "$or": [
+                        {"lat": {"$exists": False}},
+                        {"lat": None},
+                    ],
+                    "geocode_miss": {"$ne": True},  # skip previously-tried misses
+                },
+                {"_id": 1, "area": 1},
+            )
+            count = 0
+            async for row in cursor:
+                await geocode_gig_area_bg(row["_id"], row.get("area") or "")
+                count += 1
+            if count:
+                logger.info("Gig geocode backfill processed %d gigs", count)
+        except Exception as e:  # noqa: BLE001
+            logger.warning("gig geocode backfill failed (non-fatal): %s", e)
+
+    asyncio.create_task(backfill_gig_geocoding())
     try:
         ensure_contract_templates(ROOT_DIR / "uploads")
         logger.info("Contract templates ready")
