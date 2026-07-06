@@ -15,13 +15,14 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import axios from 'axios';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
-import { Search, ArrowRight, Loader2, SlidersHorizontal, Award, Zap, MapPin } from 'lucide-react';
+import { Search, ArrowRight, Loader2, SlidersHorizontal, Award, Zap, MapPin, LayoutGrid, Map as MapIcon } from 'lucide-react';
 import { API } from '../App';
 import PageMeta from '../components/PageMeta';
 import StarRating from '../components/marketplace/StarRating';
 import CategoryCarousel from '../components/marketplace/CategoryCarousel';
 import LocationChipsRow from '../components/marketplace/LocationChipsRow';
 import ServicesFiltersModal from '../components/marketplace/ServicesFiltersModal';
+import ServicesMapView from '../components/marketplace/ServicesMapView';
 import { localizedTitle } from '../utils/gigLocale';
 
 const TEAL = '#1E6A6A';
@@ -147,6 +148,13 @@ const Services = () => {
   // URL, so shared links can't leak location. Cleared on tab close.
   const [coords, setCoords] = useState(null);
   const [geoBusy, setGeoBusy] = useState(false);
+  // Permission-denied recovery modal — surfaced when the browser blocks
+  // the geolocation prompt (typically because the user hit "Never allow"
+  // earlier). Shows OS-specific instructions to unblock + a retry button.
+  const [geoBlocked, setGeoBlocked] = useState(false);
+  // View mode toggle — 'list' (default grid) vs 'map' (OSM pins). Held
+  // in the URL so a shared "come see these gigs on the map" link works.
+  const viewMode = searchParams.get('view') === 'map' ? 'map' : 'list';
 
   const state = readFilters(searchParams);
   const {
@@ -274,7 +282,9 @@ const Services = () => {
       (err) => {
         setGeoBusy(false);
         if (err.code === err.PERMISSION_DENIED) {
-          toast.error(t('services.geoDenied', 'Location permission denied. You can re-enable it in your browser settings.'));
+          // Show the recovery modal — the toast alone doesn't tell users
+          // where to click to unblock in their browser settings.
+          setGeoBlocked(true);
         } else {
           toast.error(t('services.geoFailed', 'Could not fetch your location — please try again.'));
         }
@@ -433,6 +443,41 @@ const Services = () => {
             </span>
           </h2>
           <div className="flex items-center gap-2">
+            {/* List / Map view toggle — segmented pill. Held in URL as
+                `?view=map` so shared links can deep-link directly to
+                the map view. */}
+            <div
+              className="inline-flex items-center rounded-full border border-gray-200 bg-white p-0.5"
+              data-testid="services-view-toggle"
+              role="tablist"
+              aria-label={t('services.viewToggle', 'View mode')}
+            >
+              <button
+                type="button"
+                onClick={() => patchUrl({ view: '' })}
+                className={`inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-semibold transition-colors ${
+                  viewMode === 'list' ? 'bg-[#1E6A6A] text-white' : 'text-gray-700 hover:text-gray-900'
+                }`}
+                aria-pressed={viewMode === 'list'}
+                data-testid="services-view-list"
+              >
+                <LayoutGrid size={13} />
+                {t('services.viewList', 'List')}
+              </button>
+              <button
+                type="button"
+                onClick={() => patchUrl({ view: 'map' })}
+                className={`inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-semibold transition-colors ${
+                  viewMode === 'map' ? 'bg-[#1E6A6A] text-white' : 'text-gray-700 hover:text-gray-900'
+                }`}
+                aria-pressed={viewMode === 'map'}
+                data-testid="services-view-map"
+              >
+                <MapIcon size={13} />
+                {t('services.viewMap', 'Map')}
+              </button>
+            </div>
+
             {/* Nearby toggle — opts into browser geolocation. Coords live
                 in memory only (never in the URL) so shared links can't
                 leak location. */}
@@ -599,6 +644,12 @@ const Services = () => {
               </button>
             )}
           </div>
+        ) : viewMode === 'map' ? (
+          <ServicesMapView
+            gigs={gigs}
+            userCoords={nearby && coords ? coords : null}
+            maxDistanceKm={nearby && coords ? maxDistance : ''}
+          />
         ) : (
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-x-5 gap-y-8">
             {gigs.map((gig) => (
@@ -623,6 +674,60 @@ const Services = () => {
         onClearAll={clearAdvancedFilters}
         nearbyActive={nearby && !!coords}
       />
+
+      {/* Geolocation permission-denied recovery — surfaced when the
+          browser rejects the prompt (typically because the user hit
+          "Never allow" earlier or has location disabled OS-wide). We
+          can't re-open the prompt from JS once it's blocked; the user
+          has to unblock it in their settings, so we tell them exactly
+          where to click. */}
+      {geoBlocked && (
+        <div
+          className="fixed inset-0 z-[110] bg-black/50 backdrop-blur-sm flex items-center justify-center px-4"
+          role="dialog"
+          aria-modal="true"
+          data-testid="geo-blocked-modal"
+          onClick={(e) => { if (e.target === e.currentTarget) setGeoBlocked(false); }}
+        >
+          <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6">
+            <div className="flex items-center gap-3 mb-3">
+              <div className="p-2.5 rounded-full bg-amber-100">
+                <MapPin size={22} className="text-amber-600" />
+              </div>
+              <h2 className="text-lg font-bold text-gray-900" style={{ fontFamily: 'Playfair Display' }}>
+                {t('services.geoBlockedTitle', 'Location access is blocked')}
+              </h2>
+            </div>
+            <p className="text-sm text-gray-600 leading-relaxed mb-4">
+              {t('services.geoBlockedBody', 'Your browser is blocking location for this site — we need it to sort services by distance from you. It only takes a second to re-enable:')}
+            </p>
+            <ol className="text-sm text-gray-700 space-y-1.5 mb-5 ps-4 list-decimal marker:text-[#1E6A6A] marker:font-bold">
+              <li>{t('services.geoStep1', 'Click the lock (or info) icon in your browser\'s address bar.')}</li>
+              <li>{t('services.geoStep2', 'Find "Location" in the site permissions list.')}</li>
+              <li>{t('services.geoStep3', 'Switch it to Allow.')}</li>
+              <li>{t('services.geoStep4', 'Come back here and tap "Try again" below.')}</li>
+            </ol>
+            <div className="flex items-center justify-end gap-2">
+              <button
+                type="button"
+                onClick={() => setGeoBlocked(false)}
+                className="px-4 py-2 rounded-lg text-sm font-semibold text-gray-700 hover:bg-gray-100"
+                data-testid="geo-blocked-dismiss"
+              >
+                {t('common.dismiss', 'Dismiss')}
+              </button>
+              <button
+                type="button"
+                onClick={() => { setGeoBlocked(false); toggleNearby(); }}
+                className="px-5 py-2 rounded-lg text-sm font-semibold text-white bg-[#1E6A6A] hover:bg-[#0F3A3A]"
+                data-testid="geo-blocked-retry"
+              >
+                {t('services.geoRetry', 'Try again')}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

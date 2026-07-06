@@ -446,6 +446,58 @@ async def impersonate_user(user_id: str, payload: dict = Depends(verify_token)) 
     return {"token": token, "user": target}
 
 
+@api_router.post("/admin/users/{user_id}/resend-set-password", response_model=MessageResponse)
+async def resend_set_password_email(user_id: str, payload: dict = Depends(verify_token)) -> dict:
+    """Re-send the "Set your password" email to an admin-imported owner
+    who hasn't finished onboarding yet.
+
+    Guardrails:
+      • Admin-only.
+      • Only imported accounts (`admin_imported=True`) are eligible —
+        we don't want an admin accidentally spamming legitimate
+        self-signup users with a reset link.
+      • Refuses if the owner has already completed onboarding
+        (`password_set_at` is set). If they've forgotten their password
+        after that, they use the normal /auth/forgot-password flow.
+      • Reuses `_issue_reset_token` from admin_import so the email +
+        expiry semantics stay identical to the original invite.
+    """
+    if payload.get('role') != 'admin':
+        raise HTTPException(status_code=403, detail="Admin access required")
+
+    target = await db.users.find_one({"id": user_id}, {"_id": 0, "password": 0})
+    if not target:
+        raise HTTPException(status_code=404, detail="User not found")
+    if not target.get('admin_imported'):
+        raise HTTPException(status_code=400, detail="Only admin-imported accounts can be re-sent a set-password email")
+    if target.get('password_set_at'):
+        raise HTTPException(status_code=400, detail="This owner has already set their password")
+
+    from routes.admin_import import _issue_reset_token, _frontend_origin
+    from utils.email import send_email
+
+    email_lc = (target.get('email') or '').strip().lower()
+    display_name = target.get('name') or email_lc
+    raw_token = await _issue_reset_token(target['id'], email_lc)
+    link = f"{_frontend_origin()}/auth/reset-password?token={raw_token}"
+    asyncio.create_task(send_email(
+        to_email=email_lc,
+        subject="Your MyIsraelRental account is ready — set your password",
+        html_body=(
+            f"<p>Hi {display_name},</p>"
+            "<p>This is a friendly reminder — your <b>MyIsraelRental.com</b> owner account "
+            "is set up and waiting for you.</p>"
+            "<p>To finish onboarding, please set your password using the link below "
+            "(valid for 24 hours):</p>"
+            f"<p><a href=\"{link}\" style='background:#1E6A6A;color:#fff;padding:10px 18px;border-radius:8px;text-decoration:none;'>Set my password</a></p>"
+            f"<p>Or copy and paste: {link}</p>"
+        ),
+        tag="admin-imported-owner-resend",
+        skip_suppression_check=True,
+    ))
+    return {"message": f"Set-password email re-sent to {email_lc}"}
+
+
 @api_router.get("/admin/duplicates")
 async def list_duplicate_listings(payload: dict = Depends(verify_token)) -> dict:
     """Return groups of properties that share (owner_id, normalized address,

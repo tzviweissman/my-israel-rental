@@ -11,6 +11,16 @@ Build a bilingual (English/Hebrew) rental website named MyIsraelRental.com with 
 - **i18n**: i18next with English and Hebrew (RTL) support
 
 ## What's Been Implemented
+
+- [x] **Services Map view rewritten with vanilla Leaflet + Resend set-password email (2026-07-06)**:
+  - **Map view fix**: `ServicesMapView.jsx` was crashing with `Map container is already initialized` under React 18 StrictMode's double-invoke lifecycle (react-leaflet 4.2.1 doesn't clean up MapContainer's Leaflet instance between StrictMode's synthetic unmount + remount). Replaced react-leaflet primitives with vanilla `L.map()` / `L.tileLayer()` / `L.marker()` managed via `useRef` + explicit `map.remove()` cleanup in useEffect. Two effects: one for map lifecycle (mount/unmount), one for pins + user coords + fit-bounds updates. Belt-and-braces `delete containerRef.current._leaflet_id` before init. Popups render raw HTML with a `data-gig-id` attribute and wire click listeners on `popupopen` so navigation stays inside React Router.
+  - **Verified live**: 15 OSM tiles + 1 gig pin over Jerusalem, teal/gold branded marker, zoom controls, no runtime errors on `/services?view=map`.
+  - **Resend set-password email** (P1): Added `POST /api/admin/users/{id}/resend-set-password` in `routes/admin.py` — admin-only, requires `admin_imported=true` on the target, refuses if `password_set_at` is set (already onboarded). Reuses `_issue_reset_token` from admin_import.py to keep invite semantics identical. `routes/auth.py::reset_password` now stamps `password_set_at` on completion so the UI can hide the resend button after onboarding.
+  - **UI**: `UsersTab.jsx` shows an amber `Mail` icon between LogIn and Ban, only when `u.admin_imported && !u.password_set_at`. Toast on success/error. Testid: `resend-setpwd-{userId}`.
+  - **Verified live**: seeded imported owner → button appears → click → password_reset row inserted (token `f462a991…`) → cleanup verified. Negative paths: non-imported user 400, unknown user 404, no-auth 403, already-onboarded 400 — all pass.
+  - Files: `frontend/src/components/marketplace/ServicesMapView.jsx` (rewrite), `frontend/src/components/admin/UsersTab.jsx`, `backend/routes/admin.py`, `backend/routes/auth.py`.
+
+
 - [x] **"Take Your Services to the Next Level" upsell modal + $0 provider trial (2026-07-05)**: One-time promotional popup surfaced to every logged-in non-admin user until they either accept (→ $0 30-day provider trial + immediate redirect to My Gigs) or dismiss (→ stamped as seen, never shown again).
   - **Backend `routes/misc.py`**: `POST /api/user/services-pitch/action` now (on accept) lazy-imports `_ensure_provider_record` from marketplace, creates/reuses the `marketplace_providers` row with a 30-day trial, and mirrors `{started_at, ends_at, source, status}` onto `users.provider_trial` so the frontend can gate My Gigs without an extra round-trip. Dismiss just stamps `services_pitch_seen_at`. Fully idempotent — repeated accepts don't duplicate the provider row.
   - **Frontend `App.js`**: mounts `<ServicesUpsellModal />` when `user && !user.services_pitch_seen_at && user.role !== 'admin'`. After accept, modal calls `/auth/me` and pushes the refreshed user into AuthContext, which auto-hides the modal and unlocks the My Gigs tab.

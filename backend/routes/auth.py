@@ -330,7 +330,13 @@ async def reset_password(request: ResetPasswordRequest) -> dict:
     hashed = bcrypt.hashpw(request.new_password.encode('utf-8'), bcrypt.gensalt())
     await db.users.update_one(
         {"id": reset_doc['user_id']},
-        {"$set": {"password": hashed.decode('utf-8')}}
+        {"$set": {
+            "password": hashed.decode('utf-8'),
+            # Stamp the completion so admin tools can distinguish
+            # imported owners who've onboarded from those still holding
+            # the throwaway hash. Drives the "Resend set-password" UI.
+            "password_set_at": datetime.now(UTC).isoformat(),
+        }}
     )
     await db.password_resets.update_one(
         {"token": request.token},

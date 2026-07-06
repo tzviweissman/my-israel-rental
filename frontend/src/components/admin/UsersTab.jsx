@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { toast } from 'sonner';
-import { Search, Ban, CheckCircle, Trash2, LogIn } from 'lucide-react';
+import { Search, Ban, CheckCircle, Trash2, LogIn, Mail } from 'lucide-react';
 import { API, AuthContext } from '../../App';
 import { useApiSWR } from '../../hooks/useApiSWR';
 
@@ -79,6 +79,24 @@ export const UsersTab = ({ token, onStatsChange, prefilter }) => {
     }
   };
 
+  // Re-send the "Set your password" email to an imported owner who
+  // hasn't finished onboarding. Backend refuses if the owner already
+  // set their password, so this button is safe even without extra
+  // client-side gating — but we still hide it in the row render below
+  // to keep the UI honest.
+  const [resendingId, setResendingId] = useState('');
+  const resendSetPassword = async (u) => {
+    setResendingId(u.id);
+    try {
+      const res = await axios.post(`${API}/admin/users/${u.id}/resend-set-password`, {}, { headers });
+      toast.success(res.data.message || 'Email re-sent');
+    } catch (e) {
+      toast.error(e.response?.data?.detail || 'Failed to re-send email');
+    } finally {
+      setResendingId('');
+    }
+  };
+
   return (
     <div data-testid="admin-users-section">
       <div className="flex items-center gap-4 mb-6">
@@ -129,6 +147,21 @@ export const UsersTab = ({ token, onStatsChange, prefilter }) => {
                       <button onClick={() => impersonateUser(u)} className="p-1.5 rounded hover:bg-blue-50 text-blue-600" title={t('admin.impersonate', 'Log in as this user')} data-testid={`impersonate-user-${u.id}`}>
                         <LogIn size={16} />
                       </button>
+                      {/* Resend "Set your password" email — only visible
+                          for admin-imported owners who haven't yet
+                          completed onboarding. Keeps the row compact for
+                          the 95%+ of users this doesn't apply to. */}
+                      {u.admin_imported && !u.password_set_at && (
+                        <button
+                          onClick={() => resendSetPassword(u)}
+                          disabled={resendingId === u.id}
+                          className="p-1.5 rounded hover:bg-amber-50 text-amber-600 disabled:opacity-50"
+                          title={t('admin.resendSetPassword', 'Re-send set-password email')}
+                          data-testid={`resend-setpwd-${u.id}`}
+                        >
+                          <Mail size={16} />
+                        </button>
+                      )}
                       <button onClick={() => toggleUserStatus(u.id)} className="p-1.5 rounded hover:bg-gray-100" title={(u.status || 'active') === 'active' ? t('admin.block') : t('admin.unblock')} data-testid={`toggle-user-${u.id}`}>
                         {(u.status || 'active') === 'active' ? <Ban size={16} className="text-orange-500" /> : <CheckCircle size={16} className="text-green-500" />}
                       </button>
