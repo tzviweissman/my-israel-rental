@@ -361,6 +361,31 @@ const BookingCalendar = ({
           </span>
         </div>
       )}
+      {/* Availability hint — when the owner capped `available_to` (and/or
+          `available_from`), surface the boundary right under the calendar
+          so renters instantly understand why later dates are greyed out.
+          Suppressed for subleases since the sublease popover already
+          renders the sublease window prominently elsewhere. */}
+      {!sublease && (property.available_from || property.available_to) && (
+        <div
+          className="mt-2 px-3 py-2 rounded-lg bg-[#FBF8F2] border border-[#D4AF37]/40 text-[11px] text-[#1E6A6A] leading-snug"
+          data-testid="calendar-availability-hint"
+        >
+          {property.available_from && property.available_to ? (
+            <>
+              {t('property.availabilityWindowHint', 'Bookable {{from}} → {{to}}. Dates outside this window are not offered by the owner.')
+                .replace('{{from}}', format(parseLocalDate(property.available_from), 'MMM d, yyyy'))
+                .replace('{{to}}',   format(parseLocalDate(property.available_to),   'MMM d, yyyy'))}
+            </>
+          ) : property.available_to ? (
+            <>{t('property.availabilityEndsHint', 'Availability ends {{to}}. Later dates are not offered by the owner.')
+                .replace('{{to}}', format(parseLocalDate(property.available_to), 'MMM d, yyyy'))}</>
+          ) : (
+            <>{t('property.availabilityFromHint', 'Available from {{from}} onwards. Earlier dates are not offered by the owner.')
+                .replace('{{from}}', format(parseLocalDate(property.available_from), 'MMM d, yyyy'))}</>
+          )}
+        </div>
+      )}
     </div>
   );
 };
