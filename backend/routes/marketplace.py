@@ -625,6 +625,12 @@ async def create_gig(payload: GigIn, user=Depends(verify_token)):
         raise HTTPException(status_code=400, detail="booking_mode must be 'whatsapp' or 'in_platform'")
     if payload.booking_mode == "whatsapp" and not (payload.whatsapp or "").strip():
         raise HTTPException(status_code=400, detail="WhatsApp number required for WhatsApp booking mode")
+    # Service area is required — every published gig has to land in the
+    # /services?nearby=1 discovery net. Free text so providers can add
+    # neighborhoods after the city (e.g. "Tel Aviv, Florentin"), but the
+    # head-of-string still has to resolve to something.
+    if not (payload.area or "").strip():
+        raise HTTPException(status_code=400, detail="Service area (city) is required")
     prov = await _ensure_provider_record(user["user_id"])
     now = datetime.now(UTC).isoformat()
     gig = {

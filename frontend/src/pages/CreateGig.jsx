@@ -26,6 +26,7 @@ const CreateGig = () => {
   const navigate = useNavigate();
   const [step, setStep] = useState(1);
   const [categories, setCategories] = useState([]);
+  const [locations, setLocations] = useState([]);
   const [saving, setSaving] = useState(false);
 
   const [form, setForm] = useState({
@@ -78,6 +79,10 @@ const CreateGig = () => {
   useEffect(() => {
     if (!token) { navigate('/auth'); return; }
     axios.get(`${API}/marketplace/categories`).then((r) => setCategories(r.data));
+    // Load the supported city list too so the wizard's area field can
+    // autocomplete against the same slugs used by /nearby distance sort.
+    // Ensures every published gig lands in the discovery net from day 1.
+    axios.get(`${API}/marketplace/locations`).then((r) => setLocations(r.data)).catch(() => {});
   }, [token, navigate]);
 
   const set = (patch) => setForm((f) => ({ ...f, ...patch }));
@@ -96,6 +101,11 @@ const CreateGig = () => {
     if (step === 3) return form.tiers.length > 0 && form.tiers.every((t) => t.name && parseFloat(t.price) > 0);
     if (step === 4) return true; // Gallery optional
     if (step === 5) {
+      // Service area required — every gig must carry a city so it can
+      // surface in the /services?nearby=1 distance sort. See Marketplace
+      // Trust & Discovery Phase 2 (the /marketplace/nearest-city helper
+      // resolves a renter's coords against this exact string).
+      if (!(form.area || '').trim()) return false;
       if (form.booking_mode === 'whatsapp') return (form.whatsapp || '').replace(/\D/g, '').length >= 7;
       return true;
     }
@@ -274,8 +284,27 @@ const CreateGig = () => {
               </div>
             )}
             <div>
-              <label className="text-sm font-semibold text-gray-700">Service area (optional)</label>
-              <input value={form.area} onChange={(e) => set({ area: e.target.value })} placeholder="Tel Aviv, Jerusalem, All Israel…" className="w-full mt-1 px-3 py-2 rounded-lg border border-gray-200 text-sm" data-testid="wizard-area" />
+              <label className="text-sm font-semibold text-gray-700">
+                Service area <span className="text-red-500">*</span>
+              </label>
+              <input
+                value={form.area}
+                onChange={(e) => set({ area: e.target.value })}
+                placeholder="Tel Aviv, Jerusalem, Haifa…"
+                list="services-city-suggestions"
+                className={`w-full mt-1 px-3 py-2 rounded-lg border text-sm focus:outline-none focus:border-[#1E6A6A] ${
+                  (form.area || '').trim() ? 'border-gray-200' : 'border-gray-300'
+                }`}
+                data-testid="wizard-area"
+              />
+              <datalist id="services-city-suggestions">
+                {locations.map((l) => (
+                  <option key={l.slug} value={l.label} />
+                ))}
+              </datalist>
+              <p className="text-[11px] text-gray-500 mt-1 leading-snug">
+                Pick a city so renters within a few km can find your gig via <span className="font-semibold">Show nearby</span>. Matching one of the suggested cities gives you the highest visibility.
+              </p>
             </div>
           </div>
         )}
