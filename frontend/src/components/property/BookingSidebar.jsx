@@ -274,6 +274,7 @@ const BookingCalendar = ({
   // on scroll + resize so the popover stays glued to the trigger.
   const CALENDAR_WIDTH = numMonths === 2 ? 660 : 320;
   const [pos, setPos] = React.useState(() => ({ top: 0, left: 0 }));
+  const popoverRef = React.useRef(null);
   React.useLayoutEffect(() => {
     const compute = () => {
       const anchor = anchorRef?.current;
@@ -294,6 +295,29 @@ const BookingCalendar = ({
       window.removeEventListener('resize', compute);
     };
   }, [anchorRef, numMonths, CALENDAR_WIDTH]);
+
+  // Esc key + outside-click dismiss — full Airbnb parity. Clicks inside
+  // the popover OR on the anchor row (check-in/checkout pills, which
+  // toggle the popover themselves) are ignored so we don't fight the
+  // trigger's own close-on-second-click handler.
+  React.useEffect(() => {
+    const onKey = (e) => {
+      if (e.key === 'Escape') setShowCalendar(null);
+    };
+    const onDown = (e) => {
+      const pop = popoverRef.current;
+      const anch = anchorRef?.current;
+      if (pop && pop.contains(e.target)) return;
+      if (anch && anch.contains(e.target)) return;
+      setShowCalendar(null);
+    };
+    document.addEventListener('keydown', onKey);
+    document.addEventListener('mousedown', onDown);
+    return () => {
+      document.removeEventListener('keydown', onKey);
+      document.removeEventListener('mousedown', onDown);
+    };
+  }, [anchorRef, setShowCalendar]);
 
   const onSelect = (range) => {
     // If the user already had a complete range and is now clicking ANY
@@ -355,6 +379,7 @@ const BookingCalendar = ({
 
   return createPortal(
     <div
+      ref={popoverRef}
       className="bg-white rounded-2xl border border-gray-200 shadow-2xl p-5 sm:p-6 fixed z-[100]"
       style={{ top: pos.top, left: pos.left, width: CALENDAR_WIDTH, pointerEvents: 'auto' }}
       data-testid="booking-calendar"
