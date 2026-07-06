@@ -462,6 +462,10 @@ async def list_gigs(
     # `distance_km` on each card + unlock the `sort=distance` option.
     lat: Optional[float] = Query(None, ge=-90, le=90),
     lng: Optional[float] = Query(None, ge=-180, le=180),
+    # Distance ceiling — silently ignored when lat/lng weren't supplied
+    # (nothing to measure against). Gigs whose area can't be resolved to
+    # coords are treated as unmatched.
+    max_distance_km: Optional[float] = Query(None, ge=0, le=500),
     limit: int = Query(60, ge=1, le=200),
 ):
     query: dict[str, Any] = {"status": "published"}
@@ -568,6 +572,12 @@ async def list_gigs(
         if lat is not None and lng is not None:
             coords = _resolve_gig_coords(gig)
             gig["distance_km"] = _haversine_km((lat, lng), coords) if coords else None
+            # Distance ceiling — drop gigs beyond the requested radius.
+            # Unresolvable coords are pruned too (no way to promise the
+            # renter it's within their walking/biking range).
+            if max_distance_km is not None:
+                if gig["distance_km"] is None or gig["distance_km"] > max_distance_km:
+                    continue
         kept.append(gig)
 
     # Sort strategy — all sorts happen in Python since rating & price

@@ -124,6 +124,8 @@ const readFilters = (params) => ({
   languages: (params.get('languages') || '').split(',').filter(Boolean),
   bookingMode: params.get('booking_mode') || '',
   sort: params.get('sort') || 'match',
+  // Distance ceiling — only respected when nearby coords are also present.
+  maxDistance: params.get('max_distance_km') || '',
   // Nearby-mode: only active when both lat/lng are present. Coords aren't
   // persisted to the URL so a shared /services link never leaks anyone's
   // location — nearby always requires a fresh geolocation opt-in.
@@ -149,7 +151,7 @@ const Services = () => {
   const state = readFilters(searchParams);
   const {
     selectedCat, selectedLoc, q,
-    minRating, minPrice, maxPrice, responseTime, languages, bookingMode, sort, nearby,
+    minRating, minPrice, maxPrice, responseTime, languages, bookingMode, sort, nearby, maxDistance,
   } = state;
 
   // One-shot fetches — categories/locations/languages don't change.
@@ -184,6 +186,7 @@ const Services = () => {
     if (nearby && coords) {
       params.set('lat', coords.lat.toFixed(4));
       params.set('lng', coords.lng.toFixed(4));
+      if (maxDistance) params.set('max_distance_km', maxDistance);
     }
     setLoading(true);
     axios.get(`${API}/marketplace/gigs?${params.toString()}`)
@@ -195,7 +198,7 @@ const Services = () => {
     minRating, minPrice, maxPrice, responseTime,
     // Joined to a primitive so the effect doesn't fire on identity change alone.
     languages.join(','), bookingMode, sort, t,
-    nearby, coords?.lat, coords?.lng,
+    nearby, coords?.lat, coords?.lng, maxDistance,
   ]);
 
   // Centralised URL sync — every setter goes through this so the URL is
@@ -262,6 +265,7 @@ const Services = () => {
       response_time: draft.responseTime,
       languages:     draft.languages,
       booking_mode:  draft.bookingMode,
+      max_distance_km: draft.maxDistance,
     });
   };
 
@@ -269,6 +273,7 @@ const Services = () => {
     patchUrl({
       min_rating: '', min_price: '', max_price: '',
       response_time: '', languages: [], booking_mode: '',
+      max_distance_km: '',
     });
   };
 
@@ -279,7 +284,8 @@ const Services = () => {
     (minPrice || maxPrice ? 1 : 0) +
     (responseTime ? 1 : 0) +
     (languages.length ? 1 : 0) +
-    (bookingMode ? 1 : 0);
+    (bookingMode ? 1 : 0) +
+    (maxDistance ? 1 : 0);
 
   const seo = useMemo(() => {
     const catLbl = categories.find((c) => c.slug === selectedCat)?.label;
@@ -513,6 +519,15 @@ const Services = () => {
                   : t('services.bookWhatsApp', 'WhatsApp')} ×
               </button>
             )}
+            {maxDistance && (
+              <button
+                onClick={() => patchUrl({ max_distance_km: '' })}
+                className="px-2.5 py-1 rounded-full bg-[#1E6A6A] text-white font-semibold"
+                data-testid="active-filter-distance"
+              >
+                ≤ {maxDistance} km ×
+              </button>
+            )}
             <button
               onClick={clearAdvancedFilters}
               className="text-[#1E6A6A] font-semibold underline"
@@ -576,10 +591,11 @@ const Services = () => {
       <ServicesFiltersModal
         open={filtersOpen}
         onClose={() => setFiltersOpen(false)}
-        initial={{ minRating, minPrice, maxPrice, responseTime, languages, bookingMode }}
+        initial={{ minRating, minPrice, maxPrice, responseTime, languages, bookingMode, maxDistance }}
         languages={languagesList}
         onApply={applyFilters}
         onClearAll={clearAdvancedFilters}
+        nearbyActive={nearby && !!coords}
       />
     </div>
   );

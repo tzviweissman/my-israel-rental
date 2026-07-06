@@ -69,9 +69,10 @@ export const buildInitialDraft = (state) => ({
   responseTime: state.responseTime || '',
   languages: state.languages || [],
   bookingMode: state.bookingMode || '',
+  maxDistance: state.maxDistance || '',
 });
 
-const ServicesFiltersModal = ({ open, onClose, initial, languages, onApply, onClearAll }) => {
+const ServicesFiltersModal = ({ open, onClose, initial, languages, onApply, onClearAll, nearbyActive }) => {
   const { t } = useTranslation();
   const [draft, setDraft] = useState(buildInitialDraft(initial));
 
@@ -199,6 +200,36 @@ const ServicesFiltersModal = ({ open, onClose, initial, languages, onApply, onCl
                 { value: '24h', label: t('services.replies24h', 'Replies in 24h') },
               ]}
             />
+          </section>
+
+          {/* Max distance — only meaningful when Nearby is active
+              (coords are in memory). Grayed out with a hint when off so
+              renters know to tap "Show nearby" first. */}
+          <section>
+            <div className="flex items-baseline justify-between gap-3 mb-2">
+              <p className="text-xs font-bold uppercase tracking-wider text-gray-500">
+                {t('services.filter.distance', 'Max distance')}
+              </p>
+              {!nearbyActive && (
+                <p className="text-[10px] text-gray-400 italic">
+                  {t('services.filter.distanceNeedsNearby', 'Enable "Show nearby" first')}
+                </p>
+              )}
+            </div>
+            <div className={nearbyActive ? '' : 'opacity-50 pointer-events-none'}>
+              <ChipRow
+                testidPrefix="filter-distance"
+                value={draft.maxDistance}
+                onChange={(v) => setDraft((d) => ({ ...d, maxDistance: v }))}
+                options={[
+                  { value: '',   label: t('common.any', 'Any') },
+                  { value: '1',  label: t('services.within1km',  'Within 1 km') },
+                  { value: '3',  label: t('services.within3km',  'Within 3 km') },
+                  { value: '5',  label: t('services.within5km',  'Within 5 km') },
+                  { value: '10', label: t('services.within10km', 'Within 10 km') },
+                ]}
+              />
+            </div>
           </section>
 
           {/* Languages */}
