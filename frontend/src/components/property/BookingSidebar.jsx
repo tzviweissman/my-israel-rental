@@ -149,9 +149,19 @@ const QuickSelectRow = ({ property, dateRange, setDateRange, setBookingData }) =
   // the renter builds a range the backend will reject at submit time
   // (see routes/bookings.py::_assert_within_availability_window) — and
   // in the worst case they'd contact the owner about impossible dates.
+  // Applies to every rental_type — including long-term listings whose
+  // owner capped the rental at, say, 18 months from the starting_date.
   const availableTo = property.available_to
     ? parseLocalDate(property.available_to)
     : null;
+  // Compute the raw +1 year target so we know whether the clamp will
+  // actually kick in — used to decide when to re-label the button.
+  const rawFrom = (property.rental_type === 'long-term' && property.starting_date)
+    ? parseLocalDate(property.starting_date)
+    : (() => { const d = new Date(); d.setDate(d.getDate() + 1); return d; })();
+  const rawTo = new Date(rawFrom);
+  rawTo.setFullYear(rawTo.getFullYear() + 1);
+  const clampActive = availableTo && availableTo < rawTo;
   return (
     <div className="mt-3">
       <p className="text-xs text-gray-500 mb-2">{t('property.quickSelect')}</p>
@@ -159,24 +169,14 @@ const QuickSelectRow = ({ property, dateRange, setDateRange, setBookingData }) =
         <button
           type="button"
           onClick={() => {
-            // For long-term rentals with a fixed starting date, anchor the
-            // +1 year range to that date. Otherwise, start tomorrow.
-            const from = (property.rental_type === 'long-term' && property.starting_date)
-              ? parseLocalDate(property.starting_date)
-              : (() => { const d = new Date(); d.setDate(d.getDate() + 1); return d; })();
-            let to = new Date(from);
-            to.setFullYear(to.getFullYear() + 1);
-            // Clamp to the owner's availability cap when it's earlier
-            // than the raw +1-year target.
-            if (availableTo && availableTo < to) {
-              to = availableTo;
-            }
-            setRange(from, to);
+            let to = new Date(rawTo);
+            if (clampActive) to = availableTo;
+            setRange(rawFrom, to);
           }}
           className="px-3 py-1.5 rounded-lg border border-[#1E6A6A] text-[#1E6A6A] hover:bg-[#1E6A6A] hover:text-white text-xs font-medium transition-colors"
           data-testid="quick-select-plus-year"
         >
-          {availableTo
+          {clampActive
             ? t('property.untilAvailability', 'Until {{date}}').replace('{{date}}', format(availableTo, 'MMM d'))
             : t('property.plusOneYear')}
         </button>
