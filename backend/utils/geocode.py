@@ -169,6 +169,131 @@ async def geocode_area(area_text: str) -> Optional[tuple[float, float]]:
     return (lat, lng)
 
 
+async def suggest_areas(query_text: str, limit: int = 5) -> list[dict]:
+    """Return up to ``limit`` typeahead suggestions for a partial
+    free-text query.
+
+    Strategy:
+      1. **Curated fuzzy match** against ~150 well-known Israeli
+         cities / neighborhoods / landmarks — instant, no network,
+         typo-tolerant ("rehavya" → Rehavia). Ships with the app so
+         works even when Nominatim is throttled or offline.
+      2. **Nominatim fallback** if the curated set doesn't hit ≥3
+         results — catches street-level queries the curated list can't
+         cover ("20 Rothschild Blvd", "Emek Refaim").
+
+    Each suggestion is a light dict:
+        {"label": "Rehavia", "sublabel": "Jerusalem",
+         "lat": 31.775, "lng": 35.212, "type": "curated"|"osm"}
+    """
+    q = (query_text or "").strip()
+    if not q or len(q) < 2:
+        return []
+
+    # Step 1: local curated suggestions (typo-tolerant).
+    from utils.israeli_locations import fuzzy_suggest
+    curated = fuzzy_suggest(q, limit=limit)
+    if len(curated) >= 3:
+        return curated
+
+    # Step 2: Nominatim fallback for the rare miss. We cache the full
+    # suggestion set so repeat typing patterns don't re-hit the wire.
+    query = _normalize(q)
+    if not query:
+        return curated
+    cache_id = f"suggest::{query}::{limit}"
+    doc = await db.geocode_cache.find_one({"_id": cache_id}, {"_id": 0, "results": 1})
+    if doc and isinstance(doc.get("results"), list):
+        # Merge curated + cached OSM, deduping on (lat, lng) rounded to
+        # 4 decimals so we don't show the same neighborhood twice.
+        return _merge_suggestions(curated, doc["results"], limit)
+
+    global _last_request_ts
+    async with _rate_lock:
+        elapsed = time.monotonic() - _last_request_ts
+        if elapsed < _MIN_REQUEST_INTERVAL_SEC:
+            await asyncio.sleep(_MIN_REQUEST_INTERVAL_SEC - elapsed)
+        _last_request_ts = time.monotonic()
+
+    params = {
+        "q": query.replace(",", " ") + " Israel",
+        "format": "json",
+        "limit": max(1, min(limit, 8)),
+        "countrycodes": "il",
+        "addressdetails": 1,
+    }
+    headers = {"User-Agent": _USER_AGENT, "Accept-Language": "en"}
+    try:
+        async with httpx.AsyncClient(timeout=6.0) as client:
+            r = await client.get(_NOMINATIM_URL, params=params, headers=headers)
+            if r.status_code != 200:
+                return curated
+            data = r.json() or []
+    except Exception as e:  # noqa: BLE001
+        logger.warning("Nominatim suggest network error for %r: %s", query, e)
+        return curated
+
+    osm_results: list[dict] = []
+    for row in data:
+        try:
+            lat = float(row["lat"])
+            lng = float(row["lon"])
+        except (KeyError, ValueError, TypeError):
+            continue
+        addr = row.get("address") or {}
+        primary = (
+            addr.get("neighbourhood")
+            or addr.get("suburb")
+            or addr.get("quarter")
+            or addr.get("city")
+            or addr.get("town")
+            or addr.get("village")
+            or addr.get("road")
+            or row.get("name")
+            or (row.get("display_name") or "").split(",")[0].strip()
+        )
+        parent_bits = [
+            addr.get("city") or addr.get("town") or addr.get("village") or "",
+            addr.get("county") or addr.get("state") or "",
+        ]
+        parent = ", ".join([b for b in parent_bits if b and b != primary])
+        osm_results.append({
+            "label": primary,
+            "sublabel": parent or (row.get("display_name") or "").split(",", 1)[-1].strip(),
+            "lat": lat,
+            "lng": lng,
+            "type": "osm",
+        })
+
+    await db.geocode_cache.update_one(
+        {"_id": cache_id},
+        {"$set": {"results": osm_results}},
+        upsert=True,
+    )
+    return _merge_suggestions(curated, osm_results, limit)
+
+
+def _merge_suggestions(curated: list[dict], osm: list[dict], limit: int) -> list[dict]:
+    """Interleave curated + OSM rows, deduplicating on both rounded
+    coords AND normalized label so we don't show the same place twice
+    under a slightly different spelling. Curated rows always keep
+    their position — Nominatim rows only fill the remaining slots."""
+    out = list(curated)
+    seen_coords = {(round(r["lat"], 3), round(r["lng"], 3)) for r in out}
+    seen_labels = {r["label"].strip().lower() for r in out}
+    for r in osm:
+        key_coords = (round(r["lat"], 3), round(r["lng"], 3))
+        key_label = r["label"].strip().lower()
+        if key_coords in seen_coords or key_label in seen_labels:
+            continue
+        seen_coords.add(key_coords)
+        seen_labels.add(key_label)
+        out.append(r)
+        if len(out) >= limit:
+            break
+    return out[:limit]
+
+
 async def geocode_gig_area_bg(gig_id: str, area_text: str) -> None:
     """Fire-and-forget helper: forward-geocode `area_text` and stamp
     `lat`/`lng` (or `lat=None, lng=None, geocode_miss=True`) on the gig

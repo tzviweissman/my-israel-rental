@@ -7,7 +7,7 @@ renter typing can't get us throttled or IP-banned by OSM.
 """
 from fastapi import APIRouter, Query
 
-from utils.geocode import geocode_area
+from utils.geocode import geocode_area, suggest_areas
 
 router = APIRouter()
 api_router = router
@@ -27,3 +27,19 @@ async def geocode_search(q: str = Query(..., min_length=2, max_length=140)):
     if not coords:
         return {"lat": None, "lng": None, "query": q}
     return {"lat": coords[0], "lng": coords[1], "query": q}
+
+
+@api_router.get("/geocode/suggest")
+async def geocode_suggest(
+    q: str = Query(..., min_length=2, max_length=140),
+    limit: int = Query(5, ge=1, le=8),
+):
+    """Google-Maps-style autocomplete suggestions for the Stays +
+    Services address inputs. Returns a list — never a 404 — so the
+    client can just render an empty state when no matches turn up
+    without a special error path.
+
+    Response shape (each row):
+        {"label": str, "sublabel": str, "lat": float, "lng": float, "type": str}
+    """
+    return {"query": q, "results": await suggest_areas(q.strip(), limit=limit)}

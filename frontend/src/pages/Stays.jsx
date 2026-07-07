@@ -31,6 +31,7 @@ import AreaRow from '../components/stays/AreaRow';
 import StaysSearchBar from '../components/stays/StaysSearchBar';
 import FiltersModal, { AMENITY_PRESETS } from '../components/stays/FiltersModal';
 import StaysMapView from '../components/stays/StaysMapView';
+import AddressAutocomplete from '../components/common/AddressAutocomplete';
 import { flexLabel } from '../components/search/WhenPicker';
 import QuickChips from '../components/search/QuickChips';
 import NotifyMeCard from '../components/NotifyMeCard';
@@ -453,41 +454,22 @@ const Stays = ({ landing = null }) => {
               near my synagogue / office / kid's school." This closes
               that gap. */}
           <div className="mt-3 flex flex-wrap items-center gap-2">
-            <div className="flex items-center flex-1 min-w-[240px] bg-gray-50 rounded-full border border-gray-200 focus-within:border-[#1E6A6A] focus-within:bg-white transition-colors">
-              <MapPin size={14} className="ms-3 text-gray-500 shrink-0" />
-              <input
-                value={nearInput}
-                onChange={(e) => setNearInput(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') runAddressSearch(nearInput);
-                }}
-                placeholder={t('stays.nearPlaceholder', 'Show stays near an address — e.g. Rothschild Blvd, Tel Aviv')}
-                className="flex-1 px-2 py-2 text-xs sm:text-sm bg-transparent focus:outline-none"
-                data-testid="stays-near-input"
-              />
-              {nearCoords ? (
-                <button
-                  type="button"
-                  onClick={clearAddressSearch}
-                  className="pe-3 ps-1 text-[#1E6A6A] hover:opacity-70"
-                  title={t('stays.clearNear', 'Clear address')}
-                  data-testid="stays-near-clear"
-                >
-                  <X size={14} />
-                </button>
-              ) : (
-                <button
-                  type="button"
-                  onClick={() => runAddressSearch(nearInput)}
-                  disabled={nearBusy || !nearInput.trim()}
-                  className="pe-3 ps-1 text-[#1E6A6A] hover:opacity-70 disabled:opacity-30"
-                  title={t('stays.search', 'Search')}
-                  data-testid="stays-near-submit"
-                >
-                  {nearBusy ? <Loader2 size={14} className="animate-spin" /> : <Search size={14} />}
-                </button>
-              )}
-            </div>
+            <AddressAutocomplete
+              value={nearInput}
+              onChange={setNearInput}
+              hasSelection={Boolean(nearCoords)}
+              onSelect={({ label, lat, lng }) => {
+                // Direct pick from the dropdown — no re-geocode needed.
+                setNearInput(label);
+                setNearQuery(label);
+                setNearCoords({ lat, lng });
+                toast.success(t('stays.nearShownFrom', 'Showing stays near "{{addr}}"', { addr: label }));
+              }}
+              onSubmit={runAddressSearch}
+              onClear={clearAddressSearch}
+              placeholder={t('stays.nearPlaceholder', 'Show stays near an address — e.g. Rothschild Blvd, Tel Aviv')}
+              testId="stays-near"
+            />
             <div
               className="inline-flex items-center rounded-full border border-gray-200 bg-white p-0.5 shrink-0"
               role="tablist"

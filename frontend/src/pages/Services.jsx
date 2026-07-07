@@ -16,6 +16,7 @@ import axios from 'axios';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
 import { Search, ArrowRight, Loader2, SlidersHorizontal, Award, Zap, MapPin, LayoutGrid, Map as MapIcon } from 'lucide-react';
+import AddressAutocomplete from '../components/common/AddressAutocomplete';
 import { API } from '../App';
 import PageMeta from '../components/PageMeta';
 import StarRating from '../components/marketplace/StarRating';
@@ -148,6 +149,12 @@ const Services = () => {
   // URL, so shared links can't leak location. Cleared on tab close.
   const [coords, setCoords] = useState(null);
   const [geoBusy, setGeoBusy] = useState(false);
+  // Address-search state — parallel to browser geolocation, powered by
+  // the /api/geocode/suggest dropdown. When set, `coords` gets populated
+  // from the pick and `nearAddrLabel` is the human-readable string we
+  // show in the "Showing services near X" chip. Cleared on tab close.
+  const [nearAddrInput, setNearAddrInput] = useState('');
+  const [nearAddrLabel, setNearAddrLabel] = useState('');
   // Permission-denied recovery modal — surfaced when the browser blocks
   // the geolocation prompt (typically because the user hit "Never allow"
   // earlier). Shows OS-specific instructions to unblock + a retry button.
@@ -381,6 +388,57 @@ const Services = () => {
             >
               {t('services.becomeProvider', 'Become a provider')}
             </button>
+          </div>
+
+          {/* Address autocomplete — the "typo-tolerant" alternative to
+              the geolocation nearby button. Renters who don't want to
+              grant location access can just type "Rehavia", pick from
+              the dropdown, and see nearby providers ranked by proximity.
+              White frame on the dark hero background so it reads as a
+              secondary search widget under the primary keyword search. */}
+          <div className="mt-3 max-w-xl mx-auto flex" data-testid="services-address-shell">
+            <div className="flex-1 bg-white rounded-full shadow-lg overflow-visible">
+              <AddressAutocomplete
+                value={nearAddrInput}
+                onChange={setNearAddrInput}
+                hasSelection={Boolean(nearAddrLabel)}
+                onSelect={({ label, lat, lng }) => {
+                  setNearAddrInput(label);
+                  setNearAddrLabel(label);
+                  setCoords({ lat, lng });
+                  patchUrl({ nearby: '1', sort: 'distance' });
+                  toast.success(t('services.nearAddress', 'Showing services near "{{addr}}"', { addr: label }));
+                }}
+                onSubmit={async (raw) => {
+                  const trimmed = (raw || '').trim();
+                  if (!trimmed) return;
+                  // Fallback path when the renter hits Enter with no
+                  // highlighted suggestion — geocode as a one-shot and
+                  // apply the coords if the API resolves it.
+                  try {
+                    const r = await axios.get(`${API}/geocode/search`, { params: { q: trimmed } });
+                    if (typeof r.data?.lat === 'number' && typeof r.data?.lng === 'number') {
+                      setNearAddrLabel(trimmed);
+                      setCoords({ lat: r.data.lat, lng: r.data.lng });
+                      patchUrl({ nearby: '1', sort: 'distance' });
+                      toast.success(t('services.nearAddress', 'Showing services near "{{addr}}"', { addr: trimmed }));
+                    } else {
+                      toast.error(t('services.nearNotFound', "We couldn't find that address — try picking from the dropdown."));
+                    }
+                  } catch {
+                    toast.error(t('services.nearFailed', 'Address lookup failed — please try again.'));
+                  }
+                }}
+                onClear={() => {
+                  setNearAddrInput('');
+                  setNearAddrLabel('');
+                  setCoords(null);
+                  patchUrl({ nearby: '', sort: sort === 'distance' ? '' : sort });
+                }}
+                placeholder={t('services.addressPlaceholder', 'Or type an address — e.g. Rehavia, Jerusalem')}
+                testId="services-address"
+              />
+            </div>
           </div>
         </div>
       </div>

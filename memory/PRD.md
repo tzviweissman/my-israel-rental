@@ -12,6 +12,20 @@ Build a bilingual (English/Hebrew) rental website named MyIsraelRental.com with 
 
 ## What's Been Implemented
 
+- [x] **Google-Maps-style autocomplete for Stays + Services search (2026-07-07)**:
+  - **Root problem**: users who misspelled search queries got zero results ("rehavya" → nothing found), and Nominatim's own autocomplete is weak for partial spellings + blocked from our container network. Users had no way to recover from typos.
+  - **Curated dataset** (`backend/utils/israeli_locations.py`): ~150 hand-picked Israeli locations — top 45 cities, 28 Jerusalem neighborhoods, 22 Tel Aviv neighborhoods + landmarks, 6 Haifa neighborhoods, 20 landmarks (Kotel, Machane Yehuda, Ben Gurion Airport, Weizmann, Knesset, etc.) with verified coords. Parenthetical aliases (e.g. `Western Wall (Kotel)`) exploded so both "kotel" and "western wall" match.
+  - **Fuzzy matching** using Python's built-in `difflib.SequenceMatcher` — no new deps. Handles typos ("rehavya" → Rehavia), substring hits ("beach" → Tel Aviv Beach), and short prefixes ("tel a" → Tel Aviv + Beach + University). Priority boost so cities outrank neighborhoods on equal similarity.
+  - **Nominatim fallback** (`suggest_areas`): if curated set returns <3 hits, we top up from OSM Nominatim with rate limit + cache + dedup on rounded coords + normalized labels. Zero duplicates in the final list.
+  - **New endpoint** `GET /api/geocode/suggest?q=...` — instant response (no network on cached queries), returns `[{label, sublabel, lat, lng, type}]`.
+  - **New component** `frontend/src/components/common/AddressAutocomplete.jsx`: reusable dropdown with 250ms debounce, out-of-order response guard (request-id ref), keyboard nav (ArrowUp/Down/Enter/Escape), click-outside close, direct-pick (no re-geocode needed), and Enter-fallback for power users. Two-line item cards (bold label + muted sublabel) matching the app's visual language.
+  - **Wired into Stays** (`Stays.jsx`): replaced plain text input. Picking a suggestion sets coords in memory + sorts filtered list by proximity (haversine) + updates map center.
+  - **Wired into Services** (`Services.jsx`): new address input under the hero keyword search. Picking a suggestion sets `coords` + `nearby=1` + `sort=distance` in the URL — same downstream logic as the geolocation button, but works without granting location permission.
+  - **Verified live**: "rehavy" → dropdown shows Rehavia + Rehovot. "kotel" → Western Wall (Kotel), Muslim/Jewish Quarter. "tel a" → Tel Aviv, Tel Aviv Beach, University, Port. Selecting a row instantly filters + re-centers map / re-sorts list.
+  - Files: `backend/utils/israeli_locations.py` (new, ~200 lines curated data), `backend/utils/geocode.py`, `backend/routes/geocode.py`, `frontend/src/components/common/AddressAutocomplete.jsx` (new), `frontend/src/pages/Stays.jsx`, `frontend/src/pages/Services.jsx`.
+
+
+
 - [x] **Stays map view + address search (2026-07-07)**:
   - **Backend geocoding for properties**: Extended `utils/geocode.py` with `geocode_property_bg(id, address, area)` that combines street + neighborhood + city for street-level precision, with a graceful fallback to area-only when the full address doesn't resolve. Hooked into `POST /api/properties` (create) and `PUT /api/properties/{id}` (update) via `asyncio.create_task` — API responses stay snappy, coords land on the doc within ~1s. Startup backfill migrates existing listings.
   - **Normalizer bugfix**: Nominatim's parser is order-sensitive. "Jerusalem American Colony" resolved to "Jerusalem Boulevard" in Tel Aviv; "American Colony Jerusalem" correctly finds the Jerusalem neighborhood. `_normalize()` now reverses tokens for area-labels (city → neighborhood becomes neighborhood → city) but keeps order for street-address shapes (detected via leading digit). Splits handle both `,` and ` - ` separators. Cache reset + backfill: 12/15 active properties now geocoded.
