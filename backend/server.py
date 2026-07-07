@@ -36,6 +36,7 @@ from routes import (  # noqa: E402
     bulk_upload,
     chat,
     contracts,
+    geocode,
     ical,
     marketplace,
     misc,
@@ -82,6 +83,7 @@ for mod in (
     marketplace,
     misc,
     payments,
+    geocode,
 ):
     api_router.include_router(mod.router)
 
@@ -229,6 +231,39 @@ async def startup_tasks() -> None:
             logger.warning("gig geocode backfill failed (non-fatal): %s", e)
 
     asyncio.create_task(backfill_gig_geocoding())
+
+    # One-shot backfill for properties: pin every active listing to a
+    # street-level lat/lng so the Stays map view works immediately —
+    # not just for freshly-listed inventory. Same Nominatim 1 rps
+    # trickle as the gig backfill; wraps around asynchronously so
+    # unrelated startup steps don't get blocked if OSM is slow.
+    async def backfill_property_geocoding() -> None:
+        await asyncio.sleep(90)  # Land after gig backfill so we don't stampede Nominatim.
+        try:
+            from utils.geocode import geocode_property_bg
+            cursor = db.properties.find(
+                {
+                    "status": "active",
+                    "$or": [
+                        {"lat": {"$exists": False}},
+                        {"lat": None},
+                    ],
+                    "geocode_miss": {"$ne": True},
+                },
+                {"id": 1, "address": 1, "area": 1, "_id": 0},
+            )
+            count = 0
+            async for row in cursor:
+                await geocode_property_bg(
+                    row["id"], row.get("address"), row.get("area"),
+                )
+                count += 1
+            if count:
+                logger.info("Property geocode backfill processed %d listings", count)
+        except Exception as e:  # noqa: BLE001
+            logger.warning("property geocode backfill failed (non-fatal): %s", e)
+
+    asyncio.create_task(backfill_property_geocoding())
     try:
         ensure_contract_templates(ROOT_DIR / "uploads")
         logger.info("Contract templates ready")

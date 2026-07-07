@@ -24,11 +24,13 @@ import axios from 'axios';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { format } from 'date-fns';
-import { X, Loader2, Bell } from 'lucide-react';
+import { X, Loader2, Bell, LayoutGrid, Map as MapIcon, MapPin, Search } from 'lucide-react';
+import { toast } from 'sonner';
 import StaysCard from '../components/stays/StaysCard';
 import AreaRow from '../components/stays/AreaRow';
 import StaysSearchBar from '../components/stays/StaysSearchBar';
 import FiltersModal, { AMENITY_PRESETS } from '../components/stays/FiltersModal';
+import StaysMapView from '../components/stays/StaysMapView';
 import { flexLabel } from '../components/search/WhenPicker';
 import QuickChips from '../components/search/QuickChips';
 import NotifyMeCard from '../components/NotifyMeCard';
@@ -98,6 +100,20 @@ const Stays = ({ landing = null }) => {
     return [];
   });
 
+  // View mode toggle — 'list' (default grid) vs 'map' (Voyager tiles).
+  // Persisted to the URL so a shared "come look at these on the map"
+  // link deep-links straight to the map.
+  const viewMode = searchParams.get('view') === 'map' ? 'map' : 'list';
+
+  // "Near this address" state — coords live in memory only, never on
+  // the URL, so shared links don't leak someone else's search location.
+  // Cleared on tab close. The query text IS persisted (as `?near=...`)
+  // so a refresh preserves the visible input value.
+  const [nearQuery, setNearQuery] = useState(searchParams.get('near') || '');
+  const [nearCoords, setNearCoords] = useState(null);
+  const [nearBusy, setNearBusy] = useState(false);
+  const [nearInput, setNearInput] = useState(searchParams.get('near') || '');
+
   // Load every non-storage property once. Volume is in the low thousands
   // so a single fetch + client-side filter beats round-tripping each query.
   useEffect(() => {
@@ -127,8 +143,6 @@ const Stays = ({ landing = null }) => {
     }
     if (priceMin) next.set('priceMin', priceMin);
     if (priceMax) next.set('priceMax', priceMax);
-    // Only write `cur` when it diverges from the ILS default so URLs
-    // stay clean for the typical Israeli renter.
     if (priceCurrency === 'USD') next.set('cur', 'USD');
     if (bedrooms) next.set('bedrooms', bedrooms);
     if (bathrooms) next.set('bathrooms', bathrooms);
@@ -138,8 +152,10 @@ const Stays = ({ landing = null }) => {
     if (hasElevator) next.set('elevator', '1');
     if (subType) next.set('subType', subType);
     if (amenities.length) next.set('amenities', amenities.join(','));
+    if (viewMode === 'map') next.set('view', 'map');
+    if (nearQuery) next.set('near', nearQuery);
     setSearchParams(next, { replace: true });
-  }, [where, checkin, checkout, flexible, priceMin, priceMax, priceCurrency, bedrooms, bathrooms, porches, condition, furnished, hasElevator, subType, amenities, setSearchParams]);
+  }, [where, checkin, checkout, flexible, priceMin, priceMax, priceCurrency, bedrooms, bathrooms, porches, condition, furnished, hasElevator, subType, amenities, viewMode, nearQuery, setSearchParams]);
 
   useEffect(() => { syncUrl(); }, [syncUrl]);
 
@@ -260,6 +276,72 @@ const Stays = ({ landing = null }) => {
       });
   }, [filtered]);
 
+  // Great-circle distance (haversine) — used when the renter has typed
+  // an address so we can sort results by proximity + annotate each card
+  // with a "3.2 km away" chip. Returns kilometers.
+  const haversineKm = (a, b) => {
+    const R = 6371;
+    const toRad = (d) => (d * Math.PI) / 180;
+    const dLat = toRad(b.lat - a.lat);
+    const dLng = toRad(b.lng - a.lng);
+    const s = Math.sin(dLat / 2) ** 2 +
+      Math.cos(toRad(a.lat)) * Math.cos(toRad(b.lat)) * Math.sin(dLng / 2) ** 2;
+    return 2 * R * Math.asin(Math.sqrt(s));
+  };
+
+  // When an address is set, decorate each property with `distance_km`
+  // and re-order the filtered list by proximity. Properties missing
+  // coords sink to the bottom (still visible, just not distance-ranked).
+  const filteredWithDistance = useMemo(() => {
+    if (!nearCoords) return filtered;
+    return [...filtered]
+      .map((p) => {
+        if (typeof p.lat !== 'number' || typeof p.lng !== 'number') {
+          return { ...p, distance_km: null };
+        }
+        return {
+          ...p,
+          distance_km: haversineKm(nearCoords, { lat: p.lat, lng: p.lng }),
+        };
+      })
+      .sort((a, b) => {
+        if (a.distance_km == null && b.distance_km == null) return 0;
+        if (a.distance_km == null) return 1;
+        if (b.distance_km == null) return -1;
+        return a.distance_km - b.distance_km;
+      });
+  }, [filtered, nearCoords]);
+
+  // Address input → Nominatim (via our /api/geocode/search proxy which
+  // handles the 1 rps cap + caching). On success we set coords in memory
+  // and stamp the query on the URL so a refresh preserves the visible
+  // input value.
+  const runAddressSearch = async (raw) => {
+    const q = (raw || '').trim();
+    if (!q) {
+      setNearCoords(null); setNearQuery(''); return;
+    }
+    setNearBusy(true);
+    try {
+      const r = await axios.get(`${API}/geocode/search`, { params: { q } });
+      if (typeof r.data?.lat === 'number' && typeof r.data?.lng === 'number') {
+        setNearCoords({ lat: r.data.lat, lng: r.data.lng });
+        setNearQuery(q);
+        toast.success(t('stays.nearShownFrom', 'Showing stays near "{{addr}}"', { addr: q }));
+      } else {
+        toast.error(t('stays.nearNotFound', "We couldn't find that address — try a specific street or landmark."));
+      }
+    } catch (e) {
+      toast.error(t('stays.nearFailed', 'Address lookup failed — please try again.'));
+    } finally {
+      setNearBusy(false);
+    }
+  };
+
+  const clearAddressSearch = () => {
+    setNearCoords(null); setNearQuery(''); setNearInput('');
+  };
+
   // Filter count badge — counts only the filters that live in the
   // modal (price, bedrooms, amenities). Where / Stay type / When are
   // already visible in the search bar itself so showing them as a
@@ -275,7 +357,8 @@ const Stays = ({ landing = null }) => {
   // narrowing down what they want.
   const isSearchActive = Boolean(
     where || checkin || checkout || flexible || priceMin || priceMax || bedrooms ||
-    bathrooms || porches || condition || furnished || hasElevator || subType || amenities.length,
+    bathrooms || porches || condition || furnished || hasElevator || subType || amenities.length ||
+    nearCoords,
   );
 
   const clearAllFilters = () => {
@@ -283,6 +366,7 @@ const Stays = ({ landing = null }) => {
     setSubType(''); setBedrooms(''); setBathrooms(''); setPorches('');
     setCondition(''); setFurnished(false); setHasElevator(false);
     setPriceMin(''); setPriceMax(''); setPriceCurrency('ILS'); setAmenities([]);
+    clearAddressSearch();
   };
 
   // Shared favorites state — drives the interactive heart on every card.
@@ -359,6 +443,83 @@ const Stays = ({ landing = null }) => {
               testidPrefix="stays-quick-chips"
             />
           </div>
+
+          {/* Address search + List/Map view toggle row — new discovery
+              tools that let a renter (a) enter a specific address like
+              "20 Rothschild Blvd, Tel Aviv" to sort listings by proximity
+              and (b) flip the whole result set into a Leaflet map so
+              they can pattern-match neighborhoods visually. Renters
+              rarely think "I want Tel Aviv" — they think "I want to be
+              near my synagogue / office / kid's school." This closes
+              that gap. */}
+          <div className="mt-3 flex flex-wrap items-center gap-2">
+            <div className="flex items-center flex-1 min-w-[240px] bg-gray-50 rounded-full border border-gray-200 focus-within:border-[#1E6A6A] focus-within:bg-white transition-colors">
+              <MapPin size={14} className="ms-3 text-gray-500 shrink-0" />
+              <input
+                value={nearInput}
+                onChange={(e) => setNearInput(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') runAddressSearch(nearInput);
+                }}
+                placeholder={t('stays.nearPlaceholder', 'Show stays near an address — e.g. Rothschild Blvd, Tel Aviv')}
+                className="flex-1 px-2 py-2 text-xs sm:text-sm bg-transparent focus:outline-none"
+                data-testid="stays-near-input"
+              />
+              {nearCoords ? (
+                <button
+                  type="button"
+                  onClick={clearAddressSearch}
+                  className="pe-3 ps-1 text-[#1E6A6A] hover:opacity-70"
+                  title={t('stays.clearNear', 'Clear address')}
+                  data-testid="stays-near-clear"
+                >
+                  <X size={14} />
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => runAddressSearch(nearInput)}
+                  disabled={nearBusy || !nearInput.trim()}
+                  className="pe-3 ps-1 text-[#1E6A6A] hover:opacity-70 disabled:opacity-30"
+                  title={t('stays.search', 'Search')}
+                  data-testid="stays-near-submit"
+                >
+                  {nearBusy ? <Loader2 size={14} className="animate-spin" /> : <Search size={14} />}
+                </button>
+              )}
+            </div>
+            <div
+              className="inline-flex items-center rounded-full border border-gray-200 bg-white p-0.5 shrink-0"
+              role="tablist"
+              aria-label={t('stays.viewToggle', 'View mode')}
+              data-testid="stays-view-toggle"
+            >
+              <button
+                type="button"
+                onClick={() => setSearchParams((prev) => { const n = new URLSearchParams(prev); n.delete('view'); return n; }, { replace: true })}
+                className={`inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-semibold transition-colors ${
+                  viewMode === 'list' ? 'bg-[#1E6A6A] text-white' : 'text-gray-700 hover:text-gray-900'
+                }`}
+                aria-pressed={viewMode === 'list'}
+                data-testid="stays-view-list"
+              >
+                <LayoutGrid size={13} />
+                {t('stays.viewList', 'List')}
+              </button>
+              <button
+                type="button"
+                onClick={() => setSearchParams((prev) => { const n = new URLSearchParams(prev); n.set('view', 'map'); return n; }, { replace: true })}
+                className={`inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-semibold transition-colors ${
+                  viewMode === 'map' ? 'bg-[#1E6A6A] text-white' : 'text-gray-700 hover:text-gray-900'
+                }`}
+                aria-pressed={viewMode === 'map'}
+                data-testid="stays-view-map"
+              >
+                <MapIcon size={13} />
+                {t('stays.viewMap', 'Map')}
+              </button>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -398,15 +559,57 @@ const Stays = ({ landing = null }) => {
             {t('stays.clearAll', 'Clear all filters')}
           </button>
         </div>
+      ) : viewMode === 'map' ? (
+        // Map view — full-width Leaflet render with price-pin markers.
+        // Renderable both with and without an active search so a renter
+        // can just flip to "show me everything on a map" from the
+        // default view too. When an address is set, we center on it and
+        // show a "you searched here" pin.
+        <div className="max-w-[1760px] mx-auto px-4 sm:px-6 lg:px-10 py-6" data-testid="stays-map-container">
+          <div className="flex items-end justify-between mb-4">
+            <div>
+              <h2 className="text-lg md:text-xl font-semibold text-gray-900">
+                {filteredWithDistance.length} {filteredWithDistance.length === 1 ? t('stays.stay', 'stay') : t('stays.staysLabel', 'stays')}
+                {nearCoords ? ` ${t('stays.nearAddress', 'near this address')}` : ''}
+              </h2>
+              {nearCoords && nearQuery && (
+                <p className="text-xs text-gray-500 mt-0.5 truncate max-w-md" data-testid="stays-near-label">
+                  {t('stays.centeredOn', 'Centered on')} {nearQuery}
+                </p>
+              )}
+            </div>
+            {isSearchActive && (
+              <button
+                onClick={clearAllFilters}
+                className="text-xs font-semibold text-[#1E6A6A] hover:underline"
+                data-testid="stays-map-clear"
+              >
+                {t('stays.clearAll', 'Clear all')}
+              </button>
+            )}
+          </div>
+          <StaysMapView
+            properties={filteredWithDistance}
+            userCoords={nearCoords}
+            focusOnUser={Boolean(nearCoords)}
+            displayCurrency={priceCurrency}
+          />
+        </div>
       ) : isSearchActive ? (
         // Flat results grid — Airbnb-style, shown once any search/filter is active
         <div className="max-w-[1760px] mx-auto px-4 sm:px-6 lg:px-10 py-6" data-testid="stays-results-grid">
           <div className="flex items-end justify-between mb-4">
             <div>
               <h2 className="text-lg md:text-xl font-semibold text-gray-900">
-                {filtered.length} {filtered.length === 1 ? t('stays.stay', 'stay') : t('stays.staysLabel', 'stays')}
+                {filteredWithDistance.length} {filteredWithDistance.length === 1 ? t('stays.stay', 'stay') : t('stays.staysLabel', 'stays')}
                 {where ? ` ${t('stays.in', 'in')} ${where}` : ''}
+                {nearCoords && !where ? ` ${t('stays.nearAddress', 'near this address')}` : ''}
               </h2>
+              {nearCoords && nearQuery && (
+                <p className="text-xs text-gray-500 mt-0.5 truncate max-w-md" data-testid="stays-near-label-grid">
+                  {t('stays.nearestFirst', 'Nearest first — from')} {nearQuery}
+                </p>
+              )}
               {flexible ? (
                 <p className="text-xs text-gray-500 mt-0.5">
                   {flexLabel(flexible, t)}
@@ -439,7 +642,7 @@ const Stays = ({ landing = null }) => {
             </div>
           </div>
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-x-5 gap-y-8">
-            {filtered.map((p) => (
+            {filteredWithDistance.map((p) => (
               <StaysCard
                 key={p.id}
                 property={p}

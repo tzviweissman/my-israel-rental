@@ -12,6 +12,17 @@ Build a bilingual (English/Hebrew) rental website named MyIsraelRental.com with 
 
 ## What's Been Implemented
 
+- [x] **Stays map view + address search (2026-07-07)**:
+  - **Backend geocoding for properties**: Extended `utils/geocode.py` with `geocode_property_bg(id, address, area)` that combines street + neighborhood + city for street-level precision, with a graceful fallback to area-only when the full address doesn't resolve. Hooked into `POST /api/properties` (create) and `PUT /api/properties/{id}` (update) via `asyncio.create_task` — API responses stay snappy, coords land on the doc within ~1s. Startup backfill migrates existing listings.
+  - **Normalizer bugfix**: Nominatim's parser is order-sensitive. "Jerusalem American Colony" resolved to "Jerusalem Boulevard" in Tel Aviv; "American Colony Jerusalem" correctly finds the Jerusalem neighborhood. `_normalize()` now reverses tokens for area-labels (city → neighborhood becomes neighborhood → city) but keeps order for street-address shapes (detected via leading digit). Splits handle both `,` and ` - ` separators. Cache reset + backfill: 12/15 active properties now geocoded.
+  - **Public geocode endpoint** (`GET /api/geocode/search?q=...`): thin wrapper over `geocode_area` — the Stays "Show stays near an address" input calls this. Rate limit + cache still enforced. New file `backend/routes/geocode.py`.
+  - **Frontend `StaysMapView`** (`components/stays/StaysMapView.jsx`): full-width Leaflet map with CartoDB Voyager basemap. Uses Airbnb-style price pills (`₪450`, `₪5k`, etc.) instead of generic pins so renters can pattern-match neighborhoods by price at a glance. Top-quartile pricing gets a subtle gold highlight. Rich popup with cover image + "View details →" click-through. Vanilla-Leaflet lifecycle (same StrictMode-safe pattern as ServicesMapView).
+  - **Stays page integration**: List/Map toggle (`data-testid="stays-view-list"` / `stays-view-map"`), URL-persisted (`?view=map` deep-linkable). Address search input with real-time submit + clear button (`stays-near-input`). When address is set, `filteredWithDistance` (new memoized selector) computes per-property haversine distance and sorts by proximity; map centers on the searched point + drops a blue "You searched here" pin.
+  - **Verified live**: address search "Rehavia Jerusalem" → 12 pins rebalance around the neighborhood, top-list results reorder (Talbiya + Beit Yisrael surface first), user pin lands ~200m from nearest ₪450 pin.
+  - Files: `backend/routes/geocode.py` (new), `backend/utils/geocode.py`, `backend/routes/properties.py`, `backend/server.py`, `frontend/src/components/stays/StaysMapView.jsx` (new), `frontend/src/pages/Stays.jsx`, `frontend/src/index.css`.
+
+
+
 - [x] **Street-level geocoding for marketplace gigs (2026-07-06)**:
   - Replaced city-center-only precision (~2-4 km error inside big cities) with per-gig Nominatim geocoding at gig create + patch time. Providers now enter `area` as "Jerusalem, Talpiot" or "Tel Aviv, Florentin" and get pinned to within ~100 m of the actual neighborhood.
   - **New**: `utils/geocode.py` — Nominatim forward geocoder with ToS-compliant 1 req/sec rate limit gate + descriptive User-Agent + `db.geocode_cache` collection so repeat queries never hit the network. Cache stores both hits and misses.

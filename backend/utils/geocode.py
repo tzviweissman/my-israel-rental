@@ -75,9 +75,27 @@ async def _cache_miss(query: str) -> None:
 
 def _normalize(area_text: str) -> str:
     """Collapse whitespace + lowercase so 'Tel Aviv , Florentin' and
-    'tel aviv, florentin' hit the same cache row."""
-    parts = [p.strip() for p in (area_text or "").split(",") if p.strip()]
-    return ", ".join(parts).lower()
+    'tel aviv, florentin' hit the same cache row.
+
+    Two input shapes flow through here:
+      1. Area labels like "Jerusalem - Rehavia" — split on `-` and
+         REVERSE so the neighborhood leads (crucial for Nominatim; see
+         the American Colony → Tel Aviv bug in the git history).
+      2. Full street addresses like "20 Rothschild Blvd, Tel Aviv" —
+         these already have the most-specific token first (the street),
+         so keeping the original order works.
+
+    We detect (2) by checking if the first token starts with a digit.
+    """
+    text = (area_text or "").replace(" - ", ", ").replace(" – ", ", ")
+    parts = [p.strip() for p in text.split(",") if p.strip()]
+    if not parts:
+        return ""
+    # Address-shaped input keeps its order.
+    if parts[0] and parts[0][0].isdigit():
+        return ", ".join(parts).lower()
+    # Area-shaped input gets reversed so the neighborhood leads.
+    return ", ".join(reversed(parts)).lower()
 
 
 async def geocode_area(area_text: str) -> Optional[tuple[float, float]]:
@@ -111,11 +129,16 @@ async def geocode_area(area_text: str) -> Optional[tuple[float, float]]:
         _last_request_ts = time.monotonic()
 
     params = {
-        "q": f"{area_text}, Israel",
+        # Nominatim's free-form parser handles space-joined queries far
+        # better than comma-joined ones for our dataset:
+        #   "American Colony Jerusalem Israel"  → correct Jerusalem pin
+        #   "American Colony, Jerusalem, Israel" → often hits Tel Aviv
+        # The `countrycodes=il` filter is a defence-in-depth; we still
+        # occasionally see the parser prefer a US result when an Israeli
+        # neighborhood name shadows a more famous foreign one.
+        "q": query.replace(",", " ") + " Israel",
         "format": "json",
         "limit": 1,
-        # Restrict to Israel country code so obscure neighborhood names
-        # don't get plucked from other countries.
         "countrycodes": "il",
     }
     headers = {"User-Agent": _USER_AGENT, "Accept-Language": "en"}
@@ -167,3 +190,49 @@ async def geocode_gig_area_bg(gig_id: str, area_text: str) -> None:
         await db.marketplace_gigs.update_one({"_id": gig_id}, {"$set": patch})
     except Exception as e:  # noqa: BLE001
         logger.error("geocode_gig_area_bg(%s) failed: %s", gig_id, e)
+
+
+async def geocode_property_bg(
+    property_id: str,
+    address: Optional[str],
+    area: Optional[str],
+) -> None:
+    """Fire-and-forget helper: forward-geocode a property's address +
+    area combo and stamp `lat`/`lng` on the doc. Street address gives
+    us building-level precision on the Stays map (~10-20 m), a huge
+    step up from area-centroid pins.
+
+    Query string is built defensively so a property with only `area`
+    still resolves to city-center — better than skipping the geocode
+    entirely and leaving the pin off the map.
+    """
+    parts = [p.strip() for p in [address, area] if p and p.strip()]
+    query = ", ".join(parts) if parts else ""
+    if not query:
+        return
+    try:
+        coords = await geocode_area(query)
+        patch: dict = {"geocoded_at": time.time()}
+        if coords:
+            patch["lat"] = coords[0]
+            patch["lng"] = coords[1]
+            patch["geocode_miss"] = False
+        else:
+            # If the full address didn't resolve (bad street name,
+            # typos, etc.) fall back to area-only so we at least
+            # pin the property on the correct city on the map.
+            fallback_coords = None
+            if area and area.strip():
+                fallback_coords = await geocode_area(area)
+            if fallback_coords:
+                patch["lat"] = fallback_coords[0]
+                patch["lng"] = fallback_coords[1]
+                patch["geocode_miss"] = False
+                patch["geocode_fallback"] = "area_only"
+            else:
+                patch["geocode_miss"] = True
+                patch["lat"] = None
+                patch["lng"] = None
+        await db.properties.update_one({"id": property_id}, {"$set": patch})
+    except Exception as e:  # noqa: BLE001
+        logger.error("geocode_property_bg(%s) failed: %s", property_id, e)

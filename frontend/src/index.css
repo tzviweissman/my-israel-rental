@@ -126,10 +126,11 @@ code {
 
 /* --------------------------------------------------------------------
    Services Marketplace map — Leaflet chrome overrides for a modern,
-   Airbnb-style look. All scoped under `.services-map` so we don't
-   accidentally restyle any future Leaflet instance elsewhere.
+   Airbnb-style look. All scoped under `.services-map` and `.stays-map`
+   so we don't accidentally restyle any future Leaflet instance.
    -------------------------------------------------------------------- */
-.services-map .leaflet-container {
+.services-map .leaflet-container,
+.stays-map .leaflet-container {
     /* Off-white to blend with the CartoDB Voyager tiles until they load
        — the default Leaflet grey backfill flashes harsh against the
        modern basemap. */
@@ -141,7 +142,8 @@ code {
 /* Glass-morphism zoom control — replaces Leaflet's default hard-edged
    grey buttons with a subtle blurred pill that reads as one cohesive
    modern element. */
-.services-map .leaflet-control-zoom {
+.services-map .leaflet-control-zoom,
+.stays-map .leaflet-control-zoom {
     border: 0 !important;
     border-radius: 12px !important;
     overflow: hidden;
@@ -151,7 +153,8 @@ code {
     -webkit-backdrop-filter: blur(12px);
     margin: 14px !important;
 }
-.services-map .leaflet-control-zoom a {
+.services-map .leaflet-control-zoom a,
+.stays-map .leaflet-control-zoom a {
     background: rgba(255, 255, 255, 0.9) !important;
     color: #1E6A6A !important;
     border: 0 !important;
@@ -162,17 +165,20 @@ code {
     font-weight: 600;
     transition: background 0.15s ease, color 0.15s ease;
 }
-.services-map .leaflet-control-zoom a:hover {
+.services-map .leaflet-control-zoom a:hover,
+.stays-map .leaflet-control-zoom a:hover {
     background: #1E6A6A !important;
     color: #fff !important;
 }
-.services-map .leaflet-control-zoom a.leaflet-disabled {
+.services-map .leaflet-control-zoom a.leaflet-disabled,
+.stays-map .leaflet-control-zoom a.leaflet-disabled {
     opacity: 0.5;
 }
 
 /* Attribution: keep it there for CARTO/OSM compliance but style it so
    it doesn't visually clutter the corner. */
-.services-map .leaflet-control-attribution {
+.services-map .leaflet-control-attribution,
+.stays-map .leaflet-control-attribution {
     background: rgba(255, 255, 255, 0.75) !important;
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);
@@ -182,18 +188,21 @@ code {
     border-radius: 8px 0 0 0;
     box-shadow: none !important;
 }
-.services-map .leaflet-control-attribution a {
+.services-map .leaflet-control-attribution a,
+.stays-map .leaflet-control-attribution a {
     color: #1E6A6A !important;
     text-decoration: none !important;
 }
 
 /* Popups — flat, borderless, rounded to match our card language. */
-.services-map .leaflet-popup-content-wrapper {
+.services-map .leaflet-popup-content-wrapper,
+.stays-map .leaflet-popup-content-wrapper {
     border-radius: 14px !important;
     box-shadow: 0 12px 32px -12px rgba(15, 58, 58, 0.35) !important;
     padding: 4px !important;
 }
-.services-map .leaflet-popup-tip {
+.services-map .leaflet-popup-tip,
+.stays-map .leaflet-popup-tip {
     box-shadow: 0 4px 8px -4px rgba(15, 58, 58, 0.35);
 }
 
@@ -204,5 +213,18 @@ code {
 }
 .services-map .gig-pin:hover {
     transform: scale(1.12);
+    z-index: 1000 !important;
+}
+
+/* Stays price pin — the pill lifts on hover + jumps forward so it
+   isn't hidden by neighbouring pins. */
+.stays-map .stays-price-pin > div {
+    cursor: pointer;
+}
+.stays-map .stays-price-pin:hover > div {
+    transform: translateY(-2px) scale(1.06);
+    box-shadow: 0 8px 18px rgba(15, 58, 58, 0.28) !important;
+}
+.stays-map .stays-price-pin:hover {
     z-index: 1000 !important;
 }

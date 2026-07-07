@@ -100,6 +100,17 @@ async def create_property(property_data: PropertyCreate, payload: dict = Depends
 
     await db.properties.insert_one(property_doc)
 
+    # Kick off Nominatim geocoding in the background so the Stays map
+    # can pin this property at street-level accuracy without slowing
+    # down the create response. Fire-and-forget; if it fails or misses
+    # we simply won't have coords, and the frontend falls back to the
+    # area-centroid lookup or hides the pin.
+    if property_data.address or property_data.area:
+        from utils.geocode import geocode_property_bg
+        asyncio.create_task(geocode_property_bg(
+            property_id, property_data.address, property_data.area,
+        ))
+
     # Fire saved-search alerts (non-blocking)
     try:
         asyncio.create_task(match_property_against_searches(
@@ -333,6 +344,19 @@ async def update_property(property_id: str, property_data: PropertyCreate, paylo
     update_doc = property_data.model_dump()
     _normalize_rental_types(update_doc)
     await db.properties.update_one({"id": property_id}, {"$set": update_doc})
+
+    # Re-geocode when address / area changed. Keeping this in-place
+    # (rather than only on create) is critical because owners often
+    # correct the street name after listing — we want the map pin to
+    # follow the fix without them having to know we're geocoding.
+    if (
+        update_doc.get("address") != existing.get("address")
+        or update_doc.get("area") != existing.get("area")
+    ):
+        from utils.geocode import geocode_property_bg
+        asyncio.create_task(geocode_property_bg(
+            property_id, update_doc.get("address"), update_doc.get("area"),
+        ))
 
     # Fire saved-search alerts when price drops or listing re-activates
     try:
