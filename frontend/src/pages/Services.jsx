@@ -25,6 +25,7 @@ import LocationChipsRow from '../components/marketplace/LocationChipsRow';
 import ServicesFiltersModal from '../components/marketplace/ServicesFiltersModal';
 import ServicesMapView from '../components/marketplace/ServicesMapView';
 import PeekableResultsSheet from '../components/common/PeekableResultsSheet';
+import NearbyDensityBar from '../components/common/NearbyDensityBar';
 import { localizedTitle } from '../utils/gigLocale';
 
 const TEAL = '#1E6A6A';
@@ -714,13 +715,23 @@ const Services = () => {
           </div>
         ) : viewMode === 'map' ? (
           <>
-            <ServicesMapView
-              gigs={gigs}
-              userCoords={nearby && coords ? coords : null}
-              maxDistanceKm={nearby && coords ? maxDistance : ''}
-              activeId={activeMapId}
-              onPinClick={setActiveMapId}
-            />
+            <div className="relative">
+              <ServicesMapView
+                gigs={gigs}
+                userCoords={nearby && coords ? coords : null}
+                maxDistanceKm={nearby && coords ? maxDistance : ''}
+                activeId={activeMapId}
+                onPinClick={setActiveMapId}
+              />
+              {nearby && coords && (
+                <div className="absolute top-3 start-3 z-10 pointer-events-none">
+                  <NearbyDensityBar
+                    items={gigs}
+                    testId="services-density-bar"
+                  />
+                </div>
+              )}
+            </div>
             {/* Mobile-only peekable sheet — mirrors the Stays pattern
                 so renters can glance at gig cards without leaving the
                 map. Reuses the shared GigCard component in the full

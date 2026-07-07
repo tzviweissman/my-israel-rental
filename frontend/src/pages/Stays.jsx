@@ -33,6 +33,7 @@ import FiltersModal, { AMENITY_PRESETS } from '../components/stays/FiltersModal'
 import StaysMapView from '../components/stays/StaysMapView';
 import AddressAutocomplete from '../components/common/AddressAutocomplete';
 import PeekableResultsSheet from '../components/common/PeekableResultsSheet';
+import NearbyDensityBar from '../components/common/NearbyDensityBar';
 import { flexLabel } from '../components/search/WhenPicker';
 import QuickChips from '../components/search/QuickChips';
 import NotifyMeCard from '../components/NotifyMeCard';
@@ -582,14 +583,30 @@ const Stays = ({ landing = null }) => {
               </button>
             )}
           </div>
-          <StaysMapView
-            properties={filteredWithDistance}
-            userCoords={nearCoords}
-            focusOnUser={Boolean(nearCoords)}
-            displayCurrency={priceCurrency}
-            activeId={activeMapId}
-            onPinClick={setActiveMapId}
-          />
+          <div className="relative">
+            <StaysMapView
+              properties={filteredWithDistance}
+              userCoords={nearCoords}
+              focusOnUser={Boolean(nearCoords)}
+              displayCurrency={priceCurrency}
+              activeId={activeMapId}
+              onPinClick={setActiveMapId}
+            />
+            {/* Density strip — only when the renter has picked an
+                address. Floats over the top-left of the map so users
+                get an instant "is this a dense area?" read without
+                counting pins. Higher z than the map so it clears the
+                pin layer but below the zoom control so it never
+                collides with the +/- buttons in the top-right. */}
+            {nearCoords && (
+              <div className="absolute top-3 start-3 z-10 pointer-events-none">
+                <NearbyDensityBar
+                  items={filteredWithDistance}
+                  testId="stays-density-bar"
+                />
+              </div>
+            )}
+          </div>
 
           {/* Mobile-only peekable bottom sheet — lets renters glance at
               results without leaving the map. Full sheet expands to a
@@ -694,6 +711,14 @@ const Stays = ({ landing = null }) => {
                 <p className="text-xs text-gray-500 mt-0.5 truncate max-w-md" data-testid="stays-near-label-grid">
                   {t('stays.nearestFirst', 'Nearest first — from')} {nearQuery}
                 </p>
+              )}
+              {nearCoords && (
+                <div className="mt-2">
+                  <NearbyDensityBar
+                    items={filteredWithDistance}
+                    testId="stays-density-bar-list"
+                  />
+                </div>
               )}
               {flexible ? (
                 <p className="text-xs text-gray-500 mt-0.5">

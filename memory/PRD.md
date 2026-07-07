@@ -12,6 +12,17 @@ Build a bilingual (English/Hebrew) rental website named MyIsraelRental.com with 
 
 ## What's Been Implemented
 
+- [x] **Nearby density bar (2026-07-07)**: One-line summary of how many results sit within common distance bands from the renter's searched address. Answers "is this area dense enough for me?" without them having to zoom out and count pins.
+  - New reusable component `frontend/src/components/common/NearbyDensityBar.jsx`. Takes an `items` array with `distance_km` fields (already computed by the parent's haversine sort) — zero new API calls.
+  - Renders as a glass-morphism pill: `🚶 N within walking · 📍 N within 3 km · 🏢 N total`. The "walking" chip only appears when count > 0 so we don't show `🚶 0 within walking` noise; the "3 km" chip only appears when it's strictly more than the walking count.
+  - **On maps**: floats over the top-left corner (`z-10 pointer-events-none`) — clears the top-right zoom control so they don't collide. Only rendered when `nearCoords`/`coords` are set.
+  - **On list view (Stays)**: rendered inline under the header near-address label so desktop users also see the density read.
+  - Applied to both Stays (`stays-density-bar`) and Services (`services-density-bar`).
+  - **Verified live**: picked "Rehavia" → bar renders `1 within walking · 11 within 3 km · 15 total` — exactly the "quick read" the user asked for.
+  - Files: `frontend/src/components/common/NearbyDensityBar.jsx` (new), `frontend/src/pages/Stays.jsx`, `frontend/src/pages/Services.jsx`.
+
+
+
 - [x] **Map interaction lock + pin ↔ card cross-highlight (2026-07-07)**:
   - **Bugfix — no more auto-zoom on address pick**: user complained "when I click show stays nearby it zooms in". Root cause: the `focusOnUser` prop forced `map.setView(coords, 14)` (street-level zoom) on every address selection. Removed that path. Now picking an address just drops a "you searched here" pin at their existing zoom level — the user's view is respected.
   - **Interaction lock**: added a `hasUserInteractedRef` that flips to `true` on the first `dragstart`/`zoomstart`. Once set, we NEVER programmatically move the view again — new pin sets, filter changes, or address picks all drop pins without hijacking the user's scroll. The `hasFramedRef` guarantees the initial "fit to bounds" happens exactly once so users still land on a sensible frame on first paint.
