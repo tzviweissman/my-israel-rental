@@ -229,8 +229,7 @@ const StaysMapView = ({ properties, userCoords, focusOnUser, displayCurrency }) 
   return (
     <div
       ref={containerRef}
-      className="stays-map w-full rounded-3xl overflow-hidden ring-1 ring-black/5 shadow-[0_10px_40px_-15px_rgba(15,58,58,0.25)]"
-      style={{ height: 'min(78vh, 720px)' }}
+      className="stays-map w-full rounded-3xl overflow-hidden ring-1 ring-black/5 shadow-[0_10px_40px_-15px_rgba(15,58,58,0.25)] h-[380px] sm:h-[520px] md:h-[620px] lg:h-[720px] lg:max-h-[78vh]"
       data-testid="stays-map"
     />
   );

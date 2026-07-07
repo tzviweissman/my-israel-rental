@@ -242,8 +242,7 @@ const ServicesMapView = ({ gigs, userCoords, maxDistanceKm }) => {
   return (
     <div
       ref={containerRef}
-      className="services-map w-full rounded-3xl overflow-hidden ring-1 ring-black/5 shadow-[0_10px_40px_-15px_rgba(15,58,58,0.25)]"
-      style={{ height: 'min(72vh, 640px)' }}
+      className="services-map w-full rounded-3xl overflow-hidden ring-1 ring-black/5 shadow-[0_10px_40px_-15px_rgba(15,58,58,0.25)] h-[360px] sm:h-[480px] md:h-[560px] lg:h-[640px] lg:max-h-[72vh]"
       data-testid="services-map"
     />
   );

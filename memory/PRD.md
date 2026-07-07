@@ -12,6 +12,14 @@ Build a bilingual (English/Hebrew) rental website named MyIsraelRental.com with 
 
 ## What's Been Implemented
 
+- [x] **Responsive map heights for mobile (2026-07-07)**: Both StaysMapView and ServicesMapView used a single `min(78vh, 720px)` inline style which ate ~80% of a phone screen. Swapped to Tailwind step-responsive heights so the map takes a sensible chunk on each device class:
+  - **Stays**: `h-[380px] sm:h-[520px] md:h-[620px] lg:h-[720px] lg:max-h-[78vh]`
+  - **Services**: `h-[360px] sm:h-[480px] md:h-[560px] lg:h-[640px] lg:max-h-[72vh]`
+  - On a 390×800 phone the Stays map now takes 380px (48% of viewport) instead of ~624px (78%), leaving room for the address input, filters, and the top of the results below the fold to be visible without scrolling.
+  - Files: `frontend/src/components/stays/StaysMapView.jsx`, `frontend/src/components/marketplace/ServicesMapView.jsx`.
+
+
+
 - [x] **Autocomplete: full POI coverage for hotels, malls, landmarks (2026-07-07)**:
   - **Root problem**: user typed "waldorf astoria" and got "Nahalat Shiva" — a neighborhood, not the hotel. Two bugs: (1) Nominatim label extractor was pulling `address.neighbourhood` for POI results instead of the POI's own name, (2) fuzzy matcher's 0.55 cutoff let "hilton" fuzz-match "Holon" (ratio 0.727).
   - **POI-aware label extraction**: for Nominatim rows tagged `class ∈ {tourism, amenity, shop, historic, leisure, building, ...}`, primary label is now `row.name` or the first `display_name` segment (the actual POI name), with neighborhood + city as sublabel. For `place`/`boundary` rows the old area-first extraction still applies.
