@@ -385,7 +385,7 @@ const Navigation = () => {
                   {t('nav.login', 'Sign In')}
                 </button>
                 <button
-                  onClick={() => navigate('/auth/signup')}
+                  onClick={() => navigate('/signup')}
                   className="text-xs sm:text-sm font-bold px-3 py-1.5 rounded-full transition-all hover:shadow-md"
                   style={{ backgroundColor: '#D4AF37', color: '#1E6A6A' }}
                   data-testid="nav-signup-top"
@@ -679,7 +679,7 @@ const Navigation = () => {
                         <span className="w-4 h-4 flex items-center justify-center opacity-60 group-hover:opacity-100 text-xs">&#x2192;</span>
                         <span>{t('nav.login')}</span>
                       </button>
-                      <button onClick={() => handleNav('/auth/signup')} className="w-full mt-1 py-2.5 rounded-lg text-sm font-bold tracking-wide transition-all duration-200 hover:shadow-lg" style={{ backgroundColor: '#D4AF37', color: '#1E6A6A' }} data-testid="nav-signup">
+                      <button onClick={() => handleNav('/signup')} className="w-full mt-1 py-2.5 rounded-lg text-sm font-bold tracking-wide transition-all duration-200 hover:shadow-lg" style={{ backgroundColor: '#D4AF37', color: '#1E6A6A' }} data-testid="nav-signup">
                         {t('nav.signup')}
                       </button>
                     </>

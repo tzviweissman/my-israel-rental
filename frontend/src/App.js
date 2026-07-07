@@ -29,6 +29,7 @@ import Properties from './pages/Properties';
 import PropertyDetail from './pages/PropertyDetail';
 import SubleaseDetail from './pages/SubleaseDetail';
 import Auth from './pages/Auth';
+import SignupJoin from './pages/SignupJoin';
 import VerifyPending from './pages/VerifyPending';
 import VerifyEmail from './pages/VerifyEmail';
 import Dashboard from './pages/Dashboard';
@@ -175,6 +176,8 @@ function App() {
             <Route path="/property/:id" element={<PropertyDetail />} />
             <Route path="/sublease/:id" element={<SubleaseDetail />} />
             <Route path="/auth/:mode" element={<Auth />} />
+            <Route path="/signup" element={<SignupJoin />} />
+            <Route path="/join" element={<SignupJoin />} />
             <Route path="/verify-pending" element={<VerifyPending />} />
             <Route path="/verify-email" element={<VerifyEmail />} />
             <Route path="/dashboard" element={user ? <Dashboard /> : <Navigate to="/auth/login" />} />

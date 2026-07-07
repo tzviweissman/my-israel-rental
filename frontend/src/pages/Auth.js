@@ -558,7 +558,7 @@ const Auth = () => {
               return mode === 'login' ? (
                 <p className="text-sm text-gray-600">
                   {t('auth.noAccount')}{' '}
-                  <a href={`/auth/signup${qs}`} className="font-medium" style={{ color: '#1E6A6A' }} data-testid="auth-toggle-link">
+                  <a href={`/signup${qs}`} className="font-medium" style={{ color: '#1E6A6A' }} data-testid="auth-toggle-link">
                     {t('auth.signUpHere')}
                   </a>
                 </p>

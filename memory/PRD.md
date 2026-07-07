@@ -12,6 +12,19 @@ Build a bilingual (English/Hebrew) rental website named MyIsraelRental.com with 
 
 ## What's Been Implemented
 
+- [x] **New dedicated signup page `/signup` (2026-07-07)**:
+  - Route-level page `frontend/src/pages/SignupJoin.jsx` — separate from the existing `/auth/login` screen so the join funnel feels welcoming instead of a stacked form.
+  - 2-step wizard:
+    - **Step 1 — role picker**: three big cards (`Traveler` → `renter`, `Host` → `owner`, `Service Provider` → `provider`) with lucide-react icons (`Plane`, `Home`, `Sparkles`), shadow lift on hover, teal ring + gold check when selected. "Most popular" gold pill on the Traveler card.
+    - **Step 2 — details**: Full name, email, phone (optional), password + confirm with show/hide toggles, T&C checkbox. Back button returns to step 1 preserving selection.
+  - Copy is renter/host/provider-neutral so it reads well without touching internal role names in the DB. Backend still receives `renter`/`owner`/`provider`.
+  - Palette: existing Ocean Teal (#1E6A6A) + Gold (#D4AF37) with a soft sand radial-gradient background so the screen feels distinctly a signup surface without breaking brand.
+  - Post-signup behaviour mirrors `/auth/signup` exactly — renter gets `WelcomePopups`, owner gets `OwnerManagementOfferModal`, provider is routed straight to `/services/create-gig`. Honors `?redirect=…` on completion.
+  - Route also aliased at `/join`.
+  - Nav "Sign Up" button (desktop + mobile) and the "Sign up here" link on the login form now point to `/signup`.
+  - Verified end-to-end: renders on desktop + mobile viewports, step transition works, `POST /api/auth/register` returns `role=renter` + valid token.
+  - Files: `frontend/src/pages/SignupJoin.jsx` (new), `frontend/src/App.js`, `frontend/src/components/Navigation.js`, `frontend/src/pages/Auth.js`.
+
 - [x] **Bugfix: AddressAutocomplete dropdown reopened after pick (2026-07-07)**:
   - User report: "when I type something into the show stays nearby and click the result the dropdown pops down again".
   - Root cause: `pick()` cleared suggestions + closed dropdown, then called `onSelect(hit)` which parents used to write the selected label back into `value`. That value change re-triggered the debounced `useEffect`, which re-fetched suggestions and set `open=true` again ~250ms after the click.
