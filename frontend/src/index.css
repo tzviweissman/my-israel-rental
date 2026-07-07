@@ -129,6 +129,20 @@ code {
    Airbnb-style look. All scoped under `.services-map` and `.stays-map`
    so we don't accidentally restyle any future Leaflet instance.
    -------------------------------------------------------------------- */
+/* Isolate Leaflet's internal stacking context so its panes (which use
+   z-indexes up to 800 for controls) can't punch through the Stay
+   Type dropdown, When calendar popover, filter modal, etc. rendered
+   on the same page. `isolation: isolate` creates a new stacking
+   context anchored at the map container — everything inside plays by
+   z-index rules that are invisible to elements outside. Belt-and-
+   braces: also cap the map container's own z-index at 0 so it can
+   never race the header/nav. */
+.services-map,
+.stays-map {
+    position: relative;
+    z-index: 0;
+    isolation: isolate;
+}
 .services-map .leaflet-container,
 .stays-map .leaflet-container {
     /* Off-white to blend with the CartoDB Voyager tiles until they load
