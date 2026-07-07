@@ -12,6 +12,16 @@ Build a bilingual (English/Hebrew) rental website named MyIsraelRental.com with 
 
 ## What's Been Implemented
 
+- [x] **Mobile floating view toggle (2026-07-07)**: The inline "List / Map" segmented pill next to the address input wrapped onto a second line on <640px screens, cluttering the mobile toolbar. Solution mirrors Airbnb's mobile pattern:
+  - Inline toggle hidden below `sm` breakpoint (`hidden sm:inline-flex`).
+  - New floating FAB at `bottom + safe-area-inset-bottom + var(--bottom-nav-h) + 1.5rem` centered horizontally, dark gray-900 pill with white text. Renders only when `!loading && results > 0`.
+  - Same iOS-safe positioning convention already used by `WhatsAppButton` + `AccessibilityButton` so the FAB never overlaps the home-indicator or a mobile bottom nav bar.
+  - Applied identically to Stays + Services (`stays-view-fab`, `services-view-fab` testids).
+  - Desktop UX unchanged — inline toggle still visible at `sm+`.
+  - Files: `frontend/src/pages/Stays.jsx`, `frontend/src/pages/Services.jsx`.
+
+
+
 - [x] **Responsive map heights for mobile (2026-07-07)**: Both StaysMapView and ServicesMapView used a single `min(78vh, 720px)` inline style which ate ~80% of a phone screen. Swapped to Tailwind step-responsive heights so the map takes a sensible chunk on each device class:
   - **Stays**: `h-[380px] sm:h-[520px] md:h-[620px] lg:h-[720px] lg:max-h-[78vh]`
   - **Services**: `h-[360px] sm:h-[480px] md:h-[560px] lg:h-[640px] lg:max-h-[72vh]`

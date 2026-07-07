@@ -505,7 +505,7 @@ const Services = () => {
                 `?view=map` so shared links can deep-link directly to
                 the map view. */}
             <div
-              className="inline-flex items-center rounded-full border border-gray-200 bg-white p-0.5"
+              className="hidden sm:inline-flex items-center rounded-full border border-gray-200 bg-white p-0.5"
               data-testid="services-view-toggle"
               role="tablist"
               aria-label={t('services.viewToggle', 'View mode')}
@@ -785,6 +785,36 @@ const Services = () => {
             </div>
           </div>
         </div>
+      )}
+
+      {/* Mobile-only floating view toggle — Airbnb-style bottom-center
+          pill that flips between list and map. Complements the inline
+          `sm:inline-flex` toggle inside the toolbar above (which is
+          hidden on mobile) so the mobile toolbar stays clean and the
+          switch remains one-tap discoverable while browsing. */}
+      {!loading && gigs.length > 0 && (
+        <button
+          type="button"
+          onClick={() => patchUrl({ view: viewMode === 'map' ? '' : 'map' })}
+          className="sm:hidden fixed start-1/2 -translate-x-1/2 z-40 inline-flex items-center gap-2 rounded-full bg-gray-900 text-white px-4 py-2.5 text-sm font-semibold shadow-[0_10px_25px_-5px_rgba(0,0,0,0.35)] hover:bg-gray-800 active:scale-95 transition-transform"
+          style={{
+            bottom: 'calc(env(safe-area-inset-bottom, 0px) + var(--bottom-nav-h, 0px) + 1.5rem)',
+          }}
+          data-testid="services-view-fab"
+          aria-label={viewMode === 'map' ? t('services.viewList', 'Show list') : t('services.viewMap', 'Show map')}
+        >
+          {viewMode === 'map' ? (
+            <>
+              <LayoutGrid size={14} />
+              {t('services.viewList', 'List')}
+            </>
+          ) : (
+            <>
+              <MapIcon size={14} />
+              {t('services.viewMap', 'Map')}
+            </>
+          )}
+        </button>
       )}
     </div>
   );

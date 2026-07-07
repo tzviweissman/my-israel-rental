@@ -471,7 +471,7 @@ const Stays = ({ landing = null }) => {
               testId="stays-near"
             />
             <div
-              className="inline-flex items-center rounded-full border border-gray-200 bg-white p-0.5 shrink-0"
+              className="hidden sm:inline-flex items-center rounded-full border border-gray-200 bg-white p-0.5 shrink-0"
               role="tablist"
               aria-label={t('stays.viewToggle', 'View mode')}
               data-testid="stays-view-toggle"
@@ -711,6 +711,48 @@ const Stays = ({ landing = null }) => {
           totalCount={filtered.length}
           t={t}
         />
+      )}
+
+      {/* Mobile-only floating view toggle — Airbnb-style bottom-center
+          pill that flips between list and map. The inline `sm:inline-flex`
+          toggle inside the search bar row is hidden below the `sm`
+          breakpoint precisely because this element takes over on mobile,
+          giving the address input a full clean row of its own.
+
+          Positioned above the mobile bottom-nav (~64px tall) so it never
+          overlaps our persistent nav bar, and only rendered when there
+          are actually results to switch between. */}
+      {!loading && filtered.length > 0 && (
+        <button
+          type="button"
+          onClick={() => setSearchParams((prev) => {
+            const n = new URLSearchParams(prev);
+            if (viewMode === 'map') n.delete('view'); else n.set('view', 'map');
+            return n;
+          }, { replace: true })}
+          className="sm:hidden fixed start-1/2 -translate-x-1/2 z-40 inline-flex items-center gap-2 rounded-full bg-gray-900 text-white px-4 py-2.5 text-sm font-semibold shadow-[0_10px_25px_-5px_rgba(0,0,0,0.35)] hover:bg-gray-800 active:scale-95 transition-transform"
+          style={{
+            // Match AccessibilityButton / WhatsAppButton positioning:
+            // clear the iOS home-indicator + any mobile bottom nav +
+            // a comfortable thumb-reach margin. Users who tap the FAB
+            // never accidentally hit the nav bar behind it.
+            bottom: 'calc(env(safe-area-inset-bottom, 0px) + var(--bottom-nav-h, 0px) + 1.5rem)',
+          }}
+          data-testid="stays-view-fab"
+          aria-label={viewMode === 'map' ? t('stays.viewList', 'Show list') : t('stays.viewMap', 'Show map')}
+        >
+          {viewMode === 'map' ? (
+            <>
+              <LayoutGrid size={14} />
+              {t('stays.viewList', 'List')}
+            </>
+          ) : (
+            <>
+              <MapIcon size={14} />
+              {t('stays.viewMap', 'Map')}
+            </>
+          )}
+        </button>
       )}
     </div>
   );
