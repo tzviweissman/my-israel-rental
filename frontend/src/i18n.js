@@ -633,6 +633,41 @@ const resources = {
         phone: 'Phone',
         faq: 'Frequently Asked Questions'
       },
+      signupJoin: {
+        headline: 'Join My Israel Rental',
+        sub: 'Plan your perfect Israel trip — stays & local services in one place.',
+        question: 'What best describes you?',
+        stepRole: 'YOUR ROLE',
+        stepDetails: 'YOUR DETAILS',
+        traveler: 'Traveler',
+        travelerDesc: 'I want to book stays and hire local services for my trip',
+        travelerBadge: 'Most popular',
+        host: 'Host',
+        hostDesc: 'I want to list my vacation rental or property',
+        provider: 'Service Provider',
+        providerDesc: 'Cleaner, mover, tour guide, or any local service',
+        selected: 'Selected',
+        chooseThis: 'Choose this',
+        roleHint: 'You can always add another role later from your account settings.',
+        continue: 'Continue',
+        haveAccount: 'Already have an account?',
+        logIn: 'Log in',
+        back: 'Back to role',
+        signingUpAs: 'Signing up as',
+        detailsHeadline: 'Create your account',
+        detailsSub: "We'll only email you about your account and listings you care about.",
+        fullName: 'Full name',
+        fullNamePh: 'Jane Doe',
+        email: 'Email',
+        phone: 'Phone',
+        password: 'Password',
+        passwordPh: 'At least 6 characters',
+        confirmPassword: 'Confirm password',
+        agree: 'I agree to the',
+        terms: 'Terms & Privacy Policy',
+        creating: 'Creating your account…',
+        createAccount: 'Create account'
+      },
       common: {
         cancel: 'Cancel',
         confirm: 'Confirm',
@@ -1613,6 +1648,41 @@ const resources = {
         phone: 'טלפון',
         faq: 'שאלות נפוצות'
       },
+      signupJoin: {
+        headline: 'הצטרפו ל-My Israel Rental',
+        sub: 'תכננו את הטיול המושלם בישראל — לינה ושירותים מקומיים במקום אחד.',
+        question: 'מה מתאר אתכם הכי טוב?',
+        stepRole: 'התפקיד שלכם',
+        stepDetails: 'הפרטים שלכם',
+        traveler: 'מטייל',
+        travelerDesc: 'אני רוצה להזמין לינה ולשכור שירותים מקומיים לטיול',
+        travelerBadge: 'הכי פופולרי',
+        host: 'מארח',
+        hostDesc: 'אני רוצה לפרסם דירת נופש או נכס',
+        provider: 'ספק שירות',
+        providerDesc: 'ניקיון, הובלה, מדריך טיולים או כל שירות מקומי',
+        selected: 'נבחר',
+        chooseThis: 'בחרו זה',
+        roleHint: 'תמיד אפשר להוסיף תפקיד נוסף מהגדרות החשבון.',
+        continue: 'המשך',
+        haveAccount: 'כבר יש לכם חשבון?',
+        logIn: 'התחברות',
+        back: 'חזרה לבחירת תפקיד',
+        signingUpAs: 'נרשם/ת בתור',
+        detailsHeadline: 'צרו את החשבון שלכם',
+        detailsSub: 'נשלח לכם מיילים רק על החשבון והרישומים שחשובים לכם.',
+        fullName: 'שם מלא',
+        fullNamePh: 'ישראל ישראלי',
+        email: 'אימייל',
+        phone: 'טלפון',
+        password: 'סיסמה',
+        passwordPh: 'לפחות 6 תווים',
+        confirmPassword: 'אימות סיסמה',
+        agree: 'אני מסכים/ה ל',
+        terms: 'תנאי השימוש ומדיניות הפרטיות',
+        creating: '...יוצר את החשבון שלכם',
+        createAccount: 'צור חשבון'
+      },
       common: {
         cancel: 'ביטול',
         confirm: 'אישור',
@@ -1973,21 +2043,18 @@ i18n
   });
 
 // ---------------------------------------------------------------------------
-// RTL / LTR direction sync — flip the document direction whenever the user
-// switches to Hebrew (or any other RTL locale we may add later). Without
-// this, the strings render in Hebrew but the layout stays LTR — search
-// pills, chips, calendars all read left-to-right, which feels wrong to a
-// native Hebrew speaker. Setting `dir="rtl"` on <html> tells the browser
-// to flip text-alignment, flex/grid order, and even animation direction
-// for everything downstream automatically.
+// Language sync — set the <html lang> attribute so screen readers /
+// browser translation heuristics pick up the switch. We intentionally
+// force `dir="ltr"` for all locales (Hebrew included) because the user
+// asked the layout to stay put when switching to Hebrew — only the
+// words change, chips/cards/calendars stay in their LTR positions.
+// Removing this would re-flip everything on `he`.
 // ---------------------------------------------------------------------------
-const RTL_LOCALES = new Set(['he', 'ar', 'fa', 'ur']);
 const applyLocaleDir = (lng) => {
   if (typeof document === 'undefined') return;
   const lang = (lng || 'en').split('-')[0];
-  const dir = RTL_LOCALES.has(lang) ? 'rtl' : 'ltr';
   document.documentElement.setAttribute('lang', lang);
-  document.documentElement.setAttribute('dir', dir);
+  document.documentElement.setAttribute('dir', 'ltr');
 };
 applyLocaleDir(i18n.language);
 i18n.on('languageChanged', applyLocaleDir);
