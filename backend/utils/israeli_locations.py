@@ -153,6 +153,48 @@ _LANDMARKS: list[tuple[str, str, float, float]] = [
     ("Old Jaffa Port", "Tel Aviv", 32.0520, 34.7501),
     ("Dolphinarium Beach", "Tel Aviv", 32.0693, 34.7627),
 ]
+# Popular hotels — these are searched by exact name far more often than
+# their generic neighborhood, so we curate them for zero-latency hits.
+# Coords verified against Nominatim.
+_HOTELS: list[tuple[str, str, float, float]] = [
+    ("King David Hotel", "Jerusalem", 31.7752, 35.2246),
+    ("Waldorf Astoria Jerusalem", "Jerusalem", 31.7772, 35.2251),
+    ("Mamilla Hotel", "Jerusalem", 31.7772, 35.2287),
+    ("The Inbal Jerusalem Hotel", "Jerusalem", 31.7716, 35.2224),
+    ("David Citadel Hotel", "Jerusalem", 31.7793, 35.2265),
+    ("Dan Panorama Jerusalem", "Jerusalem", 31.7752, 35.2196),
+    ("Leonardo Plaza Jerusalem", "Jerusalem", 31.7803, 35.2170),
+    ("Herbert Samuel Jerusalem", "Jerusalem", 31.7842, 35.2222),
+    ("Abraham Hostel Jerusalem", "Jerusalem", 31.7855, 35.2189),
+    ("Notre Dame of Jerusalem", "Jerusalem", 31.7818, 35.2288),
+    ("YMCA Jerusalem (Three Arches)", "Jerusalem", 31.7754, 35.2216),
+    ("Hilton Tel Aviv", "Tel Aviv", 32.0871, 34.7671),
+    ("Dan Tel Aviv", "Tel Aviv", 32.0821, 34.7688),
+    ("Sheraton Tel Aviv", "Tel Aviv", 32.0801, 34.7688),
+    ("David InterContinental Tel Aviv", "Tel Aviv", 32.0674, 34.7605),
+    ("Isrotel Tower Tel Aviv", "Tel Aviv", 32.0895, 34.7729),
+    ("Carlton Tel Aviv", "Tel Aviv", 32.0947, 34.7745),
+    ("Norman Tel Aviv", "Tel Aviv", 32.0785, 34.7756),
+    ("Poli House Tel Aviv", "Tel Aviv", 32.0700, 34.7702),
+    ("Brown TLV", "Tel Aviv", 32.0658, 34.7727),
+    ("Isrotel King Solomon Eilat", "Eilat", 29.5518, 34.9550),
+    ("Herods Palace Eilat", "Eilat", 29.5486, 34.9563),
+    ("Leonardo Plaza Eilat", "Eilat", 29.5544, 34.9525),
+    ("Dan Eilat", "Eilat", 29.5511, 34.9539),
+    ("Royal Beach Eilat", "Eilat", 29.5510, 34.9550),
+]
+
+# Popular malls + markets — Google Maps users search these by name.
+_SHOPPING: list[tuple[str, str, float, float]] = [
+    ("Mamilla Mall", "Jerusalem", 31.7767, 35.2280),
+    ("Malha Mall", "Jerusalem", 31.7511, 35.1875),
+    ("Ramat Aviv Mall", "Tel Aviv", 32.1130, 34.8028),
+    ("Dizengoff Center", "Tel Aviv", 32.0757, 34.7756),
+    ("Azrieli Mall", "Tel Aviv", 32.0738, 34.7920),
+    ("TLV Fashion Mall", "Tel Aviv", 32.0554, 34.7810),
+    ("Grand Kanyon Haifa", "Haifa", 32.7860, 35.0223),
+    ("Ice Mall Eilat", "Eilat", 29.5528, 34.9584),
+]
 # fmt: on
 
 
@@ -185,6 +227,12 @@ def _build_index() -> list[tuple[str, str, str, float, float, int]]:
     for label, city, lat, lng in _JLM_NBRHDS + _TLV_NBRHDS + _HAI_NBRHDS:
         for alias in _aliases_for_label(label):
             rows.append((alias, label, city, lat, lng, 2))
+    # Hotels + shopping — high priority because users search these by
+    # exact brand name ("Waldorf", "Mamilla Mall") and are almost never
+    # looking for the surrounding neighborhood instead.
+    for label, city, lat, lng in _HOTELS + _SHOPPING:
+        for alias in _aliases_for_label(label):
+            rows.append((alias, label, city, lat, lng, 3))
     for label, sub, lat, lng in _LANDMARKS:
         for alias in _aliases_for_label(label):
             rows.append((alias, label, sub, lat, lng, 1))
@@ -221,10 +269,12 @@ def fuzzy_suggest(query: str, limit: int = 5) -> list[dict]:
         return [_row_to_dict(row) for row, _ in starts[:limit]]
 
     # Longer queries — use difflib's normalized similarity ratio.
-    # `get_close_matches` returns aliases in ranked order; then we
-    # re-rank by adding the entry's own priority boost so cities
-    # outrank neighborhoods when they're both a similar match.
-    close = difflib.get_close_matches(q, _ALIASES, n=limit * 3, cutoff=0.55)
+    # Cutoff at 0.78: strict enough that "hilton" no longer fuzz-matches
+    # "Holon" (0.727) or "mamilla" → "Ramla" (0.667), but lenient enough
+    # to keep the typo case working — "rehavya" → "Rehavia" is 0.857 and
+    # "rehav" → "Rehavia" is 0.833. Anything weaker is punted to Nominatim
+    # which has real POI + hotel + landmark data our curated set doesn't.
+    close = difflib.get_close_matches(q, _ALIASES, n=limit * 3, cutoff=0.78)
     scored: list[tuple[tuple[str, str, str, float, float, int], float]] = []
     seen_labels: set[str] = set()
     for alias in close:

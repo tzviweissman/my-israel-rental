@@ -12,6 +12,17 @@ Build a bilingual (English/Hebrew) rental website named MyIsraelRental.com with 
 
 ## What's Been Implemented
 
+- [x] **Autocomplete: full POI coverage for hotels, malls, landmarks (2026-07-07)**:
+  - **Root problem**: user typed "waldorf astoria" and got "Nahalat Shiva" — a neighborhood, not the hotel. Two bugs: (1) Nominatim label extractor was pulling `address.neighbourhood` for POI results instead of the POI's own name, (2) fuzzy matcher's 0.55 cutoff let "hilton" fuzz-match "Holon" (ratio 0.727).
+  - **POI-aware label extraction**: for Nominatim rows tagged `class ∈ {tourism, amenity, shop, historic, leisure, building, ...}`, primary label is now `row.name` or the first `display_name` segment (the actual POI name), with neighborhood + city as sublabel. For `place`/`boundary` rows the old area-first extraction still applies.
+  - **POI-first ranking**: OSM results are re-sorted so tagged POIs (hotels, malls, museums, markets) surface above generic neighborhoods with `_boost=2`. Nominatim's default `importance` score doesn't do this consistently for Israeli data.
+  - **Fuzzy cutoff raised to 0.78**: "hilton" no longer matches "Holon" (0.727) or "mamilla" → "Ramla" (0.667). Typo case still works — "rehavya" → "Rehavia" is 0.857, "rehav" → "Rehavia" is 0.833.
+  - **Expanded curated dataset**: 25 famous hotels (Waldorf Astoria Jerusalem, King David Hotel, Inbal, Mamilla, David Citadel, Hilton Tel Aviv, Dan Tel Aviv, Sheraton, InterContinental, Norman, Brown TLV, Isrotel/Herods/Dan/Royal Beach Eilat, etc.) + 8 malls (Mamilla Mall, Malha Mall, Ramat Aviv Mall, Dizengoff Center, Azrieli, TLV Fashion, Grand Kanyon Haifa, Ice Mall Eilat). All aliased so `_aliases_for_label()` still surfaces the parenthetical + partial forms.
+  - **Verified live**: "waldorf" / "waldorf astoria" → Waldorf Astoria Jerusalem #1. "king david" → King David Hotel #1. "hilton" → Hilton Tel Aviv (no Holon). "mamilla" → Mamilla Hotel/Mall/Pool. "sheraton", "brown", "leonardo", "isrotel" all resolve correctly. Typo tests ("rehavya", "kotel") still pass.
+  - Files: `backend/utils/israeli_locations.py` (added `_HOTELS` + `_SHOPPING`), `backend/utils/geocode.py` (POI-aware extractor + POI-first sort).
+
+
+
 - [x] **Google-Maps-style autocomplete for Stays + Services search (2026-07-07)**:
   - **Root problem**: users who misspelled search queries got zero results ("rehavya" → nothing found), and Nominatim's own autocomplete is weak for partial spellings + blocked from our container network. Users had no way to recover from typos.
   - **Curated dataset** (`backend/utils/israeli_locations.py`): ~150 hand-picked Israeli locations — top 45 cities, 28 Jerusalem neighborhoods, 22 Tel Aviv neighborhoods + landmarks, 6 Haifa neighborhoods, 20 landmarks (Kotel, Machane Yehuda, Ben Gurion Airport, Weizmann, Knesset, etc.) with verified coords. Parenthetical aliases (e.g. `Western Wall (Kotel)`) exploded so both "kotel" and "western wall" match.

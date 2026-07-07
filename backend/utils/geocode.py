@@ -218,7 +218,9 @@ async def suggest_areas(query_text: str, limit: int = 5) -> list[dict]:
     params = {
         "q": query.replace(",", " ") + " Israel",
         "format": "json",
-        "limit": max(1, min(limit, 8)),
+        # Fetch a few extras so the POI-boost pass below has room to
+        # reorder — the client still only sees `limit` in the end.
+        "limit": max(3, min(limit * 2, 12)),
         "countrycodes": "il",
         "addressdetails": 1,
     }
@@ -241,29 +243,72 @@ async def suggest_areas(query_text: str, limit: int = 5) -> list[dict]:
         except (KeyError, ValueError, TypeError):
             continue
         addr = row.get("address") or {}
-        primary = (
-            addr.get("neighbourhood")
-            or addr.get("suburb")
-            or addr.get("quarter")
-            or addr.get("city")
-            or addr.get("town")
-            or addr.get("village")
-            or addr.get("road")
-            or row.get("name")
-            or (row.get("display_name") or "").split(",")[0].strip()
+        cls = (row.get("class") or "").lower()
+        typ = (row.get("type") or "").lower()
+
+        # POI vs. area: Nominatim tags concrete places (hotels, malls,
+        # museums, restaurants, universities, hospitals, parks) with a
+        # non-`place`/`boundary` class. For those the interesting label
+        # is the POI's own name — NOT the neighbourhood it sits in.
+        # That's the fix for "Waldorf Astoria → Nahalat Shiva" — the
+        # earlier extractor threw away the hotel name because it
+        # preferred the geographic parent.
+        is_poi = cls in {
+            "tourism", "amenity", "shop", "historic", "leisure",
+            "building", "office", "man_made", "railway", "aeroway", "sport",
+        }
+
+        # First `display_name` segment is almost always the human-friendly
+        # POI or place label (in English when `Accept-Language: en` is set).
+        display_first = (row.get("display_name") or "").split(",")[0].strip()
+
+        if is_poi:
+            primary = row.get("name") or display_first
+            # Parent line for POIs: neighborhood + city, deduped.
+            parent_bits = [
+                addr.get("neighbourhood") or addr.get("suburb") or addr.get("quarter") or "",
+                addr.get("city") or addr.get("town") or addr.get("village") or "",
+            ]
+        else:
+            primary = (
+                addr.get("neighbourhood")
+                or addr.get("suburb")
+                or addr.get("quarter")
+                or addr.get("city")
+                or addr.get("town")
+                or addr.get("village")
+                or addr.get("road")
+                or row.get("name")
+                or display_first
+            )
+            parent_bits = [
+                addr.get("city") or addr.get("town") or addr.get("village") or "",
+                addr.get("county") or addr.get("state") or "",
+            ]
+
+        # Dedup parent: drop bits that equal the primary label or are
+        # empty. Prevents "Rehavia · Rehavia · Jerusalem District".
+        parent = ", ".join(
+            b for b in parent_bits if b and b.strip() and b != primary
         )
-        parent_bits = [
-            addr.get("city") or addr.get("town") or addr.get("village") or "",
-            addr.get("county") or addr.get("state") or "",
-        ]
-        parent = ", ".join([b for b in parent_bits if b and b != primary])
         osm_results.append({
             "label": primary,
             "sublabel": parent or (row.get("display_name") or "").split(",", 1)[-1].strip(),
             "lat": lat,
             "lng": lng,
-            "type": "osm",
+            "type": typ or cls,
+            # Internal ranking hint — POIs (hotels, malls, museums,
+            # markets) get pushed above generic neighborhoods, since a
+            # user typing "waldorf" or "mahane yehuda" is almost always
+            # looking for the specific place, not the surrounding area.
+            "_boost": 2 if is_poi else 0,
         })
+
+    # Re-rank so real places (hotels/POIs) surface above vague
+    # neighborhood/area matches — Nominatim's default `importance`
+    # score doesn't do this consistently for Israeli data. Stable
+    # sort preserves the original order among ties.
+    osm_results.sort(key=lambda r: -r.pop("_boost", 0))
 
     await db.geocode_cache.update_one(
         {"_id": cache_id},
