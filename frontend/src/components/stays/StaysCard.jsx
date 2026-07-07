@@ -81,7 +81,21 @@ const StaysCard = ({
       </div>
       <div className="pt-2 px-0.5">
         <p className="font-semibold text-sm text-gray-900 truncate">{property.title}</p>
-        <p className="text-xs text-gray-500 truncate">{property.area}</p>
+        <p className="text-xs text-gray-500 truncate">
+          {property.area}
+          {/* Distance chip — only when the parent has stamped
+              `distance_km` (i.e. renter picked an address). Colored
+              teal so it reads as an actionable data point rather than
+              just decoration; the chip auto-picks between "m" and
+              "km" so 640 m stays readable and 12 km isn't over-precise. */}
+          {typeof property.distance_km === 'number' && (
+            <span className="ms-1 inline-flex items-center gap-0.5 text-[10px] text-[#1E6A6A] font-semibold">
+              · {property.distance_km < 1
+                ? `${Math.round(property.distance_km * 1000)} m`
+                : `${property.distance_km.toFixed(property.distance_km < 10 ? 1 : 0)} km`}
+            </span>
+          )}
+        </p>
         {price ? (
           <>
             <p className="text-xs mt-0.5 text-gray-900">

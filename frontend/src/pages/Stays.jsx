@@ -669,7 +669,16 @@ const Stays = ({ landing = null }) => {
                       />
                       <div className="px-2 py-1.5">
                         <div className="text-[11px] font-semibold text-gray-900 truncate">{p.title || 'Property'}</div>
-                        <div className="text-[10px] text-gray-500 truncate">{price}</div>
+                        <div className="text-[10px] text-gray-500 truncate">
+                          {price}
+                          {typeof p.distance_km === 'number' && (
+                            <span className="ms-1 text-[#1E6A6A] font-semibold">
+                              · {p.distance_km < 1
+                                ? `${Math.round(p.distance_km * 1000)} m`
+                                : `${p.distance_km.toFixed(p.distance_km < 10 ? 1 : 0)} km`}
+                            </span>
+                          )}
+                        </div>
                       </div>
                     </button>
                   );

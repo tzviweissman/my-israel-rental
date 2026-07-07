@@ -51,12 +51,21 @@ const AddressAutocomplete = ({
   const wrapRef = useRef(null);
   const debounceRef = useRef(0);
   const requestIdRef = useRef(0);
+  // After picking a suggestion, the parent typically writes the label
+  // back into `value` which would retrigger the debounced fetch and
+  // pop the dropdown open again. This ref suppresses exactly one
+  // fetch cycle following a pick so the dropdown stays closed.
+  const suppressNextFetchRef = useRef(false);
 
   // Debounced fetch. The `requestIdRef` guards against a slow older
   // request landing after a newer one — without it, a quick typist
   // could see stale suggestions if two responses arrive out of order.
   useEffect(() => {
     if (debounceRef.current) window.clearTimeout(debounceRef.current);
+    if (suppressNextFetchRef.current) {
+      suppressNextFetchRef.current = false;
+      return undefined;
+    }
     const q = (value || '').trim();
     if (q.length < 2) {
       setSuggestions([]);
@@ -98,8 +107,10 @@ const AddressAutocomplete = ({
   }, [open]);
 
   const pick = (hit) => {
+    suppressNextFetchRef.current = true;
     setOpen(false);
     setSuggestions([]);
+    setHighlight(-1);
     onSelect(hit);
   };
 

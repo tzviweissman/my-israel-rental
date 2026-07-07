@@ -12,6 +12,13 @@ Build a bilingual (English/Hebrew) rental website named MyIsraelRental.com with 
 
 ## What's Been Implemented
 
+- [x] **Bugfix: AddressAutocomplete dropdown reopened after pick (2026-07-07)**:
+  - User report: "when I type something into the show stays nearby and click the result the dropdown pops down again".
+  - Root cause: `pick()` cleared suggestions + closed dropdown, then called `onSelect(hit)` which parents used to write the selected label back into `value`. That value change re-triggered the debounced `useEffect`, which re-fetched suggestions and set `open=true` again ~250ms after the click.
+  - Fix in `frontend/src/components/common/AddressAutocomplete.jsx`: added `suppressNextFetchRef` — set to true in `pick()`, checked (and reset) at the top of the fetch effect so exactly one value-change cycle is skipped after a pick.
+  - Also reset `highlight` to -1 on pick so the next fresh search starts clean.
+  - Verified with Playwright: after typing "waldorf" and clicking "Waldorf Astoria Jerusalem", dropdown count → 0 and stays 0 through 3.5s post-click.
+
 - [x] **Nearby density bar (2026-07-07)**: One-line summary of how many results sit within common distance bands from the renter's searched address. Answers "is this area dense enough for me?" without them having to zoom out and count pins.
   - New reusable component `frontend/src/components/common/NearbyDensityBar.jsx`. Takes an `items` array with `distance_km` fields (already computed by the parent's haversine sort) — zero new API calls.
   - Renders as a glass-morphism pill: `🚶 N within walking · 📍 N within 3 km · 🏢 N total`. The "walking" chip only appears when count > 0 so we don't show `🚶 0 within walking` noise; the "3 km" chip only appears when it's strictly more than the walking count.
