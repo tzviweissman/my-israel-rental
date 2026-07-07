@@ -85,11 +85,25 @@ const priceLabel = (p) => {
   return `${s}${Math.round(nightly)}`;
 };
 
-const StaysMapView = ({ properties, userCoords, focusOnUser, displayCurrency }) => {
+const StaysMapView = ({ properties, userCoords, focusOnUser, displayCurrency, activeId, onPinClick }) => {
   const navigate = useNavigate();
   const containerRef = useRef(null);
   const mapRef = useRef(null);
   const layerRef = useRef(null);
+  // Once the user pans / zooms the map manually we STOP moving the
+  // view programmatically. Address selections then drop a "you
+  // searched here" pin without hijacking whatever the user was
+  // looking at — the direct fix for "don't zoom in when I search
+  // nearby". Only the very first render frames the view.
+  const hasUserInteractedRef = useRef(false);
+  const hasFramedRef = useRef(false);
+  const markersByIdRef = useRef(new Map());
+  // Stash the callback in a ref so the pin-click handler always sees
+  // the latest without needing to appear in the pin-effect dep array
+  // (adding it there would rebuild the entire marker layer on every
+  // parent re-render — janky when the parent re-renders often).
+  const onPinClickRef = useRef(onPinClick);
+  useEffect(() => { onPinClickRef.current = onPinClick; }, [onPinClick]);
 
   const pinRows = properties.filter(
     (p) => typeof p.lat === 'number' && typeof p.lng === 'number',
@@ -122,10 +136,16 @@ const StaysMapView = ({ properties, userCoords, focusOnUser, displayCurrency }) 
       keepBuffer: 4,
     }).addTo(map);
     mapRef.current = map;
+    // The moment the user grabs the map (drag) or scrolls it (zoom)
+    // we lock our programmatic recentering out — see hasUserInteractedRef.
+    map.on('dragstart zoomstart', () => {
+      hasUserInteractedRef.current = true;
+    });
     return () => {
       map.remove();
       mapRef.current = null;
       layerRef.current = null;
+      markersByIdRef.current = new Map();
     };
   }, []);
 
@@ -141,6 +161,7 @@ const StaysMapView = ({ properties, userCoords, focusOnUser, displayCurrency }) 
     }
     const group = L.layerGroup().addTo(map);
     layerRef.current = group;
+    markersByIdRef.current = new Map();
 
     // Vacation + short-term listings priced in the top 25% of the
     // filtered set get a gold pin — a subtle visual cue that these are
@@ -183,6 +204,11 @@ const StaysMapView = ({ properties, userCoords, focusOnUser, displayCurrency }) 
           </button>
         </div>`;
       marker.bindPopup(html, { closeButton: false, minWidth: 220 });
+      // Every pin click echoes up to the parent so the peek-strip can
+      // scroll the matching card into view + light it up. `preventOpen`
+      // isn't a Leaflet API — instead we let the popup open normally
+      // AND bubble the id so both affordances stay in sync.
+      marker.on('click', () => { onPinClickRef.current?.(p.id); });
       marker.on('popupopen', (e) => {
         const el = e.popup.getElement();
         if (!el) return;
@@ -193,6 +219,7 @@ const StaysMapView = ({ properties, userCoords, focusOnUser, displayCurrency }) 
           });
         });
       });
+      markersByIdRef.current.set(p.id, marker);
       points.push([p.lat, p.lng]);
     }
 
@@ -203,28 +230,54 @@ const StaysMapView = ({ properties, userCoords, focusOnUser, displayCurrency }) 
       points.push([userCoords.lat, userCoords.lng]);
     }
 
-    // Framing: prefer the user's search point if they gave us one,
-    // otherwise fit to all pins. Falls back to the Israel bounding box
-    // when the map opens with nothing plotted (still nicer than the
-    // Leaflet default of centering on the Atlantic).
-    if (focusOnUser && userCoords) {
-      map.setView([userCoords.lat, userCoords.lng], 14);
-    } else if (points.length === 0) {
-      map.fitBounds(ISRAEL_BOUNDS, { padding: [24, 24] });
-    } else if (points.length === 1) {
-      map.setView(points[0], 13);
-    } else {
-      map.fitBounds(
-        L.latLngBounds(points.map(([lat, lng]) => L.latLng(lat, lng))),
-        { padding: [48, 48], maxZoom: 14 },
-      );
+    // Framing rules:
+    //   • Once the user has panned or zoomed manually, we never
+    //     move the view again. Explicit fix for "don't zoom in when
+    //     I search stays nearby" — a new address pin drops in place,
+    //     but their existing pan/zoom is respected.
+    //   • On the very first paint (before any interaction) we frame
+    //     the map: fit to all pins, or the Israel bounding box when
+    //     empty. `hasFramedRef` guards against re-framing on data
+    //     refresh even if the user hasn't yet interacted — otherwise
+    //     an admin editing a listing would see the map jump every
+    //     time the WebSocket delivered fresh inventory.
+    if (hasUserInteractedRef.current) {
+      // No-op: the user has taken control.
+    } else if (!hasFramedRef.current) {
+      hasFramedRef.current = true;
+      if (points.length === 0) {
+        map.fitBounds(ISRAEL_BOUNDS, { padding: [24, 24] });
+      } else if (points.length === 1) {
+        map.setView(points[0], 13);
+      } else {
+        map.fitBounds(
+          L.latLngBounds(points.map(([lat, lng]) => L.latLng(lat, lng))),
+          { padding: [48, 48], maxZoom: 14 },
+        );
+      }
     }
+    // `focusOnUser` is intentionally NOT honoured here anymore — the
+    // request "don't zoom in when I click Show stays nearby" is the
+    // whole reason we moved to interaction-locked framing. The user
+    // pin is drawn above; framing happens only on first paint.
   }, [
     // Serialize a compact projection so we re-run only when the pin set
     // actually changes, not on every parent re-render.
     JSON.stringify(pinRows.map((p) => [p.id, p.lat, p.lng, p.nightly_price, p.monthly_price])),
     userCoords?.lat, userCoords?.lng, focusOnUser, displayCurrency, navigate,
   ]);
+
+  // Open the matching marker's popup whenever the peek strip / list
+  // highlights a card. Keeping this in its own effect means we never
+  // tear down and rebuild the pin layer just because a card was
+  // hovered — critical for smooth map ↔ list cross-linking.
+  useEffect(() => {
+    if (!activeId) return;
+    const marker = markersByIdRef.current.get(activeId);
+    if (marker && !marker.isPopupOpen?.()) {
+      marker.openPopup();
+    }
+  }, [activeId]);
 
   return (
     <div

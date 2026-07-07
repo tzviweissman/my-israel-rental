@@ -156,6 +156,15 @@ const Services = () => {
   // show in the "Showing services near X" chip. Cleared on tab close.
   const [nearAddrInput, setNearAddrInput] = useState('');
   const [nearAddrLabel, setNearAddrLabel] = useState('');
+
+  // Cross-highlight state, same pattern as Stays — pin click → this id,
+  // peek strip watches for it, scrolls the matching card into view.
+  const [activeMapId, setActiveMapId] = useState(null);
+  useEffect(() => {
+    if (!activeMapId) return undefined;
+    const clr = setTimeout(() => setActiveMapId(null), 4000);
+    return () => clearTimeout(clr);
+  }, [activeMapId]);
   // Permission-denied recovery modal — surfaced when the browser blocks
   // the geolocation prompt (typically because the user hit "Never allow"
   // earlier). Shows OS-specific instructions to unblock + a retry button.
@@ -709,6 +718,8 @@ const Services = () => {
               gigs={gigs}
               userCoords={nearby && coords ? coords : null}
               maxDistanceKm={nearby && coords ? maxDistance : ''}
+              activeId={activeMapId}
+              onPinClick={setActiveMapId}
             />
             {/* Mobile-only peekable sheet — mirrors the Stays pattern
                 so renters can glance at gig cards without leaving the
@@ -732,12 +743,28 @@ const Services = () => {
                     const price = gig.tiers?.[0]?.price
                       ? `₪${Math.round(gig.tiers[0].price)}`
                       : '';
+                    const isActive = gig.id === activeMapId;
                     return (
                       <button
                         key={gig.id}
                         type="button"
-                        onClick={() => navigate(`/services/gig/${gig.id}`)}
-                        className="shrink-0 w-[168px] rounded-xl overflow-hidden ring-1 ring-black/5 bg-white text-start active:scale-95 transition-transform"
+                        ref={(el) => {
+                          if (isActive && el) {
+                            el.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+                          }
+                        }}
+                        onClick={() => {
+                          setActiveMapId(gig.id);
+                          if (activeMapId === gig.id) {
+                            navigate(`/services/gig/${gig.id}`);
+                          }
+                        }}
+                        className={`shrink-0 w-[168px] rounded-xl overflow-hidden bg-white text-start active:scale-95 transition-all ${
+                          isActive
+                            ? 'ring-2 ring-[#1E6A6A] shadow-[0_10px_20px_-8px_rgba(30,106,106,0.5)] scale-[1.03]'
+                            : 'ring-1 ring-black/5'
+                        }`}
+                        data-testid={`services-peek-card-${gig.id}`}
                       >
                         <div
                           className="h-[76px] bg-gray-100"

@@ -116,6 +116,17 @@ const Stays = ({ landing = null }) => {
   const [nearBusy, setNearBusy] = useState(false);
   const [nearInput, setNearInput] = useState(searchParams.get('near') || '');
 
+  // Cross-highlight between the map and the peek strip / list. When
+  // a pin is tapped we bounce the id up here so the card can scroll
+  // itself into view and paint a subtle ring. Clears after 4s so a
+  // stale focus doesn't linger while the user browses elsewhere.
+  const [activeMapId, setActiveMapId] = useState(null);
+  useEffect(() => {
+    if (!activeMapId) return undefined;
+    const clr = setTimeout(() => setActiveMapId(null), 4000);
+    return () => clearTimeout(clr);
+  }, [activeMapId]);
+
   // Load every non-storage property once. Volume is in the low thousands
   // so a single fetch + client-side filter beats round-tripping each query.
   useEffect(() => {
@@ -576,6 +587,8 @@ const Stays = ({ landing = null }) => {
             userCoords={nearCoords}
             focusOnUser={Boolean(nearCoords)}
             displayCurrency={priceCurrency}
+            activeId={activeMapId}
+            onPinClick={setActiveMapId}
           />
 
           {/* Mobile-only peekable bottom sheet — lets renters glance at
@@ -602,15 +615,36 @@ const Stays = ({ landing = null }) => {
                   const price = isLT
                     ? (p.monthly_price ? `${sym}${Math.round(p.monthly_price / 1000)}k/mo` : `${sym}—`)
                     : (p.nightly_price ? `${sym}${Math.round(p.nightly_price)}/nt` : `${sym}—`);
+                  const isActive = p.id === activeMapId;
                   return (
                     <button
                       key={p.id}
                       type="button"
-                      onClick={() => {
-                        sessionStorage.setItem('previousPath', '/stays' + window.location.search);
-                        navigate(`/property/${p.id}`);
+                      // Scroll the highlighted card into view when the
+                      // user taps a map pin. `ref` callback fires after
+                      // the DOM mounts / re-renders, so we always find
+                      // the freshest element even after filter changes.
+                      ref={(el) => {
+                        if (isActive && el) {
+                          el.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+                        }
                       }}
-                      className="shrink-0 w-[168px] rounded-xl overflow-hidden ring-1 ring-black/5 bg-white text-start active:scale-95 transition-transform"
+                      onClick={() => {
+                        setActiveMapId(p.id);
+                        // On second tap, navigate through — matches
+                        // native map-app behaviour ("tap to preview,
+                        // tap again to open").
+                        if (activeMapId === p.id) {
+                          sessionStorage.setItem('previousPath', '/stays' + window.location.search);
+                          navigate(`/property/${p.id}`);
+                        }
+                      }}
+                      className={`shrink-0 w-[168px] rounded-xl overflow-hidden bg-white text-start active:scale-95 transition-all ${
+                        isActive
+                          ? 'ring-2 ring-[#1E6A6A] shadow-[0_10px_20px_-8px_rgba(30,106,106,0.5)] scale-[1.03]'
+                          : 'ring-1 ring-black/5'
+                      }`}
+                      data-testid={`stays-peek-card-${p.id}`}
                     >
                       <div
                         className="h-[76px] bg-gray-100"

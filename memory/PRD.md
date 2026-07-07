@@ -12,6 +12,15 @@ Build a bilingual (English/Hebrew) rental website named MyIsraelRental.com with 
 
 ## What's Been Implemented
 
+- [x] **Map interaction lock + pin ↔ card cross-highlight (2026-07-07)**:
+  - **Bugfix — no more auto-zoom on address pick**: user complained "when I click show stays nearby it zooms in". Root cause: the `focusOnUser` prop forced `map.setView(coords, 14)` (street-level zoom) on every address selection. Removed that path. Now picking an address just drops a "you searched here" pin at their existing zoom level — the user's view is respected.
+  - **Interaction lock**: added a `hasUserInteractedRef` that flips to `true` on the first `dragstart`/`zoomstart`. Once set, we NEVER programmatically move the view again — new pin sets, filter changes, or address picks all drop pins without hijacking the user's scroll. The `hasFramedRef` guarantees the initial "fit to bounds" happens exactly once so users still land on a sensible frame on first paint.
+  - **Cross-highlight**: added `activeId` + `onPinClick` props to both StaysMapView and ServicesMapView. Pin click → parent stores `activeMapId` → peek strip finds the matching card, scrolls it into view via a `ref` callback (`scrollIntoView({ behavior: 'smooth', inline: 'center' })`), and paints a teal ring + subtle scale bump. In reverse: parent watches `activeId` too and the map auto-opens the matching marker's popup. Highlight auto-clears after 4s so a stale focus doesn't linger.
+  - **Second-tap-to-navigate**: peek cards behave like native map apps — first tap highlights + scrolls into view, second tap opens the detail page. Prevents accidental drill-through while the user is still browsing.
+  - Files: `frontend/src/components/stays/StaysMapView.jsx`, `frontend/src/components/marketplace/ServicesMapView.jsx`, `frontend/src/pages/Stays.jsx`, `frontend/src/pages/Services.jsx`.
+
+
+
 - [x] **Peekable results bottom sheet for mobile map (2026-07-07)**: Airbnb-style drawer that peeks 132px from the bottom of the map with a horizontal scroll strip of thumbnails, then expands to a scrollable list of full cards on drag/tap. Users can browse ~12 nearby results without ever leaving the map context.
   - New reusable component `frontend/src/components/common/PeekableResultsSheet.jsx`:
     - Two snap points — peek (132px) and full (88vh). Ternary states add UX friction; users mostly want "hide/show".

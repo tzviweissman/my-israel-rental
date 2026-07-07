@@ -66,12 +66,21 @@ const formatDistance = (km) => {
   return `${km.toFixed(km < 10 ? 1 : 0)} km`;
 };
 
-const ServicesMapView = ({ gigs, userCoords, maxDistanceKm }) => {
+const ServicesMapView = ({ gigs, userCoords, maxDistanceKm, activeId, onPinClick }) => {
   const navigate = useNavigate();
   const { t, i18n } = useTranslation();
   const containerRef = useRef(null);
   const mapRef = useRef(null);
   const layerRef = useRef(null);
+  // Preserve the user's manual pan/zoom the same way Stays does — the
+  // moment they interact we stop repositioning the map on data changes,
+  // so a fresh "near this address" pick drops a pin without hijacking
+  // whatever view they were looking at.
+  const hasUserInteractedRef = useRef(false);
+  const hasFramedRef = useRef(false);
+  const markersByIdRef = useRef(new Map());
+  const onPinClickRef = useRef(onPinClick);
+  useEffect(() => { onPinClickRef.current = onPinClick; }, [onPinClick]);
 
   // Build pin coordinates + drop gigs whose city we can't resolve —
   // they still show in the list view, they just can't be plotted.
@@ -129,10 +138,15 @@ const ServicesMapView = ({ gigs, userCoords, maxDistanceKm }) => {
       keepBuffer: 4,
     }).addTo(map);
     mapRef.current = map;
+    // Interaction lock — see hasUserInteractedRef comment.
+    map.on('dragstart zoomstart', () => {
+      hasUserInteractedRef.current = true;
+    });
     return () => {
       map.remove();
       mapRef.current = null;
       layerRef.current = null;
+      markersByIdRef.current = new Map();
     };
   }, []);
 
@@ -150,6 +164,7 @@ const ServicesMapView = ({ gigs, userCoords, maxDistanceKm }) => {
     }
     const group = L.layerGroup().addTo(map);
     layerRef.current = group;
+    markersByIdRef.current = new Map();
 
     // Aggregate pins by exact city coord so a stack of gigs in Tel Aviv
     // doesn't render 30 overlapping markers — we show one pin per city
@@ -187,6 +202,19 @@ const ServicesMapView = ({ gigs, userCoords, maxDistanceKm }) => {
 
       const marker = L.marker([cluster.lat, cluster.lng], { icon: gigIcon() }).addTo(group);
       marker.bindPopup(html);
+      // Bounce the first gig's id up to the parent so the peek-strip
+      // scrolls its card into view. For city-cluster pins we take the
+      // first gig — the popup lists all of them so the user can still
+      // pick a specific one from there.
+      const firstGigId = cluster.items[0]?.id;
+      if (firstGigId) {
+        marker.on('click', () => { onPinClickRef.current?.(firstGigId); });
+        // Register the marker under every gig id in this cluster so
+        // the parent can open the popup by any id in the group.
+        for (const g of cluster.items) {
+          markersByIdRef.current.set(g.id, marker);
+        }
+      }
       // Wire click events on rendered buttons the moment the popup opens.
       marker.on('popupopen', (e) => {
         const el = e.popup.getElement();
@@ -220,16 +248,22 @@ const ServicesMapView = ({ gigs, userCoords, maxDistanceKm }) => {
       points.push([userCoords.lat, userCoords.lng]);
     }
 
-    // Fit map to whatever we drew — fall back to Israel bounds if empty.
-    if (points.length === 0) {
-      map.fitBounds(ISRAEL_BOUNDS, { padding: [24, 24] });
-    } else if (points.length === 1) {
-      map.setView(points[0], 12);
-    } else {
-      map.fitBounds(L.latLngBounds(points.map(([lat, lng]) => L.latLng(lat, lng))), {
-        padding: [48, 48],
-        maxZoom: 13,
-      });
+    // Framing rules — mirror Stays: only frame on first paint, then
+    // respect the user's manual pan/zoom for the rest of the session.
+    // Prevents the map from jumping every time a new address is
+    // selected or the search filter changes.
+    if (!hasUserInteractedRef.current && !hasFramedRef.current) {
+      hasFramedRef.current = true;
+      if (points.length === 0) {
+        map.fitBounds(ISRAEL_BOUNDS, { padding: [24, 24] });
+      } else if (points.length === 1) {
+        map.setView(points[0], 12);
+      } else {
+        map.fitBounds(L.latLngBounds(points.map(([lat, lng]) => L.latLng(lat, lng))), {
+          padding: [48, 48],
+          maxZoom: 13,
+        });
+      }
     }
   }, [
     // Use JSON of a lightweight projection so we re-run only when the
@@ -238,6 +272,16 @@ const ServicesMapView = ({ gigs, userCoords, maxDistanceKm }) => {
     userCoords?.lat, userCoords?.lng, maxDistanceKm,
     i18n.language, navigate, t,
   ]);
+
+  // Open the matching marker popup when the peek strip highlights an
+  // id — same mechanism as Stays, keeps map ↔ list bi-directional.
+  useEffect(() => {
+    if (!activeId) return;
+    const marker = markersByIdRef.current.get(activeId);
+    if (marker && !marker.isPopupOpen?.()) {
+      marker.openPopup();
+    }
+  }, [activeId]);
 
   return (
     <div
