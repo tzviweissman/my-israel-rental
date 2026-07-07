@@ -24,6 +24,7 @@ import CategoryCarousel from '../components/marketplace/CategoryCarousel';
 import LocationChipsRow from '../components/marketplace/LocationChipsRow';
 import ServicesFiltersModal from '../components/marketplace/ServicesFiltersModal';
 import ServicesMapView from '../components/marketplace/ServicesMapView';
+import PeekableResultsSheet from '../components/common/PeekableResultsSheet';
 import { localizedTitle } from '../utils/gigLocale';
 
 const TEAL = '#1E6A6A';
@@ -703,11 +704,70 @@ const Services = () => {
             )}
           </div>
         ) : viewMode === 'map' ? (
-          <ServicesMapView
-            gigs={gigs}
-            userCoords={nearby && coords ? coords : null}
-            maxDistanceKm={nearby && coords ? maxDistance : ''}
-          />
+          <>
+            <ServicesMapView
+              gigs={gigs}
+              userCoords={nearby && coords ? coords : null}
+              maxDistanceKm={nearby && coords ? maxDistance : ''}
+            />
+            {/* Mobile-only peekable sheet — mirrors the Stays pattern
+                so renters can glance at gig cards without leaving the
+                map. Reuses the shared GigCard component in the full
+                list; the peek strip is a lighter mini-card format
+                tuned for horizontal scroll. */}
+            <PeekableResultsSheet
+              count={gigs.length}
+              countLabel={gigs.length === 1
+                ? t('services.gigLabel', 'service')
+                : t('services.gigsLabel', 'services')}
+              peekContent={(
+                <div
+                  className="flex gap-3 overflow-x-auto no-scrollbar px-4 pb-3"
+                  data-testid="services-peek-strip"
+                  style={{ WebkitOverflowScrolling: 'touch' }}
+                >
+                  {gigs.slice(0, 12).map((gig) => {
+                    const cover = (gig.gallery && gig.gallery[0]) || (gig.images && gig.images[0]) || '';
+                    const title = gig.title || 'Service';
+                    const price = gig.tiers?.[0]?.price
+                      ? `₪${Math.round(gig.tiers[0].price)}`
+                      : '';
+                    return (
+                      <button
+                        key={gig.id}
+                        type="button"
+                        onClick={() => navigate(`/services/gig/${gig.id}`)}
+                        className="shrink-0 w-[168px] rounded-xl overflow-hidden ring-1 ring-black/5 bg-white text-start active:scale-95 transition-transform"
+                      >
+                        <div
+                          className="h-[76px] bg-gray-100"
+                          style={cover ? { background: `url(${cover}) center/cover no-repeat` } : undefined}
+                        />
+                        <div className="px-2 py-1.5">
+                          <div className="text-[11px] font-semibold text-gray-900 truncate">{title}</div>
+                          <div className="text-[10px] text-gray-500 truncate">{price}</div>
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+              fullContent={(
+                <div className="grid grid-cols-1 gap-4 px-4 py-3 pb-24">
+                  {gigs.map((gig) => (
+                    <GigCard
+                      key={gig.id}
+                      gig={gig}
+                      onClick={() => navigate(`/services/gig/${gig.id}`)}
+                      i18n={i18n}
+                      t={t}
+                    />
+                  ))}
+                </div>
+              )}
+              testId="services-peek"
+            />
+          </>
         ) : (
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-x-5 gap-y-8">
             {gigs.map((gig) => (
@@ -788,32 +848,21 @@ const Services = () => {
       )}
 
       {/* Mobile-only floating view toggle — Airbnb-style bottom-center
-          pill that flips between list and map. Complements the inline
-          `sm:inline-flex` toggle inside the toolbar above (which is
-          hidden on mobile) so the mobile toolbar stays clean and the
-          switch remains one-tap discoverable while browsing. */}
-      {!loading && gigs.length > 0 && (
+          pill. Only shown in LIST view; on the map, the peekable bottom
+          sheet handles browsing results without leaving the map. */}
+      {!loading && gigs.length > 0 && viewMode !== 'map' && (
         <button
           type="button"
-          onClick={() => patchUrl({ view: viewMode === 'map' ? '' : 'map' })}
+          onClick={() => patchUrl({ view: 'map' })}
           className="sm:hidden fixed start-1/2 -translate-x-1/2 z-40 inline-flex items-center gap-2 rounded-full bg-gray-900 text-white px-4 py-2.5 text-sm font-semibold shadow-[0_10px_25px_-5px_rgba(0,0,0,0.35)] hover:bg-gray-800 active:scale-95 transition-transform"
           style={{
             bottom: 'calc(env(safe-area-inset-bottom, 0px) + var(--bottom-nav-h, 0px) + 1.5rem)',
           }}
           data-testid="services-view-fab"
-          aria-label={viewMode === 'map' ? t('services.viewList', 'Show list') : t('services.viewMap', 'Show map')}
+          aria-label={t('services.viewMap', 'Show map')}
         >
-          {viewMode === 'map' ? (
-            <>
-              <LayoutGrid size={14} />
-              {t('services.viewList', 'List')}
-            </>
-          ) : (
-            <>
-              <MapIcon size={14} />
-              {t('services.viewMap', 'Map')}
-            </>
-          )}
+          <MapIcon size={14} />
+          {t('services.viewMap', 'Map')}
         </button>
       )}
     </div>

@@ -12,6 +12,22 @@ Build a bilingual (English/Hebrew) rental website named MyIsraelRental.com with 
 
 ## What's Been Implemented
 
+- [x] **Peekable results bottom sheet for mobile map (2026-07-07)**: Airbnb-style drawer that peeks 132px from the bottom of the map with a horizontal scroll strip of thumbnails, then expands to a scrollable list of full cards on drag/tap. Users can browse ~12 nearby results without ever leaving the map context.
+  - New reusable component `frontend/src/components/common/PeekableResultsSheet.jsx`:
+    - Two snap points — peek (132px) and full (88vh). Ternary states add UX friction; users mostly want "hide/show".
+    - Touch-drag on the header with 60px snap threshold. Live 1:1 finger tracking while dragging, spring transition on release (`cubic-bezier(0.32, 0.72, 0, 1)`).
+    - Mouse-drag support too (for desktop-emulation testing; hidden by `sm:hidden` on real desktops).
+    - Body wrapped in an independent `overflow-y-auto overscroll-contain` scroll container so drags on cards don't trigger sheet snap.
+    - iOS-safe: `env(safe-area-inset-bottom)` padding + `touch-action: none` on the container to prevent iOS body-bounce.
+  - **Wired into Stays**: peek strip = horizontal-scroll thumbnails (168×130 mini-cards with price chip), full state = single-column StaysCard grid. `pb-24` on the full list clears the iOS home-indicator.
+  - **Wired into Services**: same pattern, mini-cards + full-column GigCard list.
+  - **FAB visibility refined**: previously the mobile "List/Map" FAB overlapped the sheet handle. Now the FAB only renders in LIST view (labeled "Map"); in map view, the sheet header IS the "see the list" affordance so no second control is needed.
+  - Added `.no-scrollbar` utility to `index.css` for the horizontal peek strip.
+  - Desktop UX unchanged — sheet + FAB both `sm:hidden`, inline toggle remains at ≥640px.
+  - Files: `frontend/src/components/common/PeekableResultsSheet.jsx` (new), `frontend/src/pages/Stays.jsx`, `frontend/src/pages/Services.jsx`, `frontend/src/index.css`.
+
+
+
 - [x] **Mobile floating view toggle (2026-07-07)**: The inline "List / Map" segmented pill next to the address input wrapped onto a second line on <640px screens, cluttering the mobile toolbar. Solution mirrors Airbnb's mobile pattern:
   - Inline toggle hidden below `sm` breakpoint (`hidden sm:inline-flex`).
   - New floating FAB at `bottom + safe-area-inset-bottom + var(--bottom-nav-h) + 1.5rem` centered horizontally, dark gray-900 pill with white text. Renders only when `!loading && results > 0`.

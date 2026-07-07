@@ -124,6 +124,13 @@ code {
 }
 
 
+/* Hides the native scrollbar while keeping scroll behaviour — used
+   by the mobile peekable-sheet peek strip so the horizontal card
+   scroll doesn't render a chunky scrollbar under the cards. */
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+
 /* --------------------------------------------------------------------
    Services Marketplace map — Leaflet chrome overrides for a modern,
    Airbnb-style look. All scoped under `.services-map` and `.stays-map`

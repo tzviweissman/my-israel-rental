@@ -32,6 +32,7 @@ import StaysSearchBar from '../components/stays/StaysSearchBar';
 import FiltersModal, { AMENITY_PRESETS } from '../components/stays/FiltersModal';
 import StaysMapView from '../components/stays/StaysMapView';
 import AddressAutocomplete from '../components/common/AddressAutocomplete';
+import PeekableResultsSheet from '../components/common/PeekableResultsSheet';
 import { flexLabel } from '../components/search/WhenPicker';
 import QuickChips from '../components/search/QuickChips';
 import NotifyMeCard from '../components/NotifyMeCard';
@@ -576,6 +577,74 @@ const Stays = ({ landing = null }) => {
             focusOnUser={Boolean(nearCoords)}
             displayCurrency={priceCurrency}
           />
+
+          {/* Mobile-only peekable bottom sheet — lets renters glance at
+              results without leaving the map. Full sheet expands to a
+              vertical list of standard StaysCards; the peek strip is a
+              horizontal-scrollable rail of thumbnails so users see
+              which listings sit under the current viewport. */}
+          <PeekableResultsSheet
+            count={filteredWithDistance.length}
+            countLabel={filteredWithDistance.length === 1
+              ? t('stays.stay', 'stay')
+              : t('stays.staysLabel', 'stays')}
+            peekContent={(
+              <div
+                className="flex gap-3 overflow-x-auto no-scrollbar px-4 pb-3"
+                data-testid="stays-peek-strip"
+                style={{ WebkitOverflowScrolling: 'touch' }}
+              >
+                {filteredWithDistance.slice(0, 12).map((p) => {
+                  const cover = (p.images && p.images[0]) || '';
+                  const cur = (p.currency || 'ILS').toUpperCase();
+                  const sym = cur === 'USD' ? '$' : cur === 'EUR' ? '€' : '₪';
+                  const isLT = p.rental_type === 'long-term';
+                  const price = isLT
+                    ? (p.monthly_price ? `${sym}${Math.round(p.monthly_price / 1000)}k/mo` : `${sym}—`)
+                    : (p.nightly_price ? `${sym}${Math.round(p.nightly_price)}/nt` : `${sym}—`);
+                  return (
+                    <button
+                      key={p.id}
+                      type="button"
+                      onClick={() => {
+                        sessionStorage.setItem('previousPath', '/stays' + window.location.search);
+                        navigate(`/property/${p.id}`);
+                      }}
+                      className="shrink-0 w-[168px] rounded-xl overflow-hidden ring-1 ring-black/5 bg-white text-start active:scale-95 transition-transform"
+                    >
+                      <div
+                        className="h-[76px] bg-gray-100"
+                        style={cover ? { background: `url(${cover}) center/cover no-repeat` } : undefined}
+                      />
+                      <div className="px-2 py-1.5">
+                        <div className="text-[11px] font-semibold text-gray-900 truncate">{p.title || 'Property'}</div>
+                        <div className="text-[10px] text-gray-500 truncate">{price}</div>
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+            fullContent={(
+              <div className="grid grid-cols-1 gap-4 px-4 py-3 pb-24">
+                {filteredWithDistance.map((p) => (
+                  <StaysCard
+                    key={p.id}
+                    property={p}
+                    fullWidth
+                    liked={likedIds.has(p.id)}
+                    onToggleLike={(e) => toggleLike(p.id, e)}
+                    displayCurrency={priceCurrency}
+                    onClick={() => {
+                      sessionStorage.setItem('previousPath', '/stays' + window.location.search);
+                      navigate(`/property/${p.id}`);
+                    }}
+                  />
+                ))}
+              </div>
+            )}
+            testId="stays-peek"
+          />
         </div>
       ) : isSearchActive ? (
         // Flat results grid — Airbnb-style, shown once any search/filter is active
@@ -719,15 +788,16 @@ const Stays = ({ landing = null }) => {
           breakpoint precisely because this element takes over on mobile,
           giving the address input a full clean row of its own.
 
-          Positioned above the mobile bottom-nav (~64px tall) so it never
-          overlaps our persistent nav bar, and only rendered when there
-          are actually results to switch between. */}
-      {!loading && filtered.length > 0 && (
+          Only renders in LIST view — in map view the peekable bottom
+          sheet already exposes a "swipe up for details" affordance, so
+          adding a second toggle would clutter the screen and overlap
+          the sheet handle. */}
+      {!loading && filtered.length > 0 && viewMode !== 'map' && (
         <button
           type="button"
           onClick={() => setSearchParams((prev) => {
             const n = new URLSearchParams(prev);
-            if (viewMode === 'map') n.delete('view'); else n.set('view', 'map');
+            n.set('view', 'map');
             return n;
           }, { replace: true })}
           className="sm:hidden fixed start-1/2 -translate-x-1/2 z-40 inline-flex items-center gap-2 rounded-full bg-gray-900 text-white px-4 py-2.5 text-sm font-semibold shadow-[0_10px_25px_-5px_rgba(0,0,0,0.35)] hover:bg-gray-800 active:scale-95 transition-transform"
@@ -739,19 +809,10 @@ const Stays = ({ landing = null }) => {
             bottom: 'calc(env(safe-area-inset-bottom, 0px) + var(--bottom-nav-h, 0px) + 1.5rem)',
           }}
           data-testid="stays-view-fab"
-          aria-label={viewMode === 'map' ? t('stays.viewList', 'Show list') : t('stays.viewMap', 'Show map')}
+          aria-label={t('stays.viewMap', 'Show map')}
         >
-          {viewMode === 'map' ? (
-            <>
-              <LayoutGrid size={14} />
-              {t('stays.viewList', 'List')}
-            </>
-          ) : (
-            <>
-              <MapIcon size={14} />
-              {t('stays.viewMap', 'Map')}
-            </>
-          )}
+          <MapIcon size={14} />
+          {t('stays.viewMap', 'Map')}
         </button>
       )}
     </div>
