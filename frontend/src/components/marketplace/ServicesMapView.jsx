@@ -26,15 +26,18 @@ const TEAL = '#1E6A6A';
 const GOLD = '#D4AF37';
 
 // Inline SVG icon — Leaflet's default asset paths break under bundlers.
+// Uses a soft drop-shadow filter so pins lift off the pale Positron tiles
+// with a bit of depth (the flat OSM tiles didn't need it; Positron does).
 const gigIcon = () => new L.DivIcon({
-  className: '',
-  iconSize: [28, 36],
-  iconAnchor: [14, 34],
-  popupAnchor: [0, -30],
+  className: 'gig-pin',
+  iconSize: [30, 40],
+  iconAnchor: [15, 38],
+  popupAnchor: [0, -34],
   html: `
-    <svg xmlns="http://www.w3.org/2000/svg" width="28" height="36" viewBox="0 0 28 36" fill="none">
-      <path d="M14 0C6.27 0 0 6.27 0 14c0 9.5 12.05 20.6 13.24 21.68a1.13 1.13 0 0 0 1.52 0C15.95 34.6 28 23.5 28 14 28 6.27 21.73 0 14 0Z" fill="${TEAL}"/>
-      <circle cx="14" cy="14" r="6" fill="${GOLD}"/>
+    <svg xmlns="http://www.w3.org/2000/svg" width="30" height="40" viewBox="0 0 30 40" fill="none"
+         style="filter: drop-shadow(0 3px 6px rgba(15,58,58,0.35));">
+      <path d="M15 0C6.72 0 0 6.72 0 15c0 10.5 13.16 23.15 14.34 24.32a.94.94 0 0 0 1.32 0C16.84 38.15 30 25.5 30 15 30 6.72 23.28 0 15 0Z" fill="${TEAL}"/>
+      <circle cx="15" cy="15" r="6.5" fill="${GOLD}"/>
     </svg>`,
 });
 
@@ -93,10 +96,37 @@ const ServicesMapView = ({ gigs, userCoords, maxDistanceKm }) => {
       center: [CITY_COORDS.telAviv.lat, CITY_COORDS.telAviv.lng],
       zoom: 9,
       scrollWheelZoom: true,
+      // Cleaner UX defaults for the modern basemap:
+      //  - Zoom controls repositioned to top-right so they never
+      //    collide with our overlay pins clustered around city
+      //    centers on first load.
+      //  - `preferCanvas` renders shapes on <canvas> instead of SVG,
+      //    which is markedly faster with hundreds of markers.
+      //  - `zoomSnap: 0.25` gives a silky smooth pinch/scroll zoom
+      //    instead of the default hard-integer 1-step snap.
+      zoomControl: false,
+      preferCanvas: true,
+      zoomSnap: 0.25,
+      wheelDebounceTime: 40,
     });
-    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '&copy; <a href="https://openstreetmap.org/copyright">OpenStreetMap</a>',
-      maxZoom: 19,
+    L.control.zoom({ position: 'topright' }).addTo(map);
+    // CartoDB Voyager — the clean, muted basemap used by most modern
+    // travel + services apps (subtle grey roads, soft greens for parks,
+    // light blue water). Retains just enough visual character to help
+    // renters pick out neighborhoods without competing with our teal
+    // pins for attention. Free under CC BY, no API key required.
+    // Retina tiles (`{r}` = "@2x") auto-serve on hi-DPI screens so the
+    // base looks tack-sharp on modern laptops + phones.
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+      attribution:
+        '&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a> · ' +
+        '&copy; <a href="https://carto.com/attributions">CARTO</a>',
+      subdomains: 'abcd',
+      maxZoom: 20,
+      // A hair of extra tile buffer keeps the edges smooth when the
+      // user pans quickly — otherwise Positron flashes empty grey
+      // rectangles for a beat.
+      keepBuffer: 4,
     }).addTo(map);
     mapRef.current = map;
     return () => {
@@ -212,8 +242,8 @@ const ServicesMapView = ({ gigs, userCoords, maxDistanceKm }) => {
   return (
     <div
       ref={containerRef}
-      className="w-full rounded-2xl overflow-hidden border border-gray-200 shadow-sm"
-      style={{ height: 'min(70vh, 620px)' }}
+      className="services-map w-full rounded-3xl overflow-hidden ring-1 ring-black/5 shadow-[0_10px_40px_-15px_rgba(15,58,58,0.25)]"
+      style={{ height: 'min(72vh, 640px)' }}
       data-testid="services-map"
     />
   );
