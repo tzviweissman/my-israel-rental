@@ -3,18 +3,19 @@ single ``router`` so ``server.py`` can register the whole admin surface
 with one ``include_router()`` call.
 
 Sub-modules:
-  * ``core`` — dashboard, bookings, users, property bulk ops, settings
+  * ``core`` — dashboard, bookings, users, settings
   * ``events`` — SSE stream, Postmark webhook, email-health
   * ``duplicates`` — duplicate detection + auto-cleanup
   * ``chats_nudge`` — chat list, reattach, owner-nudge system
   * ``document_services`` — paid document-services catalog
+  * ``properties_bulk`` — bulk delete/restore/mark-booked, featured/managed toggles
 
 Public names historically exported from ``routes.admin`` (background
 task hooks + shared helpers) are re-exported here for import stability.
 """
 from fastapi import APIRouter
 
-from . import chats_nudge, core, document_services, duplicates, events
+from . import chats_nudge, core, document_services, duplicates, events, properties_bulk
 
 # One router that owns every admin endpoint. Order of inclusion is
 # irrelevant because each sub-module attaches to its own path prefix.
@@ -24,6 +25,7 @@ router.include_router(events.router)
 router.include_router(duplicates.router)
 router.include_router(chats_nudge.router)
 router.include_router(document_services.router)
+router.include_router(properties_bulk.router)
 
 # Re-exports so callers that used to do ``from routes.admin import X``
 # keep working without touching the call site. ``server.py``'s startup

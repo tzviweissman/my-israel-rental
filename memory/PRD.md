@@ -12,6 +12,14 @@ Build a bilingual (English/Hebrew) rental website named MyIsraelRental.com with 
 
 ## What's Been Implemented
 
+- [x] **`routes/admin/properties_bulk.py` extraction (2026-07-08)**:
+  - Peeled the 650-line property-bulk block out of `routes/admin/core.py` into its own module inside the admin package. `core.py` shrunk from 990 → **333 lines** — under the 400-line "misc admin panel" ceiling.
+  - New `routes/admin/properties_bulk.py` (681 lines) owns: bulk delete (`/admin/properties/bulk`, tombstone + auto-rescue-duplicates path), bulk restore (`/admin/properties/bulk-restore`), full admin property list, toggle managed / featured (per-id and bulk), mark-booked + block CRUD, bulk mark-booked, and status toggle.
+  - `routes/admin/__init__.py` registers the new sub-module in its aggregation. `server.py` needed zero changes — the single `admin.router` include already picks it up.
+  - Trimmed `core.py` imports (dropped `uuid`, `Field`, `AdminBlockOut`, `AdminBulkMarkBookedResponse`, `AdminMarkBookedResponse`, `PropertyOut`, `Request`, `List`, `Optional`, `logger`).
+  - **Verified**: backend restarts clean; 8 admin endpoints (dashboard, users, properties, duplicates, chats, document-services, email-health, settings) return 200; `test_admin_dashboard.py` (19 passed / 5 skipped) and `test_admin_bulk_delete_http.py` (6 passed / 1 skipped) both green.
+  - Final module sizes in `routes/admin/`: `core.py` 333, `properties_bulk.py` 681, `chats_nudge.py` 546, `duplicates.py` 481, `events.py` 225, `document_services.py` 95, `__init__.py` 44.
+
 - [x] **`routes/admin/` package restructure (2026-07-08)**:
   - Converted the flat `admin*.py` sibling files into a proper Python package at `backend/routes/admin/`. The 5 modules I own now live inside:
     - `routes/admin/__init__.py` — aggregates every sub-module router into one `router` and re-exports background-task hooks so callers doing `from routes.admin import X` keep working unchanged.
