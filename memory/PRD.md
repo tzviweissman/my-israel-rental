@@ -12,6 +12,20 @@ Build a bilingual (English/Hebrew) rental website named MyIsraelRental.com with 
 
 ## What's Been Implemented
 
+- [x] **`routes/properties/` package split (2026-07-08)**:
+  - Replaced the single-file `routes/properties.py` (1,139 lines) with a proper Python package containing 6 focused modules + `__init__.py` aggregator + `shared.py`. Zero public-API changes.
+  - Module layout:
+    - `routes/properties/__init__.py` (36 lines) — aggregates the 6 sub-module routers; re-exports `delete_property` so `tests/test_property_delete_cascade.py` keeps working with its direct import.
+    - `routes/properties/shared.py` (46 lines) — `_VALID_RENTAL_TYPES`, `_BULK_EDITABLE_FIELDS`, `_normalize_rental_types` helper.
+    - `routes/properties/browse.py` (227 lines) — `GET /properties` (list), `GET /properties/{id}` (detail), `GET /manager/{id}/properties`.
+    - `routes/properties/crud.py` (340 lines) — `POST /properties`, `PUT /properties/{id}`, `DELETE /properties/{id}` (tombstone + renter-notify), `POST /properties/{id}/cover`.
+    - `routes/properties/bulk.py` (180 lines) — `POST /properties/bulk-edit`, `POST /properties/bulk-images` with `BulkEditBody`/`BulkImagesBody` schemas.
+    - `routes/properties/likes.py` (75 lines) — `POST /properties/{id}/like`, `GET /liked-properties`, `GET /liked-property-ids`.
+    - `routes/properties/contract.py` (199 lines) — `POST /properties/{id}/contract`, `GET /properties/{id}/contract`, `DELETE /properties/{id}/contract`.
+    - `routes/properties/availability.py` (152 lines) — `GET /owner/availability`.
+  - `server.py` needed **zero changes** — `from routes import properties` still resolves; `properties.router` is now the aggregated router.
+  - Verified: backend starts clean; smoke tests on `/properties`, `/properties?rental_type=vacation`, `/manager/{id}/properties` return correct status codes; **31 property tests passed** across pagination/fields/filters/delete-cascade/bulk-manager suites (21 errors from an admin test bunch are all rate-limit 429s from the smoke run — confirmed unrelated after cooldown). Lint clean.
+
 - [x] **Test-suite alignment with current marketplace taxonomy (2026-07-08)**:
   - `tests/test_marketplace.py` referenced 4 stale category slugs (`cleaning`, `handyman`, `moving`) and 12 legacy category names that were replaced by the current 2026-07 taxonomy (`tours-activities`, `music-entertainment`, `real-estate-services`, `health-fitness`, `transportation`, `home-organizers`, `hotels-travel`, `home-repair`, `womens-spa`, `bookkeeping`, `photography`, `graphic-design`). Test also missed the `area` field which is now required on gig creation.
   - Remapped stale slugs → current equivalents: `cleaning` → `home-repair`, `handyman` → `home-repair`, `moving` → `transportation`. Updated the "expected categories" set assertion to the actual 12 seeded slugs. Added `"area": "Tel Aviv"` to every gig-creation payload that was missing it.
