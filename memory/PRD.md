@@ -12,6 +12,16 @@ Build a bilingual (English/Hebrew) rental website named MyIsraelRental.com with 
 
 ## What's Been Implemented
 
+- [x] **`routes/admin/` package restructure (2026-07-08)**:
+  - Converted the flat `admin*.py` sibling files into a proper Python package at `backend/routes/admin/`. The 5 modules I own now live inside:
+    - `routes/admin/__init__.py` — aggregates every sub-module router into one `router` and re-exports background-task hooks so callers doing `from routes.admin import X` keep working unchanged.
+    - `routes/admin/core.py` — dashboard, bookings, users, property bulk ops, settings (was `admin.py`).
+    - `routes/admin/events.py`, `duplicates.py`, `chats_nudge.py`, `document_services.py`.
+  - Left `admin_area_aliases.py`, `admin_import.py`, `admin_smart_lists.py` at the top level because external test files import them directly (`from routes.admin_import import _split_urls`, etc.).
+  - `server.py`: replaced the 5 sibling registrations with a single `admin` in the include loop. Deferred imports for `run_duplicate_auto_cleanup`, `run_auto_owner_nudge_pass`, and `AUTO_NUDGE_LOOP_INTERVAL_SEC` reverted to `from routes.admin import ...` (now served by the package's `__init__.py` re-exports).
+  - Verified: backend restarts clean; 11 admin endpoints across all 5 sub-modules return 200; `tests/test_admin_dashboard.py` now runs **19 passed / 5 skipped** (up from 15/9). Lint clean.
+  - Files: `backend/routes/admin/*` (5 new sub-modules + `__init__.py`), `backend/server.py`. Old `admin_events.py`, `admin_duplicates.py`, `admin_chats_nudge.py`, `admin_document_services.py`, `admin.py` at the top level are removed.
+
 - [x] **Backend refactor: `admin.py` split (2026-07-08)**:
   - Reduced `routes/admin.py` from **2,241 → 990 lines** by extracting five logical route groups into focused sibling modules. Zero public-API changes — every URL and response shape is identical.
   - New sibling files (each has its own `router` registered in `server.py`):
