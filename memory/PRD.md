@@ -12,6 +12,18 @@ Build a bilingual (English/Hebrew) rental website named MyIsraelRental.com with 
 
 ## What's Been Implemented
 
+- [x] **Backend refactor: `admin.py` split (2026-07-08)**:
+  - Reduced `routes/admin.py` from **2,241 → 990 lines** by extracting five logical route groups into focused sibling modules. Zero public-API changes — every URL and response shape is identical.
+  - New sibling files (each has its own `router` registered in `server.py`):
+    - `routes/admin_events.py` (~230 lines) — SSE admin event stream, Postmark webhook + helpers (`_assert_webhook_token`, `_read_postmark_json`, `_build_email_event`, `_user_email_update_from`), `/admin/email-health`.
+    - `routes/admin_duplicates.py` (~450 lines) — `/admin/duplicates` list, `/admin/duplicates/resolve`, `/admin/duplicates/auto-resolve`, `/admin/duplicates/auto-status`, `run_duplicate_auto_cleanup` (exported for the every-30-min background task in `server.py`).
+    - `routes/admin_chats_nudge.py` (~505 lines) — `/admin/chats/reattach` (+ `ReattachChatsRequest`), `/admin/chats` list, `/admin/chats/nudge-owner` (+ `NudgeOwnerRequest`), auto-nudge system (`AUTO_NUDGE_LOOP_INTERVAL_SEC`, `run_auto_owner_nudge_pass`, `/admin/auto-owner-nudge/status`, `/admin/auto-owner-nudge/run-now`, `/user/auto-nudge-opt-out`).
+    - `routes/admin_document_services.py` (~95 lines) — `/admin/document-services*` (list, status update, revenue breakdown).
+  - `server.py`: registered the 4 new modules in the include loop; updated deferred imports (`run_duplicate_auto_cleanup` and `run_auto_owner_nudge_pass, AUTO_NUDGE_LOOP_INTERVAL_SEC`) to point at the new locations.
+  - Cleaned up admin.py imports (dropped 15 now-unused symbols: `json`, `StreamingResponse`, `AsyncGenerator`, `OkResponse`, `SubscribersResponse`, `AdminEmailHealthResponse`, `ServiceRequestOut`, `ServiceRevenueResponse`, `ConversationOut`, `SERVICE_PRETTY`, `VALID_DOC_SERVICES`, `POSTMARK_WEBHOOK_SECRET`, `decode_query_token`, `subscribe`, `subscriber_count`, `unsubscribe`).
+  - Verified live: `GET /admin/dashboard`, `/admin/users`, `/admin/duplicates`, `/admin/chats`, `/admin/document-services`, `/admin/email-health` all return 200 with valid data; `tests/test_admin_dashboard.py` runs 15 passed / 9 skipped.
+  - Files: `backend/routes/admin.py` (slimmed), `backend/routes/admin_events.py` (new), `backend/routes/admin_duplicates.py` (new), `backend/routes/admin_chats_nudge.py` (new), `backend/routes/admin_document_services.py` (new), `backend/server.py`.
+
 - [x] **New dedicated signup page `/signup` (2026-07-07)**:
   - Route-level page `frontend/src/pages/SignupJoin.jsx` — separate from the existing `/auth/login` screen so the join funnel feels welcoming instead of a stacked form.
   - 2-step wizard:

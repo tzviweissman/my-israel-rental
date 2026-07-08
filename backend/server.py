@@ -28,6 +28,10 @@ load_dotenv(ROOT_DIR / ".env")
 from routes import (  # noqa: E402
     admin,
     admin_area_aliases,
+    admin_chats_nudge,
+    admin_document_services,
+    admin_duplicates,
+    admin_events,
     admin_import,
     admin_smart_lists,
     auth,
@@ -73,6 +77,10 @@ for mod in (
     notifications,
     admin,
     admin_area_aliases,
+    admin_chats_nudge,
+    admin_document_services,
+    admin_duplicates,
+    admin_events,
     admin_import,
     admin_smart_lists,
     saved_searches,
@@ -166,7 +174,7 @@ async def startup_tasks() -> None:
     # where every user-visible field is identical. Re-attaches chats /
     # bookings / likes / photos to the surviving twin before deleting
     # the losers, so bookmarked URLs and inbox conversations survive.
-    from routes.admin import run_duplicate_auto_cleanup
+    from routes.admin_duplicates import run_duplicate_auto_cleanup
 
     async def duplicate_auto_cleanup_loop() -> None:
         # Small initial delay so startup completes cleanly (and gives
@@ -186,7 +194,7 @@ async def startup_tasks() -> None:
     # inbound message has been unanswered for 12h+. Reuses the same
     # `chat_nudges` throttle collection as the admin-manual nudge so
     # neither surface double-emails owners.
-    from routes.admin import run_auto_owner_nudge_pass, AUTO_NUDGE_LOOP_INTERVAL_SEC
+    from routes.admin_chats_nudge import run_auto_owner_nudge_pass, AUTO_NUDGE_LOOP_INTERVAL_SEC
 
     async def auto_owner_nudge_loop() -> None:
         await asyncio.sleep(180)  # Wait for indexes + templates.
