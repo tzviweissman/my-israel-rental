@@ -12,6 +12,18 @@ Build a bilingual (English/Hebrew) rental website named MyIsraelRental.com with 
 
 ## What's Been Implemented
 
+- [x] **`routes/marketplace/` package split (2026-07-08)**:
+  - Replaced the single-file `routes/marketplace.py` (1,169 lines) with a proper Python package `routes/marketplace/` containing 4 focused modules + `__init__.py` aggregator. Zero public-API changes.
+  - Module layout:
+    - `routes/marketplace/__init__.py` (35 lines) — aggregates the 3 sub-module routers into one `router`; re-exports `handle_subscription_webhook_event`.
+    - `routes/marketplace/shared.py` (360 lines) — constants (CATEGORIES, LOCATIONS, SUBSCRIPTION_*, SUPPORTED_LANGUAGES, TOP_RATED_MIN_*), Pydantic models (PricingTier, GigIn, GigPatch, CredentialDoc, ProviderPatch, BookingIn, BookingPatch, ReviewIn), and every private helper (`_resolve_gig_coords`, `_haversine_km`, `_validate_category`, `_ensure_provider_record`, `_response_bucket`, `_member_since_year`, `_cheapest_tier_price`, `_update_response_ema`, `_provider_is_active`, `_clean_gig`, `_rating_aggregate`, `_batch_rating_aggregate`).
+    - `routes/marketplace/providers.py` (165 lines) — public catalog reads: `/categories`, `/locations`, `/languages`, `/nearest-city`, `/providers/{user_id}`, and the authed `PATCH /providers/me`.
+    - `routes/marketplace/gigs.py` (490 lines) — the seller surface: gig browse/create/get/patch/delete, `/my-gigs`, booking flow (`/gigs/{id}/book`, `PATCH /bookings/{id}`), reviews (`GET/POST/DELETE /gigs/{id}/reviews`).
+    - `routes/marketplace/subscription.py` (265 lines) — PayPal-backed Pro subscription lifecycle + `_get_or_create_billing_plan` helper + `handle_subscription_webhook_event`.
+  - `server.py` needed **zero changes** — `from routes import marketplace` still resolves and `marketplace.router` is now the aggregated router.
+  - Verified: backend starts clean; 5 public endpoints (`/categories`, `/locations`, `/languages`, `/gigs`, `/nearest-city`) return 200; `test_marketplace_reviews.py` (10 passed) and `test_marketplace_subscription.py` (9 passed) fully green; `test_marketplace.py` runs 27 passed / 6 failed / 5 errored — but the failures are **pre-existing** (test uses category `"moving"` which was removed from `CATEGORIES` before this refactor; confirmed by running the same test on the pre-refactor commit — identical failure).
+  - Lint clean across `routes/marketplace/`.
+
 - [x] **`routes/admin/properties_bulk.py` extraction (2026-07-08)**:
   - Peeled the 650-line property-bulk block out of `routes/admin/core.py` into its own module inside the admin package. `core.py` shrunk from 990 → **333 lines** — under the 400-line "misc admin panel" ceiling.
   - New `routes/admin/properties_bulk.py` (681 lines) owns: bulk delete (`/admin/properties/bulk`, tombstone + auto-rescue-duplicates path), bulk restore (`/admin/properties/bulk-restore`), full admin property list, toggle managed / featured (per-id and bulk), mark-booked + block CRUD, bulk mark-booked, and status toggle.
