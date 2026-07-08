@@ -12,6 +12,22 @@ Build a bilingual (English/Hebrew) rental website named MyIsraelRental.com with 
 
 ## What's Been Implemented
 
+- [x] **`routes/smart_pricing/` package split (2026-07-08)** — completes the backend refactor epic:
+  - Replaced the single-file `routes/smart_pricing.py` (920 lines) with a 4-module package + aggregator.
+  - Module layout:
+    - `routes/smart_pricing/__init__.py` (49 lines) — aggregates the router; re-exports `SmartPricingSettings`, `compute_suggestion`, `smart_pricing_daily_loop`, `pricing_insights_weekly_loop`, `record_view_event`, `_send_owner_digest_if_eligible` so `server.py`, `routes/properties/browse.py`, and 3 test files keep their existing imports unchanged.
+    - `routes/smart_pricing/shared.py` (409 lines) — Pydantic models (SmartPricingSettings, CalculateRequest, ApplyRequest, FactorOut, SuggestionOut), Hebcal fetcher + holiday lookup, `_gather_signals`, the pure `compute_suggestion` engine, `_build_reason`, `_load_property_for_owner`, `_settings_from_prop`, `_forecast`.
+    - `routes/smart_pricing/pricing.py` (210 lines) — 5 per-property endpoints (settings GET/PATCH, calculate, apply, revert) + `record_view_event` demand-signal hook.
+    - `routes/smart_pricing/daily_loop.py` (92 lines) — `smart_pricing_daily_loop` + `_refresh_all_enabled` background sweep.
+    - `routes/smart_pricing/insights.py` (265 lines) — weekly owner-digest email (`_build_owner_digest`, `_send_owner_digest_if_eligible`, `pricing_insights_weekly_loop`, `_send_pricing_insights_to_all`) + `send-sample`, `GET/PATCH /insights/preferences` endpoints, `InsightsPrefBody`.
+  - `server.py` needed **zero changes** — `from routes import smart_pricing` still resolves; both background loops accessible via re-exports.
+  - Verified: backend starts clean; smoke tests on `/smart-pricing/insights/preferences` return 200; **20 smart-pricing tests pass** across `test_smart_pricing.py`, `test_smart_pricing_extra.py`, `test_pricing_insights.py`. Lint clean.
+
+- [x] **BACKEND REFACTOR EPIC COMPLETE (2026-07-08)**:
+  - All 4 monoliths (admin.py 2,241 + marketplace.py 1,169 + properties.py 1,139 + smart_pricing.py 920 = 5,469 lines in 4 files) are now split into 4 packages containing focused sub-modules. Every module is under 700 lines.
+  - Zero public API changes. Every URL, response shape, and background hook preserved via aggregator + re-export pattern.
+  - Tests remain green: `test_admin_dashboard.py` 19/24, `test_marketplace*` 38/38, property tests 31 pass, smart-pricing tests 20/20.
+
 - [x] **`routes/properties/` package split (2026-07-08)**:
   - Replaced the single-file `routes/properties.py` (1,139 lines) with a proper Python package containing 6 focused modules + `__init__.py` aggregator + `shared.py`. Zero public-API changes.
   - Module layout:
