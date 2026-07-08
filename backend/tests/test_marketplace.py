@@ -59,9 +59,10 @@ class TestCategories:
         assert isinstance(cats, list)
         slugs = {c["slug"] for c in cats}
         expected = {
-            "cleaning", "moving", "locksmith", "handyman", "photography",
-            "interior-design", "tour-guide", "furniture-assembly", "barber",
-            "ac-cleaner", "plumber", "electrician",
+            "tours-activities", "music-entertainment", "real-estate-services",
+            "health-fitness", "transportation", "home-organizers",
+            "hotels-travel", "home-repair", "womens-spa",
+            "bookkeeping", "photography", "graphic-design",
         }
         assert slugs == expected, f"got {slugs}"
         assert len(cats) == 12
@@ -73,7 +74,7 @@ class TestGigCreate:
     def test_create_gig_unauthenticated_rejected(self):
         r = requests.post(
             f"{API}/gigs",
-            json={"title": "x", "category": "cleaning", "booking_mode": "whatsapp", "whatsapp": "+972500000000"},
+            json={"title": "x", "category": "home-repair", "booking_mode": "whatsapp", "whatsapp": "+972500000000"},
             timeout=15,
         )
         assert r.status_code in (401, 403), f"got {r.status_code}"
@@ -91,7 +92,7 @@ class TestGigCreate:
         r = requests.post(
             f"{API}/gigs",
             headers=_h(owner_token),
-            json={"title": "TEST_wa_no_number", "category": "cleaning", "booking_mode": "whatsapp", "whatsapp": "   "},
+            json={"title": "TEST_wa_no_number", "category": "home-repair", "booking_mode": "whatsapp", "whatsapp": "   "},
             timeout=15,
         )
         assert r.status_code == 400, r.text
@@ -102,7 +103,7 @@ class TestGigCreate:
             headers=_h(owner_token),
             json={
                 "title": "TEST_Deep Cleaning Service",
-                "category": "cleaning",
+                "category": "home-repair",
                 "description": "Sparkling deep clean for apartments",
                 "tiers": [{"name": "Basic", "price": 300, "currency": "ILS", "description": "2h clean"}],
                 "gallery": ["https://example.com/img.jpg"],
@@ -115,7 +116,7 @@ class TestGigCreate:
         assert r.status_code == 200, r.text
         gig = r.json()
         assert gig["id"] and gig["title"] == "TEST_Deep Cleaning Service"
-        assert gig["category"] == "cleaning"
+        assert gig["category"] == "home-repair"
         assert gig["status"] == "published"
 
         mg = requests.get(f"{API}/my-gigs", headers=_h(owner_token), timeout=15)
@@ -134,8 +135,8 @@ class TestPublicBrowse:
         requests.post(
             f"{API}/gigs",
             headers=_h(owner_token),
-            json={"title": "TEST_Deep browse", "category": "cleaning", "description": "deep clean",
-                  "booking_mode": "whatsapp", "whatsapp": "+972500000002"},
+            json={"title": "TEST_Deep browse", "category": "home-repair", "description": "deep clean",
+                  "booking_mode": "whatsapp", "whatsapp": "+972500000002", "area": "Tel Aviv"},
             timeout=15,
         )
         r = requests.get(f"{API}/gigs", timeout=15)
@@ -147,10 +148,10 @@ class TestPublicBrowse:
             assert "provider" in g and g["provider"]["user_id"]
 
     def test_filter_by_category(self):
-        r = requests.get(f"{API}/gigs", params={"category": "cleaning"}, timeout=15)
+        r = requests.get(f"{API}/gigs", params={"category": "home-repair"}, timeout=15)
         assert r.status_code == 200
         gigs = r.json()
-        assert all(g["category"] == "cleaning" for g in gigs)
+        assert all(g["category"] == "home-repair" for g in gigs)
 
     def test_search_case_insensitive(self):
         r = requests.get(f"{API}/gigs", params={"q": "deep"}, timeout=15)
@@ -170,8 +171,8 @@ class TestGigOwnership:
         r = requests.post(
             f"{API}/gigs",
             headers=_h(owner_token),
-            json={"title": "TEST_owned_gig", "category": "handyman",
-                  "booking_mode": "whatsapp", "whatsapp": "+972500000003"},
+            json={"title": "TEST_owned_gig", "category": "home-repair",
+                  "booking_mode": "whatsapp", "whatsapp": "+972500000003", "area": "Tel Aviv"},
             timeout=15,
         )
         assert r.status_code == 200
@@ -231,8 +232,8 @@ class TestBooking:
         cr = requests.post(
             f"{API}/gigs",
             headers=_h(owner_token),
-            json={"title": "TEST_wa_only", "category": "cleaning",
-                  "booking_mode": "whatsapp", "whatsapp": "+972500000004"},
+            json={"title": "TEST_wa_only", "category": "home-repair",
+                  "booking_mode": "whatsapp", "whatsapp": "+972500000004", "area": "Tel Aviv"},
             timeout=15,
         )
         gid = cr.json()["id"]
@@ -248,8 +249,8 @@ class TestBooking:
         cr = requests.post(
             f"{API}/gigs",
             headers=_h(owner_token),
-            json={"title": "TEST_in_platform", "category": "moving", "booking_mode": "in_platform",
-                  "tiers": [{"name": "Basic", "price": 500, "currency": "ILS"}]},
+            json={"title": "TEST_in_platform", "category": "transportation", "booking_mode": "in_platform",
+                  "tiers": [{"name": "Basic", "price": 500, "currency": "ILS"}], "area": "Tel Aviv"},
             timeout=15,
         )
         assert cr.status_code == 200, cr.text
