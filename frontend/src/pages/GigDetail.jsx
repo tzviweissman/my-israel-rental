@@ -423,19 +423,53 @@ const GigDetail = () => {
                   {gig.products.map((p, i) => {
                     const psym = p.currency === 'USD' ? '$' : '₪';
                     const active = tier?.name === p.name;
+                    const askAbout = (e) => {
+                      e.stopPropagation();
+                      // Per-product WhatsApp shortcut. Carries the exact
+                      // item + price + a link to the store page so the
+                      // seller has full context regardless of which
+                      // product the shopper picked in the sidebar.
+                      if (gig.booking_mode === 'whatsapp') {
+                        if (!gig.whatsapp) return toast.error('Seller has no WhatsApp set');
+                        const link = `${window.location.origin}/services/gig/${gig.id}`;
+                        const msg = `Hi! I'm interested in "${p.name}" (${psym}${Number(p.price).toLocaleString()}) from your ${displayTitle} store on MyIsraelRental.\n${link}`;
+                        window.open(buildWhatsAppUrl(gig.whatsapp, msg), '_blank');
+                        return;
+                      }
+                      // Fall back to selecting the product + opening the in-platform booking modal.
+                      setTier(p);
+                      if (!token) { toast.error('Please sign in to message the seller'); navigate('/auth'); return; }
+                      setShowBook(true);
+                    };
                     return (
-                      <button key={i} onClick={() => setTier(p)}
-                        className={`text-left rounded-xl overflow-hidden border-2 transition-all bg-white ${
+                      <div
+                        key={i}
+                        role="button"
+                        tabIndex={0}
+                        onClick={() => setTier(p)}
+                        onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') setTier(p); }}
+                        className={`text-left rounded-xl overflow-hidden border-2 transition-all bg-white cursor-pointer ${
                           active ? 'border-[#1E6A6A] shadow-md' : 'border-gray-200 hover:border-[#D4AF37]'
                         }`}
-                        data-testid={`gig-product-${i}`}>
+                        data-testid={`gig-product-${i}`}
+                      >
                         <div className="aspect-square bg-gray-100" style={p.image ? { backgroundImage: `url(${p.image})`, backgroundSize: 'cover', backgroundPosition: 'center' } : {}} />
-                        <div className="p-2.5">
+                        <div className="p-2.5 space-y-1.5">
                           <p className="text-sm font-semibold text-gray-900 line-clamp-1">{p.name}</p>
-                          <p className="text-sm text-[#1E6A6A] font-bold mt-0.5">{psym}{Number(p.price).toLocaleString()}</p>
-                          {!p.in_stock && <p className="text-[10px] text-red-500 font-semibold mt-0.5">Out of stock</p>}
+                          <div className="flex items-baseline justify-between gap-2">
+                            <p className="text-sm text-[#1E6A6A] font-bold">{psym}{Number(p.price).toLocaleString()}</p>
+                            {!p.in_stock && <p className="text-[10px] text-red-500 font-semibold">Out of stock</p>}
+                          </div>
+                          <button
+                            type="button"
+                            onClick={askAbout}
+                            className="w-full mt-1 inline-flex items-center justify-center gap-1 py-1.5 rounded-md text-[11px] font-semibold text-[#1E6A6A] bg-[#1E6A6A]/8 hover:bg-[#1E6A6A]/15 transition-colors"
+                            data-testid={`gig-product-ask-${i}`}
+                          >
+                            <MessageCircle size={11} /> Ask about this →
+                          </button>
                         </div>
-                      </button>
+                      </div>
                     );
                   })}
                 </div>
