@@ -27,6 +27,7 @@ import ServicesMapView from '../components/marketplace/ServicesMapView';
 import PeekableResultsSheet from '../components/common/PeekableResultsSheet';
 import NearbyDensityBar from '../components/common/NearbyDensityBar';
 import { localizedTitle } from '../utils/gigLocale';
+import { isAvailableNow } from '../utils/gigAvailability';
 
 const TEAL = '#1E6A6A';
 const GOLD = '#D4AF37';
@@ -48,6 +49,7 @@ const GigCard = ({ gig, onClick, i18n, t }) => {
   const currency = gig.tiers?.[0]?.currency || 'ILS';
   const sym = currency === 'ILS' ? '₪' : '$';
   const bucket = gig.provider?.response_bucket;
+  const availableNow = isAvailableNow(gig);
   return (
     <button
       onClick={onClick}
@@ -72,6 +74,19 @@ const GigCard = ({ gig, onClick, i18n, t }) => {
           >
             <Award size={10} />
             {t('services.topRated', 'Top rated')}
+          </span>
+        )}
+        {/* Available-now chip — only for appointment gigs whose weekly
+            hours include the current wall-clock. Positioned top-right so
+            it never collides with the top-rated pill (top-left) or the
+            response-time chip (bottom-right). */}
+        {availableNow && (
+          <span
+            className="absolute top-2 end-2 inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wide shadow bg-emerald-500 text-white"
+            data-testid={`gig-available-now-${gig.id}`}
+          >
+            <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
+            Available now
           </span>
         )}
         {/* Response-time chip */}

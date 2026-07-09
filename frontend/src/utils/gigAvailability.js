@@ -1,0 +1,36 @@
+/**
+ * isAvailableNow — pure function that decides whether an appointment
+ * gig has an open window at the moment this code runs.
+ *
+ * Uses the browser's local time. The provider's declared weekly hours
+ * live in the same civil time we display them in (the wizard stores
+ * plain "HH:MM" strings without a timezone), so mapping current local
+ * hh:mm → the day's window is enough — no timezone math required.
+ *
+ * Returns `false` for non-appointment gigs so the callsite doesn't have
+ * to double-check `gig_type`. Also returns `false` when the gig has no
+ * weekly_availability yet (fresh appointment gig before hours are set).
+ */
+const DAY_KEYS = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'];
+
+const toMinutes = (hhmm) => {
+  if (typeof hhmm !== 'string') return null;
+  const [h, m] = hhmm.split(':').map(Number);
+  if (Number.isNaN(h) || Number.isNaN(m)) return null;
+  return h * 60 + m;
+};
+
+export const isAvailableNow = (gig, now = new Date()) => {
+  if (!gig || gig.gig_type !== 'appointment') return false;
+  const weekly = gig.weekly_availability;
+  if (!weekly || typeof weekly !== 'object') return false;
+  const dayKey = DAY_KEYS[now.getDay()];
+  const windows = weekly[dayKey] || [];
+  if (!windows.length) return false;
+  const nowMin = now.getHours() * 60 + now.getMinutes();
+  return windows.some((w) => {
+    const s = toMinutes(w?.start);
+    const e = toMinutes(w?.end);
+    return s != null && e != null && s <= nowMin && nowMin < e;
+  });
+};

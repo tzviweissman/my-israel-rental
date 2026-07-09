@@ -16,6 +16,7 @@ import { API, AuthContext } from '../App';
 import PageMeta from '../components/PageMeta';
 import StarRating from '../components/marketplace/StarRating';
 import { localizedTitle, localizedDescription } from '../utils/gigLocale';
+import { isAvailableNow } from '../utils/gigAvailability';
 
 const buildWhatsAppUrl = (raw, message) => {
   const digits = (raw || '').replace(/[^\d]/g, '');
@@ -399,6 +400,15 @@ const GigDetail = () => {
                     {bucket === '1h'
                       ? t('services.replies1h', 'Replies in 1h')
                       : t('services.replies24h', 'Replies in 24h')}
+                  </span>
+                )}
+                {isAvailableNow(gig) && (
+                  <span
+                    className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold uppercase tracking-wide shadow-sm bg-emerald-500 text-white"
+                    data-testid="gig-available-now"
+                  >
+                    <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
+                    Available now
                   </span>
                 )}
               </div>
