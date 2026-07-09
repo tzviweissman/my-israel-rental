@@ -195,6 +195,22 @@ const Services = () => {
     minRating, minPrice, maxPrice, responseTime, languages, bookingMode, sort, nearby, maxDistance,
   } = state;
 
+  // Client-side toggle — filters the fetched gig list down to just
+  // appointment gigs whose weekly hours include the current wall-clock.
+  // Kept in the URL so shoppers can bookmark / share the "who's open
+  // right now" view.
+  const availableNowOnly = searchParams.get('available_now') === '1';
+  const displayGigs = useMemo(
+    () => (availableNowOnly ? gigs.filter((g) => isAvailableNow(g)) : gigs),
+    [gigs, availableNowOnly],
+  );
+  const toggleAvailableNow = () => {
+    const next = new URLSearchParams(searchParams);
+    if (availableNowOnly) next.delete('available_now');
+    else next.set('available_now', '1');
+    setSearchParams(next, { replace: true });
+  };
+
   // One-shot fetches — categories/locations/languages don't change.
   useEffect(() => {
     Promise.all([
@@ -523,7 +539,7 @@ const Services = () => {
               ? categories.find((c) => c.slug === selectedCat)?.label
               : t('services.allServices', 'All services')}
             <span className="text-sm text-gray-500 font-normal ms-2" data-testid="services-count">
-              ({gigs.length})
+              ({displayGigs.length})
             </span>
           </h2>
           <div className="flex items-center gap-2">
@@ -583,6 +599,23 @@ const Services = () => {
               {nearby && coords
                 ? t('services.nearbyOn', 'Nearby you')
                 : t('services.showNearby', 'Show nearby')}
+            </button>
+            {/* Available-now toggle — client-side filter that keeps only
+                appointment gigs whose weekly hours include right-now. */}
+            <button
+              type="button"
+              onClick={toggleAvailableNow}
+              className={`inline-flex items-center gap-1.5 px-3 py-2 rounded-full text-xs sm:text-sm border font-semibold transition-colors ${
+                availableNowOnly
+                  ? 'bg-emerald-500 text-white border-emerald-500'
+                  : 'bg-white text-gray-800 border-gray-200 hover:border-gray-400'
+              }`}
+              data-testid="services-available-now-btn"
+              aria-pressed={availableNowOnly}
+              title="Show only appointment services open right now"
+            >
+              <span className={`w-1.5 h-1.5 rounded-full ${availableNowOnly ? 'bg-white animate-pulse' : 'bg-emerald-500'}`} />
+              {availableNowOnly ? 'Available now' : 'Available now'}
             </button>
             {/* Sort dropdown */}
             <label className="text-xs text-gray-500 me-1 hidden sm:inline">
@@ -700,17 +733,29 @@ const Services = () => {
           <div className="flex items-center justify-center py-24">
             <Loader2 className="animate-spin text-[#1E6A6A]" size={28} />
           </div>
-        ) : gigs.length === 0 ? (
+        ) : displayGigs.length === 0 ? (
           <div className="bg-white border border-gray-200 rounded-2xl p-10 text-center">
             <p className="text-gray-700 font-semibold mb-2">
-              {t('services.emptyTitle', 'No services match your filters')}
+              {availableNowOnly
+                ? 'No services open right now'
+                : t('services.emptyTitle', 'No services match your filters')}
             </p>
             <p className="text-gray-500 text-sm mb-5">
-              {advCount > 0
-                ? t('services.emptyBodyFiltered', 'Try loosening the filters, or clear them all to see everything.')
-                : t('services.emptyBody', 'Be the first to list your service in this category — free 30-day trial.')}
+              {availableNowOnly
+                ? 'Nobody with appointment hours listed is inside their open window right now. Try turning the filter off to see everyone.'
+                : (advCount > 0
+                    ? t('services.emptyBodyFiltered', 'Try loosening the filters, or clear them all to see everything.')
+                    : t('services.emptyBody', 'Be the first to list your service in this category — free 30-day trial.'))}
             </p>
-            {advCount > 0 ? (
+            {availableNowOnly ? (
+              <button
+                onClick={toggleAvailableNow}
+                className="px-5 py-2.5 rounded-lg text-sm font-semibold text-white bg-[#1E6A6A] hover:bg-[#0F3A3A]"
+                data-testid="services-empty-available-off"
+              >
+                Show everyone
+              </button>
+            ) : advCount > 0 ? (
               <button
                 onClick={clearAdvancedFilters}
                 className="px-5 py-2.5 rounded-lg text-sm font-semibold text-white bg-[#1E6A6A] hover:bg-[#0F3A3A]"
@@ -732,7 +777,7 @@ const Services = () => {
           <>
             <div className="relative">
               <ServicesMapView
-                gigs={gigs}
+                gigs={displayGigs}
                 userCoords={nearby && coords ? coords : null}
                 maxDistanceKm={nearby && coords ? maxDistance : ''}
                 activeId={activeMapId}
@@ -741,7 +786,7 @@ const Services = () => {
               {nearby && coords && (
                 <div className="absolute top-3 start-3 z-10 pointer-events-none">
                   <NearbyDensityBar
-                    items={gigs}
+                    items={displayGigs}
                     testId="services-density-bar"
                   />
                 </div>
@@ -753,8 +798,8 @@ const Services = () => {
                 list; the peek strip is a lighter mini-card format
                 tuned for horizontal scroll. */}
             <PeekableResultsSheet
-              count={gigs.length}
-              countLabel={gigs.length === 1
+              count={displayGigs.length}
+              countLabel={displayGigs.length === 1
                 ? t('services.gigLabel', 'service')
                 : t('services.gigsLabel', 'services')}
               peekContent={(
@@ -763,7 +808,7 @@ const Services = () => {
                   data-testid="services-peek-strip"
                   style={{ WebkitOverflowScrolling: 'touch' }}
                 >
-                  {gigs.slice(0, 12).map((gig) => {
+                  {displayGigs.slice(0, 12).map((gig) => {
                     const cover = (gig.gallery && gig.gallery[0]) || (gig.images && gig.images[0]) || '';
                     const title = gig.title || 'Service';
                     const price = gig.tiers?.[0]?.price
@@ -807,7 +852,7 @@ const Services = () => {
               )}
               fullContent={(
                 <div className="grid grid-cols-1 gap-4 px-4 py-3 pb-24">
-                  {gigs.map((gig) => (
+                  {displayGigs.map((gig) => (
                     <GigCard
                       key={gig.id}
                       gig={gig}
@@ -823,7 +868,7 @@ const Services = () => {
           </>
         ) : (
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-x-5 gap-y-8">
-            {gigs.map((gig) => (
+            {displayGigs.map((gig) => (
               <GigCard
                 key={gig.id}
                 gig={gig}
@@ -903,7 +948,7 @@ const Services = () => {
       {/* Mobile-only floating view toggle — Airbnb-style bottom-center
           pill. Only shown in LIST view; on the map, the peekable bottom
           sheet handles browsing results without leaving the map. */}
-      {!loading && gigs.length > 0 && viewMode !== 'map' && (
+      {!loading && displayGigs.length > 0 && viewMode !== 'map' && (
         <button
           type="button"
           onClick={() => patchUrl({ view: 'map' })}
