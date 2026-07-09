@@ -12,6 +12,14 @@ Build a bilingual (English/Hebrew) rental website named MyIsraelRental.com with 
 
 ## What's Been Implemented
 
+- [x] **Publish-flow polish for auto-translate (2026-07-09)**:
+  - Provider now gets clear signals that the ~4-second publish latency is doing valuable work, not just being slow:
+    - **Pre-publish notice on step 5**: teal "Heads up" strip with a spinner icon and copy: *"Publishing takes about 4 seconds because we auto-translate your listing to Hebrew so Hebrew-speaking renters can find and read it right away — no extra typing needed."*
+    - **Loading state**: Publish button flips from `Publish gig →` to `⟳ Publishing… translating to Hebrew` while the LLM call is in flight.
+    - **Success toast**: reads `"Gig published — also translated to Hebrew for you"` when the response includes populated Hebrew fields; falls back to the plain `"Gig published!"` toast if the translator didn't run (e.g. provider is editing an already-Hebrew listing).
+  - Files: `frontend/src/pages/CreateGig.jsx`.
+  - Verified visually on both states (idle + saving) via Playwright.
+
 - [x] **Inline (synchronous) Hebrew auto-translate on gig publish (2026-07-09)**:
   - User feedback: "why doesnt it work right away when someone adds a new gig".
   - Root cause: the earlier hook fired as a `asyncio.create_task` background job, so the response returned before translation finished. Hebrew renters loading the gig within the first ~10 s still saw English.

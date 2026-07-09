@@ -132,7 +132,15 @@ const CreateGig = () => {
       const { data } = await axios.post(`${API}/marketplace/gigs`, payload, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      toast.success('Gig published!');
+      // Success toast tailored to whether the backend actually generated
+      // Hebrew copy — reassures the provider that their listing is
+      // bilingual without them having to type anything twice.
+      const translated = data?.title_he || data?.description_he;
+      toast.success(
+        translated
+          ? 'Gig published — also translated to Hebrew for you'
+          : 'Gig published!'
+      );
       navigate(`/services/gig/${data.id}`);
     } catch (err) {
       toast.error(err.response?.data?.detail || 'Failed to publish');
@@ -325,6 +333,16 @@ const CreateGig = () => {
                 Pick a city so renters within a few km can find your gig via <span className="font-semibold">Show nearby</span>. Matching one of the suggested cities gives you the highest visibility.
               </p>
             </div>
+            {/* Sets expectations for the ~4-second Publish latency —
+                the round-trip is dominated by the LLM translation
+                call. Providers are more patient when they know it's
+                doing valuable work in the background. */}
+            <div className="rounded-xl bg-[#1E6A6A]/6 border border-[#1E6A6A]/15 p-3 text-xs text-[#1E6A6A] leading-snug flex items-start gap-2" data-testid="wizard-translate-notice">
+              <Loader2 size={14} className="mt-0.5 flex-shrink-0 opacity-70" />
+              <span>
+                <b>Heads up:</b> Publishing takes about 4 seconds because we auto-translate your listing to Hebrew so Hebrew-speaking renters can find and read it right away — no extra typing needed.
+              </span>
+            </div>
           </div>
         )}
 
@@ -338,7 +356,14 @@ const CreateGig = () => {
             </button>
           ) : (
             <button type="button" disabled={!canNext() || saving} onClick={submit} className="px-5 py-2 rounded-lg text-sm font-semibold text-white bg-[#1E6A6A] disabled:opacity-40 flex items-center gap-1" data-testid="wizard-publish">
-              {saving ? <Loader2 className="animate-spin" size={14} /> : <>Publish gig <ArrowRight size={14} /></>}
+              {saving ? (
+                <>
+                  <Loader2 className="animate-spin" size={14} />
+                  <span>Publishing… translating to Hebrew</span>
+                </>
+              ) : (
+                <>Publish gig <ArrowRight size={14} /></>
+              )}
             </button>
           )}
         </div>
