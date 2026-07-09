@@ -11,7 +11,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import axios from 'axios';
 import { toast } from 'sonner';
-import { MessageCircle, Send, Loader2, ArrowLeft, Award, Zap, Calendar, Clock } from 'lucide-react';
+import { MessageCircle, Send, Loader2, ArrowLeft, Award, Zap, Calendar, Clock, Camera } from 'lucide-react';
 import { API, AuthContext } from '../App';
 import PageMeta from '../components/PageMeta';
 import StarRating from '../components/marketplace/StarRating';
@@ -616,6 +616,7 @@ const TierList = ({ tiers, selected, onSelect, isAppointment }) => {
   return tiers.map((tt) => {
     const active = selected?.name === tt.name;
     const sym = tt.currency === 'USD' ? '$' : '₪';
+    const photoCount = Array.isArray(tt.images) ? tt.images.length : 0;
     return (
       <button
         key={tt.name}
@@ -626,7 +627,22 @@ const TierList = ({ tiers, selected, onSelect, isAppointment }) => {
         data-testid={`gig-tier-${tt.name}`}
       >
         <div className="flex justify-between items-baseline gap-2">
-          <span className="font-semibold text-sm flex-1">{tt.name}</span>
+          <span className="font-semibold text-sm flex-1 flex items-center gap-1.5">
+            {tt.name}
+            {/* Camera pip when this tier has its own gallery — signals to
+                buyers that clicking it swaps the header photos. */}
+            {photoCount > 0 && (
+              <span
+                className={`inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wide ${
+                  active ? 'bg-[#1E6A6A] text-white' : 'bg-[#1E6A6A]/10 text-[#1E6A6A]'
+                }`}
+                title={`${photoCount} photo${photoCount === 1 ? '' : 's'} of this option`}
+                data-testid={`gig-tier-photo-badge-${tt.name}`}
+              >
+                <Camera size={9} strokeWidth={2.5} /> {photoCount}
+              </span>
+            )}
+          </span>
           <span className="font-bold text-gray-900">{sym}{Number(tt.price).toLocaleString()}</span>
         </div>
         {isAppointment && tt.duration_minutes && (
