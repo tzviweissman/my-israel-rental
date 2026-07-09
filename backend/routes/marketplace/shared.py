@@ -190,6 +190,11 @@ class PricingTier(BaseModel):
     duration_minutes: Optional[int] = None
     description: str = ""
     features: list[str] = Field(default_factory=list)
+    # Optional per-tier image gallery. Lets a tour guide with two very
+    # different offerings (Jerusalem walking tour vs. Tel Aviv beach
+    # tour) attach photos specific to each option instead of dumping
+    # everything into the gig-wide gallery.
+    images: list[str] = Field(default_factory=list)
 
 
 class ProductItem(BaseModel):

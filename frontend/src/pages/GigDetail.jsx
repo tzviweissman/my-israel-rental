@@ -301,7 +301,17 @@ const GigDetail = () => {
   }
   if (!gig) return null;
 
-  const cover = gig.gallery?.[0];
+  // When the buyer picks an appointment/deliverable tier that has its
+  // own photos, swap the header cover + thumbnail strip to show those
+  // instead of the gig-wide gallery. Falls back to the gig gallery when
+  // the tier has no images (or on Store gigs, which show a product grid
+  // and use `tier` for the product row).
+  const _isStoreEarly = (gig.gig_type || 'deliverable') === 'store';
+  const tierGallery = (tier && !_isStoreEarly && Array.isArray(tier.images) && tier.images.length > 0)
+    ? tier.images
+    : null;
+  const activeGallery = tierGallery || gig.gallery || [];
+  const cover = activeGallery[0];
   const sym = tier?.currency === 'USD' ? '$' : '₪';
   // Bilingual fallbacks — Hebrew renders when i18n.language starts with `he`
   // AND the provider actually supplied the Hebrew copy, otherwise primary.
@@ -368,13 +378,20 @@ const GigDetail = () => {
 
         <div className="grid md:grid-cols-3 gap-8">
           <div className="md:col-span-2 space-y-6">
-            {/* Cover + gallery */}
-            <div className="aspect-video bg-gray-100 rounded-2xl overflow-hidden" style={cover ? { backgroundImage: `url(${cover})`, backgroundSize: 'cover', backgroundPosition: 'center' } : {}}>
+            {/* Cover + gallery — swaps to the selected tier's own photos
+                when that tier has any, so a tour guide's "Jerusalem" vs
+                "Tel Aviv" tours show visually distinct hero images. */}
+            <div className="relative aspect-video bg-gray-100 rounded-2xl overflow-hidden" style={cover ? { backgroundImage: `url(${cover})`, backgroundSize: 'cover', backgroundPosition: 'center' } : {}}>
               {!cover && <div className="w-full h-full flex items-center justify-center text-gray-300">No image</div>}
+              {tierGallery && tier?.name && (
+                <span className="absolute top-3 left-3 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-black/70 text-white backdrop-blur-sm" data-testid="gig-tier-gallery-tag">
+                  Photos of · {tier.name}
+                </span>
+              )}
             </div>
-            {gig.gallery?.length > 1 && (
+            {activeGallery.length > 1 && (
               <div className="flex gap-2 overflow-x-auto">
-                {gig.gallery.map((src) => (
+                {activeGallery.map((src) => (
                   <div key={src} className="w-24 h-24 shrink-0 rounded-lg bg-gray-100" style={{ backgroundImage: `url(${src})`, backgroundSize: 'cover', backgroundPosition: 'center' }} />
                 ))}
               </div>

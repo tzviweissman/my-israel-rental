@@ -74,6 +74,7 @@ const emptyWeekly = () => DAYS.reduce((acc, d) => ({ ...acc, [d.k]: [] }), {});
 const emptyTierFor = (type, prevCurrency = 'ILS') => ({
   name: '', price: '', currency: prevCurrency,
   description: '', features: [],
+  images: [],
   ...(type === 'appointment'
     ? { duration_minutes: 30, delivery_days: '' }
     : { delivery_days: '', duration_minutes: '' }),
@@ -149,6 +150,30 @@ const CreateGig = () => {
     tiers: form.tiers.map((t, idx) => (idx === i ? { ...t, ...patch } : t)),
   });
   const removeTier = (i) => set({ tiers: form.tiers.filter((_, idx) => idx !== i) });
+
+  // Upload one or more images to a specific tier's local `images` array.
+  // Reuses the same Cloudinary fast-upload path as the gig-wide gallery.
+  const uploadTierImages = async (i, files) => {
+    const arr = Array.from(files || []).filter((f) => f.type.startsWith('image/'));
+    if (!arr.length) return;
+    const current = form.tiers[i]?.images || [];
+    if (current.length + arr.length > 6) {
+      toast.error('Max 6 photos per option');
+      return;
+    }
+    try {
+      const results = await uploadFilesFast(arr, API, token, () => {});
+      const good = results.filter((r) => r.url && !r.error);
+      if (good.length < results.length) toast.error(`${results.length - good.length} upload(s) failed`);
+      if (good.length > 0) updateTier(i, { images: [...current, ...good.map((r) => r.url)] });
+    } catch (err) {
+      toast.error(err.message || 'Upload failed');
+    }
+  };
+  const removeTierImage = (i, url) => {
+    const current = form.tiers[i]?.images || [];
+    updateTier(i, { images: current.filter((u) => u !== url) });
+  };
 
   // ---- Product helpers (store) ---------------------------------------------
   const addProduct = () => {
@@ -317,6 +342,7 @@ const CreateGig = () => {
           currency: t.currency,
           description: t.description,
           features: t.features || [],
+          images: t.images || [],
           delivery_days: form.gig_type === 'deliverable' && t.delivery_days
             ? parseInt(t.delivery_days, 10) : null,
           duration_minutes: form.gig_type === 'appointment' && t.duration_minutes
@@ -459,6 +485,8 @@ const CreateGig = () => {
             onUpdate={updateTier}
             onAdd={addTier}
             onRemove={removeTier}
+            onUploadImages={uploadTierImages}
+            onRemoveImage={removeTierImage}
             enableDateBooking={form.enable_date_booking}
             onToggleDateBooking={() => set({ enable_date_booking: !form.enable_date_booking })}
           />
@@ -682,8 +710,9 @@ const StoreProductsStep = ({ products, onUpdate, onAdd, onRemove, productImageIn
 );
 
 // ---------- Step 4B — Deliverable + Appointment tiers ----------
-const TiersStep = ({ gigType, tiers, onUpdate, onAdd, onRemove, enableDateBooking, onToggleDateBooking }) => {
+const TiersStep = ({ gigType, tiers, onUpdate, onAdd, onRemove, onUploadImages, onRemoveImage, enableDateBooking, onToggleDateBooking }) => {
   const isAppt = gigType === 'appointment';
+  const fileInputsRef = React.useRef({});
   return (
     <div className="space-y-4">
       <div className="rounded-xl bg-[#1E6A6A]/8 border border-[#1E6A6A]/20 p-3 text-xs text-[#1E6A6A] leading-snug">
@@ -762,6 +791,60 @@ const TiersStep = ({ gigType, tiers, onUpdate, onAdd, onRemove, enableDateBookin
           )}
           <textarea value={tt.description} onChange={(e) => onUpdate(i, { description: e.target.value })} rows={2}
             placeholder="What's included (optional)" className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm" />
+
+          {/* Per-tier photo uploader — lets a provider give each option
+              its own visual identity (e.g. "Jerusalem tour" vs. "Tel Aviv
+              tour" photos). Max 6 per option; falls back to the gig-wide
+              gallery on the public page when a tier has no images. */}
+          <div className="pt-1">
+            <div className="flex items-center justify-between mb-1.5">
+              <p className="text-[11px] font-semibold text-gray-600">
+                Photos of this option <span className="text-gray-400 font-normal">(optional · max 6)</span>
+              </p>
+              {(tt.images || []).length < 6 && (
+                <>
+                  <input
+                    ref={(el) => { fileInputsRef.current[i] = el; }}
+                    type="file"
+                    accept="image/*"
+                    multiple
+                    className="hidden"
+                    onChange={(e) => { onUploadImages(i, e.target.files); e.target.value = ''; }}
+                    data-testid={`wizard-tier-images-input-${i}`}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => fileInputsRef.current[i]?.click()}
+                    className="text-[11px] font-semibold text-[#1E6A6A] flex items-center gap-0.5 hover:underline"
+                    data-testid={`wizard-tier-images-add-${i}`}
+                  >
+                    <Plus size={11} /> Add photos
+                  </button>
+                </>
+              )}
+            </div>
+            {(tt.images || []).length > 0 ? (
+              <div className="grid grid-cols-6 gap-1.5">
+                {tt.images.map((u, k) => (
+                  <div key={u} className="relative aspect-square rounded-md bg-gray-100 group overflow-hidden" data-testid={`wizard-tier-image-${i}-${k}`}>
+                    <div className="absolute inset-0" style={{ backgroundImage: `url(${u})`, backgroundSize: 'cover', backgroundPosition: 'center' }} />
+                    <button
+                      type="button"
+                      onClick={() => onRemoveImage(i, u)}
+                      className="absolute top-0.5 right-0.5 w-4 h-4 rounded-full bg-black/70 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                      data-testid={`wizard-tier-image-remove-${i}-${k}`}
+                    >
+                      <X size={9} />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="text-[11px] text-gray-400 italic">
+                No photos yet — customers will see the main gig gallery instead.
+              </p>
+            )}
+          </div>
           {(missingName || missingPrice) && (
             <p className="text-[11px] text-red-600 leading-snug flex items-center gap-1" data-testid={`wizard-tier-hint-${i}`}>
               <span className="inline-block w-1 h-1 rounded-full bg-red-500" />
