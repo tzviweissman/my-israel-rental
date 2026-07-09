@@ -95,7 +95,7 @@ const CreateGig = () => {
   const set = (patch) => setForm((f) => ({ ...f, ...patch }));
 
   const addTier = () => {
-    if (form.tiers.length >= 8) return;
+    if (form.tiers.length >= 15) return;
     set({ tiers: [...form.tiers, { name: '', price: '', currency: 'ILS', delivery_days: '', description: '', features: [] }] });
   };
   const updateTier = (i, patch) => set({ tiers: form.tiers.map((t, idx) => (idx === i ? { ...t, ...patch } : t)) });
@@ -195,7 +195,7 @@ const CreateGig = () => {
                 barber can list "Haircut", "Beard trim", "Full grooming"
                 as separate options with their own prices. */}
             <div className="rounded-xl bg-[#1E6A6A]/8 border border-[#1E6A6A]/20 p-3 text-xs text-[#1E6A6A] leading-snug">
-              List each service you offer as a separate option — for example, a barber might add <b>Haircut</b> (₪60), <b>Beard trim</b> (₪30), and <b>Full grooming</b> (₪90). These aren&apos;t tiers or upgrades; they&apos;re the different things customers can book from you.
+              List each service or tier you offer as a separate option — for example, a barber might add <b>Haircut</b> (₪60), <b>Beard trim</b> (₪30), and <b>Full grooming</b> (₪90). These are the different options customers can book from you.
             </div>
             {form.tiers.map((tt, i) => (
               <div key={i} className="border border-gray-200 rounded-xl p-4 space-y-2">
@@ -222,8 +222,8 @@ const CreateGig = () => {
                 <textarea value={tt.description} onChange={(e) => updateTier(i, { description: e.target.value })} rows={2} placeholder="What's included (optional)" className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm" />
               </div>
             ))}
-            {form.tiers.length < 8 && (
-              <button type="button" onClick={addTier} className="text-sm font-semibold text-[#1E6A6A] flex items-center gap-1" data-testid="wizard-tier-add"><Plus size={14} /> Add another service</button>
+            {form.tiers.length < 15 && (
+              <button type="button" onClick={addTier} className="text-sm font-semibold text-[#1E6A6A] flex items-center gap-1" data-testid="wizard-tier-add"><Plus size={14} /> Add another service or tier</button>
             )}
           </div>
         )}

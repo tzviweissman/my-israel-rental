@@ -89,7 +89,7 @@ CATEGORIES = [
     {"slug": "real-estate-services", "label": "Real Estate Services",     "icon": "home"},
     {"slug": "health-fitness",       "label": "Health & Fitness",         "icon": "dumbbell"},
     {"slug": "transportation",       "label": "Transportation",           "icon": "car"},
-    {"slug": "home-organizers",      "label": "Home Organizers",          "icon": "boxes"},
+    {"slug": "home-organizers",      "label": "Home and Living",          "icon": "boxes"},
     {"slug": "hotels-travel",        "label": "Hotels / Travel Agencies", "icon": "plane"},
     {"slug": "home-repair",          "label": "Home Service / Repair",    "icon": "wrench"},
     {"slug": "womens-spa",           "label": "Personal Care",            "icon": "scissors"},
