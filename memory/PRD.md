@@ -12,6 +12,26 @@ Build a bilingual (English/Hebrew) rental website named MyIsraelRental.com with 
 
 ## What's Been Implemented
 
+- [x] **`routes/admin_import/` and `routes/bookings/` package splits (2026-07-09)** — bonus round of the backend refactor:
+  - **`admin_import/`** (was 1,153 lines):
+    - `helpers.py` (461) — CSV parsers, coercers, AI column mapper (Claude + fuzzy fallback), `_build_property_doc`, `_resolve_or_create_owner`, `_issue_reset_token`, `_frontend_origin`.
+    - `preview.py` (103) — `POST /admin/import/preview`.
+    - `properties.py` (451) — property commit + `_background_mirror_properties` + `/admin/properties/remirror` + `/admin/properties/repair-prices`.
+    - `users.py` (121) — user commit + set-password emails.
+    - `quick_add.py` (130) — single-property quick-add.
+    - `__init__.py` (52) — aggregator + 8 re-exports for 4 test files and `routes/admin/core.py`.
+    - Result: 25 admin-import tests pass.
+  - **`bookings/`** (was 1,067 lines):
+    - `shared.py` (363) — property/sublease loader, availability + holiday-window + overlap checks, notifications, `_compute_booking_total` engine, `_build_booking_doc`, `_queue_booking_emails`.
+    - `crud.py` (114) — `POST /bookings`, `GET /bookings`.
+    - `accept.py` (163) — accept endpoint + owner-authorize + contract attach + renter notify.
+    - `cancel.py` (202) — cancel + request-cancel + approve-cancel + deny-cancel.
+    - `contract.py` (314) — sign-contract + translate-contract with all their helpers.
+    - `__init__.py` (33) — aggregator + `BookingCreate`, `_compute_booking_total` re-exports.
+    - Result: 4 accept-booking tests pass, 4 smart-pricing tests pass. Also patched `tests/test_accept_booking_refactor.py` to monkeypatch `routes.bookings.accept.send_booking_confirmation_email` (used to patch it on the flat module). Remaining `test_cancellation.py` failures are **pre-existing** (confirmed identical failure on pre-refactor commit — bad test data, unrelated).
+  - `server.py` needed **zero changes** for either split — `from routes import admin_import, bookings` still resolves and each `.router` is now the aggregated router.
+  - All routes files in the codebase now under 700 lines.
+
 - [x] **`routes/smart_pricing/` package split (2026-07-08)** — completes the backend refactor epic:
   - Replaced the single-file `routes/smart_pricing.py` (920 lines) with a 4-module package + aggregator.
   - Module layout:

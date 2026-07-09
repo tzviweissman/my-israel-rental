@@ -22,7 +22,7 @@ load_dotenv(ROOT / ".env")
 from motor.motor_asyncio import AsyncIOMotorClient  # noqa: E402
 
 # Import the module so we can monkey-patch its `send_booking_confirmation_email`
-from routes import bookings as bookings_route  # noqa: E402
+from routes.bookings import accept as bookings_route  # noqa: E402
 
 
 @pytest.fixture()
