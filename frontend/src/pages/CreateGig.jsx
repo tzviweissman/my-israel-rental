@@ -4,7 +4,10 @@
  * Steps:
  *   1. Overview: title + category
  *   2. Description + FAQs
- *   3. Pricing tiers (up to 3)
+ *   3. Services & prices — each row is a distinct service the provider
+ *      offers (e.g. Haircut, Beard trim, Full grooming), NOT a
+ *      Fiverr-style Basic/Standard/Premium upgrade ladder. Data is
+ *      still stored under `tiers[]` on the backend for compatibility.
  *   4. Gallery (URL-based for MVP — Cloudinary upload wiring in Phase 1b)
  *   5. Booking mode + WhatsApp/area
  *
@@ -36,7 +39,11 @@ const CreateGig = () => {
     description: '',
     description_he: '',
     faqs: [],
-    tiers: [{ name: 'Basic', price: '', currency: 'ILS', delivery_days: '', description: '', features: [] }],
+    // Each entry represents one distinct service the provider offers.
+    // Kept under the legacy `tiers[]` key so the backend + gig detail
+    // page don't have to change. Names are free-text — no forced
+    // Basic/Standard/Premium ladder.
+    tiers: [{ name: '', price: '', currency: 'ILS', delivery_days: '', description: '', features: [] }],
     gallery: [],
     booking_mode: 'whatsapp',
     whatsapp: '',
@@ -90,9 +97,8 @@ const CreateGig = () => {
   const set = (patch) => setForm((f) => ({ ...f, ...patch }));
 
   const addTier = () => {
-    if (form.tiers.length >= 3) return;
-    const nextName = ['Basic', 'Standard', 'Premium'][form.tiers.length];
-    set({ tiers: [...form.tiers, { name: nextName, price: '', currency: 'ILS', delivery_days: '', description: '', features: [] }] });
+    if (form.tiers.length >= 8) return;
+    set({ tiers: [...form.tiers, { name: '', price: '', currency: 'ILS', delivery_days: '', description: '', features: [] }] });
   };
   const updateTier = (i, patch) => set({ tiers: form.tiers.map((t, idx) => (idx === i ? { ...t, ...patch } : t)) });
   const removeTier = (i) => set({ tiers: form.tiers.filter((_, idx) => idx !== i) });
@@ -147,7 +153,7 @@ const CreateGig = () => {
           ))}
         </div>
         <h1 className="text-2xl font-bold mb-6" style={{ fontFamily: 'Playfair Display' }}>
-          {['', 'Overview', 'Description', 'Pricing', 'Gallery', 'Booking'][step]}
+          {['', 'Overview', 'Description', 'Services & Prices', 'Gallery', 'Booking'][step]}
         </h1>
 
         {step === 1 && (
@@ -214,10 +220,23 @@ const CreateGig = () => {
 
         {step === 3 && (
           <div className="space-y-4">
+            {/* Helper strip — explains this isn't a Fiverr tier ladder.
+                Each row is a distinct service the provider offers, so a
+                barber can list "Haircut", "Beard trim", "Full grooming"
+                as separate options with their own prices. */}
+            <div className="rounded-xl bg-[#1E6A6A]/8 border border-[#1E6A6A]/20 p-3 text-xs text-[#1E6A6A] leading-snug">
+              List each service you offer as a separate option — for example, a barber might add <b>Haircut</b> (₪60), <b>Beard trim</b> (₪30), and <b>Full grooming</b> (₪90). These aren&apos;t tiers or upgrades; they&apos;re the different things customers can book from you.
+            </div>
             {form.tiers.map((tt, i) => (
               <div key={i} className="border border-gray-200 rounded-xl p-4 space-y-2">
-                <div className="flex items-center justify-between">
-                  <input value={tt.name} onChange={(e) => updateTier(i, { name: e.target.value })} className="font-bold text-sm bg-transparent focus:outline-none" data-testid={`wizard-tier-name-${i}`} />
+                <div className="flex items-center justify-between gap-2">
+                  <input
+                    value={tt.name}
+                    onChange={(e) => updateTier(i, { name: e.target.value })}
+                    placeholder={i === 0 ? 'e.g. Haircut' : (i === 1 ? 'e.g. Beard trim' : 'Service name')}
+                    className="font-bold text-sm bg-transparent focus:outline-none flex-1 placeholder:text-gray-400 placeholder:font-normal"
+                    data-testid={`wizard-tier-name-${i}`}
+                  />
                   {form.tiers.length > 1 && (
                     <button type="button" onClick={() => removeTier(i)} className="text-red-500" data-testid={`wizard-tier-remove-${i}`}><Trash2 size={14} /></button>
                   )}
@@ -228,13 +247,13 @@ const CreateGig = () => {
                     <option value="USD">$ USD</option>
                   </select>
                   <input type="number" value={tt.price} onChange={(e) => updateTier(i, { price: e.target.value })} placeholder="Price" className="flex-1 px-3 py-2 rounded-lg border border-gray-200 text-sm" data-testid={`wizard-tier-price-${i}`} />
-                  <input type="number" value={tt.delivery_days} onChange={(e) => updateTier(i, { delivery_days: e.target.value })} placeholder="Days" className="w-24 px-3 py-2 rounded-lg border border-gray-200 text-sm" />
+                  <input type="number" value={tt.delivery_days} onChange={(e) => updateTier(i, { delivery_days: e.target.value })} placeholder="Days" title="Turnaround in days — leave blank for on-the-spot services" className="w-20 px-3 py-2 rounded-lg border border-gray-200 text-sm" />
                 </div>
-                <textarea value={tt.description} onChange={(e) => updateTier(i, { description: e.target.value })} rows={2} placeholder="What's included in this tier" className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm" />
+                <textarea value={tt.description} onChange={(e) => updateTier(i, { description: e.target.value })} rows={2} placeholder="What's included (optional)" className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm" />
               </div>
             ))}
-            {form.tiers.length < 3 && (
-              <button type="button" onClick={addTier} className="text-sm font-semibold text-[#1E6A6A] flex items-center gap-1" data-testid="wizard-tier-add"><Plus size={14} /> Add tier</button>
+            {form.tiers.length < 8 && (
+              <button type="button" onClick={addTier} className="text-sm font-semibold text-[#1E6A6A] flex items-center gap-1" data-testid="wizard-tier-add"><Plus size={14} /> Add another service</button>
             )}
           </div>
         )}

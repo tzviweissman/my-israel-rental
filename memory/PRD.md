@@ -12,6 +12,21 @@ Build a bilingual (English/Hebrew) rental website named MyIsraelRental.com with 
 
 ## What's Been Implemented
 
+- [x] **Reframe gig "tiers" as distinct services (2026-07-09)**:
+  - User feedback: "when adding a new service when adding tiers it should be tiers or just multiple services like a barber shop just has different haircut options not different tiers".
+  - The gig-creation wizard was auto-labeling rows Basic / Standard / Premium — implicitly forcing a Fiverr upgrade-ladder mental model. A barber's real offering is 3 distinct services (Haircut, Beard trim, Full grooming), not 3 escalating packages.
+  - `frontend/src/pages/CreateGig.jsx`:
+    - Step-3 title changed from "Pricing" → "**Services & Prices**".
+    - Default first row no longer pre-fills "Basic" — starts empty with a placeholder that rotates (row 0 shows `e.g. Haircut`, row 1 `e.g. Beard trim`, later rows `Service name`).
+    - "Add tier" button → "**Add another service**"; limit bumped from 3 → 8 (a barber may offer more options).
+    - New teal helper strip explaining the shift: "List each service you offer as a separate option — for example, a barber might add Haircut (₪60), Beard trim (₪30), and Full grooming (₪90). These aren't tiers or upgrades; they're the different things customers can book from you."
+    - "What's included in this tier" placeholder → "What's included (optional)". Days field gets a tooltip: "Turnaround in days — leave blank for on-the-spot services".
+  - `frontend/src/pages/GigDetail.jsx`:
+    - "Pick a tier first" → "**Pick a service option first**".
+    - WhatsApp booking message no longer says `"${tier.name} tier"` — just the service name.
+  - Backend model unchanged (`tiers[]` on the gig doc) so existing gigs render identically; only the UI mental model shifted. Zero migration required.
+  - Verified visually via Playwright — empty state shows helper + placeholder; filled state renders Haircut / Beard trim / Full grooming as separate cards; "Add another service" reappears until the 8-service ceiling.
+
 - [x] **`routes/admin_import/` and `routes/bookings/` package splits (2026-07-09)** — bonus round of the backend refactor:
   - **`admin_import/`** (was 1,153 lines):
     - `helpers.py` (461) — CSV parsers, coercers, AI column mapper (Claude + fuzzy fallback), `_build_property_doc`, `_resolve_or_create_owner`, `_issue_reset_token`, `_frontend_origin`.

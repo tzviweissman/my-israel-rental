@@ -293,10 +293,10 @@ const GigDetail = () => {
   const bucket = gig.provider?.response_bucket;
 
   const handleBookClick = () => {
-    if (!tier) return toast.error('Pick a tier first');
+    if (!tier) return toast.error('Pick a service option first');
     if (gig.booking_mode === 'whatsapp') {
       if (!gig.whatsapp) return toast.error('Provider has no WhatsApp set');
-      const msg = `Hi! I'd like to book your "${displayTitle}" — ${tier.name} tier (${sym}${tier.price}) from MyIsraelRental.`;
+      const msg = `Hi! I'd like to book your "${displayTitle}" — ${tier.name} (${sym}${tier.price}) from MyIsraelRental.`;
       window.open(buildWhatsAppUrl(gig.whatsapp, msg), '_blank');
       return;
     }
