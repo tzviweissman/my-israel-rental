@@ -23,7 +23,7 @@ import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { toast } from 'sonner';
 import {
-  Loader2, Plus, Trash2, ArrowLeft, ArrowRight, Upload, X,
+  Loader2, Plus, Trash2, ArrowLeft, ArrowRight, X,
   Store, Package, CalendarClock, ImagePlus,
 } from 'lucide-react';
 import { API, AuthContext } from '../App';
@@ -91,9 +91,6 @@ const CreateGig = () => {
   const [categories, setCategories] = useState([]);
   const [locations, setLocations] = useState([]);
   const [saving, setSaving] = useState(false);
-  const [uploading, setUploading] = useState(false);
-  const [uploadPct, setUploadPct] = useState(0);
-  const fileInputRef = useRef(null);
   const productImageInputRef = useRef({});
 
   const [form, setForm] = useState({
@@ -212,35 +209,10 @@ const CreateGig = () => {
     set({ weekly_availability: { ...form.weekly_availability, [d]: merged } });
   };
 
-  // ---- Gallery --------------------------------------------------------------
-  const handleFilesPicked = async (files) => {
-    const arr = Array.from(files || []).filter((f) => f.type.startsWith('image/'));
-    if (arr.length === 0) return;
-    if (form.gallery.length + arr.length > 10) {
-      toast.error('Max 10 images per gig');
-      return;
-    }
-    setUploading(true);
-    setUploadPct(0);
-    try {
-      const results = await uploadFilesFast(arr, API, token, (p) => setUploadPct(Math.round(p * 100)));
-      const good = results.filter((r) => r.url && !r.error);
-      if (good.length < results.length) {
-        toast.error(`${results.length - good.length} upload(s) failed`);
-      }
-      if (good.length > 0) {
-        set({ gallery: [...form.gallery, ...good.map((r) => r.url)] });
-        toast.success(`Added ${good.length} image${good.length > 1 ? 's' : ''}`);
-      }
-    } catch (err) {
-      toast.error(err.message || 'Upload failed');
-    } finally {
-      setUploading(false);
-      setUploadPct(0);
-      if (fileInputRef.current) fileInputRef.current.value = '';
-    }
-  };
-  const removeImage = (url) => set({ gallery: form.gallery.filter((u) => u !== url) });
+  // ---- Gallery uploads live inside each tier / product now (per-tier
+  // photos + per-product photos), so the gig-wide gallery step has been
+  // removed from the wizard. `form.gallery` still exists as an empty
+  // array so the payload shape is unchanged.
 
   useEffect(() => {
     if (!token) { navigate('/auth'); return; }
@@ -252,8 +224,8 @@ const CreateGig = () => {
   const isAppointment = form.gig_type === 'appointment';
   const stepLabels = useMemo(() => (
     isAppointment
-      ? ['', 'Type', 'Overview', 'Description', 'Services', 'Hours', 'Gallery', 'Contact']
-      : ['', 'Type', 'Overview', 'Description', form.gig_type === 'store' ? 'Products' : 'Services & Prices', 'Gallery', 'Contact']
+      ? ['', 'Type', 'Overview', 'Description', 'Services', 'Hours', 'Contact']
+      : ['', 'Type', 'Overview', 'Description', form.gig_type === 'store' ? 'Products' : 'Services & Prices', 'Contact']
   ), [isAppointment, form.gig_type]);
   const totalSteps = stepLabels.length - 1;
 
@@ -278,8 +250,8 @@ const CreateGig = () => {
       const anyOpen = DAYS.some((d) => (form.weekly_availability[d.k] || []).length > 0);
       return anyOpen;
     }
-    // Gallery is optional — final step is contact.
-    const contactStep = isAppointment ? 7 : 6;
+    // Gallery step removed — contact is now the final step.
+    const contactStep = isAppointment ? 6 : 5;
     if (step === contactStep) {
       if (!(form.area || '').trim()) return false;
       if (form.booking_mode === 'whatsapp') return (form.whatsapp || '').replace(/\D/g, '').length >= 7;
@@ -312,7 +284,7 @@ const CreateGig = () => {
       }
     }
     if (isAppointment && step === 5) return 'Turn on at least one open day so customers can book you.';
-    const contactStep = isAppointment ? 7 : 6;
+    const contactStep = isAppointment ? 6 : 5;
     if (step === contactStep) {
       if (!(form.area || '').trim()) return 'Pick a service area (city).';
       if (form.booking_mode === 'whatsapp'
@@ -375,9 +347,8 @@ const CreateGig = () => {
     }
   };
 
-  // Which real step index maps to gallery / contact given the optional hours step.
-  const galleryStep = isAppointment ? 6 : 5;
-  const contactStep = isAppointment ? 7 : 6;
+  // Which real step index maps to contact given the optional hours step.
+  const contactStep = isAppointment ? 6 : 5;
 
   return (
     <div className="min-h-screen bg-[#FAFAF7]" style={{ paddingTop: 'var(--nav-h, 68px)' }} data-testid="create-gig-page">
@@ -501,53 +472,6 @@ const CreateGig = () => {
             onUpdateWindow={updateWindow}
             onSlotDurationChange={(v) => set({ slot_duration_minutes: v })}
           />
-        )}
-
-        {/* --- Gallery (all types) --- */}
-        {step === galleryStep && (
-          <div className="space-y-3">
-            <p className="text-sm text-gray-600">
-              {form.gig_type === 'store'
-                ? 'Add up to 10 photos of your storefront or brand. First image becomes the cover.'
-                : 'Add up to 10 photos of your work. First image becomes the cover.'}
-            </p>
-            <input ref={fileInputRef} type="file" accept="image/*" multiple className="hidden"
-              onChange={(e) => handleFilesPicked(e.target.files)} data-testid="wizard-gallery-file-input" />
-            <button type="button" onClick={() => fileInputRef.current?.click()}
-              disabled={uploading || form.gallery.length >= 10}
-              className="w-full py-8 rounded-xl border-2 border-dashed border-gray-300 hover:border-[#1E6A6A] hover:bg-[#1E6A6A]/5 transition-colors flex flex-col items-center gap-2 disabled:opacity-50"
-              data-testid="wizard-gallery-upload">
-              {uploading ? (
-                <>
-                  <Loader2 className="animate-spin text-[#1E6A6A]" size={24} />
-                  <span className="text-sm text-gray-700">Uploading… {uploadPct}%</span>
-                </>
-              ) : (
-                <>
-                  <Upload size={24} className="text-[#1E6A6A]" />
-                  <span className="text-sm font-semibold text-gray-700">Click to upload photos</span>
-                  <span className="text-xs text-gray-500">JPG / PNG / WebP · max 10 images</span>
-                </>
-              )}
-            </button>
-            {form.gallery.length > 0 && (
-              <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
-                {form.gallery.map((u, i) => (
-                  <div key={u} className="relative aspect-square rounded-lg bg-gray-100 group overflow-hidden" data-testid={`wizard-gallery-item-${i}`}>
-                    <div className="absolute inset-0" style={{ backgroundImage: `url(${u})`, backgroundSize: 'cover', backgroundPosition: 'center' }} />
-                    {i === 0 && (
-                      <span className="absolute top-1 left-1 px-1.5 py-0.5 rounded bg-black/70 text-white text-[10px] font-semibold">Cover</span>
-                    )}
-                    <button type="button" onClick={() => removeImage(u)}
-                      className="absolute top-1 right-1 w-6 h-6 rounded-full bg-black/70 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
-                      data-testid={`wizard-gallery-remove-${i}`}>
-                      <X size={12} />
-                    </button>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
         )}
 
         {/* --- Contact step --- */}

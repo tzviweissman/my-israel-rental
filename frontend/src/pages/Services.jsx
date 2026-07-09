@@ -27,7 +27,7 @@ import ServicesMapView from '../components/marketplace/ServicesMapView';
 import PeekableResultsSheet from '../components/common/PeekableResultsSheet';
 import NearbyDensityBar from '../components/common/NearbyDensityBar';
 import { localizedTitle } from '../utils/gigLocale';
-import { isAvailableNow } from '../utils/gigAvailability';
+import { isAvailableNow, getGigCover } from '../utils/gigAvailability';
 
 const TEAL = '#1E6A6A';
 const GOLD = '#D4AF37';
@@ -44,7 +44,7 @@ const SORT_OPTIONS = [
 ];
 
 const GigCard = ({ gig, onClick, i18n, t }) => {
-  const cover = gig.gallery?.[0];
+  const cover = getGigCover(gig);
   const cheapest = gig.cheapest_price;
   const currency = gig.tiers?.[0]?.currency || 'ILS';
   const sym = currency === 'ILS' ? '₪' : '$';
@@ -809,7 +809,7 @@ const Services = () => {
                   style={{ WebkitOverflowScrolling: 'touch' }}
                 >
                   {displayGigs.slice(0, 12).map((gig) => {
-                    const cover = (gig.gallery && gig.gallery[0]) || (gig.images && gig.images[0]) || '';
+                    const cover = getGigCover(gig) || (gig.images && gig.images[0]) || '';
                     const title = gig.title || 'Service';
                     const price = gig.tiers?.[0]?.price
                       ? `₪${Math.round(gig.tiers[0].price)}`

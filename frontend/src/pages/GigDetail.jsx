@@ -11,12 +11,12 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import axios from 'axios';
 import { toast } from 'sonner';
-import { MessageCircle, Send, Loader2, ArrowLeft, Award, Zap, Calendar, Clock, Camera } from 'lucide-react';
+import { MessageCircle, Send, Loader2, ArrowLeft, Award, Zap, Calendar, Clock, Camera, ChevronLeft, ChevronRight, X } from 'lucide-react';
 import { API, AuthContext } from '../App';
 import PageMeta from '../components/PageMeta';
 import StarRating from '../components/marketplace/StarRating';
 import { localizedTitle, localizedDescription } from '../utils/gigLocale';
-import { isAvailableNow } from '../utils/gigAvailability';
+import { isAvailableNow, getGigCover } from '../utils/gigAvailability';
 
 const buildWhatsAppUrl = (raw, message) => {
   const digits = (raw || '').replace(/[^\d]/g, '');
@@ -221,6 +221,9 @@ const GigDetail = () => {
   const [loading, setLoading] = useState(true);
   const [tier, setTier] = useState(null);
   const [showBook, setShowBook] = useState(false);
+  // Lightbox — full-screen carousel. `lightboxIndex` is null when closed;
+  // an integer when open (index into `activeGallery`).
+  const [lightboxIndex, setLightboxIndex] = useState(null);
   // Appointment-only: buyer-selected day (YYYY-MM-DD) + slot ("HH:MM").
   const [appointmentDate, setAppointmentDate] = useState(null);
   const [appointmentSlot, setAppointmentSlot] = useState(null);
@@ -310,8 +313,23 @@ const GigDetail = () => {
   const tierGallery = (tier && !_isStoreEarly && Array.isArray(tier.images) && tier.images.length > 0)
     ? tier.images
     : null;
-  const activeGallery = tierGallery || gig.gallery || [];
-  const cover = activeGallery[0];
+  // For the header carousel: prefer tier-specific images (already the
+  // "curated" view), otherwise fall back to a synthesised gallery of
+  // *every* image the gig actually owns — legacy gig.gallery, product
+  // images (stores), or tier images (deliverable/appointment).
+  const legacyGallery = Array.isArray(gig.gallery) ? gig.gallery : [];
+  const productImages = Array.isArray(gig.products)
+    ? gig.products.filter((p) => p?.image).map((p) => p.image)
+    : [];
+  const allTierImages = Array.isArray(gig.tiers)
+    ? gig.tiers.flatMap((t) => (Array.isArray(t?.images) ? t.images : []))
+    : [];
+  const derivedGallery = [...legacyGallery, ...productImages, ...allTierImages]
+    .filter(Boolean)
+    // Dedupe — a legacy gig might have the same URL in gallery and tier.
+    .filter((u, i, a) => a.indexOf(u) === i);
+  const activeGallery = tierGallery || derivedGallery;
+  const cover = activeGallery[0] || getGigCover(gig);
   const sym = tier?.currency === 'USD' ? '$' : '₪';
   // Bilingual fallbacks — Hebrew renders when i18n.language starts with `he`
   // AND the provider actually supplied the Hebrew copy, otherwise primary.
@@ -380,19 +398,40 @@ const GigDetail = () => {
           <div className="md:col-span-2 space-y-6">
             {/* Cover + gallery — swaps to the selected tier's own photos
                 when that tier has any, so a tour guide's "Jerusalem" vs
-                "Tel Aviv" tours show visually distinct hero images. */}
-            <div className="relative aspect-video bg-gray-100 rounded-2xl overflow-hidden" style={cover ? { backgroundImage: `url(${cover})`, backgroundSize: 'cover', backgroundPosition: 'center' } : {}}>
+                "Tel Aviv" tours show visually distinct hero images.
+                Clicking any thumbnail (or the cover) opens the lightbox. */}
+            <button
+              type="button"
+              onClick={() => cover && setLightboxIndex(0)}
+              className="relative aspect-video w-full bg-gray-100 rounded-2xl overflow-hidden group"
+              style={cover ? { backgroundImage: `url(${cover})`, backgroundSize: 'cover', backgroundPosition: 'center' } : {}}
+              data-testid="gig-cover"
+              aria-label={cover ? 'Open photo gallery' : undefined}
+            >
               {!cover && <div className="w-full h-full flex items-center justify-center text-gray-300">No image</div>}
               {tierGallery && tier?.name && (
                 <span className="absolute top-3 left-3 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-black/70 text-white backdrop-blur-sm" data-testid="gig-tier-gallery-tag">
                   Photos of · {tier.name}
                 </span>
               )}
-            </div>
+              {activeGallery.length > 1 && (
+                <span className="absolute bottom-3 right-3 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-black/70 text-white backdrop-blur-sm inline-flex items-center gap-1">
+                  <Camera size={11} /> {activeGallery.length}
+                </span>
+              )}
+            </button>
             {activeGallery.length > 1 && (
               <div className="flex gap-2 overflow-x-auto">
-                {activeGallery.map((src) => (
-                  <div key={src} className="w-24 h-24 shrink-0 rounded-lg bg-gray-100" style={{ backgroundImage: `url(${src})`, backgroundSize: 'cover', backgroundPosition: 'center' }} />
+                {activeGallery.map((src, i) => (
+                  <button
+                    key={src}
+                    type="button"
+                    onClick={() => setLightboxIndex(i)}
+                    className="w-24 h-24 shrink-0 rounded-lg bg-gray-100 hover:ring-2 hover:ring-[#1E6A6A] transition"
+                    style={{ backgroundImage: `url(${src})`, backgroundSize: 'cover', backgroundPosition: 'center' }}
+                    data-testid={`gig-thumb-${i}`}
+                    aria-label={`Open photo ${i + 1}`}
+                  />
                 ))}
               </div>
             )}
@@ -605,6 +644,16 @@ const GigDetail = () => {
       {showBook && tier && (
         <BookingForm gig={gig} tier={tier} onClose={() => setShowBook(false)} token={token} />
       )}
+
+      {lightboxIndex !== null && activeGallery.length > 0 && (
+        <Lightbox
+          images={activeGallery}
+          index={lightboxIndex}
+          onChange={setLightboxIndex}
+          onClose={() => setLightboxIndex(null)}
+          label={tier?.name}
+        />
+      )}
     </div>
   );
 };
@@ -763,3 +812,82 @@ const AppointmentPicker = ({ gig, tier, selectedDate, selectedSlot, onSelectDate
 };
 
 export default GigDetail;
+
+// ---------- Lightbox — full-screen photo carousel ----------
+// Keyboard support: Esc closes, ←/→ navigate. Body scroll is locked
+// while open so background content doesn't drift under the modal.
+const Lightbox = ({ images, index, onChange, onClose, label }) => {
+  const safeIndex = ((index % images.length) + images.length) % images.length;
+  const goPrev = React.useCallback(() => onChange((safeIndex - 1 + images.length) % images.length), [onChange, safeIndex, images.length]);
+  const goNext = React.useCallback(() => onChange((safeIndex + 1) % images.length), [onChange, safeIndex, images.length]);
+  React.useEffect(() => {
+    const onKey = (e) => {
+      if (e.key === 'Escape') onClose();
+      else if (e.key === 'ArrowLeft') goPrev();
+      else if (e.key === 'ArrowRight') goNext();
+    };
+    document.addEventListener('keydown', onKey);
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.removeEventListener('keydown', onKey);
+      document.body.style.overflow = prevOverflow;
+    };
+  }, [onClose, goPrev, goNext]);
+  return (
+    <div
+      className="fixed inset-0 z-[70] bg-black/95 flex items-center justify-center"
+      onClick={onClose}
+      data-testid="gig-lightbox"
+      role="dialog"
+      aria-modal="true"
+    >
+      <button
+        type="button"
+        onClick={(e) => { e.stopPropagation(); onClose(); }}
+        className="absolute top-4 right-4 w-11 h-11 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-colors"
+        data-testid="gig-lightbox-close"
+        aria-label="Close"
+      >
+        <X size={20} />
+      </button>
+      {label && (
+        <span className="absolute top-4 left-4 px-3 py-1.5 rounded-full text-xs font-semibold bg-white/10 text-white backdrop-blur-sm">
+          {label}
+        </span>
+      )}
+      <span className="absolute bottom-6 left-1/2 -translate-x-1/2 px-3 py-1 rounded-full text-[11px] font-semibold bg-white/10 text-white/90">
+        {safeIndex + 1} / {images.length}
+      </span>
+      {images.length > 1 && (
+        <button
+          type="button"
+          onClick={(e) => { e.stopPropagation(); goPrev(); }}
+          className="absolute left-4 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-colors"
+          data-testid="gig-lightbox-prev"
+          aria-label="Previous photo"
+        >
+          <ChevronLeft size={22} />
+        </button>
+      )}
+      <img
+        src={images[safeIndex]}
+        alt=""
+        onClick={(e) => e.stopPropagation()}
+        className="max-w-[92vw] max-h-[86vh] object-contain rounded-lg shadow-2xl"
+        data-testid="gig-lightbox-image"
+      />
+      {images.length > 1 && (
+        <button
+          type="button"
+          onClick={(e) => { e.stopPropagation(); goNext(); }}
+          className="absolute right-4 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-colors"
+          data-testid="gig-lightbox-next"
+          aria-label="Next photo"
+        >
+          <ChevronRight size={22} />
+        </button>
+      )}
+    </div>
+  );
+};

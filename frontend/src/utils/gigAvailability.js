@@ -34,3 +34,28 @@ export const isAvailableNow = (gig, now = new Date()) => {
     return s != null && e != null && s <= nowMin && nowMin < e;
   });
 };
+
+/**
+ * getGigCover — resolve the best cover image for a gig.
+ *
+ * Search order:
+ *   1. Legacy gig-wide gallery (still populated on older gigs)
+ *   2. First product with an image (Store gigs)
+ *   3. First tier with images (Deliverable/Appointment gigs)
+ *
+ * Returns `null` when the gig has no images anywhere. Callsites are
+ * expected to render a "No image" placeholder in that case.
+ */
+export const getGigCover = (gig) => {
+  if (!gig) return null;
+  if (Array.isArray(gig.gallery) && gig.gallery[0]) return gig.gallery[0];
+  if (Array.isArray(gig.products)) {
+    const withImg = gig.products.find((p) => typeof p?.image === 'string' && p.image);
+    if (withImg) return withImg.image;
+  }
+  if (Array.isArray(gig.tiers)) {
+    const withImgs = gig.tiers.find((t) => Array.isArray(t?.images) && t.images[0]);
+    if (withImgs) return withImgs.images[0];
+  }
+  return null;
+};
