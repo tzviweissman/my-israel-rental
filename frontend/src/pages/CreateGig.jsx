@@ -264,6 +264,38 @@ const CreateGig = () => {
     return true;
   };
 
+  // Human-readable reason Next is blocked. Rendered under the disabled
+  // Next button so users don't have to hunt around the form to find the
+  // missing field.
+  const nextBlockReason = () => {
+    if (canNext()) return '';
+    if (step === 1) return 'Pick a listing type to continue.';
+    if (step === 2) {
+      if (!form.title.trim()) return 'Add a title above.';
+      if (!form.category) return 'Pick a category above.';
+    }
+    if (step === 3) return 'Write at least 10 characters describing what you offer.';
+    if (step === 4) {
+      if (form.gig_type === 'store') {
+        const bad = form.products.find((p) => !p.name.trim() || !(parseFloat(p.price) > 0));
+        if (bad && !bad.name.trim()) return 'Give every product a name.';
+        if (bad) return 'Every product needs a price greater than 0.';
+      } else {
+        const bad = form.tiers.find((t) => !t.name.trim() || !(parseFloat(t.price) > 0));
+        if (bad && !bad.name.trim()) return 'Give every service or tier a name (see the highlighted field).';
+        if (bad) return 'Every service needs a price greater than 0.';
+      }
+    }
+    if (isAppointment && step === 5) return 'Turn on at least one open day so customers can book you.';
+    const contactStep = isAppointment ? 7 : 6;
+    if (step === contactStep) {
+      if (!(form.area || '').trim()) return 'Pick a service area (city).';
+      if (form.booking_mode === 'whatsapp'
+          && (form.whatsapp || '').replace(/\D/g, '').length < 7) return 'Enter a valid WhatsApp number with country code.';
+    }
+    return '';
+  };
+
   const submit = async () => {
     setSaving(true);
     try {
@@ -539,29 +571,36 @@ const CreateGig = () => {
           </div>
         )}
 
-        <div className="flex items-center justify-between mt-8">
+        <div className="flex flex-col items-end mt-8 gap-2 sm:flex-row sm:items-center sm:justify-between">
           <button type="button" disabled={step === 1} onClick={() => setStep((s) => s - 1)}
-            className="px-4 py-2 rounded-lg text-sm font-semibold text-gray-600 disabled:opacity-30 flex items-center gap-1" data-testid="wizard-back">
+            className="px-4 py-2 rounded-lg text-sm font-semibold text-gray-600 disabled:opacity-30 flex items-center gap-1 self-start sm:self-auto" data-testid="wizard-back">
             <ArrowLeft size={14} /> Back
           </button>
-          {step < totalSteps ? (
-            <button type="button" disabled={!canNext()} onClick={() => setStep((s) => s + 1)}
-              className="px-5 py-2 rounded-lg text-sm font-semibold text-white bg-[#1E6A6A] disabled:opacity-40 flex items-center gap-1" data-testid="wizard-next">
-              Next <ArrowRight size={14} />
-            </button>
-          ) : (
-            <button type="button" disabled={!canNext() || saving} onClick={submit}
-              className="px-5 py-2 rounded-lg text-sm font-semibold text-white bg-[#1E6A6A] disabled:opacity-40 flex items-center gap-1" data-testid="wizard-publish">
-              {saving ? (
-                <>
-                  <Loader2 className="animate-spin" size={14} />
-                  <span>Publishing… translating to Hebrew</span>
-                </>
-              ) : (
-                <>Publish gig <ArrowRight size={14} /></>
-              )}
-            </button>
-          )}
+          <div className="flex flex-col items-end gap-1">
+            {step < totalSteps ? (
+              <button type="button" disabled={!canNext()} onClick={() => setStep((s) => s + 1)}
+                className="px-5 py-2 rounded-lg text-sm font-semibold text-white bg-[#1E6A6A] disabled:opacity-40 flex items-center gap-1" data-testid="wizard-next">
+                Next <ArrowRight size={14} />
+              </button>
+            ) : (
+              <button type="button" disabled={!canNext() || saving} onClick={submit}
+                className="px-5 py-2 rounded-lg text-sm font-semibold text-white bg-[#1E6A6A] disabled:opacity-40 flex items-center gap-1" data-testid="wizard-publish">
+                {saving ? (
+                  <>
+                    <Loader2 className="animate-spin" size={14} />
+                    <span>Publishing… translating to Hebrew</span>
+                  </>
+                ) : (
+                  <>Publish gig <ArrowRight size={14} /></>
+                )}
+              </button>
+            )}
+            {!canNext() && nextBlockReason() && (
+              <p className="text-[11px] text-red-600 font-medium max-w-xs text-end" data-testid="wizard-next-blocked-reason">
+                {nextBlockReason()}
+              </p>
+            )}
+          </div>
         </div>
       </div>
     </div>
@@ -652,17 +691,27 @@ const TiersStep = ({ gigType, tiers, onUpdate, onAdd, onRemove, enableDateBookin
           ? 'List each bookable service — e.g. a barber might add Haircut (30 min · ₪60), Beard trim (15 min · ₪30), Full grooming (45 min · ₪90). Duration lets us build the time-slot picker.'
           : 'List each service or tier you offer as a separate option — for example, a designer might add Basic package (3 samples · 3 days · ₪250) and Premium (5 samples · 5 days · ₪450).'}
       </div>
-      {tiers.map((tt, i) => (
+      {tiers.map((tt, i) => {
+        const missingName = !tt.name.trim();
+        const missingPrice = !(parseFloat(tt.price) > 0);
+        return (
         <div key={i} className="border border-gray-200 rounded-xl p-4 space-y-2" data-testid={`wizard-tier-${i}`}>
-          <div className="flex items-center justify-between gap-2">
-            <input value={tt.name} onChange={(e) => onUpdate(i, { name: e.target.value })}
-              placeholder={isAppt
-                ? (i === 0 ? 'e.g. Haircut' : 'Service name')
-                : (i === 0 ? 'e.g. Basic package' : 'Service name')}
-              className="font-bold text-sm bg-transparent focus:outline-none flex-1 placeholder:text-gray-400 placeholder:font-normal"
-              data-testid={`wizard-tier-name-${i}`} />
+          <div className="flex items-end justify-between gap-2">
+            <div className="flex-1">
+              <label className="block text-[11px] font-semibold text-gray-600 mb-1">
+                {isAppt ? 'Service name' : 'Service or tier name'} <span className="text-red-500">*</span>
+              </label>
+              <input value={tt.name} onChange={(e) => onUpdate(i, { name: e.target.value })}
+                placeholder={isAppt
+                  ? (i === 0 ? 'e.g. Haircut' : 'Service name')
+                  : (i === 0 ? 'e.g. Basic package' : 'Service name')}
+                className={`w-full px-3 py-2 rounded-lg border text-sm font-semibold placeholder:font-normal placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#1E6A6A]/30 ${
+                  missingName ? 'border-red-200 bg-red-50/30' : 'border-gray-200 bg-white'
+                }`}
+                data-testid={`wizard-tier-name-${i}`} />
+            </div>
             {tiers.length > 1 && (
-              <button type="button" onClick={() => onRemove(i)} className="text-red-500" data-testid={`wizard-tier-remove-${i}`}>
+              <button type="button" onClick={() => onRemove(i)} className="text-red-500 p-2 mb-0.5" data-testid={`wizard-tier-remove-${i}`}>
                 <Trash2 size={14} />
               </button>
             )}
@@ -681,7 +730,8 @@ const TiersStep = ({ gigType, tiers, onUpdate, onAdd, onRemove, enableDateBookin
               <span className="pointer-events-none absolute inset-y-0 right-2 flex items-center text-gray-400 text-xs">▾</span>
             </div>
             <input type="number" value={tt.price} onChange={(e) => onUpdate(i, { price: e.target.value })}
-              placeholder="Price" className="flex-1 px-3 py-2 rounded-lg border border-gray-200 text-sm"
+              placeholder="Price"
+              className={`flex-1 px-3 py-2 rounded-lg border text-sm ${missingPrice ? 'border-red-200 bg-red-50/30' : 'border-gray-200'}`}
               data-testid={`wizard-tier-price-${i}`} />
             {isAppt ? (
               <div className="relative">
@@ -712,8 +762,18 @@ const TiersStep = ({ gigType, tiers, onUpdate, onAdd, onRemove, enableDateBookin
           )}
           <textarea value={tt.description} onChange={(e) => onUpdate(i, { description: e.target.value })} rows={2}
             placeholder="What's included (optional)" className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm" />
+          {(missingName || missingPrice) && (
+            <p className="text-[11px] text-red-600 leading-snug flex items-center gap-1" data-testid={`wizard-tier-hint-${i}`}>
+              <span className="inline-block w-1 h-1 rounded-full bg-red-500" />
+              {missingName && missingPrice
+                ? 'Add a service name and a price above to continue.'
+                : missingName
+                  ? 'Give this service a name (e.g. Haircut, Deep clean).'
+                  : 'Add a price greater than 0.'}
+            </p>
+          )}
         </div>
-      ))}
+      );})}
       {tiers.length < 15 && (
         <button type="button" onClick={onAdd} className="text-sm font-semibold text-[#1E6A6A] flex items-center gap-1" data-testid="wizard-tier-add">
           <Plus size={14} /> Add another service or tier
