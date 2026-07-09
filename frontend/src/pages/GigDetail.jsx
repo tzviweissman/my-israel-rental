@@ -834,10 +834,27 @@ const Lightbox = ({ images, index, onChange, onClose, label }) => {
       document.body.style.overflow = prevOverflow;
     };
   }, [onClose, goPrev, goNext]);
+  // Swipe handling — track the primary touch X delta and translate the
+  // fired gesture into a prev/next call. Threshold of 50px keeps
+  // accidental taps from being classified as swipes. Only fires when
+  // the gallery has more than one image (otherwise there's nowhere to
+  // swipe to).
+  const touchStartX = React.useRef(null);
+  const onTouchStart = (e) => { touchStartX.current = e.touches?.[0]?.clientX ?? null; };
+  const onTouchEnd = (e) => {
+    if (touchStartX.current == null || images.length < 2) return;
+    const endX = e.changedTouches?.[0]?.clientX ?? touchStartX.current;
+    const dx = endX - touchStartX.current;
+    touchStartX.current = null;
+    if (Math.abs(dx) < 50) return;
+    if (dx < 0) goNext(); else goPrev();
+  };
   return (
     <div
-      className="fixed inset-0 z-[70] bg-black/95 flex items-center justify-center"
+      className="fixed inset-0 z-[70] bg-black/95 flex items-center justify-center touch-pan-y"
       onClick={onClose}
+      onTouchStart={onTouchStart}
+      onTouchEnd={onTouchEnd}
       data-testid="gig-lightbox"
       role="dialog"
       aria-modal="true"
