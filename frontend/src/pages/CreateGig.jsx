@@ -96,7 +96,10 @@ const CreateGig = () => {
 
   const addTier = () => {
     if (form.tiers.length >= 15) return;
-    set({ tiers: [...form.tiers, { name: '', price: '', currency: 'ILS', delivery_days: '', description: '', features: [] }] });
+    // Inherit currency from the last row so a provider who set USD once
+    // doesn't have to flip it again for every new service.
+    const lastCurrency = form.tiers.length > 0 ? form.tiers[form.tiers.length - 1].currency : 'ILS';
+    set({ tiers: [...form.tiers, { name: '', price: '', currency: lastCurrency || 'ILS', delivery_days: '', description: '', features: [] }] });
   };
   const updateTier = (i, patch) => set({ tiers: form.tiers.map((t, idx) => (idx === i ? { ...t, ...patch } : t)) });
   const removeTier = (i) => set({ tiers: form.tiers.filter((_, idx) => idx !== i) });
@@ -211,14 +214,40 @@ const CreateGig = () => {
                     <button type="button" onClick={() => removeTier(i)} className="text-red-500" data-testid={`wizard-tier-remove-${i}`}><Trash2 size={14} /></button>
                   )}
                 </div>
-                <div className="flex gap-2">
-                  <select value={tt.currency} onChange={(e) => updateTier(i, { currency: e.target.value })} className="px-2 py-2 rounded-lg border border-gray-200 text-sm">
-                    <option value="ILS">₪ ILS</option>
-                    <option value="USD">$ USD</option>
-                  </select>
+                <div className="flex gap-2 items-stretch">
+                  {/* Currency selector rendered as a compact glyph pill instead
+                      of the browser-styled "$ USD / ₪ ILS" dropdown so the row
+                      looks less form-y and matches the app's monetary chips. */}
+                  <div className="relative">
+                    <span className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500 font-semibold text-sm">
+                      {tt.currency === 'USD' ? '$' : '₪'}
+                    </span>
+                    <select
+                      value={tt.currency}
+                      onChange={(e) => updateTier(i, { currency: e.target.value })}
+                      className="appearance-none pl-7 pr-6 py-2 rounded-lg border border-gray-200 text-sm bg-white cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#1E6A6A]/30"
+                      data-testid={`wizard-tier-currency-${i}`}
+                    >
+                      <option value="ILS">ILS</option>
+                      <option value="USD">USD</option>
+                    </select>
+                    <span className="pointer-events-none absolute inset-y-0 right-2 flex items-center text-gray-400 text-xs">▾</span>
+                  </div>
                   <input type="number" value={tt.price} onChange={(e) => updateTier(i, { price: e.target.value })} placeholder="Price" className="flex-1 px-3 py-2 rounded-lg border border-gray-200 text-sm" data-testid={`wizard-tier-price-${i}`} />
-                  <input type="number" value={tt.delivery_days} onChange={(e) => updateTier(i, { delivery_days: e.target.value })} placeholder="Days" title="Turnaround in days — leave blank for on-the-spot services" className="w-20 px-3 py-2 rounded-lg border border-gray-200 text-sm" />
+                  <input
+                    type="number"
+                    min="0"
+                    value={tt.delivery_days}
+                    onChange={(e) => updateTier(i, { delivery_days: e.target.value })}
+                    placeholder="Days to complete"
+                    title="How many days you need to complete this service — leave blank for on-the-spot or same-day services"
+                    className="w-32 px-3 py-2 rounded-lg border border-gray-200 text-sm"
+                    data-testid={`wizard-tier-days-${i}`}
+                  />
                 </div>
+                <p className={`text-[11px] text-gray-500 leading-snug ${i === 0 ? '' : 'hidden'}`}>
+                  <span className="font-semibold">Days to complete</span> is the turnaround time you need to finish this service (e.g. a logo design might take 3 days). Leave blank for on-the-spot services like a haircut or a taxi ride.
+                </p>
                 <textarea value={tt.description} onChange={(e) => updateTier(i, { description: e.target.value })} rows={2} placeholder="What's included (optional)" className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm" />
               </div>
             ))}
