@@ -12,6 +12,18 @@ Build a bilingual (English/Hebrew) rental website named MyIsraelRental.com with 
 
 ## What's Been Implemented
 
+- [x] **Auto-translate hook on gig create/edit (2026-07-09)**:
+  - `utils/translate.py` gained `translate_marketing_to_hebrew(text)` — a new marketing-copy translator (Claude Sonnet 4.6) with a punchier prompt than the legal-contract translator that already lived there. Strips wrapping quotes, returns just the Hebrew.
+  - `routes/marketplace/shared.py` added `auto_translate_gig_bg(gig_id, title, description)` — a fire-and-forget helper that translates whichever fields are missing/changed and writes them back to the gig doc. LLM failures are logged and swallowed; the English text still serves.
+  - `routes/marketplace/gigs.py`:
+    - **`create_gig`**: after insert, if the provider didn't supply Hebrew copy, spawns `auto_translate_gig_bg` as an `asyncio.create_task`. Response returns immediately; Hebrew fields land ~5-10 s later.
+    - **`patch_gig`**: when a provider edits the English title/description AND isn't explicitly overriding the Hebrew field themselves, re-translates just the fields that changed.
+  - `scripts/backfill_hebrew_gigs.py` refactored to import the new shared helper (DRY) — the backfill and live-hook now share exactly one translation prompt, so tone is consistent.
+  - **Verified live** end-to-end:
+    - POST `/api/marketplace/gigs` with English-only text → `title_he="מקצועני ניקוי עומק מהשורה הראשונה"` and `description_he="ניקוי יסודי לכל הבית על ידי מומחים מוסמכים..."` populated within 10 s.
+    - PATCH title → `title_he` re-translated within 8 s.
+  - Files: `backend/utils/translate.py`, `backend/routes/marketplace/shared.py`, `backend/routes/marketplace/gigs.py`, `backend/scripts/backfill_hebrew_gigs.py`.
+
 - [x] **Hebrew-copy backfill script for existing gigs (2026-07-09)**:
   - Created `backend/scripts/backfill_hebrew_gigs.py` — a one-time (idempotent, safe to re-run) CLI that walks every gig missing `title_he` or `description_he` and translates the English original into Hebrew via Claude Sonnet 4.6.
   - Purpose-built marketing-copy translator prompt (not the "legal contract" prompt in `utils/translate.py`): preserves tone, returns just the translation, strips wrapping quotes.

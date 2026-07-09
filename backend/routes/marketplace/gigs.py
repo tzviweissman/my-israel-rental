@@ -266,6 +266,17 @@ async def create_gig(payload: GigIn, user=Depends(verify_token)):
     if (payload.area or "").strip():
         from utils.geocode import geocode_gig_area_bg
         asyncio.create_task(geocode_gig_area_bg(gig["_id"], payload.area))
+    # Kick off Hebrew auto-translation in the background if the provider
+    # didn't supply Hebrew copy themselves. Zero-effort bilingual coverage
+    # for renters browsing the site in Hebrew — the new gig picks up
+    # ``title_he`` / ``description_he`` within a few seconds of publish.
+    if not gig["title_he"] or not gig["description_he"]:
+        from .shared import auto_translate_gig_bg
+        asyncio.create_task(auto_translate_gig_bg(
+            gig["_id"],
+            gig["title"] if not gig["title_he"] else None,
+            gig["description"] if not gig["description_he"] else None,
+        ))
     return _clean_gig(gig)
 
 
@@ -325,6 +336,22 @@ async def patch_gig(gig_id: str, payload: GigPatch, user=Depends(verify_token)):
     if "area" in update and (update["area"] or "").strip() and update["area"] != gig.get("area"):
         from utils.geocode import geocode_gig_area_bg
         asyncio.create_task(geocode_gig_area_bg(gig_id, update["area"]))
+    # Refresh Hebrew copy when the provider edits the English text.
+    # Skipped when the provider is explicitly editing the Hebrew field
+    # themselves (they're overriding the auto-translation on purpose).
+    title_changed = "title" in update and update["title"] != gig.get("title")
+    desc_changed = "description" in update and update["description"] != gig.get("description")
+    override_title_he = "title_he" in update
+    override_desc_he = "description_he" in update
+    needs_title_tr = title_changed and not override_title_he
+    needs_desc_tr = desc_changed and not override_desc_he
+    if needs_title_tr or needs_desc_tr:
+        from .shared import auto_translate_gig_bg
+        asyncio.create_task(auto_translate_gig_bg(
+            gig_id,
+            update["title"] if needs_title_tr else None,
+            update["description"] if needs_desc_tr else None,
+        ))
     fresh = await db.marketplace_gigs.find_one({"_id": gig_id})
     return _clean_gig(fresh)
 

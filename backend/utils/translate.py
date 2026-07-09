@@ -30,3 +30,31 @@ async def translate_text(text: str, direction: str) -> str:
     )
     chat.with_model("anthropic", "claude-sonnet-4-6")
     return await chat.send_message(UserMessage(text=text))
+
+
+async def translate_marketing_to_hebrew(text: str) -> str:
+    """Marketing-copy translator (as opposed to the legal-contract prompt
+    above). Used to auto-populate ``title_he`` / ``description_he`` on
+    marketplace gigs so Hebrew-locale renters see native Hebrew copy
+    without providers having to write everything twice.
+
+    Keeps output punchy — no explanations, no quotation marks — so the
+    result drops straight into a card title or list item.
+    """
+    text = (text or "").strip()
+    if not text:
+        return ""
+    chat = LlmChat(
+        api_key=EMERGENT_LLM_KEY,
+        session_id=str(uuid.uuid4()),
+        system_message=(
+            "You translate short marketing copy for a services marketplace from "
+            "English into modern, natural Hebrew. Preserve the tone (friendly, "
+            "professional). Do NOT wrap the output in quotes and do NOT add "
+            "explanations, notes, or transliteration — return only the Hebrew "
+            "translation of the input."
+        ),
+    )
+    chat.with_model("anthropic", "claude-sonnet-4-6")
+    out = await chat.send_message(UserMessage(text=text))
+    return (out or "").strip().strip('"').strip("'")

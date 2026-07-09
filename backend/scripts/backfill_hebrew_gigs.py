@@ -49,8 +49,10 @@ from dotenv import load_dotenv  # noqa: E402
 
 load_dotenv(BACKEND_DIR / ".env")
 
-from emergentintegrations.llm.chat import LlmChat, UserMessage  # noqa: E402
+from emergentintegrations.llm.chat import LlmChat, UserMessage  # noqa: E402,F401 — kept for compat / future custom prompts
 from motor.motor_asyncio import AsyncIOMotorClient  # noqa: E402
+
+from utils.translate import translate_marketing_to_hebrew as _translate_to_hebrew  # noqa: E402
 
 
 EMERGENT_LLM_KEY = os.environ["EMERGENT_LLM_KEY"]
@@ -58,24 +60,12 @@ MONGO_URL = os.environ["MONGO_URL"]
 DB_NAME = os.environ["DB_NAME"]
 
 
-async def _translate_to_hebrew(text: str) -> str:
-    """Marketing-copy translator (as opposed to the legal-contract prompt
-    in ``utils/translate.py``). Keeps output punchy — no explanations,
-    no quotation marks — so it drops straight into a card title."""
-    chat = LlmChat(
-        api_key=EMERGENT_LLM_KEY,
-        session_id=str(uuid.uuid4()),
-        system_message=(
-            "You translate short marketing copy for a services marketplace from "
-            "English into modern, natural Hebrew. Preserve the tone (friendly, "
-            "professional). Do NOT wrap the output in quotes and do NOT add "
-            "explanations, notes, or transliteration — return only the Hebrew "
-            "translation of the input."
-        ),
-    )
-    chat.with_model("anthropic", "claude-sonnet-4-6")
-    out = await chat.send_message(UserMessage(text=text))
-    return (out or "").strip().strip('"').strip("'")
+async def _translate_to_hebrew_local(text: str) -> str:
+    """Deprecated local wrapper — the real translator lives in
+    ``utils.translate.translate_marketing_to_hebrew`` now. Kept only as
+    a signature-preserving shim so an old cached import doesn't break.
+    """
+    return await _translate_to_hebrew(text)
 
 
 async def _process_one(gig: dict, db, sem: asyncio.Semaphore, dry_run: bool) -> str:

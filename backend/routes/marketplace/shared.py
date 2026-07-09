@@ -28,6 +28,32 @@ PLAN_NAME = "MyIsraelRental Pro (monthly)"
 PLAN_DESCRIPTION = "Publish unlimited gigs on the MyIsraelRental Services Marketplace."
 FRONTEND_URL = os.environ.get("FRONTEND_URL", "https://myisraelrental.com").rstrip("/")
 
+
+async def auto_translate_gig_bg(gig_id: str, title: str | None, description: str | None) -> None:
+    """Fire-and-forget: translate the English title / description to
+    Hebrew and cache the results on the gig doc so Hebrew-locale renters
+    see native copy on the very next request.
+
+    Called by ``create_gig`` after insert, and by ``patch_gig`` whenever
+    the English text changes. Kept out of the request path so provider
+    saves stay snappy (LLM call takes 1-3 s). If translation fails, the
+    English text still serves — no user-visible regression.
+    """
+    from utils.translate import translate_marketing_to_hebrew
+
+    updates: dict[str, str] = {}
+    try:
+        if (title or "").strip():
+            updates["title_he"] = await translate_marketing_to_hebrew(title)
+        if (description or "").strip():
+            updates["description_he"] = await translate_marketing_to_hebrew(description)
+    except Exception as e:  # noqa: BLE001 — top-level around a network call
+        logger.warning("[auto-translate] gig=%s failed: %s", gig_id, e)
+        return
+    if updates:
+        await db.marketplace_gigs.update_one({"_id": gig_id}, {"$set": updates})
+        logger.info("[auto-translate] gig=%s wrote %s", gig_id, list(updates))
+
 # 12 seed categories per user's Phase 1 scope (2026-07-01).
 CATEGORIES = [
     {"slug": "tours-activities",     "label": "Tours & Activities",       "icon": "map"},
