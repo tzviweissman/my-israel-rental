@@ -130,6 +130,42 @@ code {
 .no-scrollbar::-webkit-scrollbar { display: none; }
 .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
+/* --------------------------------------------------------------------
+   Peek FABs — WhatsApp (right) and Accessibility eye (left) tuck ~55%
+   off their edge so they don't cover content, then slide fully back
+   into view on hover / focus / tap. The `.fab-peek-open` override is
+   applied to the accessibility button when its panel is open so the
+   icon anchors the popup properly. Uses translateX only so the CSS
+   transition composes cleanly with the hover scale on the buttons.
+   -------------------------------------------------------------------- */
+.fab-peek-right {
+  transform: translateX(55%);
+}
+.fab-peek-right:hover,
+.fab-peek-right:focus-visible,
+.fab-peek-right:active {
+  transform: translateX(0) scale(1.06);
+}
+.fab-peek-left {
+  transform: translateX(-55%);
+}
+.fab-peek-left:hover,
+.fab-peek-left:focus-visible,
+.fab-peek-left:active,
+.fab-peek-left.fab-peek-open {
+  transform: translateX(0) scale(1.06);
+}
+/* Touch devices don't fire :hover reliably — leave a slightly bigger
+   sliver visible so the tap-target stays generous. */
+@media (hover: none) {
+  .fab-peek-right {
+    transform: translateX(40%);
+  }
+  .fab-peek-left {
+    transform: translateX(-40%);
+  }
+}
+
 
 /* --------------------------------------------------------------------
    Services Marketplace map — Leaflet chrome overrides for a modern,

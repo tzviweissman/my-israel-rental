@@ -22,7 +22,12 @@ const WhatsAppButton = () => {
       href={whatsappUrl}
       target="_blank"
       rel="noopener noreferrer"
-      className="fixed right-6 z-50 flex items-center justify-center w-16 h-16 rounded-2xl shadow-2xl transition-all duration-300 hover:scale-110"
+      // Peek behaviour: sit ~55% off the right edge so only a sliver is
+      // visible while browsing, then slide fully into view on hover / focus
+      // (desktop) and on tap (mobile — the group-hover state is triggered
+      // by touch too since we're not gating on media queries). Keeps the
+      // help affordance discoverable without blocking content behind it.
+      className="fab-peek-right group fixed right-0 z-50 flex items-center justify-center w-16 h-16 rounded-l-2xl shadow-2xl transition-transform duration-300 ease-out"
       style={{ bottom: FAB_BOTTOM }}
       data-testid="whatsapp-button"
       aria-label="Chat on WhatsApp"

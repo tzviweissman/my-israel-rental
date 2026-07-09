@@ -42,7 +42,14 @@ const AccessibilityButton = () => {
     <>
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="fixed left-6 z-50 flex items-center justify-center w-11 h-11 rounded-full shadow-2xl transition-all duration-300 hover:scale-110"
+        // Peek behaviour: tuck ~55% off the left edge so only a sliver of
+        // the eye icon is visible while browsing. Slides fully into view
+        // on hover / focus / tap so touch users still get access without
+        // the button covering content behind it. Kept full-width when the
+        // panel is open so the icon anchors the popup correctly.
+        className={`fab-peek-left fixed left-0 z-50 flex items-center justify-center w-11 h-11 rounded-r-full shadow-2xl transition-transform duration-300 ease-out ${
+          isOpen ? 'fab-peek-open' : ''
+        }`}
         style={{
           backgroundColor: '#4A90E2',
           // Stay above iOS home-indicator + any future bottom-nav.
