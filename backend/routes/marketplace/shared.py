@@ -38,7 +38,7 @@ CATEGORIES = [
     {"slug": "home-organizers",      "label": "Home Organizers",          "icon": "boxes"},
     {"slug": "hotels-travel",        "label": "Hotels / Travel Agencies", "icon": "plane"},
     {"slug": "home-repair",          "label": "Home Service / Repair",    "icon": "wrench"},
-    {"slug": "womens-spa",           "label": "Women's Spa / Care",       "icon": "flower"},
+    {"slug": "womens-spa",           "label": "Personal Care",            "icon": "scissors"},
     {"slug": "bookkeeping",          "label": "Bookkeeping",              "icon": "book"},
     {"slug": "photography",          "label": "Photography",              "icon": "camera"},
     {"slug": "graphic-design",       "label": "Graphic Design",           "icon": "palette"},

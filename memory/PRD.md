@@ -12,6 +12,13 @@ Build a bilingual (English/Hebrew) rental website named MyIsraelRental.com with 
 
 ## What's Been Implemented
 
+- [x] **Rename "Women's Spa / Care" → "Personal Care" + drop Hebrew wizard fields (2026-07-09)**:
+  - User feedback: "have it say personal care so a barbershop can be added" + "why do we need a hebrew title if the website can translate everything".
+  - **Category label**: `backend/routes/marketplace/shared.py` renamed the display label from "Women's Spa / Care" to **"Personal Care"** while keeping the slug `womens-spa` so existing gigs and DB references keep working (zero migration).
+  - **Icon + palette**: `frontend/src/components/marketplace/categoryTheme.js` swapped the pink `#5B2A3A / #EED0DC` for a warm neutral terracotta `#6B4A3C / #EBDACF` and changed the icon from `Flower` → **`Scissors`** so the category reads as gender-neutral personal grooming (barbers, salons, spas, groomers).
+  - **Wizard cleanup**: `frontend/src/pages/CreateGig.jsx` removed the `title_he` and `description_he` inputs (both were "optional, for Hebrew browsers"). Dropped the fields from form state and the submit payload. Replaced the second FAQ line on step 2 with an explanation: "Min 10 characters. Hebrew-browsing renters will see this text auto-translated — no need to write it twice."
+  - Verified live via Playwright: step 1 shows the 12-category grid including a **"Personal Care"** button and *no* "Title (Hebrew)" field; step 2 shows a single description textarea + the new helper copy, no Hebrew textarea.
+
 - [x] **Reframe gig "tiers" as distinct services (2026-07-09)**:
   - User feedback: "when adding a new service when adding tiers it should be tiers or just multiple services like a barber shop just has different haircut options not different tiers".
   - The gig-creation wizard was auto-labeling rows Basic / Standard / Premium — implicitly forcing a Fiverr upgrade-ladder mental model. A barber's real offering is 3 distinct services (Haircut, Beard trim, Full grooming), not 3 escalating packages.

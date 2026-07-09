@@ -48,8 +48,10 @@ const CATEGORY_THEME = {
     icon: 'Wrench', iconColor: '#402A16',
   },
   'womens-spa': {
-    header: '#5B2A3A', body: '#EED0DC',
-    icon: 'Flower', iconColor: '#5B2A3A',
+    // Slug preserved for back-compat; label now reads "Personal Care"
+    // so barbershops, salons, spas, and grooming services all fit.
+    header: '#6B4A3C', body: '#EBDACF',
+    icon: 'Scissors', iconColor: '#6B4A3C',
   },
   bookkeeping: {
     header: '#22405C', body: '#C6D6E6',
