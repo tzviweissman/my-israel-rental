@@ -29,6 +29,34 @@ PLAN_DESCRIPTION = "Publish unlimited gigs on the MyIsraelRental Services Market
 FRONTEND_URL = os.environ.get("FRONTEND_URL", "https://myisraelrental.com").rstrip("/")
 
 
+async def auto_translate_gig_inline(
+    title: str | None, description: str | None,
+) -> dict[str, str]:
+    """Translate English gig copy to Hebrew inline (synchronously, in the
+    request path). Returns just the ``title_he`` / ``description_he``
+    dict for the caller to persist — this function itself is DB-free so
+    ``create_gig`` can merge the result into the in-memory doc before
+    the first Mongo write, avoiding a second update round-trip.
+
+    Adds ~3-6 s per missing field to the response latency but ensures
+    Hebrew renters see native copy immediately when the gig goes live.
+    LLM failures are logged and the empty dict is returned — provider's
+    publish still succeeds, English copy still serves.
+    """
+    from utils.translate import translate_marketing_to_hebrew
+
+    updates: dict[str, str] = {}
+    try:
+        if (title or "").strip():
+            updates["title_he"] = await translate_marketing_to_hebrew(title)
+        if (description or "").strip():
+            updates["description_he"] = await translate_marketing_to_hebrew(description)
+    except Exception as e:  # noqa: BLE001 — top-level around a network call
+        logger.warning("[auto-translate-inline] failed: %s", e)
+        return {}
+    return updates
+
+
 async def auto_translate_gig_bg(gig_id: str, title: str | None, description: str | None) -> None:
     """Fire-and-forget: translate the English title / description to
     Hebrew and cache the results on the gig doc so Hebrew-locale renters

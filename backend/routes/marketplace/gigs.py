@@ -266,17 +266,22 @@ async def create_gig(payload: GigIn, user=Depends(verify_token)):
     if (payload.area or "").strip():
         from utils.geocode import geocode_gig_area_bg
         asyncio.create_task(geocode_gig_area_bg(gig["_id"], payload.area))
-    # Kick off Hebrew auto-translation in the background if the provider
-    # didn't supply Hebrew copy themselves. Zero-effort bilingual coverage
-    # for renters browsing the site in Hebrew — the new gig picks up
-    # ``title_he`` / ``description_he`` within a few seconds of publish.
+    # Hebrew auto-translation — done inline so the response the provider
+    # sees already has ``title_he`` / ``description_he`` populated. Adds
+    # ~3-6 s to the publish latency (one Claude Sonnet round-trip per
+    # missing field), but means a Hebrew renter loading the gig one
+    # second later sees native Hebrew copy immediately. If the LLM call
+    # fails we log and continue with English-only; better a working
+    # publish than a hard failure on a nice-to-have translation.
     if not gig["title_he"] or not gig["description_he"]:
-        from .shared import auto_translate_gig_bg
-        asyncio.create_task(auto_translate_gig_bg(
-            gig["_id"],
+        from .shared import auto_translate_gig_inline
+        translated = await auto_translate_gig_inline(
             gig["title"] if not gig["title_he"] else None,
             gig["description"] if not gig["description_he"] else None,
-        ))
+        )
+        if translated:
+            gig.update(translated)
+            await db.marketplace_gigs.update_one({"_id": gig["_id"]}, {"$set": translated})
     return _clean_gig(gig)
 
 
@@ -336,7 +341,8 @@ async def patch_gig(gig_id: str, payload: GigPatch, user=Depends(verify_token)):
     if "area" in update and (update["area"] or "").strip() and update["area"] != gig.get("area"):
         from utils.geocode import geocode_gig_area_bg
         asyncio.create_task(geocode_gig_area_bg(gig_id, update["area"]))
-    # Refresh Hebrew copy when the provider edits the English text.
+    # Refresh Hebrew copy inline whenever the English text changes so
+    # the response we return already reflects the new Hebrew version.
     # Skipped when the provider is explicitly editing the Hebrew field
     # themselves (they're overriding the auto-translation on purpose).
     title_changed = "title" in update and update["title"] != gig.get("title")
@@ -346,12 +352,13 @@ async def patch_gig(gig_id: str, payload: GigPatch, user=Depends(verify_token)):
     needs_title_tr = title_changed and not override_title_he
     needs_desc_tr = desc_changed and not override_desc_he
     if needs_title_tr or needs_desc_tr:
-        from .shared import auto_translate_gig_bg
-        asyncio.create_task(auto_translate_gig_bg(
-            gig_id,
+        from .shared import auto_translate_gig_inline
+        translated = await auto_translate_gig_inline(
             update["title"] if needs_title_tr else None,
             update["description"] if needs_desc_tr else None,
-        ))
+        )
+        if translated:
+            await db.marketplace_gigs.update_one({"_id": gig_id}, {"$set": translated})
     fresh = await db.marketplace_gigs.find_one({"_id": gig_id})
     return _clean_gig(fresh)
 

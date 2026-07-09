@@ -12,6 +12,15 @@ Build a bilingual (English/Hebrew) rental website named MyIsraelRental.com with 
 
 ## What's Been Implemented
 
+- [x] **Inline (synchronous) Hebrew auto-translate on gig publish (2026-07-09)**:
+  - User feedback: "why doesnt it work right away when someone adds a new gig".
+  - Root cause: the earlier hook fired as a `asyncio.create_task` background job, so the response returned before translation finished. Hebrew renters loading the gig within the first ~10 s still saw English.
+  - **Fix**: added `auto_translate_gig_inline(title, description)` in `routes/marketplace/shared.py` — same translator prompt, but returns the `{title_he, description_he}` dict synchronously so the caller can merge it into the response BEFORE returning to the client.
+  - Wired into both `create_gig` and `patch_gig` on the request path. Kept the older `auto_translate_gig_bg` helper for callers that genuinely want background fire-and-forget (e.g. bulk backfills).
+  - LLM failures still swallowed silently — the publish itself never fails on a translation error; the gig just goes live with English-only Hebrew fields until the next edit.
+  - **Verified live**: a fresh English-only gig published in **4.1 s** and the create-response already contained `"יוגה על הגג עם זריחת השמש"` and `"שיעור וינייסה בן 90 דקות על גג בתל אביב. מזרנים מסופקים. מתאים לכל הרמות."`. A Hebrew renter loading the gig one second later sees native Hebrew immediately.
+  - Files: `backend/routes/marketplace/gigs.py`, `backend/routes/marketplace/shared.py`.
+
 - [x] **Auto-translate hook on gig create/edit (2026-07-09)**:
   - `utils/translate.py` gained `translate_marketing_to_hebrew(text)` — a new marketing-copy translator (Claude Sonnet 4.6) with a punchier prompt than the legal-contract translator that already lived there. Strips wrapping quotes, returns just the Hebrew.
   - `routes/marketplace/shared.py` added `auto_translate_gig_bg(gig_id, title, description)` — a fire-and-forget helper that translates whichever fields are missing/changed and writes them back to the gig doc. LLM failures are logged and swallowed; the English text still serves.
