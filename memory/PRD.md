@@ -12,6 +12,14 @@ Build a bilingual (English/Hebrew) rental website named MyIsraelRental.com with 
 
 ## What's Been Implemented
 
+- [x] **Hebrew-copy backfill script for existing gigs (2026-07-09)**:
+  - Created `backend/scripts/backfill_hebrew_gigs.py` — a one-time (idempotent, safe to re-run) CLI that walks every gig missing `title_he` or `description_he` and translates the English original into Hebrew via Claude Sonnet 4.6.
+  - Purpose-built marketing-copy translator prompt (not the "legal contract" prompt in `utils/translate.py`): preserves tone, returns just the translation, strips wrapping quotes.
+  - Guardrails: `--dry-run` mode for planning, `--limit` and `--concurrency` flags (defaults 500 gigs, 3 parallel LLM calls), skip-if-already-populated logic, per-gig error containment (network hiccup on one gig doesn't kill the batch — next run picks it up).
+  - Handles legacy schema variance: some old gig docs use `_id` as the UUID, newer ones mirror it into `id`. Update filter prefers `id` when present, falls back to `_id`.
+  - **Ran live**: 9 gigs translated in one pass (e.g. "Kotel Old City walking tour" → "סיור בעיר העתיקה"). Re-run confirms idempotency — the 4 remaining query matches are gigs with EMPTY English text (nothing to translate) and are correctly skipped.
+  - Files: `backend/scripts/backfill_hebrew_gigs.py` (new), `backend/scripts/__init__.py` (new).
+
 - [x] **Rename "Women's Spa / Care" → "Personal Care" + drop Hebrew wizard fields (2026-07-09)**:
   - User feedback: "have it say personal care so a barbershop can be added" + "why do we need a hebrew title if the website can translate everything".
   - **Category label**: `backend/routes/marketplace/shared.py` renamed the display label from "Women's Spa / Care" to **"Personal Care"** while keeping the slug `womens-spa` so existing gigs and DB references keep working (zero migration).
