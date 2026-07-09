@@ -179,12 +179,46 @@ TOP_RATED_MIN_COUNT = 10
 # --------------------------- Models --------------------------- #
 
 class PricingTier(BaseModel):
-    name: str = "Basic"            # Basic / Standard / Premium (free-form)
+    name: str = "Basic"            # Barber "Haircut" / logo "Basic package"
     price: float                   # ILS by default
     currency: str = "ILS"
+    # `delivery_days` is used by Deliverable gigs (logo design, translation,
+    # cleaning). `duration_minutes` is used by Appointment gigs (barber,
+    # massage, coaching) so the calendar knows how long each slot is.
+    # Only one applies per gig — enforced client-side by the wizard.
     delivery_days: Optional[int] = None
+    duration_minutes: Optional[int] = None
     description: str = ""
     features: list[str] = Field(default_factory=list)
+
+
+class ProductItem(BaseModel):
+    """One product row on a Store-type gig.
+
+    Stores don't do slot booking or turnaround — they showcase products
+    and let the buyer message the seller. Kept lean on purpose so the
+    onboarding stays fast.
+    """
+    name: str
+    price: float
+    currency: str = "ILS"
+    description: str = ""
+    image: Optional[str] = None      # single URL — thumbnail
+    in_stock: bool = True
+
+
+class WeeklyWindow(BaseModel):
+    """One open window in the weekly availability grid used by
+    Appointment gigs. Times are 24h ``HH:MM`` strings.
+    """
+    start: str = Field(..., pattern=r"^\d{2}:\d{2}$")
+    end: str = Field(..., pattern=r"^\d{2}:\d{2}$")
+
+
+# Empty windows list per day = closed. Providers only fill days they work.
+_DEFAULT_WEEKLY: dict[str, list[WeeklyWindow]] = {
+    "mon": [], "tue": [], "wed": [], "thu": [], "fri": [], "sat": [], "sun": [],
+}
 
 
 class GigIn(BaseModel):
@@ -193,12 +227,24 @@ class GigIn(BaseModel):
     description: str = ""
     title_he: Optional[str] = None
     description_he: Optional[str] = None
+    # Gig shape drives which fields apply. Defaults to `deliverable` so
+    # any legacy client hitting the API without the new field keeps its
+    # current behaviour (tiers + optional days-to-complete).
+    gig_type: str = Field("deliverable", pattern="^(store|deliverable|appointment)$")
     tiers: list[PricingTier] = Field(default_factory=list)
-    gallery: list[str] = Field(default_factory=list)      # image URLs
-    booking_mode: str = "whatsapp"                        # "whatsapp" | "in_platform"
-    whatsapp: Optional[str] = None                        # required if booking_mode = whatsapp
-    area: Optional[str] = None                            # Tel Aviv / Jerusalem / etc.
-    faqs: list[dict[str, str]] = Field(default_factory=list)  # [{q, a}]
+    products: list[ProductItem] = Field(default_factory=list)         # Store only
+    # Appointment-only: weekly recurring hours + slot duration. `weekly_availability`
+    # is a dict keyed by weekday abbreviation → list of open windows.
+    weekly_availability: Optional[dict[str, list[WeeklyWindow]]] = None
+    slot_duration_minutes: Optional[int] = 30
+    # Deliverable-only optional toggle: when true, buyer picks the target
+    # service date on the booking form (cleaner arrives on Tuesday, etc.).
+    enable_date_booking: bool = False
+    gallery: list[str] = Field(default_factory=list)
+    booking_mode: str = "whatsapp"
+    whatsapp: Optional[str] = None
+    area: Optional[str] = None
+    faqs: list[dict[str, str]] = Field(default_factory=list)
 
 
 class GigPatch(BaseModel):
@@ -207,7 +253,12 @@ class GigPatch(BaseModel):
     description: Optional[str] = None
     title_he: Optional[str] = None
     description_he: Optional[str] = None
+    gig_type: Optional[str] = Field(None, pattern="^(store|deliverable|appointment)$")
     tiers: Optional[list[PricingTier]] = None
+    products: Optional[list[ProductItem]] = None
+    weekly_availability: Optional[dict[str, list[WeeklyWindow]]] = None
+    slot_duration_minutes: Optional[int] = None
+    enable_date_booking: Optional[bool] = None
     gallery: Optional[list[str]] = None
     booking_mode: Optional[str] = None
     whatsapp: Optional[str] = None
@@ -238,6 +289,9 @@ class BookingIn(BaseModel):
     contact_email: str
     contact_phone: Optional[str] = None
     preferred_date: Optional[str] = None                  # ISO YYYY-MM-DD
+    # Appointment-only. Provider-side time slot chosen by the buyer.
+    # Format: ``HH:MM`` in the provider's local time (Israel).
+    time_slot: Optional[str] = Field(None, pattern=r"^\d{2}:\d{2}$")
 
 
 class BookingPatch(BaseModel):
@@ -324,11 +378,16 @@ def _member_since_year(user: Optional[dict[str, Any]], prov: Optional[dict[str, 
 
 
 def _cheapest_tier_price(gig: dict[str, Any]) -> Optional[float]:
-    """Lowest tier price on a gig, coerced to a float. Used by the price
-    filter + price_asc sort."""
-    tiers = gig.get("tiers") or []
+    """Lowest price on a gig, coerced to a float. Used by the price
+    filter + price_asc sort. Store gigs use the cheapest product; other
+    types use the cheapest tier — whichever list applies is scanned."""
+    rows: list[dict[str, Any]] = []
+    if (gig.get("gig_type") or "deliverable") == "store":
+        rows = gig.get("products") or []
+    else:
+        rows = gig.get("tiers") or []
     prices: list[float] = []
-    for t in tiers:
+    for t in rows:
         p = t.get("price") if isinstance(t, dict) else None
         try:
             prices.append(float(p))

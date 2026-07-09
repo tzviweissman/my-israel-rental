@@ -235,6 +235,14 @@ async def create_gig(payload: GigIn, user=Depends(verify_token)):
     # head-of-string still has to resolve to something.
     if not (payload.area or "").strip():
         raise HTTPException(status_code=400, detail="Service area (city) is required")
+    # Type-specific content validation. Store gigs need at least one
+    # product because there's literally nothing to show otherwise. For
+    # deliverable/appointment gigs we don't require tiers up-front so
+    # existing tests + legacy API clients that publish a "message me
+    # for a quote" gig keep working. The wizard enforces tier presence
+    # at UI level.
+    if payload.gig_type == "store" and not payload.products:
+        raise HTTPException(status_code=400, detail="Store gigs need at least one product")
     prov = await _ensure_provider_record(user["user_id"])
     now = datetime.now(UTC).isoformat()
     gig = {
@@ -246,7 +254,15 @@ async def create_gig(payload: GigIn, user=Depends(verify_token)):
         "category": payload.category,
         "description": payload.description,
         "description_he": (payload.description_he or "").strip() or None,
+        "gig_type": payload.gig_type,
         "tiers": [t.model_dump() for t in payload.tiers],
+        "products": [p.model_dump() for p in payload.products],
+        "weekly_availability": (
+            {d: [w.model_dump() for w in wins] for d, wins in payload.weekly_availability.items()}
+            if payload.weekly_availability else None
+        ),
+        "slot_duration_minutes": payload.slot_duration_minutes if payload.gig_type == "appointment" else None,
+        "enable_date_booking": bool(payload.enable_date_booking) if payload.gig_type == "deliverable" else False,
         "gallery": payload.gallery,
         "booking_mode": payload.booking_mode,
         "whatsapp": payload.whatsapp,
@@ -331,6 +347,13 @@ async def patch_gig(gig_id: str, payload: GigPatch, user=Depends(verify_token)):
     update = {k: v for k, v in payload.model_dump(exclude_none=True).items()}
     if "tiers" in update:
         update["tiers"] = [t if isinstance(t, dict) else t.model_dump() for t in update["tiers"]]
+    if "products" in update:
+        update["products"] = [p if isinstance(p, dict) else p.model_dump() for p in update["products"]]
+    if "weekly_availability" in update and update["weekly_availability"] is not None:
+        update["weekly_availability"] = {
+            d: [w if isinstance(w, dict) else w.model_dump() for w in (wins or [])]
+            for d, wins in update["weekly_availability"].items()
+        }
     if "category" in update:
         _validate_category(update["category"])
     update["updated_at"] = datetime.now(UTC).isoformat()
@@ -398,8 +421,16 @@ async def book_gig(gig_id: str, payload: BookingIn, user=Depends(verify_token)):
     gig = await db.marketplace_gigs.find_one({"_id": gig_id})
     if not gig:
         raise HTTPException(status_code=404, detail="Gig not found")
+    # Store gigs use direct messaging only — no calendar / no tier booking.
+    if (gig.get("gig_type") or "deliverable") == "store":
+        raise HTTPException(status_code=400, detail="Store gigs do not accept bookings — message the seller directly")
     if gig.get("booking_mode") != "in_platform":
         raise HTTPException(status_code=400, detail="This gig only accepts WhatsApp bookings")
+    # Appointment gigs require an explicit time slot so the calendar can
+    # be enforced. Deliverable gigs may optionally include a preferred
+    # date if the provider enabled `enable_date_booking`.
+    if (gig.get("gig_type") or "deliverable") == "appointment" and not payload.time_slot:
+        raise HTTPException(status_code=400, detail="Please pick an available time slot")
     booking = {
         "_id": str(uuid.uuid4()),
         "gig_id": gig_id,
@@ -410,6 +441,7 @@ async def book_gig(gig_id: str, payload: BookingIn, user=Depends(verify_token)):
         "contact_email": payload.contact_email,
         "contact_phone": payload.contact_phone,
         "preferred_date": payload.preferred_date,
+        "time_slot": payload.time_slot,
         "status": "pending",
         "created_at": datetime.now(UTC).isoformat(),
     }

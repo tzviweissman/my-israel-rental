@@ -6,12 +6,12 @@
  * with either a "Book on WhatsApp" deep-link OR an in-platform booking
  * modal — driven by `gig.booking_mode`.
  */
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useContext, useEffect, useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import axios from 'axios';
 import { toast } from 'sonner';
-import { MessageCircle, Send, Loader2, ArrowLeft, Award, Zap } from 'lucide-react';
+import { MessageCircle, Send, Loader2, ArrowLeft, Award, Zap, Calendar, Clock } from 'lucide-react';
 import { API, AuthContext } from '../App';
 import PageMeta from '../components/PageMeta';
 import StarRating from '../components/marketplace/StarRating';
@@ -220,10 +220,26 @@ const GigDetail = () => {
   const [loading, setLoading] = useState(true);
   const [tier, setTier] = useState(null);
   const [showBook, setShowBook] = useState(false);
+  // Appointment-only: buyer-selected day (YYYY-MM-DD) + slot ("HH:MM").
+  const [appointmentDate, setAppointmentDate] = useState(null);
+  const [appointmentSlot, setAppointmentSlot] = useState(null);
+  // Deliverable-only: optional buyer-selected date (when the gig has
+  // `enable_date_booking` on).
+  const [deliverableDate, setDeliverableDate] = useState('');
 
   useEffect(() => {
     axios.get(`${API}/marketplace/gigs/${id}`)
-      .then((r) => { setGig(r.data); setTier(r.data.tiers?.[0] || null); })
+      .then((r) => {
+        setGig(r.data);
+        // Pick the first tier/product as the default selection so the
+        // sidebar CTA has something to book on the initial render.
+        const gigType = r.data.gig_type || 'deliverable';
+        if (gigType === 'store') {
+          setTier(r.data.products?.[0] || null);
+        } else {
+          setTier(r.data.tiers?.[0] || null);
+        }
+      })
       .catch(() => toast.error('Gig not found'))
       .finally(() => setLoading(false));
   }, [id]);
@@ -292,19 +308,52 @@ const GigDetail = () => {
   const displayDescription = localizedDescription(gig, i18n);
   const bucket = gig.provider?.response_bucket;
 
+  const gigType = gig.gig_type || 'deliverable';
+  const isStore = gigType === 'store';
+  const isAppointment = gigType === 'appointment';
+  const isDeliverable = gigType === 'deliverable';
+
   const handleBookClick = () => {
-    if (!tier) return toast.error('Pick a service option first');
+    if (!tier) {
+      return toast.error(isStore ? 'Pick a product first' : 'Pick a service option first');
+    }
+    // Store gigs never do calendar booking — always go straight to
+    // WhatsApp message (or in-platform message) with the product in
+    // context so the buyer + seller can negotiate.
+    if (isStore) {
+      if (gig.booking_mode === 'whatsapp') {
+        if (!gig.whatsapp) return toast.error('Seller has no WhatsApp set');
+        const msg = `Hi! I'm interested in "${tier.name}" (${sym}${tier.price}) from your ${displayTitle} store on MyIsraelRental.`;
+        window.open(buildWhatsAppUrl(gig.whatsapp, msg), '_blank');
+        return;
+      }
+      if (!token) { toast.error('Please sign in to message the seller'); navigate('/auth'); return; }
+      setShowBook(true);
+      return;
+    }
+    if (isAppointment) {
+      if (!appointmentDate || !appointmentSlot) {
+        return toast.error('Pick a day and time slot first');
+      }
+      if (gig.booking_mode === 'whatsapp') {
+        if (!gig.whatsapp) return toast.error('Provider has no WhatsApp set');
+        const msg = `Hi! I'd like to book your "${displayTitle}" — ${tier.name} on ${appointmentDate} at ${appointmentSlot} (${sym}${tier.price}) from MyIsraelRental.`;
+        window.open(buildWhatsAppUrl(gig.whatsapp, msg), '_blank');
+        return;
+      }
+      if (!token) { toast.error('Please sign in to book'); navigate('/auth'); return; }
+      setShowBook(true);
+      return;
+    }
+    // Deliverable
     if (gig.booking_mode === 'whatsapp') {
       if (!gig.whatsapp) return toast.error('Provider has no WhatsApp set');
-      const msg = `Hi! I'd like to book your "${displayTitle}" — ${tier.name} (${sym}${tier.price}) from MyIsraelRental.`;
+      const datePart = gig.enable_date_booking && deliverableDate ? ` on ${deliverableDate}` : '';
+      const msg = `Hi! I'd like to book your "${displayTitle}" — ${tier.name} (${sym}${tier.price})${datePart} from MyIsraelRental.`;
       window.open(buildWhatsAppUrl(gig.whatsapp, msg), '_blank');
       return;
     }
-    if (!token) {
-      toast.error('Please sign in to book');
-      navigate('/auth');
-      return;
-    }
+    if (!token) { toast.error('Please sign in to book'); navigate('/auth'); return; }
     setShowBook(true);
   };
 
@@ -363,9 +412,35 @@ const GigDetail = () => {
             </div>
 
             <div>
-              <h2 className="text-lg font-bold mb-2">About this service</h2>
+              <h2 className="text-lg font-bold mb-2">{isStore ? 'About this store' : 'About this service'}</h2>
               <p className="text-gray-700 whitespace-pre-line">{displayDescription || 'No description provided.'}</p>
             </div>
+
+            {isStore && (gig.products || []).length > 0 && (
+              <div data-testid="gig-store-grid">
+                <h2 className="text-lg font-bold mb-3">Products</h2>
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                  {gig.products.map((p, i) => {
+                    const psym = p.currency === 'USD' ? '$' : '₪';
+                    const active = tier?.name === p.name;
+                    return (
+                      <button key={i} onClick={() => setTier(p)}
+                        className={`text-left rounded-xl overflow-hidden border-2 transition-all bg-white ${
+                          active ? 'border-[#1E6A6A] shadow-md' : 'border-gray-200 hover:border-[#D4AF37]'
+                        }`}
+                        data-testid={`gig-product-${i}`}>
+                        <div className="aspect-square bg-gray-100" style={p.image ? { backgroundImage: `url(${p.image})`, backgroundSize: 'cover', backgroundPosition: 'center' } : {}} />
+                        <div className="p-2.5">
+                          <p className="text-sm font-semibold text-gray-900 line-clamp-1">{p.name}</p>
+                          <p className="text-sm text-[#1E6A6A] font-bold mt-0.5">{psym}{Number(p.price).toLocaleString()}</p>
+                          {!p.in_stock && <p className="text-[10px] text-red-500 font-semibold mt-0.5">Out of stock</p>}
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
 
             {gig.faqs?.length > 0 && (
               <div>
@@ -401,46 +476,65 @@ const GigDetail = () => {
             </div>
           </div>
 
-          {/* Pricing sidebar */}
+          {/* Pricing sidebar — the shape shown depends on gig_type:
+              - Store: product list, CTA is "Message the seller".
+              - Appointment: service list + date + time-slot picker built from weekly_availability.
+              - Deliverable: tier list + optional date picker when enable_date_booking. */}
           <div className="md:sticky md:top-24 h-fit space-y-4">
             <div className="border border-gray-200 rounded-2xl bg-white p-4 space-y-3">
-              <h3 className="text-sm font-bold text-gray-500 uppercase tracking-wide">Choose a package</h3>
-              {(gig.tiers || []).length === 0 ? (
-                <p className="text-sm text-gray-500">No packages listed yet.</p>
+              <h3 className="text-sm font-bold text-gray-500 uppercase tracking-wide">
+                {isStore ? 'Choose a product' : isAppointment ? 'Book an appointment' : 'Choose a package'}
+              </h3>
+
+              {isStore ? (
+                <StoreProductList products={gig.products || []} selected={tier} onSelect={setTier} />
               ) : (
-                gig.tiers.map((tt) => {
-                  const active = tier?.name === tt.name;
-                  return (
-                    <button
-                      key={tt.name}
-                      onClick={() => setTier(tt)}
-                      className={`w-full text-left rounded-lg border p-3 transition-colors ${active ? 'border-[#1E6A6A] bg-[#1E6A6A]/5' : 'border-gray-200 hover:border-[#D4AF37]'}`}
-                      data-testid={`gig-tier-${tt.name}`}
-                    >
-                      <div className="flex justify-between items-baseline">
-                        <span className="font-semibold text-sm">{tt.name}</span>
-                        <span className="font-bold text-gray-900">{tt.currency === 'USD' ? '$' : '₪'}{tt.price.toLocaleString()}</span>
-                      </div>
-                      {tt.delivery_days && <p className="text-xs text-gray-500 mt-1">Delivered in {tt.delivery_days} days</p>}
-                      {tt.description && <p className="text-xs text-gray-600 mt-1">{tt.description}</p>}
-                      {tt.features?.length > 0 && (
-                        <ul className="text-xs text-gray-600 mt-2 space-y-0.5">
-                          {tt.features.map((ft, i) => <li key={i}>• {ft}</li>)}
-                        </ul>
-                      )}
-                    </button>
-                  );
-                })
+                <TierList
+                  gig={gig}
+                  tiers={gig.tiers || []}
+                  selected={tier}
+                  onSelect={(tt) => { setTier(tt); if (isAppointment) { setAppointmentSlot(null); } }}
+                  isAppointment={isAppointment}
+                />
               )}
-              <button
-                onClick={handleBookClick}
-                className="w-full flex items-center justify-center gap-2 py-3 rounded-lg text-sm font-bold text-white bg-[#1E6A6A] hover:bg-[#0F3A3A] transition-colors"
-                data-testid="gig-book-btn"
-              >
-                {gig.booking_mode === 'whatsapp' ? <><MessageCircle size={14} /> Book on WhatsApp</> : <><Send size={14} /> Send booking request</>}
+
+              {isAppointment && tier && (
+                <AppointmentPicker
+                  gig={gig}
+                  tier={tier}
+                  selectedDate={appointmentDate}
+                  selectedSlot={appointmentSlot}
+                  onSelectDate={(d) => { setAppointmentDate(d); setAppointmentSlot(null); }}
+                  onSelectSlot={setAppointmentSlot}
+                />
+              )}
+
+              {isDeliverable && gig.enable_date_booking && tier && (
+                <div className="pt-2 border-t border-gray-100">
+                  <label className="text-xs font-semibold text-gray-700 flex items-center gap-1 mb-1">
+                    <Calendar size={12} /> Preferred service date (optional)
+                  </label>
+                  <input type="date" value={deliverableDate} onChange={(e) => setDeliverableDate(e.target.value)}
+                    min={new Date().toISOString().slice(0, 10)}
+                    className="w-full px-2 py-1.5 rounded-lg border border-gray-200 text-sm"
+                    data-testid="gig-preferred-date" />
+                </div>
+              )}
+
+              <button onClick={handleBookClick}
+                disabled={isAppointment && (!appointmentDate || !appointmentSlot)}
+                className="w-full flex items-center justify-center gap-2 py-3 rounded-lg text-sm font-bold text-white bg-[#1E6A6A] hover:bg-[#0F3A3A] disabled:opacity-40 disabled:hover:bg-[#1E6A6A] transition-colors"
+                data-testid="gig-book-btn">
+                {isStore ? (
+                  gig.booking_mode === 'whatsapp' ? <><MessageCircle size={14} /> Message the seller</> : <><Send size={14} /> Send an inquiry</>
+                ) : gig.booking_mode === 'whatsapp' ? (
+                  <><MessageCircle size={14} /> Book on WhatsApp</>
+                ) : (
+                  <><Send size={14} /> Send booking request</>
+                )}
               </button>
               <p className="text-[11px] text-gray-400 text-center">
-                MyIsraelRental never takes a cut — you deal with the provider directly.
+                MyIsraelRental never takes a cut — you deal with the {isStore ? 'seller' : 'provider'} directly.
               </p>
             </div>
           </div>
@@ -450,6 +544,143 @@ const GigDetail = () => {
       {showBook && tier && (
         <BookingForm gig={gig} tier={tier} onClose={() => setShowBook(false)} token={token} />
       )}
+    </div>
+  );
+};
+
+// ---------- Sidebar sub-components ----------
+
+const TierList = ({ tiers, selected, onSelect, isAppointment }) => {
+  if (!tiers.length) return <p className="text-sm text-gray-500">No packages listed yet.</p>;
+  return tiers.map((tt) => {
+    const active = selected?.name === tt.name;
+    const sym = tt.currency === 'USD' ? '$' : '₪';
+    return (
+      <button
+        key={tt.name}
+        onClick={() => onSelect(tt)}
+        className={`w-full text-left rounded-lg border p-3 transition-colors ${
+          active ? 'border-[#1E6A6A] bg-[#1E6A6A]/5' : 'border-gray-200 hover:border-[#D4AF37]'
+        }`}
+        data-testid={`gig-tier-${tt.name}`}
+      >
+        <div className="flex justify-between items-baseline gap-2">
+          <span className="font-semibold text-sm flex-1">{tt.name}</span>
+          <span className="font-bold text-gray-900">{sym}{Number(tt.price).toLocaleString()}</span>
+        </div>
+        {isAppointment && tt.duration_minutes && (
+          <p className="text-xs text-gray-500 mt-1 flex items-center gap-1"><Clock size={11} /> {tt.duration_minutes} min</p>
+        )}
+        {!isAppointment && tt.delivery_days && (
+          <p className="text-xs text-gray-500 mt-1">Delivered in {tt.delivery_days} days</p>
+        )}
+        {tt.description && <p className="text-xs text-gray-600 mt-1">{tt.description}</p>}
+        {tt.features?.length > 0 && (
+          <ul className="text-xs text-gray-600 mt-2 space-y-0.5">
+            {tt.features.map((ft, i) => <li key={i}>• {ft}</li>)}
+          </ul>
+        )}
+      </button>
+    );
+  });
+};
+
+const StoreProductList = ({ products, selected, onSelect }) => {
+  if (!products.length) return <p className="text-sm text-gray-500">No products listed yet.</p>;
+  return products.map((p, i) => {
+    const active = selected?.name === p.name;
+    const sym = p.currency === 'USD' ? '$' : '₪';
+    return (
+      <button key={i} onClick={() => onSelect(p)}
+        className={`w-full text-left rounded-lg border p-2.5 flex gap-2.5 items-center transition-colors ${
+          active ? 'border-[#1E6A6A] bg-[#1E6A6A]/5' : 'border-gray-200 hover:border-[#D4AF37]'
+        }`}
+        data-testid={`gig-product-side-${i}`}>
+        <div className="w-11 h-11 rounded bg-gray-100 flex-shrink-0" style={p.image ? { backgroundImage: `url(${p.image})`, backgroundSize: 'cover', backgroundPosition: 'center' } : {}} />
+        <div className="flex-1 min-w-0">
+          <p className="text-sm font-semibold text-gray-900 truncate">{p.name}</p>
+          <p className="text-sm text-[#1E6A6A] font-bold">{sym}{Number(p.price).toLocaleString()}</p>
+        </div>
+      </button>
+    );
+  });
+};
+
+// Generate slot buttons for a given day using the gig's weekly hours + tier duration.
+// Returns [{date: 'YYYY-MM-DD', label: 'Mon Jul 14', slots: ['09:00', '09:30', ...]}]
+const buildAppointmentSlots = (gig, tier) => {
+  const weekly = gig.weekly_availability || {};
+  const slotMin = gig.slot_duration_minutes || 30;
+  const duration = tier.duration_minutes || slotMin;
+  const dayKeys = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'];
+  const out = [];
+  const today = new Date();
+  for (let offset = 0; offset < 14; offset += 1) {
+    const day = new Date(today);
+    day.setDate(today.getDate() + offset);
+    const key = dayKeys[day.getDay()];
+    const windows = weekly[key] || [];
+    if (!windows.length) continue;
+    const slots = [];
+    for (const win of windows) {
+      const [sh, sm] = (win.start || '09:00').split(':').map(Number);
+      const [eh, em] = (win.end || '17:00').split(':').map(Number);
+      const startMin = sh * 60 + sm;
+      const endMin = eh * 60 + em;
+      for (let t = startMin; t + duration <= endMin; t += slotMin) {
+        const hh = String(Math.floor(t / 60)).padStart(2, '0');
+        const mm = String(t % 60).padStart(2, '0');
+        slots.push(`${hh}:${mm}`);
+      }
+    }
+    if (!slots.length) continue;
+    const iso = day.toISOString().slice(0, 10);
+    const label = day.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' });
+    out.push({ date: iso, label, slots });
+  }
+  return out;
+};
+
+const AppointmentPicker = ({ gig, tier, selectedDate, selectedSlot, onSelectDate, onSelectSlot }) => {
+  const days = useMemo(() => buildAppointmentSlots(gig, tier), [gig, tier]);
+  if (!days.length) {
+    return <p className="text-xs text-gray-500 pt-2 border-t border-gray-100">Provider hasn&apos;t set open hours yet — book via message.</p>;
+  }
+  const active = days.find((d) => d.date === selectedDate) || days[0];
+  return (
+    <div className="pt-3 border-t border-gray-100 space-y-2" data-testid="gig-appointment-picker">
+      <label className="text-xs font-semibold text-gray-700 flex items-center gap-1">
+        <Calendar size={12} /> Pick a day
+      </label>
+      <div className="flex gap-1.5 overflow-x-auto pb-1 no-scrollbar">
+        {days.map((d) => (
+          <button key={d.date} onClick={() => onSelectDate(d.date)}
+            className={`px-2.5 py-1.5 rounded-lg text-[11px] font-semibold border whitespace-nowrap ${
+              selectedDate === d.date
+                ? 'bg-[#1E6A6A] text-white border-[#1E6A6A]'
+                : 'bg-white text-gray-700 border-gray-200 hover:border-[#D4AF37]'
+            }`}
+            data-testid={`gig-appt-day-${d.date}`}>
+            {d.label}
+          </button>
+        ))}
+      </div>
+      <label className="text-xs font-semibold text-gray-700 flex items-center gap-1 pt-1">
+        <Clock size={12} /> Pick a time
+      </label>
+      <div className="grid grid-cols-3 gap-1.5">
+        {active.slots.map((s) => (
+          <button key={s} onClick={() => onSelectSlot(s)}
+            className={`px-2 py-1.5 rounded-lg text-[11px] font-semibold border ${
+              selectedSlot === s && selectedDate === active.date
+                ? 'bg-[#1E6A6A] text-white border-[#1E6A6A]'
+                : 'bg-white text-gray-700 border-gray-200 hover:border-[#D4AF37]'
+            }`}
+            data-testid={`gig-appt-slot-${s}`}>
+            {s}
+          </button>
+        ))}
+      </div>
     </div>
   );
 };
