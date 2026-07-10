@@ -50,6 +50,49 @@ const OPTIONS = [
     src: '/videos/hero-previews/F-freelancer.mp4',
     poster: '/videos/hero-previews/F-freelancer-poster.jpg',
   },
+  // ── Round 2 (new options) ─────────────────────────────
+  {
+    id: 'G',
+    label: 'Plumber in safety glasses checking installations',
+    fit: 'Plumbers/installers — close-up variant of B',
+    src: '/videos/hero-previews/G-plumber2.mp4',
+    poster: '/videos/hero-previews/G-plumber2-poster.jpg',
+  },
+  {
+    id: 'H',
+    label: 'Two construction workers walking on a job site',
+    fit: 'Construction, renovations, team feel',
+    src: '/videos/hero-previews/H-team.mp4',
+    poster: '/videos/hero-previews/H-team-poster.jpg',
+  },
+  {
+    id: 'I',
+    label: 'Delivery courier taping up a box at doorstep',
+    fit: 'Moving, courier, doorstep delivery',
+    src: '/videos/hero-previews/I-courier-truck.mp4',
+    poster: '/videos/hero-previews/I-courier-truck-poster.jpg',
+  },
+  {
+    id: 'J',
+    label: 'Pro car detailer vacuuming a luxury car interior',
+    fit: 'Auto detail, premium cleaning services',
+    src: '/videos/hero-previews/J-car-detail.mp4',
+    poster: '/videos/hero-previews/J-car-detail-poster.jpg',
+  },
+  {
+    id: 'K',
+    label: 'Carpenter in green apron sanding in a workshop',
+    fit: 'Carpenters, craftsmen, custom furniture',
+    src: '/videos/hero-previews/K-carpenter.mp4',
+    poster: '/videos/hero-previews/K-carpenter-poster.jpg',
+  },
+  {
+    id: 'L',
+    label: 'Guys hanging out in a barbershop (atmospheric)',
+    fit: 'Beauty / grooming services — atmospheric, not action',
+    src: '/videos/hero-previews/L-barber.mp4',
+    poster: '/videos/hero-previews/L-barber-poster.jpg',
+  },
 ];
 
 function HeroPreview({ opt, overlay }) {
@@ -134,10 +177,10 @@ export default function ServicesHeroPreview() {
           Services hero video — preview
         </h1>
         <p className="text-sm text-gray-600 mb-4">
-          6 candidate background videos rendered exactly as they'd appear on
-          the /services page. Pick the option ID you prefer (A–F). Toggle the
+          Candidate background videos rendered exactly as they'd appear on
+          the /services page. Pick the option ID you prefer (A–L). Toggle the
           overlay strength to compare how "video-forward" vs "brand-forward"
-          each one looks.
+          each one looks. Options G–L were added in Round 2.
         </p>
 
         <div className="flex flex-wrap gap-2 mb-6" data-testid="overlay-toggle">
@@ -169,7 +212,7 @@ export default function ServicesHeroPreview() {
       </div>
 
       <div className="max-w-5xl mx-auto px-4 py-10 text-center text-sm text-gray-500">
-        Reply with the letter (A–F) of your favourite and I'll wire it into the
+        Reply with the letter (A–L) of your favourite and I'll wire it into the
         real /services page.
       </div>
     </div>
