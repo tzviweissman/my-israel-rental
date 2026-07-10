@@ -21,6 +21,20 @@ html {
     overflow-x: hidden;
 }
 
+/* iOS Safari auto-zooms whenever the user taps an input whose computed
+   font-size is under 16px — jarring on the signup wizard and every
+   other form. Force 16px on all interactive form controls at mobile
+   widths so the viewport never re-scales, and the "no horizontal scroll"
+   promise above stays intact. Kept scoped to mobile so desktop layouts
+   don't inherit an inflated form typography. */
+@media (max-width: 640px) {
+  input:not([type='checkbox']):not([type='radio']):not([type='range']):not([type='color']),
+  textarea,
+  select {
+    font-size: 16px !important;
+  }
+}
+
 code {
     font-family:
         source-code-pro, Menlo, Monaco, Consolas, "Courier New", monospace;
