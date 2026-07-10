@@ -11,7 +11,6 @@ Build a bilingual (English/Hebrew) rental website named MyIsraelRental.com with 
 - **i18n**: i18next with English and Hebrew (RTL) support
 
 ## What's Been Implemented
-
 - [x] **Services hero: rotating background video (2026-07-10)**:
   - Replaced the plain teal gradient on `/services` with three rotating stock clips (plumber → doorstep courier → carpenter) behind a translucent teal-to-dark-teal gradient (78%→88% opacity) so hero copy stays legible.
   - Videos are self-hosted under `/app/frontend/public/videos/services-hero/` (~14 MB total). Each has a matching poster JPG extracted with ffmpeg so the fallback image matches whatever clip would be playing.
@@ -21,6 +20,13 @@ Build a bilingual (English/Hebrew) rental website named MyIsraelRental.com with 
     - Honours `prefers-reduced-motion`: renders the poster as a plain `<img>` and never mounts the video element (zero MB downloaded).
     - `onError` falls through to the next clip so a single decode failure never leaves an empty hero.
   - Files: `pages/Services.jsx`, `components/marketplace/RotatingHeroVideo.jsx`, `public/videos/services-hero/{B-plumber,I-courier-truck,K-carpenter}.{mp4,jpg}`.
+
+- [x] **Services "How it works" video strip (2026-07-10)**:
+  - New section directly below the hero that visually explains the marketplace in 3 rounded video cards: **01 Post a job** (hands on phone at seaside) → **02 Get quotes** (young woman smiling on cell) → **03 Book & relax** (happy couple with house keys). Highest-converting reverse-marketplace pattern (Fiverr / Thumbtack).
+  - Each card: 16:9 muted looping video with poster fallback, step number chip (`01 · 💬`) anchored bottom-left inside the video frame, title, and one-line description below.
+  - Component: `frontend/src/components/marketplace/ServicesHowItWorks.jsx` — mirrors the reduced-motion contract from `RotatingHeroVideo` (renders poster `<img>` only for users who prefer reduced motion).
+  - Copy is i18n-ready via `services.howItWorks.*` keys with English defaults, so Hebrew translations can be added later without touching the component.
+  - Files: `pages/Services.jsx` (inserted after hero), `components/marketplace/ServicesHowItWorks.jsx`, `public/videos/services-hero/step{1,2,3}-*.{mp4,jpg}`.
 
 
 - [x] **Publish-flow polish for auto-translate (2026-07-09)**:

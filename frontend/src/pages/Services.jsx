@@ -29,6 +29,7 @@ import NearbyDensityBar from '../components/common/NearbyDensityBar';
 import { localizedTitle } from '../utils/gigLocale';
 import { isAvailableNow, getGigCover } from '../utils/gigAvailability';
 import RotatingHeroVideo from '../components/marketplace/RotatingHeroVideo';
+import ServicesHowItWorks from '../components/marketplace/ServicesHowItWorks';
 
 // Rotating hero clips (plumber → doorstep courier → carpenter). Kept as
 // a module-level constant so React doesn't rebuild the array on every render.
@@ -514,6 +515,12 @@ const Services = () => {
           </div>
         </div>
       </div>
+
+      {/* "How it works" strip — 3 short looping clips (post → get quotes →
+          book) that show the marketplace flow before the visitor has to
+          read anything. Highest-converting Fiverr-style pattern for
+          reverse marketplaces. */}
+      <ServicesHowItWorks />
 
       {/* Locations + Categories */}
       <div className="max-w-7xl mx-auto px-4 md:px-6 py-10">
