@@ -68,6 +68,18 @@ class ApplicationIn(BaseModel):
     quoted_currency: str = Field("ILS", pattern="^(ILS|USD)$")
 
 
+class SavedSearchIn(BaseModel):
+    """Provider-defined subscription to matching new jobs.
+
+    Category is required; area is optional and prefix-matched (so saving
+    ``area='Tel Aviv'`` matches ``Tel Aviv, Florentin``, ``Tel Aviv``,
+    etc.). Once saved, per-post pings for matching jobs are suppressed
+    in favour of a single daily digest email.
+    """
+    category: str
+    area: Optional[str] = Field(None, max_length=120)
+
+
 # ---------------- Helpers ----------------
 
 MAX_OPEN_JOBS_PER_USER = 5
@@ -123,6 +135,19 @@ async def _notify_matching_providers(job: dict[str, Any]) -> None:
         )
         if not provider_ids:
             return
+        # Providers with a saved search covering this category+area
+        # are opted-in to the daily digest — suppress the per-post ping
+        # for them here. `saved_area` uses a case-insensitive prefix
+        # match against the job's area so "Tel Aviv" also swallows
+        # "Tel Aviv, Florentin".
+        job_area = (job.get("area") or "").lower()
+        digest_subscribed_ids: set[str] = set()
+        async for s in db.marketplace_job_searches.find(
+            {"category": cat, "provider_user_id": {"$in": list(provider_ids)}},
+        ):
+            saved_area = (s.get("area") or "").strip().lower()
+            if not saved_area or job_area.startswith(saved_area):
+                digest_subscribed_ids.add(s["provider_user_id"])
         # Fetch user emails in one round-trip. Skip the poster themselves.
         poster_id = job.get("poster_user_id")
         users = await db.users.find(
@@ -141,6 +166,8 @@ async def _notify_matching_providers(job: dict[str, Any]) -> None:
             uid = user.get("_id")
             if uid == poster_id:
                 continue
+            if uid in digest_subscribed_ids:
+                continue  # will get this in the daily digest instead
             to_email = user.get("email")
             if not to_email:
                 continue
@@ -425,3 +452,150 @@ async def provider_job_matches(user=Depends(verify_token)):
         for r in rows:
             r["already_applied"] = r["id"] in applied_ids
     return rows
+
+
+# ---------------- Saved searches (daily digest) ----------------
+
+@router.post("/job-searches")
+async def create_saved_search(payload: SavedSearchIn, user=Depends(verify_token)):
+    _validate_category(payload.category)
+    # De-dupe on (user, category, normalised area) so re-clicking Save
+    # doesn't create ghosts.
+    normalised_area = (payload.area or "").strip() or None
+    existing = await db.marketplace_job_searches.find_one({
+        "provider_user_id": user["user_id"],
+        "category": payload.category,
+        "area": normalised_area,
+    })
+    if existing:
+        raise HTTPException(status_code=400, detail="You already have this search saved")
+    now = datetime.now(UTC).isoformat()
+    doc = {
+        "_id": str(uuid.uuid4()),
+        "provider_user_id": user["user_id"],
+        "category": payload.category,
+        "area": normalised_area,
+        "created_at": now,
+        "last_digest_sent_at": None,
+    }
+    await db.marketplace_job_searches.insert_one(doc)
+    out = {k: v for k, v in doc.items() if k != "_id"}
+    out["id"] = doc["_id"]
+    return out
+
+
+@router.get("/job-searches")
+async def list_saved_searches(user=Depends(verify_token)):
+    cur = db.marketplace_job_searches.find({"provider_user_id": user["user_id"]}).sort("created_at", -1)
+    out = []
+    async for s in cur:
+        row = {k: v for k, v in s.items() if k != "_id"}
+        row["id"] = s["_id"]
+        out.append(row)
+    return out
+
+
+@router.delete("/job-searches/{search_id}")
+async def delete_saved_search(search_id: str, user=Depends(verify_token)):
+    res = await db.marketplace_job_searches.delete_one({
+        "_id": search_id,
+        "provider_user_id": user["user_id"],
+    })
+    if res.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Saved search not found")
+    return {"ok": True}
+
+
+def _admin_only(user: dict) -> None:
+    if user.get("role") != "admin":
+        raise HTTPException(status_code=403, detail="Admin only")
+
+
+@router.post("/job-searches/send-digest")
+async def send_digest(user=Depends(verify_token)):
+    """Admin-triggered (or cron-triggered) digest sender. Every saved
+    search whose `last_digest_sent_at` is older than 20h gets one email
+    listing every open job posted since that timestamp that still
+    matches. Idempotent: re-running within 20h is a no-op.
+    """
+    _admin_only(user)
+    from datetime import timedelta
+    now = datetime.now(UTC)
+    cutoff_iso = (now - timedelta(hours=20)).isoformat()
+
+    searches = await db.marketplace_job_searches.find({
+        "$or": [
+            {"last_digest_sent_at": None},
+            {"last_digest_sent_at": {"$lt": cutoff_iso}},
+        ],
+    }).to_list(500)
+    if not searches:
+        return {"sent": 0, "reason": "nothing due"}
+
+    # Group by user so a provider with multiple saved searches gets one
+    # email with all matches in one place instead of several.
+    by_user: dict[str, list[dict]] = {}
+    for s in searches:
+        by_user.setdefault(s["provider_user_id"], []).append(s)
+
+    sent_count = 0
+    for uid, user_searches in by_user.items():
+        u = await db.users.find_one({"_id": uid}) \
+            or await db.users.find_one({"id": uid})
+        if not u or not u.get("email"):
+            continue
+
+        # Build a match query that OR's every saved search — one round
+        # trip against the jobs collection instead of one per search.
+        or_clauses: list[dict[str, Any]] = []
+        min_created = min(
+            (s.get("last_digest_sent_at") or s.get("created_at") or "1970-01-01")
+            for s in user_searches
+        )
+        for s in user_searches:
+            clause: dict[str, Any] = {"category": s["category"]}
+            if s.get("area"):
+                clause["area"] = {"$regex": f"^{s['area']}", "$options": "i"}
+            or_clauses.append(clause)
+        jobs = await db.marketplace_jobs.find({
+            "status": "open",
+            "poster_user_id": {"$ne": uid},
+            "created_at": {"$gte": min_created},
+            "$or": or_clauses,
+        }).sort("created_at", -1).limit(50).to_list(50)
+        if not jobs:
+            continue
+
+        rows_html = "".join(
+            f"<li style=\"margin-bottom:12px\"><a href=\"{FRONTEND_URL}/services/jobs/{j['_id']}\" "
+            f"style=\"color:#1E6A6A;font-weight:600;text-decoration:none\">{j.get('title')}</a><br/>"
+            f"<span style=\"color:#666;font-size:12px\">📍 {j.get('area', '')}"
+            f"{' · 💰 ' + ('₪' if j.get('budget_currency','ILS') == 'ILS' else '$') + str(int(j['budget_amount'])) if j.get('budget_type') == 'fixed' and j.get('budget_amount') else ' · 💰 open to offers'}"
+            f"{' · 🗓 ' + j['preferred_date'] if j.get('preferred_date') else ''}"
+            "</span></li>"
+            for j in jobs
+        )
+        html = f"""
+          <p>Hi {u.get('full_name') or 'there'},</p>
+          <p>Here are the new jobs matching your saved searches in the last day:</p>
+          <ul style="list-style:none;padding:0">{rows_html}</ul>
+          <p style="color:#666;font-size:12px;margin-top:24px">
+            You can manage or unsubscribe from these searches in your
+            <a href="{FRONTEND_URL}/dashboard" style="color:#1E6A6A">MyIsraelRental dashboard</a>.
+          </p>
+        """
+        await send_email(
+            u["email"],
+            subject=f"Your daily jobs digest — {len(jobs)} new match{'es' if len(jobs) != 1 else ''}",
+            html_body=html,
+            tag="job-digest",
+        )
+        sent_count += 1
+
+    # Stamp all processed searches so they don't re-fire until tomorrow.
+    ids = [s["_id"] for s in searches]
+    await db.marketplace_job_searches.update_many(
+        {"_id": {"$in": ids}},
+        {"$set": {"last_digest_sent_at": now.isoformat()}},
+    )
+    return {"sent": sent_count, "searches_processed": len(searches)}

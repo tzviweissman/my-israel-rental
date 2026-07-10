@@ -5,10 +5,11 @@
  * name + member-since year so the board reads more like a job board
  * than a personal ad. Filters: category + area (server-side).
  */
-import React, { useContext, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import axios from 'axios';
-import { Loader2, MapPin, Coins, Calendar, Plus, MessageSquare } from 'lucide-react';
+import { toast } from 'sonner';
+import { Loader2, MapPin, Coins, Calendar, Plus, MessageSquare, Bell, BellRing } from 'lucide-react';
 import { API, AuthContext } from '../App';
 import PageMeta from '../components/PageMeta';
 
@@ -20,6 +21,52 @@ const JobsBoard = () => {
   const [jobs, setJobs] = useState([]);
   const [loading, setLoading] = useState(true);
   const activeCat = params.get('category') || '';
+  const activeArea = params.get('area') || '';
+  const [savedSearches, setSavedSearches] = useState([]);
+  const [savingSearch, setSavingSearch] = useState(false);
+
+  // Refresh the saved-search list any time we mount or the filter
+  // context changes — so the toggle button can flip between "Save this
+  // search" and "✓ Subscribed".
+  const refreshSavedSearches = useCallback(() => {
+    if (!token) return;
+    axios.get(`${API}/marketplace/job-searches`, {
+      headers: { Authorization: `Bearer ${token}` },
+    }).then((r) => setSavedSearches(r.data)).catch(() => {});
+  }, [token]);
+
+  useEffect(() => { refreshSavedSearches(); }, [refreshSavedSearches]);
+
+  const matchedSaved = useMemo(() => {
+    if (!activeCat) return null;
+    const norm = (activeArea || '').trim().toLowerCase();
+    return savedSearches.find((s) => s.category === activeCat
+      && ((s.area || '').toLowerCase() === norm)) || null;
+  }, [savedSearches, activeCat, activeArea]);
+
+  const toggleSaveSearch = async () => {
+    if (!token) { navigate('/auth'); return; }
+    if (!activeCat) return;
+    setSavingSearch(true);
+    try {
+      if (matchedSaved) {
+        await axios.delete(`${API}/marketplace/job-searches/${matchedSaved.id}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        toast.success('Search unsaved — per-post pings will resume.');
+      } else {
+        await axios.post(`${API}/marketplace/job-searches`,
+          { category: activeCat, area: activeArea || null },
+          { headers: { Authorization: `Bearer ${token}` } });
+        toast.success('Search saved. You\'ll get a daily digest of new matches.');
+      }
+      refreshSavedSearches();
+    } catch (err) {
+      toast.error(err.response?.data?.detail || 'Something went wrong');
+    } finally {
+      setSavingSearch(false);
+    }
+  };
 
   useEffect(() => {
     axios.get(`${API}/marketplace/categories`).then((r) => setCategories(r.data));
@@ -60,6 +107,35 @@ const JobsBoard = () => {
             <Plus size={14} /> Post a job
           </button>
         </div>
+
+        {/* Save this search — only surface when a category filter is
+            active (an empty subscription for "all categories" would be
+            spammy). Flips into an unsubscribe pill once saved so the
+            provider can toggle it back off without leaving the page. */}
+        {activeCat && token && (
+          <div className="mb-4 rounded-2xl border border-[#1E6A6A]/15 bg-[#1E6A6A]/5 px-4 py-3 flex items-center justify-between gap-3 flex-wrap" data-testid="jobs-save-search-strip">
+            <div className="flex items-center gap-2 text-sm text-gray-700">
+              {matchedSaved ? <BellRing size={16} className="text-[#1E6A6A]" /> : <Bell size={16} className="text-gray-500" />}
+              <span>
+                {matchedSaved
+                  ? <>You&apos;ll get a <b>daily digest</b> of new matches in this filter.</>
+                  : <>Save this search to get a <b>daily email digest</b> instead of one email per post.</>}
+              </span>
+            </div>
+            <button
+              onClick={toggleSaveSearch}
+              disabled={savingSearch}
+              className={`px-3 py-1.5 rounded-lg text-xs font-semibold border ${
+                matchedSaved
+                  ? 'bg-white text-gray-700 border-gray-200 hover:border-red-300 hover:text-red-600'
+                  : 'bg-[#1E6A6A] text-white border-[#1E6A6A] hover:bg-[#0F3A3A]'
+              } disabled:opacity-60`}
+              data-testid="jobs-save-search-btn"
+            >
+              {savingSearch ? '…' : matchedSaved ? 'Unsubscribe' : 'Save this search'}
+            </button>
+          </div>
+        )}
 
         {/* Category strip */}
         <div className="flex gap-2 overflow-x-auto pb-2 mb-6 no-scrollbar">
