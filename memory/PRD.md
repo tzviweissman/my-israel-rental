@@ -12,6 +12,17 @@ Build a bilingual (English/Hebrew) rental website named MyIsraelRental.com with 
 
 ## What's Been Implemented
 
+- [x] **Services hero: rotating background video (2026-07-10)**:
+  - Replaced the plain teal gradient on `/services` with three rotating stock clips (plumber → doorstep courier → carpenter) behind a translucent teal-to-dark-teal gradient (78%→88% opacity) so hero copy stays legible.
+  - Videos are self-hosted under `/app/frontend/public/videos/services-hero/` (~14 MB total). Each has a matching poster JPG extracted with ffmpeg so the fallback image matches whatever clip would be playing.
+  - New reusable component `frontend/src/components/marketplace/RotatingHeroVideo.jsx`:
+    - Advances on `ended` — respects each clip's natural length instead of a fixed timer.
+    - `key={src}` remount on rotation → clean `play()` lifecycle, no stuck decoders.
+    - Honours `prefers-reduced-motion`: renders the poster as a plain `<img>` and never mounts the video element (zero MB downloaded).
+    - `onError` falls through to the next clip so a single decode failure never leaves an empty hero.
+  - Files: `pages/Services.jsx`, `components/marketplace/RotatingHeroVideo.jsx`, `public/videos/services-hero/{B-plumber,I-courier-truck,K-carpenter}.{mp4,jpg}`.
+
+
 - [x] **Publish-flow polish for auto-translate (2026-07-09)**:
   - Provider now gets clear signals that the ~4-second publish latency is doing valuable work, not just being slow:
     - **Pre-publish notice on step 5**: teal "Heads up" strip with a spinner icon and copy: *"Publishing takes about 4 seconds because we auto-translate your listing to Hebrew so Hebrew-speaking renters can find and read it right away — no extra typing needed."*

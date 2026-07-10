@@ -28,6 +28,24 @@ import PeekableResultsSheet from '../components/common/PeekableResultsSheet';
 import NearbyDensityBar from '../components/common/NearbyDensityBar';
 import { localizedTitle } from '../utils/gigLocale';
 import { isAvailableNow, getGigCover } from '../utils/gigAvailability';
+import RotatingHeroVideo from '../components/marketplace/RotatingHeroVideo';
+
+// Rotating hero clips (plumber → doorstep courier → carpenter). Kept as
+// a module-level constant so React doesn't rebuild the array on every render.
+const HERO_VIDEO_CLIPS = [
+  {
+    src: '/videos/services-hero/B-plumber.mp4',
+    poster: '/videos/services-hero/B-plumber-poster.jpg',
+  },
+  {
+    src: '/videos/services-hero/I-courier-truck.mp4',
+    poster: '/videos/services-hero/I-courier-truck-poster.jpg',
+  },
+  {
+    src: '/videos/services-hero/K-carpenter.mp4',
+    poster: '/videos/services-hero/K-carpenter-poster.jpg',
+  },
+];
 
 const TEAL = '#1E6A6A';
 const GOLD = '#D4AF37';
@@ -403,9 +421,21 @@ const Services = () => {
     >
       <PageMeta title={seo.title} description={seo.description} path={seo.path} />
 
-      {/* Hero + search */}
-      <div className="relative bg-gradient-to-br from-[#1E6A6A] to-[#0F3A3A] text-white py-14 md:py-20 px-4">
-        <div className="max-w-5xl mx-auto text-center">
+      {/* Hero + search — background video rotates through 3 service clips
+          (plumber → doorstep courier → carpenter) behind a translucent
+          teal gradient. The gradient keeps the copy legible while still
+          letting the human motion behind it read through. */}
+      <div className="relative overflow-hidden text-white py-14 md:py-20 px-4" data-testid="services-hero">
+        <RotatingHeroVideo clips={HERO_VIDEO_CLIPS} />
+        <div
+          className="absolute inset-0 pointer-events-none"
+          style={{
+            background:
+              'linear-gradient(135deg, rgba(30,106,106,0.78) 0%, rgba(15,58,58,0.88) 100%)',
+          }}
+          aria-hidden="true"
+        />
+        <div className="relative max-w-5xl mx-auto text-center">
           <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-4" style={{ fontFamily: 'Playfair Display' }}>
             {t('services.heroTitle', 'Find & book trusted local services')}
           </h1>
