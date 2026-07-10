@@ -43,6 +43,7 @@ import PaymentCancel from './pages/PaymentCancel';
 import AvailabilityExtended from './pages/AvailabilityExtended';
 import Stays from './pages/Stays';
 import Services from './pages/Services';
+import ServicesHeroPreview from './pages/ServicesHeroPreview';
 import GigDetail from './pages/GigDetail';
 import CreateGig from './pages/CreateGig';
 import JobsBoard from './pages/JobsBoard';
@@ -205,6 +206,7 @@ function App() {
               }} />}
             />
             <Route path="/services" element={<Services />} />
+            <Route path="/services-hero-preview" element={<ServicesHeroPreview />} />
             <Route path="/services/jobs" element={<JobsBoard />} />
             <Route path="/services/jobs/:id" element={<JobDetail />} />
             <Route path="/services/post-job" element={user ? <PostJob /> : <Navigate to="/auth/login" />} />
