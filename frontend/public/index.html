@@ -2,7 +2,16 @@
 <html lang="en">
     <head>
         <meta charset="utf-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <!-- Lock viewport zoom on mobile.
+             `maximum-scale=1, user-scalable=no` prevents:
+               • iOS pinch-to-zoom from breaking sticky UI (bottom nav / FABs)
+               • accidental double-tap zoom on interactive elements
+               • lingering zoom state persisting between routes
+             Combined with the min-16px input font-size rule in index.css,
+             this fully removes the "form focus zooms the whole page" bug.
+             Accessibility note: OS-level zoom (Settings → Display → Text
+             size) is unaffected — we're only disabling ad-hoc pinch. -->
+        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
         <meta name="theme-color" content="#1E6A6A" />
         <!-- NOTE: per-route <title>, <meta name="description">, og:* and
              twitter:* tags are now injected by react-helmet-async on each
