@@ -28,6 +28,16 @@ Build a bilingual (English/Hebrew) rental website named MyIsraelRental.com with 
   - Copy is i18n-ready via `services.howItWorks.*` keys with English defaults, so Hebrew translations can be added later without touching the component.
   - Files: `pages/Services.jsx` (inserted after hero), `components/marketplace/ServicesHowItWorks.jsx`, `public/videos/services-hero/step{1,2,3}-*.{mp4,jpg}`.
 
+- [x] **Services hero: segmented Airbnb-style search (2026-07-10)**:
+  - Removed the "From apartment cleaners…" subtitle and the secondary address autocomplete input. The primary search bar moved up directly below the H1.
+  - Replaced the single free-text input with a 3-segment pill (Service · When · Budget), plus a teal filters button on the right that opens the existing `ServicesFiltersModal` for the deeper filters (rating, response time, languages, sort, distance).
+  - **Service**: dropdown of all `/api/marketplace/categories` (13 options, incl. "All services" reset). Persists as `?category=<slug>`.
+  - **When**: `Anytime` / `Today` / `This week` — `Today` maps to `?available_now=1` (already server-honoured); other windows clear it (client-side placeholder for a future `available_on=YYYY-MM-DD` param).
+  - **Budget**: `Under ₪100` / `₪100–300` / `₪300–800` / `₪800 and up` / `Any` — persists as `?min_price=<n>&max_price=<n>`.
+  - `Become a provider →` demoted to a small text link under the pill so the primary CTA remains "pick a service".
+  - Full test-id coverage: `services-hero-{service,day,budget,more-filters,become-provider}` for deterministic UI testing.
+  - Files: `components/marketplace/ServicesHeroSearch.jsx` (new), `pages/Services.jsx` (hero simplified, unused `AddressAutocomplete` + `nearAddrInput/Label` state removed).
+
 
 - [x] **Publish-flow polish for auto-translate (2026-07-09)**:
   - Provider now gets clear signals that the ~4-second publish latency is doing valuable work, not just being slow:

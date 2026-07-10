@@ -10,13 +10,12 @@
  * URL state persists every filter so a screenshot-worthy filtered view
  * is always deep-linkable (e.g. shareable /services?category=photography&min_rating=4&sort=rating).
  */
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import axios from 'axios';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
-import { Search, ArrowRight, Loader2, SlidersHorizontal, Award, Zap, MapPin, LayoutGrid, Map as MapIcon } from 'lucide-react';
-import AddressAutocomplete from '../components/common/AddressAutocomplete';
+import { ArrowRight, Loader2, SlidersHorizontal, Award, Zap, MapPin, LayoutGrid, Map as MapIcon } from 'lucide-react';
 import { API } from '../App';
 import PageMeta from '../components/PageMeta';
 import StarRating from '../components/marketplace/StarRating';
@@ -30,6 +29,7 @@ import { localizedTitle } from '../utils/gigLocale';
 import { isAvailableNow, getGigCover } from '../utils/gigAvailability';
 import RotatingHeroVideo from '../components/marketplace/RotatingHeroVideo';
 import ServicesHowItWorks from '../components/marketplace/ServicesHowItWorks';
+import ServicesHeroSearch from '../components/marketplace/ServicesHeroSearch';
 
 // Rotating hero clips (plumber → doorstep courier → carpenter). Kept as
 // a module-level constant so React doesn't rebuild the array on every render.
@@ -185,12 +185,6 @@ const Services = () => {
   // URL, so shared links can't leak location. Cleared on tab close.
   const [coords, setCoords] = useState(null);
   const [geoBusy, setGeoBusy] = useState(false);
-  // Address-search state — parallel to browser geolocation, powered by
-  // the /api/geocode/suggest dropdown. When set, `coords` gets populated
-  // from the pick and `nearAddrLabel` is the human-readable string we
-  // show in the "Showing services near X" chip. Cleared on tab close.
-  const [nearAddrInput, setNearAddrInput] = useState('');
-  const [nearAddrLabel, setNearAddrLabel] = useState('');
 
   // Cross-highlight state, same pattern as Stays — pin click → this id,
   // peek strip watches for it, scrolls the matching card into view.
@@ -437,82 +431,18 @@ const Services = () => {
           aria-hidden="true"
         />
         <div className="relative max-w-5xl mx-auto text-center">
-          <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-4" style={{ fontFamily: 'Playfair Display' }}>
+          <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-6 md:mb-8" style={{ fontFamily: 'Playfair Display' }}>
             {t('services.heroTitle', 'Find & book trusted local services')}
           </h1>
-          <p className="text-white/80 max-w-2xl mx-auto mb-8">
-            {t('services.heroSubtitle', 'From apartment cleaners to plumbers, movers to interior designers — everything you need for living and hosting in Israel, in one place.')}
-          </p>
-          <div className="flex bg-white rounded-full overflow-hidden shadow-lg max-w-xl mx-auto" data-testid="services-search-bar">
-            <div className="flex items-center flex-1 ps-4">
-              <Search size={16} className="text-gray-400 shrink-0" />
-              <input
-                value={q}
-                onChange={(e) => patchUrl({ q: e.target.value })}
-                placeholder={t('services.searchPlaceholder', 'Search cleaners, movers, plumbers…')}
-                className="flex-1 px-3 py-3 text-sm text-gray-800 focus:outline-none"
-                data-testid="services-search-input"
-              />
-            </div>
-            <button
-              onClick={() => navigate('/dashboard?tab=my-gigs')}
-              className="px-5 py-3 bg-[#D4AF37] text-white text-sm font-semibold hover:bg-[#c19f2c] transition-colors"
-              data-testid="services-become-provider"
-            >
-              {t('services.becomeProvider', 'Become a provider')}
-            </button>
-          </div>
-
-          {/* Address autocomplete — the "typo-tolerant" alternative to
-              the geolocation nearby button. Renters who don't want to
-              grant location access can just type "Rehavia", pick from
-              the dropdown, and see nearby providers ranked by proximity.
-              White frame on the dark hero background so it reads as a
-              secondary search widget under the primary keyword search. */}
-          <div className="mt-3 max-w-xl mx-auto flex" data-testid="services-address-shell">
-            <div className="flex-1 bg-white rounded-full shadow-lg overflow-visible">
-              <AddressAutocomplete
-                value={nearAddrInput}
-                onChange={setNearAddrInput}
-                hasSelection={Boolean(nearAddrLabel)}
-                onSelect={({ label, lat, lng }) => {
-                  setNearAddrInput(label);
-                  setNearAddrLabel(label);
-                  setCoords({ lat, lng });
-                  patchUrl({ nearby: '1', sort: 'distance' });
-                  toast.success(t('services.nearAddress', 'Showing services near "{{addr}}"', { addr: label }));
-                }}
-                onSubmit={async (raw) => {
-                  const trimmed = (raw || '').trim();
-                  if (!trimmed) return;
-                  // Fallback path when the renter hits Enter with no
-                  // highlighted suggestion — geocode as a one-shot and
-                  // apply the coords if the API resolves it.
-                  try {
-                    const r = await axios.get(`${API}/geocode/search`, { params: { q: trimmed } });
-                    if (typeof r.data?.lat === 'number' && typeof r.data?.lng === 'number') {
-                      setNearAddrLabel(trimmed);
-                      setCoords({ lat: r.data.lat, lng: r.data.lng });
-                      patchUrl({ nearby: '1', sort: 'distance' });
-                      toast.success(t('services.nearAddress', 'Showing services near "{{addr}}"', { addr: trimmed }));
-                    } else {
-                      toast.error(t('services.nearNotFound', "We couldn't find that address — try picking from the dropdown."));
-                    }
-                  } catch {
-                    toast.error(t('services.nearFailed', 'Address lookup failed — please try again.'));
-                  }
-                }}
-                onClear={() => {
-                  setNearAddrInput('');
-                  setNearAddrLabel('');
-                  setCoords(null);
-                  patchUrl({ nearby: '', sort: sort === 'distance' ? '' : sort });
-                }}
-                placeholder={t('services.addressPlaceholder', 'Or type an address — e.g. Rehavia, Jerusalem')}
-                testId="services-address"
-              />
-            </div>
-          </div>
+          <ServicesHeroSearch
+            categories={categories}
+            selectedCat={selectedCat}
+            minPrice={minPrice}
+            maxPrice={maxPrice}
+            availableNow={availableNowOnly}
+            onPatch={patchUrl}
+            onOpenFilters={() => setFiltersOpen(true)}
+          />
         </div>
       </div>
 
