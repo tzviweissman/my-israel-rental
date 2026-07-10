@@ -16,7 +16,7 @@ identical, endpoints just live in smaller modules now.
 """
 from fastapi import APIRouter
 
-from . import gigs, providers, subscription
+from . import gigs, jobs, providers, subscription
 
 # One router that owns every marketplace endpoint. All three sub-modules
 # use the same ``/marketplace`` prefix + ``["marketplace"]`` tag on their
@@ -25,6 +25,7 @@ from . import gigs, providers, subscription
 router = APIRouter()
 router.include_router(providers.router)
 router.include_router(gigs.router)
+router.include_router(jobs.router)
 router.include_router(subscription.router)
 
 # Re-export the webhook handler so ``routes/payments.py`` (or any future

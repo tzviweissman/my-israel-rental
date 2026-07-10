@@ -71,6 +71,17 @@ const DashboardTabs = ({ activeTab, setActiveTab, role, user, unreadMessages = 0
           </button>
         )}
 
+        {canPublish && (
+          <button
+            onClick={() => setActiveTab('job-requests')}
+            className={`${cls(activeTab === 'job-requests', ACTIVE_GOLD)} flex items-center justify-center gap-1.5`}
+            data-testid="tab-job-requests"
+          >
+            <Briefcase size={14} />
+            {t('dashboard.jobRequests', 'Job Requests')}
+          </button>
+        )}
+
         <button
           onClick={() => setActiveTab('bookings')}
           className={cls(activeTab === 'bookings')}

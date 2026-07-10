@@ -18,6 +18,7 @@ import BulkUploadModal from '../components/dashboard/BulkUploadModal';
 import BulkManagerTab from '../components/dashboard/BulkManagerTab';
 import MessagesTab from '../components/dashboard/MessagesTab';
 import MyGigsTab from '../components/dashboard/MyGigsTab';
+import JobRequestsTab from '../components/dashboard/JobRequestsTab';
 import ManagerHeader from '../components/dashboard/ManagerHeader';
 import ShareLinkRow from '../components/dashboard/ShareLinkRow';
 import DashboardTabs from '../components/dashboard/DashboardTabs';
@@ -313,6 +314,10 @@ const Dashboard = () => {
 
         {activeTab === 'my-gigs' && canPublishGigs(user) && (
           <MyGigsTab API={API} token={token} />
+        )}
+
+        {activeTab === 'job-requests' && canPublishGigs(user) && (
+          <JobRequestsTab API={API} token={token} />
         )}
       </div>
     </div>

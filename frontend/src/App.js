@@ -45,6 +45,9 @@ import Stays from './pages/Stays';
 import Services from './pages/Services';
 import GigDetail from './pages/GigDetail';
 import CreateGig from './pages/CreateGig';
+import JobsBoard from './pages/JobsBoard';
+import JobDetail from './pages/JobDetail';
+import PostJob from './pages/PostJob';
 import ProviderProfile from './pages/ProviderProfile';
 import FAQ from './pages/FAQ';
 import { DOCUMENT_SERVICES_ENABLED } from './config/features';
@@ -202,6 +205,9 @@ function App() {
               }} />}
             />
             <Route path="/services" element={<Services />} />
+            <Route path="/services/jobs" element={<JobsBoard />} />
+            <Route path="/services/jobs/:id" element={<JobDetail />} />
+            <Route path="/services/post-job" element={user ? <PostJob /> : <Navigate to="/auth/login" />} />
             <Route path="/services/gig/:id" element={<GigDetail />} />
             <Route path="/services/create-gig" element={user ? <CreateGig /> : <Navigate to="/auth/login" />} />
             <Route path="/services/provider/:userId" element={<ProviderProfile />} />
