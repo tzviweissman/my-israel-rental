@@ -38,6 +38,13 @@ Build a bilingual (English/Hebrew) rental website named MyIsraelRental.com with 
   - Full test-id coverage: `services-hero-{service,day,budget,more-filters,become-provider}` for deterministic UI testing.
   - Files: `components/marketplace/ServicesHeroSearch.jsx` (new), `pages/Services.jsx` (hero simplified, unused `AddressAutocomplete` + `nearAddrInput/Label` state removed).
 
+- [x] **Services hero: real date picker in "When" (2026-07-10)**:
+  - Replaced the small `<select>` in the When segment with a Shadcn `Popover` that houses three preset chips (Anytime / Today / Tomorrow) plus an inline `Calendar` for any future date. Past dates are disabled (`{ before: today }`) so nobody books yesterday.
+  - Selected date is stored on the URL as `?available_on=YYYY-MM-DD` (deep-linkable) and rendered in the segment as a short locale-aware label ("Fri, Jul 12") or one of the preset strings when the exact date matches.
+  - **Backend**: `GET /api/marketplace/gigs` now accepts `available_on=YYYY-MM-DD` (regex-validated). Appointment gigs are kept only if their `weekly_availability[<weekday>]` has ≥ 1 window on that weekday. Store/deliverable gigs pass through untouched (no per-day schedule). `fetch_multiplier` also branches on this filter so we don't undershoot the pagination limit.
+  - Regression-tested via curl: baseline 45 gigs → 42 on Saturday (all 3 appointment gigs closed) → 422 for invalid date shapes.
+  - Files: `backend/routes/marketplace/gigs.py`, `components/marketplace/ServicesHeroSearch.jsx`, `pages/Services.jsx` (readFilters + fetch effect + hero prop plumbing).
+
 
 - [x] **Publish-flow polish for auto-translate (2026-07-09)**:
   - Provider now gets clear signals that the ~4-second publish latency is doing valuable work, not just being slow:

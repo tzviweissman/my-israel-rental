@@ -12,18 +12,47 @@
  * comes from the parent via props (categories list + patchUrl + current
  * URL params) so this component stays a pure controlled surface.
  */
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Briefcase, Calendar, Wallet, SlidersHorizontal } from 'lucide-react';
+import { Briefcase, Calendar as CalendarIcon, Wallet, SlidersHorizontal } from 'lucide-react';
+import { Popover, PopoverTrigger, PopoverContent } from '../ui/popover';
+import { Calendar } from '../ui/calendar';
 
-// Day windows. "Today" and "This week" are the two we can express with
-// existing backend params (available_now=1) or the client-side filter.
-// "Anytime" clears the day filter entirely.
-const DAY_OPTIONS = [
-  { value: '',       labelKey: 'services.hero.day.any',      labelDefault: 'Anytime' },
-  { value: 'today',  labelKey: 'services.hero.day.today',    labelDefault: 'Today' },
-  { value: 'week',   labelKey: 'services.hero.day.week',     labelDefault: 'This week' },
-];
+// Format a Date object as YYYY-MM-DD for the URL param — uses the
+// browser's local timezone so what the renter picks visually matches
+// what the server evaluates (both live in civil time, no TZ math needed).
+const toIsoDate = (d) => {
+  if (!(d instanceof Date) || Number.isNaN(d.getTime())) return '';
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${y}-${m}-${day}`;
+};
+
+// Parse a YYYY-MM-DD string back to a Date at local midnight. Returns
+// null for anything not matching the expected shape so we don't
+// hydrate the calendar with garbage from a tampered URL.
+const fromIsoDate = (s) => {
+  if (typeof s !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(s)) return null;
+  const [y, m, d] = s.split('-').map(Number);
+  const dt = new Date(y, m - 1, d);
+  return Number.isNaN(dt.getTime()) ? null : dt;
+};
+
+// Short, locale-aware label for the "When" segment. Falls back to a
+// month/day summary when Intl isn't available (very rare).
+const formatDateLabel = (d, locale = 'en-US') => {
+  if (!(d instanceof Date)) return '';
+  try {
+    return new Intl.DateTimeFormat(locale, {
+      weekday: 'short',
+      month: 'short',
+      day: 'numeric',
+    }).format(d);
+  } catch {
+    return `${d.getMonth() + 1}/${d.getDate()}`;
+  }
+};
 
 // Budget brackets in ILS. Values are `min-max` (max can be empty for
 // open-ended "and up"). Kept short so the dropdown stays scannable.
@@ -68,14 +97,129 @@ function SegmentSelect({ icon: Icon, label, value, onChange, options, testId }) 
   );
 }
 
+/**
+ * "When" segment — clicks open a popover with three preset chips (Any /
+ * Today / Tomorrow) plus an inline calendar for picking any future date.
+ * Renders a compact human-readable label ("Fri, Jul 12") when a date is
+ * active so the visitor always sees which day their results are pinned
+ * to without opening the popover.
+ */
+function WhenSegment({ value, onChange, locale }) {
+  const { t } = useTranslation();
+  const [open, setOpen] = useState(false);
+
+  const today = useMemo(() => {
+    const d = new Date();
+    d.setHours(0, 0, 0, 0);
+    return d;
+  }, []);
+  const tomorrow = useMemo(() => {
+    const d = new Date(today);
+    d.setDate(d.getDate() + 1);
+    return d;
+  }, [today]);
+
+  const selectedDate = fromIsoDate(value);
+
+  // Human-readable label rendered inside the pill segment.
+  const displayLabel = !selectedDate
+    ? t('services.hero.day.any', 'Anytime')
+    : selectedDate.getTime() === today.getTime()
+      ? t('services.hero.day.today', 'Today')
+      : selectedDate.getTime() === tomorrow.getTime()
+        ? t('services.hero.day.tomorrow', 'Tomorrow')
+        : formatDateLabel(selectedDate, locale);
+
+  const handlePreset = (nextIso) => {
+    onChange(nextIso);
+    setOpen(false);
+  };
+
+  return (
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger asChild>
+        <button
+          type="button"
+          className="relative flex-1 flex items-center gap-3 px-5 py-3 cursor-pointer hover:bg-black/[0.03] transition-colors text-left"
+          data-testid="services-hero-day"
+        >
+          <CalendarIcon size={16} className="text-[#1E6A6A] shrink-0" strokeWidth={2.25} />
+          <div className="flex-1 min-w-0">
+            <div className="text-[11px] font-semibold uppercase tracking-wider text-gray-500">
+              {t('services.hero.day.label', 'When')}
+            </div>
+            <div className="text-sm font-medium text-gray-900 truncate" data-testid="services-hero-day-value">
+              {displayLabel}
+            </div>
+          </div>
+        </button>
+      </PopoverTrigger>
+      <PopoverContent
+        align="start"
+        className="w-auto p-3 bg-white shadow-xl border-gray-200"
+        data-testid="services-hero-day-popover"
+      >
+        {/* Preset chips row — three fastest bookings sit here so the
+            common case doesn't require scrolling the calendar. */}
+        <div className="flex flex-wrap gap-1.5 mb-3">
+          <button
+            type="button"
+            onClick={() => handlePreset('')}
+            className={`px-3 py-1.5 rounded-full text-xs font-medium border transition-colors ${
+              !selectedDate
+                ? 'bg-[#1E6A6A] text-white border-[#1E6A6A]'
+                : 'bg-white text-gray-700 border-gray-300 hover:border-[#1E6A6A]'
+            }`}
+            data-testid="services-hero-day-preset-any"
+          >
+            {t('services.hero.day.any', 'Anytime')}
+          </button>
+          <button
+            type="button"
+            onClick={() => handlePreset(toIsoDate(today))}
+            className={`px-3 py-1.5 rounded-full text-xs font-medium border transition-colors ${
+              selectedDate?.getTime() === today.getTime()
+                ? 'bg-[#1E6A6A] text-white border-[#1E6A6A]'
+                : 'bg-white text-gray-700 border-gray-300 hover:border-[#1E6A6A]'
+            }`}
+            data-testid="services-hero-day-preset-today"
+          >
+            {t('services.hero.day.today', 'Today')}
+          </button>
+          <button
+            type="button"
+            onClick={() => handlePreset(toIsoDate(tomorrow))}
+            className={`px-3 py-1.5 rounded-full text-xs font-medium border transition-colors ${
+              selectedDate?.getTime() === tomorrow.getTime()
+                ? 'bg-[#1E6A6A] text-white border-[#1E6A6A]'
+                : 'bg-white text-gray-700 border-gray-300 hover:border-[#1E6A6A]'
+            }`}
+            data-testid="services-hero-day-preset-tomorrow"
+          >
+            {t('services.hero.day.tomorrow', 'Tomorrow')}
+          </button>
+        </div>
+        <Calendar
+          mode="single"
+          selected={selectedDate || undefined}
+          onSelect={(d) => handlePreset(toIsoDate(d))}
+          // Block past dates — booking yesterday makes no sense.
+          disabled={{ before: today }}
+        />
+      </PopoverContent>
+    </Popover>
+  );
+}
+
 export default function ServicesHeroSearch({
   categories,
   selectedCat,
   minPrice,
   maxPrice,
-  availableNow,
+  availableOn,
   onPatch,
   onOpenFilters,
+  locale = 'en-US',
 }) {
   const { t } = useTranslation();
 
@@ -92,28 +236,10 @@ export default function ServicesHeroSearch({
     return [any, ...cats];
   }, [categories, t]);
 
-  const dayOptions = useMemo(
-    () => DAY_OPTIONS.map((o) => ({ ...o, label: t(o.labelKey, o.labelDefault) })),
-    [t]
-  );
-
   const budgetOptions = useMemo(
     () => BUDGET_OPTIONS.map((o) => ({ ...o, label: t(o.labelKey, o.labelDefault) })),
     [t]
   );
-
-  // Derive the current "day" value from the URL flags. We only surface
-  // Today/Anytime today — This week is client-side-only and reset every
-  // page load, so it's stored on the pill via `availableNow` too.
-  const currentDay = availableNow ? 'today' : '';
-
-  const handleDayChange = (v) => {
-    // Only 'today' hits the server (available_now flag). Other windows
-    // just clear the flag; a future backend `available_on=YYYY-MM-DD`
-    // param can hook in here without touching the pill's UX.
-    if (v === 'today') onPatch({ available_now: '1' });
-    else onPatch({ available_now: '' });
-  };
 
   // Derive current budget bracket from min/max, or fall back to empty.
   const currentBudget = useMemo(() => {
@@ -146,13 +272,10 @@ export default function ServicesHeroSearch({
           options={serviceOptions}
           testId="services-hero-service"
         />
-        <SegmentSelect
-          icon={Calendar}
-          label={t('services.hero.day.label', 'When')}
-          value={currentDay}
-          onChange={handleDayChange}
-          options={dayOptions}
-          testId="services-hero-day"
+        <WhenSegment
+          value={availableOn}
+          onChange={(iso) => onPatch({ available_on: iso })}
+          locale={locale}
         />
         <SegmentSelect
           icon={Wallet}

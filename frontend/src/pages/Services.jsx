@@ -164,6 +164,9 @@ const readFilters = (params) => ({
   sort: params.get('sort') || 'match',
   // Distance ceiling — only respected when nearby coords are also present.
   maxDistance: params.get('max_distance_km') || '',
+  // Date filter — YYYY-MM-DD string picked in the hero's "When" segment.
+  // Blank string means "Anytime" (server-side filter is skipped).
+  availableOn: params.get('available_on') || '',
   // Nearby-mode: only active when both lat/lng are present. Coords aren't
   // persisted to the URL so a shared /services link never leaks anyone's
   // location — nearby always requires a fresh geolocation opt-in.
@@ -206,6 +209,7 @@ const Services = () => {
   const {
     selectedCat, selectedLoc, q,
     minRating, minPrice, maxPrice, responseTime, languages, bookingMode, sort, nearby, maxDistance,
+    availableOn,
   } = state;
 
   // Client-side toggle — filters the fetched gig list down to just
@@ -249,6 +253,7 @@ const Services = () => {
     if (responseTime)  params.set('response_time', responseTime);
     if (languages.length) params.set('languages', languages.join(','));
     if (bookingMode)   params.set('booking_mode', bookingMode);
+    if (availableOn)   params.set('available_on', availableOn);
     if (sort && sort !== 'match') params.set('sort', sort);
     // Nearby-mode: only send lat/lng when both the toggle is on AND
     // coords are available. The backend will silently degrade sort to
@@ -267,7 +272,7 @@ const Services = () => {
     selectedCat, selectedLoc, q,
     minRating, minPrice, maxPrice, responseTime,
     // Joined to a primitive so the effect doesn't fire on identity change alone.
-    languages.join(','), bookingMode, sort, t,
+    languages.join(','), bookingMode, sort, t, availableOn,
     nearby, coords?.lat, coords?.lng, maxDistance,
   ]);
 
@@ -439,9 +444,10 @@ const Services = () => {
             selectedCat={selectedCat}
             minPrice={minPrice}
             maxPrice={maxPrice}
-            availableNow={availableNowOnly}
+            availableOn={availableOn}
             onPatch={patchUrl}
             onOpenFilters={() => setFiltersOpen(true)}
+            locale={i18n.language === 'he' ? 'he-IL' : 'en-US'}
           />
         </div>
       </div>

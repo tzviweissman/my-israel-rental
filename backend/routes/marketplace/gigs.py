@@ -69,6 +69,11 @@ async def list_gigs(
     # (nothing to measure against). Gigs whose area can't be resolved to
     # coords are treated as unmatched.
     max_distance_km: Optional[float] = Query(None, ge=0, le=500),
+    # Date filter — YYYY-MM-DD. When set, appointment gigs are kept
+    # only if their weekly_availability has a window on that weekday.
+    # Store & deliverable gigs are considered always-available and pass
+    # through untouched (they don't publish per-day schedules).
+    available_on: Optional[str] = Query(None, pattern=r"^\d{4}-\d{2}-\d{2}$"),
     limit: int = Query(60, ge=1, le=200),
 ):
     query: dict[str, Any] = {"status": "published"}
@@ -98,10 +103,20 @@ async def list_gigs(
     if booking_mode:
         query["booking_mode"] = booking_mode
 
+    # Resolve the date filter once, ahead of the per-gig loop. Any invalid
+    # date has already been rejected by the query pattern regex, so this
+    # `strptime` call cannot raise ValueError.
+    available_weekday_key: Optional[str] = None
+    if available_on:
+        d = datetime.strptime(available_on, "%Y-%m-%d").date()
+        # datetime.date.weekday(): Mon=0..Sun=6 — map to the schema keys
+        # used by weekly_availability (sun/mon/…/sat).
+        available_weekday_key = ["mon", "tue", "wed", "thu", "fri", "sat", "sun"][d.weekday()]
+
     # Fetch more than `limit` because the post-filters (rating floor,
-    # price band, response bucket, languages) may prune the initial page
-    # down below the requested count.
-    fetch_multiplier = 3 if any(v is not None for v in (min_rating, min_price, max_price, response_time, languages)) else 1
+    # price band, response bucket, languages, availability) may prune the
+    # initial page down below the requested count.
+    fetch_multiplier = 3 if any(v is not None for v in (min_rating, min_price, max_price, response_time, languages, available_weekday_key)) else 1
     cursor = db.marketplace_gigs.find(query).sort("created_at", -1).limit(limit * fetch_multiplier)
     raw = [g async for g in cursor]
 
@@ -150,6 +165,14 @@ async def list_gigs(
         prov_langs = prov.get("languages") or []
         if language_filter and not (language_filter & set(prov_langs)):
             continue
+
+        # Date filter — only prunes appointment gigs. Store/deliverable
+        # gigs are always considered available (no per-day schedule).
+        if available_weekday_key and gig.get("gig_type") == "appointment":
+            wa = gig.get("weekly_availability") or {}
+            windows = wa.get(available_weekday_key) or []
+            if not windows:
+                continue
 
         user = users.get(gig.get("provider_user_id"))
         gig["provider"] = {
