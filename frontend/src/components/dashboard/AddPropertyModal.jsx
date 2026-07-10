@@ -187,6 +187,31 @@ const AddPropertyModal = ({ isOpen, onClose, editingProperty, onSaved, API, toke
 
   const authHeaders = { headers: { Authorization: `Bearer ${token}` } };
 
+  // Compute which required fields the user hasn't filled yet, so we can
+  // surface a proactive hint right above the Submit button instead of
+  // relying on the browser's per-field validation popup (which only
+  // shows one field at a time and looks alien to the app's design).
+  const missingRequiredFields = React.useMemo(() => {
+    const missing = [];
+    if (!(propertyForm.title || '').trim()) missing.push('Title');
+    if (!(propertyForm.area || '').trim()) missing.push('Area / city');
+    const hasPrice = propertyForm.rental_type === 'long-term'
+      ? Number(propertyForm.monthly_price) > 0
+      : Number(propertyForm.nightly_price) > 0;
+    if (!hasPrice) {
+      missing.push(propertyForm.rental_type === 'long-term'
+        ? 'Monthly price'
+        : 'Nightly price');
+    }
+    if (propertyForm.rental_type === 'long-term' && !propertyForm.starting_date) {
+      missing.push('Starting date');
+    }
+    return missing;
+  }, [propertyForm.title, propertyForm.area, propertyForm.monthly_price,
+      propertyForm.nightly_price, propertyForm.starting_date,
+      propertyForm.rental_type]);
+  const canSubmit = missingRequiredFields.length === 0;
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     const toNumOrNull = (v) => (v === '' || v === null || v === undefined ? null : Number(v));
@@ -997,12 +1022,38 @@ const AddPropertyModal = ({ isOpen, onClose, editingProperty, onSaved, API, toke
           )}
 
           <div className="flex gap-4">
-            <button type="submit" className="flex-1 primary-btn" data-testid="submit-property-button">
+          {/* Proactive "what's still missing" hint — mirrors the pattern
+              on the gig creation wizard so hosts don't have to hunt for
+              the empty required field via browser tooltip loops. */}
+          <div className="flex-1 flex flex-col gap-3">
+            {!canSubmit && (
+              <div
+                className="rounded-xl border border-red-100 bg-red-50/40 p-3 text-xs text-red-700 leading-snug"
+                data-testid="add-property-missing-hint"
+              >
+                <p className="font-semibold mb-1 flex items-center gap-1">
+                  <span className="inline-block w-1.5 h-1.5 rounded-full bg-red-500" />
+                  Still needed to publish:
+                </p>
+                <ul className="list-disc ms-5 space-y-0.5">
+                  {missingRequiredFields.map((f) => (
+                    <li key={f}>{f}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
+            <button
+              type="submit"
+              className="primary-btn disabled:opacity-50 disabled:cursor-not-allowed"
+              disabled={!canSubmit}
+              data-testid="submit-property-button"
+            >
               {editingProperty && editingProperty.id ? t('dashboard.saveChanges') : t('dashboard.addProperty')}
             </button>
-            <button type="button" onClick={onClose} className="flex-1 secondary-btn" data-testid="cancel-add-property-button">
-              {t('dashboard.cancel')}
-            </button>
+          </div>
+          <button type="button" onClick={onClose} className="flex-1 secondary-btn self-start" data-testid="cancel-add-property-button">
+            {t('dashboard.cancel')}
+          </button>
           </div>
         </form>
       </div>

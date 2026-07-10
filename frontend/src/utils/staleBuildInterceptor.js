@@ -19,6 +19,7 @@
  */
 import axios from 'axios';
 import { toast } from 'sonner';
+import recentChangelog from '../data/recentChangelog';
 
 let installed = false;
 
@@ -33,11 +34,18 @@ const showStaleBuildToast = (reason) => {
     /* private mode — fall through and just show the toast once per page */
   }
   console.warn('[stale-build-detector]', reason);
+  // Include the two most recent user-visible updates so people don't
+  // just see "refresh please" — they see *what they'll get*.
+  const highlights = recentChangelog.slice(0, 2);
+  const description = highlights.length
+    ? `What's new:\n${highlights.map((c) => `• ${c.title}`).join('\n')}`
+    : undefined;
   toast(
-    'A newer version of the site is available. Please refresh to get the latest features.',
+    'A newer version of the site is available. Refresh to pick up the latest.',
     {
-      duration: 12000,
+      duration: 15000,
       position: 'top-center',
+      description,
       action: {
         label: 'Refresh',
         onClick: () => window.location.reload(),

@@ -144,6 +144,25 @@ const highlightText = (text, query) => {
   );
 };
 
+// Precomputed FAQPage JSON-LD payload from the SECTIONS module constant.
+// Google (and Bing) parse this out of the DOM to render rich FAQ
+// snippets. Kept at module scope so it's computed once at import time
+// instead of on every FAQ render.
+const FAQ_JSON_LD = JSON.stringify({
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  mainEntity: SECTIONS.flatMap((s) => s.items).map((item) => ({
+    '@type': 'Question',
+    name: item.q,
+    acceptedAnswer: {
+      '@type': 'Answer',
+      // `item.a` can be a plain string or JSX (see cancellation policy).
+      // Flatten to searchable text so the schema stays valid JSON.
+      text: answerToText(item.a),
+    },
+  })),
+});
+
 const FAQ = () => {
   const navigate = useNavigate();
   const { t } = useTranslation();
@@ -176,12 +195,23 @@ const FAQ = () => {
 
   const totalMatches = filteredSections.reduce((n, s) => n + s.items.length, 0);
 
+  // Build a Schema.org FAQPage payload from every Q&A on the page so
+  // Google (and other engines) can surface rich FAQ snippets in search
+  // results. Computed at module scope (see FAQ_JSON_LD constant).
+
   return (
     <div className="min-h-screen bg-[#fafafa] pt-[140px] sm:pt-[160px] md:pt-[220px] pb-20 px-4" data-testid="faq-page">
       <PageMeta
         title="FAQ — Renting in Israel made simple | MyIsraelRental"
         description="Answers about booking, payments, cancellations, deposits and contracts when renting in Israel. Learn how MyIsraelRental keeps it free for renters and owners."
         path="/faq"
+      />
+      {/* FAQPage structured data — Google reads this and can render rich
+          "People Also Ask"-style expandable snippets on the SERP. */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: FAQ_JSON_LD }}
+        data-testid="faq-jsonld"
       />
       <div className="max-w-3xl mx-auto">
         <button
