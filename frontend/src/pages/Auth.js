@@ -8,6 +8,7 @@ import { toast } from 'sonner';
 import { Eye, EyeOff, ArrowLeft, Mail, KeyRound, CheckCircle, Home, Building2, Briefcase } from 'lucide-react';
 import WelcomePopups from '../components/WelcomePopups';
 import OwnerManagementOfferModal from '../components/OwnerManagementOfferModal';
+import GoogleSignInButton from '../components/auth/GoogleSignInButton';
 
 const Auth = () => {
   const { mode } = useParams();
@@ -334,6 +335,19 @@ const Auth = () => {
           <h2 className="text-3xl font-bold mb-8 text-center" style={{ fontFamily: 'Playfair Display' }}>
             {mode === 'login' ? t('auth.loginTitle') : t('auth.signupTitle')}
           </h2>
+
+          {/* Google Sign-In — sits above the email/password form so
+              returning users don't scroll past it. Same button shape on
+              login + signup because the underlying flow is identical
+              (Emergent upserts by email server-side). */}
+          <GoogleSignInButton className="mb-4" />
+          <div className="flex items-center gap-3 mb-6" aria-hidden="true">
+            <div className="flex-1 h-px bg-gray-200" />
+            <span className="text-xs uppercase tracking-wider text-gray-400">
+              {t('auth.orContinueWith', 'or')}
+            </span>
+            <div className="flex-1 h-px bg-gray-200" />
+          </div>
 
           <form onSubmit={handleSubmit} className="space-y-6" data-testid="auth-form">
             {mode === 'signup' && (

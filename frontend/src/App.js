@@ -29,6 +29,7 @@ import Properties from './pages/Properties';
 import PropertyDetail from './pages/PropertyDetail';
 import SubleaseDetail from './pages/SubleaseDetail';
 import Auth from './pages/Auth';
+import AuthCallback from './pages/AuthCallback';
 import SignupJoin from './pages/SignupJoin';
 import VerifyPending from './pages/VerifyPending';
 import VerifyEmail from './pages/VerifyEmail';
@@ -146,13 +147,29 @@ function App() {
     );
   }
 
+  // Emergent Google Sign-In callback — when we return from
+  // auth.emergentagent.com the URL fragment carries a one-shot
+  // `#session_id=…`. We must handle it BEFORE the normal <Routes>
+  // evaluate `user ? … : Navigate(/auth/login)`, otherwise the
+  // ProtectedRoute check bounces the visitor to the login page while
+  // the session_id is still unspent. Reading window.location.hash here
+  // (outside any hook) makes the check synchronous with the first
+  // render, avoiding the classic useEffect race.
+  // REMINDER: DO NOT HARDCODE THE URL, OR ADD ANY FALLBACKS OR REDIRECT
+  // URLS, THIS BREAKS THE AUTH.
+  const hasGoogleCallback = typeof window !== 'undefined' && window.location.hash?.includes('session_id=');
+
   return (
     <AuthContext.Provider value={{ user, token, login, logout, impersonate, endImpersonation }}>
       <BrowserRouter>
-        <ScrollToTop />
-        <div className="App">
-          <ImpersonationBanner />
-          <Navigation />
+        {hasGoogleCallback ? (
+          <AuthCallback />
+        ) : (
+          <>
+            <ScrollToTop />
+            <div className="App">
+              <ImpersonationBanner />
+              <Navigation />
           {/* One-time services marketplace upsell — shown to every logged-in
               user until they either accept (→ $0 provider trial + My Gigs
               redirect) or dismiss. Admins are exempt so the internal team
@@ -214,6 +231,8 @@ function App() {
             <Route path="/faq" element={<FAQ />} />
           </Routes>
         </div>
+          </>
+        )}
       </BrowserRouter>
     </AuthContext.Provider>
   );

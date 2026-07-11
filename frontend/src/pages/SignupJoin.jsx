@@ -23,6 +23,7 @@ import {
 import { API, AuthContext } from '../App';
 import WelcomePopups from '../components/WelcomePopups';
 import OwnerManagementOfferModal from '../components/OwnerManagementOfferModal';
+import GoogleSignInButton from '../components/auth/GoogleSignInButton';
 
 const ROLE_CARDS = [
   {
@@ -262,6 +263,22 @@ const SignupJoin = () => {
               </button>
             </div>
 
+            {/* One-tap Google sign-up — bypasses the multi-field form.
+                New Google accounts default to `renter`; users can upgrade
+                to owner/provider from the dashboard after landing. Placed
+                below the primary CTA so role-selection remains the
+                headline choice on step 1. */}
+            <div className="mt-8 max-w-sm mx-auto">
+              <div className="flex items-center gap-3 mb-3" aria-hidden="true">
+                <div className="flex-1 h-px bg-gray-200" />
+                <span className="text-xs uppercase tracking-wider text-gray-400">
+                  {t('signupJoin.orQuickSignup', 'or sign up in one tap')}
+                </span>
+                <div className="flex-1 h-px bg-gray-200" />
+              </div>
+              <GoogleSignInButton />
+            </div>
+
             <p className="mt-10 text-center sm:hidden text-sm text-gray-600">
               {t('signupJoin.haveAccount', 'Already have an account?')}{' '}
               <Link to={loginHref} className="font-semibold text-[#1E6A6A]" data-testid="signup-login-link-mobile">
@@ -295,6 +312,22 @@ const SignupJoin = () => {
               <p className="mt-2 text-sm text-gray-600">
                 {t('signupJoin.detailsSub', "We'll only email you about your account and listings you care about.")}
               </p>
+
+              {/* Google Sign-In — one-tap alternative to the multi-field
+                  form. On success, the visitor lands at /dashboard as a
+                  freshly-created `renter` (the least-privileged role);
+                  they can promote themselves to owner/provider later
+                  from the dashboard. See AuthCallback.jsx. */}
+              <div className="mt-6">
+                <GoogleSignInButton />
+                <div className="flex items-center gap-3 mt-4 mb-1" aria-hidden="true">
+                  <div className="flex-1 h-px bg-gray-200" />
+                  <span className="text-xs uppercase tracking-wider text-gray-400">
+                    {t('auth.orContinueWith', 'or')}
+                  </span>
+                  <div className="flex-1 h-px bg-gray-200" />
+                </div>
+              </div>
 
               <form onSubmit={handleSubmit} className="mt-8 space-y-4" data-testid="signup-form">
                 <Field

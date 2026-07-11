@@ -45,6 +45,15 @@ Build a bilingual (English/Hebrew) rental website named MyIsraelRental.com with 
   - Regression-tested via curl: baseline 45 gigs → 42 on Saturday (all 3 appointment gigs closed) → 422 for invalid date shapes.
   - Files: `backend/routes/marketplace/gigs.py`, `components/marketplace/ServicesHeroSearch.jsx`, `pages/Services.jsx` (readFilters + fetch effect + hero prop plumbing).
 
+- [x] **Emergent-managed Google Sign-In (2026-07-10)**:
+  - New "Sign in with Google" button on `/auth/login`, `/signup` step 1 (as a one-tap alternative to role selection + form), and `/signup` step 2 (once a role is picked). All buttons redirect to `https://auth.emergentagent.com/?redirect=<origin>/dashboard` — origin derived from `window.location.origin` so preview / production / localhost all just work.
+  - **Backend**: `POST /api/auth/google/session { session_id }` in `routes/auth.py`. Exchanges the one-shot `session_id` with Emergent Auth (`/auth/v1/env/oauth/session-data`), upserts the user in `db.users` (matches by email so an existing email/password account gets Google-linked instead of duplicated), mints our existing JWT via `create_token()`, and returns the same `{token, user}` shape as `/auth/login` — so the frontend `login()` helper doesn't need a special branch. Rate-limited (20 req / 5 min per IP).
+  - **Frontend**: `pages/AuthCallback.jsx` — mounted synchronously in `App.js` whenever `window.location.hash` contains `session_id=`, BEFORE `<Routes>` evaluate. This defeats the ProtectedRoute race that would otherwise bounce the visitor to `/auth/login` before the session_id can be spent. Uses a `useRef` guard (not `useState`) so StrictMode double-invoke can't consume the session_id twice. On failure, stays on-screen for 2.5s then redirects to `/auth/login`.
+  - Coexists with the existing email/password JWT flow — no cookies, no dual-auth complexity. Google-first users default to `renter` role; they can promote themselves to owner/provider from the dashboard.
+  - New user fields on `db.users`: `google_linked: bool`, `picture: str | None`. Fires the existing `send_welcome_email()` task for brand-new Google users.
+  - Regression-tested via curl: missing `session_id` → 400; fake session_id → 401 with "Invalid or expired session"; UI callback intercepts hash, shows spinner, then error, then bounces to login.
+  - Files: `backend/routes/auth.py`, `frontend/src/App.js`, `frontend/src/pages/AuthCallback.jsx` (new), `frontend/src/components/auth/GoogleSignInButton.jsx` (new), `frontend/src/pages/Auth.js`, `frontend/src/pages/SignupJoin.jsx`.
+
 
 - [x] **Publish-flow polish for auto-translate (2026-07-09)**:
   - Provider now gets clear signals that the ~4-second publish latency is doing valuable work, not just being slow:

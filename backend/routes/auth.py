@@ -7,7 +7,8 @@ import uuid
 from datetime import UTC, datetime, timedelta
 
 import bcrypt
-from fastapi import APIRouter, Depends, HTTPException, Request
+import httpx
+from fastapi import APIRouter, Body, Depends, HTTPException, Request
 from fastapi.responses import RedirectResponse
 
 from models import (
@@ -158,6 +159,114 @@ async def login(credentials: UserLogin, req: Request) -> dict:
             "role": user['role'], "email_verified": user.get('email_verified', True),
         },
     }
+
+
+# ── Emergent-managed Google Sign-In ───────────────────────────────────────
+# Front-end kicks off the flow by sending the visitor to
+# https://auth.emergentagent.com/?redirect=<our-app>#... — once they finish
+# Google's consent, Emergent redirects back with `#session_id=<one-shot>`.
+# The client posts that session_id here; we exchange it with Emergent for
+# the verified profile, upsert a local user, and mint one of our own JWTs
+# so the rest of the app (which already trusts our JWT) works unchanged.
+# We deliberately return the same shape as /auth/login so the frontend
+# `login()` helper doesn't need a special case.
+EMERGENT_AUTH_SESSION_URL = (
+    "https://demobackend.emergentagent.com/auth/v1/env/oauth/session-data"
+)
+
+
+@api_router.post("/auth/google/session", response_model=TokenResponse)
+async def google_session_exchange(
+    payload: dict = Body(..., embed=False),
+    req: Request = None,
+) -> dict:
+    """Exchange a one-shot Emergent session_id for our own JWT + user."""
+    # Very light rate limit — this is a public endpoint that talks to a
+    # 3rd-party auth server, so we want to keep abuse windows narrow.
+    if req is not None:
+        check_rate(req, bucket="auth-google-session", limit=20, window_seconds=300)
+
+    session_id = (payload or {}).get("session_id")
+    if not isinstance(session_id, str) or not session_id.strip():
+        raise HTTPException(status_code=400, detail="session_id is required")
+
+    # Ask Emergent Auth for the profile behind this session_id. Short
+    # timeout — the browser is blocking on us to redirect.
+    try:
+        async with httpx.AsyncClient(timeout=10.0) as client:
+            r = await client.get(
+                EMERGENT_AUTH_SESSION_URL,
+                headers={"X-Session-ID": session_id.strip()},
+            )
+    except httpx.RequestError as e:
+        logger.warning(f"Emergent Auth unreachable: {e}")
+        raise HTTPException(status_code=502, detail="Auth provider unreachable") from e
+
+    if r.status_code != 200:
+        # Most common cause: the session_id has already been consumed
+        # (StrictMode double-render or a stale bookmark). Surface a 401
+        # so the client redirects the visitor back to /auth/login.
+        logger.info(f"Emergent Auth returned {r.status_code}: {r.text[:200]}")
+        raise HTTPException(status_code=401, detail="Invalid or expired session")
+
+    data = r.json() or {}
+    email = (data.get("email") or "").strip().lower()
+    name = (data.get("name") or "").strip() or (email.split("@")[0] if email else "Google user")
+    picture = data.get("picture") or None
+    if not email:
+        raise HTTPException(status_code=502, detail="Auth provider returned no email")
+
+    # Upsert by email — if the visitor previously signed up with
+    # email/password we link the same account instead of orphaning it.
+    existing = await db.users.find_one({"email": email}, {"_id": 0})
+    if existing:
+        # Attach the Google identity + picture on first-time link. We
+        # don't touch role/password/etc — an existing account keeps its
+        # settings.
+        set_updates: dict[str, str] = {}
+        if picture and not existing.get("picture"):
+            set_updates["picture"] = picture
+        if not existing.get("google_linked"):
+            set_updates["google_linked"] = True
+        # A Google user is trivially email-verified.
+        if not existing.get("email_verified"):
+            set_updates["email_verified"] = True
+        if set_updates:
+            await db.users.update_one({"id": existing["id"]}, {"$set": set_updates})
+            existing.update(set_updates)
+        user_doc = existing
+    else:
+        # Fresh Google-first user. Default role is `renter` — the least
+        # privileged option; they can upgrade in the dashboard.
+        user_doc = {
+            "id": str(uuid.uuid4()),
+            "email": email,
+            "name": name,
+            "picture": picture,
+            "role": "renter",
+            "email_verified": True,
+            "google_linked": True,
+            "created_at": datetime.now(UTC).isoformat(),
+        }
+        await db.users.insert_one(user_doc)
+        # Fire-and-forget welcome email (best-effort — errors are logged).
+        try:
+            asyncio.create_task(send_welcome_email(email, name, "renter"))
+        except Exception as e:  # noqa: BLE001
+            logger.warning(f"Failed to queue welcome email for {email}: {e}")
+
+    jwt_token = create_token(user_doc["id"], user_doc.get("role", "renter"))
+    return {
+        "token": jwt_token,
+        "user": {
+            "id": user_doc["id"],
+            "email": user_doc["email"],
+            "name": user_doc.get("name", ""),
+            "role": user_doc.get("role", "renter"),
+            "email_verified": True,
+        },
+    }
+
 
 
 @api_router.get("/auth/verify-email")
