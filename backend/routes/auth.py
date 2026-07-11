@@ -534,10 +534,10 @@ async def set_user_role(payload_in: RoleUpdate, payload: dict = Depends(verify_t
         to manager or admin).
     """
     target = (payload_in.role or "").strip().lower()
-    if target not in {"renter", "owner"}:
+    if target not in {"renter", "owner", "provider"}:
         raise HTTPException(
             status_code=400,
-            detail="Target role must be 'renter' or 'owner' — promotion to manager/admin requires admin help",
+            detail="Target role must be 'renter', 'owner', or 'provider' — promotion to manager/admin requires admin help",
         )
 
     current_role = payload.get("role")
@@ -549,10 +549,16 @@ async def set_user_role(payload_in: RoleUpdate, payload: dict = Depends(verify_t
     if current_role == target:
         raise HTTPException(status_code=400, detail=f"You are already a {target}")
 
-    # Allowed transition set
+    # Allowed transition set. Provider is added alongside owner — same
+    # privilege tier (self-selected marketplace participant), so we let
+    # a fresh Google-signed renter promote themselves without an admin.
     allowed = {
         ("renter", "owner"),
+        ("renter", "provider"),
         ("owner", "renter"),
+        ("owner", "provider"),
+        ("provider", "renter"),
+        ("provider", "owner"),
         ("manager", "renter"),
     }
     if (current_role, target) not in allowed:
@@ -575,6 +581,7 @@ async def set_user_role(payload_in: RoleUpdate, payload: dict = Depends(verify_t
     new_token = create_token(user["id"], user["role"])
     message = (
         "You're now set up as a lister. Welcome aboard!" if target == "owner"
+        else "You're now set up as a service provider. Welcome aboard!" if target == "provider"
         else "Switched back to renter. You can switch to lister again any time from Settings."
     )
     return {"token": new_token, "user": user, "message": message}

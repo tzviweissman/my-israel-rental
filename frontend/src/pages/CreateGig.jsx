@@ -19,7 +19,7 @@
  * All state is local; we POST once on the final "Publish" click.
  */
 import React, { useContext, useEffect, useMemo, useRef, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import axios from 'axios';
 import { toast } from 'sonner';
 import {
@@ -87,11 +87,26 @@ const emptyProduct = (prevCurrency = 'ILS') => ({
 const CreateGig = () => {
   const { token } = useContext(AuthContext);
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [step, setStep] = useState(1);
   const [categories, setCategories] = useState([]);
   const [locations, setLocations] = useState([]);
   const [saving, setSaving] = useState(false);
   const productImageInputRef = useRef({});
+
+  // Post-signup onboarding hook — when a provider lands here fresh from
+  // the Google sign-in flow (?welcome=1), surface a one-shot friendly
+  // banner + strip the flag from the URL so refreshes stay clean.
+  const [showWelcome, setShowWelcome] = useState(searchParams.get('welcome') === '1');
+  useEffect(() => {
+    if (searchParams.get('welcome') === '1') {
+      const url = new URL(window.location.href);
+      url.searchParams.delete('welcome');
+      navigate(url.pathname + (url.search ? url.search : '') + url.hash, { replace: true });
+    }
+    // Runs once on mount — no deps.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const [form, setForm] = useState({
     gig_type: 'deliverable',
@@ -354,6 +369,34 @@ const CreateGig = () => {
     <div className="min-h-screen bg-[#FAFAF7]" style={{ paddingTop: 'var(--nav-h, 68px)' }} data-testid="create-gig-page">
       <PageMeta title="Create a service | MyIsraelRental Provider" description="List your service on MyIsraelRental." path="/services/create" />
       <div className="max-w-2xl mx-auto px-4 py-8">
+        {showWelcome && (
+          <div
+            className="mb-6 relative rounded-2xl bg-gradient-to-br from-[#1E6A6A] to-[#0F3A3A] text-white p-5 shadow-lg"
+            data-testid="create-gig-welcome-banner"
+          >
+            <button
+              type="button"
+              onClick={() => setShowWelcome(false)}
+              className="absolute top-3 right-3 text-white/70 hover:text-white transition-colors"
+              aria-label="Dismiss"
+              data-testid="create-gig-welcome-dismiss"
+            >
+              <X size={16} />
+            </button>
+            <div className="pr-6">
+              <div className="text-xs font-semibold uppercase tracking-wider text-[#D4AF37] mb-1">
+                Welcome aboard
+              </div>
+              <div className="text-lg font-semibold mb-1" style={{ fontFamily: 'Playfair Display' }}>
+                Let&apos;s create your first service
+              </div>
+              <p className="text-sm text-white/85 leading-snug">
+                Tell us what you offer — customers browsing the marketplace
+                will see your listing within minutes of publishing.
+              </p>
+            </div>
+          </div>
+        )}
         <div className="flex items-center gap-2 mb-6">
           {Array.from({ length: totalSteps }, (_, i) => i + 1).map((n) => (
             <div key={n} className={`flex-1 h-1 rounded-full ${n <= step ? 'bg-[#1E6A6A]' : 'bg-gray-200'}`} />

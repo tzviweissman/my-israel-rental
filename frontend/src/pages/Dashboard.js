@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import axios from 'axios';
 import { Plus, Upload, Home, Sparkles } from 'lucide-react';
@@ -29,6 +29,7 @@ const Dashboard = () => {
   const { t } = useTranslation();
   const { user, token } = useContext(AuthContext);
   const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
   const [properties, setProperties] = useState([]);
   const [bookings, setBookings] = useState([]);
   const [showAddProperty, setShowAddProperty] = useState(false);
@@ -44,6 +45,22 @@ const Dashboard = () => {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
+
+  // Post-signup onboarding hook — when the auth callback lands an owner
+  // here with `?welcome=1`, auto-open the AddPropertyModal so the very
+  // first thing they see is "list your first property". We then strip
+  // the flag from the URL to keep refresh-friendly behaviour (no popup
+  // on every reload). Provider signups are handled by CreateGig.jsx.
+  const welcomeParam = searchParams.get('welcome');
+  useEffect(() => {
+    if (welcomeParam === '1' && user?.role === 'owner') {
+      setShowAddProperty(true);
+      // Strip the flag from the URL without adding a history entry.
+      const url = new URL(window.location.href);
+      url.searchParams.delete('welcome');
+      navigate(url.pathname + (url.search ? url.search : '') + url.hash, { replace: true });
+    }
+  }, [welcomeParam, user?.role, navigate]);
 
   const fetchUnreadConversations = async () => {
     if (!user) return;

@@ -54,6 +54,14 @@ Build a bilingual (English/Hebrew) rental website named MyIsraelRental.com with 
   - Regression-tested via curl: missing `session_id` → 400; fake session_id → 401 with "Invalid or expired session"; UI callback intercepts hash, shows spinner, then error, then bounces to login.
   - Files: `backend/routes/auth.py`, `frontend/src/App.js`, `frontend/src/pages/AuthCallback.jsx` (new), `frontend/src/components/auth/GoogleSignInButton.jsx` (new), `frontend/src/pages/Auth.js`, `frontend/src/pages/SignupJoin.jsx`.
 
+- [x] **Post-Google onboarding for Host / Provider + "Continue as X" banner (2026-07-10)**:
+  - **Role-intent through OAuth**: `GoogleSignInButton` now accepts an `intentRole` prop; when a visitor clicks "Host" or "Service Provider" on `/signup` step 1 (or step 2) and then hits Google, the intent is stashed in `sessionStorage.signup_intent_role` BEFORE the redirect. `AuthCallback.jsx` reads (and clears) it after the token exchange and calls `PUT /api/auth/role` to promote the fresh account. Uses the JWT returned by that call so the dashboard renders in the correct shape on the very first paint.
+  - **Backend**: `PUT /api/auth/role` extended to allow renter↔owner, renter↔provider, and owner↔provider transitions (same self-service privilege tier). Admin/manager privilege boundaries unchanged.
+  - **Role-specific landings after Google**: `owner` → `/dashboard?welcome=1` (Dashboard auto-opens the AddPropertyModal + strips the flag from the URL). `provider` → `/services/create-gig?welcome=1` (CreateGig shows a teal "Welcome aboard — let's create your first service" banner dismissable via X).
+  - **Continue as {name} banner**: New `ContinueAsBanner.jsx` on `/auth/login` (login mode only). After any successful login (Google or email/password), we cache `{name, email, picture, provider, ts}` in `localStorage.last_login_hint` (30-day expiry). Return visitors see a card with their avatar / initials, name, and email; one tap fires the same OAuth flow (Google) or pre-fills the email + focuses the password field (email/password). Tiny "X" dismiss button forgets the hint.
+  - Tested end-to-end: renter→provider role bump returns fresh token with `role: provider` and confirmation message; `sessionStorage.signup_intent_role` correctly captures `'provider'` when the Provider card + Google button are clicked; `ContinueAsBanner` renders with initials avatar when a hint is seeded. ESLint clean.
+  - Files: `backend/routes/auth.py`, `frontend/src/pages/AuthCallback.jsx`, `frontend/src/pages/Auth.js`, `frontend/src/pages/SignupJoin.jsx`, `frontend/src/pages/Dashboard.js`, `frontend/src/pages/CreateGig.jsx`, `frontend/src/components/auth/GoogleSignInButton.jsx`, `frontend/src/components/auth/ContinueAsBanner.jsx` (new).
+
 
 - [x] **Publish-flow polish for auto-translate (2026-07-09)**:
   - Provider now gets clear signals that the ~4-second publish latency is doing valuable work, not just being slow:

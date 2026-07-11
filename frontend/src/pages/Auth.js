@@ -9,6 +9,8 @@ import { Eye, EyeOff, ArrowLeft, Mail, KeyRound, CheckCircle, Home, Building2, B
 import WelcomePopups from '../components/WelcomePopups';
 import OwnerManagementOfferModal from '../components/OwnerManagementOfferModal';
 import GoogleSignInButton from '../components/auth/GoogleSignInButton';
+import ContinueAsBanner from '../components/auth/ContinueAsBanner';
+import { LAST_LOGIN_HINT_KEY } from './AuthCallback';
 
 const Auth = () => {
   const { mode } = useParams();
@@ -69,6 +71,18 @@ const Auth = () => {
       const endpoint = mode === 'login' ? '/auth/login' : '/auth/register';
       const response = await axios.post(`${API}${endpoint}`, formData);
       login(response.data.token, response.data.user);
+      // Persist "Continue as X" hint for the next visit — populated on
+      // both email/password and Google flows so returning visitors get
+      // a one-tap re-login regardless of how they originally signed up.
+      try {
+        localStorage.setItem(LAST_LOGIN_HINT_KEY, JSON.stringify({
+          name: response.data.user?.name || '',
+          email: response.data.user?.email || '',
+          picture: response.data.user?.picture || null,
+          provider: 'email',
+          ts: Date.now(),
+        }));
+      } catch { /* quota / private mode */ }
       toast.success(mode === 'login' ? t('auth.welcomeBack') : t('auth.accountCreated'));
       const destination = postAuthDestination(response.data.user);
       if (mode === 'signup' && formData.role === 'renter') {
@@ -335,6 +349,22 @@ const Auth = () => {
           <h2 className="text-3xl font-bold mb-8 text-center" style={{ fontFamily: 'Playfair Display' }}>
             {mode === 'login' ? t('auth.loginTitle') : t('auth.signupTitle')}
           </h2>
+
+          {/* Track-2: "Continue as X" one-tap re-login. Only shown on
+              login mode — on signup the visitor is (by definition) a
+              first-time user and shouldn't be nudged into a return flow. */}
+          {mode === 'login' && (
+            <ContinueAsBanner
+              onFocusEmailField={(email) => {
+                setFormData((f) => ({ ...f, email }));
+                // Focus the password field so the user only has to type
+                // their password and hit enter.
+                setTimeout(() => {
+                  document.querySelector('input[type="password"]')?.focus();
+                }, 50);
+              }}
+            />
+          )}
 
           {/* Google Sign-In — sits above the email/password form so
               returning users don't scroll past it. Same button shape on

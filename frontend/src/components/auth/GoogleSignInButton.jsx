@@ -11,10 +11,25 @@
  */
 import { useTranslation } from 'react-i18next';
 
-export default function GoogleSignInButton({ className = '', variant = 'default' }) {
+// sessionStorage key used to smuggle role intent through the OAuth
+// round-trip. Kept here (single source of truth) so AuthCallback and
+// this button can't drift apart. Cleared by AuthCallback after use.
+export const SIGNUP_INTENT_ROLE_KEY = 'signup_intent_role';
+
+export default function GoogleSignInButton({
+  className = '',
+  variant = 'default',
+  intentRole = '',
+}) {
   const { t } = useTranslation();
 
   const handleClick = () => {
+    // Stash role intent BEFORE redirecting so it survives the OAuth
+    // hop. AuthCallback reads (and clears) this after the token
+    // exchange completes.
+    if (intentRole && ['owner', 'provider'].includes(intentRole)) {
+      try { sessionStorage.setItem(SIGNUP_INTENT_ROLE_KEY, intentRole); } catch { /* private mode etc */ }
+    }
     // REMINDER: DO NOT HARDCODE THE URL, OR ADD ANY FALLBACKS OR REDIRECT
     // URLS, THIS BREAKS THE AUTH. Derive the redirect from the *current*
     // browser origin so preview / production / localhost all just work.

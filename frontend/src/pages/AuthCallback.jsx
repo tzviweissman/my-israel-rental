@@ -23,6 +23,11 @@ import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { toast } from 'sonner';
 import { AuthContext, API } from '../App';
+import { SIGNUP_INTENT_ROLE_KEY } from '../components/auth/GoogleSignInButton';
+
+// localStorage key for the "Continue as {name}" banner on /auth/login.
+// Set here so the constant lives with the auth flow that populates it.
+export const LAST_LOGIN_HINT_KEY = 'last_login_hint';
 
 export default function AuthCallback() {
   const navigate = useNavigate();
@@ -52,14 +57,66 @@ export default function AuthCallback() {
     (async () => {
       try {
         const res = await axios.post(`${API}/auth/google/session`, { session_id: sessionId });
-        const { token, user } = res.data || {};
+        let { token, user } = res.data || {};
         if (!token || !user) throw new Error('Invalid response from auth server');
+
+        // ── Role intent promotion ────────────────────────────────────────
+        // If the visitor picked "Host" or "Provider" on /signup before
+        // hitting the Google button, the desired role was stashed in
+        // sessionStorage. Emergent Auth doesn't know about our roles, so
+        // the account was created as `renter` — promote it now before we
+        // let AuthContext see the user, otherwise the dashboard would
+        // briefly render in the wrong shape.
+        let intentRole = '';
+        try {
+          intentRole = sessionStorage.getItem(SIGNUP_INTENT_ROLE_KEY) || '';
+          sessionStorage.removeItem(SIGNUP_INTENT_ROLE_KEY);
+        } catch { /* private mode etc */ }
+
+        if (intentRole && ['owner', 'provider'].includes(intentRole) && user.role !== intentRole) {
+          try {
+            const r = await axios.put(
+              `${API}/auth/role`,
+              { role: intentRole },
+              { headers: { Authorization: `Bearer ${token}` } },
+            );
+            // The endpoint returns a fresh token minted with the new
+            // role claim — use it instead of the original so any RBAC
+            // dependency sees the up-to-date role.
+            if (r.data?.token) token = r.data.token;
+            if (r.data?.user)  user  = r.data.user;
+          } catch (e) {
+            // Non-fatal: land them on the dashboard as `renter` and let
+            // them upgrade via the "Switch role" flow if the auto-
+            // promotion failed.
+            console.warn('Role auto-promotion failed:', e?.response?.data || e.message);
+          }
+        }
+
+        // Persist "Continue as X" hint for the next visit (Track 2).
+        try {
+          localStorage.setItem(LAST_LOGIN_HINT_KEY, JSON.stringify({
+            name: user.name || '',
+            email: user.email || '',
+            picture: user.picture || null,
+            provider: 'google',
+            ts: Date.now(),
+          }));
+        } catch { /* quota / private mode */ }
+
         login(token, user);
         toast.success(`Welcome, ${user.name || user.email}`);
-        // Route by role — same rules the existing email/password login
-        // uses. Owners land on their dashboard, everyone else on the
-        // renter dashboard.
-        navigate('/dashboard', { replace: true });
+
+        // Route by final role. Provider intent → straight into gig
+        // creation. Owner intent → dashboard with the welcome flag so
+        // Dashboard shows the "Add your first property" prompt.
+        if (user.role === 'provider') {
+          navigate('/services/create-gig?welcome=1', { replace: true });
+        } else if (user.role === 'owner') {
+          navigate('/dashboard?welcome=1', { replace: true });
+        } else {
+          navigate('/dashboard', { replace: true });
+        }
       } catch (e) {
         const msg = e?.response?.data?.detail || e.message || 'Google sign-in failed';
         setError(String(msg));

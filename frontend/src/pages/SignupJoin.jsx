@@ -263,11 +263,10 @@ const SignupJoin = () => {
               </button>
             </div>
 
-            {/* One-tap Google sign-up — bypasses the multi-field form.
-                New Google accounts default to `renter`; users can upgrade
-                to owner/provider from the dashboard after landing. Placed
-                below the primary CTA so role-selection remains the
-                headline choice on step 1. */}
+            {/* One-tap Google sign-up — respects the role card the user
+                clicked (if any). AuthCallback picks up `signup_intent_role`
+                from sessionStorage after the OAuth roundtrip and promotes
+                the fresh account before landing them on the dashboard. */}
             <div className="mt-8 max-w-sm mx-auto">
               <div className="flex items-center gap-3 mb-3" aria-hidden="true">
                 <div className="flex-1 h-px bg-gray-200" />
@@ -276,7 +275,7 @@ const SignupJoin = () => {
                 </span>
                 <div className="flex-1 h-px bg-gray-200" />
               </div>
-              <GoogleSignInButton />
+              <GoogleSignInButton intentRole={activeCard?.backendRole || ''} />
             </div>
 
             <p className="mt-10 text-center sm:hidden text-sm text-gray-600">
@@ -319,7 +318,7 @@ const SignupJoin = () => {
                   they can promote themselves to owner/provider later
                   from the dashboard. See AuthCallback.jsx. */}
               <div className="mt-6">
-                <GoogleSignInButton />
+                <GoogleSignInButton intentRole={activeCard?.backendRole || ''} />
                 <div className="flex items-center gap-3 mt-4 mb-1" aria-hidden="true">
                   <div className="flex-1 h-px bg-gray-200" />
                   <span className="text-xs uppercase tracking-wider text-gray-400">
