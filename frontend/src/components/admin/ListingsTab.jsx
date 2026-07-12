@@ -6,6 +6,7 @@ import { toast } from 'sonner';
 import {
   Trash2, ToggleLeft, ToggleRight, Search, Loader2, AlertTriangle,
   CalendarX, CalendarCheck, Lock, Briefcase, Star, Copy, ImageOff, Camera, DollarSign,
+  Wand2, RotateCcw,
 } from 'lucide-react';
 import { API } from '../../App';
 import { useApiSWR } from '../../hooks/useApiSWR';
@@ -95,17 +96,72 @@ export const ListingsTab = ({ token, onStatsChange }) => {
   // beyond scrolling the whole list. Purely informational; no rows are
   // touched until the admin clicks a resolve action.
   const [priceAudit, setPriceAudit] = useState(null);
+  const [autoFixing, setAutoFixing] = useState(false);
+  const refreshAudit = async () => {
+    try {
+      const res = await axios.get(`${API}/admin/properties/pricing-audit`, { headers });
+      setPriceAudit(res.data);
+    } catch {
+      setPriceAudit(null);
+    }
+  };
   useEffect(() => {
-    (async () => {
-      try {
-        const res = await axios.get(`${API}/admin/properties/pricing-audit`, { headers });
-        setPriceAudit(res.data);
-      } catch {
-        // Silently ignore — the banner is optional.
-        setPriceAudit(null);
-      }
-    })();
+    refreshAudit();
   }, []);
+
+  // One-click auto-fix for every listing surfaced by the pricing audit.
+  // Backend strips stranded nightly rates on long-term listings and
+  // quarantines the rest (zero-price + implausibly low monthly) so the
+  // public feed stops serving broken prices while the owner reviews.
+  const handleAutoFixPricing = async () => {
+    if (autoFixing) return;
+    const t = priceAudit?.totals || {};
+    const total = (t.zero_price || 0) + (t.low_monthly || 0) + (t.wrong_field || 0);
+    if (!window.confirm(
+      `Auto-fix ${total} listing${total === 1 ? '' : 's'} flagged by the pricing audit?\n\n` +
+      `• ${t.wrong_field || 0} with a stranded nightly rate → nightly stripped, monthly kept.\n` +
+      `• ${t.low_monthly || 0} long-term under ₪1,500/mo → hidden from public feed pending owner review.\n` +
+      `• ${t.zero_price || 0} with no price at all → hidden from public feed pending owner review.\n\n` +
+      `Owners still see these in their own dashboard. Reversible via "Restore quarantined".`
+    )) return;
+    setAutoFixing(true);
+    try {
+      const res = await axios.post(`${API}/admin/properties/pricing-autofix`, {}, { headers });
+      const d = res.data;
+      if (d.totals?.total_fixed === 0) {
+        toast.success('Nothing to fix — pricing audit is clean.');
+      } else {
+        toast.success(d.message, { duration: 8000 });
+      }
+      await Promise.all([refreshAudit(), fetchProperties()]);
+    } catch (e) {
+      toast.error(e?.response?.data?.detail || 'Auto-fix failed — try again');
+    } finally {
+      setAutoFixing(false);
+    }
+  };
+
+  // Undo pricing-autofix quarantine — restores every listing hidden by
+  // the auto-fix pass. Useful if the threshold flagged too many owners.
+  const [unquarantining, setUnquarantining] = useState(false);
+  const handleRestoreQuarantined = async () => {
+    if (unquarantining) return;
+    if (!window.confirm(
+      'Restore every listing that was quarantined by the pricing auto-fix?\n\n' +
+      'They will re-appear in the public feed with their current prices — ' +
+      'even if the prices are still wrong. Owners will need to update them manually.'
+    )) return;
+    setUnquarantining(true);
+    try {
+      const res = await axios.post(`${API}/admin/properties/pricing-unquarantine`, {}, { headers });
+      toast.success(res.data?.message || 'Restored quarantined listings');
+      await Promise.all([refreshAudit(), fetchProperties()]);
+    } catch (e) {
+      toast.error(e?.response?.data?.detail || 'Restore failed — try again');
+    } finally {
+      setUnquarantining(false);
+    }
+  };
 
   // One-click "Sweep duplicates" — runs the identical-fields auto-cleanup
   // first (safest, only touches groups where every visible field matches),
@@ -523,6 +579,28 @@ export const ListingsTab = ({ token, onStatsChange }) => {
                 </span>
               )}
             </div>
+          </div>
+          <div className="flex flex-col sm:flex-row gap-2 shrink-0">
+            <button
+              onClick={handleAutoFixPricing}
+              disabled={autoFixing}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-emerald-600 text-white hover:bg-emerald-700 disabled:opacity-50 shadow-sm"
+              title="Strip stranded nightly rates and quarantine broken-price listings in one pass"
+              data-testid="pricing-autofix-btn"
+            >
+              {autoFixing ? <Loader2 size={14} className="animate-spin" /> : <Wand2 size={14} />}
+              {autoFixing ? 'Fixing…' : 'Auto-fix all'}
+            </button>
+            <button
+              onClick={handleRestoreQuarantined}
+              disabled={unquarantining}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-white text-amber-800 border border-amber-300 hover:bg-amber-100 disabled:opacity-50"
+              title="Un-hide every listing quarantined by a previous auto-fix"
+              data-testid="pricing-unquarantine-btn"
+            >
+              {unquarantining ? <Loader2 size={14} className="animate-spin" /> : <RotateCcw size={14} />}
+              {unquarantining ? 'Restoring…' : 'Restore quarantined'}
+            </button>
           </div>
         </div>
       )}

@@ -473,7 +473,7 @@ async def pricing_audit(
         "_id": 0, "id": 1, "title": 1, "rental_type": 1,
         "monthly_price": 1, "nightly_price": 1, "holiday_lump_price": 1,
         "currency": 1, "owner_id": 1, "owner_name": 1, "location": 1,
-        "area": 1, "address": 1, "created_at": 1,
+        "area": 1, "address": 1, "created_at": 1, "is_hidden": 1,
     }
 
     all_props = await db.properties.find({}, _select).to_list(5000)
@@ -489,6 +489,11 @@ async def pricing_audit(
     wrong_field: list[dict] = []
 
     for p in all_props:
+        # Skip listings already quarantined by a previous pricing auto-fix
+        # — the admin has already taken action on these, so keeping them
+        # in the banner would create a "why is this still flagged?" loop.
+        if p.get("is_hidden"):
+            continue
         cur = (p.get("currency") or "ILS").upper()
         monthly = _num(p.get("monthly_price"))
         nightly = _num(p.get("nightly_price"))
@@ -529,6 +534,150 @@ async def pricing_audit(
         "zero_price": zero_price[:200],
         "low_monthly": low_monthly[:200],
         "wrong_field": wrong_field[:200],
+    }
+
+
+# ── Pricing auto-fix ──────────────────────────────────────────────────
+# One-click "sanitize every audit-flagged listing" tool. Runs the same
+# classification the /pricing-audit endpoint uses and applies the safest
+# action per bucket:
+#
+#   • ``wrong_field`` → strip the stranded ``nightly_price`` (keep the
+#     monthly rent, which is what long-term listings actually charge).
+#   • ``low_monthly`` → quarantine (set ``is_hidden=True``) with a reason
+#     tag. Public listings are filtered by ``is_hidden``, so the row
+#     stops rendering until the owner picks the right rental type +
+#     price. Safer than guessing whether the low monthly is a stranded
+#     nightly rate or a genuine sub-market long-term deal.
+#   • ``zero_price`` → quarantine same way — nothing to salvage.
+#
+# Idempotent: re-running only affects newly-flagged rows. The owner
+# still sees the listing in their dashboard; only the public feed is
+# suppressed.
+@api_router.post("/admin/properties/pricing-autofix")
+async def pricing_autofix(
+    low_monthly_ils: float = 1500,
+    low_monthly_usd: float = 500,
+    payload: dict = Depends(verify_token),
+) -> dict:
+    if payload.get("role") != "admin":
+        raise HTTPException(status_code=403, detail="Admin access required")
+
+    def _num(v: Any) -> float:
+        try:
+            return float(v or 0)
+        except (TypeError, ValueError):
+            return 0.0
+
+    all_props = await db.properties.find(
+        {}, {"_id": 0, "id": 1, "title": 1, "rental_type": 1,
+             "monthly_price": 1, "nightly_price": 1, "holiday_lump_price": 1,
+             "currency": 1, "is_hidden": 1},
+    ).to_list(5000)
+
+    stripped_nightly = 0
+    quarantined_low = 0
+    quarantined_zero = 0
+    samples_stripped: list[dict] = []
+    samples_quarantined: list[dict] = []
+    now = datetime.now(UTC).isoformat()
+
+    for p in all_props:
+        cur = (p.get("currency") or "ILS").upper()
+        monthly = _num(p.get("monthly_price"))
+        nightly = _num(p.get("nightly_price"))
+        holiday = _num(p.get("holiday_lump_price"))
+        rt = (p.get("rental_type") or "long-term").lower()
+        floor = low_monthly_usd if cur == "USD" else low_monthly_ils
+
+        # Bucket 1: zero price everywhere → quarantine.
+        if monthly <= 0 and nightly <= 0 and holiday <= 0:
+            if not p.get("is_hidden"):
+                await db.properties.update_one(
+                    {"id": p["id"]},
+                    {"$set": {
+                        "is_hidden": True,
+                        "pricing_review_reason": "zero_price",
+                        "pricing_review_at": now,
+                    }},
+                )
+                quarantined_zero += 1
+                if len(samples_quarantined) < 10:
+                    samples_quarantined.append({
+                        "id": p["id"], "title": p.get("title"),
+                        "reason": "zero_price",
+                    })
+            continue
+
+        # Bucket 2: long-term with implausibly low monthly → quarantine.
+        if rt in ("long-term", "short-term") and monthly > 0 and monthly < floor:
+            if not p.get("is_hidden"):
+                await db.properties.update_one(
+                    {"id": p["id"]},
+                    {"$set": {
+                        "is_hidden": True,
+                        "pricing_review_reason": "low_monthly",
+                        "pricing_review_at": now,
+                    }},
+                )
+                quarantined_low += 1
+                if len(samples_quarantined) < 10:
+                    samples_quarantined.append({
+                        "id": p["id"], "title": p.get("title"),
+                        "reason": "low_monthly", "monthly": monthly,
+                    })
+            continue
+
+        # Bucket 3: long-term with a stranded nightly alongside a healthy
+        # monthly → drop the stranded nightly. Safe: the monthly is the
+        # intended price for a long-term listing.
+        if rt in ("long-term", "short-term") and nightly > 0 and monthly > 0:
+            await db.properties.update_one(
+                {"id": p["id"]},
+                {"$set": {"nightly_price": 0}},
+            )
+            stripped_nightly += 1
+            if len(samples_stripped) < 10:
+                samples_stripped.append({
+                    "id": p["id"], "title": p.get("title"),
+                    "stripped_nightly": nightly,
+                })
+
+    total_fixed = stripped_nightly + quarantined_low + quarantined_zero
+    return {
+        "totals": {
+            "stripped_nightly": stripped_nightly,
+            "quarantined_low_monthly": quarantined_low,
+            "quarantined_zero_price": quarantined_zero,
+            "total_fixed": total_fixed,
+        },
+        "samples_stripped": samples_stripped,
+        "samples_quarantined": samples_quarantined,
+        "message": (
+            f"Auto-fixed {total_fixed} listing{'s' if total_fixed != 1 else ''}: "
+            f"stripped {stripped_nightly} stranded nightly rate"
+            f"{'s' if stripped_nightly != 1 else ''}, quarantined "
+            f"{quarantined_low + quarantined_zero} for owner review."
+        ),
+    }
+
+
+# ── Un-quarantine (undo pricing-autofix) ──────────────────────────────
+# Reverse of the quarantine step so the admin can bulk-restore listings
+# after resolving pricing manually or if the auto-fix flagged too much.
+@api_router.post("/admin/properties/pricing-unquarantine")
+async def pricing_unquarantine(payload: dict = Depends(verify_token)) -> dict:
+    if payload.get("role") != "admin":
+        raise HTTPException(status_code=403, detail="Admin access required")
+    res = await db.properties.update_many(
+        {"is_hidden": True, "pricing_review_reason": {"$exists": True}},
+        {"$set": {"is_hidden": False},
+         "$unset": {"pricing_review_reason": "", "pricing_review_at": ""}},
+    )
+    return {
+        "restored": res.modified_count,
+        "message": f"Restored {res.modified_count} quarantined listing"
+                   f"{'s' if res.modified_count != 1 else ''}.",
     }
 
 

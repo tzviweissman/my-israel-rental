@@ -77,7 +77,13 @@ async def get_properties(
         query['has_elevator'] = has_elevator
     if condition:
         query['condition'] = condition
-    
+
+    # Public feed hides admin-quarantined listings (e.g. flagged by the
+    # pricing-audit auto-fix as needing owner review). ``is_hidden`` is
+    # only set by admin tools — the field is absent on healthy docs, so
+    # ``$ne: True`` matches everything without the flag.
+    query['is_hidden'] = {"$ne": True}
+
     properties = await db.properties.find(query, {"_id": 0}).to_list(1000)
 
     # Slim the list payload: the public listing grid renders only the

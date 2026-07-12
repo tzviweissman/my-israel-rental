@@ -1,0 +1,28 @@
+{
+  "summary": "Backend testing for pricing-autofix + pricing-unquarantine endpoints. All 9 pytest cases passed (100%).",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {"ui_bugs": [], "integration_issues": [], "design_issues": []},
+  "test_report_links": ["/app/backend/tests/test_pricing_autofix.py", "/app/test_reports/pytest/pricing_autofix.xml"],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "pricing_autofix reads all_props into memory (limit 5000) — OK for now but consider streaming if listings grow past 5k.",
+    "pricing_unquarantine restores ALL rows with pricing_review_reason (no filtering by run/timestamp); acknowledged as intended per spec ('Undo/Restore quarantined')."
+  ],
+  "updated_files": ["/app/backend/tests/test_pricing_autofix.py"],
+  "success_rate": {"backend": "100%", "frontend": "not tested (per request)"},
+  "test_credentials": "admin@rental.com / Admin123!, owner@test.com / Test1234!, renter@test.com / Test1234!",
+  "seed_data_creation": "3 properties with title prefix '[AUTOFIX-TEST]' inserted directly into Mongo; cleaned up via delete_many regex in fixture teardown.",
+  "retest_needed": false,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "Endpoints POST /api/admin/properties/pricing-autofix and /api/admin/properties/pricing-unquarantine verified. Public GET /api/properties correctly filters is_hidden. Audit skips already-quarantined. Idempotency verified.",
+  "verified_behaviors": [
+    "autofix totals: stripped_nightly=1, quarantined_low_monthly=1, quarantined_zero_price=1, total_fixed=3",
+    "wrong-field row: monthly_price stays 7500, nightly_price -> 0, is_hidden false",
+    "low/zero rows quarantined with pricing_review_reason set",
+    "audit skips quarantined + repaired rows (all seeded ids absent from audit buckets)",
+    "public GET /api/properties hides quarantined ids, still returns wrong-field id",
+    "unquarantine restored >=2 rows, is_hidden cleared, pricing_review_reason removed",
+    "owner + renter get 403 on both endpoints",
+    "second autofix on clean DB returns total_fixed=0"
+  ]
+}
