@@ -24,11 +24,13 @@ import { useEffect } from 'react';
 // Colours picked to match the bright emerald pill in the reference
 // screenshot. `PRIMARY` replaces the medium teal; `PRIMARY_DARK`
 // replaces the deep teal so gradients still have visible depth.
-const PRIMARY = '#22C55E';
-const PRIMARY_DARK = '#166534';
-const PRIMARY_HOVER = '#16A34A';
-const PRIMARY_10 = 'rgba(34, 197, 94, 0.10)';
-const PRIMARY_20 = 'rgba(34, 197, 94, 0.20)';
+// v2: Emerald palette — slightly more teal-leaning than the previous
+// grass green, blends better with the existing gold accent.
+const PRIMARY = '#10B981';       // emerald-500
+const PRIMARY_DARK = '#065F46';  // emerald-800
+const PRIMARY_HOVER = '#059669'; // emerald-600
+const PRIMARY_10 = 'rgba(16, 185, 129, 0.10)';
+const PRIMARY_20 = 'rgba(16, 185, 129, 0.20)';
 
 // The `.bg-\[\#…\]` selectors below match how Tailwind escapes the `#`
 // and brackets. Written out long-form so we don't have to templateify
@@ -52,10 +54,10 @@ const CSS = `
 .hover\\:bg-\\[\\#175656\\]:hover { background-color: ${PRIMARY_HOVER} !important; }
 
 /* Gradient stops — Tailwind stores them in CSS variables */
-.from-\\[\\#1E6A6A\\] { --tw-gradient-from: ${PRIMARY} var(--tw-gradient-from-position) !important; --tw-gradient-to: rgba(34, 197, 94, 0) var(--tw-gradient-to-position) !important; --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to) !important; }
+.from-\\[\\#1E6A6A\\] { --tw-gradient-from: ${PRIMARY} var(--tw-gradient-from-position) !important; --tw-gradient-to: rgba(16, 185, 129, 0) var(--tw-gradient-to-position) !important; --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to) !important; }
 .to-\\[\\#0F3A3A\\] { --tw-gradient-to: ${PRIMARY_DARK} var(--tw-gradient-to-position) !important; }
 .to-\\[\\#1E6A6A\\] { --tw-gradient-to: ${PRIMARY} var(--tw-gradient-to-position) !important; }
-.from-\\[\\#0F3A3A\\] { --tw-gradient-from: ${PRIMARY_DARK} var(--tw-gradient-from-position) !important; --tw-gradient-to: rgba(22, 101, 52, 0) var(--tw-gradient-to-position) !important; --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to) !important; }
+.from-\\[\\#0F3A3A\\] { --tw-gradient-from: ${PRIMARY_DARK} var(--tw-gradient-from-position) !important; --tw-gradient-to: rgba(6, 95, 70, 0) var(--tw-gradient-to-position) !important; --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to) !important; }
 .via-\\[\\#1E6A6A\\] { --tw-gradient-stops: var(--tw-gradient-from), ${PRIMARY} var(--tw-gradient-via-position), var(--tw-gradient-to) !important; }
 
 /* Alpha variants seen sporadically across the codebase */
@@ -64,11 +66,11 @@ const CSS = `
 .border-\\[\\#1E6A6A\\]\\/20 { border-color: ${PRIMARY_20} !important; }
 
 /* The Services hero video overlay uses hard-coded rgba() — repaint it
-   in the same green so the "video-forward" tint of the primary hero
+   in the same emerald so the "video-forward" tint of the primary hero
    section flips too. Scoped to the hero element so we don't accidentally
    green-tint every dark overlay in the app. */
 [data-testid="services-hero"] > div[aria-hidden="true"] {
-  background: linear-gradient(135deg, rgba(34,197,94,0.78) 0%, rgba(22,101,52,0.88) 100%) !important;
+  background: linear-gradient(135deg, rgba(16,185,129,0.78) 0%, rgba(6,95,70,0.88) 100%) !important;
 }
 
 /* Preview watermark chip — small, top-right, dismissible-by-URL-edit */
