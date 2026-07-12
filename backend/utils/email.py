@@ -754,6 +754,104 @@ async def send_availability_expiring_email(
     )
 
 
+async def send_pricing_quarantine_email(
+    to_email: str,
+    owner_name: str,
+    property_title: str,
+    property_id: str,
+    reason: str,
+    monthly_price: float | None = None,
+    currency: str = "ILS",
+) -> bool:
+    """Notify an owner that we've temporarily hidden their listing from
+    the public feed because its price failed the admin pricing audit.
+    Owners still see the listing on their own dashboard — the CTA deep
+    links directly into the price-edit form so the fix is one tap away.
+
+    ``reason`` is one of:
+      * ``zero_price`` — no monthly, nightly, or holiday price set.
+      * ``low_monthly`` — long-term monthly rent below the ₪1,500 / $500
+        plausibility floor (usually a stranded nightly rate migrated to
+        the monthly field by an older import).
+    """
+    edit_url = f"{FRONTEND_URL}/dashboard/properties/{property_id}/edit#pricing"
+    dashboard_url = f"{FRONTEND_URL}/dashboard?tab=properties"
+    cur_symbol = "$" if (currency or "ILS").upper() == "USD" else "₪"
+
+    if reason == "zero_price":
+        issue_summary = (
+            "The listing currently has <strong>no price set</strong> — no monthly "
+            "rent, nightly rate, or holiday lump sum. Renters browsing the site "
+            "were seeing a blank price, which hurts trust and clicks."
+        )
+        fix_hint = (
+            "Set the price for whichever rental type this listing offers — a "
+            "monthly rent for long-term, a nightly rate for vacation, or a "
+            "holiday lump sum for Sukkot / Pesach short stays."
+        )
+    else:  # low_monthly
+        shown = f"{cur_symbol}{int(monthly_price or 0):,}/month" if monthly_price else "an unusually low monthly amount"
+        issue_summary = (
+            f"The listing is set at <strong>{shown}</strong> — well below the "
+            f"typical long-term rent floor in Israel. This usually means a "
+            f"nightly rate ended up in the monthly field by mistake, so the "
+            f"listing was showing an unrealistic price to renters."
+        )
+        fix_hint = (
+            "Open the pricing form, double-check whether this should be a "
+            "monthly rent (long-term) or a nightly rate (vacation/short-term), "
+            "and update the correct field."
+        )
+
+    inner = f"""
+    <h2 style="color:#222;font-size:22px;margin:0 0 12px;">
+      We temporarily paused <em>{property_title}</em>
+    </h2>
+    <p style="color:#555;font-size:14px;line-height:1.7;margin:0 0 14px;">
+      Hi {owner_name or 'there'},
+    </p>
+    <p style="color:#555;font-size:14px;line-height:1.7;margin:0 0 14px;">
+      During our latest pricing quality sweep we hid <strong>{property_title}</strong>
+      from the public feed so renters wouldn't see a price that looks off. It's
+      still fully visible to you on your dashboard — <strong>we haven't deleted
+      anything.</strong>
+    </p>
+    <div style="background:#fff8e5;border-left:4px solid {BRAND_GOLD};border-radius:8px;padding:16px 18px;margin:22px 0;">
+      <div style="color:#333;font-size:13px;font-weight:600;margin-bottom:6px;">
+        What we found
+      </div>
+      <p style="color:#555;font-size:13px;line-height:1.7;margin:0;">
+        {issue_summary}
+      </p>
+    </div>
+    <div style="background:#f7f7f4;border-left:4px solid {BRAND_TEAL};border-radius:8px;padding:16px 18px;margin:22px 0;">
+      <div style="color:#333;font-size:13px;font-weight:600;margin-bottom:6px;">
+        One-click fix
+      </div>
+      <p style="color:#555;font-size:13px;line-height:1.7;margin:0;">
+        {fix_hint} As soon as you save a valid price, we automatically republish
+        the listing to the public feed — no admin approval needed.
+      </p>
+    </div>
+    {_button("Fix pricing now", edit_url)}
+    <p style="text-align:center;margin:6px 0 22px;">
+      <a href="{dashboard_url}" style="color:{BRAND_TEAL};font-size:13px;font-weight:600;text-decoration:none;">
+        Or open your properties dashboard
+      </a>
+    </p>
+    <p style="color:#888;font-size:12px;line-height:1.6;">
+      Questions? Reply to this email and we'll help you sort it out.
+    </p>
+    """
+    subject = f"Action needed — we paused {property_title} while you review the price"
+    return await send_email(
+        to_email,
+        subject,
+        _wrap(inner, preheader="Your listing was auto-paused pending a price update. One click to reopen it."),
+        tag="pricing-quarantine",
+    )
+
+
 
 # --- Property-deletion notifications --------------------------------------
 async def send_property_removed_email(

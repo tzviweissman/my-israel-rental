@@ -132,7 +132,43 @@ async def update_property(property_id: str, property_data: PropertyCreate, paylo
 
     update_doc = property_data.model_dump()
     _normalize_rental_types(update_doc)
+
+    # Auto-republish: if this listing was quarantined by the admin
+    # pricing auto-fix, and the owner has now supplied a plausible
+    # price for the correct rental type, drop the ``is_hidden`` flag +
+    # review reason so the listing re-appears in the public feed
+    # immediately. Matches what the owner-notification email promised:
+    # "as soon as you save a valid price, we automatically republish".
+    if existing.get("is_hidden") and existing.get("pricing_review_reason"):
+        new_monthly = float(update_doc.get("monthly_price") or 0)
+        new_nightly = float(update_doc.get("nightly_price") or 0)
+        new_holiday = float(update_doc.get("holiday_lump_price") or 0)
+        new_cur = (update_doc.get("currency") or "ILS").upper()
+        new_rt = (update_doc.get("rental_type") or "long-term").lower()
+        floor = 500 if new_cur == "USD" else 1500
+        # A price counts as "plausible" if:
+        #   • any of the three price fields is > 0 for a non-long-term
+        #     listing (nightly or holiday rent is fine); or
+        #   • for long-term / short-term, the monthly is at or above the
+        #     plausibility floor.
+        looks_ok = False
+        if new_rt in ("long-term", "short-term"):
+            looks_ok = new_monthly >= floor
+        else:
+            looks_ok = new_monthly > 0 or new_nightly > 0 or new_holiday > 0
+        if looks_ok:
+            update_doc["is_hidden"] = False
+            update_doc.setdefault("pricing_review_reason", None)  # marker for $unset below
+
     await db.properties.update_one({"id": property_id}, {"$set": update_doc})
+
+    # If we just cleared the quarantine flags, drop the reason/timestamp
+    # fields entirely so the listing looks clean in future audits.
+    if update_doc.get("is_hidden") is False and existing.get("pricing_review_reason"):
+        await db.properties.update_one(
+            {"id": property_id},
+            {"$unset": {"pricing_review_reason": "", "pricing_review_at": ""}},
+        )
 
     # Re-geocode when address / area changed. Keeping this in-place
     # (rather than only on create) is critical because owners often

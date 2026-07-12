@@ -20,8 +20,11 @@ Build a bilingual (English/Hebrew) rental website named MyIsraelRental.com with 
   - Public `GET /api/properties` now filters `is_hidden` with `{'$ne': True}` so quarantined rows never leak into the browse grid — owners still see them on their own dashboard.
   - `/pricing-audit` now skips already-quarantined listings so the amber banner disappears the moment the auto-fix runs (no "why is this still flagged?" loop).
   - Frontend `components/admin/ListingsTab.jsx` — pricing audit banner now exposes two buttons: **Auto-fix all** (`data-testid=pricing-autofix-btn`, emerald primary) and **Restore quarantined** (`data-testid=pricing-unquarantine-btn`, secondary). Both prompt `window.confirm` with a bucket-by-bucket preview before hitting the API and refresh the audit + listings on success.
+  - **Owner notification loop (2026-07-12)**: Every quarantined listing now fires an in-app notification (`type=pricing_quarantine`, includes `action_url` deep-linking to `/dashboard/properties/{id}/edit#pricing`) + a branded Postmark email (`send_pricing_quarantine_email`) so the affected owner learns about the pause instantly. Notification bell (`components/Navigation.js`) prioritizes `action_url` for click-through so any future backend-provided routes work with zero frontend churn.
+  - **Auto-republish**: `PUT /api/properties/{id}` in `routes/properties/crud.py` now detects a quarantined listing whose new price crosses the plausibility floor (≥₪1,500 monthly for long-term, or any positive nightly/holiday for vacation) and drops `is_hidden` + `pricing_review_reason` on the same save — matching the email's "we automatically republish" promise.
   - Backend regression test: `/app/backend/tests/test_pricing_autofix.py` (9 cases, 100% pass — verified via testing agent, iteration_56).
-  - Files: `routes/admin_import/properties.py`, `routes/properties/browse.py`, `components/admin/ListingsTab.jsx`, `backend/tests/test_pricing_autofix.py`.
+  - Files: `routes/admin_import/properties.py`, `routes/properties/browse.py`, `routes/properties/crud.py`, `utils/email.py`, `components/admin/ListingsTab.jsx`, `components/Navigation.js`, `backend/tests/test_pricing_autofix.py`.
+
 
 
 - [x] **Services hero: rotating background video (2026-07-10)**:

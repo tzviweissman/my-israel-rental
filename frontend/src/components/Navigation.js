@@ -230,6 +230,14 @@ const Navigation = () => {
     // The trailing `_t` cache-buster guarantees the deep-link useEffect fires every
     // time, even when the user is already on the same booking/sublease.
     const t = Date.now();
+    // Highest-priority branch: notifications that carry an explicit
+    // ``action_url`` (e.g. pricing-quarantine emails deep-link straight
+    // into the price-edit form). Trust the backend's route so we don't
+    // have to maintain a switch on every new notification type.
+    if (notification.action_url) {
+      navigate(notification.action_url);
+      return;
+    }
     if (notification.type === 'new_message' && notification.property_id) {
       // Take the lister directly into the chat with the renter who messaged them.
       const params = new URLSearchParams();

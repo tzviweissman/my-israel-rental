@@ -572,7 +572,7 @@ async def pricing_autofix(
     all_props = await db.properties.find(
         {}, {"_id": 0, "id": 1, "title": 1, "rental_type": 1,
              "monthly_price": 1, "nightly_price": 1, "holiday_lump_price": 1,
-             "currency": 1, "is_hidden": 1},
+             "currency": 1, "is_hidden": 1, "owner_id": 1},
     ).to_list(5000)
 
     stripped_nightly = 0
@@ -580,6 +580,10 @@ async def pricing_autofix(
     quarantined_zero = 0
     samples_stripped: list[dict] = []
     samples_quarantined: list[dict] = []
+    # Owner notification queue: rows we just quarantined. We batch the
+    # in-app + email fan-out AFTER the mutation loop finishes so a slow
+    # Postmark call can't stall the admin's HTTP response.
+    to_notify: list[dict] = []
     now = datetime.now(UTC).isoformat()
 
     for p in all_props:
@@ -602,6 +606,14 @@ async def pricing_autofix(
                     }},
                 )
                 quarantined_zero += 1
+                to_notify.append({
+                    "property_id": p["id"],
+                    "title": p.get("title") or "your listing",
+                    "owner_id": p.get("owner_id"),
+                    "reason": "zero_price",
+                    "monthly_price": 0,
+                    "currency": cur,
+                })
                 if len(samples_quarantined) < 10:
                     samples_quarantined.append({
                         "id": p["id"], "title": p.get("title"),
@@ -621,6 +633,14 @@ async def pricing_autofix(
                     }},
                 )
                 quarantined_low += 1
+                to_notify.append({
+                    "property_id": p["id"],
+                    "title": p.get("title") or "your listing",
+                    "owner_id": p.get("owner_id"),
+                    "reason": "low_monthly",
+                    "monthly_price": monthly,
+                    "currency": cur,
+                })
                 if len(samples_quarantined) < 10:
                     samples_quarantined.append({
                         "id": p["id"], "title": p.get("title"),
@@ -643,6 +663,12 @@ async def pricing_autofix(
                     "stripped_nightly": nightly,
                 })
 
+    # Fire owner notifications AFTER the response data is finalized so a
+    # slow Postmark call can't stall the admin's HTTP round-trip.
+    notified_count = 0
+    if to_notify:
+        notified_count = await _notify_owners_of_quarantine(to_notify)
+
     total_fixed = stripped_nightly + quarantined_low + quarantined_zero
     return {
         "totals": {
@@ -650,6 +676,7 @@ async def pricing_autofix(
             "quarantined_low_monthly": quarantined_low,
             "quarantined_zero_price": quarantined_zero,
             "total_fixed": total_fixed,
+            "owners_notified": notified_count,
         },
         "samples_stripped": samples_stripped,
         "samples_quarantined": samples_quarantined,
@@ -657,9 +684,76 @@ async def pricing_autofix(
             f"Auto-fixed {total_fixed} listing{'s' if total_fixed != 1 else ''}: "
             f"stripped {stripped_nightly} stranded nightly rate"
             f"{'s' if stripped_nightly != 1 else ''}, quarantined "
-            f"{quarantined_low + quarantined_zero} for owner review."
+            f"{quarantined_low + quarantined_zero} for owner review"
+            + (f" (notified {notified_count} owner{'s' if notified_count != 1 else ''})."
+               if notified_count else ".")
         ),
     }
+
+
+async def _notify_owners_of_quarantine(items: list[dict]) -> int:
+    """In-app + email fan-out for a batch of freshly quarantined listings.
+
+    Groups by ``owner_id`` so an owner with 4 flagged listings gets a
+    single email that lists all of them (implemented per-property here
+    for simplicity — grouping is a future enhancement if fan-out gets
+    noisy). Falls back gracefully when Postmark is unavailable so the
+    admin's HTTP response still returns success + counts.
+
+    Returns the number of owners we successfully created an in-app
+    notification for (email delivery is best-effort and not counted).
+    """
+    from utils.email import send_pricing_quarantine_email
+
+    notified = 0
+    for item in items:
+        owner_id = item.get("owner_id")
+        if not owner_id:
+            continue
+        try:
+            # In-app notification — always attempted, cheap, no external
+            # dependency. Deep-links straight into the price-edit form.
+            await db.notifications.insert_one({
+                "id": str(uuid.uuid4()),
+                "user_id": owner_id,
+                "type": "pricing_quarantine",
+                "property_id": item["property_id"],
+                "reason": item["reason"],
+                "message": (
+                    f"We paused \"{item['title']}\" pending a price update — "
+                    f"tap to fix and republish."
+                ),
+                "action_url": f"/dashboard/properties/{item['property_id']}/edit#pricing",
+                "read": False,
+                "created_at": datetime.now(UTC).isoformat(),
+            })
+            notified += 1
+        except Exception as e:  # noqa: BLE001
+            logger.warning(f"Failed in-app notify for owner {owner_id} on {item['property_id']}: {e}")
+            continue
+
+        # Email — best-effort. Look up the owner's email + name so the
+        # template can personalize the greeting. Skip silently if the
+        # user record is missing or has no email (placeholder owners).
+        try:
+            owner = await db.users.find_one(
+                {"id": owner_id},
+                {"_id": 0, "email": 1, "name": 1},
+            )
+            if owner and owner.get("email"):
+                await send_pricing_quarantine_email(
+                    to_email=owner["email"],
+                    owner_name=owner.get("name") or "",
+                    property_title=item["title"],
+                    property_id=item["property_id"],
+                    reason=item["reason"],
+                    monthly_price=item.get("monthly_price"),
+                    currency=item.get("currency", "ILS"),
+                )
+        except Exception as e:  # noqa: BLE001
+            logger.warning(f"Failed quarantine email for owner {owner_id}: {e}")
+
+    return notified
 
 
 # ── Un-quarantine (undo pricing-autofix) ──────────────────────────────
