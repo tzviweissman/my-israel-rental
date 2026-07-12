@@ -156,3 +156,10 @@ backend/tests/.env.test
 -e 
 -e 
 -e 
+.env
+.env.*
+*.env
+credentials.json
+*.pem
+*.key
+.credentials
