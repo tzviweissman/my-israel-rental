@@ -11,6 +11,19 @@ Build a bilingual (English/Hebrew) rental website named MyIsraelRental.com with 
 - **i18n**: i18next with English and Hebrew (RTL) support
 
 ## What's Been Implemented
+- [x] **Admin pricing auto-fix + quarantine (2026-07-12)**:
+  - New backend endpoint `POST /api/admin/properties/pricing-autofix` in `routes/admin_import/properties.py` that runs the same classification as `/pricing-audit` and applies the safest action per bucket in one pass:
+    - `wrong_field` (long-term with both monthly + nightly set) → strips the stranded `nightly_price` (keeps monthly).
+    - `low_monthly` (long-term monthly under ₪1,500 / $500) → sets `is_hidden=True` + `pricing_review_reason='low_monthly'` so the row disappears from the public feed until the owner sets a real price.
+    - `zero_price` (no monthly, nightly, or holiday_lump) → same quarantine as `low_monthly` with reason `zero_price`.
+  - Sibling endpoint `POST /api/admin/properties/pricing-unquarantine` bulk-restores every listing quarantined by a previous auto-fix (`is_hidden→False`, `$unset pricing_review_reason`).
+  - Public `GET /api/properties` now filters `is_hidden` with `{'$ne': True}` so quarantined rows never leak into the browse grid — owners still see them on their own dashboard.
+  - `/pricing-audit` now skips already-quarantined listings so the amber banner disappears the moment the auto-fix runs (no "why is this still flagged?" loop).
+  - Frontend `components/admin/ListingsTab.jsx` — pricing audit banner now exposes two buttons: **Auto-fix all** (`data-testid=pricing-autofix-btn`, emerald primary) and **Restore quarantined** (`data-testid=pricing-unquarantine-btn`, secondary). Both prompt `window.confirm` with a bucket-by-bucket preview before hitting the API and refresh the audit + listings on success.
+  - Backend regression test: `/app/backend/tests/test_pricing_autofix.py` (9 cases, 100% pass — verified via testing agent, iteration_56).
+  - Files: `routes/admin_import/properties.py`, `routes/properties/browse.py`, `components/admin/ListingsTab.jsx`, `backend/tests/test_pricing_autofix.py`.
+
+
 - [x] **Services hero: rotating background video (2026-07-10)**:
   - Replaced the plain teal gradient on `/services` with three rotating stock clips (plumber → doorstep courier → carpenter) behind a translucent teal-to-dark-teal gradient (78%→88% opacity) so hero copy stays legible.
   - Videos are self-hosted under `/app/frontend/public/videos/services-hero/` (~14 MB total). Each has a matching poster JPG extracted with ffmpeg so the fallback image matches whatever clip would be playing.
