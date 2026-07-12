@@ -82,31 +82,47 @@ async def get_bookings(payload: dict = Depends(verify_token)) -> list[dict]:
         query['owner_id'] = payload['user_id']
     
     bookings = await db.bookings.find(query, {"_id": 0}).to_list(1000)
-    
+
     # Enrich bookings with property details (or sublease details when the
     # booking was for a sublease — sublessors should see the sublease title
     # in their dashboard, not the underlying property's).
+    #
+    # Batch-fetched via $in to avoid an N+1 query pattern that used to
+    # trigger one Mongo round-trip per booking.
+    property_ids = {b['property_id'] for b in bookings if b.get('property_id') and not b.get('sublease_id')}
+    sublease_ids = {b['sublease_id'] for b in bookings if b.get('sublease_id')}
+
+    prop_map: dict[str, dict] = {}
+    if property_ids:
+        prop_docs = await db.properties.find(
+            {"id": {"$in": list(property_ids)}},
+            {"_id": 0, "id": 1, "title": 1, "location": 1, "rental_type": 1},
+        ).to_list(len(property_ids))
+        prop_map = {p['id']: p for p in prop_docs}
+
+    sub_map: dict[str, dict] = {}
+    if sublease_ids:
+        sub_docs = await db.subleases.find(
+            {"id": {"$in": list(sublease_ids)}},
+            {"_id": 0, "id": 1, "title": 1, "area": 1},
+        ).to_list(len(sublease_ids))
+        sub_map = {s['id']: s for s in sub_docs}
+
     for booking in bookings:
         if booking.get('sublease_id'):
-            sub = await db.subleases.find_one(
-                {"id": booking['sublease_id']},
-                {"_id": 0, "title": 1, "area": 1},
-            )
+            sub = sub_map.get(booking['sublease_id'])
             if sub:
                 booking['property_title'] = sub.get('title', 'Sublease')
                 booking['property_location'] = sub.get('area', '')
                 booking['property_rental_type'] = 'sublease'
                 continue
 
-        property_data = await db.properties.find_one(
-            {"id": booking['property_id']},
-            {"_id": 0, "title": 1, "location": 1, "rental_type": 1},
-        )
+        property_data = prop_map.get(booking.get('property_id'))
         if property_data:
             booking['property_title'] = property_data.get('title', 'Unknown Property')
             booking['property_location'] = property_data.get('location', '')
             booking['property_rental_type'] = property_data.get('rental_type', '')
-    
+
     return bookings
 
 # Booking Cancellation Endpoints
