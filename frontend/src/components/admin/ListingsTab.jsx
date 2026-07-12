@@ -105,7 +105,6 @@ export const ListingsTab = ({ token, onStatsChange }) => {
         setPriceAudit(null);
       }
     })();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // One-click "Sweep duplicates" — runs the identical-fields auto-cleanup

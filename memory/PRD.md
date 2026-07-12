@@ -79,6 +79,15 @@ Build a bilingual (English/Hebrew) rental website named MyIsraelRental.com with 
   - Regression-tested via curl: match found (self), match null (exclude_property_id), match null (different address), and `GET /properties/{id}` still returns 200. ESLint + Python lint clean.
   - Files: `backend/routes/properties/browse.py` (new endpoint + `find_duplicate` import), `backend/routes/properties/crud.py` (unused `Query` import removed), `frontend/src/components/dashboard/AddPropertyModal.jsx` (debounced hook + banner render).
 
+- [x] **Low-monthly-rent bug fix + pricing audit (2026-07-10)**:
+  - **Root cause** (verified by testing agent): `AddPropertyModal.jsx` did not clear the stranded price field when a host switched `rental_type` from vacation ↔ long-term. A ₪450 value entered as `nightly_price` under vacation stayed in form state; if the host later switched to long-term and hit submit, the DB row ended up with `monthly_price: null, nightly_price: 450`. The existing "Repair prices" admin tool then auto-migrated the stranded nightly → monthly (its rule for `long-term + nightly>0 + no monthly`), producing the ₪450/month (and similarly ₪78, ₪630, ₪800, ₪850, ₪945 …) values on the admin Listings screenshot.
+  - **Frontend fix**: `AddPropertyModal` rental_type `<select>`'s onChange now clears the OLD price field on cross-type transitions (vacation↔long-term). No stale value can survive the switch.
+  - **Frontend soft warning**: `[data-testid="price-sanity-warning"]` amber banner appears below the price input when `long-term && monthly < 1500 ILS` (or `< 500 USD`), or when `vacation && nightly > 5000 ILS` (or `> 1500 USD`). Advisory only — never blocks submit.
+  - **Backend audit endpoint**: `GET /api/admin/properties/pricing-audit` (admin-only, 403 for anon/renter/owner). Returns `{ totals, thresholds, zero_price[], low_monthly[], wrong_field[] }` — three categorized buckets for admin visibility on existing bad data.
+  - **Admin banner**: `[data-testid="pricing-audit-banner"]` at the top of the Listings tab shows when any bucket has hits, with sub-testids `audit-zero-price`, `audit-low-monthly`, `audit-wrong-field` for each row that has entries.
+  - **Testing agent verification (iteration_55.json)**: 12/12 backend pytest tests pass in `test_pricing_audit.py`. Testing agent independently confirmed the exact root cause and caught + fixed a regression (missing `useEffect` import in `ListingsTab.jsx`) that would have crashed the admin tab. `retest_needed: false`, `main_agent_can_self_test: true`.
+  - Files: `backend/routes/admin_import/properties.py` (new `pricing-audit` endpoint), `frontend/src/components/dashboard/AddPropertyModal.jsx` (rental_type flip fix + price sanity warning), `frontend/src/components/admin/ListingsTab.jsx` (audit fetch + banner, `useEffect` import).
+
 
 - [x] **Publish-flow polish for auto-translate (2026-07-09)**:
   - Provider now gets clear signals that the ~4-second publish latency is doing valuable work, not just being slow:
