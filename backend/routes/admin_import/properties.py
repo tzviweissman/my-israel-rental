@@ -447,5 +447,90 @@ async def admin_repair_misplaced_prices(payload: dict = Depends(verify_token)) -
     }
 
 
+# ── Pricing audit ─────────────────────────────────────────────────────
+# Read-only diagnostic for admins to find listings whose price fields
+# look wrong before any repair is attempted. Groups results into three
+# buckets so the admin can eyeball severity:
+#
+#   * ``zero_price`` — no monthly, no nightly, no holiday_lump. Rendered
+#     as ₪0 on the site and marketplace.
+#   * ``low_monthly`` — long-term listings with a monthly rent under an
+#     "unrealistic" floor (default ₪1,500 or $500). Common signature of a
+#     rental-type flip where a stale nightly value got auto-migrated.
+#   * ``wrong_field`` — long-term listings that STILL have a positive
+#     nightly_price sitting stranded alongside their monthly. Highlights
+#     which rows the previous repair pass would touch if run again.
+@api_router.get("/admin/properties/pricing-audit")
+async def pricing_audit(
+    low_monthly_ils: float = 1500,
+    low_monthly_usd: float = 500,
+    payload: dict = Depends(verify_token),
+) -> dict:
+    if payload.get("role") != "admin":
+        raise HTTPException(status_code=403, detail="Admin access required")
+
+    _select = {
+        "_id": 0, "id": 1, "title": 1, "rental_type": 1,
+        "monthly_price": 1, "nightly_price": 1, "holiday_lump_price": 1,
+        "currency": 1, "owner_id": 1, "owner_name": 1, "location": 1,
+        "area": 1, "address": 1, "created_at": 1,
+    }
+
+    all_props = await db.properties.find({}, _select).to_list(5000)
+
+    def _num(v: Any) -> float:
+        try:
+            return float(v or 0)
+        except (TypeError, ValueError):
+            return 0.0
+
+    zero_price: list[dict] = []
+    low_monthly: list[dict] = []
+    wrong_field: list[dict] = []
+
+    for p in all_props:
+        cur = (p.get("currency") or "ILS").upper()
+        monthly = _num(p.get("monthly_price"))
+        nightly = _num(p.get("nightly_price"))
+        holiday = _num(p.get("holiday_lump_price"))
+        rt = (p.get("rental_type") or "long-term").lower()
+
+        # Bucket 1: entirely missing price. Applies to any rental type.
+        if monthly <= 0 and nightly <= 0 and holiday <= 0:
+            zero_price.append(p)
+            continue
+
+        # Bucket 2: long-term with implausibly low monthly.
+        if rt in ("long-term", "short-term") and monthly > 0:
+            floor = low_monthly_usd if cur == "USD" else low_monthly_ils
+            if monthly < floor:
+                low_monthly.append(p)
+                continue
+
+        # Bucket 3: long-term with a stranded nightly value. Not always
+        # broken — an owner may deliberately offer daily short-stay too —
+        # but flagged so the admin can review.
+        if rt in ("long-term", "short-term") and nightly > 0 and monthly > 0:
+            wrong_field.append(p)
+
+    return {
+        "totals": {
+            "checked": len(all_props),
+            "zero_price": len(zero_price),
+            "low_monthly": len(low_monthly),
+            "wrong_field": len(wrong_field),
+        },
+        "thresholds": {
+            "low_monthly_ils": low_monthly_ils,
+            "low_monthly_usd": low_monthly_usd,
+        },
+        # Truncate to 200 per bucket so the response stays manageable — the
+        # totals still convey full counts if a bucket is bigger.
+        "zero_price": zero_price[:200],
+        "low_monthly": low_monthly[:200],
+        "wrong_field": wrong_field[:200],
+    }
+
+
 # --- Commit: users -------------------------------------------------------
 

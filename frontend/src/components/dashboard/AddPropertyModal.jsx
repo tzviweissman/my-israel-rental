@@ -410,7 +410,27 @@ const AddPropertyModal = ({ isOpen, onClose, editingProperty, onSaved, API, toke
               <label className="block text-sm font-medium mb-2">{t('property.rentalType')}</label>
               <select
                 value={propertyForm.rental_type}
-                onChange={(e) => setPropertyForm({ ...propertyForm, rental_type: e.target.value })}
+                onChange={(e) => {
+                  // Clear the price field that belongs to the OLD rental
+                  // type. Otherwise a value entered under (say) `vacation`
+                  // stays stranded in `nightly_price` after switching to
+                  // `long-term`, and the "Repair prices" admin tool later
+                  // migrates it into `monthly_price` — producing wildly
+                  // low "monthly rent" values on the listings table.
+                  const nextType = e.target.value;
+                  const oldType = propertyForm.rental_type;
+                  const patch = { rental_type: nextType };
+                  if (oldType !== nextType) {
+                    const oldWasNightly = oldType === 'vacation';
+                    const newIsNightly = nextType === 'vacation';
+                    if (oldWasNightly !== newIsNightly) {
+                      // Zero the stranded field to force a fresh price entry.
+                      patch.nightly_price = newIsNightly ? propertyForm.nightly_price : '';
+                      patch.monthly_price = newIsNightly ? '' : propertyForm.monthly_price;
+                    }
+                  }
+                  setPropertyForm({ ...propertyForm, ...patch });
+                }}
                 className="w-full px-4 py-2 rounded-lg border border-[#E5E5E5] focus:outline-none focus:ring-2 focus:ring-[#1E6A6A]/50"
                 data-testid="property-rental-type-select"
               >
@@ -698,6 +718,39 @@ const AddPropertyModal = ({ isOpen, onClose, editingProperty, onSaved, API, toke
                   <option value="USD">$ USD</option>
                 </select>
               </div>
+              {/* Sanity-check warning — a monthly rent under ₪1,500 (or
+                  $500) is almost never real in Israel, and typically
+                  means the host confused nightly with monthly, dropped a
+                  digit, or the number is stale from a rental-type flip.
+                  We warn instead of block: some sublets are legitimately
+                  cheap (e.g. yeshiva students, family arrangements). */}
+              {(() => {
+                const isLongTerm = propertyForm.rental_type !== 'vacation';
+                const rawVal = isLongTerm ? propertyForm.monthly_price : propertyForm.nightly_price;
+                const val = Number(rawVal);
+                if (!val || Number.isNaN(val)) return null;
+                const cur = propertyForm.currency || 'ILS';
+                const lowMonthly = isLongTerm && (
+                  (cur === 'ILS' && val < 1500) || (cur === 'USD' && val < 500)
+                );
+                const highNightly = !isLongTerm && (
+                  (cur === 'ILS' && val > 5000) || (cur === 'USD' && val > 1500)
+                );
+                if (!lowMonthly && !highNightly) return null;
+                return (
+                  <div
+                    className="mt-2 flex items-start gap-2 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm"
+                    data-testid="price-sanity-warning"
+                  >
+                    <AlertTriangle size={16} className="mt-0.5 text-amber-600 shrink-0" />
+                    <div className="text-xs text-amber-900">
+                      {lowMonthly
+                        ? `This monthly rent looks unusually low. Did you mean to enter a nightly rate, or is this really ${cur === 'ILS' ? '₪' : '$'}${val.toLocaleString()} per month?`
+                        : `This nightly rate looks high. Did you mean to enter a monthly rate, or is this really ${cur === 'ILS' ? '₪' : '$'}${val.toLocaleString()} per night?`}
+                    </div>
+                  </div>
+                );
+              })()}
             </div>
 
             {(propertyForm.holiday_tags || []).length > 0 && (() => {

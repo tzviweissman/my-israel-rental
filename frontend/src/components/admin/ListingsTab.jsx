@@ -1,10 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import axios from 'axios';
 import { toast } from 'sonner';
 import {
-  Trash2, ToggleLeft, ToggleRight, Search, Loader2,
+  Trash2, ToggleLeft, ToggleRight, Search, Loader2, AlertTriangle,
   CalendarX, CalendarCheck, Lock, Briefcase, Star, Copy, ImageOff, Camera, DollarSign,
 } from 'lucide-react';
 import { API } from '../../App';
@@ -85,6 +85,28 @@ export const ListingsTab = ({ token, onStatsChange }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [showDuplicates, setShowDuplicates] = useState(false);
   const [sweeping, setSweeping] = useState(false);
+
+  // ── Pricing audit banner ──────────────────────────────────────────
+  // Read-only diagnostic that runs when the tab mounts. If we find any
+  // listings whose price fields look wrong (zero rent, absurdly low
+  // monthly, or a long-term row with a stranded nightly value), we show
+  // a compact amber summary at the top of the tab pointing the admin at
+  // the "Repair prices" button — so bad data has a discovery path
+  // beyond scrolling the whole list. Purely informational; no rows are
+  // touched until the admin clicks a resolve action.
+  const [priceAudit, setPriceAudit] = useState(null);
+  useEffect(() => {
+    (async () => {
+      try {
+        const res = await axios.get(`${API}/admin/properties/pricing-audit`, { headers });
+        setPriceAudit(res.data);
+      } catch {
+        // Silently ignore — the banner is optional.
+        setPriceAudit(null);
+      }
+    })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // One-click "Sweep duplicates" — runs the identical-fields auto-cleanup
   // first (safest, only touches groups where every visible field matches),
@@ -475,6 +497,36 @@ export const ListingsTab = ({ token, onStatsChange }) => {
 
   return (
     <div data-testid="admin-listings-section">
+      {priceAudit && (priceAudit.totals?.zero_price + priceAudit.totals?.low_monthly + priceAudit.totals?.wrong_field) > 0 && (
+        <div
+          className="mb-4 flex items-start gap-3 rounded-lg border border-amber-200 bg-amber-50 p-3"
+          data-testid="pricing-audit-banner"
+        >
+          <AlertTriangle size={18} className="text-amber-600 shrink-0 mt-0.5" />
+          <div className="flex-1 min-w-0">
+            <div className="text-sm font-semibold text-amber-900">
+              {(priceAudit.totals.zero_price + priceAudit.totals.low_monthly + priceAudit.totals.wrong_field).toLocaleString()} listing{(priceAudit.totals.zero_price + priceAudit.totals.low_monthly + priceAudit.totals.wrong_field) === 1 ? '' : 's'} may have wrong prices
+            </div>
+            <div className="text-xs text-amber-800 mt-0.5 flex flex-wrap gap-x-4 gap-y-1">
+              {priceAudit.totals.zero_price > 0 && (
+                <span data-testid="audit-zero-price">
+                  <b>{priceAudit.totals.zero_price}</b> with no price set
+                </span>
+              )}
+              {priceAudit.totals.low_monthly > 0 && (
+                <span data-testid="audit-low-monthly">
+                  <b>{priceAudit.totals.low_monthly}</b> long-term under ₪{priceAudit.thresholds.low_monthly_ils}/mo (likely stranded nightly rate)
+                </span>
+              )}
+              {priceAudit.totals.wrong_field > 0 && (
+                <span data-testid="audit-wrong-field">
+                  <b>{priceAudit.totals.wrong_field}</b> with both monthly + nightly set
+                </span>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
       <div className="flex items-center gap-4 mb-6 flex-wrap">
         <div className="relative flex-1 max-w-md">
           <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
