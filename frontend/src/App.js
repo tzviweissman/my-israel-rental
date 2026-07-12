@@ -30,6 +30,7 @@ import PropertyDetail from './pages/PropertyDetail';
 import SubleaseDetail from './pages/SubleaseDetail';
 import Auth from './pages/Auth';
 import AuthCallback from './pages/AuthCallback';
+import ThemePreviewOverride from './components/ThemePreviewOverride';
 import SignupJoin from './pages/SignupJoin';
 import VerifyPending from './pages/VerifyPending';
 import VerifyEmail from './pages/VerifyEmail';
@@ -167,6 +168,7 @@ function App() {
         ) : (
           <>
             <ScrollToTop />
+            <ThemePreviewOverride />
             <div className="App">
               <ImpersonationBanner />
               <Navigation />
