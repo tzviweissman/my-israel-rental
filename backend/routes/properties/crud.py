@@ -25,6 +25,18 @@ router = APIRouter()
 api_router = router
 
 
+# ── Soft duplicate warning (pre-submit) ────────────────────────────────
+# Called by AddPropertyModal as the host types their address, so we can
+# nudge them BEFORE they submit if they already have an active listing
+# at the same address + rental_type + bedroom count + floor. Purely
+# advisory: the actual duplicate BLOCK still lives inside
+# `create_property` below — this endpoint just surfaces the same
+# information earlier in the flow.
+# NOTE: intentionally not placed here — see `browse.py` for the route
+# definition. Kept as a comment for grep-ability.
+
+
+
 @api_router.post("/properties", response_model=IdMessageResponse)
 async def create_property(property_data: PropertyCreate, payload: dict = Depends(verify_token)) -> dict:
     # Block duplicate listings: same owner + same address + same rental_type

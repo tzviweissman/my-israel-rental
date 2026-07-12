@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import axios from 'axios';
 import { toast } from 'sonner';
 
-import { Sparkles, X } from 'lucide-react';
+import { Sparkles, X, AlertTriangle, ArrowRight } from 'lucide-react';
 
 import DateField from './propertyForm/DateField';
 import LocationPicker from './propertyForm/LocationPicker';
@@ -71,6 +71,55 @@ const AddPropertyModal = ({ isOpen, onClose, editingProperty, onSaved, API, toke
   // never for edits (we don't want to silently clobber a saved listing).
   const [smartPaste, setSmartPaste] = useState('');
   const [smartPasting, setSmartPasting] = useState(false);
+
+  // ── Soft duplicate warning ─────────────────────────────────────────
+  // As the host types their address (or edits an existing listing's
+  // address to a new one), we debounce-poll `/properties/check-duplicate`
+  // so we can surface a "you already have a listing here" banner BEFORE
+  // they hit Submit. The backend still enforces the block at submit
+  // time, but catching it here saves the round-trip + confusion.
+  const [duplicateWarning, setDuplicateWarning] = useState(null);
+  useEffect(() => {
+    // Only poll once the host has provided the minimum signature fields.
+    // Empty/short addresses would either 400 or false-negative — skip.
+    const addr = (propertyForm.address || '').trim();
+    const rt = propertyForm.rental_type;
+    if (!isOpen || !addr || addr.length < 4 || !rt) {
+      setDuplicateWarning(null);
+      return;
+    }
+
+    const timer = setTimeout(async () => {
+      try {
+        const params = new URLSearchParams({ address: addr, rental_type: rt });
+        if (propertyForm.bedrooms != null && propertyForm.bedrooms !== '') {
+          params.set('bedrooms', String(propertyForm.bedrooms));
+        }
+        if (propertyForm.floor != null && propertyForm.floor !== '') {
+          params.set('floor', String(propertyForm.floor));
+        }
+        // When editing, exclude the row itself so we don't flag it against
+        // its own signature.
+        if (editingProperty?.id) params.set('exclude_property_id', editingProperty.id);
+
+        const res = await axios.get(`${API}/properties/check-duplicate?${params.toString()}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        setDuplicateWarning(res.data?.duplicate || null);
+      } catch {
+        // Non-fatal — a network hiccup here shouldn't get in the host's
+        // way. Silently drop the warning; the submit-time block is still
+        // authoritative.
+        setDuplicateWarning(null);
+      }
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, [
+    isOpen, propertyForm.address, propertyForm.rental_type,
+    propertyForm.bedrooms, propertyForm.floor,
+    editingProperty?.id, API, token,
+  ]);
 
   const handleSmartPaste = async () => {
     if (!smartPaste.trim()) {
@@ -399,6 +448,37 @@ const AddPropertyModal = ({ isOpen, onClose, editingProperty, onSaved, API, toke
                 className="w-full px-4 py-2 rounded-lg border border-[#E5E5E5] focus:outline-none focus:ring-2 focus:ring-[#1E6A6A]/50"
                 data-testid="property-address-input"
               />
+              {duplicateWarning && (
+                <div
+                  className="mt-2 flex items-start gap-2 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm"
+                  data-testid="duplicate-warning-banner"
+                >
+                  <AlertTriangle size={16} className="mt-0.5 text-amber-600 shrink-0" />
+                  <div className="flex-1 min-w-0">
+                    <div className="font-semibold text-amber-900">
+                      {t(
+                        'property.duplicateWarning.title',
+                        'You already have a listing at this address',
+                      )}
+                    </div>
+                    <div className="text-xs text-amber-700 mt-0.5 truncate">
+                      {duplicateWarning.title}
+                      {duplicateWarning.rental_type ? ` · ${duplicateWarning.rental_type}` : ''}
+                      {duplicateWarning.bedrooms != null ? ` · ${duplicateWarning.bedrooms} BR` : ''}
+                    </div>
+                  </div>
+                  <a
+                    href={`/property/${duplicateWarning.id}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1 text-xs font-semibold text-amber-900 hover:text-amber-950 underline shrink-0"
+                    data-testid="duplicate-warning-view-existing"
+                  >
+                    {t('property.duplicateWarning.viewExisting', 'View existing')}
+                    <ArrowRight size={12} />
+                  </a>
+                </div>
+              )}
             </div>
             <div>
               <label className="block text-sm font-medium mb-2">{t('property.sqm')}</label>

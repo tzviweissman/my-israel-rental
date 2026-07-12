@@ -71,6 +71,14 @@ Build a bilingual (English/Hebrew) rental website named MyIsraelRental.com with 
   - Tested end-to-end: both endpoints return valid JSON (`{deleted, groups_resolved, reattached, report}`) with admin auth; button + tooltip render correctly on the Listings tab; ESLint clean.
   - Files: `frontend/src/components/admin/ListingsTab.jsx` (button + `sweepDuplicates` handler), `memory/test_credentials.md` (fixed duplicate/malformed admin section, password confirmed as `Admin123!`).
 
+- [x] **Soft duplicate warning at listing creation (2026-07-10)**:
+  - New `GET /api/properties/check-duplicate?address=&rental_type=&bedrooms=&floor=&exclude_property_id=` endpoint in `backend/routes/properties/browse.py`. Reuses the existing `find_duplicate()` helper — same composite dedupe signature the backend already enforces at submit time, just exposed as a pre-check.
+  - Registered ABOVE `/properties/{property_id}` in the router because FastAPI matches routes in registration order — the literal path would otherwise be swallowed as a property_id.
+  - `AddPropertyModal.jsx` now polls this endpoint with a 500ms debounce whenever address/rental_type/bedrooms/floor change. When a match is found, a compact amber banner appears directly under the address input: **"You already have a listing at this address"** with a subtitle (existing title · rental type · bedrooms) and a **"View existing →"** link that opens the offending listing in a new tab.
+  - Edit-mode aware: passes `exclude_property_id={editingProperty.id}` so a host editing their own listing doesn't get flagged against itself.
+  - Regression-tested via curl: match found (self), match null (exclude_property_id), match null (different address), and `GET /properties/{id}` still returns 200. ESLint + Python lint clean.
+  - Files: `backend/routes/properties/browse.py` (new endpoint + `find_duplicate` import), `backend/routes/properties/crud.py` (unused `Query` import removed), `frontend/src/components/dashboard/AddPropertyModal.jsx` (debounced hook + banner render).
+
 
 - [x] **Publish-flow polish for auto-translate (2026-07-09)**:
   - Provider now gets clear signals that the ~4-second publish latency is doing valuable work, not just being slow:

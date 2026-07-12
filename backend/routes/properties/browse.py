@@ -6,11 +6,12 @@ import asyncio
 from datetime import UTC, datetime
 from typing import Any
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Query
 
 from models_response import ManagerPropertiesResponse, PropertyOut
-from routes.deps import db, logger
+from routes.deps import db, logger, verify_token
 from utils.area_filter import area_mongo_query
+from utils.dedupe import find_duplicate
 from utils.helpers import get_usd_ils_rate
 
 from .shared import _normalize_rental_types
@@ -173,6 +174,54 @@ async def get_properties(
         properties = properties[start:start + limit]
 
     return properties
+
+
+# ── Soft duplicate warning (pre-submit) ────────────────────────────────
+# Called by AddPropertyModal as the host types their address, so we can
+# nudge them BEFORE they submit if they already have an active listing
+# at the same address + rental_type + bedroom count + floor. Purely
+# advisory: the actual duplicate BLOCK still lives inside
+# `crud.create_property` — this endpoint just surfaces the same
+# information earlier in the flow.
+#
+# MUST be declared BEFORE `/properties/{property_id}` (below) so FastAPI
+# matches the literal path first — otherwise `check-duplicate` would be
+# swallowed as a property_id and 404.
+@api_router.get("/properties/check-duplicate")
+async def check_duplicate_listing(
+    address: str = Query(..., min_length=1, max_length=500),
+    rental_type: str = Query(..., min_length=1, max_length=64),
+    bedrooms: int | None = Query(None, ge=0, le=50),
+    floor: int | None = Query(None, ge=-5, le=200),
+    exclude_property_id: str | None = Query(None),
+    payload: dict = Depends(verify_token),
+) -> dict:
+    """Return `{ duplicate: {...} }` if the caller already has an active
+    listing that would collide on the composite dedupe signature, else
+    `{ duplicate: null }`. Never raises on bad address strings — the
+    signature resolves to None and we simply report no match.
+    """
+    dup = await find_duplicate(
+        db,
+        owner_id=payload["user_id"],
+        address=address,
+        rental_type=rental_type,
+        bedrooms=bedrooms,
+        floor=floor,
+        exclude_property_id=exclude_property_id,
+    )
+    if not dup:
+        return {"duplicate": None}
+    return {
+        "duplicate": {
+            "id": dup.get("id"),
+            "title": dup.get("title") or "Untitled listing",
+            "address": dup.get("address"),
+            "rental_type": dup.get("rental_type"),
+            "bedrooms": dup.get("bedrooms"),
+            "floor": dup.get("floor"),
+        },
+    }
 
 
 @api_router.get("/properties/{property_id}", response_model=PropertyOut)
