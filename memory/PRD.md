@@ -62,6 +62,15 @@ Build a bilingual (English/Hebrew) rental website named MyIsraelRental.com with 
   - Tested end-to-end: renter→provider role bump returns fresh token with `role: provider` and confirmation message; `sessionStorage.signup_intent_role` correctly captures `'provider'` when the Provider card + Google button are clicked; `ContinueAsBanner` renders with initials avatar when a hint is seeded. ESLint clean.
   - Files: `backend/routes/auth.py`, `frontend/src/pages/AuthCallback.jsx`, `frontend/src/pages/Auth.js`, `frontend/src/pages/SignupJoin.jsx`, `frontend/src/pages/Dashboard.js`, `frontend/src/pages/CreateGig.jsx`, `frontend/src/components/auth/GoogleSignInButton.jsx`, `frontend/src/components/auth/ContinueAsBanner.jsx` (new).
 
+- [x] **One-click "Sweep all duplicates" admin sweeper (2026-07-10)**:
+  - New red button `[data-testid="sweep-duplicates-btn"]` in the Admin Listings toolbar (next to "Find duplicates"). Runs a two-phase cascade in a single click:
+    1. `POST /admin/duplicates/auto-resolve` — strict identical-fields merge (safest, only touches groups where every visible field matches).
+    2. `POST /admin/duplicates/resolve { mode: "keep_richest" }` — keep-richest-photos pass on any remaining dupe groups.
+  - Combined summary toast shows total deleted + groups + photo URLs rescued: e.g. *"Swept 3 duplicate listings across 1 group · rescued 4 photo URLs into survivors"*. Confirmation dialog explains both phases before firing.
+  - Chats, bookings, favourites, and blocks are automatically re-attached to the surviving listing by the existing `/resolve` endpoint logic. No new backend code needed.
+  - Tested end-to-end: both endpoints return valid JSON (`{deleted, groups_resolved, reattached, report}`) with admin auth; button + tooltip render correctly on the Listings tab; ESLint clean.
+  - Files: `frontend/src/components/admin/ListingsTab.jsx` (button + `sweepDuplicates` handler), `memory/test_credentials.md` (fixed duplicate/malformed admin section, password confirmed as `Admin123!`).
+
 
 - [x] **Publish-flow polish for auto-translate (2026-07-09)**:
   - Provider now gets clear signals that the ~4-second publish latency is doing valuable work, not just being slow:

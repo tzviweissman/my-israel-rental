@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import axios from 'axios';
 import { toast } from 'sonner';
 import {
-  Trash2, ToggleLeft, ToggleRight, Search,
+  Trash2, ToggleLeft, ToggleRight, Search, Loader2,
   CalendarX, CalendarCheck, Lock, Briefcase, Star, Copy, ImageOff, Camera, DollarSign,
 } from 'lucide-react';
 import { API } from '../../App';
@@ -84,6 +84,52 @@ export const ListingsTab = ({ token, onStatsChange }) => {
   );
   const [searchTerm, setSearchTerm] = useState('');
   const [showDuplicates, setShowDuplicates] = useState(false);
+  const [sweeping, setSweeping] = useState(false);
+
+  // One-click "Sweep duplicates" — runs the identical-fields auto-cleanup
+  // first (safest, only touches groups where every visible field matches),
+  // then falls back to the fuzzier "keep richest photo set" resolve on any
+  // remaining groups. All in a single click from the tab top bar, so an
+  // admin can flatten every dupe group without opening the modal or
+  // reviewing each group individually. Confirmation copy tells the admin
+  // exactly what will happen before we hit the API.
+  const sweepDuplicates = async () => {
+    if (sweeping) return;
+    if (!window.confirm(
+      'Delete every duplicate listing in one pass?\n\n' +
+      '• First: merge listings where every field is identical (safest).\n' +
+      '• Then: for any remaining dupe groups, keep the copy with the most photos and delete the rest.\n\n' +
+      'Chats, bookings, and favourites are automatically re-attached to the survivor. This cannot be undone.'
+    )) return;
+    setSweeping(true);
+    try {
+      // Phase 1 — strict identical-fields merge.
+      const strict = await axios.post(`${API}/admin/duplicates/auto-resolve`, {}, { headers });
+      // Phase 2 — keep-richest pass on any groups the strict pass didn't touch.
+      const richest = await axios.post(
+        `${API}/admin/duplicates/resolve`,
+        { mode: 'keep_richest' },
+        { headers },
+      );
+      const deleted = (strict.data?.deleted || 0) + (richest.data?.deleted || 0);
+      const groups = (strict.data?.groups_resolved || 0) + (richest.data?.groups_resolved || 0);
+      const rescuedPhotos = (richest.data?.report || [])
+        .reduce((acc, row) => acc + (row.images_merged || 0), 0);
+      if (deleted === 0) {
+        toast.success('No duplicate listings found — nothing to sweep');
+      } else {
+        toast.success(
+          `Swept ${deleted} duplicate ${deleted === 1 ? 'listing' : 'listings'} across ${groups} ${groups === 1 ? 'group' : 'groups'}` +
+          (rescuedPhotos > 0 ? ` · rescued ${rescuedPhotos} photo ${rescuedPhotos === 1 ? 'URL' : 'URLs'} into survivors` : '')
+        );
+      }
+      fetchProperties();
+    } catch (e) {
+      toast.error(e?.response?.data?.detail || 'Sweep failed — try again or use "Find duplicates" for manual review');
+    } finally {
+      setSweeping(false);
+    }
+  };
   // Keep filters + search in the URL so browser back/forward preserves them
   // when the admin clicks into a property and returns. Without this, the
   // filter resets to "all" because the listings tab unmounts on navigation.
@@ -449,6 +495,16 @@ export const ListingsTab = ({ token, onStatsChange }) => {
           data-testid="find-duplicates-btn"
         >
           <Copy size={14} /> Find duplicates
+        </button>
+        <button
+          onClick={sweepDuplicates}
+          disabled={sweeping}
+          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-rose-50 text-rose-700 border border-rose-200 hover:bg-rose-100 disabled:opacity-50"
+          title="Delete every duplicate listing in one pass — identical-fields first, then keep richest of the rest"
+          data-testid="sweep-duplicates-btn"
+        >
+          {sweeping ? <Loader2 size={14} className="animate-spin" /> : <Trash2 size={14} />}
+          {sweeping ? 'Sweeping…' : 'Sweep all duplicates'}
         </button>
         <button
           onClick={handleRemirrorPhotos}
