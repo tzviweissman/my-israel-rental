@@ -31,20 +31,50 @@ const CategoryCard = ({ category, active, onClick }) => {
     <button
       onClick={onClick}
       className={`
-        relative shrink-0 snap-start overflow-hidden rounded-2xl text-left
-        transition-transform duration-200 will-change-transform
+        group relative shrink-0 snap-start overflow-hidden rounded-2xl text-left
+        transition-all duration-300 ease-out will-change-transform
         w-[168px] h-[280px] sm:w-[196px] sm:h-[320px] md:w-[212px] md:h-[352px]
-        ${active ? 'ring-4 ring-[#D4AF37] scale-[0.98]' : 'hover:-translate-y-1'}
+        ${active ? 'ring-4 ring-[#D4AF37] scale-[0.98]' : 'hover:-translate-y-0.5'}
       `}
-      style={{ backgroundColor: theme.header }}
+      // Light-gold hover treatment matching the "How it works" cards
+      // above:
+      //   • resting: soft 1px gold hairline (rgba 15%) so cards feel
+      //     framed even when idle;
+      //   • hover:  border jumps to 45% gold + a low-spread gold glow
+      //     (24 px, 12 % alpha) that reads as a warm halo, not a
+      //     shadow. The whole thing composes cleanly on top of the
+      //     existing dark header colour.
+      // Active cards keep the solid gold ring so selection state
+      // still dominates over hover state visually.
+      style={{
+        backgroundColor: theme.header,
+        border: active ? undefined : '1px solid rgba(212,175,55,0.15)',
+        boxShadow: active ? undefined : '0 6px 20px -14px rgba(15,58,58,0.25)',
+      }}
+      onMouseEnter={(e) => {
+        if (active) return;
+        e.currentTarget.style.border = '1px solid rgba(212,175,55,0.45)';
+        e.currentTarget.style.boxShadow =
+          '0 12px 28px -14px rgba(212,175,55,0.35), 0 0 0 3px rgba(212,175,55,0.08)';
+      }}
+      onMouseLeave={(e) => {
+        if (active) return;
+        e.currentTarget.style.border = '1px solid rgba(212,175,55,0.15)';
+        e.currentTarget.style.boxShadow = '0 6px 20px -14px rgba(15,58,58,0.25)';
+      }}
       data-testid={`services-category-${category.slug}`}
       data-active={active ? '1' : '0'}
     >
       {/* Header — dark slab with the category name */}
       <div className="relative h-[38%] px-4 pt-4 pb-2 flex items-start">
         <span
-          className="text-white font-semibold leading-tight text-base sm:text-lg md:text-xl"
-          style={{ fontFamily: 'Playfair Display, serif' }}
+          className="text-white leading-tight text-base sm:text-lg md:text-xl tracking-tight"
+          style={{
+            fontFamily:
+              "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
+            fontWeight: 700,
+            letterSpacing: '-0.015em',
+          }}
         >
           {category.label}
         </span>
