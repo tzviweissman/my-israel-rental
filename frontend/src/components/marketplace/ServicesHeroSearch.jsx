@@ -302,11 +302,11 @@ export default function ServicesHeroSearch({
       {/* Mobile-only "More filters" row + a plain-language link back to
           the provider path. Below the pill so the primary controls stay
           uncluttered on small screens. */}
-      <div className="mt-4 flex items-center justify-center gap-3 md:gap-4 text-sm text-white/85">
+      <div className="mt-4 flex items-center justify-center gap-3 md:gap-4 text-sm text-gray-600">
         <button
           type="button"
           onClick={onOpenFilters}
-          className="md:hidden inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/15 hover:bg-white/25 backdrop-blur-sm border border-white/20 transition-colors"
+          className="md:hidden inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#1E6A6A]/10 hover:bg-[#1E6A6A]/15 text-[#1E6A6A] border border-[#1E6A6A]/20 transition-colors"
           data-testid="services-hero-more-filters-mobile"
         >
           <SlidersHorizontal size={14} />
@@ -314,7 +314,7 @@ export default function ServicesHeroSearch({
         </button>
         <a
           href="/dashboard?tab=my-gigs"
-          className="inline-flex items-center gap-1.5 text-white/90 hover:text-[#D4AF37] font-semibold transition-colors"
+          className="inline-flex items-center gap-1.5 text-[#1E6A6A] hover:text-[#0F3A3A] font-semibold transition-colors"
           data-testid="services-hero-become-provider"
         >
           {t('services.becomeProvider', 'Become a provider')}

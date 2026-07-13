@@ -403,34 +403,51 @@ const Services = () => {
     >
       <PageMeta title={seo.title} description={seo.description} path={seo.path} />
 
-      {/* Hero + search — clean solid teal background (no video). Keeps
-          the copy front-and-centre and drops the ~14 MB of stock clips
-          the older version pre-loaded on every /services visit. */}
+      {/* Hero + search — clean off-white background. The gold-shimmer
+          sweep behind "Hire proven talent" is a CSS gradient with an
+          animated background-position (no JS, no images, respects
+          prefers-reduced-motion via the media query at the bottom of
+          the styles block below). */}
       <div
-        className="relative overflow-hidden text-white py-14 md:py-20 px-4"
-        style={{
-          background:
-            'linear-gradient(135deg, #1E6A6A 0%, #0F3A3A 100%)',
-        }}
+        className="relative overflow-hidden py-14 md:py-20 px-4"
+        style={{ background: '#FFFFFF' }}
         data-testid="services-hero"
       >
+        {/* Scoped keyframes for the gold shimmer. Kept inline so this
+            hero stays a single self-contained block — no global CSS
+            to keep in sync. */}
+        <style>{`
+          @keyframes servicesHeroGoldShimmer {
+            0%   { background-position: -120% 50%; }
+            60%  { background-position: 220% 50%;  }
+            100% { background-position: 220% 50%;  }
+          }
+          @media (prefers-reduced-motion: reduce) {
+            .services-hero-shimmer { animation: none !important; }
+          }
+        `}</style>
         <div className="relative max-w-5xl mx-auto text-center">
           <h1
-            className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-4 md:mb-5 leading-[1.15]"
+            className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-4 md:mb-5 leading-[1.15] text-[#0F3A3A]"
             style={{ fontFamily: 'Playfair Display' }}
             data-testid="services-hero-title"
           >
-            {/* Two-line hero — first half highlighted in a translucent
-                gold sweep (echoes the brand accent from the "How it
-                works" strip below), second half plain white. The
-                gradient is inline so the highlight sits behind the
-                text without breaking line-wrap on narrow viewports. */}
+            {/* Highlighted first half — a fill of soft brand gold with a
+                brighter shimmer stripe that pans across every ~6s. The
+                base gradient (below the shimmer) keeps the highlight
+                readable when the shimmer sits off-screen. */}
             <span
-              className="inline-block px-2 md:px-3 py-0.5 rounded-md"
+              className="services-hero-shimmer inline-block px-2 md:px-3 py-0.5 rounded-md"
               style={{
+                // 3-stop gradient: gold base → bright gold streak → gold base.
+                // Sized 250% wide so the streak has room to travel
+                // across the highlight before wrapping.
                 background:
-                  'linear-gradient(120deg, rgba(212,175,55,0.55) 0%, rgba(212,175,55,0.3) 100%)',
+                  'linear-gradient(120deg, rgba(212,175,55,0.55) 0%, rgba(212,175,55,0.55) 32%, rgba(255,224,138,0.95) 50%, rgba(212,175,55,0.55) 68%, rgba(212,175,55,0.55) 100%)',
+                backgroundSize: '250% 100%',
+                backgroundPosition: '-120% 50%',
                 color: '#0F3A3A',
+                animation: 'servicesHeroGoldShimmer 6s ease-in-out infinite',
                 boxDecorationBreak: 'clone',
                 WebkitBoxDecorationBreak: 'clone',
               }}
@@ -441,7 +458,7 @@ const Services = () => {
             {t('services.heroTitleTail', 'who deliver')}
           </h1>
           <p
-            className="max-w-2xl mx-auto text-sm md:text-lg text-white/85 mb-6 md:mb-8 leading-relaxed"
+            className="max-w-2xl mx-auto text-sm md:text-lg text-gray-600 mb-6 md:mb-8 leading-relaxed"
             data-testid="services-hero-subtitle"
           >
             {t(
