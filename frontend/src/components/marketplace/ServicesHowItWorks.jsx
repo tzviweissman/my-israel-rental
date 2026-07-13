@@ -1,17 +1,17 @@
 /**
- * "How it works" strip that sits directly below the Services hero.
+ * "How it works" strip below the Services hero.
  *
- * Three 8–15s stock clips playing on loop side-by-side, each labelled with
- * a step: post a job → get quotes → book & relax. This is the highest-
- * converting pattern for reverse marketplaces (Fiverr / Thumbtack / Bark)
- * because it collapses the entire user story into ~30 seconds of visual
- * proof before the visitor has to read anything.
+ * Text-only redesign (was previously three looping videos): three
+ * translucent light-gold cards with a big numbered step chip, an icon,
+ * a bold title, and a one-line description. Renders the same 3-step
+ * narrative (post a job → get quotes → book & relax) but loads
+ * instantly with zero bandwidth cost and works cleanly on every
+ * viewport / connection speed / reduced-motion setting.
  *
- * Uses the same "poster + inline muted autoplay + prefers-reduced-motion
- * fallback" contract as RotatingHeroVideo, so the two components feel
- * consistent when scrolling from hero → strip.
+ * The gold palette (`BRAND_GOLD` = #D4AF37) is anchored to the
+ * emerald primary via low-alpha overlays so the strip reads as an
+ * intentional accent inside the wider MyIsraelRental color story.
  */
-import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { MessageSquare, Sparkles, KeyRound } from 'lucide-react';
 
@@ -19,8 +19,6 @@ const STEPS = [
   {
     key: 'post',
     Icon: MessageSquare,
-    src: '/videos/services-hero/step1-post.mp4',
-    poster: '/videos/services-hero/step1-post-poster.jpg',
     titleKey: 'services.howItWorks.step1.title',
     titleDefault: 'Post a job',
     descKey: 'services.howItWorks.step1.desc',
@@ -30,8 +28,6 @@ const STEPS = [
   {
     key: 'quotes',
     Icon: Sparkles,
-    src: '/videos/services-hero/step2-quotes.mp4',
-    poster: '/videos/services-hero/step2-quotes-poster.jpg',
     titleKey: 'services.howItWorks.step2.title',
     titleDefault: 'Get quotes',
     descKey: 'services.howItWorks.step2.desc',
@@ -41,8 +37,6 @@ const STEPS = [
   {
     key: 'book',
     Icon: KeyRound,
-    src: '/videos/services-hero/step3-book.mp4',
-    poster: '/videos/services-hero/step3-book-poster.jpg',
     titleKey: 'services.howItWorks.step3.title',
     titleDefault: 'Book & relax',
     descKey: 'services.howItWorks.step3.desc',
@@ -51,52 +45,74 @@ const STEPS = [
   },
 ];
 
-function StepCard({ step, index, reducedMotion }) {
+function StepCard({ step, index }) {
   const { t } = useTranslation();
   const { Icon } = step;
+  const num = String(index + 1).padStart(2, '0');
 
   return (
     <article
-      className="group relative flex-1 rounded-2xl overflow-hidden bg-white shadow-sm ring-1 ring-black/5 hover:shadow-md hover:-translate-y-0.5 transition-all duration-300"
+      className="group relative flex-1 rounded-2xl overflow-hidden p-6 md:p-7 transition-all duration-300 hover:-translate-y-0.5"
+      // Layered background:
+      //   1. Soft gold gradient (rgba so it stays translucent over
+      //      whatever section BG sits behind us).
+      //   2. Hairline gold border (rgba, not solid) so cards read as
+      //      one visual family without shouting.
+      // The single-property style block keeps the palette tunable
+      // from one place — swap BRAND_GOLD across the app by editing
+      // these two rgba values.
+      style={{
+        background:
+          'linear-gradient(155deg, rgba(212,175,55,0.14) 0%, rgba(212,175,55,0.06) 55%, rgba(212,175,55,0.02) 100%)',
+        border: '1px solid rgba(212,175,55,0.28)',
+        boxShadow:
+          '0 1px 0 rgba(255,255,255,0.6) inset, 0 8px 24px -12px rgba(15,58,58,0.12)',
+      }}
       data-testid={`how-it-works-step-${step.key}`}
     >
-      {/* Video frame — 16:9 to keep the visual weight balanced across cards */}
-      <div className="relative aspect-video overflow-hidden bg-[#F1EFEA]">
-        {reducedMotion ? (
-          <img
-            src={step.poster}
-            alt=""
-            aria-hidden="true"
-            className="absolute inset-0 w-full h-full object-cover"
-          />
-        ) : (
-          <video
-            className="absolute inset-0 w-full h-full object-cover"
-            src={step.src}
-            poster={step.poster}
-            autoPlay
-            muted
-            loop
-            playsInline
-            preload="metadata"
-            aria-hidden="true"
-          />
-        )}
-        {/* Subtle bottom fade so the step number always reads. */}
-        <div className="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-black/45 to-transparent pointer-events-none" />
-        {/* Step number chip — anchored bottom-left inside the video frame */}
-        <div className="absolute bottom-3 left-3 flex items-center gap-2 px-2.5 py-1 rounded-full bg-white/95 backdrop-blur-sm text-[#1E6A6A] text-xs font-semibold shadow-sm">
-          <span className="tabular-nums">{String(index + 1).padStart(2, '0')}</span>
-          <Icon size={13} strokeWidth={2.5} />
-        </div>
+      {/* Watermark step number — soft gold, sits behind the copy so
+          the eye reads it as texture, not label. Kept large + light. */}
+      <span
+        aria-hidden="true"
+        className="pointer-events-none absolute -top-3 -right-2 select-none font-bold leading-none tabular-nums"
+        style={{
+          fontFamily: 'Playfair Display',
+          fontSize: '7rem',
+          color: 'rgba(212,175,55,0.18)',
+          letterSpacing: '-0.04em',
+        }}
+      >
+        {num}
+      </span>
+
+      {/* Icon chip — small circle in the top-left, echoes the gold
+          without competing with the watermark number. */}
+      <div
+        className="relative z-10 inline-flex items-center justify-center w-11 h-11 rounded-full mb-4 backdrop-blur-sm transition-transform duration-300 group-hover:scale-105"
+        style={{
+          background: 'rgba(212,175,55,0.18)',
+          border: '1px solid rgba(212,175,55,0.35)',
+          color: '#8A6D1D',
+        }}
+      >
+        <Icon size={19} strokeWidth={2.2} />
       </div>
 
       {/* Copy */}
-      <div className="p-5">
-        <h3 className="text-lg font-semibold text-[#0F3A3A] mb-1.5">
+      <div className="relative z-10">
+        <div
+          className="text-[11px] font-semibold uppercase tracking-[0.18em] mb-1.5"
+          style={{ color: '#8A6D1D' }}
+        >
+          <span className="tabular-nums">{num}</span> · Step
+        </div>
+        <h3
+          className="text-xl md:text-2xl font-bold text-[#0F3A3A] mb-2 leading-tight"
+          style={{ fontFamily: 'Playfair Display' }}
+        >
           {t(step.titleKey, step.titleDefault)}
         </h3>
-        <p className="text-sm text-gray-600 leading-relaxed">
+        <p className="text-sm md:text-[15px] text-gray-700 leading-relaxed">
           {t(step.descKey, step.descDefault)}
         </p>
       </div>
@@ -106,11 +122,6 @@ function StepCard({ step, index, reducedMotion }) {
 
 export default function ServicesHowItWorks() {
   const { t } = useTranslation();
-
-  const reducedMotion = useMemo(() => {
-    if (typeof window === 'undefined' || !window.matchMedia) return false;
-    return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  }, []);
 
   return (
     <section
@@ -136,12 +147,7 @@ export default function ServicesHowItWorks() {
 
         <div className="flex flex-col md:flex-row gap-4 md:gap-5">
           {STEPS.map((step, i) => (
-            <StepCard
-              key={step.key}
-              step={step}
-              index={i}
-              reducedMotion={reducedMotion}
-            />
+            <StepCard key={step.key} step={step} index={i} />
           ))}
         </div>
       </div>
