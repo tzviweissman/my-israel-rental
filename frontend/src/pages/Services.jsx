@@ -393,8 +393,8 @@ const Services = () => {
   const seo = useMemo(() => {
     const catLbl = categories.find((c) => c.slug === selectedCat)?.label;
     const locLbl = locations.find((l) => l.slug === selectedLoc)?.label;
-    let title = 'Services Marketplace in Israel — Cleaners, Movers, Plumbers & more | MyIsraelRental';
-    let description = 'Book trusted local services in Israel — cleaning, movers, plumbers, electricians, photographers, barbers, tour guides and more. Zero booking fees, direct chat, WhatsApp-ready.';
+    let title = 'Hire Proven Local Talent in Israel — Cleaners, Movers, Plumbers & more | MyIsraelRental';
+    let description = 'Hire proven talent who deliver — post a job, get bids immediately, see verified work history, reviews and certifications. Cleaning, movers, plumbers, electricians, photographers, barbers, tour guides and more. Zero booking fees.';
     if (catLbl && locLbl) {
       title = `${catLbl} in ${locLbl} — Services Marketplace | MyIsraelRental`;
       description = `Find and book trusted ${catLbl.toLowerCase()} providers in ${locLbl}. Direct chat, WhatsApp booking, zero renter fees.`;
@@ -436,9 +436,40 @@ const Services = () => {
           aria-hidden="true"
         />
         <div className="relative max-w-5xl mx-auto text-center">
-          <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-6 md:mb-8" style={{ fontFamily: 'Playfair Display' }}>
-            {t('services.heroTitle', 'Find & book trusted local services')}
+          <h1
+            className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-4 md:mb-5 leading-[1.15]"
+            style={{ fontFamily: 'Playfair Display' }}
+            data-testid="services-hero-title"
+          >
+            {/* Two-line hero — first half highlighted in a translucent
+                gold sweep (echoes the brand accent from the "How it
+                works" strip below), second half plain white. The
+                gradient is inline so the highlight sits behind the
+                text without breaking line-wrap on narrow viewports. */}
+            <span
+              className="inline-block px-2 md:px-3 py-0.5 rounded-md"
+              style={{
+                background:
+                  'linear-gradient(120deg, rgba(212,175,55,0.55) 0%, rgba(212,175,55,0.3) 100%)',
+                color: '#0F3A3A',
+                boxDecorationBreak: 'clone',
+                WebkitBoxDecorationBreak: 'clone',
+              }}
+            >
+              {t('services.heroTitleAccent', 'Hire proven talent')}
+            </span>
+            <br />
+            {t('services.heroTitleTail', 'who deliver')}
           </h1>
+          <p
+            className="max-w-2xl mx-auto text-sm md:text-lg text-white/85 mb-6 md:mb-8 leading-relaxed"
+            data-testid="services-hero-subtitle"
+          >
+            {t(
+              'services.heroSubtitle',
+              'Post a job, get bids immediately. See verified work history, reviews, certifications. Hire in a few clicks.'
+            )}
+          </p>
           <ServicesHeroSearch
             categories={categories}
             selectedCat={selectedCat}
