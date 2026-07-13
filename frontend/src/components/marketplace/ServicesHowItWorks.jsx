@@ -136,8 +136,13 @@ function StepCard({ step, index }) {
           <span className="tabular-nums">{num}</span> · Step
         </div>
         <h3
-          className="text-xl md:text-2xl font-bold text-[#0F3A3A] mb-2 leading-tight"
-          style={{ fontFamily: 'Playfair Display' }}
+          className="text-xl md:text-2xl text-[#0F3A3A] mb-2 leading-tight tracking-tight"
+          style={{
+            fontFamily:
+              "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
+            fontWeight: 700,
+            letterSpacing: '-0.015em',
+          }}
         >
           {t(step.titleKey, step.titleDefault)}
         </h3>
@@ -164,8 +169,13 @@ export default function ServicesHowItWorks() {
             {t('services.howItWorks.eyebrow', 'How it works')}
           </div>
           <h2
-            className="text-2xl md:text-3xl font-bold text-[#0F3A3A] leading-tight"
-            style={{ fontFamily: 'Playfair Display' }}
+            className="text-2xl md:text-3xl text-[#0F3A3A] leading-tight tracking-tight"
+            style={{
+              fontFamily:
+                "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
+              fontWeight: 800,
+              letterSpacing: '-0.02em',
+            }}
           >
             {t(
               'services.howItWorks.title',

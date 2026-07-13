@@ -446,7 +446,7 @@ const Services = () => {
         `}</style>
         <div className="relative max-w-5xl mx-auto text-center">
           <h1
-            className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl mb-4 md:mb-5 leading-[1.1] text-[#0F3A3A] tracking-tight"
+            className="text-3xl sm:text-4xl md:text-5xl mb-4 md:mb-5 leading-[1.1] text-[#0F3A3A] tracking-tight"
             style={{
               fontFamily:
                 "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
@@ -481,7 +481,7 @@ const Services = () => {
             {t('services.heroTitleTail', 'who deliver')}
           </h1>
           <p
-            className="max-w-2xl mx-auto text-sm md:text-lg text-gray-600 mb-6 md:mb-8 leading-relaxed"
+            className="max-w-2xl mx-auto text-sm md:text-base text-gray-600 mb-6 md:mb-8 leading-relaxed"
             style={{
               fontFamily:
                 "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
@@ -516,7 +516,7 @@ const Services = () => {
       {/* Locations + Categories */}
       <div className="max-w-7xl mx-auto px-4 md:px-6 py-10">
         <div className="flex items-center justify-between mb-3">
-          <h2 className="text-xl md:text-2xl font-bold text-gray-900" style={{ fontFamily: 'Playfair Display' }}>
+          <h2 className="text-xl md:text-2xl font-bold text-gray-900 tracking-tight" style={{ fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif", letterSpacing: '-0.02em' }}>
             {t('services.byLocation', 'Browse by location')}
           </h2>
           {selectedLoc && (
@@ -538,7 +538,7 @@ const Services = () => {
         {/* Categories */}
         <div className="mt-8">
           <div className="flex items-center justify-between mb-5">
-            <h3 className="text-lg md:text-xl font-bold text-gray-900" style={{ fontFamily: 'Playfair Display' }}>
+            <h3 className="text-lg md:text-xl font-bold text-gray-900 tracking-tight" style={{ fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif", letterSpacing: '-0.02em' }}>
               {t('services.browse', 'Browse by category')}
             </h3>
             {selectedCat && (
@@ -965,7 +965,7 @@ const Services = () => {
               <div className="p-2.5 rounded-full bg-amber-100">
                 <MapPin size={22} className="text-amber-600" />
               </div>
-              <h2 className="text-lg font-bold text-gray-900" style={{ fontFamily: 'Playfair Display' }}>
+              <h2 className="text-lg font-bold text-gray-900 tracking-tight" style={{ fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif", letterSpacing: '-0.02em' }}>
                 {t('services.geoBlockedTitle', 'Location access is blocked')}
               </h2>
             </div>
