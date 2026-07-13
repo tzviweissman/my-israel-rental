@@ -12,6 +12,7 @@ import { useTranslation } from 'react-i18next';
 import axios from 'axios';
 import { toast } from 'sonner';
 import { MessageCircle, Send, Loader2, ArrowLeft, Award, Zap, Calendar, Clock, Camera, ChevronLeft, ChevronRight, X } from 'lucide-react';
+import { Calendar as CalendarUI } from '../components/ui/calendar';
 import { API, AuthContext } from '../App';
 import PageMeta from '../components/PageMeta';
 import StarRating from '../components/marketplace/StarRating';
@@ -732,16 +733,24 @@ const StoreProductList = ({ products, selected, onSelect }) => {
   });
 };
 
-// Generate slot buttons for a given day using the gig's weekly hours + tier duration.
-// Returns [{date: 'YYYY-MM-DD', label: 'Mon Jul 14', slots: ['09:00', '09:30', ...]}]
+// Build the availability map for the next 90 days: keyed by ISO date
+// (YYYY-MM-DD) → { label, slots }. Days without any matching weekly
+// window are omitted, so callsites can use `Object.keys(slotsByDate)`
+// as the enabled-date set for the calendar picker.
+//
+// Range bumped from 14 → 90 days so buyers can book a full quarter
+// ahead. The previous 14-day cap plus a horizontal-scroll pill row hid
+// most future dates and looked like a "can't book more than a week"
+// bug from the buyer's perspective.
 const buildAppointmentSlots = (gig, tier) => {
   const weekly = gig.weekly_availability || {};
   const slotMin = gig.slot_duration_minutes || 30;
   const duration = tier.duration_minutes || slotMin;
   const dayKeys = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'];
-  const out = [];
+  const byDate = {};
   const today = new Date();
-  for (let offset = 0; offset < 14; offset += 1) {
+  today.setHours(0, 0, 0, 0);
+  for (let offset = 0; offset < 90; offset += 1) {
     const day = new Date(today);
     day.setDate(today.getDate() + offset);
     const key = dayKeys[day.getDay()];
@@ -760,45 +769,99 @@ const buildAppointmentSlots = (gig, tier) => {
       }
     }
     if (!slots.length) continue;
-    const iso = day.toISOString().slice(0, 10);
+    // Use local YYYY-MM-DD (not toISOString — which shifts to UTC and
+    // can off-by-one a day for timezones east of GMT).
+    const yy = day.getFullYear();
+    const mo = String(day.getMonth() + 1).padStart(2, '0');
+    const dd = String(day.getDate()).padStart(2, '0');
+    const iso = `${yy}-${mo}-${dd}`;
     const label = day.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' });
-    out.push({ date: iso, label, slots });
+    byDate[iso] = { label, slots };
   }
-  return out;
+  return byDate;
 };
 
 const AppointmentPicker = ({ gig, tier, selectedDate, selectedSlot, onSelectDate, onSelectSlot }) => {
-  const days = useMemo(() => buildAppointmentSlots(gig, tier), [gig, tier]);
-  if (!days.length) {
+  const slotsByDate = useMemo(() => buildAppointmentSlots(gig, tier), [gig, tier]);
+  const availableIsoSet = useMemo(() => new Set(Object.keys(slotsByDate)), [slotsByDate]);
+  const firstAvailableIso = useMemo(() => Object.keys(slotsByDate)[0] || null, [slotsByDate]);
+
+  // Seed the parent's `selectedDate` with the first available day so the
+  // slot grid + submit button are wired up on first mount. Without this
+  // the buyer would have to click a day before the "book" button
+  // recognizes a valid selection — but they'd naturally expect the
+  // default-highlighted day to already be "picked".
+  useEffect(() => {
+    if (firstAvailableIso && (!selectedDate || !availableIsoSet.has(selectedDate))) {
+      onSelectDate(firstAvailableIso);
+    }
+  }, [firstAvailableIso]);
+
+  if (!availableIsoSet.size) {
     return <p className="text-xs text-gray-500 pt-2 border-t border-gray-100">Provider hasn&apos;t set open hours yet — book via message.</p>;
   }
-  const active = days.find((d) => d.date === selectedDate) || days[0];
+
+  // Convert current selection into a Date the shadcn calendar accepts,
+  // defaulting to the first available day so the picker never renders
+  // with an empty slot column on first mount.
+  const effectiveIso = selectedDate && availableIsoSet.has(selectedDate) ? selectedDate : firstAvailableIso;
+  const [y, m, d] = (effectiveIso || '').split('-').map(Number);
+  const selectedDateObj = effectiveIso ? new Date(y, m - 1, d) : undefined;
+
+  const activeSlots = effectiveIso ? (slotsByDate[effectiveIso]?.slots || []) : [];
+  const activeLabel = effectiveIso ? slotsByDate[effectiveIso]?.label : '';
+
+  // Compute the calendar bounds so the caret can only reach months
+  // that contain at least one available date — no dead browsing.
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const isoList = Object.keys(slotsByDate).sort();
+  const lastIso = isoList[isoList.length - 1];
+  const [ly, lm, ld] = lastIso.split('-').map(Number);
+  const lastDate = new Date(ly, lm - 1, ld);
+
   return (
     <div className="pt-3 border-t border-gray-100 space-y-2" data-testid="gig-appointment-picker">
       <label className="text-xs font-semibold text-gray-700 flex items-center gap-1">
         <Calendar size={12} /> Pick a day
       </label>
-      <div className="flex gap-1.5 overflow-x-auto pb-1 no-scrollbar">
-        {days.map((d) => (
-          <button key={d.date} onClick={() => onSelectDate(d.date)}
-            className={`px-2.5 py-1.5 rounded-lg text-[11px] font-semibold border whitespace-nowrap ${
-              selectedDate === d.date
-                ? 'bg-[#1E6A6A] text-white border-[#1E6A6A]'
-                : 'bg-white text-gray-700 border-gray-200 hover:border-[#D4AF37]'
-            }`}
-            data-testid={`gig-appt-day-${d.date}`}>
-            {d.label}
-          </button>
-        ))}
+      <div className="rounded-lg border border-gray-200 bg-white overflow-hidden">
+        <CalendarUI
+          mode="single"
+          selected={selectedDateObj}
+          onSelect={(dateObj) => {
+            if (!dateObj) return;
+            const yy = dateObj.getFullYear();
+            const mm = String(dateObj.getMonth() + 1).padStart(2, '0');
+            const dd = String(dateObj.getDate()).padStart(2, '0');
+            const iso = `${yy}-${mm}-${dd}`;
+            if (availableIsoSet.has(iso)) onSelectDate(iso);
+          }}
+          disabled={(dateObj) => {
+            const yy = dateObj.getFullYear();
+            const mm = String(dateObj.getMonth() + 1).padStart(2, '0');
+            const dd = String(dateObj.getDate()).padStart(2, '0');
+            return !availableIsoSet.has(`${yy}-${mm}-${dd}`);
+          }}
+          fromDate={today}
+          toDate={lastDate}
+          initialFocus
+          data-testid="gig-appt-calendar"
+        />
       </div>
+      {activeLabel && (
+        <div className="text-[11px] text-gray-500 pt-1" data-testid="gig-appt-day-summary">
+          Available slots for <span className="font-semibold text-gray-800">{activeLabel}</span>
+        </div>
+      )}
       <label className="text-xs font-semibold text-gray-700 flex items-center gap-1 pt-1">
         <Clock size={12} /> Pick a time
       </label>
-      <div className="grid grid-cols-3 gap-1.5">
-        {active.slots.map((s) => (
+      <div className="grid grid-cols-3 gap-1.5" data-testid="gig-appt-slots">
+        {activeSlots.map((s) => (
           <button key={s} onClick={() => onSelectSlot(s)}
             className={`px-2 py-1.5 rounded-lg text-[11px] font-semibold border ${
-              selectedSlot === s && selectedDate === active.date
+              selectedSlot === s && selectedDate === effectiveIso
                 ? 'bg-[#1E6A6A] text-white border-[#1E6A6A]'
                 : 'bg-white text-gray-700 border-gray-200 hover:border-[#D4AF37]'
             }`}
