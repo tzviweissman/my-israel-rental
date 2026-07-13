@@ -775,5 +775,36 @@ async def pricing_unquarantine(payload: dict = Depends(verify_token)) -> dict:
     }
 
 
+# ── Per-listing quarantine restore ────────────────────────────────────
+# One-click "this listing was flagged in error" tool from the admin
+# listings row. Same $unset as the bulk endpoint but scoped to a single
+# id so the admin can review false-positives one at a time.
+@api_router.post("/admin/properties/{property_id}/pricing-restore")
+async def restore_single_quarantined(
+    property_id: str,
+    payload: dict = Depends(verify_token),
+) -> dict:
+    if payload.get("role") != "admin":
+        raise HTTPException(status_code=403, detail="Admin access required")
+    prop = await db.properties.find_one(
+        {"id": property_id},
+        {"_id": 0, "id": 1, "title": 1, "is_hidden": 1},
+    )
+    if prop is None:
+        raise HTTPException(status_code=404, detail="Property not found")
+    if not prop.get("is_hidden"):
+        return {"restored": False, "message": "Listing was not quarantined."}
+    await db.properties.update_one(
+        {"id": property_id},
+        {"$set": {"is_hidden": False},
+         "$unset": {"pricing_review_reason": "", "pricing_review_at": ""}},
+    )
+    return {
+        "restored": True,
+        "id": property_id,
+        "message": f"Restored \"{prop.get('title') or property_id}\" to the public feed.",
+    }
+
+
 # --- Commit: users -------------------------------------------------------
 

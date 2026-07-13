@@ -6,7 +6,7 @@ import { toast } from 'sonner';
 import {
   Trash2, ToggleLeft, ToggleRight, Search, Loader2, AlertTriangle,
   CalendarX, CalendarCheck, Lock, Briefcase, Star, Copy, ImageOff, Camera, DollarSign,
-  Wand2, RotateCcw,
+  Wand2, RotateCcw, EyeOff, Undo2,
 } from 'lucide-react';
 import { API } from '../../App';
 import { useApiSWR } from '../../hooks/useApiSWR';
@@ -163,6 +163,28 @@ export const ListingsTab = ({ token, onStatsChange }) => {
     }
   };
 
+  // Per-row restore — one-click "this listing was flagged in error"
+  // from a quarantined row without touching the other quarantined ones.
+  const [restoringId, setRestoringId] = useState(null);
+  const handleRestoreSingle = async (property) => {
+    if (restoringId) return;
+    if (!window.confirm(
+      `Restore "${property.title}" to the public feed?\n\nThis lifts the pricing quarantine only for this listing — the current price will be shown to renters as-is.`
+    )) return;
+    setRestoringId(property.id);
+    try {
+      const res = await axios.post(
+        `${API}/admin/properties/${property.id}/pricing-restore`, {}, { headers },
+      );
+      toast.success(res.data?.message || 'Listing restored');
+      await Promise.all([refreshAudit(), fetchProperties()]);
+    } catch (e) {
+      toast.error(e?.response?.data?.detail || 'Restore failed — try again');
+    } finally {
+      setRestoringId(null);
+    }
+  };
+
   // One-click "Sweep duplicates" — runs the identical-fields auto-cleanup
   // first (safest, only touches groups where every visible field matches),
   // then falls back to the fuzzier "keep richest photo set" resolve on any
@@ -249,6 +271,17 @@ export const ListingsTab = ({ token, onStatsChange }) => {
     const next = new URLSearchParams(searchParams);
     next.delete('min');
     next.delete('max');
+    setSearchParams(next, { replace: true });
+  };
+  // Quarantined filter — URL-synced. Values: 'all' | 'quarantined'.
+  // Quarantined rows are the ones the pricing auto-fix hid from the
+  // public feed (is_hidden=True + pricing_review_reason set). Surfacing
+  // them behind a one-click chip lets the admin audit false positives.
+  const quarantinedFilter = searchParams.get('quarantined') === '1' ? 'quarantined' : 'all';
+  const setQuarantinedFilter = (val) => {
+    const next = new URLSearchParams(searchParams);
+    if (val === 'quarantined') next.set('quarantined', '1');
+    else next.delete('quarantined');
     setSearchParams(next, { replace: true });
   };
   const [selectedPropIds, setSelectedPropIds] = useState(new Set());
@@ -521,6 +554,7 @@ export const ListingsTab = ({ token, onStatsChange }) => {
   const filteredProperties = properties.filter(p => {
     if (managedFilter === 'managed' && !p.managed_by_admin) return false;
     if (featuredFilter === 'featured' && !p.is_featured) return false;
+    if (quarantinedFilter === 'quarantined' && !p.is_hidden) return false;
     if (rentalTypeFilter !== 'all' && p.rental_type !== rentalTypeFilter) return false;
     // Effective price = whatever the table column shows: monthly first,
     // nightly as fallback. Keeps the filter result consistent with what
@@ -540,6 +574,7 @@ export const ListingsTab = ({ token, onStatsChange }) => {
   });
   const managedCount = properties.filter(p => p.managed_by_admin).length;
   const featuredCount = properties.filter(p => p.is_featured).length;
+  const quarantinedCount = properties.filter(p => p.is_hidden).length;
   // Per-rental-type counts surfaced on each filter chip so the admin can
   // tell at a glance how many vacation rentals vs long-term leases exist
   // before clicking. The four canonical rental types match what
@@ -683,6 +718,20 @@ export const ListingsTab = ({ token, onStatsChange }) => {
             title={featuredCount === 0 ? "Nothing featured yet — toggle a property's star to mark it" : 'Show only featured listings'}
           >
             <Star size={12} fill={featuredFilter === 'featured' ? 'currentColor' : 'none'} /> Featured ({featuredCount})
+          </button>
+        </div>
+        {/* Quick chip toggle: show only quarantined listings — hidden
+            from the public feed by a previous pricing auto-fix. Lets
+            the admin audit what was paused and catch false positives. */}
+        <div className="inline-flex bg-white rounded-lg border border-[#E5E5E5] p-0.5" data-testid="quarantined-filter">
+          <button
+            onClick={() => setQuarantinedFilter(quarantinedFilter === 'quarantined' ? 'all' : 'quarantined')}
+            disabled={quarantinedCount === 0}
+            className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-semibold transition-colors disabled:opacity-40 disabled:cursor-not-allowed ${quarantinedFilter === 'quarantined' ? 'bg-rose-600 text-white' : 'text-gray-600 hover:bg-gray-50'}`}
+            data-testid="quarantined-filter-on"
+            title={quarantinedCount === 0 ? 'Nothing quarantined right now' : 'Show only listings hidden by the pricing auto-fix'}
+          >
+            <EyeOff size={12} /> Quarantined ({quarantinedCount})
           </button>
         </div>
         {/* Rental-type filter — lets the admin slice the table down to
@@ -872,6 +921,22 @@ export const ListingsTab = ({ token, onStatsChange }) => {
                         <Lock size={10} /> {t('admin.adminBlocked')}
                       </span>
                     )}
+                    {p.is_hidden && (
+                      <span
+                        className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-rose-100 text-rose-800"
+                        title={
+                          p.pricing_review_reason === 'zero_price'
+                            ? `Hidden from public feed — no price set${p.pricing_review_at ? ` · ${new Date(p.pricing_review_at).toLocaleDateString()}` : ''}`
+                            : p.pricing_review_reason === 'low_monthly'
+                            ? `Hidden from public feed — monthly rent below plausibility floor${p.pricing_review_at ? ` · ${new Date(p.pricing_review_at).toLocaleDateString()}` : ''}`
+                            : 'Hidden from public feed'
+                        }
+                        data-testid={`quarantine-badge-${p.id}`}
+                      >
+                        <EyeOff size={10} /> Quarantined
+                        {p.pricing_review_reason ? ` · ${p.pricing_review_reason === 'zero_price' ? 'no price' : 'low rent'}` : ''}
+                      </span>
+                    )}
                   </div>
                 </td>
                 <td className="px-4 py-3 text-sm text-gray-600">
@@ -944,6 +1009,17 @@ export const ListingsTab = ({ token, onStatsChange }) => {
                     >
                       <Trash2 size={16} />
                     </button>
+                    {p.is_hidden && (
+                      <button
+                        onClick={() => handleRestoreSingle(p)}
+                        disabled={restoringId === p.id}
+                        className="p-1.5 rounded hover:bg-emerald-50 text-emerald-600 disabled:opacity-50"
+                        title="Restore this listing to the public feed (lift quarantine)"
+                        data-testid={`restore-quarantined-${p.id}`}
+                      >
+                        {restoringId === p.id ? <Loader2 size={16} className="animate-spin" /> : <Undo2 size={16} />}
+                      </button>
+                    )}
                   </div>
                 </td>
               </tr>
@@ -1020,6 +1096,15 @@ export const ListingsTab = ({ token, onStatsChange }) => {
                     {p.admin_blocked_now && (
                       <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[9px] font-semibold bg-amber-100 text-amber-800">
                         <Lock size={9} /> {t('admin.adminBlocked')}
+                      </span>
+                    )}
+                    {p.is_hidden && (
+                      <span
+                        className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[9px] font-semibold bg-rose-100 text-rose-800"
+                        data-testid={`quarantine-badge-mobile-${p.id}`}
+                      >
+                        <EyeOff size={9} /> Quarantined
+                        {p.pricing_review_reason ? ` · ${p.pricing_review_reason === 'zero_price' ? 'no price' : 'low rent'}` : ''}
                       </span>
                     )}
                   </div>
