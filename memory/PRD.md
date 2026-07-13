@@ -11,6 +11,15 @@ Build a bilingual (English/Hebrew) rental website named MyIsraelRental.com with 
 - **i18n**: i18next with English and Hebrew (RTL) support
 
 ## What's Been Implemented
+- [x] **Service gig calendar — month grid with 90-day range (2026-07-13)**:
+  - Fixed buyer-facing bug: the appointment gig booking picker showed only 14 days as a horizontal-scroll pill row with a hidden scrollbar, so most future days were literally cut off with no scroll hint. Buyers complained they "can't book more than a week ahead".
+  - Replaced with the shadcn `Calendar` (react-day-picker) rendered inline in the booking sidebar. Range extended from 14 → **90 days**. Prev/next month chevrons let buyers browse a full quarter ahead. Weekdays without any `weekly_availability` window are auto-disabled (grayed). `fromDate={today}` locks out past dates.
+  - New `data-testid`s: `gig-appt-calendar`, `gig-appt-day-summary`, `gig-appt-slots`. Removed the old `gig-appt-day-<iso>` pill testids.
+  - `useEffect` seeds the parent's `selectedDate` with the first available day so the slot grid + submit button work on first mount without an extra click.
+  - Fixed a latent timezone bug: previous `toISOString().slice(0, 10)` shifted to UTC and could off-by-one east of GMT. Now uses local `YYYY-MM-DD`.
+  - Verified end-to-end via testing agent (iteration_58, 8/8 pass): calendar mounts with today pre-selected, chevrons advance July → August → September, distant date selection (Sep 16, ~65 days out) works, past dates disabled.
+  - Files: `pages/GigDetail.jsx` — `buildAppointmentSlots` + `AppointmentPicker` refactored; new import of `CalendarUI` from `components/ui/calendar`.
+
 - [x] **Super Admin quarantined-listings view (2026-07-13)**:
   - New URL-synced **Quarantined ({count})** filter chip (`data-testid=quarantined-filter-on`, rose accent) in the Admin Listings toolbar. Disabled when nothing is quarantined so the admin never sees an empty view by accident. Toggles a `?quarantined=1` URL param so deep-links and back-button work.
   - Every listing row now shows a rose **Quarantined · no price / low rent** badge (`data-testid=quarantine-badge-<id>` desktop, `quarantine-badge-mobile-<id>` mobile) with a tooltip that includes the timestamp of when it was flagged.
