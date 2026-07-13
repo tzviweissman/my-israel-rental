@@ -29,6 +29,7 @@ import { localizedTitle } from '../utils/gigLocale';
 import { isAvailableNow, getGigCover } from '../utils/gigAvailability';
 import ServicesHowItWorks from '../components/marketplace/ServicesHowItWorks';
 import ServicesHeroSearch from '../components/marketplace/ServicesHeroSearch';
+import ServicesHeroTitle from '../components/marketplace/ServicesHeroTitle';
 
 const TEAL = '#1E6A6A';
 const GOLD = '#D4AF37';
@@ -431,57 +432,10 @@ const Services = () => {
             backgroundSize: '240px 240px',
           }}
         />
-        {/* Scoped keyframes for the gold shimmer. Kept inline so this
-            hero stays a single self-contained block — no global CSS
-            to keep in sync. */}
-        <style>{`
-          @keyframes servicesHeroGoldShimmer {
-            0%   { background-position: -120% 50%; }
-            60%  { background-position: 220% 50%;  }
-            100% { background-position: 220% 50%;  }
-          }
-          @media (prefers-reduced-motion: reduce) {
-            .services-hero-shimmer { animation: none !important; }
-          }
-        `}</style>
         <div className="relative max-w-5xl mx-auto text-center">
-          <h1
-            className="text-3xl sm:text-4xl md:text-5xl mb-4 md:mb-5 leading-[1.1] text-[#0F3A3A] tracking-tight"
-            style={{
-              fontFamily:
-                "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
-              fontWeight: 800,
-              letterSpacing: '-0.025em',
-            }}
-            data-testid="services-hero-title"
-          >
-            {/* Highlighted first half — a fill of soft brand gold with a
-                brighter shimmer stripe that pans across every ~6s. The
-                base gradient (below the shimmer) keeps the highlight
-                readable when the shimmer sits off-screen. */}
-            <span
-              className="services-hero-shimmer inline-block px-2 md:px-3 py-0.5 rounded-md"
-              style={{
-                // 3-stop gradient: gold base → bright gold streak → gold base.
-                // Sized 250% wide so the streak has room to travel
-                // across the highlight before wrapping.
-                background:
-                  'linear-gradient(120deg, rgba(212,175,55,0.55) 0%, rgba(212,175,55,0.55) 32%, rgba(255,224,138,0.95) 50%, rgba(212,175,55,0.55) 68%, rgba(212,175,55,0.55) 100%)',
-                backgroundSize: '250% 100%',
-                backgroundPosition: '-120% 50%',
-                color: '#0F3A3A',
-                animation: 'servicesHeroGoldShimmer 6s ease-in-out infinite',
-                boxDecorationBreak: 'clone',
-                WebkitBoxDecorationBreak: 'clone',
-              }}
-            >
-              {t('services.heroTitleAccent', 'Hire proven talent')}
-            </span>
-            <br />
-            {t('services.heroTitleTail', 'who deliver')}
-          </h1>
+          <ServicesHeroTitle />
           <p
-            className="max-w-2xl mx-auto text-sm md:text-base text-gray-600 mb-6 md:mb-8 leading-relaxed"
+            className="max-w-2xl mx-auto text-sm md:text-base text-gray-600 mt-5 mb-6 md:mb-8 leading-relaxed"
             style={{
               fontFamily:
                 "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
