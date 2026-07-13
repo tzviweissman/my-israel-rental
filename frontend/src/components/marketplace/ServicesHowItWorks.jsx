@@ -12,6 +12,7 @@
  * emerald primary via low-alpha overlays so the strip reads as an
  * intentional accent inside the wider MyIsraelRental color story.
  */
+import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { MessageSquare, Sparkles, KeyRound } from 'lucide-react';
 
@@ -50,23 +51,51 @@ function StepCard({ step, index }) {
   const { Icon } = step;
   const num = String(index + 1).padStart(2, '0');
 
+  // Scroll-in animation: fade + rise 8px, staggered by index.
+  // Uses IntersectionObserver so cards only animate when they actually
+  // reach the viewport (matters on long service pages where the strip
+  // starts below the fold). ``prefers-reduced-motion`` short-circuits
+  // the animation to an instant reveal so we respect user OS settings.
+  const ref = useRef(null);
+  const [visible, setVisible] = useState(false);
+  useEffect(() => {
+    if (typeof window === 'undefined') return undefined;
+    const reduce = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+    if (reduce) { setVisible(true); return undefined; }
+    const el = ref.current;
+    if (!el || !('IntersectionObserver' in window)) { setVisible(true); return undefined; }
+    const io = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((e) => { if (e.isIntersecting) { setVisible(true); io.disconnect(); } });
+      },
+      { threshold: 0.15, rootMargin: '0px 0px -40px 0px' },
+    );
+    io.observe(el);
+    return () => io.disconnect();
+  }, []);
+
   return (
     <article
-      className="group relative flex-1 rounded-2xl overflow-hidden p-6 md:p-7 transition-all duration-300 hover:-translate-y-0.5"
+      ref={ref}
+      className="group relative flex-1 rounded-2xl overflow-hidden p-6 md:p-7 transition-all duration-700 ease-out hover:-translate-y-0.5"
       // Layered background:
       //   1. Soft gold gradient (rgba so it stays translucent over
       //      whatever section BG sits behind us).
       //   2. Hairline gold border (rgba, not solid) so cards read as
       //      one visual family without shouting.
-      // The single-property style block keeps the palette tunable
-      // from one place — swap BRAND_GOLD across the app by editing
-      // these two rgba values.
+      // Enter animation is stacked via `translateY` — when hovered the
+      // hover transform composes with the resting `translate(0,0)` and
+      // stays clean because both use `transform` (not `top`/`margin`).
       style={{
         background:
           'linear-gradient(155deg, rgba(212,175,55,0.14) 0%, rgba(212,175,55,0.06) 55%, rgba(212,175,55,0.02) 100%)',
         border: '1px solid rgba(212,175,55,0.28)',
         boxShadow:
           '0 1px 0 rgba(255,255,255,0.6) inset, 0 8px 24px -12px rgba(15,58,58,0.12)',
+        opacity: visible ? 1 : 0,
+        transform: visible ? 'translateY(0)' : 'translateY(8px)',
+        transitionDelay: visible ? `${index * 120}ms` : '0ms',
+        transitionProperty: 'opacity, transform, box-shadow',
       }}
       data-testid={`how-it-works-step-${step.key}`}
     >
