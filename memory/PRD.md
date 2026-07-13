@@ -11,6 +11,14 @@ Build a bilingual (English/Hebrew) rental website named MyIsraelRental.com with 
 - **i18n**: i18next with English and Hebrew (RTL) support
 
 ## What's Been Implemented
+- [x] **Super Admin quarantined-listings view (2026-07-13)**:
+  - New URL-synced **Quarantined ({count})** filter chip (`data-testid=quarantined-filter-on`, rose accent) in the Admin Listings toolbar. Disabled when nothing is quarantined so the admin never sees an empty view by accident. Toggles a `?quarantined=1` URL param so deep-links and back-button work.
+  - Every listing row now shows a rose **Quarantined · no price / low rent** badge (`data-testid=quarantine-badge-<id>` desktop, `quarantine-badge-mobile-<id>` mobile) with a tooltip that includes the timestamp of when it was flagged.
+  - Per-row **Undo** icon (`data-testid=restore-quarantined-<id>`) next to the delete action fires a `window.confirm` and calls the new `POST /api/admin/properties/{id}/pricing-restore` endpoint — one-click restore for false positives without touching the other quarantined rows.
+  - Backend `pricing-restore` endpoint returns `{restored: true, id, message}` on success, `{restored: false, ...}` on a no-op if the row wasn't quarantined, 404 on unknown id, 403 for non-admin.
+  - Tests: `/app/backend/tests/test_pricing_restore_single.py` (5/5 pass) + full Playwright coverage of chip / badge / restore flow — verified in `iteration_57.json`.
+  - Files: `routes/admin_import/properties.py` (new endpoint), `components/admin/ListingsTab.jsx` (filter chip + badge + row action).
+
 - [x] **Admin pricing auto-fix + quarantine (2026-07-12)**:
   - New backend endpoint `POST /api/admin/properties/pricing-autofix` in `routes/admin_import/properties.py` that runs the same classification as `/pricing-audit` and applies the safest action per bucket in one pass:
     - `wrong_field` (long-term with both monthly + nightly set) → strips the stranded `nightly_price` (keeps monthly).
