@@ -403,16 +403,34 @@ const Services = () => {
     >
       <PageMeta title={seo.title} description={seo.description} path={seo.path} />
 
-      {/* Hero + search — clean off-white background. The gold-shimmer
-          sweep behind "Hire proven talent" is a CSS gradient with an
-          animated background-position (no JS, no images, respects
-          prefers-reduced-motion via the media query at the bottom of
-          the styles block below). */}
+      {/* Hero + search — clean white background with two accents:
+          (1) a barely-visible diagonal gold paper-grain SVG behind
+              everything (adds "designed white" texture without
+              distracting from the copy);
+          (2) a gold-shimmer sweep animating across the highlighted
+              first half of the H1.
+          Font swapped from Playfair (serif) to Inter (modern
+          sans-serif) to match the Upwork-style visual reference. */}
       <div
         className="relative overflow-hidden py-14 md:py-20 px-4"
         style={{ background: '#FFFFFF' }}
         data-testid="services-hero"
       >
+        {/* Diagonal gold paper-grain overlay. Rendered as an inline
+            SVG data URI so it ships zero extra network requests. Kept
+            at 4% opacity + a fine 240 px repeat so it reads as
+            texture, not pattern. `pointer-events-none` keeps clicks
+            passing through to the search pill underneath. */}
+        <div
+          aria-hidden="true"
+          className="absolute inset-0 pointer-events-none"
+          style={{
+            opacity: 0.06,
+            backgroundImage:
+              "url(\"data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='240' height='240' viewBox='0 0 240 240'><defs><pattern id='p' patternUnits='userSpaceOnUse' width='24' height='24' patternTransform='rotate(35)'><line x1='0' y1='0' x2='0' y2='24' stroke='%23D4AF37' stroke-width='0.6'/></pattern></defs><rect width='240' height='240' fill='url(%23p)'/></svg>\")",
+            backgroundSize: '240px 240px',
+          }}
+        />
         {/* Scoped keyframes for the gold shimmer. Kept inline so this
             hero stays a single self-contained block — no global CSS
             to keep in sync. */}
@@ -428,8 +446,13 @@ const Services = () => {
         `}</style>
         <div className="relative max-w-5xl mx-auto text-center">
           <h1
-            className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-4 md:mb-5 leading-[1.15] text-[#0F3A3A]"
-            style={{ fontFamily: 'Playfair Display' }}
+            className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl mb-4 md:mb-5 leading-[1.1] text-[#0F3A3A] tracking-tight"
+            style={{
+              fontFamily:
+                "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
+              fontWeight: 800,
+              letterSpacing: '-0.025em',
+            }}
             data-testid="services-hero-title"
           >
             {/* Highlighted first half — a fill of soft brand gold with a
@@ -459,6 +482,11 @@ const Services = () => {
           </h1>
           <p
             className="max-w-2xl mx-auto text-sm md:text-lg text-gray-600 mb-6 md:mb-8 leading-relaxed"
+            style={{
+              fontFamily:
+                "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
+              fontWeight: 500,
+            }}
             data-testid="services-hero-subtitle"
           >
             {t(
