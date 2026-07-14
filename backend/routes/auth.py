@@ -445,11 +445,11 @@ async def forgot_password(request: ForgotPasswordRequest, req: Request) -> dict:
 
     reset_link = f"{origin}/auth/reset-password?token={reset_token}"
 
-    try:
-        await send_password_reset_email(request.email, user.get('name', ''), reset_link)
-    except Exception:  # noqa: BLE001
-        # Don't reveal delivery failures to the caller
-        pass
+    # Fire-and-forget so a slow Postmark call doesn't stall the
+    # forgot-password response. Same strong-ref pattern as signup.
+    _schedule_bg_email(
+        send_password_reset_email(normalized_reset_email, user.get('name', ''), reset_link)
+    )
 
     return generic_response
 

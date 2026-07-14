@@ -287,9 +287,14 @@ async def admin_email_diagnose(
     recent_events = await db.email_events.find(
         {"email": lookup_email}, {"_id": 0, "raw": 0},
     ).sort("received_at", -1).limit(20).to_list(20)
+    # chat_email_throttle is keyed by receiver_id (not email) — that's
+    # the shape ``routes/chat.py`` writes. Use the resolved user id so
+    # this diagnostic actually returns rows instead of always being
+    # empty. See the ``_recently_emailed`` throttle write at
+    # ``routes/chat.py:213`` for the source-of-truth key set.
     throttle_rows = await db.chat_email_throttle.find(
-        {"to_email": lookup_email}, {"_id": 0},
-    ).sort("last_sent_at", -1).limit(10).to_list(10)
+        {"receiver_id": user["id"]}, {"_id": 0},
+    ).sort("sent_at", -1).limit(10).to_list(10)
     recent_failures = await db.email_send_failures.find(
         {"to_email": lookup_email}, {"_id": 0},
     ).sort("received_at", -1).limit(20).to_list(20)
