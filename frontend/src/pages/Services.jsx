@@ -27,7 +27,6 @@ import PeekableResultsSheet from '../components/common/PeekableResultsSheet';
 import NearbyDensityBar from '../components/common/NearbyDensityBar';
 import { localizedTitle } from '../utils/gigLocale';
 import { isAvailableNow, getGigCover } from '../utils/gigAvailability';
-import ServicesHowItWorks from '../components/marketplace/ServicesHowItWorks';
 import ServicesHeroSearch from '../components/marketplace/ServicesHeroSearch';
 import ServicesHeroTitle from '../components/marketplace/ServicesHeroTitle';
 
@@ -460,12 +459,6 @@ const Services = () => {
           />
         </div>
       </div>
-
-      {/* "How it works" strip — 3 short looping clips (post → get quotes →
-          book) that show the marketplace flow before the visitor has to
-          read anything. Highest-converting Fiverr-style pattern for
-          reverse marketplaces. */}
-      <ServicesHowItWorks />
 
       {/* Locations + Categories */}
       <div className="max-w-7xl mx-auto px-4 md:px-6 py-10">
