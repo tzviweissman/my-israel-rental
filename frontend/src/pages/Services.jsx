@@ -411,6 +411,31 @@ const Services = () => {
               first half of the H1.
           Font swapped from Playfair (serif) to Inter (modern
           sans-serif) to match the Upwork-style visual reference. */}
+      {/* Top-right marketplace anchors — parked just under the sticky
+          nav so both audiences (job posters + job browsers) have a
+          persistent path from the moment they land on /services. The
+          two links are the same targets as the old inline banner (now
+          removed) but read as a subtler utility strip rather than a
+          hero-competing block. */}
+      <div className="bg-white border-b border-gray-100">
+        <div className="max-w-6xl mx-auto px-4 py-2 flex items-center justify-end gap-2" data-testid="services-jobs-anchor">
+          <button
+            onClick={() => navigate('/services/jobs')}
+            className="px-3 py-1.5 rounded-lg text-xs font-semibold bg-white text-[#1E6A6A] border border-[#1E6A6A]/25 hover:border-[#1E6A6A]"
+            data-testid="services-browse-jobs"
+          >
+            {t('services.browseJobs', 'Browse jobs')}
+          </button>
+          <button
+            onClick={() => navigate('/services/post-job')}
+            className="px-3 py-1.5 rounded-lg text-xs font-semibold bg-[#1E6A6A] text-white hover:bg-[#0F3A3A]"
+            data-testid="services-post-job"
+          >
+            {t('services.postJob', 'Post a job')}
+          </button>
+        </div>
+      </div>
+
       <div
         className="relative overflow-hidden py-14 md:py-20 px-4"
         style={{ background: '#FFFFFF' }}
@@ -508,33 +533,6 @@ const Services = () => {
 
       {/* Results header — Sort + Filters button + count */}
       <div className="max-w-6xl mx-auto px-4">
-        {/* Two-sided marketplace banner — reminds shoppers they can
-            also post a job, and providers that there's a job board. */}
-        <div className="mb-4 rounded-2xl bg-gradient-to-r from-[#1E6A6A]/8 via-[#D4AF37]/8 to-transparent border border-[#1E6A6A]/15 p-3 sm:p-4 flex flex-wrap items-center justify-between gap-3" data-testid="services-jobs-banner">
-          <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-full bg-[#1E6A6A]/12 flex items-center justify-center text-[#1E6A6A] font-bold">💼</div>
-            <div>
-              <p className="text-sm font-semibold text-gray-900">Looking for something specific?</p>
-              <p className="text-xs text-gray-600">Post a job and matching providers will reach out to you.</p>
-            </div>
-          </div>
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => navigate('/services/jobs')}
-              className="px-3 py-1.5 rounded-lg text-xs font-semibold bg-white text-[#1E6A6A] border border-[#1E6A6A]/25 hover:border-[#1E6A6A]"
-              data-testid="services-browse-jobs"
-            >
-              Browse jobs
-            </button>
-            <button
-              onClick={() => navigate('/services/post-job')}
-              className="px-3 py-1.5 rounded-lg text-xs font-semibold bg-[#1E6A6A] text-white hover:bg-[#0F3A3A]"
-              data-testid="services-post-job"
-            >
-              Post a job
-            </button>
-          </div>
-        </div>
         <div className="flex items-center justify-between mb-4 gap-3 flex-wrap">
           <h2 className="text-xl font-bold text-gray-900">
             {selectedCat
