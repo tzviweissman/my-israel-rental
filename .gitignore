@@ -8,6 +8,7 @@
 node_modules/
 /node_modules
 /.pnp
+frontend/yarn.lock
 .pnp.js
 .yarn/install-state.gz
 .yarn/*
