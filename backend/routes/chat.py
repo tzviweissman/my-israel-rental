@@ -29,6 +29,23 @@ logger = logging.getLogger(__name__)
 # How long a typing ping is considered "live" for the counterparty.
 _TYPING_TTL_SECONDS = 5
 
+# Strong references for fire-and-forget email tasks. Python's asyncio
+# only holds weak refs to running tasks — without this set, the GC can
+# collect a task mid-Postmark-call and the email vanishes silently.
+# We add on schedule + discard on completion, so the set stays small.
+# https://docs.python.org/3/library/asyncio-task.html#asyncio.create_task
+_bg_email_tasks: set[asyncio.Task] = set()
+
+
+def _schedule_bg_email(coro) -> asyncio.Task:
+    """Wrap ``asyncio.create_task`` with strong-reference tracking so the
+    event-loop scheduler can't garbage-collect our fire-and-forget task
+    before it finishes talking to Postmark."""
+    task = asyncio.create_task(coro)
+    _bg_email_tasks.add(task)
+    task.add_done_callback(_bg_email_tasks.discard)
+    return task
+
 
 @api_router.post("/chat/messages", response_model=IdMessageResponse)
 async def send_message(chat_data: ChatMessage, payload: dict = Depends(verify_token)) -> dict:
@@ -80,10 +97,12 @@ async def send_message(chat_data: ChatMessage, payload: dict = Depends(verify_to
     }
     await db.notifications.insert_one(notification)
 
-    # Fire-and-forget email to the recipient. We don't await it so the HTTP
-    # response stays snappy; Postmark calls run on a worker thread inside
-    # send_email() itself.
-    asyncio.create_task(
+    # Fire-and-forget email to the recipient — routed through
+    # ``_schedule_bg_email`` so the task keeps a strong reference and
+    # can't get garbage-collected before Postmark responds. Response
+    # stays snappy; Postmark's HTTP call runs on the worker thread
+    # inside ``send_email()`` itself.
+    _schedule_bg_email(
         _send_chat_email_safe(
             sender_id=payload["user_id"],
             receiver_id=chat_data.receiver_id,

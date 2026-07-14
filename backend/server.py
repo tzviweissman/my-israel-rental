@@ -151,6 +151,21 @@ async def stamp_build_id(request, call_next):
 async def startup_tasks() -> None:
     """Kick off the iCal background sync and make sure the blank-contract
     PDF templates exist on disk."""
+    # Loud check on the Postmark token — historically we've had prod
+    # deploys where POSTMARK_SERVER_TOKEN was missing and every email
+    # silently failed for days before anyone noticed. Log at CRITICAL so
+    # the deployer sees it in the container boot log and can fix it
+    # before the pipeline goes stale.
+    import logging as _log
+    import os as _os
+    _startup_log = _log.getLogger(__name__)
+    if not _os.environ.get("POSTMARK_SERVER_TOKEN"):
+        _startup_log.critical(
+            "POSTMARK_SERVER_TOKEN is not set — outbound email will be "
+            "SKIPPED on this instance. GET /api/admin/email-health will "
+            "return postmark_token_present=false. Set the env var and "
+            "restart before assuming email works."
+        )
     asyncio.create_task(sync_all_ical_feeds())
     asyncio.create_task(mention_email_loop())
     # Daily Smart Pricing refresh — sleeps until 03:00 UTC, then loops.

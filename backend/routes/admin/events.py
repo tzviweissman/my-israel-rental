@@ -6,6 +6,7 @@ identical — same endpoints, same auth gates, same helper contracts.
 """
 import asyncio
 import json
+import os
 import uuid
 from collections.abc import AsyncGenerator
 from datetime import UTC, datetime, timedelta
@@ -214,6 +215,22 @@ async def admin_email_health(payload: dict = Depends(verify_token)) -> dict:
 
     suppressed_users = await db.users.count_documents({"email_suppressed": True})
 
+    # Loud check on POSTMARK_SERVER_TOKEN — surfaces a broken pipeline
+    # to the admin without them having to shell into the pod.
+    postmark_token_present = bool(os.environ.get("POSTMARK_SERVER_TOKEN"))
+
+    # Recent send failures (30-day window) — grouped so the admin can
+    # spot patterns (e.g. suppression cascade, Postmark token missing).
+    send_failure_pipeline = [
+        {"$match": {"received_at": {"$gte": thirty_days_ago}}},
+        {"$group": {"_id": "$reason_code", "count": {"$sum": 1}}},
+    ]
+    fail_agg = await db.email_send_failures.aggregate(send_failure_pipeline).to_list(50)
+    send_failure_counts = {row["_id"]: row["count"] for row in fail_agg}
+    recent_failures = await db.email_send_failures.find(
+        {}, {"_id": 0}
+    ).sort("received_at", -1).limit(50).to_list(50)
+
     return {
         "window_days": 30,
         "delivered": delivered,
@@ -222,4 +239,65 @@ async def admin_email_health(payload: dict = Depends(verify_token)) -> dict:
         "delivery_rate_pct": delivery_rate,
         "suppressed_users": suppressed_users,
         "recent_events": recent,
+        "postmark_token_present": postmark_token_present,
+        "send_failure_counts": send_failure_counts,
+        "recent_failures": recent_failures,
+    }
+
+
+# ── Per-user email diagnostic ─────────────────────────────────────────
+# One-shot admin lookup: given an email or user_id, dump the exact
+# suppression state, throttle rows, and last N deliverability events so
+# support can answer "why didn't user X get the email?" in one click
+# instead of grepping Mongo shells.
+@api_router.get("/admin/email/diagnose")
+async def admin_email_diagnose(
+    email: str | None = None,
+    user_id: str | None = None,
+    payload: dict = Depends(verify_token),
+) -> dict:
+    if payload['role'] != 'admin':
+        raise HTTPException(status_code=403, detail="Admin access required")
+    if not email and not user_id:
+        raise HTTPException(status_code=400, detail="Provide email or user_id")
+
+    query = {"id": user_id} if user_id else {"email": (email or "").strip().lower()}
+    user = await db.users.find_one(
+        query,
+        {"_id": 0, "id": 1, "email": 1, "name": 1, "role": 1,
+         "email_verified": 1, "email_suppressed": 1,
+         "email_suppressed_reason": 1, "email_suppressed_at": 1,
+         "created_at": 1},
+    )
+    if not user:
+        # Fall back to a case-insensitive scan for legacy mixed-case rows
+        # written before the 2026-07 lowercase normalization.
+        if email:
+            user = await db.users.find_one(
+                {"email": {"$regex": f"^{email}$", "$options": "i"}},
+                {"_id": 0, "id": 1, "email": 1, "name": 1, "role": 1,
+                 "email_verified": 1, "email_suppressed": 1,
+                 "email_suppressed_reason": 1, "email_suppressed_at": 1,
+                 "created_at": 1},
+            )
+        if not user:
+            return {"found": False, "queried": query}
+
+    lookup_email = (user.get("email") or "").lower()
+    recent_events = await db.email_events.find(
+        {"email": lookup_email}, {"_id": 0, "raw": 0},
+    ).sort("received_at", -1).limit(20).to_list(20)
+    throttle_rows = await db.chat_email_throttle.find(
+        {"to_email": lookup_email}, {"_id": 0},
+    ).sort("last_sent_at", -1).limit(10).to_list(10)
+    recent_failures = await db.email_send_failures.find(
+        {"to_email": lookup_email}, {"_id": 0},
+    ).sort("received_at", -1).limit(20).to_list(20)
+
+    return {
+        "found": True,
+        "user": user,
+        "recent_events": recent_events,
+        "chat_throttle": throttle_rows,
+        "recent_send_failures": recent_failures,
     }

@@ -29,6 +29,20 @@ from utils.email import (
 )
 from utils.rate_limit import check_rate
 
+# Strong-refs for fire-and-forget email tasks — same reason as
+# routes/chat.py's ``_bg_email_tasks``. asyncio only holds weak refs
+# to tasks scheduled via ``create_task``, so without this set the GC
+# can collect our welcome/reset email tasks mid-flight and Postmark
+# never sees the send.
+_bg_email_tasks: set[asyncio.Task] = set()
+
+
+def _schedule_bg_email(coro) -> asyncio.Task:
+    task = asyncio.create_task(coro)
+    _bg_email_tasks.add(task)
+    task.add_done_callback(_bg_email_tasks.discard)
+    return task
+
 router = APIRouter()
 api_router = router  # alias so existing @api_router decorators work verbatim
 
@@ -95,7 +109,14 @@ async def register(user_data: UserRegister, req: Request) -> dict:
             detail="Registration role must be 'renter', 'owner', 'manager', or 'provider'",
         )
 
-    existing = await db.users.find_one({"email": user_data.email})
+    # Normalize the incoming email to lowercase so downstream lookups
+    # (auth login, postmark webhook, suppression check) don't drift by
+    # letter-case. All routes already lowercase the search key; we just
+    # need to store it that way once at signup. See also the migration
+    # in scripts/backfill_email_lowercase.py for existing users.
+    signup_email = (user_data.email or "").strip().lower()
+
+    existing = await db.users.find_one({"email": signup_email})
     if existing:
         raise HTTPException(status_code=400, detail="Email already registered")
 
@@ -104,7 +125,7 @@ async def register(user_data: UserRegister, req: Request) -> dict:
 
     user_doc = {
         "id": user_id,
-        "email": user_data.email,
+        "email": signup_email,
         "password": hashed_password.decode('utf-8'),
         "name": user_data.name,
         "role": requested_role,
@@ -122,14 +143,14 @@ async def register(user_data: UserRegister, req: Request) -> dict:
 
     # Fire-and-forget welcome email (no verification link).
     try:
-        asyncio.create_task(send_welcome_email(user_data.email, user_data.name, requested_role))
+        _schedule_bg_email(send_welcome_email(signup_email, user_data.name, requested_role))
     except Exception as e:  # noqa: BLE001
-        logger.warning(f"Failed to queue welcome email for {user_data.email}: {e}")
+        logger.warning(f"Failed to queue welcome email for {signup_email}: {e}")
 
     return {
         "token": token,
         "user": {
-            "id": user_id, "email": user_data.email, "name": user_data.name,
+            "id": user_id, "email": signup_email, "name": user_data.name,
             "role": requested_role, "email_verified": True,
         },
     }
@@ -144,7 +165,17 @@ async def login(credentials: UserLogin, req: Request) -> dict:
     check_rate(req, bucket="auth-login-email", limit=10, window_seconds=300, key_extra=credentials.email.lower(), ip_agnostic=True)
     check_rate(req, bucket="auth-login-ip", limit=30, window_seconds=300)
 
-    user = await db.users.find_one({"email": credentials.email}, {"_id": 0})
+    # Normalize the login email — legacy pre-2026-07 accounts may have
+    # been stored with mixed case, so we look up case-insensitively when
+    # the direct lowercase match misses.
+    login_email = (credentials.email or "").strip().lower()
+    user = await db.users.find_one({"email": login_email}, {"_id": 0})
+    if not user:
+        # Legacy fallback for rows written before the lowercase migration
+        user = await db.users.find_one(
+            {"email": {"$regex": f"^{login_email}$", "$options": "i"}},
+            {"_id": 0},
+        )
     if not user:
         raise HTTPException(status_code=401, detail="Invalid credentials")
 
@@ -218,7 +249,7 @@ async def google_session_exchange(
 
     # Upsert by email — if the visitor previously signed up with
     # email/password we link the same account instead of orphaning it.
-    existing = await db.users.find_one({"email": email}, {"_id": 0})
+    existing = await db.users.find_one({"email": (email or "").strip().lower()}, {"_id": 0})
     if existing:
         # Attach the Google identity + picture on first-time link. We
         # don't touch role/password/etc — an existing account keeps its
@@ -251,7 +282,7 @@ async def google_session_exchange(
         await db.users.insert_one(user_doc)
         # Fire-and-forget welcome email (best-effort — errors are logged).
         try:
-            asyncio.create_task(send_welcome_email(email, name, "renter"))
+            _schedule_bg_email(send_welcome_email(email, name, "renter"))
         except Exception as e:  # noqa: BLE001
             logger.warning(f"Failed to queue welcome email for {email}: {e}")
 
@@ -320,7 +351,7 @@ async def resend_verification(request: ForgotPasswordRequest, req: Request) -> d
     `verification_email_last_sent_at` (60s cooldown).
     """
     generic = {"message": "If an account exists for that email, a verification link has been re-sent. Please check your inbox (and spam folder)."}
-    user = await db.users.find_one({"email": request.email}, {"_id": 0})
+    user = await db.users.find_one({"email": (request.email or "").strip().lower()}, {"_id": 0})
     if not user:
         return generic
     if user.get("email_verified"):
@@ -345,7 +376,7 @@ async def resend_verification(request: ForgotPasswordRequest, req: Request) -> d
             "verification_email_last_sent_at": datetime.now(UTC).isoformat(),
         }},
     )
-    asyncio.create_task(_send_verification_email(user, raw_token, req))
+    _schedule_bg_email(_send_verification_email(user, raw_token, req))
     return generic
 
 
@@ -373,7 +404,7 @@ async def forgot_password(request: ForgotPasswordRequest, req: Request) -> dict:
     check_rate(req, bucket="auth-forgot-email", limit=5, window_seconds=600, key_extra=request.email.lower(), ip_agnostic=True)
     check_rate(req, bucket="auth-forgot-ip", limit=15, window_seconds=600)
 
-    user = await db.users.find_one({"email": request.email}, {"_id": 0})
+    user = await db.users.find_one({"email": (request.email or "").strip().lower()}, {"_id": 0})
 
     # Generic public-facing response used in both the "user found" and
     # "user not found" branches so attackers cannot probe which emails exist.
@@ -390,10 +421,11 @@ async def forgot_password(request: ForgotPasswordRequest, req: Request) -> dict:
     reset_token = str(uuid.uuid4())
     expires_at = (datetime.now(UTC) + timedelta(hours=1)).isoformat()
 
-    await db.password_resets.delete_many({"email": request.email})
+    normalized_reset_email = (request.email or "").strip().lower()
+    await db.password_resets.delete_many({"email": normalized_reset_email})
     await db.password_resets.insert_one({
         "token": reset_token,
-        "email": request.email,
+        "email": normalized_reset_email,
         "user_id": user['id'],
         "expires_at": expires_at,
         "used": False,

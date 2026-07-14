@@ -9,6 +9,8 @@ from __future__ import annotations
 import asyncio
 import logging
 import os
+import uuid
+from datetime import UTC, datetime
 from typing import Any
 
 from postmarker.core import PostmarkClient
@@ -75,25 +77,41 @@ async def send_email(
     If the recipient has been flagged as hard-bounced or spam-complained via
     the Postmark webhook (users.email_suppressed=True), the send is skipped
     unless skip_suppression_check=True.
+
+    Every failure (missing client, suppression skip, Postmark exception)
+    is persisted to the ``email_send_failures`` Mongo collection so an
+    admin can audit the pipeline without grepping logs. See the admin
+    endpoint /api/admin/email/delivery-health.
     """
+    normalized_to = (to_email or "").strip().lower()
+
     client = _get_client()
     if client is None:
-        logger.error("Postmark client unavailable — POSTMARK_SERVER_TOKEN not set")
+        logger.error("Postmark email skipped — POSTMARK_SERVER_TOKEN not set (to=%s, subject=%s)", to_email, subject)
+        await _record_email_failure(normalized_to, subject, tag, "postmark_client_missing", "POSTMARK_SERVER_TOKEN not set")
         return False
 
-    # Check suppression list (writable via the /webhooks/postmark endpoint)
-    if not skip_suppression_check and to_email:
+    # Check suppression list (writable via the /webhooks/postmark endpoint).
+    # Lookup uses lowercased email to match the Postmark webhook's own
+    # normalization — otherwise mixed-case user emails would silently
+    # bypass the suppression flag they should be blocked by.
+    if not skip_suppression_check and normalized_to:
         try:
             _db = _get_db()
             if _db is not None:
                 suppressed = await _db.users.find_one(
-                    {"email": to_email.lower(), "email_suppressed": True},
+                    {"email": normalized_to, "email_suppressed": True},
                     {"_id": 0, "email_suppressed_reason": 1},
                 )
                 if suppressed:
+                    reason = suppressed.get("email_suppressed_reason", "unknown")
                     logger.warning(
                         "Skipping email to %s — suppressed (%s)",
-                        to_email, suppressed.get("email_suppressed_reason", "unknown"),
+                        to_email, reason,
+                    )
+                    await _record_email_failure(
+                        normalized_to, subject, tag,
+                        "suppressed", f"user.email_suppressed=True reason={reason}",
                     )
                     return False
         except Exception as e:  # noqa: BLE001
@@ -123,8 +141,42 @@ async def send_email(
         )
         return True
     except Exception as e:  # noqa: BLE001
-        logger.error("Postmark send failed to %s: %s", to_email, e)
+        logger.error("Postmark send failed to %s: %s", to_email, e, exc_info=True)
+        await _record_email_failure(normalized_to, subject, tag, "postmark_exception", str(e))
         return False
+
+
+async def _record_email_failure(
+    to_email: str, subject: str, tag: str | None,
+    reason_code: str, detail: str,
+) -> None:
+    """Persist a single email-send failure to Mongo for admin observability.
+
+    Reason codes we currently write:
+      * ``postmark_client_missing`` — POSTMARK_SERVER_TOKEN not configured
+      * ``suppressed`` — user.email_suppressed=True (with the recorded reason)
+      * ``postmark_exception`` — the Postmark SDK raised
+
+    This is best-effort — if Mongo is down we simply log and drop. We
+    don't want a broken observability layer to make the primary email
+    path even worse. Rows include a rolling ``received_at`` timestamp
+    so /admin/email/delivery-health can graph the last 24h at a glance.
+    """
+    try:
+        _db = _get_db()
+        if _db is None:
+            return
+        await _db.email_send_failures.insert_one({
+            "id": str(uuid.uuid4()),
+            "to_email": to_email,
+            "subject": subject,
+            "tag": tag,
+            "reason_code": reason_code,
+            "detail": detail[:500],
+            "received_at": datetime.now(UTC).isoformat(),
+        })
+    except Exception as e:  # noqa: BLE001
+        logger.debug("Failed to record email failure (non-fatal): %s", e)
 
 
 def _strip_html(html: str) -> str:
