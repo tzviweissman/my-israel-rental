@@ -467,7 +467,7 @@ const BulkUploadModal = ({ isOpen, onClose, onDone, API, token }) => {
                   </button>
                 </div>
                 <p className="text-xs text-gray-600 mb-3">
-                  Need a starting point? <button onClick={() => downloadTemplate('xlsx')} className="underline font-medium" data-testid="download-xlsx">download Excel template</button> or <button onClick={() => downloadTemplate('csv')} className="underline font-medium" data-testid="download-csv">CSV template</button>.
+                  Need a starting point? <button onClick={() => downloadTemplate('xlsx')} className="underline font-medium" data-testid="download-xlsx">download Excel template</button> or <button onClick={() => downloadTemplate("csv")} className="underline font-medium" data-testid="download-csv">{t("sweep.csvTemplate", "CSV template")}</button>.
                 </p>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                   <label className="block">
@@ -771,7 +771,7 @@ const PropertyRowCard = ({ index, row, error, onChange, onDuplicate, onRemove, A
           <Input label="Title*" value={row.title} onChange={v => onChange('title', v)} placeholder="Cozy Tel Aviv 2BR" testid={`r${index}-title`} />
         </div>
         <div className="col-span-2 md:col-span-1">
-          <Input label="Address" value={row.address} onChange={v => onChange('address', v)} placeholder="King George 10" testid={`r${index}-address`} />
+          <Input label="Address" value={row.address} onChange={v => onChange('address', v)} placeholder={t("sweep.bulkExampleStreet", "King George 10")} testid={`r${index}-address`} />
         </div>
         <div className="col-span-2 md:col-span-1">
           <LocationSelect label="Area / Neighborhood*" value={row.area} onChange={v => onChange('area', v)} testid={`r${index}-area`} />
@@ -855,7 +855,7 @@ const PropertyRowCard = ({ index, row, error, onChange, onDuplicate, onRemove, A
           {(row.rental_type === 'vacation' || row.rental_type === 'short-term') && row.cancellation_policy === 'custom' && (
             <div className="col-span-2 md:col-span-3">
               <label className="block">
-                <span className="block text-[11px] font-semibold text-gray-600 uppercase tracking-wide mb-1">Custom cancellation policy</span>
+                <span className="block text-[11px] font-semibold text-gray-600 uppercase tracking-wide mb-1">{t("sweep.customCancellationPolicy", "Custom Cancellation Policy")}</span>
                 <textarea
                   value={row.custom_cancellation_policy || ''}
                   onChange={e => onChange('custom_cancellation_policy', e.target.value)}

@@ -493,7 +493,7 @@ const PropertyList = ({ properties, bookings = [], onEdit, onRefresh, API, token
               <div className="w-12 h-12 rounded-full bg-[#1E6A6A]/10 flex items-center justify-center">
                 <Upload className="text-[#1E6A6A]" size={22} />
               </div>
-              <p className="text-sm font-semibold text-gray-800">Drop images here</p>
+              <p className="text-sm font-semibold text-gray-800">{t("sweep.dropImagesHere", "Drop images here")}</p>
               <p className="text-xs text-gray-500 max-w-md">
                 We match files to listings by filename (e.g. <code className="bg-white px-1 rounded">tel-aviv-hero.jpg</code> → <em>Tel Aviv</em> listing) and round-robin the rest. Re-map any row below before confirming.
               </p>
@@ -630,7 +630,7 @@ const PropertyList = ({ properties, bookings = [], onEdit, onRefresh, API, token
               {(property.rental_type === 'long-term' || property.rental_type === 'short-term') && (
                 <div className="mt-3 pt-3 border-t border-gray-100">
                   <div className="flex items-center justify-between mb-2">
-                    <span className="text-xs font-medium text-gray-700">Property Contract</span>
+                    <span className="text-xs font-medium text-gray-700">{t("sweep.propertyContract", "Property Contract")}</span>
                     {property.contract_url && (
                       <a
                         href={`${API.replace('/api', '')}${property.contract_url}`}

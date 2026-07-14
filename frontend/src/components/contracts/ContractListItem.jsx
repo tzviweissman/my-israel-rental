@@ -1,4 +1,5 @@
 import React, { useState, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import SignatureCanvas from 'react-signature-canvas';
 import {
   ChevronDown, ChevronUp, Download, Trash2, PenTool, Languages,
@@ -30,6 +31,7 @@ const StatusBadge = ({ contract }) => {
 };
 
 const TranslationPanel = ({ contract, translatingId, onTranslate }) => {
+  const { t } = useTranslation();
   const [viewMode, setViewMode] = useState('original');
   return (
     <div className="bg-gray-50 rounded-xl p-4 mb-4" data-testid={`translate-section-${contract.id}`}>
@@ -120,7 +122,7 @@ const TranslationPanel = ({ contract, translatingId, onTranslate }) => {
             </div>
           ) : (
             <div className="bg-white rounded-lg border border-gray-200 p-3 max-h-80 overflow-y-auto">
-              <p className="text-[10px] uppercase tracking-wider text-gray-400 font-semibold mb-2">Original Extracted Text</p>
+              <p className="text-[10px] uppercase tracking-wider text-gray-400 font-semibold mb-2">{t("sweep.originalExtractedText", "Original Extracted Text")}</p>
               <p className="text-xs text-gray-700 whitespace-pre-wrap leading-relaxed">{contract.extracted_text}</p>
             </div>
           )}
@@ -131,6 +133,7 @@ const TranslationPanel = ({ contract, translatingId, onTranslate }) => {
 };
 
 const SignaturePanel = ({ contract, signerName, setSignerName, onSign, onCancel }) => {
+  const { t } = useTranslation();
   const sigCanvasRef = useRef(null);
   const handleSign = () => {
     if (!sigCanvasRef.current || sigCanvasRef.current.isEmpty()) return onSign(null);
@@ -140,21 +143,21 @@ const SignaturePanel = ({ contract, signerName, setSignerName, onSign, onCancel 
     <div className="bg-gray-50 rounded-xl p-4 mb-4" data-testid={`signing-section-${contract.id}`}>
       <div className="flex items-center gap-2 mb-3">
         <PenTool size={18} className="text-[#D4AF37]" />
-        <h4 className="text-sm font-semibold text-gray-800">Digital Signature</h4>
+        <h4 className="text-sm font-semibold text-gray-800">{t("sweep.digitalSignature", "Digital Signature")}</h4>
       </div>
       <div className="mb-3">
-        <label className="block text-xs font-medium text-gray-600 mb-1">Full Name</label>
+        <label className="block text-xs font-medium text-gray-600 mb-1">{t("sweep.fullName", "Full Name")}</label>
         <input
           type="text"
           value={signerName}
           onChange={(e) => setSignerName(e.target.value)}
-          placeholder="Enter your full legal name"
+          placeholder={t("sweep.enterFullLegalName", "Enter your full legal name")}
           className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/30 focus:border-[#D4AF37]"
           data-testid="signer-name-input"
         />
       </div>
       <div className="mb-3">
-        <label className="block text-xs font-medium text-gray-600 mb-1">Draw Your Signature</label>
+        <label className="block text-xs font-medium text-gray-600 mb-1">{t("sweep.drawYourSignature", "Draw Your Signature")}</label>
         <div className="bg-white rounded-lg border-2 border-dashed border-gray-300 overflow-hidden">
           <SignatureCanvas
             ref={sigCanvasRef}

@@ -11,9 +11,11 @@ import axios from 'axios';
 import { toast } from 'sonner';
 import { ArrowLeft, Loader2, Coins, MapPin, Calendar, Send, User } from 'lucide-react';
 import { API, AuthContext } from '../App';
+import { useTranslation } from 'react-i18next';
 import PageMeta from '../components/PageMeta';
 
 const JobDetail = () => {
+  const { t } = useTranslation();
   const { id } = useParams();
   const { token, user } = useContext(AuthContext);
   const navigate = useNavigate();
@@ -128,7 +130,7 @@ const JobDetail = () => {
                 className="px-4 py-2 rounded-lg text-sm font-semibold text-white bg-[#1E6A6A] hover:bg-[#0F3A3A] inline-flex items-center gap-1"
                 data-testid="job-apply-btn"
               >
-                <Send size={14} /> Apply to this job
+                <Send size={14} /> {t("sweep.applyToThisJob", "Apply to this job")}
               </button>
             )}
           </div>
@@ -162,12 +164,12 @@ const JobDetail = () => {
       {applyOpen && (
         <div className="fixed inset-0 z-50 bg-black/60 flex items-end sm:items-center justify-center p-0 sm:p-4" onClick={() => setApplyOpen(false)}>
           <div onClick={(e) => e.stopPropagation()} className="w-full sm:max-w-lg bg-white rounded-t-2xl sm:rounded-2xl p-5 sm:p-6 space-y-4 max-h-[90vh] overflow-y-auto">
-            <h2 className="text-lg font-bold">Apply to this job</h2>
+            <h2 className="text-lg font-bold">{t("sweep.applyToThisJob", "Apply to this job")}</h2>
             <p className="text-sm text-gray-600">
               Introduce yourself and explain how you&apos;d handle it. If you know your price, add a quote.
             </p>
             <div>
-              <label className="text-xs font-semibold text-gray-700 block mb-1">Message to the poster</label>
+              <label className="text-xs font-semibold text-gray-700 block mb-1">{t("sweep.messageToPoster", "Message to the poster")}</label>
               <textarea
                 rows={5}
                 value={applyForm.message}

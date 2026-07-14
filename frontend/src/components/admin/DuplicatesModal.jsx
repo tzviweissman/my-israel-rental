@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import axios from 'axios';
 import { toast } from 'sonner';
 import {
@@ -26,6 +27,7 @@ const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
  * the safest default — preserves whichever copy has the most content.
  */
 const DuplicatesModal = ({ token, onClose, onDeleted }) => {
+  const { t } = useTranslation();
   const [loading, setLoading] = useState(true);
   const [groups, setGroups] = useState([]);
   const [busyGroupKey, setBusyGroupKey] = useState(null); // group being auto-resolved
@@ -158,7 +160,7 @@ const DuplicatesModal = ({ token, onClose, onDeleted }) => {
         <div className="sticky top-0 bg-white rounded-t-2xl border-b border-gray-200 px-5 py-4 flex items-center gap-3 z-10">
           <AlertTriangle size={20} className="text-amber-600 shrink-0" />
           <div className="flex-1 min-w-0">
-            <h2 className="font-bold text-lg leading-tight">Duplicate listings</h2>
+            <h2 className="font-bold text-lg leading-tight">{t("sweep.duplicateListings", "Duplicate listings")}</h2>
             <p className="text-xs text-gray-500 mt-0.5">
               Same owner + address + rental type. Cross-type copies (long-term + vacation) are intentionally allowed.
             </p>
@@ -253,7 +255,7 @@ const DuplicatesModal = ({ token, onClose, onDeleted }) => {
           ) : groups.length === 0 ? (
             <div className="text-center py-10">
               <Copy size={32} className="mx-auto text-gray-300 mb-2" />
-              <p className="text-sm font-semibold text-gray-700">No duplicates found</p>
+              <p className="text-sm font-semibold text-gray-700">{t("sweep.noDuplicatesFound", "No duplicates found")}</p>
               <p className="text-xs text-gray-500 mt-1">Every owner has unique address + rental_type combinations.</p>
             </div>
           ) : (

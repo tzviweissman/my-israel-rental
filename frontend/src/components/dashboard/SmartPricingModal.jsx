@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import axios from 'axios';
 import { toast } from 'sonner';
 import { X, Sparkles, RefreshCw, Loader2, Check, Info, TrendingUp, TrendingDown, Mail } from 'lucide-react';
@@ -79,6 +80,7 @@ const DEFAULT_SETTINGS = {
 };
 
 const SmartPricingModal = ({ isOpen, onClose, property, API, token }) => {
+  const { t } = useTranslation();
   const [tab, setTab] = useState('rules');
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -266,7 +268,7 @@ const SmartPricingModal = ({ isOpen, onClose, property, API, token }) => {
               <Sparkles size={20} className="text-white" />
             </div>
             <div>
-              <h2 className="text-lg font-bold text-gray-900">Smart Pricing</h2>
+              <h2 className="text-lg font-bold text-gray-900">{t("sweep.smartPricing", "Smart Pricing")}</h2>
               <p className="text-xs text-gray-500 truncate max-w-[400px]">{property.title}</p>
             </div>
           </div>
@@ -378,13 +380,14 @@ const RulesTab = ({
   onSendSampleDigest,
   sendingSample,
 }) => {
+  const { t } = useTranslation();
   const set = (k, v) => setSettings((s) => ({ ...s, [k]: v }));
   return (
     <div className="space-y-6">
       {/* Master toggle row */}
       <div className="flex items-start justify-between p-4 rounded-xl bg-gradient-to-r from-[#fff8e6] to-white border border-[#D4AF37]/30">
         <div className="flex-1">
-          <p className="text-sm font-semibold text-gray-900">Enable Smart Pricing</p>
+          <p className="text-sm font-semibold text-gray-900">{t("sweep.enableSmartPricing", "Enable Smart Pricing")}</p>
           <p className="text-xs text-gray-600 mt-0.5">
             Let MyIsraelRental suggest nightly rates based on day-of-week, Israeli holidays,
             lead time, demand, and comparable rentals in your area.
@@ -426,7 +429,7 @@ const RulesTab = ({
 
       {/* Price bands */}
       <div>
-        <h3 className="text-sm font-bold text-gray-900 mb-3">Price bands</h3>
+        <h3 className="text-sm font-bold text-gray-900 mb-3">{t("sweep.priceBands", "Price bands")}</h3>
         <div className="flex gap-3">
           <NumericInput
             label="Min nightly"
@@ -675,6 +678,7 @@ const CalendarTab = ({ suggestions, calculating, onRefresh, onApply, onRevert, o
 // Tab: Forecast
 // ---------------------------------------------------------------------------
 const ForecastTab = ({ forecast, sym, calculating }) => {
+  const { t } = useTranslation();
   if (calculating || !forecast) {
     return (
       <div className="flex items-center justify-center py-12">
@@ -687,7 +691,7 @@ const ForecastTab = ({ forecast, sym, calculating }) => {
     <div className="space-y-5">
       <div className="grid grid-cols-2 gap-4">
         <div className="p-5 rounded-xl bg-gray-50 border border-gray-100">
-          <p className="text-xs uppercase tracking-wide text-gray-500 font-semibold">At base rate</p>
+          <p className="text-xs uppercase tracking-wide text-gray-500 font-semibold">{t("sweep.atBaseRate", "At base rate")}</p>
           <p className="text-2xl font-bold text-gray-900 mt-1" data-testid="smart-pricing-base-total">
             {sym}{forecast.base_total.toLocaleString()}
           </p>
@@ -716,11 +720,11 @@ const ForecastTab = ({ forecast, sym, calculating }) => {
       </div>
       <div className="grid grid-cols-2 gap-4 text-sm">
         <div className="flex justify-between p-3 rounded-lg bg-gray-50">
-          <span className="text-gray-600">Open nights</span>
+          <span className="text-gray-600">{t("sweep.openNights", "Open nights")}</span>
           <span className="font-semibold text-gray-900">{forecast.open_nights}</span>
         </div>
         <div className="flex justify-between p-3 rounded-lg bg-gray-50">
-          <span className="text-gray-600">Already booked</span>
+          <span className="text-gray-600">{t("sweep.alreadyBooked", "Already booked")}</span>
           <span className="font-semibold text-gray-900">{forecast.booked_nights}</span>
         </div>
       </div>

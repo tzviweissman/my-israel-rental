@@ -29,6 +29,7 @@ import {
 import { API, AuthContext } from '../App';
 import PageMeta from '../components/PageMeta';
 import { uploadFilesFast } from '../utils/fastUpload';
+import { useTranslation } from 'react-i18next';
 
 // ---- Gig type registry ------------------------------------------------------
 // Central definition of every gig-type-aware behaviour so the wizard, the
@@ -85,6 +86,7 @@ const emptyProduct = (prevCurrency = 'ILS') => ({
 });
 
 const CreateGig = () => {
+  const { t } = useTranslation();
   const { token } = useContext(AuthContext);
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -554,7 +556,7 @@ const CreateGig = () => {
                 {locations.map((l) => (<option key={l.slug} value={l.label} />))}
               </datalist>
               <p className="text-[11px] text-gray-500 mt-1 leading-snug">
-                Pick a city so renters within a few km can find your gig via <span className="font-semibold">Show nearby</span>.
+                Pick a city so renters within a few km can find your gig via <span className="font-semibold">{t('sweep.showNearby', 'Show nearby')}</span>.
               </p>
             </div>
             <div className="rounded-xl bg-[#1E6A6A]/6 border border-[#1E6A6A]/15 p-3 text-xs text-[#1E6A6A] leading-snug flex items-start gap-2" data-testid="wizard-translate-notice">
@@ -603,7 +605,9 @@ const CreateGig = () => {
 };
 
 // ---------- Step 4A — Store products ----------
-const StoreProductsStep = ({ products, onUpdate, onAdd, onRemove, productImageInputRef, onUploadImage }) => (
+const StoreProductsStep = ({ products, onUpdate, onAdd, onRemove, productImageInputRef, onUploadImage }) => {
+  const { t } = useTranslation();
+  return (
   <div className="space-y-4" data-testid="wizard-products-step">
     <div className="rounded-xl bg-[#1E6A6A]/8 border border-[#1E6A6A]/20 p-3 text-xs text-[#1E6A6A] leading-snug">
       Add each product you sell as a separate row — with a photo, price, and short description. Customers browse the grid and message you to buy.
@@ -655,7 +659,7 @@ const StoreProductsStep = ({ products, onUpdate, onAdd, onRemove, productImageIn
                 <span className="pointer-events-none absolute inset-y-0 right-2 flex items-center text-gray-400 text-xs">▾</span>
               </div>
               <input type="number" value={p.price} onChange={(e) => onUpdate(i, { price: e.target.value })}
-                placeholder="Price" className="flex-1 px-3 py-2 rounded-lg border border-gray-200 text-sm"
+                placeholder={t("sweep.price", "Price")} className="flex-1 px-3 py-2 rounded-lg border border-gray-200 text-sm"
                 data-testid={`wizard-product-price-${i}`} />
               {products.length > 1 && (
                 <button type="button" onClick={() => onRemove(i)} className="px-2 text-red-500" data-testid={`wizard-product-remove-${i}`}>
@@ -674,10 +678,12 @@ const StoreProductsStep = ({ products, onUpdate, onAdd, onRemove, productImageIn
       <Plus size={14} /> Add another product
     </button>
   </div>
-);
+  );
+};
 
 // ---------- Step 4B — Deliverable + Appointment tiers ----------
 const TiersStep = ({ gigType, tiers, onUpdate, onAdd, onRemove, onUploadImages, onRemoveImage, enableDateBooking, onToggleDateBooking }) => {
+  const { t } = useTranslation();
   const isAppt = gigType === 'appointment';
   const fileInputsRef = React.useRef({});
   return (
@@ -726,14 +732,14 @@ const TiersStep = ({ gigType, tiers, onUpdate, onAdd, onRemove, onUploadImages, 
               <span className="pointer-events-none absolute inset-y-0 right-2 flex items-center text-gray-400 text-xs">▾</span>
             </div>
             <input type="number" value={tt.price} onChange={(e) => onUpdate(i, { price: e.target.value })}
-              placeholder="Price"
+              placeholder={t("sweep.price", "Price")}
               className={`flex-1 px-3 py-2 rounded-lg border text-sm ${missingPrice ? 'border-red-200 bg-red-50/30' : 'border-gray-200'}`}
               data-testid={`wizard-tier-price-${i}`} />
             {isAppt ? (
               <div className="relative">
                 <input type="number" min="5" step="5" value={tt.duration_minutes}
                   onChange={(e) => onUpdate(i, { duration_minutes: e.target.value })}
-                  placeholder="Duration"
+                  placeholder={t("sweep.duration", "Duration")}
                   className="w-24 pl-3 pr-8 py-2 rounded-lg border border-gray-200 text-sm"
                   data-testid={`wizard-tier-duration-${i}`} />
                 <span className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 text-[11px] text-gray-500">min</span>
@@ -741,7 +747,7 @@ const TiersStep = ({ gigType, tiers, onUpdate, onAdd, onRemove, onUploadImages, 
             ) : (
               <input type="number" min="0" value={tt.delivery_days}
                 onChange={(e) => onUpdate(i, { delivery_days: e.target.value })}
-                placeholder="Days to complete"
+                placeholder={t('sweep.daysToComplete', 'Days to complete')}
                 title="Turnaround in days — leave blank for on-the-spot services"
                 className="w-32 px-3 py-2 rounded-lg border border-gray-200 text-sm"
                 data-testid={`wizard-tier-days-${i}`} />
@@ -750,9 +756,9 @@ const TiersStep = ({ gigType, tiers, onUpdate, onAdd, onRemove, onUploadImages, 
           {i === 0 && (
             <p className="text-[11px] text-gray-500 leading-snug">
               {isAppt ? (
-                <><span className="font-semibold">Duration</span> is how long this service takes (used to build your bookable time slots).</>
+                <><span className="font-semibold">{t('sweep.duration', 'Duration')}</span> is how long this service takes (used to build your bookable time slots).</>
               ) : (
-                <><span className="font-semibold">Days to complete</span> is the turnaround time. Leave blank for on-the-spot services.</>
+                <><span className="font-semibold">{t('sweep.daysToComplete', 'Days to complete')}</span> is the turnaround time. Leave blank for on-the-spot services.</>
               )}
             </p>
           )}
@@ -845,13 +851,15 @@ const TiersStep = ({ gigType, tiers, onUpdate, onAdd, onRemove, onUploadImages, 
 };
 
 // ---------- Step 5 — Appointment weekly availability ----------
-const AvailabilityStep = ({ weekly, slotDuration, onToggleDay, onUpdateWindow, onSlotDurationChange }) => (
+const AvailabilityStep = ({ weekly, slotDuration, onToggleDay, onUpdateWindow, onSlotDurationChange }) => {
+  const { t } = useTranslation();
+  return (
   <div className="space-y-4" data-testid="wizard-hours-step">
     <div className="rounded-xl bg-[#1E6A6A]/8 border border-[#1E6A6A]/20 p-3 text-xs text-[#1E6A6A] leading-snug">
       Tell us when you&apos;re open. We&apos;ll turn this into bookable time slots on your public page. You can adjust or add exceptions later from your dashboard.
     </div>
     <div>
-      <label className="text-sm font-semibold text-gray-700">Slot length</label>
+      <label className="text-sm font-semibold text-gray-700">{t('sweep.slotLength', 'Slot length')}</label>
       <div className="mt-2 flex gap-2">
         {[15, 30, 45, 60, 90].map((mm) => (
           <button key={mm} type="button" onClick={() => onSlotDurationChange(mm)}
@@ -890,6 +898,7 @@ const AvailabilityStep = ({ weekly, slotDuration, onToggleDay, onUpdateWindow, o
       })}
     </div>
   </div>
-);
+  );
+};
 
 export default CreateGig;

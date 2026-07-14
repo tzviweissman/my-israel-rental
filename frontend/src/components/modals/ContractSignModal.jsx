@@ -1,4 +1,5 @@
 import React, { useRef, useState, useEffect, useContext } from 'react';
+import { useTranslation } from 'react-i18next';
 import { X, Upload, Move, Maximize2, Languages, Loader2 } from 'lucide-react';
 import { Rnd } from 'react-rnd';
 import axios from 'axios';
@@ -12,6 +13,7 @@ const ContractSignModal = ({
   contractPreviewUrl,
   onSignSuccess 
 }) => {
+  const { t } = useTranslation();
   const { token } = useContext(AuthContext);
   const [signatureData, setSignatureData] = useState('');
   const [signatureMethod, setSignatureMethod] = useState('draw');
@@ -149,7 +151,7 @@ const ContractSignModal = ({
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[70] p-4" onClick={handleClose}>
       <div className="bg-white rounded-2xl p-6 max-w-6xl w-full max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
         <div className="flex items-center justify-between mb-6">
-          <h3 className="text-2xl font-bold text-[#1E6A6A]">Sign Rental Contract</h3>
+          <h3 className="text-2xl font-bold text-[#1E6A6A]">{t("sweep.signRentalContract", "Sign Rental Contract")}</h3>
           <button
             onClick={handleClose}
             className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
@@ -224,7 +226,7 @@ const ContractSignModal = ({
                   ) : (
                     <div className="text-center">
                       <Upload size={40} className="mx-auto mb-2 text-gray-400" />
-                      <p className="text-sm text-gray-600">Click to upload signature image</p>
+                      <p className="text-sm text-gray-600">{t("sweep.clickToUploadSignatureImage", "Click to upload signature image")}</p>
                     </div>
                   )}
                   <input
@@ -254,7 +256,7 @@ const ContractSignModal = ({
                 type="text"
                 value={legalName}
                 onChange={(e) => setLegalName(e.target.value)}
-                placeholder="As it appears on your ID"
+                placeholder={t("sweep.asItAppearsOnId", "As it appears on your ID")}
                 className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:border-[#1E6A6A] focus:outline-none focus:ring-2 focus:ring-[#1E6A6A]/30 text-sm"
                 data-testid="legal-name-input"
                 required

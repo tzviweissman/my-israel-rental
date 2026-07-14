@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import axios from 'axios';
 import { Upload, X, Image as ImageIcon, ExternalLink } from 'lucide-react';
 import { toast } from 'sonner';
@@ -9,6 +10,7 @@ import ShareLinkRow from './ShareLinkRow';
  * public-page link. Self-contained (owns its own logo state and fetch).
  */
 const ManagerHeader = ({ user, token, API }) => {
+  const { t } = useTranslation();
   const [businessLogo, setBusinessLogo] = useState(null);
   const [logoUploading, setLogoUploading] = useState(false);
 
@@ -69,7 +71,7 @@ const ManagerHeader = ({ user, token, API }) => {
       className="bg-white p-6 rounded-2xl border border-[#E5E5E5] mb-8"
       data-testid="manager-page-section"
     >
-      <h2 className="text-xl font-bold mb-4">Your Manager Page</h2>
+      <h2 className="text-xl font-bold mb-4">{t("sweep.yourManagerPage", "Your Manager Page")}</h2>
 
       {/* Two-column layout on md+ so the Public-page details editor sits
           next to the business logo + share link instead of stacking below
@@ -77,7 +79,7 @@ const ManagerHeader = ({ user, token, API }) => {
       <div className="grid gap-6 md:grid-cols-[minmax(0,280px)_minmax(0,1fr)] md:items-start">
         <div className="space-y-4">
           <div>
-            <label className="block text-sm font-medium mb-2">Business Logo</label>
+            <label className="block text-sm font-medium mb-2">{t("sweep.businessLogo", "Business Logo")}</label>
             <div className="flex items-center gap-4">
               {businessLogo ? (
                 <div className="relative">
@@ -142,6 +144,7 @@ const ManagerHeader = ({ user, token, API }) => {
 // description) meant for things like "Cleaning", "Airport pickup",
 // "Concierge" that don't warrant a full marketplace gig.
 const WhiteLabelSettings = ({ API, token, initial, managerId }) => {
+  const { t } = useTranslation();
   const [bio, setBio] = useState(initial.bio || '');
   const [services, setServices] = useState(
     Array.isArray(initial.services) && initial.services.length
@@ -188,7 +191,7 @@ const WhiteLabelSettings = ({ API, token, initial, managerId }) => {
       data-testid="white-label-settings"
     >
       <div className="mb-3">
-        <h3 className="text-sm font-bold text-gray-900">Public page details</h3>
+        <h3 className="text-sm font-bold text-gray-900">{t("sweep.publicPageDetails", "Public page details")}</h3>
         <p className="text-[11px] text-gray-500 leading-snug">
           Personalize your public agency page. Leave any field blank to keep the default look.
         </p>
@@ -212,7 +215,7 @@ const WhiteLabelSettings = ({ API, token, initial, managerId }) => {
 
       <div className="mb-4">
         <div className="flex items-center justify-between mb-2">
-          <span className="text-xs text-gray-700 font-medium">Other services you offer</span>
+          <span className="text-xs text-gray-700 font-medium">{t("sweep.otherServicesYouOffer", "Other services you offer")}</span>
           <button
             type="button"
             onClick={addService}
@@ -236,7 +239,7 @@ const WhiteLabelSettings = ({ API, token, initial, managerId }) => {
                   type="text"
                   value={s.title || ''}
                   onChange={(e) => updateService(i, 'title', e.target.value)}
-                  placeholder="Service name"
+                  placeholder={t("sweep.serviceName", "Service name")}
                   className="h-9 px-2 rounded border border-gray-200 text-xs"
                   maxLength={80}
                   data-testid={`wl-service-title-${i}`}
@@ -266,7 +269,7 @@ const WhiteLabelSettings = ({ API, token, initial, managerId }) => {
       </div>
 
       <label className="text-xs block mb-4">
-        <span className="block text-gray-700 font-medium mb-1">Public contact email</span>
+        <span className="block text-gray-700 font-medium mb-1">{t("sweep.publicContactEmail", "Public contact email")}</span>
         <input
           type="email"
           value={contactEmail}

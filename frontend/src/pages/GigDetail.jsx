@@ -160,6 +160,7 @@ const ReviewSection = ({ gig, token, user, onRatingChange }) => {
 };
 
 const BookingForm = ({ gig, tier, onClose, token }) => {
+  const { t } = useTranslation();
   const [message, setMessage] = useState('');
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
@@ -198,7 +199,7 @@ const BookingForm = ({ gig, tier, onClose, token }) => {
         data-testid="gig-booking-form"
       >
         <h3 className="text-lg font-bold">Request &quot;{tier.name}&quot; — ₪{tier.price.toLocaleString()}</h3>
-        <input required type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Your email" className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm" data-testid="gig-booking-email" />
+        <input required type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder={t("sweep.yourEmail", "Your email")} className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm" data-testid="gig-booking-email" />
         <input type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="Phone (optional)" className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm" />
         <input type="date" value={date} onChange={(e) => setDate(e.target.value)} className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm" />
         <textarea value={message} onChange={(e) => setMessage(e.target.value)} placeholder="Tell the provider what you need…" rows={3} className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm" />
@@ -525,7 +526,7 @@ const GigDetail = () => {
                           <p className="text-sm font-semibold text-gray-900 line-clamp-1">{p.name}</p>
                           <div className="flex items-baseline justify-between gap-2">
                             <p className="text-sm text-[#1E6A6A] font-bold">{psym}{Number(p.price).toLocaleString()}</p>
-                            {!p.in_stock && <p className="text-[10px] text-red-500 font-semibold">Out of stock</p>}
+                            {!p.in_stock && <p className="text-[10px] text-red-500 font-semibold">{t("sweep.outOfStock", "Out of stock")}</p>}
                           </div>
                           <button
                             type="button"
@@ -713,6 +714,7 @@ const TierList = ({ tiers, selected, onSelect, isAppointment }) => {
 };
 
 const StoreProductList = ({ products, selected, onSelect }) => {
+  const { t } = useTranslation();
   if (!products.length) return <p className="text-sm text-gray-500">No products listed yet.</p>;
   return products.map((p, i) => {
     const active = selected?.name === p.name;

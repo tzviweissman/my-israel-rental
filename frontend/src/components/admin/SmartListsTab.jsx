@@ -6,6 +6,7 @@
  * `smart_lists` Mongo collection (private to the super admin).
  */
 import React, { useState, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import axios from 'axios';
 import { toast } from 'sonner';
 import {
@@ -188,6 +189,7 @@ const applySort = (properties, sortOrder, usdToIlsRate) => {
 };
 
 const SmartListsTab = ({ token }) => {
+  const { t } = useTranslation();
   const [location, setLocation] = useState('');
   const [maxRent, setMaxRent] = useState('');
   const [minBedrooms, setMinBedrooms] = useState('');
@@ -360,7 +362,7 @@ const SmartListsTab = ({ token }) => {
           <Sparkles size={20} className="text-[#D4AF37]" />
         </div>
         <div>
-          <h2 className="text-2xl font-bold text-gray-900">Smart Lists</h2>
+          <h2 className="text-2xl font-bold text-gray-900">{t("sweep.smartLists", "Smart Lists")}</h2>
           <p className="text-sm text-gray-500 mt-1">
             Generate a shareable list of active rentals by location, price ceiling, and
             availability — then copy it for WhatsApp, email, or Telegram.
@@ -511,7 +513,7 @@ const SmartListsTab = ({ token }) => {
                   relevant once a list has been generated, hence the
                   ``results &&`` guard above. */}
               <label className="inline-flex items-center gap-2 px-3 py-2.5 rounded-xl bg-white border border-gray-200 text-sm text-gray-700">
-                <span className="text-xs text-gray-500 font-medium">Sort by</span>
+                <span className="text-xs text-gray-500 font-medium">{t("sweep.sortBy", "Sort by")}</span>
                 <select
                   value={sortOrder}
                   onChange={(e) => setSortOrder(e.target.value)}
@@ -585,7 +587,7 @@ const SmartListsTab = ({ token }) => {
               text is going to read right before they hit send. */}
           {appliedFilters && (
             <div className="mb-4 pb-3 border-b border-gray-100">
-              <p className="text-xs uppercase tracking-wider text-gray-400">List header</p>
+              <p className="text-xs uppercase tracking-wider text-gray-400">{t("sweep.listHeader", "List header")}</p>
               {/* Mock WhatsApp link-preview card so the admin can see the
                   MyIsraelRental logo will sit on top of the shared list. */}
               <div className="mt-2 mb-3 inline-flex items-center gap-3 px-3 py-2 rounded-xl border border-gray-200 bg-gray-50 max-w-md">
@@ -595,7 +597,7 @@ const SmartListsTab = ({ token }) => {
                   className="w-12 h-12 rounded-lg object-contain bg-white shrink-0"
                 />
                 <div className="min-w-0">
-                  <p className="text-[11px] text-gray-400 uppercase tracking-wide">WhatsApp preview</p>
+                  <p className="text-[11px] text-gray-400 uppercase tracking-wide">{t("sweep.whatsappPreview", "WhatsApp preview")}</p>
                   <p className="text-sm font-bold text-gray-900 truncate">MyIsraelRental — Rentals across Israel</p>
                   <p className="text-[11px] text-gray-500 truncate">myisraelrental.com</p>
                 </div>
@@ -662,7 +664,7 @@ const SmartListsTab = ({ token }) => {
 
       {/* ---------------- Saved lists ---------------- */}
       <div className="bg-white rounded-2xl border border-gray-200 p-6" data-testid="smart-list-saved-section">
-        <h3 className="text-lg font-bold text-gray-900 mb-4">Saved lists</h3>
+        <h3 className="text-lg font-bold text-gray-900 mb-4">{t("sweep.savedLists", "Saved lists")}</h3>
         {saved.length === 0 ? (
           <p className="text-sm text-gray-500">
             No saved lists yet. Generate a list and click <strong>Save this list</strong> to keep it.

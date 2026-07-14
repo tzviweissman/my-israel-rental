@@ -1015,6 +1015,87 @@ const resources = {
         bedrooms: 'Bedrooms',
         amenities: 'Amenities',
         showCount: 'Show {{count}} stays'
+      },
+      // ── Sweep: previously hardcoded UI strings gathered from 13 high-
+      // traffic files (AddPropertyModal, CreateGig, ManagerHeader,
+      // SmartPricingModal, contracts, admin tabs, modals, dashboard
+      // lists, marketplace pages). Grouped under one `sweep` namespace
+      // so the diff stays reviewable and the Hebrew maintainers can
+      // audit one block instead of chasing them across every file.
+      sweep: {
+        // Cancellation & policies
+        cancellationPolicy: 'Cancellation Policy',
+        customCancellationPolicy: 'Custom Cancellation Policy',
+        cancellationPolicyDesc: 'How refunds work if a renter cancels.',
+        // Holiday pricing
+        holidayCategories: 'Holiday Categories',
+        holidayCategoriesDesc: 'Set a special nightly rate for peak holiday windows.',
+        perNightHoliday: 'Per night during holiday',
+        feeAmount: 'Fee amount',
+        noLimit: 'No limit',
+        // CreateGig
+        daysToComplete: 'Days to complete',
+        showNearby: 'Show nearby',
+        slotLength: 'Slot length',
+        duration: 'Duration',
+        price: 'Price',
+        minutes: 'minutes',
+        // ManagerHeader
+        yourManagerPage: 'Your Manager Page',
+        businessLogo: 'Business Logo',
+        publicPageDetails: 'Public page details',
+        otherServicesYouOffer: 'Other services you offer',
+        publicContactEmail: 'Public contact email',
+        serviceName: 'Service name',
+        addService: 'Add service',
+        // Smart Pricing
+        smartPricing: 'Smart Pricing',
+        enableSmartPricing: 'Enable Smart Pricing',
+        priceBands: 'Price bands',
+        alreadyBooked: 'Already booked',
+        atBaseRate: 'At base rate',
+        openNights: 'Open nights',
+        smartPricingDesc: 'Automatically adjust nightly rates based on demand and calendar occupancy.',
+        // Contracts
+        digitalSignature: 'Digital Signature',
+        drawYourSignature: 'Draw Your Signature',
+        fullName: 'Full Name',
+        originalExtractedText: 'Original Extracted Text',
+        enterFullLegalName: 'Enter your full legal name',
+        clickToUploadSignatureImage: 'Click to upload signature image',
+        asItAppearsOnId: 'As it appears on your ID',
+        signRentalContract: 'Sign Rental Contract',
+        propertyContract: 'Property Contract',
+        // Admin Smart Lists
+        smartLists: 'Smart Lists',
+        savedLists: 'Saved lists',
+        listHeader: 'List header',
+        sortBy: 'Sort by',
+        whatsappPreview: 'WhatsApp preview',
+        // Admin Duplicates
+        duplicateListings: 'Duplicate listings',
+        noDuplicatesFound: 'No duplicates found',
+        // Property List
+        dropImagesHere: 'Drop images here',
+        // Bulk Upload
+        csvTemplate: 'CSV template',
+        bulkExampleFamily: 'Cohen Family',
+        bulkExampleStreet: 'King George 10',
+        // Jobs / Gigs
+        applyToThisJob: 'Apply to this job',
+        messageToPoster: 'Message to the poster',
+        outOfStock: 'Out of stock',
+        yourEmail: 'Your email',
+        // Provider profile
+        memberSince: 'Member since',
+        responseTime: 'Response time',
+        // Small helpers reused across the sweep
+        save: 'Save',
+        cancel: 'Cancel',
+        edit: 'Edit',
+        remove: 'Remove',
+        optional: 'Optional',
+        required: 'Required',
       }
     }
   },
@@ -2026,6 +2107,85 @@ const resources = {
         bedrooms: 'חדרי שינה',
         amenities: 'מאפיינים',
         showCount: 'הצג {{count}} נכסים'
+      },
+      // Sweep — same block layout as the English side. Tone is
+      // conversational (the way a native Israeli would say it, not
+      // stiff textbook Hebrew). Uses Hebrew geresh (׳) for abbreviations
+      // and established loan-words (וואטסאפ, צ׳ק-אין, וכו׳).
+      sweep: {
+        // Cancellation & policies
+        cancellationPolicy: 'מדיניות ביטול',
+        customCancellationPolicy: 'מדיניות ביטול מותאמת',
+        cancellationPolicyDesc: 'איך מתנהלים החזרים אם השוכר מבטל.',
+        // Holiday pricing
+        holidayCategories: 'קטגוריות חג',
+        holidayCategoriesDesc: 'קבע מחיר ללילה בתקופות חגים ועומסים.',
+        perNightHoliday: 'ללילה בתקופת החג',
+        feeAmount: 'סכום העמלה',
+        noLimit: 'ללא הגבלה',
+        // CreateGig
+        daysToComplete: 'ימים להשלמה',
+        showNearby: 'הצג בקרבת מקום',
+        slotLength: 'אורך סלוט',
+        duration: 'משך',
+        price: 'מחיר',
+        minutes: 'דקות',
+        // ManagerHeader
+        yourManagerPage: 'העמוד שלך כמנהל',
+        businessLogo: 'לוגו העסק',
+        publicPageDetails: 'פרטי העמוד הציבורי',
+        otherServicesYouOffer: 'שירותים נוספים שאתה מציע',
+        publicContactEmail: 'אימייל ליצירת קשר',
+        serviceName: 'שם השירות',
+        addService: 'הוסף שירות',
+        // Smart Pricing
+        smartPricing: 'תמחור חכם',
+        enableSmartPricing: 'הפעל תמחור חכם',
+        priceBands: 'רצועות מחיר',
+        alreadyBooked: 'כבר תפוס',
+        atBaseRate: 'במחיר בסיס',
+        openNights: 'לילות פתוחים',
+        smartPricingDesc: 'עדכון אוטומטי של מחיר הלילה לפי ביקוש ותפוסה בלוח.',
+        // Contracts
+        digitalSignature: 'חתימה דיגיטלית',
+        drawYourSignature: 'צייר את החתימה שלך',
+        fullName: 'שם מלא',
+        originalExtractedText: 'טקסט מקורי שחולץ',
+        enterFullLegalName: 'הזן את השם המלא כפי שמופיע בת״ז',
+        clickToUploadSignatureImage: 'לחץ להעלאת תמונת חתימה',
+        asItAppearsOnId: 'כפי שמופיע בת״ז שלך',
+        signRentalContract: 'חתום על חוזה השכירות',
+        propertyContract: 'חוזה שכירות',
+        // Admin Smart Lists
+        smartLists: 'רשימות חכמות',
+        savedLists: 'רשימות שמורות',
+        listHeader: 'כותרת הרשימה',
+        sortBy: 'מיין לפי',
+        whatsappPreview: 'תצוגה בוואטסאפ',
+        // Admin Duplicates
+        duplicateListings: 'מודעות כפולות',
+        noDuplicatesFound: 'לא נמצאו כפילויות',
+        // Property List
+        dropImagesHere: 'גרור לכאן תמונות',
+        // Bulk Upload
+        csvTemplate: 'תבנית CSV',
+        bulkExampleFamily: 'כהן',
+        bulkExampleStreet: 'רחוב דיזנגוף 10',
+        // Jobs / Gigs
+        applyToThisJob: 'הגש הצעה לעבודה',
+        messageToPoster: 'הודעה למפרסם',
+        outOfStock: 'אזל מהמלאי',
+        yourEmail: 'האימייל שלך',
+        // Provider profile
+        memberSince: 'חבר מאז',
+        responseTime: 'זמן תגובה',
+        // Small helpers reused across the sweep
+        save: 'שמור',
+        cancel: 'ביטול',
+        edit: 'עריכה',
+        remove: 'הסר',
+        optional: 'לא חובה',
+        required: 'חובה',
       }
     }
   }

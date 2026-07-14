@@ -572,7 +572,7 @@ const AddPropertyModal = ({ isOpen, onClose, editingProperty, onSaved, API, toke
                 apartment appears in BOTH feeds. */}
             {propertyForm.rental_type !== 'sublease' && (
               <div className="md:col-span-2 bg-[#FBF8F2] rounded-xl p-4 border border-[#D4AF37]/30">
-                <h3 className="text-base font-bold mb-1 text-[#1E6A6A]">Holiday Categories</h3>
+                <h3 className="text-base font-bold mb-1 text-[#1E6A6A]">{t('sweep.holidayCategories', 'Holiday Categories')}</h3>
                 <p className="text-xs text-gray-500 mb-3">
                   Optional — tag this listing so it also shows under <span className="font-medium">Sukkot Rentals</span> or <span className="font-medium">Pesach Rentals</span>. Unlocks a separate one-price-for-the-whole-holiday rate below AND auto-lists this apartment under Vacation Rentals during the holiday window.
                 </p>
@@ -790,7 +790,7 @@ const AddPropertyModal = ({ isOpen, onClose, editingProperty, onSaved, API, toke
                           color: isPerNight ? '#FFFFFF' : '#1E6A6A',
                         }}
                         data-testid="holiday-mode-night-btn"
-                      >Per night during holiday</button>
+                      >{t('sweep.perNightHoliday', 'Per night during holiday')}</button>
                     </div>
                   </div>
                   <div className="flex gap-2">
@@ -882,7 +882,7 @@ const AddPropertyModal = ({ isOpen, onClose, editingProperty, onSaved, API, toke
           {/* Cancellation Policy - Vacation + Short-Term Rentals */}
           {(propertyForm.rental_type === 'vacation' || propertyForm.rental_type === 'short-term') && (
             <div className="border-t border-gray-200 pt-6">
-              <h3 className="text-lg font-bold mb-4">Cancellation Policy</h3>
+              <h3 className="text-lg font-bold mb-4">{t('sweep.cancellationPolicy', 'Cancellation Policy')}</h3>
               <div className="space-y-4">
                 <div>
                   <label className="block text-sm font-medium mb-2">Policy Type</label>
@@ -899,7 +899,7 @@ const AddPropertyModal = ({ isOpen, onClose, editingProperty, onSaved, API, toke
                 </div>
                 {propertyForm.cancellation_policy === 'custom' && (
                   <div>
-                    <label className="block text-sm font-medium mb-2">Custom Cancellation Policy</label>
+                    <label className="block text-sm font-medium mb-2">{t('sweep.customCancellationPolicy', 'Custom Cancellation Policy')}</label>
                     <textarea
                       ref={customCancelRef}
                       value={propertyForm.custom_cancellation_policy}
@@ -1063,7 +1063,7 @@ const AddPropertyModal = ({ isOpen, onClose, editingProperty, onSaved, API, toke
                           type="number"
                           value={propertyForm.cleaning_fee_price}
                           onChange={(e) => setPropertyForm({ ...propertyForm, cleaning_fee_price: parseFloat(e.target.value) })}
-                          placeholder="Fee amount"
+                          placeholder={t("sweep.feeAmount", "Fee amount")}
                           min="0"
                           className="flex-1 px-3 py-2 rounded-lg border border-[#E5E5E5] focus:outline-none focus:ring-2 focus:ring-[#1E6A6A]/50 text-sm"
                           data-testid="property-cleaning-fee-input"
@@ -1091,7 +1091,7 @@ const AddPropertyModal = ({ isOpen, onClose, editingProperty, onSaved, API, toke
                       max="50"
                       value={propertyForm.max_guests}
                       onChange={(e) => setPropertyForm({ ...propertyForm, max_guests: e.target.value })}
-                      placeholder="No limit"
+                      placeholder={t("sweep.noLimit", "No limit")}
                       className="w-32 px-3 py-2 rounded-lg border border-[#E5E5E5] focus:outline-none focus:ring-2 focus:ring-[#1E6A6A]/50 text-sm"
                       data-testid="property-max-guests-input"
                     />
@@ -1120,7 +1120,7 @@ const AddPropertyModal = ({ isOpen, onClose, editingProperty, onSaved, API, toke
                           type="number"
                           value={propertyForm.agent_fee_price}
                           onChange={(e) => setPropertyForm({ ...propertyForm, agent_fee_price: parseFloat(e.target.value) })}
-                          placeholder="Fee amount"
+                          placeholder={t("sweep.feeAmount", "Fee amount")}
                           min="0"
                           className="flex-1 px-3 py-2 rounded-lg border border-[#E5E5E5] focus:outline-none focus:ring-2 focus:ring-[#1E6A6A]/50 text-sm"
                           data-testid="property-agent-fee-input"

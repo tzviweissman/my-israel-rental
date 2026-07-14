@@ -8,10 +8,12 @@ import axios from 'axios';
 import { toast } from 'sonner';
 import { Loader2, BadgeCheck, ArrowLeft, Calendar, Globe, Award, FileText, Zap, ExternalLink } from 'lucide-react';
 import { API } from '../App';
+import { useTranslation } from 'react-i18next';
 import PageMeta from '../components/PageMeta';
 import StarRating from '../components/marketplace/StarRating';
 
 const ProviderProfile = () => {
+  const { t } = useTranslation();
   const { userId } = useParams();
   const navigate = useNavigate();
   const [data, setData] = useState(null);
@@ -92,7 +94,7 @@ const ProviderProfile = () => {
               <div className="flex items-start gap-2.5" data-testid="provider-member-since">
                 <Calendar size={16} className="text-[#1E6A6A] mt-0.5 shrink-0" />
                 <div className="min-w-0">
-                  <p className="text-[10px] font-bold uppercase tracking-wider text-gray-500">Member since</p>
+                  <p className="text-[10px] font-bold uppercase tracking-wider text-gray-500">{t("sweep.memberSince", "Member since")}</p>
                   <p className="text-sm font-semibold text-gray-900">{data.member_since_year}</p>
                 </div>
               </div>
@@ -101,7 +103,7 @@ const ProviderProfile = () => {
               <div className="flex items-start gap-2.5" data-testid="provider-response-bucket">
                 <Zap size={16} className="text-emerald-600 mt-0.5 shrink-0" />
                 <div className="min-w-0">
-                  <p className="text-[10px] font-bold uppercase tracking-wider text-gray-500">Response time</p>
+                  <p className="text-[10px] font-bold uppercase tracking-wider text-gray-500">{t("sweep.responseTime", "Response time")}</p>
                   <p className="text-sm font-semibold text-gray-900">
                     {data.response_bucket === '1h' ? 'Replies in 1h' : 'Replies in 24h'}
                   </p>

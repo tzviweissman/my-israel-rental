@@ -20,7 +20,14 @@ Build a bilingual (English/Hebrew) rental website named MyIsraelRental.com with 
   - Verified end-to-end via testing agent (iteration_58, 8/8 pass): calendar mounts with today pre-selected, chevrons advance July → August → September, distant date selection (Sep 16, ~65 days out) works, past dates disabled.
   - Files: `pages/GigDetail.jsx` — `buildAppointmentSlots` + `AppointmentPicker` refactored; new import of `CalendarUI` from `components/ui/calendar`.
 
-- [x] **Code-review hygiene sweep (2026-07-14)**:
+- [x] **i18n sweep — 13 files wired for Hebrew (2026-07-14)**:
+  - New `sweep.*` namespace in `frontend/src/i18n.js` (both `en` and `he`) holding ~50 previously-hardcoded UI strings. Hebrew tone follows the existing conventions: geresh (״/׳) for Hebrew abbreviations (`ת״ז`, `מינ׳`), established loanwords (`וואטסאפ`, `צ׳ק-אין`), natural Israeli phrasing (`בלי כאב ראש` style, not stiff textbook Hebrew), and Israeli examples for placeholders (`כהן` family, `רחוב דיזנגוף 10` address).
+  - Wired `useTranslation()` + `t()` calls into the 13 named files: `AddPropertyModal.jsx`, `CreateGig.jsx` (parent + 3 inner steps), `ManagerHeader.jsx` (2 sub-components), `SmartPricingModal.jsx` (2 tabs), `ContractListItem.jsx` (2 sub-components), `SmartListsTab.jsx`, `DuplicatesModal.jsx`, `ContractSignModal.jsx`, `PropertyList.jsx`, `BulkUploadModal.jsx`, `JobDetail.jsx`, `GigDetail.jsx` (2 sub-components), `ProviderProfile.jsx`.
+  - Fixed a rendering-scope bug uncovered along the way: several arrow-function inner components in `CreateGig.jsx` (`StoreProductsStep`, `AvailabilityStep`) used implicit-return `() => (...)` syntax which prevented adding a hook — converted to explicit-body `() => { const { t } = useTranslation(); return (...); }` per component.
+  - Lint clean across all 13 modified files; frontend serves 200 and renders identically in English (Hebrew keys resolve when the LanguageSwitcher in the nav toggles the locale).
+  - **⚠ Not yet done**: the broader sweep across the *rest* of `frontend/src/components/` and `frontend/src/pages/` for the same pattern. The named 13 files were "the worst offenders, not the complete list" — a follow-up pass on the remainder is still pending.
+
+
   - **SEC**: wrapped 2 user-controlled MongoDB `$regex` build-ups in `re.escape()` at `routes/marketplace/jobs.py:212` (public GET /jobs `area` filter) and `:558` (saved-search digest area matcher). Closes a regex-injection / ReDoS foot-gun that could hang the Mongo query planner if a malicious client sent `.*+?` in the `area` param.
   - Removed 62 unused Python imports across `backend/routes/` and `backend/utils/` via `ruff check --select F401 --fix`.
   - Added `strict=True` to two `zip()` calls in `admin_import/properties.py` (image_urls/img_results and video_urls/vid_results) to catch silent length mismatches.
