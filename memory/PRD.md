@@ -20,6 +20,17 @@ Build a bilingual (English/Hebrew) rental website named MyIsraelRental.com with 
   - Verified end-to-end via testing agent (iteration_58, 8/8 pass): calendar mounts with today pre-selected, chevrons advance July → August → September, distant date selection (Sep 16, ~65 days out) works, past dates disabled.
   - Files: `pages/GigDetail.jsx` — `buildAppointmentSlots` + `AppointmentPicker` refactored; new import of `CalendarUI` from `components/ui/calendar`.
 
+- [x] **Code-review hygiene sweep (2026-07-14)**:
+  - **SEC**: wrapped 2 user-controlled MongoDB `$regex` build-ups in `re.escape()` at `routes/marketplace/jobs.py:212` (public GET /jobs `area` filter) and `:558` (saved-search digest area matcher). Closes a regex-injection / ReDoS foot-gun that could hang the Mongo query planner if a malicious client sent `.*+?` in the `area` param.
+  - Removed 62 unused Python imports across `backend/routes/` and `backend/utils/` via `ruff check --select F401 --fix`.
+  - Added `strict=True` to two `zip()` calls in `admin_import/properties.py` (image_urls/img_results and video_urls/vid_results) to catch silent length mismatches.
+  - `helpers.get_usd_ils_rate()` now logs the exception with `logger.warning(exc_info=True)` before falling back to the cached rate — no more silent FX failures.
+  - `WelcomePopups.js` now wraps its `dangerouslySetInnerHTML` in `DOMPurify.sanitize()`, matching the pattern used by every other HTML-injecting component.
+  - **Prune**: deleted 43 unused shadcn/ui components (kept `button.jsx`, `calendar.jsx`, `popover.jsx`, `slider.jsx` — the four actually imported by app code), plus `hooks/use-toast.js` and `components/marketplace/RotatingHeroVideo.jsx`. Uninstalled 34 unused NPM deps: `recharts`, `ical.js`, `react-hook-form`, `@hookform/resolvers`, `zod`, `cmdk`, `vaul`, `input-otp`, `embla-carousel-react`, `react-resizable-panels`, and 24 unused `@radix-ui/*` packages. Kept `@radix-ui/react-slot`, `class-variance-authority`, `clsx`, `@radix-ui/react-popover`, `@radix-ui/react-slider`.
+  - **Cleanup**: removed 19 stray root-level files (contract preview PNGs, refactoring TODOs, orphan test files).
+  - Added `PropertyCommitRequest`, `commit_property_import`, `db`, `find_duplicate`, `mirror_url_to_cloudinary`, `send_email` re-exports to `admin_import/__init__.py` to unblock 2 previously-broken tests (net -2 pre-existing failures).
+  - **Test run**: 90/94 focused pytest passes (4 pre-existing failures unrelated to the review — mock-patching scope issues in `test_admin_import_background_mirror.py` and `test_admin_import_sync_photos.py`). Regex-injection guard verified via curl with dangerous payload.
+
 - [x] **Super Admin quarantined-listings view (2026-07-13)**:
   - New URL-synced **Quarantined ({count})** filter chip (`data-testid=quarantined-filter-on`, rose accent) in the Admin Listings toolbar. Disabled when nothing is quarantined so the admin never sees an empty view by accident. Toggles a `?quarantined=1` URL param so deep-links and back-button work.
   - Every listing row now shows a rose **Quarantined · no price / low rent** badge (`data-testid=quarantine-badge-<id>` desktop, `quarantine-badge-mobile-<id>` mobile) with a tooltip that includes the timestamp of when it was flagged.

@@ -16,11 +16,10 @@ import bcrypt
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 
-from routes.deps import db, logger, verify_token
+from routes.deps import db, verify_token
 from utils.email import send_email
 
 from .helpers import (
-    USER_FIELDS,
     _ai_map_columns,
     _frontend_origin,
     _issue_reset_token,

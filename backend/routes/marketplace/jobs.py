@@ -19,6 +19,7 @@ Data model:
 from __future__ import annotations
 
 import asyncio
+import re
 import uuid
 from datetime import datetime
 from typing import Any, Optional
@@ -209,7 +210,7 @@ async def list_jobs(
     if category:
         q["category"] = category
     if area:
-        q["area"] = {"$regex": f"^{area}", "$options": "i"}
+        q["area"] = {"$regex": f"^{re.escape(area)}", "$options": "i"}
     cur = db.marketplace_jobs.find(q).sort("created_at", -1).limit(limit)
     return [_pub_job(d) async for d in cur]
 
@@ -555,7 +556,7 @@ async def send_digest(user=Depends(verify_token)):
         for s in user_searches:
             clause: dict[str, Any] = {"category": s["category"]}
             if s.get("area"):
-                clause["area"] = {"$regex": f"^{s['area']}", "$options": "i"}
+                clause["area"] = {"$regex": f"^{re.escape(s['area'])}", "$options": "i"}
             or_clauses.append(clause)
         jobs = await db.marketplace_jobs.find({
             "status": "open",

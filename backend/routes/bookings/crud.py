@@ -2,10 +2,8 @@
 
 Extracted from ``bookings.py`` in the 2026-07 refactor.
 """
-import uuid
-from datetime import UTC, datetime
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends
 
 from models import BookingCreate
 from models_response import BookingCreateResponse, BookingOut
@@ -16,7 +14,6 @@ from .shared import (
     _assert_not_in_holiday_window,
     _assert_within_availability_window,
     _build_booking_doc,
-    _compute_booking_total,
     _load_property_and_sublease,
     _queue_booking_emails,
     _send_booking_notifications,

@@ -3,20 +3,17 @@
 Extracted from ``properties.py`` in the 2026-07 refactor.
 """
 import asyncio
-import os
 import uuid
 from datetime import UTC, datetime
-from typing import Any
 
-from fastapi import APIRouter, Depends, File, HTTPException, UploadFile
+from fastapi import APIRouter, Depends, HTTPException
 
 from models import PropertyCreate
 from models_response import IdMessageResponse, MessageResponse
-from routes.deps import ROOT_DIR, db, logger, verify_token
+from routes.deps import db, logger, verify_token
 from utils.dedupe import find_duplicate
 from utils.email import notify_renters_of_property_deletion, send_email
 from utils.events import publish
-from utils.helpers import get_usd_ils_rate
 from utils.saved_search import match_property_against_searches
 
 from .shared import _normalize_rental_types

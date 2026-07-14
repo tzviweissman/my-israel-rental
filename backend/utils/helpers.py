@@ -75,7 +75,12 @@ async def get_usd_ils_rate() -> float:
             _exchange_cache["rate"] = rate
             _exchange_cache["fetched_at"] = now
             return rate
-    except Exception:
+    except Exception:  # noqa: BLE001
+        logger.warning(
+            "USD/ILS exchange rate fetch failed — falling back to cached=%.4f",
+            _exchange_cache["rate"] or 3.65,
+            exc_info=True,
+        )
         return _exchange_cache["rate"] or 3.65
 
 

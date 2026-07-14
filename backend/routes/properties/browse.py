@@ -3,18 +3,15 @@
 Extracted from ``properties.py`` in the 2026-07 refactor.
 """
 import asyncio
-from datetime import UTC, datetime
-from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 
 from models_response import ManagerPropertiesResponse, PropertyOut
-from routes.deps import db, logger, verify_token
+from routes.deps import db, verify_token
 from utils.area_filter import area_mongo_query
 from utils.dedupe import find_duplicate
 from utils.helpers import get_usd_ils_rate
 
-from .shared import _normalize_rental_types
 
 router = APIRouter()
 api_router = router

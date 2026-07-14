@@ -11,11 +11,8 @@ from pydantic import BaseModel
 from routes.deps import verify_token, logger
 
 from .helpers import (
-    PROPERTY_FIELDS,
-    USER_FIELDS,
     _ai_map_columns,
     _detect_schema_kind,
-    _fallback_map,
     _parse_csv,
 )
 

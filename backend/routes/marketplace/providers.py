@@ -5,8 +5,6 @@ public provider view) plus the authed provider self-update.
 
 Extracted from ``marketplace.py`` in the 2026-07 refactor.
 """
-from datetime import datetime
-from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel  # noqa: F401 — kept for consistency w/ other admin modules
@@ -19,7 +17,6 @@ from .shared import (
     SUPPORTED_LANGUAGES,
     TOP_RATED_MIN_AVG,
     TOP_RATED_MIN_COUNT,
-    UTC,
     ProviderPatch,
     _LANGUAGE_SET,
     _batch_rating_aggregate,
@@ -29,7 +26,6 @@ from .shared import (
     _haversine_km,
     _member_since_year,
     _provider_is_active,
-    _rating_aggregate,
     _response_bucket,
 )
 

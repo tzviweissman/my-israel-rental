@@ -6,9 +6,8 @@ Extracted from ``routes/admin/core.py`` in the 2026-07 refactor. Every
 endpoint keeps its exact URL, request/response shape, and side effects
 (cache invalidation via ``publish``, tombstone/undo support).
 """
-import asyncio
 import uuid
-from datetime import UTC, datetime, timedelta
+from datetime import UTC, datetime
 from typing import List
 
 from fastapi import APIRouter, Depends, HTTPException

@@ -26,7 +26,6 @@ from utils.cloud_storage import mirror_url_to_cloudinary
 from utils.dedupe import find_duplicate
 
 from .helpers import (
-    PROPERTY_FIELDS,
     _ai_map_columns,
     _build_property_doc,
     _parse_csv,
@@ -268,11 +267,11 @@ async def _background_mirror_properties(
                 ], return_exceptions=False)
             final_images = [
                 (r["url"] if r and r.get("url") else src)
-                for src, r in zip(image_urls, img_results)
+                for src, r in zip(image_urls, img_results, strict=True)
             ] if image_urls else []
             final_videos = [
                 (r["url"] if r and r.get("url") else src)
-                for src, r in zip(video_urls, vid_results)
+                for src, r in zip(video_urls, vid_results, strict=True)
             ] if video_urls else []
             await db.properties.update_one(
                 {"id": prop_id},
