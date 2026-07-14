@@ -10,7 +10,6 @@ If a handler returns a computed/enriched dict, the model below uses
 ``extra='allow'`` so additional keys pass through unchanged. New endpoints
 should prefer a precise model where possible.
 """
-from typing import Any
 
 from pydantic import BaseModel, ConfigDict
 

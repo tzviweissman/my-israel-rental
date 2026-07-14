@@ -6,7 +6,7 @@ gigs; without it, gigs go inactive when the free trial ends.
 
 Extracted from ``marketplace.py`` in the 2026-07 refactor.
 """
-from datetime import datetime, timedelta
+from datetime import datetime
 from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException

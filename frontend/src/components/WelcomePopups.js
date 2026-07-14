@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Home, FileCheck, ArrowRight, X, Sparkles } from 'lucide-react';
+import DOMPurify from 'dompurify';
 
 const WelcomePopups = ({ onDismiss }) => {
   const { t } = useTranslation();
@@ -139,7 +140,7 @@ const WelcomePopups = ({ onDismiss }) => {
                 </h2>
                 <p
                   className="text-sm text-gray-600 leading-relaxed"
-                  dangerouslySetInnerHTML={{ __html: t('welcome.servicesDesc') }}
+                  dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(t('welcome.servicesDesc')) }}
                 />
                 <div className="mt-5 flex justify-center">
                   <button

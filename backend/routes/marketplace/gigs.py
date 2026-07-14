@@ -6,10 +6,9 @@ browse the catalog and book, and both parties leave reviews.
 Extracted from ``marketplace.py`` in the 2026-07 refactor.
 """
 import asyncio
-import os
 import re
 import uuid
-from datetime import datetime, timedelta
+from datetime import datetime
 from typing import Any, Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Query
@@ -18,10 +17,6 @@ from pydantic import BaseModel  # noqa: F401 — kept for consistency
 from routes.deps import db, logger, verify_token
 
 from .shared import (
-    CATEGORIES,
-    FRONTEND_URL,
-    LOCATIONS,
-    MIN_RESPONSES_FOR_BADGE,
     TOP_RATED_MIN_AVG,
     TOP_RATED_MIN_COUNT,
     UTC,

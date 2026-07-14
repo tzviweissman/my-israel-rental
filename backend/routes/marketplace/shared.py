@@ -6,17 +6,14 @@ Nothing behavioural changed — the router itself now lives in each
 sub-module and gets aggregated by ``__init__.py``.
 """
 import os
-import re
 import uuid
-import asyncio
 from datetime import datetime, timedelta, timezone
 from typing import Any, Optional
 
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import HTTPException
 from pydantic import BaseModel, Field
 
-from routes.deps import db, logger, verify_token
-from utils import paypal
+from routes.deps import db, logger
 
 UTC = timezone.utc
 

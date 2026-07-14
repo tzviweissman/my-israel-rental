@@ -20,7 +20,6 @@ import uuid
 from datetime import UTC, datetime
 from typing import Any
 
-from fastapi import HTTPException
 
 import bcrypt
 from routes.deps import db, logger, EMERGENT_LLM_KEY

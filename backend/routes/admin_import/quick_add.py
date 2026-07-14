@@ -5,8 +5,6 @@ Extracted from ``admin_import.py`` in the 2026-07 refactor.
 """
 from __future__ import annotations
 
-import uuid
-from datetime import UTC, datetime
 
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel

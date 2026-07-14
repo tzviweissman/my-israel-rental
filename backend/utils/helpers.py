@@ -76,6 +76,7 @@ async def get_usd_ils_rate() -> float:
             _exchange_cache["fetched_at"] = now
             return rate
     except Exception:
+        logger.warning("get_usd_ils_rate: fetch failed, using fallback", exc_info=True)
         return _exchange_cache["rate"] or 3.65
 
 

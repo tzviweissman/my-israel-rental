@@ -10,7 +10,6 @@ from __future__ import annotations
 
 import asyncio
 import statistics
-import uuid
 from datetime import UTC, date, datetime, timedelta
 from typing import Any
 

@@ -8,7 +8,6 @@ contract text between languages using our LLM client.
 Extracted from ``bookings.py`` in the 2026-07 refactor.
 """
 import logging
-import os
 import uuid
 from datetime import UTC, datetime
 from typing import Any
@@ -18,7 +17,6 @@ from fastapi import APIRouter, Body, Depends, HTTPException
 from models_response import BookingSignContractResponse, BookingTranslationResponse
 from routes.deps import ROOT_DIR, db, logger, verify_token
 from utils.contract_signing import stamp_signature_on_contract
-from utils.email import send_email
 from utils.files import extract_text_from_image, extract_text_from_pdf
 from utils.translate import translate_text as _translate_text
 

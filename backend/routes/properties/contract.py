@@ -12,7 +12,6 @@ from fastapi import APIRouter, Depends, File, HTTPException, UploadFile
 from models_response import ContractStatusResponse, MessageResponse, PropertyContractUploadResponse
 from routes.deps import ROOT_DIR, db, logger, verify_token
 from utils.email import send_email
-from utils.events import publish
 
 router = APIRouter()
 api_router = router

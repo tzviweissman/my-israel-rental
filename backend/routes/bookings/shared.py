@@ -9,7 +9,6 @@ sub-modules.
 import asyncio
 import uuid
 from datetime import UTC, datetime, timedelta
-from typing import Any
 
 from fastapi import HTTPException
 
@@ -19,7 +18,6 @@ from utils.email import (
     send_booking_confirmation_email,
     send_booking_notification_email,
 )
-from utils.saved_search import match_property_against_searches
 
 
 async def _load_property_and_sublease(

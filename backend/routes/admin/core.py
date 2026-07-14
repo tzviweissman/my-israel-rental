@@ -14,7 +14,6 @@ from datetime import UTC, datetime, timedelta
 import jwt
 
 from fastapi import APIRouter, Depends, HTTPException
-from pydantic import BaseModel
 
 from models import SiteSettings
 from models_response import (

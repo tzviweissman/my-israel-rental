@@ -3,7 +3,6 @@ images across many properties in one call.
 
 Extracted from ``properties.py`` in the 2026-07 refactor.
 """
-from datetime import UTC, datetime
 from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException

@@ -18,6 +18,10 @@ node_modules/
 
 # Testing
 /coverage
+/test_reports/
+
+# User-uploaded runtime content (recreated on startup by routes/deps.py)
+/backend/uploads/
 
 # Next.js
 /.next/

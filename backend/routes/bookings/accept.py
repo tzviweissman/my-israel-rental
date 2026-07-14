@@ -11,7 +11,7 @@ from fastapi import APIRouter, Depends, HTTPException
 
 from models_response import BookingAcceptResponse
 from routes.deps import db, logger, verify_token
-from utils.email import send_booking_confirmation_email, send_email
+from utils.email import send_booking_confirmation_email
 
 router = APIRouter()
 api_router = router
