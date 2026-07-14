@@ -69,7 +69,9 @@ const JobsBoard = () => {
   };
 
   useEffect(() => {
-    axios.get(`${API}/marketplace/categories`).then((r) => setCategories(r.data));
+    axios.get(`${API}/marketplace/categories`)
+      .then((r) => setCategories(r.data))
+      .catch(() => {});
   }, []);
   useEffect(() => {
     setLoading(true);
@@ -77,6 +79,7 @@ const JobsBoard = () => {
     if (activeCat) q.set('category', activeCat);
     axios.get(`${API}/marketplace/jobs?${q.toString()}`)
       .then((r) => setJobs(r.data))
+      .catch(() => {})
       .finally(() => setLoading(false));
   }, [activeCat]);
 
