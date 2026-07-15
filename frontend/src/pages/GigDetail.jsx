@@ -305,6 +305,13 @@ const GigDetail = () => {
   }
   if (!gig) return null;
 
+  // Return to wherever the visitor actually came from — the filtered
+  // /services listing (Services.jsx saves path+search on gig-card click)
+  // or a provider profile (saved below) — falling back to the unfiltered
+  // page for direct/shared links.
+  const previousPath = sessionStorage.getItem('previousPath') || '/services';
+  const backDestination = previousPath.startsWith('/services') ? previousPath : '/services';
+
   // When the buyer picks an appointment/deliverable tier that has its
   // own photos, swap the header cover + thumbnail strip to show those
   // instead of the gig-wide gallery. Falls back to the gig gallery when
@@ -391,7 +398,7 @@ const GigDetail = () => {
     <div className="min-h-screen bg-[#FAFAF7]" style={{ paddingTop: 'var(--nav-h, 68px)' }} data-testid="gig-detail-page">
       <PageMeta title={`${displayTitle} — MyIsraelRental Services`} description={displayDescription?.slice(0, 155) || `Book ${displayTitle} on MyIsraelRental.`} path={`/services/gig/${id}`} jsonLd={gigJsonLd} />
       <div className="max-w-5xl mx-auto px-4 py-8">
-        <button onClick={() => navigate('/services')} className="text-sm text-gray-600 flex items-center gap-1 mb-4 hover:text-[#1E6A6A]" data-testid="gig-back">
+        <button onClick={() => navigate(backDestination)} className="text-sm text-gray-600 flex items-center gap-1 mb-4 hover:text-[#1E6A6A]" data-testid="gig-back">
           <ArrowLeft size={14} /> Back to services
         </button>
 
@@ -571,7 +578,15 @@ const GigDetail = () => {
                 <p className="font-semibold text-sm">{gig.provider?.name}</p>
                 <p className="text-xs text-gray-500">{gig.provider?.tagline || gig.provider?.bio || '\u00A0'}</p>
               </div>
-              <button onClick={() => navigate(`/services/provider/${gig.provider?.user_id}`)} className="text-xs font-semibold text-[#1E6A6A] hover:underline" data-testid="gig-view-provider">
+              <button
+                onClick={() => {
+                  // So the provider profile's back button returns here, not to /services.
+                  sessionStorage.setItem('previousPath', window.location.pathname + window.location.search);
+                  navigate(`/services/provider/${gig.provider?.user_id}`);
+                }}
+                className="text-xs font-semibold text-[#1E6A6A] hover:underline"
+                data-testid="gig-view-provider"
+              >
                 View profile
               </button>
             </div>

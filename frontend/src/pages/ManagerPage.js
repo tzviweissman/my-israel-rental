@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { useParams, useNavigate, useLocation } from 'react-router-dom';
+import { useParams, useNavigate, useLocation, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import axios from 'axios';
 import { API, AuthContext } from '../App';
@@ -24,13 +24,33 @@ const ManagerPage = () => {
   const { t } = useTranslation();
   const { user } = useContext(AuthContext);
   const [data, setData] = useState(null);
-  const [activeType, setActiveType] = useState('all');
-  const [activeArea, setActiveArea] = useState('all');
-  const [activeBedrooms, setActiveBedrooms] = useState('all');
+  // Filter state honors the URL on first render so the page is shareable and
+  // — like Properties.js — survives a round-trip through a property-detail
+  // page: PropertyDetail's "Back to Listings" returns to this same URL,
+  // which must still carry the filters or they'd silently reset to "all".
+  const [urlSearchParams, setUrlSearchParams] = useSearchParams();
+  const [activeType, setActiveType] = useState(() => urlSearchParams.get('type') || 'all');
+  const [activeArea, setActiveArea] = useState(() => urlSearchParams.get('area') || 'all');
+  const [activeBedrooms, setActiveBedrooms] = useState(() => urlSearchParams.get('bedrooms') || 'all');
 
   useEffect(() => {
     fetchManagerData();
   }, [managerId]);
+
+  // Mirror the active filters into the URL query string (replace: true keeps
+  // history clean while clicking through filter pills).
+  useEffect(() => {
+    const next = new URLSearchParams();
+    if (activeType !== 'all') next.set('type', activeType);
+    if (activeArea !== 'all') next.set('area', activeArea);
+    if (activeBedrooms !== 'all') next.set('bedrooms', activeBedrooms);
+    const currentStr = urlSearchParams.toString();
+    const nextStr = next.toString();
+    if (currentStr !== nextStr) {
+      setUrlSearchParams(next, { replace: true });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeType, activeArea, activeBedrooms]);
 
   // Manager can optionally set a custom tagline (replaces the default
   // "N Properties Available" line) and a public contact email that
@@ -283,7 +303,7 @@ const ManagerPage = () => {
               key={property.id}
               className="property-card"
               onClick={() => {
-                sessionStorage.setItem('previousPath', window.location.pathname);
+                sessionStorage.setItem('previousPath', window.location.pathname + window.location.search);
                 navigate(`/property/${property.id}`);
               }}
               data-testid={`manager-property-${property.id}`}

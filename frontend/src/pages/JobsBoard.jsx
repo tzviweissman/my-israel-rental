@@ -179,7 +179,18 @@ const JobsBoard = () => {
           </div>
         ) : (
           <div className="grid gap-3">
-            {jobs.map((j) => <JobRow key={j.id} job={j} onClick={() => navigate(`/services/jobs/${j.id}`)} />)}
+            {jobs.map((j) => (
+              <JobRow
+                key={j.id}
+                job={j}
+                onClick={() => {
+                  // Save path+search so JobDetail's "All jobs" button restores
+                  // this exact filtered view instead of resetting to unfiltered.
+                  sessionStorage.setItem('previousPath', window.location.pathname + window.location.search);
+                  navigate(`/services/jobs/${j.id}`);
+                }}
+              />
+            ))}
           </div>
         )}
       </div>

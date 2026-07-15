@@ -71,6 +71,12 @@ const JobDetail = () => {
   if (loading) return <div className="min-h-screen flex items-center justify-center"><Loader2 className="animate-spin" /></div>;
   if (!job) return null;
 
+  // Return to the exact filtered jobs-board view the visitor came from
+  // (JobsBoard saves path+search on card click), falling back to the
+  // unfiltered board for direct/shared links.
+  const previousPath = sessionStorage.getItem('previousPath') || '/services/jobs';
+  const backDestination = previousPath.startsWith('/services/jobs') ? previousPath : '/services/jobs';
+
   const sym = job.budget_currency === 'USD' ? '$' : '₪';
   const budget = job.budget_type === 'fixed' && job.budget_amount
     ? `${sym}${Number(job.budget_amount).toLocaleString()}`
@@ -80,7 +86,7 @@ const JobDetail = () => {
     <div className="min-h-screen bg-[#FAFAF7]" style={{ paddingTop: 'var(--nav-h, 68px)' }} data-testid="job-detail-page">
       <PageMeta title={`${job.title} · MyIsraelRental`} description={(job.description || '').slice(0, 160)} path={`/services/jobs/${id}`} />
       <div className="max-w-3xl mx-auto px-4 py-8">
-        <button onClick={() => navigate('/services/jobs')} className="text-sm text-gray-500 flex items-center gap-1 mb-4">
+        <button onClick={() => navigate(backDestination)} className="text-sm text-gray-500 flex items-center gap-1 mb-4">
           <ArrowLeft size={14} /> All jobs
         </button>
 

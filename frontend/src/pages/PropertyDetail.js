@@ -73,13 +73,16 @@ const PropertyDetail = () => {
   const previousPath = sessionStorage.getItem('previousPath') || '/';
   const isFromDashboard = previousPath.includes('/dashboard');
   const isFromManager = previousPath.includes('/manager/');
-  const isFromListings = previousPath.includes('/properties/');
-  
+  const isFromListings =
+    previousPath.includes('/properties/') ||
+    previousPath.startsWith('/stays') ||
+    previousPath.startsWith('/kosher-stays-in-israel');
+
   // Determine back button destination and text
   const getBackDestination = () => {
     if (isFromDashboard) return '/dashboard';
     if (isFromManager) return previousPath;
-    if (isFromListings) return previousPath; // Return to the specific listings page
+    if (isFromListings) return previousPath; // Return to the specific listings page, filters intact
     return '/stays'; // Default to the new unified search UI
   };
   

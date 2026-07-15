@@ -27,6 +27,13 @@ const ProviderProfile = () => {
   if (loading) return <div className="min-h-screen flex items-center justify-center pt-32"><Loader2 className="animate-spin text-[#1E6A6A]" size={28} /></div>;
   if (!data) return null;
 
+  // Return to wherever the visitor came from — the filtered /services
+  // listing or the gig detail page whose "View profile" link brought them
+  // here (both save path+search to previousPath) — falling back to the
+  // unfiltered page for direct/shared links.
+  const previousPath = sessionStorage.getItem('previousPath') || '/services';
+  const backDestination = previousPath.startsWith('/services') ? previousPath : '/services';
+
   // LocalBusiness schema: emits enough structured data for Google to show
   // avatar, aggregate rating, and price ranges directly in the search
   // snippet. Aggregate rating is computed across all this provider's gigs.
@@ -64,7 +71,7 @@ const ProviderProfile = () => {
     <div className="min-h-screen bg-[#FAFAF7]" style={{ paddingTop: 'var(--nav-h, 68px)' }} data-testid="provider-profile">
       <PageMeta title={`${data.name} — Services on MyIsraelRental`} description={data.tagline || data.bio?.slice(0, 155) || `Services from ${data.name}`} path={`/services/provider/${userId}`} jsonLd={providerJsonLd} />
       <div className="max-w-5xl mx-auto px-4 py-8">
-        <button onClick={() => navigate('/services')} className="text-sm text-gray-600 flex items-center gap-1 mb-4 hover:text-[#1E6A6A]">
+        <button onClick={() => navigate(backDestination)} className="text-sm text-gray-600 flex items-center gap-1 mb-4 hover:text-[#1E6A6A]">
           <ArrowLeft size={14} /> Back to services
         </button>
         <div className="flex items-center gap-4 mb-6">
@@ -172,7 +179,16 @@ const ProviderProfile = () => {
             const cheap = (g.tiers || []).reduce((a, t) => (a == null || t.price < a ? t.price : a), null);
             const sym = g.tiers?.[0]?.currency === 'USD' ? '$' : '₪';
             return (
-              <button key={g.id} onClick={() => navigate(`/services/gig/${g.id}`)} className="text-left" data-testid={`provider-gig-${g.id}`}>
+              <button
+                key={g.id}
+                onClick={() => {
+                  // So the gig's "Back to services" returns to this provider page.
+                  sessionStorage.setItem('previousPath', window.location.pathname + window.location.search);
+                  navigate(`/services/gig/${g.id}`);
+                }}
+                className="text-left"
+                data-testid={`provider-gig-${g.id}`}
+              >
                 <div className="aspect-square bg-gray-100 rounded-xl overflow-hidden mb-2" style={cover ? { backgroundImage: `url(${cover})`, backgroundSize: 'cover', backgroundPosition: 'center' } : {}} />
                 <p className="font-semibold text-sm truncate">{g.title}</p>
                 {g.rating_count > 0 && (

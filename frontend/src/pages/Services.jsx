@@ -161,6 +161,14 @@ const Services = () => {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
 
+  // Persist path+search before leaving to a gig/provider detail page, so its
+  // "Back to services" button can restore this exact filtered view instead
+  // of resetting to unfiltered /services.
+  const handleGigClick = (gigId) => {
+    sessionStorage.setItem('previousPath', window.location.pathname + window.location.search);
+    navigate(`/services/gig/${gigId}`);
+  };
+
   const [categories, setCategories] = useState([]);
   const [locations, setLocations] = useState([]);
   const [languagesList, setLanguagesList] = useState([]);
@@ -836,7 +844,7 @@ const Services = () => {
                         onClick={() => {
                           setActiveMapId(gig.id);
                           if (activeMapId === gig.id) {
-                            navigate(`/services/gig/${gig.id}`);
+                            handleGigClick(gig.id);
                           }
                         }}
                         className={`shrink-0 w-[168px] rounded-xl overflow-hidden bg-white text-start active:scale-95 transition-all ${
@@ -865,7 +873,7 @@ const Services = () => {
                     <GigCard
                       key={gig.id}
                       gig={gig}
-                      onClick={() => navigate(`/services/gig/${gig.id}`)}
+                      onClick={() => handleGigClick(gig.id)}
                       i18n={i18n}
                       t={t}
                     />
