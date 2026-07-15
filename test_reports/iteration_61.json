@@ -1,0 +1,37 @@
+{
+  "summary": "Tested MyJobsTab (backend + frontend) for the Jobs Board poster dashboard. All 6 backend regression tests pass and all UI flows work: deep-link, list rendering, count badge, expand, applicant enrichment (name/quote/message), close→closed pill, reopen→open pill, view public page, empty state, tab visibility for renter AND owner.",
+  "backend_issues": {
+    "critical": [],
+    "minor": []
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": [
+      {"screen": "MyJobsTab applicant row", "issues": ["Applicant display_name falls back to literal 'Provider' when the applying user has no marketplace_providers row (e.g. owner@test.com). Not a MyJobsTab bug — it's a data-enrichment fallback in GET /jobs/{id}/applications — but for a poster this looks unhelpful. Consider falling back to the user's full_name from db.users when marketplace_providers is missing."]}
+    ]
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_my_jobs.py",
+    "/app/test_reports/pytest/my_jobs_iter61.xml"
+  ],
+  "action_items": [
+    "(Optional polish) In /api/marketplace/jobs/{id}/applications, when marketplace_providers has no row for the applicant, fall back to users.full_name instead of the literal 'Provider' string so posters see real names."
+  ],
+  "critical_code_review_comments": [
+    "MyJobsTab.jsx cleanly separates JobCard/ApplicationRow — good.",
+    "applications are lazy-loaded on expand (only when count > 0) — good perf.",
+    "onStatusChange updates local state but does NOT refresh applications_count. Not a bug for close/reopen (count doesn't change) but worth noting for future award/delete flows.",
+    "DashboardTabs: tab-my-jobs is correctly ungated (visible to all roles) per spec. Verified in UI for renter and owner.",
+    "PostJob toast action button 'My jobs' (sonner) not directly tested via UI (would risk hitting the auth rate limiter with a third login) — covered indirectly since navigation to /dashboard?tab=my-jobs works via deep-link."
+  ],
+  "updated_files": [
+    "/app/backend/tests/test_my_jobs.py (new)"
+  ],
+  "success_rate": {"backend": "100% (6/6)", "frontend": "100% (all flows tested)"},
+  "test_credentials": "renter@test.com / Test1234!, owner@test.com / Test1234! — both work",
+  "seed_data_creation": "Backend tests self-clean via fixture teardown. UI tests seeded a TEST_ job + owner application via API, then deleted the job at the end. No residual data.",
+  "retest_needed": false,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "MyJobsTab is fully working. Backend tests live at /app/backend/tests/test_my_jobs.py. Run via `pytest backend/tests/test_my_jobs.py -v`. Applicant display_name enrichment falls back to 'Provider' string when applicant has no marketplace_providers row — minor UX nit only."
+}

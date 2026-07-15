@@ -61,7 +61,12 @@ const PostJob = () => {
       const { data } = await axios.post(`${API}/marketplace/jobs`, payload, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      toast.success('Job posted — matching providers will be notified by email.');
+      toast.success('Job posted — matching providers will be notified by email.', {
+        action: {
+          label: 'My jobs',
+          onClick: () => navigate('/dashboard?tab=my-jobs'),
+        },
+      });
       navigate(`/services/jobs/${data.id}`);
     } catch (err) {
       toast.error(err.response?.data?.detail || 'Failed to post job');

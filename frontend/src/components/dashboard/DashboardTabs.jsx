@@ -83,6 +83,15 @@ const DashboardTabs = ({ activeTab, setActiveTab, role, user, unreadMessages = 0
         )}
 
         <button
+          onClick={() => setActiveTab('my-jobs')}
+          className={`${cls(activeTab === 'my-jobs', ACTIVE_GOLD)} flex items-center justify-center gap-1.5`}
+          data-testid="tab-my-jobs"
+        >
+          <Briefcase size={14} />
+          {t('dashboard.myJobs', 'My Jobs')}
+        </button>
+
+        <button
           onClick={() => setActiveTab('bookings')}
           className={cls(activeTab === 'bookings')}
           data-testid="tab-bookings"
