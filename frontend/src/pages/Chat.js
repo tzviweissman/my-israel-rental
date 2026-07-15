@@ -28,6 +28,7 @@ const Chat = () => {
   const [newMessage, setNewMessage] = useState('');
   const [property, setProperty] = useState(null);
   const [sublease, setSublease] = useState(null);
+  const [job, setJob] = useState(null);
   const [otherUserId, setOtherUserId] = useState('');
   const [sending, setSending] = useState(false);
   const [showScrollBtn, setShowScrollBtn] = useState(false);
@@ -243,9 +244,24 @@ const Chat = () => {
         setOtherUserId(response.data.owner_id);
       }
     } catch (error) {
-      // Property may have been deleted — keep the override-derived
-      // counterparty if present so the conversation still loads.
-      console.error('Failed to fetch property', error);
+      // Property may have been deleted OR the propertyId is actually a
+      // Jobs-Board job UUID (a poster clicked "Message" on an applicant).
+      // Try the job endpoint as a fallback — if it resolves, we render a
+      // job info bar in the header instead of the property card.
+      try {
+        const jobRes = await axios.get(`${API}/marketplace/jobs/${propertyId}`);
+        setJob(jobRes.data);
+        // Counterparty: prefer `?with=` (poster→applicant), else fall
+        // back to the job poster (applicant→poster).
+        if (!counterpartyOverride) {
+          setOtherUserId(jobRes.data.poster_user_id);
+        }
+      } catch {
+        // Neither a live property nor a job — the conversation is a
+        // pure orphan. Keep the `?with=` counterparty if present so the
+        // messages still load.
+        console.error('Failed to fetch property or job', error);
+      }
     }
   };
 
@@ -330,6 +346,7 @@ const Chat = () => {
         <ChatHeader
           property={property}
           sublease={sublease}
+          job={job}
           onBack={() => navigate(-1)}
           onDashboard={() => navigate('/dashboard')}
           searchOpen={searchOpen}

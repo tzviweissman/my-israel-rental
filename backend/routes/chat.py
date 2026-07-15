@@ -371,6 +371,17 @@ async def get_conversations(payload: dict = Depends(verify_token)) -> list[dict]
 
         if conv_key not in conversations:
             property_data = await db.properties.find_one({"id": msg['property_id']}, {"_id": 0, "title": 1, "owner_id": 1})
+            # If the "property_id" doesn't match any live property, it may
+            # actually be a Jobs Board job UUID — a job-scoped chat thread
+            # created when a poster clicked "Message" on an applicant.
+            # Fall back to the marketplace_jobs lookup so the inbox shows
+            # a meaningful title instead of "Unknown".
+            job_data = None
+            if property_data is None:
+                job_data = await db.marketplace_jobs.find_one(
+                    {"_id": msg['property_id']},
+                    {"_id": 1, "title": 1, "poster_user_id": 1},
+                )
             other_user = await db.users.find_one({"id": other_user_id}, {"_id": 0, "id": 1, "name": 1, "email": 1})
 
             # Was the CURRENT user @-mentioned by their counterpart in the
@@ -383,10 +394,21 @@ async def get_conversations(payload: dict = Depends(verify_token)) -> list[dict]
                 not sent_by_me and my_role and my_role in (msg.get('mentions') or [])
             )
 
+            # Choose a display title for the conversation preview. Job
+            # threads get a "Job:" prefix so the inbox visually
+            # distinguishes them from property threads at a glance.
+            if property_data:
+                display_title = property_data.get('title', 'Unknown')
+            elif job_data:
+                display_title = f"Job: {job_data.get('title', 'Untitled')}"
+            else:
+                display_title = 'Unknown'
+
             conversations[conv_key] = {
                 "property_id": msg['property_id'],
-                "property_title": property_data.get('title', 'Unknown') if property_data else 'Unknown',
-                "property_missing": property_data is None,
+                "property_title": display_title,
+                "property_missing": property_data is None and job_data is None,
+                "is_job_thread": job_data is not None,
                 "other_user": other_user if other_user else {},
                 "last_message": msg['message'],
                 "last_message_time": msg['created_at'],

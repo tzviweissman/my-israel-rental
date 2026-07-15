@@ -35,6 +35,7 @@ import {
   Zap,
   Users,
   ArrowRight,
+  MessageCircle,
 } from 'lucide-react';
 
 const StatusPill = ({ status }) => {
@@ -78,14 +79,14 @@ const ResponseBadge = ({ bucket }) => {
   );
 };
 
-const ApplicationRow = ({ app }) => {
+const ApplicationRow = ({ app, jobId, onMessage }) => {
   const sym = app.quoted_currency === 'USD' ? '$' : '₪';
   const price =
     app.quoted_price != null
       ? `${sym}${Number(app.quoted_price).toLocaleString()}`
       : null;
   return (
-    <div className="border-t border-gray-100 pt-3 pb-1" data-testid={`applicant-${app.id}`}>
+    <div className="border-t border-gray-100 pt-3 pb-3" data-testid={`applicant-${app.id}`}>
       <div className="flex items-start justify-between gap-3 mb-1.5">
         <div className="min-w-0">
           <p className="text-sm font-semibold text-gray-900 truncate" data-testid={`applicant-name-${app.id}`}>
@@ -103,9 +104,16 @@ const ApplicationRow = ({ app }) => {
           </div>
         )}
       </div>
-      <p className="text-sm text-gray-700 leading-relaxed whitespace-pre-line" data-testid={`applicant-message-${app.id}`}>
+      <p className="text-sm text-gray-700 leading-relaxed whitespace-pre-line mb-2" data-testid={`applicant-message-${app.id}`}>
         {app.message}
       </p>
+      <button
+        onClick={() => onMessage(app)}
+        className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-semibold border border-[#1E6A6A]/25 text-[#1E6A6A] bg-white hover:bg-[#1E6A6A] hover:text-white transition-colors"
+        data-testid={`applicant-message-btn-${app.id}`}
+      >
+        <MessageCircle size={11} /> Message
+      </button>
     </div>
   );
 };
@@ -264,7 +272,14 @@ const JobCard = ({ job, API, token, onStatusChange }) => {
             </div>
           ) : (
             <div className="bg-white rounded-xl border border-gray-100 divide-y divide-gray-100 px-3">
-              {(applications || []).map((a) => <ApplicationRow key={a.id} app={a} />)}
+              {(applications || []).map((a) => (
+                <ApplicationRow
+                  key={a.id}
+                  app={a}
+                  jobId={job.id}
+                  onMessage={(app) => navigate(`/chat/${job.id}?with=${app.provider?.user_id}`)}
+                />
+              ))}
             </div>
           )}
         </div>

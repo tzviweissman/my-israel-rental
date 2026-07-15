@@ -1,0 +1,31 @@
+{
+  "summary": "Job-scoped chat integration (iter 62) fully validated end-to-end. 10/10 backend integration tests pass. All 8 UI flows from the review request pass: MyJobsTab Message button navigates to /chat/{job_id}?with={applicant_uid}; ChatHeader renders the gold Briefcase job bar with title/area/'Open to offers'/JOB pill; message send + reload persistence works both sides; applicant inbox at /dashboard?tab=messages shows 'Job: <title>' label (with is_job_thread:true); applicant can click into the same job-bar thread; regression: property chat still renders Building2 property bar (no job bar); edge case: /chat/<fake_uuid> renders empty chat page gracefully with no crash and no job bar; cleanup DELETE succeeds.",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_job_chat_integration.py",
+    "/app/test_reports/pytest/job_chat_iter62.xml"
+  ],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "chat.py get_conversations correctly uses `_id` (UUID) on the marketplace_jobs fallback — matches jobs.py's storage schema. Good.",
+    "Chat.js fetchProperty falls back to /marketplace/jobs/{id} only on ANY error (not strictly 404). Slightly loose — but Axios throws for all non-2xx so behavior is equivalent in practice.",
+    "ChatHeader gates the job bar with `!property && job`, so if BOTH resolve (never happens today) the property bar wins. Sensible priority.",
+    "Job info bar has 'Open to offers' as a hardcoded English string (not i18n'd), while the property bar uses translated `rental_type` labels. Minor i18n inconsistency for future polish — not blocking.",
+    "MyJobsTab passes `app.provider?.user_id` to the chat URL. If enrichment ever returns null (e.g. deleted provider row), the URL becomes `?with=undefined`. Consider disabling the Message button when user_id is missing.",
+    "Job chat threads store messages with `property_id=<job_uuid>` — that overloading is documented in chat.py comments but the field name in db.messages is now semantically 'thread_id'. Consider a schema note in models.py."
+  ],
+  "updated_files": [
+    "/app/backend/tests/test_job_chat_integration.py (new)"
+  ],
+  "success_rate": {"backend": "100% (10/10)", "frontend": "100% (all 8 flows)"},
+  "test_credentials": "renter@test.com / Test1234!, owner@test.com / Test1234! — both work",
+  "seed_data_creation": "Backend tests self-clean (job fixture teardown deletes the job). UI test creates + deletes its own TEST_UI_JobChat_iter62_v2 job. No residual data.",
+  "retest_needed": false,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "Backend regression test at /app/backend/tests/test_job_chat_integration.py covers apply→chat message send→conversations 'Job:' labeling→two-way reply→orphan uuid graceful degradation. Run: `pytest backend/tests/test_job_chat_integration.py -v`. Category slugs are enforced against CATEGORIES list in /app/backend/routes/marketplace/shared.py (use 'home-repair' not 'moving'). The 4f5680df test property in test_credentials.md is stale (404s in preview env); use /api/properties?limit=1 to grab a live property id for property-chat regression tests."
+}

@@ -1,19 +1,26 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import {
-  ArrowLeft, Home, Building2, Search, ChevronUp, ChevronDown, X,
+  ArrowLeft, Home, Building2, Briefcase, Search, ChevronUp, ChevronDown, X,
 } from 'lucide-react';
 
 /**
  * Chat top bar (back / live indicator / search toggle / dashboard) +
- * collapsible search bar + property/sublease info bar.
+ * collapsible search bar + property/sublease/job info bar.
  *
  * Owns nothing — every piece of state comes from the parent (Chat.js)
  * because the search query also drives message-bubble highlighting.
+ *
+ * A single chat thread is scoped to ONE of {property, sublease, job}.
+ * Job threads exist for the Jobs Board reverse marketplace when a poster
+ * clicks "Message" on an applicant. The Chat.js parent fetches the job
+ * doc from `/marketplace/jobs/{id}` when the /properties lookup returns
+ * 404, and passes it down here.
  */
 const ChatHeader = ({
   property,
   sublease,
+  job,
   onBack,
   onDashboard,
   searchOpen,
@@ -196,6 +203,45 @@ const ChatHeader = ({
           <div className="text-right shrink-0">
             <span className="inline-flex items-center gap-1 px-2 py-0.5 text-[10px] font-semibold rounded-full bg-[#1E6A6A]/10 text-[#1E6A6A] uppercase tracking-wider">
               {sublease ? t('chat.subleaseLabel') : property.rental_type?.replace('-', ' ')}
+            </span>
+          </div>
+        </div>
+      )}
+
+      {/* Job info bar — rendered when the chat is scoped to a Jobs Board
+          post rather than a property listing. Same visual shape as the
+          property bar so the chat page stays consistent regardless of
+          which surface spawned the thread. */}
+      {!property && job && (
+        <div className="flex items-center gap-3 px-5 py-3 border-b border-gray-100" data-testid="chat-header-job-bar">
+          <div className="w-11 h-11 rounded-xl bg-[#D4AF37]/15 flex items-center justify-center shrink-0">
+            <Briefcase size={20} className="text-[#8A6A15]" />
+          </div>
+          <div className="min-w-0 flex-1">
+            <h3 className="text-sm font-bold text-gray-800 truncate" data-testid="chat-header-job-title">
+              {job.title}
+            </h3>
+            <p className="text-xs text-gray-500 flex items-center gap-1">
+              <span>{job.area}</span>
+              {job.budget_type === 'fixed' && job.budget_amount ? (
+                <>
+                  <span className="text-gray-300 mx-1">•</span>
+                  <span className="font-medium" style={{ color: '#D4AF37' }}>
+                    {job.budget_currency === 'USD' ? '$' : '₪'}
+                    {Number(job.budget_amount).toLocaleString()}
+                  </span>
+                </>
+              ) : (
+                <>
+                  <span className="text-gray-300 mx-1">•</span>
+                  <span className="text-gray-500">Open to offers</span>
+                </>
+              )}
+            </p>
+          </div>
+          <div className="text-right shrink-0">
+            <span className="inline-flex items-center gap-1 px-2 py-0.5 text-[10px] font-semibold rounded-full bg-[#D4AF37]/15 text-[#8A6A15] uppercase tracking-wider">
+              Job
             </span>
           </div>
         </div>
