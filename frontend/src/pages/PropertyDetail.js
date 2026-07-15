@@ -13,6 +13,7 @@ import ImageGallery from '../components/property/ImageGallery';
 import PropertyStats from '../components/property/PropertyStats';
 import AmenitiesList from '../components/property/AmenitiesList';
 import BookingSidebar from '../components/property/BookingSidebar';
+import Breadcrumb from '../components/common/Breadcrumb';
 
 // Parse 'YYYY-MM-DD' as a LOCAL date (avoids the UTC-shift bug where
 // selecting June 2 displays as June 1 in timezones east of UTC).
@@ -266,14 +267,17 @@ const PropertyDetail = () => {
       
       <div className="max-w-7xl mx-auto px-4 md:px-6 pb-12 bg-white">
         <div className="flex items-center justify-between gap-2 mb-6">
-          <button
-            onClick={() => navigate(getBackDestination())}
-            className="flex items-center gap-1.5 md:gap-2 text-xs md:text-sm font-medium hover:text-[#D4AF37] transition-colors min-w-0"
-            data-testid="back-button"
-          >
-            <ArrowLeft size={16} className="md:w-[18px] md:h-[18px] shrink-0" />
-            <span className="truncate">{getBackButtonText()}</span>
-          </button>
+          <div className="min-w-0 flex-1">
+            <Breadcrumb current={property?.title || ''} testId="property-breadcrumb" />
+            <button
+              onClick={() => navigate(getBackDestination())}
+              className="flex items-center gap-1.5 md:gap-2 text-xs md:text-sm font-medium hover:text-[#D4AF37] transition-colors min-w-0"
+              data-testid="back-button"
+            >
+              <ArrowLeft size={16} className="md:w-[18px] md:h-[18px] shrink-0" />
+              <span className="truncate">{getBackButtonText()}</span>
+            </button>
+          </div>
           <button
             onClick={handleShare}
             className="flex items-center gap-1.5 md:gap-2 px-2.5 md:px-4 py-1.5 md:py-2 rounded-lg border border-[#1E6A6A] text-[#1E6A6A] hover:bg-[#1E6A6A]/10 transition-colors text-xs md:text-sm font-medium shrink-0"

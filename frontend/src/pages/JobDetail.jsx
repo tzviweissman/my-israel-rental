@@ -14,6 +14,7 @@ import { API, AuthContext } from '../App';
 import { useTranslation } from 'react-i18next';
 import PageMeta from '../components/PageMeta';
 import { useReturnDestination } from '../hooks/useBackNavigation';
+import Breadcrumb from '../components/common/Breadcrumb';
 
 const JOB_RETURN_PREFIXES = ['/services/jobs'];
 
@@ -88,6 +89,7 @@ const JobDetail = () => {
     <div className="min-h-screen bg-[#FAFAF7]" style={{ paddingTop: 'var(--nav-h, 68px)' }} data-testid="job-detail-page">
       <PageMeta title={`${job.title} · MyIsraelRental`} description={(job.description || '').slice(0, 160)} path={`/services/jobs/${id}`} />
       <div className="max-w-3xl mx-auto px-4 py-8">
+        <Breadcrumb current={job.title} testId="job-breadcrumb" />
         <button onClick={() => navigate(backTo)} className="text-sm text-gray-500 flex items-center gap-1 mb-4" data-testid="job-detail-back">
           <ArrowLeft size={14} /> All jobs
         </button>

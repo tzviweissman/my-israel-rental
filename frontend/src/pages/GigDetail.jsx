@@ -19,6 +19,7 @@ import StarRating from '../components/marketplace/StarRating';
 import { localizedTitle, localizedDescription } from '../utils/gigLocale';
 import { isAvailableNow, getGigCover } from '../utils/gigAvailability';
 import { useReturnDestination, saveReturnPath } from '../hooks/useBackNavigation';
+import Breadcrumb from '../components/common/Breadcrumb';
 
 const GIG_RETURN_PREFIXES = ['/services'];
 
@@ -400,6 +401,7 @@ const GigDetail = () => {
     <div className="min-h-screen bg-[#FAFAF7]" style={{ paddingTop: 'var(--nav-h, 68px)' }} data-testid="gig-detail-page">
       <PageMeta title={`${displayTitle} — MyIsraelRental Services`} description={displayDescription?.slice(0, 155) || `Book ${displayTitle} on MyIsraelRental.`} path={`/services/gig/${id}`} jsonLd={gigJsonLd} />
       <div className="max-w-5xl mx-auto px-4 py-8">
+        <Breadcrumb current={displayTitle} testId="gig-breadcrumb" />
         <button onClick={() => navigate(backTo)} className="text-sm text-gray-600 flex items-center gap-1 mb-4 hover:text-[#1E6A6A]" data-testid="gig-back">
           <ArrowLeft size={14} /> Back to services
         </button>

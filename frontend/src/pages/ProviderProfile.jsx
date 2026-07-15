@@ -12,6 +12,7 @@ import { useTranslation } from 'react-i18next';
 import PageMeta from '../components/PageMeta';
 import StarRating from '../components/marketplace/StarRating';
 import { useReturnDestination, saveReturnPath } from '../hooks/useBackNavigation';
+import Breadcrumb from '../components/common/Breadcrumb';
 
 const PROVIDER_RETURN_PREFIXES = ['/services'];
 
@@ -73,6 +74,7 @@ const ProviderProfile = () => {
     <div className="min-h-screen bg-[#FAFAF7]" style={{ paddingTop: 'var(--nav-h, 68px)' }} data-testid="provider-profile">
       <PageMeta title={`${data.name} — Services on MyIsraelRental`} description={data.tagline || data.bio?.slice(0, 155) || `Services from ${data.name}`} path={`/services/provider/${userId}`} jsonLd={providerJsonLd} />
       <div className="max-w-5xl mx-auto px-4 py-8">
+        <Breadcrumb current={data.name} testId="provider-breadcrumb" />
         <button onClick={() => navigate(backTo)} className="text-sm text-gray-600 flex items-center gap-1 mb-4 hover:text-[#1E6A6A]" data-testid="provider-back">
           <ArrowLeft size={14} /> Back to services
         </button>
