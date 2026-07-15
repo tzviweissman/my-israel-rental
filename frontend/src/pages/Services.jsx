@@ -28,6 +28,7 @@ import NearbyDensityBar from '../components/common/NearbyDensityBar';
 import { localizedTitle } from '../utils/gigLocale';
 import { isAvailableNow, getGigCover } from '../utils/gigAvailability';
 import ServicesHeroSearch from '../components/marketplace/ServicesHeroSearch';
+import { saveReturnPath } from '../hooks/useBackNavigation';
 import ServicesHeroTitle from '../components/marketplace/ServicesHeroTitle';
 
 const TEAL = '#1E6A6A';
@@ -827,6 +828,7 @@ const Services = () => {
                         onClick={() => {
                           setActiveMapId(gig.id);
                           if (activeMapId === gig.id) {
+                            saveReturnPath();
                             navigate(`/services/gig/${gig.id}`);
                           }
                         }}
@@ -856,7 +858,7 @@ const Services = () => {
                     <GigCard
                       key={gig.id}
                       gig={gig}
-                      onClick={() => navigate(`/services/gig/${gig.id}`)}
+                      onClick={() => { saveReturnPath(); navigate(`/services/gig/${gig.id}`); }}
                       i18n={i18n}
                       t={t}
                     />
@@ -872,7 +874,7 @@ const Services = () => {
               <GigCard
                 key={gig.id}
                 gig={gig}
-                onClick={() => navigate(`/services/gig/${gig.id}`)}
+                onClick={() => { saveReturnPath(); navigate(`/services/gig/${gig.id}`); }}
                 i18n={i18n}
                 t={t}
               />

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { useParams, useNavigate, useLocation } from 'react-router-dom';
+import { useParams, useNavigate, useLocation, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import axios from 'axios';
 import { API, AuthContext } from '../App';
@@ -8,6 +8,7 @@ import DefaultImageBadge from '../components/property/DefaultImageBadge';
 import VideoCoverBadge from '../components/property/VideoCoverBadge';
 import { getCoverImage } from '../utils/coverImage';
 import { sizedImage } from '../utils/cdnImage';
+import { saveReturnPath } from '../hooks/useBackNavigation';
 
 const RENTAL_TYPES = [
   { key: 'all', label: 'All' },
@@ -23,10 +24,26 @@ const ManagerPage = () => {
   const location = useLocation();
   const { t } = useTranslation();
   const { user } = useContext(AuthContext);
+  const [searchParams, setSearchParams] = useSearchParams();
   const [data, setData] = useState(null);
-  const [activeType, setActiveType] = useState('all');
-  const [activeArea, setActiveArea] = useState('all');
-  const [activeBedrooms, setActiveBedrooms] = useState('all');
+
+  // Filters live in the URL (same pattern as Properties.js / Stays.jsx) so
+  // that saving path+search before drilling into a listing gives us a
+  // "Back to Listings" that restores the exact filtered view — including
+  // rental type, area, and bedrooms.
+  const activeType = searchParams.get('type') || 'all';
+  const activeArea = searchParams.get('area') || 'all';
+  const activeBedrooms = searchParams.get('bedrooms') || 'all';
+
+  const updateFilter = (key, value) => {
+    const next = new URLSearchParams(searchParams);
+    if (!value || value === 'all') next.delete(key);
+    else next.set(key, value);
+    setSearchParams(next, { replace: true });
+  };
+  const setActiveType = (v) => updateFilter('type', v);
+  const setActiveArea = (v) => updateFilter('area', v);
+  const setActiveBedrooms = (v) => updateFilter('bedrooms', v);
 
   useEffect(() => {
     fetchManagerData();
@@ -283,7 +300,7 @@ const ManagerPage = () => {
               key={property.id}
               className="property-card"
               onClick={() => {
-                sessionStorage.setItem('previousPath', window.location.pathname);
+                saveReturnPath();
                 navigate(`/property/${property.id}`);
               }}
               data-testid={`manager-property-${property.id}`}

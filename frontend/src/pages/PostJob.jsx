@@ -74,8 +74,8 @@ const PostJob = () => {
     <div className="min-h-screen bg-[#FAFAF7]" style={{ paddingTop: 'var(--nav-h, 68px)' }} data-testid="post-job-page">
       <PageMeta title="Post a job | MyIsraelRental" description="Post a job on MyIsraelRental — service providers reach out to you." path="/services/post-job" />
       <div className="max-w-2xl mx-auto px-4 py-8">
-        <button onClick={() => navigate('/services')} className="text-sm text-gray-500 flex items-center gap-1 mb-4" data-testid="post-job-back">
-          <ArrowLeft size={14} /> Back to Services
+        <button onClick={() => navigate('/services/jobs')} className="text-sm text-gray-500 flex items-center gap-1 mb-4" data-testid="post-job-back">
+          <ArrowLeft size={14} /> Back to Jobs
         </button>
         <h1 className="text-2xl sm:text-3xl font-bold mb-1" style={{ fontFamily: 'Playfair Display' }}>
           Post a job

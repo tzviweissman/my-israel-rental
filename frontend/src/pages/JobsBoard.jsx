@@ -12,6 +12,7 @@ import { toast } from 'sonner';
 import { Loader2, MapPin, Coins, Calendar, Plus, MessageSquare, Bell, BellRing } from 'lucide-react';
 import { API, AuthContext } from '../App';
 import PageMeta from '../components/PageMeta';
+import { saveReturnPath } from '../hooks/useBackNavigation';
 
 const JobsBoard = () => {
   const { token } = useContext(AuthContext);
@@ -182,7 +183,7 @@ const JobsBoard = () => {
           </div>
         ) : (
           <div className="grid gap-3">
-            {jobs.map((j) => <JobRow key={j.id} job={j} onClick={() => navigate(`/services/jobs/${j.id}`)} />)}
+            {jobs.map((j) => <JobRow key={j.id} job={j} onClick={() => { saveReturnPath(); navigate(`/services/jobs/${j.id}`); }} />)}
           </div>
         )}
       </div>

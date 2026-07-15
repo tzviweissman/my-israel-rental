@@ -1,0 +1,36 @@
+{
+  "summary": "Frontend regression tests for the useBackNavigation refactor (filter-preservation on Back). All 9 flows pass end-to-end against the live preview URL.",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "tests_run": {
+    "properties_long_term_min_bedrooms_2_roundtrip": "PASS — previousPath saved as /properties/long-term?min_bedrooms=2; Back button restores the filter",
+    "stays_area_jerusalem_roundtrip": "PASS — sessionStorage.previousPath=/stays?area=Jerusalem; PropertyDetail Back restores /stays?area=Jerusalem (verifies isFromListings now matches /stays, not just /properties/)",
+    "manager_page_area_filter_url_mirror_and_roundtrip": "PASS — selecting Area=Jerusalem updates URL to ?area=Jerusalem, previousPath saved with query, Back restores URL AND dropdown reflects value=Jerusalem",
+    "services_gig_back_preservation": "PASS — /services previousPath saved; gig-back returns to /services",
+    "gig_to_provider_to_gig_via_provider_back": "PASS — provider-back returns to the exact /services/gig/{id}, not /services",
+    "jobs_board_category_roundtrip": "PASS — /services/jobs?category=home-repair preserved after opening job detail and clicking job-detail-back",
+    "postjob_back_button_goes_to_services_jobs": "PASS — [data-testid=post-job-back] now navigates to /services/jobs (was /services)",
+    "gigdetail_fallback_ignores_stale_dashboard_previousPath": "PASS — with previousPath=/dashboard, gig-back falls back to /services (whitelist works)",
+    "jobdetail_fallback_ignores_stale_dashboard_previousPath": "PASS — with previousPath=/dashboard, job-detail-back falls back to /services/jobs"
+  },
+  "test_report_links": ["/app/tests/test_back_navigation.py"],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "useBackNavigation hook is well-scoped and defensively coded (try/catch around sessionStorage for privacy modes). No issues.",
+    "ManagerPage now correctly mirrors area/bedrooms/type into URL via useSearchParams so round-trips are safe.",
+    "PropertyDetail.isFromListings now covers /properties/, /stays, /kosher-stays-in-israel — verified via stays round-trip.",
+    "Whitelist-based useReturnDestination prevents cross-domain hijack (verified: /dashboard is ignored on both gig-back and job-detail-back)."
+  ],
+  "updated_files": ["/app/tests/test_back_navigation.py"],
+  "success_rate": {"backend": "N/A (not tested — per request)", "frontend": "100% (9/9)"},
+  "test_credentials": "renter@test.com / Test1234! (used for PostJob back test); owner id b0a59336-f059-4d91-b608-6bbedc63a775 used as /manager/:id target.",
+  "seed_data_creation": "None — used existing seeded data.",
+  "retest_needed": false,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "Reusable regression suite at /app/tests/test_back_navigation.py. Run with `python /app/tests/test_back_navigation.py` (needs playwright installed). Uses REACT_APP_BACKEND_URL. Note: /stays cards use data-testid=stays-card-<id> (NOT stays-peek-card-<id> which only shows in peek/map view). /properties filter key in URL is `min_bedrooms` not `bedrooms`. /services categories exist but the /api/services/categories endpoint returned 404 — CategoryCarousel items are only rendered client-side; verify via UI click, not API.",
+  "notes_for_main_agent": "All requested back-navigation flows work correctly. The refactor is solid. Only nit: sessionStorage.previousPath persists across full new sessions until overwritten — the whitelist approach mitigates that, and tests 8/9 confirm the fallback path works."
+}

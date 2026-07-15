@@ -39,6 +39,7 @@ import QuickChips from '../components/search/QuickChips';
 import NotifyMeCard from '../components/NotifyMeCard';
 import PageMeta from '../components/PageMeta';
 import useFavorites from '../hooks/useFavorites';
+import { saveReturnPath } from '../hooks/useBackNavigation';
 
 const API = process.env.REACT_APP_BACKEND_URL + '/api';
 
@@ -652,7 +653,7 @@ const Stays = ({ landing = null }) => {
                         // native map-app behaviour ("tap to preview,
                         // tap again to open").
                         if (activeMapId === p.id) {
-                          sessionStorage.setItem('previousPath', '/stays' + window.location.search);
+                          saveReturnPath();
                           navigate(`/property/${p.id}`);
                         }
                       }}
@@ -696,7 +697,7 @@ const Stays = ({ landing = null }) => {
                     onToggleLike={(e) => toggleLike(p.id, e)}
                     displayCurrency={priceCurrency}
                     onClick={() => {
-                      sessionStorage.setItem('previousPath', '/stays' + window.location.search);
+                      saveReturnPath();
                       navigate(`/property/${p.id}`);
                     }}
                   />
@@ -770,7 +771,7 @@ const Stays = ({ landing = null }) => {
                 onToggleLike={(e) => toggleLike(p.id, e)}
                 displayCurrency={priceCurrency}
                 onClick={() => {
-                  sessionStorage.setItem('previousPath', '/stays' + window.location.search);
+                  saveReturnPath();
                   navigate(`/property/${p.id}`);
                 }}
               />
@@ -809,7 +810,7 @@ const Stays = ({ landing = null }) => {
               onToggleLike={toggleLike}
               displayCurrency={priceCurrency}
               onCardClick={(id) => {
-                sessionStorage.setItem('previousPath', '/stays' + window.location.search);
+                saveReturnPath();
                 navigate(`/property/${id}`);
               }}
               onSeeAll={() => {

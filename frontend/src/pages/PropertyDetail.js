@@ -73,7 +73,15 @@ const PropertyDetail = () => {
   const previousPath = sessionStorage.getItem('previousPath') || '/';
   const isFromDashboard = previousPath.includes('/dashboard');
   const isFromManager = previousPath.includes('/manager/');
-  const isFromListings = previousPath.includes('/properties/');
+  // Match the broader Stays surface too — /stays and its SEO landing
+  // variants (e.g. /kosher-stays-in-israel) — plus the legacy
+  // /properties/<type> pages. Any of these should return the renter to
+  // their exact filtered view. Missing /stays here was the "filters
+  // wiped on back" bug.
+  const isFromListings =
+    previousPath.includes('/properties/') ||
+    previousPath.startsWith('/stays') ||
+    previousPath.startsWith('/kosher-stays-in-israel');
   
   // Determine back button destination and text
   const getBackDestination = () => {

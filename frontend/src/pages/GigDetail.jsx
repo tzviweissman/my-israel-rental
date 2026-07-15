@@ -18,6 +18,9 @@ import PageMeta from '../components/PageMeta';
 import StarRating from '../components/marketplace/StarRating';
 import { localizedTitle, localizedDescription } from '../utils/gigLocale';
 import { isAvailableNow, getGigCover } from '../utils/gigAvailability';
+import { useReturnDestination, saveReturnPath } from '../hooks/useBackNavigation';
+
+const GIG_RETURN_PREFIXES = ['/services'];
 
 const buildWhatsAppUrl = (raw, message) => {
   const digits = (raw || '').replace(/[^\d]/g, '');
@@ -219,6 +222,11 @@ const GigDetail = () => {
   const navigate = useNavigate();
   const { t, i18n } = useTranslation();
   const { token, user } = useContext(AuthContext);
+  // Compute where "Back to services" should return the visitor. If they
+  // came from a filtered /services grid (or from an adjacent
+  // /services/provider/... or /services/jobs page), send them back to
+  // that exact URL. Otherwise fall through to the plain /services hub.
+  const backTo = useReturnDestination(GIG_RETURN_PREFIXES, '/services');
   const [gig, setGig] = useState(null);
   const [loading, setLoading] = useState(true);
   const [tier, setTier] = useState(null);
@@ -392,7 +400,7 @@ const GigDetail = () => {
     <div className="min-h-screen bg-[#FAFAF7]" style={{ paddingTop: 'var(--nav-h, 68px)' }} data-testid="gig-detail-page">
       <PageMeta title={`${displayTitle} — MyIsraelRental Services`} description={displayDescription?.slice(0, 155) || `Book ${displayTitle} on MyIsraelRental.`} path={`/services/gig/${id}`} jsonLd={gigJsonLd} />
       <div className="max-w-5xl mx-auto px-4 py-8">
-        <button onClick={() => navigate('/services')} className="text-sm text-gray-600 flex items-center gap-1 mb-4 hover:text-[#1E6A6A]" data-testid="gig-back">
+        <button onClick={() => navigate(backTo)} className="text-sm text-gray-600 flex items-center gap-1 mb-4 hover:text-[#1E6A6A]" data-testid="gig-back">
           <ArrowLeft size={14} /> Back to services
         </button>
 
@@ -572,7 +580,7 @@ const GigDetail = () => {
                 <p className="font-semibold text-sm">{gig.provider?.name}</p>
                 <p className="text-xs text-gray-500">{gig.provider?.tagline || gig.provider?.bio || '\u00A0'}</p>
               </div>
-              <button onClick={() => navigate(`/services/provider/${gig.provider?.user_id}`)} className="text-xs font-semibold text-[#1E6A6A] hover:underline" data-testid="gig-view-provider">
+              <button onClick={() => { saveReturnPath(); navigate(`/services/provider/${gig.provider?.user_id}`); }} className="text-xs font-semibold text-[#1E6A6A] hover:underline" data-testid="gig-view-provider">
                 View profile
               </button>
             </div>

@@ -14,6 +14,7 @@ import PropertyCard from '../components/property/PropertyCard';
 import HolidayBanner from '../components/property/HolidayBanner';
 import FiltersPanel, { PRICE_MAX } from '../components/property/FiltersPanel';
 import PageMeta from '../components/PageMeta';
+import { saveReturnPath } from '../hooks/useBackNavigation';
 
 // Per-rental-type SEO copy. Each entry maps the URL segment (e.g.
 // `long-term`) to a unique title + meta description so search engines
@@ -526,7 +527,7 @@ const Properties = () => {
     // Persist BOTH pathname and search so PropertyDetail's "Back to Listings"
     // returns the renter to the exact filtered view they came from — not
     // just /properties/<type> with all filters wiped.
-    sessionStorage.setItem('previousPath', window.location.pathname + window.location.search);
+    saveReturnPath();
     // Sublease cards route to the standalone sublease detail page. This is
     // independent of the underlying property — if the original was deleted,
     // the sublease still has a working detail view (option-b detach).
@@ -704,7 +705,7 @@ const Properties = () => {
                 <button
                   key={slug}
                   onClick={() => {
-                    sessionStorage.setItem('previousPath', window.location.pathname);
+                    saveReturnPath();
                     navigate(`/properties/${slug}`);
                   }}
                   className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold transition-all hover:shadow-md active:scale-[0.97]"
