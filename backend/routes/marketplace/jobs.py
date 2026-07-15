@@ -389,7 +389,14 @@ async def list_applications(job_id: str, user=Depends(verify_token)):
 
     # Enrich with provider display info in one round-trip.
     provider_ids = list({a["provider_user_id"] for a in apps})
-    users = {u["_id"]: u for u in await db.users.find({"_id": {"$in": provider_ids}}).to_list(len(provider_ids))}
+    # Users store their UUID in the `id` field (mirror of user_id used
+    # everywhere else in the app); `_id` is the raw Mongo ObjectId which
+    # nothing else references. Key the dict by `id` to match how
+    # provider_user_id is written to applications.
+    users = {
+        u["id"]: u
+        async for u in db.users.find({"id": {"$in": provider_ids}})
+    }
     providers = {p["user_id"]: p for p in await db.marketplace_providers.find({"user_id": {"$in": provider_ids}}).to_list(len(provider_ids))}
     out: list[dict[str, Any]] = []
     for a in apps:
@@ -400,7 +407,11 @@ async def list_applications(job_id: str, user=Depends(verify_token)):
         row["id"] = a["_id"]
         row["provider"] = {
             "user_id": pid,
-            "display_name": p.get("display_name") or u.get("full_name") or "Provider",
+            # The users collection stores the readable label as `name`
+            # (not `full_name`). Prefer the provider profile's
+            # display_name when set, otherwise the user's name, and
+            # finally a neutral fallback so the row never renders blank.
+            "display_name": p.get("display_name") or u.get("name") or "Provider",
             "response_bucket": p.get("response_bucket"),
         }
         out.append(row)
