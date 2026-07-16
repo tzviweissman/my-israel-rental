@@ -2,16 +2,14 @@
 <html lang="en">
     <head>
         <meta charset="utf-8" />
-        <!-- Lock viewport zoom on mobile.
-             `maximum-scale=1, user-scalable=no` prevents:
-               • iOS pinch-to-zoom from breaking sticky UI (bottom nav / FABs)
-               • accidental double-tap zoom on interactive elements
-               • lingering zoom state persisting between routes
-             Combined with the min-16px input font-size rule in index.css,
-             this fully removes the "form focus zooms the whole page" bug.
-             Accessibility note: OS-level zoom (Settings → Display → Text
-             size) is unaffected — we're only disabling ad-hoc pinch. -->
-        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
+        <!-- Standard responsive viewport. Pinch-to-zoom is intentionally
+             ALLOWED for accessibility (WCAG 2.1 SC 1.4.4 / 1.4.10) —
+             users with low vision must be able to zoom the page. The
+             "input focus auto-zooms the whole page" bug is prevented
+             separately by the 16px min-font-size rule on all form
+             controls in index.css (@media max-width: 640px), so we
+             don't need a blanket zoom lock here. -->
+        <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
         <meta name="theme-color" content="#1E6A6A" />
         <!-- NOTE: per-route <title>, <meta name="description">, og:* and
              twitter:* tags are now injected by react-helmet-async on each
@@ -45,7 +43,14 @@
              from PageMeta. -->
         <title>MyIsraelRental — Rentals across Israel</title>
         <script>window.addEventListener("error",function(e){if(e.error instanceof DOMException&&e.error.name==="DataCloneError"&&e.message&&e.message.includes("PerformanceServerTiming")){e.stopImmediatePropagation();e.preventDefault()}},true);</script>
-        <script src="https://assets.emergent.sh/scripts/emergent-main.js"></script>
+        <!-- Emergent visual-edits tooling. `defer` so it doesn't block
+             HTML parsing (previously synchronous, was the largest
+             head-script bottleneck on cold paint). The inline error
+             handler above doesn't depend on this script, and PostHog
+             lower in <body> already handles itself. `defer` (over
+             `async`) is chosen so the tooling still executes after
+             the DOM has been parsed — matches its expectations. -->
+        <script defer src="https://assets.emergent.sh/scripts/emergent-main.js"></script>
     </head>
     <body>
         <noscript>You need to enable JavaScript to run this app.</noscript>

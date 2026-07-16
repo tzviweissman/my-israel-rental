@@ -17,6 +17,7 @@ UTC = timezone.utc
 
 from dotenv import load_dotenv
 from fastapi import APIRouter, FastAPI
+from fastapi.middleware.gzip import GZipMiddleware
 from fastapi.staticfiles import StaticFiles
 from starlette.middleware.cors import CORSMiddleware
 
@@ -111,6 +112,14 @@ app.add_middleware(
     allow_headers=["*"],
     expose_headers=["Content-Disposition", "X-Build-Id"],
 )
+
+# Compress every JSON response ≥500 bytes so property lists, gig feeds,
+# and other large payloads don't ship uncompressed. The 500-byte floor
+# avoids the tiny overhead of gzipping already-small responses (e.g.
+# a plain {"ok": true}) while still catching everything the client
+# would actually benefit from. Uses Accept-Encoding negotiation so
+# clients that don't want gzip (rare) still get plain JSON.
+app.add_middleware(GZipMiddleware, minimum_size=500)
 
 
 # Stable build-id stamp for the lifetime of THIS backend process. The
