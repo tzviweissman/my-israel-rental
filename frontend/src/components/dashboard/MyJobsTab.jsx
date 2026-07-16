@@ -109,7 +109,8 @@ const ApplicationRow = ({ app, jobId, onMessage }) => {
       </p>
       <button
         onClick={() => onMessage(app)}
-        className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-semibold border border-[#1E6A6A]/25 text-[#1E6A6A] bg-white hover:bg-[#1E6A6A] hover:text-white transition-colors"
+        disabled={!app.provider?.user_id}
+        className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-semibold border border-[#1E6A6A]/25 text-[#1E6A6A] bg-white hover:bg-[#1E6A6A] hover:text-white transition-colors disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-white disabled:hover:text-[#1E6A6A]"
         data-testid={`applicant-message-btn-${app.id}`}
       >
         <MessageCircle size={11} /> Message
