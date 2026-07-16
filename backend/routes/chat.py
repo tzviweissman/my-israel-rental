@@ -195,7 +195,20 @@ async def _send_chat_email_safe(
         prop = await db.properties.find_one(
             {"id": property_id}, {"_id": 0, "title": 1}
         )
-        property_title = (prop or {}).get("title") or "your conversation"
+        # Fall back to the Jobs Board when the id doesn't match a live
+        # property — chat threads spawned from a poster clicking
+        # "Message" on an applicant are keyed by the job UUID. Prefixed
+        # with "Job:" so the email subject reads naturally:
+        #   "New message about Job: Need a barber for a wedding"
+        if not prop:
+            job = await db.marketplace_jobs.find_one(
+                {"_id": property_id}, {"_id": 0, "title": 1}
+            )
+            property_title = (
+                f"Job: {job['title']}" if job and job.get("title") else "your conversation"
+            )
+        else:
+            property_title = prop.get("title") or "your conversation"
 
         sent = await send_chat_message_email(
             to_email=receiver["email"],
