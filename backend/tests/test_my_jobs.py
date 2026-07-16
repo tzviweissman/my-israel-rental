@@ -50,7 +50,7 @@ def _headers(token):
 def created_job(renter_token):
     payload = {
         "title": "TEST_ MyJobsTab backend job",
-        "category": "home-repair",
+        "category": "home-services-repair",
         "description": "Testing MyJobsTab flows end to end",
         "budget_type": "open",
         "budget_currency": "ILS",

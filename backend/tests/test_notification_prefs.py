@@ -90,11 +90,11 @@ class TestSnooze:
     def test_snooze_valid_category(self, renter_headers):
         r = requests.post(
             f"{BASE_URL}/api/marketplace/notification-preferences/snooze",
-            headers=renter_headers, json={"category": "home-repair"}, timeout=15,
+            headers=renter_headers, json={"category": "home-services-repair"}, timeout=15,
         )
         assert r.status_code == 200, r.text
         data = r.json()
-        assert data["category"] == "home-repair"
+        assert data["category"] == "home-services-repair"
         until = datetime.fromisoformat(data["until"])
         # ensure ~7 days ahead (allow +/- 2 days slop)
         delta = until - datetime.now(timezone.utc)
@@ -105,7 +105,7 @@ class TestSnooze:
             f"{BASE_URL}/api/marketplace/notification-preferences",
             headers=renter_headers, timeout=15,
         ).json()
-        assert any(s["category"] == "home-repair" for s in g["snoozed_categories"])
+        assert any(s["category"] == "home-services-repair" for s in g["snoozed_categories"])
 
     def test_snooze_unknown_category_400(self, renter_headers):
         r = requests.post(
@@ -187,7 +187,7 @@ class TestDeeplinkConsume:
 
     def test_wrong_purpose_400(self):
         from utils.notification_tokens import create_snooze_token
-        tok = create_snooze_token("e4d3695f-6090-4499-9912-9d253d3115a4", "home-repair")
+        tok = create_snooze_token("e4d3695f-6090-4499-9912-9d253d3115a4", "home-services-repair")
         r = requests.post(
             f"{BASE_URL}/api/auth/deeplink-consume",
             json={"token": tok}, timeout=15,
@@ -228,14 +228,14 @@ class TestInstantEmailPath:
             db = client[os.environ.get("DB_NAME", "test_database")]
             existing = await db.marketplace_gigs.find_one({
                 "provider_user_id": "e4d3695f-6090-4499-9912-9d253d3115a4",
-                "category": "home-repair",
+                "category": "home-services-repair",
                 "status": "published",
             })
             if not existing:
                 await db.marketplace_gigs.insert_one({
                     "_id": str(uuid.uuid4()),
                     "provider_user_id": "e4d3695f-6090-4499-9912-9d253d3115a4",
-                    "category": "home-repair",
+                    "category": "home-services-repair",
                     "status": "published",
                     "title": "TEST_ home repair gig",
                     "description": "Test gig for notif tests",
@@ -251,7 +251,7 @@ class TestInstantEmailPath:
             )
         asyncio.run(_do())
 
-    def _post_job(self, owner_headers, area="Tel Aviv", category="home-repair"):
+    def _post_job(self, owner_headers, area="Tel Aviv", category="home-services-repair"):
         payload = {
             "title": "TEST_ Fix leaky pipe",
             "description": "Kitchen tap dripping",
@@ -326,7 +326,7 @@ class TestInstantEmailPath:
         # Snooze home-repair
         r = requests.post(
             f"{BASE_URL}/api/marketplace/notification-preferences/snooze",
-            headers=renter_headers, json={"category": "home-repair"}, timeout=15,
+            headers=renter_headers, json={"category": "home-services-repair"}, timeout=15,
         )
         assert r.status_code == 200
         owner_tok = _login(OWNER)

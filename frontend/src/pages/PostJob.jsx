@@ -16,6 +16,7 @@ import { toast } from 'sonner';
 import { Loader2, ArrowLeft, ArrowRight } from 'lucide-react';
 import { API, AuthContext } from '../App';
 import PageMeta from '../components/PageMeta';
+import { SUBCATEGORIES } from '../lib/categories';
 
 const PostJob = () => {
   const { token } = useContext(AuthContext);
@@ -25,6 +26,7 @@ const PostJob = () => {
   const [form, setForm] = useState({
     title: '',
     category: '',
+    subcategory: '',
     description: '',
     budget_type: 'open',
     budget_amount: '',
@@ -101,13 +103,16 @@ const PostJob = () => {
           </Field>
 
           <Field label="Category" required>
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+            {/* 4-column grid on md+ so 15 categories fit cleanly in 4
+                rows without cramping the labels; falls back to 2 on
+                mobile where truncation would hurt more than height. */}
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
               {categories.map((c) => (
                 <button
                   key={c.slug}
                   type="button"
-                  onClick={() => set({ category: c.slug })}
-                  className={`px-3 py-2 rounded-lg text-xs font-semibold border ${
+                  onClick={() => set({ category: c.slug, subcategory: '' })}
+                  className={`px-3 py-2 rounded-lg text-xs font-semibold border transition-colors ${
                     form.category === c.slug ? 'bg-black text-[#D4AF37] border-black' : 'bg-white text-gray-700 border-gray-200 hover:border-[#D4AF37]'
                   }`}
                   data-testid={`post-job-cat-${c.slug}`}
@@ -117,6 +122,31 @@ const PostJob = () => {
               ))}
             </div>
           </Field>
+
+          {/* Optional subcategory picker — only shown for the four
+              merged categories that carry sub-buckets. Providers who
+              tagged their gigs with a matching subcategory get a
+              tighter match, but the field is never required so a
+              vague poster still lands somewhere sensible. */}
+          {SUBCATEGORIES[form.category] && (
+            <Field label="Specific type" hint="Optional — helps us match the right provider.">
+              <div className="flex flex-wrap gap-2">
+                {SUBCATEGORIES[form.category].map((s) => (
+                  <button
+                    key={s.slug}
+                    type="button"
+                    onClick={() => set({ subcategory: form.subcategory === s.slug ? '' : s.slug })}
+                    className={`px-3 py-1.5 rounded-full text-xs font-semibold border transition-colors ${
+                      form.subcategory === s.slug ? 'bg-[#1E6A6A] text-white border-[#1E6A6A]' : 'bg-white text-gray-700 border-gray-200 hover:border-[#1E6A6A]'
+                    }`}
+                    data-testid={`post-job-sub-${s.slug}`}
+                  >
+                    {s.label}
+                  </button>
+                ))}
+              </div>
+            </Field>
+          )}
 
           <Field label="Describe what you need" required hint="Min 10 characters. The more detail, the better the applicant quality.">
             <textarea

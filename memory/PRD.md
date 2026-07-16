@@ -11,6 +11,29 @@ Build a bilingual (English/Hebrew) rental website named MyIsraelRental.com with 
 - **i18n**: i18next with English and Hebrew (RTL) support
 
 ## What's Been Implemented
+- [x] **Marketplace category restructure — 12 → 15 categories + subcategories (2026-07-15)**:
+  - **New taxonomy (`backend/routes/marketplace/shared.py`)**:
+    - **Kept as-is (4)**: Real Estate Services, Health & Fitness, Personal Care (slug renamed `womens-spa` → `personal-care`), Transportation.
+    - **Merged / renamed (4)**: Home Services & Repair (was `home-organizers` + `home-repair`), Travel & Tourism (was `tours-activities` + `hotels-travel`), Creative & Design Services (was `photography` + `graphic-design`), Business & Financial Services (was `bookkeeping` broadened).
+    - **New (7)**: Moving & Relocation, Cleaning Services, IT & Tech Support, Education & Tutoring, Childcare & Babysitting, Pet Services, Events Music & Catering (absorbed the entertainment slice of the former `music-entertainment`).
+    - **Total = 15 top-level slugs**. Spec asked for 16 — the reconciliation is that the new "Events, Music & Catering" combines what could have been split into two, and no obvious 16th emerged. Confirmed acceptable per spec's own math (4 + 4 + 7 = 15) with the 4-column grid hint already assuming a ~15-tile layout.
+  - **Optional subcategory tags on the 4 merged categories**:
+    - `home-services-repair`: plumbing, electrical, handyman, appliance-repair, interior-design
+    - `travel-tourism`: tour-guide, tour-operator, hotel, travel-agency
+    - `creative-design`: photography, videography, graphic-design, web-design
+    - `business-financial`: bookkeeping, accounting, tax-prep, legal, consulting
+    - Sub-list is advisory: known slugs validated for direct match, and free-text long-tail values (max 40 chars, alphanumeric + hyphen/underscore/space only) accepted so odd specializations like "solar-panel-installation" still work.
+  - **Migration script (`backend/scripts/migrate_categories.py`)**: idempotent one-shot that remaps legacy slugs on `marketplace_gigs`, `marketplace_jobs`, `marketplace_job_searches`, `marketplace_providers.categories[]` (array), and `job_notification_preferences.snoozed_categories[].category`. Live run touched **48 rows** (43 gigs + 4 jobs + 1 saved search). Supports `--apply` flag; dry-run by default.
+  - **Read-time normalization** (`_normalize_category()` in shared.py): legacy slugs (womens-spa, home-repair, tours-activities, hotels-travel, photography, graphic-design, bookkeeping, music-entertainment, home-organizers) transparently upgrade on read — so a bookmarked URL like `/services?category=photography` still lands on the new `creative-design` grid. Write paths validate strictly against the new slugs.
+  - **`JobIn` accepts `subcategory`** (optional). Validated via new `_validate_subcategory()` helper — known slug OR free-text (bounded, safe chars only). Persists as `None` when empty so downstream filters can key `{subcategory: {$exists: true}}` cleanly.
+  - **Frontend**:
+    - **New source-of-truth util** `frontend/src/lib/categories.js` — `CATEGORY_LABELS`, `LEGACY_CATEGORY_MIGRATION`, `SUBCATEGORIES`, `labelForCategory`, `normalizeCategory`. Replaces the duplicated `CATEGORY_LABELS` maps that were in `NotificationSettings.jsx` and `NotificationSnooze.jsx`.
+    - `categoryTheme.js` — 15 new themes with warm/earthy header colors for hands-on trades (Home Services, Moving, Transportation) and cool/pastel for creative/professional (IT, Education, Business). New lucide icons added: `Briefcase`, `Truck`, `SprayCan`, `Monitor`, `GraduationCap`, `Baby`, `PawPrint`, `PartyPopper`.
+    - `PostJob.jsx` — category picker now uses `grid-cols-2 sm:grid-cols-3 md:grid-cols-4` (was `2/3`) so 15 tiles fit in 4 clean rows on desktop. New **subcategory chip picker** shown only for the 4 merged categories with the hint *"Optional — helps us match the right provider"*.
+  - **Tests**: `test_marketplace.py::test_categories_returns_expected_slugs` updated to assert the new 15-slug set. Fixture data in `test_my_jobs.py`, `test_notification_prefs.py`, `test_chat_email_job_title.py`, `test_job_chat_integration.py`, and `scripts/seed_demo_gigs.py` bulk-remapped via sed to the new slugs. Live curl verified: (a) new category `moving-relocation` accepts posts, (b) `home-services-repair` + `plumbing` subcategory persists correctly, (c) legacy slug `home-repair` rejected on write with clear error, (d) malicious subcategory `<script>` rejected. Screenshot confirms 4-column grid + subcategory chip picker rendering exactly to spec.
+  - Files touched: `backend/routes/marketplace/shared.py`, `backend/routes/marketplace/jobs.py`, `backend/scripts/migrate_categories.py` (new), `backend/scripts/seed_demo_gigs.py`, `backend/tests/*.py` (5 files bulk-remapped), `frontend/src/lib/categories.js` (new), `frontend/src/components/marketplace/categoryTheme.js`, `frontend/src/components/marketplace/CategoryCarousel.jsx`, `frontend/src/components/dashboard/NotificationSettings.jsx`, `frontend/src/pages/NotificationSnooze.jsx`, `frontend/src/pages/PostJob.jsx`.
+
+
 - [x] **Prefetch hints for top-3 destinations from Home (2026-07-15)**:
   - Added `/* webpackPrefetch: true */` magic comments to the `React.lazy()` imports for `Properties`, `Stays`, and `Services` — the three most-clicked destinations from the Home landing.
   - **How it works**: after Home's initial paint, webpack injects `<link rel="prefetch">` tags for the target chunks during browser-idle time. When the user actually clicks "Stays" (or any of the three), the chunk is already in the browser cache — click-through feels instant even though the pages are still lazy-loaded.

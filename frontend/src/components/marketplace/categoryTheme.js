@@ -14,15 +14,11 @@
  */
 const un = (id) => `https://images.unsplash.com/${id}?auto=format&fit=crop&w=520&q=75`;
 
+// Slugs match backend/routes/marketplace/shared.py CATEGORIES exactly.
+// If you change the taxonomy there, update this map (missing slugs fall
+// through to DEFAULT_THEME so nothing renders blank).
 const CATEGORY_THEME = {
-  'tours-activities': {
-    header: '#3E5A2A', body: '#DCE9B8',
-    icon: 'Map', iconColor: '#3E5A2A',
-  },
-  'music-entertainment': {
-    header: '#4A1D5B', body: '#E4CFEC',
-    icon: 'Music', iconColor: '#4A1D5B',
-  },
+  // --- Kept as-is from the 2026-07-01 taxonomy ---
   'real-estate-services': {
     header: '#1E4A6A', body: '#C6DAEA',
     icon: 'Home', iconColor: '#1E4A6A',
@@ -35,35 +31,55 @@ const CATEGORY_THEME = {
     header: '#5A3720', body: '#F3D7B5',
     icon: 'Car', iconColor: '#5A3720',
   },
-  'home-organizers': {
-    header: '#2A3A4A', body: '#CFDBE7',
-    icon: 'Boxes', iconColor: '#2A3A4A',
-  },
-  'hotels-travel': {
-    header: '#134256', body: '#C6DFEE',
-    icon: 'Plane', iconColor: '#134256',
-  },
-  'home-repair': {
-    header: '#402A16', body: '#EDCFA4',
-    icon: 'Wrench', iconColor: '#402A16',
-  },
-  'womens-spa': {
-    // Slug preserved for back-compat; label now reads "Personal Care"
-    // so barbershops, salons, spas, and grooming services all fit.
+  'personal-care': {
     header: '#6B4A3C', body: '#EBDACF',
     icon: 'Scissors', iconColor: '#6B4A3C',
   },
-  bookkeeping: {
-    header: '#22405C', body: '#C6D6E6',
-    icon: 'BookOpen', iconColor: '#22405C',
+  // --- Merged / renamed ---
+  'home-services-repair': {
+    header: '#402A16', body: '#EDCFA4',
+    icon: 'Wrench', iconColor: '#402A16',
   },
-  photography: {
-    header: '#1A1A1A', body: '#EAE3D7',
-    image: un('photo-1502920917128-1aa500764cbd'),
+  'travel-tourism': {
+    header: '#134256', body: '#C6DFEE',
+    icon: 'Plane', iconColor: '#134256',
   },
-  'graphic-design': {
+  'creative-design': {
     header: '#5D3C2A', body: '#F0CFA8',
     icon: 'Palette', iconColor: '#5D3C2A',
+  },
+  'business-financial': {
+    header: '#22405C', body: '#C6D6E6',
+    icon: 'Briefcase', iconColor: '#22405C',
+  },
+  // --- New categories ---
+  'moving-relocation': {
+    header: '#3F2E1E', body: '#E6D5BB',
+    icon: 'Truck', iconColor: '#3F2E1E',
+  },
+  'cleaning-services': {
+    header: '#1C4A5E', body: '#CFE4EC',
+    icon: 'SprayCan', iconColor: '#1C4A5E',
+  },
+  'it-tech-support': {
+    header: '#2A2A3E', body: '#D4D4E1',
+    icon: 'Monitor', iconColor: '#2A2A3E',
+  },
+  'education-tutoring': {
+    header: '#3B2D5E', body: '#DBD1E8',
+    icon: 'GraduationCap', iconColor: '#3B2D5E',
+  },
+  'childcare-babysitting': {
+    header: '#5B3A5A', body: '#EAD6E5',
+    icon: 'Baby', iconColor: '#5B3A5A',
+  },
+  'pet-services': {
+    header: '#3E5A2A', body: '#DCE9B8',
+    icon: 'PawPrint', iconColor: '#3E5A2A',
+  },
+  'events-catering': {
+    header: '#4A1D5B', body: '#E4CFEC',
+    icon: 'PartyPopper', iconColor: '#4A1D5B',
   },
 };
 

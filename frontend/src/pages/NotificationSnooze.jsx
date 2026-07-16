@@ -17,16 +17,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import axios from 'axios';
 import { CheckCircle2, XCircle, Bell, ArrowRight, Loader2 } from 'lucide-react';
 import { API } from '../App';
-
-const CATEGORY_LABELS = {
-  'home-repair': 'Home Repair',
-  'womens-spa': "Women's Spa",
-  'transportation': 'Transportation',
-  'tours-activities': 'Tours & Activities',
-  'music-entertainment': 'Music & Entertainment',
-  'photo-video': 'Photo & Video',
-  'other': 'Other',
-};
+import { CATEGORY_LABELS } from '../lib/categories';
 
 const NotificationSnooze = () => {
   const [params] = useSearchParams();

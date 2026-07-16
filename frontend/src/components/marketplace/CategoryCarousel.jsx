@@ -15,6 +15,7 @@ import {
   Truck, Key, Map, Wind, Sparkles, Wrench, Hammer, Camera,
   Palette, Scissors, Droplet, Zap,
   Music, Home, Dumbbell, Car, Boxes, Plane, Flower, BookOpen,
+  Briefcase, SprayCan, Monitor, GraduationCap, Baby, PawPrint, PartyPopper,
 } from 'lucide-react';
 import { themeForCategory } from './categoryTheme';
 
@@ -22,6 +23,7 @@ const ICONS = {
   Truck, Key, Map, Wind, Sparkles, Wrench, Hammer, Camera,
   Palette, Scissors, Droplet, Zap,
   Music, Home, Dumbbell, Car, Boxes, Plane, Flower, BookOpen,
+  Briefcase, SprayCan, Monitor, GraduationCap, Baby, PawPrint, PartyPopper,
 };
 
 const CategoryCard = ({ category, active, onClick }) => {

@@ -79,22 +79,97 @@ async def auto_translate_gig_bg(gig_id: str, title: str | None, description: str
         await db.marketplace_gigs.update_one({"_id": gig_id}, {"$set": updates})
         logger.info("[auto-translate] gig=%s wrote %s", gig_id, list(updates))
 
-# 12 seed categories per user's Phase 1 scope (2026-07-01).
+# 15 top-level categories (2026-07-15 restructure). Aligned to how
+# renters actually search — home services and travel each consolidated
+# into single broad buckets so a poster looking for "someone to fix
+# my sink" doesn't have to guess between "Home Repair" and "Home &
+# Living". Sub-buckets on the broader categories are captured via the
+# optional `subcategory` field on gigs/jobs (see SUBCATEGORIES below).
 CATEGORIES = [
-    {"slug": "tours-activities",     "label": "Tours & Activities",       "icon": "map"},
-    {"slug": "music-entertainment",  "label": "Music & Entertainment",    "icon": "music"},
-    {"slug": "real-estate-services", "label": "Real Estate Services",     "icon": "home"},
-    {"slug": "health-fitness",       "label": "Health & Fitness",         "icon": "dumbbell"},
-    {"slug": "transportation",       "label": "Transportation",           "icon": "car"},
-    {"slug": "home-organizers",      "label": "Home and Living",          "icon": "boxes"},
-    {"slug": "hotels-travel",        "label": "Hotels / Travel Agencies", "icon": "plane"},
-    {"slug": "home-repair",          "label": "Home Service / Repair",    "icon": "wrench"},
-    {"slug": "womens-spa",           "label": "Personal Care",            "icon": "scissors"},
-    {"slug": "bookkeeping",          "label": "Bookkeeping",              "icon": "book"},
-    {"slug": "photography",          "label": "Photography",              "icon": "camera"},
-    {"slug": "graphic-design",       "label": "Graphic Design",           "icon": "palette"},
+    # --- Kept as-is ---
+    {"slug": "real-estate-services", "label": "Real Estate Services",       "icon": "home"},
+    {"slug": "health-fitness",       "label": "Health & Fitness",           "icon": "dumbbell"},
+    {"slug": "personal-care",        "label": "Personal Care",              "icon": "scissors"},
+    {"slug": "transportation",       "label": "Transportation",             "icon": "car"},
+    # --- Merged/renamed ---
+    # home-services-repair = former "home-organizers" ∪ "home-repair"
+    {"slug": "home-services-repair", "label": "Home Services & Repair",     "icon": "wrench"},
+    # travel-tourism = former "tours-activities" ∪ "hotels-travel"
+    {"slug": "travel-tourism",       "label": "Travel & Tourism",           "icon": "plane"},
+    # creative-design = former "photography" ∪ "graphic-design" (+ new videography/web-design as subs)
+    {"slug": "creative-design",      "label": "Creative & Design Services", "icon": "palette"},
+    # business-financial = former "bookkeeping" (broadened to include accounting/tax/legal/consulting)
+    {"slug": "business-financial",   "label": "Business & Financial Services", "icon": "briefcase"},
+    # --- New ---
+    {"slug": "moving-relocation",    "label": "Moving & Relocation",        "icon": "truck"},
+    {"slug": "cleaning-services",    "label": "Cleaning Services",          "icon": "spray-can"},
+    {"slug": "it-tech-support",      "label": "IT & Tech Support",          "icon": "monitor"},
+    {"slug": "education-tutoring",   "label": "Education & Tutoring",       "icon": "graduation-cap"},
+    {"slug": "childcare-babysitting","label": "Childcare & Babysitting",    "icon": "baby"},
+    {"slug": "pet-services",         "label": "Pet Services",               "icon": "paw-print"},
+    # events-catering absorbs the entertainment/music slice of the former "music-entertainment"
+    {"slug": "events-catering",      "label": "Events, Music & Catering",   "icon": "party-popper"},
 ]
 _CATEGORY_SLUGS = {c["slug"] for c in CATEGORIES}
+
+# Optional subcategory tags for categories that were merged. Kept as
+# a soft-typed list — the field is validated for membership but the
+# frontend can also accept free-text (rare edge cases like "solar
+# panel installation" under home-services-repair). Filtering stays
+# precise even though the top-level list is broader.
+SUBCATEGORIES: dict[str, list[dict[str, str]]] = {
+    "home-services-repair": [
+        {"slug": "plumbing",        "label": "Plumbing"},
+        {"slug": "electrical",      "label": "Electrical"},
+        {"slug": "handyman",        "label": "Handyman"},
+        {"slug": "appliance-repair","label": "Appliance Repair"},
+        {"slug": "interior-design", "label": "Interior Design"},
+    ],
+    "travel-tourism": [
+        {"slug": "tour-guide",     "label": "Tour Guide"},
+        {"slug": "tour-operator",  "label": "Tour Operator"},
+        {"slug": "hotel",          "label": "Hotel / Lodging"},
+        {"slug": "travel-agency",  "label": "Travel Agency"},
+    ],
+    "creative-design": [
+        {"slug": "photography",    "label": "Photography"},
+        {"slug": "videography",    "label": "Videography"},
+        {"slug": "graphic-design", "label": "Graphic Design"},
+        {"slug": "web-design",     "label": "Web Design"},
+    ],
+    "business-financial": [
+        {"slug": "bookkeeping",    "label": "Bookkeeping"},
+        {"slug": "accounting",     "label": "Accounting"},
+        {"slug": "tax-prep",       "label": "Tax Preparation"},
+        {"slug": "legal",          "label": "Legal"},
+        {"slug": "consulting",     "label": "Consulting"},
+    ],
+}
+
+# Migration map from the pre-2026-07-15 category slugs to the new
+# top-level slugs. Consumed by scripts/migrate_categories.py and
+# also by _normalize_category() below so any leftover data (or an
+# old cached bookmark URL like /services?category=photography) still
+# resolves to the right modern category at read-time.
+CATEGORY_MIGRATION: dict[str, str] = {
+    "womens-spa":          "personal-care",
+    "home-organizers":     "home-services-repair",
+    "home-repair":         "home-services-repair",
+    "tours-activities":    "travel-tourism",
+    "hotels-travel":       "travel-tourism",
+    "photography":         "creative-design",
+    "graphic-design":      "creative-design",
+    "bookkeeping":         "business-financial",
+    "music-entertainment": "events-catering",
+}
+
+# If a legacy slug is passed at read-time (bookmarks, saved searches
+# not yet migrated), transparently upgrade it. Write paths still
+# validate strictly against _CATEGORY_SLUGS.
+def _normalize_category(slug: str | None) -> str | None:
+    if slug and slug in CATEGORY_MIGRATION:
+        return CATEGORY_MIGRATION[slug]
+    return slug
 
 # Curated Israeli cities most likely to host marketplace providers. The
 # `label` is the matcher — a case-insensitive substring against the gig's
@@ -315,6 +390,27 @@ class ReviewIn(BaseModel):
 def _validate_category(cat: str) -> None:
     if cat not in _CATEGORY_SLUGS:
         raise HTTPException(status_code=400, detail=f"Unknown category '{cat}'")
+
+
+def _validate_subcategory(cat: str, sub: str | None) -> None:
+    """Optional subcategory field on gigs/jobs. Empty/None is always
+    valid — subcategories are advisory tags, not required.  If set,
+    the value must either be a known slug from SUBCATEGORIES[cat] OR
+    a short free-text string (max 40 chars) so we can still handle
+    long-tail specializations we haven't formally listed yet (e.g.
+    "solar panel installation" under home-services-repair).
+    """
+    if not sub:
+        return
+    if len(sub) > 40:
+        raise HTTPException(status_code=400, detail="Subcategory too long")
+    known = {s["slug"] for s in SUBCATEGORIES.get(cat, [])}
+    if known and sub in known:
+        return
+    # Long-tail free-text: only allow simple slug-shape strings so we
+    # don't accidentally accept HTML or URL fragments here.
+    if not all(c.isalnum() or c in "-_ " for c in sub):
+        raise HTTPException(status_code=400, detail="Subcategory has invalid characters")
 
 
 async def _ensure_provider_record(user_id: str) -> dict[str, Any]:

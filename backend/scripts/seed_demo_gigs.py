@@ -59,7 +59,7 @@ def _now() -> str:
 STORE_DEMOS = [
     dict(
         title="Modern Furniture — Tel Aviv Showroom",
-        category="home-organizers",
+        category="home-services-repair",
         area="Tel Aviv",
         description=(
             "A curated collection of solid-wood and mid-century furniture, "
@@ -85,7 +85,7 @@ STORE_DEMOS = [
     ),
     dict(
         title="Jerusalem Ceramics Studio",
-        category="home-organizers",
+        category="home-services-repair",
         area="Jerusalem",
         description=(
             "Handmade tableware and vases from a family studio in the "
@@ -132,7 +132,7 @@ STORE_DEMOS = [
 DELIVERABLE_DEMOS = [
     dict(
         title="Deep Cleaning Service — Tel Aviv & Center",
-        category="home-repair",
+        category="home-services-repair",
         area="Tel Aviv",
         description=(
             "Bonded crew for deep cleans, move-in / move-out, and "
@@ -183,7 +183,7 @@ DELIVERABLE_DEMOS = [
     ),
     dict(
         title="Moving Company — Israel-Wide",
-        category="home-repair",
+        category="home-services-repair",
         area="Jerusalem",
         description=(
             "Insured, 15+ years experience. Local moves same-day, "
@@ -212,7 +212,7 @@ DELIVERABLE_DEMOS = [
 APPOINTMENT_DEMOS = [
     dict(
         title="Downtown Barbershop — Rothschild",
-        category="womens-spa",
+        category="personal-care",
         area="Tel Aviv",
         description=(
             "Old-school straight-razor shaves and modern fades. Walk-ins "
@@ -280,7 +280,7 @@ APPOINTMENT_DEMOS = [
     ),
     dict(
         title="Guided Tours of Israel",
-        category="tours-activities",
+        category="travel-tourism",
         area="Jerusalem",
         description=(
             "Licensed guide, 20+ years experience. From half-day city "

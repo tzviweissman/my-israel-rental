@@ -52,20 +52,25 @@ def _h(tok):
 # ---------- Categories ----------
 
 class TestCategories:
-    def test_categories_returns_12_expected_slugs(self):
+    def test_categories_returns_expected_slugs(self):
         r = requests.get(f"{API}/categories", timeout=15)
         assert r.status_code == 200
         cats = r.json()
         assert isinstance(cats, list)
         slugs = {c["slug"] for c in cats}
+        # 15-category taxonomy (2026-07-15 restructure): 4 kept + 4
+        # merged/renamed + 7 new. Bumped from the original 12.
         expected = {
-            "tours-activities", "music-entertainment", "real-estate-services",
-            "health-fitness", "transportation", "home-organizers",
-            "hotels-travel", "home-repair", "womens-spa",
-            "bookkeeping", "photography", "graphic-design",
+            # kept as-is
+            "real-estate-services", "health-fitness", "personal-care", "transportation",
+            # merged / renamed
+            "home-services-repair", "travel-tourism", "creative-design", "business-financial",
+            # new
+            "moving-relocation", "cleaning-services", "it-tech-support",
+            "education-tutoring", "childcare-babysitting", "pet-services", "events-catering",
         }
         assert slugs == expected, f"got {slugs}"
-        assert len(cats) == 12
+        assert len(cats) == 15
 
 
 # ---------- Gig create ----------
@@ -74,7 +79,7 @@ class TestGigCreate:
     def test_create_gig_unauthenticated_rejected(self):
         r = requests.post(
             f"{API}/gigs",
-            json={"title": "x", "category": "home-repair", "booking_mode": "whatsapp", "whatsapp": "+972500000000"},
+            json={"title": "x", "category": "home-services-repair", "booking_mode": "whatsapp", "whatsapp": "+972500000000"},
             timeout=15,
         )
         assert r.status_code in (401, 403), f"got {r.status_code}"
@@ -92,7 +97,7 @@ class TestGigCreate:
         r = requests.post(
             f"{API}/gigs",
             headers=_h(owner_token),
-            json={"title": "TEST_wa_no_number", "category": "home-repair", "booking_mode": "whatsapp", "whatsapp": "   "},
+            json={"title": "TEST_wa_no_number", "category": "home-services-repair", "booking_mode": "whatsapp", "whatsapp": "   "},
             timeout=15,
         )
         assert r.status_code == 400, r.text
@@ -103,7 +108,7 @@ class TestGigCreate:
             headers=_h(owner_token),
             json={
                 "title": "TEST_Deep Cleaning Service",
-                "category": "home-repair",
+                "category": "home-services-repair",
                 "description": "Sparkling deep clean for apartments",
                 "tiers": [{"name": "Basic", "price": 300, "currency": "ILS", "description": "2h clean"}],
                 "gallery": ["https://example.com/img.jpg"],
@@ -116,7 +121,7 @@ class TestGigCreate:
         assert r.status_code == 200, r.text
         gig = r.json()
         assert gig["id"] and gig["title"] == "TEST_Deep Cleaning Service"
-        assert gig["category"] == "home-repair"
+        assert gig["category"] == "home-services-repair"
         assert gig["status"] == "published"
 
         mg = requests.get(f"{API}/my-gigs", headers=_h(owner_token), timeout=15)
@@ -135,7 +140,7 @@ class TestPublicBrowse:
         requests.post(
             f"{API}/gigs",
             headers=_h(owner_token),
-            json={"title": "TEST_Deep browse", "category": "home-repair", "description": "deep clean",
+            json={"title": "TEST_Deep browse", "category": "home-services-repair", "description": "deep clean",
                   "booking_mode": "whatsapp", "whatsapp": "+972500000002", "area": "Tel Aviv"},
             timeout=15,
         )
@@ -148,10 +153,10 @@ class TestPublicBrowse:
             assert "provider" in g and g["provider"]["user_id"]
 
     def test_filter_by_category(self):
-        r = requests.get(f"{API}/gigs", params={"category": "home-repair"}, timeout=15)
+        r = requests.get(f"{API}/gigs", params={"category": "home-services-repair"}, timeout=15)
         assert r.status_code == 200
         gigs = r.json()
-        assert all(g["category"] == "home-repair" for g in gigs)
+        assert all(g["category"] == "home-services-repair" for g in gigs)
 
     def test_search_case_insensitive(self):
         r = requests.get(f"{API}/gigs", params={"q": "deep"}, timeout=15)
@@ -171,7 +176,7 @@ class TestGigOwnership:
         r = requests.post(
             f"{API}/gigs",
             headers=_h(owner_token),
-            json={"title": "TEST_owned_gig", "category": "home-repair",
+            json={"title": "TEST_owned_gig", "category": "home-services-repair",
                   "booking_mode": "whatsapp", "whatsapp": "+972500000003", "area": "Tel Aviv"},
             timeout=15,
         )
@@ -232,7 +237,7 @@ class TestBooking:
         cr = requests.post(
             f"{API}/gigs",
             headers=_h(owner_token),
-            json={"title": "TEST_wa_only", "category": "home-repair",
+            json={"title": "TEST_wa_only", "category": "home-services-repair",
                   "booking_mode": "whatsapp", "whatsapp": "+972500000004", "area": "Tel Aviv"},
             timeout=15,
         )

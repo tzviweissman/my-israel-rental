@@ -17,6 +17,7 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import axios from 'axios';
 import { toast } from 'sonner';
 import { Bell, Zap, Layers, Loader2, X } from 'lucide-react';
+import { CATEGORY_LABELS } from '../../lib/categories';
 
 const MODES = [
   {
@@ -39,16 +40,8 @@ const MODES = [
   },
 ];
 
-const CATEGORY_LABELS = {
-  'home-repair': 'Home Repair',
-  'womens-spa': "Women's Spa",
-  'transportation': 'Transportation',
-  'tours-activities': 'Tours & Activities',
-  'music-entertainment': 'Music & Entertainment',
-  'photo-video': 'Photo & Video',
-  'other': 'Other',
-};
-const label = (slug) => CATEGORY_LABELS[slug] || slug;
+const CATEGORY_LABELS_LOCAL = CATEGORY_LABELS;  // local alias for readability inside label()
+const label = (slug) => CATEGORY_LABELS_LOCAL[slug] || slug;
 
 const NotificationSettings = ({ API, token }) => {
   const [mode, setMode] = useState(null);

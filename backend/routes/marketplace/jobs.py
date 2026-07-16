@@ -33,7 +33,7 @@ from utils.notification_tokens import create_deeplink_token, create_snooze_token
 from utils.translate import translate_marketing_to_hebrew
 
 from .notification_prefs import DEFAULT_MODE as DEFAULT_PREF_MODE
-from .shared import UTC, _validate_category, CATEGORIES, FRONTEND_URL
+from .shared import UTC, _validate_category, _validate_subcategory, CATEGORIES, FRONTEND_URL
 
 
 router = APIRouter(prefix="/marketplace", tags=["marketplace"])
@@ -44,6 +44,11 @@ router = APIRouter(prefix="/marketplace", tags=["marketplace"])
 class JobIn(BaseModel):
     title: str = Field(..., min_length=6, max_length=140)
     category: str
+    # Optional sub-bucket for merged categories (home-services-repair,
+    # travel-tourism, creative-design, business-financial). None or ''
+    # is fine — the field is advisory. See routes.marketplace.shared
+    # SUBCATEGORIES for the suggested values per category.
+    subcategory: Optional[str] = None
     description: str = Field(..., min_length=10, max_length=4000)
     # Fixed amount ("I'll pay 800 ILS") or open ("open to offers").
     # No ranges in v1 — the UI stays lean.
@@ -303,6 +308,7 @@ async def get_job(job_id: str):
 @router.post("/jobs")
 async def create_job(payload: JobIn, user=Depends(verify_token)):
     _validate_category(payload.category)
+    _validate_subcategory(payload.category, payload.subcategory)
     if payload.budget_type == "fixed" and not (payload.budget_amount and payload.budget_amount > 0):
         raise HTTPException(status_code=400, detail="Fixed budget needs an amount greater than 0")
 
@@ -323,6 +329,9 @@ async def create_job(payload: JobIn, user=Depends(verify_token)):
         "title": payload.title.strip(),
         "title_he": None,
         "category": payload.category,
+        # Empty string / None normalized to None so downstream filters
+        # can key on `subcategory: {"$exists": true}` cleanly.
+        "subcategory": (payload.subcategory or "").strip() or None,
         "description": payload.description.strip(),
         "description_he": None,
         "budget_type": payload.budget_type,

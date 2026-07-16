@@ -50,7 +50,7 @@ def job(poster_token):
     payload = {
         "title": "TEST_ChatIntegration_Job_iter62",
         "description": "Backend integration test — should be deleted at end.",
-        "category": "home-repair",
+        "category": "home-services-repair",
         "area": "Tel Aviv",
         "budget_type": "open",
     }
