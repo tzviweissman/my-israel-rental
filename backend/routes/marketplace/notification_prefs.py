@@ -18,9 +18,8 @@ from typing import Any, Literal
 
 from fastapi import APIRouter, Body, Depends, HTTPException
 from pydantic import BaseModel, Field
-from motor.motor_asyncio import AsyncIOMotorClient
-import os
 
+from routes.deps import db
 from utils.auth import verify_token
 from utils.notification_tokens import (
     NotificationTokenError,
@@ -31,9 +30,6 @@ from .shared import CATEGORIES
 MODES = ("instant", "digest", "both")
 DEFAULT_MODE = "digest"
 SNOOZE_DAYS = 7
-
-client = AsyncIOMotorClient(os.environ["MONGO_URL"])
-db = client[os.environ["DB_NAME"]]
 
 router = APIRouter(prefix="/marketplace/notification-preferences", tags=["notifications"])
 
@@ -87,8 +83,8 @@ async def get_preferences(user=Depends(verify_token)):
 
 @router.patch("", response_model=PreferenceOut)
 async def patch_preferences(payload: PatchIn, user=Depends(verify_token)):
-    if payload.mode not in MODES:
-        raise HTTPException(status_code=400, detail="Invalid mode")
+    # Pydantic's Literal already validates the mode — no manual check
+    # needed. If a client sends anything else FastAPI returns 422.
     await db.job_notification_preferences.update_one(
         {"user_id": user["user_id"]},
         {"$set": {"mode": payload.mode, "updated_at": datetime.now(UTC).isoformat()}},
@@ -121,6 +117,26 @@ async def _apply_snooze(user_id: str, category: str) -> dict[str, Any]:
 @router.post("/snooze")
 async def snooze(payload: SnoozeIn, user=Depends(verify_token)):
     return await _apply_snooze(user["user_id"], payload.category)
+
+
+@router.delete("/snooze/{category}")
+async def clear_snooze(category: str, user=Depends(verify_token)):
+    """Un-snooze a category before its 7-day natural expiry. Used by
+    the X button on the "Currently snoozed" chip in the notification
+    settings card so a provider who changed their mind doesn't have
+    to wait a week."""
+    _validate_category(category)
+    doc = await db.job_notification_preferences.find_one({"user_id": user["user_id"]}) or {}
+    remaining = [
+        s for s in (doc.get("snoozed_categories") or [])
+        if s.get("category") != category
+    ]
+    await db.job_notification_preferences.update_one(
+        {"user_id": user["user_id"]},
+        {"$set": {"snoozed_categories": remaining}},
+        upsert=True,
+    )
+    return {"ok": True, "category": category}
 
 
 @router.post("/snooze-consume")

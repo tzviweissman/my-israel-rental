@@ -106,17 +106,22 @@ const NotificationSettings = ({ API, token }) => {
     }
   };
 
-  // Immediately expire a snooze by re-snoozing then filtering it out
-  // locally. The backend doesn't have an "un-snooze" endpoint yet — we
-  // just PATCH the mode with itself to force a re-fetch; then the
-  // snoozed_categories array is auto-purged of expired entries next
-  // fetch. This is a placeholder for a proper DELETE endpoint (TODO
-  // when we ever see a real user needing it — rarely used surface).
   const clearSnooze = async (category) => {
-    // Optimistic UI: drop from list immediately.
+    // Optimistic UI: drop from list immediately, then persist. On
+    // failure we re-fetch to reconcile — no manual rollback needed
+    // because prefs are small.
+    const before = snoozed;
     setSnoozed((cur) => cur.filter((s) => s.category !== category));
-    // Backend side-effect can be added later; safe no-op for now.
-    toast.success(`${label(category)} snooze cleared (auto-expires in ${daysLeft(snoozed.find((s) => s.category === category)?.until)} days regardless)`);
+    try {
+      await axios.delete(
+        `${API}/marketplace/notification-preferences/snooze/${category}`,
+        { headers: { Authorization: `Bearer ${token}` } },
+      );
+      toast.success(`${label(category)} snooze cleared`);
+    } catch (err) {
+      setSnoozed(before);
+      toast.error(err.response?.data?.detail || 'Could not clear snooze');
+    }
   };
 
   if (mode === null) {

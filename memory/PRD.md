@@ -11,6 +11,39 @@ Build a bilingual (English/Hebrew) rental website named MyIsraelRental.com with 
 - **i18n**: i18next with English and Hebrew (RTL) support
 
 ## What's Been Implemented
+- [x] **Notification preferences system + signed email deep-links (2026-07-15)**:
+  - **Prefs model**: new `db.job_notification_preferences` collection keyed on `user_id` with `{mode: 'instant'|'digest'|'both', snoozed_categories: [{category, until}]}`. Default mode for un-set providers is **'digest'** (safer — avoids day-one inbox flood). Snoozes auto-expire after 7 days; `_fetch` purges expired entries on every read so the UI never shows stale data.
+  - **New endpoints** (`backend/routes/marketplace/notification_prefs.py`):
+    - `GET /marketplace/notification-preferences` → returns current mode + live snoozes
+    - `PATCH /marketplace/notification-preferences` → save mode
+    - `POST /marketplace/notification-preferences/snooze` → snooze a category for 7 days (auth'd)
+    - `DELETE /marketplace/notification-preferences/snooze/{category}` → un-snooze early (auth'd; fixes iteration_63 optimistic-only bug)
+    - `POST /marketplace/notification-preferences/snooze-consume` → **public**, token-signed: applies snooze from an email link without requiring login
+  - **Signed token helpers** (`backend/utils/notification_tokens.py`): `create_deeplink_token(user_id, job_id)` (7-day) and `create_snooze_token(user_id, category)` (30-day). Both include a `purpose` claim so a leaked deep-link JWT can't be repurposed for a snooze and vice versa.
+  - **New auth endpoint**: `POST /auth/deeplink-consume {token}` → exchanges a 7-day deeplink JWT for a fresh 30-day session token. Lets the "View & Bid" email CTA land providers on the job post already authenticated.
+  - **Rewritten `_notify_matching_providers`** (`backend/routes/marketplace/jobs.py`):
+    - **Bugfix**: users lookup was querying `_id` (ObjectId) but `provider_user_id` is a UUID stored in `id` — same bug as `_list_applications` last iteration. Zero instant emails have been reaching the actual providers until now. Fixed by querying `id` and keying `users_by_id`. Also `full_name` → `name` fallback.
+    - Respects `mode` — providers on `'digest'` are skipped from instant emails; grandfathers legacy saved-search subscribers into digest-only silence.
+    - Respects per-category snoozes (`until > now`).
+    - **New subject format**: `New job match: [Category] in [Location] — $[Budget]` (budget-open jobs drop the em-dash tail).
+    - **Single "View & Bid" CTA** with signed deeplink token so the click lands the provider logged in.
+    - **Inline metadata table** (Budget · Location · Timeline) so providers can judge fit without clicking through.
+    - Footer: "Snooze <Category> for 7 days" (signed URL) + "Notification settings" link.
+  - **Rewritten digest sender**:
+    - Grouped by category with `<h3>Category · N new</h3>` section headers (ordered by match count desc).
+    - Capped at 10 visible per section with `+N more, view all →` linking to `/services/jobs?category=<slug>`.
+    - Footer: `Want fewer emails? Adjust your notification settings →` linking to `/dashboard/settings?section=notifications`.
+    - Skips providers with `mode='instant'` (they don't want digests) and per-category snoozes.
+    - Each category section also has its own snooze link.
+  - **Frontend**:
+    - `components/dashboard/NotificationSettings.jsx` — 3-way toggle card (radiogroup a11y) with autosave-on-click, active-snoozes chips with X-clear affordance now wired to `DELETE /snooze/{category}`.
+    - `pages/AuthDeeplink.jsx` — consumes deeplink token via `/auth/deeplink-consume`, calls `login()` from AuthContext, redirects to `?goto=`. StrictMode double-mount guard so tokens aren't burnt twice. Fallback: `/auth/login?redirect=...` on failure.
+    - `pages/NotificationSnooze.jsx` — public snooze consumption page with success/error states + CTA to notification settings.
+    - New routes: `/dashboard/settings`, `/auth/deeplink`, `/notification-snooze`.
+    - `Dashboard.js` — `/dashboard/settings` path auto-selects settings tab. `NotificationSettings` reads `?section=notifications` and scrolls into view.
+  - **Regression tests**: iteration_63 — **16/16 backend pytest + 100% frontend flows PASS**. Tests locked in at `/app/backend/tests/test_notification_prefs.py`. Includes: default digest, mode toggling, snooze/unsnooze, purpose-mismatch rejection, expired-token rejection, digest suppression when mode=instant, instant suppression when mode=digest, snooze suppression, unknown-category 400.
+
+
 - [x] **Job-scoped chat email notifications — "Job: <title>" subject fallback (2026-07-15)**:
   - Job-scoped chat threads (from the "Message this applicant" button in MyJobsTab) were already firing the standard chat email pipeline — the code path was reused verbatim because job messages persist in `db.messages` with `property_id=<job_uuid>`. However, the email lookup for the subject/body only queried `db.properties`, so job threads landed with the generic "…about your conversation" fallback text.
   - **Fix in `_send_chat_email_safe` (`routes/chat.py:191-208`)**: when the properties lookup returns None, fall back to `db.marketplace_jobs.find_one({"_id": property_id})`. If the job resolves, use `"Job: <title>"` as the `property_title` argument passed to `send_chat_message_email`. This gives applicants a subject like *"Sarah: New message"* with a body that reads *"…about Job: Need a wedding barber"* — the exact same conversational shape as the existing property emails.
