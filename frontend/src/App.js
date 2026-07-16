@@ -30,7 +30,8 @@ import PropertyDetail from './pages/PropertyDetail';
 import SubleaseDetail from './pages/SubleaseDetail';
 import Auth from './pages/Auth';
 import AuthCallback from './pages/AuthCallback';
-import ThemePreviewOverride from './components/ThemePreviewOverride';
+import AuthDeeplink from './pages/AuthDeeplink';
+import NotificationSnooze from './pages/NotificationSnooze';import ThemePreviewOverride from './components/ThemePreviewOverride';
 import SignupJoin from './pages/SignupJoin';
 import VerifyPending from './pages/VerifyPending';
 import VerifyEmail from './pages/VerifyEmail';
@@ -203,6 +204,9 @@ function App() {
             <Route path="/verify-pending" element={<VerifyPending />} />
             <Route path="/verify-email" element={<VerifyEmail />} />
             <Route path="/dashboard" element={user ? <Dashboard /> : <Navigate to="/auth/login" />} />
+            <Route path="/dashboard/settings" element={user ? <Dashboard /> : <Navigate to="/auth/login" />} />
+            <Route path="/auth/deeplink" element={<AuthDeeplink />} />
+            <Route path="/notification-snooze" element={<NotificationSnooze />} />
             <Route path="/admin" element={user?.role === 'admin' ? <AdminDashboard /> : <Navigate to="/" />} />
             <Route path="/manager/:managerId" element={<ManagerPage />} />
             <Route path="/chat/:propertyId" element={user ? <Chat /> : <Navigate to="/auth/login" />} />

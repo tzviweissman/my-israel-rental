@@ -4,6 +4,7 @@ import { KeyRound, EyeOff, Eye, Globe, MessageCircle, Check, Home as HomeIcon, B
 import { toast } from 'sonner';
 import axios from 'axios';
 import { AuthContext } from '../../App';
+import NotificationSettings from './NotificationSettings';
 
 const SettingsTab = ({ user, token, API }) => {
   const { i18n, t } = useTranslation();
@@ -163,6 +164,8 @@ const SettingsTab = ({ user, token, API }) => {
   return (
     <div>
       <h2 className="text-2xl font-bold mb-6" style={{ fontFamily: 'Playfair Display' }}>{i18n.t('dashboard.accountSettings')}</h2>
+
+      <NotificationSettings API={API} token={token} />
 
       {/* Self-service role switch. The exact CTA depends on the user's
           current role — renter sees "Switch to lister", owner sees

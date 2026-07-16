@@ -120,6 +120,13 @@ const Dashboard = () => {
   useEffect(() => {
     const tab = searchParams.get('tab');
     if (tab) setActiveTab(tab);
+    // Support the /dashboard/settings deep-link (used by notification
+    // emails with ?section=notifications). Any path that ends in
+    // /settings auto-selects the settings tab; NotificationSettings
+    // itself reads ?section from the URL and scrolls into view.
+    if (typeof window !== 'undefined' && window.location.pathname.endsWith('/dashboard/settings')) {
+      setActiveTab('settings');
+    }
   }, [searchParams]);
 
   // Refetch bookings whenever the user lands on the Bookings tab,

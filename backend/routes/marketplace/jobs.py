@@ -29,8 +29,10 @@ from pydantic import BaseModel, Field
 
 from routes.deps import db, logger, verify_token
 from utils.email import send_email
+from utils.notification_tokens import create_deeplink_token, create_snooze_token
 from utils.translate import translate_marketing_to_hebrew
 
+from .notification_prefs import DEFAULT_MODE as DEFAULT_PREF_MODE
 from .shared import UTC, _validate_category, CATEGORIES, FRONTEND_URL
 
 
@@ -119,28 +121,39 @@ async def _translate_bg(job_id: str, title: str, description: str) -> None:
 
 
 async def _notify_matching_providers(job: dict[str, Any]) -> None:
-    """Fire an email to every provider whose gigs cover the job's
-    category. Deduped by provider_user_id (a provider with several gigs
-    in one category still gets one email). Runs as a background task —
-    the posting flow returns immediately.
+    """Fire a per-post email to every provider whose gigs cover the
+    job's category AND whose notification preference is 'instant' or
+    'both' AND who hasn't snoozed the category. Runs as a background
+    task — the posting flow returns immediately.
+
+    Providers set to 'digest' mode are skipped here entirely (they'll
+    see the job in tomorrow's grouped digest). Providers on the legacy
+    saved-search opt-in are ALSO grandfathered into digest-only for
+    backwards compat.
     """
     try:
         cat = job.get("category")
         if not cat:
             return
-        # Find distinct provider_user_ids that have at least one
-        # published gig in the matched category.
+        # Distinct provider_user_ids with at least one published gig
+        # in the matched category.
         provider_ids = await db.marketplace_gigs.distinct(
             "provider_user_id",
             {"category": cat, "status": "published"},
         )
         if not provider_ids:
             return
-        # Providers with a saved search covering this category+area
-        # are opted-in to the daily digest — suppress the per-post ping
-        # for them here. `saved_area` uses a case-insensitive prefix
-        # match against the job's area so "Tel Aviv" also swallows
-        # "Tel Aviv, Florentin".
+
+        # Load prefs + snoozes in one round-trip. Providers with no
+        # prefs row default to 'digest' — matches the safer-default
+        # policy so day-one signups don't get instantly spammed.
+        prefs_by_uid: dict[str, dict[str, Any]] = {}
+        async for p in db.job_notification_preferences.find(
+            {"user_id": {"$in": provider_ids}},
+        ):
+            prefs_by_uid[p["user_id"]] = p
+
+        # Legacy saved-search subscribers: digest-only grandfather.
         job_area = (job.get("area") or "").lower()
         digest_subscribed_ids: set[str] = set()
         async for s in db.marketplace_job_searches.find(
@@ -149,46 +162,92 @@ async def _notify_matching_providers(job: dict[str, Any]) -> None:
             saved_area = (s.get("area") or "").strip().lower()
             if not saved_area or job_area.startswith(saved_area):
                 digest_subscribed_ids.add(s["provider_user_id"])
-        # Fetch user emails in one round-trip. Skip the poster themselves.
+
+        # Users are keyed by UUID stored in `id` (mirror of user_id used
+        # everywhere else). Querying by `_id` (ObjectId) always missed
+        # and silently sent zero emails — matches the same bug fixed in
+        # _list_applications last iteration.
         poster_id = job.get("poster_user_id")
-        users = await db.users.find(
-            {"_id": {"$in": list(provider_ids)}},
-        ).to_list(len(provider_ids))
-        # Pretty label for the category chip in the email.
+        users_by_id = {
+            u["id"]: u
+            async for u in db.users.find({"id": {"$in": provider_ids}})
+        }
         cat_label = next((c["label"] for c in CATEGORIES if c["slug"] == cat), cat)
-        job_link = f"{FRONTEND_URL}/services/jobs/{job['_id']}"
-        budget_line = ""
+        now_iso = datetime.now(UTC).isoformat()
+
+        # Format the subject line once. Spec:
+        # "New job match: [Category] in [Location] — $[Budget]"
+        # Budget-open jobs drop the em-dash tail so the subject stays clean.
+        sym = "₪" if job.get("budget_currency", "ILS") == "ILS" else "$"
         if job.get("budget_type") == "fixed" and job.get("budget_amount"):
-            sym = "₪" if job.get("budget_currency", "ILS") == "ILS" else "$"
-            budget_line = f"<p style=\"margin:0 0 8px;color:#334\">💰 <b>{sym}{job['budget_amount']:g}</b> · fixed</p>"
+            budget_subject = f" — {sym}{int(job['budget_amount'])}"
+            budget_body = f"{sym}{int(job['budget_amount'])} · fixed"
         else:
-            budget_line = "<p style=\"margin:0 0 8px;color:#334\">💰 Open to offers</p>"
-        for user in users:
-            uid = user.get("_id")
+            budget_subject = ""
+            budget_body = "Open to offers"
+        subject = f"New job match: {cat_label} in {job.get('area', 'Israel')}{budget_subject}"
+
+        timeline_body = job.get("preferred_date") or "Flexible"
+
+        for uid in provider_ids:
             if uid == poster_id:
                 continue
-            if uid in digest_subscribed_ids:
-                continue  # will get this in the daily digest instead
+            user = users_by_id.get(uid)
+            if not user:
+                continue
             to_email = user.get("email")
             if not to_email:
                 continue
+
+            # Mode check. Default = 'digest' so untouched providers get
+            # the daily digest instead of getting bombed on day one.
+            pref = prefs_by_uid.get(uid, {})
+            mode = pref.get("mode") or DEFAULT_PREF_MODE
+            if uid in digest_subscribed_ids and mode == DEFAULT_PREF_MODE:
+                # Legacy saved-search subscriber — grandfather them into
+                # digest-only silence for the instant channel.
+                continue
+            if mode == "digest":
+                continue
+
+            # Snooze check.
+            snoozed = any(
+                s.get("category") == cat and (s.get("until") or "") > now_iso
+                for s in (pref.get("snoozed_categories") or [])
+            )
+            if snoozed:
+                continue
+
+            # Signed deep-link so the CTA lands them logged-in.
+            deeplink = create_deeplink_token(uid, job["_id"])
+            snooze_tok = create_snooze_token(uid, cat)
+            cta_url = f"{FRONTEND_URL}/auth/deeplink?t={deeplink}&goto=/services/jobs/{job['_id']}"
+            snooze_url = f"{FRONTEND_URL}/notification-snooze?t={snooze_tok}"
+            settings_url = f"{FRONTEND_URL}/dashboard/settings?section=notifications"
+
             html = f"""
-              <p>Hi {user.get('full_name') or 'there'},</p>
-              <p>A new job in <b>{cat_label}</b> was just posted on MyIsraelRental
-              that matches your services:</p>
-              <div style="border:1px solid #eee;border-radius:12px;padding:16px;margin:16px 0;background:#fafafa">
-                <p style="margin:0 0 8px;font-size:16px;font-weight:700;color:#111">{job.get('title')}</p>
-                <p style="margin:0 0 8px;color:#555;font-size:14px">{(job.get('description') or '')[:280]}{'…' if len(job.get('description') or '') > 280 else ''}</p>
-                {budget_line}
-                <p style="margin:0 0 8px;color:#334">📍 {job.get('area', '')}</p>
-                {('<p style="margin:0 0 8px;color:#334">🗓 ' + job['preferred_date'] + '</p>') if job.get('preferred_date') else ''}
+              <p>Hi {user.get('name') or 'there'},</p>
+              <p>A new job in <b>{cat_label}</b> just went live on MyIsraelRental — and it matches what you offer.</p>
+              <div style="border:1px solid #eee;border-radius:12px;padding:18px;margin:18px 0;background:#fafafa">
+                <p style="margin:0 0 10px;font-size:16px;font-weight:700;color:#111">{job.get('title')}</p>
+                <p style="margin:0 0 12px;color:#555;font-size:14px;line-height:1.5">{(job.get('description') or '')[:280]}{'…' if len(job.get('description') or '') > 280 else ''}</p>
+                <table cellpadding="0" cellspacing="0" style="width:100%;font-size:13px;color:#334">
+                  <tr><td style="padding:2px 0;width:80px;color:#888">Budget</td><td style="padding:2px 0"><b>{budget_body}</b></td></tr>
+                  <tr><td style="padding:2px 0;color:#888">Location</td><td style="padding:2px 0"><b>{job.get('area','')}</b></td></tr>
+                  <tr><td style="padding:2px 0;color:#888">Timeline</td><td style="padding:2px 0"><b>{timeline_body}</b></td></tr>
+                </table>
               </div>
-              <p><a href="{job_link}" style="display:inline-block;padding:10px 18px;background:#1E6A6A;color:#fff;text-decoration:none;border-radius:8px;font-weight:600">View job &amp; apply</a></p>
-              <p style="color:#666;font-size:12px;margin-top:24px">You're getting this because you have a published gig in <b>{cat_label}</b>. You can turn these off from your dashboard.</p>
+              <p style="margin:24px 0">
+                <a href="{cta_url}" style="display:inline-block;padding:12px 22px;background:#1E6A6A;color:#fff;text-decoration:none;border-radius:8px;font-weight:700">View &amp; Bid</a>
+              </p>
+              <p style="color:#666;font-size:12px;margin-top:28px;line-height:1.6">
+                Getting too many? <a href="{snooze_url}" style="color:#1E6A6A">Snooze {cat_label} for 7 days</a>
+                &nbsp;·&nbsp; <a href="{settings_url}" style="color:#1E6A6A">Notification settings</a>
+              </p>
             """
             await send_email(
                 to_email,
-                subject=f"New job in {cat_label}: {job.get('title')}",
+                subject=subject,
                 html_body=html,
                 tag="job-match",
             )
@@ -525,10 +584,16 @@ def _admin_only(user: dict) -> None:
 
 @router.post("/job-searches/send-digest")
 async def send_digest(user=Depends(verify_token)):
-    """Admin-triggered (or cron-triggered) digest sender. Every saved
-    search whose `last_digest_sent_at` is older than 20h gets one email
-    listing every open job posted since that timestamp that still
-    matches. Idempotent: re-running within 20h is a no-op.
+    """Admin-triggered (or cron-triggered) daily digest.
+
+    Every saved search whose ``last_digest_sent_at`` is older than 20h
+    contributes to one email per provider — grouped by category, capped
+    at 10 jobs per category with a "+N more, view all" tail, and with a
+    "Adjust your notification settings" footer link. Idempotent within
+    the 20h window.
+
+    Providers whose ``mode`` is 'instant' are opted OUT of the digest
+    (they get per-post pings instead).
     """
     _admin_only(user)
     from datetime import timedelta
@@ -550,21 +615,45 @@ async def send_digest(user=Depends(verify_token)):
     for s in searches:
         by_user.setdefault(s["provider_user_id"], []).append(s)
 
+    # Pre-load prefs for every user in one round-trip so we can filter
+    # digest-off ('instant' mode) and honor per-category snoozes.
+    prefs_by_uid: dict[str, dict[str, Any]] = {}
+    async for p in db.job_notification_preferences.find(
+        {"user_id": {"$in": list(by_user.keys())}},
+    ):
+        prefs_by_uid[p["user_id"]] = p
+    now_iso = now.isoformat()
+
     sent_count = 0
     for uid, user_searches in by_user.items():
-        u = await db.users.find_one({"_id": uid}) \
-            or await db.users.find_one({"id": uid})
+        pref = prefs_by_uid.get(uid, {})
+        mode = pref.get("mode") or DEFAULT_PREF_MODE
+        if mode == "instant":
+            # This user wants per-post pings ONLY, no daily digest.
+            continue
+        snoozed_cats = {
+            s["category"]
+            for s in (pref.get("snoozed_categories") or [])
+            if (s.get("until") or "") > now_iso
+        }
+
+        u = await db.users.find_one({"id": uid}) or await db.users.find_one({"_id": uid})
         if not u or not u.get("email"):
             continue
 
-        # Build a match query that OR's every saved search — one round
-        # trip against the jobs collection instead of one per search.
+        # Filter saved searches by snooze state.
+        active_searches = [s for s in user_searches if s["category"] not in snoozed_cats]
+        if not active_searches:
+            continue
+
+        # Build a match query that OR's every active saved search — one
+        # round-trip against the jobs collection.
         or_clauses: list[dict[str, Any]] = []
         min_created = min(
             (s.get("last_digest_sent_at") or s.get("created_at") or "1970-01-01")
-            for s in user_searches
+            for s in active_searches
         )
-        for s in user_searches:
+        for s in active_searches:
             clause: dict[str, Any] = {"category": s["category"]}
             if s.get("area"):
                 clause["area"] = {"$regex": f"^{re.escape(s['area'])}", "$options": "i"}
@@ -574,31 +663,74 @@ async def send_digest(user=Depends(verify_token)):
             "poster_user_id": {"$ne": uid},
             "created_at": {"$gte": min_created},
             "$or": or_clauses,
-        }).sort("created_at", -1).limit(50).to_list(50)
+        }).sort("created_at", -1).limit(200).to_list(200)
         if not jobs:
             continue
 
-        rows_html = "".join(
-            f"<li style=\"margin-bottom:12px\"><a href=\"{FRONTEND_URL}/services/jobs/{j['_id']}\" "
-            f"style=\"color:#1E6A6A;font-weight:600;text-decoration:none\">{j.get('title')}</a><br/>"
-            f"<span style=\"color:#666;font-size:12px\">📍 {j.get('area', '')}"
-            f"{' · 💰 ' + ('₪' if j.get('budget_currency','ILS') == 'ILS' else '$') + str(int(j['budget_amount'])) if j.get('budget_type') == 'fixed' and j.get('budget_amount') else ' · 💰 open to offers'}"
-            f"{' · 🗓 ' + j['preferred_date'] if j.get('preferred_date') else ''}"
-            "</span></li>"
-            for j in jobs
-        )
+        # Group by category. Within each group, sort by newest first
+        # and cap at 10 with a "+N more" tail. Category label maps to
+        # the pretty CATEGORIES table so the section header reads
+        # "Home Repair · 3 new jobs" not "home-repair · 3 new jobs".
+        by_cat: dict[str, list[dict]] = {}
+        for j in jobs:
+            by_cat.setdefault(j["category"], []).append(j)
+
+        cat_label_map = {c["slug"]: c["label"] for c in CATEGORIES}
+        sections_html: list[str] = []
+        total_shown = 0
+        for cat_slug, cat_jobs in sorted(by_cat.items(), key=lambda x: -len(x[1])):
+            cat_label = cat_label_map.get(cat_slug, cat_slug)
+            visible = cat_jobs[:10]
+            hidden = len(cat_jobs) - len(visible)
+            total_shown += len(visible)
+            rows_html = "".join(
+                f"<li style=\"margin-bottom:10px;list-style:none;padding-left:0\">"
+                f"<a href=\"{FRONTEND_URL}/services/jobs/{j['_id']}\" "
+                f"style=\"color:#1E6A6A;font-weight:600;text-decoration:none\">{j.get('title')}</a>"
+                f"<br/><span style=\"color:#666;font-size:12px\">"
+                f"📍 {j.get('area','')}"
+                f"{' · 💰 ' + ('₪' if j.get('budget_currency','ILS') == 'ILS' else '$') + str(int(j['budget_amount'])) if j.get('budget_type') == 'fixed' and j.get('budget_amount') else ' · 💰 open to offers'}"
+                f"{' · 🗓 ' + j['preferred_date'] if j.get('preferred_date') else ''}"
+                "</span></li>"
+                for j in visible
+            )
+            more_line = ""
+            if hidden > 0:
+                more_url = f"{FRONTEND_URL}/services/jobs?category={cat_slug}"
+                more_line = (
+                    f"<p style=\"margin:4px 0 12px 0;font-size:12px\">"
+                    f"<a href=\"{more_url}\" style=\"color:#1E6A6A\">+{hidden} more, view all →</a>"
+                    "</p>"
+                )
+            snooze_tok = create_snooze_token(uid, cat_slug)
+            snooze_url = f"{FRONTEND_URL}/notification-snooze?t={snooze_tok}"
+            sections_html.append(f"""
+              <div style="margin:20px 0">
+                <h3 style="margin:0 0 8px;color:#0F3A3A;font-size:14px;text-transform:uppercase;letter-spacing:0.5px">
+                  {cat_label} <span style="color:#888;font-weight:400">· {len(cat_jobs)} new</span>
+                </h3>
+                <ul style="padding:0;margin:0">{rows_html}</ul>
+                {more_line}
+                <p style="margin:4px 0 0;font-size:11px">
+                  <a href="{snooze_url}" style="color:#999">Snooze {cat_label} for 7 days</a>
+                </p>
+              </div>
+            """)
+
+        settings_url = f"{FRONTEND_URL}/dashboard/settings?section=notifications"
         html = f"""
-          <p>Hi {u.get('full_name') or 'there'},</p>
-          <p>Here are the new jobs matching your saved searches in the last day:</p>
-          <ul style="list-style:none;padding:0">{rows_html}</ul>
-          <p style="color:#666;font-size:12px;margin-top:24px">
-            You can manage or unsubscribe from these searches in your
-            <a href="{FRONTEND_URL}/dashboard" style="color:#1E6A6A">MyIsraelRental dashboard</a>.
+          <p>Hi {u.get('name') or 'there'},</p>
+          <p>Here are the new jobs matching your saved searches — grouped by category for a quick scan:</p>
+          {''.join(sections_html)}
+          <hr style="border:none;border-top:1px solid #eee;margin:28px 0"/>
+          <p style="color:#666;font-size:12px;line-height:1.6">
+            Want fewer emails?
+            <a href="{settings_url}" style="color:#1E6A6A;font-weight:600">Adjust your notification settings →</a>
           </p>
         """
         await send_email(
             u["email"],
-            subject=f"Your daily jobs digest — {len(jobs)} new match{'es' if len(jobs) != 1 else ''}",
+            subject=f"Your daily jobs digest — {total_shown} new match{'es' if total_shown != 1 else ''}",
             html_body=html,
             tag="job-digest",
         )

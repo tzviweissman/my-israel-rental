@@ -10,6 +10,7 @@ import bcrypt
 import httpx
 from fastapi import APIRouter, Body, Depends, HTTPException, Request
 from fastapi.responses import RedirectResponse
+from pydantic import BaseModel
 
 from models import (
     ChangePasswordRequest,
@@ -617,3 +618,51 @@ async def set_user_role(payload_in: RoleUpdate, payload: dict = Depends(verify_t
         else "Switched back to renter. You can switch to lister again any time from Settings."
     )
     return {"token": new_token, "user": user, "message": message}
+
+
+
+class DeeplinkConsumeIn(BaseModel):
+    token: str
+
+
+@router.post("/auth/deeplink-consume")
+async def deeplink_consume(payload: DeeplinkConsumeIn):
+    """Exchange a short-lived (7-day) email deep-link JWT for a full
+    30-day session token.
+
+    Used by the "View & Bid" CTA in job-match notification emails so
+    that a provider who clicks through lands on the job post already
+    authenticated — they can hit "Apply" without a login prompt.
+
+    Auth-in: the signed token itself (no bearer). Auth-out: a normal
+    session JWT the client persists in sessionStorage. Failure modes
+    (expired, invalid, wrong purpose) return 400 with a friendly
+    message so the frontend can render a "log in instead" fallback.
+    """
+    from utils.notification_tokens import (
+        NotificationTokenError,
+        verify_notification_token,
+    )
+
+    try:
+        claims = verify_notification_token(payload.token, "job_deeplink")
+    except NotificationTokenError as e:
+        raise HTTPException(status_code=400, detail=str(e)) from e
+
+    user = await db.users.find_one(
+        {"id": claims["user_id"]},
+        {
+            "_id": 0, "id": 1, "email": 1, "name": 1, "role": 1,
+            "email_verified": 1, "phone": 1, "preferred_language": 1,
+        },
+    )
+    if not user:
+        # Account was deleted between the email being sent and now.
+        raise HTTPException(status_code=400, detail="This link is no longer valid.")
+
+    session_token = create_token(user["id"], user.get("role") or "renter")
+    return {
+        "token": session_token,
+        "user": user,
+        "job_id": claims.get("job_id"),
+    }
