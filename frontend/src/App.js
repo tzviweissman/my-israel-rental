@@ -35,7 +35,14 @@ function ScrollToTop() {
 // banners, floating buttons, ThemePreviewOverride) stays static so we
 // don't ship a spinner where the chrome should already be visible.
 const Home = lazy(() => import('./pages/Home'));
-const Properties = lazy(() => import('./pages/Properties'));
+// Prefetch the top destinations users navigate to from Home during
+// idle browser time. Webpack emits `<link rel="prefetch">` for these
+// chunks, so click-through from Home feels instant while still keeping
+// the pages lazy (they don't run on initial paint). Kept conservative
+// — over-prefetching burns bandwidth on visitors who never navigate.
+const Properties = lazy(() => import(/* webpackPrefetch: true */ './pages/Properties'));
+const Stays = lazy(() => import(/* webpackPrefetch: true */ './pages/Stays'));
+const Services = lazy(() => import(/* webpackPrefetch: true */ './pages/Services'));
 const PropertyDetail = lazy(() => import('./pages/PropertyDetail'));
 const SubleaseDetail = lazy(() => import('./pages/SubleaseDetail'));
 const Auth = lazy(() => import('./pages/Auth'));
@@ -54,8 +61,6 @@ const SignContract = lazy(() => import('./pages/SignContract'));
 const PaymentSuccess = lazy(() => import('./pages/PaymentSuccess'));
 const PaymentCancel = lazy(() => import('./pages/PaymentCancel'));
 const AvailabilityExtended = lazy(() => import('./pages/AvailabilityExtended'));
-const Stays = lazy(() => import('./pages/Stays'));
-const Services = lazy(() => import('./pages/Services'));
 const GigDetail = lazy(() => import('./pages/GigDetail'));
 const CreateGig = lazy(() => import('./pages/CreateGig'));
 const JobsBoard = lazy(() => import('./pages/JobsBoard'));

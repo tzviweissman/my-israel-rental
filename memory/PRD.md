@@ -11,6 +11,14 @@ Build a bilingual (English/Hebrew) rental website named MyIsraelRental.com with 
 - **i18n**: i18next with English and Hebrew (RTL) support
 
 ## What's Been Implemented
+- [x] **Prefetch hints for top-3 destinations from Home (2026-07-15)**:
+  - Added `/* webpackPrefetch: true */` magic comments to the `React.lazy()` imports for `Properties`, `Stays`, and `Services` — the three most-clicked destinations from the Home landing.
+  - **How it works**: after Home's initial paint, webpack injects `<link rel="prefetch">` tags for the target chunks during browser-idle time. When the user actually clicks "Stays" (or any of the three), the chunk is already in the browser cache — click-through feels instant even though the pages are still lazy-loaded.
+  - **Live verified**: 17 prefetch links injected on `/` cold-load, covering the 3 target page chunks (`src_pages_Properties_js.chunk.js`, `src_pages_Stays_jsx.chunk.js`, `src_pages_Services_jsx.chunk.js`) plus their transitive shared dependencies (leaflet, radix-popover, react-day-picker, lucide icons, etc.). No visible degradation to Home paint.
+  - Kept conservative — did NOT prefetch admin, contract-signing, gig-management, or job-detail pages since those are lower-frequency destinations and over-prefetching wastes bandwidth on visitors who never navigate there.
+  - Files touched: `frontend/src/App.js` (3 magic comments).
+
+
 - [x] **Performance sweep — 5-item bundle-size & network optimization pass (2026-07-15)**:
   - **1. Route-level code splitting** (`frontend/src/App.js`): converted all 27 page components to `React.lazy(() => import(...))` and wrapped `<Routes>` in a single `<Suspense>` with a shared spinner fallback (reused from the auth-loading gate). Small always-mounted chrome (Navigation, ImpersonationBanner, WhatsAppButton, AccessibilityButton, ServicesUpsellModal, ThemePreviewOverride) stays static — only route pages are split. **Result**: main bundle down from ~800 kB → **167.44 kB** (~80% reduction on first paint). Build now emits **41 route chunks** so a visitor landing on `/` no longer downloads admin dashboards, contract signing, gig marketplace, or the jobs board upfront. `yarn build` completes in ~19s. Live verified: `/`, `/stays`, `/services`, `/services/jobs`, `/services/gig/<id>`, `/faq`, `/auth/login`, `/property/<id>` all render with 0 console errors and no "Failed to fetch dynamically imported module" — RouteFallback shows for <100ms on cold chunk resolution.
   - **2. GZip middleware** (`backend/server.py`): added `GZipMiddleware(minimum_size=500)` right after CORS. **Result**: `/api/properties?limit=50` compresses from 38,864 B → 3,469 B (**91% reduction**), with `content-encoding: gzip` + `vary: Accept-Encoding` headers. Tiny responses (<500 B) correctly skip compression to avoid overhead — e.g. `/api/marketplace/notification-preferences` at 41 B ships uncompressed.
