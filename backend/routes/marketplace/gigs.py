@@ -387,6 +387,13 @@ async def patch_gig(gig_id: str, payload: GigPatch, user=Depends(verify_token)):
         }
     if "category" in update:
         _validate_category(update["category"])
+    # Re-validate subcategory on patch too so a malicious update
+    # can't smuggle HTML or overlong strings past the create-time
+    # guard. Uses the effective category (new value if being patched,
+    # otherwise the existing one on the doc).
+    if "subcategory" in update:
+        effective_cat = update.get("category") or gig.get("category") or ""
+        _validate_subcategory(effective_cat, update["subcategory"])
     update["updated_at"] = datetime.now(UTC).isoformat()
     await db.marketplace_gigs.update_one({"_id": gig_id}, {"$set": update})
     # If area changed, re-geocode in the background so distance sort

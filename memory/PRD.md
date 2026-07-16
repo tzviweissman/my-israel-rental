@@ -10,6 +10,13 @@ Build a bilingual (English/Hebrew) rental website named MyIsraelRental.com with 
 - **Theme**: Ocean Teal and Gold (#1E6A6A, #D4AF37)
 - **i18n**: i18next with English and Hebrew (RTL) support
 
+- [x] **Subcategory filtering wired end-to-end (2026-07-16)**:
+  - **Frontend (`Services.jsx`)**: subcategory chip row renders below the CategoryCarousel only when the selected top-level category has entries in `SUBCATEGORIES` (home-services-repair, travel-tourism, creative-design, business-financial). Chips are aria-pressed toggles that patch `?subcategory=<slug>` into the URL; second click clears. Clearing the category also clears subcategory (`patchUrl({ category: '', subcategory: '' })`). All chips carry `data-testid="services-sub-<slug>"`, the row carries `data-testid="services-subcategory-row"`.
+  - **Backend (`gigs.py`, `jobs.py`)**: `list_gigs` and `list_jobs` accept an optional `subcategory` query param. Applied as a Mongo equality filter **only inside the category branch** — a global `?subcategory=plumbing` is intentionally ignored. `PATCH /api/marketplace/gigs/{id}` now re-validates the subcategory field against the effective category (either the patched value or the existing one on the doc) — closes the low-priority hardening flag from iteration_65.
+  - **Verified (iteration_65)**: 100% backend + frontend pass. `?subcategory=plumbing` narrows the 31-gig home-services list to the 1 tagged gig; unknown-but-slug-shaped long-tail values (`solar-panel-installation`) accepted on create; `<script>` payloads rejected 400; row hides for categories without subcategories (Personal Care); Show-all clears both filters.
+  - Files touched: `backend/routes/marketplace/gigs.py` (PATCH re-validation), test file `backend/tests/test_subcategory_filter.py` added by testing agent.
+
+
 ## What's Been Implemented
 - [x] **Marketplace category restructure — 12 → 15 categories + subcategories (2026-07-15)**:
   - **New taxonomy (`backend/routes/marketplace/shared.py`)**:
