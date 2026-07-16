@@ -29,6 +29,7 @@ import { localizedTitle } from '../utils/gigLocale';
 import { isAvailableNow, getGigCover } from '../utils/gigAvailability';
 import ServicesHeroSearch from '../components/marketplace/ServicesHeroSearch';
 import { saveReturnPath } from '../hooks/useBackNavigation';
+import { SUBCATEGORIES } from '../lib/categories';
 import ServicesHeroTitle from '../components/marketplace/ServicesHeroTitle';
 
 const TEAL = '#1E6A6A';
@@ -136,6 +137,9 @@ const GigCard = ({ gig, onClick, i18n, t }) => {
 // consumes. Kept at module scope so the identity is stable.
 const readFilters = (params) => ({
   selectedCat: params.get('category') || '',
+  // Optional sub-bucket, only respected when selectedCat is set. Blank
+  // string means "no sub-filter" — matches every gig in the category.
+  selectedSubcategory: params.get('subcategory') || '',
   selectedLoc: params.get('location') || '',
   q: params.get('q') || '',
   minRating: params.get('min_rating') || '',
@@ -190,7 +194,7 @@ const Services = () => {
 
   const state = readFilters(searchParams);
   const {
-    selectedCat, selectedLoc, q,
+    selectedCat, selectedSubcategory, selectedLoc, q,
     minRating, minPrice, maxPrice, responseTime, languages, bookingMode, sort, nearby, maxDistance,
     availableOn,
   } = state;
@@ -228,6 +232,10 @@ const Services = () => {
   useEffect(() => {
     const params = new URLSearchParams();
     if (selectedCat)   params.set('category', selectedCat);
+    // Only send subcategory when a top-level category is also selected
+    // — matches the backend's contract and avoids leaking useless
+    // query params.
+    if (selectedCat && selectedSubcategory) params.set('subcategory', selectedSubcategory);
     if (selectedLoc)   params.set('location', selectedLoc);
     if (q)             params.set('q', q);
     if (minRating)     params.set('min_rating', minRating);
@@ -252,7 +260,7 @@ const Services = () => {
       .catch((e) => { console.error(e); toast.error(t('services.loadError', 'Failed to load')); })
       .finally(() => setLoading(false));
   }, [
-    selectedCat, selectedLoc, q,
+    selectedCat, selectedSubcategory, selectedLoc, q,
     minRating, minPrice, maxPrice, responseTime,
     // Joined to a primitive so the effect doesn't fire on identity change alone.
     languages.join(','), bookingMode, sort, t, availableOn,
@@ -516,7 +524,7 @@ const Services = () => {
             </h3>
             {selectedCat && (
               <button
-                onClick={() => patchUrl({ category: '' })}
+                onClick={() => patchUrl({ category: '', subcategory: '' })}
                 className="text-xs font-semibold text-[#1E6A6A] hover:underline"
                 data-testid="services-category-clear"
               >
@@ -527,8 +535,42 @@ const Services = () => {
           <CategoryCarousel
             categories={categories}
             selectedCat={selectedCat}
-            onSelect={(v) => patchUrl({ category: v })}
+            onSelect={(v) => patchUrl({ category: v, subcategory: '' })}
           />
+
+          {/* Subcategory chip row — only shown when the current top-level
+              category has sub-buckets defined (the 4 merged buckets:
+              home-services-repair, travel-tourism, creative-design,
+              business-financial). Clicking a chip narrows the gig list
+              to that specific sub-bucket; clicking it again clears the
+              filter. URL-persisted so `/services?category=X&subcategory=Y`
+              is shareable. */}
+          {selectedCat && SUBCATEGORIES[selectedCat] && (
+            <div
+              className="flex flex-wrap gap-2 mt-3"
+              data-testid="services-subcategory-row"
+            >
+              {SUBCATEGORIES[selectedCat].map((s) => {
+                const active = selectedSubcategory === s.slug;
+                return (
+                  <button
+                    key={s.slug}
+                    type="button"
+                    onClick={() => patchUrl({ subcategory: active ? '' : s.slug })}
+                    className={`px-3 py-1.5 rounded-full text-xs font-semibold border transition-colors ${
+                      active
+                        ? 'bg-[#1E6A6A] text-white border-[#1E6A6A]'
+                        : 'bg-white text-gray-700 border-gray-200 hover:border-[#1E6A6A]'
+                    }`}
+                    data-testid={`services-sub-${s.slug}`}
+                    aria-pressed={active}
+                  >
+                    {s.label}
+                  </button>
+                );
+              })}
+            </div>
+          )}
         </div>
       </div>
 

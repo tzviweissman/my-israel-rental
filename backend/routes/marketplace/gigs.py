@@ -39,6 +39,7 @@ from .shared import (
     _response_bucket,
     _update_response_ema,
     _validate_category,
+    _validate_subcategory,
 )
 
 router = APIRouter(prefix="/marketplace", tags=["marketplace"])
@@ -46,6 +47,12 @@ router = APIRouter(prefix="/marketplace", tags=["marketplace"])
 @router.get("/gigs")
 async def list_gigs(
     category: Optional[str] = None,
+    # Optional sub-bucket filter. Only applied when a top-level
+    # category is also selected — narrows the match to gigs tagged
+    # with this specific sub-bucket. Free-text values pass through
+    # (a poster tagged "solar-panel-installation" still shows up
+    # when the filter matches).
+    subcategory: Optional[str] = None,
     location: Optional[str] = None,
     q: Optional[str] = None,
     # Trust & Discovery filters — all optional. Defaults to previous behavior.
@@ -75,6 +82,10 @@ async def list_gigs(
     if category:
         _validate_category(category)
         query["category"] = category
+        # Subcategory only applies when scoping to a top-level category
+        # — a global "?subcategory=plumbing" is meaningless.
+        if subcategory:
+            query["subcategory"] = subcategory
     if location:
         # Case-insensitive substring match on the `area` field so a gig
         # tagged "Jerusalem, Old City" matches the "jerusalem" slug.
@@ -243,6 +254,7 @@ async def list_gigs(
 @router.post("/gigs")
 async def create_gig(payload: GigIn, user=Depends(verify_token)):
     _validate_category(payload.category)
+    _validate_subcategory(payload.category, payload.subcategory)
     if payload.booking_mode not in ("whatsapp", "in_platform"):
         raise HTTPException(status_code=400, detail="booking_mode must be 'whatsapp' or 'in_platform'")
     if payload.booking_mode == "whatsapp" and not (payload.whatsapp or "").strip():
@@ -270,6 +282,7 @@ async def create_gig(payload: GigIn, user=Depends(verify_token)):
         "title": payload.title.strip(),
         "title_he": (payload.title_he or "").strip() or None,
         "category": payload.category,
+        "subcategory": (payload.subcategory or "").strip() or None,
         "description": payload.description,
         "description_he": (payload.description_he or "").strip() or None,
         "gig_type": payload.gig_type,

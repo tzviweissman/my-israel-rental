@@ -301,6 +301,11 @@ _DEFAULT_WEEKLY: dict[str, list[WeeklyWindow]] = {
 class GigIn(BaseModel):
     title: str
     category: str
+    # Optional sub-bucket for merged categories (home-services-repair,
+    # travel-tourism, creative-design, business-financial). Providers
+    # who set this get tighter match precision when posters filter by
+    # the same value. See SUBCATEGORIES for the suggested list.
+    subcategory: Optional[str] = None
     description: str = ""
     title_he: Optional[str] = None
     description_he: Optional[str] = None
@@ -327,6 +332,7 @@ class GigIn(BaseModel):
 class GigPatch(BaseModel):
     title: Optional[str] = None
     category: Optional[str] = None
+    subcategory: Optional[str] = None
     description: Optional[str] = None
     title_he: Optional[str] = None
     description_he: Optional[str] = None

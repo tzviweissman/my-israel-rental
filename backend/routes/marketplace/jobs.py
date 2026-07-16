@@ -265,6 +265,7 @@ async def _notify_matching_providers(job: dict[str, Any]) -> None:
 @router.get("/jobs")
 async def list_jobs(
     category: Optional[str] = None,
+    subcategory: Optional[str] = None,
     area: Optional[str] = None,
     status: str = "open",
     limit: int = Query(60, ge=1, le=120),
@@ -273,6 +274,9 @@ async def list_jobs(
     q: dict[str, Any] = {"status": status}
     if category:
         q["category"] = category
+        # Subcategory is only meaningful inside a top-level category.
+        if subcategory:
+            q["subcategory"] = subcategory
     if area:
         q["area"] = {"$regex": f"^{re.escape(area)}", "$options": "i"}
     cur = db.marketplace_jobs.find(q).sort("created_at", -1).limit(limit)

@@ -1,0 +1,38 @@
+{
+  "summary": "Verified Services marketplace subcategory filtering & validation on both backend and frontend. All 7 pytest backend tests pass; full Playwright frontend flow validates chip row, URL persistence, toggle behavior, hide-on-non-matching-category, and clear-category reset.",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {"ui_bugs": [], "integration_issues": [], "design_issues": []},
+  "test_report_links": [
+    "/app/backend/tests/test_subcategory_filter.py",
+    "/app/test_reports/pytest/subcategory_results.xml"
+  ],
+  "verified_behaviors": [
+    "GET /api/marketplace/gigs?category=home-services-repair returns 31 gigs",
+    "GET ?category=home-services-repair&subcategory=plumbing returns exactly the tagged gig 85ae999e-1086-4e91-89c4-c89532792f49",
+    "GET ?category=home-services-repair&subcategory=electrical returns []",
+    "POST /api/marketplace/gigs rejects subcategory '<script>alert(1)</script>' with 400",
+    "POST /api/marketplace/jobs rejects '<script>x</script>' subcategory (400/422)",
+    "POST /api/marketplace/gigs accepts long-tail slug 'solar-panel-installation'",
+    "GET /api/marketplace/jobs?category=home-services-repair&subcategory=plumbing responds 200 (no crash)",
+    "Frontend: subcategory row hidden by default; appears with 5 chips after clicking Home Services & Repair",
+    "Frontend: clicking services-sub-plumbing adds ?subcategory=plumbing to URL and count drops to (1)",
+    "Frontend: aria-pressed toggles true→false and URL loses subcategory on second click",
+    "Frontend: switching to Personal Care hides the subcategory row",
+    "Frontend: services-category-clear ('Show all') resets both category and subcategory query params"
+  ],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "_validate_subcategory correctly permits both known subcategory slugs and long-tail slug-shape strings (max 40 chars, alnum + -_ space) — safe against HTML injection.",
+    "LIST endpoint applies subcategory only inside category branch (correct behavior; global ?subcategory ignored).",
+    "PATCH /gigs does not call _validate_subcategory when subcategory field is updated — minor: a malicious subcategory could be set via patch. Consider re-validating (low-priority since patch is auth-gated to gig owner)."
+  ],
+  "updated_files": [
+    "/app/backend/tests/test_subcategory_filter.py"
+  ],
+  "success_rate": {"backend": "100%", "frontend": "100%"},
+  "test_credentials": "owner@test.com / Test1234! (used for authed create tests)",
+  "seed_data_creation": "None — reused pre-existing tagged gig 85ae999e-1086-4e91-89c4-c89532792f49. Created & deleted a temp long-tail slug gig during test (cleaned up).",
+  "retest_needed": false,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "Subcategory filtering feature verified end-to-end (backend + Services.jsx UI). Note: PATCH /gigs currently skips subcategory validation on update — low-risk since auth-gated, but flagged for hardening."
+}
