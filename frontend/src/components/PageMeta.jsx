@@ -29,7 +29,7 @@ const PageMeta = ({ title, description, path, image, jsonLd }) => {
   const canonical = `${CANONICAL_ORIGIN}${resolvedPath}`;
   const ogImage =
     image ??
-    'https://customer-assets.emergentagent.com/job_listing-manager-pro-2/artifacts/hx4hc6hw_IMG_1745%20%281%29.PNG';
+    `${CANONICAL_ORIGIN}/brand-logo.png`;
   // Normalise jsonLd into an array so callers can pass a single object
   // or a list of structured-data blocks (Organization + WebSite, etc.)
   const ldBlocks = jsonLd ? (Array.isArray(jsonLd) ? jsonLd : [jsonLd]) : [];

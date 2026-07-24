@@ -109,7 +109,7 @@ const Home = () => {
             '@id': 'https://myisraelrental.com/#organization',
             name: 'MyIsraelRental',
             url: 'https://myisraelrental.com',
-            logo: 'https://customer-assets.emergentagent.com/job_listing-manager-pro-2/artifacts/hx4hc6hw_IMG_1745%20%281%29.PNG',
+            logo: 'https://myisraelrental.com/brand-logo.png',
             description: 'Find long-term, short-term, and vacation rentals across Israel. Free for renters, free for owners.',
             areaServed: { '@type': 'Country', name: 'Israel' },
           },

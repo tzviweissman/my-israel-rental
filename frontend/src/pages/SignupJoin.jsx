@@ -24,6 +24,7 @@ import { API, AuthContext } from '../App';
 import WelcomePopups from '../components/WelcomePopups';
 import OwnerManagementOfferModal from '../components/OwnerManagementOfferModal';
 import GoogleSignInButton from '../components/auth/GoogleSignInButton';
+import { GOOGLE_CLIENT_ID } from '../components/auth/useGoogleSignIn';
 
 const ROLE_CARDS = [
   {
@@ -264,19 +265,21 @@ const SignupJoin = () => {
             </div>
 
             {/* One-tap Google sign-up — respects the role card the user
-                clicked (if any). AuthCallback picks up `signup_intent_role`
+                clicked (if any). completeGoogleSignIn picks up `signup_intent_role`
                 from sessionStorage after the OAuth roundtrip and promotes
                 the fresh account before landing them on the dashboard. */}
-            <div className="mt-8 max-w-sm mx-auto">
-              <div className="flex items-center gap-3 mb-3" aria-hidden="true">
-                <div className="flex-1 h-px bg-gray-200" />
-                <span className="text-xs uppercase tracking-wider text-gray-400">
-                  {t('signupJoin.orQuickSignup', 'or sign up in one tap')}
-                </span>
-                <div className="flex-1 h-px bg-gray-200" />
+            {GOOGLE_CLIENT_ID && (
+              <div className="mt-8 max-w-sm mx-auto">
+                <div className="flex items-center gap-3 mb-3" aria-hidden="true">
+                  <div className="flex-1 h-px bg-gray-200" />
+                  <span className="text-xs uppercase tracking-wider text-gray-400">
+                    {t('signupJoin.orQuickSignup', 'or sign up in one tap')}
+                  </span>
+                  <div className="flex-1 h-px bg-gray-200" />
+                </div>
+                <GoogleSignInButton intentRole={activeCard?.backendRole || ''} />
               </div>
-              <GoogleSignInButton intentRole={activeCard?.backendRole || ''} />
-            </div>
+            )}
 
             <p className="mt-10 text-center sm:hidden text-sm text-gray-600">
               {t('signupJoin.haveAccount', 'Already have an account?')}{' '}
@@ -316,17 +319,19 @@ const SignupJoin = () => {
                   form. On success, the visitor lands at /dashboard as a
                   freshly-created `renter` (the least-privileged role);
                   they can promote themselves to owner/provider later
-                  from the dashboard. See AuthCallback.jsx. */}
-              <div className="mt-6">
-                <GoogleSignInButton intentRole={activeCard?.backendRole || ''} />
-                <div className="flex items-center gap-3 mt-4 mb-1" aria-hidden="true">
-                  <div className="flex-1 h-px bg-gray-200" />
-                  <span className="text-xs uppercase tracking-wider text-gray-400">
-                    {t('auth.orContinueWith', 'or')}
-                  </span>
-                  <div className="flex-1 h-px bg-gray-200" />
+                  from the dashboard. See completeGoogleSignIn.js. */}
+              {GOOGLE_CLIENT_ID && (
+                <div className="mt-6">
+                  <GoogleSignInButton intentRole={activeCard?.backendRole || ''} />
+                  <div className="flex items-center gap-3 mt-4 mb-1" aria-hidden="true">
+                    <div className="flex-1 h-px bg-gray-200" />
+                    <span className="text-xs uppercase tracking-wider text-gray-400">
+                      {t('auth.orContinueWith', 'or')}
+                    </span>
+                    <div className="flex-1 h-px bg-gray-200" />
+                  </div>
                 </div>
-              </div>
+              )}
 
               <form onSubmit={handleSubmit} className="mt-8 space-y-4" data-testid="signup-form">
                 <Field

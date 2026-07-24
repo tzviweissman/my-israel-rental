@@ -22,7 +22,7 @@ from typing import Any
 
 
 import bcrypt
-from routes.deps import db, logger, EMERGENT_LLM_KEY
+from routes.deps import db, logger, ANTHROPIC_API_KEY
 from utils.email import send_email
 
 
@@ -108,14 +108,14 @@ async def _ai_map_columns(source_columns: list[str], schema: str = "property") -
     names to our canonical schema. Returns {source_col: canonical_field}.
     """
     try:
-        from emergentintegrations.llm.chat import LlmChat, UserMessage
-        if not EMERGENT_LLM_KEY:
+        from utils.llm import LlmChat, UserMessage
+        if not ANTHROPIC_API_KEY:
             return _fallback_map(source_columns, schema)
         system = _PROPERTY_SYSTEM if schema == "property" else (
             "Map each source column to one of: " + ", ".join(sorted(USER_FIELDS)) +
             ". Output JSON {col: field_or_null}."
         )
-        chat = LlmChat(api_key=EMERGENT_LLM_KEY, session_id=f"csv-map-{uuid.uuid4().hex[:8]}", system_message=system).with_model("anthropic", "claude-sonnet-4-5-20250929")
+        chat = LlmChat(api_key=ANTHROPIC_API_KEY, session_id=f"csv-map-{uuid.uuid4().hex[:8]}", system_message=system).with_model("anthropic", "claude-sonnet-4-5-20250929")
         prompt = "Source columns: " + " | ".join(source_columns)
         msg = UserMessage(text=prompt)
         raw = await chat.send_message(msg)

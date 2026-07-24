@@ -1,10 +1,10 @@
 """LLM-backed translation helper shared by the contract-translation routes."""
 import uuid
 
-from emergentintegrations.llm.chat import LlmChat, UserMessage
 from fastapi import HTTPException
 
-from routes.deps import EMERGENT_LLM_KEY
+from routes.deps import ANTHROPIC_API_KEY
+from utils.llm import LlmChat, UserMessage
 
 
 async def translate_text(text: str, direction: str) -> str:
@@ -19,7 +19,7 @@ async def translate_text(text: str, direction: str) -> str:
     else:
         raise HTTPException(status_code=400, detail="Invalid direction. Use 'he-en' or 'en-he'")
     chat = LlmChat(
-        api_key=EMERGENT_LLM_KEY,
+        api_key=ANTHROPIC_API_KEY,
         session_id=str(uuid.uuid4()),
         system_message=(
             f"You are a professional legal document translator specializing in Israeli rental contracts. "
@@ -45,7 +45,7 @@ async def translate_marketing_to_hebrew(text: str) -> str:
     if not text:
         return ""
     chat = LlmChat(
-        api_key=EMERGENT_LLM_KEY,
+        api_key=ANTHROPIC_API_KEY,
         session_id=str(uuid.uuid4()),
         system_message=(
             "You translate short marketing copy for a services marketplace from "

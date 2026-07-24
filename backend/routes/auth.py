@@ -23,7 +23,7 @@ from models import (
     WhatsAppNumberUpdate,
 )
 from models_response import MessageResponse, PasswordResetResponse, TokenResponse, UserPublic
-from routes.deps import create_token, db, logger, verify_token
+from routes.deps import GOOGLE_CLIENT_ID, create_token, db, logger, verify_token
 from utils.email import (
     send_password_reset_email,
     send_welcome_email,
@@ -193,18 +193,21 @@ async def login(credentials: UserLogin, req: Request) -> dict:
     }
 
 
-# ── Emergent-managed Google Sign-In ───────────────────────────────────────
-# Front-end kicks off the flow by sending the visitor to
-# https://auth.emergentagent.com/?redirect=<our-app>#... — once they finish
-# Google's consent, Emergent redirects back with `#session_id=<one-shot>`.
-# The client posts that session_id here; we exchange it with Emergent for
-# the verified profile, upsert a local user, and mint one of our own JWTs
-# so the rest of the app (which already trusts our JWT) works unchanged.
-# We deliberately return the same shape as /auth/login so the frontend
-# `login()` helper doesn't need a special case.
-EMERGENT_AUTH_SESSION_URL = (
-    "https://demobackend.emergentagent.com/auth/v1/env/oauth/session-data"
-)
+# ── Google Sign-In (direct — no Emergent) ─────────────────────────────────
+# The browser opens Google's OAuth popup via Google Identity Services
+# (`google.accounts.oauth2.initTokenClient`) and receives an access token,
+# which it POSTs here. We then:
+#   1. Verify the token was minted for OUR client id (tokeninfo `aud`).
+#      This check is load-bearing: without it, an access token obtained by
+#      ANY other Google app could be replayed here and we'd happily log the
+#      caller in as whoever that token belongs to (the "confused deputy"
+#      attack). Never fetch the profile before this passes.
+#   2. Fetch the profile (email / name / picture) from Google's userinfo.
+# Everything below (upsert-by-email + mint our JWT) is unchanged from the
+# old Emergent-backed flow, so existing `google_linked` accounts keep
+# working and the response shape still matches /auth/login.
+GOOGLE_TOKENINFO_URL = "https://oauth2.googleapis.com/tokeninfo"
+GOOGLE_USERINFO_URL = "https://www.googleapis.com/oauth2/v3/userinfo"
 
 
 @api_router.post("/auth/google/session", response_model=TokenResponse)
@@ -212,34 +215,49 @@ async def google_session_exchange(
     payload: dict = Body(..., embed=False),
     req: Request = None,
 ) -> dict:
-    """Exchange a one-shot Emergent session_id for our own JWT + user."""
+    """Exchange a Google OAuth access token for our own JWT + user."""
     # Very light rate limit — this is a public endpoint that talks to a
     # 3rd-party auth server, so we want to keep abuse windows narrow.
     if req is not None:
         check_rate(req, bucket="auth-google-session", limit=20, window_seconds=300)
 
-    session_id = (payload or {}).get("session_id")
-    if not isinstance(session_id, str) or not session_id.strip():
-        raise HTTPException(status_code=400, detail="session_id is required")
+    access_token = (payload or {}).get("access_token")
+    if not isinstance(access_token, str) or not access_token.strip():
+        raise HTTPException(status_code=400, detail="access_token is required")
+    access_token = access_token.strip()
 
-    # Ask Emergent Auth for the profile behind this session_id. Short
-    # timeout — the browser is blocking on us to redirect.
+    if not GOOGLE_CLIENT_ID:
+        logger.error("GOOGLE_CLIENT_ID is not set — Google sign-in is disabled")
+        raise HTTPException(status_code=503, detail="Google sign-in is not configured")
+
     try:
         async with httpx.AsyncClient(timeout=10.0) as client:
+            # 1. Audience check — reject tokens minted for any other app.
+            ti = await client.get(
+                GOOGLE_TOKENINFO_URL, params={"access_token": access_token}
+            )
+            if ti.status_code != 200:
+                logger.info(f"Google tokeninfo returned {ti.status_code}: {ti.text[:200]}")
+                raise HTTPException(status_code=401, detail="Invalid or expired Google token")
+            info = ti.json() or {}
+            if (info.get("aud") or info.get("azp") or "") != GOOGLE_CLIENT_ID:
+                logger.warning("Google token audience mismatch — rejecting sign-in")
+                raise HTTPException(
+                    status_code=401, detail="Token was not issued for this application"
+                )
+
+            # 2. Only now is it safe to read the profile behind the token.
             r = await client.get(
-                EMERGENT_AUTH_SESSION_URL,
-                headers={"X-Session-ID": session_id.strip()},
+                GOOGLE_USERINFO_URL,
+                headers={"Authorization": f"Bearer {access_token}"},
             )
     except httpx.RequestError as e:
-        logger.warning(f"Emergent Auth unreachable: {e}")
+        logger.warning(f"Google auth unreachable: {e}")
         raise HTTPException(status_code=502, detail="Auth provider unreachable") from e
 
     if r.status_code != 200:
-        # Most common cause: the session_id has already been consumed
-        # (StrictMode double-render or a stale bookmark). Surface a 401
-        # so the client redirects the visitor back to /auth/login.
-        logger.info(f"Emergent Auth returned {r.status_code}: {r.text[:200]}")
-        raise HTTPException(status_code=401, detail="Invalid or expired session")
+        logger.info(f"Google userinfo returned {r.status_code}: {r.text[:200]}")
+        raise HTTPException(status_code=401, detail="Invalid or expired Google token")
 
     data = r.json() or {}
     email = (data.get("email") or "").strip().lower()
@@ -247,6 +265,12 @@ async def google_session_exchange(
     picture = data.get("picture") or None
     if not email:
         raise HTTPException(status_code=502, detail="Auth provider returned no email")
+    # Refuse unverified addresses — otherwise someone could stand up a Google
+    # account claiming an email they don't own and take over the local user
+    # we key on that address.
+    verified = data.get("email_verified", info.get("email_verified", True))
+    if str(verified).strip().lower() not in ("true", "1"):
+        raise HTTPException(status_code=401, detail="Google account email is not verified")
 
     # Upsert by email — if the visitor previously signed up with
     # email/password we link the same account instead of orphaning it.

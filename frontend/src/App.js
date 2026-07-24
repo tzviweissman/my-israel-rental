@@ -46,7 +46,6 @@ const Services = lazy(() => import(/* webpackPrefetch: true */ './pages/Services
 const PropertyDetail = lazy(() => import('./pages/PropertyDetail'));
 const SubleaseDetail = lazy(() => import('./pages/SubleaseDetail'));
 const Auth = lazy(() => import('./pages/Auth'));
-const AuthCallback = lazy(() => import('./pages/AuthCallback'));
 const AuthDeeplink = lazy(() => import('./pages/AuthDeeplink'));
 const NotificationSnooze = lazy(() => import('./pages/NotificationSnooze'));
 const SignupJoin = lazy(() => import('./pages/SignupJoin'));
@@ -170,27 +169,15 @@ function App() {
     return <RouteFallback />;
   }
 
-  // Emergent Google Sign-In callback — when we return from
-  // auth.emergentagent.com the URL fragment carries a one-shot
-  // `#session_id=…`. We must handle it BEFORE the normal <Routes>
-  // evaluate `user ? … : Navigate(/auth/login)`, otherwise the
-  // ProtectedRoute check bounces the visitor to the login page while
-  // the session_id is still unspent. Reading window.location.hash here
-  // (outside any hook) makes the check synchronous with the first
-  // render, avoiding the classic useEffect race.
-  // REMINDER: DO NOT HARDCODE THE URL, OR ADD ANY FALLBACKS OR REDIRECT
-  // URLS, THIS BREAKS THE AUTH.
-  const hasGoogleCallback = typeof window !== 'undefined' && window.location.hash?.includes('session_id=');
+  // NOTE: Google Sign-In no longer round-trips through a redirect, so there
+  // is no `#session_id=…` fragment to intercept before <Routes> evaluate.
+  // Google Identity Services hands us the token in-page — see
+  // components/auth/GoogleSignInButton.jsx.
 
   return (
     <AuthContext.Provider value={{ user, token, login, logout, impersonate, endImpersonation }}>
       <BrowserRouter>
-        {hasGoogleCallback ? (
-          <Suspense fallback={<RouteFallback />}>
-            <AuthCallback />
-          </Suspense>
-        ) : (
-          <>
+        <>
             <ScrollToTop />
             <ThemePreviewOverride />
             <div className="App">
@@ -263,7 +250,6 @@ function App() {
           </Suspense>
         </div>
           </>
-        )}
       </BrowserRouter>
     </AuthContext.Provider>
   );

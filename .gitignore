@@ -163,3 +163,16 @@ credentials.json
 *.pem
 *.key
 .credentials
+
+# Uploaded media and signed contracts must never be committed. Contracts in
+# particular contain personal data + signatures; they belong in Cloudinary /
+# object storage, not in version control.
+backend/uploads/
+backend/private_contracts/
+
+# ...but DO track the env templates (no secrets in them) — the new host needs
+# them as the canonical list of variables to configure.
+!.env.example
+!backend/.env.example
+!frontend/.env.example
+.claude/

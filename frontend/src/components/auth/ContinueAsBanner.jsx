@@ -7,7 +7,7 @@
  * are back in with a single tap.
  *
  * The hint is populated by:
- *   • AuthCallback.jsx on Google login
+ *   • completeGoogleSignIn.js on Google login
  *   • pages/Auth.js on email/password login (falls back to a generic
  *     "Continue as X" that just pre-fills the email field)
  *
@@ -16,20 +16,15 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { User as UserIcon, X } from 'lucide-react';
-import { LAST_LOGIN_HINT_KEY } from '../../pages/AuthCallback';
-
-// Kick off the exact same Google flow used by the primary sign-in
-// button — kept inline (no extra dep) since we don't need the icon or
-// text of the primary button here.
-const startGoogleFlow = () => {
-  // REMINDER: DO NOT HARDCODE THE URL, OR ADD ANY FALLBACKS OR REDIRECT
-  // URLS, THIS BREAKS THE AUTH.
-  const redirectUrl = `${window.location.origin}/dashboard`;
-  window.location.href = `https://auth.emergentagent.com/?redirect=${encodeURIComponent(redirectUrl)}`;
-};
+import { LAST_LOGIN_HINT_KEY } from './completeGoogleSignIn';
+import useGoogleSignIn from './useGoogleSignIn';
 
 export default function ContinueAsBanner({ onFocusEmailField }) {
   const { t } = useTranslation();
+  // Same Google popup the primary sign-in button uses — shared so the two
+  // entry points can't drift (they previously each hardcoded their own
+  // redirect, and only one got updated when the provider changed).
+  const { start: startGoogleFlow } = useGoogleSignIn();
 
   // Parse the hint once at mount; if it's malformed we treat it as
   // absent rather than crashing the whole login page.

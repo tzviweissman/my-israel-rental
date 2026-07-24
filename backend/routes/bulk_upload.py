@@ -630,12 +630,11 @@ async def smart_extract(
     if len(text) > 30_000:
         raise HTTPException(status_code=413, detail="Input too long (max 30k characters)")
 
-    from emergentintegrations.llm.chat import LlmChat, UserMessage
-
-    from routes.deps import EMERGENT_LLM_KEY
+    from routes.deps import ANTHROPIC_API_KEY
+    from utils.llm import LlmChat, UserMessage
 
     chat = LlmChat(
-        api_key=EMERGENT_LLM_KEY,
+        api_key=ANTHROPIC_API_KEY,
         session_id=str(uuid.uuid4()),
         system_message=_EXTRACT_SYSTEM_PROMPT,
     )

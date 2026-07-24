@@ -592,7 +592,7 @@ const SmartListsTab = ({ token }) => {
                   MyIsraelRental logo will sit on top of the shared list. */}
               <div className="mt-2 mb-3 inline-flex items-center gap-3 px-3 py-2 rounded-xl border border-gray-200 bg-gray-50 max-w-md">
                 <img
-                  src="https://customer-assets.emergentagent.com/job_listing-manager-pro-2/artifacts/hx4hc6hw_IMG_1745%20%281%29.PNG"
+                  src="/brand-logo.png"
                   alt="MyIsraelRental logo"
                   className="w-12 h-12 rounded-lg object-contain bg-white shrink-0"
                 />

@@ -332,7 +332,7 @@ const Navigation = () => {
         <div className="flex items-center justify-between relative">
           <Link to="/" className="flex items-center shrink-0" data-testid="nav-logo" onClick={() => window.scrollTo(0, 0)}>
             <img
-              src="https://customer-assets.emergentagent.com/job_listing-manager-pro-2/artifacts/hx4hc6hw_IMG_1745%20%281%29.PNG"
+              src="/brand-logo.png"
               alt="MyIsraelRental"
               className={`w-auto transition-all duration-300 ${
                 scrolled

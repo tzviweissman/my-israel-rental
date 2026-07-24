@@ -4,7 +4,6 @@ import uuid
 from datetime import UTC, datetime, timedelta
 from typing import List
 
-from emergentintegrations.llm.chat import LlmChat, UserMessage
 from fastapi import APIRouter, Body, Depends, File, HTTPException, Request, UploadFile
 from pydantic import BaseModel
 
@@ -21,13 +20,14 @@ from models_response import (
 from routes.deps import (
     ALLOWED_IMAGE_TYPES,
     ALLOWED_VIDEO_TYPES,
-    EMERGENT_LLM_KEY,
+    ANTHROPIC_API_KEY,
     MAX_FILE_SIZE,
     UPLOAD_DIR,
     db,
     logger,
     verify_token,
 )
+from utils.llm import LlmChat, UserMessage
 from utils.rate_limit import check_rate
 from utils.cloud_storage import (
     CLOUDINARY_ENABLED,
@@ -99,7 +99,7 @@ async def get_cloudinary_signature(
 async def translate_text(request: TranslationRequest) -> dict:
     try:
         chat = LlmChat(
-            api_key=EMERGENT_LLM_KEY,
+            api_key=ANTHROPIC_API_KEY,
             session_id=str(uuid.uuid4()),
             system_message=f"You are a professional translator. Translate the following text from {request.from_lang} to {request.to_lang}. Only provide the translation, no explanations."
         )

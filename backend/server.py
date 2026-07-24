@@ -88,6 +88,28 @@ for mod in (
 ):
     api_router.include_router(mod.router)
 
+@app.get("/api/health")
+async def health() -> dict:
+    """Liveness + dependency probe used by the platform health check.
+
+    Deliberately cheap and unauthenticated: it reports whether the process is
+    up and whether Mongo actually answers, so a deploy that boots but can't
+    reach the database is reported as unhealthy instead of silently serving
+    errors. Exposes no data beyond booleans.
+    """
+    db_ok = False
+    try:
+        await client.admin.command("ping")
+        db_ok = True
+    except Exception as e:  # noqa: BLE001
+        logger.warning(f"health check: mongo ping failed: {e}")
+    return {
+        "status": "ok" if db_ok else "degraded",
+        "database": db_ok,
+        "cloudinary": bool(os.environ.get("CLOUDINARY_CLOUD_NAME")),
+    }
+
+
 app.include_router(api_router)
 app.mount("/api/uploads", StaticFiles(directory=str(UPLOAD_DIR)), name="uploads")
 

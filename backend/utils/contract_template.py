@@ -42,20 +42,37 @@ FONTS_DIR = Path(__file__).resolve().parent.parent / "fonts"
 
 
 def _register_fonts() -> None:
-    """Register Liberation Sans (bundled) + Noto Hebrew. Idempotent."""
+    """Register the body + Hebrew fonts. Idempotent.
+
+    Fonts are BUNDLED in backend/fonts/ rather than read from system paths.
+    The old code pointed at /usr/share/fonts/... which only existed inside
+    Emergent's custom image — on any other host those files are absent and
+    Hebrew silently falls back to Helvetica, which has no Hebrew glyphs, so
+    Hebrew contracts render as blank boxes. System paths are kept as a
+    secondary fallback for images that do provide them.
+    """
+    # Static Regular/Bold instances generated from the upstream variable fonts
+    # (Arimo is the metric-compatible open substitute for Liberation Sans).
+    # Using the variable file directly would render at its default weight —
+    # Thin — which is too light to read on a legal document.
     mappings = [
-        ("Inter", "/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf"),
-        ("Inter-Bold", "/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf"),
-        ("Inter-Italic", "/usr/share/fonts/truetype/liberation/LiberationSans-Italic.ttf"),
-        ("Hebrew", "/usr/share/fonts/truetype/noto/NotoSansHebrew-Regular.ttf"),
-        ("Hebrew-Bold", "/usr/share/fonts/truetype/noto/NotoSansHebrew-Bold.ttf"),
+        # (registered name, bundled file, legacy system path)
+        ("Inter", "Arimo-Regular.ttf", "/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf"),
+        ("Inter-Bold", "Arimo-Bold.ttf", "/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf"),
+        ("Inter-Italic", "Arimo-Italic.ttf", "/usr/share/fonts/truetype/liberation/LiberationSans-Italic.ttf"),
+        ("Hebrew", "NotoSansHebrew-Regular.ttf", "/usr/share/fonts/truetype/noto/NotoSansHebrew-Regular.ttf"),
+        ("Hebrew-Bold", "NotoSansHebrew-Bold.ttf", "/usr/share/fonts/truetype/noto/NotoSansHebrew-Bold.ttf"),
     ]
-    for name, path in mappings:
-        try:
-            if name not in pdfmetrics.getRegisteredFontNames():
-                pdfmetrics.registerFont(TTFont(name, path))
-        except Exception:
-            pass  # font optional — fall back to Helvetica
+    for name, bundled, system_path in mappings:
+        if name in pdfmetrics.getRegisteredFontNames():
+            continue
+        for candidate in (FONTS_DIR / bundled, Path(system_path)):
+            try:
+                if candidate.exists():
+                    pdfmetrics.registerFont(TTFont(name, str(candidate)))
+                    break
+            except Exception:
+                continue  # try the next candidate; Helvetica is the last resort
 
 
 def _he(text: str) -> str:

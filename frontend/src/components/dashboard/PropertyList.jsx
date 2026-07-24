@@ -5,6 +5,7 @@ import axios from 'axios';
 import { Edit, Eye, Trash2, Upload, FileText, CalendarSync, Link2, X, RefreshCw, Copy, Check, Sparkles, Image as ImageIcon, Loader2, CalendarCheck, TrendingUp } from 'lucide-react';
 import { toast } from 'sonner';
 import { getCoverImage } from '../../utils/coverImage';
+import openAuthedFile from '../../utils/openAuthedFile';
 import DefaultImageBadge from '../property/DefaultImageBadge';
 import VideoCoverBadge from '../property/VideoCoverBadge';
 import SmartPricingModal from './SmartPricingModal';
@@ -632,14 +633,15 @@ const PropertyList = ({ properties, bookings = [], onEdit, onRefresh, API, token
                   <div className="flex items-center justify-between mb-2">
                     <span className="text-xs font-medium text-gray-700">{t("sweep.propertyContract", "Property Contract")}</span>
                     {property.contract_url && (
-                      <a
-                        href={`${API.replace('/api', '')}${property.contract_url}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
+                      <button
+                        type="button"
+                        onClick={() => openAuthedFile(
+                          `/properties/${property.id}/contract-file`, API, token,
+                        )}
                         className="text-xs text-[#1E6A6A] hover:text-[#D4AF37] flex items-center gap-1"
                       >
                         <FileText size={12} /> View
-                      </a>
+                      </button>
                     )}
                   </div>
                   <label

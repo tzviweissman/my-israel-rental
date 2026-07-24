@@ -1,6 +1,8 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import { useTranslation } from 'react-i18next';
 import { FileText, FileCheck, Download } from 'lucide-react';
+import { AuthContext } from '../../App';
+import openAuthedFile from '../../utils/openAuthedFile';
 
 const STATUS_COLORS = {
   confirmed: 'bg-green-100 text-green-700',
@@ -51,9 +53,16 @@ const BookingRow = ({
     booking.contract_sent_at &&
     !booking.contract_signed;
 
-  const signedHref = booking.signed_contract_url
-    ? `${API.replace('/api', '')}${booking.signed_contract_url}`
-    : null;
+  // Signed contracts are no longer public files — they're fetched from a
+  // permission-checked endpoint with the caller's token, so we can't use a
+  // plain <a href>. `hasSigned` just drives whether the buttons render.
+  const { token } = useContext(AuthContext);
+  const hasSigned = Boolean(booking.signed_contract_url);
+  const openSigned = (download) =>
+    openAuthedFile(`/bookings/${booking.id}/signed-contract`, API, token, {
+      download,
+      filename: `signed-contract-${booking.id}`,
+    });
 
   return (
     <div
@@ -124,27 +133,26 @@ const BookingRow = ({
               {t('dashboard.signContract')}
             </button>
           )}
-          {booking.contract_signed && signedHref && (
+          {booking.contract_signed && hasSigned && (
             <>
-              <a
-                href={signedHref}
-                target="_blank"
-                rel="noopener noreferrer"
+              <button
+                type="button"
+                onClick={() => openSigned(false)}
                 className="px-3 py-2 rounded-lg text-xs md:text-sm font-medium bg-green-500 text-white hover:bg-green-600 transition-colors flex items-center justify-center gap-1.5 whitespace-nowrap"
                 data-testid={`view-signed-contract-${booking.id}`}
               >
                 <FileCheck size={15} />
                 {t('dashboard.viewSignedContract')}
-              </a>
-              <a
-                href={signedHref}
-                download
+              </button>
+              <button
+                type="button"
+                onClick={() => openSigned(true)}
                 className="px-3 py-2 rounded-lg text-xs md:text-sm font-medium bg-[#1E6A6A] text-white hover:bg-[#1E6A6A]/90 transition-colors flex items-center justify-center gap-1.5 whitespace-nowrap"
                 data-testid={`download-signed-contract-${booking.id}`}
               >
                 <Download size={15} />
                 {t('dashboard.download')}
-              </a>
+              </button>
             </>
           )}
           {canAccept && (

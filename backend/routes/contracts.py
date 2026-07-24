@@ -1,9 +1,11 @@
 """Auto-extracted from server.py during the 2026-04 refactor."""
+import io
 import uuid
 from datetime import UTC, datetime
+from pathlib import PurePosixPath
 
 from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, StreamingResponse
 
 from models import ContractSignature
 from models_response import (
@@ -14,6 +16,7 @@ from models_response import (
     MessageResponse,
 )
 from routes.deps import ALLOWED_CONTRACT_TYPES, CONTRACT_DIR, MAX_FILE_SIZE, ROOT_DIR, db, logger, verify_token
+from utils.cloud_storage import fetch_contract_from_cloudinary
 from utils.contract_template import ensure_templates as ensure_contract_templates
 from utils.files import extract_text_from_docx, extract_text_from_image, extract_text_from_pdf
 from utils.translate import translate_text as _translate_text
@@ -133,11 +136,40 @@ async def list_contracts(property_id: str | None = None, payload: dict = Depends
 
 
 
+async def _may_access_contract(contract: dict, payload: dict) -> bool:
+    """True when the caller is entitled to read this contract.
+
+    Contracts are signed legal documents, so access is limited to the people
+    actually party to them: the property owner, an admin, or a renter who has
+    a booking against the same property.
+    """
+    if payload.get("role") == "admin":
+        return True
+    user_id = payload.get("user_id")
+    if contract.get("owner_id") == user_id:
+        return True
+    property_id = contract.get("property_id")
+    if property_id and user_id:
+        booking = await db.bookings.find_one(
+            {"property_id": property_id, "renter_id": user_id}, {"_id": 1}
+        )
+        if booking:
+            return True
+    return False
+
+
 @api_router.get("/contracts/download/{contract_id}")
-async def download_contract(contract_id: str) -> FileResponse:
+async def download_contract(
+    contract_id: str, payload: dict = Depends(verify_token)
+) -> FileResponse:
     contract = await db.contracts.find_one({"id": contract_id}, {"_id": 0})
     if not contract:
         raise HTTPException(status_code=404, detail="Contract not found")
+
+    # Was previously unauthenticated: any contract_id could be downloaded by
+    # anyone. Signed contracts carry personal data + signatures, so gate it.
+    if not await _may_access_contract(contract, payload):
+        raise HTTPException(status_code=403, detail="Not authorized to access this contract")
 
     file_path = CONTRACT_DIR / contract.get('stored_filename', '')
     if not file_path.exists():
@@ -158,6 +190,130 @@ async def download_contract(contract_id: str) -> FileResponse:
         filename=contract.get('original_filename', f"contract.{contract.get('file_type', 'pdf')}")
     )
 
+
+
+_CONTRACT_MEDIA_TYPES = {
+    "pdf": "application/pdf",
+    "docx": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    "jpg": "image/jpeg",
+    "jpeg": "image/jpeg",
+    "png": "image/png",
+    "webp": "image/webp",
+}
+
+
+def _resolve_private_contract_file(stored: str):
+    """Map a stored contract reference to a file inside CONTRACT_DIR.
+
+    Accepts BOTH the legacy public-URL form ("/api/uploads/signed_x.pdf") and a
+    bare filename, so this works before and after the stored values are
+    normalised — no flag day, and old records keep resolving.
+
+    Returns the resolved Path, or None if it's missing/outside CONTRACT_DIR.
+    """
+    if not stored:
+        return None
+    # basename only — defeats "../" traversal in the stored value
+    filename = PurePosixPath(stored.replace("\\", "/")).name
+    if not filename or filename in (".", ".."):
+        return None
+    root = CONTRACT_DIR.resolve()
+    candidate = (root / filename).resolve()
+    if not str(candidate).startswith(str(root)):
+        return None
+    return candidate if candidate.exists() else None
+
+
+async def _serve_contract(doc: dict, url_field: str, pid_field: str, download_name: str):
+    """Stream a contract from private Cloudinary storage, falling back to disk.
+
+    Cloudinary holds it as an `authenticated` raw asset, which is not publicly
+    fetchable — we pull the bytes server-side with a short-lived signed URL and
+    stream them ourselves, so no signed URL ever reaches the browser.
+    """
+    public_id = doc.get(pid_field)
+    if public_id:
+        data = await fetch_contract_from_cloudinary(public_id)
+        if data is not None:
+            ext = (doc.get(url_field) or "").rsplit(".", 1)[-1].lower()
+            return StreamingResponse(
+                io.BytesIO(data),
+                media_type=_CONTRACT_MEDIA_TYPES.get(ext, "application/octet-stream"),
+                headers={"Content-Disposition": f'attachment; filename="{download_name}.{ext or "pdf"}"'},
+            )
+        logger.warning(f"Cloudinary fetch failed for {public_id}; trying local disk")
+
+    file_path = _resolve_private_contract_file(doc.get(url_field) or "")
+    if file_path is None:
+        return None
+    ext = file_path.suffix.lstrip(".").lower()
+    return FileResponse(
+        path=str(file_path),
+        media_type=_CONTRACT_MEDIA_TYPES.get(ext, "application/octet-stream"),
+        filename=f"{download_name}.{ext or 'pdf'}",
+    )
+
+
+@api_router.get("/bookings/{booking_id}/signed-contract")
+async def download_signed_contract(
+    booking_id: str, payload: dict = Depends(verify_token)
+):
+    """Serve a booking's signed contract to the parties involved.
+
+    Replaces the old pattern of storing a public `/api/uploads/...` URL and
+    letting the static mount serve it — that bypassed all access control, so
+    anyone holding the URL could read a signed agreement.
+    """
+    booking = await db.bookings.find_one({"id": booking_id}, {"_id": 0})
+    if not booking:
+        raise HTTPException(status_code=404, detail="Booking not found")
+
+    user_id = payload.get("user_id")
+    if payload.get("role") != "admin" and user_id not in (
+        booking.get("renter_id"),
+        booking.get("owner_id"),
+    ):
+        raise HTTPException(status_code=403, detail="Not authorized to access this contract")
+
+    resp = await _serve_contract(
+        booking, "signed_contract_url", "signed_contract_public_id",
+        f"signed-contract-{booking_id}",
+    )
+    if resp is None:
+        raise HTTPException(status_code=404, detail="Signed contract not available")
+    return resp
+
+
+@api_router.get("/properties/{property_id}/contract-file")
+async def download_property_contract(
+    property_id: str, payload: dict = Depends(verify_token)
+):
+    """Serve a property's uploaded contract template to entitled users.
+
+    Same rationale as the booking endpoint: this file used to be reachable at
+    a public `/api/uploads/contract_<uuid>.pdf` URL with no access control.
+    """
+    prop = await db.properties.find_one({"id": property_id}, {"_id": 0})
+    if not prop:
+        raise HTTPException(status_code=404, detail="Property not found")
+
+    user_id = payload.get("user_id")
+    allowed = payload.get("role") == "admin" or prop.get("owner_id") == user_id
+    if not allowed and user_id:
+        # Renters need to read the contract for a property they've booked.
+        booking = await db.bookings.find_one(
+            {"property_id": property_id, "renter_id": user_id}, {"_id": 1}
+        )
+        allowed = booking is not None
+    if not allowed:
+        raise HTTPException(status_code=403, detail="Not authorized to access this contract")
+
+    resp = await _serve_contract(
+        prop, "contract_url", "contract_public_id", f"contract-{property_id}",
+    )
+    if resp is None:
+        raise HTTPException(status_code=404, detail="Contract not available")
+    return resp
 
 
 @api_router.get("/contracts/{contract_id}", response_model=ContractOut)

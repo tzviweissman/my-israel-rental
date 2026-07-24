@@ -54,7 +54,7 @@ export const showDesktopNotification = (title, body, onClick) => {
   try {
     const n = new Notification(title, {
       body,
-      icon: 'https://customer-assets.emergentagent.com/job_listing-manager-pro-2/artifacts/hx4hc6hw_IMG_1745%20%281%29.PNG',
+      icon: '/brand-logo.png',
       tag: 'myisraelrental-message',
     });
     if (onClick) {

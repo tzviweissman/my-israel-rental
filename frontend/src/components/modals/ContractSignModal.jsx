@@ -11,6 +11,7 @@ const ContractSignModal = ({
   onClose, 
   bookingId, 
   contractPreviewUrl,
+  contractPreviewIsPdf = false,
   onSignSuccess 
 }) => {
   const { t } = useTranslation();
@@ -369,7 +370,7 @@ const ContractSignModal = ({
             <div ref={previewScrollRef} className="mb-6 relative border-2 border-gray-300 rounded-lg overflow-auto bg-gray-100" style={{ maxHeight: '60vh' }}>
               <div className="relative inline-block">
                 {/* Contract Document */}
-                {contractPreviewUrl.toLowerCase().endsWith('.pdf') ? (
+                {(contractPreviewIsPdf || contractPreviewUrl.toLowerCase().endsWith('.pdf')) ? (
                   <iframe
                     ref={contractElRef}
                     src={contractPreviewUrl}

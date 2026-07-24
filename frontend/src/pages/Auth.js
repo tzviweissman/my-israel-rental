@@ -9,8 +9,9 @@ import { Eye, EyeOff, ArrowLeft, Mail, KeyRound, CheckCircle, Home, Building2, B
 import WelcomePopups from '../components/WelcomePopups';
 import OwnerManagementOfferModal from '../components/OwnerManagementOfferModal';
 import GoogleSignInButton from '../components/auth/GoogleSignInButton';
+import { GOOGLE_CLIENT_ID } from '../components/auth/useGoogleSignIn';
 import ContinueAsBanner from '../components/auth/ContinueAsBanner';
-import { LAST_LOGIN_HINT_KEY } from './AuthCallback';
+import { LAST_LOGIN_HINT_KEY } from '../components/auth/completeGoogleSignIn';
 
 const Auth = () => {
   const { mode } = useParams();
@@ -369,15 +370,20 @@ const Auth = () => {
           {/* Google Sign-In — sits above the email/password form so
               returning users don't scroll past it. Same button shape on
               login + signup because the underlying flow is identical
-              (Emergent upserts by email server-side). */}
-          <GoogleSignInButton className="mb-4" />
-          <div className="flex items-center gap-3 mb-6" aria-hidden="true">
-            <div className="flex-1 h-px bg-gray-200" />
-            <span className="text-xs uppercase tracking-wider text-gray-400">
-              {t('auth.orContinueWith', 'or')}
-            </span>
-            <div className="flex-1 h-px bg-gray-200" />
-          </div>
+              (we upsert by email server-side). Divider is gated with the
+              button so it can't render orphaned when Google is unconfigured. */}
+          {GOOGLE_CLIENT_ID && (
+            <>
+              <GoogleSignInButton className="mb-4" />
+              <div className="flex items-center gap-3 mb-6" aria-hidden="true">
+                <div className="flex-1 h-px bg-gray-200" />
+                <span className="text-xs uppercase tracking-wider text-gray-400">
+                  {t('auth.orContinueWith', 'or')}
+                </span>
+                <div className="flex-1 h-px bg-gray-200" />
+              </div>
+            </>
+          )}
 
           <form onSubmit={handleSubmit} className="space-y-6" data-testid="auth-form">
             {mode === 'signup' && (

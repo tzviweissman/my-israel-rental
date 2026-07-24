@@ -13,9 +13,12 @@ Internally dispatches to the PDF or image branch based on file extension.
 from __future__ import annotations
 
 import base64
+import logging
 from io import BytesIO
 from pathlib import Path
 from typing import Any
+
+logger = logging.getLogger("server")
 
 from PIL import Image, ImageDraw, ImageFont
 
@@ -173,10 +176,27 @@ def _stamp_signature_on_image(
     font_size = max(56, min(180, int(isig_h * 1.1)))
     font_reg: Any
     font_bold: Any
-    try:
-        font_reg = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf", font_size)
-        font_bold = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf", font_size)
-    except Exception:
+    # Prefer the fonts bundled in backend/fonts/ — the /usr/share paths below
+    # only existed in Emergent's image. Without a real TTF, Pillow falls back
+    # to a tiny bitmap font and the signer's printed name is barely legible on
+    # a full-resolution contract scan.
+    _fonts_dir = Path(__file__).resolve().parent.parent / "fonts"
+    _candidates = [
+        (_fonts_dir / "DejaVuSans.ttf", _fonts_dir / "DejaVuSans-Bold.ttf"),
+        (Path("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf"),
+         Path("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf")),
+    ]
+    font_reg = font_bold = None
+    for reg_path, bold_path in _candidates:
+        try:
+            if reg_path.exists() and bold_path.exists():
+                font_reg = ImageFont.truetype(str(reg_path), font_size)
+                font_bold = ImageFont.truetype(str(bold_path), font_size)
+                break
+        except Exception:
+            continue
+    if font_reg is None or font_bold is None:
+        logger.warning("DejaVu fonts unavailable — signature name will use a bitmap fallback")
         font_reg = font_bold = ImageFont.load_default()
 
     pad = max(12, int(isig_h * 0.18))

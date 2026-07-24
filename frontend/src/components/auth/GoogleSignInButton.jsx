@@ -1,20 +1,27 @@
 /**
- * "Sign in with Google" button — kicks off the Emergent-managed OAuth
- * flow. The visitor is bounced to auth.emergentagent.com; once Google
- * returns them, they land back at <origin>/dashboard#session_id=<one>
- * where <AuthCallback /> exchanges the session_id for a JWT.
+ * "Sign in with Google" button — opens Google's OAuth popup directly via
+ * Google Identity Services (`google.accounts.oauth2.initTokenClient`), gets
+ * an access token, and POSTs it to our backend for verification.
  *
- * REMINDER: DO NOT HARDCODE THE URL, OR ADD ANY FALLBACKS OR REDIRECT
- * URLS, THIS BREAKS THE AUTH. `window.location.origin` is the ONLY
- * source of truth for the redirect target — env vars and literals will
- * misfire between preview/production/localhost.
+ * This replaced the old Emergent-managed redirect flow (auth.emergentagent.com
+ * → `<origin>/dashboard#session_id=…`). Because the token now arrives in-page,
+ * there is no redirect, no URL fragment, and no one-shot session to consume —
+ * so the callback-route plumbing that guarded against double-consumption is
+ * gone. Nothing here needs a redirect URL, which is why the old
+ * "DO NOT HARDCODE THE URL" hazard no longer applies: Google authorizes by
+ * JavaScript *origin*, configured in the Google Cloud console, not by a
+ * redirect URI we send.
+ *
+ * Requires REACT_APP_GOOGLE_CLIENT_ID. If it's unset the button renders
+ * nothing, so local dev without Google configured degrades quietly instead of
+ * showing a control that can't work.
  */
 import { useTranslation } from 'react-i18next';
+import { SIGNUP_INTENT_ROLE_KEY } from './completeGoogleSignIn';
+import useGoogleSignIn from './useGoogleSignIn';
 
-// sessionStorage key used to smuggle role intent through the OAuth
-// round-trip. Kept here (single source of truth) so AuthCallback and
-// this button can't drift apart. Cleared by AuthCallback after use.
-export const SIGNUP_INTENT_ROLE_KEY = 'signup_intent_role';
+// Re-exported so existing importers keep working.
+export { SIGNUP_INTENT_ROLE_KEY };
 
 export default function GoogleSignInButton({
   className = '',
@@ -22,23 +29,15 @@ export default function GoogleSignInButton({
   intentRole = '',
 }) {
   const { t } = useTranslation();
+  const { start, busy, available } = useGoogleSignIn();
 
-  const handleClick = () => {
-    // Stash role intent BEFORE redirecting so it survives the OAuth
-    // hop. AuthCallback reads (and clears) this after the token
-    // exchange completes.
-    if (intentRole && ['owner', 'provider'].includes(intentRole)) {
-      try { sessionStorage.setItem(SIGNUP_INTENT_ROLE_KEY, intentRole); } catch { /* private mode etc */ }
-    }
-    // REMINDER: DO NOT HARDCODE THE URL, OR ADD ANY FALLBACKS OR REDIRECT
-    // URLS, THIS BREAKS THE AUTH. Derive the redirect from the *current*
-    // browser origin so preview / production / localhost all just work.
-    const redirectUrl = `${window.location.origin}/dashboard`;
-    window.location.href = `https://auth.emergentagent.com/?redirect=${encodeURIComponent(redirectUrl)}`;
-  };
+  const handleClick = () => start(intentRole);
+
+  // No client id configured → nothing to render.
+  if (!available) return null;
 
   const base =
-    'w-full inline-flex items-center justify-center gap-2 rounded-lg border font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-[#1E6A6A]/40';
+    'w-full inline-flex items-center justify-center gap-2 rounded-lg border font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-[#1E6A6A]/40 disabled:opacity-60 disabled:cursor-not-allowed';
   const sizing = 'px-4 py-2.5 text-sm';
   const styles =
     variant === 'ghost'
@@ -49,6 +48,7 @@ export default function GoogleSignInButton({
     <button
       type="button"
       onClick={handleClick}
+      disabled={busy}
       className={`${base} ${sizing} ${styles} ${className}`}
       data-testid="google-signin-button"
       aria-label={t('auth.googleSignIn', 'Sign in with Google')}
@@ -73,7 +73,7 @@ export default function GoogleSignInButton({
           d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"
         />
       </svg>
-      <span>{t('auth.googleSignIn', 'Sign in with Google')}</span>
+      <span>{busy ? t('auth.googleSigningIn', 'Signing in…') : t('auth.googleSignIn', 'Sign in with Google')}</span>
     </button>
   );
 }

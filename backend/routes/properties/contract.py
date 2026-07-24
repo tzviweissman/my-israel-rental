@@ -10,7 +10,7 @@ from datetime import UTC, datetime
 from fastapi import APIRouter, Depends, File, HTTPException, UploadFile
 
 from models_response import ContractStatusResponse, MessageResponse, PropertyContractUploadResponse
-from routes.deps import ROOT_DIR, db, logger, verify_token
+from routes.deps import CONTRACT_DIR, db, logger, verify_token
 from utils.email import send_email
 
 router = APIRouter()
@@ -50,9 +50,9 @@ async def upload_property_contract(
     if not file.content_type or file.content_type not in ALLOWED_TYPES:
         raise HTTPException(status_code=400, detail="Only PDF and image files (JPG, PNG, WEBP, HEIC) are allowed for contracts")
     
-    # Save file
-    UPLOAD_DIR = ROOT_DIR / "uploads"
-    UPLOAD_DIR.mkdir(exist_ok=True)
+    # Save file. CONTRACT_DIR is a private directory (never mounted as public
+    # StaticFiles) — this used to write into the public uploads/ tree, which
+    # meant any property contract was downloadable by URL with no auth check.
     file_id = str(uuid.uuid4())
     
     # Get file extension from content type
@@ -67,7 +67,7 @@ async def upload_property_contract(
     }
     ext = extension_map.get(file.content_type, 'pdf')
     filename = f"contract_{file_id}.{ext}"
-    file_path = UPLOAD_DIR / filename
+    file_path = CONTRACT_DIR / filename
     
     size = 0
     MAX_CONTRACT_SIZE = 10 * 1024 * 1024  # 10MB
@@ -181,10 +181,10 @@ async def delete_property_contract(property_id: str, payload: dict = Depends(ver
     if property_data['owner_id'] != payload['user_id']:
         raise HTTPException(status_code=403, detail="Not authorized")
     
-    # Delete file from disk
+    # Delete file from disk (private contracts dir — see upload handler above)
     if property_data.get('contract_url'):
         filename = property_data['contract_url'].split('/')[-1]
-        file_path = ROOT_DIR / "uploads" / filename
+        file_path = CONTRACT_DIR / filename
         file_path.unlink(missing_ok=True)
     
     # Remove from database

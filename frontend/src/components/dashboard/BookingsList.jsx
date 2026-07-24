@@ -606,6 +606,7 @@ const BookingsList = ({ bookings, onUpdate, user, token, API }) => {
         onClose={actions.closeContractSign}
         bookingId={actions.contractBookingId}
         contractPreviewUrl={actions.contractPreviewUrl}
+        contractPreviewIsPdf={actions.contractPreviewIsPdf}
         onSignSuccess={actions.submitContractSign}
       />
       <AcceptBookingModal

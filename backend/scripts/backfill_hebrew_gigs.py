@@ -49,13 +49,13 @@ from dotenv import load_dotenv  # noqa: E402
 
 load_dotenv(BACKEND_DIR / ".env")
 
-from emergentintegrations.llm.chat import LlmChat, UserMessage  # noqa: E402,F401 — kept for compat / future custom prompts
 from motor.motor_asyncio import AsyncIOMotorClient  # noqa: E402
 
+from utils.llm import LlmChat, UserMessage  # noqa: E402,F401 — kept for compat / future custom prompts
 from utils.translate import translate_marketing_to_hebrew as _translate_to_hebrew  # noqa: E402
 
 
-EMERGENT_LLM_KEY = os.environ["EMERGENT_LLM_KEY"]
+ANTHROPIC_API_KEY = os.environ.get("ANTHROPIC_API_KEY", "")
 MONGO_URL = os.environ["MONGO_URL"]
 DB_NAME = os.environ["DB_NAME"]
 

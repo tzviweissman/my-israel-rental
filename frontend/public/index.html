@@ -43,14 +43,6 @@
              from PageMeta. -->
         <title>MyIsraelRental — Rentals across Israel</title>
         <script>window.addEventListener("error",function(e){if(e.error instanceof DOMException&&e.error.name==="DataCloneError"&&e.message&&e.message.includes("PerformanceServerTiming")){e.stopImmediatePropagation();e.preventDefault()}},true);</script>
-        <!-- Emergent visual-edits tooling. `defer` so it doesn't block
-             HTML parsing (previously synchronous, was the largest
-             head-script bottleneck on cold paint). The inline error
-             handler above doesn't depend on this script, and PostHog
-             lower in <body> already handles itself. `defer` (over
-             `async`) is chosen so the tooling still executes after
-             the DOM has been parsed — matches its expectations. -->
-        <script defer src="https://assets.emergent.sh/scripts/emergent-main.js"></script>
     </head>
     <body>
         <noscript>You need to enable JavaScript to run this app.</noscript>

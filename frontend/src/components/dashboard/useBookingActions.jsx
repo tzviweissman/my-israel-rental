@@ -20,6 +20,8 @@ export default function useBookingActions({ bookings, API, token, onUpdate }) {
   const [showContractSignModal, setShowContractSignModal] = useState(false);
   const [contractBookingId, setContractBookingId] = useState(null);
   const [contractPreviewUrl, setContractPreviewUrl] = useState('');
+  // Blob URLs carry no extension, so track the type separately for preview.
+  const [contractPreviewIsPdf, setContractPreviewIsPdf] = useState(false);
 
   const authHeader = { headers: { Authorization: `Bearer ${token}` } };
 
@@ -128,9 +130,18 @@ export default function useBookingActions({ bookings, API, token, onUpdate }) {
     try {
       const booking = bookings.find((b) => b.id === bookingId);
       if (!booking) return;
-      const propertyRes = await axios.get(`${API}/properties/${booking.property_id}/contract`);
+      const propertyRes = await axios.get(`${API}/properties/${booking.property_id}/contract`, authHeader);
       if (propertyRes.data.has_contract && propertyRes.data.contract_url) {
-        setContractPreviewUrl(`${API.replace('/api', '')}${propertyRes.data.contract_url}`);
+        // The contract is no longer a public file — pull it through the
+        // permission-checked endpoint and preview it as a blob.
+        setContractPreviewIsPdf(
+          String(propertyRes.data.contract_url).toLowerCase().endsWith('.pdf'),
+        );
+        const fileRes = await axios.get(
+          `${API}/properties/${booking.property_id}/contract-file`,
+          { ...authHeader, responseType: 'blob' },
+        );
+        setContractPreviewUrl(URL.createObjectURL(fileRes.data));
       }
     } catch (error) {
       console.error('Failed to fetch contract:', error);
@@ -140,7 +151,12 @@ export default function useBookingActions({ bookings, API, token, onUpdate }) {
   const closeContractSign = () => {
     setShowContractSignModal(false);
     setContractBookingId(null);
-    setContractPreviewUrl('');
+    // Release the blob so we don't leak object URLs across sign attempts.
+    setContractPreviewUrl((prev) => {
+      if (prev && prev.startsWith('blob:')) URL.revokeObjectURL(prev);
+      return '';
+    });
+    setContractPreviewIsPdf(false);
   };
 
   const submitContractSign = async (
@@ -203,5 +219,6 @@ export default function useBookingActions({ bookings, API, token, onUpdate }) {
     showContractSignModal,
     contractBookingId,
     contractPreviewUrl,
+    contractPreviewIsPdf,
   };
 }

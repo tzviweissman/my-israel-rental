@@ -1,0 +1,15 @@
+# Railway build config for the FastAPI backend.
+#
+# tesseract-ocr is needed by utils/files.py (extract_text_from_image) for the
+# contract OCR path — it degrades to empty text without it, so contracts
+# uploaded as photos would silently lose their extracted text.
+# Hebrew + English trained data are both required.
+[phases.setup]
+nixPkgs = ["python312", "gcc"]
+aptPkgs = ["tesseract-ocr", "tesseract-ocr-heb", "tesseract-ocr-eng"]
+
+[phases.install]
+cmds = ["python -m venv --copies /opt/venv && . /opt/venv/bin/activate && pip install --upgrade pip && pip install -r requirements.txt"]
+
+[start]
+cmd = "uvicorn server:app --host 0.0.0.0 --port $PORT"

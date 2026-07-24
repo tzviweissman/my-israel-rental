@@ -9,12 +9,15 @@ preview envs), we fall back to the legacy local-disk path so dev still works.
 from __future__ import annotations
 
 import asyncio
+import io
 import os
+import urllib.request
 import uuid
 from typing import Any
 
 import cloudinary
 import cloudinary.uploader
+import cloudinary.utils
 
 _CLOUD_NAME = os.environ.get("CLOUDINARY_CLOUD_NAME", "").strip()
 _API_KEY = os.environ.get("CLOUDINARY_API_KEY", "").strip()
@@ -139,6 +142,75 @@ def delete_from_cloudinary(public_id: str, *, is_video: bool = False) -> bool:
         )
         return res.get("result") in ("ok", "not found")
     except Exception:
+        return False
+
+
+# ── Contracts: PRIVATE storage ───────────────────────────────────────────────
+# Contracts are signed legal documents (personal data + signatures), so unlike
+# property media they must never be publicly fetchable. They're stored as
+# `raw` assets with `type="authenticated"`, which Cloudinary refuses to serve
+# without a signature (verified: unsigned GET returns 401). Delivery always
+# goes through our own permission-checked endpoints, which fetch the bytes
+# server-side with a short-lived signed URL — the signed URL is never handed
+# to the browser.
+CONTRACT_FOLDER = "myisraelrental/contracts"
+
+
+async def upload_contract_to_cloudinary(
+    content: bytes, *, public_id_hint: str
+) -> dict[str, Any] | None:
+    """Store a contract as a private (authenticated) raw asset."""
+    if not CLOUDINARY_ENABLED:
+        return None
+
+    def _do() -> dict[str, Any] | None:
+        try:
+            res = cloudinary.uploader.upload(
+                io.BytesIO(content),
+                resource_type="raw",
+                type="authenticated",
+                folder=CONTRACT_FOLDER,
+                public_id=public_id_hint,
+                overwrite=False,
+                use_filename=False,
+                unique_filename=False,
+            )
+            return {"public_id": res.get("public_id"), "bytes": res.get("bytes", len(content))}
+        except Exception:  # noqa: BLE001
+            return None
+
+    return await asyncio.to_thread(_do)
+
+
+async def fetch_contract_from_cloudinary(public_id: str) -> bytes | None:
+    """Fetch a private contract's bytes via a short-lived signed URL."""
+    if not CLOUDINARY_ENABLED or not public_id:
+        return None
+
+    def _do() -> bytes | None:
+        try:
+            url, _opts = cloudinary.utils.cloudinary_url(
+                public_id, resource_type="raw", type="authenticated",
+                sign_url=True, secure=True,
+            )
+            with urllib.request.urlopen(url, timeout=30) as r:
+                return r.read()
+        except Exception:  # noqa: BLE001
+            return None
+
+    return await asyncio.to_thread(_do)
+
+
+def delete_contract_from_cloudinary(public_id: str) -> bool:
+    """Delete a private contract asset."""
+    if not CLOUDINARY_ENABLED or not public_id:
+        return False
+    try:
+        res = cloudinary.uploader.destroy(
+            public_id, resource_type="raw", type="authenticated", invalidate=True
+        )
+        return res.get("result") in ("ok", "not found")
+    except Exception:  # noqa: BLE001
         return False
 
 

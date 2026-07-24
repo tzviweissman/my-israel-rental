@@ -5,9 +5,8 @@ a much more conversational tone and Hebrew/English autodetection."""
 import re
 import uuid
 
-from emergentintegrations.llm.chat import LlmChat, UserMessage
-
-from routes.deps import EMERGENT_LLM_KEY
+from routes.deps import ANTHROPIC_API_KEY
+from utils.llm import LlmChat, UserMessage
 
 _HEBREW_RE = re.compile(r"[\u0590-\u05FF]")
 
@@ -21,7 +20,7 @@ async def translate_chat_message(text: str, target_lang: str) -> str:
     """Translate a single chat message into ``target_lang`` ('en' or 'he')."""
     target_full = "English" if target_lang == "en" else "Hebrew"
     chat = LlmChat(
-        api_key=EMERGENT_LLM_KEY,
+        api_key=ANTHROPIC_API_KEY,
         session_id=str(uuid.uuid4()),
         system_message=(
             f"You are translating informal real-estate chat messages between "
