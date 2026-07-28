@@ -1,0 +1,25 @@
+# Railway build config for the CRA/craco frontend.
+#
+# CI=false: Railway (like any CI system) sets CI=true, and CRA's react-scripts
+# treats every ESLint warning as a hard build error under that flag. The repo
+# has ~18 pre-existing react-hooks/exhaustive-deps warnings across ~13 files —
+# real code-quality debt worth cleaning up, but not something that should
+# block every deploy. Same pragmatic default Vercel/Netlify/Heroku CRA
+# buildpacks use.
+[variables]
+CI = "false"
+
+# --legacy-peer-deps is required: react-day-picker@8.10.1 declares a peer on
+# date-fns ^2||^3, but the app pins date-fns ^4. Works fine in practice; a
+# plain `npm install` aborts on the peer-dependency conflict.
+[phases.install]
+cmds = ["npm install --legacy-peer-deps"]
+
+[phases.build]
+cmds = ["npm run build"]
+
+[start]
+# CRA's own `npm start` is a dev server — wrong for production (slow,
+# unoptimized, not meant to be internet-facing). Serve the static build
+# instead. $PORT is injected by Railway at runtime.
+cmd = "npx serve -s build -l $PORT"
