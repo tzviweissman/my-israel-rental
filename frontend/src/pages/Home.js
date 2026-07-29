@@ -42,6 +42,9 @@ const Home = () => {
     fetchFeaturedProperties();
   }, []);
 
+  // Kept in sync with FEATURED_MIN_FILLER in backend/routes/properties/browse.py
+  const MIN_FILLER = 6;
+
   const fetchFeaturedProperties = async () => {
     try {
       // Dedicated endpoint — the selection (every admin-curated pick from
@@ -52,6 +55,29 @@ const Home = () => {
       // browser; the backend's MIN_FILLER constant mirrors what lived here.
       const response = await axios.get(`${API}/properties/featured`);
       setFeaturedProperties(response.data || []);
+      return;
+    } catch (error) {
+      // The frontend and backend are separate Railway services that deploy
+      // independently, so the browser can be running a build that knows
+      // about /properties/featured while the API hasn't shipped it yet.
+      // Fall back to the old client-side selection for that window rather
+      // than rendering an empty featured strip. Safe to delete once the
+      // endpoint has been live in production for a release or two.
+      if (error?.response?.status !== 404) {
+        console.error('Failed to fetch featured properties', error);
+        return;
+      }
+    }
+    try {
+      const response = await axios.get(`${API}/properties`);
+      const all = response.data || [];
+      const featured = all.filter((p) => p.is_featured);
+      const others = all.filter((p) => !p.is_featured);
+      setFeaturedProperties(
+        featured.length >= MIN_FILLER
+          ? featured
+          : [...featured, ...others.slice(0, MIN_FILLER - featured.length)],
+      );
     } catch (error) {
       console.error('Failed to fetch properties', error);
     }
