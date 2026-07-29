@@ -14,9 +14,11 @@ import {
   Plus, Loader2, ExternalLink, Trash2, BadgeCheck, Clock, Sparkles,
   Pencil, Upload, X, FileText, Globe, Award,
 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { uploadFilesFast } from '../../utils/fastUpload';
 
 const ProfileEditModal = ({ API, token, initial, onClose, onSaved }) => {
+  const { t } = useTranslation();
   const [bio, setBio] = useState(initial?.bio || '');
   const [tagline, setTagline] = useState(initial?.tagline || '');
   const [whatsapp, setWhatsapp] = useState(initial?.whatsapp || '');
@@ -152,8 +154,14 @@ const ProfileEditModal = ({ API, token, initial, onClose, onSaved }) => {
           <textarea value={bio} onChange={(e) => setBio(e.target.value)} rows={4} placeholder="Tell clients about your experience…" className="w-full mt-1 px-3 py-2 rounded-lg border border-gray-200 text-sm" data-testid="provider-bio-input" maxLength={600} />
         </div>
         <div>
-          <label className="text-xs font-semibold text-gray-700">WhatsApp (with country code)</label>
-          <input value={whatsapp} onChange={(e) => setWhatsapp(e.target.value)} placeholder="+972…" className="w-full mt-1 px-3 py-2 rounded-lg border border-gray-200 text-sm" data-testid="provider-whatsapp-input" />
+          <label className="text-xs font-semibold text-gray-700">WhatsApp</label>
+          <input value={whatsapp} onChange={(e) => setWhatsapp(e.target.value)} placeholder="050-123-4567" className="w-full mt-1 px-3 py-2 rounded-lg border border-gray-200 text-sm" data-testid="provider-whatsapp-input" />
+          {/* Doubles as the fallback for any gig published with WhatsApp
+              booking mode but a blank per-gig number — see the `whatsapp`
+              field on GET /marketplace/gigs/{id}'s provider block. */}
+          <p className="text-[11px] text-gray-500 mt-1">
+            {t('services.whatsappHint', 'Israeli numbers can be entered as 050-123-4567 — we add the +972 for you.')}
+          </p>
         </div>
 
         {/* Spoken languages — feeds the /services filter modal. Empty

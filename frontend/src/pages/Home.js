@@ -10,6 +10,7 @@ import DefaultImageBadge from '../components/property/DefaultImageBadge';
 import VideoCoverBadge from '../components/property/VideoCoverBadge';
 import PageMeta from '../components/PageMeta';
 import { getCoverImage } from '../utils/coverImage';
+import { srcSet } from '../utils/cdnImage';
 import useIsRtl from '../hooks/useIsRtl';
 
 // Hero background rotation. Keep widths consistent so the cross-fade is
@@ -43,21 +44,14 @@ const Home = () => {
 
   const fetchFeaturedProperties = async () => {
     try {
-      // The backend stamps `is_featured` on every property based on
-      // site_settings.featured_property_ids — surface every admin-curated
-      // pick, and only top up with recent non-featured listings when
-      // the admin has selected fewer than the minimum (so the strip
-      // never looks empty on a fresh install).
-      const response = await axios.get(`${API}/properties`);
-      const all = response.data || [];
-      const featured = all.filter((p) => p.is_featured);
-      const others = all.filter((p) => !p.is_featured);
-      const MIN_FILLER = 6; // top up when there's almost nothing featured
-      const combined =
-        featured.length >= MIN_FILLER
-          ? featured
-          : [...featured, ...others.slice(0, MIN_FILLER - featured.length)];
-      setFeaturedProperties(combined);
+      // Dedicated endpoint — the selection (every admin-curated pick from
+      // site_settings.featured_property_ids, topped up with other live
+      // listings when fewer than 6 are curated so the strip never looks
+      // empty) now happens server-side. This page used to pull the ENTIRE
+      // catalog with no query params and filter it down to ~8 cards in the
+      // browser; the backend's MIN_FILLER constant mirrors what lived here.
+      const response = await axios.get(`${API}/properties/featured`);
+      setFeaturedProperties(response.data || []);
     } catch (error) {
       console.error('Failed to fetch properties', error);
     }
@@ -264,11 +258,19 @@ const Home = () => {
                 }}
                 data-testid={`property-card-${property.id}`}
               >
-                <div className="relative h-44 md:h-60 bg-gray-200" style={{
-                  backgroundImage: `url(${cover.url})`,
-                  backgroundSize: 'cover',
-                  backgroundPosition: 'center'
-                }}>
+                <div className="relative h-44 md:h-60 bg-gray-200 overflow-hidden">
+                  {/* Real <img> so the browser can lazy-load and pick a
+                      variant from srcSet — a CSS background-image can do
+                      neither. Same treatment as PropertyCard.jsx. */}
+                  <img
+                    src={cover.url}
+                    srcSet={srcSet(cover.url, 600)}
+                    sizes="(max-width: 640px) 78vw, (max-width: 768px) 44vw, 360px"
+                    alt={property.title || ''}
+                    loading="lazy"
+                    decoding="async"
+                    className="absolute inset-0 w-full h-full object-cover"
+                  />
                   {cover.isDefault && <DefaultImageBadge />}
                   {cover.fromVideo && <VideoCoverBadge />}
                 </div>

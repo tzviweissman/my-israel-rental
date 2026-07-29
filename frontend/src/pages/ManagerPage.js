@@ -7,7 +7,7 @@ import { Bed, Bath, Home as HomeIcon, MapPin, User, LogIn, Mail } from 'lucide-r
 import DefaultImageBadge from '../components/property/DefaultImageBadge';
 import VideoCoverBadge from '../components/property/VideoCoverBadge';
 import { getCoverImage } from '../utils/coverImage';
-import { sizedImage } from '../utils/cdnImage';
+import { sizedImage, srcSet } from '../utils/cdnImage';
 import { saveReturnPath } from '../hooks/useBackNavigation';
 
 const RENTAL_TYPES = [
@@ -305,11 +305,20 @@ const ManagerPage = () => {
               }}
               data-testid={`manager-property-${property.id}`}
             >
-              <div className="relative h-36 md:h-64 bg-gray-200" style={{
-                backgroundImage: `url(${cover.url})`,
-                backgroundSize: 'cover',
-                backgroundPosition: 'center'
-              }}>
+              <div className="relative h-36 md:h-64 bg-gray-200 overflow-hidden">
+                {/* Real <img> so the browser can lazy-load and pick a variant
+                    from srcSet — a CSS background-image can do neither, and
+                    this grid renders every property a manager owns at once.
+                    Same treatment as PropertyCard.jsx. */}
+                <img
+                  src={cover.url}
+                  srcSet={srcSet(cover.url, 600)}
+                  sizes="(max-width: 768px) 50vw, 33vw"
+                  alt={property.title || ''}
+                  loading="lazy"
+                  decoding="async"
+                  className="absolute inset-0 w-full h-full object-cover"
+                />
                 {cover.isDefault && <DefaultImageBadge />}
                 {cover.fromVideo && <VideoCoverBadge />}
               </div>

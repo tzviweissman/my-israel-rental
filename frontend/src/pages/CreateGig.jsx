@@ -29,6 +29,7 @@ import {
 import { API, AuthContext } from '../App';
 import PageMeta from '../components/PageMeta';
 import { uploadFilesFast } from '../utils/fastUpload';
+import { normalizeWhatsAppNumber, hasValidWhatsApp } from '../utils/whatsappLink';
 import { useTranslation } from 'react-i18next';
 
 // ---- Gig type registry ------------------------------------------------------
@@ -271,7 +272,10 @@ const CreateGig = () => {
     const contactStep = isAppointment ? 6 : 5;
     if (step === contactStep) {
       if (!(form.area || '').trim()) return false;
-      if (form.booking_mode === 'whatsapp') return (form.whatsapp || '').replace(/\D/g, '').length >= 7;
+      // Gate on the same normalizer the gig detail page uses to build the
+      // wa.me link, so the wizard can never publish a gig whose WhatsApp
+      // CTA would silently fall back to the in-platform flow.
+      if (form.booking_mode === 'whatsapp') return hasValidWhatsApp(form.whatsapp);
       return true;
     }
     // Gallery step
@@ -304,8 +308,9 @@ const CreateGig = () => {
     const contactStep = isAppointment ? 6 : 5;
     if (step === contactStep) {
       if (!(form.area || '').trim()) return 'Pick a service area (city).';
-      if (form.booking_mode === 'whatsapp'
-          && (form.whatsapp || '').replace(/\D/g, '').length < 7) return 'Enter a valid WhatsApp number with country code.';
+      if (form.booking_mode === 'whatsapp' && !hasValidWhatsApp(form.whatsapp)) {
+        return t('services.whatsappInvalid', 'Enter a valid WhatsApp number — e.g. 050-123-4567 or +972 50 123 4567.');
+      }
     }
     return '';
   };
@@ -526,23 +531,66 @@ const CreateGig = () => {
               <label className="text-sm font-semibold text-gray-700">
                 {form.gig_type === 'store' ? 'How should buyers reach you?' : 'How should clients book?'}
               </label>
+              {/* Provider's contact preference. Both paths are fully
+                  supported for services — unlike rentals, where WhatsApp is
+                  currently the only primary CTA pending Meta approval. */}
               <div className="mt-2 flex gap-2">
                 {[
-                  { v: 'whatsapp', label: form.gig_type === 'store' ? 'Message on WhatsApp' : 'Book on WhatsApp' },
-                  { v: 'in_platform', label: form.gig_type === 'store' ? 'Message on MyIsraelRental' : 'Book on MyIsraelRental' },
+                  {
+                    v: 'whatsapp',
+                    label: form.gig_type === 'store' ? 'Message on WhatsApp' : 'Book on WhatsApp',
+                    hint: t('services.contactHintWhatsApp', 'Customers open a WhatsApp chat with you directly.'),
+                  },
+                  {
+                    v: 'in_platform',
+                    label: form.gig_type === 'store' ? 'Message on MyIsraelRental' : 'Book on MyIsraelRental',
+                    hint: t('services.contactHintInPlatform', 'Requests arrive in your MyIsraelRental inbox — no phone number shared.'),
+                  },
                 ].map((o) => (
                   <button key={o.v} type="button" onClick={() => set({ booking_mode: o.v })}
-                    className={`flex-1 px-3 py-2 rounded-lg text-sm font-semibold border ${
+                    className={`flex-1 px-3 py-2 rounded-lg text-sm font-semibold border text-left ${
                       form.booking_mode === o.v ? 'bg-black text-[#D4AF37] border-black' : 'bg-white text-gray-700 border-gray-200 hover:border-[#D4AF37]'
-                    }`} data-testid={`wizard-booking-${o.v}`}>{o.label}</button>
+                    }`} data-testid={`wizard-booking-${o.v}`}>
+                    <span className="block">{o.label}</span>
+                    <span className={`block text-[11px] font-normal mt-0.5 leading-snug ${
+                      form.booking_mode === o.v ? 'text-[#D4AF37]/80' : 'text-gray-500'
+                    }`}>{o.hint}</span>
+                  </button>
                 ))}
               </div>
             </div>
             {form.booking_mode === 'whatsapp' && (
               <div>
-                <label className="text-sm font-semibold text-gray-700">WhatsApp number (with country code)</label>
+                <label className="text-sm font-semibold text-gray-700">
+                  {t('services.whatsappNumberLabel', 'WhatsApp number')}
+                </label>
                 <input value={form.whatsapp} onChange={(e) => set({ whatsapp: e.target.value })}
-                  placeholder="+972…" className="w-full mt-1 px-3 py-2 rounded-lg border border-gray-200 text-sm" data-testid="wizard-whatsapp" />
+                  placeholder="050-123-4567" className={`w-full mt-1 px-3 py-2 rounded-lg border text-sm focus:outline-none ${
+                    (form.whatsapp || '').trim() && !hasValidWhatsApp(form.whatsapp)
+                      ? 'border-red-400 focus:border-red-500'
+                      : 'border-gray-200 focus:border-[#1E6A6A]'
+                  }`} data-testid="wizard-whatsapp" />
+                {/* Live feedback on what we'll actually dial. An Israeli
+                    number typed in national format (050…) is rewritten to
+                    972… — showing the result here means the provider spots
+                    a wrong number before publishing, not after a customer
+                    hits a dead link. */}
+                {hasValidWhatsApp(form.whatsapp) ? (
+                  <p className="text-[11px] text-emerald-600 mt-1" data-testid="wizard-whatsapp-ok">
+                    {t('services.whatsappResolved', {
+                      defaultValue: 'Customers will message you at +{{number}}',
+                      number: normalizeWhatsAppNumber(form.whatsapp),
+                    })}
+                  </p>
+                ) : (form.whatsapp || '').trim() ? (
+                  <p className="text-[11px] text-red-500 mt-1" data-testid="wizard-whatsapp-warning">
+                    {t('services.whatsappInvalid', 'Enter a valid WhatsApp number — e.g. 050-123-4567 or +972 50 123 4567.')}
+                  </p>
+                ) : (
+                  <p className="text-[11px] text-gray-500 mt-1">
+                    {t('services.whatsappHint', 'Israeli numbers can be entered as 050-123-4567 — we add the +972 for you.')}
+                  </p>
+                )}
               </div>
             )}
             <div>

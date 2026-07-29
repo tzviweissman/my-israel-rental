@@ -73,15 +73,32 @@ def dedupe_signature(
     rental_type: str | None,
     bedrooms: Any = None,
     floor: Any = None,
+    area: str | None = None,
+    title: str | None = None,
 ) -> tuple | None:
     """Composite key that two property docs must share to be considered
-    duplicates. Returns None when the address / rental_type / owner
-    fields aren't usable, so creates with missing data don't get blocked.
+    duplicates. Returns None when there isn't enough data to judge, so
+    creates with missing data don't get blocked.
 
     Bedrooms and floor are part of the key so distinct apartments at
     the same street address (different unit in the same building) don't
     collide. ``None`` means "this listing didn't specify" — two such
     listings still match each other but never match a concrete value.
+
+    Two key shapes, tagged so they can never collide with each other:
+
+    ``("addr", …)`` — the precise path, used whenever a street address
+    is present. Unchanged from the original behaviour.
+
+    ``("area", …)`` — fallback for listings with NO street address.
+    `address` is optional on PropertyCreate (only `area` is required),
+    and this function used to return None for those rows. That meant an
+    address-less listing was never checked at creation AND never showed
+    up in the admin Duplicates tool — so owners could stack unlimited
+    copies of one listing invisibly. The fallback additionally requires
+    a matching normalized *title*, because `area` alone ("Jerusalem -
+    Nachlaot") is far too coarse to identify a unit and would flag
+    genuinely-distinct apartments as duplicates.
 
     NOTE: `holiday_tags` is intentionally NOT part of the signature.
     A single vacation listing can carry holiday pricing AND a regular
@@ -90,12 +107,29 @@ def dedupe_signature(
     end up with two near-identical listings just to capture holiday
     premium pricing.
     """
-    norm = normalize_address(address)
-    if not norm or not owner_id or not rental_type:
+    if not owner_id or not rental_type:
+        return None
+
+    norm_addr = normalize_address(address)
+    if norm_addr:
+        return (
+            "addr",
+            owner_id,
+            norm_addr,
+            rental_type,
+            _norm_int(bedrooms),
+            _norm_int(floor),
+        )
+
+    norm_area = normalize_address(area)
+    norm_title = normalize_address(title)
+    if not norm_area or not norm_title:
         return None
     return (
+        "area",
         owner_id,
-        norm,
+        norm_area,
+        norm_title,
         rental_type,
         _norm_int(bedrooms),
         _norm_int(floor),
@@ -110,15 +144,20 @@ async def find_duplicate(
     rental_type: str | None,
     bedrooms: Any = None,
     floor: Any = None,
+    area: str | None = None,
+    title: str | None = None,
     exclude_property_id: str | None = None,
 ) -> dict | None:
     """Return the existing property document that would collide with the
     requested signature — or None if no collision. Pass `exclude_property_id`
     when updating an existing row so we don't flag the row against itself.
+
+    `area` / `title` power the address-less fallback signature — callers
+    that don't pass them keep the original address-only behaviour.
     """
     sig = dedupe_signature(
         owner_id=owner_id, address=address, rental_type=rental_type,
-        bedrooms=bedrooms, floor=floor,
+        bedrooms=bedrooms, floor=floor, area=area, title=title,
     )
     if sig is None:
         return None
@@ -134,12 +173,13 @@ async def find_duplicate(
     candidates = await db.properties.find(
         query,
         {"_id": 0, "id": 1, "address": 1, "title": 1, "rental_type": 1,
-         "bedrooms": 1, "floor": 1},
+         "bedrooms": 1, "floor": 1, "area": 1},
     ).to_list(500)
     for c in candidates:
         cand_sig = dedupe_signature(
             owner_id=owner_id, address=c.get("address"), rental_type=rental_type,
             bedrooms=c.get("bedrooms"), floor=c.get("floor"),
+            area=c.get("area"), title=c.get("title"),
         )
         if cand_sig == sig:
             return c

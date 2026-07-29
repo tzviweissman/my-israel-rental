@@ -17,16 +17,18 @@ import { API, AuthContext } from '../App';
 import PageMeta from '../components/PageMeta';
 import StarRating from '../components/marketplace/StarRating';
 import { localizedTitle, localizedDescription } from '../utils/gigLocale';
+import { buildWhatsAppLinkWithMessage, hasValidWhatsApp } from '../utils/whatsappLink';
 import { isAvailableNow, getGigCover } from '../utils/gigAvailability';
 import { useReturnDestination, saveReturnPath } from '../hooks/useBackNavigation';
 import Breadcrumb from '../components/common/Breadcrumb';
 
 const GIG_RETURN_PREFIXES = ['/services'];
 
-const buildWhatsAppUrl = (raw, message) => {
-  const digits = (raw || '').replace(/[^\d]/g, '');
-  return `https://wa.me/${digits}?text=${encodeURIComponent(message)}`;
-};
+// Resolve which number a gig's WhatsApp CTA should dial. The per-gig
+// number (typed in the create wizard) wins; the provider's account-level
+// number is the safety net for gigs published before that field existed
+// or left blank. Returns '' when neither is set.
+const gigWhatsAppNumber = (gig) => (gig?.whatsapp || gig?.provider?.whatsapp || '');
 
 const ReviewSection = ({ gig, token, user, onRatingChange }) => {
   const [reviews, setReviews] = useState([]);
@@ -353,6 +355,22 @@ const GigDetail = () => {
   const isAppointment = gigType === 'appointment';
   const isDeliverable = gigType === 'deliverable';
 
+  // The provider's contact preference is `gig.booking_mode`
+  // ('whatsapp' | 'in_platform') — set in the create/edit wizard.
+  // We only *honour* the WhatsApp preference when the number actually
+  // normalizes to a dialable one; otherwise we silently fall back to the
+  // in-platform inquiry flow rather than rendering a button that opens an
+  // empty WhatsApp compose screen. Every branch below keys off `useWhatsApp`
+  // rather than `booking_mode` directly so the fallback can't be bypassed.
+  const waNumber = gigWhatsAppNumber(gig);
+  const useWhatsApp = gig.booking_mode === 'whatsapp' && hasValidWhatsApp(waNumber);
+  const openWhatsApp = (message) => {
+    const url = buildWhatsAppLinkWithMessage(waNumber, message);
+    if (!url) return false;
+    window.open(url, '_blank', 'noopener,noreferrer');
+    return true;
+  };
+
   const handleBookClick = () => {
     if (!tier) {
       return toast.error(isStore ? 'Pick a product first' : 'Pick a service option first');
@@ -361,11 +379,9 @@ const GigDetail = () => {
     // WhatsApp message (or in-platform message) with the product in
     // context so the buyer + seller can negotiate.
     if (isStore) {
-      if (gig.booking_mode === 'whatsapp') {
-        if (!gig.whatsapp) return toast.error('Seller has no WhatsApp set');
+      if (useWhatsApp) {
         const msg = `Hi! I'm interested in "${tier.name}" (${sym}${tier.price}) from your ${displayTitle} store on MyIsraelRental.`;
-        window.open(buildWhatsAppUrl(gig.whatsapp, msg), '_blank');
-        return;
+        if (openWhatsApp(msg)) return;
       }
       if (!token) { toast.error('Please sign in to message the seller'); navigate('/auth'); return; }
       setShowBook(true);
@@ -375,23 +391,19 @@ const GigDetail = () => {
       if (!appointmentDate || !appointmentSlot) {
         return toast.error('Pick a day and time slot first');
       }
-      if (gig.booking_mode === 'whatsapp') {
-        if (!gig.whatsapp) return toast.error('Provider has no WhatsApp set');
+      if (useWhatsApp) {
         const msg = `Hi! I'd like to book your "${displayTitle}" — ${tier.name} on ${appointmentDate} at ${appointmentSlot} (${sym}${tier.price}) from MyIsraelRental.`;
-        window.open(buildWhatsAppUrl(gig.whatsapp, msg), '_blank');
-        return;
+        if (openWhatsApp(msg)) return;
       }
       if (!token) { toast.error('Please sign in to book'); navigate('/auth'); return; }
       setShowBook(true);
       return;
     }
     // Deliverable
-    if (gig.booking_mode === 'whatsapp') {
-      if (!gig.whatsapp) return toast.error('Provider has no WhatsApp set');
+    if (useWhatsApp) {
       const datePart = gig.enable_date_booking && deliverableDate ? ` on ${deliverableDate}` : '';
       const msg = `Hi! I'd like to book your "${displayTitle}" — ${tier.name} (${sym}${tier.price})${datePart} from MyIsraelRental.`;
-      window.open(buildWhatsAppUrl(gig.whatsapp, msg), '_blank');
-      return;
+      if (openWhatsApp(msg)) return;
     }
     if (!token) { toast.error('Please sign in to book'); navigate('/auth'); return; }
     setShowBook(true);
@@ -507,12 +519,10 @@ const GigDetail = () => {
                       // item + price + a link to the store page so the
                       // seller has full context regardless of which
                       // product the shopper picked in the sidebar.
-                      if (gig.booking_mode === 'whatsapp') {
-                        if (!gig.whatsapp) return toast.error('Seller has no WhatsApp set');
+                      if (useWhatsApp) {
                         const link = `${window.location.origin}/services/gig/${gig.id}`;
                         const msg = `Hi! I'm interested in "${p.name}" (${psym}${Number(p.price).toLocaleString()}) from your ${displayTitle} store on MyIsraelRental.\n${link}`;
-                        window.open(buildWhatsAppUrl(gig.whatsapp, msg), '_blank');
-                        return;
+                        if (openWhatsApp(msg)) return;
                       }
                       // Fall back to selecting the product + opening the in-platform booking modal.
                       setTier(p);
@@ -633,16 +643,25 @@ const GigDetail = () => {
                 </div>
               )}
 
+              {/* WhatsApp CTAs get WhatsApp green so the destination is
+                  obvious before the tap; the in-platform flow keeps the
+                  brand teal. */}
               <button onClick={handleBookClick}
                 disabled={isAppointment && (!appointmentDate || !appointmentSlot)}
-                className="w-full flex items-center justify-center gap-2 py-3 rounded-lg text-sm font-bold text-white bg-[#1E6A6A] hover:bg-[#0F3A3A] disabled:opacity-40 disabled:hover:bg-[#1E6A6A] transition-colors"
+                className={`w-full flex items-center justify-center gap-2 py-3 rounded-lg text-sm font-bold text-white disabled:opacity-40 transition-colors ${
+                  useWhatsApp
+                    ? 'bg-[#25D366] hover:bg-[#1DA851] disabled:hover:bg-[#25D366]'
+                    : 'bg-[#1E6A6A] hover:bg-[#0F3A3A] disabled:hover:bg-[#1E6A6A]'
+                }`}
                 data-testid="gig-book-btn">
                 {isStore ? (
-                  gig.booking_mode === 'whatsapp' ? <><MessageCircle size={14} /> Message the seller</> : <><Send size={14} /> Send an inquiry</>
-                ) : gig.booking_mode === 'whatsapp' ? (
-                  <><MessageCircle size={14} /> Book on WhatsApp</>
+                  useWhatsApp
+                    ? <><MessageCircle size={14} /> {t('services.messageSellerWhatsApp', 'Message the seller on WhatsApp')}</>
+                    : <><Send size={14} /> {t('services.sendInquiry', 'Send an inquiry')}</>
+                ) : useWhatsApp ? (
+                  <><MessageCircle size={14} /> {t('services.bookOnWhatsApp', 'Book on WhatsApp')}</>
                 ) : (
-                  <><Send size={14} /> Send booking request</>
+                  <><Send size={14} /> {t('services.sendBookingRequest', 'Send booking request')}</>
                 )}
               </button>
               <p className="text-[11px] text-gray-400 text-center">

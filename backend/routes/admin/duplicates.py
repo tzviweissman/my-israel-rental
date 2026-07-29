@@ -16,6 +16,41 @@ router = APIRouter()
 api_router = router
 
 
+def _sig_key(sig: tuple) -> str:
+    """Canonical string form of a dedupe signature.
+
+    Emitted by ``/admin/duplicates`` as each group's ``key`` and consumed
+    verbatim by ``/admin/duplicates/resolve``. Both endpoints go through
+    this one function so the two can never drift apart — previously the
+    frontend rebuilt the key itself as ``owner|address|rental_type`` while
+    the backend expected ``owner|address|rental_type|bedrooms|floor``, so
+    per-group resolve matched nothing and silently deleted zero rows.
+    """
+    return "|".join("" if part is None else str(part) for part in sig)
+
+
+def _sig_display(sig: tuple) -> dict:
+    """Unpack either signature shape into the fields the admin UI renders.
+
+    ``("addr", owner, address, rental_type, bedrooms, floor)`` or
+    ``("area", owner, area, title, rental_type, bedrooms, floor)``.
+    """
+    kind = sig[0]
+    if kind == "addr":
+        _, owner_id, address, rental_type, bedrooms, floor = sig
+        return {
+            "owner_id": owner_id, "address": address, "area": None,
+            "rental_type": rental_type, "bedrooms": bedrooms, "floor": floor,
+            "matched_on": "address",
+        }
+    _, owner_id, area, title, rental_type, bedrooms, floor = sig
+    return {
+        "owner_id": owner_id, "address": None, "area": area, "matched_title": title,
+        "rental_type": rental_type, "bedrooms": bedrooms, "floor": floor,
+        "matched_on": "area+title",
+    }
+
+
 @api_router.get("/admin/duplicates")
 async def list_duplicate_listings(payload: dict = Depends(verify_token)) -> dict:
     """Return groups of properties that share (owner_id, normalized address,
@@ -36,7 +71,7 @@ async def list_duplicate_listings(payload: dict = Depends(verify_token)) -> dict
             "_id": 0, "id": 1, "owner_id": 1, "title": 1, "address": 1,
             "rental_type": 1, "created_at": 1, "images": 1,
             "description": 1, "monthly_price": 1, "nightly_price": 1,
-            "bedrooms": 1, "floor": 1,
+            "bedrooms": 1, "floor": 1, "area": 1,
         },
     ).to_list(5000)
 
@@ -51,6 +86,8 @@ async def list_duplicate_listings(payload: dict = Depends(verify_token)) -> dict
             rental_type=r.get("rental_type"),
             bedrooms=r.get("bedrooms"),
             floor=r.get("floor"),
+            area=r.get("area"),
+            title=r.get("title"),
         )
         if sig is None:
             continue
@@ -75,16 +112,17 @@ async def list_duplicate_listings(payload: dict = Depends(verify_token)) -> dict
     for sig, props in groups.items():
         if len(props) < 2:
             continue
-        owner_id, addr, rt, bedrooms, floor = sig
-        owner = await db.users.find_one({"id": owner_id}, {"_id": 0, "name": 1, "email": 1})
+        display = _sig_display(sig)
+        owner = await db.users.find_one(
+            {"id": display["owner_id"]}, {"_id": 0, "name": 1, "email": 1}
+        )
         out.append({
-            "owner_id": owner_id,
+            **display,
+            # Canonical key the resolve endpoint matches on — the frontend
+            # must send this back verbatim rather than rebuilding it.
+            "key": _sig_key(sig),
             "owner_name": owner.get("name") if owner else None,
             "owner_email": owner.get("email") if owner else None,
-            "address": addr,
-            "rental_type": rt,
-            "bedrooms": bedrooms,
-            "floor": floor,
             "properties": sorted(props, key=lambda p: p.get("created_at", "")),
         })
     # Newest collisions first — they're the freshest cleanup targets.
@@ -176,7 +214,7 @@ async def resolve_duplicates(
         {
             "_id": 0, "id": 1, "owner_id": 1, "address": 1, "rental_type": 1,
             "created_at": 1, "images": 1, "videos": 1, "description": 1,
-            "bedrooms": 1, "floor": 1,
+            "bedrooms": 1, "floor": 1, "area": 1,
             # Extra fields loaded so `strict_only` can compare every
             # user-visible piece of data. Small overhead when strict_only
             # is off — worth it to keep both paths using the same query.
@@ -197,6 +235,8 @@ async def resolve_duplicates(
             rental_type=r.get("rental_type"),
             bedrooms=r.get("bedrooms"),
             floor=r.get("floor"),
+            area=r.get("area"),
+            title=r.get("title"),
         )
         if sig is None:
             continue
@@ -241,10 +281,9 @@ async def resolve_duplicates(
     for sig, props in groups.items():
         if len(props) < 2:
             continue
-        owner_id, addr, rt, bedrooms, floor = sig
-        # Group key string: matches the shape returned by /admin/duplicates
-        # so the frontend can target specific groups via `keys`.
-        key_str = f"{owner_id}|{addr}|{rt}|{bedrooms or ''}|{floor or ''}"
+        # Same canonical key /admin/duplicates emits, so a group targeted
+        # by the admin UI actually matches here.
+        key_str = _sig_key(sig)
         if target_keys is not None and key_str not in target_keys:
             continue
 

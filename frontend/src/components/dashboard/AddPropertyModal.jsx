@@ -79,6 +79,12 @@ const AddPropertyModal = ({ isOpen, onClose, editingProperty, onSaved, API, toke
   // they hit Submit. The backend still enforces the block at submit
   // time, but catching it here saves the round-trip + confusion.
   const [duplicateWarning, setDuplicateWarning] = useState(null);
+  // Guards against double-submit. The backend dedupe check is
+  // read-then-insert with no unique index, so two racing POSTs (an
+  // impatient double-click on a slow connection) both pass the check and
+  // both insert — creating exactly the duplicate listings this modal is
+  // supposed to prevent.
+  const [submitting, setSubmitting] = useState(false);
   useEffect(() => {
     // Only poll once the host has provided the minimum signature fields.
     // Empty/short addresses would either 400 or false-negative — skip.
@@ -263,6 +269,8 @@ const AddPropertyModal = ({ isOpen, onClose, editingProperty, onSaved, API, toke
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (submitting) return;
+    setSubmitting(true);
     const toNumOrNull = (v) => (v === '' || v === null || v === undefined ? null : Number(v));
     const toIntOrNull = (v) => {
       if (v === '' || v === null || v === undefined) return null;
@@ -311,6 +319,8 @@ const AddPropertyModal = ({ isOpen, onClose, editingProperty, onSaved, API, toke
         msg = `${msg}: ${detail}`;
       }
       toast.error(msg);
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -1178,10 +1188,12 @@ const AddPropertyModal = ({ isOpen, onClose, editingProperty, onSaved, API, toke
             <button
               type="submit"
               className="primary-btn disabled:opacity-50 disabled:cursor-not-allowed"
-              disabled={!canSubmit}
+              disabled={!canSubmit || submitting}
               data-testid="submit-property-button"
             >
-              {editingProperty && editingProperty.id ? t('dashboard.saveChanges') : t('dashboard.addProperty')}
+              {submitting
+                ? t('common.saving', 'Saving...')
+                : (editingProperty && editingProperty.id ? t('dashboard.saveChanges') : t('dashboard.addProperty'))}
             </button>
           </div>
           <button type="button" onClick={onClose} className="flex-1 secondary-btn self-start" data-testid="cancel-add-property-button">

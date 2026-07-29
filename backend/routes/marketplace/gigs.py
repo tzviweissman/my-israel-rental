@@ -354,6 +354,22 @@ async def get_gig(gig_id: str):
         "member_since_year": _member_since_year(user, prov),
         "credentials": (prov or {}).get("credentials", ""),
         "credential_docs": (prov or {}).get("credential_docs") or [],
+        # Fallback WhatsApp number for the contact CTA, mirroring
+        # `owner_whatsapp` on GET /properties/{id}. A gig carries its own
+        # per-gig `whatsapp` field (filled in the create wizard); this is
+        # what we use when the provider picked WhatsApp booking mode but
+        # left that field blank — we'd otherwise render a dead button.
+        # Order: provider record → user account setting. Empty string when
+        # neither is set, which tells the frontend to fall back to the
+        # in-platform inquiry flow.
+        #
+        # Detail endpoint only — never added to the browse/list routes, so
+        # the whole provider phonebook can't be scraped in one request.
+        "whatsapp": (
+            (prov or {}).get("whatsapp")
+            or (user or {}).get("whatsapp_number")
+            or ""
+        ).strip(),
     }
     agg = await _rating_aggregate(gig_id)
     gig["rating_avg"] = agg["rating_avg"]

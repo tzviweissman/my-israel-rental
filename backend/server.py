@@ -338,6 +338,16 @@ async def startup_tasks() -> None:
         await db.users.create_index("email", unique=True, background=True)
         await db.users.create_index("id", unique=True, background=True)
         await db.messages.create_index([("property_id", 1), ("created_at", -1)], background=True)
+        # `GET /chat/conversations` filters `$or: [{sender_id}, {receiver_id}]`
+        # and sorts by created_at. Navigation.js polls it every 20s for every
+        # signed-in user, so without these it's a full collection scan plus an
+        # in-memory sort on every poll. Compound with created_at so Mongo can
+        # satisfy both branches of the $or and the sort from the index.
+        await db.messages.create_index([("sender_id", 1), ("created_at", -1)], background=True)
+        await db.messages.create_index([("receiver_id", 1), ("created_at", -1)], background=True)
+        # Notifications are polled every 30s per signed-in user and the
+        # collection had no indexes at all.
+        await db.notifications.create_index([("user_id", 1), ("created_at", -1)], background=True)
         await db.liked_properties.create_index([("user_id", 1), ("property_id", 1)], background=True)
         # Smart Pricing — composite key for per-property daily overrides, and
         # a time index on the view events so 14-day demand queries don't scan.

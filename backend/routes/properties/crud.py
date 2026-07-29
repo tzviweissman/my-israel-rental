@@ -48,6 +48,8 @@ async def create_property(property_data: PropertyCreate, payload: dict = Depends
         rental_type=property_data.rental_type,
         bedrooms=property_data.bedrooms,
         floor=getattr(property_data, "floor", None),
+        area=property_data.area,
+        title=property_data.title,
     )
     if dup:
         raise HTTPException(status_code=409, detail={
@@ -115,6 +117,8 @@ async def update_property(property_id: str, property_data: PropertyCreate, paylo
         rental_type=property_data.rental_type,
         bedrooms=property_data.bedrooms,
         floor=getattr(property_data, "floor", None),
+        area=property_data.area,
+        title=property_data.title,
         exclude_property_id=property_id,
     )
     if dup:
@@ -224,6 +228,8 @@ async def delete_property(property_id: str, payload: dict = Depends(verify_token
         rental_type=existing.get("rental_type"),
         bedrooms=existing.get("bedrooms"),
         floor=existing.get("floor"),
+        area=existing.get("area"),
+        title=existing.get("title"),
         exclude_property_id=property_id,
     )
     reattached = {"to": None, "messages": 0, "bookings": 0, "likes": 0,

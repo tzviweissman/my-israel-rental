@@ -14,6 +14,7 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Heart } from 'lucide-react';
 import { getCoverImage } from '../../utils/coverImage';
+import { srcSet } from '../../utils/cdnImage';
 import DefaultImageBadge from '../property/DefaultImageBadge';
 import VideoCoverBadge from '../property/VideoCoverBadge';
 
@@ -50,6 +51,13 @@ const StaysCard = ({
     ? 'w-full'
     : 'snap-start shrink-0 w-[180px] sm:w-[200px] lg:w-[220px]';
 
+  // Matches the Stays grid (2 → 6 columns) in `fullWidth` mode and the fixed
+  // carousel widths above otherwise, so the browser picks the smallest
+  // Cloudinary variant it can get away with.
+  const imgSizes = fullWidth
+    ? '(max-width: 640px) 50vw, (max-width: 768px) 33vw, (max-width: 1024px) 25vw, (max-width: 1280px) 20vw, 16vw'
+    : '(max-width: 640px) 180px, (max-width: 1024px) 200px, 220px';
+
   return (
     <div
       onClick={onClick}
@@ -59,10 +67,26 @@ const StaysCard = ({
       className={`${sizeClasses} bg-transparent text-left group cursor-pointer`}
       data-testid={`stays-card-${property.id}`}
     >
-      <div
-        className="relative aspect-square w-full bg-gray-100 rounded-xl overflow-hidden"
-        style={{ backgroundImage: `url(${cover.url})`, backgroundSize: 'cover', backgroundPosition: 'center' }}
-      >
+      <div className="relative aspect-square w-full bg-gray-100 rounded-xl overflow-hidden">
+        {/*
+         * Real <img> rather than a CSS background-image: `loading="lazy"` only
+         * works on img/iframe, and the Stays grid mounts the entire filtered
+         * result set (300+ cards) at once — as a background it fired 300+
+         * simultaneous image requests on load. `decoding="async"` keeps the
+         * decode off the main thread. Same treatment as PropertyCard.jsx.
+         * Absolute inset-0 + object-cover reproduces `background-size: cover;
+         * background-position: center` pixel-for-pixel, and keeping the img
+         * first in DOM order leaves the badges/heart painting above it.
+         */}
+        <img
+          src={cover.url}
+          srcSet={srcSet(cover.url, 400)}
+          sizes={imgSizes}
+          alt={property.title || ''}
+          loading="lazy"
+          decoding="async"
+          className="absolute inset-0 w-full h-full object-cover"
+        />
         {cover.isDefault && <DefaultImageBadge />}
         {cover.fromVideo && <VideoCoverBadge />}
         <button

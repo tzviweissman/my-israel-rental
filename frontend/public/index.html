@@ -25,6 +25,23 @@
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@600;700;800&display=swap" rel="stylesheet" />
+        <!-- The API lives on a different origin from the site (Railway vs.
+             myisraelrental.com), so without this the first XHR of every cold
+             load pays a full DNS + TCP + TLS handshake before a byte moves.
+             `%REACT_APP_BACKEND_URL%` is substituted at build time by CRA's
+             InterpolateHtmlPlugin (same mechanism as %PUBLIC_URL%) — CRA feeds
+             it every REACT_APP_* var, so this resolves to the same origin
+             axios talks to instead of a hardcoded host that drifts.
+             `crossorigin` is required: our API calls are anonymous CORS
+             requests (bearer token in a header, no cookies), and a preconnect
+             without it opens a connection in the wrong credentials mode that
+             the actual request then can't reuse.
+             If the var is ever unset at build time the placeholder is left
+             verbatim, which the browser resolves as a same-origin relative
+             URL — a no-op preconnect, not a broken tag. -->
+        <link rel="preconnect" href="%REACT_APP_BACKEND_URL%" crossorigin />
+        <!-- dns-prefetch fallback for browsers that ignore preconnect. -->
+        <link rel="dns-prefetch" href="%REACT_APP_BACKEND_URL%" />
         <!--
         manifest.json provides metadata used when your web app is installed on a
         user's mobile device or desktop. See https://developers.google.com/web/fundamentals/web-app-manifest/

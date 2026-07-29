@@ -58,8 +58,11 @@ const DuplicatesModal = ({ token, onClose, onDeleted }) => {
   };
   useEffect(() => { fetchGroups(); fetchAutoStatus(); /* eslint-disable-next-line */ }, []);
 
-  // Group key string mirrors the backend format owner|address|rental_type.
-  const keyOf = (g) => `${g.owner_id}|${g.address}|${g.rental_type}`;
+  // Use the canonical key the backend sends with each group. Rebuilding it
+  // here previously produced `owner|address|rental_type` while the resolver
+  // matched on `owner|address|rental_type|bedrooms|floor`, so per-group
+  // resolve matched nothing and silently deleted zero listings.
+  const keyOf = (g) => g.key;
 
   const deleteOne = async (propertyId) => {
     if (!window.confirm('Delete this listing? This cannot be undone.')) return;

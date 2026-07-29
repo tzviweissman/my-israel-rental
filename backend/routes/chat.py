@@ -376,59 +376,94 @@ async def get_conversations(payload: dict = Depends(verify_token)) -> list[dict]
         {"$or": [{"sender_id": payload['user_id']}, {"receiver_id": payload['user_id']}]},
         {"_id": 0}
     ).sort("created_at", -1).to_list(1000)
-    
-    conversations = {}
+
+    # ── Batched lookups ────────────────────────────────────────────────
+    # Navigation.js polls this endpoint every 20s for every signed-in
+    # user, and it used to issue 2-3 sequential `find_one` calls PER
+    # conversation (properties, sometimes marketplace_jobs, users). At
+    # ~160ms per Atlas round-trip a 10-conversation inbox cost ~5s. Now
+    # it's a fixed 2-3 round-trips regardless of inbox size.
+    #
+    # First pass walks the (already created_at-desc sorted) messages to
+    # find each conversation's newest message and collect the ids we need;
+    # the second pass builds the response in the exact same order as before.
+    latest_by_conv: dict = {}
     for msg in messages:
         other_user_id = msg['receiver_id'] if msg['sender_id'] == payload['user_id'] else msg['sender_id']
         conv_key = f"{msg['property_id']}_{other_user_id}"
+        if conv_key not in latest_by_conv:
+            latest_by_conv[conv_key] = (msg, other_user_id)
 
-        if conv_key not in conversations:
-            property_data = await db.properties.find_one({"id": msg['property_id']}, {"_id": 0, "title": 1, "owner_id": 1})
-            # If the "property_id" doesn't match any live property, it may
-            # actually be a Jobs Board job UUID — a job-scoped chat thread
-            # created when a poster clicked "Message" on an applicant.
-            # Fall back to the marketplace_jobs lookup so the inbox shows
-            # a meaningful title instead of "Unknown".
-            job_data = None
-            if property_data is None:
-                job_data = await db.marketplace_jobs.find_one(
-                    {"_id": msg['property_id']},
-                    {"_id": 1, "title": 1, "poster_user_id": 1},
-                )
-            other_user = await db.users.find_one({"id": other_user_id}, {"_id": 0, "id": 1, "name": 1, "email": 1})
+    property_ids = {msg['property_id'] for msg, _ in latest_by_conv.values()}
+    user_ids = {uid for _, uid in latest_by_conv.values()}
 
-            # Was the CURRENT user @-mentioned by their counterpart in the
-            # last message? Only true when (a) the message wasn't sent by
-            # me and (b) my role-token appears in the message's stored
-            # mentions list. Drives the inbox bell + gold ring.
-            my_role = current_user_role_in_property(payload['user_id'], property_data)
-            sent_by_me = msg['sender_id'] == payload['user_id']
-            mentions_me = bool(
-                not sent_by_me and my_role and my_role in (msg.get('mentions') or [])
-            )
+    properties_by_id: dict = {}
+    if property_ids:
+        for row in await db.properties.find(
+            {"id": {"$in": list(property_ids)}},
+            {"_id": 0, "id": 1, "title": 1, "owner_id": 1},
+        ).to_list(len(property_ids)):
+            properties_by_id[row["id"]] = row
 
-            # Choose a display title for the conversation preview. Job
-            # threads get a "Job:" prefix so the inbox visually
-            # distinguishes them from property threads at a glance.
-            if property_data:
-                display_title = property_data.get('title', 'Unknown')
-            elif job_data:
-                display_title = f"Job: {job_data.get('title', 'Untitled')}"
-            else:
-                display_title = 'Unknown'
+    # Any "property_id" with no live property may actually be a Jobs Board
+    # job UUID — a job-scoped chat thread created when a poster clicked
+    # "Message" on an applicant. Look those up in one extra query so the
+    # inbox shows a meaningful title instead of "Unknown".
+    jobs_by_id: dict = {}
+    missing_ids = [pid for pid in property_ids if pid not in properties_by_id]
+    if missing_ids:
+        for row in await db.marketplace_jobs.find(
+            {"_id": {"$in": missing_ids}},
+            {"_id": 1, "title": 1, "poster_user_id": 1},
+        ).to_list(len(missing_ids)):
+            jobs_by_id[row["_id"]] = row
 
-            conversations[conv_key] = {
-                "property_id": msg['property_id'],
-                "property_title": display_title,
-                "property_missing": property_data is None and job_data is None,
-                "is_job_thread": job_data is not None,
-                "other_user": other_user if other_user else {},
-                "last_message": msg['message'],
-                "last_message_time": msg['created_at'],
-                "last_message_from_me": sent_by_me,
-                "last_message_mentions_me": mentions_me,
-                "unread": not msg['read'] and msg['receiver_id'] == payload['user_id']
-            }
+    users_by_id: dict = {}
+    if user_ids:
+        for row in await db.users.find(
+            {"id": {"$in": list(user_ids)}},
+            {"_id": 0, "id": 1, "name": 1, "email": 1},
+        ).to_list(len(user_ids)):
+            users_by_id[row["id"]] = row
+
+    conversations = {}
+    for conv_key, (msg, other_user_id) in latest_by_conv.items():
+        property_data = properties_by_id.get(msg['property_id'])
+        job_data = jobs_by_id.get(msg['property_id'])
+        other_user = users_by_id.get(other_user_id)
+
+        # Was the CURRENT user @-mentioned by their counterpart in the
+        # last message? Only true when (a) the message wasn't sent by
+        # me and (b) my role-token appears in the message's stored
+        # mentions list. Drives the inbox bell + gold ring.
+        my_role = current_user_role_in_property(payload['user_id'], property_data)
+        sent_by_me = msg['sender_id'] == payload['user_id']
+        mentions_me = bool(
+            not sent_by_me and my_role and my_role in (msg.get('mentions') or [])
+        )
+
+        # Choose a display title for the conversation preview. Job
+        # threads get a "Job:" prefix so the inbox visually
+        # distinguishes them from property threads at a glance.
+        if property_data:
+            display_title = property_data.get('title', 'Unknown')
+        elif job_data:
+            display_title = f"Job: {job_data.get('title', 'Untitled')}"
+        else:
+            display_title = 'Unknown'
+
+        conversations[conv_key] = {
+            "property_id": msg['property_id'],
+            "property_title": display_title,
+            "property_missing": property_data is None and job_data is None,
+            "is_job_thread": job_data is not None,
+            "other_user": other_user if other_user else {},
+            "last_message": msg['message'],
+            "last_message_time": msg['created_at'],
+            "last_message_from_me": sent_by_me,
+            "last_message_mentions_me": mentions_me,
+            "unread": not msg['read'] and msg['receiver_id'] == payload['user_id']
+        }
 
     return list(conversations.values())
 

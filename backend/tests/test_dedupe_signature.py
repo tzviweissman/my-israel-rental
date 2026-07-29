@@ -92,8 +92,82 @@ def test_different_rental_type_NOT_duplicate():
     assert sig_a != sig_b
 
 
-def test_missing_address_yields_None_signature():
-    """No safe dedupe key without an address — better to allow the
-    create than block legitimate inputs."""
+def test_missing_address_and_no_fallback_data_yields_None():
+    """With neither an address nor (area + title) there's no safe key —
+    better to allow the create than block a legitimate listing."""
     assert dedupe_signature(owner_id="o", address=None, rental_type="vacation") is None
     assert dedupe_signature(owner_id="o", address="  ", rental_type="vacation") is None
+    # area alone is far too coarse to identify a unit — title is required too.
+    assert dedupe_signature(
+        owner_id="o", address=None, rental_type="vacation",
+        area="Jerusalem - Nachlaot",
+    ) is None
+
+
+# ---------------------------------------------------------------------------
+# Address-less fallback.
+#
+# `address` is optional on PropertyCreate (only `area` is required), and the
+# signature used to return None for those rows — so an address-less listing
+# was never checked at creation AND never appeared in the admin Duplicates
+# tool. Owners could stack unlimited invisible copies. The fallback keys on
+# area + title instead.
+# ---------------------------------------------------------------------------
+
+def test_addressless_same_area_and_title_IS_duplicate():
+    sig_a = dedupe_signature(
+        owner_id="o", address=None, rental_type="long-term",
+        area="Jerusalem - Nachlaot", title="Cozy 2BR near the shuk",
+        bedrooms=2, floor=1,
+    )
+    sig_b = dedupe_signature(
+        owner_id="o", address="", rental_type="long-term",
+        area="  jerusalem - nachlaot ", title="COZY 2BR NEAR THE SHUK",
+        bedrooms=2, floor=1,
+    )
+    assert sig_a is not None
+    assert sig_a == sig_b, "Case/whitespace-insensitive area+title must collapse"
+
+
+def test_addressless_different_title_NOT_duplicate():
+    """Two genuinely different units in the same neighbourhood must not
+    collide just because they share an area."""
+    sig_a = dedupe_signature(
+        owner_id="o", address=None, rental_type="long-term",
+        area="Jerusalem - Nachlaot", title="Cozy 2BR near the shuk",
+        bedrooms=2, floor=1,
+    )
+    sig_b = dedupe_signature(
+        owner_id="o", address=None, rental_type="long-term",
+        area="Jerusalem - Nachlaot", title="Sunny garden apartment",
+        bedrooms=2, floor=1,
+    )
+    assert sig_a != sig_b
+
+
+def test_addressless_key_never_collides_with_address_key():
+    """The two key shapes are tagged, so an address-keyed listing can't be
+    mistaken for an area-keyed one that happens to share strings."""
+    with_addr = dedupe_signature(
+        owner_id="o", address="Nachlaot", rental_type="long-term",
+        area="Nachlaot", title="Nachlaot", bedrooms=1, floor=1,
+    )
+    without_addr = dedupe_signature(
+        owner_id="o", address=None, rental_type="long-term",
+        area="Nachlaot", title="Nachlaot", bedrooms=1, floor=1,
+    )
+    assert with_addr != without_addr
+
+
+def test_address_path_unaffected_by_new_params():
+    """Passing area/title must not change the key for listings that have a
+    real address — otherwise existing duplicate groups would re-shuffle."""
+    sig_plain = dedupe_signature(
+        owner_id="o", address="King George 12", rental_type="long-term",
+        bedrooms=2, floor=3,
+    )
+    sig_with_extras = dedupe_signature(
+        owner_id="o", address="King George 12", rental_type="long-term",
+        bedrooms=2, floor=3, area="Jerusalem - Center", title="Whatever",
+    )
+    assert sig_plain == sig_with_extras

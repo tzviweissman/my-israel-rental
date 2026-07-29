@@ -4,6 +4,7 @@ import { HelmetProvider } from "react-helmet-async";
 import "@/index.css";
 import App from "@/App";
 import { Toaster } from "sonner";
+import { i18nReady } from "@/i18n";
 
 // Silence the benign "ResizeObserver loop completed with undelivered
 // notifications" browser warning so it doesn't surface in the
@@ -26,11 +27,21 @@ window.addEventListener('unhandledrejection', (e) => {
 });
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
-root.render(
-  <React.StrictMode>
-    <HelmetProvider>
-      <App />
-      <Toaster position="top-right" duration={1500} />
-    </HelmetProvider>
-  </React.StrictMode>,
-);
+
+const renderApp = () =>
+  root.render(
+    <React.StrictMode>
+      <HelmetProvider>
+        <App />
+        <Toaster position="top-right" duration={1500} />
+      </HelmetProvider>
+    </React.StrictMode>,
+  );
+
+// Hold the first paint until i18next has the detected language in its store.
+// English resolves on the next tick (it's bundled statically); a returning
+// Hebrew visitor waits on one async locale chunk, which is what stops them
+// from seeing a flash of English before the switch lands. If the locale chunk
+// fails to load we render anyway — `fallbackLng: 'en'` keeps the UI usable
+// rather than leaving a blank page.
+i18nReady.then(renderApp, renderApp);
