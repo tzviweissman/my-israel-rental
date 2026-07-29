@@ -65,7 +65,7 @@ const GigCard = ({ gig, onClick, i18n, t }) => {
       >
         {!cover && (
           <div className="w-full h-full flex items-center justify-center text-gray-300 text-xs">
-            No image
+            {t('services.noImage', 'No image')}
           </div>
         )}
         {/* Top-Rated overlay pill */}
@@ -89,7 +89,7 @@ const GigCard = ({ gig, onClick, i18n, t }) => {
             data-testid={`gig-available-now-${gig.id}`}
           >
             <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
-            Available now
+            {t('services.availableNow', 'Available now')}
           </span>
         )}
         {/* Response-time chip */}
@@ -334,7 +334,7 @@ const Services = () => {
         toast.success(
           nearestSlug
             ? t('services.nearbyOnCity', 'Showing services near you')
-            : t('services.nearbyOn', 'Showing services near you'),
+            : t('services.nearbyOnToast', 'Showing services near you'),
         );
       },
       (err) => {
@@ -655,10 +655,10 @@ const Services = () => {
               }`}
               data-testid="services-available-now-btn"
               aria-pressed={availableNowOnly}
-              title="Show only appointment services open right now"
+              title={t('services.availableNowTooltip', 'Show only appointment services open right now')}
             >
               <span className={`w-1.5 h-1.5 rounded-full ${availableNowOnly ? 'bg-white animate-pulse' : 'bg-emerald-500'}`} />
-              {availableNowOnly ? 'Available now' : 'Available now'}
+              {t('services.availableNow', 'Available now')}
             </button>
             {/* Sort dropdown */}
             <label className="text-xs text-gray-500 me-1 hidden sm:inline">
@@ -780,12 +780,12 @@ const Services = () => {
           <div className="bg-white border border-gray-200 rounded-2xl p-10 text-center">
             <p className="text-gray-700 font-semibold mb-2">
               {availableNowOnly
-                ? 'No services open right now'
+                ? t('services.noServicesOpenTitle', 'No services open right now')
                 : t('services.emptyTitle', 'No services match your filters')}
             </p>
             <p className="text-gray-500 text-sm mb-5">
               {availableNowOnly
-                ? 'Nobody with appointment hours listed is inside their open window right now. Try turning the filter off to see everyone.'
+                ? t('services.noServicesOpenBody', 'Nobody with appointment hours listed is inside their open window right now. Try turning the filter off to see everyone.')
                 : (advCount > 0
                     ? t('services.emptyBodyFiltered', 'Try loosening the filters, or clear them all to see everything.')
                     : t('services.emptyBody', 'Be the first to list your service in this category — free 30-day trial.'))}
@@ -796,7 +796,7 @@ const Services = () => {
                 className="px-5 py-2.5 rounded-lg text-sm font-semibold text-white bg-[#1E6A6A] hover:bg-[#0F3A3A]"
                 data-testid="services-empty-available-off"
               >
-                Show everyone
+                {t('services.showEveryone', 'Show everyone')}
               </button>
             ) : advCount > 0 ? (
               <button
@@ -853,7 +853,7 @@ const Services = () => {
                 >
                   {displayGigs.slice(0, 12).map((gig) => {
                     const cover = getGigCover(gig) || (gig.images && gig.images[0]) || '';
-                    const title = gig.title || 'Service';
+                    const title = gig.title || t('services.serviceFallbackTitle', 'Service');
                     const price = gig.tiers?.[0]?.price
                       ? `₪${Math.round(gig.tiers[0].price)}`
                       : '';
@@ -1001,7 +1001,7 @@ const Services = () => {
             bottom: 'calc(env(safe-area-inset-bottom, 0px) + var(--bottom-nav-h, 0px) + 1.5rem)',
           }}
           data-testid="services-view-fab"
-          aria-label={t('services.viewMap', 'Show map')}
+          aria-label={t('services.viewMapAria', 'Show map')}
         >
           <MapIcon size={14} />
           {t('services.viewMap', 'Map')}

@@ -324,17 +324,19 @@ const PropertyDetail = () => {
             <div className="flex items-center justify-between gap-4 mb-6">
               <div className="flex items-center gap-2 text-gray-600">
                 <MapPin size={20} />
-                <span className="text-lg">{property.address}, {property.area}</span>
+                <span className="text-lg">
+                  {[property.address, property.area].filter(Boolean).join(', ')}
+                </span>
               </div>
               {/* Vacation rentals show a Cleaning fee badge in the same
                   place where long/short-term rentals show the Agent fee.
                   Both are mutually exclusive — the form gates the toggles
                   by rental_type. */}
-              {!sublease && property.rental_type === 'vacation' && property.has_cleaning_fee && property.cleaning_fee_price && (
+              {!sublease && property.rental_type === 'vacation' && property.has_cleaning_fee && property.cleaning_fee_price > 0 && (
                 <div className="flex flex-col gap-1 px-3 py-1.5 bg-[#D4AF37]/10 rounded-lg border border-[#D4AF37]/30">
                   <div className="flex items-center gap-2">
                     <span className="text-sm font-medium text-gray-700">{t('property.cleaningFeeLabel', 'Cleaning fee:')}</span>
-                    <span className="text-sm font-bold" style={{ color: '#D4AF37' }}>
+                    <span className="text-sm font-bold" style={{ color: 'var(--gold-text-on-light)' }}>
                       {property.cleaning_fee_currency === 'USD' ? '$' : '₪'}{property.cleaning_fee_price.toLocaleString()}
                     </span>
                   </div>
@@ -349,11 +351,11 @@ const PropertyDetail = () => {
                   })()}
                 </div>
               )}
-              {!sublease && property.rental_type !== 'vacation' && property.has_agent_fee && property.agent_fee_price && (
+              {!sublease && property.rental_type !== 'vacation' && property.has_agent_fee && property.agent_fee_price > 0 && (
                 <div className="flex flex-col gap-1 px-3 py-1.5 bg-[#D4AF37]/10 rounded-lg border border-[#D4AF37]/30">
                   <div className="flex items-center gap-2">
                     <span className="text-sm font-medium text-gray-700">{t('property.agentFeeLabel')}</span>
-                    <span className="text-sm font-bold" style={{ color: '#D4AF37' }}>
+                    <span className="text-sm font-bold" style={{ color: 'var(--gold-text-on-light)' }}>
                       {property.agent_fee_currency === 'USD' ? '$' : '₪'}{property.agent_fee_price.toLocaleString()}
                     </span>
                   </div>
@@ -422,7 +424,9 @@ const PropertyDetail = () => {
 
             <div className="bg-white p-6 rounded-2xl border border-[#E5E5E5] mb-8">
               <h2 className="text-2xl font-bold mb-4" style={{ fontFamily: 'Playfair Display' }}>{t('property.description')}</h2>
-              <p className="text-gray-700 leading-relaxed">{property.description}</p>
+              <p className="text-gray-700 leading-relaxed">
+                {property.description || t('property.noDescription', 'No description provided yet.')}
+              </p>
             </div>
 
             <AmenitiesList amenities={property.amenities} />

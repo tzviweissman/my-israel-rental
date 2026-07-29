@@ -23,6 +23,7 @@
  *     the iOS home-indicator regardless of state.
  */
 import React, { useEffect, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { ChevronUp, ChevronDown } from 'lucide-react';
 
 const PEEK_HEIGHT = 132;   // px — shows the header + a peek strip
@@ -36,6 +37,7 @@ const PeekableResultsSheet = ({
   fullContent,          // vertical list shown when expanded
   testId = 'peek-sheet',
 }) => {
+  const { t } = useTranslation();
   const [state, setState] = useState('peek');   // 'peek' | 'full'
   const [dragOffset, setDragOffset] = useState(0);   // px live-drag delta
   const dragStartYRef = useRef(null);
@@ -137,14 +139,14 @@ const PeekableResultsSheet = ({
           className="w-full flex-shrink-0 pt-2 pb-3 px-4 flex flex-col items-stretch cursor-grab active:cursor-grabbing focus:outline-none"
           data-testid={`${testId}-handle`}
           aria-expanded={state === 'full'}
-          aria-label={state === 'peek' ? 'Show all results' : 'Collapse results'}
+          aria-label={state === 'peek' ? t('common.showAllResults', 'Show all results') : t('common.collapseResults', 'Collapse results')}
         >
           <div className="mx-auto w-10 h-1 rounded-full bg-gray-300 mb-2" />
           <div className="flex items-center justify-between">
             <div className="text-sm font-semibold text-gray-900">
               {count} {countLabel}
               {state === 'peek' && (
-                <span className="ms-1.5 text-gray-500 font-normal">· swipe up for details</span>
+                <span className="ms-1.5 text-gray-500 font-normal">· {t('common.swipeUpForDetails', 'swipe up for details')}</span>
               )}
             </div>
             <span className="text-gray-500">

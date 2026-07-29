@@ -2,6 +2,7 @@ import React, { useRef } from 'react';
 import { ChevronLeft, ChevronRight, Film, Play } from 'lucide-react';
 import { sizedImage, srcSet, videoPoster } from '../../utils/cdnImage';
 import useIsRtl from '../../hooks/useIsRtl';
+import DefaultImageBadge from './DefaultImageBadge';
 
 const HERO_FALLBACK_URL = 'https://images.pexels.com/photos/1669799/pexels-photo-1669799.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940';
 
@@ -49,9 +50,7 @@ const ImageGallery = ({ media, currentIndex, onIndexChange, alt, apiBase }) => {
             backgroundPosition: 'center',
           }}
         />
-        <div className="absolute top-3 left-3 inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-black/60 backdrop-blur-sm text-white text-xs font-semibold uppercase tracking-wide">
-          Default image — lister hasn't added photos yet
-        </div>
+        <DefaultImageBadge />
       </div>
     );
   }

@@ -37,6 +37,10 @@ const ROLE_CARDS = [
     defaultDesc: 'I want to book stays and hire local services for my trip',
     tBadgeKey: 'signupJoin.travelerBadge',
     defaultBadge: 'Most popular',
+    tCtaKey: 'signupJoin.travelerCta',
+    defaultCta: 'Continue as a traveler',
+    tDetailsSubKey: 'signupJoin.travelerDetailsSub',
+    defaultDetailsSub: "We'll only email you about your account and stays you care about.",
   },
   {
     key: 'host',
@@ -48,6 +52,10 @@ const ROLE_CARDS = [
     defaultDesc: 'I want to list my vacation rental or property',
     tBadgeKey: null,
     defaultBadge: null,
+    tCtaKey: 'signupJoin.hostCta',
+    defaultCta: 'Continue as a host',
+    tDetailsSubKey: 'signupJoin.hostDetailsSub',
+    defaultDetailsSub: "We'll only email you about your account and bookings on your listings.",
   },
   {
     key: 'provider',
@@ -59,6 +67,10 @@ const ROLE_CARDS = [
     defaultDesc: 'Cleaner, mover, tour guide, or any local service',
     tBadgeKey: null,
     defaultBadge: null,
+    tCtaKey: 'signupJoin.providerCta',
+    defaultCta: 'Continue as a service provider',
+    tDetailsSubKey: 'signupJoin.providerDetailsSub',
+    defaultDetailsSub: "We'll only email you about your account and requests for your services.",
   },
 ];
 
@@ -177,7 +189,7 @@ const SignupJoin = () => {
               {t('signupJoin.headline', 'Join My Israel Rental')}
             </h1>
             <p className="mt-3 text-base sm:text-lg text-gray-600 max-w-2xl">
-              {t('signupJoin.sub', 'Plan your perfect Israel trip — stays & local services in one place.')}
+              {t('signupJoin.sub', 'Book a stay, list a property, or offer your services — all in one place.')}
             </p>
 
             <p className="mt-10 sm:mt-14 text-sm font-semibold tracking-wide uppercase text-gray-500">
@@ -188,7 +200,7 @@ const SignupJoin = () => {
               className="mt-4 grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-5"
               data-testid="signup-role-cards"
             >
-              {ROLE_CARDS.map(({ key, Icon, tKey, defaultLabel, tDescKey, defaultDesc, tBadgeKey, defaultBadge }) => {
+              {ROLE_CARDS.map(({ key, Icon, tKey, defaultLabel, tDescKey, defaultDesc, tBadgeKey, defaultBadge, tCtaKey, defaultCta }) => {
                 const active = selectedRole === key;
                 return (
                   <button
@@ -232,7 +244,7 @@ const SignupJoin = () => {
                       <span className={`text-xs font-semibold ${active ? 'text-[#1E6A6A]' : 'text-gray-400 group-hover:text-gray-600'}`}>
                         {active
                           ? t('signupJoin.selected', 'Selected')
-                          : t('signupJoin.chooseThis', 'Choose this')}
+                          : t(tCtaKey, defaultCta)}
                       </span>
                       {active ? (
                         <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-[#1E6A6A] text-white">
@@ -312,7 +324,7 @@ const SignupJoin = () => {
                 {t('signupJoin.detailsHeadline', 'Create your account')}
               </h1>
               <p className="mt-2 text-sm text-gray-600">
-                {t('signupJoin.detailsSub', "We'll only email you about your account and listings you care about.")}
+                {t(activeCard.tDetailsSubKey, activeCard.defaultDetailsSub)}
               </p>
 
               {/* Google Sign-In — one-tap alternative to the multi-field
@@ -430,6 +442,7 @@ const SignupJoin = () => {
                     checked={termsAccepted}
                     onChange={(e) => setTermsAccepted(e.target.checked)}
                     className="mt-1 h-4 w-4 rounded border-gray-300 accent-[#D4AF37]"
+                    required
                     data-testid="signup-terms-checkbox"
                   />
                   <span className="text-sm text-gray-600 leading-snug">

@@ -294,7 +294,7 @@ const FiltersModal = ({
                   className="text-[11px] font-semibold text-gray-500 hover:text-gray-900 underline"
                   data-testid="stays-filter-amenities-clear"
                 >
-                  {t('stays.clearAmenities', `Clear (${amenities.length})`)}
+                  {t('stays.clearAmenities', `Clear (${amenities.length})`, { count: amenities.length })}
                 </button>
               )}
             </div>
@@ -364,7 +364,7 @@ const FiltersModal = ({
                     >
                       <span className="flex items-center gap-2">
                         <span className={`text-[11px] leading-none transition-transform ${''}`}>▸</span>
-                        {cat.label}
+                        {t(`stays.amenityCategory.${cat.slug}`, cat.label)}
                       </span>
                       <span className="text-[11px] font-bold text-gray-500">
                         {selectedInCat > 0 ? `${selectedInCat} / ${cat.services.length}` : cat.services.length}

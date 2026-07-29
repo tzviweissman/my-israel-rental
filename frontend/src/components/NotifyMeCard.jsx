@@ -1,9 +1,20 @@
 import React, { useState, useContext } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { Bell, Sparkles } from 'lucide-react';
 import { toast } from 'sonner';
 import { API, AuthContext } from '../App';
+
+// Rental-type filter value → the shared translation key already used for
+// this same label elsewhere (StayTypePicker, FiltersModal) so the chip
+// text matches exactly instead of introducing a second translation of
+// the same concept.
+const RENTAL_TYPE_KEY = {
+  vacation: 'property.vacationType',
+  'short-term': 'property.shortTerm',
+  'long-term': 'property.longTerm',
+};
 
 /**
  * Renter-facing "save this search" card. Rendered inside the search results'
@@ -11,15 +22,19 @@ import { API, AuthContext } from '../App';
  * user isn't logged in we redirect them to /auth with a return URL.
  */
 const NotifyMeCard = ({ filters, dateRange }) => {
+  const { t } = useTranslation();
   const { token } = useContext(AuthContext);
   const navigate = useNavigate();
   const [saving, setSaving] = useState(false);
 
   // Build the summary chips from the current filters
   const chips = [];
-  if (filters.rental_type) chips.push(String(filters.rental_type).replace('-', ' '));
+  if (filters.rental_type) {
+    const key = RENTAL_TYPE_KEY[filters.rental_type];
+    chips.push(key ? t(key, String(filters.rental_type).replace('-', ' ')) : String(filters.rental_type).replace('-', ' '));
+  }
   if (filters.area) chips.push(filters.area);
-  if (filters.min_bedrooms) chips.push(`${filters.min_bedrooms}+ BR`);
+  if (filters.min_bedrooms) chips.push(t('stays.bedroomsPlusChip', '{{count}}+ BR', { count: filters.min_bedrooms }));
   if (filters.max_price) chips.push(`≤ ${Number(filters.max_price).toLocaleString()}`);
   if (dateRange?.from && dateRange?.to) {
     const fmt = (d) => d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
@@ -28,7 +43,7 @@ const NotifyMeCard = ({ filters, dateRange }) => {
 
   const handleSave = async () => {
     if (!token) {
-      toast.error('Please sign in to save this alert.');
+      toast.error(t('stays.notifySignInToast', 'Please sign in to save this alert.'));
       navigate('/auth?return=' + encodeURIComponent(window.location.pathname + window.location.search));
       return;
     }
@@ -49,12 +64,12 @@ const NotifyMeCard = ({ filters, dateRange }) => {
         headers: { Authorization: `Bearer ${token}` },
       });
       if (res.data.existing) {
-        toast.success('Alert already active — we\'ll notify you when something matches.');
+        toast.success(t('stays.notifyAlreadyActive', "Alert already active — we'll notify you when something matches."));
       } else {
-        toast.success('Saved! We\'ll email and notify you when a match becomes available.');
+        toast.success(t('stays.notifySaved', "Saved! We'll email and notify you when a match becomes available."));
       }
     } catch (err) {
-      toast.error(err.response?.data?.detail || 'Failed to save alert');
+      toast.error(err.response?.data?.detail || t('stays.notifySaveFailed', 'Failed to save alert'));
     } finally {
       setSaving(false);
     }
@@ -75,10 +90,10 @@ const NotifyMeCard = ({ filters, dateRange }) => {
         </div>
       </div>
       <h3 className="text-2xl font-bold text-white mb-2" style={{ fontFamily: 'Playfair Display' }}>
-        Don't see what you're looking for?
+        {t('stays.notifyTitle', "Don't see what you're looking for?")}
       </h3>
       <p className="text-white/80 text-sm leading-relaxed mb-5 max-w-md mx-auto">
-        We'll watch new listings for you and ping you by email + in-app the moment a property matches your filters — including ±30 days around your dates.
+        {t('stays.notifyBody', "We'll watch new listings for you and ping you by email + in-app the moment a property matches your filters — including ±30 days around your dates.")}
       </p>
 
       {chips.length > 0 && (
@@ -103,11 +118,11 @@ const NotifyMeCard = ({ filters, dateRange }) => {
         data-testid="notify-me-save-btn"
       >
         <Sparkles size={16} />
-        {saving ? 'Saving…' : 'Notify me when available'}
+        {saving ? t('stays.notifySaving', 'Saving…') : t('stays.notifyCta', 'Notify me when available')}
       </button>
 
       <p className="text-white/50 text-[11px] mt-4">
-        Alert auto-expires after 60 days. Manage alerts in your dashboard.
+        {t('stays.notifyFooter', 'Alert auto-expires after 60 days. Manage alerts in your dashboard.')}
       </p>
     </div>
   );

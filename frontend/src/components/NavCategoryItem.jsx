@@ -12,7 +12,11 @@ import { Link } from 'react-router-dom';
 const NavCategoryItem = ({ type, Icon, label, active, scrolled, iconHidden = false, testidSuffix = '', to }) => {
   const [hover, setHover] = useState(false);
   const isGold = active || hover;
-  const color = isGold ? '#D4AF37' : '#FFFFFF';
+  // Solid brand gold reads fine over the hero-image backdrop (shadowed
+  // for legibility below), but only hits ~3:1 against the scrolled navbar's
+  // solid teal fill — short of WCAG AA's 4.5:1 for text. Swap to the paler,
+  // AA-compliant gold once scrolled; unscrolled keeps the original brand gold.
+  const color = isGold ? (scrolled ? 'var(--gold-text-on-dark)' : '#D4AF37') : '#FFFFFF';
 
   // Default route falls back to the legacy /properties/<rental-type> path
   // for backwards compat (rental-type pills still using this component),

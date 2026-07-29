@@ -122,9 +122,10 @@ const FiltersPanel = ({
                     onClick={() => switchCurrency('ILS')}
                     className={`px-3 py-1 text-xs font-bold tracking-wider transition-all duration-200 ${
                       priceCurrency === 'ILS'
-                        ? 'bg-[#1E6A6A] text-[#D4AF37]'
+                        ? 'bg-[#1E6A6A]'
                         : 'bg-transparent text-[#999] hover:text-[#666]'
                     }`}
+                    style={priceCurrency === 'ILS' ? { color: 'var(--gold-text-on-dark)' } : undefined}
                     data-testid="filter-currency-ils"
                   >
                     ₪ ILS
@@ -134,9 +135,10 @@ const FiltersPanel = ({
                     onClick={() => switchCurrency('USD')}
                     className={`px-3 py-1 text-xs font-bold tracking-wider transition-all duration-200 ${
                       priceCurrency === 'USD'
-                        ? 'bg-[#1E6A6A] text-[#D4AF37]'
+                        ? 'bg-[#1E6A6A]'
                         : 'bg-transparent text-[#999] hover:text-[#666]'
                     }`}
+                    style={priceCurrency === 'USD' ? { color: 'var(--gold-text-on-dark)' } : undefined}
                     data-testid="filter-currency-usd"
                   >
                     $ USD
@@ -168,7 +170,7 @@ const FiltersPanel = ({
                     className="flex items-center rounded-lg px-3.5 py-2.5 bg-white transition-all duration-200 hover:shadow-sm"
                     style={{ border: '1.5px solid #e0dcd4' }}
                   >
-                    <span className="text-sm font-bold text-[#D4AF37] mr-1.5">
+                    <span className="text-sm font-bold mr-1.5" style={{ color: 'var(--gold-text-on-light)' }}>
                       {priceCurrency === 'USD' ? '$' : '₪'}
                     </span>
                     <input
@@ -195,7 +197,7 @@ const FiltersPanel = ({
                     className="flex items-center rounded-lg px-3.5 py-2.5 bg-white transition-all duration-200 hover:shadow-sm"
                     style={{ border: '1.5px solid #e0dcd4' }}
                   >
-                    <span className="text-sm font-bold text-[#D4AF37] mr-1.5">
+                    <span className="text-sm font-bold mr-1.5" style={{ color: 'var(--gold-text-on-light)' }}>
                       {priceCurrency === 'USD' ? '$' : '₪'}
                     </span>
                     <input

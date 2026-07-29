@@ -10,6 +10,7 @@ import DefaultImageBadge from '../components/property/DefaultImageBadge';
 import VideoCoverBadge from '../components/property/VideoCoverBadge';
 import PageMeta from '../components/PageMeta';
 import { getCoverImage } from '../utils/coverImage';
+import useIsRtl from '../hooks/useIsRtl';
 
 // Hero background rotation. Keep widths consistent so the cross-fade is
 // imperceptible at the image edges (browser caches the second slide while
@@ -28,6 +29,7 @@ const HERO_IMAGES = [
 const Home = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const isRtl = useIsRtl();
   const [featuredProperties, setFeaturedProperties] = useState([]);
   const scrollerRef = useRef(null);
   // Track which scroll directions are still possible so we can dim/hide
@@ -68,7 +70,11 @@ const Home = () => {
     if (!el) return;
     // One screenful at a time feels more useful than 1 card; falls back to
     // the container width so it adapts to whatever card size is in effect.
-    const distance = el.clientWidth * 0.9 * (direction === 'left' ? -1 : 1);
+    // In RTL, browsers report scrollLeft as 0..-maxScroll (CSSOM View spec)
+    // rather than LTR's 0..+maxScroll, so the raw scrollBy delta needs its
+    // sign flipped too — same fix as AreaRow.jsx's carousel.
+    const rtlSign = isRtl ? -1 : 1;
+    const distance = el.clientWidth * 0.9 * (direction === 'left' ? -1 : 1) * rtlSign;
     el.scrollBy({ left: distance, behavior: 'smooth' });
   };
 
@@ -78,9 +84,20 @@ const Home = () => {
   const updateScrollEdges = () => {
     const el = scrollerRef.current;
     if (!el) return;
-    setCanScrollLeft(el.scrollLeft > 4);
-    setCanScrollRight(el.scrollLeft + el.clientWidth < el.scrollWidth - 4);
+    const maxScroll = el.scrollWidth - el.clientWidth;
+    const scrolledFromStart = isRtl ? -el.scrollLeft : el.scrollLeft;
+    setCanScrollLeft(scrolledFromStart > 4);
+    setCanScrollRight(scrolledFromStart < maxScroll - 4);
   };
+
+  // Force the strip to its true start on mount / language flip — some
+  // mobile browsers default a freshly rtl-flexed overflow container to a
+  // scrolled/inconsistent position instead of `scrollLeft: 0`.
+  useEffect(() => {
+    const el = scrollerRef.current;
+    if (!el) return;
+    el.scrollLeft = 0;
+  }, [isRtl, featuredProperties]);
 
   useEffect(() => {
     const el = scrollerRef.current;
@@ -92,7 +109,7 @@ const Home = () => {
       el.removeEventListener('scroll', updateScrollEdges);
       window.removeEventListener('resize', updateScrollEdges);
     };
-  }, [featuredProperties]);
+  }, [featuredProperties, isRtl]);
 
   return (
     <div className="min-h-screen">
@@ -262,19 +279,19 @@ const Home = () => {
                     <span className="text-xs md:text-sm truncate">{property.area}</span>
                   </div>
                   <div className="hidden md:flex items-center gap-4 mb-4 text-sm text-gray-700">
-                    {property.bedrooms && (
+                    {property.bedrooms > 0 && (
                       <div className="flex items-center gap-1">
                         <Bed size={16} />
                         <span>{property.bedrooms}</span>
                       </div>
                     )}
-                    {property.bathrooms && (
+                    {property.bathrooms > 0 && (
                       <div className="flex items-center gap-1">
                         <Bath size={16} />
                         <span>{property.bathrooms}</span>
                       </div>
                     )}
-                    {property.square_meters && (
+                    {property.square_meters > 0 && (
                       <div className="flex items-center gap-1">
                         <HomeIcon size={16} />
                         <span>{property.square_meters} m²</span>
@@ -282,7 +299,7 @@ const Home = () => {
                     )}
                   </div>
                 <div className="flex items-center justify-between">
-                  <span className="text-base md:text-2xl font-bold" style={{ color: "#D4AF37" }}>
+                  <span className="text-base md:text-2xl font-bold" style={{ color: "var(--gold-text-on-light)" }}>
                     ₪{property.monthly_price || property.nightly_price}
                     <span className="text-[10px] md:text-sm font-normal text-gray-600">
                       {property.rental_type === 'vacation' ? t('property.perNight') : t('property.perMonth')}
@@ -330,61 +347,42 @@ const Home = () => {
             className="text-3xl sm:text-4xl font-bold mb-12 text-center"
             style={{ fontFamily: 'Playfair Display', color: '#1E6A6A' }}
           >
-            Renting in Israel, made simple.
+            {t('home.seo.heading', 'Renting in Israel, made simple.')}
           </h2>
 
           <div className="grid md:grid-cols-2 gap-10 text-base leading-relaxed text-gray-700 mb-12">
             <div>
-              <h3 className="text-xl font-bold text-gray-900 mb-3">For renters</h3>
-              <p>
-                Whether you&apos;re moving to Israel for a year, planning a holiday in Jerusalem, or
-                spending a few months working remotely from Tel Aviv, MyIsraelRental gives you a single
-                place to compare apartments, vacation homes, and short-stay flats — without the broker
-                fees and back-and-forth that usually come with renting here. Every listing is posted by
-                the owner or their authorised representative, so you talk directly to the person who
-                holds the keys.
-              </p>
+              <h3 className="text-xl font-bold text-gray-900 mb-3">{t('home.seo.forRentersTitle', 'For renters')}</h3>
+              <p>{t('home.seo.forRentersPara1', "Whether you're moving to Israel for a year, planning a holiday in Jerusalem, or spending a few months working remotely from Tel Aviv, My Israel Rental gives you a single place to compare apartments, vacation homes, and short-stay flats — without the broker fees and back-and-forth that usually come with renting here. Every listing is posted by the owner or their authorized representative, so you talk directly to the person who holds the keys.")}</p>
               <p className="mt-4">
-                Use our{' '}
+                {t('home.seo.forRentersPara2Before', 'Use our')}{' '}
                 <a href="/stays" onClick={(e) => { e.preventDefault(); navigate('/stays'); }} className="text-[#1E6A6A] font-semibold hover:underline">
-                  Stays search
+                  {t('home.seo.staysSearchLink', 'Stays search')}
                 </a>{' '}
-                to filter by area, dates, bedrooms, budget and amenities. Save favourites with one tap,
-                message owners through the built-in chat, and sign your rental contract digitally — all
-                from your browser.
+                {t('home.seo.forRentersPara2After', 'to filter by area, dates, bedrooms, budget and amenities. Save favorites with one tap, message owners through the built-in chat, and sign your rental contract digitally — all from your browser.')}
               </p>
             </div>
 
             <div>
-              <h3 className="text-xl font-bold text-gray-900 mb-3">For owners</h3>
-              <p>
-                Listing on MyIsraelRental is free for owners too — no commission, no payout fees, no
-                lock-in. Add photos in minutes, set your nightly or monthly price, choose your
-                availability, and let renters reach out to you directly. We handle the contract
-                templates, calendar sync, and email/WhatsApp delivery so you can focus on welcoming
-                guests instead of chasing paperwork.
-              </p>
+              <h3 className="text-xl font-bold text-gray-900 mb-3">{t('home.seo.forOwnersTitle', 'For owners')}</h3>
+              <p>{t('home.seo.forOwnersPara1', 'Listing on My Israel Rental is free for owners too — no commission, no payout fees, no lock-in. Add photos in minutes, set your nightly or monthly price, choose your availability, and let renters reach out to you directly. We handle the contract templates, calendar sync, and email/WhatsApp delivery so you can focus on welcoming guests instead of chasing paperwork.')}</p>
               <p className="mt-4">
-                Need help cleaning, photographing, or managing turnovers? Browse trusted local{' '}
+                {t('home.seo.forOwnersPara2Before', 'Need help cleaning, photographing, or managing turnovers? Browse trusted local')}{' '}
                 <a href="/services" onClick={(e) => { e.preventDefault(); navigate('/services'); }} className="text-[#1E6A6A] font-semibold hover:underline">
-                  service providers
+                  {t('home.seo.serviceProvidersLink', 'service providers')}
                 </a>{' '}
-                — or list your own business and reach every owner on the platform.
+                {t('home.seo.forOwnersPara2After', '— or list your own business and reach every owner on the platform.')}
               </p>
             </div>
           </div>
 
           <div className="border-t border-gray-200 pt-10">
-            <h3 className="text-xl font-bold text-gray-900 mb-3 text-center">Cities we cover</h3>
+            <h3 className="text-xl font-bold text-gray-900 mb-3 text-center">{t('home.seo.citiesTitle', 'Cities we cover')}</h3>
             <p className="text-center text-gray-700 mb-6 max-w-3xl mx-auto">
-              From the beaches of Tel Aviv to the alleys of the Old City of Jerusalem, MyIsraelRental
-              hosts listings in every major Israeli urban centre — plus dozens of neighbourhoods that
-              don&apos;t usually show up on global rental sites.
+              {t('home.seo.citiesPara', "From the beaches of Tel Aviv to the alleys of the Old City of Jerusalem, My Israel Rental hosts listings in every major Israeli urban center — plus dozens of neighborhoods that don't usually show up on global rental sites.")}
             </p>
             <p className="text-center text-gray-600 text-sm leading-loose">
-              Jerusalem · Tel Aviv · Haifa · Beit Shemesh · Modi&apos;in · Ra&apos;anana · Netanya ·
-              Herzliya · Rishon LeZion · Petah Tikva · Ramat Gan · Givatayim · Rehovot · Ashdod ·
-              Be&apos;er Sheva · Eilat · Tiberias · Tzfat · Nahariya
+              {t('home.seo.citiesList', "Jerusalem · Tel Aviv · Haifa · Beit Shemesh · Modi'in · Ra'anana · Netanya · Herzliya · Rishon LeZion · Petah Tikva · Ramat Gan · Givatayim · Rehovot · Ashdod · Be'er Sheva · Eilat · Tiberias · Tzfat · Nahariya")}
             </p>
             <p className="text-center mt-8 text-sm">
               <a
@@ -392,10 +390,9 @@ const Home = () => {
                 onClick={(e) => { e.preventDefault(); navigate('/faq'); }}
                 className="text-[#1E6A6A] font-semibold hover:underline"
               >
-                Read our FAQ
+                {t('home.seo.readFaqLink', 'Read our FAQ')}
               </a>{' '}
-              to learn more about deposits, cancellations, and how we keep MyIsraelRental free for
-              everyone.
+              {t('home.seo.faqAfter', 'to learn more about deposits, cancellations, and how we keep My Israel Rental free for everyone.')}
             </p>
           </div>
         </div>

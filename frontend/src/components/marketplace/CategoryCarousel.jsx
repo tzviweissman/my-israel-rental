@@ -18,6 +18,7 @@ import {
   Briefcase, SprayCan, Monitor, GraduationCap, Baby, PawPrint, PartyPopper,
 } from 'lucide-react';
 import { themeForCategory } from './categoryTheme';
+import useIsRtl from '../../hooks/useIsRtl';
 
 const ICONS = {
   Truck, Key, Map, Wind, Sparkles, Wrench, Hammer, Camera,
@@ -107,15 +108,21 @@ const CategoryCard = ({ category, active, onClick }) => {
 
 const CategoryCarousel = ({ categories, selectedCat, onSelect }) => {
   const scrollerRef = useRef(null);
+  const isRtl = useIsRtl();
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(true);
 
   const updateEdges = useCallback(() => {
     const el = scrollerRef.current;
     if (!el) return;
-    setCanScrollLeft(el.scrollLeft > 4);
-    setCanScrollRight(el.scrollLeft + el.clientWidth < el.scrollWidth - 4);
-  }, []);
+    // In RTL, browsers report scrollLeft as 0..-maxScroll (CSSOM View spec)
+    // rather than LTR's 0..+maxScroll — normalize before comparing, same
+    // fix as AreaRow.jsx's carousel.
+    const maxScroll = el.scrollWidth - el.clientWidth;
+    const scrolledFromStart = isRtl ? -el.scrollLeft : el.scrollLeft;
+    setCanScrollLeft(scrolledFromStart > 4);
+    setCanScrollRight(scrolledFromStart < maxScroll - 4);
+  }, [isRtl]);
 
   useEffect(() => {
     updateEdges();
@@ -130,7 +137,9 @@ const CategoryCarousel = ({ categories, selectedCat, onSelect }) => {
   }, [updateEdges, categories.length]);
 
   const scrollBy = (delta) => {
-    scrollerRef.current?.scrollBy({ left: delta, behavior: 'smooth' });
+    const el = scrollerRef.current;
+    if (!el) return;
+    el.scrollBy({ left: isRtl ? -delta : delta, behavior: 'smooth' });
   };
 
   return (

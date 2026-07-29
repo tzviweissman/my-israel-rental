@@ -72,7 +72,7 @@ const StayTypePicker = ({
                 onClick={(e) => { e.stopPropagation(); onChange(''); }}
                 onKeyDown={(e) => { if (e.key === 'Enter') { e.stopPropagation(); onChange(''); } }}
                 className="p-0.5 text-gray-400 hover:text-gray-700 cursor-pointer"
-                aria-label="Clear stay type"
+                aria-label={t('stays.clearStayType', 'Clear stay type')}
                 data-testid={`${testidPrefix}-clear`}
               >
                 <X size={14} />

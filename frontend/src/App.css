@@ -72,6 +72,15 @@ h1, h2, h3, h4, h5, h6 {
   border-bottom: 1px solid #E5E5E5;
 }
 
+:root {
+  /* Brand gold (#D4AF37) fails WCAG AA (4.5:1) as TEXT on the solid
+     backgrounds it's paired with elsewhere (white cards ~2.1:1, the
+     scrolled-nav teal ~3:1) — decorative use (borders, icons, fills)
+     is unaffected and keeps the original brand color. */
+  --gold-text-on-light: #8B6914; /* ~5.1:1 on white */
+  --gold-text-on-dark: #F0DA8C;  /* ~4.5:1 on #1E6A6A */
+}
+
 [dir="rtl"] {
   direction: rtl;
   text-align: right;

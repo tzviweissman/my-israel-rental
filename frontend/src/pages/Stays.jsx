@@ -669,7 +669,7 @@ const Stays = ({ landing = null }) => {
                         style={cover ? { background: `url(${cover}) center/cover no-repeat` } : undefined}
                       />
                       <div className="px-2 py-1.5">
-                        <div className="text-[11px] font-semibold text-gray-900 truncate">{p.title || 'Property'}</div>
+                        <div className="text-[11px] font-semibold text-gray-900 truncate">{p.title || t('stays.untitledProperty', 'Property')}</div>
                         <div className="text-[10px] text-gray-500 truncate">
                           {price}
                           {typeof p.distance_km === 'number' && (

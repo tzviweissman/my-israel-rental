@@ -136,7 +136,9 @@ const PropertyCard = ({
           {property.floor !== null && property.floor !== undefined && (
             <div className="flex items-center gap-1">
               <Building2 size={16} />
-              <span>{t('property.floor')} {property.floor}</span>
+              <span>
+                {t('property.floor')} {property.floor === 0 ? t('property.groundFloor') : property.floor}
+              </span>
             </div>
           )}
         </div>
@@ -144,7 +146,7 @@ const PropertyCard = ({
           <div>
             <span
               className="text-base md:text-2xl font-bold"
-              style={{ color: '#D4AF37' }}
+              style={{ color: 'var(--gold-text-on-light)' }}
               data-testid={`property-price-${property.id}`}
             >
               {property.currency === 'USD' ? '$' : '₪'}{rawPrice.toLocaleString()}

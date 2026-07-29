@@ -11,6 +11,7 @@
  * have to do the FX math themselves.
  */
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { Heart } from 'lucide-react';
 import { getCoverImage } from '../../utils/coverImage';
 import DefaultImageBadge from '../property/DefaultImageBadge';
@@ -28,11 +29,12 @@ const StaysCard = ({
   onToggleLike,
   displayCurrency = null,
 }) => {
+  const { t } = useTranslation();
   const cover = getCoverImage(property.images, 400, '', property.videos, property.id);
   const propCur = property.currency || 'ILS';
   const sym = propCur === 'ILS' ? '₪' : '$';
   const price = property.rental_type === 'vacation' ? property.nightly_price : property.monthly_price;
-  const unit = property.rental_type === 'vacation' ? 'night' : 'month';
+  const unit = property.rental_type === 'vacation' ? t('stays.unitNight', 'night') : t('stays.unitMonth', 'month');
 
   let convertedHint = null;
   if (price && displayCurrency && displayCurrency !== propCur) {
@@ -67,7 +69,7 @@ const StaysCard = ({
           type="button"
           onClick={(e) => onToggleLike?.(e)}
           className="absolute top-2 end-2 p-1.5 rounded-full hover:scale-110 active:scale-95 transition-transform"
-          aria-label={liked ? 'Remove from favorites' : 'Save to favorites'}
+          aria-label={liked ? t('stays.removeFromFavorites', 'Remove from favorites') : t('stays.saveToFavorites', 'Save to favorites')}
           aria-pressed={liked}
           data-testid={`stays-card-like-${property.id}`}
         >
@@ -109,7 +111,7 @@ const StaysCard = ({
             )}
           </>
         ) : (
-          <p className="text-xs text-gray-400 mt-0.5">Price on request</p>
+          <p className="text-xs text-gray-400 mt-0.5">{t('stays.priceOnRequest', 'Price on request')}</p>
         )}
       </div>
     </div>
