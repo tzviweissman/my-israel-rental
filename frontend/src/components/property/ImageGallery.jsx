@@ -43,7 +43,7 @@ const ImageGallery = ({ media, currentIndex, onIndexChange, alt, apiBase }) => {
     return (
       <div className="relative">
         <div
-          className="w-full h-96 rounded-2xl"
+          className="w-full aspect-[4/3] rounded-2xl"
           style={{
             backgroundImage: `url(${HERO_FALLBACK_URL})`,
             backgroundSize: 'cover',
@@ -70,7 +70,7 @@ const ImageGallery = ({ media, currentIndex, onIndexChange, alt, apiBase }) => {
                 srcSet={srcSet(toSrc(m.url), 1200)}
                 sizes="(max-width: 1024px) 100vw, 1200px"
                 alt={`${alt} - ${idx + 1}`}
-                className="w-full h-96 object-cover flex-shrink-0"
+                className="w-full aspect-[4/3] object-cover flex-shrink-0"
                 data-testid={idx === currentIndex ? 'gallery-main-image' : undefined}
               />
             ) : (
@@ -84,7 +84,7 @@ const ImageGallery = ({ media, currentIndex, onIndexChange, alt, apiBase }) => {
                 controls
                 playsInline
                 preload="metadata"
-                className="w-full h-96 object-contain flex-shrink-0 bg-black"
+                className="w-full aspect-[4/3] object-contain flex-shrink-0 bg-black"
                 data-testid={`gallery-video-${idx}`}
               />
             )
