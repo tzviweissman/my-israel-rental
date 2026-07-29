@@ -13,6 +13,7 @@ import React, { useEffect, useRef } from 'react';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
 const TEAL = '#1E6A6A';
 const GOLD = '#D4AF37';
@@ -87,6 +88,7 @@ const priceLabel = (p) => {
 
 const StaysMapView = ({ properties, userCoords, focusOnUser, displayCurrency, activeId, onPinClick }) => {
   const navigate = useNavigate();
+  const { t, i18n } = useTranslation();
   const containerRef = useRef(null);
   const mapRef = useRef(null);
   const layerRef = useRef(null);
@@ -186,12 +188,12 @@ const StaysMapView = ({ properties, userCoords, focusOnUser, displayCurrency, ac
 
       // Rich popup: cover thumbnail (if any) + title + area + click-through.
       const cover = (p.images && p.images[0]) || '';
-      const title = esc(p.title || 'Property');
+      const title = esc(p.title || t('stays.untitledProperty', 'Property'));
       const area = esc(p.area || '');
       const cur = p.currency || 'ILS';
       const priceLine = p.rental_type === 'long-term'
-        ? `${symOf(cur)}${(p.monthly_price || 0).toLocaleString()} / month`
-        : `${symOf(cur)}${Math.round(nightly).toLocaleString()} / night`;
+        ? `${symOf(cur)}${(p.monthly_price || 0).toLocaleString()} / ${t('stays.unitMonth', 'month')}`
+        : `${symOf(cur)}${Math.round(nightly).toLocaleString()} / ${t('stays.unitNight', 'night')}`;
       const html = `
         <div data-testid="stays-map-popup" style="width:220px;font-family:inherit;">
           ${cover ? `<div style="height:120px;border-radius:10px;background:url(${esc(cover)}) center/cover no-repeat;margin-bottom:8px;"></div>` : ''}
@@ -200,7 +202,7 @@ const StaysMapView = ({ properties, userCoords, focusOnUser, displayCurrency, ac
           <div style="font-size:13px;color:${TEAL};font-weight:700;margin-bottom:8px;">${priceLine}</div>
           <button type="button" data-property-id="${esc(p.id)}"
             style="display:block;width:100%;padding:8px 10px;border:0;border-radius:8px;background:${TEAL};color:#fff;font-size:12px;font-weight:600;cursor:pointer;">
-            View details →
+            ${esc(t('stays.viewDetailsArrow', 'View details →'))}
           </button>
         </div>`;
       marker.bindPopup(html, { closeButton: false, minWidth: 220 });
@@ -226,7 +228,7 @@ const StaysMapView = ({ properties, userCoords, focusOnUser, displayCurrency, ac
     if (userCoords) {
       L.marker([userCoords.lat, userCoords.lng], { icon: userIcon() })
         .addTo(group)
-        .bindPopup(`<span style="font-size:13px;font-weight:600;color:${TEAL};">You searched here</span>`);
+        .bindPopup(`<span style="font-size:13px;font-weight:600;color:${TEAL};">${esc(t('stays.youSearchedHere', 'You searched here'))}</span>`);
       points.push([userCoords.lat, userCoords.lng]);
     }
 
@@ -264,7 +266,7 @@ const StaysMapView = ({ properties, userCoords, focusOnUser, displayCurrency, ac
     // Serialize a compact projection so we re-run only when the pin set
     // actually changes, not on every parent re-render.
     JSON.stringify(pinRows.map((p) => [p.id, p.lat, p.lng, p.nightly_price, p.monthly_price])),
-    userCoords?.lat, userCoords?.lng, focusOnUser, displayCurrency, navigate,
+    userCoords?.lat, userCoords?.lng, focusOnUser, displayCurrency, navigate, i18n.language,
   ]);
 
   // Open the matching marker's popup whenever the peek strip / list

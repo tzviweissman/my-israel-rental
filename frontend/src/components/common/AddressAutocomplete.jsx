@@ -19,6 +19,7 @@
  */
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import axios from 'axios';
+import { useTranslation } from 'react-i18next';
 import { Loader2, MapPin, Search, X } from 'lucide-react';
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
@@ -44,6 +45,7 @@ const AddressAutocomplete = ({
   placeholder,
   testId = 'address-autocomplete',
 }) => {
+  const { t } = useTranslation();
   const [suggestions, setSuggestions] = useState([]);
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -163,7 +165,7 @@ const AddressAutocomplete = ({
             type="button"
             onClick={() => { onClear?.(); }}
             className="pe-3 ps-1 text-[#1E6A6A] hover:opacity-70"
-            title="Clear"
+            title={t('common.clear', 'Clear')}
             data-testid={`${testId}-clear`}
           >
             <X size={14} />
@@ -174,7 +176,7 @@ const AddressAutocomplete = ({
             onClick={() => { onSubmit?.(value); }}
             disabled={loading || !(value || '').trim()}
             className="pe-3 ps-1 text-[#1E6A6A] hover:opacity-70 disabled:opacity-30"
-            title="Search"
+            title={t('common.search', 'Search')}
             data-testid={`${testId}-submit`}
           >
             {loading ? <Loader2 size={14} className="animate-spin" /> : <Search size={14} />}

@@ -9,6 +9,7 @@
  * out and counting pins.
  */
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { Footprints, MapPin, Layers } from 'lucide-react';
 
 /**
@@ -18,6 +19,7 @@ import { Footprints, MapPin, Layers } from 'lucide-react';
  * @param {string} [props.className]
  */
 const NearbyDensityBar = ({ items, testId = 'nearby-density-bar', className = '' }) => {
+  const { t } = useTranslation();
   // Skip render entirely when we don't have a signal to talk about —
   // the parent already gates on `nearCoords`, but this guard keeps the
   // component safe if someone reuses it elsewhere.
@@ -39,18 +41,18 @@ const NearbyDensityBar = ({ items, testId = 'nearby-density-bar', className = ''
       {walking > 0 && (
         <span className="inline-flex items-center gap-1.5 text-[#1E6A6A] font-semibold">
           <Footprints size={14} strokeWidth={2.4} />
-          {walking} within walking
+          {t('common.nearbyWalking', '{{count}} within walking', { count: walking })}
         </span>
       )}
       {shortHop > walking && (
         <span className="inline-flex items-center gap-1.5 text-gray-800">
           <MapPin size={14} />
-          {shortHop} within 3&nbsp;km
+          {t('common.nearbyShortHop', '{{count}} within 3 km', { count: shortHop })}
         </span>
       )}
       <span className="inline-flex items-center gap-1.5 text-gray-500">
         <Layers size={14} />
-        {total} total
+        {t('common.nearbyTotal', '{{count}} total', { count: total })}
       </span>
     </div>
   );

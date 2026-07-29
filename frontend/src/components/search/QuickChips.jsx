@@ -24,6 +24,7 @@ import { useTranslation } from 'react-i18next';
 import { format, addDays, getDay, endOfMonth, parseISO } from 'date-fns';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { loadHolidayWindows } from '../../utils/holidayWindows';
+import useIsRtl from '../../hooks/useIsRtl';
 
 const toIso = (d) => format(d, 'yyyy-MM-dd');
 const fmt = (d) => format(d, 'MMM d');
@@ -88,6 +89,7 @@ const QuickChips = ({
   testidPrefix = 'quick-chips',
 }) => {
   const { t, i18n } = useTranslation();
+  const isRtl = useIsRtl();
   // Re-build chip labels when the language changes so users switching
   // between English and Hebrew see the translated labels immediately.
   const genericChips = useMemo(() => buildGenericChips(t), [t, i18n.language]);
@@ -124,11 +126,16 @@ const QuickChips = ({
     const el = scrollerRef.current;
     if (!el) return;
     const maxScroll = el.scrollWidth - el.clientWidth;
+    // Modern browsers report scrollLeft in RTL as 0..-maxScroll (CSSOM View
+    // spec) rather than LTR's 0..+maxScroll, so normalize to "distance
+    // scrolled from the start" before comparing against thresholds — same
+    // fix already applied in AreaRow.jsx for its own carousel.
+    const scrolledFromStart = isRtl ? -el.scrollLeft : el.scrollLeft;
     setEdges({
-      left: el.scrollLeft > 4,
-      right: maxScroll > 4 && el.scrollLeft < maxScroll - 4,
+      left: scrolledFromStart > 4,
+      right: maxScroll > 4 && scrolledFromStart < maxScroll - 4,
     });
-  }, []);
+  }, [isRtl]);
   useEffect(() => {
     recomputeEdges();
     const el = scrollerRef.current;
@@ -140,10 +147,21 @@ const QuickChips = ({
       window.removeEventListener('resize', recomputeEdges);
     };
   }, [recomputeEdges, chips.length]);
+
+  // Force the strip to its true start (first chip = "Tonight") on mount and
+  // whenever the language flips. Some mobile browsers default a freshly
+  // rtl-flexed overflow container to a scrolled/inconsistent position
+  // instead of `scrollLeft: 0` — don't rely on the platform default.
+  useEffect(() => {
+    const el = scrollerRef.current;
+    if (!el) return;
+    el.scrollLeft = 0;
+  }, [isRtl]);
   const scrollBy = (dir) => {
     const el = scrollerRef.current;
     if (!el) return;
-    el.scrollBy({ left: dir * Math.round(el.clientWidth * 0.7), behavior: 'smooth' });
+    const sign = isRtl ? -1 : 1;
+    el.scrollBy({ left: dir * sign * Math.round(el.clientWidth * 0.7), behavior: 'smooth' });
   };
 
   return (
@@ -198,7 +216,7 @@ const QuickChips = ({
         <button
           type="button"
           onClick={() => scrollBy(-1)}
-          aria-label="Scroll chips left"
+          aria-label={t('stays.scrollChipsLeft', 'Scroll chips left')}
           className="hidden md:flex absolute start-0 top-1/2 -translate-y-1/2 z-10 h-8 w-8 items-center justify-center rounded-full bg-white shadow-md border border-gray-200 text-gray-700 opacity-0 group-hover:opacity-100 transition-opacity hover:border-[#D4AF37]"
           data-testid={`${testidPrefix}-arrow-left`}
         >
@@ -209,7 +227,7 @@ const QuickChips = ({
         <button
           type="button"
           onClick={() => scrollBy(1)}
-          aria-label="Scroll chips right"
+          aria-label={t('stays.scrollChipsRight', 'Scroll chips right')}
           className="hidden md:flex absolute end-0 top-1/2 -translate-y-1/2 z-10 h-8 w-8 items-center justify-center rounded-full bg-white shadow-md border border-gray-200 text-gray-700 opacity-0 group-hover:opacity-100 transition-opacity hover:border-[#D4AF37]"
           data-testid={`${testidPrefix}-arrow-right`}
         >

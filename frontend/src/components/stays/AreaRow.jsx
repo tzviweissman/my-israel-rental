@@ -50,14 +50,14 @@ const AreaRow = ({
             <button
               onClick={() => scroll(-1)}
               className="w-7 h-7 rounded-full border border-gray-300 flex items-center justify-center text-gray-700 hover:border-gray-900 transition-colors"
-              aria-label="Scroll back"
+              aria-label={t('stays.scrollBack', 'Scroll back')}
             >
               {isRtl ? <ChevronRight size={14} /> : <ChevronLeft size={14} />}
             </button>
             <button
               onClick={() => scroll(1)}
               className="w-7 h-7 rounded-full border border-gray-300 flex items-center justify-center text-gray-700 hover:border-gray-900 transition-colors"
-              aria-label="Scroll forward"
+              aria-label={t('stays.scrollForward', 'Scroll forward')}
             >
               {isRtl ? <ChevronLeft size={14} /> : <ChevronRight size={14} />}
             </button>

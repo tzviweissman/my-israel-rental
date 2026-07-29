@@ -192,10 +192,11 @@ const Auth = () => {
                 </div>
                 <form onSubmit={handleForgotPassword} className="space-y-5" data-testid="forgot-password-form">
                   <div>
-                    <label className="block text-sm font-medium mb-2">{t('auth.emailAddress')}</label>
+                    <label htmlFor="forgot-email" className="block text-sm font-medium mb-2">{t('auth.emailAddress')}</label>
                     <div className="relative">
                       <Mail size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
                       <input
+                        id="forgot-email"
                         type="email"
                         value={forgotEmail}
                         onChange={(e) => setForgotEmail(e.target.value)}
@@ -235,16 +236,18 @@ const Auth = () => {
               <div className="w-14 h-14 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-3">
                 <KeyRound size={24} className="text-red-500" />
               </div>
-              <h2 className="text-2xl font-bold mb-2" style={{ fontFamily: 'Playfair Display' }}>Invalid reset link</h2>
+              <h2 className="text-2xl font-bold mb-2" style={{ fontFamily: 'Playfair Display' }}>
+                {t('auth.invalidResetLinkTitle', 'Invalid Reset Link')}
+              </h2>
               <p className="text-sm text-gray-500 mb-6">
-                This page can only be opened from the secure link in your password-reset email. Please start from “Forgot your password?”.
+                {t('auth.invalidResetLinkHint', 'This page can only be opened from the secure link in your password-reset email. Please start from “Forgot your password?”.')}
               </p>
               <button
                 onClick={() => navigate('/auth/forgot-password')}
                 className="w-full primary-btn"
                 data-testid="reset-password-restart"
               >
-                Request a reset email
+                {t('auth.requestResetEmail', 'Request a Reset Email')}
               </button>
             </div>
           </div>
@@ -281,9 +284,10 @@ const Auth = () => {
                 </div>
                 <form onSubmit={handleResetPassword} className="space-y-5" data-testid="reset-password-form">
                   <div>
-                    <label className="block text-sm font-medium mb-2">{t('auth.newPassword')}</label>
+                    <label htmlFor="reset-new-password" className="block text-sm font-medium mb-2">{t('auth.newPassword')}</label>
                     <div className="relative">
                       <input
+                        id="reset-new-password"
                         type={showResetPassword ? 'text' : 'password'}
                         value={resetPassword}
                         onChange={(e) => setResetPassword(e.target.value)}
@@ -303,8 +307,9 @@ const Auth = () => {
                     </div>
                   </div>
                   <div>
-                    <label className="block text-sm font-medium mb-2">{t('auth.confirmNewPassword')}</label>
+                    <label htmlFor="reset-confirm-password" className="block text-sm font-medium mb-2">{t('auth.confirmNewPassword')}</label>
                     <input
+                      id="reset-confirm-password"
                       type="password"
                       value={resetConfirmPassword}
                       onChange={(e) => setResetConfirmPassword(e.target.value)}
@@ -388,8 +393,9 @@ const Auth = () => {
           <form onSubmit={handleSubmit} className="space-y-6" data-testid="auth-form">
             {mode === 'signup' && (
               <div>
-                <label className="block text-sm font-medium mb-2">{t('auth.name')}</label>
+                <label htmlFor="auth-name" className="block text-sm font-medium mb-2">{t('auth.name')}</label>
                 <input
+                  id="auth-name"
                   type="text"
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
@@ -401,8 +407,9 @@ const Auth = () => {
             )}
 
             <div>
-              <label className="block text-sm font-medium mb-2">{t('auth.email')}</label>
+              <label htmlFor="auth-email" className="block text-sm font-medium mb-2">{t('auth.email')}</label>
               <input
+                id="auth-email"
                 type="email"
                 value={formData.email}
                 onChange={(e) => setFormData({ ...formData, email: e.target.value })}
@@ -413,9 +420,10 @@ const Auth = () => {
             </div>
 
             <div>
-              <label className="block text-sm font-medium mb-2">{t('auth.password')}</label>
+              <label htmlFor="auth-password" className="block text-sm font-medium mb-2">{t('auth.password')}</label>
               <div className="relative">
                 <input
+                  id="auth-password"
                   type={showPassword ? 'text' : 'password'}
                   value={formData.password}
                   onChange={(e) => setFormData({ ...formData, password: e.target.value })}
@@ -449,9 +457,10 @@ const Auth = () => {
             {mode === 'signup' && (
               <>
                 <div>
-                  <label className="block text-sm font-medium mb-2">{t('auth.confirmPassword')}</label>
+                  <label htmlFor="auth-confirm-password" className="block text-sm font-medium mb-2">{t('auth.confirmPassword')}</label>
                   <div className="relative">
                     <input
+                      id="auth-confirm-password"
                       type={showConfirmPassword ? 'text' : 'password'}
                       value={confirmPassword}
                       onChange={(e) => setConfirmPassword(e.target.value)}
@@ -474,13 +483,14 @@ const Auth = () => {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium mb-2">
+                  <label htmlFor="auth-phone" className="block text-sm font-medium mb-2">
                     {t('auth.whatsappNumber', 'WhatsApp number')}
                     <span className="text-gray-500 font-normal ml-2 text-xs">
                       ({t('auth.recommendedOptional', 'recommended, optional')})
                     </span>
                   </label>
                   <input
+                    id="auth-phone"
                     type="tel"
                     value={formData.phone}
                     onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
@@ -494,8 +504,8 @@ const Auth = () => {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium mb-2">{t('auth.role', 'I want to')}</label>
-                  <div className="grid grid-cols-3 gap-2" data-testid="auth-role-select">
+                  <span id="auth-role-label" className="block text-sm font-medium mb-2">{t('auth.role', 'I want to')}</span>
+                  <div className="grid grid-cols-3 gap-2" role="group" aria-labelledby="auth-role-label" data-testid="auth-role-select">
                     {[
                       { value: 'renter', label: t('auth.renter', 'Rent'), sub: t('auth.renterSub', 'Find a home'), Icon: Home },
                       // Group `owner` and `manager` under one "List" card
@@ -583,6 +593,7 @@ const Auth = () => {
                   checked={termsAccepted}
                   onChange={(e) => setTermsAccepted(e.target.checked)}
                   className="mt-1 w-4 h-4 rounded border-gray-300 accent-[#D4AF37] cursor-pointer"
+                  required
                   data-testid="auth-terms-checkbox"
                 />
                 <label htmlFor="terms" className="text-sm text-gray-600 cursor-pointer leading-snug">
@@ -595,7 +606,7 @@ const Auth = () => {
             )}
 
             <button type="submit" className="w-full primary-btn" data-testid="auth-submit-button">
-              {t('auth.submit')}
+              {mode === 'login' ? t('auth.loginButton', 'Log in') : t('auth.signupButton', 'Create Account')}
             </button>
           </form>
 

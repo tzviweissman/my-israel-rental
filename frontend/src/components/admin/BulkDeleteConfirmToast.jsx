@@ -77,7 +77,7 @@ const BulkDeleteConfirmToast = ({
   return (
     <div className="bg-white rounded-xl shadow-xl border border-gray-200 p-4 w-96" data-testid="bulk-delete-confirm-toast">
       <p className="text-sm font-semibold text-gray-800 mb-1">
-        {t('admin.bulkDeleteTitle', `Delete ${ids.length} listing${ids.length === 1 ? '' : 's'}?`)}
+        {t('admin.bulkDeleteTitle', `Delete ${ids.length} listing${ids.length === 1 ? '' : 's'}?`, { count: ids.length })}
       </p>
       <p className="text-xs text-gray-500 mb-3">
         {t(

@@ -11,7 +11,7 @@ const PropertyStats = ({ property }) => {
   const { t } = useTranslation();
   return (
     <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-      {property.bedrooms && (
+      {property.bedrooms > 0 && (
         <div className="bg-white p-4 rounded-xl border border-[#E5E5E5]">
           <div className="flex items-center gap-2 mb-1">
             <Bed size={20} style={{ color: '#D4AF37' }} />
@@ -20,7 +20,7 @@ const PropertyStats = ({ property }) => {
           <p className="text-2xl font-bold">{property.bedrooms}</p>
         </div>
       )}
-      {property.bathrooms && (
+      {property.bathrooms > 0 && (
         <div className="bg-white p-4 rounded-xl border border-[#E5E5E5]">
           <div className="flex items-center gap-2 mb-1">
             <Bath size={20} style={{ color: '#D4AF37' }} />
@@ -29,7 +29,7 @@ const PropertyStats = ({ property }) => {
           <p className="text-2xl font-bold">{property.bathrooms}</p>
         </div>
       )}
-      {property.square_meters && (
+      {property.square_meters > 0 && (
         <div className="bg-white p-4 rounded-xl border border-[#E5E5E5]">
           <div className="flex items-center gap-2 mb-1">
             <HomeIcon size={20} style={{ color: '#D4AF37' }} />
@@ -44,7 +44,9 @@ const PropertyStats = ({ property }) => {
             <Building2 size={20} style={{ color: '#D4AF37' }} />
             <span className="text-sm text-gray-600">{t('property.floor')}</span>
           </div>
-          <p className="text-2xl font-bold">{property.floor}</p>
+          <p className="text-2xl font-bold">
+            {property.floor === 0 ? t('property.groundFloor') : property.floor}
+          </p>
           {property.has_elevator && (
             <p className="text-xs mt-1 font-semibold text-gray-600">
               {t('property.elevator')}
@@ -76,7 +78,7 @@ const PropertyStats = ({ property }) => {
           )}
         </div>
       )}
-      {property.rental_type === 'vacation' && property.max_guests && (
+      {property.rental_type === 'vacation' && property.max_guests > 0 && (
         <div className="bg-white p-4 rounded-xl border border-[#E5E5E5]" data-testid="property-max-guests">
           <div className="flex items-center gap-2 mb-1">
             <Users size={20} style={{ color: '#D4AF37' }} />

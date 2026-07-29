@@ -320,19 +320,19 @@ const ManagerPage = () => {
                   <span className="text-xs md:text-sm truncate">{property.area}</span>
                 </div>
                 <div className="hidden md:flex items-center gap-4 mb-4 text-sm text-gray-700">
-                  {property.bedrooms && (
+                  {property.bedrooms > 0 && (
                     <div className="flex items-center gap-1">
                       <Bed size={16} />
                       <span>{property.bedrooms}</span>
                     </div>
                   )}
-                  {property.bathrooms && (
+                  {property.bathrooms > 0 && (
                     <div className="flex items-center gap-1">
                       <Bath size={16} />
                       <span>{property.bathrooms}</span>
                     </div>
                   )}
-                  {property.square_meters && (
+                  {property.square_meters > 0 && (
                     <div className="flex items-center gap-1">
                       <HomeIcon size={16} />
                       <span>{property.square_meters} m²</span>
@@ -340,7 +340,7 @@ const ManagerPage = () => {
                   )}
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="text-base md:text-2xl font-bold" style={{ color: '#D4AF37' }}>
+                  <span className="text-base md:text-2xl font-bold" style={{ color: 'var(--gold-text-on-light)' }}>
                     {property.currency === 'USD' ? '$' : '₪'}{(property.monthly_price || property.nightly_price || 0).toLocaleString()}
                     <span className="text-[10px] md:text-sm font-normal text-gray-600">
                       {property.rental_type === 'vacation' ? t('property.perNight') : t('property.perMonth')}

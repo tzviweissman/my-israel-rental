@@ -11,18 +11,25 @@
  */
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { ChevronLeft, ChevronRight, MapPin } from 'lucide-react';
+import useIsRtl from '../../hooks/useIsRtl';
 
 const LocationChipsRow = ({ locations, selectedLoc, onSelect }) => {
   const scrollerRef = useRef(null);
+  const isRtl = useIsRtl();
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(true);
 
   const updateEdges = useCallback(() => {
     const el = scrollerRef.current;
     if (!el) return;
-    setCanScrollLeft(el.scrollLeft > 4);
-    setCanScrollRight(el.scrollLeft + el.clientWidth < el.scrollWidth - 4);
-  }, []);
+    // In RTL, browsers report scrollLeft as 0..-maxScroll (CSSOM View spec)
+    // rather than LTR's 0..+maxScroll — normalize before comparing, same
+    // fix as AreaRow.jsx's carousel.
+    const maxScroll = el.scrollWidth - el.clientWidth;
+    const scrolledFromStart = isRtl ? -el.scrollLeft : el.scrollLeft;
+    setCanScrollLeft(scrolledFromStart > 4);
+    setCanScrollRight(scrolledFromStart < maxScroll - 4);
+  }, [isRtl]);
 
   useEffect(() => {
     updateEdges();
@@ -37,7 +44,9 @@ const LocationChipsRow = ({ locations, selectedLoc, onSelect }) => {
   }, [updateEdges, locations.length]);
 
   const scrollBy = (delta) => {
-    scrollerRef.current?.scrollBy({ left: delta, behavior: 'smooth' });
+    const el = scrollerRef.current;
+    if (!el) return;
+    el.scrollBy({ left: isRtl ? -delta : delta, behavior: 'smooth' });
   };
 
   if (!locations || locations.length === 0) return null;

@@ -23,7 +23,7 @@ const PriceBlock = ({ property, sublease, preSubleaseId, convertPrice, holidayCo
     const perLabel = sublease.price_type === 'per_night' ? t('property.perNight') : ' total';
     return (
       <>
-        <span className="text-3xl font-bold" style={{ color: '#D4AF37' }} data-testid="property-detail-price">
+        <span className="text-3xl font-bold" style={{ color: 'var(--gold-text-on-light)' }} data-testid="property-detail-price">
           {sublease.currency === 'USD' ? '$' : '₪'}{(sublease.price || 0).toLocaleString()}
         </span>
         <span className="text-base text-gray-600">{perLabel}</span>
@@ -82,7 +82,7 @@ const PriceBlock = ({ property, sublease, preSubleaseId, convertPrice, holidayCo
 
   return (
     <>
-      <span className="text-3xl font-bold" style={{ color: '#D4AF37' }} data-testid="property-detail-price">
+      <span className="text-3xl font-bold" style={{ color: 'var(--gold-text-on-light)' }} data-testid="property-detail-price">
         {displayCurrency === 'USD' ? '$' : '₪'}{rawPrice.toLocaleString()}
       </span>
       <span className="text-base text-gray-600">{perLabel}</span>
@@ -771,7 +771,7 @@ const BookingSidebar = ({
         >
           <div className="flex items-start justify-between gap-2">
             <div className="min-w-0">
-              <p className="text-[10px] font-bold uppercase tracking-wider text-[#D4AF37]">
+              <p className="text-[10px] font-bold uppercase tracking-wider" style={{ color: 'var(--gold-text-on-light)' }}>
                 {t('property.availableFor', 'Also available for')} {holidayCTA.tag.charAt(0).toUpperCase() + holidayCTA.tag.slice(1)}
               </p>
               <p className="mt-0.5 text-lg font-bold text-[#1E6A6A] leading-tight" data-testid="holiday-cta-price">

@@ -23,6 +23,7 @@ import {
 } from 'date-fns';
 import 'react-day-picker/dist/style.css';
 import './whenpicker.css';
+import useIsRtl from '../../hooks/useIsRtl';
 
 const toIso = (d) => (d ? format(d, 'yyyy-MM-dd') : '');
 const fromIso = (s) => {
@@ -208,7 +209,7 @@ const WhenPicker = ({
                 onClick={() => setOpen(false)}
                 className="absolute end-4 top-4 p-1.5 hover:bg-gray-100 rounded-full"
                 data-testid={`${testidPrefix}-close`}
-                aria-label="Close"
+                aria-label={t('stays.close', 'Close')}
               >
                 <X size={16} />
               </button>
@@ -281,7 +282,12 @@ const FlexiblePanel = ({ stayLength, setStayLength, monthCards, flexMonth, setFl
   // and the lazy-extend on reaching the right edge. Using `scrollBy` so
   // we move ~3 cards at a time which matches the snap stride.
   const rowRef = useRef(null);
+  const isRtl = useIsRtl();
   const SCROLL_STEP = 360; // ~3 cards × 110px + gap
+  // In RTL, browsers report scrollLeft as 0..-maxScroll (CSSOM View spec)
+  // rather than LTR's 0..+maxScroll — normalize to "distance scrolled from
+  // the start" before comparing against thresholds, same fix as AreaRow.jsx.
+  const scrolledFromStart = (el) => (isRtl ? -el.scrollLeft : el.scrollLeft);
   const scroll = (dir) => {
     const el = rowRef.current;
     if (!el) return;
@@ -289,23 +295,26 @@ const FlexiblePanel = ({ stayLength, setStayLength, monthCards, flexMonth, setFl
     // more months before scrolling so the scroll keeps revealing new
     // cards rather than slamming into the boundary.
     if (dir === 1 && canExtend) {
-      const nearEnd = el.scrollLeft + el.clientWidth >= el.scrollWidth - SCROLL_STEP;
+      const maxScroll = el.scrollWidth - el.clientWidth;
+      const nearEnd = scrolledFromStart(el) >= maxScroll - SCROLL_STEP;
       if (nearEnd) onExtend?.();
     }
-    el.scrollBy({ left: dir * SCROLL_STEP, behavior: 'smooth' });
+    const sign = isRtl ? -1 : 1;
+    el.scrollBy({ left: dir * sign * SCROLL_STEP, behavior: 'smooth' });
   };
   // Auto-extend when the user reaches the right edge via touch / wheel.
   useEffect(() => {
     const el = rowRef.current;
     if (!el || !canExtend) return undefined;
     const onScroll = () => {
-      if (el.scrollLeft + el.clientWidth >= el.scrollWidth - 80) {
+      const maxScroll = el.scrollWidth - el.clientWidth;
+      if (scrolledFromStart(el) >= maxScroll - 80) {
         onExtend?.();
       }
     };
     el.addEventListener('scroll', onScroll, { passive: true });
     return () => el.removeEventListener('scroll', onScroll);
-  }, [canExtend, onExtend]);
+  }, [canExtend, onExtend, isRtl]);
   return (
     <div className="space-y-5" data-testid={`${testidPrefix}-flexible-panel`}>
       {/* "How long would you like to stay?" */}
@@ -343,7 +352,7 @@ const FlexiblePanel = ({ stayLength, setStayLength, monthCards, flexMonth, setFl
           <button
             type="button"
             onClick={() => scroll(-1)}
-            aria-label="Scroll to earlier months"
+            aria-label={t('stays.scrollEarlierMonths', 'Scroll to earlier months')}
             className="hidden sm:flex absolute left-0 top-1/2 -translate-y-1/2 z-10 w-8 h-8 rounded-full bg-white border border-gray-300 shadow items-center justify-center text-gray-700 hover:border-gray-900 transition-colors"
             data-testid={`${testidPrefix}-month-prev`}
           >
@@ -353,7 +362,7 @@ const FlexiblePanel = ({ stayLength, setStayLength, monthCards, flexMonth, setFl
           <button
             type="button"
             onClick={() => scroll(1)}
-            aria-label="Scroll to later months"
+            aria-label={t('stays.scrollLaterMonths', 'Scroll to later months')}
             className="hidden sm:flex absolute right-0 top-1/2 -translate-y-1/2 z-10 w-8 h-8 rounded-full bg-white border border-gray-300 shadow items-center justify-center text-gray-700 hover:border-gray-900 transition-colors"
             data-testid={`${testidPrefix}-month-next`}
           >

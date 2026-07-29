@@ -111,7 +111,7 @@ const V2 = ({ t }) => (
       }}
       data-testid="services-hero-title"
     >
-      Hire{' '}
+      {t('services.heroHirePrefix', 'Hire')}{' '}
       <span className="relative inline-block">
         {/* Soft overlapping halo — radial gradient (teal → gold),
             positioned behind the italic word. Uses ``translate``
@@ -133,10 +133,10 @@ const V2 = ({ t }) => (
             color: '#0F3A3A',
           }}
         >
-          proven
+          {t('services.heroProvenWord', 'proven')}
         </span>
       </span>{' '}
-      talent
+      {t('services.heroTalentSuffix', 'talent')}
       <br />
       <span
         style={{
@@ -145,7 +145,7 @@ const V2 = ({ t }) => (
           color: '#3B4A4A',
         }}
       >
-        who deliver
+        {t('services.heroTitleTail', 'who deliver')}
       </span>
     </h1>
   </div>
@@ -180,9 +180,9 @@ const V3 = ({ t }) => (
       }}
       data-testid="services-hero-title"
     >
-      Hire proven{' '}
+      {t('services.heroHireProvenPrefix', 'Hire proven')}{' '}
       <span className="relative inline-block">
-        talent
+        {t('services.heroTalentSuffix', 'talent')}
         {/* Hand-drawn gold brush underline SVG. The path is a rough
             asymmetric curve so it reads as ink, not a rule. Teal
             drop-glow via `filter` gives it warmth without adding
@@ -213,7 +213,7 @@ const V3 = ({ t }) => (
           color: TEAL,
         }}
       >
-        who deliver
+        {t('services.heroTitleTail', 'who deliver')}
       </span>
     </h1>
   </div>
@@ -238,7 +238,7 @@ const V4 = ({ t }) => (
       }}
       data-testid="services-hero-title"
     >
-      Hire proven talent
+      {t('services.heroTitleAccent', 'Hire proven talent')}
     </h1>
     {/* Ornament row: thin teal rule · diamond · italic gold serif
         · diamond · thin teal rule. Everything is inline-flex so it
@@ -261,7 +261,7 @@ const V4 = ({ t }) => (
           color: '#8A6D1D',
         }}
       >
-        who deliver
+        {t('services.heroTitleTail', 'who deliver')}
       </span>
       <span
         aria-hidden="true"
