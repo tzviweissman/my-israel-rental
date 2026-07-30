@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { Bell, Trash2, Loader2, ChevronDown } from 'lucide-react';
 import { toast } from 'sonner';
 import { API, AuthContext } from '../App';
+import { areaLabel } from '../utils/areaNames';
 
 /**
  * Compact "My saved alerts" trigger that lives inline next to the live result
@@ -18,11 +19,13 @@ import { API, AuthContext } from '../App';
  * - Auto-closes on outside click + ESC.
  */
 
-const filterSummary = (s) => {
+const filterSummary = (s, t) => {
   const f = s.filters || {};
   const chips = [];
   if (f.rental_type) chips.push(String(f.rental_type).replace('-', ' '));
-  if (f.area) chips.push(f.area);
+  // DB-sourced area → localised label (utils/areaNames); unknown areas
+  // fall through as stored.
+  if (f.area) chips.push(areaLabel(f.area, t));
   if (f.bedrooms_min) chips.push(`${f.bedrooms_min}+ BR`);
   if (f.max_price) chips.push(`≤ ${Number(f.max_price).toLocaleString()}`);
   if (f.start_date && f.end_date) {
@@ -218,7 +221,7 @@ const MyAlertsPopover = ({ refreshSignal }) => {
             ) : (
               <ul className="divide-y divide-gray-100">
                 {alerts.map((a) => {
-                  const chips = filterSummary(a);
+                  const chips = filterSummary(a, t);
                   return (
                     <li
                       key={a.id}

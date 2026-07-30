@@ -14,6 +14,7 @@ import BookingChip from './BookingChip';
 import MiniCalendar from './MiniCalendar';
 import useBookingActions from './useBookingActions';
 import { sizedImage } from '../../utils/cdnImage';
+import { areaLabel } from '../../utils/areaNames';
 
 const STATUS_FILTERS = [
   { key: 'all', labelKey: 'dashboard.statusAll' },
@@ -120,7 +121,7 @@ const PropertyAvailabilityCard = ({
             {property.area && (
               <span className="inline-flex items-center gap-1">
                 <MapPin size={11} />
-                <span className="truncate max-w-[180px] md:max-w-none">{property.area}</span>
+                <span className="truncate max-w-[180px] md:max-w-none">{areaLabel(property.area, t)}</span>
               </span>
             )}
             {property.bedrooms != null && (

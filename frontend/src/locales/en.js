@@ -189,6 +189,85 @@ const en = {
           viewExisting: 'View existing'
         }
       },
+      // Display-only labels for the amenity/service strings stored on
+      // `property.amenities`. The stored value is ALWAYS the canonical English
+      // string — see components/property/services/servicesCatalog.js for the
+      // stored-string -> key map and the `serviceLabel()` helper every render
+      // site goes through. Never translate the stored or compared value: the
+      // Stays filter matches these strings exactly and ALL_PREDEFINED
+      // membership decides custom-vs-predefined.
+      amenities: {
+        // Essentials
+        wifiIncluded: 'WiFi included',
+        centralAcHeating: 'Central AC / Heating',
+        freshLinensTowels: 'Fresh linens & towels',
+        cleaningIncluded: 'Cleaning included',
+        hairDryer: 'Hair dryer',
+        iron: 'Iron',
+        hotWater247: 'Hot water 24/7',
+        extraBeddingOnRequest: 'Extra bedding on request',
+        toiletriesProvided: 'Toiletries provided',
+        // Kitchen & dining
+        fullKitchen: 'Full kitchen',
+        coffeeMaker: 'Coffee maker',
+        espressoMachine: 'Espresso machine',
+        dishwasher: 'Dishwasher',
+        microwave: 'Microwave',
+        oven: 'Oven',
+        electricKettle: 'Electric kettle',
+        kosherCertifiedKitchen: 'Kosher-certified kitchen',
+        wineGlasses: 'Wine glasses',
+        // Family-friendly
+        cribOnRequest: 'Crib on request',
+        highChair: 'High chair',
+        babyBath: 'Baby bath',
+        toysBooks: 'Toys & books',
+        babyMonitor: 'Baby monitor',
+        strollerAvailable: 'Stroller available',
+        // Home comforts
+        smartTv: 'Smart TV',
+        netflixStreaming: 'Netflix / streaming',
+        soundSystem: 'Sound system',
+        workspaceDesk: 'Workspace / desk',
+        blackoutCurtains: 'Blackout curtains',
+        balconyTerrace: 'Balcony / terrace',
+        fireplace: 'Fireplace',
+        // Building & access
+        elevator: 'Elevator',
+        groundFloor: 'Ground floor',
+        wheelchairAccessible: 'Wheelchair accessible',
+        doormanConcierge: 'Doorman / concierge',
+        shabbatElevator: 'Shabbat elevator',
+        evCharging: 'EV charging',
+        onSiteParking: 'On-site parking',
+        // Outdoors & wellness
+        privatePool: 'Private pool',
+        sharedPool: 'Shared pool',
+        hotTubSpa: 'Hot tub / spa',
+        gymFitnessRoom: 'Gym / fitness room',
+        sukkahBalcony: 'Sukkah balcony',
+        privateGarden: 'Private garden',
+        bbqGrill: 'BBQ / grill',
+        rooftopAccess: 'Rooftop access',
+        // Location perks
+        oldCityView: 'Old City view',
+        seaView: 'Sea view',
+        beachAccess: 'Beach access',
+        kosherRestaurantsNearby: 'Kosher restaurants nearby',
+        synagogueNearby: 'Synagogue nearby',
+        mikvehNearby: 'Mikveh nearby',
+        // Legacy AMENITY_OPTIONS grid (constants/propertyEnums.js) — still
+        // stored on older listings and still offered by the bulk tools.
+        inUnitWasherAndDryer: 'In-unit washer and dryer',
+        walkInClosets: 'Walk in Closets',
+        highCeilings: 'High Ceilings',
+        ensuiteBathroom: 'Ensuite Bathroom',
+        storageSpace: 'Storage Space',
+        heatedFloors: 'Heated Floors',
+        gymFitnessCenter: 'Gym / Fitness center',
+        swimmingPoolIndoorOrOutdoor: 'Swimming pool (indoor or outdoor)',
+        onSiteParkingGarageOrLot: 'On-site parking (garage or lot)'
+      },
       dashboard: {
         myProperties: 'My Properties',
         addProperty: 'Add Property',
@@ -1247,6 +1326,49 @@ const en = {
           outdoor: 'Outdoors & wellness',
           location: 'Location perks'
         }
+      },
+      // ---------------------------------------------------------------
+      // Areas — canonical labels for the free-text `property.area` field.
+      // These are DB values, not UI strings, so they never went through
+      // the i18n sweep and rendered English in Hebrew mode ("נכסים ב City
+      // Center"). Resolved through utils/areaNames.js, which also folds
+      // the stored spelling variants ("Ramat Eshkol, Jerusalem",
+      // "Jerusalem - Ramat Eshkol") onto one canonical key. Keys here are
+      // the canonical English label slugged to camelCase — add to BOTH
+      // en.js and he.js or Hebrew silently renders the English fallback.
+      // ---------------------------------------------------------------
+      areas: {
+        ramatEshkol: 'Ramat Eshkol',
+        geula: 'Geula',
+        nachlaot: 'Nachlaot',
+        oldCity: 'Old City',
+        cityCenter: 'City Center',
+        romema: 'Romema',
+        // Streets inside Ramat Eshkol, labelled "<Street>, <Neighbourhood>"
+        // so the lister's precision survives and the renter still knows
+        // where it is. See utils/areaNames.js.
+        machalStRamatEshkol: 'Machal St, Ramat Eshkol',
+        rehavia: 'Rehavia',
+        shaareiChessed: 'Shaarei Chessed',
+        givatHamivtar: 'Givat Hamivtar',
+        givatHamivtarRamatEshkol: 'Givat Hamivtar / Ramat Eshkol',
+        sanhedriaMurchevet: 'Sanhedria Murchevet',
+        sanhedria: 'Sanhedria',
+        frenchHill: 'French Hill',
+        mekorBaruch: 'Mekor Baruch',
+        maalotDafna: 'Maalot Dafna',
+        baka: 'Baka',
+        arzeiHabira: 'Arzei Habira',
+        eshkolBlvdRamatEshkol: 'Eshkol Blvd, Ramat Eshkol',
+        ramatShlomo: 'Ramat Shlomo',
+        talbiya: 'Talbiya',
+        harNof: 'Har Nof',
+        gush80: 'Gush 80',
+        belz: 'Belz',
+        mishmarHaGvulStRamatEshkol: 'Mishmar HaGvul St, Ramat Eshkol',
+        germanColony: 'German Colony',
+        mamilla: 'Mamilla',
+        mekorHaim: 'Mekor Haim'
       },
       // ── Sweep: previously hardcoded UI strings gathered from 13 high-
       // traffic files (AddPropertyModal, CreateGig, ManagerHeader,

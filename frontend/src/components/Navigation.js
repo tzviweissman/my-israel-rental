@@ -573,7 +573,14 @@ const Navigation = () => {
 
             {menuOpen && (
               <div
-                className="absolute right-0 top-full mt-3 w-72 rounded-2xl overflow-hidden z-[60]"
+                // `end-0` not `right-0`: in RTL the menu button sits on the
+                // left, so a physical right-anchor pushed the panel away from
+                // its trigger. `max-h` + overflow-y-auto because the panel
+                // grows with the signed-in item list and was being clipped by
+                // `overflow-hidden` on short viewports — the last entries
+                // (Logout / Sign up) were simply unreachable. x stays hidden
+                // so the rounded corners still clip.
+                className="absolute end-0 top-full mt-3 w-72 rounded-2xl overflow-y-auto overflow-x-hidden max-h-[calc(100vh-96px)] sm:max-h-[80vh] z-[60] overscroll-contain"
                 style={{
                   backgroundColor: '#1E6A6A',
                   border: '1.5px solid rgba(212,175,55,0.25)',

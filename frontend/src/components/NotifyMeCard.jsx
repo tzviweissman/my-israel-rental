@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { Bell, Sparkles } from 'lucide-react';
 import { toast } from 'sonner';
 import { API, AuthContext } from '../App';
+import { areaLabel } from '../utils/areaNames';
 
 // Rental-type filter value → the shared translation key already used for
 // this same label elsewhere (StayTypePicker, FiltersModal) so the chip
@@ -33,7 +34,7 @@ const NotifyMeCard = ({ filters, dateRange }) => {
     const key = RENTAL_TYPE_KEY[filters.rental_type];
     chips.push(key ? t(key, String(filters.rental_type).replace('-', ' ')) : String(filters.rental_type).replace('-', ' '));
   }
-  if (filters.area) chips.push(filters.area);
+  if (filters.area) chips.push(areaLabel(filters.area, t));
   if (filters.min_bedrooms) chips.push(t('stays.bedroomsPlusChip', '{{count}}+ BR', { count: filters.min_bedrooms }));
   if (filters.max_price) chips.push(`≤ ${Number(filters.max_price).toLocaleString()}`);
   if (dateRange?.from && dateRange?.to) {

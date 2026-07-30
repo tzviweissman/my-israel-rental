@@ -21,6 +21,9 @@ const StaysSearchBar = ({
   flexible, setFlexible,
   subType, setSubType,
   areaOptions,
+  // Localises the Where suggestions (DB area values aren't in the i18n
+  // catalogue) without changing the option VALUE the parent filters on.
+  areaLabelFor,
   onOpenFilters,
   filterCount,
   t,
@@ -37,6 +40,7 @@ const StaysSearchBar = ({
           value={where}
           onChange={setWhere}
           options={areaOptions}
+          labelFor={areaLabelFor}
           testidPrefix="stays-where"
         />
       </div>

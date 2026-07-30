@@ -5,6 +5,7 @@ import { Calendar } from '../ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '../ui/popover';
 import { Slider } from '../ui/slider';
 import { format } from 'date-fns';
+import { areaLabel } from '../../utils/areaNames';
 
 export const PRICE_MAX = 50000;
 
@@ -298,7 +299,7 @@ const FiltersPanel = ({
                         'Neve Yaakov', 'Old City', 'Pisgat Zeev', 'Ramat Eshkol', 'Ramat Shlomo',
                         'Ramot', 'Rehavia', 'Sanhedria', 'Talbiya', 'Talpiot',
                       ].map((n) => (
-                        <option key={n} value={`Jerusalem - ${n}`}>{n}</option>
+                        <option key={n} value={`Jerusalem - ${n}`}>{areaLabel(n, t)}</option>
                       ))}
                     </optgroup>
                     <optgroup label="Tel Aviv">
@@ -306,7 +307,7 @@ const FiltersPanel = ({
                         'City Center', 'Florentin', 'Jaffa (Yafo)', 'Neve Tzedek', 'Old North',
                         'Ramat Aviv', 'Ramat HaHayal', 'Sarona', 'Shapira', 'White City', 'Yad Eliyahu',
                       ].map((n) => (
-                        <option key={n} value={`Tel Aviv - ${n}`}>{n}</option>
+                        <option key={n} value={`Tel Aviv - ${n}`}>{areaLabel(n, t)}</option>
                       ))}
                     </optgroup>
                     <optgroup label="Haifa">
@@ -314,7 +315,7 @@ const FiltersPanel = ({
                         'Ahuza', 'Carmel Center', 'German Colony', 'Hadar HaCarmel', "Neve Sha'anan",
                         'Stella Maris', 'Wadi Nisnas',
                       ].map((n) => (
-                        <option key={n} value={`Haifa - ${n}`}>{n}</option>
+                        <option key={n} value={`Haifa - ${n}`}>{areaLabel(n, t)}</option>
                       ))}
                     </optgroup>
                     <optgroup label="Other">

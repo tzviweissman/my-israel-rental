@@ -15,6 +15,7 @@ import { useTranslation } from 'react-i18next';
 import { Heart } from 'lucide-react';
 import { getCoverImage } from '../../utils/coverImage';
 import { srcSet } from '../../utils/cdnImage';
+import { areaLabel } from '../../utils/areaNames';
 import DefaultImageBadge from '../property/DefaultImageBadge';
 import VideoCoverBadge from '../property/VideoCoverBadge';
 
@@ -108,7 +109,10 @@ const StaysCard = ({
       <div className="pt-2 px-0.5">
         <p className="font-semibold text-sm text-gray-900 truncate">{property.title}</p>
         <p className="text-xs text-gray-500 truncate">
-          {property.area}
+          {/* `area` is a raw DB string — localise it (and normalise the
+              stored spelling variants) via utils/areaNames. Unknown areas
+              render exactly as the host typed them. */}
+          {areaLabel(property.area, t)}
           {/* Distance chip — only when the parent has stamped
               `distance_km` (i.e. renter picked an address). Colored
               teal so it reads as an actionable data point rather than

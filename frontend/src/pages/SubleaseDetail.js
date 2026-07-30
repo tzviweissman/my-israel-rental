@@ -8,6 +8,8 @@ import { format } from 'date-fns';
 import { toast } from 'sonner';
 
 import ImageGallery from '../components/property/ImageGallery';
+import { areaLabel } from '../utils/areaNames';
+import { serviceLabel } from '../components/property/services/servicesCatalog';
 
 /**
  * Standalone sublease detail page. Renders a sublease as a first-class
@@ -147,7 +149,7 @@ const SubleaseDetail = () => {
           {sublease.area && (
             <div className="flex items-center gap-2 text-gray-600 mb-4" data-testid="sublease-area">
               <MapPin size={16} />
-              <span>{sublease.area}</span>
+              <span>{areaLabel(sublease.area, t)}</span>
             </div>
           )}
 
@@ -200,7 +202,7 @@ const SubleaseDetail = () => {
                 {sublease.amenities.map((a) => (
                   <li key={a} className="flex items-center gap-2">
                     <span className="inline-block w-1.5 h-1.5 rounded-full bg-[#D4AF37]" />
-                    {a}
+                    {serviceLabel(t, a)}
                   </li>
                 ))}
               </ul>

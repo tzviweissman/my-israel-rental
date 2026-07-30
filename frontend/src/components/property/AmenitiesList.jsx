@@ -5,7 +5,7 @@ import {
   ArrowUpFromLine, ShowerHead, Warehouse, Flame, Dumbbell, Waves,
   Sparkles, Car, Wifi, Star,
 } from 'lucide-react';
-import { isCustomService } from './services/servicesCatalog';
+import { isCustomService, serviceLabel } from './services/servicesCatalog';
 
 const ICON_MAP = {
   'Central AC / Heating': Snowflake,
@@ -37,6 +37,9 @@ const AmenitiesList = ({ amenities }) => {
       </h2>
       <div className="grid grid-cols-2 gap-3">
         {amenities.map((amenity) => {
+          // `amenity` stays the canonical stored string — it keys the icon
+          // map, the custom-service test and React's list key. Only the
+          // rendered text goes through serviceLabel().
           const custom = isCustomService(amenity);
           const Icon = custom ? Star : (ICON_MAP[amenity] || HomeIcon);
           return (
@@ -50,7 +53,7 @@ const AmenitiesList = ({ amenities }) => {
                 style={{ color: '#D4AF37' }}
                 fill={custom ? '#D4AF37' : 'none'}
               />
-              <span>{amenity}</span>
+              <span>{serviceLabel(t, amenity)}</span>
             </div>
           );
         })}

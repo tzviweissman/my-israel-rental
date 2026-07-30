@@ -21,6 +21,7 @@ import {
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { sizedImage, srcSet } from '../../utils/cdnImage';
+import { areaLabel } from '../../utils/areaNames';
 
 // Same neighborhood groupings used by /properties — keeping them in sync.
 const AREA_GROUPS = [
@@ -191,7 +192,10 @@ const CreateAlertForm = ({ API, token, onCreated, onCancel }) => {
             {AREA_GROUPS.map((g) => (
               <optgroup key={g.label} label={g.label}>
                 {g.cities.map((c) => (
-                  <option key={`${g.prefix}${c}`} value={`${g.prefix}${c}`}>{c}</option>
+                  // Label localised via utils/areaNames; the VALUE keeps the
+                  // `<City> - <Neighborhood>` shape the backend saved-search
+                  // matcher (utils/area_filter.py) expects.
+                  <option key={`${g.prefix}${c}`} value={`${g.prefix}${c}`}>{areaLabel(c, t)}</option>
                 ))}
               </optgroup>
             ))}
@@ -554,7 +558,7 @@ const SavedSearchesTab = ({ API, token }) => {
                       {f.area && (
                         <div className="flex items-center gap-1 truncate">
                           <MapPin size={10} className="text-[#1E6A6A] flex-shrink-0" />
-                          <span className="truncate">{f.area}</span>
+                          <span className="truncate">{areaLabel(f.area, t)}</span>
                         </div>
                       )}
                       {f.rental_type && (
@@ -689,7 +693,7 @@ const SavedSearchesTab = ({ API, token }) => {
                   <div className="flex items-center gap-3 text-xs text-gray-500">
                     {p.area && (
                       <span className="inline-flex items-center gap-1">
-                        <MapPin size={11} /> {p.area}
+                        <MapPin size={11} /> {areaLabel(p.area, t)}
                       </span>
                     )}
                     {bed !== undefined && bed !== null && (

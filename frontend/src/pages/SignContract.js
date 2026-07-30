@@ -3,6 +3,7 @@ import { useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import axios from 'axios';
 import SignatureCanvas from 'react-signature-canvas';
+import { areaLabel } from '../utils/areaNames';
 import { FileText, PenTool, Check, Download, Loader2, AlertCircle, X, MapPin, Calendar, DollarSign } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -118,7 +119,7 @@ const SignContract = () => {
               <h3 className="text-sm font-bold text-gray-800 mb-2">{contract.sublease.title}</h3>
               <div className="flex flex-wrap gap-4 text-xs text-gray-600">
                 {contract.sublease.area && (
-                  <span className="flex items-center gap-1"><MapPin size={12} /> {contract.sublease.area}</span>
+                  <span className="flex items-center gap-1"><MapPin size={12} /> {areaLabel(contract.sublease.area, t)}</span>
                 )}
                 {contract.sublease.available_from && (
                   <span className="flex items-center gap-1">

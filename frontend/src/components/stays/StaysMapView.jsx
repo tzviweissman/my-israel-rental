@@ -14,6 +14,7 @@ import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { areaLabel } from '../../utils/areaNames';
 
 const TEAL = '#1E6A6A';
 const GOLD = '#D4AF37';
@@ -189,7 +190,9 @@ const StaysMapView = ({ properties, userCoords, focusOnUser, displayCurrency, ac
       // Rich popup: cover thumbnail (if any) + title + area + click-through.
       const cover = (p.images && p.images[0]) || '';
       const title = esc(p.title || t('stays.untitledProperty', 'Property'));
-      const area = esc(p.area || '');
+      // Localised through utils/areaNames (DB value, not an i18n string);
+      // still escaped because it goes into a raw popup HTML string.
+      const area = esc(areaLabel(p.area, t));
       const cur = p.currency || 'ILS';
       const priceLine = p.rental_type === 'long-term'
         ? `${symOf(cur)}${(p.monthly_price || 0).toLocaleString()} / ${t('stays.unitMonth', 'month')}`

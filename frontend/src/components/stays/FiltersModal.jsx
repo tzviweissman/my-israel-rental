@@ -12,7 +12,9 @@
  */
 import React from 'react';
 import { X } from 'lucide-react';
-import { SERVICE_CATEGORIES } from '../property/services/servicesCatalog';
+import {
+  SERVICE_CATEGORIES, serviceLabel, serviceCategoryLabel,
+} from '../property/services/servicesCatalog';
 
 // Amenity taxonomy comes from the shared services catalog so hosts and
 // renters see the exact same strings — enabling exact-string match on
@@ -321,7 +323,7 @@ const FiltersModal = ({
                         : 'bg-white text-[#1E6A6A] border-[#1E6A6A]/40 hover:border-[#1E6A6A]'
                     }`}
                     data-testid={`stays-filter-preset-${preset.id}`}
-                    title={preset.items.join(' + ')}
+                    title={preset.items.map((s) => serviceLabel(t, s)).join(' + ')}
                   >
                     <span aria-hidden="true">{preset.icon}</span>
                     {t(`stays.preset.${preset.id}`, preset.label)}
@@ -342,7 +344,7 @@ const FiltersModal = ({
                     className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-[#D4AF37] text-white hover:bg-[#b8951f]"
                     data-testid={`stays-filter-amenity-selected-${a.replace(/[^a-z0-9]+/gi, '-').toLowerCase()}`}
                   >
-                    {a}
+                    {serviceLabel(t, a)}
                     <X size={11} />
                   </button>
                 ))}
@@ -364,7 +366,7 @@ const FiltersModal = ({
                     >
                       <span className="flex items-center gap-2">
                         <span className={`text-[11px] leading-none transition-transform ${''}`}>▸</span>
-                        {t(`stays.amenityCategory.${cat.slug}`, cat.label)}
+                        {serviceCategoryLabel(t, cat)}
                       </span>
                       <span className="text-[11px] font-bold text-gray-500">
                         {selectedInCat > 0 ? `${selectedInCat} / ${cat.services.length}` : cat.services.length}
@@ -385,7 +387,7 @@ const FiltersModal = ({
                             }`}
                             data-testid={`stays-filter-amenity-${a.replace(/[^a-z0-9]+/gi, '-').toLowerCase()}`}
                           >
-                            {a}
+                            {serviceLabel(t, a)}
                           </button>
                         );
                       })}

@@ -17,18 +17,20 @@
  * hit-targets, no page reload, and every action stays under a fold.
  */
 import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   ChevronDown, ChevronUp, Plus, X, Sparkles, CookingPot, Baby, Tv,
   Building2, Waves, MapPin, Star, Check,
 } from 'lucide-react';
 import {
   SERVICE_CATEGORIES, CATEGORY_BY_SERVICE, isCustomService,
-  defaultServicesFor,
+  defaultServicesFor, serviceLabel, serviceCategoryLabel,
 } from './servicesCatalog';
 
 const ICONS = { Sparkles, CookingPot, Baby, Tv, Building2, Waves, MapPin };
 
 const CategoryAccordion = ({ category, selected, onToggle, open, onOpenToggle }) => {
+  const { t } = useTranslation();
   const Icon = ICONS[category.icon] || Sparkles;
   const selectedCount = category.services.filter((s) => selected.includes(s)).length;
   return (
@@ -43,7 +45,7 @@ const CategoryAccordion = ({ category, selected, onToggle, open, onOpenToggle })
           <span className="w-8 h-8 rounded-lg bg-[#1E6A6A]/8 flex items-center justify-center">
             <Icon size={16} className="text-[#1E6A6A]" />
           </span>
-          <span className="font-semibold text-sm text-gray-900">{category.label}</span>
+          <span className="font-semibold text-sm text-gray-900">{serviceCategoryLabel(t, category)}</span>
           <span className={`text-xs font-medium ${selectedCount > 0 ? 'text-[#1E6A6A]' : 'text-gray-400'}`}>
             ({selectedCount} / {category.services.length})
           </span>
@@ -66,7 +68,9 @@ const CategoryAccordion = ({ category, selected, onToggle, open, onOpenToggle })
                   onChange={() => onToggle(s)}
                   className="w-4 h-4 rounded border-gray-300 text-[#1E6A6A] focus:ring-[#1E6A6A]"
                 />
-                <span className="text-sm">{s}</span>
+                {/* `s` remains the stored value everywhere it is compared or
+                    written back — only the visible text is translated. */}
+                <span className="text-sm">{serviceLabel(t, s)}</span>
               </label>
             );
           })}
@@ -77,6 +81,7 @@ const CategoryAccordion = ({ category, selected, onToggle, open, onOpenToggle })
 };
 
 const CustomServiceModal = ({ onClose, onAdd }) => {
+  const { t } = useTranslation();
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [category, setCategory] = useState('essentials');
@@ -141,7 +146,7 @@ const CustomServiceModal = ({ onClose, onAdd }) => {
             data-testid="custom-svc-category"
           >
             {SERVICE_CATEGORIES.map((c) => (
-              <option key={c.slug} value={c.slug}>{c.label}</option>
+              <option key={c.slug} value={c.slug}>{serviceCategoryLabel(t, c)}</option>
             ))}
             <option value="other">Other / uncategorized</option>
           </select>
@@ -164,8 +169,10 @@ const CustomServiceModal = ({ onClose, onAdd }) => {
 };
 
 const Chip = ({ value, onRemove }) => {
+  const { t } = useTranslation();
   const custom = isCustomService(value);
   const cat = CATEGORY_BY_SERVICE[value];
+  const label = serviceLabel(t, value);
   return (
     <span
       className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium ${
@@ -174,13 +181,15 @@ const Chip = ({ value, onRemove }) => {
       data-testid="svc-chip"
     >
       {custom && <Star size={10} className="text-[#D4AF37] fill-[#D4AF37]" />}
-      <span>{value}</span>
-      {cat && !custom && <span className="text-[10px] text-gray-500 ms-0.5">· {cat.label}</span>}
+      <span>{label}</span>
+      {cat && !custom && (
+        <span className="text-[10px] text-gray-500 ms-0.5">· {serviceCategoryLabel(t, cat)}</span>
+      )}
       <button
         type="button"
         onClick={() => onRemove(value)}
         className="ms-0.5 w-4 h-4 rounded-full inline-flex items-center justify-center hover:bg-black/10"
-        aria-label={`Remove ${value}`}
+        aria-label={`Remove ${label}`}
         data-testid="svc-chip-remove"
       >
         <X size={10} />

@@ -11,6 +11,7 @@ import {
   RENTAL_TYPES, PROPERTY_TYPES, CONDITIONS, FURNITURE_OPTIONS,
   CANCELLATION_POLICIES, AMENITY_OPTIONS,
 } from '../../constants/propertyEnums';
+import { serviceLabel } from '../property/services/servicesCatalog';
 import { uploadFilesFast } from '../../utils/fastUpload';
 import { sizedImage, videoPoster } from '../../utils/cdnImage';
 
@@ -1080,6 +1081,7 @@ const Textarea = ({ label, value, onChange, placeholder, testid }) => (
 // Same 13-amenity grid as the regular Add/Edit form, rendered as a compact
 // checkbox cluster so bulk-upload rows stay readable.
 const AmenitiesGrid = ({ value, onChange, testid }) => {
+  const { t } = useTranslation();
   const toggle = (amenity) => {
     if (value.includes(amenity)) {
       onChange(value.filter(a => a !== amenity));
@@ -1100,7 +1102,7 @@ const AmenitiesGrid = ({ value, onChange, testid }) => {
               className="w-4 h-4 rounded border-gray-300 text-[#1E6A6A] focus:ring-[#1E6A6A]/30"
               data-testid={`${testid}-${amenity.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')}`}
             />
-            <span className="text-gray-700">{amenity}</span>
+            <span className="text-gray-700">{serviceLabel(t, amenity)}</span>
           </label>
         ))}
       </div>

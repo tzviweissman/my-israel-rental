@@ -6,6 +6,7 @@ import { Edit, Eye, Trash2, Upload, FileText, CalendarSync, Link2, X, RefreshCw,
 import { toast } from 'sonner';
 import { getCoverImage } from '../../utils/coverImage';
 import openAuthedFile from '../../utils/openAuthedFile';
+import { areaLabel } from '../../utils/areaNames';
 import DefaultImageBadge from '../property/DefaultImageBadge';
 import VideoCoverBadge from '../property/VideoCoverBadge';
 import SmartPricingModal from './SmartPricingModal';
@@ -601,7 +602,7 @@ const PropertyList = ({ properties, bookings = [], onEdit, onRefresh, API, token
             </div>
             <div className="p-4">
               <h3 className="text-lg font-bold mb-2">{property.title}</h3>
-              <p className="text-gray-600 text-sm mb-4">{property.area}</p>
+              <p className="text-gray-600 text-sm mb-4">{areaLabel(property.area, t)}</p>
               <div className="flex items-start justify-between gap-2">
                 <PriceBlock property={property} t={t} />
                 <div className="flex gap-2 shrink-0">

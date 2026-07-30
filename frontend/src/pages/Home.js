@@ -11,6 +11,7 @@ import VideoCoverBadge from '../components/property/VideoCoverBadge';
 import PageMeta from '../components/PageMeta';
 import { getCoverImage } from '../utils/coverImage';
 import { srcSet } from '../utils/cdnImage';
+import { areaLabel } from '../utils/areaNames';
 import useIsRtl from '../hooks/useIsRtl';
 
 // Hero background rotation. Keep widths consistent so the cross-fade is
@@ -304,7 +305,8 @@ const Home = () => {
                   <h3 className="text-sm md:text-lg font-bold mb-1 md:mb-2 line-clamp-1">{property.title}</h3>
                   <div className="flex items-center gap-2 text-gray-600 mb-2 md:mb-3">
                     <MapPin size={14} className="md:w-4 md:h-4 shrink-0" />
-                    <span className="text-xs md:text-sm truncate">{property.area}</span>
+                    {/* DB-sourced area → localised via utils/areaNames. */}
+                    <span className="text-xs md:text-sm truncate">{areaLabel(property.area, t)}</span>
                   </div>
                   <div className="hidden md:flex items-center gap-4 mb-4 text-sm text-gray-700">
                     {property.bedrooms > 0 && (

@@ -8,6 +8,7 @@ import {
   RENTAL_TYPES, PROPERTY_TYPES, CONDITIONS, FURNITURE_OPTIONS,
   CANCELLATION_POLICIES, AMENITY_OPTIONS,
 } from '../../constants/propertyEnums';
+import { serviceLabel } from '../property/services/servicesCatalog';
 
 /**
  * Bulk Edit Modal — pick a group of selected properties, tick the fields
@@ -110,7 +111,7 @@ const FieldEditor = ({ field, value, onChange, amenitiesMode, setAmenitiesMode }
           {AMENITY_OPTIONS.map(a => (
             <label key={a} className="flex items-center gap-2 text-sm cursor-pointer">
               <input type="checkbox" checked={arr.includes(a)} onChange={() => toggle(a)} className="w-3.5 h-3.5 rounded border-gray-300 text-[#1E6A6A] focus:ring-[#1E6A6A]/30" />
-              <span className="text-gray-700">{a}</span>
+              <span className="text-gray-700">{serviceLabel(t, a)}</span>
             </label>
           ))}
         </div>

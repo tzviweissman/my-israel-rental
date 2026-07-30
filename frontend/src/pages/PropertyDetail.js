@@ -14,6 +14,7 @@ import PropertyStats from '../components/property/PropertyStats';
 import AmenitiesList from '../components/property/AmenitiesList';
 import BookingSidebar from '../components/property/BookingSidebar';
 import Breadcrumb from '../components/common/Breadcrumb';
+import { areaLabel } from '../utils/areaNames';
 
 // Parse 'YYYY-MM-DD' as a LOCAL date (avoids the UTC-shift bug where
 // selecting June 2 displays as June 1 in timezones east of UTC).
@@ -326,7 +327,9 @@ const PropertyDetail = () => {
               <div className="flex items-center gap-2 text-gray-600">
                 <MapPin size={20} />
                 <span className="text-lg">
-                  {[property.address, property.area].filter(Boolean).join(', ')}
+                  {/* `area` is a DB value, localised through
+                      utils/areaNames; the street address stays verbatim. */}
+                  {[property.address, areaLabel(property.area, t)].filter(Boolean).join(', ')}
                 </span>
               </div>
               {/* Vacation rentals show a Cleaning fee badge in the same

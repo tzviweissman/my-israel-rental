@@ -40,6 +40,7 @@ import NotifyMeCard from '../components/NotifyMeCard';
 import PageMeta from '../components/PageMeta';
 import useFavorites from '../hooks/useFavorites';
 import { saveReturnPath } from '../hooks/useBackNavigation';
+import { areaLabel, areaGroupKey, canonicalArea } from '../utils/areaNames';
 
 const API = process.env.REACT_APP_BACKEND_URL + '/api';
 
@@ -176,14 +177,29 @@ const Stays = ({ landing = null }) => {
 
   // Build the list of areas for the Where dropdown — pulled from actual
   // properties so we never show an empty area chip.
+  //
+  // Collapsed to canonical group keys (utils/areaNames) so the three stored
+  // spellings of "Ramat Eshkol" show up as ONE suggestion. The option value
+  // stays an English canonical/stored string — never the Hebrew label — so
+  // everything downstream that consumes `where` (the `?area=` URL param and
+  // the saved-search alert posted to the backend, which regex-matches
+  // against stored English values) keeps working. Only the visible label is
+  // localised, via `areaLabel` below.
   const areaOptions = useMemo(() => {
     const set = new Set();
-    allProperties.forEach((p) => { if (p.area) set.add(p.area); });
-    return Array.from(set).sort();
-  }, [allProperties]);
+    allProperties.forEach((p) => {
+      const key = areaGroupKey(p.area);
+      if (key) set.add(key);
+    });
+    return Array.from(set).sort((a, b) => areaLabel(a, t).localeCompare(areaLabel(b, t)));
+  }, [allProperties, t]);
 
   // Master filter chain — runs in-memory across every active criterion.
   const filtered = useMemo(() => {
+    // Resolved once per filter pass — `where` may be a canonical group key
+    // (picked from the Where suggestions / an area row's "see all") or free
+    // text the renter typed.
+    const whereCanonical = canonicalArea(where);
     // Pre-compute the flexible window's edges so we don't recompute
     // them per property. A flexible "week in October" matches any
     // property whose `available_from` allows at least one N-night
@@ -213,10 +229,22 @@ const Stays = ({ landing = null }) => {
     }
     return allProperties.filter((p) => {
       if (where) {
-        // Case-insensitive substring match so partial names ("tel",
-        // "jeru") return the right listings.
-        const needle = where.toLowerCase().trim();
-        if (!(p.area || '').toLowerCase().includes(needle)) return false;
+        // Two-tier area match, all client-side (this page filters in
+        // memory; the backend regex in utils/area_filter.py is untouched):
+        //   * When `where` resolves to a canonical neighbourhood — i.e. the
+        //     renter picked a suggestion, or typed an exact name — match on
+        //     the canonical key so every stored spelling of it is included
+        //     ("Jerusalem - Shaare Hesed" for "Shaarei Chessed") while
+        //     genuinely different neighbourhoods stay apart ("Sanhedria"
+        //     does NOT swallow "Sanhedria Murchevet").
+        //   * Otherwise fall back to the old case-insensitive substring
+        //     match so partial typing ("tel", "jeru") still works.
+        if (whereCanonical) {
+          if (canonicalArea(p.area) !== whereCanonical) return false;
+        } else {
+          const needle = where.toLowerCase().trim();
+          if (!(p.area || '').toLowerCase().includes(needle)) return false;
+        }
       }
       if (subType && p.rental_type !== subType) return false;
       if (bedrooms) {
@@ -273,23 +301,27 @@ const Stays = ({ landing = null }) => {
   }, [allProperties, where, subType, bedrooms, bathrooms, porches, condition, furnished, hasElevator, priceMin, priceMax, priceCurrency, amenities, checkin, checkout, flexible]);
 
   // Group filtered properties by area for the per-area row layout.
+  // Keyed by canonical group key so the same neighbourhood stored under
+  // several spellings renders as ONE row ("Ramat Eshkol" x3 used to be
+  // three separate headings). Unmapped areas group under themselves.
   const grouped = useMemo(() => {
     const m = new Map();
     filtered.forEach((p) => {
-      const key = p.area || 'Other';
+      const key = areaGroupKey(p.area) || 'Other';
       if (!m.has(key)) m.set(key, []);
       m.get(key).push(p);
     });
     // Stable sort by area name, but push areas with fewer than 3 listings
-    // to the bottom so the top of the page always shows full rows.
+    // to the bottom so the top of the page always shows full rows. Sorting
+    // on the localised label keeps Hebrew mode alphabetical in Hebrew.
     return Array.from(m.entries())
       .sort((a, b) => {
         const aBig = a[1].length >= 3 ? 0 : 1;
         const bBig = b[1].length >= 3 ? 0 : 1;
         if (aBig !== bBig) return aBig - bBig;
-        return a[0].localeCompare(b[0]);
+        return areaLabel(a[0], t).localeCompare(areaLabel(b[0], t));
       });
-  }, [filtered]);
+  }, [filtered, t]);
 
   // Great-circle distance (haversine) — used when the renter has typed
   // an address so we can sort results by proximity + annotate each card
@@ -442,6 +474,7 @@ const Stays = ({ landing = null }) => {
             flexible={flexible} setFlexible={setFlexible}
             subType={subType} setSubType={setSubType}
             areaOptions={areaOptions}
+            areaLabelFor={(a) => areaLabel(a, t)}
             onOpenFilters={() => setShowFilters(true)}
             filterCount={activeFilterCount}
             t={t}
@@ -714,7 +747,7 @@ const Stays = ({ landing = null }) => {
             <div>
               <h2 className="text-lg md:text-xl font-semibold text-gray-900">
                 {filteredWithDistance.length} {filteredWithDistance.length === 1 ? t('stays.stay', 'stay') : t('stays.staysLabel', 'stays')}
-                {where ? ` ${t('stays.in', 'in')} ${where}` : ''}
+                {where ? ` ${t('stays.in', 'in')} ${areaLabel(where, t)}` : ''}
                 {nearCoords && !where ? ` ${t('stays.nearAddress', 'near this address')}` : ''}
               </h2>
               {nearCoords && nearQuery && (

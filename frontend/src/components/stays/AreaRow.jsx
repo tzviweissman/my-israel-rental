@@ -7,10 +7,17 @@
  * chevrons on the right (desktop only) scroll ~3 cards at a time, and
  * we flip the direction sign in RTL because browser scrollLeft is
  * reversed under `dir="rtl"`.
+ *
+ * `area` is the canonical *group key* from utils/areaNames (so the three
+ * stored spellings of "Ramat Eshkol" arrive here as one row); the heading
+ * renders it through `areaLabel` so Hebrew mode reads "נכסים ברמת אשכול"
+ * instead of leaking the raw DB string. Unmapped areas pass through
+ * unchanged.
  */
 import React from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import useIsRtl from '../../hooks/useIsRtl';
+import { areaLabel } from '../../utils/areaNames';
 import StaysCard from './StaysCard';
 
 const AreaRow = ({
@@ -41,7 +48,7 @@ const AreaRow = ({
           data-testid={`stays-see-all-${area}`}
         >
           <h2 className="text-base md:text-lg font-semibold text-gray-900 group-hover:underline">
-            {t('stays.staysIn', 'Stays in')} {area}
+            {t('stays.staysIn', 'Stays in')} {areaLabel(area, t)}
           </h2>
           <ForwardChevron size={16} className="text-gray-900" />
         </button>

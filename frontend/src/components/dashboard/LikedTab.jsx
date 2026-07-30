@@ -1,15 +1,20 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import axios from 'axios';
 import { Heart, MapPin, Bed, Bath } from 'lucide-react';
 import { toast } from 'sonner';
 import { getCoverImage } from '../../utils/coverImage';
+import { areaLabel } from '../../utils/areaNames';
 
 /**
  * Renter's "Liked Properties" dashboard tab.
  * Self-contained: owns its own fetch + unlike state.
  */
 const LikedTab = ({ API, token }) => {
+  // Only used for the DB-sourced area label (see utils/areaNames) — the
+  // rest of this tab's copy is still English-only.
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [likedProperties, setLikedProperties] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -114,7 +119,7 @@ const LikedTab = ({ API, token }) => {
                 <h3 className="text-base font-bold text-gray-900 mb-1 truncate">{property.title}</h3>
                 <div className="flex items-center gap-1.5 text-gray-500 text-sm mb-3">
                   <MapPin size={14} />
-                  <span className="truncate">{property.area}</span>
+                  <span className="truncate">{areaLabel(property.area, t)}</span>
                 </div>
                 <div className="flex items-center gap-3 mb-3 text-xs text-gray-600">
                   {property.bedrooms > 0 && (

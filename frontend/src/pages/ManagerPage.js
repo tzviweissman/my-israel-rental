@@ -8,6 +8,7 @@ import DefaultImageBadge from '../components/property/DefaultImageBadge';
 import VideoCoverBadge from '../components/property/VideoCoverBadge';
 import { getCoverImage } from '../utils/coverImage';
 import { sizedImage, srcSet } from '../utils/cdnImage';
+import { areaLabel, areaGroupKey, sameArea } from '../utils/areaNames';
 import { saveReturnPath } from '../hooks/useBackNavigation';
 
 const RENTAL_TYPES = [
@@ -60,20 +61,23 @@ const ManagerPage = () => {
   // "all" instead of showing an empty grid. Same for bedrooms.
   useEffect(() => {
     if (!data) return;
+    // Compared on canonical group keys (utils/areaNames) so a legacy
+    // `?area=Ramat Eshkol, Jerusalem` link still resolves to the collapsed
+    // "Ramat Eshkol" option instead of silently resetting to "all".
     const validAreas = new Set(
       data.properties
         .filter(p => activeType === 'all' || p.rental_type === activeType)
-        .map(p => p.area)
+        .map(p => areaGroupKey(p.area))
         .filter(Boolean)
     );
-    if (activeArea !== 'all' && !validAreas.has(activeArea)) {
+    if (activeArea !== 'all' && !validAreas.has(areaGroupKey(activeArea))) {
       setActiveArea('all');
     }
     const validBedrooms = new Set(
       data.properties
         .filter(p =>
           (activeType === 'all' || p.rental_type === activeType) &&
-          (activeArea === 'all' || p.area === activeArea)
+          (activeArea === 'all' || sameArea(p.area, activeArea))
         )
         .map(p => String(p.bedrooms ?? ''))
     );
@@ -99,9 +103,13 @@ const ManagerPage = () => {
     );
   }
 
+  // Area comparison is canonical-aware (utils/areaNames): picking the single
+  // "Ramat Eshkol" option matches all three stored spellings of it, while
+  // distinct neighbourhoods (Sanhedria vs Sanhedria Murchevet) stay apart.
+  // All of this is client-side — the manager endpoint returns every listing.
   const filteredProperties = data.properties.filter(p =>
     (activeType === 'all' || p.rental_type === activeType) &&
-    (activeArea === 'all' || p.area === activeArea) &&
+    (activeArea === 'all' || sameArea(p.area, activeArea)) &&
     (activeBedrooms === 'all' || String(p.bedrooms ?? '') === activeBedrooms)
   );
 
@@ -113,19 +121,22 @@ const ManagerPage = () => {
   // Area dropdown options are derived from this lister's actual listings,
   // scoped to the currently-selected rental type so the user never sees
   // an area that would yield zero results.
+  // Collapsed to canonical group keys so the same neighbourhood stored under
+  // several spellings appears once. Each key is itself a stored value, so it
+  // remains a safe filter/URL value. Sorted by the localised label.
   const areasForActiveType = Array.from(new Set(
     data.properties
       .filter(p => activeType === 'all' || p.rental_type === activeType)
-      .map(p => p.area)
+      .map(p => areaGroupKey(p.area))
       .filter(Boolean)
-  )).sort((a, b) => a.localeCompare(b));
+  )).sort((a, b) => areaLabel(a, t).localeCompare(areaLabel(b, t)));
 
   // Bedroom counts available for the active type+area slice. Sorted numerically.
   const bedroomsForActiveSlice = Array.from(new Set(
     data.properties
       .filter(p =>
         (activeType === 'all' || p.rental_type === activeType) &&
-        (activeArea === 'all' || p.area === activeArea)
+        (activeArea === 'all' || sameArea(p.area, activeArea))
       )
       .map(p => p.bedrooms)
       .filter(b => b !== null && b !== undefined)
@@ -251,8 +262,8 @@ const ManagerPage = () => {
                   <option value="all">All areas ({areasForActiveType.length})</option>
                   {areasForActiveType.map((area) => (
                     <option key={area} value={area}>
-                      {area} ({data.properties.filter(p =>
-                        (activeType === 'all' || p.rental_type === activeType) && p.area === area
+                      {areaLabel(area, t)} ({data.properties.filter(p =>
+                        (activeType === 'all' || p.rental_type === activeType) && sameArea(p.area, area)
                       ).length})
                     </option>
                   ))}
@@ -277,7 +288,7 @@ const ManagerPage = () => {
                     <option key={b} value={String(b)}>
                       {b} {Number(b) === 1 ? 'bedroom' : 'bedrooms'} ({data.properties.filter(p =>
                         (activeType === 'all' || p.rental_type === activeType) &&
-                        (activeArea === 'all' || p.area === activeArea) &&
+                        (activeArea === 'all' || sameArea(p.area, activeArea)) &&
                         p.bedrooms === b
                       ).length})
                     </option>
@@ -326,7 +337,7 @@ const ManagerPage = () => {
                 <h3 className="text-sm md:text-xl font-bold mb-1 md:mb-2 line-clamp-1">{property.title}</h3>
                 <div className="flex items-center gap-2 text-gray-600 mb-2 md:mb-3">
                   <MapPin size={14} className="md:w-4 md:h-4 shrink-0" />
-                  <span className="text-xs md:text-sm truncate">{property.area}</span>
+                  <span className="text-xs md:text-sm truncate">{areaLabel(property.area, t)}</span>
                 </div>
                 <div className="hidden md:flex items-center gap-4 mb-4 text-sm text-gray-700">
                   {property.bedrooms > 0 && (

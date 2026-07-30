@@ -1,5 +1,6 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
+import { areaLabel } from '../../utils/areaNames';
 import {
   ArrowLeft, Home, Building2, Briefcase, Search, ChevronUp, ChevronDown, X,
 } from 'lucide-react';
@@ -179,7 +180,7 @@ const ChatHeader = ({
               {sublease?.title || property.title}
             </h3>
             <p className="text-xs text-gray-500 flex items-center gap-1">
-              <span>{sublease?.area || property.area}</span>
+              <span>{areaLabel(sublease?.area || property.area, t)}</span>
               {sublease ? (
                 <>
                   <span className="text-gray-300 mx-1">•</span>

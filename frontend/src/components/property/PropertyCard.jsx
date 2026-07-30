@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { Bed, Bath, Home as HomeIcon, MapPin, Building2, Heart } from 'lucide-react';
 import { getCoverImage } from '../../utils/coverImage';
 import { srcSet } from '../../utils/cdnImage';
+import { areaLabel } from '../../utils/areaNames';
 import DefaultImageBadge from './DefaultImageBadge';
 import VideoCoverBadge from './VideoCoverBadge';
 
@@ -112,7 +113,10 @@ const PropertyCard = ({
         <h3 className="text-sm md:text-xl font-bold mb-1 md:mb-2 line-clamp-1">{property.title}</h3>
         <div className="flex items-center gap-2 text-gray-600 mb-2 md:mb-3">
           <MapPin size={14} className="md:w-4 md:h-4 shrink-0" />
-          <span className="text-xs md:text-sm truncate">{property.area}</span>
+          {/* Localised via utils/areaNames — `area` is a DB value, so it
+              never went through the i18n catalogue. Unmapped areas render
+              exactly as stored. */}
+          <span className="text-xs md:text-sm truncate">{areaLabel(property.area, t)}</span>
         </div>
         <div className="hidden md:flex items-center gap-4 mb-4 text-sm text-gray-700">
           {property.bedrooms > 0 && (

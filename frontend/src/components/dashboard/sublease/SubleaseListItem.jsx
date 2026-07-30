@@ -1,5 +1,7 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { FileText, Upload, Loader2, Copy, Check } from 'lucide-react';
+import { areaLabel } from '../../../utils/areaNames';
 
 /**
  * One row in the renter's "Your Sublease Listings" table. Owns nothing —
@@ -16,6 +18,8 @@ const SubleaseListItem = ({
   onUpload,
   onCopySignLink,
 }) => {
+  // `sub.area` is a DB value — localise it via utils/areaNames.
+  const { t } = useTranslation();
   return (
     <div
       className="rounded-xl border border-gray-200 bg-white overflow-hidden"
@@ -33,7 +37,7 @@ const SubleaseListItem = ({
         <div className="min-w-0 flex-1">
           <p className="text-sm font-bold text-gray-800 truncate">{sub.title}</p>
           <p className="text-xs text-gray-500">
-            {sub.area} • {sub.bedrooms_available} bed
+            {areaLabel(sub.area, t)} • {sub.bedrooms_available} bed
           </p>
           <p className="text-xs text-gray-400 mt-0.5">
             {new Date(sub.available_from).toLocaleDateString()} —{' '}

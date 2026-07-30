@@ -189,6 +189,82 @@ const he = {
           viewExisting: 'צפה בנכס הקיים'
         }
       },
+      // Amenities — display-only labels. Same key set as the English side
+      // (see the note there): the value stored on `property.amenities` stays
+      // the canonical English string, these are only what the renter sees.
+      // Wording follows what an Israeli listing actually says (מטבח מאובזר,
+      // מנגל, בייבי מוניטור) rather than a literal translation.
+      amenities: {
+        // הכרחיים
+        wifiIncluded: 'כולל Wi-Fi',
+        centralAcHeating: 'מיזוג מרכזי / חימום',
+        freshLinensTowels: 'מצעים ומגבות נקיים',
+        cleaningIncluded: 'כולל ניקיון',
+        hairDryer: 'מייבש שיער',
+        iron: 'מגהץ',
+        hotWater247: 'מים חמים 24/7',
+        extraBeddingOnRequest: 'מצעים נוספים לפי בקשה',
+        toiletriesProvided: 'מוצרי טיפוח בסיסיים',
+        // מטבח ואוכל
+        fullKitchen: 'מטבח מאובזר',
+        coffeeMaker: 'מכונת קפה',
+        espressoMachine: 'מכונת אספרסו',
+        dishwasher: 'מדיח כלים',
+        microwave: 'מיקרוגל',
+        oven: 'תנור אפייה',
+        electricKettle: 'קומקום חשמלי',
+        kosherCertifiedKitchen: 'מטבח כשר בהשגחה',
+        wineGlasses: 'כוסות יין',
+        // ידידותי למשפחות
+        cribOnRequest: 'מיטת תינוק לפי בקשה',
+        highChair: 'כיסא אוכל לתינוק',
+        babyBath: 'אמבטיה לתינוק',
+        toysBooks: 'צעצועים וספרים',
+        babyMonitor: 'בייבי מוניטור',
+        strollerAvailable: 'עגלת תינוק',
+        // נוחות ביתית
+        smartTv: 'טלוויזיה חכמה',
+        netflixStreaming: 'נטפליקס / סטרימינג',
+        soundSystem: 'מערכת שמע',
+        workspaceDesk: 'פינת עבודה / שולחן כתיבה',
+        blackoutCurtains: 'וילונות האפלה',
+        balconyTerrace: 'מרפסת',
+        fireplace: 'קמין',
+        // בניין וגישה
+        elevator: 'מעלית',
+        groundFloor: 'קומת קרקע',
+        wheelchairAccessible: 'נגיש לכיסא גלגלים',
+        doormanConcierge: 'שוער / קונסיירז׳',
+        shabbatElevator: 'מעלית שבת',
+        evCharging: 'עמדת טעינה לרכב חשמלי',
+        onSiteParking: 'חניה בבניין',
+        // חוץ ופנאי
+        privatePool: 'בריכה פרטית',
+        sharedPool: 'בריכה משותפת',
+        hotTubSpa: 'ג׳קוזי / ספא',
+        gymFitnessRoom: 'חדר כושר',
+        sukkahBalcony: 'מרפסת סוכה',
+        privateGarden: 'גינה פרטית',
+        bbqGrill: 'מנגל / גריל',
+        rooftopAccess: 'גישה לגג',
+        // יתרונות מיקום
+        oldCityView: 'נוף לעיר העתיקה',
+        seaView: 'נוף לים',
+        beachAccess: 'גישה לחוף הים',
+        kosherRestaurantsNearby: 'מסעדות כשרות בסביבה',
+        synagogueNearby: 'בית כנסת בקרבת מקום',
+        mikvehNearby: 'מקווה בקרבת מקום',
+        // הטקסונומיה הקודמת (AMENITY_OPTIONS) — עדיין שמורה בנכסים ותיקים
+        inUnitWasherAndDryer: 'מכונת כביסה ומייבש בדירה',
+        walkInClosets: 'חדר ארונות',
+        highCeilings: 'תקרות גבוהות',
+        ensuiteBathroom: 'חדר רחצה צמוד לחדר השינה',
+        storageSpace: 'מחסן',
+        heatedFloors: 'חימום תת-רצפתי',
+        gymFitnessCenter: 'חדר כושר',
+        swimmingPoolIndoorOrOutdoor: 'בריכת שחייה (מקורה או פתוחה)',
+        onSiteParkingGarageOrLot: 'חניה בבניין (חניון או מגרש)'
+      },
       dashboard: {
         myProperties: 'הנכסים שלי',
         addProperty: 'הוסף נכס',
@@ -1232,6 +1308,42 @@ const he = {
           outdoor: 'חוץ ופנאי',
           location: 'יתרונות מיקום'
         }
+      },
+      // Areas — Hebrew names for the neighbourhoods stored in
+      // `property.area`. Same key set as the English side (see the note
+      // there); resolved through utils/areaNames.js. These are the names
+      // an Israeli renter actually uses, not transliterations of the
+      // English spelling.
+      areas: {
+        ramatEshkol: 'רמת אשכול',
+        geula: 'גאולה',
+        nachlaot: 'נחלאות',
+        oldCity: 'העיר העתיקה',
+        cityCenter: 'מרכז העיר',
+        romema: 'רוממה',
+        // Streets inside Ramat Eshkol — "<רחוב>, <שכונה>".
+        machalStRamatEshkol: 'מח״ל, רמת אשכול',
+        rehavia: 'רחביה',
+        shaareiChessed: 'שערי חסד',
+        givatHamivtar: 'גבעת המבתר',
+        givatHamivtarRamatEshkol: 'גבעת המבתר / רמת אשכול',
+        sanhedriaMurchevet: 'סנהדריה המורחבת',
+        sanhedria: 'סנהדריה',
+        frenchHill: 'הגבעה הצרפתית',
+        mekorBaruch: 'מקור ברוך',
+        maalotDafna: 'מעלות דפנה',
+        baka: 'בקעה',
+        arzeiHabira: 'ארזי הבירה',
+        eshkolBlvdRamatEshkol: 'שדרות אשכול, רמת אשכול',
+        ramatShlomo: 'רמת שלמה',
+        talbiya: 'טלביה',
+        harNof: 'הר נוף',
+        gush80: 'גוש 80',
+        belz: 'בעלז',
+        mishmarHaGvulStRamatEshkol: 'משמר הגבול, רמת אשכול',
+        germanColony: 'המושבה הגרמנית',
+        mamilla: 'ממילא',
+        mekorHaim: 'מקור חיים'
       },
       // Sweep — same block layout as the English side. Tone is
       // conversational (the way a native Israeli would say it, not
