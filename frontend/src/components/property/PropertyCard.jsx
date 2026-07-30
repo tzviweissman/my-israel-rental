@@ -5,6 +5,7 @@ import { getCoverImage } from '../../utils/coverImage';
 import { srcSet } from '../../utils/cdnImage';
 import { areaLabel } from '../../utils/areaNames';
 import { propertyTitle } from '../../utils/propertyTitle';
+import { listedAgoLabel, isFreshListing } from '../../utils/listedAgo';
 import DefaultImageBadge from './DefaultImageBadge';
 import VideoCoverBadge from './VideoCoverBadge';
 
@@ -21,6 +22,8 @@ const PropertyCard = ({
   holidayContext = null,
 }) => {
   const { t } = useTranslation();
+  const listedAgo = listedAgoLabel(property.created_at, t);
+  const fresh = isFreshListing(property.created_at);
   // Grid cards render at ~470px wide on desktop, ~360px on mobile.
   // Request 600px from Cloudinary so 2x-DPR displays stay crisp without
   // overpaying. Non-Cloudinary URLs pass through untouched.
@@ -124,6 +127,16 @@ const PropertyCard = ({
               exactly as stored. */}
           <span className="text-xs md:text-sm truncate">{areaLabel(property.area, t)}</span>
         </div>
+        {/* Freshness stamp — see StaysCard for the reasoning. Omitted
+            entirely when the listing has no usable created_at. */}
+        {listedAgo && (
+          <p
+            className={`text-[11px] md:text-xs -mt-1 mb-2 ${fresh ? 'text-[#1E6A6A] font-semibold' : 'text-gray-400'}`}
+            data-testid={`property-card-listed-${property.id}`}
+          >
+            {listedAgo}
+          </p>
+        )}
         <div className="hidden md:flex items-center gap-4 mb-4 text-sm text-gray-700">
           {property.bedrooms > 0 && (
             <div className="flex items-center gap-1">

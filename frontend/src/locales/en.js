@@ -1292,6 +1292,24 @@ const en = {
         // keys): card fallbacks, price units, aria-labels, map popup copy.
         untitledProperty: 'Property',
         priceOnRequest: 'Price on request',
+        // Result ordering.
+        sortBy: 'Sort',
+        sortNewest: 'Newest',
+        sortPriceAsc: 'Price: low to high',
+        sortPriceDesc: 'Price: high to low',
+        sortNearest: 'Nearest',
+        // Freshness stamp. Interpolated with `n`, not `count` — see
+        // utils/listedAgo.js for why.
+        listedToday: 'Listed today',
+        listedYesterday: 'Listed yesterday',
+        listedTwoDays: 'Listed 2 days ago',
+        listedDaysAgo: 'Listed {{n}} days ago',
+        listedWeekAgo: 'Listed last week',
+        listedTwoWeeks: 'Listed 2 weeks ago',
+        listedWeeksAgo: 'Listed {{n}} weeks ago',
+        listedMonthAgo: 'Listed last month',
+        listedTwoMonths: 'Listed 2 months ago',
+        listedMonthsAgo: 'Listed {{n}} months ago',
         unitNight: 'night',
         unitMonth: 'month',
         removeFromFavorites: 'Remove from favorites',

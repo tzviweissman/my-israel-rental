@@ -41,11 +41,30 @@ import PageMeta from '../components/PageMeta';
 import useFavorites from '../hooks/useFavorites';
 import { saveReturnPath } from '../hooks/useBackNavigation';
 import { areaLabel, areaGroupKey, canonicalArea, UNGROUPED_AREA } from '../utils/areaNames';
+import { byPrice, priceIn } from '../utils/listingPrice';
+import SortSelect, {
+  SORT_NEWEST, SORT_PRICE_ASC, SORT_PRICE_DESC, SORT_NEAREST, parseSort,
+} from '../components/search/SortSelect';
 
 const API = process.env.REACT_APP_BACKEND_URL + '/api';
 
 // Stays = everything that's not storage. Storage was retired this session.
 const STAY_RENTAL_TYPES = ['vacation', 'short-term', 'long-term'];
+
+/**
+ * Newest first. Listings with no `created_at` sink to the bottom rather than
+ * being treated as epoch-old and burying the genuinely new ones.
+ */
+const byNewest = (a, b) => {
+  const ta = Date.parse(a?.created_at || '');
+  const tb = Date.parse(b?.created_at || '');
+  const va = Number.isNaN(ta) ? null : ta;
+  const vb = Number.isNaN(tb) ? null : tb;
+  if (va == null && vb == null) return 0;
+  if (va == null) return 1;
+  if (vb == null) return -1;
+  return vb - va;
+};
 
 const Stays = ({ landing = null }) => {
   const navigate = useNavigate();
@@ -110,6 +129,11 @@ const Stays = ({ landing = null }) => {
   // link deep-links straight to the map.
   const viewMode = searchParams.get('view') === 'map' ? 'map' : 'list';
 
+  // Sort is URL-synced like every other filter so a shared link reproduces
+  // the same ordering. An unknown value from a hand-edited or stale URL
+  // resolves to '' — the contextual default — rather than throwing.
+  const [sort, setSort] = useState(() => parseSort(searchParams.get('sort') || ''));
+
   // "Near this address" state — coords live in memory only, never on
   // the URL, so shared links don't leak someone else's search location.
   // Cleared on tab close. The query text IS persisted (as `?near=...`)
@@ -169,9 +193,10 @@ const Stays = ({ landing = null }) => {
     if (subType) next.set('subType', subType);
     if (amenities.length) next.set('amenities', amenities.join(','));
     if (viewMode === 'map') next.set('view', 'map');
+    if (sort) next.set('sort', sort);
     if (nearQuery) next.set('near', nearQuery);
     setSearchParams(next, { replace: true });
-  }, [where, checkin, checkout, flexible, priceMin, priceMax, priceCurrency, bedrooms, bathrooms, porches, condition, furnished, hasElevator, subType, amenities, viewMode, nearQuery, setSearchParams]);
+  }, [where, checkin, checkout, flexible, priceMin, priceMax, priceCurrency, bedrooms, bathrooms, porches, condition, furnished, hasElevator, subType, amenities, viewMode, sort, nearQuery, setSearchParams]);
 
   useEffect(() => { syncUrl(); }, [syncUrl]);
 
@@ -264,21 +289,10 @@ const Stays = ({ landing = null }) => {
       if (condition && p.condition !== condition) return false;
       if (furnished && !p.furnished) return false;
       if (hasElevator && !p.has_elevator) return false;
-      const price = p.rental_type === 'vacation' ? p.nightly_price : p.monthly_price;
-      // Convert the listing's price into the renter's chosen filter
-      // currency before comparing. FX rate matches the constant used by
-      // Properties.js / backend fallback so all conversions stay in
-      // sync. Properties with no `currency` field default to ILS.
-      let priceInFilterCurrency = price || 0;
-      if (price && (p.currency || 'ILS') !== priceCurrency) {
-        const FX_USD_TO_ILS = 3.65;
-        const propCur = p.currency || 'ILS';
-        if (priceCurrency === 'USD' && propCur === 'ILS') {
-          priceInFilterCurrency = price / FX_USD_TO_ILS;
-        } else if (priceCurrency === 'ILS' && propCur === 'USD') {
-          priceInFilterCurrency = price * FX_USD_TO_ILS;
-        }
-      }
+      // Convert the listing's price into the renter's chosen filter currency
+      // before comparing. Shared with the price sort below (utils/listingPrice)
+      // so the two can't disagree about what a listing costs.
+      const priceInFilterCurrency = priceIn(p, priceCurrency);
       if (priceMin && priceInFilterCurrency < parseFloat(priceMin)) return false;
       if (priceMax && priceInFilterCurrency > parseFloat(priceMax)) return false;
       if (amenities.length && !amenities.every((a) => (p.amenities || []).includes(a))) return false;
@@ -339,7 +353,7 @@ const Stays = ({ landing = null }) => {
   // When an address is set, decorate each property with `distance_km`
   // and re-order the filtered list by proximity. Properties missing
   // coords sink to the bottom (still visible, just not distance-ranked).
-  const filteredWithDistance = useMemo(() => {
+  const withDistance = useMemo(() => {
     if (!nearCoords) return filtered;
     return [...filtered]
       .map((p) => {
@@ -358,6 +372,37 @@ const Stays = ({ landing = null }) => {
         return a.distance_km - b.distance_km;
       });
   }, [filtered, nearCoords]);
+
+  // Which sort actually applies. Proximity is the implicit default once an
+  // address search is active — that was the behaviour before this control
+  // existed and it stays the default so an address search still leads with
+  // the closest places. A stale `?sort=nearest` link opened without an
+  // address falls back to newest rather than silently doing nothing.
+  const effectiveSort = useMemo(() => {
+    if (sort === SORT_NEAREST && !nearCoords) return SORT_NEWEST;
+    if (!sort) return nearCoords ? SORT_NEAREST : SORT_NEWEST;
+    return sort;
+  }, [sort, nearCoords]);
+
+  const filteredWithDistance = useMemo(() => {
+    switch (effectiveSort) {
+      case SORT_PRICE_ASC:
+        return [...withDistance].sort(byPrice(priceCurrency, 'asc'));
+      case SORT_PRICE_DESC:
+        return [...withDistance].sort(byPrice(priceCurrency, 'desc'));
+      case SORT_NEAREST:
+        // `withDistance` is already proximity-ordered.
+        return withDistance;
+      case SORT_NEWEST:
+      default:
+        // The backend returns created_at desc, so the unsorted list is
+        // already newest-first — but only while no address is set, since
+        // `withDistance` re-orders by proximity. Re-sort explicitly in that
+        // case so picking "Newest" during an address search actually does
+        // something.
+        return nearCoords ? [...withDistance].sort(byNewest) : withDistance;
+    }
+  }, [withDistance, effectiveSort, nearCoords, priceCurrency]);
 
   // Address input → Nominatim (via our /api/geocode/search proxy which
   // handles the 1 rps cap + caching). On success we set coords in memory
@@ -774,6 +819,13 @@ const Stays = ({ landing = null }) => {
               )}
             </div>
             <div className="flex items-center gap-3">
+              <SortSelect
+                value={effectiveSort}
+                onChange={setSort}
+                allowNearest={Boolean(nearCoords)}
+                t={t}
+                testid="stays-sort-select"
+              />
               {/* Quick "save this search" CTA always available when the
                   renter is narrowing — high-intent moment for converting
                   them into a logged-in user with an alert subscription. */}

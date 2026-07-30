@@ -44,7 +44,7 @@ api_router = router
 #
 # Deliberately EXCLUDED because no card-grid consumer reads them:
 # description (~77 KB of the old payload), status, views,
-# created_at, owner_id, contract_url/contract_uploaded_at, ical_*,
+# owner_id, contract_url/contract_uploaded_at, ical_*,
 # bulk_created, max_guests, sukkah_compatible, furniture_option,
 # minimum_booking_days, checkin_time/checkout_time, cancellation_policy,
 # custom_cancellation_policy, starting_date, porch_square_meters,
@@ -64,6 +64,10 @@ LIST_PROJECTION: dict = {
     # the street to tell them apart (utils/propertyTitle.js). Short strings —
     # a few KB across the whole grid — and already public on the detail page.
     "address": 1,
+    # Powers the "Listed N days ago" stamp and the Newest sort on /stays.
+    # In a market where good listings go in hours, freshness is the single
+    # most useful thing a card can say. ~25 bytes per row.
+    "created_at": 1,
     "area": 1,
     "rental_type": 1,
     "property_type": 1,
@@ -184,6 +188,7 @@ async def get_properties(
     date_to: str | None = None,
     page: int = 1,
     limit: int | None = None,
+    sort: str | None = None,
 ) -> list[dict]:
     query: dict = {}
     if rental_type:
@@ -322,6 +327,47 @@ async def get_properties(
                 booked_property_ids.add(b['property_id'])
         properties = [p for p in properties if p['id'] not in booked_property_ids]
     
+    # Sorting — before pagination, or page 2 would be sorted independently of
+    # page 1 and the same listing could appear on both. Applied in Python for
+    # the same reason pagination is: the price and date-overlap filters above
+    # already run here, so a DB-level sort would order the wrong set.
+    #
+    # Unknown values fall through to the default (created_at desc, which is
+    # how the documents already arrive) rather than erroring — a hand-edited
+    # or stale `?sort=` in a shared link should degrade, not 422.
+    if sort in ("price_asc", "price_desc"):
+        # Live rate (1h cached, falls back to 3.65) — the same source the
+        # cross-currency price *filter* above uses, so a listing can't pass
+        # the filter and then sort as though it cost something else.
+        sort_rate = await get_usd_ils_rate()
+
+        def _price(p: dict) -> float:
+            raw = p.get("nightly_price") if p.get("rental_type") == "vacation" else p.get("monthly_price")
+            try:
+                value = float(raw or 0)
+            except (TypeError, ValueError):
+                return 0.0
+            # Mirrors utils/listingPrice.js — listings priced in USD are
+            # normalised to ILS so a $2,000 flat doesn't sort below a ₪6,000
+            # one. Listings with no currency are treated as ILS, matching how
+            # they're displayed.
+            if value and (p.get("currency") or "ILS") == "USD":
+                value *= sort_rate
+            return value
+
+        # Unpriced listings sink to the bottom in BOTH directions: a
+        # "cheapest first" page opening on a wall of price-on-request rows is
+        # useless, and they aren't meaningfully "most expensive" either.
+        properties.sort(
+            key=lambda p: (_price(p) == 0, -_price(p) if sort == "price_desc" else _price(p)),
+        )
+    elif sort == "newest":
+        # created_at is an ISO 8601 string, so lexicographic desc is
+        # chronological desc. Missing values become "" — the smallest string —
+        # so they land last under reverse, which is what we want: an undated
+        # listing shouldn't lead a "newest first" page.
+        properties.sort(key=lambda p: p.get("created_at") or "", reverse=True)
+
     # Pagination — applied AFTER all filters (price + date overlap filters
     # are post-query in Python, so DB-level skip/limit would slice the wrong
     # set). When `limit` is omitted, behavior is unchanged: return everything

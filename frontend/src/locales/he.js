@@ -1282,6 +1282,24 @@ const he = {
         // t() at all.
         untitledProperty: 'נכס',
         priceOnRequest: 'מחיר לפי בקשה',
+        // Result ordering.
+        sortBy: 'מיון',
+        sortNewest: 'החדשים ביותר',
+        sortPriceAsc: 'מחיר: מהנמוך לגבוה',
+        sortPriceDesc: 'מחיר: מהגבוה לנמוך',
+        sortNearest: 'הקרובים ביותר',
+        // Freshness stamp. Interpolated with `n`, not `count` — see
+        // utils/listedAgo.js for why.
+        listedToday: 'פורסם היום',
+        listedYesterday: 'פורסם אתמול',
+        listedTwoDays: 'פורסם לפני יומיים',
+        listedDaysAgo: 'פורסם לפני {{n}} ימים',
+        listedWeekAgo: 'פורסם בשבוע שעבר',
+        listedTwoWeeks: 'פורסם לפני שבועיים',
+        listedWeeksAgo: 'פורסם לפני {{n}} שבועות',
+        listedMonthAgo: 'פורסם בחודש שעבר',
+        listedTwoMonths: 'פורסם לפני חודשיים',
+        listedMonthsAgo: 'פורסם לפני {{n}} חודשים',
         unitNight: 'לילה',
         unitMonth: 'חודש',
         removeFromFavorites: 'הסר מהמועדפים',

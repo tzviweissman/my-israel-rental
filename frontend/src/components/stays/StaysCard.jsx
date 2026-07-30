@@ -16,12 +16,14 @@ import { Heart } from 'lucide-react';
 import { getCoverImage } from '../../utils/coverImage';
 import { srcSet } from '../../utils/cdnImage';
 import { areaLabel } from '../../utils/areaNames';
+import { propertyTitle } from '../../utils/propertyTitle';
+import { listedAgoLabel, isFreshListing } from '../../utils/listedAgo';
 import DefaultImageBadge from '../property/DefaultImageBadge';
 import VideoCoverBadge from '../property/VideoCoverBadge';
 
-// Same constant the Stays filter chain + Properties.js + backend fallback
-// (utils/helpers.py) use. Keep in sync if FX strategy ever changes.
-const FX_USD_TO_ILS = 3.65;
+// Re-exported from utils/listingPrice so the card, the /stays filter and the
+// /stays price sort all convert with the same rate.
+import { FX_USD_TO_ILS } from '../../utils/listingPrice';
 
 const StaysCard = ({
   property,
@@ -37,6 +39,8 @@ const StaysCard = ({
   const sym = propCur === 'ILS' ? '₪' : '$';
   const price = property.rental_type === 'vacation' ? property.nightly_price : property.monthly_price;
   const unit = property.rental_type === 'vacation' ? t('stays.unitNight', 'night') : t('stays.unitMonth', 'month');
+  const listedAgo = listedAgoLabel(property.created_at, t);
+  const fresh = isFreshListing(property.created_at);
 
   let convertedHint = null;
   if (price && displayCurrency && displayCurrency !== propCur) {
@@ -107,7 +111,12 @@ const StaysCard = ({
         </button>
       </div>
       <div className="pt-2 px-0.5">
-        <p className="font-semibold text-sm text-gray-900 truncate">{property.title}</p>
+        {/* Same display layer as PropertyCard: 120 listings store the area
+            as their title, which repeats the line directly below and makes
+            distinct apartments look like one card duplicated. */}
+        <p className="font-semibold text-sm text-gray-900 truncate">
+          {propertyTitle(property, t)}
+        </p>
         <p className="text-xs text-gray-500 truncate">
           {/* `area` is a raw DB string — localise it (and normalise the
               stored spelling variants) via utils/areaNames. Unknown areas
@@ -140,6 +149,19 @@ const StaysCard = ({
           </>
         ) : (
           <p className="text-xs text-gray-400 mt-0.5">{t('stays.priceOnRequest', 'Price on request')}</p>
+        )}
+        {/* Freshness. Good listings here go within hours, so how recently
+            something was posted is among the first things a renter wants.
+            Rendered only when the listing actually has a usable timestamp —
+            claiming "Listed today" for an undated listing would be worse
+            than saying nothing. */}
+        {listedAgo && (
+          <p
+            className={`text-[11px] mt-0.5 ${fresh ? 'text-[#1E6A6A] font-semibold' : 'text-gray-400'}`}
+            data-testid={`stays-card-listed-${property.id}`}
+          >
+            {listedAgo}
+          </p>
         )}
       </div>
     </div>
