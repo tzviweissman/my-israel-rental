@@ -580,6 +580,11 @@ const he = {
         searchListings: 'חיפוש נכסים לפי כותרת, אזור או בעלים...',
         searchUsers: 'חיפוש משתמשים לפי שם או אימייל...',
         noListings: 'לא נמצאו נכסים',
+        listingsLoadFailed: 'לא ניתן לטעון את הנכסים',
+        listingsLoadFailedHint:
+          'הנכסים שלך בטוחים — השרת פשוט לא הגיב. בדרך כלל זה מסתדר מעצמו מיד אחרי עדכון גרסה.',
+        listingsRetry: 'נסה שוב',
+        listingsRetrying: 'מנסה שוב…',
         noUsers: 'לא נמצאו משתמשים',
         noConversations: 'אין שיחות עדיין',
         noServices: 'אין בקשות שירות מסמכים',

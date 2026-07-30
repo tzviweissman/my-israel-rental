@@ -583,6 +583,11 @@ const en = {
         searchListings: 'Search listings by title, area, or owner...',
         searchUsers: 'Search users by name or email...',
         noListings: 'No listings found',
+        listingsLoadFailed: "Couldn't load listings",
+        listingsLoadFailedHint:
+          'Your listings are safe — the server just did not answer. This usually clears on its own right after a deploy.',
+        listingsRetry: 'Try again',
+        listingsRetrying: 'Retrying…',
         noUsers: 'No users found',
         noConversations: 'No conversations yet',
         noServices: 'No document service requests',

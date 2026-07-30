@@ -80,9 +80,16 @@ export const ListingsTab = ({ token, onStatsChange }) => {
   const { t } = useTranslation();
   const headers = { Authorization: `Bearer ${token}` };
 
-  const { data: properties, refresh: fetchProperties } = useApiSWR(
-    `${API}/admin/properties`, token, { initial: [] }
-  );
+  // `error` matters as much as `data` here: a failed fetch leaves `data` at
+  // its `initial: []`, which is indistinguishable from "this account really
+  // has no listings" unless we look. Rendering the two the same way sent a
+  // false "all your listings are gone" during a backend restart.
+  const {
+    data: properties,
+    error: propertiesError,
+    isValidating: propertiesLoading,
+    refresh: fetchProperties,
+  } = useApiSWR(`${API}/admin/properties`, token, { initial: [] });
   const [searchTerm, setSearchTerm] = useState('');
   const [showDuplicates, setShowDuplicates] = useState(false);
   const [sweeping, setSweeping] = useState(false);
@@ -1173,7 +1180,35 @@ export const ListingsTab = ({ token, onStatsChange }) => {
         </div>
 
         {filteredProperties.length === 0 && (
-          <p className="text-center text-gray-400 py-8 text-sm">{t('admin.noListings')}</p>
+          propertiesError ? (
+            /* Never claim "no listings" when we simply failed to ask. The hook
+               caches nothing on error and won't retry on its own, so an
+               explicit retry is the only way out short of a page reload. */
+            <div className="text-center py-8 px-4" data-testid="admin-listings-error">
+              <p className="text-sm text-red-600 font-medium">
+                {t('admin.listingsLoadFailed', "Couldn't load listings")}
+              </p>
+              <p className="text-xs text-gray-500 mt-1">
+                {t(
+                  'admin.listingsLoadFailedHint',
+                  'Your listings are safe — the server just did not answer. This usually clears on its own right after a deploy.',
+                )}
+              </p>
+              <button
+                type="button"
+                onClick={() => fetchProperties()}
+                disabled={propertiesLoading}
+                className="mt-3 px-4 py-2 text-sm rounded-lg border border-gray-300 hover:bg-gray-50 disabled:opacity-50"
+                data-testid="admin-listings-retry"
+              >
+                {propertiesLoading
+                  ? t('admin.listingsRetrying', 'Retrying…')
+                  : t('admin.listingsRetry', 'Try again')}
+              </button>
+            </div>
+          ) : (
+            <p className="text-center text-gray-400 py-8 text-sm">{t('admin.noListings')}</p>
+          )
         )}
       </div>
 

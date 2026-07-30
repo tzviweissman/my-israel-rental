@@ -37,6 +37,21 @@ const refreshSubscribers = new Set(); // { url, refresh } objects
 // user toggles between tabs in quick succession.
 const DEFAULT_DEDUPE_MS = 30_000;
 
+// A failed fetch caches nothing, so without this the hook just sits there
+// showing `initial` (usually `[]`) until the component remounts. Every admin
+// tab renders that as "nothing here" rather than "we couldn't ask", so a
+// backend restart looked exactly like the data had been deleted. Retry a few
+// times with backoff so a deploy blip heals itself.
+const RETRY_DELAYS_MS = [2_000, 5_000, 10_000];
+
+/** Retry transport failures and 5xx; never retry a verdict the server meant.
+ *  401/403 won't fix themselves, and hammering them just burns rate limit. */
+const isRetryable = (err) => {
+  const status = err?.response?.status;
+  if (status === undefined) return true; // network error / timeout / CORS
+  return status >= 500;
+};
+
 const buildKey = (url, token) => `${url}|${(token || '').slice(-12)}`;
 
 export function useApiSWR(url, token, { initial = null, dedupeMs = DEFAULT_DEDUPE_MS } = {}) {
@@ -48,9 +63,19 @@ export function useApiSWR(url, token, { initial = null, dedupeMs = DEFAULT_DEDUP
   // Track current key so a stale request from a previous key can't overwrite.
   const keyRef = useRef(key);
   keyRef.current = key;
+  // Pending retry timer, so unmount / key-change can cancel it.
+  const retryTimerRef = useRef(null);
+  const cancelRetry = useCallback(() => {
+    if (retryTimerRef.current) {
+      clearTimeout(retryTimerRef.current);
+      retryTimerRef.current = null;
+    }
+  }, []);
 
-  const refresh = useCallback(async ({ force = false } = {}) => {
+  const refresh = useCallback(async ({ force = false, attempt = 0 } = {}) => {
     if (!url || !token) return;
+    // A newer request supersedes any retry we had queued.
+    cancelRetry();
     const reqKey = buildKey(url, token);
     const entry = cache.get(reqKey);
     if (!force && entry && Date.now() - entry.fetchedAt < dedupeMs) {
@@ -76,11 +101,30 @@ export function useApiSWR(url, token, { initial = null, dedupeMs = DEFAULT_DEDUP
         setError(null);
       }
     } catch (e) {
-      if (keyRef.current === reqKey) setError(e);
+      if (keyRef.current !== reqKey) return;
+      setError(e);
+      const delay = RETRY_DELAYS_MS[attempt];
+      if (delay !== undefined && isRetryable(e)) {
+        // `force` so the retry isn't short-circuited by the dedupe window.
+        retryTimerRef.current = setTimeout(() => {
+          retryTimerRef.current = null;
+          if (keyRef.current === reqKey) {
+            refreshRef.current?.({ force: true, attempt: attempt + 1 });
+          }
+        }, delay);
+      }
     } finally {
       if (keyRef.current === reqKey) setIsValidating(false);
     }
-  }, [url, token, dedupeMs]);
+  }, [url, token, dedupeMs, cancelRetry]);
+
+  // Self-reference for the retry timer without making `refresh` depend on
+  // itself (which would rebuild it every render and re-fire the mount effect).
+  const refreshRef = useRef(null);
+  refreshRef.current = refresh;
+
+  // Never leave a timer running past unmount or a key change.
+  useEffect(() => cancelRetry, [key, cancelRetry]);
 
   useEffect(() => {
     // On mount / key-change: trigger a (possibly-deduped) revalidation.
