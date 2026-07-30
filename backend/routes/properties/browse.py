@@ -14,6 +14,7 @@ from routes.deps import db, verify_token
 from utils.area_filter import area_mongo_query
 from utils.dedupe import find_duplicate
 from utils.helpers import get_usd_ils_rate
+from utils.user_contact import WHATSAPP_PROJECTION, user_whatsapp
 
 
 router = APIRouter()
@@ -471,7 +472,7 @@ async def get_property(property_id: str, response: Response) -> dict:
 
     owner = await db.users.find_one(
         {"id": property_data.get("owner_id")},
-        {"_id": 0, "name": 1, "email": 1, "whatsapp_number": 1},
+        {"_id": 0, "name": 1, "email": 1, **WHATSAPP_PROJECTION},
     )
     if owner:
         property_data['owner_name'] = owner.get('name', '')
@@ -481,7 +482,11 @@ async def get_property(property_id: str, response: Response) -> dict:
         # the list endpoints, so the whole lister phonebook can't be
         # harvested in one request. Empty/absent means the frontend falls
         # back to the in-app chat instead.
-        property_data['owner_whatsapp'] = (owner.get('whatsapp_number') or '').strip()
+        #
+        # Resolved through utils.user_contact rather than a field name: this
+        # read `whatsapp_number` directly, which nothing ever writes, so the
+        # button was dead for all 47 owners and all 204 listings.
+        property_data['owner_whatsapp'] = user_whatsapp(owner)
 
     # Stamp is_featured the same way the list endpoint does, so the property
     # detail page can render the "Featured" badge consistently. Served from

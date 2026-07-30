@@ -41,6 +41,7 @@ from .shared import (
     _validate_category,
     _validate_subcategory,
 )
+from utils.user_contact import user_whatsapp
 
 router = APIRouter(prefix="/marketplace", tags=["marketplace"])
 
@@ -365,11 +366,13 @@ async def get_gig(gig_id: str):
         #
         # Detail endpoint only — never added to the browse/list routes, so
         # the whole provider phonebook can't be scraped in one request.
+        # The account-level half of this fallback read `whatsapp_number`,
+        # which nothing writes — so a provider who set their number in
+        # Settings still got the dead path. Resolved via utils.user_contact.
         "whatsapp": (
-            (prov or {}).get("whatsapp")
-            or (user or {}).get("whatsapp_number")
-            or ""
-        ).strip(),
+            ((prov or {}).get("whatsapp") or "").strip()
+            or user_whatsapp(user)
+        ),
     }
     agg = await _rating_aggregate(gig_id)
     gig["rating_avg"] = agg["rating_avg"]
