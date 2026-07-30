@@ -4,6 +4,7 @@ import { Bed, Bath, Home as HomeIcon, MapPin, Building2, Heart } from 'lucide-re
 import { getCoverImage } from '../../utils/coverImage';
 import { srcSet } from '../../utils/cdnImage';
 import { areaLabel } from '../../utils/areaNames';
+import { propertyTitle } from '../../utils/propertyTitle';
 import DefaultImageBadge from './DefaultImageBadge';
 import VideoCoverBadge from './VideoCoverBadge';
 
@@ -110,7 +111,12 @@ const PropertyCard = ({
         </button>
       </div>
       <div className="p-3 md:p-6">
-        <h3 className="text-sm md:text-xl font-bold mb-1 md:mb-2 line-clamp-1">{property.title}</h3>
+        {/* Localised via utils/propertyTitle: 120 listings store the area as
+            their title, so the raw value repeats the line right below it and
+            makes distinct apartments look like one duplicated card. */}
+        <h3 className="text-sm md:text-xl font-bold mb-1 md:mb-2 line-clamp-1">
+          {propertyTitle(property, t)}
+        </h3>
         <div className="flex items-center gap-2 text-gray-600 mb-2 md:mb-3">
           <MapPin size={14} className="md:w-4 md:h-4 shrink-0" />
           {/* Localised via utils/areaNames — `area` is a DB value, so it

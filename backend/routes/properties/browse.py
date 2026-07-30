@@ -42,7 +42,7 @@ api_router = router
 # to keep that filter's behavior byte-identical if the field ever lands.
 #
 # Deliberately EXCLUDED because no card-grid consumer reads them:
-# description (~77 KB of the old payload), address, status, views,
+# description (~77 KB of the old payload), status, views,
 # created_at, owner_id, contract_url/contract_uploaded_at, ical_*,
 # bulk_created, max_guests, sukkah_compatible, furniture_option,
 # minimum_booking_days, checkin_time/checkout_time, cancellation_policy,
@@ -59,6 +59,10 @@ LIST_PROJECTION: dict = {
     "_id": 0,
     "id": 1,
     "title": 1,
+    # 120 listings store the area as their title, so the card falls back to
+    # the street to tell them apart (utils/propertyTitle.js). Short strings —
+    # a few KB across the whole grid — and already public on the detail page.
+    "address": 1,
     "area": 1,
     "rental_type": 1,
     "property_type": 1,

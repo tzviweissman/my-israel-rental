@@ -25,6 +25,30 @@ const parseLocalDate = (dateStr) => {
   return new Date(y, m - 1, d);
 };
 
+// Opening a listing is the one request a visitor definitely meant to make, so
+// a transient failure is worth retrying before telling them it doesn't exist.
+// A 404 is the server's actual answer and is returned immediately — retrying
+// it would only delay the honest message.
+const PROPERTY_RETRY_DELAYS_MS = [1_000, 3_000];
+
+const fetchPropertyWithRetry = async (id) => {
+  let lastError;
+  for (let attempt = 0; attempt <= PROPERTY_RETRY_DELAYS_MS.length; attempt += 1) {
+    try {
+      return await axios.get(`${API}/properties/${id}`);
+    } catch (error) {
+      lastError = error;
+      const status = error?.response?.status;
+      // 4xx is a verdict, not a hiccup — don't retry it.
+      if (status !== undefined && status < 500) throw error;
+      const delay = PROPERTY_RETRY_DELAYS_MS[attempt];
+      if (delay === undefined) break;
+      await new Promise((resolve) => setTimeout(resolve, delay));
+    }
+  }
+  throw lastError;
+};
+
 const PropertyDetail = () => {
   const { id } = useParams();
   const [searchParams] = useSearchParams();
@@ -149,11 +173,29 @@ const PropertyDetail = () => {
   };
 
   const fetchProperty = async () => {
+    let response;
     try {
-      const response = await axios.get(`${API}/properties/${id}`);
+      response = await fetchPropertyWithRetry(id);
       setProperty(response.data);
+    } catch (error) {
+      console.error('Failed to fetch property', error);
+      // Only a real 404 means the listing is gone. A network drop, a 5xx, or
+      // the backend restarting for a deploy used to report the same thing,
+      // which reads as "your listing was deleted" at the worst moment.
+      if (error?.response?.status === 404) {
+        toast.error(t('property.notFound', 'Property not found'));
+      } else {
+        toast.error(
+          t('property.loadFailed', "Couldn't load this listing — please try again in a moment."),
+        );
+      }
+      return;
+    }
 
-      // Fetch blocked dates
+    try {
+      // Blocked dates are supplementary: the listing renders fine without
+      // them. Deliberately its own try/catch — sharing the property's meant
+      // a calendar hiccup claimed the property itself didn't exist.
       const blockedRes = await axios.get(`${API}/properties/${id}/blocked-dates`);
       const allBlocked = [...(blockedRes.data.internal || []), ...(blockedRes.data.external || [])];
       const dates = [];
@@ -165,7 +207,13 @@ const PropertyDetail = () => {
         }
       });
       setBlockedDates(dates);
-      
+    } catch (error) {
+      console.error('Failed to fetch blocked dates', error);
+    }
+
+    // Pure date pre-fill from here down — no network, so nothing left to
+    // mistake for a missing property.
+    try {
       // Sublease deep-link: pre-fill booking window from URL params.
       if (preFromParam && preToParam) {
         const from = parseLocalDate(preFromParam);
@@ -191,8 +239,7 @@ const PropertyDetail = () => {
         setDateRange({ from: startDate, to: undefined });
       }
     } catch (error) {
-      console.error('Failed to fetch property', error);
-      toast.error('Property not found');
+      console.error('Failed to pre-fill booking dates', error);
     }
   };
 
