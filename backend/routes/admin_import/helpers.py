@@ -23,6 +23,7 @@ from typing import Any
 
 import bcrypt
 from routes.deps import db, logger, ANTHROPIC_API_KEY
+from utils.area_normalize import normalize_area
 from utils.email import send_email
 
 
@@ -347,7 +348,15 @@ def _build_property_doc(row_remapped: dict, owner_id: str, default_rental_type: 
         "owner_id": owner_id,
         "title": (row_remapped.get("title") or "Imported listing")[:160],
         "description": row_remapped.get("description") or "",
-        "area": row_remapped.get("area") or "",
+        # Canonicalise on the way in so a spreadsheet full of "Ramat Eshkol,
+        # Jerusalem" lands as "Jerusalem - Ramat Eshkol". Unknown areas are
+        # returned unchanged. This is the admin-import twin of the
+        # PropertyCreate validator (models.py) — this path builds its doc by
+        # hand and never constructs PropertyCreate, so it needs its own call.
+        # Covers BOTH admin-import entry points: the CSV/sheet importer
+        # (properties.py) and Quick Add (quick_add.py), which share this
+        # builder.
+        "area": normalize_area(row_remapped.get("area") or ""),
         "address": row_remapped.get("address") or "",
         "rental_type": effective_rt,
         "property_type": (row_remapped.get("property_type") or "apartment").lower(),

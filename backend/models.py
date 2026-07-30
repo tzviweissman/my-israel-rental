@@ -1,7 +1,9 @@
 """Pydantic models for API requests/responses"""
 from typing import List
 
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr, field_validator
+
+from utils.area_normalize import normalize_area
 
 
 class UserRegister(BaseModel):
@@ -126,6 +128,20 @@ class PropertyCreate(BaseModel):
     # YYYY-MM-DD. Both inclusive.
     holiday_start_date: str | None = None
     holiday_end_date: str | None = None
+
+    # Canonicalise `area` at the model boundary — the one choke point every
+    # write path funnels through: POST /properties (create), PUT
+    # /properties/{id} (update), and the bulk-upload commit in
+    # routes/bulk_upload.py, which builds each row as PropertyCreate(**row)
+    # before inserting. Putting it here rather than in each route means a
+    # future write path cannot forget it.
+    #
+    # Unrecognised areas pass through untouched — see utils/area_normalize.
+    # Existing documents are NOT rewritten; this only affects new writes.
+    @field_validator("area")
+    @classmethod
+    def _canonicalize_area(cls, v: str) -> str:
+        return normalize_area(v)
 
 
 class BookingCreate(BaseModel):

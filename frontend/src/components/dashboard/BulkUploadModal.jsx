@@ -12,6 +12,7 @@ import {
   CANCELLATION_POLICIES, AMENITY_OPTIONS,
 } from '../../constants/propertyEnums';
 import { serviceLabel } from '../property/services/servicesCatalog';
+import { storedArea } from '../../utils/areaNames';
 import { uploadFilesFast } from '../../utils/fastUpload';
 import { sizedImage, videoPoster } from '../../utils/cdnImage';
 
@@ -270,6 +271,13 @@ const BulkUploadModal = ({ isOpen, onClose, onDone, API, token }) => {
       // Surface every row in the visual editor for inline review
       const editorRows = parsed.rows.map(p => {
         const merged = { ...blankProperty(), ...p.normalized };
+        // Fold spreadsheet spellings onto the canonical stored form, so a
+        // sheet full of "Ramat Eshkol, Jerusalem" lands as
+        // "Jerusalem - Ramat Eshkol". The backend does this too (it's the
+        // authority); doing it here as well means the review step SHOWS the
+        // value that will be saved instead of rewriting it behind the user's
+        // back. Unrecognised areas are left exactly as typed.
+        if (merged.area) merged.area = storedArea(merged.area);
         // Coerce list / object fields back into the shape the editor expects
         if (typeof merged.amenities === 'string') {
           merged.amenities = merged.amenities
@@ -330,6 +338,9 @@ const BulkUploadModal = ({ isOpen, onClose, onDone, API, token }) => {
           if (v === null || v === undefined) continue;
           merged[k] = v;
         }
+        // Same canonicalisation as the spreadsheet path — the LLM echoes the
+        // area back in whatever wording the source message used.
+        if (merged.area) merged.area = storedArea(merged.area);
         // Normalise booleans the editor expects (yes/no strings)
         for (const bf of ['has_elevator', 'is_shabbat_elevator', 'is_tama', 'sukkah_compatible', 'has_agent_fee', 'has_cleaning_fee']) {
           if (typeof merged[bf] === 'boolean') merged[bf] = merged[bf] ? 'yes' : 'no';
@@ -986,7 +997,18 @@ const Select = ({ label, value, onChange, options, testid }) => (
 // Area / Neighborhood select — grouped by Israeli city.
 // LocationSelect — combobox with type-ahead. Same UX as the regular Add
 // Property form's LocationPicker, just compact for the bulk row layout.
-// Free typing also stores whatever the user types so custom areas survive.
+//
+// Typing filters the list but does NOT commit — a value is only saved when
+// the user deliberately picks a row (a catalogue suggestion, or the explicit
+// `Use "..."` escape hatch at the bottom for an area the catalogue doesn't
+// know yet). This mirrors what LocationPicker actually does.
+//
+// It previously called `onChange` on every keystroke, with a comment claiming
+// that matched LocationPicker — it did not. LocationPicker only fires on click
+// (and on clearing the field). Persisting half-typed text is where a large
+// share of the ~48 spellings for ~28 real neighbourhoods came from, and area
+// drift is not cosmetic: utils/dedupe.py keys on `area` when a listing has no
+// street address, so every extra spelling is a dedupe blind spot.
 const LocationSelect = ({ label, value, onChange, testid }) => {
   const [search, setSearch] = React.useState('');
   const [open, setOpen] = React.useState(false);
@@ -1015,6 +1037,34 @@ const LocationSelect = ({ label, value, onChange, testid }) => {
       .map((n) => ({ value: `${group.city} - ${n}`, city: group.city, neighborhood: n }))
   );
 
+  const typed = search.trim();
+  // `storedArea` returns its input unchanged when it doesn't recognise it, so
+  // "changed" means "this is a known area under a different spelling".
+  const canonicalTyped = typed ? storedArea(typed) : '';
+  const isKnown = canonicalTyped !== typed;
+
+  // Someone typed a real area the substring filter can't surface — e.g.
+  // "Ramat Eshkol, Jerusalem", which matches no catalogue string. Offer the
+  // canonical value instead of dead-ending them on "No matches"; that dead end
+  // is exactly the pressure that produced the drifted spellings.
+  const resolved = isKnown && !matches.some((m) => m.value === canonicalTyped)
+    ? canonicalTyped
+    : null;
+
+  // Escape hatch: the catalogue can't cover every neighbourhood in Israel, so
+  // a genuinely new area must still be listable. Offered as a row the user has
+  // to click on purpose — never as a silent side effect of typing. Withheld
+  // when the text resolves to a known area, so nobody can mint a second
+  // spelling of somewhere that already exists.
+  const offerCustom = typed.length > 0 && !isKnown
+    && !matches.some((m) => m.value.toLowerCase() === typed.toLowerCase());
+
+  const commit = (next) => {
+    onChange(next);
+    setSearch('');
+    setOpen(false);
+  };
+
   return (
     <div className="relative" ref={ref}>
       <label className="block">
@@ -1023,10 +1073,11 @@ const LocationSelect = ({ label, value, onChange, testid }) => {
           type="text"
           value={open ? search : (value || '')}
           onChange={(e) => {
+            // Typing only filters the list. The row value changes when the
+            // user picks something below — except for clearing the field,
+            // which clears the value (same as LocationPicker).
             setSearch(e.target.value);
-            // Mirror typed text into the row value so users can save a
-            // non-canonical area name (matches LocationPicker semantics).
-            onChange(e.target.value);
+            if (e.target.value === '') onChange('');
             setOpen(true);
           }}
           onFocus={() => {
@@ -1040,23 +1091,39 @@ const LocationSelect = ({ label, value, onChange, testid }) => {
       </label>
       {open && (
         <div className="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-60 overflow-y-auto">
-          {matches.length === 0 ? (
-            <div className="px-3 py-2 text-xs text-gray-500">No matches — typed value will be saved as-is</div>
-          ) : (
-            matches.map((loc) => (
-              <div
-                key={loc.value}
-                onClick={() => {
-                  onChange(loc.value);
-                  setSearch('');
-                  setOpen(false);
-                }}
-                className="px-3 py-2 hover:bg-[#1E6A6A]/10 cursor-pointer text-sm transition-colors"
-              >
-                <span className="font-medium text-gray-700">{loc.neighborhood}</span>
-                <span className="text-gray-500 text-xs ms-2">({loc.city})</span>
-              </div>
-            ))
+          {matches.length === 0 && !offerCustom && !resolved && (
+            <div className="px-3 py-2 text-xs text-gray-500">
+              {typed ? 'No matches' : 'Type to search…'}
+            </div>
+          )}
+          {resolved && (
+            <div
+              onClick={() => commit(resolved)}
+              className="px-3 py-2 hover:bg-[#1E6A6A]/10 cursor-pointer text-sm transition-colors"
+              data-testid={testid ? `${testid}-resolved` : undefined}
+            >
+              <span className="font-medium text-gray-700">{resolved}</span>
+            </div>
+          )}
+          {matches.map((loc) => (
+            <div
+              key={loc.value}
+              onClick={() => commit(loc.value)}
+              className="px-3 py-2 hover:bg-[#1E6A6A]/10 cursor-pointer text-sm transition-colors"
+            >
+              <span className="font-medium text-gray-700">{loc.neighborhood}</span>
+              <span className="text-gray-500 text-xs ms-2">({loc.city})</span>
+            </div>
+          ))}
+          {offerCustom && (
+            <div
+              onClick={() => commit(typed)}
+              className="px-3 py-2 border-t border-gray-100 hover:bg-[#1E6A6A]/10 cursor-pointer text-sm transition-colors"
+              data-testid={testid ? `${testid}-custom` : undefined}
+            >
+              <span className="text-gray-700">Use “{typed}”</span>
+              <span className="text-gray-400 text-xs ms-2">(not in the list)</span>
+            </div>
           )}
         </div>
       )}
