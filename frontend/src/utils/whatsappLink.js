@@ -50,18 +50,42 @@ const ISRAEL_CC = '972';
  */
 export function normalizeWhatsAppNumber(raw) {
   if (raw === null || raw === undefined) return null;
-  // Coerce defensively — backends have handed us numbers before.
-  const digits = String(raw).replace(/\D/g, '');
+  const text = String(raw);
+  // Coerce defensively — backends have handed us numbers before. Also
+  // strips the directional marks and non-breaking hyphens that come with
+  // numbers pasted out of iOS Contacts.
+  const digits = text.replace(/\D/g, '');
   if (!digits) return null;
 
-  // `00` is the international dialing prefix in Israel and much of the
-  // world (00972…) — strip it before the leading-zero rule below, which
-  // would otherwise mangle it.
-  let normalized = digits.startsWith('00') ? digits.slice(2) : digits;
+  // Did the user actually tell us the country? A leading `+` (anywhere in
+  // the leading punctuation) or a `00` prefix is an explicit statement; a
+  // bare string of digits is not, and guessing is what sent renters abroad.
+  const explicitIntl = /^[\s‎‏‪-‮(]*\+/.test(text) || digits.startsWith('00');
 
-  if (normalized.startsWith('0')) {
-    // National format → prepend IL country code, dropping the trunk 0.
-    normalized = ISRAEL_CC + normalized.replace(/^0+/, '');
+  let normalized;
+  if (explicitIntl) {
+    // Honour it as given. We deliberately don't try to "fix" foreign
+    // numbers — we have no basis to.
+    normalized = digits.startsWith('00') ? digits.slice(2) : digits;
+  } else if (digits.startsWith('0')) {
+    // Israeli national format ("050-123-4567"): the trunk 0 is REPLACED by
+    // the country code, never kept alongside it.
+    normalized = ISRAEL_CC + digits.replace(/^0+/, '');
+  } else if (digits.startsWith(ISRAEL_CC) && digits.length === 12) {
+    // Already a full Israeli number, just without the +.
+    normalized = digits;
+  } else if (digits.length === 9 && digits.startsWith('5')) {
+    // Israeli mobile with both the + and the trunk 0 missing ("553304424").
+    // 9 digits starting with 5 is unambiguous here: an Israeli mobile is
+    // exactly 9 digits after the 0.
+    normalized = ISRAEL_CC + digits;
+  } else {
+    // Ambiguous: bare digits that could belong to any country. This used to
+    // fall through as "assume it already has a country code", which dialled
+    // "732 723 8572" (a New Jersey number) as +7 Russia and "553304424" (an
+    // Israeli mobile) as +55 Brazil. Sending a renter to a stranger abroad
+    // is worse than showing no button, so the caller falls back to chat.
+    return null;
   }
 
   if (normalized.length < MIN_DIGITS || normalized.length > MAX_DIGITS) return null;

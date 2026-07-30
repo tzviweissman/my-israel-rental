@@ -22,6 +22,7 @@ from models import (
     UserRegister,
     WhatsAppNumberUpdate,
 )
+from utils.whatsapp_link import normalize_whatsapp_number
 from models_response import MessageResponse, PasswordResetResponse, TokenResponse, UserPublic
 from routes.deps import GOOGLE_CLIENT_ID, create_token, db, logger, verify_token
 from utils.email import (
@@ -561,12 +562,22 @@ async def set_whatsapp_number(
     """
     raw = (payload_in.whatsapp_number or '').strip()
     # Light normalisation: collapse internal whitespace, strip everything
-    # except digits and a leading +. We don't try to validate country
-    # codes — that's a job for the WhatsApp provider on send.
+    # except digits and a leading +.
     cleaned = '+' if raw.startswith('+') else ''
     cleaned += ''.join(ch for ch in raw if ch.isdigit())
-    if cleaned and len(cleaned.lstrip('+')) < 6:
-        raise HTTPException(status_code=400, detail="WhatsApp number looks too short")
+    # Reject anything we can't resolve to a single country. The old check
+    # only looked at length, so "553304424" saved happily and then dialled
+    # as +55 Brazil — the frontend now blocks that, but the API is reachable
+    # without it and a stored number nothing can dial is worse than an
+    # error at save time.
+    if cleaned and not normalize_whatsapp_number(raw):
+        raise HTTPException(
+            status_code=400,
+            detail=(
+                "That number is missing its country code. Start with 0 for an "
+                "Israeli number (050-123-4567), or add the country code (+1, +44)."
+            ),
+        )
     await db.users.update_one(
         {"id": payload['user_id']},
         {"$set": {"phone": cleaned}},

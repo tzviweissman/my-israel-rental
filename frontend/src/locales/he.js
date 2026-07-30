@@ -1490,6 +1490,12 @@ const he = {
       // Renter positioning strip (Home + Stays header). Every line here is
       // about what WE cost and how the site works — never about agent,
       // broker or key-money fees. See RenterTrustBanner.jsx.
+      // Phone/WhatsApp field validation. See en.js.
+      phone: {
+        tooShort: 'המספר נראה קצר מדי — נא להזין את המספר המלא.',
+        needsCountryCode: 'התחילו ב-0 למספר ישראלי (050-1234567), או הוסיפו קידומת מדינה (‎+1, ‎+44).',
+        willDial: 'שוכרים יגיעו אליכם במספר {{number}}',
+      },
       trust: {
         compact: 'חינם לחיפוש ויצירת קשר ישיר עם בעלי הדירות — מודעות גם באנגלית.',
         freeTitle: 'שימוש חינם',

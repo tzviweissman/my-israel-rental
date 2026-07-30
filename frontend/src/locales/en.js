@@ -1520,6 +1520,13 @@ const en = {
       // about what WE cost and how the site works — never about agent,
       // broker or key-money fees, which are the owner's to set and which
       // some listings do charge. See RenterTrustBanner.jsx.
+      // Phone/WhatsApp field validation. Wording tells people exactly what
+      // to add — "invalid number" leaves them guessing.
+      phone: {
+        tooShort: "That looks too short — please include the full number.",
+        needsCountryCode: 'Please start with 0 for an Israeli number (050-123-4567), or add the country code (+1, +44).',
+        willDial: 'Renters will reach you at {{number}}',
+      },
       trust: {
         compact: 'Free to search and contact owners directly — listings in English.',
         freeTitle: 'Free to use',

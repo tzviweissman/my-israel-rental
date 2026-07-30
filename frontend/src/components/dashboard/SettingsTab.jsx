@@ -5,6 +5,7 @@ import { toast } from 'sonner';
 import axios from 'axios';
 import { AuthContext } from '../../App';
 import NotificationSettings from './NotificationSettings';
+import { phoneError, phonePreview } from '../../utils/phoneValidation';
 
 const SettingsTab = ({ user, token, API }) => {
   const { i18n, t } = useTranslation();
@@ -86,8 +87,17 @@ const SettingsTab = ({ user, token, API }) => {
     }
   };
 
+  // Empty is valid here — it's how an owner opts out.
+  const waErr = phoneError(whatsappNumber, t);
+
   const handleSaveWhatsapp = async (e) => {
     e?.preventDefault?.();
+    if (waErr) {
+      // Saving an ambiguous number would leave the owner with no WhatsApp
+      // button and no indication why.
+      toast.error(waErr);
+      return;
+    }
     setSavingWhatsapp(true);
     try {
       await axios.put(
@@ -273,6 +283,7 @@ const SettingsTab = ({ user, token, API }) => {
             onChange={(e) => setWhatsappNumber(e.target.value)}
             placeholder="+972 50 123 4567"
             className="flex-1 px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500"
+            aria-invalid={waErr ? 'true' : undefined}
             data-testid="settings-whatsapp-input"
             inputMode="tel"
             autoComplete="tel"
@@ -287,8 +298,20 @@ const SettingsTab = ({ user, token, API }) => {
             <Check size={16} /> {savingWhatsapp ? i18n.t('dashboard.saving') : t('common.save', 'Save')}
           </button>
         </form>
+        {waErr ? (
+          <p className="text-[11px] text-red-600 mt-2" data-testid="settings-whatsapp-error">
+            {waErr}
+          </p>
+        ) : phonePreview(whatsappNumber) ? (
+          <p className="text-[11px] text-gray-500 mt-2" data-testid="settings-whatsapp-preview">
+            {t('phone.willDial', {
+              number: phonePreview(whatsappNumber),
+              defaultValue: `Renters will reach you at ${phonePreview(whatsappNumber)}`,
+            })}
+          </p>
+        ) : null}
         <p className="text-[11px] text-gray-400 mt-2">
-          {t('settings.whatsappLeaveBlank', 'Leave blank to opt out of WhatsApp notifications. International format recommended (+country code).')}
+          {t('settings.whatsappLeaveBlank', 'Leave blank to hide the WhatsApp button on your listings and turn off WhatsApp notifications. International format recommended (+country code).')}
         </p>
       </div>
 

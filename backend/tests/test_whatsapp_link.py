@@ -42,6 +42,10 @@ JS_MODULE = (
         ("050 123 4567", "972501234567"),
         # Already international — passed through untouched.
         ("972501234567", "972501234567"),
+        # Bare Israeli mobile: no +, no trunk 0. Nine digits starting with 5
+        # is unambiguous (an IL mobile is exactly 9 digits after the 0).
+        # This was dialled as +55 BRAZIL before the country check.
+        ("553304424", "972553304424"),
         ("+972-50-123-4567", "972501234567"),
         ("+1 (415) 555-0123", "14155550123"),
         # `00` international prefix stripped before the leading-zero rule,
@@ -54,6 +58,13 @@ JS_MODULE = (
         ("abc", None),
         ("+", None),
         ("1" * (MAX_DIGITS + 1), None),
+        # Ambiguous bare digits — no country code, no trunk 0, and not a
+        # 9-digit IL mobile. These are the ones that used to be guessed
+        # wrong: a New Jersey number read as +7 Russia, a New York one as
+        # an unknown country. No button beats the wrong stranger.
+        ("732 723 8572", None),
+        ("5166809190", None),
+        ("17189746750", None),
     ],
 )
 def test_normalize_matches_js_rules(raw, expected) -> None:
@@ -61,8 +72,23 @@ def test_normalize_matches_js_rules(raw, expected) -> None:
 
 
 def test_min_digits_boundary() -> None:
-    assert normalize_whatsapp_number("1" * MIN_DIGITS) == "1" * MIN_DIGITS
-    assert normalize_whatsapp_number("1" * (MIN_DIGITS - 1)) is None
+    # Tested with an explicit `+` because a BARE run of digits is now
+    # rejected on country-ambiguity before length is even considered — this
+    # test used to pass a bare "11111111" and assert it came back unchanged,
+    # which was exactly the guess that dialled renters into the wrong
+    # country. Length is still enforced, just no longer the only gate.
+    assert normalize_whatsapp_number("+" + "1" * MIN_DIGITS) == "1" * MIN_DIGITS
+    assert normalize_whatsapp_number("+" + "1" * (MIN_DIGITS - 1)) is None
+
+
+def test_bare_digits_are_rejected_regardless_of_length() -> None:
+    """The country has to come from the user, not from us."""
+    for length in range(MIN_DIGITS, MAX_DIGITS + 1):
+        bare = "1" * length
+        assert normalize_whatsapp_number(bare) is None, (
+            f"{bare!r} was accepted — a bare number with no country code and "
+            f"no Israeli trunk 0 must not be guessed at."
+        )
 
 
 def test_builds_link_with_encoded_message() -> None:

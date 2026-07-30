@@ -40,17 +40,38 @@ def normalize_whatsapp_number(raw: object) -> Optional[str]:
     """
     if raw is None:
         return None
-    digits = "".join(ch for ch in str(raw) if ch.isdigit())
+    text = str(raw)
+    digits = "".join(ch for ch in text if ch.isdigit())
     if not digits:
         return None
 
-    # `00` is the international dialing prefix in Israel and much of the
-    # world (00972…) — strip it before the leading-zero rule below, which
-    # would otherwise mangle it.
-    normalized = digits[2:] if digits.startswith("00") else digits
+    # Did the user actually tell us the country? A leading `+` or a `00`
+    # prefix is an explicit statement; a bare string of digits is not, and
+    # guessing is what sent renters abroad.
+    explicit_intl = text.lstrip(" \t‎‏‪‫‬‭‮(").startswith("+") \
+        or digits.startswith("00")
 
-    if normalized.startswith("0"):
-        normalized = ISRAEL_CC + normalized.lstrip("0")
+    if explicit_intl:
+        # Honour it as given — we have no basis to "fix" a foreign number.
+        normalized = digits[2:] if digits.startswith("00") else digits
+    elif digits.startswith("0"):
+        # Israeli national format: the trunk 0 is REPLACED by the country
+        # code, never kept alongside it.
+        normalized = ISRAEL_CC + digits.lstrip("0")
+    elif digits.startswith(ISRAEL_CC) and len(digits) == 12:
+        # Already a full Israeli number, just without the +.
+        normalized = digits
+    elif len(digits) == 9 and digits.startswith("5"):
+        # Israeli mobile with both the + and the trunk 0 missing. 9 digits
+        # starting with 5 is unambiguous: an Israeli mobile is exactly 9
+        # digits after the 0.
+        normalized = ISRAEL_CC + digits
+    else:
+        # Ambiguous bare digits. This used to fall through as "assume it
+        # already carries a country code", which dialled a New Jersey number
+        # as +7 Russia and an Israeli mobile as +55 Brazil. Sending someone
+        # to a stranger abroad is worse than showing no button.
+        return None
 
     if not MIN_DIGITS <= len(normalized) <= MAX_DIGITS:
         return None

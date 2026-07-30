@@ -4,6 +4,7 @@ from typing import List
 from pydantic import BaseModel, EmailStr, field_validator
 
 from utils.area_normalize import normalize_area
+from utils.whatsapp_link import normalize_whatsapp_number
 
 
 class UserRegister(BaseModel):
@@ -12,6 +13,33 @@ class UserRegister(BaseModel):
     name: str
     role: str
     phone: str | None = None
+
+    @field_validator("phone")
+    @classmethod
+    def _phone_must_be_dialable(cls, value: str | None) -> str | None:
+        """Reject a number we couldn't dial, at the point of entry.
+
+        The field is optional — blank stays blank. But a number saved in an
+        ambiguous format (no country code and no Israeli leading 0) can't be
+        resolved to a country, so it produces no WhatsApp button later and
+        nothing anywhere explains why. Worse, before this the guess sent
+        renters abroad: "553304424" — an Israeli mobile typed without the 0 —
+        was dialled as +55 Brazil.
+
+        Signup is the one moment the person who knows the number is looking
+        at the screen, so this fails loudly here rather than silently there.
+        """
+        if value is None:
+            return None
+        raw = value.strip()
+        if not raw:
+            return raw
+        if normalize_whatsapp_number(raw) is None:
+            raise ValueError(
+                "That number is missing its country code. Start with 0 for an "
+                "Israeli number (050-123-4567), or add the country code (+1, +44)."
+            )
+        return raw
 
 
 class UserLogin(BaseModel):

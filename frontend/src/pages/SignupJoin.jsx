@@ -16,6 +16,7 @@ import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import axios from 'axios';
 import { toast } from 'sonner';
+import { phoneError, phonePreview } from '../utils/phoneValidation';
 import {
   ArrowLeft, ArrowRight, Check, Eye, EyeOff,
   Plane, Home, Sparkles,
@@ -107,9 +108,19 @@ const SignupJoin = () => {
     setStep(2);
   };
 
+  // Recomputed each render so the message tracks the input without extra
+  // state. Empty phone is always fine — the field is optional.
+  const phoneErr = phoneError(form.phone, t);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!activeCard) return;
+    if (phoneErr) {
+      // Blocked rather than saved: an ambiguous number gets no WhatsApp
+      // button later and nothing explains why.
+      toast.error(phoneErr);
+      return;
+    }
     if (form.password.length < 6) {
       toast.error(t('auth.passwordTooShort', 'Password must be at least 6 characters.'));
       return;
@@ -385,8 +396,21 @@ const SignupJoin = () => {
                     onChange={(e) => setForm({ ...form, phone: e.target.value })}
                     className="w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm focus:outline-none focus:border-[#1E6A6A] focus:ring-2 focus:ring-[#1E6A6A]/20"
                     placeholder="+972 50 123 4567"
+                    aria-invalid={phoneErr ? 'true' : undefined}
                     data-testid="signup-phone-input"
                   />
+                  {phoneErr ? (
+                    <p className="text-[11px] text-red-600 mt-1" data-testid="signup-phone-error">
+                      {phoneErr}
+                    </p>
+                  ) : phonePreview(form.phone) ? (
+                    <p className="text-[11px] text-gray-500 mt-1">
+                      {t('phone.willDial', {
+                        number: phonePreview(form.phone),
+                        defaultValue: `Renters will reach you at ${phonePreview(form.phone)}`,
+                      })}
+                    </p>
+                  ) : null}
                 </Field>
                 <Field label={t('signupJoin.password', 'Password')} testId="signup-password">
                   <div className="relative">
