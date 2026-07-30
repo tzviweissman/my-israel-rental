@@ -13,6 +13,7 @@ import ImageGallery from '../components/property/ImageGallery';
 import PropertyStats from '../components/property/PropertyStats';
 import AmenitiesList from '../components/property/AmenitiesList';
 import BookingSidebar from '../components/property/BookingSidebar';
+import MovingServicesCrossSell from '../components/services/MovingServicesCrossSell';
 import Breadcrumb from '../components/common/Breadcrumb';
 import { areaLabel } from '../utils/areaNames';
 
@@ -90,6 +91,9 @@ const PropertyDetail = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [sublease, property?.available_from, property?.starting_date]);
   const [showBooking, setShowBooking] = useState(false);
+  // Set once a booking request goes through, so the services cross-sell can
+  // switch to its post-booking copy.
+  const [justBooked, setJustBooked] = useState(false);
   const [exchangeRate, setExchangeRate] = useState(null);
   const [blockedDates, setBlockedDates] = useState([]);
   const [isLiked, setIsLiked] = useState(false);
@@ -274,6 +278,10 @@ const PropertyDetail = () => {
           : 'Booking request sent successfully!',
       );
       setShowBooking(false);
+      // Highest-intent moment on the whole rentals side: they've committed to
+      // a place and now need movers/cleaners. Swaps the cross-sell strip to
+      // its post-booking copy rather than interrupting with a modal.
+      setJustBooked(true);
     } catch (error) {
       toast.error(error.response?.data?.detail || 'Failed to create booking');
     }
@@ -509,6 +517,16 @@ const PropertyDetail = () => {
               onBook={handleBooking}
               onChat={handleChat}
             />
+            {/* Cross-sell into the paid services side. Below the sidebar so
+                it can never push the booking CTA off-screen. After a booking
+                request it swaps to the higher-intent variant — that's the
+                moment someone actually needs movers. */}
+            <div className="mt-4">
+              <MovingServicesCrossSell
+                property={property}
+                variant={justBooked ? 'booked' : 'detail'}
+              />
+            </div>
           </div>
         </div>
       </div>

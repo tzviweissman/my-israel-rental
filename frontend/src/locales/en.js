@@ -1499,6 +1499,16 @@ const en = {
       // cards, hero search, filters, nearby/geolocation flows, view
       // toggle, empty states, and the geolocation-blocked recovery modal.
       services: {
+        // Rentals → services cross-sell strip (property detail + post-booking).
+        crossSell: {
+          title: 'Moving in? Find movers, cleaners & handymen',
+          bookedTitle: 'Request sent — now sort the move out?',
+          subtitle: 'Service providers across Israel who work with English speakers.',
+          movers: 'Movers',
+          cleaners: 'Cleaners',
+          handyman: 'Handyman',
+          dismiss: 'Hide this suggestion',
+        },
         topRated: 'Top rated',
         replies1h: 'Replies in 1h',
         replies24h: 'Replies in 24h',

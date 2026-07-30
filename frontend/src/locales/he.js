@@ -1470,6 +1470,16 @@ const he = {
       },
       // Services marketplace hub — same key layout as the English side.
       services: {
+        // Rentals → services cross-sell strip (property detail + post-booking).
+        crossSell: {
+          title: 'עוברים דירה? מצאו מובילים, מנקים ואנשי תחזוקה',
+          bookedTitle: 'הבקשה נשלחה — נסדר גם את המעבר?',
+          subtitle: 'נותני שירות בכל הארץ שעובדים גם באנגלית.',
+          movers: 'מובילים',
+          cleaners: 'ניקיון',
+          handyman: 'איש תחזוקה',
+          dismiss: 'הסתר הצעה זו',
+        },
         topRated: 'מדורג מעולה',
         replies1h: 'עונה תוך שעה',
         replies24h: 'עונה תוך 24 שעות',
