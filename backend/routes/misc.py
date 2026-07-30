@@ -451,7 +451,11 @@ async def act_on_services_pitch(
 
     if req.accepted:
         # Lazy-import to avoid an import cycle between misc and marketplace.
-        from routes.marketplace import _ensure_provider_record
+        # Import from the submodule that defines it, not the package: the
+        # 2026-07 split moved this out of marketplace.py into shared.py, and
+        # the package only re-exports `router` + the webhook handler. The
+        # package-level import raised ImportError on every accepted upsell.
+        from routes.marketplace.shared import _ensure_provider_record
 
         prov = await _ensure_provider_record(user_id)
         trial_ends_at = prov.get("trial_ends_at") or (now + timedelta(days=30)).isoformat()
