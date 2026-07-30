@@ -1487,6 +1487,18 @@ const he = {
         managerToRenterNote: 'צור קשר עם התמיכה אם תשנה את דעתך — תפקיד מנהל ניתן לשחזור רק על ידי אדמין.'
       },
       // Services marketplace hub — same key layout as the English side.
+      // Renter positioning strip (Home + Stays header). Every line here is
+      // about what WE cost and how the site works — never about agent,
+      // broker or key-money fees. See RenterTrustBanner.jsx.
+      trust: {
+        compact: 'חינם לחיפוש ויצירת קשר ישיר עם בעלי הדירות — מודעות גם באנגלית.',
+        freeTitle: 'שימוש חינם',
+        freeBody: 'החיפוש ויצירת הקשר עם בעלי הדירות לא עולים לשוכרים דבר.',
+        directTitle: 'קשר ישיר עם בעל הדירה',
+        directBody: 'הודעה או וואטסאפ ישירות למי שמחזיק את המפתחות.',
+        englishTitle: 'מותאם לדוברי אנגלית',
+        englishBody: 'מודעות, סינון וחוזים באנגלית — וגם בעברית.',
+      },
       services: {
         // Rentals → services cross-sell strip (property detail + post-booking).
         crossSell: {

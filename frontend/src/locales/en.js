@@ -1516,6 +1516,19 @@ const en = {
       // Services marketplace hub (frontend/src/pages/Services.jsx) — gig
       // cards, hero search, filters, nearby/geolocation flows, view
       // toggle, empty states, and the geolocation-blocked recovery modal.
+      // Renter positioning strip (Home + Stays header). Every line here is
+      // about what WE cost and how the site works — never about agent,
+      // broker or key-money fees, which are the owner's to set and which
+      // some listings do charge. See RenterTrustBanner.jsx.
+      trust: {
+        compact: 'Free to search and contact owners directly — listings in English.',
+        freeTitle: 'Free to use',
+        freeBody: 'Searching and contacting owners costs renters nothing.',
+        directTitle: 'Contact owners directly',
+        directBody: 'Message or WhatsApp the person who actually holds the keys.',
+        englishTitle: 'Built for English speakers',
+        englishBody: 'Listings, filters and contracts in English — and in Hebrew.',
+      },
       services: {
         // Rentals → services cross-sell strip (property detail + post-booking).
         crossSell: {

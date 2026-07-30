@@ -9,6 +9,7 @@ import HeroSlideshow from '../components/HeroSlideshow';
 import DefaultImageBadge from '../components/property/DefaultImageBadge';
 import VideoCoverBadge from '../components/property/VideoCoverBadge';
 import PageMeta from '../components/PageMeta';
+import RenterTrustBanner from '../components/common/RenterTrustBanner';
 import { getCoverImage } from '../utils/coverImage';
 import { srcSet } from '../utils/cdnImage';
 import { areaLabel } from '../utils/areaNames';
@@ -134,9 +135,15 @@ const Home = () => {
 
   return (
     <div className="min-h-screen">
+      {/* The description deliberately does NOT say "no broker fees" (it used
+          to). MyIsraelRental charging no service fee says nothing about
+          whether the owner or managing agent charges one — and some listings
+          do carry an agent fee, shown on the listing page. Claiming otherwise
+          in a search snippet sets an expectation the platform can't keep.
+          Keep any claim here about OUR costs, not third parties'. */}
       <PageMeta
-        title="MyIsraelRental — Find your perfect rental in Israel | No service fees"
-        description="Browse long-term, short-term, and vacation rentals across Israel. Free for renters, free for owners. Search Jerusalem, Tel Aviv, Haifa and more — no broker fees."
+        title="MyIsraelRental — Find your perfect rental in Israel | Free to search"
+        description="Browse long-term, short-term, and vacation rentals across Israel — free to search and contact owners directly. Listings in Jerusalem, Tel Aviv, Haifa and more, in English."
         path="/"
         jsonLd={[
           // Organization — surfaces the brand name + logo in Google's
@@ -225,6 +232,13 @@ const Home = () => {
           </div>
         </div>
       </HeroSlideshow>
+
+      {/* Positioning strip — first thing below the hero, before the featured
+          listings. Says what the site is and what it costs a renter; makes
+          no claim about agent or broker fees (see RenterTrustBanner). */}
+      <div className="max-w-7xl mx-auto px-6 pt-8">
+        <RenterTrustBanner />
+      </div>
 
       <div className="max-w-7xl mx-auto px-6 py-16">
         {/* Title row — on desktop we anchor labeled "Scroll" pills to the

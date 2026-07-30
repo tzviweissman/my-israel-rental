@@ -34,6 +34,7 @@ import StaysMapView from '../components/stays/StaysMapView';
 import AddressAutocomplete from '../components/common/AddressAutocomplete';
 import PeekableResultsSheet from '../components/common/PeekableResultsSheet';
 import NearbyDensityBar from '../components/common/NearbyDensityBar';
+import RenterTrustBanner from '../components/common/RenterTrustBanner';
 import { flexLabel } from '../components/search/WhenPicker';
 import QuickChips from '../components/search/QuickChips';
 import NotifyMeCard from '../components/NotifyMeCard';
@@ -795,6 +796,11 @@ const Stays = ({ landing = null }) => {
                 {where ? ` ${t('stays.in', 'in')} ${areaLabel(where, t)}` : ''}
                 {nearCoords && !where ? ` ${t('stays.nearAddress', 'near this address')}` : ''}
               </h2>
+              {/* One-line version of the Home positioning strip — the full
+                  three-column block here would push the actual listings
+                  below the fold. Same rule: nothing about agent or broker
+                  fees. */}
+              <RenterTrustBanner variant="compact" className="mt-0.5" />
               {nearCoords && nearQuery && (
                 <p className="text-xs text-gray-500 mt-0.5 truncate max-w-md" data-testid="stays-near-label-grid">
                   {t('stays.nearestFirst', 'Nearest first — from')} {nearQuery}

@@ -27,7 +27,10 @@ const RENTAL_TYPE_META = {
   },
   'long-term': {
     title: 'Long-term apartment rentals in Israel | MyIsraelRental',
-    description: '12-month and longer apartment rentals across Israel. Browse verified listings in Jerusalem, Tel Aviv, Haifa, Beit Shemesh and more. No broker fees.',
+    // No "No broker fees." here — see the note in Home.js. The platform is
+    // free to use; what an owner or managing agent charges is theirs to set,
+    // and listings that do carry an agent fee display it.
+    description: '12-month and longer apartment rentals across Israel. Browse verified listings in Jerusalem, Tel Aviv, Haifa, Beit Shemesh and more — free to search and contact owners directly.',
   },
   'short-term': {
     title: 'Short-term rentals in Israel (1–6 months) | MyIsraelRental',
