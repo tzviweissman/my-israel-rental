@@ -107,8 +107,14 @@ export function getCoverImage(images, width = 600, apiBase = '', videos = undefi
     }
   }
 
-  // 3. Nothing at all → deterministic 1-of-5 generic apartment placeholder
-  return { url: pickFallback(seed), isDefault: true, fromVideo: false };
+  // 3. Nothing at all → deterministic 1-of-10 generic apartment placeholder.
+  // Run it through sizedImage() like the real-photo branch above does. This
+  // used to return the raw URL, which was harmless while every fallback was
+  // a Pexels URL (sizedImage no-ops on foreign CDNs) but meant the
+  // Cloudinary placeholders served their full ~250 KB original on `src`
+  // instead of the ~24 KB w_600 variant.
+  const fallback = pickFallback(seed);
+  return { url: sizedImage(fallback, width) || fallback, isDefault: true, fromVideo: false };
 }
 
 export { FALLBACK_URL, FALLBACK_URLS, pickFallback };
