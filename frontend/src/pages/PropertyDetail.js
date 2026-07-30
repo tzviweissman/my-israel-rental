@@ -194,8 +194,8 @@ const PropertyDetail = () => {
 
     try {
       // Blocked dates are supplementary: the listing renders fine without
-      // them. Deliberately its own try/catch — sharing the property's meant
-      // a calendar hiccup claimed the property itself didn't exist.
+      // them. Deliberately its own try/catch — sharing the property fetch's
+      // meant a calendar hiccup claimed the property itself didn't exist.
       const blockedRes = await axios.get(`${API}/properties/${id}/blocked-dates`);
       const allBlocked = [...(blockedRes.data.internal || []), ...(blockedRes.data.external || [])];
       const dates = [];
