@@ -1,10 +1,14 @@
 import React, { useRef } from 'react';
 import { ChevronLeft, ChevronRight, Film, Play } from 'lucide-react';
 import { sizedImage, srcSet, videoPoster } from '../../utils/cdnImage';
+import { pickFallback } from '../../utils/coverImage';
 import useIsRtl from '../../hooks/useIsRtl';
 import DefaultImageBadge from './DefaultImageBadge';
 
-const HERO_FALLBACK_URL = 'https://images.pexels.com/photos/1669799/pexels-photo-1669799.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940';
+// No hardcoded hero fallback any more — we seed off the same property id the
+// card grid used so a photo-less listing keeps the SAME placeholder when the
+// visitor clicks into it. It used to be an unrelated one-off Pexels photo,
+// which made the image appear to change for no reason.
 
 /**
  * Image + video carousel with thumbnail strip. Pure presentational.
@@ -14,8 +18,10 @@ const HERO_FALLBACK_URL = 'https://images.pexels.com/photos/1669799/pexels-photo
  *                                  back-nav can drive the gallery too.
  *   apiBase — used to resolve `/api/...` upload URLs to absolute. Pass the
  *             frontend's API constant.
+ *   seed    — property id. Only used when there is no media at all, to pick
+ *             the same rotating placeholder the card grid showed.
  */
-const ImageGallery = ({ media, currentIndex, onIndexChange, alt, apiBase }) => {
+const ImageGallery = ({ media, currentIndex, onIndexChange, alt, apiBase, seed }) => {
   const videoRefs = useRef({});
   const isRtl = useIsRtl();
   // In RTL: Prev sits on the right edge (start in RTL = right), with
@@ -40,15 +46,17 @@ const ImageGallery = ({ media, currentIndex, onIndexChange, alt, apiBase }) => {
   };
 
   if (!media || media.length === 0) {
+    const placeholder = pickFallback(seed);
     return (
       <div className="relative">
-        <div
-          className="w-full aspect-[4/3] rounded-2xl"
-          style={{
-            backgroundImage: `url(${HERO_FALLBACK_URL})`,
-            backgroundSize: 'cover',
-            backgroundPosition: 'center',
-          }}
+        <img
+          src={sizedImage(placeholder, 1200)}
+          srcSet={srcSet(placeholder, 1200)}
+          sizes="(max-width: 1024px) 100vw, 1200px"
+          alt={alt || ''}
+          loading="lazy"
+          decoding="async"
+          className="w-full aspect-[4/3] rounded-2xl object-cover"
         />
         <DefaultImageBadge />
       </div>

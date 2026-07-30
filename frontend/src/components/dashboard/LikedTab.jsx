@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { Heart, MapPin, Bed, Bath } from 'lucide-react';
 import { toast } from 'sonner';
+import { getCoverImage } from '../../utils/coverImage';
 
 /**
  * Renter's "Liked Properties" dashboard tab.
@@ -44,13 +45,11 @@ const LikedTab = ({ API, token }) => {
     }
   };
 
-  const imageUrl = (p) => {
-    const first = p.images?.[0];
-    if (!first) {
-      return 'https://images.pexels.com/photos/1669799/pexels-photo-1669799.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940';
-    }
-    return first.startsWith('/api') ? `${API.replace('/api', '')}${first}` : first;
-  };
+  // Route through the shared helper so a photo-less listing shows the same
+  // rotating placeholder here as it does in the search grid and on the
+  // detail page. This used to be its own hardcoded Pexels URL — a third
+  // copy of the same literal that lived in ImageGallery too.
+  const imageUrl = (p) => getCoverImage(p.images, 600, API, p.videos, p.id).url;
 
   return (
     <div className="space-y-6" data-testid="liked-tab">

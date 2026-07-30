@@ -299,6 +299,7 @@ const PropertyDetail = () => {
                 onIndexChange={setCurrentImageIndex}
                 alt={property.title}
                 apiBase={API}
+                seed={property.id}
               />
             </div>
 
