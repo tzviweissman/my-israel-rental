@@ -365,8 +365,16 @@ const GigDetail = () => {
   const waNumber = gigWhatsAppNumber(gig);
   const useWhatsApp = gig.booking_mode === 'whatsapp' && hasValidWhatsApp(waNumber);
   const openWhatsApp = (message) => {
-    const url = buildWhatsAppLinkWithMessage(waNumber, message);
-    if (!url) return false;
+    // Guard on the number we already have so the button behaves exactly as
+    // before when there's nothing to dial — the backend would only bounce
+    // the visitor back to this page.
+    if (!buildWhatsAppLinkWithMessage(waNumber, message)) return false;
+    // Go through the tracked redirect rather than straight to wa.me, so the
+    // lead is counted. Opened synchronously in the click handler: a popup
+    // blocker kills a window opened after an await, and the endpoint bounces
+    // to wa.me even if its own logging fails.
+    const url = `${API}/marketplace/gigs/${encodeURIComponent(gig.id)}/contact`
+      + `?text=${encodeURIComponent(message || '')}`;
     window.open(url, '_blank', 'noopener,noreferrer');
     return true;
   };

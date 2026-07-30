@@ -356,6 +356,13 @@ async def startup_tasks() -> None:
         )
         await db.property_view_events.create_index("at", background=True)
         await db.property_view_events.create_index("property_id", background=True)
+        # Provider lead attribution: the analytics dashboard reads these by
+        # gig and by provider over a date window, so index both with the
+        # timestamp trailing.
+        await db.lead_events.create_index([("gig_id", 1), ("created_at", -1)], background=True)
+        await db.lead_events.create_index(
+            [("provider_id", 1), ("created_at", -1)], background=True,
+        )
         logger.info("Hot-path indexes ensured")
     except Exception as e:  # noqa: BLE001
         logger.warning(f"hot-path index creation failed (non-fatal): {e}")

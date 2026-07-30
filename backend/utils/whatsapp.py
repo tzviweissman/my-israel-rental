@@ -46,6 +46,8 @@ import logging
 import os
 from typing import Optional
 
+from utils.whatsapp_link import normalize_whatsapp_number
+
 log = logging.getLogger(__name__)
 
 # Cached Client — created lazily on first send.
@@ -85,14 +87,18 @@ def _client(cfg: dict):
 def _to_whatsapp_address(raw: str) -> str:
     """Normalize a user-entered number to Twilio's ``whatsapp:+E.164``
     address form. Returns empty string for an empty/invalid input so
-    the caller can short-circuit."""
-    if not raw:
-        return ""
-    digits = "".join(ch for ch in raw if ch.isdigit())
+    the caller can short-circuit.
+
+    Delegates to ``utils.whatsapp_link`` so this agrees with the wa.me
+    deep-links. It previously just stripped non-digits and prepended ``+``,
+    which meant a number saved in Israeli national format ("050-123-4567" —
+    how essentially every local user types it) became ``+0501234567``: a
+    valid-looking address that Twilio can never deliver to. The trunk ``0``
+    has to be replaced by the country code, not kept alongside it.
+    """
+    digits = normalize_whatsapp_number(raw)
     if not digits:
         return ""
-    # If the user saved a leading + already, preserve it. Otherwise
-    # assume E.164 with no prefix; Twilio still requires the +.
     return f"whatsapp:+{digits}"
 
 

@@ -6,12 +6,15 @@ browse the catalog and book, and both parties leave reviews.
 Extracted from ``marketplace.py`` in the 2026-07 refactor.
 """
 import asyncio
+import os
 import re
 import uuid
 from datetime import datetime
 from typing import Any, Optional
+from urllib.parse import urlparse
 
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Query, Request
+from fastapi.responses import RedirectResponse
 from pydantic import BaseModel  # noqa: F401 — kept for consistency
 
 from routes.deps import db, logger, verify_token
@@ -42,6 +45,7 @@ from .shared import (
     _validate_subcategory,
 )
 from utils.user_contact import user_whatsapp
+from utils.whatsapp_link import build_whatsapp_link
 
 router = APIRouter(prefix="/marketplace", tags=["marketplace"])
 
@@ -538,6 +542,88 @@ async def update_booking(booking_id: str, payload: BookingPatch, user=Depends(ve
     fresh["id"] = fresh.pop("_id")
     return fresh
 
+
+
+@router.get("/gigs/{gig_id}/contact")
+async def contact_gig_on_whatsapp(
+    gig_id: str,
+    request: Request,
+    text: str = Query("", max_length=1000),
+) -> RedirectResponse:
+    """Count a WhatsApp lead, then hand the visitor to WhatsApp.
+
+    Provider subscriptions are the paid side of the marketplace, and until
+    now a WhatsApp inquiry left no trace at all — the deep link went straight
+    from the browser to ``wa.me``. Nothing could tell a provider (or us) how
+    many leads a gig produced, which makes the subscription impossible to
+    justify with numbers. This is the measurement point that the provider
+    analytics dashboard will read from.
+
+    Deliberately a redirect rather than a POST-then-open: a popup blocker
+    kills a window opened after an await, and a failed beacon would silently
+    lose the lead. The browser navigates here and we bounce it onward, so the
+    click and the measurement are the same action.
+
+    **Logging never blocks the lead.** Every failure path still redirects —
+    a broken analytics write must not cost a provider a customer.
+
+    The ``wa.me`` URL is built server-side from the stored number rather than
+    accepted from the caller; taking a client-supplied destination would make
+    this an open redirect.
+    """
+    gig = await db.marketplace_gigs.find_one({"_id": gig_id})
+    if not gig:
+        raise HTTPException(status_code=404, detail="Gig not found")
+
+    # Same precedence the gig detail payload uses: per-gig number first,
+    # then the provider record, then the account-level number.
+    provider_user_id = gig.get("provider_user_id")
+    number = (gig.get("whatsapp") or "").strip()
+    if not number:
+        prov = await db.marketplace_providers.find_one({"user_id": provider_user_id})
+        number = ((prov or {}).get("whatsapp") or "").strip()
+    if not number:
+        user = await db.users.find_one({"_id": provider_user_id}) \
+            or await db.users.find_one({"id": provider_user_id})
+        number = user_whatsapp(user)
+
+    target = build_whatsapp_link(number, text)
+    if not target:
+        # No dialable number. Send them back to the gig rather than showing a
+        # raw API error — the in-platform inquiry flow is on that page.
+        frontend = os.environ.get("FRONTEND_URL", "https://myisraelrental.com").rstrip("/")
+        return RedirectResponse(f"{frontend}/services/gig/{gig_id}", status_code=302)
+
+    try:
+        await db.lead_events.insert_one({
+            "_id": str(uuid.uuid4()),
+            "type": "whatsapp_click",
+            "gig_id": gig_id,
+            "provider_id": provider_user_id,
+            "created_at": datetime.now(UTC).isoformat(),
+            # Coarse only — enough to tell apart "found us on Google" from
+            # "clicked through from a listing", with no new PII. The full
+            # user-agent and IP are deliberately not stored.
+            "referrer_host": _referrer_host(request.headers.get("referer")),
+        })
+    except Exception:  # noqa: BLE001 — the lead matters more than the metric
+        logger.exception("lead_events insert failed for gig %s", gig_id)
+
+    return RedirectResponse(target, status_code=302)
+
+
+def _referrer_host(referer: Optional[str]) -> str:
+    """Host portion of a Referer header, or '' — never the full URL.
+
+    Query strings on our own pages carry filter state (and on the rentals
+    side, sometimes a searched address), so only the host is kept.
+    """
+    if not referer:
+        return ""
+    try:
+        return (urlparse(referer).hostname or "")[:100]
+    except Exception:  # noqa: BLE001
+        return ""
 
 
 @router.get("/gigs/{gig_id}/reviews")
