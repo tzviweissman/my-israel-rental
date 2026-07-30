@@ -40,7 +40,7 @@ import NotifyMeCard from '../components/NotifyMeCard';
 import PageMeta from '../components/PageMeta';
 import useFavorites from '../hooks/useFavorites';
 import { saveReturnPath } from '../hooks/useBackNavigation';
-import { areaLabel, areaGroupKey, canonicalArea } from '../utils/areaNames';
+import { areaLabel, areaGroupKey, canonicalArea, UNGROUPED_AREA } from '../utils/areaNames';
 
 const API = process.env.REACT_APP_BACKEND_URL + '/api';
 
@@ -307,7 +307,7 @@ const Stays = ({ landing = null }) => {
   const grouped = useMemo(() => {
     const m = new Map();
     filtered.forEach((p) => {
-      const key = areaGroupKey(p.area) || 'Other';
+      const key = areaGroupKey(p.area) || UNGROUPED_AREA;
       if (!m.has(key)) m.set(key, []);
       m.get(key).push(p);
     });

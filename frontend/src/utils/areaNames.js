@@ -71,12 +71,15 @@ export const AREA_CANONICALS = [
   ['Sanhedria', ['Sanhedria', 'Sanhedria, Jerusalem']],
   ['French Hill', ['French Hill', 'French Hill, Jerusalem']],
   ['Mekor Baruch', ['Mekor Baruch', 'Jerusalem - Mekor Baruch']],
-  ['Maalot Dafna', ['Maalot Dafna', 'Jerusalem - Maalot Dafna']],
+  ['Maalot Dafna', ['Maalot Dafna', 'Jerusalem - Maalot Dafna', 'Maalot Dafna, Jerusalem']],
   ['Baka', ['Baka']],
-  ['Arzei Habira', ['Arzei Habira', 'Arzei HaBirah', 'Arzei HaBirah, Jerusalem']],
+  ['Arzei Habira', ['Arzei Habira', 'Arzei HaBirah', 'Arzei HaBirah, Jerusalem', 'Jerusalem - Arzei HaBira']],
   // Sderot Eshkol — the boulevard named for PM Levi Eshkol, in Ramat Eshkol.
   ['Eshkol Blvd, Ramat Eshkol', ['Levi Eshkol']],
-  ['Ramat Shlomo', ['Ramat Shlomo']],
+  ['Ramat Shlomo', ['Ramat Shlomo', 'Ramat Shlomo, Jerusalem']],
+  // Real west-Jerusalem neighbourhood. Missed on the first pass because the
+  // area census was accidentally truncated before this row.
+  ['Givat Shaul', ['Givat Shaul', 'Jerusalem - Givat Shaul']],
   ['Talbiya', ['Talbiya']],
   ['Har Nof', ['Har Nof']],
   ['Gush 80', ['Gush 80']],
@@ -139,8 +142,20 @@ export const canonicalArea = (stored) => {
  * label (variants are normalised away in both languages). Unknown values
  * are returned **exactly as stored**.
  */
+/**
+ * Sentinel the browse-by-area grouping uses for listings with a blank
+ * `area` (8 in production). Kept as a fixed English string rather than a
+ * localised one because it doubles as a Map key and is compared against —
+ * a language-dependent key would regroup rows on every language switch.
+ * Translated here at render time instead.
+ */
+export const UNGROUPED_AREA = 'Other';
+
 export const areaLabel = (stored, t) => {
   const raw = stored == null ? '' : String(stored);
+  if (raw === UNGROUPED_AREA) {
+    return typeof t === 'function' ? t('areas.other', UNGROUPED_AREA) : raw;
+  }
   const canonical = canonicalArea(raw);
   if (!canonical) return raw;
   if (typeof t !== 'function') return canonical;

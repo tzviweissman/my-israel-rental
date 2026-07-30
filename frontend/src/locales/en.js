@@ -1361,6 +1361,9 @@ const en = {
         arzeiHabira: 'Arzei Habira',
         eshkolBlvdRamatEshkol: 'Eshkol Blvd, Ramat Eshkol',
         ramatShlomo: 'Ramat Shlomo',
+        givatShaul: 'Givat Shaul',
+        // Heading for listings whose `area` is blank (8 in production).
+        other: 'Other',
         talbiya: 'Talbiya',
         harNof: 'Har Nof',
         gush80: 'Gush 80',

@@ -1336,6 +1336,9 @@ const he = {
         arzeiHabira: 'ארזי הבירה',
         eshkolBlvdRamatEshkol: 'שדרות אשכול, רמת אשכול',
         ramatShlomo: 'רמת שלמה',
+        givatShaul: 'גבעת שאול',
+        // Heading for listings whose `area` is blank (8 in production).
+        other: 'אחר',
         talbiya: 'טלביה',
         harNof: 'הר נוף',
         gush80: 'גוש 80',
