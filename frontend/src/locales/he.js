@@ -1490,6 +1490,18 @@ const he = {
       // Renter positioning strip (Home + Stays header). Every line here is
       // about what WE cost and how the site works — never about agent,
       // broker or key-money fees. See RenterTrustBanner.jsx.
+      // Provider subscription ladder. See en.js — prices come from the API.
+      plans: {
+        chooseTitle: 'בחרו את תקופת ההתחייבות',
+        bestValue: 'המשתלם ביותר',
+        months: '{{n}} חודשים',
+        perMonth: 'לחודש',
+        approxIls: 'כ-₪{{amount}} לחודש',
+        billingNote: 'החיוב מתבצע מדי חודש בדולרים. הסכומים בשקלים הם הערכה ומשתנים לפי שער החליפין.',
+        upgradeCta: 'שדרוג ל-Pro',
+        continueToPaypal: 'המשך ל-PayPal',
+        loadFailed: 'לא הצלחנו לטעון את המחירים — נסו שוב בעוד רגע.',
+      },
       // Phone/WhatsApp field validation. See en.js.
       phone: {
         tooShort: 'המספר נראה קצר מדי — נא להזין את המספר המלא.',

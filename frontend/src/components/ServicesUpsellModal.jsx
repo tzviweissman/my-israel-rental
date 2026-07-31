@@ -21,7 +21,11 @@ const BENEFITS = [
   { Icon: Trophy, title: 'Professional Service Page', body: 'A dedicated page with high-quality photos, detailed description, reviews and direct contact — designed to look premium and convert.' },
   { Icon: Megaphone, title: 'Built-in Advertising', body: 'We promote you across the homepage, search results, popular listings and email newsletters — consistent visibility, no extra effort.' },
   { Icon: Gift, title: 'First Month Completely Free', body: 'Test the platform risk-free. No payment required upfront.' },
-  { Icon: DollarSign, title: 'Affordable Growth', body: 'Only $25 / month after the free trial — one of the lowest rates for this level of targeted exposure in Israel.' },
+  // Deliberately no figure here. This copy said "Only $25 / month", which is
+  // now the 12-month rate only — one of three tiers — and a price written in
+  // prose goes stale the moment the ladder moves. The actual numbers come
+  // from GET /marketplace/subscription/plans wherever they're shown.
+  { Icon: DollarSign, title: 'Affordable Growth', body: 'Plans from the price of a couple of coffees a month, with a lower monthly rate the longer you commit.' },
   { Icon: Inbox, title: 'Direct High-Quality Leads', body: 'Inquiries from serious clients who already trust the MyIsraelRental platform.' },
   { Icon: LineChart, title: 'Easy Management', body: 'A simple dashboard to update availability, pricing, photos, and respond to leads quickly.' },
   { Icon: Shield, title: 'Proven Platform Trust', body: 'Leverage our established reputation in the Israel rental community for instant credibility.' },

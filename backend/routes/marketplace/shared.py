@@ -18,11 +18,66 @@ from routes.deps import db, logger
 UTC = timezone.utc
 
 # ---- Subscription plan constants -------------------------------------------
-SUBSCRIPTION_PRICE = 25.00
 SUBSCRIPTION_CURRENCY = "USD"
 SUBSCRIPTION_INTERVAL = "MONTH"
 PLAN_NAME = "MyIsraelRental Pro (monthly)"
 PLAN_DESCRIPTION = "Publish unlimited gigs on the MyIsraelRental Services Marketplace."
+
+# Commitment ladder. Longer term, lower monthly rate — the shape providers
+# already expect, priced under the main competitor at every tier (they charge
+# 3mo $45 / 6mo $40 / 12mo $35).
+#
+# Prices stay in USD because the provider base is heavily American. The UI
+# renders an approximate shekel figure beside each using the LIVE rate from
+# utils.helpers.get_usd_ils_rate — never a hardcoded one — and labels it
+# "approx.", because the amount PayPal actually charges is the USD one.
+#
+# `key` is stable and ends up in the DB and in PayPal plan names. Don't
+# rename one without a migration: existing subscribers are matched by it.
+SUBSCRIPTION_PLANS: list[dict] = [
+    {
+        "key": "12mo",
+        "months": 12,
+        "monthly_price": 25.00,
+        "headline": True,   # "Best value" badge + preselected in the UI
+    },
+    {
+        "key": "6mo",
+        "months": 6,
+        "monthly_price": 30.00,
+        "headline": False,
+    },
+    {
+        "key": "3mo",
+        "months": 3,
+        "monthly_price": 35.00,
+        "headline": False,
+    },
+]
+
+SUBSCRIPTION_PLANS_BY_KEY: dict[str, dict] = {p["key"]: p for p in SUBSCRIPTION_PLANS}
+
+# The plan a caller gets when it doesn't name one. Also what pre-ladder
+# clients (and anything still posting no plan_key) fall back to.
+DEFAULT_PLAN_KEY = "12mo"
+
+# Retained so existing imports and the old single-plan billing rows keep
+# resolving. Equal to the headline plan's rate.
+SUBSCRIPTION_PRICE = SUBSCRIPTION_PLANS_BY_KEY[DEFAULT_PLAN_KEY]["monthly_price"]
+
+
+def plan_for(key: str | None) -> dict:
+    """Resolve a plan key to its definition, falling back to the default.
+
+    Unknown keys fall back rather than raising: a stale client or a
+    hand-edited request should land on a real plan, not a 500.
+    """
+    return SUBSCRIPTION_PLANS_BY_KEY.get(key or "", SUBSCRIPTION_PLANS_BY_KEY[DEFAULT_PLAN_KEY])
+
+
+# TODO(pricing): a free/starter tier and the Verified badge are a separate,
+# larger effort — they change what a provider gets, not just what they pay.
+# This module only sets the paid ladder.
 FRONTEND_URL = os.environ.get("FRONTEND_URL", "https://myisraelrental.com").rstrip("/")
 
 

@@ -1520,6 +1520,20 @@ const en = {
       // about what WE cost and how the site works — never about agent,
       // broker or key-money fees, which are the owner's to set and which
       // some listings do charge. See RenterTrustBanner.jsx.
+      // Provider subscription ladder. Prices are NOT here — they come from
+      // GET /marketplace/subscription/plans so they exist in one place and
+      // match what PayPal is told to charge.
+      plans: {
+        chooseTitle: 'Choose your commitment',
+        bestValue: 'Best value',
+        months: '{{n}} months',
+        perMonth: 'mo',
+        approxIls: 'approx. ₪{{amount}} / mo',
+        billingNote: 'Billed monthly in USD. Shekel amounts are approximate and move with the exchange rate.',
+        upgradeCta: 'Upgrade to Pro',
+        continueToPaypal: 'Continue to PayPal',
+        loadFailed: "Couldn't load pricing — please try again in a moment.",
+      },
       // Phone/WhatsApp field validation. Wording tells people exactly what
       // to add — "invalid number" leaves them guessing.
       phone: {

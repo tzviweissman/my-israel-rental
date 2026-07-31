@@ -10,6 +10,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { toast } from 'sonner';
+import PlanPicker from '../marketplace/PlanPicker';
 import {
   Plus, Loader2, ExternalLink, Trash2, BadgeCheck, Clock, Sparkles,
   Pencil, Upload, X, FileText, Globe, Award,
@@ -307,6 +308,10 @@ const MyGigsTab = ({ API, token }) => {
   const [provider, setProvider] = useState(null);
   const [providerDetails, setProviderDetails] = useState(null);
   const [upgrading, setUpgrading] = useState(false);
+  // Commitment tier. Left empty until PlanPicker reports the ladder's
+  // default, so we never post a tier the backend didn't offer.
+  const [planKey, setPlanKey] = useState('');
+  const [showPlans, setShowPlans] = useState(false);
   const [showProfile, setShowProfile] = useState(false);
 
   const load = async () => {
@@ -351,9 +356,14 @@ const MyGigsTab = ({ API, token }) => {
   const upgrade = async () => {
     setUpgrading(true);
     try {
-      const res = await axios.post(`${API}/marketplace/subscription/upgrade`, {}, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      // The tier travels as a query param — the endpoint accepts it
+      // optionally so an older client still lands on the default plan.
+      const res = await axios.post(
+        `${API}/marketplace/subscription/upgrade`
+          + (planKey ? `?plan_key=${encodeURIComponent(planKey)}` : ''),
+        {},
+        { headers: { Authorization: `Bearer ${token}` } },
+      );
       if (res.data?.approval_url) {
         // Redirect to PayPal for approval. PayPal will return the user
         // to /payment/success?flow=marketplace-subscription which activates.
@@ -412,13 +422,16 @@ const MyGigsTab = ({ API, token }) => {
           </button>
           {provider && provider.subscription_status !== 'active' && (
             <button
-              onClick={upgrade}
+              onClick={() => setShowPlans(true)}
               disabled={upgrading}
               className="px-4 py-2.5 rounded-lg text-sm font-semibold text-white bg-[#D4AF37] hover:bg-[#c19f2c] flex items-center gap-1.5 disabled:opacity-60"
               data-testid="my-gigs-upgrade-btn"
             >
               {upgrading ? <Loader2 className="animate-spin" size={14} /> : <Sparkles size={14} />}
-              Upgrade — $25/mo
+              {/* No price on the button any more: it hardcoded "$25/mo",
+                  which is now only one of three tiers and would go stale the
+                  moment pricing moves. The ladder itself is the source. */}
+              {t('plans.upgradeCta', 'Upgrade to Pro')}
             </button>
           )}
           {provider && provider.subscription_status === 'active' && (
@@ -439,6 +452,40 @@ const MyGigsTab = ({ API, token }) => {
           </button>
         </div>
       </div>
+
+      {/* Tier selection. Inline rather than a modal so the provider can still
+          see their gigs and trial status while deciding — this is a pricing
+          decision, not an interruption. */}
+      {showPlans && provider && provider.subscription_status !== 'active' && (
+        <div
+          className="bg-white border border-gray-200 rounded-2xl p-4 mb-4"
+          data-testid="my-gigs-plans-panel"
+        >
+          <p className="text-sm font-semibold text-gray-900 mb-2">
+            {t('plans.chooseTitle', 'Choose your commitment')}
+          </p>
+          <PlanPicker value={planKey} onChange={setPlanKey} disabled={upgrading} />
+          <div className="flex gap-2 mt-3">
+            <button
+              onClick={upgrade}
+              disabled={upgrading || !planKey}
+              className="px-4 py-2.5 rounded-lg text-sm font-semibold text-white bg-[#D4AF37] hover:bg-[#c19f2c] flex items-center gap-1.5 disabled:opacity-60"
+              data-testid="my-gigs-confirm-upgrade-btn"
+            >
+              {upgrading ? <Loader2 className="animate-spin" size={14} /> : <Sparkles size={14} />}
+              {t('plans.continueToPaypal', 'Continue to PayPal')}
+            </button>
+            <button
+              onClick={() => setShowPlans(false)}
+              disabled={upgrading}
+              className="px-3 py-2.5 rounded-lg text-sm font-semibold text-gray-700 border border-gray-300 hover:bg-gray-50"
+              data-testid="my-gigs-plans-cancel"
+            >
+              {t('common.cancel', 'Cancel')}
+            </button>
+          </div>
+        </div>
+      )}
 
       {gigs.length === 0 ? (
         <div className="bg-white border border-gray-200 rounded-2xl p-10 text-center" data-testid="my-gigs-empty">
