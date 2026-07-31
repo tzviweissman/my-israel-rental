@@ -6,6 +6,7 @@ gigs; without it, gigs go inactive when the free trial ends.
 
 Extracted from ``marketplace.py`` in the 2026-07 refactor.
 """
+import os
 from datetime import datetime
 from typing import Any
 
@@ -78,8 +79,11 @@ async def _get_or_create_billing_plan(plan_key: str | None = None) -> str:
     are bound to the plan they were created against, so an existing
     subscriber keeps billing at the price they agreed to.
 
-    Creating a plan is a WRITE to live PayPal. It happens lazily on the
-    first upgrade at a given tier, never on deploy or on a page load.
+    Creating a plan is a WRITE to PayPal, in whatever environment
+    PAYPAL_MODE points at — sandbox by default, real billing objects when
+    it is "live". It happens lazily on the first upgrade at a given tier,
+    never on deploy or on a page load. Use the admin bootstrap endpoint at
+    the bottom of this module to create them deliberately instead.
     """
     plan = plan_for(plan_key)
     key = plan["key"]
@@ -352,3 +356,102 @@ async def handle_subscription_webhook_event(event: dict[str, Any]) -> None:
 
 # --------------------------- Reviews --------------------------- #
 
+
+# --------------------- Admin: PayPal plan bootstrap --------------------- #
+# Plans are normally created lazily, on the first upgrade at a given tier.
+# That is fine for correctness but means the FIRST REAL PROVIDER's checkout
+# is also the first time the plan-creation path ever runs — so a
+# misconfiguration surfaces during someone's actual payment attempt.
+#
+# These two endpoints make it a deliberate, inspectable step instead: check
+# what exists, then create what's missing, before anyone tries to subscribe.
+
+
+def _plan_settings_summary(settings: dict) -> list[dict]:
+    """Which tiers currently resolve to a PayPal plan id. No PayPal calls."""
+    stored = (settings or {}).get("plans") or {}
+    legacy_id = (settings or {}).get("plan_id")
+    rows = []
+    for plan in SUBSCRIPTION_PLANS:
+        key = plan["key"]
+        entry = stored.get(key) or {}
+        plan_id = entry.get("plan_id")
+        source = "per-tier"
+        # The pre-ladder document held a single id at the top level; it still
+        # serves the default tier so we don't create a duplicate at the same
+        # price. Surface that explicitly rather than showing it as missing.
+        if not plan_id and key == DEFAULT_PLAN_KEY and legacy_id:
+            plan_id, source = legacy_id, "legacy single-plan document"
+        rows.append({
+            "key": key,
+            "months": plan["months"],
+            "monthly_price": plan["monthly_price"],
+            "plan_id": plan_id,
+            "exists": bool(plan_id),
+            "source": source if plan_id else None,
+        })
+    return rows
+
+
+@router.get("/subscription/plans/status")
+async def admin_plan_status(payload: dict = Depends(verify_token)) -> dict:
+    """Read-only: which tiers already have a PayPal plan.
+
+    Touches nothing. Safe to call at any time, in any mode.
+    """
+    if payload.get("role") != "admin":
+        raise HTTPException(status_code=403, detail="Admin access required")
+
+    settings = await db.marketplace_settings.find_one({"_id": "paypal_plan"}) or {}
+    rows = _plan_settings_summary(settings)
+    return {
+        # Which PayPal environment the backend is pointed at. Worth seeing
+        # before creating anything — sandbox plan ids are useless in live and
+        # vice versa.
+        "paypal_mode": os.environ.get("PAYPAL_MODE", "sandbox").lower(),
+        "product_id": settings.get("product_id"),
+        "plans": rows,
+        "missing": [r["key"] for r in rows if not r["exists"]],
+    }
+
+
+@router.post("/subscription/plans/bootstrap")
+async def admin_bootstrap_plans(payload: dict = Depends(verify_token)) -> dict:
+    """Create any missing PayPal plans, deliberately.
+
+    Idempotent: a tier that already resolves to a plan id is skipped, never
+    recreated. Duplicate plans at the same price are the main hazard here —
+    they're hard to tell apart afterwards and subscriptions bind to whichever
+    one was used.
+
+    Creating a plan is a WRITE to PayPal in whatever mode the backend is
+    configured for. In sandbox this is free and reversible. In live it
+    creates real billing objects against the merchant account.
+    """
+    if payload.get("role") != "admin":
+        raise HTTPException(status_code=403, detail="Admin access required")
+
+    mode = os.environ.get("PAYPAL_MODE", "sandbox").lower()
+    before = await db.marketplace_settings.find_one({"_id": "paypal_plan"}) or {}
+    summary = _plan_settings_summary(before)
+    missing = [r["key"] for r in summary if not r["exists"]]
+
+    created, failed = [], []
+    for key in missing:
+        try:
+            plan_id = await _get_or_create_billing_plan(key)
+            created.append({"key": key, "plan_id": plan_id})
+        except Exception as e:  # noqa: BLE001
+            # Keep going: one bad tier shouldn't block the others, and the
+            # response needs to say exactly which failed and why.
+            logger.exception("[marketplace] plan bootstrap failed for %s", key)
+            failed.append({"key": key, "error": str(e)})
+
+    after = await db.marketplace_settings.find_one({"_id": "paypal_plan"}) or {}
+    return {
+        "paypal_mode": mode,
+        "already_existed": [r["key"] for r in summary if r["exists"]],
+        "created": created,
+        "failed": failed,
+        "plans": _plan_settings_summary(after),
+    }
