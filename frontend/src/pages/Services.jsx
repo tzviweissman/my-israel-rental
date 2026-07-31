@@ -807,8 +807,11 @@ const Services = () => {
                 {t('common.clearAll', 'Clear all filters')}
               </button>
             ) : (
+              /* Routed via the value page rather than straight into the
+                 wizard: a provider who hasn't been told what they're buying
+                 shouldn't land on a pricing choice. */
               <button
-                onClick={() => navigate('/services/create-gig')}
+                onClick={() => navigate('/why-list')}
                 className="px-5 py-2.5 rounded-lg text-sm font-semibold text-white bg-[#1E6A6A] hover:bg-[#0F3A3A]"
                 data-testid="services-empty-cta"
               >

@@ -43,6 +43,7 @@ const Home = lazy(() => import('./pages/Home'));
 const Properties = lazy(() => import(/* webpackPrefetch: true */ './pages/Properties'));
 const Stays = lazy(() => import(/* webpackPrefetch: true */ './pages/Stays'));
 const Services = lazy(() => import(/* webpackPrefetch: true */ './pages/Services'));
+const WhyList = lazy(() => import('./pages/WhyList'));
 const PropertyDetail = lazy(() => import('./pages/PropertyDetail'));
 const SubleaseDetail = lazy(() => import('./pages/SubleaseDetail'));
 const Auth = lazy(() => import('./pages/Auth'));
@@ -239,6 +240,10 @@ function App() {
               }} />}
             />
             <Route path="/services" element={<Services />} />
+            {/* Value page in front of plan selection. /for-providers is an
+                alias so either URL works in outreach. */}
+            <Route path="/why-list" element={<WhyList />} />
+            <Route path="/for-providers" element={<WhyList />} />
             <Route path="/services/jobs" element={<JobsBoard />} />
             <Route path="/services/jobs/:id" element={<JobDetail />} />
             <Route path="/services/post-job" element={user ? <PostJob /> : <Navigate to="/auth/login" />} />

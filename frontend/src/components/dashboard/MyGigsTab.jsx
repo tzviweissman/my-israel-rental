@@ -461,9 +461,20 @@ const MyGigsTab = ({ API, token }) => {
           className="bg-white border border-gray-200 rounded-2xl p-4 mb-4"
           data-testid="my-gigs-plans-panel"
         >
-          <p className="text-sm font-semibold text-gray-900 mb-2">
-            {t('plans.chooseTitle', 'Choose your commitment')}
-          </p>
+          <div className="flex items-baseline justify-between gap-3 mb-2">
+            <p className="text-sm font-semibold text-gray-900">
+              {t('plans.chooseTitle', 'Choose your commitment')}
+            </p>
+            {/* Escape hatch for anyone who reached pricing without reading
+                what they get — the brief asks for this link here. */}
+            <a
+              href="/why-list"
+              className="text-xs font-semibold text-[#1E6A6A] hover:underline shrink-0"
+              data-testid="my-gigs-why-list-link"
+            >
+              {t('plans.whatDoIGet', "What's included?")}
+            </a>
+          </div>
           <PlanPicker value={planKey} onChange={setPlanKey} disabled={upgrading} />
           <div className="flex gap-2 mt-3">
             <button

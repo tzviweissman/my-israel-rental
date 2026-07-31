@@ -1520,6 +1520,52 @@ const en = {
       // about what WE cost and how the site works — never about agent,
       // broker or key-money fees, which are the owner's to set and which
       // some listings do charge. See RenterTrustBanner.jsx.
+      // Provider value page (/why-list, /for-providers).
+      // RULE: every benefit below must map to shipped code. The two roadmap
+      // entries are rendered in their own labelled section â do not promote
+      // one into the benefits list until it actually exists.
+      whyList: {
+        heroTitle: 'Get found by English-speaking renters across Israel',
+        heroBody: 'People move, and then they need movers, cleaners, handymen and more. This is where they look — in a language they read, at the moment they need you.',
+        startListing: 'Start listing',
+        trialNote: 'Your first 30 days are free — no card needed to start.',
+        benefitsTitle: 'What you get',
+        reachTitle: 'Customers at the moment of need',
+        reachBody: 'Your services sit alongside the rental listings people are already browsing while they move.',
+        leadsTitle: 'A jobs board that comes to you',
+        leadsBody: 'Customers post what they need and you reply — instead of hoping they find your post.',
+        bilingualTitle: 'A bilingual profile, automatically',
+        bilingualBody: 'Write once. Your listing is translated so it reads properly in both English and Hebrew.',
+        reputationTitle: 'Reviews you actually earned',
+        reputationBody: 'Reviews are tied to real bookings, and consistently strong ratings earn a Top Rated badge.',
+        bookingTitle: 'Bookings and availability',
+        bookingBody: 'Offer appointment slots, fixed-price services or products, and set your own availability.',
+        contactTitle: 'Customers reach you directly',
+        contactBody: 'Take enquiries on WhatsApp or through the site — your choice, per listing.',
+        roadmapLabel: 'Coming soon — not available yet',
+        dashboardTitle: 'Leads and views dashboard',
+        dashboardBody: 'See how many people viewed your listing and got in touch. Being built now.',
+        verifiedTitle: 'Verified badge',
+        verifiedBody: 'An identity and credential check that shows on your profile. Not available yet.',
+        vsTitle: 'Better than a group chat',
+        vsBody: 'Most work here still comes from scattered WhatsApp and Facebook groups — your post scrolls away in an hour, nobody can search it later, and a new customer has no way to tell whether you are any good.',
+        vs_searchable: 'Your listing stays searchable by category and city, not buried in a feed.',
+        vs_trust: 'Ratings tied to real bookings give a stranger a reason to pick you.',
+        vs_english: 'Olim can read your listing and contact you without a translation app.',
+        pricingTitle: 'Simple pricing',
+        pricingBody: 'The longer you commit, the lower the monthly rate. Start with 30 days free.',
+        faqTitle: 'Questions',
+        faq_billing_q: 'How does billing work?',
+        faq_billing_a: 'You are billed monthly in US dollars through PayPal, at the rate for the commitment you choose. The first 30 days are free.',
+        faq_cancel_q: 'Can I cancel?',
+        faq_cancel_a: 'Yes. Cancel from your dashboard and you keep access until the end of the period you have already paid for.',
+        faq_leads_q: 'How do customers reach me?',
+        faq_leads_a: 'Through WhatsApp or an in-site enquiry, whichever you pick for each listing. You can also reply to posts on the jobs board.',
+        faq_language_q: 'Do I need to speak English?',
+        faq_language_a: 'No. Your listing is shown in both languages automatically, and you can mark which languages you work in.',
+        browseFirst: 'Want to look around first?',
+        browseServices: 'Browse the services marketplace',
+      },
       // Provider subscription ladder. Prices are NOT here — they come from
       // GET /marketplace/subscription/plans so they exist in one place and
       // match what PayPal is told to charge.
@@ -1530,6 +1576,7 @@ const en = {
         perMonth: 'mo',
         approxIls: 'approx. ₪{{amount}} / mo',
         billingNote: 'Billed monthly in USD. Shekel amounts are approximate and move with the exchange rate.',
+        whatDoIGet: "What's included?",
         upgradeCta: 'Upgrade to Pro',
         continueToPaypal: 'Continue to PayPal',
         loadFailed: "Couldn't load pricing — please try again in a moment.",
