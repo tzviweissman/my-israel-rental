@@ -31,6 +31,40 @@ component's `provider.<field>` accesses and fails on any mismatch.
 **Rule:** when a hand-picked payload feeds a specific consumer, pin them
 together. Don't rely on noticing.
 
+### 1b. The same shape, with *authorisation* on one side (2026-08-02)
+
+A fourth instance, worth calling out separately because the two sides weren't
+a payload and a reader — they were a **permission check and a button**.
+
+The API authorises every booking action on the caller's *relationship to that
+booking* (`owner_id`, `renter_id`). The dashboard decided which buttons to
+show from `user.role`. Both are reasonable sentences. They are not the same
+question, and the difference is invisible until someone hits it:
+
+| Frontend gate | Backend check | Result |
+|---|---|---|
+| `user.role === 'owner' \|\| 'manager'` | `booking.owner_id == user_id` | Cancel button on bookings you don't own → **403** |
+| `user.role === 'renter'` | `booking.renter_id == user_id` | **No cancellation button at all** for an owner/manager/admin who books a place |
+
+The second one is the nastier direction. A 403 at least produces an error
+someone can report; a button that never renders produces a user who assumes
+the feature doesn't exist. It was found only because the site owner happened
+to test a booking from their own non-renter account.
+
+Note that `BookingChip` already had the renter side right and the lister side
+wrong — so "we fixed this pattern once" was not true even within one feature.
+
+**What catches it:** `tests/test_booking_actions_contract.py` parses the
+authorisation checks out of `routes/bookings/cancel.py` and fails if either
+component reintroduces `user.role`. The rule it enforces is deliberately
+blunt — no role checks at all in those files — because the narrower version
+("role may be read, just not for a can* flag") is exactly the rule that was
+being followed when both bugs shipped.
+
+**Rule:** the UI's condition for *offering* an action must be the same
+predicate the server uses to *allow* it. If the server says `owner_id`, the
+button says `owner_id`. Role is a different question and answers it wrong.
+
 ---
 
 ## 2. A condition that quietly matches nothing
