@@ -65,19 +65,34 @@ async def create_booking(booking_data: BookingCreate, payload: dict = Depends(ve
 # ---- create_booking helpers ----------------------------------------------
 
 
+def bookings_scope_query(role: str | None, user_id: str) -> dict:
+    """Mongo filter limiting /bookings to what this caller may see.
+
+    Extracted from the handler so the security property is testable without
+    a database — see tests/test_bookings_scope.py.
+
+    **Never returns an empty filter.** The handler used to start with `{}`
+    and only narrow it for renter / owner / manager, so any other role —
+    provider, admin, or anything added later — fell through and received
+    EVERY booking in the database: strangers' guest names, dates, prices and
+    properties. A freshly created provider account opened its dashboard to a
+    full list of other people's bookings.
+
+    Unknown roles now default to the same self-scoped filter a renter gets,
+    so adding a role tomorrow leaks nothing. Admins are unaffected: the admin
+    dashboard reads GET /admin/bookings, which does its own role check.
+    """
+    if role in ('owner', 'manager'):
+        return {'owner_id': user_id}
+    # Renters see bookings where they are the guest OR where they're the
+    # sublessor (owner_id on a sublease booking points to them). That shape
+    # is also the safe default for every other role.
+    return {'$or': [{'renter_id': user_id}, {'owner_id': user_id}]}
+
+
 @api_router.get("/bookings", response_model=list[BookingOut])
 async def get_bookings(payload: dict = Depends(verify_token)) -> list[dict]:
-    query: dict = {}
-    if payload['role'] == 'renter':
-        # Renters see bookings where they are the guest OR where they're
-        # the sublessor (owner_id on a sublease booking points to them).
-        query['$or'] = [
-            {'renter_id': payload['user_id']},
-            {'owner_id': payload['user_id']},
-        ]
-    elif payload['role'] == 'owner' or payload['role'] == 'manager':
-        query['owner_id'] = payload['user_id']
-    
+    query = bookings_scope_query(payload.get('role'), payload['user_id'])
     bookings = await db.bookings.find(query, {"_id": 0}).to_list(1000)
 
     # Enrich bookings with property details (or sublease details when the
