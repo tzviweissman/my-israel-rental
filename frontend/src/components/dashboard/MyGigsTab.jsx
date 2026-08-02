@@ -303,6 +303,11 @@ const StatusPill = ({ provider }) => {
 
 const MyGigsTab = ({ API, token }) => {
   const navigate = useNavigate();
+  // This component had no translator of its own — the `useTranslation()`
+  // higher up this file belongs to ProfileEditModal. Adding t(...) calls
+  // down here without it threw ReferenceError on render and blanked the
+  // whole tab.
+  const { t } = useTranslation();
   const [loading, setLoading] = useState(true);
   const [gigs, setGigs] = useState([]);
   const [provider, setProvider] = useState(null);

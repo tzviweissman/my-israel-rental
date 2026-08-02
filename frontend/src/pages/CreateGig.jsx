@@ -460,7 +460,7 @@ const CreateGig = () => {
               <label className="text-sm font-semibold text-gray-700">Title</label>
               <input value={form.title} onChange={(e) => set({ title: e.target.value })}
                 placeholder={form.gig_type === 'store' ? 'e.g. Modern Furniture — Tel Aviv Showroom' : 'e.g. Deep apartment cleaning'}
-                className="w-full mt-1 px-3 py-2 rounded-lg border border-gray-200 text-sm" data-testid="wizard-title" />
+                className="w-full mt-1 px-3 py-2 rounded-lg border bg-white border-gray-300 focus:outline-none focus:border-[#1E6A6A] focus:ring-2 focus:ring-[#1E6A6A]/20 text-sm" data-testid="wizard-title" />
             </div>
             <div>
               <label className="text-sm font-semibold text-gray-700">Category</label>
@@ -483,7 +483,7 @@ const CreateGig = () => {
           <div className="space-y-4">
             <textarea value={form.description} onChange={(e) => set({ description: e.target.value })} rows={8}
               placeholder="Describe what you offer, who it's for, and what's included…"
-              className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm" data-testid="wizard-description" />
+              className="w-full px-3 py-2 rounded-lg border bg-white border-gray-300 focus:outline-none focus:border-[#1E6A6A] focus:ring-2 focus:ring-[#1E6A6A]/20 text-sm" data-testid="wizard-description" />
             <p className="text-xs text-gray-500">Min 10 characters. Hebrew-browsing renters will see this auto-translated — no need to write it twice.</p>
           </div>
         )}
@@ -707,7 +707,7 @@ const StoreProductsStep = ({ products, onUpdate, onAdd, onRemove, productImageIn
                 <span className="pointer-events-none absolute inset-y-0 right-2 flex items-center text-gray-400 text-xs">▾</span>
               </div>
               <input type="number" value={p.price} onChange={(e) => onUpdate(i, { price: e.target.value })}
-                placeholder={t("sweep.price", "Price")} className="flex-1 px-3 py-2 rounded-lg border border-gray-200 text-sm"
+                placeholder={t("sweep.price", "Price")} className="flex-1 px-3 py-2 rounded-lg border bg-white border-gray-300 focus:outline-none focus:border-[#1E6A6A] focus:ring-2 focus:ring-[#1E6A6A]/20 text-sm"
                 data-testid={`wizard-product-price-${i}`} />
               {products.length > 1 && (
                 <button type="button" onClick={() => onRemove(i)} className="px-2 text-red-500" data-testid={`wizard-product-remove-${i}`}>
@@ -719,7 +719,7 @@ const StoreProductsStep = ({ products, onUpdate, onAdd, onRemove, productImageIn
         </div>
         <textarea value={p.description} onChange={(e) => onUpdate(i, { description: e.target.value })} rows={2}
           placeholder="Short description (optional) — dimensions, materials, colours…"
-          className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm" />
+          className="w-full px-3 py-2 rounded-lg border bg-white border-gray-300 focus:outline-none focus:border-[#1E6A6A] focus:ring-2 focus:ring-[#1E6A6A]/20 text-sm" />
       </div>
     ))}
     <button type="button" onClick={onAdd} className="text-sm font-semibold text-[#1E6A6A] flex items-center gap-1" data-testid="wizard-product-add">
@@ -788,7 +788,7 @@ const TiersStep = ({ gigType, tiers, onUpdate, onAdd, onRemove, onUploadImages, 
                 <input type="number" min="5" step="5" value={tt.duration_minutes}
                   onChange={(e) => onUpdate(i, { duration_minutes: e.target.value })}
                   placeholder={t("sweep.duration", "Duration")}
-                  className="w-24 pl-3 pr-8 py-2 rounded-lg border border-gray-200 text-sm"
+                  className="w-24 pl-3 pr-8 py-2 rounded-lg border bg-white border-gray-300 focus:outline-none focus:border-[#1E6A6A] focus:ring-2 focus:ring-[#1E6A6A]/20 text-sm"
                   data-testid={`wizard-tier-duration-${i}`} />
                 <span className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 text-[11px] text-gray-500">min</span>
               </div>
@@ -797,7 +797,7 @@ const TiersStep = ({ gigType, tiers, onUpdate, onAdd, onRemove, onUploadImages, 
                 onChange={(e) => onUpdate(i, { delivery_days: e.target.value })}
                 placeholder={t('sweep.daysToComplete', 'Days to complete')}
                 title="Turnaround in days — leave blank for on-the-spot services"
-                className="w-32 px-3 py-2 rounded-lg border border-gray-200 text-sm"
+                className="w-32 px-3 py-2 rounded-lg border bg-white border-gray-300 focus:outline-none focus:border-[#1E6A6A] focus:ring-2 focus:ring-[#1E6A6A]/20 text-sm"
                 data-testid={`wizard-tier-days-${i}`} />
             )}
           </div>
@@ -811,7 +811,7 @@ const TiersStep = ({ gigType, tiers, onUpdate, onAdd, onRemove, onUploadImages, 
             </p>
           )}
           <textarea value={tt.description} onChange={(e) => onUpdate(i, { description: e.target.value })} rows={2}
-            placeholder="What's included (optional)" className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm" />
+            placeholder="What's included (optional)" className="w-full px-3 py-2 rounded-lg border bg-white border-gray-300 focus:outline-none focus:border-[#1E6A6A] focus:ring-2 focus:ring-[#1E6A6A]/20 text-sm" />
 
           {/* Per-tier photo uploader — lets a provider give each option
               its own visual identity (e.g. "Jerusalem tour" vs. "Tel Aviv
@@ -933,10 +933,10 @@ const AvailabilityStep = ({ weekly, slotDuration, onToggleDay, onUpdateWindow, o
             {open ? (
               <div className="flex items-center gap-2 flex-1">
                 <input type="time" value={win.start} onChange={(e) => onUpdateWindow(d.k, { start: e.target.value })}
-                  className="px-2 py-1.5 rounded-lg border border-gray-200 text-sm" data-testid={`wizard-day-start-${d.k}`} />
+                  className="px-2 py-1.5 rounded-lg border bg-white border-gray-300 focus:outline-none focus:border-[#1E6A6A] focus:ring-2 focus:ring-[#1E6A6A]/20 text-sm" data-testid={`wizard-day-start-${d.k}`} />
                 <span className="text-gray-400 text-sm">–</span>
                 <input type="time" value={win.end} onChange={(e) => onUpdateWindow(d.k, { end: e.target.value })}
-                  className="px-2 py-1.5 rounded-lg border border-gray-200 text-sm" data-testid={`wizard-day-end-${d.k}`} />
+                  className="px-2 py-1.5 rounded-lg border bg-white border-gray-300 focus:outline-none focus:border-[#1E6A6A] focus:ring-2 focus:ring-[#1E6A6A]/20 text-sm" data-testid={`wizard-day-end-${d.k}`} />
               </div>
             ) : (
               <span className="text-xs text-gray-400 italic">Closed</span>
