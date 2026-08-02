@@ -4,6 +4,7 @@ import axios from 'axios';
 import { toast } from 'sonner';
 import { API } from '../../App';
 import { useApiSWR } from '../../hooks/useApiSWR';
+import PayPalPlansPanel from './PayPalPlansPanel';
 
 const EMPTY = { whatsapp_number: '', contact_email: '', contact_phone: '', featured_property_ids: [] };
 
@@ -83,6 +84,10 @@ export const SettingsTab = ({ token }) => {
           </button>
         </div>
       </div>
+      {/* Subscription billing setup. Lives here rather than behind a
+          devtools console command — the endpoints are admin-only and need
+          an auth header, which a plain browser tab can't send. */}
+      <PayPalPlansPanel token={token} />
     </div>
   );
 };
