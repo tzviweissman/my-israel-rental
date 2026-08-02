@@ -472,6 +472,15 @@ async def my_gigs(user=Depends(verify_token)):
             "trial_ends_at": (prov or {}).get("trial_ends_at"),
             "subscribed_until": (prov or {}).get("subscribed_until"),
             "active": _provider_is_active(prov or {}),
+            # Cancelling sets THIS field, not `subscription_status` — the
+            # provider keeps paid-for access until the period ends. Without
+            # it the dashboard cannot tell "active" from "cancelled, winding
+            # down", so a successful cancel looked like nothing happened and
+            # the Upgrade button never came back.
+            "paypal_subscription_status": (prov or {}).get("paypal_subscription_status"),
+            "cancelled_at": (prov or {}).get("cancelled_at"),
+            # What they picked in the gig wizard, for "your plan starts on X".
+            "selected_plan_key": (prov or {}).get("selected_plan_key"),
         },
     }
 
