@@ -11,6 +11,7 @@ from datetime import datetime
 from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException, Query
+from pydantic import BaseModel
 
 from routes.deps import db, logger, verify_token
 from utils import paypal
@@ -65,6 +66,53 @@ async def list_subscription_plans() -> dict:
             }
             for p in SUBSCRIPTION_PLANS
         ],
+    }
+
+
+class PlanSelection(BaseModel):
+    """Payload for POST /subscription/select-plan."""
+    plan_key: str
+
+
+@router.post("/subscription/select-plan")
+async def select_plan(body: PlanSelection, user=Depends(verify_token)) -> dict:
+    """Record which tier a provider intends to pay for, WITHOUT charging.
+
+    The gig wizard makes this a required choice so nobody publishes without
+    knowing what they will eventually pay. But the first 30 days are free,
+    and taking a payment method at that point would misrepresent that — so
+    this touches no PayPal object and moves no money. It only writes the
+    intent onto the provider row.
+
+    Deliberately idempotent and re-callable: a provider changing their mind
+    during the trial just overwrites the choice, and the actual charge only
+    ever happens when they complete the PayPal flow in /upgrade.
+
+    Returns the trial end date so the UI can say exactly when the plan
+    starts rather than a vague "after your trial".
+    """
+    prov = await _ensure_provider_record(user["user_id"])
+    plan = plan_for(body.plan_key)
+
+    await db.marketplace_providers.update_one(
+        {"user_id": user["user_id"]},
+        {"$set": {
+            "selected_plan_key": plan["key"],
+            "selected_plan_months": plan["months"],
+            "selected_plan_price": plan["monthly_price"],
+            "selected_plan_at": datetime.now(UTC).isoformat(),
+        }},
+    )
+    return {
+        "ok": True,
+        "plan_key": plan["key"],
+        "months": plan["months"],
+        "monthly_price": plan["monthly_price"],
+        "currency": SUBSCRIPTION_CURRENCY,
+        # Present already when the row exists; _ensure_provider_record sets
+        # it 30 days out on first creation.
+        "trial_ends_at": prov.get("trial_ends_at"),
+        "subscription_status": prov.get("subscription_status", "trial"),
     }
 
 

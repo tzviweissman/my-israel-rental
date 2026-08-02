@@ -15,6 +15,10 @@
  *   5. Weekly availability (appointment only) — else skipped
  *   6. Gallery (all)
  *   7. Contact + booking mode + area (all)
+ *   8. Plan — which commitment tier starts after the free month (all).
+ *      Required to publish: the trial rolls into a paid plan, so nobody
+ *      should get here without having seen the number. Recorded via
+ *      /subscription/select-plan; no charge and no card at this point.
  *
  * All state is local; we POST once on the final "Publish" click.
  */
@@ -30,6 +34,7 @@ import { API, AuthContext } from '../App';
 import PageMeta from '../components/PageMeta';
 import { uploadFilesFast } from '../utils/fastUpload';
 import { normalizeWhatsAppNumber, hasValidWhatsApp } from '../utils/whatsappLink';
+import PlanPicker from '../components/marketplace/PlanPicker';
 import { useTranslation } from 'react-i18next';
 
 // ---- Gig type registry ------------------------------------------------------
@@ -95,6 +100,9 @@ const CreateGig = () => {
   const [categories, setCategories] = useState([]);
   const [locations, setLocations] = useState([]);
   const [saving, setSaving] = useState(false);
+  // Chosen commitment tier. Required to publish; recorded, never charged
+  // at this point — the first 30 days are free.
+  const [planKey, setPlanKey] = useState('');
   const productImageInputRef = useRef({});
 
   // Post-signup onboarding hook — when a provider lands here fresh from
@@ -242,8 +250,8 @@ const CreateGig = () => {
   const isAppointment = form.gig_type === 'appointment';
   const stepLabels = useMemo(() => (
     isAppointment
-      ? ['', 'Type', 'Overview', 'Description', 'Services', 'Hours', 'Contact']
-      : ['', 'Type', 'Overview', 'Description', form.gig_type === 'store' ? 'Products' : 'Services & Prices', 'Contact']
+      ? ['', 'Type', 'Overview', 'Description', 'Services', 'Hours', 'Contact', 'Plan']
+      : ['', 'Type', 'Overview', 'Description', form.gig_type === 'store' ? 'Products' : 'Services & Prices', 'Contact', 'Plan']
   ), [isAppointment, form.gig_type]);
   const totalSteps = stepLabels.length - 1;
 
@@ -268,8 +276,14 @@ const CreateGig = () => {
       const anyOpen = DAYS.some((d) => (form.weekly_availability[d.k] || []).length > 0);
       return anyOpen;
     }
-    // Gallery step removed — contact is now the final step.
+    // Plan selection is the final step now; contact is the one before it.
     const contactStep = isAppointment ? 6 : 5;
+    if (step === contactStep + 1) {
+      // Required on purpose. Publishing starts a 30-day trial that rolls
+      // into a paid plan, and nobody should get that far without having
+      // seen the number. Nothing is charged here — see /select-plan.
+      return !!planKey;
+    }
     if (step === contactStep) {
       if (!(form.area || '').trim()) return false;
       // Gate on the same normalizer the gig detail page uses to build the
@@ -292,6 +306,7 @@ const CreateGig = () => {
       if (!form.title.trim()) return 'Add a title above.';
       if (!form.category) return 'Pick a category above.';
     }
+    if (step === (isAppointment ? 7 : 6)) return 'Pick the plan that starts after your free month.';
     if (step === 3) return 'Write at least 10 characters describing what you offer.';
     if (step === 4) {
       if (form.gig_type === 'store') {
@@ -357,6 +372,18 @@ const CreateGig = () => {
       const { data } = await axios.post(`${API}/marketplace/gigs`, payload, {
         headers: { Authorization: `Bearer ${token}` },
       });
+      // Record the chosen tier. Deliberately AFTER the gig POST: this is
+      // bookkeeping for when the trial ends, and a failure here must never
+      // cost someone the listing they just spent ten minutes writing.
+      if (planKey) {
+        try {
+          await axios.post(
+            `${API}/marketplace/subscription/select-plan`,
+            { plan_key: planKey },
+            { headers: { Authorization: `Bearer ${token}` } },
+          );
+        } catch (_) { /* non-fatal — changeable later from My Gigs */ }
+      }
       const translated = data?.title_he || data?.description_he;
       toast.success(translated
         ? 'Gig published — also translated to Hebrew for you'
@@ -613,6 +640,37 @@ const CreateGig = () => {
                 <b>Heads up:</b> Publishing takes about 4 seconds because we auto-translate your listing to Hebrew so Hebrew-speaking renters can find and read it right away — no extra typing needed.
               </span>
             </div>
+          </div>
+        )}
+
+        {/* --- Final step: which plan starts after the free month --- */}
+        {step === (isAppointment ? 7 : 6) && (
+          <div className="space-y-4" data-testid="wizard-plan-step">
+            {/* The free month leads, in bold, above the prices. Someone
+                reaching a pricing screen mid-signup assumes they're about to
+                be charged; saying otherwise afterwards is too late. */}
+            <div className="rounded-xl border border-[#1E6A6A]/25 bg-[#f2f8f8] p-4">
+              <p className="text-sm font-bold text-gray-900">
+                Your first 30 days are free
+              </p>
+              <p className="text-sm text-gray-600 mt-1">
+                Publish today and pay nothing this month. Choose the plan you
+                want to continue on afterwards — nothing is charged now, and no
+                card is needed to publish.
+              </p>
+            </div>
+            <div>
+              <label className="text-sm font-semibold text-gray-700">
+                Plan after your free month
+              </label>
+              <div className="mt-2">
+                <PlanPicker value={planKey} onChange={setPlanKey} />
+              </div>
+            </div>
+            <p className="text-xs text-gray-500">
+              You can switch plans or cancel any time during the free month
+              from My Gigs.
+            </p>
           </div>
         )}
 
