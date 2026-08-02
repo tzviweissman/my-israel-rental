@@ -69,6 +69,37 @@ async def list_subscription_plans() -> dict:
     }
 
 
+def paypal_mode() -> str:
+    """Which PayPal environment this process talks to: "live" or "sandbox"."""
+    return os.environ.get("PAYPAL_MODE", "sandbox").lower()
+
+
+def _env_settings(settings: dict, mode: str) -> dict:
+    """Stored product/plan ids for ONE PayPal environment.
+
+    Plan ids are environment-specific: a sandbox plan id means nothing to
+    live PayPal and vice versa. They were originally stored flat, so
+    switching PAYPAL_MODE to "live" would have found the cached SANDBOX ids
+    and handed them to live PayPal — and the admin panel would have reported
+    "all tiers ready" while being entirely broken.
+
+    The pre-existing flat layout is read as sandbox, which is what it is:
+    every plan created so far was made while PAYPAL_MODE was sandbox. Going
+    live therefore starts from an empty set and creates real plans, which is
+    exactly what should happen.
+    """
+    env = ((settings or {}).get("env") or {}).get(mode)
+    if env:
+        return env
+    if mode != "sandbox":
+        return {}
+    legacy_plans = dict((settings or {}).get("plans") or {})
+    # The original single-plan document kept one id at the top level.
+    if (settings or {}).get("plan_id") and DEFAULT_PLAN_KEY not in legacy_plans:
+        legacy_plans[DEFAULT_PLAN_KEY] = {"plan_id": settings["plan_id"]}
+    return {"product_id": (settings or {}).get("product_id"), "plans": legacy_plans}
+
+
 def _future_trial_end(prov: dict | None) -> str | None:
     """Trial end as an RFC 3339 UTC string, or None if it isn't in the future.
 
@@ -144,13 +175,16 @@ async def select_plan(body: PlanSelection, user=Depends(verify_token)) -> dict:
 async def _get_or_create_billing_plan(plan_key: str | None = None) -> str:
     """PayPal plan_id for one commitment tier, creating it on first use.
 
-    Each tier gets its OWN PayPal plan, cached under its own key in the
-    `marketplace_settings` doc. Deliberately additive: the pre-ladder
-    single-plan document stored its id at the top level as `plan_id`, and
-    that stays exactly where it is and keeps resolving for the default
-    tier. Nobody's existing subscription is touched — PayPal subscriptions
-    are bound to the plan they were created against, so an existing
-    subscriber keeps billing at the price they agreed to.
+    Each tier gets its OWN PayPal plan, cached per ENVIRONMENT under
+    `env.<sandbox|live>` in the `marketplace_settings` doc. The environment
+    split matters: a sandbox plan id is meaningless to live PayPal, so
+    sharing one cache across both would break the moment PAYPAL_MODE
+    changed. The pre-ladder flat layout is read as sandbox — see
+    `_env_settings`.
+
+    Nobody's existing subscription is touched — PayPal subscriptions are
+    bound to the plan they were created against, so an existing subscriber
+    keeps billing at the price they agreed to.
 
     Creating a plan is a WRITE to PayPal, in whatever environment
     PAYPAL_MODE points at — sandbox by default, real billing objects when
@@ -162,17 +196,15 @@ async def _get_or_create_billing_plan(plan_key: str | None = None) -> str:
     key = plan["key"]
 
     settings = await db.marketplace_settings.find_one({"_id": "paypal_plan"}) or {}
+    mode = paypal_mode()
+    env = _env_settings(settings, mode)
 
-    # Legacy layout: one plan, id at the top level. Reuse it for the default
-    # tier rather than creating a duplicate at the same price.
-    if key == DEFAULT_PLAN_KEY and settings.get("plan_id"):
-        return settings["plan_id"]
-    cached = (settings.get("plans") or {}).get(key, {}).get("plan_id")
+    cached = (env.get("plans") or {}).get(key, {}).get("plan_id")
     if cached:
         return cached
 
     # One PayPal product covers every tier; only the plan differs.
-    product_id = settings.get("product_id")
+    product_id = env.get("product_id")
     if not product_id:
         product = await paypal.create_product(name=PLAN_NAME, description=PLAN_DESCRIPTION)
         product_id = product["id"]
@@ -191,8 +223,8 @@ async def _get_or_create_billing_plan(plan_key: str | None = None) -> str:
     await db.marketplace_settings.update_one(
         {"_id": "paypal_plan"},
         {"$set": {
-            "product_id": product_id,
-            f"plans.{key}": {
+            f"env.{mode}.product_id": product_id,
+            f"env.{mode}.plans.{key}": {
                 "plan_id": plan_id,
                 "amount": plan["monthly_price"],
                 "months": plan["months"],
@@ -203,8 +235,8 @@ async def _get_or_create_billing_plan(plan_key: str | None = None) -> str:
         upsert=True,
     )
     logger.info(
-        "[marketplace] Created PayPal plan key=%s product=%s plan=%s amount=%s",
-        key, product_id, plan_id, plan["monthly_price"],
+        "[marketplace] Created PayPal plan mode=%s key=%s product=%s plan=%s amount=%s",
+        mode, key, product_id, plan_id, plan["monthly_price"],
     )
     return plan_id
 
@@ -468,21 +500,21 @@ async def handle_subscription_webhook_event(event: dict[str, Any]) -> None:
 # what exists, then create what's missing, before anyone tries to subscribe.
 
 
-def _plan_settings_summary(settings: dict) -> list[dict]:
-    """Which tiers currently resolve to a PayPal plan id. No PayPal calls."""
-    stored = (settings or {}).get("plans") or {}
-    legacy_id = (settings or {}).get("plan_id")
+def _plan_settings_summary(settings: dict, mode: str | None = None) -> list[dict]:
+    """Which tiers resolve to a PayPal plan id IN THIS ENVIRONMENT.
+
+    Mode-scoped on purpose: reporting sandbox ids while the backend is
+    pointed at live would show "all tiers ready" for plans live PayPal has
+    never heard of — the most dangerous possible answer on a billing screen.
+    """
+    env = _env_settings(settings, mode or paypal_mode())
+    stored = env.get("plans") or {}
     rows = []
     for plan in SUBSCRIPTION_PLANS:
         key = plan["key"]
         entry = stored.get(key) or {}
         plan_id = entry.get("plan_id")
         source = "per-tier"
-        # The pre-ladder document held a single id at the top level; it still
-        # serves the default tier so we don't create a duplicate at the same
-        # price. Surface that explicitly rather than showing it as missing.
-        if not plan_id and key == DEFAULT_PLAN_KEY and legacy_id:
-            plan_id, source = legacy_id, "legacy single-plan document"
         rows.append({
             "key": key,
             "months": plan["months"],
@@ -504,13 +536,14 @@ async def admin_plan_status(payload: dict = Depends(verify_token)) -> dict:
         raise HTTPException(status_code=403, detail="Admin access required")
 
     settings = await db.marketplace_settings.find_one({"_id": "paypal_plan"}) or {}
-    rows = _plan_settings_summary(settings)
+    mode = paypal_mode()
+    rows = _plan_settings_summary(settings, mode)
     return {
         # Which PayPal environment the backend is pointed at. Worth seeing
         # before creating anything — sandbox plan ids are useless in live and
-        # vice versa.
-        "paypal_mode": os.environ.get("PAYPAL_MODE", "sandbox").lower(),
-        "product_id": settings.get("product_id"),
+        # vice versa, and the rows above are scoped to this environment.
+        "paypal_mode": mode,
+        "product_id": _env_settings(settings, mode).get("product_id"),
         "plans": rows,
         "missing": [r["key"] for r in rows if not r["exists"]],
     }
@@ -532,9 +565,9 @@ async def admin_bootstrap_plans(payload: dict = Depends(verify_token)) -> dict:
     if payload.get("role") != "admin":
         raise HTTPException(status_code=403, detail="Admin access required")
 
-    mode = os.environ.get("PAYPAL_MODE", "sandbox").lower()
+    mode = paypal_mode()
     before = await db.marketplace_settings.find_one({"_id": "paypal_plan"}) or {}
-    summary = _plan_settings_summary(before)
+    summary = _plan_settings_summary(before, mode)
     missing = [r["key"] for r in summary if not r["exists"]]
 
     created, failed = [], []
@@ -554,5 +587,5 @@ async def admin_bootstrap_plans(payload: dict = Depends(verify_token)) -> dict:
         "already_existed": [r["key"] for r in summary if r["exists"]],
         "created": created,
         "failed": failed,
-        "plans": _plan_settings_summary(after),
+        "plans": _plan_settings_summary(after, mode),
     }
