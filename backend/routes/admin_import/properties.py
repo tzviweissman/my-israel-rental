@@ -216,7 +216,11 @@ async def commit_property_import(req: PropertyCommitRequest, payload: dict = Dep
             if req.mirror_images and CLOUDINARY_ENABLED and (image_urls or video_urls):
                 to_mirror.append((doc["id"], image_urls[:30], video_urls[:5]))
         except Exception as e:  # noqa: BLE001
-            skipped.append({"index": i, "title": raw.get("title") or raw.get("Name"), "error": f"Unexpected error: {e}"})
+            skipped.append({
+                "index": i,
+                "title": raw.get("title") or raw.get("Name"),
+                "error": row_error(e, logger=logger, context="bulk property import row", extra={"index": i}),
+            })
 
     # Kick off background mirroring AFTER the response data is finalized.
     # Each property gets one task that mirrors all its images concurrently

@@ -36,6 +36,7 @@ from utils.cloud_storage import (
     upload_bytes_to_cloudinary,
 )
 from utils.helpers import get_usd_ils_rate
+from utils.errors import api_error, row_error
 
 router = APIRouter()
 api_router = router  # alias so existing @api_router decorators work verbatim
@@ -110,7 +111,10 @@ async def translate_text(request: TranslationRequest) -> dict:
         
         return {"translation": response}
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Translation failed: {str(e)}")
+        raise api_error(
+            status_code=500, message="We couldn't translate that just now. Please try again in a moment.",
+            exc=e, logger=logger, context="translate endpoint",
+        ) from e
 
 
 @api_router.post("/document-service", response_model=IdMessageResponse)
@@ -252,7 +256,13 @@ async def upload_multiple_files(files: List[UploadFile] = File(...), payload: di
         except HTTPException as e:
             results.append({"filename": file.filename, "error": e.detail})
         except Exception as e:
-            results.append({"filename": file.filename, "error": str(e)})
+            # The HTTPException branch above returns OUR written detail, which
+            # is right. This one was returning the raw exception.
+            results.append({
+                "filename": file.filename,
+                "error": row_error(e, logger=logger, context="file upload",
+                                   extra={"filename": file.filename}),
+            })
     return results
 
 

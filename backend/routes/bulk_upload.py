@@ -34,7 +34,7 @@ from models_response import (
     BulkParseResponse,
 )
 from routes.deps import UPLOAD_DIR, db, verify_token
-from utils.errors import api_error
+from utils.errors import api_error, row_error
 
 router = APIRouter()
 api_router = router
@@ -400,7 +400,11 @@ async def commit_bulk(body: BulkCommitBody, payload: dict = Depends(verify_token
             await db.properties.insert_one(doc)
             created.append({"index": i, "id": property_id, "title": doc["title"], "image_filenames": image_filenames})
         except Exception as e:
-            skipped.append({"index": i, "title": row.get("title"), "error": str(e)})
+            skipped.append({
+                "index": i,
+                "title": row.get("title"),
+                "error": row_error(e, logger=logger, context="bulk upload row", extra={"index": i}),
+            })
 
     return {"created": created, "skipped": skipped, "summary": {"created": len(created), "skipped": len(skipped)}}
 

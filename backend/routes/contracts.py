@@ -361,7 +361,10 @@ async def translate_contract(contract_id: str, direction: str = Form("he-en"), p
         return {"translated_text": translated, "direction": direction, "status": "completed"}
     except Exception as e:
         logger.error(f"Translation failed for contract {contract_id}: {e}")
-        raise HTTPException(status_code=500, detail=f"Translation failed: {str(e)}")
+        raise api_error(
+            status_code=500, message="We couldn't translate that just now. Please try again in a moment.",
+            exc=e, logger=logger, context="contract translation",
+        ) from e
 
 
 

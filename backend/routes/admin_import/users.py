@@ -17,6 +17,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 
 from routes.deps import db, verify_token
+from utils.errors import row_error
 from utils.email import send_email
 
 from .helpers import (
@@ -106,7 +107,10 @@ async def commit_user_import(req: UserCommitRequest, payload: dict = Depends(ver
             ))
             created.append({"id": new_user_id, "email": email, "role": role})
         except Exception as e:  # noqa: BLE001
-            skipped.append({"index": i, "error": f"Unexpected error: {e}"})
+            skipped.append({
+                "index": i,
+                "error": row_error(e, logger=logger, context="bulk user import row", extra={"index": i}),
+            })
 
     return {
         "summary": {"total": len(rows), "created": len(created), "skipped": len(skipped)},

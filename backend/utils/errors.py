@@ -67,6 +67,47 @@ def api_error(
     return HTTPException(status_code=status_code, detail=message)
 
 
+def row_error(
+    exc: BaseException,
+    *,
+    logger: logging.Logger | None = None,
+    context: str = "",
+    extra: dict[str, Any] | None = None,
+) -> str:
+    """A per-row error string for bulk operations.
+
+    Bulk import and multi-file upload report failures in a list rather than
+    by raising, so they bypass `api_error` entirely — this is the same rule
+    for that shape.
+
+    The tradeoff here is real and worth stating: an admin looking at "row 12
+    failed" genuinely wants to know why. But `str(exc)` on an arbitrary
+    exception gives them ``KeyError('price')`` at best and a file path or
+    connection string at worst — informative to a developer reading a log,
+    not to the person looking at an import screen.
+
+    So the reader gets the exception TYPE in plain words plus their own row
+    identifier, and the full exception goes to the log where a developer can
+    match it up. Enough to see the shape of the problem ("eight rows failed
+    the same way") without pasting internals into a browser.
+    """
+    if logger is not None:
+        detail = f"{context}: {exc!r}" if context else repr(exc)
+        if extra:
+            detail = f"{detail} | {extra}"
+        logger.exception(detail)
+    name = type(exc).__name__
+    friendly = {
+        "KeyError": "a required column was missing",
+        "ValueError": "a value wasn't in the expected format",
+        "TypeError": "a value wasn't in the expected format",
+        "DuplicateKeyError": "this row already exists",
+    }.get(name)
+    return f"Couldn't import this row — {friendly}." if friendly else (
+        "Couldn't import this row. The full error is in the server log."
+    )
+
+
 def is_our_error(exc: BaseException) -> bool:
     """True for exceptions we raised deliberately, whose text is safe to show.
 

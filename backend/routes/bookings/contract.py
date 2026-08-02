@@ -318,4 +318,7 @@ async def _do_translate(text: str, direction: str, booking_id: str) -> str:
         return await _translate_text(text, direction)
     except Exception as e:
         logger.error(f"Booking contract translation failed for {booking_id}: {e}")
-        raise HTTPException(status_code=500, detail=f"Translation failed: {str(e)}") from None
+        raise api_error(
+            status_code=500, message="We couldn't translate that just now. Please try again in a moment.",
+            exc=e, logger=logger, context="contract translation",
+        ) from e
