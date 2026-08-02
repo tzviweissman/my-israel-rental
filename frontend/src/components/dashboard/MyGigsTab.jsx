@@ -11,6 +11,8 @@ import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { toast } from 'sonner';
 import PlanPicker from '../marketplace/PlanPicker';
+import PhoneInput from '../common/PhoneInput';
+import { phoneError } from '../../utils/phoneValidation';
 import {
   Plus, Loader2, ExternalLink, Trash2, BadgeCheck, Clock, Sparkles,
   Pencil, Upload, X, FileText, Globe, Award,
@@ -156,13 +158,18 @@ const ProfileEditModal = ({ API, token, initial, onClose, onSaved }) => {
         </div>
         <div>
           <label className="text-xs font-semibold text-gray-700">WhatsApp</label>
-          <input value={whatsapp} onChange={(e) => setWhatsapp(e.target.value)} placeholder="050-123-4567" className="w-full mt-1 px-3 py-2 rounded-lg border border-gray-200 text-sm" data-testid="provider-whatsapp-input" />
           {/* Doubles as the fallback for any gig published with WhatsApp
               booking mode but a blank per-gig number — see the `whatsapp`
-              field on GET /marketplace/gigs/{id}'s provider block. */}
-          <p className="text-[11px] text-gray-500 mt-1">
-            {t('services.whatsappHint', 'Israeli numbers can be entered as 050-123-4567 — we add the +972 for you.')}
-          </p>
+              field on GET /marketplace/gigs/{id}'s provider block, which is
+              exactly why the country must be explicit here too. */}
+          <div className="mt-1">
+            <PhoneInput
+              value={whatsapp}
+              onChange={setWhatsapp}
+              error={phoneError(whatsapp, t)}
+              testid="provider-whatsapp"
+            />
+          </div>
         </div>
 
         {/* Spoken languages — feeds the /services filter modal. Empty

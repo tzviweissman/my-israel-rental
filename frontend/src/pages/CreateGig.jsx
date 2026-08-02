@@ -17,8 +17,10 @@
  *   7. Contact + booking mode + area (all)
  *   8. Plan — which commitment tier starts after the free month (all).
  *      Required to publish: the trial rolls into a paid plan, so nobody
- *      should get here without having seen the number. Recorded via
- *      /subscription/select-plan; no charge and no card at this point.
+ *      should get here without having seen the number. Publishing records
+ *      the choice via /subscription/select-plan and then hands off to
+ *      PayPal to authorise it. Billing is deferred server-side to the end
+ *      of the free trial, so authorising does NOT charge them today.
  *
  * All state is local; we POST once on the final "Publish" click.
  */
@@ -35,6 +37,7 @@ import PageMeta from '../components/PageMeta';
 import { uploadFilesFast } from '../utils/fastUpload';
 import { normalizeWhatsAppNumber, hasValidWhatsApp } from '../utils/whatsappLink';
 import PlanPicker from '../components/marketplace/PlanPicker';
+import PhoneInput from '../components/common/PhoneInput';
 import { useTranslation } from 'react-i18next';
 
 // ---- Gig type registry ------------------------------------------------------
@@ -372,10 +375,17 @@ const CreateGig = () => {
       const { data } = await axios.post(`${API}/marketplace/gigs`, payload, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      // Record the chosen tier. Deliberately AFTER the gig POST: this is
-      // bookkeeping for when the trial ends, and a failure here must never
-      // cost someone the listing they just spent ten minutes writing.
+      // The gig is live from here on, whatever happens next. Everything
+      // below is subscription setup, and none of it may cost them the
+      // listing they just spent ten minutes writing.
+      const translated = data?.title_he || data?.description_he;
+      toast.success(translated
+        ? 'Gig published — also translated to Hebrew for you'
+        : 'Gig published!');
+
       if (planKey) {
+        // Record the choice first, so we still know their intent even if
+        // they abandon the PayPal screen.
         try {
           await axios.post(
             `${API}/marketplace/subscription/select-plan`,
@@ -383,11 +393,32 @@ const CreateGig = () => {
             { headers: { Authorization: `Bearer ${token}` } },
           );
         } catch (_) { /* non-fatal — changeable later from My Gigs */ }
+
+        // Then hand them to PayPal to authorise it. Billing is deferred to
+        // the end of the free trial server-side (see /subscription/upgrade),
+        // so authorising now does NOT charge them today.
+        try {
+          const sub = await axios.post(
+            `${API}/marketplace/subscription/upgrade?plan_key=${encodeURIComponent(planKey)}`,
+            {},
+            { headers: { Authorization: `Bearer ${token}` } },
+          );
+          if (sub.data?.approval_url) {
+            window.location.assign(sub.data.approval_url);
+            return;
+          }
+        } catch (err) {
+          // Abandoning or failing here leaves a published gig on a free
+          // trial — a perfectly good state. Say so rather than implying
+          // the listing failed.
+          toast.error(
+            err.response?.data?.detail
+            || 'Your gig is live. We could not open PayPal — you can set up billing from My Gigs.',
+          );
+          navigate('/dashboard');
+          return;
+        }
       }
-      const translated = data?.title_he || data?.description_he;
-      toast.success(translated
-        ? 'Gig published — also translated to Hebrew for you'
-        : 'Gig published!');
       navigate(`/services/gig/${data.id}`);
     } catch (err) {
       toast.error(err.response?.data?.detail || 'Failed to publish');
@@ -591,33 +622,22 @@ const CreateGig = () => {
                 <label className="text-sm font-semibold text-gray-700">
                   {t('services.whatsappNumberLabel', 'WhatsApp number')}
                 </label>
-                <input value={form.whatsapp} onChange={(e) => set({ whatsapp: e.target.value })}
-                  placeholder="050-123-4567" className={`w-full mt-1 px-3 py-2 rounded-lg border text-sm focus:outline-none ${
-                    (form.whatsapp || '').trim() && !hasValidWhatsApp(form.whatsapp)
-                      ? 'border-red-400 focus:border-red-500'
-                      : 'border-gray-200 focus:border-[#1E6A6A]'
-                  }`} data-testid="wizard-whatsapp" />
-                {/* Live feedback on what we'll actually dial. An Israeli
-                    number typed in national format (050…) is rewritten to
-                    972… — showing the result here means the provider spots
-                    a wrong number before publishing, not after a customer
-                    hits a dead link. */}
-                {hasValidWhatsApp(form.whatsapp) ? (
-                  <p className="text-[11px] text-emerald-600 mt-1" data-testid="wizard-whatsapp-ok">
-                    {t('services.whatsappResolved', {
-                      defaultValue: 'Customers will message you at +{{number}}',
-                      number: normalizeWhatsAppNumber(form.whatsapp),
-                    })}
-                  </p>
-                ) : (form.whatsapp || '').trim() ? (
-                  <p className="text-[11px] text-red-500 mt-1" data-testid="wizard-whatsapp-warning">
-                    {t('services.whatsappInvalid', 'Enter a valid WhatsApp number — e.g. 050-123-4567 or +972 50 123 4567.')}
-                  </p>
-                ) : (
-                  <p className="text-[11px] text-gray-500 mt-1">
-                    {t('services.whatsappHint', 'Israeli numbers can be entered as 050-123-4567 — we add the +972 for you.')}
-                  </p>
-                )}
+                <div className="mt-1">
+                  <PhoneInput
+                    value={form.whatsapp}
+                    onChange={(v) => set({ whatsapp: v })}
+                    error={(form.whatsapp || '').trim() && !hasValidWhatsApp(form.whatsapp)
+                      ? t('services.whatsappInvalid', 'Enter a valid WhatsApp number.')
+                      : ''}
+                    hint={hasValidWhatsApp(form.whatsapp)
+                      ? t('services.whatsappResolved', {
+                          defaultValue: 'Customers will message you at +{{number}}',
+                          number: normalizeWhatsAppNumber(form.whatsapp),
+                        })
+                      : ''}
+                    testid="wizard-whatsapp"
+                  />
+                </div>
               </div>
             )}
             <div>
@@ -654,9 +674,10 @@ const CreateGig = () => {
                 Your first 30 days are free
               </p>
               <p className="text-sm text-gray-600 mt-1">
-                Publish today and pay nothing this month. Choose the plan you
-                want to continue on afterwards — nothing is charged now, and no
-                card is needed to publish.
+                Publish today and pay nothing this month. Pick the plan you
+                want to continue on, then confirm it with PayPal —{' '}
+                <strong>your card is not charged today</strong>. The first
+                payment is taken when your free month ends.
               </p>
             </div>
             <div>
@@ -669,7 +690,9 @@ const CreateGig = () => {
             </div>
             <p className="text-xs text-gray-500">
               You can switch plans or cancel any time during the free month
-              from My Gigs.
+              from My Gigs. Publishing takes you to PayPal to confirm — your
+              gig goes live either way, so you can set billing up later if
+              you'd rather.
             </p>
           </div>
         )}
