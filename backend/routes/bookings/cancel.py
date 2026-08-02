@@ -1,7 +1,25 @@
-"""Booking cancellation flow — direct cancel (owner or admin) plus
-the two-step renter cancellation request / owner approve-or-deny path.
+"""Booking cancellation flow — direct cancel by the lister, plus the
+two-step renter cancellation request / lister approve-or-deny path.
 
 Extracted from ``bookings.py`` in the 2026-07 refactor.
+
+Who may do what
+---------------
+Every endpoint here authorises on the caller's **relationship to this
+booking** — ``owner_id`` for the lister side, ``renter_id`` for the renter
+side — and never on their account role. Note what that means:
+
+* An account with role ``owner`` gets no privileges on a booking it doesn't
+  own. It is a renter on its own trips, exactly like anyone else.
+* **Admins have no override here.** A support admin cannot cancel on a
+  lister's behalf; they would get a 403. That is deliberate as long as it's
+  the documented behaviour — this docstring used to claim "owner or admin",
+  which was never true and sent people looking for a bug in the wrong place.
+
+The frontend must mirror these checks exactly. When it gated its buttons on
+role instead, listers saw a Cancel button that 403'd and renters-who-aren't-
+role-renter saw no cancellation button at all. ``tests/
+test_booking_actions_contract.py`` pins the two sides together.
 """
 import asyncio
 import uuid
@@ -29,9 +47,18 @@ async def cancel_booking(booking_id: str, reason: str = Body(..., embed=True), p
     # this is the listing owner/manager for regular bookings, OR the sublessor
     # for sublease bookings (we re-write owner_id to the sublessor's id when
     # creating sublease bookings so they own the calendar).
-    if booking['owner_id'] != payload['user_id']:
+    if booking.get('owner_id') != payload['user_id']:
         raise HTTPException(status_code=403, detail="Not authorized")
-    
+
+    # A booking can only be cancelled once. Without this guard a double-click
+    # or a stale tab re-cancels an already-cancelled booking: it rewrites the
+    # reason, sends the renter a second "your booking was cancelled" notice,
+    # and re-fires the saved-search email batch for dates that were freed the
+    # first time. The frontend already hides the button in that state, so the
+    # only way to reach it is the path the frontend can't see.
+    if booking.get('status') == 'cancelled':
+        raise HTTPException(status_code=400, detail="This booking is already cancelled")
+
     # Update booking
     await db.bookings.update_one(
         {"id": booking_id},
@@ -74,13 +101,29 @@ async def request_cancel_booking(booking_id: str, reason: str = Body(..., embed=
         raise HTTPException(status_code=404, detail="Booking not found")
     
     # Verify user is the renter
-    if booking['renter_id'] != payload['user_id']:
+    if booking.get('renter_id') != payload['user_id']:
         raise HTTPException(status_code=403, detail="Not authorized")
-    
+
+    # Only a live booking can have a cancellation requested. The guard on
+    # 'cancellation_requested' matters more than it looks: `previous_status`
+    # below reads the current status, so re-requesting on an already-requested
+    # booking would record previous_status='cancellation_requested'. A later
+    # deny would then "revert" it to the requested state, leaving the booking
+    # stuck in a loop with no live status to go back to.
+    if booking.get('status') not in ('pending', 'confirmed'):
+        raise HTTPException(
+            status_code=400,
+            detail="This booking can't be cancelled in its current state",
+        )
+
     # Save previous status before changing
     previous_status = booking.get('status', 'confirmed')
-    
-    # Update booking
+
+    # Update booking. The $unset clears any *earlier* denial: without it, a
+    # booking that was denied once carries `cancellation_denial_reason`
+    # forever, and the dashboard keeps showing the red "your request was
+    # denied" box next to a request that is currently pending — or even one
+    # that was later approved.
     await db.bookings.update_one(
         {"id": booking_id},
         {"$set": {
@@ -88,7 +131,9 @@ async def request_cancel_booking(booking_id: str, reason: str = Body(..., embed=
             "previous_status": previous_status,
             "cancellation_reason": reason,
             "cancellation_requested_at": datetime.now(UTC).isoformat()
-        }}
+        },
+         "$unset": {"cancellation_denied": "", "cancellation_denial_reason": "", "cancellation_denied_at": ""}
+        }
     )
     
     # Notify owner
@@ -115,7 +160,7 @@ async def approve_cancel_request(booking_id: str, payload: dict = Depends(verify
         raise HTTPException(status_code=404, detail="Booking not found")
     
     # Authorization: the booking's "owner" (listing owner OR sublessor) approves.
-    if booking['owner_id'] != payload['user_id']:
+    if booking.get('owner_id') != payload['user_id']:
         raise HTTPException(status_code=403, detail="Not authorized")
     
     if booking.get('status') != 'cancellation_requested':
@@ -162,7 +207,7 @@ async def deny_cancel_request(booking_id: str, denial_reason: str = Body(..., em
         raise HTTPException(status_code=404, detail="Booking not found")
     
     # Authorization: the booking's "owner" (listing owner OR sublessor) denies.
-    if booking['owner_id'] != payload['user_id']:
+    if booking.get('owner_id') != payload['user_id']:
         raise HTTPException(status_code=403, detail="Not authorized")
     
     if booking.get('status') != 'cancellation_requested':

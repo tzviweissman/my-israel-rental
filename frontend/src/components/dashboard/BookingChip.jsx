@@ -35,17 +35,20 @@ const BookingChip = ({
   const todayIso = new Date().toISOString().slice(0, 10);
   const isCurrent = b.start_date <= todayIso && todayIso <= b.end_date && ['confirmed', 'pending'].includes(b.status);
 
-  const isOwnerRole = user.role === 'owner' || user.role === 'manager';
+  // Relationship to THIS booking, never the account's role — the backend
+  // authorises on owner_id / renter_id alone, so `user.role === 'owner'`
+  // put a Cancel button on bookings the caller didn't own and the request
+  // came back 403. See the note in BookingRow.jsx.
   const ownsAsLister = b.owner_id === user.id;
   const isRenterOnBooking = b.renter_id === user.id;
   const cancellable = ['pending', 'confirmed'].includes(b.status);
-  // Owner can directly cancel only while booking is still pending. After
-  // accepting, they must use the cancellation-request flow.
-  const canDirectCancel = (isOwnerRole || ownsAsLister) && b.status === 'pending';
-  const canRequestCancelAsLister = (isOwnerRole || ownsAsLister) && b.status === 'confirmed';
+  // The lister can directly cancel only while the booking is still pending.
+  // After accepting, they must use the cancellation-request flow.
+  const canDirectCancel = ownsAsLister && b.status === 'pending';
+  const canRequestCancelAsLister = ownsAsLister && b.status === 'confirmed';
   const canRequestCancelAsRenter = isRenterOnBooking && !ownsAsLister && cancellable;
-  const canAccept = (isOwnerRole || ownsAsLister) && b.status === 'pending';
-  const canApprove = (isOwnerRole || ownsAsLister) && b.status === 'cancellation_requested';
+  const canAccept = ownsAsLister && b.status === 'pending';
+  const canApprove = ownsAsLister && b.status === 'cancellation_requested';
   const needsSignature =
     b.renter_id === user.id &&
     b.status === 'confirmed' &&

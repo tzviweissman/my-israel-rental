@@ -35,18 +35,33 @@ const BookingRow = ({
     if (s === 'cancellation_requested') return t('dashboard.cancellationRequested');
     return s;
   };
-  const isOwner = user.role === 'owner' || user.role === 'manager';
-  const isRenter = user.role === 'renter';
+  // Every flag here mirrors the backend's own check, which authorises on
+  // THIS booking's relationship — owner_id / renter_id — and never on the
+  // account's role. Gating the buttons on role instead produced two real
+  // bugs:
+  //
+  //   • `isOwner` (role) showed Cancel on bookings the user doesn't own, and
+  //     POST /bookings/{id}/cancel then returned 403 "Not authorized".
+  //   • `isRenter` (role) hid "Request cancellation" from anyone whose
+  //     account isn't literally role 'renter' — so an owner, manager or
+  //     admin who books a place has no way to ask to cancel it, even though
+  //     the endpoint would happily accept them.
+  //
+  // Role and relationship are different questions. Only the second one
+  // decides what the server will allow.
+  //
   // The lister side of any booking owns the calendar via booking.owner_id.
-  // For sublease bookings, that is the sublessor (a renter-role user).
+  // For sublease bookings, that is the sublessor (a renter-role user) —
+  // which is itself proof that role can't stand in for relationship.
   const ownsBookingAsLister = booking.owner_id === user.id;
+  const isBookingRenter = booking.renter_id === user.id;
   const cancellableStatuses = ['pending', 'confirmed'];
-  const canCancel = (isOwner || ownsBookingAsLister) && cancellableStatuses.includes(booking.status);
+  const canCancel = ownsBookingAsLister && cancellableStatuses.includes(booking.status);
   const canRequestCancel =
-    isRenter && !ownsBookingAsLister && cancellableStatuses.includes(booking.status);
+    isBookingRenter && !ownsBookingAsLister && cancellableStatuses.includes(booking.status);
   const canApprove =
-    (isOwner || ownsBookingAsLister) && booking.status === 'cancellation_requested';
-  const canAccept = (isOwner || ownsBookingAsLister) && booking.status === 'pending';
+    ownsBookingAsLister && booking.status === 'cancellation_requested';
+  const canAccept = ownsBookingAsLister && booking.status === 'pending';
   const needsSignature =
     booking.renter_id === user.id &&
     booking.status === 'confirmed' &&
@@ -111,7 +126,15 @@ const BookingRow = ({
                 </p>
               </div>
             )}
-          {booking.cancellation_denial_reason && (
+          {/* Only while the denial is the booking's current state. This box
+              used to render on `cancellation_denial_reason` alone, so once a
+              request had been denied the red notice stayed forever — beside a
+              later request that was still pending, and even beside one that
+              was eventually approved. The backend now clears these fields on
+              a fresh request; this guard also covers bookings already
+              carrying stale fields, with no migration. */}
+          {booking.cancellation_denial_reason &&
+            ['pending', 'confirmed'].includes(booking.status) && (
             <div className="mt-3 p-3 bg-red-50 rounded-lg">
               <p className="text-sm">
                 <span className="font-medium text-red-700">{t('dashboard.denialReason')}:</span>{' '}
