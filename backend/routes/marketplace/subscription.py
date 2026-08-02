@@ -14,6 +14,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel
 
 from routes.deps import db, logger, verify_token
+from utils.errors import api_error
 from utils import paypal
 from utils.helpers import get_usd_ils_rate
 
@@ -284,8 +285,14 @@ async def upgrade_subscription(
             start_time=billing_starts_at,
         )
     except Exception as e:  # noqa: BLE001
-        logger.exception("PayPal create_subscription error")
-        raise HTTPException(status_code=502, detail=f"PayPal error: {e}") from e
+        raise api_error(
+            status_code=502,
+            message=(
+                "We couldn't start the subscription with PayPal. Nothing has "
+                "been charged. Please try again in a moment."
+            ),
+            exc=e, logger=logger, context="PayPal create_subscription",
+        ) from e
 
     approval_url = next(
         (link["href"] for link in sub.get("links", []) if link.get("rel") == "approve"),
@@ -344,8 +351,15 @@ async def activate_subscription(user=Depends(verify_token)):
     try:
         sub = await paypal.get_subscription(sub_id)
     except Exception as e:  # noqa: BLE001
-        logger.exception("PayPal get_subscription error during activate")
-        raise HTTPException(status_code=502, detail=f"PayPal error: {e}") from e
+        raise api_error(
+            status_code=502,
+            message=(
+                "We couldn't confirm your subscription with PayPal just now. "
+                "If you completed the payment it will activate shortly — check "
+                "My Gigs in a few minutes before trying again."
+            ),
+            exc=e, logger=logger, context="PayPal get_subscription during activate",
+        ) from e
 
     status = sub.get("status", "").upper()
     if status not in ("ACTIVE", "APPROVED"):
@@ -393,15 +407,26 @@ async def cancel_subscription_route(user=Depends(verify_token)):
         # error '422 Unknown Error'" and carries no reason at all — so 422
         # fell through to the 502 branch and surfaced as a wall of URL.
         if not e.already_final:
-            logger.exception("PayPal cancel_subscription error")
-            raise HTTPException(status_code=502, detail=str(e)) from e
+            # PayPalCancelError's message is one WE compose and it names the
+            # PayPal issue — that's the entire reason the class exists, so
+            # this is the rare case where the exception text is safe to show.
+            raise api_error(
+                status_code=502, message=str(e),
+                exc=e, logger=logger, context="PayPal cancel_subscription",
+            ) from e
         logger.info(
             "PayPal cancel: %s not cancellable (%s); marking cancelled locally",
             prov["paypal_subscription_id"], ", ".join(e.issues) or e.status_code,
         )
     except Exception as e:  # noqa: BLE001 — network/auth failures are real
-        logger.exception("PayPal cancel_subscription error")
-        raise HTTPException(status_code=502, detail=f"PayPal error: {e}") from e
+        raise api_error(
+            status_code=502,
+            message=(
+                "We couldn't reach PayPal to cancel the subscription. Your "
+                "access is unchanged — please try again in a moment."
+            ),
+            exc=e, logger=logger, context="PayPal cancel_subscription",
+        ) from e
 
     await db.marketplace_providers.update_one(
         {"user_id": user["user_id"]},

@@ -16,6 +16,7 @@ from models_response import (
     MessageResponse,
 )
 from routes.deps import ALLOWED_CONTRACT_TYPES, CONTRACT_DIR, MAX_FILE_SIZE, ROOT_DIR, db, logger, verify_token
+from utils.errors import api_error
 from utils.cloud_storage import fetch_contract_from_cloudinary
 from utils.contract_template import ensure_templates as ensure_contract_templates
 from utils.files import extract_text_from_docx, extract_text_from_image, extract_text_from_pdf
@@ -37,7 +38,11 @@ async def download_contract_template(lang: str) -> FileResponse:
         try:
             ensure_contract_templates(ROOT_DIR / "uploads")
         except Exception as e:
-            raise HTTPException(status_code=500, detail=f"Template generation failed: {e}")
+            raise api_error(
+                status_code=500,
+                message="The contract template isn't available right now. Please try again shortly.",
+                exc=e, logger=logger, context="contract template generation",
+            ) from e
     if not pdf_path.exists():
         raise HTTPException(status_code=404, detail="Contract template not found")
     return FileResponse(

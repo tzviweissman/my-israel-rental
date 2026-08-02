@@ -34,6 +34,7 @@ from models_response import (
     BulkParseResponse,
 )
 from routes.deps import UPLOAD_DIR, db, verify_token
+from utils.errors import api_error
 
 router = APIRouter()
 api_router = router
@@ -651,10 +652,15 @@ async def smart_extract(
             cleaned = cleaned.strip().strip("`").strip()
         parsed = json.loads(cleaned)
     except (json.JSONDecodeError, IndexError) as e:
-        raise HTTPException(
+        raise api_error(
             status_code=502,
-            detail=f"Could not parse LLM response as JSON: {e}",
-        )
+            message=(
+                "We couldn't read the extracted listing data. Please try the "
+                "upload again — if it keeps failing, the file may be in an "
+                "unexpected format."
+            ),
+            exc=e, logger=logger, context="parse LLM response as JSON",
+        ) from e
 
     properties = parsed.get("properties") if isinstance(parsed, dict) else None
     if not isinstance(properties, list):

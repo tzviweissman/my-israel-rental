@@ -16,6 +16,7 @@ from fastapi import APIRouter, Body, Depends, HTTPException
 
 from models_response import BookingSignContractResponse, BookingTranslationResponse
 from routes.deps import ROOT_DIR, db, logger, verify_token
+from utils.errors import api_error
 from utils.contract_signing import stamp_signature_on_contract
 from utils.files import extract_text_from_image, extract_text_from_pdf
 from utils.translate import translate_text as _translate_text
@@ -123,8 +124,16 @@ async def _stamp_contract_if_present(
             uploads_dir=ROOT_DIR / "uploads",
         )
     except Exception as e:
-        logger.error(f"Failed to stamp signature on contract: {e}")
-        raise HTTPException(status_code=500, detail=f"Failed to process signature: {e}")
+        raise api_error(
+            status_code=500,
+            message=(
+                "We couldn't add your signature to the contract. Your booking "
+                "is unaffected — please try signing again, and contact us if "
+                "it keeps failing."
+            ),
+            exc=e, logger=logger, context="stamp signature on contract",
+            extra={"booking_id": booking_id},
+        ) from e
     return f"/api/uploads/{signed_filename}"
 
 
