@@ -6,6 +6,7 @@ import axios from 'axios';
 import { AuthContext } from '../../App';
 import NotificationSettings from './NotificationSettings';
 import { phoneError, phonePreview } from '../../utils/phoneValidation';
+import PhoneInput from '../common/PhoneInput';
 
 const SettingsTab = ({ user, token, API }) => {
   const { i18n, t } = useTranslation();
@@ -277,17 +278,20 @@ const SettingsTab = ({ user, token, API }) => {
           </div>
         </div>
         <form onSubmit={handleSaveWhatsapp} className="flex flex-col sm:flex-row gap-3">
-          <input
-            type="tel"
-            value={whatsappNumber}
-            onChange={(e) => setWhatsappNumber(e.target.value)}
-            placeholder="+972 50 123 4567"
-            className="flex-1 px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500"
-            aria-invalid={waErr ? 'true' : undefined}
-            data-testid="settings-whatsapp-input"
-            inputMode="tel"
-            autoComplete="tel"
-          />
+          <div className="flex-1">
+            <PhoneInput
+              value={whatsappNumber}
+              onChange={setWhatsappNumber}
+              error={waErr}
+              hint={phonePreview(whatsappNumber)
+                ? t('phone.willDial', {
+                    number: phonePreview(whatsappNumber),
+                    defaultValue: `Renters will reach you at ${phonePreview(whatsappNumber)}`,
+                  })
+                : ''}
+              testid="settings-whatsapp"
+            />
+          </div>
           <button
             type="submit"
             disabled={savingWhatsapp}
@@ -298,18 +302,9 @@ const SettingsTab = ({ user, token, API }) => {
             <Check size={16} /> {savingWhatsapp ? i18n.t('dashboard.saving') : t('common.save', 'Save')}
           </button>
         </form>
-        {waErr ? (
-          <p className="text-[11px] text-red-600 mt-2" data-testid="settings-whatsapp-error">
-            {waErr}
-          </p>
-        ) : phonePreview(whatsappNumber) ? (
-          <p className="text-[11px] text-gray-500 mt-2" data-testid="settings-whatsapp-preview">
-            {t('phone.willDial', {
-              number: phonePreview(whatsappNumber),
-              defaultValue: `Renters will reach you at ${phonePreview(whatsappNumber)}`,
-            })}
-          </p>
-        ) : null}
+        {/* The error and the "renters will reach you at…" confirmation are
+            rendered by PhoneInput itself, directly under the field — repeating
+            them here showed the same message twice. */}
         <p className="text-[11px] text-gray-400 mt-2">
           {t('settings.whatsappLeaveBlank', 'Leave blank to hide the WhatsApp button on your listings and turn off WhatsApp notifications. International format recommended (+country code).')}
         </p>

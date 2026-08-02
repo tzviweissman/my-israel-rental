@@ -11,6 +11,7 @@ import OwnerManagementOfferModal from '../components/OwnerManagementOfferModal';
 import GoogleSignInButton from '../components/auth/GoogleSignInButton';
 import { GOOGLE_CLIENT_ID } from '../components/auth/useGoogleSignIn';
 import { phoneError, phonePreview } from '../utils/phoneValidation';
+import PhoneInput from '../components/common/PhoneInput';
 import ContinueAsBanner from '../components/auth/ContinueAsBanner';
 import { LAST_LOGIN_HINT_KEY } from '../components/auth/completeGoogleSignIn';
 
@@ -500,39 +501,18 @@ const Auth = () => {
                       ({t('auth.recommendedOptional', 'recommended, optional')})
                     </span>
                   </label>
-                  <input
-                    id="auth-phone"
-                    type="tel"
+                  <PhoneInput
                     value={formData.phone}
-                    onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                    placeholder="+972 50 123 4567"
-                    className="w-full px-4 py-3 rounded-lg border border-[#E5E5E5] focus:outline-none focus:ring-2 focus:ring-[#1E6A6A]/50"
-                    aria-invalid={phoneErr ? 'true' : undefined}
-                    aria-describedby="auth-phone-help"
-                    data-testid="auth-phone-input"
+                    onChange={(v) => setFormData({ ...formData, phone: v })}
+                    error={phoneErr}
+                    hint={phonePreview(formData.phone)
+                      ? t('phone.willDial', {
+                          number: phonePreview(formData.phone),
+                          defaultValue: `Renters will reach you at ${phonePreview(formData.phone)}`,
+                        })
+                      : t('auth.whatsappHelp', 'Shown on your listings so renters can WhatsApp you, and used to notify you.')}
+                    testid="auth-phone"
                   />
-                  {/* Caught here rather than at save time: an ambiguous
-                      number gets no WhatsApp button and no error anywhere
-                      else, so this is the only moment someone who knows the
-                      number is still looking at it. */}
-                  {phoneErr ? (
-                    <p
-                      id="auth-phone-help"
-                      className="text-[11px] text-red-600 mt-1"
-                      data-testid="auth-phone-error"
-                    >
-                      {phoneErr}
-                    </p>
-                  ) : (
-                    <p id="auth-phone-help" className="text-[11px] text-gray-500 mt-1">
-                      {phonePreview(formData.phone)
-                        ? t('phone.willDial', {
-                            number: phonePreview(formData.phone),
-                            defaultValue: `Renters will reach you at ${phonePreview(formData.phone)}`,
-                          })
-                        : t('auth.whatsappHelp', "Shown on your listings so renters can WhatsApp you, and used to notify you.")}
-                    </p>
-                  )}
                 </div>
 
                 <div>

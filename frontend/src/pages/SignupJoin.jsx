@@ -17,6 +17,7 @@ import { useTranslation } from 'react-i18next';
 import axios from 'axios';
 import { toast } from 'sonner';
 import { phoneError, phonePreview } from '../utils/phoneValidation';
+import PhoneInput from '../components/common/PhoneInput';
 import {
   ArrowLeft, ArrowRight, Check, Eye, EyeOff,
   Plane, Home, Sparkles,
@@ -389,28 +390,18 @@ const SignupJoin = () => {
                   optional
                   testId="signup-phone"
                 >
-                  <input
-                    type="tel"
-                    autoComplete="tel"
+                  <PhoneInput
                     value={form.phone}
-                    onChange={(e) => setForm({ ...form, phone: e.target.value })}
-                    className="w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm focus:outline-none focus:border-[#1E6A6A] focus:ring-2 focus:ring-[#1E6A6A]/20"
-                    placeholder="+972 50 123 4567"
-                    aria-invalid={phoneErr ? 'true' : undefined}
-                    data-testid="signup-phone-input"
+                    onChange={(v) => setForm({ ...form, phone: v })}
+                    error={phoneErr}
+                    hint={phonePreview(form.phone)
+                      ? t('phone.willDial', {
+                          number: phonePreview(form.phone),
+                          defaultValue: `Renters will reach you at ${phonePreview(form.phone)}`,
+                        })
+                      : ''}
+                    testid="signup-phone"
                   />
-                  {phoneErr ? (
-                    <p className="text-[11px] text-red-600 mt-1" data-testid="signup-phone-error">
-                      {phoneErr}
-                    </p>
-                  ) : phonePreview(form.phone) ? (
-                    <p className="text-[11px] text-gray-500 mt-1">
-                      {t('phone.willDial', {
-                        number: phonePreview(form.phone),
-                        defaultValue: `Renters will reach you at ${phonePreview(form.phone)}`,
-                      })}
-                    </p>
-                  ) : null}
                 </Field>
                 <Field label={t('signupJoin.password', 'Password')} testId="signup-password">
                   <div className="relative">

@@ -1586,6 +1586,8 @@ const en = {
       phone: {
         tooShort: "That looks too short — please include the full number.",
         needsCountryCode: 'Please start with 0 for an Israeli number (050-123-4567), or add the country code (+1, +44).',
+        countryCode: 'Country code',
+        dropLeadingZero: 'Pick your country, then the rest of the number — no need for the leading 0.',
         willDial: 'Renters will reach you at {{number}}',
       },
       trust: {
