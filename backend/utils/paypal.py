@@ -276,10 +276,19 @@ async def create_subscription(
     return_url: str,
     cancel_url: str,
     subscriber_email: str | None = None,
+    start_time: str | None = None,
 ) -> dict[str, Any]:
     """Start a subscription approval flow. Returns the PayPal subscription
     payload with an `id` (I-XXX) and a `links[rel=approve].href` for the
-    frontend to redirect the user to."""
+    frontend to redirect the user to.
+
+    ``start_time`` (RFC 3339, e.g. "2026-09-01T00:00:00Z") defers the FIRST
+    charge to that moment. Without it PayPal bills on approval — which is
+    what made a provider mid-way through their free trial pay immediately
+    and lose the remaining free days, despite being told the first 30 days
+    were free. PayPal rejects a start_time in the past, so callers must only
+    pass a future one.
+    """
     token = await get_access_token()
     body: dict[str, Any] = {
         "plan_id": plan_id,
@@ -292,6 +301,8 @@ async def create_subscription(
             "cancel_url": cancel_url,
         },
     }
+    if start_time:
+        body["start_time"] = start_time
     if subscriber_email:
         body["subscriber"] = {"email_address": subscriber_email}
     async with httpx.AsyncClient(timeout=30.0) as client:

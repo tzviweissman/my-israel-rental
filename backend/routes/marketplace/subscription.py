@@ -69,6 +69,31 @@ async def list_subscription_plans() -> dict:
     }
 
 
+def _future_trial_end(prov: dict | None) -> str | None:
+    """Trial end as an RFC 3339 UTC string, or None if it isn't in the future.
+
+    PayPal's ``start_time`` must be in the future and must carry a timezone.
+    Stored trial dates are ISO strings that may or may not have one, and a
+    naive value compared against an aware ``now`` raises TypeError — so
+    anything unparseable or already past returns None and the subscription
+    simply bills immediately, which is the correct behaviour once a trial
+    has ended.
+    """
+    raw = (prov or {}).get("trial_ends_at")
+    if not raw:
+        return None
+    try:
+        parsed = datetime.fromisoformat(str(raw).replace("Z", "+00:00"))
+    except (TypeError, ValueError):
+        return None
+    if parsed.tzinfo is None:
+        parsed = parsed.replace(tzinfo=UTC)
+    if parsed <= datetime.now(UTC):
+        return None
+    # PayPal wants "…Z", not "+00:00".
+    return parsed.astimezone(UTC).strftime("%Y-%m-%dT%H:%M:%SZ")
+
+
 class PlanSelection(BaseModel):
     """Payload for POST /subscription/select-plan."""
     plan_key: str
@@ -197,9 +222,19 @@ async def upgrade_subscription(
     still works — it lands on the default tier.
     """
     # Ensure the provider row exists (creates a fresh trial on first call).
-    await _ensure_provider_record(user["user_id"])
+    prov = await _ensure_provider_record(user["user_id"])
     plan = plan_for(plan_key)
     plan_id = await _get_or_create_billing_plan(plan["key"])
+
+    # Don't charge before the free trial is over. PayPal bills on approval
+    # unless given a start_time, so a provider who subscribed on day 3 of
+    # their 30-day trial paid immediately and forfeited the other 27 — while
+    # the signup flow told them the first 30 days were free.
+    #
+    # Only sent when it is genuinely in the future: PayPal rejects a past
+    # start_time outright, which would turn an expired trial into a failed
+    # upgrade.
+    billing_starts_at = _future_trial_end(prov)
 
     # Look up provider email for a smoother PayPal checkout prefill.
     u = await db.users.find_one({"_id": user["user_id"]}) or await db.users.find_one({"id": user["user_id"]})
@@ -214,6 +249,7 @@ async def upgrade_subscription(
             return_url=return_url,
             cancel_url=cancel_url,
             subscriber_email=email,
+            start_time=billing_starts_at,
         )
     except Exception as e:  # noqa: BLE001
         logger.exception("PayPal create_subscription error")
@@ -253,6 +289,10 @@ async def upgrade_subscription(
         "plan_key": plan["key"],
         "months": plan["months"],
         "currency": SUBSCRIPTION_CURRENCY,
+        # None means "billing starts now" (trial already over). When set, no
+        # charge happens until this moment — the UI should say so rather than
+        # implying an immediate payment.
+        "billing_starts_at": billing_starts_at,
     }
 
 
