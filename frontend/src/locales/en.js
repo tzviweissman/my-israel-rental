@@ -46,6 +46,19 @@ const en = {
         noFeesDetail: 'Free for renters. Free for owners.'
       },
       property: {
+        // Instant-book vs request-to-book, chosen by the lister in the
+        // add/edit property form. The two `default*` strings describe what
+        // happens while the lister hasn't chosen — that state is real and
+        // the copy has to name it rather than imply a toggle is already set.
+        bookingMode: {
+          label: 'How do you want to receive bookings?',
+          request: 'Review each request',
+          instant: 'Book instantly',
+          instantHelp: "Bookings are confirmed straight away and the dates are blocked. You won't be asked to approve them.",
+          requestHelp: 'Bookings arrive as requests. Nothing is confirmed until you accept, and the dates stay held until you do.',
+          defaultInstant: 'Not set — vacation rentals currently confirm instantly. Pick an option above to change that.',
+          defaultRequest: 'Not set — bookings for this listing currently arrive as requests for you to accept. Pick an option above to change that.',
+        },
         messageListerForPictures: 'For illustration only — message lister for pictures',
         bedrooms: 'Bedrooms',
         bathrooms: 'Bathrooms',

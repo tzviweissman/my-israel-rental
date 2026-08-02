@@ -150,6 +150,16 @@ class PropertyCreate(BaseModel):
     # (typically to capture Sukkot/Pesach travelers). If missing/empty on
     # read, callers should treat it as `[rental_type]`.
     rental_types: List[str] | None = None
+    # Does a booking confirm immediately, or land as a request the lister
+    # accepts? True = instant, False = request-to-book.
+    #
+    # `None` is meaningful and is NOT the same as False: it means the lister
+    # has never chosen, so booking creation falls back to the old hardcoded
+    # rule (vacation → instant, everything else → request). Defaulting this to
+    # False instead would silently switch every existing vacation rental to
+    # request-only the first time its owner saved an unrelated edit, because
+    # this same model backs PUT /properties/{id}.
+    instant_booking: bool | None = None
     # Optional holiday window — when set, any booking whose date range
     # overlaps this window under the primary (monthly/nightly) rate is
     # rejected, and renters are steered to the `holiday_lump_price`. ISO

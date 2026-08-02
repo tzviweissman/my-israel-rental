@@ -7,6 +7,7 @@ import { format } from 'date-fns';
 import { HOLIDAY_WINDOWS } from '../../constants/holidayWindows';
 import { loadHolidayWindows } from '../../utils/holidayWindows';
 import { buildWhatsAppLinkWithMessage } from '../../utils/whatsappLink';
+import { isInstantBooking } from '../../utils/instantBooking';
 
 // WhatsApp brand glyph, drawn in `currentColor` so it inherits the
 // button's text colour. Decorative — the button already carries a text
@@ -651,7 +652,12 @@ const BookingSidebar = ({
   };
 
   const datesIncomplete = !bookingData.start_date || !bookingData.end_date;
-  const isInstantBook = property.rental_type === 'vacation' && !sublease;
+  // Honours the lister's instant-book setting, falling back to the legacy
+  // "vacation is instant" rule when they haven't chosen. Shared helper rather
+  // than the rule inlined here, because the backend decides the booking's
+  // real status with the same logic — if this line and that one drift, the
+  // button promises something the API doesn't do.
+  const isInstantBook = isInstantBooking(property, sublease);
   const ctaLabel = datesIncomplete
     ? t('property.pickDates')
     : isInstantBook

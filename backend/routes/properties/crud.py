@@ -134,6 +134,17 @@ async def update_property(property_id: str, property_data: PropertyCreate, paylo
     update_doc = property_data.model_dump()
     _normalize_rental_types(update_doc)
 
+    # `model_dump()` is a FULL dump, so every optional field the caller left
+    # out arrives here as None and overwrites whatever was stored. For most
+    # fields the edit form round-trips the current value, so that's harmless.
+    # `instant_booking` is different: None is a real, distinct state ("never
+    # chosen"), so a client that doesn't know about the field — the admin
+    # importer, an older cached bundle, a script — would silently reset a
+    # lister's deliberate choice on an unrelated edit. Keep the stored value
+    # unless this request actually carried the key.
+    if 'instant_booking' not in property_data.model_fields_set:
+        update_doc['instant_booking'] = existing.get('instant_booking')
+
     # Auto-republish: if this listing was quarantined by the admin
     # pricing auto-fix, and the owner has now supplied a plausible
     # price for the correct rental type, drop the ``is_hidden`` flag +

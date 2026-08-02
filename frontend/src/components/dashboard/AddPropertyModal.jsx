@@ -34,6 +34,12 @@ const EMPTY_FORM = {
   // Example: `rental_type='short-term', rental_types=['short-term','vacation']`
   // → shows in Short-term AND in Vacation feeds (for Sukkot travelers).
   rental_types: [],
+  // Instant book vs request to book. `null` means "not chosen" and is NOT
+  // the same as false — the backend falls back to its legacy rule (vacation
+  // rentals confirm instantly, everything else is a request) until the lister
+  // actually picks. Keep it null here so opening the form doesn't itself
+  // count as a choice.
+  instant_booking: null,
   // Holiday window — when set, the primary monthly/nightly booking flow
   // rejects overlaps with these dates and steers renters to the holiday
   // lump price. Owners can auto-fill this from the Jewish calendar.
@@ -218,6 +224,10 @@ const AddPropertyModal = ({ isOpen, onClose, editingProperty, onSaved, API, toke
         // Multi-list + holiday window hydration — legacy rows won't have
         // these so default to a safe empty state.
         rental_types: editingProperty.rental_types || [],
+        // `??` and not `||`: false is a real choice here ("request to book")
+        // and `||` would quietly turn it back into null, i.e. "not chosen",
+        // handing the listing back to the legacy vacation rule on every edit.
+        instant_booking: editingProperty.instant_booking ?? null,
         holiday_start_date: editingProperty.holiday_start_date || '',
         holiday_end_date: editingProperty.holiday_end_date || '',
       });
@@ -886,6 +896,65 @@ const AddPropertyModal = ({ isOpen, onClose, editingProperty, onSaved, API, toke
               {propertyForm.rental_type === 'vacation'
                 ? 'Minimum number of days a renter must book (e.g., 3, 7, 14 days)'
                 : 'Minimum number of months a renter must book (e.g., 6, 12, 24 months)'}
+            </p>
+          </div>
+
+          {/* How bookings arrive — instant confirm vs. request to book.
+              Three states, not two: null means the lister hasn't chosen and
+              the backend applies its legacy rule, so the copy spells out what
+              that rule will do for THIS listing rather than showing a toggle
+              silently sitting on one side. */}
+          <div>
+            <label className="block text-sm font-medium mb-2">
+              {t('property.bookingMode.label', 'How do you want to receive bookings?')}
+            </label>
+            <div
+              className="inline-flex items-center gap-1 p-1 rounded-lg bg-white border border-[#E5E5E5]"
+              data-testid="instant-booking-toggle"
+            >
+              {[
+                { value: false, label: t('property.bookingMode.request', 'Review each request') },
+                { value: true, label: t('property.bookingMode.instant', 'Book instantly') },
+              ].map(({ value, label }) => {
+                const active = propertyForm.instant_booking === value;
+                return (
+                  <button
+                    key={String(value)}
+                    type="button"
+                    onClick={() => setPropertyForm({ ...propertyForm, instant_booking: value })}
+                    className="px-3 py-1.5 rounded-md text-xs font-semibold transition-all"
+                    style={{
+                      backgroundColor: active ? '#1E6A6A' : 'transparent',
+                      color: active ? '#FFFFFF' : '#1E6A6A',
+                    }}
+                    aria-pressed={active}
+                    data-testid={`instant-booking-${value ? 'on' : 'off'}`}
+                  >
+                    {label}
+                  </button>
+                );
+              })}
+            </div>
+            <p className="text-xs text-gray-500 mt-1">
+              {propertyForm.instant_booking === true
+                ? t(
+                    'property.bookingMode.instantHelp',
+                    "Bookings are confirmed straight away and the dates are blocked. You won't be asked to approve them.",
+                  )
+                : propertyForm.instant_booking === false
+                ? t(
+                    'property.bookingMode.requestHelp',
+                    'Bookings arrive as requests. Nothing is confirmed until you accept, and the dates stay held until you do.',
+                  )
+                : propertyForm.rental_type === 'vacation'
+                ? t(
+                    'property.bookingMode.defaultInstant',
+                    "Not set — vacation rentals currently confirm instantly. Pick an option above to change that.",
+                  )
+                : t(
+                    'property.bookingMode.defaultRequest',
+                    'Not set — bookings for this listing currently arrive as requests for you to accept. Pick an option above to change that.',
+                  )}
             </p>
           </div>
 

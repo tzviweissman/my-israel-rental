@@ -142,6 +142,9 @@ class PropertyOut(BaseModel):
     # Multi-list support (see PropertyCreate). When missing/empty on read,
     # clients should treat it as [rental_type].
     rental_types: list[str] | None = None
+    # Lister's instant-book choice. None = never chosen; the booking endpoint
+    # then falls back to "vacation rentals are instant". See PropertyCreate.
+    instant_booking: bool | None = None
     holiday_start_date: str | None = None
     holiday_end_date: str | None = None
     contract_url: str | None = None

@@ -46,6 +46,16 @@ const he = {
         noFeesDetail: 'חינם לשוכרים. חינם לבעלי דירות.'
       },
       property: {
+        // Instant-book vs request-to-book — see the note on the English side.
+        bookingMode: {
+          label: 'איך תרצו לקבל הזמנות?',
+          request: 'אישור כל בקשה',
+          instant: 'הזמנה מיידית',
+          instantHelp: 'ההזמנות מאושרות מיד והתאריכים נחסמים. לא תתבקשו לאשר אותן.',
+          requestHelp: 'ההזמנות מגיעות כבקשות. שום דבר לא מאושר עד שתאשרו, והתאריכים נשמרים עד אז.',
+          defaultInstant: 'לא הוגדר — נכסי נופש מאושרים כרגע מיד. בחרו אפשרות למעלה כדי לשנות זאת.',
+          defaultRequest: 'לא הוגדר — הזמנות לנכס הזה מגיעות כרגע כבקשות לאישורכם. בחרו אפשרות למעלה כדי לשנות זאת.',
+        },
         messageListerForPictures: 'להמחשה בלבד — לקבלת תמונות, שלחו הודעה למשכיר',
         bedrooms: 'חדרי שינה',
         bathrooms: 'חדרי רחצה',

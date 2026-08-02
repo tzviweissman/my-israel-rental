@@ -181,11 +181,24 @@ def _build_booking_doc(
 ) -> dict:
     """Assemble the booking document with id, owner routing, and the
     auto-confirm/pending status decision baked in.
-    Auto-confirm only for vacation rentals (and never for sublease bookings,
-    which always require sublessor accept/deny)."""
-    is_instant_confirm = (
-        property_data.get('rental_type') == 'vacation' and sublease_data is None
-    )
+
+    Instant confirm vs. request-to-book is the lister's choice, stored on the
+    property as ``instant_booking``:
+
+    * ``True``  — the booking is confirmed immediately.
+    * ``False`` — it lands as ``pending`` for the lister to accept or decline.
+    * unset     — fall back to the old hardcoded rule (vacation rentals were
+      instant, everything else a request), so the ~200 listings that predate
+      the setting keep behaving exactly as they do today. Nothing changes for
+      a lister until they deliberately flip the switch.
+
+    Sublease bookings are never instant regardless of the flag: the sublessor,
+    not the property owner, is on the hook and must accept explicitly.
+    """
+    instant_preference = property_data.get('instant_booking')
+    if instant_preference is None:
+        instant_preference = property_data.get('rental_type') == 'vacation'
+    is_instant_confirm = bool(instant_preference) and sublease_data is None
     booking_doc = booking_data.model_dump()
     booking_doc.update({
         'id': str(uuid.uuid4()),
