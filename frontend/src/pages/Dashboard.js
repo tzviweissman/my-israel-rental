@@ -39,11 +39,19 @@ const Dashboard = () => {
   const [activeTab, setActiveTab] = useState('properties');
   const [unreadConversations, setUnreadConversations] = useState(0);
 
-  // Renters don't have a Properties tab — fall back to Bookings on first load.
+  // Land everyone on a tab they actually have.
+  //
+  // The default was always 'properties', with a renter-only correction. A
+  // provider has no Properties tab at all (it's gated to owner / manager /
+  // admin), so they opened their dashboard on a tab that isn't in their tab
+  // bar and renders nothing — a blank page on the first screen after signup.
+  //
+  // Keyed off role rather than patching case by case, so a role added later
+  // gets a deliberate answer instead of an empty panel.
   useEffect(() => {
-    if (user?.role === 'renter' && activeTab === 'properties') {
-      setActiveTab('bookings');
-    }
+    if (!user || activeTab !== 'properties') return;
+    if (user.role === 'provider') setActiveTab('my-gigs');
+    else if (user.role === 'renter') setActiveTab('bookings');
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
 

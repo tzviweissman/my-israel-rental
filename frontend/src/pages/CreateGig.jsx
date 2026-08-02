@@ -495,7 +495,7 @@ const CreateGig = () => {
                 {categories.map((c) => (
                   <button key={c.slug} type="button" onClick={() => set({ category: c.slug })}
                     className={`px-3 py-2 rounded-lg text-xs font-semibold border ${
-                      form.category === c.slug ? 'bg-black text-[#D4AF37] border-black' : 'bg-white text-gray-700 border-gray-200 hover:border-[#D4AF37]'
+                      form.category === c.slug ? 'bg-[#1E6A6A] text-white border-[#1E6A6A]' : 'bg-white text-gray-700 border-gray-200 hover:border-[#1E6A6A]'
                     }`} data-testid={`wizard-cat-${c.slug}`}>
                     {c.label}
                   </button>
@@ -576,7 +576,7 @@ const CreateGig = () => {
                 ].map((o) => (
                   <button key={o.v} type="button" onClick={() => set({ booking_mode: o.v })}
                     className={`flex-1 px-3 py-2 rounded-lg text-sm font-semibold border text-left ${
-                      form.booking_mode === o.v ? 'bg-black text-[#D4AF37] border-black' : 'bg-white text-gray-700 border-gray-200 hover:border-[#D4AF37]'
+                      form.booking_mode === o.v ? 'bg-[#1E6A6A] text-white border-[#1E6A6A]' : 'bg-white text-gray-700 border-gray-200 hover:border-[#1E6A6A]'
                     }`} data-testid={`wizard-booking-${o.v}`}>
                     <span className="block">{o.label}</span>
                     <span className={`block text-[11px] font-normal mt-0.5 leading-snug ${
@@ -749,7 +749,7 @@ const StoreProductsStep = ({ products, onUpdate, onAdd, onRemove, productImageIn
           <div className="flex-1 space-y-2">
             <input value={p.name} onChange={(e) => onUpdate(i, { name: e.target.value })}
               placeholder="Product name (e.g. Oak dining table)"
-              className="font-semibold text-sm w-full bg-transparent focus:outline-none placeholder:text-gray-400"
+              className="w-full px-3 py-2 rounded-lg border bg-white border-gray-300 text-sm font-semibold focus:outline-none focus:border-[#1E6A6A] focus:ring-2 focus:ring-[#1E6A6A]/20 placeholder:text-gray-400 placeholder:font-normal"
               data-testid={`wizard-product-name-${i}`} />
             <div className="flex gap-2 items-stretch">
               <div className="relative">
