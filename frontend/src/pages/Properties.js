@@ -15,6 +15,7 @@ import HolidayBanner from '../components/property/HolidayBanner';
 import FiltersPanel, { PRICE_MAX } from '../components/property/FiltersPanel';
 import PageMeta from '../components/PageMeta';
 import { saveReturnPath } from '../hooks/useBackNavigation';
+import { FX_USD_TO_ILS } from '../utils/listingPrice';
 
 // Per-rental-type SEO copy. Each entry maps the URL segment (e.g.
 // `long-term`) to a unique title + meta description so search engines
@@ -166,7 +167,7 @@ const Properties = () => {
   };
 
   useEffect(() => {
-    axios.get(`${API}/exchange-rate`).then(res => setExchangeRate(res.data)).catch(() => setExchangeRate({ usd_to_ils: 3.65, ils_to_usd: 0.274 }));
+    axios.get(`${API}/exchange-rate`).then(res => setExchangeRate(res.data)).catch(() => setExchangeRate({ usd_to_ils: FX_USD_TO_ILS, ils_to_usd: 1 / FX_USD_TO_ILS }));
   }, []);
 
   useEffect(() => {
@@ -316,7 +317,12 @@ const Properties = () => {
     const maxP = opts.max_price ?? filters.max_price;
     const targetCurrency = opts.currency ?? priceCurrency;
     if (!minP && !maxP) return items;
-    const FX_USD_TO_ILS = 3.65; // matches backend fallback in utils/helpers.py
+    // Live rate — the same `exchangeRate` this page already fetches for the
+    // ≈ conversions it DISPLAYS. This filter used a hardcoded 3.65 while the
+    // display used the live figure, so a listing could show one price and be
+    // filtered on another. At the current ~3.06 that gap is ~19%, enough to
+    // hide listings that genuinely matched the renter's budget.
+    const fx = exchangeRate?.usd_to_ils || FX_USD_TO_ILS;
     return items.filter((p) => {
       const raw = p.monthly_price || p.nightly_price || 0;
       if (!raw) return true; // no price listed — don't block
@@ -324,9 +330,9 @@ const Properties = () => {
       let priceInTarget = raw;
       if (propCurrency !== targetCurrency) {
         if (targetCurrency === 'USD' && propCurrency === 'ILS') {
-          priceInTarget = raw / FX_USD_TO_ILS;
+          priceInTarget = raw / fx;
         } else if (targetCurrency === 'ILS' && propCurrency === 'USD') {
-          priceInTarget = raw * FX_USD_TO_ILS;
+          priceInTarget = raw * fx;
         }
       }
       if (minP && priceInTarget < Number(minP)) return false;

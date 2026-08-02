@@ -23,7 +23,7 @@ import VideoCoverBadge from '../property/VideoCoverBadge';
 
 // Re-exported from utils/listingPrice so the card, the /stays filter and the
 // /stays price sort all convert with the same rate.
-import { FX_USD_TO_ILS } from '../../utils/listingPrice';
+import { FX_USD_TO_ILS, priceIn } from '../../utils/listingPrice';
 
 const StaysCard = ({
   property,
@@ -32,6 +32,10 @@ const StaysCard = ({
   liked = false,
   onToggleLike,
   displayCurrency = null,
+  // Live USD->ILS, passed down from the page so every card on a results
+  // grid converts with the same number and none of them fetch it. Falls
+  // back to the constant when a caller hasn't wired it through yet.
+  fxRate = FX_USD_TO_ILS,
 }) => {
   const { t } = useTranslation();
   const cover = getCoverImage(property.images, 400, '', property.videos, property.id);
@@ -44,9 +48,9 @@ const StaysCard = ({
 
   let convertedHint = null;
   if (price && displayCurrency && displayCurrency !== propCur) {
-    let converted = price;
-    if (displayCurrency === 'USD' && propCur === 'ILS') converted = price / FX_USD_TO_ILS;
-    else if (displayCurrency === 'ILS' && propCur === 'USD') converted = price * FX_USD_TO_ILS;
+    // Shared with the /stays price filter and sort so a card can't show one
+    // number while the filter uses another.
+    const converted = priceIn(property, displayCurrency, fxRate);
     const convSym = displayCurrency === 'ILS' ? '₪' : '$';
     convertedHint = `≈ ${convSym}${Math.round(converted).toLocaleString()}`;
   }

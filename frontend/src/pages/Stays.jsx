@@ -40,6 +40,7 @@ import QuickChips from '../components/search/QuickChips';
 import NotifyMeCard from '../components/NotifyMeCard';
 import PageMeta from '../components/PageMeta';
 import useFavorites from '../hooks/useFavorites';
+import useExchangeRate from '../hooks/useExchangeRate';
 import { saveReturnPath } from '../hooks/useBackNavigation';
 import { areaLabel, areaGroupKey, canonicalArea, UNGROUPED_AREA } from '../utils/areaNames';
 import { byPrice, priceIn } from '../utils/listingPrice';
@@ -71,6 +72,10 @@ const Stays = ({ landing = null }) => {
   const navigate = useNavigate();
   const { t } = useTranslation();
   const [searchParams, setSearchParams] = useSearchParams();
+  // Live USD->ILS. Feeds the price filter AND the price sort, so both agree
+  // with what the cards display. Was a hardcoded 3.65 against a real rate
+  // near 3.06 — see hooks/useExchangeRate.
+  const { rate: fxRate } = useExchangeRate();
 
   const [allProperties, setAllProperties] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -293,7 +298,7 @@ const Stays = ({ landing = null }) => {
       // Convert the listing's price into the renter's chosen filter currency
       // before comparing. Shared with the price sort below (utils/listingPrice)
       // so the two can't disagree about what a listing costs.
-      const priceInFilterCurrency = priceIn(p, priceCurrency);
+      const priceInFilterCurrency = priceIn(p, priceCurrency, fxRate);
       if (priceMin && priceInFilterCurrency < parseFloat(priceMin)) return false;
       if (priceMax && priceInFilterCurrency > parseFloat(priceMax)) return false;
       if (amenities.length && !amenities.every((a) => (p.amenities || []).includes(a))) return false;
@@ -313,7 +318,7 @@ const Stays = ({ landing = null }) => {
       }
       return true;
     });
-  }, [allProperties, where, subType, bedrooms, bathrooms, porches, condition, furnished, hasElevator, priceMin, priceMax, priceCurrency, amenities, checkin, checkout, flexible]);
+  }, [allProperties, where, subType, bedrooms, bathrooms, porches, condition, furnished, hasElevator, priceMin, priceMax, priceCurrency, amenities, checkin, checkout, flexible, fxRate]);
 
   // Group filtered properties by area for the per-area row layout.
   // Keyed by canonical group key so the same neighbourhood stored under
@@ -388,9 +393,9 @@ const Stays = ({ landing = null }) => {
   const filteredWithDistance = useMemo(() => {
     switch (effectiveSort) {
       case SORT_PRICE_ASC:
-        return [...withDistance].sort(byPrice(priceCurrency, 'asc'));
+        return [...withDistance].sort(byPrice(priceCurrency, 'asc', fxRate));
       case SORT_PRICE_DESC:
-        return [...withDistance].sort(byPrice(priceCurrency, 'desc'));
+        return [...withDistance].sort(byPrice(priceCurrency, 'desc', fxRate));
       case SORT_NEAREST:
         // `withDistance` is already proximity-ordered.
         return withDistance;
@@ -403,7 +408,7 @@ const Stays = ({ landing = null }) => {
         // something.
         return nearCoords ? [...withDistance].sort(byNewest) : withDistance;
     }
-  }, [withDistance, effectiveSort, nearCoords, priceCurrency]);
+  }, [withDistance, effectiveSort, nearCoords, priceCurrency, fxRate]);
 
   // Address input → Nominatim (via our /api/geocode/search proxy which
   // handles the 1 rps cap + caching). On success we set coords in memory
@@ -668,7 +673,7 @@ const Stays = ({ landing = null }) => {
               properties={filteredWithDistance}
               userCoords={nearCoords}
               focusOnUser={Boolean(nearCoords)}
-              displayCurrency={priceCurrency}
+              displayCurrency={priceCurrency} fxRate={fxRate}
               activeId={activeMapId}
               onPinClick={setActiveMapId}
             />
@@ -774,7 +779,7 @@ const Stays = ({ landing = null }) => {
                     fullWidth
                     liked={likedIds.has(p.id)}
                     onToggleLike={(e) => toggleLike(p.id, e)}
-                    displayCurrency={priceCurrency}
+                    displayCurrency={priceCurrency} fxRate={fxRate}
                     onClick={() => {
                       saveReturnPath();
                       navigate(`/property/${p.id}`);
@@ -860,7 +865,7 @@ const Stays = ({ landing = null }) => {
                 fullWidth
                 liked={likedIds.has(p.id)}
                 onToggleLike={(e) => toggleLike(p.id, e)}
-                displayCurrency={priceCurrency}
+                displayCurrency={priceCurrency} fxRate={fxRate}
                 onClick={() => {
                   saveReturnPath();
                   navigate(`/property/${p.id}`);
@@ -899,7 +904,7 @@ const Stays = ({ landing = null }) => {
               properties={props}
               likedIds={likedIds}
               onToggleLike={toggleLike}
-              displayCurrency={priceCurrency}
+              displayCurrency={priceCurrency} fxRate={fxRate}
               onCardClick={(id) => {
                 saveReturnPath();
                 navigate(`/property/${id}`);

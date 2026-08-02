@@ -3,6 +3,7 @@ import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import axios from 'axios';
 import { API, AuthContext } from '../App';
+import { FX_USD_TO_ILS } from '../utils/listingPrice';
 import { MapPin, Calendar as CalendarIcon, Heart, Share2, Check } from 'lucide-react';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
@@ -129,7 +130,7 @@ const PropertyDetail = () => {
   useEffect(() => {
     axios.get(`${API}/exchange-rate`)
       .then(res => setExchangeRate(res.data))
-      .catch(() => setExchangeRate({ usd_to_ils: 3.65, ils_to_usd: 0.274 }));
+      .catch(() => setExchangeRate({ usd_to_ils: FX_USD_TO_ILS, ils_to_usd: 1 / FX_USD_TO_ILS }));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
