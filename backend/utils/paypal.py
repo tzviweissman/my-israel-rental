@@ -322,8 +322,42 @@ async def get_subscription(subscription_id: str) -> dict[str, Any]:
     return res.json()
 
 
+class PayPalCancelError(Exception):
+    """A cancel that PayPal refused, carrying enough to decide what to do.
+
+    httpx's own message is just "Client error '422 Unknown Error' for url
+    …", which says nothing about WHY. PayPal puts the actual reason in the
+    response body as an issue name, and the caller needs it: a 422
+    SUBSCRIPTION_STATUS_INVALID (the subscription isn't in a cancellable
+    state) means the user's intent is already satisfied, while other 422s
+    are genuine failures.
+    """
+
+    def __init__(self, status_code: int, body: str, issues: list[str]) -> None:
+        detail = ", ".join(issues) if issues else (body[:200] or "no detail")
+        super().__init__(f"PayPal cancel failed ({status_code}): {detail}")
+        self.status_code = status_code
+        self.body = body
+        self.issues = issues
+
+    @property
+    def already_final(self) -> bool:
+        """True when the subscription can't be cancelled because it is
+        already cancelled/expired, or was never approved."""
+        if self.status_code == 404:
+            return True
+        return any(
+            i in {"SUBSCRIPTION_STATUS_INVALID", "RESOURCE_NOT_FOUND"}
+            for i in self.issues
+        )
+
+
 async def cancel_subscription(subscription_id: str, reason: str = "User requested cancel") -> None:
-    """Cancel a subscription. PayPal returns 204 No Content on success."""
+    """Cancel a subscription. PayPal returns 204 No Content on success.
+
+    Raises ``PayPalCancelError`` (not a bare httpx error) so the caller can
+    tell "already cancelled / never approved" apart from a real failure.
+    """
     token = await get_access_token()
     async with httpx.AsyncClient(timeout=20.0) as client:
         res = await client.post(
@@ -336,4 +370,14 @@ async def cancel_subscription(subscription_id: str, reason: str = "User requeste
         )
     if res.status_code not in (204, 200):
         logger.error("PayPal cancel_subscription failed: %s %s", res.status_code, res.text)
-        res.raise_for_status()
+        issues: list[str] = []
+        try:
+            payload = res.json()
+            issues = [
+                str(d.get("issue")) for d in (payload.get("details") or []) if d.get("issue")
+            ]
+            if not issues and payload.get("name"):
+                issues = [str(payload["name"])]
+        except Exception:  # noqa: BLE001 — a non-JSON body is still reportable
+            pass
+        raise PayPalCancelError(res.status_code, res.text or "", issues)

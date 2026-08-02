@@ -308,15 +308,28 @@ async def cancel_subscription_route(user=Depends(verify_token)):
         raise HTTPException(status_code=400, detail="No active subscription")
     try:
         await paypal.cancel_subscription(prov["paypal_subscription_id"])
-    except Exception as e:  # noqa: BLE001
-        # PayPal returns 404 for subscriptions that are still APPROVAL_PENDING
-        # (never approved) or already cancelled/expired. In both cases the
-        # provider's intent is clear — mark it cancelled locally and move on.
-        msg = str(e)
-        if "404" not in msg and "RESOURCE_NOT_FOUND" not in msg:
+    except paypal.PayPalCancelError as e:
+        # PayPal refuses to cancel a subscription that isn't ACTIVE or
+        # SUSPENDED: 404 when it's gone, 422 SUBSCRIPTION_STATUS_INVALID when
+        # it's already cancelled/expired or was never approved (created by
+        # /upgrade but the provider never completed checkout). In every one of
+        # those the provider's intent is already satisfied, so record it
+        # locally instead of showing them a raw PayPal error for a
+        # subscription that was never going to bill them.
+        #
+        # This previously matched on the httpx message, which reads "Client
+        # error '422 Unknown Error'" and carries no reason at all — so 422
+        # fell through to the 502 branch and surfaced as a wall of URL.
+        if not e.already_final:
             logger.exception("PayPal cancel_subscription error")
-            raise HTTPException(status_code=502, detail=f"PayPal error: {e}") from e
-        logger.info("PayPal cancel: subscription already gone (%s); marking cancelled locally", prov["paypal_subscription_id"])
+            raise HTTPException(status_code=502, detail=str(e)) from e
+        logger.info(
+            "PayPal cancel: %s not cancellable (%s); marking cancelled locally",
+            prov["paypal_subscription_id"], ", ".join(e.issues) or e.status_code,
+        )
+    except Exception as e:  # noqa: BLE001 — network/auth failures are real
+        logger.exception("PayPal cancel_subscription error")
+        raise HTTPException(status_code=502, detail=f"PayPal error: {e}") from e
 
     await db.marketplace_providers.update_one(
         {"user_id": user["user_id"]},
