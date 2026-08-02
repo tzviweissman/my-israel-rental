@@ -267,8 +267,32 @@ const ProfileEditModal = ({ API, token, initial, onClose, onSaved }) => {
   );
 };
 
+/** True once a cancellation has gone through but paid-for access remains.
+ *  Cancelling sets `paypal_subscription_status` and deliberately leaves
+ *  `subscription_status` alone — the provider keeps what they paid for
+ *  until the period ends. */
+export const isCancelled = (provider) =>
+  provider?.paypal_subscription_status === 'CANCELLED';
+
 const StatusPill = ({ provider }) => {
   if (provider.subscription_status === 'active') {
+    // Cancelled-but-still-active had no state of its own, so the pill kept
+    // reading "Pro — active" after a successful cancellation and it looked
+    // like the button had done nothing.
+    if (isCancelled(provider)) {
+      const until = provider.subscribed_until
+        ? new Date(provider.subscribed_until).toLocaleDateString()
+        : null;
+      return (
+        <span
+          className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-amber-50 text-amber-700 text-xs font-semibold"
+          data-testid="my-gigs-status-cancelled"
+        >
+          <Clock size={12} />
+          {until ? `Pro — cancelled, access until ${until}` : 'Pro — cancelled, access until the period ends'}
+        </span>
+      );
+    }
     return (
       <span
         className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 text-xs font-semibold"
@@ -389,7 +413,7 @@ const MyGigsTab = ({ API, token }) => {
       await axios.post(`${API}/marketplace/subscription/cancel`, {}, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      toast.success('Subscription cancelled');
+      toast.success('Subscription cancelled — you keep Pro access until the period ends');
       load();
     } catch (err) {
       toast.error(err.response?.data?.detail || 'Cancel failed');
@@ -425,7 +449,7 @@ const MyGigsTab = ({ API, token }) => {
           >
             <Pencil size={14} /> Edit profile
           </button>
-          {provider && provider.subscription_status !== 'active' && (
+          {provider && (provider.subscription_status !== 'active' || isCancelled(provider)) && (
             <button
               onClick={() => setShowPlans(true)}
               disabled={upgrading}
@@ -439,7 +463,7 @@ const MyGigsTab = ({ API, token }) => {
               {t('plans.upgradeCta', 'Upgrade to Pro')}
             </button>
           )}
-          {provider && provider.subscription_status === 'active' && (
+          {provider && provider.subscription_status === 'active' && !isCancelled(provider) && (
             <button
               onClick={cancelPro}
               className="px-3 py-2.5 rounded-lg text-xs font-semibold text-red-600 border border-red-200 hover:bg-red-50"
@@ -461,7 +485,7 @@ const MyGigsTab = ({ API, token }) => {
       {/* Tier selection. Inline rather than a modal so the provider can still
           see their gigs and trial status while deciding — this is a pricing
           decision, not an interruption. */}
-      {showPlans && provider && provider.subscription_status !== 'active' && (
+      {showPlans && provider && (provider.subscription_status !== 'active' || isCancelled(provider)) && (
         <div
           className="bg-white border border-gray-200 rounded-2xl p-4 mb-4"
           data-testid="my-gigs-plans-panel"
