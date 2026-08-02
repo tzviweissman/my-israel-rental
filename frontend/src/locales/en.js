@@ -1583,6 +1583,14 @@ const en = {
       },
       // Phone/WhatsApp field validation. Wording tells people exactly what
       // to add — "invalid number" leaves them guessing.
+      // Shown by ErrorBoundary when a page crashes. Until this existed a
+      // render error produced a blank white document with no message.
+      errors: {
+        title: 'Something went wrong on this page',
+        body: "This one's on us, not you. Nothing you did was lost — try reloading, or head back and come at it again.",
+        reload: 'Reload the page',
+        goHome: 'Go to home',
+      },
       phone: {
         tooShort: "That looks too short — please include the full number.",
         needsCountryCode: 'Please start with 0 for an Israeli number (050-123-4567), or add the country code (+1, +44).',

@@ -1548,6 +1548,13 @@ const he = {
         loadFailed: 'לא הצלחנו לטעון את המחירים — נסו שוב בעוד רגע.',
       },
       // Phone/WhatsApp field validation. See en.js.
+      // Shown by ErrorBoundary when a page crashes. See en.js.
+      errors: {
+        title: 'משהו השתבש בעמוד הזה',
+        body: 'זו תקלה אצלנו, לא אצלכם. שום דבר שעשיתם לא אבד — נסו לרענן, או לחזור ולנסות שוב.',
+        reload: 'רענון העמוד',
+        goHome: 'חזרה לדף הבית',
+      },
       phone: {
         tooShort: 'המספר נראה קצר מדי — נא להזין את המספר המלא.',
         needsCountryCode: 'התחילו ב-0 למספר ישראלי (050-1234567), או הוסיפו קידומת מדינה (‎+1, ‎+44).',

@@ -78,6 +78,7 @@ const RouteFallback = () => (
   </div>
 );
 
+import ErrorBoundary from './components/common/ErrorBoundary';
 import { DOCUMENT_SERVICES_ENABLED } from './config/features';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
@@ -195,6 +196,10 @@ function App() {
           )}
           <WhatsAppButton />
           <AccessibilityButton />
+          {/* Around the ROUTES only: a page-level crash then leaves the
+              nav bar intact so the user can click their way out, instead
+              of being stranded on a blank document. */}
+          <ErrorBoundary>
           <Suspense fallback={<RouteFallback />}>
           <Routes>
             {/* `/` lands on the marketing-style Home page (hero +
@@ -253,6 +258,7 @@ function App() {
             <Route path="/faq" element={<FAQ />} />
           </Routes>
           </Suspense>
+          </ErrorBoundary>
         </div>
           </>
       </BrowserRouter>
