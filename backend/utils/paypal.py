@@ -56,6 +56,21 @@ async def get_access_token() -> str:
             data={"grant_type": "client_credentials"},
             headers={"Accept": "application/json", "Accept-Language": "en_US"},
         )
+    if res.status_code == 401:
+        # The single most likely cause, and the one the raw httpx message
+        # ("Client error '401 Unauthorized' for url …") tells you nothing
+        # about: sandbox credentials pointed at live, or the reverse. The
+        # two environments issue completely separate client ids and secrets
+        # and each rejects the other's outright.
+        mode = os.environ.get("PAYPAL_MODE", "sandbox").lower()
+        other = "live" if mode == "sandbox" else "sandbox"
+        raise RuntimeError(
+            f"PayPal rejected the credentials for the {mode} environment (401). "
+            f"PAYPAL_CLIENT_ID / PAYPAL_CLIENT_SECRET are most likely {other} "
+            f"keys — the two are separate and are not interchangeable. Get the "
+            f"{mode} pair from developer.paypal.com → Apps & Credentials with "
+            f"the {mode.capitalize()} toggle selected."
+        )
     res.raise_for_status()
     payload = res.json()
     _token_cache["value"] = payload["access_token"]
