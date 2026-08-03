@@ -927,8 +927,7 @@ const AddPropertyModal = ({ isOpen, onClose, editingProperty, onSaved, API, toke
                         <strong>Nobody can book this listing.</strong> Your
                         availability ended on{' '}
                         {new Date(cap).toLocaleDateString()}, so every date is
-                        greyed out on the renter's calendar. Clear this field
-                        for open-ended availability, or set a later date.
+                        greyed out on the renter's calendar.
                       </>
                     ) : (
                       <>
@@ -937,10 +936,54 @@ const AddPropertyModal = ({ isOpen, onClose, editingProperty, onSaved, API, toke
                         </strong>{' '}
                         Renters can't pick any date after{' '}
                         {new Date(cap).toLocaleDateString()} — including next
-                        summer or the holidays. Clear this field to accept
-                        bookings with no end date.
+                        summer or the holidays.
                       </>
                     )}
+                    {/* Actionable, not just informative. Telling an owner
+                        their listing is dead is only useful if fixing it is
+                        one tap away — most won't hand-pick a date, and the
+                        common intent is "keep me open through the next chag".
+                        The windows come from utils/holidayCalendar, which is
+                        now Hebcal-verified; building this on the old table
+                        would have rolled listings forward to the wrong week. */}
+                    <div className="mt-3 flex flex-wrap gap-2">
+                      {['sukkot', 'pesach'].map((tag) => {
+                        const win = nextHolidayWindow([tag]);
+                        // Skip a holiday the cap already covers — offering to
+                        // "extend" to a date earlier than the current one
+                        // would silently shorten the window instead.
+                        if (!win || win.end <= propertyForm.available_to) return null;
+                        const label = tag.charAt(0).toUpperCase() + tag.slice(1);
+                        return (
+                          <button
+                            key={tag}
+                            type="button"
+                            onClick={() =>
+                              setPropertyForm({ ...propertyForm, available_to: win.end })
+                            }
+                            className="px-3 py-1.5 rounded-lg text-xs font-semibold bg-white border border-[#1E6A6A] text-[#1E6A6A] hover:bg-[#1E6A6A] hover:text-white transition-colors"
+                            data-testid={`extend-availability-${tag}`}
+                          >
+                            Open through {label} (
+                            {new Date(`${win.end}T00:00:00`).toLocaleDateString(undefined, {
+                              month: 'short', day: 'numeric', year: 'numeric',
+                            })}
+                            )
+                          </button>
+                        );
+                      })}
+                      <button
+                        type="button"
+                        onClick={() => setPropertyForm({ ...propertyForm, available_to: '' })}
+                        className="px-3 py-1.5 rounded-lg text-xs font-semibold bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors"
+                        data-testid="extend-availability-clear"
+                      >
+                        No end date
+                      </button>
+                    </div>
+                    <p className="text-[11px] mt-2 opacity-80">
+                      Remember to save the listing after choosing.
+                    </p>
                   </div>
                 );
               })()}
