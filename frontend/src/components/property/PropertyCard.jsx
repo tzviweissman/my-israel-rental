@@ -47,19 +47,28 @@ const PropertyCard = ({
     property.holiday_lump_price != null &&
     property.holiday_lump_price > 0;
   const tags = property.holiday_tags || [];
+  // The listing's own everyday rate, if it has one. A lister who only rents
+  // over Pesach leaves this blank on purpose.
+  const regularPrice = Number(
+    property.rental_type === 'vacation' ? property.nightly_price : property.monthly_price,
+  );
+  const hasRegularPrice = regularPrice > 0;
   const showHolidayPrice =
     hasHolidayPrice &&
-    holidayContext != null &&
-    tags.includes(holidayContext);
+    // Normally the holiday rate only surfaces from a holiday-page context, so
+    // a listing carrying both prices doesn't confuse renters browsing /all.
+    // But when there is no everyday rate, that rule printed "₪0" on every
+    // surface except the holiday page — advertising a free apartment. If the
+    // holiday rate is the only price the listing has, it IS the price.
+    ((holidayContext != null && tags.includes(holidayContext)) || !hasRegularPrice);
 
   const priceCurrency = showHolidayPrice
     ? (property.holiday_lump_currency || property.currency)
     : property.currency;
-  const rawPrice = showHolidayPrice
-    ? property.holiday_lump_price
-    : property.rental_type === 'vacation'
-      ? (property.nightly_price || 0)
-      : (property.monthly_price || 0);
+  const rawPrice = showHolidayPrice ? property.holiday_lump_price : regularPrice;
+  // Eight live listings have no price of any kind. They were rendering as
+  // "₪0", which reads as free rather than as missing.
+  const hasAnyPrice = Number(rawPrice) > 0;
   const converted = convertPrice(rawPrice, priceCurrency);
 
   const holidayLabelMap = {
@@ -172,10 +181,25 @@ const PropertyCard = ({
               style={{ color: 'var(--gold-text-on-light)' }}
               data-testid={`property-price-${property.id}`}
             >
-              {property.currency === 'USD' ? '$' : '₪'}{rawPrice.toLocaleString()}
-              <span className="text-[10px] md:text-sm font-normal text-gray-600">{perLabel}</span>
+              {hasAnyPrice ? (
+                <>
+                  {/* priceCurrency, not property.currency — the holiday rate
+                      carries its own currency, so a USD holiday price on an
+                      ILS listing was rendering a dollar amount behind a ₪. */}
+                  {priceCurrency === 'USD' ? '$' : '₪'}{Number(rawPrice).toLocaleString()}
+                  <span className="text-[10px] md:text-sm font-normal text-gray-600">{perLabel}</span>
+                </>
+              ) : (
+                <span className="text-sm md:text-lg text-gray-500 font-semibold">
+                  {/* Reuses the key StaysCard already uses (and which is
+                      translated in both locales) rather than adding a second
+                      spelling of the same sentence. StaysCard has always
+                      handled the no-price case; this card printed ₪0. */}
+                  {t('stays.priceOnRequest', 'Price on request')}
+                </span>
+              )}
             </span>
-            {converted && (
+            {hasAnyPrice && converted && (
               <div
                 className="text-xs text-gray-400 mt-0.5"
                 data-testid={`property-converted-price-${property.id}`}
