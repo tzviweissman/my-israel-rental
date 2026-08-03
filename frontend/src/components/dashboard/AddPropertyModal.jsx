@@ -599,88 +599,12 @@ const AddPropertyModal = ({ isOpen, onClose, editingProperty, onSaved, API, toke
             </div>
 
 
-            {/* ── The regular rate ─────────────────────────────────────────
-                Everything about normal pricing sits together, and every
-                holiday field sits together below it. It used to alternate —
-                holiday tags, then the nightly price, then the holiday rate —
-                which read as though the second holiday box belonged to a
-                different question. */}
-            {/* Price section — always a single nightly/monthly input, with an
-                optional additive holiday-rate block below when one or more
-                holiday tags are selected. Owners enter BOTH a regular vacation
-                price and (optionally) a holiday premium — the UI/UX on the
-                listing pages picks the right one based on whether the renter
-                is browsing /vacation vs /sukkot. */}
-            <div className="md:col-span-2">
-              <label className="block text-sm font-medium mb-2">
-                {propertyForm.rental_type === 'vacation' ? 'Price (per night)' : 'Price (monthly)'}
-              </label>
-              <div className="flex gap-2">
-                <input
-                  type="number"
-                  value={propertyForm.rental_type === 'vacation' ? propertyForm.nightly_price : propertyForm.monthly_price}
-                  onChange={(e) => {
-                    const raw = e.target.value;
-                    const parsed = raw === '' ? '' : parseFloat(raw);
-                    if (propertyForm.rental_type === 'vacation') {
-                      setPropertyForm({ ...propertyForm, nightly_price: parsed });
-                    } else {
-                      setPropertyForm({ ...propertyForm, monthly_price: parsed });
-                    }
-                  }}
-                  min="0"
-                  className="flex-1 px-4 py-2 rounded-lg border border-[#E5E5E5] focus:outline-none focus:ring-2 focus:ring-[#1E6A6A]/50"
-                  required
-                  data-testid="property-price-input"
-                />
-                <select
-                  value={propertyForm.currency}
-                  onChange={(e) => setPropertyForm({ ...propertyForm, currency: e.target.value })}
-                  className="px-4 py-2 rounded-lg border border-[#E5E5E5] focus:outline-none focus:ring-2 focus:ring-[#1E6A6A]/50"
-                  data-testid="property-currency-select"
-                >
-                  <option value="ILS">₪ ILS</option>
-                  <option value="USD">$ USD</option>
-                </select>
-              </div>
-              {/* Sanity-check warning — a monthly rent under ₪1,500 (or
-                  $500) is almost never real in Israel, and typically
-                  means the host confused nightly with monthly, dropped a
-                  digit, or the number is stale from a rental-type flip.
-                  We warn instead of block: some sublets are legitimately
-                  cheap (e.g. yeshiva students, family arrangements). */}
-              {(() => {
-                const isLongTerm = propertyForm.rental_type !== 'vacation';
-                const rawVal = isLongTerm ? propertyForm.monthly_price : propertyForm.nightly_price;
-                const val = Number(rawVal);
-                if (!val || Number.isNaN(val)) return null;
-                const cur = propertyForm.currency || 'ILS';
-                const lowMonthly = isLongTerm && (
-                  (cur === 'ILS' && val < 1500) || (cur === 'USD' && val < 500)
-                );
-                const highNightly = !isLongTerm && (
-                  (cur === 'ILS' && val > 5000) || (cur === 'USD' && val > 1500)
-                );
-                if (!lowMonthly && !highNightly) return null;
-                return (
-                  <div
-                    className="mt-2 flex items-start gap-2 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm"
-                    data-testid="price-sanity-warning"
-                  >
-                    <AlertTriangle size={16} className="mt-0.5 text-amber-600 shrink-0" />
-                    <div className="text-xs text-amber-900">
-                      {lowMonthly
-                        ? `This monthly rent looks unusually low. Did you mean to enter a nightly rate, or is this really ${cur === 'ILS' ? '₪' : '$'}${val.toLocaleString()} per month?`
-                        : `This nightly rate looks high. Did you mean to enter a monthly rate, or is this really ${cur === 'ILS' ? '₪' : '$'}${val.toLocaleString()} per night?`}
-                    </div>
-                  </div>
-                );
-              })()}
-            </div>
 
             {/* ── Holidays (optional) ──────────────────────────────────────
-                Tags, the date window, and the holiday rate: one group, in
-                the order a lister thinks about them. */}
+                Tag, date window and holiday rate are ONE card: ticking
+                "Sukkot Rental" should answer every Sukkot question in one
+                place. It used to put the regular price in between, so the
+                rate box read as though it belonged to a different question. */}
             {/* Holiday Categories — available on ANY rental_type so a
                 short-term monthly listing can ALSO surface under vacation
                 for Sukkot / Pesach at a different lump price. When any
@@ -793,16 +717,13 @@ const AddPropertyModal = ({ isOpen, onClose, editingProperty, onSaved, API, toke
                     </button>
                   </div>
                 )}
-              </div>
-            )}
-
             {(propertyForm.holiday_tags || []).length > 0 && (() => {
               const tagsLabel = (propertyForm.holiday_tags || [])
                 .map((tag) => tag.charAt(0).toUpperCase() + tag.slice(1))
                 .join(' / ');
               const isPerNight = !!propertyForm.holiday_lump_is_per_night;
               return (
-                <div className="md:col-span-2 p-4 rounded-xl bg-[#FBF8F2] border border-[#D4AF37]/30" data-testid="holiday-rate-block">
+                <div className="mt-4 pt-4 border-t border-[#D4AF37]/40" data-testid="holiday-rate-block">
                   <div className="flex items-start justify-between gap-3 flex-wrap mb-3">
                     <div className="min-w-0">
                       <h4 className="text-sm font-bold text-[#1E6A6A]">{tagsLabel} rate</h4>
@@ -859,6 +780,85 @@ const AddPropertyModal = ({ isOpen, onClose, editingProperty, onSaved, API, toke
                 </div>
               );
             })()}
+              </div>
+            )}
+
+            {/* ── The regular rate ─────────────────────────────────────────
+                Asked after the holiday card, because a lister who came here
+                to list a Sukkot rental has just finished that thought. It is
+                optional: a holiday rate alone is a valid listing. */}
+            {/* Price section — always a single nightly/monthly input, with an
+                optional additive holiday-rate block below when one or more
+                holiday tags are selected. Owners enter BOTH a regular vacation
+                price and (optionally) a holiday premium — the UI/UX on the
+                listing pages picks the right one based on whether the renter
+                is browsing /vacation vs /sukkot. */}
+            <div className="md:col-span-2">
+              <label className="block text-sm font-medium mb-2">
+                {propertyForm.rental_type === 'vacation' ? 'Price (per night)' : 'Price (monthly)'}
+              </label>
+              <div className="flex gap-2">
+                <input
+                  type="number"
+                  value={propertyForm.rental_type === 'vacation' ? propertyForm.nightly_price : propertyForm.monthly_price}
+                  onChange={(e) => {
+                    const raw = e.target.value;
+                    const parsed = raw === '' ? '' : parseFloat(raw);
+                    if (propertyForm.rental_type === 'vacation') {
+                      setPropertyForm({ ...propertyForm, nightly_price: parsed });
+                    } else {
+                      setPropertyForm({ ...propertyForm, monthly_price: parsed });
+                    }
+                  }}
+                  min="0"
+                  className="flex-1 px-4 py-2 rounded-lg border border-[#E5E5E5] focus:outline-none focus:ring-2 focus:ring-[#1E6A6A]/50"
+                  required
+                  data-testid="property-price-input"
+                />
+                <select
+                  value={propertyForm.currency}
+                  onChange={(e) => setPropertyForm({ ...propertyForm, currency: e.target.value })}
+                  className="px-4 py-2 rounded-lg border border-[#E5E5E5] focus:outline-none focus:ring-2 focus:ring-[#1E6A6A]/50"
+                  data-testid="property-currency-select"
+                >
+                  <option value="ILS">₪ ILS</option>
+                  <option value="USD">$ USD</option>
+                </select>
+              </div>
+              {/* Sanity-check warning — a monthly rent under ₪1,500 (or
+                  $500) is almost never real in Israel, and typically
+                  means the host confused nightly with monthly, dropped a
+                  digit, or the number is stale from a rental-type flip.
+                  We warn instead of block: some sublets are legitimately
+                  cheap (e.g. yeshiva students, family arrangements). */}
+              {(() => {
+                const isLongTerm = propertyForm.rental_type !== 'vacation';
+                const rawVal = isLongTerm ? propertyForm.monthly_price : propertyForm.nightly_price;
+                const val = Number(rawVal);
+                if (!val || Number.isNaN(val)) return null;
+                const cur = propertyForm.currency || 'ILS';
+                const lowMonthly = isLongTerm && (
+                  (cur === 'ILS' && val < 1500) || (cur === 'USD' && val < 500)
+                );
+                const highNightly = !isLongTerm && (
+                  (cur === 'ILS' && val > 5000) || (cur === 'USD' && val > 1500)
+                );
+                if (!lowMonthly && !highNightly) return null;
+                return (
+                  <div
+                    className="mt-2 flex items-start gap-2 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm"
+                    data-testid="price-sanity-warning"
+                  >
+                    <AlertTriangle size={16} className="mt-0.5 text-amber-600 shrink-0" />
+                    <div className="text-xs text-amber-900">
+                      {lowMonthly
+                        ? `This monthly rent looks unusually low. Did you mean to enter a nightly rate, or is this really ${cur === 'ILS' ? '₪' : '$'}${val.toLocaleString()} per month?`
+                        : `This nightly rate looks high. Did you mean to enter a monthly rate, or is this really ${cur === 'ILS' ? '₪' : '$'}${val.toLocaleString()} per night?`}
+                    </div>
+                  </div>
+                );
+              })()}
+            </div>
           </div>
 
           {/* Date picker — Starting Date for long-term, Date Available for everything else */}
