@@ -260,21 +260,35 @@ const AddPropertyModal = ({ isOpen, onClose, editingProperty, onSaved, API, toke
     const missing = [];
     if (!(propertyForm.title || '').trim()) missing.push('Title');
     if (!(propertyForm.area || '').trim()) missing.push('Area / city');
-    const hasPrice = propertyForm.rental_type === 'long-term'
+    // A listing needs A price, not specifically the regular one. Someone who
+    // only rents over Pesach sets a holiday rate and leaves the nightly rate
+    // blank; someone who never touches holidays does the reverse. Requiring
+    // the regular price unconditionally made the holiday-only case
+    // impossible to submit — the Add button just stayed disabled, naming a
+    // field the lister had deliberately left empty.
+    const hasRegularPrice = propertyForm.rental_type === 'long-term'
       ? Number(propertyForm.monthly_price) > 0
       : Number(propertyForm.nightly_price) > 0;
-    if (!hasPrice) {
+    const hasHolidayPrice =
+      (propertyForm.holiday_tags || []).length > 0 &&
+      Number(propertyForm.holiday_lump_price) > 0;
+    if (!hasRegularPrice && !hasHolidayPrice) {
       missing.push(propertyForm.rental_type === 'long-term'
-        ? 'Monthly price'
-        : 'Nightly price');
+        ? 'Monthly price (or a holiday rate)'
+        : 'Nightly price (or a holiday rate)');
     }
     if (propertyForm.rental_type === 'long-term' && !propertyForm.starting_date) {
       missing.push('Starting date');
     }
     return missing;
+  // holiday_tags / holiday_lump_price belong here now that they can satisfy
+  // the price requirement. Without them the memo wouldn't recompute when a
+  // lister typed a holiday rate, so the Submit button would stay disabled —
+  // still naming the nightly price — until some unrelated field changed.
   }, [propertyForm.title, propertyForm.area, propertyForm.monthly_price,
       propertyForm.nightly_price, propertyForm.starting_date,
-      propertyForm.rental_type]);
+      propertyForm.rental_type, propertyForm.holiday_tags,
+      propertyForm.holiday_lump_price]);
   const canSubmit = missingRequiredFields.length === 0;
 
   const handleSubmit = async (e) => {
@@ -584,6 +598,89 @@ const AddPropertyModal = ({ isOpen, onClose, editingProperty, onSaved, API, toke
               </select>
             </div>
 
+
+            {/* ── The regular rate ─────────────────────────────────────────
+                Everything about normal pricing sits together, and every
+                holiday field sits together below it. It used to alternate —
+                holiday tags, then the nightly price, then the holiday rate —
+                which read as though the second holiday box belonged to a
+                different question. */}
+            {/* Price section — always a single nightly/monthly input, with an
+                optional additive holiday-rate block below when one or more
+                holiday tags are selected. Owners enter BOTH a regular vacation
+                price and (optionally) a holiday premium — the UI/UX on the
+                listing pages picks the right one based on whether the renter
+                is browsing /vacation vs /sukkot. */}
+            <div className="md:col-span-2">
+              <label className="block text-sm font-medium mb-2">
+                {propertyForm.rental_type === 'vacation' ? 'Price (per night)' : 'Price (monthly)'}
+              </label>
+              <div className="flex gap-2">
+                <input
+                  type="number"
+                  value={propertyForm.rental_type === 'vacation' ? propertyForm.nightly_price : propertyForm.monthly_price}
+                  onChange={(e) => {
+                    const raw = e.target.value;
+                    const parsed = raw === '' ? '' : parseFloat(raw);
+                    if (propertyForm.rental_type === 'vacation') {
+                      setPropertyForm({ ...propertyForm, nightly_price: parsed });
+                    } else {
+                      setPropertyForm({ ...propertyForm, monthly_price: parsed });
+                    }
+                  }}
+                  min="0"
+                  className="flex-1 px-4 py-2 rounded-lg border border-[#E5E5E5] focus:outline-none focus:ring-2 focus:ring-[#1E6A6A]/50"
+                  required
+                  data-testid="property-price-input"
+                />
+                <select
+                  value={propertyForm.currency}
+                  onChange={(e) => setPropertyForm({ ...propertyForm, currency: e.target.value })}
+                  className="px-4 py-2 rounded-lg border border-[#E5E5E5] focus:outline-none focus:ring-2 focus:ring-[#1E6A6A]/50"
+                  data-testid="property-currency-select"
+                >
+                  <option value="ILS">₪ ILS</option>
+                  <option value="USD">$ USD</option>
+                </select>
+              </div>
+              {/* Sanity-check warning — a monthly rent under ₪1,500 (or
+                  $500) is almost never real in Israel, and typically
+                  means the host confused nightly with monthly, dropped a
+                  digit, or the number is stale from a rental-type flip.
+                  We warn instead of block: some sublets are legitimately
+                  cheap (e.g. yeshiva students, family arrangements). */}
+              {(() => {
+                const isLongTerm = propertyForm.rental_type !== 'vacation';
+                const rawVal = isLongTerm ? propertyForm.monthly_price : propertyForm.nightly_price;
+                const val = Number(rawVal);
+                if (!val || Number.isNaN(val)) return null;
+                const cur = propertyForm.currency || 'ILS';
+                const lowMonthly = isLongTerm && (
+                  (cur === 'ILS' && val < 1500) || (cur === 'USD' && val < 500)
+                );
+                const highNightly = !isLongTerm && (
+                  (cur === 'ILS' && val > 5000) || (cur === 'USD' && val > 1500)
+                );
+                if (!lowMonthly && !highNightly) return null;
+                return (
+                  <div
+                    className="mt-2 flex items-start gap-2 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm"
+                    data-testid="price-sanity-warning"
+                  >
+                    <AlertTriangle size={16} className="mt-0.5 text-amber-600 shrink-0" />
+                    <div className="text-xs text-amber-900">
+                      {lowMonthly
+                        ? `This monthly rent looks unusually low. Did you mean to enter a nightly rate, or is this really ${cur === 'ILS' ? '₪' : '$'}${val.toLocaleString()} per month?`
+                        : `This nightly rate looks high. Did you mean to enter a monthly rate, or is this really ${cur === 'ILS' ? '₪' : '$'}${val.toLocaleString()} per night?`}
+                    </div>
+                  </div>
+                );
+              })()}
+            </div>
+
+            {/* ── Holidays (optional) ──────────────────────────────────────
+                Tags, the date window, and the holiday rate: one group, in
+                the order a lister thinks about them. */}
             {/* Holiday Categories — available on ANY rental_type so a
                 short-term monthly listing can ALSO surface under vacation
                 for Sukkot / Pesach at a different lump price. When any
@@ -699,80 +796,6 @@ const AddPropertyModal = ({ isOpen, onClose, editingProperty, onSaved, API, toke
               </div>
             )}
 
-
-            {/* Price section — always a single nightly/monthly input, with an
-                optional additive holiday-rate block below when one or more
-                holiday tags are selected. Owners enter BOTH a regular vacation
-                price and (optionally) a holiday premium — the UI/UX on the
-                listing pages picks the right one based on whether the renter
-                is browsing /vacation vs /sukkot. */}
-            <div className="md:col-span-2">
-              <label className="block text-sm font-medium mb-2">
-                {propertyForm.rental_type === 'vacation' ? 'Price (per night)' : 'Price (monthly)'}
-              </label>
-              <div className="flex gap-2">
-                <input
-                  type="number"
-                  value={propertyForm.rental_type === 'vacation' ? propertyForm.nightly_price : propertyForm.monthly_price}
-                  onChange={(e) => {
-                    const raw = e.target.value;
-                    const parsed = raw === '' ? '' : parseFloat(raw);
-                    if (propertyForm.rental_type === 'vacation') {
-                      setPropertyForm({ ...propertyForm, nightly_price: parsed });
-                    } else {
-                      setPropertyForm({ ...propertyForm, monthly_price: parsed });
-                    }
-                  }}
-                  min="0"
-                  className="flex-1 px-4 py-2 rounded-lg border border-[#E5E5E5] focus:outline-none focus:ring-2 focus:ring-[#1E6A6A]/50"
-                  required
-                  data-testid="property-price-input"
-                />
-                <select
-                  value={propertyForm.currency}
-                  onChange={(e) => setPropertyForm({ ...propertyForm, currency: e.target.value })}
-                  className="px-4 py-2 rounded-lg border border-[#E5E5E5] focus:outline-none focus:ring-2 focus:ring-[#1E6A6A]/50"
-                  data-testid="property-currency-select"
-                >
-                  <option value="ILS">₪ ILS</option>
-                  <option value="USD">$ USD</option>
-                </select>
-              </div>
-              {/* Sanity-check warning — a monthly rent under ₪1,500 (or
-                  $500) is almost never real in Israel, and typically
-                  means the host confused nightly with monthly, dropped a
-                  digit, or the number is stale from a rental-type flip.
-                  We warn instead of block: some sublets are legitimately
-                  cheap (e.g. yeshiva students, family arrangements). */}
-              {(() => {
-                const isLongTerm = propertyForm.rental_type !== 'vacation';
-                const rawVal = isLongTerm ? propertyForm.monthly_price : propertyForm.nightly_price;
-                const val = Number(rawVal);
-                if (!val || Number.isNaN(val)) return null;
-                const cur = propertyForm.currency || 'ILS';
-                const lowMonthly = isLongTerm && (
-                  (cur === 'ILS' && val < 1500) || (cur === 'USD' && val < 500)
-                );
-                const highNightly = !isLongTerm && (
-                  (cur === 'ILS' && val > 5000) || (cur === 'USD' && val > 1500)
-                );
-                if (!lowMonthly && !highNightly) return null;
-                return (
-                  <div
-                    className="mt-2 flex items-start gap-2 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm"
-                    data-testid="price-sanity-warning"
-                  >
-                    <AlertTriangle size={16} className="mt-0.5 text-amber-600 shrink-0" />
-                    <div className="text-xs text-amber-900">
-                      {lowMonthly
-                        ? `This monthly rent looks unusually low. Did you mean to enter a nightly rate, or is this really ${cur === 'ILS' ? '₪' : '$'}${val.toLocaleString()} per month?`
-                        : `This nightly rate looks high. Did you mean to enter a monthly rate, or is this really ${cur === 'ILS' ? '₪' : '$'}${val.toLocaleString()} per night?`}
-                    </div>
-                  </div>
-                );
-              })()}
-            </div>
-
             {(propertyForm.holiday_tags || []).length > 0 && (() => {
               const tagsLabel = (propertyForm.holiday_tags || [])
                 .map((tag) => tag.charAt(0).toUpperCase() + tag.slice(1))
@@ -874,6 +897,53 @@ const AddPropertyModal = ({ isOpen, onClose, editingProperty, onSaved, API, toke
                 helperText="Leave blank for open-ended availability. Set this if you're only renting for a fixed window (e.g. one week while travelling)."
                 testid="property-available-to"
               />
+              {/* An expired or nearly-expired cap silently makes a listing
+                  unbookable: the renter's calendar greys out every date after
+                  it, so the page looks live while nothing can be selected.
+                  Three live listings were sitting at an 11-day remaining
+                  window this way, which is what "only 2 days available the
+                  whole year" turned out to be. Nothing anywhere told the
+                  owner, so say it here, where they can fix it. */}
+              {(() => {
+                if (!propertyForm.available_to) return null;
+                const cap = new Date(`${propertyForm.available_to}T00:00:00`);
+                if (Number.isNaN(cap.getTime())) return null;
+                const today = new Date();
+                today.setHours(0, 0, 0, 0);
+                const daysLeft = Math.round((cap - today) / 86400000);
+                if (daysLeft > 30) return null;
+                const expired = daysLeft < 0;
+                return (
+                  <div
+                    className={`md:col-span-2 -mt-2 p-3 rounded-xl text-sm border ${
+                      expired
+                        ? 'bg-red-50 border-red-200 text-red-800'
+                        : 'bg-amber-50 border-amber-200 text-amber-900'
+                    }`}
+                    data-testid="available-to-warning"
+                  >
+                    {expired ? (
+                      <>
+                        <strong>Nobody can book this listing.</strong> Your
+                        availability ended on{' '}
+                        {new Date(cap).toLocaleDateString()}, so every date is
+                        greyed out on the renter's calendar. Clear this field
+                        for open-ended availability, or set a later date.
+                      </>
+                    ) : (
+                      <>
+                        <strong>
+                          Only {daysLeft === 0 ? 'today' : `${daysLeft} more day${daysLeft === 1 ? '' : 's'}`} bookable.
+                        </strong>{' '}
+                        Renters can't pick any date after{' '}
+                        {new Date(cap).toLocaleDateString()} — including next
+                        summer or the holidays. Clear this field to accept
+                        bookings with no end date.
+                      </>
+                    )}
+                  </div>
+                );
+              })()}
             </>
           )}
 
