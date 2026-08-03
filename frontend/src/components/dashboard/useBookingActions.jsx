@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { toast } from 'sonner';
 import axios from 'axios';
+import { apiErrorMessage } from '../../utils/apiError';
 
 /**
  * Encapsulates every booking-mutation flow used by `BookingsList`:
@@ -35,7 +36,7 @@ export default function useBookingActions({ bookings, API, token, onUpdate }) {
       closeAccept();
       await onUpdate();
     } catch (error) {
-      toast.error(error.response?.data?.detail || 'Failed to accept booking');
+      toast.error(apiErrorMessage(error, 'Failed to accept booking'));
     }
   };
 
@@ -60,9 +61,20 @@ export default function useBookingActions({ bookings, API, token, onUpdate }) {
         deny: 'deny-cancel',
       };
       const path = ENDPOINTS[cancelModal.type];
+      // Each endpoint names its own body field, and they are NOT the same:
+      // /cancel and /request-cancel take `reason`, /deny-cancel takes
+      // `denial_reason`. Posting `reason` to all three meant every denial
+      // came back 422 with a validation error naming the missing field —
+      // which then blanked the page, because a 422 `detail` is an array of
+      // objects and it went straight into toast.error(). See utils/apiError.
+      const BODY_FIELD = {
+        cancel: 'reason',
+        request: 'reason',
+        deny: 'denial_reason',
+      };
       await axios.post(
         `${API}/bookings/${cancelModal.bookingId}/${path}`,
-        { reason },
+        { [BODY_FIELD[cancelModal.type]]: reason },
         authHeader,
       );
       const MSG = {
@@ -74,7 +86,7 @@ export default function useBookingActions({ bookings, API, token, onUpdate }) {
       closeCancel();
       await onUpdate();
     } catch (error) {
-      toast.error(error.response?.data?.detail || 'Failed to process cancellation');
+      toast.error(apiErrorMessage(error, 'Failed to process cancellation'));
     } finally {
       setProcessingCancel(false);
     }
@@ -108,7 +120,7 @@ export default function useBookingActions({ bookings, API, token, onUpdate }) {
                   toast.success('Cancellation approved');
                   await onUpdate();
                 } catch (error) {
-                  toast.error(error.response?.data?.detail || 'Failed to approve cancellation');
+                  toast.error(apiErrorMessage(error, 'Failed to approve cancellation'));
                 }
               }}
               className="px-3 py-1.5 rounded-lg text-xs font-semibold text-white bg-[#1E6A6A] hover:bg-[#175555]"
@@ -193,7 +205,7 @@ export default function useBookingActions({ bookings, API, token, onUpdate }) {
       closeContractSign();
       await onUpdate();
     } catch (error) {
-      toast.error(error.response?.data?.detail || 'Failed to sign contract');
+      toast.error(apiErrorMessage(error, 'Failed to sign contract'));
     }
   };
 

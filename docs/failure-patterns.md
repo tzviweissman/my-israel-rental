@@ -67,6 +67,48 @@ button says `owner_id`. Role is a different question and answers it wrong.
 
 ---
 
+### 1c. The error path had the same bug, and hid the first one (2026-08-02)
+
+Denying a cancellation request blanked the page. Two bugs stacked, and the
+order matters:
+
+1. `/deny-cancel` takes a body field named `denial_reason`. `/cancel` and
+   `/request-cancel` take `reason`. The hook posted `reason` to all three, so
+   **every** denial returned 422.
+2. FastAPI's 422 body is `{"detail": [ {...}, ... ]}` — an **array of
+   objects**. The app does `toast.error(err.response?.data?.detail || '…')`
+   ~115 times. An array is truthy, so the fallback never runs, the array
+   reaches sonner, and React throws *"Objects are not valid as a React
+   child"*. `<Toaster/>` is mounted at the root **outside** the route-level
+   boundary, so this unmounted the entire app.
+
+The first bug was ordinary and would have taken minutes to find — *if* the
+error had been displayed. The second turned it into a blank white page, which
+is the one symptom that carries no information at all. **An error path that
+can itself crash converts every small bug downstream of it into the same
+unreportable one.**
+
+Note the near-miss in the fix: the obvious move was to wrap `<Toaster/>` in
+the existing `ErrorBoundary`. That component calls `useLocation()` and
+`useNavigate()`, and there is no `<Router>` at that level — it would have
+crashed the app on startup. Hence `SilentBoundary`, which needs no context and
+renders `null`, because a failed toast should cost you the toast.
+
+**What catches it:** `tests/test_cancel_body_fields_contract.py` compares each
+endpoint's `Body(...)` field to what the hook posts. `utils/apiError.js`
+guarantees a renderable string for every shape — string detail, 422 array,
+structured 409, network failure, unknown.
+
+**Rules:**
+- Never pass a value straight from the wire to anything that renders it.
+  `|| fallback` does not sanitise a type; it only catches falsiness.
+- Boundaries belong around *root-level* UI too, not just routes. Ask what is
+  mounted outside the boundary you already have.
+- Request bodies are a contract in the same way response payloads are. Three
+  sibling endpoints with three field names is a trap regardless.
+
+---
+
 ## 2. A condition that quietly matches nothing
 
 Four blank pages, four causes, one symptom:

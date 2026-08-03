@@ -4,6 +4,7 @@ import { HelmetProvider } from "react-helmet-async";
 import "@/index.css";
 import App from "@/App";
 import { Toaster } from "sonner";
+import SilentBoundary from "@/components/common/SilentBoundary";
 import { i18nReady } from "@/i18n";
 
 // Silence the benign "ResizeObserver loop completed with undelivered
@@ -33,7 +34,20 @@ const renderApp = () =>
     <React.StrictMode>
       <HelmetProvider>
         <App />
-        <Toaster position="top-right" duration={1500} />
+        {/* The Toaster renders arbitrary values that came off the wire, and
+            it lives OUTSIDE App's route-level ErrorBoundary — so a toast
+            given a non-string (a FastAPI 422 `detail` is an array of
+            objects) threw "Objects are not valid as a React child" at the
+            root and unmounted the entire app: a blank white page, with the
+            real error never shown. utils/apiError.js stops the bad value at
+            the source; this stops any future one from being fatal.
+
+            SilentBoundary rather than ErrorBoundary on purpose — the latter
+            uses router hooks, and there is no <Router> out here (it lives
+            inside <App/>), so it would throw on startup. */}
+        <SilentBoundary>
+          <Toaster position="top-right" duration={1500} />
+        </SilentBoundary>
       </HelmetProvider>
     </React.StrictMode>,
   );
