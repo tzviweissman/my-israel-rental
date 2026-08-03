@@ -42,10 +42,14 @@ const BookingChip = ({
   const ownsAsLister = b.owner_id === user.id;
   const isRenterOnBooking = b.renter_id === user.id;
   const cancellable = ['pending', 'confirmed'].includes(b.status);
-  // The lister can directly cancel only while the booking is still pending.
-  // After accepting, they must use the cancellation-request flow.
-  const canDirectCancel = ownsAsLister && b.status === 'pending';
-  const canRequestCancelAsLister = ownsAsLister && b.status === 'confirmed';
+  // The lister cancels directly, at any live status. This used to be capped
+  // at 'pending', with confirmed bookings offering "Request cancellation"
+  // instead — a button that could never work: it posts to /request-cancel,
+  // which authorises on `renter_id`, so the lister always got 403. The
+  // request flow is the RENTER's route for asking permission; the lister
+  // doesn't need permission, they own the calendar. /cancel has always
+  // accepted them at any status.
+  const canDirectCancel = ownsAsLister && cancellable;
   const canRequestCancelAsRenter = isRenterOnBooking && !ownsAsLister && cancellable;
   const canAccept = ownsAsLister && b.status === 'pending';
   const canApprove = ownsAsLister && b.status === 'cancellation_requested';
@@ -186,17 +190,6 @@ const BookingChip = ({
           >
             <XCircle size={12} />
             {t('dashboard.cancelBooking')}
-          </button>
-        )}
-
-        {canRequestCancelAsLister && (
-          <button
-            onClick={() => onRequestCancel(b.id)}
-            className="ms-auto px-2.5 py-1.5 rounded-md text-[11px] font-semibold text-orange-700 border border-orange-500 hover:bg-orange-50 inline-flex items-center gap-1"
-            data-testid={`request-cancel-${b.id}`}
-          >
-            <XCircle size={12} />
-            {t('dashboard.requestCancellation')}
           </button>
         )}
 
