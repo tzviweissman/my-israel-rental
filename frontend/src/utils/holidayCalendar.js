@@ -8,16 +8,32 @@
  * and offline. Refresh the table each summer before the new booking cycle
  * (a 30-second annual chore, no library dependency to keep the bundle small).
  */
+// Verified against the Hebcal API (Israel schedule, i=on) on 2026-08-02,
+// covering Erev Yom Tov through the last day of the chag inclusive.
+//
+// Every Sukkot row here was previously WRONG — 2026 by 11 days, 2027 by three
+// weeks, 2028 by 10 days — and Pesach 2026 ended a day late. This table is
+// what fills a lister's holiday booking window when they tick "Sukkot", so
+// those listings advertised a Sukkot rate over dates that aren't Sukkot: the
+// holiday premium applied to the wrong week, and renters searching the real
+// dates didn't match. Hand-curated tables drift silently; do not edit these
+// from memory. Re-derive them:
+//
+//   https://www.hebcal.com/hebcal?v=1&cfg=json&maj=on&i=on&year=<YYYY>
+//
+// `backend/tests/test_holiday_tables_agree.py` pins these values and checks
+// this table against constants/holidayWindows.js, so a wrong edit fails the
+// suite rather than quietly mispricing a chag.
 export const HOLIDAY_WINDOWS = {
   sukkot: {
-    2026: { start: '2026-10-06', end: '2026-10-13' },   // 15–22 Tishrei 5787
-    2027: { start: '2027-09-25', end: '2027-10-02' },   // 15–22 Tishrei 5788
-    2028: { start: '2028-10-14', end: '2028-10-21' },   // 15–22 Tishrei 5789
+    2026: { start: '2026-09-25', end: '2026-10-03' },   // Erev Sukkot–Simchat Torah 5787
+    2027: { start: '2027-10-15', end: '2027-10-23' },   // Erev Sukkot–Simchat Torah 5788
+    2028: { start: '2028-10-04', end: '2028-10-12' },   // Erev Sukkot–Simchat Torah 5789
   },
   pesach: {
-    2026: { start: '2026-04-01', end: '2026-04-09' },   // 15–22 Nisan 5786
-    2027: { start: '2027-04-21', end: '2027-04-28' },   // 15–22 Nisan 5787
-    2028: { start: '2028-04-10', end: '2028-04-17' },   // 15–22 Nisan 5788
+    2026: { start: '2026-04-01', end: '2026-04-08' },   // Erev Pesach–Pesach VII 5786
+    2027: { start: '2027-04-21', end: '2027-04-28' },   // Erev Pesach–Pesach VII 5787
+    2028: { start: '2028-04-10', end: '2028-04-17' },   // Erev Pesach–Pesach VII 5788
   },
 };
 

@@ -6,10 +6,12 @@
 
 export const HOLIDAY_WINDOWS = {
   sukkot: {
+    // Sukkot 5787 — Erev Sukkot through Simchat Torah, Hebcal Israel
+    // schedule, verified 2026-08-02. The end was 2026-10-04, a day past the
+    // chag; aligned so this file and utils/holidayCalendar.js agree.
     label: 'Sukkot',
-    // Sukkot 5787 — 1st night sunset Sep 25, ends Simchat Torah evening Oct 4
     start: '2026-09-25',
-    end: '2026-10-04',
+    end: '2026-10-03',
     year: 2026,
   },
   pesach: {
