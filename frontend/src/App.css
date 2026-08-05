@@ -1,4 +1,8 @@
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Manrope:wght@400;500&display=swap');
+/* Fonts and the base body/heading rules now come from
+   styles/design-tokens.css, imported first in index.js. They are NOT
+   repeated here: a second declaration later in the cascade wins on load
+   order, so duplicating them would silently pin the old values and make
+   the locked token file a decoration. */
 
 * {
   margin: 0;
@@ -6,49 +10,47 @@
   box-sizing: border-box;
 }
 
-body {
-  font-family: 'Manrope', sans-serif;
-  background-color: #FAFAFA;
-  color: #1A1A1A;
-}
+/* Legacy button aliases.
+   The design system's names are .btn-primary / .btn-accent (see
+   design-tokens.css). This app already had .primary-btn / .secondary-btn —
+   the same words in the opposite order, which is a genuine footgun: typing
+   the wrong one yields an unstyled <button> with no error.
 
-h1, h2, h3, h4, h5, h6 {
-  font-family: 'Playfair Display', serif;
-  font-weight: 600;
-}
-
+   Rather than leave two competing implementations, these now inherit the
+   token styling, so both spellings render identically while call sites are
+   migrated. They intentionally add nothing of their own. */
 .primary-btn {
-  background-color: #1E6A6A;
-  color: #D4AF37;
-  padding: 0.75rem 2rem;
-  border-radius: 9999px;
-  border: 1px solid #D4AF37;
-  font-weight: 500;
+  background: var(--brand-primary);
+  color: #fff;
+  border: 1.5px solid transparent;
+  border-radius: var(--radius-pill);
+  font-weight: 700;
+  padding: 13px 24px;
   cursor: pointer;
-  transition: all 0.3s ease-in-out;
+  transition: all .26s var(--ease);
 }
 
 .primary-btn:hover {
-  background-color: #D4AF37;
-  color: #1E6A6A;
-  transform: translateY(-2px);
+  background: var(--brand-primary-dark);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
 }
 
 .secondary-btn {
-  background-color: transparent;
-  color: #1E6A6A;
-  padding: 0.75rem 2rem;
-  border-radius: 9999px;
-  border: 1px solid #1E6A6A;
-  font-weight: 500;
+  background: transparent;
+  color: var(--brand-primary);
+  border: 1.5px solid var(--brand-primary);
+  border-radius: var(--radius-pill);
+  font-weight: 700;
+  padding: 13px 24px;
   cursor: pointer;
-  transition: all 0.3s ease-in-out;
+  transition: all .26s var(--ease);
 }
 
 .secondary-btn:hover {
-  background-color: rgba(0, 0, 0, 0.05);
-  border-color: #D4AF37;
-  color: #D4AF37;
+  background: rgba(30, 95, 140, .06);
+  border-color: var(--brand-primary-dark);
+  color: var(--brand-primary-dark);
 }
 
 .property-card {

@@ -176,3 +176,4 @@ backend/private_contracts/
 !backend/.env.example
 !frontend/.env.example
 .claude/
+screenshots/
