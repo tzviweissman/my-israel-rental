@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>MyIsraelRental — Home page redesign preview</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700;800&family=Manrope:wght@400;500;600;700;800&family=Frank+Ruhl+Libre:wght@500;600;700&family=Assistant:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<style>
+  :root{
+    --teal:#1E5F8C; --teal-dark:#184E73; --teal-deep:#123B57;
+    --gold:#C9A227; --gold-text:#8A6A14; --gold-lg:#A9831C;
+    --ink:#23201B; --muted:#6B6459; --bg:#EFE9DC; --surface:#FFFFFF; --border:#E1D8C6;
+    --shadow-sm:0 1px 2px rgba(20,40,40,.06),0 2px 8px rgba(20,40,40,.05);
+    --shadow-md:0 8px 24px rgba(20,40,40,.10);
+    --shadow-lg:0 18px 48px rgba(20,40,40,.16);
+    --r:18px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{font-family:'Manrope',system-ui,sans-serif;color:var(--ink);background:var(--bg);line-height:1.55;-webkit-font-smoothing:antialiased}
+  h1,h2,h3,.serif{font-family:'Playfair Display',Georgia,serif}
+  /* Hebrew type identity — Playfair/Manrope carry no Hebrew glyphs */
+  [dir="rtl"] body{font-family:'Assistant',system-ui,sans-serif}
+  [dir="rtl"] h1,[dir="rtl"] h2,[dir="rtl"] h3,[dir="rtl"] .serif,[dir="rtl"] .logo{font-family:'Frank Ruhl Libre',Georgia,serif}
+  [dir="rtl"] .eyebrow{text-transform:none;letter-spacing:.02em}
+  a{color:inherit;text-decoration:none}
+  img{display:block;max-width:100%}
+  .wrap{max-width:1200px;margin:0 auto;padding:0 24px}
+  .eyebrow{font-size:12px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--teal)}
+  :focus-visible{outline:2px solid var(--teal);outline-offset:2px;border-radius:6px}
+
+  /* inline icons inherit color + size from parent font-size */
+  .ic{display:inline-flex;width:1em;height:1em;flex:0 0 auto}
+  .ic svg{width:1em;height:1em;stroke:currentColor;fill:none;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round}
+  .ic.fill svg{fill:currentColor;stroke:none}
+  .arw{display:inline-flex;width:1em;height:1em}
+  .arw svg{width:1em;height:1em;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+  [dir="rtl"] .arw{transform:scaleX(-1)}
+
+  button{font-family:inherit}
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:9px;font-weight:700;font-size:15px;border-radius:999px;padding:13px 24px;cursor:pointer;border:1.5px solid transparent;transition:all .2s ease;white-space:nowrap;line-height:1}
+  .btn-teal{background:var(--teal);color:#fff}
+  .btn-teal:hover{background:var(--teal-dark);transform:translateY(-1px);box-shadow:var(--shadow-md)}
+  .btn-gold{background:rgba(172,134,28,.64);color:#fff;border-color:rgba(201,162,39,.85);backdrop-filter:blur(10px);box-shadow:inset 0 1px 0 rgba(255,255,255,.3);text-shadow:0 1px 2px rgba(50,36,0,.5)}
+  .btn-gold:hover{background:rgba(172,134,28,.78);transform:translateY(-1px);box-shadow:var(--shadow-md)} .scta.need .btn-gold,.band .btn-gold,.hero .btn-gold{background:rgba(172,134,28,.72);color:#fff;border-color:rgba(201,162,39,.95)}
+  .btn-ghost{background:#fff;border-color:var(--border);color:var(--ink)}
+  .btn-ghost:hover{border-color:var(--teal);color:var(--teal)}
+  .btn-lg{padding:15px 30px;font-size:16px}
+  .btn-outline-white{background:rgba(255,255,255,.10);border-color:rgba(255,255,255,.6);color:#fff;backdrop-filter:blur(6px)}
+  .btn-outline-white:hover{background:rgba(255,255,255,.2)}
+  .btn .arw{font-size:16px}
+
+  /* ---------- Preview banner ---------- */
+  .previewbar{background:#123B57;color:#cfe6e2;font-size:12.5px;text-align:center;padding:7px 16px;letter-spacing:.02em}
+  .previewbar b{color:#fff}
+
+  /* ---------- Nav ---------- */
+  nav.bar{position:sticky;top:0;z-index:50;background:rgba(255,255,255,.82);backdrop-filter:blur(14px);border-bottom:1px solid var(--border)}
+  .nav-in{display:flex;align-items:center;justify-content:space-between;height:66px}
+  .logo{display:flex;align-items:center;gap:11px;font-family:'Playfair Display';font-weight:700;font-size:20px;color:var(--teal)} .logo .badge{background:linear-gradient(135deg,#1E5F8C,#123B57);border-radius:12px;padding:7px 9px;display:grid;place-items:center;box-shadow:0 2px 6px rgba(18,59,87,.25)}
+  .logo .mark{width:32px;height:32px;border-radius:9px;background:linear-gradient(135deg,var(--teal),var(--teal-deep));display:grid;place-items:center;color:var(--gold)}
+  .logo .mark svg{width:18px;height:18px}
+  .nav-links{display:flex;align-items:center;gap:6px}
+  .nav-links a.pill{padding:9px 15px;border-radius:999px;font-weight:600;font-size:15px;color:#33413d}
+  .nav-links a.pill:hover{background:#EAF1F7;color:var(--teal)}
+  .nav-right{display:flex;align-items:center;gap:10px}
+  .lang{border:1px solid var(--border);border-radius:999px;font-size:13px;font-weight:600;color:var(--muted);padding:7px 12px;cursor:pointer;background:#fff}
+  .signin{font-weight:600;font-size:15px;color:#33413d;padding:9px 12px;cursor:pointer;background:none;border:none}
+  .signin:hover{color:var(--teal)}
+  @media(max-width:820px){.nav-links,.signin{display:none}}
+
+  /* ---------- Hero (cinematic, framed) ---------- */
+  .hero-stage{position:relative;overflow:hidden;min-height:86vh;display:flex;align-items:center;justify-content:center;padding:clamp(28px,5vw,90px);background:url('https://images.unsplash.com/photo-1547483036-24bc77c79804?auto=format&fit=crop&w=1920&q=80') center/cover no-repeat;background-color:var(--bg)}
+  .hero-stage::before{content:"";position:absolute;inset:0;z-index:0;pointer-events:none;background:rgba(243,238,229,.28)}
+  .hero-stage::after{content:"";position:absolute;inset:0;z-index:0;pointer-events:none;background:linear-gradient(180deg,transparent 60%,var(--bg) 100%)}
+  .hero{position:relative;z-index:1;width:100%;max-width:1180px;margin:0 auto;border-radius:26px;overflow:hidden;color:#fff;min-height:58vh;display:flex;flex-direction:column;justify-content:flex-end;box-shadow:0 30px 70px rgba(8,20,26,.30);border:1px solid rgba(255,255,255,.22)}
+  .hero .bg{position:absolute;inset:0;z-index:0;background:linear-gradient(95deg,rgba(8,20,26,.82) 0%,rgba(8,20,26,.5) 42%,rgba(8,20,26,.12) 74%,rgba(8,20,26,.28) 100%)}
+  .hero::after{content:"";position:absolute;inset:0;z-index:1;pointer-events:none;background:linear-gradient(0deg,rgba(6,16,20,.6),transparent 46%)}
+  .hero-in{position:relative;z-index:2;width:100%;max-width:1160px;margin:0 auto;padding:clamp(34px,5vh,52px) clamp(24px,4vw,52px) clamp(40px,6vh,60px);text-align:start;text-shadow:0 1px 3px rgba(0,0,0,.35)}
+  .hero .eyebrow{color:var(--gold);letter-spacing:.22em}
+  .hero h1{font-size:clamp(36px,5.6vw,66px);font-weight:800;line-height:1.02;letter-spacing:-1.2px;margin-top:14px;text-shadow:0 2px 20px rgba(0,0,0,.35)}
+  .hero h1 .accent{color:var(--gold)}
+  .hero .sub{font-size:clamp(16px,1.6vw,19px);color:rgba(255,255,255,.9);max-width:520px;margin:20px 0 0;font-weight:500}
+  .hero-cta{display:flex;gap:14px;flex-wrap:wrap;margin-top:30px}
+  .btn-white{background:#fff;color:var(--ink);border:1.5px solid #fff;border-radius:999px;font-weight:700;font-size:15px;padding:15px 28px;display:inline-flex;align-items:center;gap:9px;cursor:pointer;transition:transform .26s cubic-bezier(.16,.7,.3,1),box-shadow .26s}
+  .btn-white:hover{transform:translateY(-2px);box-shadow:0 16px 34px rgba(0,0,0,.3)}
+  .hero-meta{display:flex;align-items:center;gap:18px;margin-top:36px}
+  .hero-progress{position:relative;width:150px;height:2px;background:rgba(255,255,255,.28);border-radius:2px;overflow:hidden}
+  .hero-progress span{position:absolute;inset:0;width:40%;background:var(--gold)}
+  .hero-dots{display:flex;gap:7px}
+  .hero-dots i{width:7px;height:7px;border-radius:50%;background:rgba(255,255,255,.4);transition:all .3s}
+  .hero-dots i.on{background:#fff;width:22px;border-radius:99px}
+  .hero-social{position:absolute;left:clamp(16px,2.4vw,30px);bottom:clamp(40px,7vh,78px);z-index:3;display:flex;flex-direction:column;gap:16px}
+  .hero-social a{color:rgba(255,255,255,.72);display:inline-flex;transition:color .2s,transform .2s}
+  .hero-social a:hover{color:var(--gold);transform:translateY(-1px)}
+  .hero-social .ic{font-size:16px}
+  .hero .trust-chip{margin-top:24px}
+  .trust-chip{display:inline-flex;align-items:center;gap:9px;flex-wrap:wrap;background:rgba(201,162,39,.13);border:1px solid rgba(201,162,39,.55);backdrop-filter:blur(8px);border-radius:999px;padding:8px 18px;font-size:14px;font-weight:600;color:#fff}
+  .trust-chip .g{color:var(--gold);font-weight:800;display:inline-flex;align-items:center;gap:6px}
+  .trust-chip .g .ic{font-size:14px}
+  .trust-chip .sep{opacity:.4}
+  @media(max-width:820px){.hero-stage{min-height:auto;padding:12px}.hero{min-height:66vh;max-width:none}.hero-social{display:none}}
+
+  /* ---------- Start-your-search cards ---------- */
+  .start-band{max-width:1160px;margin:0 auto;padding:60px 24px 0}
+  .start-head{font-family:'Playfair Display',Georgia,serif;font-size:clamp(23px,3vw,32px);font-weight:700;letter-spacing:-.4px;margin-bottom:22px}
+  .doors{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+  .door{background:var(--surface);border-radius:24px;padding:26px 26px 24px;border:1px solid var(--border);box-shadow:var(--shadow-sm);text-align:start;transition:transform .3s cubic-bezier(.16,.7,.3,1),box-shadow .3s;color:var(--ink)}
+  .door:hover{transform:translateY(-6px);box-shadow:var(--shadow-md)}
+  .door .ico{width:52px;height:52px;border-radius:14px;display:grid;place-items:center;font-size:26px;margin-bottom:14px}
+  .door.rent .ico{background:#E4EEF6;color:var(--teal)}
+  .door.serv .ico{background:#F3E9C9;color:var(--gold-text)}
+  .door h3{font-size:23px;font-weight:700;color:var(--ink)}
+  .door p{color:var(--muted);font-size:15px;margin-top:6px;min-height:44px}
+  .door .chips{display:flex;flex-wrap:wrap;gap:7px;margin:14px 0 18px}
+  .door .chips button{font-size:12.5px;font-weight:600;color:#3a4a45;background:#EEF2F6;border:1px solid var(--border);border-radius:999px;padding:5px 11px;cursor:pointer;transition:all .15s}
+  .door.serv .chips button:hover{background:#F3E9C9;border-color:var(--gold);color:var(--gold-text)}
+  .door.rent .chips button:hover{background:#E4EEF6;border-color:var(--teal);color:var(--teal)}
+  .door .btn{width:100%}
+  @media(max-width:760px){.doors{grid-template-columns:1fr;gap:16px}.door p{min-height:0}}
+
+  /* ---------- Stat strip ---------- */
+  .stats{background:var(--surface);border-top:1px solid var(--border);border-bottom:1px solid var(--border)}
+  .stats-in{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;padding:46px 0 34px;text-align:center}
+  .stat .n{font-family:'Playfair Display';font-weight:700;font-size:30px;color:var(--teal)}
+  .stat .l{font-size:13px;color:var(--muted);font-weight:600;margin-top:2px}
+  .stat .stars{color:var(--gold-lg);font-size:15px;letter-spacing:2px;display:inline-flex;gap:1px}
+  .stat .stars .ic{font-size:14px}
+  @media(max-width:760px){.stats-in{grid-template-columns:1fr 1fr;padding-top:78px;gap:26px 16px}}
+
+  /* ---------- Section shells ---------- */
+  section.pad{padding:72px 0}
+  .sec-head{display:flex;align-items:flex-end;justify-content:space-between;gap:20px;margin-bottom:30px}
+  .sec-head h2{font-size:clamp(26px,3.4vw,38px);font-weight:700;letter-spacing:-.3px}
+  .sec-head p{color:var(--muted);margin-top:6px;font-size:15px}
+  .link-more{color:var(--teal);font-weight:700;font-size:15px;white-space:nowrap;cursor:pointer;background:none;border:none;display:inline-flex;align-items:center;gap:6px}
+  .link-more:hover{text-decoration:underline}
+  .link-more .arw{font-size:15px}
+
+  /* ---------- Featured rentals ---------- */
+  .rail{display:grid;grid-auto-flow:column;grid-auto-columns:300px;gap:20px;overflow-x:auto;padding:6px 2px 16px;scroll-snap-type:x mandatory;scrollbar-width:none}
+  .rail::-webkit-scrollbar{display:none}
+  .pcard{scroll-snap-align:start;background:#fff;border:1px solid var(--border);border-radius:var(--r);overflow:hidden;cursor:pointer;transition:transform .2s,box-shadow .2s;text-align:start}
+  .pcard:hover{transform:translateY(-4px);box-shadow:var(--shadow-md)}
+  .pcard .ph{height:190px;position:relative;background-size:cover;background-position:center}
+  .pcard .tag{position:absolute;top:12px;inset-inline-start:12px;background:rgba(255,255,255,.94);color:var(--teal);font-size:12px;font-weight:700;padding:4px 10px;border-radius:999px}
+  .pcard .fav{position:absolute;top:10px;inset-inline-end:12px;font-size:19px;color:#fff;filter:drop-shadow(0 1px 2px rgba(0,0,0,.45))}
+  .pcard .pb{padding:14px 16px 16px}
+  .pcard h4{font-size:16px;font-weight:700;line-height:1.2}
+  .pcard .loc{display:flex;align-items:center;gap:5px;color:var(--muted);font-size:13px;margin-top:5px}
+  .pcard .loc .ic{font-size:14px;color:var(--teal)}
+  .pcard .meta{display:flex;gap:14px;color:#4a5551;font-size:13px;margin-top:10px}
+  .pcard .meta span{display:inline-flex;align-items:center;gap:5px}
+  .pcard .meta .ic{font-size:15px;color:#6a7873}
+  .pcard .price{display:flex;align-items:baseline;justify-content:space-between;margin-top:12px}
+  .pcard .price .amt{font-size:19px;font-weight:800;color:var(--gold-lg)}
+  .pcard .price .per{font-size:12px;color:var(--muted);font-weight:600}
+  .pcard .rate{font-size:13px;color:#4a5551;font-weight:700;display:inline-flex;align-items:center;gap:4px}
+  .pcard .rate .ic{font-size:13px;color:var(--gold-lg)}
+
+  /* ---------- Services showcase ---------- */
+  .serv-wrap{background:linear-gradient(180deg,#fff,#EDF2F6)}
+  .cat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+  .cat{background:#fff;border:1px solid var(--border);border-radius:16px;padding:20px 18px;cursor:pointer;transition:all .2s;display:flex;flex-direction:column;gap:10px;text-align:start}
+  .cat:hover{transform:translateY(-4px);box-shadow:var(--shadow-md);border-color:#CFDDE8}
+  .cat .ci{width:44px;height:44px;border-radius:12px;background:#EAF1F7;color:var(--teal);display:grid;place-items:center;font-size:22px}
+  .cat h4{font-size:16px;font-weight:700}
+  .cat p{font-size:13px;color:var(--muted)}
+  .cat .ct{font-size:13px;font-weight:700;color:var(--gold-text);display:inline-flex;align-items:center;gap:5px;margin-top:2px}
+  .cat .ct .arw{font-size:13px}
+  @media(max-width:900px){.cat-grid{grid-template-columns:1fr 1fr}}
+
+  .serv-cta{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:26px}
+  .scta{border-radius:18px;padding:24px 26px;display:flex;align-items:center;justify-content:space-between;gap:16px}
+  .scta.need{background:#163A52;color:#eafff9}
+  .scta.offer{background:#F6EFD9;border:1.5px solid var(--gold)}
+  .scta h4{font-size:19px;font-weight:700;font-family:'Playfair Display'}
+  [dir="rtl"] .scta h4{font-family:'Frank Ruhl Libre',serif}
+  .scta.need h4{color:#fff}
+  .scta.offer h4{color:var(--ink)}
+  .scta small{display:block;font-size:13px;margin-top:3px;opacity:.9;font-weight:500}
+  @media(max-width:760px){.serv-cta{grid-template-columns:1fr}.scta{flex-direction:column;align-items:flex-start}}
+
+  /* ---------- How it works ---------- */
+  .tabs{display:inline-flex;background:#EAF1F7;border-radius:999px;padding:4px;margin:0 auto 34px;gap:4px}
+  .tab{border:none;background:transparent;font-weight:700;font-size:14px;color:#4a5551;padding:9px 22px;border-radius:999px;cursor:pointer;transition:all .18s}
+  .tab.active{background:#fff;color:var(--teal);box-shadow:var(--shadow-sm)}
+  .steps{display:grid;grid-template-columns:repeat(3,1fr);gap:26px}
+  .step{text-align:center;padding:8px}
+  .step .num{width:48px;height:48px;margin:0 auto 14px;border-radius:50%;background:#E4EEF6;color:var(--teal);display:grid;place-items:center;font-family:'Playfair Display';font-weight:700;font-size:20px}
+  .step h4{font-size:17px;font-weight:700}
+  .step p{color:var(--muted);font-size:14px;margin-top:6px}
+  @media(max-width:760px){.steps{grid-template-columns:1fr;gap:20px}}
+
+  /* ---------- Testimonials ---------- */
+  .tgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+  .tcard{background:#fff;border:1px solid var(--border);border-radius:16px;padding:22px;text-align:start}
+  .tcard .stars{color:var(--gold-lg);font-size:15px;display:inline-flex;gap:2px}
+  .tcard p{font-size:15px;color:#33413d;margin:10px 0 16px;line-height:1.6}
+  .tcard .who{display:flex;align-items:center;gap:11px}
+  .tcard .av{width:38px;height:38px;border-radius:50%;background-size:cover;background-position:center;flex:0 0 auto}
+  .tcard .who b{font-size:14px}
+  .tcard .who span{font-size:13px;color:var(--muted);display:block}
+  @media(max-width:900px){.tgrid{grid-template-columns:1fr}}
+
+  /* ---------- Supply band ---------- */
+  .band{background:linear-gradient(120deg,var(--teal-deep),var(--teal));color:#fff;border-radius:26px;padding:46px 44px;display:grid;grid-template-columns:1fr 1fr;gap:26px;align-items:center}
+  .band h2{font-size:clamp(24px,3vw,34px);font-weight:700;line-height:1.1}
+  .band p{color:rgba(255,255,255,.88);margin-top:12px;font-size:15px}
+  .band .cta-row{display:flex;gap:12px;flex-wrap:wrap;margin-top:22px}
+  .band .facts{display:flex;flex-direction:column;gap:14px}
+  .band .fact{display:flex;gap:12px;align-items:flex-start;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.16);border-radius:14px;padding:14px 16px}
+  .band .fact .fi{font-size:20px;color:var(--gold);width:24px;flex:0 0 auto;display:grid;place-items:center;font-weight:800}
+  .band .fact .fi .ic{font-size:20px}
+  .band .fact b{font-size:15px}
+  .band .fact small{font-size:13px;opacity:.85;display:block}
+  @media(max-width:820px){.band{grid-template-columns:1fr;padding:34px 26px}}
+
+  /* ---------- Cities ---------- */
+  .cities{text-align:center}
+  .cities .list{display:flex;flex-wrap:wrap;justify-content:center;gap:9px;margin-top:22px}
+  .cities .list span{font-size:14px;font-weight:600;color:#3a4a45;background:#fff;border:1px solid var(--border);border-radius:999px;padding:7px 15px}
+
+  /* ---------- Footer ---------- */
+  footer{background:#10344E;color:#cfe0dc;padding:52px 0 30px}
+  .foot-grid{display:grid;grid-template-columns:2fr 1fr 1fr 1.4fr;gap:30px}
+  footer h5{color:#fff;font-size:14px;font-weight:700;margin-bottom:14px;letter-spacing:.03em}
+  footer a{display:block;color:#a9c4bf;font-size:14px;padding:4px 0}
+  footer a:hover{color:var(--gold)}
+  .foot-brand .logo{color:#fff}
+  .foot-brand p{font-size:14px;color:#9fbab5;margin-top:12px;max-width:260px}
+  .foot-contact .c{font-size:14px;color:#fff;font-weight:700;margin-top:4px}
+  .foot-bot{border-top:1px solid rgba(255,255,255,.12);margin-top:34px;padding-top:18px;display:flex;justify-content:space-between;font-size:13px;color:#8fada8;flex-wrap:wrap;gap:8px}
+  @media(max-width:820px){.foot-grid{grid-template-columns:1fr 1fr;gap:26px}}
+
+  .fade{opacity:0;transform:translateY(16px);transition:opacity .6s ease,transform .6s ease}
+  .fade.in{opacity:1;transform:none}
+  @media(prefers-reduced-motion:reduce){.fade{opacity:1;transform:none;transition:none}}
+
+  /* ===== premium polish ===== */
+  :root{--shadow-sm:0 1px 2px rgba(30,45,60,.05),0 4px 14px rgba(30,45,60,.05);--shadow-md:0 12px 32px rgba(30,45,60,.10);--shadow-lg:0 28px 64px rgba(30,45,60,.17)}
+  section.pad{padding:94px 0}
+  .eyebrow{letter-spacing:.16em}
+  .door{border-radius:24px;transition:transform .32s cubic-bezier(.16,.7,.3,1),box-shadow .32s cubic-bezier(.16,.7,.3,1)}
+  .door:hover{transform:translateY(-8px);box-shadow:0 34px 72px rgba(30,45,60,.22)}
+  .btn{transition:all .26s cubic-bezier(.16,.7,.3,1)}
+  .sec-head h2{font-size:clamp(28px,3.6vw,40px);letter-spacing:-.5px}
+  .stat .n{font-size:34px}
+  .pcard{transition:transform .32s cubic-bezier(.16,.7,.3,1),box-shadow .32s}
+  .pcard:hover{transform:translateY(-6px);box-shadow:var(--shadow-md)}
+  .pcard .ph{transition:transform .7s cubic-bezier(.16,.7,.3,1)}
+  .pcard:hover .ph{transform:scale(1.06)}
+  .rcard{transition:transform .32s cubic-bezier(.16,.7,.3,1),box-shadow .32s}
+  .band{border-radius:30px}
+  .fade{transform:translateY(26px);transition:opacity .8s cubic-bezier(.16,.7,.3,1),transform .8s cubic-bezier(.16,.7,.3,1)}
+  @media(prefers-reduced-motion:reduce){.hero::after{display:none}.pcard:hover .ph{transform:none}}
+
+  /* ---------- Requests board promo ---------- */
+  .wanted-band{background:var(--surface);border:1px solid var(--border);border-radius:26px;padding:44px 46px;display:grid;grid-template-columns:1.15fr .85fr;gap:32px;align-items:center;box-shadow:var(--shadow-sm)}
+  .wanted-band h2{font-size:clamp(26px,3.4vw,38px);font-weight:700;letter-spacing:-.4px;margin-top:8px}
+  .wanted-band p{color:var(--muted);margin-top:12px;font-size:15px;max-width:520px}
+  .wanted-band p em{font-style:normal;color:var(--gold-text);font-weight:700}
+  .wanted-band .cta-row{display:flex;gap:12px;flex-wrap:wrap;margin-top:22px}
+  .wanted-card{display:block;background:linear-gradient(180deg,#fff,#f7f4ee);border:1px solid var(--border);border-radius:18px;padding:18px 20px;box-shadow:var(--shadow-md);transition:transform .3s cubic-bezier(.16,.7,.3,1),box-shadow .3s}
+  .wanted-card:hover{transform:translateY(-4px);box-shadow:var(--shadow-lg)}
+  .wanted-card .rc-badge{display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:800;letter-spacing:.03em;color:var(--teal);background:#E4EEF6;border-radius:999px;padding:4px 10px}
+  .wanted-card .rc-badge .ic{font-size:12px}
+  .wanted-card h4{font-size:18px;font-weight:700;margin:12px 0 10px;color:var(--ink)}
+  .wanted-card .rc-chips{display:flex;flex-wrap:wrap;gap:6px}
+  .wanted-card .rc-chips span{font-size:12px;font-weight:600;color:#3a4a45;background:#f1f4f2;border:1px solid var(--border);border-radius:999px;padding:4px 9px}
+  .wanted-card .rc-foot{display:flex;align-items:center;justify-content:space-between;margin-top:15px;padding-top:12px;border-top:1px solid var(--border)}
+  .wanted-card .rc-status{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:800;color:#2e7d4f;background:#e6f4ea;border-radius:999px;padding:3px 9px}
+  @media(max-width:760px){.wanted-band{grid-template-columns:1fr;padding:30px 24px}}
+</style>
+</head>
+<body>
+
+<!-- Reusable SVG symbols -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="i-home" viewBox="0 0 24 24"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M9 22V12h6v10"/></symbol>
+    <symbol id="i-wrench" viewBox="0 0 24 24"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></symbol>
+    <symbol id="i-star" viewBox="0 0 24 24"><path d="M12 2 15.09 8.26 22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01z"/></symbol>
+    <symbol id="i-heart" viewBox="0 0 24 24"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7z"/></symbol>
+    <symbol id="i-pin" viewBox="0 0 24 24"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0z"/><circle cx="12" cy="10" r="3"/></symbol>
+    <symbol id="i-bed" viewBox="0 0 24 24"><path d="M2 4v16"/><path d="M2 8h18a2 2 0 0 1 2 2v10"/><path d="M2 17h20"/><path d="M6 8v9"/></symbol>
+    <symbol id="i-bath" viewBox="0 0 24 24"><path d="M9 6 6.5 3.5a1.5 1.5 0 0 0-1-.5C4.68 3 4 3.68 4 4.5V17a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/><line x1="10" x2="8" y1="5" y2="7"/><line x1="2" x2="22" y1="12" y2="12"/><line x1="7" x2="7" y1="19" y2="21"/><line x1="17" x2="17" y1="19" y2="21"/></symbol>
+    <symbol id="i-area" viewBox="0 0 24 24"><path d="M3 7V5a2 2 0 0 1 2-2h2"/><path d="M17 3h2a2 2 0 0 1 2 2v2"/><path d="M21 17v2a2 2 0 0 1-2 2h-2"/><path d="M7 21H5a2 2 0 0 1-2-2v-2"/></symbol>
+    <symbol id="i-spark" viewBox="0 0 24 24"><path d="m12 3-1.9 5.8a2 2 0 0 1-1.3 1.3L3 12l5.8 1.9a2 2 0 0 1 1.3 1.3L12 21l1.9-5.8a2 2 0 0 1 1.3-1.3L21 12l-5.8-1.9a2 2 0 0 1-1.3-1.3z"/></symbol>
+    <symbol id="i-box" viewBox="0 0 24 24"><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/></symbol>
+    <symbol id="i-drop" viewBox="0 0 24 24"><path d="M12 22a7 7 0 0 0 7-7c0-2-1-3.9-3-5.5s-3.5-4-4-6.5c-.5 2.5-2 4.9-4 6.5C6 11.1 5 13 5 15a7 7 0 0 0 7 7z"/></symbol>
+    <symbol id="i-zap" viewBox="0 0 24 24"><path d="M4 14a1 1 0 0 1-.78-1.63l9.9-10.2a.5.5 0 0 1 .86.46l-1.92 6.02A1 1 0 0 0 13 10h7a1 1 0 0 1 .78 1.63l-9.9 10.2a.5.5 0 0 1-.86-.46l1.92-6.02A1 1 0 0 0 11 14z"/></symbol>
+    <symbol id="i-camera" viewBox="0 0 24 24"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3z"/><circle cx="12" cy="13" r="3"/></symbol>
+    <symbol id="i-hammer" viewBox="0 0 24 24"><path d="m15 12-8.5 8.5a2.12 2.12 0 1 1-3-3L12 9"/><path d="M17.64 15 22 10.64"/><path d="m20.91 11.7-1.25-1.25c-.6-.6-.93-1.4-.93-2.25v-.86L16.01 4.6a5.56 5.56 0 0 0-3.94-1.64H9l.92.82A6.18 6.18 0 0 1 12 8.4v1.56l2 2h.86c.85 0 1.65.33 2.25.93l1.25 1.25"/></symbol>
+    <symbol id="i-compass" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88"/></symbol>
+    <symbol id="i-scissors" viewBox="0 0 24 24"><circle cx="6" cy="6" r="3"/><path d="M8.12 8.12 12 12"/><path d="M20 4 8.12 15.88"/><circle cx="6" cy="18" r="3"/><path d="M14.8 14.8 20 20"/></symbol>
+    <symbol id="i-msg" viewBox="0 0 24 24"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22z"/></symbol>
+    <symbol id="i-file" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M16 13H8"/><path d="M16 17H8"/><path d="M10 9H8"/></symbol>
+    <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></symbol>
+    <symbol id="i-key" viewBox="0 0 24 24"><circle cx="7.5" cy="15.5" r="4.5"/><path d="m10.7 12.3 7.3-7.3"/><path d="m18 5 2 2"/><path d="m15 8 2 2"/></symbol>
+  <symbol id="i-fb" viewBox="0 0 24 24"><path d="M15 3h-2.5A3.5 3.5 0 0 0 9 6.5V9H7v3h2v9h3v-9h2.4l.6-3H12V6.8c0-.5.3-.8.8-.8H15z"/></symbol><symbol id="i-ig" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.2" cy="6.8" r="1"/></symbol></defs>
+</svg>
+
+<div class="previewbar"><b>Design preview</b> — proposed MyIsraelRental home page. Stats, reviews &amp; listings are placeholders for layout only. Not yet on your live site.</div>
+
+<!-- NAV -->
+<nav class="bar">
+  <div class="wrap nav-in">
+    <a class="logo" href="#"><span class="badge"><img src="brand/logo-mark.png" alt="" style="height:34px;width:auto;display:block"/></span><span>MyIsraelRental</span></a>
+    <div class="nav-links">
+      <a class="pill" href="#rentals">Stays</a>
+      <a class="pill" href="#services">Services</a>
+      <a class="pill" href="wanted-board-preview.html">Requests</a>
+      <a class="pill" href="#how">How it works</a>
+      <a class="pill" href="#supply">List / Offer</a>
+    </div>
+    <div class="nav-right">
+      <button class="lang">עברית / EN</button>
+      <button class="signin">Sign in</button>
+      <button class="btn btn-teal" style="padding:9px 18px">Join free</button>
+    </div>
+  </div>
+</nav>
+
+<!-- HERO + DUAL DOOR -->
+<div class="hero-stage">
+<header class="hero">
+  <div class="bg"></div>
+  <div class="hero-social">
+    <a href="#" aria-label="Facebook"><span class="ic"><svg><use href="#i-fb"/></svg></span></a>
+    <a href="#" aria-label="Instagram"><span class="ic"><svg><use href="#i-ig"/></svg></span></a>
+    <a href="#" aria-label="WhatsApp"><span class="ic"><svg><use href="#i-msg"/></svg></span></a>
+  </div>
+  <div class="hero-in">
+    <div class="eyebrow">Rentals &amp; local services · across Israel</div>
+    <h1>Rent a home.<br>Hire the pros. <span class="accent">with ease.</span></h1>
+    <p class="sub">Verified rentals from owners and trusted local pros — cleaners, movers, plumbers and more. In English &amp; Hebrew, with no service fees.</p>
+    <div class="trust-chip">
+      <span class="g"><span class="ic"><svg><use href="#i-check"/></svg></span> Free to search</span><span class="sep">·</span>
+      <span>No service fees</span><span class="sep">·</span>
+      <span>Deal with owners &amp; pros directly</span>
+    </div>
+    <div class="hero-cta">
+      <button class="btn-white">Explore rentals <span class="arw"><svg><use href="#i-arrow"/></svg></span></button>
+      <button class="btn btn-outline-white btn-lg">Explore services</button>
+    </div>
+    <div class="hero-meta">
+      <div class="hero-progress"><span></span></div>
+      <div class="hero-dots"><i class="on"></i><i></i><i></i></div>
+    </div>
+  </div>
+</header>
+</div>
+
+<section class="start-band">
+  <h2 class="start-head fade">Start your search</h2>
+  <div class="doors fade">
+    <div class="door rent">
+      <div class="ico"><span class="ic"><svg><use href="#i-home"/></svg></span></div>
+      <h3>Find a place to stay</h3>
+      <p>Browse verified rentals from owners — filter by area, dates, budget and amenities.</p>
+      <div class="chips"><button>Tel Aviv</button><button>Jerusalem</button><button>Haifa</button><button>Vacation</button></div>
+      <button class="btn btn-teal">Search rentals <span class="arw"><svg><use href="#i-arrow"/></svg></span></button>
+    </div>
+    <div class="door serv">
+      <div class="ico"><span class="ic"><svg><use href="#i-wrench"/></svg></span></div>
+      <h3>Find or offer services</h3>
+      <p>Hire proven local pros with reviews &amp; verified work — or list your business, free.</p>
+      <div class="chips"><button>Cleaning</button><button>Movers</button><button>Plumbers</button><button>Photography</button></div>
+      <button class="btn btn-gold">Explore services <span class="arw"><svg><use href="#i-arrow"/></svg></span></button>
+    </div>
+  </div>
+</section>
+
+<!-- STAT / TRUST STRIP -->
+<div class="stats">
+  <div class="wrap stats-in">
+    <div class="stat"><div class="n">1,200+</div><div class="l">Active rentals</div></div>
+    <div class="stat"><div class="n">19</div><div class="l">Cities covered</div></div>
+    <div class="stat"><div class="n">450+</div><div class="l">Verified service pros</div></div>
+    <div class="stat"><div class="n">4.8<span style="font-size:18px">/5</span></div><div class="stars"><span class="ic fill"><svg><use href="#i-star"/></svg></span><span class="ic fill"><svg><use href="#i-star"/></svg></span><span class="ic fill"><svg><use href="#i-star"/></svg></span><span class="ic fill"><svg><use href="#i-star"/></svg></span><span class="ic fill"><svg><use href="#i-star"/></svg></span></div><div class="l">from 2,100+ reviews</div></div>
+  </div>
+</div>
+
+<!-- FEATURED RENTALS -->
+<section class="pad" id="rentals">
+  <div class="wrap">
+    <div class="sec-head fade">
+      <div>
+        <div class="eyebrow">Handpicked</div>
+        <h2>Featured rentals</h2>
+        <p>A rotating selection of live listings from owners across Israel.</p>
+      </div>
+      <button class="link-more">See all stays <span class="arw"><svg><use href="#i-arrow"/></svg></span></button>
+    </div>
+    <div class="rail fade">
+      <div class="pcard">
+        <div class="ph" style="background-image:url('https://images.pexels.com/photos/1571460/pexels-photo-1571460.jpeg?auto=compress&cs=tinysrgb&w=700')"><span class="tag">Long-term</span><span class="fav ic"><svg><use href="#i-heart"/></svg></span></div>
+        <div class="pb"><h4>Bright 3-room near Rothschild</h4><div class="loc"><span class="ic"><svg><use href="#i-pin"/></svg></span> Tel Aviv – Lev Ha'ir</div><div class="meta"><span><span class="ic"><svg><use href="#i-bed"/></svg></span>3</span><span><span class="ic"><svg><use href="#i-bath"/></svg></span>1</span><span><span class="ic"><svg><use href="#i-area"/></svg></span>82 m²</span></div><div class="price"><span class="amt">₪8,900<span class="per">/mo</span></span><span class="rate"><span class="ic fill"><svg><use href="#i-star"/></svg></span>4.9</span></div></div>
+      </div>
+      <div class="pcard">
+        <div class="ph" style="background-image:url('https://images.pexels.com/photos/2360673/pexels-photo-2360673.jpeg?auto=compress&cs=tinysrgb&w=700')"><span class="tag">Vacation</span><span class="fav ic"><svg><use href="#i-heart"/></svg></span></div>
+        <div class="pb"><h4>Old City view apartment</h4><div class="loc"><span class="ic"><svg><use href="#i-pin"/></svg></span> Jerusalem – Nachlaot</div><div class="meta"><span><span class="ic"><svg><use href="#i-bed"/></svg></span>2</span><span><span class="ic"><svg><use href="#i-bath"/></svg></span>1</span><span><span class="ic"><svg><use href="#i-area"/></svg></span>60 m²</span></div><div class="price"><span class="amt">₪520<span class="per">/night</span></span><span class="rate"><span class="ic fill"><svg><use href="#i-star"/></svg></span>5.0</span></div></div>
+      </div>
+      <div class="pcard">
+        <div class="ph" style="background-image:url('https://images.pexels.com/photos/1643383/pexels-photo-1643383.jpeg?auto=compress&cs=tinysrgb&w=700')"><span class="tag">Short-term</span><span class="fav ic"><svg><use href="#i-heart"/></svg></span></div>
+        <div class="pb"><h4>Sea-facing studio, Carmel</h4><div class="loc"><span class="ic"><svg><use href="#i-pin"/></svg></span> Haifa – German Colony</div><div class="meta"><span><span class="ic"><svg><use href="#i-bed"/></svg></span>1</span><span><span class="ic"><svg><use href="#i-bath"/></svg></span>1</span><span><span class="ic"><svg><use href="#i-area"/></svg></span>45 m²</span></div><div class="price"><span class="amt">₪5,200<span class="per">/mo</span></span><span class="rate"><span class="ic fill"><svg><use href="#i-star"/></svg></span>4.7</span></div></div>
+      </div>
+      <div class="pcard">
+        <div class="ph" style="background-image:url('https://images.pexels.com/photos/2029731/pexels-photo-2029731.jpeg?auto=compress&cs=tinysrgb&w=700')"><span class="tag">Long-term</span><span class="fav ic"><svg><use href="#i-heart"/></svg></span></div>
+        <div class="pb"><h4>Family garden apartment</h4><div class="loc"><span class="ic"><svg><use href="#i-pin"/></svg></span> Ra'anana – City Center</div><div class="meta"><span><span class="ic"><svg><use href="#i-bed"/></svg></span>4</span><span><span class="ic"><svg><use href="#i-bath"/></svg></span>2</span><span><span class="ic"><svg><use href="#i-area"/></svg></span>110 m²</span></div><div class="price"><span class="amt">₪11,500<span class="per">/mo</span></span><span class="rate"><span class="ic fill"><svg><use href="#i-star"/></svg></span>4.8</span></div></div>
+      </div>
+      <div class="pcard">
+        <div class="ph" style="background-image:url('https://images.pexels.com/photos/2635038/pexels-photo-2635038.jpeg?auto=compress&cs=tinysrgb&w=700')"><span class="tag">Vacation</span><span class="fav ic"><svg><use href="#i-heart"/></svg></span></div>
+        <div class="pb"><h4>Modern loft w/ balcony</h4><div class="loc"><span class="ic"><svg><use href="#i-pin"/></svg></span> Netanya – Seafront</div><div class="meta"><span><span class="ic"><svg><use href="#i-bed"/></svg></span>2</span><span><span class="ic"><svg><use href="#i-bath"/></svg></span>2</span><span><span class="ic"><svg><use href="#i-area"/></svg></span>70 m²</span></div><div class="price"><span class="amt">₪640<span class="per">/night</span></span><span class="rate"><span class="ic fill"><svg><use href="#i-star"/></svg></span>4.9</span></div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SERVICES SHOWCASE -->
+<section class="pad serv-wrap" id="services">
+  <div class="wrap">
+    <div class="sec-head fade" style="justify-content:center;text-align:center;flex-direction:column;align-items:center">
+      <div class="eyebrow" style="color:var(--gold-text)">New on MyIsraelRental</div>
+      <h2>Get things done — hire local, trusted pros</h2>
+      <p style="max-width:560px">Post a job and get bids fast, or browse providers with verified reviews and work history. Zero booking fees, ever.</p>
+    </div>
+
+    <div class="cat-grid fade">
+      <div class="cat"><div class="ci"><span class="ic"><svg><use href="#i-spark"/></svg></span></div><h4>Cleaning</h4><p>Deep cleans, turnovers, regular help</p><span class="ct">120+ pros <span class="arw"><svg><use href="#i-arrow"/></svg></span></span></div>
+      <div class="cat"><div class="ci"><span class="ic"><svg><use href="#i-box"/></svg></span></div><h4>Movers</h4><p>Local &amp; long-distance moving</p><span class="ct">80+ pros <span class="arw"><svg><use href="#i-arrow"/></svg></span></span></div>
+      <div class="cat"><div class="ci"><span class="ic"><svg><use href="#i-drop"/></svg></span></div><h4>Plumbers</h4><p>Repairs, installs, emergencies</p><span class="ct">65+ pros <span class="arw"><svg><use href="#i-arrow"/></svg></span></span></div>
+      <div class="cat"><div class="ci"><span class="ic"><svg><use href="#i-zap"/></svg></span></div><h4>Electricians</h4><p>Licensed &amp; insured work</p><span class="ct">54+ pros <span class="arw"><svg><use href="#i-arrow"/></svg></span></span></div>
+      <div class="cat"><div class="ci"><span class="ic"><svg><use href="#i-camera"/></svg></span></div><h4>Photography</h4><p>Listings, events, portraits</p><span class="ct">40+ pros <span class="arw"><svg><use href="#i-arrow"/></svg></span></span></div>
+      <div class="cat"><div class="ci"><span class="ic"><svg><use href="#i-hammer"/></svg></span></div><h4>Handyman</h4><p>Fixes, assembly, mounting</p><span class="ct">90+ pros <span class="arw"><svg><use href="#i-arrow"/></svg></span></span></div>
+      <div class="cat"><div class="ci"><span class="ic"><svg><use href="#i-compass"/></svg></span></div><h4>Tour guides</h4><p>Licensed guides across Israel</p><span class="ct">35+ pros <span class="arw"><svg><use href="#i-arrow"/></svg></span></span></div>
+      <div class="cat"><div class="ci"><span class="ic"><svg><use href="#i-scissors"/></svg></span></div><h4>Barbers &amp; beauty</h4><p>At-home &amp; in-studio</p><span class="ct">28+ pros <span class="arw"><svg><use href="#i-arrow"/></svg></span></span></div>
+    </div>
+
+    <div class="serv-cta fade">
+      <div class="scta need">
+        <div><h4>Need something done?</h4><small>Post a job free — get matched with pros in minutes.</small></div>
+        <button class="btn btn-gold">Post a job</button>
+      </div>
+      <div class="scta offer">
+        <div><h4>Offer your services</h4><small>List your business and reach every renter &amp; owner on the platform.</small></div>
+        <button class="btn btn-teal">List for free</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- WANTED BOARD PROMO -->
+<section class="pad" id="wanted-promo">
+  <div class="wrap">
+    <div class="wanted-band fade">
+      <div>
+        <div class="eyebrow" style="color:var(--gold-text)">New · Requests board</div>
+        <h2>Can't find it? Let it find you.</h2>
+        <p>Post what you're looking for — a 3-bed in Ramat Eshkol, a mover next week — and owners &amp; pros reach out to <em>you</em>. No more losing your search in a WhatsApp group.</p>
+        <div class="cta-row">
+          <a class="btn btn-gold" href="wanted-board-preview.html">Post a request</a>
+          <a class="btn btn-ghost" href="wanted-board-preview.html">Browse the board</a>
+        </div>
+      </div>
+      <a class="wanted-card" href="wanted-board-preview.html" aria-label="Open the Requests board">
+        <span class="rc-badge"><span class="ic"><svg><use href="#i-home"/></svg></span> Rental request</span>
+        <h4>3-bed wanted in Ramat Eshkol</h4>
+        <div class="rc-chips"><span>Up to ₪9,000/mo</span><span>From September</span><span>Long-term</span></div>
+        <div class="rc-foot"><span class="rc-status">● Open · 12 days left</span><span style="font-size:12px;font-weight:700;color:var(--teal)">Message seeker →</span></div>
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section class="pad" id="how" style="text-align:center;background:#fff">
+  <div class="wrap">
+    <div class="eyebrow fade">Simple &amp; direct</div>
+    <h2 class="fade" style="font-size:clamp(26px,3.4vw,38px);margin-top:8px">How MyIsraelRental works</h2>
+    <div style="display:flex;justify-content:center">
+      <div class="tabs fade">
+        <button class="tab active" data-tab="rent">Renting a place</button>
+        <button class="tab" data-tab="serv">Hiring a pro</button>
+      </div>
+    </div>
+    <div class="steps fade" id="steps-rent">
+      <div class="step"><div class="num">1</div><h4>Search &amp; filter</h4><p>Pick your city, dates and budget. Every listing is posted by the owner or their agent.</p></div>
+      <div class="step"><div class="num">2</div><h4>Message directly</h4><p>Chat with the person who holds the keys — no middleman, no service fee from us.</p></div>
+      <div class="step"><div class="num">3</div><h4>Sign &amp; move in</h4><p>Review and sign your rental contract digitally, in English or Hebrew.</p></div>
+    </div>
+    <div class="steps fade" id="steps-serv" style="display:none">
+      <div class="step"><div class="num">1</div><h4>Post or browse</h4><p>Describe what you need, or browse pros by category, area and rating.</p></div>
+      <div class="step"><div class="num">2</div><h4>Compare &amp; choose</h4><p>See verified reviews, work history and certifications before you commit.</p></div>
+      <div class="step"><div class="num">3</div><h4>Book &amp; done</h4><p>Agree the details and get it done. Zero booking fees on either side.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- TESTIMONIALS -->
+<section class="pad" style="background:var(--bg)">
+  <div class="wrap">
+    <div class="sec-head fade" style="justify-content:center;text-align:center;flex-direction:column;align-items:center">
+      <h2>Trusted by movers, renters &amp; owners</h2>
+      <p>Real people finding homes and help across Israel.</p>
+    </div>
+    <div class="tgrid fade">
+      <div class="tcard"><div class="stars"><span class="ic fill"><svg><use href="#i-star"/></svg></span><span class="ic fill"><svg><use href="#i-star"/></svg></span><span class="ic fill"><svg><use href="#i-star"/></svg></span><span class="ic fill"><svg><use href="#i-star"/></svg></span><span class="ic fill"><svg><use href="#i-star"/></svg></span></div><p>"Found our Jerusalem apartment in a week and messaged the owner straight away. No agent fees, no runaround."</p><div class="who"><div class="av" style="background-image:url('https://images.pexels.com/photos/774909/pexels-photo-774909.jpeg?auto=compress&cs=tinysrgb&w=120')"></div><div><b>Rivka L.</b><span>Renter · Jerusalem</span></div></div></div>
+      <div class="tcard"><div class="stars"><span class="ic fill"><svg><use href="#i-star"/></svg></span><span class="ic fill"><svg><use href="#i-star"/></svg></span><span class="ic fill"><svg><use href="#i-star"/></svg></span><span class="ic fill"><svg><use href="#i-star"/></svg></span><span class="ic fill"><svg><use href="#i-star"/></svg></span></div><p>"Booked a cleaner and a mover for the same week through the services tab. Both showed up on time and were great."</p><div class="who"><div class="av" style="background-image:url('https://images.pexels.com/photos/1222271/pexels-photo-1222271.jpeg?auto=compress&cs=tinysrgb&w=120')"></div><div><b>Daniel M.</b><span>New oleh · Tel Aviv</span></div></div></div>
+      <div class="tcard"><div class="stars"><span class="ic fill"><svg><use href="#i-star"/></svg></span><span class="ic fill"><svg><use href="#i-star"/></svg></span><span class="ic fill"><svg><use href="#i-star"/></svg></span><span class="ic fill"><svg><use href="#i-star"/></svg></span><span class="ic fill"><svg><use href="#i-star"/></svg></span></div><p>"I list my two apartments here for free and get renters directly. Added my cleaning business to the services side too."</p><div class="who"><div class="av" style="background-image:url('https://images.pexels.com/photos/415829/pexels-photo-415829.jpeg?auto=compress&cs=tinysrgb&w=120')"></div><div><b>Yossi B.</b><span>Owner &amp; provider · Haifa</span></div></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- SUPPLY BAND -->
+<section class="pad" id="supply">
+  <div class="wrap">
+    <div class="band fade">
+      <div>
+        <div class="eyebrow" style="color:var(--gold)">For owners &amp; providers</div>
+        <h2 style="margin-top:10px">List your property or grow your business — free</h2>
+        <p>No commission, no payout fees, no lock-in. Reach renters and owners actively looking, right now.</p>
+        <div class="cta-row">
+          <button class="btn btn-gold btn-lg">List your property</button>
+          <button class="btn btn-outline-white btn-lg">Offer a service</button>
+        </div>
+      </div>
+      <div class="facts">
+        <div class="fact"><span class="fi">₪0</span><div><b>Free to list</b><small>Photos, pricing and availability in minutes.</small></div></div>
+        <div class="fact"><span class="fi"><span class="ic"><svg><use href="#i-msg"/></svg></span></span><div><b>Direct leads</b><small>Renters and clients message you directly — you own the relationship.</small></div></div>
+        <div class="fact"><span class="fi"><span class="ic"><svg><use href="#i-file"/></svg></span></span><div><b>Contracts &amp; tools included</b><small>Digital contracts, calendar sync, WhatsApp &amp; email delivery.</small></div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CITIES -->
+<section class="pad cities" style="background:#fff">
+  <div class="wrap">
+    <div class="eyebrow fade">Nationwide</div>
+    <h2 class="fade" style="margin-top:8px">Cities we cover</h2>
+    <p class="fade" style="color:var(--muted);max-width:620px;margin:12px auto 0">From the beaches of Tel Aviv to the alleys of the Old City — listings and services in every major Israeli urban center.</p>
+    <div class="list fade">
+      <span>Jerusalem</span><span>Tel Aviv</span><span>Haifa</span><span>Beit Shemesh</span><span>Modi'in</span><span>Ra'anana</span><span>Netanya</span><span>Herzliya</span><span>Rishon LeZion</span><span>Petah Tikva</span><span>Ramat Gan</span><span>Rehovot</span><span>Ashdod</span><span>Be'er Sheva</span><span>Eilat</span><span>Tiberias</span><span>Tzfat</span><span>Nahariya</span>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="wrap">
+    <div class="foot-grid">
+      <div class="foot-brand">
+        <div class="logo"><img src="brand/logo-mark.png" alt="" style="height:44px;width:auto;display:block"/><span>MyIsraelRental</span></div>
+        <p>Long-term, short-term and vacation rentals plus trusted local services across Israel. Free for renters, free for owners.</p>
+      </div>
+      <div><h5>Rentals</h5><a href="#">Browse stays</a><a href="#">Long-term</a><a href="#">Vacation</a><a href="#">List a property</a></div>
+      <div><h5>Services</h5><a href="#">Browse services</a><a href="#">Post a job</a><a href="#">Offer a service</a><a href="#">For providers</a></div>
+      <div class="foot-contact"><h5>Get in touch</h5><a href="#">FAQ</a><div class="c">WhatsApp: +972 55 322 5141</div><div class="c">support@myisraelrental.com</div></div>
+    </div>
+    <div class="foot-bot"><span>© 2026 MyIsraelRental. All rights reserved.</span><span>עברית / English · Free to search · No service fees</span></div>
+  </div>
+</footer>
+
+<script>
+  document.querySelectorAll('.tab').forEach(function(t){
+    t.addEventListener('click',function(){
+      document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
+      t.classList.add('active');
+      var rent=t.dataset.tab==='rent';
+      document.getElementById('steps-rent').style.display=rent?'grid':'none';
+      document.getElementById('steps-serv').style.display=rent?'none':'grid';
+    });
+  });
+  var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target);}});},{threshold:.12});
+  document.querySelectorAll('.fade').forEach(function(el){io.observe(el);});
+</script>
+</body>
+</html>

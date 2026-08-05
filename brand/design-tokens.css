@@ -1,0 +1,117 @@
+/* MyIsraelRental — LOCKED design tokens (source of truth).
+   Import once; reference these variables. Values match
+   home-redesign-preview.html / wanted-board-preview.html exactly.
+
+   SCOPE OF "no hardcoded values": applies to NEW and CHANGED UI you write.
+   It is NOT a mandate to refactor the ~1,275 existing hex values across the
+   app. Do not do a repo-wide color sweep unless explicitly asked.
+
+   CARVE-OUT: the hero (docs/hero-cinematic-spec.md) uses literal values on
+   purpose (radius 26px, layered rgba gradients, its shadow). Those are
+   intentional and exact — copy them literally. The no-hardcoding rule is
+   about reusable component styling elsewhere. */
+
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700;800&family=Manrope:wght@400;500;600;700;800&family=Frank+Ruhl+Libre:wght@500;600;700&family=Assistant:wght@400;500;600;700&display=swap');
+
+:root{
+  /* Brand — blue primary */
+  --primary:#1E5F8C; --primary-dark:#184E73; --primary-deep:#123B57;
+  /* Aliases so CSS copied verbatim from the preview mockups (which use --teal*)
+     resolves correctly. --teal == --primary. */
+  --teal:#1E5F8C; --teal-dark:#184E73; --teal-deep:#123B57;
+
+  /* Brand — gold accent (seasoning, not a base) */
+  --gold:#C9A227;        /* use on DARK surfaces + large display */
+  --gold-text:#8A6A14;   /* small gold text on LIGHT (passes AA) */
+  --gold-lg:#A9831C;     /* large/display gold on LIGHT ONLY — it is ~3.3:1 on
+                            dark, so never use --gold-lg on a dark panel; use
+                            --gold there instead. */
+
+  /* Neutrals */
+  --ink:#23201B; --muted:#6B6459;
+  --bg:#EFE9DC; --surface:#FFFFFF; --border:#E1D8C6;
+
+  /* Functional GREEN — success/status ONLY (never a brand accent) */
+  --success:#1F8A50; --success-bg:#E3F3EA;       /* Verified */
+  --status-open:#2E7D4F; --status-open-bg:#E6F4EA; /* Open / available */
+
+  /* Shadows — reconciled to the preview's premium values (authoritative) */
+  --shadow-sm:0 1px 2px rgba(30,45,60,.05),0 4px 14px rgba(30,45,60,.05);
+  --shadow-md:0 12px 32px rgba(30,45,60,.10);
+  --shadow-lg:0 28px 64px rgba(30,45,60,.17);
+
+  /* Radii — one scale, matches the preview usage */
+  --radius-tile:12px;    /* logo tile, small chips-in-cards      */
+  --radius-card:18px;    /* property/request cards (.pcard/.rcard) */
+  --radius-panel:24px;   /* doors, promo bands                    */
+  --radius-hero:26px;    /* hero card (literal in the hero spec)  */
+  --radius-pill:999px;
+  /* legacy alias used by preview markup */
+  --r:18px;
+
+  --ease:cubic-bezier(.16,.7,.3,1);
+
+  /* Type */
+  --font-head:'Playfair Display',Georgia,serif;
+  --font-body:'Manrope',system-ui,sans-serif;
+  --font-head-he:'Frank Ruhl Libre',Georgia,serif;
+  --font-body-he:'Assistant',system-ui,sans-serif;
+}
+
+/* Base */
+body{font-family:var(--font-body);color:var(--ink);background:var(--bg);line-height:1.55;-webkit-font-smoothing:antialiased}
+h1,h2,h3{font-family:var(--font-head);letter-spacing:-.5px}
+
+/* RTL: swap the font VARIABLES, not per-tag selectors.
+   Why: a CSS variable resolves against the element's OWN cascade, so anything
+   reading var(--font-head) — including inline style="font-family:var(--font-head)"
+   — picks up the Hebrew face below. A rule like `[dir="rtl"] h1{font-family:…}`
+   does NOT work on this codebase: ~69 headings across ~45 files set
+   style={{ fontFamily: 'Playfair Display' }} INLINE, and an inline style beats
+   any stylesheet selector. Playfair has no Hebrew glyphs, so those headings
+   silently fall back to a system serif in RTL.
+   REQUIRED FIX when touching those headings: change the inline
+   `fontFamily: 'Playfair Display'` to `fontFamily: 'var(--font-head)'`
+   (and Manrope → `var(--font-body)`). Verify by toggling dir="rtl" and checking
+   a heading's computed fontFamily actually reads "Frank Ruhl Libre". */
+[dir="rtl"]{--font-head:var(--font-head-he);--font-body:var(--font-body-he)}
+
+/* ---------- Buttons (all variants the mockups use — none should be undefined) ---------- */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:9px;font-weight:700;font-size:15px;border-radius:var(--radius-pill);padding:13px 24px;cursor:pointer;border:1.5px solid transparent;transition:all .2s ease;white-space:nowrap;line-height:1;font-family:inherit}
+.btn-lg{padding:15px 30px;font-size:16px}
+
+/* Primary — solid blue, white text. (.btn-teal is the mockup's name; same thing.) */
+.btn-primary,.btn-teal{background:var(--primary);color:#fff}
+.btn-primary:hover,.btn-teal:hover{background:var(--primary-dark);transform:translateY(-1px);box-shadow:var(--shadow-md)}
+
+/* Accent — frosted GLASS GOLD, WHITE text. (.btn-gold is the mockup's name.) Used
+   for accent CTAs on normal (light/section) surfaces, NOT in the hero. */
+.btn-accent,.btn-gold{background:rgba(172,134,28,.64);color:#fff;border:1.5px solid rgba(201,162,39,.85);border-radius:var(--radius-pill);backdrop-filter:blur(10px);text-shadow:0 1px 2px rgba(50,36,0,.5)}
+.btn-accent:hover,.btn-gold:hover{background:rgba(172,134,28,.78);transform:translateY(-1px);box-shadow:var(--shadow-md)}
+.on-dark .btn-accent,.on-dark .btn-gold{background:rgba(172,134,28,.72);border-color:rgba(201,162,39,.95)}
+
+/* Neutral / ghost */
+.btn-ghost{background:#fff;border:1.5px solid var(--border);color:var(--ink)}
+.btn-ghost:hover{border-color:var(--primary);color:var(--primary)}
+
+/* HERO-only buttons (over a dark photo). In the hero the primary CTA is solid
+   WHITE and the secondary is outline-white — this is the intended exception to
+   "accent buttons are gold everywhere"; the gold-glass button is for the rest
+   of the site. */
+.btn-white{background:#fff;color:var(--ink);border:1.5px solid #fff;border-radius:var(--radius-pill);font-weight:700;font-size:15px;padding:15px 28px;display:inline-flex;align-items:center;gap:9px;cursor:pointer;transition:transform .26s var(--ease),box-shadow .26s}
+.btn-white:hover{transform:translateY(-2px);box-shadow:0 16px 34px rgba(0,0,0,.3)}
+.btn-outline-white{background:rgba(255,255,255,.10);border:1.5px solid rgba(255,255,255,.6);color:#fff;backdrop-filter:blur(6px)}
+.btn-outline-white:hover{background:rgba(255,255,255,.2)}
+
+/* Status pills (functional green) */
+.pill-open{color:var(--status-open);background:var(--status-open-bg);border-radius:var(--radius-pill);font-weight:800;font-size:11px;padding:3px 9px}
+.badge-verified{color:var(--success);background:var(--success-bg);border-radius:var(--radius-pill);font-weight:700;font-size:11px;padding:2px 7px}
+
+/* ---------- Scroll reveal — FAIL-SAFE (no blank-page risk) ---------- */
+/* Content is visible by default. It is only hidden once JS has proven it's
+   running by adding `js-reveal` to <html> BEFORE observing. If JS errors or
+   never runs, nothing is hidden — users and crawlers see everything.
+   JS: document.documentElement.classList.add('js-reveal') then IntersectionObserver adds `.in`. */
+.js-reveal .reveal{opacity:0;transform:translateY(26px);transition:opacity .8s var(--ease),transform .8s var(--ease)}
+.js-reveal .reveal.in{opacity:1;transform:none}
+@media(prefers-reduced-motion:reduce){.js-reveal .reveal{opacity:1;transform:none;transition:none}}

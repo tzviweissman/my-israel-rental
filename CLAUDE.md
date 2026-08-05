@@ -42,3 +42,19 @@ Signed contracts and uploaded contract templates are **personal/legal documents*
 ## Local dev
 
 See `backend/.env.example` and `frontend/.env.example` for the full list of variables and what each does. Local dev typically runs a local MongoDB rather than pointing at production Atlas — check `backend/.env`'s current `MONGO_URL` before assuming which database you're touching, especially before running any migration or backfill script.
+
+## Design system (locked) — do not reinterpret
+
+The brand and UI are locked. When building or changing any UI, treat these as the source of truth and **copy exact values — never re-derive, "improve", or invent** colors, spacing, radii, or component styles.
+
+- **Source of truth files:** `brand/design-tokens.css` (import it; reference its CSS variables everywhere — no hardcoded hex/spacing in components), the two design mockups `home-redesign-preview.html` and `wanted-board-preview.html` (match them section-for-section), the logo assets in `brand/`, and `brand/inspiration/` for the intended premium feel. Full build spec: `docs/redesign-and-wanted-board-prompt.md`. Per-phase definition-of-done: `docs/acceptance-checklist.md`.
+- **Palette:** primary blue `#1E5F8C` (dark `#184E73`, deep `#123B57`); accent gold `#C9A227` (small-text `#8A6A14`, display `#A9831C`); limestone bg `#EFE9DC`; ink `#23201B`; muted `#6B6459`; border `#E1D8C6`; surface `#FFFFFF`. **Green is functional only** (status/verified/available — `#2E7D4F` on `#E6F4EA`, verified `#1F8A50` on `#E3F3EA`) — never a brand accent or button color.
+- **Type:** Playfair Display headings, Manrope body; Frank Ruhl Libre + Assistant under `[dir="rtl"]`. Every page must work LTR and RTL. **RTL font gotcha:** ~69 headings across ~45 files set `style={{ fontFamily: 'Playfair Display' }}` inline; inline styles beat `[dir="rtl"] h1{…}`, and Playfair has no Hebrew glyphs, so RTL headings silently fall back to a system serif. Fix is in `brand/design-tokens.css` — RTL swaps the font *variables*; any heading you touch must read `fontFamily: 'var(--font-head)'`, never the literal face. Verify via a heading's computed `fontFamily` in RTL.
+- **Accent buttons** (`.btn-accent`/`.btn-gold`) are frosted glass-gold with **white** text (see `design-tokens.css`). Primary buttons are solid blue with white text. **Exception:** over the hero photo the CTAs are solid white (`.btn-white`) + outline-white (`.btn-outline-white`) by design.
+- **Gold on dark:** use `--gold` (#C9A227) on dark surfaces; `--gold-lg` (#A9831C) is for large/display gold on **light** only (it's ~3.3:1 on dark).
+- **Scope of "no hardcoding":** copy exact token values in **new/changed** UI; do not refactor the ~1,275 existing hardcoded hexes app-wide. The hero (`docs/hero-cinematic-spec.md`) uses literal values on purpose — copy them verbatim; that's the one intended exception.
+- **Icons:** the mockups' `<use href="#i-…">` are placeholders — implement with `lucide-react` (mapping in `docs/hero-cinematic-spec.md`). **Scroll reveal** must use the fail-safe `.js-reveal` pattern (content visible if JS doesn't run). **Verify with `scripts/screenshot.mjs`**, not by stalling for a human screenshot.
+- **Logo:** nav = navy rounded tile holding `brand/logo-mark.png` + "MyIsraelRental" wordmark; footer uses the dark logo variant.
+- **Feel:** premium/editorial — generous whitespace, large serif headings with a single gold accent word, soft layered shadows, gentle hover lifts, slow scroll reveals (respect `prefers-reduced-motion`). Restraint with gold; most of the page is neutral with blue structure.
+- **Verify visually before claiming done.** After a UI change, run the app, screenshot the page, and compare against the matching mockup; fix differences before reporting complete. If you can't screenshot, ask for one — don't guess. Work one section/component at a time and show a diff.
+

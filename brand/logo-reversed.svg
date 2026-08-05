@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="472" height="120" viewBox="0 0 472 120" role="img" aria-label="MyIsraelRental">
+  <title>MyIsraelRental reversed</title>
+  <defs><style>@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@800&amp;display=swap');</style></defs>
+  <rect x="0" y="0" width="472" height="120" rx="20" fill="#143C5A"/>
+  <g transform="translate(14,10) scale(0.8333)">
+    <rect x="33" y="60" width="14" height="30" rx="6" fill="#6E9DBE"/>
+    <rect x="53" y="44" width="14" height="46" rx="6" fill="#FFFFFF"/>
+    <rect x="73" y="30" width="14" height="60" rx="6" fill="#22D179"/>
+  </g>
+  <text x="128" y="74" font-family="Manrope, 'Segoe UI', system-ui, sans-serif" font-weight="800" font-size="46" letter-spacing="-1.4">
+    <tspan fill="#FFFFFF">MyIsrael</tspan><tspan fill="#2ED47E">Rental</tspan>
+  </text>
+</svg>
