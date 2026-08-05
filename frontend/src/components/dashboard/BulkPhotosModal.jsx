@@ -49,7 +49,7 @@ const DropZone = ({ label, files, onFiles, onRemove, compact, testid }) => {
         onDrop={(e) => { e.preventDefault(); setHover(false); onFiles(e.dataTransfer.files); }}
         onClick={() => inputRef.current?.click()}
         className={`rounded-xl border-2 border-dashed transition-colors cursor-pointer text-center ${
-          hover ? 'border-[#1E6A6A] bg-[#1E6A6A]/5' : 'border-gray-200 hover:border-gray-300'
+          hover ? 'border-[var(--brand-primary)] bg-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/5' : 'border-gray-200 hover:border-gray-300'
         } ${compact ? 'py-4 px-3' : 'py-8 px-4'}`}
         data-testid={testid}
       >
@@ -163,7 +163,7 @@ const BulkPhotosModal = ({ properties, onClose, onSaved, API, token, auth }) => 
           <div className="inline-flex bg-gray-100 rounded-lg p-1 text-sm">
             <button
               onClick={() => setMode('shared')}
-              className={`px-3 py-1.5 rounded-md font-medium transition-colors ${mode === 'shared' ? 'bg-white text-[#1E6A6A] shadow-sm' : 'text-gray-500'}`}
+              className={`px-3 py-1.5 rounded-md font-medium transition-colors ${mode === 'shared' ? 'bg-white text-[var(--brand-primary)] shadow-sm' : 'text-gray-500'}`}
               data-testid="bulk-photos-mode-shared"
             >
               <Sparkles size={12} className="inline -mt-0.5 me-1" />
@@ -171,7 +171,7 @@ const BulkPhotosModal = ({ properties, onClose, onSaved, API, token, auth }) => 
             </button>
             <button
               onClick={() => setMode('per_property')}
-              className={`px-3 py-1.5 rounded-md font-medium transition-colors ${mode === 'per_property' ? 'bg-white text-[#1E6A6A] shadow-sm' : 'text-gray-500'}`}
+              className={`px-3 py-1.5 rounded-md font-medium transition-colors ${mode === 'per_property' ? 'bg-white text-[var(--brand-primary)] shadow-sm' : 'text-gray-500'}`}
               data-testid="bulk-photos-mode-per"
             >
               {t('bulk.photosDifferentPerProp')}
@@ -207,7 +207,7 @@ const BulkPhotosModal = ({ properties, onClose, onSaved, API, token, auth }) => 
           )}
           {progress && (
             <div className="mt-4 text-xs text-gray-600 flex items-center gap-2">
-              <Loader2 size={14} className="animate-spin text-[#1E6A6A]" />
+              <Loader2 size={14} className="animate-spin text-[var(--brand-primary)]" />
               {t('bulk.uploadingProgress', { current: progress.current, total: progress.total })}
             </div>
           )}
@@ -218,7 +218,7 @@ const BulkPhotosModal = ({ properties, onClose, onSaved, API, token, auth }) => 
           <button
             onClick={handleSave}
             disabled={saving}
-            className="px-5 py-2 rounded-lg text-sm font-semibold bg-[#D4AF37] text-white hover:bg-[#b8962f] disabled:bg-gray-300 flex items-center gap-2"
+            className="px-5 py-2 rounded-lg text-sm font-semibold bg-[var(--gold)] text-white hover:bg-[#b8962f] disabled:bg-gray-300 flex items-center gap-2"
             data-testid="bulk-photos-save"
           >
             {saving ? <Loader2 size={14} className="animate-spin" /> : <CheckCircle2 size={14} />}

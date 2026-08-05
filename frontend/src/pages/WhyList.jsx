@@ -99,7 +99,7 @@ const WhyList = () => {
           <button
             onClick={startListing}
             className="inline-flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-semibold text-white transition-all hover:shadow-md active:scale-[0.98]"
-            style={{ backgroundColor: '#1E6A6A' }}
+            style={{ backgroundColor: 'var(--brand-primary)' }}
             data-testid="why-list-hero-cta"
           >
             {t('whyList.startListing', 'Start listing')}
@@ -122,11 +122,11 @@ const WhyList = () => {
             {BENEFITS.map(({ key, Icon }) => (
               <div
                 key={key}
-                className="rounded-2xl border border-gray-200 p-5 hover:border-[#1E6A6A]/40 transition-colors"
+                className="rounded-2xl border border-gray-200 p-5 hover:border-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/40 transition-colors"
                 data-testid={`why-list-benefit-${key}`}
               >
-                <div className="w-10 h-10 rounded-xl bg-[#1E6A6A]/10 flex items-center justify-center mb-3">
-                  <Icon size={20} className="text-[#1E6A6A]" />
+                <div className="w-10 h-10 rounded-xl bg-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/10 flex items-center justify-center mb-3">
+                  <Icon size={20} className="text-[var(--brand-primary)]" />
                 </div>
                 <h3 className="font-semibold text-gray-900 mb-1">
                   {t(`whyList.${key}Title`, key)}
@@ -179,7 +179,7 @@ const WhyList = () => {
           <ul className="space-y-2">
             {['searchable', 'trust', 'english'].map((key) => (
               <li key={key} className="flex items-start gap-2 text-sm text-gray-700">
-                <Check size={16} className="shrink-0 mt-0.5 text-[#1E6A6A]" />
+                <Check size={16} className="shrink-0 mt-0.5 text-[var(--brand-primary)]" />
                 {t(`whyList.vs_${key}`, '')}
               </li>
             ))}
@@ -201,7 +201,7 @@ const WhyList = () => {
             <button
               onClick={startListing}
               className="inline-flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-semibold text-white transition-all hover:shadow-md active:scale-[0.98]"
-              style={{ backgroundColor: '#1E6A6A' }}
+              style={{ backgroundColor: 'var(--brand-primary)' }}
               data-testid="why-list-pricing-cta"
             >
               {t('whyList.startListing', 'Start listing')}
@@ -229,7 +229,7 @@ const WhyList = () => {
           </div>
           <p className="text-sm text-gray-500 mt-8">
             {t('whyList.browseFirst', 'Want to look around first?')}{' '}
-            <Link to="/services" className="text-[#1E6A6A] font-semibold hover:underline">
+            <Link to="/services" className="text-[var(--brand-primary)] font-semibold hover:underline">
               {t('whyList.browseServices', 'Browse the services marketplace')}
             </Link>
           </p>

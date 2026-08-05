@@ -32,8 +32,8 @@ import { saveReturnPath } from '../hooks/useBackNavigation';
 import { SUBCATEGORIES } from '../lib/categories';
 import ServicesHeroTitle from '../components/marketplace/ServicesHeroTitle';
 
-const TEAL = '#1E6A6A';
-const GOLD = '#D4AF37';
+const TEAL = 'var(--brand-primary)';
+const GOLD = 'var(--gold)';
 
 // Sort options the dropdown surfaces — keys map 1:1 to the backend
 // `sort` query param (see `list_gigs` in routes/marketplace.py).
@@ -72,7 +72,7 @@ const GigCard = ({ gig, onClick, i18n, t }) => {
         {gig.is_top_rated && (
           <span
             className="absolute top-2 start-2 inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wide shadow"
-            style={{ background: GOLD, color: '#1E6A6A' }}
+            style={{ background: GOLD, color: 'var(--brand-primary)' }}
             data-testid={`gig-top-rated-${gig.id}`}
           >
             <Award size={10} />
@@ -111,7 +111,7 @@ const GigCard = ({ gig, onClick, i18n, t }) => {
       <p className="text-xs text-gray-500 truncate">
         {gig.provider?.name}{gig.area ? ` · ${gig.area}` : ''}
         {typeof gig.distance_km === 'number' && (
-          <span className="ms-1 inline-flex items-center gap-0.5 text-[10px] text-[#1E6A6A] font-semibold">
+          <span className="ms-1 inline-flex items-center gap-0.5 text-[10px] text-[var(--brand-primary)] font-semibold">
             · {gig.distance_km < 1
               ? `${Math.round(gig.distance_km * 1000)} m`
               : `${gig.distance_km.toFixed(gig.distance_km < 10 ? 1 : 0)} km`}
@@ -430,14 +430,14 @@ const Services = () => {
         <div className="max-w-6xl mx-auto px-4 py-2 flex items-center justify-end gap-2" data-testid="services-jobs-anchor">
           <button
             onClick={() => navigate('/services/jobs')}
-            className="px-3 py-1.5 rounded-lg text-xs font-semibold bg-white text-[#1E6A6A] border border-[#1E6A6A]/25 hover:border-[#1E6A6A]"
+            className="px-3 py-1.5 rounded-lg text-xs font-semibold bg-white text-[var(--brand-primary)] border border-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/25 hover:border-[var(--brand-primary)]"
             data-testid="services-browse-jobs"
           >
             {t('services.browseJobs', 'Browse jobs')}
           </button>
           <button
             onClick={() => navigate('/services/post-job')}
-            className="px-3 py-1.5 rounded-lg text-xs font-semibold bg-[#1E6A6A] text-white hover:bg-[#0F3A3A]"
+            className="px-3 py-1.5 rounded-lg text-xs font-semibold bg-[var(--brand-primary)] text-white hover:bg-[#0F3A3A]"
             data-testid="services-post-job"
           >
             {t('services.postJob', 'Post a job')}
@@ -503,7 +503,7 @@ const Services = () => {
           {selectedLoc && (
             <button
               onClick={() => patchUrl({ location: '' })}
-              className="text-xs font-semibold text-[#1E6A6A] hover:underline"
+              className="text-xs font-semibold text-[var(--brand-primary)] hover:underline"
               data-testid="services-location-clear"
             >
               {t('services.clearLocation', 'Clear location')} ×
@@ -525,7 +525,7 @@ const Services = () => {
             {selectedCat && (
               <button
                 onClick={() => patchUrl({ category: '', subcategory: '' })}
-                className="text-xs font-semibold text-[#1E6A6A] hover:underline"
+                className="text-xs font-semibold text-[var(--brand-primary)] hover:underline"
                 data-testid="services-category-clear"
               >
                 {t('services.showAll', 'Show all')} ×
@@ -559,8 +559,8 @@ const Services = () => {
                     onClick={() => patchUrl({ subcategory: active ? '' : s.slug })}
                     className={`px-3 py-1.5 rounded-full text-xs font-semibold border transition-colors ${
                       active
-                        ? 'bg-[#1E6A6A] text-white border-[#1E6A6A]'
-                        : 'bg-white text-gray-700 border-gray-200 hover:border-[#1E6A6A]'
+                        ? 'bg-[var(--brand-primary)] text-white border-[var(--brand-primary)]'
+                        : 'bg-white text-gray-700 border-gray-200 hover:border-[var(--brand-primary)]'
                     }`}
                     data-testid={`services-sub-${s.slug}`}
                     aria-pressed={active}
@@ -599,7 +599,7 @@ const Services = () => {
                 type="button"
                 onClick={() => patchUrl({ view: '' })}
                 className={`inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-semibold transition-colors ${
-                  viewMode === 'list' ? 'bg-[#1E6A6A] text-white' : 'text-gray-700 hover:text-gray-900'
+                  viewMode === 'list' ? 'bg-[var(--brand-primary)] text-white' : 'text-gray-700 hover:text-gray-900'
                 }`}
                 aria-pressed={viewMode === 'list'}
                 data-testid="services-view-list"
@@ -611,7 +611,7 @@ const Services = () => {
                 type="button"
                 onClick={() => patchUrl({ view: 'map' })}
                 className={`inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-semibold transition-colors ${
-                  viewMode === 'map' ? 'bg-[#1E6A6A] text-white' : 'text-gray-700 hover:text-gray-900'
+                  viewMode === 'map' ? 'bg-[var(--brand-primary)] text-white' : 'text-gray-700 hover:text-gray-900'
                 }`}
                 aria-pressed={viewMode === 'map'}
                 data-testid="services-view-map"
@@ -630,7 +630,7 @@ const Services = () => {
               disabled={geoBusy}
               className={`inline-flex items-center gap-1.5 px-3 py-2 rounded-full text-xs sm:text-sm border font-semibold transition-colors ${
                 nearby && coords
-                  ? 'bg-[#1E6A6A] text-white border-[#1E6A6A]'
+                  ? 'bg-[var(--brand-primary)] text-white border-[var(--brand-primary)]'
                   : 'bg-white text-gray-800 border-gray-200 hover:border-gray-400'
               } disabled:opacity-60`}
               data-testid="services-nearby-btn"
@@ -667,7 +667,7 @@ const Services = () => {
             <select
               value={sort}
               onChange={(e) => patchUrl({ sort: e.target.value === 'match' ? '' : e.target.value })}
-              className="text-xs sm:text-sm px-3 py-2 rounded-full border border-gray-200 bg-white hover:border-gray-400 focus:outline-none focus:border-[#1E6A6A] font-semibold"
+              className="text-xs sm:text-sm px-3 py-2 rounded-full border border-gray-200 bg-white hover:border-gray-400 focus:outline-none focus:border-[var(--brand-primary)] font-semibold"
               data-testid="services-sort-select"
             >
               {SORT_OPTIONS.filter((o) => !o.requiresCoords || (nearby && coords)).map((o) => (
@@ -703,7 +703,7 @@ const Services = () => {
             {minRating && (
               <button
                 onClick={() => patchUrl({ min_rating: '' })}
-                className="px-2.5 py-1 rounded-full bg-[#1E6A6A] text-white font-semibold"
+                className="px-2.5 py-1 rounded-full bg-[var(--brand-primary)] text-white font-semibold"
                 data-testid="active-filter-rating"
               >
                 ★ {minRating}+ ×
@@ -712,7 +712,7 @@ const Services = () => {
             {(minPrice || maxPrice) && (
               <button
                 onClick={() => patchUrl({ min_price: '', max_price: '' })}
-                className="px-2.5 py-1 rounded-full bg-[#1E6A6A] text-white font-semibold"
+                className="px-2.5 py-1 rounded-full bg-[var(--brand-primary)] text-white font-semibold"
                 data-testid="active-filter-price"
               >
                 ₪{minPrice || 0}–{maxPrice || '∞'} ×
@@ -721,7 +721,7 @@ const Services = () => {
             {responseTime && (
               <button
                 onClick={() => patchUrl({ response_time: '' })}
-                className="px-2.5 py-1 rounded-full bg-[#1E6A6A] text-white font-semibold"
+                className="px-2.5 py-1 rounded-full bg-[var(--brand-primary)] text-white font-semibold"
                 data-testid="active-filter-response"
               >
                 {responseTime === '1h'
@@ -733,7 +733,7 @@ const Services = () => {
               <button
                 key={lang}
                 onClick={() => patchUrl({ languages: languages.filter((l) => l !== lang) })}
-                className="px-2.5 py-1 rounded-full bg-[#1E6A6A] text-white font-semibold"
+                className="px-2.5 py-1 rounded-full bg-[var(--brand-primary)] text-white font-semibold"
                 data-testid={`active-filter-lang-${lang.toLowerCase()}`}
               >
                 {lang} ×
@@ -742,7 +742,7 @@ const Services = () => {
             {bookingMode && (
               <button
                 onClick={() => patchUrl({ booking_mode: '' })}
-                className="px-2.5 py-1 rounded-full bg-[#1E6A6A] text-white font-semibold"
+                className="px-2.5 py-1 rounded-full bg-[var(--brand-primary)] text-white font-semibold"
                 data-testid="active-filter-booking"
               >
                 {bookingMode === 'in_platform'
@@ -753,7 +753,7 @@ const Services = () => {
             {maxDistance && (
               <button
                 onClick={() => patchUrl({ max_distance_km: '' })}
-                className="px-2.5 py-1 rounded-full bg-[#1E6A6A] text-white font-semibold"
+                className="px-2.5 py-1 rounded-full bg-[var(--brand-primary)] text-white font-semibold"
                 data-testid="active-filter-distance"
               >
                 ≤ {maxDistance} km ×
@@ -761,7 +761,7 @@ const Services = () => {
             )}
             <button
               onClick={clearAdvancedFilters}
-              className="text-[#1E6A6A] font-semibold underline"
+              className="text-[var(--brand-primary)] font-semibold underline"
               data-testid="services-clear-adv"
             >
               {t('common.clearAll', 'Clear all')}
@@ -774,7 +774,7 @@ const Services = () => {
       <div className="max-w-6xl mx-auto px-4 pb-16">
         {loading ? (
           <div className="flex items-center justify-center py-24">
-            <Loader2 className="animate-spin text-[#1E6A6A]" size={28} />
+            <Loader2 className="animate-spin text-[var(--brand-primary)]" size={28} />
           </div>
         ) : displayGigs.length === 0 ? (
           <div className="bg-white border border-gray-200 rounded-2xl p-10 text-center">
@@ -793,7 +793,7 @@ const Services = () => {
             {availableNowOnly ? (
               <button
                 onClick={toggleAvailableNow}
-                className="px-5 py-2.5 rounded-lg text-sm font-semibold text-white bg-[#1E6A6A] hover:bg-[#0F3A3A]"
+                className="px-5 py-2.5 rounded-lg text-sm font-semibold text-white bg-[var(--brand-primary)] hover:bg-[#0F3A3A]"
                 data-testid="services-empty-available-off"
               >
                 {t('services.showEveryone', 'Show everyone')}
@@ -801,7 +801,7 @@ const Services = () => {
             ) : advCount > 0 ? (
               <button
                 onClick={clearAdvancedFilters}
-                className="px-5 py-2.5 rounded-lg text-sm font-semibold text-white bg-[#1E6A6A] hover:bg-[#0F3A3A]"
+                className="px-5 py-2.5 rounded-lg text-sm font-semibold text-white bg-[var(--brand-primary)] hover:bg-[#0F3A3A]"
                 data-testid="services-empty-clear"
               >
                 {t('common.clearAll', 'Clear all filters')}
@@ -812,7 +812,7 @@ const Services = () => {
                  shouldn't land on a pricing choice. */
               <button
                 onClick={() => navigate('/why-list')}
-                className="px-5 py-2.5 rounded-lg text-sm font-semibold text-white bg-[#1E6A6A] hover:bg-[#0F3A3A]"
+                className="px-5 py-2.5 rounded-lg text-sm font-semibold text-white bg-[var(--brand-primary)] hover:bg-[#0F3A3A]"
                 data-testid="services-empty-cta"
               >
                 {t('services.listYourService', 'List your service')} <ArrowRight size={14} className="inline-block ms-1" />
@@ -879,7 +879,7 @@ const Services = () => {
                         }}
                         className={`shrink-0 w-[168px] rounded-xl overflow-hidden bg-white text-start active:scale-95 transition-all ${
                           isActive
-                            ? 'ring-2 ring-[#1E6A6A] shadow-[0_10px_20px_-8px_rgba(30,106,106,0.5)] scale-[1.03]'
+                            ? 'ring-2 ring-[var(--brand-primary)] shadow-[0_10px_20px_-8px_rgba(30, 95, 140,0.5)] scale-[1.03]'
                             : 'ring-1 ring-black/5'
                         }`}
                         data-testid={`services-peek-card-${gig.id}`}
@@ -964,7 +964,7 @@ const Services = () => {
             <p className="text-sm text-gray-600 leading-relaxed mb-4">
               {t('services.geoBlockedBody', 'Your browser is blocking location for this site — we need it to sort services by distance from you. It only takes a second to re-enable:')}
             </p>
-            <ol className="text-sm text-gray-700 space-y-1.5 mb-5 ps-4 list-decimal marker:text-[#1E6A6A] marker:font-bold">
+            <ol className="text-sm text-gray-700 space-y-1.5 mb-5 ps-4 list-decimal marker:text-[var(--brand-primary)] marker:font-bold">
               <li>{t('services.geoStep1', 'Click the lock (or info) icon in your browser\'s address bar.')}</li>
               <li>{t('services.geoStep2', 'Find "Location" in the site permissions list.')}</li>
               <li>{t('services.geoStep3', 'Switch it to Allow.')}</li>
@@ -982,7 +982,7 @@ const Services = () => {
               <button
                 type="button"
                 onClick={() => { setGeoBlocked(false); toggleNearby(); }}
-                className="px-5 py-2 rounded-lg text-sm font-semibold text-white bg-[#1E6A6A] hover:bg-[#0F3A3A]"
+                className="px-5 py-2 rounded-lg text-sm font-semibold text-white bg-[var(--brand-primary)] hover:bg-[#0F3A3A]"
                 data-testid="geo-blocked-retry"
               >
                 {t('services.geoRetry', 'Try again')}

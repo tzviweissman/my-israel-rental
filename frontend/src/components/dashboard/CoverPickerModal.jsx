@@ -58,19 +58,19 @@ const CoverPickerModal = ({ property, API, auth, onClose, onSaved }) => {
                     onClick={() => pick(url)}
                     disabled={busyUrl === url}
                     className={`relative group rounded-lg overflow-hidden border-2 transition-all aspect-square ${
-                      isCover ? 'border-[#D4AF37] ring-2 ring-[#D4AF37]/40' : 'border-transparent hover:border-[#1E6A6A]'
+                      isCover ? 'border-[var(--gold)] ring-2 ring-[rgb(var(--gold-rgb)/<alpha-value>)]/40' : 'border-transparent hover:border-[var(--brand-primary)]'
                     }`}
                     data-testid={`cover-pick-${i}`}
                   >
                     <img src={src} alt={`Photo ${i + 1}`} className="w-full h-full object-cover" />
                     {isCover && (
-                      <div className="absolute top-1 left-1 bg-[#D4AF37] text-white rounded-md px-1.5 py-0.5 text-[10px] font-bold flex items-center gap-1 shadow">
+                      <div className="absolute top-1 left-1 bg-[var(--gold)] text-white rounded-md px-1.5 py-0.5 text-[10px] font-bold flex items-center gap-1 shadow">
                         <Star size={10} fill="white" /> {t('bulk.coverBadge')}
                       </div>
                     )}
                     {!isCover && (
                       <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 flex items-center justify-center transition-colors">
-                        <span className="opacity-0 group-hover:opacity-100 px-2 py-1 rounded-md bg-white text-[#1E6A6A] text-xs font-semibold flex items-center gap-1 shadow">
+                        <span className="opacity-0 group-hover:opacity-100 px-2 py-1 rounded-md bg-white text-[var(--brand-primary)] text-xs font-semibold flex items-center gap-1 shadow">
                           {busyUrl === url ? t('bulk.coverSaving') : <><CheckCircle2 size={12} /> {t('bulk.setAsCover')}</>}
                         </span>
                       </div>

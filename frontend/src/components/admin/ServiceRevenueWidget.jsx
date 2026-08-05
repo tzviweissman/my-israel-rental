@@ -31,7 +31,7 @@ export const ServiceRevenueWidget = ({ token }) => {
     <div className="mt-10" data-testid="admin-service-revenue">
       <div className="flex items-center justify-between flex-wrap gap-3 mb-4">
         <div className="flex items-center gap-2">
-          <TrendingUp size={18} className="text-[#1E6A6A]" />
+          <TrendingUp size={18} className="text-[var(--brand-primary)]" />
           <h2 className="text-xl font-bold" style={{ fontFamily: 'Playfair Display' }}>
             {t('admin.serviceRevenueTitle', 'Revenue by service')}
           </h2>
@@ -43,7 +43,7 @@ export const ServiceRevenueWidget = ({ token }) => {
               onClick={() => setWindowDays(w.days)}
               className={`px-3 py-1 rounded-md text-xs font-medium transition-colors ${
                 windowDays === w.days
-                  ? 'bg-[#1E6A6A] text-white'
+                  ? 'bg-[var(--brand-primary)] text-white'
                   : 'text-gray-600 hover:bg-gray-50'
               }`}
               data-testid={`revenue-window-${w.days}`}
@@ -58,7 +58,7 @@ export const ServiceRevenueWidget = ({ token }) => {
         <div className="flex items-baseline gap-6 mb-5 flex-wrap">
           <div>
             <p className="text-xs text-gray-500 uppercase tracking-wide">Total revenue</p>
-            <p className="text-3xl font-bold text-[#1E6A6A]" data-testid="revenue-total">
+            <p className="text-3xl font-bold text-[var(--brand-primary)]" data-testid="revenue-total">
               ${total_revenue_usd.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
             </p>
           </div>
@@ -89,7 +89,7 @@ export const ServiceRevenueWidget = ({ token }) => {
                   </div>
                   <div className="h-2 rounded-full bg-gray-100 overflow-hidden">
                     <div
-                      className="h-full bg-gradient-to-r from-[#1E6A6A] to-[#2a8a8a] rounded-full transition-all duration-500"
+                      className="h-full bg-gradient-to-r from-[var(--brand-primary)] to-[#2a8a8a] rounded-full transition-all duration-500"
                       style={{ width: `${pct}%` }}
                     />
                   </div>

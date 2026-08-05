@@ -132,7 +132,7 @@ const StaysCard = ({
               just decoration; the chip auto-picks between "m" and
               "km" so 640 m stays readable and 12 km isn't over-precise. */}
           {typeof property.distance_km === 'number' && (
-            <span className="ms-1 inline-flex items-center gap-0.5 text-[10px] text-[#1E6A6A] font-semibold">
+            <span className="ms-1 inline-flex items-center gap-0.5 text-[10px] text-[var(--brand-primary)] font-semibold">
               · {property.distance_km < 1
                 ? `${Math.round(property.distance_km * 1000)} m`
                 : `${property.distance_km.toFixed(property.distance_km < 10 ? 1 : 0)} km`}
@@ -161,7 +161,7 @@ const StaysCard = ({
             than saying nothing. */}
         {listedAgo && (
           <p
-            className={`text-[11px] mt-0.5 ${fresh ? 'text-[#1E6A6A] font-semibold' : 'text-gray-400'}`}
+            className={`text-[11px] mt-0.5 ${fresh ? 'text-[var(--brand-primary)] font-semibold' : 'text-gray-400'}`}
             data-testid={`stays-card-listed-${property.id}`}
           >
             {listedAgo}

@@ -71,7 +71,7 @@ const PriceBlock = ({ property, t }) => {
       {hasRegular && (
         <span
           className="text-lg font-bold leading-tight"
-          style={{ color: '#1E6A6A' }}
+          style={{ color: 'var(--brand-primary)' }}
           data-testid={`dashboard-regular-price-${property.id}`}
         >
           {regularSym}
@@ -82,7 +82,7 @@ const PriceBlock = ({ property, t }) => {
       {hasHoliday && (
         <span
           className="text-sm font-semibold leading-tight"
-          style={{ color: '#D4AF37' }}
+          style={{ color: 'var(--gold)' }}
           data-testid={`dashboard-holiday-price-${property.id}`}
         >
           {holidaySym}
@@ -424,15 +424,15 @@ const PropertyList = ({ properties, bookings = [], onEdit, onRefresh, API, token
               onClick={() => toggleFilter('bulk')}
               className={`inline-flex items-center gap-1.5 ps-2.5 pe-3 py-1.5 rounded-full text-xs font-semibold transition-all ${
                 activeFilter === 'bulk'
-                  ? 'bg-[#D4AF37] text-[#1E6A6A] shadow-sm'
-                  : 'bg-[#fafaf5] text-gray-600 hover:text-[#1E6A6A] border border-[#E5E5E5]'
+                  ? 'bg-[var(--gold)] text-[var(--brand-primary)] shadow-sm'
+                  : 'bg-[#fafaf5] text-gray-600 hover:text-[var(--brand-primary)] border border-[#E5E5E5]'
               }`}
               data-testid="filter-bulk-only-btn"
               title="Show only properties added in the last 24 hours via bulk upload"
             >
               <Sparkles size={12} />
               Recently Bulk-Uploaded
-              <span className={`ms-0.5 px-1.5 py-0.5 rounded-full text-[10px] ${activeFilter === 'bulk' ? 'bg-[#1E6A6A] text-[#D4AF37]' : 'bg-white text-[#1E6A6A]'}`}>
+              <span className={`ms-0.5 px-1.5 py-0.5 rounded-full text-[10px] ${activeFilter === 'bulk' ? 'bg-[var(--brand-primary)] text-[var(--gold)]' : 'bg-white text-[var(--brand-primary)]'}`}>
                 {bulkCount}
               </span>
               {activeFilter === 'bulk' && <X size={12} className="opacity-70" />}
@@ -443,15 +443,15 @@ const PropertyList = ({ properties, bookings = [], onEdit, onRefresh, API, token
               onClick={() => toggleFilter('no_images')}
               className={`inline-flex items-center gap-1.5 ps-2.5 pe-3 py-1.5 rounded-full text-xs font-semibold transition-all ${
                 activeFilter === 'no_images'
-                  ? 'bg-[#1E6A6A] text-[#D4AF37] shadow-sm'
-                  : 'bg-[#fafaf5] text-gray-600 hover:text-[#1E6A6A] border border-[#E5E5E5]'
+                  ? 'bg-[var(--brand-primary)] text-[var(--gold)] shadow-sm'
+                  : 'bg-[#fafaf5] text-gray-600 hover:text-[var(--brand-primary)] border border-[#E5E5E5]'
               }`}
               data-testid="filter-no-images-btn"
               title="Listings missing cover photos — add images to boost views"
             >
               <ImageIcon size={12} />
               Needs Images
-              <span className={`ms-0.5 px-1.5 py-0.5 rounded-full text-[10px] ${activeFilter === 'no_images' ? 'bg-[#D4AF37] text-[#1E6A6A]' : 'bg-white text-[#1E6A6A]'}`}>
+              <span className={`ms-0.5 px-1.5 py-0.5 rounded-full text-[10px] ${activeFilter === 'no_images' ? 'bg-[var(--gold)] text-[var(--brand-primary)]' : 'bg-white text-[var(--brand-primary)]'}`}>
                 {needsImagesCount}
               </span>
               {activeFilter === 'no_images' && <X size={12} className="opacity-70" />}
@@ -487,19 +487,19 @@ const PropertyList = ({ properties, bookings = [], onEdit, onRefresh, API, token
             onDragLeave={() => setDropHover(false)}
             onDrop={handleDrop}
             className={`rounded-2xl border-2 border-dashed p-6 text-center transition-all ${
-              dropHover ? 'border-[#D4AF37] bg-[#fafaf0]' : 'border-gray-300 bg-[#fafaf5]'
+              dropHover ? 'border-[var(--gold)] bg-[#fafaf0]' : 'border-gray-300 bg-[#fafaf5]'
             }`}
             data-testid="bulk-image-dropzone"
           >
             <div className="flex flex-col items-center gap-2">
-              <div className="w-12 h-12 rounded-full bg-[#1E6A6A]/10 flex items-center justify-center">
-                <Upload className="text-[#1E6A6A]" size={22} />
+              <div className="w-12 h-12 rounded-full bg-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/10 flex items-center justify-center">
+                <Upload className="text-[var(--brand-primary)]" size={22} />
               </div>
               <p className="text-sm font-semibold text-gray-800">{t("sweep.dropImagesHere", "Drop images here")}</p>
               <p className="text-xs text-gray-500 max-w-md">
                 We match files to listings by filename (e.g. <code className="bg-white px-1 rounded">tel-aviv-hero.jpg</code> → <em>Tel Aviv</em> listing) and round-robin the rest. Re-map any row below before confirming.
               </p>
-              <label className="mt-1 text-xs text-[#1E6A6A] font-medium cursor-pointer hover:underline">
+              <label className="mt-1 text-xs text-[var(--brand-primary)] font-medium cursor-pointer hover:underline">
                 or click to choose files
                 <input
                   type="file"
@@ -531,7 +531,7 @@ const PropertyList = ({ properties, bookings = [], onEdit, onRefresh, API, token
                     onClick={submitBulkImages}
                     disabled={bulkImgUploading}
                     className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-white disabled:opacity-50"
-                    style={{ backgroundColor: '#1E6A6A' }}
+                    style={{ backgroundColor: 'var(--brand-primary)' }}
                     data-testid="bulk-image-attach-btn"
                   >
                     {bulkImgUploading ? <Loader2 size={12} className="animate-spin" /> : <Check size={12} />}
@@ -555,7 +555,7 @@ const PropertyList = ({ properties, bookings = [], onEdit, onRefresh, API, token
                     <select
                       value={a.propertyId}
                       onChange={(e) => updateAssignment(i, e.target.value)}
-                      className="text-xs px-2 py-1.5 rounded-lg border border-gray-200 focus:outline-none focus:border-[#1E6A6A] max-w-[240px]"
+                      className="text-xs px-2 py-1.5 rounded-lg border border-gray-200 focus:outline-none focus:border-[var(--brand-primary)] max-w-[240px]"
                       data-testid={`bulk-image-select-${i}`}
                     >
                       {displayedProperties.map((p) => (
@@ -592,7 +592,7 @@ const PropertyList = ({ properties, bookings = [], onEdit, onRefresh, API, token
               {isFreshBulkUpload(property) && (
                 <span
                   className="absolute top-3 right-3 px-2.5 py-1 rounded-full text-[10px] font-bold tracking-[0.1em] uppercase shadow-md"
-                  style={{ backgroundColor: '#D4AF37', color: '#1E6A6A' }}
+                  style={{ backgroundColor: 'var(--gold)', color: 'var(--brand-primary)' }}
                   data-testid={`new-badge-${property.id}`}
                   title="Added in the last 24 hours via bulk upload"
                 >
@@ -639,7 +639,7 @@ const PropertyList = ({ properties, bookings = [], onEdit, onRefresh, API, token
                         onClick={() => openAuthedFile(
                           `/properties/${property.id}/contract-file`, API, token,
                         )}
-                        className="text-xs text-[#1E6A6A] hover:text-[#D4AF37] flex items-center gap-1"
+                        className="text-xs text-[var(--brand-primary)] hover:text-[var(--gold)] flex items-center gap-1"
                       >
                         <FileText size={12} /> View
                       </button>
@@ -648,9 +648,9 @@ const PropertyList = ({ properties, bookings = [], onEdit, onRefresh, API, token
                   <label
                     className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-xs font-medium cursor-pointer transition-all border border-dashed"
                     style={{
-                      borderColor: property.contract_url ? '#D4AF37' : '#ccc',
+                      borderColor: property.contract_url ? 'var(--gold)' : '#ccc',
                       backgroundColor: property.contract_url ? '#f5f5f0' : 'transparent',
-                      color: property.contract_url ? '#1E6A6A' : '#666',
+                      color: property.contract_url ? 'var(--brand-primary)' : '#666',
                     }}
                   >
                     <Upload size={14} />
@@ -675,11 +675,11 @@ const PropertyList = ({ properties, bookings = [], onEdit, onRefresh, API, token
                   )}
                   <div className="mt-2 flex items-center gap-2 text-[11px] text-gray-500">
                     <span>Need a template?</span>
-                    <a href={`${API}/contract-template/en`} target="_blank" rel="noopener noreferrer" className="text-[#1E6A6A] hover:text-[#D4AF37] underline" data-testid={`template-en-${property.id}`}>
+                    <a href={`${API}/contract-template/en`} target="_blank" rel="noopener noreferrer" className="text-[var(--brand-primary)] hover:text-[var(--gold)] underline" data-testid={`template-en-${property.id}`}>
                       EN
                     </a>
                     <span className="text-gray-300">·</span>
-                    <a href={`${API}/contract-template/he`} target="_blank" rel="noopener noreferrer" className="text-[#1E6A6A] hover:text-[#D4AF37] underline" data-testid={`template-he-${property.id}`}>
+                    <a href={`${API}/contract-template/he`} target="_blank" rel="noopener noreferrer" className="text-[var(--brand-primary)] hover:text-[var(--gold)] underline" data-testid={`template-he-${property.id}`}>
                       HE
                     </a>
                   </div>
@@ -694,15 +694,15 @@ const PropertyList = ({ properties, bookings = [], onEdit, onRefresh, API, token
                     onClick={() => setSmartPricingProperty(property)}
                     className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-all"
                     style={{
-                      backgroundColor: property.smart_pricing?.enabled ? '#1E6A6A' : '#f5f5f0',
-                      color: property.smart_pricing?.enabled ? '#D4AF37' : '#1E6A6A',
+                      backgroundColor: property.smart_pricing?.enabled ? 'var(--brand-primary)' : '#f5f5f0',
+                      color: property.smart_pricing?.enabled ? 'var(--gold)' : 'var(--brand-primary)',
                     }}
                     data-testid={`smart-pricing-btn-${property.id}`}
                   >
                     <TrendingUp size={15} />
                     Smart Pricing
                     {property.smart_pricing?.enabled && (
-                      <span className="text-[10px] font-bold uppercase tracking-wide px-1.5 py-0.5 rounded bg-[#D4AF37] text-white">
+                      <span className="text-[10px] font-bold uppercase tracking-wide px-1.5 py-0.5 rounded bg-[var(--gold)] text-white">
                         {property.smart_pricing?.auto_apply ? 'Auto' : 'On'}
                       </span>
                     )}
@@ -711,15 +711,15 @@ const PropertyList = ({ properties, bookings = [], onEdit, onRefresh, API, token
                     onClick={() => openIcalPanel(property.id)}
                     className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-all"
                     style={{
-                      backgroundColor: icalPanel === property.id ? '#1E6A6A' : '#f5f5f0',
-                      color: icalPanel === property.id ? '#D4AF37' : '#1E6A6A',
+                      backgroundColor: icalPanel === property.id ? 'var(--brand-primary)' : '#f5f5f0',
+                      color: icalPanel === property.id ? 'var(--gold)' : 'var(--brand-primary)',
                     }}
                     data-testid={`ical-toggle-${property.id}`}
                   >
                     <CalendarSync size={15} />
                     {t('property.ical.title')}
                     {property.ical_urls?.length > 0 && (
-                      <span className="w-5 h-5 rounded-full text-[10px] flex items-center justify-center font-bold bg-[#D4AF37] text-white">
+                      <span className="w-5 h-5 rounded-full text-[10px] flex items-center justify-center font-bold bg-[var(--gold)] text-white">
                         {property.ical_urls.length}
                       </span>
                     )}
@@ -734,14 +734,14 @@ const PropertyList = ({ properties, bookings = [], onEdit, onRefresh, API, token
                           value={icalUrl}
                           onChange={(e) => setIcalUrl(e.target.value)}
                           placeholder={t('property.ical.urlPlaceholder')}
-                          className="flex-1 px-3 py-2 rounded-lg border border-gray-200 text-sm focus:outline-none focus:border-[#D4AF37]"
+                          className="flex-1 px-3 py-2 rounded-lg border border-gray-200 text-sm focus:outline-none focus:border-[var(--gold)]"
                           data-testid={`ical-url-input-${property.id}`}
                         />
                         <button
                           onClick={() => addIcalUrl(property.id)}
                           disabled={icalSyncing || !icalUrl.trim()}
                           className="px-3 py-2 rounded-lg text-sm font-medium text-white disabled:opacity-40"
-                          style={{ backgroundColor: '#1E6A6A' }}
+                          style={{ backgroundColor: 'var(--brand-primary)' }}
                           data-testid={`ical-add-btn-${property.id}`}
                         >
                           {icalSyncing ? t('property.ical.syncing') : t('property.ical.add')}
@@ -752,7 +752,7 @@ const PropertyList = ({ properties, bookings = [], onEdit, onRefresh, API, token
                         <div className="space-y-1.5">
                           {property.ical_urls.map((url, i) => (
                             <div key={url} className="flex items-center gap-2 px-3 py-2 rounded-lg bg-gray-50 text-xs">
-                              <Link2 size={12} className="text-[#D4AF37] shrink-0" />
+                              <Link2 size={12} className="text-[var(--gold)] shrink-0" />
                               <span className="flex-1 truncate text-gray-600">{url}</span>
                               <button onClick={() => removeIcalUrl(property.id, url)} className="text-red-400 hover:text-red-600 shrink-0" data-testid={`ical-remove-${i}`}>
                                 <X size={14} />
@@ -767,7 +767,7 @@ const PropertyList = ({ properties, bookings = [], onEdit, onRefresh, API, token
                       {icalData[property.id] && (
                         <div className="flex items-center justify-between text-xs text-gray-500">
                           <span>{icalData[property.id].external?.length || 0} {t('property.ical.blockedDates')}</span>
-                          <button onClick={() => manualSync(property.id)} disabled={icalSyncing} className="flex items-center gap-1 text-[#D4AF37] hover:underline disabled:opacity-40" data-testid={`ical-sync-btn-${property.id}`}>
+                          <button onClick={() => manualSync(property.id)} disabled={icalSyncing} className="flex items-center gap-1 text-[var(--gold)] hover:underline disabled:opacity-40" data-testid={`ical-sync-btn-${property.id}`}>
                             <RefreshCw size={12} className={icalSyncing ? 'animate-spin' : ''} />
                             {t('property.ical.autoSync')}
                           </button>
@@ -779,7 +779,7 @@ const PropertyList = ({ properties, bookings = [], onEdit, onRefresh, API, token
                         <p className="text-[11px] text-gray-400 mb-2">{t('property.ical.exportDesc')}</p>
                         <button
                           onClick={() => copyExportUrl(property.id)}
-                          className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-lg border border-gray-200 text-sm hover:border-[#D4AF37] transition-colors"
+                          className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-lg border border-gray-200 text-sm hover:border-[var(--gold)] transition-colors"
                           data-testid={`ical-export-btn-${property.id}`}
                         >
                           {copiedExport ? <Check size={14} className="text-green-500" /> : <Copy size={14} className="text-gray-500" />}

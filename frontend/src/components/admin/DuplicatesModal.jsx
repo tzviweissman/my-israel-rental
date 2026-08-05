@@ -225,7 +225,7 @@ const DuplicatesModal = ({ token, onClose, onDeleted }) => {
             <button
               onClick={() => resolveAll('keep_richest')}
               disabled={bulkBusy}
-              className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-[#1E6A6A] text-white text-xs font-semibold disabled:opacity-50 hover:bg-[#175555]"
+              className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-[var(--brand-primary)] text-white text-xs font-semibold disabled:opacity-50 hover:bg-[#175555]"
               data-testid="resolve-all-richest"
               title="Each group keeps the listing with the most photos (best content) — safest default"
             >
@@ -280,7 +280,7 @@ const DuplicatesModal = ({ token, onClose, onDeleted }) => {
                         <button
                           onClick={() => resolveOne(g, 'keep_richest')}
                           disabled={isBusy || bulkBusy}
-                          className="inline-flex items-center gap-1 px-2 py-1 rounded-md bg-[#1E6A6A] text-white text-[11px] font-semibold disabled:opacity-50 hover:bg-[#175555]"
+                          className="inline-flex items-center gap-1 px-2 py-1 rounded-md bg-[var(--brand-primary)] text-white text-[11px] font-semibold disabled:opacity-50 hover:bg-[#175555]"
                           data-testid={`resolve-group-richest-${gi}`}
                           title="Keep the richest copy (most photos + longest description), delete the rest"
                         >
@@ -322,7 +322,7 @@ const DuplicatesModal = ({ token, onClose, onDeleted }) => {
                               href={p.cover_url}
                               target="_blank"
                               rel="noreferrer"
-                              className="w-12 h-12 rounded-md overflow-hidden border border-gray-200 shrink-0 hover:ring-2 hover:ring-[#1E6A6A]/40 block"
+                              className="w-12 h-12 rounded-md overflow-hidden border border-gray-200 shrink-0 hover:ring-2 hover:ring-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/40 block"
                               title="Open full-size cover"
                             >
                               <img
@@ -369,7 +369,7 @@ const DuplicatesModal = ({ token, onClose, onDeleted }) => {
                             href={`/property/${p.id}`}
                             target="_blank"
                             rel="noreferrer"
-                            className="text-xs text-[#1E6A6A] hover:underline shrink-0"
+                            className="text-xs text-[var(--brand-primary)] hover:underline shrink-0"
                           >
                             view
                           </a>

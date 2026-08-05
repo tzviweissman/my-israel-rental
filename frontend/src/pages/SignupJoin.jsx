@@ -162,7 +162,7 @@ const SignupJoin = () => {
       style={{
         // Soft sand-to-white wash keeps the Ocean Teal + Gold brand
         // primary while giving the screen a warm, welcoming atmosphere.
-        background: 'radial-gradient(1200px 600px at 20% -10%, rgba(212,175,55,0.10), transparent 60%), radial-gradient(900px 500px at 100% 100%, rgba(30,106,106,0.10), transparent 60%), #FBF7EF',
+        background: 'radial-gradient(1200px 600px at 20% -10%, rgba(201, 162, 39,0.10), transparent 60%), radial-gradient(900px 500px at 100% 100%, rgba(30, 95, 140,0.10), transparent 60%), #FBF7EF',
       }}
       data-testid="signup-join-page"
     >
@@ -174,7 +174,7 @@ const SignupJoin = () => {
             {t('signupJoin.haveAccount', 'Already have an account?')}
             <Link
               to={loginHref}
-              className="font-semibold text-[#1E6A6A] hover:underline"
+              className="font-semibold text-[var(--brand-primary)] hover:underline"
               data-testid="signup-login-link"
             >
               {t('signupJoin.logIn', 'Log in')}
@@ -184,11 +184,11 @@ const SignupJoin = () => {
 
         {/* Step indicator */}
         <div className="mt-6 sm:mt-10 flex items-center gap-3 text-xs font-semibold tracking-wide text-gray-500">
-          <span className={`inline-flex h-6 w-6 items-center justify-center rounded-full ${step >= 1 ? 'bg-[#1E6A6A] text-white' : 'bg-gray-200 text-gray-500'}`}>1</span>
-          <span className={step === 1 ? 'text-[#1E6A6A]' : ''}>{t('signupJoin.stepRole', 'YOUR ROLE')}</span>
+          <span className={`inline-flex h-6 w-6 items-center justify-center rounded-full ${step >= 1 ? 'bg-[var(--brand-primary)] text-white' : 'bg-gray-200 text-gray-500'}`}>1</span>
+          <span className={step === 1 ? 'text-[var(--brand-primary)]' : ''}>{t('signupJoin.stepRole', 'YOUR ROLE')}</span>
           <div className="h-px w-8 bg-gray-300" />
-          <span className={`inline-flex h-6 w-6 items-center justify-center rounded-full ${step >= 2 ? 'bg-[#1E6A6A] text-white' : 'bg-gray-200 text-gray-500'}`}>2</span>
-          <span className={step === 2 ? 'text-[#1E6A6A]' : ''}>{t('signupJoin.stepDetails', 'YOUR DETAILS')}</span>
+          <span className={`inline-flex h-6 w-6 items-center justify-center rounded-full ${step >= 2 ? 'bg-[var(--brand-primary)] text-white' : 'bg-gray-200 text-gray-500'}`}>2</span>
+          <span className={step === 2 ? 'text-[var(--brand-primary)]' : ''}>{t('signupJoin.stepDetails', 'YOUR DETAILS')}</span>
         </div>
 
         {/* STEP 1 — role picker */}
@@ -219,9 +219,9 @@ const SignupJoin = () => {
                     type="button"
                     key={key}
                     onClick={() => setSelectedRole(key)}
-                    className={`group relative text-start rounded-2xl border bg-white p-6 sm:p-7 transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#1E6A6A] focus-visible:ring-offset-2 ${
+                    className={`group relative text-start rounded-2xl border bg-white p-6 sm:p-7 transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand-primary)] focus-visible:ring-offset-2 ${
                       active
-                        ? 'border-[#1E6A6A] shadow-[0_20px_50px_-15px_rgba(30,106,106,0.35)] -translate-y-0.5'
+                        ? 'border-[var(--brand-primary)] shadow-[0_20px_50px_-15px_rgba(30, 95, 140,0.35)] -translate-y-0.5'
                         : 'border-gray-200 shadow-[0_4px_15px_-8px_rgba(0,0,0,0.15)] hover:border-gray-300 hover:shadow-[0_20px_40px_-20px_rgba(0,0,0,0.25)] hover:-translate-y-0.5'
                     }`}
                     aria-pressed={active}
@@ -230,7 +230,7 @@ const SignupJoin = () => {
                     {defaultBadge && (
                       <span
                         className="absolute top-3 end-3 text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full"
-                        style={{ background: '#D4AF37', color: '#1E6A6A' }}
+                        style={{ background: 'var(--gold)', color: 'var(--brand-primary)' }}
                       >
                         {tBadgeKey ? t(tBadgeKey, defaultBadge) : defaultBadge}
                       </span>
@@ -239,11 +239,11 @@ const SignupJoin = () => {
                       className="h-14 w-14 rounded-2xl flex items-center justify-center transition-colors"
                       style={{
                         background: active
-                          ? 'linear-gradient(135deg, #1E6A6A 0%, #2B8686 100%)'
-                          : 'linear-gradient(135deg, rgba(30,106,106,0.08), rgba(30,106,106,0.03))',
+                          ? 'linear-gradient(135deg, var(--brand-primary) 0%, #2B8686 100%)'
+                          : 'linear-gradient(135deg, rgba(30, 95, 140,0.08), rgba(30, 95, 140,0.03))',
                       }}
                     >
-                      <Icon size={26} className={active ? 'text-[#D4AF37]' : 'text-[#1E6A6A]'} />
+                      <Icon size={26} className={active ? 'text-[var(--gold)]' : 'text-[var(--brand-primary)]'} />
                     </div>
                     <h3 className="mt-5 text-xl font-bold text-[#0F3A3A]">
                       {t(tKey, defaultLabel)}
@@ -253,17 +253,17 @@ const SignupJoin = () => {
                     </p>
 
                     <div className="mt-5 flex items-center justify-between">
-                      <span className={`text-xs font-semibold ${active ? 'text-[#1E6A6A]' : 'text-gray-400 group-hover:text-gray-600'}`}>
+                      <span className={`text-xs font-semibold ${active ? 'text-[var(--brand-primary)]' : 'text-gray-400 group-hover:text-gray-600'}`}>
                         {active
                           ? t('signupJoin.selected', 'Selected')
                           : t(tCtaKey, defaultCta)}
                       </span>
                       {active ? (
-                        <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-[#1E6A6A] text-white">
+                        <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-[var(--brand-primary)] text-white">
                           <Check size={14} strokeWidth={3} />
                         </span>
                       ) : (
-                        <ArrowRight size={16} className="text-gray-400 group-hover:text-[#1E6A6A] transition-colors" />
+                        <ArrowRight size={16} className="text-gray-400 group-hover:text-[var(--brand-primary)] transition-colors" />
                       )}
                     </div>
                   </button>
@@ -280,7 +280,7 @@ const SignupJoin = () => {
                 onClick={handleContinue}
                 disabled={!selectedRole}
                 className="inline-flex items-center gap-2 rounded-full px-8 py-3 text-sm font-bold shadow-lg transition-all disabled:opacity-40 disabled:cursor-not-allowed hover:shadow-xl hover:-translate-y-0.5"
-                style={{ background: '#1E6A6A', color: '#D4AF37' }}
+                style={{ background: 'var(--brand-primary)', color: 'var(--gold)' }}
                 data-testid="signup-continue-btn"
               >
                 {t('signupJoin.continue', 'Continue')}
@@ -307,7 +307,7 @@ const SignupJoin = () => {
 
             <p className="mt-10 text-center sm:hidden text-sm text-gray-600">
               {t('signupJoin.haveAccount', 'Already have an account?')}{' '}
-              <Link to={loginHref} className="font-semibold text-[#1E6A6A]" data-testid="signup-login-link-mobile">
+              <Link to={loginHref} className="font-semibold text-[var(--brand-primary)]" data-testid="signup-login-link-mobile">
                 {t('signupJoin.logIn', 'Log in')}
               </Link>
             </p>
@@ -320,7 +320,7 @@ const SignupJoin = () => {
             <button
               type="button"
               onClick={() => setStep(1)}
-              className="inline-flex items-center gap-2 text-sm font-semibold text-gray-600 hover:text-[#1E6A6A] transition-colors"
+              className="inline-flex items-center gap-2 text-sm font-semibold text-gray-600 hover:text-[var(--brand-primary)] transition-colors"
               data-testid="signup-back-btn"
             >
               <ArrowLeft size={16} />
@@ -328,7 +328,7 @@ const SignupJoin = () => {
             </button>
 
             <div className="mt-6 max-w-xl">
-              <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#1E6A6A]/8 text-[#1E6A6A] text-xs font-semibold">
+              <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/8 text-[var(--brand-primary)] text-xs font-semibold">
                 <activeCard.Icon size={14} />
                 {t('signupJoin.signingUpAs', 'Signing up as')} · {t(activeCard.tKey, activeCard.defaultLabel)}
               </div>
@@ -368,7 +368,7 @@ const SignupJoin = () => {
                     autoComplete="name"
                     value={form.name}
                     onChange={(e) => setForm({ ...form, name: e.target.value })}
-                    className="w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm focus:outline-none focus:border-[#1E6A6A] focus:ring-2 focus:ring-[#1E6A6A]/20"
+                    className="w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm focus:outline-none focus:border-[var(--brand-primary)] focus:ring-2 focus:ring-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/20"
                     placeholder={t('signupJoin.fullNamePh', 'Jane Doe')}
                     data-testid="signup-name-input"
                   />
@@ -380,7 +380,7 @@ const SignupJoin = () => {
                     autoComplete="email"
                     value={form.email}
                     onChange={(e) => setForm({ ...form, email: e.target.value })}
-                    className="w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm focus:outline-none focus:border-[#1E6A6A] focus:ring-2 focus:ring-[#1E6A6A]/20"
+                    className="w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm focus:outline-none focus:border-[var(--brand-primary)] focus:ring-2 focus:ring-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/20"
                     placeholder="you@example.com"
                     data-testid="signup-email-input"
                   />
@@ -412,7 +412,7 @@ const SignupJoin = () => {
                       autoComplete="new-password"
                       value={form.password}
                       onChange={(e) => setForm({ ...form, password: e.target.value })}
-                      className="w-full rounded-xl border border-gray-200 bg-white px-4 py-3 pe-11 text-sm focus:outline-none focus:border-[#1E6A6A] focus:ring-2 focus:ring-[#1E6A6A]/20"
+                      className="w-full rounded-xl border border-gray-200 bg-white px-4 py-3 pe-11 text-sm focus:outline-none focus:border-[var(--brand-primary)] focus:ring-2 focus:ring-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/20"
                       placeholder={t('signupJoin.passwordPh', 'At least 6 characters')}
                       data-testid="signup-password-input"
                     />
@@ -436,7 +436,7 @@ const SignupJoin = () => {
                       autoComplete="new-password"
                       value={confirmPassword}
                       onChange={(e) => setConfirmPassword(e.target.value)}
-                      className="w-full rounded-xl border border-gray-200 bg-white px-4 py-3 pe-11 text-sm focus:outline-none focus:border-[#1E6A6A] focus:ring-2 focus:ring-[#1E6A6A]/20"
+                      className="w-full rounded-xl border border-gray-200 bg-white px-4 py-3 pe-11 text-sm focus:outline-none focus:border-[var(--brand-primary)] focus:ring-2 focus:ring-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/20"
                       data-testid="signup-confirm-input"
                     />
                     <button
@@ -456,13 +456,13 @@ const SignupJoin = () => {
                     type="checkbox"
                     checked={termsAccepted}
                     onChange={(e) => setTermsAccepted(e.target.checked)}
-                    className="mt-1 h-4 w-4 rounded border-gray-300 accent-[#D4AF37]"
+                    className="mt-1 h-4 w-4 rounded border-gray-300 accent-[var(--gold)]"
                     required
                     data-testid="signup-terms-checkbox"
                   />
                   <span className="text-sm text-gray-600 leading-snug">
                     {t('signupJoin.agree', 'I agree to the')}{' '}
-                    <a href="/terms" target="_blank" rel="noreferrer" className="font-semibold text-[#1E6A6A] underline underline-offset-2">
+                    <a href="/terms" target="_blank" rel="noreferrer" className="font-semibold text-[var(--brand-primary)] underline underline-offset-2">
                       {t('signupJoin.terms', 'Terms & Privacy Policy')}
                     </a>
                   </span>
@@ -472,7 +472,7 @@ const SignupJoin = () => {
                   type="submit"
                   disabled={submitting}
                   className="w-full mt-2 inline-flex items-center justify-center gap-2 rounded-full px-8 py-3.5 text-sm font-bold shadow-lg transition-all hover:shadow-xl hover:-translate-y-0.5 disabled:opacity-60 disabled:cursor-not-allowed"
-                  style={{ background: '#1E6A6A', color: '#D4AF37' }}
+                  style={{ background: 'var(--brand-primary)', color: 'var(--gold)' }}
                   data-testid="signup-submit-btn"
                 >
                   {submitting
@@ -482,7 +482,7 @@ const SignupJoin = () => {
 
                 <p className="text-center text-sm text-gray-600 pt-2">
                   {t('signupJoin.haveAccount', 'Already have an account?')}{' '}
-                  <Link to={loginHref} className="font-semibold text-[#1E6A6A]" data-testid="signup-login-link-form">
+                  <Link to={loginHref} className="font-semibold text-[var(--brand-primary)]" data-testid="signup-login-link-form">
                     {t('signupJoin.logIn', 'Log in')}
                   </Link>
                 </p>

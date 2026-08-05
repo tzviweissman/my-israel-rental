@@ -405,7 +405,7 @@ const BulkUploadModal = ({ isOpen, onClose, onDone, API, token }) => {
         <div className="flex items-start justify-between gap-4 px-6 py-5 border-b border-gray-100">
           <div>
             <h2 className="text-2xl font-bold flex items-center gap-2" style={{ fontFamily: 'Playfair Display' }}>
-              <Sparkles size={20} className="text-[#D4AF37]" />
+              <Sparkles size={20} className="text-[var(--gold)]" />
               Add multiple properties
             </h2>
             <p className="text-sm text-gray-500 mt-0.5">
@@ -421,9 +421,9 @@ const BulkUploadModal = ({ isOpen, onClose, onDone, API, token }) => {
         {stage === 'editor' && (
           <div className="px-6 py-5">
             {/* Smart paste — the killer feature for managers receiving listings via WhatsApp */}
-            <div className="mb-5 p-4 rounded-xl bg-gradient-to-br from-[#1E6A6A]/5 to-[#D4AF37]/10 border border-[#1E6A6A]/20" data-testid="smart-paste-panel">
+            <div className="mb-5 p-4 rounded-xl bg-gradient-to-br from-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/5 to-[rgb(var(--gold-rgb)/<alpha-value>)]/10 border border-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/20" data-testid="smart-paste-panel">
               <div className="flex items-start gap-2 mb-2">
-                <Sparkles size={16} className="text-[#1E6A6A] mt-0.5 shrink-0" />
+                <Sparkles size={16} className="text-[var(--brand-primary)] mt-0.5 shrink-0" />
                 <div className="flex-1">
                   <p className="text-sm font-semibold text-gray-900">{t('bulkUpload.gotListingsFrom')}</p>
                   <p className="text-xs text-gray-600 mt-0.5">
@@ -436,7 +436,7 @@ const BulkUploadModal = ({ isOpen, onClose, onDone, API, token }) => {
                 onChange={e => setSmartPaste(e.target.value)}
                 placeholder={'Paste your property descriptions here…\n\nExample:\nסנהדריה מורחבת\n1.5 bedroom, fully furnished\nGround floor, 9000nis\n\nBelz area, 1BR, basement, 9500'}
                 rows={smartPaste ? 6 : 3}
-                className="w-full px-3 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#1E6A6A]/30 focus:border-[#1E6A6A] text-sm font-mono bg-white/70 transition-all"
+                className="w-full px-3 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/30 focus:border-[var(--brand-primary)] text-sm font-mono bg-white/70 transition-all"
                 data-testid="smart-paste-input"
               />
               <div className="flex items-center justify-between mt-2">
@@ -444,7 +444,7 @@ const BulkUploadModal = ({ isOpen, onClose, onDone, API, token }) => {
                 <button
                   onClick={handleSmartPaste}
                   disabled={smartPasting || !smartPaste.trim()}
-                  className="px-4 py-1.5 rounded-lg bg-[#1E6A6A] text-[#D4AF37] text-xs font-semibold hover:bg-[#175757] disabled:opacity-50 inline-flex items-center gap-1.5"
+                  className="px-4 py-1.5 rounded-lg bg-[var(--brand-primary)] text-[var(--gold)] text-xs font-semibold hover:bg-[#175757] disabled:opacity-50 inline-flex items-center gap-1.5"
                   data-testid="smart-paste-btn"
                 >
                   <Sparkles size={12} />
@@ -488,7 +488,7 @@ const BulkUploadModal = ({ isOpen, onClose, onDone, API, token }) => {
                       type="file"
                       accept=".csv,.xlsx"
                       onChange={e => setFile(e.target.files?.[0] || null)}
-                      className="mt-1 block w-full text-xs text-gray-700 file:me-2 file:px-3 file:py-1.5 file:rounded file:border-0 file:bg-black file:text-[#D4AF37] file:text-xs file:font-semibold"
+                      className="mt-1 block w-full text-xs text-gray-700 file:me-2 file:px-3 file:py-1.5 file:rounded file:border-0 file:bg-black file:text-[var(--gold)] file:text-xs file:font-semibold"
                       data-testid="bulk-upload-file"
                     />
                   </label>
@@ -535,7 +535,7 @@ const BulkUploadModal = ({ isOpen, onClose, onDone, API, token }) => {
 
             <button
               onClick={addRow}
-              className="mt-4 w-full py-3 rounded-xl border-2 border-dashed border-gray-300 hover:border-[#1E6A6A] hover:bg-gray-50 text-sm font-semibold text-gray-600 hover:text-[#1E6A6A] flex items-center justify-center gap-2 transition-colors"
+              className="mt-4 w-full py-3 rounded-xl border-2 border-dashed border-gray-300 hover:border-[var(--brand-primary)] hover:bg-gray-50 text-sm font-semibold text-gray-600 hover:text-[var(--brand-primary)] flex items-center justify-center gap-2 transition-colors"
               data-testid="add-row-btn"
             >
               <Plus size={16} />
@@ -560,7 +560,7 @@ const BulkUploadModal = ({ isOpen, onClose, onDone, API, token }) => {
                   type="file"
                   accept=".zip"
                   onChange={e => setZipFile(e.target.files?.[0] || null)}
-                  className="block w-full text-sm text-gray-700 file:me-3 file:px-4 file:py-2 file:rounded-lg file:border-0 file:bg-black file:text-[#D4AF37] file:font-semibold"
+                  className="block w-full text-sm text-gray-700 file:me-3 file:px-4 file:py-2 file:rounded-lg file:border-0 file:bg-black file:text-[var(--gold)] file:font-semibold"
                   data-testid="bulk-zip-file"
                 />
                 <div className="mt-4 flex justify-end gap-2">
@@ -570,7 +570,7 @@ const BulkUploadModal = ({ isOpen, onClose, onDone, API, token }) => {
                   <button
                     onClick={handleAttachImages}
                     disabled={!zipFile || attaching}
-                    className="px-4 py-2 rounded-lg bg-black text-[#D4AF37] text-sm font-semibold hover:bg-gray-900 disabled:opacity-50"
+                    className="px-4 py-2 rounded-lg bg-black text-[var(--gold)] text-sm font-semibold hover:bg-gray-900 disabled:opacity-50"
                     data-testid="attach-images-btn"
                   >
                     {attaching ? 'Attaching…' : 'Attach images'}
@@ -581,7 +581,7 @@ const BulkUploadModal = ({ isOpen, onClose, onDone, API, token }) => {
               <>
                 <p className="text-sm text-gray-600">{t('bulkUpload.addPhotosLater')}</p>
                 <div className="mt-4 flex justify-end">
-                  <button onClick={() => setStage('done')} className="px-4 py-2 rounded-lg bg-black text-[#D4AF37] text-sm font-semibold" data-testid="continue-to-done-btn">
+                  <button onClick={() => setStage('done')} className="px-4 py-2 rounded-lg bg-black text-[var(--gold)] text-sm font-semibold" data-testid="continue-to-done-btn">
                     Continue
                   </button>
                 </div>
@@ -602,7 +602,7 @@ const BulkUploadModal = ({ isOpen, onClose, onDone, API, token }) => {
             </p>
             <button
               onClick={() => { onDone && onDone(); close(); }}
-              className="px-6 py-2.5 rounded-lg bg-black text-[#D4AF37] text-sm font-semibold hover:bg-gray-900"
+              className="px-6 py-2.5 rounded-lg bg-black text-[var(--gold)] text-sm font-semibold hover:bg-gray-900"
               data-testid="bulk-finish-btn"
             >
               Done
@@ -626,7 +626,7 @@ const BulkUploadModal = ({ isOpen, onClose, onDone, API, token }) => {
               <button
                 onClick={handleSaveAll}
                 disabled={saving}
-                className="px-5 py-2 rounded-lg bg-black text-[#D4AF37] text-sm font-semibold hover:bg-gray-900 disabled:opacity-50"
+                className="px-5 py-2 rounded-lg bg-black text-[var(--gold)] text-sm font-semibold hover:bg-gray-900 disabled:opacity-50"
                 data-testid="bulk-save-btn"
               >
                 {saving ? 'Saving…' : `Save ${rows.length} propert${rows.length === 1 ? 'y' : 'ies'}`}
@@ -691,7 +691,7 @@ const PropertyRowCard = ({ index, row, error, onChange, onDuplicate, onRemove, A
         <div className="flex items-center gap-1">
           <button
             onClick={onDuplicate}
-            className="text-xs font-medium text-gray-500 hover:text-[#1E6A6A] px-2 py-1 rounded hover:bg-gray-50"
+            className="text-xs font-medium text-gray-500 hover:text-[var(--brand-primary)] px-2 py-1 rounded hover:bg-gray-50"
             title={t('bulkUpload.duplicateRow')}
             data-testid={`duplicate-row-${index}`}
           >
@@ -713,7 +713,7 @@ const PropertyRowCard = ({ index, row, error, onChange, onDuplicate, onRemove, A
           list and drop photos into each one without leaving the modal. */}
       <div className="mb-3">
         <label
-          className={`flex items-center gap-2 px-3 py-2.5 rounded-lg border-2 border-dashed cursor-pointer transition-colors ${uploading ? 'border-gray-200 bg-gray-50 text-gray-400 cursor-wait' : 'border-[#1E6A6A]/30 bg-[#1E6A6A]/5 hover:bg-[#1E6A6A]/10 text-[#1E6A6A]'}`}
+          className={`flex items-center gap-2 px-3 py-2.5 rounded-lg border-2 border-dashed cursor-pointer transition-colors ${uploading ? 'border-gray-200 bg-gray-50 text-gray-400 cursor-wait' : 'border-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/30 bg-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/5 hover:bg-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/10 text-[var(--brand-primary)]'}`}
           data-testid={`row-media-upload-${index}`}
         >
           {uploading ? <Loader2 size={16} className="animate-spin" /> : <ImageIcon size={16} />}
@@ -848,7 +848,7 @@ const PropertyRowCard = ({ index, row, error, onChange, onDuplicate, onRemove, A
 
       <button
         onClick={() => setShowMore(!showMore)}
-        className="mt-3 text-xs font-medium text-[#1E6A6A] hover:underline"
+        className="mt-3 text-xs font-medium text-[var(--brand-primary)] hover:underline"
         data-testid={`toggle-more-${index}`}
       >
         {showMore ? '↑ Hide extra fields' : '↓ More fields (amenities, elevator, agent fee, sukkah, etc.)'}
@@ -873,7 +873,7 @@ const PropertyRowCard = ({ index, row, error, onChange, onDuplicate, onRemove, A
                   onChange={e => onChange('custom_cancellation_policy', e.target.value)}
                   placeholder="Describe your cancellation policy in detail…"
                   rows={3}
-                  className="w-full px-3 py-2 rounded-lg border-2 border-[#D4AF37] focus:outline-none focus:ring-2 focus:ring-[#1E6A6A]/30 text-sm"
+                  className="w-full px-3 py-2 rounded-lg border-2 border-[var(--gold)] focus:outline-none focus:ring-2 focus:ring-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/30 text-sm"
                   data-testid={`r${index}-custom_cancel`}
                 />
               </label>
@@ -960,7 +960,7 @@ const Input = ({ label, value, onChange, placeholder, testid }) => (
       value={value || ''}
       onChange={e => onChange(e.target.value)}
       placeholder={placeholder}
-      className="w-full px-3 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#1E6A6A]/30 focus:border-[#1E6A6A] text-sm"
+      className="w-full px-3 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/30 focus:border-[var(--brand-primary)] text-sm"
       data-testid={testid}
     />
   </label>
@@ -974,7 +974,7 @@ const NumberInput = ({ label, value, onChange, placeholder, testid }) => (
       value={value === '' || value === undefined || value === null ? '' : value}
       onChange={e => onChange(e.target.value === '' ? '' : Number(e.target.value))}
       placeholder={placeholder}
-      className="w-full px-3 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#1E6A6A]/30 focus:border-[#1E6A6A] text-sm"
+      className="w-full px-3 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/30 focus:border-[var(--brand-primary)] text-sm"
       data-testid={testid}
     />
   </label>
@@ -986,7 +986,7 @@ const Select = ({ label, value, onChange, options, testid }) => (
     <select
       value={value || ''}
       onChange={e => onChange(e.target.value)}
-      className="w-full px-3 py-2 rounded-lg border border-gray-200 bg-white focus:outline-none focus:ring-2 focus:ring-[#1E6A6A]/30 focus:border-[#1E6A6A] text-sm"
+      className="w-full px-3 py-2 rounded-lg border border-gray-200 bg-white focus:outline-none focus:ring-2 focus:ring-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/30 focus:border-[var(--brand-primary)] text-sm"
       data-testid={testid}
     >
       {options.map(o => <option key={o.v} value={o.v}>{o.label}</option>)}
@@ -1085,7 +1085,7 @@ const LocationSelect = ({ label, value, onChange, testid }) => {
             setOpen(true);
           }}
           placeholder="Type to search…"
-          className="w-full px-3 py-2 rounded-lg border border-gray-200 bg-white focus:outline-none focus:ring-2 focus:ring-[#1E6A6A]/30 focus:border-[#1E6A6A] text-sm"
+          className="w-full px-3 py-2 rounded-lg border border-gray-200 bg-white focus:outline-none focus:ring-2 focus:ring-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/30 focus:border-[var(--brand-primary)] text-sm"
           data-testid={testid}
         />
       </label>
@@ -1099,7 +1099,7 @@ const LocationSelect = ({ label, value, onChange, testid }) => {
           {resolved && (
             <div
               onClick={() => commit(resolved)}
-              className="px-3 py-2 hover:bg-[#1E6A6A]/10 cursor-pointer text-sm transition-colors"
+              className="px-3 py-2 hover:bg-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/10 cursor-pointer text-sm transition-colors"
               data-testid={testid ? `${testid}-resolved` : undefined}
             >
               <span className="font-medium text-gray-700">{resolved}</span>
@@ -1109,7 +1109,7 @@ const LocationSelect = ({ label, value, onChange, testid }) => {
             <div
               key={loc.value}
               onClick={() => commit(loc.value)}
-              className="px-3 py-2 hover:bg-[#1E6A6A]/10 cursor-pointer text-sm transition-colors"
+              className="px-3 py-2 hover:bg-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/10 cursor-pointer text-sm transition-colors"
             >
               <span className="font-medium text-gray-700">{loc.neighborhood}</span>
               <span className="text-gray-500 text-xs ms-2">({loc.city})</span>
@@ -1118,7 +1118,7 @@ const LocationSelect = ({ label, value, onChange, testid }) => {
           {offerCustom && (
             <div
               onClick={() => commit(typed)}
-              className="px-3 py-2 border-t border-gray-100 hover:bg-[#1E6A6A]/10 cursor-pointer text-sm transition-colors"
+              className="px-3 py-2 border-t border-gray-100 hover:bg-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/10 cursor-pointer text-sm transition-colors"
               data-testid={testid ? `${testid}-custom` : undefined}
             >
               <span className="text-gray-700">Use “{typed}”</span>
@@ -1139,7 +1139,7 @@ const Textarea = ({ label, value, onChange, placeholder, testid }) => (
       onChange={e => onChange(e.target.value)}
       placeholder={placeholder}
       rows={2}
-      className="w-full px-3 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#1E6A6A]/30 focus:border-[#1E6A6A] text-sm"
+      className="w-full px-3 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/30 focus:border-[var(--brand-primary)] text-sm"
       data-testid={testid}
     />
   </label>
@@ -1166,7 +1166,7 @@ const AmenitiesGrid = ({ value, onChange, testid }) => {
               type="checkbox"
               checked={value.includes(amenity)}
               onChange={() => toggle(amenity)}
-              className="w-4 h-4 rounded border-gray-300 text-[#1E6A6A] focus:ring-[#1E6A6A]/30"
+              className="w-4 h-4 rounded border-gray-300 text-[var(--brand-primary)] focus:ring-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/30"
               data-testid={`${testid}-${amenity.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')}`}
             />
             <span className="text-gray-700">{serviceLabel(t, amenity)}</span>

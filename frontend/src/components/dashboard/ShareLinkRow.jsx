@@ -48,7 +48,7 @@ const ShareLinkRow = ({
         {label}
       </p>
       <div
-        className="flex items-stretch rounded-xl border border-[#E5E5E5] bg-gray-50 overflow-hidden focus-within:border-[#1E6A6A] focus-within:ring-2 focus-within:ring-[#1E6A6A]/15 transition-all"
+        className="flex items-stretch rounded-xl border border-[#E5E5E5] bg-gray-50 overflow-hidden focus-within:border-[var(--brand-primary)] focus-within:ring-2 focus-within:ring-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/15 transition-all"
         data-testid={`${testidPrefix}-row`}
       >
         <span className="flex items-center ps-3 pe-2 text-gray-400 flex-shrink-0">
@@ -67,7 +67,7 @@ const ShareLinkRow = ({
           className={`flex items-center gap-1.5 px-3.5 text-xs font-semibold transition-colors flex-shrink-0 border-l border-[#E5E5E5] ${
             copied
               ? 'bg-green-500 text-white'
-              : 'bg-[#1E6A6A] text-[#D4AF37] hover:bg-[#155454]'
+              : 'bg-[var(--brand-primary)] text-[var(--gold)] hover:bg-[#155454]'
           }`}
           data-testid={`${testidPrefix}-copy-button`}
         >

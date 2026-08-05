@@ -24,7 +24,7 @@ Implement in **three phases. After each phase, show me the diff and wait for app
 
 Adopt this palette (matches the mockups exactly). Wire it as CSS variables / theme tokens in the shared stylesheet, replacing the old teal/gold:
 
-- Primary (blue): `--primary:#1E5F8C`, hover `#184E73`, deep `#123B57`
+- Primary (blue): `--brand-primary:#1E5F8C`, hover `#184E73`, deep `#123B57`. **Brand tokens are namespaced `--brand-*` on purpose** — `--primary/--border/--muted` collide with shadcn's HSL tokens in `frontend/src/index.css` and would silently break (see the header comment in `design-tokens.css`). Import `design-tokens.css` **after** `index.css`, and when porting preview CSS rewrite `var(--border)`→`var(--brand-border)` and `var(--muted)`→`var(--brand-muted)`.
 - Accent (gold): `--gold:#C9A227`, gold text on light `#8A6A14`, gold display `#A9831C`
 - Neutrals: bg (limestone) `#EFE9DC`, surface `#FFFFFF`, ink `#23201B`, muted `#6B6459`, border `#E1D8C6`
 - **Functional green (success only — do NOT use as a brand accent):** "Open"/available status `#2e7d4f` on `#e6f4ea`; "Verified" badge `#1F8A50` on `#E3F3EA`

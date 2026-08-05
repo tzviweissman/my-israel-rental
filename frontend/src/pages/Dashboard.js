@@ -243,10 +243,10 @@ const Dashboard = () => {
 
         {isRenter && !DOCUMENT_SERVICES_ENABLED && (
           <div
-            className="mb-5 flex items-start gap-3 rounded-2xl border border-[#D4AF37]/30 bg-gradient-to-r from-[#fff8e6] to-[#fffaf0] px-5 py-3.5"
+            className="mb-5 flex items-start gap-3 rounded-2xl border border-[rgb(var(--gold-rgb)/<alpha-value>)]/30 bg-gradient-to-r from-[#fff8e6] to-[#fffaf0] px-5 py-3.5"
             data-testid="services-coming-soon-banner"
           >
-            <div className="flex-shrink-0 w-8 h-8 rounded-full bg-[#D4AF37]/15 text-[#a37d10] flex items-center justify-center">
+            <div className="flex-shrink-0 w-8 h-8 rounded-full bg-[rgb(var(--gold-rgb)/<alpha-value>)]/15 text-[#a37d10] flex items-center justify-center">
               <Sparkles size={16} />
             </div>
             <div className="flex-1 min-w-0">

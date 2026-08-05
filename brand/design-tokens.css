@@ -9,7 +9,24 @@
    CARVE-OUT: the hero (docs/hero-cinematic-spec.md) uses literal values on
    purpose (radius 26px, layered rgba gradients, its shadow). Those are
    intentional and exact — copy them literally. The no-hardcoding rule is
-   about reusable component styling elsewhere. */
+   about reusable component styling elsewhere.
+
+   ⚠ shadcn / Tailwind COLLISION — why brand colors are namespaced --brand-*:
+   frontend/src/index.css (shadcn) already defines --primary, --border and --muted
+   in :root as HSL TRIPLETS (e.g. `--primary: 0 0% 9%`) consumed via
+   hsl(var(--primary)). Do NOT redefine those three names as hex here — then
+   var(--primary) returns "0 0% 9%", `background: var(--primary)` becomes invalid
+   and is DROPPED, and every primary button silently loses its fill. That is why
+   the brand colors below are --brand-primary / --brand-border / --brand-muted and
+   shadcn is left untouched.
+     • Import THIS file AFTER index.css.
+     • PORTING preview CSS into React: rewrite `var(--border)` -> `var(--brand-border)`
+       and `var(--muted)` -> `var(--brand-muted)` (those two names collide). The rest
+       the previews use — --teal*, --gold*, --ink, --bg, --surface, --r, --ease,
+       --font-* — is safe as-is.
+     • Want shadcn components themselves brand-blue? Separate deliberate pass: set
+       shadcn's --primary to the brand blue in HSL-triplet form in index.css — never
+       via this file. */
 
 @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700;800&family=Manrope:wght@400;500;600;700;800&family=Frank+Ruhl+Libre:wght@500;600;700&family=Assistant:wght@400;500;600;700&display=swap');
 
@@ -21,7 +38,17 @@
   --teal:#1E5F8C; --teal-dark:#184E73; --teal-deep:#123B57;
 
   /* Brand — gold accent (seasoning, not a base) */
-  --gold:#C9A227;        /* use on DARK surfaces + large display */
+  --gold:#C9A227;
+
+  /* Channel triplets — needed ONLY for Tailwind opacity modifiers.
+     Tailwind 3.4 cannot apply an alpha modifier to a var() colour:
+     `bg-[var(--brand-primary)]/30` generates NO RULE AT ALL, silently.
+     `bg-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/30` does work.
+     Keep these in sync with the hexes above by hand — they are the same
+     colours in the only format Tailwind can add alpha to. */
+  --brand-primary-rgb:30 95 140;   /* #1E5F8C */
+  --gold-rgb:201 162 39;           /* #C9A227 */
+        /* use on DARK surfaces + large display */
   --gold-text:#8A6A14;   /* small gold text on LIGHT (passes AA) */
   --gold-lg:#A9831C;     /* large/display gold on LIGHT ONLY — it is ~3.3:1 on
                             dark, so never use --gold-lg on a dark panel; use

@@ -37,7 +37,7 @@ const ChatHeader = ({
   return (
     <div className="bg-white rounded-t-2xl border border-b-0 border-gray-200 shadow-sm overflow-hidden flex-shrink-0">
       {/* Top bar with back button */}
-      <div className="flex items-center justify-between px-5 py-3 bg-gradient-to-r from-[#1E6A6A] to-[#267a7a]">
+      <div className="flex items-center justify-between px-5 py-3 bg-gradient-to-r from-[var(--brand-primary)] to-[#267a7a]">
         <button
           onClick={onBack}
           className="flex items-center gap-1.5 text-white/90 hover:text-white text-sm font-medium transition-colors"
@@ -172,8 +172,8 @@ const ChatHeader = ({
       {/* Property info bar */}
       {property && (
         <div className="flex items-center gap-3 px-5 py-3 border-b border-gray-100">
-          <div className="w-11 h-11 rounded-xl bg-[#1E6A6A]/10 flex items-center justify-center shrink-0">
-            <Building2 size={20} className="text-[#1E6A6A]" />
+          <div className="w-11 h-11 rounded-xl bg-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/10 flex items-center justify-center shrink-0">
+            <Building2 size={20} className="text-[var(--brand-primary)]" />
           </div>
           <div className="min-w-0 flex-1">
             <h3 className="text-sm font-bold text-gray-800 truncate">
@@ -184,7 +184,7 @@ const ChatHeader = ({
               {sublease ? (
                 <>
                   <span className="text-gray-300 mx-1">•</span>
-                  <span className="font-medium" style={{ color: '#D4AF37' }}>
+                  <span className="font-medium" style={{ color: 'var(--gold)' }}>
                     {sublease.currency === 'USD' ? '$' : '₪'}
                     {sublease.price?.toLocaleString()}
                     {sublease.price_type === 'per_night' ? '/night' : ' total'}
@@ -193,7 +193,7 @@ const ChatHeader = ({
               ) : property.monthly_price ? (
                 <>
                   <span className="text-gray-300 mx-1">•</span>
-                  <span className="font-medium" style={{ color: '#D4AF37' }}>
+                  <span className="font-medium" style={{ color: 'var(--gold)' }}>
                     {property.currency === 'USD' ? '$' : '₪'}
                     {property.monthly_price?.toLocaleString()}/mo
                   </span>
@@ -202,7 +202,7 @@ const ChatHeader = ({
             </p>
           </div>
           <div className="text-right shrink-0">
-            <span className="inline-flex items-center gap-1 px-2 py-0.5 text-[10px] font-semibold rounded-full bg-[#1E6A6A]/10 text-[#1E6A6A] uppercase tracking-wider">
+            <span className="inline-flex items-center gap-1 px-2 py-0.5 text-[10px] font-semibold rounded-full bg-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/10 text-[var(--brand-primary)] uppercase tracking-wider">
               {sublease ? t('chat.subleaseLabel') : property.rental_type?.replace('-', ' ')}
             </span>
           </div>
@@ -215,7 +215,7 @@ const ChatHeader = ({
           which surface spawned the thread. */}
       {!property && job && (
         <div className="flex items-center gap-3 px-5 py-3 border-b border-gray-100" data-testid="chat-header-job-bar">
-          <div className="w-11 h-11 rounded-xl bg-[#D4AF37]/15 flex items-center justify-center shrink-0">
+          <div className="w-11 h-11 rounded-xl bg-[rgb(var(--gold-rgb)/<alpha-value>)]/15 flex items-center justify-center shrink-0">
             <Briefcase size={20} className="text-[#8A6A15]" />
           </div>
           <div className="min-w-0 flex-1">
@@ -227,7 +227,7 @@ const ChatHeader = ({
               {job.budget_type === 'fixed' && job.budget_amount ? (
                 <>
                   <span className="text-gray-300 mx-1">•</span>
-                  <span className="font-medium" style={{ color: '#D4AF37' }}>
+                  <span className="font-medium" style={{ color: 'var(--gold)' }}>
                     {job.budget_currency === 'USD' ? '$' : '₪'}
                     {Number(job.budget_amount).toLocaleString()}
                   </span>
@@ -241,7 +241,7 @@ const ChatHeader = ({
             </p>
           </div>
           <div className="text-right shrink-0">
-            <span className="inline-flex items-center gap-1 px-2 py-0.5 text-[10px] font-semibold rounded-full bg-[#D4AF37]/15 text-[#8A6A15] uppercase tracking-wider">
+            <span className="inline-flex items-center gap-1 px-2 py-0.5 text-[10px] font-semibold rounded-full bg-[rgb(var(--gold-rgb)/<alpha-value>)]/15 text-[#8A6A15] uppercase tracking-wider">
               Job
             </span>
           </div>

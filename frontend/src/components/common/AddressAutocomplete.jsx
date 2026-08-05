@@ -148,7 +148,7 @@ const AddressAutocomplete = ({
   const showDropdown = open && suggestions.length > 0;
   return (
     <div ref={wrapRef} className="relative flex-1 min-w-[240px]">
-      <div className="flex items-center bg-gray-50 rounded-full border border-gray-200 focus-within:border-[#1E6A6A] focus-within:bg-white transition-colors">
+      <div className="flex items-center bg-gray-50 rounded-full border border-gray-200 focus-within:border-[var(--brand-primary)] focus-within:bg-white transition-colors">
         <MapPin size={14} className="ms-3 text-gray-500 shrink-0" />
         <input
           value={value}
@@ -164,7 +164,7 @@ const AddressAutocomplete = ({
           <button
             type="button"
             onClick={() => { onClear?.(); }}
-            className="pe-3 ps-1 text-[#1E6A6A] hover:opacity-70"
+            className="pe-3 ps-1 text-[var(--brand-primary)] hover:opacity-70"
             title={t('common.clear', 'Clear')}
             data-testid={`${testId}-clear`}
           >
@@ -175,7 +175,7 @@ const AddressAutocomplete = ({
             type="button"
             onClick={() => { onSubmit?.(value); }}
             disabled={loading || !(value || '').trim()}
-            className="pe-3 ps-1 text-[#1E6A6A] hover:opacity-70 disabled:opacity-30"
+            className="pe-3 ps-1 text-[var(--brand-primary)] hover:opacity-70 disabled:opacity-30"
             title={t('common.search', 'Search')}
             data-testid={`${testId}-submit`}
           >
@@ -199,13 +199,13 @@ const AddressAutocomplete = ({
                 onMouseDown={(e) => { e.preventDefault(); pick(s); }}
                 onMouseEnter={() => setHighlight(i)}
                 className={`w-full text-start flex items-start gap-3 px-4 py-2.5 transition-colors ${
-                  active ? 'bg-[#1E6A6A]/8' : 'hover:bg-gray-50'
+                  active ? 'bg-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/8' : 'hover:bg-gray-50'
                 }`}
                 role="option"
                 aria-selected={active}
                 data-testid={`${testId}-item-${i}`}
               >
-                <MapPin size={16} className={active ? 'text-[#1E6A6A] mt-0.5 shrink-0' : 'text-gray-400 mt-0.5 shrink-0'} />
+                <MapPin size={16} className={active ? 'text-[var(--brand-primary)] mt-0.5 shrink-0' : 'text-gray-400 mt-0.5 shrink-0'} />
                 <div className="min-w-0 flex-1">
                   <div className="text-sm font-semibold text-gray-900 truncate">{s.label}</div>
                   {s.sublabel && (

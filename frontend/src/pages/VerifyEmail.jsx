@@ -15,7 +15,7 @@ const STATUS_THEME = {
   success: { Icon: CheckCircle2, color: '#16A34A', bg: '#DCFCE7',
     titleKey: 'auth.verifyEmail.successTitle', titleFallback: 'Email verified',
     bodyKey: 'auth.verifyEmail.successBody', bodyFallback: 'Your email is confirmed. Welcome aboard — you can now use every feature of MyIsraelRental.' },
-  already: { Icon: MailCheck, color: '#1E6A6A', bg: '#1E6A6A1A',
+  already: { Icon: MailCheck, color: 'var(--brand-primary)', bg: 'var(--brand-primary)1A',
     titleKey: 'auth.verifyEmail.alreadyTitle', titleFallback: 'Already verified',
     bodyKey: 'auth.verifyEmail.alreadyBody', bodyFallback: "This account is already verified — you're good to go." },
   expired: { Icon: Clock, color: '#D97706', bg: '#FEF3C7',
@@ -53,7 +53,7 @@ const VerifyEmail = () => {
         {success ? (
           <button
             onClick={() => navigate('/dashboard')}
-            className="w-full px-4 py-2.5 rounded-lg font-semibold text-sm bg-[#1E6A6A] text-white hover:bg-[#175555]"
+            className="w-full px-4 py-2.5 rounded-lg font-semibold text-sm bg-[var(--brand-primary)] text-white hover:bg-[#175555]"
             data-testid="verify-email-cta-dashboard"
           >
             {t('auth.verifyEmail.goToDashboard', 'Go to dashboard')}
@@ -61,7 +61,7 @@ const VerifyEmail = () => {
         ) : (
           <Link
             to="/auth/login"
-            className="inline-block w-full px-4 py-2.5 rounded-lg font-semibold text-sm bg-[#1E6A6A] text-white hover:bg-[#175555]"
+            className="inline-block w-full px-4 py-2.5 rounded-lg font-semibold text-sm bg-[var(--brand-primary)] text-white hover:bg-[#175555]"
             data-testid="verify-email-cta-login"
           >
             {t('auth.verifyEmail.goToLogin', 'Log in to resend')}

@@ -58,7 +58,7 @@ const CoverThumb = ({ property, size = 'md' }) => {
       href={src}
       target="_blank"
       rel="noopener noreferrer"
-      className={`${dim} rounded-md overflow-hidden border border-gray-200 shrink-0 block hover:ring-2 hover:ring-[#1E6A6A]/40 transition-shadow`}
+      className={`${dim} rounded-md overflow-hidden border border-gray-200 shrink-0 block hover:ring-2 hover:ring-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/40 transition-shadow`}
       title="Open full-size cover image"
       data-testid={`cover-thumb-${property.id}`}
       onClick={(e) => e.stopPropagation()}
@@ -699,14 +699,14 @@ export const ListingsTab = ({ token, onStatsChange }) => {
         <div className="inline-flex bg-white rounded-lg border border-[#E5E5E5] p-0.5 ms-1" data-testid="managed-filter">
           <button
             onClick={() => setManagedFilter('all')}
-            className={`px-2.5 py-1 rounded-md text-xs font-semibold transition-colors ${managedFilter === 'all' ? 'bg-[#1E6A6A] text-white' : 'text-gray-600 hover:bg-gray-50'}`}
+            className={`px-2.5 py-1 rounded-md text-xs font-semibold transition-colors ${managedFilter === 'all' ? 'bg-[var(--brand-primary)] text-white' : 'text-gray-600 hover:bg-gray-50'}`}
             data-testid="managed-filter-all"
           >
             All
           </button>
           <button
             onClick={() => setManagedFilter('managed')}
-            className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-semibold transition-colors ${managedFilter === 'managed' ? 'bg-[#1E6A6A] text-white' : 'text-gray-600 hover:bg-gray-50'}`}
+            className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-semibold transition-colors ${managedFilter === 'managed' ? 'bg-[var(--brand-primary)] text-white' : 'text-gray-600 hover:bg-gray-50'}`}
             data-testid="managed-filter-managed"
           >
             <Briefcase size={12} /> I manage ({managedCount})
@@ -762,7 +762,7 @@ export const ListingsTab = ({ token, onStatsChange }) => {
                 key={opt.v}
                 onClick={() => setRentalTypeFilter(opt.v)}
                 disabled={isEmpty}
-                className={`px-2.5 py-1 rounded-md text-xs font-semibold transition-colors disabled:opacity-30 disabled:cursor-not-allowed ${isActive ? 'bg-[#1E6A6A] text-white' : 'text-gray-600 hover:bg-gray-50'}`}
+                className={`px-2.5 py-1 rounded-md text-xs font-semibold transition-colors disabled:opacity-30 disabled:cursor-not-allowed ${isActive ? 'bg-[var(--brand-primary)] text-white' : 'text-gray-600 hover:bg-gray-50'}`}
                 data-testid={`rental-type-${opt.v}`}
                 title={isEmpty ? `No ${opt.label.toLowerCase()} listings yet` : `Show only ${opt.label.toLowerCase()}`}
               >
@@ -783,7 +783,7 @@ export const ListingsTab = ({ token, onStatsChange }) => {
             value={minPrice}
             onChange={(e) => setPriceParam('min', e.target.value)}
             placeholder="min"
-            className="w-20 px-2 py-1 rounded border border-transparent hover:border-gray-200 focus:border-[#1E6A6A] focus:outline-none focus:ring-1 focus:ring-[#1E6A6A]/30 text-xs"
+            className="w-20 px-2 py-1 rounded border border-transparent hover:border-gray-200 focus:border-[var(--brand-primary)] focus:outline-none focus:ring-1 focus:ring-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/30 text-xs"
             data-testid="price-min-input"
           />
           <span className="text-xs text-gray-400">–</span>
@@ -794,7 +794,7 @@ export const ListingsTab = ({ token, onStatsChange }) => {
             value={maxPrice}
             onChange={(e) => setPriceParam('max', e.target.value)}
             placeholder="max"
-            className="w-20 px-2 py-1 rounded border border-transparent hover:border-gray-200 focus:border-[#1E6A6A] focus:outline-none focus:ring-1 focus:ring-[#1E6A6A]/30 text-xs"
+            className="w-20 px-2 py-1 rounded border border-transparent hover:border-gray-200 focus:border-[var(--brand-primary)] focus:outline-none focus:ring-1 focus:ring-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/30 text-xs"
             data-testid="price-max-input"
           />
           {(minPrice || maxPrice) && (
@@ -912,7 +912,7 @@ export const ListingsTab = ({ token, onStatsChange }) => {
                     )}
                     {p.managed_by_admin && (
                       <span
-                        className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-[#1E6A6A]/10 text-[#1E6A6A]"
+                        className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/10 text-[var(--brand-primary)]"
                         title="Admin-managed for the owner"
                         data-testid={`managed-badge-${p.id}`}
                       >
@@ -992,7 +992,7 @@ export const ListingsTab = ({ token, onStatsChange }) => {
                     )}
                     <button
                       onClick={() => toggleAdminManaged(p.id)}
-                      className={`p-1.5 rounded transition-colors ${p.managed_by_admin ? 'bg-[#1E6A6A]/10 text-[#1E6A6A] hover:bg-[#1E6A6A]/15' : 'hover:bg-gray-100 text-gray-400'}`}
+                      className={`p-1.5 rounded transition-colors ${p.managed_by_admin ? 'bg-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/10 text-[var(--brand-primary)] hover:bg-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/15' : 'hover:bg-gray-100 text-gray-400'}`}
                       title={p.managed_by_admin ? 'Stop managing this property' : 'Start managing this property for the owner'}
                       data-testid={`toggle-managed-${p.id}`}
                     >
@@ -1053,7 +1053,7 @@ export const ListingsTab = ({ token, onStatsChange }) => {
                 {t('admin.selectAllVisible', 'Select all visible')}
               </label>
               {selectedPropIds.size > 0 && (
-                <span className="text-[#1E6A6A] font-semibold" data-testid="selected-count-mobile">
+                <span className="text-[var(--brand-primary)] font-semibold" data-testid="selected-count-mobile">
                   {t('admin.selectedCount', { count: selectedPropIds.size })}
                 </span>
               )}
@@ -1096,7 +1096,7 @@ export const ListingsTab = ({ token, onStatsChange }) => {
                       </span>
                     )}
                     {p.managed_by_admin && (
-                      <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[9px] font-semibold bg-[#1E6A6A]/10 text-[#1E6A6A]">
+                      <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[9px] font-semibold bg-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/10 text-[var(--brand-primary)]">
                         <Briefcase size={9} /> Managing
                       </span>
                     )}
@@ -1149,7 +1149,7 @@ export const ListingsTab = ({ token, onStatsChange }) => {
                 )}
                 <button
                   onClick={() => toggleAdminManaged(p.id)}
-                  className={`flex flex-col items-center justify-center gap-0.5 py-2 rounded text-[10px] font-medium ${p.managed_by_admin ? 'bg-[#1E6A6A]/10 text-[#1E6A6A]' : 'bg-gray-50 text-gray-500 hover:bg-gray-100'}`}
+                  className={`flex flex-col items-center justify-center gap-0.5 py-2 rounded text-[10px] font-medium ${p.managed_by_admin ? 'bg-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/10 text-[var(--brand-primary)]' : 'bg-gray-50 text-gray-500 hover:bg-gray-100'}`}
                   data-testid={`toggle-managed-mobile-${p.id}`}
                 >
                   <Briefcase size={16} />

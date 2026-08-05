@@ -113,8 +113,8 @@ const QuickChips = ({
   // Holiday chips get a subtle gold border to set them apart from the
   // generic presets — visual hint that they're seasonal / Israeli.
   const holidayBase = variant === 'dark'
-    ? 'bg-white/20 border-[#D4AF37] text-white hover:bg-white/30 backdrop-blur-sm'
-    : 'bg-white border-[#D4AF37] text-gray-900 hover:border-[#B98F1F] shadow-sm';
+    ? 'bg-white/20 border-[var(--gold)] text-white hover:bg-white/30 backdrop-blur-sm'
+    : 'bg-white border-[var(--gold)] text-gray-900 hover:border-[#B98F1F] shadow-sm';
 
   // Scroll-arrow affordance for desktop hover — the chip row overflows
   // horizontally, but a hidden scrollbar leaves no visual cue that more
@@ -217,7 +217,7 @@ const QuickChips = ({
           type="button"
           onClick={() => scrollBy(-1)}
           aria-label={t('stays.scrollChipsLeft', 'Scroll chips left')}
-          className="hidden md:flex absolute start-0 top-1/2 -translate-y-1/2 z-10 h-8 w-8 items-center justify-center rounded-full bg-white shadow-md border border-gray-200 text-gray-700 opacity-0 group-hover:opacity-100 transition-opacity hover:border-[#D4AF37]"
+          className="hidden md:flex absolute start-0 top-1/2 -translate-y-1/2 z-10 h-8 w-8 items-center justify-center rounded-full bg-white shadow-md border border-gray-200 text-gray-700 opacity-0 group-hover:opacity-100 transition-opacity hover:border-[var(--gold)]"
           data-testid={`${testidPrefix}-arrow-left`}
         >
           <ChevronLeft size={16} />
@@ -228,7 +228,7 @@ const QuickChips = ({
           type="button"
           onClick={() => scrollBy(1)}
           aria-label={t('stays.scrollChipsRight', 'Scroll chips right')}
-          className="hidden md:flex absolute end-0 top-1/2 -translate-y-1/2 z-10 h-8 w-8 items-center justify-center rounded-full bg-white shadow-md border border-gray-200 text-gray-700 opacity-0 group-hover:opacity-100 transition-opacity hover:border-[#D4AF37]"
+          className="hidden md:flex absolute end-0 top-1/2 -translate-y-1/2 z-10 h-8 w-8 items-center justify-center rounded-full bg-white shadow-md border border-gray-200 text-gray-700 opacity-0 group-hover:opacity-100 transition-opacity hover:border-[var(--gold)]"
           data-testid={`${testidPrefix}-arrow-right`}
         >
           <ChevronRight size={16} />

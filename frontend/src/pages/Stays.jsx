@@ -496,7 +496,7 @@ const Stays = ({ landing = null }) => {
         <div className="bg-[#F5F1E8] border-b border-[#E5E5E5]">
           <div className="max-w-7xl mx-auto px-4 py-8 sm:py-10">
             <h1
-              className="text-3xl sm:text-4xl lg:text-5xl font-bold text-[#1E6A6A]"
+              className="text-3xl sm:text-4xl lg:text-5xl font-bold text-[var(--brand-primary)]"
               style={{ fontFamily: 'Playfair Display' }}
               data-testid="stays-landing-h1"
             >
@@ -578,7 +578,7 @@ const Stays = ({ landing = null }) => {
                 type="button"
                 onClick={() => setSearchParams((prev) => { const n = new URLSearchParams(prev); n.delete('view'); return n; }, { replace: true })}
                 className={`inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-semibold transition-colors ${
-                  viewMode === 'list' ? 'bg-[#1E6A6A] text-white' : 'text-gray-700 hover:text-gray-900'
+                  viewMode === 'list' ? 'bg-[var(--brand-primary)] text-white' : 'text-gray-700 hover:text-gray-900'
                 }`}
                 aria-pressed={viewMode === 'list'}
                 data-testid="stays-view-list"
@@ -590,7 +590,7 @@ const Stays = ({ landing = null }) => {
                 type="button"
                 onClick={() => setSearchParams((prev) => { const n = new URLSearchParams(prev); n.set('view', 'map'); return n; }, { replace: true })}
                 className={`inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-semibold transition-colors ${
-                  viewMode === 'map' ? 'bg-[#1E6A6A] text-white' : 'text-gray-700 hover:text-gray-900'
+                  viewMode === 'map' ? 'bg-[var(--brand-primary)] text-white' : 'text-gray-700 hover:text-gray-900'
                 }`}
                 aria-pressed={viewMode === 'map'}
                 data-testid="stays-view-map"
@@ -605,7 +605,7 @@ const Stays = ({ landing = null }) => {
 
       {loading ? (
         <div className="flex items-center justify-center py-24">
-          <Loader2 className="animate-spin text-[#1E6A6A]" size={32} />
+          <Loader2 className="animate-spin text-[var(--brand-primary)]" size={32} />
         </div>
       ) : filtered.length === 0 ? (
         <div className="max-w-3xl mx-auto px-6 py-12 text-center">
@@ -633,7 +633,7 @@ const Stays = ({ landing = null }) => {
           <button
             onClick={clearAllFilters}
             className="px-5 py-2.5 rounded-lg text-sm font-semibold text-white"
-            style={{ backgroundColor: '#1E6A6A' }}
+            style={{ backgroundColor: 'var(--brand-primary)' }}
             data-testid="stays-clear-filters"
           >
             {t('stays.clearAll', 'Clear all filters')}
@@ -661,7 +661,7 @@ const Stays = ({ landing = null }) => {
             {isSearchActive && (
               <button
                 onClick={clearAllFilters}
-                className="text-xs font-semibold text-[#1E6A6A] hover:underline"
+                className="text-xs font-semibold text-[var(--brand-primary)] hover:underline"
                 data-testid="stays-map-clear"
               >
                 {t('stays.clearAll', 'Clear all')}
@@ -743,7 +743,7 @@ const Stays = ({ landing = null }) => {
                       }}
                       className={`shrink-0 w-[168px] rounded-xl overflow-hidden bg-white text-start active:scale-95 transition-all ${
                         isActive
-                          ? 'ring-2 ring-[#1E6A6A] shadow-[0_10px_20px_-8px_rgba(30,106,106,0.5)] scale-[1.03]'
+                          ? 'ring-2 ring-[var(--brand-primary)] shadow-[0_10px_20px_-8px_rgba(30, 95, 140,0.5)] scale-[1.03]'
                           : 'ring-1 ring-black/5'
                       }`}
                       data-testid={`stays-peek-card-${p.id}`}
@@ -757,7 +757,7 @@ const Stays = ({ landing = null }) => {
                         <div className="text-[10px] text-gray-500 truncate">
                           {price}
                           {typeof p.distance_km === 'number' && (
-                            <span className="ms-1 text-[#1E6A6A] font-semibold">
+                            <span className="ms-1 text-[var(--brand-primary)] font-semibold">
                               · {p.distance_km < 1
                                 ? `${Math.round(p.distance_km * 1000)} m`
                                 : `${p.distance_km.toFixed(p.distance_km < 10 ? 1 : 0)} km`}
@@ -842,7 +842,7 @@ const Stays = ({ landing = null }) => {
                   them into a logged-in user with an alert subscription. */}
               <button
                 onClick={() => setShowNotifyCard(true)}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold border border-[#D4AF37] bg-white text-[#1E6A6A] hover:bg-[#D4AF37] hover:text-white transition-colors"
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold border border-[var(--gold)] bg-white text-[var(--brand-primary)] hover:bg-[var(--gold)] hover:text-white transition-colors"
                 data-testid="stays-create-alert-btn"
               >
                 <Bell size={12} />
@@ -850,7 +850,7 @@ const Stays = ({ landing = null }) => {
               </button>
               <button
                 onClick={clearAllFilters}
-                className="text-xs font-semibold text-[#1E6A6A] hover:underline"
+                className="text-xs font-semibold text-[var(--brand-primary)] hover:underline"
                 data-testid="stays-grid-clear"
               >
                 {t('stays.clearAll', 'Clear all')}

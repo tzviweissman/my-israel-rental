@@ -8,7 +8,7 @@
  *
  * All variants share:
  *   • Deep-teal ink (#0F3A3A) as the primary text colour;
- *   • Gold (#D4AF37) reserved for accents only;
+ *   • Gold (var(--gold)) reserved for accents only;
  *   • Inter for body + supporting text, Playfair for the emphasis
  *     word (in the variants that use one);
  *   • Zero heavy fills or thick underlines — every accent is a
@@ -20,8 +20,8 @@ import { useTranslation } from 'react-i18next';
 const INTER = "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
 const PLAYFAIR = "'Playfair Display', Georgia, serif";
 const INK = '#0F3A3A';
-const GOLD = '#D4AF37';
-const TEAL = '#1E6A6A';
+const GOLD = 'var(--gold)';
+const TEAL = 'var(--brand-primary)';
 
 // Small helper reading the ?hero= param without pulling in a full
 // query-string lib. Falls back to v2 when the param is missing / bogus.
@@ -121,7 +121,7 @@ const V2 = ({ t }) => (
           className="pointer-events-none absolute -inset-x-4 -inset-y-2 rounded-full"
           style={{
             background:
-              'radial-gradient(circle at 30% 50%, rgba(30,106,106,0.14) 0%, rgba(212,175,55,0.14) 55%, rgba(255,255,255,0) 75%)',
+              'radial-gradient(circle at 30% 50%, rgba(30, 95, 140,0.14) 0%, rgba(201, 162, 39,0.14) 55%, rgba(255,255,255,0) 75%)',
             filter: 'blur(8px)',
           }}
         />
@@ -192,7 +192,7 @@ const V3 = ({ t }) => (
           viewBox="0 0 220 24"
           preserveAspectRatio="none"
           className="absolute left-[-6%] right-[-4%] -bottom-2 h-3 w-[110%] pointer-events-none"
-          style={{ filter: 'drop-shadow(0 1px 3px rgba(30,106,106,0.25))' }}
+          style={{ filter: 'drop-shadow(0 1px 3px rgba(30, 95, 140,0.25))' }}
         >
           <path
             d="M 6 14 C 40 4, 80 22, 120 12 S 200 6, 214 14"

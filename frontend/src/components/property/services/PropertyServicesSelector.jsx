@@ -42,11 +42,11 @@ const CategoryAccordion = ({ category, selected, onToggle, open, onOpenToggle })
         data-testid={`svc-cat-toggle-${category.slug}`}
       >
         <span className="flex items-center gap-3">
-          <span className="w-8 h-8 rounded-lg bg-[#1E6A6A]/8 flex items-center justify-center">
-            <Icon size={16} className="text-[#1E6A6A]" />
+          <span className="w-8 h-8 rounded-lg bg-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/8 flex items-center justify-center">
+            <Icon size={16} className="text-[var(--brand-primary)]" />
           </span>
           <span className="font-semibold text-sm text-gray-900">{serviceCategoryLabel(t, category)}</span>
-          <span className={`text-xs font-medium ${selectedCount > 0 ? 'text-[#1E6A6A]' : 'text-gray-400'}`}>
+          <span className={`text-xs font-medium ${selectedCount > 0 ? 'text-[var(--brand-primary)]' : 'text-gray-400'}`}>
             ({selectedCount} / {category.services.length})
           </span>
         </span>
@@ -66,7 +66,7 @@ const CategoryAccordion = ({ category, selected, onToggle, open, onOpenToggle })
                   type="checkbox"
                   checked={on}
                   onChange={() => onToggle(s)}
-                  className="w-4 h-4 rounded border-gray-300 text-[#1E6A6A] focus:ring-[#1E6A6A]"
+                  className="w-4 h-4 rounded border-gray-300 text-[var(--brand-primary)] focus:ring-[var(--brand-primary)]"
                 />
                 {/* `s` remains the stored value everywhere it is compared or
                     written back — only the visible text is translated. */}
@@ -157,7 +157,7 @@ const CustomServiceModal = ({ onClose, onAdd }) => {
           <button
             type="submit"
             disabled={!name.trim()}
-            className="px-5 py-2 rounded-lg text-sm font-semibold text-white bg-[#D4AF37] hover:bg-[#c19f2c] disabled:opacity-50 flex items-center gap-1.5"
+            className="px-5 py-2 rounded-lg text-sm font-semibold text-white bg-[var(--gold)] hover:bg-[#c19f2c] disabled:opacity-50 flex items-center gap-1.5"
             data-testid="custom-svc-add"
           >
             <Check size={14} /> Add to listing
@@ -176,11 +176,11 @@ const Chip = ({ value, onRemove }) => {
   return (
     <span
       className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium ${
-        custom ? 'bg-[#D4AF37]/10 text-[#8a6f1c] border border-[#D4AF37]/40' : 'bg-[#1E6A6A]/8 text-[#0F3A3A] border border-[#1E6A6A]/20'
+        custom ? 'bg-[rgb(var(--gold-rgb)/<alpha-value>)]/10 text-[#8a6f1c] border border-[rgb(var(--gold-rgb)/<alpha-value>)]/40' : 'bg-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/8 text-[#0F3A3A] border border-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/20'
       }`}
       data-testid="svc-chip"
     >
-      {custom && <Star size={10} className="text-[#D4AF37] fill-[#D4AF37]" />}
+      {custom && <Star size={10} className="text-[var(--gold)] fill-[var(--gold)]" />}
       <span>{label}</span>
       {cat && !custom && (
         <span className="text-[10px] text-gray-500 ms-0.5">· {serviceCategoryLabel(t, cat)}</span>
@@ -269,7 +269,7 @@ const PropertyServicesSelector = ({
         <button
           type="button"
           onClick={() => setShowCustom(true)}
-          className="px-3.5 py-2 rounded-lg text-sm font-semibold text-white bg-[#D4AF37] hover:bg-[#c19f2c] inline-flex items-center gap-1.5 self-start sm:self-auto"
+          className="px-3.5 py-2 rounded-lg text-sm font-semibold text-white bg-[var(--gold)] hover:bg-[#c19f2c] inline-flex items-center gap-1.5 self-start sm:self-auto"
           data-testid="add-custom-service-btn"
         >
           <Plus size={14} /> Add custom service

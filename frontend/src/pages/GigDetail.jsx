@@ -128,7 +128,7 @@ const ReviewSection = ({ gig, token, user, onRatingChange }) => {
                 Withdraw
               </button>
             )}
-            <button type="submit" disabled={saving || myRating < 1} className="px-4 py-2 rounded-lg text-sm font-semibold text-white bg-[#1E6A6A] disabled:opacity-50 flex items-center gap-1" data-testid="gig-review-submit">
+            <button type="submit" disabled={saving || myRating < 1} className="px-4 py-2 rounded-lg text-sm font-semibold text-white bg-[var(--brand-primary)] disabled:opacity-50 flex items-center gap-1" data-testid="gig-review-submit">
               {saving ? <Loader2 className="animate-spin" size={12} /> : (myReview ? 'Update review' : 'Post review')}
             </button>
           </div>
@@ -142,7 +142,7 @@ const ReviewSection = ({ gig, token, user, onRatingChange }) => {
       )}
 
       {loading ? (
-        <div className="flex items-center py-4"><Loader2 className="animate-spin text-[#1E6A6A]" size={18} /></div>
+        <div className="flex items-center py-4"><Loader2 className="animate-spin text-[var(--brand-primary)]" size={18} /></div>
       ) : reviews.length === 0 ? (
         <p className="text-sm text-gray-500" data-testid="gig-reviews-empty">No reviews yet. Be the first!</p>
       ) : (
@@ -211,7 +211,7 @@ const BookingForm = ({ gig, tier, onClose, token }) => {
         <textarea value={message} onChange={(e) => setMessage(e.target.value)} placeholder="Tell the provider what you need…" rows={3} className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm" />
         <div className="flex justify-end gap-2">
           <button type="button" onClick={onClose} className="px-4 py-2 rounded-lg text-sm font-semibold text-gray-600">Cancel</button>
-          <button type="submit" disabled={saving} className="px-5 py-2 rounded-lg text-sm font-semibold text-white bg-[#1E6A6A]" data-testid="gig-booking-submit">
+          <button type="submit" disabled={saving} className="px-5 py-2 rounded-lg text-sm font-semibold text-white bg-[var(--brand-primary)]" data-testid="gig-booking-submit">
             {saving ? <Loader2 className="animate-spin" size={14} /> : 'Send request'}
           </button>
         </div>
@@ -311,7 +311,7 @@ const GigDetail = () => {
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center" style={{ paddingTop: 'var(--nav-h, 68px)' }}>
-        <Loader2 className="animate-spin text-[#1E6A6A]" size={28} />
+        <Loader2 className="animate-spin text-[var(--brand-primary)]" size={28} />
       </div>
     );
   }
@@ -422,7 +422,7 @@ const GigDetail = () => {
       <PageMeta title={`${displayTitle} — MyIsraelRental Services`} description={displayDescription?.slice(0, 155) || `Book ${displayTitle} on MyIsraelRental.`} path={`/services/gig/${id}`} jsonLd={gigJsonLd} />
       <div className="max-w-5xl mx-auto px-4 py-8">
         <Breadcrumb current={displayTitle} testId="gig-breadcrumb" />
-        <button onClick={() => navigate(backTo)} className="text-sm text-gray-600 flex items-center gap-1 mb-4 hover:text-[#1E6A6A]" data-testid="gig-back">
+        <button onClick={() => navigate(backTo)} className="text-sm text-gray-600 flex items-center gap-1 mb-4 hover:text-[var(--brand-primary)]" data-testid="gig-back">
           <ArrowLeft size={14} /> Back to services
         </button>
 
@@ -459,7 +459,7 @@ const GigDetail = () => {
                     key={src}
                     type="button"
                     onClick={() => setLightboxIndex(i)}
-                    className="w-24 h-24 shrink-0 rounded-lg bg-gray-100 hover:ring-2 hover:ring-[#1E6A6A] transition"
+                    className="w-24 h-24 shrink-0 rounded-lg bg-gray-100 hover:ring-2 hover:ring-[var(--brand-primary)] transition"
                     style={{ backgroundImage: `url(${src})`, backgroundSize: 'cover', backgroundPosition: 'center' }}
                     data-testid={`gig-thumb-${i}`}
                     aria-label={`Open photo ${i + 1}`}
@@ -473,7 +473,7 @@ const GigDetail = () => {
                 {gig.is_top_rated && (
                   <span
                     className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold uppercase tracking-wide"
-                    style={{ background: '#D4AF37', color: '#1E6A6A' }}
+                    style={{ background: 'var(--gold)', color: 'var(--brand-primary)' }}
                     data-testid="gig-top-rated"
                   >
                     <Award size={12} /> {t('services.topRated', 'Top rated')}
@@ -545,7 +545,7 @@ const GigDetail = () => {
                         onClick={() => setTier(p)}
                         onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') setTier(p); }}
                         className={`text-left rounded-xl overflow-hidden border-2 transition-all bg-white cursor-pointer ${
-                          active ? 'border-[#1E6A6A] shadow-md' : 'border-gray-200 hover:border-[#D4AF37]'
+                          active ? 'border-[var(--brand-primary)] shadow-md' : 'border-gray-200 hover:border-[var(--gold)]'
                         }`}
                         data-testid={`gig-product-${i}`}
                       >
@@ -553,13 +553,13 @@ const GigDetail = () => {
                         <div className="p-2.5 space-y-1.5">
                           <p className="text-sm font-semibold text-gray-900 line-clamp-1">{p.name}</p>
                           <div className="flex items-baseline justify-between gap-2">
-                            <p className="text-sm text-[#1E6A6A] font-bold">{psym}{Number(p.price).toLocaleString()}</p>
+                            <p className="text-sm text-[var(--brand-primary)] font-bold">{psym}{Number(p.price).toLocaleString()}</p>
                             {!p.in_stock && <p className="text-[10px] text-red-500 font-semibold">{t("sweep.outOfStock", "Out of stock")}</p>}
                           </div>
                           <button
                             type="button"
                             onClick={askAbout}
-                            className="w-full mt-1 inline-flex items-center justify-center gap-1 py-1.5 rounded-md text-[11px] font-semibold text-[#1E6A6A] bg-[#1E6A6A]/8 hover:bg-[#1E6A6A]/15 transition-colors"
+                            className="w-full mt-1 inline-flex items-center justify-center gap-1 py-1.5 rounded-md text-[11px] font-semibold text-[var(--brand-primary)] bg-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/8 hover:bg-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/15 transition-colors"
                             data-testid={`gig-product-ask-${i}`}
                           >
                             <MessageCircle size={11} /> Ask about this →
@@ -600,7 +600,7 @@ const GigDetail = () => {
                 <p className="font-semibold text-sm">{gig.provider?.name}</p>
                 <p className="text-xs text-gray-500">{gig.provider?.tagline || gig.provider?.bio || '\u00A0'}</p>
               </div>
-              <button onClick={() => { saveReturnPath(); navigate(`/services/provider/${gig.provider?.user_id}`); }} className="text-xs font-semibold text-[#1E6A6A] hover:underline" data-testid="gig-view-provider">
+              <button onClick={() => { saveReturnPath(); navigate(`/services/provider/${gig.provider?.user_id}`); }} className="text-xs font-semibold text-[var(--brand-primary)] hover:underline" data-testid="gig-view-provider">
                 View profile
               </button>
             </div>
@@ -659,7 +659,7 @@ const GigDetail = () => {
                 className={`w-full flex items-center justify-center gap-2 py-3 rounded-lg text-sm font-bold text-white disabled:opacity-40 transition-colors ${
                   useWhatsApp
                     ? 'bg-[#25D366] hover:bg-[#1DA851] disabled:hover:bg-[#25D366]'
-                    : 'bg-[#1E6A6A] hover:bg-[#0F3A3A] disabled:hover:bg-[#1E6A6A]'
+                    : 'bg-[var(--brand-primary)] hover:bg-[#0F3A3A] disabled:hover:bg-[var(--brand-primary)]'
                 }`}
                 data-testid="gig-book-btn">
                 {isStore ? (
@@ -710,7 +710,7 @@ const TierList = ({ tiers, selected, onSelect, isAppointment }) => {
         key={tt.name}
         onClick={() => onSelect(tt)}
         className={`w-full text-left rounded-lg border p-3 transition-colors ${
-          active ? 'border-[#1E6A6A] bg-[#1E6A6A]/5' : 'border-gray-200 hover:border-[#D4AF37]'
+          active ? 'border-[var(--brand-primary)] bg-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/5' : 'border-gray-200 hover:border-[var(--gold)]'
         }`}
         data-testid={`gig-tier-${tt.name}`}
       >
@@ -722,7 +722,7 @@ const TierList = ({ tiers, selected, onSelect, isAppointment }) => {
             {photoCount > 0 && (
               <span
                 className={`inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wide ${
-                  active ? 'bg-[#1E6A6A] text-white' : 'bg-[#1E6A6A]/10 text-[#1E6A6A]'
+                  active ? 'bg-[var(--brand-primary)] text-white' : 'bg-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/10 text-[var(--brand-primary)]'
                 }`}
                 title={`${photoCount} photo${photoCount === 1 ? '' : 's'} of this option`}
                 data-testid={`gig-tier-photo-badge-${tt.name}`}
@@ -759,13 +759,13 @@ const StoreProductList = ({ products, selected, onSelect }) => {
     return (
       <button key={i} onClick={() => onSelect(p)}
         className={`w-full text-left rounded-lg border p-2.5 flex gap-2.5 items-center transition-colors ${
-          active ? 'border-[#1E6A6A] bg-[#1E6A6A]/5' : 'border-gray-200 hover:border-[#D4AF37]'
+          active ? 'border-[var(--brand-primary)] bg-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/5' : 'border-gray-200 hover:border-[var(--gold)]'
         }`}
         data-testid={`gig-product-side-${i}`}>
         <div className="w-11 h-11 rounded bg-gray-100 flex-shrink-0" style={p.image ? { backgroundImage: `url(${p.image})`, backgroundSize: 'cover', backgroundPosition: 'center' } : {}} />
         <div className="flex-1 min-w-0">
           <p className="text-sm font-semibold text-gray-900 truncate">{p.name}</p>
-          <p className="text-sm text-[#1E6A6A] font-bold">{sym}{Number(p.price).toLocaleString()}</p>
+          <p className="text-sm text-[var(--brand-primary)] font-bold">{sym}{Number(p.price).toLocaleString()}</p>
         </div>
       </button>
     );
@@ -901,8 +901,8 @@ const AppointmentPicker = ({ gig, tier, selectedDate, selectedSlot, onSelectDate
           <button key={s} onClick={() => onSelectSlot(s)}
             className={`px-2 py-1.5 rounded-lg text-[11px] font-semibold border ${
               selectedSlot === s && selectedDate === effectiveIso
-                ? 'bg-[#1E6A6A] text-white border-[#1E6A6A]'
-                : 'bg-white text-gray-700 border-gray-200 hover:border-[#D4AF37]'
+                ? 'bg-[var(--brand-primary)] text-white border-[var(--brand-primary)]'
+                : 'bg-white text-gray-700 border-gray-200 hover:border-[var(--gold)]'
             }`}
             data-testid={`gig-appt-slot-${s}`}>
             {s}

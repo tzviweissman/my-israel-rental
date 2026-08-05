@@ -55,19 +55,19 @@ const SECTIONS = [
             <p className="mb-3">Policies are chosen by the lister. Common options include:</p>
             <ul className="space-y-2 list-none">
               <li className="flex gap-2">
-                <span className="font-semibold text-[#1E6A6A] flex-shrink-0">Flexible —</span>
+                <span className="font-semibold text-[var(--brand-primary)] flex-shrink-0">Flexible —</span>
                 <span>Full refund if cancelled 24–48 hours before check-in.</span>
               </li>
               <li className="flex gap-2">
-                <span className="font-semibold text-[#1E6A6A] flex-shrink-0">Moderate —</span>
+                <span className="font-semibold text-[var(--brand-primary)] flex-shrink-0">Moderate —</span>
                 <span>Full refund up to 5–7 days before arrival.</span>
               </li>
               <li className="flex gap-2">
-                <span className="font-semibold text-[#1E6A6A] flex-shrink-0">Strict —</span>
+                <span className="font-semibold text-[var(--brand-primary)] flex-shrink-0">Strict —</span>
                 <span>Refund only if cancelled 30+ days before arrival.</span>
               </li>
               <li className="flex gap-2">
-                <span className="font-semibold text-[#1E6A6A] flex-shrink-0">Custom —</span>
+                <span className="font-semibold text-[var(--brand-primary)] flex-shrink-0">Custom —</span>
                 <span>Chosen by the lister.</span>
               </li>
             </ul>
@@ -93,15 +93,15 @@ const FAQItem = ({ q, a, isOpen, onToggle, testid, highlight }) => (
   <div className="border-b border-[#E5E5E5] last:border-b-0" data-testid={testid}>
     <button
       onClick={onToggle}
-      className="w-full flex items-center justify-between gap-4 py-4 md:py-5 text-left hover:text-[#1E6A6A] transition-colors group"
+      className="w-full flex items-center justify-between gap-4 py-4 md:py-5 text-left hover:text-[var(--brand-primary)] transition-colors group"
       aria-expanded={isOpen}
     >
-      <span className="text-sm md:text-base font-semibold text-gray-900 group-hover:text-[#1E6A6A] transition-colors">
+      <span className="text-sm md:text-base font-semibold text-gray-900 group-hover:text-[var(--brand-primary)] transition-colors">
         {highlight ? highlightText(q, highlight) : q}
       </span>
       <ChevronDown
         size={18}
-        className={`flex-shrink-0 text-gray-400 transition-transform ${isOpen ? 'rotate-180 text-[#1E6A6A]' : ''}`}
+        className={`flex-shrink-0 text-gray-400 transition-transform ${isOpen ? 'rotate-180 text-[var(--brand-primary)]' : ''}`}
       />
     </button>
     <div
@@ -137,7 +137,7 @@ const highlightText = (text, query) => {
   const parts = String(text).split(new RegExp(`(${safe})`, 'gi'));
   return parts.map((part, i) =>
     part.toLowerCase() === query.toLowerCase() ? (
-      <mark key={i} className="bg-[#D4AF37]/30 text-gray-900 rounded px-0.5">{part}</mark>
+      <mark key={i} className="bg-[rgb(var(--gold-rgb)/<alpha-value>)]/30 text-gray-900 rounded px-0.5">{part}</mark>
     ) : (
       <React.Fragment key={i}>{part}</React.Fragment>
     )
@@ -216,14 +216,14 @@ const FAQ = () => {
       <div className="max-w-3xl mx-auto">
         <button
           onClick={() => navigate(-1)}
-          className="inline-flex items-center gap-1.5 text-sm font-medium text-gray-600 hover:text-[#1E6A6A] mb-4 transition-colors"
+          className="inline-flex items-center gap-1.5 text-sm font-medium text-gray-600 hover:text-[var(--brand-primary)] mb-4 transition-colors"
           data-testid="faq-back"
         >
           <ArrowLeft size={16} /> {t('common.back')}
         </button>
 
         <header className="mb-8">
-          <p className="text-xs font-semibold text-[#D4AF37] uppercase tracking-[0.2em] mb-2">
+          <p className="text-xs font-semibold text-[var(--gold)] uppercase tracking-[0.2em] mb-2">
             Help center
           </p>
           <h1
@@ -250,7 +250,7 @@ const FAQ = () => {
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Search questions…"
-            className="w-full pl-11 pr-10 py-3.5 rounded-xl border border-[#E5E5E5] bg-white text-sm md:text-[15px] text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#1E6A6A]/20 focus:border-[#1E6A6A] transition-all shadow-sm"
+            className="w-full pl-11 pr-10 py-3.5 rounded-xl border border-[#E5E5E5] bg-white text-sm md:text-[15px] text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/20 focus:border-[var(--brand-primary)] transition-all shadow-sm"
             data-testid="faq-search-input"
           />
           {isSearching && (
@@ -304,7 +304,7 @@ const FAQ = () => {
                   data-testid={`faq-section-${section.id}`}
                 >
                   <div className="flex items-center gap-3 px-5 md:px-7 py-4 border-b border-[#f0ece4] bg-gradient-to-r from-[#fffaf0] to-white">
-                    <div className="w-9 h-9 rounded-lg bg-[#D4AF37]/15 text-[#D4AF37] flex items-center justify-center flex-shrink-0">
+                    <div className="w-9 h-9 rounded-lg bg-[rgb(var(--gold-rgb)/<alpha-value>)]/15 text-[var(--gold)] flex items-center justify-center flex-shrink-0">
                       <Icon size={17} />
                     </div>
                     <h2
@@ -340,7 +340,7 @@ const FAQ = () => {
         )}
 
         <div
-          className="mt-12 rounded-2xl bg-gradient-to-br from-[#1E6A6A] to-[#155454] text-white p-6 md:p-8"
+          className="mt-12 rounded-2xl bg-gradient-to-br from-[var(--brand-primary)] to-[#155454] text-white p-6 md:p-8"
           data-testid="faq-contact-cta"
         >
           <h3 className="text-xl md:text-2xl font-bold mb-2" style={{ fontFamily: 'Playfair Display' }}>

@@ -227,7 +227,7 @@ code {
 .services-map .leaflet-control-zoom a,
 .stays-map .leaflet-control-zoom a {
     background: rgba(255, 255, 255, 0.9) !important;
-    color: #1E6A6A !important;
+    color: var(--brand-primary) !important;
     border: 0 !important;
     width: 34px;
     height: 34px;
@@ -238,7 +238,7 @@ code {
 }
 .services-map .leaflet-control-zoom a:hover,
 .stays-map .leaflet-control-zoom a:hover {
-    background: #1E6A6A !important;
+    background: var(--brand-primary) !important;
     color: #fff !important;
 }
 .services-map .leaflet-control-zoom a.leaflet-disabled,
@@ -261,7 +261,7 @@ code {
 }
 .services-map .leaflet-control-attribution a,
 .stays-map .leaflet-control-attribution a {
-    color: #1E6A6A !important;
+    color: var(--brand-primary) !important;
     text-decoration: none !important;
 }
 

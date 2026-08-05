@@ -37,7 +37,7 @@ const TranslationPanel = ({ contract, translatingId, onTranslate }) => {
     <div className="bg-gray-50 rounded-xl p-4 mb-4" data-testid={`translate-section-${contract.id}`}>
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2">
-          <Languages size={18} className="text-[#1E6A6A]" />
+          <Languages size={18} className="text-[var(--brand-primary)]" />
           <h4 className="text-sm font-semibold text-gray-800">Translation</h4>
         </div>
         <div className="flex gap-2">
@@ -45,7 +45,7 @@ const TranslationPanel = ({ contract, translatingId, onTranslate }) => {
             onClick={() => onTranslate(contract.id, 'he-en')}
             disabled={translatingId === contract.id || !contract.extracted_text}
             className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-medium text-white disabled:opacity-40 transition-all"
-            style={{ backgroundColor: '#1E6A6A' }}
+            style={{ backgroundColor: 'var(--brand-primary)' }}
             data-testid={`translate-he-en-${contract.id}`}
           >
             {translatingId === contract.id ? <Loader2 size={12} className="animate-spin" /> : null}
@@ -55,7 +55,7 @@ const TranslationPanel = ({ contract, translatingId, onTranslate }) => {
             onClick={() => onTranslate(contract.id, 'en-he')}
             disabled={translatingId === contract.id || !contract.extracted_text}
             className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-medium text-white disabled:opacity-40 transition-all"
-            style={{ backgroundColor: '#D4AF37' }}
+            style={{ backgroundColor: 'var(--gold)' }}
             data-testid={`translate-en-he-${contract.id}`}
           >
             {translatingId === contract.id ? <Loader2 size={12} className="animate-spin" /> : null}
@@ -74,7 +74,7 @@ const TranslationPanel = ({ contract, translatingId, onTranslate }) => {
           <div className="flex gap-1 mb-3 bg-white rounded-lg p-1 border border-gray-200">
             <button
               onClick={() => setViewMode('original')}
-              className={`flex-1 px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${viewMode === 'original' ? 'bg-[#1E6A6A] text-white' : 'text-gray-600 hover:bg-gray-50'}`}
+              className={`flex-1 px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${viewMode === 'original' ? 'bg-[var(--brand-primary)] text-white' : 'text-gray-600 hover:bg-gray-50'}`}
             >
               Original
             </button>
@@ -82,13 +82,13 @@ const TranslationPanel = ({ contract, translatingId, onTranslate }) => {
               <>
                 <button
                   onClick={() => setViewMode('translated')}
-                  className={`flex-1 px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${viewMode === 'translated' ? 'bg-[#1E6A6A] text-white' : 'text-gray-600 hover:bg-gray-50'}`}
+                  className={`flex-1 px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${viewMode === 'translated' ? 'bg-[var(--brand-primary)] text-white' : 'text-gray-600 hover:bg-gray-50'}`}
                 >
                   Translated
                 </button>
                 <button
                   onClick={() => setViewMode('side-by-side')}
-                  className={`flex-1 px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${viewMode === 'side-by-side' ? 'bg-[#1E6A6A] text-white' : 'text-gray-600 hover:bg-gray-50'}`}
+                  className={`flex-1 px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${viewMode === 'side-by-side' ? 'bg-[var(--brand-primary)] text-white' : 'text-gray-600 hover:bg-gray-50'}`}
                 >
                   Side by Side
                 </button>
@@ -103,7 +103,7 @@ const TranslationPanel = ({ contract, translatingId, onTranslate }) => {
                 <p className="text-xs text-gray-700 whitespace-pre-wrap leading-relaxed">{contract.extracted_text}</p>
               </div>
               <div className="bg-white rounded-lg border border-gray-200 p-3 max-h-80 overflow-y-auto">
-                <p className="text-[10px] uppercase tracking-wider text-[#1E6A6A] font-semibold mb-2">
+                <p className="text-[10px] uppercase tracking-wider text-[var(--brand-primary)] font-semibold mb-2">
                   Translated ({contract.translation_direction === 'he-en' ? 'English' : 'Hebrew'})
                 </p>
                 <p className="text-xs text-gray-700 whitespace-pre-wrap leading-relaxed" dir={contract.translation_direction === 'en-he' ? 'rtl' : 'ltr'}>
@@ -113,7 +113,7 @@ const TranslationPanel = ({ contract, translatingId, onTranslate }) => {
             </div>
           ) : viewMode === 'translated' && contract.translated_text ? (
             <div className="bg-white rounded-lg border border-gray-200 p-3 max-h-80 overflow-y-auto">
-              <p className="text-[10px] uppercase tracking-wider text-[#1E6A6A] font-semibold mb-2">
+              <p className="text-[10px] uppercase tracking-wider text-[var(--brand-primary)] font-semibold mb-2">
                 Translated ({contract.translation_direction === 'he-en' ? 'English' : 'Hebrew'})
               </p>
               <p className="text-xs text-gray-700 whitespace-pre-wrap leading-relaxed" dir={contract.translation_direction === 'en-he' ? 'rtl' : 'ltr'}>
@@ -142,7 +142,7 @@ const SignaturePanel = ({ contract, signerName, setSignerName, onSign, onCancel 
   return (
     <div className="bg-gray-50 rounded-xl p-4 mb-4" data-testid={`signing-section-${contract.id}`}>
       <div className="flex items-center gap-2 mb-3">
-        <PenTool size={18} className="text-[#D4AF37]" />
+        <PenTool size={18} className="text-[var(--gold)]" />
         <h4 className="text-sm font-semibold text-gray-800">{t("sweep.digitalSignature", "Digital Signature")}</h4>
       </div>
       <div className="mb-3">
@@ -152,7 +152,7 @@ const SignaturePanel = ({ contract, signerName, setSignerName, onSign, onCancel 
           value={signerName}
           onChange={(e) => setSignerName(e.target.value)}
           placeholder={t("sweep.enterFullLegalName", "Enter your full legal name")}
-          className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/30 focus:border-[#D4AF37]"
+          className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-[rgb(var(--gold-rgb)/<alpha-value>)]/30 focus:border-[var(--gold)]"
           data-testid="signer-name-input"
         />
       </div>
@@ -161,7 +161,7 @@ const SignaturePanel = ({ contract, signerName, setSignerName, onSign, onCancel 
         <div className="bg-white rounded-lg border-2 border-dashed border-gray-300 overflow-hidden">
           <SignatureCanvas
             ref={sigCanvasRef}
-            penColor="#1E6A6A"
+            penColor="var(--brand-primary)"
             canvasProps={{
               width: 500, height: 150, className: 'w-full',
               style: { width: '100%', height: '150px' },
@@ -179,7 +179,7 @@ const SignaturePanel = ({ contract, signerName, setSignerName, onSign, onCancel 
         <button
           onClick={handleSign}
           className="flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium text-white"
-          style={{ backgroundColor: '#D4AF37' }}
+          style={{ backgroundColor: 'var(--gold)' }}
           data-testid={`confirm-sign-btn-${contract.id}`}
         >
           <Check size={14} /> Confirm & Sign
@@ -239,7 +239,7 @@ const ContractListItem = ({
           <div className="flex flex-wrap gap-2 pt-4 pb-4">
             <button
               onClick={() => onDownload(contract.id)}
-              className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium border border-gray-200 hover:border-[#1E6A6A] hover:text-[#1E6A6A] transition-colors"
+              className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium border border-gray-200 hover:border-[var(--brand-primary)] hover:text-[var(--brand-primary)] transition-colors"
               data-testid={`download-btn-${contract.id}`}
             >
               <Download size={14} /> Download
@@ -247,7 +247,7 @@ const ContractListItem = ({
             {!contract.signed && (
               <button
                 onClick={onBeginSign}
-                className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium border border-gray-200 hover:border-[#D4AF37] hover:text-[#D4AF37] transition-colors"
+                className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium border border-gray-200 hover:border-[var(--gold)] hover:text-[var(--gold)] transition-colors"
                 data-testid={`sign-btn-${contract.id}`}
               >
                 <PenTool size={14} /> Sign

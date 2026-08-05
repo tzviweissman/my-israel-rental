@@ -37,7 +37,7 @@ const CategoryCard = ({ category, active, onClick }) => {
         group relative shrink-0 snap-start overflow-hidden rounded-2xl text-left
         transition-all duration-300 ease-out will-change-transform
         w-[168px] h-[280px] sm:w-[196px] sm:h-[320px] md:w-[212px] md:h-[352px]
-        ${active ? 'ring-4 ring-[#D4AF37] scale-[0.98]' : 'hover:-translate-y-0.5'}
+        ${active ? 'ring-4 ring-[var(--gold)] scale-[0.98]' : 'hover:-translate-y-0.5'}
       `}
       // Light-gold hover treatment matching the "How it works" cards
       // above:
@@ -51,18 +51,18 @@ const CategoryCard = ({ category, active, onClick }) => {
       // still dominates over hover state visually.
       style={{
         backgroundColor: theme.header,
-        border: active ? undefined : '1px solid rgba(212,175,55,0.15)',
+        border: active ? undefined : '1px solid rgba(201, 162, 39,0.15)',
         boxShadow: active ? undefined : '0 6px 20px -14px rgba(15,58,58,0.25)',
       }}
       onMouseEnter={(e) => {
         if (active) return;
-        e.currentTarget.style.border = '1px solid rgba(212,175,55,0.45)';
+        e.currentTarget.style.border = '1px solid rgba(201, 162, 39,0.45)';
         e.currentTarget.style.boxShadow =
-          '0 12px 28px -14px rgba(212,175,55,0.35), 0 0 0 3px rgba(212,175,55,0.08)';
+          '0 12px 28px -14px rgba(201, 162, 39,0.35), 0 0 0 3px rgba(201, 162, 39,0.08)';
       }}
       onMouseLeave={(e) => {
         if (active) return;
-        e.currentTarget.style.border = '1px solid rgba(212,175,55,0.15)';
+        e.currentTarget.style.border = '1px solid rgba(201, 162, 39,0.15)';
         e.currentTarget.style.boxShadow = '0 6px 20px -14px rgba(15,58,58,0.25)';
       }}
       data-testid={`services-category-${category.slug}`}

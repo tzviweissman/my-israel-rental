@@ -73,7 +73,7 @@ export default function ContinueAsBanner({ onFocusEmailField }) {
     <button
       type="button"
       onClick={handleContinue}
-      className="group w-full flex items-center gap-3 p-3 mb-4 rounded-xl border border-gray-200 bg-white hover:border-[#1E6A6A] hover:shadow-sm transition-all text-left"
+      className="group w-full flex items-center gap-3 p-3 mb-4 rounded-xl border border-gray-200 bg-white hover:border-[var(--brand-primary)] hover:shadow-sm transition-all text-left"
       data-testid="continue-as-banner"
     >
       {/* Avatar — picture from Google, otherwise a coloured initials chip */}
@@ -86,7 +86,7 @@ export default function ContinueAsBanner({ onFocusEmailField }) {
         />
       ) : (
         <div
-          className="w-11 h-11 rounded-full bg-[#1E6A6A] text-white flex items-center justify-center font-semibold shrink-0"
+          className="w-11 h-11 rounded-full bg-[var(--brand-primary)] text-white flex items-center justify-center font-semibold shrink-0"
           aria-hidden="true"
         >
           {initials}
@@ -103,7 +103,7 @@ export default function ContinueAsBanner({ onFocusEmailField }) {
         </div>
         <div className="text-xs text-gray-500 truncate">{hint.email}</div>
       </div>
-      <UserIcon size={16} className="text-gray-400 group-hover:text-[#1E6A6A] transition-colors shrink-0" />
+      <UserIcon size={16} className="text-gray-400 group-hover:text-[var(--brand-primary)] transition-colors shrink-0" />
       {/* Tiny dismiss icon in the corner — small so it doesn't compete
           with the primary tap target. */}
       <span

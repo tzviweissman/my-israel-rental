@@ -73,7 +73,7 @@ class ErrorBoundaryInner extends React.Component {
               type="button"
               onClick={() => window.location.reload()}
               className="px-5 py-2.5 rounded-xl text-sm font-semibold text-white"
-              style={{ backgroundColor: '#1E6A6A' }}
+              style={{ backgroundColor: 'var(--brand-primary)' }}
               data-testid="error-boundary-reload"
             >
               {t('errors.reload', 'Reload the page')}

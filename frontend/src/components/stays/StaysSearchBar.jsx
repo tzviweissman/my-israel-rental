@@ -29,7 +29,7 @@ const StaysSearchBar = ({
   t,
 }) => (
   <div className="flex items-stretch gap-2" data-testid="stays-search-bar">
-    <div className="flex-1 flex items-stretch bg-[#F5F5F0] rounded-full border border-[#E5E5E5] hover:border-[#D4AF37] transition-colors">
+    <div className="flex-1 flex items-stretch bg-[#F5F5F0] rounded-full border border-[#E5E5E5] hover:border-[var(--gold)] transition-colors">
       {/* On mobile the pill collapses to just Where — Stay type and
           When are hidden because they're available inside the Filters
           modal (Stay type as chips, Dates as a mobile-only section).
@@ -69,13 +69,13 @@ const StaysSearchBar = ({
     </div>
     <button
       onClick={onOpenFilters}
-      className="flex items-center gap-2 px-3 sm:px-4 rounded-full border border-[#E5E5E5] hover:border-[#D4AF37] bg-white font-semibold text-sm text-gray-800 relative transition-colors shrink-0"
+      className="flex items-center gap-2 px-3 sm:px-4 rounded-full border border-[#E5E5E5] hover:border-[var(--gold)] bg-white font-semibold text-sm text-gray-800 relative transition-colors shrink-0"
       data-testid="stays-filters-btn"
     >
       <SlidersHorizontal size={16} />
       <span className="hidden sm:inline">{t('stays.filters', 'Filters')}</span>
       {filterCount > 0 && (
-        <span className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-[#D4AF37] text-white text-[10px] font-bold flex items-center justify-center">
+        <span className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-[var(--gold)] text-white text-[10px] font-bold flex items-center justify-center">
           {filterCount}
         </span>
       )}

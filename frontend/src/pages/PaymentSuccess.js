@@ -108,7 +108,7 @@ const PaymentSuccess = () => {
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center" data-testid="payment-success-loading">
-        <Loader2 size={32} className="animate-spin text-[#1E6A6A]" />
+        <Loader2 size={32} className="animate-spin text-[var(--brand-primary)]" />
       </div>
     );
   }
@@ -118,7 +118,7 @@ const PaymentSuccess = () => {
     return (
       <div className="min-h-screen bg-[#fafafa] pt-24 pb-16 px-4" data-testid="subscription-success-page">
         <div className="max-w-md mx-auto bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-          <div className="bg-gradient-to-br from-[#1E6A6A] to-[#155454] px-8 py-10 text-white text-center">
+          <div className="bg-gradient-to-br from-[var(--brand-primary)] to-[#155454] px-8 py-10 text-white text-center">
             <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-4">
               <CheckCircle2 size={36} />
             </div>
@@ -189,13 +189,13 @@ const PaymentSuccess = () => {
         <button
           type="button"
           onClick={() => navigate('/dashboard')}
-          className="inline-flex items-center gap-1.5 text-sm font-medium text-gray-600 hover:text-[#1E6A6A] mb-4 transition-colors"
+          className="inline-flex items-center gap-1.5 text-sm font-medium text-gray-600 hover:text-[var(--brand-primary)] mb-4 transition-colors"
           data-testid="payment-success-back-link"
         >
           <ArrowLeft size={16} /> {t('paymentSuccess.viewDashboard')}
         </button>
         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-          <div className="bg-gradient-to-br from-[#1E6A6A] to-[#155454] px-8 py-10 text-white text-center">
+          <div className="bg-gradient-to-br from-[var(--brand-primary)] to-[#155454] px-8 py-10 text-white text-center">
             <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-4">
               <CheckCircle2 size={36} />
             </div>
@@ -204,7 +204,7 @@ const PaymentSuccess = () => {
           </div>
           <div className="p-8">
             <h2 className="text-base font-semibold text-gray-700 mb-4 flex items-center gap-2">
-              <Receipt size={18} className="text-[#D4AF37]" /> Order summary
+              <Receipt size={18} className="text-[var(--gold)]" /> Order summary
             </h2>
             <dl className="space-y-3 text-sm">
               <div className="flex justify-between border-b border-gray-100 pb-2.5">
@@ -279,7 +279,7 @@ const PaymentSuccess = () => {
             )}
 
             <p className="text-center text-xs text-gray-400 mt-4">
-              Need help? <Link to="/" className="text-[#1E6A6A] hover:underline">{t('paymentSuccess.contactUs')}</Link>
+              Need help? <Link to="/" className="text-[var(--brand-primary)] hover:underline">{t('paymentSuccess.contactUs')}</Link>
             </p>
           </div>
         </div>

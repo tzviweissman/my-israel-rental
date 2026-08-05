@@ -184,8 +184,8 @@ const AreaAliasManager = ({ token }) => {
         data-testid="area-alias-toggle"
       >
         <div className="flex items-start gap-3">
-          <div className="w-9 h-9 rounded-lg bg-[#1E6A6A]/10 flex items-center justify-center shrink-0">
-            <Tags size={16} className="text-[#1E6A6A]" />
+          <div className="w-9 h-9 rounded-lg bg-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/10 flex items-center justify-center shrink-0">
+            <Tags size={16} className="text-[var(--brand-primary)]" />
           </div>
           <div>
             <h3 className="text-base font-bold text-gray-900">Neighborhood aliases</h3>
@@ -195,7 +195,7 @@ const AreaAliasManager = ({ token }) => {
             </p>
           </div>
         </div>
-        <span className="text-sm text-[#1E6A6A] font-semibold">
+        <span className="text-sm text-[var(--brand-primary)] font-semibold">
           {expanded ? 'Hide' : 'Manage'}
         </span>
       </button>
@@ -215,7 +215,7 @@ const AreaAliasManager = ({ token }) => {
                 value={alias}
                 onChange={(e) => setAlias(e.target.value)}
                 placeholder='e.g. "Levi Eshkol"'
-                className="mt-2 w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#1E6A6A]/30 focus:border-[#1E6A6A] text-sm"
+                className="mt-2 w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/30 focus:border-[var(--brand-primary)] text-sm"
                 data-testid="area-alias-alias-input"
                 disabled={saving}
               />
@@ -232,7 +232,7 @@ const AreaAliasManager = ({ token }) => {
                 value={canonical}
                 onChange={(e) => setCanonical(e.target.value)}
                 placeholder='e.g. "Ramat Eshkol" or "Jerusalem - Ramat Eshkol"'
-                className="mt-2 w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#1E6A6A]/30 focus:border-[#1E6A6A] text-sm"
+                className="mt-2 w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/30 focus:border-[var(--brand-primary)] text-sm"
                 data-testid="area-alias-canonical-input"
                 disabled={saving}
               />
@@ -240,7 +240,7 @@ const AreaAliasManager = ({ token }) => {
             <button
               type="submit"
               disabled={saving}
-              className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-[#1E6A6A] text-white text-sm font-semibold hover:bg-[#175555] disabled:opacity-50 transition-colors"
+              className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-[var(--brand-primary)] text-white text-sm font-semibold hover:bg-[#175555] disabled:opacity-50 transition-colors"
               data-testid="area-alias-add-btn"
             >
               <Plus size={16} /> Add
@@ -264,7 +264,7 @@ const AreaAliasManager = ({ token }) => {
                     <div className="flex items-center gap-3 text-sm min-w-0">
                       <span className="font-medium text-gray-900 truncate">{a.alias}</span>
                       <ArrowRight size={13} className="text-gray-300 shrink-0" />
-                      <span className="text-[#1E6A6A] font-semibold truncate">{a.canonical}</span>
+                      <span className="text-[var(--brand-primary)] font-semibold truncate">{a.canonical}</span>
                     </div>
                     <button
                       type="button"
@@ -295,7 +295,7 @@ const AreaAliasManager = ({ token }) => {
                 type="button"
                 onClick={scanForSuggestions}
                 disabled={scanning}
-                className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-[#D4AF37] text-[#1E6A6A] text-sm font-semibold hover:opacity-90 disabled:opacity-50 transition-opacity shrink-0"
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-[var(--gold)] text-[var(--brand-primary)] text-sm font-semibold hover:opacity-90 disabled:opacity-50 transition-opacity shrink-0"
                 data-testid="area-alias-scan-btn"
               >
                 <Wand2 size={14} /> {scanning ? 'Scanning…' : 'Scan catalog'}
@@ -315,7 +315,7 @@ const AreaAliasManager = ({ token }) => {
                   <select
                     value={bulkThreshold}
                     onChange={(e) => setBulkThreshold(Number(e.target.value))}
-                    className="text-xs px-2 py-1.5 rounded-md border border-gray-200 bg-white focus:outline-none focus:ring-2 focus:ring-[#1E6A6A]/30"
+                    className="text-xs px-2 py-1.5 rounded-md border border-gray-200 bg-white focus:outline-none focus:ring-2 focus:ring-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/30"
                     data-testid="area-alias-bulk-threshold"
                   >
                     <option value={95}>≥ 95% (very safe)</option>
@@ -330,7 +330,7 @@ const AreaAliasManager = ({ token }) => {
                     type="button"
                     onClick={bulkAcceptAboveThreshold}
                     disabled={bulkBusy}
-                    className="ms-auto inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-[#1E6A6A] text-white text-xs font-semibold hover:bg-[#175555] disabled:opacity-50 transition-colors"
+                    className="ms-auto inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-[var(--brand-primary)] text-white text-xs font-semibold hover:bg-[#175555] disabled:opacity-50 transition-colors"
                     data-testid="area-alias-bulk-accept-btn"
                   >
                     <Check size={12} /> {bulkBusy ? 'Mapping…' : 'Bulk map'}
@@ -376,7 +376,7 @@ const AreaAliasManager = ({ token }) => {
                           {s.unknown_value}
                         </span>
                         <ArrowRight size={13} className="text-gray-300 shrink-0" />
-                        <span className="text-[#1E6A6A] font-semibold truncate">
+                        <span className="text-[var(--brand-primary)] font-semibold truncate">
                           {s.suggested_canonical_full}
                         </span>
                       </div>
@@ -393,7 +393,7 @@ const AreaAliasManager = ({ token }) => {
                         <button
                           type="button"
                           onClick={() => acceptSuggestion(s)}
-                          className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-[#1E6A6A] text-white text-xs font-semibold hover:bg-[#175555] transition-colors"
+                          className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-[var(--brand-primary)] text-white text-xs font-semibold hover:bg-[#175555] transition-colors"
                           data-testid={`area-alias-accept-${s.unknown_value}`}
                         >
                           <Check size={12} /> Map

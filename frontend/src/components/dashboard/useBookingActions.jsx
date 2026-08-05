@@ -123,7 +123,7 @@ export default function useBookingActions({ bookings, API, token, onUpdate }) {
                   toast.error(apiErrorMessage(error, 'Failed to approve cancellation'));
                 }
               }}
-              className="px-3 py-1.5 rounded-lg text-xs font-semibold text-white bg-[#1E6A6A] hover:bg-[#175555]"
+              className="px-3 py-1.5 rounded-lg text-xs font-semibold text-white bg-[var(--brand-primary)] hover:bg-[#175555]"
               data-testid={`confirm-approve-cancel-${bookingId}`}
             >
               Approve

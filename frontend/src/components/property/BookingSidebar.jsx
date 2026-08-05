@@ -116,14 +116,14 @@ const PriceBlock = ({ property, sublease, preSubleaseId, convertPrice, holidayCo
           dual-price model without forcing two separate listings. */}
       {hasHolidayPrice && matchingHolidayTags.length > 0 && (
         <div className="mt-3" data-testid="rate-toggle-wrap">
-          <div className="inline-flex items-center gap-1 p-1 rounded-lg bg-[#FBF8F2] border border-[#D4AF37]/30" data-testid="rate-toggle">
+          <div className="inline-flex items-center gap-1 p-1 rounded-lg bg-[#FBF8F2] border border-[rgb(var(--gold-rgb)/<alpha-value>)]/30" data-testid="rate-toggle">
             <button
               type="button"
               onClick={() => setHolidayContext(null)}
               className="px-3 py-1 rounded-md text-xs font-semibold transition-all"
               style={{
-                backgroundColor: !holidayContext ? '#1E6A6A' : 'transparent',
-                color: !holidayContext ? '#FFFFFF' : '#1E6A6A',
+                backgroundColor: !holidayContext ? 'var(--brand-primary)' : 'transparent',
+                color: !holidayContext ? '#FFFFFF' : 'var(--brand-primary)',
               }}
               data-testid="rate-toggle-regular"
             >Regular</button>
@@ -134,8 +134,8 @@ const PriceBlock = ({ property, sublease, preSubleaseId, convertPrice, holidayCo
                 onClick={() => setHolidayContext(tg)}
                 className="px-3 py-1 rounded-md text-xs font-semibold transition-all capitalize"
                 style={{
-                  backgroundColor: holidayContext === tg ? '#1E6A6A' : 'transparent',
-                  color: holidayContext === tg ? '#FFFFFF' : '#1E6A6A',
+                  backgroundColor: holidayContext === tg ? 'var(--brand-primary)' : 'transparent',
+                  color: holidayContext === tg ? '#FFFFFF' : 'var(--brand-primary)',
                 }}
                 data-testid={`rate-toggle-${tg}`}
               >{tg} rate</button>
@@ -145,7 +145,7 @@ const PriceBlock = ({ property, sublease, preSubleaseId, convertPrice, holidayCo
               selected by the date-driven effect (still active toggle +
               this listing's check-in falls in the holiday window). */}
           {holidayContext && (
-            <p className="text-[11px] text-[#1E6A6A] mt-1.5 ml-1" data-testid="rate-auto-hint">
+            <p className="text-[11px] text-[var(--brand-primary)] mt-1.5 ml-1" data-testid="rate-auto-hint">
               {(t('property.holidayRateApplied') || 'Holiday rate applied — switch to Regular if you prefer.')}
             </p>
           )}
@@ -194,7 +194,7 @@ const QuickSelectRow = ({ property, dateRange, setDateRange, setBookingData }) =
             if (clampActive) to = availableTo;
             setRange(rawFrom, to);
           }}
-          className="px-3 py-1.5 rounded-lg border border-[#1E6A6A] text-[#1E6A6A] hover:bg-[#1E6A6A] hover:text-white text-xs font-medium transition-colors"
+          className="px-3 py-1.5 rounded-lg border border-[var(--brand-primary)] text-[var(--brand-primary)] hover:bg-[var(--brand-primary)] hover:text-white text-xs font-medium transition-colors"
           data-testid="quick-select-plus-year"
         >
           {clampActive
@@ -522,11 +522,11 @@ const BookingCalendar = ({
           head_cell: 'text-gray-500 rounded-md w-10 font-medium text-[0.7rem] uppercase tracking-wider flex-shrink-0',
           row: 'flex w-[280px] mt-1',
           cell: 'relative p-0 text-center text-sm w-10 flex-shrink-0',
-          day: 'h-10 w-10 p-0 font-semibold rounded-full hover:bg-[#1E6A6A] hover:text-white inline-flex items-center justify-center text-gray-900 transition-all text-base',
+          day: 'h-10 w-10 p-0 font-semibold rounded-full hover:bg-[var(--brand-primary)] hover:text-white inline-flex items-center justify-center text-gray-900 transition-all text-base',
           day_range_start: 'day-range-start !bg-black !text-white rounded-full hover:!bg-black',
           day_range_end: 'day-range-end !bg-black !text-white rounded-full hover:!bg-black',
           day_selected: '!bg-black !text-white hover:!bg-black focus:!bg-black',
-          day_today: 'font-bold text-[#D4AF37] border-2 border-[#D4AF37]',
+          day_today: 'font-bold text-[var(--gold)] border-2 border-[var(--gold)]',
           day_outside: 'text-gray-300 opacity-50',
           day_disabled: 'text-gray-300 opacity-40 line-through',
           day_range_middle: 'aria-selected:bg-black/5 aria-selected:text-black rounded-none',
@@ -540,7 +540,7 @@ const BookingCalendar = ({
           renders the sublease window prominently elsewhere. */}
       {!sublease && (property.available_from || property.available_to) && (
         <div
-          className="mt-4 px-3 py-2 rounded-lg bg-[#FBF8F2] border border-[#D4AF37]/40 text-[11px] text-[#1E6A6A] leading-snug"
+          className="mt-4 px-3 py-2 rounded-lg bg-[#FBF8F2] border border-[rgb(var(--gold-rgb)/<alpha-value>)]/40 text-[11px] text-[var(--brand-primary)] leading-snug"
           data-testid="calendar-availability-hint"
         >
           {property.available_from && property.available_to ? (
@@ -805,7 +805,7 @@ const BookingSidebar = ({
         <button
           type="button"
           onClick={applyHolidayCTA}
-          className="w-full mb-4 group relative overflow-hidden rounded-xl border-2 border-[#D4AF37] bg-gradient-to-br from-[#FBF8F2] to-[#F7EFDD] p-3 text-left hover:shadow-md transition-shadow"
+          className="w-full mb-4 group relative overflow-hidden rounded-xl border-2 border-[var(--gold)] bg-gradient-to-br from-[#FBF8F2] to-[#F7EFDD] p-3 text-left hover:shadow-md transition-shadow"
           data-testid="holiday-cta-card"
         >
           <div className="flex items-start justify-between gap-2">
@@ -813,7 +813,7 @@ const BookingSidebar = ({
               <p className="text-[10px] font-bold uppercase tracking-wider" style={{ color: 'var(--gold-text-on-light)' }}>
                 {t('property.availableFor', 'Also available for')} {holidayCTA.tag.charAt(0).toUpperCase() + holidayCTA.tag.slice(1)}
               </p>
-              <p className="mt-0.5 text-lg font-bold text-[#1E6A6A] leading-tight" data-testid="holiday-cta-price">
+              <p className="mt-0.5 text-lg font-bold text-[var(--brand-primary)] leading-tight" data-testid="holiday-cta-price">
                 {property.holiday_lump_currency === 'USD' ? '$' : '₪'}
                 {property.holiday_lump_price.toLocaleString()}
                 <span className="text-xs font-medium text-gray-500 ms-1">
@@ -826,11 +826,11 @@ const BookingSidebar = ({
                 {holidayCTA.win.start} → {holidayCTA.win.end}
               </p>
             </div>
-            <span className="shrink-0 text-[#1E6A6A] text-base font-bold group-hover:translate-x-0.5 transition-transform">
+            <span className="shrink-0 text-[var(--brand-primary)] text-base font-bold group-hover:translate-x-0.5 transition-transform">
               →
             </span>
           </div>
-          <p className="text-[11px] text-[#1E6A6A]/80 mt-1.5 font-medium">
+          <p className="text-[11px] text-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/80 mt-1.5 font-medium">
             {t('property.holidayCTAHint', 'Tap to book the holiday window at this rate')}
           </p>
         </button>
@@ -901,7 +901,7 @@ const BookingSidebar = ({
             <a
               href={`mailto:${property.owner_email}?subject=${encodeURIComponent(t('property.emailSubject') + ': ' + property.title)}`}
               className="w-full flex items-center justify-center gap-2 px-6 py-2.5 rounded-full text-sm font-medium border-2 transition-colors"
-              style={{ borderColor: '#D4AF37', color: '#D4AF37' }}
+              style={{ borderColor: 'var(--gold)', color: 'var(--gold)' }}
               data-testid="email-owner-button"
             >
               <Mail size={18} />

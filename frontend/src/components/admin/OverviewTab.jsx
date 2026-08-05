@@ -45,13 +45,13 @@ export const OverviewTab = ({ dashboard, emailHealth, token, onNavigate }) => {
               onClick={stat.onClick}
               disabled={!clickable}
               className={`bg-white p-5 rounded-xl border border-[#E5E5E5] text-left w-full ${
-                clickable ? 'cursor-pointer hover:border-[#D4AF37] hover:shadow-md transition-all' : 'cursor-default'
+                clickable ? 'cursor-pointer hover:border-[var(--gold)] hover:shadow-md transition-all' : 'cursor-default'
               }`}
               data-testid={`stat-${stat.key}`}
             >
               <div className="flex items-center gap-3">
-                <div className="p-2 rounded-lg" style={{ backgroundColor: '#1E6A6A' }}>
-                  <Icon size={18} color="#D4AF37" />
+                <div className="p-2 rounded-lg" style={{ backgroundColor: 'var(--brand-primary)' }}>
+                  <Icon size={18} color="var(--gold)" />
                 </div>
                 <div>
                   <p className="text-2xl font-bold">{stat.value}</p>
@@ -92,7 +92,7 @@ export const OverviewTab = ({ dashboard, emailHealth, token, onNavigate }) => {
       {emailHealth && (
         <div className="mt-10" data-testid="admin-email-health">
           <div className="flex items-center gap-2 mb-4">
-            <Mail size={18} className="text-[#1E6A6A]" />
+            <Mail size={18} className="text-[var(--brand-primary)]" />
             <h2 className="text-xl font-bold" style={{ fontFamily: 'Playfair Display' }}>
               {t('admin.emailDeliverability')} <span className="text-sm font-normal text-gray-500">{t('admin.lastNDays', { days: emailHealth.window_days })}</span>
             </h2>

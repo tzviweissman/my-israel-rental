@@ -41,7 +41,7 @@ import {
 const StatusPill = ({ status }) => {
   const styles = {
     open: 'bg-emerald-50 text-emerald-700 border-emerald-100',
-    awarded: 'bg-[#1E6A6A]/10 text-[#1E6A6A] border-[#1E6A6A]/20',
+    awarded: 'bg-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/10 text-[var(--brand-primary)] border-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/20',
     closed: 'bg-gray-100 text-gray-600 border-gray-200',
   };
   return (
@@ -73,7 +73,7 @@ const timeAgo = (iso) => {
 const ResponseBadge = ({ bucket }) => {
   if (!bucket) return null;
   return (
-    <span className="inline-flex items-center gap-0.5 text-[10px] font-semibold text-[#1E6A6A]" data-testid="applicant-response-badge">
+    <span className="inline-flex items-center gap-0.5 text-[10px] font-semibold text-[var(--brand-primary)]" data-testid="applicant-response-badge">
       <Zap size={10} /> {bucket}
     </span>
   );
@@ -100,7 +100,7 @@ const ApplicationRow = ({ app, jobId, onMessage }) => {
         {price && (
           <div className="text-right shrink-0">
             <p className="text-xs text-gray-500">Quoted</p>
-            <p className="text-sm font-bold text-[#1E6A6A]" data-testid={`applicant-quote-${app.id}`}>{price}</p>
+            <p className="text-sm font-bold text-[var(--brand-primary)]" data-testid={`applicant-quote-${app.id}`}>{price}</p>
           </div>
         )}
       </div>
@@ -110,7 +110,7 @@ const ApplicationRow = ({ app, jobId, onMessage }) => {
       <button
         onClick={() => onMessage(app)}
         disabled={!app.provider?.user_id}
-        className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-semibold border border-[#1E6A6A]/25 text-[#1E6A6A] bg-white hover:bg-[#1E6A6A] hover:text-white transition-colors disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-white disabled:hover:text-[#1E6A6A]"
+        className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-semibold border border-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/25 text-[var(--brand-primary)] bg-white hover:bg-[var(--brand-primary)] hover:text-white transition-colors disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-white disabled:hover:text-[var(--brand-primary)]"
         data-testid={`applicant-message-btn-${app.id}`}
       >
         <MessageCircle size={11} /> Message
@@ -204,7 +204,7 @@ const JobCard = ({ job, API, token, onStatusChange }) => {
             <div
               className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold ${
                 job.applications_count > 0
-                  ? 'bg-[#D4AF37]/15 text-[#8A6A15] border border-[#D4AF37]/30'
+                  ? 'bg-[rgb(var(--gold-rgb)/<alpha-value>)]/15 text-[#8A6A15] border border-[rgb(var(--gold-rgb)/<alpha-value>)]/30'
                   : 'bg-gray-100 text-gray-500 border border-gray-200'
               }`}
               data-testid={`my-job-app-count-${job.id}`}
@@ -232,7 +232,7 @@ const JobCard = ({ job, API, token, onStatusChange }) => {
           <div className="flex flex-wrap gap-2 mb-4">
             <button
               onClick={() => navigate(`/services/jobs/${job.id}`)}
-              className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-semibold border border-gray-200 bg-white hover:border-[#1E6A6A] hover:text-[#1E6A6A]"
+              className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-semibold border border-gray-200 bg-white hover:border-[var(--brand-primary)] hover:text-[var(--brand-primary)]"
               data-testid={`my-job-view-${job.id}`}
             >
               <ExternalLink size={12} /> View public page
@@ -251,7 +251,7 @@ const JobCard = ({ job, API, token, onStatusChange }) => {
               <button
                 onClick={() => patchStatus('open')}
                 disabled={mutating}
-                className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-semibold border border-[#1E6A6A] bg-[#1E6A6A] text-white hover:bg-[#0F3A3A] disabled:opacity-60"
+                className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-semibold border border-[var(--brand-primary)] bg-[var(--brand-primary)] text-white hover:bg-[#0F3A3A] disabled:opacity-60"
                 data-testid={`my-job-reopen-${job.id}`}
               >
                 Reopen
@@ -312,7 +312,7 @@ const MyJobsTab = ({ API, token }) => {
   if (loading) {
     return (
       <div className="flex justify-center py-16">
-        <Loader2 className="animate-spin text-[#1E6A6A]" />
+        <Loader2 className="animate-spin text-[var(--brand-primary)]" />
       </div>
     );
   }
@@ -328,7 +328,7 @@ const MyJobsTab = ({ API, token }) => {
         </div>
         <button
           onClick={() => navigate('/services/post-job')}
-          className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-[#1E6A6A] text-white text-sm font-semibold hover:bg-[#0F3A3A]"
+          className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-[var(--brand-primary)] text-white text-sm font-semibold hover:bg-[#0F3A3A]"
           data-testid="my-jobs-post-cta"
         >
           <Plus size={14} /> Post a job
@@ -347,7 +347,7 @@ const MyJobsTab = ({ API, token }) => {
           </p>
           <button
             onClick={() => navigate('/services/post-job')}
-            className="inline-flex items-center gap-1 px-5 py-2 rounded-lg text-sm font-semibold text-white bg-[#1E6A6A] hover:bg-[#0F3A3A]"
+            className="inline-flex items-center gap-1 px-5 py-2 rounded-lg text-sm font-semibold text-white bg-[var(--brand-primary)] hover:bg-[#0F3A3A]"
             data-testid="my-jobs-empty-cta"
           >
             Post your first job <ArrowRight size={14} />

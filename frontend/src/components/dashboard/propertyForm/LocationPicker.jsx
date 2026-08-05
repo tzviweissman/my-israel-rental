@@ -57,7 +57,7 @@ const LocationPicker = ({ value, onChange, required = false, testid = 'property-
           setOpen(true);
         }}
         placeholder="Type to search location..."
-        className="w-full px-4 py-2 rounded-lg border border-[#E5E5E5] focus:outline-none focus:ring-2 focus:ring-[#1E6A6A]/50"
+        className="w-full px-4 py-2 rounded-lg border border-[#E5E5E5] focus:outline-none focus:ring-2 focus:ring-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/50"
         required={required && !value}
         data-testid={testid}
       />
@@ -74,7 +74,7 @@ const LocationPicker = ({ value, onChange, required = false, testid = 'property-
                   setSearch('');
                   setOpen(false);
                 }}
-                className="px-4 py-2 hover:bg-[#1E6A6A]/10 cursor-pointer text-sm transition-colors"
+                className="px-4 py-2 hover:bg-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/10 cursor-pointer text-sm transition-colors"
               >
                 <span className="font-medium text-gray-700">{location.neighborhood}</span>
                 <span className="text-gray-500 text-xs ms-2">({location.city})</span>

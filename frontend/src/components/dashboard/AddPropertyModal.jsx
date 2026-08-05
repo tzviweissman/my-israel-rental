@@ -379,11 +379,11 @@ const AddPropertyModal = ({ isOpen, onClose, editingProperty, onSaved, API, toke
 
           {!editingProperty?.id && (
             <div
-              className="p-4 rounded-xl bg-gradient-to-br from-[#1E6A6A]/5 to-[#D4AF37]/10 border border-[#1E6A6A]/20"
+              className="p-4 rounded-xl bg-gradient-to-br from-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/5 to-[rgb(var(--gold-rgb)/<alpha-value>)]/10 border border-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/20"
               data-testid="smart-paste-panel"
             >
               <div className="flex items-start gap-2 mb-2">
-                <Sparkles size={18} className="text-[#D4AF37] mt-0.5 shrink-0" />
+                <Sparkles size={18} className="text-[var(--gold)] mt-0.5 shrink-0" />
                 <div>
                   <h3 className="text-sm font-semibold">AI smart paste</h3>
                   <p className="text-xs text-gray-600">
@@ -396,7 +396,7 @@ const AddPropertyModal = ({ isOpen, onClose, editingProperty, onSaved, API, toke
                 onChange={(e) => setSmartPaste(e.target.value)}
                 placeholder='e.g. "2BR for rent in Rechavia, 4th floor, shabbat elevator, fully furnished, 7,500₪/mo, available October 1. Great area, near supermarket. WhatsApp 050-XXX-XXXX."'
                 rows={smartPaste ? 5 : 2}
-                className="w-full px-3 py-2 rounded-lg border border-[#E5E5E5] focus:outline-none focus:ring-2 focus:ring-[#1E6A6A]/50 text-sm bg-white/80"
+                className="w-full px-3 py-2 rounded-lg border border-[#E5E5E5] focus:outline-none focus:ring-2 focus:ring-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/50 text-sm bg-white/80"
                 maxLength={30000}
                 data-testid="smart-paste-input"
               />
@@ -406,7 +406,7 @@ const AddPropertyModal = ({ isOpen, onClose, editingProperty, onSaved, API, toke
                   type="button"
                   onClick={handleSmartPaste}
                   disabled={smartPasting || !smartPaste.trim()}
-                  className="px-4 py-1.5 rounded-lg bg-[#1E6A6A] text-white text-sm font-semibold hover:bg-[#175757] transition-colors disabled:opacity-50 disabled:cursor-not-allowed inline-flex items-center gap-1.5"
+                  className="px-4 py-1.5 rounded-lg bg-[var(--brand-primary)] text-white text-sm font-semibold hover:bg-[#175757] transition-colors disabled:opacity-50 disabled:cursor-not-allowed inline-flex items-center gap-1.5"
                   data-testid="smart-paste-btn"
                 >
                   <Sparkles size={14} />
@@ -422,7 +422,7 @@ const AddPropertyModal = ({ isOpen, onClose, editingProperty, onSaved, API, toke
               type="text"
               value={propertyForm.title}
               onChange={(e) => setPropertyForm({ ...propertyForm, title: e.target.value })}
-              className="w-full px-4 py-2 rounded-lg border border-[#E5E5E5] focus:outline-none focus:ring-2 focus:ring-[#1E6A6A]/50"
+              className="w-full px-4 py-2 rounded-lg border border-[#E5E5E5] focus:outline-none focus:ring-2 focus:ring-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/50"
               required
               data-testid="property-title-input"
             />
@@ -434,7 +434,7 @@ const AddPropertyModal = ({ isOpen, onClose, editingProperty, onSaved, API, toke
               value={propertyForm.description}
               onChange={(e) => setPropertyForm({ ...propertyForm, description: e.target.value })}
               rows="4"
-              className="w-full px-4 py-2 rounded-lg border border-[#E5E5E5] focus:outline-none focus:ring-2 focus:ring-[#1E6A6A]/50"
+              className="w-full px-4 py-2 rounded-lg border border-[#E5E5E5] focus:outline-none focus:ring-2 focus:ring-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/50"
               data-testid="property-description-input"
             ></textarea>
           </div>
@@ -465,7 +465,7 @@ const AddPropertyModal = ({ isOpen, onClose, editingProperty, onSaved, API, toke
                   }
                   setPropertyForm({ ...propertyForm, ...patch });
                 }}
-                className="w-full px-4 py-2 rounded-lg border border-[#E5E5E5] focus:outline-none focus:ring-2 focus:ring-[#1E6A6A]/50"
+                className="w-full px-4 py-2 rounded-lg border border-[#E5E5E5] focus:outline-none focus:ring-2 focus:ring-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/50"
                 data-testid="property-rental-type-select"
               >
                 <option value="long-term">{t('property.longTerm')}</option>
@@ -479,7 +479,7 @@ const AddPropertyModal = ({ isOpen, onClose, editingProperty, onSaved, API, toke
                 <select
                   value={propertyForm.property_type}
                   onChange={(e) => setPropertyForm({ ...propertyForm, property_type: e.target.value })}
-                  className="w-full px-4 py-2 rounded-lg border border-[#E5E5E5] focus:outline-none focus:ring-2 focus:ring-[#1E6A6A]/50"
+                  className="w-full px-4 py-2 rounded-lg border border-[#E5E5E5] focus:outline-none focus:ring-2 focus:ring-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/50"
                   data-testid="property-type-select"
                 >
                   <option value="apartment">{t('property.apartment')}</option>
@@ -499,7 +499,7 @@ const AddPropertyModal = ({ isOpen, onClose, editingProperty, onSaved, API, toke
                 type="text"
                 value={propertyForm.address}
                 onChange={(e) => setPropertyForm({ ...propertyForm, address: e.target.value })}
-                className="w-full px-4 py-2 rounded-lg border border-[#E5E5E5] focus:outline-none focus:ring-2 focus:ring-[#1E6A6A]/50"
+                className="w-full px-4 py-2 rounded-lg border border-[#E5E5E5] focus:outline-none focus:ring-2 focus:ring-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/50"
                 data-testid="property-address-input"
               />
               {duplicateWarning && (
@@ -543,7 +543,7 @@ const AddPropertyModal = ({ isOpen, onClose, editingProperty, onSaved, API, toke
                 min="0"
                 step="0.1"
                 placeholder={propertyForm.rental_type === 'storage' ? 'Storage area size' : 'Total apartment size'}
-                className="w-full px-4 py-2 rounded-lg border border-[#E5E5E5] focus:outline-none focus:ring-2 focus:ring-[#1E6A6A]/50"
+                className="w-full px-4 py-2 rounded-lg border border-[#E5E5E5] focus:outline-none focus:ring-2 focus:ring-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/50"
                 data-testid="property-sqm-input"
               />
             </div>
@@ -553,7 +553,7 @@ const AddPropertyModal = ({ isOpen, onClose, editingProperty, onSaved, API, toke
                 <select
                   value={propertyForm.bedrooms}
                   onChange={(e) => setPropertyForm({ ...propertyForm, bedrooms: parseFloat(e.target.value) })}
-                  className="w-full px-4 py-2 rounded-lg border border-[#E5E5E5] focus:outline-none focus:ring-2 focus:ring-[#1E6A6A]/50"
+                  className="w-full px-4 py-2 rounded-lg border border-[#E5E5E5] focus:outline-none focus:ring-2 focus:ring-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/50"
                   data-testid="property-bedrooms-input"
                 >
                   <option value="0">Studio</option>
@@ -570,7 +570,7 @@ const AddPropertyModal = ({ isOpen, onClose, editingProperty, onSaved, API, toke
                 <select
                   value={propertyForm.bathrooms}
                   onChange={(e) => setPropertyForm({ ...propertyForm, bathrooms: parseFloat(e.target.value) })}
-                  className="w-full px-4 py-2 rounded-lg border border-[#E5E5E5] focus:outline-none focus:ring-2 focus:ring-[#1E6A6A]/50"
+                  className="w-full px-4 py-2 rounded-lg border border-[#E5E5E5] focus:outline-none focus:ring-2 focus:ring-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/50"
                   data-testid="property-bathrooms-input"
                 >
                   {[1, 1.5, 2, 2.5, 3, 3.5, 4, 4.5, 5, 5.5].map((n) => (
@@ -585,7 +585,7 @@ const AddPropertyModal = ({ isOpen, onClose, editingProperty, onSaved, API, toke
               <select
                 value={propertyForm.floor}
                 onChange={(e) => setPropertyForm({ ...propertyForm, floor: parseFloat(e.target.value) })}
-                className="w-full px-4 py-2 rounded-lg border border-[#E5E5E5] focus:outline-none focus:ring-2 focus:ring-[#1E6A6A]/50"
+                className="w-full px-4 py-2 rounded-lg border border-[#E5E5E5] focus:outline-none focus:ring-2 focus:ring-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/50"
                 data-testid="property-floor-input"
               >
                 <option value="-2">Basement 2</option>
@@ -612,8 +612,8 @@ const AddPropertyModal = ({ isOpen, onClose, editingProperty, onSaved, API, toke
                 property's `rental_types` array so the same physical
                 apartment appears in BOTH feeds. */}
             {propertyForm.rental_type !== 'sublease' && (
-              <div className="md:col-span-2 bg-[#FBF8F2] rounded-xl p-4 border border-[#D4AF37]/30">
-                <h3 className="text-base font-bold mb-1 text-[#1E6A6A]">{t('sweep.holidayCategories', 'Holiday Categories')}</h3>
+              <div className="md:col-span-2 bg-[#FBF8F2] rounded-xl p-4 border border-[rgb(var(--gold-rgb)/<alpha-value>)]/30">
+                <h3 className="text-base font-bold mb-1 text-[var(--brand-primary)]">{t('sweep.holidayCategories', 'Holiday Categories')}</h3>
                 <p className="text-xs text-gray-500 mb-3">
                   Optional — tag this listing so it also shows under <span className="font-medium">Sukkot Rentals</span> or <span className="font-medium">Pesach Rentals</span>. Unlocks a separate one-price-for-the-whole-holiday rate below AND auto-lists this apartment under Vacation Rentals during the holiday window.
                 </p>
@@ -628,14 +628,14 @@ const AddPropertyModal = ({ isOpen, onClose, editingProperty, onSaved, API, toke
                         key={key}
                         className={`flex items-center gap-2 px-3 py-2 rounded-lg border-2 cursor-pointer transition-all text-sm ${
                           checked
-                            ? 'border-[#D4AF37] bg-[#D4AF37]/15 text-[#1E6A6A]'
-                            : 'bg-white border-gray-200 hover:border-[#D4AF37]/40 text-gray-600'
+                            ? 'border-[var(--gold)] bg-[rgb(var(--gold-rgb)/<alpha-value>)]/15 text-[var(--brand-primary)]'
+                            : 'bg-white border-gray-200 hover:border-[rgb(var(--gold-rgb)/<alpha-value>)]/40 text-gray-600'
                         }`}
                         data-testid={`holiday-tag-${key}`}
                       >
                         <input
                           type="checkbox"
-                          className="w-4 h-4 accent-[#1E6A6A]"
+                          className="w-4 h-4 accent-[var(--brand-primary)]"
                           checked={checked}
                           onChange={(e) => {
                             const current = propertyForm.holiday_tags || [];
@@ -701,7 +701,7 @@ const AddPropertyModal = ({ isOpen, onClose, editingProperty, onSaved, API, toke
                     />
                     <button
                       type="button"
-                      className="sm:col-span-2 self-start text-[11px] font-semibold text-[#1E6A6A] hover:underline"
+                      className="sm:col-span-2 self-start text-[11px] font-semibold text-[var(--brand-primary)] hover:underline"
                       onClick={() => {
                         const win = nextHolidayWindow(propertyForm.holiday_tags);
                         if (!win) return;
@@ -723,10 +723,10 @@ const AddPropertyModal = ({ isOpen, onClose, editingProperty, onSaved, API, toke
                 .join(' / ');
               const isPerNight = !!propertyForm.holiday_lump_is_per_night;
               return (
-                <div className="mt-4 pt-4 border-t border-[#D4AF37]/40" data-testid="holiday-rate-block">
+                <div className="mt-4 pt-4 border-t border-[rgb(var(--gold-rgb)/<alpha-value>)]/40" data-testid="holiday-rate-block">
                   <div className="flex items-start justify-between gap-3 flex-wrap mb-3">
                     <div className="min-w-0">
-                      <h4 className="text-sm font-bold text-[#1E6A6A]">{tagsLabel} rate</h4>
+                      <h4 className="text-sm font-bold text-[var(--brand-primary)]">{tagsLabel} rate</h4>
                       <p className="text-xs text-gray-500 mt-0.5">
                         Renters browsing {tagsLabel} rentals see this price.
                         {propertyForm.rental_type === 'vacation'
@@ -734,14 +734,14 @@ const AddPropertyModal = ({ isOpen, onClose, editingProperty, onSaved, API, toke
                           : ` During the holiday window (${propertyForm.holiday_start_date || '—'} → ${propertyForm.holiday_end_date || '—'}), the regular ${propertyForm.rental_type === 'long-term' ? 'monthly' : 'per-night'} rate is blocked so nobody grabs a bargain over the holidays.`}
                       </p>
                     </div>
-                    <div className="inline-flex items-center gap-1 p-1 rounded-lg bg-white border border-[#D4AF37]/30" data-testid="holiday-price-mode-toggle">
+                    <div className="inline-flex items-center gap-1 p-1 rounded-lg bg-white border border-[rgb(var(--gold-rgb)/<alpha-value>)]/30" data-testid="holiday-price-mode-toggle">
                       <button
                         type="button"
                         onClick={() => setPropertyForm({ ...propertyForm, holiday_lump_is_per_night: false })}
                         className="px-3 py-1 rounded-md text-xs font-semibold transition-all"
                         style={{
-                          backgroundColor: !isPerNight ? '#1E6A6A' : 'transparent',
-                          color: !isPerNight ? '#FFFFFF' : '#1E6A6A',
+                          backgroundColor: !isPerNight ? 'var(--brand-primary)' : 'transparent',
+                          color: !isPerNight ? '#FFFFFF' : 'var(--brand-primary)',
                         }}
                         data-testid="holiday-mode-lump-btn"
                       >Total for whole holiday</button>
@@ -750,8 +750,8 @@ const AddPropertyModal = ({ isOpen, onClose, editingProperty, onSaved, API, toke
                         onClick={() => setPropertyForm({ ...propertyForm, holiday_lump_is_per_night: true })}
                         className="px-3 py-1 rounded-md text-xs font-semibold transition-all"
                         style={{
-                          backgroundColor: isPerNight ? '#1E6A6A' : 'transparent',
-                          color: isPerNight ? '#FFFFFF' : '#1E6A6A',
+                          backgroundColor: isPerNight ? 'var(--brand-primary)' : 'transparent',
+                          color: isPerNight ? '#FFFFFF' : 'var(--brand-primary)',
                         }}
                         data-testid="holiday-mode-night-btn"
                       >{t('sweep.perNightHoliday', 'Per night during holiday')}</button>
@@ -764,13 +764,13 @@ const AddPropertyModal = ({ isOpen, onClose, editingProperty, onSaved, API, toke
                       onChange={(e) => setPropertyForm({ ...propertyForm, holiday_lump_price: e.target.value })}
                       min="0"
                       placeholder={isPerNight ? 'e.g. 800 (per night during the holiday)' : 'e.g. 10000 (total for whole holiday window)'}
-                      className="flex-1 px-4 py-2 rounded-lg border border-[#E5E5E5] focus:outline-none focus:ring-2 focus:ring-[#1E6A6A]/50"
+                      className="flex-1 px-4 py-2 rounded-lg border border-[#E5E5E5] focus:outline-none focus:ring-2 focus:ring-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/50"
                       data-testid="holiday-price-input"
                     />
                     <select
                       value={propertyForm.holiday_lump_currency}
                       onChange={(e) => setPropertyForm({ ...propertyForm, holiday_lump_currency: e.target.value })}
-                      className="px-4 py-2 rounded-lg border border-[#E5E5E5] focus:outline-none focus:ring-2 focus:ring-[#1E6A6A]/50"
+                      className="px-4 py-2 rounded-lg border border-[#E5E5E5] focus:outline-none focus:ring-2 focus:ring-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/50"
                       data-testid="holiday-price-currency-select"
                     >
                       <option value="ILS">₪ ILS</option>
@@ -811,14 +811,14 @@ const AddPropertyModal = ({ isOpen, onClose, editingProperty, onSaved, API, toke
                     }
                   }}
                   min="0"
-                  className="flex-1 px-4 py-2 rounded-lg border border-[#E5E5E5] focus:outline-none focus:ring-2 focus:ring-[#1E6A6A]/50"
+                  className="flex-1 px-4 py-2 rounded-lg border border-[#E5E5E5] focus:outline-none focus:ring-2 focus:ring-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/50"
                   required
                   data-testid="property-price-input"
                 />
                 <select
                   value={propertyForm.currency}
                   onChange={(e) => setPropertyForm({ ...propertyForm, currency: e.target.value })}
-                  className="px-4 py-2 rounded-lg border border-[#E5E5E5] focus:outline-none focus:ring-2 focus:ring-[#1E6A6A]/50"
+                  className="px-4 py-2 rounded-lg border border-[#E5E5E5] focus:outline-none focus:ring-2 focus:ring-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/50"
                   data-testid="property-currency-select"
                 >
                   <option value="ILS">₪ ILS</option>
@@ -961,7 +961,7 @@ const AddPropertyModal = ({ isOpen, onClose, editingProperty, onSaved, API, toke
                             onClick={() =>
                               setPropertyForm({ ...propertyForm, available_to: win.end })
                             }
-                            className="px-3 py-1.5 rounded-lg text-xs font-semibold bg-white border border-[#1E6A6A] text-[#1E6A6A] hover:bg-[#1E6A6A] hover:text-white transition-colors"
+                            className="px-3 py-1.5 rounded-lg text-xs font-semibold bg-white border border-[var(--brand-primary)] text-[var(--brand-primary)] hover:bg-[var(--brand-primary)] hover:text-white transition-colors"
                             data-testid={`extend-availability-${tag}`}
                           >
                             Open through {label} (
@@ -1002,7 +1002,7 @@ const AddPropertyModal = ({ isOpen, onClose, editingProperty, onSaved, API, toke
               value={propertyForm.minimum_booking_days}
               onChange={(e) => setPropertyForm({ ...propertyForm, minimum_booking_days: e.target.value })}
               placeholder={propertyForm.rental_type === 'vacation' ? 'e.g. 7' : 'e.g. 12'}
-              className="w-full px-4 py-2 rounded-lg border border-[#E5E5E5] focus:outline-none focus:ring-2 focus:ring-[#1E6A6A]/50"
+              className="w-full px-4 py-2 rounded-lg border border-[#E5E5E5] focus:outline-none focus:ring-2 focus:ring-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/50"
               min="1"
             />
             <p className="text-xs text-gray-500 mt-1">
@@ -1037,8 +1037,8 @@ const AddPropertyModal = ({ isOpen, onClose, editingProperty, onSaved, API, toke
                     onClick={() => setPropertyForm({ ...propertyForm, instant_booking: value })}
                     className="px-3 py-1.5 rounded-md text-xs font-semibold transition-all"
                     style={{
-                      backgroundColor: active ? '#1E6A6A' : 'transparent',
-                      color: active ? '#FFFFFF' : '#1E6A6A',
+                      backgroundColor: active ? 'var(--brand-primary)' : 'transparent',
+                      color: active ? '#FFFFFF' : 'var(--brand-primary)',
                     }}
                     aria-pressed={active}
                     data-testid={`instant-booking-${value ? 'on' : 'off'}`}
@@ -1081,7 +1081,7 @@ const AddPropertyModal = ({ isOpen, onClose, editingProperty, onSaved, API, toke
                   <select
                     value={propertyForm.cancellation_policy}
                     onChange={(e) => setPropertyForm({ ...propertyForm, cancellation_policy: e.target.value })}
-                    className="w-full px-4 py-2 rounded-lg border border-[#E5E5E5] focus:outline-none focus:ring-2 focus:ring-[#1E6A6A]/50"
+                    className="w-full px-4 py-2 rounded-lg border border-[#E5E5E5] focus:outline-none focus:ring-2 focus:ring-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/50"
                   >
                     <option value="flexible">Flexible - Full refund 7+ days before check-in</option>
                     <option value="moderate">Moderate - 50% refund 14+ days before check-in</option>
@@ -1098,7 +1098,7 @@ const AddPropertyModal = ({ isOpen, onClose, editingProperty, onSaved, API, toke
                       onChange={(e) => setPropertyForm({ ...propertyForm, custom_cancellation_policy: e.target.value })}
                       placeholder="Describe your cancellation policy in detail..."
                       rows={3}
-                      className="w-full px-4 py-2 rounded-lg border-2 border-[#D4AF37] focus:outline-none focus:ring-2 focus:ring-[#1E6A6A]/50"
+                      className="w-full px-4 py-2 rounded-lg border-2 border-[var(--gold)] focus:outline-none focus:ring-2 focus:ring-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/50"
                       data-testid="custom-cancellation-policy-textarea"
                     />
                   </div>
@@ -1114,7 +1114,7 @@ const AddPropertyModal = ({ isOpen, onClose, editingProperty, onSaved, API, toke
                 <select
                   value={propertyForm.condition}
                   onChange={(e) => setPropertyForm({ ...propertyForm, condition: e.target.value })}
-                  className="w-full px-4 py-2 rounded-lg border border-[#E5E5E5] focus:outline-none focus:ring-2 focus:ring-[#1E6A6A]/50"
+                  className="w-full px-4 py-2 rounded-lg border border-[#E5E5E5] focus:outline-none focus:ring-2 focus:ring-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/50"
                   data-testid="property-condition-select"
                 >
                   <option value="renovated">{t('property.renovated')}</option>
@@ -1136,7 +1136,7 @@ const AddPropertyModal = ({ isOpen, onClose, editingProperty, onSaved, API, toke
                       sukkah_compatible: next > 0 ? propertyForm.sukkah_compatible : false,
                     });
                   }}
-                  className="w-full px-4 py-2 rounded-lg border border-[#E5E5E5] focus:outline-none focus:ring-2 focus:ring-[#1E6A6A]/50"
+                  className="w-full px-4 py-2 rounded-lg border border-[#E5E5E5] focus:outline-none focus:ring-2 focus:ring-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/50"
                   data-testid="property-porches-input"
                 >
                   {[0, 1, 2, 3, 4, 5].map((n) => (
@@ -1154,7 +1154,7 @@ const AddPropertyModal = ({ isOpen, onClose, editingProperty, onSaved, API, toke
                         onChange={(e) => setPropertyForm({ ...propertyForm, porch_square_meters: parseFloat(e.target.value) || '' })}
                         min="0"
                         step="0.1"
-                        className="w-full px-3 py-2 rounded-lg border border-[#E5E5E5] focus:outline-none focus:ring-2 focus:ring-[#1E6A6A]/50 text-sm"
+                        className="w-full px-3 py-2 rounded-lg border border-[#E5E5E5] focus:outline-none focus:ring-2 focus:ring-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/50 text-sm"
                         data-testid="property-porch-sqm-input"
                       />
                     </div>
@@ -1178,7 +1178,7 @@ const AddPropertyModal = ({ isOpen, onClose, editingProperty, onSaved, API, toke
                 <select
                   value={propertyForm.furniture_option}
                   onChange={(e) => setPropertyForm({ ...propertyForm, furniture_option: e.target.value })}
-                  className="w-full px-4 py-2 rounded-lg border border-[#E5E5E5] focus:outline-none focus:ring-2 focus:ring-[#1E6A6A]/50"
+                  className="w-full px-4 py-2 rounded-lg border border-[#E5E5E5] focus:outline-none focus:ring-2 focus:ring-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/50"
                   data-testid="property-furniture-select"
                 >
                   <option value="no_furniture">{t('property.noFurniture')}</option>
@@ -1257,13 +1257,13 @@ const AddPropertyModal = ({ isOpen, onClose, editingProperty, onSaved, API, toke
                           onChange={(e) => setPropertyForm({ ...propertyForm, cleaning_fee_price: parseFloat(e.target.value) })}
                           placeholder={t("sweep.feeAmount", "Fee amount")}
                           min="0"
-                          className="flex-1 px-3 py-2 rounded-lg border border-[#E5E5E5] focus:outline-none focus:ring-2 focus:ring-[#1E6A6A]/50 text-sm"
+                          className="flex-1 px-3 py-2 rounded-lg border border-[#E5E5E5] focus:outline-none focus:ring-2 focus:ring-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/50 text-sm"
                           data-testid="property-cleaning-fee-input"
                         />
                         <select
                           value={propertyForm.cleaning_fee_currency}
                           onChange={(e) => setPropertyForm({ ...propertyForm, cleaning_fee_currency: e.target.value })}
-                          className="px-3 py-2 rounded-lg border border-[#E5E5E5] focus:outline-none focus:ring-2 focus:ring-[#1E6A6A]/50 text-sm"
+                          className="px-3 py-2 rounded-lg border border-[#E5E5E5] focus:outline-none focus:ring-2 focus:ring-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/50 text-sm"
                           data-testid="property-cleaning-fee-currency-select"
                         >
                           <option value="ILS">₪</option>
@@ -1284,7 +1284,7 @@ const AddPropertyModal = ({ isOpen, onClose, editingProperty, onSaved, API, toke
                       value={propertyForm.max_guests}
                       onChange={(e) => setPropertyForm({ ...propertyForm, max_guests: e.target.value })}
                       placeholder={t("sweep.noLimit", "No limit")}
-                      className="w-32 px-3 py-2 rounded-lg border border-[#E5E5E5] focus:outline-none focus:ring-2 focus:ring-[#1E6A6A]/50 text-sm"
+                      className="w-32 px-3 py-2 rounded-lg border border-[#E5E5E5] focus:outline-none focus:ring-2 focus:ring-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/50 text-sm"
                       data-testid="property-max-guests-input"
                     />
                   </div>
@@ -1314,13 +1314,13 @@ const AddPropertyModal = ({ isOpen, onClose, editingProperty, onSaved, API, toke
                           onChange={(e) => setPropertyForm({ ...propertyForm, agent_fee_price: parseFloat(e.target.value) })}
                           placeholder={t("sweep.feeAmount", "Fee amount")}
                           min="0"
-                          className="flex-1 px-3 py-2 rounded-lg border border-[#E5E5E5] focus:outline-none focus:ring-2 focus:ring-[#1E6A6A]/50 text-sm"
+                          className="flex-1 px-3 py-2 rounded-lg border border-[#E5E5E5] focus:outline-none focus:ring-2 focus:ring-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/50 text-sm"
                           data-testid="property-agent-fee-input"
                         />
                         <select
                           value={propertyForm.agent_fee_currency}
                           onChange={(e) => setPropertyForm({ ...propertyForm, agent_fee_currency: e.target.value })}
-                          className="px-3 py-2 rounded-lg border border-[#E5E5E5] focus:outline-none focus:ring-2 focus:ring-[#1E6A6A]/50 text-sm"
+                          className="px-3 py-2 rounded-lg border border-[#E5E5E5] focus:outline-none focus:ring-2 focus:ring-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/50 text-sm"
                           data-testid="property-agent-fee-currency-select"
                         >
                           <option value="ILS">₪</option>

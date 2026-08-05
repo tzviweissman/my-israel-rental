@@ -65,9 +65,9 @@ const OwnerManagementOfferModal = ({ open, onDismiss }) => {
           <X size={18} />
         </button>
 
-        <div className="bg-gradient-to-br from-[#1E6A6A] via-[#1E6A6A] to-[#155454] text-white px-7 pt-8 pb-6">
+        <div className="bg-gradient-to-br from-[var(--brand-primary)] via-[var(--brand-primary)] to-[#155454] text-white px-7 pt-8 pb-6">
           <div className="flex items-center gap-2 mb-2">
-            <span className="px-2.5 py-1 rounded-full bg-[#D4AF37] text-[#1E6A6A] text-[10px] font-bold uppercase tracking-wider">
+            <span className="px-2.5 py-1 rounded-full bg-[var(--gold)] text-[var(--brand-primary)] text-[10px] font-bold uppercase tracking-wider">
               {t('ownerOffer.tag', 'Owner perk')}
             </span>
           </div>
@@ -88,12 +88,12 @@ const OwnerManagementOfferModal = ({ open, onDismiss }) => {
         <div className="px-7 py-6 space-y-4">
           {benefits.map((b) => (
             <div key={b.title} className="flex items-start gap-3">
-              <div className="flex-shrink-0 w-9 h-9 rounded-lg bg-[#1E6A6A]/10 text-[#1E6A6A] flex items-center justify-center mt-0.5">
+              <div className="flex-shrink-0 w-9 h-9 rounded-lg bg-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/10 text-[var(--brand-primary)] flex items-center justify-center mt-0.5">
                 <b.icon size={17} />
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-bold text-gray-900 flex items-center gap-1.5">
-                  <Check size={13} className="text-[#1E6A6A]" /> {b.title}
+                  <Check size={13} className="text-[var(--brand-primary)]" /> {b.title}
                 </p>
                 <p className="text-xs text-gray-600 leading-relaxed mt-0.5">{b.copy}</p>
               </div>

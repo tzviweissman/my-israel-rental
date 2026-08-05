@@ -16,7 +16,7 @@ const NavCategoryItem = ({ type, Icon, label, active, scrolled, iconHidden = fal
   // for legibility below), but only hits ~3:1 against the scrolled navbar's
   // solid teal fill — short of WCAG AA's 4.5:1 for text. Swap to the paler,
   // AA-compliant gold once scrolled; unscrolled keeps the original brand gold.
-  const color = isGold ? (scrolled ? 'var(--gold-text-on-dark)' : '#D4AF37') : '#FFFFFF';
+  const color = isGold ? (scrolled ? 'var(--gold-text-on-dark)' : 'var(--gold)') : '#FFFFFF';
 
   // Default route falls back to the legacy /properties/<rental-type> path
   // for backwards compat (rental-type pills still using this component),
@@ -33,9 +33,9 @@ const NavCategoryItem = ({ type, Icon, label, active, scrolled, iconHidden = fal
       className={`${iconHidden ? 'flex-row gap-2 px-3 py-1' : 'flex-col px-3 pb-1'} flex items-center transition-all`}
       style={{
         borderBottom: active
-          ? '2px solid #D4AF37'
+          ? '2px solid var(--gold)'
           : hover
-            ? '2px solid rgba(212,175,55,0.6)'
+            ? '2px solid rgba(201, 162, 39,0.6)'
             : '2px solid transparent',
         opacity: active ? 1 : 0.95,
       }}

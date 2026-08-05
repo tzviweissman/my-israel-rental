@@ -121,14 +121,14 @@ const BulkManagerTab = ({ properties, onRefresh, API, token }) => {
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder={t('bulk.searchPlaceholder')}
-                className="w-full ps-9 pe-3 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#1E6A6A]/30 focus:border-[#1E6A6A] text-sm"
+                className="w-full ps-9 pe-3 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/30 focus:border-[var(--brand-primary)] text-sm"
                 data-testid="bulk-search-input"
               />
             </div>
             <select
               value={rentalFilter}
               onChange={(e) => setRentalFilter(e.target.value)}
-              className="px-3 py-2 rounded-lg border border-gray-200 bg-white focus:outline-none focus:ring-2 focus:ring-[#1E6A6A]/30 text-sm"
+              className="px-3 py-2 rounded-lg border border-gray-200 bg-white focus:outline-none focus:ring-2 focus:ring-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/30 text-sm"
               data-testid="bulk-rental-filter"
             >
               {RT_FILTERS.map(o => <option key={o.v} value={o.v}>{o.label}</option>)}
@@ -139,7 +139,7 @@ const BulkManagerTab = ({ properties, onRefresh, API, token }) => {
             <select
               value={areaFilter}
               onChange={(e) => setAreaFilter(e.target.value)}
-              className="hidden md:block px-3 py-2 rounded-lg border border-gray-200 bg-white focus:outline-none focus:ring-2 focus:ring-[#1E6A6A]/30 text-sm max-w-[200px]"
+              className="hidden md:block px-3 py-2 rounded-lg border border-gray-200 bg-white focus:outline-none focus:ring-2 focus:ring-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/30 text-sm max-w-[200px]"
               data-testid="bulk-area-filter"
             >
               <option value="">{t('bulk.allAreas')}</option>
@@ -170,7 +170,7 @@ const BulkManagerTab = ({ properties, onRefresh, API, token }) => {
           <div className="flex items-center gap-2">
             <button
               onClick={toggleAll}
-              className="text-sm font-medium px-3 py-2 rounded-lg text-[#1E6A6A] hover:bg-[#1E6A6A]/5 transition-colors"
+              className="text-sm font-medium px-3 py-2 rounded-lg text-[var(--brand-primary)] hover:bg-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/5 transition-colors"
               data-testid="bulk-select-all"
             >
               {allFilteredSelected ? t('bulk.clearAllVisible') : t('bulk.selectAllVisible')}
@@ -189,7 +189,7 @@ const BulkManagerTab = ({ properties, onRefresh, API, token }) => {
 
         <div className="flex items-center justify-between mt-4 pt-4 border-t border-gray-100">
           <div className="text-sm text-gray-600">
-            <span className="font-semibold text-[#1E6A6A]" data-testid="bulk-selected-count">{selected.size}</span>
+            <span className="font-semibold text-[var(--brand-primary)]" data-testid="bulk-selected-count">{selected.size}</span>
             {' '}{t('bulk.selected')}{filtered.length !== (properties || []).length ? ` · ${t('bulk.visibleCount', { count: filtered.length })}` : ''}
             {' · '}
             <span className="text-gray-400">{t('bulk.totalCount', { count: (properties || []).length })}</span>
@@ -198,7 +198,7 @@ const BulkManagerTab = ({ properties, onRefresh, API, token }) => {
             <button
               onClick={() => setEditOpen(true)}
               disabled={selected.size === 0}
-              className="text-sm font-semibold px-4 py-2 rounded-lg flex items-center gap-2 bg-[#1E6A6A] text-white hover:bg-[#155454] disabled:bg-gray-200 disabled:text-gray-400 disabled:cursor-not-allowed transition-colors"
+              className="text-sm font-semibold px-4 py-2 rounded-lg flex items-center gap-2 bg-[var(--brand-primary)] text-white hover:bg-[#155454] disabled:bg-gray-200 disabled:text-gray-400 disabled:cursor-not-allowed transition-colors"
               data-testid="bulk-open-edit"
             >
               <Layers size={16} /> {t('bulk.bulkEditDetails')}
@@ -206,7 +206,7 @@ const BulkManagerTab = ({ properties, onRefresh, API, token }) => {
             <button
               onClick={() => setPhotoOpen(true)}
               disabled={selected.size === 0}
-              className="text-sm font-semibold px-4 py-2 rounded-lg flex items-center gap-2 bg-[#D4AF37] text-white hover:bg-[#b8962f] disabled:bg-gray-200 disabled:text-gray-400 disabled:cursor-not-allowed transition-colors"
+              className="text-sm font-semibold px-4 py-2 rounded-lg flex items-center gap-2 bg-[var(--gold)] text-white hover:bg-[#b8962f] disabled:bg-gray-200 disabled:text-gray-400 disabled:cursor-not-allowed transition-colors"
               data-testid="bulk-open-photos"
             >
               <ImageIcon size={16} /> {t('bulk.bulkAddPhotos')}
@@ -243,7 +243,7 @@ const BulkManagerTab = ({ properties, onRefresh, API, token }) => {
               key={p.id}
               onClick={() => toggleOne(p.id)}
               className={`grid grid-cols-[40px_60px_1fr] md:grid-cols-[40px_60px_1fr_140px_180px_120px_120px] gap-3 px-4 py-3 border-b border-gray-50 last:border-0 cursor-pointer transition-colors ${
-                isSelected ? 'bg-[#1E6A6A]/5' : 'hover:bg-gray-50'
+                isSelected ? 'bg-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/5' : 'hover:bg-gray-50'
               }`}
               data-testid={`bulk-row-${p.id}`}
             >
@@ -252,13 +252,13 @@ const BulkManagerTab = ({ properties, onRefresh, API, token }) => {
                   type="checkbox"
                   checked={isSelected}
                   onChange={() => toggleOne(p.id)}
-                  className="w-4 h-4 rounded border-gray-300 text-[#1E6A6A] focus:ring-[#1E6A6A]/30"
+                  className="w-4 h-4 rounded border-gray-300 text-[var(--brand-primary)] focus:ring-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/30"
                   data-testid={`bulk-checkbox-${p.id}`}
                 />
               </div>
               <div
                 onClick={(e) => { e.stopPropagation(); if ((p.images?.length || 0) > 0) setCoverPickerProp(p); }}
-                className={`relative w-12 h-12 rounded-md overflow-hidden bg-gray-100 ${(p.images?.length || 0) > 0 ? 'cursor-pointer ring-1 ring-gray-200 hover:ring-[#D4AF37]' : ''}`}
+                className={`relative w-12 h-12 rounded-md overflow-hidden bg-gray-100 ${(p.images?.length || 0) > 0 ? 'cursor-pointer ring-1 ring-gray-200 hover:ring-[var(--gold)]' : ''}`}
                 data-testid={`bulk-cover-${p.id}`}
                 title={(p.images?.length || 0) > 0 ? t('bulk.chooseCover') : t('bulk.noPhotos')}
               >
@@ -282,7 +282,7 @@ const BulkManagerTab = ({ properties, onRefresh, API, token }) => {
                 {(p.images?.length || 0) > 0 && (
                   <button
                     onClick={() => setCoverPickerProp(p)}
-                    className="px-2 py-0.5 rounded-md text-[11px] font-medium text-[#D4AF37] border border-[#D4AF37]/40 hover:bg-[#D4AF37]/10 flex items-center gap-1"
+                    className="px-2 py-0.5 rounded-md text-[11px] font-medium text-[var(--gold)] border border-[rgb(var(--gold-rgb)/<alpha-value>)]/40 hover:bg-[rgb(var(--gold-rgb)/<alpha-value>)]/10 flex items-center gap-1"
                     data-testid={`bulk-set-cover-${p.id}`}
                     title={t('bulk.chooseCoverPhoto')}
                   >
@@ -297,15 +297,15 @@ const BulkManagerTab = ({ properties, onRefresh, API, token }) => {
 
       {/* Floating selection bar (mobile) */}
       {selected.size > 0 && (
-        <div className="fixed bottom-4 left-4 right-4 md:hidden z-40 bg-[#1E6A6A] text-white rounded-2xl shadow-2xl p-3 flex items-center gap-2">
+        <div className="fixed bottom-4 left-4 right-4 md:hidden z-40 bg-[var(--brand-primary)] text-white rounded-2xl shadow-2xl p-3 flex items-center gap-2">
           <span className="text-sm font-semibold flex-1">{t('bulk.selectedCount', { count: selected.size })}</span>
           <button onClick={clearSelection} className="p-2 rounded-lg hover:bg-white/10" aria-label={t('bulk.clear')}>
             <X size={16} />
           </button>
-          <button onClick={() => setEditOpen(true)} className="px-3 py-2 rounded-lg bg-white text-[#1E6A6A] text-sm font-semibold flex items-center gap-1">
+          <button onClick={() => setEditOpen(true)} className="px-3 py-2 rounded-lg bg-white text-[var(--brand-primary)] text-sm font-semibold flex items-center gap-1">
             <Layers size={14} /> {t('bulk.edit')}
           </button>
-          <button onClick={() => setPhotoOpen(true)} className="px-3 py-2 rounded-lg bg-[#D4AF37] text-white text-sm font-semibold flex items-center gap-1">
+          <button onClick={() => setPhotoOpen(true)} className="px-3 py-2 rounded-lg bg-[var(--gold)] text-white text-sm font-semibold flex items-center gap-1">
             <ImageIcon size={14} /> {t('bulk.photos')}
           </button>
         </div>

@@ -81,7 +81,7 @@ const AdminDashboard = () => {
                   if (tab.key === 'users') setUsersPrefilter('');
                   setActiveTab(tab.key);
                 }}
-                className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${activeTab === tab.key ? 'bg-black text-[#D4AF37]' : 'bg-white text-gray-700 border border-[#E5E5E5] hover:bg-gray-50'}`}
+                className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${activeTab === tab.key ? 'bg-black text-[var(--gold)]' : 'bg-white text-gray-700 border border-[#E5E5E5] hover:bg-gray-50'}`}
                 data-testid={`admin-tab-${tab.key}`}
               >
                 <Icon size={16} />

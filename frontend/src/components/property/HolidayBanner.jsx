@@ -18,12 +18,12 @@ const HolidayBanner = ({ window: win, type, onApply }) => {
   if (!win) return null;
   return (
     <div
-      className="mb-8 rounded-2xl overflow-hidden border border-[#D4AF37]/30 bg-gradient-to-br from-[#fffaee] via-white to-[#fffaee] shadow-sm"
+      className="mb-8 rounded-2xl overflow-hidden border border-[rgb(var(--gold-rgb)/<alpha-value>)]/30 bg-gradient-to-br from-[#fffaee] via-white to-[#fffaee] shadow-sm"
       data-testid={`holiday-banner-${type}`}
     >
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 px-6 py-5">
         <div className="flex items-start gap-4">
-          <div className="shrink-0 w-12 h-12 rounded-xl bg-[#D4AF37]/15 flex items-center justify-center">
+          <div className="shrink-0 w-12 h-12 rounded-xl bg-[rgb(var(--gold-rgb)/<alpha-value>)]/15 flex items-center justify-center">
             <CalendarIcon size={22} style={{ color: '#8a6d1d' }} />
           </div>
           <div>
@@ -40,7 +40,7 @@ const HolidayBanner = ({ window: win, type, onApply }) => {
         <button
           onClick={() => onApply(type)}
           className="shrink-0 px-5 py-2.5 rounded-xl text-sm font-semibold transition-all hover:shadow-md active:scale-[0.98] flex items-center gap-2 self-start md:self-center"
-          style={{ backgroundColor: '#1E6A6A', color: '#D4AF37' }}
+          style={{ backgroundColor: 'var(--brand-primary)', color: 'var(--gold)' }}
           data-testid={`apply-holiday-window-${type}`}
         >
           <Filter size={14} />

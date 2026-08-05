@@ -140,7 +140,7 @@ const ProfileEditModal = ({ API, token, initial, onClose, onSaved }) => {
             type="button"
             onClick={() => fileRef.current?.click()}
             disabled={uploading}
-            className="px-3 py-2 rounded-lg text-xs font-semibold text-[#1E6A6A] border border-[#1E6A6A] hover:bg-[#1E6A6A]/5 flex items-center gap-1.5 disabled:opacity-60"
+            className="px-3 py-2 rounded-lg text-xs font-semibold text-[var(--brand-primary)] border border-[var(--brand-primary)] hover:bg-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/5 flex items-center gap-1.5 disabled:opacity-60"
             data-testid="provider-avatar-btn"
           >
             {uploading ? <Loader2 className="animate-spin" size={12} /> : <Upload size={12} />}
@@ -177,7 +177,7 @@ const ProfileEditModal = ({ API, token, initial, onClose, onSaved }) => {
             (validated against the `/marketplace/languages` allowlist). */}
         <div data-testid="provider-languages-section">
           <label className="text-xs font-semibold text-gray-700 flex items-center gap-1.5">
-            <Globe size={12} className="text-[#1E6A6A]" />
+            <Globe size={12} className="text-[var(--brand-primary)]" />
             Languages you speak
             <span className="text-[10px] font-normal text-gray-400 ms-1">— shows on your public profile</span>
           </label>
@@ -191,7 +191,7 @@ const ProfileEditModal = ({ API, token, initial, onClose, onSaved }) => {
                   onClick={() => toggleLanguage(lang)}
                   className={`px-3 py-1 rounded-full text-xs font-semibold border transition-colors ${
                     active
-                      ? 'bg-[#1E6A6A] text-white border-[#1E6A6A]'
+                      ? 'bg-[var(--brand-primary)] text-white border-[var(--brand-primary)]'
                       : 'bg-white text-gray-700 border-gray-200 hover:border-gray-400'
                   }`}
                   data-testid={`provider-lang-${lang.toLowerCase()}`}
@@ -209,7 +209,7 @@ const ProfileEditModal = ({ API, token, initial, onClose, onSaved }) => {
             proof and it shows immediately. */}
         <div data-testid="provider-credentials-section">
           <label className="text-xs font-semibold text-gray-700 flex items-center gap-1.5">
-            <Award size={12} className="text-[#D4AF37]" />
+            <Award size={12} className="text-[var(--gold)]" />
             Credentials &amp; licenses
             <span className="text-[10px] font-normal text-gray-400 ms-1">— optional</span>
           </label>
@@ -228,7 +228,7 @@ const ProfileEditModal = ({ API, token, initial, onClose, onSaved }) => {
           <div className="mt-2 space-y-1.5">
             {credentialDocs.map((doc, i) => (
               <div key={i} className="flex items-center gap-2 text-xs bg-gray-50 rounded-lg px-3 py-1.5" data-testid={`credential-doc-row-${i}`}>
-                <FileText size={12} className="text-[#1E6A6A] shrink-0" />
+                <FileText size={12} className="text-[var(--brand-primary)] shrink-0" />
                 <input
                   value={doc.label || ''}
                   onChange={(e) => setCredentialDocs((prev) => prev.map((d, idx) => idx === i ? { ...d, label: e.target.value } : d))}
@@ -236,7 +236,7 @@ const ProfileEditModal = ({ API, token, initial, onClose, onSaved }) => {
                   className="flex-1 bg-transparent focus:outline-none text-gray-900"
                   data-testid={`credential-doc-label-${i}`}
                 />
-                <a href={doc.url} target="_blank" rel="noopener noreferrer" className="text-[#1E6A6A] hover:underline">View</a>
+                <a href={doc.url} target="_blank" rel="noopener noreferrer" className="text-[var(--brand-primary)] hover:underline">View</a>
                 <button
                   type="button"
                   onClick={() => setCredentialDocs((prev) => prev.filter((_, idx) => idx !== i))}
@@ -253,7 +253,7 @@ const ProfileEditModal = ({ API, token, initial, onClose, onSaved }) => {
                 type="button"
                 onClick={() => docRef.current?.click()}
                 disabled={docUploading}
-                className="text-xs font-semibold text-[#1E6A6A] hover:underline inline-flex items-center gap-1 disabled:opacity-60"
+                className="text-xs font-semibold text-[var(--brand-primary)] hover:underline inline-flex items-center gap-1 disabled:opacity-60"
                 data-testid="add-credential-doc-btn"
               >
                 {docUploading ? <Loader2 className="animate-spin" size={11} /> : <Plus size={11} />}
@@ -265,7 +265,7 @@ const ProfileEditModal = ({ API, token, initial, onClose, onSaved }) => {
 
         <div className="flex justify-end gap-2 pt-2">
           <button type="button" onClick={onClose} className="px-4 py-2 rounded-lg text-sm font-semibold text-gray-600">Cancel</button>
-          <button type="submit" disabled={saving} className="px-5 py-2 rounded-lg text-sm font-semibold text-white bg-[#1E6A6A] disabled:opacity-60" data-testid="provider-profile-save">
+          <button type="submit" disabled={saving} className="px-5 py-2 rounded-lg text-sm font-semibold text-white bg-[var(--brand-primary)] disabled:opacity-60" data-testid="provider-profile-save">
             {saving ? <Loader2 className="animate-spin" size={14} /> : 'Save'}
           </button>
         </div>
@@ -430,7 +430,7 @@ const MyGigsTab = ({ API, token }) => {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-24" data-testid="my-gigs-loading">
-        <Loader2 className="animate-spin text-[#1E6A6A]" size={28} />
+        <Loader2 className="animate-spin text-[var(--brand-primary)]" size={28} />
       </div>
     );
   }
@@ -460,7 +460,7 @@ const MyGigsTab = ({ API, token }) => {
             <button
               onClick={() => setShowPlans(true)}
               disabled={upgrading}
-              className="px-4 py-2.5 rounded-lg text-sm font-semibold text-white bg-[#D4AF37] hover:bg-[#c19f2c] flex items-center gap-1.5 disabled:opacity-60"
+              className="px-4 py-2.5 rounded-lg text-sm font-semibold text-white bg-[var(--gold)] hover:bg-[#c19f2c] flex items-center gap-1.5 disabled:opacity-60"
               data-testid="my-gigs-upgrade-btn"
             >
               {upgrading ? <Loader2 className="animate-spin" size={14} /> : <Sparkles size={14} />}
@@ -481,7 +481,7 @@ const MyGigsTab = ({ API, token }) => {
           )}
           <button
             onClick={() => navigate('/services/create-gig')}
-            className="px-4 py-2.5 rounded-lg text-sm font-semibold text-white bg-[#1E6A6A] hover:bg-[#0F3A3A] flex items-center gap-1.5"
+            className="px-4 py-2.5 rounded-lg text-sm font-semibold text-white bg-[var(--brand-primary)] hover:bg-[#0F3A3A] flex items-center gap-1.5"
             data-testid="my-gigs-create-btn"
           >
             <Plus size={14} /> Create new gig
@@ -505,7 +505,7 @@ const MyGigsTab = ({ API, token }) => {
                 what they get — the brief asks for this link here. */}
             <a
               href="/why-list"
-              className="text-xs font-semibold text-[#1E6A6A] hover:underline shrink-0"
+              className="text-xs font-semibold text-[var(--brand-primary)] hover:underline shrink-0"
               data-testid="my-gigs-why-list-link"
             >
               {t('plans.whatDoIGet', "What's included?")}
@@ -516,7 +516,7 @@ const MyGigsTab = ({ API, token }) => {
             <button
               onClick={upgrade}
               disabled={upgrading || !planKey}
-              className="px-4 py-2.5 rounded-lg text-sm font-semibold text-white bg-[#D4AF37] hover:bg-[#c19f2c] flex items-center gap-1.5 disabled:opacity-60"
+              className="px-4 py-2.5 rounded-lg text-sm font-semibold text-white bg-[var(--gold)] hover:bg-[#c19f2c] flex items-center gap-1.5 disabled:opacity-60"
               data-testid="my-gigs-confirm-upgrade-btn"
             >
               {upgrading ? <Loader2 className="animate-spin" size={14} /> : <Sparkles size={14} />}
@@ -542,7 +542,7 @@ const MyGigsTab = ({ API, token }) => {
           </p>
           <button
             onClick={() => navigate('/services/create-gig')}
-            className="px-5 py-2.5 rounded-lg text-sm font-semibold text-white bg-[#1E6A6A] hover:bg-[#0F3A3A] inline-flex items-center gap-1.5"
+            className="px-5 py-2.5 rounded-lg text-sm font-semibold text-white bg-[var(--brand-primary)] hover:bg-[#0F3A3A] inline-flex items-center gap-1.5"
             data-testid="my-gigs-empty-cta"
           >
             <Plus size={14} /> Create your first gig
@@ -588,7 +588,7 @@ const MyGigsTab = ({ API, token }) => {
                   <div className="flex justify-between items-center pt-2 border-t border-gray-100">
                     <button
                       onClick={() => navigate(`/services/gig/${g.id}`)}
-                      className="text-xs font-semibold text-[#1E6A6A] hover:underline flex items-center gap-1"
+                      className="text-xs font-semibold text-[var(--brand-primary)] hover:underline flex items-center gap-1"
                       data-testid={`my-gigs-view-${g.id}`}
                     >
                       View <ExternalLink size={11} />

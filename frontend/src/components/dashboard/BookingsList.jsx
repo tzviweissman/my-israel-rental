@@ -28,7 +28,7 @@ const STATUS_FILTERS = [
 const PROPERTY_STATUS_THEME = {
   available: { color: '#16A34A', labelKey: 'dashboard.availableNow', fallback: 'Available now', Icon: CheckCircle2 },
   upcoming: { color: '#0EA5E9', labelKey: 'dashboard.bookedUpcoming', fallback: 'Booked upcoming', Icon: Clock },
-  booked: { color: '#D4AF37', labelKey: 'dashboard.currentlyBooked', fallback: 'Currently booked', Icon: CalendarIcon },
+  booked: { color: 'var(--gold)', labelKey: 'dashboard.currentlyBooked', fallback: 'Currently booked', Icon: CalendarIcon },
 };
 
 const PropertyStatusBadge = ({ status }) => {
@@ -288,7 +288,7 @@ const RenterBookingsList = ({ bookings, user, API, actions }) => {
               placeholder={t('dashboard.searchBookingsHint', 'Search by property, guest, dates…')}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full px-4 py-2.5 ps-10 rounded-xl border-2 border-gray-200 focus:border-[#1E6A6A] focus:outline-none text-sm"
+              className="w-full px-4 py-2.5 ps-10 rounded-xl border-2 border-gray-200 focus:border-[var(--brand-primary)] focus:outline-none text-sm"
               data-testid="bookings-search"
             />
             <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
@@ -320,7 +320,7 @@ const RenterBookingsList = ({ bookings, user, API, actions }) => {
                 key={f.key}
                 onClick={() => setStatusFilter(f.key)}
                 className={`px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all ${
-                  active ? 'bg-[#1E6A6A] text-white shadow-sm' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                  active ? 'bg-[var(--brand-primary)] text-white shadow-sm' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                 }`}
                 data-testid={`bookings-filter-${f.key}`}
               >
@@ -331,7 +331,7 @@ const RenterBookingsList = ({ bookings, user, API, actions }) => {
           {isFiltering && (
             <button
               onClick={clearAll}
-              className="ms-auto inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-medium text-[#1E6A6A] hover:bg-[#1E6A6A]/5 transition-colors"
+              className="ms-auto inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-medium text-[var(--brand-primary)] hover:bg-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/5 transition-colors"
               data-testid="bookings-clear-filters"
             >
               <X size={12} />
@@ -358,7 +358,7 @@ const RenterBookingsList = ({ bookings, user, API, actions }) => {
               <p className="text-gray-500 mb-2">
                 {t('dashboard.noBookingsMatchFilter', 'No bookings match your filter')}
               </p>
-              <button onClick={clearAll} className="text-[#1E6A6A] hover:underline text-sm" data-testid="bookings-empty-clear">
+              <button onClick={clearAll} className="text-[var(--brand-primary)] hover:underline text-sm" data-testid="bookings-empty-clear">
                 {t('dashboard.clearFilters', 'Clear filters')}
               </button>
             </>
@@ -488,7 +488,7 @@ const OwnerStackedView = ({ bookings, user, token, API, actions, onUpdate }) => 
               placeholder={t('dashboard.searchPropertyHint', 'Search by property or area…')}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full px-4 py-2.5 ps-10 rounded-xl border-2 border-gray-200 focus:border-[#1E6A6A] focus:outline-none text-sm"
+              className="w-full px-4 py-2.5 ps-10 rounded-xl border-2 border-gray-200 focus:border-[var(--brand-primary)] focus:outline-none text-sm"
               data-testid="properties-search"
             />
             <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />

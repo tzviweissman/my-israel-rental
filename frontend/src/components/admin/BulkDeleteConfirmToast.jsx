@@ -94,7 +94,7 @@ const BulkDeleteConfirmToast = ({
           type="checkbox"
           checked={autoRescue}
           onChange={(e) => setAutoRescue(e.target.checked)}
-          className="mt-0.5 accent-[#1E6A6A]"
+          className="mt-0.5 accent-[var(--brand-primary)]"
           data-testid="auto-rescue-duplicates-checkbox"
         />
         <div>

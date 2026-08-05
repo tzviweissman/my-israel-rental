@@ -3,14 +3,14 @@
  * `?preview=green-gold`. Purely additive; no permanent changes.
  *
  * How it works:
- *   - Tailwind arbitrary color classes like `bg-[#1E6A6A]` compile to
- *     escaped CSS class selectors (`.bg-\[\#1E6A6A\]`). We override
+ *   - Tailwind arbitrary color classes like `bg-[var(--brand-primary)]` compile to
+ *     escaped CSS class selectors (`.bg-\[\var(--brand-primary)\]`). We override
  *     those (plus the `from-` / `to-` gradient stop variables) so every
  *     occurrence of the current teal palette flips to green without
  *     touching the 98 source files that reference it.
  *   - `!important` beats the compiled Tailwind rules AND unimportant
- *     inline `style={{ background: '#1E6A6A' }}` props.
- *   - Handful of hand-written `linear-gradient(135deg, #1E6A6A ...)`
+ *     inline `style={{ background: 'var(--brand-primary)' }}` props.
+ *   - Handful of hand-written `linear-gradient(135deg, var(--brand-primary) ...)`
  *     inline strings can't be selector-targeted; the preview will still
  *     show teal for those (all in secondary UI, not the home page).
  *
@@ -37,14 +37,14 @@ const PRIMARY_20 = 'rgba(16, 185, 129, 0.20)';
 // the escape sequences at runtime.
 const CSS = `
 /* Solid utilities */
-.bg-\\[\\#1E6A6A\\] { background-color: ${PRIMARY} !important; }
-.text-\\[\\#1E6A6A\\] { color: ${PRIMARY} !important; }
-.border-\\[\\#1E6A6A\\] { border-color: ${PRIMARY} !important; }
-.ring-\\[\\#1E6A6A\\] { --tw-ring-color: ${PRIMARY} !important; box-shadow: 0 0 0 3px ${PRIMARY_20} !important; }
-.hover\\:bg-\\[\\#1E6A6A\\]:hover { background-color: ${PRIMARY_HOVER} !important; }
-.hover\\:text-\\[\\#1E6A6A\\]:hover { color: ${PRIMARY_HOVER} !important; }
-.hover\\:border-\\[\\#1E6A6A\\]:hover { border-color: ${PRIMARY_HOVER} !important; }
-.focus\\:border-\\[\\#1E6A6A\\]:focus { border-color: ${PRIMARY} !important; }
+.bg-\\[\\var(--brand-primary)\\] { background-color: ${PRIMARY} !important; }
+.text-\\[\\var(--brand-primary)\\] { color: ${PRIMARY} !important; }
+.border-\\[\\var(--brand-primary)\\] { border-color: ${PRIMARY} !important; }
+.ring-\\[\\var(--brand-primary)\\] { --tw-ring-color: ${PRIMARY} !important; box-shadow: 0 0 0 3px ${PRIMARY_20} !important; }
+.hover\\:bg-\\[\\var(--brand-primary)\\]:hover { background-color: ${PRIMARY_HOVER} !important; }
+.hover\\:text-\\[\\var(--brand-primary)\\]:hover { color: ${PRIMARY_HOVER} !important; }
+.hover\\:border-\\[\\var(--brand-primary)\\]:hover { border-color: ${PRIMARY_HOVER} !important; }
+.focus\\:border-\\[\\var(--brand-primary)\\]:focus { border-color: ${PRIMARY} !important; }
 
 .bg-\\[\\#0F3A3A\\] { background-color: ${PRIMARY_DARK} !important; }
 .text-\\[\\#0F3A3A\\] { color: ${PRIMARY_DARK} !important; }
@@ -54,16 +54,16 @@ const CSS = `
 .hover\\:bg-\\[\\#175656\\]:hover { background-color: ${PRIMARY_HOVER} !important; }
 
 /* Gradient stops — Tailwind stores them in CSS variables */
-.from-\\[\\#1E6A6A\\] { --tw-gradient-from: ${PRIMARY} var(--tw-gradient-from-position) !important; --tw-gradient-to: rgba(16, 185, 129, 0) var(--tw-gradient-to-position) !important; --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to) !important; }
+.from-\\[\\var(--brand-primary)\\] { --tw-gradient-from: ${PRIMARY} var(--tw-gradient-from-position) !important; --tw-gradient-to: rgba(16, 185, 129, 0) var(--tw-gradient-to-position) !important; --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to) !important; }
 .to-\\[\\#0F3A3A\\] { --tw-gradient-to: ${PRIMARY_DARK} var(--tw-gradient-to-position) !important; }
-.to-\\[\\#1E6A6A\\] { --tw-gradient-to: ${PRIMARY} var(--tw-gradient-to-position) !important; }
+.to-\\[\\var(--brand-primary)\\] { --tw-gradient-to: ${PRIMARY} var(--tw-gradient-to-position) !important; }
 .from-\\[\\#0F3A3A\\] { --tw-gradient-from: ${PRIMARY_DARK} var(--tw-gradient-from-position) !important; --tw-gradient-to: rgba(6, 95, 70, 0) var(--tw-gradient-to-position) !important; --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to) !important; }
-.via-\\[\\#1E6A6A\\] { --tw-gradient-stops: var(--tw-gradient-from), ${PRIMARY} var(--tw-gradient-via-position), var(--tw-gradient-to) !important; }
+.via-\\[\\var(--brand-primary)\\] { --tw-gradient-stops: var(--tw-gradient-from), ${PRIMARY} var(--tw-gradient-via-position), var(--tw-gradient-to) !important; }
 
 /* Alpha variants seen sporadically across the codebase */
-.bg-\\[\\#1E6A6A\\]\\/8, .bg-\\[\\#1E6A6A\\]\\/10 { background-color: ${PRIMARY_10} !important; }
-.bg-\\[\\#1E6A6A\\]\\/20 { background-color: ${PRIMARY_20} !important; }
-.border-\\[\\#1E6A6A\\]\\/20 { border-color: ${PRIMARY_20} !important; }
+.bg-\\[\\var(--brand-primary)\\]\\/8, .bg-\\[\\var(--brand-primary)\\]\\/10 { background-color: ${PRIMARY_10} !important; }
+.bg-\\[\\var(--brand-primary)\\]\\/20 { background-color: ${PRIMARY_20} !important; }
+.border-\\[\\var(--brand-primary)\\]\\/20 { border-color: ${PRIMARY_20} !important; }
 
 /* The Services hero video overlay uses hard-coded rgba() — repaint it
    in the same emerald so the "video-forward" tint of the primary hero
@@ -99,13 +99,13 @@ const MARK_ATTR = 'data-theme-preview-patched';
 // on exit is deliberately out of scope: the "Exit preview" link is a
 // plain <a href="?"> that triggers a full navigation, remounting the
 // app from scratch with the original values.
-// The browser normalises `style="background: #1E6A6A"` to `rgb(30, 106,
+// The browser normalises `style="background: var(--brand-primary)"` to `rgb(30, 106,
 // 106)` at parse time, so `getAttribute('style')` returns the rgb form.
 // We map BOTH representations to cover:
-//   • React inline `style={{ backgroundColor: '#1E6A6A' }}` (rgb form)
-//   • Hand-written `linear-gradient(135deg, #1E6A6A 0%, …)` (hex form)
+//   • React inline `style={{ backgroundColor: 'var(--brand-primary)' }}` (rgb form)
+//   • Hand-written `linear-gradient(135deg, var(--brand-primary) 0%, …)` (hex form)
 const COLOUR_MAP = [
-  { from: /#1E6A6A/gi, to: PRIMARY },
+  { from: /var(--brand-primary)/gi, to: PRIMARY },
   { from: /rgb\(\s*30,\s*106,\s*106\s*\)/gi, to: PRIMARY },
   { from: /#175656/gi, to: PRIMARY_HOVER },
   { from: /rgb\(\s*23,\s*86,\s*86\s*\)/gi, to: PRIMARY_HOVER },

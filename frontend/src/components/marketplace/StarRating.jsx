@@ -31,7 +31,7 @@ export const StarRating = ({
           const StarEl = (
             <Star
               size={size}
-              className={filled ? 'text-[#D4AF37] fill-[#D4AF37]' : 'text-gray-300'}
+              className={filled ? 'text-[var(--gold)] fill-[var(--gold)]' : 'text-gray-300'}
             />
           );
           if (!interactive) return <span key={n}>{StarEl}</span>;

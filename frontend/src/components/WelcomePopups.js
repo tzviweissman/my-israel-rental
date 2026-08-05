@@ -58,7 +58,7 @@ const WelcomePopups = ({ onDismiss }) => {
         {currentPopup === 0 && (
           <div className="bg-white rounded-3xl overflow-hidden shadow-2xl" data-testid="welcome-popup-sublease">
             {/* Header gradient */}
-            <div className="bg-gradient-to-br from-[#1E6A6A] to-[#267a7a] px-8 pt-8 pb-12 relative overflow-hidden">
+            <div className="bg-gradient-to-br from-[var(--brand-primary)] to-[#267a7a] px-8 pt-8 pb-12 relative overflow-hidden">
               <div className="absolute top-0 right-0 w-40 h-40 bg-white/5 rounded-full -translate-y-10 translate-x-10" />
               <div className="absolute bottom-0 left-0 w-24 h-24 bg-white/5 rounded-full translate-y-8 -translate-x-8" />
               <button
@@ -72,9 +72,9 @@ const WelcomePopups = ({ onDismiss }) => {
                   <Home size={30} className="text-white" />
                 </div>
                 <div className="flex items-center justify-center gap-2 mb-2">
-                  <Sparkles size={16} className="text-[#D4AF37]" />
-                  <span className="text-xs font-semibold text-[#D4AF37] uppercase tracking-wider">{t('welcome.newFeature')}</span>
-                  <Sparkles size={16} className="text-[#D4AF37]" />
+                  <Sparkles size={16} className="text-[var(--gold)]" />
+                  <span className="text-xs font-semibold text-[var(--gold)] uppercase tracking-wider">{t('welcome.newFeature')}</span>
+                  <Sparkles size={16} className="text-[var(--gold)]" />
                 </div>
               </div>
             </div>
@@ -92,7 +92,7 @@ const WelcomePopups = ({ onDismiss }) => {
                   <button
                     onClick={advancePopup}
                     className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-medium text-white transition-all hover:shadow-lg active:scale-95"
-                    style={{ backgroundColor: '#D4AF37' }}
+                    style={{ backgroundColor: 'var(--gold)' }}
                   >
                     {t('welcome.learnMore')} <ArrowRight size={16} />
                   </button>
@@ -102,7 +102,7 @@ const WelcomePopups = ({ onDismiss }) => {
 
             {/* Progress dots */}
             <div className="flex justify-center gap-2 pb-6">
-              <div className="w-8 h-1.5 rounded-full bg-[#1E6A6A]" />
+              <div className="w-8 h-1.5 rounded-full bg-[var(--brand-primary)]" />
               <div className="w-8 h-1.5 rounded-full bg-gray-200" />
             </div>
           </div>
@@ -111,7 +111,7 @@ const WelcomePopups = ({ onDismiss }) => {
         {currentPopup === 1 && (
           <div className="bg-white rounded-3xl overflow-hidden shadow-2xl" data-testid="welcome-popup-services">
             {/* Header gradient */}
-            <div className="bg-gradient-to-br from-[#D4AF37] to-[#c4a030] px-8 pt-8 pb-12 relative overflow-hidden">
+            <div className="bg-gradient-to-br from-[var(--gold)] to-[#c4a030] px-8 pt-8 pb-12 relative overflow-hidden">
               <div className="absolute top-0 right-0 w-40 h-40 bg-white/5 rounded-full -translate-y-10 translate-x-10" />
               <div className="absolute bottom-0 left-0 w-24 h-24 bg-white/5 rounded-full translate-y-8 -translate-x-8" />
               <button
@@ -146,7 +146,7 @@ const WelcomePopups = ({ onDismiss }) => {
                   <button
                     onClick={dismissAll}
                     className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-medium text-white transition-all hover:shadow-lg active:scale-95"
-                    style={{ backgroundColor: '#1E6A6A' }}
+                    style={{ backgroundColor: 'var(--brand-primary)' }}
                   >
                     {t('welcome.goToDashboard')} <ArrowRight size={16} />
                   </button>
@@ -157,7 +157,7 @@ const WelcomePopups = ({ onDismiss }) => {
             {/* Progress dots */}
             <div className="flex justify-center gap-2 pb-6">
               <div className="w-8 h-1.5 rounded-full bg-gray-200" />
-              <div className="w-8 h-1.5 rounded-full bg-[#D4AF37]" />
+              <div className="w-8 h-1.5 rounded-full bg-[var(--gold)]" />
             </div>
           </div>
         )}

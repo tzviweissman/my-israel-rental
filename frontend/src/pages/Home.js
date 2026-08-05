@@ -199,7 +199,7 @@ const Home = () => {
             <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold mb-2" style={{ fontFamily: 'Playfair Display', color: 'white' }}>
               {t('hero.title')}
             </h1>
-            <p className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-8" style={{ fontFamily: 'Playfair Display', color: '#D4AF37' }}>
+            <p className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-8" style={{ fontFamily: 'Playfair Display', color: 'var(--gold)' }}>
               {t('hero.anyDuration')}
             </p>
 
@@ -211,13 +211,13 @@ const Home = () => {
                 className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full backdrop-blur-md border"
                 style={{
                   backgroundColor: 'rgba(255, 255, 255, 0.12)',
-                  borderColor: 'rgba(212, 175, 55, 0.55)',
+                  borderColor: 'rgba(201, 162, 39, 0.55)',
                 }}
               >
-                <Check size={14} strokeWidth={3} style={{ color: '#D4AF37' }} />
+                <Check size={14} strokeWidth={3} style={{ color: 'var(--gold)' }} />
                 <span
                   className="text-xs sm:text-sm font-semibold uppercase tracking-wider"
-                  style={{ color: '#D4AF37', letterSpacing: '0.12em' }}
+                  style={{ color: 'var(--gold)', letterSpacing: '0.12em' }}
                 >
                   {t('hero.noFeesTagline')}
                 </span>
@@ -255,7 +255,7 @@ const Home = () => {
               disabled={!canScrollLeft}
               aria-label={t('home.scrollToPrevAria')}
               className="inline-flex items-center gap-2 px-4 py-2 rounded-full border text-sm font-semibold transition-all disabled:opacity-30 disabled:cursor-not-allowed hover:shadow-md"
-              style={{ borderColor: '#1E6A6A', color: '#1E6A6A', backgroundColor: 'white' }}
+              style={{ borderColor: 'var(--brand-primary)', color: 'var(--brand-primary)', backgroundColor: 'white' }}
               data-testid="featured-scroll-left"
             >
               <ArrowLeft size={16} />
@@ -267,7 +267,7 @@ const Home = () => {
               disabled={!canScrollRight}
               aria-label={t('home.scrollToMoreAria')}
               className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold transition-all disabled:opacity-30 disabled:cursor-not-allowed hover:shadow-lg"
-              style={{ backgroundColor: '#1E6A6A', color: 'white' }}
+              style={{ backgroundColor: 'var(--brand-primary)', color: 'white' }}
               data-testid="featured-scroll-right"
             >
               <span>{t('home.scrollForMore')}</span>
@@ -349,7 +349,7 @@ const Home = () => {
                       {property.rental_type === 'vacation' ? t('property.perNight') : t('property.perMonth')}
                     </span>
                   </span>
-                  <span className="hidden md:inline text-sm px-3 py-1 rounded-full" style={{ backgroundColor: '#E5E5E5', color: '#1E6A6A' }}>
+                  <span className="hidden md:inline text-sm px-3 py-1 rounded-full" style={{ backgroundColor: '#E5E5E5', color: 'var(--brand-primary)' }}>
                     {{'long-term': t('property.longTerm'), 'short-term': t('property.shortTerm'), 'vacation': t('property.vacationType'), 'storage': t('property.storageType')}[property.rental_type] || property.rental_type}
                   </span>
                 </div>
@@ -364,7 +364,7 @@ const Home = () => {
       {/* About Us Section */}
       <div className="py-20" style={{ backgroundColor: '#F5F5F5' }}>
         <div className="max-w-5xl mx-auto px-6">
-          <h2 className="text-4xl sm:text-5xl font-bold mb-8 text-center" style={{ fontFamily: 'Playfair Display', color: '#1E6A6A' }}>
+          <h2 className="text-4xl sm:text-5xl font-bold mb-8 text-center" style={{ fontFamily: 'Playfair Display', color: 'var(--brand-primary)' }}>
             {t('home.aboutUs')}
           </h2>
           <div className="space-y-6 text-lg leading-relaxed text-gray-700">
@@ -389,7 +389,7 @@ const Home = () => {
           <h2
             id="why-myisraelrental-heading"
             className="text-3xl sm:text-4xl font-bold mb-12 text-center"
-            style={{ fontFamily: 'Playfair Display', color: '#1E6A6A' }}
+            style={{ fontFamily: 'Playfair Display', color: 'var(--brand-primary)' }}
           >
             {t('home.seo.heading', 'Renting in Israel, made simple.')}
           </h2>
@@ -400,7 +400,7 @@ const Home = () => {
               <p>{t('home.seo.forRentersPara1', "Whether you're moving to Israel for a year, planning a holiday in Jerusalem, or spending a few months working remotely from Tel Aviv, My Israel Rental gives you a single place to compare apartments, vacation homes, and short-stay flats — without the broker fees and back-and-forth that usually come with renting here. Every listing is posted by the owner or their authorized representative, so you talk directly to the person who holds the keys.")}</p>
               <p className="mt-4">
                 {t('home.seo.forRentersPara2Before', 'Use our')}{' '}
-                <a href="/stays" onClick={(e) => { e.preventDefault(); navigate('/stays'); }} className="text-[#1E6A6A] font-semibold hover:underline">
+                <a href="/stays" onClick={(e) => { e.preventDefault(); navigate('/stays'); }} className="text-[var(--brand-primary)] font-semibold hover:underline">
                   {t('home.seo.staysSearchLink', 'Stays search')}
                 </a>{' '}
                 {t('home.seo.forRentersPara2After', 'to filter by area, dates, bedrooms, budget and amenities. Save favorites with one tap, message owners through the built-in chat, and sign your rental contract digitally — all from your browser.')}
@@ -412,7 +412,7 @@ const Home = () => {
               <p>{t('home.seo.forOwnersPara1', 'Listing on My Israel Rental is free for owners too — no commission, no payout fees, no lock-in. Add photos in minutes, set your nightly or monthly price, choose your availability, and let renters reach out to you directly. We handle the contract templates, calendar sync, and email/WhatsApp delivery so you can focus on welcoming guests instead of chasing paperwork.')}</p>
               <p className="mt-4">
                 {t('home.seo.forOwnersPara2Before', 'Need help cleaning, photographing, or managing turnovers? Browse trusted local')}{' '}
-                <a href="/services" onClick={(e) => { e.preventDefault(); navigate('/services'); }} className="text-[#1E6A6A] font-semibold hover:underline">
+                <a href="/services" onClick={(e) => { e.preventDefault(); navigate('/services'); }} className="text-[var(--brand-primary)] font-semibold hover:underline">
                   {t('home.seo.serviceProvidersLink', 'service providers')}
                 </a>{' '}
                 {t('home.seo.forOwnersPara2After', '— or list your own business and reach every owner on the platform.')}
@@ -432,7 +432,7 @@ const Home = () => {
               <a
                 href="/faq"
                 onClick={(e) => { e.preventDefault(); navigate('/faq'); }}
-                className="text-[#1E6A6A] font-semibold hover:underline"
+                className="text-[var(--brand-primary)] font-semibold hover:underline"
               >
                 {t('home.seo.readFaqLink', 'Read our FAQ')}
               </a>{' '}
@@ -442,8 +442,8 @@ const Home = () => {
         </div>
       </section>
 
-      <div className="py-16" style={{ backgroundColor: '#1E6A6A' }}>
-        <div className="max-w-7xl mx-auto px-6 text-center" style={{ color: '#D4AF37' }}>
+      <div className="py-16" style={{ backgroundColor: 'var(--brand-primary)' }}>
+        <div className="max-w-7xl mx-auto px-6 text-center" style={{ color: 'var(--gold)' }}>
           <h2 className="text-3xl font-bold mb-4" style={{ fontFamily: 'Playfair Display' }}>
             {t('footer.contact')}
           </h2>
@@ -453,7 +453,7 @@ const Home = () => {
           <p className="text-lg">
             {t('home.email')}: <a href="mailto:support@myisraelrental.com" className="font-bold hover:underline">support@myisraelrental.com</a>
           </p>
-          <div className="mt-6 pt-6 border-t" style={{ borderColor: 'rgba(212,175,55,0.25)' }}>
+          <div className="mt-6 pt-6 border-t" style={{ borderColor: 'rgba(201, 162, 39,0.25)' }}>
             <a
               href="/faq"
               onClick={(e) => { e.preventDefault(); navigate('/faq'); }}

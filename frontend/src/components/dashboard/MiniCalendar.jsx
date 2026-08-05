@@ -75,7 +75,7 @@ const MiniCalendar = ({ year, month, bookings = [] }) => {
           const isTurnover = outgoing && incoming;
           const dayIso = localIso(year, month, day);
           const isToday = dayIso === todayIso;
-          const todayRing = isToday ? 'ring-2 ring-[#D4AF37]' : '';
+          const todayRing = isToday ? 'ring-2 ring-[var(--gold)]' : '';
 
           if (isTurnover) {
             return (
@@ -111,7 +111,7 @@ const MiniCalendar = ({ year, month, bookings = [] }) => {
 
           return (
             <Cell key={dayIso}>
-              <span className={`text-gray-500 ${isToday ? 'font-bold text-[#D4AF37]' : ''}`}>{day}</span>
+              <span className={`text-gray-500 ${isToday ? 'font-bold text-[var(--gold)]' : ''}`}>{day}</span>
             </Cell>
           );
         })}

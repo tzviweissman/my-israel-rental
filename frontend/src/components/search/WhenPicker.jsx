@@ -253,7 +253,7 @@ const WhenPicker = ({
                 className={`px-5 py-2 rounded-lg text-sm font-semibold text-white ${
                   applyDisabled ? 'opacity-50 cursor-not-allowed' : ''
                 }`}
-                style={{ backgroundColor: '#1E6A6A' }}
+                style={{ backgroundColor: 'var(--brand-primary)' }}
                 data-testid={`${testidPrefix}-apply`}
               >
                 {mode === 'flexible'

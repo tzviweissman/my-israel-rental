@@ -37,7 +37,7 @@ export default function GoogleSignInButton({
   if (!available) return null;
 
   const base =
-    'w-full inline-flex items-center justify-center gap-2 rounded-lg border font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-[#1E6A6A]/40 disabled:opacity-60 disabled:cursor-not-allowed';
+    'w-full inline-flex items-center justify-center gap-2 rounded-lg border font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/40 disabled:opacity-60 disabled:cursor-not-allowed';
   const sizing = 'px-4 py-2.5 text-sm';
   const styles =
     variant === 'ghost'

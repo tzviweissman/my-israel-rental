@@ -75,7 +75,7 @@ function SegmentSelect({ icon: Icon, label, value, onChange, options, testId }) 
       className="relative flex-1 flex items-center gap-3 px-5 py-3 cursor-pointer hover:bg-black/[0.03] transition-colors"
       data-testid={testId}
     >
-      <Icon size={16} className="text-[#1E6A6A] shrink-0" strokeWidth={2.25} />
+      <Icon size={16} className="text-[var(--brand-primary)] shrink-0" strokeWidth={2.25} />
       <div className="flex-1 min-w-0">
         <div className="text-[11px] font-semibold uppercase tracking-wider text-gray-500">
           {label}
@@ -143,7 +143,7 @@ function WhenSegment({ value, onChange, locale }) {
           className="relative flex-1 flex items-center gap-3 px-5 py-3 cursor-pointer hover:bg-black/[0.03] transition-colors text-left"
           data-testid="services-hero-day"
         >
-          <CalendarIcon size={16} className="text-[#1E6A6A] shrink-0" strokeWidth={2.25} />
+          <CalendarIcon size={16} className="text-[var(--brand-primary)] shrink-0" strokeWidth={2.25} />
           <div className="flex-1 min-w-0">
             <div className="text-[11px] font-semibold uppercase tracking-wider text-gray-500">
               {t('services.hero.day.label', 'When')}
@@ -167,8 +167,8 @@ function WhenSegment({ value, onChange, locale }) {
             onClick={() => handlePreset('')}
             className={`px-3 py-1.5 rounded-full text-xs font-medium border transition-colors ${
               !selectedDate
-                ? 'bg-[#1E6A6A] text-white border-[#1E6A6A]'
-                : 'bg-white text-gray-700 border-gray-300 hover:border-[#1E6A6A]'
+                ? 'bg-[var(--brand-primary)] text-white border-[var(--brand-primary)]'
+                : 'bg-white text-gray-700 border-gray-300 hover:border-[var(--brand-primary)]'
             }`}
             data-testid="services-hero-day-preset-any"
           >
@@ -179,8 +179,8 @@ function WhenSegment({ value, onChange, locale }) {
             onClick={() => handlePreset(toIsoDate(today))}
             className={`px-3 py-1.5 rounded-full text-xs font-medium border transition-colors ${
               selectedDate?.getTime() === today.getTime()
-                ? 'bg-[#1E6A6A] text-white border-[#1E6A6A]'
-                : 'bg-white text-gray-700 border-gray-300 hover:border-[#1E6A6A]'
+                ? 'bg-[var(--brand-primary)] text-white border-[var(--brand-primary)]'
+                : 'bg-white text-gray-700 border-gray-300 hover:border-[var(--brand-primary)]'
             }`}
             data-testid="services-hero-day-preset-today"
           >
@@ -191,8 +191,8 @@ function WhenSegment({ value, onChange, locale }) {
             onClick={() => handlePreset(toIsoDate(tomorrow))}
             className={`px-3 py-1.5 rounded-full text-xs font-medium border transition-colors ${
               selectedDate?.getTime() === tomorrow.getTime()
-                ? 'bg-[#1E6A6A] text-white border-[#1E6A6A]'
-                : 'bg-white text-gray-700 border-gray-300 hover:border-[#1E6A6A]'
+                ? 'bg-[var(--brand-primary)] text-white border-[var(--brand-primary)]'
+                : 'bg-white text-gray-700 border-gray-300 hover:border-[var(--brand-primary)]'
             }`}
             data-testid="services-hero-day-preset-tomorrow"
           >
@@ -291,7 +291,7 @@ export default function ServicesHeroSearch({
         <button
           type="button"
           onClick={onOpenFilters}
-          className="hidden md:flex items-center justify-center px-5 bg-[#1E6A6A] hover:bg-[#175656] text-white transition-colors"
+          className="hidden md:flex items-center justify-center px-5 bg-[var(--brand-primary)] hover:bg-[#175656] text-white transition-colors"
           aria-label={t('services.hero.moreFilters', 'More filters')}
           data-testid="services-hero-more-filters"
         >
@@ -306,7 +306,7 @@ export default function ServicesHeroSearch({
         <button
           type="button"
           onClick={onOpenFilters}
-          className="md:hidden inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#1E6A6A]/10 hover:bg-[#1E6A6A]/15 text-[#1E6A6A] border border-[#1E6A6A]/20 transition-colors"
+          className="md:hidden inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/10 hover:bg-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/15 text-[var(--brand-primary)] border border-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/20 transition-colors"
           data-testid="services-hero-more-filters-mobile"
         >
           <SlidersHorizontal size={14} />
@@ -314,7 +314,7 @@ export default function ServicesHeroSearch({
         </button>
         <a
           href="/dashboard?tab=my-gigs"
-          className="inline-flex items-center gap-1.5 text-[#1E6A6A] hover:text-[#0F3A3A] font-semibold transition-colors"
+          className="inline-flex items-center gap-1.5 text-[var(--brand-primary)] hover:text-[#0F3A3A] font-semibold transition-colors"
           data-testid="services-hero-become-provider"
         >
           {t('services.becomeProvider', 'Become a provider')}

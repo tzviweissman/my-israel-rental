@@ -47,16 +47,16 @@ const DocumentService = () => {
                     key={svc.key}
                     type="button"
                     onClick={() => toggle(svc.key)}
-                    className={`w-full text-left flex items-start gap-3 rounded-xl border p-4 transition-all ${isOn ? 'border-[#1E6A6A] bg-[#1E6A6A]/5' : 'border-gray-200 hover:border-gray-300'}`}
+                    className={`w-full text-left flex items-start gap-3 rounded-xl border p-4 transition-all ${isOn ? 'border-[var(--brand-primary)] bg-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/5' : 'border-gray-200 hover:border-gray-300'}`}
                     data-testid={`service-option-${svc.key}`}
                   >
-                    <div className={`mt-0.5 w-5 h-5 rounded-md flex items-center justify-center flex-shrink-0 ${isOn ? 'bg-[#1E6A6A] text-white' : 'border-2 border-gray-300 bg-white'}`}>
+                    <div className={`mt-0.5 w-5 h-5 rounded-md flex items-center justify-center flex-shrink-0 ${isOn ? 'bg-[var(--brand-primary)] text-white' : 'border-2 border-gray-300 bg-white'}`}>
                       {isOn && <Check size={12} strokeWidth={3} />}
                     </div>
                     <div className="flex-1">
                       <div className="flex items-center justify-between gap-3">
                         <p className="text-sm font-semibold text-gray-900">{svc.label}</p>
-                        <span className="text-sm font-semibold text-[#1E6A6A]">${svc.price}</span>
+                        <span className="text-sm font-semibold text-[var(--brand-primary)]">${svc.price}</span>
                       </div>
                       <p className="text-xs text-gray-500 mt-1">{svc.hint}</p>
                     </div>
@@ -79,15 +79,15 @@ const DocumentService = () => {
             <h2 className="text-base font-semibold mb-4">2. How it works</h2>
             <ol className="space-y-3 text-sm text-gray-600">
               <li className="flex items-start gap-3" data-testid="how-it-works-step-1">
-                <span className="flex-shrink-0 w-6 h-6 rounded-full bg-[#1E6A6A]/10 text-[#1E6A6A] text-xs font-bold flex items-center justify-center">1</span>
+                <span className="flex-shrink-0 w-6 h-6 rounded-full bg-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/10 text-[var(--brand-primary)] text-xs font-bold flex items-center justify-center">1</span>
                 <span>Pick your services and pay securely with PayPal.</span>
               </li>
               <li className="flex items-start gap-3" data-testid="how-it-works-step-2">
-                <span className="flex-shrink-0 w-6 h-6 rounded-full bg-[#1E6A6A]/10 text-[#1E6A6A] text-xs font-bold flex items-center justify-center">2</span>
+                <span className="flex-shrink-0 w-6 h-6 rounded-full bg-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/10 text-[var(--brand-primary)] text-xs font-bold flex items-center justify-center">2</span>
                 <span>We email you a checklist of the documents and details we need.</span>
               </li>
               <li className="flex items-start gap-3" data-testid="how-it-works-step-3">
-                <span className="flex-shrink-0 w-6 h-6 rounded-full bg-[#1E6A6A]/10 text-[#1E6A6A] text-xs font-bold flex items-center justify-center">3</span>
+                <span className="flex-shrink-0 w-6 h-6 rounded-full bg-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/10 text-[var(--brand-primary)] text-xs font-bold flex items-center justify-center">3</span>
                 <span className="flex items-center gap-1.5">
                   Send everything to us on WhatsApp <MessageCircle size={14} className="text-[#25D366]" /> and we file the forms for you.
                 </span>
@@ -98,7 +98,7 @@ const DocumentService = () => {
           {/* Right: payment summary */}
           <aside className="bg-white rounded-2xl p-7 border border-gray-100 h-fit md:sticky md:top-24 md:max-h-[calc(100vh-120px)] md:overflow-y-auto" data-testid="payment-panel">
             <div className="flex items-center gap-2 mb-4">
-              <FileText size={18} className="text-[#D4AF37]" />
+              <FileText size={18} className="text-[var(--gold)]" />
               <h2 className="text-base font-semibold">3. Review & pay</h2>
             </div>
             <dl className="space-y-2 text-sm mb-4">
@@ -120,7 +120,7 @@ const DocumentService = () => {
             </dl>
             <div className="border-t border-gray-100 pt-3 mb-5 flex justify-between items-baseline">
               <span className="text-sm font-semibold text-gray-700">Total</span>
-              <span className="text-2xl font-bold text-[#1E6A6A]" data-testid="service-total">${total}</span>
+              <span className="text-2xl font-bold text-[var(--brand-primary)]" data-testid="service-total">${total}</span>
             </div>
             {!valid ? (
               <p className="text-xs text-gray-500 text-center" data-testid="fill-form-hint">

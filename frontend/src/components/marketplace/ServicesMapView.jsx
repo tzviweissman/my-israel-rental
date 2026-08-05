@@ -22,8 +22,8 @@ import { useTranslation } from 'react-i18next';
 import { CITY_COORDS, resolveGigCoords } from '../../utils/servicesGeo';
 import { localizedTitle } from '../../utils/gigLocale';
 
-const TEAL = '#1E6A6A';
-const GOLD = '#D4AF37';
+const TEAL = 'var(--brand-primary)';
+const GOLD = 'var(--gold)';
 
 // Inline SVG icon — Leaflet's default asset paths break under bundlers.
 // Uses a soft drop-shadow filter so pins lift off the pale Positron tiles

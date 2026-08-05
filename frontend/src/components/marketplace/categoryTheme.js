@@ -86,7 +86,7 @@ const CATEGORY_THEME = {
 // Neutral fallback so a new category from the backend still renders
 // something reasonable even before we add a bespoke theme.
 export const DEFAULT_THEME = {
-  header: '#1E6A6A', body: '#E7EEE9',
+  header: 'var(--brand-primary)', body: '#E7EEE9',
   image: un('photo-1497366216548-37526070297c'),
 };
 

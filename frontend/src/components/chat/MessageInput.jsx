@@ -8,9 +8,9 @@ import { uploadFilesFast } from '../../utils/fastUpload';
 // Keep this list in sync — adding one here without backend support means the
 // email-ping task will never fire for it.
 const ROLES = [
-  { key: 'owner', icon: Home, color: '#1E6A6A' },
-  { key: 'renter', icon: User, color: '#1E6A6A' },
-  { key: 'manager', icon: Briefcase, color: '#D4AF37' },
+  { key: 'owner', icon: Home, color: 'var(--brand-primary)' },
+  { key: 'renter', icon: User, color: 'var(--brand-primary)' },
+  { key: 'manager', icon: Briefcase, color: 'var(--gold)' },
 ];
 
 /**
@@ -221,7 +221,7 @@ const MessageInput = ({ newMessage, setNewMessage, onSend, sending, onTyping, AP
               type="button"
               onClick={sendAttachments}
               disabled={sending}
-              className="ml-1 px-4 py-2 rounded-xl bg-[#1E6A6A] text-white text-sm font-semibold disabled:opacity-40 hover:bg-[#175555] shrink-0"
+              className="ml-1 px-4 py-2 rounded-xl bg-[var(--brand-primary)] text-white text-sm font-semibold disabled:opacity-40 hover:bg-[#175555] shrink-0"
               data-testid="send-pending-attachments"
             >
               {sending
@@ -239,7 +239,7 @@ const MessageInput = ({ newMessage, setNewMessage, onSend, sending, onTyping, AP
             type="button"
             onClick={pickPhoto}
             disabled={uploading || sending}
-            className="w-11 h-11 rounded-xl flex items-center justify-center text-[#1E6A6A] bg-gray-50 border border-gray-200 hover:bg-gray-100 disabled:opacity-50 transition-all shrink-0"
+            className="w-11 h-11 rounded-xl flex items-center justify-center text-[var(--brand-primary)] bg-gray-50 border border-gray-200 hover:bg-gray-100 disabled:opacity-50 transition-all shrink-0"
             title={t('chat.attachPhoto', 'Attach photos or a video')}
             data-testid="attach-photo-btn"
           >
@@ -267,7 +267,7 @@ const MessageInput = ({ newMessage, setNewMessage, onSend, sending, onTyping, AP
                 setTimeout(() => setMention(null), 150);
               }}
               placeholder={t('chat.messagePlaceholder')}
-              className="w-full pl-4 pr-4 py-3 rounded-xl bg-gray-50 border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#1E6A6A]/30 focus:border-[#1E6A6A] focus:bg-white text-sm transition-all placeholder:text-gray-400"
+              className="w-full pl-4 pr-4 py-3 rounded-xl bg-gray-50 border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/30 focus:border-[var(--brand-primary)] focus:bg-white text-sm transition-all placeholder:text-gray-400"
               data-testid="chat-input"
               autoComplete="off"
             />
@@ -298,7 +298,7 @@ const MessageInput = ({ newMessage, setNewMessage, onSend, sending, onTyping, AP
                         }}
                         onMouseEnter={() => setHoverIdx(idx)}
                         className={`flex items-center gap-3 px-3 py-2.5 cursor-pointer transition-colors ${
-                          active ? 'bg-[#1E6A6A]/10' : 'hover:bg-gray-50'
+                          active ? 'bg-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/10' : 'hover:bg-gray-50'
                         }`}
                         data-testid={`mention-option-${role.key}`}
                       >
@@ -326,7 +326,7 @@ const MessageInput = ({ newMessage, setNewMessage, onSend, sending, onTyping, AP
             type="submit"
             disabled={!newMessage.trim() || sending}
             className="w-11 h-11 rounded-xl flex items-center justify-center text-white disabled:opacity-30 transition-all hover:shadow-md active:scale-95 shrink-0"
-            style={{ backgroundColor: newMessage.trim() ? '#1E6A6A' : '#93a3a3' }}
+            style={{ backgroundColor: newMessage.trim() ? 'var(--brand-primary)' : '#93a3a3' }}
             data-testid="send-message-button"
           >
             <Send size={18} className={sending ? 'animate-pulse' : ''} />

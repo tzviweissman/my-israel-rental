@@ -140,7 +140,7 @@ const PropertyCard = ({
             entirely when the listing has no usable created_at. */}
         {listedAgo && (
           <p
-            className={`text-[11px] md:text-xs -mt-1 mb-2 ${fresh ? 'text-[#1E6A6A] font-semibold' : 'text-gray-400'}`}
+            className={`text-[11px] md:text-xs -mt-1 mb-2 ${fresh ? 'text-[var(--brand-primary)] font-semibold' : 'text-gray-400'}`}
             data-testid={`property-card-listed-${property.id}`}
           >
             {listedAgo}

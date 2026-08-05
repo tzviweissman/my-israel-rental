@@ -59,7 +59,7 @@ const AuthDeeplink = () => {
       data-testid="auth-deeplink-loader"
     >
       <div className="text-center">
-        <Loader2 className="mx-auto animate-spin text-[#1E6A6A]" size={32} />
+        <Loader2 className="mx-auto animate-spin text-[var(--brand-primary)]" size={32} />
         <p className="mt-3 text-sm text-gray-500">Signing you in…</p>
       </div>
     </div>

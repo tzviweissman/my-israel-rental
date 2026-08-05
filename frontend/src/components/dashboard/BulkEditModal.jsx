@@ -33,13 +33,13 @@ const FIELD_GROUPS = [
 const FieldRow = ({ field, apply, onToggleApply, value, onChange, amenitiesMode, setAmenitiesMode }) => {
   const { t } = useTranslation();
   return (
-    <div className={`rounded-xl border p-3 transition-colors ${apply ? 'border-[#1E6A6A]/40 bg-[#1E6A6A]/5' : 'border-gray-200 bg-white'}`}>
+    <div className={`rounded-xl border p-3 transition-colors ${apply ? 'border-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/40 bg-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/5' : 'border-gray-200 bg-white'}`}>
       <label className="flex items-center gap-2 cursor-pointer mb-2">
         <input
           type="checkbox"
           checked={apply}
           onChange={onToggleApply}
-          className="w-4 h-4 rounded border-gray-300 text-[#1E6A6A] focus:ring-[#1E6A6A]/30"
+          className="w-4 h-4 rounded border-gray-300 text-[var(--brand-primary)] focus:ring-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/30"
           data-testid={`bulk-edit-apply-${field}`}
         />
         <span className="text-xs font-bold text-gray-700 uppercase tracking-wider">{t(`bulk.fieldLabels.${field}`, { defaultValue: field })}</span>
@@ -51,7 +51,7 @@ const FieldRow = ({ field, apply, onToggleApply, value, onChange, amenitiesMode,
 
 const FieldEditor = ({ field, value, onChange, amenitiesMode, setAmenitiesMode }) => {
   const { t } = useTranslation();
-  const cls = 'w-full px-3 py-2 rounded-lg border border-gray-200 bg-white focus:outline-none focus:ring-2 focus:ring-[#1E6A6A]/30 focus:border-[#1E6A6A] text-sm';
+  const cls = 'w-full px-3 py-2 rounded-lg border border-gray-200 bg-white focus:outline-none focus:ring-2 focus:ring-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/30 focus:border-[var(--brand-primary)] text-sm';
 
   if (field === 'description' || field === 'custom_cancellation_policy') {
     return <textarea value={value || ''} onChange={(e) => onChange(e.target.value)} rows={3} className={cls} placeholder="…" data-testid={`bulk-edit-${field}`} />;
@@ -110,7 +110,7 @@ const FieldEditor = ({ field, value, onChange, amenitiesMode, setAmenitiesMode }
         <div className="grid grid-cols-2 gap-1.5 max-h-40 overflow-y-auto pe-1">
           {AMENITY_OPTIONS.map(a => (
             <label key={a} className="flex items-center gap-2 text-sm cursor-pointer">
-              <input type="checkbox" checked={arr.includes(a)} onChange={() => toggle(a)} className="w-3.5 h-3.5 rounded border-gray-300 text-[#1E6A6A] focus:ring-[#1E6A6A]/30" />
+              <input type="checkbox" checked={arr.includes(a)} onChange={() => toggle(a)} className="w-3.5 h-3.5 rounded border-gray-300 text-[var(--brand-primary)] focus:ring-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/30" />
               <span className="text-gray-700">{serviceLabel(t, a)}</span>
             </label>
           ))}
@@ -234,7 +234,7 @@ const BulkEditModal = ({ properties, onClose, onSaved, API, auth }) => {
           <button
             onClick={handleSave}
             disabled={saving}
-            className="px-5 py-2 rounded-lg text-sm font-semibold bg-[#1E6A6A] text-white hover:bg-[#155454] disabled:bg-gray-300 flex items-center gap-2"
+            className="px-5 py-2 rounded-lg text-sm font-semibold bg-[var(--brand-primary)] text-white hover:bg-[#155454] disabled:bg-gray-300 flex items-center gap-2"
             data-testid="bulk-edit-save"
           >
             {saving ? <Loader2 size={14} className="animate-spin" /> : <CheckCircle2 size={14} />}

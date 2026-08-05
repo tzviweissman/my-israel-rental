@@ -70,15 +70,15 @@ const PlanPicker = ({ value, onChange, disabled = false }) => {
             aria-pressed={selected}
             className={`relative text-start rounded-xl border p-3 transition-colors disabled:opacity-60 ${
               selected
-                ? 'border-[#1E6A6A] bg-[#1E6A6A]/5 ring-2 ring-[#1E6A6A]/25'
-                : 'border-gray-200 hover:border-[#1E6A6A]/40'
+                ? 'border-[var(--brand-primary)] bg-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/5 ring-2 ring-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/25'
+                : 'border-gray-200 hover:border-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/40'
             }`}
             data-testid={`plan-option-${plan.key}`}
           >
             {plan.headline && (
               <span
                 className="absolute -top-2 end-2 px-2 py-0.5 rounded-full text-[10px] font-bold text-white"
-                style={{ backgroundColor: '#1E6A6A' }}
+                style={{ backgroundColor: 'var(--brand-primary)' }}
               >
                 {t('plans.bestValue', 'Best value')}
               </span>

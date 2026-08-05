@@ -59,7 +59,7 @@ const NotificationSnooze = () => {
       <div className="bg-white border border-gray-100 rounded-2xl shadow-sm max-w-md w-full p-8">
         {status === 'loading' && (
           <div className="text-center" data-testid="snooze-loading">
-            <Loader2 className="mx-auto animate-spin text-[#1E6A6A]" size={28} />
+            <Loader2 className="mx-auto animate-spin text-[var(--brand-primary)]" size={28} />
             <p className="mt-3 text-sm text-gray-500">Applying snooze…</p>
           </div>
         )}
@@ -74,7 +74,7 @@ const NotificationSnooze = () => {
             </h1>
             <p className="text-sm text-gray-600 leading-relaxed">
               We&apos;ll stop emailing you about new{' '}
-              <span className="font-semibold text-[#1E6A6A]">{label(result.category)}</span> jobs
+              <span className="font-semibold text-[var(--brand-primary)]">{label(result.category)}</span> jobs
               for the next{' '}
               <span className="font-semibold">{daysLeft(result.until)} days</span>. You can
               undo or extend this any time.
@@ -82,7 +82,7 @@ const NotificationSnooze = () => {
             <button
               type="button"
               onClick={() => navigate('/dashboard/settings?section=notifications')}
-              className="mt-6 inline-flex items-center gap-1.5 px-5 py-2.5 rounded-lg bg-[#1E6A6A] text-white text-sm font-semibold hover:bg-[#0F3A3A]"
+              className="mt-6 inline-flex items-center gap-1.5 px-5 py-2.5 rounded-lg bg-[var(--brand-primary)] text-white text-sm font-semibold hover:bg-[#0F3A3A]"
               data-testid="snooze-goto-settings"
             >
               <Bell size={14} /> Notification settings <ArrowRight size={13} />
@@ -100,7 +100,7 @@ const NotificationSnooze = () => {
             <button
               type="button"
               onClick={() => navigate('/dashboard/settings?section=notifications')}
-              className="inline-flex items-center gap-1.5 px-5 py-2.5 rounded-lg border border-[#1E6A6A] text-[#1E6A6A] text-sm font-semibold hover:bg-[#1E6A6A]/10"
+              className="inline-flex items-center gap-1.5 px-5 py-2.5 rounded-lg border border-[var(--brand-primary)] text-[var(--brand-primary)] text-sm font-semibold hover:bg-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/10"
               data-testid="snooze-manual-settings"
             >
               Log in to manage settings <ArrowRight size={13} />

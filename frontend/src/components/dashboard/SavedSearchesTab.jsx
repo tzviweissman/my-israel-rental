@@ -125,18 +125,18 @@ const CreateAlertForm = ({ API, token, onCreated, onCancel }) => {
     }
   };
 
-  const inputCls = 'w-full px-3.5 py-2.5 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#1E6A6A]/20 focus:border-[#1E6A6A] transition-all border border-gray-200';
+  const inputCls = 'w-full px-3.5 py-2.5 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/20 focus:border-[var(--brand-primary)] transition-all border border-gray-200';
 
   return (
     <form
       onSubmit={submit}
-      className="rounded-2xl border border-[#1E6A6A]/20 bg-gradient-to-br from-white to-[#f7faf9] p-5 md:p-6 space-y-4"
+      className="rounded-2xl border border-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/20 bg-gradient-to-br from-white to-[#f7faf9] p-5 md:p-6 space-y-4"
       data-testid="create-alert-form"
     >
       <div className="flex items-start justify-between gap-3 mb-1">
         <div>
           <h3 className="text-base font-bold text-gray-900 flex items-center gap-2">
-            <Sparkles size={16} className="text-[#D4AF37]" /> {t('savedSearches.newAlertHeading')}
+            <Sparkles size={16} className="text-[var(--gold)]" /> {t('savedSearches.newAlertHeading')}
           </h3>
           <p className="text-xs text-gray-500 mt-0.5">
             {t('savedSearches.newAlertSub')}
@@ -222,7 +222,7 @@ const CreateAlertForm = ({ API, token, onCreated, onCancel }) => {
             <select
               value={form.max_price_currency}
               onChange={(e) => update('max_price_currency', e.target.value)}
-              className="px-2.5 py-2.5 rounded-l-lg text-sm bg-gray-50 border border-r-0 border-gray-200 text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#1E6A6A]/20 focus:border-[#1E6A6A] cursor-pointer"
+              className="px-2.5 py-2.5 rounded-l-lg text-sm bg-gray-50 border border-r-0 border-gray-200 text-gray-700 focus:outline-none focus:ring-2 focus:ring-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/20 focus:border-[var(--brand-primary)] cursor-pointer"
               data-testid="alert-currency"
               aria-label={t('savedSearches.currency')}
             >
@@ -275,7 +275,7 @@ const CreateAlertForm = ({ API, token, onCreated, onCancel }) => {
             role="switch"
             aria-checked={form.flexible_dates}
             onClick={() => update('flexible_dates', !form.flexible_dates)}
-            className={`relative inline-flex h-6 w-11 flex-shrink-0 items-center rounded-full transition-colors ${form.flexible_dates ? 'bg-[#1E6A6A]' : 'bg-gray-300'}`}
+            className={`relative inline-flex h-6 w-11 flex-shrink-0 items-center rounded-full transition-colors ${form.flexible_dates ? 'bg-[var(--brand-primary)]' : 'bg-gray-300'}`}
             data-testid="flexible-dates-switch"
           >
             <span
@@ -302,7 +302,7 @@ const CreateAlertForm = ({ API, token, onCreated, onCancel }) => {
             type="submit"
             disabled={submitting}
             className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold text-white transition-all hover:shadow-md disabled:opacity-50"
-            style={{ backgroundColor: '#1E6A6A' }}
+            style={{ backgroundColor: 'var(--brand-primary)' }}
             data-testid="alert-submit-btn"
           >
             <Bell size={14} />
@@ -445,7 +445,7 @@ const SavedSearchesTab = ({ API, token }) => {
   if (loading) {
     return (
       <div className="flex justify-center py-12" data-testid="saved-searches-loading">
-        <div className="w-8 h-8 border-[3px] border-[#1E6A6A] border-t-transparent rounded-full animate-spin" />
+        <div className="w-8 h-8 border-[3px] border-[var(--brand-primary)] border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
@@ -464,7 +464,7 @@ const SavedSearchesTab = ({ API, token }) => {
         <button
           onClick={() => setShowCreate((v) => !v)}
           className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold text-white transition-all hover:shadow-md"
-          style={{ backgroundColor: '#1E6A6A' }}
+          style={{ backgroundColor: 'var(--brand-primary)' }}
           data-testid="create-alert-cta"
         >
           <Sparkles size={15} />
@@ -490,7 +490,7 @@ const SavedSearchesTab = ({ API, token }) => {
         <div>
           <button
             onClick={() => setShowManage((v) => !v)}
-            className="inline-flex items-center gap-2 text-sm font-semibold text-[#1E6A6A] hover:text-[#155454] transition-colors"
+            className="inline-flex items-center gap-2 text-sm font-semibold text-[var(--brand-primary)] hover:text-[#155454] transition-colors"
             data-testid="toggle-manage-alerts"
           >
             <Settings size={14} />
@@ -524,8 +524,8 @@ const SavedSearchesTab = ({ API, token }) => {
                   >
                     <div className="flex items-start justify-between mb-1.5 gap-2">
                       <div className="flex items-center gap-1.5 min-w-0 flex-1">
-                        <Bell className="text-[#D4AF37] flex-shrink-0" size={12} />
-                        <h3 className="text-xs font-bold text-[#1E6A6A] line-clamp-1">{s.name}</h3>
+                        <Bell className="text-[var(--gold)] flex-shrink-0" size={12} />
+                        <h3 className="text-xs font-bold text-[var(--brand-primary)] line-clamp-1">{s.name}</h3>
                       </div>
                       <div className="flex items-center gap-0.5 flex-shrink-0">
                         <button
@@ -533,7 +533,7 @@ const SavedSearchesTab = ({ API, token }) => {
                             e.stopPropagation();
                             copySearchLink(s);
                           }}
-                          className="text-gray-400 hover:text-[#1E6A6A] transition-colors p-0.5"
+                          className="text-gray-400 hover:text-[var(--brand-primary)] transition-colors p-0.5"
                           data-testid={`saved-search-copy-${s.id}`}
                           aria-label={t('savedSearches.copyLink')}
                           title="Copy search link"
@@ -557,19 +557,19 @@ const SavedSearchesTab = ({ API, token }) => {
                     <div className="space-y-0.5 text-[11px] text-gray-600">
                       {f.area && (
                         <div className="flex items-center gap-1 truncate">
-                          <MapPin size={10} className="text-[#1E6A6A] flex-shrink-0" />
+                          <MapPin size={10} className="text-[var(--brand-primary)] flex-shrink-0" />
                           <span className="truncate">{areaLabel(f.area, t)}</span>
                         </div>
                       )}
                       {f.rental_type && (
                         <div className="flex items-center gap-1">
-                          <HomeIcon size={10} className="text-[#1E6A6A] flex-shrink-0" />
+                          <HomeIcon size={10} className="text-[var(--brand-primary)] flex-shrink-0" />
                           <span className="capitalize truncate">{String(f.rental_type).replace('-', ' ')}</span>
                         </div>
                       )}
                       {(f.bedrooms_min || f.max_price) && (
                         <div className="flex items-center gap-1">
-                          <DollarSign size={10} className="text-[#1E6A6A] flex-shrink-0" />
+                          <DollarSign size={10} className="text-[var(--brand-primary)] flex-shrink-0" />
                           <span className="truncate">
                             {f.bedrooms_min ? `${f.bedrooms_min}+ BR` : ''}
                             {f.bedrooms_min && f.max_price ? ' · ' : ''}
@@ -581,7 +581,7 @@ const SavedSearchesTab = ({ API, token }) => {
                       )}
                       {f.start_date && f.end_date && (
                         <div className="flex items-center gap-1">
-                          <Calendar size={10} className="text-[#1E6A6A] flex-shrink-0" />
+                          <Calendar size={10} className="text-[var(--brand-primary)] flex-shrink-0" />
                           <span className="truncate">{f.start_date} → {f.end_date}</span>
                         </div>
                       )}
@@ -607,8 +607,8 @@ const SavedSearchesTab = ({ API, token }) => {
           style={{ borderColor: '#d4cec2', background: '#fafaf8' }}
           data-testid="matches-empty"
         >
-          <div className="w-14 h-14 rounded-full bg-[#1E6A6A]/10 flex items-center justify-center mx-auto mb-4">
-            <Bell className="text-[#1E6A6A]" size={22} />
+          <div className="w-14 h-14 rounded-full bg-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/10 flex items-center justify-center mx-auto mb-4">
+            <Bell className="text-[var(--brand-primary)]" size={22} />
           </div>
           <p className="text-gray-700 font-medium mb-1">
             {searches.length === 0 ? t('dashboard.noAlerts') : t('dashboard.noNewMatches')}
@@ -638,7 +638,7 @@ const SavedSearchesTab = ({ API, token }) => {
               <div
                 key={m.id}
                 onClick={() => navigate(`/property/${m.property_id}`)}
-                className="text-left rounded-2xl bg-white overflow-hidden border border-gray-100 transition-all hover:shadow-lg hover:border-[#D4AF37]/40 cursor-pointer relative group"
+                className="text-left rounded-2xl bg-white overflow-hidden border border-gray-100 transition-all hover:shadow-lg hover:border-[rgb(var(--gold-rgb)/<alpha-value>)]/40 cursor-pointer relative group"
                 data-testid={`alert-match-${m.property_id}`}
                 role="button"
                 tabIndex={0}
@@ -677,14 +677,14 @@ const SavedSearchesTab = ({ API, token }) => {
                     </div>
                   )}
                   <span
-                    className="absolute top-2 left-2 px-2 py-1 rounded-full text-[10px] font-bold tracking-wide text-[#1E6A6A]"
-                    style={{ backgroundColor: '#D4AF37' }}
+                    className="absolute top-2 left-2 px-2 py-1 rounded-full text-[10px] font-bold tracking-wide text-[var(--brand-primary)]"
+                    style={{ backgroundColor: 'var(--gold)' }}
                   >
                     {reasonLabel}
                   </span>
                 </div>
                 <div className="p-4 space-y-1.5">
-                  <p className="text-[11px] text-[#D4AF37] font-bold uppercase tracking-wider line-clamp-1">
+                  <p className="text-[11px] text-[var(--gold)] font-bold uppercase tracking-wider line-clamp-1">
                     {m.search_name}
                   </p>
                   <p className="text-sm font-bold text-gray-900 line-clamp-1">
@@ -708,7 +708,7 @@ const SavedSearchesTab = ({ API, token }) => {
                     )}
                   </div>
                   {priceLabel && (
-                    <p className="text-sm font-semibold text-[#1E6A6A] pt-1">{priceLabel}</p>
+                    <p className="text-sm font-semibold text-[var(--brand-primary)] pt-1">{priceLabel}</p>
                   )}
                 </div>
               </div>

@@ -36,7 +36,7 @@ const GovernmentServicesTab = () => {
       </h2>
 
       <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden shadow-sm">
-        <div className="bg-gradient-to-r from-[#D4AF37] to-[#c4a030] px-6 py-5">
+        <div className="bg-gradient-to-r from-[var(--gold)] to-[#c4a030] px-6 py-5">
           <div className="flex items-center gap-3">
             <div className="w-12 h-12 rounded-xl bg-white/20 flex items-center justify-center backdrop-blur-sm">
               <FileCheck size={24} className="text-white" />
@@ -66,16 +66,16 @@ const GovernmentServicesTab = () => {
                       key={svc.key}
                       type="button"
                       onClick={() => toggle(svc.key)}
-                      className={`w-full text-left flex items-start gap-3 rounded-xl border p-4 transition-all ${isOn ? 'border-[#1E6A6A] bg-[#1E6A6A]/5' : 'border-gray-200 hover:border-gray-300'}`}
+                      className={`w-full text-left flex items-start gap-3 rounded-xl border p-4 transition-all ${isOn ? 'border-[var(--brand-primary)] bg-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/5' : 'border-gray-200 hover:border-gray-300'}`}
                       data-testid={`service-option-${svc.key}`}
                     >
-                      <div className={`mt-0.5 w-5 h-5 rounded-md flex items-center justify-center flex-shrink-0 ${isOn ? 'bg-[#1E6A6A] text-white' : 'border-2 border-gray-300 bg-white'}`}>
+                      <div className={`mt-0.5 w-5 h-5 rounded-md flex items-center justify-center flex-shrink-0 ${isOn ? 'bg-[var(--brand-primary)] text-white' : 'border-2 border-gray-300 bg-white'}`}>
                         {isOn && <Check size={12} strokeWidth={3} />}
                       </div>
                       <div className="flex-1">
                         <div className="flex items-center justify-between gap-3">
                           <p className="text-sm font-semibold text-gray-900">{svc.label}</p>
-                          <span className="text-sm font-semibold text-[#1E6A6A]">${svc.price}</span>
+                          <span className="text-sm font-semibold text-[var(--brand-primary)]">${svc.price}</span>
                         </div>
                         <p className="text-xs text-gray-500 mt-1">{svc.hint}</p>
                       </div>
@@ -131,7 +131,7 @@ const GovernmentServicesTab = () => {
               </dl>
               <div className="border-t border-gray-100 pt-3 mb-4 flex justify-between items-baseline">
                 <span className="text-sm font-semibold text-gray-700">Total</span>
-                <span className="text-2xl font-bold text-[#1E6A6A]" data-testid="service-total">${total}</span>
+                <span className="text-2xl font-bold text-[var(--brand-primary)]" data-testid="service-total">${total}</span>
               </div>
               {!valid ? (
                 <p className="text-xs text-gray-500 text-center" data-testid="fill-form-hint">

@@ -11,8 +11,8 @@ import { canPublishGigs } from '../../utils/providerTrial';
 const BASE =
   'flex-shrink-0 py-2.5 px-3 md:px-4 rounded-lg text-xs md:text-sm font-medium transition-all whitespace-nowrap';
 const INACTIVE = 'text-gray-500 hover:text-gray-700';
-const ACTIVE_TEAL = 'bg-white text-[#1E6A6A] shadow-sm';
-const ACTIVE_GOLD = 'bg-white text-[#D4AF37] shadow-sm';
+const ACTIVE_TEAL = 'bg-white text-[var(--brand-primary)] shadow-sm';
+const ACTIVE_GOLD = 'bg-white text-[var(--gold)] shadow-sm';
 const ACTIVE_RED = 'bg-white text-red-500 shadow-sm';
 
 const cls = (active, activeColor = ACTIVE_TEAL) =>

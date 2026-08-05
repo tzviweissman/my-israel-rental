@@ -72,7 +72,7 @@ const SignContract = () => {
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <Loader2 size={32} className="animate-spin text-[#1E6A6A]" />
+        <Loader2 size={32} className="animate-spin text-[var(--brand-primary)]" />
       </div>
     );
   }
@@ -94,14 +94,14 @@ const SignContract = () => {
       <div className="max-w-2xl mx-auto">
         {/* Header */}
         <div className="text-center mb-6">
-          <h1 className="text-2xl font-bold text-[#1E6A6A]" style={{ fontFamily: 'Playfair Display' }}>MyIsraelRental</h1>
-          <p className="text-xs text-[#D4AF37] tracking-widest uppercase mt-1">{t('sign.subleaseContract')}</p>
+          <h1 className="text-2xl font-bold text-[var(--brand-primary)]" style={{ fontFamily: 'Playfair Display' }}>MyIsraelRental</h1>
+          <p className="text-xs text-[var(--gold)] tracking-widest uppercase mt-1">{t('sign.subleaseContract')}</p>
         </div>
 
         {/* Contract Card */}
         <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden" data-testid="sign-contract-card">
           {/* Title Bar */}
-          <div className="bg-gradient-to-r from-[#1E6A6A] to-[#267a7a] px-6 py-5">
+          <div className="bg-gradient-to-r from-[var(--brand-primary)] to-[#267a7a] px-6 py-5">
             <div className="flex items-center gap-3">
               <div className="w-11 h-11 rounded-xl bg-white/20 flex items-center justify-center">
                 <FileText size={22} className="text-white" />
@@ -128,7 +128,7 @@ const SignContract = () => {
                   </span>
                 )}
                 {contract.sublease.price > 0 && (
-                  <span className="flex items-center gap-1 font-semibold" style={{ color: '#D4AF37' }}>
+                  <span className="flex items-center gap-1 font-semibold" style={{ color: 'var(--gold)' }}>
                     <DollarSign size={12} />
                     {contract.sublease.currency === 'USD' ? '$' : '₪'}{contract.sublease.price.toLocaleString()}{contract.sublease.price_type === 'per_night' ? t('sign.perNightSuffix') : t('sign.totalSuffix')}
                   </span>
@@ -143,7 +143,7 @@ const SignContract = () => {
               <div>
                 <button
                   onClick={() => setShowText(!showText)}
-                  className="flex items-center gap-2 text-sm font-medium text-[#1E6A6A] hover:underline mb-2"
+                  className="flex items-center gap-2 text-sm font-medium text-[var(--brand-primary)] hover:underline mb-2"
                 >
                   <FileText size={14} />
                   {showText ? t('sign.hideText') : t('sign.viewText')}
@@ -159,7 +159,7 @@ const SignContract = () => {
             {/* Download */}
             <button
               onClick={downloadContract}
-              className="flex items-center gap-2 px-4 py-2 rounded-xl border border-gray-200 text-sm font-medium text-gray-700 hover:border-[#1E6A6A] hover:text-[#1E6A6A] transition-colors"
+              className="flex items-center gap-2 px-4 py-2 rounded-xl border border-gray-200 text-sm font-medium text-gray-700 hover:border-[var(--brand-primary)] hover:text-[var(--brand-primary)] transition-colors"
               data-testid="download-contract-btn"
             >
               <Download size={16} /> {t('sign.downloadContract')}
@@ -189,7 +189,7 @@ const SignContract = () => {
             {!signed ? (
               <div className="bg-gray-50 rounded-xl p-5 border border-gray-200" data-testid="signing-section">
                 <div className="flex items-center gap-2 mb-4">
-                  <PenTool size={18} className="text-[#D4AF37]" />
+                  <PenTool size={18} className="text-[var(--gold)]" />
                   <h4 className="text-base font-bold text-gray-800">{t('sign.signThisContract')}</h4>
                 </div>
 
@@ -201,7 +201,7 @@ const SignContract = () => {
                       value={signerName}
                       onChange={(e) => setSignerName(e.target.value)}
                       placeholder={t('sign.fullLegalNamePlaceholder')}
-                      className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/30 focus:border-[#D4AF37] text-sm"
+                      className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[rgb(var(--gold-rgb)/<alpha-value>)]/30 focus:border-[var(--gold)] text-sm"
                       data-testid="signer-name-input"
                     />
                   </div>
@@ -211,7 +211,7 @@ const SignContract = () => {
                     <div className="bg-white rounded-xl border-2 border-dashed border-gray-300 overflow-hidden">
                       <SignatureCanvas
                         ref={sigCanvasRef}
-                        penColor="#1E6A6A"
+                        penColor="var(--brand-primary)"
                         canvasProps={{
                           width: 600,
                           height: 160,
@@ -232,7 +232,7 @@ const SignContract = () => {
                     onClick={handleSign}
                     disabled={signing}
                     className="w-full flex items-center justify-center gap-2 py-3 rounded-xl text-white font-medium text-sm disabled:opacity-50 transition-all hover:shadow-lg"
-                    style={{ backgroundColor: '#D4AF37' }}
+                    style={{ backgroundColor: 'var(--gold)' }}
                     data-testid="confirm-sign-btn"
                   >
                     {signing ? (

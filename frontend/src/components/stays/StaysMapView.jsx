@@ -16,8 +16,8 @@ import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { areaLabel } from '../../utils/areaNames';
 
-const TEAL = '#1E6A6A';
-const GOLD = '#D4AF37';
+const TEAL = 'var(--brand-primary)';
+const GOLD = 'var(--gold)';
 
 // Israel-centric fallback bounds — used when we have no pins yet so the
 // map opens on-country instead of the middle of the Atlantic.

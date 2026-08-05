@@ -400,8 +400,8 @@ const en = {
       home: {
         featuredProperties: 'Featured Properties',
         aboutUs: 'About Us',
-        aboutPara1: '<span style="color:#D4AF37;font-weight:700">My Israel Rental</span> is transforming the rental landscape in Israel, offering a seamless, free, and efficient way to find apartments. Our mission is to simplify the renting process, ensuring that both tenants and property owners save time, money, and energy. With an intuitive platform that tailors property suggestions to your needs, we stand out as the go-to solution for finding the perfect home in Israel.',
-        aboutPara2: 'Inspired by the success of platforms like Airbnb and Zillow, <span style="color:#D4AF37;font-weight:700">My Israel Rental</span> is designed to cater specifically to the Israeli market, providing long-term rentals, short-term rentals, vacation rentals, and even machsan (storage space) rentals. We aim to make the process fluid, user-friendly, and free, creating a hassle-free experience for everyone involved.',
+        aboutPara1: '<span style="color:var(--gold);font-weight:700">My Israel Rental</span> is transforming the rental landscape in Israel, offering a seamless, free, and efficient way to find apartments. Our mission is to simplify the renting process, ensuring that both tenants and property owners save time, money, and energy. With an intuitive platform that tailors property suggestions to your needs, we stand out as the go-to solution for finding the perfect home in Israel.',
+        aboutPara2: 'Inspired by the success of platforms like Airbnb and Zillow, <span style="color:var(--gold);font-weight:700">My Israel Rental</span> is designed to cater specifically to the Israeli market, providing long-term rentals, short-term rentals, vacation rentals, and even machsan (storage space) rentals. We aim to make the process fluid, user-friendly, and free, creating a hassle-free experience for everyone involved.',
         contactUs: 'Contact Us',
         phone: 'Phone',
         email: 'Email',

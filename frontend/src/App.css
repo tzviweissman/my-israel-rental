@@ -64,8 +64,8 @@
 
 .property-card:hover {
   transform: translateY(-4px);
-  box-shadow: 0 10px 40px rgba(212, 175, 55, 0.2);
-  border-color: #D4AF37;
+  box-shadow: 0 10px 40px rgba(201, 162, 39, 0.2);
+  border-color: var(--gold);
 }
 
 .glassmorphism {
@@ -75,12 +75,12 @@
 }
 
 :root {
-  /* Brand gold (#D4AF37) fails WCAG AA (4.5:1) as TEXT on the solid
+  /* Brand gold (var(--gold)) fails WCAG AA (4.5:1) as TEXT on the solid
      backgrounds it's paired with elsewhere (white cards ~2.1:1, the
      scrolled-nav teal ~3:1) — decorative use (borders, icons, fills)
      is unaffected and keeps the original brand color. */
   --gold-text-on-light: #8B6914; /* ~5.1:1 on white */
-  --gold-text-on-dark: #F0DA8C;  /* ~4.5:1 on #1E6A6A */
+  --gold-text-on-dark: #F0DA8C;  /* ~4.5:1 on var(--brand-primary) */
 }
 
 [dir="rtl"] {
@@ -128,12 +128,12 @@ input[type="date"]::-moz-calendar-picker-indicator {
 
 /* Date input hover effect */
 input[type="date"]:hover {
-  box-shadow: 0 4px 12px rgba(30, 106, 106, 0.08);
+  box-shadow: 0 4px 12px rgba(30, 95, 140, 0.08);
 }
 
 /* Date input focus state */
 input[type="date"]:focus {
-  box-shadow: 0 0 0 3px rgba(30, 106, 106, 0.1), 0 4px 12px rgba(30, 106, 106, 0.15);
+  box-shadow: 0 0 0 3px rgba(30, 95, 140, 0.1), 0 4px 12px rgba(30, 95, 140, 0.15);
 }
 
 /* Placeholder styling for empty date */

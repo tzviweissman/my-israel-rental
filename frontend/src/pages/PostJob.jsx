@@ -97,7 +97,7 @@ const PostJob = () => {
               value={form.title}
               onChange={(e) => set({ title: e.target.value })}
               placeholder="e.g. Need someone to move a 2BR apartment on July 20th"
-              className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-[#1E6A6A]/30"
+              className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/30"
               data-testid="post-job-title"
             />
           </Field>
@@ -113,7 +113,7 @@ const PostJob = () => {
                   type="button"
                   onClick={() => set({ category: c.slug, subcategory: '' })}
                   className={`px-3 py-2 rounded-lg text-xs font-semibold border transition-colors ${
-                    form.category === c.slug ? 'bg-black text-[#D4AF37] border-black' : 'bg-white text-gray-700 border-gray-200 hover:border-[#D4AF37]'
+                    form.category === c.slug ? 'bg-black text-[var(--gold)] border-black' : 'bg-white text-gray-700 border-gray-200 hover:border-[var(--gold)]'
                   }`}
                   data-testid={`post-job-cat-${c.slug}`}
                 >
@@ -137,7 +137,7 @@ const PostJob = () => {
                     type="button"
                     onClick={() => set({ subcategory: form.subcategory === s.slug ? '' : s.slug })}
                     className={`px-3 py-1.5 rounded-full text-xs font-semibold border transition-colors ${
-                      form.subcategory === s.slug ? 'bg-[#1E6A6A] text-white border-[#1E6A6A]' : 'bg-white text-gray-700 border-gray-200 hover:border-[#1E6A6A]'
+                      form.subcategory === s.slug ? 'bg-[var(--brand-primary)] text-white border-[var(--brand-primary)]' : 'bg-white text-gray-700 border-gray-200 hover:border-[var(--brand-primary)]'
                     }`}
                     data-testid={`post-job-sub-${s.slug}`}
                   >
@@ -154,7 +154,7 @@ const PostJob = () => {
               onChange={(e) => set({ description: e.target.value })}
               rows={5}
               placeholder="What's the scope? Any constraints? What does a great outcome look like?"
-              className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-[#1E6A6A]/30"
+              className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/30"
               data-testid="post-job-description"
             />
           </Field>
@@ -170,7 +170,7 @@ const PostJob = () => {
                   type="button"
                   onClick={() => set({ budget_type: o.v })}
                   className={`flex-1 px-3 py-2 rounded-lg text-sm font-semibold border ${
-                    form.budget_type === o.v ? 'bg-[#1E6A6A] text-white border-[#1E6A6A]' : 'bg-white text-gray-700 border-gray-200 hover:border-[#D4AF37]'
+                    form.budget_type === o.v ? 'bg-[var(--brand-primary)] text-white border-[var(--brand-primary)]' : 'bg-white text-gray-700 border-gray-200 hover:border-[var(--gold)]'
                   }`}
                   data-testid={`post-job-budget-${o.v}`}
                 >
@@ -187,7 +187,7 @@ const PostJob = () => {
                   <select
                     value={form.budget_currency}
                     onChange={(e) => set({ budget_currency: e.target.value })}
-                    className="appearance-none pl-7 pr-6 py-2 rounded-lg border border-gray-200 text-sm bg-white cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#1E6A6A]/30"
+                    className="appearance-none pl-7 pr-6 py-2 rounded-lg border border-gray-200 text-sm bg-white cursor-pointer focus:outline-none focus:ring-2 focus:ring-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/30"
                     data-testid="post-job-currency"
                   >
                     <option value="ILS">ILS</option>
@@ -234,7 +234,7 @@ const PostJob = () => {
             type="button"
             disabled={!canSubmit || saving}
             onClick={submit}
-            className="px-5 py-2.5 rounded-lg text-sm font-semibold text-white bg-[#1E6A6A] disabled:opacity-40 flex items-center gap-1"
+            className="px-5 py-2.5 rounded-lg text-sm font-semibold text-white bg-[var(--brand-primary)] disabled:opacity-40 flex items-center gap-1"
             data-testid="post-job-submit"
           >
             {saving ? <><Loader2 className="animate-spin" size={14} /> Posting…</> : <>Post job <ArrowRight size={14} /></>}

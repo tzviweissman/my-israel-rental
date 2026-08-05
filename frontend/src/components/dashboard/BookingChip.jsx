@@ -118,7 +118,7 @@ const BookingChip = ({
           <button
             onClick={() => onSignContract(b.id)}
             className="px-2.5 py-1.5 rounded-md text-[11px] font-semibold text-white inline-flex items-center gap-1"
-            style={{ backgroundColor: '#D4AF37' }}
+            style={{ backgroundColor: 'var(--gold)' }}
             data-testid={`sign-contract-${b.id}`}
           >
             <FileText size={12} />
@@ -140,7 +140,7 @@ const BookingChip = ({
             <button
               type="button"
               onClick={() => openSigned(true)}
-              className="px-2.5 py-1.5 rounded-md text-[11px] font-semibold text-white bg-[#1E6A6A] hover:bg-[#175555] inline-flex items-center gap-1"
+              className="px-2.5 py-1.5 rounded-md text-[11px] font-semibold text-white bg-[var(--brand-primary)] hover:bg-[#175555] inline-flex items-center gap-1"
               data-testid={`download-signed-contract-${b.id}`}
             >
               <Download size={12} />
@@ -153,7 +153,7 @@ const BookingChip = ({
           <button
             onClick={() => onAccept(b.id)}
             className="px-2.5 py-1.5 rounded-md text-[11px] font-semibold text-white inline-flex items-center gap-1"
-            style={{ backgroundColor: '#1E6A6A' }}
+            style={{ backgroundColor: 'var(--brand-primary)' }}
             data-testid={`accept-booking-${b.id}`}
           >
             <CheckCircle2 size={12} />
@@ -207,7 +207,7 @@ const BookingChip = ({
         {/* Chat shortcut — always visible */}
         <a
           href={`/chat/${b.property_id}?with=${ownsAsLister ? b.renter_id : b.owner_id}`}
-          className="px-2.5 py-1.5 rounded-md text-[11px] font-semibold text-[#1E6A6A] border border-[#1E6A6A] hover:bg-[#1E6A6A]/5 inline-flex items-center gap-1"
+          className="px-2.5 py-1.5 rounded-md text-[11px] font-semibold text-[var(--brand-primary)] border border-[var(--brand-primary)] hover:bg-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/5 inline-flex items-center gap-1"
           data-testid={`booking-message-${b.id}`}
         >
           <MessageCircle size={12} />

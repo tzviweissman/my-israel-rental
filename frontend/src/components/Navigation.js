@@ -324,7 +324,7 @@ const Navigation = () => {
       data-testid="global-nav"
       className="fixed top-0 left-0 right-0 z-50 transition-all duration-300"
       style={{
-        background: scrolled ? '#1E6A6A' : 'transparent',
+        background: scrolled ? 'var(--brand-primary)' : 'transparent',
         boxShadow: scrolled ? '0 2px 20px rgba(0,0,0,0.3)' : 'none'
       }}
     >
@@ -387,7 +387,7 @@ const Navigation = () => {
                 <button
                   onClick={() => navigate('/auth/login')}
                   className="text-xs sm:text-sm font-semibold px-3 py-1.5 rounded-full hover:bg-white/10 transition-colors"
-                  style={{ color: '#D4AF37' }}
+                  style={{ color: 'var(--gold)' }}
                   data-testid="nav-login-top"
                 >
                   {t('nav.login', 'Sign In')}
@@ -395,7 +395,7 @@ const Navigation = () => {
                 <button
                   onClick={() => navigate('/signup')}
                   className="text-xs sm:text-sm font-bold px-3 py-1.5 rounded-full transition-all hover:shadow-md"
-                  style={{ backgroundColor: '#D4AF37', color: '#1E6A6A' }}
+                  style={{ backgroundColor: 'var(--gold)', color: 'var(--brand-primary)' }}
                   data-testid="nav-signup-top"
                 >
                   {t('nav.signup', 'Sign Up')}
@@ -413,10 +413,10 @@ const Navigation = () => {
               aria-label={t('nav.toggleLanguage')}
               title={i18n.language.startsWith('he') ? 'Switch to English' : 'Switch to Hebrew'}
             >
-              <Globe size={scrolled ? 20 : 22} color="#D4AF37" />
+              <Globe size={scrolled ? 20 : 22} color="var(--gold)" />
               <span
                 className="text-[10px] font-bold tracking-wide"
-                style={{ color: '#D4AF37' }}
+                style={{ color: 'var(--gold)' }}
               >
                 {i18n.language.startsWith('he') ? 'EN' : 'עב'}
               </span>
@@ -431,7 +431,7 @@ const Navigation = () => {
                 aria-label="Messages"
                 title="Messages"
               >
-                <MessageCircle size={scrolled ? 20 : 22} color="#D4AF37" />
+                <MessageCircle size={scrolled ? 20 : 22} color="var(--gold)" />
                 {unreadConversations > 0 && (
                   <span
                     className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center"
@@ -454,7 +454,7 @@ const Navigation = () => {
                   className="relative p-2 rounded-full hover:bg-white/10 transition-colors"
                   data-testid="notification-bell"
                 >
-                  <Bell size={scrolled ? 20 : 22} color="#D4AF37" />
+                  <Bell size={scrolled ? 20 : 22} color="var(--gold)" />
                   {unreadCount > 0 && (
                     <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
                       {unreadCount > 9 ? '9+' : unreadCount}
@@ -470,19 +470,19 @@ const Navigation = () => {
                   <div
                     className="fixed sm:absolute left-4 right-4 sm:left-auto sm:right-0 top-[64px] sm:top-full sm:mt-3 sm:w-96 max-w-md max-h-[70vh] sm:max-h-[500px] overflow-y-auto rounded-2xl z-50"
                     style={{
-                      backgroundColor: '#1E6A6A',
-                      border: '1.5px solid rgba(212,175,55,0.25)',
+                      backgroundColor: 'var(--brand-primary)',
+                      border: '1.5px solid rgba(201, 162, 39,0.25)',
                       boxShadow: '0 16px 48px rgba(0,0,0,0.5)'
                     }}
                     data-testid="notification-dropdown"
                   >
-                    <div className="sticky top-0 bg-[#1E6A6A] border-b border-[#D4AF37]/20 p-3 sm:p-4 flex items-center justify-between">
+                    <div className="sticky top-0 bg-[var(--brand-primary)] border-b border-[rgb(var(--gold-rgb)/<alpha-value>)]/20 p-3 sm:p-4 flex items-center justify-between">
                       <h3 className="text-white font-bold text-sm">Notifications</h3>
                       <div className="flex items-center gap-2">
                         {unreadCount > 0 && (
                           <button
                             onClick={markAllAsRead}
-                            className="text-xs text-[#D4AF37] hover:text-[#D4AF37]/80 transition-colors whitespace-nowrap"
+                            className="text-xs text-[var(--gold)] hover:text-[rgb(var(--gold-rgb)/<alpha-value>)]/80 transition-colors whitespace-nowrap"
                           >
                             Mark all as read
                           </button>
@@ -521,7 +521,7 @@ const Navigation = () => {
                             >
                               <div className="flex items-start gap-2 sm:gap-3 pr-7">
                                 <div className={`w-2 h-2 rounded-full mt-2 flex-shrink-0 ${
-                                  !notification.read ? 'bg-[#D4AF37]' : 'bg-transparent'
+                                  !notification.read ? 'bg-[var(--gold)]' : 'bg-transparent'
                                 }`} />
                                 <div className="flex-1 min-w-0">
                                   <p className={`text-xs sm:text-sm break-words ${!notification.read ? 'text-white font-medium' : 'text-white/70'}`}>
@@ -562,13 +562,13 @@ const Navigation = () => {
                 className="flex items-center gap-2 rounded-xl transition-all duration-200"
               style={{
                 backgroundColor: 'transparent',
-                border: '1.5px solid #D4AF37',
+                border: '1.5px solid var(--gold)',
                 padding: scrolled ? '6px 14px' : '10px 18px'
               }}
               data-testid="nav-menu-button"
             >
-              {menuOpen ? <X size={scrolled ? 16 : 18} color="#D4AF37" /> : <Menu size={scrolled ? 16 : 18} color="#D4AF37" />}
-              <span className="hidden sm:inline font-semibold tracking-wide" style={{ color: '#D4AF37', fontSize: scrolled ? '12px' : '14px' }}>{t('nav.menu')}</span>
+              {menuOpen ? <X size={scrolled ? 16 : 18} color="var(--gold)" /> : <Menu size={scrolled ? 16 : 18} color="var(--gold)" />}
+              <span className="hidden sm:inline font-semibold tracking-wide" style={{ color: 'var(--gold)', fontSize: scrolled ? '12px' : '14px' }}>{t('nav.menu')}</span>
             </button>
 
             {menuOpen && (
@@ -582,9 +582,9 @@ const Navigation = () => {
                 // so the rounded corners still clip.
                 className="absolute end-0 top-full mt-3 w-72 rounded-2xl overflow-y-auto overflow-x-hidden max-h-[calc(100vh-96px)] sm:max-h-[80vh] z-[60] overscroll-contain"
                 style={{
-                  backgroundColor: '#1E6A6A',
-                  border: '1.5px solid rgba(212,175,55,0.25)',
-                  boxShadow: '0 16px 48px rgba(0,0,0,0.5), 0 0 0 1px rgba(212,175,55,0.08)'
+                  backgroundColor: 'var(--brand-primary)',
+                  border: '1.5px solid rgba(201, 162, 39,0.25)',
+                  boxShadow: '0 16px 48px rgba(0,0,0,0.5), 0 0 0 1px rgba(201, 162, 39,0.08)'
                 }}
                 data-testid="nav-menu-dropdown"
               >
@@ -598,24 +598,24 @@ const Navigation = () => {
                   <button
                     onClick={() => { toggleLanguage(); setMenuOpen(false); }}
                     className="w-full flex items-center gap-2.5 px-4 py-2.5 border-b transition-colors hover:bg-white/5"
-                    style={{ borderColor: 'rgba(212,175,55,0.15)' }}
+                    style={{ borderColor: 'rgba(201, 162, 39,0.15)' }}
                     data-testid="nav-language-sync-pill"
                     title={t('nav.toggleLanguage')}
                   >
                     <div
                       className="w-7 h-7 rounded-full flex items-center justify-center"
-                      style={{ backgroundColor: 'rgba(212,175,55,0.18)' }}
+                      style={{ backgroundColor: 'rgba(201, 162, 39,0.18)' }}
                     >
-                      <Globe size={14} style={{ color: '#D4AF37' }} />
+                      <Globe size={14} style={{ color: 'var(--gold)' }} />
                     </div>
                     <div className="flex-1 text-left">
-                      <p className="text-xs font-semibold" style={{ color: '#D4AF37' }}>
+                      <p className="text-xs font-semibold" style={{ color: 'var(--gold)' }}>
                         {i18n.language.startsWith('he') ? t('nav.hebrew') : t('nav.english')}
                         <span className="ml-1.5 opacity-50 font-normal">
                           · {t('nav.switchTo')}{i18n.language.startsWith('he') ? ' English' : ' עברית'}
                         </span>
                       </p>
-                      <p className="text-[10px] flex items-center gap-1 mt-0.5" style={{ color: 'rgba(212,175,55,0.55)' }}>
+                      <p className="text-[10px] flex items-center gap-1 mt-0.5" style={{ color: 'rgba(201, 162, 39,0.55)' }}>
                         <span
                           className="inline-block w-1.5 h-1.5 rounded-full"
                           style={{ backgroundColor: '#10B981' }}
@@ -630,40 +630,40 @@ const Navigation = () => {
                 {/* Stays + Services + Holiday quick-links (mobile drawer).
                     Storage rentals have been retired so the entry is gone. */}
                 <div className="px-2 pt-3 pb-1">
-                  <p className="px-3 mb-1.5 text-[10px] font-bold tracking-[0.1em] uppercase" style={{ color: 'rgba(212,175,55,0.45)' }}>
+                  <p className="px-3 mb-1.5 text-[10px] font-bold tracking-[0.1em] uppercase" style={{ color: 'rgba(201, 162, 39,0.45)' }}>
                     {t('nav.browse', 'Browse')}
                   </p>
-                  <button onClick={() => handleNav('/stays')} className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-150 hover:bg-white/5 group" style={{ color: '#D4AF37' }} data-testid="nav-stays">
+                  <button onClick={() => handleNav('/stays')} className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-150 hover:bg-white/5 group" style={{ color: 'var(--gold)' }} data-testid="nav-stays">
                     <Bed size={16} className="opacity-60 group-hover:opacity-100" />
                     <span>{t('nav.stays', 'Stays')}</span>
                     <ChevronRight size={14} className="ml-auto opacity-0 group-hover:opacity-60 transition-opacity" />
                   </button>
-                  <button onClick={() => handleNav('/services')} className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-150 hover:bg-white/5 group" style={{ color: '#D4AF37' }} data-testid="nav-services">
+                  <button onClick={() => handleNav('/services')} className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-150 hover:bg-white/5 group" style={{ color: 'var(--gold)' }} data-testid="nav-services">
                     <Briefcase size={16} className="opacity-60 group-hover:opacity-100" />
                     <span>{t('nav.services', 'Services')}</span>
                     <ChevronRight size={14} className="ml-auto opacity-0 group-hover:opacity-60 transition-opacity" />
                   </button>
                 </div>
 
-                <div className="mx-4 border-t" style={{ borderColor: 'rgba(212,175,55,0.15)' }} />
+                <div className="mx-4 border-t" style={{ borderColor: 'rgba(201, 162, 39,0.15)' }} />
 
                 {/* Help / FAQ */}
                 <div className="px-2 py-2">
-                  <button onClick={() => handleNav('/faq')} className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-150 hover:bg-white/5 group" style={{ color: '#D4AF37' }} data-testid="nav-faq">
+                  <button onClick={() => handleNav('/faq')} className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-150 hover:bg-white/5 group" style={{ color: 'var(--gold)' }} data-testid="nav-faq">
                     <HelpCircle size={16} className="opacity-60 group-hover:opacity-100" />
                     <span>{t('nav.faq')}</span>
                     <ChevronRight size={14} className="ml-auto opacity-0 group-hover:opacity-60 transition-opacity" />
                   </button>
                 </div>
 
-                <div className="mx-4 border-t" style={{ borderColor: 'rgba(212,175,55,0.15)' }} />
+                <div className="mx-4 border-t" style={{ borderColor: 'rgba(201, 162, 39,0.15)' }} />
 
                 {/* Language switch — mobile only (desktop has the icon in the top nav) */}
                 <div className="sm:hidden px-2 py-2">
                   <button
                     onClick={() => { toggleLanguage(); setMenuOpen(false); }}
                     className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-150 hover:bg-white/5 group"
-                    style={{ color: '#D4AF37' }}
+                    style={{ color: 'var(--gold)' }}
                     data-testid="nav-language-toggle-mobile"
                   >
                     <Globe size={16} className="opacity-60 group-hover:opacity-100" />
@@ -672,29 +672,29 @@ const Navigation = () => {
                   </button>
                 </div>
 
-                <div className="sm:hidden mx-4 border-t" style={{ borderColor: 'rgba(212,175,55,0.15)' }} />
+                <div className="sm:hidden mx-4 border-t" style={{ borderColor: 'rgba(201, 162, 39,0.15)' }} />
 
                 {/* Settings */}
                 <div className="px-2 py-2">
                   {user ? (
                     <>
-                      <button onClick={() => handleNav(user.role === 'admin' ? '/admin' : '/dashboard')} className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-150 hover:bg-white/5 group" style={{ color: '#D4AF37' }} data-testid="nav-dashboard">
+                      <button onClick={() => handleNav(user.role === 'admin' ? '/admin' : '/dashboard')} className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-150 hover:bg-white/5 group" style={{ color: 'var(--gold)' }} data-testid="nav-dashboard">
                         <LayoutDashboard size={16} className="opacity-60 group-hover:opacity-100" />
                         <span>{t('nav.dashboard')}</span>
                         <ChevronRight size={14} className="ml-auto opacity-0 group-hover:opacity-60 transition-opacity" />
                       </button>
-                      <button onClick={handleLogout} className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-150 hover:bg-white/5 group" style={{ color: '#D4AF37' }} data-testid="nav-logout">
+                      <button onClick={handleLogout} className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-150 hover:bg-white/5 group" style={{ color: 'var(--gold)' }} data-testid="nav-logout">
                         <LogOut size={16} className="opacity-60 group-hover:opacity-100" />
                         <span>{t('nav.logout')}</span>
                       </button>
                     </>
                   ) : (
                     <>
-                      <button onClick={() => handleNav('/auth/login')} className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-150 hover:bg-white/5 group" style={{ color: '#D4AF37' }} data-testid="nav-login">
+                      <button onClick={() => handleNav('/auth/login')} className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-150 hover:bg-white/5 group" style={{ color: 'var(--gold)' }} data-testid="nav-login">
                         <span className="w-4 h-4 flex items-center justify-center opacity-60 group-hover:opacity-100 text-xs">&#x2192;</span>
                         <span>{t('nav.login')}</span>
                       </button>
-                      <button onClick={() => handleNav('/signup')} className="w-full mt-1 py-2.5 rounded-lg text-sm font-bold tracking-wide transition-all duration-200 hover:shadow-lg" style={{ backgroundColor: '#D4AF37', color: '#1E6A6A' }} data-testid="nav-signup">
+                      <button onClick={() => handleNav('/signup')} className="w-full mt-1 py-2.5 rounded-lg text-sm font-bold tracking-wide transition-all duration-200 hover:shadow-lg" style={{ backgroundColor: 'var(--gold)', color: 'var(--brand-primary)' }} data-testid="nav-signup">
                         {t('nav.signup')}
                       </button>
                     </>

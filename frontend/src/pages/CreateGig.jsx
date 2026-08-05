@@ -436,7 +436,7 @@ const CreateGig = () => {
       <div className="max-w-2xl mx-auto px-4 py-8">
         {showWelcome && (
           <div
-            className="mb-6 relative rounded-2xl bg-gradient-to-br from-[#1E6A6A] to-[#0F3A3A] text-white p-5 shadow-lg"
+            className="mb-6 relative rounded-2xl bg-gradient-to-br from-[var(--brand-primary)] to-[#0F3A3A] text-white p-5 shadow-lg"
             data-testid="create-gig-welcome-banner"
           >
             <button
@@ -449,7 +449,7 @@ const CreateGig = () => {
               <X size={16} />
             </button>
             <div className="pr-6">
-              <div className="text-xs font-semibold uppercase tracking-wider text-[#D4AF37] mb-1">
+              <div className="text-xs font-semibold uppercase tracking-wider text-[var(--gold)] mb-1">
                 Welcome aboard
               </div>
               <div className="text-lg font-semibold mb-1" style={{ fontFamily: 'Playfair Display' }}>
@@ -464,7 +464,7 @@ const CreateGig = () => {
         )}
         <div className="flex items-center gap-2 mb-6">
           {Array.from({ length: totalSteps }, (_, i) => i + 1).map((n) => (
-            <div key={n} className={`flex-1 h-1 rounded-full ${n <= step ? 'bg-[#1E6A6A]' : 'bg-gray-200'}`} />
+            <div key={n} className={`flex-1 h-1 rounded-full ${n <= step ? 'bg-[var(--brand-primary)]' : 'bg-gray-200'}`} />
           ))}
         </div>
         <h1 className="text-2xl font-bold mb-6" style={{ fontFamily: 'Playfair Display' }}>
@@ -487,13 +487,13 @@ const CreateGig = () => {
                   onClick={() => setGigType(t.id)}
                   className={`w-full text-left rounded-2xl border-2 p-4 flex gap-4 items-start transition-all ${
                     active
-                      ? 'border-[#1E6A6A] bg-[#1E6A6A]/5 shadow-md'
-                      : 'border-gray-200 bg-white hover:border-[#D4AF37] hover:shadow-sm'
+                      ? 'border-[var(--brand-primary)] bg-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/5 shadow-md'
+                      : 'border-gray-200 bg-white hover:border-[var(--gold)] hover:shadow-sm'
                   }`}
                   data-testid={`wizard-type-${t.id}`}
                 >
                   <div className={`w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0 ${
-                    active ? 'bg-[#1E6A6A] text-white' : 'bg-gray-100 text-gray-700'
+                    active ? 'bg-[var(--brand-primary)] text-white' : 'bg-gray-100 text-gray-700'
                   }`}>
                     <Icon size={22} />
                   </div>
@@ -503,7 +503,7 @@ const CreateGig = () => {
                     <div className="text-xs text-gray-500 mt-1">Examples: {t.examples}</div>
                   </div>
                   {active && (
-                    <div className="w-5 h-5 rounded-full bg-[#1E6A6A] text-white flex items-center justify-center text-xs">✓</div>
+                    <div className="w-5 h-5 rounded-full bg-[var(--brand-primary)] text-white flex items-center justify-center text-xs">✓</div>
                   )}
                 </button>
               );
@@ -518,7 +518,7 @@ const CreateGig = () => {
               <label className="text-sm font-semibold text-gray-700">Title</label>
               <input value={form.title} onChange={(e) => set({ title: e.target.value })}
                 placeholder={form.gig_type === 'store' ? 'e.g. Modern Furniture — Tel Aviv Showroom' : 'e.g. Deep apartment cleaning'}
-                className="w-full mt-1 px-3 py-2 rounded-lg border bg-white border-gray-300 focus:outline-none focus:border-[#1E6A6A] focus:ring-2 focus:ring-[#1E6A6A]/20 text-sm" data-testid="wizard-title" />
+                className="w-full mt-1 px-3 py-2 rounded-lg border bg-white border-gray-300 focus:outline-none focus:border-[var(--brand-primary)] focus:ring-2 focus:ring-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/20 text-sm" data-testid="wizard-title" />
             </div>
             <div>
               <label className="text-sm font-semibold text-gray-700">Category</label>
@@ -526,7 +526,7 @@ const CreateGig = () => {
                 {categories.map((c) => (
                   <button key={c.slug} type="button" onClick={() => set({ category: c.slug })}
                     className={`px-3 py-2 rounded-lg text-xs font-semibold border ${
-                      form.category === c.slug ? 'bg-[#1E6A6A] text-white border-[#1E6A6A]' : 'bg-white text-gray-700 border-gray-200 hover:border-[#1E6A6A]'
+                      form.category === c.slug ? 'bg-[var(--brand-primary)] text-white border-[var(--brand-primary)]' : 'bg-white text-gray-700 border-gray-200 hover:border-[var(--brand-primary)]'
                     }`} data-testid={`wizard-cat-${c.slug}`}>
                     {c.label}
                   </button>
@@ -541,7 +541,7 @@ const CreateGig = () => {
           <div className="space-y-4">
             <textarea value={form.description} onChange={(e) => set({ description: e.target.value })} rows={8}
               placeholder="Describe what you offer, who it's for, and what's included…"
-              className="w-full px-3 py-2 rounded-lg border bg-white border-gray-300 focus:outline-none focus:border-[#1E6A6A] focus:ring-2 focus:ring-[#1E6A6A]/20 text-sm" data-testid="wizard-description" />
+              className="w-full px-3 py-2 rounded-lg border bg-white border-gray-300 focus:outline-none focus:border-[var(--brand-primary)] focus:ring-2 focus:ring-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/20 text-sm" data-testid="wizard-description" />
             <p className="text-xs text-gray-500">Min 10 characters. Hebrew-browsing renters will see this auto-translated — no need to write it twice.</p>
           </div>
         )}
@@ -607,11 +607,11 @@ const CreateGig = () => {
                 ].map((o) => (
                   <button key={o.v} type="button" onClick={() => set({ booking_mode: o.v })}
                     className={`flex-1 px-3 py-2 rounded-lg text-sm font-semibold border text-left ${
-                      form.booking_mode === o.v ? 'bg-[#1E6A6A] text-white border-[#1E6A6A]' : 'bg-white text-gray-700 border-gray-200 hover:border-[#1E6A6A]'
+                      form.booking_mode === o.v ? 'bg-[var(--brand-primary)] text-white border-[var(--brand-primary)]' : 'bg-white text-gray-700 border-gray-200 hover:border-[var(--brand-primary)]'
                     }`} data-testid={`wizard-booking-${o.v}`}>
                     <span className="block">{o.label}</span>
                     <span className={`block text-[11px] font-normal mt-0.5 leading-snug ${
-                      form.booking_mode === o.v ? 'text-[#D4AF37]/80' : 'text-gray-500'
+                      form.booking_mode === o.v ? 'text-[rgb(var(--gold-rgb)/<alpha-value>)]/80' : 'text-gray-500'
                     }`}>{o.hint}</span>
                   </button>
                 ))}
@@ -644,7 +644,7 @@ const CreateGig = () => {
               <label className="text-sm font-semibold text-gray-700">Service area <span className="text-red-500">*</span></label>
               <input value={form.area} onChange={(e) => set({ area: e.target.value })}
                 placeholder="Tel Aviv, Jerusalem, Haifa…" list="services-city-suggestions"
-                className={`w-full mt-1 px-3 py-2 rounded-lg border text-sm focus:outline-none focus:border-[#1E6A6A] ${
+                className={`w-full mt-1 px-3 py-2 rounded-lg border text-sm focus:outline-none focus:border-[var(--brand-primary)] ${
                   (form.area || '').trim() ? 'border-gray-200' : 'border-gray-300'
                 }`} data-testid="wizard-area" />
               <datalist id="services-city-suggestions">
@@ -654,7 +654,7 @@ const CreateGig = () => {
                 Pick a city so renters within a few km can find your gig via <span className="font-semibold">{t('sweep.showNearby', 'Show nearby')}</span>.
               </p>
             </div>
-            <div className="rounded-xl bg-[#1E6A6A]/6 border border-[#1E6A6A]/15 p-3 text-xs text-[#1E6A6A] leading-snug flex items-start gap-2" data-testid="wizard-translate-notice">
+            <div className="rounded-xl bg-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/6 border border-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/15 p-3 text-xs text-[var(--brand-primary)] leading-snug flex items-start gap-2" data-testid="wizard-translate-notice">
               <Loader2 size={14} className="mt-0.5 flex-shrink-0 opacity-70" />
               <span>
                 <b>Heads up:</b> Publishing takes about 4 seconds because we auto-translate your listing to Hebrew so Hebrew-speaking renters can find and read it right away — no extra typing needed.
@@ -669,7 +669,7 @@ const CreateGig = () => {
             {/* The free month leads, in bold, above the prices. Someone
                 reaching a pricing screen mid-signup assumes they're about to
                 be charged; saying otherwise afterwards is too late. */}
-            <div className="rounded-xl border border-[#1E6A6A]/25 bg-[#f2f8f8] p-4">
+            <div className="rounded-xl border border-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/25 bg-[#f2f8f8] p-4">
               <p className="text-sm font-bold text-gray-900">
                 Your first 30 days are free
               </p>
@@ -705,12 +705,12 @@ const CreateGig = () => {
           <div className="flex flex-col items-end gap-1">
             {step < totalSteps ? (
               <button type="button" disabled={!canNext()} onClick={() => setStep((s) => s + 1)}
-                className="px-5 py-2 rounded-lg text-sm font-semibold text-white bg-[#1E6A6A] disabled:opacity-40 flex items-center gap-1" data-testid="wizard-next">
+                className="px-5 py-2 rounded-lg text-sm font-semibold text-white bg-[var(--brand-primary)] disabled:opacity-40 flex items-center gap-1" data-testid="wizard-next">
                 Next <ArrowRight size={14} />
               </button>
             ) : (
               <button type="button" disabled={!canNext() || saving} onClick={submit}
-                className="px-5 py-2 rounded-lg text-sm font-semibold text-white bg-[#1E6A6A] disabled:opacity-40 flex items-center gap-1" data-testid="wizard-publish">
+                className="px-5 py-2 rounded-lg text-sm font-semibold text-white bg-[var(--brand-primary)] disabled:opacity-40 flex items-center gap-1" data-testid="wizard-publish">
                 {saving ? (
                   <>
                     <Loader2 className="animate-spin" size={14} />
@@ -738,7 +738,7 @@ const StoreProductsStep = ({ products, onUpdate, onAdd, onRemove, productImageIn
   const { t } = useTranslation();
   return (
   <div className="space-y-4" data-testid="wizard-products-step">
-    <div className="rounded-xl bg-[#1E6A6A]/8 border border-[#1E6A6A]/20 p-3 text-xs text-[#1E6A6A] leading-snug">
+    <div className="rounded-xl bg-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/8 border border-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/20 p-3 text-xs text-[var(--brand-primary)] leading-snug">
       Add each product you sell as a separate row — with a photo, price, and short description. Customers browse the grid and message you to buy.
     </div>
     {products.map((p, i) => (
@@ -758,7 +758,7 @@ const StoreProductsStep = ({ products, onUpdate, onAdd, onRemove, productImageIn
               type="button"
               onClick={() => productImageInputRef.current[i]?.click()}
               className={`w-20 h-20 rounded-lg border-2 border-dashed flex items-center justify-center overflow-hidden ${
-                p.image ? 'border-transparent' : 'border-gray-300 hover:border-[#1E6A6A]'
+                p.image ? 'border-transparent' : 'border-gray-300 hover:border-[var(--brand-primary)]'
               }`}
               data-testid={`wizard-product-image-btn-${i}`}
             >
@@ -772,7 +772,7 @@ const StoreProductsStep = ({ products, onUpdate, onAdd, onRemove, productImageIn
           <div className="flex-1 space-y-2">
             <input value={p.name} onChange={(e) => onUpdate(i, { name: e.target.value })}
               placeholder="Product name (e.g. Oak dining table)"
-              className="w-full px-3 py-2 rounded-lg border bg-white border-gray-300 text-sm font-semibold focus:outline-none focus:border-[#1E6A6A] focus:ring-2 focus:ring-[#1E6A6A]/20 placeholder:text-gray-400 placeholder:font-normal"
+              className="w-full px-3 py-2 rounded-lg border bg-white border-gray-300 text-sm font-semibold focus:outline-none focus:border-[var(--brand-primary)] focus:ring-2 focus:ring-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/20 placeholder:text-gray-400 placeholder:font-normal"
               data-testid={`wizard-product-name-${i}`} />
             <div className="flex gap-2 items-stretch">
               <div className="relative">
@@ -780,7 +780,7 @@ const StoreProductsStep = ({ products, onUpdate, onAdd, onRemove, productImageIn
                   {p.currency === 'USD' ? '$' : '₪'}
                 </span>
                 <select value={p.currency} onChange={(e) => onUpdate(i, { currency: e.target.value })}
-                  className="appearance-none pl-7 pr-6 py-2 rounded-lg border border-gray-200 text-sm bg-white cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#1E6A6A]/30"
+                  className="appearance-none pl-7 pr-6 py-2 rounded-lg border border-gray-200 text-sm bg-white cursor-pointer focus:outline-none focus:ring-2 focus:ring-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/30"
                   data-testid={`wizard-product-currency-${i}`}>
                   <option value="ILS">ILS</option>
                   <option value="USD">USD</option>
@@ -788,7 +788,7 @@ const StoreProductsStep = ({ products, onUpdate, onAdd, onRemove, productImageIn
                 <span className="pointer-events-none absolute inset-y-0 right-2 flex items-center text-gray-400 text-xs">▾</span>
               </div>
               <input type="number" value={p.price} onChange={(e) => onUpdate(i, { price: e.target.value })}
-                placeholder={t("sweep.price", "Price")} className="flex-1 px-3 py-2 rounded-lg border bg-white border-gray-300 focus:outline-none focus:border-[#1E6A6A] focus:ring-2 focus:ring-[#1E6A6A]/20 text-sm"
+                placeholder={t("sweep.price", "Price")} className="flex-1 px-3 py-2 rounded-lg border bg-white border-gray-300 focus:outline-none focus:border-[var(--brand-primary)] focus:ring-2 focus:ring-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/20 text-sm"
                 data-testid={`wizard-product-price-${i}`} />
               {products.length > 1 && (
                 <button type="button" onClick={() => onRemove(i)} className="px-2 text-red-500" data-testid={`wizard-product-remove-${i}`}>
@@ -800,10 +800,10 @@ const StoreProductsStep = ({ products, onUpdate, onAdd, onRemove, productImageIn
         </div>
         <textarea value={p.description} onChange={(e) => onUpdate(i, { description: e.target.value })} rows={2}
           placeholder="Short description (optional) — dimensions, materials, colours…"
-          className="w-full px-3 py-2 rounded-lg border bg-white border-gray-300 focus:outline-none focus:border-[#1E6A6A] focus:ring-2 focus:ring-[#1E6A6A]/20 text-sm" />
+          className="w-full px-3 py-2 rounded-lg border bg-white border-gray-300 focus:outline-none focus:border-[var(--brand-primary)] focus:ring-2 focus:ring-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/20 text-sm" />
       </div>
     ))}
-    <button type="button" onClick={onAdd} className="text-sm font-semibold text-[#1E6A6A] flex items-center gap-1" data-testid="wizard-product-add">
+    <button type="button" onClick={onAdd} className="text-sm font-semibold text-[var(--brand-primary)] flex items-center gap-1" data-testid="wizard-product-add">
       <Plus size={14} /> Add another product
     </button>
   </div>
@@ -817,7 +817,7 @@ const TiersStep = ({ gigType, tiers, onUpdate, onAdd, onRemove, onUploadImages, 
   const fileInputsRef = React.useRef({});
   return (
     <div className="space-y-4">
-      <div className="rounded-xl bg-[#1E6A6A]/8 border border-[#1E6A6A]/20 p-3 text-xs text-[#1E6A6A] leading-snug">
+      <div className="rounded-xl bg-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/8 border border-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/20 p-3 text-xs text-[var(--brand-primary)] leading-snug">
         {isAppt
           ? 'List each bookable service — e.g. a barber might add Haircut (30 min · ₪60), Beard trim (15 min · ₪30), Full grooming (45 min · ₪90). Duration lets us build the time-slot picker.'
           : 'List each service or tier you offer as a separate option — for example, a designer might add Basic package (3 samples · 3 days · ₪250) and Premium (5 samples · 5 days · ₪450).'}
@@ -836,7 +836,7 @@ const TiersStep = ({ gigType, tiers, onUpdate, onAdd, onRemove, onUploadImages, 
                 placeholder={isAppt
                   ? (i === 0 ? 'e.g. Haircut' : 'Service name')
                   : (i === 0 ? 'e.g. Basic package' : 'Service name')}
-                className={`w-full px-3 py-2 rounded-lg border text-sm font-semibold placeholder:font-normal placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#1E6A6A]/30 ${
+                className={`w-full px-3 py-2 rounded-lg border text-sm font-semibold placeholder:font-normal placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/30 ${
                   missingName ? 'border-red-200 bg-red-50/30' : 'border-gray-200 bg-white'
                 }`}
                 data-testid={`wizard-tier-name-${i}`} />
@@ -853,7 +853,7 @@ const TiersStep = ({ gigType, tiers, onUpdate, onAdd, onRemove, onUploadImages, 
                 {tt.currency === 'USD' ? '$' : '₪'}
               </span>
               <select value={tt.currency} onChange={(e) => onUpdate(i, { currency: e.target.value })}
-                className="appearance-none pl-7 pr-6 py-2 rounded-lg border border-gray-200 text-sm bg-white cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#1E6A6A]/30"
+                className="appearance-none pl-7 pr-6 py-2 rounded-lg border border-gray-200 text-sm bg-white cursor-pointer focus:outline-none focus:ring-2 focus:ring-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/30"
                 data-testid={`wizard-tier-currency-${i}`}>
                 <option value="ILS">ILS</option>
                 <option value="USD">USD</option>
@@ -869,7 +869,7 @@ const TiersStep = ({ gigType, tiers, onUpdate, onAdd, onRemove, onUploadImages, 
                 <input type="number" min="5" step="5" value={tt.duration_minutes}
                   onChange={(e) => onUpdate(i, { duration_minutes: e.target.value })}
                   placeholder={t("sweep.duration", "Duration")}
-                  className="w-24 pl-3 pr-8 py-2 rounded-lg border bg-white border-gray-300 focus:outline-none focus:border-[#1E6A6A] focus:ring-2 focus:ring-[#1E6A6A]/20 text-sm"
+                  className="w-24 pl-3 pr-8 py-2 rounded-lg border bg-white border-gray-300 focus:outline-none focus:border-[var(--brand-primary)] focus:ring-2 focus:ring-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/20 text-sm"
                   data-testid={`wizard-tier-duration-${i}`} />
                 <span className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 text-[11px] text-gray-500">min</span>
               </div>
@@ -878,7 +878,7 @@ const TiersStep = ({ gigType, tiers, onUpdate, onAdd, onRemove, onUploadImages, 
                 onChange={(e) => onUpdate(i, { delivery_days: e.target.value })}
                 placeholder={t('sweep.daysToComplete', 'Days to complete')}
                 title="Turnaround in days — leave blank for on-the-spot services"
-                className="w-32 px-3 py-2 rounded-lg border bg-white border-gray-300 focus:outline-none focus:border-[#1E6A6A] focus:ring-2 focus:ring-[#1E6A6A]/20 text-sm"
+                className="w-32 px-3 py-2 rounded-lg border bg-white border-gray-300 focus:outline-none focus:border-[var(--brand-primary)] focus:ring-2 focus:ring-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/20 text-sm"
                 data-testid={`wizard-tier-days-${i}`} />
             )}
           </div>
@@ -892,7 +892,7 @@ const TiersStep = ({ gigType, tiers, onUpdate, onAdd, onRemove, onUploadImages, 
             </p>
           )}
           <textarea value={tt.description} onChange={(e) => onUpdate(i, { description: e.target.value })} rows={2}
-            placeholder="What's included (optional)" className="w-full px-3 py-2 rounded-lg border bg-white border-gray-300 focus:outline-none focus:border-[#1E6A6A] focus:ring-2 focus:ring-[#1E6A6A]/20 text-sm" />
+            placeholder="What's included (optional)" className="w-full px-3 py-2 rounded-lg border bg-white border-gray-300 focus:outline-none focus:border-[var(--brand-primary)] focus:ring-2 focus:ring-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/20 text-sm" />
 
           {/* Per-tier photo uploader — lets a provider give each option
               its own visual identity (e.g. "Jerusalem tour" vs. "Tel Aviv
@@ -917,7 +917,7 @@ const TiersStep = ({ gigType, tiers, onUpdate, onAdd, onRemove, onUploadImages, 
                   <button
                     type="button"
                     onClick={() => fileInputsRef.current[i]?.click()}
-                    className="text-[11px] font-semibold text-[#1E6A6A] flex items-center gap-0.5 hover:underline"
+                    className="text-[11px] font-semibold text-[var(--brand-primary)] flex items-center gap-0.5 hover:underline"
                     data-testid={`wizard-tier-images-add-${i}`}
                   >
                     <Plus size={11} /> Add photos
@@ -960,7 +960,7 @@ const TiersStep = ({ gigType, tiers, onUpdate, onAdd, onRemove, onUploadImages, 
         </div>
       );})}
       {tiers.length < 15 && (
-        <button type="button" onClick={onAdd} className="text-sm font-semibold text-[#1E6A6A] flex items-center gap-1" data-testid="wizard-tier-add">
+        <button type="button" onClick={onAdd} className="text-sm font-semibold text-[var(--brand-primary)] flex items-center gap-1" data-testid="wizard-tier-add">
           <Plus size={14} /> Add another service or tier
         </button>
       )}
@@ -984,7 +984,7 @@ const AvailabilityStep = ({ weekly, slotDuration, onToggleDay, onUpdateWindow, o
   const { t } = useTranslation();
   return (
   <div className="space-y-4" data-testid="wizard-hours-step">
-    <div className="rounded-xl bg-[#1E6A6A]/8 border border-[#1E6A6A]/20 p-3 text-xs text-[#1E6A6A] leading-snug">
+    <div className="rounded-xl bg-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/8 border border-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/20 p-3 text-xs text-[var(--brand-primary)] leading-snug">
       Tell us when you&apos;re open. We&apos;ll turn this into bookable time slots on your public page. You can adjust or add exceptions later from your dashboard.
     </div>
     <div>
@@ -993,7 +993,7 @@ const AvailabilityStep = ({ weekly, slotDuration, onToggleDay, onUpdateWindow, o
         {[15, 30, 45, 60, 90].map((mm) => (
           <button key={mm} type="button" onClick={() => onSlotDurationChange(mm)}
             className={`px-3 py-1.5 rounded-full text-xs font-semibold border ${
-              slotDuration === mm ? 'bg-[#1E6A6A] text-white border-[#1E6A6A]' : 'bg-white text-gray-700 border-gray-200 hover:border-[#D4AF37]'
+              slotDuration === mm ? 'bg-[var(--brand-primary)] text-white border-[var(--brand-primary)]' : 'bg-white text-gray-700 border-gray-200 hover:border-[var(--gold)]'
             }`} data-testid={`wizard-slot-${mm}`}>
             {mm} min
           </button>
@@ -1014,10 +1014,10 @@ const AvailabilityStep = ({ weekly, slotDuration, onToggleDay, onUpdateWindow, o
             {open ? (
               <div className="flex items-center gap-2 flex-1">
                 <input type="time" value={win.start} onChange={(e) => onUpdateWindow(d.k, { start: e.target.value })}
-                  className="px-2 py-1.5 rounded-lg border bg-white border-gray-300 focus:outline-none focus:border-[#1E6A6A] focus:ring-2 focus:ring-[#1E6A6A]/20 text-sm" data-testid={`wizard-day-start-${d.k}`} />
+                  className="px-2 py-1.5 rounded-lg border bg-white border-gray-300 focus:outline-none focus:border-[var(--brand-primary)] focus:ring-2 focus:ring-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/20 text-sm" data-testid={`wizard-day-start-${d.k}`} />
                 <span className="text-gray-400 text-sm">–</span>
                 <input type="time" value={win.end} onChange={(e) => onUpdateWindow(d.k, { end: e.target.value })}
-                  className="px-2 py-1.5 rounded-lg border bg-white border-gray-300 focus:outline-none focus:border-[#1E6A6A] focus:ring-2 focus:ring-[#1E6A6A]/20 text-sm" data-testid={`wizard-day-end-${d.k}`} />
+                  className="px-2 py-1.5 rounded-lg border bg-white border-gray-300 focus:outline-none focus:border-[var(--brand-primary)] focus:ring-2 focus:ring-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/20 text-sm" data-testid={`wizard-day-end-${d.k}`} />
               </div>
             ) : (
               <span className="text-xs text-gray-400 italic">Closed</span>

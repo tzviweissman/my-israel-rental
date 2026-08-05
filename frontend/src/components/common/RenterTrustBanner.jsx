@@ -45,13 +45,13 @@ const RenterTrustBanner = ({ variant = 'full', className = '' }) => {
 
   return (
     <div
-      className={`rounded-2xl border border-[#1E6A6A]/15 bg-[#f2f8f8] px-5 py-4 ${className}`}
+      className={`rounded-2xl border border-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/15 bg-[#f2f8f8] px-5 py-4 ${className}`}
       data-testid="renter-trust-banner"
     >
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-6">
         {POINTS.map(({ key, icon: Icon }) => (
           <div key={key} className="flex items-start gap-2.5">
-            <Icon size={18} className="shrink-0 mt-0.5 text-[#1E6A6A]" aria-hidden="true" />
+            <Icon size={18} className="shrink-0 mt-0.5 text-[var(--brand-primary)]" aria-hidden="true" />
             <div>
               <p className="text-sm font-semibold text-gray-900">
                 {t(`trust.${key}Title`, key)}

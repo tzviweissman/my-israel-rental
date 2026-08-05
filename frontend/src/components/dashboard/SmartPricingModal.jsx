@@ -27,7 +27,7 @@ const RuleSlider = ({ label, value, onChange, min = 0, max = 100, step = 1, suff
           </span>
         )}
       </span>
-      <span className="font-mono text-[#1E6A6A]" data-testid={`${testid}-value`}>
+      <span className="font-mono text-[var(--brand-primary)]" data-testid={`${testid}-value`}>
         {value}{suffix}
       </span>
     </div>
@@ -38,7 +38,7 @@ const RuleSlider = ({ label, value, onChange, min = 0, max = 100, step = 1, suff
       step={step}
       value={value}
       onChange={(e) => onChange(parseFloat(e.target.value))}
-      className="w-full accent-[#D4AF37]"
+      className="w-full accent-[var(--gold)]"
       data-testid={testid}
     />
   </div>
@@ -52,7 +52,7 @@ const NumericInput = ({ label, value, onChange, suffix, testid }) => (
         type="number"
         value={value ?? ''}
         onChange={(e) => onChange(e.target.value === '' ? null : parseFloat(e.target.value))}
-        className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm focus:outline-none focus:border-[#D4AF37]"
+        className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm focus:outline-none focus:border-[var(--gold)]"
         data-testid={testid}
       />
       {suffix && (
@@ -264,7 +264,7 @@ const SmartPricingModal = ({ isOpen, onClose, property, API, token }) => {
         {/* Header */}
         <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#D4AF37] to-[#1E6A6A] flex items-center justify-center">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[var(--gold)] to-[var(--brand-primary)] flex items-center justify-center">
               <Sparkles size={20} className="text-white" />
             </div>
             <div>
@@ -298,7 +298,7 @@ const SmartPricingModal = ({ isOpen, onClose, property, API, token }) => {
               }}
               className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
                 tab === tdef.id
-                  ? 'border-[#D4AF37] text-[#1E6A6A]'
+                  ? 'border-[var(--gold)] text-[var(--brand-primary)]'
                   : 'border-transparent text-gray-500 hover:text-gray-700'
               }`}
               data-testid={`smart-pricing-tab-${tdef.id}`}
@@ -312,7 +312,7 @@ const SmartPricingModal = ({ isOpen, onClose, property, API, token }) => {
         <div className="flex-1 overflow-y-auto p-6">
           {loading ? (
             <div className="flex items-center justify-center py-12">
-              <Loader2 className="animate-spin text-[#1E6A6A]" size={28} />
+              <Loader2 className="animate-spin text-[var(--brand-primary)]" size={28} />
             </div>
           ) : tab === 'rules' ? (
             <RulesTab
@@ -354,7 +354,7 @@ const SmartPricingModal = ({ isOpen, onClose, property, API, token }) => {
               onClick={saveSettings}
               disabled={saving}
               className="px-5 py-2 rounded-lg text-sm font-semibold text-white disabled:opacity-50 transition-all"
-              style={{ backgroundColor: '#1E6A6A' }}
+              style={{ backgroundColor: 'var(--brand-primary)' }}
               data-testid="smart-pricing-save"
             >
               {saving ? <Loader2 className="animate-spin inline me-1" size={14} /> : null}
@@ -385,7 +385,7 @@ const RulesTab = ({
   return (
     <div className="space-y-6">
       {/* Master toggle row */}
-      <div className="flex items-start justify-between p-4 rounded-xl bg-gradient-to-r from-[#fff8e6] to-white border border-[#D4AF37]/30">
+      <div className="flex items-start justify-between p-4 rounded-xl bg-gradient-to-r from-[#fff8e6] to-white border border-[rgb(var(--gold-rgb)/<alpha-value>)]/30">
         <div className="flex-1">
           <p className="text-sm font-semibold text-gray-900">{t("sweep.enableSmartPricing", "Enable Smart Pricing")}</p>
           <p className="text-xs text-gray-600 mt-0.5">
@@ -401,7 +401,7 @@ const RulesTab = ({
             className="sr-only peer"
             data-testid="smart-pricing-enabled-toggle"
           />
-          <div className="w-11 h-6 bg-gray-300 rounded-full peer-checked:bg-[#1E6A6A] transition-colors after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-transform peer-checked:after:translate-x-5" />
+          <div className="w-11 h-6 bg-gray-300 rounded-full peer-checked:bg-[var(--brand-primary)] transition-colors after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-transform peer-checked:after:translate-x-5" />
         </label>
       </div>
 
@@ -423,7 +423,7 @@ const RulesTab = ({
             className="sr-only peer"
             data-testid="smart-pricing-autoapply-toggle"
           />
-          <div className="w-11 h-6 bg-gray-300 rounded-full peer-checked:bg-[#D4AF37] peer-disabled:opacity-40 transition-colors after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-transform peer-checked:after:translate-x-5" />
+          <div className="w-11 h-6 bg-gray-300 rounded-full peer-checked:bg-[var(--gold)] peer-disabled:opacity-40 transition-colors after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-transform peer-checked:after:translate-x-5" />
         </label>
       </div>
 
@@ -515,7 +515,7 @@ const RulesTab = ({
         <div className="flex items-start justify-between gap-4">
           <div className="flex-1">
             <p className="text-sm font-semibold text-gray-900 flex items-center gap-1.5">
-              <Mail size={14} className="text-[#1E6A6A]" />
+              <Mail size={14} className="text-[var(--brand-primary)]" />
               Weekly Pricing Insights digest
             </p>
             <p className="text-xs text-gray-600 mt-1 leading-relaxed">
@@ -537,13 +537,13 @@ const RulesTab = ({
               className="sr-only peer"
               data-testid="pricing-insights-toggle"
             />
-            <div className="w-11 h-6 bg-gray-300 rounded-full peer-checked:bg-[#1E6A6A] transition-colors after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-transform peer-checked:after:translate-x-5" />
+            <div className="w-11 h-6 bg-gray-300 rounded-full peer-checked:bg-[var(--brand-primary)] transition-colors after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-transform peer-checked:after:translate-x-5" />
           </label>
         </div>
         <button
           onClick={onSendSampleDigest}
           disabled={sendingSample}
-          className="mt-3 text-xs font-semibold text-[#1E6A6A] hover:underline disabled:opacity-50 flex items-center gap-1"
+          className="mt-3 text-xs font-semibold text-[var(--brand-primary)] hover:underline disabled:opacity-50 flex items-center gap-1"
           data-testid="pricing-insights-send-sample"
         >
           {sendingSample ? <Loader2 size={12} className="animate-spin" /> : <Mail size={12} />}
@@ -561,7 +561,7 @@ const CalendarTab = ({ suggestions, calculating, onRefresh, onApply, onRevert, o
   if (calculating && suggestions.length === 0) {
     return (
       <div className="flex items-center justify-center py-12">
-        <Loader2 className="animate-spin text-[#1E6A6A]" size={28} />
+        <Loader2 className="animate-spin text-[var(--brand-primary)]" size={28} />
       </div>
     );
   }
@@ -572,7 +572,7 @@ const CalendarTab = ({ suggestions, calculating, onRefresh, onApply, onRevert, o
         <button
           onClick={onRefresh}
           className="px-5 py-2 rounded-lg text-sm font-semibold text-white"
-          style={{ backgroundColor: '#1E6A6A' }}
+          style={{ backgroundColor: 'var(--brand-primary)' }}
           data-testid="smart-pricing-calc-first"
         >
           Calculate Suggestions
@@ -590,7 +590,7 @@ const CalendarTab = ({ suggestions, calculating, onRefresh, onApply, onRevert, o
           <button
             onClick={onRefresh}
             disabled={calculating}
-            className="px-3 py-1.5 rounded-lg text-xs font-medium border border-gray-200 hover:border-[#D4AF37] flex items-center gap-1.5 disabled:opacity-50"
+            className="px-3 py-1.5 rounded-lg text-xs font-medium border border-gray-200 hover:border-[var(--gold)] flex items-center gap-1.5 disabled:opacity-50"
             data-testid="smart-pricing-refresh"
           >
             <RefreshCw size={12} className={calculating ? 'animate-spin' : ''} />
@@ -599,7 +599,7 @@ const CalendarTab = ({ suggestions, calculating, onRefresh, onApply, onRevert, o
           <button
             onClick={onApplyAll}
             className="px-3 py-1.5 rounded-lg text-xs font-semibold text-white"
-            style={{ backgroundColor: '#D4AF37' }}
+            style={{ backgroundColor: 'var(--gold)' }}
             data-testid="smart-pricing-apply-all"
           >
             Apply All to Calendar
@@ -613,14 +613,14 @@ const CalendarTab = ({ suggestions, calculating, onRefresh, onApply, onRevert, o
           const isBooked = s.booked;
           // Color by direction + apply state
           let bg = '#f5f5f0';
-          let txt = '#1E6A6A';
+          let txt = 'var(--brand-primary)';
           if (isBooked) { bg = '#e5e7eb'; txt = '#6b7280'; }
           else if (delta > 0) { bg = '#dcfce7'; txt = '#166534'; }
           else if (delta < 0) { bg = '#fef3c7'; txt = '#92400e'; }
           return (
             <div
               key={s.date}
-              className={`relative p-2.5 rounded-lg border ${isApplied ? 'border-[#D4AF37]' : 'border-transparent'}`}
+              className={`relative p-2.5 rounded-lg border ${isApplied ? 'border-[var(--gold)]' : 'border-transparent'}`}
               style={{ backgroundColor: bg }}
               title={s.reason}
               data-testid={`smart-pricing-day-${s.date}`}
@@ -655,7 +655,7 @@ const CalendarTab = ({ suggestions, calculating, onRefresh, onApply, onRevert, o
                   ) : (
                     <button
                       onClick={() => onApply(s.date)}
-                      className="text-[10px] font-semibold text-[#1E6A6A] hover:underline"
+                      className="text-[10px] font-semibold text-[var(--brand-primary)] hover:underline"
                       data-testid={`smart-pricing-apply-${s.date}`}
                     >
                       Apply
@@ -682,7 +682,7 @@ const ForecastTab = ({ forecast, sym, calculating }) => {
   if (calculating || !forecast) {
     return (
       <div className="flex items-center justify-center py-12">
-        <Loader2 className="animate-spin text-[#1E6A6A]" size={28} />
+        <Loader2 className="animate-spin text-[var(--brand-primary)]" size={28} />
       </div>
     );
   }
