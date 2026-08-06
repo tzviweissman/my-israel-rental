@@ -10,7 +10,11 @@
              controls in index.css (@media max-width: 640px), so we
              don't need a blanket zoom lock here. -->
         <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-        <meta name="theme-color" content="#1E6A6A" />
+        <meta name="theme-color" content="#1E5F8C" />
+        <!-- Favicon from the gold mark. %PUBLIC_URL% is substituted by CRA at
+             build time; a bare "/favicon.png" breaks under a sub-path deploy. -->
+        <link rel="icon" type="image/png" href="%PUBLIC_URL%/favicon.png" />
+        <link rel="apple-touch-icon" href="%PUBLIC_URL%/favicon.png" />
         <!-- NOTE: per-route <title>, <meta name="description">, og:* and
              twitter:* tags are now injected by react-helmet-async on each
              page (see /src/components/PageMeta.jsx). The site_name +

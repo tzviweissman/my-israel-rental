@@ -7,6 +7,7 @@ import axios from 'axios';
 import { toast } from 'sonner';
 import { playMessagePing, requestDesktopNotificationPermission, showDesktopNotification } from '../utils/messageAlerts';
 import NavCategoryItem from './NavCategoryItem';
+import logoMark from '../assets/brand/logo-mark.png';
 
 const Navigation = () => {
   const { t, i18n } = useTranslation();
@@ -330,17 +331,45 @@ const Navigation = () => {
     >
       <div className="max-w-7xl mx-auto px-6" style={{ padding: scrolled ? '4px 24px' : '0 24px' }}>
         <div className="flex items-center justify-between relative">
-          <Link to="/" className="flex items-center shrink-0" data-testid="nav-logo" onClick={() => window.scrollTo(0, 0)}>
+          {/* Logo lockup, copied from `.lg` in the preview files rather than
+              re-derived: the raw gold mark floating in the glass nav with a
+              drop-shadow, NO navy tile behind it, wordmark in Playfair.
+
+              Values are the preview's verbatim — 11px gap, 44px mark, 19px
+              Playfair 700, and the two shadows that are what keep white text
+              and a gold mark legible over arbitrary hero photography. The
+              44px shrinks on scroll because this nav collapses; the preview
+              is a fixed overlay and never does.
+
+              Replaces a single PNG that rendered up to 200px tall and shoved
+              the nav around as it shrank. */}
+          <Link
+            to="/"
+            className="flex items-center shrink-0 gap-[11px]"
+            data-testid="nav-logo"
+            onClick={() => window.scrollTo(0, 0)}
+          >
             <img
-              src="/brand-logo.png"
-              alt="MyIsraelRental"
-              className={`w-auto transition-all duration-300 ${
-                scrolled
-                  ? 'h-12 sm:h-[60px] md:h-[60px]'
-                  : 'h-20 sm:h-[140px] md:h-[200px]'
-              }`}
-              style={{ marginTop: scrolled ? '0' : '-8px' }}
+              src={logoMark}
+              alt=""
+              aria-hidden="true"
+              className={`w-auto block transition-all duration-300 ${scrolled ? 'h-8' : 'h-11'}`}
+              style={{ filter: 'drop-shadow(0 2px 8px rgba(0,0,0,.55))' }}
             />
+            <span
+              className={`font-bold tracking-tight text-white transition-all duration-300 ${
+                scrolled ? 'text-base' : 'text-[19px]'
+              } hidden sm:inline`}
+              style={{
+                fontFamily: 'var(--font-head)',
+                textShadow: '0 1px 8px rgba(0,0,0,.5)',
+              }}
+            >
+              MyIsraelRental
+            </span>
+            {/* The wordmark is hidden on small screens, so the link still
+                needs an accessible name there. */}
+            <span className="sr-only sm:hidden">MyIsraelRental</span>
           </Link>
 
           {/* Category pill row — Airbnb-style rental-type tabs.
