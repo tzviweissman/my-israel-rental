@@ -1560,6 +1560,9 @@ const he = {
       // Phone/WhatsApp field validation. See en.js.
       // Shown by ErrorBoundary when a page crashes. See en.js.
       errors: {
+        listingsTitle: 'לא הצלחנו לטעון את הנכסים כרגע',
+        listingsBody: 'זו תקלה אצלנו, לא בחיפוש שלכם — הנכסים עדיין כאן. נסו שוב בעוד רגע.',
+        listingsRetry: 'לנסות שוב',
         title: 'משהו השתבש בעמוד הזה',
         body: 'זו תקלה אצלנו, לא אצלכם. שום דבר שעשיתם לא אבד — נסו לרענן, או לחזור ולנסות שוב.',
         reload: 'רענון העמוד',

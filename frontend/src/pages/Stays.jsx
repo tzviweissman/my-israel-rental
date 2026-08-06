@@ -22,6 +22,7 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import axios from 'axios';
 import { useNavigate, useSearchParams } from 'react-router-dom';
+import ListingsUnavailable from '../components/common/ListingsUnavailable';
 import { useTranslation } from 'react-i18next';
 import { format } from 'date-fns';
 import { X, Loader2, Bell, LayoutGrid, Map as MapIcon, MapPin, Search } from 'lucide-react';
@@ -78,6 +79,10 @@ const Stays = ({ landing = null }) => {
   const { rate: fxRate } = useExchangeRate();
 
   const [allProperties, setAllProperties] = useState([]);
+  // Whether the LAST fetch failed, kept separate from "the list is empty".
+  // Collapsing the two is what let a database outage render as "No stays
+  // match those filters" — blaming the visitor's search for our failure.
+  const [loadError, setLoadError] = useState(false);
   const [loading, setLoading] = useState(true);
   const [showFilters, setShowFilters] = useState(false);
   // Toggles the inline "Notify me" card the renter can summon from
@@ -171,8 +176,12 @@ const Stays = ({ landing = null }) => {
           STAY_RENTAL_TYPES.includes(p.rental_type),
         );
         setAllProperties(list);
+        setLoadError(false);
       })
-      .catch(() => setAllProperties([]))
+      .catch(() => {
+        setAllProperties([]);
+        setLoadError(true);
+      })
       .finally(() => setLoading(false));
   }, []);
 
@@ -607,6 +616,10 @@ const Stays = ({ landing = null }) => {
         <div className="flex items-center justify-center py-24">
           <Loader2 className="animate-spin text-[var(--brand-primary)]" size={32} />
         </div>
+      ) : loadError ? (
+        /* A failed fetch is NOT an empty search — different cause, different
+           advice. This branch must come first or the no-results copy wins. */
+        <ListingsUnavailable onRetry={() => window.location.reload()} />
       ) : filtered.length === 0 ? (
         <div className="max-w-3xl mx-auto px-6 py-12 text-center">
           {/* Notify-me card is hoisted to the top of the empty-state so
