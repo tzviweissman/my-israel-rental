@@ -1,3 +1,6 @@
+> ⚠ **PARTIALLY SUPERSEDED (2026-08-06).** The home page (`/`) is now the scroll-driven cinematic experience in `cinematic-preview.html` — where THIS file's verbatim DOM/CSS (`.hero-stage`, `.hero-in`, `.trust-chip`, framed-hero layout) conflicts with that file, **`cinematic-preview.html` wins**. Do NOT build the framed hero described below as the home page.
+> Still authoritative and in force: the **Implementation notes** section (lucide icon mapping table, hero i18n keys + Hebrew, the HeroSlideshow wrapping caveat, the fail-safe `.js-reveal` rule, social-link a11y note). The framed-hero CSS below is retained only as a reference for the section library (`home-redesign-preview.html`).
+
 # Home hero — cinematic framed hero (copy EXACTLY) + keep the rotating scenes
 
 Reproduce the hero from `home-redesign-preview.html` **exactly** — same layout, spacing, gradients, radii, and the "darkened window floating on a continuous photo" effect. **Copy the CSS values below verbatim; do not re-derive or approximate.** In the React app map the raw hex to the theme tokens in `brand/design-tokens.css` where one exists (`--teal`→`--primary`, `--gold`→`--gold`), but keep every number identical.

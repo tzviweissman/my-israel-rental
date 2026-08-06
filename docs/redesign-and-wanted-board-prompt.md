@@ -4,10 +4,19 @@ You are working in the **MyIsraelRental** repo (FastAPI backend in `backend/`, R
 
 **Before anything, read `CLAUDE.md` and follow every guardrail in it** — especially: never print secrets; do not regress the contract-file storage rules; the Railway/CRA build gotchas; and **confirm with me before** anything that spends real API credit, writes to production Atlas, pushes, or triggers a deploy. Work against local/dev, not production data.
 
-There are three self-contained preview files at the repo root that are the **visual source of truth** — open and study them before writing code:
-- `home-redesign-preview.html` — the redesigned home page
-- `wanted-board-preview.html` — a brand-new "Requests" demand board feature
-- `brand/` — final logo assets: `logo-mark.png` (gold buildings only), `logo-gold-blue.png` / `logo-light-trim.png` (light bg), `logo-gold-blue-dark.png` / `logo-dark-trim.png` (dark bg)
+**HOME PAGE RULING (authoritative): `cinematic-preview.html` IS the home page (`/`). It supersedes `home-redesign-preview.html`, which is a SECTION LIBRARY only — never build it as a page. Where `docs/hero-cinematic-spec.md` conflicts with `cinematic-preview.html`, the preview file wins (see the banner in that spec).**
+
+## Visual source of truth — a five-page linked preview site at the repo root. Open every file in a browser and click through before writing code. Copy exactly; do not reinterpret.
+
+- `cinematic-preview.html` — **the Home page (`/`)**: a scroll-driven cinematic story. Pinned 100vh scenes with video-clip backgrounds; scroll drives caption/card fades and the scene-2 "zoom through the stone wall" dissolve (exterior clip scales up, crossfades into the interior STILL — the interior is deliberately a still image so the full-room framing is deterministic at any scroll speed). Push-in clips must NOT loop (a looping push-in visibly "rewinds"); they play once and hold the final frame. Videos play only while their scene is on screen; `prefers-reduced-motion` gets posters. Then the "Also on MyIsraelRental" feature-pill strip and the limestone finale.
+- `stays-preview.html` — the Stays search page: dark photo band, floating white search panel (Where / Stay type / When), quick-date chips incl. gold holiday chips (Sukkot/Pesach/Shavuot), near-address bar, List/Map toggle, listings grid. Wire to the real `/stays` data (`useSearchParams`, existing filters); keep the layout.
+- `services-preview.html` — the Services page: dark band, search panel (What/Where/When), 8-category grid, top-rated provider rows (Verified + rating badges, Message → chat), Post-a-job / List-free CTA band. Wire to existing `/services` data.
+- `wanted-board-preview.html` — the Requests board (spec in Phase 3).
+- `home-redesign-preview.html` — a **section library**: start-your-search doors, featured rentals rail, services showcase, tabbed how-it-works, testimonials, owner/provider band, cities, footer. Use these sections for secondary pages/anchors (e.g. "How it works"); the cinematic page is the primary `/`.
+
+**Shared glass design system (identical on every page — copy verbatim from any of the five files):** transparent nav over the hero media with a faint top gradient; the raw gold `brand/logo-mark.png` floating at ~44px with a drop shadow + "MyIsraelRental" wordmark to its right (NO navy tile); every nav item in a frosted glass bubble (`rgba(255,255,255,.12)` fill, 1.5px `rgba(255,255,255,.55)` border, `backdrop-filter:blur(10px)`, white text, hover lift), the active page's bubble brighter with a gold dot; the primary CTA a near-solid white pill. Nav links: Stays / Services / Requests / How it works (+ Sign in, עברית/EN, CTA) — each goes to its DEDICATED page, never an anchor halfway down another page.
+
+**Generated media:** `assets/generated/assets-manifest.json` maps every image/video (Higgsfield CDN URL + prompt + job id). Before production: download all assets locally (command in the manifest), compress the videos, and confirm Higgsfield's terms cover commercial use. `brand/` holds the logo set.
 
 Implement in **three phases. After each phase, show me the diff and wait for approval before continuing.** Reuse existing components/utilities/patterns rather than duplicating (per CLAUDE.md). Keep everything bilingual (react-i18next `en.js`/`he.js`) and RTL-safe.
 
@@ -31,16 +40,17 @@ Adopt this palette (matches the mockups exactly). Wire it as CSS variables / the
 - Primary buttons: solid `--primary`, white text. Accent buttons: frosted **glass gold** — `background:rgba(172,134,28,.64)`, `color:#fff`, `border:1.5px solid rgba(201,162,39,.85)`, `backdrop-filter:blur(10px)`, `text-shadow:0 1px 2px rgba(50,36,0,.5)`; on dark panels bump to `rgba(172,134,28,.72)`.
 - Fonts: Playfair Display (headings), Manrope (body); for Hebrew use Frank Ruhl Libre (headings) + Assistant (body) scoped to `[dir="rtl"]`.
 
-Logo (`components/Navigation.js` + footer): horizontal lockup = a navy rounded tile (`linear-gradient(135deg,#1E5F8C,#123B57)`, ~12px radius) holding `brand/logo-mark.png` (~34px tall), with "MyIsraelRental" wordmark beside it in Playfair, `--primary` color. In the footer (dark), use the light wordmark / `logo-gold-blue-dark.png`. Add the PNGs to the frontend assets and a favicon from `logo-mark.png`.
+Logo (`components/Navigation.js` + footer): the raw gold `brand/logo-mark.png` floating at ~44px with a drop shadow (NO navy tile), "MyIsraelRental" wordmark to its right in Playfair — copy the `.lg` markup/CSS from any preview file. It lives inside the glass nav (see the design-system block above). Footer (dark bg) uses `logo-gold-blue-dark.png`. Add the PNGs to frontend assets and a favicon from `logo-mark.png`.
 
-## Phase 2 — Home page redesign (`frontend/src/pages/Home.js`)
+## Phase 2 — Frontend redesign: cinematic Home + Stays + Services (new layout)
 
-Rebuild the home page to match `home-redesign-preview.html`, keeping the existing `PageMeta`/JSON-LD SEO block:
-- **Hero:** build it exactly per `docs/hero-cinematic-spec.md` (cinematic framed hero — smaller darkened card floating on a full-scale photo). **Keep the existing `HeroSlideshow` rotating scenes** (the `HERO_IMAGES` crossfade) as the stage background so they show through the transparent card.
-- Hero over the existing hero image with a **dual front-door**: "Find a place to stay" (rentals) and "Find or offer services", both equal weight, plus a trust chip ("Free to search · No service fees · Deal with owners & pros directly").
-- Below: stat/trust strip, a **featured rentals** horizontal rail (reuse the existing `/properties/featured` fetch), a **services showcase** category grid, a tabbed **how-it-works** (renting vs hiring), testimonials, a free-to-list **owner/provider band**, cities-served, footer.
-- The two doors and their quick chips must **deep-link into the existing search pages** with correct params: rentals → `/stays?area=…` / `?subType=…`; services → `/services?category=<slug>`. Use the **real** area names and category slugs from the code (`servicesCatalog.js` / `CategoryCarousel`, and how `Stays.jsx` reads `useSearchParams`) — don't invent values.
-- All copy through i18n keys; add Hebrew.
+**2a. Home (`frontend/src/pages/Home.js`, route `/`)** — rebuild as the scroll-driven cinematic experience in `cinematic-preview.html`, keeping the existing `PageMeta`/JSON-LD SEO block. Copy the scene structure, captions, notification cards, and scroll engine exactly (pinned sections, per-scene progress, `data-seg` fades, the scene-2 zoom-through-the-wall with the interior STILL, no-loop push-in clips, play/pause via IntersectionObserver, `prefers-reduced-motion` fallback to posters). The "Also on MyIsraelRental" pill strip and limestone finale included. All copy through i18n keys (add Hebrew); CTAs deep-link: Explore rentals → `/stays`, Explore services → `/services`, Post a request → `/requests`. Note the older `docs/hero-cinematic-spec.md` describes a previous framed-hero design — where it conflicts, `cinematic-preview.html` wins; its implementation notes (lucide icon mapping, i18n table, HeroSlideshow caveat, fail-safe reveal) still apply.
+
+**2b. Stays (`frontend/src/pages/Stays.jsx`)** — restyle to `stays-preview.html`: glass nav, dark photo band, floating search panel, holiday chips, near-address bar, List/Map toggle, card grid. This is a RESTYLE — keep all existing search logic, URL params, filters, map view, and data wiring intact.
+
+**2c. Services (`frontend/src/pages/Services.jsx`)** — restyle to `services-preview.html`: glass nav, dark band, search panel, category grid (use the REAL slugs from `servicesCatalog.js`), provider rows (Verified badge, rating, Message → existing chat), CTA band. Again a restyle over existing logic.
+
+**2d. Shared glass nav** — implement once in `components/Navigation.js` (glass bubbles + floating gold logo per the design-system block above) and use on every page. Links go to dedicated routes: `/stays`, `/services`, `/requests` — never in-page anchors on `/`.
 
 ## Phase 3 — "Housing & Services Requests" demand board (new feature)
 

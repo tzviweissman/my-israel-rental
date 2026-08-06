@@ -16,9 +16,14 @@
 - [ ] Accent buttons (`.btn-accent`/`.btn-gold`) are frosted glass-gold with **white** text on section surfaces. (Hero CTAs are the white/outline exception.)
 - [ ] All placeholder `<use href="#i-…">` icons replaced with the mapped `lucide-react` components (see hero spec table); no empty icon slots.
 - [ ] `.reveal` uses the fail-safe `.js-reveal` pattern — with JS disabled, all content is visible (no blank sections).
-- [ ] Nav logo = navy tile holding `brand/logo-mark.png` + "MyIsraelRental" wordmark; footer uses the dark logo. Favicon set.
+- [ ] Nav logo = the raw gold `brand/logo-mark.png` floating (~44px, drop shadow, NO navy tile) + "MyIsraelRental" wordmark to its right, inside the glass nav (copy from any preview file). Footer uses the dark-bg logo. Favicon from `logo-mark.png`.
 
-## Home page (Phase 2)
+## Home + Stays + Services (Phase 2)
+- [ ] `/` is the cinematic scroll experience matching `cinematic-preview.html`: scenes pin, captions/cards fade on scroll, scene-2 zooms through the wall into the interior STILL (framing identical at any scroll speed), push-in clips do NOT loop, reduced-motion shows posters.
+- [ ] Stays and Services pages match `stays-preview.html` / `services-preview.html` visually while keeping ALL existing search/filter/data logic.
+- [ ] Glass nav identical on every page (bubbles, floating gold logo, active-page bubble + gold dot); Stays/Services/Requests links go to dedicated pages, not anchors.
+
+### Section library (from home-redesign-preview.html)
 - [ ] Dual front-door hero (Find a place to stay / Find or offer services), equal weight, over the hero image with the dark overlay + vignette.
 - [ ] The two doors + quick chips deep-link into `/stays` and `/services` with REAL param names/slugs (verified against `Stays.jsx` and `servicesCatalog.js` — not invented).
 - [ ] All sections present and in order: hero → stat strip → featured rentals rail → services grid → tabbed how-it-works → testimonials → owner/provider band → cities → footer.

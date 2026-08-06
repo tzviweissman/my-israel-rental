@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>MyIsraelRental — Stays (new layout preview)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+<style>
+:root{--blue:#1E5F8C;--blue-dark:#184E73;--blue-deep:#123B57;--gold:#C9A227;--gold-text:#8A6A14;--gold-lg:#A9831C;--ink:#23201B;--muted:#6B6459;--bg:#EFE9DC;--surface:#fff;--border:#E1D8C6;--ease:cubic-bezier(.16,.7,.3,1)}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Manrope',system-ui,sans-serif;background:var(--bg);color:var(--ink);line-height:1.5;-webkit-font-smoothing:antialiased}
+h1,h2,h3,h4{font-family:'Playfair Display',Georgia,serif}
+.wrap{max-width:1200px;margin:0 auto;padding:0 24px}
+.previewbar{background:#123B57;color:#cfe6e2;font-size:12.5px;text-align:center;padding:7px 16px;letter-spacing:.02em}
+.previewbar b{color:#fff}
+
+/* dark hero band with glass nav (matches cinematic/board/home) */
+.band{position:relative;overflow:hidden;color:#fff}
+.band .bg{position:absolute;inset:0;background:url('https://d8j0ntlcm91z4.cloudfront.net/user_3HWGlZDXVCAOoMKfZq628Ml9cM5/hf_20260806_140841_dd0ae729-6af8-43e0-b4c5-15f63a29c9cc.png') center/cover no-repeat}
+.band .shade{position:absolute;inset:0;background:linear-gradient(180deg,rgba(4,12,17,.5),rgba(4,12,17,.35) 55%,rgba(4,12,17,.62))}
+nav.bar{position:relative;z-index:5;display:flex;align-items:center;justify-content:space-between;gap:14px;padding:14px clamp(16px,3vw,36px)}
+.lg{display:flex;align-items:center;gap:11px;font-family:'Playfair Display';font-weight:700;font-size:19px;color:#fff;text-shadow:0 1px 8px rgba(0,0,0,.5);text-decoration:none}
+.lg img{height:44px;width:auto;display:block;filter:drop-shadow(0 2px 8px rgba(0,0,0,.55))}
+.links{display:flex;align-items:center;gap:9px}
+.links a,.lang,.signin{background:rgba(255,255,255,.12);border:1.5px solid rgba(255,255,255,.55);backdrop-filter:blur(10px) saturate(1.1);border-radius:999px;color:#fff;font-weight:700;font-size:14px;text-shadow:0 1px 4px rgba(0,0,0,.4);box-shadow:inset 0 1px 0 rgba(255,255,255,.25),0 4px 16px rgba(0,0,0,.18);transition:all .2s ease;text-decoration:none;padding:10px 18px;cursor:pointer;font-family:inherit}
+.links a:hover,.lang:hover,.signin:hover{background:rgba(255,255,255,.24);transform:translateY(-1px)}
+.links a.current{background:rgba(255,255,255,.28);border-color:rgba(255,255,255,.85)}
+.links a.current .dot{display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--gold);margin-inline-start:6px;vertical-align:middle}
+.right{display:flex;align-items:center;gap:9px}
+.lang{font-size:12.5px;padding:9px 14px}
+.cta{background:rgba(255,255,255,.92);border:1.5px solid rgba(255,255,255,.95);border-radius:999px;color:var(--ink);font-weight:800;font-size:14px;padding:10px 20px;cursor:pointer;font-family:inherit;backdrop-filter:blur(10px);box-shadow:0 6px 18px rgba(0,0,0,.25)}
+.cta:hover{background:#fff}
+@media(max-width:900px){.links,.signin{display:none}}
+.band .head{position:relative;z-index:4;text-align:center;padding:34px 20px 120px}
+.band h1{font-size:clamp(30px,4.6vw,54px);font-weight:800;letter-spacing:-1px;text-shadow:0 2px 24px rgba(0,0,0,.5)}
+.band h1 .a{color:var(--gold)}
+.band p{margin-top:10px;color:rgba(255,255,255,.9);font-size:15px}
+
+/* floating search panel */
+.search{position:relative;z-index:6;margin:-88px auto 0;max-width:1080px;padding:0 20px}
+.panel{background:rgba(255,255,255,.97);border-radius:22px;box-shadow:0 30px 70px rgba(8,20,26,.28);border:1px solid rgba(255,255,255,.6);padding:18px}
+.fields{display:grid;grid-template-columns:1.2fr 1fr 1fr auto;gap:0;align-items:stretch}
+.field{padding:10px 18px;border-inline-end:1px solid var(--border)}
+.field:last-of-type{border-inline-end:none}
+.field .lab{font-size:10.5px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.field .val{margin-top:3px;font-size:15px;font-weight:600;color:var(--ink)}
+.field .val.dim{color:#9a938a}
+.go{display:flex;align-items:center;justify-content:center;padding:0 8px}
+.go button{background:var(--blue);color:#fff;border:none;border-radius:999px;font-weight:800;font-size:14.5px;padding:14px 26px;cursor:pointer;font-family:inherit;transition:all .2s}
+.go button:hover{background:var(--blue-dark);transform:translateY(-1px)}
+.chips{display:flex;gap:9px;flex-wrap:nowrap;overflow-x:auto;padding:14px 4px 4px;scrollbar-width:none}
+.chips::-webkit-scrollbar{display:none}
+.chips button{white-space:nowrap;background:#fff;border:1px solid var(--border);border-radius:999px;padding:8px 15px;font-size:13px;font-weight:700;color:#3a4a45;cursor:pointer;font-family:inherit;transition:all .15s}
+.chips button b{font-weight:800}
+.chips button span{color:var(--muted);font-weight:600;font-size:12px}
+.chips button:hover{border-color:var(--blue);color:var(--blue)}
+.chips button.holiday{border-color:rgba(201,162,39,.6);background:#FBF7EA;color:var(--gold-text)}
+.subrow{display:flex;gap:10px;align-items:center;margin-top:12px}
+.near{flex:1;display:flex;align-items:center;gap:9px;background:#fff;border:1px solid var(--border);border-radius:999px;padding:11px 16px;color:#9a938a;font-size:13.5px}
+.viewtog{display:flex;gap:6px}
+.viewtog button{border:1px solid var(--border);background:#fff;border-radius:999px;padding:10px 16px;font-weight:700;font-size:13px;color:#3a4a45;cursor:pointer;font-family:inherit}
+.viewtog button.on{background:var(--blue);border-color:var(--blue);color:#fff}
+@media(max-width:860px){.fields{grid-template-columns:1fr;row-gap:2px}.field{border-inline-end:none;border-bottom:1px solid var(--border)}.go{padding-top:10px}}
+
+/* results */
+.results{max-width:1200px;margin:0 auto;padding:44px 24px 80px}
+.rhead{display:flex;align-items:baseline;justify-content:space-between;gap:16px;margin-bottom:22px}
+.rhead h2{font-size:clamp(21px,2.6vw,29px);font-weight:700;letter-spacing:-.4px}
+.rhead span{color:var(--muted);font-size:13.5px;font-weight:600}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+@media(max-width:980px){.grid{grid-template-columns:1fr 1fr}}
+@media(max-width:640px){.grid{grid-template-columns:1fr}}
+.card{background:#fff;border:1px solid var(--border);border-radius:18px;overflow:hidden;cursor:pointer;transition:transform .3s var(--ease),box-shadow .3s}
+.card:hover{transform:translateY(-5px);box-shadow:0 12px 32px rgba(30,45,60,.12)}
+.card .ph{height:200px;position:relative;background-size:cover;background-position:center;overflow:hidden}
+.card .ph .tag{position:absolute;top:12px;inset-inline-start:12px;background:rgba(255,255,255,.94);color:var(--blue);font-size:11.5px;font-weight:800;padding:4px 10px;border-radius:999px}
+.card .ph .heart{position:absolute;top:10px;inset-inline-end:12px;color:#fff;font-size:18px;filter:drop-shadow(0 1px 3px rgba(0,0,0,.5))}
+.card .pb{padding:14px 16px 16px}
+.card h4{font-size:16px;font-weight:700;font-family:'Manrope';letter-spacing:0}
+.card .loc{color:var(--muted);font-size:13px;margin-top:4px}
+.card .meta{display:flex;gap:13px;color:#4a5551;font-size:12.5px;margin-top:9px;font-weight:600}
+.card .price{display:flex;align-items:baseline;justify-content:space-between;margin-top:11px}
+.card .amt{font-size:18px;font-weight:800;color:var(--gold-lg)}
+.card .amt span{font-size:11.5px;color:var(--muted);font-weight:600}
+.card .rate{font-size:12.5px;color:#4a5551;font-weight:800}
+.card .rate i{color:var(--gold-lg);font-style:normal}
+</style>
+</head>
+<body>
+<div class="previewbar"><b>Design preview</b> — proposed MyIsraelRental <b>Stays</b> in the new layout. Listings, prices &amp; dates are <b>placeholder data</b>. Not yet on your live site.</div>
+
+<div class="band">
+  <div class="bg"></div><div class="shade"></div>
+  <nav class="bar">
+    <a class="lg" href="cinematic-preview.html"><img src="brand/logo-mark.png" alt=""/><span>MyIsraelRental</span></a>
+    <div class="links">
+      <a class="current" href="stays-preview.html">Stays <span class="dot"></span></a>
+      <a href="services-preview.html">Services</a>
+      <a href="wanted-board-preview.html">Requests</a>
+      <a href="home-redesign-preview.html#how">How it works</a>
+    </div>
+    <div class="right">
+      <button class="lang">עברית / EN</button>
+      <button class="signin">Sign in</button>
+      <button class="cta">List your property</button>
+    </div>
+  </nav>
+  <div class="head">
+    <h1>Find your <span class="a">stay.</span></h1>
+    <p>Long-term, short-term and vacation rentals — direct from owners, zero service fees.</p>
+  </div>
+</div>
+
+<div class="search">
+  <div class="panel">
+    <div class="fields">
+      <div class="field"><div class="lab">Where</div><div class="val dim">Anywhere in Israel</div></div>
+      <div class="field"><div class="lab">Stay type</div><div class="val">Any · long / short / vacation</div></div>
+      <div class="field"><div class="lab">When</div><div class="val dim">Add dates</div></div>
+      <div class="go"><button>Search</button></div>
+    </div>
+    <div class="chips">
+      <button><b>Tonight</b> <span>· Aug 6 – 7</span></button>
+      <button><b>This weekend</b> <span>· Aug 7 – 9</span></button>
+      <button><b>Next week</b> <span>· Aug 10 – 17</span></button>
+      <button><b>This month</b> <span>· Aug 6 – 31</span></button>
+      <button class="holiday"><b>Sukkot week</b> <span>· Sep 25 – Oct 3</span></button>
+      <button class="holiday"><b>Pesach week</b> <span>· Apr 21 – 28</span></button>
+      <button class="holiday"><b>Shavuot</b> <span>· Jun 10 – 12</span></button>
+    </div>
+    <div class="subrow">
+      <div class="near">📍 Show stays near an address — e.g. Rothschild Blvd, Tel Aviv</div>
+      <div class="viewtog"><button class="on">☷ List</button><button>🗺 Map</button></div>
+    </div>
+  </div>
+</div>
+
+<div class="results">
+  <div class="rhead"><h2>1,214 stays across Israel</h2><span>Sorted by: recommended</span></div>
+  <div class="grid">
+    <div class="card"><div class="ph" style="background-image:url('https://d8j0ntlcm91z4.cloudfront.net/user_3HWGlZDXVCAOoMKfZq628Ml9cM5/hf_20260806_194343_d6e3ec03-0b80-4899-95fa-6d97f5f0c08a.png')"><span class="tag">Vacation</span><span class="heart">♡</span></div>
+      <div class="pb"><h4>Old City apartment overlooking the Kotel</h4><div class="loc">Jerusalem · Old City</div><div class="meta"><span>🛏 2</span><span>🛁 1</span><span>▫ 74 m²</span></div><div class="price"><span class="amt">₪780 <span>/night</span></span><span class="rate"><i>★</i> 5.0</span></div></div></div>
+    <div class="card"><div class="ph" style="background-image:url('https://d8j0ntlcm91z4.cloudfront.net/user_3HWGlZDXVCAOoMKfZq628Ml9cM5/hf_20260806_140841_1239f205-9ad4-47d6-8b6e-89f4ef7e628a.png')"><span class="tag">Vacation</span><span class="heart">♡</span></div>
+      <div class="pb"><h4>Beachfront stone villa</h4><div class="loc">Tel Aviv · Seafront</div><div class="meta"><span>🛏 4</span><span>🛁 3</span><span>▫ 160 m²</span></div><div class="price"><span class="amt">₪1,450 <span>/night</span></span><span class="rate"><i>★</i> 4.9</span></div></div></div>
+    <div class="card"><div class="ph" style="background-image:url('https://d8j0ntlcm91z4.cloudfront.net/user_3HWGlZDXVCAOoMKfZq628Ml9cM5/hf_20260806_140841_f89984ce-f7c9-410a-9717-1669a87d77d2.png')"><span class="tag">Short-term</span><span class="heart">♡</span></div>
+      <div class="pb"><h4>Sea-view open-plan apartment</h4><div class="loc">Tel Aviv · Lev Ha'ir</div><div class="meta"><span>🛏 3</span><span>🛁 2</span><span>▫ 98 m²</span></div><div class="price"><span class="amt">₪9,200 <span>/mo</span></span><span class="rate"><i>★</i> 4.8</span></div></div></div>
+    <div class="card"><div class="ph" style="background-image:url('https://d8j0ntlcm91z4.cloudfront.net/user_3HWGlZDXVCAOoMKfZq628Ml9cM5/hf_20260806_140841_15036e87-4ad6-4e3c-b48c-3f6bdf42d234.png')"><span class="tag">Long-term</span><span class="heart">♡</span></div>
+      <div class="pb"><h4>Stone-walled apartment, Nachlaot</h4><div class="loc">Jerusalem · Nachlaot</div><div class="meta"><span>🛏 3</span><span>🛁 1</span><span>▫ 85 m²</span></div><div class="price"><span class="amt">₪8,400 <span>/mo</span></span><span class="rate"><i>★</i> 4.8</span></div></div></div>
+    <div class="card"><div class="ph" style="background-image:url('https://d8j0ntlcm91z4.cloudfront.net/user_3HWGlZDXVCAOoMKfZq628Ml9cM5/hf_20260806_182939_99ea6716-e1d2-47af-b156-934c07f68373.png')"><span class="tag">Long-term</span><span class="heart">♡</span></div>
+      <div class="pb"><h4>Bright 2-bed near the shuk</h4><div class="loc">Jerusalem · Mahane Yehuda</div><div class="meta"><span>🛏 2</span><span>🛁 1</span><span>▫ 66 m²</span></div><div class="price"><span class="amt">₪6,900 <span>/mo</span></span><span class="rate"><i>★</i> 4.7</span></div></div></div>
+    <div class="card"><div class="ph" style="background-image:url('https://d8j0ntlcm91z4.cloudfront.net/user_3HWGlZDXVCAOoMKfZq628Ml9cM5/hf_20260806_140841_3c1a9b11-94c4-4589-ae8c-be950bf7ed85.png')"><span class="tag">Vacation</span><span class="heart">♡</span></div>
+      <div class="pb"><h4>Sunny suite with balcony</h4><div class="loc">Netanya · Seafront</div><div class="meta"><span>🛏 1</span><span>🛁 1</span><span>▫ 52 m²</span></div><div class="price"><span class="amt">₪540 <span>/night</span></span><span class="rate"><i>★</i> 4.9</span></div></div></div>
+  </div>
+</div>
+</body>
+</html>
