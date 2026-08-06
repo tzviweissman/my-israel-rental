@@ -44,6 +44,12 @@ Logo (`components/Navigation.js` + footer): the raw gold `brand/logo-mark.png` f
 
 ## Phase 2 — Frontend redesign: cinematic Home + Stays + Services (new layout)
 
+**Carried over from Phase 1 — do not lose:**
+- **Glass nav (`.bar`)** — part of **2d** (shared `Navigation.js`). Must land **before or with** the page restyles so all five pages sit in the same chrome. Deferred from Phase 1 deliberately: building it against the old nav and then again against the new one is the same work twice.
+- **Footer logo** — the dark-background lockup (`logo-gold-blue-dark.png` / light wordmark). There is currently **no shared Footer component in the codebase at all**; it arrives with the previews' footer in this phase, and the logo ships with it.
+- **Phase 1 logo is settled** (don't re-litigate): raw gold `logo-mark.png`, **no navy tile**, **44px** at full nav height and **32px** once the bar condenses, wordmark vertically centred with the mark at both sizes. Values copied verbatim from `.lg`.
+
+
 **2a. Home (`frontend/src/pages/Home.js`, route `/`)** — rebuild as the scroll-driven cinematic experience in `cinematic-preview.html`, keeping the existing `PageMeta`/JSON-LD SEO block. Copy the scene structure, captions, notification cards, and scroll engine exactly (pinned sections, per-scene progress, `data-seg` fades, the scene-2 zoom-through-the-wall with the interior STILL, no-loop push-in clips, play/pause via IntersectionObserver, `prefers-reduced-motion` fallback to posters). The "Also on MyIsraelRental" pill strip and limestone finale included. All copy through i18n keys (add Hebrew); CTAs deep-link: Explore rentals → `/stays`, Explore services → `/services`, Post a request → `/requests`. Note the older `docs/hero-cinematic-spec.md` describes a previous framed-hero design — where it conflicts, `cinematic-preview.html` wins; its implementation notes (lucide icon mapping, i18n table, HeroSlideshow caveat, fail-safe reveal) still apply.
 
 **2b. Stays (`frontend/src/pages/Stays.jsx`)** — restyle to `stays-preview.html`: glass nav, dark photo band, floating search panel, holiday chips, near-address bar, List/Map toggle, card grid. This is a RESTYLE — keep all existing search logic, URL params, filters, map view, and data wiring intact.
