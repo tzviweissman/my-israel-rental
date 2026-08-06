@@ -1,7 +1,9 @@
 # MyIsraelRental.com - Product Requirements Document
 
+> **DISCONTINUED — document / government "paid services" (Arnona discount, name change, document filing, Bituach Leumi benefits) are no longer offered.** Do not surface them in UI/marketing or build new work for them. Historical changelog entries below that reference document services are kept for audit only; treat the feature as retired. (The related code/feature flag `DOCUMENT_SERVICES_ENABLED` should stay off / be cleaned up separately.)
+
 ## Original Problem Statement
-Build a bilingual (English/Hebrew) rental website named MyIsraelRental.com with admin dashboard, property listing management (long-term, short-term, vacation, storage), real-time chat, iCal/Airbnb calendar sync, paid service portal (Arnona/name change), rental contract translation & signing, renter notifications, and manager bulk upload features. Dark grey and gold color scheme.
+Build a bilingual (English/Hebrew) rental website named MyIsraelRental.com with admin dashboard, property listing management (long-term, short-term, vacation, storage), real-time chat, iCal/Airbnb calendar sync, rental contract translation & signing, renter notifications, and manager bulk upload features. Plus a two-sided local **services marketplace** (hire/offer pros) and a **Requests board** (post what you're looking for). Blue and gold color scheme.
 
 ## Core Architecture
 - **Frontend**: React + TailwindCSS + Lucide-react icons + Shadcn/UI

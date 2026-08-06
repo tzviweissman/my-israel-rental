@@ -6,6 +6,8 @@ Guardrails and project knowledge for working in this repo. Read this before maki
 
 MyIsraelRental — a rental/marketplace web app. FastAPI backend (`backend/`) + React (CRA/craco) frontend (`frontend/`). MongoDB Atlas for data, Cloudinary for media and private contract storage, Google Identity Services for sign-in, the direct Anthropic API for LLM features (translation, CSV mapping, bulk extraction). Deployed on Railway. Migrated off Emergent (formerly hosted there) in July 2026 — see `docs/emergent-exit-checklist.md` for what that involved and what's still outstanding.
 
+**Offerings:** property rentals (long/short-term, vacation), a two-sided local **services marketplace** (hire/offer pros), and a **Requests board** (post what you're looking for; owners/pros respond via chat). **Discontinued — do not surface or build for:** document / government "paid services" (Arnona discount, name change, document filing, Bituach Leumi benefits). Related code may still exist behind the `DOCUMENT_SERVICES_ENABLED` flag; keep it off and clean it up separately, don't extend it.
+
 ## Before making changes
 
 - **Look for existing code first.** Check `backend/routes/` and `backend/utils/` before adding a new backend module; check `frontend/src/components/` and `frontend/src/utils/` before adding a new frontend one. Don't duplicate what's already there.
