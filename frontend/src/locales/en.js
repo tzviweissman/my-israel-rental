@@ -1599,6 +1599,9 @@ const en = {
       // Shown by ErrorBoundary when a page crashes. Until this existed a
       // render error produced a blank white document with no message.
       errors: {
+        listingsTitle: "We couldn't load listings just now",
+        listingsBody: 'This is a problem on our side, not with your search — the properties are still here. Please try again in a moment.',
+        listingsRetry: 'Try again',
         title: 'Something went wrong on this page',
         body: "This one's on us, not you. Nothing you did was lost — try reloading, or head back and come at it again.",
         reload: 'Reload the page',
