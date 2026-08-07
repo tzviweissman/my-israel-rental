@@ -323,10 +323,15 @@ const Navigation = () => {
     <nav
       ref={navRef}
       data-testid="global-nav"
-      className="fixed top-0 left-0 right-0 z-50 transition-all duration-300"
+      className="fixed top-0 left-0 right-0 z-50 transition-all duration-300 glass-nav"
       style={{
-        background: scrolled ? 'var(--brand-primary)' : 'transparent',
-        boxShadow: scrolled ? '0 2px 20px rgba(0,0,0,0.3)' : 'none'
+        // Unscrolled, `.glass-nav` supplies the preview's gradient scrim, which
+        // is what lets white pills read over a bright hero photo. Once the page
+        // scrolls past the hero there is no photo left to sit on, so it falls
+        // back to the solid brand blue — the preview is a one-page overlay and
+        // never has to solve that.
+        background: scrolled ? 'var(--brand-primary)' : undefined,
+        boxShadow: scrolled ? '0 2px 20px rgba(0,0,0,0.3)' : 'none',
       }}
     >
       <div className="max-w-7xl mx-auto px-6" style={{ padding: scrolled ? '4px 24px' : '0 24px' }}>
@@ -413,18 +418,20 @@ const Navigation = () => {
                 Kept compact so they don't crowd the top-right cluster. */}
             {!user && (
               <div className="hidden sm:flex items-center gap-2" data-testid="nav-auth-cluster">
+                {/* Glass pills per the preview's `.signin` / `.join`. Sign in
+                    is the translucent treatment; the join CTA is the single
+                    solid element in the bar, which is what makes it read as
+                    the primary action without needing a colour. */}
                 <button
                   onClick={() => navigate('/auth/login')}
-                  className="text-xs sm:text-sm font-semibold px-3 py-1.5 rounded-full hover:bg-white/10 transition-colors"
-                  style={{ color: 'var(--gold)' }}
+                  className="glass-pill"
                   data-testid="nav-login-top"
                 >
                   {t('nav.login', 'Sign In')}
                 </button>
                 <button
                   onClick={() => navigate('/signup')}
-                  className="text-xs sm:text-sm font-bold px-3 py-1.5 rounded-full transition-all hover:shadow-md"
-                  style={{ backgroundColor: 'var(--gold)', color: 'var(--brand-primary)' }}
+                  className="glass-pill-solid"
                   data-testid="nav-signup-top"
                 >
                   {t('nav.signup', 'Sign Up')}
