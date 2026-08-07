@@ -455,20 +455,20 @@ const Navigation = () => {
             {/* Language toggle — desktop always, mobile shown only when
                 signed out (signed-in users have bell + chat in this slot
                 and can switch language inside the menu drawer). */}
+            {/* `.lang` from the previews: a small glass pill reading
+                "עברית / EN", not an icon. Both scripts are shown at once and
+                the label never changes, which is the point — an Anglo reader
+                who has accidentally switched to Hebrew can still find the way
+                back, where a label that only says the OTHER language means
+                the way out is written in the script they can't read. */}
             <button
               onClick={toggleLanguage}
-              className={`${user ? 'hidden sm:flex' : 'flex'} p-2 rounded-full hover:bg-white/10 transition-colors items-center gap-1`}
+              className={`${user ? 'hidden sm:inline-flex' : 'inline-flex'} glass-pill glass-pill-sm items-center`}
               data-testid="language-toggle"
               aria-label={t('nav.toggleLanguage')}
               title={i18n.language.startsWith('he') ? 'Switch to English' : 'Switch to Hebrew'}
             >
-              <Globe size={scrolled ? 20 : 22} color="var(--gold)" />
-              <span
-                className="text-[10px] font-bold tracking-wide"
-                style={{ color: 'var(--gold)' }}
-              >
-                {i18n.language.startsWith('he') ? 'EN' : 'עב'}
-              </span>
+              עברית / EN
             </button>
 
             {/* Inbox / Messages shortcut */}
@@ -606,19 +606,21 @@ const Navigation = () => {
 
             {/* Menu Button */}
             <div className="relative" ref={menuRef}>
+              {/* Glass pill like the rest of the bar. The icon stays: this is
+                  the only control whose meaning isn't carried by its label on
+                  mobile, where the word "Menu" is hidden. */}
               <button
                 onClick={() => setMenuOpen(!menuOpen)}
-                className="flex items-center gap-2 rounded-xl transition-all duration-200"
-              style={{
-                backgroundColor: 'transparent',
-                border: '1.5px solid var(--gold)',
-                padding: scrolled ? '6px 14px' : '10px 18px'
-              }}
-              data-testid="nav-menu-button"
-            >
-              {menuOpen ? <X size={scrolled ? 16 : 18} color="var(--gold)" /> : <Menu size={scrolled ? 16 : 18} color="var(--gold)" />}
-              <span className="hidden sm:inline font-semibold tracking-wide" style={{ color: 'var(--gold)', fontSize: scrolled ? '12px' : '14px' }}>{t('nav.menu')}</span>
-            </button>
+                className="glass-pill inline-flex items-center gap-2"
+                aria-expanded={menuOpen}
+                aria-haspopup="menu"
+                data-testid="nav-menu-button"
+              >
+                {menuOpen ? <X size={16} aria-hidden="true" /> : <Menu size={16} aria-hidden="true" />}
+                <span className="hidden sm:inline">{t('nav.menu')}</span>
+                {/* The label is hidden on mobile, so name the control there. */}
+                <span className="sr-only sm:hidden">{t('nav.menu')}</span>
+              </button>
 
             {menuOpen && (
               <div
@@ -631,9 +633,19 @@ const Navigation = () => {
                 // so the rounded corners still clip.
                 className="absolute end-0 top-full mt-3 w-72 rounded-2xl overflow-y-auto overflow-x-hidden max-h-[calc(100vh-96px)] sm:max-h-[80vh] z-[60] overscroll-contain"
                 style={{
-                  backgroundColor: 'var(--brand-primary)',
-                  border: '1.5px solid rgba(201, 162, 39,0.25)',
-                  boxShadow: '0 16px 48px rgba(0,0,0,0.5), 0 0 0 1px rgba(201, 162, 39,0.08)'
+                  // Glass, but a DEEP glass. The nav pills sit at .12 alpha
+                  // because they hold two words over a photo; this panel holds
+                  // a dozen menu rows over whatever page is beneath it, and at
+                  // that alpha the text underneath shows through and the list
+                  // becomes unreadable. .92 over the deep brand blue keeps the
+                  // frosted feel while the content stays legible — the blur is
+                  // doing the aesthetic work, not the transparency.
+                  backgroundColor: 'rgba(18, 59, 87, .92)',
+                  backdropFilter: 'blur(14px) saturate(1.1)',
+                  WebkitBackdropFilter: 'blur(14px) saturate(1.1)',
+                  border: '1.5px solid rgba(255, 255, 255, .28)',
+                  boxShadow:
+                    'inset 0 1px 0 rgba(255,255,255,.18), 0 16px 48px rgba(0,0,0,.5)',
                 }}
                 data-testid="nav-menu-dropdown"
               >
