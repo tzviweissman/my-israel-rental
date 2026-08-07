@@ -11,6 +11,9 @@
 // if the key goes missing.
 const en = {
       nav: {
+        requests: 'Requests',
+        listOffer: 'List / Offer',
+        primary: 'Primary',
         home: 'Home',
         longTerm: 'Long Term',
         shortTerm: 'Short Term',
@@ -1598,6 +1601,15 @@ const en = {
       // to add — "invalid number" leaves them guessing.
       // Shown by ErrorBoundary when a page crashes. Until this existed a
       // render error produced a blank white document with no message.
+      requests: {
+        metaTitle: 'Requests — MyIsraelRental',
+        metaDescription: 'Post what you are looking for and let owners and local pros come to you. Coming soon to MyIsraelRental.',
+        eyebrow: 'Coming soon',
+        title: 'Requests',
+        blurb: 'Post what you are looking for — a 3-bed in Ramat Eshkol, a mover next week — and let owners and local pros come to you.',
+        ctaStays: 'Browse stays',
+        ctaServices: 'Browse services',
+      },
       errors: {
         listingsTitle: "We couldn't load listings just now",
         listingsBody: 'This is a problem on our side, not with your search — the properties are still here. Please try again in a moment.',

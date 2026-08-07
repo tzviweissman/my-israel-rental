@@ -20,7 +20,11 @@ const CANONICAL_ORIGIN = 'https://myisraelrental.com';
 // tag ships on every rendered page without a runtime lookup per mount.
 const GOOGLE_VERIFICATION = process.env.REACT_APP_GOOGLE_VERIFICATION;
 
-const PageMeta = ({ title, description, path, image, jsonLd }) => {
+const PageMeta = ({ title, description, path, image, jsonLd, noindex = false }) => {
+  // `noindex` keeps a page out of search results. Needed for coming-soon and
+  // placeholder pages: if one gets indexed it will outrank the real page for
+  // its own name once that ships, and removing a URL from an index is far
+  // slower than never adding it.
   // Prefer the explicit `path` prop so server-rendered crawlers and
   // navigations both resolve to the same canonical. Fallback to the
   // browser path if the caller didn't pass one in.
@@ -37,6 +41,7 @@ const PageMeta = ({ title, description, path, image, jsonLd }) => {
     <Helmet prioritizeSeoTags>
       <title>{title}</title>
       <meta name="description" content={description} />
+      {noindex && <meta name="robots" content="noindex,nofollow" />}
       <link rel="canonical" href={canonical} />
       {/* Google Search Console verification. Ships site-wide when the
           REACT_APP_GOOGLE_VERIFICATION env var is set — see

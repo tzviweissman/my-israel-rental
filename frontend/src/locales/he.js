@@ -11,6 +11,9 @@
 // if the key goes missing.
 const he = {
       nav: {
+        requests: 'בקשות',
+        listOffer: 'פרסום נכס / שירות',
+        primary: 'ניווט ראשי',
         home: 'בית',
         longTerm: 'טווח ארוך',
         shortTerm: 'טווח קצר',
@@ -1559,6 +1562,15 @@ const he = {
       },
       // Phone/WhatsApp field validation. See en.js.
       // Shown by ErrorBoundary when a page crashes. See en.js.
+      requests: {
+        metaTitle: 'בקשות — MyIsraelRental',
+        metaDescription: 'פרסמו מה אתם מחפשים ותנו לבעלי נכסים ובעלי מקצוע לפנות אליכם. בקרוב ב-MyIsraelRental.',
+        eyebrow: 'בקרוב',
+        title: 'בקשות',
+        blurb: 'פרסמו מה אתם מחפשים — 3 חדרים ברמת אשכול, מוביל לשבוע הבא — ותנו לבעלי הנכסים והמקצוע לפנות אליכם.',
+        ctaStays: 'לדירות',
+        ctaServices: 'לשירותים',
+      },
       errors: {
         listingsTitle: 'לא הצלחנו לטעון את הנכסים כרגע',
         listingsBody: 'זו תקלה אצלנו, לא בחיפוש שלכם — הנכסים עדיין כאן. נסו שוב בעוד רגע.',

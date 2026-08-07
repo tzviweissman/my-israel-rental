@@ -377,35 +377,48 @@ const Navigation = () => {
             <span className="sr-only sm:hidden">MyIsraelRental</span>
           </Link>
 
-          {/* Category pill row — Airbnb-style rental-type tabs.
-              Desktop: absolutely centered overlay in the same flex row.
-              Mobile: handled separately below the main row. */}
-          <div
-            className="hidden md:flex items-end justify-center gap-8 pointer-events-none absolute left-1/2 top-1/2"
+          {/* Desktop links — text-only glass pills per the previews. The
+              bed/briefcase icon pills they replace are gone by ruling; the
+              mobile drawer keeps icons, since tap targets benefit and the
+              previews don't cover mobile.
+
+              Four links, settled: "How it works" is deliberately absent —
+              the cinematic home page IS the how-it-works, so a nav item
+              pointing at a subsection of it would be circular.
+
+              /requests is backed by a placeholder until Phase 3 replaces it
+              in place, so this row never has to be rebuilt. */}
+          <nav
+            className="hidden md:flex items-center gap-[9px] pointer-events-none absolute left-1/2 top-1/2"
             style={{ transform: 'translate(-50%, -50%)' }}
             data-testid="nav-rental-categories"
+            aria-label={t('nav.primary', 'Primary')}
           >
-            <div className="flex items-end gap-8 pointer-events-auto">
-            {/* Top-level pills — replaces the old 4-rental-type strip with
-                the simpler Stays vs Services duality (Airbnb-style). The
-                rental-type sub-filter now lives inside the Stays page
-                Filters modal. */}
-            {[
-              { type: 'stays', icon: Bed, label: t('nav.stays', 'Stays'), to: '/stays' },
-              { type: 'services', icon: Briefcase, label: t('nav.services', 'Services'), to: '/services' },
-            ].map(({ type, icon: Icon, label, to }) => (
-              <NavCategoryItem
-                key={type}
-                type={type}
-                Icon={Icon}
-                label={label}
-                to={to}
-                active={location.pathname.startsWith(to)}
-                scrolled={scrolled}
-              />
-            ))}
+            <div className="flex items-center gap-[9px] pointer-events-auto">
+              {[
+                { key: 'stays', label: t('nav.stays', 'Stays'), to: '/stays' },
+                { key: 'services', label: t('nav.services', 'Services'), to: '/services' },
+                { key: 'requests', label: t('nav.requests', 'Requests'), to: '/requests' },
+                { key: 'supply', label: t('nav.listOffer', 'List / Offer'), to: '/why-list' },
+              ].map(({ key, label, to }) => {
+                const active = location.pathname.startsWith(to);
+                return (
+                  <Link
+                    key={key}
+                    to={to}
+                    className={`glass-pill ${active ? 'glass-pill-current' : ''}`}
+                    // The gold dot is decorative; aria-current is what
+                    // actually tells a screen reader which page this is.
+                    aria-current={active ? 'page' : undefined}
+                    data-testid={`nav-link-${key}`}
+                  >
+                    {label}
+                    {active && <span className="glass-dot" aria-hidden="true" />}
+                  </Link>
+                );
+              })}
             </div>
-          </div>
+          </nav>
 
           {/* Mobile-on-scroll search bar was removed per user request —
               the global nav stays clean on scroll, and dedicated

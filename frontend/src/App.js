@@ -41,6 +41,8 @@ const Home = lazy(() => import('./pages/Home'));
 // — over-prefetching burns bandwidth on visitors who never navigate.
 const Properties = lazy(() => import(/* webpackPrefetch: true */ './pages/Properties'));
 const Stays = lazy(() => import(/* webpackPrefetch: true */ './pages/Stays'));
+// Phase 3 replaces this component in place at the same route.
+const RequestsPlaceholder = lazy(() => import('./pages/RequestsPlaceholder'));
 const Services = lazy(() => import(/* webpackPrefetch: true */ './pages/Services'));
 const WhyList = lazy(() => import('./pages/WhyList'));
 const PropertyDetail = lazy(() => import('./pages/PropertyDetail'));
@@ -237,6 +239,7 @@ function App() {
             <Route path="/payment/cancel" element={<PaymentCancel />} />
             <Route path="/availability-extended" element={<AvailabilityExtended />} />
             <Route path="/stays" element={<Stays />} />
+            <Route path="/requests" element={<RequestsPlaceholder />} />
             <Route
               path="/kosher-stays-in-israel"
               element={<Stays landing={{

@@ -216,3 +216,25 @@ input[type="date"]:valid:before {
   .glass-pill:hover,
   .glass-pill-solid:hover { transform: none; }
 }
+
+/* Active nav link — brighter bubble plus a gold dot, verbatim from
+   `.links a.current` / `.dot` in the previews. Two signals rather than
+   one: the brightness shift alone is a ~1.2:1 difference against the
+   inactive pill, which is invisible to anyone with low vision and
+   vanishes entirely over a bright patch of hero photo. The dot carries
+   the meaning; the bubble reinforces it.
+
+   `margin-inline-start` (not left) so the dot flips sides in Hebrew. */
+.glass-pill-current {
+  background: rgba(255, 255, 255, .28);
+  border-color: rgba(255, 255, 255, .85);
+}
+.glass-dot {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--gold);
+  margin-inline-start: 6px;
+  vertical-align: middle;
+}
