@@ -11,6 +11,9 @@
 // if the key goes missing.
 const en = {
       nav: {
+        signin: 'Sign in',
+        listProperty: 'List your property',
+        account: 'Account menu',
         requests: 'Requests',
         listOffer: 'List / Offer',
         primary: 'Primary',

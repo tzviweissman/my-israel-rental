@@ -11,6 +11,9 @@
 // if the key goes missing.
 const he = {
       nav: {
+        signin: 'התחברות',
+        listProperty: 'פרסום נכס',
+        account: 'תפריט חשבון',
         requests: 'בקשות',
         listOffer: 'פרסום נכס / שירות',
         primary: 'ניווט ראשי',

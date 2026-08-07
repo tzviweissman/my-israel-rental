@@ -425,33 +425,6 @@ const Navigation = () => {
               category pages (/stays) own their own search experience. */}
 
           <div className="flex items-center gap-3">
-            {/* Sign In / Sign Up — visible only when signed out, always
-                to the LEFT of the language + menu icons so first-time
-                visitors can act on the CTA without opening the drawer.
-                Kept compact so they don't crowd the top-right cluster. */}
-            {!user && (
-              <div className="hidden sm:flex items-center gap-2" data-testid="nav-auth-cluster">
-                {/* Glass pills per the preview's `.signin` / `.join`. Sign in
-                    is the translucent treatment; the join CTA is the single
-                    solid element in the bar, which is what makes it read as
-                    the primary action without needing a colour. */}
-                <button
-                  onClick={() => navigate('/auth/login')}
-                  className="glass-pill"
-                  data-testid="nav-login-top"
-                >
-                  {t('nav.login', 'Sign In')}
-                </button>
-                <button
-                  onClick={() => navigate('/signup')}
-                  className="glass-pill-solid"
-                  data-testid="nav-signup-top"
-                >
-                  {t('nav.signup', 'Sign Up')}
-                </button>
-              </div>
-            )}
-
             {/* Language toggle — desktop always, mobile shown only when
                 signed out (signed-in users have bell + chat in this slot
                 and can switch language inside the menu drawer). */}
@@ -470,6 +443,37 @@ const Navigation = () => {
             >
               עברית / EN
             </button>
+
+            {/* Signed-out desktop: exactly the preview — lang, Sign in, and
+                one solid CTA. Order matters and it is deliberate.
+
+                There is no separate Sign Up. Auth is Google Identity, so
+                signing in and signing up are the same flow; two buttons was
+                inventory the preview correctly didn't have, and it split the
+                one solid slot between two competing asks.
+
+                That slot now recruits listers. In a two-sided marketplace
+                supply is the constraint — searchers already convert through
+                the hero doors and the search panels, so the nav's single
+                loudest element is better spent on the side that is scarce. */}
+            {!user && (
+              <div className="hidden md:flex items-center gap-[9px]" data-testid="nav-auth-cluster">
+                <button
+                  onClick={() => navigate('/auth/login')}
+                  className="glass-pill"
+                  data-testid="nav-login-top"
+                >
+                  {t('nav.signin', 'Sign in')}
+                </button>
+                <button
+                  onClick={() => navigate('/why-list')}
+                  className="glass-pill-solid"
+                  data-testid="nav-list-property"
+                >
+                  {t('nav.listProperty', 'List your property')}
+                </button>
+              </div>
+            )}
 
             {/* Inbox / Messages shortcut */}
             {user && (
@@ -606,20 +610,51 @@ const Navigation = () => {
 
             {/* Menu Button */}
             <div className="relative" ref={menuRef}>
-              {/* Glass pill like the rest of the bar. The icon stays: this is
-                  the only control whose meaning isn't carried by its label on
-                  mobile, where the word "Menu" is hidden. */}
+              {/* One control, two presentations, because it opens the same
+                  drawer either way.
+
+                  Signed OUT on desktop it is hidden entirely: the preview is
+                  the logged-out nav and has no Menu, and everything the
+                  drawer holds — dashboard, messages, notifications, logout —
+                  only exists once you are signed in. A hamburger that opens a
+                  menu of things you cannot do is worse than no hamburger.
+
+                  Signed IN on desktop it becomes the account pill: same glass
+                  bubble, avatar/name instead of a burger icon.
+
+                  Mobile keeps the drawer in both states — it is the only
+                  place the nav links live at that width. */}
               <button
                 onClick={() => setMenuOpen(!menuOpen)}
-                className="glass-pill inline-flex items-center gap-2"
+                className={`glass-pill inline-flex items-center gap-2 ${
+                  user ? '' : 'md:hidden'
+                }`}
                 aria-expanded={menuOpen}
                 aria-haspopup="menu"
                 data-testid="nav-menu-button"
               >
-                {menuOpen ? <X size={16} aria-hidden="true" /> : <Menu size={16} aria-hidden="true" />}
-                <span className="hidden sm:inline">{t('nav.menu')}</span>
-                {/* The label is hidden on mobile, so name the control there. */}
-                <span className="sr-only sm:hidden">{t('nav.menu')}</span>
+                {user ? (
+                  <>
+                    {/* Initial as a cheap avatar — no image to load, and it
+                        still reads as "this is you" rather than "settings". */}
+                    <span
+                      className="grid h-5 w-5 place-items-center rounded-full text-[10px] font-extrabold"
+                      style={{ background: 'rgba(255,255,255,.9)', color: 'var(--brand-primary-deep)' }}
+                      aria-hidden="true"
+                    >
+                      {(user.name || user.email || '?').trim().charAt(0).toUpperCase()}
+                    </span>
+                    <span className="hidden md:inline max-w-[9rem] truncate">
+                      {(user.name || user.email || '').split(' ')[0]}
+                    </span>
+                    <span className="sr-only">{t('nav.account', 'Account menu')}</span>
+                  </>
+                ) : (
+                  <>
+                    {menuOpen ? <X size={16} aria-hidden="true" /> : <Menu size={16} aria-hidden="true" />}
+                    <span className="sr-only">{t('nav.menu')}</span>
+                  </>
+                )}
               </button>
 
             {menuOpen && (
