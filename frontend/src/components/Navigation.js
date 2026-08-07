@@ -479,7 +479,7 @@ const Navigation = () => {
             {user && (
               <button
                 onClick={() => navigate('/dashboard?tab=messages')}
-                className="relative p-2 rounded-full hover:bg-white/10 transition-colors"
+                className="glass-pill relative inline-flex items-center justify-center !px-3"
                 data-testid="nav-messages-icon"
                 aria-label="Messages"
                 title="Messages"
@@ -504,7 +504,7 @@ const Navigation = () => {
                     setShowNotifications(!showNotifications);
                     requestDesktopNotificationPermission();
                   }}
-                  className="relative p-2 rounded-full hover:bg-white/10 transition-colors"
+                  className="glass-pill relative inline-flex items-center justify-center !px-3"
                   data-testid="notification-bell"
                 >
                   <Bell size={scrolled ? 20 : 22} color="var(--gold)" />
@@ -786,12 +786,21 @@ const Navigation = () => {
                     </>
                   ) : (
                     <>
-                      <button onClick={() => handleNav('/auth/login')} className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-150 hover:bg-white/5 group" style={{ color: 'var(--gold)' }} data-testid="nav-login">
-                        <span className="w-4 h-4 flex items-center justify-center opacity-60 group-hover:opacity-100 text-xs">&#x2192;</span>
-                        <span>{t('nav.login')}</span>
-                      </button>
-                      <button onClick={() => handleNav('/signup')} className="w-full mt-1 py-2.5 rounded-lg text-sm font-bold tracking-wide transition-all duration-200 hover:shadow-lg" style={{ backgroundColor: 'var(--gold)', color: 'var(--brand-primary)' }} data-testid="nav-signup">
-                        {t('nav.signup')}
+                      {/* One auth action, matching the desktop bar. Google
+                          Identity makes signing in and signing up the same
+                          flow, so a second button was false inventory — it
+                          implied a choice that doesn't exist and made new
+                          visitors pick between two doors to the same room.
+
+                          The solid gold Sign Up that used to sit here is
+                          gone: no solid gold element survives anywhere in the
+                          nav or drawer. Glass, like everything else. */}
+                      <button
+                        onClick={() => handleNav('/auth/login')}
+                        className="glass-pill w-full justify-center mt-1"
+                        data-testid="nav-login"
+                      >
+                        {t('nav.signin', 'Sign in')}
                       </button>
                     </>
                   )}
