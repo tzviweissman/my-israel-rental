@@ -19,6 +19,29 @@ import { installStaleBuildInterceptor } from './utils/staleBuildInterceptor';
 // think a feature was broken when it was just stale.
 installStaleBuildInterceptor();
 
+/**
+ * The floating WhatsApp CTA, suppressed on the cinematic home page.
+ *
+ * Not hidden with CSS — not rendered at all, so it costs nothing on that
+ * route and cannot flash before being hidden.
+ *
+ * Two reasons it goes. It floats over scene media and captions for the full
+ * length of an immersive full-bleed story that was never laid out around it.
+ * And it argues against the page: a generic WhatsApp bubble hovering beside
+ * the scene whose whole message is "chat happens inside MyIsraelRental"
+ * undercuts the thing being said. The home page carries its own CTAs in the
+ * hero and the finale for anyone ready to act.
+ *
+ * Every other route keeps it. This is a wrapper rather than a check inside
+ * WhatsAppButton so the widget stays a generic component that knows nothing
+ * about routing.
+ */
+function FloatingContact() {
+  const { pathname } = useLocation();
+  if (pathname === '/') return null;
+  return <WhatsAppButton />;
+}
+
 function ScrollToTop() {
   const { pathname } = useLocation();
   useEffect(() => { window.scrollTo(0, 0); }, [pathname]);
@@ -200,7 +223,7 @@ function App() {
               re-enabling is a one-line change if you want it back on a
               different trigger. `services_pitch_seen_at` on the user doc is
               now unread by the UI. */}
-          <WhatsAppButton />
+          <FloatingContact />
           <AccessibilityButton />
           {/* Around the ROUTES only: a page-level crash then leaves the
               nav bar intact so the user can click their way out, instead
