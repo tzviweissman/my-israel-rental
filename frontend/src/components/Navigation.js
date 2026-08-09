@@ -325,13 +325,12 @@ const Navigation = () => {
       data-testid="global-nav"
       className="fixed top-0 left-0 right-0 z-50 transition-all duration-300 glass-nav"
       style={{
-        // Unscrolled, `.glass-nav` supplies the preview's gradient scrim, which
-        // is what lets white pills read over a bright hero photo. Once the page
-        // scrolls past the hero there is no photo left to sit on, so it falls
-        // back to the solid brand blue — the preview is a one-page overlay and
-        // never has to solve that.
-        background: scrolled ? 'var(--brand-primary)' : undefined,
-        boxShadow: scrolled ? '0 2px 20px rgba(0,0,0,0.3)' : 'none',
+        // The bar NEVER takes a fill. `.glass-nav` supplies the preview's
+        // gradient scrim and the glass bubbles are the chrome — that is the
+        // whole design. Solidifying on scroll (which this used to do) also
+        // gave captions and notification cards a hard edge to clip against
+        // at scene exits, which read as a rendering fault.
+        boxShadow: 'none',
       }}
     >
       {/* Vertical padding per the preview's .bar: 14px clamp(16px,3vw,36px).

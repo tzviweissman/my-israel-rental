@@ -404,6 +404,14 @@ const en = {
         message: 'Message'
       },
       home: {
+        hero: {
+          h1: "Find your place",
+          accent: "in Israel.",
+          sub: "Rent a home. Hire the pros. — one place for both. Free for renters and owners, no service fees.",
+          ctaStays: "Search rentals",
+          ctaList: "List your property",
+          hint: "Scroll — the story moves with you",
+        },
         scenes: {
         villaA: {
           kick: "Rentals · long · short · vacation",

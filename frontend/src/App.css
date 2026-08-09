@@ -297,3 +297,87 @@ input[type="date"]:valid:before {
 }
 /* Scenes are dark by definition — the nav scrim sits on top of video. */
 .scene{position:relative;background:#060e13;color:#fff}
+
+/* ── Fixes from the human pass on the cinematic page ──────────────────── */
+
+/* The preview's CSS references --blue and --blue-deep, which do not exist in
+   design-tokens.css (they are --brand-primary / --brand-primary-deep there).
+   An undefined var makes the whole declaration invalid at computed-value
+   time, so `.b-blue{background:var(--blue)}` silently produced a button with
+   NO fill — white text on limestone. Same failure the shadcn --primary
+   collision produced, from the opposite direction: there the name existed
+   with the wrong type, here it doesn't exist at all. Both are invisible to a
+   value-level check and obvious in a screenshot. */
+:root {
+  --blue: var(--brand-primary);
+  --blue-deep: var(--brand-primary-deep);
+}
+
+/* Notification cards. The base rule was dropped when I extracted the
+   preview's CSS — it is preceded by a comment, which broke the selector
+   match — so the cards had no positioning at all and rendered as full-width
+   strips jammed under the nav. This is the preview's rule verbatim: a
+   floating right-hand column, capped at 360px, sitting above the fold line
+   rather than at the top of the viewport. */
+.note {
+  position: absolute;
+  z-index: 6;
+  right: clamp(18px, 4.5vw, 64px);
+  bottom: clamp(84px, 17vh, 170px);
+  width: min(360px, calc(100vw - 36px));
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  pointer-events: none;
+}
+[dir="rtl"] .note { right: auto; left: clamp(18px, 4.5vw, 64px); }
+
+/* Finale was flush to the left edge — the preview centres it in a
+   max-width container. */
+.finale {
+  padding: clamp(64px, 12vh, 130px) clamp(20px, 5vw, 64px);
+  text-align: center;
+}
+.finale > div {
+  max-width: 780px;
+  margin-inline: auto;
+}
+
+/* The gold CTA sits on limestone here, so it uses the frosted glass-gold
+   from design-tokens.css rather than an opaque fill. */
+.b-gold {
+  background: rgba(172, 134, 28, .64);
+  border: 1.5px solid rgba(201, 162, 39, .85);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+/* ── Hero (opening aerial) ────────────────────────────────────────────
+   Copied verbatim from the preview. The page previously opened cold on
+   scene 1's Kotel wall with no <h1> anywhere — this is the establishing
+   shot and the document's only top-level heading. The `.hint` bob is
+   defined here but neutralised under reduced motion below. */
+.hero video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.hero .shade2{position:absolute;inset:0;background:linear-gradient(180deg,rgba(6,14,19,.4),rgba(6,14,19,.12) 40%,rgba(6,14,19,.75))}
+.hero .center{position:absolute;z-index:5;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:0 20px}
+.hero h1{font-size:clamp(38px,6.6vw,80px);font-weight:800;letter-spacing:-1.5px;line-height:1.02;text-shadow:0 3px 30px rgba(0,0,0,.55)}
+.hero h1 .a{color:var(--gold)}
+.hero p{margin-top:16px;font-size:clamp(14px,1.6vw,18px);color:rgba(255,255,255,.92);max-width:560px}
+.hero .ctas{display:flex;gap:14px;margin-top:28px;flex-wrap:wrap;justify-content:center}
+.b-white{background:#fff;color:var(--ink);border:none;border-radius:999px;font-weight:800;font-size:15px;padding:15px 30px;cursor:pointer;font-family:inherit}
+.b-line{background:rgba(255,255,255,.1);color:#fff;border:1.5px solid rgba(255,255,255,.6);border-radius:999px;font-weight:700;font-size:15px;padding:15px 30px;cursor:pointer;backdrop-filter:blur(8px);font-family:inherit}
+.hero .hint{position:absolute;bottom:24px;left:50%;transform:translateX(-50%);z-index:5;font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:rgba(255,255,255,.65);animation:bob 2.4s ease-in-out infinite}
+@keyframes bob { 0%,100% { transform: translateX(-50%) translateY(0) } 50% { transform: translateX(-50%) translateY(6px) } }
+@media (prefers-reduced-motion: reduce) { .hero .hint { animation: none } }
+
+/* The preview's body is white-on-dark, so .hero and .finale text inherited
+   white for free. This app's body is ink-on-limestone, so every one of those
+   rules landed dark-on-photo — the h1 read as almost invisible against the
+   stone. Set the colour explicitly at each surface rather than changing the
+   app's body colour, which everything else depends on. */
+.hero, .hero .center { color: #fff; }
+.hero h1 { color: #fff; }
+.hero h1 .a { color: var(--gold); }
+.hero .hint { color: rgba(255, 255, 255, .65); }
+/* The finale is the one LIGHT surface — it keeps the app's ink. */
+.finale h2 { color: var(--ink); }
