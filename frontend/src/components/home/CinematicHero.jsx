@@ -23,10 +23,23 @@ const CDN = 'https://d8j0ntlcm91z4.cloudfront.net/user_3HWGlZDXVCAOoMKfZq628Ml9c
 const CinematicHero = ({ reducedMotion }) => {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const videoRef = React.useRef(null);
+
+  // The `autoplay` attribute alone is not enough here. The element mounts
+  // inside a React tree, and browsers evaluate autoplay at parse time — so a
+  // muted, playsinline video can still come up paused. The scene observer
+  // does not cover this one either: it watches [data-scene] video, and the
+  // hero is a plain <header> outside that. Ask once on mount and swallow a
+  // rejection, which leaves the poster showing rather than a dead frame.
+  React.useEffect(() => {
+    if (reducedMotion) return;
+    videoRef.current?.play().catch(() => {});
+  }, [reducedMotion]);
 
   return (
     <header className="hero">
       <video
+        ref={videoRef}
         // autoPlay only when motion is welcome. muted+playsInline are what
         // make autoplay permissible at all on mobile Safari.
         autoPlay={!reducedMotion}

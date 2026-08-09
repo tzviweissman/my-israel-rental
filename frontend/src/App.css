@@ -381,3 +381,15 @@ input[type="date"]:valid:before {
 .hero .hint { color: rgba(255, 255, 255, .65); }
 /* The finale is the one LIGHT surface — it keeps the app's ink. */
 .finale h2 { color: var(--ink); }
+
+/* The base .hero rule — dropped by the same extraction flaw that lost
+   `.note`: both are preceded by a comment, which broke the selector match,
+   so only their descendant rules came across. Without it the section had no
+   height of its own; every child is absolutely positioned, so the container
+   collapsed to 0 and scene 1 started at document top with the headline
+   floating over the Kotel media behind it.
+
+   Verbatim from the preview. `height`, not `min-height`: the hero is exactly
+   one viewport by design, and min-height would let a long Hebrew headline
+   push it taller and desynchronise every scene boundary below. */
+.hero { position: relative; height: 100vh; overflow: hidden; }
