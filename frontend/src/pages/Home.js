@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import PageMeta from '../components/PageMeta';
 import CinematicHero from '../components/home/CinematicHero';
 import CinematicScenes from '../components/home/CinematicScenes';
+import AlsoStrip from '../components/home/AlsoStrip';
 
 const Home = () => {
   const { t } = useTranslation();
@@ -71,6 +72,10 @@ const Home = () => {
       {/* Establishing shot, then the pinned sequence. */}
       <CinematicHero reducedMotion={reducedMotion} />
       <CinematicScenes reducedMotion={reducedMotion} />
+
+      {/* Capabilities strip — the last dark surface, between the Requests
+          scene and the limestone finale. */}
+      <AlsoStrip />
 
       {/* Limestone finale — the one light surface on the page, which is what
           makes it read as an ending rather than a sixth scene. */}

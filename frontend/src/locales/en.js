@@ -404,6 +404,18 @@ const en = {
         message: 'Message'
       },
       home: {
+        also: {
+          kick: "And that's not all",
+          title: "Also on MyIsraelRental",
+          shabbat: "🕎 Shabbat-elevator, sukkah & kosher-kitchen filters",
+          savedSearch: "🔔 Saved searches with instant alerts",
+          chat: "⇄ Auto-translated EN ↔ HE chat",
+          map: "🗺️ Map & near-address search",
+          ical: "📅 iCal / Airbnb calendar sync",
+          reviews: "⭐ Reviews & verified work history",
+          subleases: "🏘️ Subleases",
+          bulk: "🧰 Bulk tools for property managers",
+        },
         hero: {
           h1: "Find your place",
           accent: "in Israel.",
@@ -447,9 +459,15 @@ const en = {
           accent: "while you rest.",
           p: "Out the other side of that chat — a lister in Jerusalem, feet up, while bookings come to him.",
         },
+        ownersSigned: {
+          from: "🔔 MyIsraelRental",
+          msg: "Contract signed ✓",
+          sig: "Daniel M.",
+          ok: "✓ Signed directly on your dashboard",
+        },
         ownersNote: {
           from: "🔔 MyIsraelRental",
-          msg: "Your long-term apartment — available in 6 months — was just booked.",
+          msg: "Your long-term apartment — available in 6 months — was just booked for the following year.",
           meta: "just now · owners work less on MyIsraelRental",
         },
         services: {

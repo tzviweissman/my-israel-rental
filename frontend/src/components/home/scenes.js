@@ -56,7 +56,14 @@ export const SCENES = [
     poster: `${CDN}/hf_20260806_140841_15036e87-4ad6-4e3c-b48c-3f6bdf42d234.png`,
     loop: true,
     texts: [{ seg: '.06,1', key: 'owners' }],
-    notes: [{ seg: '.35,1', key: 'ownersNote' }],
+    // TWO cards, per the preview. The second matters even before it fades
+    // in: `.note` is a flex column, so an opacity-0 card still occupies
+    // height and lifts the first card 164px. Shipping one card put the
+    // booking notification in the wrong place for the whole scene.
+    notes: [
+      { seg: '.28,1', key: 'ownersNote' },
+      { seg: '.55,1', key: 'ownersSigned', sig: true },
+    ],
   },
   {
     key: 'services',

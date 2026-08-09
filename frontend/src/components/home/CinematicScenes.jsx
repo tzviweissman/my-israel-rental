@@ -88,7 +88,18 @@ const CinematicScenes = ({ reducedMotion }) => {
                       {t(`home.scenes.${n.key}.from`)}
                     </div>
                     <div className="msg">{t(`home.scenes.${n.key}.msg`)}</div>
-                    <div className="meta">{t(`home.scenes.${n.key}.meta`)}</div>
+                    {/* The contract card has a different shape from a
+                        notification: a signature line and a verified pill
+                        instead of a timestamp. Both classes are already in
+                        the ported CSS. */}
+                    {n.sig ? (
+                      <>
+                        <div className="sig">{t(`home.scenes.${n.key}.sig`)}</div>
+                        <div className="ok">{t(`home.scenes.${n.key}.ok`)}</div>
+                      </>
+                    ) : (
+                      <div className="meta">{t(`home.scenes.${n.key}.meta`)}</div>
+                    )}
                   </div>
                 ))}
               </div>

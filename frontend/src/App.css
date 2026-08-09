@@ -393,3 +393,49 @@ input[type="date"]:valid:before {
    one viewport by design, and min-height would let a long Hebrew headline
    push it taller and desynchronise every scene boundary below. */
 .hero { position: relative; height: 100vh; overflow: hidden; }
+
+/* ── "Also on MyIsraelRental" pill strip ───────────────────────────────
+   Between the Requests scene and the finale. Ported BY HAND, not through
+   the extraction script — that script silently dropped every rule preceded
+   by a comment and flattened @media blocks, which cost four separate bugs
+   on this page.
+
+   Checked against the app's cascade rather than assumed, since that is what
+   the previous bugs had in common:
+     • every colour here is explicit (#fff, rgba(...)), so nothing inherits
+       from the preview's white-on-dark body the way .hero did;
+     • no var(--border) / var(--muted) appear, so there is nothing to
+       rewrite to --brand-border / --brand-muted;
+     • the preview has no @media override for .also — the only max-width
+       block on the page covers .bar and closes before these rules.
+
+   Dark panel on purpose: it sits between the last dark scene and the
+   limestone finale, so it carries the eye out of the film and into the
+   page without a hard cut. */
+.also { background: #0b1c26; padding: 96px 22px; text-align: center; }
+.also-in { max-width: 960px; margin: 0 auto; }
+.also h2 {
+  font-size: clamp(26px, 3.6vw, 44px);
+  font-weight: 800;
+  letter-spacing: -.8px;
+  margin-top: 12px;
+  color: #fff;
+}
+.also-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  justify-content: center;
+  margin-top: 34px;
+}
+.also-grid span {
+  background: rgba(255, 255, 255, .07);
+  border: 1px solid rgba(255, 255, 255, .22);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  border-radius: 999px;
+  padding: 11px 20px;
+  font-size: 14px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, .92);
+}
