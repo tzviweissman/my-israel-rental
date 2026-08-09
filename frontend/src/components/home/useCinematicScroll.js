@@ -26,6 +26,23 @@ import { useEffect } from 'react';
 
 const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
 
+/**
+ * Document scroll progress, 0–100, written straight to the bar's width.
+ *
+ * Queried from the document rather than passed in as a ref: the bar is
+ * position:fixed at page level, deliberately outside the scenes container
+ * this hook is scoped to, and threading a ref up through Home just to reach
+ * it would couple two things that otherwise have nothing to say to each
+ * other. It is a no-op when the element is absent.
+ */
+const paintProgress = () => {
+  const bar = document.getElementById('scroll-progress');
+  if (!bar) return;
+  const h = document.documentElement;
+  const span = h.scrollHeight - h.clientHeight;
+  bar.style.width = span > 0 ? `${(h.scrollTop / span) * 100}%` : '0%';
+};
+
 export default function useCinematicScroll(rootRef, { enabled = true } = {}) {
   useEffect(() => {
     const root = rootRef.current;
@@ -41,6 +58,12 @@ export default function useCinematicScroll(rootRef, { enabled = true } = {}) {
         el.style.opacity = 1;
         el.style.transform = 'none';
       });
+      // The choreography loop does not run in this mode, but the progress
+      // bar is a position indicator and stays. A passive scroll listener is
+      // the cheapest way to keep it live without reviving the rAF loop.
+      paintProgress();
+      window.addEventListener('scroll', paintProgress, { passive: true });
+
       // The villa's interior still is inline opacity:0, so reveal the
       // exterior and leave the still hidden — one static frame, not a
       // half-dissolved sandwich of both.
@@ -55,13 +78,17 @@ export default function useCinematicScroll(rootRef, { enabled = true } = {}) {
         }
         if (vi) vi.style.opacity = 0;
       }
-      return undefined;
+      return () => window.removeEventListener('scroll', paintProgress);
     }
 
     let raf = 0;
     const scenes = [...root.querySelectorAll('[data-scene]')];
 
     const drive = () => {
+      // Same handler as the scenes, deliberately — a separate scroll
+      // listener would tick on a different cadence from paint and let the
+      // bar drift a frame away from the choreography it is describing.
+      paintProgress();
       scenes.forEach((s) => {
         const r = s.getBoundingClientRect();
         const total = r.height - window.innerHeight;

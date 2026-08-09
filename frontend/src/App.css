@@ -439,3 +439,20 @@ input[type="date"]:valid:before {
   font-weight: 600;
   color: rgba(255, 255, 255, .92);
 }
+
+/* Scroll-progress bar, verbatim from the preview. Deliberately NOT hidden
+   under prefers-reduced-motion: the preview's reduced-motion block covers
+   only .scene video and the hint animation, and this is a position
+   indicator rather than an animation — on a page this tall it is the one
+   cue telling a visitor the story has length and where they are in it.
+   Removing it would take information away from the users most likely to
+   want it. */
+.progress {
+  position: fixed;
+  left: 0;
+  top: 0;
+  height: 3px;
+  background: var(--gold);
+  width: 0%;
+  z-index: 60;
+}

@@ -69,6 +69,13 @@ const Home = () => {
           The old hero, featured rail and About/Cities blocks are gone: the
           scenes carry that content now, and keeping both would have left the
           page arguing with itself about what it is. */}
+      {/* Scroll-progress bar. Fixed at page level rather than inside the
+          scenes, because it describes the whole document. aria-hidden: it
+          duplicates information the scrollbar already conveys to assistive
+          tech, and announcing a percentage that changes on every frame
+          would be noise. */}
+      <div className="progress" id="scroll-progress" aria-hidden="true" />
+
       {/* Establishing shot, then the pinned sequence. */}
       <CinematicHero reducedMotion={reducedMotion} />
       <CinematicScenes reducedMotion={reducedMotion} />
