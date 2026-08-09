@@ -404,6 +404,69 @@ const en = {
         message: 'Message'
       },
       home: {
+        scenes: {
+        villaA: {
+          kick: "Rentals · long · short · vacation",
+          h2: "List any stay —",
+          accent: "free.",
+          p: "Long-term, short-term or vacation rentals, posted by owners.",
+        },
+        villaB: {
+          kick: "You're in",
+          h2: "Book with",
+          accent: "zero fees.",
+          p: "",
+        },
+        whatsapp: {
+          kick: "Direct chat",
+          h2: "WhatsApp the lister",
+          accent: "directly.",
+          p: "The person with the keys is one message away — easy communication, no middleman.",
+        },
+        waMsg: {
+          from: "● WhatsApp · Lister",
+          msg: "Welcome to your MyIsraelRental stay! 🌊 Door code 4832 — the balcony sunset is all yours.",
+          meta: "now",
+        },
+        waTranslate: {
+          from: "⇄ Auto-translate",
+          msg: "His Hebrew, your English — chat is translated automatically, both ways.",
+          meta: "built into every MyIsraelRental chat",
+        },
+        owners: {
+          kick: "For owners",
+          h2: "Your listings work",
+          accent: "while you rest.",
+          p: "Out the other side of that chat — a lister in Jerusalem, feet up, while bookings come to him.",
+        },
+        ownersNote: {
+          from: "🔔 MyIsraelRental",
+          msg: "Your long-term apartment — available in 6 months — was just booked.",
+          meta: "just now · owners work less on MyIsraelRental",
+        },
+        services: {
+          kick: "Services marketplace",
+          h2: "Hire",
+          accent: "the pros.",
+          p: "Cleaners, movers, plumbers, electricians and more — reviewed, verified, zero booking fees. Or post your own service and let the jobs find you.",
+        },
+        servicesNote: {
+          from: "🔔 Requests board",
+          msg: "New job near you: AC repair in Katamon — matches your service profile.",
+          meta: "post a service · get matched · get paid",
+        },
+        requests: {
+          kick: "The Requests board",
+          h2: "Can't find it?",
+          accent: "Let it find you.",
+          p: "Post what you're looking for — a 3-bed in Ramat Eshkol, a mover next week — and owners & pros come to you.",
+        },
+        requestsNote: {
+          from: "📌 Your request is live",
+          msg: "\"3-bed in Ramat Eshkol, up to ₪9,000/mo, from September\" — owners with a match reply to you.",
+          meta: "structured · filterable · auto-expires when you're sorted",
+        },
+        },
         featuredProperties: 'Featured Properties',
         aboutUs: 'About Us',
         aboutPara1: '<span style="color:var(--gold);font-weight:700">My Israel Rental</span> is transforming the rental landscape in Israel, offering a seamless, free, and efficient way to find apartments. Our mission is to simplify the renting process, ensuring that both tenants and property owners save time, money, and energy. With an intuitive platform that tailors property suggestions to your needs, we stand out as the go-to solution for finding the perfect home in Israel.',

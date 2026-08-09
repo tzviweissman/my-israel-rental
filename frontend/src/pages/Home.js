@@ -1,137 +1,17 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
-import DOMPurify from 'dompurify';
-import { API } from '../App';
-import { Bed, Bath, Home as HomeIcon, MapPin, Check, ArrowLeft, ArrowRight } from 'lucide-react';
-import HeroSlideshow from '../components/HeroSlideshow';
-import DefaultImageBadge from '../components/property/DefaultImageBadge';
-import VideoCoverBadge from '../components/property/VideoCoverBadge';
 import PageMeta from '../components/PageMeta';
-import RenterTrustBanner from '../components/common/RenterTrustBanner';
-import { getCoverImage } from '../utils/coverImage';
-import { srcSet } from '../utils/cdnImage';
-import { areaLabel } from '../utils/areaNames';
-import useIsRtl from '../hooks/useIsRtl';
-
-// Hero background rotation. Keep widths consistent so the cross-fade is
-// imperceptible at the image edges (browser caches the second slide while
-// the first is showing).
-const HERO_IMAGES = [
-  // Tel Aviv coastline at sunset (original hero)
-  'https://images.unsplash.com/photo-1547483036-24bc77c79804?auto=format&fit=crop&w=1920&q=80',
-  // Kotel + Dome of the Rock — wide majestic view, golden hour
-  'https://images.pexels.com/photos/2087387/pexels-photo-2087387.jpeg?auto=compress&cs=tinysrgb&w=1920&q=80',
-  // Haifa coastline aerial — Mediterranean + Mount Carmel, sunny day
-  'https://images.pexels.com/photos/27638436/pexels-photo-27638436.jpeg?auto=compress&cs=tinysrgb&w=1920&q=80',
-  // Modern open-plan apartment living + kitchen with urban skyline view
-  'https://images.pexels.com/photos/32178051/pexels-photo-32178051.png?auto=compress&cs=tinysrgb&w=1920&q=80',
-];
+import CinematicScenes from '../components/home/CinematicScenes';
 
 const Home = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const isRtl = useIsRtl();
-  const [featuredProperties, setFeaturedProperties] = useState([]);
-  const scrollerRef = useRef(null);
-  // Track which scroll directions are still possible so we can dim/hide
-  // the "Scroll" pills when the user has reached either end.
-  const [canScrollLeft, setCanScrollLeft] = useState(false);
-  const [canScrollRight, setCanScrollRight] = useState(true);
-
-  useEffect(() => {
-    fetchFeaturedProperties();
-  }, []);
-
-  // Kept in sync with FEATURED_MIN_FILLER in backend/routes/properties/browse.py
-  const MIN_FILLER = 6;
-
-  const fetchFeaturedProperties = async () => {
-    try {
-      // Dedicated endpoint — the selection (every admin-curated pick from
-      // site_settings.featured_property_ids, topped up with other live
-      // listings when fewer than 6 are curated so the strip never looks
-      // empty) now happens server-side. This page used to pull the ENTIRE
-      // catalog with no query params and filter it down to ~8 cards in the
-      // browser; the backend's MIN_FILLER constant mirrors what lived here.
-      const response = await axios.get(`${API}/properties/featured`);
-      setFeaturedProperties(response.data || []);
-      return;
-    } catch (error) {
-      // The frontend and backend are separate Railway services that deploy
-      // independently, so the browser can be running a build that knows
-      // about /properties/featured while the API hasn't shipped it yet.
-      // Fall back to the old client-side selection for that window rather
-      // than rendering an empty featured strip. Safe to delete once the
-      // endpoint has been live in production for a release or two.
-      if (error?.response?.status !== 404) {
-        console.error('Failed to fetch featured properties', error);
-        return;
-      }
-    }
-    try {
-      const response = await axios.get(`${API}/properties`);
-      const all = response.data || [];
-      const featured = all.filter((p) => p.is_featured);
-      const others = all.filter((p) => !p.is_featured);
-      setFeaturedProperties(
-        featured.length >= MIN_FILLER
-          ? featured
-          : [...featured, ...others.slice(0, MIN_FILLER - featured.length)],
-      );
-    } catch (error) {
-      console.error('Failed to fetch properties', error);
-    }
-  };
-
-  // Scroller helpers — used by the desktop "Scroll" pills. Mobile users can
-  // just swipe; we hide the pills below md.
-  const scrollByCards = (direction) => {
-    const el = scrollerRef.current;
-    if (!el) return;
-    // One screenful at a time feels more useful than 1 card; falls back to
-    // the container width so it adapts to whatever card size is in effect.
-    // In RTL, browsers report scrollLeft as 0..-maxScroll (CSSOM View spec)
-    // rather than LTR's 0..+maxScroll, so the raw scrollBy delta needs its
-    // sign flipped too — same fix as AreaRow.jsx's carousel.
-    const rtlSign = isRtl ? -1 : 1;
-    const distance = el.clientWidth * 0.9 * (direction === 'left' ? -1 : 1) * rtlSign;
-    el.scrollBy({ left: distance, behavior: 'smooth' });
-  };
-
-  // Recalculate which directions are scrollable whenever the user scrolls,
-  // the strip is resized, or the property list changes. Using a small
-  // tolerance (4px) avoids flicker at the exact edge.
-  const updateScrollEdges = () => {
-    const el = scrollerRef.current;
-    if (!el) return;
-    const maxScroll = el.scrollWidth - el.clientWidth;
-    const scrolledFromStart = isRtl ? -el.scrollLeft : el.scrollLeft;
-    setCanScrollLeft(scrolledFromStart > 4);
-    setCanScrollRight(scrolledFromStart < maxScroll - 4);
-  };
-
-  // Force the strip to its true start on mount / language flip — some
-  // mobile browsers default a freshly rtl-flexed overflow container to a
-  // scrolled/inconsistent position instead of `scrollLeft: 0`.
-  useEffect(() => {
-    const el = scrollerRef.current;
-    if (!el) return;
-    el.scrollLeft = 0;
-  }, [isRtl, featuredProperties]);
-
-  useEffect(() => {
-    const el = scrollerRef.current;
-    if (!el) return;
-    updateScrollEdges();
-    el.addEventListener('scroll', updateScrollEdges, { passive: true });
-    window.addEventListener('resize', updateScrollEdges);
-    return () => {
-      el.removeEventListener('scroll', updateScrollEdges);
-      window.removeEventListener('resize', updateScrollEdges);
-    };
-  }, [featuredProperties, isRtl]);
+  // Read once, at the top, and handed down. Asking per-component invites the
+  // video and the choreography to disagree about which mode they are in.
+  const reducedMotion =
+    typeof window !== 'undefined' &&
+    window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   return (
     <div className="min-h-screen">
@@ -180,291 +60,47 @@ const Home = () => {
           },
         ]}
       />
-      {/* Search bar was removed per user request — it now only appears
-          once a category (Stays / Services) is chosen, so the home page
-          stays focused on the hero + featured listings. The 3-segment
-          search lives at the top of /stays. */}
+      {/* Phase 2a — the page IS the cinematic sequence. Per the ruling,
+          cinematic-preview.html is the home page; home-redesign-preview.html
+          is a section library and is never built as a page.
 
-      <HeroSlideshow
-        images={HERO_IMAGES}
-        holdMs={6000}
-        fadeMs={1500}
-        className="h-[560px] flex items-center justify-center"
-      >
-        <div data-testid="hero-section" className="h-full flex items-center justify-center">
-          <div
-            className="relative z-10 text-center text-white px-6 max-w-4xl"
-            style={{ marginTop: 'var(--nav-h, 68px)' }}
-          >
-            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold mb-2" style={{ fontFamily: 'Playfair Display', color: 'white' }}>
-              {t('hero.title')}
-            </h1>
-            <p className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-8" style={{ fontFamily: 'Playfair Display', color: 'var(--gold)' }}>
-              {t('hero.anyDuration')}
-            </p>
+          The old hero, featured rail and About/Cities blocks are gone: the
+          scenes carry that content now, and keeping both would have left the
+          page arguing with itself about what it is. */}
+      <CinematicScenes reducedMotion={reducedMotion} />
 
-            {/* No-fees badge stays in the hero, but the search bar moved
-                up into its own band directly under the Stays/Services
-                pills (per user request, matches Airbnb screenshot). */}
-            <div className="flex flex-col items-center" data-testid="no-fees-badge">
-              <div
-                className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full backdrop-blur-md border"
-                style={{
-                  backgroundColor: 'rgba(255, 255, 255, 0.12)',
-                  borderColor: 'rgba(201, 162, 39, 0.55)',
-                }}
-              >
-                <Check size={14} strokeWidth={3} style={{ color: 'var(--gold)' }} />
-                <span
-                  className="text-xs sm:text-sm font-semibold uppercase tracking-wider"
-                  style={{ color: 'var(--gold)', letterSpacing: '0.12em' }}
-                >
-                  {t('hero.noFeesTagline')}
-                </span>
-              </div>
-              <p
-                className="mt-2 text-xs sm:text-sm text-white/85"
-                style={{ fontWeight: 400 }}
-              >
-                {t('hero.noFeesDetail')}
-              </p>
-            </div>
-          </div>
-        </div>
-      </HeroSlideshow>
-
-      {/* Positioning strip — first thing below the hero, before the featured
-          listings. Says what the site is and what it costs a renter; makes
-          no claim about agent or broker fees (see RenterTrustBanner). */}
-      <div className="max-w-7xl mx-auto px-6 pt-8">
-        <RenterTrustBanner />
-      </div>
-
-      <div className="max-w-7xl mx-auto px-6 py-16">
-        {/* Title row — on desktop we anchor labeled "Scroll" pills to the
-            right of the title so users immediately see how to advance the
-            carousel. Mobile users swipe, so the pills stay hidden. */}
-        <div className="flex items-center justify-between mb-8 md:mb-10 gap-4">
-          <h2 className="text-3xl sm:text-4xl font-bold text-center md:text-left flex-1 md:flex-none" style={{ fontFamily: 'Playfair Display' }}>
-            {t('home.featuredProperties')}
+      {/* Limestone finale — the one light surface on the page, which is what
+          makes it read as an ending rather than a sixth scene. */}
+      <section className="finale">
+        <div>
+          <div className="kick">MyIsraelRental</div>
+          <h2>
+            {t('home.finale.h2', 'Rent a home. Hire the pros.')}
+            <br />
+            <span className="a">{t('home.finale.accent', 'One place for both.')}</span>
           </h2>
-          <div className="hidden md:flex items-center gap-2" data-testid="featured-scroll-controls">
-            <button
-              type="button"
-              onClick={() => scrollByCards('left')}
-              disabled={!canScrollLeft}
-              aria-label={t('home.scrollToPrevAria')}
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-full border text-sm font-semibold transition-all disabled:opacity-30 disabled:cursor-not-allowed hover:shadow-md"
-              style={{ borderColor: 'var(--brand-primary)', color: 'var(--brand-primary)', backgroundColor: 'white' }}
-              data-testid="featured-scroll-left"
-            >
-              <ArrowLeft size={16} />
-              <span>{t('home.previous')}</span>
+          <p>
+            {t(
+              'home.finale.p',
+              'Fully bilingual (English + Hebrew), verified listings and reviews, on-platform chat — free to search for everyone, free to list for owners and pros.',
+            )}
+          </p>
+          <div className="ctas">
+            <button type="button" className="b-blue" onClick={() => navigate('/stays')}>
+              {t('home.finale.ctaStays', 'Search rentals')}
             </button>
-            <button
-              type="button"
-              onClick={() => scrollByCards('right')}
-              disabled={!canScrollRight}
-              aria-label={t('home.scrollToMoreAria')}
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold transition-all disabled:opacity-30 disabled:cursor-not-allowed hover:shadow-lg"
-              style={{ backgroundColor: 'var(--brand-primary)', color: 'white' }}
-              data-testid="featured-scroll-right"
-            >
-              <span>{t('home.scrollForMore')}</span>
-              <ArrowRight size={16} />
+            <button type="button" className="b-gold" onClick={() => navigate('/requests')}>
+              {t('home.finale.ctaRequest', 'Post a request')}
             </button>
           </div>
-        </div>
-
-        {/* Horizontal scroller — every admin-curated featured listing is
-            kept in the strip. Desktop users click the labeled "Scroll" pills
-            above; mobile users swipe. snap-x keeps cards from stopping
-            mid-image. A gradient fade on the right edge hints that there's
-            more content when more cards exist offscreen. */}
-        <div className="relative" data-testid="featured-strip">
-          <div
-            ref={scrollerRef}
-            className="flex gap-3 md:gap-6 overflow-x-auto snap-x snap-mandatory scroll-smooth pb-3 -mx-6 px-6 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
-            data-testid="featured-scroller"
-          >
-            {featuredProperties.map((property) => {
-              const cover = getCoverImage(property.images, 600, '', property.videos, property.id);
-              return (
-              <div
-                key={property.id}
-                className="property-card snap-start shrink-0 w-[78vw] sm:w-[44vw] md:w-[340px] lg:w-[360px]"
-                onClick={() => {
-                  sessionStorage.setItem('previousPath', window.location.pathname);
-                  navigate(`/property/${property.id}`);
-                }}
-                data-testid={`property-card-${property.id}`}
-              >
-                <div className="relative h-44 md:h-60 bg-gray-200 overflow-hidden">
-                  {/* Real <img> so the browser can lazy-load and pick a
-                      variant from srcSet — a CSS background-image can do
-                      neither. Same treatment as PropertyCard.jsx. */}
-                  <img
-                    src={cover.url}
-                    srcSet={srcSet(cover.url, 600)}
-                    sizes="(max-width: 640px) 78vw, (max-width: 768px) 44vw, 360px"
-                    alt={property.title || ''}
-                    loading="lazy"
-                    decoding="async"
-                    className="absolute inset-0 w-full h-full object-cover"
-                  />
-                  {cover.isDefault && <DefaultImageBadge />}
-                  {cover.fromVideo && <VideoCoverBadge />}
-                </div>
-                <div className="p-3 md:p-5">
-                  <h3 className="text-sm md:text-lg font-bold mb-1 md:mb-2 line-clamp-1">{property.title}</h3>
-                  <div className="flex items-center gap-2 text-gray-600 mb-2 md:mb-3">
-                    <MapPin size={14} className="md:w-4 md:h-4 shrink-0" />
-                    {/* DB-sourced area → localised via utils/areaNames. */}
-                    <span className="text-xs md:text-sm truncate">{areaLabel(property.area, t)}</span>
-                  </div>
-                  <div className="hidden md:flex items-center gap-4 mb-4 text-sm text-gray-700">
-                    {property.bedrooms > 0 && (
-                      <div className="flex items-center gap-1">
-                        <Bed size={16} />
-                        <span>{property.bedrooms}</span>
-                      </div>
-                    )}
-                    {property.bathrooms > 0 && (
-                      <div className="flex items-center gap-1">
-                        <Bath size={16} />
-                        <span>{property.bathrooms}</span>
-                      </div>
-                    )}
-                    {property.square_meters > 0 && (
-                      <div className="flex items-center gap-1">
-                        <HomeIcon size={16} />
-                        <span>{property.square_meters} m²</span>
-                      </div>
-                    )}
-                  </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-base md:text-2xl font-bold" style={{ color: "var(--gold-text-on-light)" }}>
-                    ₪{property.monthly_price || property.nightly_price}
-                    <span className="text-[10px] md:text-sm font-normal text-gray-600">
-                      {property.rental_type === 'vacation' ? t('property.perNight') : t('property.perMonth')}
-                    </span>
-                  </span>
-                  <span className="hidden md:inline text-sm px-3 py-1 rounded-full" style={{ backgroundColor: '#E5E5E5', color: 'var(--brand-primary)' }}>
-                    {{'long-term': t('property.longTerm'), 'short-term': t('property.shortTerm'), 'vacation': t('property.vacationType'), 'storage': t('property.storageType')}[property.rental_type] || property.rental_type}
-                  </span>
-                </div>
-              </div>
-            </div>
-            );
-          })}
-          </div>
-        </div>
-      </div>
-
-      {/* About Us Section */}
-      <div className="py-20" style={{ backgroundColor: '#F5F5F5' }}>
-        <div className="max-w-5xl mx-auto px-6">
-          <h2 className="text-4xl sm:text-5xl font-bold mb-8 text-center" style={{ fontFamily: 'Playfair Display', color: 'var(--brand-primary)' }}>
-            {t('home.aboutUs')}
-          </h2>
-          <div className="space-y-6 text-lg leading-relaxed text-gray-700">
-            <p dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(t('home.aboutPara1')) }} />
-            <p dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(t('home.aboutPara2')) }} />
-          </div>
-        </div>
-      </div>
-
-      {/* SEO content section — bumps Home from ~170 words to ~450,
-          adds three internal links (to /stays, /services, /faq), and
-          enumerates the cities we serve. Pure marketing copy; no
-          interactive state. Skipped in i18n for now — Hebrew version
-          can be added later via translation keys without touching
-          structure. */}
-      <section
-        className="py-20 bg-white"
-        aria-labelledby="why-myisraelrental-heading"
-        data-testid="home-seo-content"
-      >
-        <div className="max-w-5xl mx-auto px-6">
-          <h2
-            id="why-myisraelrental-heading"
-            className="text-3xl sm:text-4xl font-bold mb-12 text-center"
-            style={{ fontFamily: 'Playfair Display', color: 'var(--brand-primary)' }}
-          >
-            {t('home.seo.heading', 'Renting in Israel, made simple.')}
-          </h2>
-
-          <div className="grid md:grid-cols-2 gap-10 text-base leading-relaxed text-gray-700 mb-12">
-            <div>
-              <h3 className="text-xl font-bold text-gray-900 mb-3">{t('home.seo.forRentersTitle', 'For renters')}</h3>
-              <p>{t('home.seo.forRentersPara1', "Whether you're moving to Israel for a year, planning a holiday in Jerusalem, or spending a few months working remotely from Tel Aviv, My Israel Rental gives you a single place to compare apartments, vacation homes, and short-stay flats — without the broker fees and back-and-forth that usually come with renting here. Every listing is posted by the owner or their authorized representative, so you talk directly to the person who holds the keys.")}</p>
-              <p className="mt-4">
-                {t('home.seo.forRentersPara2Before', 'Use our')}{' '}
-                <a href="/stays" onClick={(e) => { e.preventDefault(); navigate('/stays'); }} className="text-[var(--brand-primary)] font-semibold hover:underline">
-                  {t('home.seo.staysSearchLink', 'Stays search')}
-                </a>{' '}
-                {t('home.seo.forRentersPara2After', 'to filter by area, dates, bedrooms, budget and amenities. Save favorites with one tap, message owners through the built-in chat, and sign your rental contract digitally — all from your browser.')}
-              </p>
-            </div>
-
-            <div>
-              <h3 className="text-xl font-bold text-gray-900 mb-3">{t('home.seo.forOwnersTitle', 'For owners')}</h3>
-              <p>{t('home.seo.forOwnersPara1', 'Listing on My Israel Rental is free for owners too — no commission, no payout fees, no lock-in. Add photos in minutes, set your nightly or monthly price, choose your availability, and let renters reach out to you directly. We handle the contract templates, calendar sync, and email/WhatsApp delivery so you can focus on welcoming guests instead of chasing paperwork.')}</p>
-              <p className="mt-4">
-                {t('home.seo.forOwnersPara2Before', 'Need help cleaning, photographing, or managing turnovers? Browse trusted local')}{' '}
-                <a href="/services" onClick={(e) => { e.preventDefault(); navigate('/services'); }} className="text-[var(--brand-primary)] font-semibold hover:underline">
-                  {t('home.seo.serviceProvidersLink', 'service providers')}
-                </a>{' '}
-                {t('home.seo.forOwnersPara2After', '— or list your own business and reach every owner on the platform.')}
-              </p>
-            </div>
-          </div>
-
-          <div className="border-t border-gray-200 pt-10">
-            <h3 className="text-xl font-bold text-gray-900 mb-3 text-center">{t('home.seo.citiesTitle', 'Cities we cover')}</h3>
-            <p className="text-center text-gray-700 mb-6 max-w-3xl mx-auto">
-              {t('home.seo.citiesPara', "From the beaches of Tel Aviv to the alleys of the Old City of Jerusalem, My Israel Rental hosts listings in every major Israeli urban center — plus dozens of neighborhoods that don't usually show up on global rental sites.")}
-            </p>
-            <p className="text-center text-gray-600 text-sm leading-loose">
-              {t('home.seo.citiesList', "Jerusalem · Tel Aviv · Haifa · Beit Shemesh · Modi'in · Ra'anana · Netanya · Herzliya · Rishon LeZion · Petah Tikva · Ramat Gan · Givatayim · Rehovot · Ashdod · Be'er Sheva · Eilat · Tiberias · Tzfat · Nahariya")}
-            </p>
-            <p className="text-center mt-8 text-sm">
-              <a
-                href="/faq"
-                onClick={(e) => { e.preventDefault(); navigate('/faq'); }}
-                className="text-[var(--brand-primary)] font-semibold hover:underline"
-              >
-                {t('home.seo.readFaqLink', 'Read our FAQ')}
-              </a>{' '}
-              {t('home.seo.faqAfter', 'to learn more about deposits, cancellations, and how we keep My Israel Rental free for everyone.')}
-            </p>
+          <div className="strip">
+            <span><b>1,200+</b> {t('home.finale.statRentals', 'active rentals')}</span>
+            <span><b>19</b> {t('home.finale.statCities', 'cities')}</span>
+            <span><b>450+</b> {t('home.finale.statPros', 'verified pros')}</span>
+            <span><b>&#8362;0</b> {t('home.finale.statFees', 'service fees')}</span>
           </div>
         </div>
       </section>
-
-      <div className="py-16" style={{ backgroundColor: 'var(--brand-primary)' }}>
-        <div className="max-w-7xl mx-auto px-6 text-center" style={{ color: 'var(--gold)' }}>
-          <h2 className="text-3xl font-bold mb-4" style={{ fontFamily: 'Playfair Display' }}>
-            {t('footer.contact')}
-          </h2>
-          <p className="text-lg mb-2">
-            {t('home.whatsapp')}: <a href="https://wa.me/972553225141" target="_blank" rel="noopener noreferrer" className="font-bold hover:underline" data-testid="contact-whatsapp">+972 55 322 5141</a>
-          </p>
-          <p className="text-lg">
-            {t('home.email')}: <a href="mailto:support@myisraelrental.com" className="font-bold hover:underline">support@myisraelrental.com</a>
-          </p>
-          <div className="mt-6 pt-6 border-t" style={{ borderColor: 'rgba(201, 162, 39,0.25)' }}>
-            <a
-              href="/faq"
-              onClick={(e) => { e.preventDefault(); navigate('/faq'); }}
-              className="inline-flex items-center gap-1.5 text-sm font-medium hover:underline transition-opacity hover:opacity-80"
-              data-testid="footer-faq-link"
-            >
-              {t('footer.faq')} →
-            </a>
-          </div>
-        </div>
-      </div>
     </div>
   );
 };

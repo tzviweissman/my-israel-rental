@@ -238,3 +238,45 @@ input[type="date"]:valid:before {
   margin-inline-start: 6px;
   vertical-align: middle;
 }
+
+/* ── Cinematic home scenes (Phase 2a) ─────────────────────────────────
+   Copied verbatim from cinematic-preview.html. The values here are
+   choreography, not taste: .txt sits bottom-left because the .shade
+   gradient is darkest on that edge, and the two together are what keep a
+   white headline legible over an arbitrary video frame.
+
+   NOTE: nothing here sets opacity:0. The scroll engine sets opacity from
+   JS only, so if the engine never runs every caption is simply visible.
+   Adding a CSS opacity:0 to [data-seg] would turn a script failure into a
+   blank page. */
+.scene .pin{position:sticky;top:0;height:100vh;overflow:hidden}
+.scene video,.scene .still{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;will-change:transform,opacity}
+.scene .still{background-size:cover;background-position:center}
+.scene .shade{position:absolute;inset:0;background:linear-gradient(90deg,rgba(6,14,19,.7) 0%,rgba(6,14,19,.32) 45%,rgba(6,14,19,.05) 75%);pointer-events:none}
+.vig{position:absolute;inset:0;pointer-events:none;background:radial-gradient(125% 95% at 50% 30%,transparent 55%,rgba(3,10,14,.5) 100%)}
+.txt{position:absolute;z-index:5;left:clamp(20px,5.5vw,80px);bottom:clamp(70px,14vh,150px);max-width:600px;will-change:transform,opacity}
+.kick{font-size:11.5px;font-weight:800;letter-spacing:.2em;text-transform:uppercase;color:var(--gold);text-shadow:0 1px 8px rgba(0,0,0,.6)}
+.txt h2{font-size:clamp(28px,4.4vw,54px);font-weight:800;line-height:1.04;letter-spacing:-1px;margin-top:10px;text-shadow:0 2px 26px rgba(0,0,0,.55)}
+.txt h2 .a{color:var(--gold)}
+.txt p{margin-top:12px;font-size:clamp(14px,1.35vw,17px);color:rgba(255,255,255,.92);max-width:470px;text-shadow:0 1px 10px rgba(0,0,0,.6)}
+.ncard{background:rgba(255,255,255,.97);color:var(--ink);border-radius:16px;box-shadow:0 24px 60px rgba(0,0,0,.5);padding:14px 16px}
+.ncard .from{font-size:10.5px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--blue);display:flex;align-items:center;gap:6px}
+.ncard .from.wa{color:#128C7E}
+.ncard .msg{margin-top:7px;font-size:13.5px;font-weight:600;line-height:1.5;overflow-wrap:break-word}
+.ncard .sig{margin-top:9px;border-top:1px dashed #d8cfc0;padding-top:9px;font-family:'Playfair Display';font-style:italic;font-size:19px;color:var(--blue-deep)}
+.ncard .ok{display:inline-flex;align-items:center;gap:6px;margin-top:9px;font-size:11px;font-weight:800;color:#1F8A50;background:#E3F3EA;border-radius:999px;padding:3px 10px}
+.ncard .meta{margin-top:7px;font-size:10.5px;color:#8a8377}
+.finale .kick{color:var(--gold-lg)}
+.finale h2{font-size:clamp(32px,5vw,62px);font-weight:800;letter-spacing:-1px;color:var(--blue-deep);margin-top:14px;line-height:1.05}
+.finale h2 .a{color:var(--gold-lg)}
+.finale p{margin-top:16px;color:#6B6459;font-size:17px;max-width:540px;margin-left:auto;margin-right:auto}
+.finale .ctas{display:flex;gap:14px;margin-top:30px;justify-content:center;flex-wrap:wrap}
+.b-blue{background:var(--blue);color:#fff;border:none;border-radius:999px;font-weight:800;font-size:15px;padding:15px 30px;cursor:pointer;font-family:inherit}
+.b-gold{background:rgba(172,134,28,.85);color:#fff;border:1.5px solid rgba(201,162,39,.9);border-radius:999px;font-weight:700;font-size:15px;padding:15px 30px;cursor:pointer;font-family:inherit;text-shadow:0 1px 2px rgba(50,36,0,.5)}
+.strip{display:flex;gap:26px;justify-content:center;flex-wrap:wrap;margin-top:44px;color:#6B6459;font-size:13.5px;font-weight:600}
+.strip b{color:var(--blue-deep)}
+.note{right:18px;left:18px;width:auto;bottom:20px}
+.scene .shade{background:linear-gradient(180deg,rgba(6,14,19,.25),rgba(6,14,19,.78))}
+.scene video{display:none}
+/* Scenes are dark by definition — the nav scrim sits on top of video. */
+.scene{position:relative;background:#060e13;color:#fff}
