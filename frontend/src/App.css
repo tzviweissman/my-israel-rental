@@ -275,8 +275,25 @@ input[type="date"]:valid:before {
 .b-gold{background:rgba(172,134,28,.85);color:#fff;border:1.5px solid rgba(201,162,39,.9);border-radius:999px;font-weight:700;font-size:15px;padding:15px 30px;cursor:pointer;font-family:inherit;text-shadow:0 1px 2px rgba(50,36,0,.5)}
 .strip{display:flex;gap:26px;justify-content:center;flex-wrap:wrap;margin-top:44px;color:#6B6459;font-size:13.5px;font-weight:600}
 .strip b{color:var(--blue-deep)}
-.note{right:18px;left:18px;width:auto;bottom:20px}
-.scene .shade{background:linear-gradient(180deg,rgba(6,14,19,.25),rgba(6,14,19,.78))}
-.scene video{display:none}
+/* These three were inside @media blocks in the preview. My extraction
+   flattened them, so `.scene video{display:none}` — a REDUCED-MOTION rule —
+   applied at every width and hid the video for everyone. The page rendered
+   pure black on desktop and in headless, and the CSS was "correct" by every
+   value check because the values were right; only their scope was wrong.
+   Re-wrapped at the correct scope. */
+@media (max-width: 700px) {
+  /* Narrow: notification cards span the width and the shade goes
+     top-to-bottom, since there is no room for a side gradient. */
+  .note { right: 18px; left: 18px; width: auto; bottom: 20px; }
+  .scene .shade {
+    background: linear-gradient(180deg, rgba(6, 14, 19, .25), rgba(6, 14, 19, .78));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  /* Posters instead of video — the fallback the brief asks for. The poster
+     attribute paints once the element itself is hidden. */
+  .scene video { display: none; }
+}
 /* Scenes are dark by definition — the nav scrim sits on top of video. */
 .scene{position:relative;background:#060e13;color:#fff}

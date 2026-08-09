@@ -52,8 +52,8 @@ export const SCENES = [
   {
     key: 'owners',
     heightVh: 280,
-    video: `${CDN}/hf_20260806_162828_de927014-f12c-433d-b56d-31e819576804.mp4`,
-    poster: `${CDN}/hf_20260806_140841_7194d0ec-edc0-40b5-87c2-ce574b273e13.png`,
+    video: `${CDN}/hf_20260806_162843_81c9ed69-00ec-417b-b86b-5a4a605d799d.mp4`,
+    poster: `${CDN}/hf_20260806_140841_15036e87-4ad6-4e3c-b48c-3f6bdf42d234.png`,
     loop: true,
     texts: [{ seg: '.06,1', key: 'owners' }],
     notes: [{ seg: '.35,1', key: 'ownersNote' }],
@@ -70,8 +70,8 @@ export const SCENES = [
   {
     key: 'requests',
     heightVh: 240,
-    video: `${CDN}/hf_20260806_162828_de927014-f12c-433d-b56d-31e819576804.mp4`,
-    poster: `${CDN}/hf_20260806_140841_7194d0ec-edc0-40b5-87c2-ce574b273e13.png`,
+    video: `${CDN}/hf_20260806_183007_1ca273cb-a7bf-4c09-9653-2cf301320ad5.mp4`,
+    poster: `${CDN}/hf_20260806_182939_99ea6716-e1d2-47af-b156-934c07f68373.png`,
     loop: true,
     texts: [{ seg: '.06,1', key: 'requests' }],
     notes: [{ seg: '.35,1', key: 'requestsNote' }],

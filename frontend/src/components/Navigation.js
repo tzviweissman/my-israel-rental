@@ -334,7 +334,13 @@ const Navigation = () => {
         boxShadow: scrolled ? '0 2px 20px rgba(0,0,0,0.3)' : 'none',
       }}
     >
-      <div className="max-w-7xl mx-auto px-6" style={{ padding: scrolled ? '4px 24px' : '0 24px' }}>
+      {/* Vertical padding per the preview's .bar: 14px clamp(16px,3vw,36px).
+          It was 0 unscrolled, which put the first glass bubble 6px from the
+          top edge — the bubbles read as clipped rather than floating. */}
+      <div
+        className="max-w-7xl mx-auto"
+        style={{ padding: scrolled ? '8px clamp(16px,3vw,36px)' : '14px clamp(16px,3vw,36px)' }}
+      >
         <div className="flex items-center justify-between relative">
           {/* Logo lockup, copied from `.lg` in the preview files rather than
               re-derived: the raw gold mark floating in the glass nav with a
