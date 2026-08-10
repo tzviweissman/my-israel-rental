@@ -1441,6 +1441,7 @@ const en = {
         scrollChipsLeft: 'Scroll chips left',
         scrollChipsRight: 'Scroll chips right',
         clearStayType: 'Clear stay type',
+        closeFilters: 'Close filters',
         viewDetailsArrow: 'View details →',
         youSearchedHere: 'You searched here',
         // NotifyMeCard — "save this search" card shown on the empty

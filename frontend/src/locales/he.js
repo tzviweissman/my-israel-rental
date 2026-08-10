@@ -1429,6 +1429,7 @@ const he = {
         scrollChipsLeft: 'גלול שמאלה',
         scrollChipsRight: 'גלול ימינה',
         clearStayType: 'נקה סוג שהייה',
+        closeFilters: 'סגור סינון',
         viewDetailsArrow: 'צפה בפרטים ←',
         youSearchedHere: 'חיפשת כאן',
         // NotifyMeCard

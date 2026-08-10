@@ -88,11 +88,29 @@ const FiltersModal = ({
   };
   return (
     <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4" onClick={onClose} data-testid="stays-filters-modal">
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-hidden flex flex-col" onClick={(e) => e.stopPropagation()}>
+      {/* role/aria-modal sit on the PANEL, not the backdrop above it: the
+          backdrop is the click-outside catcher, and naming it the dialog
+          would tell a screen reader the dimmed overlay is the dialog and
+          put the whole page inside it. `aria-labelledby` points at the
+          heading that is already there, so the dialog announces as
+          "Filters" instead of an unnamed dialog. */}
+      <div
+        className="bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-hidden flex flex-col"
+        onClick={(e) => e.stopPropagation()}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="stays-filters-title"
+      >
         <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
-          <h2 className="text-lg font-bold">{t('stays.filters', 'Filters')}</h2>
-          <button onClick={onClose} className="p-2 hover:bg-gray-100 rounded-lg" data-testid="stays-filters-close">
-            <X size={18} />
+          <h2 className="text-lg font-bold" id="stays-filters-title">{t('stays.filters', 'Filters')}</h2>
+          <button
+            onClick={onClose}
+            className="p-2 hover:bg-gray-100 rounded-lg"
+            // Icon-only button: without this it announces as just "button".
+            aria-label={t('stays.closeFilters', 'Close filters')}
+            data-testid="stays-filters-close"
+          >
+            <X size={18} aria-hidden="true" />
           </button>
         </div>
         <div className="flex-1 overflow-y-auto p-6 space-y-6">
