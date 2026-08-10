@@ -66,11 +66,7 @@ const freezeVideos = (page) =>
       try {
         v.pause();
         v.removeAttribute('autoplay');
-        v.preload = 'none';
-        v.querySelectorAll('source').forEach((s) => s.remove());
-        v.removeAttribute('src');
-        v.load(); // repaints the poster with no decoder attached
-      } catch { /* nothing to detach */ }
+      } catch { /* already inert */ }
     });
     // One frame for the poster to paint.
     await new Promise((r) => requestAnimationFrame(() => r()));
@@ -92,6 +88,11 @@ async function sweep(browser, url, label) {
     reducedMotion: reduced ? 'reduce' : 'no-preference',
   });
   const page = await ctx.newPage();
+  // Block the MP4s BEFORE load rather than detaching them after. Nothing
+  // fetches, so no decoder spins up (that is what crashed the renderer), and
+  // a <video> that never receives frames paints its own poster attribute
+  // natively — which is what we actually want to compare against.
+  await page.route('**/*.mp4', (r) => r.abort());
   // NOT networkidle: five streaming MP4s keep the network busy forever, so
   // networkidle never fires and the whole sweep hangs. domcontentloaded plus
   // an explicit settle is both faster and actually terminates.
@@ -137,12 +138,12 @@ const browser = await chromium.launch({
   args: ['--autoplay-policy=no-user-gesture-required', '--mute-audio'],
 });
 try {
-  console.log(reduced ? 'reduced-motion sweep:' : 'sweep — app:');
-  await sweep(browser, APP, 'app');
-  if (!reduced) {
-    console.log('sweep — preview:');
-    await sweep(browser, PREVIEW, 'preview');
-  }
+  // Separate invocations: one long sweep timing out must not take the other
+  // side with it, which is how the first run produced 17 app frames and zero
+  // preview frames.
+  const which = process.argv.includes('--preview') ? 'preview' : 'app';
+  console.log(`sweep — ${which}${reduced ? ' (reduced motion)' : ''}:`);
+  await sweep(browser, which === 'preview' ? PREVIEW : APP, which);
 } finally {
   await browser.close();
 }
