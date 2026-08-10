@@ -394,7 +394,13 @@ const Navigation = () => {
               /requests is backed by a placeholder until Phase 3 replaces it
               in place, so this row never has to be rebuilt. */}
           <nav
-            className="hidden md:flex items-center gap-[9px] pointer-events-none absolute left-1/2 top-1/2"
+            /* 900px, not Tailwind's `md` (768px), because that is the
+               breakpoint the previews use: `@media(max-width:900px){.links,
+               .signin{display:none}}`. At 768 the four link pills, the
+               language pill, Sign in and the CTA do not fit on one line —
+               they overlapped each other and clipped the wordmark. The
+               drawer already carries these links below this width. */
+            className="hidden min-[900px]:flex items-center gap-[9px] pointer-events-none absolute left-1/2 top-1/2"
             style={{ transform: 'translate(-50%, -50%)' }}
             data-testid="nav-rental-categories"
             aria-label={t('nav.primary', 'Primary')}
@@ -462,7 +468,13 @@ const Navigation = () => {
                 the hero doors and the search panels, so the nav's single
                 loudest element is better spent on the side that is scarce. */}
             {!user && (
-              <div className="hidden md:flex items-center gap-[9px]" data-testid="nav-auth-cluster">
+              /* Same 900px threshold as the link row above. The preview
+                 hides only `.signin` here and keeps the CTA, but the
+                 preview has no hamburger — this app does, and its drawer
+                 already carries both Sign in and "List your property".
+                 Keeping the CTA in the bar at 768 would put it beside a
+                 hamburger holding the same button. */
+              <div className="hidden min-[900px]:flex items-center gap-[9px]" data-testid="nav-auth-cluster">
                 <button
                   onClick={() => navigate('/auth/login')}
                   className="glass-pill"
@@ -631,8 +643,13 @@ const Navigation = () => {
                   place the nav links live at that width. */}
               <button
                 onClick={() => setMenuOpen(!menuOpen)}
+                /* `min-[900px]:hidden`, matching the link row and auth
+                   cluster. It was `md:hidden` (768px) — but once those two
+                   moved to 900px, a logged-out visitor between 768 and
+                   899px had no links, no Sign in, no CTA and no burger:
+                   a nav containing only a logo and a language toggle. */
                 className={`glass-pill inline-flex items-center gap-2 ${
-                  user ? '' : 'md:hidden'
+                  user ? '' : 'min-[900px]:hidden'
                 }`}
                 aria-expanded={menuOpen}
                 aria-haspopup="menu"

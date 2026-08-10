@@ -1326,6 +1326,13 @@ const en = {
       // nesting) since the i18n lookups in code use `stays.<key>`.
       // ---------------------------------------------------------------
       stays: {
+        // Photo band (Phase 2b). `heroAccent` is the gold-coloured tail of
+        // the headline and is a SEPARATE key on purpose: Hebrew puts the
+        // emphasis on a different word, so the two halves have to be
+        // translatable independently rather than split from one string.
+        heroTitle: 'Find your',
+        heroAccent: 'stay.',
+        heroLede: 'Long-term, short-term and vacation rentals — direct from owners, zero service fees.',
         // Search pill
         where: 'Where',
         anywhere: 'Anywhere',

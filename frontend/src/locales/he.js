@@ -1316,6 +1316,13 @@ const he = {
       // Stays (Hebrew) — mirrors the English `stays` namespace above.
       // ---------------------------------------------------------------
       stays: {
+        // Photo band (Phase 2b). The split falls in a different place than
+        // the English: "מצאו את" / "הבית שלכם." puts the gold on the noun,
+        // which is the word carrying the emphasis in Hebrew — translating
+        // "stay." literally would gold-colour a verb particle.
+        heroTitle: 'מצאו את',
+        heroAccent: 'הבית שלכם.',
+        heroLede: 'השכרות לטווח ארוך, לטווח קצר ולחופשה — ישירות מהבעלים, ללא דמי תיווך.',
         // Search pill
         where: 'איפה',
         anywhere: 'כל מקום',

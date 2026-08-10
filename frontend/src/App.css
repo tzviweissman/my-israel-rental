@@ -456,3 +456,158 @@ input[type="date"]:valid:before {
   width: 0%;
   z-index: 60;
 }
+
+/* ── Stays band + floating search panel (Phase 2b) ────────────────────
+   Hand-ported from stays-preview.html. Ported by hand rather than
+   extracted, because preview CSS leans on context this app doesn't
+   share (a `.band`-scoped `color:#fff`, a bare `--blue` var, no fixed
+   nav) — the last round of extraction bugs all came from exactly that.
+
+   The one structural difference from the preview: there, `nav.bar` is
+   `position:relative` INSIDE `.band`, so the band's own padding places
+   the headline below it. Here the global nav is `position:fixed` and
+   overlays the band, so `.stays-band-head` pads by `--nav-h` instead of
+   the preview's flat 34px. Same visual result, different mechanism. */
+.stays-band { position: relative; overflow: hidden; color: #fff; }
+.stays-band .stays-band-bg {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+/* Verbatim from `.band .shade`. Three stops, not two: the middle stop
+   keeps the centre of the photo readable while both edges stay dark
+   enough for white text and for the nav's own scrim to blend into. */
+.stays-band .stays-band-shade {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(4,12,17,.5), rgba(4,12,17,.35) 55%, rgba(4,12,17,.62));
+}
+.stays-band-head {
+  position: relative;
+  z-index: 4;
+  text-align: center;
+  /* preview: 34px 20px 120px — plus the fixed nav's height, since our
+     nav floats over the band instead of sitting in its flow. */
+  padding: calc(var(--nav-h, 68px) + 34px) 20px 120px;
+}
+.stays-band-head h1 {
+  font-size: clamp(30px, 4.6vw, 54px);
+  font-weight: 800;
+  letter-spacing: -1px;
+  text-shadow: 0 2px 24px rgba(0,0,0,.5);
+}
+.stays-band-head h1 .accent { color: var(--gold); }
+.stays-band-head p {
+  margin-top: 10px;
+  color: rgba(255,255,255,.9);
+  font-size: 15px;
+}
+
+/* The panel rides up over the band by 88px. `z-index:6` clears the
+   band's shade (z 4) but stays under the nav (z 50) so the nav's
+   bubbles are never covered by the panel's corners on short viewports. */
+.stays-search-float {
+  position: relative;
+  z-index: 6;
+  margin: -88px auto 0;
+  max-width: 1080px;
+  padding: 0 20px;
+}
+.stays-panel {
+  background: rgba(255,255,255,.97);
+  border-radius: 22px;
+  box-shadow: 0 30px 70px rgba(8,20,26,.28);
+  border: 1px solid rgba(255,255,255,.6);
+  padding: 18px;
+}
+
+/* ── Stays card (Phase 2b) ───────────────────────────────────────────
+   From `.card` in the preview. The photo height is the preview's flat
+   200px; see the note in StaysCard.jsx about how that reads at this
+   grid's density. */
+.stays-card {
+  background: #fff;
+  border: 1px solid var(--brand-border);
+  border-radius: 18px;
+  overflow: hidden;
+  cursor: pointer;
+  transition: transform .3s var(--ease), box-shadow .3s var(--ease);
+}
+.stays-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 12px 32px rgba(30,45,60,.12);
+}
+@media (prefers-reduced-motion: reduce) {
+  .stays-card { transition: none; }
+  .stays-card:hover { transform: none; }
+}
+/* `.tag` — the rental-type pill. inset-inline-start so it flips in
+   Hebrew; the preview already used logical properties here. */
+.stays-card-tag {
+  position: absolute;
+  top: 12px;
+  inset-inline-start: 12px;
+  background: rgba(255,255,255,.94);
+  color: var(--brand-primary);
+  font-size: 11.5px;
+  font-weight: 800;
+  padding: 4px 10px;
+  border-radius: 999px;
+}
+.stays-card-body { padding: 14px 16px 16px; }
+.stays-card-body h4 {
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: 0;
+  /* The preview forces Manrope on card titles specifically — they are
+     the one heading in the design that is NOT Playfair. */
+  font-family: var(--font-body);
+}
+.stays-card-loc { color: var(--brand-muted); font-size: 13px; margin-top: 4px; }
+.stays-card-meta {
+  display: flex;
+  gap: 13px;
+  color: #4a5551;
+  font-size: 12.5px;
+  margin-top: 9px;
+  font-weight: 600;
+}
+.stays-card-price {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: 11px;
+}
+.stays-card-amt {
+  font-size: 18px;
+  font-weight: 800;
+  /* --gold-lg in the preview (#A9831C): the gold darkened enough to pass
+     contrast as text on white, which the brand gold does not. */
+  color: var(--gold-text-on-light);
+}
+.stays-card-amt .unit {
+  font-size: 11.5px;
+  color: var(--brand-muted);
+  font-weight: 600;
+}
+
+/* `.rhead` — the results header. Shared by the flat search grid and the
+   map view, which ask the same question ("how many, sorted how?") and so
+   should not answer it in two different type sizes.
+
+   The preview pairs this with `.results{max-width:1200px}`; this app keeps
+   its wider container and denser grid (an explicit call — 1200px/3-up
+   roughly halves listings per screen), so only the type is ported. */
+.stays-rhead h2 {
+  font-size: clamp(21px, 2.6vw, 29px);
+  font-weight: 700;
+  letter-spacing: -.4px;
+}
+.stays-rhead .stays-rhead-note {
+  color: var(--brand-muted);
+  font-size: 13.5px;
+  font-weight: 600;
+}
