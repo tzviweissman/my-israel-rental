@@ -12,8 +12,15 @@
  *   • No `★ 4.9` rating row. Nothing in this product stores a rating —
  *     not on the listing, not anywhere — so the preview's `.rate` element
  *     has no value to bind to. Printing one would be inventing a number
- *     about someone's apartment. The price row keeps its `space-between`
- *     so it still reads as a row when the right side is empty.
+ *     about someone's apartment.
+ *
+ *     TODO: wire to review aggregates when they exist. Reviews are a real
+ *     part of the product, so this slot is expected to fill eventually.
+ *     `.stays-card-price` keeps `justify-content: space-between` with a
+ *     single child for exactly that reason: dropping in a second element
+ *     on the end lands it in the preview's `.rate` position without
+ *     touching the price, so no card in a live grid reflows. Please don't
+ *     "simplify" that to a plain block — the empty half IS the seam.
  *   • The photo keeps its `.ph` height of 200px, but real listings can
  *     have no photo, a video-derived cover, or a placeholder — so the
  *     badges the app already had (DefaultImageBadge / VideoCoverBadge)

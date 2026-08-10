@@ -1323,6 +1323,12 @@ const he = {
         heroTitle: 'מצאו את',
         heroAccent: 'הבית שלכם.',
         heroLede: 'השכרות לטווח ארוך, לטווח קצר ולחופשה — ישירות מהבעלים, ללא דמי תיווך.',
+        // Search-panel-only display copy — see the note in en.js. The
+        // separator is the same "·" as the English so the two locales'
+        // panels read at the same rhythm; the slashes are direction-neutral
+        // and need no RTL handling.
+        panelAnywhere: 'כל מקום בישראל',
+        panelStayTypeAny: 'הכל · ארוך / קצר / חופשה',
         // Search pill
         where: 'איפה',
         anywhere: 'כל מקום',

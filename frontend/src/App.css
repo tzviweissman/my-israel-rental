@@ -574,6 +574,10 @@ input[type="date"]:valid:before {
   margin-top: 9px;
   font-weight: 600;
 }
+/* `space-between` with only one child today. That is intentional: the
+   preview's `★ 4.9` sits on the end of this row, and this product has no
+   rating data yet, so the slot is reserved rather than removed. Appending
+   a rating element later drops it straight into place. See StaysCard.jsx. */
 .stays-card-price {
   display: flex;
   align-items: baseline;

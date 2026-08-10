@@ -523,6 +523,10 @@ const Stays = ({ landing = null }) => {
             areaLabelFor={(a) => areaLabel(a, t)}
             onOpenFilters={() => setShowFilters(true)}
             filterCount={activeFilterCount}
+            // The preview's panel copy, applied here rather than inside the
+            // shared pickers — see the note in StaysSearchBar.
+            wherePlaceholder={t('stays.panelAnywhere', 'Anywhere in Israel')}
+            stayTypeEmptyLabel={t('stays.panelStayTypeAny', 'Any · long / short / vacation')}
             t={t}
           />
           {/* One-tap date presets (`.chips` in the preview, including the

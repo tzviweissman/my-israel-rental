@@ -1333,6 +1333,11 @@ const en = {
         heroTitle: 'Find your',
         heroAccent: 'stay.',
         heroLede: 'Long-term, short-term and vacation rentals — direct from owners, zero service fees.',
+        // Search-panel-only display copy, from the preview. Kept separate
+        // from `anywhere` / `any` below, which remain the shared pickers'
+        // defaults for any narrower context they end up in.
+        panelAnywhere: 'Anywhere in Israel',
+        panelStayTypeAny: 'Any · long / short / vacation',
         // Search pill
         where: 'Where',
         anywhere: 'Anywhere',

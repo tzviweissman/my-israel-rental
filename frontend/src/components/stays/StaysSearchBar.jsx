@@ -26,6 +26,15 @@ const StaysSearchBar = ({
   areaLabelFor,
   onOpenFilters,
   filterCount,
+  // Page-scoped display copy for the two collapsed segments, passed in by
+  // Stays.jsx rather than baked into WherePicker / StayTypePicker. This
+  // wording is the search panel's voice, not the pickers' — those are
+  // generic components, and "Any · long / short / vacation" only makes
+  // sense in a wide panel. This bar is their only consumer today, so the
+  // rule is enforced by the seam rather than by a second caller: omitting
+  // either prop leaves that picker on its own terse default.
+  wherePlaceholder,
+  stayTypeEmptyLabel,
   t,
 }) => (
   <div className="flex items-stretch gap-2" data-testid="stays-search-bar">
@@ -41,6 +50,7 @@ const StaysSearchBar = ({
           onChange={setWhere}
           options={areaOptions}
           labelFor={areaLabelFor}
+          placeholder={wherePlaceholder}
           testidPrefix="stays-where"
         />
       </div>
@@ -49,6 +59,7 @@ const StaysSearchBar = ({
         <StayTypePicker
           value={subType}
           onChange={setSubType}
+          emptyLabel={stayTypeEmptyLabel}
           testidPrefix="stays-type"
         />
       </div>
