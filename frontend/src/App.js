@@ -1,10 +1,6 @@
 import React, { useState, useEffect, Suspense, lazy } from 'react';
 import { Helmet } from 'react-helmet-async';
 
-// Preview builds keep the entire app out of search results. Read once at
-// module load — CRA inlines REACT_APP_* at build time, so this is a
-// constant and the whole block below compiles away in production.
-const PREVIEW_NOINDEX = process.env.REACT_APP_PREVIEW === '1';
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import axios from 'axios';
@@ -74,6 +70,7 @@ const Stays = lazy(() => import(/* webpackPrefetch: true */ './pages/Stays'));
 const RequestsPlaceholder = lazy(() => import('./pages/RequestsPlaceholder'));
 const Services = lazy(() => import(/* webpackPrefetch: true */ './pages/Services'));
 const WhyList = lazy(() => import('./pages/WhyList'));
+const WhyHost = lazy(() => import('./pages/WhyHost'));
 const PropertyDetail = lazy(() => import('./pages/PropertyDetail'));
 const SubleaseDetail = lazy(() => import('./pages/SubleaseDetail'));
 const Auth = lazy(() => import('./pages/Auth'));
@@ -110,6 +107,11 @@ const RouteFallback = () => (
 
 import ErrorBoundary from './components/common/ErrorBoundary';
 import { DOCUMENT_SERVICES_ENABLED } from './config/features';
+
+// Preview builds keep the entire app out of search results. Read once at
+// module load — CRA inlines REACT_APP_* at build time, so this is a
+// constant and the whole block below compiles away in production.
+const PREVIEW_NOINDEX = process.env.REACT_APP_PREVIEW === '1';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 export const API = `${BACKEND_URL}/api`;
@@ -296,7 +298,11 @@ function App() {
             <Route path="/services" element={<Services />} />
             {/* Value page in front of plan selection. /for-providers is an
                 alias so either URL works in outreach. */}
+            {/* Two supply-side pitches: /why-list sells to service
+                providers, /why-host to property owners. Neither is in
+                the nav — both are reached from their role card on /join. */}
             <Route path="/why-list" element={<WhyList />} />
+            <Route path="/why-host" element={<WhyHost />} />
             <Route path="/for-providers" element={<WhyList />} />
             <Route path="/services/jobs" element={<JobsBoard />} />
             <Route path="/services/jobs/:id" element={<JobDetail />} />

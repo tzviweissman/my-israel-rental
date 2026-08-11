@@ -712,3 +712,108 @@ input[type="date"]:valid:before {
   white-space: nowrap;
 }
 .btn-blue-solid:hover { background: var(--brand-primary-dark); }
+
+/* ── Section library: supply band, tabbed steps (used by /why-host) ────
+   Hand-ported from home-redesign-preview.html's SUPPLY BAND and HOW IT
+   WORKS sections. The preview's `--teal` / `--teal-deep` are this app's
+   `--brand-primary` / `--brand-primary-deep`.
+
+   `wh-` prefixed rather than the preview's generic `.band` / `.tabs` /
+   `.step`, for the same reason `.glass-nav-*` is prefixed: those names
+   would collide with something in a 125-file app. */
+.wh-eyebrow {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+}
+
+.wh-band {
+  background: linear-gradient(120deg, var(--brand-primary-deep), var(--brand-primary));
+  color: #fff;
+  border-radius: 30px;
+  padding: 46px 44px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 26px;
+  align-items: center;
+}
+.wh-band h2 { font-size: clamp(24px, 3vw, 34px); font-weight: 700; line-height: 1.1; }
+.wh-band p { color: rgba(255,255,255,.88); margin-top: 12px; font-size: 15px; }
+@media (max-width: 860px) {
+  .wh-band { grid-template-columns: 1fr; padding: 32px 24px; border-radius: 22px; }
+}
+
+.wh-facts { display: flex; flex-direction: column; gap: 14px; }
+.wh-fact {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  background: rgba(255,255,255,.08);
+  border: 1px solid rgba(255,255,255,.16);
+  border-radius: 14px;
+  padding: 14px 16px;
+}
+.wh-fact .fi {
+  font-size: 20px;
+  color: var(--gold);
+  width: 24px;
+  flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+  font-weight: 800;
+}
+.wh-fact b { font-size: 15px; }
+.wh-fact small { font-size: 13px; opacity: .85; display: block; }
+
+/* Tabbed how-it-works. The tab list is a real radio-style group: one
+   control per panel, `aria-selected` carrying the state, because the
+   active tab is otherwise signalled by background colour alone. */
+.wh-tabs {
+  display: inline-flex;
+  background: #EAF1F7;
+  border-radius: 999px;
+  padding: 4px;
+  gap: 4px;
+}
+.wh-tab {
+  border: none;
+  background: transparent;
+  font-weight: 700;
+  font-size: 14px;
+  color: #4a5551;
+  padding: 9px 22px;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: all .18s var(--ease);
+  font-family: inherit;
+}
+.wh-tab[aria-selected="true"] {
+  background: #fff;
+  color: var(--brand-primary);
+  box-shadow: var(--shadow-sm);
+}
+
+.wh-steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 26px; }
+/* `hidden` is a UA-stylesheet `display:none`, and ANY author `display`
+   beats it — so the inactive tab panel stayed on screen and both step
+   rows rendered at once. Keeping the attribute (rather than unmounting)
+   means the panel is still a real tabpanel for assistive tech. */
+.wh-steps[hidden] { display: none; }
+@media (max-width: 760px) { .wh-steps { grid-template-columns: 1fr; } }
+.wh-step { text-align: center; padding: 8px; }
+.wh-step .num {
+  width: 48px;
+  height: 48px;
+  margin: 0 auto 14px;
+  border-radius: 50%;
+  background: #E4EEF6;
+  color: var(--brand-primary);
+  display: grid;
+  place-items: center;
+  font-family: var(--font-head);
+  font-weight: 700;
+  font-size: 20px;
+}
+.wh-step h4 { font-size: 17px; font-weight: 700; }
+.wh-step p { color: var(--brand-muted); font-size: 14px; margin-top: 6px; }
