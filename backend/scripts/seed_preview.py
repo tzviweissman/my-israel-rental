@@ -128,8 +128,19 @@ async def main() -> None:
     await db.marketplace_providers.delete_many({})
 
     if properties:
-        for p in properties:
-            p["_id"] = p.pop("id")
+        # Properties and gigs use OPPOSITE id conventions, and getting this
+        # backwards is what broke the first seed run:
+        #
+        #   properties — `id` is a real uuid FIELD with a unique index, and
+        #     Mongo assigns `_id` itself (see routes/properties/crud.py).
+        #     Moving `id` into `_id` left every document with `id: null`,
+        #     so the second insert hit a duplicate-key error on `id_1`, and
+        #     the one row that did land 500'd the list endpoint because
+        #     PropertyOut requires `id`.
+        #   gigs — `_id` IS the uuid, and `_clean_gig()` renames it to `id`
+        #     on the way out. Those are handled below.
+        #
+        # So: leave properties exactly as the API returned them.
         await db.properties.insert_many(properties)
 
     # One synthetic provider per distinct real provider, so the spread of
@@ -169,6 +180,14 @@ async def main() -> None:
         f"{len(provider_map)} synthetic providers into {DB_NAME}"
     )
     # Prove the personal fields really are gone rather than assuming it.
+    # A property without `id` breaks the list endpoint outright (PropertyOut
+    # requires it) and the failure surfaces as an opaque 500, not as a bad
+    # row — so assert the shape here where the cause is still obvious.
+    idless = await db.properties.count_documents({"id": {"$in": [None, ""]}})
+    print(f"verify: properties missing an id = {idless} (want 0)")
+    if idless:
+        sys.exit("SEED FAILED VERIFICATION — properties without `id` will 500 the list endpoint")
+
     leaked = await db.marketplace_gigs.count_documents({"whatsapp": {"$exists": True}})
     real_ids = await db.marketplace_gigs.count_documents(
         {"provider_user_id": {"$not": {"$regex": "^preview-provider-"}}}
