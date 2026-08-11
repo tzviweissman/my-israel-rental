@@ -817,3 +817,96 @@ input[type="date"]:valid:before {
 }
 .wh-step h4 { font-size: 17px; font-weight: 700; }
 .wh-step p { color: var(--brand-muted); font-size: 14px; margin-top: 6px; }
+
+/* ── Requests board (Phase 3) ─────────────────────────────────────────
+   From `.rcard` in wanted-board-preview.html.
+
+   The preview's card also carries a poster block — avatar, name,
+   "Verified", "member since". None of it is rendered: the public request
+   endpoints deliberately return no seeker identity (the board is
+   chat-only and must not be harvestable), and there is no verification
+   feature. A card shows the REQUEST; who posted it is revealed by them,
+   in chat. */
+.rcard {
+  background: #fff;
+  border: 1px solid var(--brand-border);
+  border-radius: 18px;
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  transition: transform .25s var(--ease), box-shadow .25s var(--ease);
+}
+.rcard:hover { transform: translateY(-3px); box-shadow: 0 12px 32px rgba(30,45,60,.12); }
+@media (prefers-reduced-motion: reduce) {
+  .rcard { transition: none; }
+  .rcard:hover { transform: none; }
+}
+.rcard h3 { font-size: 17px; font-weight: 700; font-family: var(--font-body); color: var(--ink); }
+
+/* Type badge — the one place the two request kinds are colour-coded, so
+   a scanner can tell rentals from services without reading. */
+.rc-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+  font-weight: 800;
+  padding: 3px 9px;
+  border-radius: 999px;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+}
+.rc-badge-rental { background: rgb(var(--brand-primary-rgb) / .10); color: var(--brand-primary); }
+.rc-badge-service { background: #F6EFD9; color: var(--gold-text-on-light); }
+
+.rc-chips { display: flex; flex-wrap: wrap; gap: 7px; }
+.rc-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #4a5551;
+  background: #F4F1EA;
+  border: 1px solid var(--brand-border);
+  border-radius: 999px;
+  padding: 4px 10px;
+}
+/* The two chips a seeker actually filters on — area and budget. */
+.rc-chip-key { background: #fff; border-color: rgb(var(--brand-primary-rgb) / .35); color: var(--brand-primary); }
+
+.rc-note {
+  font-size: 13.5px;
+  color: var(--brand-muted);
+  line-height: 1.5;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.rc-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: auto;
+  padding-top: 10px;
+  border-top: 1px solid var(--brand-border);
+}
+.rc-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--brand-muted);
+}
+.rc-status .dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #1F8A50;
+  flex: 0 0 auto;
+}

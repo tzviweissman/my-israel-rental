@@ -66,8 +66,9 @@ const Home = lazy(() => import('./pages/Home'));
 // — over-prefetching burns bandwidth on visitors who never navigate.
 const Properties = lazy(() => import(/* webpackPrefetch: true */ './pages/Properties'));
 const Stays = lazy(() => import(/* webpackPrefetch: true */ './pages/Stays'));
-// Phase 3 replaces this component in place at the same route.
-const RequestsPlaceholder = lazy(() => import('./pages/RequestsPlaceholder'));
+const RequestsBoard = lazy(() => import(/* webpackPrefetch: true */ './pages/RequestsBoard'));
+const RequestDetail = lazy(() => import('./pages/RequestDetail'));
+const PostRequest = lazy(() => import('./pages/PostRequest'));
 const Services = lazy(() => import(/* webpackPrefetch: true */ './pages/Services'));
 const WhyList = lazy(() => import('./pages/WhyList'));
 const WhyHost = lazy(() => import('./pages/WhyHost'));
@@ -283,7 +284,16 @@ function App() {
             <Route path="/payment/cancel" element={<PaymentCancel />} />
             <Route path="/availability-extended" element={<AvailabilityExtended />} />
             <Route path="/stays" element={<Stays />} />
-            <Route path="/requests" element={<RequestsPlaceholder />} />
+            {/* Demand board. Reading is public; posting needs an account,
+                which is what keeps the board from being scraped for leads.
+                /requests/post sits BEFORE /requests/:id so "post" is never
+                swallowed as an id. */}
+            <Route path="/requests" element={<RequestsBoard />} />
+            <Route
+              path="/requests/post"
+              element={user ? <PostRequest /> : <Navigate to="/join?redirect=%2Frequests%2Fpost" replace />}
+            />
+            <Route path="/requests/:id" element={<RequestDetail />} />
             <Route
               path="/kosher-stays-in-israel"
               element={<Stays landing={{
