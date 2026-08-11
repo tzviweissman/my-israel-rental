@@ -10,13 +10,13 @@
  * URL state persists every filter so a screenshot-worthy filtered view
  * is always deep-linkable (e.g. shareable /services?category=photography&min_rating=4&sort=rating).
  */
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import axios from 'axios';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
 import { ArrowRight, Loader2, SlidersHorizontal, Award, Zap, MapPin, LayoutGrid, Map as MapIcon } from 'lucide-react';
-import { API } from '../App';
+import { API, AuthContext } from '../App';
 import PageMeta from '../components/PageMeta';
 import StarRating from '../components/marketplace/StarRating';
 import CategoryCarousel from '../components/marketplace/CategoryCarousel';
@@ -34,6 +34,7 @@ import { SUBCATEGORIES } from '../lib/categories';
 // headline now lives in the photo band. The component file is left in
 // place rather than deleted until 2c is approved.
 import ServicesHero from '../components/marketplace/ServicesHero';
+import FeaturedProviders from '../components/marketplace/FeaturedProviders';
 
 const TEAL = 'var(--brand-primary)';
 const GOLD = 'var(--gold)';
@@ -59,7 +60,11 @@ const GigCard = ({ gig, onClick, i18n, t }) => {
   return (
     <button
       onClick={onClick}
-      className="text-left group"
+      // `w-full` is load-bearing: a <button> is inline-block, so when it
+      // is not itself the grid item (the admin featuring toggle wraps it
+      // in a positioned div) it shrinks to its content and the cards
+      // overlap. Harmless when it IS the grid item.
+      className="text-left group w-full"
       data-testid={`services-gig-${gig.id}`}
     >
       <div
@@ -172,12 +177,54 @@ const Services = () => {
   const [locations, setLocations] = useState([]);
   const [languagesList, setLanguagesList] = useState([]);
   const [gigs, setGigs] = useState([]);
+  // Editorially featured gigs — a separate, unfiltered fetch. Deliberately
+  // NOT derived from `gigs`: the featured row is a fixed editorial slot,
+  // so it must not empty out the moment a visitor picks a category or a
+  // price ceiling. It is hidden entirely when nothing is flagged.
+  const [featuredGigs, setFeaturedGigs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filtersOpen, setFiltersOpen] = useState(false);
   // Nearby-mode local state — coords live in memory only, never on the
   // URL, so shared links can't leak location. Cleared on tab close.
   const [coords, setCoords] = useState(null);
   const [geoBusy, setGeoBusy] = useState(false);
+
+  // Admin-only inline featuring. The control lives on the cards rather
+  // than in a new admin tab because there is no marketplace-gig admin
+  // surface at all today (admin/ServicesTab.jsx manages document-services,
+  // a different thing) — and featuring is a judgement about a listing you
+  // are looking at, so the decision belongs where the listing is.
+  //
+  // This only hides the BUTTON. The endpoint does its own role check, so a
+  // non-admin who forges the request still gets a 403.
+  const { user, token } = useContext(AuthContext);
+  const isAdmin = user?.role === 'admin';
+
+  const toggleFeatured = async (gig) => {
+    const next = !gig.featured;
+    try {
+      await axios.patch(
+        `${API}/marketplace/gigs/${gig.id}/featured`,
+        { featured: next },
+        { headers: { Authorization: `Bearer ${token}` } },
+      );
+      // Patch the row in place rather than refetching the whole grid —
+      // a refetch would re-apply filters and could make the card the
+      // admin just clicked jump or disappear mid-interaction.
+      setGigs((prev) => prev.map((g) => (g.id === gig.id ? { ...g, featured: next } : g)));
+      const fresh = await axios.get(`${API}/marketplace/gigs`, {
+        params: { featured: true, limit: 6 },
+      });
+      setFeaturedGigs(fresh.data || []);
+      toast.success(
+        next
+          ? t('services.featuredOn', 'Featured on the services page')
+          : t('services.featuredOff', 'Removed from featured'),
+      );
+    } catch (e) {
+      toast.error(t('services.featuredError', 'Could not change featured status'));
+    }
+  };
 
   // Cross-highlight state, same pattern as Stays — pin click → this id,
   // peek strip watches for it, scrolls the matching card into view.
@@ -228,6 +275,13 @@ const Services = () => {
       console.error(e);
       toast.error(t('services.loadError', 'Failed to load marketplace'));
     });
+    // Featured row. Failure is swallowed on purpose — this is an
+    // editorial extra, and the section simply doesn't render. Toasting a
+    // second error for it would double-report one bad network moment.
+    axios
+      .get(`${API}/marketplace/gigs`, { params: { featured: true, limit: 6 } })
+      .then((r) => setFeaturedGigs(r.data || []))
+      .catch(() => setFeaturedGigs([]));
   }, []);
 
   // Re-fetch gigs whenever any server-side filter changes. Backend does
@@ -528,6 +582,18 @@ const Services = () => {
           )}
         </div>
       </div>
+
+      {/* Featured row — sits between browse-by-category and the results,
+          matching the preview's order. Renders nothing when no gig is
+          flagged, which is the expected state until an admin features
+          something. */}
+      <FeaturedProviders
+        gigs={featuredGigs}
+        coords={coords}
+        onOpen={(id) => { saveReturnPath(); navigate(`/services/gig/${id}`); }}
+        t={t}
+        i18n={i18n}
+      />
 
       {/* Results header — Sort + Filters button + count */}
       <div className="max-w-6xl mx-auto px-4">
@@ -871,13 +937,35 @@ const Services = () => {
         ) : (
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-x-5 gap-y-8">
             {displayGigs.map((gig) => (
-              <GigCard
-                key={gig.id}
-                gig={gig}
-                onClick={() => { saveReturnPath(); navigate(`/services/gig/${gig.id}`); }}
-                i18n={i18n}
-                t={t}
-              />
+              /* The admin feature-toggle is a SIBLING of the card, not a
+                 child: GigCard renders a <button>, and a button inside a
+                 button is invalid HTML that browsers reflow unpredictably
+                 (and whose clicks fight each other). */
+              <div key={gig.id} className="relative">
+                <GigCard
+                  gig={gig}
+                  onClick={() => { saveReturnPath(); navigate(`/services/gig/${gig.id}`); }}
+                  i18n={i18n}
+                  t={t}
+                />
+                {isAdmin && (
+                  <button
+                    type="button"
+                    onClick={() => toggleFeatured(gig)}
+                    className={`absolute top-2 end-2 z-10 px-2 py-1 rounded-full text-[10px] font-bold shadow transition-colors ${
+                      gig.featured
+                        ? 'bg-[var(--gold)] text-white'
+                        : 'bg-white/95 text-gray-700 hover:bg-white'
+                    }`}
+                    data-testid={`services-feature-toggle-${gig.id}`}
+                    aria-pressed={Boolean(gig.featured)}
+                  >
+                    {gig.featured
+                      ? t('services.featured', 'Featured')
+                      : t('services.feature', 'Feature')}
+                  </button>
+                )}
+              </div>
             ))}
           </div>
         )}
