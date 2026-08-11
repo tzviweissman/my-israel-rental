@@ -74,8 +74,13 @@ const CinematicHero = ({ reducedMotion }) => {
           <button type="button" className="b-white" onClick={() => navigate('/stays')}>
             {t('home.hero.ctaStays', 'Search rentals')} →
           </button>
-          <button type="button" className="b-line" onClick={() => navigate('/why-list')}>
-            {t('home.hero.ctaList', 'List your property')}
+          {/* The supply-side door. Now "Join free" → the role picker rather
+              than "List your property" → /why-list: the hero speaks to
+              hosts AND service providers, and the old label only invited
+              one of them. /why-list is still the full host pitch, reached
+              from the Host card on the join page. */}
+          <button type="button" className="b-line" onClick={() => navigate('/join')}>
+            {t('home.hero.ctaJoin', 'Join free')}
           </button>
         </div>
       </div>

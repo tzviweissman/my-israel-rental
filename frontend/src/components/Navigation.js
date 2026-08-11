@@ -410,7 +410,11 @@ const Navigation = () => {
                 { key: 'stays', label: t('nav.stays', 'Stays'), to: '/stays' },
                 { key: 'services', label: t('nav.services', 'Services'), to: '/services' },
                 { key: 'requests', label: t('nav.requests', 'Requests'), to: '/requests' },
-                { key: 'supply', label: t('nav.listOffer', 'List / Offer'), to: '/why-list' },
+                // No supply link here any more. "List / Offer" spoke to one
+                // of three audiences and duplicated the CTA beside it; the
+                // solid "Join free" button now carries every audience and
+                // the role picker does the routing. /why-list still exists —
+                // it's the Host card's "full pitch" link on the join page.
               ].map(({ key, label, to }) => {
                 const active = location.pathname.startsWith(to);
                 return (
@@ -463,10 +467,12 @@ const Navigation = () => {
                 inventory the preview correctly didn't have, and it split the
                 one solid slot between two competing asks.
 
-                That slot now recruits listers. In a two-sided marketplace
-                supply is the constraint — searchers already convert through
-                the hero doors and the search panels, so the nav's single
-                loudest element is better spent on the side that is scarce. */}
+                That slot is now "Join free", which serves all three
+                audiences at once — traveler, host, service provider — and
+                hands the routing to the role picker on /join. The previous
+                "List your property" spoke only to hosts, which meant the
+                nav's loudest element was invisible to two thirds of the
+                people it was trying to recruit. */}
             {!user && (
               /* Same 900px threshold as the link row above. The preview
                  hides only `.signin` here and keeps the CTA, but the
@@ -483,11 +489,11 @@ const Navigation = () => {
                   {t('nav.signin', 'Sign in')}
                 </button>
                 <button
-                  onClick={() => navigate('/why-list')}
+                  onClick={() => navigate('/join')}
                   className="glass-pill-solid"
-                  data-testid="nav-list-property"
+                  data-testid="nav-join-free"
                 >
-                  {t('nav.listProperty', 'List your property')}
+                  {t('nav.joinFree', 'Join free')}
                 </button>
               </div>
             )}
@@ -808,21 +814,34 @@ const Navigation = () => {
                     </>
                   ) : (
                     <>
-                      {/* One auth action, matching the desktop bar. Google
-                          Identity makes signing in and signing up the same
-                          flow, so a second button was false inventory — it
-                          implied a choice that doesn't exist and made new
-                          visitors pick between two doors to the same room.
+                      {/* Two actions, matching the desktop bar's Sign in +
+                          Join free, in the same order.
 
-                          The solid gold Sign Up that used to sit here is
-                          gone: no solid gold element survives anywhere in the
-                          nav or drawer. Glass, like everything else. */}
+                          This drawer previously held ONE button, on the
+                          reasoning that a "Sign Up" beside "Sign in" was
+                          false inventory — Google Identity makes them the
+                          same flow, so it implied a choice that didn't
+                          exist. That reasoning doesn't cover "Join free":
+                          it goes to the role picker, which is a genuinely
+                          different destination, and below 900px this drawer
+                          is the ONLY navigation — omitting it would hide the
+                          site's primary CTA from every tablet and phone.
+
+                          Still no solid gold: both are glass pills, per the
+                          standing rule for the nav and drawer. */}
                       <button
                         onClick={() => handleNav('/auth/login')}
                         className="glass-pill w-full justify-center mt-1"
                         data-testid="nav-login"
                       >
                         {t('nav.signin', 'Sign in')}
+                      </button>
+                      <button
+                        onClick={() => handleNav('/join')}
+                        className="glass-pill w-full justify-center mt-2"
+                        data-testid="nav-join-free-drawer"
+                      >
+                        {t('nav.joinFree', 'Join free')}
                       </button>
                     </>
                   )}

@@ -13,6 +13,7 @@ const he = {
       nav: {
         signin: 'התחברות',
         listProperty: 'פרסום נכס',
+        joinFree: 'הצטרפות חינם',
         account: 'תפריט חשבון',
         requests: 'בקשות',
         listOffer: 'פרסום נכס / שירות',
@@ -416,6 +417,7 @@ const he = {
           sub: "לשכור בית. להזמין בעלי מקצוע. — הכול במקום אחד. חינם לשוכרים ולבעלי נכסים, ללא דמי שירות.",
           ctaStays: "חיפוש דירות",
           ctaList: "פרסום נכס",
+          ctaJoin: "הצטרפות חינם",
           hint: "גללו — הסיפור זז אתכם",
         },
         scenes: {
@@ -974,6 +976,10 @@ const he = {
         traveler: 'מטייל',
         travelerDesc: 'אני רוצה להזמין לינה ושירותים מקומיים לטיול',
         travelerBadge: 'הכי פופולרי',
+        travelerValue: 'חיפוש חינם · ללא דמי הזמנה',
+        hostValue: 'פרסום חינם · ללא דמי הזמנה',
+        providerValue: 'פרסום חינם · ללא דמי הזמנה',
+        providerLearnMore: 'מה מקבלים נותני שירות',
         travelerCta: 'המשך כמטייל',
         travelerDetailsSub: 'נשלח לכם מיילים רק על החשבון והלינות שחשובות לכם.',
         host: 'מארח',

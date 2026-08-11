@@ -13,6 +13,7 @@ const en = {
       nav: {
         signin: 'Sign in',
         listProperty: 'List your property',
+        joinFree: 'Join free',
         account: 'Account menu',
         requests: 'Requests',
         listOffer: 'List / Offer',
@@ -421,7 +422,10 @@ const en = {
           accent: "in Israel.",
           sub: "Rent a home. Hire the pros. — one place for both. Free for renters and owners, no service fees.",
           ctaStays: "Search rentals",
+          // Supply-side hero door. `ctaList` is kept because /why-list
+          // still uses that wording; the hero now says "Join free".
           ctaList: "List your property",
+          ctaJoin: "Join free",
           hint: "Scroll — the story moves with you",
         },
         scenes: {
@@ -980,6 +984,10 @@ const en = {
         traveler: 'Traveler',
         travelerDesc: 'I want to book stays and hire local services for my trip',
         travelerBadge: 'Most popular',
+        travelerValue: 'free to browse · no booking fees',
+        hostValue: 'free to list · no booking fees',
+        providerValue: 'free to list · no booking fees',
+        providerLearnMore: 'See what providers get',
         travelerCta: 'Continue as a traveler',
         travelerDetailsSub: "We'll only email you about your account and stays you care about.",
         host: 'Host',

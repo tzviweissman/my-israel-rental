@@ -28,6 +28,12 @@ import OwnerManagementOfferModal from '../components/OwnerManagementOfferModal';
 import GoogleSignInButton from '../components/auth/GoogleSignInButton';
 import { GOOGLE_CLIENT_ID } from '../components/auth/useGoogleSignIn';
 
+// This page is now the single front door for all three audiences — the
+// nav's one CTA points here and the role picker does the routing. That
+// makes it a persuasion surface, not just a form, so each card carries a
+// one-line reason to pick it. `valueLine` is that line; `learnMore` gives
+// the host the full pitch on /why-list, which left the nav but still
+// exists as the page it always was.
 const ROLE_CARDS = [
   {
     key: 'traveler',
@@ -37,6 +43,8 @@ const ROLE_CARDS = [
     defaultLabel: 'Traveler',
     tDescKey: 'signupJoin.travelerDesc',
     defaultDesc: 'I want to book stays and hire local services for my trip',
+    tValueKey: 'signupJoin.travelerValue',
+    defaultValue: 'free to browse · no booking fees',
     tBadgeKey: 'signupJoin.travelerBadge',
     defaultBadge: 'Most popular',
     tCtaKey: 'signupJoin.travelerCta',
@@ -52,6 +60,15 @@ const ROLE_CARDS = [
     defaultLabel: 'Host',
     tDescKey: 'signupJoin.hostDesc',
     defaultDesc: 'I want to list my vacation rental or property',
+    tValueKey: 'signupJoin.hostValue',
+    defaultValue: 'free to list · no booking fees',
+    // NO learn-more link yet, and deliberately so. The brief asked for
+    // this card to link to /why-list as "the full pitch" — but /why-list
+    // is the SERVICE PROVIDER value page (its own title is "For service
+    // providers") and it leads into provider subscription plans. Pointing
+    // a property owner there would both mis-describe the page and
+    // contradict this card's "free to list". There is no host-facing
+    // pitch page in the app today; when one exists, it goes here.
     tBadgeKey: null,
     defaultBadge: null,
     tCtaKey: 'signupJoin.hostCta',
@@ -67,6 +84,14 @@ const ROLE_CARDS = [
     defaultLabel: 'Service Provider',
     tDescKey: 'signupJoin.providerDesc',
     defaultDesc: 'Cleaner, mover, tour guide, or any local service',
+    tValueKey: 'signupJoin.providerValue',
+    defaultValue: 'free to list · no booking fees',
+    // /why-list lives here rather than on the Host card: it is the
+    // provider value page. This keeps it reachable now that "List / Offer"
+    // has left the nav, which was the point of linking it at all.
+    learnMoreHref: '/why-list',
+    tLearnMoreKey: 'signupJoin.providerLearnMore',
+    defaultLearnMore: 'See what providers get',
     tBadgeKey: null,
     defaultBadge: null,
     tCtaKey: 'signupJoin.providerCta',
@@ -160,9 +185,14 @@ const SignupJoin = () => {
     <div
       className="min-h-screen relative overflow-hidden"
       style={{
-        // Soft sand-to-white wash keeps the Ocean Teal + Gold brand
-        // primary while giving the screen a warm, welcoming atmosphere.
-        background: 'radial-gradient(1200px 600px at 20% -10%, rgba(201, 162, 39,0.10), transparent 60%), radial-gradient(900px 500px at 100% 100%, rgba(30, 95, 140,0.10), transparent 60%), #FBF7EF',
+        // Limestone base with a gold and a blue bloom. Was hardcoded
+        // rgba() + #FBF7EF from the teal era — the numbers had been
+        // find-replaced to the new blue but never moved onto tokens, so
+        // this page would not have followed a future palette change.
+        background:
+          'radial-gradient(1200px 600px at 20% -10%, rgb(var(--gold-rgb) / 0.10), transparent 60%),'
+          + ' radial-gradient(900px 500px at 100% 100%, rgb(var(--brand-primary-rgb) / 0.10), transparent 60%),'
+          + ' var(--bg)',
       }}
       data-testid="signup-join-page"
     >
@@ -195,7 +225,12 @@ const SignupJoin = () => {
         {step === 1 && (
           <section className="mt-8 sm:mt-12" data-testid="signup-step-role">
             <h1
-              className="text-4xl sm:text-5xl lg:text-6xl font-black tracking-tight text-[#0F3A3A]"
+              className="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight"
+              // Playfair (Frank Ruhl Libre in Hebrew) via the token, and
+              // --ink instead of the leftover #0F3A3A dark teal.
+              // font-black is dropped: Playfair ships 600–800 here, so a
+              // 900 weight silently fell back to a synthesised bold.
+              style={{ fontFamily: 'var(--font-head)', color: 'var(--ink)' }}
               data-testid="signup-headline"
             >
               {t('signupJoin.headline', 'Join My Israel Rental')}
@@ -212,25 +247,48 @@ const SignupJoin = () => {
               className="mt-4 grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-5"
               data-testid="signup-role-cards"
             >
-              {ROLE_CARDS.map(({ key, Icon, tKey, defaultLabel, tDescKey, defaultDesc, tBadgeKey, defaultBadge, tCtaKey, defaultCta }) => {
+              {ROLE_CARDS.map(({
+                key, Icon, tKey, defaultLabel, tDescKey, defaultDesc,
+                tValueKey, defaultValue, learnMoreHref, tLearnMoreKey, defaultLearnMore,
+                tBadgeKey, defaultBadge, tCtaKey, defaultCta,
+              }) => {
                 const active = selectedRole === key;
                 return (
+                  /* Wrapper exists so the Host card's "See how hosting
+                     works" link can be a SIBLING of the selection button.
+                     A link inside a button is invalid HTML, and clicking it
+                     would also toggle the card. */
+                  <div key={key} className="relative">
                   <button
                     type="button"
-                    key={key}
                     onClick={() => setSelectedRole(key)}
-                    className={`group relative text-start rounded-2xl border bg-white p-6 sm:p-7 transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand-primary)] focus-visible:ring-offset-2 ${
+                    className={`group relative w-full h-full text-start rounded-2xl border bg-white p-6 sm:p-7 transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand-primary)] focus-visible:ring-offset-2 ${
+                      learnMoreHref ? 'pb-14' : ''
+                    } ${
                       active
-                        ? 'border-[var(--brand-primary)] shadow-[0_20px_50px_-15px_rgba(30, 95, 140,0.35)] -translate-y-0.5'
-                        : 'border-gray-200 shadow-[0_4px_15px_-8px_rgba(0,0,0,0.15)] hover:border-gray-300 hover:shadow-[0_20px_40px_-20px_rgba(0,0,0,0.25)] hover:-translate-y-0.5'
+                        ? 'border-[var(--brand-primary)] -translate-y-0.5'
+                        : 'border-gray-200 hover:border-gray-300 hover:-translate-y-0.5'
                     }`}
+                    style={{
+                      // Inline rather than a Tailwind arbitrary value: these
+                      // shadows carry rgba() with spaces, and an arbitrary
+                      // value containing a space is silently dropped. The
+                      // selected card had NO shadow because of exactly that.
+                      boxShadow: active
+                        ? '0 20px 50px -15px rgb(var(--brand-primary-rgb) / 0.35)'
+                        : '0 4px 15px -8px rgba(0,0,0,0.15)',
+                    }}
                     aria-pressed={active}
                     data-testid={`signup-role-${key}`}
                   >
                     {defaultBadge && (
+                      /* Gold pill, matching the badge treatment used across
+                         the redesign. Gold fill with brand-primary text —
+                         the reverse (gold text on white) fails contrast at
+                         this size. */
                       <span
-                        className="absolute top-3 end-3 text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full"
-                        style={{ background: 'var(--gold)', color: 'var(--brand-primary)' }}
+                        className="absolute top-3 end-3 text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full"
+                        style={{ background: 'var(--gold)', color: 'var(--brand-primary-deep)' }}
                       >
                         {tBadgeKey ? t(tBadgeKey, defaultBadge) : defaultBadge}
                       </span>
@@ -239,18 +297,35 @@ const SignupJoin = () => {
                       className="h-14 w-14 rounded-2xl flex items-center justify-center transition-colors"
                       style={{
                         background: active
-                          ? 'linear-gradient(135deg, var(--brand-primary) 0%, #2B8686 100%)'
-                          : 'linear-gradient(135deg, rgba(30, 95, 140,0.08), rgba(30, 95, 140,0.03))',
+                          ? 'linear-gradient(135deg, var(--brand-primary) 0%, var(--brand-primary-dark) 100%)'
+                          : 'rgb(var(--brand-primary-rgb) / 0.07)',
                       }}
                     >
                       <Icon size={26} className={active ? 'text-[var(--gold)]' : 'text-[var(--brand-primary)]'} />
                     </div>
-                    <h3 className="mt-5 text-xl font-bold text-[#0F3A3A]">
+                    <h3
+                      className="mt-5 text-xl font-bold"
+                      style={{ fontFamily: 'var(--font-head)', color: 'var(--ink)' }}
+                    >
                       {t(tKey, defaultLabel)}
                     </h3>
-                    <p className="mt-1.5 text-sm text-gray-600 leading-relaxed">
+                    <p className="mt-1.5 text-sm leading-relaxed" style={{ color: 'var(--brand-muted)' }}>
                       {t(tDescKey, defaultDesc)}
                     </p>
+
+                    {/* The reason to pick this card, in one line. This page
+                        is the only supply-side pitch most visitors will
+                        see now that the nav's "List / Offer" link is gone,
+                        so "free" has to appear on the card itself. */}
+                    {tValueKey && (
+                      <p
+                        className="mt-2.5 text-xs font-bold"
+                        style={{ color: 'var(--gold-text-on-light)' }}
+                        data-testid={`signup-role-value-${key}`}
+                      >
+                        {t(tValueKey, defaultValue)}
+                      </p>
+                    )}
 
                     <div className="mt-5 flex items-center justify-between">
                       <span className={`text-xs font-semibold ${active ? 'text-[var(--brand-primary)]' : 'text-gray-400 group-hover:text-gray-600'}`}>
@@ -267,6 +342,23 @@ const SignupJoin = () => {
                       )}
                     </div>
                   </button>
+
+                  {/* Host's deeper pitch. /why-list left the nav in this
+                      change but is still the page that sells hosting, so
+                      the card that cares about it links there directly.
+                      Sits over the button's reserved bottom padding. */}
+                  {learnMoreHref && (
+                    <Link
+                      to={learnMoreHref}
+                      className="absolute bottom-5 start-6 sm:start-7 inline-flex items-center gap-1 text-xs font-bold hover:underline"
+                      style={{ color: 'var(--brand-primary)' }}
+                      data-testid={`signup-role-learnmore-${key}`}
+                    >
+                      {t(tLearnMoreKey, defaultLearnMore)}
+                      <ArrowRight size={12} aria-hidden="true" />
+                    </Link>
+                  )}
+                  </div>
                 );
               })}
             </div>
@@ -332,7 +424,10 @@ const SignupJoin = () => {
                 <activeCard.Icon size={14} />
                 {t('signupJoin.signingUpAs', 'Signing up as')} · {t(activeCard.tKey, activeCard.defaultLabel)}
               </div>
-              <h1 className="mt-4 text-3xl sm:text-4xl font-black tracking-tight text-[#0F3A3A]">
+              <h1
+                className="mt-4 text-3xl sm:text-4xl font-extrabold tracking-tight"
+                style={{ fontFamily: 'var(--font-head)', color: 'var(--ink)' }}
+              >
                 {t('signupJoin.detailsHeadline', 'Create your account')}
               </h1>
               <p className="mt-2 text-sm text-gray-600">
