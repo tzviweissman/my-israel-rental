@@ -62,13 +62,15 @@ const ROLE_CARDS = [
     defaultDesc: 'I want to list my vacation rental or property',
     tValueKey: 'signupJoin.hostValue',
     defaultValue: 'free to list · no booking fees',
-    // NO learn-more link yet, and deliberately so. The brief asked for
-    // this card to link to /why-list as "the full pitch" — but /why-list
-    // is the SERVICE PROVIDER value page (its own title is "For service
-    // providers") and it leads into provider subscription plans. Pointing
-    // a property owner there would both mis-describe the page and
-    // contradict this card's "free to list". There is no host-facing
-    // pitch page in the app today; when one exists, it goes here.
+    // NO learn-more link, deliberately. /why-list is the SERVICE PROVIDER
+    // value page (its own title is "For service providers"), so pointing a
+    // property owner there would mis-describe it.
+    //
+    // TODO: add `learnMoreHref: '/why-host'` once that page exists — the
+    // host pitch, to be assembled from the section library in
+    // home-redesign-preview.html (owner/provider band, tabbed how-it-works,
+    // testimonials). Until then this card converts straight into the signup
+    // flow, which beats a link to nothing.
     tBadgeKey: null,
     defaultBadge: null,
     tCtaKey: 'signupJoin.hostCta',

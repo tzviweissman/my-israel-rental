@@ -578,8 +578,27 @@ async def _update_response_ema(provider_user_id: str, elapsed_hours: float) -> N
     )
 
 
+# The marketplace is free. Listing a service costs nothing, so nothing
+# about a provider's billing decides whether their gigs are visible.
+#
+# Flip this to False to bring paid plans back — the subscription routes,
+# the PayPal helpers and the webhook handler are all still here and still
+# mounted, deliberately dormant rather than deleted.
+MARKETPLACE_IS_FREE = True
+
+
 def _provider_is_active(prov: dict[str, Any]) -> bool:
-    """True while the provider can still publish new/active gigs."""
+    """True while the provider can still publish new/active gigs.
+
+    While ``MARKETPLACE_IS_FREE`` every provider is active. This is the one
+    gate the whole marketplace reads — browse, search, gig detail and the
+    provider directory all funnel through it — so making it unconditional
+    is what actually makes the site free. Hiding the pricing UI alone would
+    have left providers whose trial had quietly expired invisible, with no
+    screen left anywhere to explain why.
+    """
+    if MARKETPLACE_IS_FREE:
+        return True
     if prov.get("subscription_status") == "active":
         return True
     trial_end = prov.get("trial_ends_at")

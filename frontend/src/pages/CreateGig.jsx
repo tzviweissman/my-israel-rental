@@ -14,13 +14,12 @@
  *   4. Products / Tiers / Services (dynamic per type)
  *   5. Weekly availability (appointment only) — else skipped
  *   6. Gallery (all)
- *   7. Contact + booking mode + area (all)
- *   8. Plan — which commitment tier starts after the free month (all).
- *      Required to publish: the trial rolls into a paid plan, so nobody
- *      should get here without having seen the number. Publishing records
- *      the choice via /subscription/select-plan and then hands off to
- *      PayPal to authorise it. Billing is deferred server-side to the end
- *      of the free trial, so authorising does NOT charge them today.
+ *   7. Contact + booking mode + area (all) — the last step.
+ *
+ * There used to be an eighth step: which commitment tier starts after the
+ * free month, required before publishing and followed by a PayPal handoff.
+ * Listing is free now, so a provider never sees a price and the wizard
+ * ends at Contact.
  *
  * All state is local; we POST once on the final "Publish" click.
  */
@@ -36,7 +35,6 @@ import { API, AuthContext } from '../App';
 import PageMeta from '../components/PageMeta';
 import { uploadFilesFast } from '../utils/fastUpload';
 import { normalizeWhatsAppNumber, hasValidWhatsApp } from '../utils/whatsappLink';
-import PlanPicker from '../components/marketplace/PlanPicker';
 import PhoneInput from '../components/common/PhoneInput';
 import { useTranslation } from 'react-i18next';
 
@@ -103,9 +101,6 @@ const CreateGig = () => {
   const [categories, setCategories] = useState([]);
   const [locations, setLocations] = useState([]);
   const [saving, setSaving] = useState(false);
-  // Chosen commitment tier. Required to publish; recorded, never charged
-  // at this point — the first 30 days are free.
-  const [planKey, setPlanKey] = useState('');
   const productImageInputRef = useRef({});
 
   // Post-signup onboarding hook — when a provider lands here fresh from
@@ -251,10 +246,14 @@ const CreateGig = () => {
 
   // The appointment type inserts one extra step for weekly hours.
   const isAppointment = form.gig_type === 'appointment';
+  // 'Plan' was the last step. Listing is free, so the wizard now ends at
+  // Contact — dropping the label is what shortens the whole wizard, since
+  // `totalSteps` (and therefore the progress dots and the Publish button)
+  // are derived from this array.
   const stepLabels = useMemo(() => (
     isAppointment
-      ? ['', 'Type', 'Overview', 'Description', 'Services', 'Hours', 'Contact', 'Plan']
-      : ['', 'Type', 'Overview', 'Description', form.gig_type === 'store' ? 'Products' : 'Services & Prices', 'Contact', 'Plan']
+      ? ['', 'Type', 'Overview', 'Description', 'Services', 'Hours', 'Contact']
+      : ['', 'Type', 'Overview', 'Description', form.gig_type === 'store' ? 'Products' : 'Services & Prices', 'Contact']
   ), [isAppointment, form.gig_type]);
   const totalSteps = stepLabels.length - 1;
 
@@ -281,12 +280,6 @@ const CreateGig = () => {
     }
     // Plan selection is the final step now; contact is the one before it.
     const contactStep = isAppointment ? 6 : 5;
-    if (step === contactStep + 1) {
-      // Required on purpose. Publishing starts a 30-day trial that rolls
-      // into a paid plan, and nobody should get that far without having
-      // seen the number. Nothing is charged here — see /select-plan.
-      return !!planKey;
-    }
     if (step === contactStep) {
       if (!(form.area || '').trim()) return false;
       // Gate on the same normalizer the gig detail page uses to build the
@@ -309,7 +302,6 @@ const CreateGig = () => {
       if (!form.title.trim()) return 'Add a title above.';
       if (!form.category) return 'Pick a category above.';
     }
-    if (step === (isAppointment ? 7 : 6)) return 'Pick the plan that starts after your free month.';
     if (step === 3) return 'Write at least 10 characters describing what you offer.';
     if (step === 4) {
       if (form.gig_type === 'store') {
@@ -375,50 +367,14 @@ const CreateGig = () => {
       const { data } = await axios.post(`${API}/marketplace/gigs`, payload, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      // The gig is live from here on, whatever happens next. Everything
-      // below is subscription setup, and none of it may cost them the
-      // listing they just spent ten minutes writing.
       const translated = data?.title_he || data?.description_he;
       toast.success(translated
         ? 'Gig published — also translated to Hebrew for you'
         : 'Gig published!');
 
-      if (planKey) {
-        // Record the choice first, so we still know their intent even if
-        // they abandon the PayPal screen.
-        try {
-          await axios.post(
-            `${API}/marketplace/subscription/select-plan`,
-            { plan_key: planKey },
-            { headers: { Authorization: `Bearer ${token}` } },
-          );
-        } catch (_) { /* non-fatal — changeable later from My Gigs */ }
-
-        // Then hand them to PayPal to authorise it. Billing is deferred to
-        // the end of the free trial server-side (see /subscription/upgrade),
-        // so authorising now does NOT charge them today.
-        try {
-          const sub = await axios.post(
-            `${API}/marketplace/subscription/upgrade?plan_key=${encodeURIComponent(planKey)}`,
-            {},
-            { headers: { Authorization: `Bearer ${token}` } },
-          );
-          if (sub.data?.approval_url) {
-            window.location.assign(sub.data.approval_url);
-            return;
-          }
-        } catch (err) {
-          // Abandoning or failing here leaves a published gig on a free
-          // trial — a perfectly good state. Say so rather than implying
-          // the listing failed.
-          toast.error(
-            err.response?.data?.detail
-            || 'Your gig is live. We could not open PayPal — you can set up billing from My Gigs.',
-          );
-          navigate('/dashboard');
-          return;
-        }
-      }
+      // Publishing used to be followed by /subscription/select-plan and a
+      // PayPal handoff for the plan starting after the free month. Listing
+      // is free, so publishing now ends at the gig itself.
       navigate(`/services/gig/${data.id}`);
     } catch (err) {
       toast.error(err.response?.data?.detail || 'Failed to publish');
@@ -663,39 +619,11 @@ const CreateGig = () => {
           </div>
         )}
 
-        {/* --- Final step: which plan starts after the free month --- */}
-        {step === (isAppointment ? 7 : 6) && (
-          <div className="space-y-4" data-testid="wizard-plan-step">
-            {/* The free month leads, in bold, above the prices. Someone
-                reaching a pricing screen mid-signup assumes they're about to
-                be charged; saying otherwise afterwards is too late. */}
-            <div className="rounded-xl border border-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/25 bg-[#f2f8f8] p-4">
-              <p className="text-sm font-bold text-gray-900">
-                Your first 30 days are free
-              </p>
-              <p className="text-sm text-gray-600 mt-1">
-                Publish today and pay nothing this month. Pick the plan you
-                want to continue on, then confirm it with PayPal —{' '}
-                <strong>your card is not charged today</strong>. The first
-                payment is taken when your free month ends.
-              </p>
-            </div>
-            <div>
-              <label className="text-sm font-semibold text-gray-700">
-                Plan after your free month
-              </label>
-              <div className="mt-2">
-                <PlanPicker value={planKey} onChange={setPlanKey} />
-              </div>
-            </div>
-            <p className="text-xs text-gray-500">
-              You can switch plans or cancel any time during the free month
-              from My Gigs. Publishing takes you to PayPal to confirm — your
-              gig goes live either way, so you can set billing up later if
-              you'd rather.
-            </p>
-          </div>
-        )}
+        {/* The plan step used to live here — "which plan starts after the
+            free month", with a PlanPicker and a PayPal handoff. Listing is
+            free now, so the wizard ends at the contact step. Removed rather
+            than hidden: a disabled step still has to be walked past, and
+            the whole point is that a provider never sees a price. */}
 
         <div className="flex flex-col items-end mt-8 gap-2 sm:flex-row sm:items-center sm:justify-between">
           <button type="button" disabled={step === 1} onClick={() => setStep((s) => s - 1)}

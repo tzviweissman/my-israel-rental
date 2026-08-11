@@ -1,20 +1,17 @@
 /**
  * MyGigsTab — provider hub for the Services Marketplace.
  *
- * Surfaces the provider's current gigs, subscription/trial state, and
- * a primary CTA to create a new gig. The Upgrade button hits the
- * `/subscription/upgrade` endpoint (Phase 1a: just flips the flag —
- * real Stripe/PayPal billing lands in Phase 1b).
+ * Surfaces the provider's current gigs and a primary CTA to create a new
+ * one. There is no subscription or trial state to show — listing is free.
  */
 import React, { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { toast } from 'sonner';
-import PlanPicker from '../marketplace/PlanPicker';
 import PhoneInput from '../common/PhoneInput';
 import { phoneError } from '../../utils/phoneValidation';
 import {
-  Plus, Loader2, ExternalLink, Trash2, BadgeCheck, Clock, Sparkles,
+  Plus, Loader2, ExternalLink, Trash2,
   Pencil, Upload, X, FileText, Globe, Award,
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
@@ -274,63 +271,11 @@ const ProfileEditModal = ({ API, token, initial, onClose, onSaved }) => {
   );
 };
 
-/** True once a cancellation has gone through but paid-for access remains.
- *  Cancelling sets `paypal_subscription_status` and deliberately leaves
- *  `subscription_status` alone — the provider keeps what they paid for
- *  until the period ends. */
-export const isCancelled = (provider) =>
-  provider?.paypal_subscription_status === 'CANCELLED';
-
-const StatusPill = ({ provider }) => {
-  if (provider.subscription_status === 'active') {
-    // Cancelled-but-still-active had no state of its own, so the pill kept
-    // reading "Pro — active" after a successful cancellation and it looked
-    // like the button had done nothing.
-    if (isCancelled(provider)) {
-      const until = provider.subscribed_until
-        ? new Date(provider.subscribed_until).toLocaleDateString()
-        : null;
-      return (
-        <span
-          className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-amber-50 text-amber-700 text-xs font-semibold"
-          data-testid="my-gigs-status-cancelled"
-        >
-          <Clock size={12} />
-          {until ? `Pro — cancelled, access until ${until}` : 'Pro — cancelled, access until the period ends'}
-        </span>
-      );
-    }
-    return (
-      <span
-        className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 text-xs font-semibold"
-        data-testid="my-gigs-status-active"
-      >
-        <BadgeCheck size={12} /> Pro — active
-      </span>
-    );
-  }
-  if (provider.active) {
-    const daysLeft = provider.trial_ends_at
-      ? Math.max(0, Math.ceil((new Date(provider.trial_ends_at) - new Date()) / 86400000))
-      : null;
-    return (
-      <span
-        className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-amber-50 text-amber-700 text-xs font-semibold"
-        data-testid="my-gigs-status-trial"
-      >
-        <Clock size={12} /> Free trial{daysLeft != null ? ` — ${daysLeft} days left` : ''}
-      </span>
-    );
-  }
-  return (
-    <span
-      className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-red-50 text-red-700 text-xs font-semibold"
-      data-testid="my-gigs-status-expired"
-    >
-      Trial expired
-    </span>
-  );
-};
+/* `isCancelled` and `StatusPill` (trial / Pro / expired badges) lived
+   here. Listing is free, so a provider has no plan state to show. The
+   billing API and PayPal helpers stay in the backend, dormant; this was
+   only their dashboard readout, and dead React state in a component is
+   worse than no state. */
 
 const MyGigsTab = ({ API, token }) => {
   const navigate = useNavigate();
@@ -343,11 +288,6 @@ const MyGigsTab = ({ API, token }) => {
   const [gigs, setGigs] = useState([]);
   const [provider, setProvider] = useState(null);
   const [providerDetails, setProviderDetails] = useState(null);
-  const [upgrading, setUpgrading] = useState(false);
-  // Commitment tier. Left empty until PlanPicker reports the ladder's
-  // default, so we never post a tier the backend didn't offer.
-  const [planKey, setPlanKey] = useState('');
-  const [showPlans, setShowPlans] = useState(false);
   const [showProfile, setShowProfile] = useState(false);
 
   const load = async () => {
@@ -389,43 +329,10 @@ const MyGigsTab = ({ API, token }) => {
     }
   };
 
-  const upgrade = async () => {
-    setUpgrading(true);
-    try {
-      // The tier travels as a query param — the endpoint accepts it
-      // optionally so an older client still lands on the default plan.
-      const res = await axios.post(
-        `${API}/marketplace/subscription/upgrade`
-          + (planKey ? `?plan_key=${encodeURIComponent(planKey)}` : ''),
-        {},
-        { headers: { Authorization: `Bearer ${token}` } },
-      );
-      if (res.data?.approval_url) {
-        // Redirect to PayPal for approval. PayPal will return the user
-        // to /payment/success?flow=marketplace-subscription which activates.
-        window.location.assign(res.data.approval_url);
-        return;
-      }
-      toast.error('PayPal approval URL missing');
-    } catch (err) {
-      toast.error(err.response?.data?.detail || 'Upgrade failed');
-    } finally {
-      setUpgrading(false);
-    }
-  };
+  /* upgrade() and cancelPro() lived here — they POSTed to
+     /marketplace/subscription/upgrade and /cancel and handed off to
+     PayPal. Both endpoints still exist server-side, dormant. */
 
-  const cancelPro = async () => {
-    if (!window.confirm('Cancel your Pro subscription? You keep access until the current period ends.')) return;
-    try {
-      await axios.post(`${API}/marketplace/subscription/cancel`, {}, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      toast.success('Subscription cancelled — you keep Pro access until the period ends');
-      load();
-    } catch (err) {
-      toast.error(err.response?.data?.detail || 'Cancel failed');
-    }
-  };
 
   if (loading) {
     return (
@@ -442,7 +349,9 @@ const MyGigsTab = ({ API, token }) => {
         <div className="flex flex-col gap-2">
           <h2 className="text-lg font-bold text-gray-900">Your services</h2>
           <div className="flex items-center gap-2 flex-wrap">
-            {provider && <StatusPill provider={provider} />}
+            {/* The trial / Pro status pill is gone with the subscription —
+                there is no plan to be on. StatusPill and isCancelled are
+                kept below, unused, alongside the dormant billing code. */}
             <span className="text-xs text-gray-500">
               {gigs.length} {gigs.length === 1 ? 'gig' : 'gigs'} listed
             </span>
@@ -456,29 +365,8 @@ const MyGigsTab = ({ API, token }) => {
           >
             <Pencil size={14} /> Edit profile
           </button>
-          {provider && (provider.subscription_status !== 'active' || isCancelled(provider)) && (
-            <button
-              onClick={() => setShowPlans(true)}
-              disabled={upgrading}
-              className="px-4 py-2.5 rounded-lg text-sm font-semibold text-white bg-[var(--gold)] hover:bg-[#c19f2c] flex items-center gap-1.5 disabled:opacity-60"
-              data-testid="my-gigs-upgrade-btn"
-            >
-              {upgrading ? <Loader2 className="animate-spin" size={14} /> : <Sparkles size={14} />}
-              {/* No price on the button any more: it hardcoded "$25/mo",
-                  which is now only one of three tiers and would go stale the
-                  moment pricing moves. The ladder itself is the source. */}
-              {t('plans.upgradeCta', 'Upgrade to Pro')}
-            </button>
-          )}
-          {provider && provider.subscription_status === 'active' && !isCancelled(provider) && (
-            <button
-              onClick={cancelPro}
-              className="px-3 py-2.5 rounded-lg text-xs font-semibold text-red-600 border border-red-200 hover:bg-red-50"
-              data-testid="my-gigs-cancel-pro-btn"
-            >
-              Cancel Pro
-            </button>
-          )}
+          {/* "Upgrade to Pro" and "Cancel Pro" lived here. Listing is free,
+              so there is nothing to upgrade to and nothing to cancel. */}
           <button
             onClick={() => navigate('/services/create-gig')}
             className="px-4 py-2.5 rounded-lg text-sm font-semibold text-white bg-[var(--brand-primary)] hover:bg-[#0F3A3A] flex items-center gap-1.5"
@@ -489,50 +377,8 @@ const MyGigsTab = ({ API, token }) => {
         </div>
       </div>
 
-      {/* Tier selection. Inline rather than a modal so the provider can still
-          see their gigs and trial status while deciding — this is a pricing
-          decision, not an interruption. */}
-      {showPlans && provider && (provider.subscription_status !== 'active' || isCancelled(provider)) && (
-        <div
-          className="bg-white border border-gray-200 rounded-2xl p-4 mb-4"
-          data-testid="my-gigs-plans-panel"
-        >
-          <div className="flex items-baseline justify-between gap-3 mb-2">
-            <p className="text-sm font-semibold text-gray-900">
-              {t('plans.chooseTitle', 'Choose your commitment')}
-            </p>
-            {/* Escape hatch for anyone who reached pricing without reading
-                what they get — the brief asks for this link here. */}
-            <a
-              href="/why-list"
-              className="text-xs font-semibold text-[var(--brand-primary)] hover:underline shrink-0"
-              data-testid="my-gigs-why-list-link"
-            >
-              {t('plans.whatDoIGet', "What's included?")}
-            </a>
-          </div>
-          <PlanPicker value={planKey} onChange={setPlanKey} disabled={upgrading} />
-          <div className="flex gap-2 mt-3">
-            <button
-              onClick={upgrade}
-              disabled={upgrading || !planKey}
-              className="px-4 py-2.5 rounded-lg text-sm font-semibold text-white bg-[var(--gold)] hover:bg-[#c19f2c] flex items-center gap-1.5 disabled:opacity-60"
-              data-testid="my-gigs-confirm-upgrade-btn"
-            >
-              {upgrading ? <Loader2 className="animate-spin" size={14} /> : <Sparkles size={14} />}
-              {t('plans.continueToPaypal', 'Continue to PayPal')}
-            </button>
-            <button
-              onClick={() => setShowPlans(false)}
-              disabled={upgrading}
-              className="px-3 py-2.5 rounded-lg text-sm font-semibold text-gray-700 border border-gray-300 hover:bg-gray-50"
-              data-testid="my-gigs-plans-cancel"
-            >
-              {t('common.cancel', 'Cancel')}
-            </button>
-          </div>
-        </div>
-      )}
+      {/* The inline plan-selection panel (PlanPicker + "Continue to
+          PayPal") was here. Removed with the subscription. */}
 
       {gigs.length === 0 ? (
         <div className="bg-white border border-gray-200 rounded-2xl p-10 text-center" data-testid="my-gigs-empty">

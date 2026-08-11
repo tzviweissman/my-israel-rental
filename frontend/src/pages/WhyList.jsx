@@ -31,7 +31,6 @@ import {
   BarChart3, BadgeCheck, ArrowRight, Check,
 } from 'lucide-react';
 import PageMeta from '../components/PageMeta';
-import PlanPicker from '../components/marketplace/PlanPicker';
 
 // Shipped features only. Each `key` resolves to whyList.<key>Title/<key>Body.
 const BENEFITS = [
@@ -69,7 +68,6 @@ const SocialProof = () => null;
 const WhyList = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const [planKey, setPlanKey] = React.useState('');
 
   const startListing = () => navigate('/services/create-gig');
 
@@ -107,7 +105,7 @@ const WhyList = () => {
             <ArrowRight size={16} className="rtl:rotate-180" />
           </button>
           <p className="text-xs text-gray-500 mt-3">
-            {t('whyList.trialNote', 'Your first 30 days are free — no card needed to start.')}
+            {t('whyList.trialNote', 'Free to list — no card needed, ever.')}
           </p>
         </div>
       </section>
@@ -187,16 +185,22 @@ const WhyList = () => {
         </div>
       </section>
 
-      {/* Pricing — same live ladder as the dashboard, from the same endpoint */}
+      {/* Pricing — there isn't any. This section used to carry the live
+          commitment ladder from /subscription/plans; listing is free, so it
+          states that plainly instead. Kept as a section rather than deleted
+          because "what does it cost?" is the question a provider arrives
+          with, and an unanswered one reads as a hidden fee. */}
       <section className="px-6 py-14">
         <div className="max-w-3xl mx-auto">
           <h2 className="text-2xl font-bold text-gray-900 mb-2 text-center">
-            {t('whyList.pricingTitle', 'Simple pricing')}
+            {t('whyList.pricingTitle', 'Free to list')}
           </h2>
           <p className="text-sm text-gray-600 mb-6 text-center">
-            {t('whyList.pricingBody', 'The longer you commit, the lower the monthly rate. Start with 30 days free.')}
+            {t(
+              'whyList.pricingBody',
+              'No subscription, no listing fee, and no commission on the work you win. You keep what you earn.',
+            )}
           </p>
-          <PlanPicker value={planKey} onChange={setPlanKey} />
           <div className="text-center mt-6">
             <button
               onClick={startListing}
