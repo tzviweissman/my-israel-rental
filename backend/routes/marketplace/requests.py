@@ -39,6 +39,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel, Field
 
 from routes.deps import db, logger, verify_token
+from utils.translate import translate_marketing_to_hebrew
 
 from .shared import UTC, _validate_category, _validate_subcategory
 
@@ -134,6 +135,37 @@ def _public(doc: dict[str, Any]) -> dict[str, Any]:
     out = {k: v for k, v in doc.items() if k not in ("_id", "report_count", "reported_by", "hidden_by_admin")}
     out["id"] = doc.get("_id")
     return out
+
+
+async def _translate_bg(request_id: str, title: str, description: str) -> None:
+    """Fill title_he / description_he in the background.
+
+    Bilingual reach is the whole point of this board: a Hebrew-speaking
+    landlord scanning demand has to be able to read an English speaker's
+    request, and the reverse.
+
+    Same helper, model and config as gigs and jobs — deliberately no new
+    spend pattern. Runs as a background task rather than inline so an
+    Anthropic outage can never delay or block someone from posting: the
+    request is already saved and live before this starts, and a failure
+    here leaves it published in the language it was written in.
+
+    Fires on create and on edit only, never on read.
+    """
+    try:
+        title_he = await translate_marketing_to_hebrew(title) if title else None
+        desc_he = await translate_marketing_to_hebrew(description) if description else None
+        updates: dict[str, Any] = {}
+        if title_he:
+            updates["title_he"] = title_he
+        if desc_he:
+            updates["description_he"] = desc_he
+        if updates:
+            await db.requests.update_one({"_id": request_id}, {"$set": updates})
+    except Exception as e:  # noqa: BLE001
+        # Swallowed on purpose. The post is already live; the next edit
+        # re-runs this, so a transient outage self-heals.
+        logger.warning("[requests] Hebrew translation failed for %s: %s", request_id, e)
 
 
 async def _request_or_404(request_id: str) -> dict[str, Any]:
@@ -292,6 +324,8 @@ async def create_request(payload: RequestIn, user=Depends(verify_token)):
     }
     await db.requests.insert_one(doc)
     logger.info("[requests] created %s (%s) by %s", doc["_id"], doc["request_type"], user["user_id"])
+    # After the insert, so the request is live whatever the LLM does.
+    asyncio.create_task(_translate_bg(doc["_id"], doc["title"], doc["description"]))
     return _public(doc)
 
 
@@ -311,7 +345,19 @@ async def patch_request(request_id: str, payload: RequestPatch, user=Depends(ver
         update["budget_amount"] = None
     update["updated_at"] = datetime.now(UTC).isoformat()
     await db.requests.update_one({"_id": request_id}, {"$set": update})
-    return _public(await db.requests.find_one({"_id": request_id}))
+    fresh = await db.requests.find_one({"_id": request_id})
+
+    # Re-translate when the English actually changed — which doubles as the
+    # retry path when the create-time call failed and the Hebrew is still
+    # empty. Skipped when neither field moved, so editing only a budget
+    # doesn't spend an API call.
+    title_changed = "title" in update and update["title"] != doc.get("title")
+    desc_changed = "description" in update and update["description"] != doc.get("description")
+    missing_he = not fresh.get("title_he") or not fresh.get("description_he")
+    if title_changed or desc_changed or missing_he:
+        asyncio.create_task(_translate_bg(request_id, fresh["title"], fresh["description"]))
+
+    return _public(fresh)
 
 
 @router.delete("/requests/{request_id}")
