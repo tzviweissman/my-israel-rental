@@ -1844,6 +1844,9 @@ const en = {
         status_found: 'Found',
         status_expired: 'Expired',
         status_closed: 'Closed',
+        verified: 'Verified',
+        verifiedHint: 'Email verified through Google sign-in',
+        memberSince: 'Member since {{year}}',
       },
       errors: {
         listingsTitle: "We couldn't load listings just now",

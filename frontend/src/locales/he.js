@@ -1799,6 +1799,9 @@ const he = {
         status_found: 'נמצא',
         status_expired: 'פג תוקף',
         status_closed: 'סגור',
+        verified: 'מאומת',
+        verifiedHint: 'האימייל אומת דרך חשבון Google',
+        memberSince: 'חבר מאז {{year}}',
       },
       errors: {
         listingsTitle: 'לא הצלחנו לטעון את הנכסים כרגע',

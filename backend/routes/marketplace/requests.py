@@ -10,9 +10,16 @@ Deliberately a separate module and collection rather than an extension of
 prices and an applications list; requests are chat-only. Overloading one
 collection with two contact models is how both end up half-implemented.
 
-Privacy rules, enforced here rather than trusted to the frontend:
-  * public endpoints NEVER return the seeker's identity beyond the opaque
-    ``poster_user_id`` needed to open a chat — no name, phone or email;
+Privacy rules, enforced here rather than trusted to the frontend. The
+line is between IDENTITY and CONTACT, and it is drawn deliberately:
+
+  * identity IS public — a shortened display name ("Rivka L."), a verified
+    flag and a joined year. An owner deciding whether to answer needs to
+    know a real person is asking, and a two-sided board lives on response
+    rate. See ``_poster_identity``;
+  * contact is NEVER public — no phone, no email, no full surname, no
+    avatar, in any endpoint, in any shape. Chat is the only channel, and
+    ``poster_user_id`` resolves to no contact route outside it;
   * contacting requires auth, so a scraper cannot harvest the board;
   * posting requires auth, is capped per user, and is rate-limited.
 
@@ -121,19 +128,87 @@ class ReportIn(BaseModel):
 
 # ---------------- Helpers ----------------
 
-def _public(doc: dict[str, Any]) -> dict[str, Any]:
+def _display_name(full_name: str | None) -> str:
+    """"Rivka Levy" -> "Rivka L." — enough to address a human, not enough
+    to look them up. Derived here rather than client-side so the full
+    surname never crosses the wire in the first place."""
+    parts = (full_name or "").strip().split()
+    if not parts:
+        return "Someone"
+    if len(parts) == 1:
+        return parts[0]
+    return f"{parts[0]} {parts[-1][0]}."
+
+
+async def _poster_identity(user_ids: list[str]) -> dict[str, dict[str, Any]]:
+    """Display identity for a batch of posters, keyed by user id.
+
+    IDENTITY, NOT CONTACT. Three fields only — a shortened name, whether
+    the account is verified, and a joined year. An owner deciding whether
+    to answer a request needs to know a real person is asking; a two-sided
+    board lives on response rate. None of it is a way to reach anyone:
+    chat remains the only channel.
+
+    Never returns email, phone, full surname, or the avatar. `picture`
+    exists on Google accounts but is only used today in the self-facing
+    "Continue as" banner, so it is not an already-public avatar and is not
+    surfaced here.
+
+    Batched deliberately — the board returns up to 200 requests, and a
+    per-row lookup would be 200 round-trips to Atlas.
+    """
+    if not user_ids:
+        return {}
+    out: dict[str, dict[str, Any]] = {}
+    cursor = db.users.find(
+        {"id": {"$in": list(set(user_ids))}},
+        # Projection is the enforcement: fields not named here cannot leak
+        # by accident when someone later adds one to the user document.
+        {"_id": 0, "id": 1, "name": 1, "created_at": 1, "google_linked": 1},
+    )
+    async for u in cursor:
+        year = None
+        try:
+            year = datetime.fromisoformat(u["created_at"]).year if u.get("created_at") else None
+        except (ValueError, TypeError):
+            year = None
+        out[u["id"]] = {
+            "poster_display_name": _display_name(u.get("name")),
+            # Bound to `google_linked`, NOT `email_verified`.
+            #
+            # email_verified is set True for EVERY signup — verification was
+            # rolled back in 2026-06 (see routes/auth.py) — so a badge built
+            # on it would appear on every account including one typed with a
+            # fake address. A badge everyone has carries no information and
+            # actively misleads the owner it is meant to reassure.
+            #
+            # google_linked means Google asserted the address and the login
+            # path rejects unverified Google emails, so this badge is true
+            # only when something was actually verified.
+            "poster_verified": bool(u.get("google_linked")),
+            "poster_member_since": year,
+        }
+    return out
+
+
+def _public(doc: dict[str, Any], identity: dict[str, Any] | None = None) -> dict[str, Any]:
     """API-safe shape.
 
-    Strips Mongo's ``_id`` into ``id`` and drops the moderation fields —
-    a seeker should not be able to see their own report count and start
-    guessing who filed them, and nobody else needs it either.
+    Strips Mongo's ``_id`` into ``id`` and drops the moderation fields — a
+    seeker should not see their own report count and start guessing who
+    filed them, and nobody else needs it.
 
-    ``poster_user_id`` SURVIVES on purpose: the contact flow needs it to
-    open a chat. It is an opaque uuid, not PII. No name, phone or email is
-    ever attached to a request document, so there is nothing else to leak.
+    ``poster_user_id`` survives because the contact flow needs it to open a
+    chat. It is an opaque uuid that resolves to no contact route outside
+    that flow.
+
+    Display identity is merged in by the caller via ``_poster_identity``.
+    Contact details are never included, in any shape, ever.
     """
     out = {k: v for k, v in doc.items() if k not in ("_id", "report_count", "reported_by", "hidden_by_admin")}
     out["id"] = doc.get("_id")
+    if identity:
+        out.update(identity)
     return out
 
 
@@ -236,7 +311,8 @@ async def list_requests(
             {"description": {"$regex": q.strip(), "$options": "i"}},
         ]
     docs = await db.requests.find(query).sort("created_at", -1).to_list(limit)
-    return [_public(d) for d in docs]
+    identities = await _poster_identity([d.get("poster_user_id") for d in docs if d.get("poster_user_id")])
+    return [_public(d, identities.get(d.get("poster_user_id"))) for d in docs]
 
 
 @router.get("/requests/{request_id}")
@@ -247,7 +323,8 @@ async def get_request(request_id: str):
         # hidden request exists tells a reporter their report landed and
         # tells a spammer which posts got caught.
         raise HTTPException(status_code=404, detail="Request not found")
-    return _public(doc)
+    identities = await _poster_identity([doc.get("poster_user_id")])
+    return _public(doc, identities.get(doc.get("poster_user_id")))
 
 
 @router.post("/requests")
@@ -466,6 +543,7 @@ async def my_requests(user=Depends(verify_token)):
     docs = await db.requests.find(
         {"poster_user_id": user["user_id"]},
     ).sort("created_at", -1).to_list(200)
+    # No identity lookup here — it is the caller's own name.
     return [_public(d) for d in docs]
 
 

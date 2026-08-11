@@ -9,11 +9,16 @@
  * Public: anyone can read the board. Posting and contacting require an
  * account, which is what stops it being scraped for leads.
  *
- * The mockup's cards carry a poster identity block (avatar, name,
- * "Verified", member-since). None of it is rendered, because the API
- * deliberately returns no seeker identity — see routes/marketplace/
- * requests.py. A card describes the REQUEST; the person behind it appears
- * when they choose to, in chat.
+ * Cards carry a poster block — shortened name, verified badge,
+ * member-since — because identity drives response rate: an owner is far
+ * likelier to answer a named, verified human than an anonymous card.
+ *
+ * That is IDENTITY, not contact. No phone, no email, no full surname, no
+ * avatar, and no route to the person outside the existing chat flow. The
+ * mockup's avatar is deliberately not rendered: the only photo on a user
+ * is their Google `picture`, which today appears solely in the
+ * self-facing "Continue as" banner and is therefore not an already-public
+ * avatar. See `_poster_identity` in routes/marketplace/requests.py.
  */
 import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import axios from 'axios';
@@ -21,7 +26,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import {
-  Home, Wrench, LayoutGrid, MapPin, Coins, BedDouble, CalendarDays,
+  Home, Wrench, LayoutGrid, MapPin, Coins, BedDouble, CalendarDays, ShieldCheck,
   Clock, MessageCircle, Loader2, Search, Plus,
 } from 'lucide-react';
 import { API, AuthContext } from '../App';
@@ -107,6 +112,29 @@ export const RequestCard = ({ request: r, onOpen, t }) => {
       </div>
 
       {r.description && <p className="rc-note">{r.description}</p>}
+
+      {/* Who is asking. Identity, not contact — a shortened name, a
+          verified badge and a joined year, all derived server-side. It is
+          load-bearing for response rate: an owner is far likelier to
+          answer a named, verified human than an anonymous card. There is
+          no avatar and no way to reach them from here; chat is the only
+          channel. */}
+      {r.poster_display_name && (
+        <div className="rc-poster" data-testid={`request-poster-${r.id}`}>
+          <span className="rc-poster-name">{r.poster_display_name}</span>
+          {r.poster_verified && (
+            <span className="rc-verified" title={t('requests.verifiedHint', 'Email verified')}>
+              <ShieldCheck size={11} aria-hidden="true" />
+              {t('requests.verified', 'Verified')}
+            </span>
+          )}
+          {r.poster_member_since && (
+            <span className="rc-poster-since">
+              {t('requests.memberSince', 'Member since {{year}}', { year: r.poster_member_since })}
+            </span>
+          )}
+        </div>
+      )}
 
       <div className="rc-foot">
         <span className="rc-status">

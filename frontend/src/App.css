@@ -910,3 +910,26 @@ input[type="date"]:valid:before {
   background: #1F8A50;
   flex: 0 0 auto;
 }
+
+/* Poster identity strip on a request card. Identity only — see the note
+   in RequestsBoard.jsx. No avatar slot exists here on purpose. */
+.rc-poster {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  font-size: 12.5px;
+}
+.rc-poster-name { font-weight: 700; color: var(--ink); }
+.rc-poster-since { color: var(--brand-muted); }
+.rc-verified {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  font-weight: 800;
+  color: #1F8A50;
+  background: #E3F3EA;
+  border-radius: 999px;
+  padding: 2px 8px;
+}
