@@ -1,4 +1,10 @@
 import React, { useState, useEffect, Suspense, lazy } from 'react';
+import { Helmet } from 'react-helmet-async';
+
+// Preview builds keep the entire app out of search results. Read once at
+// module load — CRA inlines REACT_APP_* at build time, so this is a
+// constant and the whole block below compiles away in production.
+const PREVIEW_NOINDEX = process.env.REACT_APP_PREVIEW === '1';
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import axios from 'axios';
@@ -204,6 +210,19 @@ function App() {
     <AuthContext.Provider value={{ user, token, login, logout, impersonate, endImpersonation }}>
       <BrowserRouter>
         <>
+            {/* Preview-environment noindex, emitted ONCE for the whole app.
+                It used to live only in PageMeta, which 17 pages never
+                render — /join, /auth/*, /dashboard and /property/:id among
+                them — so the preview was leaving its most linkable pages
+                indexable while the pages that did render PageMeta looked
+                correctly protected. Putting it at the root means a new
+                route is covered the moment it exists, without anyone
+                remembering to add a meta tag. */}
+            {PREVIEW_NOINDEX && (
+              <Helmet prioritizeSeoTags>
+                <meta name="robots" content="noindex,nofollow" />
+              </Helmet>
+            )}
             <ScrollToTop />
             <ThemePreviewOverride />
             <div className="App">
