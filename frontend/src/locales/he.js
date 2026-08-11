@@ -1737,6 +1737,20 @@ const he = {
         nearbyOnToast: 'מציג שירותים בקרבתך',
         geoFailed: 'לא הצלחנו לאתר את המיקום שלך — נסה שוב.',
         browseJobs: 'עיין בעבודות',
+        // Photo band (Phase 2c). The gold falls on "המקצוענים" — the noun
+        // carrying the emphasis in Hebrew, same principle as stays.
+        heroTitle: 'שכרו את',
+        heroAccent: 'המקצוענים.',
+        // "verified" deliberately absent here too — see the en.js note.
+        heroLede: 'מנקים, מובילים, אינסטלטורים, חשמלאים ועוד — עם ביקורות ודירוגים, ללא דמי תיווך.',
+        // Dual CTA band
+        ctaNeedTitle: 'צריכים שמישהו יבצע עבודה?',
+        ctaNeedBody: 'פרסמו עבודה בחינם — ותקבלו התאמה לבעלי מקצוע תוך דקות.',
+        ctaOfferTitle: 'הציעו את השירותים שלכם',
+        ctaOfferBody: 'רשמו את העסק שלכם והגיעו לכל השוכרים ובעלי הנכסים בפלטפורמה.',
+        listForFree: 'הרשמה חינם',
+        featuredNearYou: 'מומלצים באזורכם',
+        featuredSubtitle: 'נבחרו בקפידה על ידי הצוות שלנו',
         postJob: 'פרסם עבודה',
         heroSubtitle: 'פרסם עבודה וקבל הצעות מחיר מיד. צפה בהיסטוריית עבודה מאומתת, ביקורות ותעודות. גייס תוך כמה קליקים.',
         byLocation: 'עיון לפי אזור',

@@ -1,25 +1,24 @@
 /**
- * StaysHero — the dark photo band at the top of /stays, from
- * stays-preview.html's `.band`.
+ * StaysHero — /stays' photo band. Thin wrapper over the shared HeroBand
+ * (components/common/HeroBand.jsx); everything structural lives there.
  *
- * The global nav is `position: fixed` and floats over this band, which is
- * the whole point of the glass treatment: the bubbles read as glass only
- * when there is a photo behind them. That means /stays must NOT pad its
- * page wrapper by `--nav-h` the way the other pages do — the band starts
- * at y=0 and `.stays-band-head` carries the nav's height as padding
- * instead. See App.css.
- *
- * SEO landing routes (/kosher-stays-in-israel and friends) pass their own
- * `heroTitle` / `heroLede`, which take over the band's copy. Those pages
- * exist to rank for a long-tail phrase, so their H1 has to be the
- * landing phrase — not the generic "Find your stay." Keeping one H1 per
- * page also means the band can't introduce a second one.
+ * All this adds is which photo and which copy, plus the SEO landing case:
+ * routes like /kosher-stays-in-israel pass their own `heroTitle` /
+ * `heroLede`, which take over the headline. Those pages exist to rank for
+ * a long-tail phrase, so their H1 has to be that phrase rather than the
+ * generic "Find your stay." — and a page still gets exactly one H1.
  */
 import React from 'react';
+import HeroBand from '../common/HeroBand';
 
-// Same CloudFront bucket the cinematic home scenes already load from
-// (see components/home/scenes.js) — this is the exact asset the preview
+// Same CloudFront bucket the cinematic home scenes already load from (see
+// components/home/scenes.js) — this is the exact asset the preview
 // specifies, not a re-pick.
+//
+// NOTE: this is a hotlink to Higgsfield's CDN and must be self-hosted
+// before production. See the blocker in
+// docs/redesign-and-wanted-board-prompt.md (Phase 4). Keep the URL in this
+// one constant so the repoint stays a one-line change.
 const CDN = 'https://d8j0ntlcm91z4.cloudfront.net/user_3HWGlZDXVCAOoMKfZq628Ml9cM5';
 const BAND_IMAGE = `${CDN}/hf_20260806_140841_dd0ae729-6af8-43e0-b4c5-15f63a29c9cc.png`;
 
@@ -27,42 +26,23 @@ const StaysHero = ({ landing, t }) => {
   const hasLandingCopy = Boolean(landing?.heroTitle);
 
   return (
-    <div className="stays-band" data-testid="stays-band">
-      {/* Decorative only — the headline carries the meaning, so the photo
-          gets no alt text and is painted as a background rather than an
-          <img> a screen reader would announce. */}
-      <div
-        className="stays-band-bg"
-        style={{ backgroundImage: `url('${BAND_IMAGE}')` }}
-        aria-hidden="true"
-      />
-      <div className="stays-band-shade" aria-hidden="true" />
-      <div className="stays-band-head">
-        {hasLandingCopy ? (
-          <>
-            <h1 data-testid="stays-landing-h1">{landing.heroTitle}</h1>
-            {landing.heroLede && (
-              <p className="mx-auto max-w-2xl" data-testid="stays-landing-lede">
-                {landing.heroLede}
-              </p>
-            )}
-          </>
-        ) : (
-          <>
-            <h1 data-testid="stays-hero-title">
-              {t('stays.heroTitle', 'Find your')}{' '}
-              <span className="accent">{t('stays.heroAccent', 'stay.')}</span>
-            </h1>
-            <p className="mx-auto max-w-2xl">
-              {t(
-                'stays.heroLede',
-                'Long-term, short-term and vacation rentals — direct from owners, zero service fees.',
-              )}
-            </p>
-          </>
-        )}
-      </div>
-    </div>
+    <HeroBand
+      image={BAND_IMAGE}
+      headline={hasLandingCopy ? landing.heroTitle : undefined}
+      title={t('stays.heroTitle', 'Find your')}
+      accent={t('stays.heroAccent', 'stay.')}
+      lede={
+        hasLandingCopy
+          ? landing.heroLede
+          : t(
+              'stays.heroLede',
+              'Long-term, short-term and vacation rentals — direct from owners, zero service fees.',
+            )
+      }
+      headlineTestId={hasLandingCopy ? 'stays-landing-h1' : 'stays-hero-title'}
+      ledeTestId={hasLandingCopy ? 'stays-landing-lede' : undefined}
+      testId="stays-band"
+    />
   );
 };
 

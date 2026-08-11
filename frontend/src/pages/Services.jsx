@@ -30,7 +30,10 @@ import { isAvailableNow, getGigCover } from '../utils/gigAvailability';
 import ServicesHeroSearch from '../components/marketplace/ServicesHeroSearch';
 import { saveReturnPath } from '../hooks/useBackNavigation';
 import { SUBCATEGORIES } from '../lib/categories';
-import ServicesHeroTitle from '../components/marketplace/ServicesHeroTitle';
+// ServicesHeroTitle (the shimmer-on-white H1) is no longer rendered — the
+// headline now lives in the photo band. The component file is left in
+// place rather than deleted until 2c is approved.
+import ServicesHero from '../components/marketplace/ServicesHero';
 
 const TEAL = 'var(--brand-primary)';
 const GOLD = 'var(--gold)';
@@ -406,81 +409,28 @@ const Services = () => {
 
   return (
     <div
-      className="min-h-screen bg-[#FAFAF7]"
-      style={{ paddingTop: 'var(--nav-h, 68px)' }}
+      className="min-h-screen bg-[var(--bg)]"
+      // No paddingTop: the photo band starts at y=0 and the fixed glass
+      // nav floats over it. `.hero-band-head` carries `--nav-h` instead.
+      // See components/common/HeroBand.jsx.
       data-testid="services-page"
     >
       <PageMeta title={seo.title} description={seo.description} path={seo.path} />
 
-      {/* Hero + search — clean white background with two accents:
-          (1) a barely-visible diagonal gold paper-grain SVG behind
-              everything (adds "designed white" texture without
-              distracting from the copy);
-          (2) a gold-shimmer sweep animating across the highlighted
-              first half of the H1.
-          Font swapped from Playfair (serif) to Inter (modern
-          sans-serif) to match the Upwork-style visual reference. */}
-      {/* Top-right marketplace anchors — parked just under the sticky
-          nav so both audiences (job posters + job browsers) have a
-          persistent path from the moment they land on /services. The
-          two links are the same targets as the old inline banner (now
-          removed) but read as a subtler utility strip rather than a
-          hero-competing block. */}
-      <div className="bg-white border-b border-gray-100">
-        <div className="max-w-6xl mx-auto px-4 py-2 flex items-center justify-end gap-2" data-testid="services-jobs-anchor">
-          <button
-            onClick={() => navigate('/services/jobs')}
-            className="px-3 py-1.5 rounded-lg text-xs font-semibold bg-white text-[var(--brand-primary)] border border-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/25 hover:border-[var(--brand-primary)]"
-            data-testid="services-browse-jobs"
-          >
-            {t('services.browseJobs', 'Browse jobs')}
-          </button>
-          <button
-            onClick={() => navigate('/services/post-job')}
-            className="px-3 py-1.5 rounded-lg text-xs font-semibold bg-[var(--brand-primary)] text-white hover:bg-[#0F3A3A]"
-            data-testid="services-post-job"
-          >
-            {t('services.postJob', 'Post a job')}
-          </button>
-        </div>
-      </div>
+      {/* Photo band + floating search panel, matching /stays and the
+          preview. This replaces the old white hero: its gold paper-grain
+          texture and shimmer H1 were solving "make a white page feel
+          designed", a problem the band doesn't have. The glass nav also
+          all but disappeared against that white — grey-on-white bubbles.
 
-      <div
-        className="relative overflow-hidden py-14 md:py-20 px-4"
-        style={{ background: '#FFFFFF' }}
-        data-testid="services-hero"
-      >
-        {/* Diagonal gold paper-grain overlay. Rendered as an inline
-            SVG data URI so it ships zero extra network requests. Kept
-            at 4% opacity + a fine 240 px repeat so it reads as
-            texture, not pattern. `pointer-events-none` keeps clicks
-            passing through to the search pill underneath. */}
-        <div
-          aria-hidden="true"
-          className="absolute inset-0 pointer-events-none"
-          style={{
-            opacity: 0.06,
-            backgroundImage:
-              "url(\"data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='240' height='240' viewBox='0 0 240 240'><defs><pattern id='p' patternUnits='userSpaceOnUse' width='24' height='24' patternTransform='rotate(35)'><line x1='0' y1='0' x2='0' y2='24' stroke='%23D4AF37' stroke-width='0.6'/></pattern></defs><rect width='240' height='240' fill='url(%23p)'/></svg>\")",
-            backgroundSize: '240px 240px',
-          }}
-        />
-        <div className="relative max-w-5xl mx-auto text-center">
-          <ServicesHeroTitle />
-          <p
-            className="max-w-2xl mx-auto text-sm md:text-base text-gray-600 mt-5 mb-6 md:mb-8 leading-relaxed"
-            style={{
-              fontFamily:
-                "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
-              fontWeight: 500,
-            }}
-            data-testid="services-hero-subtitle"
-          >
-            {t(
-              'services.heroSubtitle',
-              'Post a job, get bids immediately. See verified work history, reviews, certifications. Hire in a few clicks.'
-            )}
-          </p>
+          The "Browse jobs / Post a job" utility strip that used to sit
+          above the hero is gone from here; both actions now live in the
+          dual CTA band at the foot of the page, where the preview puts
+          them and where they don't compete with the headline. */}
+      <ServicesHero t={t} />
+
+      <div className="hero-panel-float">
+        <div className="hero-panel">
           <ServicesHeroSearch
             categories={categories}
             selectedCat={selectedCat}
@@ -496,8 +446,13 @@ const Services = () => {
 
       {/* Locations + Categories */}
       <div className="max-w-7xl mx-auto px-4 md:px-6 py-10">
-        <div className="flex items-center justify-between mb-3">
-          <h2 className="text-xl md:text-2xl font-bold text-gray-900 tracking-tight" style={{ fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif", letterSpacing: '-0.02em' }}>
+        {/* Section headings drop their hardcoded Inter/tracking styles for
+            the shared `.section-rhead` rule — the preview's editorial
+            Playfair, and the same type as the Stays results header. The
+            inline font-family also pinned Latin Inter in Hebrew, defeating
+            the RTL font swap in design-tokens.css. */}
+        <div className="section-rhead flex items-center justify-between mb-3">
+          <h2 className="text-gray-900">
             {t('services.byLocation', 'Browse by location')}
           </h2>
           {selectedLoc && (
@@ -518,10 +473,10 @@ const Services = () => {
 
         {/* Categories */}
         <div className="mt-8">
-          <div className="flex items-center justify-between mb-5">
-            <h3 className="text-lg md:text-xl font-bold text-gray-900 tracking-tight" style={{ fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif", letterSpacing: '-0.02em' }}>
+          <div className="section-rhead flex items-center justify-between mb-5">
+            <h2 className="text-gray-900">
               {t('services.browse', 'Browse by category')}
-            </h3>
+            </h2>
             {selectedCat && (
               <button
                 onClick={() => patchUrl({ category: '', subcategory: '' })}
@@ -576,8 +531,8 @@ const Services = () => {
 
       {/* Results header — Sort + Filters button + count */}
       <div className="max-w-6xl mx-auto px-4">
-        <div className="flex items-center justify-between mb-4 gap-3 flex-wrap">
-          <h2 className="text-xl font-bold text-gray-900">
+        <div className="section-rhead flex items-center justify-between mb-4 gap-3 flex-wrap">
+          <h2 className="text-gray-900">
             {selectedCat
               ? categories.find((c) => c.slug === selectedCat)?.label
               : t('services.allServices', 'All services')}
@@ -926,6 +881,65 @@ const Services = () => {
             ))}
           </div>
         )}
+      </div>
+
+      {/* Dual CTA band, from the preview's `.ctaband`. Deliberately the
+          last thing on the page: it addresses the visitor who did NOT
+          find what they came for by scrolling the whole marketplace, and
+          it is where the "Browse jobs / Post a job" strip that used to sit
+          above the hero now lives.
+
+          Two panels, opposite weights — one speaks to someone who needs
+          work done, the other to someone selling their labour. Both
+          audiences land on /services and the page previously only spoke
+          to the first. */}
+      <div
+        className="max-w-6xl mx-auto px-4 pb-20 grid gap-[18px] md:grid-cols-2"
+        data-testid="services-cta-band"
+      >
+        <div className="svc-cta svc-cta-need">
+          <div>
+            <h4>{t('services.ctaNeedTitle', 'Need something done?')}</h4>
+            <small>{t('services.ctaNeedBody', 'Post a job free — get matched with pros in minutes.')}</small>
+          </div>
+          <button
+            type="button"
+            onClick={() => navigate('/services/post-job')}
+            className="btn-gold-solid"
+            data-testid="services-post-job"
+          >
+            {t('services.postJob', 'Post a job')}
+          </button>
+        </div>
+        <div className="svc-cta svc-cta-offer">
+          <div>
+            <h4>{t('services.ctaOfferTitle', 'Offer your services')}</h4>
+            <small>{t('services.ctaOfferBody', 'List your business and reach every renter and owner on the platform.')}</small>
+          </div>
+          <button
+            type="button"
+            onClick={() => navigate('/why-list')}
+            className="btn-blue-solid"
+            data-testid="services-list-free"
+          >
+            {t('services.listForFree', 'List for free')}
+          </button>
+        </div>
+      </div>
+
+      {/* Browsing open jobs is a third, narrower intent (providers looking
+          for work) — kept as a quiet text link under the band rather than
+          a third panel competing with the two above. It used to be a
+          button in the strip above the hero. */}
+      <div className="max-w-6xl mx-auto px-4 pb-16 -mt-12 text-center">
+        <button
+          type="button"
+          onClick={() => navigate('/services/jobs')}
+          className="text-sm font-semibold text-[var(--brand-primary)] hover:underline"
+          data-testid="services-browse-jobs"
+        >
+          {t('services.browseJobs', 'Browse jobs')} →
+        </button>
       </div>
 
       <ServicesFiltersModal

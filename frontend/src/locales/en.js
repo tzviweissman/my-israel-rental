@@ -1775,6 +1775,23 @@ const en = {
         nearbyOnToast: 'Showing services near you',
         geoFailed: 'Could not fetch your location — please try again.',
         browseJobs: 'Browse jobs',
+        // Photo band (Phase 2c). Split headline — see the note on
+        // stays.heroTitle for why the accent is its own key.
+        heroTitle: 'Hire',
+        heroAccent: 'the pros.',
+        // The preview's lede says "reviewed, verified, zero booking fees".
+        // "verified" is dropped: there is no verification feature yet (see
+        // the TODO in backend/routes/marketplace/shared.py), and promising
+        // it in the hero is a claim we can't honour.
+        heroLede: 'Cleaners, movers, plumbers, electricians and more — reviewed, rated, zero booking fees.',
+        // Dual CTA band
+        ctaNeedTitle: 'Need something done?',
+        ctaNeedBody: 'Post a job free — get matched with pros in minutes.',
+        ctaOfferTitle: 'Offer your services',
+        ctaOfferBody: 'List your business and reach every renter and owner on the platform.',
+        listForFree: 'List for free',
+        featuredNearYou: 'Featured near you',
+        featuredSubtitle: 'Hand-picked by our team',
         postJob: 'Post a job',
         heroSubtitle: 'Post a job, get bids immediately. See verified work history, reviews, certifications. Hire in a few clicks.',
         byLocation: 'Browse by location',

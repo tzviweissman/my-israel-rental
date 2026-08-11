@@ -487,7 +487,7 @@ const Stays = ({ landing = null }) => {
         // NO paddingTop, unlike every other page: the dark band starts at
         // y=0 and the fixed glass nav floats over it, which is the whole
         // point of the glass treatment (the bubbles only read as glass
-        // with a photo behind them). `.stays-band-head` carries `--nav-h`
+        // with a photo behind them). `.hero-band-head` carries `--nav-h`
         // as padding instead, so the headline still clears the bar.
         // Leave room at the bottom so the floating WhatsApp + a11y FABs
         // (~64px tall + their 24px safe-area offset) never cover the
@@ -511,8 +511,8 @@ const Stays = ({ landing = null }) => {
       {/* Floating white search panel, riding up over the band. Not sticky:
           it scrolls away with the page so the cards get the full viewport,
           which is how it behaved before 2b and what the user asked for. */}
-      <div className="stays-search-float">
-        <div className="stays-panel">
+      <div className="hero-panel-float">
+        <div className="hero-panel">
           <StaysSearchBar
             where={where} setWhere={setWhere}
             checkin={checkin} setCheckin={setCheckin}
@@ -649,7 +649,7 @@ const Stays = ({ landing = null }) => {
         // default view too. When an address is set, we center on it and
         // show a "you searched here" pin.
         <div className="max-w-[1760px] mx-auto px-4 sm:px-6 lg:px-10 pt-11 pb-6" data-testid="stays-map-container">
-          <div className="stays-rhead flex items-end justify-between mb-5">
+          <div className="section-rhead flex items-end justify-between mb-5">
             <div>
               <h2 className="text-gray-900">
                 {filteredWithDistance.length} {filteredWithDistance.length === 1 ? t('stays.stay', 'stay') : t('stays.staysLabel', 'stays')}
@@ -797,7 +797,7 @@ const Stays = ({ landing = null }) => {
       ) : isSearchActive ? (
         // Flat results grid — Airbnb-style, shown once any search/filter is active
         <div className="max-w-[1760px] mx-auto px-4 sm:px-6 lg:px-10 pt-11 pb-6" data-testid="stays-results-grid">
-          <div className="stays-rhead flex items-end justify-between mb-5">
+          <div className="section-rhead flex items-end justify-between mb-5">
             <div>
               <h2 className="text-gray-900">
                 {filteredWithDistance.length} {filteredWithDistance.length === 1 ? t('stays.stay', 'stay') : t('stays.staysLabel', 'stays')}

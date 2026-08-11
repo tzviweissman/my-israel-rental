@@ -466,10 +466,10 @@ input[type="date"]:valid:before {
    The one structural difference from the preview: there, `nav.bar` is
    `position:relative` INSIDE `.band`, so the band's own padding places
    the headline below it. Here the global nav is `position:fixed` and
-   overlays the band, so `.stays-band-head` pads by `--nav-h` instead of
+   overlays the band, so `.hero-band-head` pads by `--nav-h` instead of
    the preview's flat 34px. Same visual result, different mechanism. */
-.stays-band { position: relative; overflow: hidden; color: #fff; }
-.stays-band .stays-band-bg {
+.hero-band { position: relative; overflow: hidden; color: #fff; }
+.hero-band .hero-band-bg {
   position: absolute;
   inset: 0;
   background-size: cover;
@@ -479,12 +479,12 @@ input[type="date"]:valid:before {
 /* Verbatim from `.band .shade`. Three stops, not two: the middle stop
    keeps the centre of the photo readable while both edges stay dark
    enough for white text and for the nav's own scrim to blend into. */
-.stays-band .stays-band-shade {
+.hero-band .hero-band-shade {
   position: absolute;
   inset: 0;
   background: linear-gradient(180deg, rgba(4,12,17,.5), rgba(4,12,17,.35) 55%, rgba(4,12,17,.62));
 }
-.stays-band-head {
+.hero-band-head {
   position: relative;
   z-index: 4;
   text-align: center;
@@ -492,14 +492,14 @@ input[type="date"]:valid:before {
      nav floats over the band instead of sitting in its flow. */
   padding: calc(var(--nav-h, 68px) + 34px) 20px 120px;
 }
-.stays-band-head h1 {
+.hero-band-head h1 {
   font-size: clamp(30px, 4.6vw, 54px);
   font-weight: 800;
   letter-spacing: -1px;
   text-shadow: 0 2px 24px rgba(0,0,0,.5);
 }
-.stays-band-head h1 .accent { color: var(--gold); }
-.stays-band-head p {
+.hero-band-head h1 .accent { color: var(--gold); }
+.hero-band-head p {
   margin-top: 10px;
   color: rgba(255,255,255,.9);
   font-size: 15px;
@@ -508,14 +508,14 @@ input[type="date"]:valid:before {
 /* The panel rides up over the band by 88px. `z-index:6` clears the
    band's shade (z 4) but stays under the nav (z 50) so the nav's
    bubbles are never covered by the panel's corners on short viewports. */
-.stays-search-float {
+.hero-panel-float {
   position: relative;
   z-index: 6;
   margin: -88px auto 0;
   max-width: 1080px;
   padding: 0 20px;
 }
-.stays-panel {
+.hero-panel {
   background: rgba(255,255,255,.97);
   border-radius: 22px;
   box-shadow: 0 30px 70px rgba(8,20,26,.28);
@@ -605,13 +605,110 @@ input[type="date"]:valid:before {
    The preview pairs this with `.results{max-width:1200px}`; this app keeps
    its wider container and denser grid (an explicit call — 1200px/3-up
    roughly halves listings per screen), so only the type is ported. */
-.stays-rhead h2 {
+.section-rhead h2 {
   font-size: clamp(21px, 2.6vw, 29px);
   font-weight: 700;
   letter-spacing: -.4px;
 }
-.stays-rhead .stays-rhead-note {
+.section-rhead .section-rhead-note {
   color: var(--brand-muted);
   font-size: 13.5px;
   font-weight: 600;
 }
+
+/* ── Services: provider rows + dual CTA band (Phase 2c) ───────────────
+   Hand-ported from services-preview.html's `.pcard` and `.scta`.
+
+   The band and floating panel are NOT redefined here — Services uses the
+   shared `.hero-band*` / `.hero-panel*` rules above, which is why they
+   carry a neutral prefix rather than a per-page one. */
+.svc-row {
+  display: grid;
+  grid-template-columns: 120px 1fr auto;
+  gap: 18px;
+  align-items: center;
+  background: #fff;
+  border: 1px solid var(--brand-border);
+  border-radius: 18px;
+  padding: 14px;
+  transition: transform .25s var(--ease), box-shadow .25s var(--ease);
+}
+.svc-row:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 32px rgba(30, 45, 60, .12);
+}
+@media (prefers-reduced-motion: reduce) {
+  .svc-row { transition: none; }
+  .svc-row:hover { transform: none; }
+}
+.svc-row-ph {
+  width: 120px;
+  height: 86px;
+  border-radius: 12px;
+  background-size: cover;
+  background-position: center;
+  background-color: #EDE7DA;
+}
+.svc-row h4 { font-size: 16px; font-weight: 700; font-family: var(--font-body); }
+.svc-row-sub { color: var(--brand-muted); font-size: 13px; margin-top: 3px; }
+.svc-row-badges { display: flex; gap: 7px; margin-top: 8px; flex-wrap: wrap; }
+.svc-row-badges span {
+  font-size: 11px;
+  font-weight: 800;
+  border-radius: 999px;
+  padding: 3px 9px;
+}
+/* Only the rating badge ships — the preview's green "✓ Verified" has no
+   data behind it. See the TODO in backend/routes/marketplace/shared.py:
+   the Verified badge is a deliberately deferred feature, not an oversight. */
+.svc-badge-rating { color: var(--gold-text-on-light); background: #F6EFD9; }
+@media (max-width: 700px) {
+  .svc-row { grid-template-columns: 1fr; }
+  .svc-row-ph { width: 100%; height: 150px; }
+}
+
+/* Dual CTA band. Two panels, deliberately unlike each other: the dark one
+   speaks to someone who needs work done, the cream one to someone selling
+   their labour. Same width, opposite weight. */
+.svc-cta {
+  border-radius: 18px;
+  padding: 26px 28px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+.svc-cta h4 { font-size: 19px; font-weight: 700; }
+.svc-cta small { display: block; font-size: 13px; margin-top: 3px; opacity: .9; }
+.svc-cta-need { background: var(--brand-primary-deep); color: #eaf4ff; }
+.svc-cta-need h4 { color: #fff; }
+.svc-cta-offer { background: #F6EFD9; border: 1.5px solid var(--gold); }
+/* Gold that carries white text at AA — the brand gold does not, and this
+   button sits on a cream panel where a lighter fill would vanish. */
+.btn-gold-solid {
+  background: rgba(172, 134, 28, .85);
+  color: #fff;
+  border: 1.5px solid rgba(201, 162, 39, .9);
+  border-radius: 999px;
+  font-weight: 700;
+  font-size: 14.5px;
+  padding: 13px 24px;
+  cursor: pointer;
+  font-family: inherit;
+  text-shadow: 0 1px 2px rgba(50, 36, 0, .5);
+  white-space: nowrap;
+}
+.btn-blue-solid {
+  background: var(--brand-primary);
+  color: #fff;
+  border: none;
+  border-radius: 999px;
+  font-weight: 800;
+  font-size: 14.5px;
+  padding: 13px 24px;
+  cursor: pointer;
+  font-family: inherit;
+  white-space: nowrap;
+}
+.btn-blue-solid:hover { background: var(--brand-primary-dark); }
