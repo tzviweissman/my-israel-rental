@@ -7,6 +7,8 @@ Sub-modules:
   * ``providers`` — categories, locations, languages, nearest-city,
     public provider profile, and the authed provider self-update.
   * ``gigs`` — gig CRUD, browse, booking flow, and reviews.
+  * ``requests`` — the demand board: seekers post what they are
+    looking for, owners/providers reach them via chat only.
   * ``subscription`` — PayPal-backed provider Pro subscription lifecycle
     (upgrade, activate, cancel, webhook handler).
 
@@ -16,7 +18,7 @@ identical, endpoints just live in smaller modules now.
 """
 from fastapi import APIRouter
 
-from . import gigs, jobs, notification_prefs, providers, subscription
+from . import gigs, jobs, notification_prefs, providers, requests, subscription
 
 # One router that owns every marketplace endpoint. All three sub-modules
 # use the same ``/marketplace`` prefix + ``["marketplace"]`` tag on their
@@ -26,6 +28,7 @@ router = APIRouter()
 router.include_router(providers.router)
 router.include_router(gigs.router)
 router.include_router(jobs.router)
+router.include_router(requests.router)
 router.include_router(notification_prefs.router)
 router.include_router(subscription.router)
 

@@ -208,6 +208,12 @@ async def startup_tasks() -> None:
     # Availability-expiry reminders — daily at 06:00 UTC. Nudges hosts
     # whose available_to is rolling past in the next 4-6 days.
     asyncio.create_task(availability_reminders.availability_reminders_daily_loop())
+    # Requests board lifecycle — daily at 05:00 UTC. Flips open->expired
+    # once a request's 30 days are up. A soft flip, not a TTL index, so
+    # the seeker can still renew it. See the single-replica note in
+    # routes/marketplace/requests.py.
+    from routes.marketplace.requests import requests_lifecycle_daily_loop
+    asyncio.create_task(requests_lifecycle_daily_loop())
     # Auto-dedupe loop — every 30 minutes, silently merge property groups
     # where every user-visible field is identical. Re-attaches chats /
     # bookings / likes / photos to the surviving twin before deleting
@@ -331,6 +337,13 @@ async def startup_tasks() -> None:
         await db.properties.create_index("area", background=True)
         await db.properties.create_index("id", unique=True, background=True)
         await db.properties.create_index("created_at", background=True)
+        # Requests board. The board query is always status+type, the
+        # dashboard is always poster_user_id, and the daily expiry pass
+        # scans status+expires_at.
+        await db.requests.create_index([("status", 1), ("request_type", 1), ("created_at", -1)], background=True)
+        await db.requests.create_index("poster_user_id", background=True)
+        await db.requests.create_index([("status", 1), ("expires_at", 1)], background=True)
+        await db.requests.create_index("category", background=True)
         await db.bookings.create_index([("property_id", 1), ("status", 1)], background=True)
         await db.bookings.create_index([("start_date", 1), ("end_date", 1)], background=True)
         await db.external_bookings.create_index([("start_date", 1), ("end_date", 1)], background=True)
