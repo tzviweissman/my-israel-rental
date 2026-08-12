@@ -77,6 +77,7 @@ const SubleaseDetail = lazy(() => import('./pages/SubleaseDetail'));
 const Auth = lazy(() => import('./pages/Auth'));
 const AuthDeeplink = lazy(() => import('./pages/AuthDeeplink'));
 const NotificationSnooze = lazy(() => import('./pages/NotificationSnooze'));
+const RequestsEmailsOff = lazy(() => import('./pages/RequestsEmailsOff'));
 const SignupJoin = lazy(() => import('./pages/SignupJoin'));
 const VerifyPending = lazy(() => import('./pages/VerifyPending'));
 const VerifyEmail = lazy(() => import('./pages/VerifyEmail'));
@@ -275,6 +276,9 @@ function App() {
             <Route path="/dashboard/settings" element={user ? <Dashboard /> : <Navigate to="/auth/login" />} />
             <Route path="/auth/deeplink" element={<AuthDeeplink />} />
             <Route path="/notification-snooze" element={<NotificationSnooze />} />
+            {/* Public on purpose — the unsubscribe link in the requests
+                matching email must work without logging in. */}
+            <Route path="/requests-emails-off" element={<RequestsEmailsOff />} />
             <Route path="/admin" element={user?.role === 'admin' ? <AdminDashboard /> : <Navigate to="/" />} />
             <Route path="/manager/:managerId" element={<ManagerPage />} />
             <Route path="/chat/:propertyId" element={user ? <Chat /> : <Navigate to="/auth/login" />} />

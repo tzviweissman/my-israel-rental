@@ -38,17 +38,26 @@ replica, move these loops to a single scheduled worker.
 from __future__ import annotations
 
 import asyncio
+import re
 import uuid
 from datetime import datetime, timedelta
+from html import escape as html_escape
 from typing import Any, Optional
 
-from fastapi import APIRouter, Depends, HTTPException, Query
+import jwt
+from fastapi import APIRouter, Body, Depends, HTTPException, Query
 from pydantic import BaseModel, Field
 
 from routes.deps import db, logger, verify_token
+from utils.auth import JWT_SECRET
+from utils.email import send_email
+from utils.notification_tokens import (
+    NotificationTokenError,
+    verify_notification_token,
+)
 from utils.translate import translate_marketing_to_hebrew
 
-from .shared import UTC, _validate_category, _validate_subcategory
+from .shared import UTC, FRONTEND_URL, _validate_category, _validate_subcategory
 
 
 router = APIRouter(prefix="/marketplace", tags=["marketplace"])
@@ -579,3 +588,282 @@ async def requests_lifecycle_daily_loop() -> None:
             # A crash here must not kill the loop — tomorrow's pass would
             # never run, and requests would stay open forever.
             logger.warning("[requests] lifecycle loop crashed: %s", e)
+
+
+# ---------------- Matching digest ----------------
+#
+# The board only works if demand reaches supply. An owner or tradesperson
+# does not check a requests page daily, so a request they could answer
+# goes unseen and the seeker concludes nobody is here. This closes that
+# loop: once a day, anyone who already has something on the platform that
+# fits a new request gets one email saying someone is looking for it.
+#
+# Three rules, each load-bearing:
+#
+#   1. ONE EMAIL PER PERSON PER DAY, grouped — not one per request. A
+#      per-post ping is what trains people to filter us out; the jobs
+#      board already learned this, which is why `digest` is the default
+#      mode in notification_prefs.py.
+#
+#   2. MATCH NARROWLY. Someone hears about a request only if they already
+#      have a published gig in that category, or a property in that area.
+#      Anything looser turns a signal into a mailing list.
+#
+#   3. ALWAYS OFFER A WAY OUT. Every one of these carries a one-click
+#      "stop these emails" link that needs no login.
+#
+# Idempotency is a ``digest_sent`` flag on the request document, not a
+# "created in the last 24h" window. A window looks equivalent and is not:
+# if the process restarts near the send hour the loop runs twice and every
+# recipient gets the same email twice.
+
+# Stored on the shared prefs doc rather than in a new collection — this is
+# the same "how should we email you about the marketplace" question the
+# jobs board already asks, and a second preferences store would mean two
+# places to check and one of them eventually forgotten.
+REQUESTS_OPT_OUT_FIELD = "requests_emails_off"
+OPT_OUT_PURPOSE = "requests_optout"
+OPT_OUT_TTL_DAYS = 90
+
+# Most days this is one or two items. The cap exists for the FIRST run
+# after deploy, when nothing carries the ``digest_sent`` flag yet and the
+# pass therefore covers every open request on the board at once. A
+# fifty-item email reads as spam no matter how relevant it is; the rest
+# are summarised as a "and N more" line pointing at the board.
+MAX_REQUESTS_PER_EMAIL = 8
+
+
+def create_requests_optout_token(user_id: str) -> str:
+    """Signed token behind the "stop these emails" link.
+
+    Long TTL on purpose: someone who ignored the email for two months and
+    then decides they have had enough must still be able to act on it. A
+    link that expires quietly turns an unsubscribe into a dead end.
+    """
+    return jwt.encode(
+        {
+            "purpose": OPT_OUT_PURPOSE,
+            "user_id": user_id,
+            "exp": datetime.now(UTC) + timedelta(days=OPT_OUT_TTL_DAYS),
+        },
+        JWT_SECRET,
+        algorithm="HS256",
+    )
+
+
+@router.post("/requests/emails/opt-out")
+async def requests_optout_from_email(payload: dict = Body(...)):
+    """Public. Auth is the signed token itself, so the link works straight
+    from an email client without logging in — the point of an unsubscribe.
+    """
+    try:
+        claims = verify_notification_token(payload.get("token") or "", OPT_OUT_PURPOSE)
+    except NotificationTokenError as e:
+        raise HTTPException(status_code=400, detail=str(e)) from e
+    await db.job_notification_preferences.update_one(
+        {"user_id": claims["user_id"]},
+        {"$set": {REQUESTS_OPT_OUT_FIELD: True, "updated_at": datetime.now(UTC).isoformat()}},
+        upsert=True,
+    )
+    return {"ok": True}
+
+
+async def _match_recipients(pending: list[dict[str, Any]]) -> dict[str, list[dict[str, Any]]]:
+    """Map recipient user_id -> the new requests that concern them.
+
+    A SERVICE request reaches providers with a published gig in the same
+    category. A RENTAL request reaches owners with a property in the same
+    area. Nobody is matched to their own request.
+    """
+    out: dict[str, list[dict[str, Any]]] = {}
+
+    for req in pending:
+        if req.get("request_type") == "service" and req.get("category"):
+            ids = await db.marketplace_gigs.distinct(
+                "provider_user_id",
+                {"category": req["category"], "status": "published"},
+            )
+        elif req.get("request_type") == "rental" and (req.get("area") or "").strip():
+            # Match on the first comma-separated part so a request for
+            # "Ramat Eshkol" still reaches an owner whose property area
+            # reads "Jerusalem, Ramat Eshkol". re.escape because area is
+            # free text — a stray "(" would otherwise raise mid-loop.
+            needle = re.escape(req["area"].split(",")[0].strip())
+            if not needle:
+                continue
+            ids = await db.properties.distinct(
+                "owner_id",
+                {
+                    "area": {"$regex": needle, "$options": "i"},
+                    "status": {"$ne": "archived"},
+                },
+            )
+        else:
+            continue
+
+        for uid in ids:
+            if uid and uid != req.get("poster_user_id"):
+                out.setdefault(uid, []).append(req)
+
+    return out
+
+
+def _esc(value: Any) -> str:
+    """Request text is user-written and goes straight into an HTML email,
+    so escaping is not optional here."""
+    return html_escape(str(value or ""))
+
+
+def _digest_email(name: str, reqs: list[dict[str, Any]], optout_url: str) -> tuple[str, str]:
+    """(subject, html). Short and plain — a nudge, not a newsletter."""
+    n = len(reqs)
+    subject = (
+        "Someone is looking for what you offer"
+        if n == 1
+        else f"{n} people are looking for what you offer"
+    )
+
+    shown = reqs[:MAX_REQUESTS_PER_EMAIL]
+    overflow = n - len(shown)
+
+    rows = []
+    for r in shown:
+        bits = []
+        if r.get("area"):
+            bits.append(_esc(r["area"]))
+        if r.get("bedrooms_min"):
+            bits.append(f"{int(r['bedrooms_min'])}+ bedrooms")
+        if r.get("budget_type") == "fixed" and r.get("budget_amount"):
+            sym = "₪" if (r.get("budget_currency") or "ILS") == "ILS" else "$"
+            bits.append(f"up to {sym}{int(r['budget_amount']):,}")
+        rows.append(
+            f'<li style="margin:0 0 14px">'
+            f'<a href="{FRONTEND_URL}/requests/{_esc(r["_id"])}" '
+            f'style="color:#1E6A6A;font-weight:700;text-decoration:none;font-size:15px">'
+            f'{_esc(r.get("title") or "A request")}</a>'
+            f'<div style="color:#777;font-size:13px;margin-top:3px">{" · ".join(bits)}</div>'
+            f'</li>'
+        )
+
+    if overflow:
+        rows.append(
+            f'<li style="margin:0 0 14px;color:#777;font-size:14px">'
+            f'and {overflow} more on the board</li>'
+        )
+
+    lead = (
+        "Someone has posted on the MyIsraelRental requests board looking for "
+        "something you may be able to help with."
+        if n == 1
+        else "People have posted on the MyIsraelRental requests board looking "
+             "for things you may be able to help with."
+    )
+    settings_url = f"{FRONTEND_URL}/dashboard/settings?section=notifications"
+    html = f"""
+      <p>Hi {_esc(name) or 'there'},</p>
+      <p>{lead}</p>
+      <ul style="padding-left:18px;margin:18px 0">{''.join(rows)}</ul>
+      <p style="margin:24px 0">
+        <a href="{FRONTEND_URL}/requests" style="display:inline-block;padding:12px 22px;background:#1E6A6A;color:#fff;text-decoration:none;border-radius:8px;font-weight:700">See the board</a>
+      </p>
+      <p style="color:#666;font-size:12px;margin-top:28px;line-height:1.6">
+        You are getting this because you have a listing that matches. Replies
+        happen in chat on MyIsraelRental — nobody gets your phone number or
+        email address.<br>
+        <a href="{optout_url}" style="color:#1E6A6A">Stop these emails</a>
+        &nbsp;·&nbsp; <a href="{settings_url}" style="color:#1E6A6A">Notification settings</a>
+      </p>
+    """
+    return subject, html
+
+
+async def _send_matching_digest() -> int:
+    """One pass. Returns the number of emails sent."""
+    pending = await db.requests.find({
+        "status": "open",
+        "hidden_by_admin": {"$ne": True},
+        "digest_sent": {"$ne": True},
+    }).to_list(500)
+    if not pending:
+        return 0
+
+    by_user = await _match_recipients(pending)
+
+    sent = 0
+    if by_user:
+        now_iso = datetime.now(UTC).isoformat()
+        prefs = {
+            p["user_id"]: p
+            async for p in db.job_notification_preferences.find(
+                {"user_id": {"$in": list(by_user)}},
+            )
+        }
+        users = {
+            u["id"]: u
+            async for u in db.users.find(
+                {"id": {"$in": list(by_user)}},
+                {"_id": 0, "id": 1, "name": 1, "email": 1},
+            )
+        }
+
+        for uid, reqs in by_user.items():
+            pref = prefs.get(uid, {})
+            if pref.get(REQUESTS_OPT_OUT_FIELD):
+                continue
+
+            # A provider who snoozed a category on the jobs board doesn't
+            # want request emails about that category either — from their
+            # side it is the same "not right now, thanks".
+            snoozed = {
+                s.get("category")
+                for s in (pref.get("snoozed_categories") or [])
+                if (s.get("until") or "") > now_iso
+            }
+            visible = [r for r in reqs if r.get("category") not in snoozed]
+            if not visible:
+                continue
+
+            user = users.get(uid)
+            if not user or not user.get("email"):
+                continue
+
+            subject, body = _digest_email(
+                user.get("name") or "",
+                visible,
+                f"{FRONTEND_URL}/requests-emails-off?t={create_requests_optout_token(uid)}",
+            )
+            try:
+                await send_email(user["email"], subject, body, tag="requests-digest")
+                sent += 1
+            except Exception as e:  # noqa: BLE001
+                # One bad address must not abort the rest of the run.
+                logger.warning("[requests] digest email failed for %s: %s", uid, e)
+
+    # Mark everything this pass considered — including requests that
+    # matched nobody — so none is reconsidered tomorrow. Done after the
+    # sends: if the process dies mid-pass the worst case is a repeat,
+    # which beats a request that silently never goes out at all.
+    await db.requests.update_many(
+        {"_id": {"$in": [r["_id"] for r in pending]}},
+        {"$set": {"digest_sent": True}},
+    )
+    logger.info(
+        "[requests] matching digest: %d email(s) for %d new request(s)",
+        sent, len(pending),
+    )
+    return sent
+
+
+async def requests_digest_daily_loop() -> None:
+    """Daily at 09:00 UTC — the same hour the jobs digest goes out, and
+    the same single-replica caveat as the lifecycle loop above."""
+    while True:
+        now = datetime.now(UTC)
+        next_run = now.replace(hour=9, minute=0, second=0, microsecond=0)
+        if next_run <= now:
+            next_run += timedelta(days=1)
+        await asyncio.sleep((next_run - now).total_seconds())
+        try:
+            await _send_matching_digest()
+        except Exception as e:  # noqa: BLE001
+            logger.warning("[requests] digest loop crashed: %s", e)

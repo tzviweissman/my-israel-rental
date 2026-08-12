@@ -212,8 +212,15 @@ async def startup_tasks() -> None:
     # once a request's 30 days are up. A soft flip, not a TTL index, so
     # the seeker can still renew it. See the single-replica note in
     # routes/marketplace/requests.py.
-    from routes.marketplace.requests import requests_lifecycle_daily_loop
+    from routes.marketplace.requests import (
+        requests_digest_daily_loop,
+        requests_lifecycle_daily_loop,
+    )
     asyncio.create_task(requests_lifecycle_daily_loop())
+    # "Someone is looking for what you offer" — the daily matching email
+    # to owners and providers. Separate loop from the lifecycle one so a
+    # crash in either cannot silence the other.
+    asyncio.create_task(requests_digest_daily_loop())
     # Auto-dedupe loop — every 30 minutes, silently merge property groups
     # where every user-visible field is identical. Re-attaches chats /
     # bookings / likes / photos to the surviving twin before deleting
