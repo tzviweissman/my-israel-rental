@@ -1483,7 +1483,9 @@ const en = {
           access: 'Building & access',
           outdoor: 'Outdoors & wellness',
           location: 'Location perks'
-        }
+        },
+        cantFindIt: "Can't find it?",
+        postWhatYouWant: 'Post what you are looking for',
       },
       // ---------------------------------------------------------------
       // Areas — canonical labels for the free-text `property.area` field.
@@ -1700,9 +1702,8 @@ const en = {
         vacation_s2_body: 'Take instant bookings, or review each request first — your call, changeable any time.',
         vacation_s3_title: 'Keep one calendar',
         vacation_s3_body: 'Sync with the other sites you list on so the same week can never be booked twice.',
-        roadmapLabel: 'Coming soon — not available yet',
         requestsTitle: 'The Requests board',
-        requestsBody: 'Renters will post what they are looking for, and you will be able to answer the ones that match your property. Being built now — the page is a placeholder today.',
+        requestsBody: 'Renters post what they are looking for. Browse the Requests board and answer the ones that match your property — demand that comes to you, instead of waiting to be found.',
         closingTitle: 'Your next tenant is already looking',
         closingBody: 'Listing takes a few minutes and costs nothing.',
       },
@@ -1908,6 +1909,8 @@ const en = {
         nearbyOnToast: 'Showing services near you',
         geoFailed: 'Could not fetch your location — please try again.',
         browseJobs: 'Browse jobs',
+        cantFindIt: "Can't find the right pro?",
+        postWhatYouNeed: 'Post what you need',
         // Photo band (Phase 2c). Split headline — see the note on
         // stays.heroTitle for why the accent is its own key.
         heroTitle: 'Hire',

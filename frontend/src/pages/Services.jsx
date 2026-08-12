@@ -839,6 +839,20 @@ const Services = () => {
                 {t('services.listYourService', 'List your service')} <ArrowRight size={14} className="inline-block ms-1" />
               </button>
             )}
+            {/* Same escape hatch as /stays: nobody matched the search, so
+                let them describe the job and have pros come to them. */}
+            <p className="mt-6 text-sm" style={{ color: 'var(--brand-muted)' }}>
+              {t('services.cantFindIt', "Can't find the right pro?")}{' '}
+              <button
+                type="button"
+                onClick={() => navigate('/requests/post')}
+                className="font-semibold hover:underline"
+                style={{ color: 'var(--brand-primary)' }}
+                data-testid="services-post-request-link"
+              >
+                {t('services.postWhatYouNeed', 'Post what you need')} →
+              </button>
+            </p>
           </div>
         ) : viewMode === 'map' ? (
           <>

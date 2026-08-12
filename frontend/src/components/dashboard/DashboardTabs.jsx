@@ -1,6 +1,6 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { Layers, KeyRound, Home, Sparkles, Bell, Heart, MessageCircle, Briefcase } from 'lucide-react';
+import { Layers, KeyRound, Home, Sparkles, Bell, Heart, MessageCircle, Briefcase, Inbox } from 'lucide-react';
 import { DOCUMENT_SERVICES_ENABLED } from '../../config/features';
 import { canPublishGigs } from '../../utils/providerTrial';
 
@@ -89,6 +89,17 @@ const DashboardTabs = ({ activeTab, setActiveTab, role, user, unreadMessages = 0
         >
           <Briefcase size={14} />
           {t('dashboard.myJobs', 'My Jobs')}
+        </button>
+
+        {/* Requests board — the seeker's own posts. Shown to everyone:
+            anyone can post a request, it is not a role-gated surface. */}
+        <button
+          onClick={() => setActiveTab('my-requests')}
+          className={`${cls(activeTab === 'my-requests', ACTIVE_GOLD)} flex items-center justify-center gap-1.5`}
+          data-testid="tab-my-requests"
+        >
+          <Inbox size={14} />
+          {t('requests.myTitle', 'My requests')}
         </button>
 
         <button

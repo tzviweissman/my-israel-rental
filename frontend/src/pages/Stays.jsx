@@ -641,6 +641,22 @@ const Stays = ({ landing = null }) => {
           >
             {t('stays.clearAll', 'Clear all filters')}
           </button>
+          {/* The demand-side escape hatch. Someone whose search returned
+              nothing is exactly the person the Requests board exists for:
+              rather than widening filters until they give up, they can
+              state what they want and let owners come to them. */}
+          <p className="mt-6 text-sm" style={{ color: 'var(--brand-muted)' }}>
+            {t('stays.cantFindIt', "Can't find it?")}{' '}
+            <button
+              type="button"
+              onClick={() => navigate('/requests/post')}
+              className="font-semibold hover:underline"
+              style={{ color: 'var(--brand-primary)' }}
+              data-testid="stays-post-request-link"
+            >
+              {t('stays.postWhatYouWant', 'Post what you are looking for')} →
+            </button>
+          </p>
         </div>
       ) : viewMode === 'map' ? (
         // Map view — full-width Leaflet render with price-pin markers.

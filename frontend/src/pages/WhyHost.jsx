@@ -13,10 +13,11 @@
  *
  *   1. **Only claim what exists today.** Every benefit below maps to
  *      shipped code — free listing, direct WhatsApp/in-app contact,
- *      message translation, digital contract signing, iCal sync. The
- *      Requests board is NOT among them: /requests is still a placeholder
- *      page, so it sits in a separate, explicitly-labelled "coming soon"
- *      block rather than being sold as inbound demand that exists.
+ *      message translation, digital contract signing, iCal sync, and the
+ *      Requests board. The board was in a "coming soon" block while
+ *      /requests was a placeholder; it shipped in Phase 3, so it moved
+ *      into the benefits list and the roadmap block was removed with it
+ *      (there was nothing else in it).
  *
  *   2. **No invented people.** The mockup's testimonials section carries
  *      three named renters and owners with stock headshots and five-star
@@ -41,11 +42,10 @@ const BENEFITS = [
   { key: 'bilingual', Icon: Languages },
   { key: 'contract', Icon: FileSignature },
   { key: 'ical', Icon: CalendarSync },
+  // Promoted out of the roadmap block: the Requests board shipped, so it
+  // is now a real benefit rather than something "coming soon".
+  { key: 'requests', Icon: Inbox },
 ];
-
-// Built but NOT shipped — /requests is a placeholder today. Rendered in
-// its own labelled block so it can never read as a live feature.
-const ROADMAP = [{ key: 'requests', Icon: Inbox }];
 
 const TABS = ['longTerm', 'vacation'];
 
@@ -241,30 +241,6 @@ const WhyHost = () => {
               ))}
             </div>
           ))}
-        </div>
-      </section>
-
-      {/* Roadmap — separate and labelled, never mixed with the shipped list */}
-      <section className="px-6 pb-14">
-        <div className="max-w-5xl mx-auto">
-          <div className="rounded-2xl border border-dashed p-5" style={{ borderColor: 'var(--brand-border)' }}>
-            <p className="text-xs font-semibold tracking-wider uppercase mb-4" style={{ color: 'var(--brand-muted)' }}>
-              {t('whyHost.roadmapLabel', 'Coming soon — not available yet')}
-            </p>
-            {ROADMAP.map(({ key, Icon }) => (
-              <div key={key} className="flex items-start gap-3" data-testid={`why-host-roadmap-${key}`}>
-                <Icon size={18} className="shrink-0 mt-0.5" style={{ color: 'var(--brand-muted)' }} />
-                <div>
-                  <h3 className="font-semibold text-sm" style={{ color: 'var(--ink)' }}>
-                    {t(`whyHost.${key}Title`, key)}
-                  </h3>
-                  <p className="text-sm" style={{ color: 'var(--brand-muted)' }}>
-                    {t(`whyHost.${key}Body`, '')}
-                  </p>
-                </div>
-              </div>
-            ))}
-          </div>
         </div>
       </section>
 

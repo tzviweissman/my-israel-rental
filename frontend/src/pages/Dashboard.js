@@ -12,6 +12,7 @@ import SavedSearchesTab from '../components/dashboard/SavedSearchesTab';
 import LikedTab from '../components/dashboard/LikedTab';
 import SubleasesTab from '../components/dashboard/SubleasesTab';
 import GovernmentServicesTab from '../components/dashboard/GovernmentServicesTab';
+import MyRequestsTab from '../components/dashboard/MyRequestsTab';
 import PropertyList from '../components/dashboard/PropertyList';
 import AddPropertyModal from '../components/dashboard/AddPropertyModal';
 import BulkUploadModal from '../components/dashboard/BulkUploadModal';
@@ -279,6 +280,10 @@ const Dashboard = () => {
         )}
 
         {activeTab === 'liked' && <LikedTab API={API} token={token} />}
+
+        {activeTab === 'my-requests' && (
+          <MyRequestsTab API={API} token={token} />
+        )}
 
         {activeTab === 'subleases' && isRenter && (
           <SubleasesTab API={API} token={token} />

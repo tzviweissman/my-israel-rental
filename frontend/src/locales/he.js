@@ -1461,7 +1461,9 @@ const he = {
           access: 'בניין וגישה',
           outdoor: 'חוץ ופנאי',
           location: 'יתרונות מיקום'
-        }
+        },
+        cantFindIt: 'לא מוצאים?',
+        postWhatYouWant: 'פרסמו מה אתם מחפשים',
       },
       // Areas — Hebrew names for the neighbourhoods stored in
       // `property.area`. Same key set as the English side (see the note
@@ -1660,9 +1662,8 @@ const he = {
         vacation_s2_body: 'הזמנה מיידית, או אישור כל בקשה מראש — אתם מחליטים, וניתן לשנות בכל רגע.',
         vacation_s3_title: 'יומן אחד לכל המקומות',
         vacation_s3_body: 'סנכרנו עם האתרים האחרים שבהם אתם מפרסמים, כדי שאותו שבוע לא יוזמן פעמיים.',
-        roadmapLabel: 'בקרוב — עדיין לא זמין',
         requestsTitle: 'לוח הבקשות',
-        requestsBody: 'שוכרים יפרסמו מה הם מחפשים, ותוכלו להגיב לאלה שמתאימים לנכס שלכם. בבנייה — כרגע העמוד הוא זמני.',
+        requestsBody: 'שוכרים מפרסמים מה הם מחפשים. עיינו בלוח הבקשות והגיבו לאלה שמתאימים לנכס שלכם — ביקוש שמגיע אליכם.',
         closingTitle: 'הדייר הבא שלכם כבר מחפש',
         closingBody: 'הפרסום לוקח כמה דקות ולא עולה כלום.',
       },
@@ -1863,6 +1864,8 @@ const he = {
         nearbyOnToast: 'מציג שירותים בקרבתך',
         geoFailed: 'לא הצלחנו לאתר את המיקום שלך — נסה שוב.',
         browseJobs: 'עיין בעבודות',
+        cantFindIt: 'לא מוצאים את בעל המקצוע?',
+        postWhatYouNeed: 'פרסמו מה אתם צריכים',
         // Photo band (Phase 2c). The gold falls on "המקצוענים" — the noun
         // carrying the emphasis in Hebrew, same principle as stays.
         heroTitle: 'שכרו את',
