@@ -83,20 +83,15 @@ Suggested MVP order within Phase 3: structured posting + filterable board + chat
 
 Goal: a separate, shareable preview URL showing all the above changes that **does NOT touch production data or the live site**. Confirm with me before creating any service or deploying, and paste the preview URL when it's live.
 
-### ⛔ BLOCKER — self-host the generated assets before ANY production ship
+### ✅ RESOLVED — the generated assets are self-hosted
 
-**Nothing hotlinks Higgsfield in production.** Every generated asset — the hero video, all five scene clips, every still, and the `/stays` band photo — currently loads straight from Higgsfield's CDN (`d8j0ntlcm91z4.cloudfront.net`). Those URLs are not contractually permanent and the commercial-use terms still need confirming. `assets/generated/assets-manifest.json` has flagged this from day one.
+Was a blocker: every generated asset loaded straight from Higgsfield's CDN (`d8j0ntlcm91z4.cloudfront.net`), whose URLs are not contractually permanent.
 
-This does **not** block preview work — the preview can keep hotlinking. It blocks production.
+All 20 assets (95.5 MB) now live in our own Cloudinary account under `myisraelrental/site/<key>`, delivered with `f_auto,q_auto` (`q_auto` only for video). `backend/scripts/migrate_site_assets_to_cloudinary.py` did the move and is idempotent — re-run it after adding an asset. The manifest keeps each original Higgsfield URL alongside the new `cloudinary_url` for provenance; the original is **not** for shipping.
 
-Before anything ships to production:
+The five per-file `CDN` constants are gone. Every consumer now imports `frontend/src/lib/siteAssets.js` (generated from the manifest) and refers to assets by key, so a future move is one regenerated file rather than an edit per call site. The three root `*-preview.html` mockups were repointed too.
 
-1. Download every asset in `assets/generated/assets-manifest.json` (20 URLs; 13 are referenced from `frontend/src` today).
-2. Self-host them — Cloudinary, or an R2 bucket behind a custom domain (same setup as rendrly's, so the workflow is already known).
-3. Repoint every URL. Current referencing files: `frontend/src/components/home/scenes.js`, `frontend/src/components/home/CinematicHero.jsx`, `frontend/src/components/stays/StaysHero.jsx` — each holds a `CDN` constant, so this is a one-line change per file plus the manifest. The five root `*-preview.html` mockups also hotlink, but they are design references, not shipped code.
-4. Confirm the commercial-use terms before the assets go anywhere public under our own domain.
-
-Treat the single `CDN` constant in each file as the seam — do not inline these URLs at call sites, or step 3 stops being a one-line change.
+**Still open:** confirm Higgsfield's commercial-use terms cover these assets on our own domain. Self-hosting removed the availability risk, not the licensing question.
 
 - Work from a dedicated branch (e.g. `redesign-preview`), not `main`.
 - In Railway, create a **new environment** (e.g. "preview") in the existing project, or new preview-only services — do not modify the production services. Link by **project ID**, not name (names can change).

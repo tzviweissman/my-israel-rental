@@ -10,17 +10,12 @@
  */
 import React from 'react';
 import HeroBand from '../common/HeroBand';
+import SITE_ASSETS from '../../lib/siteAssets';
 
-// Same CloudFront bucket the cinematic home scenes already load from (see
-// components/home/scenes.js) — this is the exact asset the preview
-// specifies, not a re-pick.
-//
-// NOTE: this is a hotlink to Higgsfield's CDN and must be self-hosted
-// before production. See the blocker in
-// docs/redesign-and-wanted-board-prompt.md (Phase 4). Keep the URL in this
-// one constant so the repoint stays a one-line change.
-const CDN = 'https://d8j0ntlcm91z4.cloudfront.net/user_3HWGlZDXVCAOoMKfZq628Ml9cM5';
-const BAND_IMAGE = `${CDN}/hf_20260806_140841_dd0ae729-6af8-43e0-b4c5-15f63a29c9cc.png`;
+// The same aerial the cinematic home page opens on (see
+// components/home/scenes.js) — the exact asset the preview specifies, not
+// a re-pick.
+const BAND_IMAGE = SITE_ASSETS['scene1-aerial'];
 
 const StaysHero = ({ landing, t }) => {
   const hasLandingCopy = Boolean(landing?.heroTitle);

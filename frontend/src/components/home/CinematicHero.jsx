@@ -1,8 +1,7 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
-
-const CDN = 'https://d8j0ntlcm91z4.cloudfront.net/user_3HWGlZDXVCAOoMKfZq628Ml9cM5';
+import SITE_ASSETS from '../../lib/siteAssets';
 
 /**
  * The opening aerial — the establishing shot before scene 1.
@@ -47,11 +46,11 @@ const CinematicHero = ({ reducedMotion }) => {
         loop
         playsInline
         preload="auto"
-        poster={`${CDN}/hf_20260806_140841_dd0ae729-6af8-43e0-b4c5-15f63a29c9cc.png`}
+        poster={SITE_ASSETS['scene1-aerial']}
         aria-hidden="true"
       >
         <source
-          src={`${CDN}/hf_20260806_162843_d02440e3-cf32-4021-8fcd-970452ae7d9f.mp4`}
+          src={SITE_ASSETS['clip0-aerial']}
           type="video/mp4"
         />
       </video>

@@ -33,12 +33,9 @@ import { API, AuthContext } from '../App';
 import PageMeta from '../components/PageMeta';
 import HeroBand from '../components/common/HeroBand';
 import ListingsUnavailable from '../components/common/ListingsUnavailable';
+import SITE_ASSETS from '../lib/siteAssets';
 
-const CDN = 'https://d8j0ntlcm91z4.cloudfront.net/user_3HWGlZDXVCAOoMKfZq628Ml9cM5';
-// NOTE: hotlinked to Higgsfield's CDN — must be self-hosted before
-// production. See the Phase 4 blocker in
-// docs/redesign-and-wanted-board-prompt.md. One constant per file.
-const BAND_IMAGE = `${CDN}/hf_20260806_182939_99ea6716-e1d2-47af-b156-934c07f68373.png`;
+const BAND_IMAGE = SITE_ASSETS['scene8-requests-man'];
 
 const TYPES = [
   { key: '', labelKey: 'requests.typeAll', fallback: 'All', Icon: LayoutGrid },
