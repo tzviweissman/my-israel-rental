@@ -486,6 +486,8 @@ const en = {
           meta: "post a service · get matched · get paid",
         },
         requests: {
+          lightUpTitle: 'Behind one of these windows, someone is looking for a place like yours.',
+          lightUpBody: 'Requests are posted by people who have already decided to move. Answering one takes a message.',
           kick: "The Requests board",
           h2: "Can't find it?",
           accent: "Let it find you.",

@@ -39,6 +39,8 @@ const SITE_ASSETS = {
   'clip8-kotel-approach-v2': 'https://res.cloudinary.com/dirvyboe9/video/upload/q_auto/v1786504673/myisraelrental/site/clip8-kotel-approach-v2.mp4',
   'clip9-kotel-interior-v2': 'https://res.cloudinary.com/dirvyboe9/video/upload/q_auto/v1786504676/myisraelrental/site/clip9-kotel-interior-v2.mp4',
   'scene11-apartment-exploded': 'https://res.cloudinary.com/dirvyboe9/video/upload/q_auto/v1786580951/myisraelrental/site/scene11-apartment-exploded.mp4',
+  'scene12-street-dark': 'https://res.cloudinary.com/dirvyboe9/image/upload/f_auto,q_auto/v1786589200/myisraelrental/site/scene12-street-dark.png',
+  'scene13-street-lit': 'https://res.cloudinary.com/dirvyboe9/image/upload/f_auto,q_auto/v1786589202/myisraelrental/site/scene13-street-lit.png',
 };
 
 export default SITE_ASSETS;

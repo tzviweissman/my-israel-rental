@@ -202,6 +202,26 @@
       "prompt": "High quality 3D exploded view animation of a modern apartment. The apartment separates smoothly into its layers: roof, floors, walls, and furniture, each element floating apart and hovering in place, revealing the rooms inside. Clean white studio background. It should expand outward in all directions, both vertically and horizontally, and every element must stay fully inside the frame at all times. No text, no labels. Premium architectural visualization, soft even studio lighting, warm neutral materials, slow controlled cinematic motion.",
       "cloudinary_url": "https://res.cloudinary.com/dirvyboe9/video/upload/q_auto/v1786580951/myisraelrental/site/scene11-apartment-exploded.mp4",
       "cloudinary_public_id": "myisraelrental/site/scene11-apartment-exploded"
+    },
+    {
+      "key": "scene12-street-dark",
+      "file": "street-night-dark.png",
+      "job_id": "c10c5dee-56a7-4dbd-8d83-b41a06adf8c4",
+      "url": "https://d8j0ntlcm91z4.cloudfront.net/user_3HWGlZDXVCAOoMKfZq628Ml9cM5/hf_20260813_024323_c10c5dee-56a7-4dbd-8d83-b41a06adf8c4.png",
+      "model": "nano_banana_pro",
+      "prompt": "A row of Jerusalem stone residential apartment buildings at night, every window unlit and black, silhouettes just readable against a slightly lighter deep navy sky.",
+      "cloudinary_url": "https://res.cloudinary.com/dirvyboe9/image/upload/f_auto,q_auto/v1786589200/myisraelrental/site/scene12-street-dark.png",
+      "cloudinary_public_id": "myisraelrental/site/scene12-street-dark"
+    },
+    {
+      "key": "scene13-street-lit",
+      "file": "street-night-lit.png",
+      "job_id": "ad8d052e-e9d2-4a82-98e8-ebc705d3b9db",
+      "url": "https://d8j0ntlcm91z4.cloudfront.net/user_3HWGlZDXVCAOoMKfZq628Ml9cM5/hf_20260813_024453_ad8d052e-e9d2-4a82-98e8-ebc705d3b9db.png",
+      "model": "nano_banana_pro",
+      "prompt": "The SAME photograph with only the lighting changed: every window warmly lit from inside. Produced by EDITING scene12-street-dark rather than generating a second building, which is what guarantees the two layers align pixel for pixel.",
+      "cloudinary_url": "https://res.cloudinary.com/dirvyboe9/image/upload/f_auto,q_auto/v1786589202/myisraelrental/site/scene13-street-lit.png",
+      "cloudinary_public_id": "myisraelrental/site/scene13-street-lit"
     }
   ],
   "download_locally": "PowerShell, from repo root:  foreach ($a in (Get-Content assets/generated/assets-manifest.json | ConvertFrom-Json).assets) { Invoke-WebRequest $a.url -OutFile (\"assets/generated/\" + $a.file) }",

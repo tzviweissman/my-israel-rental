@@ -33,6 +33,7 @@ import { API, AuthContext } from '../App';
 import PageMeta from '../components/PageMeta';
 import HeroBand from '../components/common/HeroBand';
 import ListingsUnavailable from '../components/common/ListingsUnavailable';
+import LightUpStreet from '../components/common/LightUpStreet';
 import SITE_ASSETS from '../lib/siteAssets';
 
 const BAND_IMAGE = SITE_ASSETS['scene8-requests-man'];
@@ -355,6 +356,27 @@ const RequestsBoard = () => {
           </div>
         )}
       </section>
+
+      {/* Closing band, aimed at the owners and tradespeople reading the
+          board rather than at the seekers posting to it. The picture is
+          the argument: a dark street where the windows come on under your
+          pointer, because "somewhere out there people are looking" is
+          exactly what this page sells and a photograph says it faster
+          than a paragraph. */}
+      <LightUpStreet testId="requests-lightup">
+        <h2
+          className="text-2xl sm:text-3xl lg:text-4xl font-bold max-w-[20ch] mx-auto"
+          style={{ fontFamily: 'var(--font-head)', color: '#fff', textShadow: '0 2px 24px rgba(4,12,17,.75)' }}
+        >
+          {t('requests.lightUpTitle', 'Behind one of these windows, someone is looking for a place like yours.')}
+        </h2>
+        <p
+          className="text-sm sm:text-base mt-4 max-w-[46ch] mx-auto"
+          style={{ color: 'rgba(255,255,255,.86)', textShadow: '0 1px 16px rgba(4,12,17,.8)' }}
+        >
+          {t('requests.lightUpBody', 'Requests are posted by people who have already decided to move. Answering one takes a message.')}
+        </p>
+      </LightUpStreet>
     </div>
   );
 };
