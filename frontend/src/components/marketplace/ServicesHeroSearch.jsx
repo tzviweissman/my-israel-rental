@@ -77,13 +77,13 @@ function SegmentSelect({ icon: Icon, label, value, onChange, options, testId }) 
     >
       <Icon size={16} className="text-[var(--brand-primary)] shrink-0" strokeWidth={2.25} />
       <div className="flex-1 min-w-0">
-        <div className="text-[11px] font-semibold uppercase tracking-wider text-gray-500">
+        <div className="text-[11px] font-semibold uppercase tracking-wider text-[var(--brand-muted)]">
           {label}
         </div>
         <select
           value={value}
           onChange={(e) => onChange(e.target.value)}
-          className="w-full appearance-none bg-transparent text-sm font-medium text-gray-900 focus:outline-none cursor-pointer pr-4 truncate"
+          className="w-full appearance-none bg-transparent text-sm font-medium text-[var(--ink)] focus:outline-none cursor-pointer pr-4 truncate"
           data-testid={`${testId}-select`}
         >
           {options.map((o) => (
@@ -145,10 +145,10 @@ function WhenSegment({ value, onChange, locale }) {
         >
           <CalendarIcon size={16} className="text-[var(--brand-primary)] shrink-0" strokeWidth={2.25} />
           <div className="flex-1 min-w-0">
-            <div className="text-[11px] font-semibold uppercase tracking-wider text-gray-500">
+            <div className="text-[11px] font-semibold uppercase tracking-wider text-[var(--brand-muted)]">
               {t('services.hero.day.label', 'When')}
             </div>
-            <div className="text-sm font-medium text-gray-900 truncate" data-testid="services-hero-day-value">
+            <div className="text-sm font-medium text-[var(--ink)] truncate" data-testid="services-hero-day-value">
               {displayLabel}
             </div>
           </div>
@@ -156,7 +156,13 @@ function WhenSegment({ value, onChange, locale }) {
       </PopoverTrigger>
       <PopoverContent
         align="start"
-        className="w-auto p-3 bg-white shadow-xl border-gray-200"
+        className="w-auto p-4 rounded-2xl bg-white border-[var(--brand-border)]"
+        /* Two-layer shadow as an inline style, not an arbitrary class: a
+           multi-layer `shadow-[a,b]` silently fails to compile and the
+           panel ships with no shadow at all, which is the same failure
+           mode as a space inside an arbitrary value. Tinted to the brand
+           blue rather than neutral black, per the design system. */
+        style={{ boxShadow: '0 2px 6px -2px rgba(18,59,87,.12), 0 24px 60px -20px rgba(18,59,87,.35)' }}
         data-testid="services-hero-day-popover"
       >
         {/* Preset chips row — three fastest bookings sit here so the
@@ -167,8 +173,8 @@ function WhenSegment({ value, onChange, locale }) {
             onClick={() => handlePreset('')}
             className={`px-3 py-1.5 rounded-full text-xs font-medium border transition-colors ${
               !selectedDate
-                ? 'bg-[var(--brand-primary)] text-white border-[var(--brand-primary)]'
-                : 'bg-white text-gray-700 border-gray-300 hover:border-[var(--brand-primary)]'
+                ? 'bg-[var(--brand-primary)] text-white border-[var(--brand-primary)] shadow-[0_2px_8px_-2px_rgba(30,95,140,0.5)]'
+                : 'bg-[rgb(var(--brand-primary-rgb)/0.05)] text-[var(--ink)] border-transparent hover:border-[var(--brand-primary)] hover:bg-[rgb(var(--brand-primary-rgb)/0.09)]'
             }`}
             data-testid="services-hero-day-preset-any"
           >
@@ -179,8 +185,8 @@ function WhenSegment({ value, onChange, locale }) {
             onClick={() => handlePreset(toIsoDate(today))}
             className={`px-3 py-1.5 rounded-full text-xs font-medium border transition-colors ${
               selectedDate?.getTime() === today.getTime()
-                ? 'bg-[var(--brand-primary)] text-white border-[var(--brand-primary)]'
-                : 'bg-white text-gray-700 border-gray-300 hover:border-[var(--brand-primary)]'
+                ? 'bg-[var(--brand-primary)] text-white border-[var(--brand-primary)] shadow-[0_2px_8px_-2px_rgba(30,95,140,0.5)]'
+                : 'bg-[rgb(var(--brand-primary-rgb)/0.05)] text-[var(--ink)] border-transparent hover:border-[var(--brand-primary)] hover:bg-[rgb(var(--brand-primary-rgb)/0.09)]'
             }`}
             data-testid="services-hero-day-preset-today"
           >
@@ -191,8 +197,8 @@ function WhenSegment({ value, onChange, locale }) {
             onClick={() => handlePreset(toIsoDate(tomorrow))}
             className={`px-3 py-1.5 rounded-full text-xs font-medium border transition-colors ${
               selectedDate?.getTime() === tomorrow.getTime()
-                ? 'bg-[var(--brand-primary)] text-white border-[var(--brand-primary)]'
-                : 'bg-white text-gray-700 border-gray-300 hover:border-[var(--brand-primary)]'
+                ? 'bg-[var(--brand-primary)] text-white border-[var(--brand-primary)] shadow-[0_2px_8px_-2px_rgba(30,95,140,0.5)]'
+                : 'bg-[rgb(var(--brand-primary-rgb)/0.05)] text-[var(--ink)] border-transparent hover:border-[var(--brand-primary)] hover:bg-[rgb(var(--brand-primary-rgb)/0.09)]'
             }`}
             data-testid="services-hero-day-preset-tomorrow"
           >
@@ -261,7 +267,7 @@ export default function ServicesHeroSearch({
       {/* Main segmented pill. On mobile the three segments stack; on md+
           they sit side-by-side with subtle dividers between them. */}
       <div
-        className="flex flex-col md:flex-row bg-white rounded-3xl md:rounded-full shadow-2xl divide-y md:divide-y-0 md:divide-x divide-gray-200 overflow-hidden"
+        className="flex flex-col md:flex-row bg-white rounded-3xl md:rounded-full shadow-2xl divide-y md:divide-y-0 md:divide-x divide-[var(--brand-border)] overflow-hidden"
         data-testid="services-hero-search"
       >
         <SegmentSelect
@@ -291,7 +297,7 @@ export default function ServicesHeroSearch({
         <button
           type="button"
           onClick={onOpenFilters}
-          className="hidden md:flex items-center justify-center px-5 bg-[var(--brand-primary)] hover:bg-[#175656] text-white transition-colors"
+          className="hidden md:flex items-center justify-center px-5 bg-[var(--brand-primary)] hover:bg-[var(--brand-primary-dark)] text-white transition-colors"
           aria-label={t('services.hero.moreFilters', 'More filters')}
           data-testid="services-hero-more-filters"
         >
@@ -302,7 +308,7 @@ export default function ServicesHeroSearch({
       {/* Mobile-only "More filters" row + a plain-language link back to
           the provider path. Below the pill so the primary controls stay
           uncluttered on small screens. */}
-      <div className="mt-4 flex items-center justify-center gap-3 md:gap-4 text-sm text-gray-600">
+      <div className="mt-4 flex items-center justify-center gap-3 md:gap-4 text-sm text-[var(--brand-muted)]">
         <button
           type="button"
           onClick={onOpenFilters}
@@ -314,7 +320,7 @@ export default function ServicesHeroSearch({
         </button>
         <a
           href="/dashboard?tab=my-gigs"
-          className="inline-flex items-center gap-1.5 text-[var(--brand-primary)] hover:text-[#0F3A3A] font-semibold transition-colors"
+          className="inline-flex items-center gap-1.5 text-[var(--brand-primary)] hover:text-[var(--brand-primary-dark)] font-semibold transition-colors"
           data-testid="services-hero-become-provider"
         >
           {t('services.becomeProvider', 'Become a provider')}
