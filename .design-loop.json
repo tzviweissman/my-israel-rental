@@ -18,6 +18,8 @@
 
   "extraDestructive": ["unlist", "withdraw", "terminate"],
 
+  "imageBudgetKb": 300,
+
   "viewports": [["desktop", 1280], ["tablet", 768], ["mobile", 375]],
 
   "ignoreRules": []
