@@ -89,6 +89,11 @@
      margin rather than by a hair: limestone 4.87, badge #F6EFD9 5.13,
      white 5.89. */
   --gold-text-on-light: #805F12;
+
+  /* Gold for large text sitting on a PHOTO or video, where the surface
+     is neither the light page nor a solid dark panel. See the note on
+     .hero-band-head h1 .accent for why --gold cannot be used there. */
+  --gold-on-photo: #EFD89B;
   --gold-text-on-dark: #F0DA8C;  /* ~4.5:1 on var(--brand-primary) */
 }
 
@@ -491,7 +496,14 @@ input[type="date"]:valid:before {
 .hero-band .hero-band-shade {
   position: absolute;
   inset: 0;
-  background: linear-gradient(180deg, rgba(4,12,17,.5), rgba(4,12,17,.35) 55%, rgba(4,12,17,.62));
+  /* The middle stop used to be .35, and that is exactly the band the
+     headline sits in. Over the brightest part of a hero photo, white
+     headline text measured 2.56:1 there against the 4.5 it needs. Raised
+     so the text band is the STRONGEST part of the scrim rather than the
+     weakest: at .55 the same white text measures 4.77:1.
+     Measured against rgb(248,242,230), about the brightest pixel any of
+     these three photos puts behind the headline. */
+  background: linear-gradient(180deg, rgba(4,12,17,.6), rgba(4,12,17,.55) 55%, rgba(4,12,17,.68));
 }
 .hero-band-head {
   position: relative;
@@ -507,7 +519,16 @@ input[type="date"]:valid:before {
   letter-spacing: -1px;
   text-shadow: 0 2px 24px rgba(0,0,0,.5);
 }
-.hero-band-head h1 .accent { color: var(--gold); }
+/* Gold on a PHOTO is a third surface, and the palette only had two.
+   --gold (#C9A227) is specified for dark surfaces, and a photograph is
+   not reliably dark: over the bright part of these heroes it measured
+   1.97:1 against the 3:1 large text needs. Darkening the scrim cannot
+   rescue it either, because gold and a lit photo sit at similar
+   luminance, so the background has to pass THROUGH gold on its way down.
+   It would take a .7 scrim to clear 3:1, which turns the photo to mud.
+   A lighter gold clears it at the scrim above: 3.40:1, and it still
+   reads as the brand's gold rather than as cream. */
+.hero-band-head h1 .accent { color: var(--gold-on-photo); }
 .hero-band-head p {
   margin-top: 10px;
   color: rgba(255,255,255,.9);
