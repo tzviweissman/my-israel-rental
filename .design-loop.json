@@ -1,0 +1,24 @@
+{
+  "_comment": "Project settings for the shared design-loop skill (~/.claude/skills/design-loop). Everything here is optional; delete a key to fall back to the default.",
+
+  "baseUrl": "http://localhost:3210",
+  "routesFile": "frontend/src/App.js",
+
+  "i18nNamespaces": [
+    "whyHost", "whyList", "stays", "services", "requests",
+    "nav", "auth", "common", "home", "dashboard", "property", "chat"
+  ],
+
+  "rtl": {
+    "toggleText": "עברית",
+    "forbiddenHeadingFonts": ["Playfair Display", "Manrope"]
+  },
+
+  "inlineFontLiterals": ["Playfair Display"],
+
+  "extraDestructive": ["unlist", "withdraw", "terminate"],
+
+  "viewports": [["desktop", 1280], ["tablet", 768], ["mobile", 375]],
+
+  "ignoreRules": []
+}
