@@ -48,6 +48,7 @@ import { useNavigate } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
 import PageMeta from '../components/PageMeta';
 import SITE_ASSETS from '../lib/siteAssets';
+import SkylineRule from '../components/common/SkylineRule';
 
 // Shipped features only. Each key resolves to whyHost.<key>Title/<key>Body.
 const FEATURES = ['free', 'direct', 'bilingual', 'contract', 'ical', 'requests'];
@@ -191,8 +192,16 @@ const WhyHost = () => {
         </div>
       </section>
 
+      {/* Visual rhyme, and the only one on the page. The logo's skyline
+          becomes the edge where the white section meets the limestone.
+          Tried first as an 8px hairline in two places: at that size the
+          buildings are imperceptible, so it read as a slightly wobbly
+          line and bought nothing. A rhyme has to be recognisable to be a
+          rhyme, so it appears once, large. */}
+      <SkylineRule color="var(--surface)" height={30} style={{ marginTop: -1 }} />
+
       {/* How it works - the verb is the label */}
-      <section className="px-6 py-16 bg-white">
+      <section className="px-6 pb-16 pt-6 bg-white">
         <div className="max-w-5xl mx-auto">
           <div className="flex flex-wrap items-end justify-between gap-5 mb-10">
             <h2
