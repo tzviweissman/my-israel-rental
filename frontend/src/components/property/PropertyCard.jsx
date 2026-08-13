@@ -140,7 +140,7 @@ const PropertyCard = ({
             entirely when the listing has no usable created_at. */}
         {listedAgo && (
           <p
-            className={`text-[11px] md:text-xs -mt-1 mb-2 ${fresh ? 'text-[var(--brand-primary)] font-semibold' : 'text-gray-400'}`}
+            className={`text-[11px] md:text-xs -mt-1 mb-2 ${fresh ? 'text-[var(--brand-primary)] font-semibold' : 'text-[var(--brand-muted)]'}`}
             data-testid={`property-card-listed-${property.id}`}
           >
             {listedAgo}
@@ -201,7 +201,7 @@ const PropertyCard = ({
             </span>
             {hasAnyPrice && converted && (
               <div
-                className="text-xs text-gray-400 mt-0.5"
+                className="text-xs text-[var(--brand-muted)] mt-0.5"
                 data-testid={`property-converted-price-${property.id}`}
               >
                 ≈ {converted.symbol}{converted.amount.toLocaleString()}{perLabel}

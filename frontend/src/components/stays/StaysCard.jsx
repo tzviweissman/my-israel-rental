@@ -227,7 +227,7 @@ const StaysCard = ({
               </span>
             </div>
             {convertedHint && (
-              <p className="text-[11px] text-gray-400 mt-0.5" data-testid={`stays-card-fx-${property.id}`}>
+              <p className="text-[11px] text-[var(--brand-muted)] mt-0.5" data-testid={`stays-card-fx-${property.id}`}>
                 {convertedHint} / {unit}
               </p>
             )}
@@ -236,7 +236,7 @@ const StaysCard = ({
           /* Same row slot as a real price, so a card without one lines up
              with its neighbours in the grid instead of sitting 11px high. */
           <div className="stays-card-price">
-            <span className="text-[13px] font-semibold text-gray-400">
+            <span className="text-[13px] font-semibold text-[var(--brand-muted)]">
               {t('stays.priceOnRequest', 'Price on request')}
             </span>
           </div>
@@ -248,7 +248,7 @@ const StaysCard = ({
             than saying nothing. */}
         {listedAgo && (
           <p
-            className={`text-[11px] mt-0.5 ${fresh ? 'text-[var(--brand-primary)] font-semibold' : 'text-gray-400'}`}
+            className={`text-[11px] mt-0.5 ${fresh ? 'text-[var(--brand-primary)] font-semibold' : 'text-[var(--brand-muted)]'}`}
             data-testid={`stays-card-listed-${property.id}`}
           >
             {listedAgo}

@@ -89,6 +89,7 @@
      margin rather than by a hair: limestone 4.87, badge #F6EFD9 5.13,
      white 5.89. */
   --gold-text-on-light: #805F12;
+  --focus-ring: rgb(30 95 140 / .55); /* --brand-primary at 55% */
 
   /* Gold for large text sitting on a PHOTO or video, where the surface
      is neither the light page nor a solid dark panel. See the note on
@@ -493,6 +494,23 @@ input[type="date"]:valid:before {
 /* Verbatim from `.band .shade`. Three stops, not two: the middle stop
    keeps the centre of the photo readable while both edges stay dark
    enough for white text and for the nav's own scrim to blend into. */
+/* Anything that removes its own outline has to put something back.
+   Several inputs across the app carry Tailwind's `outline-none` with no
+   replacement, so tabbing into them moved focus somewhere invisible. A
+   utility class is specificity 0,1,0 and this selector is 0,1,1, so this
+   wins without any of those call sites needing to change.
+
+   Deliberately :focus-visible, not :focus, so a mouse click does not draw
+   a ring the user did not ask for, only keyboard navigation does. */
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible,
+[contenteditable]:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
 .hero-band .hero-band-shade {
   position: absolute;
   inset: 0;

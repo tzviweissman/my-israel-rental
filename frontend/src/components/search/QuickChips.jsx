@@ -211,13 +211,18 @@ const QuickChips = ({
       {/* Desktop-only scroll arrows — hidden on mobile (touch users can
           swipe). Fade in on parent hover, and only when the corresponding
           edge is actually scrollable. Positioned as absolute overlays
-          with a soft gradient fade so they don't clip a chip label. */}
+          with a soft gradient fade so they don't clip a chip label.
+
+          They also fade in on FOCUS. Revealing a control on hover alone
+          means a keyboard user can tab to it and see nothing happen,
+          which is how "Scroll chips right" came to be reported as
+          unreachable: it was reachable, and invisible. */}
       {edges.left && (
         <button
           type="button"
           onClick={() => scrollBy(-1)}
           aria-label={t('stays.scrollChipsLeft', 'Scroll chips left')}
-          className="hidden md:flex absolute start-0 top-1/2 -translate-y-1/2 z-10 h-8 w-8 items-center justify-center rounded-full bg-white shadow-md border border-gray-200 text-gray-700 opacity-0 group-hover:opacity-100 transition-opacity hover:border-[var(--gold)]"
+          className="hidden md:flex absolute start-0 top-1/2 -translate-y-1/2 z-10 h-8 w-8 items-center justify-center rounded-full bg-white shadow-md border border-gray-200 text-gray-700 opacity-0 group-hover:opacity-100 focus-visible:opacity-100 focus:opacity-100 transition-opacity hover:border-[var(--gold)]"
           data-testid={`${testidPrefix}-arrow-left`}
         >
           <ChevronLeft size={16} />
@@ -228,7 +233,7 @@ const QuickChips = ({
           type="button"
           onClick={() => scrollBy(1)}
           aria-label={t('stays.scrollChipsRight', 'Scroll chips right')}
-          className="hidden md:flex absolute end-0 top-1/2 -translate-y-1/2 z-10 h-8 w-8 items-center justify-center rounded-full bg-white shadow-md border border-gray-200 text-gray-700 opacity-0 group-hover:opacity-100 transition-opacity hover:border-[var(--gold)]"
+          className="hidden md:flex absolute end-0 top-1/2 -translate-y-1/2 z-10 h-8 w-8 items-center justify-center rounded-full bg-white shadow-md border border-gray-200 text-gray-700 opacity-0 group-hover:opacity-100 focus-visible:opacity-100 focus:opacity-100 transition-opacity hover:border-[var(--gold)]"
           data-testid={`${testidPrefix}-arrow-right`}
         >
           <ChevronRight size={16} />
