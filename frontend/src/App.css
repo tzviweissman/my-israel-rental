@@ -735,7 +735,13 @@ select:focus-visible,
 /* Gold that carries white text at AA — the brand gold does not, and this
    button sits on a cream panel where a lighter fill would vanish. */
 .btn-gold-solid {
-  background: rgba(172, 134, 28, .85);
+  /* Was rgba(172,134,28,.85), which composites to about #AC861C and gives
+     white text only 3.40:1 against the 4.5 AA needs. The design system
+     specifies WHITE text on the accent button, so the background is what
+     has to move: this composites near #8A6A14 and takes white to 5.06:1,
+     with margin rather than by a hair. Still recognisably the brand gold,
+     and the brighter --gold stays on the border to keep the edge lit. */
+  background: rgba(138, 106, 20, .95);
   color: #fff;
   border: 1.5px solid rgba(201, 162, 39, .9);
   border-radius: 999px;

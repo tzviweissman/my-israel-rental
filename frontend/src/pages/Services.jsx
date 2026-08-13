@@ -68,11 +68,19 @@ const GigCard = ({ gig, onClick, i18n, t }) => {
       data-testid={`services-gig-${gig.id}`}
     >
       <div
-        className="relative aspect-square w-full bg-gray-100 rounded-xl overflow-hidden mb-2"
-        style={cover ? { backgroundImage: `url(${cover})`, backgroundSize: 'cover', backgroundPosition: 'center' } : {}}
+        className="relative aspect-square w-full rounded-xl overflow-hidden mb-2"
+        // Limestone-tinted rather than bg-gray-100. The "No image" label
+        // used to be gray-300 on gray-100, which measures 1.34:1 and is
+        // effectively invisible. Matches .svc-row-ph elsewhere.
+        style={{
+          background: '#EDE7DA',
+          ...(cover
+            ? { backgroundImage: `url(${cover})`, backgroundSize: 'cover', backgroundPosition: 'center' }
+            : {}),
+        }}
       >
         {!cover && (
-          <div className="w-full h-full flex items-center justify-center text-gray-300 text-xs">
+          <div className="w-full h-full flex items-center justify-center text-xs" style={{ color: 'var(--brand-muted)' }}>
             {t('services.noImage', 'No image')}
           </div>
         )}
@@ -116,7 +124,7 @@ const GigCard = ({ gig, onClick, i18n, t }) => {
       <p className="font-semibold text-sm text-gray-900 truncate">
         {localizedTitle(gig, i18n)}
       </p>
-      <p className="text-xs text-gray-500 truncate">
+      <p className="text-xs text-[var(--brand-muted)] truncate">
         {gig.provider?.name}{gig.area ? ` · ${gig.area}` : ''}
         {typeof gig.distance_km === 'number' && (
           <span className="ms-1 inline-flex items-center gap-0.5 text-[10px] text-[var(--brand-primary)] font-semibold">
@@ -133,7 +141,7 @@ const GigCard = ({ gig, onClick, i18n, t }) => {
       )}
       {cheapest != null && (
         <p className="text-xs mt-0.5 text-gray-900">
-          <span className="text-gray-500">{t('services.from', 'from')} </span>
+          <span className="text-[var(--brand-muted)]">{t('services.from', 'from')} </span>
           <span className="font-semibold">{sym}{cheapest.toLocaleString()}</span>
         </p>
       )}
@@ -602,7 +610,7 @@ const Services = () => {
             {selectedCat
               ? categories.find((c) => c.slug === selectedCat)?.label
               : t('services.allServices', 'All services')}
-            <span className="text-sm text-gray-500 font-normal ms-2" data-testid="services-count">
+            <span className="text-sm text-[var(--brand-muted)] font-normal ms-2" data-testid="services-count">
               ({displayGigs.length})
             </span>
           </h2>
@@ -649,7 +657,7 @@ const Services = () => {
               type="button"
               onClick={toggleNearby}
               disabled={geoBusy}
-              className={`inline-flex items-center gap-1.5 px-3 py-2 rounded-full text-xs sm:text-sm border font-semibold transition-colors ${
+              className={`inline-flex items-center gap-1.5 px-3 py-2 rounded-full text-xs sm:text-sm border font-semibold whitespace-nowrap shrink-0 transition-colors ${
                 nearby && coords
                   ? 'bg-[var(--brand-primary)] text-white border-[var(--brand-primary)]'
                   : 'bg-white text-gray-800 border-gray-200 hover:border-gray-400'
@@ -669,7 +677,7 @@ const Services = () => {
             <button
               type="button"
               onClick={toggleAvailableNow}
-              className={`inline-flex items-center gap-1.5 px-3 py-2 rounded-full text-xs sm:text-sm border font-semibold transition-colors ${
+              className={`inline-flex items-center gap-1.5 px-3 py-2 rounded-full text-xs sm:text-sm border font-semibold whitespace-nowrap shrink-0 transition-colors ${
                 availableNowOnly
                   ? 'bg-emerald-500 text-white border-emerald-500'
                   : 'bg-white text-gray-800 border-gray-200 hover:border-gray-400'
@@ -682,7 +690,7 @@ const Services = () => {
               {t('services.availableNow', 'Available now')}
             </button>
             {/* Sort dropdown */}
-            <label className="text-xs text-gray-500 me-1 hidden sm:inline">
+            <label className="text-xs text-[var(--brand-muted)] me-1 hidden sm:inline">
               {t('services.sortBy', 'Sort by')}
             </label>
             <select
@@ -804,7 +812,7 @@ const Services = () => {
                 ? t('services.noServicesOpenTitle', 'No services open right now')
                 : t('services.emptyTitle', 'No services match your filters')}
             </p>
-            <p className="text-gray-500 text-sm mb-5">
+            <p className="text-[var(--brand-muted)] text-sm mb-5">
               {availableNowOnly
                 ? t('services.noServicesOpenBody', 'Nobody with appointment hours listed is inside their open window right now. Try turning the filter off to see everyone.')
                 : (advCount > 0
@@ -925,7 +933,7 @@ const Services = () => {
                         />
                         <div className="px-2 py-1.5">
                           <div className="text-[11px] font-semibold text-gray-900 truncate">{title}</div>
-                          <div className="text-[10px] text-gray-500 truncate">{price}</div>
+                          <div className="text-[10px] text-[var(--brand-muted)] truncate">{price}</div>
                         </div>
                       </button>
                     );
