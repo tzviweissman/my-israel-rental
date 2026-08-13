@@ -62,15 +62,27 @@ export const RequestCard = ({ request: r, onOpen, t }) => {
   const budget = money(r.budget_amount, r.budget_currency);
 
   return (
+    /* A ROW, NOT A CARD.
+       Three equal cards side by side is the most generic shape a list of
+       anything can take, and it fought this content in particular: the
+       requests are different lengths, so the middle card stood taller
+       than its neighbours and the row stopped lining up at all.
+       Demand also reads differently from merchandise. People scan a list
+       of what others are asking for; they do not browse it. A row puts
+       the type, the ask and who is asking on one line, so ten of them can
+       be taken in at a glance instead of three. */
     <article
-      className="rcard"
+      className="grid gap-x-5 gap-y-2 py-5 items-start cursor-pointer
+                 sm:grid-cols-[auto_minmax(0,1fr)_auto]
+                 hover:bg-[rgb(var(--brand-primary-rgb)/0.03)] transition-colors"
+      style={{ borderBottom: '1px solid var(--brand-border)' }}
       role="button"
       tabIndex={0}
       onClick={() => onOpen(r.id)}
       onKeyDown={(e) => { if (e.key === 'Enter') onOpen(r.id); }}
       data-testid={`request-card-${r.id}`}
     >
-      <div className="flex items-center justify-between gap-2">
+      <div className="flex sm:flex-col items-center sm:items-start gap-2 sm:pt-0.5">
         <span className={`rc-badge ${isRental ? 'rc-badge-rental' : 'rc-badge-service'}`}>
           {isRental ? <Home size={11} aria-hidden="true" /> : <Wrench size={11} aria-hidden="true" />}
           {isRental ? t('requests.rental', 'Rental') : t('requests.service', 'Service')}
@@ -80,7 +92,8 @@ export const RequestCard = ({ request: r, onOpen, t }) => {
         </span>
       </div>
 
-      <h3 className="truncate">{r.title}</h3>
+      <div className="min-w-0">
+      <h3 className="text-[17px] font-semibold mb-1.5" style={{ color: 'var(--ink)' }}>{r.title}</h3>
 
       <div className="rc-chips">
         {r.area && (
@@ -108,7 +121,8 @@ export const RequestCard = ({ request: r, onOpen, t }) => {
         )}
       </div>
 
-      {r.description && <p className="rc-note">{r.description}</p>}
+        {r.description && <p className="rc-note line-clamp-2">{r.description}</p>}
+      </div>
 
       {/* Who is asking. Identity, not contact — a shortened name, a
           verified badge and a joined year, all derived server-side. It is
@@ -116,8 +130,11 @@ export const RequestCard = ({ request: r, onOpen, t }) => {
           answer a named, verified human than an anonymous card. There is
           no avatar and no way to reach them from here; chat is the only
           channel. */}
+      {/* Right-hand column: who is asking, how long is left, and the one
+          action. Grouped so the eye can run down a single edge. */}
+      <div className="sm:text-right sm:min-w-[190px] flex flex-col sm:items-end gap-2">
       {r.poster_display_name && (
-        <div className="rc-poster" data-testid={`request-poster-${r.id}`}>
+        <div className="rc-poster !mt-0 !pt-0 !border-0" data-testid={`request-poster-${r.id}`}>
           <span className="rc-poster-name">{r.poster_display_name}</span>
           {r.poster_verified && (
             <span className="rc-verified" title={t('requests.verifiedHint', 'Email verified')}>
@@ -133,7 +150,7 @@ export const RequestCard = ({ request: r, onOpen, t }) => {
         </div>
       )}
 
-      <div className="rc-foot">
+      <div className="rc-foot !mt-0 !pt-0 !border-0 flex-col sm:items-end gap-2">
         <span className="rc-status">
           <span className="dot" aria-hidden="true" />
           {t('requests.open', 'Open')}
@@ -149,6 +166,7 @@ export const RequestCard = ({ request: r, onOpen, t }) => {
           <MessageCircle size={13} aria-hidden="true" />
           {t('requests.messageSeeker', 'Message seeker')}
         </span>
+      </div>
       </div>
     </article>
   );
@@ -330,7 +348,7 @@ const RequestsBoard = () => {
             </button>
           </div>
         ) : (
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3" data-testid="requests-grid">
+          <div style={{ borderTop: '1px solid var(--brand-border)' }} data-testid="requests-grid">
             {requests.map((r) => (
               <RequestCard key={r.id} request={r} onOpen={openRequest} t={t} />
             ))}
