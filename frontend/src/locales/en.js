@@ -1657,6 +1657,19 @@ const en = {
       // entries are rendered in their own labelled section â do not promote
       // one into the benefits list until it actually exists.
       whyHost: {
+        heroImageAlt: 'A property owner at home in Jerusalem, reading a message from a renter',
+        proofFreeTitle: 'Free to list',
+        proofFreeBody: 'No listing fee, no card, ever.',
+        proofCommissionTitle: 'No commission',
+        proofCommissionBody: 'What you agree is what you get.',
+        proofLangTitle: 'Two languages',
+        proofLangBody: 'Messages translate both ways.',
+        longTerm_s1_verb: 'List',
+        longTerm_s2_verb: 'Reply',
+        longTerm_s3_verb: 'Sign',
+        vacation_s1_verb: 'List',
+        vacation_s2_verb: 'Choose',
+        vacation_s3_verb: 'Sync',
         // Property-owner pitch (/why-host). Every line below maps to
         // shipped code â see the docstring in pages/WhyHost.jsx. The
         // Requests board is the one exception and lives under `requests*`,

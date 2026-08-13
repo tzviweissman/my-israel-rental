@@ -78,6 +78,9 @@ const Auth = lazy(() => import('./pages/Auth'));
 const AuthDeeplink = lazy(() => import('./pages/AuthDeeplink'));
 const NotificationSnooze = lazy(() => import('./pages/NotificationSnooze'));
 const RequestsEmailsOff = lazy(() => import('./pages/RequestsEmailsOff'));
+// EXPERIMENT: the same skill with nothing pinned - it picks palette, type
+// and shape itself. Deliberately off-brand, look-only.
+const WhyHostV3 = lazy(() => import('./pages/WhyHostV3'));
 const SignupJoin = lazy(() => import('./pages/SignupJoin'));
 const VerifyPending = lazy(() => import('./pages/VerifyPending'));
 const VerifyEmail = lazy(() => import('./pages/VerifyEmail'));
@@ -279,6 +282,7 @@ function App() {
             {/* Public on purpose — the unsubscribe link in the requests
                 matching email must work without logging in. */}
             <Route path="/requests-emails-off" element={<RequestsEmailsOff />} />
+            <Route path="/why-host-v3" element={<WhyHostV3 />} />
             <Route path="/admin" element={user?.role === 'admin' ? <AdminDashboard /> : <Navigate to="/" />} />
             <Route path="/manager/:managerId" element={<ManagerPage />} />
             <Route path="/chat/:propertyId" element={user ? <Chat /> : <Navigate to="/auth/login" />} />

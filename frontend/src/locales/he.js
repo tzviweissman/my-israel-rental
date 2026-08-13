@@ -1621,6 +1621,19 @@ const he = {
       // Provider value page (/why-list, /for-providers). See en.js for the
       // rule about shipped-vs-roadmap features.
       whyHost: {
+        heroImageAlt: 'בעל נכס בביתו בירושלים קורא הודעה משוכר',
+        proofFreeTitle: 'פרסום חינם',
+        proofFreeBody: 'ללא דמי פרסום, ללא כרטיס אשראי, אף פעם.',
+        proofCommissionTitle: 'ללא עמלה',
+        proofCommissionBody: 'מה שסיכמתם הוא מה שתקבלו.',
+        proofLangTitle: 'שתי שפות',
+        proofLangBody: 'ההודעות מתורגמות לשני הכיוונים.',
+        longTerm_s1_verb: 'פרסמו',
+        longTerm_s2_verb: 'השיבו',
+        longTerm_s3_verb: 'חתמו',
+        vacation_s1_verb: 'פרסמו',
+        vacation_s2_verb: 'בחרו',
+        vacation_s3_verb: 'סנכרנו',
         eyebrow: 'לבעלי נכסים',
         heroTitle: 'פרסמו את הנכס. תשמרו על כל שקל.',
         heroBody: 'שוכרים שמחפשים בית באנגלית מוצאים אתכם כאן ופונים אליכם ישירות. ללא דמי פרסום, ללא דמי הזמנה וללא עמלה.',
