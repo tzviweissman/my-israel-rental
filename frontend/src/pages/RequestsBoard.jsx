@@ -245,7 +245,13 @@ const RequestsBoard = () => {
           </div>
 
           <div className="flex flex-wrap items-center gap-2">
-            <div className="flex-1 min-w-[220px] flex items-center gap-2 bg-white border rounded-full px-4 py-2.5"
+            {/* The input sets `outline-none` and nothing replaced it, so
+                tabbing to the search box moved focus somewhere invisible.
+                The ring goes on the wrapper via focus-within, because the
+                input is transparent and it is the pill that reads as the
+                control. Keyboard users can now see where they are. */}
+            <div className="flex-1 min-w-[220px] flex items-center gap-2 bg-white border rounded-full px-4 py-2.5
+                            focus-within:ring-2 focus-within:ring-offset-1 focus-within:ring-[rgb(var(--brand-primary-rgb)/0.55)]"
                  style={{ borderColor: 'var(--brand-border)' }}>
               <Search size={15} style={{ color: 'var(--brand-muted)' }} aria-hidden="true" />
               <input
