@@ -42,7 +42,7 @@
  * direction automatically. Headings read `var(--font-head)`, never a
  * literal face, so the Hebrew swap in design-tokens.css applies.
  */
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
@@ -71,10 +71,80 @@ const TABS = ['longTerm', 'vacation'];
  */
 const Testimonials = () => null;
 
+/**
+ * Ties the hero clip's playhead to scroll position, so the apartment comes
+ * apart as the reader moves down the page instead of looping on its own.
+ *
+ * The idea is borrowed: when a page has one big three-dimensional element,
+ * carry it into the next section rather than leaving it stranded in the
+ * hero. Here the apartment finishes opening at roughly the moment "What
+ * you get" arrives, so the picture and the list are one movement.
+ *
+ * FAIL-SAFE BY CONSTRUCTION, which is the house rule for anything driven
+ * by JavaScript here. The markup already autoplays and loops, so if this
+ * effect never runs - JS disabled, an error earlier in the tree, an old
+ * browser - the visitor still gets a playing video. Scrubbing is an
+ * upgrade applied on top, never a prerequisite.
+ *
+ * Skipped entirely for `prefers-reduced-motion`, where the markup shows a
+ * still instead, and on narrow screens, where scroll-scrubbing a video is
+ * unreliable and the loop reads better anyway.
+ */
+function useScrollScrub(videoRef) {
+  useEffect(() => {
+    const v = videoRef.current;
+    if (!v) return undefined;
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return undefined;
+    if (window.innerWidth < 768) return undefined;
+
+    let frame = 0;
+    let duration = 0;
+
+    const takeOver = () => {
+      duration = v.duration;
+      if (!duration || !Number.isFinite(duration)) return;
+      v.pause();
+      v.loop = false;
+    };
+
+    const update = () => {
+      frame = 0;
+      if (!duration) return;
+      const rect = v.getBoundingClientRect();
+      // 0 when the clip sits where it loads, 1 once it has travelled its
+      // own height plus half a viewport upward, which lands the end of
+      // the animation on the section below.
+      const travelled = -rect.top;
+      const span = rect.height + window.innerHeight * 0.5;
+      const progress = Math.min(1, Math.max(0, travelled / span));
+      const target = progress * (duration - 0.05);
+      // Seeking to a value we are already at makes some browsers stutter.
+      if (Math.abs(v.currentTime - target) > 0.02) v.currentTime = target;
+    };
+
+    const onScroll = () => {
+      if (!frame) frame = window.requestAnimationFrame(update);
+    };
+
+    if (v.readyState >= 1) takeOver();
+    else v.addEventListener('loadedmetadata', takeOver, { once: true });
+
+    window.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('resize', onScroll, { passive: true });
+    return () => {
+      window.removeEventListener('scroll', onScroll);
+      window.removeEventListener('resize', onScroll);
+      if (frame) window.cancelAnimationFrame(frame);
+    };
+  }, [videoRef]);
+}
+
 const WhyHost = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const [tab, setTab] = useState('longTerm');
+  const heroVideo = useRef(null);
+  useScrollScrub(heroVideo);
 
   const startHosting = () => navigate('/join');
 
@@ -131,6 +201,7 @@ const WhyHost = () => {
             style={{ boxShadow: '0 24px 60px -30px rgba(18,59,87,0.45)', background: 'var(--surface)' }}
           >
             <video
+              ref={heroVideo}
               src={SITE_ASSETS['scene11-apartment-exploded']}
               poster={POSTER}
               autoPlay
