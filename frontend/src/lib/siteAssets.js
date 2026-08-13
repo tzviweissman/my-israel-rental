@@ -1,5 +1,5 @@
 /**
- * Site media — the generated hero stills and clips, on our own Cloudinary.
+ * Site media - the generated hero stills and clips, on our own Cloudinary.
  *
  * GENERATED FILE. Produced by
  * backend/scripts/migrate_site_assets_to_cloudinary.py from
@@ -7,7 +7,7 @@
  * an asset rather than hand-editing a URL here.
  *
  * These used to be five separate `CDN` constants pointing at Higgsfield's
- * CloudFront distribution — someone else's CDN, whose URLs can expire or
+ * CloudFront distribution - someone else's CDN, whose URLs can expire or
  * rotate without notice. The failure mode was every hero on the site going
  * blank at once with nothing in our logs to explain it. They are now our
  * own copies, delivered with f_auto/q_auto so browsers get WebP/AVIF where
@@ -38,6 +38,7 @@ const SITE_ASSETS = {
   'scene10-kotel-interior-v2': 'https://res.cloudinary.com/dirvyboe9/image/upload/f_auto,q_auto/v1786504670/myisraelrental/site/scene10-kotel-interior-v2.png',
   'clip8-kotel-approach-v2': 'https://res.cloudinary.com/dirvyboe9/video/upload/q_auto/v1786504673/myisraelrental/site/clip8-kotel-approach-v2.mp4',
   'clip9-kotel-interior-v2': 'https://res.cloudinary.com/dirvyboe9/video/upload/q_auto/v1786504676/myisraelrental/site/clip9-kotel-interior-v2.mp4',
+  'scene11-apartment-exploded': 'https://res.cloudinary.com/dirvyboe9/video/upload/q_auto/v1786580951/myisraelrental/site/scene11-apartment-exploded.mp4',
 };
 
 export default SITE_ASSETS;

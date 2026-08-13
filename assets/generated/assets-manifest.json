@@ -192,6 +192,16 @@
       "model": "kling3_0_turbo image-to-video, 5s, 16:9",
       "cloudinary_url": "https://res.cloudinary.com/dirvyboe9/video/upload/q_auto/v1786504676/myisraelrental/site/clip9-kotel-interior-v2.mp4",
       "cloudinary_public_id": "myisraelrental/site/clip9-kotel-interior-v2"
+    },
+    {
+      "key": "scene11-apartment-exploded",
+      "file": "clip-apartment-exploded.mp4",
+      "job_id": "0c30f763-9872-4391-828b-421a4e7d9f51",
+      "url": "https://d8j0ntlcm91z4.cloudfront.net/user_3HWGlZDXVCAOoMKfZq628Ml9cM5/hf_20260813_002739_0c30f763-9872-4391-828b-421a4e7d9f51.mp4",
+      "model": "kling3_0",
+      "prompt": "High quality 3D exploded view animation of a modern apartment. The apartment separates smoothly into its layers: roof, floors, walls, and furniture, each element floating apart and hovering in place, revealing the rooms inside. Clean white studio background. It should expand outward in all directions, both vertically and horizontally, and every element must stay fully inside the frame at all times. No text, no labels. Premium architectural visualization, soft even studio lighting, warm neutral materials, slow controlled cinematic motion.",
+      "cloudinary_url": "https://res.cloudinary.com/dirvyboe9/video/upload/q_auto/v1786580951/myisraelrental/site/scene11-apartment-exploded.mp4",
+      "cloudinary_public_id": "myisraelrental/site/scene11-apartment-exploded"
     }
   ],
   "download_locally": "PowerShell, from repo root:  foreach ($a in (Get-Content assets/generated/assets-manifest.json | ConvertFrom-Json).assets) { Invoke-WebRequest $a.url -OutFile (\"assets/generated/\" + $a.file) }",
