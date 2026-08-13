@@ -1621,7 +1621,7 @@ const he = {
       // Provider value page (/why-list, /for-providers). See en.js for the
       // rule about shipped-vs-roadmap features.
       whyHost: {
-        heroImageAlt: 'בעל נכס בביתו בירושלים קורא הודעה משוכר',
+        heroImageAlt: 'דירה שנפרסת לחדרים, קומות וריהוט',
         proofFreeTitle: 'פרסום חינם',
         proofFreeBody: 'ללא דמי פרסום, ללא כרטיס אשראי, אף פעם.',
         proofCommissionTitle: 'ללא עמלה',

@@ -1657,7 +1657,7 @@ const en = {
       // entries are rendered in their own labelled section â do not promote
       // one into the benefits list until it actually exists.
       whyHost: {
-        heroImageAlt: 'A property owner at home in Jerusalem, reading a message from a renter',
+        heroImageAlt: 'An apartment separating into its rooms, floors and furnishings',
         proofFreeTitle: 'Free to list',
         proofFreeBody: 'No listing fee, no card, ever.',
         proofCommissionTitle: 'No commission',

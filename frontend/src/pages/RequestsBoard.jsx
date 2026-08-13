@@ -258,10 +258,16 @@ const RequestsBoard = () => {
                 data-testid="requests-search-input"
               />
             </div>
+            {/* Two actions in one row used to be blue and gold, so colour
+                said nothing about which one mattered. One action colour
+                now: blue is the CTA everywhere on the site, so posting
+                takes it and searching steps back to a quiet outline. Gold
+                stays what it is elsewhere, an emphasis colour, not a
+                second competing "click me". */}
             <button
               type="button"
               onClick={() => patchUrl({ q: qDraft.trim() })}
-              className="btn-blue-solid !py-2.5 !px-5 !text-sm"
+              className="btn-ghost !py-2.5 !px-5 !text-sm"
               data-testid="requests-search-btn"
             >
               {t('requests.search', 'Search')}
@@ -269,7 +275,7 @@ const RequestsBoard = () => {
             <button
               type="button"
               onClick={() => navigate(postHref)}
-              className="btn-gold-solid !py-2.5 !px-5 !text-sm inline-flex items-center gap-1.5"
+              className="btn-blue-solid !py-2.5 !px-5 !text-sm inline-flex items-center gap-1.5"
               data-testid="requests-post-cta"
             >
               <Plus size={14} aria-hidden="true" />

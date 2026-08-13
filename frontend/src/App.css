@@ -79,7 +79,16 @@
      backgrounds it's paired with elsewhere (white cards ~2.1:1, the
      scrolled-nav teal ~3:1) — decorative use (borders, icons, fills)
      is unaffected and keeps the original brand color. */
-  --gold-text-on-light: #8B6914; /* ~5.1:1 on white */
+  /* Small gold text on light surfaces.
+     Was #8B6914, chosen against WHITE where it measures 5.09:1 and passes
+     comfortably. But it is mostly used on the LIMESTONE page background,
+     where it is 4.20:1 and fails AA for small text. The colour was
+     calibrated against a background it is rarely used on, which nobody
+     noticed until a contrast checker measured the rendered page.
+     #805F12 clears AA on all three surfaces it actually appears on, with
+     margin rather than by a hair: limestone 4.87, badge #F6EFD9 5.13,
+     white 5.89. */
+  --gold-text-on-light: #805F12;
   --gold-text-on-dark: #F0DA8C;  /* ~4.5:1 on var(--brand-primary) */
 }
 

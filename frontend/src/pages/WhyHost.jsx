@@ -53,6 +53,11 @@ import SkylineRule from '../components/common/SkylineRule';
 // Shipped features only. Each key resolves to whyHost.<key>Title/<key>Body.
 const FEATURES = ['free', 'direct', 'bilingual', 'contract', 'ical', 'requests'];
 
+// The poster is only ever shown at ~535px wide, so ask Cloudinary for a
+// width rather than shipping the 2048px original. The full-size file is
+// 320KB, over the project's 300KB image budget, for pixels nobody sees.
+const POSTER = SITE_ASSETS['scene3-interior-reveal'].replace('/f_auto,q_auto/', '/f_auto,q_auto,w_1100/');
+
 const TABS = ['longTerm', 'vacation'];
 
 /**
@@ -110,16 +115,38 @@ const WhyHost = () => {
             </button>
           </div>
 
+          {/* The star of the page, and it has to earn that by referring to
+              what this product does, not merely by being a nice picture.
+              It was a photograph of an owner on a sofa: warm, but it said
+              nothing about keeping every shekel or about the paperwork
+              disappearing. An apartment coming apart into its layers says
+              "your property, and everything in it" in one shot, which is
+              the actual offer.
+
+              Muted and loop-played, so it never asks for a decision, and
+              the still is the poster so nothing is blank while it loads.
+              Anyone who has asked for reduced motion gets the still only. */}
           <div
             className="rounded-2xl overflow-hidden"
-            style={{ boxShadow: '0 24px 60px -30px rgba(18,59,87,0.45)' }}
+            style={{ boxShadow: '0 24px 60px -30px rgba(18,59,87,0.45)', background: 'var(--surface)' }}
           >
-            <img
-              src={SITE_ASSETS['scene5-lister-jerusalem']}
-              alt={t('whyHost.heroImageAlt', 'A property owner at home in Jerusalem, reading a message from a renter')}
-              className="w-full h-full object-cover"
+            <video
+              src={SITE_ASSETS['scene11-apartment-exploded']}
+              poster={POSTER}
+              autoPlay
+              muted
+              loop
+              playsInline
+              preload="metadata"
+              aria-label={t('whyHost.heroImageAlt', 'An apartment separating into its rooms, floors and furnishings')}
+              className="w-full h-full object-cover motion-reduce:hidden"
               style={{ aspectRatio: '4 / 3' }}
-              loading="eager"
+            />
+            <img
+              src={POSTER}
+              alt={t('whyHost.heroImageAlt', 'An apartment separating into its rooms, floors and furnishings')}
+              className="w-full h-full object-cover hidden motion-reduce:block"
+              style={{ aspectRatio: '4 / 3' }}
             />
           </div>
         </div>
