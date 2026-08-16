@@ -1166,3 +1166,46 @@ select:focus-visible,
      push the row wider than its column rather than wrapping. */
   overflow-wrap: anywhere;
 }
+
+/* The request row's right-hand column, kept in step across rows.
+
+   Each row is its OWN grid, so an `auto` column is sized by that row's
+   content alone and nothing lines up between rows — the fixed width in the
+   grid template is what makes a column of buttons a column. 260px is
+   measured, not guessed: it is what the longest status line ("Open · 4
+   responses · expires in 25 days") needs without wrapping.
+
+   align-items has to be restated here. `.rc-foot` sets `center` and beats
+   the `sm:items-end` utility on the element, so the buttons were centred in
+   their column while the markup said end — the fourth time in this file
+   that a rule has looked right in the JSX and lost in the cascade.
+
+   In a column flex, justify-content is the VERTICAL axis. Setting it to
+   flex-end here pushed the stack to the bottom of the row rather than
+   right — which is what my first attempt at this did. */
+/* A fixed height, not a minimum. Empty it measured 18px and filled 19px,
+   which put the status row and button of every identified poster 1-3px
+   below their neighbours — invisible on any one row and exactly the sort
+   of thing that reads as "untidy" down a column of thirteen. */
+.rc-poster-slot { height: 19px; overflow: hidden; }
+@media (min-width: 640px) {
+  .rc-poster-slot,
+  .rc-foot {
+    width: 100%;
+    align-items: flex-end;
+    justify-content: flex-start;
+    text-align: end;
+  }
+  /* Never wrap — a wrapped status line pushed the button down a whole line
+     on exactly the rows with most to say. But nowrap alone made the
+     opposite mess: the longest lines then overflowed the fixed column and
+     dragged their buttons 28px past the row's right edge. So it is capped
+     as well, and truncates rather than growing. Nothing is lost — the same
+     facts are on the row and on the post itself. */
+  .rc-status {
+    white-space: nowrap;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+}

@@ -90,7 +90,7 @@ export const RequestCard = ({ request: r, onOpen, t }) => {
        be taken in at a glance instead of three. */
     <article
       className="grid gap-x-5 gap-y-2 py-5 items-start cursor-pointer
-                 sm:grid-cols-[auto_minmax(0,1fr)_auto]
+                 sm:grid-cols-[auto_minmax(0,1fr)_260px]
                  hover:bg-[rgb(var(--brand-primary-rgb)/0.03)] transition-colors"
       style={{ borderBottom: '1px solid var(--brand-border)' }}
       role="button"
@@ -193,8 +193,15 @@ export const RequestCard = ({ request: r, onOpen, t }) => {
       {/* Right-hand column: who is asking, how long is left, and the one
           action. Grouped so the eye can run down a single edge. */}
       <div className="sm:text-right sm:min-w-[190px] flex flex-col sm:items-end gap-2">
-      {r.poster_display_name && (
-        <div className="rc-poster !mt-0 !pt-0 !border-0" data-testid={`request-poster-${r.id}`}>
+      {/* Always rendered, even with nothing in it. Not every poster
+          resolves to a display name, and when this line appeared on some
+          rows and not others it shoved their status row and button 27px
+          down the row — a column of buttons at ragged heights. An empty
+          slot of a fixed height costs one line of space and buys a
+          straight edge. */}
+      <div className="rc-poster rc-poster-slot !mt-0 !pt-0 !border-0" data-testid={`request-poster-${r.id}`}>
+        {r.poster_display_name && (
+          <>
           <span className="rc-poster-name">{r.poster_display_name}</span>
           {r.poster_verified && (
             <span className="rc-verified" title={t('requests.verifiedHint', 'Email verified')}>
@@ -202,13 +209,14 @@ export const RequestCard = ({ request: r, onOpen, t }) => {
               {t('requests.verified', 'Verified')}
             </span>
           )}
-          {r.poster_member_since && (
-            <span className="rc-poster-since">
-              {t('requests.memberSince', 'Member since {{year}}', { year: r.poster_member_since })}
-            </span>
-          )}
-        </div>
-      )}
+            {r.poster_member_since && (
+              <span className="rc-poster-since">
+                {t('requests.memberSince', 'Member since {{year}}', { year: r.poster_member_since })}
+              </span>
+            )}
+          </>
+        )}
+      </div>
 
       <div className="rc-foot !mt-0 !pt-0 !border-0 flex-col sm:items-end gap-2">
         <span className="rc-status">
