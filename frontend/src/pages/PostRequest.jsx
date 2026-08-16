@@ -45,6 +45,7 @@ import {
 import { API, AuthContext } from '../App';
 import PageMeta from '../components/PageMeta';
 import DateModePills from '../components/requests/DateModePills';
+import AreaCombobox from '../components/requests/AreaCombobox';
 
 const RENTAL_KINDS = ['long-term', 'short-term', 'vacation'];
 
@@ -474,11 +475,19 @@ const PostRequest = () => {
                   label={t('requests.fieldArea', 'Area')}
                   hint={t('requests.areaHint', 'A neighbourhood is more useful than a city — it is how people search here.')}
                 >
-                  <input
-                    className={inputCls} style={{ borderColor: 'var(--brand-border)' }}
-                    value={form.area} onChange={(e) => set({ area: e.target.value })}
-                    placeholder={t('requests.areaPh', 'e.g. Jerusalem, Ramat Eshkol')}
-                    maxLength={120} data-testid="post-request-area"
+                  {/* Type-ahead over the canonical area list. Free text is
+                      still accepted, but a pick from the list spells the
+                      area the same way the listings do — which is what the
+                      matching email and the board filter actually match on.
+                      A typo here is a request nobody is told about. */}
+                  <AreaCombobox
+                    value={form.area}
+                    onChange={(v) => set({ area: v })}
+                    className={inputCls}
+                    style={{ borderColor: 'var(--brand-border)' }}
+                    placeholder={t('requests.areaPh', 'Start typing — e.g. Ramat Eshkol')}
+                    emptyHint={t('requests.areaFreeText', 'Not on our list? Type it anyway — it still posts.')}
+                    testid="post-request-area"
                   />
                 </Field>
               )}
