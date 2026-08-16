@@ -11,15 +11,22 @@
  */
 import React, { useContext, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import axios from 'axios';
 import { toast } from 'sonner';
 import { Loader2, ArrowLeft, ArrowRight } from 'lucide-react';
 import { API, AuthContext } from '../App';
+import { useReturnDestination, backLabelFor } from '../hooks/useBackNavigation';
 import PageMeta from '../components/PageMeta';
 import DateField from '../components/common/DateField';
 import { SUBCATEGORIES } from '../lib/categories';
 
 const PostJob = () => {
+  const { t } = useTranslation();
+  // Back to wherever they came from — the dashboard, the jobs board, or a
+  // filtered view of it — rather than always the board. Someone who starts
+  // from their dashboard should end up back at their dashboard.
+  const backTo = useReturnDestination(['/dashboard', '/services/jobs', '/services'], '/services/jobs');
   const { token } = useContext(AuthContext);
   const navigate = useNavigate();
   const [categories, setCategories] = useState([]);
@@ -82,8 +89,9 @@ const PostJob = () => {
     <div className="min-h-screen bg-[#FAFAF7]" style={{ paddingTop: 'var(--nav-h, 68px)' }} data-testid="post-job-page">
       <PageMeta title="Post a job | MyIsraelRental" description="Post a job on MyIsraelRental — service providers reach out to you." path="/services/post-job" />
       <div className="max-w-2xl mx-auto px-4 py-8">
-        <button onClick={() => navigate('/services/jobs')} className="text-sm text-gray-500 flex items-center gap-1 mb-4" data-testid="post-job-back">
-          <ArrowLeft size={14} /> Back to Jobs
+        <button onClick={() => navigate(backTo)} className="text-sm text-gray-500 flex items-center gap-1 mb-4" data-testid="post-job-back">
+          <ArrowLeft size={14} className="rtl:rotate-180" />
+          {backLabelFor(backTo, t, 'jobs.backToJobs', 'Back to jobs')}
         </button>
         <h1 className="text-2xl sm:text-3xl font-bold mb-1" style={{ fontFamily: 'Playfair Display' }}>
           Post a job

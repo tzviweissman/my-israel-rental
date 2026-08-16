@@ -1029,6 +1029,7 @@ const he = {
         orQuickSignup: 'או הירשמו בלחיצה אחת'
       },
       common: {
+        backToDashboard: 'חזרה ללוח שלי',
         cancel: 'ביטול',
         confirm: 'אישור',
         save: 'שמור',

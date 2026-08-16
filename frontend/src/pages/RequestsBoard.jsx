@@ -23,6 +23,7 @@
 import React, { useCallback, useContext, useEffect, useState } from 'react';
 import axios from 'axios';
 import { useNavigate, useSearchParams } from 'react-router-dom';
+import { saveReturnPath } from '../hooks/useBackNavigation';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import {
@@ -449,7 +450,7 @@ const RequestsBoard = () => {
             </button>
             <button
               type="button"
-              onClick={() => navigate(postHref)}
+              onClick={() => { saveReturnPath(); navigate(postHref); }}
               className="btn-blue-solid !py-2.5 !px-5 !text-sm inline-flex items-center gap-1.5"
               data-testid="requests-post-cta"
             >
@@ -494,7 +495,7 @@ const RequestsBoard = () => {
             <p className="text-sm mt-2 mb-6" style={{ color: 'var(--brand-muted)' }}>
               {t('requests.emptyBody', 'Be the first — post what you are looking for, or what you have available.')}
             </p>
-            <button type="button" onClick={() => navigate(postHref)} className="btn-blue-solid" data-testid="requests-empty-cta">
+            <button type="button" onClick={() => { saveReturnPath(); navigate(postHref); }} className="btn-blue-solid" data-testid="requests-empty-cta">
               {t('requests.postCta', 'Post to the marketplace')}
             </button>
           </div>

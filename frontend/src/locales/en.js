@@ -1039,6 +1039,7 @@ const en = {
         orQuickSignup: 'or sign up in one tap'
       },
       common: {
+        backToDashboard: 'Back to my dashboard',
         cancel: 'Cancel',
         confirm: 'Confirm',
         save: 'Save',

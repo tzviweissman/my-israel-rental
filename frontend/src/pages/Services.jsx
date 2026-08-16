@@ -853,7 +853,7 @@ const Services = () => {
               {t('services.cantFindIt', "Can't find the right pro?")}{' '}
               <button
                 type="button"
-                onClick={() => navigate('/requests/post')}
+                onClick={() => { saveReturnPath(); navigate('/requests/post'); }}
                 className="font-semibold hover:underline"
                 style={{ color: 'var(--brand-primary)' }}
                 data-testid="services-post-request-link"

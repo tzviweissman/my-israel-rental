@@ -12,6 +12,7 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import { saveReturnPath } from '../../hooks/useBackNavigation';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import {
@@ -99,7 +100,7 @@ const MyRequestsTab = ({ API, token }) => {
           </p>
         </div>
         <button
-          onClick={() => navigate('/requests/post')}
+          onClick={() => { saveReturnPath(); navigate('/requests/post'); }}
           className="btn-blue-solid inline-flex items-center gap-1.5 !py-2.5 !px-4 !text-sm"
           data-testid="my-requests-new"
         >
@@ -115,7 +116,7 @@ const MyRequestsTab = ({ API, token }) => {
           <p className="text-gray-500 text-sm mb-5">
             {t('requests.myEmptyBody', 'Tell owners and pros what you are looking for, and let them come to you.')}
           </p>
-          <button onClick={() => navigate('/requests/post')} className="btn-blue-solid" data-testid="my-requests-empty-cta">
+          <button onClick={() => { saveReturnPath(); navigate('/requests/post'); }} className="btn-blue-solid" data-testid="my-requests-empty-cta">
             {t('requests.postCta', 'Post a request')}
           </button>
         </div>

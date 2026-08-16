@@ -48,6 +48,7 @@ import DateModePills from '../components/requests/DateModePills';
 import AreaCombobox from '../components/requests/AreaCombobox';
 import Combobox from '../components/common/Combobox';
 import DateField from '../components/common/DateField';
+import { useReturnDestination, backLabelFor } from '../hooks/useBackNavigation';
 
 const RENTAL_KINDS = ['long-term', 'short-term', 'vacation'];
 
@@ -114,6 +115,9 @@ const ChoiceCard = ({ active, Icon, label, sub, onClick, testid }) => (
 );
 
 const PostRequest = () => {
+  // Where the back button goes: the dashboard if that is where they came
+  // from, otherwise the board. Same rule on every posting page.
+  const backTo = useReturnDestination(['/dashboard', '/requests'], '/requests');
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { token, user } = useContext(AuthContext);
@@ -353,13 +357,13 @@ const PostRequest = () => {
       <div className="max-w-4xl mx-auto px-4 py-10">
         <button
           type="button"
-          onClick={() => navigate('/requests')}
+          onClick={() => navigate(backTo)}
           className="inline-flex items-center gap-2 text-sm font-semibold mb-6"
           style={{ color: 'var(--brand-muted)' }}
           data-testid="post-request-back"
         >
           <ArrowLeft size={16} className="rtl:rotate-180" />
-          {t('requests.backToBoard', 'Back to the board')}
+          {backLabelFor(backTo, t, 'requests.backToBoard', 'Back to the board')}
         </button>
 
         <div className="grid gap-8 md:grid-cols-[210px_1fr]">

@@ -62,3 +62,16 @@ export const useReturnDestination = (prefixWhitelist, fallback) => {
 export const matchesReturnPrefix = (prefixes) => {
   return matchesPrefix(readReturnPath(), prefixes);
 };
+
+// The label for a back button, derived from where it actually goes.
+//
+// This exists because "Back to Jobs" was hardcoded on the post-a-job page,
+// so someone who arrived from their dashboard was told they were going
+// back to a board they had never been on — and then was. The label and the
+// destination must come from the same fact or they drift apart again.
+export const backLabelFor = (destination, t, fallbackKey, fallbackText) => {
+  if (String(destination || '').startsWith('/dashboard')) {
+    return t('common.backToDashboard', 'Back to my dashboard');
+  }
+  return t(fallbackKey, fallbackText);
+};

@@ -6,6 +6,7 @@
  */
 import React, { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { saveReturnPath } from '../../hooks/useBackNavigation';
 import axios from 'axios';
 import { toast } from 'sonner';
 import PhoneInput from '../common/PhoneInput';
@@ -368,7 +369,7 @@ const MyGigsTab = ({ API, token }) => {
           {/* "Upgrade to Pro" and "Cancel Pro" lived here. Listing is free,
               so there is nothing to upgrade to and nothing to cancel. */}
           <button
-            onClick={() => navigate('/services/create-gig')}
+            onClick={() => { saveReturnPath(); navigate('/services/create-gig'); }}
             className="px-4 py-2.5 rounded-lg text-sm font-semibold text-white bg-[var(--brand-primary)] hover:bg-[#0F3A3A] flex items-center gap-1.5"
             data-testid="my-gigs-create-btn"
           >
@@ -387,7 +388,7 @@ const MyGigsTab = ({ API, token }) => {
             Publish your first gig — a free 30-day trial starts on your first listing.
           </p>
           <button
-            onClick={() => navigate('/services/create-gig')}
+            onClick={() => { saveReturnPath(); navigate('/services/create-gig'); }}
             className="px-5 py-2.5 rounded-lg text-sm font-semibold text-white bg-[var(--brand-primary)] hover:bg-[#0F3A3A] inline-flex items-center gap-1.5"
             data-testid="my-gigs-empty-cta"
           >

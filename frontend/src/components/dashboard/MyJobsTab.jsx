@@ -21,6 +21,7 @@
  */
 import React, { useCallback, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { saveReturnPath } from '../../hooks/useBackNavigation';
 import axios from 'axios';
 import { toast } from 'sonner';
 import {
@@ -327,7 +328,7 @@ const MyJobsTab = ({ API, token }) => {
           </p>
         </div>
         <button
-          onClick={() => navigate('/services/post-job')}
+          onClick={() => { saveReturnPath(); navigate('/services/post-job'); }}
           className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-[var(--brand-primary)] text-white text-sm font-semibold hover:bg-[#0F3A3A]"
           data-testid="my-jobs-post-cta"
         >
@@ -346,7 +347,7 @@ const MyJobsTab = ({ API, token }) => {
             Tell us what you need — matching providers will apply directly.
           </p>
           <button
-            onClick={() => navigate('/services/post-job')}
+            onClick={() => { saveReturnPath(); navigate('/services/post-job'); }}
             className="inline-flex items-center gap-1 px-5 py-2 rounded-lg text-sm font-semibold text-white bg-[var(--brand-primary)] hover:bg-[#0F3A3A]"
             data-testid="my-jobs-empty-cta"
           >
