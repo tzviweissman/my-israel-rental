@@ -352,6 +352,7 @@ const en = {
         // so this tab rendered the English default even in Hebrew. Now a
         // real key, in the same namespace as every sibling tab.
         myRequests: 'My Requests',
+        more: 'More',
         // D6 — the share link, named rather than shown as a raw uuid.
         sharePanelTitle: 'Your public listings page',
         sharePanelBody: 'One link showing everything you have listed — send it to anyone.',
