@@ -405,6 +405,22 @@ const en = {
         message: 'Message'
       },
       home: {
+        // The cinematic finale. These keys did not exist at all until now:
+        // every string in that section was reaching the English default and
+        // the whole ending rendered in English under Hebrew. Adding them is
+        // a fix, not a feature.
+        finale: {
+          h2: 'Rent a home. Hire the pros.',
+          accent: 'One place for both.',
+          price: 'Free to list. Free to book. No commission.',
+          p: 'Fully bilingual (English + Hebrew), verified listings and reviews, and on-platform chat.',
+          ctaStays: 'Search rentals',
+          ctaRequest: 'Post a request',
+          statRentals: 'active rentals',
+          statAreas: 'Jerusalem neighbourhoods',
+          statFees: 'service fees',
+        },
+
         also: {
           kick: "And that's not all",
           title: "Also on MyIsraelRental",
@@ -987,8 +1003,8 @@ const en = {
         travelerDesc: 'I want to book stays and hire local services for my trip',
         travelerBadge: 'Most popular',
         travelerValue: 'free to browse · no booking fees',
-        hostValue: 'free to list · no booking fees',
-        providerValue: 'free to list · no booking fees',
+        hostValue: 'Free to list · no booking fees · no commission',
+        providerValue: 'Free to list · no booking fees · no commission',
         providerLearnMore: 'See what providers get',
         hostLearnMore: 'See how hosting works',
         travelerCta: 'Continue as a traveler',
@@ -1684,7 +1700,9 @@ const en = {
         // rendered only inside the "coming soon" block.
         eyebrow: 'For property owners',
         heroTitle: 'List your property. Keep every shekel.',
-        heroBody: 'Renters looking for a home in English find you here and message you directly. No listing fee, no booking fees, and no commission on what you agree.',
+        // B2 — the fee position, out of the paragraph and into its own line.
+        heroPrice: 'No listing fee. No booking fees. No commission.',
+        heroBody: 'Renters looking for a home in English find you here and message you directly — you keep whatever you agree with them.',
         cta: 'List your property free',
         ctaNote: 'Free to list — no card needed, ever.',
         bandEyebrow: 'For owners',

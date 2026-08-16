@@ -399,6 +399,20 @@ const he = {
         message: 'הודעה'
       },
       home: {
+        // See the note on the English side — these were missing entirely,
+        // so the finale rendered in English for Hebrew readers.
+        finale: {
+          h2: 'לשכור בית. להזמין בעלי מקצוע.',
+          accent: 'הכול במקום אחד.',
+          price: 'פרסום חינם. הזמנה חינם. ללא עמלה.',
+          p: 'דו-לשוני מלא (עברית ואנגלית), נכסים וביקורות מאומתים, והתכתבות בתוך האתר.',
+          ctaStays: 'חיפוש נכסים',
+          ctaRequest: 'פרסום בקשה',
+          statRentals: 'נכסים פעילים',
+          statAreas: 'שכונות בירושלים',
+          statFees: 'דמי שירות',
+        },
+
         also: {
           kick: "וזה עוד לא הכול",
           title: "עוד ב-MyIsraelRental",
@@ -979,8 +993,8 @@ const he = {
         travelerDesc: 'אני רוצה להזמין לינה ושירותים מקומיים לטיול',
         travelerBadge: 'הכי פופולרי',
         travelerValue: 'חיפוש חינם · ללא דמי הזמנה',
-        hostValue: 'פרסום חינם · ללא דמי הזמנה',
-        providerValue: 'פרסום חינם · ללא דמי הזמנה',
+        hostValue: 'פרסום חינם · ללא דמי הזמנה · ללא עמלה',
+        providerValue: 'פרסום חינם · ללא דמי הזמנה · ללא עמלה',
         providerLearnMore: 'מה מקבלים נותני שירות',
         hostLearnMore: 'איך עובד אירוח אצלנו',
         travelerCta: 'המשך כמטייל',
@@ -1642,7 +1656,9 @@ const he = {
         vacation_s3_verb: 'סנכרנו',
         eyebrow: 'לבעלי נכסים',
         heroTitle: 'פרסמו את הנכס. תשמרו על כל שקל.',
-        heroBody: 'שוכרים שמחפשים בית באנגלית מוצאים אתכם כאן ופונים אליכם ישירות. ללא דמי פרסום, ללא דמי הזמנה וללא עמלה.',
+        // B2 — מחיר כטענה ולא כפרט בתוך פסקה.
+        heroPrice: 'ללא דמי פרסום. ללא דמי הזמנה. ללא עמלה.',
+        heroBody: 'שוכרים שמחפשים בית באנגלית מוצאים אתכם כאן ופונים אליכם ישירות — ומה שסיכמתם איתם נשאר אצלכם.',
         cta: 'פרסמו נכס בחינם',
         ctaNote: 'פרסום חינם — ללא צורך בכרטיס אשראי.',
         bandEyebrow: 'לבעלי נכסים',

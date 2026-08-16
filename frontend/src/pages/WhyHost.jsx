@@ -169,10 +169,19 @@ const WhyHost = () => {
             >
               {t('whyHost.heroTitle', 'List your property. Keep every shekel.')}
             </h1>
+            {/* B2 — the price position promoted out of the paragraph it was
+                buried in. Kindred makes "No membership fee" its
+                second-largest text; ours is the stronger offer and was one
+                clause of three in a sentence a visitor may not reach.
+                Sized between the h1 and the body so it reads as a claim
+                rather than as detail. */}
+            <p className="wh-price">
+              {t('whyHost.heroPrice', 'No listing fee. No booking fees. No commission.')}
+            </p>
             <p className="text-base sm:text-lg mb-8 max-w-[48ch]" style={{ color: 'var(--brand-muted)' }}>
               {t(
                 'whyHost.heroBody',
-                'Renters looking for a home in English find you here and message you directly. No listing fee, no booking fees, and no commission on what you agree.',
+                'Renters looking for a home in English find you here and message you directly — you keep whatever you agree with them.',
               )}
             </p>
             <button

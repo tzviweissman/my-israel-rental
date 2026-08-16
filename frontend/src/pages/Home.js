@@ -5,6 +5,7 @@ import PageMeta from '../components/PageMeta';
 import CinematicHero from '../components/home/CinematicHero';
 import CinematicScenes from '../components/home/CinematicScenes';
 import AlsoStrip from '../components/home/AlsoStrip';
+import FinaleStats from '../components/home/FinaleStats';
 
 const Home = () => {
   const { t } = useTranslation();
@@ -94,10 +95,18 @@ const Home = () => {
             <br />
             <span className="a">{t('home.finale.accent', 'One place for both.')}</span>
           </h2>
+          {/* B2 — the price position promoted out of the paragraph. Kindred
+              makes "No membership fee" its second-largest text; ours is a
+              stronger offer than theirs and was a clause in a sentence.
+              This is an element the preview does not have: everything else
+              in the finale is preview-exact. */}
+          <p className="finale-price">
+            {t('home.finale.price', 'Free to list. Free to book. No commission.')}
+          </p>
           <p>
             {t(
               'home.finale.p',
-              'Fully bilingual (English + Hebrew), verified listings and reviews, on-platform chat — free to search for everyone, free to list for owners and pros.',
+              'Fully bilingual (English + Hebrew), verified listings and reviews, and on-platform chat.',
             )}
           </p>
           <div className="ctas">
@@ -108,12 +117,15 @@ const Home = () => {
               {t('home.finale.ctaRequest', 'Post a request')}
             </button>
           </div>
-          <div className="strip">
-            <span><b>1,200+</b> {t('home.finale.statRentals', 'active rentals')}</span>
-            <span><b>19</b> {t('home.finale.statCities', 'cities')}</span>
-            <span><b>450+</b> {t('home.finale.statPros', 'verified pros')}</span>
-            <span><b>&#8362;0</b> {t('home.finale.statFees', 'service fees')}</span>
-          </div>
+          {/* These were the preview's placeholder figures - 1,200+ active
+              rentals, 19 cities, 450+ verified pros - and they were about
+              to ship as claims. The real numbers are 196 listings, all of
+              them in Jerusalem, and three providers. Nothing here is
+              typed in now: it comes from the same counts as the Stays
+              trust line, and a clause with no honest number is absent
+              rather than estimated. ₪0 is not a count - it is a standing
+              fact about the product - so it always shows. */}
+          <FinaleStats t={t} />
         </div>
       </section>
     </div>

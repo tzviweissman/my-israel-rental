@@ -61,7 +61,7 @@ const ROLE_CARDS = [
     tDescKey: 'signupJoin.hostDesc',
     defaultDesc: 'I want to list my vacation rental or property',
     tValueKey: 'signupJoin.hostValue',
-    defaultValue: 'free to list · no booking fees',
+    defaultValue: 'Free to list · no booking fees · no commission',
     // /why-host, NOT /why-list — the latter is the service-provider value
     // page and would mis-describe itself to a property owner.
     learnMoreHref: '/why-host',
@@ -83,7 +83,7 @@ const ROLE_CARDS = [
     tDescKey: 'signupJoin.providerDesc',
     defaultDesc: 'Cleaner, mover, tour guide, or any local service',
     tValueKey: 'signupJoin.providerValue',
-    defaultValue: 'free to list · no booking fees',
+    defaultValue: 'Free to list · no booking fees · no commission',
     // /why-list lives here rather than on the Host card: it is the
     // provider value page. This keeps it reachable now that "List / Offer"
     // has left the nav, which was the point of linking it at all.
@@ -322,7 +322,18 @@ const SignupJoin = () => {
                         so "free" has to appear on the card itself. */}
                     {tValueKey && (
                       <p
-                        className="mt-2.5 text-xs font-bold"
+                        // B2: on the two supply-side cards this is the
+                        // offer, not a footnote, so it steps up from 12px
+                        // fine print to a readable claim. The traveler card
+                        // keeps the small treatment — "free to browse" is
+                        // expected of any listings site and promoting it
+                        // would spend emphasis on the least surprising
+                        // thing on the page.
+                        className={
+                          key === 'traveler'
+                            ? 'mt-2.5 text-xs font-bold'
+                            : 'mt-3 text-[15px] font-bold leading-snug'
+                        }
                         style={{ color: 'var(--gold-text-on-light)' }}
                         data-testid={`signup-role-value-${key}`}
                       >

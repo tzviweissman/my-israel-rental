@@ -1032,3 +1032,38 @@ select:focus-visible,
      paragraph. Slightly tighter, and the line-height keeps it a caption. */
   .trust-line { font-size: 12px; line-height: 1.5; }
 }
+
+/* B2 — the price position, promoted from body copy to a claim.
+   Kindred makes "No membership fee" its second-largest text. These sit
+   between the headline and the body on purpose: large enough to be read
+   before the paragraph, small enough not to compete with the h1.
+
+   --blue-deep rather than gold. Gold at this size on limestone is the
+   --gold-lg case and reads as decoration; the fee position is the
+   argument, so it takes the structural colour. */
+/* `.finale .finale-price`, not `.finale-price`: `.finale p` above sets
+   font-size:17px at specificity (0,1,1) and would beat a bare class, so
+   the line rendered at body size while the CSS said 28px. Fourth time
+   this exact cascade trap has bitten in this file - always confirm on the
+   rendered page, never in the stylesheet. */
+.finale .finale-price {
+  margin-top: 18px;
+  font-family: var(--font-head);
+  font-size: clamp(19px, 2.3vw, 28px);
+  font-weight: 600;
+  line-height: 1.25;
+  color: var(--blue-deep);
+}
+.wh-price {
+  margin: 0 0 14px;
+  font-family: var(--font-head);
+  font-size: clamp(19px, 2.2vw, 27px);
+  font-weight: 600;
+  line-height: 1.25;
+  color: var(--blue-deep);
+  max-width: 22ch;
+}
+/* Hebrew: Frank Ruhl Libre reads lighter than Playfair at the same number,
+   the same reason the display headings carry a per-direction weight. */
+[dir="rtl"] .finale .finale-price,
+[dir="rtl"] .wh-price { font-weight: 700; }
