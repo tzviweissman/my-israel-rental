@@ -27,7 +27,7 @@ import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import {
   Home, Wrench, LayoutGrid, MapPin, Coins, BedDouble, CalendarDays, ShieldCheck,
-  Clock, MessageCircle, Loader2, Search, Plus,
+  Clock, MessageCircle, Loader2, Search, Plus, Users,
 } from 'lucide-react';
 import { API, AuthContext } from '../App';
 import PageMeta from '../components/PageMeta';
@@ -155,11 +155,37 @@ export const RequestCard = ({ request: r, onOpen, t }) => {
         <span className="rc-status">
           <span className="dot" aria-hidden="true" />
           {t('requests.open', 'Open')}
+          {/* C1 — the response count. Airtasker shows it and it is the
+              strongest signal a two-sided board has: a board that looks
+              alive attracts the supply side, who are the ones deciding
+              whether this place is worth checking again.
+
+              Only when it is above zero. "0 responses" is a true fact that
+              argues against the request, and every board starts there — it
+              would be attached to every new post at the exact moment it
+              does the most damage. `> 0` rather than truthiness because 0
+              is a number React renders happily. */}
+          {r.contact_count > 0 && (
+            <>
+              <span aria-hidden="true">·</span>
+              <Users size={12} aria-hidden="true" />
+              <span className="rc-responses">
+                {r.contact_count === 1
+                  ? t('requests.responsesOne', '1 response')
+                  : t('requests.responses', '{{n}} responses', { n: r.contact_count })}
+              </span>
+            </>
+          )}
           {expiresIn != null && (
             <>
               <span aria-hidden="true">·</span>
               <Clock size={12} aria-hidden="true" />
-              {t('requests.expiresIn', 'expires in {{n}} days', { n: expiresIn })}
+              {/* "expires in 1 days" reads as broken, and the Hebrew was
+                  worse - "1 ימים" is not a thing anyone writes. Both
+                  languages have a shorter, better word for it. */}
+              {expiresIn === 1
+                ? t('requests.expiresInOne', 'expires tomorrow')
+                : t('requests.expiresIn', 'expires in {{n}} days', { n: expiresIn })}
             </>
           )}
         </span>

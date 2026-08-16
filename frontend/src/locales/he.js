@@ -1781,7 +1781,11 @@ const he = {
         emptyTitle: 'אין עדיין בקשות פתוחות כאן',
         emptyBody: 'היו הראשונים — פרסמו מה אתם מחפשים ותנו להם להגיע אליכם.',
         open: 'פתוחה',
+        // C1 — מוצג רק כשיש יותר מאפס.
+        responses: '{{n}} פניות',
+        responsesOne: 'פנייה אחת',
         expiresIn: 'פג בעוד {{n}} ימים',
+        expiresInOne: 'פג מחר',
         bedroomsMin: '{{n}}+ חדרים',
         upTo: 'עד {{amount}}',
         messageSeeker: 'שלחו הודעה',

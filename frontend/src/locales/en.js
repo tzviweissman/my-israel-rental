@@ -1830,7 +1830,11 @@ const en = {
         emptyTitle: 'No open requests here yet',
         emptyBody: 'Be the first — post what you are looking for and let owners and pros come to you.',
         open: 'Open',
+        // C1 — shown only when above zero; see the note at the call site.
+        responses: '{{n}} responses',
+        responsesOne: '1 response',
         expiresIn: 'expires in {{n}} days',
+        expiresInOne: 'expires tomorrow',
         bedroomsMin: '{{n}}+ bd',
         upTo: 'up to {{amount}}',
         messageSeeker: 'Message seeker',
