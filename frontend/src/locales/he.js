@@ -1786,6 +1786,12 @@ const he = {
         responsesOne: 'פנייה אחת',
         expiresIn: 'פג בעוד {{n}} ימים',
         expiresInOne: 'פג מחר',
+        // C3 — שאלת התאריך. "גמיש" היא תשובה, לא שדה ריק.
+        dateModeLabel: 'מתי אתם צריכים את זה?',
+        dateOn: 'בתאריך',
+        dateBefore: 'עד תאריך',
+        dateFlexible: 'גמיש/ה בתאריכים',
+        dateByPrefix: 'עד {{date}}',
         bedroomsMin: '{{n}}+ חדרים',
         upTo: 'עד {{amount}}',
         messageSeeker: 'שלחו הודעה',

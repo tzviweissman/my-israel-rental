@@ -17,6 +17,7 @@ import { toast } from 'sonner';
 import { Home, Wrench, Loader2, ArrowLeft } from 'lucide-react';
 import { API, AuthContext } from '../App';
 import PageMeta from '../components/PageMeta';
+import DateModePills from '../components/requests/DateModePills';
 
 const RENTAL_KINDS = ['long-term', 'short-term', 'vacation'];
 
@@ -50,6 +51,7 @@ const PostRequest = () => {
     // rental
     rental_kind: 'long-term',
     bedrooms_min: '',
+    date_mode: 'on',
     move_in_date: '',
     lease_months: '',
     // service
@@ -95,12 +97,12 @@ const PostRequest = () => {
           ? {
               rental_kind: form.rental_kind,
               bedrooms_min: form.bedrooms_min === '' ? null : Number(form.bedrooms_min),
-              move_in_date: form.move_in_date || null,
+              move_in_date: form.date_mode === 'flexible' ? null : (form.move_in_date || null),
               lease_months: form.lease_months === '' ? null : Number(form.lease_months),
             }
           : {
               category: form.category,
-              preferred_date: form.preferred_date || null,
+              preferred_date: form.date_mode === 'flexible' ? null : (form.preferred_date || null),
             }),
       };
       const { data } = await axios.post(`${API}/marketplace/requests`, payload, {
@@ -226,13 +228,24 @@ const PostRequest = () => {
                   data-testid="post-request-bedrooms"
                 />
               </Field>
+              {/* C3 — the date question, with "I'm flexible" as a
+                  first-class answer rather than an empty field. For rentals
+                  it is the common case. */}
               <Field label={t('requests.fieldMoveIn', 'Move-in date')}>
-                <input
-                  type="date"
-                  className={inputCls} style={{ borderColor: 'var(--brand-border)' }}
-                  value={form.move_in_date} onChange={(e) => set({ move_in_date: e.target.value })}
-                  data-testid="post-request-movein"
+                <DateModePills
+                  value={form.date_mode}
+                  onChange={(m) => set({ date_mode: m })}
+                  t={t}
+                  testidPrefix="post-request-date-mode"
                 />
+                {form.date_mode !== 'flexible' && (
+                  <input
+                    type="date"
+                    className={`${inputCls} mt-2`} style={{ borderColor: 'var(--brand-border)' }}
+                    value={form.move_in_date} onChange={(e) => set({ move_in_date: e.target.value })}
+                    data-testid="post-request-movein"
+                  />
+                )}
               </Field>
               <Field label={t('requests.fieldLease', 'Lease length (months)')}>
                 <input
@@ -258,12 +271,20 @@ const PostRequest = () => {
                 </select>
               </Field>
               <Field label={t('requests.fieldPreferredDate', 'Preferred date')}>
-                <input
-                  type="date"
-                  className={inputCls} style={{ borderColor: 'var(--brand-border)' }}
-                  value={form.preferred_date} onChange={(e) => set({ preferred_date: e.target.value })}
-                  data-testid="post-request-preferred-date"
+                <DateModePills
+                  value={form.date_mode}
+                  onChange={(m) => set({ date_mode: m })}
+                  t={t}
+                  testidPrefix="post-request-date-mode"
                 />
+                {form.date_mode !== 'flexible' && (
+                  <input
+                    type="date"
+                    className={`${inputCls} mt-2`} style={{ borderColor: 'var(--brand-border)' }}
+                    value={form.preferred_date} onChange={(e) => set({ preferred_date: e.target.value })}
+                    data-testid="post-request-preferred-date"
+                  />
+                )}
               </Field>
             </div>
           )}

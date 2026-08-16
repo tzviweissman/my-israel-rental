@@ -1835,6 +1835,12 @@ const en = {
         responsesOne: '1 response',
         expiresIn: 'expires in {{n}} days',
         expiresInOne: 'expires tomorrow',
+        // C3 — the date question. "Flexible" is an answer, not a blank.
+        dateModeLabel: 'When do you need it?',
+        dateOn: 'On date',
+        dateBefore: 'Before date',
+        dateFlexible: "I'm flexible",
+        dateByPrefix: 'by {{date}}',
         bedroomsMin: '{{n}}+ bd',
         upTo: 'up to {{amount}}',
         messageSeeker: 'Message seeker',

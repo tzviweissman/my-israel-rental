@@ -144,6 +144,17 @@ const RequestDetail = () => {
     ? `${request.budget_currency === 'USD' ? '$' : '₪'}${Number(request.budget_amount).toLocaleString()}`
     : t('requests.budgetOpenShort', 'Open to offers');
 
+  // C3 — one value for both variants' date row. Flexible is stated rather
+  // than left blank: a blank row makes a flexible seeker indistinguishable
+  // from one who never answered, and an owner reads those very differently.
+  // null falls through to the Row component's own empty handling.
+  const rawDate = isRental ? request.move_in_date : request.preferred_date;
+  const dateValue = request.date_mode === 'flexible'
+    ? t('requests.dateFlexible', "I'm flexible")
+    : rawDate && request.date_mode === 'before'
+      ? t('requests.dateByPrefix', 'by {{date}}', { date: rawDate })
+      : rawDate;
+
   return (
     <div
       className="min-h-screen"
@@ -196,14 +207,14 @@ const RequestDetail = () => {
             {isRental && (
               <>
                 <Row Icon={BedDouble} label={t('requests.fieldBedrooms', 'Bedrooms (minimum)')} value={request.bedrooms_min || null} />
-                <Row Icon={CalendarDays} label={t('requests.fieldMoveIn', 'Move-in date')} value={request.move_in_date} />
+                <Row Icon={CalendarDays} label={t('requests.fieldMoveIn', 'Move-in date')} value={dateValue} />
                 <Row Icon={Clock} label={t('requests.fieldLease', 'Lease length (months)')} value={request.lease_months} />
               </>
             )}
             {!isRental && (
               <>
                 <Row Icon={Wrench} label={t('requests.fieldCategory', 'Category')} value={(request.category || '').replace(/-/g, ' ')} />
-                <Row Icon={CalendarDays} label={t('requests.fieldPreferredDate', 'Preferred date')} value={request.preferred_date} />
+                <Row Icon={CalendarDays} label={t('requests.fieldPreferredDate', 'Preferred date')} value={dateValue} />
               </>
             )}
           </div>

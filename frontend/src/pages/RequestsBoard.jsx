@@ -27,7 +27,7 @@ import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import {
   Home, Wrench, LayoutGrid, MapPin, Coins, BedDouble, CalendarDays, ShieldCheck,
-  Clock, MessageCircle, Loader2, Search, Plus, Users,
+  Clock, MessageCircle, Loader2, Search, Plus, Users, Sparkles,
 } from 'lucide-react';
 import { API, AuthContext } from '../App';
 import PageMeta from '../components/PageMeta';
@@ -114,12 +114,24 @@ export const RequestCard = ({ request: r, onOpen, t }) => {
             {t('requests.upTo', 'up to {{amount}}', { amount: budget })}
           </span>
         )}
-        {(r.move_in_date || r.preferred_date) && (
+        {/* C3 — "Flexible" is information, so it gets a chip of its own.
+            Showing nothing would make a flexible seeker look identical to
+            one who simply never answered, and those are opposite signals
+            to an owner deciding whether to reply. `before` is prefixed so
+            a deadline does not read as a fixed date. */}
+        {r.date_mode === 'flexible' ? (
+          <span className="rc-chip">
+            <Sparkles size={12} aria-hidden="true" />
+            {t('requests.dateFlexible', "I'm flexible")}
+          </span>
+        ) : (r.move_in_date || r.preferred_date) ? (
           <span className="rc-chip">
             <CalendarDays size={12} aria-hidden="true" />
-            {r.move_in_date || r.preferred_date}
+            {r.date_mode === 'before'
+              ? t('requests.dateByPrefix', 'by {{date}}', { date: r.move_in_date || r.preferred_date })
+              : (r.move_in_date || r.preferred_date)}
           </span>
-        )}
+        ) : null}
       </div>
 
         {r.description && <p className="rc-note line-clamp-2">{r.description}</p>}

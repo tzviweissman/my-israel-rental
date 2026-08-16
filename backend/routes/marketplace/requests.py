@@ -102,6 +102,17 @@ class RequestIn(BaseModel):
     budget_amount: Optional[float] = None
     budget_currency: str = Field("ILS", pattern="^(ILS|USD)$")
 
+    # How to read the date on this request (C3). Applies to both variants:
+    # `move_in_date` on rentals, `preferred_date` on services.
+    #   on       — that specific day
+    #   before   — any time up to and including it
+    #   flexible — no date; the seeker will work around whoever replies
+    # Defaults to "on" so every request written before this field existed
+    # keeps meaning exactly what it meant. "flexible" is the common case for
+    # rentals but it must be CHOSEN, never inferred from a blank date - a
+    # blank date is just as likely to mean the form was abandoned.
+    date_mode: str = Field("on", pattern="^(on|before|flexible)$")
+
     # --- service variant ---
     category: Optional[str] = None
     subcategory: Optional[str] = None
@@ -123,6 +134,7 @@ class RequestPatch(BaseModel):
     budget_type: Optional[str] = Field(None, pattern="^(fixed|open)$")
     budget_amount: Optional[float] = None
     budget_currency: Optional[str] = Field(None, pattern="^(ILS|USD)$")
+    date_mode: Optional[str] = Field(None, pattern="^(on|before|flexible)$")
     preferred_date: Optional[str] = None
     bedrooms_min: Optional[int] = Field(None, ge=0, le=20)
     move_in_date: Optional[str] = None
@@ -386,11 +398,15 @@ async def create_request(payload: RequestIn, user=Depends(verify_token)):
         # Service variant — null on rentals so filters can key on presence.
         "category": payload.category if is_service else None,
         "subcategory": ((payload.subcategory or "").strip() or None) if is_service else None,
-        "preferred_date": payload.preferred_date if is_service else None,
+        # A flexible request stores NO date, whatever arrived in the payload.
+        # Otherwise a seeker who fills a date, then switches to flexible,
+        # leaves a date behind that the board would go on displaying.
+        "date_mode": payload.date_mode,
+        "preferred_date": (payload.preferred_date if is_service and payload.date_mode != "flexible" else None),
         # Rental variant — null on services, same reason.
         "rental_kind": payload.rental_kind if not is_service else None,
         "bedrooms_min": payload.bedrooms_min if not is_service else None,
-        "move_in_date": payload.move_in_date if not is_service else None,
+        "move_in_date": (payload.move_in_date if not is_service and payload.date_mode != "flexible" else None),
         "lease_months": payload.lease_months if not is_service else None,
         "furnished": payload.furnished if not is_service else None,
         "amenities": (payload.amenities or []) if not is_service else [],
@@ -429,6 +445,13 @@ async def patch_request(request_id: str, payload: RequestPatch, user=Depends(ver
             raise HTTPException(status_code=400, detail="Fixed budget needs an amount greater than 0")
     if update.get("budget_type") == "open":
         update["budget_amount"] = None
+    # Same rule as create: switching an existing request to flexible clears
+    # whatever date it was carrying, so the board can't keep showing a date
+    # the seeker has just said no longer applies. Both variants' date fields
+    # are cleared because only one of them is ever set.
+    if update.get("date_mode") == "flexible":
+        update["move_in_date"] = None
+        update["preferred_date"] = None
     update["updated_at"] = datetime.now(UTC).isoformat()
     await db.requests.update_one({"_id": request_id}, {"$set": update})
     fresh = await db.requests.find_one({"_id": request_id})
