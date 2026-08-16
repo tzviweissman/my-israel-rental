@@ -6,6 +6,7 @@ Nothing behavioural changed — the router itself now lives in each
 sub-module and gets aggregated by ``__init__.py``.
 """
 import os
+import re
 import uuid
 from datetime import datetime, timedelta, timezone
 from typing import Any, Optional
@@ -649,3 +650,83 @@ async def _batch_rating_aggregate(gig_ids: list[str]) -> dict[str, dict[str, Any
         }
     return result
 
+
+# ---------------- Free-text search ----------------
+
+# Numbers get written both ways, and a search must not care which. Someone
+# posts "Three bedroom apartment"; someone else searches "3 bedroom" and
+# finds nothing. Both directions are covered.
+_NUMBER_WORDS = {
+    "0": "zero", "1": "one", "2": "two", "3": "three", "4": "four", "5": "five",
+    "6": "six", "7": "seven", "8": "eight", "9": "nine", "10": "ten",
+}
+_WORD_NUMBERS = {v: k for k, v in _NUMBER_WORDS.items()}
+
+# Words for the same thing. Kept deliberately short: every entry here is a
+# way for a search to return something surprising, so it earns its place
+# only if people actually type it.
+_SYNONYMS = {
+    "bedroom": ["bedrooms", "bed", "beds", "br", "bdr", "bd"],
+    "bedrooms": ["bedroom", "bed", "beds", "br", "bdr", "bd"],
+    "bed": ["bedroom", "bedrooms", "br", "bd"],
+    "br": ["bedroom", "bedrooms", "bed"],
+    "bd": ["bedroom", "bedrooms", "bed"],
+    "apartment": ["apt", "flat"],
+    "apt": ["apartment", "flat"],
+    "flat": ["apartment", "apt"],
+    "furnished": ["furniture"],
+    "lift": ["elevator"],
+    "elevator": ["lift"],
+}
+
+
+def _token_alternatives(token: str) -> list[str]:
+    """Every spelling of one search word that should count as a match."""
+    alts = {token}
+    if token in _NUMBER_WORDS:
+        alts.add(_NUMBER_WORDS[token])
+    if token in _WORD_NUMBERS:
+        alts.add(_WORD_NUMBERS[token])
+    for extra in _SYNONYMS.get(token, []):
+        alts.add(extra)
+    return sorted(alts)
+
+
+def _search_clauses(q: str) -> list[dict[str, Any]]:
+    """Turn a search box into Mongo clauses.
+
+    Each WORD is matched independently and all of them must appear, in the
+    title or the description. That one decision fixes most of what was
+    broken, because the old code matched the whole query as a single
+    substring:
+
+      * "2 bedroom" found nothing, while "2-bedroom near the Old City" sat
+        on the board — the hyphen alone was enough to miss;
+      * "three bedroom" and "3 bedroom" were different searches;
+      * any word order but the poster's own returned nothing.
+
+    Tokens are matched as substrings rather than whole words on purpose, so
+    "bed" still finds "bedroom". The cost is that "3" also matches "13";
+    requiring every token narrows that back down in practice.
+    """
+    # Split on anything that is not a letter, digit or Hebrew character.
+    # ֐-׿ is the Hebrew block; without it a Hebrew query would be
+    # shredded into single letters by \w on some builds.
+    # Cap the raw query before tokenising. gigs.py capped at 80 before this
+    # helper existed and that cap must not be lost: this runs on an
+    # unauthenticated endpoint, and length is the cheap half of stopping a
+    # pathological query from building a pathological pipeline.
+    tokens = [t for t in re.split(r"[^\w\u0590-\u05FF]+", q.strip()[:80].lower()) if t]
+    # A pathological query should not build a hundred-clause pipeline.
+    tokens = tokens[:8]
+    clauses: list[dict[str, Any]] = []
+    for token in tokens:
+        alts = "|".join(re.escape(a) for a in _token_alternatives(token))
+        rx = {"$regex": f"({alts})", "$options": "i"}
+        clauses.append({"$or": [
+            {"title": rx}, {"description": rx},
+            # Hebrew copy is auto-translated into these, so a Hebrew search
+            # has to reach them or half the board is invisible to it.
+            {"title_he": rx}, {"description_he": rx},
+        ]})
+    return clauses

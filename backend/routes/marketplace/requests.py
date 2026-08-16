@@ -57,7 +57,7 @@ from utils.notification_tokens import (
 )
 from utils.translate import translate_marketing_to_hebrew
 
-from .shared import UTC, FRONTEND_URL, _validate_category, _validate_subcategory
+from .shared import UTC, FRONTEND_URL, _search_clauses, _validate_category, _validate_subcategory
 
 
 router = APIRouter(prefix="/marketplace", tags=["marketplace"])
@@ -382,10 +382,12 @@ async def list_requests(
         # Prefix-ish match so "Tel Aviv" finds "Tel Aviv, Florentin".
         query["area"] = {"$regex": area.strip(), "$options": "i"}
     if q:
-        query["$or"] = [
-            {"title": {"$regex": q.strip(), "$options": "i"}},
-            {"description": {"$regex": q.strip(), "$options": "i"}},
-        ]
+        clauses = _search_clauses(q)
+        if clauses:
+            # $and, not $or: every word must appear. $or on tokens would
+            # make a two-word search WIDER than a one-word search, which is
+            # the opposite of what typing more words means.
+            query["$and"] = query.get("$and", []) + clauses
     docs = await db.requests.find(query).sort("created_at", -1).to_list(limit)
     identities = await _poster_identity([d.get("poster_user_id") for d in docs if d.get("poster_user_id")])
     return [_public(d, identities.get(d.get("poster_user_id"))) for d in docs]

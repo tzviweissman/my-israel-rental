@@ -28,6 +28,7 @@ from .shared import (
     GigIn,
     GigPatch,
     ReviewIn,
+    _search_clauses,
     _LANGUAGE_SET,
     _LOCATION_BY_SLUG,
     _batch_rating_aggregate,
@@ -118,18 +119,18 @@ async def list_gigs(
             raise HTTPException(status_code=400, detail=f"Unknown location '{location}'")
         query["area"] = {"$regex": re.escape(loc["label"]), "$options": "i"}
     if q:
-        # SEC-003: escape the user input so it's treated as a literal
-        # substring, not a regex — prevents catastrophic-backtracking DoS
-        # on this unauthenticated endpoint. Also cap the length to keep
-        # the query size sane. Search across bilingual fields too so
-        # Hebrew queries match `title_he` / `description_he`.
-        needle = re.escape(q[:80])
-        query["$or"] = [
-            {"title":          {"$regex": needle, "$options": "i"}},
-            {"description":    {"$regex": needle, "$options": "i"}},
-            {"title_he":       {"$regex": needle, "$options": "i"}},
-            {"description_he": {"$regex": needle, "$options": "i"}},
-        ]
+        # Word-by-word rather than one substring, and shared with the
+        # Requests board so both searches behave the same way. It fixes the
+        # same misses here: "2 hour" never found "2-hour", and "three" and
+        # "3" were different searches.
+        #
+        # SEC-003 still holds — _search_clauses re.escapes every alternative
+        # it builds, so user input is never treated as a regex, and it caps
+        # both the query length and the token count so a pathological query
+        # cannot build a huge pipeline on this unauthenticated endpoint.
+        clauses = _search_clauses(q)
+        if clauses:
+            query["$and"] = query.get("$and", []) + clauses
     if booking_mode:
         query["booking_mode"] = booking_mode
 
