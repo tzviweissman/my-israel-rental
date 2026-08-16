@@ -337,8 +337,10 @@ const he = {
         clearFilters: 'נקה סינון',
         inProgress: 'בעיצומו',
         myGigs: 'העבודות שלי',
-        jobRequests: 'בקשות עבודה',
-        myJobs: 'המשרות שלי',
+        // D1 — ראו את ההערה בצד האנגלי.
+        jobRequests: 'הצעות עבודה אליי',
+        myJobs: 'עבודות שפרסמתי',
+        myRequests: 'הבקשות שלי',
         location: 'מיקום',
         confirmed: 'אושר',
         pending: 'ממתין',

@@ -78,7 +78,7 @@ const DashboardTabs = ({ activeTab, setActiveTab, role, user, unreadMessages = 0
             data-testid="tab-job-requests"
           >
             <Briefcase size={14} />
-            {t('dashboard.jobRequests', 'Job Requests')}
+            {t('dashboard.jobRequests', 'Work Offers')}
           </button>
         )}
 
@@ -88,7 +88,7 @@ const DashboardTabs = ({ activeTab, setActiveTab, role, user, unreadMessages = 0
           data-testid="tab-my-jobs"
         >
           <Briefcase size={14} />
-          {t('dashboard.myJobs', 'My Jobs')}
+          {t('dashboard.myJobs', "Jobs I've Posted")}
         </button>
 
         {/* Requests board — the seeker's own posts. Shown to everyone:
@@ -99,7 +99,7 @@ const DashboardTabs = ({ activeTab, setActiveTab, role, user, unreadMessages = 0
           data-testid="tab-my-requests"
         >
           <Inbox size={14} />
-          {t('requests.myTitle', 'My requests')}
+          {t('dashboard.myRequests', 'My Requests')}
         </button>
 
         <button

@@ -343,8 +343,15 @@ const en = {
         clearFilters: 'Clear filters',
         inProgress: 'IN PROGRESS',
         myGigs: 'My Gigs',
-        jobRequests: 'Job Requests',
-        myJobs: 'My Jobs',
+        // D1 — these four tabs shared three words between them and no
+        // user could predict what was behind any of them. Named now by
+        // WHOSE work it is and which direction it flows.
+        jobRequests: 'Work Offers',
+        myJobs: "Jobs I've Posted",
+        // Was t('requests.myTitle') with no such key in either catalogue,
+        // so this tab rendered the English default even in Hebrew. Now a
+        // real key, in the same namespace as every sibling tab.
+        myRequests: 'My Requests',
         location: 'Location',
         confirmed: 'confirmed',
         pending: 'pending',
