@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import DateField from '../common/DateField';
 import axios from 'axios';
 import { toast } from 'sonner';
 import { X, CheckCircle2, Loader2 } from 'lucide-react';
@@ -122,7 +123,7 @@ const FieldEditor = ({ field, value, onChange, amenitiesMode, setAmenitiesMode }
     return <input type="time" value={value || ''} onChange={(e) => onChange(e.target.value)} className={cls} data-testid={`bulk-edit-${field}`} />;
   }
   if (field === 'available_from' || field === 'starting_date') {
-    return <input type="date" value={value || ''} onChange={(e) => onChange(e.target.value)} className={cls} data-testid={`bulk-edit-${field}`} />;
+    return <DateField value={value || ''} onChange={onChange} className={`${cls} bg-white`} testid={`bulk-edit-${field}`} />;
   }
   if (['bedrooms', 'bathrooms', 'floor', 'square_meters', 'monthly_price', 'nightly_price', 'agent_fee_price', 'minimum_booking_days'].includes(field)) {
     return <input type="number" value={value ?? ''} onChange={(e) => onChange(e.target.value === '' ? null : Number(e.target.value))} className={cls} placeholder="…" data-testid={`bulk-edit-${field}`} />;

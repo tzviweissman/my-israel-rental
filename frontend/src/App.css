@@ -1090,3 +1090,56 @@ select:focus-visible,
    the same reason the display headings carry a per-direction weight. */
 [dir="rtl"] .finale .finale-price,
 [dir="rtl"] .wh-price { font-weight: 700; }
+
+/* ── Calendar (components/common/DateField) ────────────────────────────
+   react-day-picker ships functional defaults in its own stylesheet; this
+   dresses it in the brand rather than leaving it looking like a library
+   demo. Scoped to .mir-daypicker so the booking sidebar's own calendar,
+   which has its own styling and its own range behaviour, is untouched. */
+.mir-daypicker {
+  --rdp-cell-size: 38px;
+  --rdp-accent-color: var(--brand-primary);
+  --rdp-background-color: rgb(var(--brand-primary-rgb) / .10);
+  margin: 0;
+  font-family: var(--font-body);
+}
+.mir-daypicker .rdp-caption_label {
+  font-family: var(--font-head);
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--ink);
+}
+.mir-daypicker .rdp-head_cell {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+  color: var(--brand-muted);
+}
+.mir-daypicker .rdp-day {
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink);
+}
+.mir-daypicker .rdp-day:hover:not(.rdp-day_selected):not(.rdp-day_disabled) {
+  background: rgb(var(--brand-primary-rgb) / .08);
+}
+.mir-daypicker .rdp-day_today:not(.rdp-day_selected) {
+  /* An outline rather than a fill: today is a landmark, not a selection,
+     and filling it makes an unselected calendar look like it already has
+     an answer in it. */
+  box-shadow: inset 0 0 0 1.5px var(--brand-border);
+}
+.mir-daypicker .rdp-day_selected,
+.mir-daypicker .rdp-day_selected:hover {
+  background: var(--brand-primary);
+  color: #fff;
+}
+.mir-daypicker .rdp-day_outside { color: var(--brand-muted); opacity: .5; }
+.mir-daypicker .rdp-day_disabled { color: var(--brand-muted); opacity: .35; }
+.mir-daypicker .rdp-nav_button {
+  border-radius: 999px;
+  color: var(--brand-primary);
+}
+.mir-daypicker .rdp-nav_button:hover { background: rgb(var(--brand-primary-rgb) / .08); }

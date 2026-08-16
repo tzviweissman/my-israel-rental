@@ -12,6 +12,7 @@
  */
 import React from 'react';
 import { X } from 'lucide-react';
+import DateField from '../common/DateField';
 import {
   SERVICE_CATEGORIES, serviceLabel, serviceCategoryLabel,
 } from '../property/services/servicesCatalog';
@@ -119,20 +120,18 @@ const FiltersModal = ({
           <div className="sm:hidden">
             <h3 className="text-sm font-bold mb-2">{t('stays.dates', 'Dates')}</h3>
             <div className="flex gap-3">
-              <input
-                type="date"
+              <DateField
                 value={checkin}
-                onChange={(e) => setCheckin(e.target.value)}
-                className="flex-1 px-3 py-2 rounded-lg border border-gray-200 text-sm focus:outline-none focus:border-[var(--gold)]"
-                data-testid="stays-filter-checkin"
+                onChange={setCheckin}
+                className="flex-1 px-3 py-2 rounded-lg border border-gray-200 text-sm bg-white focus:outline-none focus:border-[var(--gold)]"
+                testid="stays-filter-checkin"
               />
-              <input
-                type="date"
+              <DateField
                 value={checkout}
+                onChange={setCheckout}
                 min={checkin || undefined}
-                onChange={(e) => setCheckout(e.target.value)}
-                className="flex-1 px-3 py-2 rounded-lg border border-gray-200 text-sm focus:outline-none focus:border-[var(--gold)]"
-                data-testid="stays-filter-checkout"
+                className="flex-1 px-3 py-2 rounded-lg border border-gray-200 text-sm bg-white focus:outline-none focus:border-[var(--gold)]"
+                testid="stays-filter-checkout"
               />
             </div>
           </div>

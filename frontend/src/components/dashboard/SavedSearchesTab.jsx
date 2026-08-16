@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
+import DateField from '../common/DateField';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import {
@@ -243,12 +244,11 @@ const CreateAlertForm = ({ API, token, onCreated, onCancel }) => {
 
         <div>
           <label className="text-[11px] font-semibold text-gray-500 uppercase tracking-wider mb-1.5 block">{t('savedSearches.availableFrom')}</label>
-          <input
-            type="date"
+          <DateField
             value={form.start_date}
-            onChange={(e) => update('start_date', e.target.value)}
-            className={inputCls}
-            data-testid="alert-start-date"
+            onChange={(v) => update('start_date', v)}
+            className={`${inputCls} bg-white`}
+            testid="alert-start-date"
           />
           {form.start_date && (
             <p className="text-[11px] text-gray-500 mt-1.5" data-testid="alert-fuzziness-hint">

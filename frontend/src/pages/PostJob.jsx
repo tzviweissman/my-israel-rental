@@ -16,6 +16,7 @@ import { toast } from 'sonner';
 import { Loader2, ArrowLeft, ArrowRight } from 'lucide-react';
 import { API, AuthContext } from '../App';
 import PageMeta from '../components/PageMeta';
+import DateField from '../components/common/DateField';
 import { SUBCATEGORIES } from '../lib/categories';
 
 const PostJob = () => {
@@ -208,13 +209,12 @@ const PostJob = () => {
           </Field>
 
           <Field label="Preferred date (optional)">
-            <input
-              type="date"
+            <DateField
               value={form.preferred_date}
-              onChange={(e) => set({ preferred_date: e.target.value })}
+              onChange={(v) => set({ preferred_date: v })}
               min={new Date().toISOString().slice(0, 10)}
-              className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm"
-              data-testid="post-job-date"
+              className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm bg-white"
+              testid="post-job-date"
             />
           </Field>
 

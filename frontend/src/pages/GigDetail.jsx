@@ -9,6 +9,7 @@
 import React, { useContext, useEffect, useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import DateField from '../components/common/DateField';
 import axios from 'axios';
 import { toast } from 'sonner';
 import { MessageCircle, Send, Loader2, ArrowLeft, Award, Zap, Calendar, Clock, Camera, ChevronLeft, ChevronRight, X } from 'lucide-react';
@@ -207,7 +208,7 @@ const BookingForm = ({ gig, tier, onClose, token }) => {
         <h3 className="text-lg font-bold">Request &quot;{tier.name}&quot; — ₪{tier.price.toLocaleString()}</h3>
         <input required type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder={t("sweep.yourEmail", "Your email")} className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm" data-testid="gig-booking-email" />
         <input type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="Phone (optional)" className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm" />
-        <input type="date" value={date} onChange={(e) => setDate(e.target.value)} className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm" />
+        <DateField value={date} onChange={setDate} className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm bg-white" testid="gig-booking-date" />
         <textarea value={message} onChange={(e) => setMessage(e.target.value)} placeholder="Tell the provider what you need…" rows={3} className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm" />
         <div className="flex justify-end gap-2">
           <button type="button" onClick={onClose} className="px-4 py-2 rounded-lg text-sm font-semibold text-gray-600">Cancel</button>
@@ -644,10 +645,10 @@ const GigDetail = () => {
                   <label className="text-xs font-semibold text-gray-700 flex items-center gap-1 mb-1">
                     <Calendar size={12} /> Preferred service date (optional)
                   </label>
-                  <input type="date" value={deliverableDate} onChange={(e) => setDeliverableDate(e.target.value)}
+                  <DateField value={deliverableDate} onChange={setDeliverableDate}
                     min={new Date().toISOString().slice(0, 10)}
-                    className="w-full px-2 py-1.5 rounded-lg border border-gray-200 text-sm"
-                    data-testid="gig-preferred-date" />
+                    className="w-full px-2 py-1.5 rounded-lg border border-gray-200 text-sm bg-white"
+                    testid="gig-preferred-date" />
                 </div>
               )}
 

@@ -46,6 +46,7 @@ import { API, AuthContext } from '../App';
 import PageMeta from '../components/PageMeta';
 import DateModePills from '../components/requests/DateModePills';
 import AreaCombobox from '../components/requests/AreaCombobox';
+import DateField from '../components/common/DateField';
 
 const RENTAL_KINDS = ['long-term', 'short-term', 'vacation'];
 
@@ -300,12 +301,12 @@ const PostRequest = () => {
         testidPrefix="post-request-date-mode"
       />
       {form.date_mode !== 'flexible' && (
-        <input
-          type="date"
+        <DateField
           className={`${inputCls} mt-2`} style={{ borderColor: 'var(--brand-border)' }}
           value={isRental ? form.move_in_date : form.preferred_date}
-          onChange={(e) => set(isRental ? { move_in_date: e.target.value } : { preferred_date: e.target.value })}
-          data-testid={isRental ? 'post-request-movein' : 'post-request-preferred-date'}
+          onChange={(v) => set(isRental ? { move_in_date: v } : { preferred_date: v })}
+          min={new Date().toISOString().slice(0, 10)}
+          testid={isRental ? 'post-request-movein' : 'post-request-preferred-date'}
         />
       )}
     </Field>
