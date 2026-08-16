@@ -282,11 +282,12 @@ input[type="date"]:valid:before {
 .ncard .ok{display:inline-flex;align-items:center;gap:6px;margin-top:9px;font-size:11px;font-weight:800;color:#1F8A50;background:#E3F3EA;border-radius:999px;padding:3px 10px}
 .ncard .meta{margin-top:7px;font-size:10.5px;color:#8a8377}
 .finale .kick{color:var(--gold-lg)}
-.finale h2{font-size:clamp(32px,5vw,62px);font-weight:800;letter-spacing:-1px;color:var(--blue-deep);margin-top:14px;line-height:1.05}
+.finale h2{font-size:clamp(32px,5vw,62px);font-weight:600;letter-spacing:-1px;color:var(--blue-deep);margin-top:14px;line-height:1.05}
 /* A1 display weight — same cascade reason as .hero-band-head h1 above.
    Note this one passed RTL and failed LTR before the fix, because the
    token file's [dir="rtl"] selector outranks App.css while its plain
    selector does not. A one-direction pass is the tell. */
+[dir="rtl"] .finale h2 { font-weight: 700; }
 @media (min-width: 1024px) {
   .finale h2 { font-weight: 400; }
   [dir="rtl"] .finale h2 { font-weight: 500; }
@@ -541,14 +542,16 @@ select:focus-visible,
 }
 .hero-band-head h1 {
   font-size: clamp(30px, 4.6vw, 54px);
-  font-weight: 800;
+  font-weight: 600;
   letter-spacing: -1px;
   text-shadow: 0 2px 24px rgba(0,0,0,.5);
 }
-/* A1 display weight. This has to live here, not in design-tokens.css:
+/* A1 display weight. 600 small, 400 large (Hebrew one notch up at each).
+   This has to live here, not in design-tokens.css:
    the rule above and the token rule have identical specificity (0,1,1),
    App.css loads later, so the token rule lost silently — the computed
    weight stayed 800 while the CSS looked correct. */
+[dir="rtl"] .hero-band-head h1 { font-weight: 700; }
 @media (min-width: 1024px) {
   .hero-band-head h1 { font-weight: 400; }
   [dir="rtl"] .hero-band-head h1 { font-weight: 500; }

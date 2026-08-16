@@ -223,7 +223,7 @@ const SignupJoin = () => {
         {step === 1 && (
           <section className="mt-8 sm:mt-12" data-testid="signup-step-role">
             <h1
-              className="display-weight text-4xl sm:text-5xl lg:text-6xl font-extrabold lg:font-normal tracking-tight"
+              className="display-weight text-4xl sm:text-5xl lg:text-6xl font-semibold lg:font-normal tracking-tight"
               // Playfair (Frank Ruhl Libre in Hebrew) via the token, and
               // --ink instead of the leftover #0F3A3A dark teal.
               // font-black is dropped: Playfair ships 600–800 here, so a
