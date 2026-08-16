@@ -28,7 +28,12 @@
        shadcn's --primary to the brand blue in HSL-triplet form in index.css — never
        via this file. */
 
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700;800&family=Manrope:wght@400;500;600;700;800&family=Frank+Ruhl+Libre:wght@500;600;700&family=Assistant:wght@400;500;600;700&display=swap');
+/* Playfair 400 and Frank Ruhl Libre 400 are loaded for the display-weight
+   rule below. Without them the rule is a SILENT NO-OP that still passes a
+   naive check: a browser never synthesises a LIGHTER weight, it picks the
+   nearest available face (500) while computed style keeps reporting 400.
+   Verified with document.fonts.check before and after. */
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700;800&family=Manrope:wght@400;500;600;700;800&family=Frank+Ruhl+Libre:wght@400;500;600;700&family=Assistant:wght@400;500;600;700&display=swap');
 
 :root{
   /* Brand — blue primary */
@@ -142,3 +147,32 @@ h1,h2,h3{font-family:var(--font-head);letter-spacing:-.5px}
 .js-reveal .reveal{opacity:0;transform:translateY(26px);transition:opacity .8s var(--ease),transform .8s var(--ease)}
 .js-reveal .reveal.in{opacity:1;transform:none}
 @media(prefers-reduced-motion:reduce){.js-reveal .reveal{opacity:1;transform:none;transition:none}}
+
+/* ── A1 · Display weight ──────────────────────────────────────────────
+   Large display type reads as premium at 300-400, not 700-800: Plum Guide
+   sets 64px/400, Kindred 55px/300. Ours ran 700-800 everywhere.
+
+   Applied at >=1024px rather than by font-size, because CSS cannot select
+   on a computed size and every one of these headings is a clamp() that
+   crosses ~48px within a few pixels of that viewport. Below it the same
+   headings are 30-36px, where 400 would read as under-set rather than
+   deliberate, so current weights stand.
+
+   RTL is NOT forced to parity. Frank Ruhl Libre carries a different
+   optical weight from Playfair at the same number; the Hebrew override
+   sits at 500 so headlines stay solid rather than anaemic. */
+@media (min-width: 1024px) {
+  .pin .txt h2,                    /* cinematic scene headlines */
+  .finale h2,                      /* finale                    */
+  .hero-band-head h1,              /* Stays / Services / Requests bands */
+  .display-weight {                /* opt-in for page headings  */
+    font-weight: 400;
+  }
+
+  [dir="rtl"] .pin .txt h2,
+  [dir="rtl"] .finale h2,
+  [dir="rtl"] .hero-band-head h1,
+  [dir="rtl"] .display-weight {
+    font-weight: 500;
+  }
+}

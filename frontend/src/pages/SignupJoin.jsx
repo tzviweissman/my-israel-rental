@@ -223,11 +223,16 @@ const SignupJoin = () => {
         {step === 1 && (
           <section className="mt-8 sm:mt-12" data-testid="signup-step-role">
             <h1
-              className="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight"
+              className="display-weight text-4xl sm:text-5xl lg:text-6xl font-extrabold lg:font-normal tracking-tight"
               // Playfair (Frank Ruhl Libre in Hebrew) via the token, and
               // --ink instead of the leftover #0F3A3A dark teal.
               // font-black is dropped: Playfair ships 600–800 here, so a
               // 900 weight silently fell back to a synthesised bold.
+              // A1: extrabold below lg, regular at lg+ where this hits
+              // 60px. `lg:font-normal` is needed as well as
+              // `.display-weight` because a bare Tailwind utility would
+              // otherwise beat the token rule on source order; the class
+              // is what carries the RTL 500 override.
               style={{ fontFamily: 'var(--font-head)', color: 'var(--ink)' }}
               data-testid="signup-headline"
             >

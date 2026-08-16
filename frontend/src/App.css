@@ -283,6 +283,14 @@ input[type="date"]:valid:before {
 .ncard .meta{margin-top:7px;font-size:10.5px;color:#8a8377}
 .finale .kick{color:var(--gold-lg)}
 .finale h2{font-size:clamp(32px,5vw,62px);font-weight:800;letter-spacing:-1px;color:var(--blue-deep);margin-top:14px;line-height:1.05}
+/* A1 display weight — same cascade reason as .hero-band-head h1 above.
+   Note this one passed RTL and failed LTR before the fix, because the
+   token file's [dir="rtl"] selector outranks App.css while its plain
+   selector does not. A one-direction pass is the tell. */
+@media (min-width: 1024px) {
+  .finale h2 { font-weight: 400; }
+  [dir="rtl"] .finale h2 { font-weight: 500; }
+}
 .finale h2 .a{color:var(--gold-lg)}
 .finale p{margin-top:16px;color:#6B6459;font-size:17px;max-width:540px;margin-left:auto;margin-right:auto}
 .finale .ctas{display:flex;gap:14px;margin-top:30px;justify-content:center;flex-wrap:wrap}
@@ -536,6 +544,14 @@ select:focus-visible,
   font-weight: 800;
   letter-spacing: -1px;
   text-shadow: 0 2px 24px rgba(0,0,0,.5);
+}
+/* A1 display weight. This has to live here, not in design-tokens.css:
+   the rule above and the token rule have identical specificity (0,1,1),
+   App.css loads later, so the token rule lost silently — the computed
+   weight stayed 800 while the CSS looked correct. */
+@media (min-width: 1024px) {
+  .hero-band-head h1 { font-weight: 400; }
+  [dir="rtl"] .hero-band-head h1 { font-weight: 500; }
 }
 /* Gold on a PHOTO is a third surface, and the palette only had two.
    --gold (#C9A227) is specified for dark surfaces, and a photograph is
