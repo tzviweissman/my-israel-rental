@@ -117,7 +117,18 @@ export const RequestCard = ({ request: r, onOpen, t }) => {
       </div>
 
       <div className="min-w-0">
-      <h3 className="text-[17px] font-semibold mb-1.5" style={{ color: 'var(--ink)' }}>{r.title}</h3>
+      {/* C6 — two lines, then ellipsis. Titles run to 140 characters and
+          an unclamped one took three lines on a phone, which pushes the
+          chips and the status row down and makes rows of wildly different
+          heights out of what should scan as a list. `title` carries the
+          full text for anyone who wants it without opening the post. */}
+      <h3
+        className="text-[17px] font-semibold mb-1.5 rc-title"
+        style={{ color: 'var(--ink)' }}
+        title={r.title}
+      >
+        {r.title}
+      </h3>
 
       <div className="rc-chips">
         {r.area && (
@@ -168,7 +179,9 @@ export const RequestCard = ({ request: r, onOpen, t }) => {
         ) : null}
       </div>
 
-        {r.description && <p className="rc-note line-clamp-2">{r.description}</p>}
+        {/* The clamp lives in .rc-note, not here — two rules claiming the
+            same property is what let them disagree in the first place. */}
+        {r.description && <p className="rc-note">{r.description}</p>}
       </div>
 
       {/* Who is asking. Identity, not contact — a shortened name, a

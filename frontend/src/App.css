@@ -982,9 +982,15 @@ select:focus-visible,
   color: var(--brand-muted);
   line-height: 1.5;
   display: -webkit-box;
-  -webkit-line-clamp: 3;
+  /* Two, matching the title above it and the `line-clamp-2` the markup
+     already asked for. It was 3 here, and this rule quietly outranked the
+     utility class — so the JSX said two lines and the page rendered three.
+     One place owns this now; the utility class has been removed from the
+     element rather than left there disagreeing. */
+  -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
+  overflow-wrap: anywhere;
 }
 .rc-foot {
   display: flex;
@@ -1143,3 +1149,20 @@ select:focus-visible,
   color: var(--brand-primary);
 }
 .mir-daypicker .rdp-nav_button:hover { background: rgb(var(--brand-primary-rgb) / .08); }
+
+/* C6 — request row title, clamped to two lines.
+   -webkit-line-clamp is the only cross-browser way to clamp at a line
+   count; it is not a vendor experiment any more but it does still need
+   the -webkit-box display and vertical orientation to work at all. Every
+   one of the three declarations is load-bearing — drop any and the clamp
+   silently does nothing, which is exactly the failure mode that got this
+   shipped unclamped in the first place. */
+.rc-title {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+  /* Long unbroken strings (a URL, a very long place name) would otherwise
+     push the row wider than its column rather than wrapping. */
+  overflow-wrap: anywhere;
+}
