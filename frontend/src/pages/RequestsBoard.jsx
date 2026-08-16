@@ -273,7 +273,7 @@ export const RequestCard = ({ request: r, onOpen, t }) => {
               target="_blank"
               rel="noopener noreferrer"
               onClick={(e) => e.stopPropagation()}
-              className="btn btn-ghost inline-flex items-center gap-1.5 !py-2 !px-3.5 !text-[13px]"
+              className="btn btn-whatsapp inline-flex items-center gap-1.5 !py-2 !px-3.5 !text-[13px]"
               data-testid={`request-whatsapp-${r.id}`}
             >
               <MessageCircle size={13} aria-hidden="true" />

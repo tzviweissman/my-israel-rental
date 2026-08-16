@@ -1209,3 +1209,25 @@ select:focus-visible,
     text-overflow: ellipsis;
   }
 }
+
+/* WhatsApp button — WhatsApp's own green (#25D366), which is why this is
+   the one green in the product that is not a status colour. The design
+   system reserves green for status, and this is a deliberate, narrow
+   exception: it is a third-party brand mark, people recognise it before
+   they read the label, and four other places in the app already use it.
+
+   INK text, not white. White on #25D366 measures about 2:1 — it is
+   everywhere on the web and it is unreadable for anyone with low vision;
+   ink on the same green is over 8:1 and looks more like WhatsApp's own
+   buttons anyway. Same reasoning as the gold accent button. */
+.btn-whatsapp {
+  background: #25D366;
+  color: var(--ink);
+  border: 1.5px solid #25D366;
+}
+.btn-whatsapp:hover {
+  background: #1FBE5B;
+  border-color: #1FBE5B;
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+}

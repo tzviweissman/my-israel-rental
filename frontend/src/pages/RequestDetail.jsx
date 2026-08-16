@@ -291,7 +291,7 @@ const RequestDetail = () => {
                     : t('requests.waPrefillRequest', 'Hi! I saw your request on the MyIsraelRental marketplace.'))}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="btn btn-ghost inline-flex items-center gap-2"
+                className="btn btn-whatsapp inline-flex items-center gap-2"
                 data-testid="request-detail-whatsapp"
               >
                 <MessageCircle size={15} aria-hidden="true" />
