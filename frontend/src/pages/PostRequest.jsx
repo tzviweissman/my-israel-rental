@@ -46,6 +46,7 @@ import { API, AuthContext } from '../App';
 import PageMeta from '../components/PageMeta';
 import DateModePills from '../components/requests/DateModePills';
 import AreaCombobox from '../components/requests/AreaCombobox';
+import Combobox from '../components/common/Combobox';
 import DateField from '../components/common/DateField';
 
 const RENTAL_KINDS = ['long-term', 'short-term', 'vacation'];
@@ -531,18 +532,20 @@ const PostRequest = () => {
                     </Field>
                     <Field label={t('requests.fieldBedrooms', 'Bedrooms (minimum)')}>
                       <input
-                        type="number" min="0" max="20"
+                        type="number" min="0" max="20" inputMode="numeric"
                         className={inputCls} style={{ borderColor: 'var(--brand-border)' }}
                         value={form.bedrooms_min} onChange={(e) => set({ bedrooms_min: e.target.value })}
+                        placeholder={t('requests.bedroomsPh', 'e.g. 3 — leave blank if it does not matter')}
                         data-testid="post-request-bedrooms"
                       />
                     </Field>
                     {dateField}
                     <Field label={t('requests.fieldLease', 'Lease length (months)')}>
                       <input
-                        type="number" min="1" max="120"
+                        type="number" min="1" max="120" inputMode="numeric"
                         className={inputCls} style={{ borderColor: 'var(--brand-border)' }}
                         value={form.lease_months} onChange={(e) => set({ lease_months: e.target.value })}
+                        placeholder={t('requests.leasePh', 'e.g. 12 — optional')}
                         data-testid="post-request-lease"
                       />
                     </Field>
@@ -550,16 +553,24 @@ const PostRequest = () => {
                 ) : (
                   <div className="grid sm:grid-cols-2 gap-4" data-testid="post-request-service-fields">
                     <Field label={t('requests.fieldCategory', 'Category')}>
-                      <select
-                        className={inputCls} style={{ borderColor: 'var(--brand-border)' }}
-                        value={form.category} onChange={(e) => set({ category: e.target.value })}
-                        data-testid="post-request-category"
-                      >
-                        <option value="">{t('requests.pickCategory', 'Pick a category…')}</option>
-                        {categories.map((c) => (
-                          <option key={c.slug} value={c.slug}>{c.label}</option>
-                        ))}
-                      </select>
+                      {/* Fifteen categories behind a select you cannot type
+                          into means hunting for a word you already know.
+                          allowFreeText is off: the value is a slug the API
+                          validates, so an unmatched string would only earn
+                          a 400 — it reverts to the last valid choice
+                          instead. */}
+                      <Combobox
+                        value={form.category}
+                        onChange={(v) => set({ category: v })}
+                        options={categories.map((c) => ({ value: c.slug, label: c.label }))}
+                        allowFreeText={false}
+                        icon={Wrench}
+                        className={inputCls}
+                        style={{ borderColor: 'var(--brand-border)' }}
+                        placeholder={t('requests.pickCategory', 'Type or pick a category…')}
+                        emptyHint={t('requests.noCategoryMatch', 'No category matches that — try a shorter word.')}
+                        testid="post-request-category"
+                      />
                     </Field>
                     {dateField}
                   </div>
