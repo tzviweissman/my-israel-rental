@@ -144,6 +144,7 @@ const PostRequest = () => {
     bedrooms_min: '',
     post_kind: 'want',
     listing_id: '',
+    whatsapp: '',
     date_mode: 'on',
     move_in_date: '',
     lease_months: '',
@@ -285,6 +286,7 @@ const PostRequest = () => {
         post_kind: form.post_kind,
         date_mode: form.date_mode,
         listing_id: isOffer ? (form.listing_id || null) : null,
+        whatsapp: form.whatsapp.trim() || null,
         title: form.title.trim(),
         description: form.description.trim(),
         area: form.area.trim(),
@@ -621,6 +623,33 @@ const PostRequest = () => {
                         </>
                       )}
                     </div>
+                  </Field>
+
+                  {/* WhatsApp, entirely opt-in.
+                      The board's rule is chat-only and no contact detail of
+                      any kind is public — this is the one exception and it
+                      belongs to the poster: they type their own number, for
+                      their own post, and the copy says plainly what it
+                      means. Left blank, nothing changes and chat stays the
+                      only route.
+                      The number is never shown on the board even when
+                      given; the button goes through a redirect that counts
+                      the click and then hands over to WhatsApp. */}
+                  <Field
+                    label={t('requests.fieldWhatsapp', 'WhatsApp number (optional)')}
+                    hint={t('requests.whatsappHint', 'Add it and people can message you on WhatsApp as well as here. Your number is not shown on the board — it opens WhatsApp when someone taps the button. Leave it blank to keep replies on-site only.')}
+                  >
+                    <input
+                      type="tel"
+                      inputMode="tel"
+                      className={inputCls}
+                      style={{ borderColor: 'var(--brand-border)' }}
+                      value={form.whatsapp}
+                      onChange={(e) => set({ whatsapp: e.target.value })}
+                      placeholder={t('requests.whatsappPh', 'e.g. 050-123-4567')}
+                      maxLength={40}
+                      data-testid="post-request-whatsapp"
+                    />
                   </Field>
 
                   {/* Optional link to a listing the poster already has here.

@@ -257,12 +257,36 @@ export const RequestCard = ({ request: r, onOpen, t }) => {
             </>
           )}
         </span>
-        <span className="btn-blue-solid inline-flex items-center gap-1.5 !py-2 !px-4 !text-[13px]">
-          <MessageCircle size={13} aria-hidden="true" />
-          {isOffer
-            ? t('requests.messageOwner', 'Message owner')
-            : t('requests.messageSeeker', 'Message seeker')}
-        </span>
+        <div className="flex items-center gap-2">
+          {/* Only when the poster opted in. The href is our own tracked
+              redirect, not a wa.me link — the number is never in this
+              payload, so the board cannot leak it to a scraper, and the
+              click gets counted on the way past.
+              stopPropagation because the whole row is a click target and
+              this goes somewhere else entirely. */}
+          {r.whatsapp_available && (
+            <a
+              href={`${API}/marketplace/requests/${encodeURIComponent(r.id)}/contact-whatsapp`
+                + `?text=${encodeURIComponent(isOffer
+                  ? t('requests.waPrefillOffer', 'Hi! I saw your post on the MyIsraelRental marketplace.')
+                  : t('requests.waPrefillRequest', 'Hi! I saw your request on the MyIsraelRental marketplace.'))}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={(e) => e.stopPropagation()}
+              className="btn btn-ghost inline-flex items-center gap-1.5 !py-2 !px-3.5 !text-[13px]"
+              data-testid={`request-whatsapp-${r.id}`}
+            >
+              <MessageCircle size={13} aria-hidden="true" />
+              {t('requests.messageWhatsapp', 'WhatsApp')}
+            </a>
+          )}
+          <span className="btn-blue-solid inline-flex items-center gap-1.5 !py-2 !px-4 !text-[13px]">
+            <MessageCircle size={13} aria-hidden="true" />
+            {isOffer
+              ? t('requests.messageOwner', 'Message owner')
+              : t('requests.messageSeeker', 'Message seeker')}
+          </span>
+        </div>
       </div>
       </div>
     </article>

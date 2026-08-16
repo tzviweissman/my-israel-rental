@@ -281,6 +281,23 @@ const RequestDetail = () => {
                   ? t('requests.messageOwner', 'Message owner')
                   : t('requests.messageSeeker', 'Message seeker')}
               </button>
+            {/* Opt-in only, and through the tracked redirect so the number
+                stays server-side and the click is counted. */}
+            {request.whatsapp_available && (
+              <a
+                href={`${API}/marketplace/requests/${encodeURIComponent(id)}/contact-whatsapp`
+                  + `?text=${encodeURIComponent(request.post_kind === 'have'
+                    ? t('requests.waPrefillOffer', 'Hi! I saw your post on the MyIsraelRental marketplace.')
+                    : t('requests.waPrefillRequest', 'Hi! I saw your request on the MyIsraelRental marketplace.'))}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="btn btn-ghost inline-flex items-center gap-2"
+                data-testid="request-detail-whatsapp"
+              >
+                <MessageCircle size={15} aria-hidden="true" />
+                {t('requests.messageWhatsapp', 'WhatsApp')}
+              </a>
+            )}
               <span className="text-xs" style={{ color: 'var(--brand-muted)' }}>
                 {t('requests.chatOnlyNote', 'Chat happens on MyIsraelRental — no phone numbers are shared.')}
               </span>

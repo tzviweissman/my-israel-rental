@@ -45,7 +45,11 @@ from html import escape as html_escape
 from typing import Any, Optional
 
 import jwt
-from fastapi import APIRouter, Body, Depends, HTTPException, Query
+import os
+from urllib.parse import urlparse
+
+from fastapi import APIRouter, Body, Depends, HTTPException, Query, Request
+from fastapi.responses import RedirectResponse
 from pydantic import BaseModel, Field
 
 from routes.deps import db, logger, verify_token
@@ -56,6 +60,7 @@ from utils.notification_tokens import (
     verify_notification_token,
 )
 from utils.translate import translate_marketing_to_hebrew
+from utils.whatsapp_link import build_whatsapp_link, normalize_whatsapp_number
 
 from .shared import UTC, FRONTEND_URL, _search_clauses, _validate_category, _validate_subcategory
 
@@ -120,6 +125,19 @@ class RequestIn(BaseModel):
     # /property/{id} on our own site and is checked server-side to belong to
     # the poster, so it can only ever point at something they own here.
     listing_id: Optional[str] = Field(None, max_length=64)
+
+    # OPT-IN WhatsApp number. The board's default is chat-only and no
+    # contact detail of any kind is public — see the module docstring. This
+    # is the one deliberate exception, and it is the poster's own decision:
+    # they type their own number, for their own post, knowing it becomes a
+    # way to reach them. Nobody else can add it and it is never inherited
+    # from their account without them entering it here.
+    #
+    # It is NEVER returned by the public API even when set (see _public).
+    # The board exposes only a boolean, and the number lives behind the
+    # tracked redirect — so a scraper gets nothing, and the poster still
+    # gets their WhatsApp messages.
+    whatsapp: Optional[str] = Field(None, max_length=40)
     title: str = Field(..., min_length=6, max_length=140)
     description: str = Field(..., min_length=10, max_length=4000)
     area: str = Field(..., min_length=2, max_length=120)
@@ -163,6 +181,7 @@ class RequestPatch(BaseModel):
     date_mode: Optional[str] = Field(None, pattern="^(on|before|flexible)$")
     post_kind: Optional[str] = Field(None, pattern="^(want|have)$")
     listing_id: Optional[str] = Field(None, max_length=64)
+    whatsapp: Optional[str] = Field(None, max_length=40)
     preferred_date: Optional[str] = None
     bedrooms_min: Optional[int] = Field(None, ge=0, le=20)
     move_in_date: Optional[str] = None
@@ -274,8 +293,16 @@ def _public(doc: dict[str, Any], identity: dict[str, Any] | None = None) -> dict
     Display identity is merged in by the caller via ``_poster_identity``.
     Contact details are never included, in any shape, ever.
     """
-    out = {k: v for k, v in doc.items() if k not in ("_id", "report_count", "reported_by", "hidden_by_admin")}
+    out = {
+        k: v for k, v in doc.items()
+        if k not in ("_id", "report_count", "reported_by", "hidden_by_admin", "whatsapp")
+    }
     out["id"] = doc.get("_id")
+    # The NUMBER never leaves the server; only the fact that there is one.
+    # This function whitelists by exclusion, so a field added to the document
+    # is public by default — which is exactly how a phone number would have
+    # ended up in a public JSON feed without anyone deciding to put it there.
+    out["whatsapp_available"] = bool(doc.get("whatsapp"))
     if identity:
         out.update(identity)
     return out
@@ -459,6 +486,9 @@ async def create_request(payload: RequestIn, user=Depends(verify_token)):
         # Otherwise a seeker who fills a date, then switches to flexible,
         # leaves a date behind that the board would go on displaying.
         "post_kind": payload.post_kind,
+        # Normalised on the way in, so an unusable number is stored as None
+        # rather than lingering as a WhatsApp button that goes nowhere.
+        "whatsapp": normalize_whatsapp_number(payload.whatsapp),
         # Only meaningful on a supply-side post; a seeker has nothing to link.
         "listing_id": (await _validated_listing_id(payload.listing_id, user["user_id"]) if payload.post_kind == "have" else None),
         "date_mode": payload.date_mode,
@@ -514,6 +544,10 @@ async def patch_request(request_id: str, payload: RequestPatch, user=Depends(ver
     # whatever date it was carrying, so the board can't keep showing a date
     # the seeker has just said no longer applies. Both variants' date fields
     # are cleared because only one of them is ever set.
+    if "whatsapp" in update:
+        # An explicit empty string is how a poster withdraws their number,
+        # so it must survive as None rather than being dropped as falsy.
+        update["whatsapp"] = normalize_whatsapp_number(update["whatsapp"])
     if "listing_id" in update:
         update["listing_id"] = await _validated_listing_id(update["listing_id"], user["user_id"])
     if update.get("date_mode") == "flexible":
@@ -635,6 +669,76 @@ async def report_request(request_id: str, payload: ReportIn, user=Depends(verify
         "created_at": datetime.now(UTC).isoformat(),
     })
     return {"ok": True}
+
+
+def _referrer_host(referer: Optional[str]) -> str:
+    """Host portion of a Referer header, or '' — never the full URL.
+
+    Our own query strings carry filter state (an area someone searched, for
+    instance), so only the host is kept. Same rule as the gigs redirect.
+    """
+    if not referer:
+        return ""
+    try:
+        return (urlparse(referer).hostname or "")[:100]
+    except Exception:  # noqa: BLE001
+        return ""
+
+
+@router.get("/requests/{request_id}/contact-whatsapp")
+async def contact_request_on_whatsapp(
+    request_id: str,
+    request: Request,
+    text: str = Query("", max_length=1000),
+) -> RedirectResponse:
+    """Count the click, then hand the visitor to WhatsApp.
+
+    The twin of the gigs redirect, and deliberately the same shape:
+
+    * a REDIRECT rather than a POST-then-open, because a popup blocker kills
+      a window opened after an await and a failed beacon loses the lead
+      silently. The click and the measurement are one action;
+    * logging NEVER blocks the hand-off — every failure path still
+      redirects. A broken metric must not cost a poster a reply;
+    * the wa.me URL is built here from the stored number, never taken from
+      the caller, or this becomes an open redirect;
+    * and the number reaches the browser only as a Location header on a
+      click, not as a field in a public list. Someone scraping the board
+      gets nothing.
+
+    No auth. Requiring a login here would defeat the point — the poster
+    opted in precisely so people can reach them without ceremony — and the
+    number is not returned, only followed.
+    """
+    doc = await db.requests.find_one({"_id": request_id})
+    frontend = os.environ.get("FRONTEND_URL", FRONTEND_URL).rstrip("/")
+    if not doc or doc.get("hidden_by_admin"):
+        # Same 404-shaped answer a hidden request gives everywhere else.
+        return RedirectResponse(f"{frontend}/requests", status_code=302)
+
+    target = build_whatsapp_link(doc.get("whatsapp"), text)
+    if not target:
+        # Opted out, or never opted in. Send them to the post, where the
+        # in-platform chat button is.
+        return RedirectResponse(f"{frontend}/requests/{request_id}", status_code=302)
+
+    try:
+        await db.lead_events.insert_one({
+            "_id": str(uuid.uuid4()),
+            "type": "whatsapp_click",
+            # Namespaced so board clicks can be told apart from gig clicks
+            # in the same collection rather than silently mixed together.
+            "source": "request",
+            "request_id": request_id,
+            "poster_id": doc.get("poster_user_id"),
+            "post_kind": doc.get("post_kind") or "want",
+            "created_at": datetime.now(UTC).isoformat(),
+            "referrer_host": _referrer_host(request.headers.get("referer")),
+        })
+    except Exception:  # noqa: BLE001 — the lead matters more than the metric
+        logger.exception("lead_events insert failed for request %s", request_id)
+
+    return RedirectResponse(target, status_code=302)
 
 
 @router.get("/my-requests")
