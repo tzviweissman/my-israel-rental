@@ -20,7 +20,7 @@
  * self-facing "Continue as" banner and is therefore not an already-public
  * avatar. See `_poster_identity` in routes/marketplace/requests.py.
  */
-import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useState } from 'react';
 import axios from 'axios';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
@@ -288,12 +288,10 @@ const RequestsBoard = () => {
 
   const openRequest = (id) => navigate(`/requests/${id}`);
 
-  const postHref = useMemo(
-    // Signed-out visitors get sent to join, then back here. The board is
-    // readable without an account; posting is not.
-    () => (user ? '/requests/post' : `/join?redirect=${encodeURIComponent('/requests/post')}`),
-    [user],
-  );
+  // C4 — everyone goes straight to the wizard, signed in or not. The
+  // account is asked for at the last step, once they can see what it is
+  // for. Posting still requires one; only the timing of the ask changed.
+  const postHref = '/requests/post';
 
   return (
     <div className="min-h-screen" style={{ background: 'var(--bg)' }} data-testid="requests-board-page">

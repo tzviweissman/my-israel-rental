@@ -314,10 +314,14 @@ function App() {
                 /requests/post sits BEFORE /requests/:id so "post" is never
                 swallowed as an id. */}
             <Route path="/requests" element={<RequestsBoard />} />
-            <Route
-              path="/requests/post"
-              element={user ? <PostRequest /> : <Navigate to="/join?redirect=%2Frequests%2Fpost" replace />}
-            />
+            {/* C4 — no longer gated. Anyone can fill the wizard in; the
+                account is asked for at the final step, with the draft
+                preserved across the sign-in round trip. Posting still
+                REQUIRES an account, which the server enforces regardless
+                of what the UI does — only the timing of the ask moved.
+                Sending someone to a signup form before they have seen what
+                they are signing up for is where most of them leave. */}
+            <Route path="/requests/post" element={<PostRequest />} />
             <Route path="/requests/:id" element={<RequestDetail />} />
             <Route
               path="/kosher-stays-in-israel"

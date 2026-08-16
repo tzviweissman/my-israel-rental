@@ -261,12 +261,21 @@ const SignupJoin = () => {
                      works" link can be a SIBLING of the selection button.
                      A link inside a button is invalid HTML, and clicking it
                      would also toggle the card. */
-                  <div key={key} className="relative">
+                  <div key={key} className="relative flex flex-col h-full">
                   <button
                     type="button"
                     onClick={() => setSelectedRole(key)}
-                    className={`group relative w-full h-full text-start rounded-2xl border bg-white p-6 sm:p-7 transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand-primary)] focus-visible:ring-offset-2 ${
-                      learnMoreHref ? 'pb-14' : ''
+                    className={`group relative w-full flex-1 text-start rounded-2xl border bg-white p-6 sm:p-7 transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand-primary)] focus-visible:ring-offset-2 ${
+                      // The "See how it works" link used to be pinned to
+                      // the card's bottom over reserved padding, which
+                      // collided with the CTA row by 7px once B2 grew the
+                      // value line and it started wrapping. Bottom padding
+                      // could not fix it: the row sits in normal flow after
+                      // the content, so it moves down with the content
+                      // while the pinned link never moves. The link is now
+                      // in flow below the button, where nothing can reach
+                      // it. Cards keep equal heights via the flex column.
+                      learnMoreHref ? 'rounded-b-none border-b-0' : ''
                     } ${
                       active
                         ? 'border-[var(--brand-primary)] -translate-y-0.5'
@@ -364,8 +373,8 @@ const SignupJoin = () => {
                   {learnMoreHref && (
                     <Link
                       to={learnMoreHref}
-                      className="absolute bottom-5 start-6 sm:start-7 inline-flex items-center gap-1 text-xs font-bold hover:underline"
-                      style={{ color: 'var(--brand-primary)' }}
+                      className="rounded-b-2xl border border-t-0 bg-white px-6 sm:px-7 pb-5 pt-1 inline-flex items-center gap-1 text-xs font-bold hover:underline"
+                      style={{ color: 'var(--brand-primary)', borderColor: 'var(--brand-border)' }}
                       data-testid={`signup-role-learnmore-${key}`}
                     >
                       {t(tLearnMoreKey, defaultLearnMore)}

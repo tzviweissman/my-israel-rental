@@ -1,20 +1,47 @@
 /**
- * PostRequest — /requests/post. Signed-in only (gated at the route).
+ * PostRequest — /requests/post. Open to everyone; the account is asked for
+ * at the final step (C4), not at the door.
  *
- * One form, two shapes. Picking "I'm looking for a place" vs "I need a
- * service" swaps the variant fields, because the backend requires
- * `rental_kind` on one and `category` on the other and rejects the post
- * otherwise — so the form must not let someone reach Submit without the
- * field their type needs.
+ * Anyone can fill the whole thing in signed out. On submit without a token
+ * the draft is parked in sessionStorage, they are sent to /join, and they
+ * come back to the last step with every answer intact. Posting still
+ * requires an account — the server enforces that regardless of the UI —
+ * but the ask now lands when the reason for it is obvious rather than
+ * before they have seen what they are signing up for.
  *
- * Structure follows PostJob.jsx.
+ * A five-step wizard rather than one long form (C2 of the marketplace
+ * research). Airtasker runs this exact product and asks one question per
+ * screen with the steps listed in a rail; the reasons that matter here:
+ *
+ *   • a single column of a dozen inputs reads as paperwork, and this is the
+ *     one screen where a hesitant seeker decides whether to bother;
+ *   • short questions translate cleanly into Hebrew. Long compound field
+ *     labels do not — they end up as a clause with the verb in the wrong
+ *     place, which is how half our Hebrew UI got stilted;
+ *   • per-step validation means the Next button can say what is missing at
+ *     the moment it is missing, instead of the user discovering on submit
+ *     that something ten fields up was wrong.
+ *
+ * Both sides of the market go through it: "I'm looking for" and "I have
+ * available". The first step is which of those, because it changes how
+ * every question after it reads.
+ *
+ * State lives in one object for the whole wizard, so stepping backwards
+ * never loses an answer. Nothing is sent until the final step.
+ *
+ * The variant rule is unchanged and still load-bearing: the backend
+ * requires `rental_kind` on a rental and `category` on a service and
+ * rejects the post otherwise, so the wizard must not let anyone reach the
+ * end without the field their type needs.
  */
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useContext, useEffect, useMemo, useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
-import { Home, Wrench, Loader2, ArrowLeft, Search, KeyRound } from 'lucide-react';
+import {
+  Home, Wrench, Loader2, ArrowLeft, ArrowRight, Search, KeyRound, Check,
+} from 'lucide-react';
 import { API, AuthContext } from '../App';
 import PageMeta from '../components/PageMeta';
 import DateModePills from '../components/requests/DateModePills';
@@ -33,6 +60,56 @@ const Field = ({ label, hint, children }) => (
 
 const inputCls = 'w-full rounded-xl border bg-white px-4 py-3 text-sm outline-none focus:border-[var(--brand-primary)]';
 
+// C4 — the draft, parked across the sign-in round trip.
+//
+// sessionStorage rather than localStorage: it is the same store the auth
+// token uses, it dies with the tab, and a half-written post is not
+// something to leave on a shared machine for a week.
+//
+// The draft is the whole form object. Keeping only "the fields they had
+// filled" would mean deciding what counts as filled, and getting that
+// wrong loses someone's typing — the exact failure this feature exists to
+// prevent.
+const DRAFT_KEY = 'requests_post_draft';
+
+const readDraft = () => {
+  try {
+    const raw = sessionStorage.getItem(DRAFT_KEY);
+    return raw ? JSON.parse(raw) : null;
+  } catch {
+    // Corrupt or unavailable storage must not take the page down with it —
+    // a lost draft is a bad afternoon, a blank page is a lost user.
+    return null;
+  }
+};
+const writeDraft = (form, step) => {
+  try {
+    sessionStorage.setItem(DRAFT_KEY, JSON.stringify({ form, step }));
+  } catch { /* private mode, quota — posting still works, just without the parachute */ }
+};
+const clearDraft = () => {
+  try { sessionStorage.removeItem(DRAFT_KEY); } catch { /* nothing to do */ }
+};
+
+/** Big card used by the two choose-one steps. */
+const ChoiceCard = ({ active, Icon, label, sub, onClick, testid }) => (
+  <button
+    type="button"
+    onClick={onClick}
+    aria-pressed={active}
+    className="rounded-xl border p-4 text-start transition-colors w-full"
+    style={{
+      borderColor: active ? 'var(--brand-primary)' : 'var(--brand-border)',
+      background: active ? 'rgb(var(--brand-primary-rgb) / 0.06)' : '#fff',
+    }}
+    data-testid={testid}
+  >
+    <Icon size={18} style={{ color: 'var(--brand-primary)' }} />
+    <span className="block mt-2 text-sm font-bold" style={{ color: 'var(--ink)' }}>{label}</span>
+    {sub && <span className="block mt-1 text-xs" style={{ color: 'var(--brand-muted)' }}>{sub}</span>}
+  </button>
+);
+
 const PostRequest = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
@@ -40,6 +117,7 @@ const PostRequest = () => {
 
   const [categories, setCategories] = useState([]);
   const [saving, setSaving] = useState(false);
+  const [step, setStep] = useState(0);
   const [form, setForm] = useState({
     request_type: 'rental',
     title: '',
@@ -62,7 +140,7 @@ const PostRequest = () => {
   });
   const set = (patch) => setForm((f) => ({ ...f, ...patch }));
   const isRental = form.request_type === 'rental';
-  // Supply-side post — flips the page's questions from asking to offering.
+  // Supply-side post — flips the wizard's questions from asking to offering.
   const isOffer = form.post_kind === 'have';
 
   // The poster's own listings, for the optional link on a "have" post.
@@ -80,28 +158,94 @@ const PostRequest = () => {
     return () => { alive = false; };
   }, [isOffer, user?.id]);
 
+  // Restore a draft parked before sign-in, once, on mount. Landing back
+  // here after signing up and finding the form empty is worse than having
+  // been asked to sign up first, so this runs before anything else can
+  // touch the form.
+  const [restored, setRestored] = useState(false);
+  useEffect(() => {
+    const draft = readDraft();
+    if (!draft?.form) return;
+    setForm((f) => ({ ...f, ...draft.form }));
+    // Back to the step they were on — which is the last one, since that is
+    // the only place the sign-in ask happens.
+    if (typeof draft.step === 'number') setStep(draft.step);
+    clearDraft();
+    setRestored(true);
+  }, []);
+
   useEffect(() => {
     axios.get(`${API}/marketplace/categories`)
       .then((r) => setCategories(r.data || []))
       .catch(() => setCategories([]));
   }, []);
 
-  // Mirrors the server's own validation so the button explains itself
-  // rather than the user discovering the rule via a 400.
-  const missing = (() => {
-    if (form.title.trim().length < 6) return t('requests.needTitle', 'Give your request a title (at least 6 characters).');
-    if (form.description.trim().length < 10) return t('requests.needDescription', 'Describe what you need — at least 10 characters.');
-    if (form.area.trim().length < 2) return t('requests.needArea', 'Which area?');
-    if (!isRental && !form.category) return t('requests.needCategory', 'Pick a service category.');
-    if (form.budget_type === 'fixed' && !(Number(form.budget_amount) > 0)) {
-      return t('requests.needBudget', 'Enter a budget amount, or switch to "open to offers".');
-    }
-    return null;
-  })();
+  // One entry per step. `blocker` mirrors the server's own validation for
+  // the fields on THAT step, so Next can refuse with the reason attached
+  // rather than letting someone walk to the end and meet a 400.
+  const STEPS = useMemo(() => [
+    {
+      key: 'what',
+      label: t('requests.stepWhat', 'What you are posting'),
+      blocker: () => null, // both choices always have a value
+    },
+    {
+      key: 'about',
+      label: t('requests.stepAbout', 'Title and details'),
+      blocker: () => {
+        if (form.title.trim().length < 6) return t('requests.needTitle', 'Give your post a title (at least 6 characters).');
+        if (form.description.trim().length < 10) return t('requests.needDescription', 'Add a few more details — at least 10 characters.');
+        return null;
+      },
+    },
+    {
+      key: 'where',
+      label: t('requests.stepWhere', 'Location'),
+      blocker: () => (form.area.trim().length < 2 ? t('requests.needArea', 'Which area?') : null),
+    },
+    {
+      key: 'when',
+      label: t('requests.stepWhen', 'Specifics and timing'),
+      blocker: () => (!isRental && !form.category ? t('requests.needCategory', 'Pick a service category.') : null),
+    },
+    {
+      key: 'budget',
+      label: t('requests.stepBudget', 'Budget'),
+      blocker: () => (form.budget_type === 'fixed' && !(Number(form.budget_amount) > 0)
+        ? t('requests.needBudget', 'Enter a budget amount, or switch to "open to offers".')
+        : null),
+    },
+  ], [t, form, isRental]);
+
+  const current = STEPS[step];
+  const blocker = current.blocker();
+  const isLast = step === STEPS.length - 1;
+
+  const next = () => {
+    if (blocker) { toast.error(blocker); return; }
+    setStep((s) => Math.min(s + 1, STEPS.length - 1));
+  };
+  const back = () => setStep((s) => Math.max(s - 1, 0));
 
   const submit = async (e) => {
     e.preventDefault();
-    if (missing) { toast.error(missing); return; }
+    // Re-check every step, not just this one. Someone can reach the end and
+    // then edit an earlier answer into an invalid state by stepping back.
+    const firstBad = STEPS.findIndex((s) => s.blocker());
+    if (firstBad !== -1) {
+      setStep(firstBad);
+      toast.error(STEPS[firstBad].blocker());
+      return;
+    }
+    // C4 — the account ask, at the end rather than the beginning. They
+    // have written the whole thing by now, so the reason for an account is
+    // self-evident, and the draft comes back with them.
+    if (!token) {
+      writeDraft(form, STEPS.length - 1);
+      toast.message(t('requests.signInToPost', 'One last step — create an account so people can reply to you. Your post is saved.'));
+      navigate(`/join?redirect=${encodeURIComponent('/requests/post')}`);
+      return;
+    }
     setSaving(true);
     try {
       const payload = {
@@ -130,16 +274,41 @@ const PostRequest = () => {
       const { data } = await axios.post(`${API}/marketplace/requests`, payload, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      toast.success(t('requests.posted', 'Your request is live — owners and pros can now reach you.'));
+      toast.success(isOffer
+        ? t('requests.postedOffer', 'Your post is live — renters can now reach you.')
+        : t('requests.posted', 'Your request is live — owners and pros can now reach you.'));
       navigate(`/requests/${data.id}`);
     } catch (err) {
       // The server owns the real rules (open cap, cooldown); surface its
       // message rather than inventing a generic one.
-      toast.error(err.response?.data?.detail || t('requests.postFailed', 'Could not post your request'));
+      toast.error(err.response?.data?.detail || t('requests.postFailed', 'Could not post'));
     } finally {
       setSaving(false);
     }
   };
+
+  const dateField = (
+    <Field label={isRental
+      ? t('requests.fieldMoveIn', 'Move-in date')
+      : t('requests.fieldPreferredDate', 'Preferred date')}
+    >
+      <DateModePills
+        value={form.date_mode}
+        onChange={(m) => set({ date_mode: m })}
+        t={t}
+        testidPrefix="post-request-date-mode"
+      />
+      {form.date_mode !== 'flexible' && (
+        <input
+          type="date"
+          className={`${inputCls} mt-2`} style={{ borderColor: 'var(--brand-border)' }}
+          value={isRental ? form.move_in_date : form.preferred_date}
+          onChange={(e) => set(isRental ? { move_in_date: e.target.value } : { preferred_date: e.target.value })}
+          data-testid={isRental ? 'post-request-movein' : 'post-request-preferred-date'}
+        />
+      )}
+    </Field>
+  );
 
   return (
     <div
@@ -148,12 +317,12 @@ const PostRequest = () => {
       data-testid="post-request-page"
     >
       <PageMeta
-        title="Post a request | MyIsraelRental"
-        description="Tell owners and service providers what you're looking for."
+        title="Post to the marketplace | MyIsraelRental"
+        description="Say what you are looking for, or what you have available."
         path="/requests/post"
         noindex
       />
-      <div className="max-w-2xl mx-auto px-4 py-10">
+      <div className="max-w-4xl mx-auto px-4 py-10">
         <button
           type="button"
           onClick={() => navigate('/requests')}
@@ -165,283 +334,351 @@ const PostRequest = () => {
           {t('requests.backToBoard', 'Back to the board')}
         </button>
 
-        <h1
-          className="text-3xl font-bold mb-2"
-          style={{ fontFamily: 'var(--font-head)', color: 'var(--ink)' }}
-        >
-          {isOffer
-            ? t('requests.postTitleOffer', 'What do you have available?')
-            : t('requests.postTitle', 'What are you looking for?')}
-        </h1>
-        <p className="text-sm mb-8" style={{ color: 'var(--brand-muted)' }}>
-          {isOffer
-            ? t('requests.postSubOffer', 'Free to post. Renters reply through on-platform chat — your phone and email are never shown. For a full listing with photos and pricing, list it on Stays instead.')
-            : t('requests.postSub', 'Free to post. Owners and pros reply through on-platform chat — your phone and email are never shown.')}
-        </p>
-
-        <form onSubmit={submit} className="space-y-5" data-testid="post-request-form">
-          {/* Side picker. This sits ABOVE the type picker deliberately:
-              which side of the market you are on changes how every question
-              below reads, so it has to be answered first.
-
-              "I have" is the lightweight supply path — an owner saying a
-              place is coming free without building a full listing. Full
-              listings, with photos, price and a contract, still live on
-              /stays; this is for asking around first. */}
-          <div className="grid grid-cols-2 gap-3" data-testid="post-request-kind">
-            {[
-              { v: 'want', Icon: Search, label: t('requests.kindWant', "I'm looking for something") },
-              { v: 'have', Icon: KeyRound, label: t('requests.kindHave', 'I have something available') },
-            ].map(({ v, Icon, label }) => (
-              <button
-                key={v}
-                type="button"
-                onClick={() => set({ post_kind: v })}
-                aria-pressed={form.post_kind === v}
-                className="rounded-xl border p-4 text-start transition-colors"
-                style={{
-                  borderColor: form.post_kind === v ? 'var(--brand-primary)' : 'var(--brand-border)',
-                  background: form.post_kind === v ? 'rgb(var(--brand-primary-rgb) / 0.06)' : '#fff',
-                }}
-                data-testid={`post-request-kind-${v}`}
-              >
-                <Icon size={18} style={{ color: 'var(--brand-primary)' }} />
-                <span className="block mt-2 text-sm font-bold" style={{ color: 'var(--ink)' }}>{label}</span>
-              </button>
-            ))}
-          </div>
-
-          {/* Type picker — swaps the variant fields below. */}
-          <div className="grid grid-cols-2 gap-3">
-            {[
-              {
-                v: 'rental',
-                Icon: Home,
-                label: isOffer
-                  ? t('requests.typeRentalOffer', 'A place to rent out')
-                  : t('requests.typeRentalLong', "I'm looking for a place"),
-              },
-              {
-                v: 'service',
-                Icon: Wrench,
-                label: isOffer
-                  ? t('requests.typeServiceOffer', 'A service I provide')
-                  : t('requests.typeServiceLong', 'I need a service'),
-              },
-            ].map(({ v, Icon, label }) => (
-              <button
-                key={v}
-                type="button"
-                onClick={() => set({ request_type: v })}
-                aria-pressed={form.request_type === v}
-                className="rounded-xl border p-4 text-start transition-colors"
-                style={{
-                  borderColor: form.request_type === v ? 'var(--brand-primary)' : 'var(--brand-border)',
-                  background: form.request_type === v ? 'rgb(var(--brand-primary-rgb) / 0.06)' : '#fff',
-                }}
-                data-testid={`post-request-type-${v}`}
-              >
-                <Icon size={18} style={{ color: 'var(--brand-primary)' }} />
-                <span className="block mt-2 text-sm font-bold" style={{ color: 'var(--ink)' }}>{label}</span>
-              </button>
-            ))}
-          </div>
-
-          {/* Optional link to a listing the poster already has here. Only
-              on a supply-side post, and only if they actually have one -
-              an empty dropdown is a dead end that implies a missing step.
-              A picker of their own listings rather than a URL box: this
-              board is public, and a free link field on it would be a
-              phishing vector wearing our chrome. */}
-          {isOffer && myListings.length > 0 && (
-            <Field label={t('requests.fieldLinkListing', 'Link one of your listings (optional)')}>
-              <select
-                className={inputCls} style={{ borderColor: 'var(--brand-border)' }}
-                value={form.listing_id} onChange={(e) => set({ listing_id: e.target.value })}
-                data-testid="post-request-listing"
-              >
-                <option value="">{t('requests.noListingLink', 'No listing — just this post')}</option>
-                {myListings.map((p) => (
-                  <option key={p.id} value={p.id}>{p.title}</option>
-                ))}
-              </select>
-              <p className="mt-1.5 text-xs" style={{ color: 'var(--brand-muted)' }}>
-                {t('requests.linkListingHelp', 'Anyone reading your post can jump straight to the full listing, with photos and price.')}
-              </p>
-            </Field>
-          )}
-
-          <Field label={t('requests.fieldTitle', 'Title')}>
-            <input
-              className={inputCls} style={{ borderColor: 'var(--brand-border)' }}
-              value={form.title} onChange={(e) => set({ title: e.target.value })}
-              placeholder={isRental
-                ? t('requests.titlePhRental', 'e.g. 3-bed wanted in Ramat Eshkol')
-                : t('requests.titlePhService', 'e.g. Mover needed on the 14th')}
-              maxLength={140} data-testid="post-request-title"
-            />
-          </Field>
-
-          <Field label={t('requests.fieldDescription', 'Details')}>
-            <textarea
-              className={inputCls} style={{ borderColor: 'var(--brand-border)' }}
-              rows={5} value={form.description} onChange={(e) => set({ description: e.target.value })}
-              placeholder={t('requests.descriptionPh', 'The things that would make an offer right or wrong for you.')}
-              maxLength={4000} data-testid="post-request-description"
-            />
-          </Field>
-
-          <Field label={t('requests.fieldArea', 'Area')}>
-            <input
-              className={inputCls} style={{ borderColor: 'var(--brand-border)' }}
-              value={form.area} onChange={(e) => set({ area: e.target.value })}
-              placeholder={t('requests.areaPh', 'e.g. Jerusalem, Ramat Eshkol')}
-              maxLength={120} data-testid="post-request-area"
-            />
-          </Field>
-
-          {isRental ? (
-            <div className="grid sm:grid-cols-2 gap-4" data-testid="post-request-rental-fields">
-              <Field label={t('requests.fieldRentalKind', 'Rental type')}>
-                <select
-                  className={inputCls} style={{ borderColor: 'var(--brand-border)' }}
-                  value={form.rental_kind} onChange={(e) => set({ rental_kind: e.target.value })}
-                  data-testid="post-request-rental-kind"
-                >
-                  {RENTAL_KINDS.map((k) => (
-                    <option key={k} value={k}>{t(`requests.rentalKind_${k}`, k)}</option>
-                  ))}
-                </select>
-              </Field>
-              <Field label={t('requests.fieldBedrooms', 'Bedrooms (minimum)')}>
-                <input
-                  type="number" min="0" max="20"
-                  className={inputCls} style={{ borderColor: 'var(--brand-border)' }}
-                  value={form.bedrooms_min} onChange={(e) => set({ bedrooms_min: e.target.value })}
-                  data-testid="post-request-bedrooms"
-                />
-              </Field>
-              {/* C3 — the date question, with "I'm flexible" as a
-                  first-class answer rather than an empty field. For rentals
-                  it is the common case. */}
-              <Field label={t('requests.fieldMoveIn', 'Move-in date')}>
-                <DateModePills
-                  value={form.date_mode}
-                  onChange={(m) => set({ date_mode: m })}
-                  t={t}
-                  testidPrefix="post-request-date-mode"
-                />
-                {form.date_mode !== 'flexible' && (
-                  <input
-                    type="date"
-                    className={`${inputCls} mt-2`} style={{ borderColor: 'var(--brand-border)' }}
-                    value={form.move_in_date} onChange={(e) => set({ move_in_date: e.target.value })}
-                    data-testid="post-request-movein"
-                  />
-                )}
-              </Field>
-              <Field label={t('requests.fieldLease', 'Lease length (months)')}>
-                <input
-                  type="number" min="1" max="120"
-                  className={inputCls} style={{ borderColor: 'var(--brand-border)' }}
-                  value={form.lease_months} onChange={(e) => set({ lease_months: e.target.value })}
-                  data-testid="post-request-lease"
-                />
-              </Field>
-            </div>
-          ) : (
-            <div className="grid sm:grid-cols-2 gap-4" data-testid="post-request-service-fields">
-              <Field label={t('requests.fieldCategory', 'Category')}>
-                <select
-                  className={inputCls} style={{ borderColor: 'var(--brand-border)' }}
-                  value={form.category} onChange={(e) => set({ category: e.target.value })}
-                  data-testid="post-request-category"
-                >
-                  <option value="">{t('requests.pickCategory', 'Pick a category…')}</option>
-                  {categories.map((c) => (
-                    <option key={c.slug} value={c.slug}>{c.label}</option>
-                  ))}
-                </select>
-              </Field>
-              <Field label={t('requests.fieldPreferredDate', 'Preferred date')}>
-                <DateModePills
-                  value={form.date_mode}
-                  onChange={(m) => set({ date_mode: m })}
-                  t={t}
-                  testidPrefix="post-request-date-mode"
-                />
-                {form.date_mode !== 'flexible' && (
-                  <input
-                    type="date"
-                    className={`${inputCls} mt-2`} style={{ borderColor: 'var(--brand-border)' }}
-                    value={form.preferred_date} onChange={(e) => set({ preferred_date: e.target.value })}
-                    data-testid="post-request-preferred-date"
-                  />
-                )}
-              </Field>
-            </div>
-          )}
-
-          <Field label={t('requests.fieldBudget', 'Budget')}>
-            <div className="flex flex-wrap gap-2 items-center">
-              {['open', 'fixed'].map((v) => (
-                <button
-                  key={v} type="button" onClick={() => set({ budget_type: v })}
-                  aria-pressed={form.budget_type === v}
-                  className="px-4 py-2 rounded-full text-sm font-semibold border transition-colors"
-                  style={{
-                    borderColor: form.budget_type === v ? 'var(--brand-primary)' : 'var(--brand-border)',
-                    background: form.budget_type === v ? 'var(--brand-primary)' : '#fff',
-                    color: form.budget_type === v ? '#fff' : 'var(--ink)',
-                  }}
-                  data-testid={`post-request-budget-${v}`}
-                >
-                  {v === 'open' ? t('requests.budgetOpen', 'Open to offers') : t('requests.budgetFixed', 'I have a budget')}
-                </button>
-              ))}
-              {form.budget_type === 'fixed' && (
-                <>
-                  <input
-                    type="number" min="1"
-                    className="rounded-xl border bg-white px-3 py-2 text-sm w-32 outline-none"
-                    style={{ borderColor: 'var(--brand-border)' }}
-                    value={form.budget_amount} onChange={(e) => set({ budget_amount: e.target.value })}
-                    placeholder="8000" data-testid="post-request-budget-amount"
-                  />
-                  <select
-                    className="rounded-xl border bg-white px-3 py-2 text-sm outline-none"
-                    style={{ borderColor: 'var(--brand-border)' }}
-                    value={form.budget_currency} onChange={(e) => set({ budget_currency: e.target.value })}
-                    data-testid="post-request-budget-currency"
+        <div className="grid gap-8 md:grid-cols-[210px_1fr]">
+          {/* Step rail. Airtasker lists the steps rather than showing a bare
+              "3 of 5", because knowing what is still coming is what makes a
+              multi-step form feel shorter than one long one rather than
+              longer. Horizontal and scrollable on a phone, where a vertical
+              rail would push the actual question below the fold. */}
+          <ol
+            className="flex md:flex-col gap-2 overflow-x-auto md:overflow-visible scrollbar-hide"
+            data-testid="post-request-steps"
+          >
+            {STEPS.map((s, i) => {
+              const done = i < step;
+              const active = i === step;
+              return (
+                <li key={s.key} className="shrink-0">
+                  <button
+                    type="button"
+                    // Backwards only. Jumping forward would skip the
+                    // validation that makes each step's error message
+                    // arrive at the right moment.
+                    onClick={() => { if (i < step) setStep(i); }}
+                    disabled={i > step}
+                    aria-current={active ? 'step' : undefined}
+                    className="flex items-center gap-2 rounded-full md:rounded-xl px-3 py-2 text-[13px] font-semibold w-full text-start transition-colors disabled:cursor-default"
+                    style={{
+                      background: active ? 'rgb(var(--brand-primary-rgb) / 0.08)' : 'transparent',
+                      color: active || done ? 'var(--brand-primary)' : 'var(--brand-muted)',
+                    }}
+                    data-testid={`post-request-step-${s.key}`}
                   >
-                    <option value="ILS">₪ ILS</option>
-                    <option value="USD">$ USD</option>
-                  </select>
+                    <span
+                      className="inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[11px]"
+                      style={{
+                        background: done || active ? 'var(--brand-primary)' : 'rgba(35,32,27,.08)',
+                        color: done || active ? '#fff' : 'var(--brand-muted)',
+                      }}
+                    >
+                      {done ? <Check size={11} aria-hidden="true" /> : i + 1}
+                    </span>
+                    <span className="whitespace-nowrap md:whitespace-normal">{s.label}</span>
+                  </button>
+                </li>
+              );
+            })}
+          </ol>
+
+          <form onSubmit={submit} data-testid="post-request-form">
+            <h1
+              className="text-2xl sm:text-3xl font-bold mb-2"
+              style={{ fontFamily: 'var(--font-head)', color: 'var(--ink)' }}
+              data-testid="post-request-heading"
+            >
+              {current.key === 'what' && (isOffer
+                ? t('requests.postTitleOffer', 'What do you have available?')
+                : t('requests.postTitle', 'What are you looking for?'))}
+              {current.key === 'about' && (isOffer
+                ? t('requests.qAboutOffer', 'Describe what you have')
+                : t('requests.qAbout', 'In a few words, what do you need?'))}
+              {current.key === 'where' && t('requests.qWhere', 'Where?')}
+              {current.key === 'when' && t('requests.qWhen', 'The specifics')}
+              {current.key === 'budget' && (isOffer
+                ? t('requests.qBudgetOffer', 'What are you asking?')
+                : t('requests.qBudget', 'What is your budget?'))}
+            </h1>
+            <p className="text-sm mb-7" style={{ color: 'var(--brand-muted)' }}>
+              {isOffer
+                ? t('requests.postSubOffer', 'Free to post. Renters reply through on-platform chat — your phone and email are never shown. For a full listing with photos and pricing, list it on Stays instead.')
+                : t('requests.postSub', 'Free to post. Owners and pros reply through on-platform chat — your phone and email are never shown.')}
+            </p>
+
+            <div className="space-y-5">
+              {current.key === 'what' && (
+                <>
+                  <div className="grid sm:grid-cols-2 gap-3" data-testid="post-request-kind">
+                    <ChoiceCard
+                      active={form.post_kind === 'want'} Icon={Search}
+                      label={t('requests.kindWant', "I'm looking for something")}
+                      sub={t('requests.kindWantSub', 'Owners and pros come to you')}
+                      onClick={() => set({ post_kind: 'want' })}
+                      testid="post-request-kind-want"
+                    />
+                    <ChoiceCard
+                      active={form.post_kind === 'have'} Icon={KeyRound}
+                      label={t('requests.kindHave', 'I have something available')}
+                      sub={t('requests.kindHaveSub', 'No photos or price needed')}
+                      onClick={() => set({ post_kind: 'have' })}
+                      testid="post-request-kind-have"
+                    />
+                  </div>
+                  <div className="grid sm:grid-cols-2 gap-3">
+                    <ChoiceCard
+                      active={isRental} Icon={Home}
+                      label={isOffer
+                        ? t('requests.typeRentalOffer', 'A place to rent out')
+                        : t('requests.typeRentalLong', "I'm looking for a place")}
+                      onClick={() => set({ request_type: 'rental' })}
+                      testid="post-request-type-rental"
+                    />
+                    <ChoiceCard
+                      active={!isRental} Icon={Wrench}
+                      label={isOffer
+                        ? t('requests.typeServiceOffer', 'A service I provide')
+                        : t('requests.typeServiceLong', 'I need a service')}
+                      onClick={() => set({ request_type: 'service' })}
+                      testid="post-request-type-service"
+                    />
+                  </div>
+                </>
+              )}
+
+              {current.key === 'about' && (
+                <>
+                  <Field label={t('requests.fieldTitle', 'Title')}>
+                    <input
+                      className={inputCls} style={{ borderColor: 'var(--brand-border)' }}
+                      value={form.title} onChange={(e) => set({ title: e.target.value })}
+                      placeholder={isRental
+                        ? t('requests.titlePhRental', 'e.g. 3-bed wanted in Ramat Eshkol')
+                        : t('requests.titlePhService', 'e.g. Mover needed on the 14th')}
+                      maxLength={140} data-testid="post-request-title"
+                    />
+                  </Field>
+                  <Field label={t('requests.fieldDescription', 'Details')}>
+                    <textarea
+                      className={inputCls} style={{ borderColor: 'var(--brand-border)' }}
+                      rows={5} value={form.description} onChange={(e) => set({ description: e.target.value })}
+                      placeholder={isOffer
+                        ? t('requests.descriptionPhOffer', 'What makes it worth a look — the floor, the light, when it is free.')
+                        : t('requests.descriptionPh', 'The things that would make an offer right or wrong for you.')}
+                      maxLength={4000} data-testid="post-request-description"
+                    />
+                  </Field>
+                </>
+              )}
+
+              {current.key === 'where' && (
+                <Field
+                  label={t('requests.fieldArea', 'Area')}
+                  hint={t('requests.areaHint', 'A neighbourhood is more useful than a city — it is how people search here.')}
+                >
+                  <input
+                    className={inputCls} style={{ borderColor: 'var(--brand-border)' }}
+                    value={form.area} onChange={(e) => set({ area: e.target.value })}
+                    placeholder={t('requests.areaPh', 'e.g. Jerusalem, Ramat Eshkol')}
+                    maxLength={120} data-testid="post-request-area"
+                  />
+                </Field>
+              )}
+
+              {current.key === 'when' && (
+                isRental ? (
+                  <div className="grid sm:grid-cols-2 gap-4" data-testid="post-request-rental-fields">
+                    <Field label={t('requests.fieldRentalKind', 'Rental type')}>
+                      <select
+                        className={inputCls} style={{ borderColor: 'var(--brand-border)' }}
+                        value={form.rental_kind} onChange={(e) => set({ rental_kind: e.target.value })}
+                        data-testid="post-request-rental-kind"
+                      >
+                        {RENTAL_KINDS.map((k) => (
+                          <option key={k} value={k}>{t(`requests.rentalKind_${k}`, k)}</option>
+                        ))}
+                      </select>
+                    </Field>
+                    <Field label={t('requests.fieldBedrooms', 'Bedrooms (minimum)')}>
+                      <input
+                        type="number" min="0" max="20"
+                        className={inputCls} style={{ borderColor: 'var(--brand-border)' }}
+                        value={form.bedrooms_min} onChange={(e) => set({ bedrooms_min: e.target.value })}
+                        data-testid="post-request-bedrooms"
+                      />
+                    </Field>
+                    {dateField}
+                    <Field label={t('requests.fieldLease', 'Lease length (months)')}>
+                      <input
+                        type="number" min="1" max="120"
+                        className={inputCls} style={{ borderColor: 'var(--brand-border)' }}
+                        value={form.lease_months} onChange={(e) => set({ lease_months: e.target.value })}
+                        data-testid="post-request-lease"
+                      />
+                    </Field>
+                  </div>
+                ) : (
+                  <div className="grid sm:grid-cols-2 gap-4" data-testid="post-request-service-fields">
+                    <Field label={t('requests.fieldCategory', 'Category')}>
+                      <select
+                        className={inputCls} style={{ borderColor: 'var(--brand-border)' }}
+                        value={form.category} onChange={(e) => set({ category: e.target.value })}
+                        data-testid="post-request-category"
+                      >
+                        <option value="">{t('requests.pickCategory', 'Pick a category…')}</option>
+                        {categories.map((c) => (
+                          <option key={c.slug} value={c.slug}>{c.label}</option>
+                        ))}
+                      </select>
+                    </Field>
+                    {dateField}
+                  </div>
+                )
+              )}
+
+              {current.key === 'budget' && (
+                <>
+                  <Field label={t('requests.fieldBudget', 'Budget')}>
+                    <div className="flex flex-wrap gap-2 items-center">
+                      {['open', 'fixed'].map((v) => (
+                        <button
+                          key={v} type="button" onClick={() => set({ budget_type: v })}
+                          aria-pressed={form.budget_type === v}
+                          className="px-4 py-2 rounded-full text-sm font-semibold border transition-colors"
+                          style={{
+                            borderColor: form.budget_type === v ? 'var(--brand-primary)' : 'var(--brand-border)',
+                            background: form.budget_type === v ? 'var(--brand-primary)' : '#fff',
+                            color: form.budget_type === v ? '#fff' : 'var(--ink)',
+                          }}
+                          data-testid={`post-request-budget-${v}`}
+                        >
+                          {v === 'open' ? t('requests.budgetOpen', 'Open to offers') : t('requests.budgetFixed', 'I have a budget')}
+                        </button>
+                      ))}
+                      {form.budget_type === 'fixed' && (
+                        <>
+                          <input
+                            type="number" min="1"
+                            className="rounded-xl border bg-white px-3 py-2 text-sm w-32 outline-none"
+                            style={{ borderColor: 'var(--brand-border)' }}
+                            value={form.budget_amount} onChange={(e) => set({ budget_amount: e.target.value })}
+                            placeholder="8000" data-testid="post-request-budget-amount"
+                          />
+                          <select
+                            className="rounded-xl border bg-white px-3 py-2 text-sm outline-none"
+                            style={{ borderColor: 'var(--brand-border)' }}
+                            value={form.budget_currency} onChange={(e) => set({ budget_currency: e.target.value })}
+                            data-testid="post-request-budget-currency"
+                          >
+                            <option value="ILS">₪ ILS</option>
+                            <option value="USD">$ USD</option>
+                          </select>
+                        </>
+                      )}
+                    </div>
+                  </Field>
+
+                  {/* Optional link to a listing the poster already has here.
+                      Only on a supply-side post, and only if they actually
+                      have one — an empty dropdown is a dead end that implies
+                      a missing step. A picker of their own listings rather
+                      than a URL box: this board is public, and a free link
+                      field on it would be a phishing vector wearing our
+                      chrome. */}
+                  {isOffer && myListings.length > 0 && (
+                    <Field label={t('requests.fieldLinkListing', 'Link one of your listings (optional)')}>
+                      <select
+                        className={inputCls} style={{ borderColor: 'var(--brand-border)' }}
+                        value={form.listing_id} onChange={(e) => set({ listing_id: e.target.value })}
+                        data-testid="post-request-listing"
+                      >
+                        <option value="">{t('requests.noListingLink', 'No listing — just this post')}</option>
+                        {myListings.map((p) => (
+                          <option key={p.id} value={p.id}>{p.title}</option>
+                        ))}
+                      </select>
+                      <p className="mt-1.5 text-xs" style={{ color: 'var(--brand-muted)' }}>
+                        {t('requests.linkListingHelp', 'Anyone reading your post can jump straight to the full listing, with photos and price.')}
+                      </p>
+                    </Field>
+                  )}
                 </>
               )}
             </div>
-          </Field>
 
-          <div className="pt-2">
-            <button
-              type="submit"
-              disabled={saving}
-              className="btn-blue-solid inline-flex items-center gap-2 disabled:opacity-60"
-              data-testid="post-request-submit"
-            >
-              {saving && <Loader2 className="animate-spin" size={15} />}
-              {t('requests.submit', 'Post my request')}
-            </button>
-            {missing && (
-              <p className="text-xs mt-2" style={{ color: 'var(--brand-muted)' }} data-testid="post-request-hint">
-                {missing}
+            {isLast && !token && (
+              <p
+                className="mt-6 rounded-xl border px-4 py-3 text-xs"
+                style={{ borderColor: 'var(--brand-border)', background: '#fff', color: 'var(--brand-muted)' }}
+                data-testid="post-request-signin-note"
+              >
+                {t('requests.signInWhy', 'You will be asked to create an account when you post — that is how replies reach you, and it takes a moment. Nothing you have written is lost.')}
               </p>
             )}
-            <p className="text-[11px] mt-3" style={{ color: 'var(--brand-muted)' }}>
-              {t('requests.expiryNote', 'Requests stay on the board for 30 days. You can renew or mark it found at any time.')}
-            </p>
-          </div>
-        </form>
+            {restored && token && (
+              <p
+                className="mt-6 rounded-xl border px-4 py-3 text-xs"
+                style={{ borderColor: 'var(--brand-border)', background: '#fff', color: 'var(--ink)' }}
+                data-testid="post-request-restored"
+              >
+                {t('requests.draftRestored', 'Welcome back — your post is exactly as you left it. Press post to publish it.')}
+              </p>
+            )}
+            <div className="flex items-center gap-3 mt-8">
+              {step > 0 && (
+                <button
+                  type="button" onClick={back}
+                  className="btn btn-ghost !py-[9px] !px-5 !text-sm inline-flex items-center gap-1.5"
+                  data-testid="post-request-prev"
+                >
+                  <ArrowLeft size={14} className="rtl:rotate-180" aria-hidden="true" />
+                  {t('requests.wizardBack', 'Back')}
+                </button>
+              )}
+              {/* Distinct `key`s are load-bearing, not tidiness. Without
+                  them React sees a <button> at the same position in the
+                  same parent and REUSES the DOM node, mutating type from
+                  "button" to "submit" in place. The click that advanced the
+                  step is still mid-flight, so the browser then runs the
+                  default action against an element that has become a submit
+                  button — and the form posted itself the moment you reached
+                  the last step. Two keys, two nodes, no reuse. */}
+              {isLast ? (
+                <button
+                  key="submit"
+                  type="submit" disabled={saving}
+                  className="btn-blue-solid inline-flex items-center gap-2 disabled:opacity-60"
+                  data-testid="post-request-submit"
+                >
+                  {saving && <Loader2 size={15} className="animate-spin" aria-hidden="true" />}
+                  {!token
+                    ? t('requests.submitSignedOut', 'Create an account and post')
+                    : isOffer
+                      ? t('requests.submitOffer', 'Post it')
+                      : t('requests.submit', 'Post my request')}
+                </button>
+              ) : (
+                <button
+                  key="next"
+                  type="button" onClick={next}
+                  className="btn-blue-solid inline-flex items-center gap-2"
+                  data-testid="post-request-next"
+                >
+                  {t('requests.wizardNext', 'Next')}
+                  <ArrowRight size={14} className="rtl:rotate-180" aria-hidden="true" />
+                </button>
+              )}
+              <span className="text-xs" style={{ color: 'var(--brand-muted)' }}>
+                {t('requests.stepCount', 'Step {{n}} of {{total}}', { n: step + 1, total: STEPS.length })}
+              </span>
+            </div>
+            {/* The blocker is shown rather than only toasted, so someone who
+                dismissed the toast can still see why Next will not move. */}
+            {blocker && (
+              <p className="text-xs mt-2" style={{ color: 'var(--brand-muted)' }} data-testid="post-request-blocker">
+                {blocker}
+              </p>
+            )}
+          </form>
+        </div>
       </div>
     </div>
   );
