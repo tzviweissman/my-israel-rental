@@ -37,7 +37,8 @@ Adopt this palette (matches the mockups exactly). Wire it as CSS variables / the
 - Accent (gold): `--gold:#C9A227`, gold text on light `#8A6A14`, gold display `#A9831C`
 - Neutrals: bg (limestone) `#EFE9DC`, surface `#FFFFFF`, ink `#23201B`, muted `#6B6459`, border `#E1D8C6`
 - **Functional green (success only — do NOT use as a brand accent):** "Open"/available status `#2e7d4f` on `#e6f4ea`; "Verified" badge `#1F8A50` on `#E3F3EA`
-- Primary buttons: solid `--primary`, white text. Accent buttons: frosted **glass gold** — `background:rgba(172,134,28,.64)`, `color:#fff`, `border:1.5px solid rgba(201,162,39,.85)`, `backdrop-filter:blur(10px)`, `text-shadow:0 1px 2px rgba(50,36,0,.5)`; on dark panels bump to `rgba(172,134,28,.72)`.
+- Primary buttons: solid `--primary`, white text. Accent buttons: **solid gold with ink text** — `background:var(--gold)`, `color:var(--ink)`, `border:1.5px solid var(--gold)`, no blur, no text-shadow, `font-weight:600`; same on dark panels.
+  **Superseded the frosted glass-gold + white text this document originally specified** (`rgba(172,134,28,.64)` / `#fff` / `backdrop-filter:blur(10px)`). That version measured **2.27:1 on limestone** — a clear AA failure — because a frosted fill takes a tint from whatever is behind it, so on the light page the button lightened exactly where the white text needed it dark; the text-shadow was disguising it. On dark it was fine at 4.85:1, which is why it survived being mocked up. Ink on solid gold is **6.71:1 on both** surfaces. Decided in A2 of `research-driven-changes.md`; the live values are in `design-tokens.css`.
 - Fonts: Playfair Display (headings), Manrope (body); for Hebrew use Frank Ruhl Libre (headings) + Assistant (body) scoped to `[dir="rtl"]`.
 
 Logo (`components/Navigation.js` + footer): the raw gold `brand/logo-mark.png` floating at ~44px with a drop shadow (NO navy tile), "MyIsraelRental" wordmark to its right in Playfair — copy the `.lg` markup/CSS from any preview file. It lives inside the glass nav (see the design-system block above). Footer (dark bg) uses `logo-gold-blue-dark.png`. Add the PNGs to frontend assets and a favicon from `logo-mark.png`.
@@ -56,7 +57,17 @@ Logo (`components/Navigation.js` + footer): the raw gold `brand/logo-mark.png` f
 
 **2c. Services (`frontend/src/pages/Services.jsx`)** — restyle to `services-preview.html`: glass nav, dark band, search panel, category grid (use the REAL slugs from `servicesCatalog.js`), provider rows (Verified badge, rating, Message → existing chat), CTA band. Again a restyle over existing logic.
 
+  **Amendments from the marketplace research (Group D of `research-driven-changes.md`), to be built as part of this restyle rather than separately:**
+  - **D1 — free-text intake is the PRIMARY control, above the category grid.** Thumbtack leads with "Describe your project or problem" rather than a taxonomy, because a person with a problem does not know which of our fifteen categories it belongs to. Placeholder: *"Describe what you need — a mover next week, AC repair in Ramat Eshkol."* The category grid stays, demoted to the secondary path beneath it. Free text must route somewhere real — either search or a pre-filled request — before it ships; a box that only looks like an entry point is worse than the grid alone.
+  - **D2 — the search control sticks on scroll**, as Thumbtack's does, so it stays reachable the whole way down. Watch the glass nav: two stacked sticky elements on a phone eat the viewport. Sticky below ~768px only if it still leaves room for results.
+
 **2d. Shared glass nav** — implement once in `components/Navigation.js` (glass bubbles + floating gold logo per the design-system block above) and use on every page. Links go to dedicated routes: `/stays`, `/services`, `/requests` — never in-page anchors on `/`.
+
+**2e. Supply-side pages (`/why-host`, `/join`)** — from Kindred and the supply-side study (Group E of `research-driven-changes.md`). B2 (the fee position as a headline) is already built on both pages; these are the remainder.
+
+- **E1 — the supply CTA is a question, not a command.** Kindred's button reads **"Is my home a fit?"** rather than "List your property." A question invites self-qualification; a command demands commitment from someone who has not decided yet. Host: *"Would my place work here?"*; provider: *"Would my trade get work here?"* Keep the direct action available for people who have already decided — this replaces the *primary* CTA, it does not remove the direct path.
+- **E2 — name the first-timer's anxiety.** Kindred: "Full service support, tailored to **first-time hosts**." Our audience is largely owners who have never listed anywhere and suspect it is complicated and legally risky. Build a `/why-host` section around exactly that, using the reassurances we can actually back: free to list, no booking fees, contract signing built in, EN↔HE auto-translated chat, iCal sync, and the Requests board as inbound demand that arrives without them doing anything.
+- **E3 — the finale deserves hero-level care** (peak-end rule: people remember the peak and the ending). Review the cinematic finale as a second hero — type scale, spacing, and the two CTAs. **This is where the A3 question lands:** the finale currently has a blue and a gold button side by side in one container, which the preview specifies and Tzvi has chosen to keep. Decide it here, with the section's type and spacing in front of you, rather than in isolation.
 
 ## Phase 3 — "Housing & Services Requests" demand board (new feature)
 
@@ -76,6 +87,17 @@ Frontend: new routes in `App.js` (`/requests`, `/requests/:id`, `/requests/post`
 Anti-spam/privacy: signed-in-only post + contact, per-user open cap, create rate-limit, one-tap Report with auto-hide at a threshold, and never return seeker PII from public endpoints.
 
 ---
+
+### Amendments from Airtasker (Group C of `research-driven-changes.md`)
+
+Airtasker is this exact product already shipped, so these are observations of a working two-sided board rather than preferences. Fold them into the build above; they are not a separate phase.
+
+- **C1 — show the response count in the status row.** `Open · 2 responses · expires in 12 days`, not just `Open · expires in 12 days`. The data already exists: `contact_count` is incremented by `POST …/contact`. This is the strongest signal a two-sided board can display, because a board that looks alive attracts supply. Show the clause only when the count is above zero — "0 responses" advertises the opposite of what this is for.
+- **C2 — posting is a wizard, not one long form.** Airtasker's order: **Title & date → Location → Details → Budget**, one question per screen, steps listed in a left rail, plain-language prompts with real example placeholders ("In a few words, what do you need done?" / *e.g. Help move my sofa*). Short questions also translate cleanly into Hebrew; long compound form labels do not. Affects `PostRequest.jsx` and the `requests` i18n namespace.
+- **C3 — "I'm flexible" is a first-class date option**, beside "On date" and "Before date", offered as **pills rather than a dropdown**. For rentals this is the common case, and burying it in a select makes the uncommon case look like the default.
+- **C4 — the form can be started before signing in.** Posting still requires an account; only the timing of the wall changes. Collect the request, then ask for the account at submit, preserving the draft across the sign-in redirect (sessionStorage keyed to the draft, restored after the auth round-trip). This contradicts the "signed-in users only can post" line above **only** on timing — the confirmed rule that a post belongs to a real account is unchanged.
+- **C5 — map view for Requests**, reusing the Stays List/Map toggle component rather than a second implementation. Demand plotted geographically is directly useful to an owner working one neighbourhood.
+- **C6 — card anatomy:** title max two lines; type badge; structured chips; status row; poster display name + Verified. Airtasker's card is `border-radius:12px`, `padding:16px`, **no shadow**. Ours uses our 18px radius and soft shadow per the design system — but note their flat card reads as more serious, and if the board ever feels toy-like, the shadow is the first thing to try removing.
 
 Suggested MVP order within Phase 3: structured posting + filterable board + chat-only contact + 30-day expiry/renew/found + report, then the owner-match daily digest. Ask me before enabling anything that calls the Anthropic API at scale (the Hebrew auto-translation) or writes to production.
 

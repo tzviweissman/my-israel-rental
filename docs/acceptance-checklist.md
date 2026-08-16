@@ -34,12 +34,22 @@
 - [ ] Routes `/requests`, `/requests/:id`, `/requests/post` (post gated to signed-in). New module, not overloading `marketplace_jobs`.
 - [ ] Post form switches fields by type (rental vs service); posting is signed-in-only.
 - [ ] Contact is chat-only ("Message seeker"); no phone/email ever exposed in the UI or API responses.
-- [ ] Cards show type badge, structured chips, poster + Verified, and status row (Open · expires in N days).
+- [ ] Cards show type badge, structured chips, poster + Verified, and status row — including the **response count** when it is above zero (`Open · 2 responses · expires in 12 days`). Never render "0 responses" (C1).
 - [ ] Lifecycle works: mark-as-found, renew, 30-day auto-expire (soft-expire, not a TTL delete).
 - [ ] Filters are URL-driven; nav "Requests" item + cross-links from Stays/Services empty states.
-- [ ] i18n keys added to `en.js` AND `he.js`.
+- [ ] i18n keys added to `en.js` AND `he.js`. **Verify by rendering, not by grepping** — a missing key falls back to the English default string silently, which is how the entire home-page finale shipped in English to Hebrew readers.
+- [ ] Posting is a step-by-step wizard with example placeholders, not one long form (C2); "I'm flexible" is a date **pill** beside On/Before (C3).
+- [ ] The form can be started signed-out, and the draft survives the sign-in redirect (C4). Submitting still requires an account.
+- [ ] Map view reuses the Stays List/Map component rather than a second implementation (C5).
+
+## Numbers shown to users — any phase
+- [ ] Every count on a page comes from the database at runtime. **No figure is typed into source or copy.** The finale strip shipped "1,200+ active rentals / 19 cities / 450+ verified pros" from the preview's placeholders; the real numbers were 196, Jerusalem-only, and three.
+- [ ] A clause whose number isn't available is **absent**, not estimated or rounded up.
+- [ ] Before counting a field, check what it actually holds. `area` looks like a city and is a neighbourhood; the same neighbourhood appears under several spellings, and counting raw distinct values inflated 28 to 40.
 
 ## Every phase
 - [ ] Screenshot matches the mockup (spacing, colors, radii, type scale).
+- [ ] **Verified on the rendered page, not in the stylesheet.** Four separate rules in this project have looked correct in CSS and done nothing — beaten on specificity or source order by `App.css`, by `.finale p`, or by a Tailwind utility. Check the computed value in the browser.
+- [ ] Font weights: confirm the face is actually loaded (`document.fonts.check`), not just requested. A browser never synthesises a *lighter* weight — it silently substitutes the nearest one while `getComputedStyle` keeps reporting what you asked for.
 - [ ] No console errors; Lighthouse a11y ≥ 90; keyboard focus states visible.
 - [ ] Diff shown to the user; no unrelated files touched; CLAUDE.md guardrails respected (no secrets printed, no prod writes/deploys without approval).

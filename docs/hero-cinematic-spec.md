@@ -142,3 +142,16 @@ The two CTA buttons deep-link like the rest of the home page: "Explore rentals" 
 **Social links.** `href="#"` are placeholders and will fail the a11y gate. Use the real profile URLs (or drop the rail until they exist); keep the `aria-label`s.
 
 **Hebrew headings render in the wrong font (real, live bug).** ~69 headings across ~45 files set `style={{ fontFamily: 'Playfair Display' }}` **inline**. Inline styles beat every stylesheet selector, so `[dir="rtl"] h1 { font-family: … }` can NEVER reach them — and Playfair has no Hebrew glyphs, so RTL headings fall back to a system serif. The tokens file therefore swaps the font **variables** under `[dir="rtl"]` instead. For this to work, any heading you touch (including the hero `h1`) must read the variable, not the literal face: use `style={{ fontFamily: 'var(--font-head)' }}` (body copy → `var(--font-body)`), never `'Playfair Display'` inline. **Verify:** toggle `dir="rtl"` and confirm a heading's computed `fontFamily` actually says "Frank Ruhl Libre". (A repo-wide sweep of those 69 inline sites is the real fix; at minimum, don't add new ones.)
+
+---
+
+## Prompting for generated assets (Group F of `research-driven-changes.md`)
+
+**Applies only when regenerating cinematic media** — do not go re-cut existing assets for this. From the Vesper build (Jason Lee), whose prompt produced markedly more coherent output than ours did.
+
+- **F1 — every asset prompt carries an ART DIRECTION block, and the block includes BANS.** State the exact hex palette and the named typefaces, then say plainly: *"No decorative gradients, no emoji, no stock clichés."* The bans are the part that works. A prompt that only describes what you want leaves the model free to fill the gaps with the average of its training data, which is precisely the AI-slop look; naming what is forbidden is what stops the drift.
+- **F2 — "Keep the SAME building / room across every shot."** Ours never said this, and that is why the exterior and the interior in the cinematic scenes do not read as one property. It is one sentence and it is the difference between a film and a mood board.
+- **F3 — loop spec for hero video:** *"locked exposure so lights never flicker"* plus a **1.2-second opacity crossfade at the loop point**. This is a better fix than the current one. We removed `loop` entirely because the clips visibly rewound — which solved the rewind by giving up the loop. A crossfade keeps both.
+- **F4 — self-host before production, and generate through our own API keys** (kie.ai / fal.ai). The hosting half is done (see Phase 4 — all 20 assets are in our Cloudinary). The generation half is not: owning the generation avoids the content-rights question that is still open on the Higgsfield assets, rather than merely relocating it.
+
+**And the standing rule from the rest of this document applies to prompts too:** verify the output on the rendered page at 1280/768/375 in both directions before calling it done. Every source studied for these techniques skipped mobile, accessibility, RTL, and what the thing costs on the second attempt.

@@ -6,6 +6,25 @@ Source: live inspection of Plum Guide, Kindred, Thumbtack, Airtasker, and the Ve
 
 Every item is independently shippable. Do them in the numbered order; stop and show a screenshot diff after each group.
 
+> **Status (2026-08-16).** Groups A and B are **built**. C, D, E and F are **folded into the build documents** and are not tracked here any more — this file is the reasoning, those files are the plan:
+>
+> | | where it went | state |
+> |---|---|---|
+> | **A1** display weight | `design-tokens.css`, `App.css` | built — 600 small / 400 large, Hebrew one notch heavier at each |
+> | **A2** gold button | `design-tokens.css` | built — ink on solid gold, chosen by Tzvi after the comparison |
+> | **A3** one filled element | — | **audited, no change.** Both competing pairs are preview-specified; Tzvi ruled: leave them. Revisit in E3 |
+> | **B1** trust line | `components/stays/TrustLine.jsx`, `/api/properties/stats/trust` | built — real counts, no invented figures |
+> | **B2** price as headline | `/why-host`, `/join`, finale | built — and three invented figures deleted from the finale strip |
+> | **C1–C6** requests board | `redesign-and-wanted-board-prompt.md` → Phase 3 | folded |
+> | **D1–D2** services | same doc → **2c** | folded |
+> | **E1–E3** supply side | same doc → new **2e** | folded |
+> | **F1–F4** asset prompts | `hero-cinematic-spec.md` | folded |
+>
+> Two things found while building that were not in this brief, and matter more than most of what was:
+>
+> 1. **The finale shipped three invented numbers** — "1,200+ active rentals", "19 cities", "450+ verified pros", straight from the preview file's placeholders. Real: 196, Jerusalem only, three providers. Not deployed, but one push away from the front page.
+> 2. **The entire finale had no Hebrew at all.** `home.finale.*` had no catalogue entries, so it rendered in English for Hebrew readers. Both fixed in the B2 commit.
+
 ---
 
 ## Group A — Type and buttons (global, small, highest ratio of effect to effort)
@@ -23,7 +42,7 @@ Every item is independently shippable. Do them in the numbered order; stop and s
 
 **A3. One filled element per view.** Every site studied has exactly one filled button per screen region. Audit Stays, Services and the finale for competing filled buttons; demote extras to ghost/outline.
 
-> **Status: audited, nothing demoted — needs a ruling.** Measured every filled
+> **Status: audited, nothing demoted. Tzvi ruled: leave them.** Measured every filled
 > control on all three pages at 1280 (backend and local Mongo up, so the pages
 > had real data; an earlier pass against an empty Stays was measuring an error
 > state).
@@ -41,9 +60,10 @@ Every item is independently shippable. Do them in the numbered order; stop and s
 >   weaker case for calling them competing at all.
 >
 > Demoting either would override the preview files, which the brief itself puts
-> above this document. So this is escalated rather than applied. The finale pair
-> is also in scope for **E3**, and deciding it there — with type scale and
-> spacing — is probably better than deciding it here in isolation.
+> above this document, so it was escalated rather than applied — and the ruling
+> was to leave both as the previews draw them. Closed. The finale pair remains
+> in **E3**'s scope, where it can be reconsidered with the section's type and
+> spacing in view rather than in isolation.
 
 ---
 
