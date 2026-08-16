@@ -362,6 +362,37 @@ async def geocode_gig_area_bg(gig_id: str, area_text: str) -> None:
         logger.error("geocode_gig_area_bg(%s) failed: %s", gig_id, e)
 
 
+async def geocode_area_into(collection_name: str, doc_id: str, area_text: str) -> None:
+    """Generic version of the above: geocode `area_text` and stamp the
+    result onto any collection's document.
+
+    Added for the Requests board, which needed exactly what gigs already
+    had. Rather than a third near-identical copy, this takes the collection
+    by name; `geocode_gig_area_bg` stays as it is because it is called from
+    two places and its name is what those call sites read like.
+
+    Fire-and-forget, same as the gig helper: Nominatim's 1-per-second limit
+    must never sit between a user and their POST response.
+    """
+    try:
+        coords = await geocode_area(area_text)
+        patch: dict = {"geocoded_at": time.time()}
+        if coords:
+            patch["lat"], patch["lng"] = coords[0], coords[1]
+            patch["geocode_miss"] = False
+        else:
+            # An explicit miss, not a silent absence. Without this flag a
+            # never-geocoded document and an ungeocodable one look
+            # identical, and a backfill would retry the impossible ones
+            # every time it ran.
+            patch["geocode_miss"] = True
+            patch["lat"] = None
+            patch["lng"] = None
+        await db[collection_name].update_one({"_id": doc_id}, {"$set": patch})
+    except Exception as e:  # noqa: BLE001
+        logger.error("geocode_area_into(%s, %s) failed: %s", collection_name, doc_id, e)
+
+
 async def geocode_property_bg(
     property_id: str,
     address: Optional[str],

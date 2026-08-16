@@ -28,9 +28,11 @@ import { toast } from 'sonner';
 import {
   Home, Wrench, LayoutGrid, MapPin, Coins, BedDouble, CalendarDays, ShieldCheck,
   Clock, MessageCircle, Loader2, Search, Plus, Users, Sparkles, KeyRound, ExternalLink,
+  Map as MapIcon,
 } from 'lucide-react';
 import { API, AuthContext } from '../App';
 import PageMeta from '../components/PageMeta';
+import RequestsMapView from '../components/requests/RequestsMapView';
 import HeroBand from '../components/common/HeroBand';
 import ListingsUnavailable from '../components/common/ListingsUnavailable';
 import LightUpStreet from '../components/common/LightUpStreet';
@@ -260,6 +262,9 @@ const RequestsBoard = () => {
 
   const type = searchParams.get('type') || '';
   const side = searchParams.get('side') || '';
+  // C5 — list or map. In the URL like the other filters, so a map view of
+  // one neighbourhood is a link someone can send to a colleague.
+  const view = searchParams.get('view') === 'map' ? 'map' : 'list';
   const area = searchParams.get('area') || '';
   const q = searchParams.get('q') || '';
 
@@ -335,6 +340,30 @@ const RequestsBoard = () => {
                   {t(labelKey, fallback)}
                 </button>
               ))}
+            </div>
+          </div>
+
+          {/* List / Map. Same control the Stays page uses, in the same
+              place, because an owner arriving from Stays should not have to
+              learn a second way to do the same thing. */}
+          <div className="flex justify-center mb-3">
+            <div className="wh-tabs" role="tablist" aria-label={t('requests.viewToggle', 'List or map')}>
+              {[['list', 'requests.viewList', 'List', LayoutGrid], ['map', 'requests.viewMap', 'Map', MapIcon]].map(
+                ([key, k, fallback, Icon]) => (
+                  <button
+                    key={key}
+                    type="button"
+                    role="tab"
+                    className="wh-tab inline-flex items-center gap-1.5"
+                    aria-selected={view === key}
+                    onClick={() => patchUrl({ view: key === 'list' ? '' : key })}
+                    data-testid={`requests-view-${key}`}
+                  >
+                    <Icon size={13} aria-hidden="true" />
+                    {t(k, fallback)}
+                  </button>
+                ),
+              )}
             </div>
           </div>
 
@@ -448,6 +477,11 @@ const RequestsBoard = () => {
               {t('requests.postCta', 'Post to the marketplace')}
             </button>
           </div>
+        ) : view === 'map' ? (
+          // The map reads the SAME `requests` the list does, so every
+          // filter above it already applies. A map with its own fetch would
+          // drift from the list the first time a filter changed.
+          <RequestsMapView requests={requests} onPinClick={openRequest} />
         ) : (
           <div style={{ borderTop: '1px solid var(--brand-border)' }} data-testid="requests-grid">
             {requests.map((r) => (

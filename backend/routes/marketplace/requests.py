@@ -483,6 +483,11 @@ async def create_request(payload: RequestIn, user=Depends(verify_token)):
         "reported_by": [],
     }
     await db.requests.insert_one(doc)
+    # Plot it on the map (C5). Background, because Nominatim is rate
+    # limited to one call a second and that must not sit between the
+    # poster and their confirmation.
+    from utils.geocode import geocode_area_into
+    asyncio.create_task(geocode_area_into("requests", doc["_id"], doc["area"]))
     logger.info("[requests] created %s (%s) by %s", doc["_id"], doc["request_type"], user["user_id"])
     # After the insert, so the request is live whatever the LLM does.
     asyncio.create_task(_translate_bg(doc["_id"], doc["title"], doc["description"]))
@@ -513,6 +518,11 @@ async def patch_request(request_id: str, payload: RequestPatch, user=Depends(ver
         update["move_in_date"] = None
         update["preferred_date"] = None
     update["updated_at"] = datetime.now(UTC).isoformat()
+    if update.get("area") and update["area"] != doc.get("area"):
+        # Area changed, so the old pin is now wrong. Re-geocode rather than
+        # leave it sitting at the previous neighbourhood.
+        from utils.geocode import geocode_area_into
+        asyncio.create_task(geocode_area_into("requests", request_id, update["area"]))
     await db.requests.update_one({"_id": request_id}, {"$set": update})
     fresh = await db.requests.find_one({"_id": request_id})
 

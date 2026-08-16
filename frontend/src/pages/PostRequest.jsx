@@ -120,6 +120,12 @@ const PostRequest = () => {
   const [categories, setCategories] = useState([]);
   const [saving, setSaving] = useState(false);
   const [step, setStep] = useState(0);
+  // The furthest step reached, which is what the rail lets you jump back
+  // TO and FORWARD to. Without this, stepping back greyed out everything
+  // ahead: the answers were all still there, but the only way forward was
+  // Next, Next, Next, and a wizard that makes you walk past your own
+  // finished answers reads exactly like one that threw them away.
+  const [furthest, setFurthest] = useState(0);
   const [form, setForm] = useState({
     request_type: 'rental',
     title: '',
@@ -171,7 +177,7 @@ const PostRequest = () => {
     setForm((f) => ({ ...f, ...draft.form }));
     // Back to the step they were on — which is the last one, since that is
     // the only place the sign-in ask happens.
-    if (typeof draft.step === 'number') setStep(draft.step);
+    if (typeof draft.step === 'number') { setStep(draft.step); setFurthest(draft.step); }
     clearDraft();
     setRestored(true);
   }, []);
@@ -225,9 +231,28 @@ const PostRequest = () => {
 
   const next = () => {
     if (blocker) { toast.error(blocker); return; }
-    setStep((s) => Math.min(s + 1, STEPS.length - 1));
+    setStep((s) => {
+      const to = Math.min(s + 1, STEPS.length - 1);
+      setFurthest((f) => Math.max(f, to));
+      return to;
+    });
   };
   const back = () => setStep((s) => Math.max(s - 1, 0));
+
+  // Jump straight to any step already visited. Going forward still has to
+  // pass every step in between — otherwise someone could reach the end
+  // around a question they had emptied on the way back — but it stops AT
+  // the offending step and says why, rather than refusing silently.
+  const jumpTo = (i) => {
+    if (i === step) return;
+    if (i < step) { setStep(i); return; }
+    if (i > furthest) return;
+    for (let k = step; k < i; k += 1) {
+      const why = STEPS[k].blocker();
+      if (why) { setStep(k); toast.error(why); return; }
+    }
+    setStep(i);
+  };
 
   const submit = async (e) => {
     e.preventDefault();
@@ -347,17 +372,14 @@ const PostRequest = () => {
             data-testid="post-request-steps"
           >
             {STEPS.map((s, i) => {
-              const done = i < step;
+              const done = i !== step && i <= furthest;
               const active = i === step;
               return (
                 <li key={s.key} className="shrink-0">
                   <button
                     type="button"
-                    // Backwards only. Jumping forward would skip the
-                    // validation that makes each step's error message
-                    // arrive at the right moment.
-                    onClick={() => { if (i < step) setStep(i); }}
-                    disabled={i > step}
+                    onClick={() => jumpTo(i)}
+                    disabled={i > furthest}
                     aria-current={active ? 'step' : undefined}
                     className="flex items-center gap-2 rounded-full md:rounded-xl px-3 py-2 text-[13px] font-semibold w-full text-start transition-colors disabled:cursor-default"
                     style={{
