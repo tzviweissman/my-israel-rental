@@ -748,25 +748,30 @@ select:focus-visible,
 .svc-cta-need { background: var(--brand-primary-deep); color: #eaf4ff; }
 .svc-cta-need h4 { color: #fff; }
 .svc-cta-offer { background: #F6EFD9; border: 1.5px solid var(--gold); }
-/* Gold that carries white text at AA — the brand gold does not, and this
-   button sits on a cream panel where a lighter fill would vanish. */
+/* The one gold button that is actually on the live site. Kept in step with
+   .btn-accent in design-tokens.css — two different gold buttons on one
+   site reads as a mistake, and after A2 the token version is ink on solid
+   gold. */
 .btn-gold-solid {
-  /* Was rgba(172,134,28,.85), which composites to about #AC861C and gives
-     white text only 3.40:1 against the 4.5 AA needs. The design system
-     specifies WHITE text on the accent button, so the background is what
-     has to move: this composites near #8A6A14 and takes white to 5.06:1,
-     with margin rather than by a hair. Still recognisably the brand gold,
-     and the brighter --gold stays on the border to keep the edge lit. */
-  background: rgba(138, 106, 20, .95);
-  color: #fff;
-  border: 1.5px solid rgba(201, 162, 39, .9);
+  /* History, because this has moved twice. It began as rgba(172,134,28,.85),
+     which composites near #AC861C and gave white text only 3.40:1. The fix
+     then was to darken the FILL to about #8A6A14 so white cleared AA at
+     5.06:1 — correct at the time, since the design system specified white
+     text on the accent button.
+
+     A2 changed that premise. Ink on the brand's own --gold is 6.71:1, which
+     beats both earlier attempts, needs no darkening away from the palette
+     value, and no longer needs a text-shadow to survive. So the fill goes
+     back to the real brand gold and the TEXT is what moved. */
+  background: var(--gold);
+  color: var(--ink);
+  border: 1.5px solid var(--gold);
   border-radius: 999px;
   font-weight: 700;
   font-size: 14.5px;
   padding: 13px 24px;
   cursor: pointer;
   font-family: inherit;
-  text-shadow: 0 1px 2px rgba(50, 36, 0, .5);
   white-space: nowrap;
 }
 .btn-blue-solid {
@@ -1002,4 +1007,25 @@ select:focus-visible,
   background: #E3F3EA;
   border-radius: 999px;
   padding: 2px 8px;
+}
+
+/* B1 — proof line under the Stays search panel.
+   --brand-muted on the white panel measures 5.85:1, so it clears AA at
+   this small size with room to spare, and it does so
+   without pulling attention off the search control above it. Centred to
+   match the panel; separators are literal "·" in the copy so they flip
+   correctly in RTL without extra rules. */
+.trust-line {
+  margin: 12px 0 2px;
+  text-align: center;
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: .1px;
+  color: var(--brand-muted);
+}
+@media (max-width: 520px) {
+  /* Three clauses wrap to three lines on a phone and start to look like a
+     paragraph. Slightly tighter, and the line-height keeps it a caption. */
+  .trust-line { font-size: 12px; line-height: 1.5; }
 }

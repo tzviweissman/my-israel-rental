@@ -116,19 +116,26 @@ h1,h2,h3{font-family:var(--font-head);letter-spacing:-.5px}
 .btn-primary,.btn-teal{background:var(--brand-primary);color:#fff}
 .btn-primary:hover,.btn-teal:hover{background:var(--brand-primary-dark);transform:translateY(-1px);box-shadow:var(--shadow-md)}
 
-/* Accent — frosted GLASS GOLD, WHITE text. (.btn-gold is the mockup's name.) Used
-   for accent CTAs on normal (light/section) surfaces, NOT in the hero. */
-.btn-accent,.btn-gold{background:rgba(172,134,28,.64);color:#fff;border:1.5px solid rgba(201,162,39,.85);border-radius:var(--radius-pill);backdrop-filter:blur(10px);text-shadow:0 1px 2px rgba(50,36,0,.5)}
-.btn-accent:hover,.btn-gold:hover{background:rgba(172,134,28,.78);transform:translateY(-1px);box-shadow:var(--shadow-md)}
-.on-dark .btn-accent,.on-dark .btn-gold{background:rgba(172,134,28,.72);border-color:rgba(201,162,39,.95)}
-/* A2 candidate — solid gold, INK text, in the manner of Plum Guide's
-   #FDBB30-on-black primary. NOT wired to anything: this exists so the two
-   can be photographed side by side and chosen between. Do not make it the
-   default without Tzvi's call. Ours uses --gold rather than Plum Guide's
-   brighter amber, because the palette is locked. */
-.btn-accent--ink{background:var(--gold);color:var(--ink);border:1.5px solid var(--gold);border-radius:var(--radius-pill);backdrop-filter:none;text-shadow:none;font-weight:600}
-.btn-accent--ink:hover{background:#D4AC33;transform:translateY(-1px);box-shadow:var(--shadow-md)}
-.on-dark .btn-accent--ink{background:var(--gold);color:var(--ink);border-color:var(--gold)}
+/* Accent — SOLID GOLD, INK text. (.btn-gold is the mockup's name.) Used for
+   accent CTAs on normal (light/section) surfaces, NOT in the hero.
+
+   This was frosted gold with WHITE text until the A2 comparison, in the
+   manner of Plum Guide's #FDBB30-on-black primary. Two reasons it changed:
+
+   • The white version measured 2.27:1 on limestone — a clear AA failure.
+     A frosted fill blends with whatever is behind it, so the button was
+     lighter on the light page precisely where the white text needed it
+     dark. The text-shadow had been disguising that. On dark it was fine
+     (4.85:1), which is why the problem never showed in the hero.
+   • Ink on solid gold is 6.71:1 on BOTH surfaces, because a solid fill
+     does not take a tint from its background.
+
+   Uses --gold, not Plum Guide's brighter amber: the palette is locked.
+   .btn-accent--ink remains as an alias so the comparison name still
+   resolves; it is now the same treatment as the default. */
+.btn-accent,.btn-gold,.btn-accent--ink{background:var(--gold);color:var(--ink);border:1.5px solid var(--gold);border-radius:var(--radius-pill);backdrop-filter:none;text-shadow:none;font-weight:600}
+.btn-accent:hover,.btn-gold:hover,.btn-accent--ink:hover{background:#D4AC33;transform:translateY(-1px);box-shadow:var(--shadow-md)}
+.on-dark .btn-accent,.on-dark .btn-gold,.on-dark .btn-accent--ink{background:var(--gold);color:var(--ink);border-color:var(--gold)}
 
 /* Neutral / ghost */
 .btn-ghost{background:#fff;border:1.5px solid var(--brand-border);color:var(--ink)}
