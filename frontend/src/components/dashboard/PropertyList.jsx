@@ -94,7 +94,7 @@ const PriceBlock = ({ property, t }) => {
   );
 };
 
-const PropertyList = ({ properties, bookings = [], onEdit, onRefresh, API, token }) => {
+const PropertyList = ({ properties, bookings = [], onEdit, onAddProperty, onRefresh, API, token }) => {
   const { t } = useTranslation();
   const navigate = useNavigate();
 
@@ -414,10 +414,51 @@ const PropertyList = ({ properties, bookings = [], onEdit, onRefresh, API, token
     }
   };
 
+  // D7 — a real empty state. An owner who has just signed up landed on a
+  // heading, a row of filter chips for things they do not have, and
+  // nothing else: no explanation and no way forward. One sentence and
+  // exactly one action.
+  //
+  // Guarded on `properties`, not on the filtered list — an empty FILTER
+  // result is a different situation ("no listings match this chip") and
+  // telling someone to add their first property when they have twelve
+  // would be nonsense.
+  if (!properties || properties.length === 0) {
+    return (
+      <div className="mb-12" data-testid="properties-empty">
+        <h2
+          className="text-2xl font-bold mb-4"
+          style={{ fontFamily: 'var(--font-head)', color: 'var(--ink)' }}
+        >
+          {t('dashboard.myProperties')}
+        </h2>
+        <div
+          className="rounded-2xl border p-10 text-center"
+          style={{ borderColor: 'var(--brand-border)', background: '#fff' }}
+        >
+          <p className="font-semibold mb-2" style={{ color: 'var(--ink)' }}>
+            {t('dashboard.propertiesEmptyTitle', 'No properties yet')}
+          </p>
+          <p className="text-sm mb-5" style={{ color: 'var(--brand-muted)' }}>
+            {t('dashboard.propertiesEmptyBody', 'Listing is free — no listing fee, no booking fees, no commission. Add your first and renters can find it today.')}
+          </p>
+          <button
+            type="button"
+            onClick={onAddProperty}
+            className="btn-blue-solid"
+            data-testid="properties-empty-cta"
+          >
+            {t('dashboard.addProperty', 'Add a property')}
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="mb-12">
       <div className="flex items-center justify-between flex-wrap gap-3 mb-6">
-        <h2 className="text-2xl font-bold" style={{ fontFamily: 'Playfair Display' }}>{t('dashboard.myProperties')}</h2>
+        <h2 className="text-2xl font-bold" style={{ fontFamily: 'var(--font-head)' }}>{t('dashboard.myProperties')}</h2>
         <div className="flex gap-2 flex-wrap">
           {bulkCount > 0 && (
             <button

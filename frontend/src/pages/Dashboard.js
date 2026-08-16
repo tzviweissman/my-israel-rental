@@ -22,7 +22,7 @@ import MyGigsTab from '../components/dashboard/MyGigsTab';
 import JobRequestsTab from '../components/dashboard/JobRequestsTab';
 import MyJobsTab from '../components/dashboard/MyJobsTab';
 import ManagerHeader from '../components/dashboard/ManagerHeader';
-import ShareLinkRow from '../components/dashboard/ShareLinkRow';
+import ShareListingsPanel from '../components/dashboard/ShareListingsPanel';
 import DashboardTabs from '../components/dashboard/DashboardTabs';
 import { canPublishGigs } from '../utils/providerTrial';
 import { DOCUMENT_SERVICES_ENABLED } from '../config/features';
@@ -33,6 +33,11 @@ const Dashboard = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const [properties, setProperties] = useState([]);
+  // D3 — the My Jobs tab is gated on this. Fetched once here rather than
+  // inside the tab strip, which is presentational and should not make
+  // network calls to decide what to draw. A failure leaves the tab hidden,
+  // which is the same state as "no jobs" and therefore safe.
+  const [hasPostedJobs, setHasPostedJobs] = useState(false);
   const [bookings, setBookings] = useState([]);
   const [showAddProperty, setShowAddProperty] = useState(false);
   const [showBulkUpload, setShowBulkUpload] = useState(false);
@@ -113,6 +118,13 @@ const Dashboard = () => {
       fetchProperties();
       fetchBookings();
       fetchUnreadConversations();
+      // D3 — decides whether the "Jobs I've Posted" tab exists at all.
+      // Silent on failure: no jobs and a failed fetch both mean "do not
+      // show the tab", which is the safe direction to be wrong in.
+      axios
+        .get(`${API}/marketplace/my-jobs`, { headers: { Authorization: `Bearer ${token}` } })
+        .then((r) => setHasPostedJobs((r.data || []).length > 0))
+        .catch(() => {});
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
@@ -226,21 +238,12 @@ const Dashboard = () => {
           <ManagerHeader user={user} token={token} API={API} />
         )}
 
-        {/* Owners get just the share-link control — same `/manager/{id}`
-            URL serves their public listings page, without the business-logo
-            header. */}
-        {user?.role === 'owner' && (
-          <div
-            className="bg-white p-5 rounded-2xl border border-[#E5E5E5] mb-8"
-            data-testid="owner-share-section"
-          >
-            <ShareLinkRow
-              userId={user.id}
-              label="Share your listings"
-              testidPrefix="owner-share-link"
-            />
-          </div>
-        )}
+        {/* D6 — the share link used to live here, above the tabs, always
+            open, showing a raw uuid, and rendered even with zero listings.
+            It now sits at the bottom of My Properties (ShareListingsPanel),
+            collapsed, and disappears entirely when there is nothing to
+            share. The dashboard opens on the user's properties instead of
+            on a URL. */}
 
         {isRenter && !DOCUMENT_SERVICES_ENABLED && (
           <div
@@ -265,6 +268,7 @@ const Dashboard = () => {
           role={user?.role}
           user={user}
           unreadMessages={unreadConversations}
+          hasPostedJobs={hasPostedJobs}
         />
 
         {activeTab === 'contracts' && isPropertyLister && (
@@ -320,10 +324,17 @@ const Dashboard = () => {
                 setEditingProperty(p);
                 setShowAddProperty(true);
               }}
+              onAddProperty={() => {
+                setEditingProperty(null);
+                setShowAddProperty(true);
+              }}
               onRefresh={fetchProperties}
               API={API}
               token={token}
             />
+            {/* D6 — below the listings, collapsed, and absent entirely when
+                there are none. */}
+            <ShareListingsPanel userId={user?.id} propertyCount={properties.length} />
           </>
         )}
 

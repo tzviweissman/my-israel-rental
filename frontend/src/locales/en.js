@@ -352,6 +352,13 @@ const en = {
         // so this tab rendered the English default even in Hebrew. Now a
         // real key, in the same namespace as every sibling tab.
         myRequests: 'My Requests',
+        // D6 — the share link, named rather than shown as a raw uuid.
+        sharePanelTitle: 'Your public listings page',
+        sharePanelBody: 'One link showing everything you have listed — send it to anyone.',
+        sharePanelLabel: 'Copy your link',
+        propertiesEmptyTitle: 'No properties yet',
+        propertiesEmptyBody: 'Listing is free — no listing fee, no booking fees, no commission. Add your first and renters can find it today.',
+        addProperty: 'Add a property',
         location: 'Location',
         confirmed: 'confirmed',
         pending: 'pending',

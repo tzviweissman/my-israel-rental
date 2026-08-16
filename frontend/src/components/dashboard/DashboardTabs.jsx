@@ -18,7 +18,9 @@ const ACTIVE_RED = 'bg-white text-red-500 shadow-sm';
 const cls = (active, activeColor = ACTIVE_TEAL) =>
   `${BASE} ${active ? activeColor : INACTIVE}`;
 
-const DashboardTabs = ({ activeTab, setActiveTab, role, user, unreadMessages = 0 }) => {
+const DashboardTabs = ({
+  activeTab, setActiveTab, role, user, unreadMessages = 0, hasPostedJobs = false,
+}) => {
   const { t } = useTranslation();
   const isRenter = role === 'renter';
   // Property-listing tabs are hidden for pure service providers — they
@@ -82,14 +84,27 @@ const DashboardTabs = ({ activeTab, setActiveTab, role, user, unreadMessages = 0
           </button>
         )}
 
-        <button
-          onClick={() => setActiveTab('my-jobs')}
-          className={`${cls(activeTab === 'my-jobs', ACTIVE_GOLD)} flex items-center justify-center gap-1.5`}
-          data-testid="tab-my-jobs"
-        >
-          <Briefcase size={14} />
-          {t('dashboard.myJobs', "Jobs I've Posted")}
-        </button>
+        {/* D3 — gated at last. This rendered unconditionally, so a renter
+            who has never touched services carried a services tab forever:
+            the single biggest source of clutter on their dashboard, and the
+            only service tab that was not already behind canPublish.
+
+            Two ways in, because both are real: anyone who has actually
+            posted a job needs to find it again, and anyone who can publish
+            gigs is already living in the services half of the site.
+            hasPostedJobs is passed in rather than fetched here — this
+            component is presentational and a tab strip should not be making
+            network calls to decide what to draw. */}
+        {(canPublish || hasPostedJobs) && (
+          <button
+            onClick={() => setActiveTab('my-jobs')}
+            className={`${cls(activeTab === 'my-jobs', ACTIVE_GOLD)} flex items-center justify-center gap-1.5`}
+            data-testid="tab-my-jobs"
+          >
+            <Briefcase size={14} />
+            {t('dashboard.myJobs', "Jobs I've Posted")}
+          </button>
+        )}
 
         {/* Requests board — the seeker's own posts. Shown to everyone:
             anyone can post a request, it is not a role-gated surface. */}

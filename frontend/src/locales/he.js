@@ -341,6 +341,13 @@ const he = {
         jobRequests: 'הצעות עבודה אליי',
         myJobs: 'עבודות שפרסמתי',
         myRequests: 'הבקשות שלי',
+        // D6 — קישור לעמוד הפומבי, בשם ברור במקום מזהה גולמי.
+        sharePanelTitle: 'עמוד הנכסים הפומבי שלכם',
+        sharePanelBody: 'קישור אחד שמציג את כל מה שפרסמתם — שלחו אותו לכל אחד.',
+        sharePanelLabel: 'העתקת הקישור',
+        propertiesEmptyTitle: 'עדיין אין נכסים',
+        propertiesEmptyBody: 'הפרסום חינם — ללא דמי פרסום, ללא דמי הזמנה וללא עמלה. הוסיפו את הנכס הראשון ושוכרים ימצאו אותו כבר היום.',
+        addProperty: 'הוספת נכס',
         location: 'מיקום',
         confirmed: 'אושר',
         pending: 'ממתין',
