@@ -87,14 +87,14 @@ const PostJob = () => {
 
   return (
     <div className="min-h-screen bg-[#FAFAF7]" style={{ paddingTop: 'var(--nav-h, 68px)' }} data-testid="post-job-page">
-      <PageMeta title="Post a job | MyIsraelRental" description="Post a job on MyIsraelRental — service providers reach out to you." path="/services/post-job" />
+      <PageMeta title="Post a job request | MyIsraelRental" description="Say what you need done and let service providers come to you." path="/services/post-job" />
       <div className="max-w-2xl mx-auto px-4 py-8">
         <button onClick={() => navigate(backTo)} className="text-sm text-gray-500 flex items-center gap-1 mb-4" data-testid="post-job-back">
           <ArrowLeft size={14} className="rtl:rotate-180" />
-          {backLabelFor(backTo, t, 'jobs.backToJobs', 'Back to jobs')}
+          {backLabelFor(backTo, t, 'services.backToJobs', 'Back to jobs')}
         </button>
         <h1 className="text-2xl sm:text-3xl font-bold mb-1" style={{ fontFamily: 'Playfair Display' }}>
-          Post a job
+          {t('services.postTitle', 'Post a job request')}
         </h1>
         <p className="text-sm text-gray-600 mb-6">
           Tell us what you need. We&apos;ll email matching providers so they can reach out to you.

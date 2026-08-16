@@ -2032,9 +2032,9 @@ const en = {
         heroLede: 'Cleaners, movers, plumbers, electricians and more — reviewed, rated, zero booking fees.',
         // Dual CTA band
         ctaNeedTitle: 'Need something done?',
-        ctaNeedBody: 'Post a job free — get matched with pros in minutes.',
+        ctaNeedBody: 'Describe the job and let pros come to you — free, and they reply through the site.',
         ctaOfferTitle: 'Offer your services',
-        ctaOfferBody: 'List your business and reach every renter and owner on the platform.',
+        ctaOfferBody: 'One free listing reaches everyone on the platform — renters, owners and property managers alike.',
         listForFree: 'List for free',
         featuredNearYou: 'Featured near you',
         featuredSubtitle: 'Hand-picked by our team',
@@ -2046,8 +2046,13 @@ const en = {
         featuredOn: 'Featured on the services page',
         featuredOff: 'Removed from featured',
         featuredError: 'Could not change featured status',
-        postJob: 'Post a job',
-        heroSubtitle: 'Post a job, get bids immediately. See verified work history, reviews, certifications. Hire in a few clicks.',
+        // "Post a job" reads as offering work as much as asking for it,
+        // on a page whose other half is for people offering services. The
+        // word "request" is what makes the direction unambiguous.
+        postJob: 'Post a job request',
+        postTitle: 'Post a job request',
+        backToJobs: 'Back to jobs',
+        heroSubtitle: 'Post a job request, get bids immediately. See verified work history, reviews, certifications. Hire in a few clicks.',
         byLocation: 'Browse by location',
         clearLocation: 'Clear location',
         browse: 'Browse by category',

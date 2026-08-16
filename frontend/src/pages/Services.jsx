@@ -1010,7 +1010,7 @@ const Services = () => {
         <div className="svc-cta svc-cta-need">
           <div>
             <h4>{t('services.ctaNeedTitle', 'Need something done?')}</h4>
-            <small>{t('services.ctaNeedBody', 'Post a job free — get matched with pros in minutes.')}</small>
+            <small>{t('services.ctaNeedBody', 'Describe the job and let pros come to you — free, and they reply through the site.')}</small>
           </div>
           <button
             type="button"
@@ -1018,13 +1018,13 @@ const Services = () => {
             className="btn-gold-solid"
             data-testid="services-post-job"
           >
-            {t('services.postJob', 'Post a job')}
+            {t('services.postJob', 'Post a job request')}
           </button>
         </div>
         <div className="svc-cta svc-cta-offer">
           <div>
             <h4>{t('services.ctaOfferTitle', 'Offer your services')}</h4>
-            <small>{t('services.ctaOfferBody', 'List your business and reach every renter and owner on the platform.')}</small>
+            <small>{t('services.ctaOfferBody', 'One free listing reaches everyone on the platform — renters, owners and property managers alike.')}</small>
           </div>
           <button
             type="button"
