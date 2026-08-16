@@ -389,7 +389,12 @@ const RequestsBoard = () => {
             <button
               type="button"
               onClick={() => patchUrl({ q: qDraft.trim() })}
-              className="btn-ghost !py-2.5 !px-5 !text-sm"
+              // `btn` as well as `btn-ghost`. btn-ghost is a MODIFIER - it
+              // sets colours only - and the pill radius, flex centring and
+              // weight all live on `.btn`. Used alone it rendered as a bare
+              // square box between a pill-shaped input and a pill-shaped
+              // CTA, which is what it looked like: an unstyled element.
+              className="btn btn-ghost !py-[9px] !px-5 !text-sm"
               data-testid="requests-search-btn"
             >
               {t('requests.search', 'Search')}
