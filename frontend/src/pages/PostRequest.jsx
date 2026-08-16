@@ -14,7 +14,7 @@ import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
-import { Home, Wrench, Loader2, ArrowLeft } from 'lucide-react';
+import { Home, Wrench, Loader2, ArrowLeft, Search, KeyRound } from 'lucide-react';
 import { API, AuthContext } from '../App';
 import PageMeta from '../components/PageMeta';
 import DateModePills from '../components/requests/DateModePills';
@@ -36,7 +36,7 @@ const inputCls = 'w-full rounded-xl border bg-white px-4 py-3 text-sm outline-no
 const PostRequest = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const { token } = useContext(AuthContext);
+  const { token, user } = useContext(AuthContext);
 
   const [categories, setCategories] = useState([]);
   const [saving, setSaving] = useState(false);
@@ -51,6 +51,8 @@ const PostRequest = () => {
     // rental
     rental_kind: 'long-term',
     bedrooms_min: '',
+    post_kind: 'want',
+    listing_id: '',
     date_mode: 'on',
     move_in_date: '',
     lease_months: '',
@@ -60,6 +62,23 @@ const PostRequest = () => {
   });
   const set = (patch) => setForm((f) => ({ ...f, ...patch }));
   const isRental = form.request_type === 'rental';
+  // Supply-side post — flips the page's questions from asking to offering.
+  const isOffer = form.post_kind === 'have';
+
+  // The poster's own listings, for the optional link on a "have" post.
+  // Fetched only once they say they have something — a seeker never sees
+  // this field, so there is no reason to spend the request on them.
+  const [myListings, setMyListings] = useState([]);
+  useEffect(() => {
+    if (!isOffer || !user?.id) return;
+    let alive = true;
+    axios.get(`${API}/properties`, { params: { owner_id: user.id, limit: 100 } })
+      .then((r) => { if (alive) setMyListings(r.data || []); })
+      // Silent: the field is optional, and an owner with no listings and an
+      // owner whose fetch failed both just see no picker.
+      .catch(() => {});
+    return () => { alive = false; };
+  }, [isOffer, user?.id]);
 
   useEffect(() => {
     axios.get(`${API}/marketplace/categories`)
@@ -87,6 +106,9 @@ const PostRequest = () => {
     try {
       const payload = {
         request_type: form.request_type,
+        post_kind: form.post_kind,
+        date_mode: form.date_mode,
+        listing_id: isOffer ? (form.listing_id || null) : null,
         title: form.title.trim(),
         description: form.description.trim(),
         area: form.area.trim(),
@@ -147,18 +169,65 @@ const PostRequest = () => {
           className="text-3xl font-bold mb-2"
           style={{ fontFamily: 'var(--font-head)', color: 'var(--ink)' }}
         >
-          {t('requests.postTitle', 'What are you looking for?')}
+          {isOffer
+            ? t('requests.postTitleOffer', 'What do you have available?')
+            : t('requests.postTitle', 'What are you looking for?')}
         </h1>
         <p className="text-sm mb-8" style={{ color: 'var(--brand-muted)' }}>
-          {t('requests.postSub', 'Free to post. Owners and pros reply through on-platform chat — your phone and email are never shown.')}
+          {isOffer
+            ? t('requests.postSubOffer', 'Free to post. Renters reply through on-platform chat — your phone and email are never shown. For a full listing with photos and pricing, list it on Stays instead.')
+            : t('requests.postSub', 'Free to post. Owners and pros reply through on-platform chat — your phone and email are never shown.')}
         </p>
 
         <form onSubmit={submit} className="space-y-5" data-testid="post-request-form">
+          {/* Side picker. This sits ABOVE the type picker deliberately:
+              which side of the market you are on changes how every question
+              below reads, so it has to be answered first.
+
+              "I have" is the lightweight supply path — an owner saying a
+              place is coming free without building a full listing. Full
+              listings, with photos, price and a contract, still live on
+              /stays; this is for asking around first. */}
+          <div className="grid grid-cols-2 gap-3" data-testid="post-request-kind">
+            {[
+              { v: 'want', Icon: Search, label: t('requests.kindWant', "I'm looking for something") },
+              { v: 'have', Icon: KeyRound, label: t('requests.kindHave', 'I have something available') },
+            ].map(({ v, Icon, label }) => (
+              <button
+                key={v}
+                type="button"
+                onClick={() => set({ post_kind: v })}
+                aria-pressed={form.post_kind === v}
+                className="rounded-xl border p-4 text-start transition-colors"
+                style={{
+                  borderColor: form.post_kind === v ? 'var(--brand-primary)' : 'var(--brand-border)',
+                  background: form.post_kind === v ? 'rgb(var(--brand-primary-rgb) / 0.06)' : '#fff',
+                }}
+                data-testid={`post-request-kind-${v}`}
+              >
+                <Icon size={18} style={{ color: 'var(--brand-primary)' }} />
+                <span className="block mt-2 text-sm font-bold" style={{ color: 'var(--ink)' }}>{label}</span>
+              </button>
+            ))}
+          </div>
+
           {/* Type picker — swaps the variant fields below. */}
           <div className="grid grid-cols-2 gap-3">
             {[
-              { v: 'rental', Icon: Home, label: t('requests.typeRentalLong', "I'm looking for a place") },
-              { v: 'service', Icon: Wrench, label: t('requests.typeServiceLong', 'I need a service') },
+              {
+                v: 'rental',
+                Icon: Home,
+                label: isOffer
+                  ? t('requests.typeRentalOffer', 'A place to rent out')
+                  : t('requests.typeRentalLong', "I'm looking for a place"),
+              },
+              {
+                v: 'service',
+                Icon: Wrench,
+                label: isOffer
+                  ? t('requests.typeServiceOffer', 'A service I provide')
+                  : t('requests.typeServiceLong', 'I need a service'),
+              },
             ].map(({ v, Icon, label }) => (
               <button
                 key={v}
@@ -177,6 +246,30 @@ const PostRequest = () => {
               </button>
             ))}
           </div>
+
+          {/* Optional link to a listing the poster already has here. Only
+              on a supply-side post, and only if they actually have one -
+              an empty dropdown is a dead end that implies a missing step.
+              A picker of their own listings rather than a URL box: this
+              board is public, and a free link field on it would be a
+              phishing vector wearing our chrome. */}
+          {isOffer && myListings.length > 0 && (
+            <Field label={t('requests.fieldLinkListing', 'Link one of your listings (optional)')}>
+              <select
+                className={inputCls} style={{ borderColor: 'var(--brand-border)' }}
+                value={form.listing_id} onChange={(e) => set({ listing_id: e.target.value })}
+                data-testid="post-request-listing"
+              >
+                <option value="">{t('requests.noListingLink', 'No listing — just this post')}</option>
+                {myListings.map((p) => (
+                  <option key={p.id} value={p.id}>{p.title}</option>
+                ))}
+              </select>
+              <p className="mt-1.5 text-xs" style={{ color: 'var(--brand-muted)' }}>
+                {t('requests.linkListingHelp', 'Anyone reading your post can jump straight to the full listing, with photos and price.')}
+              </p>
+            </Field>
+          )}
 
           <Field label={t('requests.fieldTitle', 'Title')}>
             <input

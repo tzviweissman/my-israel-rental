@@ -938,6 +938,29 @@ select:focus-visible,
 .rc-badge-rental { background: rgb(var(--brand-primary-rgb) / .10); color: var(--brand-primary); }
 .rc-badge-service { background: #F6EFD9; color: var(--gold-text-on-light); }
 
+/* Which SIDE of the market a post is on. Deliberately ink-on-neutral
+   rather than a third and fourth colour: the board already carries a blue
+   rental badge and a gold service badge, and adding two more hues would
+   turn the card corner into a paint chart. The distinction here is carried
+   by the icon and the word, with weight doing the rest.
+
+   Green is not used for "Available" even though it is tempting - green is
+   functional-only in this system (status, verified), and an availability
+   badge is neither. */
+.rc-badge-want { background: rgba(35, 32, 27, .06); color: var(--ink); }
+.rc-badge-offer { background: var(--ink); color: #fff; }
+
+/* The link out to a full listing. Underlined because it leaves the card
+   while the rest of the card is one big click target - without it, a
+   reader cannot tell this chip behaves differently from its neighbours. */
+.rc-chip-link {
+  color: var(--brand-primary);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  cursor: pointer;
+}
+.rc-chip-link:hover { color: var(--brand-primary-dark); }
+
 .rc-chips { display: flex; flex-wrap: wrap; gap: 7px; }
 .rc-chip {
   display: inline-flex;

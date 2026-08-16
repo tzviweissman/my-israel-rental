@@ -15,7 +15,7 @@ const en = {
         listProperty: 'List your property',
         joinFree: 'Join free',
         account: 'Account menu',
-        requests: 'Requests',
+        requests: 'Marketplace',
         listOffer: 'List / Offer',
         primary: 'Primary',
         home: 'Home',
@@ -1808,10 +1808,12 @@ const en = {
       // Shown by ErrorBoundary when a page crashes. Until this existed a
       // render error produced a blank white document with no message.
       requests: {
-        // Demand board (Phase 3).
-        heroTitle: "Tell owners what you're",
-        heroAccent: 'looking for.',
-        heroLede: 'Post one structured request and let owners, managers and pros come to you — instead of losing your search in a hundred WhatsApp groups.',
+        // Two-way board (Phase 3). Was demand-only, and the hero said so
+        // — "Tell owners what you're looking for" is wrong on a page where
+        // half the posts are owners saying what they have.
+        heroTitle: 'Whether you need it or',
+        heroAccent: 'have it.',
+        heroLede: 'Say what you are looking for, or what you have coming free. Renters, owners and pros find each other here — instead of losing it all in a hundred WhatsApp groups.',
         typeAll: 'All',
         typeRental: 'Rentals',
         typeService: 'Services',
@@ -1820,15 +1822,15 @@ const en = {
         rental: 'Rental',
         service: 'Service',
         filterByType: 'Filter requests by type',
-        searchPlaceholder: 'Search demand — e.g. "3BR Ramat Eshkol", "mover Jerusalem"',
+        searchPlaceholder: 'Search the board — e.g. "3BR Ramat Eshkol", "mover Jerusalem"',
         searchLabel: 'Search requests',
         search: 'Search',
-        postCta: 'Post a request',
+        postCta: 'Post to the marketplace',
         loading: 'Loading requests…',
-        count: '{{n}} open requests',
+        count: '{{n}} open on the board',
         clearAll: 'Clear filters',
-        emptyTitle: 'No open requests here yet',
-        emptyBody: 'Be the first — post what you are looking for and let owners and pros come to you.',
+        emptyTitle: 'Nothing on the board here yet',
+        emptyBody: 'Be the first — post what you are looking for, or what you have available.',
         open: 'Open',
         // C1 — shown only when above zero; see the note at the call site.
         responses: '{{n}} responses',
@@ -1841,6 +1843,30 @@ const en = {
         dateBefore: 'Before date',
         dateFlexible: "I'm flexible",
         dateByPrefix: 'by {{date}}',
+        // Two-way board: a post is either demand ("want") or supply
+        // ("have"). Every user-facing string that named a "seeker" needs a
+        // supply-side twin, or an owner offering a flat gets called one.
+        kindWant: "I'm looking for something",
+        kindHave: 'I have something available',
+        // "Request" vs "Post" rather than "Wanted"/"Available". Tzvi's
+        // call, and the plainer pair: a reader does not have to work out
+        // which side "Available" is describing.
+        badgeWant: 'Request',
+        badgeHave: 'Post',
+        sideAll: 'Everything',
+        sideWant: 'Requests',
+        sideHave: 'Posts',
+        filterBySide: 'Filter by requests or posts',
+        typeRentalOffer: 'A place to rent out',
+        typeServiceOffer: 'A service I provide',
+        postTitleOffer: 'What do you have available?',
+        postSubOffer: 'Free to post. Renters reply through on-platform chat — your phone and email are never shown. For a full listing with photos and pricing, list it on Stays instead.',
+        messageOwner: 'Message owner',
+        fieldLinkListing: 'Link one of your listings (optional)',
+        noListingLink: 'No listing — just this post',
+        linkListingHelp: 'Anyone reading your post can jump straight to the full listing, with photos and price.',
+        viewListing: 'View the listing',
+        viewListingFull: 'See the full listing — photos, price and availability',
         bedroomsMin: '{{n}}+ bd',
         upTo: 'up to {{amount}}',
         messageSeeker: 'Message seeker',

@@ -27,7 +27,7 @@ import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import {
   Home, Wrench, LayoutGrid, MapPin, Coins, BedDouble, CalendarDays, ShieldCheck,
-  Clock, MessageCircle, Loader2, Search, Plus, Users, Sparkles,
+  Clock, MessageCircle, Loader2, Search, Plus, Users, Sparkles, KeyRound, ExternalLink,
 } from 'lucide-react';
 import { API, AuthContext } from '../App';
 import PageMeta from '../components/PageMeta';
@@ -37,6 +37,16 @@ import LightUpStreet from '../components/common/LightUpStreet';
 import SITE_ASSETS from '../lib/siteAssets';
 
 const BAND_IMAGE = SITE_ASSETS['scene8-requests-man'];
+
+// Which side of the market. The board carries both now: seekers asking and
+// owners/pros offering. This is a separate axis from rental-vs-service, so
+// it gets its own row of tabs rather than being folded into TYPES — a
+// combined list would need six entries and read as a menu.
+const SIDES = [
+  { key: '', labelKey: 'requests.sideAll', fallback: 'Everything', Icon: LayoutGrid },
+  { key: 'want', labelKey: 'requests.sideWant', fallback: 'Requests', Icon: Search },
+  { key: 'have', labelKey: 'requests.sideHave', fallback: 'Posts', Icon: KeyRound },
+];
 
 const TYPES = [
   { key: '', labelKey: 'requests.typeAll', fallback: 'All', Icon: LayoutGrid },
@@ -59,6 +69,10 @@ const money = (amount, currency) => {
 
 export const RequestCard = ({ request: r, onOpen, t }) => {
   const isRental = r.request_type === 'rental';
+  // Supply-side post. Everything user-facing on this card has to follow it:
+  // an "Available" post is not a request, and calling its poster a seeker
+  // would be plainly wrong to the person reading it.
+  const isOffer = r.post_kind === 'have';
   const expiresIn = daysUntil(r.expires_at);
   const budget = money(r.budget_amount, r.budget_currency);
 
@@ -84,6 +98,13 @@ export const RequestCard = ({ request: r, onOpen, t }) => {
       data-testid={`request-card-${r.id}`}
     >
       <div className="flex sm:flex-col items-center sm:items-start gap-2 sm:pt-0.5">
+        {/* Which side of the market, stated before what it is about. A
+            reader scanning the board needs to know "someone is offering"
+            versus "someone is asking" before anything else on the card. */}
+        <span className={`rc-badge ${isOffer ? 'rc-badge-offer' : 'rc-badge-want'}`}>
+          {isOffer ? <KeyRound size={11} aria-hidden="true" /> : <Search size={11} aria-hidden="true" />}
+          {isOffer ? t('requests.badgeHave', 'Post') : t('requests.badgeWant', 'Request')}
+        </span>
         <span className={`rc-badge ${isRental ? 'rc-badge-rental' : 'rc-badge-service'}`}>
           {isRental ? <Home size={11} aria-hidden="true" /> : <Wrench size={11} aria-hidden="true" />}
           {isRental ? t('requests.rental', 'Rental') : t('requests.service', 'Service')}
@@ -119,6 +140,17 @@ export const RequestCard = ({ request: r, onOpen, t }) => {
             one who simply never answered, and those are opposite signals
             to an owner deciding whether to reply. `before` is prefixed so
             a deadline does not read as a fixed date. */}
+        {r.listing_id && (
+          <a
+            href={`/property/${r.listing_id}`}
+            className="rc-chip rc-chip-link"
+            onClick={(e) => e.stopPropagation()}
+            data-testid="request-listing-link"
+          >
+            <ExternalLink size={12} aria-hidden="true" />
+            {t('requests.viewListing', 'View the listing')}
+          </a>
+        )}
         {r.date_mode === 'flexible' ? (
           <span className="rc-chip">
             <Sparkles size={12} aria-hidden="true" />
@@ -203,7 +235,9 @@ export const RequestCard = ({ request: r, onOpen, t }) => {
         </span>
         <span className="btn-blue-solid inline-flex items-center gap-1.5 !py-2 !px-4 !text-[13px]">
           <MessageCircle size={13} aria-hidden="true" />
-          {t('requests.messageSeeker', 'Message seeker')}
+          {isOffer
+            ? t('requests.messageOwner', 'Message owner')
+            : t('requests.messageSeeker', 'Message seeker')}
         </span>
       </div>
       </div>
@@ -225,6 +259,7 @@ const RequestsBoard = () => {
   const [qDraft, setQDraft] = useState(searchParams.get('q') || '');
 
   const type = searchParams.get('type') || '';
+  const side = searchParams.get('side') || '';
   const area = searchParams.get('area') || '';
   const q = searchParams.get('q') || '';
 
@@ -242,13 +277,14 @@ const RequestsBoard = () => {
     setLoading(true);
     const params = {};
     if (type) params.request_type = type;
+    if (side) params.post_kind = side;
     if (area) params.area = area;
     if (q) params.q = q;
     axios.get(`${API}/marketplace/requests`, { params })
       .then((r) => { setRequests(r.data || []); setLoadError(false); })
       .catch(() => { setRequests([]); setLoadError(true); })
       .finally(() => setLoading(false));
-  }, [type, area, q]);
+  }, [type, side, area, q]);
 
   const openRequest = (id) => navigate(`/requests/${id}`);
 
@@ -269,11 +305,11 @@ const RequestsBoard = () => {
 
       <HeroBand
         image={BAND_IMAGE}
-        title={t('requests.heroTitle', "Tell owners what you're")}
-        accent={t('requests.heroAccent', 'looking for.')}
+        title={t('requests.heroTitle', 'Whether you need it or')}
+        accent={t('requests.heroAccent', 'have it.')}
         lede={t(
           'requests.heroLede',
-          'Post one structured request and let owners, managers and pros come to you — instead of losing your search in a hundred WhatsApp groups.',
+          'Say what you are looking for, or what you have coming free. Renters, owners and pros find each other here — instead of losing it all in a hundred WhatsApp groups.',
         )}
         headlineTestId="requests-hero-title"
         testId="requests-band"
@@ -281,6 +317,29 @@ const RequestsBoard = () => {
 
       <div className="hero-panel-float">
         <div className="hero-panel">
+          {/* Side filter — which half of the market. Sits above the type
+              tabs because it is the coarser cut: a renter and an owner want
+              opposite halves of this board, and neither wants to scroll
+              past the other's posts to find their own. */}
+          <div className="flex justify-center mb-3">
+            <div className="wh-tabs" role="tablist" aria-label={t('requests.filterBySide', 'Filter by requests or posts')}>
+              {SIDES.map(({ key, labelKey, fallback, Icon }) => (
+                <button
+                  key={key || 'all'}
+                  type="button"
+                  role="tab"
+                  className="wh-tab inline-flex items-center gap-1.5"
+                  aria-selected={side === key}
+                  onClick={() => patchUrl({ side: key })}
+                  data-testid={`requests-side-${key || 'all'}`}
+                >
+                  <Icon size={13} aria-hidden="true" />
+                  {t(labelKey, fallback)}
+                </button>
+              ))}
+            </div>
+          </div>
+
           {/* Segmented type filter — the board's primary cut. */}
           <div className="flex justify-center mb-3">
             <div className="wh-tabs" role="tablist" aria-label={t('requests.filterByType', 'Filter requests by type')}>
@@ -316,7 +375,7 @@ const RequestsBoard = () => {
                 onChange={(e) => setQDraft(e.target.value)}
                 onKeyDown={(e) => { if (e.key === 'Enter') patchUrl({ q: qDraft.trim() }); }}
                 className="flex-1 bg-transparent text-sm outline-none"
-                placeholder={t('requests.searchPlaceholder', 'Search demand — e.g. "3BR Ramat Eshkol", "mover Jerusalem"')}
+                placeholder={t('requests.searchPlaceholder', 'Search the board — e.g. "3BR Ramat Eshkol", "mover Jerusalem"')}
                 aria-label={t('requests.searchLabel', 'Search requests')}
                 data-testid="requests-search-input"
               />
@@ -342,7 +401,7 @@ const RequestsBoard = () => {
               data-testid="requests-post-cta"
             >
               <Plus size={14} aria-hidden="true" />
-              {t('requests.postCta', 'Post a request')}
+              {t('requests.postCta', 'Post to the marketplace')}
             </button>
           </div>
         </div>
@@ -353,7 +412,7 @@ const RequestsBoard = () => {
           <h2 className="text-gray-900">
             {loading
               ? t('requests.loading', 'Loading requests…')
-              : t('requests.count', '{{n}} open requests', { n: requests.length })}
+              : t('requests.count', '{{n}} open on the board', { n: requests.length })}
           </h2>
           {(area || q || type) && (
             <button
@@ -377,13 +436,13 @@ const RequestsBoard = () => {
         ) : requests.length === 0 ? (
           <div className="text-center py-16" data-testid="requests-empty">
             <p className="text-xl font-bold" style={{ color: 'var(--ink)' }}>
-              {t('requests.emptyTitle', 'No open requests here yet')}
+              {t('requests.emptyTitle', 'Nothing on the board here yet')}
             </p>
             <p className="text-sm mt-2 mb-6" style={{ color: 'var(--brand-muted)' }}>
-              {t('requests.emptyBody', 'Be the first — post what you are looking for and let owners and pros come to you.')}
+              {t('requests.emptyBody', 'Be the first — post what you are looking for, or what you have available.')}
             </p>
             <button type="button" onClick={() => navigate(postHref)} className="btn-blue-solid" data-testid="requests-empty-cta">
-              {t('requests.postCta', 'Post a request')}
+              {t('requests.postCta', 'Post to the marketplace')}
             </button>
           </div>
         ) : (

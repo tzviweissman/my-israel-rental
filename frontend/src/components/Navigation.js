@@ -409,7 +409,7 @@ const Navigation = () => {
               {[
                 { key: 'stays', label: t('nav.stays', 'Stays'), to: '/stays' },
                 { key: 'services', label: t('nav.services', 'Services'), to: '/services' },
-                { key: 'requests', label: t('nav.requests', 'Requests'), to: '/requests' },
+                { key: 'requests', label: t('nav.requests', 'Marketplace'), to: '/requests' },
                 // No supply link here any more. "List / Offer" spoke to one
                 // of three audiences and duplicated the CTA beside it; the
                 // solid "Join free" button now carries every audience and

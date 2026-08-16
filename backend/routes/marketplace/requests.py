@@ -94,6 +94,32 @@ RENTAL_KINDS = ("long-term", "short-term", "vacation")
 
 class RequestIn(BaseModel):
     request_type: str = Field(..., pattern="^(rental|service)$")
+
+    # Which SIDE of the market this post is on, which is a separate question
+    # from what it is about:
+    #   want — "I'm looking for a 3-bed in Ramat Eshkol"   (a seeker)
+    #   have — "I have a 3-bed free from September"        (an owner or pro)
+    #
+    # The board was demand-only. Making it two-way means an owner with a
+    # place coming free can say so without building a full listing - no
+    # photos, no price, no contract - which is a different, much lighter
+    # commitment than /stays asks for. Full listings still belong on Stays;
+    # this is the "ask around first" path.
+    #
+    # Defaults to "want" so every request posted before this field existed
+    # keeps its original meaning.
+    post_kind: str = Field("want", pattern="^(want|have)$")
+
+    # Optional link from a "have" post to the poster's OWN listing, for an
+    # owner who has both: the light post to ask around, and the full listing
+    # for anyone who wants photos and a price.
+    #
+    # An id, deliberately, not a URL. A free-text link field on a public
+    # board is a phishing vector — anyone could post "I have a 3-bed" and
+    # point it wherever they liked, wearing our chrome. This resolves to
+    # /property/{id} on our own site and is checked server-side to belong to
+    # the poster, so it can only ever point at something they own here.
+    listing_id: Optional[str] = Field(None, max_length=64)
     title: str = Field(..., min_length=6, max_length=140)
     description: str = Field(..., min_length=10, max_length=4000)
     area: str = Field(..., min_length=2, max_length=120)
@@ -135,6 +161,8 @@ class RequestPatch(BaseModel):
     budget_amount: Optional[float] = None
     budget_currency: Optional[str] = Field(None, pattern="^(ILS|USD)$")
     date_mode: Optional[str] = Field(None, pattern="^(on|before|flexible)$")
+    post_kind: Optional[str] = Field(None, pattern="^(want|have)$")
+    listing_id: Optional[str] = Field(None, max_length=64)
     preferred_date: Optional[str] = None
     bedrooms_min: Optional[int] = Field(None, ge=0, le=20)
     move_in_date: Optional[str] = None
@@ -148,6 +176,26 @@ class ReportIn(BaseModel):
 
 
 # ---------------- Helpers ----------------
+
+async def _validated_listing_id(listing_id: str | None, user_id: str) -> str | None:
+    """Return the id only if this user owns that property, else raise.
+
+    The check is here rather than in the UI because the UI only ever offers
+    the user their own properties — which means anything else arriving in
+    this field came from someone bypassing it, and that is exactly the case
+    worth rejecting. Silently dropping it would be worse than a 400: the
+    poster would think their listing was linked when it was not.
+    """
+    listing_id = (listing_id or "").strip()
+    if not listing_id:
+        return None
+    prop = await db.properties.find_one({"id": listing_id}, {"owner_id": 1})
+    if not prop:
+        raise HTTPException(status_code=400, detail="That listing no longer exists")
+    if prop.get("owner_id") != user_id:
+        raise HTTPException(status_code=403, detail="You can only link your own listing")
+    return listing_id
+
 
 def _display_name(full_name: str | None) -> str:
     """"Rivka Levy" -> "Rivka L." — enough to address a human, not enough
@@ -308,6 +356,7 @@ def _validate_variant(payload: RequestIn) -> None:
 @router.get("/requests")
 async def list_requests(
     request_type: Optional[str] = Query(None, pattern="^(rental|service)$"),
+    post_kind: Optional[str] = Query(None, pattern="^(want|have)$"),
     category: Optional[str] = None,
     rental_kind: Optional[str] = None,
     area: Optional[str] = None,
@@ -318,6 +367,12 @@ async def list_requests(
     query: dict[str, Any] = {"status": "open", "hidden_by_admin": {"$ne": True}}
     if request_type:
         query["request_type"] = request_type
+    if post_kind:
+        # Documents written before post_kind existed have no such field, and
+        # they are all demand-side. Treat a missing field as "want" so the
+        # filter does not quietly hide the entire back catalogue.
+        query["post_kind"] = {"$in": ["want", None]} if post_kind == "want" else "have"
+
     if category:
         _validate_category(category)
         query["category"] = category
@@ -401,6 +456,9 @@ async def create_request(payload: RequestIn, user=Depends(verify_token)):
         # A flexible request stores NO date, whatever arrived in the payload.
         # Otherwise a seeker who fills a date, then switches to flexible,
         # leaves a date behind that the board would go on displaying.
+        "post_kind": payload.post_kind,
+        # Only meaningful on a supply-side post; a seeker has nothing to link.
+        "listing_id": (await _validated_listing_id(payload.listing_id, user["user_id"]) if payload.post_kind == "have" else None),
         "date_mode": payload.date_mode,
         "preferred_date": (payload.preferred_date if is_service and payload.date_mode != "flexible" else None),
         # Rental variant — null on services, same reason.
@@ -449,6 +507,8 @@ async def patch_request(request_id: str, payload: RequestPatch, user=Depends(ver
     # whatever date it was carrying, so the board can't keep showing a date
     # the seeker has just said no longer applies. Both variants' date fields
     # are cleared because only one of them is ever set.
+    if "listing_id" in update:
+        update["listing_id"] = await _validated_listing_id(update["listing_id"], user["user_id"])
     if update.get("date_mode") == "flexible":
         update["move_in_date"] = None
         update["preferred_date"] = None
@@ -697,10 +757,23 @@ async def _match_recipients(pending: list[dict[str, Any]]) -> dict[str, list[dic
     A SERVICE request reaches providers with a published gig in the same
     category. A RENTAL request reaches owners with a property in the same
     area. Nobody is matched to their own request.
+
+    DEMAND-SIDE POSTS ONLY. Now that the board carries supply-side posts too
+    (``post_kind == "have"``), matching every post to this audience would
+    email owners about other owners' spare flats and providers about rival
+    providers' free slots — an inbox of competitors, which is the fastest
+    way to make people turn the emails off.
+
+    The mirror digest, telling seekers about matching "have" posts, is not
+    built yet. It needs a different audience query (people with an open
+    request in that area, rather than people with a property there) and it
+    should not be bolted on by loosening the filter below.
     """
     out: dict[str, list[dict[str, Any]]] = {}
 
     for req in pending:
+        if (req.get("post_kind") or "want") != "want":
+            continue
         if req.get("request_type") == "service" and req.get("category"):
             ids = await db.marketplace_gigs.distinct(
                 "provider_user_id",

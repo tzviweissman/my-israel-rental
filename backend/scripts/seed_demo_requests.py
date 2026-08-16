@@ -67,6 +67,8 @@ def _doc(**kw):
         "found_at": None,
         "contact_count": 0,
         "date_mode": "on",
+        "post_kind": "want",
+        "listing_id": None,
         "hidden_by_admin": False,
         "report_count": 0,
         "reported_by": [],
@@ -127,6 +129,33 @@ REQUESTS = [
         date_mode="flexible",
         contact_count=12,
         age_days=9,
+    ),
+    # Supply side — an owner with a place coming free, which is the whole
+    # point of the board being two-way. No photos, no price, no listing:
+    # exactly the light post that /stays is too heavy for.
+    _doc(
+        request_type="rental",
+        post_kind="have",
+        title="3-bedroom in Ramat Eshkol free from October",
+        description="Long-term, second floor with a lift, quiet street. Happy to show it to anyone serious before I write a full listing.",
+        area="Jerusalem - Ramat Eshkol",
+        rental_kind="long-term",
+        bedrooms_min=3,
+        date_mode="on",
+        move_in_date="2026-10-01",
+        contact_count=4,
+        age_days=2,
+    ),
+    _doc(
+        request_type="service",
+        post_kind="have",
+        title="Handyman with Thursday and Sunday slots free",
+        description="Small jobs, shelving, taps, flat-pack. Based in Geula, work across the centre.",
+        area="Jerusalem - Geula",
+        category="home-services-repair",
+        date_mode="flexible",
+        contact_count=0,
+        age_days=1,
     ),
     # Expiring within a day — the urgent end of the status row.
     _doc(

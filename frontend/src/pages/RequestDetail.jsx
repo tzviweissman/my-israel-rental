@@ -17,7 +17,7 @@ import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import {
   Home, Wrench, MapPin, Coins, BedDouble, CalendarDays, Clock,
-  MessageCircle, Loader2, ArrowLeft, Flag, CheckCircle2, RefreshCw,
+  MessageCircle, Loader2, ArrowLeft, Flag, CheckCircle2, RefreshCw, ExternalLink,
 } from 'lucide-react';
 import { API, AuthContext } from '../App';
 import PageMeta from '../components/PageMeta';
@@ -180,6 +180,11 @@ const RequestDetail = () => {
 
         <div className="bg-white rounded-2xl border p-6 sm:p-8" style={{ borderColor: 'var(--brand-border)' }}>
           <div className="flex items-center gap-2 mb-3 flex-wrap">
+            <span className={`rc-badge ${request.post_kind === 'have' ? 'rc-badge-offer' : 'rc-badge-want'}`}>
+              {request.post_kind === 'have'
+                ? t('requests.badgeHave', 'Post')
+                : t('requests.badgeWant', 'Request')}
+            </span>
             <span className={`rc-badge ${isRental ? 'rc-badge-rental' : 'rc-badge-service'}`}>
               {isRental ? <Home size={11} aria-hidden="true" /> : <Wrench size={11} aria-hidden="true" />}
               {isRental ? t('requests.rental', 'Rental') : t('requests.service', 'Service')}
@@ -219,6 +224,21 @@ const RequestDetail = () => {
             )}
           </div>
 
+          {/* The full listing, when the poster has one here. Only ever an
+              internal /property/{id} link - the id is checked server-side
+              to belong to the poster, so this cannot point off-site. */}
+          {request.listing_id && (
+            <a
+              href={`/property/${request.listing_id}`}
+              className="inline-flex items-center gap-1.5 mt-4 text-sm font-semibold"
+              style={{ color: 'var(--brand-primary)', textDecoration: 'underline', textUnderlineOffset: '2px' }}
+              data-testid="request-detail-listing-link"
+            >
+              <ExternalLink size={14} aria-hidden="true" />
+              {t('requests.viewListingFull', 'See the full listing — photos, price and availability')}
+            </a>
+          )}
+
           <p className="text-sm leading-relaxed whitespace-pre-line mb-6" style={{ color: 'var(--ink)' }}>
             {request.description}
           </p>
@@ -257,7 +277,9 @@ const RequestDetail = () => {
                 data-testid="request-contact-btn"
               >
                 {busy ? <Loader2 className="animate-spin" size={15} /> : <MessageCircle size={15} />}
-                {t('requests.messageSeeker', 'Message seeker')}
+                {request.post_kind === 'have'
+                  ? t('requests.messageOwner', 'Message owner')
+                  : t('requests.messageSeeker', 'Message seeker')}
               </button>
               <span className="text-xs" style={{ color: 'var(--brand-muted)' }}>
                 {t('requests.chatOnlyNote', 'Chat happens on MyIsraelRental — no phone numbers are shared.')}
