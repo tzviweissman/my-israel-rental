@@ -351,6 +351,23 @@ async def startup_tasks() -> None:
         await db.requests.create_index("poster_user_id", background=True)
         await db.requests.create_index([("status", 1), ("expires_at", 1)], background=True)
         await db.requests.create_index("category", background=True)
+        # Spec 2.3 — the fields search now actually reads.
+        #
+        # area_id is the important one: every area query resolves to an id
+        # and matches on it, so without this the board does a collection
+        # scan on the most common filter there is.
+        await db.requests.create_index("area_id", background=True)
+        # The translated sides. Regex queries only use an index when the
+        # pattern is left-anchored, and ours are not — these earn their
+        # keep on the equality/sort paths and on covered counts rather than
+        # on the substring match itself, which is worth stating so the next
+        # person does not assume the search is index-served.
+        await db.requests.create_index("title_en", background=True)
+        await db.requests.create_index("description_en", background=True)
+        await db.requests.create_index("source_lang", background=True)
+        await db.marketplace_gigs.create_index("area_id", background=True)
+        await db.marketplace_gigs.create_index("title_en", background=True)
+        await db.marketplace_gigs.create_index("source_lang", background=True)
         await db.bookings.create_index([("property_id", 1), ("status", 1)], background=True)
         await db.bookings.create_index([("start_date", 1), ("end_date", 1)], background=True)
         await db.external_bookings.create_index([("start_date", 1), ("end_date", 1)], background=True)

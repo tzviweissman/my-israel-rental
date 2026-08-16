@@ -26,6 +26,8 @@ from __future__ import annotations
 import re
 
 from utils.locations_catalog import (
+    HEBREW_TO_KEY,
+    NEIGHBORHOOD_BY_CITY,
     NEIGHBORHOOD_INDEX,
     STATIC_NEIGHBORHOOD_ALIASES,
 )
@@ -158,3 +160,124 @@ def area_matches(prop_area: str | None, selected_area: str | None) -> bool:
     if q is None:
         return True
     return bool(re.search(q["$regex"], prop_area or "", flags=re.IGNORECASE))
+
+# ── Canonical area ids (spec 2.2) ─────────────────────────────────────
+#
+# One id per place, whatever anyone typed. "Ramat Eshkol", "רמת אשכול",
+# "ramat-eshkol" and "Jerusalem - Ramat Eshkol" all resolve to
+# ``jerusalem-ramat-eshkol``, and THAT is what search matches on.
+#
+# The old behaviour was a case-insensitive $regex on the raw text, which
+# matches none of the above against each other. It is what made a Hebrew
+# post unfindable by an English search — the highest-value item in the
+# spec, and the reason this exists.
+#
+# Unknown places still work. resolve_area_id returns None and callers keep
+# the free-text match they had, so posting about a village we have never
+# heard of behaves exactly as it did before.
+
+_PUNCT_TO_SPACE = frozenset("-_/.,'()\"" + chr(0x5F3) + chr(0x5F4) + chr(92))
+
+def _strip_punct(value: str) -> str:
+    """Fold the things people vary without meaning to.
+
+    Hyphens against spaces ("ramat-eshkol"), the Hebrew geresh, quotes,
+    and doubled whitespace. Not accents — Hebrew has none and the English
+    names here are transliterations without them.
+    """
+    out = []
+    for ch in value:
+        if ch in _PUNCT_TO_SPACE:
+            out.append(" ")
+        else:
+            out.append(ch)
+    return " ".join("".join(out).split())
+
+
+def area_slug(city: str, neighborhood: str | None = None) -> str:
+    """'Jerusalem', 'Ramat Eshkol' -> 'jerusalem-ramat-eshkol'."""
+    parts = [p for p in (city, neighborhood) if p]
+    joined = " ".join(parts).lower()
+    return "-".join(_strip_punct(joined).split())
+
+
+def resolve_area_id(area: str | None) -> str | None:
+    """A stable id for any spelling of a place, or None if unrecognised.
+
+    Handles, in one pass: English, Hebrew, hyphens-for-spaces, extra
+    whitespace, the "<City> - <Neighborhood>" form, bare neighbourhoods,
+    bare cities, and the street-name aliases the catalogue already carried.
+
+    City scoping is not decoration. "Ramat Eshkol" exists in BOTH Jerusalem
+    and Haifa, and the flat neighbourhood index keeps whichever was
+    registered first — so "Haifa - Ramat Eshkol" would silently resolve to
+    Jerusalem and file a Haifa post under the wrong city. When a city is
+    named it wins.
+
+    Unknown places return None on purpose; the caller keeps its free-text
+    match, so a village we have never heard of behaves as it always did.
+    """
+    if not area:
+        return None
+    raw = str(area).strip()
+    if not raw:
+        return None
+
+    # Split on the canonical separator BEFORE folding punctuation — the
+    # fold turns "-" into a space, so splitting after it never finds the
+    # separator and the whole "<City> - <Neighborhood>" form silently fell
+    # through to None.
+    segments = [seg.strip() for seg in raw.split(" - ") if seg.strip()]
+
+    def _key(value: str) -> str:
+        """Fold to the canonical lowercase English key, via Hebrew if needed."""
+        folded = _strip_punct(value).lower()
+        return (HEBREW_TO_KEY.get(value.strip())
+                or HEBREW_TO_KEY.get(_strip_punct(value).strip())
+                or folded)
+
+    # A named city scopes everything after it.
+    city_name = None
+    if len(segments) > 1:
+        candidate_city = _key(segments[0])
+        for _city, _n in NEIGHBORHOOD_INDEX.values():
+            if candidate_city == _city.lower():
+                city_name = _city
+                break
+
+    candidates = list(reversed(segments)) if segments else []
+    candidates.append(_strip_punct(raw))
+
+    for cand in candidates:
+        low = _key(cand)
+        if not low:
+            continue
+
+        if city_name:
+            # Only accept a neighbourhood that belongs to the named city.
+            bucket = NEIGHBORHOOD_BY_CITY.get(city_name.lower(), {})
+            if low in bucket:
+                return area_slug(city_name, bucket[low])
+            alias = all_aliases().get(low)
+            if alias and alias in bucket:
+                return area_slug(city_name, bucket[alias])
+
+        hit = NEIGHBORHOOD_INDEX.get(low)
+        if hit and not city_name:
+            return area_slug(hit[0], hit[1])
+
+        alias = all_aliases().get(low)
+        if alias and not city_name:
+            hit = NEIGHBORHOOD_INDEX.get(alias)
+            if hit:
+                return area_slug(hit[0], hit[1])
+
+        for _city in {c for c, _n in NEIGHBORHOOD_INDEX.values()}:
+            if low == _city.lower():
+                return area_slug(_city)
+
+    # A recognised city with an unrecognised neighbourhood is still better
+    # than nothing — it keeps every post in that city findable together.
+    if city_name:
+        return area_slug(city_name)
+    return None

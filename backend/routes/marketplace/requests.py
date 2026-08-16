@@ -59,6 +59,7 @@ from utils.notification_tokens import (
     NotificationTokenError,
     verify_notification_token,
 )
+from utils.area_filter import resolve_area_id
 from utils.translate import detect_lang, translate_marketing
 from utils.whatsapp_link import build_whatsapp_link, normalize_whatsapp_number
 
@@ -421,8 +422,20 @@ async def list_requests(
     if rental_kind:
         query["rental_kind"] = rental_kind
     if area:
-        # Prefix-ish match so "Tel Aviv" finds "Tel Aviv, Florentin".
-        query["area"] = {"$regex": area.strip(), "$options": "i"}
+        # Resolve the SEARCH term the same way the stored value was
+        # resolved, and match ids. This is what makes "רמת אשכול" find a
+        # post written as "Ramat Eshkol" — a case-insensitive regex on the
+        # raw text matches neither against the other.
+        wanted_id = resolve_area_id(area)
+        if wanted_id:
+            query["$or"] = [
+                {"area_id": wanted_id},
+                # Records written before area_id existed, and any area the
+                # catalogue does not know, still match on their text.
+                {"area": {"$regex": re.escape(area.strip()), "$options": "i"}},
+            ]
+        else:
+            query["area"] = {"$regex": re.escape(area.strip()), "$options": "i"}
     if q:
         clauses = _search_clauses(q)
         if clauses:
@@ -498,6 +511,10 @@ async def create_request(payload: RequestIn, user=Depends(verify_token)):
         # Judged by the background task; labels the original on the UI.
         "source_lang": None,
         "area": payload.area.strip(),
+        # Spec 2.2 — one id per place, whatever spelling was typed, in
+        # either language. The raw text is kept for display; this is what
+        # search matches on.
+        "area_id": resolve_area_id(payload.area),
         "budget_type": payload.budget_type,
         "budget_amount": payload.budget_amount if payload.budget_type == "fixed" else None,
         "budget_currency": payload.budget_currency,
@@ -576,6 +593,8 @@ async def patch_request(request_id: str, payload: RequestPatch, user=Depends(ver
         update["move_in_date"] = None
         update["preferred_date"] = None
     update["updated_at"] = datetime.now(UTC).isoformat()
+    if "area" in update:
+        update["area_id"] = resolve_area_id(update["area"])
     if update.get("area") and update["area"] != doc.get("area"):
         # Area changed, so the old pin is now wrong. Re-geocode rather than
         # leave it sitting at the previous neighbourhood.

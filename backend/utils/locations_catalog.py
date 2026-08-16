@@ -65,6 +65,18 @@ for _g in LOCATION_OPTIONS:
     for _n in _g["neighborhoods"]:
         NEIGHBORHOOD_INDEX.setdefault(_n.strip().lower(), (_g["city"], _n))
 
+# Neighbourhoods keyed BY CITY. NEIGHBORHOOD_INDEX above is flat and uses
+# setdefault, so a name shared by two cities — "Ramat Eshkol" is in both
+# Jerusalem and Haifa, "German Colony" in both Jerusalem and Haifa, "City
+# Center" in half of them — only ever resolves to whichever city was
+# registered first. That is fine for a best-guess lookup and wrong when the
+# city is stated, so scoped lookups use this instead.
+NEIGHBORHOOD_BY_CITY: dict[str, dict[str, str]] = {}
+for _g in LOCATION_OPTIONS:
+    _bucket = NEIGHBORHOOD_BY_CITY.setdefault(_g["city"].lower(), {})
+    for _n in _g["neighborhoods"]:
+        _bucket.setdefault(_n.strip().lower(), _n)
+
 # Street-name / colloquial / typo aliases → canonical neighborhood (lowercase).
 # Seed values shipped with the code — runtime additions live in the
 # ``area_aliases`` Mongo collection (see ``routes/admin_area_aliases.py``)
@@ -80,3 +92,71 @@ STATIC_NEIGHBORHOOD_ALIASES: dict[str, str] = {
 # Backwards-compat alias: existing callers import ``NEIGHBORHOOD_ALIASES``.
 # Kept as a reference to the static seed so tests can still pin it.
 NEIGHBORHOOD_ALIASES = STATIC_NEIGHBORHOOD_ALIASES
+
+# ── Hebrew names, and one stable id per area (spec 2.2) ───────────────
+#
+# The catalogue was English-only, so "רמת אשכול" and "Ramat Eshkol" were
+# two unrelated strings and a Hebrew post was invisible to an English
+# search. That is the single thing this table fixes.
+#
+# Deliberately NOT machine-translated at runtime: place names are exactly
+# where a translator invents plausible nonsense, and an area is a join key
+# — one wrong rendering silently splits a neighbourhood in two. These are
+# written down once, by hand, and reviewed.
+#
+# Coverage is the cities and Jerusalem neighbourhoods that actually carry
+# listings and posts today, plus the big-city names. An area not in the
+# table still works: it falls back to the text as typed, exactly as before.
+HEBREW_AREA_NAMES: dict[str, str] = {
+    # Cities
+    "jerusalem": "ירושלים",
+    "tel aviv": "תל אביב",
+    "haifa": "חיפה",
+    "beersheba": "באר שבע",
+    "netanya": "נתניה",
+    "ashdod": "אשדוד",
+    "ashkelon": "אשקלון",
+    "petah tikva": "פתח תקווה",
+    "ramat gan": "רמת גן",
+    "herzliya": "הרצליה",
+    "raanana": "רעננה",
+    "kfar saba": "כפר סבא",
+    "modiin": "מודיעין",
+    "beit shemesh": "בית שמש",
+    "eilat": "אילת",
+    "rishon lezion": "ראשון לציון",
+    # Jerusalem neighbourhoods — where the board's posts actually are
+    "ramat eshkol": "רמת אשכול",
+    "geula": "גאולה",
+    "nachlaot": "נחלאות",
+    "rehavia": "רחביה",
+    "baka": "בקעה",
+    "old city": "העיר העתיקה",
+    "romema": "רוממה",
+    "sanhedria": "סנהדריה",
+    "sanhedria murhevet": "סנהדריה המורחבת",
+    "french hill": "גבעה צרפתית",
+    "givat hamivtar": "גבעת המבתר",
+    "maalot dafna": "מעלות דפנה",
+    "ramat shlomo": "רמת שלמה",
+    "har nof": "הר נוף",
+    "talbiya": "טלביה",
+    "german colony": "המושבה הגרמנית",
+    "mekor baruch": "מקור ברוך",
+    "mea shearim": "מאה שערים",
+    "katamon": "קטמון",
+    "arzei habira": "ארזי הבירה",
+    "kiryat moshe": "קרית משה",
+    "givat shaul": "גבעת שאול",
+    "pisgat zeev": "פסגת זאב",
+    "gilo": "גילה",
+    "ramot": "רמות",
+    "talpiot": "תלפיות",
+    "mamilla": "ממילא",
+    "city center": "מרכז העיר",
+}
+
+# Hebrew -> the canonical lowercase English key. Built by inverting the
+# table above so the two can never drift apart.
+HEBREW_TO_KEY: dict[str, str] = {he: en for en, he in HEBREW_AREA_NAMES.items()}
+

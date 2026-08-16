@@ -740,8 +740,10 @@ def _search_clauses(q: str) -> list[dict[str, Any]]:
         rx = {"$regex": f"({alts})", "$options": "i"}
         clauses.append({"$or": [
             {"title": rx}, {"description": rx},
-            # Hebrew copy is auto-translated into these, so a Hebrew search
-            # has to reach them or half the board is invisible to it.
+            # Both translated sides. _he was already here; _en arrived with
+            # spec 1.2 and without it a Hebrew-authored post stays invisible
+            # to an English search even though its English text exists.
             {"title_he": rx}, {"description_he": rx},
+            {"title_en": rx}, {"description_en": rx},
         ]})
     return clauses
