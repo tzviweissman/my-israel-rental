@@ -59,7 +59,7 @@ from utils.notification_tokens import (
     NotificationTokenError,
     verify_notification_token,
 )
-from utils.translate import translate_marketing_to_hebrew
+from utils.translate import detect_lang, translate_marketing
 from utils.whatsapp_link import build_whatsapp_link, normalize_whatsapp_number
 
 from .shared import UTC, FRONTEND_URL, _search_clauses, _validate_category, _validate_subcategory
@@ -309,34 +309,49 @@ def _public(doc: dict[str, Any], identity: dict[str, Any] | None = None) -> dict
 
 
 async def _translate_bg(request_id: str, title: str, description: str) -> None:
-    """Fill title_he / description_he in the background.
+    """Fill in whichever language is missing, in the background (spec 1.4).
 
     Bilingual reach is the whole point of this board: a Hebrew-speaking
     landlord scanning demand has to be able to read an English speaker's
     request, and the reverse.
 
-    Same helper, model and config as gigs and jobs — deliberately no new
-    spend pattern. Runs as a background task rather than inline so an
-    Anthropic outage can never delay or block someone from posting: the
-    request is already saved and live before this starts, and a failure
-    here leaves it published in the language it was written in.
+    This used to translate ONE WAY. It called an English->Hebrew prompt on
+    whatever was typed, so a Hebrew post had its Hebrew fed through an
+    English->Hebrew translator — producing a `title_he` that was just the
+    original again, and no English version at all. An English-speaking owner
+    scanning the board saw Hebrew and moved on. Now the source language is
+    detected first and the OTHER side is filled.
+
+    Title and description are judged together, since they are one post in
+    one language; judging separately would give a record two source
+    languages and translate the wrong half.
+
+    Runs as a background task rather than inline so an Anthropic outage can
+    never delay or block someone from posting: the request is already saved
+    and live before this starts. A failure leaves it published in the
+    language it was written in, and the next edit re-runs this (spec 1.5,
+    behaviour preserved exactly).
 
     Fires on create and on edit only, never on read.
     """
     try:
-        title_he = await translate_marketing_to_hebrew(title) if title else None
-        desc_he = await translate_marketing_to_hebrew(description) if description else None
-        updates: dict[str, Any] = {}
-        if title_he:
-            updates["title_he"] = title_he
-        if desc_he:
-            updates["description_he"] = desc_he
-        if updates:
-            await db.requests.update_one({"_id": request_id}, {"$set": updates})
+        source = detect_lang(title, description)
+        target = "en" if source == "he" else "he"
+        suffix = target  # 'he' -> title_he, 'en' -> title_en
+
+        new_title = await translate_marketing(title, target) if title else None
+        new_desc = await translate_marketing(description, target) if description else None
+
+        updates: dict[str, Any] = {"source_lang": source}
+        if new_title:
+            updates[f"title_{suffix}"] = new_title
+        if new_desc:
+            updates[f"description_{suffix}"] = new_desc
+        await db.requests.update_one({"_id": request_id}, {"$set": updates})
     except Exception as e:  # noqa: BLE001
         # Swallowed on purpose. The post is already live; the next edit
         # re-runs this, so a transient outage self-heals.
-        logger.warning("[requests] Hebrew translation failed for %s: %s", request_id, e)
+        logger.warning("[requests] translation failed for %s: %s", request_id, e)
 
 
 async def _request_or_404(request_id: str) -> dict[str, Any]:
@@ -473,8 +488,15 @@ async def create_request(payload: RequestIn, user=Depends(verify_token)):
         "poster_user_id": user["user_id"],
         "title": payload.title.strip(),
         "title_he": None,
+        # Spec 1.2. Present from creation rather than appearing only once
+        # the background task has run, so a reader never has to treat
+        # "absent" as a third state alongside null and filled.
+        "title_en": None,
         "description": payload.description.strip(),
         "description_he": None,
+        "description_en": None,
+        # Judged by the background task; labels the original on the UI.
+        "source_lang": None,
         "area": payload.area.strip(),
         "budget_type": payload.budget_type,
         "budget_amount": payload.budget_amount if payload.budget_type == "fixed" else None,
@@ -568,8 +590,15 @@ async def patch_request(request_id: str, payload: RequestPatch, user=Depends(ver
     # doesn't spend an API call.
     title_changed = "title" in update and update["title"] != doc.get("title")
     desc_changed = "description" in update and update["description"] != doc.get("description")
-    missing_he = not fresh.get("title_he") or not fresh.get("description_he")
-    if title_changed or desc_changed or missing_he:
+    # Whichever side this post needs. Checking only `_he` was correct when
+    # translation ran one way; on a Hebrew-authored post the missing side is
+    # ENGLISH, and a `_he`-only check would report it complete forever.
+    source = fresh.get("source_lang") or detect_lang(fresh.get("title"), fresh.get("description"))
+    other = "en" if source == "he" else "he"
+    missing_translation = (
+        not fresh.get(f"title_{other}") or not fresh.get(f"description_{other}")
+    )
+    if title_changed or desc_changed or missing_translation:
         asyncio.create_task(_translate_bg(request_id, fresh["title"], fresh["description"]))
 
     return _public(fresh)

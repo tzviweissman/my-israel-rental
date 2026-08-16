@@ -96,17 +96,26 @@ async def auto_translate_gig_inline(
     LLM failures are logged and the empty dict is returned — provider's
     publish still succeeds, English copy still serves.
     """
-    from utils.translate import translate_marketing_to_hebrew
+    from utils.translate import detect_lang, translate_marketing
 
-    updates: dict[str, str] = {}
+    # Spec 1.4 — fill whichever side is MISSING, not always Hebrew. A gig
+    # written in Hebrew used to be run through an English->Hebrew prompt,
+    # yielding Hebrew-from-Hebrew and no English at all, so an English
+    # speaker browsing services saw copy they could not read.
+    source = detect_lang(title, description)
+    target = "en" if source == "he" else "he"
+    updates: dict[str, str] = {"source_lang": source}
     try:
         if (title or "").strip():
-            updates["title_he"] = await translate_marketing_to_hebrew(title)
+            updates[f"title_{target}"] = await translate_marketing(title, target)
         if (description or "").strip():
-            updates["description_he"] = await translate_marketing_to_hebrew(description)
+            updates[f"description_{target}"] = await translate_marketing(description, target)
     except Exception as e:  # noqa: BLE001 — top-level around a network call
         logger.warning("[auto-translate-inline] failed: %s", e)
-        return {}
+        # source_lang is still worth keeping: it costs nothing, needed no
+        # API call, and lets the UI label the original even when the
+        # translation did not land.
+        return {"source_lang": source}
     return updates
 
 
@@ -120,16 +129,22 @@ async def auto_translate_gig_bg(gig_id: str, title: str | None, description: str
     saves stay snappy (LLM call takes 1-3 s). If translation fails, the
     English text still serves — no user-visible regression.
     """
-    from utils.translate import translate_marketing_to_hebrew
+    from utils.translate import detect_lang, translate_marketing
 
-    updates: dict[str, str] = {}
+    # Same rule as the inline twin above: fill the missing side.
+    source = detect_lang(title, description)
+    target = "en" if source == "he" else "he"
+    updates: dict[str, str] = {"source_lang": source}
     try:
         if (title or "").strip():
-            updates["title_he"] = await translate_marketing_to_hebrew(title)
+            updates[f"title_{target}"] = await translate_marketing(title, target)
         if (description or "").strip():
-            updates["description_he"] = await translate_marketing_to_hebrew(description)
+            updates[f"description_{target}"] = await translate_marketing(description, target)
     except Exception as e:  # noqa: BLE001 — top-level around a network call
         logger.warning("[auto-translate] gig=%s failed: %s", gig_id, e)
+        # Record the language even on failure — free, and the retry path
+        # below reads it.
+        await db.marketplace_gigs.update_one({"_id": gig_id}, {"$set": {"source_lang": source}})
         return
     if updates:
         await db.marketplace_gigs.update_one({"_id": gig_id}, {"$set": updates})
