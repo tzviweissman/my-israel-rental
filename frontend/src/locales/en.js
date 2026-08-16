@@ -1381,6 +1381,12 @@ const en = {
         // Existing inline-defaulted keys are still used elsewhere in the
         // file — including them here makes them real i18n keys and stops
         // them from depending on the default-string fallback.
+        // B1 trust line. Numbers come from /api/properties/stats/trust at
+        // runtime — never hardcode them here, they go stale and become a
+        // false claim on a page that is arguing for trust.
+        trustListings: '{{n}} homes listed',
+        trustAreas: 'across {{n}} Jerusalem neighbourhoods',
+        trustFees: 'free to search · no booking fees',
         noResultsTitle: 'No stays match those filters',
         noResultsBody: 'Try widening your search or clearing a filter.',
         clearAll: 'Clear all',

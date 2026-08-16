@@ -566,3 +566,74 @@ async def get_manager_properties(manager_id: str) -> dict:
 # --- Owner / Manager availability dashboard ---
 
 
+
+
+# ── Trust line counts (B1) ─────────────────────────────────────────────
+# Thumbtack and Plum Guide both put a proof line under the search control.
+# The brief was explicit: real numbers from the database, and drop any
+# clause whose number isn't available rather than estimating one. So this
+# returns only what can be counted, and the UI hides whatever is missing.
+#
+# Two things learned from the live data that shaped this:
+#
+#   1. `area` is a NEIGHBOURHOOD, not a city. Every live listing is in
+#      Jerusalem — Geula, Nachlaot, Rehavia, Baka and so on — so a "cities
+#      covered" clause of the kind the research suggested would have been
+#      false on the first render. This counts neighbourhoods and the copy
+#      says Jerusalem.
+#   2. The same neighbourhood arrives spelled several ways: with and
+#      without a ", Jerusalem" suffix, "Sanhedria Murhevet" vs
+#      "Murchevet", "Arzei HaBirah" vs "Arzei Habira", and pairs joined by
+#      a slash. Counting raw distinct values gave 40; after folding the
+#      variants it is 28. The larger number was the flattering one, which
+#      is exactly why it needed checking.
+#
+# The bare value "Jerusalem" is excluded: it is the generic fallback tag,
+# not a neighbourhood, and counting it would inflate by one.
+_TRUST_CACHE: dict[str, Any] = {"at": 0.0, "data": None}
+_TRUST_TTL_SECONDS = 300
+
+
+def _fold_area(raw: Any) -> list[str]:
+    """Normalise one `area` value into zero or more neighbourhood keys."""
+    head = str(raw or "").split(" - ")[0].strip()
+    if not head:
+        return []
+    out = []
+    for part in head.split("/"):
+        key = part.strip().lower()
+        key = key.removesuffix(", jerusalem").strip()
+        key = " ".join(key.split())
+        key = key.replace("murhevet", "murchevet").replace("arzei habirah", "arzei habira")
+        if key and key != "jerusalem":
+            out.append(key)
+    return out
+
+
+@api_router.get("/properties/stats/trust")
+async def get_trust_stats(response: Response) -> dict:
+    """Counts for the proof line under the Stays search panel.
+
+    Cached for five minutes: it is two reads per call and the numbers move
+    slowly, but the endpoint sits under the most-visited control on the site.
+    """
+    now = time.time()
+    if _TRUST_CACHE["data"] is not None and now - _TRUST_CACHE["at"] < _TRUST_TTL_SECONDS:
+        response.headers["Cache-Control"] = PUBLIC_CACHE_CONTROL
+        return _TRUST_CACHE["data"]
+
+    # Same visibility rule as the public feed, so the number always matches
+    # what a visitor can actually browse.
+    visible = {"is_hidden": {"$ne": True}}
+    listings = await db.properties.count_documents(visible)
+    areas = await db.properties.distinct("area", visible)
+
+    folded: set[str] = set()
+    for raw in areas:
+        folded.update(_fold_area(raw))
+
+    data = {"listings": int(listings), "neighborhoods": len(folded)}
+    _TRUST_CACHE["at"] = now
+    _TRUST_CACHE["data"] = data
+    response.headers["Cache-Control"] = PUBLIC_CACHE_CONTROL
+    return data

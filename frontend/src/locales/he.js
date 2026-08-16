@@ -1368,6 +1368,10 @@ const he = {
         chipShavuot: 'שבועות',
         chipRoshHashana: 'ראש השנה',
         // Other Stays-page strings
+        // B1 trust line — see the note on the English side.
+        trustListings: '{{n}} דירות מפורסמות',
+        trustAreas: 'ב-{{n}} שכונות בירושלים',
+        trustFees: 'חיפוש חינם · ללא דמי הזמנה',
         noResultsTitle: 'אין נכסים שמתאימים לסינון הזה',
         noResultsBody: 'נסו להרחיב את החיפוש או לבטל סינון.',
         clearAll: 'נקה הכל',

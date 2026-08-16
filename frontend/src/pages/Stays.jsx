@@ -30,6 +30,7 @@ import { toast } from 'sonner';
 import StaysCard from '../components/stays/StaysCard';
 import AreaRow from '../components/stays/AreaRow';
 import StaysSearchBar from '../components/stays/StaysSearchBar';
+import TrustLine from '../components/stays/TrustLine';
 import StaysHero from '../components/stays/StaysHero';
 import FiltersModal, { AMENITY_PRESETS } from '../components/stays/FiltersModal';
 import StaysMapView from '../components/stays/StaysMapView';
@@ -599,6 +600,10 @@ const Stays = ({ landing = null }) => {
               </button>
             </div>
           </div>
+          {/* B1: proof line, directly under the search control the way
+              Thumbtack and Plum Guide place theirs. Renders nothing until
+              its counts arrive, so it never reserves an empty row. */}
+          <TrustLine t={t} />
         </div>
       </div>
 
