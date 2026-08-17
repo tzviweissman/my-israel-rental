@@ -50,8 +50,8 @@ const AmenitiesList = ({ amenities }) => {
             >
               <Icon
                 size={16}
-                style={{ color: '#D4AF37' }}
-                fill={custom ? '#D4AF37' : 'none'}
+                style={{ color: 'var(--gold)' }}
+                fill={custom ? 'var(--gold)' : 'none'}
               />
               <span>{serviceLabel(t, amenity)}</span>
             </div>

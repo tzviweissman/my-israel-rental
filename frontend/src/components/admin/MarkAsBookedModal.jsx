@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
+import DateField from '../common/DateField';
 import { CalendarX, X } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -79,24 +80,23 @@ export const MarkAsBookedModal = ({ open, target, selectedCount = 0, saving = fa
         <div className={`grid grid-cols-2 gap-3 mb-5 ${blockIndefinite ? 'opacity-40' : ''}`}>
           <div>
             <label className="block text-xs font-medium text-gray-600 mb-1">{t('admin.startDate')}</label>
-            <input
-              type="date"
+            <DateField
               value={blockStart}
-              onChange={e => setBlockStart(e.target.value)}
+              onChange={setBlockStart}
               disabled={blockIndefinite}
-              className="w-full px-3 py-2 rounded-lg border border-[#E5E5E5] text-sm focus:outline-none focus:ring-2 focus:ring-black/20 disabled:cursor-not-allowed"
-              data-testid="block-start-date"
+              className="w-full px-3 py-2 rounded-lg border border-[#E5E5E5] text-sm bg-white focus:outline-none focus:ring-2 focus:ring-black/20 disabled:cursor-not-allowed"
+              testid="block-start-date"
             />
           </div>
           <div>
             <label className="block text-xs font-medium text-gray-600 mb-1">{t('admin.endDate')}</label>
-            <input
-              type="date"
+            <DateField
               value={blockEnd}
-              onChange={e => setBlockEnd(e.target.value)}
+              onChange={setBlockEnd}
+              min={blockStart || undefined}
               disabled={blockIndefinite}
-              className="w-full px-3 py-2 rounded-lg border border-[#E5E5E5] text-sm focus:outline-none focus:ring-2 focus:ring-black/20 disabled:cursor-not-allowed"
-              data-testid="block-end-date"
+              className="w-full px-3 py-2 rounded-lg border border-[#E5E5E5] text-sm bg-white focus:outline-none focus:ring-2 focus:ring-black/20 disabled:cursor-not-allowed"
+              testid="block-end-date"
             />
           </div>
         </div>

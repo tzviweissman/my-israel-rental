@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>MyIsraelRental — Cinematic scroll story</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+<style>
+:root{--blue:#1E5F8C;--blue-deep:#123B57;--gold:#C9A227;--gold-lg:#A9831C;--ink:#23201B;--bg:#EFE9DC;--ease:cubic-bezier(.16,.7,.3,1)}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:'Manrope',system-ui,sans-serif;background:#06121a;color:#fff;line-height:1.5;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+h1,h2{font-family:'Playfair Display',Georgia,serif}
+
+.bar{position:fixed;top:0;left:0;right:0;z-index:50;display:flex;align-items:center;justify-content:space-between;gap:14px;padding:16px clamp(16px,3vw,36px);background:linear-gradient(180deg,rgba(4,12,17,.42),transparent);pointer-events:none}
+.bar>*{pointer-events:auto}
+.bar .lg{display:flex;align-items:center;gap:11px;font-family:'Playfair Display';font-weight:700;font-size:19px;color:#fff;text-shadow:0 1px 8px rgba(0,0,0,.5)}
+.bar .lg img{height:44px;width:auto;display:block;filter:drop-shadow(0 2px 8px rgba(0,0,0,.55))}
+/* glassy bubbles — one around each nav item, like the reference */
+.glass{background:rgba(255,255,255,.12);border:1.5px solid rgba(255,255,255,.55);backdrop-filter:blur(10px) saturate(1.1);border-radius:999px;color:#fff;font-weight:700;font-size:14px;text-shadow:0 1px 4px rgba(0,0,0,.4);box-shadow:inset 0 1px 0 rgba(255,255,255,.25),0 4px 16px rgba(0,0,0,.18);transition:all .2s var(--ease)}
+.glass:hover{background:rgba(255,255,255,.24);transform:translateY(-1px)}
+.bar .links{display:flex;align-items:center;gap:9px}
+.bar .links a,.bar .lang,.bar .signin{background:rgba(255,255,255,.12);border:1.5px solid rgba(255,255,255,.55);backdrop-filter:blur(10px) saturate(1.1);border-radius:999px;color:#fff;font-weight:700;font-size:14px;text-shadow:0 1px 4px rgba(0,0,0,.4);box-shadow:inset 0 1px 0 rgba(255,255,255,.25),0 4px 16px rgba(0,0,0,.18);transition:all .2s var(--ease);text-decoration:none;padding:10px 18px;cursor:pointer;font-family:inherit}
+.bar .links a:hover,.bar .lang:hover,.bar .signin:hover{background:rgba(255,255,255,.24);transform:translateY(-1px)}
+.bar .right{display:flex;align-items:center;gap:9px}
+.bar .lang{font-size:12.5px;padding:9px 14px}
+.bar .join{background:rgba(255,255,255,.92);border:1.5px solid rgba(255,255,255,.95);border-radius:999px;color:var(--ink);font-weight:800;font-size:14px;padding:10px 20px;cursor:pointer;font-family:inherit;backdrop-filter:blur(10px);box-shadow:0 6px 18px rgba(0,0,0,.25);transition:all .2s var(--ease)}
+.bar .join:hover{background:#fff;transform:translateY(-1px)}
+@media(max-width:900px){.bar .links,.bar .signin{display:none}}
+.progress{position:fixed;left:0;top:0;height:3px;background:var(--gold);width:0%;z-index:60}
+
+/* ---------- scene framework: pinned viewport, scroll drives everything ---------- */
+.scene{position:relative}
+.scene .pin{position:sticky;top:0;height:100vh;overflow:hidden}
+.scene video,.scene .still{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;will-change:transform,opacity}
+.scene .still{background-size:cover;background-position:center}
+.scene .shade{position:absolute;inset:0;background:linear-gradient(90deg,rgba(6,14,19,.7) 0%,rgba(6,14,19,.32) 45%,rgba(6,14,19,.05) 75%);pointer-events:none}
+.vig{position:absolute;inset:0;pointer-events:none;background:radial-gradient(125% 95% at 50% 30%,transparent 55%,rgba(3,10,14,.5) 100%)}
+
+.txt{position:absolute;z-index:5;left:clamp(20px,5.5vw,80px);bottom:clamp(70px,14vh,150px);max-width:600px;will-change:transform,opacity}
+.kick{font-size:11.5px;font-weight:800;letter-spacing:.2em;text-transform:uppercase;color:var(--gold);text-shadow:0 1px 8px rgba(0,0,0,.6)}
+.txt h2{font-size:clamp(28px,4.4vw,54px);font-weight:800;line-height:1.04;letter-spacing:-1px;margin-top:10px;text-shadow:0 2px 26px rgba(0,0,0,.55)}
+.txt h2 .a{color:var(--gold)}
+.txt p{margin-top:12px;font-size:clamp(14px,1.35vw,17px);color:rgba(255,255,255,.92);max-width:470px;text-shadow:0 1px 10px rgba(0,0,0,.6)}
+
+/* notification cards — right column, wraps freely, never clipped */
+.note{position:absolute;z-index:6;right:clamp(18px,4.5vw,64px);bottom:clamp(84px,17vh,170px);width:min(360px,calc(100vw - 36px));display:flex;flex-direction:column;gap:12px;pointer-events:none}
+.ncard{background:rgba(255,255,255,.97);color:var(--ink);border-radius:16px;box-shadow:0 24px 60px rgba(0,0,0,.5);padding:14px 16px}
+.ncard .from{font-size:10.5px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--blue);display:flex;align-items:center;gap:6px}
+.ncard .from.wa{color:#128C7E}
+.ncard .msg{margin-top:7px;font-size:13.5px;font-weight:600;line-height:1.5;overflow-wrap:break-word}
+.ncard .sig{margin-top:9px;border-top:1px dashed #d8cfc0;padding-top:9px;font-family:'Playfair Display';font-style:italic;font-size:19px;color:var(--blue-deep)}
+.ncard .ok{display:inline-flex;align-items:center;gap:6px;margin-top:9px;font-size:11px;font-weight:800;color:#1F8A50;background:#E3F3EA;border-radius:999px;padding:3px 10px}
+.ncard .meta{margin-top:7px;font-size:10.5px;color:#8a8377}
+
+/* elements animated by scroll progress get [data-fx]; JS drives opacity/transform */
+[data-fx]{opacity:0;transform:translateY(30px)}
+
+/* hero */
+.hero{position:relative;height:100vh;overflow:hidden}
+.hero video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.hero .shade2{position:absolute;inset:0;background:linear-gradient(180deg,rgba(6,14,19,.4),rgba(6,14,19,.12) 40%,rgba(6,14,19,.75))}
+.hero .center{position:absolute;z-index:5;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:0 20px}
+.hero h1{font-size:clamp(38px,6.6vw,80px);font-weight:800;letter-spacing:-1.5px;line-height:1.02;text-shadow:0 3px 30px rgba(0,0,0,.55)}
+.hero h1 .a{color:var(--gold)}
+.hero p{margin-top:16px;font-size:clamp(14px,1.6vw,18px);color:rgba(255,255,255,.92);max-width:560px}
+.hero .ctas{display:flex;gap:14px;margin-top:28px;flex-wrap:wrap;justify-content:center}
+.b-white{background:#fff;color:var(--ink);border:none;border-radius:999px;font-weight:800;font-size:15px;padding:15px 30px;cursor:pointer;font-family:inherit}
+.b-line{background:rgba(255,255,255,.1);color:#fff;border:1.5px solid rgba(255,255,255,.6);border-radius:999px;font-weight:700;font-size:15px;padding:15px 30px;cursor:pointer;backdrop-filter:blur(8px);font-family:inherit}
+.hero .hint{position:absolute;bottom:24px;left:50%;transform:translateX(-50%);z-index:5;font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:rgba(255,255,255,.65);animation:bob 2.4s ease-in-out infinite}
+@keyframes bob{0%,100%{transform:translate(-50%,0)}50%{transform:translate(-50%,7px)}}
+
+.also{background:#0b1c26;padding:96px 22px;text-align:center}
+.also-in{max-width:960px;margin:0 auto}
+.also h2{font-size:clamp(26px,3.6vw,44px);font-weight:800;letter-spacing:-.8px;margin-top:12px;color:#fff}
+.also-grid{display:flex;flex-wrap:wrap;gap:12px;justify-content:center;margin-top:34px}
+.also-grid span{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.22);backdrop-filter:blur(6px);border-radius:999px;padding:11px 20px;font-size:14px;font-weight:600;color:rgba(255,255,255,.92)}
+/* finale */
+.finale{min-height:88vh;background:var(--bg);color:var(--ink);display:flex;align-items:center;justify-content:center;text-align:center;padding:90px 22px}
+.finale .kick{color:var(--gold-lg)}
+.finale h2{font-size:clamp(32px,5vw,62px);font-weight:800;letter-spacing:-1px;color:var(--blue-deep);margin-top:14px;line-height:1.05}
+.finale h2 .a{color:var(--gold-lg)}
+.finale p{margin-top:16px;color:#6B6459;font-size:17px;max-width:540px;margin-left:auto;margin-right:auto}
+.finale .ctas{display:flex;gap:14px;margin-top:30px;justify-content:center;flex-wrap:wrap}
+.b-blue{background:var(--blue);color:#fff;border:none;border-radius:999px;font-weight:800;font-size:15px;padding:15px 30px;cursor:pointer;font-family:inherit}
+.b-gold{background:rgba(172,134,28,.85);color:#fff;border:1.5px solid rgba(201,162,39,.9);border-radius:999px;font-weight:700;font-size:15px;padding:15px 30px;cursor:pointer;font-family:inherit;text-shadow:0 1px 2px rgba(50,36,0,.5)}
+.strip{display:flex;gap:26px;justify-content:center;flex-wrap:wrap;margin-top:44px;color:#6B6459;font-size:13.5px;font-weight:600}
+.strip b{color:var(--blue-deep)}
+
+@media(max-width:760px){
+  .txt{left:20px;right:20px;bottom:120px}
+  .note{right:18px;left:18px;width:auto;bottom:20px}
+  .scene .shade{background:linear-gradient(180deg,rgba(6,14,19,.25),rgba(6,14,19,.78))}
+}
+@media(prefers-reduced-motion:reduce){
+  [data-fx]{opacity:1!important;transform:none!important}
+  .scene video{display:none}
+  .hero .hint{animation:none}
+}
+</style>
+</head>
+<body>
+<div class="progress" id="prog"></div>
+<div class="bar">
+  <div class="lg"><img src="brand/logo-mark.png" alt=""/> MyIsraelRental</div>
+  <nav class="links">
+    <a href="stays-preview.html">Stays</a>
+    <a href="services-preview.html">Services</a>
+    <a href="wanted-board-preview.html">Requests</a>
+    <a href="home-redesign-preview.html#how">How it works</a>
+    <a href="home-redesign-preview.html#supply">List / Offer</a>
+  </nav>
+  <div class="right">
+    <button class="lang">עברית / EN</button>
+    <button class="signin">Sign in</button>
+    <button class="join">Join free</button>
+  </div>
+</div>
+
+<!-- HERO · aerial over Tel Aviv (looping clip) -->
+<header class="hero">
+  <video autoplay muted loop playsinline preload="auto" poster="https://res.cloudinary.com/dirvyboe9/image/upload/f_auto,q_auto/v1786504634/myisraelrental/site/scene1-aerial.png">
+    <source src="https://res.cloudinary.com/dirvyboe9/video/upload/q_auto/v1786504647/myisraelrental/site/clip0-aerial.mp4" type="video/mp4"/>
+  </video>
+  <div class="shade2"></div>
+  <div class="center">
+    <h1>Find your place <span class="a">in Israel.</span></h1>
+    <p>Rent a home. Hire the pros. — one place for both. Free for renters and owners, no service fees.</p>
+    <div class="ctas"><button class="b-white">Search rentals →</button><button class="b-line">List your property</button></div>
+  </div>
+  <div class="hint">Scroll — the story moves with you</div>
+</header>
+
+<!-- SCENE 1 · VILLA → THROUGH THE WALL (scroll zooms in; stones dissolve into the interior) -->
+<section class="scene" id="villa" style="height:340vh">
+  <div class="pin">
+    <video class="v-villa" muted playsinline preload="auto" poster="https://res.cloudinary.com/dirvyboe9/image/upload/f_auto,q_auto/v1786504668/myisraelrental/site/scene9-kotel-exterior-v2.png">
+      <source src="https://res.cloudinary.com/dirvyboe9/video/upload/q_auto/v1786504673/myisraelrental/site/clip8-kotel-approach-v2.mp4" type="video/mp4"/>
+    </video>
+    <div class="v-interior still" style="background-image:url('https://res.cloudinary.com/dirvyboe9/image/upload/f_auto,q_auto/v1786504670/myisraelrental/site/scene10-kotel-interior-v2.png');opacity:0"></div>
+    <div class="shade"></div><div class="vig"></div>
+    <div class="txt" data-seg="0,.42">
+      <div class="kick">Rentals · long · short · vacation</div>
+      <h2>List any stay — <span class="a">free.</span></h2>
+      <p>Long-term, short-term or vacation rentals, posted by owners.</p>
+    </div>
+    <div class="txt" data-seg=".62,1">
+      <div class="kick">You're in</div>
+      <h2>Book with <span class="a">zero fees.</span></h2>
+      
+    </div>
+  </div>
+</section>
+
+<!-- SCENE 2 · GUEST + WHATSAPP -->
+<section class="scene" style="height:240vh">
+  <div class="pin">
+    <video muted loop playsinline preload="metadata" poster="https://res.cloudinary.com/dirvyboe9/image/upload/f_auto,q_auto/v1786504640/myisraelrental/site/scene4-guest-phone.png">
+      <source src="https://res.cloudinary.com/dirvyboe9/video/upload/q_auto/v1786504657/myisraelrental/site/clip3-guest.mp4" type="video/mp4"/>
+    </video>
+    <div class="shade"></div><div class="vig"></div>
+    <div class="txt" data-seg=".08,1">
+      <div class="kick">Direct chat</div>
+      <h2>WhatsApp the lister <span class="a">directly.</span></h2>
+      <p>The person with the keys is one message away — easy communication, no middleman.</p>
+    </div>
+    <div class="note">
+      <div class="ncard" data-seg=".28,1"><div class="from wa">● WhatsApp · Lister</div><div class="msg">Welcome to your MyIsraelRental stay! 🌊 Door code 4832 — the balcony sunset is all yours.</div><div class="meta">now</div></div>
+      <div class="ncard" data-seg=".55,1"><div class="from">⇄ Auto-translate</div><div class="msg">His Hebrew, your English — chat is translated automatically, both ways.</div><div class="meta">built into every MyIsraelRental chat</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- SCENE 3 · THE LISTER'S SIDE (through the phone, out in Jerusalem) -->
+<section class="scene" style="height:280vh">
+  <div class="pin">
+    <video muted loop playsinline preload="metadata" poster="https://res.cloudinary.com/dirvyboe9/image/upload/f_auto,q_auto/v1786504641/myisraelrental/site/scene5-lister-jerusalem.png">
+      <source src="https://res.cloudinary.com/dirvyboe9/video/upload/q_auto/v1786504660/myisraelrental/site/clip4-lister.mp4" type="video/mp4"/>
+    </video>
+    <div class="shade"></div><div class="vig"></div>
+    <div class="txt" data-seg=".06,1">
+      <div class="kick">For owners</div>
+      <h2>Your listings work <span class="a">while you rest.</span></h2>
+      <p>Out the other side of that chat — a lister in Jerusalem, feet up, while bookings come to him.</p>
+    </div>
+    <div class="note">
+      <div class="ncard" data-seg=".28,1"><div class="from">🔔 MyIsraelRental</div><div class="msg">Your long-term apartment — available in 6 months — was just booked for the following year.</div><div class="meta">just now · owners work less on MyIsraelRental</div></div>
+      <div class="ncard" data-seg=".55,1"><div class="from">🔔 MyIsraelRental</div><div class="msg">Contract signed ✓</div><div class="sig">Daniel M.</div><div class="ok">✓ Signed directly on your dashboard</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- SCENE 4 · HIRE THE PROS -->
+<section class="scene" style="height:240vh">
+  <div class="pin">
+    <video muted loop playsinline preload="metadata" poster="https://res.cloudinary.com/dirvyboe9/image/upload/f_auto,q_auto/v1786504645/myisraelrental/site/scene7-ac-pro.png">
+      <source src="https://res.cloudinary.com/dirvyboe9/video/upload/q_auto/v1786504662/myisraelrental/site/clip5-pro.mp4" type="video/mp4"/>
+    </video>
+    <div class="shade"></div><div class="vig"></div>
+    <div class="txt" data-seg=".06,1">
+      <div class="kick">Services marketplace</div>
+      <h2>Hire <span class="a">the pros.</span></h2>
+      <p>Cleaners, movers, plumbers, electricians and more — reviewed, verified, zero booking fees. Or post your own service and let the jobs find you.</p>
+    </div>
+    <div class="note" data-seg=".35,1">
+      <div class="ncard"><div class="from">🔔 Requests board</div><div class="msg">New job near you: AC repair in Katamon — matches your service profile.</div><div class="meta">post a service · get matched · get paid</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- SCENE 5 · THE REQUESTS BOARD -->
+<section class="scene" style="height:240vh">
+  <div class="pin">
+    <video id="reqVideo" muted loop playsinline preload="metadata" poster="https://res.cloudinary.com/dirvyboe9/image/upload/f_auto,q_auto/v1786504664/myisraelrental/site/scene8-requests-man.png">
+      <source src="https://res.cloudinary.com/dirvyboe9/video/upload/q_auto/v1786504667/myisraelrental/site/clip6-requests-man.mp4" type="video/mp4"/>
+    </video>
+    <div class="shade"></div><div class="vig"></div>
+    <div class="txt" data-seg=".06,1">
+      <div class="kick">The Requests board</div>
+      <h2>Can't find it? <span class="a">Let it find you.</span></h2>
+      <p>Post what you're looking for — a 3-bed in Ramat Eshkol, a mover next week — and owners &amp; pros come to you.</p>
+    </div>
+    <div class="note" data-seg=".35,1">
+      <div class="ncard"><div class="from">📌 Your request is live</div><div class="msg">"3-bed in Ramat Eshkol, up to ₪9,000/mo, from September" — owners with matching homes are being notified.</div><div class="meta">structured · filterable · auto-expires when you're sorted</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ALSO ON MYISRAELRENTAL -->
+<section class="also">
+  <div class="also-in">
+    <div class="kick" style="color:var(--gold)">And that's not all</div>
+    <h2>Also on MyIsraelRental</h2>
+    <div class="also-grid">
+      <span>🕎 Shabbat-elevator, sukkah &amp; kosher-kitchen filters</span>
+      <span>🔔 Saved searches with instant alerts</span>
+      <span>⇄ Auto-translated EN ↔ HE chat</span>
+      <span>🗺️ Map &amp; near-address search</span>
+      <span>📅 iCal / Airbnb calendar sync</span>
+      <span>⭐ Reviews &amp; verified work history</span>
+      <span>🏘️ Subleases</span>
+      <span>🧰 Bulk tools for property managers</span>
+    </div>
+  </div>
+</section>
+
+<!-- FINALE -->
+<section class="finale">
+  <div>
+    <div class="kick">MyIsraelRental</div>
+    <h2>Rent a home. Hire the pros.<br/><span class="a">One place for both.</span></h2>
+    <p>Fully bilingual (English + Hebrew), verified listings and reviews, on-platform chat — free to search for everyone, free to list for owners and pros.</p>
+    <div class="ctas"><button class="b-blue">Search rentals</button><button class="b-gold">Post a request</button></div>
+    <div class="strip"><span><b>1,200+</b> active rentals</span><span><b>19</b> cities</span><span><b>450+</b> verified pros</span><span><b>₪0</b> service fees</span></div>
+  </div>
+</section>
+
+<script>
+const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
+const clamp=(v,a,b)=>Math.min(b,Math.max(a,v));
+/* page progress bar */
+const prog=document.getElementById('prog');
+addEventListener('scroll',()=>{const h=document.documentElement;prog.style.width=(h.scrollTop/(h.scrollHeight-h.clientHeight)*100)+'%'},{passive:true});
+/* play videos only when their scene is on screen (saves bandwidth/CPU) */
+const vio=new IntersectionObserver(es=>es.forEach(e=>{const v=e.target;if(reduced)return;
+  if(e.isIntersecting){v.play().catch(()=>{})}else{v.pause()}}),{threshold:.05});
+document.querySelectorAll('.scene video').forEach(v=>vio.observe(v));
+/* scroll engine: per-scene progress drives segment fades + villa zoom-through */
+const scenes=[...document.querySelectorAll('.scene')];
+function drive(){
+  scenes.forEach(s=>{
+    const r=s.getBoundingClientRect();
+    const total=r.height-innerHeight;if(total<=0)return;
+    const p=clamp(-r.top/total,0,1);
+    /* segment elements: data-seg="start,end" fade in across [start, start+.18] and stay */
+    s.querySelectorAll('[data-seg]').forEach(el=>{
+      const [a,b]=el.dataset.seg.split(',').map(Number);
+      const t=clamp((p-a)/0.16,0,1);
+      const out=p>b?clamp(1-(p-b)/0.1,0,1):1;
+      const o=Math.min(t,out);
+      el.style.opacity=o;
+      el.style.transform=`translateY(${(1-t)*30}px)`;
+    });
+    /* villa zoom-through-the-wall */
+    if(s.id==='villa'&&!reduced){
+      const vv=s.querySelector('.v-villa'),vi=s.querySelector('.v-interior');
+      /* zoom villa hard as you scroll: scale 1 -> 3.1, drifting toward the facade */
+      const z=1+p*2.1;
+      vv.style.transform=`scale(${z}) translateY(${p*-4}%)`;
+      /* stones dissolve between 42% and 62% of the scroll — you pass through the wall */
+      const mix=clamp((p-.42)/.2,0,1);
+      vv.style.opacity=1-mix;
+      vv.style.filter=`brightness(${1-mix*.35})`;
+      vi.style.opacity=mix;
+      vi.style.transform=`scale(${1.12-mix*.12})`;
+    }
+  });
+  requestAnimationFrame(drive);
+}
+if(!reduced)requestAnimationFrame(drive);
+else{document.querySelectorAll('[data-seg]').forEach(el=>{el.style.opacity=1;el.style.transform='none'})}
+</script>
+</body>
+</html>

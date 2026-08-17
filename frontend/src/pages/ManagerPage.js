@@ -152,25 +152,25 @@ const ManagerPage = () => {
   return (
     <div className="min-h-screen" data-testid="manager-page">
       <div className="max-w-7xl mx-auto px-6 pt-28 pb-12">
-        <div className="rounded-2xl p-8 border border-[#E5E5E5] mb-10" style={{ background: 'linear-gradient(135deg, #1E6A6A 0%, #2A8585 100%)' }}>
+        <div className="rounded-2xl p-8 border border-[#E5E5E5] mb-10" style={{ background: 'linear-gradient(135deg, var(--brand-primary) 0%, #2A8585 100%)' }}>
           <div className="flex items-center gap-6">
             {data.manager.business_logo ? (
               <img
                 src={data.manager.business_logo.startsWith('/api') ? `${API.replace('/api', '')}${data.manager.business_logo}` : data.manager.business_logo}
                 alt={`${data.manager.name} logo`}
-                className="w-24 h-24 rounded-xl object-cover border-2 border-[#D4AF37]"
+                className="w-24 h-24 rounded-xl object-cover border-2 border-[var(--gold)]"
                 data-testid="manager-logo"
               />
             ) : (
               <div className="w-24 h-24 rounded-full flex items-center justify-center" style={{ backgroundColor: 'rgba(255,255,255,0.15)' }}>
-                <User size={48} style={{ color: '#D4AF37' }} />
+                <User size={48} style={{ color: 'var(--gold)' }} />
               </div>
             )}
             <div>
               <h1 className="text-4xl font-bold mb-2 text-white" style={{ fontFamily: 'Playfair Display' }} data-testid="manager-name">
                 {data.manager.name}
               </h1>
-              <p className="mt-2 text-sm" style={{ color: '#D4AF37' }}>
+              <p className="mt-2 text-sm" style={{ color: 'var(--gold)' }}>
                 {data.properties.length} {data.properties.length === 1 ? 'Property' : 'Properties'} Available
               </p>
             </div>
@@ -183,7 +183,7 @@ const ManagerPage = () => {
             className="mb-8 p-5 rounded-xl bg-white border border-[#E5E5E5]"
             data-testid="manager-bio"
           >
-            <h2 className="text-lg font-bold mb-2" style={{ fontFamily: 'Playfair Display', color: '#1E6A6A' }}>
+            <h2 className="text-lg font-bold mb-2" style={{ fontFamily: 'Playfair Display', color: 'var(--brand-primary)' }}>
               About {data.manager.name}
             </h2>
             <p className="text-sm text-gray-700 leading-relaxed whitespace-pre-line">{wl.bio}</p>
@@ -195,14 +195,14 @@ const ManagerPage = () => {
             entry is a title + optional description. */}
         {Array.isArray(wl.services) && wl.services.length > 0 && (
           <div className="mb-8" data-testid="manager-services">
-            <h2 className="text-lg font-bold mb-3" style={{ fontFamily: 'Playfair Display', color: '#1E6A6A' }}>
+            <h2 className="text-lg font-bold mb-3" style={{ fontFamily: 'Playfair Display', color: 'var(--brand-primary)' }}>
               Other services offered
             </h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
               {wl.services.map((s, i) => (
                 <div
                   key={i}
-                  className="p-4 rounded-xl bg-white border border-[#E5E5E5] hover:border-[#D4AF37] transition-colors"
+                  className="p-4 rounded-xl bg-white border border-[#E5E5E5] hover:border-[var(--gold)] transition-colors"
                   data-testid={`manager-service-${i}`}
                 >
                   <p className="text-sm font-semibold text-gray-900">{s.title}</p>
@@ -224,9 +224,9 @@ const ManagerPage = () => {
                 onClick={() => setActiveType(rt.key)}
                 className="px-5 py-2.5 rounded-full text-sm font-semibold tracking-wide transition-all duration-200"
                 style={{
-                  backgroundColor: activeType === rt.key ? '#1E6A6A' : 'transparent',
-                  color: activeType === rt.key ? '#D4AF37' : '#1E6A6A',
-                  border: activeType === rt.key ? '1.5px solid #1E6A6A' : '1.5px solid #d0d0d0',
+                  backgroundColor: activeType === rt.key ? 'var(--brand-primary)' : 'transparent',
+                  color: activeType === rt.key ? 'var(--gold)' : 'var(--brand-primary)',
+                  border: activeType === rt.key ? '1.5px solid var(--brand-primary)' : '1.5px solid #d0d0d0',
                 }}
                 data-testid={`tab-${rt.key}`}
               >
@@ -248,15 +248,15 @@ const ManagerPage = () => {
           <div className="flex flex-wrap items-center gap-x-5 gap-y-2 mb-8" data-testid="filters-row">
             {areasForActiveType.length > 1 && (
               <div className="flex items-center gap-2" data-testid="area-filter-row">
-                <MapPin size={16} className="text-[#1E6A6A]" />
-                <label htmlFor="manager-area-filter" className="text-sm font-medium text-[#1E6A6A]">
+                <MapPin size={16} className="text-[var(--brand-primary)]" />
+                <label htmlFor="manager-area-filter" className="text-sm font-medium text-[var(--brand-primary)]">
                   Area:
                 </label>
                 <select
                   id="manager-area-filter"
                   value={activeArea}
                   onChange={(e) => setActiveArea(e.target.value)}
-                  className="px-4 py-2 rounded-lg border border-[#1E6A6A]/30 text-sm font-medium bg-white focus:outline-none focus:ring-2 focus:ring-[#1E6A6A]/40"
+                  className="px-4 py-2 rounded-lg border border-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/30 text-sm font-medium bg-white focus:outline-none focus:ring-2 focus:ring-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/40"
                   data-testid="manager-area-filter"
                 >
                   <option value="all">All areas ({areasForActiveType.length})</option>
@@ -272,15 +272,15 @@ const ManagerPage = () => {
             )}
             {bedroomsForActiveSlice.length > 1 && (
               <div className="flex items-center gap-2" data-testid="bedrooms-filter-row">
-                <Bed size={16} className="text-[#1E6A6A]" />
-                <label htmlFor="manager-bedrooms-filter" className="text-sm font-medium text-[#1E6A6A]">
+                <Bed size={16} className="text-[var(--brand-primary)]" />
+                <label htmlFor="manager-bedrooms-filter" className="text-sm font-medium text-[var(--brand-primary)]">
                   Bedrooms:
                 </label>
                 <select
                   id="manager-bedrooms-filter"
                   value={activeBedrooms}
                   onChange={(e) => setActiveBedrooms(e.target.value)}
-                  className="px-4 py-2 rounded-lg border border-[#1E6A6A]/30 text-sm font-medium bg-white focus:outline-none focus:ring-2 focus:ring-[#1E6A6A]/40"
+                  className="px-4 py-2 rounded-lg border border-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/30 text-sm font-medium bg-white focus:outline-none focus:ring-2 focus:ring-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/40"
                   data-testid="manager-bedrooms-filter"
                 >
                   <option value="all">Any</option>
@@ -366,7 +366,7 @@ const ManagerPage = () => {
                       {property.rental_type === 'vacation' ? t('property.perNight') : t('property.perMonth')}
                     </span>
                   </span>
-                  <span className="hidden md:inline text-sm px-3 py-1 rounded-full" style={{ backgroundColor: '#E5E5E5', color: '#1E6A6A' }}>
+                  <span className="hidden md:inline text-sm px-3 py-1 rounded-full" style={{ backgroundColor: '#E5E5E5', color: 'var(--brand-primary)' }}>
                     {rentalTypeLabels[property.rental_type] || property.rental_type}
                   </span>
                 </div>
@@ -395,7 +395,7 @@ const ManagerPage = () => {
             Contact {data.manager.name}:{' '}
             <a
               href={`mailto:${wl.contact_email}`}
-              className="inline-flex items-center gap-1 text-[#1E6A6A] hover:underline"
+              className="inline-flex items-center gap-1 text-[var(--brand-primary)] hover:underline"
             >
               <Mail size={11} />{wl.contact_email}
             </a>

@@ -358,8 +358,8 @@ const SmartListsTab = ({ token }) => {
   return (
     <div className="space-y-6" data-testid="smart-lists-tab">
       <div className="flex items-start gap-3">
-        <div className="w-11 h-11 rounded-xl bg-[#D4AF37]/15 flex items-center justify-center shrink-0">
-          <Sparkles size={20} className="text-[#D4AF37]" />
+        <div className="w-11 h-11 rounded-xl bg-[rgb(var(--gold-rgb)/<alpha-value>)]/15 flex items-center justify-center shrink-0">
+          <Sparkles size={20} className="text-[var(--gold)]" />
         </div>
         <div>
           <h2 className="text-2xl font-bold text-gray-900">{t("sweep.smartLists", "Smart Lists")}</h2>
@@ -380,7 +380,7 @@ const SmartListsTab = ({ token }) => {
           <select
             value={location}
             onChange={(e) => setLocation(e.target.value)}
-            className="mt-2 w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#1E6A6A]/30 focus:border-[#1E6A6A] text-sm bg-white"
+            className="mt-2 w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/30 focus:border-[var(--brand-primary)] text-sm bg-white"
             data-testid="smart-list-location-select"
           >
             <option value="">
@@ -407,7 +407,7 @@ const SmartListsTab = ({ token }) => {
           <select
             value={rentalCategory}
             onChange={(e) => setRentalCategory(e.target.value)}
-            className="mt-2 w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#1E6A6A]/30 focus:border-[#1E6A6A] text-sm bg-white"
+            className="mt-2 w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/30 focus:border-[var(--brand-primary)] text-sm bg-white"
             data-testid="smart-list-rental-category-select"
           >
             {RENTAL_CATEGORY_OPTIONS.map((o) => (
@@ -432,7 +432,7 @@ const SmartListsTab = ({ token }) => {
                 onChange={(e) => setMaxRent(e.target.value)}
                 disabled={isVacationLike}
                 placeholder={isVacationLike ? 'N/A for vacation' : 'e.g. 10000'}
-                className="mt-2 w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#1E6A6A]/30 focus:border-[#1E6A6A] text-sm disabled:bg-gray-50 disabled:text-gray-400"
+                className="mt-2 w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/30 focus:border-[var(--brand-primary)] text-sm disabled:bg-gray-50 disabled:text-gray-400"
                 data-testid="smart-list-max-rent-input"
                 min="0"
               />
@@ -453,7 +453,7 @@ const SmartListsTab = ({ token }) => {
           <select
             value={minBedrooms}
             onChange={(e) => setMinBedrooms(e.target.value)}
-            className="mt-2 w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#1E6A6A]/30 focus:border-[#1E6A6A] text-sm bg-white"
+            className="mt-2 w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/30 focus:border-[var(--brand-primary)] text-sm bg-white"
             data-testid="smart-list-bedrooms-select"
           >
             <option value="">Any</option>
@@ -474,7 +474,7 @@ const SmartListsTab = ({ token }) => {
           <select
             value={availability}
             onChange={(e) => setAvailability(e.target.value)}
-            className="mt-2 w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#1E6A6A]/30 focus:border-[#1E6A6A] text-sm bg-white"
+            className="mt-2 w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/30 focus:border-[var(--brand-primary)] text-sm bg-white"
             data-testid="smart-list-availability-select"
           >
             {AVAILABILITY_OPTIONS.map((o) => (
@@ -490,7 +490,7 @@ const SmartListsTab = ({ token }) => {
             type="button"
             onClick={generate}
             disabled={loading}
-            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#1E6A6A] text-white text-sm font-semibold hover:bg-[#175555] disabled:opacity-50 transition-colors"
+            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[var(--brand-primary)] text-white text-sm font-semibold hover:bg-[#175555] disabled:opacity-50 transition-colors"
             data-testid="smart-list-generate-btn"
           >
             <Search size={16} />
@@ -554,13 +554,13 @@ const SmartListsTab = ({ token }) => {
               value={savingName}
               onChange={(e) => setSavingName(e.target.value)}
               placeholder='e.g. "Ramat Eshkol Under 10k – June 2026"'
-              className="flex-1 min-w-[260px] px-4 py-2.5 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#1E6A6A]/30 focus:border-[#1E6A6A] text-sm"
+              className="flex-1 min-w-[260px] px-4 py-2.5 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/30 focus:border-[var(--brand-primary)] text-sm"
               data-testid="smart-list-save-name-input"
             />
             <button
               type="button"
               onClick={saveList}
-              className="px-4 py-2.5 rounded-xl bg-[#D4AF37] text-[#1E6A6A] text-sm font-semibold hover:opacity-90"
+              className="px-4 py-2.5 rounded-xl bg-[var(--gold)] text-[var(--brand-primary)] text-sm font-semibold hover:opacity-90"
               data-testid="smart-list-save-confirm-btn"
             >
               Save
@@ -602,7 +602,7 @@ const SmartListsTab = ({ token }) => {
                   <p className="text-[11px] text-gray-500 truncate">myisraelrental.com</p>
                 </div>
               </div>
-              <p className="text-xl font-extrabold text-[#1E6A6A]">MyIsraelRental.com</p>
+              <p className="text-xl font-extrabold text-[var(--brand-primary)]">MyIsraelRental.com</p>
               <p className="text-sm font-semibold text-gray-700">
                 {buildHeader(appliedFilters)[1]}
               </p>
@@ -619,11 +619,11 @@ const SmartListsTab = ({ token }) => {
                 <li key={p.id} className="py-4 flex items-start justify-between gap-4" data-testid={`smart-list-row-${p.id}`}>
                   <div className="min-w-0">
                     <p className="font-semibold text-gray-900 text-sm flex items-center gap-2">
-                      <MapPin size={13} className="text-[#1E6A6A] shrink-0" />
+                      <MapPin size={13} className="text-[var(--brand-primary)] shrink-0" />
                       <span className="truncate">{displayArea}</span>
                     </p>
                     <p className="text-sm text-gray-600 mt-0.5">
-                      <span className="font-medium" style={{ color: '#D4AF37' }}>
+                      <span className="font-medium" style={{ color: 'var(--gold)' }}>
                         {formatPrice(p.price, p.currency)}
                         {p.price_label || ''}
                       </span>
@@ -645,7 +645,7 @@ const SmartListsTab = ({ token }) => {
                       href={p.listing_url}
                       target="_blank"
                       rel="noreferrer"
-                      className="inline-flex items-center gap-1 mt-1 text-xs text-[#1E6A6A] hover:underline"
+                      className="inline-flex items-center gap-1 mt-1 text-xs text-[var(--brand-primary)] hover:underline"
                       data-testid={`smart-list-link-${p.id}`}
                     >
                       <ExternalLink size={11} />
@@ -682,7 +682,7 @@ const SmartListsTab = ({ token }) => {
                   onClick={() => openSavedList(s.id)}
                   className="flex-1 min-w-0 text-left"
                 >
-                  <p className="text-sm font-semibold text-gray-900 truncate hover:text-[#1E6A6A]">
+                  <p className="text-sm font-semibold text-gray-900 truncate hover:text-[var(--brand-primary)]">
                     {s.name}
                   </p>
                   <p className="text-xs text-gray-500 mt-0.5">

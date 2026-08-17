@@ -123,7 +123,7 @@ const NotificationSettings = ({ API, token }) => {
         className="bg-white rounded-2xl border border-gray-200 p-6 max-w-2xl mb-6"
         data-testid="notification-settings-loading"
       >
-        <Loader2 className="animate-spin text-[#1E6A6A]" size={20} />
+        <Loader2 className="animate-spin text-[var(--brand-primary)]" size={20} />
       </div>
     );
   }
@@ -135,8 +135,8 @@ const NotificationSettings = ({ API, token }) => {
       data-testid="notification-settings-card"
     >
       <div className="flex items-center gap-3 mb-4">
-        <div className="p-3 rounded-full bg-[#1E6A6A]/10">
-          <Bell size={22} className="text-[#1E6A6A]" />
+        <div className="p-3 rounded-full bg-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/10">
+          <Bell size={22} className="text-[var(--brand-primary)]" />
         </div>
         <div>
           <h3 className="text-lg font-bold text-gray-900">Job match notifications</h3>
@@ -159,14 +159,14 @@ const NotificationSettings = ({ API, token }) => {
               disabled={saving}
               className={`w-full text-left flex items-start gap-3 p-3 rounded-xl border transition-all ${
                 active
-                  ? 'border-[#1E6A6A] bg-[#1E6A6A]/5 ring-2 ring-[#1E6A6A]/20'
+                  ? 'border-[var(--brand-primary)] bg-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/5 ring-2 ring-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/20'
                   : 'border-gray-200 hover:border-gray-300 bg-white'
               } disabled:opacity-60`}
               data-testid={`notification-mode-${key}`}
             >
               <div
                 className={`w-9 h-9 rounded-lg flex items-center justify-center shrink-0 ${
-                  active ? 'bg-[#1E6A6A] text-white' : 'bg-gray-100 text-gray-500'
+                  active ? 'bg-[var(--brand-primary)] text-white' : 'bg-gray-100 text-gray-500'
                 }`}
               >
                 <Icon size={16} />
@@ -177,7 +177,7 @@ const NotificationSettings = ({ API, token }) => {
               </div>
               <div
                 className={`w-4 h-4 rounded-full border-2 mt-1 shrink-0 ${
-                  active ? 'border-[#1E6A6A] bg-[#1E6A6A]' : 'border-gray-300 bg-white'
+                  active ? 'border-[var(--brand-primary)] bg-[var(--brand-primary)]' : 'border-gray-300 bg-white'
                 }`}
               >
                 {active && <div className="w-full h-full rounded-full bg-white scale-[0.4]" />}

@@ -12,7 +12,7 @@ const parseLocalDate = (dateStr) => {
 };
 
 const inputCls =
-  'w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#1E6A6A]/30 focus:border-[#1E6A6A] text-sm';
+  'w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/30 focus:border-[var(--brand-primary)] text-sm';
 
 const SingleDatePopover = ({ value, onChange, anchor, accent, minDate, label, testId }) => {
   const { t } = useTranslation();
@@ -26,7 +26,7 @@ const SingleDatePopover = ({ value, onChange, anchor, accent, minDate, label, te
     return () => document.removeEventListener('mousedown', onClick);
   }, []);
   const isGold = accent === 'gold';
-  const borderColor = isGold ? '#D4AF37' : '#1E6A6A';
+  const borderColor = isGold ? 'var(--gold)' : 'var(--brand-primary)';
   return (
     <div className="relative" ref={ref}>
       <label className="block text-xs font-medium text-gray-700 mb-1.5 flex items-center gap-1.5">
@@ -36,7 +36,7 @@ const SingleDatePopover = ({ value, onChange, anchor, accent, minDate, label, te
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
-        className="w-full px-4 py-2.5 rounded-xl border border-gray-200 bg-white hover:border-[#1E6A6A]/40 focus:outline-none focus:ring-2 focus:ring-[#1E6A6A]/30 focus:border-[#1E6A6A] text-sm text-left flex items-center justify-between transition-all"
+        className="w-full px-4 py-2.5 rounded-xl border border-gray-200 bg-white hover:border-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/40 focus:outline-none focus:ring-2 focus:ring-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/30 focus:border-[var(--brand-primary)] text-sm text-left flex items-center justify-between transition-all"
         data-testid={testId}
       >
         <span className={value ? 'text-gray-700' : 'text-gray-400'}>
@@ -138,7 +138,7 @@ const SubleaseForm = ({
               <button
                 key={b.id}
                 onClick={() => selectPropertyForSublease(b)}
-                className="w-full flex items-center gap-3 p-3 rounded-xl border border-gray-200 hover:border-[#1E6A6A] hover:bg-white transition-all text-left"
+                className="w-full flex items-center gap-3 p-3 rounded-xl border border-gray-200 hover:border-[var(--brand-primary)] hover:bg-white transition-all text-left"
                 data-testid={`select-booking-${b.id}`}
               >
                 <div
@@ -155,7 +155,7 @@ const SubleaseForm = ({
                     {b.property?.area} • {b.property?.bedrooms} bed • {b.property?.bathrooms} bath
                   </p>
                 </div>
-                <span className="text-xs font-medium text-[#1E6A6A]">{t('sublease.selectArrow')}</span>
+                <span className="text-xs font-medium text-[var(--brand-primary)]">{t('sublease.selectArrow')}</span>
               </button>
             ))}
           </div>
@@ -164,7 +164,7 @@ const SubleaseForm = ({
           <button
             type="button"
             onClick={startManualEntry}
-            className="w-full px-4 py-3 rounded-xl border-2 border-dashed border-[#D4AF37] hover:bg-[#D4AF37]/5 text-sm font-semibold text-[#1E6A6A] transition-all"
+            className="w-full px-4 py-3 rounded-xl border-2 border-dashed border-[var(--gold)] hover:bg-[rgb(var(--gold-rgb)/<alpha-value>)]/5 text-sm font-semibold text-[var(--brand-primary)] transition-all"
             data-testid="sublease-manual-entry-btn"
           >
             {t('sublease.bookedElsewhereBtn')}
@@ -191,14 +191,14 @@ const SubleaseForm = ({
         {!editingId && (
           <button
             onClick={() => setForm({ ...form, manual: false, property_id: '' })}
-            className="text-xs text-gray-500 hover:text-[#1E6A6A]"
+            className="text-xs text-gray-500 hover:text-[var(--brand-primary)]"
           >
             ← {isManual ? t('sublease.useInAppInstead') : t('sublease.changeProperty')}
           </button>
         )}
       </div>
       {isManual ? (
-        <div className="p-3 rounded-xl bg-[#FBF8F2] border border-[#D4AF37]/30 mb-4 grid grid-cols-1 md:grid-cols-2 gap-3" data-testid="sublease-manual-fields">
+        <div className="p-3 rounded-xl bg-[#FBF8F2] border border-[rgb(var(--gold-rgb)/<alpha-value>)]/30 mb-4 grid grid-cols-1 md:grid-cols-2 gap-3" data-testid="sublease-manual-fields">
           <div className="md:col-span-2">
             <label className="block text-xs font-medium text-gray-700 mb-1.5">{t('sublease.listingTitleReq')}</label>
             <input
@@ -274,7 +274,7 @@ const SubleaseForm = ({
           </p>
         </div>
       ) : title && (
-        <div className="flex items-center gap-3 p-3 rounded-xl bg-white border border-[#1E6A6A]/20 mb-4">
+        <div className="flex items-center gap-3 p-3 rounded-xl bg-white border border-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/20 mb-4">
           <div
             className="w-12 h-12 rounded-lg bg-gray-200 shrink-0"
             style={{ backgroundImage: `url(${img})`, backgroundSize: 'cover', backgroundPosition: 'center' }}
@@ -283,7 +283,7 @@ const SubleaseForm = ({
             <p className="text-sm font-semibold text-gray-800">{title}</p>
             <p className="text-xs text-gray-500">{area}</p>
           </div>
-          <Check size={18} className="text-[#1E6A6A] ms-auto" />
+          <Check size={18} className="text-[var(--brand-primary)] ms-auto" />
         </div>
       )}
 
@@ -318,7 +318,7 @@ const SubleaseForm = ({
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <label className="block text-xs font-medium text-gray-700 mb-1.5">{t('sublease.price')}</label>
-            <div className="flex items-stretch rounded-xl border border-gray-200 bg-white overflow-hidden focus-within:ring-2 focus-within:ring-[#1E6A6A]/30 focus-within:border-[#1E6A6A] transition-all">
+            <div className="flex items-stretch rounded-xl border border-gray-200 bg-white overflow-hidden focus-within:ring-2 focus-within:ring-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/30 focus-within:border-[var(--brand-primary)] transition-all">
               <select
                 value={form.currency}
                 onChange={(e) => setForm({ ...form, currency: e.target.value })}
@@ -384,8 +384,8 @@ const SubleaseForm = ({
                     onClick={() => setForm({ ...form, holiday_tags: [] })}
                     className={`px-3 py-1.5 rounded-full text-xs font-medium border-2 transition-all ${
                       isShortTerm
-                        ? 'bg-[#1E6A6A] text-white border-[#1E6A6A]'
-                        : 'bg-white text-gray-600 border-gray-200 hover:border-[#1E6A6A]/40'
+                        ? 'bg-[var(--brand-primary)] text-white border-[var(--brand-primary)]'
+                        : 'bg-white text-gray-600 border-gray-200 hover:border-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/40'
                     }`}
                     data-testid="sublease-type-short-term"
                   >
@@ -403,8 +403,8 @@ const SubleaseForm = ({
                         }}
                         className={`px-3 py-1.5 rounded-full text-xs font-medium border-2 transition-all ${
                           active
-                            ? 'bg-[#D4AF37] text-white border-[#D4AF37]'
-                            : 'bg-white text-gray-600 border-gray-200 hover:border-[#D4AF37]/40'
+                            ? 'bg-[var(--gold)] text-white border-[var(--gold)]'
+                            : 'bg-white text-gray-600 border-gray-200 hover:border-[rgb(var(--gold-rgb)/<alpha-value>)]/40'
                         }`}
                         data-testid={`sublease-type-${key}`}
                       >
@@ -432,7 +432,7 @@ const SubleaseForm = ({
           type="submit"
           disabled={submitting}
           className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-white text-sm font-medium disabled:opacity-50 transition-all hover:shadow-md"
-          style={{ backgroundColor: '#1E6A6A' }}
+          style={{ backgroundColor: 'var(--brand-primary)' }}
           data-testid="sublease-submit-btn"
         >
           <Send size={16} />

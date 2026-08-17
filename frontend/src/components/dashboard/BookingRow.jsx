@@ -149,7 +149,7 @@ const BookingRow = ({
             <button
               onClick={() => onSignContract(booking.id)}
               className="col-span-2 md:col-auto px-3 py-2 rounded-lg text-xs md:text-sm font-medium text-white hover:bg-opacity-90 transition-colors flex items-center justify-center gap-1.5 whitespace-nowrap"
-              style={{ backgroundColor: '#D4AF37' }}
+              style={{ backgroundColor: 'var(--gold)' }}
               data-testid={`sign-contract-${booking.id}`}
             >
               <FileText size={15} />
@@ -170,7 +170,7 @@ const BookingRow = ({
               <button
                 type="button"
                 onClick={() => openSigned(true)}
-                className="px-3 py-2 rounded-lg text-xs md:text-sm font-medium bg-[#1E6A6A] text-white hover:bg-[#1E6A6A]/90 transition-colors flex items-center justify-center gap-1.5 whitespace-nowrap"
+                className="px-3 py-2 rounded-lg text-xs md:text-sm font-medium bg-[var(--brand-primary)] text-white hover:bg-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/90 transition-colors flex items-center justify-center gap-1.5 whitespace-nowrap"
                 data-testid={`download-signed-contract-${booking.id}`}
               >
                 <Download size={15} />
@@ -182,7 +182,7 @@ const BookingRow = ({
             <button
               onClick={() => onAccept(booking.id)}
               className="px-3 py-2 rounded-lg text-xs md:text-sm font-medium text-white hover:bg-opacity-90 transition-colors whitespace-nowrap"
-              style={{ backgroundColor: '#1E6A6A' }}
+              style={{ backgroundColor: 'var(--brand-primary)' }}
               data-testid={`accept-booking-${booking.id}`}
             >
               {t('dashboard.accept')}

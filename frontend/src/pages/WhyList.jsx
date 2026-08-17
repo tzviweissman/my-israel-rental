@@ -31,7 +31,6 @@ import {
   BarChart3, BadgeCheck, ArrowRight, Check,
 } from 'lucide-react';
 import PageMeta from '../components/PageMeta';
-import PlanPicker from '../components/marketplace/PlanPicker';
 
 // Shipped features only. Each `key` resolves to whyList.<key>Title/<key>Body.
 const BENEFITS = [
@@ -69,7 +68,6 @@ const SocialProof = () => null;
 const WhyList = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const [planKey, setPlanKey] = React.useState('');
 
   const startListing = () => navigate('/services/create-gig');
 
@@ -99,7 +97,7 @@ const WhyList = () => {
           <button
             onClick={startListing}
             className="inline-flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-semibold text-white transition-all hover:shadow-md active:scale-[0.98]"
-            style={{ backgroundColor: '#1E6A6A' }}
+            style={{ backgroundColor: 'var(--brand-primary)' }}
             data-testid="why-list-hero-cta"
           >
             {t('whyList.startListing', 'Start listing')}
@@ -107,7 +105,7 @@ const WhyList = () => {
             <ArrowRight size={16} className="rtl:rotate-180" />
           </button>
           <p className="text-xs text-gray-500 mt-3">
-            {t('whyList.trialNote', 'Your first 30 days are free — no card needed to start.')}
+            {t('whyList.trialNote', 'Free to list — no card needed, ever.')}
           </p>
         </div>
       </section>
@@ -122,11 +120,11 @@ const WhyList = () => {
             {BENEFITS.map(({ key, Icon }) => (
               <div
                 key={key}
-                className="rounded-2xl border border-gray-200 p-5 hover:border-[#1E6A6A]/40 transition-colors"
+                className="rounded-2xl border border-gray-200 p-5 hover:border-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/40 transition-colors"
                 data-testid={`why-list-benefit-${key}`}
               >
-                <div className="w-10 h-10 rounded-xl bg-[#1E6A6A]/10 flex items-center justify-center mb-3">
-                  <Icon size={20} className="text-[#1E6A6A]" />
+                <div className="w-10 h-10 rounded-xl bg-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/10 flex items-center justify-center mb-3">
+                  <Icon size={20} className="text-[var(--brand-primary)]" />
                 </div>
                 <h3 className="font-semibold text-gray-900 mb-1">
                   {t(`whyList.${key}Title`, key)}
@@ -179,7 +177,7 @@ const WhyList = () => {
           <ul className="space-y-2">
             {['searchable', 'trust', 'english'].map((key) => (
               <li key={key} className="flex items-start gap-2 text-sm text-gray-700">
-                <Check size={16} className="shrink-0 mt-0.5 text-[#1E6A6A]" />
+                <Check size={16} className="shrink-0 mt-0.5 text-[var(--brand-primary)]" />
                 {t(`whyList.vs_${key}`, '')}
               </li>
             ))}
@@ -187,21 +185,27 @@ const WhyList = () => {
         </div>
       </section>
 
-      {/* Pricing — same live ladder as the dashboard, from the same endpoint */}
+      {/* Pricing — there isn't any. This section used to carry the live
+          commitment ladder from /subscription/plans; listing is free, so it
+          states that plainly instead. Kept as a section rather than deleted
+          because "what does it cost?" is the question a provider arrives
+          with, and an unanswered one reads as a hidden fee. */}
       <section className="px-6 py-14">
         <div className="max-w-3xl mx-auto">
           <h2 className="text-2xl font-bold text-gray-900 mb-2 text-center">
-            {t('whyList.pricingTitle', 'Simple pricing')}
+            {t('whyList.pricingTitle', 'Free to list')}
           </h2>
           <p className="text-sm text-gray-600 mb-6 text-center">
-            {t('whyList.pricingBody', 'The longer you commit, the lower the monthly rate. Start with 30 days free.')}
+            {t(
+              'whyList.pricingBody',
+              'No subscription, no listing fee, and no commission on the work you win. You keep what you earn.',
+            )}
           </p>
-          <PlanPicker value={planKey} onChange={setPlanKey} />
           <div className="text-center mt-6">
             <button
               onClick={startListing}
               className="inline-flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-semibold text-white transition-all hover:shadow-md active:scale-[0.98]"
-              style={{ backgroundColor: '#1E6A6A' }}
+              style={{ backgroundColor: 'var(--brand-primary)' }}
               data-testid="why-list-pricing-cta"
             >
               {t('whyList.startListing', 'Start listing')}
@@ -229,7 +233,7 @@ const WhyList = () => {
           </div>
           <p className="text-sm text-gray-500 mt-8">
             {t('whyList.browseFirst', 'Want to look around first?')}{' '}
-            <Link to="/services" className="text-[#1E6A6A] font-semibold hover:underline">
+            <Link to="/services" className="text-[var(--brand-primary)] font-semibold hover:underline">
               {t('whyList.browseServices', 'Browse the services marketplace')}
             </Link>
           </p>

@@ -16,20 +16,20 @@ const StepperControl = ({ label, value, onDecrement, onIncrement, displayValue, 
       <button
         onClick={onDecrement}
         disabled={!value}
-        className="w-9 h-9 rounded-full border border-[#d0d0d0] flex items-center justify-center text-[#888] hover:border-[#D4AF37] hover:text-[#D4AF37] hover:bg-[#D4AF37]/5 transition-all duration-200 disabled:opacity-20 disabled:cursor-not-allowed disabled:hover:border-[#d0d0d0] disabled:hover:text-[#888] disabled:hover:bg-transparent"
+        className="w-9 h-9 rounded-full border border-[#d0d0d0] flex items-center justify-center text-[#888] hover:border-[var(--gold)] hover:text-[var(--gold)] hover:bg-[rgb(var(--gold-rgb)/<alpha-value>)]/5 transition-all duration-200 disabled:opacity-20 disabled:cursor-not-allowed disabled:hover:border-[#d0d0d0] disabled:hover:text-[#888] disabled:hover:bg-transparent"
         data-testid={`${testId}-minus`}
       >
         <Minus size={14} strokeWidth={2.5} />
       </button>
       <span
-        className="w-7 text-center text-[14px] font-semibold text-[#1E6A6A] tabular-nums"
+        className="w-7 text-center text-[14px] font-semibold text-[var(--brand-primary)] tabular-nums"
         data-testid={`${testId}-value`}
       >
         {displayValue}
       </span>
       <button
         onClick={onIncrement}
-        className="w-9 h-9 rounded-full border border-[#d0d0d0] flex items-center justify-center text-[#888] hover:border-[#D4AF37] hover:text-[#D4AF37] hover:bg-[#D4AF37]/5 transition-all duration-200"
+        className="w-9 h-9 rounded-full border border-[#d0d0d0] flex items-center justify-center text-[#888] hover:border-[var(--gold)] hover:text-[var(--gold)] hover:bg-[rgb(var(--gold-rgb)/<alpha-value>)]/5 transition-all duration-200"
         data-testid={`${testId}-plus`}
       >
         <Plus size={14} strokeWidth={2.5} />
@@ -86,15 +86,15 @@ const FiltersPanel = ({
       {/* Header */}
       <div
         className="px-7 py-4 flex items-center justify-between"
-        style={{ background: 'linear-gradient(135deg, #1E6A6A 0%, #2A8585 100%)' }}
+        style={{ background: 'linear-gradient(135deg, var(--brand-primary) 0%, #2A8585 100%)' }}
       >
         <div className="flex items-center gap-2.5">
-          <Filter size={16} className="text-[#D4AF37]" />
+          <Filter size={16} className="text-[var(--gold)]" />
           <span className="text-[13px] font-semibold tracking-[0.08em] uppercase text-white/90">
             {t('filters.filters')}
           </span>
           {activeFilterCount > 0 && (
-            <span className="ml-1 w-5 h-5 rounded-full text-[10px] flex items-center justify-center font-bold bg-[#D4AF37] text-[#1E6A6A]">
+            <span className="ml-1 w-5 h-5 rounded-full text-[10px] flex items-center justify-center font-bold bg-[var(--gold)] text-[var(--brand-primary)]">
               {activeFilterCount}
             </span>
           )}
@@ -111,7 +111,7 @@ const FiltersPanel = ({
             {/* Price Range Section */}
             <div className="px-7 pt-6 pb-5" data-testid="filter-price-section">
               <div className="flex items-center justify-between mb-1">
-                <h3 className="text-[13px] font-bold tracking-[0.06em] uppercase text-[#1E6A6A]">
+                <h3 className="text-[13px] font-bold tracking-[0.06em] uppercase text-[var(--brand-primary)]">
                   {t('filters.priceRange')}
                 </h3>
                 <div
@@ -123,7 +123,7 @@ const FiltersPanel = ({
                     onClick={() => switchCurrency('ILS')}
                     className={`px-3 py-1 text-xs font-bold tracking-wider transition-all duration-200 ${
                       priceCurrency === 'ILS'
-                        ? 'bg-[#1E6A6A]'
+                        ? 'bg-[var(--brand-primary)]'
                         : 'bg-transparent text-[#999] hover:text-[#666]'
                     }`}
                     style={priceCurrency === 'ILS' ? { color: 'var(--gold-text-on-dark)' } : undefined}
@@ -136,7 +136,7 @@ const FiltersPanel = ({
                     onClick={() => switchCurrency('USD')}
                     className={`px-3 py-1 text-xs font-bold tracking-wider transition-all duration-200 ${
                       priceCurrency === 'USD'
-                        ? 'bg-[#1E6A6A]'
+                        ? 'bg-[var(--brand-primary)]'
                         : 'bg-transparent text-[#999] hover:text-[#666]'
                     }`}
                     style={priceCurrency === 'USD' ? { color: 'var(--gold-text-on-dark)' } : undefined}
@@ -157,7 +157,7 @@ const FiltersPanel = ({
                   min={0}
                   max={PRICE_MAX}
                   step={100}
-                  className="[&_[role=slider]]:h-5 [&_[role=slider]]:w-5 [&_[role=slider]]:border-[2.5px] [&_[role=slider]]:border-[#1E6A6A] [&_[role=slider]]:bg-white [&_[role=slider]]:shadow-md [&_[role=slider]]:hover:shadow-lg [&_[role=slider]]:hover:scale-110 [&_[role=slider]]:transition-all [&_.bg-primary\\/20]:bg-[#e0dcd4] [&_.bg-primary\\/20]:h-[3px] [&_.bg-primary]:bg-[#D4AF37] [&_.bg-primary]:h-[3px]"
+                  className="[&_[role=slider]]:h-5 [&_[role=slider]]:w-5 [&_[role=slider]]:border-[2.5px] [&_[role=slider]]:border-[var(--brand-primary)] [&_[role=slider]]:bg-white [&_[role=slider]]:shadow-md [&_[role=slider]]:hover:shadow-lg [&_[role=slider]]:hover:scale-110 [&_[role=slider]]:transition-all [&_.bg-primary\\/20]:bg-[#e0dcd4] [&_.bg-primary\\/20]:h-[3px] [&_.bg-primary]:bg-[var(--gold)] [&_.bg-primary]:h-[3px]"
                   data-testid="filter-price-slider"
                 />
               </div>
@@ -184,7 +184,7 @@ const FiltersPanel = ({
                         onFilterChange('min_price', val > 0 ? String(val) : '');
                       }}
                       placeholder="0"
-                      className="w-full text-sm font-medium bg-transparent outline-none text-[#1E6A6A] placeholder:text-[#ccc]"
+                      className="w-full text-sm font-medium bg-transparent outline-none text-[var(--brand-primary)] placeholder:text-[#ccc]"
                       data-testid="filter-price-min-input"
                     />
                   </div>
@@ -211,7 +211,7 @@ const FiltersPanel = ({
                         onFilterChange('max_price', val < PRICE_MAX ? String(val) : '');
                       }}
                       placeholder={`${PRICE_MAX.toLocaleString()}+`}
-                      className="w-full text-sm font-medium bg-transparent outline-none text-[#1E6A6A] placeholder:text-[#ccc]"
+                      className="w-full text-sm font-medium bg-transparent outline-none text-[var(--brand-primary)] placeholder:text-[#ccc]"
                       data-testid="filter-price-max-input"
                     />
                   </div>
@@ -223,7 +223,7 @@ const FiltersPanel = ({
 
             {/* Rooms & Details Section */}
             <div className="px-7 py-5" data-testid="filter-rooms-section">
-              <h3 className="text-[13px] font-bold tracking-[0.06em] uppercase text-[#1E6A6A] mb-1">
+              <h3 className="text-[13px] font-bold tracking-[0.06em] uppercase text-[var(--brand-primary)] mb-1">
                 {t('filters.roomsAndDetails')}
               </h3>
               <StepperControl
@@ -268,7 +268,7 @@ const FiltersPanel = ({
           <div>
             {/* Property Section */}
             <div className="px-7 pt-6 pb-5" data-testid="filter-property-section">
-              <h3 className="text-[13px] font-bold tracking-[0.06em] uppercase text-[#1E6A6A] mb-4">
+              <h3 className="text-[13px] font-bold tracking-[0.06em] uppercase text-[var(--brand-primary)] mb-4">
                 {t('filters.propertySection')}
               </h3>
               <div className="space-y-4">
@@ -280,7 +280,7 @@ const FiltersPanel = ({
                   <select
                     value={filters.area}
                     onChange={(e) => onFilterChange('area', e.target.value)}
-                    className="w-full px-3.5 py-2.5 rounded-lg text-sm bg-white focus:outline-none focus:shadow-sm transition-all duration-200 text-[#1E6A6A] appearance-none"
+                    className="w-full px-3.5 py-2.5 rounded-lg text-sm bg-white focus:outline-none focus:shadow-sm transition-all duration-200 text-[var(--brand-primary)] appearance-none"
                     style={{
                       border: '1.5px solid #e0dcd4',
                       backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23D4AF37' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E")`,
@@ -340,7 +340,7 @@ const FiltersPanel = ({
                       onFilterChange('has_elevator', filters.has_elevator === 'true' ? '' : 'true')
                     }
                     className={`relative w-[52px] h-[28px] rounded-full transition-all duration-300 ${
-                      filters.has_elevator === 'true' ? 'bg-[#D4AF37]' : 'bg-[#d4d0c8]'
+                      filters.has_elevator === 'true' ? 'bg-[var(--gold)]' : 'bg-[#d4d0c8]'
                     }`}
                     style={{ boxShadow: 'inset 0 1px 3px rgba(0,0,0,0.15)' }}
                     data-testid="filter-elevator-toggle"
@@ -361,7 +361,7 @@ const FiltersPanel = ({
                   <select
                     value={filters.condition}
                     onChange={(e) => onFilterChange('condition', e.target.value)}
-                    className="w-full px-3.5 py-2.5 rounded-lg text-sm bg-white focus:outline-none focus:shadow-sm transition-all duration-200 text-[#1E6A6A] appearance-none"
+                    className="w-full px-3.5 py-2.5 rounded-lg text-sm bg-white focus:outline-none focus:shadow-sm transition-all duration-200 text-[var(--brand-primary)] appearance-none"
                     style={{
                       border: '1.5px solid #e0dcd4',
                       backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23D4AF37' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E")`,
@@ -383,7 +383,7 @@ const FiltersPanel = ({
 
             {/* Dates Available Section */}
             <div className="px-7 py-5" data-testid="filter-dates-section">
-              <h3 className="text-[13px] font-bold tracking-[0.06em] uppercase text-[#1E6A6A] mb-3">
+              <h3 className="text-[13px] font-bold tracking-[0.06em] uppercase text-[var(--brand-primary)] mb-3">
                 {t('filters.datesAvailable')}
               </h3>
               <Popover>
@@ -393,12 +393,12 @@ const FiltersPanel = ({
                     style={{ border: '1.5px solid #e0dcd4' }}
                     data-testid="filter-date-picker-trigger"
                   >
-                    <CalendarIcon size={15} className="text-[#D4AF37] shrink-0" />
+                    <CalendarIcon size={15} className="text-[var(--gold)] shrink-0" />
                     {dateRange.from ? (
-                      <span className="text-[#1E6A6A] font-medium text-[13px]">
+                      <span className="text-[var(--brand-primary)] font-medium text-[13px]">
                         {format(dateRange.from, 'MMM d, yyyy')}
                         {dateRange.to && (
-                          <span className="text-[#D4AF37] font-bold mx-1.5">&#8594;</span>
+                          <span className="text-[var(--gold)] font-bold mx-1.5">&#8594;</span>
                         )}
                         {dateRange.to && format(dateRange.to, 'MMM d, yyyy')}
                       </span>
@@ -432,13 +432,13 @@ const FiltersPanel = ({
                 >
                   <div
                     className="px-4 py-3 flex items-center justify-between"
-                    style={{ background: 'linear-gradient(135deg, #1E6A6A 0%, #2A8585 100%)' }}
+                    style={{ background: 'linear-gradient(135deg, var(--brand-primary) 0%, #2A8585 100%)' }}
                   >
                     <span className="text-[12px] font-semibold tracking-[0.06em] uppercase text-white/90">
                       {t('filters.datesAvailable')}
                     </span>
                     {dateRange.from && dateRange.to && (
-                      <span className="text-[11px] px-2.5 py-0.5 rounded-full bg-[#D4AF37]/20 text-[#D4AF37] font-semibold">
+                      <span className="text-[11px] px-2.5 py-0.5 rounded-full bg-[rgb(var(--gold-rgb)/<alpha-value>)]/20 text-[var(--gold)] font-semibold">
                         {Math.ceil((dateRange.to - dateRange.from) / (1000 * 60 * 60 * 24))}{' '}
                         {t('property.nights')}
                       </span>
@@ -467,29 +467,29 @@ const FiltersPanel = ({
                       months: 'flex flex-col sm:flex-row gap-0 divide-x divide-[#E5E5E5]',
                       month: 'p-4',
                       caption: 'flex justify-center pt-1 relative items-center mb-2',
-                      caption_label: 'text-sm font-bold text-[#1E6A6A]',
+                      caption_label: 'text-sm font-bold text-[var(--brand-primary)]',
                       nav: 'space-x-1 flex items-center',
                       nav_button:
-                        'h-7 w-7 bg-transparent border border-[#E5E5E5] rounded-md p-0 opacity-60 hover:opacity-100 hover:border-[#D4AF37] transition-all inline-flex items-center justify-center',
+                        'h-7 w-7 bg-transparent border border-[#E5E5E5] rounded-md p-0 opacity-60 hover:opacity-100 hover:border-[var(--gold)] transition-all inline-flex items-center justify-center',
                       nav_button_previous: 'absolute left-1',
                       nav_button_next: 'absolute right-1',
                       table: 'w-full border-collapse',
                       head_row: 'flex',
-                      head_cell: 'text-[#D4AF37] rounded-md w-9 font-semibold text-[0.7rem] uppercase',
+                      head_cell: 'text-[var(--gold)] rounded-md w-9 font-semibold text-[0.7rem] uppercase',
                       row: 'flex w-full mt-1',
                       cell:
-                        'relative p-0 text-center text-sm focus-within:relative focus-within:z-20 [&:has([aria-selected])]:bg-[#D4AF37]/10 [&:has([aria-selected].day-outside)]:bg-[#D4AF37]/5 [&:has([aria-selected].day-range-end)]:rounded-r-md [&:has(>.day-range-end)]:rounded-r-md [&:has(>.day-range-start)]:rounded-l-md first:[&:has([aria-selected])]:rounded-l-md last:[&:has([aria-selected])]:rounded-r-md',
+                        'relative p-0 text-center text-sm focus-within:relative focus-within:z-20 [&:has([aria-selected])]:bg-[rgb(var(--gold-rgb)/<alpha-value>)]/10 [&:has([aria-selected].day-outside)]:bg-[rgb(var(--gold-rgb)/<alpha-value>)]/5 [&:has([aria-selected].day-range-end)]:rounded-r-md [&:has(>.day-range-end)]:rounded-r-md [&:has(>.day-range-start)]:rounded-l-md first:[&:has([aria-selected])]:rounded-l-md last:[&:has([aria-selected])]:rounded-r-md',
                       day:
-                        'h-9 w-9 p-0 font-normal rounded-md hover:bg-[#D4AF37]/10 transition-colors inline-flex items-center justify-center aria-selected:opacity-100 cursor-pointer',
+                        'h-9 w-9 p-0 font-normal rounded-md hover:bg-[rgb(var(--gold-rgb)/<alpha-value>)]/10 transition-colors inline-flex items-center justify-center aria-selected:opacity-100 cursor-pointer',
                       day_range_start:
-                        'day-range-start bg-[#1E6A6A] text-white hover:bg-[#1E6A6A] rounded-l-md',
+                        'day-range-start bg-[var(--brand-primary)] text-white hover:bg-[var(--brand-primary)] rounded-l-md',
                       day_range_end:
-                        'day-range-end bg-[#1E6A6A] text-white hover:bg-[#1E6A6A] rounded-r-md',
-                      day_selected: 'bg-[#1E6A6A] text-white hover:bg-[#1E6A6A] focus:bg-[#1E6A6A] focus:text-white',
-                      day_today: 'border border-[#D4AF37] text-[#D4AF37] font-bold',
-                      day_outside: 'text-gray-300 aria-selected:bg-[#D4AF37]/5 aria-selected:text-gray-400',
+                        'day-range-end bg-[var(--brand-primary)] text-white hover:bg-[var(--brand-primary)] rounded-r-md',
+                      day_selected: 'bg-[var(--brand-primary)] text-white hover:bg-[var(--brand-primary)] focus:bg-[var(--brand-primary)] focus:text-white',
+                      day_today: 'border border-[var(--gold)] text-[var(--gold)] font-bold',
+                      day_outside: 'text-gray-300 aria-selected:bg-[rgb(var(--gold-rgb)/<alpha-value>)]/5 aria-selected:text-gray-400',
                       day_disabled: 'text-gray-300 opacity-40 cursor-not-allowed',
-                      day_range_middle: 'aria-selected:bg-[#D4AF37]/10 aria-selected:text-[#1E6A6A]',
+                      day_range_middle: 'aria-selected:bg-[rgb(var(--gold-rgb)/<alpha-value>)]/10 aria-selected:text-[var(--brand-primary)]',
                       day_hidden: 'invisible',
                     }}
                     data-testid="filter-date-calendar"
@@ -504,7 +504,7 @@ const FiltersPanel = ({
       {/* Bottom Action Bar */}
       <div
         className="px-7 py-4 flex items-center justify-between gap-3 flex-wrap"
-        style={{ background: 'linear-gradient(135deg, #1E6A6A 0%, #2A8585 100%)' }}
+        style={{ background: 'linear-gradient(135deg, var(--brand-primary) 0%, #2A8585 100%)' }}
       >
         <button
           onClick={onClear}
@@ -527,8 +527,8 @@ const FiltersPanel = ({
           )}
           <button
             onClick={onApply}
-            className="px-7 py-2.5 rounded-lg text-[13px] font-bold tracking-wide text-[#1E6A6A] transition-all duration-200 hover:shadow-lg hover:scale-[1.02] active:scale-[0.98]"
-            style={{ backgroundColor: '#D4AF37' }}
+            className="px-7 py-2.5 rounded-lg text-[13px] font-bold tracking-wide text-[var(--brand-primary)] transition-all duration-200 hover:shadow-lg hover:scale-[1.02] active:scale-[0.98]"
+            style={{ backgroundColor: 'var(--gold)' }}
             data-testid="apply-filters-button"
           >
             {t('filters.showResults')} {resultsCount} {t('filters.places')}

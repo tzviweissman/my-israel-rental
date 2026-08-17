@@ -82,7 +82,7 @@ const ContractUploadForm = ({ properties, uploading, onUpload, onClose, onError 
         <select
           value={selectedPropertyId}
           onChange={(e) => setSelectedPropertyId(e.target.value)}
-          className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#1E6A6A]/30 focus:border-[#1E6A6A] text-sm"
+          className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/30 focus:border-[var(--brand-primary)] text-sm"
           data-testid="contract-property-select"
         >
           <option value="">Choose a property...</option>
@@ -99,7 +99,7 @@ const ContractUploadForm = ({ properties, uploading, onUpload, onClose, onError 
         onDrop={handleDrop}
         onClick={() => fileInputRef.current?.click()}
         className={`relative border-2 border-dashed rounded-xl p-8 text-center cursor-pointer transition-all ${
-          dragActive ? 'border-[#1E6A6A] bg-[#1E6A6A]/5' : 'border-gray-300 hover:border-[#D4AF37] hover:bg-gray-50'
+          dragActive ? 'border-[var(--brand-primary)] bg-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/5' : 'border-gray-300 hover:border-[var(--gold)] hover:bg-gray-50'
         }`}
         data-testid="contract-dropzone"
       >
@@ -113,7 +113,7 @@ const ContractUploadForm = ({ properties, uploading, onUpload, onClose, onError 
         />
         {selectedFile ? (
           <div className="flex items-center justify-center gap-3">
-            <FileText size={24} className="text-[#1E6A6A]" />
+            <FileText size={24} className="text-[var(--brand-primary)]" />
             <div className="text-left">
               <p className="text-sm font-medium text-gray-800">{selectedFile.name}</p>
               <p className="text-xs text-gray-500">{formatFileSize(selectedFile.size)}</p>
@@ -138,7 +138,7 @@ const ContractUploadForm = ({ properties, uploading, onUpload, onClose, onError 
         onClick={handleSubmit}
         disabled={uploading || !selectedFile || !selectedPropertyId}
         className="mt-4 w-full py-3 rounded-xl text-white font-medium text-sm disabled:opacity-40 transition-all hover:shadow-md"
-        style={{ backgroundColor: '#D4AF37' }}
+        style={{ backgroundColor: 'var(--gold)' }}
         data-testid="submit-upload-btn"
       >
         {uploading ? (

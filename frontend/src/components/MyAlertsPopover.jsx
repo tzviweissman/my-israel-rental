@@ -148,14 +148,14 @@ const MyAlertsPopover = ({ refreshSignal }) => {
       <button
         type="button"
         onClick={handleTriggerClick}
-        className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium transition-all hover:bg-gray-100 text-gray-500 hover:text-[#1E6A6A]"
+        className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium transition-all hover:bg-gray-100 text-gray-500 hover:text-[var(--brand-primary)]"
         data-testid="my-alerts-trigger"
         title={t('filters.myAlertsTooltip') || 'Manage your saved alerts'}
       >
         <Bell size={12} />
         <span>
           {t('filters.myAlerts') || 'My alerts'}{' '}
-          <span className="font-semibold text-[#1E6A6A]">({count})</span>
+          <span className="font-semibold text-[var(--brand-primary)]">({count})</span>
         </span>
         {newCount > 0 && (
           <span
@@ -238,7 +238,7 @@ const MyAlertsPopover = ({ refreshSignal }) => {
                             chips.map((c) => (
                               <span
                                 key={c}
-                                className="inline-block px-2 py-0.5 rounded-full text-[10px] font-medium bg-[#fafaf0] text-[#1E6A6A] border border-[#e5dfc8]"
+                                className="inline-block px-2 py-0.5 rounded-full text-[10px] font-medium bg-[#fafaf0] text-[var(--brand-primary)] border border-[#e5dfc8]"
                               >
                                 {c}
                               </span>

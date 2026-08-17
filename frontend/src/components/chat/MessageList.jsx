@@ -50,7 +50,7 @@ const renderHighlighted = (text, normalizedQuery) => {
   }
   return parts.map((p, i) =>
     p.match ? (
-      <mark key={i} className="bg-[#D4AF37] text-[#1E6A6A] rounded px-0.5">{p.text}</mark>
+      <mark key={i} className="bg-[var(--gold)] text-[var(--brand-primary)] rounded px-0.5">{p.text}</mark>
     ) : (
       <React.Fragment key={i}>{p.text}</React.Fragment>
     ),
@@ -80,7 +80,7 @@ const renderWithMentions = (textOrNodes, isMe) => {
         <span
           key={`${keyPrefix}-m-${i}`}
           className={`inline-flex items-center gap-0.5 px-1.5 rounded-md font-semibold text-[12px] ${
-            isMe ? 'bg-white/20 text-white' : 'bg-[#D4AF37]/15 text-[#8a6d1d]'
+            isMe ? 'bg-white/20 text-white' : 'bg-[rgb(var(--gold-rgb)/<alpha-value>)]/15 text-[#8a6d1d]'
           }`}
         >
           <AtSign size={10} className="opacity-80" />
@@ -143,7 +143,7 @@ const InlineTranslation = ({ msg, isMe, translations, uiLang, onTranslate }) => 
         type="button"
         onClick={() => onTranslate(msg.id)}
         className={`flex items-center gap-1 mt-1.5 text-[11px] underline-offset-2 hover:underline ${
-          isMe ? 'text-white/70 hover:text-white' : 'text-[#1E6A6A] hover:text-[#155454]'
+          isMe ? 'text-white/70 hover:text-white' : 'text-[var(--brand-primary)] hover:text-[#155454]'
         }`}
         data-testid={`translate-btn-${msg.id}`}
       >
@@ -188,7 +188,7 @@ const EditPanel = ({ msg, editingText, setEditingText, onSave, onCancel }) => {
         <button
           type="button"
           onClick={() => onSave(msg.id)}
-          className="px-3 py-1 rounded-md text-[11px] font-bold text-[#1E6A6A] bg-[#D4AF37] hover:opacity-90"
+          className="px-3 py-1 rounded-md text-[11px] font-bold text-[var(--brand-primary)] bg-[var(--gold)] hover:opacity-90"
           data-testid={`edit-save-${msg.id}`}
         >
           {t('chat.save')}
@@ -236,7 +236,7 @@ const MessageBubble = ({
               <button
                 type="button"
                 onClick={() => onBeginEdit(msg)}
-                className="w-6 h-6 rounded-full bg-white/90 backdrop-blur-sm text-gray-500 hover:text-[#1E6A6A] hover:bg-white shadow-sm flex items-center justify-center transition-all"
+                className="w-6 h-6 rounded-full bg-white/90 backdrop-blur-sm text-gray-500 hover:text-[var(--brand-primary)] hover:bg-white shadow-sm flex items-center justify-center transition-all"
                 data-testid={`edit-message-${msg.id}`}
                 aria-label={t('chat.editMessage')}
                 title={t('chat.editWindow')}
@@ -262,9 +262,9 @@ const MessageBubble = ({
       <div
         className={`max-w-[70%] px-4 py-2.5 transition-all ${
           isMe
-            ? `bg-gradient-to-br from-[#1E6A6A] to-[#1a5e5e] text-white ${isLast ? 'rounded-2xl rounded-br-md' : 'rounded-2xl'}`
+            ? `bg-gradient-to-br from-[var(--brand-primary)] to-[#1a5e5e] text-white ${isLast ? 'rounded-2xl rounded-br-md' : 'rounded-2xl'}`
             : `bg-white border border-gray-200 text-gray-800 shadow-sm ${isLast ? 'rounded-2xl rounded-bl-md' : 'rounded-2xl'}`
-        } ${isHighlighted ? 'ring-2 ring-[#D4AF37] ring-offset-2 ring-offset-transparent' : ''}`}
+        } ${isHighlighted ? 'ring-2 ring-[var(--gold)] ring-offset-2 ring-offset-transparent' : ''}`}
       >
         {editingId === msg.id ? (
           <EditPanel
@@ -342,7 +342,7 @@ const MessageBubble = ({
           )}
           {isMe &&
             (msg.read ? (
-              <CheckCheck size={12} className="text-[#D4AF37]" data-testid={`tick-read-${msg.id}`} />
+              <CheckCheck size={12} className="text-[var(--gold)]" data-testid={`tick-read-${msg.id}`} />
             ) : (
               <Check size={12} className="text-white/60" data-testid={`tick-sent-${msg.id}`} />
             ))}
@@ -352,7 +352,7 @@ const MessageBubble = ({
       {/* Avatar (me) */}
       {isMe && (
         <div className={`w-7 h-7 shrink-0 ${showAvatar ? 'visible' : 'invisible'}`}>
-          <div className="w-7 h-7 rounded-full flex items-center justify-center" style={{ backgroundColor: '#D4AF37' }}>
+          <div className="w-7 h-7 rounded-full flex items-center justify-center" style={{ backgroundColor: 'var(--gold)' }}>
             <span className="text-[10px] font-bold text-white">{getInitials(user?.name)}</span>
           </div>
         </div>
@@ -400,8 +400,8 @@ const MessageList = ({
       <div className="px-5 py-4 space-y-1">
         {messages.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-20 text-center">
-            <div className="w-16 h-16 rounded-full bg-[#1E6A6A]/10 flex items-center justify-center mb-4">
-              <MessageCircle size={28} className="text-[#1E6A6A]" />
+            <div className="w-16 h-16 rounded-full bg-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/10 flex items-center justify-center mb-4">
+              <MessageCircle size={28} className="text-[var(--brand-primary)]" />
             </div>
             <p className="text-gray-500 font-medium text-sm">{t('chat.noMessages')}</p>
             <p className="text-gray-400 text-xs mt-1 max-w-[260px]">

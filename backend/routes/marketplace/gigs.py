@@ -28,6 +28,7 @@ from .shared import (
     GigIn,
     GigPatch,
     ReviewIn,
+    _search_clauses,
     _LANGUAGE_SET,
     _LOCATION_BY_SLUG,
     _batch_rating_aggregate,
@@ -48,6 +49,17 @@ from utils.user_contact import user_whatsapp
 from utils.whatsapp_link import build_whatsapp_link
 
 router = APIRouter(prefix="/marketplace", tags=["marketplace"])
+
+
+def _admin_only(user: dict) -> None:
+    """Mirror of the guard in jobs.py. Defined locally rather than
+    imported to keep gigs.py from depending on a sibling router module."""
+    if user.get("role") != "admin":
+        raise HTTPException(status_code=403, detail="Admin only")
+
+
+class FeaturedIn(BaseModel):
+    featured: bool
 
 @router.get("/gigs")
 async def list_gigs(
@@ -81,9 +93,17 @@ async def list_gigs(
     # Store & deliverable gigs are considered always-available and pass
     # through untouched (they don't publish per-day schedules).
     available_on: Optional[str] = Query(None, pattern=r"^\d{4}-\d{2}-\d{2}$"),
+    # Editorially featured gigs only. Set by an admin, never by the
+    # provider — see PATCH /gigs/{id}/featured. `featured=false` is
+    # treated as "no filter" rather than "only unfeatured": nothing needs
+    # to browse the un-featured set, and reading it that way would make a
+    # stray `?featured=false` silently hide every featured gig.
+    featured: Optional[bool] = None,
     limit: int = Query(60, ge=1, le=200),
 ):
     query: dict[str, Any] = {"status": "published"}
+    if featured:
+        query["featured"] = True
     if category:
         _validate_category(category)
         query["category"] = category
@@ -99,18 +119,18 @@ async def list_gigs(
             raise HTTPException(status_code=400, detail=f"Unknown location '{location}'")
         query["area"] = {"$regex": re.escape(loc["label"]), "$options": "i"}
     if q:
-        # SEC-003: escape the user input so it's treated as a literal
-        # substring, not a regex — prevents catastrophic-backtracking DoS
-        # on this unauthenticated endpoint. Also cap the length to keep
-        # the query size sane. Search across bilingual fields too so
-        # Hebrew queries match `title_he` / `description_he`.
-        needle = re.escape(q[:80])
-        query["$or"] = [
-            {"title":          {"$regex": needle, "$options": "i"}},
-            {"description":    {"$regex": needle, "$options": "i"}},
-            {"title_he":       {"$regex": needle, "$options": "i"}},
-            {"description_he": {"$regex": needle, "$options": "i"}},
-        ]
+        # Word-by-word rather than one substring, and shared with the
+        # Requests board so both searches behave the same way. It fixes the
+        # same misses here: "2 hour" never found "2-hour", and "three" and
+        # "3" were different searches.
+        #
+        # SEC-003 still holds — _search_clauses re.escapes every alternative
+        # it builds, so user input is never treated as a regex, and it caps
+        # both the query length and the token count so a pathological query
+        # cannot build a huge pipeline on this unauthenticated endpoint.
+        clauses = _search_clauses(q)
+        if clauses:
+            query["$and"] = query.get("$and", []) + clauses
     if booking_mode:
         query["booking_mode"] = booking_mode
 
@@ -446,6 +466,44 @@ async def patch_gig(gig_id: str, payload: GigPatch, user=Depends(verify_token)):
     fresh = await db.marketplace_gigs.find_one({"_id": gig_id})
     return _clean_gig(fresh)
 
+
+
+@router.patch("/gigs/{gig_id}/featured")
+async def set_gig_featured(
+    gig_id: str, payload: FeaturedIn, user=Depends(verify_token),
+):
+    """Flag a gig as editorially featured. **Admin only.**
+
+    Deliberately a separate endpoint rather than a field on ``GigPatch``:
+    that route authorises on ``provider_user_id == user_id``, so putting
+    ``featured`` there would let every provider feature their own gig.
+    "Featured" has to mean someone at MyIsraelRental chose it, or the
+    "Featured near you" row on /services is just an unlabelled ad slot.
+
+    Not gated on the subscription plan either — every listed provider is
+    already paying, so a plan check would feature everyone.
+    """
+    _admin_only(user)
+    gig = await db.marketplace_gigs.find_one({"_id": gig_id})
+    if not gig:
+        raise HTTPException(status_code=404, detail="Gig not found")
+    await db.marketplace_gigs.update_one(
+        {"_id": gig_id},
+        {"$set": {
+            "featured": payload.featured,
+            # Who and when, so a surprising front page can be traced back
+            # to a decision rather than guessed at.
+            "featured_by": user["user_id"] if payload.featured else None,
+            "featured_at": datetime.now(UTC).isoformat() if payload.featured else None,
+            "updated_at": datetime.now(UTC).isoformat(),
+        }},
+    )
+    logger.info(
+        "[marketplace] gig %s featured=%s by admin %s",
+        gig_id, payload.featured, user["user_id"],
+    )
+    fresh = await db.marketplace_gigs.find_one({"_id": gig_id})
+    return _clean_gig(fresh)
 
 
 @router.delete("/gigs/{gig_id}")

@@ -90,7 +90,7 @@ const ManagerHeader = ({ user, token, API }) => {
                         : businessLogo
                     }
                     alt="Business Logo"
-                    className="w-20 h-20 rounded-xl object-cover border-2 border-[#D4AF37]"
+                    className="w-20 h-20 rounded-xl object-cover border-2 border-[var(--gold)]"
                     data-testid="business-logo-preview"
                   />
                   <button
@@ -109,7 +109,7 @@ const ManagerHeader = ({ user, token, API }) => {
               <div>
                 <label
                   className="cursor-pointer inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors"
-                  style={{ backgroundColor: '#1E6A6A', color: '#D4AF37' }}
+                  style={{ backgroundColor: 'var(--brand-primary)', color: 'var(--gold)' }}
                   data-testid="upload-logo-button"
                 >
                   <Upload size={16} />
@@ -220,7 +220,7 @@ const WhiteLabelSettings = ({ API, token, initial, managerId }) => {
             type="button"
             onClick={addService}
             disabled={services.length >= 20}
-            className="text-[11px] font-semibold text-[#1E6A6A] hover:underline disabled:opacity-50 disabled:no-underline"
+            className="text-[11px] font-semibold text-[var(--brand-primary)] hover:underline disabled:opacity-50 disabled:no-underline"
             data-testid="wl-add-service"
           >
             + Add service
@@ -285,7 +285,7 @@ const WhiteLabelSettings = ({ API, token, initial, managerId }) => {
           type="button"
           onClick={save}
           disabled={saving}
-          className="px-4 py-2 rounded-lg bg-[#1E6A6A] text-white text-xs font-semibold hover:bg-[#164a4a] disabled:opacity-60"
+          className="px-4 py-2 rounded-lg bg-[var(--brand-primary)] text-white text-xs font-semibold hover:bg-[#164a4a] disabled:opacity-60"
           data-testid="wl-save-btn"
         >
           {saving ? 'Saving…' : 'Save'}
@@ -295,7 +295,7 @@ const WhiteLabelSettings = ({ API, token, initial, managerId }) => {
             href={`/manager/${managerId}`}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg border border-[#D4AF37] text-[#1E6A6A] text-xs font-semibold hover:bg-[#D4AF37]/10 transition-colors"
+            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg border border-[var(--gold)] text-[var(--brand-primary)] text-xs font-semibold hover:bg-[rgb(var(--gold-rgb)/<alpha-value>)]/10 transition-colors"
             data-testid="wl-open-public-page"
           >
             <ExternalLink size={12} />

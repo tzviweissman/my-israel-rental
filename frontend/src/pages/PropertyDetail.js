@@ -328,7 +328,7 @@ const PropertyDetail = () => {
             <Breadcrumb current={property?.title || ''} testId="property-breadcrumb" />
             <button
               onClick={() => navigate(getBackDestination())}
-              className="flex items-center gap-1.5 md:gap-2 text-xs md:text-sm font-medium hover:text-[#D4AF37] transition-colors min-w-0"
+              className="flex items-center gap-1.5 md:gap-2 text-xs md:text-sm font-medium hover:text-[var(--gold)] transition-colors min-w-0"
               data-testid="back-button"
             >
               <ArrowLeft size={16} className="md:w-[18px] md:h-[18px] shrink-0" />
@@ -337,7 +337,7 @@ const PropertyDetail = () => {
           </div>
           <button
             onClick={handleShare}
-            className="flex items-center gap-1.5 md:gap-2 px-2.5 md:px-4 py-1.5 md:py-2 rounded-lg border border-[#1E6A6A] text-[#1E6A6A] hover:bg-[#1E6A6A]/10 transition-colors text-xs md:text-sm font-medium shrink-0"
+            className="flex items-center gap-1.5 md:gap-2 px-2.5 md:px-4 py-1.5 md:py-2 rounded-lg border border-[var(--brand-primary)] text-[var(--brand-primary)] hover:bg-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/10 transition-colors text-xs md:text-sm font-medium shrink-0"
             data-testid="share-button"
           >
             {shareCopied ? <Check size={14} className="md:w-4 md:h-4" /> : <Share2 size={14} className="md:w-4 md:h-4" />}
@@ -393,7 +393,7 @@ const PropertyDetail = () => {
                   Both are mutually exclusive — the form gates the toggles
                   by rental_type. */}
               {!sublease && property.rental_type === 'vacation' && property.has_cleaning_fee && property.cleaning_fee_price > 0 && (
-                <div className="flex flex-col gap-1 px-3 py-1.5 bg-[#D4AF37]/10 rounded-lg border border-[#D4AF37]/30">
+                <div className="flex flex-col gap-1 px-3 py-1.5 bg-[rgb(var(--gold-rgb)/<alpha-value>)]/10 rounded-lg border border-[rgb(var(--gold-rgb)/<alpha-value>)]/30">
                   <div className="flex items-center gap-2">
                     <span className="text-sm font-medium text-gray-700">{t('property.cleaningFeeLabel', 'Cleaning fee:')}</span>
                     <span className="text-sm font-bold" style={{ color: 'var(--gold-text-on-light)' }}>
@@ -412,7 +412,7 @@ const PropertyDetail = () => {
                 </div>
               )}
               {!sublease && property.rental_type !== 'vacation' && property.has_agent_fee && property.agent_fee_price > 0 && (
-                <div className="flex flex-col gap-1 px-3 py-1.5 bg-[#D4AF37]/10 rounded-lg border border-[#D4AF37]/30">
+                <div className="flex flex-col gap-1 px-3 py-1.5 bg-[rgb(var(--gold-rgb)/<alpha-value>)]/10 rounded-lg border border-[rgb(var(--gold-rgb)/<alpha-value>)]/30">
                   <div className="flex items-center gap-2">
                     <span className="text-sm font-medium text-gray-700">{t('property.agentFeeLabel')}</span>
                     <span className="text-sm font-bold" style={{ color: 'var(--gold-text-on-light)' }}>
@@ -438,11 +438,11 @@ const PropertyDetail = () => {
                 show a "Starting Date (Fixed)" card here, but renters don't need
                 to see internal scheduling so it's hidden now. */}
             {property.rental_type !== 'long-term' && property.available_from && (
-              <div className="bg-[#D4AF37]/10 border border-[#D4AF37]/30 p-4 rounded-xl mb-6">
+              <div className="bg-[rgb(var(--gold-rgb)/<alpha-value>)]/10 border border-[rgb(var(--gold-rgb)/<alpha-value>)]/30 p-4 rounded-xl mb-6">
                 <div className="flex items-center gap-2 flex-wrap">
-                  <CalendarIcon size={20} style={{ color: '#D4AF37' }} />
+                  <CalendarIcon size={20} style={{ color: 'var(--gold)' }} />
                   <span className="font-medium text-gray-700">{t('property.availableFromLabel')}</span>
-                  <span className="font-bold" style={{ color: '#1E6A6A' }}>
+                  <span className="font-bold" style={{ color: 'var(--brand-primary)' }}>
                     {format(parseLocalDate(property.available_from), 'MMMM d, yyyy')}
                   </span>
                   {property.available_to && (
@@ -451,7 +451,7 @@ const PropertyDetail = () => {
                       <span className="font-medium text-gray-700">
                         {t('property.availableUntilLabel', 'Until')}
                       </span>
-                      <span className="font-bold" style={{ color: '#1E6A6A' }}>
+                      <span className="font-bold" style={{ color: 'var(--brand-primary)' }}>
                         {format(parseLocalDate(property.available_to), 'MMMM d, yyyy')}
                       </span>
                     </>
@@ -493,7 +493,7 @@ const PropertyDetail = () => {
 
             <div className="flex flex-wrap gap-3">
               {property.furniture_package && (
-                <span className="px-4 py-2 rounded-full text-sm font-medium" style={{ backgroundColor: '#E5E5E5', color: '#1E6A6A' }}>
+                <span className="px-4 py-2 rounded-full text-sm font-medium" style={{ backgroundColor: '#E5E5E5', color: 'var(--brand-primary)' }}>
                   {t('property.furniture')}
                 </span>
               )}

@@ -231,7 +231,7 @@ class TestAdmin:
         r = requests.get(f"{API}/admin/dashboard", headers=_hdr(tok), timeout=20)
         assert r.status_code == 200, f"dashboard: {r.status_code} {r.text[:200]}"
         d = r.json()
-        for k in ("active_listings", "total_views", "total_inquiries", "total_users", "pending_services", "recent_properties"):
+        for k in ("active_listings", "total_views", "total_inquiries", "total_users", "recent_properties"):
             assert k in d, f"dashboard missing key {k}: got {list(d.keys())}"
         assert isinstance(d["active_listings"], int)
         assert isinstance(d["recent_properties"], list)

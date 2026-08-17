@@ -39,7 +39,7 @@ const NearbyDensityBar = ({ items, testId = 'nearby-density-bar', className = ''
       data-testid={testId}
     >
       {walking > 0 && (
-        <span className="inline-flex items-center gap-1.5 text-[#1E6A6A] font-semibold">
+        <span className="inline-flex items-center gap-1.5 text-[var(--brand-primary)] font-semibold">
           <Footprints size={14} strokeWidth={2.4} />
           {t('common.nearbyWalking', '{{count}} within walking', { count: walking })}
         </span>

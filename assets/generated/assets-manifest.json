@@ -1,0 +1,239 @@
+{
+  "note": "Higgsfield-generated assets. `url` is the ORIGINAL Higgsfield CDN link, kept for provenance only — do NOT ship it; those URLs can expire. `cloudinary_url` is our own copy and is what the site uses. Re-run backend/scripts/migrate_site_assets_to_cloudinary.py after adding an asset. Regenerate with the same model + prompt; job_id is for reproducibility/support.",
+  "generated_at": "2026-08-06",
+  "model_images": "soul_2 (text2image_soul_v2), 16:9, 2k",
+  "model_video": "kling3_0_turbo, 16:9, 5s",
+  "assets": [
+    {
+      "key": "hero-video",
+      "file": "hero-aerial-telaviv.mp4",
+      "job_id": "843a9442-5372-4210-9a56-eb82f40ef8ca",
+      "url": "https://d8j0ntlcm91z4.cloudfront.net/user_3HWGlZDXVCAOoMKfZq628Ml9cM5/hf_20260806_140948_843a9442-5372-4210-9a56-eb82f40ef8ca.mp4",
+      "prompt": "Cinematic aerial drone shot flying forward over the Tel Aviv coastline at golden hour, long sandy Mediterranean beach with gentle waves below, camera smoothly pushing in toward a warm stone beachfront villa in the distance, sun flare, warm premium travel-film color grade, smooth stabilized motion",
+      "cloudinary_url": "https://res.cloudinary.com/dirvyboe9/video/upload/q_auto/v1786504632/myisraelrental/site/hero-video.mp4",
+      "cloudinary_public_id": "myisraelrental/site/hero-video"
+    },
+    {
+      "key": "scene1-aerial",
+      "file": "scene1-aerial-telaviv.png",
+      "job_id": "dd0ae729-6af8-43e0-b4c5-15f63a29c9cc",
+      "url": "https://d8j0ntlcm91z4.cloudfront.net/user_3HWGlZDXVCAOoMKfZq628Ml9cM5/hf_20260806_140841_dd0ae729-6af8-43e0-b4c5-15f63a29c9cc.png",
+      "prompt": "Cinematic aerial drone view over Tel Aviv coastline at golden hour, long sandy Mediterranean beach, gentle waves, warm sun-drenched light, city skyline glowing in the distance, premium travel photography, rich warm color grade",
+      "cloudinary_url": "https://res.cloudinary.com/dirvyboe9/image/upload/f_auto,q_auto/v1786504634/myisraelrental/site/scene1-aerial.png",
+      "cloudinary_public_id": "myisraelrental/site/scene1-aerial"
+    },
+    {
+      "key": "scene2-villa-approach",
+      "file": "scene2-villa-approach.png",
+      "job_id": "1239f205-9ad4-47d6-8b6e-89f4ef7e628a",
+      "url": "https://d8j0ntlcm91z4.cloudfront.net/user_3HWGlZDXVCAOoMKfZq628Ml9cM5/hf_20260806_140841_1239f205-9ad4-47d6-8b6e-89f4ef7e628a.png",
+      "prompt": "Low aerial approach toward a luxury beachfront vacation villa built of warm Jerusalem stone, Mediterranean sea behind, golden hour glow on the stone facade, palm trees, premium architectural photography, cinematic",
+      "cloudinary_url": "https://res.cloudinary.com/dirvyboe9/image/upload/f_auto,q_auto/v1786504636/myisraelrental/site/scene2-villa-approach.png",
+      "cloudinary_public_id": "myisraelrental/site/scene2-villa-approach"
+    },
+    {
+      "key": "scene3-interior-reveal",
+      "file": "scene3-interior-reveal.png",
+      "job_id": "f89984ce-f7c9-410a-9717-1669a87d77d2",
+      "url": "https://d8j0ntlcm91z4.cloudfront.net/user_3HWGlZDXVCAOoMKfZq628Ml9cM5/hf_20260806_140841_f89984ce-f7c9-410a-9717-1669a87d77d2.png",
+      "prompt": "Bright modern luxury vacation apartment interior, open-plan living room with huge windows overlooking the Mediterranean sea at golden hour, warm natural stone and linen textures, sunlight streaming in, premium interior photography, cinematic warm grade",
+      "cloudinary_url": "https://res.cloudinary.com/dirvyboe9/image/upload/f_auto,q_auto/v1786504638/myisraelrental/site/scene3-interior-reveal.png",
+      "cloudinary_public_id": "myisraelrental/site/scene3-interior-reveal"
+    },
+    {
+      "key": "scene4-guest-phone",
+      "file": "scene4-guest-phone.png",
+      "job_id": "3c1a9b11-94c4-4589-ae8c-be950bf7ed85",
+      "url": "https://d8j0ntlcm91z4.cloudfront.net/user_3HWGlZDXVCAOoMKfZq628Ml9cM5/hf_20260806_140841_3c1a9b11-94c4-4589-ae8c-be950bf7ed85.png",
+      "prompt": "Happy relaxed man in his 30s smiling while lounging on a sofa in a bright modern vacation apartment, looking at his smartphone, sea view window behind him, warm golden-hour light, candid lifestyle photography, premium editorial feel",
+      "cloudinary_url": "https://res.cloudinary.com/dirvyboe9/image/upload/f_auto,q_auto/v1786504640/myisraelrental/site/scene4-guest-phone.png",
+      "cloudinary_public_id": "myisraelrental/site/scene4-guest-phone"
+    },
+    {
+      "key": "scene5-lister-jerusalem",
+      "file": "scene5-lister-jerusalem.png",
+      "job_id": "15036e87-4ad6-4e3c-b48c-3f6bdf42d234",
+      "url": "https://d8j0ntlcm91z4.cloudfront.net/user_3HWGlZDXVCAOoMKfZq628Ml9cM5/hf_20260806_140841_15036e87-4ad6-4e3c-b48c-3f6bdf42d234.png",
+      "prompt": "Man in his 40s relaxing in an armchair in a cozy Jerusalem apartment with exposed Jerusalem stone walls, warm evening lamp light, holding his smartphone glancing at a notification, coffee on side table, relaxed content expression, cinematic editorial photography",
+      "cloudinary_url": "https://res.cloudinary.com/dirvyboe9/image/upload/f_auto,q_auto/v1786504641/myisraelrental/site/scene5-lister-jerusalem.png",
+      "cloudinary_public_id": "myisraelrental/site/scene5-lister-jerusalem"
+    },
+    {
+      "key": "scene6-contract-laptop",
+      "file": "scene6-contract-laptop.png",
+      "job_id": "91927ad6-0df7-4608-9474-5f5f842ffa83",
+      "url": "https://d8j0ntlcm91z4.cloudfront.net/user_3HWGlZDXVCAOoMKfZq628Ml9cM5/hf_20260806_140841_91927ad6-0df7-4608-9474-5f5f842ffa83.png",
+      "prompt": "Close view over a man's shoulder of a laptop on a wooden desk in a warm stone-walled Jerusalem apartment at dusk, screen glow on his face, warm interior light, shallow depth of field, cinematic editorial photography, screen content softly out of focus",
+      "cloudinary_url": "https://res.cloudinary.com/dirvyboe9/image/upload/f_auto,q_auto/v1786504643/myisraelrental/site/scene6-contract-laptop.png",
+      "cloudinary_public_id": "myisraelrental/site/scene6-contract-laptop"
+    },
+    {
+      "key": "scene7-ac-pro",
+      "file": "scene7-ac-pro.png",
+      "job_id": "7194d0ec-edc0-40b5-87c2-ce574b273e13",
+      "url": "https://d8j0ntlcm91z4.cloudfront.net/user_3HWGlZDXVCAOoMKfZq628Ml9cM5/hf_20260806_140841_7194d0ec-edc0-40b5-87c2-ce574b273e13.png",
+      "prompt": "Professional technician in work clothes repairing a wall-mounted air conditioner unit in a bright Israeli apartment, toolbox open, focused expression, warm natural daylight, premium editorial photography of skilled tradesman at work",
+      "cloudinary_url": "https://res.cloudinary.com/dirvyboe9/image/upload/f_auto,q_auto/v1786504645/myisraelrental/site/scene7-ac-pro.png",
+      "cloudinary_public_id": "myisraelrental/site/scene7-ac-pro"
+    },
+    {
+      "key": "clip0-aerial",
+      "file": "hero-clip-aerial.mp4",
+      "job_id": "d02440e3-cf32-4021-8fcd-970452ae7d9f",
+      "url": "https://d8j0ntlcm91z4.cloudfront.net/user_3HWGlZDXVCAOoMKfZq628Ml9cM5/hf_20260806_162843_d02440e3-cf32-4021-8fcd-970452ae7d9f.mp4",
+      "prompt": "Aerial drone flies smoothly forward over the golden-hour coastline… (animated from scene1 still)",
+      "model": "kling3_0_turbo image-to-video, 5s, 16:9",
+      "cloudinary_url": "https://res.cloudinary.com/dirvyboe9/video/upload/q_auto/v1786504647/myisraelrental/site/clip0-aerial.mp4",
+      "cloudinary_public_id": "myisraelrental/site/clip0-aerial"
+    },
+    {
+      "key": "clip1-villa",
+      "file": "clip-villa-approach.mp4",
+      "job_id": "a9ff489f-2e9b-4dc1-a783-287a966cc0bb",
+      "url": "https://d8j0ntlcm91z4.cloudfront.net/user_3HWGlZDXVCAOoMKfZq628Ml9cM5/hf_20260806_162828_a9ff489f-2e9b-4dc1-a783-287a966cc0bb.mp4",
+      "prompt": "Camera pushes toward the stone beachfront villa… (from scene2 still)",
+      "model": "kling3_0_turbo image-to-video, 5s, 16:9",
+      "cloudinary_url": "https://res.cloudinary.com/dirvyboe9/video/upload/q_auto/v1786504650/myisraelrental/site/clip1-villa.mp4",
+      "cloudinary_public_id": "myisraelrental/site/clip1-villa"
+    },
+    {
+      "key": "clip2-interior",
+      "file": "clip-interior-dolly.mp4",
+      "job_id": "84156664-afef-44c4-b164-34f7c871cc4d",
+      "url": "https://d8j0ntlcm91z4.cloudfront.net/user_3HWGlZDXVCAOoMKfZq628Ml9cM5/hf_20260806_162843_84156664-afef-44c4-b164-34f7c871cc4d.mp4",
+      "prompt": "Slow dolly through sunlit interior toward sea-view window (from scene3 still)",
+      "model": "kling3_0_turbo image-to-video, 5s, 16:9",
+      "cloudinary_url": "https://res.cloudinary.com/dirvyboe9/video/upload/q_auto/v1786504654/myisraelrental/site/clip2-interior.mp4",
+      "cloudinary_public_id": "myisraelrental/site/clip2-interior"
+    },
+    {
+      "key": "clip3-guest",
+      "file": "clip-guest-whatsapp.mp4",
+      "job_id": "1e904da2-ab43-473b-a3cd-5f7bcd7f8d3f",
+      "url": "https://d8j0ntlcm91z4.cloudfront.net/user_3HWGlZDXVCAOoMKfZq628Ml9cM5/hf_20260806_162828_1e904da2-ab43-473b-a3cd-5f7bcd7f8d3f.mp4",
+      "prompt": "Guest smiles reading message on phone (from scene4 still)",
+      "model": "kling3_0_turbo image-to-video, 5s, 16:9",
+      "cloudinary_url": "https://res.cloudinary.com/dirvyboe9/video/upload/q_auto/v1786504657/myisraelrental/site/clip3-guest.mp4",
+      "cloudinary_public_id": "myisraelrental/site/clip3-guest"
+    },
+    {
+      "key": "clip4-lister",
+      "file": "clip-lister-notification.mp4",
+      "job_id": "81c9ed69-00ec-417b-b86b-5a4a605d799d",
+      "url": "https://d8j0ntlcm91z4.cloudfront.net/user_3HWGlZDXVCAOoMKfZq628Ml9cM5/hf_20260806_162843_81c9ed69-00ec-417b-b86b-5a4a605d799d.mp4",
+      "prompt": "Lister gets booking notification, relaxes (from scene5 still)",
+      "model": "kling3_0_turbo image-to-video, 5s, 16:9",
+      "cloudinary_url": "https://res.cloudinary.com/dirvyboe9/video/upload/q_auto/v1786504660/myisraelrental/site/clip4-lister.mp4",
+      "cloudinary_public_id": "myisraelrental/site/clip4-lister"
+    },
+    {
+      "key": "clip5-pro",
+      "file": "clip-ac-pro.mp4",
+      "job_id": "de927014-f12c-433d-b56d-31e819576804",
+      "url": "https://d8j0ntlcm91z4.cloudfront.net/user_3HWGlZDXVCAOoMKfZq628Ml9cM5/hf_20260806_162828_de927014-f12c-433d-b56d-31e819576804.mp4",
+      "prompt": "AC technician works, glances at phone (from scene7 still)",
+      "model": "kling3_0_turbo image-to-video, 5s, 16:9",
+      "cloudinary_url": "https://res.cloudinary.com/dirvyboe9/video/upload/q_auto/v1786504662/myisraelrental/site/clip5-pro.mp4",
+      "cloudinary_public_id": "myisraelrental/site/clip5-pro"
+    },
+    {
+      "key": "scene8-requests-man",
+      "file": "scene8-requests-man.png",
+      "job_id": "99ea6716-e1d2-47af-b156-934c07f68373",
+      "url": "https://d8j0ntlcm91z4.cloudfront.net/user_3HWGlZDXVCAOoMKfZq628Ml9cM5/hf_20260806_182939_99ea6716-e1d2-47af-b156-934c07f68373.png",
+      "prompt": "Young man alone on sofa posting a rental request on his smartphone, moving boxes in corner, warm evening light, cinematic editorial",
+      "cloudinary_url": "https://res.cloudinary.com/dirvyboe9/image/upload/f_auto,q_auto/v1786504664/myisraelrental/site/scene8-requests-man.png",
+      "cloudinary_public_id": "myisraelrental/site/scene8-requests-man"
+    },
+    {
+      "key": "clip6-requests-man",
+      "file": "clip-requests-man.mp4",
+      "job_id": "1ca273cb-a7bf-4c09-9653-2cf301320ad5",
+      "url": "https://d8j0ntlcm91z4.cloudfront.net/user_3HWGlZDXVCAOoMKfZq628Ml9cM5/hf_20260806_183007_1ca273cb-a7bf-4c09-9653-2cf301320ad5.mp4",
+      "prompt": "Young man types request on phone, nods satisfied, camera pushes in (from scene8 still)",
+      "model": "kling3_0_turbo image-to-video, 5s, 16:9",
+      "cloudinary_url": "https://res.cloudinary.com/dirvyboe9/video/upload/q_auto/v1786504667/myisraelrental/site/clip6-requests-man.mp4",
+      "cloudinary_public_id": "myisraelrental/site/clip6-requests-man"
+    },
+    {
+      "key": "scene9-kotel-exterior-v2",
+      "file": "scene9-kotel-exterior.png",
+      "job_id": "1adb9038-1a92-42d8-b612-7a491483a300",
+      "url": "https://d8j0ntlcm91z4.cloudfront.net/user_3HWGlZDXVCAOoMKfZq628Ml9cM5/hf_20260806_194702_1adb9038-1a92-42d8-b612-7a491483a300.png",
+      "prompt": "Photorealistic Old City / Western Wall daylight photograph (soul_2)",
+      "cloudinary_url": "https://res.cloudinary.com/dirvyboe9/image/upload/f_auto,q_auto/v1786504668/myisraelrental/site/scene9-kotel-exterior-v2.png",
+      "cloudinary_public_id": "myisraelrental/site/scene9-kotel-exterior-v2"
+    },
+    {
+      "key": "scene10-kotel-interior-v2",
+      "file": "scene10-kotel-interior.png",
+      "job_id": "d6e3ec03-0b80-4899-95fa-6d97f5f0c08a",
+      "url": "https://d8j0ntlcm91z4.cloudfront.net/user_3HWGlZDXVCAOoMKfZq628Ml9cM5/hf_20260806_194343_d6e3ec03-0b80-4899-95fa-6d97f5f0c08a.png",
+      "prompt": "Photorealistic designed Old City apartment, arched window view of the Western Wall + Dome of the Rock (nano_banana_pro)",
+      "cloudinary_url": "https://res.cloudinary.com/dirvyboe9/image/upload/f_auto,q_auto/v1786504670/myisraelrental/site/scene10-kotel-interior-v2.png",
+      "cloudinary_public_id": "myisraelrental/site/scene10-kotel-interior-v2"
+    },
+    {
+      "key": "clip8-kotel-approach-v2",
+      "file": "clip-kotel-approach.mp4",
+      "job_id": "560798ad-7aec-4522-9bc6-35ef5780de1d",
+      "url": "https://d8j0ntlcm91z4.cloudfront.net/user_3HWGlZDXVCAOoMKfZq628Ml9cM5/hf_20260806_194741_560798ad-7aec-4522-9bc6-35ef5780de1d.mp4",
+      "prompt": "Slow push-in across plaza toward the wall (from scene9-v2)",
+      "model": "kling3_0_turbo image-to-video, 5s, 16:9",
+      "cloudinary_url": "https://res.cloudinary.com/dirvyboe9/video/upload/q_auto/v1786504673/myisraelrental/site/clip8-kotel-approach-v2.mp4",
+      "cloudinary_public_id": "myisraelrental/site/clip8-kotel-approach-v2"
+    },
+    {
+      "key": "clip9-kotel-interior-v2",
+      "file": "clip-kotel-interior.mp4",
+      "job_id": "d2fb6f25-603e-434c-8cc1-6571600f6376",
+      "url": "https://d8j0ntlcm91z4.cloudfront.net/user_3HWGlZDXVCAOoMKfZq628Ml9cM5/hf_20260806_194741_d2fb6f25-603e-434c-8cc1-6571600f6376.mp4",
+      "prompt": "Slow dolly through designed apartment toward arched Kotel-view window (from scene10-v2)",
+      "model": "kling3_0_turbo image-to-video, 5s, 16:9",
+      "cloudinary_url": "https://res.cloudinary.com/dirvyboe9/video/upload/q_auto/v1786504676/myisraelrental/site/clip9-kotel-interior-v2.mp4",
+      "cloudinary_public_id": "myisraelrental/site/clip9-kotel-interior-v2"
+    },
+    {
+      "key": "scene11-apartment-exploded",
+      "file": "clip-apartment-exploded.mp4",
+      "job_id": "0c30f763-9872-4391-828b-421a4e7d9f51",
+      "url": "https://d8j0ntlcm91z4.cloudfront.net/user_3HWGlZDXVCAOoMKfZq628Ml9cM5/hf_20260813_002739_0c30f763-9872-4391-828b-421a4e7d9f51.mp4",
+      "model": "kling3_0",
+      "prompt": "High quality 3D exploded view animation of a modern apartment. The apartment separates smoothly into its layers: roof, floors, walls, and furniture, each element floating apart and hovering in place, revealing the rooms inside. Clean white studio background. It should expand outward in all directions, both vertically and horizontally, and every element must stay fully inside the frame at all times. No text, no labels. Premium architectural visualization, soft even studio lighting, warm neutral materials, slow controlled cinematic motion.",
+      "cloudinary_url": "https://res.cloudinary.com/dirvyboe9/video/upload/q_auto/v1786580951/myisraelrental/site/scene11-apartment-exploded.mp4",
+      "cloudinary_public_id": "myisraelrental/site/scene11-apartment-exploded"
+    },
+    {
+      "key": "scene12-street-dark",
+      "file": "street-night-dark.png",
+      "job_id": "c10c5dee-56a7-4dbd-8d83-b41a06adf8c4",
+      "url": "https://d8j0ntlcm91z4.cloudfront.net/user_3HWGlZDXVCAOoMKfZq628Ml9cM5/hf_20260813_024323_c10c5dee-56a7-4dbd-8d83-b41a06adf8c4.png",
+      "model": "nano_banana_pro",
+      "prompt": "A row of Jerusalem stone residential apartment buildings at night, every window unlit and black, silhouettes just readable against a slightly lighter deep navy sky.",
+      "cloudinary_url": "https://res.cloudinary.com/dirvyboe9/image/upload/f_auto,q_auto/v1786589200/myisraelrental/site/scene12-street-dark.png",
+      "cloudinary_public_id": "myisraelrental/site/scene12-street-dark"
+    },
+    {
+      "key": "scene13-street-lit",
+      "file": "street-night-lit.png",
+      "job_id": "ad8d052e-e9d2-4a82-98e8-ebc705d3b9db",
+      "url": "https://d8j0ntlcm91z4.cloudfront.net/user_3HWGlZDXVCAOoMKfZq628Ml9cM5/hf_20260813_024453_ad8d052e-e9d2-4a82-98e8-ebc705d3b9db.png",
+      "model": "nano_banana_pro",
+      "prompt": "The SAME photograph with only the lighting changed: every window warmly lit from inside. Produced by EDITING scene12-street-dark rather than generating a second building, which is what guarantees the two layers align pixel for pixel.",
+      "cloudinary_url": "https://res.cloudinary.com/dirvyboe9/image/upload/f_auto,q_auto/v1786589202/myisraelrental/site/scene13-street-lit.png",
+      "cloudinary_public_id": "myisraelrental/site/scene13-street-lit"
+    }
+  ],
+  "download_locally": "PowerShell, from repo root:  foreach ($a in (Get-Content assets/generated/assets-manifest.json | ConvertFrom-Json).assets) { Invoke-WebRequest $a.url -OutFile (\"assets/generated/\" + $a.file) }",
+  "film_chapter_order": [
+    "clip0-aerial",
+    "clip1-villa",
+    "clip2-interior",
+    "clip3-guest",
+    "clip4-lister",
+    "clip5-pro",
+    "clip6-requests-man"
+  ],
+  "experience": "scroll-driven (cinematic-preview.html): pinned scenes, clips as living backgrounds, villa scene scroll-zooms through the wall (villa clip scales up + dissolves into interior clip)",
+  "scene2_note": "Scene 2 (zoom-through-the-wall) now uses the Kotel exterior/interior clips; the beach-villa clips (clip1-villa, clip2-interior) remain available as alternates. Villa-scene videos intentionally do NOT loop (push-in clips visibly rewind on loop)."
+}

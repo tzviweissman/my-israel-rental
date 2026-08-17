@@ -2,6 +2,26 @@ import React from "react";
 import ReactDOM from "react-dom/client";
 import { HelmetProvider } from "react-helmet-async";
 import "@/index.css";
+// Locked design tokens — the single source of truth for colour, type, radii,
+// shadows and the .btn* family.
+//
+// Imported AFTER index.css on purpose. index.css is Tailwind, whose base
+// layer sets `body` font/background; loaded first, the token file's own body
+// rule lost and the page stayed white with a system font.
+//
+// Ordering it last is only safe because the brand tokens are namespaced
+// (--brand-primary / --brand-border / --brand-muted). Tailwind's shadcn theme
+// already owns --primary, --border and --muted as HSL TRIPLETS ("0 0% 9%"),
+// and an unprefixed hex here would overwrite them — feeding `hsl(var(--primary))`
+// a hex and silently killing the background of every shadcn Button, Select and
+// Dialog. Same names, incompatible formats. Keep the --brand- prefix.
+//
+// This is a byte-identical copy of `brand/design-tokens.css`. CRA's
+// ModuleScopePlugin refuses imports from outside `src/`, and relaxing it means
+// editing craco config, which CLAUDE.md says to confirm first.
+// `backend/tests/test_design_tokens_synced.py` fails if the two ever differ,
+// so there is one source of truth despite there being two files.
+import "@/styles/design-tokens.css";
 import App from "@/App";
 import { Toaster } from "sonner";
 import SilentBoundary from "@/components/common/SilentBoundary";

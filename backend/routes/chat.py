@@ -204,9 +204,20 @@ async def _send_chat_email_safe(
             job = await db.marketplace_jobs.find_one(
                 {"_id": property_id}, {"_id": 0, "title": 1}
             )
-            property_title = (
-                f"Job: {job['title']}" if job and job.get("title") else "your conversation"
-            )
+            if job and job.get("title"):
+                property_title = f"Job: {job['title']}"
+            else:
+                # Third source: the Requests board. A thread opened from
+                # "Message seeker" is keyed by the request UUID, so without
+                # this the subject degrades to "your conversation" and the
+                # seeker cannot tell which of their requests it is about.
+                req = await db.requests.find_one(
+                    {"_id": property_id}, {"_id": 0, "title": 1}
+                )
+                property_title = (
+                    f"Request: {req['title']}" if req and req.get("title")
+                    else "your conversation"
+                )
         else:
             property_title = prop.get("title") or "your conversation"
 
@@ -418,6 +429,19 @@ async def get_conversations(payload: dict = Depends(verify_token)) -> list[dict]
         ).to_list(len(missing_ids)):
             jobs_by_id[row["_id"]] = row
 
+    # Same again for the Requests board — a thread from "Message seeker"
+    # is keyed by the request UUID. Only the ids that matched neither a
+    # property nor a job are looked up, so this is one extra query and
+    # only when something is actually unresolved.
+    requests_by_id: dict = {}
+    still_missing = [pid for pid in missing_ids if pid not in jobs_by_id]
+    if still_missing:
+        for row in await db.requests.find(
+            {"_id": {"$in": still_missing}},
+            {"_id": 1, "title": 1, "poster_user_id": 1},
+        ).to_list(len(still_missing)):
+            requests_by_id[row["_id"]] = row
+
     users_by_id: dict = {}
     if user_ids:
         for row in await db.users.find(
@@ -430,6 +454,7 @@ async def get_conversations(payload: dict = Depends(verify_token)) -> list[dict]
     for conv_key, (msg, other_user_id) in latest_by_conv.items():
         property_data = properties_by_id.get(msg['property_id'])
         job_data = jobs_by_id.get(msg['property_id'])
+        request_data = requests_by_id.get(msg['property_id'])
         other_user = users_by_id.get(other_user_id)
 
         # Was the CURRENT user @-mentioned by their counterpart in the
@@ -449,14 +474,19 @@ async def get_conversations(payload: dict = Depends(verify_token)) -> list[dict]
             display_title = property_data.get('title', 'Unknown')
         elif job_data:
             display_title = f"Job: {job_data.get('title', 'Untitled')}"
+        elif request_data:
+            display_title = f"Request: {request_data.get('title', 'Untitled')}"
         else:
             display_title = 'Unknown'
 
         conversations[conv_key] = {
             "property_id": msg['property_id'],
             "property_title": display_title,
-            "property_missing": property_data is None and job_data is None,
+            "property_missing": (
+                property_data is None and job_data is None and request_data is None
+            ),
             "is_job_thread": job_data is not None,
+            "is_request_thread": request_data is not None,
             "other_user": other_user if other_user else {},
             "last_message": msg['message'],
             "last_message_time": msg['created_at'],

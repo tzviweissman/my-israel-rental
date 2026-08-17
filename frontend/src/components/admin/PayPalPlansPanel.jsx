@@ -163,7 +163,7 @@ const PayPalPlansPanel = ({ token }) => {
               onClick={bootstrap}
               disabled={creating}
               className={`px-4 py-2.5 rounded-lg text-sm font-semibold text-white flex items-center gap-2 disabled:opacity-60 ${
-                isLive ? 'bg-red-600 hover:bg-red-700' : 'bg-[#1E6A6A] hover:bg-[#0F3A3A]'
+                isLive ? 'bg-red-600 hover:bg-red-700' : 'bg-[var(--brand-primary)] hover:bg-[#0F3A3A]'
               }`}
               data-testid="paypal-plans-create"
             >

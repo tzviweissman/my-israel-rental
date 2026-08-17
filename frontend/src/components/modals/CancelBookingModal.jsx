@@ -55,7 +55,7 @@ const CancelBookingModal = ({
           <select
             value={cancelReason}
             onChange={(e) => setCancelReason(e.target.value)}
-            className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#1E6A6A]/50 mb-3"
+            className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/50 mb-3"
           >
             <option value="">{t('cancelBooking.selectReason')}</option>
             <option value="change_of_plans">{t('cancelBooking.changeOfPlans')}</option>
@@ -72,7 +72,7 @@ const CancelBookingModal = ({
               onChange={(e) => setCustomCancelReason(e.target.value)}
               placeholder={t('cancelBooking.otherSpecify')}
               rows={3}
-              className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#1E6A6A]/50"
+              className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/50"
             />
           )}
         </div>

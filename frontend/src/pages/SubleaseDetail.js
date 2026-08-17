@@ -91,7 +91,7 @@ const SubleaseDetail = () => {
         <h1 className="text-2xl font-bold mb-3">{tf('property.notFound', 'Sublease not found')}</h1>
         <button
           onClick={() => navigate('/')}
-          className="mt-4 px-5 py-2 rounded-lg bg-[#1E6A6A] text-white hover:bg-[#175757]"
+          className="mt-4 px-5 py-2 rounded-lg bg-[var(--brand-primary)] text-white hover:bg-[#175757]"
           data-testid="back-home-btn"
         >
           {tf('common.backHome', 'Back to home')}
@@ -113,7 +113,7 @@ const SubleaseDetail = () => {
       <div className="mb-4">
         <button
           onClick={() => navigate(-1)}
-          className="inline-flex items-center gap-2 text-[#1E6A6A] hover:underline"
+          className="inline-flex items-center gap-2 text-[var(--brand-primary)] hover:underline"
           data-testid="back-btn"
         >
           <ArrowLeft size={18} />
@@ -141,7 +141,7 @@ const SubleaseDetail = () => {
             >
               {sublease.title || tf('sublease.untitled', 'Sublease')}
             </h1>
-            <span className="shrink-0 px-3 py-1 rounded-full text-xs font-bold tracking-wide bg-[#D4AF37] text-[#1E6A6A]">
+            <span className="shrink-0 px-3 py-1 rounded-full text-xs font-bold tracking-wide bg-[var(--gold)] text-[var(--brand-primary)]">
               {tf('property.subleaseRibbon', 'SUBLEASE')}
             </span>
           </div>
@@ -158,7 +158,7 @@ const SubleaseDetail = () => {
               {sublease.holiday_tags.map((tag) => (
                 <span
                   key={tag}
-                  className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold bg-[#1E6A6A]/10 text-[#1E6A6A]"
+                  className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold bg-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/10 text-[var(--brand-primary)]"
                 >
                   <Sparkles size={12} />
                   {tag.charAt(0).toUpperCase() + tag.slice(1)}
@@ -201,7 +201,7 @@ const SubleaseDetail = () => {
               <ul className="grid grid-cols-1 md:grid-cols-2 gap-y-1.5 text-gray-700">
                 {sublease.amenities.map((a) => (
                   <li key={a} className="flex items-center gap-2">
-                    <span className="inline-block w-1.5 h-1.5 rounded-full bg-[#D4AF37]" />
+                    <span className="inline-block w-1.5 h-1.5 rounded-full bg-[var(--gold)]" />
                     {serviceLabel(t, a)}
                   </li>
                 ))}
@@ -233,7 +233,7 @@ const SubleaseDetail = () => {
             )}
             <button
               onClick={handleContact}
-              className="w-full inline-flex items-center justify-center gap-2 py-3 rounded-xl bg-[#1E6A6A] text-white font-semibold hover:bg-[#175757] transition-colors"
+              className="w-full inline-flex items-center justify-center gap-2 py-3 rounded-xl bg-[var(--brand-primary)] text-white font-semibold hover:bg-[#175757] transition-colors"
               data-testid="contact-host-btn"
             >
               <MessageCircle size={18} />

@@ -13,12 +13,24 @@ body {
     -moz-osx-font-smoothing: grayscale;
     /* Lock horizontal scrolling globally — vertical scrolling is unaffected.
        Prevents stray wide elements (carousels, marketing imagery, full-bleed
-       sections) from making the entire page swipeable side-to-side on mobile. */
-    overflow-x: hidden;
+       sections) from making the entire page swipeable side-to-side on mobile.
+
+       `clip`, NOT `hidden`. `overflow: hidden` on html/body makes the element
+       a scroll container, and a scroll container is what `position: sticky`
+       resolves against — so every sticky descendant silently stops sticking.
+       That is what broke the cinematic home page: each scene's pin scrolled
+       away with the page instead of holding, leaving hundreds of pixels of
+       bare section background where the picture should have been.
+
+       `clip` gives the same "no sideways swipe" guarantee without creating a
+       scroll container, so sticky keeps working. It is the reason the
+       standalone preview file worked and the app did not — the preview never
+       had this rule. Do not change it back to `hidden`. */
+    overflow-x: clip;
 }
 
 html {
-    overflow-x: hidden;
+    overflow-x: clip;
 }
 
 /* iOS Safari auto-zooms whenever the user taps an input whose computed
@@ -227,7 +239,7 @@ code {
 .services-map .leaflet-control-zoom a,
 .stays-map .leaflet-control-zoom a {
     background: rgba(255, 255, 255, 0.9) !important;
-    color: #1E6A6A !important;
+    color: var(--brand-primary) !important;
     border: 0 !important;
     width: 34px;
     height: 34px;
@@ -238,7 +250,7 @@ code {
 }
 .services-map .leaflet-control-zoom a:hover,
 .stays-map .leaflet-control-zoom a:hover {
-    background: #1E6A6A !important;
+    background: var(--brand-primary) !important;
     color: #fff !important;
 }
 .services-map .leaflet-control-zoom a.leaflet-disabled,
@@ -261,7 +273,7 @@ code {
 }
 .services-map .leaflet-control-attribution a,
 .stays-map .leaflet-control-attribution a {
-    color: #1E6A6A !important;
+    color: var(--brand-primary) !important;
     text-decoration: none !important;
 }
 

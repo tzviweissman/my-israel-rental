@@ -14,7 +14,7 @@ import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { X, SlidersHorizontal } from 'lucide-react';
 
-const TEAL = '#1E6A6A';
+const TEAL = 'var(--brand-primary)';
 
 const ChipRow = ({ options, value, onChange, testidPrefix }) => (
   <div className="flex flex-wrap gap-2">
@@ -115,7 +115,7 @@ const ServicesFiltersModal = ({ open, onClose, initial, languages, onApply, onCl
       <div className="w-full sm:max-w-lg max-h-[90vh] overflow-y-auto bg-white rounded-t-3xl sm:rounded-3xl shadow-2xl">
         <div className="sticky top-0 z-10 flex items-center justify-between px-6 py-4 border-b bg-white/95 backdrop-blur">
           <div className="flex items-center gap-2">
-            <SlidersHorizontal size={18} className="text-[#1E6A6A]" />
+            <SlidersHorizontal size={18} className="text-[var(--brand-primary)]" />
             <h2 className="text-lg font-bold text-gray-900" style={{ fontFamily: 'Playfair Display' }}>
               {t('services.filters', 'More filters')}
             </h2>
@@ -164,7 +164,7 @@ const ServicesFiltersModal = ({ open, onClose, initial, languages, onApply, onCl
                   placeholder={t('common.min', 'Min')}
                   value={draft.minPrice}
                   onChange={(e) => setDraft((d) => ({ ...d, minPrice: e.target.value }))}
-                  className="w-full ps-6 pe-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:border-[#1E6A6A]"
+                  className="w-full ps-6 pe-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:border-[var(--brand-primary)]"
                   data-testid="filter-min-price"
                 />
               </div>
@@ -178,7 +178,7 @@ const ServicesFiltersModal = ({ open, onClose, initial, languages, onApply, onCl
                   placeholder={t('common.max', 'Max')}
                   value={draft.maxPrice}
                   onChange={(e) => setDraft((d) => ({ ...d, maxPrice: e.target.value }))}
-                  className="w-full ps-6 pe-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:border-[#1E6A6A]"
+                  className="w-full ps-6 pe-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:border-[var(--brand-primary)]"
                   data-testid="filter-max-price"
                 />
               </div>

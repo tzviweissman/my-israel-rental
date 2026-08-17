@@ -85,13 +85,13 @@ const LocationChipsRow = ({ locations, selectedLoc, onSelect }) => {
               onClick={() => onSelect(active ? '' : loc.slug)}
               className={`snap-start shrink-0 inline-flex items-center gap-1.5 px-3.5 py-2 rounded-full text-sm font-semibold transition-all ${
                 active
-                  ? 'bg-[#1E6A6A] text-white shadow-sm'
-                  : 'bg-white text-gray-700 border border-gray-200 hover:border-[#1E6A6A]/50'
+                  ? 'bg-[var(--brand-primary)] text-white shadow-sm'
+                  : 'bg-white text-gray-700 border border-gray-200 hover:border-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/50'
               }`}
               data-testid={`services-location-${loc.slug}`}
               aria-pressed={active}
             >
-              <MapPin size={13} className={active ? 'opacity-90' : 'text-[#1E6A6A]'} />
+              <MapPin size={13} className={active ? 'opacity-90' : 'text-[var(--brand-primary)]'} />
               <span>{loc.label}</span>
               {typeof loc.count === 'number' && loc.count > 0 && (
                 <span className={`ms-0.5 text-[11px] font-normal ${active ? 'opacity-80' : 'text-gray-400'}`}>

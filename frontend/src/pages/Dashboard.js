@@ -11,7 +11,7 @@ import SettingsTab from '../components/dashboard/SettingsTab';
 import SavedSearchesTab from '../components/dashboard/SavedSearchesTab';
 import LikedTab from '../components/dashboard/LikedTab';
 import SubleasesTab from '../components/dashboard/SubleasesTab';
-import GovernmentServicesTab from '../components/dashboard/GovernmentServicesTab';
+import MyRequestsTab from '../components/dashboard/MyRequestsTab';
 import PropertyList from '../components/dashboard/PropertyList';
 import AddPropertyModal from '../components/dashboard/AddPropertyModal';
 import BulkUploadModal from '../components/dashboard/BulkUploadModal';
@@ -21,10 +21,9 @@ import MyGigsTab from '../components/dashboard/MyGigsTab';
 import JobRequestsTab from '../components/dashboard/JobRequestsTab';
 import MyJobsTab from '../components/dashboard/MyJobsTab';
 import ManagerHeader from '../components/dashboard/ManagerHeader';
-import ShareLinkRow from '../components/dashboard/ShareLinkRow';
 import DashboardTabs from '../components/dashboard/DashboardTabs';
+import AttentionStrip from '../components/dashboard/AttentionStrip';
 import { canPublishGigs } from '../utils/providerTrial';
-import { DOCUMENT_SERVICES_ENABLED } from '../config/features';
 
 const Dashboard = () => {
   const { t } = useTranslation();
@@ -32,6 +31,14 @@ const Dashboard = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const [properties, setProperties] = useState([]);
+  // D3 — the My Jobs tab is gated on this. Fetched once here rather than
+  // inside the tab strip, which is presentational and should not make
+  // network calls to decide what to draw. A failure leaves the tab hidden,
+  // which is the same state as "no jobs" and therefore safe.
+  const [hasPostedJobs, setHasPostedJobs] = useState(false);
+  // D4/D5 — one call feeding both the tab badges and the attention strip,
+  // so the two can never show different numbers for the same fact.
+  const [summary, setSummary] = useState({});
   const [bookings, setBookings] = useState([]);
   const [showAddProperty, setShowAddProperty] = useState(false);
   const [showBulkUpload, setShowBulkUpload] = useState(false);
@@ -112,6 +119,20 @@ const Dashboard = () => {
       fetchProperties();
       fetchBookings();
       fetchUnreadConversations();
+      // D3 — decides whether the "Jobs I've Posted" tab exists at all.
+      // Silent on failure: no jobs and a failed fetch both mean "do not
+      // show the tab", which is the safe direction to be wrong in.
+      axios
+        .get(`${API}/marketplace/my-jobs`, { headers: { Authorization: `Bearer ${token}` } })
+        .then((r) => setHasPostedJobs((r.data || []).length > 0))
+        .catch(() => {});
+      // Silent on failure: no badges and no strip is the same as nothing
+      // needing attention, and an error banner over a dashboard because a
+      // COUNT failed would be worse than the missing count.
+      axios
+        .get(`${API}/dashboard/summary`, { headers: { Authorization: `Bearer ${token}` } })
+        .then((r) => setSummary(r.data || {}))
+        .catch(() => {});
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
@@ -225,38 +246,18 @@ const Dashboard = () => {
           <ManagerHeader user={user} token={token} API={API} />
         )}
 
-        {/* Owners get just the share-link control — same `/manager/{id}`
-            URL serves their public listings page, without the business-logo
-            header. */}
-        {user?.role === 'owner' && (
-          <div
-            className="bg-white p-5 rounded-2xl border border-[#E5E5E5] mb-8"
-            data-testid="owner-share-section"
-          >
-            <ShareLinkRow
-              userId={user.id}
-              label="Share your listings"
-              testidPrefix="owner-share-link"
-            />
-          </div>
-        )}
+        {/* D6 — the share link used to live here, above the tabs, always
+            open, showing a raw uuid, and rendered even with zero listings.
+            It now sits at the bottom of My Properties (ShareListingsPanel),
+            collapsed, and disappears entirely when there is nothing to
+            share. The dashboard opens on the user's properties instead of
+            on a URL. */}
 
-        {isRenter && !DOCUMENT_SERVICES_ENABLED && (
-          <div
-            className="mb-5 flex items-start gap-3 rounded-2xl border border-[#D4AF37]/30 bg-gradient-to-r from-[#fff8e6] to-[#fffaf0] px-5 py-3.5"
-            data-testid="services-coming-soon-banner"
-          >
-            <div className="flex-shrink-0 w-8 h-8 rounded-full bg-[#D4AF37]/15 text-[#a37d10] flex items-center justify-center">
-              <Sparkles size={16} />
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-semibold text-gray-900">Document filing services — launching soon</p>
-              <p className="text-xs text-gray-600 mt-0.5">
-                Bituach Leumi benefits, Arnona discount, apartment name change, and more. We'll handle the paperwork so you don't have to.
-              </p>
-            </div>
-          </div>
-        )}
+        <AttentionStrip
+          summary={summary}
+          unreadMessages={unreadConversations}
+          onGoToTab={setActiveTab}
+        />
 
         <DashboardTabs
           activeTab={activeTab}
@@ -264,6 +265,8 @@ const Dashboard = () => {
           role={user?.role}
           user={user}
           unreadMessages={unreadConversations}
+          hasPostedJobs={hasPostedJobs}
+          summary={summary}
         />
 
         {activeTab === 'contracts' && isPropertyLister && (
@@ -280,12 +283,12 @@ const Dashboard = () => {
 
         {activeTab === 'liked' && <LikedTab API={API} token={token} />}
 
-        {activeTab === 'subleases' && isRenter && (
-          <SubleasesTab API={API} token={token} />
+        {activeTab === 'my-requests' && (
+          <MyRequestsTab API={API} token={token} />
         )}
 
-        {activeTab === 'services' && isRenter && DOCUMENT_SERVICES_ENABLED && (
-          <GovernmentServicesTab API={API} token={token} />
+        {activeTab === 'subleases' && isRenter && (
+          <SubleasesTab API={API} token={token} />
         )}
 
         {activeTab === 'properties' && isPropertyLister && (
@@ -315,7 +318,12 @@ const Dashboard = () => {
                 setEditingProperty(p);
                 setShowAddProperty(true);
               }}
+              onAddProperty={() => {
+                setEditingProperty(null);
+                setShowAddProperty(true);
+              }}
               onRefresh={fetchProperties}
+              ownerId={user?.id}
               API={API}
               token={token}
             />

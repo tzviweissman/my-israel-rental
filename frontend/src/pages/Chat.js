@@ -398,7 +398,7 @@ const Chat = () => {
         <div className="flex justify-center pt-4 flex-shrink-0">
           <button
             onClick={() => navigate('/dashboard')}
-            className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-white border border-gray-200 text-gray-600 text-sm font-medium hover:border-[#1E6A6A] hover:text-[#1E6A6A] transition-all shadow-sm hover:shadow-md"
+            className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-white border border-gray-200 text-gray-600 text-sm font-medium hover:border-[var(--brand-primary)] hover:text-[var(--brand-primary)] transition-all shadow-sm hover:shadow-md"
             data-testid="return-dashboard-footer-btn"
           >
             <Home size={16} />

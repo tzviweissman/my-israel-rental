@@ -42,14 +42,14 @@ const JobRequestsTab = ({ API, token }) => {
     }
   };
 
-  if (loading) return <div className="flex justify-center py-16"><Loader2 className="animate-spin text-[#1E6A6A]" /></div>;
+  if (loading) return <div className="flex justify-center py-16"><Loader2 className="animate-spin text-[var(--brand-primary)]" /></div>;
 
   return (
     <div className="space-y-6">
       {savedSearches.length > 0 && (
         <div className="bg-white rounded-2xl border border-gray-100 p-4 sm:p-5 shadow-sm" data-testid="job-saved-searches">
           <div className="flex items-center gap-2 mb-3">
-            <BellRing size={16} className="text-[#1E6A6A]" />
+            <BellRing size={16} className="text-[var(--brand-primary)]" />
             <h3 className="text-sm font-bold text-gray-900">Your saved searches</h3>
             <span className="text-[11px] text-gray-500">daily digest</span>
           </div>
@@ -57,7 +57,7 @@ const JobRequestsTab = ({ API, token }) => {
             {savedSearches.map((s) => (
               <span
                 key={s.id}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold bg-[#1E6A6A]/8 text-[#1E6A6A] border border-[#1E6A6A]/20"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold bg-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/8 text-[var(--brand-primary)] border border-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/20"
                 data-testid={`job-saved-search-${s.id}`}
               >
                 {s.category}{s.area ? ` · ${s.area}` : ''}
@@ -95,7 +95,7 @@ const JobRequestsTab = ({ API, token }) => {
               <button
                 key={j.id}
                 onClick={() => navigate(`/services/jobs/${j.id}`)}
-                className="w-full text-left bg-white border border-gray-100 rounded-2xl p-4 sm:p-5 hover:border-[#D4AF37] transition-colors shadow-sm"
+                className="w-full text-left bg-white border border-gray-100 rounded-2xl p-4 sm:p-5 hover:border-[var(--gold)] transition-colors shadow-sm"
                 data-testid={`job-request-row-${j.id}`}
               >
                 <div className="flex items-start justify-between gap-3">
@@ -105,7 +105,7 @@ const JobRequestsTab = ({ API, token }) => {
                       ✓ Applied
                     </span>
                   ) : (
-                    <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-[#1E6A6A]">
+                    <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-[var(--brand-primary)]">
                       <Send size={11} /> Apply
                     </span>
                   )}

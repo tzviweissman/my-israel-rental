@@ -314,7 +314,7 @@ const SubleasesTab = ({ API, token }) => {
         }}
       />
       <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden shadow-sm">
-        <div className="bg-gradient-to-r from-[#1E6A6A] to-[#267a7a] px-6 py-5">
+        <div className="bg-gradient-to-r from-[var(--brand-primary)] to-[#267a7a] px-6 py-5">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <div className="w-12 h-12 rounded-xl bg-white/20 flex items-center justify-center backdrop-blur-sm">

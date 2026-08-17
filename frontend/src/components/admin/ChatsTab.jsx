@@ -151,8 +151,8 @@ export const ChatsTab = ({ token }) => {
                 data-testid={`chat-toggle-${idx}`}
               >
                 <div className="flex items-center gap-4 text-left flex-1 min-w-0">
-                  <div className={`p-2 rounded-lg ${unresp ? 'bg-red-600' : ''}`} style={{ backgroundColor: unresp ? undefined : '#1E6A6A' }}>
-                    {unresp ? <BellRing size={16} color="#fff" /> : <MessageCircle size={16} color="#D4AF37" />}
+                  <div className={`p-2 rounded-lg ${unresp ? 'bg-red-600' : ''}`} style={{ backgroundColor: unresp ? undefined : 'var(--brand-primary)' }}>
+                    {unresp ? <BellRing size={16} color="#fff" /> : <MessageCircle size={16} color="var(--gold)" />}
                   </div>
                   <div className="min-w-0">
                     <p className="font-medium text-sm truncate">{conv.property_title}</p>
@@ -283,7 +283,7 @@ export const ChatsTab = ({ token }) => {
                           </a>
                         )}
                         {msg.video_url && (
-                          <a href={msg.video_url} target="_blank" rel="noreferrer" className="inline-block mt-1 text-xs text-[#1E6A6A] underline">
+                          <a href={msg.video_url} target="_blank" rel="noreferrer" className="inline-block mt-1 text-xs text-[var(--brand-primary)] underline">
                             [video] {msg.video_url}
                           </a>
                         )}

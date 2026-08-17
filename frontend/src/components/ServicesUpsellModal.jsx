@@ -84,15 +84,15 @@ const ServicesUpsellModal = ({ onDone }) => {
         </button>
 
         {/* Hero */}
-        <div className="relative overflow-hidden rounded-t-3xl px-8 pt-8 pb-7 text-white" style={{ background: 'linear-gradient(135deg,#1E6A6A 0%,#164a4a 100%)' }}>
+        <div className="relative overflow-hidden rounded-t-3xl px-8 pt-8 pb-7 text-white" style={{ background: 'linear-gradient(135deg,var(--brand-primary) 0%,#164a4a 100%)' }}>
           <div
             aria-hidden="true"
             className="absolute -top-10 end-[-40px] w-40 h-40 rounded-full"
-            style={{ background: 'rgba(212,175,55,0.15)' }}
+            style={{ background: 'rgba(201, 162, 39,0.15)' }}
           />
           <span
             className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold uppercase tracking-widest mb-3"
-            style={{ background: 'rgba(212,175,55,0.2)', color: '#D4AF37' }}
+            style={{ background: 'rgba(201, 162, 39,0.2)', color: 'var(--gold)' }}
           >
             Grow your service business
           </span>
@@ -116,7 +116,7 @@ const ServicesUpsellModal = ({ onDone }) => {
           <ul className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-3.5">
             {BENEFITS.map(({ Icon, title, body }) => (
               <li key={title} className="flex gap-3 text-[12.5px] leading-snug">
-                <span className="shrink-0 w-8 h-8 rounded-full flex items-center justify-center" style={{ background: 'rgba(30,106,106,0.1)', color: '#1E6A6A' }}>
+                <span className="shrink-0 w-8 h-8 rounded-full flex items-center justify-center" style={{ background: 'rgba(30, 95, 140,0.1)', color: 'var(--brand-primary)' }}>
                   <Icon size={16} />
                 </span>
                 <span>
@@ -142,7 +142,7 @@ const ServicesUpsellModal = ({ onDone }) => {
             onClick={() => submit(true)}
             disabled={busy}
             className="inline-flex items-center gap-2 px-6 py-3 rounded-full font-extrabold text-[13px] transition-all hover:shadow-lg disabled:opacity-60"
-            style={{ background: '#D4AF37', color: '#1E6A6A', boxShadow: '0 6px 20px -8px rgba(212,175,55,0.6)' }}
+            style={{ background: 'var(--gold)', color: 'var(--brand-primary)', boxShadow: '0 6px 20px -8px rgba(201, 162, 39,0.6)' }}
             data-testid="services-upsell-accept"
           >
             {busy ? 'Setting up…' : 'Start my free month →'}

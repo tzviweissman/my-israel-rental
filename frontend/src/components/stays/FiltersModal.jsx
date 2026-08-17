@@ -12,6 +12,7 @@
  */
 import React from 'react';
 import { X } from 'lucide-react';
+import DateField from '../common/DateField';
 import {
   SERVICE_CATEGORIES, serviceLabel, serviceCategoryLabel,
 } from '../property/services/servicesCatalog';
@@ -51,7 +52,7 @@ const ChipRow = ({ value, onChange, options, testidPrefix }) => (
         type="button"
         onClick={() => onChange(o.v)}
         className={`px-3 py-1.5 rounded-full text-xs font-semibold border transition-colors ${
-          value === o.v ? 'bg-black text-[#D4AF37] border-black' : 'bg-white text-gray-700 border-gray-200 hover:border-[#D4AF37]'
+          value === o.v ? 'bg-black text-[var(--gold)] border-black' : 'bg-white text-gray-700 border-gray-200 hover:border-[var(--gold)]'
         }`}
         data-testid={`${testidPrefix}-${o.v || 'any'}`}
       >
@@ -88,11 +89,29 @@ const FiltersModal = ({
   };
   return (
     <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4" onClick={onClose} data-testid="stays-filters-modal">
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-hidden flex flex-col" onClick={(e) => e.stopPropagation()}>
+      {/* role/aria-modal sit on the PANEL, not the backdrop above it: the
+          backdrop is the click-outside catcher, and naming it the dialog
+          would tell a screen reader the dimmed overlay is the dialog and
+          put the whole page inside it. `aria-labelledby` points at the
+          heading that is already there, so the dialog announces as
+          "Filters" instead of an unnamed dialog. */}
+      <div
+        className="bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-hidden flex flex-col"
+        onClick={(e) => e.stopPropagation()}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="stays-filters-title"
+      >
         <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
-          <h2 className="text-lg font-bold">{t('stays.filters', 'Filters')}</h2>
-          <button onClick={onClose} className="p-2 hover:bg-gray-100 rounded-lg" data-testid="stays-filters-close">
-            <X size={18} />
+          <h2 className="text-lg font-bold" id="stays-filters-title">{t('stays.filters', 'Filters')}</h2>
+          <button
+            onClick={onClose}
+            className="p-2 hover:bg-gray-100 rounded-lg"
+            // Icon-only button: without this it announces as just "button".
+            aria-label={t('stays.closeFilters', 'Close filters')}
+            data-testid="stays-filters-close"
+          >
+            <X size={18} aria-hidden="true" />
           </button>
         </div>
         <div className="flex-1 overflow-y-auto p-6 space-y-6">
@@ -101,20 +120,18 @@ const FiltersModal = ({
           <div className="sm:hidden">
             <h3 className="text-sm font-bold mb-2">{t('stays.dates', 'Dates')}</h3>
             <div className="flex gap-3">
-              <input
-                type="date"
+              <DateField
                 value={checkin}
-                onChange={(e) => setCheckin(e.target.value)}
-                className="flex-1 px-3 py-2 rounded-lg border border-gray-200 text-sm focus:outline-none focus:border-[#D4AF37]"
-                data-testid="stays-filter-checkin"
+                onChange={setCheckin}
+                className="flex-1 px-3 py-2 rounded-lg border border-gray-200 text-sm bg-white focus:outline-none focus:border-[var(--gold)]"
+                testid="stays-filter-checkin"
               />
-              <input
-                type="date"
+              <DateField
                 value={checkout}
+                onChange={setCheckout}
                 min={checkin || undefined}
-                onChange={(e) => setCheckout(e.target.value)}
-                className="flex-1 px-3 py-2 rounded-lg border border-gray-200 text-sm focus:outline-none focus:border-[#D4AF37]"
-                data-testid="stays-filter-checkout"
+                className="flex-1 px-3 py-2 rounded-lg border border-gray-200 text-sm bg-white focus:outline-none focus:border-[var(--gold)]"
+                testid="stays-filter-checkout"
               />
             </div>
           </div>
@@ -147,7 +164,7 @@ const FiltersModal = ({
                   type="button"
                   onClick={() => setPriceCurrency('ILS')}
                   className={`px-3 py-1 rounded-full transition-colors ${
-                    priceCurrency === 'ILS' ? 'bg-black text-[#D4AF37]' : 'text-gray-600'
+                    priceCurrency === 'ILS' ? 'bg-black text-[var(--gold)]' : 'text-gray-600'
                   }`}
                   data-testid="stays-filter-currency-ils"
                 >
@@ -157,7 +174,7 @@ const FiltersModal = ({
                   type="button"
                   onClick={() => setPriceCurrency('USD')}
                   className={`px-3 py-1 rounded-full transition-colors ${
-                    priceCurrency === 'USD' ? 'bg-black text-[#D4AF37]' : 'text-gray-600'
+                    priceCurrency === 'USD' ? 'bg-black text-[var(--gold)]' : 'text-gray-600'
                   }`}
                   data-testid="stays-filter-currency-usd"
                 >
@@ -166,7 +183,7 @@ const FiltersModal = ({
               </div>
             </div>
             <div className="flex gap-3 items-stretch">
-              <div className="flex-1 flex items-center rounded-lg border border-gray-200 focus-within:border-[#D4AF37] overflow-hidden">
+              <div className="flex-1 flex items-center rounded-lg border border-gray-200 focus-within:border-[var(--gold)] overflow-hidden">
                 <span className="ps-3 text-gray-500 text-sm select-none">
                   {priceCurrency === 'ILS' ? '₪' : '$'}
                 </span>
@@ -178,7 +195,7 @@ const FiltersModal = ({
                   data-testid="stays-filter-price-min"
                 />
               </div>
-              <div className="flex-1 flex items-center rounded-lg border border-gray-200 focus-within:border-[#D4AF37] overflow-hidden">
+              <div className="flex-1 flex items-center rounded-lg border border-gray-200 focus-within:border-[var(--gold)] overflow-hidden">
                 <span className="ps-3 text-gray-500 text-sm select-none">
                   {priceCurrency === 'ILS' ? '₪' : '$'}
                 </span>
@@ -265,7 +282,7 @@ const FiltersModal = ({
                 type="button"
                 onClick={() => setFurnished((v) => !v)}
                 className={`px-3 py-1.5 rounded-full text-xs font-semibold border transition-colors ${
-                  furnished ? 'bg-black text-[#D4AF37] border-black' : 'bg-white text-gray-700 border-gray-200 hover:border-[#D4AF37]'
+                  furnished ? 'bg-black text-[var(--gold)] border-black' : 'bg-white text-gray-700 border-gray-200 hover:border-[var(--gold)]'
                 }`}
                 data-testid="stays-filter-furnished"
               >
@@ -275,7 +292,7 @@ const FiltersModal = ({
                 type="button"
                 onClick={() => setHasElevator((v) => !v)}
                 className={`px-3 py-1.5 rounded-full text-xs font-semibold border transition-colors ${
-                  hasElevator ? 'bg-black text-[#D4AF37] border-black' : 'bg-white text-gray-700 border-gray-200 hover:border-[#D4AF37]'
+                  hasElevator ? 'bg-black text-[var(--gold)] border-black' : 'bg-white text-gray-700 border-gray-200 hover:border-[var(--gold)]'
                 }`}
                 data-testid="stays-filter-elevator"
               >
@@ -319,8 +336,8 @@ const FiltersModal = ({
                     }}
                     className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-semibold border transition-colors ${
                       active
-                        ? 'bg-[#1E6A6A] text-white border-[#1E6A6A]'
-                        : 'bg-white text-[#1E6A6A] border-[#1E6A6A]/40 hover:border-[#1E6A6A]'
+                        ? 'bg-[var(--brand-primary)] text-white border-[var(--brand-primary)]'
+                        : 'bg-white text-[var(--brand-primary)] border-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/40 hover:border-[var(--brand-primary)]'
                     }`}
                     data-testid={`stays-filter-preset-${preset.id}`}
                     title={preset.items.map((s) => serviceLabel(t, s)).join(' + ')}
@@ -341,7 +358,7 @@ const FiltersModal = ({
                     key={a}
                     type="button"
                     onClick={() => toggleAmenity(a)}
-                    className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-[#D4AF37] text-white hover:bg-[#b8951f]"
+                    className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-[var(--gold)] text-white hover:bg-[#b8951f]"
                     data-testid={`stays-filter-amenity-selected-${a.replace(/[^a-z0-9]+/gi, '-').toLowerCase()}`}
                   >
                     {serviceLabel(t, a)}
@@ -382,8 +399,8 @@ const FiltersModal = ({
                             onClick={() => toggleAmenity(a)}
                             className={`px-3 py-1.5 rounded-full text-xs font-semibold border transition-colors ${
                               active
-                                ? 'bg-[#D4AF37] text-white border-[#D4AF37]'
-                                : 'bg-white text-gray-700 border-gray-200 hover:border-[#D4AF37]'
+                                ? 'bg-[var(--gold)] text-white border-[var(--gold)]'
+                                : 'bg-white text-gray-700 border-gray-200 hover:border-[var(--gold)]'
                             }`}
                             data-testid={`stays-filter-amenity-${a.replace(/[^a-z0-9]+/gi, '-').toLowerCase()}`}
                           >
@@ -405,7 +422,7 @@ const FiltersModal = ({
           <button
             onClick={onClose}
             className="px-6 py-2 rounded-lg text-sm font-semibold text-white"
-            style={{ backgroundColor: '#1E6A6A' }}
+            style={{ backgroundColor: 'var(--brand-primary)' }}
             data-testid="stays-filters-apply"
           >
             {t('stays.showCount', { count: totalCount, defaultValue: `Show ${totalCount} stays` })}

@@ -6,6 +6,7 @@ Nothing behavioural changed — the router itself now lives in each
 sub-module and gets aggregated by ``__init__.py``.
 """
 import os
+import re
 import uuid
 from datetime import datetime, timedelta, timezone
 from typing import Any, Optional
@@ -95,17 +96,26 @@ async def auto_translate_gig_inline(
     LLM failures are logged and the empty dict is returned — provider's
     publish still succeeds, English copy still serves.
     """
-    from utils.translate import translate_marketing_to_hebrew
+    from utils.translate import detect_lang, translate_marketing
 
-    updates: dict[str, str] = {}
+    # Spec 1.4 — fill whichever side is MISSING, not always Hebrew. A gig
+    # written in Hebrew used to be run through an English->Hebrew prompt,
+    # yielding Hebrew-from-Hebrew and no English at all, so an English
+    # speaker browsing services saw copy they could not read.
+    source = detect_lang(title, description)
+    target = "en" if source == "he" else "he"
+    updates: dict[str, str] = {"source_lang": source}
     try:
         if (title or "").strip():
-            updates["title_he"] = await translate_marketing_to_hebrew(title)
+            updates[f"title_{target}"] = await translate_marketing(title, target)
         if (description or "").strip():
-            updates["description_he"] = await translate_marketing_to_hebrew(description)
+            updates[f"description_{target}"] = await translate_marketing(description, target)
     except Exception as e:  # noqa: BLE001 — top-level around a network call
         logger.warning("[auto-translate-inline] failed: %s", e)
-        return {}
+        # source_lang is still worth keeping: it costs nothing, needed no
+        # API call, and lets the UI label the original even when the
+        # translation did not land.
+        return {"source_lang": source}
     return updates
 
 
@@ -119,16 +129,22 @@ async def auto_translate_gig_bg(gig_id: str, title: str | None, description: str
     saves stay snappy (LLM call takes 1-3 s). If translation fails, the
     English text still serves — no user-visible regression.
     """
-    from utils.translate import translate_marketing_to_hebrew
+    from utils.translate import detect_lang, translate_marketing
 
-    updates: dict[str, str] = {}
+    # Same rule as the inline twin above: fill the missing side.
+    source = detect_lang(title, description)
+    target = "en" if source == "he" else "he"
+    updates: dict[str, str] = {"source_lang": source}
     try:
         if (title or "").strip():
-            updates["title_he"] = await translate_marketing_to_hebrew(title)
+            updates[f"title_{target}"] = await translate_marketing(title, target)
         if (description or "").strip():
-            updates["description_he"] = await translate_marketing_to_hebrew(description)
+            updates[f"description_{target}"] = await translate_marketing(description, target)
     except Exception as e:  # noqa: BLE001 — top-level around a network call
         logger.warning("[auto-translate] gig=%s failed: %s", gig_id, e)
+        # Record the language even on failure — free, and the retry path
+        # below reads it.
+        await db.marketplace_gigs.update_one({"_id": gig_id}, {"$set": {"source_lang": source}})
         return
     if updates:
         await db.marketplace_gigs.update_one({"_id": gig_id}, {"$set": updates})
@@ -578,8 +594,27 @@ async def _update_response_ema(provider_user_id: str, elapsed_hours: float) -> N
     )
 
 
+# The marketplace is free. Listing a service costs nothing, so nothing
+# about a provider's billing decides whether their gigs are visible.
+#
+# Flip this to False to bring paid plans back — the subscription routes,
+# the PayPal helpers and the webhook handler are all still here and still
+# mounted, deliberately dormant rather than deleted.
+MARKETPLACE_IS_FREE = True
+
+
 def _provider_is_active(prov: dict[str, Any]) -> bool:
-    """True while the provider can still publish new/active gigs."""
+    """True while the provider can still publish new/active gigs.
+
+    While ``MARKETPLACE_IS_FREE`` every provider is active. This is the one
+    gate the whole marketplace reads — browse, search, gig detail and the
+    provider directory all funnel through it — so making it unconditional
+    is what actually makes the site free. Hiding the pricing UI alone would
+    have left providers whose trial had quietly expired invisible, with no
+    screen left anywhere to explain why.
+    """
+    if MARKETPLACE_IS_FREE:
+        return True
     if prov.get("subscription_status") == "active":
         return True
     trial_end = prov.get("trial_ends_at")
@@ -630,3 +665,85 @@ async def _batch_rating_aggregate(gig_ids: list[str]) -> dict[str, dict[str, Any
         }
     return result
 
+
+# ---------------- Free-text search ----------------
+
+# Numbers get written both ways, and a search must not care which. Someone
+# posts "Three bedroom apartment"; someone else searches "3 bedroom" and
+# finds nothing. Both directions are covered.
+_NUMBER_WORDS = {
+    "0": "zero", "1": "one", "2": "two", "3": "three", "4": "four", "5": "five",
+    "6": "six", "7": "seven", "8": "eight", "9": "nine", "10": "ten",
+}
+_WORD_NUMBERS = {v: k for k, v in _NUMBER_WORDS.items()}
+
+# Words for the same thing. Kept deliberately short: every entry here is a
+# way for a search to return something surprising, so it earns its place
+# only if people actually type it.
+_SYNONYMS = {
+    "bedroom": ["bedrooms", "bed", "beds", "br", "bdr", "bd"],
+    "bedrooms": ["bedroom", "bed", "beds", "br", "bdr", "bd"],
+    "bed": ["bedroom", "bedrooms", "br", "bd"],
+    "br": ["bedroom", "bedrooms", "bed"],
+    "bd": ["bedroom", "bedrooms", "bed"],
+    "apartment": ["apt", "flat"],
+    "apt": ["apartment", "flat"],
+    "flat": ["apartment", "apt"],
+    "furnished": ["furniture"],
+    "lift": ["elevator"],
+    "elevator": ["lift"],
+}
+
+
+def _token_alternatives(token: str) -> list[str]:
+    """Every spelling of one search word that should count as a match."""
+    alts = {token}
+    if token in _NUMBER_WORDS:
+        alts.add(_NUMBER_WORDS[token])
+    if token in _WORD_NUMBERS:
+        alts.add(_WORD_NUMBERS[token])
+    for extra in _SYNONYMS.get(token, []):
+        alts.add(extra)
+    return sorted(alts)
+
+
+def _search_clauses(q: str) -> list[dict[str, Any]]:
+    """Turn a search box into Mongo clauses.
+
+    Each WORD is matched independently and all of them must appear, in the
+    title or the description. That one decision fixes most of what was
+    broken, because the old code matched the whole query as a single
+    substring:
+
+      * "2 bedroom" found nothing, while "2-bedroom near the Old City" sat
+        on the board — the hyphen alone was enough to miss;
+      * "three bedroom" and "3 bedroom" were different searches;
+      * any word order but the poster's own returned nothing.
+
+    Tokens are matched as substrings rather than whole words on purpose, so
+    "bed" still finds "bedroom". The cost is that "3" also matches "13";
+    requiring every token narrows that back down in practice.
+    """
+    # Split on anything that is not a letter, digit or Hebrew character.
+    # ֐-׿ is the Hebrew block; without it a Hebrew query would be
+    # shredded into single letters by \w on some builds.
+    # Cap the raw query before tokenising. gigs.py capped at 80 before this
+    # helper existed and that cap must not be lost: this runs on an
+    # unauthenticated endpoint, and length is the cheap half of stopping a
+    # pathological query from building a pathological pipeline.
+    tokens = [t for t in re.split(r"[^\w\u0590-\u05FF]+", q.strip()[:80].lower()) if t]
+    # A pathological query should not build a hundred-clause pipeline.
+    tokens = tokens[:8]
+    clauses: list[dict[str, Any]] = []
+    for token in tokens:
+        alts = "|".join(re.escape(a) for a in _token_alternatives(token))
+        rx = {"$regex": f"({alts})", "$options": "i"}
+        clauses.append({"$or": [
+            {"title": rx}, {"description": rx},
+            # Both translated sides. _he was already here; _en arrived with
+            # spec 1.2 and without it a Hebrew-authored post stays invisible
+            # to an English search even though its English text exists.
+            {"title_he": rx}, {"description_he": rx},
+            {"title_en": rx}, {"description_en": rx},
+        ]})
+    return clauses

@@ -18,10 +18,6 @@ import { AlertTriangle, RefreshCw } from 'lucide-react';
  *
  * So this is deliberately NOT the empty-results component. Call it only
  * when a request actually failed.
- *
- * Colours are literal because that's what this branch has — the brand
- * token set (--brand-primary, --gold-rgb, --font-head) is still on the
- * redesign branch. Swap them for the tokens when that branch lands.
  */
 const ListingsUnavailable = ({ onRetry, compact = false }) => {
   const { t } = useTranslation();
@@ -38,7 +34,7 @@ const ListingsUnavailable = ({ onRetry, compact = false }) => {
         style={{
           width: compact ? 40 : 56,
           height: compact ? 40 : 56,
-          background: 'rgba(212, 175, 55, 0.14)',
+          background: 'rgb(var(--gold-rgb)/0.14)',
         }}
       >
         <AlertTriangle
@@ -48,7 +44,10 @@ const ListingsUnavailable = ({ onRetry, compact = false }) => {
         />
       </div>
 
-      <p className={`font-bold text-gray-900 ${compact ? 'text-base mt-3' : 'text-xl mt-4'}`}>
+      <p
+        className={`font-bold text-gray-900 ${compact ? 'text-base mt-3' : 'text-xl mt-4'}`}
+        style={{ fontFamily: 'var(--font-head)' }}
+      >
         {t('errors.listingsTitle', "We couldn't load listings just now")}
       </p>
 
@@ -66,7 +65,7 @@ const ListingsUnavailable = ({ onRetry, compact = false }) => {
           type="button"
           onClick={onRetry}
           className="mt-5 inline-flex items-center gap-2 rounded-full px-5 py-2.5 text-sm font-semibold text-white transition-transform duration-200 hover:-translate-y-0.5"
-          style={{ background: '#1E6A6A' }}
+          style={{ background: 'var(--brand-primary)' }}
           data-testid="listings-unavailable-retry"
         >
           <RefreshCw size={15} aria-hidden="true" />

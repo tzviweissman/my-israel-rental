@@ -4,7 +4,7 @@
 
 .rdp-airbnb {
   --rdp-cell-size: 44px;
-  --rdp-accent-color: #1E6A6A;
+  --rdp-accent-color: var(--brand-primary);
   --rdp-background-color: #F1F1F1;
   margin: 0;
 }
@@ -66,19 +66,19 @@
 
 .rdp-airbnb .rdp-day_selected,
 .rdp-airbnb .rdp-day_selected:focus-visible {
-  background: #1E6A6A !important;
+  background: var(--brand-primary) !important;
   color: #fff !important;
 }
 
 .rdp-airbnb .rdp-day_range_start,
 .rdp-airbnb .rdp-day_range_end {
-  background: #1E6A6A !important;
+  background: var(--brand-primary) !important;
   color: #fff !important;
 }
 
 .rdp-airbnb .rdp-day_range_middle {
   background: #E6F0F0 !important;
-  color: #1E6A6A !important;
+  color: var(--brand-primary) !important;
   border-radius: 0 !important;
 }
 

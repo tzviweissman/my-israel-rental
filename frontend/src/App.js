@@ -1,4 +1,6 @@
 import React, { useState, useEffect, Suspense, lazy } from 'react';
+import { Helmet } from 'react-helmet-async';
+
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import axios from 'axios';
@@ -18,6 +20,29 @@ import { installStaleBuildInterceptor } from './utils/staleBuildInterceptor';
 // reached yet — catches the post-deploy race that previously made users
 // think a feature was broken when it was just stale.
 installStaleBuildInterceptor();
+
+/**
+ * The floating WhatsApp CTA, suppressed on the cinematic home page.
+ *
+ * Not hidden with CSS — not rendered at all, so it costs nothing on that
+ * route and cannot flash before being hidden.
+ *
+ * Two reasons it goes. It floats over scene media and captions for the full
+ * length of an immersive full-bleed story that was never laid out around it.
+ * And it argues against the page: a generic WhatsApp bubble hovering beside
+ * the scene whose whole message is "chat happens inside MyIsraelRental"
+ * undercuts the thing being said. The home page carries its own CTAs in the
+ * hero and the finale for anyone ready to act.
+ *
+ * Every other route keeps it. This is a wrapper rather than a check inside
+ * WhatsAppButton so the widget stays a generic component that knows nothing
+ * about routing.
+ */
+function FloatingContact() {
+  const { pathname } = useLocation();
+  if (pathname === '/') return null;
+  return <WhatsAppButton />;
+}
 
 function ScrollToTop() {
   const { pathname } = useLocation();
@@ -41,13 +66,31 @@ const Home = lazy(() => import('./pages/Home'));
 // — over-prefetching burns bandwidth on visitors who never navigate.
 const Properties = lazy(() => import(/* webpackPrefetch: true */ './pages/Properties'));
 const Stays = lazy(() => import(/* webpackPrefetch: true */ './pages/Stays'));
+const RequestsBoard = lazy(() => import(/* webpackPrefetch: true */ './pages/RequestsBoard'));
+const RequestDetail = lazy(() => import('./pages/RequestDetail'));
+const PostRequest = lazy(() => import('./pages/PostRequest'));
 const Services = lazy(() => import(/* webpackPrefetch: true */ './pages/Services'));
 const WhyList = lazy(() => import('./pages/WhyList'));
+const WhyHost = lazy(() => import('./pages/WhyHost'));
 const PropertyDetail = lazy(() => import('./pages/PropertyDetail'));
 const SubleaseDetail = lazy(() => import('./pages/SubleaseDetail'));
 const Auth = lazy(() => import('./pages/Auth'));
 const AuthDeeplink = lazy(() => import('./pages/AuthDeeplink'));
 const NotificationSnooze = lazy(() => import('./pages/NotificationSnooze'));
+const RequestsEmailsOff = lazy(() => import('./pages/RequestsEmailsOff'));
+// EXPERIMENT: the same skill with nothing pinned - it picks palette, type
+// and shape itself. Deliberately off-brand, look-only.
+const WhyHostV3 = lazy(() => import('./pages/WhyHostV3'));
+// The unpinned rebrand proposal, applied across the marketing surface.
+// Look-only preview routes; nothing here is linked from the real nav.
+const v3 = (name) => lazy(() => import('./pages/v3').then((m) => ({ default: m[name] })));
+const V3Home = v3('V3Home');
+const V3Stays = v3('V3Stays');
+const V3Services = v3('V3Services');
+const V3Requests = v3('V3Requests');
+const V3WhyList = v3('V3WhyList');
+const V3Join = v3('V3Join');
+const V3Faq = v3('V3Faq');
 const SignupJoin = lazy(() => import('./pages/SignupJoin'));
 const VerifyPending = lazy(() => import('./pages/VerifyPending'));
 const VerifyEmail = lazy(() => import('./pages/VerifyEmail'));
@@ -55,7 +98,6 @@ const Dashboard = lazy(() => import('./pages/Dashboard'));
 const AdminDashboard = lazy(() => import('./pages/AdminDashboard'));
 const ManagerPage = lazy(() => import('./pages/ManagerPage'));
 const Chat = lazy(() => import('./pages/Chat'));
-const DocumentService = lazy(() => import('./pages/DocumentService'));
 const SignContract = lazy(() => import('./pages/SignContract'));
 const PaymentSuccess = lazy(() => import('./pages/PaymentSuccess'));
 const PaymentCancel = lazy(() => import('./pages/PaymentCancel'));
@@ -78,7 +120,11 @@ const RouteFallback = () => (
 );
 
 import ErrorBoundary from './components/common/ErrorBoundary';
-import { DOCUMENT_SERVICES_ENABLED } from './config/features';
+
+// Preview builds keep the entire app out of search results. Read once at
+// module load — CRA inlines REACT_APP_* at build time, so this is a
+// constant and the whole block below compiles away in production.
+const PREVIEW_NOINDEX = process.env.REACT_APP_PREVIEW === '1';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 export const API = `${BACKEND_URL}/api`;
@@ -179,6 +225,19 @@ function App() {
     <AuthContext.Provider value={{ user, token, login, logout, impersonate, endImpersonation }}>
       <BrowserRouter>
         <>
+            {/* Preview-environment noindex, emitted ONCE for the whole app.
+                It used to live only in PageMeta, which 17 pages never
+                render — /join, /auth/*, /dashboard and /property/:id among
+                them — so the preview was leaving its most linkable pages
+                indexable while the pages that did render PageMeta looked
+                correctly protected. Putting it at the root means a new
+                route is covered the moment it exists, without anyone
+                remembering to add a meta tag. */}
+            {PREVIEW_NOINDEX && (
+              <Helmet prioritizeSeoTags>
+                <meta name="robots" content="noindex,nofollow" />
+              </Helmet>
+            )}
             <ScrollToTop />
             <ThemePreviewOverride />
             <div className="App">
@@ -198,7 +257,7 @@ function App() {
               re-enabling is a one-line change if you want it back on a
               different trigger. `services_pitch_seen_at` on the user doc is
               now unread by the UI. */}
-          <WhatsAppButton />
+          <FloatingContact />
           <AccessibilityButton />
           {/* Around the ROUTES only: a page-level crash then leaves the
               nav bar intact so the user can click their way out, instead
@@ -228,15 +287,39 @@ function App() {
             <Route path="/dashboard/settings" element={user ? <Dashboard /> : <Navigate to="/auth/login" />} />
             <Route path="/auth/deeplink" element={<AuthDeeplink />} />
             <Route path="/notification-snooze" element={<NotificationSnooze />} />
+            {/* Public on purpose — the unsubscribe link in the requests
+                matching email must work without logging in. */}
+            <Route path="/requests-emails-off" element={<RequestsEmailsOff />} />
+            <Route path="/why-host-v3" element={<WhyHostV3 />} />
+            <Route path="/v3" element={<V3Home />} />
+            <Route path="/v3/stays" element={<V3Stays />} />
+            <Route path="/v3/services" element={<V3Services />} />
+            <Route path="/v3/requests" element={<V3Requests />} />
+            <Route path="/v3/why-list" element={<V3WhyList />} />
+            <Route path="/v3/join" element={<V3Join />} />
+            <Route path="/v3/faq" element={<V3Faq />} />
             <Route path="/admin" element={user?.role === 'admin' ? <AdminDashboard /> : <Navigate to="/" />} />
             <Route path="/manager/:managerId" element={<ManagerPage />} />
             <Route path="/chat/:propertyId" element={user ? <Chat /> : <Navigate to="/auth/login" />} />
-            <Route path="/document-service" element={DOCUMENT_SERVICES_ENABLED ? (user ? <DocumentService /> : <Navigate to="/auth/login" />) : <Navigate to="/" />} />
             <Route path="/sign/:signToken" element={<SignContract />} />
             <Route path="/payment/success" element={user ? <PaymentSuccess /> : <Navigate to="/auth/login" />} />
             <Route path="/payment/cancel" element={<PaymentCancel />} />
             <Route path="/availability-extended" element={<AvailabilityExtended />} />
             <Route path="/stays" element={<Stays />} />
+            {/* Demand board. Reading is public; posting needs an account,
+                which is what keeps the board from being scraped for leads.
+                /requests/post sits BEFORE /requests/:id so "post" is never
+                swallowed as an id. */}
+            <Route path="/requests" element={<RequestsBoard />} />
+            {/* C4 — no longer gated. Anyone can fill the wizard in; the
+                account is asked for at the final step, with the draft
+                preserved across the sign-in round trip. Posting still
+                REQUIRES an account, which the server enforces regardless
+                of what the UI does — only the timing of the ask moved.
+                Sending someone to a signup form before they have seen what
+                they are signing up for is where most of them leave. */}
+            <Route path="/requests/post" element={<PostRequest />} />
+            <Route path="/requests/:id" element={<RequestDetail />} />
             <Route
               path="/kosher-stays-in-israel"
               element={<Stays landing={{
@@ -251,7 +334,11 @@ function App() {
             <Route path="/services" element={<Services />} />
             {/* Value page in front of plan selection. /for-providers is an
                 alias so either URL works in outreach. */}
+            {/* Two supply-side pitches: /why-list sells to service
+                providers, /why-host to property owners. Neither is in
+                the nav — both are reached from their role card on /join. */}
             <Route path="/why-list" element={<WhyList />} />
+            <Route path="/why-host" element={<WhyHost />} />
             <Route path="/for-providers" element={<WhyList />} />
             <Route path="/services/jobs" element={<JobsBoard />} />
             <Route path="/services/jobs/:id" element={<JobDetail />} />

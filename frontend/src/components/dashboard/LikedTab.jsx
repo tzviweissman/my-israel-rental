@@ -64,7 +64,7 @@ const LikedTab = ({ API, token }) => {
 
       {loading ? (
         <div className="flex justify-center py-12">
-          <div className="w-8 h-8 border-[3px] border-[#1E6A6A] border-t-transparent rounded-full animate-spin" />
+          <div className="w-8 h-8 border-[3px] border-[var(--brand-primary)] border-t-transparent rounded-full animate-spin" />
         </div>
       ) : likedProperties.length === 0 ? (
         <div className="bg-white rounded-2xl border border-gray-200 p-12 text-center">
@@ -76,7 +76,7 @@ const LikedTab = ({ API, token }) => {
           <button
             onClick={() => navigate('/stays')}
             className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-white text-sm font-medium transition-all hover:shadow-md"
-            style={{ backgroundColor: '#1E6A6A' }}
+            style={{ backgroundColor: 'var(--brand-primary)' }}
             data-testid="browse-properties-btn"
           >
             Browse Properties
@@ -130,7 +130,7 @@ const LikedTab = ({ API, token }) => {
                   )}
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="text-lg font-bold" style={{ color: '#D4AF37' }}>
+                  <span className="text-lg font-bold" style={{ color: 'var(--gold)' }}>
                     {property.currency === 'USD' ? '$' : '₪'}
                     {(property.monthly_price || property.nightly_price || 0).toLocaleString()}
                     <span className="text-xs font-normal text-gray-500">
@@ -143,7 +143,7 @@ const LikedTab = ({ API, token }) => {
                       navigate(`/property/${property.id}`);
                     }}
                     className="text-xs font-medium px-3 py-1.5 rounded-lg transition-colors"
-                    style={{ color: '#1E6A6A', backgroundColor: '#1E6A6A10' }}
+                    style={{ color: 'var(--brand-primary)', backgroundColor: 'var(--brand-primary)10' }}
                   >
                     View →
                   </button>

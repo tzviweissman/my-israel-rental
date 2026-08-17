@@ -147,18 +147,12 @@ def _compute_amount(product_type: str, metadata: dict[str, Any]) -> tuple[float,
     completed pair (formula: ``n*150 - (n//2)*50``).
     """
     if product_type == "document_service":
-        services = metadata.get("services") or []
-        services = [s for s in services if s in VALID_DOC_SERVICES]
-        services = list(dict.fromkeys(services))  # de-dupe, preserve order
-        if not services:
-            raise HTTPException(400, "At least one valid service required")
-        n = len(services)
-        amount = n * DOCUMENT_SERVICE_PRICE_PER - (n // 2) * DOCUMENT_SERVICE_PAIR_DISCOUNT
-        if n == 1:
-            desc = f"Document service — {SERVICE_PRETTY[services[0]]}"
-        else:
-            desc = "Document services — " + " + ".join(SERVICE_PRETTY[s] for s in services)
-        return amount, "USD", desc
+        # Discontinued. Refused rather than removed from the enum: an old
+        # tab or a stale client can still POST this, and a 400 saying so is
+        # better than a 500 from a branch that no longer exists. Existing
+        # orders and their document_services rows are untouched — they are
+        # records of real payments and deleting them is not a cleanup.
+        raise HTTPException(410, "Document filing services are no longer offered")
 
     raise HTTPException(400, f"Unknown product_type: {product_type}")
 
@@ -229,39 +223,12 @@ async def _apply_business_side_effects(order: dict[str, Any]) -> None:
     product_type = order["product_type"]
     metadata = order.get("metadata") or {}
 
-    if product_type == "document_service":
-        # Create a document_services row (one per service) in 'pending' state.
-        # Distribute the order total evenly across services for admin reporting.
-        # We round each share to 2dp and absorb any rounding remainder in the
-        # last row so the per-row totals always sum back to order.amount.
-        now_iso = datetime.now(UTC).isoformat()
-        services = [s for s in (metadata.get("services") or []) if s in VALID_DOC_SERVICES]
-        services = list(dict.fromkeys(services))  # de-dupe, preserve order
-        n = len(services)
-        per_service_share = round(order["amount"] / n, 2) if n else 0.0
-        running_total = 0.0
-        for idx, svc in enumerate(services):
-            is_last = idx == n - 1
-            paid_share = round(order["amount"] - running_total, 2) if is_last else per_service_share
-            running_total += paid_share
-            service_doc = {
-                "id": str(uuid.uuid4()),
-                "user_id": order["user_id"],
-                "service_type": svc,
-                "property_id": metadata.get("property_id"),
-                "property_address": metadata.get("property_address"),
-                "tenant_name": metadata.get("tenant_name"),
-                "details": metadata.get("details") or {},
-                "status": "pending",
-                "paid": True,
-                "order_id": order["id"],
-                "paid_amount_usd": paid_share,
-                "created_at": now_iso,
-            }
-            await db.document_services.insert_one(service_doc)
+    # Document filing services were discontinued. New orders are refused
+    # above, so this branch can never be reached by anything created from
+    # now on. Historical orders keep their document_services rows — they
+    # record real payments, and clearing them would be data loss dressed
+    # up as tidying.
 
-
-async def _finalize_captured_order(order_id: str, capture_payload: dict[str, Any]) -> dict[str, Any] | None:
     """Idempotent finalizer invoked both by the user-facing capture endpoint
     and the PayPal webhook.
 

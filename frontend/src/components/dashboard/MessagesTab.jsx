@@ -82,15 +82,15 @@ const MessagesTab = ({ API, token, onUnreadChange }) => {
             onClick={() => openConversation(conv)}
             className={`w-full text-left bg-white rounded-2xl border transition-all hover:shadow-md p-4 flex items-start gap-3 ${
               mentionsMe
-                ? 'border-[#D4AF37] ring-2 ring-[#D4AF37]/40 shadow-sm'
+                ? 'border-[var(--gold)] ring-2 ring-[rgb(var(--gold-rgb)/<alpha-value>)]/40 shadow-sm'
                 : isUnread
-                ? 'border-[#D4AF37] ring-1 ring-[#D4AF37]/30'
+                ? 'border-[var(--gold)] ring-1 ring-[rgb(var(--gold-rgb)/<alpha-value>)]/30'
                 : 'border-gray-100'
             }`}
             data-testid={`conversation-${conv.property_id}`}
           >
-            <div className="w-11 h-11 rounded-full bg-[#1E6A6A]/10 flex items-center justify-center flex-shrink-0">
-              <Building2 size={20} className="text-[#1E6A6A]" />
+            <div className="w-11 h-11 rounded-full bg-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/10 flex items-center justify-center flex-shrink-0">
+              <Building2 size={20} className="text-[var(--brand-primary)]" />
             </div>
             <div className="flex-1 min-w-0">
               <div className="flex items-center justify-between gap-2">
@@ -98,7 +98,7 @@ const MessagesTab = ({ API, token, onUnreadChange }) => {
                   <span className="truncate">{conv.property_title || 'Property'}</span>
                   {mentionsMe && (
                     <span
-                      className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-md text-[10px] font-bold bg-[#D4AF37] text-[#1E6A6A] shrink-0"
+                      className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-md text-[10px] font-bold bg-[var(--gold)] text-[var(--brand-primary)] shrink-0"
                       data-testid={`mention-badge-${conv.property_id}`}
                       title="You were mentioned"
                     >
@@ -122,7 +122,7 @@ const MessagesTab = ({ API, token, onUnreadChange }) => {
                   <span
                     className={`inline-block max-w-[85%] truncate rounded-2xl px-3 py-1.5 text-xs leading-relaxed ${
                       fromMe
-                        ? 'bg-gradient-to-br from-[#1E6A6A] to-[#1a5e5e] text-white rounded-br-md'
+                        ? 'bg-gradient-to-br from-[var(--brand-primary)] to-[#1a5e5e] text-white rounded-br-md'
                         : 'bg-gray-100 text-gray-800 rounded-bl-md'
                     } ${isUnread && !fromMe ? 'font-semibold' : ''}`}
                     data-testid={`conversation-preview-${conv.property_id}`}
@@ -137,7 +137,7 @@ const MessagesTab = ({ API, token, onUnreadChange }) => {
             </div>
             {isUnread && (
               <span
-                className="w-2.5 h-2.5 rounded-full bg-[#D4AF37] mt-2 flex-shrink-0"
+                className="w-2.5 h-2.5 rounded-full bg-[var(--gold)] mt-2 flex-shrink-0"
                 aria-label="Unread"
               />
             )}

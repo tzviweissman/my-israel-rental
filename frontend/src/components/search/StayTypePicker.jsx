@@ -18,6 +18,13 @@ const StayTypePicker = ({
   onChange,
   labelClassName = '',
   testidPrefix = 'stay-type',
+  // Collapsed-state text when nothing is selected. The Stays search panel
+  // passes the preview's warmer "Any · long / short / vacation"; anything
+  // narrower omits it and gets the plain "Any" this has always shown.
+  // Deliberately NOT applied to the menu's own "Any" option below — that
+  // is a choice the user picks, and "Any · long / short / vacation" reads
+  // as four options rather than one.
+  emptyLabel,
 }) => {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
@@ -62,7 +69,7 @@ const StayTypePicker = ({
         </p>
         <div className="flex items-center justify-between gap-1">
           <span className={`text-sm font-medium truncate ${selected ? 'text-gray-800' : 'text-gray-400'}`}>
-            {selected ? selected.label : t('stays.any', 'Any')}
+            {selected ? selected.label : (emptyLabel ?? t('stays.any', 'Any'))}
           </span>
           <div className="flex items-center gap-1 shrink-0">
             {selected && (

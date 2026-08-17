@@ -34,7 +34,7 @@ const ProviderProfile = () => {
       .finally(() => setLoading(false));
   }, [userId]);
 
-  if (loading) return <div className="min-h-screen flex items-center justify-center pt-32"><Loader2 className="animate-spin text-[#1E6A6A]" size={28} /></div>;
+  if (loading) return <div className="min-h-screen flex items-center justify-center pt-32"><Loader2 className="animate-spin text-[var(--brand-primary)]" size={28} /></div>;
   if (!data) return null;
 
   // LocalBusiness schema: emits enough structured data for Google to show
@@ -75,7 +75,7 @@ const ProviderProfile = () => {
       <PageMeta title={`${data.name} — Services on MyIsraelRental`} description={data.tagline || data.bio?.slice(0, 155) || `Services from ${data.name}`} path={`/services/provider/${userId}`} jsonLd={providerJsonLd} />
       <div className="max-w-5xl mx-auto px-4 py-8">
         <Breadcrumb current={data.name} testId="provider-breadcrumb" />
-        <button onClick={() => navigate(backTo)} className="text-sm text-gray-600 flex items-center gap-1 mb-4 hover:text-[#1E6A6A]" data-testid="provider-back">
+        <button onClick={() => navigate(backTo)} className="text-sm text-gray-600 flex items-center gap-1 mb-4 hover:text-[var(--brand-primary)]" data-testid="provider-back">
           <ArrowLeft size={14} /> Back to services
         </button>
         <div className="flex items-center gap-4 mb-6">
@@ -83,7 +83,7 @@ const ProviderProfile = () => {
           <div className="flex-1">
             <div className="flex items-center gap-2">
               <h1 className="text-2xl font-bold" style={{ fontFamily: 'Playfair Display' }}>{data.name}</h1>
-              {data.active && <BadgeCheck size={18} className="text-[#1E6A6A]" />}
+              {data.active && <BadgeCheck size={18} className="text-[var(--brand-primary)]" />}
             </div>
             {data.tagline && <p className="text-gray-600 text-sm">{data.tagline}</p>}
           </div>
@@ -101,7 +101,7 @@ const ProviderProfile = () => {
           >
             {data.member_since_year && (
               <div className="flex items-start gap-2.5" data-testid="provider-member-since">
-                <Calendar size={16} className="text-[#1E6A6A] mt-0.5 shrink-0" />
+                <Calendar size={16} className="text-[var(--brand-primary)] mt-0.5 shrink-0" />
                 <div className="min-w-0">
                   <p className="text-[10px] font-bold uppercase tracking-wider text-gray-500">{t("sweep.memberSince", "Member since")}</p>
                   <p className="text-sm font-semibold text-gray-900">{data.member_since_year}</p>
@@ -121,7 +121,7 @@ const ProviderProfile = () => {
             )}
             {data.languages && data.languages.length > 0 && (
               <div className="flex items-start gap-2.5" data-testid="provider-languages">
-                <Globe size={16} className="text-[#1E6A6A] mt-0.5 shrink-0" />
+                <Globe size={16} className="text-[var(--brand-primary)] mt-0.5 shrink-0" />
                 <div className="min-w-0">
                   <p className="text-[10px] font-bold uppercase tracking-wider text-gray-500">Speaks</p>
                   <p className="text-sm font-semibold text-gray-900 truncate">
@@ -147,7 +147,7 @@ const ProviderProfile = () => {
         {(data.credentials || (data.credential_docs && data.credential_docs.length > 0)) && (
           <div className="mb-8" data-testid="provider-credentials-section">
             <h2 className="text-lg font-bold mb-2 flex items-center gap-2">
-              <Award size={18} className="text-[#D4AF37]" />
+              <Award size={18} className="text-[var(--gold)]" />
               Credentials &amp; licenses
             </h2>
             {data.credentials && (
@@ -163,7 +163,7 @@ const ProviderProfile = () => {
                       href={doc.url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1.5 text-sm text-[#1E6A6A] hover:underline font-medium"
+                      className="inline-flex items-center gap-1.5 text-sm text-[var(--brand-primary)] hover:underline font-medium"
                       data-testid={`provider-credential-doc-${i}`}
                     >
                       <FileText size={14} />

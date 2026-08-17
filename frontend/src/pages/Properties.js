@@ -570,16 +570,16 @@ const Properties = () => {
             onClick={() => setShowFilters(!showFilters)}
             className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-5 py-2 sm:py-2.5 rounded-xl text-xs sm:text-sm font-semibold tracking-wide transition-all duration-200 hover:shadow-md active:scale-[0.98] shrink-0"
             style={{
-              backgroundColor: showFilters ? '#1E6A6A' : '#fafaf8',
-              color: showFilters ? '#D4AF37' : '#1E6A6A',
-              border: showFilters ? '1.5px solid #1E6A6A' : '1.5px solid #e0dcd4',
+              backgroundColor: showFilters ? 'var(--brand-primary)' : '#fafaf8',
+              color: showFilters ? 'var(--gold)' : 'var(--brand-primary)',
+              border: showFilters ? '1.5px solid var(--brand-primary)' : '1.5px solid #e0dcd4',
             }}
             data-testid="filter-toggle-button"
           >
             <Filter size={16} />
             {t('filters.filters')}
             {activeFilterCount > 0 && (
-              <span className="w-5 h-5 rounded-full text-[10px] flex items-center justify-center font-bold bg-[#D4AF37] text-[#1E6A6A]">
+              <span className="w-5 h-5 rounded-full text-[10px] flex items-center justify-center font-bold bg-[var(--gold)] text-[var(--brand-primary)]">
                 {activeFilterCount}
               </span>
             )}
@@ -599,12 +599,12 @@ const Properties = () => {
           <div className="flex items-center gap-2">
             {filtering ? (
               <>
-                <Loader2 size={14} className="animate-spin text-[#D4AF37]" />
+                <Loader2 size={14} className="animate-spin text-[var(--gold)]" />
                 <span>{t('filters.updating') || 'Updating results...'}</span>
               </>
             ) : (
               <span>
-                <span className="font-semibold text-[#1E6A6A]" data-testid="live-result-count-number">
+                <span className="font-semibold text-[var(--brand-primary)]" data-testid="live-result-count-number">
                   {properties.length}
                 </span>{' '}
                 {properties.length === 1
@@ -630,8 +630,8 @@ const Properties = () => {
                 className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold transition-all hover:shadow-sm active:scale-[0.97]"
                 style={{
                   backgroundColor: '#fafaf0',
-                  color: '#1E6A6A',
-                  border: '1px solid #D4AF37',
+                  color: 'var(--brand-primary)',
+                  border: '1px solid var(--gold)',
                 }}
                 data-testid="save-as-alert-inline-btn"
                 title={t('filters.saveAsAlertTooltip') || "We'll email you when a new place matches your filters"}
@@ -654,23 +654,23 @@ const Properties = () => {
           <div
             className="mb-6 rounded-2xl p-5 sm:p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4"
             style={{
-              backgroundColor: '#1E6A6A',
+              backgroundColor: 'var(--brand-primary)',
               color: '#fafaf0',
-              border: '1.5px solid #D4AF37',
+              border: '1.5px solid var(--gold)',
             }}
             data-testid="zero-results-alert-cta"
           >
             <div className="flex items-start gap-3">
               <div
                 className="shrink-0 w-10 h-10 rounded-full flex items-center justify-center"
-                style={{ backgroundColor: 'rgba(212,175,55,0.15)' }}
+                style={{ backgroundColor: 'rgba(201, 162, 39,0.15)' }}
               >
-                <Bell size={18} style={{ color: '#D4AF37' }} />
+                <Bell size={18} style={{ color: 'var(--gold)' }} />
               </div>
               <div>
                 <h3
                   className="text-base sm:text-lg font-semibold mb-0.5"
-                  style={{ color: '#D4AF37', fontFamily: 'Playfair Display' }}
+                  style={{ color: 'var(--gold)', fontFamily: 'Playfair Display' }}
                 >
                   {t('filters.zeroResultsHeading') || 'No matches right now'}
                 </h3>
@@ -683,7 +683,7 @@ const Properties = () => {
             <button
               onClick={saveCurrentFiltersAsAlert}
               className="shrink-0 inline-flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-semibold transition-all hover:shadow-md active:scale-[0.97]"
-              style={{ backgroundColor: '#D4AF37', color: '#1E6A6A' }}
+              style={{ backgroundColor: 'var(--gold)', color: 'var(--brand-primary)' }}
               data-testid="zero-results-save-alert-btn"
             >
               <Bell size={14} />
@@ -719,9 +719,9 @@ const Properties = () => {
                   }}
                   className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold transition-all hover:shadow-md active:scale-[0.97]"
                   style={{
-                    backgroundColor: active ? '#1E6A6A' : '#ffffff',
-                    color: active ? '#D4AF37' : '#1E6A6A',
-                    border: `1.5px solid ${active ? '#1E6A6A' : '#e0dcd4'}`,
+                    backgroundColor: active ? 'var(--brand-primary)' : '#ffffff',
+                    color: active ? 'var(--gold)' : 'var(--brand-primary)',
+                    border: `1.5px solid ${active ? 'var(--brand-primary)' : '#e0dcd4'}`,
                   }}
                   data-testid={`quick-filter-${slug}`}
                 >

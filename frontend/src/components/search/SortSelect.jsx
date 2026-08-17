@@ -26,7 +26,7 @@ const SortSelect = ({ value, onChange, allowNearest = false, t, testid = 'sort-s
     <select
       value={value}
       onChange={(e) => onChange(e.target.value)}
-      className="rounded-lg border border-[#E5E5E5] bg-white px-3 py-1.5 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#1E6A6A]/40"
+      className="rounded-lg border border-[#E5E5E5] bg-white px-3 py-1.5 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/40"
       data-testid={testid}
     >
       <option value={SORT_NEWEST}>{t('stays.sortNewest', 'Newest')}</option>

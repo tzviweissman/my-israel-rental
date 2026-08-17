@@ -30,6 +30,8 @@ import { toast } from 'sonner';
 import StaysCard from '../components/stays/StaysCard';
 import AreaRow from '../components/stays/AreaRow';
 import StaysSearchBar from '../components/stays/StaysSearchBar';
+import TrustLine from '../components/stays/TrustLine';
+import StaysHero from '../components/stays/StaysHero';
 import FiltersModal, { AMENITY_PRESETS } from '../components/stays/FiltersModal';
 import StaysMapView from '../components/stays/StaysMapView';
 import AddressAutocomplete from '../components/common/AddressAutocomplete';
@@ -481,11 +483,13 @@ const Stays = ({ landing = null }) => {
 
   return (
     <div
-      className="min-h-screen bg-[#FAFAF7]"
+      className="min-h-screen bg-[var(--bg)]"
       style={{
-        // Only the global nav stays fixed — the search bar scrolls
-        // away with the page so the cards have the full viewport.
-        paddingTop: 'var(--nav-h, 68px)',
+        // NO paddingTop, unlike every other page: the dark band starts at
+        // y=0 and the fixed glass nav floats over it, which is the whole
+        // point of the glass treatment (the bubbles only read as glass
+        // with a photo behind them). `.hero-band-head` carries `--nav-h`
+        // as padding instead, so the headline still clears the bar.
         // Leave room at the bottom so the floating WhatsApp + a11y FABs
         // (~64px tall + their 24px safe-area offset) never cover the
         // last row of property cards on mobile.
@@ -498,35 +502,18 @@ const Stays = ({ landing = null }) => {
         description={landing?.description || 'Discover stays across Israel — vacation apartments, short-term lets and long-term rentals in Jerusalem, Tel Aviv, Haifa and beyond. Filter by area, dates, price and amenities.'}
         path={landing?.path || '/stays'}
       />
-      {/* SEO landing hero — rendered only on dedicated landing routes
-          (e.g. /kosher-stays-in-israel). Gives Google a crawlable H1 +
-          intro paragraph so the URL indexes for its target long-tail. */}
-      {landing?.heroTitle && (
-        <div className="bg-[#F5F1E8] border-b border-[#E5E5E5]">
-          <div className="max-w-7xl mx-auto px-4 py-8 sm:py-10">
-            <h1
-              className="text-3xl sm:text-4xl lg:text-5xl font-bold text-[#1E6A6A]"
-              style={{ fontFamily: 'Playfair Display' }}
-              data-testid="stays-landing-h1"
-            >
-              {landing.heroTitle}
-            </h1>
-            {landing.heroLede && (
-              <p className="mt-3 max-w-2xl text-sm sm:text-base text-gray-700" data-testid="stays-landing-lede">
-                {landing.heroLede}
-              </p>
-            )}
-          </div>
-        </div>
-      )}
-      {/* Inline (non-sticky) search bar — sits flush below the global
-          nav at the top of the page and scrolls away with the rest of
-          the content as the user explores. Previously this was
-          `position: fixed`; user asked for it not to follow on scroll. */}
-      <div
-        className="bg-white border-b border-[#E5E5E5]"
-      >
-        <div className="max-w-7xl mx-auto px-4 py-3">
+      {/* Dark photo band. Also carries the SEO landing copy when one of
+          the /kosher-stays-in-israel-style routes is active — that H1 used
+          to live in its own beige strip above the search bar, but two
+          stacked headers pushed the listings off the first screen, and the
+          band is a better home for a headline than a flat block was. */}
+      <StaysHero landing={landing} t={t} />
+
+      {/* Floating white search panel, riding up over the band. Not sticky:
+          it scrolls away with the page so the cards get the full viewport,
+          which is how it behaved before 2b and what the user asked for. */}
+      <div className="hero-panel-float">
+        <div className="hero-panel">
           <StaysSearchBar
             where={where} setWhere={setWhere}
             checkin={checkin} setCheckin={setCheckin}
@@ -537,11 +524,15 @@ const Stays = ({ landing = null }) => {
             areaLabelFor={(a) => areaLabel(a, t)}
             onOpenFilters={() => setShowFilters(true)}
             filterCount={activeFilterCount}
+            // The preview's panel copy, applied here rather than inside the
+            // shared pickers — see the note in StaysSearchBar.
+            wherePlaceholder={t('stays.panelAnywhere', 'Anywhere in Israel')}
+            stayTypeEmptyLabel={t('stays.panelStayTypeAny', 'Any · long / short / vacation')}
             t={t}
           />
-          {/* Mobile-only one-tap date presets — sit inside the fixed
-              bar so they're always reachable while scrolling. Setting
-              a preset date range implicitly clears Flexible mode. */}
+          {/* One-tap date presets (`.chips` in the preview, including the
+              gold holiday chips). Setting a preset range implicitly clears
+              Flexible mode. */}
           <div className="mt-2">
             <QuickChips
               variant="light"
@@ -587,7 +578,7 @@ const Stays = ({ landing = null }) => {
                 type="button"
                 onClick={() => setSearchParams((prev) => { const n = new URLSearchParams(prev); n.delete('view'); return n; }, { replace: true })}
                 className={`inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-semibold transition-colors ${
-                  viewMode === 'list' ? 'bg-[#1E6A6A] text-white' : 'text-gray-700 hover:text-gray-900'
+                  viewMode === 'list' ? 'bg-[var(--brand-primary)] text-white' : 'text-gray-700 hover:text-gray-900'
                 }`}
                 aria-pressed={viewMode === 'list'}
                 data-testid="stays-view-list"
@@ -599,7 +590,7 @@ const Stays = ({ landing = null }) => {
                 type="button"
                 onClick={() => setSearchParams((prev) => { const n = new URLSearchParams(prev); n.set('view', 'map'); return n; }, { replace: true })}
                 className={`inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-semibold transition-colors ${
-                  viewMode === 'map' ? 'bg-[#1E6A6A] text-white' : 'text-gray-700 hover:text-gray-900'
+                  viewMode === 'map' ? 'bg-[var(--brand-primary)] text-white' : 'text-gray-700 hover:text-gray-900'
                 }`}
                 aria-pressed={viewMode === 'map'}
                 data-testid="stays-view-map"
@@ -609,12 +600,16 @@ const Stays = ({ landing = null }) => {
               </button>
             </div>
           </div>
+          {/* B1: proof line, directly under the search control the way
+              Thumbtack and Plum Guide place theirs. Renders nothing until
+              its counts arrive, so it never reserves an empty row. */}
+          <TrustLine t={t} />
         </div>
       </div>
 
       {loading ? (
         <div className="flex items-center justify-center py-24">
-          <Loader2 className="animate-spin text-[#1E6A6A]" size={32} />
+          <Loader2 className="animate-spin text-[var(--brand-primary)]" size={32} />
         </div>
       ) : loadError ? (
         /* A failed fetch is NOT an empty search — different cause, different
@@ -646,11 +641,27 @@ const Stays = ({ landing = null }) => {
           <button
             onClick={clearAllFilters}
             className="px-5 py-2.5 rounded-lg text-sm font-semibold text-white"
-            style={{ backgroundColor: '#1E6A6A' }}
+            style={{ backgroundColor: 'var(--brand-primary)' }}
             data-testid="stays-clear-filters"
           >
             {t('stays.clearAll', 'Clear all filters')}
           </button>
+          {/* The demand-side escape hatch. Someone whose search returned
+              nothing is exactly the person the Requests board exists for:
+              rather than widening filters until they give up, they can
+              state what they want and let owners come to them. */}
+          <p className="mt-6 text-sm" style={{ color: 'var(--brand-muted)' }}>
+            {t('stays.cantFindIt', "Can't find it?")}{' '}
+            <button
+              type="button"
+              onClick={() => navigate('/requests/post')}
+              className="font-semibold hover:underline"
+              style={{ color: 'var(--brand-primary)' }}
+              data-testid="stays-post-request-link"
+            >
+              {t('stays.postWhatYouWant', 'Post what you are looking for')} →
+            </button>
+          </p>
         </div>
       ) : viewMode === 'map' ? (
         // Map view — full-width Leaflet render with price-pin markers.
@@ -658,10 +669,10 @@ const Stays = ({ landing = null }) => {
         // can just flip to "show me everything on a map" from the
         // default view too. When an address is set, we center on it and
         // show a "you searched here" pin.
-        <div className="max-w-[1760px] mx-auto px-4 sm:px-6 lg:px-10 py-6" data-testid="stays-map-container">
-          <div className="flex items-end justify-between mb-4">
+        <div className="max-w-[1760px] mx-auto px-4 sm:px-6 lg:px-10 pt-11 pb-6" data-testid="stays-map-container">
+          <div className="section-rhead flex items-end justify-between mb-5">
             <div>
-              <h2 className="text-lg md:text-xl font-semibold text-gray-900">
+              <h2 className="text-gray-900">
                 {filteredWithDistance.length} {filteredWithDistance.length === 1 ? t('stays.stay', 'stay') : t('stays.staysLabel', 'stays')}
                 {nearCoords ? ` ${t('stays.nearAddress', 'near this address')}` : ''}
               </h2>
@@ -674,7 +685,7 @@ const Stays = ({ landing = null }) => {
             {isSearchActive && (
               <button
                 onClick={clearAllFilters}
-                className="text-xs font-semibold text-[#1E6A6A] hover:underline"
+                className="text-xs font-semibold text-[var(--brand-primary)] hover:underline"
                 data-testid="stays-map-clear"
               >
                 {t('stays.clearAll', 'Clear all')}
@@ -756,7 +767,7 @@ const Stays = ({ landing = null }) => {
                       }}
                       className={`shrink-0 w-[168px] rounded-xl overflow-hidden bg-white text-start active:scale-95 transition-all ${
                         isActive
-                          ? 'ring-2 ring-[#1E6A6A] shadow-[0_10px_20px_-8px_rgba(30,106,106,0.5)] scale-[1.03]'
+                          ? 'ring-2 ring-[var(--brand-primary)] shadow-[0_10px_20px_-8px_rgba(30, 95, 140,0.5)] scale-[1.03]'
                           : 'ring-1 ring-black/5'
                       }`}
                       data-testid={`stays-peek-card-${p.id}`}
@@ -770,7 +781,7 @@ const Stays = ({ landing = null }) => {
                         <div className="text-[10px] text-gray-500 truncate">
                           {price}
                           {typeof p.distance_km === 'number' && (
-                            <span className="ms-1 text-[#1E6A6A] font-semibold">
+                            <span className="ms-1 text-[var(--brand-primary)] font-semibold">
                               · {p.distance_km < 1
                                 ? `${Math.round(p.distance_km * 1000)} m`
                                 : `${p.distance_km.toFixed(p.distance_km < 10 ? 1 : 0)} km`}
@@ -806,10 +817,10 @@ const Stays = ({ landing = null }) => {
         </div>
       ) : isSearchActive ? (
         // Flat results grid — Airbnb-style, shown once any search/filter is active
-        <div className="max-w-[1760px] mx-auto px-4 sm:px-6 lg:px-10 py-6" data-testid="stays-results-grid">
-          <div className="flex items-end justify-between mb-4">
+        <div className="max-w-[1760px] mx-auto px-4 sm:px-6 lg:px-10 pt-11 pb-6" data-testid="stays-results-grid">
+          <div className="section-rhead flex items-end justify-between mb-5">
             <div>
-              <h2 className="text-lg md:text-xl font-semibold text-gray-900">
+              <h2 className="text-gray-900">
                 {filteredWithDistance.length} {filteredWithDistance.length === 1 ? t('stays.stay', 'stay') : t('stays.staysLabel', 'stays')}
                 {where ? ` ${t('stays.in', 'in')} ${areaLabel(where, t)}` : ''}
                 {nearCoords && !where ? ` ${t('stays.nearAddress', 'near this address')}` : ''}
@@ -855,7 +866,7 @@ const Stays = ({ landing = null }) => {
                   them into a logged-in user with an alert subscription. */}
               <button
                 onClick={() => setShowNotifyCard(true)}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold border border-[#D4AF37] bg-white text-[#1E6A6A] hover:bg-[#D4AF37] hover:text-white transition-colors"
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold border border-[var(--gold)] bg-white text-[var(--brand-primary)] hover:bg-[var(--gold)] hover:text-white transition-colors"
                 data-testid="stays-create-alert-btn"
               >
                 <Bell size={12} />
@@ -863,7 +874,7 @@ const Stays = ({ landing = null }) => {
               </button>
               <button
                 onClick={clearAllFilters}
-                className="text-xs font-semibold text-[#1E6A6A] hover:underline"
+                className="text-xs font-semibold text-[var(--brand-primary)] hover:underline"
                 data-testid="stays-grid-clear"
               >
                 {t('stays.clearAll', 'Clear all')}
@@ -909,7 +920,7 @@ const Stays = ({ landing = null }) => {
           )}
         </div>
       ) : (
-        <div className="max-w-[1760px] mx-auto px-4 sm:px-6 lg:px-10 py-6 space-y-8">
+        <div className="max-w-[1760px] mx-auto px-4 sm:px-6 lg:px-10 pt-11 pb-6 space-y-10">
           {grouped.map(([area, props]) => (
             <AreaRow
               key={area}

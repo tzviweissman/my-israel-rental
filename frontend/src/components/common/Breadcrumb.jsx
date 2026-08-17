@@ -112,7 +112,7 @@ const Breadcrumb = ({ current, testId = 'breadcrumb' }) => {
     >
       <Link
         to={origin.to}
-        className="hover:text-[#1E6A6A] hover:underline underline-offset-2 truncate max-w-[220px] sm:max-w-none"
+        className="hover:text-[var(--brand-primary)] hover:underline underline-offset-2 truncate max-w-[220px] sm:max-w-none"
         data-testid={`${testId}-origin`}
       >
         {origin.label}

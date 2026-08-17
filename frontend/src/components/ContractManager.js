@@ -142,7 +142,7 @@ const ContractManager = ({ properties }) => {
         <button
           onClick={() => setShowUploadForm((v) => !v)}
           className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-white font-medium text-sm shadow-md hover:shadow-lg transition-all"
-          style={{ backgroundColor: '#1E6A6A' }}
+          style={{ backgroundColor: 'var(--brand-primary)' }}
           data-testid="upload-contract-btn"
         >
           <Upload size={16} />
@@ -162,7 +162,7 @@ const ContractManager = ({ properties }) => {
 
       {loading ? (
         <div className="flex justify-center py-12">
-          <Loader2 size={32} className="animate-spin text-[#1E6A6A]" />
+          <Loader2 size={32} className="animate-spin text-[var(--brand-primary)]" />
         </div>
       ) : contracts.length === 0 ? (
         <div className="bg-white rounded-2xl border border-gray-200 p-12 text-center" data-testid="no-contracts">

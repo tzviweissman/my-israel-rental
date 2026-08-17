@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="360" height="214" viewBox="0 0 360 214" role="img" aria-label="MyIsraelRental">
+  <title>MyIsraelRental</title>
+  <defs>
+    <style>@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@800&amp;display=swap');</style>
+    <linearGradient id="gold" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#E6C86A"/><stop offset="1" stop-color="#C29A2C"/></linearGradient>
+  </defs>
+  <g transform="translate(50,10)">
+    <rect x="36" y="98" width="32" height="52" fill="#235E86"/><rect x="44" y="84" width="16" height="16" fill="#235E86"/>
+    <g stroke="#8FB6D4" stroke-width="1"><line x1="43" y1="106" x2="61" y2="106"/><line x1="43" y1="116" x2="61" y2="116"/><line x1="43" y1="126" x2="61" y2="126"/><line x1="43" y1="136" x2="61" y2="136"/></g>
+    <rect x="74" y="58" width="24" height="92" fill="url(#gold)"/>
+    <g stroke="#9A7517" stroke-width="1"><line x1="80" y1="62" x2="80" y2="146"/><line x1="86" y1="62" x2="86" y2="146"/><line x1="92" y1="62" x2="92" y2="146"/></g>
+    <rect x="104" y="104" width="26" height="46" fill="#235E86"/>
+    <g stroke="#8FB6D4" stroke-width="1"><line x1="110" y1="112" x2="124" y2="112"/><line x1="110" y1="122" x2="124" y2="122"/><line x1="110" y1="132" x2="124" y2="132"/></g>
+    <rect x="147" y="34" width="3" height="12" fill="url(#gold)"/>
+    <rect x="136" y="44" width="26" height="106" fill="url(#gold)"/>
+    <g stroke="#9A7517" stroke-width="1"><line x1="142" y1="50" x2="142" y2="146"/><line x1="149" y1="50" x2="149" y2="146"/><line x1="156" y1="50" x2="156" y2="146"/></g>
+    <rect x="168" y="74" width="26" height="76" fill="#235E86"/>
+    <g stroke="#8FB6D4" stroke-width="1"><line x1="173" y1="84" x2="189" y2="84"/><line x1="173" y1="96" x2="189" y2="96"/><line x1="173" y1="108" x2="189" y2="108"/><line x1="173" y1="120" x2="189" y2="120"/></g>
+    <rect x="200" y="110" width="24" height="40" fill="url(#gold)"/>
+    <g stroke="#9A7517" stroke-width="1"><line x1="206" y1="118" x2="206" y2="146"/><line x1="212" y1="118" x2="212" y2="146"/><line x1="218" y1="118" x2="218" y2="146"/></g>
+    <rect x="30" y="150" width="200" height="4" rx="2" fill="#C29A2C"/>
+  </g>
+  <text x="180" y="200" text-anchor="middle" font-family="Manrope, 'Segoe UI', system-ui, sans-serif" font-weight="800" font-size="34" letter-spacing="-1">
+    <tspan fill="#154C74">MyIsrael</tspan><tspan fill="#B8901E">Rental</tspan>
+  </text>
+</svg>

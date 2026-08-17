@@ -7,6 +7,7 @@ import axios from 'axios';
 import { toast } from 'sonner';
 import { playMessagePing, requestDesktopNotificationPermission, showDesktopNotification } from '../utils/messageAlerts';
 import NavCategoryItem from './NavCategoryItem';
+import logoMark from '../assets/brand/logo-mark.png';
 
 const Navigation = () => {
   const { t, i18n } = useTranslation();
@@ -322,116 +323,191 @@ const Navigation = () => {
     <nav
       ref={navRef}
       data-testid="global-nav"
-      className="fixed top-0 left-0 right-0 z-50 transition-all duration-300"
+      className="fixed top-0 left-0 right-0 z-50 transition-all duration-300 glass-nav"
       style={{
-        background: scrolled ? '#1E6A6A' : 'transparent',
-        boxShadow: scrolled ? '0 2px 20px rgba(0,0,0,0.3)' : 'none'
+        // The bar NEVER takes a fill. `.glass-nav` supplies the preview's
+        // gradient scrim and the glass bubbles are the chrome — that is the
+        // whole design. Solidifying on scroll (which this used to do) also
+        // gave captions and notification cards a hard edge to clip against
+        // at scene exits, which read as a rendering fault.
+        boxShadow: 'none',
       }}
     >
-      <div className="max-w-7xl mx-auto px-6" style={{ padding: scrolled ? '4px 24px' : '0 24px' }}>
+      {/* Vertical padding per the preview's .bar: 14px clamp(16px,3vw,36px).
+          It was 0 unscrolled, which put the first glass bubble 6px from the
+          top edge — the bubbles read as clipped rather than floating. */}
+      <div
+        className="max-w-7xl mx-auto"
+        style={{ padding: scrolled ? '8px clamp(16px,3vw,36px)' : '14px clamp(16px,3vw,36px)' }}
+      >
         <div className="flex items-center justify-between relative">
-          <Link to="/" className="flex items-center shrink-0" data-testid="nav-logo" onClick={() => window.scrollTo(0, 0)}>
+          {/* Logo lockup, copied from `.lg` in the preview files rather than
+              re-derived: the raw gold mark floating in the glass nav with a
+              drop-shadow, NO navy tile behind it, wordmark in Playfair.
+
+              Values are the preview's verbatim — 11px gap, 44px mark, 19px
+              Playfair 700, and the two shadows that are what keep white text
+              and a gold mark legible over arbitrary hero photography. The
+              44px shrinks on scroll because this nav collapses; the preview
+              is a fixed overlay and never does.
+
+              Replaces a single PNG that rendered up to 200px tall and shoved
+              the nav around as it shrank. */}
+          <Link
+            to="/"
+            className="flex items-center shrink-0 gap-[11px]"
+            data-testid="nav-logo"
+            onClick={() => window.scrollTo(0, 0)}
+          >
             <img
-              src="/brand-logo.png"
-              alt="MyIsraelRental"
-              className={`w-auto transition-all duration-300 ${
-                scrolled
-                  ? 'h-12 sm:h-[60px] md:h-[60px]'
-                  : 'h-20 sm:h-[140px] md:h-[200px]'
-              }`}
-              style={{ marginTop: scrolled ? '0' : '-8px' }}
+              src={logoMark}
+              alt=""
+              aria-hidden="true"
+              className={`w-auto block transition-all duration-300 ${scrolled ? 'h-8' : 'h-11'}`}
+              style={{ filter: 'drop-shadow(0 2px 8px rgba(0,0,0,.55))' }}
             />
+            <span
+              className={`font-bold tracking-tight text-white transition-all duration-300 ${
+                scrolled ? 'text-base' : 'text-[19px]'
+              } hidden sm:inline`}
+              style={{
+                fontFamily: 'var(--font-head)',
+                textShadow: '0 1px 8px rgba(0,0,0,.5)',
+              }}
+            >
+              MyIsraelRental
+            </span>
+            {/* The wordmark is hidden on small screens, so the link still
+                needs an accessible name there. */}
+            <span className="sr-only sm:hidden">MyIsraelRental</span>
           </Link>
 
-          {/* Category pill row — Airbnb-style rental-type tabs.
-              Desktop: absolutely centered overlay in the same flex row.
-              Mobile: handled separately below the main row. */}
-          <div
-            className="hidden md:flex items-end justify-center gap-8 pointer-events-none absolute left-1/2 top-1/2"
+          {/* Desktop links — text-only glass pills per the previews. The
+              bed/briefcase icon pills they replace are gone by ruling; the
+              mobile drawer keeps icons, since tap targets benefit and the
+              previews don't cover mobile.
+
+              Four links, settled: "How it works" is deliberately absent —
+              the cinematic home page IS the how-it-works, so a nav item
+              pointing at a subsection of it would be circular.
+
+              /requests is backed by a placeholder until Phase 3 replaces it
+              in place, so this row never has to be rebuilt. */}
+          <nav
+            /* 900px, not Tailwind's `md` (768px), because that is the
+               breakpoint the previews use: `@media(max-width:900px){.links,
+               .signin{display:none}}`. At 768 the four link pills, the
+               language pill, Sign in and the CTA do not fit on one line —
+               they overlapped each other and clipped the wordmark. The
+               drawer already carries these links below this width. */
+            className="hidden min-[900px]:flex items-center gap-[9px] pointer-events-none absolute left-1/2 top-1/2"
             style={{ transform: 'translate(-50%, -50%)' }}
             data-testid="nav-rental-categories"
+            aria-label={t('nav.primary', 'Primary')}
           >
-            <div className="flex items-end gap-8 pointer-events-auto">
-            {/* Top-level pills — replaces the old 4-rental-type strip with
-                the simpler Stays vs Services duality (Airbnb-style). The
-                rental-type sub-filter now lives inside the Stays page
-                Filters modal. */}
-            {[
-              { type: 'stays', icon: Bed, label: t('nav.stays', 'Stays'), to: '/stays' },
-              { type: 'services', icon: Briefcase, label: t('nav.services', 'Services'), to: '/services' },
-            ].map(({ type, icon: Icon, label, to }) => (
-              <NavCategoryItem
-                key={type}
-                type={type}
-                Icon={Icon}
-                label={label}
-                to={to}
-                active={location.pathname.startsWith(to)}
-                scrolled={scrolled}
-              />
-            ))}
+            <div className="flex items-center gap-[9px] pointer-events-auto">
+              {[
+                { key: 'stays', label: t('nav.stays', 'Stays'), to: '/stays' },
+                { key: 'services', label: t('nav.services', 'Services'), to: '/services' },
+                { key: 'requests', label: t('nav.requests', 'Marketplace'), to: '/requests' },
+                // No supply link here any more. "List / Offer" spoke to one
+                // of three audiences and duplicated the CTA beside it; the
+                // solid "Join free" button now carries every audience and
+                // the role picker does the routing. /why-list still exists —
+                // it's the Host card's "full pitch" link on the join page.
+              ].map(({ key, label, to }) => {
+                const active = location.pathname.startsWith(to);
+                return (
+                  <Link
+                    key={key}
+                    to={to}
+                    className={`glass-pill ${active ? 'glass-pill-current' : ''}`}
+                    // The gold dot is decorative; aria-current is what
+                    // actually tells a screen reader which page this is.
+                    aria-current={active ? 'page' : undefined}
+                    data-testid={`nav-link-${key}`}
+                  >
+                    {label}
+                    {active && <span className="glass-dot" aria-hidden="true" />}
+                  </Link>
+                );
+              })}
             </div>
-          </div>
+          </nav>
 
           {/* Mobile-on-scroll search bar was removed per user request —
               the global nav stays clean on scroll, and dedicated
               category pages (/stays) own their own search experience. */}
 
           <div className="flex items-center gap-3">
-            {/* Sign In / Sign Up — visible only when signed out, always
-                to the LEFT of the language + menu icons so first-time
-                visitors can act on the CTA without opening the drawer.
-                Kept compact so they don't crowd the top-right cluster. */}
-            {!user && (
-              <div className="hidden sm:flex items-center gap-2" data-testid="nav-auth-cluster">
-                <button
-                  onClick={() => navigate('/auth/login')}
-                  className="text-xs sm:text-sm font-semibold px-3 py-1.5 rounded-full hover:bg-white/10 transition-colors"
-                  style={{ color: '#D4AF37' }}
-                  data-testid="nav-login-top"
-                >
-                  {t('nav.login', 'Sign In')}
-                </button>
-                <button
-                  onClick={() => navigate('/signup')}
-                  className="text-xs sm:text-sm font-bold px-3 py-1.5 rounded-full transition-all hover:shadow-md"
-                  style={{ backgroundColor: '#D4AF37', color: '#1E6A6A' }}
-                  data-testid="nav-signup-top"
-                >
-                  {t('nav.signup', 'Sign Up')}
-                </button>
-              </div>
-            )}
-
             {/* Language toggle — desktop always, mobile shown only when
                 signed out (signed-in users have bell + chat in this slot
                 and can switch language inside the menu drawer). */}
+            {/* `.lang` from the previews: a small glass pill reading
+                "עברית / EN", not an icon. Both scripts are shown at once and
+                the label never changes, which is the point — an Anglo reader
+                who has accidentally switched to Hebrew can still find the way
+                back, where a label that only says the OTHER language means
+                the way out is written in the script they can't read. */}
             <button
               onClick={toggleLanguage}
-              className={`${user ? 'hidden sm:flex' : 'flex'} p-2 rounded-full hover:bg-white/10 transition-colors items-center gap-1`}
+              className={`${user ? 'hidden sm:inline-flex' : 'inline-flex'} glass-pill glass-pill-sm items-center`}
               data-testid="language-toggle"
               aria-label={t('nav.toggleLanguage')}
               title={i18n.language.startsWith('he') ? 'Switch to English' : 'Switch to Hebrew'}
             >
-              <Globe size={scrolled ? 20 : 22} color="#D4AF37" />
-              <span
-                className="text-[10px] font-bold tracking-wide"
-                style={{ color: '#D4AF37' }}
-              >
-                {i18n.language.startsWith('he') ? 'EN' : 'עב'}
-              </span>
+              עברית / EN
             </button>
+
+            {/* Signed-out desktop: exactly the preview — lang, Sign in, and
+                one solid CTA. Order matters and it is deliberate.
+
+                There is no separate Sign Up. Auth is Google Identity, so
+                signing in and signing up are the same flow; two buttons was
+                inventory the preview correctly didn't have, and it split the
+                one solid slot between two competing asks.
+
+                That slot is now "Join free", which serves all three
+                audiences at once — traveler, host, service provider — and
+                hands the routing to the role picker on /join. The previous
+                "List your property" spoke only to hosts, which meant the
+                nav's loudest element was invisible to two thirds of the
+                people it was trying to recruit. */}
+            {!user && (
+              /* Same 900px threshold as the link row above. The preview
+                 hides only `.signin` here and keeps the CTA, but the
+                 preview has no hamburger — this app does, and its drawer
+                 already carries both Sign in and "List your property".
+                 Keeping the CTA in the bar at 768 would put it beside a
+                 hamburger holding the same button. */
+              <div className="hidden min-[900px]:flex items-center gap-[9px]" data-testid="nav-auth-cluster">
+                <button
+                  onClick={() => navigate('/auth/login')}
+                  className="glass-pill"
+                  data-testid="nav-login-top"
+                >
+                  {t('nav.signin', 'Sign in')}
+                </button>
+                <button
+                  onClick={() => navigate('/join')}
+                  className="glass-pill-solid"
+                  data-testid="nav-join-free"
+                >
+                  {t('nav.joinFree', 'Join free')}
+                </button>
+              </div>
+            )}
 
             {/* Inbox / Messages shortcut */}
             {user && (
               <button
                 onClick={() => navigate('/dashboard?tab=messages')}
-                className="relative p-2 rounded-full hover:bg-white/10 transition-colors"
+                className="glass-pill relative inline-flex items-center justify-center !px-3"
                 data-testid="nav-messages-icon"
                 aria-label="Messages"
                 title="Messages"
               >
-                <MessageCircle size={scrolled ? 20 : 22} color="#D4AF37" />
+                <MessageCircle size={scrolled ? 20 : 22} color="var(--gold)" />
                 {unreadConversations > 0 && (
                   <span
                     className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center"
@@ -451,10 +527,10 @@ const Navigation = () => {
                     setShowNotifications(!showNotifications);
                     requestDesktopNotificationPermission();
                   }}
-                  className="relative p-2 rounded-full hover:bg-white/10 transition-colors"
+                  className="glass-pill relative inline-flex items-center justify-center !px-3"
                   data-testid="notification-bell"
                 >
-                  <Bell size={scrolled ? 20 : 22} color="#D4AF37" />
+                  <Bell size={scrolled ? 20 : 22} color="var(--gold)" />
                   {unreadCount > 0 && (
                     <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
                       {unreadCount > 9 ? '9+' : unreadCount}
@@ -470,19 +546,19 @@ const Navigation = () => {
                   <div
                     className="fixed sm:absolute left-4 right-4 sm:left-auto sm:right-0 top-[64px] sm:top-full sm:mt-3 sm:w-96 max-w-md max-h-[70vh] sm:max-h-[500px] overflow-y-auto rounded-2xl z-50"
                     style={{
-                      backgroundColor: '#1E6A6A',
-                      border: '1.5px solid rgba(212,175,55,0.25)',
+                      backgroundColor: 'var(--brand-primary)',
+                      border: '1.5px solid rgba(201, 162, 39,0.25)',
                       boxShadow: '0 16px 48px rgba(0,0,0,0.5)'
                     }}
                     data-testid="notification-dropdown"
                   >
-                    <div className="sticky top-0 bg-[#1E6A6A] border-b border-[#D4AF37]/20 p-3 sm:p-4 flex items-center justify-between">
+                    <div className="sticky top-0 bg-[var(--brand-primary)] border-b border-[rgb(var(--gold-rgb)/<alpha-value>)]/20 p-3 sm:p-4 flex items-center justify-between">
                       <h3 className="text-white font-bold text-sm">Notifications</h3>
                       <div className="flex items-center gap-2">
                         {unreadCount > 0 && (
                           <button
                             onClick={markAllAsRead}
-                            className="text-xs text-[#D4AF37] hover:text-[#D4AF37]/80 transition-colors whitespace-nowrap"
+                            className="text-xs text-[var(--gold)] hover:text-[rgb(var(--gold-rgb)/<alpha-value>)]/80 transition-colors whitespace-nowrap"
                           >
                             Mark all as read
                           </button>
@@ -521,7 +597,7 @@ const Navigation = () => {
                             >
                               <div className="flex items-start gap-2 sm:gap-3 pr-7">
                                 <div className={`w-2 h-2 rounded-full mt-2 flex-shrink-0 ${
-                                  !notification.read ? 'bg-[#D4AF37]' : 'bg-transparent'
+                                  !notification.read ? 'bg-[var(--gold)]' : 'bg-transparent'
                                 }`} />
                                 <div className="flex-1 min-w-0">
                                   <p className={`text-xs sm:text-sm break-words ${!notification.read ? 'text-white font-medium' : 'text-white/70'}`}>
@@ -557,19 +633,57 @@ const Navigation = () => {
 
             {/* Menu Button */}
             <div className="relative" ref={menuRef}>
+              {/* One control, two presentations, because it opens the same
+                  drawer either way.
+
+                  Signed OUT on desktop it is hidden entirely: the preview is
+                  the logged-out nav and has no Menu, and everything the
+                  drawer holds — dashboard, messages, notifications, logout —
+                  only exists once you are signed in. A hamburger that opens a
+                  menu of things you cannot do is worse than no hamburger.
+
+                  Signed IN on desktop it becomes the account pill: same glass
+                  bubble, avatar/name instead of a burger icon.
+
+                  Mobile keeps the drawer in both states — it is the only
+                  place the nav links live at that width. */}
               <button
                 onClick={() => setMenuOpen(!menuOpen)}
-                className="flex items-center gap-2 rounded-xl transition-all duration-200"
-              style={{
-                backgroundColor: 'transparent',
-                border: '1.5px solid #D4AF37',
-                padding: scrolled ? '6px 14px' : '10px 18px'
-              }}
-              data-testid="nav-menu-button"
-            >
-              {menuOpen ? <X size={scrolled ? 16 : 18} color="#D4AF37" /> : <Menu size={scrolled ? 16 : 18} color="#D4AF37" />}
-              <span className="hidden sm:inline font-semibold tracking-wide" style={{ color: '#D4AF37', fontSize: scrolled ? '12px' : '14px' }}>{t('nav.menu')}</span>
-            </button>
+                /* `min-[900px]:hidden`, matching the link row and auth
+                   cluster. It was `md:hidden` (768px) — but once those two
+                   moved to 900px, a logged-out visitor between 768 and
+                   899px had no links, no Sign in, no CTA and no burger:
+                   a nav containing only a logo and a language toggle. */
+                className={`glass-pill inline-flex items-center gap-2 ${
+                  user ? '' : 'min-[900px]:hidden'
+                }`}
+                aria-expanded={menuOpen}
+                aria-haspopup="menu"
+                data-testid="nav-menu-button"
+              >
+                {user ? (
+                  <>
+                    {/* Initial as a cheap avatar — no image to load, and it
+                        still reads as "this is you" rather than "settings". */}
+                    <span
+                      className="grid h-5 w-5 place-items-center rounded-full text-[10px] font-extrabold"
+                      style={{ background: 'rgba(255,255,255,.9)', color: 'var(--brand-primary-deep)' }}
+                      aria-hidden="true"
+                    >
+                      {(user.name || user.email || '?').trim().charAt(0).toUpperCase()}
+                    </span>
+                    <span className="hidden md:inline max-w-[9rem] truncate">
+                      {(user.name || user.email || '').split(' ')[0]}
+                    </span>
+                    <span className="sr-only">{t('nav.account', 'Account menu')}</span>
+                  </>
+                ) : (
+                  <>
+                    {menuOpen ? <X size={16} aria-hidden="true" /> : <Menu size={16} aria-hidden="true" />}
+                    <span className="sr-only">{t('nav.menu')}</span>
+                  </>
+                )}
+              </button>
 
             {menuOpen && (
               <div
@@ -582,9 +696,19 @@ const Navigation = () => {
                 // so the rounded corners still clip.
                 className="absolute end-0 top-full mt-3 w-72 rounded-2xl overflow-y-auto overflow-x-hidden max-h-[calc(100vh-96px)] sm:max-h-[80vh] z-[60] overscroll-contain"
                 style={{
-                  backgroundColor: '#1E6A6A',
-                  border: '1.5px solid rgba(212,175,55,0.25)',
-                  boxShadow: '0 16px 48px rgba(0,0,0,0.5), 0 0 0 1px rgba(212,175,55,0.08)'
+                  // Glass, but a DEEP glass. The nav pills sit at .12 alpha
+                  // because they hold two words over a photo; this panel holds
+                  // a dozen menu rows over whatever page is beneath it, and at
+                  // that alpha the text underneath shows through and the list
+                  // becomes unreadable. .92 over the deep brand blue keeps the
+                  // frosted feel while the content stays legible — the blur is
+                  // doing the aesthetic work, not the transparency.
+                  backgroundColor: 'rgba(18, 59, 87, .92)',
+                  backdropFilter: 'blur(14px) saturate(1.1)',
+                  WebkitBackdropFilter: 'blur(14px) saturate(1.1)',
+                  border: '1.5px solid rgba(255, 255, 255, .28)',
+                  boxShadow:
+                    'inset 0 1px 0 rgba(255,255,255,.18), 0 16px 48px rgba(0,0,0,.5)',
                 }}
                 data-testid="nav-menu-dropdown"
               >
@@ -598,24 +722,24 @@ const Navigation = () => {
                   <button
                     onClick={() => { toggleLanguage(); setMenuOpen(false); }}
                     className="w-full flex items-center gap-2.5 px-4 py-2.5 border-b transition-colors hover:bg-white/5"
-                    style={{ borderColor: 'rgba(212,175,55,0.15)' }}
+                    style={{ borderColor: 'rgba(201, 162, 39,0.15)' }}
                     data-testid="nav-language-sync-pill"
                     title={t('nav.toggleLanguage')}
                   >
                     <div
                       className="w-7 h-7 rounded-full flex items-center justify-center"
-                      style={{ backgroundColor: 'rgba(212,175,55,0.18)' }}
+                      style={{ backgroundColor: 'rgba(201, 162, 39,0.18)' }}
                     >
-                      <Globe size={14} style={{ color: '#D4AF37' }} />
+                      <Globe size={14} style={{ color: 'var(--gold)' }} />
                     </div>
                     <div className="flex-1 text-left">
-                      <p className="text-xs font-semibold" style={{ color: '#D4AF37' }}>
+                      <p className="text-xs font-semibold" style={{ color: 'var(--gold)' }}>
                         {i18n.language.startsWith('he') ? t('nav.hebrew') : t('nav.english')}
                         <span className="ml-1.5 opacity-50 font-normal">
                           · {t('nav.switchTo')}{i18n.language.startsWith('he') ? ' English' : ' עברית'}
                         </span>
                       </p>
-                      <p className="text-[10px] flex items-center gap-1 mt-0.5" style={{ color: 'rgba(212,175,55,0.55)' }}>
+                      <p className="text-[10px] flex items-center gap-1 mt-0.5" style={{ color: 'rgba(201, 162, 39,0.55)' }}>
                         <span
                           className="inline-block w-1.5 h-1.5 rounded-full"
                           style={{ backgroundColor: '#10B981' }}
@@ -630,40 +754,40 @@ const Navigation = () => {
                 {/* Stays + Services + Holiday quick-links (mobile drawer).
                     Storage rentals have been retired so the entry is gone. */}
                 <div className="px-2 pt-3 pb-1">
-                  <p className="px-3 mb-1.5 text-[10px] font-bold tracking-[0.1em] uppercase" style={{ color: 'rgba(212,175,55,0.45)' }}>
+                  <p className="px-3 mb-1.5 text-[10px] font-bold tracking-[0.1em] uppercase" style={{ color: 'rgba(201, 162, 39,0.45)' }}>
                     {t('nav.browse', 'Browse')}
                   </p>
-                  <button onClick={() => handleNav('/stays')} className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-150 hover:bg-white/5 group" style={{ color: '#D4AF37' }} data-testid="nav-stays">
+                  <button onClick={() => handleNav('/stays')} className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-150 hover:bg-white/5 group" style={{ color: 'var(--gold)' }} data-testid="nav-stays">
                     <Bed size={16} className="opacity-60 group-hover:opacity-100" />
                     <span>{t('nav.stays', 'Stays')}</span>
                     <ChevronRight size={14} className="ml-auto opacity-0 group-hover:opacity-60 transition-opacity" />
                   </button>
-                  <button onClick={() => handleNav('/services')} className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-150 hover:bg-white/5 group" style={{ color: '#D4AF37' }} data-testid="nav-services">
+                  <button onClick={() => handleNav('/services')} className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-150 hover:bg-white/5 group" style={{ color: 'var(--gold)' }} data-testid="nav-services">
                     <Briefcase size={16} className="opacity-60 group-hover:opacity-100" />
                     <span>{t('nav.services', 'Services')}</span>
                     <ChevronRight size={14} className="ml-auto opacity-0 group-hover:opacity-60 transition-opacity" />
                   </button>
                 </div>
 
-                <div className="mx-4 border-t" style={{ borderColor: 'rgba(212,175,55,0.15)' }} />
+                <div className="mx-4 border-t" style={{ borderColor: 'rgba(201, 162, 39,0.15)' }} />
 
                 {/* Help / FAQ */}
                 <div className="px-2 py-2">
-                  <button onClick={() => handleNav('/faq')} className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-150 hover:bg-white/5 group" style={{ color: '#D4AF37' }} data-testid="nav-faq">
+                  <button onClick={() => handleNav('/faq')} className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-150 hover:bg-white/5 group" style={{ color: 'var(--gold)' }} data-testid="nav-faq">
                     <HelpCircle size={16} className="opacity-60 group-hover:opacity-100" />
                     <span>{t('nav.faq')}</span>
                     <ChevronRight size={14} className="ml-auto opacity-0 group-hover:opacity-60 transition-opacity" />
                   </button>
                 </div>
 
-                <div className="mx-4 border-t" style={{ borderColor: 'rgba(212,175,55,0.15)' }} />
+                <div className="mx-4 border-t" style={{ borderColor: 'rgba(201, 162, 39,0.15)' }} />
 
                 {/* Language switch — mobile only (desktop has the icon in the top nav) */}
                 <div className="sm:hidden px-2 py-2">
                   <button
                     onClick={() => { toggleLanguage(); setMenuOpen(false); }}
                     className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-150 hover:bg-white/5 group"
-                    style={{ color: '#D4AF37' }}
+                    style={{ color: 'var(--gold)' }}
                     data-testid="nav-language-toggle-mobile"
                   >
                     <Globe size={16} className="opacity-60 group-hover:opacity-100" />
@@ -672,30 +796,52 @@ const Navigation = () => {
                   </button>
                 </div>
 
-                <div className="sm:hidden mx-4 border-t" style={{ borderColor: 'rgba(212,175,55,0.15)' }} />
+                <div className="sm:hidden mx-4 border-t" style={{ borderColor: 'rgba(201, 162, 39,0.15)' }} />
 
                 {/* Settings */}
                 <div className="px-2 py-2">
                   {user ? (
                     <>
-                      <button onClick={() => handleNav(user.role === 'admin' ? '/admin' : '/dashboard')} className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-150 hover:bg-white/5 group" style={{ color: '#D4AF37' }} data-testid="nav-dashboard">
+                      <button onClick={() => handleNav(user.role === 'admin' ? '/admin' : '/dashboard')} className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-150 hover:bg-white/5 group" style={{ color: 'var(--gold)' }} data-testid="nav-dashboard">
                         <LayoutDashboard size={16} className="opacity-60 group-hover:opacity-100" />
                         <span>{t('nav.dashboard')}</span>
                         <ChevronRight size={14} className="ml-auto opacity-0 group-hover:opacity-60 transition-opacity" />
                       </button>
-                      <button onClick={handleLogout} className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-150 hover:bg-white/5 group" style={{ color: '#D4AF37' }} data-testid="nav-logout">
+                      <button onClick={handleLogout} className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-150 hover:bg-white/5 group" style={{ color: 'var(--gold)' }} data-testid="nav-logout">
                         <LogOut size={16} className="opacity-60 group-hover:opacity-100" />
                         <span>{t('nav.logout')}</span>
                       </button>
                     </>
                   ) : (
                     <>
-                      <button onClick={() => handleNav('/auth/login')} className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-150 hover:bg-white/5 group" style={{ color: '#D4AF37' }} data-testid="nav-login">
-                        <span className="w-4 h-4 flex items-center justify-center opacity-60 group-hover:opacity-100 text-xs">&#x2192;</span>
-                        <span>{t('nav.login')}</span>
+                      {/* Two actions, matching the desktop bar's Sign in +
+                          Join free, in the same order.
+
+                          This drawer previously held ONE button, on the
+                          reasoning that a "Sign Up" beside "Sign in" was
+                          false inventory — Google Identity makes them the
+                          same flow, so it implied a choice that didn't
+                          exist. That reasoning doesn't cover "Join free":
+                          it goes to the role picker, which is a genuinely
+                          different destination, and below 900px this drawer
+                          is the ONLY navigation — omitting it would hide the
+                          site's primary CTA from every tablet and phone.
+
+                          Still no solid gold: both are glass pills, per the
+                          standing rule for the nav and drawer. */}
+                      <button
+                        onClick={() => handleNav('/auth/login')}
+                        className="glass-pill w-full justify-center mt-1"
+                        data-testid="nav-login"
+                      >
+                        {t('nav.signin', 'Sign in')}
                       </button>
-                      <button onClick={() => handleNav('/signup')} className="w-full mt-1 py-2.5 rounded-lg text-sm font-bold tracking-wide transition-all duration-200 hover:shadow-lg" style={{ backgroundColor: '#D4AF37', color: '#1E6A6A' }} data-testid="nav-signup">
-                        {t('nav.signup')}
+                      <button
+                        onClick={() => handleNav('/join')}
+                        className="glass-pill w-full justify-center mt-2"
+                        data-testid="nav-join-free-drawer"
+                      >
+                        {t('nav.joinFree', 'Join free')}
                       </button>
                     </>
                   )}

@@ -1,0 +1,217 @@
+/* MyIsraelRental — LOCKED design tokens (source of truth).
+   Import once; reference these variables. Values match
+   home-redesign-preview.html / wanted-board-preview.html exactly.
+
+   SCOPE OF "no hardcoded values": applies to NEW and CHANGED UI you write.
+   It is NOT a mandate to refactor the ~1,275 existing hex values across the
+   app. Do not do a repo-wide color sweep unless explicitly asked.
+
+   CARVE-OUT: the hero (docs/hero-cinematic-spec.md) uses literal values on
+   purpose (radius 26px, layered rgba gradients, its shadow). Those are
+   intentional and exact — copy them literally. The no-hardcoding rule is
+   about reusable component styling elsewhere.
+
+   ⚠ shadcn / Tailwind COLLISION — why brand colors are namespaced --brand-*:
+   frontend/src/index.css (shadcn) already defines --primary, --border and --muted
+   in :root as HSL TRIPLETS (e.g. `--primary: 0 0% 9%`) consumed via
+   hsl(var(--primary)). Do NOT redefine those three names as hex here — then
+   var(--primary) returns "0 0% 9%", `background: var(--primary)` becomes invalid
+   and is DROPPED, and every primary button silently loses its fill. That is why
+   the brand colors below are --brand-primary / --brand-border / --brand-muted and
+   shadcn is left untouched.
+     • Import THIS file AFTER index.css.
+     • PORTING preview CSS into React: rewrite `var(--border)` -> `var(--brand-border)`
+       and `var(--muted)` -> `var(--brand-muted)` (those two names collide). The rest
+       the previews use — --teal*, --gold*, --ink, --bg, --surface, --r, --ease,
+       --font-* — is safe as-is.
+     • Want shadcn components themselves brand-blue? Separate deliberate pass: set
+       shadcn's --primary to the brand blue in HSL-triplet form in index.css — never
+       via this file. */
+
+/* Playfair 400 and Frank Ruhl Libre 400 are loaded for the display-weight
+   rule below. Without them the rule is a SILENT NO-OP that still passes a
+   naive check: a browser never synthesises a LIGHTER weight, it picks the
+   nearest available face (500) while computed style keeps reporting 400.
+   Verified with document.fonts.check before and after. */
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700;800&family=Manrope:wght@400;500;600;700;800&family=Frank+Ruhl+Libre:wght@400;500;600;700&family=Assistant:wght@400;500;600;700&display=swap');
+
+:root{
+  /* Brand — blue primary */
+  --brand-primary:#1E5F8C; --brand-primary-dark:#184E73; --brand-primary-deep:#123B57;
+  /* Aliases so CSS copied verbatim from the preview mockups (which use --teal*)
+     resolves correctly. --teal == --brand-primary. */
+  --teal:#1E5F8C; --teal-dark:#184E73; --teal-deep:#123B57;
+
+  /* Brand — gold accent (seasoning, not a base) */
+  --gold:#C9A227;
+
+  /* Channel triplets — needed ONLY for Tailwind opacity modifiers.
+     Tailwind 3.4 cannot apply an alpha modifier to a var() colour:
+     `bg-[var(--brand-primary)]/30` generates NO RULE AT ALL, silently.
+     `bg-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/30` does work.
+     Keep these in sync with the hexes above by hand — they are the same
+     colours in the only format Tailwind can add alpha to. */
+  --brand-primary-rgb:30 95 140;   /* #1E5F8C */
+  --gold-rgb:201 162 39;           /* #C9A227 */
+        /* use on DARK surfaces + large display */
+  --gold-text:#8A6A14;   /* small gold text on LIGHT (passes AA) */
+  --gold-lg:#A9831C;     /* large/display gold on LIGHT ONLY — it is ~3.3:1 on
+                            dark, so never use --gold-lg on a dark panel; use
+                            --gold there instead. */
+
+  /* Neutrals */
+  --ink:#23201B; --brand-muted:#6B6459;
+  --bg:#EFE9DC; --surface:#FFFFFF; --brand-border:#E1D8C6;
+
+  /* Functional GREEN — success/status ONLY (never a brand accent) */
+  --success:#1F8A50; --success-bg:#E3F3EA;       /* Verified */
+  --status-open:#2E7D4F; --status-open-bg:#E6F4EA; /* Open / available */
+
+  /* Shadows — reconciled to the preview's premium values (authoritative) */
+  --shadow-sm:0 1px 2px rgba(30,45,60,.05),0 4px 14px rgba(30,45,60,.05);
+  --shadow-md:0 12px 32px rgba(30,45,60,.10);
+  --shadow-lg:0 28px 64px rgba(30,45,60,.17);
+
+  /* Radii — one scale, matches the preview usage */
+  --radius-tile:12px;    /* logo tile, small chips-in-cards      */
+  --radius-card:18px;    /* property/request cards (.pcard/.rcard) */
+  --radius-panel:24px;   /* doors, promo bands                    */
+  --radius-hero:26px;    /* hero card (literal in the hero spec)  */
+  --radius-pill:999px;
+  /* legacy alias used by preview markup */
+  --r:18px;
+
+  --ease:cubic-bezier(.16,.7,.3,1);
+
+  /* Type */
+  --font-head:'Playfair Display',Georgia,serif;
+  --font-body:'Manrope',system-ui,sans-serif;
+  --font-head-he:'Frank Ruhl Libre',Georgia,serif;
+  --font-body-he:'Assistant',system-ui,sans-serif;
+}
+
+/* Base */
+body{font-family:var(--font-body);color:var(--ink);background:var(--bg);line-height:1.55;-webkit-font-smoothing:antialiased}
+h1,h2,h3{font-family:var(--font-head);letter-spacing:-.5px}
+
+/* RTL: swap the font VARIABLES, not per-tag selectors.
+   Why: a CSS variable resolves against the element's OWN cascade, so anything
+   reading var(--font-head) — including inline style="font-family:var(--font-head)"
+   — picks up the Hebrew face below. A rule like `[dir="rtl"] h1{font-family:…}`
+   does NOT work on this codebase: ~69 headings across ~45 files set
+   style={{ fontFamily: 'Playfair Display' }} INLINE, and an inline style beats
+   any stylesheet selector. Playfair has no Hebrew glyphs, so those headings
+   silently fall back to a system serif in RTL.
+   REQUIRED FIX when touching those headings: change the inline
+   `fontFamily: 'Playfair Display'` to `fontFamily: 'var(--font-head)'`
+   (and Manrope → `var(--font-body)`). Verify by toggling dir="rtl" and checking
+   a heading's computed fontFamily actually reads "Frank Ruhl Libre". */
+[dir="rtl"]{--font-head:var(--font-head-he);--font-body:var(--font-body-he)}
+
+/* ---------- Buttons (all variants the mockups use — none should be undefined) ---------- */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:9px;font-weight:700;font-size:15px;border-radius:var(--radius-pill);padding:13px 24px;cursor:pointer;border:1.5px solid transparent;transition:all .2s ease;white-space:nowrap;line-height:1;font-family:inherit}
+.btn-lg{padding:15px 30px;font-size:16px}
+
+/* Primary — solid blue, white text. (.btn-teal is the mockup's name; same thing.) */
+.btn-primary,.btn-teal{background:var(--brand-primary);color:#fff}
+.btn-primary:hover,.btn-teal:hover{background:var(--brand-primary-dark);transform:translateY(-1px);box-shadow:var(--shadow-md)}
+
+/* Accent — SOLID GOLD, INK text. (.btn-gold is the mockup's name.) Used for
+   accent CTAs on normal (light/section) surfaces, NOT in the hero.
+
+   This was frosted gold with WHITE text until the A2 comparison, in the
+   manner of Plum Guide's #FDBB30-on-black primary. Two reasons it changed:
+
+   • The white version measured 2.27:1 on limestone — a clear AA failure.
+     A frosted fill blends with whatever is behind it, so the button was
+     lighter on the light page precisely where the white text needed it
+     dark. The text-shadow had been disguising that. On dark it was fine
+     (4.85:1), which is why the problem never showed in the hero.
+   • Ink on solid gold is 6.71:1 on BOTH surfaces, because a solid fill
+     does not take a tint from its background.
+
+   Uses --gold, not Plum Guide's brighter amber: the palette is locked.
+   .btn-accent--ink remains as an alias so the comparison name still
+   resolves; it is now the same treatment as the default. */
+.btn-accent,.btn-gold,.btn-accent--ink{background:var(--gold);color:var(--ink);border:1.5px solid var(--gold);border-radius:var(--radius-pill);backdrop-filter:none;text-shadow:none;font-weight:600}
+.btn-accent:hover,.btn-gold:hover,.btn-accent--ink:hover{background:#D4AC33;transform:translateY(-1px);box-shadow:var(--shadow-md)}
+.on-dark .btn-accent,.on-dark .btn-gold,.on-dark .btn-accent--ink{background:var(--gold);color:var(--ink);border-color:var(--gold)}
+
+/* Neutral / ghost */
+.btn-ghost{background:#fff;border:1.5px solid var(--brand-border);color:var(--ink)}
+.btn-ghost:hover{border-color:var(--brand-primary);color:var(--brand-primary)}
+
+/* HERO-only buttons (over a dark photo). In the hero the primary CTA is solid
+   WHITE and the secondary is outline-white — this is the intended exception to
+   "accent buttons are gold everywhere"; the gold-glass button is for the rest
+   of the site. */
+.btn-white{background:#fff;color:var(--ink);border:1.5px solid #fff;border-radius:var(--radius-pill);font-weight:700;font-size:15px;padding:15px 28px;display:inline-flex;align-items:center;gap:9px;cursor:pointer;transition:transform .26s var(--ease),box-shadow .26s}
+.btn-white:hover{transform:translateY(-2px);box-shadow:0 16px 34px rgba(0,0,0,.3)}
+.btn-outline-white{background:rgba(255,255,255,.10);border:1.5px solid rgba(255,255,255,.6);color:#fff;backdrop-filter:blur(6px)}
+.btn-outline-white:hover{background:rgba(255,255,255,.2)}
+
+/* Status pills (functional green) */
+.pill-open{color:var(--status-open);background:var(--status-open-bg);border-radius:var(--radius-pill);font-weight:800;font-size:11px;padding:3px 9px}
+.badge-verified{color:var(--success);background:var(--success-bg);border-radius:var(--radius-pill);font-weight:700;font-size:11px;padding:2px 7px}
+
+/* ---------- Scroll reveal — FAIL-SAFE (no blank-page risk) ---------- */
+/* Content is visible by default. It is only hidden once JS has proven it's
+   running by adding `js-reveal` to <html> BEFORE observing. If JS errors or
+   never runs, nothing is hidden — users and crawlers see everything.
+   JS: document.documentElement.classList.add('js-reveal') then IntersectionObserver adds `.in`. */
+.js-reveal .reveal{opacity:0;transform:translateY(26px);transition:opacity .8s var(--ease),transform .8s var(--ease)}
+.js-reveal .reveal.in{opacity:1;transform:none}
+@media(prefers-reduced-motion:reduce){.js-reveal .reveal{opacity:1;transform:none;transition:none}}
+
+/* ── A1 · Display weight ──────────────────────────────────────────────
+   Large display type reads as premium at 300-400, not 700-800: Plum Guide
+   sets 64px/400, Kindred 55px/300. Ours ran 700-800 everywhere.
+
+   Applied at >=1024px rather than by font-size, because CSS cannot select
+   on a computed size and every one of these headings is a clamp() that
+   crosses ~48px within a few pixels of that viewport. Below it the same
+   headings are 30-36px, where 400 reads as under-set rather than
+   deliberate - thin serif strokes go spindly as the size drops - so the
+   small sizes take 600.
+
+   600, and not the 800 they used to carry. Leaving the old weight below
+   the breakpoint was the first attempt and it was wrong: Playfair at 800
+   and Playfair at 400 differ enough in stroke contrast to read as two
+   different typefaces, so the page changed character between a phone and
+   a desktop. 600 keeps one face and one mood at a size that can still
+   carry it.
+
+   RTL is NOT forced to parity. Frank Ruhl Libre carries a different
+   optical weight from Playfair at the same number; the Hebrew override
+   sits one notch above the Latin weight at each size - 500 against 400
+   on desktop, 700 against 600 below it - so headlines stay solid rather
+   than anaemic. */
+.pin .txt h2,                      /* cinematic scene headlines */
+.finale h2,                        /* finale                    */
+.hero-band-head h1,                /* Stays / Services / Requests bands */
+.display-weight {                  /* opt-in for page headings  */
+  font-weight: 600;
+}
+
+[dir="rtl"] .pin .txt h2,
+[dir="rtl"] .finale h2,
+[dir="rtl"] .hero-band-head h1,
+[dir="rtl"] .display-weight {
+  font-weight: 700;
+}
+
+@media (min-width: 1024px) {
+  .pin .txt h2,
+  .finale h2,
+  .hero-band-head h1,
+  .display-weight {
+    font-weight: 400;
+  }
+
+  [dir="rtl"] .pin .txt h2,
+  [dir="rtl"] .finale h2,
+  [dir="rtl"] .hero-band-head h1,
+  [dir="rtl"] .display-weight {
+    font-weight: 500;
+  }
+}

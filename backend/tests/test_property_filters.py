@@ -172,7 +172,6 @@ class TestAdminDashboard:
         assert "total_views" in data
         assert "total_inquiries" in data
         assert "total_users" in data
-        assert "pending_services" in data
         assert "recent_properties" in data
         
         print(f"Admin dashboard stats: active_listings={data['active_listings']}, total_users={data['total_users']}")

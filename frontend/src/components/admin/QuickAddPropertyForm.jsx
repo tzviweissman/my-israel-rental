@@ -360,7 +360,7 @@ const QuickAddPropertyForm = ({ token, onJumpToOwner }) => {
         <div
           className={`col-span-full rounded-xl border-2 border-dashed transition-all p-4 ${
             isDragOver
-              ? 'border-[#1E6A6A] bg-[#1E6A6A]/5 ring-2 ring-[#1E6A6A]/20'
+              ? 'border-[var(--brand-primary)] bg-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/5 ring-2 ring-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/20'
               : 'border-gray-200 bg-white'
           }`}
           onDragOver={onDragOver}
@@ -472,7 +472,7 @@ const QuickAddPropertyForm = ({ token, onJumpToOwner }) => {
         <button
           type="submit"
           disabled={!canSubmit}
-          className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#1E6A6A] text-white text-sm font-bold hover:bg-[#175555] disabled:opacity-40"
+          className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[var(--brand-primary)] text-white text-sm font-bold hover:bg-[#175555] disabled:opacity-40"
           data-testid="quick-add-submit"
         >
           {submitting ? <Loader2 size={14} className="animate-spin" /> : <Plus size={14} />}
@@ -494,7 +494,7 @@ const QuickAddPropertyForm = ({ token, onJumpToOwner }) => {
 };
 
 const inputClass =
-  'w-full px-3 py-2 rounded-lg border border-gray-200 focus:border-[#1E6A6A] focus:outline-none focus:ring-1 focus:ring-[#1E6A6A]/40 text-sm';
+  'w-full px-3 py-2 rounded-lg border border-gray-200 focus:border-[var(--brand-primary)] focus:outline-none focus:ring-1 focus:ring-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/40 text-sm';
 
 const Section = ({ title, subtitle, children }) => (
   <div className="bg-white border border-gray-200 rounded-xl p-4">

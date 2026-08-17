@@ -104,8 +104,8 @@ const JobsBoard = () => {
             </p>
           </div>
           <button
-            onClick={() => navigate(token ? '/services/post-job' : '/auth')}
-            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-[#1E6A6A] text-white text-sm font-semibold hover:bg-[#0F3A3A]"
+            onClick={() => { saveReturnPath(); navigate(token ? '/services/post-job' : '/auth'); }}
+            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-[var(--brand-primary)] text-white text-sm font-semibold hover:bg-[#0F3A3A]"
             data-testid="jobs-post-cta"
           >
             <Plus size={14} /> Post a job
@@ -117,9 +117,9 @@ const JobsBoard = () => {
             spammy). Flips into an unsubscribe pill once saved so the
             provider can toggle it back off without leaving the page. */}
         {activeCat && token && (
-          <div className="mb-4 rounded-2xl border border-[#1E6A6A]/15 bg-[#1E6A6A]/5 px-4 py-3 flex items-center justify-between gap-3 flex-wrap" data-testid="jobs-save-search-strip">
+          <div className="mb-4 rounded-2xl border border-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/15 bg-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/5 px-4 py-3 flex items-center justify-between gap-3 flex-wrap" data-testid="jobs-save-search-strip">
             <div className="flex items-center gap-2 text-sm text-gray-700">
-              {matchedSaved ? <BellRing size={16} className="text-[#1E6A6A]" /> : <Bell size={16} className="text-gray-500" />}
+              {matchedSaved ? <BellRing size={16} className="text-[var(--brand-primary)]" /> : <Bell size={16} className="text-gray-500" />}
               <span>
                 {matchedSaved
                   ? <>You&apos;ll get a <b>daily digest</b> of new matches in this filter.</>
@@ -132,7 +132,7 @@ const JobsBoard = () => {
               className={`px-3 py-1.5 rounded-lg text-xs font-semibold border ${
                 matchedSaved
                   ? 'bg-white text-gray-700 border-gray-200 hover:border-red-300 hover:text-red-600'
-                  : 'bg-[#1E6A6A] text-white border-[#1E6A6A] hover:bg-[#0F3A3A]'
+                  : 'bg-[var(--brand-primary)] text-white border-[var(--brand-primary)] hover:bg-[#0F3A3A]'
               } disabled:opacity-60`}
               data-testid="jobs-save-search-btn"
             >
@@ -146,7 +146,7 @@ const JobsBoard = () => {
           <button
             onClick={() => setCat('')}
             className={`px-3 py-1.5 rounded-full text-xs font-semibold border whitespace-nowrap ${
-              !activeCat ? 'bg-black text-[#D4AF37] border-black' : 'bg-white text-gray-700 border-gray-200 hover:border-[#D4AF37]'
+              !activeCat ? 'bg-black text-[var(--gold)] border-black' : 'bg-white text-gray-700 border-gray-200 hover:border-[var(--gold)]'
             }`}
             data-testid="jobs-cat-all"
           >
@@ -157,7 +157,7 @@ const JobsBoard = () => {
               key={c.slug}
               onClick={() => setCat(c.slug)}
               className={`px-3 py-1.5 rounded-full text-xs font-semibold border whitespace-nowrap ${
-                activeCat === c.slug ? 'bg-black text-[#D4AF37] border-black' : 'bg-white text-gray-700 border-gray-200 hover:border-[#D4AF37]'
+                activeCat === c.slug ? 'bg-black text-[var(--gold)] border-black' : 'bg-white text-gray-700 border-gray-200 hover:border-[var(--gold)]'
               }`}
               data-testid={`jobs-cat-${c.slug}`}
             >
@@ -167,15 +167,15 @@ const JobsBoard = () => {
         </div>
 
         {loading ? (
-          <div className="flex justify-center py-16"><Loader2 className="animate-spin text-[#1E6A6A]" /></div>
+          <div className="flex justify-center py-16"><Loader2 className="animate-spin text-[var(--brand-primary)]" /></div>
         ) : jobs.length === 0 ? (
           <div className="bg-white border border-gray-100 rounded-2xl p-10 text-center">
             <MessageSquare size={32} className="mx-auto text-gray-300 mb-3" />
             <p className="text-gray-700 font-semibold mb-1">No open jobs in this category right now.</p>
             <p className="text-gray-500 text-sm mb-5">Be the first to post — matching providers will reach out.</p>
             <button
-              onClick={() => navigate(token ? '/services/post-job' : '/auth')}
-              className="px-5 py-2 rounded-lg text-sm font-semibold text-white bg-[#1E6A6A] hover:bg-[#0F3A3A]"
+              onClick={() => { saveReturnPath(); navigate(token ? '/services/post-job' : '/auth'); }}
+              className="px-5 py-2 rounded-lg text-sm font-semibold text-white bg-[var(--brand-primary)] hover:bg-[#0F3A3A]"
               data-testid="jobs-empty-cta"
             >
               Post a job
@@ -199,7 +199,7 @@ const JobRow = ({ job, onClick }) => {
   return (
     <button
       onClick={onClick}
-      className="text-left bg-white border border-gray-100 rounded-2xl p-4 sm:p-5 hover:border-[#D4AF37] transition-colors shadow-sm"
+      className="text-left bg-white border border-gray-100 rounded-2xl p-4 sm:p-5 hover:border-[var(--gold)] transition-colors shadow-sm"
       data-testid={`jobs-row-${job.id}`}
     >
       <div className="flex items-start justify-between gap-3">

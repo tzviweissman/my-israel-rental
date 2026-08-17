@@ -139,7 +139,7 @@ const BookingsTab = ({ token }) => {
         <button
           onClick={fetchBookings}
           disabled={loading}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium border border-gray-200 hover:border-[#D4AF37] disabled:opacity-50"
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium border border-gray-200 hover:border-[var(--gold)] disabled:opacity-50"
           data-testid="bookings-refresh"
         >
           <RefreshCw size={12} className={loading ? 'animate-spin' : ''} />
@@ -153,8 +153,8 @@ const BookingsTab = ({ token }) => {
           onClick={() => setStatusFilter('')}
           className={`px-3 py-1.5 rounded-full text-xs font-semibold border ${
             statusFilter === ''
-              ? 'bg-black text-[#D4AF37] border-black'
-              : 'bg-white text-gray-700 border-gray-200 hover:border-[#D4AF37]'
+              ? 'bg-black text-[var(--gold)] border-black'
+              : 'bg-white text-gray-700 border-gray-200 hover:border-[var(--gold)]'
           }`}
           data-testid="bookings-filter-all"
         >
@@ -166,8 +166,8 @@ const BookingsTab = ({ token }) => {
             onClick={() => setStatusFilter(statusFilter === s ? '' : s)}
             className={`px-3 py-1.5 rounded-full text-xs font-semibold border ${
               statusFilter === s
-                ? 'bg-black text-[#D4AF37] border-black'
-                : `${STATUS_STYLES[s] || 'bg-white text-gray-700 border-gray-200'} hover:border-[#D4AF37]`
+                ? 'bg-black text-[var(--gold)] border-black'
+                : `${STATUS_STYLES[s] || 'bg-white text-gray-700 border-gray-200'} hover:border-[var(--gold)]`
             }`}
             data-testid={`bookings-filter-${s}`}
           >
@@ -184,7 +184,7 @@ const BookingsTab = ({ token }) => {
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           placeholder="Search by guest, email, property, or area…"
-          className="w-full ps-9 pe-3 py-2 rounded-lg border border-gray-200 text-sm focus:outline-none focus:border-[#D4AF37]"
+          className="w-full ps-9 pe-3 py-2 rounded-lg border border-gray-200 text-sm focus:outline-none focus:border-[var(--gold)]"
           data-testid="bookings-search"
         />
       </div>
@@ -192,7 +192,7 @@ const BookingsTab = ({ token }) => {
       {/* Bookings grid */}
       {loading ? (
         <div className="flex items-center justify-center py-16">
-          <Loader2 className="animate-spin text-[#1E6A6A]" size={28} />
+          <Loader2 className="animate-spin text-[var(--brand-primary)]" size={28} />
         </div>
       ) : filteredBookings.length === 0 ? (
         <div className="text-center py-16 text-gray-500 text-sm">
@@ -208,7 +208,7 @@ const BookingsTab = ({ token }) => {
             return (
               <div
                 key={b.id}
-                className="bg-white rounded-xl border border-[#E5E5E5] overflow-hidden hover:border-[#D4AF37] hover:shadow-md transition-all flex"
+                className="bg-white rounded-xl border border-[#E5E5E5] overflow-hidden hover:border-[var(--gold)] hover:shadow-md transition-all flex"
                 data-testid={`booking-row-${b.id}`}
               >
                 {/* Property thumbnail — the centerpiece of the user's
@@ -235,7 +235,7 @@ const BookingsTab = ({ token }) => {
                   </div>
 
                   <div className="flex items-center gap-1.5 text-xs text-gray-700 mt-2">
-                    <Calendar size={12} className="text-[#1E6A6A] shrink-0" />
+                    <Calendar size={12} className="text-[var(--brand-primary)] shrink-0" />
                     <span className="font-medium">
                       {new Date(b.start_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
                       {' → '}
@@ -259,13 +259,13 @@ const BookingsTab = ({ token }) => {
                         {b.guest_email && (
                           <div className="flex items-center gap-1.5 truncate">
                             <Mail size={11} className="text-gray-400 shrink-0" />
-                            <a href={`mailto:${b.guest_email}`} className="text-[#1E6A6A] hover:underline truncate">{b.guest_email}</a>
+                            <a href={`mailto:${b.guest_email}`} className="text-[var(--brand-primary)] hover:underline truncate">{b.guest_email}</a>
                           </div>
                         )}
                         {b.guest_phone && (
                           <div className="flex items-center gap-1.5">
                             <Phone size={11} className="text-gray-400 shrink-0" />
-                            <a href={`tel:${b.guest_phone}`} className="text-gray-700 hover:text-[#1E6A6A]">{b.guest_phone}</a>
+                            <a href={`tel:${b.guest_phone}`} className="text-gray-700 hover:text-[var(--brand-primary)]">{b.guest_phone}</a>
                           </div>
                         )}
                       </div>
@@ -288,7 +288,7 @@ const BookingsTab = ({ token }) => {
                         {b.manager_email && (
                           <div className="flex items-center gap-1.5 truncate">
                             <Mail size={11} className="text-gray-400 shrink-0" />
-                            <a href={`mailto:${b.manager_email}`} className="text-[#1E6A6A] hover:underline truncate" data-testid={`booking-manager-email-${b.id}`}>{b.manager_email}</a>
+                            <a href={`mailto:${b.manager_email}`} className="text-[var(--brand-primary)] hover:underline truncate" data-testid={`booking-manager-email-${b.id}`}>{b.manager_email}</a>
                           </div>
                         )}
                         {b.manager_whatsapp && (
@@ -298,7 +298,7 @@ const BookingsTab = ({ token }) => {
                               href={`https://wa.me/${b.manager_whatsapp.replace(/[^\d+]/g, '')}`}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="text-gray-700 hover:text-[#1E6A6A]"
+                              className="text-gray-700 hover:text-[var(--brand-primary)]"
                               data-testid={`booking-manager-whatsapp-${b.id}`}
                             >
                               {b.manager_whatsapp}
@@ -316,7 +316,7 @@ const BookingsTab = ({ token }) => {
                             {b.manager_email && (
                               <a
                                 href={`mailto:${b.manager_email}?subject=${encodeURIComponent(msg.subject)}&body=${encodeURIComponent(msg.body)}`}
-                                className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-semibold border border-[#1E6A6A] text-[#1E6A6A] hover:bg-[#1E6A6A] hover:text-white transition-colors"
+                                className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-semibold border border-[var(--brand-primary)] text-[var(--brand-primary)] hover:bg-[var(--brand-primary)] hover:text-white transition-colors"
                                 data-testid={`booking-message-manager-email-${b.id}`}
                               >
                                 <Mail size={11} />
@@ -342,13 +342,13 @@ const BookingsTab = ({ token }) => {
                   )}
 
                   <div className="mt-2 flex items-center justify-between">
-                    <p className="font-bold text-sm text-[#1E6A6A]">{formatPrice(b)}</p>
+                    <p className="font-bold text-sm text-[var(--brand-primary)]">{formatPrice(b)}</p>
                     {b.property_id && b.property_title && (
                       <a
                         href={`/property/${b.property_id}`}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1 text-[10px] font-semibold text-gray-500 hover:text-[#1E6A6A]"
+                        className="inline-flex items-center gap-1 text-[10px] font-semibold text-gray-500 hover:text-[var(--brand-primary)]"
                         data-testid={`booking-open-property-${b.id}`}
                       >
                         Open listing <ExternalLink size={10} />

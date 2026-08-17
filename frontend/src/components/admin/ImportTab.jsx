@@ -186,7 +186,7 @@ export const ImportTab = ({ token, onJumpToOwner }) => {
           onClick={() => setFlow('quick')}
           className={`inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold border transition-colors ${
             flow === 'quick'
-              ? 'bg-[#1E6A6A] text-white border-[#1E6A6A]'
+              ? 'bg-[var(--brand-primary)] text-white border-[var(--brand-primary)]'
               : 'bg-white text-gray-700 border-gray-200 hover:bg-gray-50'
           }`}
           data-testid="import-flow-quick"
@@ -198,7 +198,7 @@ export const ImportTab = ({ token, onJumpToOwner }) => {
           onClick={() => setFlow('bulk')}
           className={`inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold border transition-colors ${
             flow === 'bulk'
-              ? 'bg-[#1E6A6A] text-white border-[#1E6A6A]'
+              ? 'bg-[var(--brand-primary)] text-white border-[var(--brand-primary)]'
               : 'bg-white text-gray-700 border-gray-200 hover:bg-gray-50'
           }`}
           data-testid="import-flow-bulk"
@@ -277,7 +277,7 @@ export const ImportTab = ({ token, onJumpToOwner }) => {
             }
           }}
           placeholder={'From CSV:\n"3BR in Sanhedria","Sanhedria",3,8500,owner@example.com\n\nFrom Excel/Sheets (⌘+C then ⌘+V here — tabs preserved):\n3BR in Sanhedria\tSanhedria\t3\t8500\towner@example.com'}
-          className="w-full px-3 py-2 rounded-lg border border-gray-200 font-mono text-xs h-40 focus:border-[#1E6A6A] focus:outline-none focus:ring-1 focus:ring-[#1E6A6A]/40"
+          className="w-full px-3 py-2 rounded-lg border border-gray-200 font-mono text-xs h-40 focus:border-[var(--brand-primary)] focus:outline-none focus:ring-1 focus:ring-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/40"
           data-testid="import-csv-textarea"
         />
         <div className="flex items-center gap-2 mt-3 flex-wrap">
@@ -288,7 +288,7 @@ export const ImportTab = ({ token, onJumpToOwner }) => {
           <button
             onClick={() => runPreview()}
             disabled={loading || !csvText.trim()}
-            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-[#1E6A6A] text-white text-sm font-semibold disabled:opacity-50 hover:bg-[#175555]"
+            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-[var(--brand-primary)] text-white text-sm font-semibold disabled:opacity-50 hover:bg-[#175555]"
             data-testid="import-preview-btn"
           >
             {loading ? <Loader2 size={14} className="animate-spin" /> : <FileSpreadsheet size={14} />}
@@ -315,7 +315,7 @@ export const ImportTab = ({ token, onJumpToOwner }) => {
                 onClick={() => overrideKind('property')}
                 className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold border transition-colors ${
                   schemaKind === 'property'
-                    ? 'bg-[#1E6A6A] text-white border-[#1E6A6A]'
+                    ? 'bg-[var(--brand-primary)] text-white border-[var(--brand-primary)]'
                     : 'bg-white text-gray-600 border-gray-200 hover:bg-gray-50'
                 }`}
                 data-testid="import-kind-properties"
@@ -327,7 +327,7 @@ export const ImportTab = ({ token, onJumpToOwner }) => {
                 onClick={() => overrideKind('user')}
                 className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold border transition-colors ${
                   schemaKind === 'user'
-                    ? 'bg-[#1E6A6A] text-white border-[#1E6A6A]'
+                    ? 'bg-[var(--brand-primary)] text-white border-[var(--brand-primary)]'
                     : 'bg-white text-gray-600 border-gray-200 hover:bg-gray-50'
                 }`}
                 data-testid="import-kind-users"

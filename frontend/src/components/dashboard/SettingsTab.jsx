@@ -185,8 +185,8 @@ const SettingsTab = ({ user, token, API }) => {
       {switchOption && (
         <div className="bg-white rounded-2xl border border-gray-200 p-6 max-w-2xl mb-6" data-testid="role-switch-card">
           <div className="flex items-center gap-3 mb-4">
-            <div className="p-3 rounded-full bg-[#D4AF37]/15">
-              <HomeIcon size={24} className="text-[#D4AF37]" />
+            <div className="p-3 rounded-full bg-[rgb(var(--gold-rgb)/<alpha-value>)]/15">
+              <HomeIcon size={24} className="text-[var(--gold)]" />
             </div>
             <div>
               <h3 className="text-lg font-bold text-gray-900">{switchOption.title}</h3>
@@ -198,7 +198,7 @@ const SettingsTab = ({ user, token, API }) => {
             onClick={() => handleSwitchRole(switchOption.target)}
             disabled={switchingRole}
             className="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl text-white font-medium hover:opacity-90 transition-all disabled:opacity-60"
-            style={{ backgroundColor: '#1E6A6A' }}
+            style={{ backgroundColor: 'var(--brand-primary)' }}
             data-testid="switch-role-btn"
           >
             <HomeIcon size={16} /> {switchingRole ? t('dashboard.saving', 'Saving…') : switchOption.cta}
@@ -210,8 +210,8 @@ const SettingsTab = ({ user, token, API }) => {
       {/* Language preference */}
       <div className="bg-white rounded-2xl border border-gray-200 p-6 max-w-2xl mb-6">
         <div className="flex items-center gap-3 mb-6">
-          <div className="p-3 rounded-full bg-[#1E6A6A]/10">
-            <Globe size={24} className="text-[#1E6A6A]" />
+          <div className="p-3 rounded-full bg-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/10">
+            <Globe size={24} className="text-[var(--brand-primary)]" />
           </div>
           <div>
             <h3 className="text-lg font-bold text-gray-900">{i18n.t('dashboard.defaultLanguage')}</h3>
@@ -235,12 +235,12 @@ const SettingsTab = ({ user, token, API }) => {
                 data-testid={`language-option-${opt.value}`}
                 className={`flex items-center justify-between px-4 py-3 rounded-xl border-2 transition-all ${
                   active
-                    ? 'border-[#1E6A6A] bg-[#1E6A6A]/5 text-[#1E6A6A]'
+                    ? 'border-[var(--brand-primary)] bg-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/5 text-[var(--brand-primary)]'
                     : 'border-gray-200 hover:border-gray-300 text-gray-700'
                 }`}
               >
                 <span className="font-medium">{opt.label}</span>
-                <span className={`text-xs font-bold ${active ? 'text-[#D4AF37]' : 'text-gray-400'}`}>
+                <span className={`text-xs font-bold ${active ? 'text-[var(--gold)]' : 'text-gray-400'}`}>
                   {opt.sub}
                 </span>
               </button>
@@ -253,7 +253,7 @@ const SettingsTab = ({ user, token, API }) => {
           onClick={handleSaveLanguage}
           disabled={savingLanguage}
           className="w-full px-6 py-3 rounded-xl text-white font-medium hover:opacity-90 transition-all disabled:opacity-60"
-          style={{ backgroundColor: '#1E6A6A' }}
+          style={{ backgroundColor: 'var(--brand-primary)' }}
           data-testid="save-language-btn"
         >
           {savingLanguage ? i18n.t('dashboard.saving') : i18n.t('dashboard.saveDefaultLanguage')}
@@ -296,7 +296,7 @@ const SettingsTab = ({ user, token, API }) => {
             type="submit"
             disabled={savingWhatsapp}
             className="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl text-white font-medium hover:opacity-90 transition-all disabled:opacity-60"
-            style={{ backgroundColor: '#1E6A6A' }}
+            style={{ backgroundColor: 'var(--brand-primary)' }}
             data-testid="settings-whatsapp-save-btn"
           >
             <Check size={16} /> {savingWhatsapp ? i18n.t('dashboard.saving') : t('common.save', 'Save')}
@@ -339,7 +339,7 @@ const SettingsTab = ({ user, token, API }) => {
               onClick={handleToggleAutoNudge}
               disabled={savingAutoNudge}
               className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                autoNudgeOptOut ? 'bg-gray-300' : 'bg-[#1E6A6A]'
+                autoNudgeOptOut ? 'bg-gray-300' : 'bg-[var(--brand-primary)]'
               } disabled:opacity-60`}
               data-testid="auto-nudge-toggle"
             >
@@ -363,8 +363,8 @@ const SettingsTab = ({ user, token, API }) => {
 
       <div className="bg-white rounded-2xl border border-gray-200 p-6 max-w-2xl">
         <div className="flex items-center gap-3 mb-6">
-          <div className="p-3 rounded-full bg-[#1E6A6A]/10">
-            <KeyRound size={24} className="text-[#1E6A6A]" />
+          <div className="p-3 rounded-full bg-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/10">
+            <KeyRound size={24} className="text-[var(--brand-primary)]" />
           </div>
           <div>
             <h3 className="text-lg font-bold text-gray-900">{i18n.t('dashboard.changePassword')}</h3>
@@ -381,7 +381,7 @@ const SettingsTab = ({ user, token, API }) => {
                 type={showCurrentPassword ? 'text' : 'password'}
                 value={passwordForm.current_password}
                 onChange={(e) => setPasswordForm({ ...passwordForm, current_password: e.target.value })}
-                className="w-full px-4 py-2.5 pe-10 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#1E6A6A]/30 focus:border-[#1E6A6A]"
+                className="w-full px-4 py-2.5 pe-10 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/30 focus:border-[var(--brand-primary)]"
                 required
                 placeholder={i18n.t('dashboard.currentPasswordPlaceholder')}
               />
@@ -403,7 +403,7 @@ const SettingsTab = ({ user, token, API }) => {
                 type={showNewPassword ? 'text' : 'password'}
                 value={passwordForm.new_password}
                 onChange={(e) => setPasswordForm({ ...passwordForm, new_password: e.target.value })}
-                className="w-full px-4 py-2.5 pe-10 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#1E6A6A]/30 focus:border-[#1E6A6A]"
+                className="w-full px-4 py-2.5 pe-10 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/30 focus:border-[var(--brand-primary)]"
                 required
                 placeholder={i18n.t('dashboard.newPasswordPlaceholder')}
               />
@@ -425,7 +425,7 @@ const SettingsTab = ({ user, token, API }) => {
                 type={showConfirmPassword ? 'text' : 'password'}
                 value={passwordForm.confirm_password}
                 onChange={(e) => setPasswordForm({ ...passwordForm, confirm_password: e.target.value })}
-                className="w-full px-4 py-2.5 pe-10 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#1E6A6A]/30 focus:border-[#1E6A6A]"
+                className="w-full px-4 py-2.5 pe-10 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/30 focus:border-[var(--brand-primary)]"
                 required
                 placeholder={i18n.t('dashboard.confirmNewPasswordPlaceholder')}
               />
@@ -442,7 +442,7 @@ const SettingsTab = ({ user, token, API }) => {
           <button
             type="submit"
             className="w-full px-6 py-3 rounded-xl text-white font-medium hover:opacity-90 transition-all"
-            style={{ backgroundColor: '#1E6A6A' }}
+            style={{ backgroundColor: 'var(--brand-primary)' }}
           >
             {i18n.t('dashboard.updatePassword')}
           </button>

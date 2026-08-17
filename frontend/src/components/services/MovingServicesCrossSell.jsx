@@ -104,7 +104,7 @@ const MovingServicesCrossSell = ({ property, variant = 'detail', storageKey }) =
 
   return (
     <div
-      className="rounded-2xl border border-[#1E6A6A]/20 bg-gradient-to-br from-[#f2f8f8] via-white to-[#f2f8f8] p-4 md:p-5"
+      className="rounded-2xl border border-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/20 bg-gradient-to-br from-[#f2f8f8] via-white to-[#f2f8f8] p-4 md:p-5"
       data-testid={`services-cross-sell-${variant}`}
     >
       <div className="flex items-start justify-between gap-3 mb-3">
@@ -142,7 +142,7 @@ const MovingServicesCrossSell = ({ property, variant = 'detail', storageKey }) =
             <Link
               key={link.key}
               to={buildHref(link, locationSlug)}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs md:text-sm font-semibold bg-white border border-[#1E6A6A]/25 text-[#1E6A6A] hover:bg-[#1E6A6A] hover:text-white transition-colors"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs md:text-sm font-semibold bg-white border border-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/25 text-[var(--brand-primary)] hover:bg-[var(--brand-primary)] hover:text-white transition-colors"
               data-testid={`services-cross-sell-${link.key}`}
             >
               <Icon size={14} />

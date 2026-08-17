@@ -46,12 +46,12 @@ const SubleaseListItem = ({
           {sub.holiday_tags && sub.holiday_tags.length > 0 && (
             <div className="flex gap-1 mt-1.5">
               {sub.holiday_tags.includes('sukkot') && (
-                <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-[#D4AF37]/15 text-[#8a6d1d]">
+                <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-[rgb(var(--gold-rgb)/<alpha-value>)]/15 text-[#8a6d1d]">
                   Sukkot
                 </span>
               )}
               {sub.holiday_tags.includes('pesach') && (
-                <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-[#D4AF37]/15 text-[#8a6d1d]">
+                <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-[rgb(var(--gold-rgb)/<alpha-value>)]/15 text-[#8a6d1d]">
                   Pesach
                 </span>
               )}
@@ -59,7 +59,7 @@ const SubleaseListItem = ({
           )}
         </div>
         <div className="text-right shrink-0">
-          <p className="text-base font-bold" style={{ color: '#D4AF37' }}>
+          <p className="text-base font-bold" style={{ color: 'var(--gold)' }}>
             {sub.currency === 'USD' ? '$' : '₪'}
             {sub.price?.toLocaleString()}
             <span className="text-[10px] font-normal text-gray-500">
@@ -77,14 +77,14 @@ const SubleaseListItem = ({
         <div className="flex flex-col gap-1 shrink-0">
           <button
             onClick={() => onEdit(sub)}
-            className="text-xs px-2.5 py-1 rounded-lg border border-gray-200 hover:border-[#D4AF37] hover:text-[#D4AF37] transition-colors"
+            className="text-xs px-2.5 py-1 rounded-lg border border-gray-200 hover:border-[var(--gold)] hover:text-[var(--gold)] transition-colors"
             data-testid={`edit-sublease-${sub.id}`}
           >
             Edit
           </button>
           <button
             onClick={() => onToggleActive(sub.id, sub.active)}
-            className="text-xs px-2.5 py-1 rounded-lg border border-gray-200 hover:border-[#1E6A6A] hover:text-[#1E6A6A] transition-colors"
+            className="text-xs px-2.5 py-1 rounded-lg border border-gray-200 hover:border-[var(--brand-primary)] hover:text-[var(--brand-primary)] transition-colors"
             data-testid={`toggle-sublease-${sub.id}`}
           >
             {sub.active ? 'Pause' : 'Activate'}
@@ -103,7 +103,7 @@ const SubleaseListItem = ({
         {sub.contract_id && sub.sign_token ? (
           <div className="flex items-center gap-3 flex-wrap">
             <div className="flex items-center gap-2 flex-1 min-w-0">
-              <FileText size={16} className="text-[#1E6A6A] shrink-0" />
+              <FileText size={16} className="text-[var(--brand-primary)] shrink-0" />
               <span className="text-xs font-medium text-gray-700 truncate">Contract uploaded</span>
               <span
                 className={`px-2 py-0.5 rounded-full text-[10px] font-semibold shrink-0 ${
@@ -117,7 +117,7 @@ const SubleaseListItem = ({
             </div>
             <button
               onClick={() => onCopySignLink(sub.sign_token)}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium border border-[#1E6A6A]/20 text-[#1E6A6A] hover:bg-[#1E6A6A]/5 transition-colors shrink-0"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium border border-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/20 text-[var(--brand-primary)] hover:bg-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/5 transition-colors shrink-0"
               data-testid={`copy-sign-link-${sub.id}`}
             >
               {copiedSignLink === sub.sign_token ? (
@@ -136,7 +136,7 @@ const SubleaseListItem = ({
             <button
               onClick={() => onUpload(sub.id)}
               disabled={uploadingFor === sub.id}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium border border-dashed border-[#D4AF37]/50 text-[#D4AF37] hover:bg-[#D4AF37]/5 transition-colors disabled:opacity-50"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium border border-dashed border-[rgb(var(--gold-rgb)/<alpha-value>)]/50 text-[var(--gold)] hover:bg-[rgb(var(--gold-rgb)/<alpha-value>)]/5 transition-colors disabled:opacity-50"
               data-testid={`upload-contract-${sub.id}`}
             >
               {uploadingFor === sub.id ? (

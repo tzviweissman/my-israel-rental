@@ -34,18 +34,18 @@ const DateField = ({
   const colors =
     variant === 'gold'
       ? {
-          chipBg: 'bg-[#D4AF37]/10',
-          icon: '#D4AF37',
-          border: 'border-[#D4AF37]/20 hover:border-[#D4AF37]/40',
-          calBorder: 'border-[#D4AF37]',
-          chev: 'text-[#D4AF37]/40 group-hover:text-[#D4AF37]/60',
+          chipBg: 'bg-[rgb(var(--gold-rgb)/<alpha-value>)]/10',
+          icon: 'var(--gold)',
+          border: 'border-[rgb(var(--gold-rgb)/<alpha-value>)]/20 hover:border-[rgb(var(--gold-rgb)/<alpha-value>)]/40',
+          calBorder: 'border-[var(--gold)]',
+          chev: 'text-[rgb(var(--gold-rgb)/<alpha-value>)]/40 group-hover:text-[rgb(var(--gold-rgb)/<alpha-value>)]/60',
         }
       : {
-          chipBg: 'bg-[#1E6A6A]/10',
-          icon: '#1E6A6A',
-          border: 'border-[#1E6A6A]/20 hover:border-[#1E6A6A]/40',
-          calBorder: 'border-[#1E6A6A]',
-          chev: 'text-[#1E6A6A]/40 group-hover:text-[#1E6A6A]/60',
+          chipBg: 'bg-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/10',
+          icon: 'var(--brand-primary)',
+          border: 'border-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/20 hover:border-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/40',
+          calBorder: 'border-[var(--brand-primary)]',
+          chev: 'text-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/40 group-hover:text-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/60',
         };
   const parsed = parseLocalDate(value);
 
@@ -104,14 +104,14 @@ const DateField = ({
         <div
           className={
             variant === 'teal'
-              ? 'mt-3 p-3 bg-[#1E6A6A]/5 rounded-lg border border-[#1E6A6A]/10'
+              ? 'mt-3 p-3 bg-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/5 rounded-lg border border-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/10'
               : 'mt-3'
           }
         >
           <p
             className={
               variant === 'teal'
-                ? 'text-xs text-[#1E6A6A] flex items-start gap-2'
+                ? 'text-xs text-[var(--brand-primary)] flex items-start gap-2'
                 : 'text-xs text-gray-500 flex items-center gap-2'
             }
           >

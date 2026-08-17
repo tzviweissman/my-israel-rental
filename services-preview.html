@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>MyIsraelRental — Services (new layout preview)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+<style>
+:root{--blue:#1E5F8C;--blue-dark:#184E73;--blue-deep:#123B57;--gold:#C9A227;--gold-text:#8A6A14;--gold-lg:#A9831C;--ink:#23201B;--muted:#6B6459;--bg:#EFE9DC;--surface:#fff;--border:#E1D8C6;--ease:cubic-bezier(.16,.7,.3,1)}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Manrope',system-ui,sans-serif;background:var(--bg);color:var(--ink);line-height:1.5;-webkit-font-smoothing:antialiased}
+h1,h2,h3,h4{font-family:'Playfair Display',Georgia,serif}
+.previewbar{background:#123B57;color:#cfe6e2;font-size:12.5px;text-align:center;padding:7px 16px;letter-spacing:.02em}
+.previewbar b{color:#fff}
+
+/* dark hero band with glass nav (matches the other pages) */
+.band{position:relative;overflow:hidden;color:#fff}
+.band .bg{position:absolute;inset:0;background:url('https://res.cloudinary.com/dirvyboe9/image/upload/f_auto,q_auto/v1786504645/myisraelrental/site/scene7-ac-pro.png') center/cover no-repeat}
+.band .shade{position:absolute;inset:0;background:linear-gradient(180deg,rgba(4,12,17,.55),rgba(4,12,17,.4) 55%,rgba(4,12,17,.66))}
+nav.bar{position:relative;z-index:5;display:flex;align-items:center;justify-content:space-between;gap:14px;padding:14px clamp(16px,3vw,36px)}
+.lg{display:flex;align-items:center;gap:11px;font-family:'Playfair Display';font-weight:700;font-size:19px;color:#fff;text-shadow:0 1px 8px rgba(0,0,0,.5);text-decoration:none}
+.lg img{height:44px;width:auto;display:block;filter:drop-shadow(0 2px 8px rgba(0,0,0,.55))}
+.links{display:flex;align-items:center;gap:9px}
+.links a,.lang,.signin{background:rgba(255,255,255,.12);border:1.5px solid rgba(255,255,255,.55);backdrop-filter:blur(10px) saturate(1.1);border-radius:999px;color:#fff;font-weight:700;font-size:14px;text-shadow:0 1px 4px rgba(0,0,0,.4);box-shadow:inset 0 1px 0 rgba(255,255,255,.25),0 4px 16px rgba(0,0,0,.18);transition:all .2s ease;text-decoration:none;padding:10px 18px;cursor:pointer;font-family:inherit}
+.links a:hover,.lang:hover,.signin:hover{background:rgba(255,255,255,.24);transform:translateY(-1px)}
+.links a.current{background:rgba(255,255,255,.28);border-color:rgba(255,255,255,.85)}
+.links a.current .dot{display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--gold);margin-inline-start:6px;vertical-align:middle}
+.right{display:flex;align-items:center;gap:9px}
+.lang{font-size:12.5px;padding:9px 14px}
+.cta{background:rgba(255,255,255,.92);border:1.5px solid rgba(255,255,255,.95);border-radius:999px;color:var(--ink);font-weight:800;font-size:14px;padding:10px 20px;cursor:pointer;font-family:inherit;backdrop-filter:blur(10px);box-shadow:0 6px 18px rgba(0,0,0,.25)}
+.cta:hover{background:#fff}
+@media(max-width:900px){.links,.signin{display:none}}
+.band .head{position:relative;z-index:4;text-align:center;padding:34px 20px 120px}
+.band h1{font-size:clamp(30px,4.6vw,54px);font-weight:800;letter-spacing:-1px;text-shadow:0 2px 24px rgba(0,0,0,.5)}
+.band h1 .a{color:var(--gold)}
+.band p{margin-top:10px;color:rgba(255,255,255,.92);font-size:15px;max-width:560px;margin-inline:auto}
+
+/* floating search panel */
+.search{position:relative;z-index:6;margin:-88px auto 0;max-width:1080px;padding:0 20px}
+.panel{background:rgba(255,255,255,.97);border-radius:22px;box-shadow:0 30px 70px rgba(8,20,26,.28);border:1px solid rgba(255,255,255,.6);padding:18px}
+.fields{display:grid;grid-template-columns:1.3fr 1fr 1fr auto;align-items:stretch}
+.field{padding:10px 18px;border-inline-end:1px solid var(--border)}
+.field:last-of-type{border-inline-end:none}
+.field .lab{font-size:10.5px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.field .val{margin-top:3px;font-size:15px;font-weight:600}
+.field .val.dim{color:#9a938a}
+.go{display:flex;align-items:center;justify-content:center;padding:0 8px}
+.go button{background:var(--blue);color:#fff;border:none;border-radius:999px;font-weight:800;font-size:14.5px;padding:14px 26px;cursor:pointer;font-family:inherit;transition:all .2s}
+.go button:hover{background:var(--blue-dark);transform:translateY(-1px)}
+@media(max-width:860px){.fields{grid-template-columns:1fr}.field{border-inline-end:none;border-bottom:1px solid var(--border)}.go{padding-top:10px}}
+
+/* categories */
+.results{max-width:1200px;margin:0 auto;padding:48px 24px 30px}
+.rhead{display:flex;align-items:baseline;justify-content:space-between;gap:16px;margin-bottom:22px}
+.rhead h2{font-size:clamp(21px,2.6vw,29px);font-weight:700;letter-spacing:-.4px}
+.rhead span{color:var(--muted);font-size:13.5px;font-weight:600}
+.cat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+@media(max-width:980px){.cat-grid{grid-template-columns:1fr 1fr}}
+.cat{background:#fff;border:1px solid var(--border);border-radius:16px;padding:20px 18px;cursor:pointer;transition:all .25s var(--ease);display:flex;flex-direction:column;gap:8px}
+.cat:hover{transform:translateY(-4px);box-shadow:0 12px 32px rgba(30,45,60,.12);border-color:#CFDDE8}
+.cat .em{font-size:24px}
+.cat h4{font-size:16px;font-weight:700;font-family:'Manrope'}
+.cat p{font-size:12.5px;color:var(--muted)}
+.cat .ct{font-size:12.5px;font-weight:800;color:var(--gold-text)}
+
+/* pros row */
+.pros{max-width:1200px;margin:0 auto;padding:20px 24px 30px}
+.pcard{display:grid;grid-template-columns:120px 1fr auto;gap:18px;align-items:center;background:#fff;border:1px solid var(--border);border-radius:18px;padding:14px;margin-bottom:14px;transition:all .25s var(--ease)}
+.pcard:hover{transform:translateY(-3px);box-shadow:0 12px 32px rgba(30,45,60,.12)}
+.pcard .ph{width:120px;height:86px;border-radius:12px;background-size:cover;background-position:center}
+.pcard h4{font-size:16px;font-weight:700;font-family:'Manrope'}
+.pcard .sub{color:var(--muted);font-size:13px;margin-top:3px}
+.pcard .badges{display:flex;gap:7px;margin-top:8px;flex-wrap:wrap}
+.pcard .badges span{font-size:11px;font-weight:800;border-radius:999px;padding:3px 9px}
+.pcard .b-ver{color:#1F8A50;background:#E3F3EA}
+.pcard .b-rate{color:var(--gold-text);background:#F6EFD9}
+.pcard .msg{background:var(--blue);color:#fff;border:none;border-radius:999px;font-weight:800;font-size:13.5px;padding:11px 20px;cursor:pointer;font-family:inherit}
+.pcard .msg:hover{background:var(--blue-dark)}
+@media(max-width:700px){.pcard{grid-template-columns:1fr}.pcard .ph{width:100%;height:150px}}
+
+/* dual CTA band */
+.ctaband{max-width:1200px;margin:0 auto;padding:10px 24px 80px;display:grid;grid-template-columns:1fr 1fr;gap:18px}
+@media(max-width:760px){.ctaband{grid-template-columns:1fr}}
+.scta{border-radius:18px;padding:26px 28px;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}
+.scta.need{background:#123B57;color:#eaf4ff}
+.scta.offer{background:#F6EFD9;border:1.5px solid var(--gold)}
+.scta h4{font-size:19px;font-weight:700}
+.scta.need h4{color:#fff}
+.scta small{display:block;font-size:13px;margin-top:3px;opacity:.9}
+.b-gold{background:rgba(172,134,28,.85);color:#fff;border:1.5px solid rgba(201,162,39,.9);border-radius:999px;font-weight:700;font-size:14.5px;padding:13px 24px;cursor:pointer;font-family:inherit;text-shadow:0 1px 2px rgba(50,36,0,.5)}
+.b-blue{background:var(--blue);color:#fff;border:none;border-radius:999px;font-weight:800;font-size:14.5px;padding:13px 24px;cursor:pointer;font-family:inherit}
+</style>
+</head>
+<body>
+<div class="previewbar"><b>Design preview</b> — proposed MyIsraelRental <b>Services</b> in the new layout. Providers, ratings &amp; counts are <b>placeholder data</b>. Not yet on your live site.</div>
+
+<div class="band">
+  <div class="bg"></div><div class="shade"></div>
+  <nav class="bar">
+    <a class="lg" href="cinematic-preview.html"><img src="brand/logo-mark.png" alt=""/><span>MyIsraelRental</span></a>
+    <div class="links">
+      <a href="stays-preview.html">Stays</a>
+      <a class="current" href="services-preview.html">Services <span class="dot"></span></a>
+      <a href="wanted-board-preview.html">Requests</a>
+      <a href="home-redesign-preview.html#how">How it works</a>
+    </div>
+    <div class="right">
+      <button class="lang">עברית / EN</button>
+      <button class="signin">Sign in</button>
+      <button class="cta">Offer a service</button>
+    </div>
+  </nav>
+  <div class="head">
+    <h1>Hire <span class="a">the pros.</span></h1>
+    <p>Cleaners, movers, plumbers, electricians and more — reviewed, verified, zero booking fees.</p>
+  </div>
+</div>
+
+<div class="search">
+  <div class="panel">
+    <div class="fields">
+      <div class="field"><div class="lab">What do you need?</div><div class="val dim">e.g. AC repair, deep clean, moving…</div></div>
+      <div class="field"><div class="lab">Where</div><div class="val dim">Anywhere in Israel</div></div>
+      <div class="field"><div class="lab">When</div><div class="val dim">Anytime</div></div>
+      <div class="go"><button>Search pros</button></div>
+    </div>
+  </div>
+</div>
+
+<div class="results">
+  <div class="rhead"><h2>Browse by category</h2><span>450+ verified pros</span></div>
+  <div class="cat-grid">
+    <div class="cat"><div class="em">✨</div><h4>Cleaning</h4><p>Deep cleans, turnovers, regular help</p><span class="ct">120+ pros →</span></div>
+    <div class="cat"><div class="em">📦</div><h4>Movers</h4><p>Local &amp; long-distance moving</p><span class="ct">80+ pros →</span></div>
+    <div class="cat"><div class="em">💧</div><h4>Plumbers</h4><p>Repairs, installs, emergencies</p><span class="ct">65+ pros →</span></div>
+    <div class="cat"><div class="em">⚡</div><h4>Electricians</h4><p>Licensed &amp; insured work</p><span class="ct">54+ pros →</span></div>
+    <div class="cat"><div class="em">📷</div><h4>Photography</h4><p>Listings, events, portraits</p><span class="ct">40+ pros →</span></div>
+    <div class="cat"><div class="em">🔨</div><h4>Handyman</h4><p>Fixes, assembly, mounting</p><span class="ct">90+ pros →</span></div>
+    <div class="cat"><div class="em">🧭</div><h4>Tour guides</h4><p>Licensed guides across Israel</p><span class="ct">35+ pros →</span></div>
+    <div class="cat"><div class="em">✂️</div><h4>Barbers &amp; beauty</h4><p>At-home &amp; in-studio</p><span class="ct">28+ pros →</span></div>
+  </div>
+</div>
+
+<div class="pros">
+  <div class="rhead"><h2>Top-rated near you</h2><span>Sorted by rating</span></div>
+  <div class="pcard">
+    <div class="ph" style="background-image:url('https://res.cloudinary.com/dirvyboe9/image/upload/f_auto,q_auto/v1786504645/myisraelrental/site/scene7-ac-pro.png')"></div>
+    <div><h4>CoolAir — AC repair &amp; installation</h4><div class="sub">Jerusalem &amp; surroundings · responds within ~1 hour</div>
+      <div class="badges"><span class="b-ver">✓ Verified</span><span class="b-rate">★ 4.9 · 132 jobs</span></div></div>
+    <button class="msg">Message</button>
+  </div>
+  <div class="pcard">
+    <div class="ph" style="background-image:url('https://res.cloudinary.com/dirvyboe9/image/upload/f_auto,q_auto/v1786504643/myisraelrental/site/scene6-contract-laptop.png')"></div>
+    <div><h4>Old City Snapshots — real-estate photography</h4><div class="sub">Jerusalem · next availability: Sunday</div>
+      <div class="badges"><span class="b-ver">✓ Verified</span><span class="b-rate">★ 5.0 · 87 jobs</span></div></div>
+    <button class="msg">Message</button>
+  </div>
+  <div class="pcard">
+    <div class="ph" style="background-image:url('https://res.cloudinary.com/dirvyboe9/image/upload/f_auto,q_auto/v1786504641/myisraelrental/site/scene5-lister-jerusalem.png')"></div>
+    <div><h4>Ben's Moving Crew — local &amp; long-distance</h4><div class="sub">Tel Aviv ↔ Jerusalem · free quotes</div>
+      <div class="badges"><span class="b-ver">✓ Verified</span><span class="b-rate">★ 4.8 · 214 jobs</span></div></div>
+    <button class="msg">Message</button>
+  </div>
+</div>
+
+<div class="ctaband">
+  <div class="scta need">
+    <div><h4>Need something done?</h4><small>Post a job free — get matched with pros in minutes.</small></div>
+    <button class="b-gold">Post a job</button>
+  </div>
+  <div class="scta offer">
+    <div><h4>Offer your services</h4><small>List your business and reach every renter &amp; owner on the platform.</small></div>
+    <button class="b-blue">List for free</button>
+  </div>
+</div>
+</body>
+</html>

@@ -133,7 +133,7 @@ const MediaUploadSection = ({
       {uploadedFiles.length > 0 && (
         <>
           <p className="mt-4 text-xs text-gray-500 flex items-center gap-1.5">
-            <Star size={12} className="text-[#D4AF37]" />
+            <Star size={12} className="text-[var(--gold)]" />
             Hover any image and click the star to set it as the cover photo (the one shown to renters first).
           </p>
           <div
@@ -146,7 +146,7 @@ const MediaUploadSection = ({
                 <div
                   key={file.filename}
                   className={`relative group rounded-lg overflow-hidden border ${
-                    isCover ? 'border-[#D4AF37] ring-2 ring-[#D4AF37]/40' : 'border-[#E5E5E5]'
+                    isCover ? 'border-[var(--gold)] ring-2 ring-[rgb(var(--gold-rgb)/<alpha-value>)]/40' : 'border-[#E5E5E5]'
                   }`}
                   data-testid={`uploaded-file-${file.filename}`}
                 >
@@ -163,7 +163,7 @@ const MediaUploadSection = ({
                   )}
                   {isCover && (
                     <div
-                      className="absolute top-1 left-1 bg-[#D4AF37] text-white rounded-md px-1.5 py-0.5 text-[10px] font-bold flex items-center gap-1 shadow"
+                      className="absolute top-1 left-1 bg-[var(--gold)] text-white rounded-md px-1.5 py-0.5 text-[10px] font-bold flex items-center gap-1 shadow"
                       data-testid={`cover-badge-${file.filename}`}
                     >
                       <Star size={10} fill="white" /> COVER
@@ -174,7 +174,7 @@ const MediaUploadSection = ({
                       type="button"
                       onClick={() => setAsCover(file)}
                       title="Set as cover image"
-                      className="absolute top-1 left-1 bg-black/70 hover:bg-[#D4AF37] text-white rounded-md p-1 opacity-0 group-hover:opacity-100 transition-all"
+                      className="absolute top-1 left-1 bg-black/70 hover:bg-[var(--gold)] text-white rounded-md p-1 opacity-0 group-hover:opacity-100 transition-all"
                       data-testid={`set-cover-${file.filename}`}
                     >
                       <Star size={11} />

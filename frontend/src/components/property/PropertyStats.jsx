@@ -14,7 +14,7 @@ const PropertyStats = ({ property }) => {
       {property.bedrooms > 0 && (
         <div className="bg-white p-4 rounded-xl border border-[#E5E5E5]">
           <div className="flex items-center gap-2 mb-1">
-            <Bed size={20} style={{ color: '#D4AF37' }} />
+            <Bed size={20} style={{ color: 'var(--gold)' }} />
             <span className="text-sm text-gray-600">{t('property.bedrooms')}</span>
           </div>
           <p className="text-2xl font-bold">{property.bedrooms}</p>
@@ -23,7 +23,7 @@ const PropertyStats = ({ property }) => {
       {property.bathrooms > 0 && (
         <div className="bg-white p-4 rounded-xl border border-[#E5E5E5]">
           <div className="flex items-center gap-2 mb-1">
-            <Bath size={20} style={{ color: '#D4AF37' }} />
+            <Bath size={20} style={{ color: 'var(--gold)' }} />
             <span className="text-sm text-gray-600">{t('property.bathrooms')}</span>
           </div>
           <p className="text-2xl font-bold">{property.bathrooms}</p>
@@ -32,7 +32,7 @@ const PropertyStats = ({ property }) => {
       {property.square_meters > 0 && (
         <div className="bg-white p-4 rounded-xl border border-[#E5E5E5]">
           <div className="flex items-center gap-2 mb-1">
-            <HomeIcon size={20} style={{ color: '#D4AF37' }} />
+            <HomeIcon size={20} style={{ color: 'var(--gold)' }} />
             <span className="text-sm text-gray-600">{t('property.sqm')}</span>
           </div>
           <p className="text-2xl font-bold">{property.square_meters}</p>
@@ -41,7 +41,7 @@ const PropertyStats = ({ property }) => {
       {property.floor !== null && (
         <div className="bg-white p-4 rounded-xl border border-[#E5E5E5]">
           <div className="flex items-center gap-2 mb-1">
-            <Building2 size={20} style={{ color: '#D4AF37' }} />
+            <Building2 size={20} style={{ color: 'var(--gold)' }} />
             <span className="text-sm text-gray-600">{t('property.floor')}</span>
           </div>
           <p className="text-2xl font-bold">
@@ -58,7 +58,7 @@ const PropertyStats = ({ property }) => {
       {property.porches > 0 && (
         <div className="bg-white p-4 rounded-xl border border-[#E5E5E5]">
           <div className="flex items-center gap-2 mb-1">
-            <HomeIcon size={20} style={{ color: '#D4AF37' }} />
+            <HomeIcon size={20} style={{ color: 'var(--gold)' }} />
             <span className="text-sm text-gray-600">
               {property.porches === 1 ? t('property.porch') : t('property.porches')}
             </span>
@@ -81,7 +81,7 @@ const PropertyStats = ({ property }) => {
       {property.rental_type === 'vacation' && property.max_guests > 0 && (
         <div className="bg-white p-4 rounded-xl border border-[#E5E5E5]" data-testid="property-max-guests">
           <div className="flex items-center gap-2 mb-1">
-            <Users size={20} style={{ color: '#D4AF37' }} />
+            <Users size={20} style={{ color: 'var(--gold)' }} />
             <span className="text-sm text-gray-600">{t('property.maxGuestsLabel', 'Max guests')}</span>
           </div>
           <p className="text-2xl font-bold">{property.max_guests}</p>

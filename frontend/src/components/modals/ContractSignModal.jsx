@@ -152,7 +152,7 @@ const ContractSignModal = ({
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[70] p-4" onClick={handleClose}>
       <div className="bg-white rounded-2xl p-6 max-w-6xl w-full max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
         <div className="flex items-center justify-between mb-6">
-          <h3 className="text-2xl font-bold text-[#1E6A6A]">{t("sweep.signRentalContract", "Sign Rental Contract")}</h3>
+          <h3 className="text-2xl font-bold text-[var(--brand-primary)]">{t("sweep.signRentalContract", "Sign Rental Contract")}</h3>
           <button
             onClick={handleClose}
             className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
@@ -173,7 +173,7 @@ const ContractSignModal = ({
                 onClick={() => setSignatureMethod('draw')}
                 className={`flex-1 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
                   signatureMethod === 'draw'
-                    ? 'bg-[#1E6A6A] text-white'
+                    ? 'bg-[var(--brand-primary)] text-white'
                     : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                 }`}
               >
@@ -183,7 +183,7 @@ const ContractSignModal = ({
                 onClick={() => setSignatureMethod('upload')}
                 className={`flex-1 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
                   signatureMethod === 'upload'
-                    ? 'bg-[#1E6A6A] text-white'
+                    ? 'bg-[var(--brand-primary)] text-white'
                     : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                 }`}
               >
@@ -221,7 +221,7 @@ const ContractSignModal = ({
             {/* Upload Signature */}
             {signatureMethod === 'upload' && (
               <div className="mb-6">
-                <label className="flex flex-col items-center justify-center w-full h-48 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-[#1E6A6A] transition-colors">
+                <label className="flex flex-col items-center justify-center w-full h-48 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-[var(--brand-primary)] transition-colors">
                   {signatureData ? (
                     <img src={signatureData} alt="Signature" className="max-h-40 object-contain" />
                   ) : (
@@ -258,7 +258,7 @@ const ContractSignModal = ({
                 value={legalName}
                 onChange={(e) => setLegalName(e.target.value)}
                 placeholder={t("sweep.asItAppearsOnId", "As it appears on your ID")}
-                className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:border-[#1E6A6A] focus:outline-none focus:ring-2 focus:ring-[#1E6A6A]/30 text-sm"
+                className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:border-[var(--brand-primary)] focus:outline-none focus:ring-2 focus:ring-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/30 text-sm"
                 data-testid="legal-name-input"
                 required
               />
@@ -279,7 +279,7 @@ const ContractSignModal = ({
                     setShowContractPreview(true);
                   }}
                   disabled={!legalName.trim()}
-                  className="flex-1 px-4 py-3 rounded-lg text-sm font-medium bg-[#1E6A6A] text-white hover:bg-[#1E6A6A]/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  className="flex-1 px-4 py-3 rounded-lg text-sm font-medium bg-[var(--brand-primary)] text-white hover:bg-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                 >
                   Next: Position Signature
                 </button>
@@ -293,7 +293,7 @@ const ContractSignModal = ({
                     onSignSuccess(signatureData, signaturePosition, signatureSize, null, legalName.trim());
                   }}
                   disabled={!signatureData || !legalName.trim()}
-                  className="flex-1 px-4 py-3 rounded-lg text-sm font-medium bg-[#D4AF37] text-white hover:bg-[#D4AF37]/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  className="flex-1 px-4 py-3 rounded-lg text-sm font-medium bg-[var(--gold)] text-white hover:bg-[rgb(var(--gold-rgb)/<alpha-value>)]/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                 >
                   Sign Contract
                 </button>
@@ -313,16 +313,16 @@ const ContractSignModal = ({
             </p>
 
             {/* Translate helper for renters whose native language differs from the contract */}
-            <div className="mb-4 bg-[#F7F4EC] border border-[#D4AF37]/30 rounded-lg p-3 flex flex-wrap items-center gap-2" data-testid="contract-translate-bar">
+            <div className="mb-4 bg-[#F7F4EC] border border-[rgb(var(--gold-rgb)/<alpha-value>)]/30 rounded-lg p-3 flex flex-wrap items-center gap-2" data-testid="contract-translate-bar">
               <div className="flex items-center gap-2 text-sm text-gray-700">
-                <Languages size={16} className="text-[#1E6A6A]" />
+                <Languages size={16} className="text-[var(--brand-primary)]" />
                 <span className="font-medium">Can't read the contract?</span>
               </div>
               <button
                 type="button"
                 onClick={() => handleTranslate('he-en')}
                 disabled={translating}
-                className="px-3 py-1.5 rounded-lg bg-[#1E6A6A] text-white text-xs font-medium hover:bg-[#1E6A6A]/90 disabled:opacity-50 flex items-center gap-1.5"
+                className="px-3 py-1.5 rounded-lg bg-[var(--brand-primary)] text-white text-xs font-medium hover:bg-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/90 disabled:opacity-50 flex items-center gap-1.5"
                 data-testid="translate-he-to-en-btn"
               >
                 {translating && translationDirection === 'he-en' && <Loader2 size={12} className="animate-spin" />}
@@ -332,7 +332,7 @@ const ContractSignModal = ({
                 type="button"
                 onClick={() => handleTranslate('en-he')}
                 disabled={translating}
-                className="px-3 py-1.5 rounded-lg bg-[#1E6A6A] text-white text-xs font-medium hover:bg-[#1E6A6A]/90 disabled:opacity-50 flex items-center gap-1.5"
+                className="px-3 py-1.5 rounded-lg bg-[var(--brand-primary)] text-white text-xs font-medium hover:bg-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/90 disabled:opacity-50 flex items-center gap-1.5"
                 data-testid="translate-en-to-he-btn"
               >
                 {translating && translationDirection === 'en-he' && <Loader2 size={12} className="animate-spin" />}
@@ -342,7 +342,7 @@ const ContractSignModal = ({
                 <button
                   type="button"
                   onClick={() => setShowTranslation((v) => !v)}
-                  className="ml-auto text-xs text-[#1E6A6A] underline"
+                  className="ml-auto text-xs text-[var(--brand-primary)] underline"
                 >
                   {showTranslation ? 'Hide translation' : 'Show translation'}
                 </button>
@@ -442,7 +442,7 @@ const ContractSignModal = ({
                     : null;
                   onSignSuccess(signatureData, signaturePosition, signatureSize, displayDims, legalName.trim());
                 }}
-                className="flex-1 px-4 py-3 rounded-lg text-sm font-medium bg-[#D4AF37] text-white hover:bg-[#D4AF37]/90 transition-colors"
+                className="flex-1 px-4 py-3 rounded-lg text-sm font-medium bg-[var(--gold)] text-white hover:bg-[rgb(var(--gold-rgb)/<alpha-value>)]/90 transition-colors"
               >
                 Sign Contract
               </button>

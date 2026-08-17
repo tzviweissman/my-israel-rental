@@ -1,4 +1,8 @@
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Manrope:wght@400;500&display=swap');
+/* Fonts and the base body/heading rules now come from
+   styles/design-tokens.css, imported first in index.js. They are NOT
+   repeated here: a second declaration later in the cascade wins on load
+   order, so duplicating them would silently pin the old values and make
+   the locked token file a decoration. */
 
 * {
   margin: 0;
@@ -6,49 +10,47 @@
   box-sizing: border-box;
 }
 
-body {
-  font-family: 'Manrope', sans-serif;
-  background-color: #FAFAFA;
-  color: #1A1A1A;
-}
+/* Legacy button aliases.
+   The design system's names are .btn-primary / .btn-accent (see
+   design-tokens.css). This app already had .primary-btn / .secondary-btn —
+   the same words in the opposite order, which is a genuine footgun: typing
+   the wrong one yields an unstyled <button> with no error.
 
-h1, h2, h3, h4, h5, h6 {
-  font-family: 'Playfair Display', serif;
-  font-weight: 600;
-}
-
+   Rather than leave two competing implementations, these now inherit the
+   token styling, so both spellings render identically while call sites are
+   migrated. They intentionally add nothing of their own. */
 .primary-btn {
-  background-color: #1E6A6A;
-  color: #D4AF37;
-  padding: 0.75rem 2rem;
-  border-radius: 9999px;
-  border: 1px solid #D4AF37;
-  font-weight: 500;
+  background: var(--brand-primary);
+  color: #fff;
+  border: 1.5px solid transparent;
+  border-radius: var(--radius-pill);
+  font-weight: 700;
+  padding: 13px 24px;
   cursor: pointer;
-  transition: all 0.3s ease-in-out;
+  transition: all .26s var(--ease);
 }
 
 .primary-btn:hover {
-  background-color: #D4AF37;
-  color: #1E6A6A;
-  transform: translateY(-2px);
+  background: var(--brand-primary-dark);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
 }
 
 .secondary-btn {
-  background-color: transparent;
-  color: #1E6A6A;
-  padding: 0.75rem 2rem;
-  border-radius: 9999px;
-  border: 1px solid #1E6A6A;
-  font-weight: 500;
+  background: transparent;
+  color: var(--brand-primary);
+  border: 1.5px solid var(--brand-primary);
+  border-radius: var(--radius-pill);
+  font-weight: 700;
+  padding: 13px 24px;
   cursor: pointer;
-  transition: all 0.3s ease-in-out;
+  transition: all .26s var(--ease);
 }
 
 .secondary-btn:hover {
-  background-color: rgba(0, 0, 0, 0.05);
-  border-color: #D4AF37;
-  color: #D4AF37;
+  background: rgba(30, 95, 140, .06);
+  border-color: var(--brand-primary-dark);
+  color: var(--brand-primary-dark);
 }
 
 .property-card {
@@ -62,8 +64,8 @@ h1, h2, h3, h4, h5, h6 {
 
 .property-card:hover {
   transform: translateY(-4px);
-  box-shadow: 0 10px 40px rgba(212, 175, 55, 0.2);
-  border-color: #D4AF37;
+  box-shadow: 0 10px 40px rgba(201, 162, 39, 0.2);
+  border-color: var(--gold);
 }
 
 .glassmorphism {
@@ -73,12 +75,27 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 :root {
-  /* Brand gold (#D4AF37) fails WCAG AA (4.5:1) as TEXT on the solid
+  /* Brand gold (var(--gold)) fails WCAG AA (4.5:1) as TEXT on the solid
      backgrounds it's paired with elsewhere (white cards ~2.1:1, the
      scrolled-nav teal ~3:1) — decorative use (borders, icons, fills)
      is unaffected and keeps the original brand color. */
-  --gold-text-on-light: #8B6914; /* ~5.1:1 on white */
-  --gold-text-on-dark: #F0DA8C;  /* ~4.5:1 on #1E6A6A */
+  /* Small gold text on light surfaces.
+     Was #8B6914, chosen against WHITE where it measures 5.09:1 and passes
+     comfortably. But it is mostly used on the LIMESTONE page background,
+     where it is 4.20:1 and fails AA for small text. The colour was
+     calibrated against a background it is rarely used on, which nobody
+     noticed until a contrast checker measured the rendered page.
+     #805F12 clears AA on all three surfaces it actually appears on, with
+     margin rather than by a hair: limestone 4.87, badge #F6EFD9 5.13,
+     white 5.89. */
+  --gold-text-on-light: #805F12;
+  --focus-ring: rgb(30 95 140 / .55); /* --brand-primary at 55% */
+
+  /* Gold for large text sitting on a PHOTO or video, where the surface
+     is neither the light page nor a solid dark panel. See the note on
+     .hero-band-head h1 .accent for why --gold cannot be used there. */
+  --gold-on-photo: #EFD89B;
+  --gold-text-on-dark: #F0DA8C;  /* ~4.5:1 on var(--brand-primary) */
 }
 
 [dir="rtl"] {
@@ -126,12 +143,12 @@ input[type="date"]::-moz-calendar-picker-indicator {
 
 /* Date input hover effect */
 input[type="date"]:hover {
-  box-shadow: 0 4px 12px rgba(30, 106, 106, 0.08);
+  box-shadow: 0 4px 12px rgba(30, 95, 140, 0.08);
 }
 
 /* Date input focus state */
 input[type="date"]:focus {
-  box-shadow: 0 0 0 3px rgba(30, 106, 106, 0.1), 0 4px 12px rgba(30, 106, 106, 0.15);
+  box-shadow: 0 0 0 3px rgba(30, 95, 140, 0.1), 0 4px 12px rgba(30, 95, 140, 0.15);
 }
 
 /* Placeholder styling for empty date */
@@ -144,4 +161,1073 @@ input[type="date"]:not(:valid):before {
 input[type="date"]:focus:before,
 input[type="date"]:valid:before {
   content: "";
+}
+
+/* ── Glass nav (Phase 2d) ──────────────────────────────────────────────
+   Copied verbatim from `.bar` / `.glass` in the preview files — these
+   live only there, not in the locked design-tokens.css, and the brief is
+   explicit that values are copied rather than re-derived.
+
+   The gradient + pointer-events pair is load-bearing: the bar spans the
+   full width so its scrim can darken the top of the hero photo, but a
+   full-width transparent overlay would swallow every click underneath it.
+   `pointer-events:none` on the bar with `auto` on its children means only
+   the pills are clickable and the hero stays interactive.
+
+   `.glass-nav-*` rather than `.bar`/`.links` so these can't collide with
+   the generic class names already used elsewhere in a 125-file app. */
+.glass-nav {
+  background: linear-gradient(180deg, rgba(4, 12, 17, .42), transparent);
+  pointer-events: none;
+}
+.glass-nav > * { pointer-events: auto; }
+
+.glass-pill {
+  background: rgba(255, 255, 255, .12);
+  border: 1.5px solid rgba(255, 255, 255, .55);
+  backdrop-filter: blur(10px) saturate(1.1);
+  -webkit-backdrop-filter: blur(10px) saturate(1.1);
+  border-radius: 999px;
+  color: #fff;
+  font-weight: 700;
+  font-size: 14px;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, .4);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .25), 0 4px 16px rgba(0, 0, 0, .18);
+  transition: all .2s var(--ease);
+  text-decoration: none;
+  padding: 10px 18px;
+  cursor: pointer;
+  font-family: inherit;
+  white-space: nowrap;
+}
+.glass-pill:hover {
+  background: rgba(255, 255, 255, .24);
+  transform: translateY(-1px);
+}
+
+/* The language toggle is a touch smaller than the nav links. */
+.glass-pill-sm { font-size: 12.5px; padding: 9px 14px; }
+
+/* The one solid button in the bar — the join CTA. */
+.glass-pill-solid {
+  background: rgba(255, 255, 255, .92);
+  border: 1.5px solid rgba(255, 255, 255, .95);
+  border-radius: 999px;
+  color: var(--ink);
+  font-weight: 800;
+  font-size: 14px;
+  padding: 10px 20px;
+  cursor: pointer;
+  font-family: inherit;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, .25);
+  transition: all .2s var(--ease);
+  white-space: nowrap;
+}
+.glass-pill-solid:hover { transform: translateY(-1px); }
+
+@media (prefers-reduced-motion: reduce) {
+  .glass-pill:hover,
+  .glass-pill-solid:hover { transform: none; }
+}
+
+/* Active nav link — brighter bubble plus a gold dot, verbatim from
+   `.links a.current` / `.dot` in the previews. Two signals rather than
+   one: the brightness shift alone is a ~1.2:1 difference against the
+   inactive pill, which is invisible to anyone with low vision and
+   vanishes entirely over a bright patch of hero photo. The dot carries
+   the meaning; the bubble reinforces it.
+
+   `margin-inline-start` (not left) so the dot flips sides in Hebrew. */
+.glass-pill-current {
+  background: rgba(255, 255, 255, .28);
+  border-color: rgba(255, 255, 255, .85);
+}
+.glass-dot {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--gold);
+  margin-inline-start: 6px;
+  vertical-align: middle;
+}
+
+/* ── Cinematic home scenes (Phase 2a) ─────────────────────────────────
+   Copied verbatim from cinematic-preview.html. The values here are
+   choreography, not taste: .txt sits bottom-left because the .shade
+   gradient is darkest on that edge, and the two together are what keep a
+   white headline legible over an arbitrary video frame.
+
+   NOTE: nothing here sets opacity:0. The scroll engine sets opacity from
+   JS only, so if the engine never runs every caption is simply visible.
+   Adding a CSS opacity:0 to [data-seg] would turn a script failure into a
+   blank page. */
+.scene .pin{position:sticky;top:0;height:100vh;overflow:hidden}
+.scene video,.scene .still{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;will-change:transform,opacity}
+.scene .still{background-size:cover;background-position:center}
+.scene .shade{position:absolute;inset:0;background:linear-gradient(90deg,rgba(6,14,19,.7) 0%,rgba(6,14,19,.32) 45%,rgba(6,14,19,.05) 75%);pointer-events:none}
+.vig{position:absolute;inset:0;pointer-events:none;background:radial-gradient(125% 95% at 50% 30%,transparent 55%,rgba(3,10,14,.5) 100%)}
+.txt{position:absolute;z-index:5;left:clamp(20px,5.5vw,80px);bottom:clamp(70px,14vh,150px);max-width:600px;will-change:transform,opacity}
+.kick{font-size:11.5px;font-weight:800;letter-spacing:.2em;text-transform:uppercase;color:var(--gold);text-shadow:0 1px 8px rgba(0,0,0,.6)}
+.txt h2{font-size:clamp(28px,4.4vw,54px);font-weight:800;line-height:1.04;letter-spacing:-1px;margin-top:10px;text-shadow:0 2px 26px rgba(0,0,0,.55)}
+.txt h2 .a{color:var(--gold)}
+.txt p{margin-top:12px;font-size:clamp(14px,1.35vw,17px);color:rgba(255,255,255,.92);max-width:470px;text-shadow:0 1px 10px rgba(0,0,0,.6)}
+.ncard{background:rgba(255,255,255,.97);color:var(--ink);border-radius:16px;box-shadow:0 24px 60px rgba(0,0,0,.5);padding:14px 16px}
+.ncard .from{font-size:10.5px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--blue);display:flex;align-items:center;gap:6px}
+.ncard .from.wa{color:#128C7E}
+.ncard .msg{margin-top:7px;font-size:13.5px;font-weight:600;line-height:1.5;overflow-wrap:break-word}
+.ncard .sig{margin-top:9px;border-top:1px dashed #d8cfc0;padding-top:9px;font-family:'Playfair Display';font-style:italic;font-size:19px;color:var(--blue-deep)}
+.ncard .ok{display:inline-flex;align-items:center;gap:6px;margin-top:9px;font-size:11px;font-weight:800;color:#1F8A50;background:#E3F3EA;border-radius:999px;padding:3px 10px}
+.ncard .meta{margin-top:7px;font-size:10.5px;color:#8a8377}
+.finale .kick{color:var(--gold-lg)}
+.finale h2{font-size:clamp(32px,5vw,62px);font-weight:600;letter-spacing:-1px;color:var(--blue-deep);margin-top:14px;line-height:1.05}
+/* A1 display weight — same cascade reason as .hero-band-head h1 above.
+   Note this one passed RTL and failed LTR before the fix, because the
+   token file's [dir="rtl"] selector outranks App.css while its plain
+   selector does not. A one-direction pass is the tell. */
+[dir="rtl"] .finale h2 { font-weight: 700; }
+@media (min-width: 1024px) {
+  .finale h2 { font-weight: 400; }
+  [dir="rtl"] .finale h2 { font-weight: 500; }
+}
+.finale h2 .a{color:var(--gold-lg)}
+.finale p{margin-top:16px;color:#6B6459;font-size:17px;max-width:540px;margin-left:auto;margin-right:auto}
+.finale .ctas{display:flex;gap:14px;margin-top:30px;justify-content:center;flex-wrap:wrap}
+.b-blue{background:var(--blue);color:#fff;border:none;border-radius:999px;font-weight:800;font-size:15px;padding:15px 30px;cursor:pointer;font-family:inherit}
+.b-gold{background:rgba(172,134,28,.85);color:#fff;border:1.5px solid rgba(201,162,39,.9);border-radius:999px;font-weight:700;font-size:15px;padding:15px 30px;cursor:pointer;font-family:inherit;text-shadow:0 1px 2px rgba(50,36,0,.5)}
+.strip{display:flex;gap:26px;justify-content:center;flex-wrap:wrap;margin-top:44px;color:#6B6459;font-size:13.5px;font-weight:600}
+.strip b{color:var(--blue-deep)}
+/* These three were inside @media blocks in the preview. My extraction
+   flattened them, so `.scene video{display:none}` — a REDUCED-MOTION rule —
+   applied at every width and hid the video for everyone. The page rendered
+   pure black on desktop and in headless, and the CSS was "correct" by every
+   value check because the values were right; only their scope was wrong.
+   Re-wrapped at the correct scope. */
+@media (max-width: 700px) {
+  /* Narrow: notification cards span the width and the shade goes
+     top-to-bottom, since there is no room for a side gradient. */
+  .note { right: 18px; left: 18px; width: auto; bottom: 20px; }
+  .scene .shade {
+    background: linear-gradient(180deg, rgba(6, 14, 19, .25), rgba(6, 14, 19, .78));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  /* Posters instead of video — the fallback the brief asks for. The poster
+     attribute paints once the element itself is hidden. */
+  .scene video { display: none; }
+}
+/* Scenes are dark by definition — the nav scrim sits on top of video. */
+.scene{position:relative;background:#060e13;color:#fff}
+
+/* ── Fixes from the human pass on the cinematic page ──────────────────── */
+
+/* The preview's CSS references --blue and --blue-deep, which do not exist in
+   design-tokens.css (they are --brand-primary / --brand-primary-deep there).
+   An undefined var makes the whole declaration invalid at computed-value
+   time, so `.b-blue{background:var(--blue)}` silently produced a button with
+   NO fill — white text on limestone. Same failure the shadcn --primary
+   collision produced, from the opposite direction: there the name existed
+   with the wrong type, here it doesn't exist at all. Both are invisible to a
+   value-level check and obvious in a screenshot. */
+:root {
+  --blue: var(--brand-primary);
+  --blue-deep: var(--brand-primary-deep);
+}
+
+/* Notification cards. The base rule was dropped when I extracted the
+   preview's CSS — it is preceded by a comment, which broke the selector
+   match — so the cards had no positioning at all and rendered as full-width
+   strips jammed under the nav. This is the preview's rule verbatim: a
+   floating right-hand column, capped at 360px, sitting above the fold line
+   rather than at the top of the viewport. */
+.note {
+  position: absolute;
+  z-index: 6;
+  right: clamp(18px, 4.5vw, 64px);
+  bottom: clamp(84px, 17vh, 170px);
+  width: min(360px, calc(100vw - 36px));
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  pointer-events: none;
+}
+[dir="rtl"] .note { right: auto; left: clamp(18px, 4.5vw, 64px); }
+
+/* Finale was flush to the left edge — the preview centres it in a
+   max-width container. */
+.finale {
+  padding: clamp(64px, 12vh, 130px) clamp(20px, 5vw, 64px);
+  text-align: center;
+}
+.finale > div {
+  max-width: 780px;
+  margin-inline: auto;
+}
+
+/* The gold CTA sits on limestone here, so it uses the frosted glass-gold
+   from design-tokens.css rather than an opaque fill. */
+.b-gold {
+  background: rgba(172, 134, 28, .64);
+  border: 1.5px solid rgba(201, 162, 39, .85);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+/* ── Hero (opening aerial) ────────────────────────────────────────────
+   Copied verbatim from the preview. The page previously opened cold on
+   scene 1's Kotel wall with no <h1> anywhere — this is the establishing
+   shot and the document's only top-level heading. The `.hint` bob is
+   defined here but neutralised under reduced motion below. */
+.hero video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.hero .shade2{position:absolute;inset:0;background:linear-gradient(180deg,rgba(6,14,19,.4),rgba(6,14,19,.12) 40%,rgba(6,14,19,.75))}
+.hero .center{position:absolute;z-index:5;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:0 20px}
+.hero h1{font-size:clamp(38px,6.6vw,80px);font-weight:800;letter-spacing:-1.5px;line-height:1.02;text-shadow:0 3px 30px rgba(0,0,0,.55)}
+.hero h1 .a{color:var(--gold)}
+.hero p{margin-top:16px;font-size:clamp(14px,1.6vw,18px);color:rgba(255,255,255,.92);max-width:560px}
+.hero .ctas{display:flex;gap:14px;margin-top:28px;flex-wrap:wrap;justify-content:center}
+.b-white{background:#fff;color:var(--ink);border:none;border-radius:999px;font-weight:800;font-size:15px;padding:15px 30px;cursor:pointer;font-family:inherit}
+.b-line{background:rgba(255,255,255,.1);color:#fff;border:1.5px solid rgba(255,255,255,.6);border-radius:999px;font-weight:700;font-size:15px;padding:15px 30px;cursor:pointer;backdrop-filter:blur(8px);font-family:inherit}
+.hero .hint{position:absolute;bottom:24px;left:50%;transform:translateX(-50%);z-index:5;font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:rgba(255,255,255,.65);animation:bob 2.4s ease-in-out infinite}
+@keyframes bob { 0%,100% { transform: translateX(-50%) translateY(0) } 50% { transform: translateX(-50%) translateY(6px) } }
+@media (prefers-reduced-motion: reduce) { .hero .hint { animation: none } }
+
+/* The preview's body is white-on-dark, so .hero and .finale text inherited
+   white for free. This app's body is ink-on-limestone, so every one of those
+   rules landed dark-on-photo — the h1 read as almost invisible against the
+   stone. Set the colour explicitly at each surface rather than changing the
+   app's body colour, which everything else depends on. */
+.hero, .hero .center { color: #fff; }
+.hero h1 { color: #fff; }
+.hero h1 .a { color: var(--gold); }
+.hero .hint { color: rgba(255, 255, 255, .65); }
+/* The finale is the one LIGHT surface — it keeps the app's ink. */
+.finale h2 { color: var(--ink); }
+
+/* The base .hero rule — dropped by the same extraction flaw that lost
+   `.note`: both are preceded by a comment, which broke the selector match,
+   so only their descendant rules came across. Without it the section had no
+   height of its own; every child is absolutely positioned, so the container
+   collapsed to 0 and scene 1 started at document top with the headline
+   floating over the Kotel media behind it.
+
+   Verbatim from the preview. `height`, not `min-height`: the hero is exactly
+   one viewport by design, and min-height would let a long Hebrew headline
+   push it taller and desynchronise every scene boundary below. */
+.hero { position: relative; height: 100vh; overflow: hidden; }
+
+/* ── "Also on MyIsraelRental" pill strip ───────────────────────────────
+   Between the Requests scene and the finale. Ported BY HAND, not through
+   the extraction script — that script silently dropped every rule preceded
+   by a comment and flattened @media blocks, which cost four separate bugs
+   on this page.
+
+   Checked against the app's cascade rather than assumed, since that is what
+   the previous bugs had in common:
+     • every colour here is explicit (#fff, rgba(...)), so nothing inherits
+       from the preview's white-on-dark body the way .hero did;
+     • no var(--border) / var(--muted) appear, so there is nothing to
+       rewrite to --brand-border / --brand-muted;
+     • the preview has no @media override for .also — the only max-width
+       block on the page covers .bar and closes before these rules.
+
+   Dark panel on purpose: it sits between the last dark scene and the
+   limestone finale, so it carries the eye out of the film and into the
+   page without a hard cut. */
+.also { background: #0b1c26; padding: 96px 22px; text-align: center; }
+.also-in { max-width: 960px; margin: 0 auto; }
+.also h2 {
+  font-size: clamp(26px, 3.6vw, 44px);
+  font-weight: 800;
+  letter-spacing: -.8px;
+  margin-top: 12px;
+  color: #fff;
+}
+.also-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  justify-content: center;
+  margin-top: 34px;
+}
+.also-grid span {
+  background: rgba(255, 255, 255, .07);
+  border: 1px solid rgba(255, 255, 255, .22);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  border-radius: 999px;
+  padding: 11px 20px;
+  font-size: 14px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, .92);
+}
+
+/* Scroll-progress bar, verbatim from the preview. Deliberately NOT hidden
+   under prefers-reduced-motion: the preview's reduced-motion block covers
+   only .scene video and the hint animation, and this is a position
+   indicator rather than an animation — on a page this tall it is the one
+   cue telling a visitor the story has length and where they are in it.
+   Removing it would take information away from the users most likely to
+   want it. */
+.progress {
+  position: fixed;
+  left: 0;
+  top: 0;
+  height: 3px;
+  background: var(--gold);
+  width: 0%;
+  z-index: 60;
+}
+
+/* ── Stays band + floating search panel (Phase 2b) ────────────────────
+   Hand-ported from stays-preview.html. Ported by hand rather than
+   extracted, because preview CSS leans on context this app doesn't
+   share (a `.band`-scoped `color:#fff`, a bare `--blue` var, no fixed
+   nav) — the last round of extraction bugs all came from exactly that.
+
+   The one structural difference from the preview: there, `nav.bar` is
+   `position:relative` INSIDE `.band`, so the band's own padding places
+   the headline below it. Here the global nav is `position:fixed` and
+   overlays the band, so `.hero-band-head` pads by `--nav-h` instead of
+   the preview's flat 34px. Same visual result, different mechanism. */
+.hero-band { position: relative; overflow: hidden; color: #fff; }
+.hero-band .hero-band-bg {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+/* Verbatim from `.band .shade`. Three stops, not two: the middle stop
+   keeps the centre of the photo readable while both edges stay dark
+   enough for white text and for the nav's own scrim to blend into. */
+/* Anything that removes its own outline has to put something back.
+   Several inputs across the app carry Tailwind's `outline-none` with no
+   replacement, so tabbing into them moved focus somewhere invisible. A
+   utility class is specificity 0,1,0 and this selector is 0,1,1, so this
+   wins without any of those call sites needing to change.
+
+   Deliberately :focus-visible, not :focus, so a mouse click does not draw
+   a ring the user did not ask for, only keyboard navigation does. */
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible,
+[contenteditable]:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+.hero-band .hero-band-shade {
+  position: absolute;
+  inset: 0;
+  /* The middle stop used to be .35, and that is exactly the band the
+     headline sits in. Over the brightest part of a hero photo, white
+     headline text measured 2.56:1 there against the 4.5 it needs. Raised
+     so the text band is the STRONGEST part of the scrim rather than the
+     weakest: at .55 the same white text measures 4.77:1.
+     Measured against rgb(248,242,230), about the brightest pixel any of
+     these three photos puts behind the headline. */
+  background: linear-gradient(180deg, rgba(4,12,17,.6), rgba(4,12,17,.55) 55%, rgba(4,12,17,.68));
+}
+.hero-band-head {
+  position: relative;
+  z-index: 4;
+  text-align: center;
+  /* preview: 34px 20px 120px — plus the fixed nav's height, since our
+     nav floats over the band instead of sitting in its flow. */
+  padding: calc(var(--nav-h, 68px) + 34px) 20px 120px;
+}
+.hero-band-head h1 {
+  font-size: clamp(30px, 4.6vw, 54px);
+  font-weight: 600;
+  letter-spacing: -1px;
+  text-shadow: 0 2px 24px rgba(0,0,0,.5);
+}
+/* A1 display weight. 600 small, 400 large (Hebrew one notch up at each).
+   This has to live here, not in design-tokens.css:
+   the rule above and the token rule have identical specificity (0,1,1),
+   App.css loads later, so the token rule lost silently — the computed
+   weight stayed 800 while the CSS looked correct. */
+[dir="rtl"] .hero-band-head h1 { font-weight: 700; }
+@media (min-width: 1024px) {
+  .hero-band-head h1 { font-weight: 400; }
+  [dir="rtl"] .hero-band-head h1 { font-weight: 500; }
+}
+/* Gold on a PHOTO is a third surface, and the palette only had two.
+   --gold (#C9A227) is specified for dark surfaces, and a photograph is
+   not reliably dark: over the bright part of these heroes it measured
+   1.97:1 against the 3:1 large text needs. Darkening the scrim cannot
+   rescue it either, because gold and a lit photo sit at similar
+   luminance, so the background has to pass THROUGH gold on its way down.
+   It would take a .7 scrim to clear 3:1, which turns the photo to mud.
+   A lighter gold clears it at the scrim above: 3.40:1, and it still
+   reads as the brand's gold rather than as cream. */
+.hero-band-head h1 .accent { color: var(--gold-on-photo); }
+.hero-band-head p {
+  margin-top: 10px;
+  color: rgba(255,255,255,.9);
+  font-size: 15px;
+}
+
+/* The panel rides up over the band by 88px. `z-index:6` clears the
+   band's shade (z 4) but stays under the nav (z 50) so the nav's
+   bubbles are never covered by the panel's corners on short viewports. */
+.hero-panel-float {
+  position: relative;
+  z-index: 6;
+  margin: -88px auto 0;
+  max-width: 1080px;
+  padding: 0 20px;
+}
+.hero-panel {
+  background: rgba(255,255,255,.97);
+  border-radius: 22px;
+  box-shadow: 0 30px 70px rgba(8,20,26,.28);
+  border: 1px solid rgba(255,255,255,.6);
+  padding: 18px;
+}
+
+/* ── Stays card (Phase 2b) ───────────────────────────────────────────
+   From `.card` in the preview. The photo height is the preview's flat
+   200px; see the note in StaysCard.jsx about how that reads at this
+   grid's density. */
+.stays-card {
+  background: #fff;
+  border: 1px solid var(--brand-border);
+  border-radius: 18px;
+  overflow: hidden;
+  cursor: pointer;
+  transition: transform .3s var(--ease), box-shadow .3s var(--ease);
+}
+.stays-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 12px 32px rgba(30,45,60,.12);
+}
+@media (prefers-reduced-motion: reduce) {
+  .stays-card { transition: none; }
+  .stays-card:hover { transform: none; }
+}
+/* `.tag` — the rental-type pill. inset-inline-start so it flips in
+   Hebrew; the preview already used logical properties here. */
+.stays-card-tag {
+  position: absolute;
+  top: 12px;
+  inset-inline-start: 12px;
+  background: rgba(255,255,255,.94);
+  color: var(--brand-primary);
+  font-size: 11.5px;
+  font-weight: 800;
+  padding: 4px 10px;
+  border-radius: 999px;
+}
+.stays-card-body { padding: 14px 16px 16px; }
+.stays-card-body h4 {
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: 0;
+  /* The preview forces Manrope on card titles specifically — they are
+     the one heading in the design that is NOT Playfair. */
+  font-family: var(--font-body);
+}
+.stays-card-loc { color: var(--brand-muted); font-size: 13px; margin-top: 4px; }
+.stays-card-meta {
+  display: flex;
+  gap: 13px;
+  color: #4a5551;
+  font-size: 12.5px;
+  margin-top: 9px;
+  font-weight: 600;
+}
+/* `space-between` with only one child today. That is intentional: the
+   preview's `★ 4.9` sits on the end of this row, and this product has no
+   rating data yet, so the slot is reserved rather than removed. Appending
+   a rating element later drops it straight into place. See StaysCard.jsx. */
+.stays-card-price {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: 11px;
+}
+.stays-card-amt {
+  font-size: 18px;
+  font-weight: 800;
+  /* --gold-lg in the preview (#A9831C): the gold darkened enough to pass
+     contrast as text on white, which the brand gold does not. */
+  color: var(--gold-text-on-light);
+}
+.stays-card-amt .unit {
+  font-size: 11.5px;
+  color: var(--brand-muted);
+  font-weight: 600;
+}
+
+/* `.rhead` — the results header. Shared by the flat search grid and the
+   map view, which ask the same question ("how many, sorted how?") and so
+   should not answer it in two different type sizes.
+
+   The preview pairs this with `.results{max-width:1200px}`; this app keeps
+   its wider container and denser grid (an explicit call — 1200px/3-up
+   roughly halves listings per screen), so only the type is ported. */
+.section-rhead h2 {
+  font-size: clamp(21px, 2.6vw, 29px);
+  font-weight: 700;
+  letter-spacing: -.4px;
+}
+.section-rhead .section-rhead-note {
+  color: var(--brand-muted);
+  font-size: 13.5px;
+  font-weight: 600;
+}
+
+/* ── Services: provider rows + dual CTA band (Phase 2c) ───────────────
+   Hand-ported from services-preview.html's `.pcard` and `.scta`.
+
+   The band and floating panel are NOT redefined here — Services uses the
+   shared `.hero-band*` / `.hero-panel*` rules above, which is why they
+   carry a neutral prefix rather than a per-page one. */
+.svc-row {
+  display: grid;
+  grid-template-columns: 120px 1fr auto;
+  gap: 18px;
+  align-items: center;
+  background: #fff;
+  border: 1px solid var(--brand-border);
+  border-radius: 18px;
+  padding: 14px;
+  transition: transform .25s var(--ease), box-shadow .25s var(--ease);
+}
+.svc-row:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 32px rgba(30, 45, 60, .12);
+}
+@media (prefers-reduced-motion: reduce) {
+  .svc-row { transition: none; }
+  .svc-row:hover { transform: none; }
+}
+.svc-row-ph {
+  width: 120px;
+  height: 86px;
+  border-radius: 12px;
+  background-size: cover;
+  background-position: center;
+  background-color: #EDE7DA;
+}
+.svc-row h4 { font-size: 16px; font-weight: 700; font-family: var(--font-body); }
+.svc-row-sub { color: var(--brand-muted); font-size: 13px; margin-top: 3px; }
+.svc-row-badges { display: flex; gap: 7px; margin-top: 8px; flex-wrap: wrap; }
+.svc-row-badges span {
+  font-size: 11px;
+  font-weight: 800;
+  border-radius: 999px;
+  padding: 3px 9px;
+}
+/* Only the rating badge ships — the preview's green "✓ Verified" has no
+   data behind it. See the TODO in backend/routes/marketplace/shared.py:
+   the Verified badge is a deliberately deferred feature, not an oversight. */
+.svc-badge-rating { color: var(--gold-text-on-light); background: #F6EFD9; }
+@media (max-width: 700px) {
+  .svc-row { grid-template-columns: 1fr; }
+  .svc-row-ph { width: 100%; height: 150px; }
+}
+
+/* Dual CTA band. Two panels, deliberately unlike each other: the dark one
+   speaks to someone who needs work done, the cream one to someone selling
+   their labour. Same width, opposite weight. */
+.svc-cta {
+  border-radius: 18px;
+  padding: 26px 28px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+.svc-cta h4 { font-size: 19px; font-weight: 700; }
+.svc-cta small { display: block; font-size: 13px; margin-top: 3px; opacity: .9; }
+.svc-cta-need { background: var(--brand-primary-deep); color: #eaf4ff; }
+.svc-cta-need h4 { color: #fff; }
+.svc-cta-offer { background: #F6EFD9; border: 1.5px solid var(--gold); }
+/* The one gold button that is actually on the live site. Kept in step with
+   .btn-accent in design-tokens.css — two different gold buttons on one
+   site reads as a mistake, and after A2 the token version is ink on solid
+   gold. */
+.btn-gold-solid {
+  /* History, because this has moved twice. It began as rgba(172,134,28,.85),
+     which composites near #AC861C and gave white text only 3.40:1. The fix
+     then was to darken the FILL to about #8A6A14 so white cleared AA at
+     5.06:1 — correct at the time, since the design system specified white
+     text on the accent button.
+
+     A2 changed that premise. Ink on the brand's own --gold is 6.71:1, which
+     beats both earlier attempts, needs no darkening away from the palette
+     value, and no longer needs a text-shadow to survive. So the fill goes
+     back to the real brand gold and the TEXT is what moved. */
+  background: var(--gold);
+  color: var(--ink);
+  border: 1.5px solid var(--gold);
+  border-radius: 999px;
+  font-weight: 700;
+  font-size: 14.5px;
+  padding: 13px 24px;
+  cursor: pointer;
+  font-family: inherit;
+  white-space: nowrap;
+}
+.btn-blue-solid {
+  background: var(--brand-primary);
+  color: #fff;
+  border: none;
+  border-radius: 999px;
+  font-weight: 800;
+  font-size: 14.5px;
+  padding: 13px 24px;
+  cursor: pointer;
+  font-family: inherit;
+  white-space: nowrap;
+}
+.btn-blue-solid:hover { background: var(--brand-primary-dark); }
+
+/* ── Section library: supply band, tabbed steps (used by /why-host) ────
+   Hand-ported from home-redesign-preview.html's SUPPLY BAND and HOW IT
+   WORKS sections. The preview's `--teal` / `--teal-deep` are this app's
+   `--brand-primary` / `--brand-primary-deep`.
+
+   `wh-` prefixed rather than the preview's generic `.band` / `.tabs` /
+   `.step`, for the same reason `.glass-nav-*` is prefixed: those names
+   would collide with something in a 125-file app. */
+.wh-eyebrow {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+}
+
+.wh-band {
+  background: linear-gradient(120deg, var(--brand-primary-deep), var(--brand-primary));
+  color: #fff;
+  border-radius: 30px;
+  padding: 46px 44px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 26px;
+  align-items: center;
+}
+.wh-band h2 { font-size: clamp(24px, 3vw, 34px); font-weight: 700; line-height: 1.1; }
+.wh-band p { color: rgba(255,255,255,.88); margin-top: 12px; font-size: 15px; }
+@media (max-width: 860px) {
+  .wh-band { grid-template-columns: 1fr; padding: 32px 24px; border-radius: 22px; }
+}
+
+.wh-facts { display: flex; flex-direction: column; gap: 14px; }
+.wh-fact {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  background: rgba(255,255,255,.08);
+  border: 1px solid rgba(255,255,255,.16);
+  border-radius: 14px;
+  padding: 14px 16px;
+}
+.wh-fact .fi {
+  font-size: 20px;
+  color: var(--gold);
+  width: 24px;
+  flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+  font-weight: 800;
+}
+.wh-fact b { font-size: 15px; }
+.wh-fact small { font-size: 13px; opacity: .85; display: block; }
+
+/* Tabbed how-it-works. The tab list is a real radio-style group: one
+   control per panel, `aria-selected` carrying the state, because the
+   active tab is otherwise signalled by background colour alone. */
+.wh-tabs {
+  display: inline-flex;
+  background: #EAF1F7;
+  border-radius: 999px;
+  padding: 4px;
+  gap: 4px;
+}
+.wh-tab {
+  border: none;
+  background: transparent;
+  font-weight: 700;
+  font-size: 14px;
+  color: #4a5551;
+  padding: 9px 22px;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: all .18s var(--ease);
+  font-family: inherit;
+}
+.wh-tab[aria-selected="true"] {
+  background: #fff;
+  color: var(--brand-primary);
+  box-shadow: var(--shadow-sm);
+}
+
+.wh-steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 26px; }
+/* `hidden` is a UA-stylesheet `display:none`, and ANY author `display`
+   beats it — so the inactive tab panel stayed on screen and both step
+   rows rendered at once. Keeping the attribute (rather than unmounting)
+   means the panel is still a real tabpanel for assistive tech. */
+.wh-steps[hidden] { display: none; }
+@media (max-width: 760px) { .wh-steps { grid-template-columns: 1fr; } }
+.wh-step { text-align: center; padding: 8px; }
+.wh-step .num {
+  width: 48px;
+  height: 48px;
+  margin: 0 auto 14px;
+  border-radius: 50%;
+  background: #E4EEF6;
+  color: var(--brand-primary);
+  display: grid;
+  place-items: center;
+  font-family: var(--font-head);
+  font-weight: 700;
+  font-size: 20px;
+}
+.wh-step h4 { font-size: 17px; font-weight: 700; }
+.wh-step p { color: var(--brand-muted); font-size: 14px; margin-top: 6px; }
+
+/* ── Requests board (Phase 3) ─────────────────────────────────────────
+   From `.rcard` in wanted-board-preview.html.
+
+   The preview's card also carries a poster block — avatar, name,
+   "Verified", "member since". None of it is rendered: the public request
+   endpoints deliberately return no seeker identity (the board is
+   chat-only and must not be harvestable), and there is no verification
+   feature. A card shows the REQUEST; who posted it is revealed by them,
+   in chat. */
+.rcard {
+  background: #fff;
+  border: 1px solid var(--brand-border);
+  border-radius: 18px;
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  transition: transform .25s var(--ease), box-shadow .25s var(--ease);
+}
+.rcard:hover { transform: translateY(-3px); box-shadow: 0 12px 32px rgba(30,45,60,.12); }
+@media (prefers-reduced-motion: reduce) {
+  .rcard { transition: none; }
+  .rcard:hover { transform: none; }
+}
+.rcard h3 { font-size: 17px; font-weight: 700; font-family: var(--font-body); color: var(--ink); }
+
+/* Type badge — the one place the two request kinds are colour-coded, so
+   a scanner can tell rentals from services without reading. */
+.rc-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+  font-weight: 800;
+  padding: 3px 9px;
+  border-radius: 999px;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+}
+.rc-badge-rental { background: rgb(var(--brand-primary-rgb) / .10); color: var(--brand-primary); }
+.rc-badge-service { background: #F6EFD9; color: var(--gold-text-on-light); }
+
+/* Which SIDE of the market a post is on. Deliberately ink-on-neutral
+   rather than a third and fourth colour: the board already carries a blue
+   rental badge and a gold service badge, and adding two more hues would
+   turn the card corner into a paint chart. The distinction here is carried
+   by the icon and the word, with weight doing the rest.
+
+   Green is not used for "Available" even though it is tempting - green is
+   functional-only in this system (status, verified), and an availability
+   badge is neither. */
+.rc-badge-want { background: rgba(35, 32, 27, .06); color: var(--ink); }
+.rc-badge-offer { background: var(--ink); color: #fff; }
+
+/* The link out to a full listing. Underlined because it leaves the card
+   while the rest of the card is one big click target - without it, a
+   reader cannot tell this chip behaves differently from its neighbours. */
+.rc-chip-link {
+  color: var(--brand-primary);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  cursor: pointer;
+}
+.rc-chip-link:hover { color: var(--brand-primary-dark); }
+
+.rc-chips { display: flex; flex-wrap: wrap; gap: 7px; }
+.rc-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #4a5551;
+  background: #F4F1EA;
+  border: 1px solid var(--brand-border);
+  border-radius: 999px;
+  padding: 4px 10px;
+}
+/* The two chips a seeker actually filters on — area and budget. */
+.rc-chip-key { background: #fff; border-color: rgb(var(--brand-primary-rgb) / .35); color: var(--brand-primary); }
+
+.rc-note {
+  font-size: 13.5px;
+  color: var(--brand-muted);
+  line-height: 1.5;
+  display: -webkit-box;
+  /* Two, matching the title above it and the `line-clamp-2` the markup
+     already asked for. It was 3 here, and this rule quietly outranked the
+     utility class — so the JSX said two lines and the page rendered three.
+     One place owns this now; the utility class has been removed from the
+     element rather than left there disagreeing. */
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  overflow-wrap: anywhere;
+}
+.rc-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: auto;
+  padding-top: 10px;
+  border-top: 1px solid var(--brand-border);
+}
+.rc-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--brand-muted);
+}
+.rc-status .dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #1F8A50;
+  flex: 0 0 auto;
+}
+
+/* Poster identity strip on a request card. Identity only — see the note
+   in RequestsBoard.jsx. No avatar slot exists here on purpose. */
+.rc-poster {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  font-size: 12.5px;
+}
+.rc-poster-name { font-weight: 700; color: var(--ink); }
+.rc-poster-since { color: var(--brand-muted); }
+.rc-verified {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  font-weight: 800;
+  color: #1F8A50;
+  background: #E3F3EA;
+  border-radius: 999px;
+  padding: 2px 8px;
+}
+
+/* B1 — proof line under the Stays search panel.
+   --brand-muted on the white panel measures 5.85:1, so it clears AA at
+   this small size with room to spare, and it does so
+   without pulling attention off the search control above it. Centred to
+   match the panel; separators are literal "·" in the copy so they flip
+   correctly in RTL without extra rules. */
+.trust-line {
+  margin: 12px 0 2px;
+  text-align: center;
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: .1px;
+  color: var(--brand-muted);
+}
+@media (max-width: 520px) {
+  /* Three clauses wrap to three lines on a phone and start to look like a
+     paragraph. Slightly tighter, and the line-height keeps it a caption. */
+  .trust-line { font-size: 12px; line-height: 1.5; }
+}
+
+/* B2 — the price position, promoted from body copy to a claim.
+   Kindred makes "No membership fee" its second-largest text. These sit
+   between the headline and the body on purpose: large enough to be read
+   before the paragraph, small enough not to compete with the h1.
+
+   --blue-deep rather than gold. Gold at this size on limestone is the
+   --gold-lg case and reads as decoration; the fee position is the
+   argument, so it takes the structural colour. */
+/* `.finale .finale-price`, not `.finale-price`: `.finale p` above sets
+   font-size:17px at specificity (0,1,1) and would beat a bare class, so
+   the line rendered at body size while the CSS said 28px. Fourth time
+   this exact cascade trap has bitten in this file - always confirm on the
+   rendered page, never in the stylesheet. */
+.finale .finale-price {
+  margin-top: 18px;
+  font-family: var(--font-head);
+  font-size: clamp(19px, 2.3vw, 28px);
+  font-weight: 600;
+  line-height: 1.25;
+  color: var(--blue-deep);
+}
+.wh-price {
+  margin: 0 0 14px;
+  font-family: var(--font-head);
+  font-size: clamp(19px, 2.2vw, 27px);
+  font-weight: 600;
+  line-height: 1.25;
+  color: var(--blue-deep);
+  max-width: 22ch;
+}
+/* Hebrew: Frank Ruhl Libre reads lighter than Playfair at the same number,
+   the same reason the display headings carry a per-direction weight. */
+[dir="rtl"] .finale .finale-price,
+[dir="rtl"] .wh-price { font-weight: 700; }
+
+/* ── Calendar (components/common/DateField) ────────────────────────────
+   react-day-picker ships functional defaults in its own stylesheet; this
+   dresses it in the brand rather than leaving it looking like a library
+   demo. Scoped to .mir-daypicker so the booking sidebar's own calendar,
+   which has its own styling and its own range behaviour, is untouched. */
+.mir-daypicker {
+  --rdp-cell-size: 38px;
+  --rdp-accent-color: var(--brand-primary);
+  --rdp-background-color: rgb(var(--brand-primary-rgb) / .10);
+  margin: 0;
+  font-family: var(--font-body);
+}
+.mir-daypicker .rdp-caption_label {
+  font-family: var(--font-head);
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--ink);
+}
+.mir-daypicker .rdp-head_cell {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+  color: var(--brand-muted);
+}
+.mir-daypicker .rdp-day {
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink);
+}
+.mir-daypicker .rdp-day:hover:not(.rdp-day_selected):not(.rdp-day_disabled) {
+  background: rgb(var(--brand-primary-rgb) / .08);
+}
+.mir-daypicker .rdp-day_today:not(.rdp-day_selected) {
+  /* An outline rather than a fill: today is a landmark, not a selection,
+     and filling it makes an unselected calendar look like it already has
+     an answer in it. */
+  box-shadow: inset 0 0 0 1.5px var(--brand-border);
+}
+.mir-daypicker .rdp-day_selected,
+.mir-daypicker .rdp-day_selected:hover {
+  background: var(--brand-primary);
+  color: #fff;
+}
+.mir-daypicker .rdp-day_outside { color: var(--brand-muted); opacity: .5; }
+.mir-daypicker .rdp-day_disabled { color: var(--brand-muted); opacity: .35; }
+.mir-daypicker .rdp-nav_button {
+  border-radius: 999px;
+  color: var(--brand-primary);
+}
+.mir-daypicker .rdp-nav_button:hover { background: rgb(var(--brand-primary-rgb) / .08); }
+
+/* C6 — request row title, clamped to two lines.
+   -webkit-line-clamp is the only cross-browser way to clamp at a line
+   count; it is not a vendor experiment any more but it does still need
+   the -webkit-box display and vertical orientation to work at all. Every
+   one of the three declarations is load-bearing — drop any and the clamp
+   silently does nothing, which is exactly the failure mode that got this
+   shipped unclamped in the first place. */
+.rc-title {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+  /* Long unbroken strings (a URL, a very long place name) would otherwise
+     push the row wider than its column rather than wrapping. */
+  overflow-wrap: anywhere;
+}
+
+/* The request row's right-hand column, kept in step across rows.
+
+   Each row is its OWN grid, so an `auto` column is sized by that row's
+   content alone and nothing lines up between rows — the fixed width in the
+   grid template is what makes a column of buttons a column. 260px is
+   measured, not guessed: it is what the longest status line ("Open · 4
+   responses · expires in 25 days") needs without wrapping.
+
+   align-items has to be restated here. `.rc-foot` sets `center` and beats
+   the `sm:items-end` utility on the element, so the buttons were centred in
+   their column while the markup said end — the fourth time in this file
+   that a rule has looked right in the JSX and lost in the cascade.
+
+   In a column flex, justify-content is the VERTICAL axis. Setting it to
+   flex-end here pushed the stack to the bottom of the row rather than
+   right — which is what my first attempt at this did. */
+/* A fixed height, not a minimum. Empty it measured 18px and filled 19px,
+   which put the status row and button of every identified poster 1-3px
+   below their neighbours — invisible on any one row and exactly the sort
+   of thing that reads as "untidy" down a column of thirteen. */
+.rc-poster-slot { height: 19px; overflow: hidden; }
+@media (min-width: 640px) {
+  .rc-poster-slot,
+  .rc-foot {
+    width: 100%;
+    align-items: flex-end;
+    justify-content: flex-start;
+    text-align: end;
+  }
+  /* Never wrap — a wrapped status line pushed the button down a whole line
+     on exactly the rows with most to say. But nowrap alone made the
+     opposite mess: the longest lines then overflowed the fixed column and
+     dragged their buttons 28px past the row's right edge. So it is capped
+     as well, and truncates rather than growing. Nothing is lost — the same
+     facts are on the row and on the post itself. */
+  .rc-status {
+    white-space: nowrap;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+}
+
+/* WhatsApp button — WhatsApp's own green (#25D366), which is why this is
+   the one green in the product that is not a status colour. The design
+   system reserves green for status, and this is a deliberate, narrow
+   exception: it is a third-party brand mark, people recognise it before
+   they read the label, and four other places in the app already use it.
+
+   INK text, not white. White on #25D366 measures about 2:1 — it is
+   everywhere on the web and it is unreadable for anyone with low vision;
+   ink on the same green is over 8:1 and looks more like WhatsApp's own
+   buttons anyway. Same reasoning as the gold accent button. */
+.btn-whatsapp {
+  background: #25D366;
+  color: var(--ink);
+  border: 1.5px solid #25D366;
+}
+.btn-whatsapp:hover {
+  background: #1FBE5B;
+  border-color: #1FBE5B;
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
 }

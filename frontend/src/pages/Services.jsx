@@ -10,13 +10,13 @@
  * URL state persists every filter so a screenshot-worthy filtered view
  * is always deep-linkable (e.g. shareable /services?category=photography&min_rating=4&sort=rating).
  */
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import axios from 'axios';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
 import { ArrowRight, Loader2, SlidersHorizontal, Award, Zap, MapPin, LayoutGrid, Map as MapIcon } from 'lucide-react';
-import { API } from '../App';
+import { API, AuthContext } from '../App';
 import PageMeta from '../components/PageMeta';
 import StarRating from '../components/marketplace/StarRating';
 import CategoryCarousel from '../components/marketplace/CategoryCarousel';
@@ -30,10 +30,14 @@ import { isAvailableNow, getGigCover } from '../utils/gigAvailability';
 import ServicesHeroSearch from '../components/marketplace/ServicesHeroSearch';
 import { saveReturnPath } from '../hooks/useBackNavigation';
 import { SUBCATEGORIES } from '../lib/categories';
-import ServicesHeroTitle from '../components/marketplace/ServicesHeroTitle';
+// ServicesHeroTitle (the shimmer-on-white H1) is no longer rendered — the
+// headline now lives in the photo band. The component file is left in
+// place rather than deleted until 2c is approved.
+import ServicesHero from '../components/marketplace/ServicesHero';
+import FeaturedProviders from '../components/marketplace/FeaturedProviders';
 
-const TEAL = '#1E6A6A';
-const GOLD = '#D4AF37';
+const TEAL = 'var(--brand-primary)';
+const GOLD = 'var(--gold)';
 
 // Sort options the dropdown surfaces — keys map 1:1 to the backend
 // `sort` query param (see `list_gigs` in routes/marketplace.py).
@@ -56,15 +60,27 @@ const GigCard = ({ gig, onClick, i18n, t }) => {
   return (
     <button
       onClick={onClick}
-      className="text-left group"
+      // `w-full` is load-bearing: a <button> is inline-block, so when it
+      // is not itself the grid item (the admin featuring toggle wraps it
+      // in a positioned div) it shrinks to its content and the cards
+      // overlap. Harmless when it IS the grid item.
+      className="text-left group w-full"
       data-testid={`services-gig-${gig.id}`}
     >
       <div
-        className="relative aspect-square w-full bg-gray-100 rounded-xl overflow-hidden mb-2"
-        style={cover ? { backgroundImage: `url(${cover})`, backgroundSize: 'cover', backgroundPosition: 'center' } : {}}
+        className="relative aspect-square w-full rounded-xl overflow-hidden mb-2"
+        // Limestone-tinted rather than bg-gray-100. The "No image" label
+        // used to be gray-300 on gray-100, which measures 1.34:1 and is
+        // effectively invisible. Matches .svc-row-ph elsewhere.
+        style={{
+          background: '#EDE7DA',
+          ...(cover
+            ? { backgroundImage: `url(${cover})`, backgroundSize: 'cover', backgroundPosition: 'center' }
+            : {}),
+        }}
       >
         {!cover && (
-          <div className="w-full h-full flex items-center justify-center text-gray-300 text-xs">
+          <div className="w-full h-full flex items-center justify-center text-xs" style={{ color: 'var(--brand-muted)' }}>
             {t('services.noImage', 'No image')}
           </div>
         )}
@@ -72,7 +88,7 @@ const GigCard = ({ gig, onClick, i18n, t }) => {
         {gig.is_top_rated && (
           <span
             className="absolute top-2 start-2 inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wide shadow"
-            style={{ background: GOLD, color: '#1E6A6A' }}
+            style={{ background: GOLD, color: 'var(--brand-primary)' }}
             data-testid={`gig-top-rated-${gig.id}`}
           >
             <Award size={10} />
@@ -108,10 +124,10 @@ const GigCard = ({ gig, onClick, i18n, t }) => {
       <p className="font-semibold text-sm text-gray-900 truncate">
         {localizedTitle(gig, i18n)}
       </p>
-      <p className="text-xs text-gray-500 truncate">
+      <p className="text-xs text-[var(--brand-muted)] truncate">
         {gig.provider?.name}{gig.area ? ` · ${gig.area}` : ''}
         {typeof gig.distance_km === 'number' && (
-          <span className="ms-1 inline-flex items-center gap-0.5 text-[10px] text-[#1E6A6A] font-semibold">
+          <span className="ms-1 inline-flex items-center gap-0.5 text-[10px] text-[var(--brand-primary)] font-semibold">
             · {gig.distance_km < 1
               ? `${Math.round(gig.distance_km * 1000)} m`
               : `${gig.distance_km.toFixed(gig.distance_km < 10 ? 1 : 0)} km`}
@@ -125,7 +141,7 @@ const GigCard = ({ gig, onClick, i18n, t }) => {
       )}
       {cheapest != null && (
         <p className="text-xs mt-0.5 text-gray-900">
-          <span className="text-gray-500">{t('services.from', 'from')} </span>
+          <span className="text-[var(--brand-muted)]">{t('services.from', 'from')} </span>
           <span className="font-semibold">{sym}{cheapest.toLocaleString()}</span>
         </p>
       )}
@@ -169,12 +185,54 @@ const Services = () => {
   const [locations, setLocations] = useState([]);
   const [languagesList, setLanguagesList] = useState([]);
   const [gigs, setGigs] = useState([]);
+  // Editorially featured gigs — a separate, unfiltered fetch. Deliberately
+  // NOT derived from `gigs`: the featured row is a fixed editorial slot,
+  // so it must not empty out the moment a visitor picks a category or a
+  // price ceiling. It is hidden entirely when nothing is flagged.
+  const [featuredGigs, setFeaturedGigs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filtersOpen, setFiltersOpen] = useState(false);
   // Nearby-mode local state — coords live in memory only, never on the
   // URL, so shared links can't leak location. Cleared on tab close.
   const [coords, setCoords] = useState(null);
   const [geoBusy, setGeoBusy] = useState(false);
+
+  // Admin-only inline featuring. The control lives on the cards rather
+  // than in a new admin tab because there is no marketplace-gig admin
+  // surface at all today (admin/ServicesTab.jsx manages document-services,
+  // a different thing) — and featuring is a judgement about a listing you
+  // are looking at, so the decision belongs where the listing is.
+  //
+  // This only hides the BUTTON. The endpoint does its own role check, so a
+  // non-admin who forges the request still gets a 403.
+  const { user, token } = useContext(AuthContext);
+  const isAdmin = user?.role === 'admin';
+
+  const toggleFeatured = async (gig) => {
+    const next = !gig.featured;
+    try {
+      await axios.patch(
+        `${API}/marketplace/gigs/${gig.id}/featured`,
+        { featured: next },
+        { headers: { Authorization: `Bearer ${token}` } },
+      );
+      // Patch the row in place rather than refetching the whole grid —
+      // a refetch would re-apply filters and could make the card the
+      // admin just clicked jump or disappear mid-interaction.
+      setGigs((prev) => prev.map((g) => (g.id === gig.id ? { ...g, featured: next } : g)));
+      const fresh = await axios.get(`${API}/marketplace/gigs`, {
+        params: { featured: true, limit: 6 },
+      });
+      setFeaturedGigs(fresh.data || []);
+      toast.success(
+        next
+          ? t('services.featuredOn', 'Featured on the services page')
+          : t('services.featuredOff', 'Removed from featured'),
+      );
+    } catch (e) {
+      toast.error(t('services.featuredError', 'Could not change featured status'));
+    }
+  };
 
   // Cross-highlight state, same pattern as Stays — pin click → this id,
   // peek strip watches for it, scrolls the matching card into view.
@@ -225,6 +283,13 @@ const Services = () => {
       console.error(e);
       toast.error(t('services.loadError', 'Failed to load marketplace'));
     });
+    // Featured row. Failure is swallowed on purpose — this is an
+    // editorial extra, and the section simply doesn't render. Toasting a
+    // second error for it would double-report one bad network moment.
+    axios
+      .get(`${API}/marketplace/gigs`, { params: { featured: true, limit: 6 } })
+      .then((r) => setFeaturedGigs(r.data || []))
+      .catch(() => setFeaturedGigs([]));
   }, []);
 
   // Re-fetch gigs whenever any server-side filter changes. Backend does
@@ -406,81 +471,28 @@ const Services = () => {
 
   return (
     <div
-      className="min-h-screen bg-[#FAFAF7]"
-      style={{ paddingTop: 'var(--nav-h, 68px)' }}
+      className="min-h-screen bg-[var(--bg)]"
+      // No paddingTop: the photo band starts at y=0 and the fixed glass
+      // nav floats over it. `.hero-band-head` carries `--nav-h` instead.
+      // See components/common/HeroBand.jsx.
       data-testid="services-page"
     >
       <PageMeta title={seo.title} description={seo.description} path={seo.path} />
 
-      {/* Hero + search — clean white background with two accents:
-          (1) a barely-visible diagonal gold paper-grain SVG behind
-              everything (adds "designed white" texture without
-              distracting from the copy);
-          (2) a gold-shimmer sweep animating across the highlighted
-              first half of the H1.
-          Font swapped from Playfair (serif) to Inter (modern
-          sans-serif) to match the Upwork-style visual reference. */}
-      {/* Top-right marketplace anchors — parked just under the sticky
-          nav so both audiences (job posters + job browsers) have a
-          persistent path from the moment they land on /services. The
-          two links are the same targets as the old inline banner (now
-          removed) but read as a subtler utility strip rather than a
-          hero-competing block. */}
-      <div className="bg-white border-b border-gray-100">
-        <div className="max-w-6xl mx-auto px-4 py-2 flex items-center justify-end gap-2" data-testid="services-jobs-anchor">
-          <button
-            onClick={() => navigate('/services/jobs')}
-            className="px-3 py-1.5 rounded-lg text-xs font-semibold bg-white text-[#1E6A6A] border border-[#1E6A6A]/25 hover:border-[#1E6A6A]"
-            data-testid="services-browse-jobs"
-          >
-            {t('services.browseJobs', 'Browse jobs')}
-          </button>
-          <button
-            onClick={() => navigate('/services/post-job')}
-            className="px-3 py-1.5 rounded-lg text-xs font-semibold bg-[#1E6A6A] text-white hover:bg-[#0F3A3A]"
-            data-testid="services-post-job"
-          >
-            {t('services.postJob', 'Post a job')}
-          </button>
-        </div>
-      </div>
+      {/* Photo band + floating search panel, matching /stays and the
+          preview. This replaces the old white hero: its gold paper-grain
+          texture and shimmer H1 were solving "make a white page feel
+          designed", a problem the band doesn't have. The glass nav also
+          all but disappeared against that white — grey-on-white bubbles.
 
-      <div
-        className="relative overflow-hidden py-14 md:py-20 px-4"
-        style={{ background: '#FFFFFF' }}
-        data-testid="services-hero"
-      >
-        {/* Diagonal gold paper-grain overlay. Rendered as an inline
-            SVG data URI so it ships zero extra network requests. Kept
-            at 4% opacity + a fine 240 px repeat so it reads as
-            texture, not pattern. `pointer-events-none` keeps clicks
-            passing through to the search pill underneath. */}
-        <div
-          aria-hidden="true"
-          className="absolute inset-0 pointer-events-none"
-          style={{
-            opacity: 0.06,
-            backgroundImage:
-              "url(\"data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='240' height='240' viewBox='0 0 240 240'><defs><pattern id='p' patternUnits='userSpaceOnUse' width='24' height='24' patternTransform='rotate(35)'><line x1='0' y1='0' x2='0' y2='24' stroke='%23D4AF37' stroke-width='0.6'/></pattern></defs><rect width='240' height='240' fill='url(%23p)'/></svg>\")",
-            backgroundSize: '240px 240px',
-          }}
-        />
-        <div className="relative max-w-5xl mx-auto text-center">
-          <ServicesHeroTitle />
-          <p
-            className="max-w-2xl mx-auto text-sm md:text-base text-gray-600 mt-5 mb-6 md:mb-8 leading-relaxed"
-            style={{
-              fontFamily:
-                "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
-              fontWeight: 500,
-            }}
-            data-testid="services-hero-subtitle"
-          >
-            {t(
-              'services.heroSubtitle',
-              'Post a job, get bids immediately. See verified work history, reviews, certifications. Hire in a few clicks.'
-            )}
-          </p>
+          The "Browse jobs / Post a job" utility strip that used to sit
+          above the hero is gone from here; both actions now live in the
+          dual CTA band at the foot of the page, where the preview puts
+          them and where they don't compete with the headline. */}
+      <ServicesHero t={t} />
+
+      <div className="hero-panel-float">
+        <div className="hero-panel">
           <ServicesHeroSearch
             categories={categories}
             selectedCat={selectedCat}
@@ -496,14 +508,19 @@ const Services = () => {
 
       {/* Locations + Categories */}
       <div className="max-w-7xl mx-auto px-4 md:px-6 py-10">
-        <div className="flex items-center justify-between mb-3">
-          <h2 className="text-xl md:text-2xl font-bold text-gray-900 tracking-tight" style={{ fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif", letterSpacing: '-0.02em' }}>
+        {/* Section headings drop their hardcoded Inter/tracking styles for
+            the shared `.section-rhead` rule — the preview's editorial
+            Playfair, and the same type as the Stays results header. The
+            inline font-family also pinned Latin Inter in Hebrew, defeating
+            the RTL font swap in design-tokens.css. */}
+        <div className="section-rhead flex items-center justify-between mb-3">
+          <h2 className="text-gray-900">
             {t('services.byLocation', 'Browse by location')}
           </h2>
           {selectedLoc && (
             <button
               onClick={() => patchUrl({ location: '' })}
-              className="text-xs font-semibold text-[#1E6A6A] hover:underline"
+              className="text-xs font-semibold text-[var(--brand-primary)] hover:underline"
               data-testid="services-location-clear"
             >
               {t('services.clearLocation', 'Clear location')} ×
@@ -518,14 +535,14 @@ const Services = () => {
 
         {/* Categories */}
         <div className="mt-8">
-          <div className="flex items-center justify-between mb-5">
-            <h3 className="text-lg md:text-xl font-bold text-gray-900 tracking-tight" style={{ fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif", letterSpacing: '-0.02em' }}>
+          <div className="section-rhead flex items-center justify-between mb-5">
+            <h2 className="text-gray-900">
               {t('services.browse', 'Browse by category')}
-            </h3>
+            </h2>
             {selectedCat && (
               <button
                 onClick={() => patchUrl({ category: '', subcategory: '' })}
-                className="text-xs font-semibold text-[#1E6A6A] hover:underline"
+                className="text-xs font-semibold text-[var(--brand-primary)] hover:underline"
                 data-testid="services-category-clear"
               >
                 {t('services.showAll', 'Show all')} ×
@@ -559,8 +576,8 @@ const Services = () => {
                     onClick={() => patchUrl({ subcategory: active ? '' : s.slug })}
                     className={`px-3 py-1.5 rounded-full text-xs font-semibold border transition-colors ${
                       active
-                        ? 'bg-[#1E6A6A] text-white border-[#1E6A6A]'
-                        : 'bg-white text-gray-700 border-gray-200 hover:border-[#1E6A6A]'
+                        ? 'bg-[var(--brand-primary)] text-white border-[var(--brand-primary)]'
+                        : 'bg-white text-gray-700 border-gray-200 hover:border-[var(--brand-primary)]'
                     }`}
                     data-testid={`services-sub-${s.slug}`}
                     aria-pressed={active}
@@ -574,14 +591,26 @@ const Services = () => {
         </div>
       </div>
 
+      {/* Featured row — sits between browse-by-category and the results,
+          matching the preview's order. Renders nothing when no gig is
+          flagged, which is the expected state until an admin features
+          something. */}
+      <FeaturedProviders
+        gigs={featuredGigs}
+        coords={coords}
+        onOpen={(id) => { saveReturnPath(); navigate(`/services/gig/${id}`); }}
+        t={t}
+        i18n={i18n}
+      />
+
       {/* Results header — Sort + Filters button + count */}
       <div className="max-w-6xl mx-auto px-4">
-        <div className="flex items-center justify-between mb-4 gap-3 flex-wrap">
-          <h2 className="text-xl font-bold text-gray-900">
+        <div className="section-rhead flex items-center justify-between mb-4 gap-3 flex-wrap">
+          <h2 className="text-gray-900">
             {selectedCat
               ? categories.find((c) => c.slug === selectedCat)?.label
               : t('services.allServices', 'All services')}
-            <span className="text-sm text-gray-500 font-normal ms-2" data-testid="services-count">
+            <span className="text-sm text-[var(--brand-muted)] font-normal ms-2" data-testid="services-count">
               ({displayGigs.length})
             </span>
           </h2>
@@ -599,7 +628,7 @@ const Services = () => {
                 type="button"
                 onClick={() => patchUrl({ view: '' })}
                 className={`inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-semibold transition-colors ${
-                  viewMode === 'list' ? 'bg-[#1E6A6A] text-white' : 'text-gray-700 hover:text-gray-900'
+                  viewMode === 'list' ? 'bg-[var(--brand-primary)] text-white' : 'text-gray-700 hover:text-gray-900'
                 }`}
                 aria-pressed={viewMode === 'list'}
                 data-testid="services-view-list"
@@ -611,7 +640,7 @@ const Services = () => {
                 type="button"
                 onClick={() => patchUrl({ view: 'map' })}
                 className={`inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-semibold transition-colors ${
-                  viewMode === 'map' ? 'bg-[#1E6A6A] text-white' : 'text-gray-700 hover:text-gray-900'
+                  viewMode === 'map' ? 'bg-[var(--brand-primary)] text-white' : 'text-gray-700 hover:text-gray-900'
                 }`}
                 aria-pressed={viewMode === 'map'}
                 data-testid="services-view-map"
@@ -628,9 +657,9 @@ const Services = () => {
               type="button"
               onClick={toggleNearby}
               disabled={geoBusy}
-              className={`inline-flex items-center gap-1.5 px-3 py-2 rounded-full text-xs sm:text-sm border font-semibold transition-colors ${
+              className={`inline-flex items-center gap-1.5 px-3 py-2 rounded-full text-xs sm:text-sm border font-semibold whitespace-nowrap shrink-0 transition-colors ${
                 nearby && coords
-                  ? 'bg-[#1E6A6A] text-white border-[#1E6A6A]'
+                  ? 'bg-[var(--brand-primary)] text-white border-[var(--brand-primary)]'
                   : 'bg-white text-gray-800 border-gray-200 hover:border-gray-400'
               } disabled:opacity-60`}
               data-testid="services-nearby-btn"
@@ -648,7 +677,7 @@ const Services = () => {
             <button
               type="button"
               onClick={toggleAvailableNow}
-              className={`inline-flex items-center gap-1.5 px-3 py-2 rounded-full text-xs sm:text-sm border font-semibold transition-colors ${
+              className={`inline-flex items-center gap-1.5 px-3 py-2 rounded-full text-xs sm:text-sm border font-semibold whitespace-nowrap shrink-0 transition-colors ${
                 availableNowOnly
                   ? 'bg-emerald-500 text-white border-emerald-500'
                   : 'bg-white text-gray-800 border-gray-200 hover:border-gray-400'
@@ -661,13 +690,13 @@ const Services = () => {
               {t('services.availableNow', 'Available now')}
             </button>
             {/* Sort dropdown */}
-            <label className="text-xs text-gray-500 me-1 hidden sm:inline">
+            <label className="text-xs text-[var(--brand-muted)] me-1 hidden sm:inline">
               {t('services.sortBy', 'Sort by')}
             </label>
             <select
               value={sort}
               onChange={(e) => patchUrl({ sort: e.target.value === 'match' ? '' : e.target.value })}
-              className="text-xs sm:text-sm px-3 py-2 rounded-full border border-gray-200 bg-white hover:border-gray-400 focus:outline-none focus:border-[#1E6A6A] font-semibold"
+              className="text-xs sm:text-sm px-3 py-2 rounded-full border border-gray-200 bg-white hover:border-gray-400 focus:outline-none focus:border-[var(--brand-primary)] font-semibold"
               data-testid="services-sort-select"
             >
               {SORT_OPTIONS.filter((o) => !o.requiresCoords || (nearby && coords)).map((o) => (
@@ -703,7 +732,7 @@ const Services = () => {
             {minRating && (
               <button
                 onClick={() => patchUrl({ min_rating: '' })}
-                className="px-2.5 py-1 rounded-full bg-[#1E6A6A] text-white font-semibold"
+                className="px-2.5 py-1 rounded-full bg-[var(--brand-primary)] text-white font-semibold"
                 data-testid="active-filter-rating"
               >
                 ★ {minRating}+ ×
@@ -712,7 +741,7 @@ const Services = () => {
             {(minPrice || maxPrice) && (
               <button
                 onClick={() => patchUrl({ min_price: '', max_price: '' })}
-                className="px-2.5 py-1 rounded-full bg-[#1E6A6A] text-white font-semibold"
+                className="px-2.5 py-1 rounded-full bg-[var(--brand-primary)] text-white font-semibold"
                 data-testid="active-filter-price"
               >
                 ₪{minPrice || 0}–{maxPrice || '∞'} ×
@@ -721,7 +750,7 @@ const Services = () => {
             {responseTime && (
               <button
                 onClick={() => patchUrl({ response_time: '' })}
-                className="px-2.5 py-1 rounded-full bg-[#1E6A6A] text-white font-semibold"
+                className="px-2.5 py-1 rounded-full bg-[var(--brand-primary)] text-white font-semibold"
                 data-testid="active-filter-response"
               >
                 {responseTime === '1h'
@@ -733,7 +762,7 @@ const Services = () => {
               <button
                 key={lang}
                 onClick={() => patchUrl({ languages: languages.filter((l) => l !== lang) })}
-                className="px-2.5 py-1 rounded-full bg-[#1E6A6A] text-white font-semibold"
+                className="px-2.5 py-1 rounded-full bg-[var(--brand-primary)] text-white font-semibold"
                 data-testid={`active-filter-lang-${lang.toLowerCase()}`}
               >
                 {lang} ×
@@ -742,7 +771,7 @@ const Services = () => {
             {bookingMode && (
               <button
                 onClick={() => patchUrl({ booking_mode: '' })}
-                className="px-2.5 py-1 rounded-full bg-[#1E6A6A] text-white font-semibold"
+                className="px-2.5 py-1 rounded-full bg-[var(--brand-primary)] text-white font-semibold"
                 data-testid="active-filter-booking"
               >
                 {bookingMode === 'in_platform'
@@ -753,7 +782,7 @@ const Services = () => {
             {maxDistance && (
               <button
                 onClick={() => patchUrl({ max_distance_km: '' })}
-                className="px-2.5 py-1 rounded-full bg-[#1E6A6A] text-white font-semibold"
+                className="px-2.5 py-1 rounded-full bg-[var(--brand-primary)] text-white font-semibold"
                 data-testid="active-filter-distance"
               >
                 ≤ {maxDistance} km ×
@@ -761,7 +790,7 @@ const Services = () => {
             )}
             <button
               onClick={clearAdvancedFilters}
-              className="text-[#1E6A6A] font-semibold underline"
+              className="text-[var(--brand-primary)] font-semibold underline"
               data-testid="services-clear-adv"
             >
               {t('common.clearAll', 'Clear all')}
@@ -774,7 +803,7 @@ const Services = () => {
       <div className="max-w-6xl mx-auto px-4 pb-16">
         {loading ? (
           <div className="flex items-center justify-center py-24">
-            <Loader2 className="animate-spin text-[#1E6A6A]" size={28} />
+            <Loader2 className="animate-spin text-[var(--brand-primary)]" size={28} />
           </div>
         ) : displayGigs.length === 0 ? (
           <div className="bg-white border border-gray-200 rounded-2xl p-10 text-center">
@@ -783,7 +812,7 @@ const Services = () => {
                 ? t('services.noServicesOpenTitle', 'No services open right now')
                 : t('services.emptyTitle', 'No services match your filters')}
             </p>
-            <p className="text-gray-500 text-sm mb-5">
+            <p className="text-[var(--brand-muted)] text-sm mb-5">
               {availableNowOnly
                 ? t('services.noServicesOpenBody', 'Nobody with appointment hours listed is inside their open window right now. Try turning the filter off to see everyone.')
                 : (advCount > 0
@@ -793,7 +822,7 @@ const Services = () => {
             {availableNowOnly ? (
               <button
                 onClick={toggleAvailableNow}
-                className="px-5 py-2.5 rounded-lg text-sm font-semibold text-white bg-[#1E6A6A] hover:bg-[#0F3A3A]"
+                className="px-5 py-2.5 rounded-lg text-sm font-semibold text-white bg-[var(--brand-primary)] hover:bg-[#0F3A3A]"
                 data-testid="services-empty-available-off"
               >
                 {t('services.showEveryone', 'Show everyone')}
@@ -801,7 +830,7 @@ const Services = () => {
             ) : advCount > 0 ? (
               <button
                 onClick={clearAdvancedFilters}
-                className="px-5 py-2.5 rounded-lg text-sm font-semibold text-white bg-[#1E6A6A] hover:bg-[#0F3A3A]"
+                className="px-5 py-2.5 rounded-lg text-sm font-semibold text-white bg-[var(--brand-primary)] hover:bg-[#0F3A3A]"
                 data-testid="services-empty-clear"
               >
                 {t('common.clearAll', 'Clear all filters')}
@@ -812,12 +841,26 @@ const Services = () => {
                  shouldn't land on a pricing choice. */
               <button
                 onClick={() => navigate('/why-list')}
-                className="px-5 py-2.5 rounded-lg text-sm font-semibold text-white bg-[#1E6A6A] hover:bg-[#0F3A3A]"
+                className="px-5 py-2.5 rounded-lg text-sm font-semibold text-white bg-[var(--brand-primary)] hover:bg-[#0F3A3A]"
                 data-testid="services-empty-cta"
               >
                 {t('services.listYourService', 'List your service')} <ArrowRight size={14} className="inline-block ms-1" />
               </button>
             )}
+            {/* Same escape hatch as /stays: nobody matched the search, so
+                let them describe the job and have pros come to them. */}
+            <p className="mt-6 text-sm" style={{ color: 'var(--brand-muted)' }}>
+              {t('services.cantFindIt', "Can't find the right pro?")}{' '}
+              <button
+                type="button"
+                onClick={() => { saveReturnPath(); navigate('/requests/post'); }}
+                className="font-semibold hover:underline"
+                style={{ color: 'var(--brand-primary)' }}
+                data-testid="services-post-request-link"
+              >
+                {t('services.postWhatYouNeed', 'Post what you need')} →
+              </button>
+            </p>
           </div>
         ) : viewMode === 'map' ? (
           <>
@@ -879,7 +922,7 @@ const Services = () => {
                         }}
                         className={`shrink-0 w-[168px] rounded-xl overflow-hidden bg-white text-start active:scale-95 transition-all ${
                           isActive
-                            ? 'ring-2 ring-[#1E6A6A] shadow-[0_10px_20px_-8px_rgba(30,106,106,0.5)] scale-[1.03]'
+                            ? 'ring-2 ring-[var(--brand-primary)] shadow-[0_10px_20px_-8px_rgba(30, 95, 140,0.5)] scale-[1.03]'
                             : 'ring-1 ring-black/5'
                         }`}
                         data-testid={`services-peek-card-${gig.id}`}
@@ -890,7 +933,7 @@ const Services = () => {
                         />
                         <div className="px-2 py-1.5">
                           <div className="text-[11px] font-semibold text-gray-900 truncate">{title}</div>
-                          <div className="text-[10px] text-gray-500 truncate">{price}</div>
+                          <div className="text-[10px] text-[var(--brand-muted)] truncate">{price}</div>
                         </div>
                       </button>
                     );
@@ -916,16 +959,97 @@ const Services = () => {
         ) : (
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-x-5 gap-y-8">
             {displayGigs.map((gig) => (
-              <GigCard
-                key={gig.id}
-                gig={gig}
-                onClick={() => { saveReturnPath(); navigate(`/services/gig/${gig.id}`); }}
-                i18n={i18n}
-                t={t}
-              />
+              /* The admin feature-toggle is a SIBLING of the card, not a
+                 child: GigCard renders a <button>, and a button inside a
+                 button is invalid HTML that browsers reflow unpredictably
+                 (and whose clicks fight each other). */
+              <div key={gig.id} className="relative">
+                <GigCard
+                  gig={gig}
+                  onClick={() => { saveReturnPath(); navigate(`/services/gig/${gig.id}`); }}
+                  i18n={i18n}
+                  t={t}
+                />
+                {isAdmin && (
+                  <button
+                    type="button"
+                    onClick={() => toggleFeatured(gig)}
+                    className={`absolute top-2 end-2 z-10 px-2 py-1 rounded-full text-[10px] font-bold shadow transition-colors ${
+                      gig.featured
+                        ? 'bg-[var(--gold)] text-white'
+                        : 'bg-white/95 text-gray-700 hover:bg-white'
+                    }`}
+                    data-testid={`services-feature-toggle-${gig.id}`}
+                    aria-pressed={Boolean(gig.featured)}
+                  >
+                    {gig.featured
+                      ? t('services.featured', 'Featured')
+                      : t('services.feature', 'Feature')}
+                  </button>
+                )}
+              </div>
             ))}
           </div>
         )}
+      </div>
+
+      {/* Dual CTA band, from the preview's `.ctaband`. Deliberately the
+          last thing on the page: it addresses the visitor who did NOT
+          find what they came for by scrolling the whole marketplace, and
+          it is where the "Browse jobs / Post a job" strip that used to sit
+          above the hero now lives.
+
+          Two panels, opposite weights — one speaks to someone who needs
+          work done, the other to someone selling their labour. Both
+          audiences land on /services and the page previously only spoke
+          to the first. */}
+      <div
+        className="max-w-6xl mx-auto px-4 pb-20 grid gap-[18px] md:grid-cols-2"
+        data-testid="services-cta-band"
+      >
+        <div className="svc-cta svc-cta-need">
+          <div>
+            <h4>{t('services.ctaNeedTitle', 'Need something done?')}</h4>
+            <small>{t('services.ctaNeedBody', 'Describe the job and let pros come to you — free, and they reply through the site.')}</small>
+          </div>
+          <button
+            type="button"
+            onClick={() => navigate('/services/post-job')}
+            className="btn-gold-solid"
+            data-testid="services-post-job"
+          >
+            {t('services.postJob', 'Post a job request')}
+          </button>
+        </div>
+        <div className="svc-cta svc-cta-offer">
+          <div>
+            <h4>{t('services.ctaOfferTitle', 'Offer your services')}</h4>
+            <small>{t('services.ctaOfferBody', 'One free listing reaches everyone on the platform — renters, owners and property managers alike.')}</small>
+          </div>
+          <button
+            type="button"
+            onClick={() => navigate('/why-list')}
+            className="btn-blue-solid"
+            data-testid="services-list-free"
+          >
+            {t('services.listForFree', 'List for free')}
+          </button>
+        </div>
+      </div>
+
+      {/* Browsing open jobs is a third, narrower intent (providers looking
+          for work) — kept as a quiet text link under the band rather than
+          a third panel competing with the two above. It used to be a
+          button in the strip above the hero. */}
+      <div className="max-w-6xl mx-auto px-4 pb-16 -mt-12 text-center">
+        <button
+          type="button"
+          onClick={() => navigate('/services/jobs')}
+          className="text-sm font-semibold text-[var(--brand-primary)] hover:underline"
+          data-testid="services-browse-jobs"
+        >
+          {t('services.browseJobs', 'Browse jobs')} →
+        </button>
       </div>
 
       <ServicesFiltersModal
@@ -964,7 +1088,7 @@ const Services = () => {
             <p className="text-sm text-gray-600 leading-relaxed mb-4">
               {t('services.geoBlockedBody', 'Your browser is blocking location for this site — we need it to sort services by distance from you. It only takes a second to re-enable:')}
             </p>
-            <ol className="text-sm text-gray-700 space-y-1.5 mb-5 ps-4 list-decimal marker:text-[#1E6A6A] marker:font-bold">
+            <ol className="text-sm text-gray-700 space-y-1.5 mb-5 ps-4 list-decimal marker:text-[var(--brand-primary)] marker:font-bold">
               <li>{t('services.geoStep1', 'Click the lock (or info) icon in your browser\'s address bar.')}</li>
               <li>{t('services.geoStep2', 'Find "Location" in the site permissions list.')}</li>
               <li>{t('services.geoStep3', 'Switch it to Allow.')}</li>
@@ -982,7 +1106,7 @@ const Services = () => {
               <button
                 type="button"
                 onClick={() => { setGeoBlocked(false); toggleNearby(); }}
-                className="px-5 py-2 rounded-lg text-sm font-semibold text-white bg-[#1E6A6A] hover:bg-[#0F3A3A]"
+                className="px-5 py-2 rounded-lg text-sm font-semibold text-white bg-[var(--brand-primary)] hover:bg-[#0F3A3A]"
                 data-testid="geo-blocked-retry"
               >
                 {t('services.geoRetry', 'Try again')}

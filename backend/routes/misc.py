@@ -7,7 +7,7 @@ from typing import List
 from fastapi import APIRouter, Body, Depends, File, HTTPException, Request, UploadFile
 from pydantic import BaseModel
 
-from models import ContactRequest, DocumentServiceRequest, TranslationRequest
+from models import ContactRequest, TranslationRequest
 from models_response import (
     ExchangeRateResponse,
     IdMessageResponse,
@@ -115,29 +115,6 @@ async def translate_text(request: TranslationRequest) -> dict:
             status_code=500, message="We couldn't translate that just now. Please try again in a moment.",
             exc=e, logger=logger, context="translate endpoint",
         ) from e
-
-
-@api_router.post("/document-service", response_model=IdMessageResponse)
-async def request_document_service(request: DocumentServiceRequest, payload: dict = Depends(verify_token)) -> dict:
-    service_id = str(uuid.uuid4())
-    service_doc = request.model_dump()
-    service_doc['id'] = service_id
-    service_doc['user_id'] = payload['user_id']
-    service_doc['status'] = 'pending'
-    service_doc['created_at'] = datetime.now(UTC).isoformat()
-    
-    await db.document_services.insert_one(service_doc)
-    return {"id": service_id, "message": "Document service request submitted successfully"}
-
-
-@api_router.get("/document-service", response_model=list[ServiceRequestOut])
-async def get_document_services(payload: dict = Depends(verify_token)) -> list[dict]:
-    if payload['role'] == 'admin':
-        services = await db.document_services.find({}, {"_id": 0}).to_list(1000)
-    else:
-        services = await db.document_services.find({"user_id": payload['user_id']}, {"_id": 0}).to_list(1000)
-    return services
-
 
 @api_router.post("/service-requests", response_model=IdMessageResponse)
 async def create_service_request(request_data: dict = Body(...), payload: dict = Depends(verify_token)) -> dict:
@@ -477,3 +454,66 @@ async def act_on_services_pitch(
         }
     await db.users.update_one({"id": user_id}, {"$set": update})
     return {"message": "OK"}
+
+
+@api_router.get("/dashboard/summary")
+async def dashboard_summary(payload: dict = Depends(verify_token)) -> dict:
+    """Every count the dashboard needs, in one call (spec D4/D5).
+
+    One endpoint rather than three, deliberately. The tab badges and the
+    "needs your attention" strip show the same facts in two places, and two
+    endpoints would let them disagree — a badge saying 2 above a strip
+    saying 3 is worse than no badge at all.
+
+    Everything here is a count_documents over data that already exists. No
+    field is invented, and a count that cannot be computed honestly is
+    absent rather than guessed:
+
+      * bookings_awaiting_reply — pending bookings on the user's OWN
+        listings. A renter's own pending booking is not waiting on them, so
+        it is matched on owner_id only.
+      * work_offers_open — open jobs matching a category this provider
+        publishes in, that they have not already applied to. Same query the
+        Work Offers tab renders from, so the number and the list agree.
+      * requests_with_responses — the user's open requests that somebody
+        has contacted. NOT "new since you last looked": nothing records
+        when a poster last read them, so "new" would be a guess. Naming it
+        for what it is beats inventing a freshness we do not track.
+      * requests_expiring_soon — open requests within a week of expiry,
+        which is the moment renewing still helps.
+    """
+    uid = payload["user_id"]
+    now = datetime.now(UTC)
+    week = (now + timedelta(days=7)).isoformat()
+
+    bookings_awaiting = await db.bookings.count_documents({
+        "owner_id": uid, "status": "pending",
+    })
+
+    my_cats = await db.marketplace_gigs.distinct(
+        "category", {"provider_user_id": uid, "status": "published"},
+    )
+    work_offers = 0
+    if my_cats:
+        applied = await db.marketplace_job_applications.distinct("job_id", {"provider_user_id": uid})
+        work_offers = await db.marketplace_jobs.count_documents({
+            "status": "open",
+            "category": {"$in": my_cats},
+            "poster_user_id": {"$ne": uid},
+            "_id": {"$nin": applied},
+        })
+
+    requests_with_responses = await db.requests.count_documents({
+        "poster_user_id": uid, "status": "open", "contact_count": {"$gt": 0},
+    })
+    requests_expiring = await db.requests.count_documents({
+        "poster_user_id": uid, "status": "open",
+        "expires_at": {"$lte": week, "$gte": now.isoformat()},
+    })
+
+    return {
+        "bookings_awaiting_reply": bookings_awaiting,
+        "work_offers_open": work_offers,
+        "requests_with_responses": requests_with_responses,
+        "requests_expiring_soon": requests_expiring,
+    }

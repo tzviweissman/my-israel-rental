@@ -135,7 +135,7 @@ const JobDetail = () => {
             ) : (
               <button
                 onClick={() => token ? setApplyOpen(true) : navigate('/auth')}
-                className="px-4 py-2 rounded-lg text-sm font-semibold text-white bg-[#1E6A6A] hover:bg-[#0F3A3A] inline-flex items-center gap-1"
+                className="px-4 py-2 rounded-lg text-sm font-semibold text-white bg-[var(--brand-primary)] hover:bg-[#0F3A3A] inline-flex items-center gap-1"
                 data-testid="job-apply-btn"
               >
                 <Send size={14} /> {t("sweep.applyToThisJob", "Apply to this job")}
@@ -153,7 +153,7 @@ const JobDetail = () => {
                   <div className="flex items-baseline justify-between gap-2 mb-1">
                     <p className="font-semibold text-sm">{a.provider?.display_name}</p>
                     {a.quoted_price && (
-                      <p className="text-sm font-bold text-[#1E6A6A]">
+                      <p className="text-sm font-bold text-[var(--brand-primary)]">
                         {a.quoted_currency === 'USD' ? '$' : '₪'}{Number(a.quoted_price).toLocaleString()}
                       </p>
                     )}
@@ -212,7 +212,7 @@ const JobDetail = () => {
               <button
                 onClick={submitApply}
                 disabled={applying || applyForm.message.trim().length < 10}
-                className="flex-1 py-2.5 rounded-lg text-sm font-semibold text-white bg-[#1E6A6A] disabled:opacity-40 inline-flex items-center justify-center gap-1"
+                className="flex-1 py-2.5 rounded-lg text-sm font-semibold text-white bg-[var(--brand-primary)] disabled:opacity-40 inline-flex items-center justify-center gap-1"
                 data-testid="job-apply-submit"
               >
                 {applying ? <><Loader2 className="animate-spin" size={14} /> Sending…</> : <>Send application</>}

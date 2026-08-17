@@ -38,7 +38,7 @@ const PhoneInput = ({
   const boxBase = 'rounded-xl border bg-white text-sm transition-colors focus:outline-none focus:ring-2';
   const boxState = error
     ? 'border-red-300 focus:border-red-400 focus:ring-red-200/50'
-    : 'border-gray-300 focus:border-[#1E6A6A] focus:ring-[#1E6A6A]/20';
+    : 'border-gray-300 focus:border-[var(--brand-primary)] focus:ring-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/20';
 
   return (
     <div>

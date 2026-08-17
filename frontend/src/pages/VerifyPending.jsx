@@ -46,7 +46,7 @@ const VerifyPending = () => {
   return (
     <div className="min-h-screen flex items-center justify-center bg-[#F8F5EF] px-4 py-12" data-testid="verify-pending-page">
       <div className="max-w-md w-full bg-white rounded-2xl shadow-sm border border-gray-200 p-8 text-center">
-        <div className="inline-flex items-center justify-center w-14 h-14 rounded-full bg-[#1E6A6A]/10 text-[#1E6A6A] mb-5">
+        <div className="inline-flex items-center justify-center w-14 h-14 rounded-full bg-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/10 text-[var(--brand-primary)] mb-5">
           <Mail size={26} />
         </div>
         <h1 className="text-2xl font-bold mb-2" style={{ fontFamily: 'Playfair Display' }}>
@@ -73,7 +73,7 @@ const VerifyPending = () => {
           className={`w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg font-semibold text-sm transition-colors ${
             cooldown > 0 || sending
               ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-              : 'bg-[#1E6A6A] text-white hover:bg-[#175555]'
+              : 'bg-[var(--brand-primary)] text-white hover:bg-[#175555]'
           }`}
           data-testid="resend-verification-btn"
         >
@@ -85,7 +85,7 @@ const VerifyPending = () => {
 
         <p className="text-xs text-gray-500 mt-6">
           {t('auth.verifyPending.alreadyVerified', 'Already verified?')}{' '}
-          <Link to="/auth/login" className="text-[#1E6A6A] font-semibold hover:underline" data-testid="verify-pending-login-link">
+          <Link to="/auth/login" className="text-[var(--brand-primary)] font-semibold hover:underline" data-testid="verify-pending-login-link">
             {t('auth.login', 'Log in')}
           </Link>
         </p>

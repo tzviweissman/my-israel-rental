@@ -190,14 +190,14 @@ const Auth = () => {
               <>
                 <button
                   onClick={() => navigate('/auth/login')}
-                  className="flex items-center gap-1 text-sm text-gray-500 hover:text-[#1E6A6A] mb-6 transition-colors"
+                  className="flex items-center gap-1 text-sm text-gray-500 hover:text-[var(--brand-primary)] mb-6 transition-colors"
                 >
                   <ArrowLeft size={16} />
                   {t('auth.backToLogin')}
                 </button>
                 <div className="text-center mb-6">
-                  <div className="w-14 h-14 bg-[#1E6A6A]/10 rounded-full flex items-center justify-center mx-auto mb-3">
-                    <KeyRound size={24} className="text-[#1E6A6A]" />
+                  <div className="w-14 h-14 bg-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/10 rounded-full flex items-center justify-center mx-auto mb-3">
+                    <KeyRound size={24} className="text-[var(--brand-primary)]" />
                   </div>
                   <h2 className="text-2xl font-bold" style={{ fontFamily: 'Playfair Display' }}>{t('auth.forgotPasswordTitle')}</h2>
                   <p className="text-sm text-gray-500 mt-2">{t('auth.forgotPasswordHint')}</p>
@@ -213,7 +213,7 @@ const Auth = () => {
                         value={forgotEmail}
                         onChange={(e) => setForgotEmail(e.target.value)}
                         placeholder={t('auth.emailPlaceholder')}
-                        className="w-full pl-10 pr-4 py-3 rounded-lg border border-[#E5E5E5] focus:outline-none focus:ring-2 focus:ring-[#1E6A6A]/50"
+                        className="w-full pl-10 pr-4 py-3 rounded-lg border border-[#E5E5E5] focus:outline-none focus:ring-2 focus:ring-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/50"
                         required
                         data-testid="forgot-email-input"
                       />
@@ -288,8 +288,8 @@ const Auth = () => {
             ) : (
               <>
                 <div className="text-center mb-6">
-                  <div className="w-14 h-14 bg-[#D4AF37]/10 rounded-full flex items-center justify-center mx-auto mb-3">
-                    <KeyRound size={24} className="text-[#D4AF37]" />
+                  <div className="w-14 h-14 bg-[rgb(var(--gold-rgb)/<alpha-value>)]/10 rounded-full flex items-center justify-center mx-auto mb-3">
+                    <KeyRound size={24} className="text-[var(--gold)]" />
                   </div>
                   <h2 className="text-2xl font-bold" style={{ fontFamily: 'Playfair Display' }}>{t('auth.setNewPassword')}</h2>
                   <p className="text-sm text-gray-500 mt-2">{t('auth.setNewPasswordHint')}</p>
@@ -304,7 +304,7 @@ const Auth = () => {
                         value={resetPassword}
                         onChange={(e) => setResetPassword(e.target.value)}
                         placeholder={t('auth.newPasswordPlaceholderShort')}
-                        className="w-full px-4 py-3 pr-12 rounded-lg border border-[#E5E5E5] focus:outline-none focus:ring-2 focus:ring-[#1E6A6A]/50"
+                        className="w-full px-4 py-3 pr-12 rounded-lg border border-[#E5E5E5] focus:outline-none focus:ring-2 focus:ring-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/50"
                         required
                         minLength={6}
                         data-testid="reset-new-password-input"
@@ -326,7 +326,7 @@ const Auth = () => {
                       value={resetConfirmPassword}
                       onChange={(e) => setResetConfirmPassword(e.target.value)}
                       placeholder={t('auth.confirmNewPasswordPlaceholder')}
-                      className={`w-full px-4 py-3 rounded-lg border focus:outline-none focus:ring-2 focus:ring-[#1E6A6A]/50 ${resetConfirmPassword && resetConfirmPassword !== resetPassword ? 'border-red-400' : 'border-[#E5E5E5]'}`}
+                      className={`w-full px-4 py-3 rounded-lg border focus:outline-none focus:ring-2 focus:ring-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/50 ${resetConfirmPassword && resetConfirmPassword !== resetPassword ? 'border-red-400' : 'border-[#E5E5E5]'}`}
                       required
                       data-testid="reset-confirm-password-input"
                     />
@@ -411,7 +411,7 @@ const Auth = () => {
                   type="text"
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  className="w-full px-4 py-3 rounded-lg border border-[#E5E5E5] focus:outline-none focus:ring-2 focus:ring-[#1E6A6A]/50"
+                  className="w-full px-4 py-3 rounded-lg border border-[#E5E5E5] focus:outline-none focus:ring-2 focus:ring-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/50"
                   required
                   data-testid="auth-name-input"
                 />
@@ -425,7 +425,7 @@ const Auth = () => {
                 type="email"
                 value={formData.email}
                 onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                className="w-full px-4 py-3 rounded-lg border border-[#E5E5E5] focus:outline-none focus:ring-2 focus:ring-[#1E6A6A]/50"
+                className="w-full px-4 py-3 rounded-lg border border-[#E5E5E5] focus:outline-none focus:ring-2 focus:ring-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/50"
                 required
                 data-testid="auth-email-input"
               />
@@ -439,7 +439,7 @@ const Auth = () => {
                   type={showPassword ? 'text' : 'password'}
                   value={formData.password}
                   onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                  className="w-full px-4 py-3 pr-12 rounded-lg border border-[#E5E5E5] focus:outline-none focus:ring-2 focus:ring-[#1E6A6A]/50"
+                  className="w-full px-4 py-3 pr-12 rounded-lg border border-[#E5E5E5] focus:outline-none focus:ring-2 focus:ring-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/50"
                   required
                   data-testid="auth-password-input"
                 />
@@ -457,7 +457,7 @@ const Auth = () => {
                   <a
                     href="/auth/forgot-password"
                     className="text-sm font-medium hover:underline transition-colors"
-                    style={{ color: '#D4AF37' }}
+                    style={{ color: 'var(--gold)' }}
                     data-testid="forgot-password-link"
                   >
                     {t('auth.forgotPassword')}
@@ -476,7 +476,7 @@ const Auth = () => {
                       type={showConfirmPassword ? 'text' : 'password'}
                       value={confirmPassword}
                       onChange={(e) => setConfirmPassword(e.target.value)}
-                      className={`w-full px-4 py-3 pr-12 rounded-lg border focus:outline-none focus:ring-2 focus:ring-[#1E6A6A]/50 ${confirmPassword && confirmPassword !== formData.password ? 'border-red-400' : 'border-[#E5E5E5]'}`}
+                      className={`w-full px-4 py-3 pr-12 rounded-lg border focus:outline-none focus:ring-2 focus:ring-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/50 ${confirmPassword && confirmPassword !== formData.password ? 'border-red-400' : 'border-[#E5E5E5]'}`}
                       required
                       data-testid="auth-confirm-password-input"
                     />
@@ -547,13 +547,13 @@ const Auth = () => {
                           }}
                           className={`flex flex-col items-start gap-1 rounded-lg border p-3 text-left transition-all ${
                             active
-                              ? 'border-[#1E6A6A] bg-[#1E6A6A]/5 ring-2 ring-[#1E6A6A]/25'
-                              : 'border-[#E5E5E5] hover:border-[#1E6A6A]/50'
+                              ? 'border-[var(--brand-primary)] bg-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/5 ring-2 ring-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/25'
+                              : 'border-[#E5E5E5] hover:border-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/50'
                           }`}
                           data-testid={`auth-role-${value}`}
                           aria-pressed={active}
                         >
-                          <Icon size={18} className={active ? 'text-[#1E6A6A]' : 'text-gray-500'} />
+                          <Icon size={18} className={active ? 'text-[var(--brand-primary)]' : 'text-gray-500'} />
                           <span className="text-sm font-semibold text-gray-900 leading-tight">{label}</span>
                           <span className="text-[11px] text-gray-500 leading-tight">{sub}</span>
                         </button>
@@ -580,8 +580,8 @@ const Auth = () => {
                             onClick={() => setFormData({ ...formData, role: value })}
                             className={`flex flex-col items-start gap-0.5 rounded-lg border p-2.5 text-left transition-all ${
                               isActive
-                                ? 'border-[#1E6A6A] bg-[#1E6A6A]/5 ring-2 ring-[#1E6A6A]/25'
-                                : 'border-[#E5E5E5] hover:border-[#1E6A6A]/50'
+                                ? 'border-[var(--brand-primary)] bg-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/5 ring-2 ring-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/25'
+                                : 'border-[#E5E5E5] hover:border-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/50'
                             }`}
                             data-testid={`auth-subrole-${value}`}
                             aria-pressed={isActive}
@@ -604,13 +604,13 @@ const Auth = () => {
                   id="terms"
                   checked={termsAccepted}
                   onChange={(e) => setTermsAccepted(e.target.checked)}
-                  className="mt-1 w-4 h-4 rounded border-gray-300 accent-[#D4AF37] cursor-pointer"
+                  className="mt-1 w-4 h-4 rounded border-gray-300 accent-[var(--gold)] cursor-pointer"
                   required
                   data-testid="auth-terms-checkbox"
                 />
                 <label htmlFor="terms" className="text-sm text-gray-600 cursor-pointer leading-snug">
                   {t('auth.agreeToTerms')}{' '}
-                  <a href="/terms" target="_blank" className="font-medium underline underline-offset-2" style={{ color: '#D4AF37' }} data-testid="auth-terms-link">
+                  <a href="/terms" target="_blank" className="font-medium underline underline-offset-2" style={{ color: 'var(--gold)' }} data-testid="auth-terms-link">
                     {t('auth.termsAndConditions')}
                   </a>
                 </label>
@@ -631,14 +631,14 @@ const Auth = () => {
               return mode === 'login' ? (
                 <p className="text-sm text-gray-600">
                   {t('auth.noAccount')}{' '}
-                  <a href={`/signup${qs}`} className="font-medium" style={{ color: '#1E6A6A' }} data-testid="auth-toggle-link">
+                  <a href={`/signup${qs}`} className="font-medium" style={{ color: 'var(--brand-primary)' }} data-testid="auth-toggle-link">
                     {t('auth.signUpHere')}
                   </a>
                 </p>
               ) : (
                 <p className="text-sm text-gray-600">
                   {t('auth.haveAccount')}{' '}
-                  <a href={`/auth/login${qs}`} className="font-medium" style={{ color: '#1E6A6A' }} data-testid="auth-toggle-link">
+                  <a href={`/auth/login${qs}`} className="font-medium" style={{ color: 'var(--brand-primary)' }} data-testid="auth-toggle-link">
                     {t('auth.loginHere')}
                   </a>
                 </p>
