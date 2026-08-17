@@ -18,6 +18,7 @@ from fastapi.responses import RedirectResponse
 from pydantic import BaseModel  # noqa: F401 — kept for consistency
 
 from routes.deps import db, logger, verify_token
+from utils.businesses import ensure_default_business
 
 from .shared import (
     TOP_RATED_MIN_AVG,
@@ -299,11 +300,20 @@ async def create_gig(payload: GigIn, user=Depends(verify_token)):
     if payload.gig_type == "store" and not payload.products:
         raise HTTPException(status_code=400, detail="Store gigs need at least one product")
     prov = await _ensure_provider_record(user["user_id"])
+    # Every gig belongs to a business (spec M2). Today that is the one
+    # created from the user's own name, so nothing looks different to
+    # anyone until they rename it or add a second.
+    #
+    # NOTE the ownership key is still provider_user_id, deliberately —
+    # business_id groups and displays, it does not authorise. Every check
+    # at :419/:514 keeps working untouched.
+    business = await ensure_default_business(user["user_id"])
     now = datetime.now(UTC).isoformat()
     gig = {
         "_id": str(uuid.uuid4()),
         "provider_user_id": user["user_id"],
         "provider_id": prov["_id"],
+        "business_id": business["_id"],
         "title": payload.title.strip(),
         "title_he": (payload.title_he or "").strip() or None,
         "category": payload.category,
