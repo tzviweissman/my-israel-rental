@@ -110,10 +110,9 @@ class TestAdminDashboard:
         assert "total_views" in data
         assert "total_inquiries" in data
         assert "total_users" in data
-        assert "pending_services" in data
         assert "recent_properties" in data
         
-        print(f"✓ Dashboard stats: {data['active_listings']} listings, {data['total_users']} users, {data['pending_services']} pending services")
+        print(f"✓ Dashboard stats: {data['active_listings']} listings, {data['total_users']} users, pending services removed")
     
     def test_dashboard_403_for_owner(self, owner_token):
         """Owner cannot access admin dashboard"""

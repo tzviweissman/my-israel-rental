@@ -371,7 +371,6 @@ class AdminDashboardResponse(BaseModel):
     total_views: int
     total_inquiries: int
     total_users: int
-    pending_services: int
     recent_properties: list[dict]
 
 

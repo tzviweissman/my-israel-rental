@@ -5,7 +5,6 @@ modules inside the ``routes.admin`` package:
   * ``events`` — SSE, Postmark webhook, email-health
   * ``duplicates`` — duplicate detection + auto-cleanup
   * ``chats_nudge`` — chat list, reattach, owner-nudge system
-  * ``document_services`` — paid document-services catalog
   * ``properties_bulk`` — bulk delete/restore/mark-booked, managed/featured toggles
 """
 import asyncio
@@ -51,7 +50,6 @@ async def get_admin_dashboard(payload: dict = Depends(verify_token)) -> dict:
     
     total_bookings = await db.bookings.count_documents({})
     total_users = await db.users.count_documents({})
-    pending_services = await db.document_services.count_documents({"status": "pending"})
     
     recent_properties = await db.properties.find({}, {"_id": 0}).sort("created_at", -1).limit(10).to_list(10)
     
@@ -65,7 +63,6 @@ async def get_admin_dashboard(payload: dict = Depends(verify_token)) -> dict:
         "total_inquiries": total_bookings,
         "total_bookings": total_bookings,
         "total_users": total_users,
-        "pending_services": pending_services,
         "recent_properties": recent_properties
     }
 

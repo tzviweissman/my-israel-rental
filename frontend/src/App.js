@@ -98,7 +98,6 @@ const Dashboard = lazy(() => import('./pages/Dashboard'));
 const AdminDashboard = lazy(() => import('./pages/AdminDashboard'));
 const ManagerPage = lazy(() => import('./pages/ManagerPage'));
 const Chat = lazy(() => import('./pages/Chat'));
-const DocumentService = lazy(() => import('./pages/DocumentService'));
 const SignContract = lazy(() => import('./pages/SignContract'));
 const PaymentSuccess = lazy(() => import('./pages/PaymentSuccess'));
 const PaymentCancel = lazy(() => import('./pages/PaymentCancel'));
@@ -121,7 +120,6 @@ const RouteFallback = () => (
 );
 
 import ErrorBoundary from './components/common/ErrorBoundary';
-import { DOCUMENT_SERVICES_ENABLED } from './config/features';
 
 // Preview builds keep the entire app out of search results. Read once at
 // module load — CRA inlines REACT_APP_* at build time, so this is a
@@ -303,7 +301,6 @@ function App() {
             <Route path="/admin" element={user?.role === 'admin' ? <AdminDashboard /> : <Navigate to="/" />} />
             <Route path="/manager/:managerId" element={<ManagerPage />} />
             <Route path="/chat/:propertyId" element={user ? <Chat /> : <Navigate to="/auth/login" />} />
-            <Route path="/document-service" element={DOCUMENT_SERVICES_ENABLED ? (user ? <DocumentService /> : <Navigate to="/auth/login" />) : <Navigate to="/" />} />
             <Route path="/sign/:signToken" element={<SignContract />} />
             <Route path="/payment/success" element={user ? <PaymentSuccess /> : <Navigate to="/auth/login" />} />
             <Route path="/payment/cancel" element={<PaymentCancel />} />

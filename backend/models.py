@@ -268,14 +268,6 @@ class SubleaseCreate(BaseModel):
     images: List[str] | None = []
 
 
-class DocumentServiceRequest(BaseModel):
-    service_type: str
-    property_address: str
-    tenant_name: str
-    tenant_id: str
-    additional_info: str | None = None
-
-
 class SiteSettings(BaseModel):
     whatsapp_number: str | None = None
     contact_email: str | None = None

@@ -8,12 +8,10 @@ import OverviewTab from '../components/admin/OverviewTab';
 import ListingsTab from '../components/admin/ListingsTab';
 import UsersTab from '../components/admin/UsersTab';
 import ChatsTab from '../components/admin/ChatsTab';
-import ServicesTab from '../components/admin/ServicesTab';
 import SettingsTab from '../components/admin/SettingsTab';
 import ImportTab from '../components/admin/ImportTab';
 import SmartListsTab from '../components/admin/SmartListsTab';
 import BookingsTab from '../components/admin/BookingsTab';
-import { DOCUMENT_SERVICES_ENABLED } from '../config/features';
 
 const TAB_KEYS = [
   { key: 'overview', labelKey: 'admin.overview', icon: Eye },
@@ -23,7 +21,6 @@ const TAB_KEYS = [
   { key: 'chats', labelKey: 'admin.chats', icon: MessageCircle },
   { key: 'smart-lists', labelKey: 'admin.smartLists', icon: Sparkles },
   { key: 'import', labelKey: 'admin.import', icon: Upload },
-  ...(DOCUMENT_SERVICES_ENABLED ? [{ key: 'services', labelKey: 'admin.services', icon: FileText }] : []),
   { key: 'settings', labelKey: 'admin.settings', icon: Settings },
 ];
 
@@ -98,7 +95,6 @@ const AdminDashboard = () => {
         {activeTab === 'chats' && <ChatsTab token={token} />}
         {activeTab === 'smart-lists' && <SmartListsTab token={token} />}
         {activeTab === 'import' && <ImportTab token={token} onJumpToOwner={jumpToUser} />}
-        {activeTab === 'services' && DOCUMENT_SERVICES_ENABLED && <ServicesTab token={token} onStatsChange={fetchDashboard} />}
         {activeTab === 'settings' && <SettingsTab token={token} />}
       </div>
     </div>

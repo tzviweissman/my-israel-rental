@@ -1,8 +1,6 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Home, Eye, FileText, Users, MessageCircle, Mail, CheckCircle, AlertTriangle, Ban, Calendar } from 'lucide-react';
-import ServiceRevenueWidget from './ServiceRevenueWidget';
-import { DOCUMENT_SERVICES_ENABLED } from '../../config/features';
 
 /**
  * Super Admin → Overview tab. Pure presentational; the parent owns the
@@ -34,7 +32,6 @@ export const OverviewTab = ({ dashboard, emailHealth, token, onNavigate }) => {
             icon: Calendar,
             onClick: () => onNavigate && onNavigate('bookings'),
           },
-          ...(DOCUMENT_SERVICES_ENABLED ? [{ label: t('admin.pendingServices'), key: 'pending-services', value: dashboard.pending_services || 0, icon: MessageCircle }] : []),
         ].map(stat => {
           const Icon = stat.icon;
           const clickable = !!stat.onClick;
@@ -165,7 +162,6 @@ export const OverviewTab = ({ dashboard, emailHealth, token, onNavigate }) => {
         </div>
       )}
 
-      {DOCUMENT_SERVICES_ENABLED && <ServiceRevenueWidget token={token} />}
     </div>
   );
 };

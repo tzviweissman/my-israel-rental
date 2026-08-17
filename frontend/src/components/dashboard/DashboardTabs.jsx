@@ -4,7 +4,6 @@ import {
   Layers, KeyRound, Home, Sparkles, Bell, Heart, MessageCircle, Briefcase,
   Inbox, MoreHorizontal,
 } from 'lucide-react';
-import { DOCUMENT_SERVICES_ENABLED } from '../../config/features';
 import { canPublishGigs } from '../../utils/providerTrial';
 
 /**
@@ -121,7 +120,6 @@ const DashboardTabs = ({
         { id: 'messages', label: t('dashboard.messages'), Icon: MessageCircle, badge: unreadMessages, show: true },
         { id: 'alerts', label: t('dashboard.alerts'), Icon: Bell, colour: ACTIVE_GOLD, show: isRenter },
         { id: 'liked', label: t('dashboard.liked'), Icon: Heart, colour: ACTIVE_RED, show: true },
-        { id: 'services', label: t('dashboard.services'), Icon: Sparkles, colour: ACTIVE_GOLD, show: isRenter && DOCUMENT_SERVICES_ENABLED },
         { id: 'settings', label: t('dashboard.settings'), Icon: KeyRound, show: true },
       ],
     },

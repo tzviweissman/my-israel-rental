@@ -7,7 +7,7 @@ from typing import List
 from fastapi import APIRouter, Body, Depends, File, HTTPException, Request, UploadFile
 from pydantic import BaseModel
 
-from models import ContactRequest, DocumentServiceRequest, TranslationRequest
+from models import ContactRequest, TranslationRequest
 from models_response import (
     ExchangeRateResponse,
     IdMessageResponse,
@@ -115,29 +115,6 @@ async def translate_text(request: TranslationRequest) -> dict:
             status_code=500, message="We couldn't translate that just now. Please try again in a moment.",
             exc=e, logger=logger, context="translate endpoint",
         ) from e
-
-
-@api_router.post("/document-service", response_model=IdMessageResponse)
-async def request_document_service(request: DocumentServiceRequest, payload: dict = Depends(verify_token)) -> dict:
-    service_id = str(uuid.uuid4())
-    service_doc = request.model_dump()
-    service_doc['id'] = service_id
-    service_doc['user_id'] = payload['user_id']
-    service_doc['status'] = 'pending'
-    service_doc['created_at'] = datetime.now(UTC).isoformat()
-    
-    await db.document_services.insert_one(service_doc)
-    return {"id": service_id, "message": "Document service request submitted successfully"}
-
-
-@api_router.get("/document-service", response_model=list[ServiceRequestOut])
-async def get_document_services(payload: dict = Depends(verify_token)) -> list[dict]:
-    if payload['role'] == 'admin':
-        services = await db.document_services.find({}, {"_id": 0}).to_list(1000)
-    else:
-        services = await db.document_services.find({"user_id": payload['user_id']}, {"_id": 0}).to_list(1000)
-    return services
-
 
 @api_router.post("/service-requests", response_model=IdMessageResponse)
 async def create_service_request(request_data: dict = Body(...), payload: dict = Depends(verify_token)) -> dict:
