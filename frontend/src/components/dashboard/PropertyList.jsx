@@ -496,7 +496,7 @@ const PropertyList = ({ properties, bookings = [], onEdit, onAddProperty, onRefr
               title="Listings missing cover photos — add images to boost views"
             >
               <ImageIcon size={12} />
-              Needs Images
+              {t('dashboard.needsImages', 'Needs Images')}
               <span className={`ms-0.5 px-1.5 py-0.5 rounded-full text-[10px] ${activeFilter === 'no_images' ? 'bg-[var(--gold)] text-[var(--brand-primary)]' : 'bg-white text-[var(--brand-primary)]'}`}>
                 {needsImagesCount}
               </span>
@@ -700,7 +700,9 @@ const PropertyList = ({ properties, bookings = [], onEdit, onAddProperty, onRefr
                     }}
                   >
                     <Upload size={14} />
-                    {property.contract_url ? 'Replace Contract' : 'Upload Contract'}
+                    {property.contract_url
+                      ? t('dashboard.replaceContract', 'Replace Contract')
+                      : t('dashboard.uploadContract', 'Upload Contract')}
                     <input
                       type="file"
                       accept=".pdf,.jpg,.jpeg,.png,.webp,.heic,.heif"
@@ -720,7 +722,7 @@ const PropertyList = ({ properties, bookings = [], onEdit, onAddProperty, onRefr
                     </button>
                   )}
                   <div className="mt-2 flex items-center gap-2 text-[11px] text-gray-500">
-                    <span>Need a template?</span>
+                    <span>{t('dashboard.needTemplate', 'Need a template?')}</span>
                     <a href={`${API}/contract-template/en`} target="_blank" rel="noopener noreferrer" className="text-[var(--brand-primary)] hover:text-[var(--gold)] underline" data-testid={`template-en-${property.id}`}>
                       EN
                     </a>
@@ -746,7 +748,7 @@ const PropertyList = ({ properties, bookings = [], onEdit, onAddProperty, onRefr
                     data-testid={`smart-pricing-btn-${property.id}`}
                   >
                     <TrendingUp size={15} />
-                    Smart Pricing
+                    {t('dashboard.smartPricing', 'Smart Pricing')}
                     {property.smart_pricing?.enabled && (
                       <span className="text-[10px] font-bold uppercase tracking-wide px-1.5 py-0.5 rounded bg-[var(--gold)] text-white">
                         {property.smart_pricing?.auto_apply ? 'Auto' : 'On'}

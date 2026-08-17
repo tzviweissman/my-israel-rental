@@ -345,6 +345,11 @@ const he = {
         // D6 — קישור לעמוד הפומבי, בשם ברור במקום מזהה גולמי.
         sharePanelTitle: 'עמוד הנכסים הפומבי שלכם',
         shareButton: 'שיתוף',
+        needsImages: 'חסרות תמונות',
+        uploadContract: 'העלאת חוזה',
+        replaceContract: 'החלפת החוזה',
+        needTemplate: 'צריכים תבנית?',
+        smartPricing: 'תמחור חכם',
         attentionMessages: '{{n}} הודעות שלא נקראו',
         attentionBookings: '{{n}} הזמנות ממתינות לתשובה שלכם',
         attentionExpiring: '{{n}} בקשות שפג תוקפן השבוע',

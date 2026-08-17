@@ -93,8 +93,17 @@ const LocationChipsRow = ({ locations, selectedLoc, onSelect }) => {
             >
               <MapPin size={13} className={active ? 'opacity-90' : 'text-[var(--brand-primary)]'} />
               <span>{loc.label}</span>
+              {/* text-gray-400 on the white chip measured 2.54:1 — a count
+                  almost nobody can read, on the control that tells you how
+                  much is in each area. --brand-muted is 5.85:1 on white and
+                  is what the rest of the site uses for secondary text.
+                  The comment lives OUT here: a JSX conditional holds one
+                  expression, and a comment plus an element is two. */}
               {typeof loc.count === 'number' && loc.count > 0 && (
-                <span className={`ms-0.5 text-[11px] font-normal ${active ? 'opacity-80' : 'text-gray-400'}`}>
+                <span
+                  className="ms-0.5 text-[11px] font-normal"
+                  style={active ? { opacity: 0.8 } : { color: 'var(--brand-muted)' }}
+                >
                   · {loc.count}
                 </span>
               )}
