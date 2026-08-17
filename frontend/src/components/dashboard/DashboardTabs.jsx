@@ -27,10 +27,21 @@ import { canPublishGigs } from '../../utils/providerTrial';
  */
 const BASE =
   'flex-shrink-0 py-2.5 px-3 md:px-4 rounded-lg text-xs md:text-sm font-medium transition-all whitespace-nowrap';
-const INACTIVE = 'text-gray-500 hover:text-gray-700';
+// D8 — the strip read as a grey admin panel bolted onto a limestone site.
+// These are the brand's own colours now. The ink/muted pair also fixes a
+// contrast problem nobody had measured: gray-500 on gray-100 is 4.0:1,
+// under the 4.5 an inactive-but-readable label needs.
+const INACTIVE = 'text-[var(--brand-muted)] hover:text-[var(--ink)]';
 const ACTIVE_TEAL = 'bg-white text-[var(--brand-primary)] shadow-sm';
 const ACTIVE_GOLD = 'bg-white text-[var(--gold)] shadow-sm';
 const ACTIVE_RED = 'bg-white text-red-500 shadow-sm';
+
+// D4 — a count that is merely information, in the brand blue. Red is kept
+// for the one thing that is genuinely time-sensitive (unread messages),
+// which is what makes red mean anything at all: four red badges teach a
+// person to ignore red.
+const BADGE_NEUTRAL = 'bg-[var(--brand-primary)] text-white';
+const BADGE_URGENT = 'bg-red-500 text-white';
 
 const cls = (active, activeColor = ACTIVE_TEAL) =>
   `${BASE} ${active ? activeColor : INACTIVE}`;
@@ -54,6 +65,7 @@ const MOBILE_TAB_LIMIT = 99;
 
 const DashboardTabs = ({
   activeTab, setActiveTab, role, user, unreadMessages = 0, hasPostedJobs = false,
+  summary = {},
 }) => {
   const { t } = useTranslation();
   const isRenter = role === 'renter';
@@ -104,20 +116,20 @@ const DashboardTabs = ({
     {
       key: 'activity',
       tabs: [
-        { id: 'bookings', label: t('dashboard.myBookings'), show: true },
+        { id: 'bookings', label: t('dashboard.myBookings'), badge: summary.bookings_awaiting_reply, show: true },
         // Anyone can post a request — not a role-gated surface.
-        { id: 'my-requests', label: t('dashboard.myRequests', 'My Requests'), Icon: Inbox, colour: ACTIVE_GOLD, show: true },
+        { id: 'my-requests', label: t('dashboard.myRequests', 'My Requests'), Icon: Inbox, colour: ACTIVE_GOLD, badge: summary.requests_with_responses, show: true },
         // D3: only for someone who has actually posted a job, or who is
         // already publishing gigs. It used to render for everyone.
         { id: 'my-jobs', label: t('dashboard.myJobs', "Jobs I've Posted"), Icon: Briefcase, colour: ACTIVE_GOLD, show: canPublish || hasPostedJobs },
-        { id: 'job-requests', label: t('dashboard.jobRequests', 'Work Offers'), Icon: Briefcase, colour: ACTIVE_GOLD, show: canPublish },
+        { id: 'job-requests', label: t('dashboard.jobRequests', 'Work Offers'), Icon: Briefcase, colour: ACTIVE_GOLD, badge: summary.work_offers_open, show: canPublish },
         { id: 'subleases', label: t('dashboard.subleases'), Icon: Home, show: isRenter },
       ],
     },
     {
       key: 'account',
       tabs: [
-        { id: 'messages', label: t('dashboard.messages'), Icon: MessageCircle, badge: unreadMessages, show: true },
+        { id: 'messages', label: t('dashboard.messages'), Icon: MessageCircle, badge: unreadMessages, urgent: true, show: true },
         { id: 'alerts', label: t('dashboard.alerts'), Icon: Bell, colour: ACTIVE_GOLD, show: isRenter },
         { id: 'liked', label: t('dashboard.liked'), Icon: Heart, colour: ACTIVE_RED, show: true },
         { id: 'settings', label: t('dashboard.settings'), Icon: KeyRound, show: true },
@@ -145,8 +157,8 @@ const DashboardTabs = ({
       {tab.label}
       {tab.badge > 0 && (
         <span
-          className="ms-1 inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full bg-red-500 text-white text-[10px] font-bold leading-none"
-          data-testid="messages-unread-badge"
+          className={`ms-1 inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full text-[10px] font-bold leading-none ${tab.urgent ? BADGE_URGENT : BADGE_NEUTRAL}`}
+          data-testid={tab.id === 'messages' ? 'messages-unread-badge' : `tab-badge-${tab.id}`}
         >
           {tab.badge > 9 ? '9+' : tab.badge}
         </span>
@@ -161,7 +173,8 @@ const DashboardTabs = ({
           — so a fade would be pointing at nothing. */}
 
       <div
-        className="flex flex-wrap lg:flex-nowrap gap-1 mb-6 bg-gray-100 rounded-xl p-1 lg:overflow-x-auto scrollbar-hide"
+        className="flex flex-wrap lg:flex-nowrap gap-1 mb-6 rounded-xl p-1 lg:overflow-x-auto scrollbar-hide"
+        style={{ background: 'rgb(var(--brand-primary-rgb) / 0.05)' }}
         data-testid="dashboard-tabs"
       >
         {shownGroups.map((group, i) => (

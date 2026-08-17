@@ -22,6 +22,7 @@ import JobRequestsTab from '../components/dashboard/JobRequestsTab';
 import MyJobsTab from '../components/dashboard/MyJobsTab';
 import ManagerHeader from '../components/dashboard/ManagerHeader';
 import DashboardTabs from '../components/dashboard/DashboardTabs';
+import AttentionStrip from '../components/dashboard/AttentionStrip';
 import { canPublishGigs } from '../utils/providerTrial';
 
 const Dashboard = () => {
@@ -35,6 +36,9 @@ const Dashboard = () => {
   // network calls to decide what to draw. A failure leaves the tab hidden,
   // which is the same state as "no jobs" and therefore safe.
   const [hasPostedJobs, setHasPostedJobs] = useState(false);
+  // D4/D5 — one call feeding both the tab badges and the attention strip,
+  // so the two can never show different numbers for the same fact.
+  const [summary, setSummary] = useState({});
   const [bookings, setBookings] = useState([]);
   const [showAddProperty, setShowAddProperty] = useState(false);
   const [showBulkUpload, setShowBulkUpload] = useState(false);
@@ -121,6 +125,13 @@ const Dashboard = () => {
       axios
         .get(`${API}/marketplace/my-jobs`, { headers: { Authorization: `Bearer ${token}` } })
         .then((r) => setHasPostedJobs((r.data || []).length > 0))
+        .catch(() => {});
+      // Silent on failure: no badges and no strip is the same as nothing
+      // needing attention, and an error banner over a dashboard because a
+      // COUNT failed would be worse than the missing count.
+      axios
+        .get(`${API}/dashboard/summary`, { headers: { Authorization: `Bearer ${token}` } })
+        .then((r) => setSummary(r.data || {}))
         .catch(() => {});
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -242,6 +253,12 @@ const Dashboard = () => {
             share. The dashboard opens on the user's properties instead of
             on a URL. */}
 
+        <AttentionStrip
+          summary={summary}
+          unreadMessages={unreadConversations}
+          onGoToTab={setActiveTab}
+        />
+
         <DashboardTabs
           activeTab={activeTab}
           setActiveTab={setActiveTab}
@@ -249,6 +266,7 @@ const Dashboard = () => {
           user={user}
           unreadMessages={unreadConversations}
           hasPostedJobs={hasPostedJobs}
+          summary={summary}
         />
 
         {activeTab === 'contracts' && isPropertyLister && (

@@ -454,3 +454,66 @@ async def act_on_services_pitch(
         }
     await db.users.update_one({"id": user_id}, {"$set": update})
     return {"message": "OK"}
+
+
+@api_router.get("/dashboard/summary")
+async def dashboard_summary(payload: dict = Depends(verify_token)) -> dict:
+    """Every count the dashboard needs, in one call (spec D4/D5).
+
+    One endpoint rather than three, deliberately. The tab badges and the
+    "needs your attention" strip show the same facts in two places, and two
+    endpoints would let them disagree — a badge saying 2 above a strip
+    saying 3 is worse than no badge at all.
+
+    Everything here is a count_documents over data that already exists. No
+    field is invented, and a count that cannot be computed honestly is
+    absent rather than guessed:
+
+      * bookings_awaiting_reply — pending bookings on the user's OWN
+        listings. A renter's own pending booking is not waiting on them, so
+        it is matched on owner_id only.
+      * work_offers_open — open jobs matching a category this provider
+        publishes in, that they have not already applied to. Same query the
+        Work Offers tab renders from, so the number and the list agree.
+      * requests_with_responses — the user's open requests that somebody
+        has contacted. NOT "new since you last looked": nothing records
+        when a poster last read them, so "new" would be a guess. Naming it
+        for what it is beats inventing a freshness we do not track.
+      * requests_expiring_soon — open requests within a week of expiry,
+        which is the moment renewing still helps.
+    """
+    uid = payload["user_id"]
+    now = datetime.now(UTC)
+    week = (now + timedelta(days=7)).isoformat()
+
+    bookings_awaiting = await db.bookings.count_documents({
+        "owner_id": uid, "status": "pending",
+    })
+
+    my_cats = await db.marketplace_gigs.distinct(
+        "category", {"provider_user_id": uid, "status": "published"},
+    )
+    work_offers = 0
+    if my_cats:
+        applied = await db.marketplace_job_applications.distinct("job_id", {"provider_user_id": uid})
+        work_offers = await db.marketplace_jobs.count_documents({
+            "status": "open",
+            "category": {"$in": my_cats},
+            "poster_user_id": {"$ne": uid},
+            "_id": {"$nin": applied},
+        })
+
+    requests_with_responses = await db.requests.count_documents({
+        "poster_user_id": uid, "status": "open", "contact_count": {"$gt": 0},
+    })
+    requests_expiring = await db.requests.count_documents({
+        "poster_user_id": uid, "status": "open",
+        "expires_at": {"$lte": week, "$gte": now.isoformat()},
+    })
+
+    return {
+        "bookings_awaiting_reply": bookings_awaiting,
+        "work_offers_open": work_offers,
+        "requests_with_responses": requests_with_responses,
+        "requests_expiring_soon": requests_expiring,
+    }

@@ -356,6 +356,11 @@ const en = {
         // D6 — the share link, named rather than shown as a raw uuid.
         sharePanelTitle: 'Your public listings page',
         shareButton: 'Share',
+        attentionMessages: '{{n}} unread messages',
+        attentionBookings: '{{n}} bookings awaiting your reply',
+        attentionExpiring: '{{n}} requests expiring this week',
+        attentionResponses: '{{n}} requests have replies',
+        attentionOffers: '{{n}} work offers you have not answered',
         sharePanelBody: 'One link showing everything you have listed — send it to anyone.',
         sharePanelLabel: 'Copy your link',
         propertiesEmptyTitle: 'No properties yet',
