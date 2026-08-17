@@ -344,6 +344,7 @@ const he = {
         more: 'עוד',
         // D6 — קישור לעמוד הפומבי, בשם ברור במקום מזהה גולמי.
         sharePanelTitle: 'עמוד הנכסים הפומבי שלכם',
+        shareButton: 'שיתוף',
         sharePanelBody: 'קישור אחד שמציג את כל מה שפרסמתם — שלחו אותו לכל אחד.',
         sharePanelLabel: 'העתקת הקישור',
         propertiesEmptyTitle: 'עדיין אין נכסים',

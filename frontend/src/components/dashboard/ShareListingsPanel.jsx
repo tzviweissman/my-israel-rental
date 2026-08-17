@@ -1,71 +1,93 @@
 /**
- * "Share your listings" — collapsed by default, inside My Properties.
+ * "Share" — a button in the My Properties header, revealing the public
+ * listings link on click.
  *
- * This used to sit above the tabs, before any content, as an always-open
- * white panel showing a raw `localhost:3210/manager/<uuid>`. Three things
- * were wrong with that and all three are fixed here (spec D6):
+ * Third position in three commits, and the reasoning is worth keeping
+ * because each move fixed the previous one's flaw:
  *
- *   • it was the first thing on the page, so the dashboard opened on a URL
- *     rather than on the user's own properties;
- *   • it rendered with zero listings, which is a link to an empty page —
- *     the one moment sharing it can only disappoint;
- *   • it displayed a uuid, which tells a person nothing and looks like
- *     something has leaked.
+ *   1. Originally a full white panel ABOVE the tabs, always open, showing
+ *      a raw /manager/<uuid>, rendered even with zero listings. The
+ *      dashboard opened on a URL instead of on the user's properties.
+ *   2. Moved to the bottom of My Properties (D6). Fixed the greeting, but
+ *      Tzvi pointed out the obvious: a manager with forty listings has to
+ *      scroll past all of them to reach a link they use constantly.
+ *   3. Here — in the header row, on the same line as the heading. Visible
+ *      without scrolling however many properties there are, taking one
+ *      button of space rather than a block, and still absent entirely when
+ *      there is nothing to share.
  *
- * Now it is a button that names what the link IS. The URL appears when
- * asked for, because someone who wants to paste it somewhere still needs
- * to see it.
+ * The link itself stays behind a click. Someone pasting it somewhere needs
+ * to see it; everyone else needs the header not to be a URL.
  */
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Link2, ChevronDown } from 'lucide-react';
+import { Share2 } from 'lucide-react';
 import ShareLinkRow from './ShareLinkRow';
 
 export default function ShareListingsPanel({ userId, propertyCount = 0 }) {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
+  const wrapRef = useRef(null);
 
-  // Nothing to share yet. Rendering nothing is the whole point — an empty
-  // public page is worse than no link at all.
+  useEffect(() => {
+    if (!open) return undefined;
+    const onDown = (e) => {
+      if (wrapRef.current && !wrapRef.current.contains(e.target)) setOpen(false);
+    };
+    const onKey = (e) => { if (e.key === 'Escape') setOpen(false); };
+    document.addEventListener('mousedown', onDown);
+    document.addEventListener('keydown', onKey);
+    return () => {
+      document.removeEventListener('mousedown', onDown);
+      document.removeEventListener('keydown', onKey);
+    };
+  }, [open]);
+
+  // Nothing to share yet. A link to an empty public page is the one thing
+  // that can only disappoint, so it does not exist until there is a
+  // listing behind it.
   if (!userId || propertyCount < 1) return null;
 
   return (
-    <div
-      className="mt-8 rounded-2xl border p-4 sm:p-5"
-      style={{ borderColor: 'var(--brand-border)', background: '#fff' }}
-      data-testid="share-listings-panel"
-    >
+    <div className="relative" ref={wrapRef}>
       <button
         type="button"
         onClick={() => setOpen((o) => !o)}
         aria-expanded={open}
-        className="flex w-full items-center gap-2.5 text-start"
+        aria-haspopup="dialog"
+        className="inline-flex items-center gap-1.5 ps-2.5 pe-3 py-1.5 rounded-full text-xs font-semibold transition-all border"
+        style={{
+          borderColor: open ? 'var(--brand-primary)' : 'var(--brand-border)',
+          background: open ? 'rgb(var(--brand-primary-rgb) / 0.06)' : '#fafaf5',
+          color: 'var(--brand-primary)',
+        }}
         data-testid="share-listings-toggle"
       >
-        <Link2 size={16} style={{ color: 'var(--brand-primary)' }} aria-hidden="true" />
-        <span className="flex-1">
-          <span className="block text-sm font-bold" style={{ color: 'var(--ink)' }}>
-            {t('dashboard.sharePanelTitle', 'Your public listings page')}
-          </span>
-          <span className="block text-xs mt-0.5" style={{ color: 'var(--brand-muted)' }}>
-            {t('dashboard.sharePanelBody', 'One link showing everything you have listed — send it to anyone.')}
-          </span>
-        </span>
-        <ChevronDown
-          size={16}
-          className={`transition-transform ${open ? 'rotate-180' : ''}`}
-          style={{ color: 'var(--brand-muted)' }}
-          aria-hidden="true"
-        />
+        <Share2 size={13} aria-hidden="true" />
+        {t('dashboard.shareButton', 'Share')}
       </button>
 
       {open && (
-        <div className="mt-4" data-testid="share-listings-link">
-          <ShareLinkRow
-            userId={userId}
-            label={t('dashboard.sharePanelLabel', 'Copy your link')}
-            testidPrefix="owner-share-link"
-          />
+        <div
+          role="dialog"
+          aria-label={t('dashboard.sharePanelTitle', 'Your public listings page')}
+          className="absolute z-30 mt-2 end-0 w-[min(360px,calc(100vw-2rem))] rounded-2xl border bg-white p-4 shadow-xl"
+          style={{ borderColor: 'var(--brand-border)' }}
+          data-testid="share-listings-panel"
+        >
+          <p className="text-sm font-bold mb-1" style={{ color: 'var(--ink)' }}>
+            {t('dashboard.sharePanelTitle', 'Your public listings page')}
+          </p>
+          <p className="text-xs mb-3" style={{ color: 'var(--brand-muted)' }}>
+            {t('dashboard.sharePanelBody', 'One link showing everything you have listed — send it to anyone.')}
+          </p>
+          <div data-testid="share-listings-link">
+            <ShareLinkRow
+              userId={userId}
+              label={t('dashboard.sharePanelLabel', 'Copy your link')}
+              testidPrefix="owner-share-link"
+            />
+          </div>
         </div>
       )}
     </div>

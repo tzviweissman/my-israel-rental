@@ -355,6 +355,7 @@ const en = {
         more: 'More',
         // D6 — the share link, named rather than shown as a raw uuid.
         sharePanelTitle: 'Your public listings page',
+        shareButton: 'Share',
         sharePanelBody: 'One link showing everything you have listed — send it to anyone.',
         sharePanelLabel: 'Copy your link',
         propertiesEmptyTitle: 'No properties yet',

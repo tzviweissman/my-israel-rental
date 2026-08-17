@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import ShareListingsPanel from './ShareListingsPanel';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import axios from 'axios';
@@ -94,7 +95,7 @@ const PriceBlock = ({ property, t }) => {
   );
 };
 
-const PropertyList = ({ properties, bookings = [], onEdit, onAddProperty, onRefresh, API, token }) => {
+const PropertyList = ({ properties, bookings = [], onEdit, onAddProperty, onRefresh, ownerId, API, token }) => {
   const { t } = useTranslation();
   const navigate = useNavigate();
 
@@ -459,7 +460,11 @@ const PropertyList = ({ properties, bookings = [], onEdit, onAddProperty, onRefr
     <div className="mb-12">
       <div className="flex items-center justify-between flex-wrap gap-3 mb-6">
         <h2 className="text-2xl font-bold" style={{ fontFamily: 'var(--font-head)' }}>{t('dashboard.myProperties')}</h2>
-        <div className="flex gap-2 flex-wrap">
+        <div className="flex gap-2 flex-wrap items-center">
+          {/* Share sits with the heading, not at the foot of the list: a
+              manager with forty properties should not scroll past all of
+              them to reach a link they use constantly. */}
+          <ShareListingsPanel userId={ownerId} propertyCount={properties.length} />
           {bulkCount > 0 && (
             <button
               onClick={() => toggleFilter('bulk')}

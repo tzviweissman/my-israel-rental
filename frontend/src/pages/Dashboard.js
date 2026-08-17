@@ -11,7 +11,6 @@ import SettingsTab from '../components/dashboard/SettingsTab';
 import SavedSearchesTab from '../components/dashboard/SavedSearchesTab';
 import LikedTab from '../components/dashboard/LikedTab';
 import SubleasesTab from '../components/dashboard/SubleasesTab';
-import GovernmentServicesTab from '../components/dashboard/GovernmentServicesTab';
 import MyRequestsTab from '../components/dashboard/MyRequestsTab';
 import PropertyList from '../components/dashboard/PropertyList';
 import AddPropertyModal from '../components/dashboard/AddPropertyModal';
@@ -22,10 +21,8 @@ import MyGigsTab from '../components/dashboard/MyGigsTab';
 import JobRequestsTab from '../components/dashboard/JobRequestsTab';
 import MyJobsTab from '../components/dashboard/MyJobsTab';
 import ManagerHeader from '../components/dashboard/ManagerHeader';
-import ShareListingsPanel from '../components/dashboard/ShareListingsPanel';
 import DashboardTabs from '../components/dashboard/DashboardTabs';
 import { canPublishGigs } from '../utils/providerTrial';
-import { DOCUMENT_SERVICES_ENABLED } from '../config/features';
 
 const Dashboard = () => {
   const { t } = useTranslation();
@@ -245,23 +242,6 @@ const Dashboard = () => {
             share. The dashboard opens on the user's properties instead of
             on a URL. */}
 
-        {isRenter && !DOCUMENT_SERVICES_ENABLED && (
-          <div
-            className="mb-5 flex items-start gap-3 rounded-2xl border border-[rgb(var(--gold-rgb)/<alpha-value>)]/30 bg-gradient-to-r from-[#fff8e6] to-[#fffaf0] px-5 py-3.5"
-            data-testid="services-coming-soon-banner"
-          >
-            <div className="flex-shrink-0 w-8 h-8 rounded-full bg-[rgb(var(--gold-rgb)/<alpha-value>)]/15 text-[#a37d10] flex items-center justify-center">
-              <Sparkles size={16} />
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-semibold text-gray-900">Document filing services — launching soon</p>
-              <p className="text-xs text-gray-600 mt-0.5">
-                Bituach Leumi benefits, Arnona discount, apartment name change, and more. We'll handle the paperwork so you don't have to.
-              </p>
-            </div>
-          </div>
-        )}
-
         <DashboardTabs
           activeTab={activeTab}
           setActiveTab={setActiveTab}
@@ -291,10 +271,6 @@ const Dashboard = () => {
 
         {activeTab === 'subleases' && isRenter && (
           <SubleasesTab API={API} token={token} />
-        )}
-
-        {activeTab === 'services' && isRenter && DOCUMENT_SERVICES_ENABLED && (
-          <GovernmentServicesTab API={API} token={token} />
         )}
 
         {activeTab === 'properties' && isPropertyLister && (
@@ -329,12 +305,10 @@ const Dashboard = () => {
                 setShowAddProperty(true);
               }}
               onRefresh={fetchProperties}
+              ownerId={user?.id}
               API={API}
               token={token}
             />
-            {/* D6 — below the listings, collapsed, and absent entirely when
-                there are none. */}
-            <ShareListingsPanel userId={user?.id} propertyCount={properties.length} />
           </>
         )}
 
