@@ -15,6 +15,12 @@ const en = {
         notFound: "This link doesn't exist or has been removed.",
         goHome: 'Go to MyIsraelRental',
       },
+      notFound: {
+        title: 'Page not found',
+        body: "The page you're looking for doesn't exist or may have moved. Check the address, or start again from one of these.",
+        goHome: 'Back to home',
+        browseStays: 'Browse stays',
+      },
       qr: {
         logoToggle: 'Logo in the centre',
         downloadPng: 'PNG for screens',

@@ -15,6 +15,12 @@ const he = {
         notFound: 'הקישור הזה אינו קיים או הוסר.',
         goHome: 'מעבר ל-MyIsraelRental',
       },
+      notFound: {
+        title: 'העמוד לא נמצא',
+        body: 'העמוד שחיפשתם אינו קיים או שהועבר למקום אחר. בדקו את הכתובת, או התחילו מחדש מאחת האפשרויות כאן.',
+        goHome: 'חזרה לדף הבית',
+        browseStays: 'חיפוש נכסים',
+      },
       qr: {
         logoToggle: 'לוגו במרכז',
         downloadPng: 'PNG למסכים',
