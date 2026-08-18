@@ -19,6 +19,7 @@
  */
 import axios from 'axios';
 import { toast } from 'sonner';
+import i18n from '../i18n';
 import recentChangelog from '../data/recentChangelog';
 
 let installed = false;
@@ -40,14 +41,17 @@ const showStaleBuildToast = (reason) => {
   const description = highlights.length
     ? `What's new:\n${highlights.map((c) => `• ${c.title}`).join('\n')}`
     : undefined;
+  // Was hardcoded English, so a Hebrew reader got an English toast — the
+  // exact silent-fallback this project keeps tripping over.
   toast(
-    'A newer version of the site is available. Refresh to pick up the latest.',
+    i18n.t('update.availableRefresh',
+      'A newer version of the site is available. Refresh to pick up the latest.'),
     {
       duration: 15000,
       position: 'top-center',
       description,
       action: {
-        label: 'Refresh',
+        label: i18n.t('update.refresh', 'Update now'),
         onClick: () => window.location.reload(),
       },
     },

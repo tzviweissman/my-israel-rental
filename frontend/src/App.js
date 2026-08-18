@@ -13,6 +13,7 @@ import WhatsAppButton from './components/WhatsAppButton';
 import AccessibilityButton from './components/AccessibilityButton';
 import ThemePreviewOverride from './components/ThemePreviewOverride';
 import { installStaleBuildInterceptor } from './utils/staleBuildInterceptor';
+import { startVersionWatcher } from './utils/appVersion';
 
 // Install the "backend hasn't caught up with this build" detector exactly
 // once at module-load. Surfaces a single "Please refresh" toast when a
@@ -20,6 +21,9 @@ import { installStaleBuildInterceptor } from './utils/staleBuildInterceptor';
 // reached yet — catches the post-deploy race that previously made users
 // think a feature was broken when it was just stale.
 installStaleBuildInterceptor();
+// Frontend-only deploys move no backend header and break no route, so the
+// interceptor above never sees them. This watches the bundle itself.
+startVersionWatcher();
 
 /**
  * The floating WhatsApp CTA, suppressed on the cinematic home page.

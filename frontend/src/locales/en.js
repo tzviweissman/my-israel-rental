@@ -10,6 +10,11 @@
 // t('some.key', 'English fallback') and silently render the fallback forever
 // if the key goes missing.
 const en = {
+      update: {
+        available: 'A newer version of the site is available.',
+        availableRefresh: 'A newer version of the site is available. Refresh to pick up the latest.',
+        refresh: 'Update now',
+      },
       nav: {
         signin: 'Sign in',
         listProperty: 'List your property',
