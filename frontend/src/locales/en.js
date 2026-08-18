@@ -16,7 +16,9 @@ const en = {
         goHome: 'Go to MyIsraelRental',
       },
       qr: {
-        logoToggle: 'Logo in the centre',
+        logoAdd: 'Add your logo',
+        logoReplace: 'Change logo',
+        logoRemove: 'Remove',
         downloadPng: 'PNG for screens',
         downloadSvg: 'SVG for print',
         printSize: 'Print at least 2 × 2 cm — larger for a building sign.',

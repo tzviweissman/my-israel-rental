@@ -64,7 +64,19 @@ Gotchas encoded in that config: `serve-handler` parses the redirect **destinatio
 
 Not for: requests (they expire — a printed code that dies in 30 days is a bad artefact), or chat threads (private).
 
-## Q6 — The printable card (worth more than the QR alone)
+## Q6 — SUPERSEDED (Tzvi, 2026-08-18): the owner's own logo, not a designed sign
+
+The A4 sign below was drafted and shown; the ruling that replaced it: owners
+just want a plain code they can drop into their OWN flyers, with THEIR logo
+in the middle — not a MyIsraelRental-branded sign. Built as: plain QR by
+default (level M), an "Add your logo" picker that embeds the owner's image
+in the centre (switching to level H), remembered between visits, never
+uploaded to the server — the logo lives only in the browser and inside the
+downloaded PNG/SVG. Scan counts show beside the code in the dashboard.
+
+The original brief, kept for the record:
+
+## ~~The printable card (worth more than the QR alone)~~
 
 A "Download a sign" action producing a **print-ready A4/Letter PDF**, since the realistic use is a sign taped in a building entrance:
 

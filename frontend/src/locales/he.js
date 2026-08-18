@@ -16,7 +16,9 @@ const he = {
         goHome: 'מעבר ל-MyIsraelRental',
       },
       qr: {
-        logoToggle: 'לוגו במרכז',
+        logoAdd: 'הוספת הלוגו שלכם',
+        logoReplace: 'החלפת לוגו',
+        logoRemove: 'הסרה',
         downloadPng: 'PNG למסכים',
         downloadSvg: 'SVG להדפסה',
         printSize: 'להדפיס לפחות 2 × 2 ס"מ — גדול יותר לשלט בבניין.',

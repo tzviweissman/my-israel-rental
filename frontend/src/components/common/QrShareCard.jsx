@@ -12,10 +12,14 @@
  *  - Modules are ink (#23201B) on white. Never gold — gold on white is
  *    roughly 2:1 and scanners need contrast. The code is functional, not
  *    decorative.
- *  - The centre logo destroys modules, so WITH the logo error correction
- *    must be H; without it M is right, and produces a sparser code that
- *    scans more easily. The toggle switches both together — H-with-logo
+ *  - The centre logo destroys modules, so WITH a logo error correction
+ *    must be H; without one M is right, and produces a sparser code that
+ *    scans more easily. Logo state drives both together — H-with-logo
  *    and M-without are the only two valid pairings.
+ *
+ *  - The centre is for the OWNER's logo, chosen from their own files: the
+ *    mark on their flyer should be theirs, not ours. It never leaves the
+ *    browser — the image only has to exist inside the downloaded file.
  *  - Quiet zone: 4 modules of white on every side (marginSize={4}). Crop
  *    it and scanners lose the code's edges.
  *  - The URL is always printed beneath the code. Many people will not
@@ -29,25 +33,67 @@
 import React, { useRef, useState } from 'react';
 import { QRCodeCanvas, QRCodeSVG } from 'qrcode.react';
 import { useTranslation } from 'react-i18next';
-import { Download, Image as ImageIcon } from 'lucide-react';
-import logoMark from '../../assets/brand/logo-mark.png';
+import { Download, Image as ImageIcon, Upload, X } from 'lucide-react';
 
 const INK = '#23201B';
 const PNG_SIZE = 1024;
 
+// The owner's own logo, remembered between visits so they set it once.
+// A data URI in localStorage, never uploaded anywhere: the logo only has
+// to exist inside the downloaded file, so the server never needs it.
+const LOGO_STORE_KEY = 'qr_custom_logo';
+
+/** Downscale whatever they picked to a small square data URI. A phone
+ *  photo dropped in raw would balloon the SVG to megabytes and slow the
+ *  canvas; 256px is plenty for a centre mark that prints at ~2cm. */
+function fileToLogoDataUri(file) {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    const url = URL.createObjectURL(file);
+    img.onload = () => {
+      const c = document.createElement('canvas');
+      c.width = 256;
+      c.height = 256;
+      const ctx = c.getContext('2d');
+      // White backing, not transparent: the logo sits on excavated (white)
+      // modules, and a transparent PNG over them looks fine on screen but
+      // any dark edge pixels eat into scan margin.
+      ctx.fillStyle = '#FFFFFF';
+      ctx.fillRect(0, 0, 256, 256);
+      const scale = Math.min(256 / img.width, 256 / img.height);
+      const w = img.width * scale;
+      const h = img.height * scale;
+      ctx.drawImage(img, (256 - w) / 2, (256 - h) / 2, w, h);
+      URL.revokeObjectURL(url);
+      resolve(c.toDataURL('image/png'));
+    };
+    img.onerror = () => { URL.revokeObjectURL(url); reject(new Error('bad image')); };
+    img.src = url;
+  });
+}
+
 export default function QrShareCard({ url, filename = 'myisraelrental-qr', testidPrefix = 'qr' }) {
   const { t } = useTranslation();
-  const [withLogo, setWithLogo] = useState(true);
+  // Plain by default. The centre is for the OWNER's logo — the mark on
+  // their flyer should be theirs, not ours — added via the button below
+  // and remembered for next time.
+  const [logoUri, setLogoUri] = useState(() => {
+    try { return localStorage.getItem(LOGO_STORE_KEY) || null; } catch { return null; }
+  });
   const svgWrapRef = useRef(null);
   const pngRef = useRef(null);
+  const fileRef = useRef(null);
 
   if (!url) return null;
 
-  const level = withLogo ? 'H' : 'M';
+  // Logo and error-correction move as one pair: a centre logo destroys
+  // modules, so it requires level H; plain gets M and a sparser code that
+  // scans more easily. These are the only two valid pairings.
+  const level = logoUri ? 'H' : 'M';
   const displayUrl = url.replace(/^https?:\/\//, '');
-  const imageSettings = withLogo
+  const imageSettings = logoUri
     ? {
-        src: logoMark,
+        src: logoUri,
         height: 40,
         width: 40,
         // excavate clears the modules under the logo instead of letting
@@ -56,6 +102,21 @@ export default function QrShareCard({ url, filename = 'myisraelrental-qr', testi
         excavate: true,
       }
     : undefined;
+
+  const pickLogo = async (files) => {
+    const file = files && files[0];
+    if (!file) return;
+    try {
+      const uri = await fileToLogoDataUri(file);
+      setLogoUri(uri);
+      try { localStorage.setItem(LOGO_STORE_KEY, uri); } catch { /* private mode */ }
+    } catch { /* unreadable image — leave the code plain */ }
+  };
+
+  const clearLogo = () => {
+    setLogoUri(null);
+    try { localStorage.removeItem(LOGO_STORE_KEY); } catch { /* private mode */ }
+  };
 
   const downloadPng = () => {
     const canvas = pngRef.current?.querySelector('canvas');
@@ -109,15 +170,38 @@ export default function QrShareCard({ url, filename = 'myisraelrental-qr', testi
         {displayUrl}
       </p>
 
-      <label className="mt-2 flex items-center justify-center gap-2 text-xs" style={{ color: 'var(--brand-muted)' }}>
+      <div className="mt-2 flex items-center justify-center gap-2">
         <input
-          type="checkbox"
-          checked={withLogo}
-          onChange={(e) => setWithLogo(e.target.checked)}
-          data-testid={`${testidPrefix}-logo-toggle`}
+          ref={fileRef}
+          type="file"
+          accept="image/*"
+          className="hidden"
+          onChange={(e) => pickLogo(e.target.files)}
+          data-testid={`${testidPrefix}-logo-input`}
         />
-        {t('qr.logoToggle', 'Logo in the centre')}
-      </label>
+        <button
+          type="button"
+          onClick={() => fileRef.current?.click()}
+          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold border"
+          style={{ borderColor: 'var(--brand-border)', color: 'var(--brand-primary)', background: '#fff' }}
+          data-testid={`${testidPrefix}-logo-add`}
+        >
+          <Upload size={12} aria-hidden="true" />
+          {logoUri ? t('qr.logoReplace', 'Change logo') : t('qr.logoAdd', 'Add your logo')}
+        </button>
+        {logoUri && (
+          <button
+            type="button"
+            onClick={clearLogo}
+            className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-full text-xs font-semibold"
+            style={{ color: 'var(--brand-muted)' }}
+            data-testid={`${testidPrefix}-logo-remove`}
+          >
+            <X size={12} aria-hidden="true" />
+            {t('qr.logoRemove', 'Remove')}
+          </button>
+        )}
+      </div>
 
       <div className="mt-3 flex justify-center gap-2">
         <button
@@ -156,7 +240,7 @@ export default function QrShareCard({ url, filename = 'myisraelrental-qr', testi
           fgColor={INK}
           bgColor="#FFFFFF"
           imageSettings={
-            withLogo
+            logoUri
               ? {
                   ...imageSettings,
                   // Same logo-to-code ratio as the preview (40/168), so
