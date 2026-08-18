@@ -17,6 +17,8 @@ import BookingSidebar from '../components/property/BookingSidebar';
 import MovingServicesCrossSell from '../components/services/MovingServicesCrossSell';
 import Breadcrumb from '../components/common/Breadcrumb';
 import QrShareCard from '../components/common/QrShareCard';
+import ScanChart from '../components/common/ScanChart';
+import ShareLinkButtons from '../components/common/ShareLinkButtons';
 import { areaLabel } from '../utils/areaNames';
 
 // Parse 'YYYY-MM-DD' as a LOCAL date (avoids the UTC-shift bug where
@@ -400,18 +402,15 @@ const PropertyDetail = () => {
                       ? t('qr.scanned1', 'Scanned once')
                       : t('qr.scannedN', 'Scanned {{n}} times', { n: shortLink.scan_count })}
                 </p>
-                <button
-                  type="button"
-                  onClick={() => {
-                    navigator.clipboard.writeText(`${window.location.origin}${shortLink.path}`);
-                    toast.success(t('property.linkCopied', 'Property link copied to clipboard!'));
-                  }}
-                  className="mt-3 w-full py-2 rounded-lg text-xs font-semibold border"
-                  style={{ borderColor: 'var(--brand-border)', color: 'var(--brand-primary)' }}
-                  data-testid="property-qr-copy"
-                >
-                  {t('qr.copyShort', 'Copy link')}
-                </button>
+                <div className="mt-3">
+                  <ScanChart daily={shortLink.daily} testidPrefix="property-qr" />
+                </div>
+                <div className="mt-3">
+                  <ShareLinkButtons
+                    url={`${window.location.origin}${shortLink.path}`}
+                    testidPrefix="property-qr"
+                  />
+                </div>
               </div>
             )}
           </div>

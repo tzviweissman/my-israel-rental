@@ -27,6 +27,12 @@ const en = {
         scannedN: 'Scanned {{n}} times',
         shareListing: 'Share this listing',
         copyShort: 'Copy link',
+        linkCopied: 'Link copied',
+        copy: 'Copy',
+        copied: 'Copied!',
+        chartTitle: 'Scans — last 14 days',
+        sendWhatsApp: 'WhatsApp',
+        sendShare: 'Share…',
       },
       update: {
         available: 'A newer version of the site is available.',

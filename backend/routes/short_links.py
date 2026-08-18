@@ -19,7 +19,8 @@ undone once they leave the building:
 from __future__ import annotations
 
 import secrets
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
+from zoneinfo import ZoneInfo
 from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException, Request
@@ -167,7 +168,20 @@ def _public(doc: dict[str, Any]) -> dict[str, Any]:
         # rather than leave a blank where a number should be.
         "scan_count": doc.get("scan_count", 0),
         "last_scanned_at": doc.get("last_scanned_at"),
+        # The last 30 Israel-calendar days, zero-filled, oldest first — the
+        # shape a bar chart wants, so the client never has to reason about
+        # missing keys or timezones.
+        "daily": _last_30_days(doc.get("daily") or {}),
     }
+
+
+def _last_30_days(buckets: dict[str, int]) -> list[dict[str, int | str]]:
+    today = datetime.now(_IL_TZ).date()
+    out = []
+    for i in range(29, -1, -1):
+        day = (today - timedelta(days=i)).strftime("%Y-%m-%d")
+        out.append({"date": day, "count": int(buckets.get(day, 0))})
+    return out
 
 
 @router.post("/short-links")
@@ -216,13 +230,33 @@ async def resolve_short_link(slug: str, request: Request):
     return {"target": f"{_canonical_path(doc['target_type'], doc['target_id'])}?src=qr"}
 
 
+# Scans are bucketed by ISRAEL's calendar day, not the server's. The owner
+# taped the sign to a wall in Jerusalem; a scan at 23:30 their time must
+# not appear under "tomorrow" because the server counts midnights in UTC.
+_IL_TZ = ZoneInfo("Asia/Jerusalem")
+
+
+def _today_bucket() -> str:
+    return datetime.now(_IL_TZ).strftime("%Y-%m-%d")
+
+
 async def _counted_lookup(slug: str, request: Request):
-    """The link doc, with the scan counted — unless a preview bot asked."""
+    """The link doc, with the scan counted — unless a preview bot asked.
+
+    Alongside the total, each scan increments a per-day bucket
+    (`daily.YYYY-MM-DD`) so the dashboard can draw scans over time. One key
+    per active day — bounded, and no separate events collection to groom.
+    Days before this shipped have no buckets; the chart starts at zero
+    history rather than inventing any (real numbers only).
+    """
     if _is_preview_bot(request):
         return await db.short_links.find_one({"slug": slug})
     return await db.short_links.find_one_and_update(
         {"slug": slug},
-        {"$inc": {"scan_count": 1}, "$set": {"last_scanned_at": datetime.now(UTC).isoformat()}},
+        {
+            "$inc": {"scan_count": 1, f"daily.{_today_bucket()}": 1},
+            "$set": {"last_scanned_at": datetime.now(UTC).isoformat()},
+        },
     )
 
 

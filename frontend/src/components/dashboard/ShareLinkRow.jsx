@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Link2, Check } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -17,6 +18,7 @@ const ShareLinkRow = ({
   label = 'Share your listings',
   testidPrefix = 'shareable-link',
 }) => {
+  const { t } = useTranslation();
   const [copied, setCopied] = useState(false);
   const shareableLink = link || `${window.location.origin}/manager/${userId}`;
 
@@ -37,7 +39,7 @@ const ShareLinkRow = ({
     };
     if (await writeOk()) {
       setCopied(true);
-      toast.success('Link copied');
+      toast.success(t('qr.linkCopied', 'Link copied'));
       setTimeout(() => setCopied(false), 2000);
     }
   };
@@ -72,7 +74,7 @@ const ShareLinkRow = ({
           data-testid={`${testidPrefix}-copy-button`}
         >
           {copied ? <Check size={13} /> : <Link2 size={13} />}
-          {copied ? 'Copied' : 'Copy'}
+          {copied ? t('qr.copied', 'Copied!') : t('qr.copy', 'Copy')}
         </button>
       </div>
     </div>

@@ -25,6 +25,8 @@ import { Share2 } from 'lucide-react';
 import axios from 'axios';
 import ShareLinkRow from './ShareLinkRow';
 import QrShareCard from '../common/QrShareCard';
+import ScanChart from '../common/ScanChart';
+import ShareLinkButtons from '../common/ShareLinkButtons';
 
 export default function ShareListingsPanel({ userId, propertyCount = 0, API, token }) {
   const { t } = useTranslation();
@@ -155,6 +157,15 @@ export default function ShareListingsPanel({ userId, propertyCount = 0, API, tok
                     ? t('qr.scanned1', 'Scanned once')
                     : t('qr.scannedN', 'Scanned {{n}} times', { n: shortLink.scan_count })}
               </p>
+              <div className="mt-3">
+                <ScanChart daily={shortLink.daily} testidPrefix="share-qr" />
+              </div>
+              <div className="mt-3">
+                <ShareLinkButtons
+                  url={`${window.location.origin}${shortLink.path}`}
+                  testidPrefix="share-qr"
+                />
+              </div>
             </div>
           )}
         </div>

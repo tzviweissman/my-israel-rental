@@ -27,6 +27,12 @@ const he = {
         scannedN: 'נסרק {{n}} פעמים',
         shareListing: 'שיתוף המודעה',
         copyShort: 'העתקת קישור',
+        linkCopied: 'הקישור הועתק',
+        copy: 'העתקה',
+        copied: 'הועתק!',
+        chartTitle: 'סריקות — 14 הימים האחרונים',
+        sendWhatsApp: 'וואטסאפ',
+        sendShare: 'שיתוף…',
       },
       update: {
         available: 'גירסה חדשה של האתר זמינה.',
