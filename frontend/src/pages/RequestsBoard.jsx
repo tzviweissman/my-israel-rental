@@ -26,6 +26,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { saveReturnPath } from '../hooks/useBackNavigation';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
+import formatDate from '../utils/formatDate';
 import {
   Home, Wrench, LayoutGrid, MapPin, Coins, BedDouble, CalendarDays, ShieldCheck,
   Clock, MessageCircle, Loader2, Search, Plus, Users, Sparkles, KeyRound, ExternalLink,
@@ -189,10 +190,10 @@ export const RequestCard = ({ request: r, onOpen, t }) => {
                 opposite meanings to someone deciding whether to enquire.
                 A seeker's date only takes "by" when they set a deadline. */}
             {isOffer
-              ? t('requests.dateFromPrefix', 'from {{date}}', { date: r.move_in_date || r.preferred_date })
+              ? t('requests.dateFromPrefix', 'from {{date}}', { date: formatDate(r.move_in_date || r.preferred_date) })
               : r.date_mode === 'before'
-                ? t('requests.dateByPrefix', 'by {{date}}', { date: r.move_in_date || r.preferred_date })
-                : (r.move_in_date || r.preferred_date)}
+                ? t('requests.dateByPrefix', 'by {{date}}', { date: formatDate(r.move_in_date || r.preferred_date) })
+                : formatDate(r.move_in_date || r.preferred_date)}
           </span>
         ) : null}
       </div>

@@ -230,7 +230,7 @@ const PostRequest = () => {
         ? t('requests.needBudget', 'Enter a budget amount, or switch to "open to offers".')
         : null),
     },
-  ], [t, form, isRental]);
+  ], [t, form, isRental, isOffer]);
 
   const current = STEPS[step];
   const blocker = current.blocker();

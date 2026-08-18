@@ -15,6 +15,7 @@ import axios from 'axios';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
+import formatDate from '../utils/formatDate';
 import {
   Home, Wrench, MapPin, Coins, BedDouble, CalendarDays, Clock,
   MessageCircle, Loader2, ArrowLeft, Flag, CheckCircle2, RefreshCw, ExternalLink,
@@ -157,14 +158,19 @@ const RequestDetail = () => {
   // than left blank: a blank row makes a flexible seeker indistinguishable
   // from one who never answered, and an owner reads those very differently.
   // null falls through to the Row component's own empty handling.
-  const rawDate = isRental ? request.move_in_date : request.preferred_date;
+  const rawDate = formatDate(
+    isRental ? request.move_in_date : request.preferred_date);
+  // Same rule as the board card: an offer's date is always the day the
+  // place comes free, so it always reads "from" — regardless of date_mode,
+  // which is a seeker's concept ("before"/deadline). A bare date on an
+  // offer is ambiguous between "available then" and "gone by then".
   const dateValue = request.date_mode === 'flexible'
     ? t('requests.dateFlexible', "I'm flexible")
-    : rawDate && request.date_mode === 'before'
-      ? (isOffer
-        ? t('requests.dateFromPrefix', 'from {{date}}', { date: rawDate })
-        : t('requests.dateByPrefix', 'by {{date}}', { date: rawDate }))
-      : rawDate;
+    : rawDate && isOffer
+      ? t('requests.dateFromPrefix', 'from {{date}}', { date: rawDate })
+      : rawDate && request.date_mode === 'before'
+        ? t('requests.dateByPrefix', 'by {{date}}', { date: rawDate })
+        : rawDate;
 
   return (
     <div
