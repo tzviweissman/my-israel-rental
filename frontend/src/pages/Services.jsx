@@ -19,6 +19,7 @@ import { ArrowRight, Loader2, SlidersHorizontal, Award, Zap, MapPin, LayoutGrid,
 import { API, AuthContext } from '../App';
 import PageMeta from '../components/PageMeta';
 import StarRating from '../components/marketplace/StarRating';
+import CoverPlaceholder from '../components/common/CoverPlaceholder';
 import CategoryCarousel from '../components/marketplace/CategoryCarousel';
 import LocationChipsRow from '../components/marketplace/LocationChipsRow';
 import ServicesFiltersModal from '../components/marketplace/ServicesFiltersModal';
@@ -64,25 +65,35 @@ const GigCard = ({ gig, onClick, i18n, t }) => {
       // is not itself the grid item (the admin featuring toggle wraps it
       // in a positioned div) it shrinks to its content and the cards
       // overlap. Harmless when it IS the grid item.
-      className="text-left group w-full"
+      //
+      // S1 — the card is a SURFACE now. It used to be a bare button: an
+      // image div and some text, no background, border or shadow. Where
+      // there was a photo the photo was the card; where there wasn't,
+      // there was nothing to see at all. Matches the Stays cards.
+      className="svc-card text-left group w-full h-full flex flex-col"
       data-testid={`services-gig-${gig.id}`}
     >
       <div
-        className="relative aspect-square w-full rounded-xl overflow-hidden mb-2"
-        // Limestone-tinted rather than bg-gray-100. The "No image" label
-        // used to be gray-300 on gray-100, which measures 1.34:1 and is
-        // effectively invisible. Matches .svc-row-ph elsewhere.
+        className="relative aspect-square w-full rounded-xl overflow-hidden"
         style={{
-          background: '#EDE7DA',
           ...(cover
-            ? { backgroundImage: `url(${cover})`, backgroundSize: 'cover', backgroundPosition: 'center' }
+            ? {
+                backgroundImage: `url(${cover})`,
+                backgroundSize: 'cover',
+                backgroundPosition: 'center',
+              }
             : {}),
         }}
       >
+        {/* S2 — a designed cover instead of a grey box reporting an
+            absence. The old placeholder was #EDE7DA on a #EFE9DC page:
+            two values apart per channel, invisible. */}
         {!cover && (
-          <div className="w-full h-full flex items-center justify-center text-xs" style={{ color: 'var(--brand-muted)' }}>
-            {t('services.noImage', 'No image')}
-          </div>
+          <CoverPlaceholder
+            name={gig.provider?.name || localizedTitle(gig, i18n)}
+            category={gig.category}
+            className="w-full h-full"
+          />
         )}
         {/* Top-Rated overlay pill */}
         {gig.is_top_rated && (
@@ -121,7 +132,7 @@ const GigCard = ({ gig, onClick, i18n, t }) => {
           </span>
         )}
       </div>
-      <p className="font-semibold text-sm text-gray-900 truncate">
+      <p className="font-semibold text-sm text-gray-900 truncate mt-2">
         {localizedTitle(gig, i18n)}
       </p>
       <p className="text-xs text-[var(--brand-muted)] truncate">
@@ -957,7 +968,17 @@ const Services = () => {
             />
           </>
         ) : (
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-x-5 gap-y-8">
+          <div
+            /* S3 — one column fewer at every breakpoint above mobile.
+               Measured, not guessed: at six columns inside the max-w-6xl
+               container every card came out 170px WHATEVER the viewport
+               or the result count, truncating any title longer than about
+               "Playful pet care and boa…". The spec read this as a
+               low-result-count bug because that is where it was noticed;
+               it was really the column count, and it was clipping titles
+               in full grids too. Now ~265px at lg and ~208px at xl. */
+            className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-x-5 gap-y-8"
+          >
             {displayGigs.map((gig) => (
               /* The admin feature-toggle is a SIBLING of the card, not a
                  child: GigCard renders a <button>, and a button inside a

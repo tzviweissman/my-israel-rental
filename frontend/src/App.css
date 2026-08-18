@@ -718,6 +718,40 @@ select:focus-visible,
 }
 .svc-row h4 { font-size: 16px; font-weight: 700; font-family: var(--font-body); }
 .svc-row-sub { color: var(--brand-muted); font-size: 13px; margin-top: 3px; }
+
+/* S1 — the grid card. Same surface language as .svc-row above and the
+   Stays cards: white, hairline border, 18px radius, lift on hover.
+
+   It exists because GigCard was a bare <button> — an image and some
+   text, no surface at all. A card with a photo looked fine (the photo
+   WAS the card); a card without one had nothing to see, which is how a
+   real provider's business became invisible on the page. The surface is
+   what makes a photoless card a card. */
+.svc-card {
+  background: var(--surface, #fff);
+  border: 1px solid var(--brand-border);
+  border-radius: 18px;
+  padding: 10px;
+  transition: transform .25s var(--ease), box-shadow .25s var(--ease);
+}
+.svc-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 32px rgba(30, 45, 60, .12);
+}
+/* Image zoom on hover, matching Stays. The overflow-hidden wrapper is
+   the image div inside the card, so the zoom is clipped to its radius. */
+.svc-card .aspect-square > img,
+.svc-card .aspect-square {
+  transition: transform .35s var(--ease);
+}
+.svc-card:hover .aspect-square {
+  transform: scale(1.02);
+}
+@media (prefers-reduced-motion: reduce) {
+  .svc-card, .svc-card .aspect-square { transition: none; }
+  .svc-card:hover { transform: none; }
+  .svc-card:hover .aspect-square { transform: none; }
+}
 .svc-row-badges { display: flex; gap: 7px; margin-top: 8px; flex-wrap: wrap; }
 .svc-row-badges span {
   font-size: 11px;
