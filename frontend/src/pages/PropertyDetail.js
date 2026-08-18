@@ -16,6 +16,7 @@ import AmenitiesList from '../components/property/AmenitiesList';
 import BookingSidebar from '../components/property/BookingSidebar';
 import MovingServicesCrossSell from '../components/services/MovingServicesCrossSell';
 import Breadcrumb from '../components/common/Breadcrumb';
+import QrShareCard from '../components/common/QrShareCard';
 import { areaLabel } from '../utils/areaNames';
 
 // Parse 'YYYY-MM-DD' as a LOCAL date (avoids the UTC-shift bug where
@@ -63,6 +64,13 @@ const PropertyDetail = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { user, token } = useContext(AuthContext);
+  // Owner-only QR share (spec Q5). The public payload deliberately does
+  // not say who owns the listing, so ownership is discovered by ASKING:
+  // the short-link mint returns 200 only to the owner (or an admin) and
+  // 403 to everyone else. One request, on click, and the server stays the
+  // only authority on who owns what.
+  const [shareOpen, setShareOpen] = useState(false);
+  const [shortLink, setShortLink] = useState(null);
   const [property, setProperty] = useState(null);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [showCalendar, setShowCalendar] = useState(null);
@@ -299,12 +307,32 @@ const PropertyDetail = () => {
     navigate(`/chat/${id}${qs}`);
   };
 
-  const handleShare = () => {
+  const copyLongLink = () => {
     const url = `${window.location.origin}/property/${id}`;
     navigator.clipboard.writeText(url);
     setShareCopied(true);
-    toast.success('Property link copied to clipboard!');
+    toast.success(t('property.linkCopied', 'Property link copied to clipboard!'));
     setTimeout(() => setShareCopied(false), 3000);
+  };
+
+  const handleShare = async () => {
+    if (shareOpen) { setShareOpen(false); return; }
+    if (token) {
+      try {
+        const { data } = await axios.post(
+          `${API}/short-links`,
+          { target_type: 'property', target_id: id },
+          { headers: { Authorization: `Bearer ${token}` } },
+        );
+        setShortLink(data);
+        setShareOpen(true);
+        return;
+      } catch {
+        // 403: not their listing — fall through to the copy behaviour
+        // every visitor gets.
+      }
+    }
+    copyLongLink();
   };
 
   if (!property) {
@@ -335,14 +363,58 @@ const PropertyDetail = () => {
               <span className="truncate">{getBackButtonText()}</span>
             </button>
           </div>
-          <button
-            onClick={handleShare}
-            className="flex items-center gap-1.5 md:gap-2 px-2.5 md:px-4 py-1.5 md:py-2 rounded-lg border border-[var(--brand-primary)] text-[var(--brand-primary)] hover:bg-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/10 transition-colors text-xs md:text-sm font-medium shrink-0"
-            data-testid="share-button"
-          >
-            {shareCopied ? <Check size={14} className="md:w-4 md:h-4" /> : <Share2 size={14} className="md:w-4 md:h-4" />}
-            <span>{shareCopied ? t('property.copied') : t('property.shareProperty')}</span>
-          </button>
+          <div className="relative shrink-0">
+            <button
+              onClick={handleShare}
+              className="flex items-center gap-1.5 md:gap-2 px-2.5 md:px-4 py-1.5 md:py-2 rounded-lg border border-[var(--brand-primary)] text-[var(--brand-primary)] hover:bg-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/10 transition-colors text-xs md:text-sm font-medium shrink-0"
+              data-testid="share-button"
+              aria-expanded={shareOpen}
+            >
+              {shareCopied ? <Check size={14} className="md:w-4 md:h-4" /> : <Share2 size={14} className="md:w-4 md:h-4" />}
+              <span>{shareCopied ? t('property.copied') : t('property.shareProperty')}</span>
+            </button>
+            {shareOpen && shortLink && (
+              <div
+                role="dialog"
+                aria-label={t('qr.shareListing', 'Share this listing')}
+                className="absolute z-30 mt-2 end-0 w-[min(320px,calc(100vw-2rem))] rounded-2xl border bg-white p-4 shadow-xl"
+                style={{ borderColor: 'var(--brand-border)' }}
+                data-testid="property-qr-panel"
+              >
+                <p className="text-sm font-bold mb-3" style={{ color: 'var(--ink)' }}>
+                  {t('qr.shareListing', 'Share this listing')}
+                </p>
+                <QrShareCard
+                  url={`${window.location.origin}${shortLink.path}`}
+                  filename="myisraelrental-listing-qr"
+                  testidPrefix="property-qr"
+                />
+                <p
+                  className="mt-2 text-center text-xs font-semibold"
+                  style={{ color: 'var(--brand-primary)' }}
+                  data-testid="property-qr-scan-count"
+                >
+                  {shortLink.scan_count === 0
+                    ? t('qr.scanned0', 'Not scanned yet')
+                    : shortLink.scan_count === 1
+                      ? t('qr.scanned1', 'Scanned once')
+                      : t('qr.scannedN', 'Scanned {{n}} times', { n: shortLink.scan_count })}
+                </p>
+                <button
+                  type="button"
+                  onClick={() => {
+                    navigator.clipboard.writeText(`${window.location.origin}${shortLink.path}`);
+                    toast.success(t('property.linkCopied', 'Property link copied to clipboard!'));
+                  }}
+                  className="mt-3 w-full py-2 rounded-lg text-xs font-semibold border"
+                  style={{ borderColor: 'var(--brand-border)', color: 'var(--brand-primary)' }}
+                  data-testid="property-qr-copy"
+                >
+                  {t('qr.copyShort', 'Copy link')}
+                </button>
+              </div>
+            )}
+          </div>
         </div>
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <div className="lg:col-span-2">

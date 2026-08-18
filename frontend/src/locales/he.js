@@ -23,6 +23,8 @@ const he = {
         scanned0: 'עוד לא נסרק',
         scanned1: 'נסרק פעם אחת',
         scannedN: 'נסרק {{n}} פעמים',
+        shareListing: 'שיתוף המודעה',
+        copyShort: 'העתקת קישור',
       },
       update: {
         available: 'גירסה חדשה של האתר זמינה.',
@@ -179,6 +181,7 @@ const he = {
         typeWithBedsOne: '{{type}} · חדר אחד',
         loading: 'טוען...',
         shareProperty: 'שתף נכס',
+        linkCopied: 'קישור לנכס הועתק!',
         copied: 'הועתק!',
         save: 'שמור',
         saved: 'נשמר',

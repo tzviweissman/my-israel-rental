@@ -47,7 +47,12 @@ _SLUG_LEN = 7
 # argument for allowing a guessable slug.
 _PUBLIC_TARGETS = {
     "manager": "/manager/{id}",
-    "property": "/properties/{id}",
+    # Singular, and load-bearing: /property/{id} is the detail page;
+    # /properties/{type} (plural) is the CATEGORY BROWSER, which would
+    # treat a UUID as a rental type and show nothing. Caught before the
+    # first property slug was minted — and slugs are permanent, so a wrong
+    # path here would have been wrong on printed signs forever.
+    "property": "/property/{id}",
     "business": "/business/{id}",
 }
 

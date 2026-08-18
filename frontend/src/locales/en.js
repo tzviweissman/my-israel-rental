@@ -23,6 +23,8 @@ const en = {
         scanned0: 'Not scanned yet',
         scanned1: 'Scanned once',
         scannedN: 'Scanned {{n}} times',
+        shareListing: 'Share this listing',
+        copyShort: 'Copy link',
       },
       update: {
         available: 'A newer version of the site is available.',
@@ -182,6 +184,7 @@ const en = {
         typeWithBedsOne: '1-bedroom {{type}}',
         loading: 'Loading...',
         shareProperty: 'Share Property',
+        linkCopied: 'Property link copied to clipboard!',
         copied: 'Copied!',
         save: 'Save',
         saved: 'Saved',
