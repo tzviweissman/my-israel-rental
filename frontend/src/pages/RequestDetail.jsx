@@ -49,6 +49,11 @@ const RequestDetail = () => {
   const [notFound, setNotFound] = useState(false);
   const [busy, setBusy] = useState(false);
 
+  // Both sides of the board render through this page, and nearly every
+  // label below means the opposite thing on each. Named once so a new row
+  // cannot quietly inherit the seeker's wording.
+  const isOffer = request?.post_kind === 'have';
+
   const load = () => {
     setLoading(true);
     axios.get(`${API}/marketplace/requests/${id}`)
@@ -96,7 +101,9 @@ const RequestDetail = () => {
   };
 
   const report = async () => {
-    const reason = window.prompt(t('requests.reportPrompt', 'What is wrong with this request?'));
+    const reason = window.prompt(isOffer
+      ? t('requests.reportPromptOffer', 'What is wrong with this post?')
+      : t('requests.reportPrompt', 'What is wrong with this request?'));
     if (!reason || reason.trim().length < 3) return;
     try {
       await axios.post(`${API}/marketplace/requests/${id}/report`, { reason: reason.trim() }, {
@@ -125,7 +132,9 @@ const RequestDetail = () => {
       >
         <div className="max-w-lg mx-auto text-center">
           <p className="text-xl font-bold" style={{ color: 'var(--ink)' }}>
-            {t('requests.goneTitle', 'This request is no longer available')}
+            {isOffer
+              ? t('requests.goneTitleOffer', 'This post is no longer available')
+              : t('requests.goneTitle', 'This request is no longer available')}
           </p>
           <p className="text-sm mt-2 mb-6" style={{ color: 'var(--brand-muted)' }}>
             {t('requests.goneBody', 'It may have been found, withdrawn or removed.')}
@@ -152,7 +161,9 @@ const RequestDetail = () => {
   const dateValue = request.date_mode === 'flexible'
     ? t('requests.dateFlexible', "I'm flexible")
     : rawDate && request.date_mode === 'before'
-      ? t('requests.dateByPrefix', 'by {{date}}', { date: rawDate })
+      ? (isOffer
+        ? t('requests.dateFromPrefix', 'from {{date}}', { date: rawDate })
+        : t('requests.dateByPrefix', 'by {{date}}', { date: rawDate }))
       : rawDate;
 
   return (
@@ -208,11 +219,33 @@ const RequestDetail = () => {
 
           <div className="grid sm:grid-cols-2 gap-2 mb-5">
             <Row Icon={MapPin} label={t('requests.fieldArea', 'Area')} value={request.area} />
-            <Row Icon={Coins} label={t('requests.fieldBudget', 'Budget')} value={budget} />
+            {/* A budget is what a seeker will spend. On an offer the
+                same number is what they are asking for. */}
+            <Row
+              Icon={Coins}
+              label={isOffer
+                ? (isRental
+                  ? t('requests.fieldAskingRent', 'Asking rent')
+                  : t('requests.fieldPrice', 'Price'))
+                : t('requests.fieldBudget', 'Budget')}
+              value={budget}
+            />
             {isRental && (
               <>
-                <Row Icon={BedDouble} label={t('requests.fieldBedrooms', 'Bedrooms (minimum)')} value={request.bedrooms_min || null} />
-                <Row Icon={CalendarDays} label={t('requests.fieldMoveIn', 'Move-in date')} value={dateValue} />
+                <Row
+                  Icon={BedDouble}
+                  label={isOffer
+                    ? t('requests.fieldBedroomsOffer', 'Bedrooms')
+                    : t('requests.fieldBedrooms', 'Bedrooms (minimum)')}
+                  value={request.bedrooms_min || null}
+                />
+                <Row
+                  Icon={CalendarDays}
+                  label={isOffer
+                    ? t('requests.fieldAvailableFrom', 'Available from')
+                    : t('requests.fieldMoveIn', 'Move-in date')}
+                  value={dateValue}
+                />
                 <Row Icon={Clock} label={t('requests.fieldLease', 'Lease length (months)')} value={request.lease_months} />
               </>
             )}
@@ -253,10 +286,14 @@ const RequestDetail = () => {
               </p>
               <div className="flex flex-wrap gap-2">
                 {request.status !== 'found' && (
-                  <button type="button" onClick={() => act('found', t('requests.markedFound', 'Marked as found'))}
+                  <button type="button" onClick={() => act('found', isOffer
+                    ? t('requests.markedTaken', 'Marked as taken')
+                    : t('requests.markedFound', 'Marked as found'))}
                           disabled={busy} className="btn-blue-solid inline-flex items-center gap-1.5 disabled:opacity-60"
                           data-testid="request-mark-found">
-                    <CheckCircle2 size={15} />{t('requests.markFound', "I found it")}
+                    <CheckCircle2 size={15} />{isOffer
+                      ? t('requests.markTaken', "It's taken")
+                      : t('requests.markFound', "I found it")}
                   </button>
                 )}
                 {request.status !== 'found' && (

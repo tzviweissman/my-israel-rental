@@ -1944,6 +1944,27 @@ const en = {
         descriptionPhOffer: 'What makes it worth a look — the floor, the light, when it is free.',
         submitOffer: 'Post it',
         postedOffer: 'Your post is live — renters can now reach you.',
+        // --- Offer-side wording (post_kind === 'have') ---------------
+        // The board carries BOTH sides, and every label below was written
+        // for the wanted side only. On a post offering an apartment they
+        // read as nonsense: "3+ bd" (a minimum, on a flat that has exactly
+        // three), "up to 6,000" (a ceiling, on a rent being asked for),
+        // "Move-in date" for the day it comes free, and "I found it" on
+        // something the poster never lost.
+        bedroomsAvail: '{{n}} bd',
+        asking: 'asking {{amount}}',
+        fieldAskingRent: 'Asking rent',
+        fieldPrice: 'Price',
+        fieldBedroomsOffer: 'Bedrooms',
+        fieldAvailableFrom: 'Available from',
+        dateFromPrefix: 'from {{date}}',
+        goneTitleOffer: 'This post is no longer available',
+        reportPromptOffer: 'What is wrong with this post?',
+        markTaken: "It's taken",
+        markedTaken: 'Marked as taken',
+        expiryNoteOffer: 'Posts stay on the board for 30 days. You can renew or mark it taken at any time.',
+        bedroomsPhOffer: 'e.g. 3',
+        stepPrice: 'Price',
         bedroomsMin: '{{n}}+ bd',
         upTo: 'up to {{amount}}',
         messageSeeker: 'Message seeker',

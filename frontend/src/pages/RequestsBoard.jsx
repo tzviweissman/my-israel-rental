@@ -137,16 +137,26 @@ export const RequestCard = ({ request: r, onOpen, t }) => {
             <MapPin size={12} aria-hidden="true" />{r.area}
           </span>
         )}
+        {/* The same field means opposite things on the two sides of this
+            board. On a wanted post `bedrooms_min` is a floor and the money
+            is a ceiling; on an offer the flat has exactly that many rooms
+            and that is the rent being asked. Rendering the wanted wording
+            for both put "3+ bd" and "up to 6,000" on a three-room flat
+            offered at 6,000, which reads as a seeker's advert. */}
         {isRental && r.bedrooms_min > 0 && (
           <span className="rc-chip">
             <BedDouble size={12} aria-hidden="true" />
-            {t('requests.bedroomsMin', '{{n}}+ bd', { n: r.bedrooms_min })}
+            {isOffer
+              ? t('requests.bedroomsAvail', '{{n}} bd', { n: r.bedrooms_min })
+              : t('requests.bedroomsMin', '{{n}}+ bd', { n: r.bedrooms_min })}
           </span>
         )}
         {budget && (
           <span className="rc-chip rc-chip-key">
             <Coins size={12} aria-hidden="true" />
-            {t('requests.upTo', 'up to {{amount}}', { amount: budget })}
+            {isOffer
+              ? t('requests.asking', 'asking {{amount}}', { amount: budget })
+              : t('requests.upTo', 'up to {{amount}}', { amount: budget })}
           </span>
         )}
         {/* C3 — "Flexible" is information, so it gets a chip of its own.
@@ -173,9 +183,16 @@ export const RequestCard = ({ request: r, onOpen, t }) => {
         ) : (r.move_in_date || r.preferred_date) ? (
           <span className="rc-chip">
             <CalendarDays size={12} aria-hidden="true" />
-            {r.date_mode === 'before'
-              ? t('requests.dateByPrefix', 'by {{date}}', { date: r.move_in_date || r.preferred_date })
-              : (r.move_in_date || r.preferred_date)}
+            {/* An offer's date is always the day the place comes free, so
+                it always takes "from" — a bare date there is ambiguous
+                between "available then" and "must go by then", which are
+                opposite meanings to someone deciding whether to enquire.
+                A seeker's date only takes "by" when they set a deadline. */}
+            {isOffer
+              ? t('requests.dateFromPrefix', 'from {{date}}', { date: r.move_in_date || r.preferred_date })
+              : r.date_mode === 'before'
+                ? t('requests.dateByPrefix', 'by {{date}}', { date: r.move_in_date || r.preferred_date })
+                : (r.move_in_date || r.preferred_date)}
           </span>
         ) : null}
       </div>

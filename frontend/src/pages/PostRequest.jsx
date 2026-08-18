@@ -224,7 +224,8 @@ const PostRequest = () => {
     },
     {
       key: 'budget',
-      label: t('requests.stepBudget', 'Budget'),
+      // Someone offering a flat is naming a price, not declaring a budget.
+      label: isOffer ? t('requests.stepPrice', 'Price') : t('requests.stepBudget', 'Budget'),
       blocker: () => (form.budget_type === 'fixed' && !(Number(form.budget_amount) > 0)
         ? t('requests.needBudget', 'Enter a budget amount, or switch to "open to offers".')
         : null),
@@ -536,12 +537,16 @@ const PostRequest = () => {
                         ))}
                       </select>
                     </Field>
-                    <Field label={t('requests.fieldBedrooms', 'Bedrooms (minimum)')}>
+                    <Field label={isOffer
+                      ? t('requests.fieldBedroomsOffer', 'Bedrooms')
+                      : t('requests.fieldBedrooms', 'Bedrooms (minimum)')}>
                       <input
                         type="number" min="0" max="20" inputMode="numeric"
                         className={inputCls} style={{ borderColor: 'var(--brand-border)' }}
                         value={form.bedrooms_min} onChange={(e) => set({ bedrooms_min: e.target.value })}
-                        placeholder={t('requests.bedroomsPh', 'e.g. 3 — leave blank if it does not matter')}
+                        placeholder={isOffer
+                          ? t('requests.bedroomsPhOffer', 'e.g. 3')
+                          : t('requests.bedroomsPh', 'e.g. 3 — leave blank if it does not matter')}
                         data-testid="post-request-bedrooms"
                       />
                     </Field>
@@ -585,7 +590,11 @@ const PostRequest = () => {
 
               {current.key === 'budget' && (
                 <>
-                  <Field label={t('requests.fieldBudget', 'Budget')}>
+                  <Field label={isOffer
+                    ? (isRental
+                      ? t('requests.fieldAskingRent', 'Asking rent')
+                      : t('requests.fieldPrice', 'Price'))
+                    : t('requests.fieldBudget', 'Budget')}>
                     <div className="flex flex-wrap gap-2 items-center">
                       {['open', 'fixed'].map((v) => (
                         <button
