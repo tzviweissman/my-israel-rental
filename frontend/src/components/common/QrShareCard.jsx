@@ -60,7 +60,13 @@ function fileToLogoDataUri(file) {
       // any dark edge pixels eat into scan margin.
       ctx.fillStyle = '#FFFFFF';
       ctx.fillRect(0, 0, 256, 256);
-      const scale = Math.min(256 / img.width, 256 / img.height);
+      // Inset to 78%, so the logo carries its own white margin. A logo
+      // drawn edge-to-edge butts straight against live modules, and a
+      // decoder reading that boundary is the difference between a code
+      // that scans and one that scans SOMETIMES — which is the worst
+      // outcome for something printed and posted on a wall.
+      const box = 256 * 0.78;
+      const scale = Math.min(box / img.width, box / img.height);
       const w = img.width * scale;
       const h = img.height * scale;
       ctx.drawImage(img, (256 - w) / 2, (256 - h) / 2, w, h);
@@ -91,11 +97,18 @@ export default function QrShareCard({ url, filename = 'myisraelrental-qr', testi
   // scans more easily. These are the only two valid pairings.
   const level = logoUri ? 'H' : 'M';
   const displayUrl = url.replace(/^https?:\/\//, '');
+  // 30/168 = 18% of the code's width. It was 24%, which LOOKED fine and
+  // decoded fine most of the time — but a real decoder refused one of two
+  // test logos at that size while accepting the other, identical but for
+  // colour. Measured down to 18%, every logo colour decoded at full size
+  // and downscaled to 300px and 200px (a phone photo of a 2cm print).
+  // Printed codes cannot be recalled, so the size is set where it has
+  // margin, not where it last worked.
   const imageSettings = logoUri
     ? {
         src: logoUri,
-        height: 40,
-        width: 40,
+        height: 30,
+        width: 30,
         // excavate clears the modules under the logo instead of letting
         // them show through it half-obscured — H can rebuild cleared
         // modules, but not smudged ones.
@@ -245,8 +258,8 @@ export default function QrShareCard({ url, filename = 'myisraelrental-qr', testi
                   ...imageSettings,
                   // Same logo-to-code ratio as the preview (40/168), so
                   // what was verified to scan on screen is what prints.
-                  height: Math.round((PNG_SIZE * 40) / 168),
-                  width: Math.round((PNG_SIZE * 40) / 168),
+                  height: Math.round((PNG_SIZE * 30) / 168),
+                  width: Math.round((PNG_SIZE * 30) / 168),
                 }
               : undefined
           }
