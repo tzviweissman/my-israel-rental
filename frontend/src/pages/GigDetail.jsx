@@ -673,8 +673,15 @@ const GigDetail = () => {
                   <><Send size={14} /> {t('services.sendBookingRequest', 'Send booking request')}</>
                 )}
               </button>
+              {/* Present tense on purpose: "never" was a forever-promise
+                  the business has not made (Tzvi, 2026-08-18 — a commission
+                  may exist one day). Say what is true today, and say it in
+                  the reader's language — this line was also hardcoded
+                  English on the Hebrew page. */}
               <p className="text-[11px] text-gray-400 text-center">
-                MyIsraelRental never takes a cut — you deal with the {isStore ? 'seller' : 'provider'} directly.
+                {isStore
+                  ? t('services.noCutSeller', "You deal with the seller directly — MyIsraelRental doesn't take a cut.")
+                  : t('services.noCutProvider', "You deal with the provider directly — MyIsraelRental doesn't take a cut.")}
               </p>
             </div>
           </div>

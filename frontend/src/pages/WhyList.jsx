@@ -105,7 +105,7 @@ const WhyList = () => {
             <ArrowRight size={16} className="rtl:rotate-180" />
           </button>
           <p className="text-xs text-gray-500 mt-3">
-            {t('whyList.trialNote', 'Free to list — no card needed, ever.')}
+            {t('whyList.trialNote', 'Free to list — no card needed.')}
           </p>
         </div>
       </section>
