@@ -143,7 +143,19 @@ export default function QrShareCard({ url, filename = 'myisraelrental-qr', testi
   const downloadSvg = () => {
     const svg = svgWrapRef.current?.querySelector('svg');
     if (!svg) return;
-    const src = new XMLSerializer().serializeToString(svg);
+    // Resize a COPY, not the one on screen. The preview is 168px because
+    // that is what fits the panel, and serialising it verbatim shipped a
+    // 168px file — which opens as a small code in the corner of a big
+    // blank page and gets scaled by hand before printing. The viewBox
+    // means an SVG loses nothing at any size, so the file may as well
+    // arrive at a usable one.
+    const clone = svg.cloneNode(true);
+    clone.setAttribute('width', String(PNG_SIZE));
+    clone.setAttribute('height', String(PNG_SIZE));
+    // Explicit namespace: the DOM carries it implicitly, a standalone
+    // file must declare it or some viewers refuse to render.
+    clone.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
+    const src = new XMLSerializer().serializeToString(clone);
     const blob = new Blob([src], { type: 'image/svg+xml' });
     const a = document.createElement('a');
     a.href = URL.createObjectURL(blob);
