@@ -22,12 +22,38 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Share2 } from 'lucide-react';
+import axios from 'axios';
 import ShareLinkRow from './ShareLinkRow';
+import QrShareCard from '../common/QrShareCard';
 
-export default function ShareListingsPanel({ userId, propertyCount = 0 }) {
+export default function ShareListingsPanel({ userId, propertyCount = 0, API, token }) {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
+  const [shortLink, setShortLink] = useState(null);
   const wrapRef = useRef(null);
+
+  // The short link is minted the FIRST time the panel opens (spec Q1:
+  // lazily), then reused forever — the backend returns the same slug on
+  // every later call, so opening the panel twice cannot produce two codes.
+  // If the call fails the panel still works: the long link never depends
+  // on the short one, and the QR simply waits for a retry on next open.
+  useEffect(() => {
+    if (!open || shortLink || !API || !token) return;
+    let cancelled = false;
+    (async () => {
+      try {
+        const { data } = await axios.post(
+          `${API}/short-links`,
+          { target_type: 'manager', target_id: userId },
+          { headers: { Authorization: `Bearer ${token}` } },
+        );
+        if (!cancelled) setShortLink(data);
+      } catch {
+        /* long link still shown; QR appears next open if this recovers */
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [open, shortLink, API, token, userId]);
 
   useEffect(() => {
     if (!open) return undefined;
@@ -84,10 +110,24 @@ export default function ShareListingsPanel({ userId, propertyCount = 0 }) {
           <div data-testid="share-listings-link">
             <ShareLinkRow
               userId={userId}
+              link={shortLink ? `${window.location.origin}${shortLink.path}` : undefined}
               label={t('dashboard.sharePanelLabel', 'Copy your link')}
               testidPrefix="owner-share-link"
             />
           </div>
+
+          {/* Q3/Q4 — the QR, encoding the SHORT link. Only rendered once
+              the slug exists: encoding the 36-character UUID would defeat
+              the reason short links were built. */}
+          {shortLink && (
+            <div className="mt-4 pt-4 border-t" style={{ borderColor: 'var(--brand-border)' }}>
+              <QrShareCard
+                url={`${window.location.origin}${shortLink.path}`}
+                filename="myisraelrental-listings-qr"
+                testidPrefix="share-qr"
+              />
+            </div>
+          )}
         </div>
       )}
     </div>

@@ -15,6 +15,12 @@ const he = {
         notFound: 'הקישור הזה אינו קיים או הוסר.',
         goHome: 'מעבר ל-MyIsraelRental',
       },
+      qr: {
+        logoToggle: 'לוגו במרכז',
+        downloadPng: 'PNG למסכים',
+        downloadSvg: 'SVG להדפסה',
+        printSize: 'להדפיס לפחות 2 × 2 ס"מ — גדול יותר לשלט בבניין.',
+      },
       update: {
         available: 'גירסה חדשה של האתר זמינה.',
         availableRefresh: 'גירסה חדשה של האתר זמינה. רעננו כדי לקבל את העדכון.',

@@ -15,6 +15,12 @@ const en = {
         notFound: "This link doesn't exist or has been removed.",
         goHome: 'Go to MyIsraelRental',
       },
+      qr: {
+        logoToggle: 'Logo in the centre',
+        downloadPng: 'PNG for screens',
+        downloadSvg: 'SVG for print',
+        printSize: 'Print at least 2 × 2 cm — larger for a building sign.',
+      },
       update: {
         available: 'A newer version of the site is available.',
         availableRefresh: 'A newer version of the site is available. Refresh to pick up the latest.',

@@ -464,7 +464,7 @@ const PropertyList = ({ properties, bookings = [], onEdit, onAddProperty, onRefr
           {/* Share sits with the heading, not at the foot of the list: a
               manager with forty properties should not scroll past all of
               them to reach a link they use constantly. */}
-          <ShareListingsPanel userId={ownerId} propertyCount={properties.length} />
+          <ShareListingsPanel userId={ownerId} propertyCount={properties.length} API={API} token={token} />
           {bulkCount > 0 && (
             <button
               onClick={() => toggleFilter('bulk')}
