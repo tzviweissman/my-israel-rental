@@ -2,7 +2,7 @@ import React, { useContext, useState, useRef, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { AuthContext, API } from '../App';
-import { Globe, LogOut, LayoutDashboard, Menu, X, Home, Building, Palmtree, Warehouse, ChevronRight, Search, Bell, MessageCircle, HelpCircle, Bed, Briefcase } from 'lucide-react';
+import { Globe, LogOut, LayoutDashboard, Menu, X, Home, Building, Palmtree, Warehouse, ChevronRight, Search, Bell, MessageCircle, HelpCircle, Bed, Briefcase, Store } from 'lucide-react';
 import axios from 'axios';
 import { toast } from 'sonner';
 import { playMessagePing, requestDesktopNotificationPermission, showDesktopNotification } from '../utils/messageAlerts';
@@ -767,6 +767,11 @@ const Navigation = () => {
                     <span>{t('nav.services', 'Services')}</span>
                     <ChevronRight size={14} className="ml-auto opacity-0 group-hover:opacity-60 transition-opacity" />
                   </button>
+                  <button onClick={() => handleNav('/requests')} className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-150 hover:bg-white/5 group" style={{ color: 'var(--gold)' }} data-testid="nav-requests">
+                    <Store size={16} className="opacity-60 group-hover:opacity-100" />
+                    <span>{t('nav.requests', 'Marketplace')}</span>
+                    <ChevronRight size={14} className="ml-auto opacity-0 group-hover:opacity-60 transition-opacity" />
+                  </button>
                 </div>
 
                 <div className="mx-4 border-t" style={{ borderColor: 'rgba(201, 162, 39,0.15)' }} />
@@ -863,12 +868,15 @@ const Navigation = () => {
           }`}
           data-testid="nav-rental-categories-mobile"
         >
-          {/* Mobile mirror of the desktop pill row — same Stays/Services
-              duality, kept here so the bottom strip on small screens
-              matches the top one on lg+. */}
+          {/* Mobile mirror of the desktop pill row. It carried only
+              Stays/Services long after Marketplace became the third
+              top-level destination, so on a phone /requests was reachable
+              only by typing the URL - and phones are most of the traffic.
+              Any link added to the desktop row above belongs here too. */}
           {[
             { type: 'stays', icon: Bed, label: t('nav.stays', 'Stays'), to: '/stays' },
             { type: 'services', icon: Briefcase, label: t('nav.services', 'Services'), to: '/services' },
+            { type: 'requests', icon: Store, label: t('nav.requests', 'Marketplace'), to: '/requests' },
           ].map(({ type, icon: Icon, label, to }) => (
             <NavCategoryItem
               key={type}

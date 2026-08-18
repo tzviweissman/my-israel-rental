@@ -27,6 +27,10 @@ const NavCategoryItem = ({ type, Icon, label, active, scrolled, iconHidden = fal
   return (
     <Link
       to={href}
+      // The gold underline says "you are here" to people who can see it.
+      // aria-current is what says it to everyone else - the desktop pill
+      // row already sets it, and these two rows are the same navigation.
+      aria-current={active ? 'page' : undefined}
       onClick={() => window.scrollTo(0, 0)}
       onMouseEnter={() => setHover(true)}
       onMouseLeave={() => setHover(false)}
