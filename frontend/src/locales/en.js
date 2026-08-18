@@ -21,6 +21,13 @@ const en = {
         goHome: 'Back to home',
         browseStays: 'Browse stays',
       },
+      photoNudge: {
+        body: 'Businesses with a photo get noticed first.',
+        action: 'Add a photo',
+        dismiss: 'Dismiss',
+        added: 'Photo added',
+        failed: "That photo didn't upload — try again",
+      },
       qr: {
         logoAdd: 'Add your logo',
         logoReplace: 'Change logo',

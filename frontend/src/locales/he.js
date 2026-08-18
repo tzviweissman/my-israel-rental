@@ -21,6 +21,13 @@ const he = {
         goHome: 'חזרה לדף הבית',
         browseStays: 'חיפוש נכסים',
       },
+      photoNudge: {
+        body: 'עסקים עם תמונה מושכים יותר תשומת לב.',
+        action: 'הוספת תמונה',
+        dismiss: 'סגירה',
+        added: 'התמונה נוספה',
+        failed: 'התמונה לא עלתה — נסו שוב',
+      },
       qr: {
         logoAdd: 'הוספת הלוגו שלכם',
         logoReplace: 'החלפת לוגו',

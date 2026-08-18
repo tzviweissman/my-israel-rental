@@ -17,6 +17,8 @@ import {
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { uploadFilesFast } from '../../utils/fastUpload';
+import CoverPlaceholder from '../common/CoverPlaceholder';
+import AddPhotoNudge from '../common/AddPhotoNudge';
 
 const ProfileEditModal = ({ API, token, initial, onClose, onSaved }) => {
   const { t } = useTranslation();
@@ -415,13 +417,39 @@ const MyGigsTab = ({ API, token }) => {
                   className="block w-full aspect-video bg-gray-100 text-left"
                   style={cover ? { backgroundImage: `url(${cover})`, backgroundSize: 'cover', backgroundPosition: 'center' } : {}}
                 >
+                  {/* Same designed cover the public grid uses. This tile
+                      had its own hardcoded-English "No image" in gray-300
+                      — invisible, and untranslated on a Hebrew
+                      dashboard. */}
                   {!cover && (
-                    <div className="w-full h-full flex items-center justify-center text-gray-300 text-xs">
-                      No image
-                    </div>
+                    <CoverPlaceholder
+                      name={g.title}
+                      category={g.category}
+                      className="w-full h-full"
+                    />
                   )}
                 </button>
                 <div className="p-4 space-y-2">
+                  {/* S4 — an invitation, never a gate (S5). It uploads
+                      here rather than linking away: there is no edit
+                      screen for a gig, so a link would have gone nowhere
+                      useful. */}
+                  {!cover && (
+                    <AddPhotoNudge
+                      itemId={g.id}
+                      API={API}
+                      token={token}
+                      testidPrefix={`my-gigs-photo-${g.id}`}
+                      onUploaded={async (url) => {
+                        await axios.patch(
+                          `${API}/marketplace/gigs/${g.id}`,
+                          { gallery: [url, ...(g.gallery || [])] },
+                          { headers: { Authorization: `Bearer ${token}` } },
+                        );
+                        await load();
+                      }}
+                    />
+                  )}
                   <p className="font-semibold text-sm text-gray-900 truncate">{g.title}</p>
                   <p className="text-xs text-gray-500 truncate">
                     {g.category}{g.area ? ` · ${g.area}` : ''}
