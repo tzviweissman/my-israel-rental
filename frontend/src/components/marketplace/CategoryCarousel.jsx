@@ -10,26 +10,16 @@
  * of the scroll range to avoid dead clicks.
  */
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import {
-  ChevronLeft, ChevronRight,
-  Truck, Key, Map, Wind, Sparkles, Wrench, Hammer, Camera,
-  Palette, Scissors, Droplet, Zap,
-  Music, Home, Dumbbell, Car, Boxes, Plane, Flower, BookOpen,
-  Briefcase, SprayCan, Monitor, GraduationCap, Baby, PawPrint, PartyPopper,
-} from 'lucide-react';
-import { themeForCategory } from './categoryTheme';
+// The per-category icons moved to categoryTheme.js, which now resolves
+// name -> component for every consumer.
+import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { themeForCategory, iconForCategory } from './categoryTheme';
 import useIsRtl from '../../hooks/useIsRtl';
 
-const ICONS = {
-  Truck, Key, Map, Wind, Sparkles, Wrench, Hammer, Camera,
-  Palette, Scissors, Droplet, Zap,
-  Music, Home, Dumbbell, Car, Boxes, Plane, Flower, BookOpen,
-  Briefcase, SprayCan, Monitor, GraduationCap, Baby, PawPrint, PartyPopper,
-};
 
 const CategoryCard = ({ category, active, onClick }) => {
   const theme = themeForCategory(category.slug);
-  const IconEl = theme.icon ? ICONS[theme.icon] : null;
+  const IconEl = iconForCategory(category.slug);
   return (
     <button
       onClick={onClick}

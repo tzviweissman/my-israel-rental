@@ -108,6 +108,14 @@ const CATEGORY_ICONS = {
   'real-estate-services': Package,
 };
 
+/** The category's icon, or a neutral fallback. Exported because the hero
+ *  search dropdown shows the same icon beside the same category — one
+ *  mapping, so a new category cannot pick up an icon in one place and a
+ *  blank in the other. */
+export function iconForCategory(category) {
+  return CATEGORY_ICONS[category] || Package;
+}
+
 /** Stable across renders, reloads and pages — the same name always maps
  *  to the same tint. */
 function hashName(name) {

@@ -14,7 +14,8 @@
  */
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Briefcase, Calendar as CalendarIcon, Wallet, SlidersHorizontal, ChevronDown, Check } from 'lucide-react';
+import { Briefcase, Calendar as CalendarIcon, Wallet, SlidersHorizontal, ChevronDown, Check, Coins } from 'lucide-react';
+import { iconForCategory } from './categoryTheme';
 import { Popover, PopoverTrigger, PopoverContent } from '../ui/popover';
 import { Calendar } from '../ui/calendar';
 
@@ -114,6 +115,7 @@ function SegmentSelect({ icon: Icon, label, value, onChange, options, testId }) 
         <div role="listbox">
           {options.map((o) => {
             const selected = o.value === value;
+            const OptIcon = o.icon;
             return (
               <button
                 key={o.value}
@@ -121,7 +123,7 @@ function SegmentSelect({ icon: Icon, label, value, onChange, options, testId }) 
                 role="option"
                 aria-selected={selected}
                 onClick={() => { onChange(o.value); setOpen(false); }}
-                className="w-full flex items-center gap-2 px-3 py-2 rounded-xl text-sm text-start transition-colors hover:bg-black/[0.04]"
+                className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-sm text-start transition-colors hover:bg-black/[0.04]"
                 style={{
                   color: 'var(--ink)',
                   background: selected ? 'rgb(var(--brand-primary-rgb) / 0.08)' : 'transparent',
@@ -129,12 +131,19 @@ function SegmentSelect({ icon: Icon, label, value, onChange, options, testId }) 
                 }}
                 data-testid={`${testId}-option-${o.value || 'any'}`}
               >
+                {/* The same little tile the Stays stay-type menu uses, so
+                    the two pickers read as one product. */}
+                <span className="w-8 h-8 rounded-lg bg-gray-100 flex items-center justify-center shrink-0">
+                  {OptIcon
+                    ? <OptIcon size={14} className="text-gray-500" />
+                    : <span className="text-xs font-bold text-gray-500">∗</span>}
+                </span>
+                <span className="truncate flex-1">{o.label}</span>
                 <Check
                   size={14}
                   className="shrink-0"
                   style={{ opacity: selected ? 1 : 0, color: 'var(--brand-primary)' }}
                 />
-                <span className="truncate">{o.label}</span>
               </button>
             );
           })}
@@ -293,12 +302,20 @@ export default function ServicesHeroSearch({
     const cats = (categories || []).map((c) => ({
       value: c.slug,
       label: c.label,
+      icon: iconForCategory(c.slug),
     }));
     return [any, ...cats];
   }, [categories, t]);
 
   const budgetOptions = useMemo(
-    () => BUDGET_OPTIONS.map((o) => ({ ...o, label: t(o.labelKey, o.labelDefault) })),
+    // Coins for a bracket, wallet for "any" — the tile is what makes the
+    // row scannable; leaving budget plain would make the two menus look
+    // like different components again.
+    () => BUDGET_OPTIONS.map((o) => ({
+      ...o,
+      label: t(o.labelKey, o.labelDefault),
+      icon: o.value ? Coins : Wallet,
+    })),
     [t]
   );
 

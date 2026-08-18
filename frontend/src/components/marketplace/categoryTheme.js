@@ -12,6 +12,25 @@
  * Images are stable Unsplash CDN URLs served with `f=auto&q=70&w=400`
  * for fast card thumbnails.
  */
+import {
+  Truck, Key, Map, Wind, Sparkles, Wrench, Hammer, Camera,
+  Palette, Scissors, Droplet, Zap,
+  Music, Home, Dumbbell, Car, Boxes, Plane, Flower, BookOpen,
+  Briefcase, SprayCan, Monitor, GraduationCap, Baby, PawPrint, PartyPopper,
+} from 'lucide-react';
+
+// The icon-name -> component registry used to live inside
+// CategoryCarousel. It is here now because the hero search dropdown shows
+// the same icon for the same category: two registries would drift, and a
+// category whose icon resolved in one place and fell back to a generic
+// box in the other is exactly what shipped before this moved.
+const ICONS = {
+  Truck, Key, Map, Wind, Sparkles, Wrench, Hammer, Camera,
+  Palette, Scissors, Droplet, Zap,
+  Music, Home, Dumbbell, Car, Boxes, Plane, Flower, BookOpen,
+  Briefcase, SprayCan, Monitor, GraduationCap, Baby, PawPrint, PartyPopper,
+};
+
 const un = (id) => `https://images.unsplash.com/${id}?auto=format&fit=crop&w=520&q=75`;
 
 // Slugs match backend/routes/marketplace/shared.py CATEGORIES exactly.
@@ -91,3 +110,10 @@ export const DEFAULT_THEME = {
 };
 
 export const themeForCategory = (slug) => CATEGORY_THEME[slug] || DEFAULT_THEME;
+
+/** The lucide COMPONENT for a category, or null when the taxonomy has no
+ *  icon for it — callers decide what a missing icon looks like. */
+export const iconForCategory = (slug) => {
+  const name = themeForCategory(slug)?.icon;
+  return (name && ICONS[name]) || null;
+};
