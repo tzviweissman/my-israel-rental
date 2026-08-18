@@ -14,7 +14,7 @@
  */
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Briefcase, Calendar as CalendarIcon, Wallet, SlidersHorizontal } from 'lucide-react';
+import { Briefcase, Calendar as CalendarIcon, Wallet, SlidersHorizontal, ChevronDown, Check } from 'lucide-react';
 import { Popover, PopoverTrigger, PopoverContent } from '../ui/popover';
 import { Calendar } from '../ui/calendar';
 
@@ -65,35 +65,82 @@ const BUDGET_OPTIONS = [
 ];
 
 /**
- * Native <select> styled as a full-height pill segment. Uses `appearance-
- * none` so we can render our own chevron + label + placeholder, but
- * still gets the OS-native picker on mobile (best-in-class UX).
+ * A pill segment whose picker is OUR panel, not the browser's.
+ *
+ * It used to be a native <select>. That renders an OS listbox — grey,
+ * square-cornered, system-font — sitting beside a calendar panel built to
+ * the design system, which is exactly why the calendar "looked nice" and
+ * these two looked old. Same reason they could not be made to match: the
+ * OS draws that menu and CSS cannot reach it.
+ *
+ * A Popover with the calendar's own surface fixes both, and opens
+ * DOWNWARD like the calendar now does.
  */
 function SegmentSelect({ icon: Icon, label, value, onChange, options, testId }) {
+  const [open, setOpen] = useState(false);
+  const current = options.find((o) => o.value === value) || options[0];
+
   return (
-    <label
-      className="relative flex-1 flex items-center gap-3 px-5 py-3 cursor-pointer hover:bg-black/[0.03] transition-colors"
-      data-testid={testId}
-    >
-      <Icon size={16} className="text-[var(--brand-primary)] shrink-0" strokeWidth={2.25} />
-      <div className="flex-1 min-w-0">
-        <div className="text-[11px] font-semibold uppercase tracking-wider text-[var(--brand-muted)]">
-          {label}
-        </div>
-        <select
-          value={value}
-          onChange={(e) => onChange(e.target.value)}
-          className="w-full appearance-none bg-transparent text-sm font-medium text-[var(--ink)] focus:outline-none cursor-pointer pr-4 truncate"
-          data-testid={`${testId}-select`}
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger asChild>
+        <button
+          type="button"
+          className="relative flex-1 flex items-center gap-3 px-5 py-3 cursor-pointer hover:bg-black/[0.03] transition-colors text-start w-full"
+          data-testid={testId}
+          aria-haspopup="listbox"
+          aria-expanded={open}
         >
-          {options.map((o) => (
-            <option key={o.value} value={o.value}>
-              {o.label}
-            </option>
-          ))}
-        </select>
-      </div>
-    </label>
+          <Icon size={16} className="text-[var(--brand-primary)] shrink-0" strokeWidth={2.25} />
+          <div className="flex-1 min-w-0">
+            <div className="text-[11px] font-semibold uppercase tracking-wider text-[var(--brand-muted)]">
+              {label}
+            </div>
+            <div className="text-sm font-medium text-[var(--ink)] truncate">
+              {current?.label}
+            </div>
+          </div>
+          <ChevronDown size={14} className="text-[var(--brand-muted)] shrink-0" />
+        </button>
+      </PopoverTrigger>
+      <PopoverContent
+        align="start"
+        side="bottom"
+        sideOffset={10}
+        avoidCollisions={false}
+        className="p-1.5 rounded-2xl bg-white border-[var(--brand-border)] max-h-[320px] overflow-y-auto"
+        style={{ boxShadow: '0 2px 6px -2px rgba(18,59,87,.12), 0 24px 60px -20px rgba(18,59,87,.35)', minWidth: 'var(--radix-popover-trigger-width)' }}
+        data-testid={`${testId}-panel`}
+      >
+        <div role="listbox">
+          {options.map((o) => {
+            const selected = o.value === value;
+            return (
+              <button
+                key={o.value}
+                type="button"
+                role="option"
+                aria-selected={selected}
+                onClick={() => { onChange(o.value); setOpen(false); }}
+                className="w-full flex items-center gap-2 px-3 py-2 rounded-xl text-sm text-start transition-colors hover:bg-black/[0.04]"
+                style={{
+                  color: 'var(--ink)',
+                  background: selected ? 'rgb(var(--brand-primary-rgb) / 0.08)' : 'transparent',
+                  fontWeight: selected ? 600 : 400,
+                }}
+                data-testid={`${testId}-option-${o.value || 'any'}`}
+              >
+                <Check
+                  size={14}
+                  className="shrink-0"
+                  style={{ opacity: selected ? 1 : 0, color: 'var(--brand-primary)' }}
+                />
+                <span className="truncate">{o.label}</span>
+              </button>
+            );
+          })}
+        </div>
+      </PopoverContent>
+    </Popover>
   );
 }
 
@@ -156,6 +203,14 @@ function WhenSegment({ value, onChange, locale }) {
       </PopoverTrigger>
       <PopoverContent
         align="start"
+        /* Downward, always. Radix defaults to bottom but flips to top on
+           collision, and this panel floats at the bottom edge of the hero
+           — so on a short window the calendar opened UPWARDS, over the
+           hero, which is what it was reported doing. The panel scrolls
+           with the page, so opening down never traps it off-screen. */
+        side="bottom"
+        sideOffset={10}
+        avoidCollisions={false}
         className="w-auto p-4 rounded-2xl bg-white border-[var(--brand-border)]"
         /* Two-layer shadow as an inline style, not an arbitrary class: a
            multi-layer `shadow-[a,b]` silently fails to compile and the
