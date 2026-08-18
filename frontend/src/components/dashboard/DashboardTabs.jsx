@@ -76,6 +76,19 @@ const DashboardTabs = ({
   // manager / renter / admin) who accepted the $0 provider trial from
   // the "Take Your Services to the Next Level" upsell modal.
   const canPublish = canPublishGigs(user);
+  // ...but ALSO for anyone who simply has services, whatever their role.
+  //
+  // The role check alone was hiding people's own listings from them: an
+  // owner who added a service could create it and then had no tab to
+  // view, edit or delete it. Roles are not exclusive here — per CLAUDE.md
+  // the site serves anyone with something to offer, and the multi-business
+  // work assumes one person can be both a landlord and a plumber.
+  //
+  // Owning a gig is the honest test of whether this tab is useful to you.
+  // It does not widen who may CREATE one — that is still the provider
+  // check on the create path, untouched.
+  const hasGigs = (summary?.gigs_count || 0) > 0;
+  const showGigTabs = canPublish || hasGigs;
 
   const [moreOpen, setMoreOpen] = useState(false);
   const [isNarrow, setIsNarrow] = useState(false);
@@ -110,7 +123,7 @@ const DashboardTabs = ({
       tabs: [
         { id: 'properties', label: t('dashboard.myProperties'), show: isPropertyLister },
         { id: 'bulk-manager', label: t('dashboard.bulkManager'), Icon: Layers, show: isPropertyLister },
-        { id: 'my-gigs', label: t('dashboard.myGigs', 'My Gigs'), Icon: Briefcase, colour: ACTIVE_GOLD, show: canPublish },
+        { id: 'my-gigs', label: t('dashboard.myGigs', 'My Gigs'), Icon: Briefcase, colour: ACTIVE_GOLD, show: showGigTabs },
       ],
     },
     {
@@ -121,8 +134,8 @@ const DashboardTabs = ({
         { id: 'my-requests', label: t('dashboard.myRequests', 'My Requests'), Icon: Inbox, colour: ACTIVE_GOLD, badge: summary.requests_with_responses, show: true },
         // D3: only for someone who has actually posted a job, or who is
         // already publishing gigs. It used to render for everyone.
-        { id: 'my-jobs', label: t('dashboard.myJobs', "Jobs I've Posted"), Icon: Briefcase, colour: ACTIVE_GOLD, show: canPublish || hasPostedJobs },
-        { id: 'job-requests', label: t('dashboard.jobRequests', 'Work Offers'), Icon: Briefcase, colour: ACTIVE_GOLD, badge: summary.work_offers_open, show: canPublish },
+        { id: 'my-jobs', label: t('dashboard.myJobs', "Jobs I've Posted"), Icon: Briefcase, colour: ACTIVE_GOLD, show: showGigTabs || hasPostedJobs },
+        { id: 'job-requests', label: t('dashboard.jobRequests', 'Work Offers'), Icon: Briefcase, colour: ACTIVE_GOLD, badge: summary.work_offers_open, show: showGigTabs },
         { id: 'subleases', label: t('dashboard.subleases'), Icon: Home, show: isRenter },
       ],
     },

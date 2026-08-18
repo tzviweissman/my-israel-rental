@@ -39,6 +39,9 @@ const Dashboard = () => {
   // D4/D5 — one call feeding both the tab badges and the attention strip,
   // so the two can never show different numbers for the same fact.
   const [summary, setSummary] = useState({});
+  // Show the service tabs to anyone who may publish OR who already owns a
+  // service — an owner who added one had no way to manage it before.
+  const showGigTabs = canPublishGigs(user) || (summary?.gigs_count || 0) > 0;
   const [bookings, setBookings] = useState([]);
   const [showAddProperty, setShowAddProperty] = useState(false);
   const [showBulkUpload, setShowBulkUpload] = useState(false);
@@ -353,11 +356,16 @@ const Dashboard = () => {
           <MessagesTab API={API} token={token} onUnreadChange={setUnreadConversations} />
         )}
 
-        {activeTab === 'my-gigs' && canPublishGigs(user) && (
+        {/* Same rule as the TAB in DashboardTabs — role OR ownership.
+            These were gated on the role alone while the tab used its own
+            check, which is exactly the drift providerTrial.js warns
+            about: fixing only the tab would have shown a My Gigs button
+            that rendered an empty panel. */}
+        {activeTab === 'my-gigs' && showGigTabs && (
           <MyGigsTab API={API} token={token} />
         )}
 
-        {activeTab === 'job-requests' && canPublishGigs(user) && (
+        {activeTab === 'job-requests' && showGigTabs && (
           <JobRequestsTab API={API} token={token} />
         )}
 

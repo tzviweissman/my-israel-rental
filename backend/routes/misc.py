@@ -481,6 +481,8 @@ async def dashboard_summary(payload: dict = Depends(verify_token)) -> dict:
         for what it is beats inventing a freshness we do not track.
       * requests_expiring_soon — open requests within a week of expiry,
         which is the moment renewing still helps.
+      * gigs_count — services this user owns, used to decide whether the
+        My Gigs tab is shown at all. Not a badge; a visibility test.
     """
     uid = payload["user_id"]
     now = datetime.now(UTC)
@@ -489,6 +491,17 @@ async def dashboard_summary(payload: dict = Depends(verify_token)) -> dict:
     bookings_awaiting = await db.bookings.count_documents({
         "owner_id": uid, "status": "pending",
     })
+
+    # Every gig this person owns, whatever their role. The dashboard uses
+    # this to decide whether to SHOW the My Gigs tab: the tab used to be
+    # gated on role alone, so an owner or manager who also offered a
+    # service could create gigs and then had nowhere to manage them —
+    # their own listings were invisible to them. Owning one is the honest
+    # test of whether the tab is useful to you.
+    #
+    # This does NOT change who may CREATE a gig; that is still the
+    # provider check on the create path.
+    gigs_count = await db.marketplace_gigs.count_documents({"provider_user_id": uid})
 
     my_cats = await db.marketplace_gigs.distinct(
         "category", {"provider_user_id": uid, "status": "published"},
@@ -516,4 +529,5 @@ async def dashboard_summary(payload: dict = Depends(verify_token)) -> dict:
         "work_offers_open": work_offers,
         "requests_with_responses": requests_with_responses,
         "requests_expiring_soon": requests_expiring,
+        "gigs_count": gigs_count,
     }
