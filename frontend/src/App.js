@@ -101,6 +101,7 @@ const JobDetail = lazy(() => import('./pages/JobDetail'));
 const PostJob = lazy(() => import('./pages/PostJob'));
 const ProviderProfile = lazy(() => import('./pages/ProviderProfile'));
 const FAQ = lazy(() => import('./pages/FAQ'));
+const NotFound = lazy(() => import('./pages/NotFound'));
 
 // Shared spinner used both by the initial auth-loading gate AND by the
 // route <Suspense> fallback so page-to-page transitions feel visually
@@ -337,6 +338,11 @@ function App() {
             <Route path="/services/create-gig" element={user ? <CreateGig /> : <Navigate to="/auth/login" />} />
             <Route path="/services/provider/:userId" element={<ProviderProfile />} />
             <Route path="/faq" element={<FAQ />} />
+            {/* Catch-all — any URL no route above claims. Without it an
+                unknown URL rendered the nav shell over an empty content
+                area, which looks like a broken site rather than a wrong
+                address. Must stay LAST in this list. */}
+            <Route path="*" element={<NotFound />} />
           </Routes>
           </Suspense>
           </ErrorBoundary>
