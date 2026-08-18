@@ -31,29 +31,44 @@ export default function ShareListingsPanel({ userId, propertyCount = 0, API, tok
   const [open, setOpen] = useState(false);
   const [shortLink, setShortLink] = useState(null);
   const wrapRef = useRef(null);
+  // The link doc lives in a ref as well as state: the fetch effect below
+  // must know whether one exists WITHOUT depending on the state value —
+  // depending on it would re-run the effect on its own setState and GET
+  // in a loop for as long as the panel stayed open.
+  const linkRef = useRef(null);
 
-  // The short link is minted the FIRST time the panel opens (spec Q1:
-  // lazily), then reused forever — the backend returns the same slug on
-  // every later call, so opening the panel twice cannot produce two codes.
+  // First open mints the short link (spec Q1: lazily — the backend
+  // returns the same slug on every later call, so opening twice cannot
+  // produce two codes). Every open after that re-reads it, because the
+  // scan count on it moves in the real world between opens and a stale
+  // number quietly becomes a wrong number (spec Q2: real numbers only).
   // If the call fails the panel still works: the long link never depends
-  // on the short one, and the QR simply waits for a retry on next open.
+  // on the short one, and the QR simply waits for the next open.
   useEffect(() => {
-    if (!open || shortLink || !API || !token) return;
+    if (!open || !API || !token) return undefined;
     let cancelled = false;
     (async () => {
       try {
-        const { data } = await axios.post(
-          `${API}/short-links`,
-          { target_type: 'manager', target_id: userId },
-          { headers: { Authorization: `Bearer ${token}` } },
-        );
-        if (!cancelled) setShortLink(data);
+        const existing = linkRef.current;
+        const { data } = existing
+          ? await axios.get(`${API}/short-links/${existing.slug}`, {
+              headers: { Authorization: `Bearer ${token}` },
+            })
+          : await axios.post(
+              `${API}/short-links`,
+              { target_type: 'manager', target_id: userId },
+              { headers: { Authorization: `Bearer ${token}` } },
+            );
+        if (!cancelled) {
+          linkRef.current = data;
+          setShortLink(data);
+        }
       } catch {
         /* long link still shown; QR appears next open if this recovers */
       }
     })();
     return () => { cancelled = true; };
-  }, [open, shortLink, API, token, userId]);
+  }, [open, API, token, userId]);
 
   useEffect(() => {
     if (!open) return undefined;
@@ -126,6 +141,20 @@ export default function ShareListingsPanel({ userId, propertyCount = 0, API, tok
                 filename="myisraelrental-listings-qr"
                 testidPrefix="share-qr"
               />
+              {/* Q2 — a real number or an explicit "not yet". Never blank,
+                  never rounded: this is the line that tells an owner
+                  whether the sign in the stairwell is doing anything. */}
+              <p
+                className="mt-2 text-center text-xs font-semibold"
+                style={{ color: 'var(--brand-primary)' }}
+                data-testid="share-scan-count"
+              >
+                {shortLink.scan_count === 0
+                  ? t('qr.scanned0', 'Not scanned yet')
+                  : shortLink.scan_count === 1
+                    ? t('qr.scanned1', 'Scanned once')
+                    : t('qr.scannedN', 'Scanned {{n}} times', { n: shortLink.scan_count })}
+              </p>
             </div>
           )}
         </div>

@@ -20,6 +20,9 @@ const en = {
         downloadPng: 'PNG for screens',
         downloadSvg: 'SVG for print',
         printSize: 'Print at least 2 × 2 cm — larger for a building sign.',
+        scanned0: 'Not scanned yet',
+        scanned1: 'Scanned once',
+        scannedN: 'Scanned {{n}} times',
       },
       update: {
         available: 'A newer version of the site is available.',

@@ -20,6 +20,9 @@ const he = {
         downloadPng: 'PNG למסכים',
         downloadSvg: 'SVG להדפסה',
         printSize: 'להדפיס לפחות 2 × 2 ס"מ — גדול יותר לשלט בבניין.',
+        scanned0: 'עוד לא נסרק',
+        scanned1: 'נסרק פעם אחת',
+        scannedN: 'נסרק {{n}} פעמים',
       },
       update: {
         available: 'גירסה חדשה של האתר זמינה.',
