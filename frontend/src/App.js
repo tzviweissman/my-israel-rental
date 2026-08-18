@@ -83,19 +83,6 @@ const Auth = lazy(() => import('./pages/Auth'));
 const AuthDeeplink = lazy(() => import('./pages/AuthDeeplink'));
 const NotificationSnooze = lazy(() => import('./pages/NotificationSnooze'));
 const RequestsEmailsOff = lazy(() => import('./pages/RequestsEmailsOff'));
-// EXPERIMENT: the same skill with nothing pinned - it picks palette, type
-// and shape itself. Deliberately off-brand, look-only.
-const WhyHostV3 = lazy(() => import('./pages/WhyHostV3'));
-// The unpinned rebrand proposal, applied across the marketing surface.
-// Look-only preview routes; nothing here is linked from the real nav.
-const v3 = (name) => lazy(() => import('./pages/v3').then((m) => ({ default: m[name] })));
-const V3Home = v3('V3Home');
-const V3Stays = v3('V3Stays');
-const V3Services = v3('V3Services');
-const V3Requests = v3('V3Requests');
-const V3WhyList = v3('V3WhyList');
-const V3Join = v3('V3Join');
-const V3Faq = v3('V3Faq');
 const SignupJoin = lazy(() => import('./pages/SignupJoin'));
 const VerifyPending = lazy(() => import('./pages/VerifyPending'));
 const VerifyEmail = lazy(() => import('./pages/VerifyEmail'));
@@ -295,14 +282,6 @@ function App() {
             {/* Public on purpose — the unsubscribe link in the requests
                 matching email must work without logging in. */}
             <Route path="/requests-emails-off" element={<RequestsEmailsOff />} />
-            <Route path="/why-host-v3" element={<WhyHostV3 />} />
-            <Route path="/v3" element={<V3Home />} />
-            <Route path="/v3/stays" element={<V3Stays />} />
-            <Route path="/v3/services" element={<V3Services />} />
-            <Route path="/v3/requests" element={<V3Requests />} />
-            <Route path="/v3/why-list" element={<V3WhyList />} />
-            <Route path="/v3/join" element={<V3Join />} />
-            <Route path="/v3/faq" element={<V3Faq />} />
             <Route path="/admin" element={user?.role === 'admin' ? <AdminDashboard /> : <Navigate to="/" />} />
             <Route path="/manager/:managerId" element={<ManagerPage />} />
             {/* Where a scanned QR lands. Deliberately NOT lazy like the
