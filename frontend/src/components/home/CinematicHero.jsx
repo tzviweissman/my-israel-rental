@@ -2,6 +2,7 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import SITE_ASSETS from '../../lib/siteAssets';
+import { playWhenAllowed } from '../../utils/videoAutoplay';
 
 /**
  * The opening aerial — the establishing shot before scene 1.
@@ -28,11 +29,16 @@ const CinematicHero = ({ reducedMotion }) => {
   // inside a React tree, and browsers evaluate autoplay at parse time — so a
   // muted, playsinline video can still come up paused. The scene observer
   // does not cover this one either: it watches [data-scene] video, and the
-  // hero is a plain <header> outside that. Ask once on mount and swallow a
-  // rejection, which leaves the poster showing rather than a dead frame.
+  // hero is a plain <header> outside that.
+  //
+  // `muted` below is a React PROPERTY, not an attribute, and the mobile
+  // autoplay policy reads the attribute — which is why this played on a
+  // laptop and showed a play button on a phone. playWhenAllowed sets both
+  // before asking, and retries once on the first touch for the cases muting
+  // cannot fix (Low Power Mode). A rejection still leaves the poster up.
   React.useEffect(() => {
     if (reducedMotion) return;
-    videoRef.current?.play().catch(() => {});
+    playWhenAllowed(videoRef.current);
   }, [reducedMotion]);
 
   return (

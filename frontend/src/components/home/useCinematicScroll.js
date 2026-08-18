@@ -1,4 +1,5 @@
 import { useEffect } from 'react';
+import { playWhenAllowed } from '../../utils/videoAutoplay';
 
 /**
  * The cinematic home page's scroll engine, ported from the inline script in
@@ -150,7 +151,10 @@ export function useSceneVideos(rootRef, { enabled = true } = {}) {
       (entries) =>
         entries.forEach((e) => {
           const v = e.target;
-          if (e.isIntersecting) v.play().catch(() => {});
+          // Same muted-attribute trap as the hero: React never wrote the
+          // attribute the mobile autoplay policy checks, so these scenes
+          // came up paused on a phone under their own poster frames.
+          if (e.isIntersecting) playWhenAllowed(v);
           else v.pause();
         }),
       { threshold: 0.05 },
