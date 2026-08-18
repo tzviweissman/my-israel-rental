@@ -387,7 +387,7 @@ const he = {
         more: 'עוד',
         // D6 — קישור לעמוד הפומבי, בשם ברור במקום מזהה גולמי.
         sharePanelTitle: 'עמוד הנכסים הפומבי שלכם',
-        shareButton: 'שיתוף',
+        shareButton: 'שיתוף וקוד QR',
         needsImages: 'חסרות תמונות',
         uploadContract: 'העלאת חוזה',
         replaceContract: 'החלפת החוזה',
@@ -399,6 +399,7 @@ const he = {
         attentionResponses: '{{n}} בקשות קיבלו תשובות',
         attentionOffers: '{{n}} הצעות עבודה שלא עניתם עליהן',
         sharePanelBody: 'קישור אחד שמציג את כל מה שפרסמתם — שלחו אותו לכל אחד.',
+        sharePanelBody2: 'קישור אחד וקוד QR לכל מה שפרסמתם — שלחו בהודעה, או הדפיסו את הקוד לפלאיר או לשלט.',
         sharePanelLabel: 'העתקת הקישור',
         propertiesEmptyTitle: 'עדיין אין נכסים',
         propertiesEmptyBody: 'הפרסום חינם — ללא דמי פרסום, ללא דמי הזמנה וללא עמלה. הוסיפו את הנכס הראשון ושוכרים ימצאו אותו כבר היום.',

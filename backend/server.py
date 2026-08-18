@@ -402,6 +402,17 @@ async def startup_tasks() -> None:
         await db.lead_events.create_index(
             [("provider_id", 1), ("created_at", -1)], background=True,
         )
+        # UNIQUE, not merely indexed. A short link is printed on signs and
+        # flyers: two businesses sharing a slug would send one owner's
+        # customers to the other's page, permanently and unfixably, since
+        # the printed copies cannot be recalled. _new_slug() already checks
+        # for a collision before using one, but that check and the insert
+        # are two operations — two simultaneous mints could pass both. This
+        # makes the database refuse the second one outright.
+        await db.short_links.create_index("slug", unique=True, background=True)
+        await db.short_links.create_index(
+            [("target_type", 1), ("target_id", 1)], background=True,
+        )
         logger.info("Hot-path indexes ensured")
     except Exception as e:  # noqa: BLE001
         logger.warning(f"hot-path index creation failed (non-fatal): {e}")

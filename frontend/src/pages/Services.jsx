@@ -20,7 +20,6 @@ import { API, AuthContext } from '../App';
 import PageMeta from '../components/PageMeta';
 import StarRating from '../components/marketplace/StarRating';
 import CoverPlaceholder from '../components/common/CoverPlaceholder';
-import CategoryCarousel from '../components/marketplace/CategoryCarousel';
 import LocationChipsRow from '../components/marketplace/LocationChipsRow';
 import ServicesFiltersModal from '../components/marketplace/ServicesFiltersModal';
 import ServicesMapView from '../components/marketplace/ServicesMapView';
@@ -544,28 +543,18 @@ const Services = () => {
           onSelect={(v) => patchUrl({ location: v })}
         />
 
-        {/* Categories */}
-        <div className="mt-8">
-          <div className="section-rhead flex items-center justify-between mb-5">
-            <h2 className="text-gray-900">
-              {t('services.browse', 'Browse by category')}
-            </h2>
-            {selectedCat && (
-              <button
-                onClick={() => patchUrl({ category: '', subcategory: '' })}
-                className="text-xs font-semibold text-[var(--brand-primary)] hover:underline"
-                data-testid="services-category-clear"
-              >
-                {t('services.showAll', 'Show all')} ×
-              </button>
-            )}
-          </div>
-          <CategoryCarousel
-            categories={categories}
-            selectedCat={selectedCat}
-            onSelect={(v) => patchUrl({ category: v, subcategory: '' })}
-          />
+        {/* The big "Browse by category" card row used to sit here. It went
+            when the hero SERVICE picker gained an icon per category: the
+            two did the same job, and the cards cost most of a screen
+            before anyone reached an actual service. Categories are still
+            fully browsable — the picker lists every one, and
+            /services?category=X still works.
 
+            The SUBCATEGORY chips below stay: they narrow within a chosen
+            category (the four merged buckets), and the picker has no
+            equivalent, so removing them would lose filtering rather than
+            duplicate it. */}
+        <div className={selectedCat && SUBCATEGORIES[selectedCat] ? 'mt-6' : ''}>
           {/* Subcategory chip row — only shown when the current top-level
               category has sub-buckets defined (the 4 merged buckets:
               home-services-repair, travel-tourism, creative-design,

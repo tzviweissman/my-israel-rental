@@ -398,7 +398,7 @@ const en = {
         more: 'More',
         // D6 — the share link, named rather than shown as a raw uuid.
         sharePanelTitle: 'Your public listings page',
-        shareButton: 'Share',
+        shareButton: 'Share & QR code',
         needsImages: 'Needs Images',
         uploadContract: 'Upload Contract',
         replaceContract: 'Replace Contract',
@@ -410,6 +410,7 @@ const en = {
         attentionResponses: '{{n}} requests have replies',
         attentionOffers: '{{n}} work offers you have not answered',
         sharePanelBody: 'One link showing everything you have listed — send it to anyone.',
+        sharePanelBody2: 'One link and a QR code for everything you have listed — send it in a message, or print the code for a flyer or a sign.',
         sharePanelLabel: 'Copy your link',
         propertiesEmptyTitle: 'No properties yet',
         propertiesEmptyBody: 'Listing is free — no listing fee, no booking fees, no commission. Add your first and renters can find it today.',

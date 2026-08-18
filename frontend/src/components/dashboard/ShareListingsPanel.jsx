@@ -21,7 +21,7 @@
  */
 import React, { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Share2 } from 'lucide-react';
+import { QrCode } from 'lucide-react';
 import axios from 'axios';
 import ShareLinkRow from './ShareLinkRow';
 import QrShareCard from '../common/QrShareCard';
@@ -106,8 +106,12 @@ export default function ShareListingsPanel({ userId, propertyCount = 0, API, tok
         }}
         data-testid="share-listings-toggle"
       >
-        <Share2 size={13} aria-hidden="true" />
-        {t('dashboard.shareButton', 'Share')}
+        {/* The label names the QR. "Share" alone tested badly for the
+            obvious reason: nothing about it suggests a printable code
+            exists behind it, so owners never opened the panel and never
+            learned they had one. The QR icon carries it at a glance. */}
+        <QrCode size={13} aria-hidden="true" />
+        {t('dashboard.shareButton', 'Share & QR code')}
       </button>
 
       {open && (
@@ -122,7 +126,7 @@ export default function ShareListingsPanel({ userId, propertyCount = 0, API, tok
             {t('dashboard.sharePanelTitle', 'Your public listings page')}
           </p>
           <p className="text-xs mb-3" style={{ color: 'var(--brand-muted)' }}>
-            {t('dashboard.sharePanelBody', 'One link showing everything you have listed — send it to anyone.')}
+            {t('dashboard.sharePanelBody2', 'One link and a QR code for everything you have listed — send it in a message, or print the code for a flyer or a sign.')}
           </p>
           <div data-testid="share-listings-link">
             <ShareLinkRow

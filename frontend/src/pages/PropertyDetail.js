@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import axios from 'axios';
 import { API, AuthContext } from '../App';
 import { FX_USD_TO_ILS } from '../utils/listingPrice';
-import { MapPin, Calendar as CalendarIcon, Heart, Share2, Check } from 'lucide-react';
+import { MapPin, Calendar as CalendarIcon, Heart, Share2, Check, QrCode } from 'lucide-react';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
 
@@ -372,7 +372,12 @@ const PropertyDetail = () => {
               data-testid="share-button"
               aria-expanded={shareOpen}
             >
-              {shareCopied ? <Check size={14} className="md:w-4 md:h-4" /> : <Share2 size={14} className="md:w-4 md:h-4" />}
+              {/* Owners get a QR here, so the button says so; everyone
+                  else still just copies the link, and for them the plain
+                  Share label is still the honest one. */}
+              {shareCopied
+                ? <Check size={14} className="md:w-4 md:h-4" />
+                : (token ? <QrCode size={14} className="md:w-4 md:h-4" /> : <Share2 size={14} className="md:w-4 md:h-4" />)}
               <span>{shareCopied ? t('property.copied') : t('property.shareProperty')}</span>
             </button>
             {shareOpen && shortLink && (
