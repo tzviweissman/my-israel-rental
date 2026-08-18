@@ -14,6 +14,7 @@ import AccessibilityButton from './components/AccessibilityButton';
 import ThemePreviewOverride from './components/ThemePreviewOverride';
 import { installStaleBuildInterceptor } from './utils/staleBuildInterceptor';
 import { startVersionWatcher } from './utils/appVersion';
+import ShortLinkRedirect from './pages/ShortLinkRedirect';
 
 // Install the "backend hasn't caught up with this build" detector exactly
 // once at module-load. Surfaces a single "Please refresh" toast when a
@@ -304,6 +305,12 @@ function App() {
             <Route path="/v3/faq" element={<V3Faq />} />
             <Route path="/admin" element={user?.role === 'admin' ? <AdminDashboard /> : <Navigate to="/" />} />
             <Route path="/manager/:managerId" element={<ManagerPage />} />
+            {/* Where a scanned QR lands. Deliberately NOT lazy like the
+                pages around it: this is the first thing someone sees after
+                scanning a printed sign, often on a phone on a bad
+                connection, and a chunk fetch before the redirect is dead
+                time on the one screen nobody should have to look at. */}
+            <Route path="/p/:slug" element={<ShortLinkRedirect />} />
             <Route path="/chat/:propertyId" element={user ? <Chat /> : <Navigate to="/auth/login" />} />
             <Route path="/sign/:signToken" element={<SignContract />} />
             <Route path="/payment/success" element={user ? <PaymentSuccess /> : <Navigate to="/auth/login" />} />

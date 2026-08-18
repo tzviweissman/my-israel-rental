@@ -10,6 +10,11 @@
 // t('some.key', 'English fallback') and silently render the fallback forever
 // if the key goes missing.
 const en = {
+      shortLink: {
+        opening: 'Opening…',
+        notFound: "This link doesn't exist or has been removed.",
+        goHome: 'Go to MyIsraelRental',
+      },
       update: {
         available: 'A newer version of the site is available.',
         availableRefresh: 'A newer version of the site is available. Refresh to pick up the latest.',
