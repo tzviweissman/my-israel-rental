@@ -817,7 +817,7 @@ const Services = () => {
                 ? t('services.noServicesOpenBody', 'Nobody with appointment hours listed is inside their open window right now. Try turning the filter off to see everyone.')
                 : (advCount > 0
                     ? t('services.emptyBodyFiltered', 'Try loosening the filters, or clear them all to see everything.')
-                    : t('services.emptyBody', 'Be the first to list your service in this category — free 30-day trial.'))}
+                    : t('services.emptyBody', 'Be the first to list your service in this category — free, no commission.'))}
             </p>
             {availableNowOnly ? (
               <button

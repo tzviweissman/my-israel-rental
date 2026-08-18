@@ -2049,6 +2049,8 @@ const en = {
         countryCode: 'Country code',
         dropLeadingZero: 'Pick your country, then the rest of the number — no need for the leading 0.',
         willDial: 'Renters will reach you at {{number}}',
+        willDialCustomers: 'Customers will reach you at {{number}}',
+        willDialOwners: 'Owners and pros will reach you at {{number}}',
       },
       trust: {
         compact: 'Free to search and contact owners directly — listings in English.',
@@ -2145,7 +2147,7 @@ const en = {
         bookWhatsApp: 'WhatsApp',
         emptyTitle: 'No services match your filters',
         emptyBodyFiltered: 'Try loosening the filters, or clear them all to see everything.',
-        emptyBody: 'Be the first to list your service in this category — free 30-day trial.',
+        emptyBody: 'Be the first to list your service in this category — free, no commission.',
         noServicesOpenTitle: 'No services open right now',
         noServicesOpenBody: 'Nobody with appointment hours listed is inside their open window right now. Try turning the filter off to see everyone.',
         showEveryone: 'Show everyone',

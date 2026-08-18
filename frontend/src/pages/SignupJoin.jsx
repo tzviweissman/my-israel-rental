@@ -513,10 +513,21 @@ const SignupJoin = () => {
                     onChange={(v) => setForm({ ...form, phone: v })}
                     error={phoneErr}
                     hint={phonePreview(form.phone)
-                      ? t('phone.willDial', {
-                          number: phonePreview(form.phone),
-                          defaultValue: `Renters will reach you at ${phonePreview(form.phone)}`,
-                        })
+                      // Who calls this number depends on who is signing up:
+                      // renters call a host, customers call a provider, and
+                      // owners/pros call a traveler back. The old hint said
+                      // "Renters" to all three — nonsense to a plumber.
+                      ? t(
+                          activeCard?.backendRole === 'provider'
+                            ? 'phone.willDialCustomers'
+                            : activeCard?.backendRole === 'renter'
+                              ? 'phone.willDialOwners'
+                              : 'phone.willDial',
+                          {
+                            number: phonePreview(form.phone),
+                            defaultValue: `You can be reached at ${phonePreview(form.phone)}`,
+                          },
+                        )
                       : ''}
                     testid="signup-phone"
                   />
