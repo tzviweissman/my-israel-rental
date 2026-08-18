@@ -22,12 +22,20 @@ import secrets
 from datetime import UTC, datetime
 from typing import Any
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request
+from fastapi.responses import RedirectResponse
 from pydantic import BaseModel
 
 from routes.deps import db, verify_token
 
 router = APIRouter()
+
+# Where the public site lives. A printed QR encodes the WHOLE URL, domain
+# included, so myisraelrental.com/p/... must keep resolving for as long as
+# a single printed sign exists — this is a permanent commitment, recorded
+# in docs/qr-and-short-links-spec.md, not an implementation detail.
+import os
+_SITE_ORIGIN = (os.environ.get("PUBLIC_SITE_ORIGIN") or "https://myisraelrental.com").rstrip("/")
 
 # No 0/O, no 1/l/I. Someone reading a slug off a printed sign should not
 # have to guess which character they are looking at.
@@ -42,6 +50,28 @@ _PUBLIC_TARGETS = {
     "property": "/properties/{id}",
     "business": "/business/{id}",
 }
+
+
+# Link-preview crawlers follow these redirects every time a /p/ link is
+# pasted into a chat — WhatsApp alone fetches from several servers. A
+# preview fetch is not a person, and "Scanned 34 times" must mean people
+# (spec Q2: real numbers only). Redirect them, never count them.
+_PREVIEW_BOTS = (
+    "facebookexternalhit",  # Facebook, and WhatsApp link previews
+    "whatsapp",
+    "twitterbot",
+    "telegrambot",
+    "linkedinbot",
+    "slackbot",
+    "discordbot",
+    "skypeuripreview",
+    "pinterestbot",
+)
+
+
+def _is_preview_bot(request: Request) -> bool:
+    ua = (request.headers.get("user-agent") or "").lower()
+    return any(bot in ua for bot in _PREVIEW_BOTS)
 
 
 class ShortLinkIn(BaseModel):
@@ -160,7 +190,7 @@ async def get_short_link(slug: str, user=Depends(verify_token)):
 
 
 @router.get("/short-links/{slug}/resolve")
-async def resolve_short_link(slug: str):
+async def resolve_short_link(slug: str, request: Request):
     """Count the scan and hand back the destination.
 
     The count happens HERE, when the link is followed — not when the
@@ -173,12 +203,43 @@ async def resolve_short_link(slug: str):
     performs the redirect after this call. The counting stays server-side
     and still happens on the follow.
     """
-    doc = await db.short_links.find_one_and_update(
-        {"slug": slug},
-        {"$inc": {"scan_count": 1}, "$set": {"last_scanned_at": datetime.now(UTC).isoformat()}},
-    )
+    doc = await _counted_lookup(slug, request)
     if not doc:
         raise HTTPException(status_code=404, detail="Unknown short link")
     # `src=qr` so existing analytics can separate scan traffic from a link
     # someone pasted into a chat.
     return {"target": f"{_canonical_path(doc['target_type'], doc['target_id'])}?src=qr"}
+
+
+async def _counted_lookup(slug: str, request: Request):
+    """The link doc, with the scan counted — unless a preview bot asked."""
+    if _is_preview_bot(request):
+        return await db.short_links.find_one({"slug": slug})
+    return await db.short_links.find_one_and_update(
+        {"slug": slug},
+        {"$inc": {"scan_count": 1}, "$set": {"last_scanned_at": datetime.now(UTC).isoformat()}},
+    )
+
+
+@router.get("/short-links/{slug}/follow")
+async def follow_short_link(slug: str, request: Request):
+    """Count the scan and 302 to the destination — the true redirect.
+
+    In production, `serve` rewrites the brand domain's /p/{slug} straight
+    here (frontend/public/serve.json), so the whole chain is real HTTP
+    redirects and no interstitial ever renders: link-preview crawlers
+    (WhatsApp, Facebook — none of which run JS) follow through to the
+    canonical page, exactly as if the long URL had been shared. The
+    /resolve endpoint above stays as the dev-server and belt-and-braces
+    fallback behind the React /p/:slug route.
+
+    302 and not 301, deliberately: a 301 gets cached by browsers and
+    crawlers, and every hop a cache absorbs is a scan the owner never
+    sees counted.
+    """
+    doc = await _counted_lookup(slug, request)
+    if not doc:
+        # A guessed or mistyped slug still lands somewhere sensible.
+        return RedirectResponse(url=_SITE_ORIGIN, status_code=302)
+    target = f"{_SITE_ORIGIN}{_canonical_path(doc['target_type'], doc['target_id'])}?src=qr"
+    return RedirectResponse(url=target, status_code=302)

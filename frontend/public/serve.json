@@ -1,0 +1,5 @@
+{
+  "redirects": [
+    { "source": "/p/:slug", "destination": "https://my-israel-rental-production.up.railway.app/api/short-links/:slug/follow", "type": 302 }
+  ]
+}

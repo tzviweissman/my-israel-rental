@@ -22,7 +22,13 @@
              and Helmet won't duplicate them. -->
         <meta property="og:type" content="website" />
         <meta property="og:site_name" content="MyIsraelRental" />
-        <meta property="og:image:alt" content="MyIsraelRental logo" />
+        <!-- og:image itself must be HERE, statically: preview crawlers
+      (WhatsApp, Facebook, Telegram) never run JS, so the copy React
+      injects at runtime is invisible to them. Until this line existed,
+      the three tags below described an image that was never declared,
+      and every shared link previewed with no image at all. -->
+    <meta property="og:image" content="https://myisraelrental.com/brand-logo.png" />
+    <meta property="og:image:alt" content="MyIsraelRental logo" />
         <meta property="og:image:width" content="1200" />
         <meta property="og:image:height" content="630" />
         <meta name="twitter:card" content="summary_large_image" />
