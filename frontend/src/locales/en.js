@@ -393,7 +393,7 @@ const en = {
         messages: 'Messages',
         alerts: 'Alerts',
         liked: 'Liked',
-        services: 'Services',
+        services: 'Businesses',
         settings: 'Settings',
         searchBookings: 'Search bookings by property, location, or status...',
         searchBookingsHint: 'Search by property, guest, dates…',
@@ -651,7 +651,7 @@ const en = {
         owner: 'Lister',
         list: 'List a home',
         listSub: 'Owner or manager',
-        provider: 'Offer services',
+        provider: 'Add your business',
         providerSub: 'Cleaner, mover, etc.',
         ownerSubroleLabel: 'Owner',
         ownerSub: '1-2 personal properties',
@@ -1079,7 +1079,7 @@ const en = {
       },
       signupJoin: {
         headline: 'Join My Israel Rental',
-        sub: 'Book a stay, list a property, or offer your services — all in one place.',
+        sub: 'Book a stay, list a property, or add your business — all in one place.',
         question: 'What best describes you?',
         stepRole: 'YOUR ROLE',
         stepDetails: 'YOUR DETAILS',
@@ -1871,7 +1871,7 @@ const en = {
         faq_language_q: 'Do I need to speak English?',
         faq_language_a: 'No. Your listing is shown in both languages automatically, and you can mark which languages you work in.',
         browseFirst: 'Want to look around first?',
-        browseServices: 'Browse the services marketplace',
+        browseServices: 'Browse the businesses marketplace',
       },
       // Provider subscription ladder. Prices are NOT here — they come from
       // GET /marketplace/subscription/plans so they exist in one place and
@@ -2102,7 +2102,7 @@ const en = {
         crossSell: {
           title: 'Moving in? Find movers, cleaners & handymen',
           bookedTitle: 'Request sent — now sort the move out?',
-          subtitle: 'Service providers across Israel who work with English speakers.',
+          subtitle: 'Businesses across Israel who work with English speakers.',
           movers: 'Movers',
           cleaners: 'Cleaners',
           handyman: 'Handyman',
@@ -2223,7 +2223,7 @@ const en = {
         within5km: 'Within 5 km',
         within10km: 'Within 10 km',
         youAreHere: 'You are here',
-        becomeProvider: 'Become a provider',
+        becomeProvider: 'Add your business — free',
         heroEyebrow: 'The MyIsraelRental Marketplace',
         heroTitleAccent: 'Hire proven talent',
         heroTitleTail: 'who deliver',
@@ -2248,8 +2248,8 @@ const en = {
             label: 'When'
           },
           service: {
-            any: 'All services',
-            label: 'Service'
+            any: 'All businesses',
+            label: 'Business'
           },
           budget: {
             label: 'Budget',

@@ -387,7 +387,7 @@ const he = {
         messages: 'הודעות',
         alerts: 'התראות',
         liked: 'מועדפים',
-        services: 'שירותים',
+        services: 'עסקים',
         settings: 'הגדרות',
         searchBookings: 'חיפוש הזמנות לפי נכס, מיקום או סטטוס...',
         searchBookingsHint: 'חיפוש לפי נכס, אורח, תאריכים…',
@@ -636,7 +636,7 @@ const he = {
         owner: 'משכיר',
         list: 'לפרסם נכס',
         listSub: 'בעלים או מנהל',
-        provider: 'להציע שירותים',
+        provider: 'הוסיפו את העסק',
         providerSub: 'ניקיון, הובלה וכו׳',
         ownerSubroleLabel: 'בעלים',
         ownerSub: 'נכס אישי אחד או שניים',
@@ -1064,7 +1064,7 @@ const he = {
       },
       signupJoin: {
         headline: 'הצטרפו ל-My Israel Rental',
-        sub: 'הזמינו לינה, פרסמו נכס, או הציעו שירות — הכול במקום אחד.',
+        sub: 'הזמינו לינה, פרסמו נכס, או הוסיפו את העסק — הכול במקום אחד.',
         question: 'מה הכי מתאר אתכם?',
         stepRole: 'התפקיד שלכם',
         stepDetails: 'הפרטים שלכם',
@@ -1822,7 +1822,7 @@ const he = {
         faq_language_q: 'אני חייב לדבר אנגלית?',
         faq_language_a: 'לא. המודעה מוצגת בשתי השפות אוטומטית, ואפשר לסמן באילו שפות אתם עובדים.',
         browseFirst: 'רוצים קודם להסתכל?',
-        browseServices: 'עיון בשוק השירותים',
+        browseServices: 'עיון במרכז העסקים',
       },
       // Provider subscription ladder. See en.js — prices come from the API.
       plans: {
@@ -2151,7 +2151,7 @@ const he = {
         within5km: 'עד 5 ק"מ',
         within10km: 'עד 10 ק"מ',
         youAreHere: 'אתם כאן',
-        becomeProvider: 'הצטרפו כספקי שירות',
+        becomeProvider: 'הוסיפו את העסק שלכם — בחינם',
         heroEyebrow: 'השוק של MyIsraelRental',
         heroTitleAccent: 'גייסו בעלי מקצוע מוכחים',
         heroTitleTail: 'שמספקים תוצאות',
@@ -2176,8 +2176,8 @@ const he = {
             label: 'מתי'
           },
           service: {
-            any: 'כל השירותים',
-            label: 'שירות'
+            any: 'כל העסקים',
+            label: 'עסק'
           },
           budget: {
             label: 'תקציב',
