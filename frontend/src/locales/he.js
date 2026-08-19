@@ -97,7 +97,7 @@ const he = {
         hebrew: 'עברית',
         switchTo: 'עבור ל-',
         stays: 'שהייה',
-        services: 'שירותים',
+        services: 'עסקים',
         browse: 'עיון'
       },
       hero: {
@@ -2110,7 +2110,7 @@ const he = {
         clearLocation: 'נקה אזור',
         browse: 'עיון לפי קטגוריה',
         showAll: 'הצג הכל',
-        allServices: 'כל השירותים',
+        allServices: 'כל העסקים',
         viewToggle: 'מצב תצוגה',
         viewList: 'רשימה',
         viewMap: 'מפה',

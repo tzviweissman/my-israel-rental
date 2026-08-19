@@ -322,7 +322,15 @@ function App() {
                 defaultAmenities: ['Kosher-certified kitchen', 'Shabbat elevator', 'Synagogue nearby', 'Mikveh nearby'],
               }} />}
             />
+            {/* Two URLs, one page. The label became "Businesses" because
+                the board carries shops as well as trades, but /services is
+                already shared, bookmarked and indexed — and the QR rule
+                applies to every public URL, not just printed ones: it must
+                keep resolving. So /businesses is the name people see and
+                /services keeps working, permanently. Neither redirects, so
+                a link of either shape lands where it says it will. */}
             <Route path="/services" element={<Services />} />
+            <Route path="/businesses" element={<Services />} />
             {/* Value page in front of plan selection. /for-providers is an
                 alias so either URL works in outreach. */}
             {/* Two supply-side pitches: /why-list sells to service

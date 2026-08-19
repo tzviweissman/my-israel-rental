@@ -97,7 +97,7 @@ const en = {
         hebrew: 'עברית',
         switchTo: 'Switch to',
         stays: 'Stays',
-        services: 'Services',
+        services: 'Businesses',
         browse: 'Browse'
       },
       hero: {
@@ -2182,7 +2182,7 @@ const en = {
         clearLocation: 'Clear location',
         browse: 'Browse by category',
         showAll: 'Show all',
-        allServices: 'All services',
+        allServices: 'All businesses',
         viewToggle: 'View mode',
         viewList: 'List',
         viewMap: 'Map',

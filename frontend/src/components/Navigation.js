@@ -408,7 +408,7 @@ const Navigation = () => {
             <div className="flex items-center gap-[9px] pointer-events-auto">
               {[
                 { key: 'stays', label: t('nav.stays', 'Stays'), to: '/stays' },
-                { key: 'services', label: t('nav.services', 'Services'), to: '/services' },
+                { key: 'services', label: t('nav.services', 'Services'), to: '/businesses' },
                 { key: 'requests', label: t('nav.requests', 'Marketplace'), to: '/requests' },
                 // No supply link here any more. "List / Offer" spoke to one
                 // of three audiences and duplicated the CTA beside it; the
@@ -762,7 +762,7 @@ const Navigation = () => {
                     <span>{t('nav.stays', 'Stays')}</span>
                     <ChevronRight size={14} className="ml-auto opacity-0 group-hover:opacity-60 transition-opacity" />
                   </button>
-                  <button onClick={() => handleNav('/services')} className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-150 hover:bg-white/5 group" style={{ color: 'var(--gold)' }} data-testid="nav-services">
+                  <button onClick={() => handleNav('/businesses')} className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-150 hover:bg-white/5 group" style={{ color: 'var(--gold)' }} data-testid="nav-services">
                     <Briefcase size={16} className="opacity-60 group-hover:opacity-100" />
                     <span>{t('nav.services', 'Services')}</span>
                     <ChevronRight size={14} className="ml-auto opacity-0 group-hover:opacity-60 transition-opacity" />
@@ -875,7 +875,7 @@ const Navigation = () => {
               Any link added to the desktop row above belongs here too. */}
           {[
             { type: 'stays', icon: Bed, label: t('nav.stays', 'Stays'), to: '/stays' },
-            { type: 'services', icon: Briefcase, label: t('nav.services', 'Services'), to: '/services' },
+            { type: 'services', icon: Briefcase, label: t('nav.services', 'Services'), to: '/businesses' },
             { type: 'requests', icon: Store, label: t('nav.requests', 'Marketplace'), to: '/requests' },
           ].map(({ type, icon: Icon, label, to }) => (
             <NavCategoryItem
