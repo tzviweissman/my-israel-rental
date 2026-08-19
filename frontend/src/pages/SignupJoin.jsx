@@ -89,11 +89,11 @@ const ROLE_CARDS = [
     // has left the nav, which was the point of linking it at all.
     learnMoreHref: '/why-list',
     tLearnMoreKey: 'signupJoin.providerLearnMore',
-    defaultLearnMore: 'See what providers get',
+    defaultLearnMore: 'See what business owners get',
     tBadgeKey: null,
     defaultBadge: null,
     tCtaKey: 'signupJoin.providerCta',
-    defaultCta: 'Continue as a service provider',
+    defaultCta: 'Continue as a business owner',
     tDetailsSubKey: 'signupJoin.providerDetailsSub',
     defaultDetailsSub: "We'll only email you about your account and requests for your services.",
   },

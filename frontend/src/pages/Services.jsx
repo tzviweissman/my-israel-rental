@@ -844,7 +844,7 @@ const Services = () => {
                 className="px-5 py-2.5 rounded-lg text-sm font-semibold text-white bg-[var(--brand-primary)] hover:bg-[#0F3A3A]"
                 data-testid="services-empty-cta"
               >
-                {t('services.listYourService', 'List your service')} <ArrowRight size={14} className="inline-block ms-1" />
+                {t('services.listYourService', 'Add your business')} <ArrowRight size={14} className="inline-block ms-1" />
               </button>
             )}
             {/* Same escape hatch as /stays: nobody matched the search, so
@@ -1033,7 +1033,7 @@ const Services = () => {
         </div>
         <div className="svc-cta svc-cta-offer">
           <div>
-            <h4>{t('services.ctaOfferTitle', 'Offer your services')}</h4>
+            <h4>{t('services.ctaOfferTitle', 'Add your business — free')}</h4>
             <small>{t('services.ctaOfferBody', 'One free listing reaches everyone on the platform — renters, owners and property managers alike.')}</small>
           </div>
           <button
