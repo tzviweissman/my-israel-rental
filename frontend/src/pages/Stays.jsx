@@ -19,7 +19,7 @@
  * storage was retired from the platform). Long-term / short-term /
  * vacation all live under the same "Stays" umbrella.
  */
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import axios from 'axios';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import ListingsUnavailable from '../components/common/ListingsUnavailable';
@@ -186,6 +186,38 @@ const Stays = ({ landing = null }) => {
       })
       .finally(() => setLoading(false));
   }, []);
+
+  // How many cards are actually rendered. Every matching listing used to
+  // be mounted at once — 196 of them on an unfiltered /stays — so the
+  // browser built ~200 cards, each with an image, before the page settled.
+  // The data was never the problem (127 KB for all of them); the DOM was.
+  //
+  // A screenful at a time, extended as the visitor scrolls. The full list
+  // is still fetched and still filtered client-side, so nothing about
+  // filtering or counts changes — only how much is mounted at once.
+  const PAGE = 24;
+  const [visibleCount, setVisibleCount] = useState(PAGE);
+  const moreRef = useRef(null);
+
+  // A new result set starts from the first page again — otherwise
+  // filtering down to 3 listings would still be carrying a window sized
+  // for the last search.
+  useEffect(() => { setVisibleCount(PAGE); }, [filteredWithDistance.length]);
+
+  // Extend as the sentinel below the grid comes into view. No scroll
+  // handler: an observer fires once per crossing instead of on every
+  // frame of scrolling.
+  useEffect(() => {
+    const el = moreRef.current;
+    if (!el) return undefined;
+    const io = new IntersectionObserver((entries) => {
+      if (entries[0].isIntersecting) {
+        setVisibleCount((c) => (c < filteredWithDistance.length ? c + PAGE : c));
+      }
+    }, { rootMargin: '600px' });   // start early, so cards are ready before they are reached
+    io.observe(el);
+    return () => io.disconnect();
+  }, [filteredWithDistance.length]);
 
   // Persist active filters to the URL so refresh + sharing keep state.
   // Only writes the keys that actually have values to keep the URL clean.
@@ -882,7 +914,7 @@ const Stays = ({ landing = null }) => {
             </div>
           </div>
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-x-5 gap-y-8">
-            {filteredWithDistance.map((p) => (
+            {filteredWithDistance.slice(0, visibleCount).map((p) => (
               <StaysCard
                 key={p.id}
                 property={p}
@@ -897,6 +929,15 @@ const Stays = ({ landing = null }) => {
               />
             ))}
           </div>
+          {/* Sentinel: crossing it mounts the next page of cards. */}
+          {visibleCount < filteredWithDistance.length && (
+            <div
+              ref={moreRef}
+              className="h-10"
+              aria-hidden="true"
+              data-testid="stays-load-more-sentinel"
+            />
+          )}
           {/* Inline alert card the user can summon from the header CTA
               when results > 0 — sits below the grid. */}
           {showNotifyCard && (
