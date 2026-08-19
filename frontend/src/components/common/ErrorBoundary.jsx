@@ -24,6 +24,47 @@ import { useLocation, useNavigate } from 'react-router-dom';
  * navigation bar survives a page-level crash and the user can click their
  * way out rather than being stranded.
  */
+
+/**
+ * "Loading chunk 6419 failed" — the signature of a browser holding an OLD
+ * page after a new deploy.
+ *
+ * The page was built against a previous release and asks for code files
+ * whose names changed; the server no longer has them, the request 404s,
+ * and the app dies on a route the visitor did nothing wrong to reach. It
+ * hits real users the moment a deploy lands under an open tab, which is
+ * exactly when they are least able to explain what happened.
+ */
+function isChunkLoadError(error) {
+  if (!error) return false;
+  const msg = String(error.message || error);
+  return (
+    error.name === 'ChunkLoadError' ||
+    /Loading chunk \S+ failed/i.test(msg) ||
+    /Loading CSS chunk \S+ failed/i.test(msg) ||
+    /Failed to fetch dynamically imported module/i.test(msg)
+  );
+}
+
+// One reload, ever, per session. A reload that does not fix it (a genuinely
+// missing file, a broken deploy) must not become a refresh loop the user
+// cannot escape — after one attempt they get the error screen and its
+// Reload button, which is at least honest and under their control.
+const RELOAD_FLAG = '__stale_build_reloaded';
+
+function recoverFromStaleBuild() {
+  try {
+    if (sessionStorage.getItem(RELOAD_FLAG)) return false;
+    sessionStorage.setItem(RELOAD_FLAG, '1');
+  } catch {
+    return false;   // private mode: prefer the error screen to a possible loop
+  }
+  // `true` forces a fresh document rather than a cached one, so the reload
+  // fetches the CURRENT index.html and the chunk names it references.
+  window.location.reload(true);
+  return true;
+}
+
 class ErrorBoundaryInner extends React.Component {
   constructor(props) {
     super(props);
@@ -34,10 +75,29 @@ class ErrorBoundaryInner extends React.Component {
     return { error };
   }
 
+  componentDidMount() {
+    // A chunk that 404s during a lazy import rejects OUTSIDE React's
+    // render, so the boundary never sees it — it surfaces as an unhandled
+    // rejection. Catch it here and treat it exactly like a caught chunk
+    // error, otherwise the same deploy leaves half the failures silent.
+    this._onRejection = (e) => {
+      if (isChunkLoadError(e?.reason) && recoverFromStaleBuild()) e.preventDefault();
+    };
+    window.addEventListener('unhandledrejection', this._onRejection);
+  }
+
+  componentWillUnmount() {
+    window.removeEventListener('unhandledrejection', this._onRejection);
+  }
+
   componentDidCatch(error, info) {
     // The console is the only diagnostic anyone has here — make sure the
     // stack and the component trace both land in it.
     console.error('Render error caught by ErrorBoundary:', error, info?.componentStack);
+    // A stale build is not a crash — it is a page asking for files that a
+    // deploy has replaced. Recover silently rather than showing someone an
+    // error screen for our release, not their action.
+    if (isChunkLoadError(error)) recoverFromStaleBuild();
   }
 
   componentDidUpdate(prevProps) {
