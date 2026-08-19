@@ -17,6 +17,7 @@ import {
   Palette, Scissors, Droplet, Zap,
   Music, Home, Dumbbell, Car, Boxes, Plane, Flower, BookOpen,
   Briefcase, SprayCan, Monitor, GraduationCap, Baby, PawPrint, PartyPopper,
+  ShoppingBag,
 } from 'lucide-react';
 
 // The icon-name -> component registry used to live inside
@@ -29,6 +30,7 @@ const ICONS = {
   Palette, Scissors, Droplet, Zap,
   Music, Home, Dumbbell, Car, Boxes, Plane, Flower, BookOpen,
   Briefcase, SprayCan, Monitor, GraduationCap, Baby, PawPrint, PartyPopper,
+  ShoppingBag,
 };
 
 const un = (id) => `https://images.unsplash.com/${id}?auto=format&fit=crop&w=520&q=75`;
@@ -99,6 +101,12 @@ const CATEGORY_THEME = {
   'events-catering': {
     header: '#4A1D5B', body: '#E4CFEC',
     icon: 'PartyPopper', iconColor: '#4A1D5B',
+  },
+  // Goods rather than labour. Warm neutral so it reads as part of the set
+  // rather than a special case.
+  'shops-products': {
+    header: '#5A3A2E', body: '#EDD9C8',
+    icon: 'ShoppingBag', iconColor: '#5A3A2E',
   },
 };
 

@@ -180,6 +180,13 @@ CATEGORIES = [
     {"slug": "pet-services",         "label": "Pet Services",               "icon": "paw-print"},
     # events-catering absorbs the entertainment/music slice of the former "music-entertainment"
     {"slug": "events-catering",      "label": "Events, Music & Catering",   "icon": "party-popper"},
+    # Added 2026-08-19: a clothing business had nowhere to list. Every
+    # category above sells LABOUR; this one sells GOODS, which the
+    # marketplace has always supported mechanically (gig_type "store" with
+    # products) while the taxonomy quietly offered no home for it. Broad on
+    # purpose — clothing, homeware, gifts, food producers — because the
+    # alternative is a new slug per trade and a list nobody can scan.
+    {"slug": "shops-products",       "label": "Shops & Products",           "icon": "shopping-bag"},
 ]
 _CATEGORY_SLUGS = {c["slug"] for c in CATEGORIES}
 
