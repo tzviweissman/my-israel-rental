@@ -22,6 +22,7 @@ import { buildWhatsAppLinkWithMessage, hasValidWhatsApp } from '../utils/whatsap
 import { isAvailableNow, getGigCover } from '../utils/gigAvailability';
 import { useReturnDestination, saveReturnPath } from '../hooks/useBackNavigation';
 import Breadcrumb from '../components/common/Breadcrumb';
+import ContactChannels from '../components/marketplace/ContactChannels';
 
 const GIG_RETURN_PREFIXES = ['/services'];
 
@@ -418,6 +419,23 @@ const GigDetail = () => {
     setShowBook(true);
   };
 
+  // The on-site route, always reachable regardless of what the provider
+  // set as their preferred channel. Before this, a WhatsApp-preferring gig
+  // offered NO way to message through the site — so a buyer without
+  // WhatsApp, or facing a number that turned out not to be on WhatsApp,
+  // had no route at all.
+  const messageOnSite = () => {
+    if (!tier) return toast.error(t('services.pickOneFirst', 'Pick an option first'));
+    if (!token) {
+      toast.error(t('services.signInToMessage', 'Please sign in to send a message'));
+      navigate('/auth');
+      return;
+    }
+    setShowBook(true);
+  };
+
+  const channels = gig.contact_channels || [];
+
   return (
     <div className="min-h-screen bg-[#FAFAF7]" style={{ paddingTop: 'var(--nav-h, 68px)' }} data-testid="gig-detail-page">
       <PageMeta title={`${displayTitle} — MyIsraelRental Services`} description={displayDescription?.slice(0, 155) || `Book ${displayTitle} on MyIsraelRental.`} path={`/services/gig/${id}`} jsonLd={gigJsonLd} />
@@ -678,7 +696,29 @@ const GigDetail = () => {
                   may exist one day). Say what is true today, and say it in
                   the reader's language — this line was also hardcoded
                   English on the Hebrew page. */}
-              <p className="text-[11px] text-gray-400 text-center">
+              {/* The other ways to reach them. The button above is the
+                  provider's PREFERRED route; these are the rest, so a
+                  buyer is never stuck because one channel does not work
+                  for them. On-site messaging is always among them. */}
+              <div className="mt-3">
+                <ContactChannels
+                  channels={channels.filter((c) => !(useWhatsApp && c === 'whatsapp'))}
+                  email={gig.contact_email}
+                  onWhatsApp={() => {
+                    const msg = t('services.waGeneric', {
+                      defaultValue: 'Hi! I saw your "{{title}}" listing on MyIsraelRental.',
+                      title: displayTitle,
+                    });
+                    if (!openWhatsApp(msg)) {
+                      toast.error(t('services.waUnavailable', 'WhatsApp is not available for this listing'));
+                    }
+                  }}
+                  onMessage={messageOnSite}
+                  testidPrefix="gig-contact"
+                />
+              </div>
+
+              <p className="text-[11px] text-gray-400 text-center mt-3">
                 {isStore
                   ? t('services.noCutSeller', "You deal with the seller directly — MyIsraelRental doesn't take a cut.")
                   : t('services.noCutProvider', "You deal with the provider directly — MyIsraelRental doesn't take a cut.")}

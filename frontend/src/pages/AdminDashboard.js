@@ -5,6 +5,7 @@ import { API, AuthContext } from '../App';
 import { useApiSWR } from '../hooks/useApiSWR';
 import { useAdminLiveEvents } from '../hooks/useAdminLiveEvents';
 import OverviewTab from '../components/admin/OverviewTab';
+import SiteQrPanel from '../components/admin/SiteQrPanel';
 import ListingsTab from '../components/admin/ListingsTab';
 import UsersTab from '../components/admin/UsersTab';
 import ChatsTab from '../components/admin/ChatsTab';
@@ -88,7 +89,14 @@ const AdminDashboard = () => {
           })}
         </div>
 
-        {activeTab === 'overview' && <OverviewTab dashboard={dashboard} emailHealth={emailHealth} token={token} onNavigate={setActiveTab} />}
+        {activeTab === 'overview' && (
+          <>
+            <OverviewTab dashboard={dashboard} emailHealth={emailHealth} token={token} onNavigate={setActiveTab} />
+            {/* Codes for advertising the site itself — one per campaign,
+                each with its own scan count. */}
+            <SiteQrPanel API={API} token={token} />
+          </>
+        )}
         {activeTab === 'listings' && <ListingsTab token={token} onStatsChange={fetchDashboard} />}
         {activeTab === 'bookings' && <BookingsTab token={token} />}
         {activeTab === 'users' && <UsersTab token={token} onStatsChange={fetchDashboard} prefilter={usersPrefilter} />}

@@ -918,7 +918,7 @@ const BookingSidebar = ({
               button that opens an empty WhatsApp compose screen.
               Flip the two branches (or drop `ownerWhatsAppUrl`) to put chat
               back in front once Meta approval lands. */}
-          {ownerWhatsAppUrl ? (
+          {ownerWhatsAppUrl && (
             <a
               href={ownerWhatsAppUrl}
               target="_blank"
@@ -934,16 +934,25 @@ const BookingSidebar = ({
               <WhatsAppGlyph />
               {t('property.whatsappOwner', 'WhatsApp Owner')}
             </a>
-          ) : (
-            <button
-              onClick={onChat}
-              className="w-full secondary-btn flex items-center justify-center gap-2 py-2.5"
-              data-testid="message-owner-button"
-            >
-              <MessageCircle size={18} />
-              {t('property.messageOwner')}
-            </button>
           )}
+          {/* ALWAYS shown, never an alternative to WhatsApp.
+              This used to be the ELSE branch: an owner with a WhatsApp
+              number got a WhatsApp button INSTEAD of this one, so a renter
+              had no way to message through the site at all. That is fine
+              until the number turns out not to be on WhatsApp — which is
+              exactly what has been happening, since a landline passes
+              every format check — and then the listing had no working
+              contact route whatsoever, with nobody the wiser.
+              On-site messaging cannot be mistyped and reaches someone who
+              is already signed in, so it stays regardless. */}
+          <button
+            onClick={onChat}
+            className="w-full secondary-btn flex items-center justify-center gap-2 py-2.5"
+            data-testid="message-owner-button"
+          >
+            <MessageCircle size={18} />
+            {t('property.messageOwner')}
+          </button>
         </div>
 
         <button

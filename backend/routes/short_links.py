@@ -47,6 +47,13 @@ _SLUG_LEN = 7
 # already public to anyone holding the URL, which is the entire security
 # argument for allowing a guessable slug.
 _PUBLIC_TARGETS = {
+    # The site itself, for advertising it. `target_id` is a campaign label
+    # rather than a record id, so one code can be printed on a flyer and
+    # another used in an ad and each carries its OWN scan count — which is
+    # the whole point of putting a code on an advert. "home" is the plain
+    # one. The label never appears in the URL a scanner sees; it only
+    # separates the counters.
+    "site": "/",
     "manager": "/manager/{id}",
     # Singular, and load-bearing: /property/{id} is the detail page;
     # /properties/{type} (plural) is the CATEGORY BROWSER, which would
@@ -108,7 +115,12 @@ async def _assert_owns_target(target_type: str, target_id: str, user: dict[str, 
     person's content is how a collection becomes a spam target.
     """
     uid = user["user_id"]
-    if target_type == "manager":
+    if target_type == "site":
+        # The site belongs to whoever runs it. Anyone else minting these
+        # would be attaching their own counters to the front page.
+        if user.get("role") != "admin":
+            raise HTTPException(status_code=403, detail="Admin only")
+    elif target_type == "manager":
         if target_id != uid:
             raise HTTPException(status_code=403, detail="Not your manager page")
     elif target_type == "property":
