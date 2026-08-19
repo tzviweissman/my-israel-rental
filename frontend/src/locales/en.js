@@ -28,6 +28,12 @@ const en = {
         added: 'Photo added',
         failed: "That photo didn't upload — try again",
       },
+      contact: {
+        whatsapp: 'WhatsApp',
+        email: 'Email',
+        onSite: 'Message on MyIsraelRental',
+        note: 'Messages on the site always reach them — no phone number needed.',
+      },
       qr: {
         logoAdd: 'Add your logo',
         logoReplace: 'Change logo',

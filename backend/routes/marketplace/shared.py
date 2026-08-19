@@ -394,13 +394,32 @@ class GigIn(BaseModel):
     # service date on the booking form (cleaner arrives on Tuesday, etc.).
     enable_date_booking: bool = False
     gallery: list[str] = Field(default_factory=list)
+    # How buyers may reach this provider. `booking_mode` is kept because
+    # the browse filter and older gigs use it, but it is no longer the
+    # whole story: it names the PREFERRED channel, not the only one.
     booking_mode: str = "whatsapp"
     whatsapp: Optional[str] = None
+    # Opt-in, per gig, and both deliberately so.
+    #
+    # whatsapp_confirmed: a number in the right SHAPE is not a number on
+    # WhatsApp — landlines and non-WhatsApp mobiles normalise perfectly and
+    # then dead-end on wa.me. Providers had been entering exactly those, so
+    # the button is only offered when the provider states it is a WhatsApp
+    # number.
+    #
+    # contact_email: never taken from the account automatically. The site
+    # has always kept email private and routed contact through chat;
+    # publishing someone's login address because they listed a service
+    # would be a privacy regression, so it is a field they fill in.
+    whatsapp_confirmed: bool = False
+    contact_email: Optional[str] = None
     area: Optional[str] = None
     faqs: list[dict[str, str]] = Field(default_factory=list)
 
 
 class GigPatch(BaseModel):
+    whatsapp_confirmed: Optional[bool] = None
+    contact_email: Optional[str] = None
     title: Optional[str] = None
     category: Optional[str] = None
     subcategory: Optional[str] = None
@@ -626,9 +645,39 @@ def _provider_is_active(prov: dict[str, Any]) -> bool:
         return False
 
 
+def contact_channels(gig: dict[str, Any]) -> list[str]:
+    """Which ways a buyer may reach this provider, in offer order.
+
+    On-site messaging is ALWAYS present and always last-resort-proof: it
+    needs no external account, cannot be mistyped, and reaches someone who
+    has already signed in. Every other channel is opt-in and can be absent.
+
+    WhatsApp requires the provider to have CONFIRMED the number is on
+    WhatsApp, not merely to have typed digits. A landline normalises to a
+    perfectly valid-looking number and then dead-ends on wa.me — which is
+    what providers had been unknowingly publishing.
+
+    Old gigs predate the confirmation flag: they opted into WhatsApp by
+    setting booking_mode, so that intent is honoured rather than silently
+    revoked, and they keep the channel they chose.
+    """
+    out: list[str] = []
+    number = (gig.get("whatsapp") or "").strip()
+    legacy_whatsapp = gig.get("booking_mode") == "whatsapp"
+    if number and (gig.get("whatsapp_confirmed") or legacy_whatsapp):
+        out.append("whatsapp")
+    if (gig.get("contact_email") or "").strip():
+        out.append("email")
+    out.append("in_platform")
+    return out
+
+
 def _clean_gig(gig: dict[str, Any]) -> dict[str, Any]:
     """Strip Mongo internals + rename `_id` → `id` for the API surface."""
     gig["id"] = gig.pop("_id", gig.get("id"))
+    # Computed, never stored: storing it would let the list drift out of
+    # step with the fields it is derived from.
+    gig["contact_channels"] = contact_channels(gig)
     return gig
 
 

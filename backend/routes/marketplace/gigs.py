@@ -283,6 +283,9 @@ async def create_gig(payload: GigIn, user=Depends(verify_token)):
     _validate_subcategory(payload.category, payload.subcategory)
     if payload.booking_mode not in ("whatsapp", "in_platform"):
         raise HTTPException(status_code=400, detail="booking_mode must be 'whatsapp' or 'in_platform'")
+    # Still required: choosing WhatsApp as the PREFERRED channel without a
+    # number would offer a button that dials nothing. Other channels remain
+    # available regardless, so this is not a dead end for the provider.
     if payload.booking_mode == "whatsapp" and not (payload.whatsapp or "").strip():
         raise HTTPException(status_code=400, detail="WhatsApp number required for WhatsApp booking mode")
     # Service area is required — every published gig has to land in the
@@ -331,6 +334,8 @@ async def create_gig(payload: GigIn, user=Depends(verify_token)):
         "enable_date_booking": bool(payload.enable_date_booking) if payload.gig_type == "deliverable" else False,
         "gallery": payload.gallery,
         "booking_mode": payload.booking_mode,
+        "whatsapp_confirmed": bool(payload.whatsapp_confirmed),
+        "contact_email": (payload.contact_email or "").strip() or None,
         "whatsapp": payload.whatsapp,
         "area": payload.area,
         "faqs": payload.faqs,
