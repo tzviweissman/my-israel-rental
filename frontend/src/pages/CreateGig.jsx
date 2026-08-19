@@ -379,7 +379,7 @@ const CreateGig = () => {
       // Publishing used to be followed by /subscription/select-plan and a
       // PayPal handoff for the plan starting after the free month. Listing
       // is free, so publishing now ends at the gig itself.
-      navigate(`/services/gig/${data.id}`);
+      navigate(`/businesses/${data.id}`);
     } catch (err) {
       toast.error(err.response?.data?.detail || 'Failed to publish');
     } finally {

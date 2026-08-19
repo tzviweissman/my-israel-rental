@@ -339,12 +339,24 @@ function App() {
             <Route path="/why-list" element={<WhyList />} />
             <Route path="/why-host" element={<WhyHost />} />
             <Route path="/for-providers" element={<WhyList />} />
+            {/* Every /services/* path keeps working, permanently — the
+                same promise as /services itself. Nothing redirects, so an
+                old link and a new link both land where they say they will,
+                and any QR or message already sent stays valid. */}
             <Route path="/services/jobs" element={<JobsBoard />} />
             <Route path="/services/jobs/:id" element={<JobDetail />} />
             <Route path="/services/post-job" element={user ? <PostJob /> : <Navigate to="/auth/login" />} />
             <Route path="/services/gig/:id" element={<GigDetail />} />
             <Route path="/services/create-gig" element={user ? <CreateGig /> : <Navigate to="/auth/login" />} />
             <Route path="/services/provider/:userId" element={<ProviderProfile />} />
+
+            {/* The names people see and share from now on. */}
+            <Route path="/businesses/jobs" element={<JobsBoard />} />
+            <Route path="/businesses/jobs/:id" element={<JobDetail />} />
+            <Route path="/businesses/post-job" element={user ? <PostJob /> : <Navigate to="/auth/login" />} />
+            <Route path="/businesses/:id" element={<GigDetail />} />
+            <Route path="/businesses/add" element={user ? <CreateGig /> : <Navigate to="/auth/login" />} />
+            <Route path="/businesses/provider/:userId" element={<ProviderProfile />} />
             <Route path="/faq" element={<FAQ />} />
             {/* Catch-all — any URL no route above claims. Without it an
                 unknown URL rendered the nav shell over an empty content

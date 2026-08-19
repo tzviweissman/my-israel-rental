@@ -69,7 +69,7 @@ const WhyList = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
 
-  const startListing = () => navigate('/services/create-gig');
+  const startListing = () => navigate('/businesses/add');
 
   return (
     <div className="min-h-screen bg-white">

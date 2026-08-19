@@ -222,7 +222,7 @@ const ServicesMapView = ({ gigs, userCoords, maxDistanceKm, activeId, onPinClick
         el.querySelectorAll('button[data-gig-id]').forEach((btn) => {
           btn.addEventListener('click', () => {
             const id = btn.getAttribute('data-gig-id');
-            if (id) navigate(`/services/gig/${id}`);
+            if (id) navigate(`/businesses/${id}`);
           });
         });
       });

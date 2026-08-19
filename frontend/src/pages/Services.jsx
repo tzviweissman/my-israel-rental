@@ -598,7 +598,7 @@ const Services = () => {
       <FeaturedProviders
         gigs={featuredGigs}
         coords={coords}
-        onOpen={(id) => { saveReturnPath(); navigate(`/services/gig/${id}`); }}
+        onOpen={(id) => { saveReturnPath(); navigate(`/businesses/${id}`); }}
         t={t}
         i18n={i18n}
       />
@@ -917,7 +917,7 @@ const Services = () => {
                           setActiveMapId(gig.id);
                           if (activeMapId === gig.id) {
                             saveReturnPath();
-                            navigate(`/services/gig/${gig.id}`);
+                            navigate(`/businesses/${gig.id}`);
                           }
                         }}
                         className={`shrink-0 w-[168px] rounded-xl overflow-hidden bg-white text-start active:scale-95 transition-all ${
@@ -946,7 +946,7 @@ const Services = () => {
                     <GigCard
                       key={gig.id}
                       gig={gig}
-                      onClick={() => { saveReturnPath(); navigate(`/services/gig/${gig.id}`); }}
+                      onClick={() => { saveReturnPath(); navigate(`/businesses/${gig.id}`); }}
                       i18n={i18n}
                       t={t}
                     />
@@ -976,7 +976,7 @@ const Services = () => {
               <div key={gig.id} className="relative">
                 <GigCard
                   gig={gig}
-                  onClick={() => { saveReturnPath(); navigate(`/services/gig/${gig.id}`); }}
+                  onClick={() => { saveReturnPath(); navigate(`/businesses/${gig.id}`); }}
                   i18n={i18n}
                   t={t}
                 />
@@ -1024,7 +1024,7 @@ const Services = () => {
           </div>
           <button
             type="button"
-            onClick={() => navigate('/services/post-job')}
+            onClick={() => navigate('/businesses/post-job')}
             className="btn-gold-solid"
             data-testid="services-post-job"
           >
@@ -1054,7 +1054,7 @@ const Services = () => {
       <div className="max-w-6xl mx-auto px-4 pb-16 -mt-12 text-center">
         <button
           type="button"
-          onClick={() => navigate('/services/jobs')}
+          onClick={() => navigate('/businesses/jobs')}
           className="text-sm font-semibold text-[var(--brand-primary)] hover:underline"
           data-testid="services-browse-jobs"
         >

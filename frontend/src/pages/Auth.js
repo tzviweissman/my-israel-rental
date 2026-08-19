@@ -109,7 +109,7 @@ const Auth = () => {
       } else if (mode === 'signup' && formData.role === 'provider') {
         // Service providers land straight in the gig-creation wizard —
         // no property-management upsell, they're here to list services.
-        navigate('/services/create-gig');
+        navigate('/businesses/add');
       } else {
         navigate(destination);
       }

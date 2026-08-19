@@ -94,7 +94,7 @@ const JobRequestsTab = ({ API, token }) => {
             return (
               <button
                 key={j.id}
-                onClick={() => navigate(`/services/jobs/${j.id}`)}
+                onClick={() => navigate(`/businesses/jobs/${j.id}`)}
                 className="w-full text-left bg-white border border-gray-100 rounded-2xl p-4 sm:p-5 hover:border-[var(--gold)] transition-colors shadow-sm"
                 data-testid={`job-request-row-${j.id}`}
               >

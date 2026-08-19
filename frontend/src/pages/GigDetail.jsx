@@ -229,7 +229,7 @@ const GigDetail = () => {
   const { token, user } = useContext(AuthContext);
   // Compute where "Back to services" should return the visitor. If they
   // came from a filtered /services grid (or from an adjacent
-  // /services/provider/... or /services/jobs page), send them back to
+  // /businesses/provider/... or /businesses/jobs page), send them back to
   // that exact URL. Otherwise fall through to the plain /services hub.
   const backTo = useReturnDestination(GIG_RETURN_PREFIXES, '/services');
   const [gig, setGig] = useState(null);
@@ -281,12 +281,12 @@ const GigDetail = () => {
       serviceType: gig.category,
       areaServed: gig.area || 'Israel',
       image: gig.gallery?.[0],
-      url: `https://myisraelrental.com/services/gig/${gig.id}`,
+      url: `https://myisraelrental.com/businesses/${gig.id}`,
       provider: {
         '@type': 'LocalBusiness',
         name: gig.provider?.name,
         image: gig.provider?.avatar,
-        '@id': `https://myisraelrental.com/services/provider/${gig.provider?.user_id}`,
+        '@id': `https://myisraelrental.com/businesses/provider/${gig.provider?.user_id}`,
       },
     };
     if (prices.length > 0) {
@@ -438,7 +438,7 @@ const GigDetail = () => {
 
   return (
     <div className="min-h-screen bg-[#FAFAF7]" style={{ paddingTop: 'var(--nav-h, 68px)' }} data-testid="gig-detail-page">
-      <PageMeta title={`${displayTitle} — MyIsraelRental Services`} description={displayDescription?.slice(0, 155) || `Book ${displayTitle} on MyIsraelRental.`} path={`/services/gig/${id}`} jsonLd={gigJsonLd} />
+      <PageMeta title={`${displayTitle} — MyIsraelRental Services`} description={displayDescription?.slice(0, 155) || `Book ${displayTitle} on MyIsraelRental.`} path={`/businesses/${id}`} jsonLd={gigJsonLd} />
       <div className="max-w-5xl mx-auto px-4 py-8">
         <Breadcrumb current={displayTitle} testId="gig-breadcrumb" />
         <button onClick={() => navigate(backTo)} className="text-sm text-gray-600 flex items-center gap-1 mb-4 hover:text-[var(--brand-primary)]" data-testid="gig-back">
@@ -547,7 +547,7 @@ const GigDetail = () => {
                       // seller has full context regardless of which
                       // product the shopper picked in the sidebar.
                       if (useWhatsApp) {
-                        const link = `${window.location.origin}/services/gig/${gig.id}`;
+                        const link = `${window.location.origin}/businesses/${gig.id}`;
                         const msg = `Hi! I'm interested in "${p.name}" (${psym}${Number(p.price).toLocaleString()}) from your ${displayTitle} store on MyIsraelRental.\n${link}`;
                         if (openWhatsApp(msg)) return;
                       }
@@ -619,7 +619,7 @@ const GigDetail = () => {
                 <p className="font-semibold text-sm">{gig.provider?.name}</p>
                 <p className="text-xs text-gray-500">{gig.provider?.tagline || gig.provider?.bio || '\u00A0'}</p>
               </div>
-              <button onClick={() => { saveReturnPath(); navigate(`/services/provider/${gig.provider?.user_id}`); }} className="text-xs font-semibold text-[var(--brand-primary)] hover:underline" data-testid="gig-view-provider">
+              <button onClick={() => { saveReturnPath(); navigate(`/businesses/provider/${gig.provider?.user_id}`); }} className="text-xs font-semibold text-[var(--brand-primary)] hover:underline" data-testid="gig-view-provider">
                 View profile
               </button>
             </div>

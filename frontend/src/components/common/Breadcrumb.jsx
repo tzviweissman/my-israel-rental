@@ -12,7 +12,7 @@
  *   /stays?area=Jerusalem              → "Stays · Jerusalem"
  *   /properties/long-term?bedrooms=2   → "Long-term rentals · 2 bed"
  *   /services?category=home-repair     → "Services · Home repair"
- *   /services/jobs?category=cleaning   → "Jobs board · Cleaning"
+ *   /businesses/jobs?category=cleaning   → "Jobs board · Cleaning"
  *   /manager/<id>?area=Jerusalem       → "Manager listings · Jerusalem"
  *
  * If `previousPath` is empty or doesn't match one of the whitelisted
@@ -92,7 +92,7 @@ const parseOrigin = (path) => {
     return { label: suffix ? `Services · ${suffix}` : 'Services', to: path };
   }
 
-  if (p.startsWith('/services/jobs')) {
+  if (p.startsWith('/businesses/jobs')) {
     const suffix = chip('category');
     return { label: suffix ? `Jobs board · ${suffix}` : 'Jobs board', to: path };
   }

@@ -1,5 +1,5 @@
 /**
- * Public provider profile — /services/provider/:userId.
+ * Public provider profile — /businesses/provider/:userId.
  * Bio, tagline, subscription "active" badge, plus all published gigs.
  */
 import React, { useEffect, useState } from 'react';
@@ -49,11 +49,11 @@ const ProviderProfile = () => {
   const providerJsonLd = {
     '@context': 'https://schema.org',
     '@type': 'LocalBusiness',
-    '@id': `https://myisraelrental.com/services/provider/${userId}`,
+    '@id': `https://myisraelrental.com/businesses/provider/${userId}`,
     name: data.name,
     image: data.avatar,
     description: (data.bio || data.tagline || '').slice(0, 500),
-    url: `https://myisraelrental.com/services/provider/${userId}`,
+    url: `https://myisraelrental.com/businesses/provider/${userId}`,
     telephone: data.whatsapp,
     areaServed: 'Israel',
     ...(priceValues.length > 0 && {
@@ -72,7 +72,7 @@ const ProviderProfile = () => {
 
   return (
     <div className="min-h-screen bg-[#FAFAF7]" style={{ paddingTop: 'var(--nav-h, 68px)' }} data-testid="provider-profile">
-      <PageMeta title={`${data.name} — Services on MyIsraelRental`} description={data.tagline || data.bio?.slice(0, 155) || `Services from ${data.name}`} path={`/services/provider/${userId}`} jsonLd={providerJsonLd} />
+      <PageMeta title={`${data.name} — Services on MyIsraelRental`} description={data.tagline || data.bio?.slice(0, 155) || `Services from ${data.name}`} path={`/businesses/provider/${userId}`} jsonLd={providerJsonLd} />
       <div className="max-w-5xl mx-auto px-4 py-8">
         <Breadcrumb current={data.name} testId="provider-breadcrumb" />
         <button onClick={() => navigate(backTo)} className="text-sm text-gray-600 flex items-center gap-1 mb-4 hover:text-[var(--brand-primary)]" data-testid="provider-back">
@@ -183,7 +183,7 @@ const ProviderProfile = () => {
             const cheap = (g.tiers || []).reduce((a, t) => (a == null || t.price < a ? t.price : a), null);
             const sym = g.tiers?.[0]?.currency === 'USD' ? '$' : '₪';
             return (
-              <button key={g.id} onClick={() => { saveReturnPath(); navigate(`/services/gig/${g.id}`); }} className="text-left" data-testid={`provider-gig-${g.id}`}>
+              <button key={g.id} onClick={() => { saveReturnPath(); navigate(`/businesses/${g.id}`); }} className="text-left" data-testid={`provider-gig-${g.id}`}>
                 <div className="aspect-square bg-gray-100 rounded-xl overflow-hidden mb-2" style={cover ? { backgroundImage: `url(${cover})`, backgroundSize: 'cover', backgroundPosition: 'center' } : {}} />
                 <p className="font-semibold text-sm truncate">{g.title}</p>
                 {g.rating_count > 0 && (

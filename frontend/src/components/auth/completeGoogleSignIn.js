@@ -74,7 +74,7 @@ export default async function completeGoogleSignIn(accessToken, login, navigate)
 
   // Route by final role.
   if (user.role === 'provider') {
-    navigate('/services/create-gig?welcome=1', { replace: true });
+    navigate('/businesses/add?welcome=1', { replace: true });
   } else if (user.role === 'owner') {
     navigate('/dashboard?welcome=1', { replace: true });
   } else {

@@ -2,7 +2,7 @@
  * PostJob — customer-facing wizard for creating a job request.
  *
  * Upwork-style flow: the customer says what they need, sets a budget +
- * date, and the job lands on `/services/jobs`. Providers whose gigs
+ * date, and the job lands on `/businesses/jobs`. Providers whose gigs
  * cover the same category get an auto-notification email and can Apply
  * with a message + optional price quote.
  *
@@ -26,7 +26,7 @@ const PostJob = () => {
   // Back to wherever they came from — the dashboard, the jobs board, or a
   // filtered view of it — rather than always the board. Someone who starts
   // from their dashboard should end up back at their dashboard.
-  const backTo = useReturnDestination(['/dashboard', '/services/jobs', '/services'], '/services/jobs');
+  const backTo = useReturnDestination(['/dashboard', '/businesses/jobs', '/services'], '/businesses/jobs');
   const { token } = useContext(AuthContext);
   const navigate = useNavigate();
   const [categories, setCategories] = useState([]);
@@ -77,7 +77,7 @@ const PostJob = () => {
           onClick: () => navigate('/dashboard?tab=my-jobs'),
         },
       });
-      navigate(`/services/jobs/${data.id}`);
+      navigate(`/businesses/jobs/${data.id}`);
     } catch (err) {
       toast.error(err.response?.data?.detail || 'Failed to post job');
     } finally {
@@ -87,7 +87,7 @@ const PostJob = () => {
 
   return (
     <div className="min-h-screen bg-[#FAFAF7]" style={{ paddingTop: 'var(--nav-h, 68px)' }} data-testid="post-job-page">
-      <PageMeta title="Post a job request | MyIsraelRental" description="Say what you need done and let service providers come to you." path="/services/post-job" />
+      <PageMeta title="Post a job request | MyIsraelRental" description="Say what you need done and let service providers come to you." path="/businesses/post-job" />
       <div className="max-w-2xl mx-auto px-4 py-8">
         <button onClick={() => navigate(backTo)} className="text-sm text-gray-500 flex items-center gap-1 mb-4" data-testid="post-job-back">
           <ArrowLeft size={14} className="rtl:rotate-180" />

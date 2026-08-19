@@ -3,7 +3,7 @@
  * email CTAs ("View & Bid") and mints a fresh 30-day session so the
  * provider lands on the job post already logged-in.
  *
- * URL shape: /auth/deeplink?t=<signed_jwt>&goto=/services/jobs/<id>
+ * URL shape: /auth/deeplink?t=<signed_jwt>&goto=/businesses/jobs/<id>
  *
  * Failure modes (expired, wrong purpose, deleted account) drop the
  * visitor to /auth/login with a friendly reason toast — they can log

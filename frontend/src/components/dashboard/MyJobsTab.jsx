@@ -13,7 +13,7 @@
  *   • Reopen    — PATCH status:open (re-lists on the board).
  *   • View      — public detail page (helpful sanity-check of what
  *                 providers actually see).
- *   • Post new  — CTA to /services/post-job.
+ *   • Post new  — CTA to /businesses/post-job.
  *
  * v1 intentionally does NOT include per-applicant "Award" or in-platform
  * messaging — those flows need a backend Award endpoint + job-scoped
@@ -232,7 +232,7 @@ const JobCard = ({ job, API, token, onStatusChange }) => {
 
           <div className="flex flex-wrap gap-2 mb-4">
             <button
-              onClick={() => navigate(`/services/jobs/${job.id}`)}
+              onClick={() => navigate(`/businesses/jobs/${job.id}`)}
               className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-semibold border border-gray-200 bg-white hover:border-[var(--brand-primary)] hover:text-[var(--brand-primary)]"
               data-testid={`my-job-view-${job.id}`}
             >
@@ -328,7 +328,7 @@ const MyJobsTab = ({ API, token }) => {
           </p>
         </div>
         <button
-          onClick={() => { saveReturnPath(); navigate('/services/post-job'); }}
+          onClick={() => { saveReturnPath(); navigate('/businesses/post-job'); }}
           className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-[var(--brand-primary)] text-white text-sm font-semibold hover:bg-[#0F3A3A]"
           data-testid="my-jobs-post-cta"
         >
@@ -347,7 +347,7 @@ const MyJobsTab = ({ API, token }) => {
             Tell us what you need — matching providers will apply directly.
           </p>
           <button
-            onClick={() => { saveReturnPath(); navigate('/services/post-job'); }}
+            onClick={() => { saveReturnPath(); navigate('/businesses/post-job'); }}
             className="inline-flex items-center gap-1 px-5 py-2 rounded-lg text-sm font-semibold text-white bg-[var(--brand-primary)] hover:bg-[#0F3A3A]"
             data-testid="my-jobs-empty-cta"
           >

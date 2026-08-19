@@ -168,7 +168,7 @@ const SignupJoin = () => {
       } else if (activeCard.backendRole === 'owner') {
         setShowOwnerOffer(true);
       } else if (activeCard.backendRole === 'provider') {
-        navigate('/services/create-gig');
+        navigate('/businesses/add');
       } else {
         navigate(redirectParam || '/dashboard');
       }

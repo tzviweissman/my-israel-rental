@@ -371,7 +371,7 @@ const MyGigsTab = ({ API, token }) => {
           {/* "Upgrade to Pro" and "Cancel Pro" lived here. Listing is free,
               so there is nothing to upgrade to and nothing to cancel. */}
           <button
-            onClick={() => { saveReturnPath(); navigate('/services/create-gig'); }}
+            onClick={() => { saveReturnPath(); navigate('/businesses/add'); }}
             className="px-4 py-2.5 rounded-lg text-sm font-semibold text-white bg-[var(--brand-primary)] hover:bg-[#0F3A3A] flex items-center gap-1.5"
             data-testid="my-gigs-create-btn"
           >
@@ -390,7 +390,7 @@ const MyGigsTab = ({ API, token }) => {
             Publish your first gig — a free 30-day trial starts on your first listing.
           </p>
           <button
-            onClick={() => { saveReturnPath(); navigate('/services/create-gig'); }}
+            onClick={() => { saveReturnPath(); navigate('/businesses/add'); }}
             className="px-5 py-2.5 rounded-lg text-sm font-semibold text-white bg-[var(--brand-primary)] hover:bg-[#0F3A3A] inline-flex items-center gap-1.5"
             data-testid="my-gigs-empty-cta"
           >
@@ -413,7 +413,7 @@ const MyGigsTab = ({ API, token }) => {
                 data-testid={`my-gigs-item-${g.id}`}
               >
                 <button
-                  onClick={() => navigate(`/services/gig/${g.id}`)}
+                  onClick={() => navigate(`/businesses/${g.id}`)}
                   className="block w-full aspect-video bg-gray-100 text-left"
                   style={cover ? { backgroundImage: `url(${cover})`, backgroundSize: 'cover', backgroundPosition: 'center' } : {}}
                 >
@@ -462,7 +462,7 @@ const MyGigsTab = ({ API, token }) => {
                   )}
                   <div className="flex justify-between items-center pt-2 border-t border-gray-100">
                     <button
-                      onClick={() => navigate(`/services/gig/${g.id}`)}
+                      onClick={() => navigate(`/businesses/${g.id}`)}
                       className="text-xs font-semibold text-[var(--brand-primary)] hover:underline flex items-center gap-1"
                       data-testid={`my-gigs-view-${g.id}`}
                     >

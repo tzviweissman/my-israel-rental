@@ -16,16 +16,16 @@ import PageMeta from '../components/PageMeta';
 import { useReturnDestination } from '../hooks/useBackNavigation';
 import Breadcrumb from '../components/common/Breadcrumb';
 
-const JOB_RETURN_PREFIXES = ['/services/jobs'];
+const JOB_RETURN_PREFIXES = ['/businesses/jobs'];
 
 const JobDetail = () => {
   const { t } = useTranslation();
   const { id } = useParams();
   const { token, user } = useContext(AuthContext);
   const navigate = useNavigate();
-  // Back button target: whichever /services/jobs filtered view the visitor
+  // Back button target: whichever /businesses/jobs filtered view the visitor
   // came from, or the plain board.
-  const backTo = useReturnDestination(JOB_RETURN_PREFIXES, '/services/jobs');
+  const backTo = useReturnDestination(JOB_RETURN_PREFIXES, '/businesses/jobs');
   const [job, setJob] = useState(null);
   const [loading, setLoading] = useState(true);
   const [applications, setApplications] = useState([]);
@@ -87,7 +87,7 @@ const JobDetail = () => {
 
   return (
     <div className="min-h-screen bg-[#FAFAF7]" style={{ paddingTop: 'var(--nav-h, 68px)' }} data-testid="job-detail-page">
-      <PageMeta title={`${job.title} · MyIsraelRental`} description={(job.description || '').slice(0, 160)} path={`/services/jobs/${id}`} />
+      <PageMeta title={`${job.title} · MyIsraelRental`} description={(job.description || '').slice(0, 160)} path={`/businesses/jobs/${id}`} />
       <div className="max-w-3xl mx-auto px-4 py-8">
         <Breadcrumb current={job.title} testId="job-breadcrumb" />
         <button onClick={() => navigate(backTo)} className="text-sm text-gray-500 flex items-center gap-1 mb-4" data-testid="job-detail-back">

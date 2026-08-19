@@ -1,5 +1,5 @@
 /**
- * JobsBoard — public /services/jobs listing.
+ * JobsBoard — public /businesses/jobs listing.
  *
  * Anyone can browse. Poster identity is anonymised beyond a display
  * name + member-since year so the board reads more like a job board
@@ -92,7 +92,7 @@ const JobsBoard = () => {
 
   return (
     <div className="min-h-screen bg-[#FAFAF7]" style={{ paddingTop: 'var(--nav-h, 68px)' }} data-testid="jobs-board-page">
-      <PageMeta title="Open jobs · MyIsraelRental" description="Browse jobs posted by renters and owners on MyIsraelRental — apply directly to reach customers." path="/services/jobs" />
+      <PageMeta title="Open jobs · MyIsraelRental" description="Browse jobs posted by renters and owners on MyIsraelRental — apply directly to reach customers." path="/businesses/jobs" />
       <div className="max-w-6xl mx-auto px-4 py-8">
         <div className="flex items-start justify-between flex-wrap gap-3 mb-6">
           <div>
@@ -104,7 +104,7 @@ const JobsBoard = () => {
             </p>
           </div>
           <button
-            onClick={() => { saveReturnPath(); navigate(token ? '/services/post-job' : '/auth'); }}
+            onClick={() => { saveReturnPath(); navigate(token ? '/businesses/post-job' : '/auth'); }}
             className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-[var(--brand-primary)] text-white text-sm font-semibold hover:bg-[#0F3A3A]"
             data-testid="jobs-post-cta"
           >
@@ -174,7 +174,7 @@ const JobsBoard = () => {
             <p className="text-gray-700 font-semibold mb-1">No open jobs in this category right now.</p>
             <p className="text-gray-500 text-sm mb-5">Be the first to post — matching providers will reach out.</p>
             <button
-              onClick={() => { saveReturnPath(); navigate(token ? '/services/post-job' : '/auth'); }}
+              onClick={() => { saveReturnPath(); navigate(token ? '/businesses/post-job' : '/auth'); }}
               className="px-5 py-2 rounded-lg text-sm font-semibold text-white bg-[var(--brand-primary)] hover:bg-[#0F3A3A]"
               data-testid="jobs-empty-cta"
             >
@@ -183,7 +183,7 @@ const JobsBoard = () => {
           </div>
         ) : (
           <div className="grid gap-3">
-            {jobs.map((j) => <JobRow key={j.id} job={j} onClick={() => { saveReturnPath(); navigate(`/services/jobs/${j.id}`); }} />)}
+            {jobs.map((j) => <JobRow key={j.id} job={j} onClick={() => { saveReturnPath(); navigate(`/businesses/jobs/${j.id}`); }} />)}
           </div>
         )}
       </div>
