@@ -131,6 +131,8 @@ const CreateGig = () => {
     gallery: [],
     booking_mode: 'whatsapp',
     whatsapp: '',
+    whatsapp_confirmed: false,
+    contact_email: '',
     area: '',
   });
 
@@ -337,6 +339,8 @@ const CreateGig = () => {
         gallery: form.gallery,
         booking_mode: form.booking_mode,
         whatsapp: form.whatsapp,
+        whatsapp_confirmed: !!form.whatsapp_confirmed,
+        contact_email: (form.contact_email || '').trim() || null,
         area: form.area,
         // Only send the arrays relevant to this gig type so we don't
         // pollute the doc with empty structures the type will never use.
@@ -594,8 +598,70 @@ const CreateGig = () => {
                     testid="wizard-whatsapp"
                   />
                 </div>
+
+                {/* The number being the right SHAPE proves nothing: a
+                    landline passes that check and then dead-ends on
+                    wa.me. Listers had been publishing exactly those and
+                    never learning the enquiries had not arrived. So they
+                    state it themselves, and the button only appears when
+                    they have. */}
+                <label
+                  className="mt-3 flex items-start gap-2 text-sm cursor-pointer"
+                  style={{ color: 'var(--ink)' }}
+                >
+                  <input
+                    type="checkbox"
+                    className="mt-0.5"
+                    checked={!!form.whatsapp_confirmed}
+                    onChange={(e) => set({ whatsapp_confirmed: e.target.checked })}
+                    data-testid="wizard-whatsapp-confirm"
+                  />
+                  <span>
+                    {t('services.whatsappConfirm', 'Yes — this number has WhatsApp')}
+                    <span className="block text-xs" style={{ color: 'var(--brand-muted)' }}>
+                      {t(
+                        'services.whatsappConfirmHint',
+                        'A landline or a number without WhatsApp will not work. Leave this unticked and customers reach you by email and on-site messages instead.',
+                      )}
+                    </span>
+                  </span>
+                </label>
+
+                {(form.whatsapp || '').trim() && !form.whatsapp_confirmed && (
+                  <p
+                    className="mt-2 text-xs px-3 py-2 rounded-lg"
+                    style={{ background: 'rgb(var(--brand-primary-rgb) / 0.06)', color: 'var(--ink)' }}
+                    data-testid="wizard-whatsapp-unconfirmed"
+                  >
+                    {t(
+                      'services.whatsappUnconfirmed',
+                      'No WhatsApp button will be shown until you confirm the number.',
+                    )}
+                  </p>
+                )}
               </div>
             )}
+
+            <div>
+              <label className="text-sm font-semibold text-gray-700">
+                {t('services.contactEmailLabel', 'Contact email (optional)')}
+              </label>
+              <input
+                type="email"
+                value={form.contact_email}
+                onChange={(e) => set({ contact_email: e.target.value })}
+                placeholder={t('services.contactEmailPh', 'you@example.com')}
+                className="w-full mt-1 px-3 py-2 rounded-lg border text-sm"
+                style={{ borderColor: 'var(--brand-border)' }}
+                data-testid="wizard-contact-email"
+              />
+              <p className="mt-1 text-xs" style={{ color: 'var(--brand-muted)' }}>
+                {t(
+                  'services.contactEmailHint',
+                  'Shown on your listing so customers can email you. Your account email is never shown.',
+                )}
+              </p>
+            </div>
             <div>
               <label className="text-sm font-semibold text-gray-700">Service area <span className="text-red-500">*</span></label>
               <input value={form.area} onChange={(e) => set({ area: e.target.value })}

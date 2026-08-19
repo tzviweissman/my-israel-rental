@@ -1,5 +1,25 @@
 {
   "redirects": [
     { "source": "/p/:slug", "destination": "https://my-israel-rental-production.up.railway.app/api/short-links/:slug/follow", "type": 302 }
+  ],
+  "headers": [
+    {
+      "source": "**/*.@(js|css|png|jpg|jpeg|gif|svg|webp|woff|woff2|mp4)",
+      "headers": [
+        { "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }
+      ]
+    },
+    {
+      "source": "index.html",
+      "headers": [
+        { "key": "Cache-Control", "value": "no-cache" }
+      ]
+    },
+    {
+      "source": "asset-manifest.json",
+      "headers": [
+        { "key": "Cache-Control", "value": "no-cache" }
+      ]
+    }
   ]
 }
