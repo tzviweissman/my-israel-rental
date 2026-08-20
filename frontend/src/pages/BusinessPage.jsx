@@ -95,12 +95,31 @@ const BusinessPage = () => {
 
   const messageLabel = t('businessPage.message', 'Message');
 
+  // Real data only: fall back through what the business actually has
+  // rather than inventing a line for it.
+  const shareImage = biz.logo_url || (primaryListing ? getGigCover(primaryListing) : null) || undefined;
+  const shareDescription =
+    biz.description?.slice(0, 155)
+    || [ (biz.categories || [])[0], (biz.areas || []).join(', ') ].filter(Boolean).join(' · ')
+    || `${biz.name} on MyIsraelRental.`;
+
   return (
     <div className="min-h-screen" style={{ background: 'var(--bg)', paddingTop: 'var(--nav-h, 68px)' }}
       data-testid="business-page">
+      {/* B2 — the picture a share card shows. Logo first, else the first
+          listing's cover, else PageMeta's branded default.
+
+          Caveat worth knowing: react-helmet writes these tags in the
+          BROWSER, and WhatsApp's crawler does not run JavaScript. It is
+          served the static index.html, so a link pasted into a chat still
+          previews with the generic site title and logo no matter what is
+          passed here. Fixing that needs the tags present in the HTML
+          before any JS runs. This still helps in-app browsers and any
+          scraper that executes scripts. */}
       <PageMeta
         title={`${biz.name} — MyIsraelRental`}
-        description={biz.description?.slice(0, 155) || `${biz.name} on MyIsraelRental.`}
+        description={shareDescription}
+        image={shareImage}
         path={`/business/${biz.slug || biz.id}`}
       />
 
