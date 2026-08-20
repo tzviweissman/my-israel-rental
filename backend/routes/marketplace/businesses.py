@@ -270,6 +270,31 @@ async def business_rating(business_id: str) -> dict[str, Any]:
     return {"rating_avg": None, "rating_count": 0}
 
 
+# Contact fields that must never leave this endpoint (spec B1). The public
+# business page is chat-only: a visitor talks to the business through the
+# site, so no phone number or address reaches the browser at all.
+#
+# This is not cosmetic. Before B1 the endpoint served every gig field
+# verbatim, which published each provider's WhatsApp number to anyone who
+# fetched the URL unauthenticated — no login, no rate limit, trivially
+# scrapeable across every business on the site.
+_CONTACT_FIELDS = ("whatsapp", "contact_email", "contact_phone", "phone", "email")
+
+
+def _public_listing(gig: dict[str, Any]) -> dict[str, Any]:
+    """A gig as the public business page may see it: no contact details.
+
+    ``contact_channels`` is pinned to in-platform rather than dropped,
+    because the front end reads it to decide what to offer and an absent
+    key would read as "no way to contact at all".
+    """
+    clean = dict(_clean_gig(dict(gig)))
+    for field in _CONTACT_FIELDS:
+        clean.pop(field, None)
+    clean["contact_channels"] = ["in_platform"]
+    return clean
+
+
 @router.get("/business/{slug_or_id}")
 async def public_business(slug_or_id: str):
     """The public page for one business (spec M4).
@@ -322,7 +347,11 @@ async def public_business(slug_or_id: str):
         "rating_avg": rating["rating_avg"],
         "rating_count": rating["rating_count"],
         "member_since": (biz.get("created_at") or "")[:4] or None,
-        "listings": [_clean_gig(g) for g in raw],
+        # Needed to address a chat thread at this business's owner. An
+        # opaque id, not contact information — the whole point of B1 is
+        # that a visitor reaches them THROUGH the site.
+        "owner_user_id": biz.get("owner_user_id"),
+        "listings": [_public_listing(g) for g in raw],
     }
 
 

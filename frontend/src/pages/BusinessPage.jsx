@@ -10,12 +10,12 @@
  * short-link table already points at /business/{id}, so both resolve and
  * neither will ever break.
  */
-import React, { useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import axios from 'axios';
-import { Star, BadgeCheck, MapPin, Loader2 } from 'lucide-react';
-import { API } from '../App';
+import { Star, BadgeCheck, MapPin, Loader2, MessageCircle } from 'lucide-react';
+import { API, AuthContext } from '../App';
 import PageMeta from '../components/PageMeta';
 import CoverPlaceholder from '../components/common/CoverPlaceholder';
 import { getGigCover } from '../utils/gigAvailability';
@@ -24,6 +24,7 @@ const BusinessPage = () => {
   const { slug } = useParams();
   const navigate = useNavigate();
   const { t } = useTranslation();
+  const { token } = useContext(AuthContext);
   const [biz, setBiz] = useState(null);
   const [missing, setMissing] = useState(false);
 
@@ -64,6 +65,35 @@ const BusinessPage = () => {
       </div>
     );
   }
+
+  /* B1 — the page had no way to contact the business at all. A visitor
+     who arrived from the owner's own flyer, liked what they saw and
+     wanted to hire them had nothing to click; the only contact control
+     on screen was the site-wide WhatsApp bubble, which reaches
+     MyIsraelRental rather than the business.
+
+     Chat-only by rule: the thread goes through the site, and no phone
+     number or email appears here or in the API behind it.
+
+     The conversation is keyed by the business's first listing because
+     that is what the chat backend already resolves and labels with the
+     business name — a thread keyed by anything else would arrive
+     unlabelled in the owner's inbox. */
+  const primaryListing = (biz.listings || [])[0];
+  const canMessage = !!(primaryListing && biz.owner_user_id);
+
+  const messageBusiness = () => {
+    const here = `/business/${biz.slug || biz.id}`;
+    if (!token) {
+      // Comes straight back here after signing in, so the intent that
+      // brought them is not lost on the way.
+      navigate(`/auth/login?redirect=${encodeURIComponent(here)}`);
+      return;
+    }
+    navigate(`/chat/${primaryListing.id}?with=${encodeURIComponent(biz.owner_user_id)}`);
+  };
+
+  const messageLabel = t('businessPage.message', 'Message');
 
   return (
     <div className="min-h-screen" style={{ background: 'var(--bg)', paddingTop: 'var(--nav-h, 68px)' }}
@@ -126,6 +156,23 @@ const BusinessPage = () => {
                 <p className="mt-3 text-sm" style={{ color: 'var(--ink)' }}>{biz.description}</p>
               )}
             </div>
+
+            {/* Sits in the header so it is on screen the moment the page
+                opens, without scrolling. Hidden on mobile, where the
+                sticky bar below carries it instead of stacking two
+                copies into the first screenful. */}
+            {canMessage && (
+              <div className="hidden sm:block shrink-0">
+                <button
+                    type="button"
+                    onClick={messageBusiness}
+                    className="btn-gold inline-flex items-center justify-center gap-2 px-5 py-2.5 text-sm"
+                    data-testid="business-message-header"
+                  >
+                    <MessageCircle size={16} aria-hidden="true" /> {messageLabel}
+                  </button>
+              </div>
+            )}
           </div>
         </div>
 
@@ -164,7 +211,46 @@ const BusinessPage = () => {
             })}
           </div>
         )}
+
+        {/* Repeated for anyone who has read to the end — asking them to
+            scroll back up to act is how intent gets lost. */}
+        {canMessage && (
+          <div className="mt-10 mb-24 sm:mb-10 flex justify-center">
+            <button
+                    type="button"
+                    onClick={messageBusiness}
+                    className="btn-gold inline-flex items-center justify-center gap-2 px-5 py-2.5 text-sm"
+                    data-testid="business-message-bottom"
+                  >
+                    <MessageCircle size={16} aria-hidden="true" /> {messageLabel}
+                  </button>
+          </div>
+        )}
       </div>
+
+      {/* Mobile only: the header button is off screen for most of the
+          page on a phone, so the action rides along instead. Padding for
+          the home indicator on iOS, or it sits under the gesture bar. */}
+      {canMessage && (
+        <div
+          className="sm:hidden fixed bottom-0 inset-x-0 z-40 border-t px-4 py-3"
+          style={{
+            background: 'var(--surface)',
+            borderColor: 'var(--brand-border)',
+            paddingBottom: 'calc(0.75rem + env(safe-area-inset-bottom))',
+          }}
+          data-testid="business-message-bar"
+        >
+          <button
+            type="button"
+            onClick={messageBusiness}
+            className="btn-gold w-full inline-flex items-center justify-center gap-2 px-5 py-3 text-sm"
+            data-testid="business-message-sticky"
+          >
+            <MessageCircle size={16} aria-hidden="true" /> {messageLabel}
+          </button>
+        </div>
+      )}
     </div>
   );
 };

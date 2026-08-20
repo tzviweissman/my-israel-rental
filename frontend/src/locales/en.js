@@ -43,6 +43,7 @@ const en = {
         failed: 'Could not create that code',
       },
       businessPage: {
+        message: 'Message',
         verified: 'Verified',
         reviews: '({{n}} reviews)',
         noReviews: 'No reviews yet',
