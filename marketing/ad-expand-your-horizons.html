@@ -45,9 +45,11 @@ body{background:#5b5b5b;display:flex;flex-direction:column;align-items:center;ga
 /* --- middle: the pitch --- */
 .body{padding:56px 96px 0;text-align:center}
 .sub{
-  font-family:'Playfair Display',Georgia,serif;font-weight:400;
-  font-size:52px;line-height:1.18;letter-spacing:-.5px;color:var(--ink);
+  font-family:'Playfair Display',Georgia,serif;font-weight:600;
+  font-size:52px;line-height:1.18;letter-spacing:-.5px;color:var(--blue-deep);
 }
+/* Matches the A4 flyer: one gold accent word, upright not italic. */
+.sub em{font-style:normal;color:var(--gold-lg)}
 .lede{
   margin-top:26px;font-size:27px;line-height:1.5;color:var(--muted);
   max-width:760px;margin-left:auto;margin-right:auto;font-weight:500;
@@ -112,7 +114,7 @@ body{background:#5b5b5b;display:flex;flex-direction:column;align-items:center;ga
   </div>
 
   <div class="body">
-    <h2 class="sub">Help your business grow.</h2>
+    <h2 class="sub">Help your business <em>grow</em>.</h2>
     <p class="lede">Reach new and larger audiences with cutting-edge platform tools built for local businesses in Israel.</p>
 
     <div class="free">All <em>free</em></div>
