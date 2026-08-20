@@ -72,6 +72,27 @@ const OVERRIDES = `
      the footer is 3mm taller now, so its stop line follows. */
   .grain{ bottom:${52 + BLEED}mm !important; }
 
+  /* Shadows are a SCREEN affectation and they break print viewers.
+     Chromium renders a blurred alpha shadow as a PDF soft mask inside a
+     transparency group, and plenty of viewers — phone PDF readers in
+     particular — paint that group's bounding box as flat grey. Reported
+     from a phone as "a grey box around horizons and around Add your
+     business, free", which are precisely the two elements carrying a
+     text-shadow and a box-shadow. On paper the shadow buys nothing: the
+     headline already sits on a darkened gradient, and the CTA is a solid
+     gold pill. So they go, for the print build only — the on-screen
+     flyer and the PNG keep them. */
+  .headline{ text-shadow:none !important; }
+  .cta{ box-shadow:none !important; }
+
+  /* The grain is a mix-blend-mode:multiply layer, which is the other way
+     to get a transparency group into a PDF — it leaves a /Luminosity soft
+     mask covering most of the page. It exists to stop the flyer reading as
+     a clean render on a SCREEN; on paper the press supplies its own
+     texture, so print loses nothing by dropping it and stops depending on
+     every viewer compositing blend modes correctly. */
+  .grain{ display:none !important; }
+
   /* Nothing but the artwork in the file. */
   body{ background:#fff !important; padding:0 !important; gap:0 !important; margin:0 !important; }
   .label{ display:none !important; }
