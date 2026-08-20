@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="UTF-8"/>
+<title>MyIsraelRental — Expand your horizons (1080×1350)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --blue:#1E5F8C; --blue-deep:#123B57;
+  --gold:#C9A227; --gold-lg:#A9831C;
+  --bg:#EFE9DC; --ink:#23201B; --muted:#6B6459; --surface:#fff;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#5b5b5b;display:flex;flex-direction:column;align-items:center;gap:28px;padding:34px;font-family:'Manrope',system-ui,sans-serif}
+
+/* ---- THE AD: 1080 x 1350 (Instagram / Facebook portrait) ---- */
+.ad{
+  width:1080px;height:1350px;position:relative;overflow:hidden;
+  background:var(--bg);color:var(--ink);
+  box-shadow:0 30px 80px rgba(0,0,0,.45);
+}
+
+/* --- top: horizon photo --- */
+.photo{position:relative;height:600px;overflow:hidden}
+.photo img{width:100%;height:100%;object-fit:cover;display:block}
+.photo img[data-broken]{display:none}
+/* darkening only where the headline sits, so the type stays legible
+   without flattening the whole picture */
+.photo::after{
+  content:"";position:absolute;inset:0;
+  background:
+    linear-gradient(180deg, rgba(8,20,30,.52) 0%, rgba(8,20,30,.18) 42%, rgba(8,20,30,0) 62%),
+    linear-gradient(180deg, rgba(239,233,220,0) 78%, var(--bg) 100%);
+}
+.headline{
+  position:absolute;top:74px;left:0;right:0;z-index:2;text-align:center;
+  font-family:'Playfair Display',Georgia,serif;font-weight:400;
+  font-size:104px;line-height:1.02;letter-spacing:-1.5px;color:#fff;
+  text-shadow:0 2px 30px rgba(0,0,0,.5);
+}
+.headline .g{color:var(--gold);font-style:italic}
+
+/* --- middle: the pitch --- */
+.body{padding:56px 96px 0;text-align:center}
+.sub{
+  font-family:'Playfair Display',Georgia,serif;font-weight:400;
+  font-size:52px;line-height:1.18;letter-spacing:-.5px;color:var(--ink);
+}
+.lede{
+  margin-top:26px;font-size:27px;line-height:1.5;color:var(--muted);
+  max-width:760px;margin-left:auto;margin-right:auto;font-weight:500;
+}
+
+/* --- the number-one message --- */
+.free{
+  margin-top:52px;text-align:center;
+  font-family:'Playfair Display',Georgia,serif;font-weight:600;
+  font-size:184px;line-height:.9;letter-spacing:-6px;color:var(--blue);
+}
+.free em{font-style:normal;color:var(--gold-lg)}
+.free-note{
+  margin-top:14px;font-size:22px;font-weight:700;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--muted);
+}
+
+/* --- CTA --- */
+.cta-wrap{position:absolute;left:0;right:0;bottom:120px;text-align:center}
+.cta{
+  display:inline-block;background:var(--gold);color:var(--ink);
+  font-weight:800;font-size:31px;letter-spacing:-.2px;
+  padding:26px 54px;border-radius:999px;
+  box-shadow:0 12px 30px rgba(169,131,28,.32);
+}
+.url{margin-top:20px;font-size:25px;font-weight:700;color:var(--blue)}
+
+/* --- brand lockup --- */
+.brand{
+  position:absolute;left:0;right:0;bottom:44px;
+  display:flex;align-items:center;justify-content:center;gap:13px;
+}
+.brand img{height:38px;width:auto;display:block}
+.brand span{font-family:'Playfair Display',serif;font-weight:600;font-size:29px;color:var(--blue)}
+
+/* --- grain: keeps it from reading as a clean render --- */
+.grain{
+  position:absolute;inset:0;pointer-events:none;opacity:.16;mix-blend-mode:multiply;
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3'/></filter><rect width='160' height='160' filter='url(%23n)' opacity='0.5'/></svg>");
+}
+
+.label{color:#eee;font-size:14px;letter-spacing:.1em;text-transform:uppercase;font-weight:700}
+@media print{body{background:#fff;padding:0;gap:0}.label{display:none}.ad{box-shadow:none}}
+</style>
+</head>
+<body>
+
+<div class="label">1080 × 1350 — Instagram / Facebook portrait</div>
+
+<div class="ad">
+  <div class="photo">
+    <!-- Local file, same photo as the A4 flyer. The remote image this used
+         to point at has AI-hallucinated gibberish text baked across the sky,
+         which landed right behind the headline. Remote URL kept only as a
+         fallback, and it is the flyer's clean one. -->
+    <img
+      src="horizon.png"
+      alt="Mediterranean horizon at golden hour"
+      onerror="if(!this.dataset.tried){this.dataset.tried=1;this.src='https://d8j0ntlcm91z4.cloudfront.net/user_3HWGlZDXVCAOoMKfZq628Ml9cM5/hf_20260819_063839_daf698c3-b5bf-4501-a04a-4b955ce7d7e7.png';}else{this.dataset.broken=1;}"
+    />
+    <h1 class="headline">Expand your<br/><span class="g">horizons.</span></h1>
+  </div>
+
+  <div class="body">
+    <h2 class="sub">Help your business grow.</h2>
+    <p class="lede">Reach new and larger audiences with cutting-edge platform tools built for local businesses in Israel.</p>
+
+    <div class="free">All <em>free</em></div>
+    <div class="free-note">No listing fee · No commission · No catch</div>
+  </div>
+
+  <div class="cta-wrap">
+    <div class="cta">Add your business, free</div>
+    <div class="url">myisraelrental.com</div>
+  </div>
+
+  <div class="brand">
+    <img src="../brand/logo-mark.png" alt=""/>
+    <span>MyIsraelRental</span>
+  </div>
+
+  <div class="grain"></div>
+</div>
+
+</body>
+</html>

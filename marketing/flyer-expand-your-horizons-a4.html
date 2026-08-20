@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="UTF-8"/>
+<title>MyIsraelRental — A4 flyer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --blue:#1E5F8C; --blue-deep:#123B57;
+  --gold:#C9A227; --gold-lg:#A9831C;
+  --bg:#EFE9DC; --ink:#23201B; --muted:#6B6459; --surface:#fff;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#5b5b5b;display:flex;flex-direction:column;align-items:center;gap:24px;padding:30px;font-family:'Manrope',system-ui,sans-serif}
+
+/* ---------- A4 PORTRAIT: 210 × 297 mm ---------- */
+@page{size:A4 portrait;margin:0}
+.page{
+  width:210mm;height:297mm;position:relative;overflow:hidden;
+  background:var(--bg);color:var(--ink);
+  box-shadow:0 24px 70px rgba(0,0,0,.45);
+  display:flex;flex-direction:column;
+}
+
+/* --- top: horizon photo --- */
+/* The photo band. A CSS-painted horizon sits underneath as a fallback, so
+   the flyer never prints with an empty band if the image can't load
+   (hotlinked CDN images are often blocked from a local file:// page).
+   Drop a file named horizon.png next to this one and it is used instead. */
+.photo{
+  position:relative;height:104mm;flex:none;overflow:hidden;
+  background:
+    radial-gradient(60% 42% at 50% 88%, rgba(255,214,130,.95) 0%, rgba(240,178,92,.55) 34%, rgba(240,178,92,0) 70%),
+    linear-gradient(180deg,
+      #0E2A3F 0%, #17425F 26%, #2A6584 52%,
+      #6E93A4 70%, #C79A55 84%, #E8B168 90%,
+      #1B4A63 90.6%, #143A50 100%);
+}
+.photo img{width:100%;height:100%;object-fit:cover;display:block}
+.photo img[data-broken]{display:none}
+.photo::after{
+  content:"";position:absolute;inset:0;
+  background:
+    linear-gradient(180deg, rgba(8,20,30,.50) 0%, rgba(8,20,30,.16) 44%, rgba(8,20,30,0) 64%),
+    linear-gradient(180deg, rgba(239,233,220,0) 84%, var(--bg) 100%);
+}
+.headline{
+  position:absolute;top:13mm;left:0;right:0;z-index:2;text-align:center;
+  font-family:'Playfair Display',Georgia,serif;font-weight:400;
+  font-size:19mm;line-height:1.02;letter-spacing:-.6mm;color:#fff;
+  text-shadow:0 1mm 7mm rgba(0,0,0,.5);
+}
+.headline .g{color:var(--gold);font-style:italic}
+
+/* --- middle --- */
+.mid{padding:9mm 18mm 0;text-align:center;flex:none}
+.sub{
+  font-family:'Playfair Display',Georgia,serif;font-weight:600;
+  font-size:15mm;line-height:1.08;letter-spacing:-.5mm;color:var(--blue-deep);
+}
+.sub em{font-style:normal;color:var(--gold-lg)}
+.lede{
+  margin-top:4.5mm;font-size:4.3mm;line-height:1.55;color:var(--muted);
+  font-weight:500;max-width:150mm;margin-left:auto;margin-right:auto;
+}
+
+/* --- the price message --- */
+.free{
+  margin-top:9mm;text-align:center;
+  font-family:'Playfair Display',Georgia,serif;font-weight:600;
+  font-size:32mm;line-height:.9;letter-spacing:-1.6mm;color:var(--blue);
+}
+.free em{font-style:normal;color:var(--gold-lg)}
+.free-note{
+  margin-top:3mm;font-size:3.4mm;font-weight:700;letter-spacing:.12em;
+  text-transform:uppercase;color:var(--muted);
+}
+
+/* --- CTA: generous air above AND below, it was cramped before --- */
+.cta-block{
+  flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  padding:6mm 0;
+}
+.cta{
+  display:inline-block;background:var(--gold);color:var(--ink);
+  font-weight:800;font-size:6.4mm;letter-spacing:-.1mm;
+  padding:5.5mm 12mm;border-radius:999px;
+  box-shadow:0 3mm 8mm rgba(169,131,28,.30);
+}
+.cta-url{margin-top:5mm;font-size:5mm;font-weight:700;color:var(--blue);letter-spacing:.2px}
+
+/* --- bottom contact bar --- */
+.foot{
+  flex:none;background:var(--surface);border-top:.4mm solid #E1D8C6;
+  padding:8mm 16mm;display:flex;align-items:center;gap:11mm;
+}
+.qr{flex:none;width:31mm;height:31mm;display:block}
+.qr svg{width:100%;height:100%;display:block}
+.qr-cap{
+  margin-top:2mm;text-align:center;font-size:2.9mm;font-weight:700;
+  letter-spacing:.06em;text-transform:uppercase;color:var(--muted);
+}
+.foot-mid{flex:1}
+.wa-label{
+  font-size:3.2mm;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);
+}
+.wa{
+  margin-top:1.5mm;font-size:8mm;font-weight:800;color:var(--ink);
+  letter-spacing:-.2mm;direction:ltr;unicode-bidi:isolate;
+}
+.brand{
+  margin-top:5mm;display:flex;align-items:center;gap:2.5mm;
+}
+.brand img{height:8mm;width:auto;display:block}
+.brand span{font-family:'Playfair Display',serif;font-weight:600;font-size:5.4mm;color:var(--blue)}
+
+/* --- grain, but NOT over the QR (it must scan) --- */
+.grain{
+  position:absolute;left:0;right:0;top:0;bottom:52mm;pointer-events:none;
+  opacity:.14;mix-blend-mode:multiply;
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3'/></filter><rect width='160' height='160' filter='url(%23n)' opacity='0.5'/></svg>");
+}
+
+.label{color:#eee;font-size:13px;letter-spacing:.1em;text-transform:uppercase;font-weight:700}
+@media print{body{background:#fff;padding:0;gap:0}.label{display:none}.page{box-shadow:none}}
+</style>
+</head>
+<body>
+
+<div class="label">A4 flyer — 210 × 297 mm — print at 100%, no scaling</div>
+
+<div class="page">
+
+  <div class="photo">
+    <img
+      src="horizon.png"
+      referrerpolicy="no-referrer"
+      alt="Open horizon at golden hour"
+      onerror="if(!this.dataset.tried){this.dataset.tried=1;this.src='https://d8j0ntlcm91z4.cloudfront.net/user_3HWGlZDXVCAOoMKfZq628Ml9cM5/hf_20260819_063839_daf698c3-b5bf-4501-a04a-4b955ce7d7e7.png';}else{this.dataset.broken=1;}"
+    />
+    <h1 class="headline">Expand your<br/><span class="g">horizons.</span></h1>
+  </div>
+
+  <div class="mid">
+    <h2 class="sub">Help your business <em>grow</em>.</h2>
+    <p class="lede">Reach new and larger audiences with cutting-edge platform tools built for local businesses in Israel.</p>
+    <div class="free">All <em>free</em></div>
+    <div class="free-note">No listing fee · No commission · No catch</div>
+  </div>
+
+  <div class="cta-block">
+    <div class="cta">Add your business, free</div>
+    <div class="cta-url">myisraelrental.com</div>
+  </div>
+
+  <div class="foot">
+    <div>
+      <div class="qr">
+        <svg viewBox="0 0 37 37" role="img" xmlns="http://www.w3.org/2000/svg" shape-rendering="crispEdges">
+          <title>Scan to open myisraelrental.com</title>
+          <path fill="#FFFFFF" d="M0,0 h37v37H0z"/>
+          <path fill="#23201B" d="M4 4h7v1H4zM12 4h3v1H12zM16 4h1v1H16zM18 4h1v1H18zM21 4h2v1H21zM24 4h1v1H24zM26,4 h7v1H26zM4 5h1v1H4zM10 5h1v1H10zM15 5h1v1H15zM21 5h1v1H21zM23 5h2v1H23zM26 5h1v1H26zM32,5 h1v1H32zM4 6h1v1H4zM6 6h3v1H6zM10 6h1v1H10zM13 6h2v1H13zM17 6h1v1H17zM20 6h2v1H20zM24 6h1v1H24zM26 6h1v1H26zM28 6h3v1H28zM32,6 h1v1H32zM4 7h1v1H4zM6 7h3v1H6zM10 7h1v1H10zM12 7h2v1H12zM18 7h2v1H18zM22 7h2v1H22zM26 7h1v1H26zM28 7h3v1H28zM32,7 h1v1H32zM4 8h1v1H4zM6 8h3v1H6zM10 8h1v1H10zM12 8h1v1H12zM14 8h2v1H14zM17 8h4v1H17zM22 8h1v1H22zM26 8h1v1H26zM28 8h3v1H28zM32,8 h1v1H32zM4 9h1v1H4zM10 9h1v1H10zM12 9h4v1H12zM17 9h2v1H17zM21 9h3v1H21zM26 9h1v1H26zM32,9 h1v1H32zM4 10h7v1H4zM12 10h1v1H12zM14 10h1v1H14zM16 10h1v1H16zM18 10h1v1H18zM20 10h1v1H20zM22 10h1v1H22zM24 10h1v1H24zM26,10 h7v1H26zM12 11h1v1H12zM15 11h1v1H15zM18 11h1v1H18zM20 11h3v1H20zM4 12h1v1H4zM8 12h1v1H8zM10 12h3v1H10zM14 12h8v1H14zM23 12h7v1H23zM32,12 h1v1H32zM6 13h1v1H6zM8 13h2v1H8zM12 13h2v1H12zM15 13h1v1H15zM19 13h4v1H19zM25,13 h8v1H25zM5 14h3v1H5zM10 14h2v1H10zM13 14h2v1H13zM17 14h3v1H17zM22 14h1v1H22zM25 14h2v1H25zM28 14h1v1H28zM32,14 h1v1H32zM4 15h5v1H4zM12 15h4v1H12zM17 15h1v1H17zM20 15h3v1H20zM24 15h2v1H24zM27 15h1v1H27zM29 15h1v1H29zM31,15 h2v1H31zM7 16h4v1H7zM15 16h3v1H15zM21 16h1v1H21zM23 16h1v1H23zM25 16h1v1H25zM27 16h1v1H27zM31 16h1v1H31zM7 17h1v1H7zM12 17h1v1H12zM14 17h5v1H14zM20 17h3v1H20zM26,17 h7v1H26zM5 18h1v1H5zM7 18h1v1H7zM10 18h4v1H10zM15 18h2v1H15zM19 18h4v1H19zM25 18h2v1H25zM29 18h2v1H29zM32,18 h1v1H32zM8 19h2v1H8zM11 19h1v1H11zM13 19h2v1H13zM16 19h1v1H16zM18 19h1v1H18zM21 19h4v1H21zM26 19h3v1H26zM31,19 h2v1H31zM8 20h1v1H8zM10 20h3v1H10zM14 20h1v1H14zM17 20h3v1H17zM21 20h2v1H21zM24 20h2v1H24zM31 20h1v1H31zM4 21h2v1H4zM9 21h1v1H9zM11 21h2v1H11zM14 21h1v1H14zM16 21h1v1H16zM19 21h4v1H19zM26 21h4v1H26zM31,21 h2v1H31zM8 22h3v1H8zM13 22h1v1H13zM16 22h5v1H16zM22 22h1v1H22zM24 22h1v1H24zM26 22h1v1H26zM30 22h1v1H30zM32,22 h1v1H32zM6 23h3v1H6zM15 23h3v1H15zM21 23h2v1H21zM24 23h1v1H24zM26 23h3v1H26zM31,23 h2v1H31zM4 24h2v1H4zM7 24h2v1H7zM10 24h3v1H10zM17 24h1v1H17zM20 24h2v1H20zM23 24h7v1H23zM32,24 h1v1H32zM12 25h1v1H12zM14 25h1v1H14zM17 25h4v1H17zM23 25h2v1H23zM28 25h1v1H28zM32,25 h1v1H32zM4 26h7v1H4zM12 26h1v1H12zM14 26h1v1H14zM19 26h1v1H19zM21 26h1v1H21zM23 26h2v1H23zM26 26h1v1H26zM28 26h3v1H28zM32,26 h1v1H32zM4 27h1v1H4zM10 27h1v1H10zM13 27h1v1H13zM16 27h1v1H16zM18 27h1v1H18zM20 27h2v1H20zM23 27h2v1H23zM28 27h1v1H28zM31,27 h2v1H31zM4 28h1v1H4zM6 28h3v1H6zM10 28h1v1H10zM12 28h2v1H12zM15 28h4v1H15zM20 28h10v1H20zM31 28h1v1H31zM4 29h1v1H4zM6 29h3v1H6zM10 29h1v1H10zM13 29h1v1H13zM15 29h2v1H15zM20 29h4v1H20zM25 29h1v1H25zM27 29h1v1H27zM32,29 h1v1H32zM4 30h1v1H4zM6 30h3v1H6zM10 30h1v1H10zM13 30h1v1H13zM19 30h2v1H19zM22 30h1v1H22zM25 30h1v1H25zM29,30 h4v1H29zM4 31h1v1H4zM10 31h1v1H10zM13 31h2v1H13zM17 31h2v1H17zM20 31h5v1H20zM29 31h1v1H29zM31,31 h2v1H31zM4 32h7v1H4zM12 32h3v1H12zM16 32h1v1H16zM18 32h2v1H18zM24 32h1v1H24zM27 32h1v1H27zM29 32h1v1H29zM31 32h1v1H31z"/>
+        </svg>
+      </div>
+      <div class="qr-cap">Scan me</div>
+    </div>
+
+    <div class="foot-mid">
+      <div class="wa-label">WhatsApp us</div>
+      <div class="wa">+972 55 322 5141</div>
+      <div class="brand">
+        <img src="../brand/logo-mark.png" alt=""/>
+        <span>MyIsraelRental</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="grain"></div>
+</div>
+
+</body>
+</html>
