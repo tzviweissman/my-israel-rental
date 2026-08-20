@@ -42,6 +42,16 @@ const he = {
         defaultLabel: 'הקוד הראשי',
         failed: 'לא הצלחנו ליצור את הקוד',
       },
+      businessPage: {
+        verified: 'מאומת',
+        reviews: '({{n}} ביקורות)',
+        noReviews: 'אין עדיין ביקורות',
+        listings: 'מה מוצע',
+        nothingYet: 'עדיין אין מודעות.',
+        from: 'החל מ-',
+        gone: 'העסק הזה כבר לא מופיע',
+        browse: 'עיון בעסקים',
+      },
       businesses: {
         yourServices: 'השירותים שלכם',
         yourProducts: 'המוצרים שלכם',

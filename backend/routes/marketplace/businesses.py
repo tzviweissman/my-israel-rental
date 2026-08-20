@@ -28,6 +28,14 @@ from utils.businesses import (
     unique_slug,
 )
 
+from .shared import (
+    TOP_RATED_MIN_AVG,
+    TOP_RATED_MIN_COUNT,
+    _batch_rating_aggregate,
+    _cheapest_tier_price,
+    _clean_gig,
+)
+
 router = APIRouter(prefix="/marketplace", tags=["marketplace"])
 
 
@@ -192,3 +200,142 @@ async def business_listings(business_id: str, user=Depends(verify_token)):
         )
     ]
     return {"count": len(gigs), "listings": gigs}
+
+
+# ---------------------------------------------------------------- M4 + M5
+
+
+async def _resolve(slug_or_id: str) -> dict[str, Any] | None:
+    """Find a business by slug OR id.
+
+    Both, permanently. The spec allows either as the canonical form and
+    the short-link table already points at /business/{id}, so accepting
+    only one would have broken links that already exist. Slug is tried
+    first because it is the pretty form people share.
+    """
+    return (
+        await db.businesses.find_one({"slug": slug_or_id})
+        or await db.businesses.find_one({"_id": slug_or_id})
+    )
+
+
+async def business_rating(business_id: str) -> dict[str, Any]:
+    """Stars for a BUSINESS, aggregated over its own listings (spec M5).
+
+    Never per person. One human may run a five-star bakery and a
+    one-star moving company, and averaging those into a single number
+    describes neither — it quietly punishes the good business and
+    launders the bad one.
+    """
+    gig_ids = [
+        g["_id"] async for g in db.marketplace_gigs.find({"business_id": business_id}, {"_id": 1})
+    ]
+    if not gig_ids:
+        return {"rating_avg": None, "rating_count": 0}
+    pipeline = [
+        {"$match": {"gig_id": {"$in": gig_ids}}},
+        {"$group": {"_id": None, "avg": {"$avg": "$rating"}, "count": {"$sum": 1}}},
+    ]
+    async for row in db.marketplace_reviews.aggregate(pipeline):
+        return {
+            "rating_avg": round(row["avg"], 1) if row.get("avg") is not None else None,
+            "rating_count": row.get("count", 0),
+        }
+    return {"rating_avg": None, "rating_count": 0}
+
+
+@router.get("/business/{slug_or_id}")
+async def public_business(slug_or_id: str):
+    """The public page for one business (spec M4).
+
+    A person with two businesses gets two of these. There is deliberately
+    no public page for the PERSON: the thing a customer is choosing is a
+    business, and merging them would put a plumber's reviews on a
+    bakery.
+    """
+    biz = await _resolve(slug_or_id)
+    if not biz:
+        raise HTTPException(status_code=404, detail="Business not found")
+    # A hidden business is hidden from the public, exactly like its
+    # listings. Its owner still reaches it from the dashboard.
+    if not biz.get("active", True):
+        raise HTTPException(status_code=404, detail="Business not found")
+
+    raw = [
+        g async for g in db.marketplace_gigs.find(
+            {"business_id": biz["_id"], "status": "published"},
+        ).sort("created_at", -1)
+    ]
+    ratings = await _batch_rating_aggregate([g["_id"] for g in raw])
+    for g in raw:
+        agg = ratings.get(g["_id"], {"rating_avg": None, "rating_count": 0})
+        g["rating_avg"] = agg["rating_avg"]
+        g["rating_count"] = agg["rating_count"]
+        g["cheapest_price"] = _cheapest_tier_price(g)
+        g["is_top_rated"] = (
+            agg["rating_avg"] is not None
+            and agg["rating_avg"] >= TOP_RATED_MIN_AVG
+            and agg["rating_count"] >= TOP_RATED_MIN_COUNT
+        )
+
+    rating = await business_rating(biz["_id"])
+    return {
+        "id": biz["_id"],
+        "slug": biz.get("slug"),
+        "name": biz.get("name") or "",
+        "name_he": biz.get("name_he"),
+        "description": biz.get("description") or "",
+        "logo_url": biz.get("logo_url"),
+        "categories": biz.get("categories") or [],
+        "areas": biz.get("areas") or [],
+        # M5 — verification belongs to the BUSINESS. Verifying that
+        # someone owns an apartment says nothing about their trade
+        # licence, so the user-level flag is not borrowed here.
+        "verified": bool(biz.get("verified")),
+        "verified_at": biz.get("verified_at"),
+        "rating_avg": rating["rating_avg"],
+        "rating_count": rating["rating_count"],
+        "member_since": (biz.get("created_at") or "")[:4] or None,
+        "listings": [_clean_gig(g) for g in raw],
+    }
+
+
+@router.get("/providers/{user_id}/default-business")
+async def provider_default_business(user_id: str):
+    """Where /providers/{user_id} should send someone (spec M4).
+
+    The old provider URL is linked from existing gigs and may be indexed,
+    so it must keep working — but there is no person page any more, so it
+    resolves to that person's first active business and the front end
+    redirects. Returns 404 when they have none, which the caller renders
+    as "no longer listed" rather than a blank page.
+    """
+    biz = await db.businesses.find_one({"owner_user_id": user_id, "active": True})
+    if not biz:
+        raise HTTPException(status_code=404, detail="No business for this provider")
+    return {"id": biz["_id"], "slug": biz.get("slug"), "name": biz.get("name")}
+
+
+class VerifyIn(BaseModel):
+    verified: bool
+
+
+@router.patch("/businesses/{business_id}/verified")
+async def set_verified(business_id: str, payload: VerifyIn, user=Depends(verify_token)):
+    """Admin-only. Verification is a claim the PLATFORM makes, so an owner
+    may never set it on their own business (spec M5)."""
+    if user.get("role") != "admin":
+        raise HTTPException(status_code=403, detail="Admin only")
+    biz = await db.businesses.find_one({"_id": business_id})
+    if not biz:
+        raise HTTPException(status_code=404, detail="Business not found")
+    now = datetime.now(UTC).isoformat()
+    await db.businesses.update_one(
+        {"_id": business_id},
+        {"$set": {
+            "verified": payload.verified,
+            "verified_at": now if payload.verified else None,
+            "updated_at": now,
+        }},
+    )
+    return {"id": business_id, "verified": payload.verified}

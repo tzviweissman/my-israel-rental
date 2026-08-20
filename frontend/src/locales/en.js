@@ -42,6 +42,16 @@ const en = {
         defaultLabel: 'Main code',
         failed: 'Could not create that code',
       },
+      businessPage: {
+        verified: 'Verified',
+        reviews: '({{n}} reviews)',
+        noReviews: 'No reviews yet',
+        listings: 'What they offer',
+        nothingYet: 'Nothing listed yet.',
+        from: 'from',
+        gone: 'This business is no longer listed',
+        browse: 'Browse businesses',
+      },
       businesses: {
         yourServices: 'Your services',
         yourProducts: 'Your products',

@@ -15,6 +15,8 @@ import ThemePreviewOverride from './components/ThemePreviewOverride';
 import { installStaleBuildInterceptor } from './utils/staleBuildInterceptor';
 import { startVersionWatcher } from './utils/appVersion';
 import ShortLinkRedirect from './pages/ShortLinkRedirect';
+import BusinessPage from './pages/BusinessPage';
+import ProviderRedirect from './pages/ProviderRedirect';
 
 // Install the "backend hasn't caught up with this build" detector exactly
 // once at module-load. Surfaces a single "Please refresh" toast when a
@@ -348,7 +350,6 @@ function App() {
             <Route path="/services/post-job" element={user ? <PostJob /> : <Navigate to="/auth/login" />} />
             <Route path="/services/gig/:id" element={<GigDetail />} />
             <Route path="/services/create-gig" element={user ? <CreateGig /> : <Navigate to="/auth/login" />} />
-            <Route path="/services/provider/:userId" element={<ProviderProfile />} />
 
             {/* The names people see and share from now on. */}
             <Route path="/businesses/jobs" element={<JobsBoard />} />
@@ -356,7 +357,16 @@ function App() {
             <Route path="/businesses/post-job" element={user ? <PostJob /> : <Navigate to="/auth/login" />} />
             <Route path="/businesses/:id" element={<GigDetail />} />
             <Route path="/businesses/add" element={user ? <CreateGig /> : <Navigate to="/auth/login" />} />
-            <Route path="/businesses/provider/:userId" element={<ProviderProfile />} />
+            {/* M4 — the public page for ONE business, by slug or by id.
+                Both resolve: the spec allows either as canonical and the
+                short-link table already points at /business/{id}. */}
+            <Route path="/business/:slug" element={<BusinessPage />} />
+
+            {/* The old per-person pages keep working, as the spec requires,
+                by resolving to that person's first business. Kept for both
+                URL spellings so nothing already shared 404s. */}
+            <Route path="/businesses/provider/:userId" element={<ProviderRedirect />} />
+            <Route path="/services/provider/:userId" element={<ProviderRedirect />} />
             <Route path="/faq" element={<FAQ />} />
             {/* Catch-all — any URL no route above claims. Without it an
                 unknown URL rendered the nav shell over an empty content
