@@ -239,6 +239,12 @@ const GigDetail = () => {
   // Lightbox — full-screen carousel. `lightboxIndex` is null when closed;
   // an integer when open (index into `activeGallery`).
   const [lightboxIndex, setLightboxIndex] = useState(null);
+  // Which gallery photo the big image on the PAGE is showing. The cover
+  // used to be hard-wired to activeGallery[0], so clicking a thumbnail
+  // opened the lightbox but left the large image on photo 1 - and after
+  // closing the lightbox on photo 3 the strip highlighted 3 while the
+  // hero still showed 1, which reads as the page ignoring the click.
+  const [heroIndex, setHeroIndex] = useState(0);
   // Appointment-only: buyer-selected day (YYYY-MM-DD) + slot ("HH:MM").
   const [appointmentDate, setAppointmentDate] = useState(null);
   const [appointmentSlot, setAppointmentSlot] = useState(null);
@@ -344,7 +350,9 @@ const GigDetail = () => {
     // Dedupe — a legacy gig might have the same URL in gallery and tier.
     .filter((u, i, a) => a.indexOf(u) === i);
   const activeGallery = tierGallery || derivedGallery;
-  const cover = activeGallery[0] || getGigCover(gig);
+  // Clamped, not trusted: switching tier can shorten the gallery under a
+  // heroIndex that was valid for the previous one.
+  const cover = activeGallery[heroIndex] || activeGallery[0] || getGigCover(gig);
   const sym = tier?.currency === 'USD' ? '$' : '₪';
   // Bilingual fallbacks — Hebrew renders when i18n.language starts with `he`
   // AND the provider actually supplied the Hebrew copy, otherwise primary.
@@ -453,7 +461,7 @@ const GigDetail = () => {
                 Clicking any thumbnail (or the cover) opens the lightbox. */}
             <button
               type="button"
-              onClick={() => cover && setLightboxIndex(0)}
+              onClick={() => cover && setLightboxIndex(heroIndex)}
               className="relative aspect-video w-full bg-gray-100 rounded-2xl overflow-hidden group"
               style={cover ? { backgroundImage: `url(${cover})`, backgroundSize: 'cover', backgroundPosition: 'center' } : {}}
               data-testid="gig-cover"
@@ -477,11 +485,21 @@ const GigDetail = () => {
                   <button
                     key={src}
                     type="button"
-                    onClick={() => setLightboxIndex(i)}
-                    className="w-24 h-24 shrink-0 rounded-lg bg-gray-100 hover:ring-2 hover:ring-[var(--brand-primary)] transition"
+                    /* Swaps the big image rather than opening the lightbox.
+                       Clicking a thumbnail asks "show me that one", and a
+                       modal is a bigger interruption than the question
+                       deserves. The lightbox is still one click away on
+                       the image itself. */
+                    onClick={() => setHeroIndex(i)}
+                    className={`w-24 h-24 shrink-0 rounded-lg bg-gray-100 transition ${
+                      i === heroIndex
+                        ? 'ring-2 ring-[var(--brand-primary)]'
+                        : 'hover:ring-2 hover:ring-[var(--brand-primary)] opacity-80 hover:opacity-100'
+                    }`}
                     style={{ backgroundImage: `url(${src})`, backgroundSize: 'cover', backgroundPosition: 'center' }}
                     data-testid={`gig-thumb-${i}`}
-                    aria-label={`Open photo ${i + 1}`}
+                    aria-label={`Show photo ${i + 1}`}
+                    aria-current={i === heroIndex ? 'true' : undefined}
                   />
                 ))}
               </div>
@@ -553,6 +571,7 @@ const GigDetail = () => {
                       }
                       // Fall back to selecting the product + opening the in-platform booking modal.
                       setTier(p);
+                      setHeroIndex(0);
                       if (!token) { toast.error('Please sign in to message the seller'); navigate('/auth'); return; }
                       setShowBook(true);
                     };
@@ -561,8 +580,8 @@ const GigDetail = () => {
                         key={i}
                         role="button"
                         tabIndex={0}
-                        onClick={() => setTier(p)}
-                        onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') setTier(p); }}
+                        onClick={() => { setTier(p); setHeroIndex(0); }}
+                        onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { setTier(p); setHeroIndex(0); } }}
                         className={`text-left rounded-xl overflow-hidden border-2 transition-all bg-white cursor-pointer ${
                           active ? 'border-[var(--brand-primary)] shadow-md' : 'border-gray-200 hover:border-[var(--gold)]'
                         }`}
@@ -642,7 +661,7 @@ const GigDetail = () => {
                   gig={gig}
                   tiers={gig.tiers || []}
                   selected={tier}
-                  onSelect={(tt) => { setTier(tt); if (isAppointment) { setAppointmentSlot(null); } }}
+                  onSelect={(tt) => { setTier(tt); setHeroIndex(0); if (isAppointment) { setAppointmentSlot(null); } }}
                   isAppointment={isAppointment}
                 />
               )}
@@ -737,7 +756,10 @@ const GigDetail = () => {
           images={activeGallery}
           index={lightboxIndex}
           onChange={setLightboxIndex}
-          onClose={() => setLightboxIndex(null)}
+          onClose={() => {
+            if (lightboxIndex != null) setHeroIndex(lightboxIndex);
+            setLightboxIndex(null);
+          }}
           label={tier?.name}
         />
       )}
