@@ -26,7 +26,6 @@ import {
 } from 'lucide-react';
 import { API } from '../../App';
 import { useApiSWR } from '../../hooks/useApiSWR';
-import AreaAliasManager from './AreaAliasManager';
 
 const AVAILABILITY_OPTIONS = [
   { value: 'next_month', label: 'Available within the next month' },
@@ -659,8 +658,9 @@ const SmartListsTab = ({ token }) => {
         </div>
       )}
 
-      {/* ---------------- Alias manager ---------------- */}
-      <AreaAliasManager token={token} />
+      {/* The alias manager used to render here, at the bottom of an
+          unrelated tab — reachable, but not somewhere anyone would look.
+          It has its own entry under Tools now (spec A2). */}
 
       {/* ---------------- Saved lists ---------------- */}
       <div className="bg-white rounded-2xl border border-gray-200 p-6" data-testid="smart-list-saved-section">

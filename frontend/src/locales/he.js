@@ -807,6 +807,12 @@ const he = {
         totalSuffix: ' סה״כ'
       },
       admin: {
+        groupSupply: 'היצע',
+        groupDemand: 'ביקוש',
+        groupPeople: 'אנשים',
+        groupTools: 'כלים',
+        groupSystem: 'מערכת',
+        areas: 'אזורים',
         servicesTab: 'שירותים',
         activeServices: 'שירותים פעילים',
         businessesCount: 'עסקים',

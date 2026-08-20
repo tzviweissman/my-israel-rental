@@ -822,6 +822,12 @@ const en = {
         totalSuffix: ' total'
       },
       admin: {
+        groupSupply: 'Supply',
+        groupDemand: 'Demand',
+        groupPeople: 'People',
+        groupTools: 'Tools',
+        groupSystem: 'System',
+        areas: 'Areas',
         servicesTab: 'Services',
         activeServices: 'Active Services',
         businessesCount: 'Businesses',
