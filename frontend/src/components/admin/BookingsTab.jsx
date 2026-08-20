@@ -133,7 +133,7 @@ const BookingsTab = ({ token }) => {
     <div data-testid="admin-bookings-section">
       {/* Header strip */}
       <div className="flex items-center justify-between mb-5 flex-wrap gap-3">
-        <h2 className="text-2xl font-bold" style={{ fontFamily: 'Playfair Display' }}>
+        <h2 className="text-2xl font-bold" style={{ fontFamily: 'var(--font-head)' }}>
           Bookings <span className="text-sm font-normal text-gray-500">({total} total)</span>
         </h2>
         <button

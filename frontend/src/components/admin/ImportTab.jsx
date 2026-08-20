@@ -176,7 +176,7 @@ export const ImportTab = ({ token, onJumpToOwner }) => {
   return (
     <div data-testid="admin-import-section">
       <div className="flex items-center gap-2 mb-5">
-        <h2 className="text-2xl font-bold" style={{ fontFamily: 'Playfair Display' }}>Import data</h2>
+        <h2 className="text-2xl font-bold" style={{ fontFamily: 'var(--font-head)' }}>Import data</h2>
       </div>
 
       {/* Flow toggle — Quick Add (one listing + photos) vs Bulk CSV */}

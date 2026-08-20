@@ -82,7 +82,7 @@ const PayPalPlansPanel = ({ token }) => {
       data-testid="admin-paypal-plans"
     >
       <div className="flex items-center justify-between mb-1">
-        <h2 className="text-xl font-bold" style={{ fontFamily: 'Playfair Display' }}>
+        <h2 className="text-xl font-bold" style={{ fontFamily: 'var(--font-head)' }}>
           Provider subscription plans
         </h2>
         <button

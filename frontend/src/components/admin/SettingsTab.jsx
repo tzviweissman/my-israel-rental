@@ -32,7 +32,7 @@ export const SettingsTab = ({ token }) => {
   return (
     <div data-testid="admin-settings-section">
       <div className="bg-white rounded-xl border border-[#E5E5E5] p-6 max-w-2xl">
-        <h2 className="text-xl font-bold mb-6" style={{ fontFamily: 'Playfair Display' }}>{t('admin.siteSettingsTitle')}</h2>
+        <h2 className="text-xl font-bold mb-6" style={{ fontFamily: 'var(--font-head)' }}>{t('admin.siteSettingsTitle')}</h2>
         <div className="space-y-5">
           <div>
             <label className="block text-sm font-medium mb-1">{t('admin.whatsappNumber')}</label>
