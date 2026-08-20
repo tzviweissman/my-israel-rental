@@ -3,75 +3,16 @@ import { useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import axios from 'axios';
 import { toast } from 'sonner';
-import {
-  Trash2, ToggleLeft, ToggleRight, Search, Loader2, AlertTriangle,
-  CalendarX, CalendarCheck, Lock, Briefcase, Star, Copy, ImageOff, Camera, DollarSign,
-  Wand2, RotateCcw, EyeOff, Undo2,
-} from 'lucide-react';
 import { API } from '../../App';
 import { useApiSWR } from '../../hooks/useApiSWR';
 import MarkAsBookedModal from './MarkAsBookedModal';
 import DuplicatesModal from './DuplicatesModal';
 import BulkDeleteConfirmToast from './BulkDeleteConfirmToast';
+import PricingAuditBanner from './PricingAuditBanner';
+import ListingsFilterBar from './ListingsFilterBar';
+import ListingsTable from './ListingsTable';
 
 
-// Backend already returns properties sorted by created_at desc, so the
-// table reads newest-first. Helper used to render "5h ago" / "3d ago"
-// strings on both desktop and mobile rows.
-const relativeAdded = (iso) => {
-  if (!iso) return '—';
-  const d = typeof iso === 'string' ? new Date(iso) : iso;
-  if (Number.isNaN(d.getTime())) return '—';
-  const mins = Math.floor((Date.now() - d.getTime()) / 60000);
-  if (mins < 1) return 'just now';
-  if (mins < 60) return `${mins} min ago`;
-  const hrs = Math.floor(mins / 60);
-  if (hrs < 24) return `${hrs}h ago`;
-  const days = Math.floor(hrs / 24);
-  if (days < 30) return `${days}d ago`;
-  const months = Math.floor(days / 30);
-  return `${months}mo ago`;
-};
-/**
- * Tiny cover-image thumbnail for each listing row. Falls back to a
- * placeholder tile when the property has no images so the admin can
- * still see at a glance "this listing needs photos". The image opens
- * in a new tab on click so the admin can sanity-check the full-size
- * shot without leaving the table.
- */
-const CoverThumb = ({ property, size = 'md' }) => {
-  const src = property.images?.[0];
-  const dim = size === 'sm' ? 'w-12 h-12' : 'w-14 h-14';
-  if (!src) {
-    return (
-      <div
-        className={`${dim} rounded-md border border-gray-200 bg-gray-50 flex items-center justify-center text-gray-400 shrink-0`}
-        title="No photos yet"
-        data-testid={`cover-thumb-empty-${property.id}`}
-      >
-        <ImageOff size={14} />
-      </div>
-    );
-  }
-  return (
-    <a
-      href={src}
-      target="_blank"
-      rel="noopener noreferrer"
-      className={`${dim} rounded-md overflow-hidden border border-gray-200 shrink-0 block hover:ring-2 hover:ring-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/40 transition-shadow`}
-      title="Open full-size cover image"
-      data-testid={`cover-thumb-${property.id}`}
-      onClick={(e) => e.stopPropagation()}
-    >
-      <img
-        src={src}
-        alt={property.title || 'Cover'}
-        loading="lazy"
-        className="w-full h-full object-cover"
-      />
-    </a>
-  );
-};
 
 /**
  * Super Admin → Listings tab.
@@ -594,623 +535,65 @@ export const ListingsTab = ({ token, onStatsChange }) => {
 
   return (
     <div data-testid="admin-listings-section">
-      {priceAudit && (priceAudit.totals?.zero_price + priceAudit.totals?.low_monthly + priceAudit.totals?.wrong_field) > 0 && (
-        <div
-          className="mb-4 flex items-start gap-3 rounded-lg border border-amber-200 bg-amber-50 p-3"
-          data-testid="pricing-audit-banner"
-        >
-          <AlertTriangle size={18} className="text-amber-600 shrink-0 mt-0.5" />
-          <div className="flex-1 min-w-0">
-            <div className="text-sm font-semibold text-amber-900">
-              {(priceAudit.totals.zero_price + priceAudit.totals.low_monthly + priceAudit.totals.wrong_field).toLocaleString()} listing{(priceAudit.totals.zero_price + priceAudit.totals.low_monthly + priceAudit.totals.wrong_field) === 1 ? '' : 's'} may have wrong prices
-            </div>
-            <div className="text-xs text-amber-800 mt-0.5 flex flex-wrap gap-x-4 gap-y-1">
-              {priceAudit.totals.zero_price > 0 && (
-                <span data-testid="audit-zero-price">
-                  <b>{priceAudit.totals.zero_price}</b> with no price set
-                </span>
-              )}
-              {priceAudit.totals.low_monthly > 0 && (
-                <span data-testid="audit-low-monthly">
-                  <b>{priceAudit.totals.low_monthly}</b> long-term under ₪{priceAudit.thresholds.low_monthly_ils}/mo (likely stranded nightly rate)
-                </span>
-              )}
-              {priceAudit.totals.wrong_field > 0 && (
-                <span data-testid="audit-wrong-field">
-                  <b>{priceAudit.totals.wrong_field}</b> with both monthly + nightly set
-                </span>
-              )}
-            </div>
-          </div>
-          <div className="flex flex-col sm:flex-row gap-2 shrink-0">
-            <button
-              onClick={handleAutoFixPricing}
-              disabled={autoFixing}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-emerald-600 text-white hover:bg-emerald-700 disabled:opacity-50 shadow-sm"
-              title="Strip stranded nightly rates and quarantine broken-price listings in one pass"
-              data-testid="pricing-autofix-btn"
-            >
-              {autoFixing ? <Loader2 size={14} className="animate-spin" /> : <Wand2 size={14} />}
-              {autoFixing ? 'Fixing…' : 'Auto-fix all'}
-            </button>
-            <button
-              onClick={handleRestoreQuarantined}
-              disabled={unquarantining}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-white text-amber-800 border border-amber-300 hover:bg-amber-100 disabled:opacity-50"
-              title="Un-hide every listing quarantined by a previous auto-fix"
-              data-testid="pricing-unquarantine-btn"
-            >
-              {unquarantining ? <Loader2 size={14} className="animate-spin" /> : <RotateCcw size={14} />}
-              {unquarantining ? 'Restoring…' : 'Restore quarantined'}
-            </button>
-          </div>
-        </div>
-      )}
-      <div className="flex items-center gap-4 mb-6 flex-wrap">
-        <div className="relative flex-1 max-w-md">
-          <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-          <input
-            type="text"
-            value={searchTerm}
-            onChange={e => setSearchTerm(e.target.value)}
-            placeholder={t('admin.searchListings')}
-            className="w-full ps-9 pe-4 py-2 rounded-lg border border-[#E5E5E5] text-sm focus:outline-none focus:ring-2 focus:ring-black/20"
-            data-testid="listings-search-input"
-          />
-        </div>
-        <span className="text-sm text-gray-500">{t('admin.listingsCount', { count: filteredProperties.length })}</span>
-        <button
-          onClick={() => setShowDuplicates(true)}
-          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-amber-50 text-amber-700 border border-amber-200 hover:bg-amber-100"
-          title="Find owners with multiple listings at the same address + rental type"
-          data-testid="find-duplicates-btn"
-        >
-          <Copy size={14} /> Find duplicates
-        </button>
-        <button
-          onClick={sweepDuplicates}
-          disabled={sweeping}
-          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-rose-50 text-rose-700 border border-rose-200 hover:bg-rose-100 disabled:opacity-50"
-          title="Delete every duplicate listing in one pass — identical-fields first, then keep richest of the rest"
-          data-testid="sweep-duplicates-btn"
-        >
-          {sweeping ? <Loader2 size={14} className="animate-spin" /> : <Trash2 size={14} />}
-          {sweeping ? 'Sweeping…' : 'Sweep all duplicates'}
-        </button>
-        <button
-          onClick={handleRemirrorPhotos}
-          disabled={remirroring}
-          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-sky-50 text-sky-700 border border-sky-200 hover:bg-sky-100 disabled:opacity-50"
-          title="Move every listing's photos onto Cloudinary. Use after a half-finished import."
-          data-testid="remirror-photos-btn"
-        >
-          <Camera size={14} /> {remirroring ? 'Re-mirroring…' : 'Re-mirror photos'}
-        </button>
-        <button
-          onClick={handleRepairPrices}
-          disabled={repairingPrices}
-          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-amber-50 text-amber-800 border border-amber-200 hover:bg-amber-100 disabled:opacity-50"
-          title="Move misplaced prices to the right field (vacation→nightly, long-term→monthly). Safe to re-run."
-          data-testid="repair-prices-btn"
-        >
-          <DollarSign size={14} /> {repairingPrices ? 'Repairing…' : 'Repair prices'}
-        </button>
-        {/* Quick chip toggle: All vs "Properties I manage" */}
-        <div className="inline-flex bg-white rounded-lg border border-[#E5E5E5] p-0.5 ms-1" data-testid="managed-filter">
-          <button
-            onClick={() => setManagedFilter('all')}
-            className={`px-2.5 py-1 rounded-md text-xs font-semibold transition-colors ${managedFilter === 'all' ? 'bg-[var(--brand-primary)] text-white' : 'text-gray-600 hover:bg-gray-50'}`}
-            data-testid="managed-filter-all"
-          >
-            All
-          </button>
-          <button
-            onClick={() => setManagedFilter('managed')}
-            className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-semibold transition-colors ${managedFilter === 'managed' ? 'bg-[var(--brand-primary)] text-white' : 'text-gray-600 hover:bg-gray-50'}`}
-            data-testid="managed-filter-managed"
-          >
-            <Briefcase size={12} /> I manage ({managedCount})
-          </button>
-        </div>
-        {/* Quick chip toggle: show only featured listings — clicking the
-            chip below restricts the table to just the ones surfaced on
-            the home page. Disabled state when there's nothing featured
-            so the admin doesn't get confused by an empty view. */}
-        <div className="inline-flex bg-white rounded-lg border border-[#E5E5E5] p-0.5" data-testid="featured-filter">
-          <button
-            onClick={() => setFeaturedFilter('featured')}
-            disabled={featuredCount === 0}
-            className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-semibold transition-colors disabled:opacity-40 disabled:cursor-not-allowed ${featuredFilter === 'featured' ? 'bg-amber-500 text-white' : 'text-gray-600 hover:bg-gray-50'}`}
-            data-testid="featured-filter-on"
-            title={featuredCount === 0 ? "Nothing featured yet — toggle a property's star to mark it" : 'Show only featured listings'}
-          >
-            <Star size={12} fill={featuredFilter === 'featured' ? 'currentColor' : 'none'} /> Featured ({featuredCount})
-          </button>
-        </div>
-        {/* Quick chip toggle: show only quarantined listings — hidden
-            from the public feed by a previous pricing auto-fix. Lets
-            the admin audit what was paused and catch false positives. */}
-        <div className="inline-flex bg-white rounded-lg border border-[#E5E5E5] p-0.5" data-testid="quarantined-filter">
-          <button
-            onClick={() => setQuarantinedFilter(quarantinedFilter === 'quarantined' ? 'all' : 'quarantined')}
-            disabled={quarantinedCount === 0}
-            className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-semibold transition-colors disabled:opacity-40 disabled:cursor-not-allowed ${quarantinedFilter === 'quarantined' ? 'bg-rose-600 text-white' : 'text-gray-600 hover:bg-gray-50'}`}
-            data-testid="quarantined-filter-on"
-            title={quarantinedCount === 0 ? 'Nothing quarantined right now' : 'Show only listings hidden by the pricing auto-fix'}
-          >
-            <EyeOff size={12} /> Quarantined ({quarantinedCount})
-          </button>
-        </div>
-        {/* Rental-type filter — lets the admin slice the table down to
-            just Long-term / Short-term / Vacation / Storage. Combines
-            with the other filters (managed, featured, search). */}
-        <div className="inline-flex bg-white rounded-lg border border-[#E5E5E5] p-0.5 flex-wrap" data-testid="rental-type-filter">
-          {[
-            { v: 'all',        label: 'All types' },
-            { v: 'long-term',  label: 'Long-term' },
-            { v: 'short-term', label: 'Short-term' },
-            { v: 'vacation',   label: 'Vacation' },
-            { v: 'storage',    label: 'Storage' },
-          ].map((opt) => {
-            const count = opt.v === 'all'
-              ? properties.length
-              : (rentalTypeCounts[opt.v] || 0);
-            const isActive = rentalTypeFilter === opt.v;
-            const isEmpty = opt.v !== 'all' && count === 0;
-            return (
-              <button
-                key={opt.v}
-                onClick={() => setRentalTypeFilter(opt.v)}
-                disabled={isEmpty}
-                className={`px-2.5 py-1 rounded-md text-xs font-semibold transition-colors disabled:opacity-30 disabled:cursor-not-allowed ${isActive ? 'bg-[var(--brand-primary)] text-white' : 'text-gray-600 hover:bg-gray-50'}`}
-                data-testid={`rental-type-${opt.v}`}
-                title={isEmpty ? `No ${opt.label.toLowerCase()} listings yet` : `Show only ${opt.label.toLowerCase()}`}
-              >
-                {opt.label} ({count})
-              </button>
-            );
-          })}
-        </div>
-        {/* Price range filter — raw numeric compare against the same
-            effective price the table column shows (monthly first,
-            nightly as fallback). Currency mixing is intentional. */}
-        <div className="inline-flex items-center gap-1.5 bg-white rounded-lg border border-[#E5E5E5] px-2 py-1" data-testid="price-range-filter">
-          <span className="text-xs font-semibold text-gray-500">Price</span>
-          <input
-            type="number"
-            inputMode="numeric"
-            min="0"
-            value={minPrice}
-            onChange={(e) => setPriceParam('min', e.target.value)}
-            placeholder="min"
-            className="w-20 px-2 py-1 rounded border border-transparent hover:border-gray-200 focus:border-[var(--brand-primary)] focus:outline-none focus:ring-1 focus:ring-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/30 text-xs"
-            data-testid="price-min-input"
-          />
-          <span className="text-xs text-gray-400">–</span>
-          <input
-            type="number"
-            inputMode="numeric"
-            min="0"
-            value={maxPrice}
-            onChange={(e) => setPriceParam('max', e.target.value)}
-            placeholder="max"
-            className="w-20 px-2 py-1 rounded border border-transparent hover:border-gray-200 focus:border-[var(--brand-primary)] focus:outline-none focus:ring-1 focus:ring-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/30 text-xs"
-            data-testid="price-max-input"
-          />
-          {(minPrice || maxPrice) && (
-            <button
-              type="button"
-              onClick={clearPriceRange}
-              className="text-[10px] uppercase tracking-wider text-gray-400 hover:text-gray-700 ms-0.5"
-              data-testid="price-clear-btn"
-              title="Clear price range"
-            >
-              clear
-            </button>
-          )}
-        </div>
-        {selectedPropIds.size > 0 && (
-          <div className="flex items-center gap-2 ms-auto flex-wrap">
-            <span className="text-xs font-medium text-gray-700" data-testid="selected-count">
-              {t('admin.selectedCount', { count: selectedPropIds.size })}
-            </span>
-            <button
-              onClick={() => bulkSetFeatured(true)}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-amber-500 text-white text-xs font-semibold hover:bg-amber-600"
-              data-testid="bulk-feature-btn"
-            >
-              <Star size={14} fill="currentColor" /> {t('admin.featureSelected', 'Feature selected')}
-            </button>
-            <button
-              onClick={() => bulkSetFeatured(false)}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white border border-amber-500 text-amber-600 text-xs font-semibold hover:bg-amber-50"
-              data-testid="bulk-unfeature-btn"
-            >
-              <Star size={14} /> {t('admin.unfeatureSelected', 'Unfeature selected')}
-            </button>
-            <button
-              onClick={() => openMarkBookedModal({ mode: 'bulk' })}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-black text-white text-xs font-semibold hover:bg-gray-800"
-              data-testid="bulk-mark-booked-btn"
-            >
-              <CalendarX size={14} /> {t('admin.markSelectedBooked')}
-            </button>
-            <button
-              onClick={bulkDelete}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-red-500 text-white text-xs font-semibold hover:bg-red-600"
-              data-testid="bulk-delete-btn"
-              title={t('admin.deleteSelectedTooltip', 'Permanently delete selected listings and their related data')}
-            >
-              <Trash2 size={14} /> {t('admin.deleteSelected', 'Delete selected')} ({selectedPropIds.size})
-            </button>
-            <button
-              onClick={() => setSelectedPropIds(new Set())}
-              className="px-2 py-1.5 rounded-lg text-xs font-medium text-gray-600 hover:bg-gray-100"
-              data-testid="clear-selection-btn"
-            >
-              {t('admin.clear')}
-            </button>
-          </div>
-        )}
-      </div>
+      <PricingAuditBanner
+        priceAudit={priceAudit}
+        autoFixing={autoFixing}
+        unquarantining={unquarantining}
+        handleAutoFixPricing={handleAutoFixPricing}
+        handleRestoreQuarantined={handleRestoreQuarantined}
+      />
+      <ListingsFilterBar
+        t={t}
+        searchTerm={searchTerm}
+        setSearchTerm={setSearchTerm}
+        filteredProperties={filteredProperties}
+        properties={properties}
+        selectedPropIds={selectedPropIds}
+        setSelectedPropIds={setSelectedPropIds}
+        managedFilter={managedFilter}
+        setManagedFilter={setManagedFilter}
+        featuredFilter={featuredFilter}
+        setFeaturedFilter={setFeaturedFilter}
+        quarantinedFilter={quarantinedFilter}
+        setQuarantinedFilter={setQuarantinedFilter}
+        rentalTypeFilter={rentalTypeFilter}
+        setRentalTypeFilter={setRentalTypeFilter}
+        rentalTypeCounts={rentalTypeCounts}
+        managedCount={managedCount}
+        featuredCount={featuredCount}
+        quarantinedCount={quarantinedCount}
+        minPrice={minPrice}
+        maxPrice={maxPrice}
+        setPriceParam={setPriceParam}
+        clearPriceRange={clearPriceRange}
+        bulkDelete={bulkDelete}
+        bulkSetFeatured={bulkSetFeatured}
+        openMarkBookedModal={openMarkBookedModal}
+        sweepDuplicates={sweepDuplicates}
+        sweeping={sweeping}
+        handleRemirrorPhotos={handleRemirrorPhotos}
+        remirroring={remirroring}
+        handleRepairPrices={handleRepairPrices}
+        repairingPrices={repairingPrices}
+        setShowDuplicates={setShowDuplicates}
+      />
 
-      <div className="bg-white rounded-xl border border-[#E5E5E5] overflow-hidden">
-        {/* Desktop table — hidden on small screens */}
-        <table className="w-full hidden md:table">
-          <thead className="bg-gray-50">
-            <tr>
-              <th className="px-3 py-3 w-8">
-                <input
-                  type="checkbox"
-                  checked={filteredProperties.length > 0 && filteredProperties.every(p => selectedPropIds.has(p.id))}
-                  onChange={e => {
-                    if (e.target.checked) {
-                      setSelectedPropIds(new Set(filteredProperties.map(p => p.id)));
-                    } else {
-                      setSelectedPropIds(new Set());
-                    }
-                  }}
-                  data-testid="select-all-listings"
-                />
-              </th>
-              <th className="px-3 py-3 w-16"></th>
-              <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">{t('admin.colTitle')}</th>
-              <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">{t('admin.colOwner')}</th>
-              <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">{t('admin.colArea')}</th>
-              <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">{t('admin.colType')}</th>
-              <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">{t('admin.colPrice')}</th>
-              <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Added</th>
-              <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">{t('admin.status')}</th>
-              <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">{t('admin.actions')}</th>
-            </tr>
-          </thead>
-          <tbody>
-            {filteredProperties.map(p => (
-              <tr key={p.id} className="border-t border-[#E5E5E5] hover:bg-gray-50" data-testid={`listing-row-${p.id}`}>
-                <td className="px-3 py-3">
-                  <input
-                    type="checkbox"
-                    checked={selectedPropIds.has(p.id)}
-                    onChange={() => togglePropSelected(p.id)}
-                    data-testid={`select-listing-${p.id}`}
-                  />
-                </td>
-                <td className="px-3 py-2 w-16">
-                  <CoverThumb property={p} />
-                </td>
-                <td className="px-4 py-3 font-medium text-sm">
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <span>{p.title}</span>
-                    {p.is_featured && (
-                      <span
-                        className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-amber-100 text-amber-800"
-                        title={t('admin.featuredOnHome', 'Featured on homepage')}
-                        data-testid={`featured-badge-${p.id}`}
-                      >
-                        <Star size={10} fill="currentColor" /> {t('admin.featured', 'Featured')}
-                      </span>
-                    )}
-                    {p.managed_by_admin && (
-                      <span
-                        className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/10 text-[var(--brand-primary)]"
-                        title="Admin-managed for the owner"
-                        data-testid={`managed-badge-${p.id}`}
-                      >
-                        <Briefcase size={10} /> Managing
-                      </span>
-                    )}
-                    {p.admin_blocked_now && (
-                      <span
-                        className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-amber-100 text-amber-800"
-                        title={p.active_admin_block?.indefinite ? t('admin.adminBlockedIndefinite') : t('admin.adminBlockedRange', { start: p.active_admin_block?.start_date?.slice(0,10), end: p.active_admin_block?.end_date?.slice(0,10) })}
-                        data-testid={`admin-blocked-badge-${p.id}`}
-                      >
-                        <Lock size={10} /> {t('admin.adminBlocked')}
-                      </span>
-                    )}
-                    {p.is_hidden && (
-                      <span
-                        className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-rose-100 text-rose-800"
-                        title={
-                          p.pricing_review_reason === 'zero_price'
-                            ? `Hidden from public feed — no price set${p.pricing_review_at ? ` · ${new Date(p.pricing_review_at).toLocaleDateString()}` : ''}`
-                            : p.pricing_review_reason === 'low_monthly'
-                            ? `Hidden from public feed — monthly rent below plausibility floor${p.pricing_review_at ? ` · ${new Date(p.pricing_review_at).toLocaleDateString()}` : ''}`
-                            : 'Hidden from public feed'
-                        }
-                        data-testid={`quarantine-badge-${p.id}`}
-                      >
-                        <EyeOff size={10} /> Quarantined
-                        {p.pricing_review_reason ? ` · ${p.pricing_review_reason === 'zero_price' ? 'no price' : 'low rent'}` : ''}
-                      </span>
-                    )}
-                  </div>
-                </td>
-                <td className="px-4 py-3 text-sm text-gray-600">
-                  {p.owner_name}<br />
-                  <span className="text-xs text-gray-400">{p.owner_email}</span>
-                </td>
-                <td className="px-4 py-3 text-sm">{p.area}</td>
-                <td className="px-4 py-3"><span className="px-2 py-1 rounded-full text-xs bg-[#E5E5E5]">{p.rental_type}</span></td>
-                <td className="px-4 py-3 font-bold text-sm">{p.currency === 'USD' ? '$' : '₪'}{p.monthly_price || p.nightly_price || 0}</td>
-                <td className="px-4 py-3 text-xs text-gray-500" title={p.created_at ? new Date(p.created_at).toLocaleString() : ''}>
-                  {p.created_at ? relativeAdded(p.created_at) : '—'}
-                </td>
-                <td className="px-4 py-3">
-                  <span className={`px-2 py-1 rounded-full text-xs font-medium ${p.status === 'active' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
-                    {p.status}
-                  </span>
-                </td>
-                <td className="px-4 py-3">
-                  <div className="flex items-center gap-1">
-                    <button
-                      onClick={() => toggleFeatured(p.id)}
-                      className={`p-1.5 rounded transition-colors ${p.is_featured ? 'bg-amber-100 text-amber-600 hover:bg-amber-200' : 'hover:bg-gray-100 text-gray-400'}`}
-                      title={p.is_featured ? t('admin.removeFromFeatured', 'Remove from featured listings') : t('admin.addToFeatured', 'Add to featured listings')}
-                      data-testid={`toggle-featured-${p.id}`}
-                    >
-                      <Star size={16} fill={p.is_featured ? 'currentColor' : 'none'} />
-                    </button>
-                    {p.admin_blocked_now ? (
-                      <button
-                        onClick={() => unmarkBooked(p)}
-                        className="p-1.5 rounded hover:bg-green-50 text-green-600"
-                        title={t('admin.removeAdminBlock')}
-                        data-testid={`unmark-booked-${p.id}`}
-                      >
-                        <CalendarCheck size={18} />
-                      </button>
-                    ) : (
-                      <button
-                        onClick={() => openMarkBookedModal({ mode: 'single', id: p.id })}
-                        className="p-1.5 rounded hover:bg-amber-50 text-amber-600"
-                        title={t('admin.markAsBooked')}
-                        data-testid={`mark-booked-${p.id}`}
-                      >
-                        <CalendarX size={18} />
-                      </button>
-                    )}
-                    <button
-                      onClick={() => toggleAdminManaged(p.id)}
-                      className={`p-1.5 rounded transition-colors ${p.managed_by_admin ? 'bg-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/10 text-[var(--brand-primary)] hover:bg-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/15' : 'hover:bg-gray-100 text-gray-400'}`}
-                      title={p.managed_by_admin ? 'Stop managing this property' : 'Start managing this property for the owner'}
-                      data-testid={`toggle-managed-${p.id}`}
-                    >
-                      <Briefcase size={16} />
-                    </button>
-                    <button
-                      onClick={() => togglePropertyStatus(p.id)}
-                      className="p-1.5 rounded hover:bg-gray-100"
-                      title={p.status === 'active' ? t('admin.deactivate') : t('admin.activate')}
-                      data-testid={`toggle-property-${p.id}`}
-                    >
-                      {p.status === 'active'
-                        ? <ToggleRight size={18} className="text-green-600" />
-                        : <ToggleLeft size={18} className="text-gray-400" />}
-                    </button>
-                    <button
-                      onClick={() => deleteProperty(p.id)}
-                      className="p-1.5 rounded hover:bg-red-50 text-red-500"
-                      title={t('admin.deleteTooltip')}
-                      data-testid={`delete-property-${p.id}`}
-                    >
-                      <Trash2 size={16} />
-                    </button>
-                    {p.is_hidden && (
-                      <button
-                        onClick={() => handleRestoreSingle(p)}
-                        disabled={restoringId === p.id}
-                        className="p-1.5 rounded hover:bg-emerald-50 text-emerald-600 disabled:opacity-50"
-                        title="Restore this listing to the public feed (lift quarantine)"
-                        data-testid={`restore-quarantined-${p.id}`}
-                      >
-                        {restoringId === p.id ? <Loader2 size={16} className="animate-spin" /> : <Undo2 size={16} />}
-                      </button>
-                    )}
-                  </div>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-
-        {/* Mobile card list — visible on small screens only.
-            Each card shows all the same info + actions in a stacked layout
-            so admins can manage listings without a sideways-scrolling table. */}
-        <div className="md:hidden">
-          {filteredProperties.length > 0 && (
-            <div className="flex items-center justify-between px-3 py-2 bg-gray-50 border-b border-[#E5E5E5] text-xs font-medium text-gray-600">
-              <label className="inline-flex items-center gap-2">
-                <input
-                  type="checkbox"
-                  checked={filteredProperties.every(p => selectedPropIds.has(p.id))}
-                  onChange={e => {
-                    if (e.target.checked) setSelectedPropIds(new Set(filteredProperties.map(p => p.id)));
-                    else setSelectedPropIds(new Set());
-                  }}
-                  data-testid="select-all-listings-mobile"
-                />
-                {t('admin.selectAllVisible', 'Select all visible')}
-              </label>
-              {selectedPropIds.size > 0 && (
-                <span className="text-[var(--brand-primary)] font-semibold" data-testid="selected-count-mobile">
-                  {t('admin.selectedCount', { count: selectedPropIds.size })}
-                </span>
-              )}
-            </div>
-          )}
-          <div className="divide-y divide-[#E5E5E5]">
-          {filteredProperties.map(p => (
-            <div key={p.id} className="p-3" data-testid={`listing-card-${p.id}`}>
-              <div className="flex items-start gap-2 mb-2">
-                <input
-                  type="checkbox"
-                  checked={selectedPropIds.has(p.id)}
-                  onChange={() => togglePropSelected(p.id)}
-                  className="mt-1 shrink-0"
-                  data-testid={`select-listing-mobile-${p.id}`}
-                />
-                <CoverThumb property={p} size="sm" />
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-1.5 flex-wrap">
-                    <p className="font-semibold text-sm break-words">{p.title || '—'}</p>
-                    <span className={`px-1.5 py-0.5 rounded-full text-[10px] font-medium ${p.status === 'active' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
-                      {p.status}
-                    </span>
-                  </div>
-                  <p className="text-xs text-gray-500 mt-0.5">{p.owner_name} · {p.area}</p>
-                  <p className="text-xs text-gray-700 mt-0.5">
-                    <span className="font-semibold">{p.currency === 'USD' ? '$' : '₪'}{p.monthly_price || p.nightly_price || 0}</span>
-                    <span className="text-gray-400"> · {p.rental_type}</span>
-                    {p.created_at && (
-                      <span
-                        className="text-gray-400"
-                        title={new Date(p.created_at).toLocaleString()}
-                      > · added {relativeAdded(p.created_at)}</span>
-                    )}
-                  </p>
-                  <div className="flex items-center gap-1 flex-wrap mt-1.5">
-                    {p.is_featured && (
-                      <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[9px] font-semibold bg-amber-100 text-amber-800">
-                        <Star size={9} fill="currentColor" /> {t('admin.featured', 'Featured')}
-                      </span>
-                    )}
-                    {p.managed_by_admin && (
-                      <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[9px] font-semibold bg-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/10 text-[var(--brand-primary)]">
-                        <Briefcase size={9} /> Managing
-                      </span>
-                    )}
-                    {p.admin_blocked_now && (
-                      <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[9px] font-semibold bg-amber-100 text-amber-800">
-                        <Lock size={9} /> {t('admin.adminBlocked')}
-                      </span>
-                    )}
-                    {p.is_hidden && (
-                      <span
-                        className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[9px] font-semibold bg-rose-100 text-rose-800"
-                        data-testid={`quarantine-badge-mobile-${p.id}`}
-                      >
-                        <EyeOff size={9} /> Quarantined
-                        {p.pricing_review_reason ? ` · ${p.pricing_review_reason === 'zero_price' ? 'no price' : 'low rent'}` : ''}
-                      </span>
-                    )}
-                  </div>
-                </div>
-              </div>
-              {/* Actions row — full-width grid so every button is reachable
-                  on a small screen without horizontal scroll. */}
-              <div className="grid grid-cols-5 gap-1 mt-2">
-                <button
-                  onClick={() => toggleFeatured(p.id)}
-                  className={`flex flex-col items-center justify-center gap-0.5 py-2 rounded text-[10px] font-medium transition-colors ${p.is_featured ? 'bg-amber-100 text-amber-700' : 'bg-gray-50 text-gray-500 hover:bg-gray-100'}`}
-                  data-testid={`toggle-featured-mobile-${p.id}`}
-                >
-                  <Star size={16} fill={p.is_featured ? 'currentColor' : 'none'} />
-                  {p.is_featured ? t('admin.unfeature', 'Unfeature') : t('admin.feature', 'Feature')}
-                </button>
-                {p.admin_blocked_now ? (
-                  <button
-                    onClick={() => unmarkBooked(p)}
-                    className="flex flex-col items-center justify-center gap-0.5 py-2 rounded text-[10px] font-medium bg-green-50 text-green-700 hover:bg-green-100"
-                    data-testid={`unmark-booked-mobile-${p.id}`}
-                  >
-                    <CalendarCheck size={16} />
-                    {t('admin.unblock', 'Unblock')}
-                  </button>
-                ) : (
-                  <button
-                    onClick={() => openMarkBookedModal({ mode: 'single', id: p.id })}
-                    className="flex flex-col items-center justify-center gap-0.5 py-2 rounded text-[10px] font-medium bg-amber-50 text-amber-700 hover:bg-amber-100"
-                    data-testid={`mark-booked-mobile-${p.id}`}
-                  >
-                    <CalendarX size={16} />
-                    {t('admin.block', 'Block')}
-                  </button>
-                )}
-                <button
-                  onClick={() => toggleAdminManaged(p.id)}
-                  className={`flex flex-col items-center justify-center gap-0.5 py-2 rounded text-[10px] font-medium ${p.managed_by_admin ? 'bg-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/10 text-[var(--brand-primary)]' : 'bg-gray-50 text-gray-500 hover:bg-gray-100'}`}
-                  data-testid={`toggle-managed-mobile-${p.id}`}
-                >
-                  <Briefcase size={16} />
-                  {p.managed_by_admin ? t('admin.unmanage', 'Unmanage') : t('admin.manage', 'Manage')}
-                </button>
-                <button
-                  onClick={() => togglePropertyStatus(p.id)}
-                  className="flex flex-col items-center justify-center gap-0.5 py-2 rounded text-[10px] font-medium bg-gray-50 text-gray-700 hover:bg-gray-100"
-                  data-testid={`toggle-property-mobile-${p.id}`}
-                >
-                  {p.status === 'active'
-                    ? <ToggleRight size={16} className="text-green-600" />
-                    : <ToggleLeft size={16} className="text-gray-400" />}
-                  {p.status === 'active' ? t('admin.deactivate') : t('admin.activate')}
-                </button>
-                <button
-                  onClick={() => deleteProperty(p.id)}
-                  className="flex flex-col items-center justify-center gap-0.5 py-2 rounded text-[10px] font-medium bg-red-50 text-red-600 hover:bg-red-100"
-                  data-testid={`delete-property-mobile-${p.id}`}
-                >
-                  <Trash2 size={14} />
-                  {t('admin.deleteAction', 'Delete')}
-                </button>
-              </div>
-            </div>
-          ))}
-          </div>
-        </div>
-
-        {filteredProperties.length === 0 && (
-          propertiesError ? (
-            /* Never claim "no listings" when we simply failed to ask. The hook
-               caches nothing on error and won't retry on its own, so an
-               explicit retry is the only way out short of a page reload. */
-            <div className="text-center py-8 px-4" data-testid="admin-listings-error">
-              <p className="text-sm text-red-600 font-medium">
-                {t('admin.listingsLoadFailed', "Couldn't load listings")}
-              </p>
-              <p className="text-xs text-gray-500 mt-1">
-                {t(
-                  'admin.listingsLoadFailedHint',
-                  'Your listings are safe — the server just did not answer. This usually clears on its own right after a deploy.',
-                )}
-              </p>
-              <button
-                type="button"
-                onClick={() => fetchProperties()}
-                disabled={propertiesLoading}
-                className="mt-3 px-4 py-2 text-sm rounded-lg border border-gray-300 hover:bg-gray-50 disabled:opacity-50"
-                data-testid="admin-listings-retry"
-              >
-                {propertiesLoading
-                  ? t('admin.listingsRetrying', 'Retrying…')
-                  : t('admin.listingsRetry', 'Try again')}
-              </button>
-            </div>
-          ) : (
-            <p className="text-center text-gray-400 py-8 text-sm">{t('admin.noListings')}</p>
-          )
-        )}
-      </div>
+      <ListingsTable
+        t={t}
+        filteredProperties={filteredProperties}
+        propertiesError={propertiesError}
+        selectedPropIds={selectedPropIds}
+        setSelectedPropIds={setSelectedPropIds}
+        togglePropSelected={togglePropSelected}
+        togglePropertyStatus={togglePropertyStatus}
+        toggleAdminManaged={toggleAdminManaged}
+        toggleFeatured={toggleFeatured}
+        deleteProperty={deleteProperty}
+        openMarkBookedModal={openMarkBookedModal}
+        unmarkBooked={unmarkBooked}
+        handleRestoreSingle={handleRestoreSingle}
+        restoringId={restoringId}
+      />
 
       <MarkAsBookedModal
         open={bookedModalOpen}
