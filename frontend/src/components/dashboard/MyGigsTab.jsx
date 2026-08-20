@@ -13,12 +13,13 @@ import PhoneInput from '../common/PhoneInput';
 import { phoneError } from '../../utils/phoneValidation';
 import {
   Plus, Loader2, ExternalLink, Trash2,
-  Pencil, Upload, X, FileText, Globe, Award,
-} from 'lucide-react';
+  Pencil, Upload, X, FileText, Globe, Award, ArrowLeft } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { uploadFilesFast } from '../../utils/fastUpload';
 import CoverPlaceholder from '../common/CoverPlaceholder';
 import AddPhotoNudge from '../common/AddPhotoNudge';
+import BusinessSelector, { ALL, readStoredBusiness } from './BusinessSelector';
+import { nounKey } from '../../utils/businessNoun';
 
 const ProfileEditModal = ({ API, token, initial, onClose, onSaved }) => {
   const { t } = useTranslation();
@@ -280,7 +281,7 @@ const ProfileEditModal = ({ API, token, initial, onClose, onSaved }) => {
    only their dashboard readout, and dead React state in a component is
    worse than no state. */
 
-const MyGigsTab = ({ API, token }) => {
+const MyGigsTab = ({ API, token, business = null, onBack = null }) => {
   const navigate = useNavigate();
   // This component had no translator of its own — the `useTranslation()`
   // higher up this file belongs to ProfileEditModal. Adding t(...) calls
@@ -289,6 +290,24 @@ const MyGigsTab = ({ API, token }) => {
   const { t } = useTranslation();
   const [loading, setLoading] = useState(true);
   const [gigs, setGigs] = useState([]);
+  // M7 — which business this tab is filtered to. Lives here rather than
+  // in the selector so the filtered list and the count agree.
+  const [businesses, setBusinesses] = useState([]);
+  const [businessFilter, setBusinessFilter] = useState(readStoredBusiness);
+
+  // Filtering is client-side because /my-gigs already returns everything
+  // this person owns — a round trip per filter change would be slower and
+  // could disagree with the list already on screen.
+  // Opened FROM a business, that business is the filter and the selector
+  // is redundant — you are already inside it.
+  const effectiveFilter = business ? business.id : businessFilter;
+  const shownGigs = effectiveFilter === ALL
+    ? gigs
+    : gigs.filter((g) => g.business_id === effectiveFilter);
+
+  // A plumber adds services; a furniture shop adds products. Derived from
+  // this business's own listings, falling back to its category.
+  const noun = nounKey(business, shownGigs);
   const [provider, setProvider] = useState(null);
   const [providerDetails, setProviderDetails] = useState(null);
   const [showProfile, setShowProfile] = useState(false);
@@ -300,6 +319,16 @@ const MyGigsTab = ({ API, token }) => {
         headers: { Authorization: `Bearer ${token}` },
       });
       setGigs(res.data.gigs || []);
+      // Only ACTIVE businesses are offered as filters: a hidden one has
+      // nothing showing publicly, and offering it would suggest otherwise.
+      try {
+        const biz = await axios.get(`${API}/marketplace/businesses`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        setBusinesses((biz.data || []).filter((b) => b.active));
+      } catch {
+        setBusinesses([]);   // selector simply does not render
+      }
       setProvider(res.data.provider || null);
       // If we have any gig, load full provider details for the edit modal.
       const firstGig = res.data.gigs?.[0];
@@ -350,13 +379,41 @@ const MyGigsTab = ({ API, token }) => {
       {/* Header row: status + primary CTAs */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 bg-white border border-gray-200 rounded-2xl p-5">
         <div className="flex flex-col gap-2">
-          <h2 className="text-lg font-bold text-gray-900">Your services</h2>
+          <div className="flex items-center gap-3 flex-wrap">
+            {onBack && (
+              <button
+                type="button"
+                onClick={onBack}
+                className="inline-flex items-center gap-1 text-xs font-semibold"
+                style={{ color: 'var(--brand-primary)' }}
+                data-testid="my-gigs-back"
+              >
+                <ArrowLeft size={13} /> {t('businesses.backToList', 'All businesses')}
+              </button>
+            )}
+            <h2 className="text-lg font-bold text-gray-900">
+              {business
+                ? business.name
+                : t(`businesses.your${noun}s`, noun === 'Product' ? 'Your products' : 'Your services')}
+            </h2>
+            {!business && (
+              <BusinessSelector
+                businesses={businesses}
+                value={businessFilter}
+                onChange={setBusinessFilter}
+                testid="my-gigs-business"
+              />
+            )}
+          </div>
           <div className="flex items-center gap-2 flex-wrap">
             {/* The trial / Pro status pill is gone with the subscription —
                 there is no plan to be on. StatusPill and isCancelled are
                 kept below, unused, alongside the dormant billing code. */}
             <span className="text-xs text-gray-500">
-              {gigs.length} {gigs.length === 1 ? 'gig' : 'gigs'} listed
+              {t(`businesses.count${noun}`, {
+                defaultValue: noun === 'Product' ? '{{n}} product(s)' : '{{n}} service(s)',
+                n: shownGigs.length,
+              })}
             </span>
           </div>
         </div>
@@ -375,7 +432,7 @@ const MyGigsTab = ({ API, token }) => {
             className="px-4 py-2.5 rounded-lg text-sm font-semibold text-white bg-[var(--brand-primary)] hover:bg-[#0F3A3A] flex items-center gap-1.5"
             data-testid="my-gigs-create-btn"
           >
-            <Plus size={14} /> Create new gig
+            <Plus size={14} /> {t(`businesses.add${noun}`, noun === 'Product' ? 'Add a product' : 'Add a service')}
           </button>
         </div>
       </div>
@@ -399,7 +456,7 @@ const MyGigsTab = ({ API, token }) => {
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {gigs.map((g) => {
+          {shownGigs.map((g) => {
             const cover = g.gallery?.[0];
             const cheap = (g.tiers || []).reduce(
               (a, t) => (a == null || t.price < a ? t.price : a),

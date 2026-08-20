@@ -14,9 +14,10 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import axios from 'axios';
-import { Briefcase, Plus, Loader2, Eye, EyeOff, Check, X } from 'lucide-react';
+import { Briefcase, Plus, Loader2, Eye, EyeOff, Check, X, Pencil } from 'lucide-react';
 import { toast } from 'sonner';
 import CoverPlaceholder from '../common/CoverPlaceholder';
+import MyGigsTab from './MyGigsTab';
 
 const MAX_ACTIVE = 5;
 
@@ -27,6 +28,10 @@ export default function MyBusinessesTab({ API, token }) {
   const [adding, setAdding] = useState(false);
   const [name, setName] = useState('');
   const [editingId, setEditingId] = useState(null);
+  // Which business is open. The dashboard tab stays put; this is a view
+  // WITHIN it, so the tab bar and the browser's back button behave the
+  // way someone expects from a dashboard rather than a page tree.
+  const [openBiz, setOpenBiz] = useState(null);
   const [editName, setEditName] = useState('');
 
   const auth = { headers: { Authorization: `Bearer ${token}` } };
@@ -104,6 +109,18 @@ export default function MyBusinessesTab({ API, token }) {
       setBusy(false);
     }
   };
+
+  // Inside a business: its own listings, in its own vocabulary.
+  if (openBiz) {
+    return (
+      <MyGigsTab
+        API={API}
+        token={token}
+        business={openBiz}
+        onBack={() => { setOpenBiz(null); load(); }}
+      />
+    );
+  }
 
   if (items === null) {
     return (
@@ -219,10 +236,10 @@ export default function MyBusinessesTab({ API, token }) {
                 ) : (
                   <button
                     type="button"
-                    onClick={() => { setEditingId(b.id); setEditName(b.name); }}
-                    className="block w-full text-start font-semibold text-sm truncate"
+                    onClick={() => setOpenBiz(b)}
+                    className="block w-full text-start font-semibold text-sm truncate hover:underline"
                     style={{ color: 'var(--ink)' }}
-                    title={t('businesses.rename', 'Rename')}
+                    title={t('businesses.open', 'Open')}
                     data-testid={`business-name-${b.id}`}
                   >
                     {b.name}
@@ -234,6 +251,15 @@ export default function MyBusinessesTab({ API, token }) {
                   {!b.active && ` · ${t('businesses.hidden', 'hidden')}`}
                 </p>
 
+                <button
+                  type="button"
+                  onClick={() => { setEditingId(b.id); setEditName(b.name); }}
+                  className="inline-flex items-center gap-1.5 text-xs font-semibold me-3"
+                  style={{ color: 'var(--brand-muted)' }}
+                  data-testid={`business-rename-${b.id}`}
+                >
+                  <Pencil size={12} /> {t('businesses.rename', 'Rename')}
+                </button>
                 <button
                   type="button"
                   onClick={() => toggleActive(b)}

@@ -2,7 +2,7 @@ import React, { useEffect, useState, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { MessageCircle, Building2, AtSign } from 'lucide-react';
+import { MessageCircle, Building2, AtSign, Store } from 'lucide-react';
 
 /**
  * Inbox tab — lists every conversation the current user is part of and
@@ -96,6 +96,21 @@ const MessagesTab = ({ API, token, onUnreadChange }) => {
               <div className="flex items-center justify-between gap-2">
                 <p className={`text-sm truncate flex items-center gap-1.5 ${isUnread ? 'font-bold text-gray-900' : 'font-semibold text-gray-800'}`}>
                   <span className="truncate">{conv.property_title || 'Property'}</span>
+                  {/* M7 — which business this thread is about. The server
+                      sets it only for the side that OWNS the business, so
+                      a customer never sees it; a two-business owner needs
+                      it to know which hat to answer in. */}
+                  {conv.business_name && (
+                    <span
+                      className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[10px] font-semibold shrink-0"
+                      style={{ background: 'rgb(var(--brand-primary-rgb) / 0.10)', color: 'var(--brand-primary)' }}
+                      data-testid={`business-badge-${conv.property_id}`}
+                      title={conv.business_name}
+                    >
+                      <Store size={9} aria-hidden="true" />
+                      <span className="max-w-[110px] truncate">{conv.business_name}</span>
+                    </span>
+                  )}
                   {mentionsMe && (
                     <span
                       className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-md text-[10px] font-bold bg-[var(--gold)] text-[var(--brand-primary)] shrink-0"

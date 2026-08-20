@@ -442,6 +442,31 @@ async def get_conversations(payload: dict = Depends(verify_token)) -> list[dict]
         ).to_list(len(still_missing)):
             requests_by_id[row["_id"]] = row
 
+    # And gigs — a thread from a marketplace listing is keyed by the gig
+    # UUID. Same one-extra-query pattern, only for ids nothing else
+    # claimed.
+    #
+    # This also carries the BUSINESS the gig belongs to (spec M7): a
+    # person who runs two businesses cannot otherwise tell which hat a
+    # message is about, and answering as the wrong business is worse than
+    # answering late.
+    gigs_by_id: dict = {}
+    businesses_by_id: dict = {}
+    unresolved = [pid for pid in still_missing if pid not in requests_by_id]
+    if unresolved:
+        for row in await db.marketplace_gigs.find(
+            {"_id": {"$in": unresolved}},
+            {"_id": 1, "title": 1, "provider_user_id": 1, "business_id": 1},
+        ).to_list(len(unresolved)):
+            gigs_by_id[row["_id"]] = row
+        biz_ids = [g.get("business_id") for g in gigs_by_id.values() if g.get("business_id")]
+        if biz_ids:
+            for row in await db.businesses.find(
+                {"_id": {"$in": biz_ids}},
+                {"_id": 1, "name": 1},
+            ).to_list(len(biz_ids)):
+                businesses_by_id[row["_id"]] = row
+
     users_by_id: dict = {}
     if user_ids:
         for row in await db.users.find(
@@ -455,6 +480,7 @@ async def get_conversations(payload: dict = Depends(verify_token)) -> list[dict]
         property_data = properties_by_id.get(msg['property_id'])
         job_data = jobs_by_id.get(msg['property_id'])
         request_data = requests_by_id.get(msg['property_id'])
+        gig_data = gigs_by_id.get(msg['property_id'])
         other_user = users_by_id.get(other_user_id)
 
         # Was the CURRENT user @-mentioned by their counterpart in the
@@ -476,17 +502,33 @@ async def get_conversations(payload: dict = Depends(verify_token)) -> list[dict]
             display_title = f"Job: {job_data.get('title', 'Untitled')}"
         elif request_data:
             display_title = f"Request: {request_data.get('title', 'Untitled')}"
+        elif gig_data:
+            display_title = gig_data.get('title', 'Untitled')
         else:
             display_title = 'Unknown'
+
+        # Which business this thread concerns, when it concerns one and
+        # the reader is the side that owns it. A customer does not need to
+        # be told which of the provider's businesses they contacted; the
+        # provider does.
+        business_name = None
+        if gig_data and gig_data.get('provider_user_id') == payload['user_id']:
+            biz = businesses_by_id.get(gig_data.get('business_id'))
+            if biz:
+                business_name = biz.get('name')
 
         conversations[conv_key] = {
             "property_id": msg['property_id'],
             "property_title": display_title,
             "property_missing": (
-                property_data is None and job_data is None and request_data is None
+                property_data is None and job_data is None
+                and request_data is None and gig_data is None
             ),
             "is_job_thread": job_data is not None,
             "is_request_thread": request_data is not None,
+            "is_gig_thread": gig_data is not None,
+            # None unless this reader owns the business the thread is about.
+            "business_name": business_name,
             "other_user": other_user if other_user else {},
             "last_message": msg['message'],
             "last_message_time": msg['created_at'],

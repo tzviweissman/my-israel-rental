@@ -124,7 +124,9 @@ const DashboardTabs = ({
         { id: 'properties', label: t('dashboard.myProperties'), show: isPropertyLister },
         { id: 'bulk-manager', label: t('dashboard.bulkManager'), Icon: Layers, show: isPropertyLister },
         { id: 'my-businesses', label: t('dashboard.myBusinesses', 'Businesses'), Icon: Store, colour: ACTIVE_GOLD, show: showGigTabs },
-        { id: 'my-gigs', label: t('dashboard.myGigs', 'My Gigs'), Icon: Briefcase, colour: ACTIVE_GOLD, show: showGigTabs },
+        // 'my-gigs' is gone from the bar: listings live INSIDE a business
+        // now, reached by opening one. The panel still renders for any
+        // saved ?tab=my-gigs link.
       ],
     },
     {

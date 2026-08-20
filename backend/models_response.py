@@ -319,6 +319,13 @@ class ConversationOut(BaseModel):
     other_user: dict | None = None
     participants: list[dict] | None = None
     messages: list[dict] | None = None
+    # Marketplace threads. `business_name` is set ONLY for the side that
+    # owns the business, so a two-business owner can tell which hat a
+    # message is about (spec M7). Declared rather than relying on
+    # extra='allow': a field the model does not name is a field the next
+    # person cannot find, and this project has already lost one that way.
+    is_gig_thread: bool | None = None
+    business_name: str | None = None
 
 
 class ServiceRequestOut(BaseModel):
