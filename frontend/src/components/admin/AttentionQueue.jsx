@@ -74,7 +74,9 @@ export default function AttentionQueue({ token, onNavigate }) {
       n: data.emails_bounced_7d,
       Icon: MailWarning,
       text: (n) => `${n} email${n === 1 ? '' : 's'} bounced in the last 7 days`,
-      go: 'settings',
+      // Points at Email health, not Settings — the row is only useful if it
+      // lands on the bounce list it is describing.
+      go: 'email-health',
     },
   ].filter((r) => (r.n || 0) > 0);
 

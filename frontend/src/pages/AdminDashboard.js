@@ -1,6 +1,6 @@
 import React, { useState, useContext } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Eye, Home, Users, MessageCircle, FileText, Settings, Upload, Sparkles, Calendar, Briefcase, MapPin } from 'lucide-react';
+import { Eye, Home, Users, MessageCircle, FileText, Settings, Upload, Sparkles, Calendar, Briefcase, MapPin, Mail } from 'lucide-react';
 import { API, AuthContext } from '../App';
 import { useApiSWR } from '../hooks/useApiSWR';
 import { useAdminLiveEvents } from '../hooks/useAdminLiveEvents';
@@ -15,6 +15,7 @@ import SettingsTab from '../components/admin/SettingsTab';
 import ImportTab from '../components/admin/ImportTab';
 import SmartListsTab from '../components/admin/SmartListsTab';
 import BookingsTab from '../components/admin/BookingsTab';
+import EmailHealthTab from '../components/admin/EmailHealthTab';
 
 /**
  * Grouped navigation (spec A2).
@@ -57,6 +58,10 @@ const TAB_GROUPS = [
   ] },
   { group: 'admin.groupSystem', items: [
     { key: 'settings', labelKey: 'admin.settings', icon: Settings },
+    // A5 — deliverability is infrastructure. It used to sit on Overview
+    // pushing the business numbers off the first screen; the exception
+    // still surfaces there through the attention queue.
+    { key: 'email-health', labelKey: 'admin.emailHealth', icon: Mail },
   ] },
 ];
 
@@ -77,7 +82,6 @@ const AdminDashboard = () => {
   const { data: dashboard, refresh: fetchDashboard } = useApiSWR(
     `${API}/admin/dashboard`, token
   );
-  const { data: emailHealth } = useApiSWR(`${API}/admin/email-health`, token);
 
   useAdminLiveEvents(token);
 
@@ -172,7 +176,7 @@ const AdminDashboard = () => {
 
         {activeTab === 'overview' && (
           <>
-            <OverviewTab dashboard={dashboard} emailHealth={emailHealth} token={token} onNavigate={setActiveTab} />
+            <OverviewTab dashboard={dashboard} token={token} onNavigate={setActiveTab} />
             {/* Codes for advertising the site itself — one per campaign,
                 each with its own scan count. */}
             <SiteQrPanel API={API} token={token} />
@@ -187,6 +191,7 @@ const AdminDashboard = () => {
         {activeTab === 'smart-lists' && <SmartListsTab token={token} />}
         {activeTab === 'import' && <ImportTab token={token} onJumpToOwner={jumpToUser} />}
         {activeTab === 'settings' && <SettingsTab token={token} />}
+        {activeTab === 'email-health' && <EmailHealthTab token={token} />}
       </div>
     </div>
   );
