@@ -24,6 +24,7 @@ from pydantic import BaseModel, Field
 from routes.deps import db, verify_token
 from utils.businesses import (
     MAX_BUSINESSES_PER_USER,
+    ensure_default_business,
     new_business_doc,
     unique_slug,
 )
@@ -92,6 +93,31 @@ async def my_businesses(user=Depends(verify_token)):
     from their owner, who needs to see them to switch them back on.
     """
     docs = [b async for b in db.businesses.find({"owner_user_id": user["user_id"]})]
+
+    # Self-healing, and it matters more than it looks: listings are reached
+    # THROUGH a business now, so someone who has listings but no business
+    # record would find them unreachable — their own work, invisible to
+    # them. That is the state of anyone whose listings predate the
+    # businesses model.
+    #
+    # Rather than a bulk migration over the production database, each
+    # person is repaired the moment they look, using the same idempotent
+    # helper the gig-create path uses. No write happens for the vast
+    # majority who already have one.
+    if not docs:
+        has_listings = await db.marketplace_gigs.count_documents(
+            {"provider_user_id": user["user_id"]},
+        )
+        if has_listings:
+            created = await ensure_default_business(user["user_id"])
+            await db.marketplace_gigs.update_many(
+                {
+                    "provider_user_id": user["user_id"],
+                    "$or": [{"business_id": {"$exists": False}}, {"business_id": None}],
+                },
+                {"$set": {"business_id": created["_id"]}},
+            )
+            docs = [created]
     counts = {}
     for b in docs:
         counts[b["_id"]] = await db.marketplace_gigs.count_documents({"business_id": b["_id"]})
