@@ -807,6 +807,10 @@ const he = {
         totalSuffix: ' סה״כ'
       },
       admin: {
+        servicesTab: 'שירותים',
+        activeServices: 'שירותים פעילים',
+        businessesCount: 'עסקים',
+        openRequests: 'בקשות פתוחות',
         title: 'לוח בקרה ראשי',
         overview: 'סקירה',
         listings: 'נכסים',

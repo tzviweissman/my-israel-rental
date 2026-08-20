@@ -1,11 +1,12 @@
 import React, { useState, useContext } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Eye, Home, Users, MessageCircle, FileText, Settings, Upload, Sparkles, Calendar } from 'lucide-react';
+import { Eye, Home, Users, MessageCircle, FileText, Settings, Upload, Sparkles, Calendar, Briefcase } from 'lucide-react';
 import { API, AuthContext } from '../App';
 import { useApiSWR } from '../hooks/useApiSWR';
 import { useAdminLiveEvents } from '../hooks/useAdminLiveEvents';
 import OverviewTab from '../components/admin/OverviewTab';
 import SiteQrPanel from '../components/admin/SiteQrPanel';
+import ServicesTab from '../components/admin/ServicesTab';
 import ListingsTab from '../components/admin/ListingsTab';
 import UsersTab from '../components/admin/UsersTab';
 import ChatsTab from '../components/admin/ChatsTab';
@@ -17,6 +18,7 @@ import BookingsTab from '../components/admin/BookingsTab';
 const TAB_KEYS = [
   { key: 'overview', labelKey: 'admin.overview', icon: Eye },
   { key: 'listings', labelKey: 'admin.listings', icon: Home },
+  { key: 'services', labelKey: 'admin.servicesTab', icon: Briefcase },
   { key: 'bookings', labelKey: 'admin.bookings', icon: Calendar },
   { key: 'users', labelKey: 'admin.users', icon: Users },
   { key: 'chats', labelKey: 'admin.chats', icon: MessageCircle },
@@ -60,14 +62,14 @@ const AdminDashboard = () => {
   }
 
   return (
-    <div className="min-h-screen bg-[#fafafa]" data-testid="admin-dashboard-page">
+    <div className="min-h-screen" style={{ background: 'var(--bg)' }} data-testid="admin-dashboard-page">
       <div className="max-w-7xl mx-auto px-6 pt-20 pb-8">
-        <h1 className="text-4xl font-bold mb-8" style={{ fontFamily: 'Playfair Display' }} data-testid="admin-title">
+        <h1 className="text-4xl font-bold mb-8" style={{ fontFamily: 'var(--font-head)' }} data-testid="admin-title">
           {t('admin.title')}
         </h1>
 
         {/* Tab navigation */}
-        <div className="flex flex-wrap gap-2 mb-8 border-b border-[#E5E5E5] pb-4" data-testid="admin-tabs">
+        <div className="flex flex-wrap gap-2 mb-8 border-b border-[var(--brand-border)] pb-4" data-testid="admin-tabs">
           {TAB_KEYS.map(tab => {
             const Icon = tab.icon;
             return (
@@ -79,7 +81,7 @@ const AdminDashboard = () => {
                   if (tab.key === 'users') setUsersPrefilter('');
                   setActiveTab(tab.key);
                 }}
-                className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${activeTab === tab.key ? 'bg-black text-[var(--gold)]' : 'bg-white text-gray-700 border border-[#E5E5E5] hover:bg-gray-50'}`}
+                className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${activeTab === tab.key ? 'bg-[var(--brand-primary)] text-white' : 'bg-white text-gray-700 border border-[var(--brand-border)] hover:bg-gray-50'}`}
                 data-testid={`admin-tab-${tab.key}`}
               >
                 <Icon size={16} />
@@ -98,6 +100,7 @@ const AdminDashboard = () => {
           </>
         )}
         {activeTab === 'listings' && <ListingsTab token={token} onStatsChange={fetchDashboard} />}
+        {activeTab === 'services' && <ServicesTab token={token} />}
         {activeTab === 'bookings' && <BookingsTab token={token} />}
         {activeTab === 'users' && <UsersTab token={token} onStatsChange={fetchDashboard} prefilter={usersPrefilter} />}
         {activeTab === 'chats' && <ChatsTab token={token} />}

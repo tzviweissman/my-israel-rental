@@ -1,6 +1,8 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Home, Eye, FileText, Users, MessageCircle, Mail, CheckCircle, AlertTriangle, Ban, Calendar } from 'lucide-react';
+import { Home, Eye, FileText, Users, MessageCircle, Mail, CheckCircle, AlertTriangle, Ban, Calendar, Briefcase, Store, Inbox } from 'lucide-react';
+import axios from 'axios';
+import { API } from '../../App';
 
 /**
  * Super Admin → Overview tab. Pure presentational; the parent owns the
@@ -15,6 +17,26 @@ import { Home, Eye, FileText, Users, MessageCircle, Mail, CheckCircle, AlertTria
  */
 export const OverviewTab = ({ dashboard, emailHealth, token, onNavigate }) => {
   const { t } = useTranslation();
+  // A1 — the marketplace counts the KPI row never had. Fetched here rather
+  // than folded into /admin/dashboard so a failure shows as three missing
+  // cards instead of an empty Overview.
+  const [mk, setMk] = useState(null);
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const { data } = await axios.get(`${API}/admin/marketplace/summary`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        if (!cancelled) setMk(data);
+      } catch {
+        // Real numbers only: a count that cannot be fetched is a card that
+        // is not rendered, never a zero standing in for "unknown".
+        if (!cancelled) setMk(null);
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [token]);
   return (
     <div data-testid="admin-overview-section">
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4 mb-10">
@@ -32,6 +54,29 @@ export const OverviewTab = ({ dashboard, emailHealth, token, onNavigate }) => {
             icon: Calendar,
             onClick: () => onNavigate && onNavigate('bookings'),
           },
+          // Present ONLY when the counts loaded. An absent card is honest;
+          // a card reading 0 because a request failed is not.
+          ...(mk ? [
+            {
+              label: t('admin.activeServices', 'Active Services'),
+              key: 'active-services',
+              value: mk.active_services,
+              icon: Briefcase,
+              onClick: () => onNavigate && onNavigate('services'),
+            },
+            {
+              label: t('admin.businessesCount', 'Businesses'),
+              key: 'businesses',
+              value: mk.businesses,
+              icon: Store,
+            },
+            {
+              label: t('admin.openRequests', 'Open Requests'),
+              key: 'open-requests',
+              value: mk.open_requests,
+              icon: Inbox,
+            },
+          ] : []),
         ].map(stat => {
           const Icon = stat.icon;
           const clickable = !!stat.onClick;
@@ -41,7 +86,7 @@ export const OverviewTab = ({ dashboard, emailHealth, token, onNavigate }) => {
               key={stat.key}
               onClick={stat.onClick}
               disabled={!clickable}
-              className={`bg-white p-5 rounded-xl border border-[#E5E5E5] text-left w-full ${
+              className={`bg-white p-5 rounded-xl border border-[var(--brand-border)] text-left w-full ${
                 clickable ? 'cursor-pointer hover:border-[var(--gold)] hover:shadow-md transition-all' : 'cursor-default'
               }`}
               data-testid={`stat-${stat.key}`}
@@ -60,8 +105,8 @@ export const OverviewTab = ({ dashboard, emailHealth, token, onNavigate }) => {
         })}
       </div>
 
-      <h2 className="text-xl font-bold mb-4" style={{ fontFamily: 'Playfair Display' }}>{t('admin.recentListings')}</h2>
-      <div className="bg-white rounded-xl border border-[#E5E5E5] overflow-hidden">
+      <h2 className="text-xl font-bold mb-4" style={{ fontFamily: 'var(--font-head)' }}>{t('admin.recentListings')}</h2>
+      <div className="bg-white rounded-xl border border-[var(--brand-border)] overflow-hidden">
         <table className="w-full">
           <thead className="bg-gray-50">
             <tr>
@@ -74,10 +119,10 @@ export const OverviewTab = ({ dashboard, emailHealth, token, onNavigate }) => {
           </thead>
           <tbody>
             {dashboard.recent_properties.map(p => (
-              <tr key={p.id} className="border-t border-[#E5E5E5] hover:bg-gray-50" data-testid={`overview-property-${p.id}`}>
+              <tr key={p.id} className="border-t border-[var(--brand-border)] hover:bg-gray-50" data-testid={`overview-property-${p.id}`}>
                 <td className="px-5 py-3 font-medium text-sm">{p.title}</td>
                 <td className="px-5 py-3 text-sm text-gray-600">{p.area}</td>
-                <td className="px-5 py-3"><span className="px-2 py-1 rounded-full text-xs bg-[#E5E5E5]">{p.rental_type}</span></td>
+                <td className="px-5 py-3"><span className="px-2 py-1 rounded-full text-xs bg-[var(--brand-border)]">{p.rental_type}</span></td>
                 <td className="px-5 py-3 font-bold text-sm">{p.currency === 'USD' ? '$' : '₪'}{p.monthly_price || p.nightly_price || 0}</td>
                 <td className="px-5 py-3 text-sm">{p.views || 0}</td>
               </tr>
@@ -90,33 +135,33 @@ export const OverviewTab = ({ dashboard, emailHealth, token, onNavigate }) => {
         <div className="mt-10" data-testid="admin-email-health">
           <div className="flex items-center gap-2 mb-4">
             <Mail size={18} className="text-[var(--brand-primary)]" />
-            <h2 className="text-xl font-bold" style={{ fontFamily: 'Playfair Display' }}>
+            <h2 className="text-xl font-bold" style={{ fontFamily: 'var(--font-head)' }}>
               {t('admin.emailDeliverability')} <span className="text-sm font-normal text-gray-500">{t('admin.lastNDays', { days: emailHealth.window_days })}</span>
             </h2>
           </div>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
-            <div className="bg-white p-4 rounded-xl border border-[#E5E5E5]" data-testid="email-delivered">
+            <div className="bg-white p-4 rounded-xl border border-[var(--brand-border)]" data-testid="email-delivered">
               <div className="flex items-center gap-2 mb-1">
                 <CheckCircle size={14} className="text-green-600" />
                 <span className="text-xs text-gray-500 uppercase tracking-wide">{t('admin.delivered')}</span>
               </div>
               <p className="text-2xl font-bold">{emailHealth.delivered}</p>
             </div>
-            <div className="bg-white p-4 rounded-xl border border-[#E5E5E5]" data-testid="email-bounced">
+            <div className="bg-white p-4 rounded-xl border border-[var(--brand-border)]" data-testid="email-bounced">
               <div className="flex items-center gap-2 mb-1">
                 <AlertTriangle size={14} className="text-amber-600" />
                 <span className="text-xs text-gray-500 uppercase tracking-wide">{t('admin.bounced')}</span>
               </div>
               <p className="text-2xl font-bold">{emailHealth.bounced}</p>
             </div>
-            <div className="bg-white p-4 rounded-xl border border-[#E5E5E5]" data-testid="email-complained">
+            <div className="bg-white p-4 rounded-xl border border-[var(--brand-border)]" data-testid="email-complained">
               <div className="flex items-center gap-2 mb-1">
                 <Ban size={14} className="text-red-600" />
                 <span className="text-xs text-gray-500 uppercase tracking-wide">{t('admin.spamComplaints')}</span>
               </div>
               <p className="text-2xl font-bold">{emailHealth.complained}</p>
             </div>
-            <div className="bg-white p-4 rounded-xl border border-[#E5E5E5]" data-testid="email-delivery-rate">
+            <div className="bg-white p-4 rounded-xl border border-[var(--brand-border)]" data-testid="email-delivery-rate">
               <div className="flex items-center gap-2 mb-1">
                 <span className="text-xs text-gray-500 uppercase tracking-wide">{t('admin.deliveryRate')}</span>
               </div>
@@ -130,11 +175,11 @@ export const OverviewTab = ({ dashboard, emailHealth, token, onNavigate }) => {
           </div>
 
           {emailHealth.recent_events?.length > 0 && (
-            <div className="bg-white rounded-xl border border-[#E5E5E5] overflow-hidden">
-              <div className="px-5 py-3 border-b border-[#E5E5E5] bg-gray-50">
+            <div className="bg-white rounded-xl border border-[var(--brand-border)] overflow-hidden">
+              <div className="px-5 py-3 border-b border-[var(--brand-border)] bg-gray-50">
                 <p className="text-xs font-semibold text-gray-600 uppercase">{t('admin.recentEvents')}</p>
               </div>
-              <div className="divide-y divide-[#E5E5E5] max-h-80 overflow-y-auto">
+              <div className="divide-y divide-[var(--brand-border)] max-h-80 overflow-y-auto">
                 {emailHealth.recent_events.slice(0, 15).map(ev => {
                   const badgeColor =
                     ev.record_type === 'Delivery' ? 'bg-green-100 text-green-700' :

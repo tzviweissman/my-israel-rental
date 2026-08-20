@@ -822,6 +822,10 @@ const en = {
         totalSuffix: ' total'
       },
       admin: {
+        servicesTab: 'Services',
+        activeServices: 'Active Services',
+        businessesCount: 'Businesses',
+        openRequests: 'Open Requests',
         title: 'Super Admin Dashboard',
         overview: 'Overview',
         listings: 'Listings',
