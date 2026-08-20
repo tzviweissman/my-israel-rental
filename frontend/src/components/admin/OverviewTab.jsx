@@ -1,117 +1,165 @@
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Home, Eye, FileText, Users, MessageCircle, Mail, CheckCircle, AlertTriangle, Ban, Calendar, Briefcase, Store, Inbox } from 'lucide-react';
+import { Home, Eye, Users, Calendar, Briefcase, Store, Inbox } from 'lucide-react';
 import axios from 'axios';
 import { API } from '../../App';
 import AttentionQueue from './AttentionQueue';
 
 /**
- * Super Admin → Overview tab. Pure presentational; the parent owns the
- * `dashboard` and `emailHealth` fetches because the parent already needs
- * `dashboard` for its initial loading-spinner gate.
+ * Super Admin → Overview tab.
  *
- * The Bookings stat card is clickable — it jumps the admin to the new
- * dedicated Bookings tab via the parent-provided ``onNavigate`` callback,
- * matching the pattern other dashboards use for drill-down. Non-clickable
- * cards just render as plain divs so a misclick on Total Views doesn't
- * navigate anywhere.
+ * Two KPI groups, not one (spec A6). Every number used to be all-time with
+ * no way to compare periods, so "total views: 4,812" told an admin nothing
+ * they could act on. Adding a range control raises a question the old
+ * single row could not answer honestly: a date range applies to things
+ * that HAPPEN (a booking, a signup) and is meaningless for things that
+ * ARE (how many listings are live right now). Filtering the first while
+ * silently leaving the second unfiltered, under one shared control, is how
+ * a dashboard starts lying. So they are separated and labelled: "in this
+ * period" and "right now".
+ *
+ * Cards are only ``<button>`` when they actually go somewhere (spec A4).
+ * Every card used to be a disabled button with cursor-default — a control
+ * that looks interactive and isn't, which the eye notices even when the
+ * mind doesn't. Cards with a destination now drill into it; the rest are
+ * plain divs.
  */
-export const OverviewTab = ({ dashboard, emailHealth, token, onNavigate }) => {
+
+// Range keys must match METRIC_RANGES in backend/routes/admin/core.py.
+const RANGES = ['today', '7d', '30d', 'all'];
+
+export const OverviewTab = ({ dashboard, token, onNavigate }) => {
   const { t } = useTranslation();
-  // A1 — the marketplace counts the KPI row never had. Fetched here rather
-  // than folded into /admin/dashboard so a failure shows as three missing
-  // cards instead of an empty Overview.
-  const [mk, setMk] = useState(null);
+  // All time by default, so the console opens showing what it always
+  // showed and the range is something the admin reaches for deliberately.
+  const [range, setRange] = useState('all');
+  const [metrics, setMetrics] = useState(null);
+  const [failed, setFailed] = useState(false);
+
   useEffect(() => {
     let cancelled = false;
+    setFailed(false);
     (async () => {
       try {
-        const { data } = await axios.get(`${API}/admin/marketplace/summary`, {
+        const { data } = await axios.get(`${API}/admin/metrics`, {
+          params: { range },
           headers: { Authorization: `Bearer ${token}` },
         });
-        if (!cancelled) setMk(data);
+        if (!cancelled) setMetrics(data);
       } catch {
         // Real numbers only: a count that cannot be fetched is a card that
         // is not rendered, never a zero standing in for "unknown".
-        if (!cancelled) setMk(null);
+        if (!cancelled) { setMetrics(null); setFailed(true); }
       }
     })();
     return () => { cancelled = true; };
-  }, [token]);
+  }, [token, range]);
+
+  const flow = metrics?.flow;
+  const stock = metrics?.stock;
+
+  const flowCards = flow ? [
+    { key: 'views', label: t('admin.kpiViews', 'Views'), value: flow.views, icon: Eye },
+    { key: 'new-listings', label: t('admin.kpiNewListings', 'New listings'), value: flow.new_listings, icon: Home, go: 'listings' },
+    { key: 'new-users', label: t('admin.kpiNewUsers', 'New users'), value: flow.new_users, icon: Users, go: 'users' },
+    { key: 'bookings', label: t('admin.kpiBookings', 'Bookings'), value: flow.bookings, icon: Calendar, go: 'bookings' },
+    { key: 'new-services', label: t('admin.kpiNewServices', 'New services'), value: flow.new_services, icon: Briefcase, go: 'services' },
+  ] : [];
+
+  const stockCards = stock ? [
+    { key: 'active-listings', label: t('admin.kpiActiveListings', 'Active listings'), value: stock.active_listings, icon: Home, go: 'listings' },
+    { key: 'active-services', label: t('admin.kpiActiveServices', 'Active services'), value: stock.active_services, icon: Briefcase, go: 'services' },
+    { key: 'businesses', label: t('admin.kpiBusinesses', 'Businesses'), value: stock.businesses, icon: Store, go: 'services' },
+    // No Requests tab exists yet, so this one genuinely has nowhere to go
+    // and stays a plain div rather than pretending otherwise.
+    { key: 'open-requests', label: t('admin.kpiOpenRequests', 'Open requests'), value: stock.open_requests, icon: Inbox },
+  ] : [];
+
+  const renderCard = ({ key, label, value, icon: Icon, go }) => {
+    const body = (
+      <div className="flex items-center gap-3">
+        <div className="p-2 rounded-lg shrink-0" style={{ backgroundColor: 'var(--brand-primary)' }}>
+          <Icon size={18} color="var(--gold)" />
+        </div>
+        <div className="min-w-0">
+          <p className="text-2xl font-bold">{typeof value === 'number' ? value.toLocaleString() : value}</p>
+          <p className="text-xs text-gray-500">{label}</p>
+        </div>
+      </div>
+    );
+    const base = 'bg-white p-4 sm:p-5 rounded-xl border border-[var(--brand-border)] text-start w-full';
+    return go ? (
+      <button
+        type="button"
+        key={key}
+        onClick={() => onNavigate && onNavigate(go)}
+        className={`${base} cursor-pointer hover:border-[var(--gold)] hover:shadow-md transition-all`}
+        data-testid={`stat-${key}`}
+      >
+        {body}
+      </button>
+    ) : (
+      <div key={key} className={base} data-testid={`stat-${key}`}>{body}</div>
+    );
+  };
+
   return (
     <div data-testid="admin-overview-section">
       {/* A3 — above the KPI grid, because "what needs me today" outranks
           "how are we doing overall". Renders nothing when all clear. */}
       <AttentionQueue token={token} onNavigate={onNavigate} />
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4 mb-10">
-        {[
-          { label: t('admin.activeListings'), key: 'active-listings', value: dashboard.active_listings, icon: Home },
-          { label: t('admin.totalViews'), key: 'total-views', value: dashboard.total_views, icon: Eye },
-          { label: t('admin.inquiries'), key: 'inquiries', value: dashboard.total_inquiries, icon: FileText },
-          { label: t('admin.totalUsers'), key: 'total-users', value: dashboard.total_users, icon: Users },
-          // Clickable — drills into the dedicated Bookings tab. The new
-          // card sits *next to* Total Users as the user explicitly asked.
-          {
-            label: t('admin.totalBookings', 'Total Bookings'),
-            key: 'total-bookings',
-            value: dashboard.total_bookings ?? dashboard.total_inquiries ?? 0,
-            icon: Calendar,
-            onClick: () => onNavigate && onNavigate('bookings'),
-          },
-          // Present ONLY when the counts loaded. An absent card is honest;
-          // a card reading 0 because a request failed is not.
-          ...(mk ? [
-            {
-              label: t('admin.activeServices', 'Active Services'),
-              key: 'active-services',
-              value: mk.active_services,
-              icon: Briefcase,
-              onClick: () => onNavigate && onNavigate('services'),
-            },
-            {
-              label: t('admin.businessesCount', 'Businesses'),
-              key: 'businesses',
-              value: mk.businesses,
-              icon: Store,
-            },
-            {
-              label: t('admin.openRequests', 'Open Requests'),
-              key: 'open-requests',
-              value: mk.open_requests,
-              icon: Inbox,
-            },
-          ] : []),
-        ].map(stat => {
-          const Icon = stat.icon;
-          const clickable = !!stat.onClick;
-          return (
+      {/* --- flow: things that happened in the selected period --- */}
+      <div className="flex items-center justify-between gap-3 mb-3 flex-wrap">
+        <h2 className="text-sm font-bold uppercase tracking-wide" style={{ color: 'var(--brand-muted)' }}>
+          {range === 'all' ? t('admin.kpiAllTime', 'All time') : t('admin.kpiInPeriod', 'In this period')}
+        </h2>
+        <div className="flex items-center gap-1 p-1 rounded-lg" style={{ background: 'rgb(var(--brand-primary-rgb) / 0.07)' }} data-testid="admin-range">
+          {RANGES.map((r) => (
             <button
-              type={clickable ? 'button' : undefined}
-              key={stat.key}
-              onClick={stat.onClick}
-              disabled={!clickable}
-              className={`bg-white p-5 rounded-xl border border-[var(--brand-border)] text-left w-full ${
-                clickable ? 'cursor-pointer hover:border-[var(--gold)] hover:shadow-md transition-all' : 'cursor-default'
-              }`}
-              data-testid={`stat-${stat.key}`}
+              key={r}
+              type="button"
+              onClick={() => setRange(r)}
+              className={`px-3 py-1 rounded-md text-xs font-semibold transition-colors ${range === r ? 'bg-white shadow-sm' : ''}`}
+              style={{ color: range === r ? 'var(--brand-primary)' : 'var(--brand-muted)' }}
+              data-testid={`admin-range-${r}`}
             >
-              <div className="flex items-center gap-3">
-                <div className="p-2 rounded-lg" style={{ backgroundColor: 'var(--brand-primary)' }}>
-                  <Icon size={18} color="var(--gold)" />
-                </div>
-                <div>
-                  <p className="text-2xl font-bold">{stat.value}</p>
-                  <p className="text-xs text-gray-500">{stat.label}</p>
-                </div>
-              </div>
+              {t(`admin.range_${r}`, { today: 'Today', '7d': '7 days', '30d': '30 days', all: 'All' }[r])}
             </button>
-          );
-        })}
+          ))}
+        </div>
+      </div>
+
+      {failed && (
+        <p className="text-sm mb-6" style={{ color: 'var(--brand-muted)' }} data-testid="admin-metrics-failed">
+          {t('admin.kpiUnavailable', 'These numbers could not be loaded.')}
+        </p>
+      )}
+
+      <div className="grid grid-cols-2 lg:grid-cols-5 gap-3 sm:gap-4 mb-3">
+        {flowCards.map(renderCard)}
+      </div>
+
+      {/* Views only exist from the day event logging started. Saying so
+          keeps "All time" from claiming more history than it has. */}
+      {metrics?.views_since && (
+        <p className="text-xs mb-8" style={{ color: 'var(--brand-muted)' }} data-testid="admin-views-since">
+          {t('admin.viewsSince', 'Views counted since {{date}}', {
+            date: new Date(metrics.views_since).toLocaleDateString(),
+          })}
+        </p>
+      )}
+
+      {/* --- stock: true right now, whatever the range says --- */}
+      <h2 className="text-sm font-bold uppercase tracking-wide mb-3" style={{ color: 'var(--brand-muted)' }}>
+        {t('admin.kpiRightNow', 'Right now')}
+      </h2>
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-10">
+        {stockCards.map(renderCard)}
       </div>
 
       <h2 className="text-xl font-bold mb-4" style={{ fontFamily: 'var(--font-head)' }}>{t('admin.recentListings')}</h2>
-      <div className="bg-white rounded-xl border border-[var(--brand-border)] overflow-hidden">
+      <div className="bg-white rounded-xl border border-[var(--brand-border)] overflow-x-auto">
         <table className="w-full">
           <thead className="bg-gray-50">
             <tr>
@@ -135,83 +183,6 @@ export const OverviewTab = ({ dashboard, emailHealth, token, onNavigate }) => {
           </tbody>
         </table>
       </div>
-
-      {emailHealth && (
-        <div className="mt-10" data-testid="admin-email-health">
-          <div className="flex items-center gap-2 mb-4">
-            <Mail size={18} className="text-[var(--brand-primary)]" />
-            <h2 className="text-xl font-bold" style={{ fontFamily: 'var(--font-head)' }}>
-              {t('admin.emailDeliverability')} <span className="text-sm font-normal text-gray-500">{t('admin.lastNDays', { days: emailHealth.window_days })}</span>
-            </h2>
-          </div>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
-            <div className="bg-white p-4 rounded-xl border border-[var(--brand-border)]" data-testid="email-delivered">
-              <div className="flex items-center gap-2 mb-1">
-                <CheckCircle size={14} className="text-green-600" />
-                <span className="text-xs text-gray-500 uppercase tracking-wide">{t('admin.delivered')}</span>
-              </div>
-              <p className="text-2xl font-bold">{emailHealth.delivered}</p>
-            </div>
-            <div className="bg-white p-4 rounded-xl border border-[var(--brand-border)]" data-testid="email-bounced">
-              <div className="flex items-center gap-2 mb-1">
-                <AlertTriangle size={14} className="text-amber-600" />
-                <span className="text-xs text-gray-500 uppercase tracking-wide">{t('admin.bounced')}</span>
-              </div>
-              <p className="text-2xl font-bold">{emailHealth.bounced}</p>
-            </div>
-            <div className="bg-white p-4 rounded-xl border border-[var(--brand-border)]" data-testid="email-complained">
-              <div className="flex items-center gap-2 mb-1">
-                <Ban size={14} className="text-red-600" />
-                <span className="text-xs text-gray-500 uppercase tracking-wide">{t('admin.spamComplaints')}</span>
-              </div>
-              <p className="text-2xl font-bold">{emailHealth.complained}</p>
-            </div>
-            <div className="bg-white p-4 rounded-xl border border-[var(--brand-border)]" data-testid="email-delivery-rate">
-              <div className="flex items-center gap-2 mb-1">
-                <span className="text-xs text-gray-500 uppercase tracking-wide">{t('admin.deliveryRate')}</span>
-              </div>
-              <p className="text-2xl font-bold">
-                {emailHealth.delivery_rate_pct !== null ? `${emailHealth.delivery_rate_pct}%` : '—'}
-              </p>
-              {emailHealth.suppressed_users > 0 && (
-                <p className="text-xs text-red-500 mt-1">{t('admin.usersSuppressed', { count: emailHealth.suppressed_users })}</p>
-              )}
-            </div>
-          </div>
-
-          {emailHealth.recent_events?.length > 0 && (
-            <div className="bg-white rounded-xl border border-[var(--brand-border)] overflow-hidden">
-              <div className="px-5 py-3 border-b border-[var(--brand-border)] bg-gray-50">
-                <p className="text-xs font-semibold text-gray-600 uppercase">{t('admin.recentEvents')}</p>
-              </div>
-              <div className="divide-y divide-[var(--brand-border)] max-h-80 overflow-y-auto">
-                {emailHealth.recent_events.slice(0, 15).map(ev => {
-                  const badgeColor =
-                    ev.record_type === 'Delivery' ? 'bg-green-100 text-green-700' :
-                    ev.record_type === 'Bounce' ? 'bg-amber-100 text-amber-700' :
-                    ev.record_type === 'SpamComplaint' ? 'bg-red-100 text-red-700' :
-                    'bg-gray-100 text-gray-700';
-                  return (
-                    <div key={ev.id} className="px-5 py-3 flex items-center justify-between gap-3 text-sm" data-testid={`email-event-${ev.id}`}>
-                      <div className="flex items-center gap-3 min-w-0 flex-1">
-                        <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${badgeColor}`}>
-                          {ev.record_type}{ev.bounce_type ? ` · ${ev.bounce_type}` : ''}
-                        </span>
-                        <span className="truncate text-gray-700">{ev.email || '—'}</span>
-                        {ev.tag && <span className="text-xs text-gray-400 shrink-0">#{ev.tag}</span>}
-                      </div>
-                      <span className="text-xs text-gray-400 shrink-0">
-                        {new Date(ev.received_at).toLocaleString()}
-                      </span>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          )}
-        </div>
-      )}
-
     </div>
   );
 };

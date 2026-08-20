@@ -9,6 +9,7 @@ modules inside the ``routes.admin`` package:
 """
 import asyncio
 from datetime import UTC, datetime, timedelta
+from zoneinfo import ZoneInfo
 
 import jwt
 
@@ -64,6 +65,114 @@ async def get_admin_dashboard(payload: dict = Depends(verify_token)) -> dict:
         "total_bookings": total_bookings,
         "total_users": total_users,
         "recent_properties": recent_properties
+    }
+
+
+# Ranges the Overview offers (spec A6). Value is days back; None is all time.
+# "today" is a CALENDAR day in Israel, not the last 24 hours — an admin
+# asking "today" means since this morning, and the business runs on Israel
+# time. Same timezone the QR scan buckets already use.
+METRIC_RANGES: dict[str, int | None] = {"today": 0, "7d": 7, "30d": 30, "all": None}
+
+
+def _range_cutoffs(rng: str) -> tuple[datetime | None, str | None]:
+    """Return (datetime cutoff, naive-ISO-string cutoff) for a range key.
+
+    BOTH forms are returned because this database stores the same idea two
+    ways and Mongo will not compare across them: every business collection
+    writes ``created_at`` as an ISO *string*, while ``property_view_events``
+    writes ``at`` as a real datetime. Querying a string field with a
+    datetime matches nothing and returns a confident 0 — verified against
+    real data, where a 30-day user count read 33 by string and 0 by
+    datetime. So each query below must pick the form that matches its own
+    collection.
+
+    The string cutoff is deliberately built WITHOUT a timezone offset:
+    stored values are mostly naive, and a naive cutoff orders correctly
+    against both naive and offset-suffixed values.
+    """
+    if rng == "all":
+        return None, None
+    now = datetime.now(UTC)
+    if rng == "today":
+        israel = ZoneInfo("Asia/Jerusalem")
+        local_midnight = now.astimezone(israel).replace(hour=0, minute=0, second=0, microsecond=0)
+        cutoff = local_midnight.astimezone(UTC)
+    else:
+        cutoff = now - timedelta(days=METRIC_RANGES.get(rng) or 0)
+    return cutoff, cutoff.replace(tzinfo=None).isoformat()
+
+
+@api_router.get("/admin/metrics")
+async def get_admin_metrics(
+    payload: dict = Depends(verify_token),
+    range: str = "all",
+) -> dict:
+    """KPI numbers for a time range (spec A6).
+
+    Split into ``flow`` and ``stock`` because conflating them is how a
+    dashboard starts lying. Flow is "how many happened in the period" and
+    genuinely responds to the range. Stock is "how many exist right now" —
+    active listings, open requests — and a date range simply does not apply
+    to it. Rather than silently leave stock unfiltered while it sits beside
+    filtered numbers under one range control, the two are returned
+    separately so the console can label them differently.
+
+    Views come from ``property_view_events`` for EVERY range including
+    "all", never from the ``properties.views`` counter. Mixing the two was
+    the first attempt and it produced a dashboard that contradicted itself:
+    all-time read 14 while the last 30 days read 93, because the counter
+    and the event log have different histories and are reset by different
+    things. A total smaller than one of its own subsets reads as a broken
+    console, and rightly so. One source keeps the series monotonic, at the
+    cost of only counting views since event logging began — which is what
+    ``views_since`` reports, so the number can be labelled honestly rather
+    than passing itself off as all of history.
+    """
+    if payload.get("role") != "admin":
+        raise HTTPException(status_code=403, detail="Admin access required")
+    if range not in METRIC_RANGES:
+        raise HTTPException(status_code=400, detail=f"range must be one of {sorted(METRIC_RANGES)}")
+
+    dt_cut, iso_cut = _range_cutoffs(range)
+    now_iso = datetime.now(UTC).isoformat()
+
+    # --- stock: true right now, unaffected by the range ---
+    stock = {
+        "active_listings": await db.properties.count_documents({"status": "active"}),
+        "active_services": await db.marketplace_gigs.count_documents({"status": "published"}),
+        "businesses": await db.businesses.count_documents({"active": True}),
+        "open_requests": await db.requests.count_documents(
+            {"status": "open", "expires_at": {"$gte": now_iso}}
+        ),
+    }
+
+    # --- flow: things that happened inside the range ---
+    # String cutoffs for these four; an empty filter when the range is all
+    # time. See _range_cutoffs for why the type has to match the collection.
+    since = {} if iso_cut is None else {"created_at": {"$gte": iso_cut}}
+    flow = {
+        "new_listings": await db.properties.count_documents(since),
+        "new_users": await db.users.count_documents(since),
+        "bookings": await db.bookings.count_documents(since),
+        "new_services": await db.marketplace_gigs.count_documents(since),
+    }
+
+    # Datetime cutoff here — different collection, different stored type.
+    view_q = {} if dt_cut is None else {"at": {"$gte": dt_cut}}
+    flow["views"] = await db.property_view_events.count_documents(view_q)
+
+    # When view logging actually began, so "all time" can say what it means
+    # instead of implying it covers the whole life of the site.
+    first = await db.property_view_events.find_one({}, {"at": 1}, sort=[("at", 1)])
+    views_since = first["at"].isoformat() if first and first.get("at") else None
+
+    return {
+        "range": range,
+        "flow": flow,
+        "stock": stock,
+        "views_source": "events",
+        "views_since": views_since,
     }
 
 
