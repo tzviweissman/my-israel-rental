@@ -23,6 +23,11 @@ from routes.deps import db, verify_token
 router = APIRouter()
 api_router = router
 
+# How long a thread may sit unanswered before the console mentions it.
+# Long enough not to nag mid-conversation, short enough that the enquiry
+# is still warm.
+STALE_CHAT_DAYS = 3
+
 
 def _admin_only(payload: dict) -> None:
     if payload.get("role") != "admin":
@@ -167,8 +172,52 @@ async def admin_attention(payload: dict = Depends(verify_token)) -> dict[str, An
     # Businesses with listings but no verification decision yet.
     unverified = await db.businesses.count_documents({"active": True, "verified": {"$ne": True}})
 
+    # Conversations where the last word came from the OTHER party and has
+    # sat there three days. Three because it is long enough not to nag
+    # someone mid-conversation and short enough that the enquiry is still
+    # warm; "unanswered" means no reply since their last message, not "no
+    # reply ever", which would keep flagging a thread that was answered
+    # twice and then went quiet naturally.
+    #
+    # Read from the messages themselves rather than a stored flag: a flag
+    # would need maintaining on every send and would drift the first time
+    # a path forgot to update it.
+    stale_before = (now - timedelta(days=STALE_CHAT_DAYS)).isoformat()
+    latest: dict[str, dict[str, Any]] = {}
+    async for msg in db.messages.find(
+        {"created_at": {"$lte": stale_before}},
+        {"property_id": 1, "sender_id": 1, "receiver_id": 1, "created_at": 1},
+    ).sort("created_at", -1).limit(4000):
+        key = f"{msg.get('property_id')}_{msg.get('sender_id')}_{msg.get('receiver_id')}"
+        pair = tuple(sorted([str(msg.get("sender_id")), str(msg.get("receiver_id"))]))
+        conv = f"{msg.get('property_id')}::{pair[0]}::{pair[1]}"
+        if conv not in latest:
+            latest[conv] = msg
+    # A thread counts when its newest message is older than the cutoff —
+    # anything newer means the conversation is still moving.
+    fresh_convs = set()
+    async for msg in db.messages.find(
+        {"created_at": {"$gt": stale_before}},
+        {"property_id": 1, "sender_id": 1, "receiver_id": 1},
+    ).limit(4000):
+        pair = tuple(sorted([str(msg.get("sender_id")), str(msg.get("receiver_id"))]))
+        fresh_convs.add(f"{msg.get('property_id')}::{pair[0]}::{pair[1]}")
+    stale_chats = len([c for c in latest if c not in fresh_convs])
+
+    # Bounces over a rolling seven days, NOT "since last visit". A
+    # since-last-visit count needs a per-admin timestamp that does not
+    # exist, and a number that silently resets when someone else opens the
+    # console is worse than no number.
+    week_ago = (now - timedelta(days=7)).isoformat()
+    bounced = await db.email_events.count_documents({
+        "record_type": "Bounce",
+        "received_at": {"$gte": week_ago},
+    })
+
     return {
         "requests_expiring_unanswered": expiring,
         "services_without_photo": no_photo,
         "businesses_unverified": unverified,
+        "chats_unanswered": stale_chats,
+        "emails_bounced_7d": bounced,
     }

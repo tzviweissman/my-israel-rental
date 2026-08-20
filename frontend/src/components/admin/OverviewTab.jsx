@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { Home, Eye, FileText, Users, MessageCircle, Mail, CheckCircle, AlertTriangle, Ban, Calendar, Briefcase, Store, Inbox } from 'lucide-react';
 import axios from 'axios';
 import { API } from '../../App';
+import AttentionQueue from './AttentionQueue';
 
 /**
  * Super Admin → Overview tab. Pure presentational; the parent owns the
@@ -39,6 +40,10 @@ export const OverviewTab = ({ dashboard, emailHealth, token, onNavigate }) => {
   }, [token]);
   return (
     <div data-testid="admin-overview-section">
+      {/* A3 — above the KPI grid, because "what needs me today" outranks
+          "how are we doing overall". Renders nothing when all clear. */}
+      <AttentionQueue token={token} onNavigate={onNavigate} />
+
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4 mb-10">
         {[
           { label: t('admin.activeListings'), key: 'active-listings', value: dashboard.active_listings, icon: Home },
