@@ -347,16 +347,16 @@ function App() {
                 and any QR or message already sent stays valid. */}
             <Route path="/services/jobs" element={<JobsBoard />} />
             <Route path="/services/jobs/:id" element={<JobDetail />} />
-            <Route path="/services/post-job" element={user ? <PostJob /> : <Navigate to="/auth/login" />} />
+            <Route path="/services/post-job" element={user ? <PostJob /> : <Navigate to="/signup" />} />
             <Route path="/services/gig/:id" element={<GigDetail />} />
-            <Route path="/services/create-gig" element={user ? <CreateGig /> : <Navigate to="/auth/login" />} />
+            <Route path="/services/create-gig" element={user ? <CreateGig /> : <Navigate to="/signup" />} />
 
             {/* The names people see and share from now on. */}
             <Route path="/businesses/jobs" element={<JobsBoard />} />
             <Route path="/businesses/jobs/:id" element={<JobDetail />} />
-            <Route path="/businesses/post-job" element={user ? <PostJob /> : <Navigate to="/auth/login" />} />
+            <Route path="/businesses/post-job" element={user ? <PostJob /> : <Navigate to="/signup" />} />
             <Route path="/businesses/:id" element={<GigDetail />} />
-            <Route path="/businesses/add" element={user ? <CreateGig /> : <Navigate to="/auth/login" />} />
+            <Route path="/businesses/add" element={user ? <CreateGig /> : <Navigate to="/signup" />} />
             {/* M4 — the public page for ONE business, by slug or by id.
                 Both resolve: the spec allows either as canonical and the
                 short-link table already points at /business/{id}. */}
