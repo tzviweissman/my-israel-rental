@@ -42,6 +42,26 @@ const en = {
         defaultLabel: 'Main code',
         failed: 'Could not create that code',
       },
+      businesses: {
+        title: 'Your businesses',
+        body: 'Run more than one? Add each separately — they each get their own listings, page and QR code.',
+        atCap: 'You have the maximum of {{n}} active businesses. Hide one to add another.',
+        add: 'Add a business',
+        namePh: 'Business name — e.g. Cohen Movers',
+        save: 'Save',
+        cancel: 'Cancel',
+        added: 'Business added',
+        addFailed: 'Could not add that business',
+        saveFailed: 'Could not save',
+        rename: 'Rename',
+        listingCount: '{{n}} listing(s)',
+        hidden: 'hidden',
+        hide: 'Hide',
+        show: 'Show',
+        empty: 'No businesses yet. Add one to start listing.',
+        confirmHide: 'Hide "{{name}}"? Its {{n}} listing(s) stop showing publicly. Reviews are kept, and you can switch it back on any time.',
+        confirmHideEmpty: 'Hide "{{name}}"? You can switch it back on any time.',
+      },
       qr: {
         logoAdd: 'Add your logo',
         logoReplace: 'Change logo',
@@ -400,6 +420,7 @@ const en = {
         clearFilters: 'Clear filters',
         inProgress: 'IN PROGRESS',
         myGigs: 'My Gigs',
+        myBusinesses: 'Businesses',
         // D1 — these four tabs shared three words between them and no
         // user could predict what was behind any of them. Named now by
         // WHOSE work it is and which direction it flows.

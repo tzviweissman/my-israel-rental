@@ -18,7 +18,7 @@ identical, endpoints just live in smaller modules now.
 """
 from fastapi import APIRouter
 
-from . import gigs, jobs, notification_prefs, providers, requests, subscription
+from . import businesses, gigs, jobs, notification_prefs, providers, requests, subscription
 
 # One router that owns every marketplace endpoint. All three sub-modules
 # use the same ``/marketplace`` prefix + ``["marketplace"]`` tag on their
@@ -26,6 +26,7 @@ from . import gigs, jobs, notification_prefs, providers, requests, subscription
 # correctly.
 router = APIRouter()
 router.include_router(providers.router)
+router.include_router(businesses.router)
 router.include_router(gigs.router)
 router.include_router(jobs.router)
 router.include_router(requests.router)

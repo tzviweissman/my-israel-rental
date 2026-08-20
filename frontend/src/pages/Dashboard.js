@@ -18,6 +18,7 @@ import BulkUploadModal from '../components/dashboard/BulkUploadModal';
 import BulkManagerTab from '../components/dashboard/BulkManagerTab';
 import MessagesTab from '../components/dashboard/MessagesTab';
 import MyGigsTab from '../components/dashboard/MyGigsTab';
+import MyBusinessesTab from '../components/dashboard/MyBusinessesTab';
 import JobRequestsTab from '../components/dashboard/JobRequestsTab';
 import MyJobsTab from '../components/dashboard/MyJobsTab';
 import ManagerHeader from '../components/dashboard/ManagerHeader';
@@ -361,6 +362,10 @@ const Dashboard = () => {
             check, which is exactly the drift providerTrial.js warns
             about: fixing only the tab would have shown a My Gigs button
             that rendered an empty panel. */}
+        {activeTab === 'my-businesses' && showGigTabs && (
+          <MyBusinessesTab API={API} token={token} />
+        )}
+
         {activeTab === 'my-gigs' && showGigTabs && (
           <MyGigsTab API={API} token={token} />
         )}
