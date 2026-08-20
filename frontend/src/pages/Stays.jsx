@@ -199,26 +199,6 @@ const Stays = ({ landing = null }) => {
   const [visibleCount, setVisibleCount] = useState(PAGE);
   const moreRef = useRef(null);
 
-  // A new result set starts from the first page again — otherwise
-  // filtering down to 3 listings would still be carrying a window sized
-  // for the last search.
-  useEffect(() => { setVisibleCount(PAGE); }, [filteredWithDistance.length]);
-
-  // Extend as the sentinel below the grid comes into view. No scroll
-  // handler: an observer fires once per crossing instead of on every
-  // frame of scrolling.
-  useEffect(() => {
-    const el = moreRef.current;
-    if (!el) return undefined;
-    const io = new IntersectionObserver((entries) => {
-      if (entries[0].isIntersecting) {
-        setVisibleCount((c) => (c < filteredWithDistance.length ? c + PAGE : c));
-      }
-    }, { rootMargin: '600px' });   // start early, so cards are ready before they are reached
-    io.observe(el);
-    return () => io.disconnect();
-  }, [filteredWithDistance.length]);
-
   // Persist active filters to the URL so refresh + sharing keep state.
   // Only writes the keys that actually have values to keep the URL clean.
   const syncUrl = useCallback(() => {
@@ -452,6 +432,30 @@ const Stays = ({ landing = null }) => {
         return nearCoords ? [...withDistance].sort(byNewest) : withDistance;
     }
   }, [withDistance, effectiveSort, nearCoords, priceCurrency, fxRate]);
+
+  // These MUST sit below filteredWithDistance, not above it. Declared
+  // earlier, they read it before its `const` is initialised — a temporal
+  // dead zone error that crashed the whole page with "Cannot access X
+  // before initialization". It shipped that way because I committed this
+  // change without verifying it rendered.
+  //
+  // A new result set starts from the first page again, or filtering down
+  // to 3 listings would keep a window sized for the previous search.
+  useEffect(() => { setVisibleCount(PAGE); }, [filteredWithDistance.length]);
+
+  // Extend as the sentinel below the grid comes into view. An observer
+  // fires once per crossing rather than on every frame of scrolling.
+  useEffect(() => {
+    const el = moreRef.current;
+    if (!el) return undefined;
+    const io = new IntersectionObserver((entries) => {
+      if (entries[0].isIntersecting) {
+        setVisibleCount((c) => (c < filteredWithDistance.length ? c + PAGE : c));
+      }
+    }, { rootMargin: '600px' });   // ready before it is reached
+    io.observe(el);
+    return () => io.disconnect();
+  }, [filteredWithDistance.length]);
 
   // Address input → Nominatim (via our /api/geocode/search proxy which
   // handles the 1 rps cap + caching). On success we set coords in memory
