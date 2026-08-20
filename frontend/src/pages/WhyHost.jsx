@@ -44,6 +44,7 @@
  */
 import React, { useState, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
+import BackLink from '../components/common/BackLink';
 import { useNavigate } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
 import PageMeta from '../components/PageMeta';
@@ -158,6 +159,11 @@ const WhyHost = () => {
 
       {/* Hero - split, photo carries the trust */}
       <section className="px-6 pt-24 pb-14">
+        {/* Reached mid-signup from the join page's "See how hosting
+            works" — same stranding problem as /why-list. */}
+        <div className="max-w-6xl mx-auto mb-6">
+          <BackLink fallback="/signup" testId="why-host-back" />
+        </div>
         <div className="max-w-6xl mx-auto grid gap-10 lg:gap-14 lg:grid-cols-[1.05fr_1fr] lg:items-center">
           <div>
             <div className="wh-eyebrow" style={{ color: 'var(--gold-text-on-light)' }}>

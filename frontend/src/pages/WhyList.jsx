@@ -25,6 +25,7 @@
  */
 import React from 'react';
 import { useTranslation } from 'react-i18next';
+import BackLink from '../components/common/BackLink';
 import { Link, useNavigate } from 'react-router-dom';
 import {
   Target, Briefcase, Languages, Star, CalendarCheck, MessageCircle,
@@ -81,10 +82,16 @@ const WhyList = () => {
 
       {/* Hero */}
       <section className="px-6 pt-24 pb-12 bg-gradient-to-b from-[#f2f8f8] to-white">
+        {/* Reached mid-signup from the join page's "See what business
+            owners get". Without this the reader is stranded on a
+            full-screen pitch with no way back to the form they left. */}
+        <div className="max-w-4xl mx-auto mb-6">
+          <BackLink fallback="/signup" testId="why-list-back" />
+        </div>
         <div className="max-w-4xl mx-auto text-center">
           <h1
             className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 mb-4"
-            style={{ fontFamily: 'Playfair Display' }}
+            style={{ fontFamily: 'var(--font-head)' }}
           >
             {t('whyList.heroTitle', 'Get found by English-speaking renters across Israel')}
           </h1>
