@@ -110,6 +110,23 @@ const BusinessPage = () => {
      six to eight on a phone screen where the grid fits two. The counts
      come from the spec's table. */
   const listingCount = (biz.listings || []).length;
+
+  /* B4 — the page opened with a 64px logo floating in a white bar on a
+     wide column, which makes a business with one service look abandoned.
+     A cover band is the shape people already read as a storefront, from
+     Facebook and Google Business.
+
+     No business has a cover image yet, so the band falls back through
+     what actually exists: a cover if one is ever set, else the first
+     listing's photo, else CoverPlaceholder's deterministic tint - the
+     same tint the cards use, so the page hangs together. Real data or a
+     designed blank; never a grey box. */
+  const bandImage = biz.cover_url || (primaryListing ? getGigCover(primaryListing) : null);
+
+  /* A wide grid amplifies empty space. Under four listings the column
+     narrows, so a small catalogue reads as deliberate rather than as a
+     page that failed to load the rest. */
+  const columnWidth = listingCount < 4 ? 'max-w-[900px]' : 'max-w-5xl';
   const autoLayout = listingCount <= 6 ? 'grid' : 'list';
   const effectiveLayout = layout || autoLayout;
   const chooseLayout = (next) => {
@@ -147,16 +164,32 @@ const BusinessPage = () => {
         path={`/business/${biz.slug || biz.id}`}
       />
 
-      <div className="max-w-5xl mx-auto px-4 py-8">
-        <div className="rounded-2xl border bg-white p-5 mb-6"
+      <div className={`${columnWidth} mx-auto px-4 py-8`}>
+        <div className="rounded-2xl border bg-white overflow-hidden mb-6"
           style={{ borderColor: 'var(--brand-border)' }}>
-          <div className="flex items-start gap-4">
-            <div className="w-16 h-16 rounded-xl overflow-hidden shrink-0">
-              {biz.logo_url
-                ? <img src={biz.logo_url} alt="" className="w-full h-full object-cover" />
-                : <CoverPlaceholder name={biz.name} category={(biz.categories || [])[0]} className="w-full h-full" />}
-            </div>
-            <div className="min-w-0 flex-1">
+          {/* Cover band. Short enough not to push the name below the
+              fold on a phone, tall enough to read as a header. */}
+          <div className="relative h-28 sm:h-40" data-testid="business-cover-band">
+            {bandImage
+              ? <img src={bandImage} alt="" className="w-full h-full object-cover" />
+              : <CoverPlaceholder name={biz.name} category={(biz.categories || [])[0]} className="w-full h-full" />}
+          </div>
+
+          {/* The logo overlaps the band's lower edge - the storefront
+              pattern - so it needs the negative margin and the padding
+              below to make room for it. */}
+          <div className="px-5 pb-5">
+            <div className="flex items-start gap-4 -mt-10 sm:-mt-12">
+              <div
+                className="w-20 h-20 sm:w-24 sm:h-24 rounded-xl overflow-hidden shrink-0 border-4 bg-white"
+                style={{ borderColor: 'var(--surface)' }}
+                data-testid="business-logo"
+              >
+                {biz.logo_url
+                  ? <img src={biz.logo_url} alt="" className="w-full h-full object-cover" />
+                  : <CoverPlaceholder name={biz.name} category={(biz.categories || [])[0]} className="w-full h-full" />}
+              </div>
+              <div className="min-w-0 flex-1 pt-10 sm:pt-14">
               <h1 className="text-2xl font-bold flex items-center gap-2 flex-wrap"
                 style={{ fontFamily: 'var(--font-head)', color: 'var(--ink)' }}>
                 {biz.name}
@@ -212,7 +245,10 @@ const BusinessPage = () => {
                 sticky bar below carries it instead of stacking two
                 copies into the first screenful. */}
             {canMessage && (
-              <div className="hidden sm:block shrink-0">
+              /* Same top offset as the text column. Without it the flex
+                 row's negative margin lifts the button onto the cover
+                 photo, where gold on a dark image is invisible. */
+              <div className="hidden sm:block shrink-0 pt-10 sm:pt-14">
                 <button
                     type="button"
                     onClick={messageBusiness}
@@ -223,6 +259,7 @@ const BusinessPage = () => {
                   </button>
               </div>
             )}
+            </div>
           </div>
         </div>
 
