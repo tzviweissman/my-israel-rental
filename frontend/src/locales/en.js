@@ -2210,6 +2210,7 @@ const en = {
         whatsappInvalid: 'Enter a valid WhatsApp number — e.g. 050-123-4567 or +972 50 123 4567.',
         whatsappResolved: 'Customers will message you at +{{number}}',
         from: 'from',
+        askForQuote: 'Ask for a quote',
         noImage: 'No image',
         availableNow: 'Available now',
         availableNowTooltip: 'Show only appointment services open right now',

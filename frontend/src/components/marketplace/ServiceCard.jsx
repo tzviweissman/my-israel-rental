@@ -4,6 +4,7 @@ import StarRating from './StarRating';
 import CoverPlaceholder from '../common/CoverPlaceholder';
 import { localizedTitle, localizedDescription } from '../../utils/gigLocale';
 import { isAvailableNow, getGigCover } from '../../utils/gigAvailability';
+import { gigPriceParts } from '../../utils/gigPrice';
 
 const GOLD = 'var(--gold)';
 
@@ -36,9 +37,7 @@ export default function ServiceCard({ gig, onClick, variant = 'grid', i18n, t })
 // --- grid: the original card, unchanged ---
 const ServiceGridCard = ({ gig, onClick, i18n, t }) => {
   const cover = getGigCover(gig);
-  const cheapest = gig.cheapest_price;
-  const currency = gig.tiers?.[0]?.currency || 'ILS';
-  const sym = currency === 'ILS' ? '₪' : '$';
+  const price = gigPriceParts(gig);
   const bucket = gig.provider?.response_bucket;
   const availableNow = isAvailableNow(gig);
   return (
@@ -133,12 +132,18 @@ const ServiceGridCard = ({ gig, onClick, i18n, t }) => {
           <StarRating value={gig.rating_avg || 0} count={gig.rating_count} size={12} testidPrefix={`gig-stars-${gig.id}`} />
         </div>
       )}
-      {cheapest != null && (
-        <p className="text-xs mt-0.5 text-gray-900">
-          <span className="text-[var(--brand-muted)]">{t('services.from', 'from')} </span>
-          <span className="font-semibold">{sym}{cheapest.toLocaleString()}</span>
-        </p>
-      )}
+      {/* C7 — a price line is always rendered. A blank where a number
+          should be reads as a broken card. */}
+      <p className="text-xs mt-0.5 text-gray-900">
+        {price.quote ? (
+          <span className="text-[var(--brand-muted)]">{t('services.askForQuote', 'Ask for a quote')}</span>
+        ) : (
+          <>
+            {price.from && <span className="text-[var(--brand-muted)]">{t('services.from', 'from')} </span>}
+            <span className="font-semibold">{price.text}</span>
+          </>
+        )}
+      </p>
     </button>
   );
 };
@@ -147,8 +152,7 @@ const ServiceGridCard = ({ gig, onClick, i18n, t }) => {
 // --- list: the compact row ---
 const ServiceRow = ({ gig, onClick, i18n, t }) => {
   const cover = getGigCover(gig);
-  const cheapest = gig.cheapest_price;
-  const sym = (gig.tiers?.[0]?.currency || 'ILS') === 'ILS' ? '₪' : '$';
+  const price = gigPriceParts(gig);
   const desc = (localizedDescription(gig, i18n) || '').trim();
   return (
     <button
@@ -189,12 +193,16 @@ const ServiceRow = ({ gig, onClick, i18n, t }) => {
 
       {/* Price pinned to the end so the eye can ladder down the column
           comparing, which is the one thing a long list is good at. */}
-      {cheapest != null && (
-        <p className="text-sm shrink-0 ps-2 text-gray-900">
-          <span className="text-[var(--brand-muted)] text-xs">{t('services.from', 'from')} </span>
-          <span className="font-semibold">{sym}{cheapest.toLocaleString()}</span>
-        </p>
-      )}
+      <p className="text-sm shrink-0 ps-2 text-gray-900 text-end">
+        {price.quote ? (
+          <span className="text-[var(--brand-muted)] text-xs">{t('services.askForQuote', 'Ask for a quote')}</span>
+        ) : (
+          <>
+            {price.from && <span className="text-[var(--brand-muted)] text-xs">{t('services.from', 'from')} </span>}
+            <span className="font-semibold">{price.text}</span>
+          </>
+        )}
+      </p>
     </button>
   );
 };
