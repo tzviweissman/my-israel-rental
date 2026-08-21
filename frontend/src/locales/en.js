@@ -43,6 +43,7 @@ const en = {
         failed: 'Could not create that code',
       },
       businessPage: {
+        newHere: 'New on MyIsraelRental',
         message: 'Message',
         verified: 'Verified',
         reviews: '({{n}} reviews)',

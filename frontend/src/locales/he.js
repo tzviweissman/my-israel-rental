@@ -43,6 +43,7 @@ const he = {
         failed: 'לא הצלחנו ליצור את הקוד',
       },
       businessPage: {
+        newHere: 'חדש ב-MyIsraelRental',
         message: 'שליחת הודעה',
         verified: 'מאומת',
         reviews: '({{n}} ביקורות)',

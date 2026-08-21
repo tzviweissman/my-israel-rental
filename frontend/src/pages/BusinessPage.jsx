@@ -94,6 +94,8 @@ const BusinessPage = () => {
   };
 
   const messageLabel = t('businessPage.message', 'Message');
+  // member_since is the joining YEAR, already computed by the API.
+  const isNewHere = String(biz.member_since || '') === String(new Date().getFullYear());
 
   // Real data only: fall back through what the business actually has
   // rather than inventing a line for it.
@@ -159,11 +161,18 @@ const BusinessPage = () => {
                     <strong style={{ color: 'var(--ink)' }}>{biz.rating_avg}</strong>
                     {t('businessPage.reviews', '({{n}} reviews)', { n: biz.rating_count })}
                   </span>
-                ) : (
-                  <span data-testid="business-no-reviews">
-                    {t('businessPage.noReviews', 'No reviews yet')}
+                ) : isNewHere ? (
+                  /* B3 — the second line a visitor read used to be "No
+                     reviews yet": the first fact learned about the
+                     business was an absence, which is a poor opening and
+                     is not information anyone needed. A business that
+                     joined this year gets a neutral statement of fact
+                     instead; one that joined earlier gets nothing, because
+                     calling a year-old business "new" would be false. */
+                  <span data-testid="business-new-here">
+                    {t('businessPage.newHere', 'New on MyIsraelRental')}
                   </span>
-                )}
+                ) : null}
                 {(biz.areas || []).length > 0 && (
                   <span className="inline-flex items-center gap-1">
                     <MapPin size={13} /> {biz.areas.join(', ')}
