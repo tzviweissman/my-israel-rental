@@ -24,7 +24,9 @@ from zoneinfo import ZoneInfo
 from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException, Request
-from fastapi.responses import RedirectResponse
+import html
+
+from fastapi.responses import HTMLResponse, RedirectResponse
 from pydantic import BaseModel
 
 from routes.deps import db, verify_token
@@ -272,6 +274,88 @@ async def _counted_lookup(slug: str, request: Request):
     )
 
 
+async def _preview_meta(target_type: str, target_id: str) -> dict[str, str]:
+    """Title, description and image for a link-preview card.
+
+    Real data only: whatever the record actually has. A business with no
+    description gets its category and area, not an invented sentence.
+    """
+    site_img = f"{_SITE_ORIGIN}/brand-logo.png"
+    if target_type == "business":
+        biz = await db.businesses.find_one(
+            {"$or": [{"_id": target_id}, {"slug": target_id}]},
+            {"name": 1, "description": 1, "logo_url": 1, "categories": 1, "areas": 1, "_id": 1},
+        )
+        if biz:
+            desc = (biz.get("description") or "").strip()
+            if not desc:
+                bits = [(biz.get("categories") or [None])[0], ", ".join(biz.get("areas") or [])]
+                desc = " · ".join(b for b in bits if b) or "On MyIsraelRental"
+            img = biz.get("logo_url")
+            if not img:
+                gig = await db.marketplace_gigs.find_one(
+                    {"business_id": biz["_id"], "status": "published", "gallery.0": {"$exists": True}},
+                    {"gallery": 1},
+                )
+                img = (gig or {}).get("gallery", [None])[0]
+            return {
+                "title": biz.get("name") or "MyIsraelRental",
+                "description": desc[:200],
+                "image": img or site_img,
+            }
+    elif target_type == "property":
+        prop = await db.properties.find_one(
+            {"id": target_id}, {"title": 1, "area": 1, "images": 1, "_id": 0},
+        )
+        if prop:
+            return {
+                "title": prop.get("title") or "MyIsraelRental",
+                "description": prop.get("area") or "On MyIsraelRental",
+                "image": (prop.get("images") or [site_img])[0],
+            }
+    return {
+        "title": "MyIsraelRental",
+        "description": "Rentals and local businesses across Israel.",
+        "image": site_img,
+    }
+
+
+def _preview_html(meta: dict[str, str], target: str) -> str:
+    """A tiny page whose only job is to carry OG tags to a crawler.
+
+    Needed because the front end is a static CRA bundle: react-helmet
+    writes its tags in the BROWSER, and no link-preview crawler runs
+    JavaScript, so every business page was served the same generic
+    index.html - same title, same logo, business name absent. Every
+    business on the site shared one preview card.
+
+    Only crawlers ever see this. People are still 302'd, so nothing about
+    the human path changes. The meta refresh and the visible link are
+    belt-and-braces for anything that renders the body instead.
+    """
+    e = html.escape
+    return f"""<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<title>{e(meta["title"])}</title>
+<meta name="description" content="{e(meta["description"])}"/>
+<meta property="og:type" content="website"/>
+<meta property="og:site_name" content="MyIsraelRental"/>
+<meta property="og:title" content="{e(meta["title"])}"/>
+<meta property="og:description" content="{e(meta["description"])}"/>
+<meta property="og:image" content="{e(meta["image"])}"/>
+<meta property="og:url" content="{e(target)}"/>
+<meta name="twitter:card" content="summary_large_image"/>
+<meta name="twitter:title" content="{e(meta["title"])}"/>
+<meta name="twitter:description" content="{e(meta["description"])}"/>
+<meta name="twitter:image" content="{e(meta["image"])}"/>
+<meta http-equiv="refresh" content="0;url={e(target)}"/>
+</head>
+<body><a href="{e(target)}">{e(meta["title"])}</a></body>
+</html>"""
+
+
 @router.get("/short-links/{slug}/follow")
 async def follow_short_link(slug: str, request: Request):
     """Count the scan and 302 to the destination — the true redirect.
@@ -293,4 +377,11 @@ async def follow_short_link(slug: str, request: Request):
         # A guessed or mistyped slug still lands somewhere sensible.
         return RedirectResponse(url=_SITE_ORIGIN, status_code=302)
     target = f"{_SITE_ORIGIN}{_canonical_path(doc['target_type'], doc['target_id'])}?src=qr"
+
+    # Crawlers get real OG tags instead of a redirect into a JS bundle
+    # they will not execute. People still get the 302.
+    if _is_preview_bot(request):
+        meta = await _preview_meta(doc["target_type"], doc["target_id"])
+        return HTMLResponse(content=_preview_html(meta, target))
+
     return RedirectResponse(url=target, status_code=302)
