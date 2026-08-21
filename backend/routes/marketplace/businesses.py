@@ -317,6 +317,19 @@ async def public_business(slug_or_id: str):
             {"business_id": biz["_id"], "status": "published"},
         ).sort("created_at", -1)
     ]
+    # A business with nothing published is not a page worth sending anyone
+    # to (spec B8). It renders as a name, an empty "Services" heading and
+    # "Nothing listed yet" - and, because the Message thread is addressed
+    # through a listing, without any way to make contact either. So it is
+    # not publicly linkable at all rather than linkable and useless.
+    #
+    # 404 and not an empty 200: the front end already has the "no longer
+    # listed" state for a business that has gone, and this is the same
+    # situation from a visitor's side. The owner still reaches it from
+    # their dashboard, which reads a different endpoint.
+    if not raw:
+        raise HTTPException(status_code=404, detail="Business not found")
+
     ratings = await _batch_rating_aggregate([g["_id"] for g in raw])
     for g in raw:
         agg = ratings.get(g["_id"], {"rating_avg": None, "rating_count": 0})
