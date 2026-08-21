@@ -43,6 +43,9 @@ const en = {
         failed: 'Could not create that code',
       },
       businessPage: {
+        services: 'Services',
+        viewGrid: 'Grid',
+        viewList: 'List',
         newHere: 'New on MyIsraelRental',
         message: 'Message',
         verified: 'Verified',

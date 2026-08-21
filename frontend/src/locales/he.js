@@ -43,6 +43,9 @@ const he = {
         failed: 'לא הצלחנו ליצור את הקוד',
       },
       businessPage: {
+        services: 'שירותים',
+        viewGrid: 'רשת',
+        viewList: 'רשימה',
         newHere: 'חדש ב-MyIsraelRental',
         message: 'שליחת הודעה',
         verified: 'מאומת',

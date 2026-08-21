@@ -14,26 +14,36 @@ import React, { useContext, useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import axios from 'axios';
-import { Star, BadgeCheck, MapPin, Loader2, MessageCircle } from 'lucide-react';
+import { Star, BadgeCheck, MapPin, Loader2, MessageCircle, LayoutGrid, List } from 'lucide-react';
 import { API, AuthContext } from '../App';
 import PageMeta from '../components/PageMeta';
 import CoverPlaceholder from '../components/common/CoverPlaceholder';
+import ServiceCard from '../components/marketplace/ServiceCard';
 import { getGigCover } from '../utils/gigAvailability';
 
 const BusinessPage = () => {
   const { slug } = useParams();
   const navigate = useNavigate();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { token } = useContext(AuthContext);
   const [biz, setBiz] = useState(null);
   const [missing, setMissing] = useState(false);
+  // null means "follow the automatic default for this many services".
+  // A stored choice wins, per business: the threshold is a starting
+  // point, not a cage (spec C2).
+  const [layout, setLayout] = useState(null);
 
   useEffect(() => {
     let cancelled = false;
     (async () => {
       try {
         const { data } = await axios.get(`${API}/marketplace/business/${encodeURIComponent(slug)}`);
-        if (!cancelled) setBiz(data);
+        if (!cancelled) {
+          setBiz(data);
+          try {
+            setLayout(localStorage.getItem(`biz-layout:${slug}`));
+          } catch { /* private mode: fall back to the automatic default */ }
+        }
       } catch {
         if (!cancelled) setMissing(true);
       }
@@ -94,6 +104,18 @@ const BusinessPage = () => {
   };
 
   const messageLabel = t('businessPage.message', 'Message');
+
+  /* C2 — the layout follows how much there is. A grid of squares is
+     right for a handful and becomes a wall at fifteen; compact rows fit
+     six to eight on a phone screen where the grid fits two. The counts
+     come from the spec's table. */
+  const listingCount = (biz.listings || []).length;
+  const autoLayout = listingCount <= 6 ? 'grid' : 'list';
+  const effectiveLayout = layout || autoLayout;
+  const chooseLayout = (next) => {
+    setLayout(next);
+    try { localStorage.setItem(`biz-layout:${slug}`, next); } catch { /* private mode */ }
+  };
   // member_since is the joining YEAR, already computed by the API.
   const isNewHere = String(biz.member_since || '') === String(new Date().getFullYear());
 
@@ -204,39 +226,68 @@ const BusinessPage = () => {
           </div>
         </div>
 
-        <h2 className="text-sm font-bold mb-3" style={{ color: 'var(--brand-muted)' }}>
-          {t('businessPage.listings', 'What they offer')}
-        </h2>
+        {/* B8 — was a small grey caption reading "What they offer", which
+            is both third person and too quiet to be a section heading.
+            A real heading, in the site's own voice. */}
+        <div className="flex items-center justify-between gap-3 mb-3 flex-wrap">
+          <h2 className="text-xl font-bold" style={{ fontFamily: 'var(--font-head)', color: 'var(--ink)' }}>
+            {t('businessPage.services', 'Services')}
+          </h2>
+          {/* Only worth offering once there is enough for the choice to
+              matter; below that the grid is simply right. */}
+          {listingCount > 6 && (
+            <div className="flex items-center gap-1 p-1 rounded-lg"
+              style={{ background: 'rgb(var(--brand-primary-rgb) / 0.07)' }}
+              data-testid="business-layout-toggle">
+              {[['grid', LayoutGrid, t('businessPage.viewGrid', 'Grid')],
+                ['list', List, t('businessPage.viewList', 'List')]].map(([key, Icon, label]) => (
+                <button
+                  key={key}
+                  type="button"
+                  onClick={() => chooseLayout(key)}
+                  className={`px-2.5 py-1 rounded-md text-xs font-semibold inline-flex items-center gap-1.5 transition-colors ${
+                    effectiveLayout === key ? 'bg-white shadow-sm' : ''
+                  }`}
+                  style={{ color: effectiveLayout === key ? 'var(--brand-primary)' : 'var(--brand-muted)' }}
+                  aria-pressed={effectiveLayout === key}
+                  data-testid={`business-layout-${key}`}
+                >
+                  <Icon size={13} aria-hidden="true" /> {label}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
 
         {biz.listings.length === 0 ? (
           <p className="text-sm" style={{ color: 'var(--brand-muted)' }} data-testid="business-empty">
             {t('businessPage.nothingYet', 'Nothing listed yet.')}
           </p>
+        ) : effectiveLayout === 'list' ? (
+          <div className="flex flex-col gap-2" data-testid="business-listings-list">
+            {biz.listings.map((g) => (
+              <ServiceCard
+                key={g.id}
+                gig={g}
+                variant="list"
+                i18n={i18n}
+                t={t}
+                onClick={() => navigate(`/businesses/${g.id}`)}
+              />
+            ))}
+          </div>
         ) : (
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-            {biz.listings.map((g) => {
-              const cover = getGigCover(g);
-              return (
-                <button key={g.id} type="button" onClick={() => navigate(`/businesses/${g.id}`)}
-                  className="text-start rounded-2xl border bg-white overflow-hidden hover:shadow-md transition-shadow"
-                  style={{ borderColor: 'var(--brand-border)' }}
-                  data-testid={`business-listing-${g.id}`}>
-                  <div className="aspect-square">
-                    {cover
-                      ? <img src={cover} alt="" className="w-full h-full object-cover" loading="lazy" />
-                      : <CoverPlaceholder name={g.title} category={g.category} className="w-full h-full" />}
-                  </div>
-                  <div className="p-2.5">
-                    <p className="text-sm font-semibold truncate" style={{ color: 'var(--ink)' }}>{g.title}</p>
-                    {g.cheapest_price != null && (
-                      <p className="text-xs mt-0.5" style={{ color: 'var(--brand-muted)' }}>
-                        {t('businessPage.from', 'from')} ₪{g.cheapest_price.toLocaleString()}
-                      </p>
-                    )}
-                  </div>
-                </button>
-              );
-            })}
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4" data-testid="business-listings-grid">
+            {biz.listings.map((g) => (
+              <ServiceCard
+                key={g.id}
+                gig={g}
+                variant="grid"
+                i18n={i18n}
+                t={t}
+                onClick={() => navigate(`/businesses/${g.id}`)}
+              />
+            ))}
           </div>
         )}
 
