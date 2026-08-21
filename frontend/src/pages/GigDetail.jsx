@@ -332,12 +332,24 @@ const GigDetail = () => {
   // the tier has no images (or on Store gigs, which show a product grid
   // and use `tier` for the product row).
   const _isStoreEarly = (gig.gig_type || 'deliverable') === 'store';
-  // Products carry a gallery now, so picking one shows its own photos in
-  // the hero. The `!_isStoreEarly` guard this replaces made sense while a
-  // product had exactly one image and there was nothing to curate; with
-  // several, the extra photos would otherwise have nowhere to appear.
+  /* Which photos the hero shows.
+     
+     A product may now carry several, and when it does, selecting it
+     shows its own set. But a product with ONE photo must not take the
+     hero over: doing that replaced a strip of every product's photo
+     with a single image, so a store of three products showed one
+     picture and no way to see the others. Reported as "three of the
+     same photo" - the hero and two similar product thumbnails, with
+     the varied strip that used to sit under them gone.
+     
+     So: take over only when the selection genuinely has a set of its
+     own. Otherwise fall through to the whole catalogue, which is what a
+     store page is for. Tiers on non-store gigs keep their original
+     behaviour, where a single curated image was always the point. */
   const selectedPhotos = tier ? productPhotos(tier) : [];
-  const tierGallery = selectedPhotos.length > 0 ? selectedPhotos : null;
+  const tierGallery = _isStoreEarly
+    ? (selectedPhotos.length > 1 ? selectedPhotos : null)
+    : (Array.isArray(tier?.images) && tier.images.length > 0 ? tier.images : null);
   // For the header carousel: prefer tier-specific images (already the
   // "curated" view), otherwise fall back to a synthesised gallery of
   // *every* image the gig actually owns — legacy gig.gallery, product
