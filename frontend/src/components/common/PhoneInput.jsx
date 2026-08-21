@@ -33,7 +33,29 @@ const PhoneInput = ({
   const { dial, local } = splitPhone(value);
 
   const setDial = (nextDial) => onChange(joinPhone(nextDial, local));
-  const setLocal = (nextLocal) => onChange(joinPhone(dial, nextLocal));
+
+  /* People paste whole numbers into the local box - off a business card,
+     out of Contacts, from their own WhatsApp - and the box is sitting
+     next to a country selector that already says +972. That is how one
+     real listing ended up as "+972972533270020", unreachable.
+     
+     So a pasted value that states its own country is treated as the
+     whole number: the selector moves to match and the local part is
+     whatever is left. Anything else goes through joinPhone, which drops
+     a trunk 0 and a repeated country code. Nothing to explain, no error
+     to read - the field just takes what it is given. */
+  const setLocal = (nextLocal) => {
+    const raw = String(nextLocal ?? '');
+    const digits = raw.replace(/\D/g, '');
+    const statesItsOwnCountry = /^[\s(]*\+/.test(raw) || digits.startsWith('00');
+    if (statesItsOwnCountry && digits) {
+      const bare = digits.startsWith('00') ? digits.slice(2) : digits;
+      const parsed = splitPhone(bare);
+      onChange(joinPhone(parsed.dial, parsed.local));
+      return;
+    }
+    onChange(joinPhone(dial, raw));
+  };
 
   const boxBase = 'rounded-xl border bg-white text-sm transition-colors focus:outline-none focus:ring-2';
   const boxState = error

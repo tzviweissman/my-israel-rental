@@ -29,6 +29,22 @@ export const DIAL_CODES = [
   { code: 'UA', dial: '380', flag: '🇺🇦', name: 'Ukraine' },
 ];
 
+// Subscriber digits after the country code, for the countries where that
+// length is fixed and we are confident about it. Used ONLY to recognise a
+// duplicated country code; a dial code missing from here is simply never
+// de-duplicated, which is the safe direction to be wrong in.
+const LOCAL_DIGITS = {
+  972: 9,   // Israeli mobile: 9 after the trunk 0, e.g. 50 123 4567
+  1: 10,    // NANP
+  44: 10,   // UK mobile
+  33: 9,
+  49: 10,
+  31: 9,
+  61: 9,
+  27: 9,
+  380: 9,
+};
+
 export const DEFAULT_DIAL = '972';
 
 // Longest first so a short code can't shadow a longer one that starts with
@@ -63,7 +79,24 @@ export const splitPhone = (raw) => {
  * Israeli WhatsApp link silently goes nowhere.
  */
 export const joinPhone = (dial, local) => {
-  const clean = String(local || '').replace(/\D/g, '').replace(/^0+/, '');
+  let clean = String(local || '').replace(/\D/g, '').replace(/^0+/, '');
   if (!clean) return '';
+
+  // The selector already shows the country, so a number that ALSO carries
+  // it is the same code twice. A real business published
+  // "+972972533270020" this way and nobody could reach them on WhatsApp:
+  // it is 15 digits, which slips under the E.164 maximum, so every length
+  // check passed and the link simply went nowhere.
+  //
+  // Only stripped when the remainder is exactly the right length for that
+  // country. Blanket stripping would corrupt a legitimate local number
+  // that happens to begin with its own dial code - a US 10-digit local
+  // starting with 1 being the obvious case.
+  const expected = LOCAL_DIGITS[dial];
+  if (expected && clean.startsWith(dial)) {
+    const rest = clean.slice(dial.length).replace(/^0+/, '');
+    if (rest.length === expected) clean = rest;
+  }
+
   return `+${dial}${clean}`;
 };
