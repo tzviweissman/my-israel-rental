@@ -48,6 +48,41 @@ const ISRAEL_CC = '972';
  * @param {string} raw
  * @returns {string|null} bare digits, or null when unusable
  */
+
+/**
+ * Undo the two ways an Israeli number gets mangled on the way in.
+ *
+ * A real listing was published as "+972972533270020" and nobody could
+ * reach it: the entry form showed a "+972" selector beside a box, the
+ * owner typed the number complete with its own 972, and the two were
+ * concatenated. At 15 digits it sits exactly on the E.164 maximum, so
+ * every length check passed and the link simply went nowhere.
+ *
+ * The entry form no longer allows it (see utils/phoneFormat.js), but
+ * numbers saved before that are still in the database, and the owners
+ * have no idea. Repairing on READ makes every one of them work again
+ * without a migration, and keeps working for any other route into the
+ * data - a CSV import, an admin edit - that might reintroduce it.
+ *
+ * Only ever applied to numbers that are already Israeli. Foreign numbers
+ * are left exactly as given, because we have no basis to second-guess
+ * them.
+ */
+function repairIsraeliDigits(digits) {
+  let d = digits;
+  // The country code twice over. Loop rather than a single slice: three
+  // copies is not a shape anyone should have to think about again.
+  while (d.startsWith(ISRAEL_CC + ISRAEL_CC) && d.length > 12) {
+    d = d.slice(ISRAEL_CC.length);
+  }
+  // The country code followed by the national trunk 0 - "+972" plus
+  // "050-123-4567" typed out of habit.
+  if (d.startsWith(`${ISRAEL_CC}0`)) {
+    d = ISRAEL_CC + d.slice(ISRAEL_CC.length).replace(/^0+/, '');
+  }
+  return d;
+}
+
 export function normalizeWhatsAppNumber(raw) {
   if (raw === null || raw === undefined) return null;
   const text = String(raw);
@@ -87,6 +122,10 @@ export function normalizeWhatsAppNumber(raw) {
     // is worse than showing no button, so the caller falls back to chat.
     return null;
   }
+
+  // Repair before measuring: a doubled country code is 15 digits, which
+  // would otherwise pass the check below and produce a dead link.
+  if (normalized.startsWith(ISRAEL_CC)) normalized = repairIsraeliDigits(normalized);
 
   if (normalized.length < MIN_DIGITS || normalized.length > MAX_DIGITS) return null;
   return normalized;
