@@ -20,6 +20,7 @@ import StarRating from '../components/marketplace/StarRating';
 import { localizedTitle, localizedDescription } from '../utils/gigLocale';
 import { buildWhatsAppLinkWithMessage, hasValidWhatsApp } from '../utils/whatsappLink';
 import { isAvailableNow, getGigCover } from '../utils/gigAvailability';
+import { productPhotos, productCover } from '../utils/productPhotos';
 import { useReturnDestination, saveReturnPath } from '../hooks/useBackNavigation';
 import Breadcrumb from '../components/common/Breadcrumb';
 import ContactChannels from '../components/marketplace/ContactChannels';
@@ -331,16 +332,19 @@ const GigDetail = () => {
   // the tier has no images (or on Store gigs, which show a product grid
   // and use `tier` for the product row).
   const _isStoreEarly = (gig.gig_type || 'deliverable') === 'store';
-  const tierGallery = (tier && !_isStoreEarly && Array.isArray(tier.images) && tier.images.length > 0)
-    ? tier.images
-    : null;
+  // Products carry a gallery now, so picking one shows its own photos in
+  // the hero. The `!_isStoreEarly` guard this replaces made sense while a
+  // product had exactly one image and there was nothing to curate; with
+  // several, the extra photos would otherwise have nowhere to appear.
+  const selectedPhotos = tier ? productPhotos(tier) : [];
+  const tierGallery = selectedPhotos.length > 0 ? selectedPhotos : null;
   // For the header carousel: prefer tier-specific images (already the
   // "curated" view), otherwise fall back to a synthesised gallery of
   // *every* image the gig actually owns — legacy gig.gallery, product
   // images (stores), or tier images (deliverable/appointment).
   const legacyGallery = Array.isArray(gig.gallery) ? gig.gallery : [];
   const productImages = Array.isArray(gig.products)
-    ? gig.products.filter((p) => p?.image).map((p) => p.image)
+    ? gig.products.flatMap((p) => productPhotos(p))
     : [];
   const allTierImages = Array.isArray(gig.tiers)
     ? gig.tiers.flatMap((t) => (Array.isArray(t?.images) ? t.images : []))
@@ -587,7 +591,21 @@ const GigDetail = () => {
                         }`}
                         data-testid={`gig-product-${i}`}
                       >
-                        <div className="aspect-square bg-gray-100" style={p.image ? { backgroundImage: `url(${p.image})`, backgroundSize: 'cover', backgroundPosition: 'center' } : {}} />
+                        {(() => {
+                          const pc = productCover(p);
+                          const extra = productPhotos(p).length - 1;
+                          return (
+                            <div className="relative aspect-square bg-gray-100" style={pc ? { backgroundImage: `url(${pc})`, backgroundSize: 'cover', backgroundPosition: 'center' } : {}}>
+                              {/* Says there is more to see, so a second
+                                  photo is not invisible behind the first. */}
+                              {extra > 0 && (
+                                <span className="absolute bottom-1 end-1 px-1.5 py-0.5 rounded-full text-[10px] font-semibold bg-black/70 text-white inline-flex items-center gap-0.5">
+                                  <Camera size={9} /> {extra + 1}
+                                </span>
+                              )}
+                            </div>
+                          );
+                        })()}
                         <div className="p-2.5 space-y-1.5">
                           <p className="text-sm font-semibold text-gray-900 line-clamp-1">{p.name}</p>
                           <div className="flex items-baseline justify-between gap-2">

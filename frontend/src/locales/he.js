@@ -2143,6 +2143,7 @@ const he = {
         whatsappInvalid: 'יש להזין מספר וואטסאפ תקין — לדוגמה 050-1234567 או 972501234567+.',
         whatsappResolved: 'הלקוחות ישלחו לך הודעה למספר ‎+{{number}}',
         from: 'החל מ-',
+        productPhotoLimit: 'עד {{n}} תמונות למוצר',
         askForQuote: 'בקשת הצעת מחיר',
         noImage: 'אין תמונה',
         availableNow: 'זמין עכשיו',

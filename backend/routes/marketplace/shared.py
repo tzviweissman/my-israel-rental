@@ -358,7 +358,16 @@ class ProductItem(BaseModel):
     price: float
     currency: str = "ILS"
     description: str = ""
-    image: Optional[str] = None      # single URL — thumbnail
+    # `image` is the ORIGINAL single thumbnail and stays readable for the
+    # records already stored with it. `images` is the real gallery.
+    #
+    # One photo per product is why a real bakery listed "Custom box of 4"
+    # twice at the same price: they had a second photo of the same item
+    # and creating the product again was the only way to attach it. The
+    # duplicate was their doing, but the shape of the form is what left
+    # them no alternative.
+    image: Optional[str] = None
+    images: list[str] = Field(default_factory=list)
     in_stock: bool = True
 
 

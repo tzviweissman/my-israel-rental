@@ -35,6 +35,7 @@ import { API, AuthContext } from '../App';
 import PageMeta from '../components/PageMeta';
 import { uploadFilesFast } from '../utils/fastUpload';
 import { normalizeWhatsAppNumber, hasValidWhatsApp } from '../utils/whatsappLink';
+import { productPhotos } from '../utils/productPhotos';
 import PhoneInput from '../components/common/PhoneInput';
 import { useTranslation } from 'react-i18next';
 
@@ -89,7 +90,7 @@ const emptyTierFor = (type, prevCurrency = 'ILS') => ({
 });
 
 const emptyProduct = (prevCurrency = 'ILS') => ({
-  name: '', price: '', currency: prevCurrency, description: '', image: '', in_stock: true,
+  name: '', price: '', currency: prevCurrency, description: '', image: '', images: [], in_stock: true,
 });
 
 const CreateGig = () => {
@@ -209,16 +210,33 @@ const CreateGig = () => {
   });
   const removeProduct = (i) => set({ products: form.products.filter((_, idx) => idx !== i) });
 
-  const uploadProductImage = async (i, file) => {
-    if (!file) return;
+  // Appends rather than replaces, and takes a multi-select in one go.
+  // One slot per product is what pushed a seller into listing the same
+  // item twice just to show a second photo of it.
+  const MAX_PRODUCT_PHOTOS = 6;
+  const uploadProductImage = async (i, files) => {
+    const chosen = Array.from(files || []).filter(Boolean);
+    if (!chosen.length) return;
+    const existing = productPhotos(form.products[i]);
+    const room = MAX_PRODUCT_PHOTOS - existing.length;
+    if (room <= 0) {
+      toast.error(t('services.productPhotoLimit', { defaultValue: 'Up to {{n}} photos per product', n: MAX_PRODUCT_PHOTOS }));
+      return;
+    }
     try {
-      const results = await uploadFilesFast([file], API, token, () => {});
-      const url = results[0]?.url;
-      if (url) updateProduct(i, { image: url });
-      else toast.error('Upload failed');
+      const results = await uploadFilesFast(chosen.slice(0, room), API, token, () => {});
+      const urls = results.map((r) => r?.url).filter(Boolean);
+      if (!urls.length) { toast.error('Upload failed'); return; }
+      // Write the whole set to `images` and clear the legacy single
+      // field, so a product is described by exactly one of the two.
+      updateProduct(i, { images: [...existing, ...urls], image: '' });
     } catch (err) {
       toast.error(err.message || 'Upload failed');
     }
+  };
+
+  const removeProductImage = (i, url) => {
+    updateProduct(i, { images: productPhotos(form.products[i]).filter((u) => u !== url), image: '' });
   };
 
   // ---- Availability helpers (appointment) -----------------------------------
@@ -515,6 +533,7 @@ const CreateGig = () => {
             onRemove={removeProduct}
             productImageInputRef={productImageInputRef}
             onUploadImage={uploadProductImage}
+            onRemoveImage={removeProductImage}
           />
         )}
         {step === 4 && form.gig_type !== 'store' && (
@@ -728,40 +747,55 @@ const CreateGig = () => {
 };
 
 // ---------- Step 4A — Store products ----------
-const StoreProductsStep = ({ products, onUpdate, onAdd, onRemove, productImageInputRef, onUploadImage }) => {
+const StoreProductsStep = ({ products, onUpdate, onAdd, onRemove, productImageInputRef, onUploadImage, onRemoveImage }) => {
   const { t } = useTranslation();
   return (
   <div className="space-y-4" data-testid="wizard-products-step">
     <div className="rounded-xl bg-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/8 border border-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/20 p-3 text-xs text-[var(--brand-primary)] leading-snug">
-      Add each product you sell as a separate row — with a photo, price, and short description. Customers browse the grid and message you to buy.
+      Add each product you sell as a separate row — with photos, price, and short description. Customers browse the grid and message you to buy.
     </div>
     {products.map((p, i) => (
       <div key={i} className="border border-gray-200 rounded-xl p-4 space-y-3" data-testid={`wizard-product-${i}`}>
         <div className="flex gap-3">
-          {/* Product photo */}
+          {/* Product photos — a strip, not a slot. The single slot this
+              replaces is why a seller listed the same box twice just to
+              show a second picture of it. */}
           <div className="flex-shrink-0">
             <input
               ref={(el) => { productImageInputRef.current[i] = el; }}
               type="file"
               accept="image/*"
+              multiple
               className="hidden"
-              onChange={(e) => e.target.files?.[0] && onUploadImage(i, e.target.files[0])}
+              onChange={(e) => { onUploadImage(i, e.target.files); e.target.value = ''; }}
               data-testid={`wizard-product-image-input-${i}`}
             />
-            <button
-              type="button"
-              onClick={() => productImageInputRef.current[i]?.click()}
-              className={`w-20 h-20 rounded-lg border-2 border-dashed flex items-center justify-center overflow-hidden ${
-                p.image ? 'border-transparent' : 'border-gray-300 hover:border-[var(--brand-primary)]'
-              }`}
-              data-testid={`wizard-product-image-btn-${i}`}
-            >
-              {p.image ? (
-                <img src={p.image} alt="" className="w-full h-full object-cover" />
-              ) : (
-                <ImagePlus size={20} className="text-gray-400" />
+            <div className="flex flex-wrap gap-1.5 w-[10.5rem]">
+              {productPhotos(p).map((url) => (
+                <div key={url} className="relative w-20 h-20 rounded-lg overflow-hidden group">
+                  <img src={url} alt="" className="w-full h-full object-cover" />
+                  <button
+                    type="button"
+                    onClick={() => onRemoveImage(i, url)}
+                    className="absolute top-0.5 end-0.5 w-5 h-5 rounded-full bg-black/60 text-white text-xs leading-none flex items-center justify-center"
+                    aria-label="Remove photo"
+                    data-testid={`wizard-product-image-remove-${i}`}
+                  >
+                    ×
+                  </button>
+                </div>
+              ))}
+              {productPhotos(p).length < 6 && (
+                <button
+                  type="button"
+                  onClick={() => productImageInputRef.current[i]?.click()}
+                  className="w-20 h-20 rounded-lg border-2 border-dashed border-gray-300 hover:border-[var(--brand-primary)] flex items-center justify-center"
+                  data-testid={`wizard-product-image-btn-${i}`}
+                >
+                  <ImagePlus size={20} className="text-gray-400" />
+                </button>
               )}
-            </button>
+            </div>
           </div>
           <div className="flex-1 space-y-2">
             <input value={p.name} onChange={(e) => onUpdate(i, { name: e.target.value })}
