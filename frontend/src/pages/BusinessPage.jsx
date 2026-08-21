@@ -172,7 +172,7 @@ const BusinessPage = () => {
           <div className="relative h-28 sm:h-40" data-testid="business-cover-band">
             {bandImage
               ? <img src={bandImage} alt="" className="w-full h-full object-cover" />
-              : <CoverPlaceholder name={biz.name} category={(biz.categories || [])[0]} className="w-full h-full" />}
+              : <CoverPlaceholder name={biz.name} category={(biz.categories || [])[0]} mark={false} className="w-full h-full" />}
           </div>
 
           {/* The logo overlaps the band's lower edge - the storefront

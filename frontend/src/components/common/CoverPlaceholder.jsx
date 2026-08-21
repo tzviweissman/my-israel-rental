@@ -132,6 +132,13 @@ export default function CoverPlaceholder({
   category = '',
   className = '',
   testid = 'cover-placeholder',
+  // `mark={false}` gives the tint alone. Used by the business page's
+  // cover band, for two reasons: the icon is sized as a share of WIDTH,
+  // so a band ten times wider than it is tall renders it comically
+  // large; and the band sits directly behind the logo tile, which draws
+  // the same icon and the same initial from the same name - the pair
+  // read as a mistake rather than a design.
+  mark = true,
 }) {
   const tint = TINTS[hashName(name) % TINTS.length];
   const Icon = CATEGORY_ICONS[category] || Package;
@@ -147,6 +154,7 @@ export default function CoverPlaceholder({
       data-tint={tint}
       aria-hidden="true"
     >
+      {mark && (
       <div className="flex flex-col items-center justify-center gap-1" style={{ color: 'var(--ink)' }}>
         {/* ~30% of the tile, per the spec. Opacity keeps it a texture
             rather than a logo, while staying well above 4.5:1 on these
@@ -166,6 +174,7 @@ export default function CoverPlaceholder({
           </span>
         )}
       </div>
+      )}
     </div>
   );
 }
