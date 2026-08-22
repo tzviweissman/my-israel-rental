@@ -14,7 +14,7 @@ import React, { useContext, useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import axios from 'axios';
-import { Star, BadgeCheck, MapPin, Loader2, MessageCircle, LayoutGrid, List } from 'lucide-react';
+import { Star, BadgeCheck, MapPin, Loader2, MessageCircle, LayoutGrid, List, Zap } from 'lucide-react';
 import { API, AuthContext } from '../App';
 import PageMeta from '../components/PageMeta';
 import CoverPlaceholder from '../components/common/CoverPlaceholder';
@@ -228,15 +228,46 @@ const BusinessPage = () => {
                     {t('businessPage.newHere', 'New on MyIsraelRental')}
                   </span>
                 ) : null}
-                {(biz.areas || []).length > 0 && (
-                  <span className="inline-flex items-center gap-1">
-                    <MapPin size={13} /> {biz.areas.join(', ')}
+                {/* B5 — response time, from the same rolling average that
+                    feeds the badge on their cards, so the two cannot
+                    disagree. Absent until there are enough replies to mean
+                    anything; a claim we cannot stand behind is worse than
+                    none. */}
+                {biz.response_bucket && (
+                  <span className="inline-flex items-center gap-1 font-semibold" style={{ color: '#1F8A50' }}
+                    data-testid="business-response">
+                    <Zap size={13} />
+                    {biz.response_bucket === '1h'
+                      ? t('businessPage.replies1h', 'Usually replies within an hour')
+                      : t('businessPage.replies24h', 'Usually replies within a day')}
                   </span>
                 )}
               </div>
 
+              {/* B5 — the description had been a single small line. It is
+                  the only thing on the page in the business's own voice,
+                  so it gets room to be read. */}
               {biz.description && (
-                <p className="mt-3 text-sm" style={{ color: 'var(--ink)' }}>{biz.description}</p>
+                <p className="mt-3 text-[15px] leading-relaxed max-w-2xl" style={{ color: 'var(--ink)' }}
+                  data-testid="business-about">
+                  {biz.description}
+                </p>
+              )}
+
+              {/* Areas as chips rather than a comma list: a business
+                  covering six neighbourhoods reads as a paragraph
+                  otherwise, and the one a visitor is scanning for is
+                  buried in it. */}
+              {(biz.areas || []).length > 0 && (
+                <div className="mt-3 flex flex-wrap gap-1.5" data-testid="business-areas">
+                  {biz.areas.map((a) => (
+                    <span key={a}
+                      className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium"
+                      style={{ background: 'rgb(var(--brand-primary-rgb) / 0.08)', color: 'var(--brand-primary)' }}>
+                      <MapPin size={11} /> {a}
+                    </span>
+                  ))}
+                </div>
               )}
             </div>
 

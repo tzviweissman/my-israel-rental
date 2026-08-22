@@ -43,6 +43,8 @@ const en = {
         failed: 'Could not create that code',
       },
       businessPage: {
+        replies1h: 'Usually replies within an hour',
+        replies24h: 'Usually replies within a day',
         services: 'Services',
         viewGrid: 'Grid',
         viewList: 'List',

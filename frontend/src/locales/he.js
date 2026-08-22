@@ -43,6 +43,8 @@ const he = {
         failed: 'לא הצלחנו ליצור את הקוד',
       },
       businessPage: {
+        replies1h: 'בדרך כלל משיב תוך שעה',
+        replies24h: 'בדרך כלל משיב תוך יום',
         services: 'שירותים',
         viewGrid: 'רשת',
         viewList: 'רשימה',

@@ -35,6 +35,7 @@ from .shared import (
     _batch_rating_aggregate,
     _cheapest_tier_price,
     _clean_gig,
+    _response_bucket,
 )
 
 router = APIRouter(prefix="/marketplace", tags=["marketplace"])
@@ -364,6 +365,15 @@ async def public_business(slug_or_id: str):
         # opaque id, not contact information — the whole point of B1 is
         # that a visitor reaches them THROUGH the site.
         "owner_user_id": biz.get("owner_user_id"),
+        # B5 — how quickly they actually reply, from the rolling EMA the
+        # marketplace already keeps. Reused rather than recomputed, so the
+        # figure on this page cannot disagree with the badge on their
+        # cards. None below MIN_RESPONSES_FOR_BADGE: a single lucky reply
+        # is not a response time, and a claim we cannot stand behind is
+        # worse than no claim.
+        "response_bucket": _response_bucket(
+            await db.marketplace_providers.find_one({"user_id": biz.get("owner_user_id")}) or {}
+        ),
         "listings": [_public_listing(g) for g in raw],
     }
 
