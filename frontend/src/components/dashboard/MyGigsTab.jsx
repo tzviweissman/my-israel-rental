@@ -19,6 +19,7 @@ import { uploadFilesFast } from '../../utils/fastUpload';
 import CoverPlaceholder from '../common/CoverPlaceholder';
 import AddPhotoNudge from '../common/AddPhotoNudge';
 import BusinessSelector, { ALL, readStoredBusiness } from './BusinessSelector';
+import LeadsPanel from './LeadsPanel';
 import { nounKey } from '../../utils/businessNoun';
 
 const ProfileEditModal = ({ API, token, initial, onClose, onSaved }) => {
@@ -439,6 +440,17 @@ const MyGigsTab = ({ API, token, business = null, onBack = null }) => {
 
       {/* The inline plan-selection panel (PlanPicker + "Continue to
           PayPal") was here. Removed with the subscription. */}
+
+      {/* Only once something is listed. Contact taps against nothing are
+          necessarily zero, and a zero next to "create your first service"
+          reads as a verdict on a listing that does not exist yet. */}
+      {gigs.length > 0 && (
+        <LeadsPanel
+          API={API}
+          token={token}
+          businessId={business ? business.id : (businessFilter !== ALL ? businessFilter : null)}
+        />
+      )}
 
       {gigs.length === 0 ? (
         <div className="bg-white border border-gray-200 rounded-2xl p-10 text-center" data-testid="my-gigs-empty">

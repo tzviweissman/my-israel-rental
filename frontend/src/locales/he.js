@@ -18,6 +18,15 @@ const he = {
         previousMonth: 'מעבר לחודש הקודם',
         nextMonth: 'מעבר לחודש הבא',
       },
+      // See the note on the English copy.
+      leads: {
+        title: 'אנשים שלחצו כדי לשלוח לכם הודעה',
+        none: 'עדיין אף אחד לא לחץ כדי לשלוח לכם הודעה — מכאן והלאה נספור.',
+        inLastDays: 'ב-{{n}} הימים האחרונים',
+        allTime: '{{n}} מאז ומעולם',
+        countingSince: 'נספר מאז {{date}}',
+        chartTitle: 'לחיצות — 14 הימים האחרונים',
+      },
       shortLink: {
         opening: 'פותחים…',
         notFound: 'הקישור הזה אינו קיים או הוסר.',

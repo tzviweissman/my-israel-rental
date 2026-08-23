@@ -29,8 +29,12 @@ const axisDate = (iso) => {
 const BAR_COLOR = 'var(--brand-primary)';
 const DAYS_SHOWN = 14;
 
-export default function ScanChart({ daily, testidPrefix = 'qr' }) {
+// `title` exists because this chart is no longer only about QR scans —
+// the leads panel plots contact taps with the same shape. Defaulting to
+// the scans wording keeps every existing caller unchanged.
+export default function ScanChart({ daily, testidPrefix = 'qr', title }) {
   const { t } = useTranslation();
+  const heading = title || t('qr.chartTitle', 'Scans — last 14 days');
   if (!Array.isArray(daily) || daily.length === 0) return null;
 
   const days = daily.slice(-DAYS_SHOWN);
@@ -48,13 +52,13 @@ export default function ScanChart({ daily, testidPrefix = 'qr' }) {
   return (
     <div dir="ltr" data-testid={`${testidPrefix}-chart`}>
       <p className="mb-1 text-[11px] font-semibold text-start" style={{ color: 'var(--brand-muted)' }}>
-        {t('qr.chartTitle', 'Scans — last 14 days')}
+        {heading}
       </p>
       <svg
         viewBox={`0 0 ${W} ${H + 14}`}
         className="w-full"
         role="img"
-        aria-label={t('qr.chartTitle', 'Scans — last 14 days')}
+        aria-label={heading}
       >
         {days.map((d, i) => {
           const h = d.count === 0 ? 0 : Math.max(3, (d.count / max) * H);

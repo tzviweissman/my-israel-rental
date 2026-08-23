@@ -18,6 +18,18 @@ const en = {
         previousMonth: 'Go to previous month',
         nextMonth: 'Go to next month',
       },
+      // Leads panel (dashboard/LeadsPanel) — L1 of
+      // docs/leads-and-views-spec.md. Says "tapped to message you", not
+      // "leads": it counts exactly one action and must not imply views or
+      // conversions, which are not tracked.
+      leads: {
+        title: 'People who tapped to message you',
+        none: 'No one has tapped to message you yet — this counts them from now on.',
+        inLastDays: 'in the last {{n}} days',
+        allTime: '{{n}} all time',
+        countingSince: 'Counting since {{date}}',
+        chartTitle: 'Taps — last 14 days',
+      },
       shortLink: {
         opening: 'Opening…',
         notFound: "This link doesn't exist or has been removed.",

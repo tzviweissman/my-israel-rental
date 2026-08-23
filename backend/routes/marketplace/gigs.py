@@ -9,9 +9,10 @@ import asyncio
 import os
 import re
 import uuid
-from datetime import UTC, datetime
+from datetime import UTC, datetime, time, timedelta
 from typing import Any, Optional
 from urllib.parse import urlparse
+from zoneinfo import ZoneInfo
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from fastapi.responses import RedirectResponse
@@ -50,6 +51,10 @@ from utils.user_contact import user_whatsapp
 from utils.whatsapp_link import build_whatsapp_link
 
 router = APIRouter(prefix="/marketplace", tags=["marketplace"])
+
+# Leads are bucketed by Israel's calendar day, matching short-link scans —
+# the same reasoning as routes/short_links.py: the owner lives here.
+_IL_TZ = ZoneInfo("Asia/Jerusalem")
 
 
 def _admin_only(user: dict) -> None:
@@ -570,6 +575,158 @@ async def my_gigs(user=Depends(verify_token)):
         },
     }
 
+
+
+# ── Leads (L1 of docs/leads-and-views-spec.md) ────────────────────────────
+#
+# `lead_events` has been written since the WhatsApp redirect shipped, and
+# until now nothing read it. This is the read side: the owner's own leads,
+# nobody else's.
+#
+# Two things here are easy to get wrong and silently produce a plausible
+# number:
+#
+# 1. `created_at` is stored as an ISO **string** (see the insert in
+#    `contact_gig`), not a datetime. A datetime cutoff matches nothing and
+#    returns a confident zero — the exact failure that made /admin/metrics
+#    report 0 users in 30 days. Every cutoff below is a UTC ISO string, and
+#    the writes are always `datetime.now(UTC).isoformat()`, so the `+00:00`
+#    offset is uniform and lexical comparison is sound.
+#
+# 2. Days are ISRAEL calendar days, matching short_links. Slicing the first
+#    ten characters off a UTC timestamp would be simpler and wrong: a tap at
+#    23:30 in Jerusalem is 20:30 or 21:30 UTC the same day, but one at 01:00
+#    is 22:00 UTC the day *before*, so a late-evening lead would land on
+#    yesterday's bar.
+LEADS_PERIOD_DAYS = 30
+
+_LEAD_TYPES = ("whatsapp_click",)
+
+
+def _il_day_window(days: int) -> tuple[str, list[str]]:
+    """(UTC ISO cutoff, list of Israel day keys oldest-first) for `days` days."""
+    today = datetime.now(_IL_TZ).date()
+    start_day = today - timedelta(days=days - 1)
+    # Midnight in Israel on the first day of the window, expressed in UTC —
+    # so it can be compared against the stored UTC ISO strings.
+    start_il = datetime.combine(start_day, time.min, tzinfo=_IL_TZ)
+    cutoff = start_il.astimezone(UTC).isoformat()
+    keys = [(start_day + timedelta(days=i)).strftime("%Y-%m-%d") for i in range(days)]
+    return cutoff, keys
+
+
+def _il_day_of(created_at: str) -> Optional[str]:
+    """The Israel calendar day an ISO timestamp falls on, or None if unparseable."""
+    try:
+        dt = datetime.fromisoformat(created_at)
+    except (TypeError, ValueError):
+        return None
+    if dt.tzinfo is None:          # tolerate a naive legacy row
+        dt = dt.replace(tzinfo=UTC)
+    return dt.astimezone(_IL_TZ).strftime("%Y-%m-%d")
+
+
+@router.get("/leads/summary")
+async def leads_summary(
+    business_id: Optional[str] = Query(None),
+    user=Depends(verify_token),
+):
+    """How many people tried to make contact, for the caller's own listings.
+
+    Scoped by `provider_id`, which the redirect denormalises off the gig, so
+    this cannot read another provider's leads even if they share a business.
+
+    `business_id` narrows every number in the response, not just the
+    breakdown. The services dashboard is entered through one business, and a
+    whole-account headline sitting above a single business's rows would
+    invite exactly the wrong reading.
+
+    `lead_events` stores no business_id — only the gig — so scoping resolves
+    the business's gigs first. One consequence worth knowing: a tap against a
+    since-deleted gig cannot be attributed to a business, so it counts in the
+    unfiltered view and not in a filtered one.
+    """
+    provider_id = user["user_id"]
+    base = {"provider_id": provider_id, "type": {"$in": list(_LEAD_TYPES)}}
+
+    if business_id:
+        owned = await db.marketplace_gigs.find(
+            # provider_user_id as well as business_id: business_id groups and
+            # displays, it does not authorise (see create_gig).
+            {"business_id": business_id, "provider_user_id": provider_id},
+            {"_id": 1},
+        ).to_list(None)
+        gig_ids = [g["_id"] for g in owned]
+        if not gig_ids:
+            return {
+                "total": 0, "period_days": LEADS_PERIOD_DAYS, "period_total": 0,
+                "daily": [{"date": k, "count": 0} for k in _il_day_window(LEADS_PERIOD_DAYS)[1]],
+                "since": None, "by_gig": [],
+            }
+        base["gig_id"] = {"$in": gig_ids}
+
+    total = await db.lead_events.count_documents(base)
+
+    # When counting began — for THIS provider, not the platform. Without it
+    # "3 leads" reads as a verdict on the listing rather than on a window we
+    # only started measuring recently.
+    # Returned as an Israel calendar date (YYYY-MM-DD), matching the keys in
+    # `daily` — one date convention across the whole payload. Also what the
+    # frontend's formatDate() can actually parse: hand it a full timestamp
+    # and it falls back to printing the raw ISO string at the reader.
+    since = None
+    first = await db.lead_events.find(base, {"created_at": 1}).sort("created_at", 1).limit(1).to_list(1)
+    if first:
+        since = _il_day_of(first[0].get("created_at"))
+
+    cutoff, day_keys = _il_day_window(LEADS_PERIOD_DAYS)
+    buckets = {k: 0 for k in day_keys}
+    per_gig: dict[str, int] = {}
+    period_total = 0
+
+    cursor = db.lead_events.find(
+        {**base, "created_at": {"$gte": cutoff}},
+        {"created_at": 1, "gig_id": 1},
+    )
+    async for ev in cursor:
+        day = _il_day_of(ev.get("created_at"))
+        # A row can sit just outside the window after the UTC→Israel shift;
+        # count it in the period total only if it lands on a day we render.
+        if day not in buckets:
+            continue
+        buckets[day] += 1
+        period_total += 1
+        gid = ev.get("gig_id")
+        if gid:
+            per_gig[gid] = per_gig.get(gid, 0) + 1
+
+    # Name the listings. Only the caller's own, and only ones that still
+    # exist — a lead against a deleted gig still counts in the total but has
+    # no row to show, which is honest: the contact happened.
+    by_gig = []
+    if per_gig:
+        gig_query = {"_id": {"$in": list(per_gig)}, "provider_user_id": provider_id}
+        if business_id:
+            gig_query["business_id"] = business_id
+        cursor = db.marketplace_gigs.find(gig_query, {"title": 1, "business_id": 1})
+        async for g in cursor:
+            by_gig.append({
+                "gig_id": g["_id"],
+                "title": g.get("title") or "",
+                "business_id": g.get("business_id"),
+                "count": per_gig.get(g["_id"], 0),
+            })
+        by_gig.sort(key=lambda r: (-r["count"], r["title"]))
+
+    return {
+        "total": total,
+        "period_days": LEADS_PERIOD_DAYS,
+        "period_total": period_total,
+        # Same shape as short_links' `daily`, so ScanChart renders it as-is.
+        "daily": [{"date": k, "count": buckets[k]} for k in day_keys],
+        "since": since,
+        "by_gig": by_gig,
+    }
 
 
 @router.post("/gigs/{gig_id}/book")
