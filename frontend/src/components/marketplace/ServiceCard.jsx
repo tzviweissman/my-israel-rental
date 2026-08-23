@@ -55,18 +55,21 @@ const ServiceGridCard = ({ gig, onClick, i18n, t }) => {
       className="svc-card text-left group w-full h-full flex flex-col"
       data-testid={`services-gig-${gig.id}`}
     >
-      <div
-        className="relative aspect-square w-full rounded-xl overflow-hidden"
-        style={{
-          ...(cover
-            ? {
-                backgroundImage: `url(${cover})`,
-                backgroundSize: 'cover',
-                backgroundPosition: 'center',
-              }
-            : {}),
-        }}
-      >
+      <div className="relative aspect-square w-full rounded-xl overflow-hidden">
+        {/* C8 — a real <img> rather than a CSS background, because only
+            an <img> can be lazy. A background-image is fetched as soon as
+            the element exists, so a business with twenty-five services
+            pulled twenty-five photos before the reader saw the second
+            row. */}
+        {cover && (
+          <img
+            src={cover}
+            alt=""
+            loading="lazy"
+            decoding="async"
+            className="absolute inset-0 w-full h-full object-cover"
+          />
+        )}
         {/* S2 — a designed cover instead of a grey box reporting an
             absence. The old placeholder was #EDE7DA on a #EFE9DC page:
             two values apart per channel, invisible. */}
@@ -162,10 +165,11 @@ const ServiceRow = ({ gig, onClick, i18n, t }) => {
     >
       {/* Same 96px square whether or not there is a photo, so the column
           of titles beside it stays on one ladder. */}
-      <div
-        className="relative w-24 h-24 shrink-0 rounded-xl overflow-hidden"
-        style={cover ? { backgroundImage: `url(${cover})`, backgroundSize: 'cover', backgroundPosition: 'center' } : {}}
-      >
+      <div className="relative w-24 h-24 shrink-0 rounded-xl overflow-hidden">
+        {cover && (
+          <img src={cover} alt="" loading="lazy" decoding="async"
+            className="absolute inset-0 w-full h-full object-cover" />
+        )}
         {!cover && (
           <CoverPlaceholder
             name={gig.provider?.name || localizedTitle(gig, i18n)}

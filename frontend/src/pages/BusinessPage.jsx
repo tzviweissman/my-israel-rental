@@ -20,7 +20,13 @@ import PageMeta from '../components/PageMeta';
 import CoverPlaceholder from '../components/common/CoverPlaceholder';
 import ServiceCard from '../components/marketplace/ServiceCard';
 import GoodToKnow from '../components/marketplace/GoodToKnow';
+import SiteFooter from '../components/common/SiteFooter';
 import { getGigCover } from '../utils/gigAvailability';
+
+// First screenful and each subsequent step. Twelve fills a desktop grid
+// three rows deep and a phone list well past the fold, without asking
+// for twenty-five photos nobody has scrolled to.
+const PAGE_SIZE = 12;
 
 const BusinessPage = () => {
   const { slug } = useParams();
@@ -33,6 +39,11 @@ const BusinessPage = () => {
   // A stored choice wins, per business: the threshold is a starting
   // point, not a cage (spec C2).
   const [layout, setLayout] = useState(null);
+  /* C8 — how many services are on screen. "Show more" rather than
+     infinite scroll: infinite scroll keeps the footer permanently out of
+     reach, and the footer is where B7's "Add yours — free" band lives.
+     It also leaves the page crawlable, which endless scroll does not. */
+  const [shown, setShown] = useState(PAGE_SIZE);
 
   useEffect(() => {
     let cancelled = false;
@@ -130,6 +141,9 @@ const BusinessPage = () => {
   const columnWidth = listingCount < 4 ? 'max-w-[900px]' : 'max-w-5xl';
   const autoLayout = listingCount <= 6 ? 'grid' : 'list';
   const effectiveLayout = layout || autoLayout;
+  const visibleListings = (biz.listings || []).slice(0, shown);
+  const remaining = listingCount - visibleListings.length;
+
   const chooseLayout = (next) => {
     setLayout(next);
     try { localStorage.setItem(`biz-layout:${slug}`, next); } catch { /* private mode */ }
@@ -339,7 +353,7 @@ const BusinessPage = () => {
           </p>
         ) : effectiveLayout === 'list' ? (
           <div className="flex flex-col gap-2" data-testid="business-listings-list">
-            {biz.listings.map((g) => (
+            {visibleListings.map((g) => (
               <ServiceCard
                 key={g.id}
                 gig={g}
@@ -352,7 +366,7 @@ const BusinessPage = () => {
           </div>
         ) : (
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4" data-testid="business-listings-grid">
-            {biz.listings.map((g) => (
+            {visibleListings.map((g) => (
               <ServiceCard
                 key={g.id}
                 gig={g}
@@ -364,6 +378,45 @@ const BusinessPage = () => {
             ))}
           </div>
         )}
+
+        {remaining > 0 && (
+          <div className="mt-4 flex justify-center">
+            <button
+              type="button"
+              onClick={() => setShown((n) => n + PAGE_SIZE)}
+              className="px-5 py-2.5 rounded-lg text-sm font-semibold border"
+              style={{ borderColor: 'var(--brand-border)', color: 'var(--brand-primary)', background: 'var(--surface)' }}
+              data-testid="business-show-more"
+            >
+              {t('businessPage.showMore', 'Show {{n}} more', { n: Math.min(remaining, PAGE_SIZE) })}
+            </button>
+          </div>
+        )}
+
+        {/* B7 — the highest-intent placement on the site for this CTA.
+            The people who read a competitor's business page to the end
+            are overwhelmingly other local business owners, which is
+            exactly the audience we want and nowhere else reaches them at
+            that moment. Quiet on purpose: it sits under someone else's
+            storefront and must not compete with it. */}
+        <div
+          className="mt-10 rounded-2xl border px-5 py-4 flex items-center justify-between gap-4 flex-wrap"
+          style={{ background: 'var(--surface)', borderColor: 'var(--brand-border)' }}
+          data-testid="business-add-yours"
+        >
+          <p className="text-sm" style={{ color: 'var(--ink)' }}>
+            {t('businessPage.addYours', 'Are you a business? Add yours — free.')}
+          </p>
+          <button
+            type="button"
+            onClick={() => navigate('/signup')}
+            className="text-sm font-semibold whitespace-nowrap"
+            style={{ color: 'var(--brand-primary)' }}
+            data-testid="business-add-yours-cta"
+          >
+            {t('businessPage.addYoursCta', 'Add your business')} →
+          </button>
+        </div>
 
         {/* Repeated for anyone who has read to the end — asking them to
             scroll back up to act is how intent gets lost. */}
@@ -380,6 +433,8 @@ const BusinessPage = () => {
           </div>
         )}
       </div>
+
+      <SiteFooter />
 
       {/* Mobile only: the header button is off screen for most of the
           page on a phone, so the action rides along instead. Padding for

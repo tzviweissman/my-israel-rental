@@ -43,6 +43,9 @@ const en = {
         failed: 'Could not create that code',
       },
       businessPage: {
+        showMore: 'Show {{n}} more',
+        addYours: 'Are you a business? Add yours — free.',
+        addYoursCta: 'Add your business',
         goodToKnow: 'Good to know',
         hours: 'Hours',
         languages: 'Languages',

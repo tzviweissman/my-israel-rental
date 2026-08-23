@@ -43,6 +43,9 @@ const he = {
         failed: 'לא הצלחנו ליצור את הקוד',
       },
       businessPage: {
+        showMore: 'הצגת {{n}} נוספים',
+        addYours: 'יש לכם עסק? הוסיפו אותו — בחינם.',
+        addYoursCta: 'הוספת העסק שלי',
         goodToKnow: 'כדאי לדעת',
         hours: 'שעות פעילות',
         languages: 'שפות',
