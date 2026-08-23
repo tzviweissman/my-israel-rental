@@ -14,6 +14,12 @@ import axios from 'axios';
 import { toast } from 'sonner';
 import { MessageCircle, Send, Loader2, ArrowLeft, Award, Zap, Calendar, Clock, Camera, ChevronLeft, ChevronRight, X } from 'lucide-react';
 import { Calendar as CalendarUI } from '../components/ui/calendar';
+// react-day-picker renders its own month name and weekday initials.
+// Without a locale it falls back to the *browser's*, not the site's,
+// so the Hebrew page showed "August 2026 / Su Mo Tu" on an English
+// machine. The shadcn wrapper spreads unknown props onto DayPicker,
+// so passing `locale` needs no change to the shared component.
+import { he as heLocale, enUS as enLocale } from 'date-fns/locale';
 import { API, AuthContext } from '../App';
 import PageMeta from '../components/PageMeta';
 import StarRating from '../components/marketplace/StarRating';
@@ -423,7 +429,7 @@ const GigDetail = () => {
     }
     if (isAppointment) {
       if (!appointmentDate || !appointmentSlot) {
-        return toast.error('Pick a day and time slot first');
+        return toast.error(t('services.pickDayAndTimeFirst', 'Pick a day and time slot first'));
       }
       if (useWhatsApp) {
         const msg = `Hi! I'd like to book your "${displayTitle}" — ${tier.name} on ${appointmentDate} at ${appointmentSlot} (${sym}${tier.price}) from MyIsraelRental.`;
@@ -681,7 +687,11 @@ const GigDetail = () => {
           <div className="md:sticky md:top-24 h-fit space-y-4">
             <div className="border border-gray-200 rounded-2xl bg-white p-4 space-y-3">
               <h3 className="text-sm font-bold text-gray-500 uppercase tracking-wide">
-                {isStore ? 'Choose a product' : isAppointment ? 'Book an appointment' : 'Choose a package'}
+                {isStore
+                  ? t('services.chooseProduct', 'Choose a product')
+                  : isAppointment
+                    ? t('services.bookAppointment', 'Book an appointment')
+                    : t('services.choosePackage', 'Choose a package')}
               </h3>
 
               {isStore ? (
@@ -801,6 +811,7 @@ const GigDetail = () => {
 // ---------- Sidebar sub-components ----------
 
 const TierList = ({ tiers, selected, onSelect, isAppointment }) => {
+  const { t } = useTranslation();
   if (!tiers.length) return <p className="text-sm text-gray-500">No packages listed yet.</p>;
   return tiers.map((tt) => {
     const active = selected?.name === tt.name;
@@ -835,7 +846,7 @@ const TierList = ({ tiers, selected, onSelect, isAppointment }) => {
           <span className="font-bold text-gray-900">{sym}{Number(tt.price).toLocaleString()}</span>
         </div>
         {isAppointment && tt.duration_minutes && (
-          <p className="text-xs text-gray-500 mt-1 flex items-center gap-1"><Clock size={11} /> {tt.duration_minutes} min</p>
+          <p className="text-xs text-gray-500 mt-1 flex items-center gap-1"><Clock size={11} /> {t('services.durationMinutes', { defaultValue: '{{n}} min', n: tt.duration_minutes })}</p>
         )}
         {!isAppointment && tt.delivery_days && (
           <p className="text-xs text-gray-500 mt-1">Delivered in {tt.delivery_days} days</p>
@@ -882,7 +893,7 @@ const StoreProductList = ({ products, selected, onSelect }) => {
 // ahead. The previous 14-day cap plus a horizontal-scroll pill row hid
 // most future dates and looked like a "can't book more than a week"
 // bug from the buyer's perspective.
-const buildAppointmentSlots = (gig, tier) => {
+const buildAppointmentSlots = (gig, tier, locale) => {
   const weekly = gig.weekly_availability || {};
   const slotMin = gig.slot_duration_minutes || 30;
   const duration = tier.duration_minutes || slotMin;
@@ -915,7 +926,9 @@ const buildAppointmentSlots = (gig, tier) => {
     const mo = String(day.getMonth() + 1).padStart(2, '0');
     const dd = String(day.getDate()).padStart(2, '0');
     const iso = `${yy}-${mo}-${dd}`;
-    const label = day.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' });
+    // `undefined` here would use the browser's locale, not the site's —
+    // which is how a Hebrew page ended up labelling days "Sun, Aug 23".
+    const label = day.toLocaleDateString(locale, { weekday: 'short', month: 'short', day: 'numeric' });
     byDate[iso] = { label, slots };
   }
   return byDate;
@@ -932,7 +945,8 @@ const AppointmentPicker = ({ gig, tier, isWhatsApp, selectedDate, selectedSlot, 
      the full grid, which is exactly the old behaviour, and the create
      call still enforces the rule. Better a slot that turns out to be
      gone than a booking form that will not open. */
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const isHebrew = (i18n.language || '').startsWith('he');
   const [taken, setTaken] = useState({});
   useEffect(() => {
     if (!gig?.id) return undefined;
@@ -949,7 +963,7 @@ const AppointmentPicker = ({ gig, tier, isWhatsApp, selectedDate, selectedSlot, 
   }, [gig?.id]);
 
   const slotsByDate = useMemo(() => {
-    const built = buildAppointmentSlots(gig, tier);
+    const built = buildAppointmentSlots(gig, tier, isHebrew ? 'he-IL' : 'en-US');
     // Subtract the held times, and drop a day entirely once nothing is
     // left on it — a date that opens onto an empty grid reads as broken.
     const out = {};
@@ -959,7 +973,7 @@ const AppointmentPicker = ({ gig, tier, isWhatsApp, selectedDate, selectedSlot, 
       if (slots.length) out[iso] = { ...day, slots };
     }
     return out;
-  }, [gig, tier, taken]);
+  }, [gig, tier, taken, isHebrew]);
   const availableIsoSet = useMemo(() => new Set(Object.keys(slotsByDate)), [slotsByDate]);
   const firstAvailableIso = useMemo(() => Object.keys(slotsByDate)[0] || null, [slotsByDate]);
 
@@ -975,7 +989,11 @@ const AppointmentPicker = ({ gig, tier, isWhatsApp, selectedDate, selectedSlot, 
   }, [firstAvailableIso]);
 
   if (!availableIsoSet.size) {
-    return <p className="text-xs text-gray-500 pt-2 border-t border-gray-100">Provider hasn&apos;t set open hours yet — book via message.</p>;
+    return (
+      <p className="text-xs text-gray-500 pt-2 border-t border-gray-100" data-testid="gig-appt-no-hours">
+        {t('services.noOpenHoursYet', "This business hasn't set open hours yet — send them a message instead.")}
+      </p>
+    );
   }
 
   // Convert current selection into a Date the shadcn calendar accepts,
@@ -1000,7 +1018,7 @@ const AppointmentPicker = ({ gig, tier, isWhatsApp, selectedDate, selectedSlot, 
   return (
     <div className="pt-3 border-t border-gray-100 space-y-2" data-testid="gig-appointment-picker">
       <label className="text-xs font-semibold text-gray-700 flex items-center gap-1">
-        <Calendar size={12} /> Pick a day
+        <Calendar size={12} /> {t('services.pickADay', 'Pick a day')}
       </label>
       <div className="rounded-lg border border-gray-200 bg-white overflow-hidden">
         <CalendarUI
@@ -1020,6 +1038,8 @@ const AppointmentPicker = ({ gig, tier, isWhatsApp, selectedDate, selectedSlot, 
             const dd = String(dateObj.getDate()).padStart(2, '0');
             return !availableIsoSet.has(`${yy}-${mm}-${dd}`);
           }}
+          locale={isHebrew ? heLocale : enLocale}
+          dir={isHebrew ? 'rtl' : 'ltr'}
           fromDate={today}
           toDate={lastDate}
           initialFocus
@@ -1028,11 +1048,12 @@ const AppointmentPicker = ({ gig, tier, isWhatsApp, selectedDate, selectedSlot, 
       </div>
       {activeLabel && (
         <div className="text-[11px] text-gray-500 pt-1" data-testid="gig-appt-day-summary">
-          Available slots for <span className="font-semibold text-gray-800">{activeLabel}</span>
+          {t('services.availableSlotsFor', 'Available slots for')}{' '}
+          <span className="font-semibold text-gray-800">{activeLabel}</span>
         </div>
       )}
       <label className="text-xs font-semibold text-gray-700 flex items-center gap-1 pt-1">
-        <Clock size={12} /> Pick a time
+        <Clock size={12} /> {t('services.pickATime', 'Pick a time')}
       </label>
       <div className="grid grid-cols-3 gap-1.5" data-testid="gig-appt-slots">
         {activeSlots.map((s) => (

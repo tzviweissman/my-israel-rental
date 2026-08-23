@@ -2177,6 +2177,21 @@ const he = {
         messageSellerWhatsApp: 'שליחת הודעה למוכר בוואטסאפ',
         sendInquiry: 'שליחת פנייה',
         sendBookingRequest: 'שליחת בקשת הזמנה',
+        // Appointment booking panel (GigDetail). These were hardcoded
+        // English and rendered untranslated on the Hebrew page, next to
+        // the one line that was translated.
+        chooseProduct: 'בחירת מוצר',
+        bookAppointment: 'קביעת תור',
+        choosePackage: 'בחירת חבילה',
+        pickADay: 'בחירת יום',
+        pickATime: 'בחירת שעה',
+        // A colon, not the prefix ל־: the day label that follows starts
+        // with "יום", and a maqaf prefix must attach to the next word
+        // with no space — which the JSX separator would break.
+        availableSlotsFor: 'שעות פנויות:',
+        pickDayAndTimeFirst: 'יש לבחור קודם יום ושעה',
+        durationMinutes: '{{n}} דק׳',
+        noOpenHoursYet: 'העסק עדיין לא הגדיר שעות פעילות — אפשר לשלוח לו הודעה.',
         // S3(c) — shown under the slot grid on WhatsApp-mode listings
         // only. The site never sees what was agreed on WhatsApp, so the
         // grid is opening hours, not a live calendar. Say so rather than

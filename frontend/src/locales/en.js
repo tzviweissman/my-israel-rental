@@ -2244,6 +2244,18 @@ const en = {
         messageSellerWhatsApp: 'Message the seller on WhatsApp',
         sendInquiry: 'Send an inquiry',
         sendBookingRequest: 'Send booking request',
+        // Appointment booking panel (GigDetail). These were hardcoded
+        // English and rendered untranslated on the Hebrew page, next to
+        // the one line that was translated.
+        chooseProduct: 'Choose a product',
+        bookAppointment: 'Book an appointment',
+        choosePackage: 'Choose a package',
+        pickADay: 'Pick a day',
+        pickATime: 'Pick a time',
+        availableSlotsFor: 'Available slots for',
+        pickDayAndTimeFirst: 'Pick a day and time slot first',
+        durationMinutes: '{{n}} min',
+        noOpenHoursYet: "This business hasn't set open hours yet — send them a message instead.",
         // S3(c) — shown under the slot grid on WhatsApp-mode listings
         // only. The site never sees what was agreed on WhatsApp, so the
         // grid is opening hours, not a live calendar. Say so rather than
