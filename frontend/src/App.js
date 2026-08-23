@@ -2,6 +2,7 @@ import React, { useState, useEffect, Suspense, lazy } from 'react';
 import { Helmet } from 'react-helmet-async';
 
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
+import useBuildRefresh from './hooks/useBuildRefresh';
 import { useTranslation } from 'react-i18next';
 import axios from 'axios';
 import './i18n';
@@ -54,6 +55,15 @@ function FloatingContact() {
 function ScrollToTop() {
   const { pathname } = useLocation();
   useEffect(() => { window.scrollTo(0, 0); }, [pathname]);
+  return null;
+}
+
+/* Picks up a newly deployed build and applies it at the next route
+   change, so a tab left open since this morning stops running this
+   morning's code. Renders nothing; it has to sit inside the router
+   because it watches navigation. */
+function BuildRefresh() {
+  useBuildRefresh();
   return null;
 }
 
@@ -234,6 +244,7 @@ function App() {
               </Helmet>
             )}
             <ScrollToTop />
+            <BuildRefresh />
             <ThemePreviewOverride />
             <div className="App">
               <ImpersonationBanner />
