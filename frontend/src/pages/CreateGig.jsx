@@ -34,6 +34,7 @@ import {
 import { API, AuthContext } from '../App';
 import PageMeta from '../components/PageMeta';
 import { uploadFilesFast } from '../utils/fastUpload';
+import { useFormDraft, readDraft, clearDraft } from '../hooks/useFormDraft';
 import { normalizeWhatsAppNumber, hasValidWhatsApp } from '../utils/whatsappLink';
 import { productPhotos } from '../utils/productPhotos';
 import PhoneInput from '../components/common/PhoneInput';
@@ -98,10 +99,14 @@ const CreateGig = () => {
   const { token } = useContext(AuthContext);
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const [step, setStep] = useState(1);
+  // Restored together with the answers: bringing someone back to step 1
+  // with their text still in the boxes reads as "it lost my work" even
+  // though nothing was lost.
+  const [step, setStep] = useState(() => readDraft('create-gig')?.step || 1);
   const [categories, setCategories] = useState([]);
   const [locations, setLocations] = useState([]);
   const [saving, setSaving] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
   const productImageInputRef = useRef({});
 
   // Post-signup onboarding hook — when a provider lands here fresh from
@@ -118,7 +123,11 @@ const CreateGig = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const [form, setForm] = useState({
+  /* A draft survives a reload — a deploy, a crashed tab, a phone killing
+     a backgrounded browser. Restored silently: asking "recover your
+     draft?" makes someone decide about work they never chose to lose,
+     and the answer is always yes. */
+  const [form, setForm] = useState(() => readDraft('create-gig')?.form || {
     gig_type: 'deliverable',
     title: '',
     category: '',
@@ -136,6 +145,8 @@ const CreateGig = () => {
     contact_email: '',
     area: '',
   });
+
+  useFormDraft('create-gig', { form, step }, !submitted);
 
   const set = (patch) => setForm((f) => ({ ...f, ...patch }));
 
@@ -226,7 +237,16 @@ const CreateGig = () => {
     try {
       const results = await uploadFilesFast(chosen.slice(0, room), API, token, () => {});
       const urls = results.map((r) => r?.url).filter(Boolean);
-      if (!urls.length) { toast.error('Upload failed'); return; }
+      if (!urls.length) {
+        // Say WHY. Cloudinary's own message ("File size too large",
+        // "Invalid image file") tells someone what to do next; a bare
+        // "Upload failed" tells them to retry something that will fail
+        // again the same way.
+        toast.error(results.find((r) => r?.error)?.error || 'Upload failed');
+        return;
+      }
+      const failed = results.length - urls.length;
+      if (failed > 0) toast.error(`${failed} photo(s) did not upload`);
       // Write the whole set to `images` and clear the legacy single
       // field, so a product is described by exactly one of the two.
       updateProduct(i, { images: [...existing, ...urls], image: '' });
@@ -413,6 +433,10 @@ const CreateGig = () => {
       // Publishing used to be followed by /subscription/select-plan and a
       // PayPal handoff for the plan starting after the free month. Listing
       // is free, so publishing now ends at the gig itself.
+      // Published: the draft has served its purpose and must not
+      // reappear the next time they open the wizard.
+      setSubmitted(true);
+      clearDraft('create-gig');
       navigate(`/businesses/${data.id}`);
     } catch (err) {
       toast.error(err.response?.data?.detail || 'Failed to publish');

@@ -18,48 +18,75 @@ const MAX_IMAGE_DIMENSION = 2400; // px; covers Retina displays at full-screen
 const IMAGE_QUALITY = 0.85;       // JPEG quality
 const COMPRESS_MIME = 'image/jpeg';
 
-/** Resize + recompress a large image File into a smaller Blob. */
+// Formats a browser canvas cannot be trusted to decode. HEIC/HEIF is
+// what every iPhone shoots by default: Safari can read it, Chrome and
+// Firefox cannot. Cloudinary converts it server-side without complaint,
+// so the right move is to skip our own compression and upload the
+// original rather than fail.
+const CANVAS_CANNOT_DECODE = /^image\/(heic|heif|avif)/i;
+
+/** Resize + recompress a large image File into a smaller Blob.
+ *
+ *  NEVER throws. Compression is an optimisation, and an optimisation
+ *  that can fail the whole upload is worse than no optimisation at all.
+ *  Any problem here returns the ORIGINAL file and lets Cloudinary deal
+ *  with it — which it can, including the formats a canvas cannot read.
+ *
+ *  This mattered: an iPhone photo made `new Image()` fire onerror, which
+ *  rejected, and because the caller compresses with Promise.all a single
+ *  undecodable photo failed the entire upload before one byte was sent.
+ *  The user saw "Upload failed" with no reason, and retrying could never
+ *  work because nothing about it was transient.
+ */
 async function compressImage(file) {
-  if (!file.type.startsWith('image/') || file.type === 'image/gif') return file;
-  // Skip tiny files — recompression would just add overhead.
-  if (file.size < 600 * 1024) return file;
+  try {
+    if (!file.type.startsWith('image/') || file.type === 'image/gif') return file;
+    if (CANVAS_CANNOT_DECODE.test(file.type)) return file;
+    // Skip tiny files — recompression would just add overhead.
+    if (file.size < 600 * 1024) return file;
 
-  const dataUrl = await new Promise((resolve, reject) => {
-    const r = new FileReader();
-    r.onload = () => resolve(r.result);
-    r.onerror = reject;
-    r.readAsDataURL(file);
-  });
-  const img = await new Promise((resolve, reject) => {
-    const i = new Image();
-    i.onload = () => resolve(i);
-    i.onerror = reject;
-    i.src = dataUrl;
-  });
+    const dataUrl = await new Promise((resolve, reject) => {
+      const r = new FileReader();
+      r.onload = () => resolve(r.result);
+      r.onerror = () => reject(new Error('could not read the file'));
+      r.readAsDataURL(file);
+    });
+    const img = await new Promise((resolve, reject) => {
+      const i = new Image();
+      i.onload = () => resolve(i);
+      // An Event, not an Error, is what used to propagate — which is why
+      // the message came out blank.
+      i.onerror = () => reject(new Error(`browser cannot decode ${file.type || 'this image'}`));
+      i.src = dataUrl;
+    });
 
-  let { width, height } = img;
-  if (width > MAX_IMAGE_DIMENSION || height > MAX_IMAGE_DIMENSION) {
-    const ratio = Math.min(MAX_IMAGE_DIMENSION / width, MAX_IMAGE_DIMENSION / height);
-    width = Math.round(width * ratio);
-    height = Math.round(height * ratio);
+    let { width, height } = img;
+    if (width > MAX_IMAGE_DIMENSION || height > MAX_IMAGE_DIMENSION) {
+      const ratio = Math.min(MAX_IMAGE_DIMENSION / width, MAX_IMAGE_DIMENSION / height);
+      width = Math.round(width * ratio);
+      height = Math.round(height * ratio);
+    }
+
+    const canvas = document.createElement('canvas');
+    canvas.width = width;
+    canvas.height = height;
+    const ctx = canvas.getContext('2d');
+    ctx.drawImage(img, 0, 0, width, height);
+
+    const blob = await new Promise((resolve) =>
+      canvas.toBlob(resolve, COMPRESS_MIME, IMAGE_QUALITY)
+    );
+
+    // If the "compressed" version is somehow larger, keep the original
+    if (!blob || blob.size >= file.size) return file;
+    return new File([blob], file.name.replace(/\.[^.]+$/, '.jpg'), {
+      type: COMPRESS_MIME,
+      lastModified: Date.now(),
+    });
+  } catch (err) {
+    // Upload the original. Slower, and it works.
+    return file;
   }
-
-  const canvas = document.createElement('canvas');
-  canvas.width = width;
-  canvas.height = height;
-  const ctx = canvas.getContext('2d');
-  ctx.drawImage(img, 0, 0, width, height);
-
-  const blob = await new Promise((resolve) =>
-    canvas.toBlob(resolve, COMPRESS_MIME, IMAGE_QUALITY)
-  );
-
-  // If the "compressed" version is somehow larger, keep the original
-  if (!blob || blob.size >= file.size) return file;
-  return new File([blob], file.name.replace(/\.[^.]+$/, '.jpg'), {
-    type: COMPRESS_MIME,
-    lastModified: Date.now(),
-  });
 }
 
 /** Fetch a fresh signature from our backend (per upload session). */
@@ -185,4 +212,35 @@ export async function uploadFilesFast(files, API, token, onAggregateProgress) {
       }
     })
   );
+}
+
+
+/**
+ * Upload ONE file and get its URL, or throw with the real reason.
+ *
+ * Exists because `uploadFilesFast` returns an array of result OBJECTS,
+ * and each one is either `{url, ...}` or `{error, ...}` — never a bare
+ * string, and never a rejected promise. Two different callers got that
+ * wrong in two different ways:
+ *
+ *   const [url] = await uploadFilesFast([file], ...)   // the OBJECT,
+ *                                                       // always truthy,
+ *                                                       // even on failure
+ *   const urls = results.map(r => r.url).filter(Boolean)  // real error
+ *                                                          // discarded
+ *
+ * The first shipped and broke every single upload through the photo
+ * nudge — it passed an object where a URL string was expected, so the
+ * save failed and the user was told to "try again", which could never
+ * work. The shape invited both mistakes, so the shape is no longer what
+ * single-file callers touch.
+ *
+ * @returns {Promise<string>} the uploaded URL
+ * @throws  {Error} carrying Cloudinary's own message where there is one
+ */
+export async function uploadOneFile(file, API, token, onProgress) {
+  const [res] = await uploadFilesFast([file], API, token, onProgress);
+  if (!res) throw new Error('Upload returned nothing');
+  if (res.error || !res.url) throw new Error(res.error || 'Upload failed');
+  return res.url;
 }

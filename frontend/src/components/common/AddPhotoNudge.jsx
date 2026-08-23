@@ -19,7 +19,7 @@ import React, { useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ImagePlus, X, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
-import { uploadFilesFast } from '../../utils/fastUpload';
+import { uploadOneFile } from '../../utils/fastUpload';
 
 // Dismissals live per item, so clearing one nudge never silences the
 // others — and a listing that gains a photo simply stops qualifying.
@@ -51,12 +51,19 @@ export default function AddPhotoNudge({
     if (!file) return;
     setBusy(true);
     try {
-      const [url] = await uploadFilesFast([file], API, token);
-      if (!url) throw new Error('upload returned nothing');
+      // uploadFilesFast returns result OBJECTS, not strings. This line
+      // used to read `const [url] = ...`, which bound the whole object
+      // to `url` — always truthy, so the guard below passed even when
+      // the upload had failed, and an object went where a URL string was
+      // expected. Every upload through this nudge failed, and the "try
+      // again" it suggested could never help.
+      const url = await uploadOneFile(file, API, token);
       await onUploaded(url);
       toast.success(t('photoNudge.added', 'Photo added'));
-    } catch {
-      toast.error(t('photoNudge.failed', "That photo didn't upload — try again"));
+    } catch (err) {
+      // Say what actually went wrong. "Try again" is only honest advice
+      // when the problem might be transient.
+      toast.error(err?.message || t('photoNudge.failed', "That photo didn't upload — try again"));
     } finally {
       setBusy(false);
     }
