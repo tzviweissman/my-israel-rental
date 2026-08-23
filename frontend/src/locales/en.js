@@ -2261,6 +2261,7 @@ const en = {
         whatsappInvalid: 'Enter a valid WhatsApp number — e.g. 050-123-4567 or +972 50 123 4567.',
         whatsappResolved: 'Customers will message you at +{{number}}',
         from: 'from',
+        photoRequired: 'Add at least one photo — a listing without one is very hard to book.',
         productPhotoLimit: 'Up to {{n}} photos per product',
         askForQuote: 'Ask for a quote',
         noImage: 'No image',

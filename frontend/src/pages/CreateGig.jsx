@@ -345,7 +345,23 @@ const CreateGig = () => {
     return '';
   };
 
+  // A listing must show something. Checked across all three places a
+  // photo can live — the gig gallery, a product, a tier — because the
+  // wizard dropped its gallery step and photos now hang off tiers and
+  // products, so looking only at form.gallery would reject everybody.
+  const hasAnyPhoto = () =>
+    (form.gallery || []).length > 0
+    || (form.products || []).some((pr) => pr.image || (pr.images || []).length)
+    || (form.tiers || []).some((tr) => (tr.images || []).length);
+
   const submit = async () => {
+    if (!hasAnyPhoto()) {
+      // Stopped here as well as on the server so the reason arrives
+      // before the save, not as a failure after it.
+      toast.error(t('services.photoRequired',
+        'Add at least one photo — a listing without one is very hard to book.'));
+      return;
+    }
     setSaving(true);
     try {
       const payload = {

@@ -302,6 +302,19 @@ async def create_gig(payload: GigIn, user=Depends(verify_token)):
     # at UI level.
     if payload.gig_type == "store" and not payload.products:
         raise HTTPException(status_code=400, detail="Store gigs need at least one product")
+    # A listing must show something. A photoless card is the single
+    # biggest reason a business page reads as abandoned, and the fix that
+    # actually works is not letting one be published in the first place.
+    #
+    # This does NOT hide or down-rank anything already live: spec S5 is
+    # explicit that a business is never penalised for having no photo,
+    # and listings created before this rule keep working untouched. The
+    # requirement applies at the moment of creation, going forward.
+    if not _has_any_photo(payload):
+        raise HTTPException(
+            status_code=400,
+            detail="Add at least one photo — a listing without one is very hard to book.",
+        )
     prov = await _ensure_provider_record(user["user_id"])
     # Every gig belongs to a business (spec M2). Today that is the one
     # created from the user's own name, so nothing looks different to
@@ -645,6 +658,30 @@ async def update_booking(booking_id: str, payload: BookingPatch, user=Depends(ve
     return fresh
 
 
+
+
+
+def _has_any_photo(payload_or_doc: Any) -> bool:
+    """Does this listing carry at least one image, anywhere?
+
+    Checked across all three places a photo can live — the gig gallery,
+    a product, or a tier — because a store that photographed each product
+    and a barber who photographed each tier have both done the thing we
+    are asking for, and only the gig-level gallery being empty is not a
+    reason to refuse them.
+    """
+    def _g(obj, key, default=None):
+        return obj.get(key, default) if isinstance(obj, dict) else getattr(obj, key, default)
+
+    if _g(payload_or_doc, "gallery") or []:
+        return True
+    for prod in _g(payload_or_doc, "products") or []:
+        if _g(prod, "image") or (_g(prod, "images") or []):
+            return True
+    for tier in _g(payload_or_doc, "tiers") or []:
+        if _g(tier, "images") or []:
+            return True
+    return False
 
 
 # --------------------------------------------------------------------------
