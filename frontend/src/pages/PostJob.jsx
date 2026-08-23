@@ -13,6 +13,7 @@ import React, { useContext, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import axios from 'axios';
+import { useFormDraft, readDraft, clearDraft } from '../hooks/useFormDraft';
 import { toast } from 'sonner';
 import { Loader2, ArrowLeft, ArrowRight } from 'lucide-react';
 import { API, AuthContext } from '../App';
@@ -31,7 +32,8 @@ const PostJob = () => {
   const navigate = useNavigate();
   const [categories, setCategories] = useState([]);
   const [saving, setSaving] = useState(false);
-  const [form, setForm] = useState({
+  const [submitted, setSubmitted] = useState(false);
+  const [form, setForm] = useState(() => readDraft('post-job')?.form || {
     title: '',
     category: '',
     subcategory: '',
@@ -42,6 +44,11 @@ const PostJob = () => {
     preferred_date: '',
     area: '',
   });
+
+  // Survives a reload — a deploy, a crashed tab, a closed browser.
+  // Declared AFTER the state it reads: a hook placed above `form` is a
+  // use-before-declaration, which is how /stays went down.
+  useFormDraft('post-job', { form }, !submitted);
   const set = (patch) => setForm((f) => ({ ...f, ...patch }));
 
   useEffect(() => {
@@ -77,6 +84,8 @@ const PostJob = () => {
           onClick: () => navigate('/dashboard?tab=my-jobs'),
         },
       });
+      setSubmitted(true);
+      clearDraft('post-job');
       navigate(`/businesses/jobs/${data.id}`);
     } catch (err) {
       toast.error(err.response?.data?.detail || 'Failed to post job');
