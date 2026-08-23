@@ -1919,8 +1919,10 @@ const he = {
         closingBody: 'הפרסום לוקח כמה דקות ולא עולה כלום.',
       },
       whyList: {
-        heroTitle: 'שיגיעו אליכם שוכרים דוברי אנגלית מכל הארץ',
-        heroBody: 'אנשים עוברים דירה — ואז הם צריכים מובילים, מנקים, אנשי תחזוקה ועוד. כאן הם מחפשים, בשפה שהם קוראים, בדיוק ברגע שהם צריכים אתכם.',
+        // See the note on the English copy — the headline must not narrow
+        // the audience to renters or to one language.
+        heroTitle: 'שיגיעו אליכם לקוחות מכל הארץ',
+        heroBody: 'בין אם מישהו עובר דירה, משפץ, חוגג או פשוט צריך שיעשו את העבודה — כאן הוא מחפש, בעברית או באנגלית, בדיוק ברגע שהוא צריך אתכם.',
         startListing: 'התחילו לפרסם',
         trialNote: 'פרסום חינם — ללא צורך בכרטיס אשראי.',
         benefitsTitle: 'מה אתם מקבלים',

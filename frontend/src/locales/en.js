@@ -1968,8 +1968,13 @@ const en = {
         closingBody: 'Listing takes a few minutes and costs nothing.',
       },
       whyList: {
-        heroTitle: 'Get found by English-speaking renters across Israel',
-        heroBody: 'People move, and then they need movers, cleaners, handymen and more. This is where they look — in a language they read, at the moment they need you.',
+        // Deliberately not "English-speaking renters" (Tzvi, 2026-08-23):
+        // naming one language and one kind of customer tells every other
+        // business on the site that this is not for them. The bilingual
+        // support is still a selling point — it just belongs in the body
+        // as something we offer, not in the headline as who we serve.
+        heroTitle: 'Get found by people across Israel',
+        heroBody: 'Whether someone is moving, renovating, celebrating or just needs a job done, this is where they look — in English or Hebrew, at the moment they need you.',
         startListing: 'Start listing',
         trialNote: 'Free to list — no card needed.',
         benefitsTitle: 'What you get',

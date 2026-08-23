@@ -76,7 +76,7 @@ const WhyList = () => {
     <div className="min-h-screen bg-white">
       <PageMeta
         title="List your service on MyIsraelRental | For service providers"
-        description="Get found by English-speaking renters and olim across Israel, at the moment they're moving and need you. Bilingual profile, real reviews, and a jobs board where customers come to you."
+        description="Get found by people across Israel, at the moment they need you. Bilingual profile, real reviews, and a jobs board where customers come to you."
         path="/why-list"
       />
 
@@ -93,12 +93,12 @@ const WhyList = () => {
             className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 mb-4"
             style={{ fontFamily: 'var(--font-head)' }}
           >
-            {t('whyList.heroTitle', 'Get found by English-speaking renters across Israel')}
+            {t('whyList.heroTitle', 'Get found by people across Israel')}
           </h1>
           <p className="text-base sm:text-lg text-gray-600 max-w-2xl mx-auto mb-8">
             {t(
               'whyList.heroBody',
-              'People move, and then they need movers, cleaners, handymen and more. This is where they look — in a language they read, at the moment they need you.',
+              'Whether someone is moving, renovating, celebrating or just needs a job done, this is where they look — in English or Hebrew, at the moment they need you.',
             )}
           </p>
           <button
