@@ -10,6 +10,14 @@
 // t('some.key', 'English fallback') and silently render the fallback forever
 // if the key goes missing.
 const he = {
+      // Screen-reader labels for the shared date picker
+      // (components/ui/calendar.jsx). react-day-picker ships these in
+      // English only and does not route them through its `locale`, so
+      // without an override a Hebrew page announces English.
+      calendar: {
+        previousMonth: 'מעבר לחודש הקודם',
+        nextMonth: 'מעבר לחודש הבא',
+      },
       shortLink: {
         opening: 'פותחים…',
         notFound: 'הקישור הזה אינו קיים או הוסר.',

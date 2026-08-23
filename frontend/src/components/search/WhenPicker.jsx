@@ -24,6 +24,7 @@ import {
 import 'react-day-picker/dist/style.css';
 import './whenpicker.css';
 import useIsRtl from '../../hooks/useIsRtl';
+import useCalendarLocale from '../../hooks/useCalendarLocale';
 
 const toIso = (d) => (d ? format(d, 'yyyy-MM-dd') : '');
 const fromIso = (s) => {
@@ -80,6 +81,7 @@ const WhenPicker = ({
   });
   const wrapRef = useRef(null);
   const { t } = useTranslation();
+  const cal = useCalendarLocale();
 
   useEffect(() => {
     if (!open) return;
@@ -217,6 +219,7 @@ const WhenPicker = ({
 
             {mode === 'dates' ? (
               <DayPicker
+                {...cal}
                 mode="range"
                 selected={range}
                 onSelect={handleCalendarSelect}

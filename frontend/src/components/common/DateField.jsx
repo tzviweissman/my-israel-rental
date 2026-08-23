@@ -24,6 +24,7 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { DayPicker } from 'react-day-picker';
 import { useTranslation } from 'react-i18next';
 import { CalendarDays, X } from 'lucide-react';
+import useCalendarLocale from '../../hooks/useCalendarLocale';
 import 'react-day-picker/dist/style.css';
 
 /** 'YYYY-MM-DD' → local Date, or null. Never via new Date(string). */
@@ -54,6 +55,7 @@ export default function DateField({
   testid = 'date-field',
 }) {
   const { t, i18n } = useTranslation();
+  const cal = useCalendarLocale();
   const [open, setOpen] = useState(false);
   const wrapRef = useRef(null);
 
@@ -139,6 +141,7 @@ export default function DateField({
           data-testid={`${testid}-popover`}
         >
           <DayPicker
+            {...cal}
             mode="single"
             selected={selected || undefined}
             defaultMonth={selected || minDate || undefined}
@@ -149,7 +152,6 @@ export default function DateField({
               onChange(d ? toISODate(d) : '');
               if (d) setOpen(false);
             }}
-            dir={i18n.language === 'he' ? 'rtl' : 'ltr'}
             weekStartsOn={0}
             showOutsideDays
             className="mir-daypicker"

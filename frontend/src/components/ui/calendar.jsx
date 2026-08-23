@@ -1,19 +1,38 @@
 import * as React from "react"
 import { ChevronLeft, ChevronRight } from "lucide-react"
 import { DayPicker } from "react-day-picker"
+import useCalendarLocale from "@/hooks/useCalendarLocale"
 
 import { cn } from "@/lib/utils"
 import { buttonVariants } from "@/components/ui/button"
 
+// NOTE — this file is a shadcn component but is NOT stock: it has been made
+// language-aware. Regenerating it from the shadcn CLI will silently drop the
+// three props below and every date picker in the app reverts to English
+// month names and LTR navigation on the Hebrew site. Six callsites rely on
+// this happening automatically; none of them pass `locale` or `dir`.
+//
+// See hooks/useCalendarLocale for what react-day-picker gets wrong on its
+// own and why these three props are needed.
+//
+// Each is a default, not an override — a caller that passes its own
+// `locale`, `dir` or `labels` still wins.
 function Calendar({
   className,
   classNames,
   showOutsideDays = true,
+  locale,
+  dir,
+  labels,
   ...props
 }) {
+  const cal = useCalendarLocale();
   return (
     <DayPicker
       showOutsideDays={showOutsideDays}
+      locale={locale ?? cal.locale}
+      dir={dir ?? cal.dir}
+      labels={{ ...cal.labels, ...labels }}
       className={cn("p-3", className)}
       classNames={{
         months: "flex flex-col sm:flex-row space-y-4 sm:space-x-4 sm:space-y-0",

@@ -13,13 +13,9 @@ import DateField from '../components/common/DateField';
 import axios from 'axios';
 import { toast } from 'sonner';
 import { MessageCircle, Send, Loader2, ArrowLeft, Award, Zap, Calendar, Clock, Camera, ChevronLeft, ChevronRight, X } from 'lucide-react';
+// The shared calendar handles its own language, direction and
+// screen-reader labels — see components/ui/calendar.jsx.
 import { Calendar as CalendarUI } from '../components/ui/calendar';
-// react-day-picker renders its own month name and weekday initials.
-// Without a locale it falls back to the *browser's*, not the site's,
-// so the Hebrew page showed "August 2026 / Su Mo Tu" on an English
-// machine. The shadcn wrapper spreads unknown props onto DayPicker,
-// so passing `locale` needs no change to the shared component.
-import { he as heLocale, enUS as enLocale } from 'date-fns/locale';
 import { API, AuthContext } from '../App';
 import PageMeta from '../components/PageMeta';
 import StarRating from '../components/marketplace/StarRating';
@@ -1038,8 +1034,6 @@ const AppointmentPicker = ({ gig, tier, isWhatsApp, selectedDate, selectedSlot, 
             const dd = String(dateObj.getDate()).padStart(2, '0');
             return !availableIsoSet.has(`${yy}-${mm}-${dd}`);
           }}
-          locale={isHebrew ? heLocale : enLocale}
-          dir={isHebrew ? 'rtl' : 'ltr'}
           fromDate={today}
           toDate={lastDate}
           initialFocus
