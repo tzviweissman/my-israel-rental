@@ -43,6 +43,7 @@ const he = {
         failed: 'לא הצלחנו ליצור את הקוד',
       },
       businessPage: {
+        mostPopular: 'התחילו כאן',
         searchThis: 'חיפוש בעסק הזה',
         noMatches: 'לא נמצאו תוצאות ל“{{q}}”.',
         askThem: 'שאלו אותם ישירות',

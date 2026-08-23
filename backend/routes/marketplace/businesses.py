@@ -88,6 +88,10 @@ class BusinessIn(BaseModel):
     payment_note: Optional[str] = Field(None, max_length=200)
     kosher_certification: Optional[KosherCert] = None
     collections: Optional[list[Collection]] = None
+    # C5 — capped at three by the MODEL, not by the UI. A page where
+    # everything is featured features nothing, and a cap enforced only in
+    # a form is a cap that a second client ignores.
+    pinned_service_ids: Optional[list[str]] = Field(None, max_length=3)
 
 
 class BusinessPatch(BaseModel):
@@ -105,6 +109,10 @@ class BusinessPatch(BaseModel):
     payment_note: Optional[str] = Field(None, max_length=200)
     kosher_certification: Optional[KosherCert] = None
     collections: Optional[list[Collection]] = None
+    # C5 — capped at three by the MODEL, not by the UI. A page where
+    # everything is featured features nothing, and a cap enforced only in
+    # a form is a cap that a second client ignores.
+    pinned_service_ids: Optional[list[str]] = Field(None, max_length=3)
 
 
 
@@ -271,6 +279,8 @@ async def update_business(business_id: str, payload: BusinessPatch, user=Depends
     # Fine for a name, which must always exist; wrong for optional facts,
     # where deleting the line is the whole point of an edit form.
     provided = payload.model_fields_set
+    if "pinned_service_ids" in provided:
+        update["pinned_service_ids"] = (payload.pinned_service_ids or [])[:3]
     if "collections" in provided:
         update["collections"] = [c.model_dump() for c in (payload.collections or [])]
     for key in ("hours", "delivery_note", "lead_time", "payment_note",
@@ -464,6 +474,7 @@ async def public_business(slug_or_id: str):
         # on the client (utils/businessCollections.js) so the rules cannot
         # drift between here and there.
         "collections": biz.get("collections") or [],
+        "pinned_service_ids": (biz.get("pinned_service_ids") or [])[:3],
         "response_bucket": _response_bucket(
             await db.marketplace_providers.find_one({"user_id": biz.get("owner_user_id")}) or {}
         ),

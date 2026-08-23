@@ -175,6 +175,16 @@ const BusinessPage = () => {
   const searching = q.length > 0;
   const searchResults = searching ? (biz.listings || []).filter(matches) : [];
 
+  /* C5 — the owner's own pick, above everything. Their judgement about
+     what sells beats any ordering we could invent, and three is the cap
+     precisely so it stays a judgement. Stale ids are skipped, same as in
+     collections: a pinned service that was later deleted should vanish
+     rather than leave a gap. */
+  const pinned = (biz.pinned_service_ids || [])
+    .map((id) => (biz.listings || []).find((g) => g.id === id))
+    .filter(Boolean)
+    .slice(0, 3);
+
   const { groups, mode: groupMode } = buildCollections(biz.listings, biz.collections, { t });
   // While searching, sections would fragment a handful of results across
   // four headings. One list answers the question that was asked.
@@ -386,6 +396,23 @@ const BusinessPage = () => {
             </div>
           )}
         </div>
+
+        {/* C5 — first, and not repeated: a pinned service still appears
+            in its collection below, because removing it from there would
+            make the section it belongs to look incomplete. */}
+        {!searching && pinned.length > 0 && (
+          <section className="mb-8" data-testid="business-pinned">
+            <h3 className="text-base font-bold mb-3" style={{ fontFamily: 'var(--font-head)', color: 'var(--ink)' }}>
+              {t('businessPage.mostPopular', 'Start here')}
+            </h3>
+            <div className={effectiveLayout === 'list' ? 'flex flex-col gap-2' : 'grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4'}>
+              {pinned.map((g) => (
+                <ServiceCard key={g.id} gig={g} variant={effectiveLayout === 'list' ? 'list' : 'grid'}
+                  i18n={i18n} t={t} onClick={() => navigate(`/businesses/${g.id}`)} />
+              ))}
+            </div>
+          </section>
+        )}
 
         {/* C3 + C4 — only for a catalogue big enough to need them. */}
         {showCatalogTools && (

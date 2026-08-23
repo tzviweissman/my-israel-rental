@@ -43,6 +43,7 @@ const en = {
         failed: 'Could not create that code',
       },
       businessPage: {
+        mostPopular: 'Start here',
         searchThis: 'Search this business',
         noMatches: 'Nothing matches “{{q}}”.',
         askThem: 'Ask them directly',
