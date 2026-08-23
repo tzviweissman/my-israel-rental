@@ -14,7 +14,7 @@ import React, { useContext, useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import axios from 'axios';
-import { Star, BadgeCheck, MapPin, Loader2, MessageCircle, LayoutGrid, List, Zap } from 'lucide-react';
+import { Star, BadgeCheck, MapPin, Loader2, MessageCircle, LayoutGrid, List, Zap, Search } from 'lucide-react';
 import { API, AuthContext } from '../App';
 import PageMeta from '../components/PageMeta';
 import CoverPlaceholder from '../components/common/CoverPlaceholder';
@@ -22,6 +22,7 @@ import ServiceCard from '../components/marketplace/ServiceCard';
 import GoodToKnow from '../components/marketplace/GoodToKnow';
 import SiteFooter from '../components/common/SiteFooter';
 import { buildCollections } from '../utils/businessCollections';
+import { localizedTitle, localizedDescription } from '../utils/gigLocale';
 import { getGigCover } from '../utils/gigAvailability';
 
 // First screenful and each subsequent step. Twelve fills a desktop grid
@@ -34,6 +35,11 @@ const PAGE_SIZE = 12;
 // enough to show the group has range, few enough that four groups still
 // fit on one screen.
 const COLLECTION_PREVIEW = 6;
+
+// Past this many services, browsing stops being enough and the page
+// needs tools: jump-to-section chips and a filter. Below it they are
+// clutter — chips over three sections is furniture, not navigation.
+const CATALOG_TOOLS_MIN = 16;
 
 const BusinessPage = () => {
   const { slug } = useParams();
@@ -53,6 +59,9 @@ const BusinessPage = () => {
   const [shown, setShown] = useState(PAGE_SIZE);
   // Which collections the reader has opened in full (C1's "See all N").
   const [expanded, setExpanded] = useState(() => new Set());
+  // C4 — filters this business's own services, in whichever language
+  // they were written.
+  const [query, setQuery] = useState('');
 
   useEffect(() => {
     let cancelled = false;
@@ -150,8 +159,27 @@ const BusinessPage = () => {
   const columnWidth = listingCount < 4 ? 'max-w-[900px]' : 'max-w-5xl';
   const autoLayout = listingCount <= 6 ? 'grid' : 'list';
   const effectiveLayout = layout || autoLayout;
+  /* C4 — search across BOTH languages. A Hebrew shopper searching
+     "עוגה" must find a service whose title was written in English and
+     translated, and the reverse; matching only the displayed string
+     would hide half the catalogue from half the customers. */
+  const q = query.trim().toLowerCase();
+  const matches = (g) => {
+    if (!q) return true;
+    const fields = [
+      g.title, g.title_he, localizedTitle(g, i18n),
+      g.description, g.description_he, localizedDescription(g, i18n),
+    ];
+    return fields.some((f) => String(f || '').toLowerCase().includes(q));
+  };
+  const searching = q.length > 0;
+  const searchResults = searching ? (biz.listings || []).filter(matches) : [];
+
   const { groups, mode: groupMode } = buildCollections(biz.listings, biz.collections, { t });
-  const grouped = groupMode !== 'flat';
+  // While searching, sections would fragment a handful of results across
+  // four headings. One list answers the question that was asked.
+  const grouped = groupMode !== 'flat' && !searching;
+  const showCatalogTools = listingCount >= CATALOG_TOOLS_MIN;
 
   const visibleListings = (biz.listings || []).slice(0, shown);
   const remaining = listingCount - visibleListings.length;
@@ -359,7 +387,84 @@ const BusinessPage = () => {
           )}
         </div>
 
-        {biz.listings.length === 0 ? (
+        {/* C3 + C4 — only for a catalogue big enough to need them. */}
+        {showCatalogTools && (
+          <div
+            className="sticky z-30 -mx-4 px-4 py-2 mb-4 backdrop-blur"
+            style={{ top: 'var(--nav-h, 68px)', background: 'rgb(239 233 220 / 0.92)' }}
+            data-testid="business-catalog-tools"
+          >
+            <div className="relative mb-2">
+              <Search
+                size={15}
+                className="absolute top-1/2 -translate-y-1/2 start-3"
+                style={{ color: 'var(--brand-muted)' }}
+                aria-hidden="true"
+              />
+              <input
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                placeholder={t('businessPage.searchThis', 'Search this business')}
+                className="w-full ps-9 pe-3 py-2 rounded-lg border text-sm bg-white"
+                style={{ borderColor: 'var(--brand-border)' }}
+                data-testid="business-search"
+              />
+            </div>
+
+            {/* Jump-to-section chips. Hidden while searching: there are
+                no sections to jump to then. */}
+            {!searching && groups.length > 1 && (
+              <div className="flex gap-1.5 overflow-x-auto pb-0.5" data-testid="business-collection-chips">
+                {groups.map((g) => (
+                  <button
+                    key={g.id}
+                    type="button"
+                    onClick={() => {
+                      const el = document.querySelector(`[data-testid="collection-${g.id}"]`);
+                      if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }}
+                    className="px-3 py-1 rounded-full text-xs font-semibold whitespace-nowrap border shrink-0"
+                    style={{ borderColor: 'var(--brand-border)', background: 'var(--surface)', color: 'var(--brand-primary)' }}
+                    data-testid={`chip-${g.id}`}
+                  >
+                    {g.name} · {g.services.length}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        {searching ? (
+          searchResults.length === 0 ? (
+            /* A dead end is the worst possible answer here: they wanted
+               something this business might well do, and the page just
+               says no. Offer the person instead. */
+            <div className="text-center py-8" data-testid="business-search-empty">
+              <p className="text-sm mb-3" style={{ color: 'var(--brand-muted)' }}>
+                {t('businessPage.noMatches', 'Nothing matches “{{q}}”.', { q: query.trim() })}
+              </p>
+              {canMessage && (
+                <button
+                  type="button"
+                  onClick={messageBusiness}
+                  className="btn-gold inline-flex items-center gap-2 px-5 py-2.5 text-sm"
+                  data-testid="business-search-message"
+                >
+                  <MessageCircle size={16} aria-hidden="true" /> {t('businessPage.askThem', 'Ask them directly')}
+                </button>
+              )}
+            </div>
+          ) : (
+            <div className={effectiveLayout === 'list' ? 'flex flex-col gap-2' : 'grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4'}
+              data-testid="business-search-results">
+              {searchResults.map((g) => (
+                <ServiceCard key={g.id} gig={g} variant={effectiveLayout === 'list' ? 'list' : 'grid'}
+                  i18n={i18n} t={t} onClick={() => navigate(`/businesses/${g.id}`)} />
+              ))}
+            </div>
+          )
+        ) : biz.listings.length === 0 ? (
           <p className="text-sm" style={{ color: 'var(--brand-muted)' }} data-testid="business-empty">
             {t('businessPage.nothingYet', 'Nothing listed yet.')}
           </p>

@@ -43,6 +43,9 @@ const en = {
         failed: 'Could not create that code',
       },
       businessPage: {
+        searchThis: 'Search this business',
+        noMatches: 'Nothing matches “{{q}}”.',
+        askThem: 'Ask them directly',
         seeAll: 'See all {{n}}',
         moreFrom: 'More from this business',
         showMore: 'Show {{n}} more',
