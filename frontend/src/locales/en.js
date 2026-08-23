@@ -35,6 +35,7 @@ const en = {
         viewsChart: 'Visitors — last 14 days',
         leadsChart: 'Taps — last 14 days',
         byListing: 'Taps by listing',
+        notCountingYet: 'Just switched on — check back tomorrow.',
         allTime: '{{n}} all time',
         countingSince: 'Counting since {{date}}',
       },

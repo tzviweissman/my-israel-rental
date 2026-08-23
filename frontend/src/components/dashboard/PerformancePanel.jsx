@@ -30,12 +30,25 @@ import formatDate from '../../utils/formatDate';
 // One column of the panel. Kept local: it is the panel's own layout, not a
 // shape anything else needs.
 function Stat({ icon: Icon, label, periodTotal, allTime, daily, chartTitle, since, testid, t }) {
+  // Nothing has EVER been recorded for this half — not "a quiet month" but
+  // "we were not counting yet". They look identical as a `0`, and the two
+  // halves start at different times: taps have months of history, visitors
+  // begin the day this ships. Printed side by side that reads as
+  // "0 visitors, 3 people messaged you", which is impossible and looks like
+  // a broken page rather than a young metric.
+  const notCountingYet = !since && !allTime;
   return (
     <div className="flex-1 min-w-0">
       <div className="flex items-center gap-1.5 mb-1">
         <Icon size={14} className="text-[var(--brand-primary)] shrink-0" />
         <span className="text-xs font-semibold text-gray-700">{label}</span>
       </div>
+      {notCountingYet ? (
+        <p className="text-xs text-gray-500" data-testid={`${testid}-not-yet`}>
+          {t('perf.notCountingYet', 'Just switched on — check back tomorrow.')}
+        </p>
+      ) : (
+      <>
       <div className="flex items-baseline gap-2 flex-wrap">
         <span className="text-2xl font-bold text-gray-900" data-testid={`${testid}-period`}>
           {periodTotal}
@@ -54,6 +67,8 @@ function Stat({ icon: Icon, label, periodTotal, allTime, daily, chartTitle, sinc
         <p className="text-[11px] text-gray-400 mt-1" data-testid={`${testid}-since`}>
           {t('perf.countingSince', { defaultValue: 'Counting since {{date}}', date: formatDate(since) })}
         </p>
+      )}
+      </>
       )}
     </div>
   );

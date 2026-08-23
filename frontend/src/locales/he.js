@@ -27,6 +27,7 @@ const he = {
         viewsChart: 'מבקרים — 14 הימים האחרונים',
         leadsChart: 'לחיצות — 14 הימים האחרונים',
         byListing: 'לחיצות לפי רשימה',
+        notCountingYet: 'המדידה הופעלה עכשיו — בדקו שוב מחר.',
         allTime: '{{n}} מאז ומעולם',
         countingSince: 'נספר מאז {{date}}',
       },
