@@ -19,6 +19,7 @@ import { API, AuthContext } from '../App';
 import PageMeta from '../components/PageMeta';
 import CoverPlaceholder from '../components/common/CoverPlaceholder';
 import ServiceCard from '../components/marketplace/ServiceCard';
+import GoodToKnow from '../components/marketplace/GoodToKnow';
 import { getGigCover } from '../utils/gigAvailability';
 
 const BusinessPage = () => {
@@ -293,6 +294,11 @@ const BusinessPage = () => {
             </div>
           </div>
         </div>
+
+        {/* C6 — facts in their own band, above the catalogue and never
+            interleaved with it. Renders nothing at all when the business
+            has filled none of it in. */}
+        <GoodToKnow business={biz} />
 
         {/* B8 — was a small grey caption reading "What they offer", which
             is both third person and too quiet to be a section heading.

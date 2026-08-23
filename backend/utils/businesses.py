@@ -98,6 +98,21 @@ def new_business_doc(
         # verification stays where it is, for identity.
         "verified": False,
         "verified_at": None,
+        # C6 — the facts that earn trust, kept OUT of the service list.
+        # All optional, all absent by default: the band renders only what
+        # a business has actually filled in, and nothing at all when it
+        # has filled in none of it. Real data or no row.
+        "hours": None,              # free text, e.g. "Sun-Thu 9:00-18:00"
+        "languages": [],            # e.g. ["Hebrew", "English"]
+        "founded_year": None,       # int; "years in business" is derived
+        "delivery_note": None,      # areas served / how delivery works
+        "lead_time": None,          # e.g. "48 hours notice"
+        "payment_note": None,       # e.g. "Cash, Bit, bank transfer"
+        # Certifying body plus optional logo and certificate image. In
+        # Israel this is often the single most decisive fact on a food
+        # business's page, and it deserves a real element rather than a
+        # truncated row reading "Under the strict Hashgach…".
+        "kosher_certification": None,
         "active": True,
         "created_at": now,
         "updated_at": now,

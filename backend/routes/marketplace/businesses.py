@@ -41,12 +41,31 @@ from .shared import (
 router = APIRouter(prefix="/marketplace", tags=["marketplace"])
 
 
+class KosherCert(BaseModel):
+    """Certifying body, and optionally proof of it (spec C6).
+
+    `body` is the only required part: a name with no scan still tells a
+    customer more than nothing, and demanding a photo would stop most
+    businesses filling it in at all.
+    """
+    body: str = Field(..., min_length=2, max_length=120)
+    logo_url: Optional[str] = None
+    certificate_url: Optional[str] = None
+
+
 class BusinessIn(BaseModel):
     name: str = Field(..., min_length=2, max_length=80)
     description: str = Field("", max_length=2000)
     categories: list[str] = Field(default_factory=list)
     areas: list[str] = Field(default_factory=list)
     logo_url: Optional[str] = None
+    hours: Optional[str] = Field(None, max_length=200)
+    languages: Optional[list[str]] = None
+    founded_year: Optional[int] = Field(None, ge=1800, le=2100)
+    delivery_note: Optional[str] = Field(None, max_length=300)
+    lead_time: Optional[str] = Field(None, max_length=120)
+    payment_note: Optional[str] = Field(None, max_length=200)
+    kosher_certification: Optional[KosherCert] = None
 
 
 class BusinessPatch(BaseModel):
@@ -56,6 +75,14 @@ class BusinessPatch(BaseModel):
     areas: Optional[list[str]] = None
     logo_url: Optional[str] = None
     active: Optional[bool] = None
+    hours: Optional[str] = Field(None, max_length=200)
+    languages: Optional[list[str]] = None
+    founded_year: Optional[int] = Field(None, ge=1800, le=2100)
+    delivery_note: Optional[str] = Field(None, max_length=300)
+    lead_time: Optional[str] = Field(None, max_length=120)
+    payment_note: Optional[str] = Field(None, max_length=200)
+    kosher_certification: Optional[KosherCert] = None
+
 
 
 def _public(doc: dict[str, Any], gig_count: int = 0) -> dict[str, Any]:
@@ -371,6 +398,15 @@ async def public_business(slug_or_id: str):
         # cards. None below MIN_RESPONSES_FOR_BADGE: a single lucky reply
         # is not a response time, and a claim we cannot stand behind is
         # worse than no claim.
+        # C6 — passed through as stored. Absent fields stay absent; the
+        # page renders a row only where there is something to say.
+        "hours": biz.get("hours"),
+        "languages": biz.get("languages") or [],
+        "founded_year": biz.get("founded_year"),
+        "delivery_note": biz.get("delivery_note"),
+        "lead_time": biz.get("lead_time"),
+        "payment_note": biz.get("payment_note"),
+        "kosher_certification": biz.get("kosher_certification"),
         "response_bucket": _response_bucket(
             await db.marketplace_providers.find_one({"user_id": biz.get("owner_user_id")}) or {}
         ),
