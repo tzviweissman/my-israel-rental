@@ -47,8 +47,9 @@ from pathlib import Path
 
 import fitz  # PyMuPDF
 
-SRC = Path("marketing/flyer-expand-your-horizons-a4-print.pdf")
-OUT = Path("marketing/flyer-expand-your-horizons-a4-print-flat.pdf")
+# Optional argv[1] selects a different print PDF; default unchanged.
+SRC = Path(sys.argv[1]) if len(sys.argv) > 1 else Path("marketing/flyer-expand-your-horizons-a4-print.pdf")
+OUT = SRC.with_name(SRC.stem + "-flat.pdf")
 DPI = 300
 MM = 72 / 25.4
 

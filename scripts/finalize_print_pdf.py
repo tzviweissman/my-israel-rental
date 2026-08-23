@@ -27,8 +27,10 @@ from pathlib import Path
 
 import fitz  # PyMuPDF
 
-PDF = Path("marketing/flyer-expand-your-horizons-a4-print.pdf")
-PROOF = Path("marketing/flyer-print-proof.png")
+# Optional argv[1] selects a different print PDF (the business flyers);
+# with no argument the original flyer is used exactly as before.
+PDF = Path(sys.argv[1]) if len(sys.argv) > 1 else Path("marketing/flyer-expand-your-horizons-a4-print.pdf")
+PROOF = PDF.with_name(PDF.stem + "-proof.png")
 
 MM = 72.0 / 25.4          # PDF points per millimetre
 TRIM_W, TRIM_H = 210 * MM, 297 * MM
