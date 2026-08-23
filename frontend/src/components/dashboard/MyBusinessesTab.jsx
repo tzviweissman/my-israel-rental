@@ -17,6 +17,7 @@ import axios from 'axios';
 import { Briefcase, Plus, Loader2, Eye, EyeOff, Check, X, Pencil } from 'lucide-react';
 import { toast } from 'sonner';
 import CoverPlaceholder from '../common/CoverPlaceholder';
+import BusinessDetailsForm from './BusinessDetailsForm';
 import MyGigsTab from './MyGigsTab';
 
 const MAX_ACTIVE = 5;
@@ -32,6 +33,8 @@ export default function MyBusinessesTab({ API, token }) {
   // WITHIN it, so the tab bar and the browser's back button behave the
   // way someone expects from a dashboard rather than a page tree.
   const [openBiz, setOpenBiz] = useState(null);
+  // Which business is having its Good-to-know facts edited (spec C6).
+  const [detailsBiz, setDetailsBiz] = useState(null);
   const [editName, setEditName] = useState('');
 
   const auth = { headers: { Authorization: `Bearer ${token}` } };
@@ -111,6 +114,16 @@ export default function MyBusinessesTab({ API, token }) {
   };
 
   // Inside a business: its own listings, in its own vocabulary.
+  const detailsModal = detailsBiz ? (
+    <BusinessDetailsForm
+      business={detailsBiz}
+      API={API}
+      token={token}
+      onClose={() => setDetailsBiz(null)}
+      onSaved={load}
+    />
+  ) : null;
+
   if (openBiz) {
     return (
       <MyGigsTab
@@ -251,6 +264,19 @@ export default function MyBusinessesTab({ API, token }) {
                   {!b.active && ` · ${t('businesses.hidden', 'hidden')}`}
                 </p>
 
+                {/* C6 — until this existed the only editable thing about
+                    a business was its name, so every fact the public page
+                    can show had no way in. */}
+                <button
+                  type="button"
+                  onClick={() => setDetailsBiz(b)}
+                  className="inline-flex items-center gap-1.5 text-xs font-semibold me-3"
+                  style={{ color: 'var(--brand-primary)' }}
+                  data-testid={`business-details-${b.id}`}
+                >
+                  {t('businesses.editDetails', 'Business details')}
+                </button>
+
                 <button
                   type="button"
                   onClick={() => { setEditingId(b.id); setEditName(b.name); }}
@@ -276,6 +302,8 @@ export default function MyBusinessesTab({ API, token }) {
           ))}
         </div>
       )}
+
+      {detailsModal}
     </div>
   );
 }

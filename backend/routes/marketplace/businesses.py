@@ -233,6 +233,24 @@ async def update_business(business_id: str, payload: BusinessPatch, user=Depends
                     detail=f"You can have up to {MAX_BUSINESSES_PER_USER} active businesses.",
                 )
 
+    # C6 fields. Keyed off model_fields_set rather than `is not None`,
+    # which every field above uses: with that test an owner can SET a
+    # value but never CLEAR one, because null reads as "not supplied".
+    # Fine for a name, which must always exist; wrong for optional facts,
+    # where deleting the line is the whole point of an edit form.
+    provided = payload.model_fields_set
+    for key in ("hours", "delivery_note", "lead_time", "payment_note",
+                "founded_year", "kosher_certification"):
+        if key in provided:
+            value = getattr(payload, key)
+            # Pydantic hands back a model for the nested cert; Mongo wants
+            # a plain dict.
+            if key == "kosher_certification" and value is not None:
+                value = value.model_dump()
+            update[key] = value
+    if "languages" in provided:
+        update["languages"] = payload.languages or []
+
     if not update:
         raise HTTPException(status_code=400, detail="Nothing to update")
 
