@@ -9,13 +9,13 @@ import asyncio
 import os
 import re
 import uuid
-from datetime import datetime
+from datetime import UTC, datetime
 from typing import Any, Optional
 from urllib.parse import urlparse
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from fastapi.responses import RedirectResponse
-from pydantic import BaseModel  # noqa: F401 — kept for consistency
+from pydantic import BaseModel, Field
 
 from routes.deps import db, logger, verify_token
 from utils.businesses import ensure_default_business
@@ -582,7 +582,7 @@ async def book_gig(gig_id: str, payload: BookingIn, user=Depends(verify_token)):
         start = _minutes(payload.time_slot)
         if start is None:
             raise HTTPException(status_code=400, detail="Invalid time slot")
-        taken = (await _held_spans(gig_id, payload.preferred_date)).get(payload.preferred_date, [])
+        taken = (await _busy_spans(gig_id, gig.get("provider_user_id"), payload.preferred_date)).get(payload.preferred_date, [])
         if _overlaps(start, start + duration, taken):
             # 409 rather than 400: the request was well formed, someone
             # else simply got there first, and the client should refresh
@@ -681,8 +681,21 @@ def _booking_duration(gig: dict[str, Any], tier_name: Optional[str]) -> int:
     return int(gig.get("slot_duration_minutes") or 30)
 
 
-async def _held_spans(gig_id: str, date_iso: Optional[str] = None) -> dict[str, list[tuple[int, int]]]:
-    """Occupied [start, end) minute ranges per date, for one gig."""
+async def _busy_spans(
+    gig_id: str,
+    provider_user_id: Optional[str] = None,
+    date_iso: Optional[str] = None,
+) -> dict[str, list[tuple[int, int]]]:
+    """Every occupied [start, end) minute range per date.
+
+    Two sources, deliberately merged here rather than checked separately
+    by each caller: bookings held against THIS gig, and time the owner
+    has blocked out (spec S3a).
+
+    Blocks are per PERSON, not per gig. Someone at a wedding is not
+    available for any of the things they offer, and blocking each listing
+    separately would be busywork that guarantees one gets forgotten.
+    """
     query: dict[str, Any] = {"gig_id": gig_id, "status": {"$in": list(HELD_STATUSES)}}
     if date_iso:
         query["preferred_date"] = date_iso
@@ -699,6 +712,21 @@ async def _held_spans(gig_id: str, date_iso: Optional[str] = None) -> dict[str, 
         # which would leave them bookable over.
         end = start + int(b.get("duration_minutes") or 30)
         spans.setdefault(day, []).append((start, end))
+
+    if provider_user_id:
+        bq: dict[str, Any] = {"provider_user_id": provider_user_id}
+        if date_iso:
+            bq["date"] = date_iso
+        async for blk in db.marketplace_blocks.find(
+            bq, {"date": 1, "start_time": 1, "end_time": 1, "_id": 0},
+        ):
+            day = blk.get("date")
+            start = _minutes(blk.get("start_time"))
+            end = _minutes(blk.get("end_time"))
+            if not day or start is None or end is None or end <= start:
+                continue
+            spans.setdefault(day, []).append((start, end))
+
     return spans
 
 
@@ -735,6 +763,79 @@ async def ensure_booking_indexes() -> None:
         logger.warning("could not create uniq_held_slot index: %s", e)
 
 
+# --------------------------------------------------------------------------
+# Blocked time (spec S3a)
+# --------------------------------------------------------------------------
+
+class BlockIn(BaseModel):
+    """A stretch of time the owner is not available.
+
+    Held against the PERSON rather than a listing: someone at a wedding
+    is unavailable for everything they offer, and asking them to block
+    each listing separately guarantees one gets missed.
+
+    Date and time are the same naive local strings bookings already use,
+    so the two can be compared without converting between formats. That
+    is a compromise inherited from the booking model, not a good idea on
+    its own - see the timezone note in docs/booking-slots-spec.md.
+    """
+    date: str = Field(..., pattern=r"^\d{4}-\d{2}-\d{2}$")
+    start_time: str = Field("00:00", pattern=r"^\d{2}:\d{2}$")
+    end_time: str = Field("23:59", pattern=r"^\d{2}:\d{2}$")
+    note: str = Field("", max_length=200)
+
+
+@router.get("/blocks")
+async def list_blocks(user=Depends(verify_token)):
+    """This person's blocked time, soonest first.
+
+    Past blocks are dropped: they cannot affect a future booking, and a
+    list that grows forever becomes one nobody reads.
+    """
+    today = datetime.now(UTC).strftime("%Y-%m-%d")
+    rows = [
+        b async for b in db.marketplace_blocks.find(
+            {"provider_user_id": user["user_id"], "date": {"$gte": today}},
+        ).sort("date", 1)
+    ]
+    for r in rows:
+        r["id"] = r.pop("_id")
+    return rows
+
+
+@router.post("/blocks")
+async def create_block(payload: BlockIn, user=Depends(verify_token)):
+    if _minutes(payload.end_time) <= _minutes(payload.start_time):
+        raise HTTPException(status_code=400, detail="The end time must be after the start time")
+    doc = {
+        "_id": str(uuid.uuid4()),
+        "provider_user_id": user["user_id"],
+        "date": payload.date,
+        "start_time": payload.start_time,
+        "end_time": payload.end_time,
+        "note": payload.note.strip(),
+        "created_at": datetime.now(UTC).isoformat(),
+    }
+    await db.marketplace_blocks.insert_one(doc)
+    doc["id"] = doc.pop("_id")
+    return doc
+
+
+@router.delete("/blocks/{block_id}")
+async def delete_block(block_id: str, user=Depends(verify_token)):
+    """Freeing time back up is a one-click undo, deliberately.
+
+    An owner who blocked the wrong day should not have to think about
+    it, and nothing depends on a block having existed.
+    """
+    res = await db.marketplace_blocks.delete_one(
+        {"_id": block_id, "provider_user_id": user["user_id"]},
+    )
+    if not res.deleted_count:
+        raise HTTPException(status_code=404, detail="Not found")
+    return {"ok": True}
+
+
 @router.get("/gigs/{gig_id}/taken-slots")
 async def taken_slots(gig_id: str):
     """Which times are already held, so the picker can leave them out.
@@ -749,12 +850,12 @@ async def taken_slots(gig_id: str):
     spoken for, so it offered every one of them to everybody.
     """
     gig = await db.marketplace_gigs.find_one(
-        {"_id": gig_id}, {"_id": 1, "slot_duration_minutes": 1},
+        {"_id": gig_id}, {"_id": 1, "slot_duration_minutes": 1, "provider_user_id": 1},
     )
     if not gig:
         raise HTTPException(status_code=404, detail="Gig not found")
 
-    spans = await _held_spans(gig_id)
+    spans = await _busy_spans(gig_id, gig.get("provider_user_id"))
     # Returned as start times on the gig's own grid rather than raw
     # ranges, because that is what the picker compares against — doing
     # the arithmetic here keeps one implementation of it.

@@ -19,6 +19,7 @@ import { toast } from 'sonner';
 import CoverPlaceholder from '../common/CoverPlaceholder';
 import BusinessDetailsForm from './BusinessDetailsForm';
 import BusinessCompleteness from './BusinessCompleteness';
+import BlockTimePanel from './BlockTimePanel';
 import MyGigsTab from './MyGigsTab';
 
 const MAX_ACTIVE = 5;
@@ -149,6 +150,10 @@ export default function MyBusinessesTab({ API, token }) {
 
   return (
     <div data-testid="my-businesses-tab">
+      {/* S3a — blocked time is per PERSON, not per business, so it sits
+          above the list rather than inside one of the cards. */}
+      <BlockTimePanel API={API} token={token} />
+
       <div className="flex items-center justify-between gap-3 mb-1">
         <h2 className="text-lg font-bold" style={{ color: 'var(--ink)' }}>
           {t('businesses.title', 'Your businesses')}
