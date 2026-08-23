@@ -700,6 +700,7 @@ const GigDetail = () => {
                 <AppointmentPicker
                   gig={gig}
                   tier={tier}
+                  isWhatsApp={useWhatsApp}
                   selectedDate={appointmentDate}
                   selectedSlot={appointmentSlot}
                   onSelectDate={(d) => { setAppointmentDate(d); setAppointmentSlot(null); }}
@@ -920,7 +921,7 @@ const buildAppointmentSlots = (gig, tier) => {
   return byDate;
 };
 
-const AppointmentPicker = ({ gig, tier, selectedDate, selectedSlot, onSelectDate, onSelectSlot }) => {
+const AppointmentPicker = ({ gig, tier, isWhatsApp, selectedDate, selectedSlot, onSelectDate, onSelectSlot }) => {
   /* S0 — times already spoken for. The grid is generated in the browser
      from weekly_availability, so without asking the server it offers
      every slot to everybody and two customers can take the same one.
@@ -931,6 +932,7 @@ const AppointmentPicker = ({ gig, tier, selectedDate, selectedSlot, onSelectDate
      the full grid, which is exactly the old behaviour, and the create
      call still enforces the rule. Better a slot that turns out to be
      gone than a booking form that will not open. */
+  const { t } = useTranslation();
   const [taken, setTaken] = useState({});
   useEffect(() => {
     if (!gig?.id) return undefined;
@@ -1045,6 +1047,18 @@ const AppointmentPicker = ({ gig, tier, selectedDate, selectedSlot, onSelectDate
           </button>
         ))}
       </div>
+      {/* S3(c) — WhatsApp-mode listings only. Bookings agreed over
+          WhatsApp never reach this site, so this grid is the business's
+          opening hours, not a live calendar: a time can look free here
+          and already be taken. (Owner-set blocked time IS subtracted
+          above, which is why the grid is still worth showing.) Say what
+          it is instead of implying a guarantee we cannot keep. Quiet on
+          purpose — it informs, it should not scare anyone off. */}
+      {isWhatsApp && (
+        <p className="text-[11px] text-gray-500 leading-snug pt-1" data-testid="gig-appt-wa-notice">
+          {t('services.waHoursNotice', "Times shown are this business's opening hours — confirm with them directly.")}
+        </p>
+      )}
     </div>
   );
 };

@@ -2244,6 +2244,11 @@ const en = {
         messageSellerWhatsApp: 'Message the seller on WhatsApp',
         sendInquiry: 'Send an inquiry',
         sendBookingRequest: 'Send booking request',
+        // S3(c) — shown under the slot grid on WhatsApp-mode listings
+        // only. The site never sees what was agreed on WhatsApp, so the
+        // grid is opening hours, not a live calendar. Say so rather than
+        // implying a guarantee we cannot keep.
+        waHoursNotice: "Times shown are this business's opening hours — confirm with them directly.",
         contactHintWhatsApp: 'Customers open a WhatsApp chat with you directly.',
         contactHintInPlatform: 'Requests arrive in your MyIsraelRental inbox — no phone number shared.',
         whatsappNumberLabel: 'WhatsApp number',

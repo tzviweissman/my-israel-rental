@@ -2177,6 +2177,11 @@ const he = {
         messageSellerWhatsApp: 'שליחת הודעה למוכר בוואטסאפ',
         sendInquiry: 'שליחת פנייה',
         sendBookingRequest: 'שליחת בקשת הזמנה',
+        // S3(c) — shown under the slot grid on WhatsApp-mode listings
+        // only. The site never sees what was agreed on WhatsApp, so the
+        // grid is opening hours, not a live calendar. Say so rather than
+        // implying a guarantee we cannot keep.
+        waHoursNotice: 'השעות המוצגות הן שעות הפעילות של העסק — יש לאשר את המועד מולם ישירות.',
         contactHintWhatsApp: 'הלקוחות יפתחו איתך שיחת וואטסאפ ישירות.',
         contactHintInPlatform: 'הפניות מגיעות לתיבה שלך ב-MyIsraelRental — מספר הטלפון לא נחשף.',
         whatsappNumberLabel: 'מספר וואטסאפ',
