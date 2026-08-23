@@ -3,14 +3,21 @@
 Extracted from ``properties.py`` in the 2026-07 refactor.
 """
 import asyncio
+import os
 import time
+import uuid
 from collections.abc import Coroutine
+from datetime import UTC, datetime
 from typing import Any
+from urllib.parse import urlparse
 
-from fastapi import APIRouter, Depends, HTTPException, Query, Response
+from fastapi import APIRouter, Depends, HTTPException, Query, Request, Response
+from fastapi.responses import RedirectResponse
 
 from models_response import ManagerPropertiesResponse, PropertyOut
-from routes.deps import db, verify_token
+from routes.deps import db, logger, optional_user, verify_token
+from utils import view_tracking
+from utils.whatsapp_link import build_whatsapp_link
 from utils.area_filter import area_mongo_query
 from utils.dedupe import find_duplicate
 from utils.helpers import get_usd_ils_rate
@@ -497,8 +504,162 @@ async def get_featured_properties(response: Response) -> list[dict]:
     return properties
 
 
+# ── Owner-facing performance (L5 of docs/leads-and-views-spec.md) ─────────
+#
+# The property half of what services already report. Two gaps closed here:
+# property WhatsApp taps were never recorded at all (the button linked
+# straight to wa.me), and property views were only ever visible to an admin.
+#
+# Declared ABOVE `/properties/{property_id}` for readability; it does not
+# actually collide, since that route matches a single path segment and these
+# have two.
+
+_PROP_PERIOD_DAYS = 30
+
+
+def _referrer_host(referer: object) -> str:
+    """Host portion of a Referer header, or ''. Never the full URL.
+
+    Same rule as the services redirect: a query string on our own pages
+    carries filter state and sometimes a searched address, so only the host
+    is kept. Enough to tell "found us on Google" from "clicked a listing",
+    with no new personal data.
+    """
+    if not referer:
+        return ""
+    try:
+        return (urlparse(str(referer)).hostname or "")[:100]
+    except Exception:  # noqa: BLE001
+        return ""
+
+
+@api_router.get("/properties/{property_id}/contact")
+async def contact_property_on_whatsapp(
+    property_id: str,
+    request: Request,
+    text: str = Query("", max_length=1000),
+) -> RedirectResponse:
+    """Redirect to the owner's WhatsApp, counting the tap on the way.
+
+    The number is resolved server-side and never returned to the caller —
+    the same rule as the services redirect, which exists because that
+    endpoint was once serving every provider's number to anyone who asked.
+    """
+    prop = await db.properties.find_one({"id": property_id}, {"owner_id": 1, "title": 1})
+    frontend = os.environ.get("FRONTEND_URL", "https://myisraelrental.com").rstrip("/")
+    if not prop:
+        return RedirectResponse(f"{frontend}/property/{property_id}", status_code=302)
+
+    owner = await db.users.find_one(
+        {"id": prop.get("owner_id")}, {"_id": 0, **WHATSAPP_PROJECTION},
+    )
+    target = build_whatsapp_link(user_whatsapp(owner or {}), text)
+    if not target:
+        # No dialable number. Send them back to the listing, which still has
+        # the on-site message button, rather than showing a raw API error.
+        return RedirectResponse(f"{frontend}/property/{property_id}", status_code=302)
+
+    try:
+        await db.lead_events.insert_one({
+            "_id": str(uuid.uuid4()),
+            "type": "whatsapp_click",
+            # `source` distinguishes these from gig taps, which carry a
+            # gig_id instead. Both live in one collection so an owner who
+            # lists a flat AND runs a business sees one consistent number.
+            "source": "property",
+            "property_id": property_id,
+            "owner_id": prop.get("owner_id"),
+            "created_at": datetime.now(UTC).isoformat(),
+            "referrer_host": _referrer_host(request.headers.get("referer")),
+        })
+    except Exception:  # noqa: BLE001 — the lead matters more than the metric
+        logger.exception("lead_events insert failed for property %s", property_id)
+
+    return RedirectResponse(target, status_code=302)
+
+
+@api_router.get("/properties/performance/summary")
+async def property_performance_summary(user=Depends(verify_token)) -> dict:
+    """Visitors and contact taps for the caller's own properties.
+
+    Same shape as /marketplace/leads/summary so one panel renders both.
+    """
+    owner_id = user["user_id"]
+
+    # Which properties are theirs. Needed for the view scope, and it is also
+    # how the tap rows get their titles.
+    owned = await db.properties.find(
+        {"owner_id": owner_id}, {"id": 1, "title": 1, "_id": 0},
+    ).to_list(None)
+    titles = {p["id"]: (p.get("title") or "") for p in owned}
+    prop_ids = list(titles)
+
+    # NOTE `created_at` here is an ISO **string** (see the insert above), so
+    # the cutoff must be one too. A datetime cutoff silently matches nothing.
+    base = {"type": "whatsapp_click", "owner_id": owner_id, "source": "property"}
+    total = await db.lead_events.count_documents(base)
+
+    since = None
+    first = await db.lead_events.find(base, {"created_at": 1}).sort(
+        "created_at", 1,
+    ).limit(1).to_list(1)
+    if first:
+        since = view_tracking.il_day_of_iso(first[0].get("created_at"))
+
+    cutoff_dt, day_keys = view_tracking.il_day_window(_PROP_PERIOD_DAYS)
+    buckets = {k: 0 for k in day_keys}
+    per_prop: dict[str, int] = {}
+    period_total = 0
+    async for ev in db.lead_events.find(
+        {**base, "created_at": {"$gte": cutoff_dt.isoformat()}},
+        {"created_at": 1, "property_id": 1},
+    ):
+        day = view_tracking.il_day_of_iso(ev.get("created_at"))
+        if day not in buckets:
+            continue
+        buckets[day] += 1
+        period_total += 1
+        pid = ev.get("property_id")
+        if pid:
+            per_prop[pid] = per_prop.get(pid, 0) + 1
+
+    by_listing = sorted(
+        (
+            {"id": pid, "title": titles.get(pid, ""), "count": n}
+            for pid, n in per_prop.items()
+            # A tap against a since-deleted listing still counts in the
+            # total; it just has no row to show, because there is nothing
+            # left to name.
+            if pid in titles
+        ),
+        key=lambda r: (-r["count"], r["title"]),
+    )
+
+    views = await view_tracking.view_summary(owner_id, _PROP_PERIOD_DAYS, prop_ids)
+
+    return {
+        "total": total,
+        "period_days": _PROP_PERIOD_DAYS,
+        "period_total": period_total,
+        "daily": [{"date": k, "count": buckets[k]} for k in day_keys],
+        "since": since,
+        "by_listing": by_listing,
+        "views": {
+            "total": views["total"],
+            "period_total": views["period_total"],
+            "daily": views["daily"],
+            "since": views["since"],
+        },
+    }
+
+
 @api_router.get("/properties/{property_id}", response_model=PropertyOut)
-async def get_property(property_id: str, response: Response) -> dict:
+async def get_property(
+    property_id: str,
+    response: Response,
+    request: Request,
+    viewer=Depends(optional_user),
+) -> dict:
     property_data = await db.properties.find_one({"id": property_id}, {"_id": 0})
     if not property_data:
         raise HTTPException(status_code=404, detail="Property not found")
@@ -515,6 +676,18 @@ async def get_property(property_id: str, response: Response) -> dict:
         _spawn_background(record_view_event(property_id))
     except Exception:  # noqa: BLE001
         pass
+    # L5 — the OWNER-facing view, which is a different question from the
+    # Smart Pricing one above and so is recorded separately. That stream
+    # deliberately counts every refresh as demand; this one is deduped to
+    # one visitor per day and skips the owner's own visits, so a property
+    # reports the same way a service does. Neither can be derived from the
+    # other, which is why both are written.
+    view_tracking.spawn(view_tracking.record_view(
+        view_tracking.ENTITY_PROPERTY, property_id,
+        owner_id=property_data.get("owner_id"),
+        viewer_id=(viewer or {}).get("user_id"),
+        visitor=request.headers.get("X-Visitor-Id"),
+    ))
 
     owner = await db.users.find_one(
         {"id": property_data.get("owner_id")},

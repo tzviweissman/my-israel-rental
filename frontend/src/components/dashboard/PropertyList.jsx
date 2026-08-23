@@ -11,6 +11,7 @@ import { areaLabel } from '../../utils/areaNames';
 import DefaultImageBadge from '../property/DefaultImageBadge';
 import VideoCoverBadge from '../property/VideoCoverBadge';
 import SmartPricingModal from './SmartPricingModal';
+import PerformancePanel from './PerformancePanel';
 
 /**
  * Owner-facing property card grid with edit / delete / contract-upload /
@@ -458,6 +459,17 @@ const PropertyList = ({ properties, bookings = [], onEdit, onAddProperty, onRefr
 
   return (
     <div className="mb-12">
+      {/* The same panel the services side uses, pointed at the property
+          route. One component so the two halves of the site cannot drift
+          into describing the same thing differently. */}
+      <div className="mb-6">
+        <PerformancePanel
+          API={API}
+          token={token}
+          endpoint="/properties/performance/summary"
+          rowsLabel={t('perf.byProperty', 'Taps by property')}
+        />
+      </div>
       <div className="flex items-center justify-between flex-wrap gap-3 mb-6">
         <h2 className="text-2xl font-bold" style={{ fontFamily: 'var(--font-head)' }}>{t('dashboard.myProperties')}</h2>
         <div className="flex gap-2 flex-wrap items-center">

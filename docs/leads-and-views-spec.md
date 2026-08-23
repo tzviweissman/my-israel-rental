@@ -113,7 +113,7 @@ console follows.
 | ~~No visitor identifier anywhere~~ | **Solved in L4** for views. Leads still carry none, so a view and a tap cannot be tied to the same person — which is why there is no conversion figure |
 | **Nothing links view → lead → booking** | No conversion rate is computable. `?src=qr` is appended to short-link redirects (`short_links.py:244`) and never read, so even "did the QR work?" cannot be answered |
 | **`lead_events.created_at` is an ISO string; `property_view_events.at` is a datetime** | Every query must use the form its own collection stores. This exact mismatch already returned a confident, wrong `0` in the admin metrics |
-| **Property WhatsApp links go straight to `wa.me`** | Services have lead tracking, properties do not. A shared dashboard would silently under-report property leads |
+| ~~Property WhatsApp links go straight to `wa.me`~~ | **Solved in L5.** Email (`mailto:`) and the on-site chat button are still untracked, so the tap figure is WhatsApp only — the same limit the services side has |
 | **`contact_count` is a bare counter** | No history, so requests cannot appear in a time series alongside everything else |
 | **Multi-business** | A person may run several businesses. Numbers must roll up per business, not per person |
 
@@ -136,9 +136,16 @@ Each step is independently shippable and useful on its own.
    Done. The owner exclusion landed with L2, the dedupe with L4 — enforced
    by a unique partial index, not by the application's upsert, which is
    racy on its own.
-5. **L5 — Property leads.** Route property WhatsApp taps through the same
-   tracked redirect services use, so the two halves of the site report the
-   same way.
+5. ~~**L5 — Property leads.**~~ Done. Property WhatsApp taps now go through
+   a tracked redirect like services', and the same panel renders on the
+   properties tab from `/properties/performance/summary`.
+
+   Property views are recorded **twice, on purpose**: `property_view_events`
+   stays raw because Smart Pricing reads it as a demand signal and its own
+   comment says refreshes are counted deliberately — deduping there would
+   quietly change pricing advice. The owner-facing copy goes to
+   `marketplace_view_events` under `entity_type: "property"`, deduped and
+   owner-excluded, so a flat and a barbershop report identically.
 6. **L6 — Conversion.** Only once L4 exists; without a visitor identifier
    there is nothing to join on.
 

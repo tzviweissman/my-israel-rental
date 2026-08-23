@@ -58,7 +58,14 @@ _IL_TZ = ZoneInfo("Asia/Jerusalem")
 
 ENTITY_GIG = "gig"
 ENTITY_BUSINESS = "business"
-_ENTITY_TYPES = (ENTITY_GIG, ENTITY_BUSINESS)
+# Properties keep their OWN, separate stream in `property_view_events` as
+# well. That one is deliberately raw — Smart Pricing reads it as a demand
+# signal and its own comment says duplicate refreshes are counted on
+# purpose, so deduping there would quietly change pricing advice. This
+# collection is the owner-facing one: deduped, owner excluded, consistent
+# with how services report. Two streams, two different questions.
+ENTITY_PROPERTY = "property"
+_ENTITY_TYPES = (ENTITY_GIG, ENTITY_BUSINESS, ENTITY_PROPERTY)
 
 COLLECTION = "marketplace_view_events"
 
@@ -145,6 +152,21 @@ def il_day_of(dt: datetime) -> Optional[str]:
     if dt.tzinfo is None:          # Mongo hands back naive UTC
         dt = dt.replace(tzinfo=UTC)
     return dt.astimezone(_IL_TZ).strftime("%Y-%m-%d")
+
+
+def il_day_of_iso(created_at: object) -> Optional[str]:
+    """Israel day for a timestamp stored as an ISO **string**.
+
+    `lead_events` stores strings while this module's own collection stores
+    datetimes. Two readers of two collections, one timezone rule — keeping
+    the conversion here rather than reimplementing it per caller is how the
+    day boundaries stay identical across the panel's two halves.
+    """
+    try:
+        dt = datetime.fromisoformat(str(created_at))
+    except (TypeError, ValueError):
+        return None
+    return il_day_of(dt)
 
 
 async def view_summary(owner_id: str, days: int, entity_ids: Optional[list[str]] = None) -> dict:

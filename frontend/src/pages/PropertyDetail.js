@@ -20,6 +20,7 @@ import QrShareCard from '../components/common/QrShareCard';
 import ScanChart from '../components/common/ScanChart';
 import ShareLinkButtons from '../components/common/ShareLinkButtons';
 import { areaLabel } from '../utils/areaNames';
+import { visitorHeaders } from '../utils/visitorId';
 
 // Parse 'YYYY-MM-DD' as a LOCAL date (avoids the UTC-shift bug where
 // selecting June 2 displays as June 1 in timezones east of UTC).
@@ -40,7 +41,9 @@ const fetchPropertyWithRetry = async (id) => {
   let lastError;
   for (let attempt = 0; attempt <= PROPERTY_RETRY_DELAYS_MS.length; attempt += 1) {
     try {
-      return await axios.get(`${API}/properties/${id}`);
+      // See utils/visitorId — this is what stops a refresh counting as
+      // a second visitor on the owner's dashboard.
+      return await axios.get(`${API}/properties/${id}`, { headers: visitorHeaders() });
     } catch (error) {
       lastError = error;
       const status = error?.response?.status;

@@ -8,6 +8,7 @@ import { HOLIDAY_WINDOWS } from '../../constants/holidayWindows';
 import { loadHolidayWindows } from '../../utils/holidayWindows';
 import { buildWhatsAppLinkWithMessage } from '../../utils/whatsappLink';
 import { isInstantBooking } from '../../utils/instantBooking';
+import { API } from '../../App';
 
 // WhatsApp brand glyph, drawn in `currentColor` so it inherits the
 // button's text colour. Decorative — the button already carries a text
@@ -619,16 +620,29 @@ const BookingSidebar = ({
   // `owner_whatsapp` comes from GET /properties/{id} only (never the list
   // endpoint) and is '' when the owner hasn't saved a number. Null here
   // means "no usable WhatsApp" → we render the in-app chat button instead.
+  // Two URLs, on purpose.
+  //
+  // `ownerWhatsAppUrl` decides whether to render the button at all: it is
+  // null when the saved number will not dial, and a green button opening an
+  // empty compose screen is worse than no button.
+  //
+  // `contactUrl` is where the tap actually goes — through the backend, so
+  // the owner's dashboard can count it, exactly as the services side has
+  // done for months. Properties linked straight to wa.me, so every enquiry
+  // a listing ever produced went unrecorded. The number is still resolved
+  // server-side and never widened beyond what this page already holds.
+  const whatsAppMessage = t('property.whatsappPrefill', {
+    defaultValue: "Hi, I'm interested in your listing on MyIsraelRental: {{title}}",
+    title: property?.title || '',
+  });
   const ownerWhatsAppUrl = React.useMemo(
-    () => buildWhatsAppLinkWithMessage(
-      property?.owner_whatsapp,
-      t('property.whatsappPrefill', {
-        defaultValue: "Hi, I'm interested in your listing on MyIsraelRental: {{title}}",
-        title: property?.title || '',
-      }),
-    ),
-    [property?.owner_whatsapp, property?.title, t],
+    () => buildWhatsAppLinkWithMessage(property?.owner_whatsapp, whatsAppMessage),
+    [property?.owner_whatsapp, whatsAppMessage],
   );
+  const contactUrl = property?.id
+    ? `${API}/properties/${encodeURIComponent(property.id)}/contact`
+      + `?text=${encodeURIComponent(whatsAppMessage)}`
+    : null;
 
   const onCheckInClick = () => {
     // If a complete range is set, clear both on calendar-open so the next
@@ -922,7 +936,7 @@ const BookingSidebar = ({
               back in front once Meta approval lands. */}
           {ownerWhatsAppUrl && (
             <a
-              href={ownerWhatsAppUrl}
+              href={contactUrl || ownerWhatsAppUrl}
               target="_blank"
               rel="noopener noreferrer"
               className="w-full flex items-center justify-center gap-2 px-6 py-2.5 rounded-full text-sm font-semibold text-white transition-colors"

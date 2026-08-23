@@ -74,7 +74,14 @@ function Stat({ icon: Icon, label, periodTotal, allTime, daily, chartTitle, sinc
   );
 }
 
-export default function PerformancePanel({ API, token, businessId = null }) {
+// `endpoint` and `params` because properties and services answer the same
+// question from different routes but return the same shape — one panel,
+// so the two halves of the site cannot drift into reporting differently.
+export default function PerformancePanel({
+  API, token, businessId = null,
+  endpoint = '/marketplace/leads/summary',
+  rowsLabel = null,
+}) {
   const { t } = useTranslation();
   const [data, setData] = useState(null);
   const [failed, setFailed] = useState(false);
@@ -83,7 +90,7 @@ export default function PerformancePanel({ API, token, businessId = null }) {
     let cancelled = false;
     (async () => {
       try {
-        const { data: d } = await axios.get(`${API}/marketplace/leads/summary`, {
+        const { data: d } = await axios.get(`${API}${endpoint}`, {
           headers: { Authorization: `Bearer ${token}` },
           // Scoped server-side, so every number on screen — both headlines,
           // both charts and the rows — describes the same set of listings.
@@ -98,12 +105,13 @@ export default function PerformancePanel({ API, token, businessId = null }) {
       }
     })();
     return () => { cancelled = true; };
-  }, [API, token, businessId]);
+  }, [API, token, businessId, endpoint]);
 
   if (failed || !data) return null;
 
   const views = data.views || { total: 0, period_total: 0, daily: [], since: null };
-  const rows = data.by_gig || [];
+  // Services return `by_gig`, properties `by_listing` — same shape.
+  const rows = data.by_gig || data.by_listing || [];
   const anything = (data.total || 0) > 0 || (views.total || 0) > 0;
 
   return (
@@ -146,10 +154,10 @@ export default function PerformancePanel({ API, token, businessId = null }) {
           {rows.length > 0 && (
             <ul className="mt-4 pt-3 border-t border-gray-100 space-y-1" data-testid="perf-by-gig">
               <li className="text-[11px] font-semibold text-gray-500 mb-1">
-                {t('perf.byListing', 'Taps by listing')}
+                {rowsLabel || t('perf.byListing', 'Taps by listing')}
               </li>
               {rows.map((r) => (
-                <li key={r.gig_id} className="flex items-center justify-between gap-3 text-xs">
+                <li key={r.gig_id || r.id} className="flex items-center justify-between gap-3 text-xs">
                   <span className="text-gray-700 truncate">{r.title}</span>
                   <span className="font-semibold text-gray-900 shrink-0">{r.count}</span>
                 </li>
