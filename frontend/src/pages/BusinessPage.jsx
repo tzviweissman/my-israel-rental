@@ -21,12 +21,19 @@ import CoverPlaceholder from '../components/common/CoverPlaceholder';
 import ServiceCard from '../components/marketplace/ServiceCard';
 import GoodToKnow from '../components/marketplace/GoodToKnow';
 import SiteFooter from '../components/common/SiteFooter';
+import { buildCollections } from '../utils/businessCollections';
 import { getGigCover } from '../utils/gigAvailability';
 
 // First screenful and each subsequent step. Twelve fills a desktop grid
 // three rows deep and a phone list well past the fold, without asking
 // for twenty-five photos nobody has scrolled to.
 const PAGE_SIZE = 12;
+
+// How many of a collection show before "See all". Six is what the
+// WhatsApp catalog this was modelled on uses, and it is about right:
+// enough to show the group has range, few enough that four groups still
+// fit on one screen.
+const COLLECTION_PREVIEW = 6;
 
 const BusinessPage = () => {
   const { slug } = useParams();
@@ -44,6 +51,8 @@ const BusinessPage = () => {
      reach, and the footer is where B7's "Add yours — free" band lives.
      It also leaves the page crawlable, which endless scroll does not. */
   const [shown, setShown] = useState(PAGE_SIZE);
+  // Which collections the reader has opened in full (C1's "See all N").
+  const [expanded, setExpanded] = useState(() => new Set());
 
   useEffect(() => {
     let cancelled = false;
@@ -141,6 +150,9 @@ const BusinessPage = () => {
   const columnWidth = listingCount < 4 ? 'max-w-[900px]' : 'max-w-5xl';
   const autoLayout = listingCount <= 6 ? 'grid' : 'list';
   const effectiveLayout = layout || autoLayout;
+  const { groups, mode: groupMode } = buildCollections(biz.listings, biz.collections, { t });
+  const grouped = groupMode !== 'flat';
+
   const visibleListings = (biz.listings || []).slice(0, shown);
   const remaining = listingCount - visibleListings.length;
 
@@ -351,6 +363,59 @@ const BusinessPage = () => {
           <p className="text-sm" style={{ color: 'var(--brand-muted)' }} data-testid="business-empty">
             {t('businessPage.nothingYet', 'Nothing listed yet.')}
           </p>
+        ) : grouped ? (
+          /* C1 — sections. Owner-defined when they exist, otherwise
+             auto-grouped by category past the threshold. Each shows six
+             with "See all" rather than everything, so four collections
+             still fit on a screen. */
+          <div className="space-y-8" data-testid="business-collections">
+            {groups.map((group) => {
+              const isOpen = expanded.has(group.id);
+              const visible = isOpen ? group.services : group.services.slice(0, COLLECTION_PREVIEW);
+              const hidden = group.services.length - visible.length;
+              return (
+                <section key={group.id} data-testid={`collection-${group.id}`}>
+                  <div className="flex items-baseline justify-between gap-3 mb-3 flex-wrap">
+                    <div>
+                      <h3 className="text-base font-bold" style={{ fontFamily: 'var(--font-head)', color: 'var(--ink)' }}>
+                        {group.name}
+                      </h3>
+                      {group.description && (
+                        <p className="text-xs mt-0.5" style={{ color: 'var(--brand-muted)' }}>{group.description}</p>
+                      )}
+                    </div>
+                    {hidden > 0 && (
+                      <button
+                        type="button"
+                        onClick={() => setExpanded((prev) => new Set(prev).add(group.id))}
+                        className="text-sm font-semibold whitespace-nowrap"
+                        style={{ color: 'var(--brand-primary)' }}
+                        data-testid={`collection-see-all-${group.id}`}
+                      >
+                        {t('businessPage.seeAll', 'See all {{n}}', { n: group.services.length })}
+                      </button>
+                    )}
+                  </div>
+
+                  {effectiveLayout === 'list' ? (
+                    <div className="flex flex-col gap-2">
+                      {visible.map((g) => (
+                        <ServiceCard key={g.id} gig={g} variant="list" i18n={i18n} t={t}
+                          onClick={() => navigate(`/businesses/${g.id}`)} />
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+                      {visible.map((g) => (
+                        <ServiceCard key={g.id} gig={g} variant="grid" i18n={i18n} t={t}
+                          onClick={() => navigate(`/businesses/${g.id}`)} />
+                      ))}
+                    </div>
+                  )}
+                </section>
+              );
+            })}
+          </div>
         ) : effectiveLayout === 'list' ? (
           <div className="flex flex-col gap-2" data-testid="business-listings-list">
             {visibleListings.map((g) => (
@@ -379,7 +444,7 @@ const BusinessPage = () => {
           </div>
         )}
 
-        {remaining > 0 && (
+        {!grouped && remaining > 0 && (
           <div className="mt-4 flex justify-center">
             <button
               type="button"

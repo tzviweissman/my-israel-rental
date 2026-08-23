@@ -43,6 +43,8 @@ const he = {
         failed: 'לא הצלחנו ליצור את הקוד',
       },
       businessPage: {
+        seeAll: 'הצגת כל {{n}}',
+        moreFrom: 'עוד מהעסק הזה',
         showMore: 'הצגת {{n}} נוספים',
         addYours: 'יש לכם עסק? הוסיפו אותו — בחינם.',
         addYoursCta: 'הוספת העסק שלי',

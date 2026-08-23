@@ -41,6 +41,27 @@ from .shared import (
 router = APIRouter(prefix="/marketplace", tags=["marketplace"])
 
 
+class Collection(BaseModel):
+    """One owner-defined group of a business's own services (spec C1).
+
+    Held on the business document rather than in its own collection: a
+    group is meaningless away from the business that owns it, there are
+    at most a handful, and this way reordering them is one write.
+
+    `service_ids` is ORDERED and a service may appear in more than one
+    group — a Shabbos package belongs under both "Shabbos" and "Packages"
+    and forcing a single home would make the owner choose for no reason.
+    Ids are not validated against the gig list here: a service deleted
+    later would otherwise make the whole business un-saveable, so stale
+    ids are simply ignored when the page is built.
+    """
+    id: str = Field(..., min_length=1, max_length=64)
+    name: str = Field(..., min_length=1, max_length=80)
+    name_he: Optional[str] = Field(None, max_length=80)
+    description: Optional[str] = Field(None, max_length=200)
+    service_ids: list[str] = Field(default_factory=list)
+
+
 class KosherCert(BaseModel):
     """Certifying body, and optionally proof of it (spec C6).
 
@@ -66,6 +87,7 @@ class BusinessIn(BaseModel):
     lead_time: Optional[str] = Field(None, max_length=120)
     payment_note: Optional[str] = Field(None, max_length=200)
     kosher_certification: Optional[KosherCert] = None
+    collections: Optional[list[Collection]] = None
 
 
 class BusinessPatch(BaseModel):
@@ -82,6 +104,7 @@ class BusinessPatch(BaseModel):
     lead_time: Optional[str] = Field(None, max_length=120)
     payment_note: Optional[str] = Field(None, max_length=200)
     kosher_certification: Optional[KosherCert] = None
+    collections: Optional[list[Collection]] = None
 
 
 
@@ -248,6 +271,8 @@ async def update_business(business_id: str, payload: BusinessPatch, user=Depends
     # Fine for a name, which must always exist; wrong for optional facts,
     # where deleting the line is the whole point of an edit form.
     provided = payload.model_fields_set
+    if "collections" in provided:
+        update["collections"] = [c.model_dump() for c in (payload.collections or [])]
     for key in ("hours", "delivery_note", "lead_time", "payment_note",
                 "founded_year", "kosher_certification"):
         if key in provided:
@@ -434,6 +459,11 @@ async def public_business(slug_or_id: str):
         "lead_time": biz.get("lead_time"),
         "payment_note": biz.get("payment_note"),
         "kosher_certification": biz.get("kosher_certification"),
+        # C1 — raw groups. Which services actually land in which group,
+        # and what happens to the ones in none, is decided in one place
+        # on the client (utils/businessCollections.js) so the rules cannot
+        # drift between here and there.
+        "collections": biz.get("collections") or [],
         "response_bucket": _response_bucket(
             await db.marketplace_providers.find_one({"user_id": biz.get("owner_user_id")}) or {}
         ),
