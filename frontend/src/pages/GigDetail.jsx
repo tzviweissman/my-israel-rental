@@ -15,6 +15,7 @@ import { toast } from 'sonner';
 import { MessageCircle, Send, Loader2, ArrowLeft, Award, Zap, Calendar, Clock, Camera, ChevronLeft, ChevronRight, X } from 'lucide-react';
 // The shared calendar handles its own language, direction and
 // screen-reader labels — see components/ui/calendar.jsx.
+import { visitorHeaders } from '../utils/visitorId';
 import { Calendar as CalendarUI } from '../components/ui/calendar';
 import { API, AuthContext } from '../App';
 import PageMeta from '../components/PageMeta';
@@ -256,7 +257,10 @@ const GigDetail = () => {
   const [deliverableDate, setDeliverableDate] = useState('');
 
   useEffect(() => {
-    axios.get(`${API}/marketplace/gigs/${id}`)
+    // The visitor header is what stops a refresh counting as a new
+    // visitor (see utils/visitorId). Sent only on this fetch — the one
+    // that represents a person actually looking at the listing.
+    axios.get(`${API}/marketplace/gigs/${id}`, { headers: visitorHeaders() })
       .then((r) => {
         setGig(r.data);
         // Pick the first tier/product as the default selection so the

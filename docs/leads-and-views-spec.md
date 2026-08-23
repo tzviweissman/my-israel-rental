@@ -69,16 +69,30 @@ puts them in contact with you.* That is a WhatsApp tap, an on-site message,
 or a booking request. Not a view, not a favourite. Three sources, one
 number, with the breakdown visible underneath.
 
-**D2 — Do we count unique people or raw actions?** Currently everything is
-raw — deliberately, in both `property_view_events`
-(`smart_pricing/pricing.py:197-198`) and `lead_events`
-(`docs/lead-tracking.md:86-87`). Raw counts flatter, and an owner who
-refreshes their own page inflates their own number. Proposed: keep raw for
-leads (a tap is a tap) and dedupe views per visitor per day, which needs a
-visitor identifier that does not exist yet.
+**D2 — Do we count unique people or raw actions? — SETTLED (L4).** Leads
+stay raw: a tap is a tap, and someone who taps twice really did try twice.
+Views are deduped to **one visitor per listing per day**, so the number is
+*visitors* and the dashboard says visitors. Not "unique people" — somebody
+returning on three days counts three times, which is a real signal rather
+than double counting.
 
-**D3 — Does the owner's own traffic count?** It should not, and today it
-does. An owner checking their listing five times adds five views.
+The identifier is an opaque random value in the browser's localStorage
+(`frontend/src/utils/visitorId.js`), sent as `X-Visitor-Id`. Deliberately
+NOT a fingerprint of IP and user-agent: that needs no cooperation from the
+browser but means storing exactly the data this codebase has avoided
+keeping. The cost is that clearing site data makes someone new, and one
+person on two devices is two visitors. Both are acceptable for counting
+views; storing personal data to avoid them is not.
+
+A request with no id is recorded undeduped rather than dropped — private
+mode and blocked storage are real, and losing those views would understate
+the quietest listings worst.
+
+**D3 — Does the owner's own traffic count? — SETTLED (L2).** No. The owner
+is the most frequent visitor their own listing has, and counting them makes
+the number describe the owner rather than the market. Implemented with a new
+`optional_user` dependency: public endpoints can now notice *who* is looking
+if anyone is, without requiring a login.
 
 **D4 — What period?** Proposed: last 30 days by default, matching
 `ScanChart`'s existing window, with the all-time total beside it and a line
@@ -96,7 +110,7 @@ console follows.
 | Problem | Consequence |
 |---|---|
 | **No view tracking for gigs or businesses** | The largest single piece of work, and it gates the whole "views" half |
-| **No visitor identifier anywhere** | Cannot dedupe, cannot exclude the owner, cannot join a view to a lead |
+| ~~No visitor identifier anywhere~~ | **Solved in L4** for views. Leads still carry none, so a view and a tap cannot be tied to the same person — which is why there is no conversion figure |
 | **Nothing links view → lead → booking** | No conversion rate is computable. `?src=qr` is appended to short-link redirects (`short_links.py:244`) and never read, so even "did the QR work?" cannot be answered |
 | **`lead_events.created_at` is an ISO string; `property_view_events.at` is a datetime** | Every query must use the form its own collection stores. This exact mismatch already returned a confident, wrong `0` in the admin metrics |
 | **Property WhatsApp links go straight to `wa.me`** | Services have lead tracking, properties do not. A shared dashboard would silently under-report property leads |
@@ -109,17 +123,19 @@ console follows.
 
 Each step is independently shippable and useful on its own.
 
-1. **L1 — Leads, read-only.** An owner-scoped endpoint over `lead_events`,
+1. ~~**L1 — Leads, read-only.**~~ Done. An owner-scoped endpoint over `lead_events`,
    plus a total and a 30-day `ScanChart` on the services tab. No new
    tracking. This is the promised feature's headline number and the data is
    already sitting there.
-2. **L2 — View tracking for gigs and business pages.** Mirror the property
+2. ~~**L2 — View tracking for gigs and business pages.**~~ Done. Mirror the property
    pattern, with the two lessons already learned: one source of truth, and a
    record of when counting began.
-3. **L3 — The dashboard itself.** Views and leads together, per listing and
+3. ~~**L3 — The dashboard itself.**~~ Done, merged into L2 rather than shipped after it: writing view data with nothing reading it is the very mistake L1 existed to correct. Views and leads together, per listing and
    per business, one honest period.
-4. **L4 — Exclude the owner, and dedupe views per visitor per day.** Needs
-   D2/D3 settled and a visitor identifier.
+4. ~~**L4 — Exclude the owner, and dedupe views per visitor per day.**~~
+   Done. The owner exclusion landed with L2, the dedupe with L4 — enforced
+   by a unique partial index, not by the application's upsert, which is
+   racy on its own.
 5. **L5 — Property leads.** Route property WhatsApp taps through the same
    tracked redirect services use, so the two halves of the site report the
    same way.

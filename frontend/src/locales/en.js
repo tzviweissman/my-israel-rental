@@ -26,9 +26,13 @@ const en = {
       perf: {
         title: 'How your listings are doing',
         none: 'Nobody has visited these listings yet — this counts them from now on.',
-        viewsLabel: 'Views in the last 30 days',
+        // "Visitors", not "views": one person per listing per day, so a
+        // refresh no longer inflates it. Not "unique people" either —
+        // somebody returning on three days counts three times, which is
+        // a real signal rather than a rounding error.
+        viewsLabel: 'Visitors in the last 30 days',
         leadsLabel: 'Tapped to message you',
-        viewsChart: 'Views — last 14 days',
+        viewsChart: 'Visitors — last 14 days',
         leadsChart: 'Taps — last 14 days',
         byListing: 'Taps by listing',
         allTime: '{{n}} all time',

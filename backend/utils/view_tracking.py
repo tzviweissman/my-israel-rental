@@ -27,9 +27,21 @@ them makes the number describe the owner rather than the market. This is
 cheaper than the general dedupe problem (L4) because an owner is
 authenticated and identifiable, whereas a repeat stranger is not.
 
-Not solved here, deliberately: two visits by the same stranger count twice,
-and a refresh counts again. Same as properties, and honest — `views` means
-page loads, and the dashboard says so.
+**One visitor per entity per day (L4).** A refresh used to be a new view,
+which meant a listing looked popular because one person hit reload. The
+browser sends an opaque random id (see frontend utils/visitorId) and the
+insert is an upsert keyed by entity + visitor + Israel day, made exclusive
+by a unique index rather than a read-then-write — two rapid requests would
+otherwise both find nothing and both insert.
+
+So the number is VISITORS, not page loads, and the dashboard says visitors.
+One person returning on three days still counts three times: that is a real
+signal (they came back) and the label is per-period, not "unique people".
+
+A client that sends no id — private mode, storage blocked, an old cached
+bundle — is recorded undeduped rather than dropped. A view we cannot
+attribute is still a view, and losing it would understate quiet listings
+worst of all.
 """
 from __future__ import annotations
 
@@ -66,29 +78,53 @@ def spawn(coro: Coroutine[Any, Any, Any]) -> None:
     task.add_done_callback(_background_tasks.discard)
 
 
+# An id longer than this is not ours — cap rather than store whatever a
+# client chose to send in a header.
+_MAX_VISITOR_LEN = 64
+
+
 async def record_view(
     entity_type: str,
     entity_id: str,
     owner_id: Optional[str],
     viewer_id: Optional[str] = None,
+    visitor: Optional[str] = None,
 ) -> None:
-    """Record one page view. Never raises — a lost metric beats a failed page."""
+    """Record one visit. Never raises — a lost metric beats a failed page."""
     if entity_type not in _ENTITY_TYPES or not entity_id:
         return
     # The owner looking at their own listing is not demand.
     if viewer_id and owner_id and viewer_id == owner_id:
         return
+
+    now = datetime.now(UTC)
+    doc = {
+        "entity_type": entity_type,
+        "entity_id": entity_id,
+        # Denormalised so an owner-scoped query needs no join. The gig or
+        # business could later change hands; the event records who owned it
+        # when the view happened, which is what an owner's totals should
+        # reflect.
+        "owner_id": owner_id,
+        "at": now,
+        "day": il_day_of(now),
+    }
+
+    visitor = (visitor or "").strip()[:_MAX_VISITOR_LEN] or None
     try:
-        await db[COLLECTION].insert_one({
-            "entity_type": entity_type,
-            "entity_id": entity_id,
-            # Denormalised so an owner-scoped query needs no join. The gig or
-            # business could later change hands; the event records who owned
-            # it when the view happened, which is what an owner's own totals
-            # should reflect.
-            "owner_id": owner_id,
-            "at": datetime.now(UTC),
-        })
+        if visitor:
+            # Upsert, not check-then-insert: two requests a millisecond
+            # apart would both read "absent" and both write. The unique
+            # index below is what actually makes this exclusive; the upsert
+            # is how we avoid turning that into an error on every refresh.
+            await db[COLLECTION].update_one(
+                {"entity_id": entity_id, "visitor": visitor, "day": doc["day"]},
+                {"$setOnInsert": {**doc, "visitor": visitor}},
+                upsert=True,
+            )
+        else:
+            # No id to dedupe on. Recorded anyway — see the module docstring.
+            await db[COLLECTION].insert_one({**doc, "visitor": None})
     except Exception:  # noqa: BLE001
         logger.exception("view event insert failed for %s %s", entity_type, entity_id)
 
@@ -169,4 +205,14 @@ async def ensure_view_indexes() -> None:
     await db[COLLECTION].create_index([("owner_id", 1), ("at", -1)], background=True)
     await db[COLLECTION].create_index(
         [("entity_type", 1), ("entity_id", 1), ("at", -1)], background=True,
+    )
+    # UNIQUE, and the actual guarantee behind "one visit per person per day"
+    # — the upsert in record_view is racy on its own. Partial, so the rows
+    # with no visitor id (storage blocked, older bundle) are exempt rather
+    # than collapsing into a single row per day between them.
+    await db[COLLECTION].create_index(
+        [("entity_id", 1), ("visitor", 1), ("day", 1)],
+        unique=True,
+        partialFilterExpression={"visitor": {"$type": "string"}},
+        background=True,
     )

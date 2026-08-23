@@ -18,7 +18,7 @@ from __future__ import annotations
 from datetime import UTC, datetime
 from typing import Any, Optional
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request
 from pydantic import BaseModel, Field
 
 from routes.deps import db, optional_user, verify_token
@@ -387,7 +387,9 @@ def _public_listing(gig: dict[str, Any]) -> dict[str, Any]:
 
 
 @router.get("/business/{slug_or_id}")
-async def public_business(slug_or_id: str, viewer=Depends(optional_user)):
+async def public_business(
+    slug_or_id: str, request: Request, viewer=Depends(optional_user),
+):
     """The public page for one business (spec M4).
 
     A person with two businesses gets two of these. There is deliberately
@@ -429,6 +431,7 @@ async def public_business(slug_or_id: str, viewer=Depends(optional_user)):
         view_tracking.ENTITY_BUSINESS, biz["_id"],
         owner_id=biz.get("owner_user_id"),
         viewer_id=(viewer or {}).get("user_id"),
+        visitor=request.headers.get("X-Visitor-Id"),
     ))
 
     ratings = await _batch_rating_aggregate([g["_id"] for g in raw])

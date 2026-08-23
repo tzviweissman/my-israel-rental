@@ -24,6 +24,7 @@ import SiteFooter from '../components/common/SiteFooter';
 import { buildCollections } from '../utils/businessCollections';
 import { localizedTitle, localizedDescription } from '../utils/gigLocale';
 import { getGigCover } from '../utils/gigAvailability';
+import { visitorHeaders } from '../utils/visitorId';
 
 // First screenful and each subsequent step. Twelve fills a desktop grid
 // three rows deep and a phone list well past the fold, without asking
@@ -67,7 +68,12 @@ const BusinessPage = () => {
     let cancelled = false;
     (async () => {
       try {
-        const { data } = await axios.get(`${API}/marketplace/business/${encodeURIComponent(slug)}`);
+        // See utils/visitorId — this header is what makes a refresh not
+        // count as a second visitor.
+        const { data } = await axios.get(
+          `${API}/marketplace/business/${encodeURIComponent(slug)}`,
+          { headers: visitorHeaders() },
+        );
         if (!cancelled) {
           setBiz(data);
           try {

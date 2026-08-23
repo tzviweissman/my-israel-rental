@@ -393,7 +393,7 @@ async def create_gig(payload: GigIn, user=Depends(verify_token)):
 
 
 @router.get("/gigs/{gig_id}")
-async def get_gig(gig_id: str, viewer=Depends(optional_user)):
+async def get_gig(gig_id: str, request: Request, viewer=Depends(optional_user)):
     gig = await db.marketplace_gigs.find_one({"_id": gig_id})
     if not gig:
         raise HTTPException(status_code=404, detail="Gig not found")
@@ -404,6 +404,7 @@ async def get_gig(gig_id: str, viewer=Depends(optional_user)):
         view_tracking.ENTITY_GIG, gig_id,
         owner_id=gig.get("provider_user_id"),
         viewer_id=(viewer or {}).get("user_id"),
+        visitor=request.headers.get("X-Visitor-Id"),
     ))
     prov = await db.marketplace_providers.find_one({"user_id": gig["provider_user_id"]})
     user = await db.users.find_one({"_id": gig["provider_user_id"]}) \

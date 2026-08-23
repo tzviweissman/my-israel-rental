@@ -106,11 +106,11 @@ export default function PerformancePanel({ API, token, businessId = null }) {
           <div className="flex flex-col sm:flex-row gap-5">
             <Stat
               icon={Eye}
-              label={t('perf.viewsLabel', 'Views in the last 30 days')}
+              label={t('perf.viewsLabel', 'Visitors in the last 30 days')}
               periodTotal={views.period_total}
               allTime={views.total}
               daily={views.daily}
-              chartTitle={t('perf.viewsChart', 'Views — last 14 days')}
+              chartTitle={t('perf.viewsChart', 'Visitors — last 14 days')}
               since={views.since}
               testid="perf-views"
               t={t}
