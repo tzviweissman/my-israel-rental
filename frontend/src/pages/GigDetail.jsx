@@ -921,7 +921,43 @@ const buildAppointmentSlots = (gig, tier) => {
 };
 
 const AppointmentPicker = ({ gig, tier, selectedDate, selectedSlot, onSelectDate, onSelectSlot }) => {
-  const slotsByDate = useMemo(() => buildAppointmentSlots(gig, tier), [gig, tier]);
+  /* S0 — times already spoken for. The grid is generated in the browser
+     from weekly_availability, so without asking the server it offers
+     every slot to everybody and two customers can take the same one.
+     The server refuses the second either way; this stops the page
+     inviting the collision in the first place.
+     
+     Failure is silent on purpose: if this request fails the picker shows
+     the full grid, which is exactly the old behaviour, and the create
+     call still enforces the rule. Better a slot that turns out to be
+     gone than a booking form that will not open. */
+  const [taken, setTaken] = useState({});
+  useEffect(() => {
+    if (!gig?.id) return undefined;
+    let cancelled = false;
+    (async () => {
+      try {
+        const { data } = await axios.get(`${API}/marketplace/gigs/${gig.id}/taken-slots`);
+        if (!cancelled) setTaken(data || {});
+      } catch {
+        if (!cancelled) setTaken({});
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [gig?.id]);
+
+  const slotsByDate = useMemo(() => {
+    const built = buildAppointmentSlots(gig, tier);
+    // Subtract the held times, and drop a day entirely once nothing is
+    // left on it — a date that opens onto an empty grid reads as broken.
+    const out = {};
+    for (const [iso, day] of Object.entries(built)) {
+      const gone = new Set(taken[iso] || []);
+      const slots = day.slots.filter((sl) => !gone.has(sl));
+      if (slots.length) out[iso] = { ...day, slots };
+    }
+    return out;
+  }, [gig, tier, taken]);
   const availableIsoSet = useMemo(() => new Set(Object.keys(slotsByDate)), [slotsByDate]);
   const firstAvailableIso = useMemo(() => Object.keys(slotsByDate)[0] || null, [slotsByDate]);
 

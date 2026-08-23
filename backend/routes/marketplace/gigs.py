@@ -574,6 +574,24 @@ async def book_gig(gig_id: str, payload: BookingIn, user=Depends(verify_token)):
     # date if the provider enabled `enable_date_booking`.
     if (gig.get("gig_type") or "deliverable") == "appointment" and not payload.time_slot:
         raise HTTPException(status_code=400, detail="Please pick an available time slot")
+    # S0 — a held booking removes its span from availability. Enforced
+    # HERE and not only by hiding the slot: hiding is a courtesy, and two
+    # people pressing send at the same moment both saw it available.
+    duration = _booking_duration(gig, payload.tier_name)
+    if payload.time_slot and payload.preferred_date:
+        start = _minutes(payload.time_slot)
+        if start is None:
+            raise HTTPException(status_code=400, detail="Invalid time slot")
+        taken = (await _held_spans(gig_id, payload.preferred_date)).get(payload.preferred_date, [])
+        if _overlaps(start, start + duration, taken):
+            # 409 rather than 400: the request was well formed, someone
+            # else simply got there first, and the client should refresh
+            # the picker rather than correct the input.
+            raise HTTPException(
+                status_code=409,
+                detail="That time has just been taken — please pick another.",
+            )
+
     booking = {
         "_id": str(uuid.uuid4()),
         "gig_id": gig_id,
@@ -585,6 +603,8 @@ async def book_gig(gig_id: str, payload: BookingIn, user=Depends(verify_token)):
         "contact_phone": payload.contact_phone,
         "preferred_date": payload.preferred_date,
         "time_slot": payload.time_slot,
+        # Frozen at creation — see _booking_duration.
+        "duration_minutes": duration,
         "status": "pending",
         "created_at": datetime.now(UTC).isoformat(),
     }
@@ -624,6 +644,135 @@ async def update_booking(booking_id: str, payload: BookingPatch, user=Depends(ve
     fresh["id"] = fresh.pop("_id")
     return fresh
 
+
+
+
+# --------------------------------------------------------------------------
+# Slot holds (spec S0)
+# --------------------------------------------------------------------------
+
+# A booking in one of these states occupies its time. `declined` and
+# `cancelled` free it immediately; `completed` is in the past and cannot
+# collide with a future request. Kept as one constant because the test
+# is made in three places and getting it wrong in any of them silently
+# double-books.
+HELD_STATUSES = ("pending", "accepted")
+
+
+def _minutes(hhmm: str) -> Optional[int]:
+    try:
+        h, m = str(hhmm).split(":")
+        return int(h) * 60 + int(m)
+    except (ValueError, AttributeError):
+        return None
+
+
+def _booking_duration(gig: dict[str, Any], tier_name: Optional[str]) -> int:
+    """How long a booking of this tier occupies.
+
+    Resolved ONCE, at creation, and frozen onto the booking. Reading it
+    back off the tier at display time — which is what the page does
+    today — means renaming a tier or changing its length silently
+    rewrites how long every past booking took.
+    """
+    for t in gig.get("tiers") or []:
+        if t.get("name") == tier_name and t.get("duration_minutes"):
+            return int(t["duration_minutes"])
+    return int(gig.get("slot_duration_minutes") or 30)
+
+
+async def _held_spans(gig_id: str, date_iso: Optional[str] = None) -> dict[str, list[tuple[int, int]]]:
+    """Occupied [start, end) minute ranges per date, for one gig."""
+    query: dict[str, Any] = {"gig_id": gig_id, "status": {"$in": list(HELD_STATUSES)}}
+    if date_iso:
+        query["preferred_date"] = date_iso
+    spans: dict[str, list[tuple[int, int]]] = {}
+    async for b in db.marketplace_bookings.find(
+        query, {"preferred_date": 1, "time_slot": 1, "duration_minutes": 1, "_id": 0},
+    ):
+        day = b.get("preferred_date")
+        start = _minutes(b.get("time_slot"))
+        if not day or start is None:
+            continue
+        # Bookings written before durations were frozen fall back to the
+        # gig's own slot length rather than being treated as zero-length,
+        # which would leave them bookable over.
+        end = start + int(b.get("duration_minutes") or 30)
+        spans.setdefault(day, []).append((start, end))
+    return spans
+
+
+def _overlaps(start: int, end: int, taken: list[tuple[int, int]]) -> bool:
+    return any(start < t_end and t_start < end for t_start, t_end in taken)
+
+
+
+async def ensure_booking_indexes() -> None:
+    """Make the one-booking-per-slot rule a database guarantee.
+
+    The check in book_gig is check-then-insert, which is racy exactly
+    where exclusivity is promised: two requests can both read "free" and
+    both write. This index makes the second write fail instead.
+
+    PARTIAL, filtered to held statuses, so a declined or cancelled
+    booking does not reserve its slot forever — the same reason
+    HELD_STATUSES exists. Same guarantee, and the same reasoning, as the
+    unique index on short-link slugs.
+
+    Failure is logged and swallowed. An index that cannot be built —
+    usually because existing rows already collide — must not stop the
+    API from starting; the application-level check still holds, and a
+    silent double-booking is a smaller emergency than an outage.
+    """
+    try:
+        await db.marketplace_bookings.create_index(
+            [("gig_id", 1), ("preferred_date", 1), ("time_slot", 1)],
+            name="uniq_held_slot",
+            unique=True,
+            partialFilterExpression={"status": {"$in": list(HELD_STATUSES)}},
+        )
+    except Exception as e:  # noqa: BLE001
+        logger.warning("could not create uniq_held_slot index: %s", e)
+
+
+@router.get("/gigs/{gig_id}/taken-slots")
+async def taken_slots(gig_id: str):
+    """Which times are already held, so the picker can leave them out.
+
+    Public and unauthenticated on purpose: the slot grid is public, and
+    which times are gone is not private information — it is the same
+    thing a caller learns by asking "are you free Tuesday at three?".
+    No customer names, no booking ids, nothing but times.
+
+    The picker is built in the browser from weekly_availability, which is
+    why this exists at all: the front end had no way to know a slot was
+    spoken for, so it offered every one of them to everybody.
+    """
+    gig = await db.marketplace_gigs.find_one(
+        {"_id": gig_id}, {"_id": 1, "slot_duration_minutes": 1},
+    )
+    if not gig:
+        raise HTTPException(status_code=404, detail="Gig not found")
+
+    spans = await _held_spans(gig_id)
+    # Returned as start times on the gig's own grid rather than raw
+    # ranges, because that is what the picker compares against — doing
+    # the arithmetic here keeps one implementation of it.
+    step = int(gig.get("slot_duration_minutes") or 30)
+    out: dict[str, list[str]] = {}
+    for day, ranges in spans.items():
+        blocked = set()
+        for start, end in ranges:
+            # Every grid slot the booking touches, not just the one it
+            # starts on: a 90-minute service booked at 10:00 must take
+            # 10:30 and 11:00 with it.
+            first = (start // step) * step
+            t = first
+            while t < end:
+                blocked.add(f"{t // 60:02d}:{t % 60:02d}")
+                t += step
+        out[day] = sorted(blocked)
+    return out
 
 
 @router.get("/gigs/{gig_id}/contact")

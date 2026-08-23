@@ -199,6 +199,13 @@ async def startup_tasks() -> None:
             "return postmark_token_present=false. Set the env var and "
             "restart before assuming email works."
         )
+    # One booking per slot, guaranteed by the database rather than only
+    # by the check in book_gig (spec S0). Awaited, not spawned: it is a
+    # single index creation, and a request that lands before it exists
+    # would fall back to the racy path.
+    from routes.marketplace.gigs import ensure_booking_indexes
+    await ensure_booking_indexes()
+
     asyncio.create_task(sync_all_ical_feeds())
     asyncio.create_task(mention_email_loop())
     # Daily Smart Pricing refresh — sleeps until 03:00 UTC, then loops.
