@@ -1184,6 +1184,29 @@ select:focus-visible,
 }
 .mir-daypicker .rdp-nav_button:hover { background: rgb(var(--brand-primary-rgb) / .08); }
 
+/* Month centred, arrows pinned to the edges — matching the shadcn calendar
+   (components/ui/calendar) and the stays picker. react-day-picker's stock
+   caption is `space-between`, which parks both arrows together on one side;
+   this was the only calendar in the app still doing that.
+
+   `inset-inline-*` rather than left/right so "previous" lands on the RIGHT
+   in Hebrew, where going back belongs. Two-class selectors beat the
+   library's own `.rdp-button_reset { position: relative }`, so no
+   !important is needed here — unlike the Tailwind-styled calendars, where
+   a single utility class loses to it. */
+.mir-daypicker .rdp-caption { position: relative; justify-content: center; }
+.mir-daypicker .rdp-nav { position: static; }
+/* top/translate is load-bearing: taking the buttons out of flow also takes
+   away the caption's vertical centring, and they drop onto the weekday row. */
+.mir-daypicker .rdp-nav_button_previous,
+.mir-daypicker .rdp-nav_button_next {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+}
+.mir-daypicker .rdp-nav_button_previous { inset-inline-start: 0; }
+.mir-daypicker .rdp-nav_button_next { inset-inline-end: 0; }
+
 /* C6 — request row title, clamped to two lines.
    -webkit-line-clamp is the only cross-browser way to clamp at a line
    count; it is not a vendor experiment any more but it does still need

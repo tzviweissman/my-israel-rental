@@ -44,8 +44,22 @@ function Calendar({
           buttonVariants({ variant: "outline" }),
           "h-7 w-7 bg-transparent p-0 opacity-50 hover:opacity-100"
         ),
-        nav_button_previous: "absolute left-1",
-        nav_button_next: "absolute right-1",
+        // Two separate traps here, both invisible in the markup.
+        //
+        // `!absolute`: react-day-picker's own stylesheet sets
+        // `.rdp-button_reset { position: relative }`, and it is imported
+        // (by common/DateField and search/WhenPicker) AFTER Tailwind's
+        // utilities — so on any page where one of those happens to be
+        // loaded, plain `absolute` loses and the arrows collapse in beside
+        // the month name. The same component was laying out two different
+        // ways depending on what else the page imported.
+        //
+        // `start`/`end` rather than `left`/`right`: these are logical
+        // properties, so in RTL "previous month" moves to the right where
+        // it belongs. Physical sides put the back arrow on the wrong end
+        // of a Hebrew calendar.
+        nav_button_previous: "!absolute start-1",
+        nav_button_next: "!absolute end-1",
         table: "w-full border-collapse space-y-1",
         head_row: "flex",
         head_cell:

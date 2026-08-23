@@ -471,8 +471,10 @@ const FiltersPanel = ({
                       nav: 'space-x-1 flex items-center',
                       nav_button:
                         'h-7 w-7 bg-transparent border border-[#E5E5E5] rounded-md p-0 opacity-60 hover:opacity-100 hover:border-[var(--gold)] transition-all inline-flex items-center justify-center',
-                      nav_button_previous: 'absolute left-1',
-                      nav_button_next: 'absolute right-1',
+                      // Logical sides + `!` so this survives RTL and
+                      // react-day-picker's own stylesheet — see ui/calendar.jsx.
+                      nav_button_previous: '!absolute start-1',
+                      nav_button_next: '!absolute end-1',
                       table: 'w-full border-collapse',
                       head_row: 'flex',
                       head_cell: 'text-[var(--gold)] rounded-md w-9 font-semibold text-[0.7rem] uppercase',

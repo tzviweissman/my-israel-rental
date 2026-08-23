@@ -515,8 +515,10 @@ const BookingCalendar = ({
           caption_label: 'text-sm font-bold w-[180px] text-center text-gray-900',
           nav: 'space-x-1 flex items-center',
           nav_button: 'h-7 w-7 bg-transparent p-0 opacity-70 hover:opacity-100 inline-flex items-center justify-center rounded-full hover:bg-gray-100',
-          nav_button_previous: 'absolute left-0',
-          nav_button_next: 'absolute right-0',
+          // Logical sides + `!` so this survives RTL and
+          // react-day-picker's own stylesheet — see ui/calendar.jsx.
+          nav_button_previous: '!absolute start-0',
+          nav_button_next: '!absolute end-0',
           table: 'w-[280px] border-collapse',
           head_row: 'flex w-[280px]',
           head_cell: 'text-gray-500 rounded-md w-10 font-medium text-[0.7rem] uppercase tracking-wider flex-shrink-0',
