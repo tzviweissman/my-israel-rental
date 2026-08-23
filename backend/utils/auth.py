@@ -47,6 +47,27 @@ def verify_token(credentials: HTTPAuthorizationCredentials = Depends(security)) 
         raise HTTPException(status_code=401, detail="Invalid token")
 
 
+# Same bearer scheme, but a missing or bad token yields None instead of a
+# 401. For endpoints that are genuinely public and only want to know WHO is
+# looking if anyone is — view tracking, which must not count an owner
+# visiting their own listing. Never use this to gate access: `None` here
+# means "not signed in OR sent us rubbish", which is not an authorisation
+# decision.
+_optional_security = HTTPBearer(auto_error=False)
+
+
+def optional_user(
+    credentials: HTTPAuthorizationCredentials = Depends(_optional_security),
+) -> dict | None:
+    """The caller's JWT payload if they sent a valid one, else None."""
+    if not credentials:
+        return None
+    try:
+        return jwt.decode(credentials.credentials, JWT_SECRET, algorithms=['HS256'])
+    except jwt.InvalidTokenError:   # covers ExpiredSignatureError
+        return None
+
+
 def decode_query_token(token: str) -> dict:
     """Decode a JWT passed as a query parameter.
 

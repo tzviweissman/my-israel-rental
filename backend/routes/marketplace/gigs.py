@@ -18,7 +18,8 @@ from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from fastapi.responses import RedirectResponse
 from pydantic import BaseModel, Field
 
-from routes.deps import db, logger, verify_token
+from routes.deps import db, logger, optional_user, verify_token
+from utils import view_tracking
 from utils.businesses import ensure_default_business
 
 from .shared import (
@@ -392,10 +393,18 @@ async def create_gig(payload: GigIn, user=Depends(verify_token)):
 
 
 @router.get("/gigs/{gig_id}")
-async def get_gig(gig_id: str):
+async def get_gig(gig_id: str, viewer=Depends(optional_user)):
     gig = await db.marketplace_gigs.find_one({"_id": gig_id})
     if not gig:
         raise HTTPException(status_code=404, detail="Gig not found")
+    # L2 — count the visit. Fire-and-forget: a metric must never slow down
+    # or fail the page it is measuring. `viewer` is optional auth purely so
+    # the provider's own visits can be skipped; it gates nothing.
+    view_tracking.spawn(view_tracking.record_view(
+        view_tracking.ENTITY_GIG, gig_id,
+        owner_id=gig.get("provider_user_id"),
+        viewer_id=(viewer or {}).get("user_id"),
+    ))
     prov = await db.marketplace_providers.find_one({"user_id": gig["provider_user_id"]})
     user = await db.users.find_one({"_id": gig["provider_user_id"]}) \
         or await db.users.find_one({"id": gig["provider_user_id"]})
@@ -658,10 +667,20 @@ async def leads_summary(
         ).to_list(None)
         gig_ids = [g["_id"] for g in owned]
         if not gig_ids:
+            # No services, but the business page itself can still have been
+            # viewed — that is exactly the state where an owner wants to
+            # know people are arriving and finding nothing.
+            empty_days = [{"date": k, "count": 0} for k in _il_day_window(LEADS_PERIOD_DAYS)[1]]
+            v = await view_tracking.view_summary(
+                provider_id, LEADS_PERIOD_DAYS, [business_id],
+            )
             return {
                 "total": 0, "period_days": LEADS_PERIOD_DAYS, "period_total": 0,
-                "daily": [{"date": k, "count": 0} for k in _il_day_window(LEADS_PERIOD_DAYS)[1]],
-                "since": None, "by_gig": [],
+                "daily": empty_days, "since": None, "by_gig": [],
+                "views": {
+                    "total": v["total"], "period_total": v["period_total"],
+                    "daily": v["daily"], "since": v["since"],
+                },
             }
         base["gig_id"] = {"$in": gig_ids}
 
@@ -718,6 +737,20 @@ async def leads_summary(
             })
         by_gig.sort(key=lambda r: (-r["count"], r["title"]))
 
+    # Views (L2). Reported beside leads rather than as a second endpoint:
+    # the two numbers are read together and a separate round trip could show
+    # them from different moments. Scoped to the same set of gigs, so the
+    # two halves always describe the same listings.
+    #
+    # The business page's own views are added when a business is named. A
+    # visit to the storefront is a view OF that business even though it is
+    # not a view of any one service, and dropping it would under-report the
+    # page the owner actually shares.
+    view_ids = None
+    if business_id:
+        view_ids = [g["_id"] for g in owned] + [business_id]
+    views = await view_tracking.view_summary(provider_id, LEADS_PERIOD_DAYS, view_ids)
+
     return {
         "total": total,
         "period_days": LEADS_PERIOD_DAYS,
@@ -726,6 +759,12 @@ async def leads_summary(
         "daily": [{"date": k, "count": buckets[k]} for k in day_keys],
         "since": since,
         "by_gig": by_gig,
+        "views": {
+            "total": views["total"],
+            "period_total": views["period_total"],
+            "daily": views["daily"],
+            "since": views["since"],
+        },
     }
 
 

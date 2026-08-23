@@ -19,7 +19,7 @@ import { uploadFilesFast } from '../../utils/fastUpload';
 import CoverPlaceholder from '../common/CoverPlaceholder';
 import AddPhotoNudge from '../common/AddPhotoNudge';
 import BusinessSelector, { ALL, readStoredBusiness } from './BusinessSelector';
-import LeadsPanel from './LeadsPanel';
+import PerformancePanel from './PerformancePanel';
 import { nounKey } from '../../utils/businessNoun';
 
 const ProfileEditModal = ({ API, token, initial, onClose, onSaved }) => {
@@ -445,7 +445,7 @@ const MyGigsTab = ({ API, token, business = null, onBack = null }) => {
           necessarily zero, and a zero next to "create your first service"
           reads as a verdict on a listing that does not exist yet. */}
       {gigs.length > 0 && (
-        <LeadsPanel
+        <PerformancePanel
           API={API}
           token={token}
           businessId={business ? business.id : (businessFilter !== ALL ? businessFilter : null)}

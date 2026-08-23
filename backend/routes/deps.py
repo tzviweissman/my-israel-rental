@@ -13,7 +13,7 @@ from dotenv import load_dotenv
 from motor.motor_asyncio import AsyncIOMotorClient
 
 # Re-export auth helpers so routers can do `from routes.deps import verify_token`
-from utils.auth import create_token, security, verify_token  # noqa: F401
+from utils.auth import create_token, optional_user, security, verify_token  # noqa: F401
 
 ROOT_DIR = Path(__file__).parent.parent  # /app/backend
 load_dotenv(ROOT_DIR / ".env")

@@ -409,6 +409,12 @@ async def startup_tasks() -> None:
         await db.lead_events.create_index(
             [("provider_id", 1), ("created_at", -1)], background=True,
         )
+        # Marketplace view events (L2) — read by owner over a window, and by
+        # entity. NOTE the timestamp here is a real datetime, unlike
+        # lead_events' ISO string: see utils/view_tracking for why, and use
+        # datetime cutoffs when querying it.
+        from utils.view_tracking import ensure_view_indexes
+        await ensure_view_indexes()
         # UNIQUE, not merely indexed. A short link is printed on signs and
         # flyers: two businesses sharing a slug would send one owner's
         # customers to the other's page, permanently and unfixably, since

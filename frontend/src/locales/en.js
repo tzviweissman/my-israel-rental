@@ -18,17 +18,21 @@ const en = {
         previousMonth: 'Go to previous month',
         nextMonth: 'Go to next month',
       },
-      // Leads panel (dashboard/LeadsPanel) — L1 of
-      // docs/leads-and-views-spec.md. Says "tapped to message you", not
-      // "leads": it counts exactly one action and must not imply views or
-      // conversions, which are not tracked.
-      leads: {
-        title: 'People who tapped to message you',
-        none: 'No one has tapped to message you yet — this counts them from now on.',
-        inLastDays: 'in the last {{n}} days',
+      // Performance panel (dashboard/PerformancePanel) — L1+L2 of
+      // docs/leads-and-views-spec.md. "Tapped to message you", not "leads":
+      // it counts exactly one action. And no conversion percentage — a view
+      // and a tap cannot be tied to the same person yet, so a ratio would
+      // imply a funnel that is really two unrelated counts.
+      perf: {
+        title: 'How your listings are doing',
+        none: 'Nobody has visited these listings yet — this counts them from now on.',
+        viewsLabel: 'Views in the last 30 days',
+        leadsLabel: 'Tapped to message you',
+        viewsChart: 'Views — last 14 days',
+        leadsChart: 'Taps — last 14 days',
+        byListing: 'Taps by listing',
         allTime: '{{n}} all time',
         countingSince: 'Counting since {{date}}',
-        chartTitle: 'Taps — last 14 days',
       },
       shortLink: {
         opening: 'Opening…',

@@ -21,7 +21,8 @@ from typing import Any, Optional
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, Field
 
-from routes.deps import db, verify_token
+from routes.deps import db, optional_user, verify_token
+from utils import view_tracking
 from utils.businesses import (
     MAX_BUSINESSES_PER_USER,
     ensure_default_business,
@@ -386,7 +387,7 @@ def _public_listing(gig: dict[str, Any]) -> dict[str, Any]:
 
 
 @router.get("/business/{slug_or_id}")
-async def public_business(slug_or_id: str):
+async def public_business(slug_or_id: str, viewer=Depends(optional_user)):
     """The public page for one business (spec M4).
 
     A person with two businesses gets two of these. There is deliberately
@@ -419,6 +420,16 @@ async def public_business(slug_or_id: str):
     # their dashboard, which reads a different endpoint.
     if not raw:
         raise HTTPException(status_code=404, detail="Business not found")
+
+    # L2 — count the visit, and only here: all three 404s above mean nobody
+    # saw a page, and counting them would credit a hidden or empty business
+    # with traffic it never received. Fire-and-forget; `viewer` is optional
+    # auth solely so the owner's own visits are skipped.
+    view_tracking.spawn(view_tracking.record_view(
+        view_tracking.ENTITY_BUSINESS, biz["_id"],
+        owner_id=biz.get("owner_user_id"),
+        viewer_id=(viewer or {}).get("user_id"),
+    ))
 
     ratings = await _batch_rating_aggregate([g["_id"] for g in raw])
     for g in raw:
