@@ -85,7 +85,7 @@ class BusinessPatch(BaseModel):
 
 
 
-def _public(doc: dict[str, Any], gig_count: int = 0) -> dict[str, Any]:
+def _public(doc: dict[str, Any], gig_count: int = 0, has_listing_photo: bool = False) -> dict[str, Any]:
     return {
         "id": doc["_id"],
         "name": doc.get("name") or "",
@@ -101,6 +101,10 @@ def _public(doc: dict[str, Any], gig_count: int = 0) -> dict[str, Any]:
         # Shown next to each business so "deactivate" is an informed
         # decision rather than a guess about what it will hide.
         "gig_count": gig_count,
+        # B6 — the completeness prompt needs to know whether any listing
+        # actually carries a photo. Counted on the server because the
+        # dashboard list does not fetch the listings themselves.
+        "has_listing_photo": bool(has_listing_photo),
     }
 
 
@@ -147,10 +151,15 @@ async def my_businesses(user=Depends(verify_token)):
             )
             docs = [created]
     counts = {}
+    photos = {}
     for b in docs:
         counts[b["_id"]] = await db.marketplace_gigs.count_documents({"business_id": b["_id"]})
+        # One matching document is enough — this is a yes/no, not a count.
+        photos[b["_id"]] = bool(await db.marketplace_gigs.find_one(
+            {"business_id": b["_id"], "gallery.0": {"$exists": True}}, {"_id": 1},
+        ))
     docs.sort(key=lambda b: (not b.get("active", True), b.get("created_at") or ""))
-    return [_public(b, counts.get(b["_id"], 0)) for b in docs]
+    return [_public(b, counts.get(b["_id"], 0), photos.get(b["_id"], False)) for b in docs]
 
 
 @router.post("/businesses")

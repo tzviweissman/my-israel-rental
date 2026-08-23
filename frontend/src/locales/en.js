@@ -73,6 +73,11 @@ const en = {
         browse: 'Browse businesses',
       },
       businesses: {
+        completePct: 'Your page is {{pct}}% complete',
+        needLogo: 'Add a logo',
+        needDescription: 'Write a description',
+        needAreas: 'Add your service areas',
+        needPhoto: 'Add one photo to a service',
         editDetails: 'Business details',
         detailsHint: 'All optional. Anything you leave blank simply is not shown on your page.',
         about: 'About your business',

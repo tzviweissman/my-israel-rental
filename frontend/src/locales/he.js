@@ -73,6 +73,11 @@ const he = {
         browse: 'עיון בעסקים',
       },
       businesses: {
+        completePct: 'העמוד שלכם מושלם ב-{{pct}}%',
+        needLogo: 'הוספת לוגו',
+        needDescription: 'כתיבת תיאור',
+        needAreas: 'הוספת אזורי שירות',
+        needPhoto: 'הוספת תמונה לשירות',
         editDetails: 'פרטי העסק',
         detailsHint: 'הכל אופציונלי. מה שלא תמלאו פשוט לא יוצג בעמוד שלכם.',
         about: 'על העסק',

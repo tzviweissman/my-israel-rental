@@ -18,6 +18,7 @@ import { Briefcase, Plus, Loader2, Eye, EyeOff, Check, X, Pencil } from 'lucide-
 import { toast } from 'sonner';
 import CoverPlaceholder from '../common/CoverPlaceholder';
 import BusinessDetailsForm from './BusinessDetailsForm';
+import BusinessCompleteness from './BusinessCompleteness';
 import MyGigsTab from './MyGigsTab';
 
 const MAX_ACTIVE = 5;
@@ -258,6 +259,14 @@ export default function MyBusinessesTab({ API, token }) {
                     {b.name}
                   </button>
                 )}
+
+                {/* B6 — what is still missing from the public page, with
+                    each gap wired to the thing that closes it. */}
+                <BusinessCompleteness
+                  business={b}
+                  onEditDetails={() => setDetailsBiz(b)}
+                  onOpenListings={() => setOpenBiz(b)}
+                />
 
                 <p className="text-xs" style={{ color: 'var(--brand-muted)' }}>
                   {t('businesses.listingCount', '{{n}} listing(s)', { n: b.gig_count })}
