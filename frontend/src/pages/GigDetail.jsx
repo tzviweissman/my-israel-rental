@@ -383,26 +383,51 @@ const GigDetail = () => {
   const displayDescription = localizedDescription(gig, i18n);
   const bucket = gig.provider?.response_bucket;
 
-  // Picking from the sidebar list used to only change the hero image at
-  // the TOP of the page. With a dozen products the shopper is scrolled
-  // well past it, so the click appeared to do nothing — reported as "when
-  // I click each option it doesn't take me to the correct picture".
+  // Picking from the product list puts that product in the LARGE image,
+  // the way a shop gallery works — thumbnails beside a big picture, click
+  // one and it swaps in place.
   //
-  // The selection still drives the hero; this additionally brings the
-  // matching card into view, which is the picture they were reaching for
-  // and is already on screen or close to it. `center` rather than `start`
-  // so it does not tuck under the fixed nav.
-  const selectProduct = (p, i) => {
+  // An earlier attempt scrolled the page DOWN to the matching card in the
+  // grid. That was the wrong instinct: it takes the shopper away from the
+  // picture they asked to see, and the picture they asked to see is the
+  // big one at the top. The gallery is sticky on desktop for the same
+  // reason, so with a long product list the image stays put while the
+  // list scrolls past it.
+  //
+  // The scroll below is only a fallback for when the gallery genuinely is
+  // not on screen — a phone, where the columns stack and the list sits
+  // below the image. Bringing the image back is the whole point of the
+  // tap there.
+  const selectProduct = (p) => {
     setTier(p);
-    setHeroIndex(0);
-    if (typeof i !== 'number') return;
-    // After the state change, so the card is in its selected state when
-    // it arrives rather than shifting once it gets there.
+    // Point the big image AT the picked product.
+    //
+    // A store's gallery only narrows to the selection when that product
+    // has MORE than one photo (see tierGallery above — a single photo
+    // must not collapse the varied strip into one thumbnail). The
+    // consequence was that picking any ordinary one-photo product left
+    // the big image on the catalogue's first picture: the click appeared
+    // to do nothing, which is exactly what was reported.
+    //
+    // So for the single-photo case, keep the full strip and move the
+    // hero INDEX to that product's photo within it. The big image shows
+    // what was picked, the strip stays browsable, and the active
+    // thumbnail lands on the right one.
+    const photos = productPhotos(p);
+    if (photos.length > 1) {
+      setHeroIndex(0);
+    } else {
+      const idx = photos[0] ? derivedGallery.indexOf(photos[0]) : -1;
+      setHeroIndex(idx >= 0 ? idx : 0);
+    }
     requestAnimationFrame(() => {
-      const card = document.querySelector(`[data-testid="gig-product-${i}"]`);
-      if (!card) return;
+      const gallery = document.querySelector('[data-testid="gig-gallery"]');
+      if (!gallery) return;
+      const r = gallery.getBoundingClientRect();
+      const mostlyVisible = r.top < window.innerHeight * 0.6 && r.bottom > 120;
+      if (mostlyVisible) return;
       const reduced = window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches;
-      card.scrollIntoView({ behavior: reduced ? 'auto' : 'smooth', block: 'center' });
+      gallery.scrollIntoView({ behavior: reduced ? 'auto' : 'smooth', block: 'start' });
     });
   };
 
@@ -504,7 +529,23 @@ const GigDetail = () => {
             {/* Cover + gallery — swaps to the selected tier's own photos
                 when that tier has any, so a tour guide's "Jerusalem" vs
                 "Tel Aviv" tours show visually distinct hero images.
-                Clicking any thumbnail (or the cover) opens the lightbox. */}
+                Clicking any thumbnail (or the cover) opens the lightbox.
+
+                Sticky from md up, matching the product list opposite it:
+                with a dozen products the shopper scrolls the list, and an
+                image that scrolls away cannot show them what they just
+                picked. Below md the columns stack and sticky would pin
+                the photo over the content, so it is left alone there. */}
+            {/* The background is load-bearing, not decoration: a sticky
+                block with a transparent background lets the content
+                scrolling underneath show straight through the thumbnail
+                strip. The page colour and a little padding give it
+                something to hide behind. */}
+            <div
+              className="md:sticky md:top-24 space-y-3 z-10 md:pb-3 md:-mx-1 md:px-1"
+              style={{ backgroundColor: '#FAFAF7' }}
+              data-testid="gig-gallery"
+            >
             <button
               type="button"
               onClick={() => cover && setLightboxIndex(heroIndex)}
@@ -550,6 +591,7 @@ const GigDetail = () => {
                 ))}
               </div>
             )}
+            </div>{/* /gig-gallery */}
 
             <div>
               <div className="flex flex-wrap items-center gap-2 mb-1">
