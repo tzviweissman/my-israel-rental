@@ -18,6 +18,7 @@ from models_response import (
     UploadResponse,
 )
 from routes.deps import (
+    optional_user,
     ALLOWED_IMAGE_TYPES,
     ALLOWED_VIDEO_TYPES,
     ANTHROPIC_API_KEY,
@@ -46,6 +47,47 @@ api_router = router  # alias so existing @api_router decorators work verbatim
 async def get_exchange_rate() -> dict:
     rate = await get_usd_ils_rate()
     return {"usd_to_ils": round(rate, 4), "ils_to_usd": round(1 / rate, 4)}
+
+
+class UploadFailureIn(BaseModel):
+    where: str = ""
+    count: int = 1
+    reason: str = ""
+
+
+@api_router.post("/client/upload-failure")
+async def report_upload_failure(
+    req: Request,
+    payload: UploadFailureIn,
+    user=Depends(optional_user),
+) -> dict:
+    """Record that a browser-side upload failed.
+
+    Media goes from the browser straight to Cloudinary's CDN — our server
+    never holds the bytes, which is why large uploads are fast. The cost is
+    that a failure there is invisible to us: during an incident the server
+    log shows signature requests returning 200 and nothing else, while
+    people are stuck being told "upload failed".
+
+    This is the missing half. It stores nothing and returns nothing; it
+    writes one WARNING so the reason shows up in the deploy log next to
+    everything else.
+
+    Deliberately tolerant: optional auth (a failure while signed out is
+    still worth knowing about) and it always returns ok, because a
+    reporting endpoint that errors would put a second failure in front of
+    someone already looking at one. Rate-limited so it cannot be used to
+    flood the log.
+    """
+    check_rate(req, bucket="upload-failure", limit=20, window_seconds=300)
+    logger.warning(
+        "client upload failure: where=%s count=%s user=%s reason=%s",
+        (payload.where or "")[:60],
+        payload.count,
+        (user or {}).get("user_id", "anon"),
+        (payload.reason or "")[:300],
+    )
+    return {"ok": True}
 
 
 @api_router.get("/cloudinary/signature")

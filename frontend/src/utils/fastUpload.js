@@ -207,7 +207,15 @@ export async function uploadFilesFast(files, API, token, onAggregateProgress) {
         return {
           filename: files[idx].name,
           original_name: files[idx].name,
-          error: err.response?.data?.detail || err.message || 'Upload failed',
+          // Cloudinary and our own API report errors in DIFFERENT shapes:
+          // Cloudinary sends {error:{message}}, we send {detail}. Reading
+          // only ours turned "Rate limit reached" into the useless
+          // "Request failed with status code 420" — which is exactly the
+          // text a stuck owner cannot act on and we cannot diagnose from.
+          error: err.response?.data?.error?.message
+            || err.response?.data?.detail
+            || err.message
+            || 'Upload failed',
         };
       }
     })
@@ -243,4 +251,38 @@ export async function uploadOneFile(file, API, token, onProgress) {
   if (!res) throw new Error('Upload returned nothing');
   if (res.error || !res.url) throw new Error(res.error || 'Upload failed');
   return res.url;
+}
+
+
+/**
+ * Tell OUR backend that a browser-side upload failed.
+ *
+ * These uploads go from the browser straight to Cloudinary's CDN — which
+ * is the point, our server never holds the bytes — but it means a failure
+ * is completely invisible to us. During an incident the server logs show
+ * signature requests returning 200 and nothing else, while people are
+ * being told "upload failed" and getting stuck.
+ *
+ * Fire-and-forget and deliberately silent: a report that fails must never
+ * become a second error on top of the first one the person is already
+ * looking at. It carries a short reason string and no file contents.
+ */
+export function reportUploadFailure({ where, count, reason, API, token }) {
+  try {
+    const body = JSON.stringify({
+      where: String(where || '').slice(0, 60),
+      count: Number(count) || 1,
+      reason: String(reason || 'unknown').slice(0, 300),
+    });
+    // keepalive so it still goes out if the tab is closing.
+    fetch(`${API}/client/upload-failure`, {
+      method: 'POST',
+      keepalive: true,
+      headers: {
+        'Content-Type': 'application/json',
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      },
+      body,
+    }).catch(() => {});
+  } catch { /* never let reporting break the page */ }
 }

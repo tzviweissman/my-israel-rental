@@ -1769,6 +1769,8 @@ const he = {
         photoWhy: 'רשימות עם תמונה מקבלות הרבה יותר פניות.',
         needPhotoEach: 'הוסיפו לפחות תמונה אחת ל"{{name}}" — רשימות עם תמונה מקבלות הרבה יותר פניות.',
         thisOne: 'השירות הזה',
+        uploadFailedWhy: 'העלאת התמונה נכשלה — {{reason}}',
+        uploadFailed: 'העלאת התמונה נכשלה. נסו תמונה אחרת.',
         // Cancellation & policies
         cancellationPolicy: 'מדיניות ביטול',
         customCancellationPolicy: 'מדיניות ביטול מותאמת',

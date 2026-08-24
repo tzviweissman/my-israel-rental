@@ -1821,6 +1821,11 @@ const en = {
         photoWhy: 'Listings with a photo get far more enquiries.',
         needPhotoEach: 'Add at least one photo to "{{name}}" — listings with a photo get far more enquiries.',
         thisOne: 'this one',
+        // The real reason, not just "failed". These uploads go straight
+        // from the browser to Cloudinary, so if we do not show the reason
+        // nobody ever sees it — not the owner, not us.
+        uploadFailedWhy: 'Photo upload failed — {{reason}}',
+        uploadFailed: 'Photo upload failed. Please try a different photo.',
         // Cancellation & policies
         cancellationPolicy: 'Cancellation Policy',
         customCancellationPolicy: 'Custom Cancellation Policy',

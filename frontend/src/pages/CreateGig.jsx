@@ -33,7 +33,7 @@ import {
 } from 'lucide-react';
 import { API, AuthContext } from '../App';
 import PageMeta from '../components/PageMeta';
-import { uploadFilesFast } from '../utils/fastUpload';
+import { uploadFilesFast, reportUploadFailure } from '../utils/fastUpload';
 import { useFormDraft, readDraft, clearDraft } from '../hooks/useFormDraft';
 import { normalizeWhatsAppNumber, hasValidWhatsApp } from '../utils/whatsappLink';
 import { productPhotos } from '../utils/productPhotos';
@@ -205,7 +205,22 @@ const CreateGig = () => {
     try {
       const results = await uploadFilesFast(arr, API, token, () => {});
       const good = results.filter((r) => r.url && !r.error);
-      if (good.length < results.length) toast.error(`${results.length - good.length} upload(s) failed`);
+      const failed = results.filter((r) => !r.url || r.error);
+      if (failed.length) {
+        // Say WHY. The reason sits right there on the result and was being
+        // discarded in favour of "1 upload(s) failed", which tells the
+        // person nothing — and tells us less, because these uploads go
+        // from the browser straight to Cloudinary and never touch our
+        // server, so the reason appeared in no log anywhere.
+        //
+        // This matters more since a photo became required to continue: a
+        // failure here is no longer an annoyance, it is a wall.
+        const why = failed.find((r) => r.error)?.error;
+        toast.error(why
+          ? t('sweep.uploadFailedWhy', { defaultValue: 'Photo upload failed — {{reason}}', reason: why })
+          : t('sweep.uploadFailed', 'Photo upload failed. Please try a different photo.'));
+        reportUploadFailure({ where: 'gig-wizard-tier', count: failed.length, reason: why, API, token });
+      }
       if (good.length > 0) updateTier(i, { images: [...current, ...good.map((r) => r.url)] });
     } catch (err) {
       toast.error(err.message || 'Upload failed');
