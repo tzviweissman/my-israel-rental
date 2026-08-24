@@ -413,6 +413,9 @@ const GigDetail = () => {
     // hero INDEX to that product's photo within it. The big image shows
     // what was picked, the strip stays browsable, and the active
     // thumbnail lands on the right one.
+    // productPhotos reads `images` first, which is where a tier's photos
+    // live too — so one handler serves both the store picker and the
+    // service option list, and they cannot drift apart.
     const photos = productPhotos(p);
     if (photos.length > 1) {
       setHeroIndex(0);
@@ -767,7 +770,7 @@ const GigDetail = () => {
                   gig={gig}
                   tiers={gig.tiers || []}
                   selected={tier}
-                  onSelect={(tt) => { setTier(tt); setHeroIndex(0); if (isAppointment) { setAppointmentSlot(null); } }}
+                  onSelect={(tt) => { selectProduct(tt); if (isAppointment) { setAppointmentSlot(null); } }}
                   isAppointment={isAppointment}
                 />
               )}
@@ -883,6 +886,7 @@ const TierList = ({ tiers, selected, onSelect, isAppointment }) => {
     const active = selected?.name === tt.name;
     const sym = tt.currency === 'USD' ? '$' : '₪';
     const photoCount = Array.isArray(tt.images) ? tt.images.length : 0;
+    const thumb = photoCount > 0 ? tt.images[0] : null;
     return (
       <button
         key={tt.name}
@@ -892,17 +896,28 @@ const TierList = ({ tiers, selected, onSelect, isAppointment }) => {
         }`}
         data-testid={`gig-tier-${tt.name}`}
       >
+        <div className="flex gap-3">
+          {/* A thumbnail, the same as the store's product picker, because
+              a service option now always has a photo and a row of names
+              gives the reader nothing to choose between. The camera pip
+              stays for the extras beyond the first. */}
+          {thumb && (
+            <div
+              className="w-14 h-14 rounded-lg bg-gray-100 bg-cover bg-center shrink-0"
+              style={{ backgroundImage: `url(${thumb})` }}
+              data-testid={`gig-tier-thumb-${tt.name}`}
+            />
+          )}
+          <div className="flex-1 min-w-0">
         <div className="flex justify-between items-baseline gap-2">
           <span className="font-semibold text-sm flex-1 flex items-center gap-1.5">
             {tt.name}
-            {/* Camera pip when this tier has its own gallery — signals to
-                buyers that clicking it swaps the header photos. */}
-            {photoCount > 0 && (
+            {photoCount > 1 && (
               <span
                 className={`inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wide ${
                   active ? 'bg-[var(--brand-primary)] text-white' : 'bg-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/10 text-[var(--brand-primary)]'
                 }`}
-                title={`${photoCount} photo${photoCount === 1 ? '' : 's'} of this option`}
+                title={`${photoCount} photos of this option`}
                 data-testid={`gig-tier-photo-badge-${tt.name}`}
               >
                 <Camera size={9} strokeWidth={2.5} /> {photoCount}
@@ -923,6 +938,8 @@ const TierList = ({ tiers, selected, onSelect, isAppointment }) => {
             {tt.features.map((ft, i) => <li key={i}>• {ft}</li>)}
           </ul>
         )}
+          </div>
+        </div>
       </button>
     );
   });
