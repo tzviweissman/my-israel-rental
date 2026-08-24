@@ -20,6 +20,7 @@ import CoverPlaceholder from '../common/CoverPlaceholder';
 import AddPhotoNudge from '../common/AddPhotoNudge';
 import BusinessSelector, { ALL, readStoredBusiness } from './BusinessSelector';
 import PerformancePanel from './PerformancePanel';
+import EditListingModal from './EditListingModal';
 import { nounKey } from '../../utils/businessNoun';
 
 const ProfileEditModal = ({ API, token, initial, onClose, onSaved }) => {
@@ -295,6 +296,9 @@ const MyGigsTab = ({ API, token, business = null, onBack = null }) => {
   // in the selector so the filtered list and the count agree.
   const [businesses, setBusinesses] = useState([]);
   const [businessFilter, setBusinessFilter] = useState(readStoredBusiness);
+  // The listing being corrected, or null. Held here rather than per-card
+  // so only one sheet can ever be open.
+  const [editing, setEditing] = useState(null);
   // Which business a new listing should belong to. The tab knows — it was
   // opened from one — but it used to send the wizard to a bare
   // /businesses/add, so the server fell back to the person's FIRST
@@ -538,14 +542,26 @@ const MyGigsTab = ({ API, token, business = null, onBack = null }) => {
                       <span className="font-semibold">{sym}{cheap.toLocaleString()}</span>
                     </p>
                   )}
-                  <div className="flex justify-between items-center pt-2 border-t border-gray-100">
-                    <button
-                      onClick={() => navigate(`/businesses/${g.id}`)}
-                      className="text-xs font-semibold text-[var(--brand-primary)] hover:underline flex items-center gap-1"
-                      data-testid={`my-gigs-view-${g.id}`}
-                    >
-                      View <ExternalLink size={11} />
-                    </button>
+                  <div className="flex justify-between items-center gap-2 pt-2 border-t border-gray-100">
+                    <div className="flex items-center gap-3">
+                      <button
+                        onClick={() => navigate(`/businesses/${g.id}`)}
+                        className="text-xs font-semibold text-[var(--brand-primary)] hover:underline flex items-center gap-1"
+                        data-testid={`my-gigs-view-${g.id}`}
+                      >
+                        View <ExternalLink size={11} />
+                      </button>
+                      {/* Fixing a typo or a wrong photo used to mean
+                          deleting the listing and rebuilding it in the
+                          wizard, so people left the mistake there. */}
+                      <button
+                        onClick={() => setEditing(g)}
+                        className="text-xs font-semibold text-gray-700 hover:text-[var(--brand-primary)] flex items-center gap-1"
+                        data-testid={`my-gigs-edit-listing-${g.id}`}
+                      >
+                        <Pencil size={11} /> {t('editListing.edit', 'Edit')}
+                      </button>
+                    </div>
                     <button
                       onClick={() => deleteGig(g.id)}
                       className="text-xs text-red-500 hover:text-red-700 flex items-center gap-1"
@@ -559,6 +575,16 @@ const MyGigsTab = ({ API, token, business = null, onBack = null }) => {
             );
           })}
         </div>
+      )}
+
+      {editing && (
+        <EditListingModal
+          gig={editing}
+          API={API}
+          token={token}
+          onClose={() => setEditing(null)}
+          onSaved={load}
+        />
       )}
 
       {showProfile && (
