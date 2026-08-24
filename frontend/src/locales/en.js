@@ -1807,6 +1807,16 @@ const en = {
       // so the diff stays reviewable and the Hebrew maintainers can
       // audit one block instead of chasing them across every file.
       sweep: {
+        // Step 4 photo gate — a photo per option is REQUIRED to continue,
+        // rather than optional and checked once at submit.
+        tierPhotos: 'Photos of this service',
+        photoRequiredTag: '(required)',
+        photoMax: '(max 6)',
+        addPhotos: 'Add photos',
+        addAPhoto: 'Add a photo of this service',
+        photoWhy: 'Listings with a photo get far more enquiries.',
+        needPhotoEach: 'Add at least one photo to "{{name}}" — listings with a photo get far more enquiries.',
+        thisOne: 'this one',
         // Cancellation & policies
         cancellationPolicy: 'Cancellation Policy',
         customCancellationPolicy: 'Custom Cancellation Policy',

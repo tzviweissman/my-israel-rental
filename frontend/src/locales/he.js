@@ -1759,6 +1759,15 @@ const he = {
       // stiff textbook Hebrew). Uses Hebrew geresh (׳) for abbreviations
       // and established loan-words (וואטסאפ, צ׳ק-אין, וכו׳).
       sweep: {
+        // See the note on the English copy.
+        tierPhotos: 'תמונות של השירות הזה',
+        photoRequiredTag: '(חובה)',
+        photoMax: '(עד 6)',
+        addPhotos: 'הוספת תמונות',
+        addAPhoto: 'הוסיפו תמונה של השירות',
+        photoWhy: 'רשימות עם תמונה מקבלות הרבה יותר פניות.',
+        needPhotoEach: 'הוסיפו לפחות תמונה אחת ל"{{name}}" — רשימות עם תמונה מקבלות הרבה יותר פניות.',
+        thisOne: 'השירות הזה',
         // Cancellation & policies
         cancellationPolicy: 'מדיניות ביטול',
         customCancellationPolicy: 'מדיניות ביטול מותאמת',

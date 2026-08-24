@@ -306,12 +306,21 @@ const CreateGig = () => {
     if (step === 3) return form.description.trim().length > 10;
     // step 4: primary list (products or tiers)
     if (step === 4) {
+      // A photo is required here, not only at submit. It was checked once,
+      // at the very end (see hasAnyPhoto), which meant someone could fill in
+      // four more screens before being told to go back — and "at least one
+      // photo anywhere" let most options ship with none.
       if (form.gig_type === 'store') {
         return form.products.length > 0
-          && form.products.every((p) => p.name.trim() && parseFloat(p.price) > 0);
+          && form.products.every((p) => (
+            p.name.trim() && parseFloat(p.price) > 0
+            && (p.image || (p.images || []).length > 0)
+          ));
       }
       return form.tiers.length > 0
-        && form.tiers.every((t) => t.name.trim() && parseFloat(t.price) > 0);
+        && form.tiers.every((t) => (
+          t.name.trim() && parseFloat(t.price) > 0 && (t.images || []).length > 0
+        ));
     }
     // Appointment inserts hours as step 5
     if (isAppointment && step === 5) {
@@ -352,6 +361,18 @@ const CreateGig = () => {
         const bad = form.tiers.find((t) => !t.name.trim() || !(parseFloat(t.price) > 0));
         if (bad && !bad.name.trim()) return 'Give every service or tier a name (see the highlighted field).';
         if (bad) return 'Every service needs a price greater than 0.';
+      }
+      // Named last so the earlier, cheaper problems are reported first —
+      // being sent to find a photo while the price is still empty would
+      // mean two trips.
+      const noPhoto = form.gig_type === 'store'
+        ? form.products.find((p) => !p.image && !(p.images || []).length)
+        : form.tiers.find((t) => !(t.images || []).length);
+      if (noPhoto) {
+        return t('sweep.needPhotoEach', {
+          defaultValue: 'Add at least one photo to "{{name}}" — listings with a photo get far more enquiries.',
+          name: (noPhoto.name || '').trim() || t('sweep.thisOne', 'this one'),
+        });
       }
     }
     if (isAppointment && step === 5) return 'Turn on at least one open day so customers can book you.';
@@ -829,10 +850,17 @@ const StoreProductsStep = ({ products, onUpdate, onAdd, onRemove, productImageIn
                 <button
                   type="button"
                   onClick={() => productImageInputRef.current[i]?.click()}
-                  className="w-20 h-20 rounded-lg border-2 border-dashed border-gray-300 hover:border-[var(--brand-primary)] flex items-center justify-center"
+                  /* Red while empty: a photo is required to continue, and a
+                     neutral grey tile reads as optional. */
+                  className={`w-20 h-20 rounded-lg border-2 border-dashed flex items-center justify-center transition-colors ${
+                    productPhotos(p).length === 0
+                      ? 'border-red-300 bg-red-50/40 hover:bg-red-50'
+                      : 'border-gray-300 hover:border-[var(--brand-primary)]'
+                  }`}
+                  title={productPhotos(p).length === 0 ? t('sweep.addAPhoto', 'Add a photo of this service') : undefined}
                   data-testid={`wizard-product-image-btn-${i}`}
                 >
-                  <ImagePlus size={20} className="text-gray-400" />
+                  <ImagePlus size={20} className={productPhotos(p).length === 0 ? 'text-red-500' : 'text-gray-400'} />
                 </button>
               )}
             </div>
@@ -893,6 +921,10 @@ const TiersStep = ({ gigType, tiers, onUpdate, onAdd, onRemove, onUploadImages, 
       {tiers.map((tt, i) => {
         const missingName = !tt.name.trim();
         const missingPrice = !(parseFloat(tt.price) > 0);
+        // A photo is now required to leave this step. It was optional, and
+        // the prompt for it was grey italic text under a small text link —
+        // easy to read as a note rather than something to act on.
+        const missingPhoto = !(tt.images || []).length;
         return (
         <div key={i} className="border border-gray-200 rounded-xl p-4 space-y-2" data-testid={`wizard-tier-${i}`}>
           <div className="flex items-end justify-between gap-2">
@@ -915,8 +947,13 @@ const TiersStep = ({ gigType, tiers, onUpdate, onAdd, onRemove, onUploadImages, 
               </button>
             )}
           </div>
-          <div className="flex gap-2 items-stretch">
-            <div className="relative">
+          {/* flex-wrap, and the price keeps a floor width: at 375px the
+              currency select + price + "Days to complete" did not fit on one
+              line and the days field was clipped off the right edge of the
+              card. Wrapping puts it on its own line on a phone and leaves
+              the desktop layout unchanged. */}
+          <div className="flex flex-wrap gap-2 items-stretch">
+            <div className="relative shrink-0">
               <span className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500 font-semibold text-sm">
                 {tt.currency === 'USD' ? '$' : '₪'}
               </span>
@@ -930,14 +967,14 @@ const TiersStep = ({ gigType, tiers, onUpdate, onAdd, onRemove, onUploadImages, 
             </div>
             <input type="number" value={tt.price} onChange={(e) => onUpdate(i, { price: e.target.value })}
               placeholder={t("sweep.price", "Price")}
-              className={`flex-1 px-3 py-2 rounded-lg border text-sm ${missingPrice ? 'border-red-200 bg-red-50/30' : 'border-gray-200'}`}
+              className={`flex-1 min-w-[5.5rem] px-3 py-2 rounded-lg border text-sm ${missingPrice ? 'border-red-200 bg-red-50/30' : 'border-gray-200'}`}
               data-testid={`wizard-tier-price-${i}`} />
             {isAppt ? (
-              <div className="relative">
+              <div className="relative shrink-0">
                 <input type="number" min="5" step="5" value={tt.duration_minutes}
                   onChange={(e) => onUpdate(i, { duration_minutes: e.target.value })}
                   placeholder={t("sweep.duration", "Duration")}
-                  className="w-24 pl-3 pr-8 py-2 rounded-lg border bg-white border-gray-300 focus:outline-none focus:border-[var(--brand-primary)] focus:ring-2 focus:ring-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/20 text-sm"
+                  className="w-28 pl-3 pr-8 py-2 rounded-lg border bg-white border-gray-300 focus:outline-none focus:border-[var(--brand-primary)] focus:ring-2 focus:ring-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/20 text-sm"
                   data-testid={`wizard-tier-duration-${i}`} />
                 <span className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 text-[11px] text-gray-500">min</span>
               </div>
@@ -946,7 +983,7 @@ const TiersStep = ({ gigType, tiers, onUpdate, onAdd, onRemove, onUploadImages, 
                 onChange={(e) => onUpdate(i, { delivery_days: e.target.value })}
                 placeholder={t('sweep.daysToComplete', 'Days to complete')}
                 title="Turnaround in days — leave blank for on-the-spot services"
-                className="w-32 px-3 py-2 rounded-lg border bg-white border-gray-300 focus:outline-none focus:border-[var(--brand-primary)] focus:ring-2 focus:ring-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/20 text-sm"
+                className="w-44 shrink-0 px-3 py-2 rounded-lg border bg-white border-gray-300 focus:outline-none focus:border-[var(--brand-primary)] focus:ring-2 focus:ring-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/20 text-sm"
                 data-testid={`wizard-tier-days-${i}`} />
             )}
           </div>
@@ -969,7 +1006,12 @@ const TiersStep = ({ gigType, tiers, onUpdate, onAdd, onRemove, onUploadImages, 
           <div className="pt-1">
             <div className="flex items-center justify-between mb-1.5">
               <p className="text-[11px] font-semibold text-gray-600">
-                Photos of this option <span className="text-gray-400 font-normal">(optional · max 6)</span>
+                {t('sweep.tierPhotos', 'Photos of this service')}{' '}
+                <span className={missingPhoto ? 'text-red-600 font-semibold' : 'text-gray-400 font-normal'}>
+                  {missingPhoto
+                    ? t('sweep.photoRequiredTag', '(required)')
+                    : t('sweep.photoMax', '(max 6)')}
+                </span>
               </p>
               {(tt.images || []).length < 6 && (
                 <>
@@ -988,7 +1030,7 @@ const TiersStep = ({ gigType, tiers, onUpdate, onAdd, onRemove, onUploadImages, 
                     className="text-[11px] font-semibold text-[var(--brand-primary)] flex items-center gap-0.5 hover:underline"
                     data-testid={`wizard-tier-images-add-${i}`}
                   >
-                    <Plus size={11} /> Add photos
+                    <Plus size={11} /> {t('sweep.addPhotos', 'Add photos')}
                   </button>
                 </>
               )}
@@ -1010,9 +1052,23 @@ const TiersStep = ({ gigType, tiers, onUpdate, onAdd, onRemove, onUploadImages, 
                 ))}
               </div>
             ) : (
-              <p className="text-[11px] text-gray-400 italic">
-                No photos yet — customers will see the main gig gallery instead.
-              </p>
+              /* A dashed target the whole width of the card, rather than a
+                 line of grey italic prose. The same tap it always was, but
+                 it now looks like something to do. */
+              <button
+                type="button"
+                onClick={() => fileInputsRef.current[i]?.click()}
+                className="w-full rounded-lg border-2 border-dashed border-red-300 bg-red-50/40 py-3 px-3 flex flex-col items-center gap-0.5 text-center hover:bg-red-50 transition-colors"
+                data-testid={`wizard-tier-images-empty-${i}`}
+              >
+                <ImagePlus size={16} className="text-red-500" />
+                <span className="text-xs font-semibold text-red-700">
+                  {t('sweep.addAPhoto', 'Add a photo of this service')}
+                </span>
+                <span className="text-[11px] text-red-600/80 leading-snug">
+                  {t('sweep.photoWhy', 'Listings with a photo get far more enquiries.')}
+                </span>
+              </button>
             )}
           </div>
           {(missingName || missingPrice) && (
