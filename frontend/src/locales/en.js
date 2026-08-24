@@ -330,6 +330,10 @@ const en = {
         checkOut: 'Check-out',
         guests: 'Guests',
         nights: 'nights',
+        // Singular for the booking sidebar's nights badge. Its absence
+        // meant a one-night stay fell back to the English literal on the
+        // Hebrew page.
+        night: 'night',
         messageLabel: 'Message',
         messagePlaceholder: 'Add a message to the owner...',
         confirm: 'Confirm Booking',

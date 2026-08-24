@@ -319,6 +319,7 @@ const he = {
         checkOut: 'צ׳ק-אאוט',
         guests: 'אורחים',
         nights: 'לילות',
+        night: 'לילה',
         messageLabel: 'הודעה',
         messagePlaceholder: 'הוסף הודעה לבעלים...',
         confirm: 'אישור הזמנה',
