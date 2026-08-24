@@ -382,6 +382,29 @@ const GigDetail = () => {
   const displayDescription = localizedDescription(gig, i18n);
   const bucket = gig.provider?.response_bucket;
 
+  // Picking from the sidebar list used to only change the hero image at
+  // the TOP of the page. With a dozen products the shopper is scrolled
+  // well past it, so the click appeared to do nothing — reported as "when
+  // I click each option it doesn't take me to the correct picture".
+  //
+  // The selection still drives the hero; this additionally brings the
+  // matching card into view, which is the picture they were reaching for
+  // and is already on screen or close to it. `center` rather than `start`
+  // so it does not tuck under the fixed nav.
+  const selectProduct = (p, i) => {
+    setTier(p);
+    setHeroIndex(0);
+    if (typeof i !== 'number') return;
+    // After the state change, so the card is in its selected state when
+    // it arrives rather than shifting once it gets there.
+    requestAnimationFrame(() => {
+      const card = document.querySelector(`[data-testid="gig-product-${i}"]`);
+      if (!card) return;
+      const reduced = window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches;
+      card.scrollIntoView({ behavior: reduced ? 'auto' : 'smooth', block: 'center' });
+    });
+  };
+
   const gigType = gig.gig_type || 'deliverable';
   const isStore = gigType === 'store';
   const isAppointment = gigType === 'appointment';
@@ -695,7 +718,7 @@ const GigDetail = () => {
               </h3>
 
               {isStore ? (
-                <StoreProductList products={gig.products || []} selected={tier} onSelect={setTier} />
+                <StoreProductList products={gig.products || []} selected={tier} onSelect={selectProduct} />
               ) : (
                 <TierList
                   gig={gig}
@@ -868,13 +891,23 @@ const StoreProductList = ({ products, selected, onSelect }) => {
   return products.map((p, i) => {
     const active = selected?.name === p.name;
     const sym = p.currency === 'USD' ? '$' : '₪';
+    const thumb = productPhotos(p)[0];
     return (
-      <button key={i} onClick={() => onSelect(p)}
+      <button key={i} onClick={() => onSelect(p, i)}
         className={`w-full text-left rounded-lg border p-2.5 flex gap-2.5 items-center transition-colors ${
           active ? 'border-[var(--brand-primary)] bg-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/5' : 'border-gray-200 hover:border-[var(--gold)]'
         }`}
         data-testid={`gig-product-side-${i}`}>
-        <div className="w-11 h-11 rounded bg-gray-100 flex-shrink-0" style={p.image ? { backgroundImage: `url(${p.image})`, backgroundSize: 'cover', backgroundPosition: 'center' } : {}} />
+        {/* productPhotos, not `p.image`: the uploader writes the gallery
+            to `images` and clears the legacy singular field, so this read
+            an empty value and every row in the picker showed a blank grey
+            square. A product list with no pictures in it is the reason
+            somebody has to scroll the page to work out which board is
+            which. */}
+        <div
+          className="w-12 h-12 rounded bg-gray-100 flex-shrink-0 bg-cover bg-center"
+          style={thumb ? { backgroundImage: `url(${thumb})` } : undefined}
+        />
         <div className="flex-1 min-w-0">
           <p className="text-sm font-semibold text-gray-900 truncate">{p.name}</p>
           <p className="text-sm text-[var(--brand-primary)] font-bold">{sym}{Number(p.price).toLocaleString()}</p>
