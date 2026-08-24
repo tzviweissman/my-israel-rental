@@ -457,6 +457,18 @@ const CreateGig = () => {
           price: parseFloat(p.price),
           currency: p.currency,
           description: p.description,
+          // BOTH fields. The uploader writes the gallery to `images` and
+          // deliberately CLEARS `image` (see uploadProductImage), so
+          // sending only `image` sent null every time — every product
+          // photo a store uploaded was discarded at publish, silently,
+          // because the thumbnails on screen were reading `images`.
+          //
+          // Harmless until a photo became required server-side, at which
+          // point the payload arrived with no photo anywhere and was
+          // rejected with "Add at least one photo" — to someone who had
+          // just watched six of them upload. Reported as trouble
+          // uploading photos; the uploads were never the problem.
+          images: p.images || [],
           image: p.image || null,
           in_stock: !!p.in_stock,
         })) : [],
