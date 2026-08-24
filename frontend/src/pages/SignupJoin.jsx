@@ -12,6 +12,7 @@
  * stay behaviourally identical from the app's perspective.
  */
 import React, { useContext, useMemo, useState } from 'react';
+import { useFormDraft, readDraft, clearDraft } from '../hooks/useFormDraft';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import axios from 'axios';
@@ -26,6 +27,9 @@ import { API, AuthContext } from '../App';
 import WelcomePopups from '../components/WelcomePopups';
 import OwnerManagementOfferModal from '../components/OwnerManagementOfferModal';
 import GoogleSignInButton from '../components/auth/GoogleSignInButton';
+
+// Namespaced so it cannot collide with the listing wizard's draft.
+const SIGNUP_DRAFT = 'signup-join';
 import { GOOGLE_CLIENT_ID } from '../components/auth/useGoogleSignIn';
 
 // This page is now the single front door for all three audiences — the
@@ -111,14 +115,40 @@ const SignupJoin = () => {
     [redirectParam],
   );
 
-  const [step, setStep] = useState(1);
-  const [selectedRole, setSelectedRole] = useState(null); // "traveler" | "host" | "provider"
-  const [form, setForm] = useState({ name: '', email: '', phone: '', password: '' });
+  // Signing up is a multi-step form like the listing wizards, and until
+  // now it kept nothing: leaving the page and coming back put you on step
+  // one with the name, email and phone blank again. Reported by someone
+  // who was halfway through adding a business.
+  //
+  // The PASSWORD IS DELIBERATELY NOT SAVED, here or anywhere. A draft
+  // lives in localStorage, which is readable by any script on the origin
+  // and survives on a shared or stolen device — convenience is not worth
+  // leaving a password lying there, and someone re-typing one field is a
+  // far smaller cost than the rest of the form. Same for the
+  // confirmation field.
+  const savedSignup = readDraft(SIGNUP_DRAFT);
+  const [step, setStep] = useState(() => savedSignup?.step || 1);
+  const [selectedRole, setSelectedRole] = useState(() => savedSignup?.selectedRole || null); // "traveler" | "host" | "provider"
+  const [form, setForm] = useState(() => ({
+    name: '', email: '', phone: '',
+    ...(savedSignup?.form || {}),
+    // Last, and unconditional: a password must never come back from a
+    // draft even if an older build once wrote one.
+    password: '',
+  }));
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showPwd, setShowPwd] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
   const [termsAccepted, setTermsAccepted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [signedUp, setSignedUp] = useState(false);
+  // `password` is destructured out and thrown away rather than filtered
+  // later, so there is no path where it reaches storage.
+  useFormDraft(
+    SIGNUP_DRAFT,
+    { step, selectedRole, form: { name: form.name, email: form.email, phone: form.phone } },
+    !signedUp,
+  );
 
   // Post-signup modals (mirrors Auth.js behaviour so the two entry
   // points feel identical after account creation).
@@ -161,6 +191,10 @@ const SignupJoin = () => {
     try {
       const payload = { ...form, role: activeCard.backendRole };
       const res = await axios.post(`${API}/auth/register`, payload);
+      // Cleared before navigating: the account exists now, so the draft
+      // is spent. Flag first so the debounced save cannot rewrite it.
+      setSignedUp(true);
+      clearDraft(SIGNUP_DRAFT);
       login(res.data.token, res.data.user);
       toast.success(t('auth.accountCreated', 'Account created — welcome!'));
       if (activeCard.backendRole === 'renter') {
