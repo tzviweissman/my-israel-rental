@@ -127,6 +127,13 @@ function hashName(name) {
   return h;
 }
 
+/** The tint this name maps to. Exported so the business cover band can
+ *  build a wash from the SAME colour the logo tile uses — two different
+ *  hashes of one name would put a lilac band behind a sage tile. */
+export function tintForName(name) {
+  return TINTS[hashName(name) % TINTS.length];
+}
+
 export default function CoverPlaceholder({
   name = '',
   category = '',

@@ -1,7 +1,7 @@
 import React from 'react';
 import { Award, Zap } from 'lucide-react';
 import StarRating from './StarRating';
-import CoverPlaceholder from '../common/CoverPlaceholder';
+import SafeImage from '../common/SafeImage';
 import { localizedTitle, localizedDescription } from '../../utils/gigLocale';
 import { isAvailableNow, getGigCover } from '../../utils/gigAvailability';
 import { gigPriceParts } from '../../utils/gigPrice';
@@ -61,25 +61,19 @@ const ServiceGridCard = ({ gig, onClick, i18n, t }) => {
             the element exists, so a business with twenty-five services
             pulled twenty-five photos before the reader saw the second
             row. */}
-        {cover && (
-          <img
-            src={cover}
-            alt=""
-            loading="lazy"
-            decoding="async"
-            className="absolute inset-0 w-full h-full object-cover"
-          />
-        )}
         {/* S2 — a designed cover instead of a grey box reporting an
             absence. The old placeholder was #EDE7DA on a #EFE9DC page:
-            two values apart per channel, invisible. */}
-        {!cover && (
-          <CoverPlaceholder
-            name={gig.provider?.name || localizedTitle(gig, i18n)}
-            category={gig.category}
-            className="w-full h-full"
-          />
-        )}
+            two values apart per channel, invisible.
+            SafeImage covers the third case: a URL that exists but no
+            longer loads, which used to render as a torn-page glyph. */}
+        <SafeImage
+          src={cover}
+          name={gig.provider?.name || localizedTitle(gig, i18n)}
+          category={gig.category}
+          loading="lazy"
+          decoding="async"
+          className="absolute inset-0 w-full h-full object-cover"
+        />
         {/* Top-Rated overlay pill */}
         {gig.is_top_rated && (
           <span
@@ -166,17 +160,18 @@ const ServiceRow = ({ gig, onClick, i18n, t }) => {
       {/* Same 96px square whether or not there is a photo, so the column
           of titles beside it stays on one ladder. */}
       <div className="relative w-24 h-24 shrink-0 rounded-xl overflow-hidden">
-        {cover && (
-          <img src={cover} alt="" loading="lazy" decoding="async"
-            className="absolute inset-0 w-full h-full object-cover" />
-        )}
-        {!cover && (
-          <CoverPlaceholder
-            name={gig.provider?.name || localizedTitle(gig, i18n)}
-            category={gig.category}
-            className="w-full h-full"
-          />
-        )}
+        {/* SafeImage, not <img>: a dead URL used to render the browser's
+            torn-page glyph on a page a business shares with its own
+            customers. It falls back to the same designed placeholder the
+            no-photo case uses. */}
+        <SafeImage
+          src={cover}
+          name={gig.provider?.name || localizedTitle(gig, i18n)}
+          category={gig.category}
+          loading="lazy"
+          decoding="async"
+          className="absolute inset-0 w-full h-full object-cover"
+        />
       </div>
 
       <div className="min-w-0 flex-1">

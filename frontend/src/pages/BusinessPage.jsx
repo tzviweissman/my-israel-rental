@@ -25,6 +25,8 @@ import { buildCollections } from '../utils/businessCollections';
 import { localizedTitle, localizedDescription } from '../utils/gigLocale';
 import { getGigCover } from '../utils/gigAvailability';
 import { visitorHeaders } from '../utils/visitorId';
+import BusinessCoverBand from '../components/marketplace/BusinessCoverBand';
+import SafeImage from '../components/common/SafeImage';
 
 // First screenful and each subsequent step. Twelve fills a desktop grid
 // three rows deep and a phone list well past the fold, without asking
@@ -242,8 +244,13 @@ const BusinessPage = () => {
               fold on a phone, tall enough to read as a header. */}
           <div className="relative h-28 sm:h-40" data-testid="business-cover-band">
             {bandImage
-              ? <img src={bandImage} alt="" className="w-full h-full object-cover" />
-              : <CoverPlaceholder name={biz.name} category={(biz.categories || [])[0]} mark={false} className="w-full h-full" />}
+              ? <SafeImage
+                  src={bandImage}
+                  name={biz.name}
+                  category={(biz.categories || [])[0]}
+                  className="w-full h-full object-cover"
+                />
+              : <BusinessCoverBand name={biz.name} className="w-full h-full" />}
           </div>
 
           {/* The logo overlaps the band's lower edge - the storefront
@@ -251,13 +258,23 @@ const BusinessPage = () => {
               below to make room for it. */}
           <div className="px-5 pb-5">
             <div className="flex items-start gap-4 -mt-10 sm:-mt-12">
+              {/* `relative` + z-10 so the tile sits ABOVE the band rather
+                  than being clipped by the card's rounded corner, which
+                  is what sliced its edge off at phone width. The ring
+                  replaces a 4px border: a border eats into the 80px box
+                  and shrank the artwork inside it. */}
               <div
-                className="w-20 h-20 sm:w-24 sm:h-24 rounded-xl overflow-hidden shrink-0 border-4 bg-white"
-                style={{ borderColor: 'var(--surface)' }}
+                className="relative z-10 w-20 h-20 sm:w-24 sm:h-24 rounded-xl overflow-hidden shrink-0 bg-white ring-4 shadow-sm"
+                style={{ '--tw-ring-color': 'var(--surface)' }}
                 data-testid="business-logo"
               >
                 {biz.logo_url
-                  ? <img src={biz.logo_url} alt="" className="w-full h-full object-cover" />
+                  ? <SafeImage
+                      src={biz.logo_url}
+                      name={biz.name}
+                      category={(biz.categories || [])[0]}
+                      className="w-full h-full object-cover"
+                    />
                   : <CoverPlaceholder name={biz.name} category={(biz.categories || [])[0]} className="w-full h-full" />}
               </div>
               <div className="min-w-0 flex-1 pt-10 sm:pt-14">
