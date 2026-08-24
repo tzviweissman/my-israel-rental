@@ -295,6 +295,15 @@ const MyGigsTab = ({ API, token, business = null, onBack = null }) => {
   // in the selector so the filtered list and the count agree.
   const [businesses, setBusinesses] = useState([]);
   const [businessFilter, setBusinessFilter] = useState(readStoredBusiness);
+  // Which business a new listing should belong to. The tab knows — it was
+  // opened from one — but it used to send the wizard to a bare
+  // /businesses/add, so the server fell back to the person's FIRST
+  // business and everything landed there. That is what made a second
+  // business look like it was showing the first one's photos.
+  const targetBusinessId = business ? business.id : (businessFilter !== ALL ? businessFilter : null);
+  const addServiceHref = targetBusinessId
+    ? `/businesses/add?business=${encodeURIComponent(targetBusinessId)}`
+    : '/businesses/add';
 
   // Filtering is client-side because /my-gigs already returns everything
   // this person owns — a round trip per filter change would be slower and
@@ -429,7 +438,7 @@ const MyGigsTab = ({ API, token, business = null, onBack = null }) => {
           {/* "Upgrade to Pro" and "Cancel Pro" lived here. Listing is free,
               so there is nothing to upgrade to and nothing to cancel. */}
           <button
-            onClick={() => { saveReturnPath(); navigate('/businesses/add'); }}
+            onClick={() => { saveReturnPath(); navigate(addServiceHref); }}
             className="px-4 py-2.5 rounded-lg text-sm font-semibold text-white bg-[var(--brand-primary)] hover:bg-[#0F3A3A] flex items-center gap-1.5"
             data-testid="my-gigs-create-btn"
           >
@@ -459,7 +468,7 @@ const MyGigsTab = ({ API, token, business = null, onBack = null }) => {
             Publish your first gig — a free 30-day trial starts on your first listing.
           </p>
           <button
-            onClick={() => { saveReturnPath(); navigate('/businesses/add'); }}
+            onClick={() => { saveReturnPath(); navigate(addServiceHref); }}
             className="px-5 py-2.5 rounded-lg text-sm font-semibold text-white bg-[var(--brand-primary)] hover:bg-[#0F3A3A] inline-flex items-center gap-1.5"
             data-testid="my-gigs-empty-cta"
           >

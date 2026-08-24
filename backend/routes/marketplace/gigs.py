@@ -329,7 +329,36 @@ async def create_gig(payload: GigIn, user=Depends(verify_token)):
     # NOTE the ownership key is still provider_user_id, deliberately —
     # business_id groups and displays, it does not authorise. Every check
     # at :419/:514 keeps working untouched.
-    business = await ensure_default_business(user["user_id"])
+    # Which business this listing belongs to.
+    #
+    # This used to be `ensure_default_business` unconditionally, which was
+    # written when a person could only have one. Once M8 let them add a
+    # second, every listing they created — including from inside business
+    # #2's own dashboard — was still filed under business #1. Business #2
+    # ended up with nothing published, which makes its page 404 as "no
+    # longer listed", while business #1's page showed all of it. Reported
+    # as "my second business shows the first one's photos"; the photos were
+    # never the problem, the listings were on the wrong business.
+    #
+    # business_id groups and displays, it does not authorise — so this
+    # checks ownership before honouring it, and silently falls back rather
+    # than erroring when the id is unknown or someone else's. A listing
+    # filed on the wrong business of your own is recoverable; a wizard that
+    # refuses to publish at the last step is not.
+    business = None
+    if payload.business_id:
+        business = await db.businesses.find_one({
+            "_id": payload.business_id,
+            "owner_user_id": user["user_id"],
+            "active": True,
+        })
+        if not business:
+            logger.warning(
+                "gig create: business_id %s not owned by %s — falling back",
+                payload.business_id, user["user_id"],
+            )
+    if not business:
+        business = await ensure_default_business(user["user_id"])
     now = datetime.now(UTC).isoformat()
     gig = {
         "_id": str(uuid.uuid4()),

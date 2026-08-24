@@ -108,6 +108,12 @@ const CreateGig = () => {
   const [saving, setSaving] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const productImageInputRef = useRef({});
+  // Which business this listing is being added to, from ?business= on the
+  // URL. Absent when someone starts from a generic "list your service"
+  // link, in which case the server picks their first business exactly as
+  // it always has. Read from the URL rather than the draft so that adding
+  // to business #2 is never resumed against business #1.
+  const targetBusinessId = searchParams.get('business') || null;
 
   // Post-signup onboarding hook — when a provider lands here fresh from
   // the Google sign-in flow (?welcome=1), surface a one-shot friendly
@@ -442,6 +448,10 @@ const CreateGig = () => {
         weekly_availability: form.gig_type === 'appointment' ? form.weekly_availability : null,
         slot_duration_minutes: form.gig_type === 'appointment' ? form.slot_duration_minutes : null,
         enable_date_booking: form.gig_type === 'deliverable' ? !!form.enable_date_booking : false,
+        // Null is meaningful: it tells the server to fall back to the
+        // caller's first business, which is the pre-multi-business
+        // behaviour and the right answer for a generic entry point.
+        business_id: targetBusinessId,
       };
       const { data } = await axios.post(`${API}/marketplace/gigs`, payload, {
         headers: { Authorization: `Bearer ${token}` },

@@ -388,6 +388,12 @@ _DEFAULT_WEEKLY: dict[str, list[WeeklyWindow]] = {
 class GigIn(BaseModel):
     title: str
     category: str
+    # Which of the caller's businesses this listing belongs to. Optional
+    # for the one-business case and for older clients; when absent the
+    # create endpoint falls back to the first active business, which is
+    # what it always did. Validated server-side — see create_gig — because
+    # a business id from a request is a claim, not a permission.
+    business_id: Optional[str] = None
     # Optional sub-bucket for merged categories (home-services-repair,
     # travel-tourism, creative-design, business-financial). Providers
     # who set this get tighter match precision when posters filter by
