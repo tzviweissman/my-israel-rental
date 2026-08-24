@@ -25,6 +25,7 @@ import { Star, MessageCircle } from 'lucide-react';
 // cover image or an untranslated title just because it's featured.
 import { getGigCover } from '../../utils/gigAvailability';
 import { localizedTitle } from '../../utils/gigLocale';
+import { prettyArea } from '../../utils/areaNames';
 
 const FeaturedProviders = ({ gigs, coords, onOpen, t, i18n }) => {
   if (!gigs || gigs.length === 0) return null;
@@ -71,7 +72,7 @@ const FeaturedProviders = ({ gigs, coords, onOpen, t, i18n }) => {
               <div className="min-w-0">
                 <h4 className="truncate">{localizedTitle(gig, i18n)}</h4>
                 <div className="svc-row-sub truncate">
-                  {gig.area}
+                  {prettyArea(gig.area, t)}
                   {typeof gig.distance_km === 'number' && (
                     <> · {gig.distance_km < 1
                       ? `${Math.round(gig.distance_km * 1000)} m`

@@ -11,6 +11,8 @@
  * to double-check `gig_type`. Also returns `false` when the gig has no
  * weekly_availability yet (fresh appointment gig before hours are set).
  */
+import { productPhotos } from './productPhotos';
+
 const DAY_KEYS = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'];
 
 const toMinutes = (hhmm) => {
@@ -50,8 +52,17 @@ export const getGigCover = (gig) => {
   if (!gig) return null;
   if (Array.isArray(gig.gallery) && gig.gallery[0]) return gig.gallery[0];
   if (Array.isArray(gig.products)) {
-    const withImg = gig.products.find((p) => typeof p?.image === 'string' && p.image);
-    if (withImg) return withImg.image;
+    // productPhotos, not `p.image`: the wizard writes a product's gallery
+    // to `images` and CLEARS the legacy singular field, so reading only
+    // `image` returned nothing for every store listed through the current
+    // uploader. This function is the cover for service cards, the
+    // featured row, the business page's header band, the share image and
+    // the gig hero — so a shop with photos on every product appeared to
+    // have none, everywhere at once.
+    for (const p of gig.products) {
+      const first = productPhotos(p)[0];
+      if (first) return first;
+    }
   }
   if (Array.isArray(gig.tiers)) {
     const withImgs = gig.tiers.find((t) => Array.isArray(t?.images) && t.images[0]);

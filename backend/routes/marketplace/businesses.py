@@ -187,8 +187,24 @@ async def my_businesses(user=Depends(verify_token)):
     for b in docs:
         counts[b["_id"]] = await db.marketplace_gigs.count_documents({"business_id": b["_id"]})
         # One matching document is enough — this is a yes/no, not a count.
+        #
+        # All THREE places a photo can live, not just the gig-level
+        # gallery. The wizard sends an empty `gallery` for a store and
+        # hangs the photos off each product, so a shop that had
+        # photographed every item was told it still had none — and the
+        # completeness checklist kept "add one photo to a service"
+        # permanently unticked for exactly the businesses that had done it.
         photos[b["_id"]] = bool(await db.marketplace_gigs.find_one(
-            {"business_id": b["_id"], "gallery.0": {"$exists": True}}, {"_id": 1},
+            {
+                "business_id": b["_id"],
+                "$or": [
+                    {"gallery.0": {"$exists": True}},
+                    {"products.images.0": {"$exists": True}},
+                    {"products.image": {"$nin": [None, ""]}},
+                    {"tiers.images.0": {"$exists": True}},
+                ],
+            },
+            {"_id": 1},
         ))
     docs.sort(key=lambda b: (not b.get("active", True), b.get("created_at") or ""))
     return [_public(b, counts.get(b["_id"], 0), photos.get(b["_id"], False)) for b in docs]

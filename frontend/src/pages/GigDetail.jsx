@@ -27,6 +27,7 @@ import { productPhotos, productCover } from '../utils/productPhotos';
 import { useReturnDestination, saveReturnPath } from '../hooks/useBackNavigation';
 import Breadcrumb from '../components/common/Breadcrumb';
 import ContactChannels from '../components/marketplace/ContactChannels';
+import { prettyArea } from '../utils/areaNames';
 
 const GIG_RETURN_PREFIXES = ['/services'];
 
@@ -583,7 +584,7 @@ const GigDetail = () => {
                 )}
               </div>
               <h1 className="text-2xl md:text-3xl font-bold text-gray-900" style={{ fontFamily: 'Playfair Display' }}>{displayTitle}</h1>
-              <p className="text-gray-600 mt-1">{gig.provider?.name}{gig.area ? ` · ${gig.area}` : ''}</p>
+              <p className="text-gray-600 mt-1">{gig.provider?.name}{gig.area ? ` · ${prettyArea(gig.area, t)}` : ''}</p>
               {(gig.rating_count > 0) && (
                 <div className="mt-2">
                   <StarRating value={gig.rating_avg || 0} count={gig.rating_count} size={14} testidPrefix="gig-header-stars" />
