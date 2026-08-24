@@ -569,19 +569,17 @@ const GigDetail = () => {
                 "Tel Aviv" tours show visually distinct hero images.
                 Clicking any thumbnail (or the cover) opens the lightbox.
 
-                Sticky from md up, matching the product list opposite it:
-                with a dozen products the shopper scrolls the list, and an
-                image that scrolls away cannot show them what they just
-                picked. Below md the columns stack and sticky would pin
-                the photo over the content, so it is left alone there. */}
-            {/* The background is load-bearing, not decoration: a sticky
-                block with a transparent background lets the content
-                scrolling underneath show straight through the thumbnail
-                strip. The page colour and a little padding give it
-                something to hide behind. */}
+                NOT sticky. It was, briefly, so the big image stayed on
+                screen while the product list scrolled — and on a laptop
+                the hero plus the thumbnail strip is around 460px of
+                opaque block, which covered the description, the product
+                grid and the reviews for the whole scroll. A gallery that
+                hides the page it belongs to is a worse problem than the
+                one it solved. Selecting a product brings the gallery back
+                into view instead (see selectProduct), which costs one
+                scroll and hides nothing. */}
             <div
-              className="md:sticky md:top-24 space-y-3 z-10 md:pb-3 md:-mx-1 md:px-1"
-              style={{ backgroundColor: '#FAFAF7' }}
+              className="space-y-3"
               data-testid="gig-gallery"
             >
             <button
