@@ -334,3 +334,36 @@ export const sameArea = (a, b) => {
   if (ca && cb) return ca === cb;
   return normalize(a) === normalize(b) && normalize(a) !== '';
 };
+
+
+/**
+ * Display name for an area that may be a marketplace SLUG.
+ *
+ * The two halves of the site speak different vocabularies. Properties
+ * store free text ("Tel Aviv", "Jerusalem - Rehavia") which `areaLabel`
+ * canonicalises. The services marketplace stores a slug ("tel-aviv"),
+ * which `areaLabel` cannot match — so it fell through and printed
+ * "· tel-aviv" on the public business page and on every service card:
+ * lower-case, hyphen and all, on pages meant to look considered.
+ *
+ * Title-casing the slug reproduces the marketplace catalogue's own label
+ * exactly (`LOCATIONS` in routes/marketplace/shared.py — "tel-aviv" →
+ * "Tel Aviv", "bet-shemesh" → "Bet Shemesh") without a network call, so
+ * a card in a list does not need to fetch a catalogue to name a city.
+ *
+ * Known limit, pre-existing and not introduced here: that catalogue has
+ * no Hebrew labels, so a Hebrew page shows the English city name either
+ * way. Giving it Hebrew is a backend change, not a formatting one.
+ */
+export const prettyArea = (stored, t) => {
+  const raw = stored == null ? '' : String(stored).trim();
+  if (!raw) return '';
+  // Slug-shaped: lower-case words joined by hyphens, no spaces.
+  if (/^[a-z0-9]+(-[a-z0-9]+)*$/.test(raw)) {
+    return raw
+      .split('-')
+      .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+      .join(' ');
+  }
+  return areaLabel(raw, t);
+};

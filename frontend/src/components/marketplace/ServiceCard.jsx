@@ -5,6 +5,7 @@ import SafeImage from '../common/SafeImage';
 import { localizedTitle, localizedDescription } from '../../utils/gigLocale';
 import { isAvailableNow, getGigCover } from '../../utils/gigAvailability';
 import { gigPriceParts } from '../../utils/gigPrice';
+import { prettyArea } from '../../utils/areaNames';
 
 const GOLD = 'var(--gold)';
 
@@ -115,7 +116,11 @@ const ServiceGridCard = ({ gig, onClick, i18n, t }) => {
         {localizedTitle(gig, i18n)}
       </p>
       <p className="text-xs text-[var(--brand-muted)] truncate">
-        {gig.provider?.name}{gig.area ? ` · ${gig.area}` : ''}
+        {/* areaLabel, not the raw field: `area` is a stored slug, so this
+            line printed "· tel-aviv" at the reader — lower-case, hyphen
+            and all — on a page meant to look considered. The helper also
+            returns the Hebrew name under RTL. */}
+        {gig.provider?.name}{gig.area ? ` · ${prettyArea(gig.area, t)}` : ''}
         {typeof gig.distance_km === 'number' && (
           <span className="ms-1 inline-flex items-center gap-0.5 text-[10px] text-[var(--brand-primary)] font-semibold">
             · {gig.distance_km < 1

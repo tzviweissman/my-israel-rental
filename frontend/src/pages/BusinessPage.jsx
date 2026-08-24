@@ -17,7 +17,6 @@ import axios from 'axios';
 import { Star, BadgeCheck, MapPin, Loader2, MessageCircle, LayoutGrid, List, Zap, Search } from 'lucide-react';
 import { API, AuthContext } from '../App';
 import PageMeta from '../components/PageMeta';
-import CoverPlaceholder from '../components/common/CoverPlaceholder';
 import ServiceCard from '../components/marketplace/ServiceCard';
 import GoodToKnow from '../components/marketplace/GoodToKnow';
 import SiteFooter from '../components/common/SiteFooter';
@@ -25,8 +24,9 @@ import { buildCollections } from '../utils/businessCollections';
 import { localizedTitle, localizedDescription } from '../utils/gigLocale';
 import { getGigCover } from '../utils/gigAvailability';
 import { visitorHeaders } from '../utils/visitorId';
-import BusinessCoverBand from '../components/marketplace/BusinessCoverBand';
+import BusinessCoverBand, { BusinessLogoMark } from '../components/marketplace/BusinessCoverBand';
 import SafeImage from '../components/common/SafeImage';
+import { prettyArea } from '../utils/areaNames';
 
 // First screenful and each subsequent step. Twelve fills a desktop grid
 // three rows deep and a phone list well past the fold, without asking
@@ -275,7 +275,7 @@ const BusinessPage = () => {
                       category={(biz.categories || [])[0]}
                       className="w-full h-full object-cover"
                     />
-                  : <CoverPlaceholder name={biz.name} category={(biz.categories || [])[0]} className="w-full h-full" />}
+                  : <BusinessLogoMark name={biz.name} className="w-full h-full" />}
               </div>
               <div className="min-w-0 flex-1 pt-10 sm:pt-14">
               <h1 className="text-2xl font-bold flex items-center gap-2 flex-wrap"
@@ -352,7 +352,7 @@ const BusinessPage = () => {
                     <span key={a}
                       className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium"
                       style={{ background: 'rgb(var(--brand-primary-rgb) / 0.08)', color: 'var(--brand-primary)' }}>
-                      <MapPin size={11} /> {a}
+                      <MapPin size={11} /> {prettyArea(a, t)}
                     </span>
                   ))}
                 </div>

@@ -85,7 +85,11 @@ export default function BusinessCoverBand({ name = '', className = '', testid = 
             // made the old placeholder unusable here.
             fontFamily: 'var(--font-head)',
             fontWeight: 700,
-            fontSize: 'clamp(56px, 92%, 132px)',
+            // Same percentage trap as the logo mark: the 92% here resolves
+            // against the inherited font size, not the band, so it is the
+            // clamp FLOOR that actually sizes this letter. Left explicit
+            // rather than relying on that accident.
+            fontSize: 'clamp(56px, 11vw, 132px)',
             lineHeight: 1,
             color: 'var(--ink)',
             // Faint, but present. At 0.09 it disappeared and the band
@@ -100,6 +104,55 @@ export default function BusinessCoverBand({ name = '', className = '', testid = 
           {initial}
         </span>
       )}
+    </div>
+  );
+}
+
+
+/**
+ * The logo tile when a business has not uploaded one.
+ *
+ * Not CoverPlaceholder: that draws a category icon on a tinted square,
+ * which sits fine against a tinted band and looks like a FAILED IMAGE
+ * against a photographic one — a flat pastel box with a parcel icon in
+ * the middle of somebody's cover photo. And because the band derives its
+ * colour from the same name, the tinted version also repeated the same
+ * icon twice within 80px.
+ *
+ * A white tile with the initial set in the display face reads as a
+ * monogram: something chosen rather than something missing. It works
+ * against a photo and against the empty band equally, which is what a
+ * default has to do — most businesses never upload either.
+ */
+export function BusinessLogoMark({ name = '', className = '', testid = 'business-logo-mark' }) {
+  const tint = tintForName(name);
+  const initial = String(name).trim().charAt(0).toUpperCase();
+  return (
+    <div
+      className={`flex items-center justify-center ${className}`}
+      // A whisper of the business's tint over white, so the tile still
+      // belongs to the same family as its band without becoming a
+      // coloured block.
+      style={{ background: `linear-gradient(160deg, ${towardWhite(tint, 0.62)} 0%, #FFFFFF 78%)` }}
+      data-testid={testid}
+      aria-hidden="true"
+    >
+      <span
+        style={{
+          fontFamily: 'var(--font-head)',
+          fontWeight: 700,
+          // A PERCENTAGE font-size resolves against the inherited font
+          // size, not the element's box — `46%` came out at roughly 7px
+          // and the tile read as an empty white square. The tile is 80px
+          // (96px from sm:), so this is sized for it directly.
+          fontSize: '2.25rem',
+          lineHeight: 1,
+          color: 'var(--brand-primary)',
+          opacity: 0.9,
+        }}
+      >
+        {initial}
+      </span>
     </div>
   );
 }
