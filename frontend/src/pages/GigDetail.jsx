@@ -439,6 +439,32 @@ const GigDetail = () => {
   const isAppointment = gigType === 'appointment';
   const isDeliverable = gigType === 'deliverable';
 
+  // Built once and rendered twice — the sidebar on desktop, directly under
+  // the image on a phone. One definition so the two can never diverge in
+  // what they offer or how selecting works.
+  const optionsHeading = isStore
+    ? t('services.chooseProduct', 'Choose a product')
+    : isAppointment
+      ? t('services.bookAppointment', 'Book an appointment')
+      : t('services.choosePackage', 'Choose a package');
+  const optionsList = (prefix) => (isStore ? (
+    <StoreProductList
+      products={gig.products || []}
+      selected={tier}
+      onSelect={selectProduct}
+      testidPrefix={prefix ? `${prefix}-product-side` : undefined}
+    />
+  ) : (
+    <TierList
+      gig={gig}
+      tiers={gig.tiers || []}
+      selected={tier}
+      onSelect={(tt) => { selectProduct(tt); if (isAppointment) { setAppointmentSlot(null); } }}
+      isAppointment={isAppointment}
+      testidPrefix={prefix ? `${prefix}-tier` : undefined}
+    />
+  ));
+
   // The provider's contact preference is `gig.booking_mode`
   // ('whatsapp' | 'in_platform') — set in the create/edit wizard.
   // We only *honour* the WhatsApp preference when the number actually
@@ -528,7 +554,16 @@ const GigDetail = () => {
         </button>
 
         <div className="grid md:grid-cols-3 gap-8">
-          <div className="md:col-span-2 space-y-6">
+          {/* min-w-0 is load-bearing. A grid item defaults to
+              `min-width: auto`, so it refuses to shrink below its
+              content's intrinsic width — and the thumbnail strip below is
+              a row of 96px tiles, thirteen of them on a store with a
+              dozen products. The column was therefore ~1344px wide inside
+              a 375px phone, and `overflow-x: clip` on <html> hid the
+              damage by silently cropping it: the hero ran off the right
+              edge and the page reported no horizontal scroll while being
+              four times too wide. */}
+          <div className="md:col-span-2 min-w-0 space-y-6">
             {/* Cover + gallery — swaps to the selected tier's own photos
                 when that tier has any, so a tour guide's "Jerusalem" vs
                 "Tel Aviv" tours show visually distinct hero images.
@@ -595,6 +630,25 @@ const GigDetail = () => {
               </div>
             )}
             </div>{/* /gig-gallery */}
+
+            {/* Mobile only. The options live in the right-hand column,
+                which on a phone stacks BELOW the description, the product
+                grid and the reviews — so choosing between options meant
+                scrolling down to the list, picking, then scrolling back up
+                to see the photo change. Putting them directly under the
+                image makes picking a single glance.
+
+                A second copy rather than reordering the columns: the
+                gallery is sticky on desktop, and moving it into its own
+                grid cell to reorder it would leave sticky nothing to
+                travel within. Its own testid prefix so the two copies
+                cannot be confused for one another. */}
+            <div className="md:hidden space-y-3" data-testid="gig-options-mobile">
+              <h3 className="text-sm font-bold text-gray-500 uppercase tracking-wide">
+                {optionsHeading}
+              </h3>
+              {optionsList('gig-m')}
+            </div>
 
             <div>
               <div className="flex flex-wrap items-center gap-2 mb-1">
@@ -756,24 +810,10 @@ const GigDetail = () => {
           <div className="md:sticky md:top-24 h-fit space-y-4">
             <div className="border border-gray-200 rounded-2xl bg-white p-4 space-y-3">
               <h3 className="text-sm font-bold text-gray-500 uppercase tracking-wide">
-                {isStore
-                  ? t('services.chooseProduct', 'Choose a product')
-                  : isAppointment
-                    ? t('services.bookAppointment', 'Book an appointment')
-                    : t('services.choosePackage', 'Choose a package')}
+                {optionsHeading}
               </h3>
 
-              {isStore ? (
-                <StoreProductList products={gig.products || []} selected={tier} onSelect={selectProduct} />
-              ) : (
-                <TierList
-                  gig={gig}
-                  tiers={gig.tiers || []}
-                  selected={tier}
-                  onSelect={(tt) => { selectProduct(tt); if (isAppointment) { setAppointmentSlot(null); } }}
-                  isAppointment={isAppointment}
-                />
-              )}
+              {optionsList()}
 
               {isAppointment && tier && (
                 <AppointmentPicker
@@ -879,7 +919,7 @@ const GigDetail = () => {
 
 // ---------- Sidebar sub-components ----------
 
-const TierList = ({ tiers, selected, onSelect, isAppointment }) => {
+const TierList = ({ tiers, selected, onSelect, isAppointment, testidPrefix = 'gig-tier' }) => {
   const { t } = useTranslation();
   if (!tiers.length) return <p className="text-sm text-gray-500">No packages listed yet.</p>;
   return tiers.map((tt) => {
@@ -894,7 +934,7 @@ const TierList = ({ tiers, selected, onSelect, isAppointment }) => {
         className={`w-full text-left rounded-lg border p-3 transition-colors ${
           active ? 'border-[var(--brand-primary)] bg-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/5' : 'border-gray-200 hover:border-[var(--gold)]'
         }`}
-        data-testid={`gig-tier-${tt.name}`}
+        data-testid={`${testidPrefix}-${tt.name}`}
       >
         <div className="flex gap-3">
           {/* A thumbnail, the same as the store's product picker, because
@@ -905,7 +945,7 @@ const TierList = ({ tiers, selected, onSelect, isAppointment }) => {
             <div
               className="w-14 h-14 rounded-lg bg-gray-100 bg-cover bg-center shrink-0"
               style={{ backgroundImage: `url(${thumb})` }}
-              data-testid={`gig-tier-thumb-${tt.name}`}
+              data-testid={`${testidPrefix}-thumb-${tt.name}`}
             />
           )}
           <div className="flex-1 min-w-0">
@@ -918,7 +958,7 @@ const TierList = ({ tiers, selected, onSelect, isAppointment }) => {
                   active ? 'bg-[var(--brand-primary)] text-white' : 'bg-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/10 text-[var(--brand-primary)]'
                 }`}
                 title={`${photoCount} photos of this option`}
-                data-testid={`gig-tier-photo-badge-${tt.name}`}
+                data-testid={`${testidPrefix}-photo-badge-${tt.name}`}
               >
                 <Camera size={9} strokeWidth={2.5} /> {photoCount}
               </span>
@@ -945,7 +985,7 @@ const TierList = ({ tiers, selected, onSelect, isAppointment }) => {
   });
 };
 
-const StoreProductList = ({ products, selected, onSelect }) => {
+const StoreProductList = ({ products, selected, onSelect, testidPrefix = 'gig-product-side' }) => {
   const { t } = useTranslation();
   if (!products.length) return <p className="text-sm text-gray-500">No products listed yet.</p>;
   return products.map((p, i) => {
@@ -957,7 +997,7 @@ const StoreProductList = ({ products, selected, onSelect }) => {
         className={`w-full text-left rounded-lg border p-2.5 flex gap-2.5 items-center transition-colors ${
           active ? 'border-[var(--brand-primary)] bg-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/5' : 'border-gray-200 hover:border-[var(--gold)]'
         }`}
-        data-testid={`gig-product-side-${i}`}>
+        data-testid={`${testidPrefix}-${i}`}>
         {/* productPhotos, not `p.image`: the uploader writes the gallery
             to `images` and clears the legacy singular field, so this read
             an empty value and every row in the picker showed a blank grey
