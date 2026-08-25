@@ -63,8 +63,11 @@ const CategoryCard = ({ category, active, onClick }) => {
         <span
           className="text-white leading-tight text-base sm:text-lg md:text-xl tracking-tight"
           style={{
-            fontFamily:
-              "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
+            // The design system's body face, not a literal. Inter is not in
+            // this product's type stack at all, and a hardcoded family also
+            // skips the RTL swap in design-tokens.css — the same trap that
+            // silently falls Hebrew headings back to a system serif.
+            fontFamily: 'var(--font-body)',
             fontWeight: 700,
             letterSpacing: '-0.015em',
           }}

@@ -1,16 +1,20 @@
 /**
  * Per-category visual theme for the Services Marketplace hub.
  *
- * Mirrors Fiverr's tall-card "Popular services" carousel — each card has
- * a dark solid header (with the category name in white) sitting above a
- * pastel body with a category-representative photo.
+ * Each card is a dark solid header carrying the category name in white,
+ * above a flat pastel body holding a line icon. No text ever sits on an
+ * image — the label's contrast is guaranteed by construction rather than
+ * by an overlay that has to be tuned per photo, and a set of categories
+ * cannot drift into looking like a random pile of stock photography.
+ * There are no images here at all any more; the last one was the
+ * unknown-category fallback.
  *
  * Colors are picked to feel intentional as a set (not a rainbow) —
  * warm/earthy for hands-on trades, cool/pastel for creative and
  * professional services, so the row reads coherently at a glance.
- *
- * Images are stable Unsplash CDN URLs served with `f=auto&q=70&w=400`
- * for fast card thumbnails.
+ * Every label is verified against its own header by
+ * `scripts/check-tile-contrast.mjs`, which is the only way this stays
+ * true after somebody adds a category.
  */
 import {
   Truck, Key, Map, Wind, Sparkles, Wrench, Hammer, Camera,
@@ -32,8 +36,6 @@ const ICONS = {
   Briefcase, SprayCan, Monitor, GraduationCap, Baby, PawPrint, PartyPopper,
   ShoppingBag,
 };
-
-const un = (id) => `https://images.unsplash.com/${id}?auto=format&fit=crop&w=520&q=75`;
 
 // Slugs match backend/routes/marketplace/shared.py CATEGORIES exactly.
 // If you change the taxonomy there, update this map (missing slugs fall
@@ -112,9 +114,17 @@ const CATEGORY_THEME = {
 
 // Neutral fallback so a new category from the backend still renders
 // something reasonable even before we add a bespoke theme.
+// An ICON, not a photo. This is the theme an unknown category falls back
+// to, so it is the tile most likely to appear without anyone deciding it
+// should — and it used to render a generic Unsplash office shot: one card
+// in a row of sixteen looking like stock, fetched from a third-party host
+// that can fail or be blocked, in a style matching nothing around it.
+//
+// A briefcase on the same flat body panel every other tile uses makes the
+// fallback look chosen rather than missing, and keeps the row coherent.
 export const DEFAULT_THEME = {
   header: 'var(--brand-primary)', body: '#E7EEE9',
-  image: un('photo-1497366216548-37526070297c'),
+  icon: 'Briefcase', iconColor: '#1E5F8C',
 };
 
 export const themeForCategory = (slug) => CATEGORY_THEME[slug] || DEFAULT_THEME;
