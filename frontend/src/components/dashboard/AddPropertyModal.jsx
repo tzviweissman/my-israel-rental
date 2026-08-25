@@ -10,6 +10,7 @@ import LocationPicker from './propertyForm/LocationPicker';
 import MediaUploadSection from './propertyForm/MediaUploadSection';
 import PropertyServicesSelector from '../property/services/PropertyServicesSelector';
 import { nextHolidayWindow } from '../../utils/holidayCalendar';
+import ChipSelect from '../common/ChipSelect';
 
 const EMPTY_FORM = {
   title: '', description: '', rental_type: 'long-term', property_type: 'apartment',
@@ -442,16 +443,15 @@ const AddPropertyModal = ({ isOpen, onClose, editingProperty, onSaved, API, toke
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
               <label className="block text-sm font-medium mb-2">{t('property.rentalType')}</label>
-              <select
+              <ChipSelect
                 value={propertyForm.rental_type}
-                onChange={(e) => {
+                onChange={(nextType) => {
                   // Clear the price field that belongs to the OLD rental
                   // type. Otherwise a value entered under (say) `vacation`
                   // stays stranded in `nightly_price` after switching to
                   // `long-term`, and the "Repair prices" admin tool later
                   // migrates it into `monthly_price` — producing wildly
                   // low "monthly rent" values on the listings table.
-                  const nextType = e.target.value;
                   const oldType = propertyForm.rental_type;
                   const patch = { rental_type: nextType };
                   if (oldType !== nextType) {
@@ -465,27 +465,32 @@ const AddPropertyModal = ({ isOpen, onClose, editingProperty, onSaved, API, toke
                   }
                   setPropertyForm({ ...propertyForm, ...patch });
                 }}
-                className="w-full px-4 py-2 rounded-lg border border-[#E5E5E5] focus:outline-none focus:ring-2 focus:ring-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/50"
-                data-testid="property-rental-type-select"
-              >
-                <option value="long-term">{t('property.longTerm')}</option>
-                <option value="short-term">{t('property.shortTerm')}</option>
-                <option value="vacation">{t('property.vacationType')}</option>
-              </select>
+                options={[
+                  { value: 'long-term', label: t('property.longTerm') },
+                  { value: 'short-term', label: t('property.shortTerm') },
+                  { value: 'vacation', label: t('property.vacationType') },
+                ]}
+                name="rental_type"
+                testid="property-rental-type-select"
+              />
             </div>
             {propertyForm.rental_type !== 'storage' && (
               <div>
                 <label className="block text-sm font-medium mb-2">{t('property.propertyType')}</label>
-                <select
+                <ChipSelect
                   value={propertyForm.property_type}
-                  onChange={(e) => setPropertyForm({ ...propertyForm, property_type: e.target.value })}
-                  className="w-full px-4 py-2 rounded-lg border border-[#E5E5E5] focus:outline-none focus:ring-2 focus:ring-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/50"
-                  data-testid="property-type-select"
-                >
-                  <option value="apartment">{t('property.apartment')}</option>
-                  <option value="house">{t('property.house')}</option>
-                  <option value="villa">Villa</option>
-                </select>
+                  onChange={(v) => setPropertyForm({ ...propertyForm, property_type: v })}
+                  options={[
+                    { value: 'apartment', label: t('property.apartment') },
+                    { value: 'house', label: t('property.house') },
+                    // 'Villa' was the one untranslated option in this form —
+                    // a bare English word sitting between two translated
+                    // ones on the Hebrew page.
+                    { value: 'villa', label: t('property.villa', 'Villa') },
+                  ]}
+                  name="property_type"
+                  testid="property-type-select"
+                />
               </div>
             )}
             <LocationPicker
@@ -767,15 +772,13 @@ const AddPropertyModal = ({ isOpen, onClose, editingProperty, onSaved, API, toke
                       className="flex-1 px-4 py-2 rounded-lg border border-[#E5E5E5] focus:outline-none focus:ring-2 focus:ring-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/50"
                       data-testid="holiday-price-input"
                     />
-                    <select
-                      value={propertyForm.holiday_lump_currency}
-                      onChange={(e) => setPropertyForm({ ...propertyForm, holiday_lump_currency: e.target.value })}
-                      className="px-4 py-2 rounded-lg border border-[#E5E5E5] focus:outline-none focus:ring-2 focus:ring-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/50"
-                      data-testid="holiday-price-currency-select"
-                    >
-                      <option value="ILS">₪ ILS</option>
-                      <option value="USD">$ USD</option>
-                    </select>
+                    <ChipSelect
+                  value={propertyForm.holiday_lump_currency}
+                  onChange={(v) => setPropertyForm({ ...propertyForm, holiday_lump_currency: v })}
+                  options={[{ value: 'ILS', label: '₪ ILS' }, { value: 'USD', label: '$ USD' }]}
+                  name="holiday_lump_currency"
+                  testid="holiday-price-currency-select"
+                />
                   </div>
                 </div>
               );
@@ -815,15 +818,13 @@ const AddPropertyModal = ({ isOpen, onClose, editingProperty, onSaved, API, toke
                   required
                   data-testid="property-price-input"
                 />
-                <select
+                <ChipSelect
                   value={propertyForm.currency}
-                  onChange={(e) => setPropertyForm({ ...propertyForm, currency: e.target.value })}
-                  className="px-4 py-2 rounded-lg border border-[#E5E5E5] focus:outline-none focus:ring-2 focus:ring-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/50"
-                  data-testid="property-currency-select"
-                >
-                  <option value="ILS">₪ ILS</option>
-                  <option value="USD">$ USD</option>
-                </select>
+                  onChange={(v) => setPropertyForm({ ...propertyForm, currency: v })}
+                  options={[{ value: 'ILS', label: '₪ ILS' }, { value: 'USD', label: '$ USD' }]}
+                  name="currency"
+                  testid="property-currency-select"
+                />
               </div>
               {/* Sanity-check warning — a monthly rent under ₪1,500 (or
                   $500) is almost never real in Israel, and typically
@@ -1163,39 +1164,42 @@ const AddPropertyModal = ({ isOpen, onClose, editingProperty, onSaved, API, toke
             {propertyForm.rental_type !== 'storage' && (
               <div>
                 <label className="block text-sm font-medium mb-2">{t('property.condition')}</label>
-                <select
+                <ChipSelect
                   value={propertyForm.condition}
-                  onChange={(e) => setPropertyForm({ ...propertyForm, condition: e.target.value })}
-                  className="w-full px-4 py-2 rounded-lg border border-[#E5E5E5] focus:outline-none focus:ring-2 focus:ring-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/50"
-                  data-testid="property-condition-select"
-                >
-                  <option value="renovated">{t('property.renovated')}</option>
-                  <option value="partially_renovated">{t('property.partiallyRenovated')}</option>
-                  <option value="good">{t('property.goodCondition')}</option>
-                </select>
+                  onChange={(v) => setPropertyForm({ ...propertyForm, condition: v })}
+                  options={[
+                    { value: 'renovated', label: t('property.renovated') },
+                    { value: 'partially_renovated', label: t('property.partiallyRenovated') },
+                    { value: 'good', label: t('property.goodCondition') },
+                  ]}
+                  name="condition"
+                  testid="property-condition-select"
+                />
               </div>
             )}
             {propertyForm.rental_type !== 'storage' && (
               <div>
                 <label className="block text-sm font-medium mb-2">{t('property.numberOfPorches')}</label>
-                <select
+<ChipSelect
                   value={typeof propertyForm.porches === 'number' ? propertyForm.porches : 0}
-                  onChange={(e) => {
-                    const next = parseInt(e.target.value, 10);
+                  onChange={(v) => {
+                    const next = parseInt(v, 10);
                     setPropertyForm({
                       ...propertyForm,
                       porches: next,
                       sukkah_compatible: next > 0 ? propertyForm.sukkah_compatible : false,
                     });
                   }}
-                  className="w-full px-4 py-2 rounded-lg border border-[#E5E5E5] focus:outline-none focus:ring-2 focus:ring-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/50"
-                  data-testid="property-porches-input"
-                >
-                  {[0, 1, 2, 3, 4, 5].map((n) => (
-                    <option key={n} value={n}>{n}</option>
-                  ))}
-                  <option value="6">6+</option>
-                </select>
+                  // 6+ is a real stored value (the select carried it as a
+                  // literal after the map); dropping it would quietly remove
+                  // the only way to record six or more.
+                  options={[
+                    ...[0, 1, 2, 3, 4, 5].map((n) => ({ value: n, label: String(n) })),
+                    { value: 6, label: '6+' },
+                  ]}
+                  name="porches"
+                  testid="property-porches-input"
+                />
                 {typeof propertyForm.porches === 'number' && propertyForm.porches > 0 && (
                   <>
                     <div className="ms-2 mt-2">
@@ -1227,17 +1231,18 @@ const AddPropertyModal = ({ isOpen, onClose, editingProperty, onSaved, API, toke
             {propertyForm.rental_type === 'long-term' && (
               <div>
                 <label className="block text-sm font-medium mb-2">{t('property.furnitureOption')}</label>
-                <select
+                <ChipSelect
                   value={propertyForm.furniture_option}
-                  onChange={(e) => setPropertyForm({ ...propertyForm, furniture_option: e.target.value })}
-                  className="w-full px-4 py-2 rounded-lg border border-[#E5E5E5] focus:outline-none focus:ring-2 focus:ring-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/50"
-                  data-testid="property-furniture-select"
-                >
-                  <option value="no_furniture">{t('property.noFurniture')}</option>
-                  <option value="furniture_package">{t('property.furniturePackage')}</option>
-                  <option value="partially_furnished">{t('property.partiallyFurnished', 'Partially furnished')}</option>
-                  <option value="furniture_free">{t('property.furnitureFree')}</option>
-                </select>
+                  onChange={(v) => setPropertyForm({ ...propertyForm, furniture_option: v })}
+                  options={[
+                    { value: 'no_furniture', label: t('property.noFurniture') },
+                    { value: 'furniture_package', label: t('property.furniturePackage') },
+                    { value: 'partially_furnished', label: t('property.partiallyFurnished', 'Partially furnished') },
+                    { value: 'furniture_free', label: t('property.furnitureFree') },
+                  ]}
+                  name="furniture_option"
+                  testid="property-furniture-select"
+                />
               </div>
             )}
           </div>
@@ -1312,15 +1317,13 @@ const AddPropertyModal = ({ isOpen, onClose, editingProperty, onSaved, API, toke
                           className="flex-1 px-3 py-2 rounded-lg border border-[#E5E5E5] focus:outline-none focus:ring-2 focus:ring-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/50 text-sm"
                           data-testid="property-cleaning-fee-input"
                         />
-                        <select
-                          value={propertyForm.cleaning_fee_currency}
-                          onChange={(e) => setPropertyForm({ ...propertyForm, cleaning_fee_currency: e.target.value })}
-                          className="px-3 py-2 rounded-lg border border-[#E5E5E5] focus:outline-none focus:ring-2 focus:ring-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/50 text-sm"
-                          data-testid="property-cleaning-fee-currency-select"
-                        >
-                          <option value="ILS">₪</option>
-                          <option value="USD">$</option>
-                        </select>
+                        <ChipSelect
+                  value={propertyForm.cleaning_fee_currency}
+                  onChange={(v) => setPropertyForm({ ...propertyForm, cleaning_fee_currency: v })}
+                  options={[{ value: 'ILS', label: '₪ ILS' }, { value: 'USD', label: '$ USD' }]}
+                  name="cleaning_fee_currency"
+                  testid="property-cleaning-fee-currency-select"
+                />
                       </div>
                     </div>
                   )}
@@ -1369,15 +1372,13 @@ const AddPropertyModal = ({ isOpen, onClose, editingProperty, onSaved, API, toke
                           className="flex-1 px-3 py-2 rounded-lg border border-[#E5E5E5] focus:outline-none focus:ring-2 focus:ring-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/50 text-sm"
                           data-testid="property-agent-fee-input"
                         />
-                        <select
-                          value={propertyForm.agent_fee_currency}
-                          onChange={(e) => setPropertyForm({ ...propertyForm, agent_fee_currency: e.target.value })}
-                          className="px-3 py-2 rounded-lg border border-[#E5E5E5] focus:outline-none focus:ring-2 focus:ring-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/50 text-sm"
-                          data-testid="property-agent-fee-currency-select"
-                        >
-                          <option value="ILS">₪</option>
-                          <option value="USD">$</option>
-                        </select>
+                        <ChipSelect
+                  value={propertyForm.agent_fee_currency}
+                  onChange={(v) => setPropertyForm({ ...propertyForm, agent_fee_currency: v })}
+                  options={[{ value: 'ILS', label: '₪ ILS' }, { value: 'USD', label: '$ USD' }]}
+                  name="agent_fee_currency"
+                  testid="property-agent-fee-currency-select"
+                />
                       </div>
                     </div>
                   )}
