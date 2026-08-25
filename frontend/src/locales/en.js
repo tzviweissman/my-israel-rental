@@ -2495,8 +2495,8 @@ const en = {
             label: 'Budget',
             any: 'Any budget',
             under100: 'Under ₪100',
-            '100_300': '₪100 – ₪300',
-            '300_800': '₪300 – ₪800',
+            under300: 'Under ₪300',
+            under800: 'Under ₪800',
             over800: '₪800 and up'
           },
           moreFilters: 'More filters'

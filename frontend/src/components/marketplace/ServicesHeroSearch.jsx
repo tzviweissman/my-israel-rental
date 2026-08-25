@@ -57,12 +57,26 @@ const formatDateLabel = (d, locale = 'en-US') => {
 
 // Budget brackets in ILS. Values are `min-max` (max can be empty for
 // open-ended "and up"). Kept short so the dropdown stays scannable.
+// Ceilings, not bands. Two reasons, and the second one is a bug fix.
+//
+// A band anchors: "₪300 – ₪800" makes the reader weigh the top of the
+// range, and four bands on screen at once is four simultaneous
+// negotiations, so the easy decision becomes no decision.
+//
+// And a band was the wrong filter. Somebody with ₪300 to spend picked
+// "₪100 – ₪300" and we hid every service under ₪100 from them — the
+// cheapest options, withheld from the most price-sensitive people who
+// asked. Nobody means "at least ₪100" when they state a budget. A budget
+// is a ceiling, so each option is now one.
+//
+// "₪800 and up" stays a floor because there is no honest ceiling to give
+// it, and it is a single number either way.
 const BUDGET_OPTIONS = [
-  { value: '',           labelKey: 'services.hero.budget.any',      labelDefault: 'Any budget' },
-  { value: '0-100',      labelKey: 'services.hero.budget.under100', labelDefault: 'Under ₪100' },
-  { value: '100-300',    labelKey: 'services.hero.budget.100_300',  labelDefault: '₪100 – ₪300' },
-  { value: '300-800',    labelKey: 'services.hero.budget.300_800',  labelDefault: '₪300 – ₪800' },
-  { value: '800-',       labelKey: 'services.hero.budget.over800',  labelDefault: '₪800 and up' },
+  { value: '',        labelKey: 'services.hero.budget.any',      labelDefault: 'Any budget' },
+  { value: '0-100',   labelKey: 'services.hero.budget.under100', labelDefault: 'Under ₪100' },
+  { value: '0-300',   labelKey: 'services.hero.budget.under300', labelDefault: 'Under ₪300' },
+  { value: '0-800',   labelKey: 'services.hero.budget.under800', labelDefault: 'Under ₪800' },
+  { value: '800-',    labelKey: 'services.hero.budget.over800',  labelDefault: '₪800 and up' },
 ];
 
 /**
