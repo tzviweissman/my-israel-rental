@@ -1,7 +1,27 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import DOMPurify from 'dompurify';
-import { Home, FileCheck, ArrowRight, X, Sparkles } from 'lucide-react';
+import { Home, FileCheck, ArrowRight, X, Sparkles, MessageCircle, Wallet } from 'lucide-react';
+
+/**
+ * The three things this product actually does for a new member, one line
+ * each. Every one is a feature that exists and can be pointed at.
+ *
+ * This card used to advertise the government-document service — Arnona
+ * discount, property name change, "quickly and professionally" — which is
+ * DISCONTINUED (see CLAUDE.md). It was still the second thing every new
+ * signup saw, so the site's first promise to a new member was for
+ * something it no longer sells.
+ *
+ * Notably absent: any "verified listing" badge. There is no verification
+ * feature — FeaturedProviders.jsx already refuses the same badge for the
+ * same reason — and a trust mark for a check nobody performs is worse than
+ * no trust mark at all.
+ */
+const WELCOME_POINTS = [
+  { key: 'chat', icon: MessageCircle },
+  { key: 'fees', icon: Wallet },
+  { key: 'contract', icon: FileCheck },
+];
 
 const WelcomePopups = ({ onDismiss }) => {
   const { t } = useTranslation();
@@ -82,7 +102,7 @@ const WelcomePopups = ({ onDismiss }) => {
             {/* Body */}
             <div className="px-8 py-8 text-center -mt-6">
               <div className="bg-white rounded-2xl shadow-sm border border-gray-100 px-6 py-6">
-                <h2 className="text-2xl font-bold text-gray-900 mb-2" style={{ fontFamily: 'Playfair Display' }}>
+                <h2 className="text-2xl font-bold text-gray-900 mb-2" style={{ fontFamily: 'var(--font-head)' }}>
                   {t('welcome.subleaseTitle')}
                 </h2>
                 <p className="text-lg text-gray-600">
@@ -135,13 +155,23 @@ const WelcomePopups = ({ onDismiss }) => {
             {/* Body */}
             <div className="px-8 py-8 text-center -mt-6">
               <div className="bg-white rounded-2xl shadow-sm border border-gray-100 px-6 py-6">
-                <h2 className="text-2xl font-bold text-gray-900 mb-3" style={{ fontFamily: 'Playfair Display' }}>
+                {/* `var(--font-head)`, not the literal face: Playfair has no
+                    Hebrew glyphs and an inline literal beats the RTL swap in
+                    design-tokens.css, so a Hebrew heading silently falls back
+                    to a system serif. */}
+                <h2 className="text-2xl font-bold text-gray-900 mb-4" style={{ fontFamily: 'var(--font-head)' }}>
                   {t('welcome.servicesTitle')}
                 </h2>
-                <p
-                  className="text-sm text-gray-600 leading-relaxed"
-                  dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(t('welcome.servicesDesc')) }}
-                />
+                <ul className="space-y-3 text-start">
+                  {WELCOME_POINTS.map(({ key, icon: Icon }) => (
+                    <li key={key} className="flex items-start gap-2.5">
+                      <Icon size={16} className="shrink-0 mt-0.5 text-[var(--brand-primary)]" aria-hidden="true" />
+                      <span className="text-sm text-gray-600 leading-relaxed">
+                        {t(`welcome.point_${key}`)}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
                 <div className="mt-5 flex justify-center">
                   <button
                     onClick={dismissAll}

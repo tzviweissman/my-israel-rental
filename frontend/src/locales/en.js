@@ -1376,13 +1376,20 @@ const en = {
       },
       welcome: {
         newFeature: 'New Feature',
-        premiumService: 'Premium Service',
-        arnonaDiscount: 'Arnona discount',
+        // Was 'Premium Service', over a card selling the discontinued
+        // government-document work. Nothing here is paid, so nothing here
+        // is premium.
+        premiumService: 'What you get',
         subleaseTitle: 'Sublease Your Property',
         subleaseSub: 'in just a few clicks',
         learnMore: 'Learn More',
-        servicesTitle: 'Let Us Handle the Hassle for You',
-        servicesDesc: 'We take care of all government documents, your <strong>Arnona discount</strong>, and the <strong>property name change</strong> — quickly and professionally.',
+        servicesTitle: 'What your account includes',
+        // Three facts, each one a feature that exists. No 'verified
+        // listings' clause — there is no verification feature to stand
+        // behind it.
+        point_chat: 'Message owners and businesses on the site, in English or Hebrew.',
+        point_fees: 'No booking fees and no commission — on either side.',
+        point_contract: 'Sign a rental contract here, without printing anything.',
         goToDashboard: 'Go to Dashboard'
       },
       cancelBooking: {

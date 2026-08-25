@@ -1339,13 +1339,14 @@ const he = {
       },
       welcome: {
         newFeature: 'תכונה חדשה',
-        premiumService: 'שירות פרימיום',
-        arnonaDiscount: 'הנחה בארנונה',
+        premiumService: 'מה מקבלים',
         subleaseTitle: 'תת-השכרת הנכס שלך',
         subleaseSub: 'בכמה לחיצות בלבד',
         learnMore: 'למידע נוסף',
-        servicesTitle: 'אנחנו נטפל בבירוקרטיה בשבילך',
-        servicesDesc: 'אנחנו מטפלים בכל מסמכי הממשלה, ב<strong>הנחת ארנונה</strong> וב<strong>שינוי שם בנכס</strong> — במהירות ובמקצועיות.',
+        servicesTitle: 'מה כולל החשבון שלך',
+        point_chat: 'התכתבות עם בעלים ועסקים באתר, בעברית או באנגלית.',
+        point_fees: 'בלי דמי הזמנה ובלי עמלה — לשני הצדדים.',
+        point_contract: 'חתימה על חוזה שכירות כאן, בלי להדפיס כלום.',
         goToDashboard: 'מעבר ללוח בקרה'
       },
       cancelBooking: {
