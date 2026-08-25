@@ -28,6 +28,16 @@ router.include_router(contract.router)
 
 # Legacy re-exports.
 from models import BookingCreate  # noqa: E402,F401
-from .shared import _compute_booking_total  # noqa: E402,F401
+from .shared import (  # noqa: E402,F401
+    _booking_window,
+    _compute_booking_total,
+    _load_property_and_sublease,
+)
 
-__all__ = ["router", "BookingCreate", "_compute_booking_total"]
+__all__ = [
+    "router",
+    "BookingCreate",
+    "_booking_window",
+    "_compute_booking_total",
+    "_load_property_and_sublease",
+]

@@ -1,4 +1,5 @@
 import React from 'react';
+import axios from 'axios';
 import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
 import { Mail, MessageCircle, X } from 'lucide-react';
@@ -720,6 +721,75 @@ const BookingSidebar = ({
       ? t('property.bookNow', 'Book now')
       : t('property.reserveBooking');
 
+  // What this stay actually costs, from the server.
+  //
+  // NOT `nightly_price * nights`. Applied Smart-Pricing entries REPLACE the
+  // base rate night by night, so the multiplication is wrong for exactly the
+  // listings whose owners are working hardest on their pricing —
+  // backend/tests/test_smart_pricing_extra.py asserts the difference. The
+  // total on this button has to be the total the booking charges, so it comes
+  // from GET /properties/{id}/quote, which calls the same pricing function the
+  // booking pipeline does.
+  const { start_date: quoteStart, end_date: quoteEnd } = bookingData;
+  const [quote, setQuote] = React.useState(null);
+  React.useEffect(() => {
+    if (!quoteStart || !quoteEnd) {
+      setQuote(null);
+      return undefined;
+    }
+    let cancelled = false;
+    // Clear FIRST. Otherwise the previous range's total sits on the button
+    // while the new one is in flight — a real price, for dates the user has
+    // already moved away from, which is the most convincing kind of wrong.
+    setQuote(null);
+    const params = new URLSearchParams({ start: quoteStart, end: quoteEnd });
+    if (sublease?.id) params.set('sublease_id', sublease.id);
+    axios.get(`${API}/properties/${property.id}/quote?${params.toString()}`)
+      .then(({ data }) => { if (!cancelled) setQuote(data); })
+      // Silence is the right failure. The button keeps its plain label and
+      // still works; inventing a total here would defeat the endpoint.
+      .catch(() => {});
+    return () => { cancelled = true; };
+  }, [property.id, sublease?.id, quoteStart, quoteEnd]);
+
+  // `null` is the backend's honest answer for long-term and short-term
+  // rentals — there is no single total to give. Show nothing, never ₪0.
+  const quoteTotal = quote && typeof quote.total === 'number' ? quote.total : null;
+  const totalLabel = quoteTotal === null ? null : t('property.ctaTotal', {
+    defaultValue: '{{amount}} total',
+    amount: `${quote.currency === 'USD' ? '$' : '₪'}${quoteTotal.toLocaleString()}`,
+  });
+
+  // The refund line, driven by the listing's own `cancellation_policy` —
+  // never a blanket "free cancellation". Only `flexible` refunds in full,
+  // and printing that promise over a `strict` listing would be a claim the
+  // owner has explicitly not made. An unrecognised or absent policy prints
+  // nothing at all.
+  //
+  // Gated on rental type for the same reason, and it is not a detail: the
+  // owner is only SHOWN the cancellation field for vacation and short-term
+  // listings (AddPropertyModal.jsx, BulkUploadModal.jsx both gate it that
+  // way), while the model defaults every listing to `flexible`. So a
+  // long-term listing carries a policy nobody chose, and printing it would
+  // put a refund promise on the page in the owner's name that the owner was
+  // never asked about. Subleases are excluded too — the sublessor sets their
+  // own terms, and the property owner's policy is not theirs to give.
+  const policyWasAsked = ['vacation', 'short-term'].includes(property.rental_type);
+  const cancellationNote = (!policyWasAsked || sublease) ? null : (() => {
+    switch (property.cancellation_policy) {
+      case 'flexible':
+        return t('property.cancelFlexible', 'Free cancellation until 7 days before check-in');
+      case 'moderate':
+        return t('property.cancelModerate', '50% refund up to 14 days before check-in');
+      case 'strict':
+        return t('property.cancelStrict', 'No refunds after booking');
+      case 'custom':
+        return (property.custom_cancellation_policy || '').trim() || null;
+      default:
+        return null;
+    }
+  })();
+
   // Holiday context — read once from `?holiday=sukkot|pesach` so a renter
   // who clicked through from the /properties/sukkot grid lands on the
   // Sukkot rate. State, not derived, so the in-sidebar Regular/Sukkot
@@ -1052,8 +1122,28 @@ const BookingSidebar = ({
           className="w-full primary-btn py-2.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
           data-testid="confirm-booking-button"
         >
-          {ctaLabel}
+          {/* Two spans rather than one concatenated string: the label is
+              Hebrew and the amount is digits plus a currency sign, and
+              letting the browser lay out each run separately is what keeps
+              the sign on the correct side under RTL. */}
+          <span className="inline-flex items-center justify-center gap-2 flex-wrap">
+            <span>{ctaLabel}</span>
+            {totalLabel && (
+              <>
+                <span aria-hidden="true" className="opacity-50">·</span>
+                <span data-testid="cta-total">{totalLabel}</span>
+              </>
+            )}
+          </span>
         </button>
+        {cancellationNote && (
+          <p
+            className="mt-2 text-center text-xs text-gray-500"
+            data-testid="cancellation-note"
+          >
+            {cancellationNote}
+          </p>
+        )}
       </div>
     </div>
   );

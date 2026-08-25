@@ -363,6 +363,15 @@ const en = {
         // the word used in "5 nights". Separate key so a language that
         // inflects them differently can say so.
         nightsLabel: 'Nights',
+        // Reserve-button total. The amount is pre-formatted with its
+        // currency sign by the caller.
+        ctaTotal: '{{amount}} total',
+        // Refund lines, one per `cancellation_policy` value. Wording tracks
+        // CANCELLATION_POLICIES in constants/propertyEnums.js — if those
+        // terms change, these are a promise that changed with them.
+        cancelFlexible: 'Free cancellation until 7 days before check-in',
+        cancelModerate: '50% refund up to 14 days before check-in',
+        cancelStrict: 'No refunds after booking',
         messageLabel: 'Message',
         messagePlaceholder: 'Add a message to the owner...',
         confirm: 'Confirm Booking',

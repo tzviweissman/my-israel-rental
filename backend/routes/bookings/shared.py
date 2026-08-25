@@ -257,6 +257,29 @@ async def _send_booking_notifications(
     })
 
 
+def _booking_window(
+    booking_data: BookingCreate,
+) -> tuple[datetime | None, datetime | None, int]:
+    """Parse a booking's date window into ``(start, end, nights)``.
+
+    Lifted out of ``_compute_booking_total`` so the quote endpoint
+    (``routes/properties/quote.py``) can report the same night count the
+    price was computed from. A quote whose nights and total came from two
+    different pieces of arithmetic can show "5 nights" beside a total for
+    four — the failure is invisible until a guest is charged.
+
+    Unparseable dates fall back to a single night with no window, exactly
+    as the pricing path did inline before: a best-effort total for an email
+    beats an exception, and callers that need strictness validate first.
+    """
+    try:
+        start = datetime.fromisoformat(booking_data.start_date.replace('Z', ''))
+        end = datetime.fromisoformat(booking_data.end_date.replace('Z', ''))
+        return start, end, max(1, (end - start).days)
+    except Exception:  # noqa: BLE001
+        return None, None, 1
+
+
 async def _compute_booking_total(
     booking_data: BookingCreate,
     property_data: dict,
@@ -269,14 +292,7 @@ async def _compute_booking_total(
     override REPLACES the base nightly rate for that night). Long-term/
     short-term rentals don't expose a single total, so we leave it as
     None."""
-    try:
-        start = datetime.fromisoformat(booking_data.start_date.replace('Z', ''))
-        end = datetime.fromisoformat(booking_data.end_date.replace('Z', ''))
-        nights = max(1, (end - start).days)
-    except Exception:
-        nights = 1
-        start = None
-        end = None
+    start, end, nights = _booking_window(booking_data)
     if sublease_data:
         price = float(sublease_data.get('price', 0))
         return price * nights if sublease_data.get('price_type') == 'per_night' else price

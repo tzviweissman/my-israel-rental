@@ -10,13 +10,14 @@ Sub-modules:
   * ``likes`` — renter like-toggle + liked-properties reads
   * ``contract`` — property contract upload / view / delete
   * ``availability`` — owner-facing availability calendar
+  * ``quote`` — public price-a-date-window endpoint
 
 Extracted from the single-file ``properties.py`` in the 2026-07 refactor.
 Zero public-API changes — every URL and response shape is identical.
 """
 from fastapi import APIRouter
 
-from . import availability, browse, bulk, contract, crud, likes
+from . import availability, browse, bulk, contract, crud, likes, quote
 
 # One router that owns every property endpoint. Sub-module inclusion
 # order is irrelevant because every path is unique.
@@ -27,6 +28,7 @@ router.include_router(bulk.router)
 router.include_router(likes.router)
 router.include_router(contract.router)
 router.include_router(availability.router)
+router.include_router(quote.router)
 
 __all__ = ["router", "delete_property"]
 
