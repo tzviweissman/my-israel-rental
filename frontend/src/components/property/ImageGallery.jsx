@@ -56,7 +56,8 @@ const ImageGallery = ({ media, currentIndex, onIndexChange, alt, apiBase, seed }
           alt={alt || ''}
           loading="lazy"
           decoding="async"
-          className="w-full aspect-[4/3] rounded-2xl object-cover"
+          className="w-full rounded-2xl object-cover"
+          style={{ height: 'min(75vw, 52vh, 520px)' }}
         />
         <DefaultImageBadge />
       </div>
@@ -65,9 +66,33 @@ const ImageGallery = ({ media, currentIndex, onIndexChange, alt, apiBase, seed }
 
   return (
     <div className="relative" data-testid="image-gallery">
-      <div className="overflow-hidden rounded-2xl bg-black">
+      {/* Height is capped against the VIEWPORT, not derived from the
+          column width.
+
+          It was `aspect-[4/3]`, which on a 1130px content column resolves
+          to roughly 850px — taller than a laptop screen. The thumbnail
+          strip lives directly underneath, so it was always below the fold:
+          to look at the second photo you scrolled down to the strip, picked
+          one, then scrolled back up to see it. Every photo cost a round
+          trip.
+
+          `min` keeps the ratio honest on a phone, where 4:3 is smaller than
+          the ceiling anyway and the old behaviour was already correct. The
+          520px cap stops a very tall desktop window from growing the hero
+          back past the strip. */}
+      {/* The overlays (arrows, counter) are positioned against THIS box, not
+          the whole gallery. They used to be siblings of the thumbnail strip,
+          so `bottom-3` meant the bottom of the strip and `top-1/2` meant the
+          middle of photo-plus-strip. Invisible while the photo was 850px
+          tall and the strip was off-screen anyway; the moment the strip came
+          into view the "1 / 6" counter sat on top of it. */}
+      <div className="relative">
+      <div
+        className="overflow-hidden rounded-2xl bg-black"
+        style={{ height: 'min(75vw, 52vh, 520px)' }}
+      >
         <div
-          className="flex transition-transform duration-500 ease-in-out"
+          className="flex h-full transition-transform duration-500 ease-in-out"
           style={{ transform: `translateX(-${currentIndex * 100}%)` }}
         >
           {media.map((m, idx) =>
@@ -78,7 +103,7 @@ const ImageGallery = ({ media, currentIndex, onIndexChange, alt, apiBase, seed }
                 srcSet={srcSet(toSrc(m.url), 1200)}
                 sizes="(max-width: 1024px) 100vw, 1200px"
                 alt={`${alt} - ${idx + 1}`}
-                className="w-full aspect-[4/3] object-cover flex-shrink-0"
+                className="w-full h-full object-cover flex-shrink-0"
                 data-testid={idx === currentIndex ? 'gallery-main-image' : undefined}
               />
             ) : (
@@ -92,7 +117,7 @@ const ImageGallery = ({ media, currentIndex, onIndexChange, alt, apiBase, seed }
                 controls
                 playsInline
                 preload="metadata"
-                className="w-full aspect-[4/3] object-contain flex-shrink-0 bg-black"
+                className="w-full h-full object-contain flex-shrink-0 bg-black"
                 data-testid={`gallery-video-${idx}`}
               />
             )
@@ -125,6 +150,7 @@ const ImageGallery = ({ media, currentIndex, onIndexChange, alt, apiBase, seed }
           </div>
         </>
       )}
+      </div>
       {media.length > 1 && (
         <div className="flex gap-2 mt-3 overflow-x-auto pb-2" data-testid="gallery-thumbnails">
           {media.map((m, idx) => (
