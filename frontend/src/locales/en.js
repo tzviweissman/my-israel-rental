@@ -1646,6 +1646,21 @@ const en = {
       // popover, and mobile QuickChips strip. Keep keys flat (no deep
       // nesting) since the i18n lookups in code use `stays.<key>`.
       // ---------------------------------------------------------------
+      leadOutcome: {
+        title: 'Did these get booked?',
+        why: 'Answering keeps your calendar honest, so nobody books a time you have already given away.',
+        sentOn: 'WhatsApp enquiry on {{date}}',
+        aListing: 'One of your listings',
+        yes: 'Yes',
+        no: 'No',
+        date: 'Date',
+        time: 'Time',
+        block: 'Block this time',
+        cancel: 'Cancel',
+        savedYes: 'Added to your calendar.',
+        savedNo: 'Thanks — noted.',
+        failed: 'Could not save that — try again.',
+      },
       search: {
         recentSearches: 'Recent searches',
         clearRecent: 'Clear',

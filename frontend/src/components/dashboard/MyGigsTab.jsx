@@ -21,6 +21,7 @@ import AddPhotoNudge from '../common/AddPhotoNudge';
 import BusinessSelector, { ALL, readStoredBusiness } from './BusinessSelector';
 import PerformancePanel from './PerformancePanel';
 import EditListingModal from './EditListingModal';
+import LeadOutcomePanel from './LeadOutcomePanel';
 import { nounKey } from '../../utils/businessNoun';
 
 const ProfileEditModal = ({ API, token, initial, onClose, onSaved }) => {
@@ -464,6 +465,13 @@ const MyGigsTab = ({ API, token, business = null, onBack = null }) => {
           businessId={business ? business.id : (businessFilter !== ALL ? businessFilter : null)}
         />
       )}
+
+      {/* Above the listings, below the numbers: it is a question that needs
+          answering, not a statistic. Renders nothing when there is nothing
+          to ask, so it cannot become furniture. */}
+      <div className="mt-4">
+        <LeadOutcomePanel token={token} />
+      </div>
 
       {gigs.length === 0 ? (
         <div className="bg-white border border-gray-200 rounded-2xl p-10 text-center" data-testid="my-gigs-empty">

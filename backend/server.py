@@ -203,7 +203,7 @@ async def startup_tasks() -> None:
     # by the check in book_gig (spec S0). Awaited, not spawned: it is a
     # single index creation, and a request that lands before it exists
     # would fall back to the racy path.
-    from routes.marketplace.gigs import ensure_booking_indexes
+    from routes.marketplace.gigs import booking_hold_sweep_loop, ensure_booking_indexes
     await ensure_booking_indexes()
 
     asyncio.create_task(sync_all_ical_feeds())
@@ -217,6 +217,12 @@ async def startup_tasks() -> None:
     # Availability-expiry reminders — daily at 06:00 UTC. Nudges hosts
     # whose available_to is rolling past in the next 4-6 days.
     asyncio.create_task(availability_reminders.availability_reminders_daily_loop())
+    # Every 15 minutes, not daily: a 24h booking hold with a halfway nudge
+    # needs finer resolution than one wake-up a day. Availability itself does
+    # not depend on this loop — lapsed holds stop occupying their slot on
+    # read (see _live_hold_query) — so a missed tick delays the notification,
+    # never the release.
+    asyncio.create_task(booking_hold_sweep_loop())
     # Requests board lifecycle — daily at 05:00 UTC. Flips open->expired
     # once a request's 30 days are up. A soft flip, not a TTL index, so
     # the seeker can still renew it. See the single-replica note in

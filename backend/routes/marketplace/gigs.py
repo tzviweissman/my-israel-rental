@@ -831,6 +831,8 @@ async def book_gig(gig_id: str, payload: BookingIn, user=Depends(verify_token)):
                 detail="That time has just been taken — please pick another.",
             )
 
+    _now = datetime.now(UTC)
+    _hold_h = await _hold_hours(gig.get("provider_user_id"))
     booking = {
         "_id": str(uuid.uuid4()),
         "gig_id": gig_id,
@@ -845,7 +847,12 @@ async def book_gig(gig_id: str, payload: BookingIn, user=Depends(verify_token)):
         # Frozen at creation — see _booking_duration.
         "duration_minutes": duration,
         "status": "pending",
-        "created_at": datetime.now(UTC).isoformat(),
+        "created_at": _now.isoformat(),
+        # Frozen at creation, like duration_minutes. Reading the business's
+        # setting at expiry time instead would mean changing the setting
+        # silently re-dated every hold already outstanding.
+        "hold_expires_at": (_now + timedelta(hours=_hold_h)).isoformat(),
+        "hold_hours": _hold_h,
     }
     await db.marketplace_bookings.insert_one(booking)
     logger.info("[marketplace] booking created: gig=%s client=%s tier=%s", gig_id, user["user_id"], payload.tier_name)
@@ -921,6 +928,62 @@ def _has_any_photo(payload_or_doc: Any) -> bool:
 # double-books.
 HELD_STATUSES = ("pending", "accepted")
 
+# A hold that lapsed. A SYSTEM transition, never a provider action — it is
+# deliberately absent from BookingPatch's pattern so nobody can set it by
+# hand and it always means the same thing: nobody replied in time.
+STATUS_EXPIRED = "expired"
+
+# How long a pending request holds its slot. Per business (spec S2), because
+# a barber replying in ten minutes and a mover quoting jobs overnight are not
+# the same business. 24h is the default: these owners live on WhatsApp and
+# reply fast, and a longer hold just lets slots rot.
+HOLD_HOURS_CHOICES = (12, 24, 48)
+DEFAULT_HOLD_HOURS = 24
+
+
+async def _hold_hours(provider_user_id: Optional[str]) -> int:
+    """The hold window for this provider, in hours.
+
+    Falls back to 24 whenever the business record is missing or holds a
+    value outside the offered set — a listing whose business row has gone
+    missing must still expire, and expiring on a sane default beats
+    holding a slot forever because a lookup failed.
+    """
+    if not provider_user_id:
+        return DEFAULT_HOLD_HOURS
+    try:
+        prov = await db.marketplace_providers.find_one(
+            {"user_id": provider_user_id}, {"_id": 0, "booking_hold_hours": 1},
+        )
+    except Exception:  # noqa: BLE001
+        return DEFAULT_HOLD_HOURS
+    raw = (prov or {}).get("booking_hold_hours")
+    return raw if raw in HOLD_HOURS_CHOICES else DEFAULT_HOLD_HOURS
+
+
+def _live_hold_query() -> dict:
+    """Bookings that occupy their slot RIGHT NOW.
+
+    Lazy expiry, and it is the primary mechanism rather than a
+    belt-and-braces one: a sweep can be defeated by a restart, a crash, or
+    a deploy landing at the wrong minute, and a slot that stays held
+    because a background task missed a tick is the exact failure this
+    feature exists to prevent. The sweep below only writes the status and
+    sends the notifications; availability never depends on it having run.
+
+    `hold_expires_at` missing means the booking predates expiry — those
+    hold indefinitely, as they always did. Silently expiring historic
+    bookings would free slots their owners believe are taken.
+    """
+    now = datetime.now(UTC).isoformat()
+    return {
+        "$or": [
+            {"status": "accepted"},
+            {"status": "pending", "hold_expires_at": {"$exists": False}},
+            {"status": "pending", "hold_expires_at": {"$gt": now}},
+        ],
+    }
+
 
 def _minutes(hhmm: str) -> Optional[int]:
     try:
@@ -959,7 +1022,10 @@ async def _busy_spans(
     available for any of the things they offer, and blocking each listing
     separately would be busywork that guarantees one gets forgotten.
     """
-    query: dict[str, Any] = {"gig_id": gig_id, "status": {"$in": list(HELD_STATUSES)}}
+    # `_live_hold_query` rather than a flat status test: a pending booking
+    # whose hold has lapsed stops occupying its slot the moment it lapses,
+    # without waiting for the sweep to notice.
+    query: dict[str, Any] = {"gig_id": gig_id, **_live_hold_query()}
     if date_iso:
         query["preferred_date"] = date_iso
     spans: dict[str, list[tuple[int, int]]] = {}
@@ -996,6 +1062,258 @@ async def _busy_spans(
 def _overlaps(start: int, end: int, taken: list[tuple[int, int]]) -> bool:
     return any(start < t_end and t_start < end for t_start, t_end in taken)
 
+
+
+# --------------------------------------------------------------------------
+# "Did it get booked?" — turning a WhatsApp lead into a real calendar entry
+# (spec S3b)
+# --------------------------------------------------------------------------
+
+# How long to wait before asking. Long enough that the conversation has
+# actually happened — asking an owner mid-negotiation whether it booked is
+# noise — and short enough that they still remember which lead it was.
+LEAD_ANSWER_DELAY_HOURS = 18
+
+# After this, stop asking. Nobody usefully remembers a WhatsApp conversation
+# from a fortnight ago, and a prompt that never goes away becomes furniture.
+LEAD_ANSWER_WINDOW_DAYS = 14
+
+
+class LeadAnswer(BaseModel):
+    """The owner's answer. `booked=False` needs nothing else — that is the
+    whole point of the one-tap No."""
+    booked: bool
+    # Required only when booked. Without them there is no slot to hold, and
+    # a "booking" that blocks nothing is worse than no record at all.
+    date: Optional[str] = Field(None, pattern=r"^\d{4}-\d{2}-\d{2}$")
+    time_slot: Optional[str] = Field(None, pattern=r"^\d{2}:\d{2}$")
+    duration_minutes: Optional[int] = Field(None, ge=5, le=1440)
+
+
+@router.get("/leads/awaiting-answer")
+async def leads_awaiting_answer(user=Depends(verify_token)) -> list[dict]:
+    """WhatsApp leads this provider has not yet told us the outcome of.
+
+    The site hands a visitor to WhatsApp and then goes blind: whatever was
+    agreed happened somewhere we cannot see, so the calendar quietly stops
+    being true. This is the one question that fixes that, and it is only
+    worth asking because the answer is one tap.
+
+    Never asks twice — `answered_at` is set by the POST below whichever way
+    the owner answers, including No.
+    """
+    now = datetime.now(UTC)
+    rows = []
+    cursor = db.lead_events.find(
+        {
+            "type": "whatsapp_click",
+            "provider_id": user["user_id"],
+            "answered_at": {"$exists": False},
+            "created_at": {
+                "$lte": (now - timedelta(hours=LEAD_ANSWER_DELAY_HOURS)).isoformat(),
+                "$gte": (now - timedelta(days=LEAD_ANSWER_WINDOW_DAYS)).isoformat(),
+            },
+        },
+        {"_id": 1, "gig_id": 1, "created_at": 1},
+    ).sort("created_at", -1).limit(10)
+    async for lead in cursor:
+        gig = await db.marketplace_gigs.find_one(
+            {"_id": lead.get("gig_id")}, {"_id": 0, "title": 1, "slot_duration_minutes": 1},
+        )
+        rows.append({
+            "id": lead["_id"],
+            "gig_id": lead.get("gig_id"),
+            "gig_title": (gig or {}).get("title"),
+            "created_at": lead.get("created_at"),
+            "default_duration": (gig or {}).get("slot_duration_minutes") or 60,
+        })
+    return rows
+
+
+@router.post("/leads/{lead_id}/answer")
+async def answer_lead(lead_id: str, payload: LeadAnswer, user=Depends(verify_token)) -> dict:
+    """Record the outcome, and block the slot when the answer is yes."""
+    lead = await db.lead_events.find_one({"_id": lead_id})
+    if not lead:
+        raise HTTPException(status_code=404, detail="Lead not found")
+    if lead.get("provider_id") != user["user_id"]:
+        raise HTTPException(status_code=403, detail="Not your lead")
+    if lead.get("answered_at"):
+        # Idempotent rather than an error: a double-tap on a phone must not
+        # produce a second block on the calendar.
+        return {"ok": True, "already_answered": True}
+
+    now_iso = datetime.now(UTC).isoformat()
+    booking_id = None
+
+    if payload.booked:
+        if not payload.date or not payload.time_slot:
+            raise HTTPException(
+                status_code=400,
+                detail="A booked lead needs the date and time it was booked for",
+            )
+        start = _minutes(payload.time_slot)
+        if start is None:
+            raise HTTPException(status_code=400, detail="Invalid time")
+        duration = int(payload.duration_minutes or 60)
+        taken = (await _busy_spans(lead["gig_id"], user["user_id"], payload.date)).get(payload.date, [])
+        if _overlaps(start, start + duration, taken):
+            raise HTTPException(
+                status_code=409,
+                detail="That time is already taken on your calendar",
+            )
+        booking_id = str(uuid.uuid4())
+        await db.marketplace_bookings.insert_one({
+            "_id": booking_id,
+            "gig_id": lead["gig_id"],
+            "provider_user_id": user["user_id"],
+            # No client account: this booking happened on WhatsApp, and
+            # inventing a customer record for someone who never signed up
+            # would put a stranger's name on a page they cannot see.
+            "client_user_id": None,
+            "tier_name": None,
+            "message": "",
+            "contact_email": "",
+            "preferred_date": payload.date,
+            "time_slot": payload.time_slot,
+            "duration_minutes": duration,
+            # Straight to accepted. It is already agreed — a pending hold
+            # with an expiry would put a real job at risk of being released.
+            "status": "accepted",
+            "source": "whatsapp_lead",
+            "lead_id": lead_id,
+            "created_at": now_iso,
+        })
+
+    await db.lead_events.update_one(
+        {"_id": lead_id},
+        {"$set": {"answered_at": now_iso, "answer_booked": bool(payload.booked),
+                  **({"booking_id": booking_id} if booking_id else {})}},
+    )
+    return {"ok": True, "booking_id": booking_id}
+
+
+async def _notify(user_id: Optional[str], kind: str, message: str, booking_id: str) -> None:
+    """One in-app notification. Never raises — a booking must not fail to
+    expire because a notification could not be written."""
+    if not user_id:
+        return
+    try:
+        await db.notifications.insert_one({
+            "id": str(uuid.uuid4()),
+            "user_id": user_id,
+            "type": kind,
+            "booking_id": booking_id,
+            "message": message,
+            "read": False,
+            "created_at": datetime.now(UTC).isoformat(),
+        })
+    except Exception:  # noqa: BLE001
+        logger.exception("notification insert failed for booking %s", booking_id)
+
+
+async def sweep_expired_holds() -> dict:
+    """Flip lapsed holds to `expired`, and nudge owners at the halfway mark.
+
+    Availability does NOT depend on this having run — `_live_hold_query`
+    already stops counting a lapsed hold the moment it lapses. What this
+    adds is the two things lazy evaluation cannot do: write the status so
+    the dashboard and the response-time stats agree with reality, and tell
+    the two people involved.
+
+    Both writes are guarded so one bad row cannot stop the sweep.
+    """
+    now = datetime.now(UTC)
+    now_iso = now.isoformat()
+    expired = 0
+    nudged = 0
+
+    # 1. Lapsed holds.
+    async for b in db.marketplace_bookings.find(
+        {"status": "pending", "hold_expires_at": {"$lte": now_iso}},
+        {"_id": 1, "gig_id": 1, "provider_user_id": 1, "client_user_id": 1,
+         "preferred_date": 1, "time_slot": 1},
+    ):
+        try:
+            res = await db.marketplace_bookings.update_one(
+                # Re-assert `pending` in the filter: the provider may have
+                # accepted it in the milliseconds since the cursor read, and
+                # expiring an accepted booking would cancel a real job.
+                {"_id": b["_id"], "status": "pending"},
+                {"$set": {"status": STATUS_EXPIRED, "expired_at": now_iso}},
+            )
+            if not res.modified_count:
+                continue
+            expired += 1
+            when = " ".join(x for x in (b.get("preferred_date"), b.get("time_slot")) if x)
+            # Deliberately not "your booking expired", which reads as the
+            # customer's fault for a delay that was not theirs.
+            await _notify(
+                b.get("client_user_id"), "booking_expired",
+                f"No reply about {when or 'your request'}, so the time is free "
+                f"again — you can request another.".strip(),
+                b["_id"],
+            )
+            await _notify(
+                b.get("provider_user_id"), "booking_expired",
+                f"A request for {when or 'a slot'} expired with no reply. "
+                f"The time is bookable again.".strip(),
+                b["_id"],
+            )
+        except Exception:  # noqa: BLE001
+            logger.exception("could not expire booking %s", b.get("_id"))
+
+    # 2. The halfway nudge. One message, once — `hold_nudged_at` is the
+    #    guard, because a sweep running every 15 minutes would otherwise
+    #    send the same reminder dozens of times before the hold lapsed.
+    async for b in db.marketplace_bookings.find(
+        {"status": "pending", "hold_nudged_at": {"$exists": False},
+         "hold_expires_at": {"$gt": now_iso}},
+        {"_id": 1, "provider_user_id": 1, "created_at": 1, "hold_expires_at": 1,
+         "preferred_date": 1, "time_slot": 1},
+    ):
+        try:
+            created = datetime.fromisoformat(b["created_at"])
+            expires = datetime.fromisoformat(b["hold_expires_at"])
+        except (KeyError, ValueError):
+            continue
+        if now < created + (expires - created) / 2:
+            continue
+        res = await db.marketplace_bookings.update_one(
+            {"_id": b["_id"], "hold_nudged_at": {"$exists": False}},
+            {"$set": {"hold_nudged_at": now_iso}},
+        )
+        if not res.modified_count:
+            continue
+        nudged += 1
+        when = " ".join(x for x in (b.get("preferred_date"), b.get("time_slot")) if x)
+        hours_left = max(1, int((expires - now).total_seconds() // 3600))
+        await _notify(
+            b.get("provider_user_id"), "booking_hold_reminder",
+            f"Still waiting on your answer for {when or 'a request'} — "
+            f"about {hours_left}h before the time is released.".strip(),
+            b["_id"],
+        )
+
+    if expired or nudged:
+        logger.info("[marketplace] hold sweep: %d expired, %d nudged", expired, nudged)
+    return {"expired": expired, "nudged": nudged}
+
+
+async def booking_hold_sweep_loop() -> None:
+    """Every 15 minutes.
+
+    Not the 06:00 daily cadence the other loops use: a 24h hold with a
+    halfway nudge needs finer resolution than once a day, or the nudge
+    lands hours late and the expiry notification arrives long after the
+    slot was already free.
+    """
+    while True:
+        await asyncio.sleep(15 * 60)
+        try:
+            await sweep_expired_holds()
+        except Exception as e:  # noqa: BLE001
+            logger.warning("booking hold sweep crashed: %s", e)
 
 
 async def ensure_booking_indexes() -> None:
