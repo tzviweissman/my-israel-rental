@@ -1014,61 +1014,113 @@ const AddPropertyModal = ({ isOpen, onClose, editingProperty, onSaved, API, toke
 
           {/* How bookings arrive — instant confirm vs. request to book.
               Three states, not two: null means the lister hasn't chosen and
-              the backend applies its legacy rule, so the copy spells out what
-              that rule will do for THIS listing rather than showing a toggle
-              silently sitting on one side. */}
+              the backend applies its legacy rule.
+
+              This was two equal segmented buttons with one line of help
+              underneath. Two identical-looking options with nothing selected
+              is the shape that makes people pick whichever sounds safest and
+              move on — and the one line only ever described the option
+              already chosen, so the thing you needed in order to choose was
+              the thing you could not see until after choosing.
+
+              Cards instead, each carrying its own consequence inside it, at
+              the moment the decision is made.
+
+              What is NOT done here: pre-selecting one. The brief asks for a
+              recommended default, but `instant_booking: null` is a real,
+              distinct state — "never chosen" — that the backend and
+              BookingSidebar both read, and writing a value into it on render
+              would silently convert every listing that has not decided. The
+              honest substitute is to SAY which one is in force right now,
+              which is a fact rather than a recommendation. */}
           <div>
             <label className="block text-sm font-medium mb-2">
               {t('property.bookingMode.label', 'How do you want to receive bookings?')}
             </label>
             <div
-              className="inline-flex items-center gap-1 p-1 rounded-lg bg-white border border-[#E5E5E5]"
+              className="grid grid-cols-1 sm:grid-cols-2 gap-3"
+              role="radiogroup"
+              aria-label={t('property.bookingMode.label', 'How do you want to receive bookings?')}
               data-testid="instant-booking-toggle"
             >
               {[
-                { value: false, label: t('property.bookingMode.request', 'Review each request') },
-                { value: true, label: t('property.bookingMode.instant', 'Book instantly') },
-              ].map(({ value, label }) => {
+                {
+                  value: false,
+                  label: t('property.bookingMode.request', 'Review each request'),
+                  help: t(
+                    'property.bookingMode.requestHelp',
+                    'Bookings arrive as requests. Nothing is confirmed until you accept, and the dates stay held until you do.',
+                  ),
+                },
+                {
+                  value: true,
+                  label: t('property.bookingMode.instant', 'Book instantly'),
+                  help: t(
+                    'property.bookingMode.instantHelp',
+                    "Bookings are confirmed straight away and the dates are blocked. You won't be asked to approve them.",
+                  ),
+                },
+              ].map(({ value, label, help }) => {
                 const active = propertyForm.instant_booking === value;
+                // Which option the backend would apply if this lister never
+                // chooses. Mirrors utils/instantBooking's legacy rule; it is
+                // reported, not imposed.
+                const isCurrentDefault =
+                  propertyForm.instant_booking === null &&
+                  value === (propertyForm.rental_type === 'vacation');
                 return (
                   <button
                     key={String(value)}
                     type="button"
+                    role="radio"
+                    aria-checked={active}
                     onClick={() => setPropertyForm({ ...propertyForm, instant_booking: value })}
-                    className="px-3 py-1.5 rounded-md text-xs font-semibold transition-all"
+                    className={`text-start p-3 rounded-xl border transition-all ${
+                      active ? 'shadow-sm' : 'hover:border-gray-300'
+                    }`}
                     style={{
-                      backgroundColor: active ? 'var(--brand-primary)' : 'transparent',
-                      color: active ? '#FFFFFF' : 'var(--brand-primary)',
+                      borderColor: active ? 'var(--brand-primary)' : 'var(--brand-border)',
+                      // A wash, not a fill: the card has to stay readable,
+                      // and a solid brand block would read as a pressed
+                      // button rather than a chosen option.
+                      backgroundColor: active
+                        ? 'rgb(var(--brand-primary-rgb) / 0.06)'
+                        : isCurrentDefault ? '#FBF8F2' : '#FFFFFF',
                     }}
-                    aria-pressed={active}
                     data-testid={`instant-booking-${value ? 'on' : 'off'}`}
                   >
-                    {label}
+                    <span className="flex items-center gap-2 flex-wrap">
+                      <span
+                        className="text-sm font-semibold"
+                        style={{ color: active ? 'var(--brand-primary)' : 'var(--ink)' }}
+                      >
+                        {label}
+                      </span>
+                      {isCurrentDefault && (
+                        <span
+                          className="text-[10px] font-bold uppercase tracking-wide px-1.5 py-0.5 rounded"
+                          style={{ background: '#FBF8F2', color: 'var(--gold-lg)' }}
+                          data-testid={`instant-booking-current-${value ? 'on' : 'off'}`}
+                        >
+                          {t('property.bookingMode.currentTag', 'In force now')}
+                        </span>
+                      )}
+                    </span>
+                    {/* The consequence lives in the card, not in a line
+                        below that only describes the option already picked. */}
+                    <span className="block text-xs text-gray-600 mt-1 leading-relaxed">{help}</span>
                   </button>
                 );
               })}
             </div>
-            <p className="text-xs text-gray-500 mt-1">
-              {propertyForm.instant_booking === true
-                ? t(
-                    'property.bookingMode.instantHelp',
-                    "Bookings are confirmed straight away and the dates are blocked. You won't be asked to approve them.",
-                  )
-                : propertyForm.instant_booking === false
-                ? t(
-                    'property.bookingMode.requestHelp',
-                    'Bookings arrive as requests. Nothing is confirmed until you accept, and the dates stay held until you do.',
-                  )
-                : propertyForm.rental_type === 'vacation'
-                ? t(
-                    'property.bookingMode.defaultInstant',
-                    "Not set — vacation rentals currently confirm instantly. Pick an option above to change that.",
-                  )
-                : t(
-                    'property.bookingMode.defaultRequest',
-                    'Not set — bookings for this listing currently arrive as requests for you to accept. Pick an option above to change that.',
-                  )}
-            </p>
+            {propertyForm.instant_booking === null && (
+              <p className="text-xs text-gray-500 mt-2" data-testid="instant-booking-unset-note">
+                {t(
+                  'property.bookingMode.unsetNote',
+                  'You have not chosen yet — the option marked above is what applies until you do.',
+                )}
+              </p>
+            )}
           </div>
 
           {/* Cancellation Policy - Vacation + Short-Term Rentals */}

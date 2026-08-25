@@ -252,6 +252,8 @@ const he = {
       property: {
         // Instant-book vs request-to-book — see the note on the English side.
         bookingMode: {
+          currentTag: 'חל כעת',
+          unsetNote: 'עוד לא בחרת — האפשרות המסומנת למעלה היא זו שחלה בינתיים.',
           label: 'איך תרצו לקבל הזמנות?',
           request: 'אישור כל בקשה',
           instant: 'הזמנה מיידית',

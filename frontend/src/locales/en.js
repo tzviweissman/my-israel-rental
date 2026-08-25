@@ -264,6 +264,8 @@ const en = {
         // happens while the lister hasn't chosen — that state is real and
         // the copy has to name it rather than imply a toggle is already set.
         bookingMode: {
+          currentTag: 'In force now',
+          unsetNote: 'You have not chosen yet — the option marked above is what applies until you do.',
           label: 'How do you want to receive bookings?',
           request: 'Review each request',
           instant: 'Book instantly',
