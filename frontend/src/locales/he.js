@@ -1598,6 +1598,10 @@ const he = {
       // ---------------------------------------------------------------
       // Stays (Hebrew) — mirrors the English `stays` namespace above.
       // ---------------------------------------------------------------
+      search: {
+        recentSearches: 'חיפושים אחרונים',
+        clearRecent: 'נקה',
+      },
       stays: {
         // Photo band (Phase 2b). The split falls in a different place than
         // the English: "מצאו את" / "הבית שלכם." puts the gold on the noun,
@@ -1615,6 +1619,9 @@ const he = {
         // Search pill
         where: 'איפה',
         anywhere: 'כל מקום',
+        recentSearches: 'חיפושים אחרונים',
+        mostListings: 'הכי הרבה מודעות',
+        areas: 'אזורים',
         when: 'מתי',
         addDates: 'בחרו תאריכים',
         filters: 'סינון',

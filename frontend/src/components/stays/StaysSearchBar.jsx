@@ -21,6 +21,9 @@ const StaysSearchBar = ({
   flexible, setFlexible,
   subType, setSubType,
   areaOptions,
+  areaCounts = null,
+  recentAreas = [],
+  onAreaCommit = null,
   // Localises the Where suggestions (DB area values aren't in the i18n
   // catalogue) without changing the option VALUE the parent filters on.
   areaLabelFor,
@@ -49,6 +52,9 @@ const StaysSearchBar = ({
           value={where}
           onChange={setWhere}
           options={areaOptions}
+          counts={areaCounts}
+          recent={recentAreas}
+          onCommit={onAreaCommit}
           labelFor={areaLabelFor}
           placeholder={wherePlaceholder}
           testidPrefix="stays-where"

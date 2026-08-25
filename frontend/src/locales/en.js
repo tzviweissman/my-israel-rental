@@ -1637,6 +1637,10 @@ const en = {
       // popover, and mobile QuickChips strip. Keep keys flat (no deep
       // nesting) since the i18n lookups in code use `stays.<key>`.
       // ---------------------------------------------------------------
+      search: {
+        recentSearches: 'Recent searches',
+        clearRecent: 'Clear',
+      },
       stays: {
         // Photo band (Phase 2b). `heroAccent` is the gold-coloured tail of
         // the headline and is a SEPARATE key on purpose: Hebrew puts the
@@ -1653,6 +1657,11 @@ const en = {
         // Search pill
         where: 'Where',
         anywhere: 'Anywhere',
+        // Suggestion-panel headings. Both sections are omitted entirely
+        // when there is no real data behind them.
+        recentSearches: 'Recent searches',
+        mostListings: 'Most listings',
+        areas: 'Areas',
         when: 'When',
         addDates: 'Add dates',
         filters: 'Filters',

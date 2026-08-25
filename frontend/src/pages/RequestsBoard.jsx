@@ -25,6 +25,8 @@ import axios from 'axios';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { saveReturnPath } from '../hooks/useBackNavigation';
 import { useTranslation } from 'react-i18next';
+import RecentSearchesPanel from '../components/search/RecentSearchesPanel';
+import { recordSearch } from '../utils/recentSearches';
 import { toast } from 'sonner';
 import formatDate from '../utils/formatDate';
 import {
@@ -323,6 +325,11 @@ const RequestsBoard = () => {
   // fetch and an empty board need different advice.
   const [loadError, setLoadError] = useState(false);
   const [qDraft, setQDraft] = useState(searchParams.get('q') || '');
+  // Suggestions are only offered while the field has focus and is empty:
+  // once someone is typing, their own half-written query is a better guide
+  // than last week's, and a panel over the results is just in the way.
+  const [qFocused, setQFocused] = useState(false);
+  const [recentKey, setRecentKey] = useState(0);
 
   const type = searchParams.get('type') || '';
   const side = searchParams.get('side') || '';
@@ -341,6 +348,19 @@ const RequestsBoard = () => {
       return next;
     }, { replace: true });
   }, [setSearchParams]);
+
+  // Defined after patchUrl on purpose: a useCallback that closes over a
+  // `const` declared further down hits the temporal dead zone and takes
+  // the whole page to the error boundary on first render.
+  const runSearch = React.useCallback((value) => {
+    const clean = String(value ?? '').trim();
+    setQDraft(clean);
+    patchUrl({ q: clean });
+    // Recorded on COMMIT, not per keystroke — otherwise the history fills
+    // with every prefix of one word.
+    if (clean) { recordSearch('requests', clean); setRecentKey((k) => k + 1); }
+    setQFocused(false);
+  }, [patchUrl]);
 
   useEffect(() => {
     setLoading(true);
@@ -457,18 +477,28 @@ const RequestsBoard = () => {
                 The ring goes on the wrapper via focus-within, because the
                 input is transparent and it is the pill that reads as the
                 control. Keyboard users can now see where they are. */}
-            <div className="flex-1 min-w-[220px] flex items-center gap-2 bg-white border rounded-full px-4 py-2.5
+            <div className="relative flex-1 min-w-[220px] flex items-center gap-2 bg-white border rounded-full px-4 py-2.5
                             focus-within:ring-2 focus-within:ring-offset-1 focus-within:ring-[rgb(var(--brand-primary-rgb)/0.55)]"
                  style={{ borderColor: 'var(--brand-border)' }}>
               <Search size={15} style={{ color: 'var(--brand-muted)' }} aria-hidden="true" />
               <input
                 value={qDraft}
                 onChange={(e) => setQDraft(e.target.value)}
-                onKeyDown={(e) => { if (e.key === 'Enter') patchUrl({ q: qDraft.trim() }); }}
+                onKeyDown={(e) => { if (e.key === 'Enter') runSearch(qDraft); }}
+                onFocus={() => setQFocused(true)}
+                onBlur={() => setQFocused(false)}
                 className="flex-1 bg-transparent text-sm outline-none"
                 placeholder={t('requests.searchPlaceholder', 'Search the board — e.g. "3BR Ramat Eshkol", "mover Jerusalem"')}
                 aria-label={t('requests.searchLabel', 'Search requests')}
                 data-testid="requests-search-input"
+              />
+              <RecentSearchesPanel
+                scope="requests"
+                open={qFocused && !qDraft.trim()}
+                refreshKey={recentKey}
+                onPick={runSearch}
+                onDismiss={() => setQFocused(false)}
+                testid="requests-recent-searches"
               />
             </div>
             {/* Two actions in one row used to be blue and gold, so colour
@@ -479,7 +509,7 @@ const RequestsBoard = () => {
                 second competing "click me". */}
             <button
               type="button"
-              onClick={() => patchUrl({ q: qDraft.trim() })}
+              onClick={() => runSearch(qDraft)}
               // `btn` as well as `btn-ghost`. btn-ghost is a MODIFIER - it
               // sets colours only - and the pill radius, flex centring and
               // weight all live on `.btn`. Used alone it rendered as a bare

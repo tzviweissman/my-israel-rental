@@ -46,6 +46,7 @@ import useFavorites from '../hooks/useFavorites';
 import useExchangeRate from '../hooks/useExchangeRate';
 import { saveReturnPath } from '../hooks/useBackNavigation';
 import { areaLabel, areaGroupKey, canonicalArea, UNGROUPED_AREA } from '../utils/areaNames';
+import { getRecentSearches, recordSearch } from '../utils/recentSearches';
 import { byPrice, priceIn } from '../utils/listingPrice';
 import SortSelect, {
   SORT_NEWEST, SORT_PRICE_ASC, SORT_PRICE_DESC, SORT_NEAREST, parseSort,
@@ -247,6 +248,23 @@ const Stays = ({ landing = null }) => {
     });
     return Array.from(set).sort((a, b) => areaLabel(a, t).localeCompare(areaLabel(b, t)));
   }, [allProperties, t]);
+
+  // How many listings each area actually has, counted from the inventory
+  // this page already loaded. Not a curated "popular areas" list and not a
+  // hardcoded top five — the number beside each suggestion is the number
+  // of results the visitor gets if they pick it.
+  const areaCounts = useMemo(() => {
+    const tally = {};
+    allProperties.forEach((p) => {
+      const key = areaGroupKey(p.area);
+      if (key) tally[key] = (tally[key] || 0) + 1;
+    });
+    return tally;
+  }, [allProperties]);
+
+  // Read once on mount. Re-reading on every render would make the panel
+  // reshuffle under the user's cursor the moment they pick something.
+  const [recentAreas, setRecentAreas] = useState(() => getRecentSearches('stays'));
 
   // Master filter chain — runs in-memory across every active criterion.
   const filtered = useMemo(() => {
@@ -557,6 +575,12 @@ const Stays = ({ landing = null }) => {
             flexible={flexible} setFlexible={setFlexible}
             subType={subType} setSubType={setSubType}
             areaOptions={areaOptions}
+            areaCounts={areaCounts}
+            recentAreas={recentAreas}
+            onAreaCommit={(v, label) => {
+              recordSearch('stays', v, label);
+              setRecentAreas(getRecentSearches('stays'));
+            }}
             areaLabelFor={(a) => areaLabel(a, t)}
             onOpenFilters={() => setShowFilters(true)}
             filterCount={activeFilterCount}
