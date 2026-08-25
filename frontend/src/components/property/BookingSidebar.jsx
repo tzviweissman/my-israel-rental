@@ -317,10 +317,21 @@ const BookingCalendar = ({
       const vh = window.innerHeight;
       const GAP = 8;
       const PAD = 8;
+      // Below this a calendar cannot show a useful number of weeks, so
+      // scrolling it in place is worse than covering the trigger.
+      const MIN_USABLE = 260;
       // Measured height when the popover is mounted; on first paint we
       // don't have it yet — assume the two-month layout worst case so we
       // still pick a sensible slot before the correction pass fires.
-      const calH = popoverRef.current?.offsetHeight || (numMonths === 2 ? 620 : 480);
+      // The popover's NATURAL height — `scrollHeight`, not `offsetHeight`.
+      // Once a maxHeight has been applied, offsetHeight reports the
+      // CONSTRAINED height, so the correction pass would read the calendar
+      // as short enough to fit, drop the constraint, and let it spring back
+      // to full size over the trigger — a measure-your-own-fix loop that
+      // undid the placement on the very next frame. scrollHeight stays the
+      // content height either way. (+2 for the 1px borders it excludes.)
+      const el = popoverRef.current;
+      const calH = el ? el.scrollHeight + 2 : (numMonths === 2 ? 620 : 480);
       const belowRoom = vh - r.bottom - GAP - PAD;
       const aboveRoom = r.top - GAP - PAD;
       let top;
@@ -331,9 +342,26 @@ const BookingCalendar = ({
       } else if (calH <= aboveRoom) {
         // Not enough room below → flip above the trigger.
         top = r.top - GAP - calH;
+      } else if (Math.max(belowRoom, aboveRoom) >= MIN_USABLE) {
+        // Doesn't fit whole on either side, but one side has enough room to
+        // be worth using. Take the roomier side and scroll internally.
+        //
+        // This branch used to pin the popover to the top of the screen,
+        // which on an ordinary laptop (~860px tall, two months = ~440px of
+        // calendar) put it straight over the date control that opened it:
+        // you could not see the dates you had already chosen while choosing
+        // the next one. A picker must never cover its own trigger.
+        if (belowRoom >= aboveRoom) {
+          top = r.bottom + GAP;
+          maxHeight = belowRoom;
+        } else {
+          maxHeight = aboveRoom;
+          top = r.top - GAP - maxHeight;
+        }
       } else {
-        // Doesn't fit either way (short viewport) — pin near the top of
-        // the screen and let the popover scroll internally.
+        // Genuinely no room on either side (a very short window). Pin near
+        // the top and scroll — covering the trigger is the lesser evil
+        // against a calendar too short to show a week.
         top = PAD;
         maxHeight = vh - 2 * PAD;
       }
