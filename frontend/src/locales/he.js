@@ -344,6 +344,7 @@ const he = {
         guests: 'אורחים',
         nights: 'לילות',
         night: 'לילה',
+        nightsLabel: 'לילות',
         messageLabel: 'הודעה',
         messagePlaceholder: 'הוסף הודעה לבעלים...',
         confirm: 'אישור הזמנה',

@@ -1,7 +1,7 @@
 import React from 'react';
 import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
-import { Calendar as CalendarIcon, Mail, MessageCircle, X } from 'lucide-react';
+import { Mail, MessageCircle, X } from 'lucide-react';
 import { Calendar } from '../ui/calendar';
 import { format } from 'date-fns';
 import { HOLIDAY_WINDOWS } from '../../constants/holidayWindows';
@@ -625,6 +625,9 @@ const BookingSidebar = ({
   // BookingCalendar to align its top-right corner with the check-in /
   // checkout row so it can escape the sidebar's `overflow-y-auto`.
   const dateRowRef = React.useRef(null);
+  // The same helper the calendar popover header uses. One arithmetic, so the
+  // two places that show a night count cannot drift apart.
+  const nights = nightsBetween(dateRange?.from, dateRange?.to);
 
   // `owner_whatsapp` comes from GET /properties/{id} only (never the list
   // endpoint) and is '' when the owner hasn't saved a number. Null here
@@ -863,59 +866,68 @@ const BookingSidebar = ({
 
       <div className="space-y-2.5" data-testid="booking-form">
         <div>
-          <label className="block text-sm font-medium mb-1.5">
-            {t('property.checkIn')} & {t('property.checkOut')}
-          </label>
-          <div className="grid grid-cols-2 gap-2" ref={dateRowRef}>
+          {/* One control, three columns — the two dates and what they add
+              up to — rather than two pills with a summary note beneath.
+
+              Every element plants a question. Two bare pills reading
+              "Mar 28" and "Apr 2" planted *which days are those, and how
+              many nights is that?* and left the reader to answer both. A
+              tracked label above each value answers the first, and giving
+              nights a column of its own inside the same border answers the
+              second while saying the three belong to one fact. A note
+              underneath said the opposite: a date row, plus a remark. */}
+          <div
+            className="grid grid-cols-[1fr_1fr_auto] rounded-xl border border-[#E5E5E5] bg-white overflow-hidden"
+            ref={dateRowRef}
+            data-testid="booking-range-summary"
+          >
             <button
               type="button"
               onClick={onCheckInClick}
-              className="flex items-center gap-2 px-3 py-2.5 rounded-lg border border-[#E5E5E5] text-sm text-left hover:border-black/30 transition-colors"
+              className="min-w-0 px-2.5 sm:px-3 py-2 text-start hover:bg-gray-50 transition-colors"
               data-testid="booking-start-date"
             >
-              <CalendarIcon size={14} className="text-gray-400 flex-shrink-0" />
-              <span className={dateRange.from ? 'text-black' : 'text-gray-400'}>
-                {dateRange.from ? format(dateRange.from, 'EEE, MMM d', { locale }) : t('property.checkIn')}
+              <span className="block text-[10px] font-semibold uppercase tracking-wider text-gray-500 truncate">
+                {t('property.checkIn')}
+              </span>
+              <span className={`block text-sm font-bold truncate ${dateRange.from ? 'text-black' : 'text-gray-400'}`}>
+                {dateRange.from ? format(dateRange.from, 'EEE, MMM d', { locale }) : '—'}
               </span>
             </button>
+            {/* Logical border, not `border-l`: under RTL the columns flip and
+                a physical side would draw the divider on the wrong edge. */}
             <button
               type="button"
               onClick={onCheckOutClick}
-              className="flex items-center gap-2 px-3 py-2.5 rounded-lg border border-[#E5E5E5] text-sm text-left hover:border-black/30 transition-colors"
+              className="min-w-0 px-2.5 sm:px-3 py-2 text-start border-s border-[#E5E5E5] hover:bg-gray-50 transition-colors"
               data-testid="booking-end-date"
             >
-              <CalendarIcon size={14} className="text-gray-400 flex-shrink-0" />
-              <span className={dateRange.to ? 'text-black' : 'text-gray-400'}>
-                {dateRange.to ? format(dateRange.to, 'EEE, MMM d', { locale }) : t('property.checkOut')}
+              <span className="block text-[10px] font-semibold uppercase tracking-wider text-gray-500 truncate">
+                {t('property.checkOut')}
+              </span>
+              <span className={`block text-sm font-bold truncate ${dateRange.to ? 'text-black' : 'text-gray-400'}`}>
+                {dateRange.to ? format(dateRange.to, 'EEE, MMM d', { locale }) : '—'}
               </span>
             </button>
-          </div>
-
-          {/* Selected range in words. A bare "Mar 28 – Apr 2" makes the
-              reader do two jobs: work out which days those are, and count
-              the nights. Both are stated here instead. */}
-          {dateRange.from && dateRange.to && (
+            {/* Not a button: nights is the consequence of the other two, not
+                a third thing to choose. A dash rather than 0 before a range
+                exists — "0 nights" asserts a stay of no nights, which is a
+                different claim from "nothing picked yet". */}
             <div
-              className="mt-2 flex items-center gap-2 text-xs text-gray-600"
-              data-testid="booking-range-summary"
+              className="px-2.5 sm:px-3 py-2 text-center border-s border-[#E5E5E5] bg-[#FBF8F2]"
+              data-testid="booking-nights-badge"
             >
-              <span
-                className="px-2 py-0.5 rounded-full font-semibold"
-                style={{ backgroundColor: '#FBF8F2', color: 'var(--brand-primary)' }}
-                data-testid="booking-nights-badge"
-              >
-                {nightsBetween(dateRange.from, dateRange.to)}{' '}
-                {nightsBetween(dateRange.from, dateRange.to) === 1
-                  ? t('property.night', 'night')
-                  : t('property.nights', 'nights')}
+              <span className="block text-[10px] font-semibold uppercase tracking-wider text-gray-500">
+                {t('property.nightsLabel', 'Nights')}
               </span>
-              <span className="truncate">
-                {format(dateRange.from, 'EEE, MMM d', { locale })}
-                {' – '}
-                {format(dateRange.to, 'EEE, MMM d, yyyy', { locale })}
+              <span
+                className="block text-sm font-bold"
+                style={{ color: nights ? 'var(--brand-primary)' : '#9CA3AF' }}
+              >
+                {nights || '—'}
               </span>
             </div>
-          )}
+          </div>
 
           {/* Quick Select Buttons for Longer Stays — hidden for subleases
               (short window) and for vacation rentals (the "+1 year" preset

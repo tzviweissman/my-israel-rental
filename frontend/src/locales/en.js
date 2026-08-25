@@ -359,6 +359,10 @@ const en = {
         // meant a one-night stay fell back to the English literal on the
         // Hebrew page.
         night: 'night',
+        // The COLUMN heading in the booking date control — a label, not
+        // the word used in "5 nights". Separate key so a language that
+        // inflects them differently can say so.
+        nightsLabel: 'Nights',
         messageLabel: 'Message',
         messagePlaceholder: 'Add a message to the owner...',
         confirm: 'Confirm Booking',
