@@ -30,6 +30,39 @@ _BULK_EDITABLE_FIELDS: set[str] = {
 }
 
 
+# The only rental types whose owner is ever SHOWN the cancellation field.
+# Mirrors the gate in AddPropertyModal.jsx and BulkUploadModal.jsx — if a
+# form starts asking long-term owners about refunds, this set is what has
+# to change first.
+_CANCELLATION_ASKED_TYPES = {"vacation", "short-term"}
+
+
+def _strip_unasked_cancellation_policy(doc: dict) -> list[str]:
+    """Drop the cancellation policy from listings nobody asked about it.
+
+    ``PropertyCreate`` defaults ``cancellation_policy`` to ``'flexible'``
+    for every listing, but only vacation and short-term owners are shown
+    the field. A long-term listing therefore stored "full refund 7+ days
+    before check-in" — a refund promise attributed to an owner who was
+    never given the option, and which the renter-facing page would print
+    in their name.
+
+    Storing nothing is the honest state.
+
+    Returns the keys it removed. The edit path writes with ``$set`` of a
+    full ``model_dump()``, so dropping a key from the dict only stops it
+    being re-written — the previously stored value survives untouched.
+    The caller needs this list to ``$unset`` it for real.
+    """
+    if doc.get("rental_type") in _CANCELLATION_ASKED_TYPES:
+        return []
+    removed = []
+    for key in ("cancellation_policy", "custom_cancellation_policy"):
+        doc.pop(key, None)
+        removed.append(key)
+    return removed
+
+
 def _normalize_rental_types(doc: dict) -> None:
     """Rewrite `rental_types` in-place so it's a de-duplicated list that
     always includes the primary `rental_type`. Empty / missing input →

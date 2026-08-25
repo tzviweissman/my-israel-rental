@@ -16,7 +16,7 @@ from utils.email import notify_renters_of_property_deletion, send_email
 from utils.events import publish
 from utils.saved_search import match_property_against_searches
 
-from .shared import _normalize_rental_types
+from .shared import _normalize_rental_types, _strip_unasked_cancellation_policy
 
 router = APIRouter()
 api_router = router
@@ -72,6 +72,7 @@ async def create_property(property_data: PropertyCreate, payload: dict = Depends
     # Normalize rental_types: always include the primary rental_type so
     # `rental_types` can be a single truth source for the multi-list filter.
     _normalize_rental_types(property_doc)
+    _strip_unasked_cancellation_policy(property_doc)
 
     await db.properties.insert_one(property_doc)
 
@@ -133,6 +134,10 @@ async def update_property(property_id: str, property_data: PropertyCreate, paylo
 
     update_doc = property_data.model_dump()
     _normalize_rental_types(update_doc)
+    # Also runs on edit, not just create: a listing switched from vacation
+    # to long-term must shed the policy it was legitimately given before.
+    # `$unset` rather than just omitting — see the helper's docstring.
+    unset_fields = _strip_unasked_cancellation_policy(update_doc)
 
     # `model_dump()` is a FULL dump, so every optional field the caller left
     # out arrives here as None and overwrites whatever was stored. For most
@@ -172,7 +177,10 @@ async def update_property(property_id: str, property_data: PropertyCreate, paylo
             update_doc["is_hidden"] = False
             update_doc.setdefault("pricing_review_reason", None)  # marker for $unset below
 
-    await db.properties.update_one({"id": property_id}, {"$set": update_doc})
+    update_ops: dict = {"$set": update_doc}
+    if unset_fields:
+        update_ops["$unset"] = {field: "" for field in unset_fields}
+    await db.properties.update_one({"id": property_id}, update_ops)
 
     # If we just cleared the quarantine flags, drop the reason/timestamp
     # fields entirely so the listing looks clean in future audits.
