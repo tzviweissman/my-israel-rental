@@ -105,7 +105,7 @@ const CustomServiceModal = ({ onClose, onAdd }) => {
         data-testid="custom-svc-modal"
       >
         <div className="flex justify-between items-center">
-          <h3 className="text-lg font-bold" style={{ fontFamily: 'Playfair Display' }}>Add a custom service</h3>
+          <h3 className="text-lg font-bold" style={{ fontFamily: 'var(--font-head)' }}>Add a custom service</h3>
           <button type="button" onClick={onClose} className="text-gray-400 hover:text-gray-700" data-testid="custom-svc-close">
             <X size={18} />
           </button>

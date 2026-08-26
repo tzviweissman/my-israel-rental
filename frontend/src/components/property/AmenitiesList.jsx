@@ -32,7 +32,7 @@ const AmenitiesList = ({ amenities }) => {
   if (!amenities || amenities.length === 0) return null;
   return (
     <div className="bg-white p-6 rounded-2xl border border-[#E5E5E5] mb-8">
-      <h2 className="text-2xl font-bold mb-4" style={{ fontFamily: 'Playfair Display' }}>
+      <h2 className="text-2xl font-bold mb-4" style={{ fontFamily: 'var(--font-head)' }}>
         {t('property.amenities')}
       </h2>
       <div className="grid grid-cols-2 gap-3">

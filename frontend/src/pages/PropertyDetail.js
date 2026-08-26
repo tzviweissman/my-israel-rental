@@ -440,7 +440,7 @@ const PropertyDetail = () => {
             </div>
 
             <div className="flex items-center justify-between mb-4">
-              <h1 className="text-4xl font-bold" style={{ fontFamily: 'Playfair Display' }} data-testid="property-title">
+              <h1 className="text-4xl font-bold" style={{ fontFamily: 'var(--font-head)' }} data-testid="property-title">
                 {property.title}
               </h1>
               <button
@@ -562,7 +562,7 @@ const PropertyDetail = () => {
             )}
 
             <div className="bg-white p-6 rounded-2xl border border-[#E5E5E5] mb-8">
-              <h2 className="text-2xl font-bold mb-4" style={{ fontFamily: 'Playfair Display' }}>{t('property.description')}</h2>
+              <h2 className="text-2xl font-bold mb-4" style={{ fontFamily: 'var(--font-head)' }}>{t('property.description')}</h2>
               <p className="text-gray-700 leading-relaxed">
                 {property.description || t('property.noDescription', 'No description provided yet.')}
               </p>
