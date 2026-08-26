@@ -350,10 +350,16 @@ const PropertyDetail = () => {
 
   return (
     <div className="min-h-screen" data-testid="property-detail-page">
-      {/* Spacer below the fixed nav. Sizes match Navigation.js logo heights
-          (mobile h-[110px], sm h-[140px], md h-[200px]) plus some padding so
-          the back button row never gets covered by the nav. */}
-      <div className="h-[130px] sm:h-[160px] md:h-[220px] bg-white"></div>
+      {/* Spacer below the fixed nav, sized to the nav as it is TODAY.
+          The old values (sm 160, md 220) were set against a nav whose logo
+          block was ~200px tall. That nav is now a 55-60px pill bar, so on
+          every screen above mobile this reserved about 160px of empty white
+          above the back button — and pushed the listing photo, the one thing
+          people came for, most of the way down the screen.
+          Measured: nav is 111px at 375, 55px at 768, 60px at 1024 and above.
+          Mobile keeps 130 because 111 + a small gap is genuinely what it
+          needs; the larger breakpoints only ever needed 100. */}
+      <div className="h-[130px] sm:h-[100px] md:h-[100px] bg-white"></div>
       
       <div className="max-w-7xl mx-auto px-4 md:px-6 pb-12 bg-white">
         <div className="flex items-center justify-between gap-2 mb-6">

@@ -59,7 +59,7 @@ const ImageGallery = ({ media, currentIndex, onIndexChange, alt, apiBase, seed }
           // `cover` is fine here: this is our own placeholder art, not a
           // photo of anyone's property, and it is chosen to crop well.
           className="w-full rounded-2xl object-cover"
-          style={{ height: 'min(75vw, 52vh, 520px)' }}
+          style={{ height: 'min(75vw, 67vh, 620px)' }}
         />
         <DefaultImageBadge />
       </div>
@@ -92,7 +92,7 @@ const ImageGallery = ({ media, currentIndex, onIndexChange, alt, apiBase, seed }
       <div
         className="overflow-hidden rounded-2xl bg-black mx-auto"
         style={{
-          height: 'min(75vw, 52vh, 520px)',
+          height: 'min(75vw, 67vh, 620px)',
           // Cap the WIDTH as well, so the box is roughly photo-shaped
           // instead of taking whatever the column happens to be.
           //
@@ -105,7 +105,7 @@ const ImageGallery = ({ media, currentIndex, onIndexChange, alt, apiBase, seed }
           // 1.6 is a compromise across what listings really contain: 4:3
           // stills, 3:2 cameras and 16:9 video frames. Nothing is cropped
           // at any of them, and none of them sit in much empty space.
-          maxWidth: 'calc(min(75vw, 52vh, 520px) * 1.6)',
+          maxWidth: 'calc(min(75vw, 67vh, 620px) * 1.6)',
         }}
       >
         <div
@@ -184,7 +184,7 @@ const ImageGallery = ({ media, currentIndex, onIndexChange, alt, apiBase, seed }
           className="flex gap-2 mt-3 overflow-x-auto pb-2 mx-auto"
           // Same ceiling as the photo above it, so the strip reads as
           // belonging to that image rather than to the page.
-          style={{ maxWidth: 'calc(min(75vw, 52vh, 520px) * 1.6)' }}
+          style={{ maxWidth: 'calc(min(75vw, 67vh, 620px) * 1.6)' }}
           data-testid="gallery-thumbnails"
         >
           {media.map((m, idx) => (
