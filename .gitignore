@@ -177,3 +177,9 @@ backend/private_contracts/
 !frontend/.env.example
 .claude/
 screenshots/
+
+# Throwaway verification scripts. Written to drive a browser or probe the
+# dev database while checking a change, then deleted. Ignored rather than
+# committed so a stray one cannot be mistaken for tooling — the real
+# checkers (screenshot.mjs, check-tile-contrast.mjs) have proper names.
+scripts/.tmp-*

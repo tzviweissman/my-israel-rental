@@ -29,6 +29,18 @@ import SafeImage from '../components/common/SafeImage';
 import { prettyArea } from '../utils/areaNames';
 import { accentFor, accentColors } from '../utils/businessAccent';
 
+/* The list column is CAPPED, and that cap is the whole point of the row.
+   The row puts the price at the far end so the eye can ladder down a column
+   comparing prices — which is the one thing a long list is good at, and it
+   only works while the ladder is short. Un-capped, a 1280px page stretched
+   each row to ~1540px and left 1,300px of empty white between a service's
+   name and its price: the two facts a customer is actually comparing, placed
+   as far apart as the screen allows.
+   720px keeps the title and the price in one glance at every width, and the
+   rows stay the shape they were designed as — a phone-density list, not a
+   full-bleed table. */
+const LIST_CLASS = 'flex flex-col gap-2 max-w-[720px]';
+
 // First screenful and each subsequent step. Twelve fills a desktop grid
 // three rows deep and a phone list well past the fold, without asking
 // for twenty-five photos nobody has scrolled to.
@@ -470,7 +482,7 @@ const BusinessPage = () => {
             <h3 className="text-base font-bold mb-3" style={{ fontFamily: 'var(--font-head)', color: 'var(--ink)' }}>
               {t('businessPage.mostPopular', 'Start here')}
             </h3>
-            <div className={effectiveLayout === 'list' ? 'flex flex-col gap-2' : 'grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4'}>
+            <div className={effectiveLayout === 'list' ? LIST_CLASS : 'grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4'}>
               {pinned.map((g) => (
                 <ServiceCard key={g.id} gig={g} variant={effectiveLayout === 'list' ? 'list' : 'grid'}
                   i18n={i18n} t={t} onClick={() => navigate(`/businesses/${g.id}`)} />
@@ -548,7 +560,7 @@ const BusinessPage = () => {
               )}
             </div>
           ) : (
-            <div className={effectiveLayout === 'list' ? 'flex flex-col gap-2' : 'grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4'}
+            <div className={effectiveLayout === 'list' ? LIST_CLASS : 'grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4'}
               data-testid="business-search-results">
               {searchResults.map((g) => (
                 <ServiceCard key={g.id} gig={g} variant={effectiveLayout === 'list' ? 'list' : 'grid'}
@@ -595,7 +607,7 @@ const BusinessPage = () => {
                   </div>
 
                   {effectiveLayout === 'list' ? (
-                    <div className="flex flex-col gap-2">
+                    <div className={LIST_CLASS}>
                       {visible.map((g) => (
                         <ServiceCard key={g.id} gig={g} variant="list" i18n={i18n} t={t}
                           onClick={() => navigate(`/businesses/${g.id}`)} />
@@ -614,7 +626,7 @@ const BusinessPage = () => {
             })}
           </div>
         ) : effectiveLayout === 'list' ? (
-          <div className="flex flex-col gap-2" data-testid="business-listings-list">
+          <div className={LIST_CLASS} data-testid="business-listings-list">
             {visibleListings.map((g) => (
               <ServiceCard
                 key={g.id}
