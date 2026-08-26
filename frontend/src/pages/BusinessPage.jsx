@@ -28,6 +28,7 @@ import BusinessCoverBand, { BusinessLogoMark } from '../components/marketplace/B
 import SafeImage from '../components/common/SafeImage';
 import { prettyArea } from '../utils/areaNames';
 import { accentFor, accentColors } from '../utils/businessAccent';
+import useCoverScrim from '../hooks/useCoverScrim';
 
 /* The list column is CAPPED, and that cap is the whole point of the row.
    The row puts the price at the far end so the eye can ladder down a column
@@ -101,6 +102,22 @@ const BusinessPage = () => {
     })();
     return () => { cancelled = true; };
   }, [slug]);
+
+  /* K2 — how much scrim this cover needs, sampled from the photo itself.
+
+     Declared HERE, above every early return, because `useCoverScrim` is a
+     hook: React counts hooks per render, and calling it after `if (missing)`
+     or `if (!biz)` meant a loading render ran fewer hooks than a loaded one.
+     That is "Rendered more hooks than during the previous render", and it
+     took the whole page to the error boundary.
+
+     `biz` is null on those early renders and the hook handles null by
+     returning the default, so nothing is lost by hoisting it. */
+  const coverSrc = biz
+    ? (biz.cover_url || (Array.isArray(biz.listings) && biz.listings[0]
+        ? getGigCover(biz.listings[0]) : null))
+    : null;
+  const scrim = useCoverScrim(coverSrc);
 
   if (missing) {
     return (
@@ -273,13 +290,18 @@ const BusinessPage = () => {
                     "this photo is bright, use dark text" and being wrong
                     gives you unreadable text on somebody's storefront. */}
                 <div
-                  className="absolute inset-x-0 bottom-0 pointer-events-none"
+                  className="absolute inset-x-0 bottom-0 pointer-events-none transition-opacity duration-500"
                   style={{
                     height: '58%',
-                    background:
-                      'linear-gradient(to top, rgba(0,0,0,0.42) 0%, rgba(0,0,0,0.14) 55%, rgba(0,0,0,0) 100%)',
+                    // K2 — strength derived from the photo's own lower band.
+                    // A night shot needs barely any; a white-tiled kitchen
+                    // needs a lot. `scrim` falls back to the fixed value on
+                    // any sampling failure, so this can only improve on the
+                    // previous behaviour, never break it.
+                    background: `linear-gradient(to top, rgba(0,0,0,${scrim}) 0%, rgba(0,0,0,${scrim * 0.33}) 55%, rgba(0,0,0,0) 100%)`,
                   }}
                   data-testid="business-cover-scrim"
+                  data-scrim={scrim.toFixed(2)}
                 />
               </>
             ) : (
