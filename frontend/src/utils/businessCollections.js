@@ -41,6 +41,51 @@ const titleCase = (s) =>
  *   mode:   which rule produced them, so the UI can prompt an owner
  *           whose page is only held together by the fallback.
  */
+/**
+ * How answerable a listing is, 0-4. Higher sorts first WITHIN a group.
+ *
+ * Nothing on this page decided what a first-time visitor sees first, so the
+ * order was whatever the database returned. That matters: the first two
+ * rows are most of what a shared link gets looked at, and landing on a
+ * nameless service with no photo and no price is the version of this page
+ * least likely to be sent to anyone.
+ *
+ * Deliberately NOT a popularity or a demand signal. There is no data for
+ * either, and inventing one would be exactly the fabricated-demand pattern
+ * this project refuses. This ranks how much of the customer's question the
+ * listing can answer — a photo, a description, a price, a stated duration
+ * or contents — so the listings that can be judged come first.
+ *
+ * The side effect is the honest kind: an owner who fills their listings in
+ * gets seen first, and the ones who have not are not hidden, only later.
+ *
+ * Ties keep their original relative order (Array#sort is stable), so a
+ * business whose listings are all equally complete sees no reshuffling.
+ */
+export function answerability(gig) {
+  if (!gig) return 0;
+  let score = 0;
+  const tiers = Array.isArray(gig.tiers) ? gig.tiers : [];
+  const products = Array.isArray(gig.products) ? gig.products : [];
+
+  const hasPhoto = Boolean(
+    (Array.isArray(gig.gallery) && gig.gallery[0])
+    || tiers.some((t) => Array.isArray(t?.images) && t.images[0])
+    || products.some((p) => Array.isArray(p?.images) && p.images[0]),
+  );
+  if (hasPhoto) score += 1;
+  if (String(gig.description || '').trim().length > 20) score += 1;
+  if (Number.isFinite(Number(gig.cheapest_price))) score += 1;
+  if (tiers.some((t) => Number(t?.duration_minutes) > 0
+      || (Array.isArray(t?.features) && t.features.length))) score += 1;
+  return score;
+}
+
+/** Most answerable first, stable within equal scores. */
+function byAnswerability(services) {
+  return [...services].sort((a, b) => answerability(b) - answerability(a));
+}
+
 export function buildCollections(listings = [], collections = [], { t } = {}) {
   const all = Array.isArray(listings) ? listings : [];
   const label = (key, fallback) => (t ? t(key, fallback) : fallback);
@@ -60,7 +105,7 @@ export function buildCollections(listings = [], collections = [], { t } = {}) {
           .map((id) => byId.get(id))
           .filter(Boolean);
         services.forEach((g) => used.add(g.id));
-        return { id: c.id, name: c.name, description: c.description || '', services };
+        return { id: c.id, name: c.name, description: c.description || '', services: byAnswerability(services) };
       })
       .filter((g) => g.services.length);
 
@@ -70,7 +115,7 @@ export function buildCollections(listings = [], collections = [], { t } = {}) {
         id: '__more__',
         name: label('businessPage.moreFrom', 'More from this business'),
         description: '',
-        services: leftover,
+        services: byAnswerability(leftover),
       });
     }
     return { groups, mode: 'owner' };
@@ -78,7 +123,7 @@ export function buildCollections(listings = [], collections = [], { t } = {}) {
 
   if (all.length < AUTO_GROUP_MIN) {
     return {
-      groups: [{ id: '__all__', name: '', description: '', services: all }],
+      groups: [{ id: '__all__', name: '', description: '', services: byAnswerability(all) }],
       mode: 'flat',
     };
   }
@@ -109,7 +154,7 @@ export function buildCollections(listings = [], collections = [], { t } = {}) {
       id: `auto-${key}`,
       name: titleCase(key),
       description: '',
-      services,
+      services: byAnswerability(services),
     }));
 
   if (strays.length) {
@@ -117,7 +162,7 @@ export function buildCollections(listings = [], collections = [], { t } = {}) {
       id: '__more__',
       name: label('businessPage.moreFrom', 'More from this business'),
       description: '',
-      services: strays,
+      services: byAnswerability(strays),
     });
   }
 

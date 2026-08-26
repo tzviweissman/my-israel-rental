@@ -1651,6 +1651,12 @@ const en = {
         hours: '{{n}} hours',
         help: 'If you have not answered by then, the time is released so someone else can book it. You get a reminder halfway through.',
       },
+      serviceFacts: {
+        minutes: '{{n}} min',
+        hours: '{{n}}h',
+        hoursMinutes: '{{h}}h {{m}}m',
+        includesN: '{{first}} +{{n}} more',
+      },
       leadOutcome: {
         title: 'Did these get booked?',
         why: 'Answering keeps your calendar honest, so nobody books a time you have already given away.',

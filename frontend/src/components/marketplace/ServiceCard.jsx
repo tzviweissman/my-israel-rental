@@ -6,6 +6,8 @@ import { localizedTitle, localizedDescription } from '../../utils/gigLocale';
 import { isAvailableNow, getGigCover } from '../../utils/gigAvailability';
 import { gigPriceParts } from '../../utils/gigPrice';
 import { prettyArea } from '../../utils/areaNames';
+import { serviceFacts } from '../../utils/serviceFacts';
+import { Clock, Check } from 'lucide-react';
 
 const GOLD = 'var(--gold)';
 
@@ -156,6 +158,10 @@ const ServiceRow = ({ gig, onClick, i18n, t }) => {
   const cover = getGigCover(gig);
   const price = gigPriceParts(gig);
   const desc = (localizedDescription(gig, i18n) || '').trim();
+  // What a customer needs before they will ask: how long, and what is in
+  // it. Both come off the owner's own tiers, and both are omitted entirely
+  // when the owner has not said — an invented duration is worse than none.
+  const facts = serviceFacts(gig, t);
   return (
     <button
       onClick={onClick}
@@ -187,6 +193,34 @@ const ServiceRow = ({ gig, onClick, i18n, t }) => {
             its description breaks the rhythm the list depends on. */}
         {desc && (
           <p className="text-xs text-[var(--brand-muted)] truncate mt-0.5">{desc}</p>
+        )}
+        {/* One quiet line of fact under the description. Deliberately not
+            a second description: a duration and a count are scannable
+            down a column, a sentence is not. */}
+        {(facts.duration || facts.includes.length > 0) && (
+          <p className="mt-1 flex items-center gap-2.5 text-[11px] flex-wrap"
+             style={{ color: 'var(--brand-muted)' }}
+             data-testid={`gig-facts-${gig.id}`}>
+            {facts.duration && (
+              <span className="inline-flex items-center gap-1">
+                <Clock size={11} aria-hidden="true" />{facts.duration}
+              </span>
+            )}
+            {facts.includes.length > 0 && (
+              <span className="inline-flex items-center gap-1 min-w-0">
+                <Check size={11} aria-hidden="true" className="shrink-0" />
+                <span className="truncate">
+                  {facts.includes.length === 1
+                    ? facts.includes[0]
+                    : t('serviceFacts.includesN', {
+                        defaultValue: '{{first}} +{{n}} more',
+                        first: facts.includes[0],
+                        n: facts.includes.length - 1,
+                      })}
+                </span>
+              </span>
+            )}
+          </p>
         )}
         {gig.rating_count > 0 && (
           <div className="mt-1">
