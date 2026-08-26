@@ -56,6 +56,8 @@ const ImageGallery = ({ media, currentIndex, onIndexChange, alt, apiBase, seed }
           alt={alt || ''}
           loading="lazy"
           decoding="async"
+          // `cover` is fine here: this is our own placeholder art, not a
+          // photo of anyone's property, and it is chosen to crop well.
           className="w-full rounded-2xl object-cover"
           style={{ height: 'min(75vw, 52vh, 520px)' }}
         />
@@ -88,8 +90,23 @@ const ImageGallery = ({ media, currentIndex, onIndexChange, alt, apiBase, seed }
           into view the "1 / 6" counter sat on top of it. */}
       <div className="relative">
       <div
-        className="overflow-hidden rounded-2xl bg-black"
-        style={{ height: 'min(75vw, 52vh, 520px)' }}
+        className="overflow-hidden rounded-2xl bg-black mx-auto"
+        style={{
+          height: 'min(75vw, 52vh, 520px)',
+          // Cap the WIDTH as well, so the box is roughly photo-shaped
+          // instead of taking whatever the column happens to be.
+          //
+          // Height alone made it about 2.5:1 on a laptop — a letterbox
+          // slot. With `contain` that meant a quarter of the frame was
+          // black bars; with `cover` it meant quietly cropping the top and
+          // bottom off the owner's photo. Neither is acceptable, and the
+          // shape was the actual cause of both.
+          //
+          // 1.6 is a compromise across what listings really contain: 4:3
+          // stills, 3:2 cameras and 16:9 video frames. Nothing is cropped
+          // at any of them, and none of them sit in much empty space.
+          maxWidth: 'calc(min(75vw, 52vh, 520px) * 1.6)',
+        }}
       >
         <div
           className="flex h-full transition-transform duration-500 ease-in-out"
@@ -103,7 +120,18 @@ const ImageGallery = ({ media, currentIndex, onIndexChange, alt, apiBase, seed }
                 srcSet={srcSet(toSrc(m.url), 1200)}
                 sizes="(max-width: 1024px) 100vw, 1200px"
                 alt={`${alt} - ${idx + 1}`}
-                className="w-full h-full object-cover flex-shrink-0"
+                // `contain`, not `cover`. The hero box is capped against the
+                // VIEWPORT, so its shape is whatever the window happens to
+                // be — roughly 2.5:1 on a laptop. `cover` fills that by
+                // cropping whatever does not fit, which on a 16:9 phone
+                // video frame silently cut the top and bottom off: a sign
+                // above the counter and an object on the floor, both gone.
+                //
+                // A listing photo is evidence about a property. Cropping it
+                // to fit a box is the site editing what the owner showed,
+                // and the renter cannot tell it happened. Letterboxing is
+                // visible and honest; the black surround is already there.
+                className="w-full h-full object-contain flex-shrink-0"
                 data-testid={idx === currentIndex ? 'gallery-main-image' : undefined}
               />
             ) : (
@@ -152,7 +180,13 @@ const ImageGallery = ({ media, currentIndex, onIndexChange, alt, apiBase, seed }
       )}
       </div>
       {media.length > 1 && (
-        <div className="flex gap-2 mt-3 overflow-x-auto pb-2" data-testid="gallery-thumbnails">
+        <div
+          className="flex gap-2 mt-3 overflow-x-auto pb-2 mx-auto"
+          // Same ceiling as the photo above it, so the strip reads as
+          // belonging to that image rather than to the page.
+          style={{ maxWidth: 'calc(min(75vw, 52vh, 520px) * 1.6)' }}
+          data-testid="gallery-thumbnails"
+        >
           {media.map((m, idx) => (
             <div
               key={`thumb-${m.url}`}
