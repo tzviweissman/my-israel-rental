@@ -22,6 +22,7 @@ import BusinessSelector, { ALL, readStoredBusiness } from './BusinessSelector';
 import PerformancePanel from './PerformancePanel';
 import EditListingModal from './EditListingModal';
 import LeadOutcomePanel from './LeadOutcomePanel';
+import ChipSelect from '../common/ChipSelect';
 import { nounKey } from '../../utils/businessNoun';
 
 const ProfileEditModal = ({ API, token, initial, onClose, onSaved }) => {
@@ -36,6 +37,10 @@ const ProfileEditModal = ({ API, token, initial, onClose, onSaved }) => {
   const [languages, setLanguages] = useState(initial?.languages || []);
   const [credentials, setCredentials] = useState(initial?.credentials || '');
   const [credentialDocs, setCredentialDocs] = useState(initial?.credential_docs || []);
+  // How long a pending request holds its slot. The backend already honoured
+  // this field and defaulted to 24; until now nothing could set it, so every
+  // business was on the default whether it suited them or not.
+  const [holdHours, setHoldHours] = useState(initial?.booking_hold_hours || 24);
   const [languageList, setLanguageList] = useState([]);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
@@ -105,7 +110,8 @@ const ProfileEditModal = ({ API, token, initial, onClose, onSaved }) => {
     try {
       await axios.patch(
         `${API}/marketplace/providers/me`,
-        { bio, tagline, whatsapp, avatar, languages, credentials, credential_docs: credentialDocs },
+        { bio, tagline, whatsapp, avatar, languages, credentials,
+          credential_docs: credentialDocs, booking_hold_hours: holdHours },
         { headers: { Authorization: `Bearer ${token}` } },
       );
       toast.success('Profile updated');
@@ -155,6 +161,25 @@ const ProfileEditModal = ({ API, token, initial, onClose, onSaved }) => {
         <div>
           <label className="text-xs font-semibold text-gray-700">Tagline</label>
           <input value={tagline} onChange={(e) => setTagline(e.target.value)} placeholder="e.g. Eco-friendly cleaning in Tel Aviv" className="w-full mt-1 px-3 py-2 rounded-lg border border-gray-200 text-sm" data-testid="provider-tagline-input" maxLength={80} />
+        </div>
+        <div>
+          {/* Chips, not a dropdown: three options, and the reader should be
+              able to see the whole choice without opening anything. */}
+          <ChipSelect
+            label={t('holdWindow.label', 'Hold a requested time for')}
+            value={holdHours}
+            onChange={setHoldHours}
+            options={[12, 24, 48].map((h) => ({
+              value: h,
+              label: t('holdWindow.hours', { defaultValue: '{{n}} hours', n: h }),
+            }))}
+            name="booking_hold_hours"
+            testid="provider-hold-hours"
+          />
+          <p className="text-xs text-gray-500 mt-1.5">
+            {t('holdWindow.help',
+              'If you have not answered by then, the time is released so someone else can book it. You get a reminder halfway through.')}
+          </p>
         </div>
         <div>
           <label className="text-xs font-semibold text-gray-700">Bio</label>

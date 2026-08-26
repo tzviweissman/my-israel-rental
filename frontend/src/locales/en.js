@@ -1646,6 +1646,11 @@ const en = {
       // popover, and mobile QuickChips strip. Keep keys flat (no deep
       // nesting) since the i18n lookups in code use `stays.<key>`.
       // ---------------------------------------------------------------
+      holdWindow: {
+        label: 'Hold a requested time for',
+        hours: '{{n}} hours',
+        help: 'If you have not answered by then, the time is released so someone else can book it. You get a reminder halfway through.',
+      },
       leadOutcome: {
         title: 'Did these get booked?',
         why: 'Answering keeps your calendar honest, so nobody books a time you have already given away.',

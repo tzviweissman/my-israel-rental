@@ -135,6 +135,11 @@ async def public_provider(user_id: str):
 
 
 
+# Imported, not restated: two lists of allowed hold lengths would drift,
+# and the one that drifted would be the one nobody tested.
+from .gigs import HOLD_HOURS_CHOICES  # noqa: E402
+
+
 @router.patch("/providers/me")
 async def update_provider(payload: ProviderPatch, user=Depends(verify_token)):
     await _ensure_provider_record(user["user_id"])
@@ -153,6 +158,13 @@ async def update_provider(payload: ProviderPatch, user=Depends(verify_token)):
             d if isinstance(d, dict) else d.model_dump()
             for d in update["credential_docs"][:8]
         ]
+    if "booking_hold_hours" in update:
+        # Silently drop an unoffered value rather than rejecting the whole
+        # request: this field rides along with ordinary profile saves, and
+        # a stale bundle sending 36 should not cost someone their bio edit.
+        # The reader (_hold_hours) falls back to 24 either way.
+        if update["booking_hold_hours"] not in HOLD_HOURS_CHOICES:
+            update.pop("booking_hold_hours")
     await db.marketplace_providers.update_one({"user_id": user["user_id"]}, {"$set": update})
     prov = await db.marketplace_providers.find_one({"user_id": user["user_id"]})
     prov["id"] = prov.pop("_id")

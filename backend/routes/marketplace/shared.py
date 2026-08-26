@@ -476,6 +476,11 @@ class ProviderPatch(BaseModel):
     languages: Optional[list[str]] = None
     credentials: Optional[str] = None
     credential_docs: Optional[list[CredentialDoc]] = None
+    # How long a pending request holds its slot before it is released.
+    # Validated against the offered set in the handler rather than by a
+    # pattern here, so a stale client sending 36 gets the default instead
+    # of a 422 on an unrelated profile save.
+    booking_hold_hours: Optional[int] = None
 
 
 class BookingIn(BaseModel):
