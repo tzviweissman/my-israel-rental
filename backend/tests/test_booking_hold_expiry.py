@@ -198,6 +198,62 @@ def test_halfway_nudge_fires_once():
     assert n == 1
 
 
+def test_quiet_hours_release_immediately_but_announce_later(monkeypatch):
+    """3am: the slot comes back, the phones stay quiet.
+
+    The release must never wait on the clock — an owner losing a slot for
+    eight hours because it lapsed overnight is the bug this feature exists
+    to remove. Only the message waits.
+    """
+    from routes.marketplace import gigs
+    bid = _run(_insert("pending", expires_in_hours=-1, slot="16:00", created_hours_ago=25))
+
+    monkeypatch.setattr(gigs, "_is_waking_hours", lambda *_a, **_k: False)
+    result = _run(gigs.sweep_expired_holds())
+    assert result["expired"] >= 1
+    assert _run(_status(bid)) == "expired", "the hold did not release overnight"
+
+    client, db = _db()
+    quiet_notes = _run(db.notifications.count_documents({"booking_id": bid}))
+    client.close()
+    assert quiet_notes == 0, f"woke someone at 3am: {quiet_notes} notifications"
+
+    # Morning. The catch-up pass announces what was released overnight.
+    monkeypatch.setattr(gigs, "_is_waking_hours", lambda *_a, **_k: True)
+    morning = _run(gigs.sweep_expired_holds())
+    assert morning["caught_up"] >= 1
+
+    client, db = _db()
+    notes = _run(db.notifications.count_documents({"booking_id": bid}))
+    client.close()
+    assert notes == 2
+
+    # And not again on the next sweep fifteen minutes later.
+    _run(gigs.sweep_expired_holds())
+    client, db = _db()
+    again = _run(db.notifications.count_documents({"booking_id": bid}))
+    client.close()
+    assert again == 2, "the catch-up pass re-announced an already-announced expiry"
+
+
+def test_no_halfway_nudge_during_quiet_hours(monkeypatch):
+    from routes.marketplace import gigs
+    bid = _run(_insert("pending", expires_in_hours=11, slot="17:00", created_hours_ago=13))
+    monkeypatch.setattr(gigs, "_is_waking_hours", lambda *_a, **_k: False)
+    assert _run(gigs.sweep_expired_holds())["nudged"] == 0
+
+    monkeypatch.setattr(gigs, "_is_waking_hours", lambda *_a, **_k: True)
+    assert _run(gigs.sweep_expired_holds())["nudged"] >= 1
+
+
+def test_a_lapsed_hold_is_never_nudged():
+    """Reminding someone to answer a request that has already been released
+    is noise at best, and misleading at worst."""
+    from routes.marketplace.gigs import sweep_expired_holds
+    _run(_insert("pending", expires_in_hours=-2, slot="18:00", created_hours_ago=26))
+    assert _run(sweep_expired_holds())["nudged"] == 0
+
+
 def test_hold_hours_falls_back_to_24_for_an_unknown_business():
     from routes.marketplace.gigs import DEFAULT_HOLD_HOURS, _hold_hours
     assert _run(_hold_hours(None)) == DEFAULT_HOLD_HOURS

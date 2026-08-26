@@ -961,6 +961,21 @@ async def _hold_hours(provider_user_id: Optional[str]) -> int:
     return raw if raw in HOLD_HOURS_CHOICES else DEFAULT_HOLD_HOURS
 
 
+# Israel local hours during which it is reasonable to buzz someone's phone.
+# The RELEASE is always immediate — a slot never stays held because of the
+# time of day. Only the message waits. An expiry notification landing at
+# 03:00, on both phones at once, reads as the site cancelling things
+# overnight, which is a worse experience than the delay it avoids.
+QUIET_START_HOUR = 22
+QUIET_END_HOUR = 8
+
+
+def _is_waking_hours(now: Optional[datetime] = None) -> bool:
+    """True when it is a civil hour to send a notification in Israel."""
+    local = (now or datetime.now(UTC)).astimezone(_IL_TZ)
+    return QUIET_END_HOUR <= local.hour < QUIET_START_HOUR
+
+
 def _live_hold_query() -> dict:
     """Bookings that occupy their slot RIGHT NOW.
 
@@ -1212,6 +1227,16 @@ async def _notify(user_id: Optional[str], kind: str, message: str, booking_id: s
         logger.exception("notification insert failed for booking %s", booking_id)
 
 
+async def _empty_aiter():
+    """An async iterable that yields nothing.
+
+    `async for x in ([] if cond else cursor)` looks reasonable and is not:
+    a list has no `__aiter__`, so the guard raises instead of skipping.
+    """
+    return
+    yield  # pragma: no cover - unreachable, makes this a generator
+
+
 async def sweep_expired_holds() -> dict:
     """Flip lapsed holds to `expired`, and nudge owners at the halfway mark.
 
@@ -1225,8 +1250,10 @@ async def sweep_expired_holds() -> dict:
     """
     now = datetime.now(UTC)
     now_iso = now.isoformat()
+    waking = _is_waking_hours(now)
     expired = 0
     nudged = 0
+    caught_up = 0
 
     # 1. Lapsed holds.
     async for b in db.marketplace_bookings.find(
@@ -1245,6 +1272,10 @@ async def sweep_expired_holds() -> dict:
             if not res.modified_count:
                 continue
             expired += 1
+            if not waking:
+                # Released, but not announced yet. The pass below picks it
+                # up on the first sweep after 08:00.
+                continue
             when = " ".join(x for x in (b.get("preferred_date"), b.get("time_slot")) if x)
             # Deliberately not "your booking expired", which reads as the
             # customer's fault for a delay that was not theirs.
@@ -1260,18 +1291,56 @@ async def sweep_expired_holds() -> dict:
                 f"The time is bookable again.".strip(),
                 b["_id"],
             )
+            await db.marketplace_bookings.update_one(
+                {"_id": b["_id"]}, {"$set": {"expiry_notified_at": now_iso}},
+            )
         except Exception:  # noqa: BLE001
             logger.exception("could not expire booking %s", b.get("_id"))
+
+    # 1b. Anything released during quiet hours, announced now. Keyed on
+    #     `expiry_notified_at` being absent rather than on a time window, so
+    #     a sweep that did not run overnight still catches up rather than
+    #     losing the message entirely.
+    if waking:
+        async for b in db.marketplace_bookings.find(
+            {"status": STATUS_EXPIRED, "expiry_notified_at": {"$exists": False}},
+            {"_id": 1, "provider_user_id": 1, "client_user_id": 1,
+             "preferred_date": 1, "time_slot": 1},
+        ).limit(200):
+            res = await db.marketplace_bookings.update_one(
+                {"_id": b["_id"], "expiry_notified_at": {"$exists": False}},
+                {"$set": {"expiry_notified_at": now_iso}},
+            )
+            if not res.modified_count:
+                continue
+            caught_up += 1
+            when = " ".join(x for x in (b.get("preferred_date"), b.get("time_slot")) if x)
+            await _notify(
+                b.get("client_user_id"), "booking_expired",
+                f"No reply about {when or 'your request'}, so the time is free "
+                f"again — you can request another.".strip(),
+                b["_id"],
+            )
+            await _notify(
+                b.get("provider_user_id"), "booking_expired",
+                f"A request for {when or 'a slot'} expired with no reply. "
+                f"The time is bookable again.".strip(),
+                b["_id"],
+            )
 
     # 2. The halfway nudge. One message, once — `hold_nudged_at` is the
     #    guard, because a sweep running every 15 minutes would otherwise
     #    send the same reminder dozens of times before the hold lapsed.
-    async for b in db.marketplace_bookings.find(
+    nudge_cursor = db.marketplace_bookings.find(
         {"status": "pending", "hold_nudged_at": {"$exists": False},
+         # `$gt now` also means a hold that has already lapsed is never
+         # nudged — a reminder to answer something already released is
+         # noise at best and misleading at worst.
          "hold_expires_at": {"$gt": now_iso}},
         {"_id": 1, "provider_user_id": 1, "created_at": 1, "hold_expires_at": 1,
          "preferred_date": 1, "time_slot": 1},
-    ):
+    ) if waking else None
+    async for b in (nudge_cursor or _empty_aiter()):
         try:
             created = datetime.fromisoformat(b["created_at"])
             expires = datetime.fromisoformat(b["hold_expires_at"])
@@ -1295,9 +1364,12 @@ async def sweep_expired_holds() -> dict:
             b["_id"],
         )
 
-    if expired or nudged:
-        logger.info("[marketplace] hold sweep: %d expired, %d nudged", expired, nudged)
-    return {"expired": expired, "nudged": nudged}
+    if expired or nudged or caught_up:
+        logger.info(
+            "[marketplace] hold sweep: %d expired, %d announced late, %d nudged",
+            expired, caught_up, nudged,
+        )
+    return {"expired": expired, "nudged": nudged, "caught_up": caught_up}
 
 
 async def booking_hold_sweep_loop() -> None:
