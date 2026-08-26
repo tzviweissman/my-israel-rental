@@ -98,6 +98,7 @@ const en = {
         failed: 'Could not create that code',
       },
       businessPage: {
+        payVia: 'Pay this business via',
         mostPopular: 'Start here',
         searchThis: 'Search this business',
         noMatches: 'Nothing matches “{{q}}”.',

@@ -89,6 +89,7 @@ const he = {
         failed: 'לא הצלחנו ליצור את הקוד',
       },
       businessPage: {
+        payVia: 'תשלום לעסק דרך',
         mostPopular: 'התחילו כאן',
         searchThis: 'חיפוש בעסק הזה',
         noMatches: 'לא נמצאו תוצאות ל“{{q}}”.',

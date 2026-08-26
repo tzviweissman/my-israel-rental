@@ -14,7 +14,7 @@ import React, { useContext, useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import axios from 'axios';
-import { Star, BadgeCheck, MapPin, Loader2, MessageCircle, LayoutGrid, List, Zap, Search } from 'lucide-react';
+import { Star, BadgeCheck, MapPin, Loader2, MessageCircle, LayoutGrid, List, Zap, Search, CreditCard } from 'lucide-react';
 import { API, AuthContext } from '../App';
 import PageMeta from '../components/PageMeta';
 import ServiceCard from '../components/marketplace/ServiceCard';
@@ -416,6 +416,38 @@ const BusinessPage = () => {
                   data-testid="business-about">
                   {biz.description}
                 </p>
+              )}
+
+              {/* P1 — the owner's own payment links.
+                  Secondary by construction: outline, not filled. Messaging
+                  the business is still the one filled action on this
+                  region, and a payment button competing with it would push
+                  people to pay before they have agreed what for.
+                  Each is labelled with the provider it goes to, so nobody
+                  presses a generic "Pay" and lands somewhere unexpected. */}
+              {Array.isArray(biz.payment_links) && biz.payment_links.length > 0 && (
+                <div className="mt-3 flex flex-wrap items-center gap-2" data-testid="business-payment-links">
+                  <span className="text-xs" style={{ color: 'var(--brand-muted)' }}>
+                    {t('businessPage.payVia', 'Pay this business via')}
+                  </span>
+                  {biz.payment_links.map((p) => (
+                    <a
+                      key={p.url}
+                      href={p.url}
+                      target="_blank"
+                      // `noopener` because the destination is owner-supplied:
+                      // without it the payment page can reach back through
+                      // window.opener and navigate this tab.
+                      rel="noopener noreferrer nofollow"
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold border transition-colors hover:bg-black/[0.03]"
+                      style={{ borderColor: 'var(--brand-border)', color: 'var(--brand-primary)' }}
+                      data-testid={`business-payment-link-${p.label}`}
+                    >
+                      <CreditCard size={13} aria-hidden="true" />
+                      {p.label}
+                    </a>
+                  ))}
+                </div>
               )}
 
               {/* Areas as chips rather than a comma list: a business

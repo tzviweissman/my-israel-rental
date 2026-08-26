@@ -119,6 +119,7 @@ def new_business_doc(
         # these existed.
         "cover_url": None,
         "accent": "stone",
+        "payment_links": [],
         "active": True,
         "created_at": now,
         "updated_at": now,

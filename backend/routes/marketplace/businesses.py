@@ -88,6 +88,10 @@ class BusinessIn(BaseModel):
     # rejected — an accent is decoration, and a stale client sending a
     # retired name should not cost the owner the rest of their save.
     accent: Optional[str] = None
+    # P1 — the owner's own payment links. Validated against a closed
+    # allowlist in utils/payment_links: an arbitrary URL rendered as a
+    # button on a page carrying our name is an open redirect.
+    payment_links: Optional[list[PaymentLink]] = None
     hours: Optional[str] = Field(None, max_length=200)
     languages: Optional[list[str]] = None
     founded_year: Optional[int] = Field(None, ge=1800, le=2100)
@@ -102,11 +106,18 @@ class BusinessIn(BaseModel):
     pinned_service_ids: Optional[list[str]] = Field(None, max_length=3)
 
 
+from utils.payment_links import PaymentLinkError, clean_payment_links  # noqa: E402
+
 # The four accents a business may choose (spec K1). NAMES only — the hex
 # values live in frontend/src/utils/businessAccent.js and nowhere else, so a
 # palette change is a code change and no business is left holding a colour
 # the design system has retired.
 ACCENTS = ("stone", "sea", "deep", "gold")
+
+
+class PaymentLink(BaseModel):
+    label: Optional[str] = Field(None, max_length=40)
+    url: str
 
 
 class BusinessPatch(BaseModel):
@@ -122,6 +133,10 @@ class BusinessPatch(BaseModel):
     # rejected — an accent is decoration, and a stale client sending a
     # retired name should not cost the owner the rest of their save.
     accent: Optional[str] = None
+    # P1 — the owner's own payment links. Validated against a closed
+    # allowlist in utils/payment_links: an arbitrary URL rendered as a
+    # button on a page carrying our name is an open redirect.
+    payment_links: Optional[list[PaymentLink]] = None
     active: Optional[bool] = None
     hours: Optional[str] = Field(None, max_length=200)
     languages: Optional[list[str]] = None
@@ -321,6 +336,14 @@ async def update_business(business_id: str, payload: BusinessPatch, user=Depends
         update["pinned_service_ids"] = (payload.pinned_service_ids or [])[:3]
     if "collections" in provided:
         update["collections"] = [c.model_dump() for c in (payload.collections or [])]
+    if "payment_links" in provided:
+        # Refused loudly, not dropped. An owner who pasted a link from an
+        # unsupported provider needs to know that is the reason rather than
+        # watching it vanish on save.
+        try:
+            update["payment_links"] = clean_payment_links(payload.payment_links)
+        except PaymentLinkError as e:
+            raise HTTPException(status_code=400, detail=str(e)) from e
     if "accent" in provided:
         # Coerced, not rejected. An accent is decoration: a stale client
         # sending a name we have since retired should not 422 and cost the
@@ -532,6 +555,7 @@ async def public_business(
         # holds a copy of the design system.
         "accent": biz.get("accent") or "stone",
         "cover_url": biz.get("cover_url"),
+        "payment_links": biz.get("payment_links") or [],
         # C1 — raw groups. Which services actually land in which group,
         # and what happens to the ones in none, is decided in one place
         # on the client (utils/businessCollections.js) so the rules cannot
