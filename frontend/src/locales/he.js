@@ -89,6 +89,8 @@ const he = {
         failed: 'לא הצלחנו ליצור את הקוד',
       },
       businessPage: {
+        hostedOn: 'הדף הזה מתארח ב-MyIsraelRental',
+        listYours: 'רשמו את העסק שלכם — בחינם',
         payVia: 'תשלום לעסק דרך',
         mostPopular: 'התחילו כאן',
         searchThis: 'חיפוש בעסק הזה',

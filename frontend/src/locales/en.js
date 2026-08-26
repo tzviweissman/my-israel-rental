@@ -98,6 +98,8 @@ const en = {
         failed: 'Could not create that code',
       },
       businessPage: {
+        hostedOn: 'This page is on MyIsraelRental',
+        listYours: 'List your business — free',
         payVia: 'Pay this business via',
         mostPopular: 'Start here',
         searchThis: 'Search this business',

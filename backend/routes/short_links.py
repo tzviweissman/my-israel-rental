@@ -284,14 +284,19 @@ async def _preview_meta(target_type: str, target_id: str) -> dict[str, str]:
     if target_type == "business":
         biz = await db.businesses.find_one(
             {"$or": [{"_id": target_id}, {"slug": target_id}]},
-            {"name": 1, "description": 1, "logo_url": 1, "categories": 1, "areas": 1, "_id": 1},
+            {"name": 1, "description": 1, "logo_url": 1, "cover_url": 1,
+             "categories": 1, "areas": 1, "_id": 1},
         )
         if biz:
             desc = (biz.get("description") or "").strip()
             if not desc:
                 bits = [(biz.get("categories") or [None])[0], ", ".join(biz.get("areas") or [])]
                 desc = " · ".join(b for b in bits if b) or "On MyIsraelRental"
-            img = biz.get("logo_url")
+            # Cover FIRST. A share card is 1200x630; a logo on that is a
+            # small mark on a large empty field, whereas the cover is a
+            # photograph chosen to be the face of the business. Logo is the
+            # fallback, not the preference.
+            img = biz.get("cover_url") or biz.get("logo_url")
             if not img:
                 gig = await db.marketplace_gigs.find_one(
                     {"business_id": biz["_id"], "status": "published", "gallery.0": {"$exists": True}},

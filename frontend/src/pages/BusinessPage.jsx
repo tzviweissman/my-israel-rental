@@ -11,7 +11,7 @@
  * neither will ever break.
  */
 import React, { useContext, useEffect, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { Link, useParams, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import axios from 'axios';
 import { Star, BadgeCheck, MapPin, Loader2, MessageCircle, LayoutGrid, List, Zap, Search, CreditCard } from 'lucide-react';
@@ -241,7 +241,11 @@ const BusinessPage = () => {
 
   // Real data only: fall back through what the business actually has
   // rather than inventing a line for it.
-  const shareImage = biz.logo_url || (primaryListing ? getGigCover(primaryListing) : null) || undefined;
+  /* Cover first, for the same reason the short-link card prefers it: a
+     share image is a wide rectangle, and a logo centred in one is a
+     small mark on a lot of empty space. */
+  const shareImage = biz.cover_url || biz.logo_url
+    || (primaryListing ? getGigCover(primaryListing) : null) || undefined;
   const shareDescription =
     biz.description?.slice(0, 155)
     || [ (biz.categories || [])[0], (biz.areas || []).join(', ') ].filter(Boolean).join(' · ')
@@ -760,6 +764,50 @@ const BusinessPage = () => {
                   </button>
           </div>
         )}
+      </div>
+
+      {/* The attribution, and the reason this page is worth building.
+
+          An owner sends this link to their own customers, and every one of
+          those people meets MyIsraelRental here for the first time. This
+          quiet line is what turns that visit into a business of their own —
+          it is the whole distribution argument in one sentence.
+
+          Placed BELOW the business's content and above the site footer, so
+          it never competes with what the owner is showing. Calm, small, and
+          plainly ours: a visitor should be able to tell who hosts this page
+          without the host shouting over the business on it. */}
+      <div className="px-4 pb-6">
+        <div
+          className="mx-auto max-w-5xl rounded-2xl border px-5 py-4 flex items-center justify-between gap-4 flex-wrap"
+          style={{ borderColor: 'var(--brand-border)', background: 'var(--surface)' }}
+          data-testid="business-attribution"
+        >
+          <div className="flex items-center gap-2.5 min-w-0">
+            <img
+              src="/brand-logo.png"
+              alt=""
+              aria-hidden="true"
+              width={28}
+              height={28}
+              className="w-7 h-7 rounded-lg shrink-0"
+              loading="lazy"
+            />
+            <span className="text-sm font-semibold truncate" style={{ color: 'var(--ink)' }}>
+              {t('businessPage.hostedOn', 'This page is on MyIsraelRental')}
+            </span>
+          </div>
+          {/* Outline, never filled: the filled action on this page belongs
+              to the business, not to us. */}
+          <Link
+            to="/join"
+            className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-full text-sm font-semibold border transition-colors hover:bg-black/[0.03] shrink-0"
+            style={{ borderColor: 'var(--brand-primary)', color: 'var(--brand-primary)' }}
+            data-testid="business-attribution-cta"
+          >
+            {t('businessPage.listYours', 'List your business — free')}
+          </Link>
+        </div>
       </div>
 
       <SiteFooter />
