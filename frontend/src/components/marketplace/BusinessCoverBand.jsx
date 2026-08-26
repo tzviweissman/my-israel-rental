@@ -28,6 +28,7 @@
  */
 import React from 'react';
 import { tintForName } from '../common/CoverPlaceholder';
+import { ACCENTS } from '../../utils/businessAccent';
 import useIsRtl from '../../hooks/useIsRtl';
 
 /** Mix a hex toward white. The card tints were chosen to carry a 96px
@@ -43,10 +44,28 @@ function towardWhite(hex, amount) {
   return `rgb(${r}, ${g}, ${b})`;
 }
 
-export default function BusinessCoverBand({ name = '', className = '', testid = 'business-cover-empty' }) {
+/** Rec. 709 perceived luminance, 0-1. */
+function luminance(hex) {
+  const h = hex.replace('#', '');
+  const v = (i) => parseInt(h.slice(i, i + 2), 16) / 255;
+  return 0.2126 * v(0) + 0.7152 * v(2) + 0.0722 * v(4);
+}
+
+export default function BusinessCoverBand({
+  name = '',
+  // K1 — the owner's chosen accent, when they have chosen one. Without it
+  // the band keeps deriving its colour from the name, which is what every
+  // business that never opens the editor continues to get.
+  accent = null,
+  className = '',
+  testid = 'business-cover-empty',
+}) {
   const isRtl = useIsRtl();
-  const tint = tintForName(name);
+  const tint = (accent && ACCENTS[accent]) ? ACCENTS[accent].tint : tintForName(name);
   const soft = towardWhite(tint, 0.45);
+  // Perceived brightness, not the raw average: #1E5F8C and #C9A227 have
+  // similar arithmetic means and read completely differently.
+  const dark = luminance(tint) < 0.45;
   const initial = String(name).trim().charAt(0).toUpperCase();
 
   return (
@@ -55,7 +74,14 @@ export default function BusinessCoverBand({ name = '', className = '', testid = 
       // The wash ends just short of white rather than at the card's own
       // white: a band that fades to exactly the card colour loses its
       // bottom edge and the logo tile appears to float.
-      style={{ background: `linear-gradient(168deg, ${soft} 0%, ${towardWhite(tint, 0.7)} 46%, #FCFBF7 100%)` }}
+      style={{
+        background: dark
+          // A dark accent is the point of choosing it: fading it to white
+          // would throw the choice away. It deepens instead, and keeps the
+          // hairline foot below for the same reason the pale version has one.
+          ? `linear-gradient(168deg, ${tint} 0%, ${tint} 55%, rgba(0,0,0,0.18) 100%)`
+          : `linear-gradient(168deg, ${soft} 0%, ${towardWhite(tint, 0.7)} 46%, #FCFBF7 100%)`,
+      }}
       data-testid={testid}
       data-tint={tint}
       aria-hidden="true"
@@ -65,7 +91,7 @@ export default function BusinessCoverBand({ name = '', className = '', testid = 
       <div
         className="absolute inset-0"
         style={{
-          background: `radial-gradient(120% 140% at ${isRtl ? '18%' : '82%'} 12%, rgba(255,255,255,.55) 0%, rgba(255,255,255,0) 62%)`,
+          background: `radial-gradient(120% 140% at ${isRtl ? '18%' : '82%'} 12%, rgba(255,255,255,${dark ? 0.16 : 0.55}) 0%, rgba(255,255,255,0) 62%)`,
         }}
       />
       {/* A hairline foot. Without it the wash simply stops, and a
@@ -91,7 +117,11 @@ export default function BusinessCoverBand({ name = '', className = '', testid = 
             // rather than relying on that accident.
             fontSize: 'clamp(56px, 11vw, 132px)',
             lineHeight: 1,
-            color: 'var(--ink)',
+            // The name-derived tints are all pale, so ink was always safe.
+            // `sea` and `deep` are not: ink on #123B57 is invisible. Take
+            // the readable colour from the accent itself rather than
+            // assuming the band is light.
+            color: (accent && ACCENTS[accent]) ? ACCENTS[accent].on : 'var(--ink)',
             // Faint, but present. At 0.09 it disappeared and the band
             // read as empty; this is still a texture rather than a mark
             // that competes with the business's own name below it.

@@ -81,6 +81,13 @@ class BusinessIn(BaseModel):
     categories: list[str] = Field(default_factory=list)
     areas: list[str] = Field(default_factory=list)
     logo_url: Optional[str] = None
+    # Cover photo behind the business name. Optional, and the page is
+    # designed to look finished without one.
+    cover_url: Optional[str] = None
+    # One of ACCENTS. Anything else is coerced to the default rather than
+    # rejected — an accent is decoration, and a stale client sending a
+    # retired name should not cost the owner the rest of their save.
+    accent: Optional[str] = None
     hours: Optional[str] = Field(None, max_length=200)
     languages: Optional[list[str]] = None
     founded_year: Optional[int] = Field(None, ge=1800, le=2100)
@@ -95,12 +102,26 @@ class BusinessIn(BaseModel):
     pinned_service_ids: Optional[list[str]] = Field(None, max_length=3)
 
 
+# The four accents a business may choose (spec K1). NAMES only — the hex
+# values live in frontend/src/utils/businessAccent.js and nowhere else, so a
+# palette change is a code change and no business is left holding a colour
+# the design system has retired.
+ACCENTS = ("stone", "sea", "deep", "gold")
+
+
 class BusinessPatch(BaseModel):
     name: Optional[str] = Field(None, min_length=2, max_length=80)
     description: Optional[str] = Field(None, max_length=2000)
     categories: Optional[list[str]] = None
     areas: Optional[list[str]] = None
     logo_url: Optional[str] = None
+    # Cover photo behind the business name. Optional, and the page is
+    # designed to look finished without one.
+    cover_url: Optional[str] = None
+    # One of ACCENTS. Anything else is coerced to the default rather than
+    # rejected — an accent is decoration, and a stale client sending a
+    # retired name should not cost the owner the rest of their save.
+    accent: Optional[str] = None
     active: Optional[bool] = None
     hours: Optional[str] = Field(None, max_length=200)
     languages: Optional[list[str]] = None
@@ -300,8 +321,15 @@ async def update_business(business_id: str, payload: BusinessPatch, user=Depends
         update["pinned_service_ids"] = (payload.pinned_service_ids or [])[:3]
     if "collections" in provided:
         update["collections"] = [c.model_dump() for c in (payload.collections or [])]
+    if "accent" in provided:
+        # Coerced, not rejected. An accent is decoration: a stale client
+        # sending a name we have since retired should not 422 and cost the
+        # owner the description they were actually editing. Unknown or
+        # cleared both land on the default, which is what the page renders
+        # for a business that has never chosen.
+        update["accent"] = payload.accent if payload.accent in ACCENTS else "stone"
     for key in ("hours", "delivery_note", "lead_time", "payment_note",
-                "founded_year", "kosher_certification"):
+                "founded_year", "kosher_certification", "cover_url"):
         if key in provided:
             value = getattr(payload, key)
             # Pydantic hands back a model for the nested cert; Mongo wants
@@ -499,6 +527,11 @@ async def public_business(
         "lead_time": biz.get("lead_time"),
         "payment_note": biz.get("payment_note"),
         "kosher_certification": biz.get("kosher_certification"),
+        # K1/K2 — page identity. `accent` is a NAME; the hexes live on
+        # the client (utils/businessAccent.js) so the database never
+        # holds a copy of the design system.
+        "accent": biz.get("accent") or "stone",
+        "cover_url": biz.get("cover_url"),
         # C1 — raw groups. Which services actually land in which group,
         # and what happens to the ones in none, is decided in one place
         # on the client (utils/businessCollections.js) so the rules cannot

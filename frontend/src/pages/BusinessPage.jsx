@@ -27,6 +27,7 @@ import { visitorHeaders } from '../utils/visitorId';
 import BusinessCoverBand, { BusinessLogoMark } from '../components/marketplace/BusinessCoverBand';
 import SafeImage from '../components/common/SafeImage';
 import { prettyArea } from '../utils/areaNames';
+import { accentFor, accentColors } from '../utils/businessAccent';
 
 // First screenful and each subsequent step. Twelve fills a desktop grid
 // three rows deep and a phone list well past the fold, without asking
@@ -243,15 +244,56 @@ const BusinessPage = () => {
           {/* Cover band. Short enough not to push the name below the
               fold on a phone, tall enough to read as a header. */}
           <div className="relative h-28 sm:h-40" data-testid="business-cover-band">
-            {bandImage
-              ? <SafeImage
+            {bandImage ? (
+              <>
+                <SafeImage
                   src={bandImage}
                   name={biz.name}
                   category={(biz.categories || [])[0]}
                   className="w-full h-full object-cover"
                 />
-              : <BusinessCoverBand name={biz.name} className="w-full h-full" />}
+                {/* K2 — a scrim confined to the band's lower edge, where the
+                    logo tile and the business name sit. Not a wash over the
+                    whole picture: the owner uploaded a photo to be looked at.
+
+                    Light-on-dark is the safe direction. White text with a
+                    scrim is readable over almost anything, whereas guessing
+                    "this photo is bright, use dark text" and being wrong
+                    gives you unreadable text on somebody's storefront. */}
+                <div
+                  className="absolute inset-x-0 bottom-0 pointer-events-none"
+                  style={{
+                    height: '58%',
+                    background:
+                      'linear-gradient(to top, rgba(0,0,0,0.42) 0%, rgba(0,0,0,0.14) 55%, rgba(0,0,0,0) 100%)',
+                  }}
+                  data-testid="business-cover-scrim"
+                />
+              </>
+            ) : (
+              <BusinessCoverBand
+                name={biz.name}
+                accent={accentFor(biz)}
+                className="w-full h-full"
+              />
+            )}
           </div>
+
+          {/* K1 — the accent, always visible.
+              The fallback band alone was not enough: `bandImage` falls back
+              to the first listing's photo, so any business with a single
+              photo anywhere never showed its accent at all, and the choice
+              would have looked broken to the owner who made it.
+              A hairline under the cover is the storefront's brand line. It
+              reads with or without a photo, and it is deliberately thin —
+              the accent should feel like the business signed the page, not
+              like the site painted it. */}
+          <div
+            aria-hidden="true"
+            style={{ height: 3, background: accentColors(biz).rule }}
+            data-testid="business-accent-rule"
+            data-accent={accentFor(biz)}
+          />
 
           {/* The logo overlaps the band's lower edge - the storefront
               pattern - so it needs the negative margin and the padding
