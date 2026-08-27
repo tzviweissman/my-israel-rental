@@ -26,11 +26,16 @@ from __future__ import annotations
 
 from urllib.parse import urlsplit
 
-# Payment providers an Israeli small business actually uses, plus the two
-# global ones. Every entry matches itself and its subdomains, nothing else.
+# Payment providers an Israeli small business actually uses, plus the global
+# ones. Every entry matches itself and its subdomains, nothing else.
 #
 # Adding a domain here is a security decision, not a convenience one: it
 # grants that host the right to be linked from a page carrying our name.
+#
+# The other question to ask before adding one is whether the provider HAS a
+# link to paste. An entry for a provider that issues no shareable URL is not
+# a security hole, but it is a promise the page cannot keep — see the note on
+# Zelle below.
 ALLOWED_PAYMENT_DOMAINS: tuple[str, ...] = (
     # Israeli
     "bitpay.co.il",        # Bit
@@ -44,12 +49,24 @@ ALLOWED_PAYMENT_DOMAINS: tuple[str, ...] = (
     "greeninvoice.co.il",
     "sumit.co.il",
     "morning.co.il",
+    "isracard.co.il",      # payment pages for its business customers
+    "max.co.il",           # ex-Leumi Card; its SMART package issues pay-by-link
     # Global
     "stripe.com",
     "paypal.com",
     "paypal.me",
     "revolut.me",
     "wise.com",
+    "venmo.com",           # venmo.com/{user}, and ?txn=charge&amount=
+    # Zelle has NO shareable payment link. It is bank-to-bank on an enrolled
+    # email or US phone number, and the payer sets it up inside their own
+    # banking app — so nothing an owner can paste here reaches a payment,
+    # and a button labelled "Zelle" lands the visitor on a marketing page.
+    # Kept because it was asked for, and it is safe; but an owner who takes
+    # Zelle is better served by the free-text `payment_note` on their
+    # business ("Zelle: name@example.com"), which is how Zelle actually
+    # works. Remove this entry the day that stops being a deliberate choice.
+    "zellepay.com",
 )
 
 # The name a provider is KNOWN BY, which is not its domain. An owner pasting
@@ -74,11 +91,15 @@ PROVIDER_NAMES: dict[str, str] = {
     "greeninvoice.co.il": "Green Invoice",
     "sumit.co.il": "Sumit",
     "morning.co.il": "Morning",
+    "isracard.co.il": "Isracard",
+    "max.co.il": "Max",
     "stripe.com": "Stripe",
     "paypal.com": "PayPal",
     "paypal.me": "PayPal",
     "revolut.me": "Revolut",
     "wise.com": "Wise",
+    "venmo.com": "Venmo",
+    "zellepay.com": "Zelle",
 }
 
 
@@ -178,7 +199,17 @@ def clean_payment_links(raw: list | None) -> list[dict]:
             # Fall back to the provider's own name rather than a generic
             # "Pay" — a visitor should know where a payment button sends
             # them before they press it.
-            host = (registrable_host(url) or "").removeprefix("www.")
-            label = host.split(".")[0].title()
+            #
+            # From PROVIDER_NAMES, not from the hostname. Deriving it from
+            # the host gave "Zellepay", "Bitpay" and "Paybox" — none of
+            # which is what the provider is called, and the first two are
+            # not even close. The host is only the last resort now, and it
+            # cannot be reached while the test that pins every allowlisted
+            # domain to a name keeps passing.
+            host = (registrable_host(url) or "").removeprefix("www.").rstrip(".")
+            label = PROVIDER_NAMES.get(host) or next(
+                (n for d, n in PROVIDER_NAMES.items() if host.endswith("." + d)),
+                host.split(".")[0].title(),
+            )
         out.append({"label": label, "url": url})
     return out

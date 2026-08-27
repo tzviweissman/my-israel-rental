@@ -37,6 +37,12 @@ from utils.payment_links import (  # noqa: E402
     "https://buy.stripe.com/test_123",
     "https://paypal.me/somebakery",
     "https://meshulam.co.il/purchase?b=1",
+    # The shapes these four actually issue.
+    "https://venmo.com/somebakery",
+    "https://venmo.com/somebakery?txn=charge&amount=120",
+    "https://www.max.co.il/pay/abc123",
+    "https://isracard.co.il/pay/abc123",
+    "https://zellepay.com/",
 ])
 def test_real_payment_links_are_allowed(url):
     assert is_allowed_payment_url(url), url
@@ -46,6 +52,14 @@ def test_real_payment_links_are_allowed(url):
     # THE case. A suffix check passes this and it is a different company.
     ("https://evil-paybox.co.il/pay", "suffix match without a dot boundary"),
     ("https://evilpaybox.co.il/pay", "no separator at all"),
+    # The same trap, once per domain added later. A short domain is the
+    # easiest to sit next to a prefix and still read right at a glance.
+    ("https://not-max.co.il/pay", "suffix match without a dot boundary"),
+    ("https://mymax.co.il/pay", "no separator at all"),
+    ("https://fake-isracard.co.il/pay", "suffix match without a dot boundary"),
+    ("https://venmo.com.evil.com/pay", "allowlisted domain as a subdomain OF evil"),
+    ("https://notvenmo.com/somebakery", "no separator at all"),
+    ("https://evil-zellepay.com/pay", "suffix match without a dot boundary"),
     # A substring check passes these.
     ("https://evil.com/?ref=paybox.co.il", "allowlisted domain in the query"),
     ("https://evil.com/paybox.co.il", "allowlisted domain in the path"),
@@ -88,7 +102,23 @@ def test_clean_keeps_good_links_and_labels_them():
     assert out[0] == {"label": "Pay with Bit", "url": "https://bitpay.co.il/p/1"}
     # An unlabelled link takes the provider's name, never a generic "Pay":
     # a visitor should know where a payment button sends them.
-    assert out[1]["label"] == "Paybox"
+    #
+    # The PROVIDER's name, not the hostname's. Derived from the host this
+    # read "Paybox", and for the two worst cases "Bitpay" and "Zellepay" —
+    # names those companies do not use and a customer would not recognise
+    # on a button they are being asked to press.
+    assert out[1]["label"] == "PayBox"
+
+
+@pytest.mark.parametrize("url,expected", [
+    ("https://bitpay.co.il/p/1", "Bit"),
+    ("https://www.paybox.co.il/pay/2", "PayBox"),
+    ("https://zellepay.com/", "Zelle"),
+    ("https://buy.stripe.com/test_1", "Stripe"),      # via the subdomain rule
+    ("https://venmo.com/somebakery", "Venmo"),
+])
+def test_unlabelled_links_take_the_provider_name(url, expected):
+    assert clean_payment_links([{"url": url}])[0]["label"] == expected
 
 
 def test_clean_refuses_a_bad_link_loudly():
