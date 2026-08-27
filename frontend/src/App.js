@@ -111,7 +111,6 @@ const CreateGig = lazy(() => import('./pages/CreateGig'));
 const JobsBoard = lazy(() => import('./pages/JobsBoard'));
 const JobDetail = lazy(() => import('./pages/JobDetail'));
 const PostJob = lazy(() => import('./pages/PostJob'));
-const ProviderProfile = lazy(() => import('./pages/ProviderProfile'));
 const FAQ = lazy(() => import('./pages/FAQ'));
 const NotFound = lazy(() => import('./pages/NotFound'));
 

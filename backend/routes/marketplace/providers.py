@@ -117,9 +117,23 @@ async def public_provider(user_id: str):
             and agg["rating_count"] >= TOP_RATED_MIN_COUNT
         )
     gigs = [_clean_gig(g) for g in raw]
+    # M4 — a public, unauthenticated endpoint does not hand out the name on
+    # somebody's account. This used to return `users.name`, which is the
+    # name they signed up with and often their legal one; the last page
+    # that rendered it was deleted with this change, but an endpoint is
+    # reachable whether or not a page calls it.
+    #
+    # The BUSINESS instead, resolved the same way `/providers/{user_id}
+    # /default-business` resolves it — their first active one — so the two
+    # cannot disagree about who this person trades as. Falling back to
+    # "Provider" rather than to the person, deliberately: nothing renders
+    # this, so there is no reader to serve by naming them.
+    default_biz = await db.businesses.find_one(
+        {"owner_user_id": user_id, "active": True},
+    )
     return {
         "user_id": user_id,
-        "name": (user or {}).get("name", "Provider"),
+        "name": (default_biz or {}).get("name") or "Provider",
         "bio": prov.get("bio", ""),
         "tagline": prov.get("tagline", ""),
         "avatar": prov.get("avatar"),
