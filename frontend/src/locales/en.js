@@ -837,6 +837,7 @@ const en = {
         }
       },
       auth: {
+        rolePromotionFailed: "You're signed in, but we couldn't set you up as a {{role}} just yet. You can switch that in Settings.",
         loginTitle: 'Login to Your Account',
         signupTitle: 'Create an Account',
         email: 'Email',
@@ -1358,7 +1359,6 @@ const en = {
         terms: 'Terms & Privacy Policy',
         creating: 'Creating your account…',
         createAccount: 'Create account',
-        orQuickSignup: 'or sign up in one tap'
       },
       common: {
         backToDashboard: 'Back to my dashboard',
@@ -2032,10 +2032,15 @@ const en = {
         autoNudgeThrottle: 'One reminder per conversation every 24 hours. Admins can still send manual reminders.',
         role: {
           lister: 'Lister',
+          provider: 'Business owner',
           renter: 'Renter',
           manager: 'Manager'
         },
         switchRoleConfirm: 'Switch from {from} to {to}? Your dashboard will update to reflect the new role.',
+        becomeProviderTitle: 'Run a business or offer a service?',
+        becomeProviderHint: 'Switch to a business account to list what you offer — cleaning, moving, tours, repairs, anything. Free to list, and no commission.',
+        becomeProviderCta: 'Switch to business owner',
+        becomeProviderNote: 'Nothing on your account is lost, and you can switch back any time.',
         becomeListerTitle: 'Have a place to list?',
         becomeListerHint: 'Switch your account from Renter to Lister to start posting properties for rent.',
         becomeListerCta: 'Switch to lister',

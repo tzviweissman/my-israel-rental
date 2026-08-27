@@ -1,6 +1,6 @@
 import React, { useState, useContext } from 'react';
 import { useTranslation } from 'react-i18next';
-import { KeyRound, EyeOff, Eye, Globe, MessageCircle, Check, Home as HomeIcon, Bell } from 'lucide-react';
+import { KeyRound, EyeOff, Eye, Globe, MessageCircle, Check, Home as HomeIcon, Bell, Sparkles } from 'lucide-react';
 import { toast } from 'sonner';
 import axios from 'axios';
 import { AuthContext } from '../../App';
@@ -48,24 +48,52 @@ const SettingsTab = ({ user, token, API }) => {
     }
   };
 
-  // Role switch: users can flip between renter ↔ owner self-service.
-  // Managers can also step down to renter. Admins never see this card —
-  // privilege boundary enforced both server-side and here.
+  /* Role switch, self-service. Admins never see this card — privilege
+     boundary enforced both server-side and here.
+
+     THIS USED TO OFFER ONE TARGET PER ROLE, and the one it left out was
+     `provider` — the business / service side. The API has always accepted
+     renter→provider and owner→provider (see the `allowed` set in
+     backend/routes/auth.py); nothing here ever exposed it. So somebody who
+     signed up as a traveller but actually runs a cleaning company had
+     exactly one button available — "Switch to lister" — which makes them a
+     PROPERTY owner, the wrong thing, and no route at all to the role they
+     wanted. That is the site treating property owners as the default
+     audience, which it is expressly not supposed to do.
+
+     Each role now lists every target the API will accept, so what the UI
+     offers and what the server allows are the same set. Existing copy is
+     reused unchanged; only the provider direction is new. */
   const [switchingRole, setSwitchingRole] = useState(false);
   const role = user?.role;
-  // Each entry is one rendered "switch role" CTA. `from` is the user's
-  // current role (we already know it), so we only need to declare the
-  // target + UI copy. This list is filtered by `role` below.
+
+  const TO_LISTER = { target: 'owner', Icon: HomeIcon, title: t('settings.becomeListerTitle', 'Have a place to list?'), hint: t('settings.becomeListerHint', 'Switch your account from Renter to Lister to start posting properties for rent.'), cta: t('settings.becomeListerCta', 'Switch to lister'), note: t('settings.becomeListerNote', "We'll keep your saved searches and favorites.") };
+  const TO_PROVIDER = { target: 'provider', Icon: Sparkles, title: t('settings.becomeProviderTitle', 'Run a business or offer a service?'), hint: t('settings.becomeProviderHint', 'Switch to a business account to list what you offer — cleaning, moving, tours, repairs, anything. Free to list, and no commission.'), cta: t('settings.becomeProviderCta', 'Switch to business owner'), note: t('settings.becomeProviderNote', 'Nothing on your account is lost, and you can switch back any time.') };
+  const TO_RENTER = { target: 'renter', Icon: HomeIcon, title: t('settings.becomeRenterTitle', 'Switch back to Renter?'), hint: t('settings.becomeRenterHint', 'Your listings stay safe in the database. You won\'t see the listing-management tools until you switch back to Lister.'), cta: t('settings.becomeRenterCta', 'Switch to renter'), note: t('settings.becomeRenterNote', 'You can switch back to Lister any time from this page.') };
+  const MANAGER_DOWN = { target: 'renter', Icon: HomeIcon, title: t('settings.managerToRenterTitle', 'Step down to Renter?'), hint: t('settings.managerToRenterHint', 'You\'ll lose your manager privileges. Your listings stay safe.'), cta: t('settings.managerToRenterCta', 'Switch to renter'), note: t('settings.managerToRenterNote', 'Contact support if you change your mind — manager role can only be restored by an admin.') };
+
   const ROLE_OPTIONS = {
-    renter: { target: 'owner', title: t('settings.becomeListerTitle', 'Have a place to list?'), hint: t('settings.becomeListerHint', 'Switch your account from Renter to Lister to start posting properties for rent.'), cta: t('settings.becomeListerCta', 'Switch to lister'), note: t('settings.becomeListerNote', "We'll keep your saved searches and favorites.") },
-    owner:  { target: 'renter', title: t('settings.becomeRenterTitle', 'Switch back to Renter?'), hint: t('settings.becomeRenterHint', 'Your listings stay safe in the database. You won\'t see the listing-management tools until you switch back to Lister.'), cta: t('settings.becomeRenterCta', 'Switch to renter'), note: t('settings.becomeRenterNote', 'You can switch back to Lister any time from this page.') },
-    manager: { target: 'renter', title: t('settings.managerToRenterTitle', 'Step down to Renter?'), hint: t('settings.managerToRenterHint', 'You\'ll lose your manager privileges. Your listings stay safe.'), cta: t('settings.managerToRenterCta', 'Switch to renter'), note: t('settings.managerToRenterNote', 'Contact support if you change your mind — manager role can only be restored by an admin.') },
+    renter: [TO_LISTER, TO_PROVIDER],
+    owner: [TO_PROVIDER, TO_RENTER],
+    provider: [TO_LISTER, TO_RENTER],
+    manager: [MANAGER_DOWN],
   };
-  const switchOption = ROLE_OPTIONS[role] || null;
+  const switchOptions = ROLE_OPTIONS[role] || null;
 
   const handleSwitchRole = async (targetRole) => {
-    const labelTo = targetRole === 'owner' ? t('settings.role.lister', 'Lister') : t('settings.role.renter', 'Renter');
-    const labelFrom = role === 'owner' ? t('settings.role.lister', 'Lister') : role === 'manager' ? t('settings.role.manager', 'Manager') : t('settings.role.renter', 'Renter');
+    /* A lookup rather than nested ternaries, because the ternaries had no
+       branch for `provider` and fell through to "Renter" — so the confirm
+       dialog for the business switch would have read "Switch from Renter
+       to Renter?", which is both wrong and alarming at the exact moment
+       someone is being asked to approve a change to their account. */
+    const roleLabel = (r) => ({
+      owner: t('settings.role.lister', 'Lister'),
+      provider: t('settings.role.provider', 'Business owner'),
+      manager: t('settings.role.manager', 'Manager'),
+      renter: t('settings.role.renter', 'Renter'),
+    }[r] || t('settings.role.renter', 'Renter'));
+    const labelTo = roleLabel(targetRole);
+    const labelFrom = roleLabel(role);
     if (!window.confirm(
       t('settings.switchRoleConfirm', `Switch from ${labelFrom} to ${labelTo}? Your dashboard will update to reflect the new role.`)
         .replace('{from}', labelFrom).replace('{to}', labelTo),
@@ -182,30 +210,34 @@ const SettingsTab = ({ user, token, API }) => {
           current role — renter sees "Switch to lister", owner sees
           "Switch to renter", manager sees "Step down to renter". Admins
           never get this card (privilege boundary). */}
-      {switchOption && (
-        <div className="bg-white rounded-2xl border border-gray-200 p-6 max-w-2xl mb-6" data-testid="role-switch-card">
+      {switchOptions && switchOptions.map((opt) => (
+        <div
+          key={opt.target}
+          className="bg-white rounded-2xl border border-gray-200 p-6 max-w-2xl mb-6"
+          data-testid={`role-switch-card-${opt.target}`}
+        >
           <div className="flex items-center gap-3 mb-4">
             <div className="p-3 rounded-full bg-[rgb(var(--gold-rgb)/<alpha-value>)]/15">
-              <HomeIcon size={24} className="text-[var(--gold)]" />
+              <opt.Icon size={24} className="text-[var(--gold)]" />
             </div>
             <div>
-              <h3 className="text-lg font-bold text-gray-900">{switchOption.title}</h3>
-              <p className="text-sm text-gray-500">{switchOption.hint}</p>
+              <h3 className="text-lg font-bold text-gray-900">{opt.title}</h3>
+              <p className="text-sm text-gray-500">{opt.hint}</p>
             </div>
           </div>
           <button
             type="button"
-            onClick={() => handleSwitchRole(switchOption.target)}
+            onClick={() => handleSwitchRole(opt.target)}
             disabled={switchingRole}
             className="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl text-white font-medium hover:opacity-90 transition-all disabled:opacity-60"
             style={{ backgroundColor: 'var(--brand-primary)' }}
-            data-testid="switch-role-btn"
+            data-testid={`switch-role-btn-${opt.target}`}
           >
-            <HomeIcon size={16} /> {switchingRole ? t('dashboard.saving', 'Saving…') : switchOption.cta}
+            <opt.Icon size={16} /> {switchingRole ? t('dashboard.saving', 'Saving…') : opt.cta}
           </button>
-          <p className="text-[11px] text-gray-400 mt-2">{switchOption.note}</p>
+          <p className="text-[11px] text-gray-400 mt-2">{opt.note}</p>
         </div>
-      )}
+      ))}
 
       {/* Language preference */}
       <div className="bg-white rounded-2xl border border-gray-200 p-6 max-w-2xl mb-6">

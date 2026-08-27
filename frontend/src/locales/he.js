@@ -802,6 +802,7 @@ const he = {
         }
       },
       auth: {
+        rolePromotionFailed: 'נכנסתם, אבל לא הצלחנו להגדיר אתכם כ-{{role}} כרגע. ניתן לשנות זאת בהגדרות.',
         loginTitle: 'התחבר לחשבון שלך',
         signupTitle: 'צור חשבון חדש',
         email: 'אימייל',
@@ -1323,7 +1324,6 @@ const he = {
         terms: 'תנאי השימוש ומדיניות הפרטיות',
         creating: '...יוצר את החשבון שלכם',
         createAccount: 'צור חשבון',
-        orQuickSignup: 'או הירשמו בלחיצה אחת'
       },
       common: {
         backToDashboard: 'חזרה ללוח שלי',
@@ -1960,10 +1960,15 @@ const he = {
         autoNudgeThrottle: 'תזכורת אחת לכל שיחה כל 24 שעות. מנהלים עדיין יכולים לשלוח תזכורות ידניות.',
         role: {
           lister: 'משכיר',
+          provider: 'בעלי עסק',
           renter: 'שוכר',
           manager: 'מנהל'
         },
         switchRoleConfirm: 'לעבור מ-{from} ל-{to}? לוח הבקרה שלך יתעדכן בהתאם לתפקיד החדש.',
+        becomeProviderTitle: 'יש לכם עסק או שירות להציע?',
+        becomeProviderHint: 'עברו לחשבון עסקי כדי לפרסם את מה שאתם מציעים — ניקיון, הובלות, טיולים, תיקונים, הכול. הפרסום חינם וללא עמלה.',
+        becomeProviderCta: 'מעבר לחשבון עסקי',
+        becomeProviderNote: 'שום דבר בחשבון שלכם לא נמחק, ואפשר לחזור בכל רגע.',
         becomeListerTitle: 'יש לך נכס להשכיר?',
         becomeListerHint: 'עבור מחשבון שוכר לחשבון משכיר כדי להתחיל לפרסם נכסים להשכרה.',
         becomeListerCta: 'עבור למשכיר',

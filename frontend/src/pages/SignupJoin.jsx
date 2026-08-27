@@ -437,22 +437,21 @@ const SignupJoin = () => {
               </button>
             </div>
 
-            {/* One-tap Google sign-up — respects the role card the user
-                clicked (if any). completeGoogleSignIn picks up `signup_intent_role`
-                from sessionStorage after the OAuth roundtrip and promotes
-                the fresh account before landing them on the dashboard. */}
-            {GOOGLE_CLIENT_ID && (
-              <div className="mt-8 max-w-sm mx-auto">
-                <div className="flex items-center gap-3 mb-3" aria-hidden="true">
-                  <div className="flex-1 h-px bg-gray-200" />
-                  <span className="text-xs uppercase tracking-wider text-gray-400">
-                    {t('signupJoin.orQuickSignup', 'or sign up in one tap')}
-                  </span>
-                  <div className="flex-1 h-px bg-gray-200" />
-                </div>
-                <GoogleSignInButton intentRole={activeCard?.backendRole || ''} />
-              </div>
-            )}
+            {/* NO Google button on this step, deliberately.
+
+                It used to sit here, below the cards, and it could be
+                pressed with no card selected — in which case no role was
+                remembered and the new account was created as a traveller
+                in silence. A cleaner or a plumber taking the fastest-
+                looking route landed on a traveller's dashboard with
+                nothing to say why.
+
+                It lives on step 2 instead, above the form, where a role
+                has necessarily been chosen to get there. That also puts
+                it in front of someone BEFORE they type out name, phone
+                and password — offering the one-tap route after the form
+                is filled in is offering it too late to be worth
+                anything. */}
 
             <p className="mt-10 text-center sm:hidden text-sm text-gray-600">
               {t('signupJoin.haveAccount', 'Already have an account?')}{' '}
@@ -491,11 +490,17 @@ const SignupJoin = () => {
                 {t(activeCard.tDetailsSubKey, activeCard.defaultDetailsSub)}
               </p>
 
-              {/* Google Sign-In — one-tap alternative to the multi-field
-                  form. On success, the visitor lands at /dashboard as a
-                  freshly-created `renter` (the least-privileged role);
-                  they can promote themselves to owner/provider later
-                  from the dashboard. See completeGoogleSignIn.js. */}
+              {/* Google Sign-In — the one-tap alternative to the form
+                  below, and deliberately ABOVE it: someone who would
+                  rather use Google should meet that option before
+                  filling anything in, not after.
+
+                  `activeCard` cannot be empty here — reaching step 2
+                  requires choosing a role — so the intent always makes
+                  it through. The account is created as `renter` and
+                  promoted to owner/provider immediately after, which is
+                  the least-privileged order to do it in. See
+                  completeGoogleSignIn.js. */}
               {GOOGLE_CLIENT_ID && (
                 <div className="mt-6">
                   <GoogleSignInButton intentRole={activeCard?.backendRole || ''} />

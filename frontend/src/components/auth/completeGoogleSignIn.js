@@ -8,6 +8,7 @@
  */
 import axios from 'axios';
 import { toast } from 'sonner';
+import i18n from 'i18next';
 import { API } from '../../App';
 
 // sessionStorage key used to smuggle role intent through the sign-in step.
@@ -52,9 +53,29 @@ export default async function completeGoogleSignIn(accessToken, login, navigate)
       if (r.data?.token) token = r.data.token;
       if (r.data?.user) user = r.data.user;
     } catch (e) {
-      // Non-fatal: land them on the dashboard as `renter`; they can upgrade
-      // via the "Switch role" flow.
+      /* Non-fatal by design — they are signed in, and refusing the whole
+         sign-in over a role would be worse. But it must not be SILENT: a
+         console warning is invisible to the person it happened to, and
+         they would land on a traveller's dashboard having asked to be a
+         host, with nothing on screen to explain it or to fix it.
+
+         So say what happened and name where the fix is. Settings → role
+         is the same endpoint this just failed to call, so the retry costs
+         them two clicks rather than a support message. */
       console.warn('Role auto-promotion failed:', e?.response?.data || e.message);
+      toast.error(
+        // i18n note: this file has no `t` — it is a plain helper, not a
+        // component — so the caller's language is reached through the
+        // shared i18next instance rather than a hook.
+        i18n.t('auth.rolePromotionFailed', {
+          defaultValue:
+            "You're signed in, but we couldn't set you up as a {{role}} just yet. "
+            + 'You can switch that in Settings.',
+          role: intentRole === 'owner'
+            ? i18n.t('signupJoin.host', { defaultValue: 'host' })
+            : i18n.t('signupJoin.provider', { defaultValue: 'business owner' }),
+        }),
+      );
     }
   }
 
