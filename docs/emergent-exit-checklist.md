@@ -27,8 +27,15 @@ Status as of 2026-07-24. Tick the remaining items before pointing DNS at a new h
       the Hebrew template and confirming the font is embedded.
 - [x] **`/api/health` endpoint** — pings Mongo so a deploy that boots but can't
       reach Atlas is reported unhealthy. Wired into `railway.json`.
-- [x] **`nixpacks.toml`** installs `tesseract-ocr` + Hebrew/English data, which
-      the contract OCR path needs (it silently returns empty text without it).
+- [ ] **`tesseract-ocr` + Hebrew/English data for the contract OCR path.**
+      Was ticked off on the strength of `backend/nixpacks.toml` declaring the
+      apt packages. **Re-opened 27 Aug 2026:** the backend service is on the
+      RAILPACK builder, Railpack does not read `nixpacks.toml`, and the build
+      for 57c34f0 has no setup/apt phase at all — so the `tesseract` binary is
+      not in the image and the OCR path is silently returning empty text, which
+      is the exact failure the line was meant to prevent. Confirm with
+      `tesseract --version` in the container; see docs/railway-deploy.md for
+      the two candidate fixes.
 - [x] **Property-contract uploads now write to the private dir.** This endpoint
       was still writing into the public `uploads/` tree and storing a public URL
       — it would have recreated the exposure for every new upload. Verified

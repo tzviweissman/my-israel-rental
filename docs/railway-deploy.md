@@ -6,12 +6,28 @@ Two services from one repo: a **backend** (FastAPI, always-on) and a **frontend*
 ## 1. Backend service
 
 **Root directory:** `backend`
-Railway auto-detects `nixpacks.toml` + `railway.json`, which pin Python 3.12,
-install `tesseract-ocr` (+ Hebrew/English data) for contract OCR, and start:
+
+The service uses the **RAILPACK** builder, set in the Railway service settings.
+That setting overrides the `"builder": "NIXPACKS"` line in `backend/railway.json`,
+and **Railpack does not read `nixpacks.toml`** — so the setup phase in that file
+never runs. The start command still comes from `railway.json`:
 
 ```
 uvicorn server:app --host 0.0.0.0 --port $PORT
 ```
+
+> **Known gap — contract OCR (found 27 Aug 2026).** `backend/nixpacks.toml`
+> installs `tesseract-ocr` plus Hebrew and English trained data. Because that
+> file is inert, the `tesseract` **binary is not in the image**. `pytesseract`
+> installs fine from pip — it is only a wrapper — so nothing fails at build or
+> boot; `utils/files.extract_text_from_image` catches the runtime error and
+> returns `""` with a log line, and a contract uploaded as a photo silently
+> loses its extracted text.
+>
+> Confirm with `tesseract --version` in the deployed container. Two candidate
+> fixes, both needing a preview deploy first: switch the service builder back
+> to NIXPACKS so the existing file applies, or add a Railpack/Dockerfile
+> equivalent of its `aptPkgs`.
 
 Do **not** hardcode a port — Railway injects `$PORT`.
 
@@ -42,10 +58,33 @@ serving errors. Already wired in `railway.json`.
 
 **Root directory:** `frontend`
 
-- Build: `npm install --legacy-peer-deps && npm run build`
-  (`--legacy-peer-deps` is required — `date-fns` v4 conflicts with
-  `react-day-picker`'s peer range.)
-- Publish directory: `build`
+Built by **Railpack**, which detects Node and picks its own commands. The
+observed plan (27 Aug 2026):
+
+```
+install:  yarn install --frozen-lockfile
+build:    yarn run build
+deploy:   node server.js          <- from frontend/railway.json
+```
+
+Three things follow from that, none of them obvious:
+
+- **The deploy installs with yarn, not npm.** There is no `yarn.lock` in the
+  repo, so `--frozen-lockfile` resolves from `package.json`. `package-lock.json`
+  is kept honest for local work but the deploy does not read it. A dependency
+  is installed because it is declared in `package.json` — nothing else.
+- **`--legacy-peer-deps` is a LOCAL requirement, not a deploy one.** `date-fns`
+  v4 conflicts with `react-day-picker`'s peer range, so `npm install` needs it
+  on a developer machine. Yarn 1 does not enforce peer ranges, so the deploy
+  never needed it.
+- **`CI=false` comes from the Railway service variable**, not from any file in
+  the repo. Without it react-scripts treats CRA's lint warnings as build errors.
+
+`frontend/nixpacks.toml` used to state the first two of those and was deleted on
+27 Aug 2026: Railpack never read it, so it described a build that was not
+happening.
+
+- Publish directory: `build` (served by `frontend/server.js`, see below)
 
 `REACT_APP_*` values are baked in at **build** time, so set them before building
 and redeploy after any change. They are public by design — no secrets.

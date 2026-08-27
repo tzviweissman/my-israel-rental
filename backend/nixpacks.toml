@@ -1,3 +1,21 @@
+# ⚠ THIS FILE IS NOT CURRENTLY APPLIED. Read before trusting it.
+#
+# The backend service is set to the RAILPACK builder in Railway, and Railpack
+# does not read nixpacks.toml. (`backend/railway.json` asks for NIXPACKS, but
+# a builder chosen in the service settings overrides the file.) Proven on the
+# frontend, whose nixpacks.toml specified npm while the build plan ran yarn;
+# the backend build for 57c34f0 shows no apt/setup phase at all.
+#
+# WHAT THAT COSTS: the aptPkgs below are not installed, so the `tesseract`
+# BINARY is absent. `pip install pytesseract` succeeds — it is only a wrapper —
+# and `utils/files.extract_text_from_image` catches the resulting error and
+# returns "" with a log line. A contract uploaded as a photo therefore loses
+# its extracted text silently. See docs/railway-deploy.md.
+#
+# KEPT, not deleted, for two reasons: it is the record of what this image
+# actually needs, and switching the service back to the NIXPACKS builder makes
+# it take effect again.
+#
 # Railway build config for the FastAPI backend.
 #
 # tesseract-ocr is needed by utils/files.py (extract_text_from_image) for the
