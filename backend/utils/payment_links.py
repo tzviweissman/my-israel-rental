@@ -52,6 +52,48 @@ ALLOWED_PAYMENT_DOMAINS: tuple[str, ...] = (
     "wise.com",
 )
 
+# The name a provider is KNOWN BY, which is not its domain. An owner pasting
+# a `bitpay.co.il` link is thinking "Bit", and a visitor reading a button
+# labelled "Bitpay" would wonder whether it is the right one.
+#
+# This exists so the owner's form can pre-fill a label and name the accepted
+# providers in the owner's own vocabulary — the API's validation still runs
+# off ALLOWED_PAYMENT_DOMAINS above and nothing here can widen it.
+# `test_payment_link_allowlist` asserts every allowlisted domain has an entry,
+# so adding a domain without naming it fails the suite rather than shipping a
+# provider list with a hole in it.
+PROVIDER_NAMES: dict[str, str] = {
+    "bitpay.co.il": "Bit",
+    "paybox.co.il": "PayBox",
+    "meshulam.co.il": "Meshulam",
+    "grow.business": "Grow",
+    "payplus.co.il": "PayPlus",
+    "tranzila.com": "Tranzila",
+    "cardcom.solutions": "Cardcom",
+    "icount.co.il": "iCount",
+    "greeninvoice.co.il": "Green Invoice",
+    "sumit.co.il": "Sumit",
+    "morning.co.il": "Morning",
+    "stripe.com": "Stripe",
+    "paypal.com": "PayPal",
+    "paypal.me": "PayPal",
+    "revolut.me": "Revolut",
+    "wise.com": "Wise",
+}
+
+
+def payment_providers() -> list[dict[str, str]]:
+    """The accepted providers, for a client that has to name them.
+
+    Read-only and derived: the tuple above stays the single authority on
+    what is accepted, and this cannot add to it.
+    """
+    return [
+        {"domain": d, "name": PROVIDER_NAMES.get(d, d)}
+        for d in ALLOWED_PAYMENT_DOMAINS
+    ]
+
+
 # Six payment options is not a business, it is a warning. The cap is here
 # rather than in the form so a second client cannot ignore it.
 MAX_PAYMENT_LINKS = 4

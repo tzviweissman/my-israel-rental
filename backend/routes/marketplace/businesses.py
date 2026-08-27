@@ -106,7 +106,12 @@ class BusinessIn(BaseModel):
     pinned_service_ids: Optional[list[str]] = Field(None, max_length=3)
 
 
-from utils.payment_links import PaymentLinkError, clean_payment_links  # noqa: E402
+from utils.payment_links import (  # noqa: E402
+    MAX_PAYMENT_LINKS,
+    PaymentLinkError,
+    clean_payment_links,
+    payment_providers,
+)
 
 # The four accents a business may choose (spec K1). NAMES only — the hex
 # values live in frontend/src/utils/businessAccent.js and nowhere else, so a
@@ -183,6 +188,27 @@ async def _owned(business_id: str, user: dict[str, Any]) -> dict[str, Any]:
     if biz.get("owner_user_id") != user["user_id"] and user.get("role") != "admin":
         raise HTTPException(status_code=403, detail="Not your business")
     return biz
+
+
+@router.get("/payment-providers")
+async def list_payment_providers():
+    """Which payment providers a link may point at, and what to call them.
+
+    The owner's form needs this for two things it cannot do without: tell
+    them *before* they save that a link will be refused, and pre-fill the
+    label with the provider's own name so no visitor ever meets a button
+    marked "Pay" with no destination on it.
+
+    The alternative was a copy of the allowlist on the client, which is a
+    security decision written down in two places — and the copy is the one
+    that goes stale. This is derived from the tuple in `utils.payment_links`
+    and cannot widen it: the API still validates every link on save, and a
+    client that ignores this list gets a 400 naming what is accepted.
+
+    Public and unauthenticated because it is a constant, and because the
+    refusal message already names the same domains to anyone who asks.
+    """
+    return {"providers": payment_providers(), "max": MAX_PAYMENT_LINKS}
 
 
 @router.get("/businesses")
@@ -467,9 +493,26 @@ async def public_business(
     biz = await _resolve(slug_or_id)
     if not biz:
         raise HTTPException(status_code=404, detail="Business not found")
+
+    # K3 — the owner may read their OWN page even when the public cannot.
+    #
+    # The page editor previews the real page component with the real
+    # payload from here, which is the point of it: two renderers of one
+    # design drift, and the one that drifts is the one the owner is looking
+    # at. Without this the editor is unusable for exactly the owner who
+    # needs it most — the one setting the page up before switching it on,
+    # or before publishing a first service. They would be asked to design a
+    # page they are not allowed to see.
+    #
+    # This widens nothing for anybody else: it is their own business, they
+    # are authenticated, and every field below is already theirs.
+    owner_preview = bool(
+        viewer and viewer.get("user_id") == biz.get("owner_user_id"),
+    )
+
     # A hidden business is hidden from the public, exactly like its
     # listings. Its owner still reaches it from the dashboard.
-    if not biz.get("active", True):
+    if not biz.get("active", True) and not owner_preview:
         raise HTTPException(status_code=404, detail="Business not found")
 
     raw = [
@@ -487,13 +530,16 @@ async def public_business(
     # listed" state for a business that has gone, and this is the same
     # situation from a visitor's side. The owner still reaches it from
     # their dashboard, which reads a different endpoint.
-    if not raw:
+    if not raw and not owner_preview:
         raise HTTPException(status_code=404, detail="Business not found")
 
     # L2 — count the visit, and only here: all three 404s above mean nobody
     # saw a page, and counting them would credit a hidden or empty business
     # with traffic it never received. Fire-and-forget; `viewer` is optional
     # auth solely so the owner's own visits are skipped.
+    #
+    # `record_view` already drops a view whose viewer IS the owner, so the
+    # owner-preview responses added above cannot inflate anybody's numbers.
     view_tracking.spawn(view_tracking.record_view(
         view_tracking.ENTITY_BUSINESS, biz["_id"],
         owner_id=biz.get("owner_user_id"),

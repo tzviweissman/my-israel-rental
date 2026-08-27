@@ -14,10 +14,11 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import axios from 'axios';
-import { Briefcase, Plus, Loader2, Eye, EyeOff, Check, X, Pencil } from 'lucide-react';
+import { Briefcase, Plus, Loader2, Eye, EyeOff, Check, X, Pencil, Palette } from 'lucide-react';
 import { toast } from 'sonner';
 import CoverPlaceholder from '../common/CoverPlaceholder';
 import BusinessDetailsForm from './BusinessDetailsForm';
+import BusinessPageEditor from './BusinessPageEditor';
 import BusinessCompleteness from './BusinessCompleteness';
 import BlockTimePanel from './BlockTimePanel';
 import MyGigsTab from './MyGigsTab';
@@ -37,6 +38,10 @@ export default function MyBusinessesTab({ API, token }) {
   const [openBiz, setOpenBiz] = useState(null);
   // Which business is having its Good-to-know facts edited (spec C6).
   const [detailsBiz, setDetailsBiz] = useState(null);
+  // K3 — which business's PAGE is being designed. A separate full-screen
+  // view rather than a third modal: the preview needs the whole width to
+  // show a page at the shape a customer reads it in.
+  const [designBiz, setDesignBiz] = useState(null);
   const [editName, setEditName] = useState('');
 
   const auth = { headers: { Authorization: `Bearer ${token}` } };
@@ -125,6 +130,18 @@ export default function MyBusinessesTab({ API, token }) {
       onSaved={load}
     />
   ) : null;
+
+  if (designBiz) {
+    return (
+      <BusinessPageEditor
+        business={designBiz}
+        API={API}
+        token={token}
+        onClose={() => setDesignBiz(null)}
+        onSaved={load}
+      />
+    );
+  }
 
   if (openBiz) {
     return (
@@ -289,6 +306,18 @@ export default function MyBusinessesTab({ API, token }) {
                   data-testid={`business-details-${b.id}`}
                 >
                   {t('businesses.editDetails', 'Business details')}
+                </button>
+
+                {/* K3 — accent, cover and payment links, against a live
+                    preview of the page they change. */}
+                <button
+                  type="button"
+                  onClick={() => setDesignBiz(b)}
+                  className="inline-flex items-center gap-1.5 text-xs font-semibold me-3"
+                  style={{ color: 'var(--brand-primary)' }}
+                  data-testid={`business-design-${b.id}`}
+                >
+                  <Palette size={12} /> {t('pageDesign.open', 'Design your page')}
                 </button>
 
                 <button

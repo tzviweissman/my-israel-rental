@@ -58,13 +58,30 @@ const COLLECTION_PREVIEW = 6;
 // clutter — chips over three sections is furniture, not navigation.
 const CATALOG_TOOLS_MIN = 16;
 
-const BusinessPage = () => {
+/**
+ * @param {object|null} business  K3 — render THIS business instead of fetching
+ *   one. The page editor passes the real payload with the owner's pending
+ *   edits applied to it, so the preview is this component and not a second
+ *   drawing of it. Undefined everywhere else, which is the route's case.
+ * @param {boolean} preview  true when this is being shown inside the editor
+ *   rather than being visited.
+ */
+const BusinessPage = ({ business: injected = null, preview = false }) => {
   const { slug } = useParams();
   const navigate = useNavigate();
   const { t, i18n } = useTranslation();
   const { token } = useContext(AuthContext);
-  const [biz, setBiz] = useState(null);
+  const [fetched, setFetched] = useState(null);
   const [missing, setMissing] = useState(false);
+  /* An injected business wins outright and nothing is requested. Merging
+     the two would give the editor a race it cannot win: the fetch would
+     land after an edit and quietly put the saved value back on screen,
+     which is the one thing an owner must never see a preview do. */
+  const biz = injected || fetched;
+  /* The route has a slug in the URL; the editor does not. Both need one for
+     the stored layout choice below, and `undefined` in that key would give
+     every previewed business the same entry. */
+  const pageSlug = injected ? (injected.slug || injected.id) : slug;
   // null means "follow the automatic default for this many services".
   // A stored choice wins, per business: the threshold is a starting
   // point, not a cage (spec C2).
@@ -81,6 +98,8 @@ const BusinessPage = () => {
   const [query, setQuery] = useState('');
 
   useEffect(() => {
+    // The editor supplies the payload; there is nothing to go and get.
+    if (injected) return undefined;
     let cancelled = false;
     (async () => {
       try {
@@ -90,18 +109,24 @@ const BusinessPage = () => {
           `${API}/marketplace/business/${encodeURIComponent(slug)}`,
           { headers: visitorHeaders() },
         );
-        if (!cancelled) {
-          setBiz(data);
-          try {
-            setLayout(localStorage.getItem(`biz-layout:${slug}`));
-          } catch { /* private mode: fall back to the automatic default */ }
-        }
+        if (!cancelled) setFetched(data);
       } catch {
         if (!cancelled) setMissing(true);
       }
     })();
     return () => { cancelled = true; };
-  }, [slug]);
+  }, [slug, injected]);
+
+  /* Split out of the fetch above so the editor gets the same remembered
+     layout the visitor would see. Reading it inside the fetch meant it was
+     only ever read on a fetch, and the preview would ignore a choice the
+     owner had already made on their own page. */
+  useEffect(() => {
+    if (!pageSlug) return;
+    try {
+      setLayout(localStorage.getItem(`biz-layout:${pageSlug}`));
+    } catch { /* private mode: fall back to the automatic default */ }
+  }, [pageSlug]);
 
   /* K2 — how much scrim this cover needs, sampled from the photo itself.
 
@@ -234,7 +259,7 @@ const BusinessPage = () => {
 
   const chooseLayout = (next) => {
     setLayout(next);
-    try { localStorage.setItem(`biz-layout:${slug}`, next); } catch { /* private mode */ }
+    try { localStorage.setItem(`biz-layout:${pageSlug}`, next); } catch { /* private mode */ }
   };
   // member_since is the joining YEAR, already computed by the API.
   const isNewHere = String(biz.member_since || '') === String(new Date().getFullYear());
@@ -264,12 +289,18 @@ const BusinessPage = () => {
           passed here. Fixing that needs the tags present in the HTML
           before any JS runs. This still helps in-app browsers and any
           scraper that executes scripts. */}
-      <PageMeta
-        title={`${biz.name} — MyIsraelRental`}
-        description={shareDescription}
-        image={shareImage}
-        path={`/business/${biz.slug || biz.id}`}
-      />
+      {/* Not in the editor. PageMeta writes into the HOST document's head
+          via react-helmet — a portal does not change that — so a preview
+          would retitle the dashboard the owner is standing in and rewrite
+          the share tags of a page nobody is on. */}
+      {!preview && (
+        <PageMeta
+          title={`${biz.name} — MyIsraelRental`}
+          description={shareDescription}
+          image={shareImage}
+          path={`/business/${biz.slug || biz.id}`}
+        />
+      )}
 
       <div className={`${columnWidth} mx-auto px-4 py-8`}>
         <div className="rounded-2xl border bg-white overflow-hidden mb-6"

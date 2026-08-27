@@ -115,3 +115,20 @@ def test_clean_handles_empty_and_none():
 def test_label_is_capped():
     out = clean_payment_links([{"label": "P" * 500, "url": "https://paybox.co.il/p"}])
     assert len(out[0]["label"]) <= 40
+
+
+def test_every_allowlisted_domain_has_a_provider_name():
+    """The owner's form pre-fills a link's label from this map and names the
+    accepted providers with it. A domain added to the allowlist without a
+    name here would show the owner a raw hostname where every other row
+    shows a brand — so the omission fails here rather than in their face."""
+    from utils.payment_links import PROVIDER_NAMES, payment_providers
+
+    missing = [d for d in ALLOWED_PAYMENT_DOMAINS if d not in PROVIDER_NAMES]
+    assert not missing, f"no display name for: {missing}"
+
+    providers = payment_providers()
+    # Derived, not a second list: it cannot name a domain the allowlist
+    # does not accept, which is the whole reason it is computed.
+    assert [p["domain"] for p in providers] == list(ALLOWED_PAYMENT_DOMAINS)
+    assert all(p["name"] for p in providers)
