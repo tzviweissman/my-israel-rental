@@ -185,6 +185,43 @@ const en = {
         paymentRefused: 'We can only show links from a payment provider we recognise, over https.',
         paymentAccepted: 'Accepted: {{list}}',
       },
+      tour: {
+        next: 'Next',
+        back: 'Back',
+        done: 'Done',
+        exit: 'End the tour',
+        progress: '{{index}} of {{total}}',
+        step: {
+          checklist: {
+            title: 'Start here',
+            body: 'The short list of what is still missing from your public page. Each line links straight to the field that fixes it \u2014 no hunting.',
+          },
+          'business-page': {
+            title: 'Your own page',
+            body: 'This opens the page customers see, and lets you set the cover photo and colour. Owners send this link instead of building a website.',
+          },
+          'add-property': {
+            title: 'Add a property',
+            body: 'Everything about a listing starts here \u2014 photos, price, availability and how people book it.',
+          },
+          availability: {
+            title: 'Days you are not free',
+            body: 'Block a holiday or a job you took elsewhere and those dates stop being offered. One list, whatever the work came from.',
+          },
+          share: {
+            title: 'Your link and QR code',
+            body: 'A short link, and a code you can print on a flyer, a van or your packaging. You will see how many people scanned it.',
+          },
+          messages: {
+            title: 'Messages translate themselves',
+            body: 'Write in Hebrew or English \u2014 whoever reads it sees it in their own language, and their reply comes back in yours. Language never costs you the job.',
+          },
+          help: {
+            title: 'If you get lost',
+            body: 'This menu is always here. Restart this tour from it, see everything the site can do, or message us.',
+          },
+        },
+      },
       features: {
         metaTitle: 'What you can do here',
         metaDescription: 'Everything MyIsraelRental does for businesses, hosts and travellers \u2014 free to list, free to be found.',
@@ -216,10 +253,10 @@ const en = {
             forWho: 'Anyone who advertises off the internet as well as on it.',
             cta: 'Get my link and code',
           },
-          'write-in-english': {
-            title: 'Write in English, they read Hebrew',
+          'write-in-your-language': {
+            title: 'Write in your language, they read theirs',
             benefit: 'Messages are translated both ways, so language never costs you the job.',
-            body: 'Write the way you normally write. Someone reading in the other language sees it in theirs, and their reply comes back in yours. Nobody has to apologise for their English or reach for a translator.',
+            body: 'Write the way you normally write \u2014 Hebrew or English. Whoever reads it sees it in their own language, and their reply comes back in yours. Nobody has to apologise for their second language or reach for a translator.',
             forWho: 'Everyone \u2014 this is the single most used thing on the site.',
             cta: 'Open my messages',
           },
@@ -341,12 +378,13 @@ const en = {
       },
       tips: {
         tip_share: 'Print this code on a flyer or your packaging \u2014 you\u2019ll see how many people scan it.',
-        tip_chat: 'Write in English; Hebrew speakers read it in Hebrew.',
+        tip_chat: 'Write in your own language \u2014 whoever reads it sees it in theirs.',
         tip_availability: 'Block time here for holidays or jobs booked elsewhere.',
       },
       help: {
         help: 'Help',
         showAround: 'Show me around',
+        restartTour: 'Restart the tour',
         whatYouCanDo: 'What you can do here',
         messageUs: 'Message us',
         offerFirstLogin: 'New here?',

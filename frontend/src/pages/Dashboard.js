@@ -24,6 +24,7 @@ import MyJobsTab from '../components/dashboard/MyJobsTab';
 import ManagerHeader from '../components/dashboard/ManagerHeader';
 import DashboardTabs from '../components/dashboard/DashboardTabs';
 import OnboardingProvider from '../components/onboarding/OnboardingProvider';
+import TourProvider from '../components/tour/TourProvider';
 import SetupChecklist from '../components/onboarding/SetupChecklist';
 import HelpMenu from '../components/onboarding/HelpMenu';
 import ShowMeAroundOffer from '../components/onboarding/ShowMeAroundOffer';
@@ -211,6 +212,9 @@ const Dashboard = () => {
        deep inside the tab components, and the "only one on screen at a
        time" rule can only be enforced from a common ancestor. */
     <OnboardingProvider>
+    {/* Inside OnboardingProvider, because the tour's entry points live in
+        the onboarding surfaces and both need the same auth context. */}
+    <TourProvider>
     <div className="min-h-screen" data-testid="dashboard-page">
       <div className="max-w-7xl mx-auto px-4 md:px-6 pt-36 sm:pt-28 md:pt-28 pb-12">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 mb-6 md:mb-8">
@@ -244,6 +248,7 @@ const Dashboard = () => {
                 }}
                 className="primary-btn flex items-center justify-center gap-1.5 sm:gap-2 whitespace-nowrap !px-3.5 sm:!px-8 !py-2 sm:!py-3 text-xs sm:text-sm"
                 data-testid="add-property-button"
+                data-tour="add-property"
               >
                 <Plus size={14} className="sm:w-[18px] sm:h-[18px]" />
                 {t('dashboard.addProperty')}
@@ -406,6 +411,7 @@ const Dashboard = () => {
         )}
       </div>
     </div>
+    </TourProvider>
     </OnboardingProvider>
   );
 };

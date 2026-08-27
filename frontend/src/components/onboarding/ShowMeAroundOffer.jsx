@@ -18,6 +18,7 @@ import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import { Compass, X } from 'lucide-react';
 import { useOnboarding, useOnboardingSlot } from './OnboardingProvider';
+import { useTour } from '../tour/TourProvider';
 import { featureLibraryFor } from './helpDestinations';
 
 const MOMENTS = {
@@ -40,8 +41,19 @@ export default function ShowMeAroundOffer({ moment, eligible = true, inline = fa
   const { t } = useTranslation();
   const config = MOMENTS[moment];
   const ctx = useOnboarding();
-  const { visible, dismiss } = useOnboardingSlot(config?.id, eligible);
+  const tour = useTour();
   const href = featureLibraryFor(ctx?.state?.role);
+
+  /* T7 — once the tour has been taken the inline offers stop appearing;
+     only the header entry remains. Offering to show somebody around a
+     place they have already been shown reads as the site not remembering
+     them. The `complete` moment is exempt: it points at the feature
+     library, which is a different destination and still worth offering. */
+  const tourDone = Boolean(ctx?.state?.tour?.completed);
+  const stillWorthOffering = moment === 'complete' || !tourDone;
+  const { visible, dismiss } = useOnboardingSlot(
+    config?.id, eligible && stillWorthOffering,
+  );
 
   if (!config || !visible) return null;
 
@@ -71,14 +83,29 @@ export default function ShowMeAroundOffer({ moment, eligible = true, inline = fa
       {lead ? (
         <span className="text-xs" style={{ color: 'var(--brand-muted)' }}>{lead}</span>
       ) : null}
-      <Link
-        to={href}
-        className="text-xs font-semibold hover:underline"
-        style={{ color: 'var(--brand-primary)' }}
-        data-testid={`show-around-${moment}-link`}
-      >
-        {cta}
-      </Link>
+      {/* Runs the tour rather than navigating to the library — this is
+          the "show me" path, and sending somebody to a page of cards
+          instead is answering a different question. */}
+      {tour?.available ? (
+        <button
+          type="button"
+          onClick={() => tour.start()}
+          className="text-xs font-semibold hover:underline"
+          style={{ color: 'var(--brand-primary)' }}
+          data-testid={`show-around-${moment}-link`}
+        >
+          {cta}
+        </button>
+      ) : (
+        <Link
+          to={href}
+          className="text-xs font-semibold hover:underline"
+          style={{ color: 'var(--brand-primary)' }}
+          data-testid={`show-around-${moment}-link`}
+        >
+          {cta}
+        </Link>
+      )}
       <button
         type="button"
         onClick={dismiss}

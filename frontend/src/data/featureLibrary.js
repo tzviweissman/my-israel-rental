@@ -53,7 +53,7 @@ export const FEATURES = [
     built: 'backend/routes/short_links.py',
   },
   {
-    slug: 'write-in-english',
+    slug: 'write-in-your-language',
     icon: 'Languages',
     audiences: ['business', 'host', 'traveller'],
     cta: '/dashboard?tab=messages',

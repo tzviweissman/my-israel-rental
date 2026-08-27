@@ -43,7 +43,7 @@ satisfied, drawn from a record. Nobody starts at zero and nothing is made up.
 from __future__ import annotations
 
 from datetime import UTC, datetime
-from typing import Any
+from typing import Any, Optional
 
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, Field
@@ -232,6 +232,72 @@ async def _property_items(uid: str, user_doc: dict[str, Any]) -> list[dict[str, 
     ]
 
 
+# The tour's lifecycle, as recorded. `step_viewed` and `step_skipped` carry
+# a step id; the rest are whole-run events.
+#
+# Drop-off PER STEP is the point, not started/completed/skipped. Knowing
+# that 40% abandon the tour tells you nothing you can act on; knowing they
+# all leave on the same step tells you which step to rewrite.
+TOUR_EVENTS: frozenset[str] = frozenset({
+    "started", "step_viewed", "step_skipped", "exited", "completed",
+})
+
+
+class TourEventIn(BaseModel):
+    event: str = Field(..., min_length=1, max_length=32)
+    step_id: Optional[str] = Field(None, max_length=64)
+    role: Optional[str] = Field(None, max_length=32)
+
+
+@router.post("/onboarding/tour")
+async def onboarding_tour_event(
+    payload_in: TourEventIn, payload: dict = Depends(verify_token),
+) -> dict[str, Any]:
+    """Record one tour event, and keep the resume point up to date.
+
+    Server-side, because `localStorage` re-offers a finished tour on every
+    new device — and because "which step lost people" is a question about
+    everyone, not about one browser.
+
+    Fire-and-forget from the client's side: it never blocks the tour and a
+    failure here must never strand somebody mid-walkthrough.
+    """
+    event = payload_in.event.strip()
+    if event not in TOUR_EVENTS:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Unknown tour event. Accepted: {', '.join(sorted(TOUR_EVENTS))}",
+        )
+
+    uid = payload["user_id"]
+    now = datetime.now(UTC).isoformat()
+
+    await db.onboarding_tour_events.insert_one({
+        "user_id": uid,
+        "event": event,
+        "step_id": payload_in.step_id,
+        "role": payload_in.role,
+        "at": now,
+    })
+
+    # The resume point. Only a real view moves it: a skipped step is one
+    # the owner never saw, and resuming onto it would show them a step the
+    # engine is about to skip again.
+    update: dict[str, Any] = {"updated_at": now}
+    if event == "step_viewed" and payload_in.step_id:
+        update["last_step_id"] = payload_in.step_id
+    if event == "completed":
+        update["completed_at"] = now
+        # Cleared so a completed tour restarts from the beginning rather
+        # than from wherever it happened to finish.
+        update["last_step_id"] = None
+    if event == "started":
+        update.setdefault("started_at", now)
+
+    await db.onboarding_tour.update_one({"user_id": uid}, {"$set": update}, upsert=True)
+    return {"ok": True}
+
+
 @router.get("/onboarding/state")
 async def onboarding_state(payload: dict = Depends(verify_token)) -> dict[str, Any]:
     """The checklist, the dismissals, and whether to show any of it.
@@ -278,6 +344,13 @@ async def onboarding_state(payload: dict = Depends(verify_token)) -> dict[str, A
     dismissed_doc = await db.onboarding_dismissals.find_one({"user_id": uid}, {"_id": 0, "ids": 1})
     dismissed = list((dismissed_doc or {}).get("ids") or [])
 
+    # T4 — whether the tour has been taken, and where it was left. Drives
+    # "Resume" vs "Show me around", and T7's rule that the inline offers
+    # stop once the tour is done while the header entry stays forever.
+    tour_doc = await db.onboarding_tour.find_one(
+        {"user_id": uid}, {"_id": 0, "completed_at": 1, "last_step_id": 1},
+    ) or {}
+
     # Past the age cap the checklist goes away entirely. Tips and the help
     # menu are unaffected — those are not "new user" furniture, they are
     # captions on features, and a feature is no less new to someone the
@@ -289,6 +362,10 @@ async def onboarding_state(payload: dict = Depends(verify_token)) -> dict[str, A
         "checklists": [] if stale else lists,
         "dismissed": dismissed,
         "account_age_days": age_days,
+        "tour": {
+            "completed": bool(tour_doc.get("completed_at")),
+            "last_step_id": tour_doc.get("last_step_id"),
+        },
     }
 
 

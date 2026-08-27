@@ -168,6 +168,10 @@ const DashboardTabs = ({
       onClick={() => setActiveTab(tab.id)}
       className={`${cls(activeTab === tab.id, tab.colour)} ${tab.Icon || tab.badge ? 'flex items-center justify-center gap-1.5 relative' : ''}`}
       data-testid={`tab-${tab.id}`}
+      // Only this one tab is a tour target. `data-tour` is put on the
+      // element on purpose, so a refactor that moves the tab strip
+      // carries the anchor with it instead of breaking the tour.
+      data-tour={tab.id === 'messages' ? 'messages-tab' : undefined}
     >
       {tab.Icon && <tab.Icon size={14} />}
       {tab.label}

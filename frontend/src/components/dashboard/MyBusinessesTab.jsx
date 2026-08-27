@@ -329,6 +329,10 @@ export default function MyBusinessesTab({ API, token }) {
                   className="inline-flex items-center gap-1.5 text-xs font-semibold me-3"
                   style={{ color: 'var(--brand-primary)' }}
                   data-testid={`business-design-${b.id}`}
+                  // The FIRST card only: the tour needs one anchor,
+                  // and duplicating it on every business would give
+                  // `querySelector` an arbitrary winner.
+                  data-tour={items[0]?.id === b.id ? 'business-design' : undefined}
                 >
                   <Palette size={12} /> {t('pageDesign.open', 'Design your page')}
                 </button>

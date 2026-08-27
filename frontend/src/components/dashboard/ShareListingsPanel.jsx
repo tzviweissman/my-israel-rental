@@ -106,6 +106,7 @@ export default function ShareListingsPanel({ userId, propertyCount = 0, API, tok
           color: 'var(--brand-primary)',
         }}
         data-testid="share-listings-toggle"
+        data-tour="share-panel"
       >
         {/* The label names the QR. "Share" alone tested badly for the
             obvious reason: nothing about it suggests a printable code

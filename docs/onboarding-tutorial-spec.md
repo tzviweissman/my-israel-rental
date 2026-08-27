@@ -59,7 +59,9 @@ Examples: on the share panel, *"Print this code on a flyer or your packaging —
 
 For owners who want to be shown: a **"Show me around"** entry point in the dashboard and in the help menu — a link, not a popup. Never auto-fires.
 
-**Build this last, and only if T1 and T2 leave a real gap.**
+**Ruling (Tzvi, 27 Aug 2026): build it.** The earlier note here said "last, and only if T1 and T2 leave a real gap." Overruled — the walkthrough is wanted now, as a **pointed, arrowed tour that shows where to click**, so an owner sees both how to use each feature and what the site offers. The gating principle is unchanged: it never fires by itself; it is entered deliberately from T7's entry points.
+
+The tour is a **demonstration, not a task**. It points at real controls on real pages and explains them; it never requires the owner to complete a step to advance, and it never performs an action on their behalf.
 
 ### Mechanics (merged from a second proposal, 26 Aug 2026)
 

@@ -16,11 +16,13 @@ import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import { HelpCircle, Compass, BookOpen, MessageCircle } from 'lucide-react';
 import { useOnboarding } from './OnboardingProvider';
+import { useTour } from '../tour/TourProvider';
 import { featureLibraryFor, SUPPORT_WHATSAPP } from './helpDestinations';
 
 export default function HelpMenu() {
   const { t } = useTranslation();
   const ctx = useOnboarding();
+  const tour = useTour();
   const [open, setOpen] = useState(false);
   const wrapRef = useRef(null);
 
@@ -54,6 +56,7 @@ export default function HelpMenu() {
         className="inline-flex items-center gap-1.5 px-3 py-2 rounded-full text-sm font-semibold border"
         style={{ borderColor: 'var(--brand-border)', color: 'var(--brand-primary)', background: 'var(--surface)' }}
         data-testid="dashboard-help-button"
+        data-tour="help"
       >
         <HelpCircle size={16} aria-hidden="true" />
         <span>{t('help.help', 'Help')}</span>
@@ -83,18 +86,44 @@ export default function HelpMenu() {
           }}
           data-testid="dashboard-help-menu"
         >
-          <Link
-            to={href}
-            role="menuitem"
-            className={itemClass}
-            style={{ color: 'var(--ink)' }}
-            onClick={() => setOpen(false)}
-            data-testid="help-show-around"
-          >
-            <Compass size={15} aria-hidden="true" style={{ color: 'var(--brand-primary)' }} />
-            {/* Same key as every other entry point — one name everywhere. */}
-            {t('help.showAround', 'Show me around')}
-          </Link>
+          {/* T4 — this now RUNS the tour rather than linking away to the
+              library. The label is unchanged and comes from the same key
+              as every other entry point: one name everywhere, so a tour
+              called three things does not read as three features.
+
+              Falls back to a link when there is no tour to run — a signed
+              out or role-less visitor should still get somewhere useful
+              rather than a button that does nothing. */}
+          {tour?.available ? (
+            <button
+              type="button"
+              role="menuitem"
+              className={itemClass}
+              style={{ color: 'var(--ink)' }}
+              onClick={() => { setOpen(false); tour.start(); }}
+              data-testid="help-show-around"
+            >
+              <Compass size={15} aria-hidden="true" style={{ color: 'var(--brand-primary)' }} />
+              {/* "Restart" once they have finished it: offering to show
+                  someone around a place they have been shown reads as the
+                  site not remembering. */}
+              {ctx?.state?.tour?.completed
+                ? t('help.restartTour', 'Restart the tour')
+                : t('help.showAround', 'Show me around')}
+            </button>
+          ) : (
+            <Link
+              to={href}
+              role="menuitem"
+              className={itemClass}
+              style={{ color: 'var(--ink)' }}
+              onClick={() => setOpen(false)}
+              data-testid="help-show-around"
+            >
+              <Compass size={15} aria-hidden="true" style={{ color: 'var(--brand-primary)' }} />
+              {t('help.showAround', 'Show me around')}
+            </Link>
+          )}
 
           <Link
             to={href}

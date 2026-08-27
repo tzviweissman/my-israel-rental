@@ -77,7 +77,7 @@ export default function BlockTimePanel({ API, token }) {
           would use it. */}
       <OnboardingTip id="tip.availability" className="mb-2" />
     <div className="rounded-2xl border bg-white" style={{ borderColor: 'var(--brand-border)' }}
-      data-testid="block-time-panel">
+      data-testid="block-time-panel" data-tour="availability">
       <button
         type="button"
         onClick={() => setOpen((o) => !o)}

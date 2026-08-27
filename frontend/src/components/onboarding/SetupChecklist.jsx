@@ -88,6 +88,7 @@ export default function SetupChecklist() {
       className="rounded-2xl border p-4 sm:p-5 mb-6"
       style={{ background: 'var(--surface)', borderColor: 'var(--brand-border)' }}
       data-testid="setup-checklist"
+      data-tour="setup-checklist"
     >
       {lists.map((list, listIndex) => {
         const pct = list.total ? Math.round((list.done / list.total) * 100) : 0;
