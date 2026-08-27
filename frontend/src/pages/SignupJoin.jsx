@@ -453,6 +453,21 @@ const SignupJoin = () => {
                 is filled in is offering it too late to be worth
                 anything. */}
 
+            {/* F4 — the feature library, linked from /join. Someone still
+                deciding which card to press is exactly who benefits from
+                reading what the site actually does. Below the cards, so it
+                never competes with the choice itself. */}
+            <p className="mt-8 text-center text-sm" style={{ color: 'var(--brand-muted)' }}>
+              {t('signupJoin.notSure', 'Not sure yet?')}{' '}
+              <Link
+                to="/what-you-can-do"
+                className="font-semibold text-[var(--brand-primary)] hover:underline"
+                data-testid="signup-what-you-can-do"
+              >
+                {t('features.title', 'What you can do here')}
+              </Link>
+            </p>
+
             <p className="mt-10 text-center sm:hidden text-sm text-gray-600">
               {t('signupJoin.haveAccount', 'Already have an account?')}{' '}
               <Link to={loginHref} className="font-semibold text-[var(--brand-primary)]" data-testid="signup-login-link-mobile">

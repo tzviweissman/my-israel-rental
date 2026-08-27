@@ -89,6 +89,10 @@ const PostRequest = lazy(() => import('./pages/PostRequest'));
 const Services = lazy(() => import(/* webpackPrefetch: true */ './pages/Services'));
 const WhyList = lazy(() => import('./pages/WhyList'));
 const WhyHost = lazy(() => import('./pages/WhyHost'));
+// The feature library (perks spec Part 1). Lazy like its neighbours:
+// it is a marketing surface, not part of the first paint.
+const WhatYouCanDo = lazy(() => import('./pages/WhatYouCanDo'));
+const FeatureDetail = lazy(() => import('./pages/FeatureDetail'));
 const PropertyDetail = lazy(() => import('./pages/PropertyDetail'));
 const SubleaseDetail = lazy(() => import('./pages/SubleaseDetail'));
 const Auth = lazy(() => import('./pages/Auth'));
@@ -348,6 +352,11 @@ function App() {
             {/* Two supply-side pitches: /why-list sells to service
                 providers, /why-host to property owners. Neither is in
                 the nav — both are reached from their role card on /join. */}
+            {/* A real page per feature, not a modal, so each one is
+                linkable, shareable and indexable — and so the help
+                menu has somewhere real to send people. */}
+            <Route path="/what-you-can-do" element={<WhatYouCanDo />} />
+            <Route path="/features/:slug" element={<FeatureDetail />} />
             <Route path="/why-list" element={<WhyList />} />
             <Route path="/why-host" element={<WhyHost />} />
             <Route path="/for-providers" element={<WhyList />} />

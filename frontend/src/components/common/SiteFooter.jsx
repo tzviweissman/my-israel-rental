@@ -23,6 +23,9 @@ export default function SiteFooter() {
     { to: '/stays', label: t('nav.stays', 'Stays') },
     { to: '/businesses', label: t('nav.services', 'Businesses') },
     { to: '/requests', label: t('nav.requests', 'Marketplace') },
+    // F4 — the feature library is linked from the footer, so it is
+    // reachable from every page rather than only from the dashboard.
+    { to: '/what-you-can-do', label: t('features.title', 'What you can do here') },
     { to: '/faq', label: t('footer.faq', 'Frequently Asked Questions') },
   ];
 

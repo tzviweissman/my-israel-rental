@@ -3,30 +3,22 @@
  * destinations in the header menu, in four inline offers, and later in the
  * Day 1 email.
  *
- * THE FEATURE LIBRARY DOES NOT EXIST YET
- * --------------------------------------
- * T7's entries are meant to point at `/what-you-can-do` — the role-filtered
- * feature library from `docs/perks-and-features-spec.md` Part 1, which this
- * pass does not build (T3 is explicitly out of scope). There is no such
- * route in `App.js`.
+ * These point at `/what-you-can-do` — the role-filtered feature library
+ * from `docs/perks-and-features-spec.md` Part 1.
  *
- * Pointing at it anyway would ship a 404 behind a control whose entire
- * reason for existing is that help should be findable. So until T3 lands
- * these go to the pages that already exist and already answer the same
- * question for the same audience:
- *
- *   * `/why-list`  — the value page for service and business owners
- *   * `/why-host`  — the value page for property owners
- *
- * Both are real, on-brand, and role-appropriate. When `/what-you-can-do`
- * exists, `featureLibraryFor` is the only thing that has to change.
+ * It was briefly not built, and while that was true these entries went to
+ * `/why-list` and `/why-host` instead: pointing at a route that does not
+ * exist would have shipped a 404 behind a control whose entire reason for
+ * existing is that help should be findable. The fallback is kept below
+ * rather than deleted, because the same situation recurs the next time a
+ * destination is planned before it is built.
  */
 
 // The path T3 will create. Named here so the swap is one line.
 export const FEATURE_LIBRARY_PATH = '/what-you-can-do';
 
-/** Whether the feature library route exists yet. Flip when T3 ships. */
-export const FEATURE_LIBRARY_READY = false;
+/** The library now exists (`/what-you-can-do`, routed in App.js). */
+export const FEATURE_LIBRARY_READY = true;
 
 /**
  * The best "what can this site do for me" page for a role, today.
