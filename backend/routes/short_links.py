@@ -325,7 +325,7 @@ async def _preview_meta(target_type: str, target_id: str) -> dict[str, str]:
     }
 
 
-def _preview_html(meta: dict[str, str], target: str) -> str:
+def _preview_html(meta: dict[str, str], target: str, *, refresh: bool = True) -> str:
     """A tiny page whose only job is to carry OG tags to a crawler.
 
     Needed because the front end is a static CRA bundle: react-helmet
@@ -339,6 +339,12 @@ def _preview_html(meta: dict[str, str], target: str) -> str:
     belt-and-braces for anything that renders the body instead.
     """
     e = html.escape
+    # A refresh to the URL you are already on is a reload loop. Served from
+    # /p/{slug} the target is elsewhere and the refresh is a useful
+    # fallback; served AT the canonical page it must be left out.
+    refresh_tag = (
+        f'<meta http-equiv="refresh" content="0;url={e(target)}"/>' if refresh else ""
+    )
     return f"""<!doctype html>
 <html lang="en">
 <head>
@@ -355,7 +361,7 @@ def _preview_html(meta: dict[str, str], target: str) -> str:
 <meta name="twitter:title" content="{e(meta["title"])}"/>
 <meta name="twitter:description" content="{e(meta["description"])}"/>
 <meta name="twitter:image" content="{e(meta["image"])}"/>
-<meta http-equiv="refresh" content="0;url={e(target)}"/>
+{refresh_tag}
 </head>
 <body><a href="{e(target)}">{e(meta["title"])}</a></body>
 </html>"""
@@ -390,3 +396,44 @@ async def follow_short_link(slug: str, request: Request):
         return HTMLResponse(content=_preview_html(meta, target))
 
     return RedirectResponse(url=target, status_code=302)
+
+
+@router.get("/og/business/{slug_or_id}", response_class=HTMLResponse)
+async def business_link_preview(slug_or_id: str):
+    """OG tags for a business, for whatever is serving /business/{slug}.
+
+    WHY THIS EXISTS SEPARATELY FROM /p/{slug}
+
+    A short link works because it is a REDIRECT: a crawler asks the backend
+    for /p/{slug}, and the backend can tell a crawler from a person and
+    answer each differently. The raw /business/{slug} URL has no such hop.
+    It is served by the static frontend, which hands every caller the same
+    CRA index.html — and no link-preview crawler runs JavaScript, so
+    react-helmet's tags never exist for them. Every business on the site
+    shared one generic card, and the raw URL is the one owners actually
+    paste, because it is the one they see in their address bar.
+
+    The static host cannot vary on user-agent, so the decision is made by
+    the small server in front of the build (`frontend/server.js`), which
+    calls this for crawlers only. This endpoint holds no policy of its own:
+    it renders the same metadata, from the same builder, as the short-link
+    card, so the two can never disagree about how a business looks when
+    shared.
+
+    Public and cacheable. It exposes nothing that /business/{slug} does not
+    already show to anyone holding the URL.
+    """
+    meta = await _preview_meta("business", slug_or_id)
+    target = f"{_SITE_ORIGIN}/business/{slug_or_id}"
+    return HTMLResponse(
+        # No refresh: the crawler is already at the canonical URL, and a
+        # refresh pointing back at it would loop for anything that renders
+        # the page rather than just reading its head.
+        content=_preview_html(meta, target, refresh=False),
+        headers={
+            # Crawlers refetch on every paste, and a business's name and
+            # cover change rarely. Five minutes is short enough that an
+            # owner who just set a cover photo sees it on their next share.
+            "Cache-Control": "public, max-age=300",
+        },
+    )

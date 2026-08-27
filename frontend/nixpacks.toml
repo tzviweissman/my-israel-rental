@@ -21,5 +21,12 @@ cmds = ["npm run build"]
 [start]
 # CRA's own `npm start` is a dev server — wrong for production (slow,
 # unoptimized, not meant to be internet-facing). Serve the static build
-# instead. $PORT is injected by Railway at runtime.
-cmd = "npx serve -s build -l $PORT"
+# instead. $PORT is read by server.js at runtime.
+#
+# `server.js` rather than `npx serve -s build`, and the difference is one
+# feature: it can tell a link-preview crawler from a person, which a static
+# host cannot. Everything else — the same files, the same SPA fallback, the
+# same headers and redirects out of serve.json — is unchanged, and the
+# crawler branch fails open to exactly what `serve` would have returned.
+# See the comment at the top of frontend/server.js.
+cmd = "node server.js"

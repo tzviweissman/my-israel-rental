@@ -33,13 +33,15 @@
     "serve": "^14.2.4",
     "sonner": "^2.0.3",
     "tailwind-merge": "^3.2.0",
-    "tailwindcss-animate": "^1.0.7"
+    "tailwindcss-animate": "^1.0.7",
+    "serve-handler": "^6.1.5"
   },
   "scripts": {
     "start": "craco start",
     "build": "craco build",
     "test": "craco test",
-    "types:generate": "node scripts/generate-types.mjs"
+    "types:generate": "node scripts/generate-types.mjs",
+    "serve": "node server.js"
   },
   "browserslist": {
     "production": [
