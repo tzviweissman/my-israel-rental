@@ -109,6 +109,7 @@ class BusinessIn(BaseModel):
 from utils.payment_links import (  # noqa: E402
     MAX_PAYMENT_LINKS,
     PaymentLinkError,
+    allowed_payment_links,
     clean_payment_links,
     payment_providers,
 )
@@ -633,7 +634,11 @@ async def public_business(
         # holds a copy of the design system.
         "accent": biz.get("accent") or "stone",
         "cover_url": biz.get("cover_url"),
-        "payment_links": biz.get("payment_links") or [],
+        # Re-checked on the way OUT, not just on the way in. The allowlist
+        # gated writes only, so taking a domain off it left every link
+        # already saved under it rendering until its owner next opened the
+        # form — which is no way to withdraw a payment domain.
+        "payment_links": allowed_payment_links(biz.get("payment_links")),
         # C1 — raw groups. Which services actually land in which group,
         # and what happens to the ones in none, is decided in one place
         # on the client (utils/businessCollections.js) so the rules cannot

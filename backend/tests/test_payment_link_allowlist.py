@@ -42,7 +42,6 @@ from utils.payment_links import (  # noqa: E402
     "https://venmo.com/somebakery?txn=charge&amount=120",
     "https://www.max.co.il/pay/abc123",
     "https://isracard.co.il/pay/abc123",
-    "https://zellepay.com/",
 ])
 def test_real_payment_links_are_allowed(url):
     assert is_allowed_payment_url(url), url
@@ -59,7 +58,6 @@ def test_real_payment_links_are_allowed(url):
     ("https://fake-isracard.co.il/pay", "suffix match without a dot boundary"),
     ("https://venmo.com.evil.com/pay", "allowlisted domain as a subdomain OF evil"),
     ("https://notvenmo.com/somebakery", "no separator at all"),
-    ("https://evil-zellepay.com/pay", "suffix match without a dot boundary"),
     # A substring check passes these.
     ("https://evil.com/?ref=paybox.co.il", "allowlisted domain in the query"),
     ("https://evil.com/paybox.co.il", "allowlisted domain in the path"),
@@ -113,7 +111,6 @@ def test_clean_keeps_good_links_and_labels_them():
 @pytest.mark.parametrize("url,expected", [
     ("https://bitpay.co.il/p/1", "Bit"),
     ("https://www.paybox.co.il/pay/2", "PayBox"),
-    ("https://zellepay.com/", "Zelle"),
     ("https://buy.stripe.com/test_1", "Stripe"),      # via the subdomain rule
     ("https://venmo.com/somebakery", "Venmo"),
 ])
@@ -162,3 +159,50 @@ def test_every_allowlisted_domain_has_a_provider_name():
     # does not accept, which is the whole reason it is computed.
     assert [p["domain"] for p in providers] == list(ALLOWED_PAYMENT_DOMAINS)
     assert all(p["name"] for p in providers)
+
+
+@pytest.mark.parametrize("url", [
+    "https://zellepay.com/",
+    "https://www.zellepay.com/how-it-works",
+    "https://enroll.zellepay.com/",
+])
+def test_zelle_is_refused_on_purpose(url):
+    """Zelle was added on request and taken back out the same day.
+
+    It issues no shareable payment link — it is bank-to-bank on an enrolled
+    email or US mobile number, set up by the payer inside their own banking
+    app — so the only button the entry could produce was one labelled
+    "Zelle" that dropped a visitor on a marketing page. That is the exact
+    thing P1 exists to prevent: nobody should press a payment button and
+    land somewhere that cannot take a payment.
+
+    Pinned as a test rather than left to the comment, because "add Zelle,
+    everyone knows Zelle" is a reasonable-sounding request that will be
+    made again.
+    """
+    assert not is_allowed_payment_url(url)
+
+
+def test_stored_links_are_rechecked_on_the_way_out():
+    """Removing a domain has to take effect on the next page load.
+
+    The allowlist gated writes only, so a link saved while its domain was
+    accepted carried on rendering after the domain was withdrawn — until
+    the owner happened to open the form and save again. Harmless for Zelle;
+    not harmless the day a payment domain has to be pulled because it was
+    compromised.
+    """
+    from utils.payment_links import allowed_payment_links
+
+    stored = [
+        {"label": "Bit", "url": "https://bitpay.co.il/p/1"},
+        {"label": "Zelle", "url": "https://zellepay.com/"},        # withdrawn
+        {"label": "Pay", "url": "https://evil-paybox.co.il/x"},    # never valid
+        {"label": "Old", "url": "http://paybox.co.il/x"},          # plain http
+    ]
+    kept = allowed_payment_links(stored)
+    assert [p["url"] for p in kept] == ["https://bitpay.co.il/p/1"]
+    # Silent, not raising: a VISITOR is reading the page this feeds, and a
+    # refusal message is addressed to the owner.
+    assert allowed_payment_links(None) == []
+    assert allowed_payment_links([{"nope": 1}, None, "x"]) == []

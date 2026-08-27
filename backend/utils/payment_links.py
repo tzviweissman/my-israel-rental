@@ -34,8 +34,18 @@ from urllib.parse import urlsplit
 #
 # The other question to ask before adding one is whether the provider HAS a
 # link to paste. An entry for a provider that issues no shareable URL is not
-# a security hole, but it is a promise the page cannot keep — see the note on
-# Zelle below.
+# a security hole, but it is a promise the page cannot keep.
+#
+# ZELLE IS DELIBERATELY ABSENT, and was briefly present before being taken
+# back out. Zelle issues no shareable payment link: it is bank-to-bank on an
+# enrolled email or US mobile number, and the payer sets the transfer up
+# inside their own banking app. Nothing an owner could paste would reach a
+# payment, so the only button the entry could produce was one labelled
+# "Zelle" that dropped the visitor on a marketing page. An owner who takes
+# Zelle says so in the free-text `payment_note` on their business
+# ("Zelle: name@example.com"), which is how Zelle actually works.
+# `test_payment_link_allowlist` pins the refusal so it is not re-added by
+# reflex.
 ALLOWED_PAYMENT_DOMAINS: tuple[str, ...] = (
     # Israeli
     "bitpay.co.il",        # Bit
@@ -58,15 +68,6 @@ ALLOWED_PAYMENT_DOMAINS: tuple[str, ...] = (
     "revolut.me",
     "wise.com",
     "venmo.com",           # venmo.com/{user}, and ?txn=charge&amount=
-    # Zelle has NO shareable payment link. It is bank-to-bank on an enrolled
-    # email or US phone number, and the payer sets it up inside their own
-    # banking app — so nothing an owner can paste here reaches a payment,
-    # and a button labelled "Zelle" lands the visitor on a marketing page.
-    # Kept because it was asked for, and it is safe; but an owner who takes
-    # Zelle is better served by the free-text `payment_note` on their
-    # business ("Zelle: name@example.com"), which is how Zelle actually
-    # works. Remove this entry the day that stops being a deliberate choice.
-    "zellepay.com",
 )
 
 # The name a provider is KNOWN BY, which is not its domain. An owner pasting
@@ -99,7 +100,6 @@ PROVIDER_NAMES: dict[str, str] = {
     "revolut.me": "Revolut",
     "wise.com": "Wise",
     "venmo.com": "Venmo",
-    "zellepay.com": "Zelle",
 }
 
 
@@ -167,6 +167,34 @@ def is_allowed_payment_url(url: str) -> bool:
     host = host.rstrip(".")
 
     return any(host == d or host.endswith("." + d) for d in ALLOWED_PAYMENT_DOMAINS)
+
+
+def allowed_payment_links(stored: list | None) -> list[dict]:
+    """The stored links that are STILL allowed, for rendering.
+
+    The allowlist gated writes and nothing else, which made removing a
+    domain from it do almost nothing: every link already saved under that
+    domain carried on rendering as a button on a page carrying our name,
+    until the owner happened to open the form and save again. Zelle came
+    out on 27 Aug 2026 and would have kept appearing on any page that had
+    already stored one.
+
+    That is the benign version. The reason this is checked on the way out
+    as well as the way in is the other version: the day a provider domain
+    has to be pulled because it was compromised or sold, pulling it has to
+    take effect on the next page load, for everybody, without waiting on
+    an action by the owner.
+
+    Silent rather than loud, and deliberately the opposite of
+    `clean_payment_links`: a VISITOR is reading this page, and a refusal
+    message is addressed to the owner. The owner is told the next time
+    they open the form, where the link shows as unaccepted.
+    """
+    return [
+        {"label": p.get("label") or "", "url": p.get("url") or ""}
+        for p in (stored or [])
+        if isinstance(p, dict) and is_allowed_payment_url(p.get("url") or "")
+    ]
 
 
 def clean_payment_links(raw: list | None) -> list[dict]:
