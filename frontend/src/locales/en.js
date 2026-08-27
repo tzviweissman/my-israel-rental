@@ -219,6 +219,7 @@ const en = {
         addFailed: 'Could not add that business',
         saveFailed: 'Could not save',
         rename: 'Rename',
+        renameHint: 'Your page address updates to match. Your old link keeps working, so anything already shared or printed still opens your page.',
         listingCount: '{{n}} listing(s)',
         hidden: 'hidden',
         hide: 'Hide',

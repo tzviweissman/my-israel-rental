@@ -330,11 +330,38 @@ async def update_business(business_id: str, payload: BusinessPatch, user=Depends
         if clash:
             raise HTTPException(status_code=400, detail="You already have a business with that name.")
         update["name"] = name
-        # The SLUG DOES NOT FOLLOW THE NAME. /business/{slug} is public and
-        # may already be shared or printed on a QR; renaming the business
-        # must not break a link that exists in the world. Same rule as the
-        # short links.
+
+        # THE SLUG NOW FOLLOWS THE NAME, and the old one keeps working.
         #
+        # It used to be frozen, for a good reason: /business/{slug} is
+        # public and may already be shared or printed on a QR, and renaming
+        # must not break a link that exists in the world.
+        #
+        # But freezing it left a worse problem. An owner who registered
+        # under their own name — which plenty do, because it is the name on
+        # the bank account — was stuck with it in the URL forever. They
+        # could rename the business and still be handing customers
+        # /business/tzodok-moerman. Renaming to remove your name from a
+        # public page does not work if the address still says it, so the
+        # privacy control was not one.
+        #
+        # Retiring the old slug into `previous_slugs` answers the original
+        # concern completely: `_resolve` still finds the business by it, so
+        # every printed QR and pasted link keeps resolving. `unique_slug`
+        # refuses to hand a retired slug to anyone else, so those links
+        # cannot later point at a stranger's business.
+        old_slug = biz.get("slug")
+        fresh_slug = await unique_slug(name, exclude_id=business_id)
+        if old_slug and fresh_slug != old_slug:
+            update["slug"] = fresh_slug
+            # Capped, and oldest-first: renaming is rare, but the list is
+            # driven by a field the owner controls and nothing unbounded
+            # should be. Twenty renames of history is far more than any
+            # real business needs and still cheap to index.
+            history = [x for x in (biz.get("previous_slugs") or []) if x != fresh_slug]
+            history.append(old_slug)
+            update["previous_slugs"] = history[-20:]
+
         # The Hebrew name is cleared so the translation pipeline refills it
         # for the new name rather than leaving the old one, which would
         # show a Hebrew reader the previous business name indefinitely.
@@ -426,6 +453,11 @@ async def _resolve(slug_or_id: str) -> dict[str, Any] | None:
     return (
         await db.businesses.find_one({"slug": slug_or_id})
         or await db.businesses.find_one({"_id": slug_or_id})
+        # A slug the business used before it was renamed. Last, so a live
+        # slug always wins over a retired one — and `unique_slug` will not
+        # issue a retired slug to a different business, so the two can
+        # never disagree about who a link belongs to.
+        or await db.businesses.find_one({"previous_slugs": slug_or_id})
     )
 
 

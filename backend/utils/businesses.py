@@ -50,18 +50,33 @@ def slugify(name: str, *, fallback: str = "business") -> str:
     return ascii_only or f"{fallback}-{uuid.uuid4().hex[:8]}"
 
 
-async def unique_slug(name: str) -> str:
+async def unique_slug(name: str, *, exclude_id: str | None = None) -> str:
     """`slugify`, then made unique. Two movers both called "Cohen Movers"
-    are a normal thing to happen, not an error."""
+    are a normal thing to happen, not an error.
+
+    Uniqueness is checked against RETIRED slugs as well as live ones. A
+    business that renames keeps its old slug as an alias so links already
+    shared or printed on a QR keep resolving (see `previous_slugs`), and a
+    new business allowed to claim that retired string would silently hijack
+    every one of those links — the lookup would find two documents and
+    return whichever came first.
+
+    `exclude_id` is the business being renamed: its own slugs must not
+    count as a clash with itself.
+    """
     base = slugify(name)
     slug = base
     n = 2
-    while await db.businesses.find_one({"slug": slug}, {"_id": 1}):
+    while True:
+        taken = {"$or": [{"slug": slug}, {"previous_slugs": slug}]}
+        if exclude_id:
+            taken = {"$and": [taken, {"_id": {"$ne": exclude_id}}]}
+        if not await db.businesses.find_one(taken, {"_id": 1}):
+            return slug
         slug = f"{base}-{n}"
         n += 1
         if n > 50:  # pathological; give up and use an opaque one
             return f"{base}-{uuid.uuid4().hex[:6]}"
-    return slug
 
 
 def new_business_doc(

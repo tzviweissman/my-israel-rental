@@ -86,6 +86,27 @@ async function openEditor(page) {
   });
 }
 
+/** The scrim the preview has settled on, once it stops changing. */
+async function readSettledScrim(page, { steps = 3, gapMs = 700, maxMs = 30000 } = {}) {
+  const read = () => page.evaluate(() => {
+    const f = document.querySelector('[data-testid="business-page-editor"] iframe');
+    return f?.contentDocument
+      ?.querySelector('[data-testid="business-cover-scrim"]')
+      ?.getAttribute('data-scrim') ?? null;
+  });
+  const deadline = Date.now() + maxMs;
+  let last = await read();
+  let stable = 0;
+  while (Date.now() < deadline) {
+    await page.waitForTimeout(gapMs);
+    const now = await read();
+    stable = now === last ? stable + 1 : 0;
+    last = now;
+    if (stable >= steps) break;
+  }
+  return last;
+}
+
 await mkdir(OUT, { recursive: true });
 await mkdir(TMP, { recursive: true });
 const browser = await chromium.launch();
@@ -199,13 +220,35 @@ try {
 
   // The scrim, on an unsaved cover.
   const scrims = {};
+  let previousThumb = null;
   for (const [name, file] of [['bright', brightCover], ['dark', darkCover]]) {
     await page.locator('[data-testid="page-design-cover-input"]').setInputFiles(file);
-    await page.locator('[data-testid="page-design-cover-thumb"]').waitFor({ timeout: 60000 });
-    // Sampling is async and best-effort; give the decode room.
-    await page.waitForTimeout(2500);
-    scrims[name] = await frame().locator('[data-testid="business-cover-scrim"]')
-      .getAttribute('data-scrim');
+    /* Wait for the thumbnail's SRC to change, not for the thumbnail to
+       exist. On the second upload it already exists — left over from the
+       first — so `waitFor` returned immediately, the scrim was read before
+       the new photo had been sampled, and the check reported the PREVIOUS
+       cover's value for both. It passed the first time by luck of timing
+       and then reported 0.60/0.60. A check that can read stale state is
+       not a check. */
+    await page.waitForFunction(
+      (prev) => {
+        const el = document.querySelector('[data-testid="page-design-cover-thumb"]');
+        return !!el && el.src && el.src !== prev;
+      },
+      previousThumb,
+      { timeout: 60000 },
+    );
+    previousThumb = await page.locator('[data-testid="page-design-cover-thumb"]')
+      .evaluate((el) => el.src);
+    /* Then wait for the SAMPLE to settle, which is a different event again.
+       `data-scrim` is never absent — it carries DEFAULT_SCRIM until the
+       canvas read finishes — so "wait until it has a value" returns
+       instantly and reads 0.42 for every photo, which is precisely the
+       "two mid-tone images proved nothing" trap in a new costume. Poll
+       until the value stops moving instead: that is the only signal that
+       distinguishes "still the default" from "sampled, and the answer
+       happens to be the default". */
+    scrims[name] = await readSettledScrim(page);
     await page.screenshot({ path: path.join(OUT, `cover-${name}.png`) });
     console.log(`  wrote cover-${name}.png  scrim=${scrims[name]}`);
   }

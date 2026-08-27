@@ -251,23 +251,36 @@ export default function MyBusinessesTab({ API, token }) {
               </div>
               <div className="p-3 space-y-2">
                 {editingId === b.id ? (
-                  <div className="flex gap-1">
-                    <input
-                      value={editName}
-                      onChange={(e) => setEditName(e.target.value)}
-                      className="flex-1 min-w-0 px-2 py-1 rounded border text-sm"
-                      style={{ borderColor: 'var(--brand-border)' }}
-                      data-testid={`business-rename-input-${b.id}`}
-                    />
-                    <button type="button" onClick={() => rename(b.id)} disabled={busy}
-                      className="p-1.5 rounded" style={{ color: 'var(--brand-primary)' }}
-                      data-testid={`business-rename-save-${b.id}`}>
-                      <Check size={14} />
-                    </button>
-                    <button type="button" onClick={() => setEditingId(null)}
-                      className="p-1.5 rounded" style={{ color: 'var(--brand-muted)' }}>
-                      <X size={14} />
-                    </button>
+                  <div className="space-y-1">
+                    <div className="flex gap-1">
+                      <input
+                        value={editName}
+                        onChange={(e) => setEditName(e.target.value)}
+                        className="flex-1 min-w-0 px-2 py-1 rounded border text-sm"
+                        style={{ borderColor: 'var(--brand-border)' }}
+                        data-testid={`business-rename-input-${b.id}`}
+                      />
+                      <button type="button" onClick={() => rename(b.id)} disabled={busy}
+                        className="p-1.5 rounded" style={{ color: 'var(--brand-primary)' }}
+                        data-testid={`business-rename-save-${b.id}`}>
+                        <Check size={14} />
+                      </button>
+                      <button type="button" onClick={() => setEditingId(null)}
+                        className="p-1.5 rounded" style={{ color: 'var(--brand-muted)' }}>
+                        <X size={14} />
+                      </button>
+                    </div>
+                    {/* Said here because this is the control someone uses to
+                        take their own name off a public page, and until they
+                        know the address follows too they have no reason to
+                        believe it worked. The second half matters just as
+                        much: an owner will not rename at all if they think
+                        it breaks the QR code already on their van. */}
+                    <p className="text-[11px] leading-snug" style={{ color: 'var(--brand-muted)' }}
+                      data-testid={`business-rename-hint-${b.id}`}>
+                      {t('businesses.renameHint',
+                        'Your page address updates to match. Your old link keeps working, so anything already shared or printed still opens your page.')}
+                    </p>
                   </div>
                 ) : (
                   <button

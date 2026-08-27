@@ -68,6 +68,28 @@ def _admin_only(user: dict) -> None:
 class FeaturedIn(BaseModel):
     featured: bool
 
+def _public_provider_name(business: dict | None, user: dict | None) -> str:
+    """What a visitor is told they are dealing with.
+
+    The BUSINESS, not the person. Spec M4 is explicit that there is no
+    public page for a PERSON — what a customer chooses is a business — and
+    every other public surface already honours that. This one did not: it
+    published `users.name`, the name on the account, with no way for an
+    owner to opt out. A one-woman cleaning company had her legal name on
+    every service card on the site because she signed up with it.
+
+    Falling back to the person is deliberate rather than lazy. A gig
+    created before businesses existed, or one whose business was deleted,
+    has no other name to give — and a card labelled "Provider" tells a
+    customer less than a real name does. The fallback shrinks to nothing
+    as gigs acquire businesses; it is not a permanent second identity.
+    """
+    name = ((business or {}).get("name") or "").strip()
+    if name:
+        return name
+    return ((user or {}).get("name") or "").strip() or "Provider"
+
+
 @router.get("/gigs")
 async def list_gigs(
     category: Optional[str] = None,
@@ -168,6 +190,13 @@ async def list_gigs(
         (u.get("id") or u.get("_id")): u
         async for u in db.users.find({"$or": [{"id": {"$in": provider_ids}}, {"_id": {"$in": provider_ids}}]})
     }
+    # M4 — the name a card carries is the BUSINESS's. Batched with the
+    # providers above rather than fetched per gig, for the same reason.
+    business_ids = list({g.get("business_id") for g in raw if g.get("business_id")})
+    businesses = {
+        b["_id"]: b
+        async for b in db.businesses.find({"_id": {"$in": business_ids}})
+    } if business_ids else {}
     ratings = await _batch_rating_aggregate([g["_id"] for g in raw])
 
     language_filter = None
@@ -215,7 +244,7 @@ async def list_gigs(
         user = users.get(gig.get("provider_user_id"))
         gig["provider"] = {
             "user_id": gig.get("provider_user_id"),
-            "name": (user or {}).get("name", "Provider"),
+            "name": _public_provider_name(businesses.get(gig.get("business_id")), user),
             "avatar": prov.get("avatar"),
             "tagline": prov.get("tagline"),
             "languages": prov_langs,
@@ -438,9 +467,13 @@ async def get_gig(gig_id: str, request: Request, viewer=Depends(optional_user)):
     prov = await db.marketplace_providers.find_one({"user_id": gig["provider_user_id"]})
     user = await db.users.find_one({"_id": gig["provider_user_id"]}) \
         or await db.users.find_one({"id": gig["provider_user_id"]})
+    business = (
+        await db.businesses.find_one({"_id": gig["business_id"]})
+        if gig.get("business_id") else None
+    )
     gig["provider"] = {
         "user_id": gig["provider_user_id"],
-        "name": (user or {}).get("name", "Provider"),
+        "name": _public_provider_name(business, user),
         "avatar": (prov or {}).get("avatar"),
         "tagline": (prov or {}).get("tagline"),
         "bio": (prov or {}).get("bio"),

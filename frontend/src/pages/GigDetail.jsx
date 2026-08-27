@@ -591,11 +591,14 @@ const GigDetail = () => {
               aria-label={cover ? 'Open photo gallery' : undefined}
             >
               {!cover && <div className="w-full h-full flex items-center justify-center text-gray-300">No image</div>}
-              {tierGallery && tier?.name && (
-                <span className="absolute top-3 left-3 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-black/70 text-white backdrop-blur-sm" data-testid="gig-tier-gallery-tag">
-                  Photos of · {tier.name}
-                </span>
-              )}
+              {/* The "Photos of · {tier}" tag is gone. It labelled the hero
+                  with the selected option's name, which told a visitor
+                  nothing they could not see from the option they had just
+                  picked — and on a listing whose tier photo is a logo
+                  rather than a photograph of the work, a black badge
+                  announcing it made the odd image look deliberate. The
+                  photos still swap with the selection; they are just no
+                  longer captioned. */}
               {activeGallery.length > 1 && (
                 <span className="absolute bottom-3 right-3 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-black/70 text-white backdrop-blur-sm inline-flex items-center gap-1">
                   <Camera size={11} /> {activeGallery.length}
