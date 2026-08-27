@@ -1,4 +1,6 @@
 import React, { useState, useEffect, useContext, useRef } from 'react';
+import OnboardingProvider from '../components/onboarding/OnboardingProvider';
+import OnboardingTip from '../components/onboarding/OnboardingTip';
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import axios from 'axios';
@@ -338,11 +340,19 @@ const Chat = () => {
   }, [searchQuery, activeMatchIndex]);
 
   return (
+    /* Chat is its own route, outside the dashboard's provider, so it
+       carries one of its own. The "only one visible at a time" rule still
+       holds: these are different pages and only one is ever on screen. */
+    <OnboardingProvider>
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100" data-testid="chat-page">
       {/* Mobile nav is taller (top bar + category strip = ~123px); desktop
           nav is ~80px. Pad enough on mobile so the chat header (Back / Live
           Chat / Search / Dashboard) isn't hidden under the nav. */}
       <div className="max-w-3xl mx-auto px-4 pt-32 md:pt-20 pb-6 h-screen flex flex-col">
+        {/* T2 — the one thing about this chat that is not obvious: it
+            translates. Said once, where the typing happens. */}
+        <OnboardingTip id="tip.chat" className="mb-2" />
+
         <ChatHeader
           property={property}
           sublease={sublease}
@@ -407,6 +417,7 @@ const Chat = () => {
         </div>
       </div>
     </div>
+    </OnboardingProvider>
   );
 };
 

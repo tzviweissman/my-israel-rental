@@ -23,6 +23,10 @@ import JobRequestsTab from '../components/dashboard/JobRequestsTab';
 import MyJobsTab from '../components/dashboard/MyJobsTab';
 import ManagerHeader from '../components/dashboard/ManagerHeader';
 import DashboardTabs from '../components/dashboard/DashboardTabs';
+import OnboardingProvider from '../components/onboarding/OnboardingProvider';
+import SetupChecklist from '../components/onboarding/SetupChecklist';
+import HelpMenu from '../components/onboarding/HelpMenu';
+import ShowMeAroundOffer from '../components/onboarding/ShowMeAroundOffer';
 import AttentionStrip from '../components/dashboard/AttentionStrip';
 import { canPublishGigs } from '../utils/providerTrial';
 
@@ -203,12 +207,26 @@ const Dashboard = () => {
   const isPropertyLister = user && ['owner', 'manager', 'admin'].includes(user.role);
 
   return (
+    /* Wraps the WHOLE dashboard, not just the checklist: the tips live
+       deep inside the tab components, and the "only one on screen at a
+       time" rule can only be enforced from a common ancestor. */
+    <OnboardingProvider>
     <div className="min-h-screen" data-testid="dashboard-page">
       <div className="max-w-7xl mx-auto px-4 md:px-6 pt-36 sm:pt-28 md:pt-28 pb-12">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 mb-6 md:mb-8">
-          <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold" style={{ fontFamily: 'Playfair Display' }}>
+          {/* `var(--font-head)`, not the literal face: an inline
+              'Playfair Display' beats the RTL variable swap, and Playfair
+              has no Hebrew glyphs — so a Hebrew reader silently got a
+              system serif. Fixed here because this heading was touched. */}
+          <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold" style={{ fontFamily: 'var(--font-head)' }}>
             {t('dashboard.title')}
           </h1>
+          {/* T7 — the permanent home for help. Rendered before the
+              role-gated action buttons below so its position does not
+              shift between a lister, a renter and a business owner. */}
+          <div className="flex items-center gap-2 sm:order-last">
+            <HelpMenu />
+          </div>
           {isPropertyLister && (
             <div className="flex gap-2 justify-end sm:justify-start sm:w-auto">
               <button
@@ -262,6 +280,15 @@ const Dashboard = () => {
           unreadMessages={unreadConversations}
           onGoToTab={setActiveTab}
         />
+
+        {/* T7 — first dashboard load after signup. One quiet line, never a
+            popup, and it competes for the same single slot as everything
+            else so it cannot stack with a tip. */}
+        <ShowMeAroundOffer moment="firstLogin" />
+
+        {/* T1 — the backbone. Above the tabs because it is about the
+            account as a whole, not about whichever tab is open. */}
+        <SetupChecklist />
 
         <DashboardTabs
           activeTab={activeTab}
@@ -379,6 +406,7 @@ const Dashboard = () => {
         )}
       </div>
     </div>
+    </OnboardingProvider>
   );
 };
 

@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useState } from 'react';
+import OnboardingTip from '../onboarding/OnboardingTip';
 import { useTranslation } from 'react-i18next';
 import axios from 'axios';
 import { toast } from 'sonner';
@@ -70,7 +71,12 @@ export default function BlockTimePanel({ API, token }) {
   const count = rows?.length ?? 0;
 
   return (
-    <div className="rounded-2xl border bg-white mb-4" style={{ borderColor: 'var(--brand-border)' }}
+    <div className="mb-4">
+      {/* T2 — what this panel is FOR, said once. The control itself says
+          "time I am not available", which is what it does, not why you
+          would use it. */}
+      <OnboardingTip id="tip.availability" className="mb-2" />
+    <div className="rounded-2xl border bg-white" style={{ borderColor: 'var(--brand-border)' }}
       data-testid="block-time-panel">
       <button
         type="button"
@@ -174,6 +180,7 @@ export default function BlockTimePanel({ API, token }) {
           )}
         </div>
       )}
+    </div>
     </div>
   );
 }

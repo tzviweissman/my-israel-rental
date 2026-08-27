@@ -25,6 +25,7 @@ import { QrCode } from 'lucide-react';
 import axios from 'axios';
 import ShareLinkRow from './ShareLinkRow';
 import QrShareCard from '../common/QrShareCard';
+import OnboardingTip from '../onboarding/OnboardingTip';
 import ScanChart from '../common/ScanChart';
 import ShareLinkButtons from '../common/ShareLinkButtons';
 
@@ -128,6 +129,12 @@ export default function ShareListingsPanel({ userId, propertyCount = 0, API, tok
           <p className="text-xs mb-3" style={{ color: 'var(--brand-muted)' }}>
             {t('dashboard.sharePanelBody2', 'One link and a QR code for everything you have listed — send it in a message, or print the code for a flyer or a sign.')}
           </p>
+          {/* T2 — a caption on the QR, the first time an owner opens this
+              panel. Beside the feature, inside the flow: nothing is
+              anchored or absolutely positioned, so there is no RTL
+              placement to get wrong. */}
+          <OnboardingTip id="tip.share" className="mb-3" />
+
           <div data-testid="share-listings-link">
             <ShareLinkRow
               userId={userId}
