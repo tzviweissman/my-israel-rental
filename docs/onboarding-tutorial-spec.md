@@ -86,6 +86,39 @@ Recorded so the same suggestions aren't re-adopted later:
 
 Coach-marks anchored to `data-tour` targets, 5–7 steps maximum, exit always visible, progress remembered so it can be resumed, and every string in `en.js` and `he.js`. **Verify tooltip placement under `dir="rtl"` before anything else** — that is the failure mode.
 
+## T7 — Making the help findable (an optional tour nobody knows about is dead weight)
+
+The corollary of "never forced" is that discovery has to be deliberate. Two rules:
+
+1. **One predictable permanent home** — so an owner who wants help knows where to look without hunting.
+2. **Offered at moments of uncertainty** — never interrupting, but present exactly where someone is likely to be stuck.
+
+**Use one name everywhere: "Show me around" / "בוא נעשה סיור".** A tour called three different things in three places reads as three different features.
+
+### The permanent home
+
+A **help control in the dashboard header** — a `?` or "Help" item, always visible, opening a small menu:
+
+- Show me around *(the walkthrough, T4)*
+- What you can do here *(the feature library, T3)*
+- Message us *(support)*
+
+This is the single answer to "where do I go when I'm lost", and it must never move.
+
+### The moments to offer it
+
+- **End of signup / first dashboard load** — one quiet line, not a popup: *"New here? Show me around."* Dismissible, and gone once dismissed or the tour is taken.
+- **Beneath the setup checklist (T1)** — *"Prefer to be shown? Show me around."* Someone staring at a checklist is already in a learning frame of mind.
+- **In empty states** — a tab with nothing in it is the clearest signal of a stuck user. Offer the tour beside the primary action, never instead of it.
+- **When the checklist completes** — *"That's the basics. Here's what else this site can do."* → the feature library. The moment of finishing is when appetite for more is highest.
+- **In the Day 1 email (T5)** — one line at the end, not the main action.
+
+### Rules
+
+- **Never more than one offer visible at a time**, and never an offer on a screen where the owner is mid-task.
+- The post-signup line and the checklist line are dismissible independently; the header control is permanent and never dismissible.
+- Once someone has completed the tour, the offers stop appearing — only the header entry remains.
+
 ## T5 — A three-message follow-up sequence
 
 The people who most need this have already closed the tab. Email (and WhatsApp where we have consent), using the existing Postmark setup:
