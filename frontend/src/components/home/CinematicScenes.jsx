@@ -1,4 +1,5 @@
 import React, { useRef } from 'react';
+import { ensureMuted } from '../../utils/videoAutoplay';
 import { useTranslation } from 'react-i18next';
 import SCENES from './scenes';
 import useCinematicScroll, { useSceneVideos } from './useCinematicScroll';
@@ -39,6 +40,19 @@ const CinematicScenes = ({ reducedMotion }) => {
               // these two layers by role, and a class is a styling concern
               // that a restyle could rename out from under it.
               data-layer={scene.dataScene === 'villa' ? 'villa' : undefined}
+              /* The muted ATTRIBUTE, written at mount rather than when the
+                 scene scrolls into view.
+
+                 React only ever sets `muted` as a property, and the mobile
+                 autoplay policy reads the attribute — the trap this repo
+                 already documents in utils/videoAutoplay.js. Until now
+                 these scenes only got the attribute when the observer
+                 first played them, so from page load until the first
+                 scroll every scene was a paused video with a poster and no
+                 `muted` attribute: the precise condition a phone renders a
+                 native play button over. The hero was fixed; its
+                 neighbours below the fold were not. */
+              ref={ensureMuted}
               muted
               playsInline
               loop={scene.loop}
