@@ -7,6 +7,7 @@
  *   - Interactive: click a star to set a value, hover to preview. Used inside
  *     the "Leave a review" form on GigDetail.
  */
+import { useTranslation } from 'react-i18next';
 import React, { useState } from 'react';
 import { Star } from 'lucide-react';
 
@@ -19,6 +20,7 @@ export const StarRating = ({
   className = '',
   testidPrefix = 'star',
 }) => {
+  const { t } = useTranslation();
   const [hover, setHover] = useState(null);
   const interactive = typeof onChange === 'function';
   const shown = hover != null ? hover : value;
@@ -60,7 +62,7 @@ export const StarRating = ({
           </span>
         ) : (
           <span className="text-xs text-gray-400" data-testid={`${testidPrefix}-empty`}>
-            No reviews yet
+            {t('gigDetail.noReviews', 'No reviews yet')}
           </span>
         )
       )}

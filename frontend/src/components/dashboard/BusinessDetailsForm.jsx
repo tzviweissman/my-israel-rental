@@ -46,7 +46,13 @@ export default function BusinessDetailsForm({ business, API, token, onClose, onS
   });
 
   const set = (patch) => setForm((f) => ({ ...f, ...patch }));
-  const showKosher = isFoodBusiness(b.categories);
+  // Asked of businesses whose listings suggest food, and always of one
+  // that already has a hechsher on file — otherwise the field that sets
+  // it would be unreachable for the same business that needs it, which
+  // is exactly the state this was in. `listing_categories` first for the
+  // reason given on showLicence below.
+  const known = [...(b.listing_categories || []), ...(b.categories || [])];
+  const showKosher = isFoodBusiness(known) || !!b.kosher_certification?.body;
   // Same principle as the hechsher: asked only where it means something.
   // Money exchange is licensed and supervised, so a licence number is
   // the fact a careful customer looks for — and asking a plumber for one
@@ -56,8 +62,7 @@ export default function BusinessDetailsForm({ business, API, token, onClose, onS
   // the API. `categories` is hand-entered and empty for most businesses
   // — keying off it alone meant an owner in a regulated category could
   // never reach this field at all.
-  const showLicence = [...(b.listing_categories || []), ...(b.categories || [])]
-    .some(needsDirectoryDisclaimer);
+  const showLicence = known.some(needsDirectoryDisclaimer);
 
   const save = async () => {
     setSaving(true);

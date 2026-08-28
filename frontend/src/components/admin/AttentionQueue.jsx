@@ -66,7 +66,12 @@ export default function AttentionQueue({ token, onNavigate }) {
       key: 'businesses-unverified',
       n: data.businesses_unverified,
       Icon: BadgeCheck,
-      text: (n) => `${n} business${n === 1 ? '' : 'es'} awaiting a verification decision`,
+      // NOT "awaiting a decision". Nothing in the product lets a business
+      // ask to be verified, so none of them are awaiting anything — the
+      // row was describing a queue of applicants that has never had a
+      // member. It now says what it counts: trading businesses that have
+      // not been looked at yet.
+      text: (n) => `${n} trading business${n === 1 ? '' : 'es'} not verified yet`,
       go: 'services',
     },
     {

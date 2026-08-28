@@ -22,12 +22,30 @@ import { needsDirectoryDisclaimer } from '../../lib/categories';
  */
 
 // Kosher certification is shown only where it means something. A plumber
-// with a hechsher is not a signal; a bakery without one is. Matched on
-// the business's own categories rather than guessed from its name.
-const FOOD_CATEGORIES = new Set([
-  'food', 'catering', 'bakery', 'restaurant', 'grocery', 'butcher', 'caterer',
-]);
+// with a hechsher is not a signal; a bakery without one is.
+//
+// This could never fire before 28 Aug 2026, for two independent reasons,
+// and the block it gates is described three lines below as "often the
+// single most decisive fact on the page":
+//
+//   1. It matched 'food', 'bakery', 'catering' and friends. Not one of
+//      those is a real slug — the taxonomy has `events-catering` and
+//      `shops-products` and nothing else food-shaped — so the set could
+//      not match anything the backend can produce.
+//   2. It read `business.categories`, which is only ever written when an
+//      owner hand-edits the business. Creating a listing does not touch
+//      it, so it is empty almost always. (Same bug the licence block
+//      had; see the note on `regulated` below.)
+//
+// Both are fixed by asking a better question. A business that has ENTERED
+// a hechsher has already told us the category is relevant — it is not a
+// field anyone fills in by accident — so the certificate itself is the
+// signal, and the category list is only used to keep it off a business
+// that plainly is not food. The narrow read (guess the trade, then decide
+// whether to believe the owner) had it backwards.
+const FOOD_CATEGORIES = new Set(['events-catering', 'shops-products']);
 
+/** Categories that would make a hechsher meaningful, if any are known. */
 export const isFoodBusiness = (categories = []) =>
   (categories || []).some((c) => FOOD_CATEGORIES.has(String(c).toLowerCase()));
 
@@ -58,8 +76,20 @@ export default function GoodToKnow({ business }) {
     b.payment_note && { key: 'payment', Icon: Wallet, label: t('businessPage.payment', 'Payment'), value: b.payment_note },
   ].filter(Boolean);
 
+  // Everything this business is known to sell — listings first, because
+  // `categories` is hand-entered and usually empty.
+  const known = [
+    ...(b.listings || []).map((g) => g && g.category),
+    ...(b.listing_categories || []),
+    ...(b.categories || []),
+  ].filter(Boolean);
+
+  // Shown when a hechsher was entered AND nothing contradicts it. An
+  // owner who typed a certifying body has made the claim deliberately;
+  // withholding it because we could not infer "bakery" from a taxonomy
+  // that has no bakery in it serves nobody.
   const cert = b.kosher_certification;
-  const showCert = !!(cert && cert.body && isFoodBusiness(b.categories));
+  const showCert = !!(cert && cert.body && (!known.length || isFoodBusiness(known)));
 
   // Same rule as the hechsher above: shown only where it means
   // something. A licence number on a cleaner is noise; on a money
@@ -71,11 +101,7 @@ export default function GoodToKnow({ business }) {
   // most businesses, and keying off it would have meant the licence
   // almost never appeared. Falls back to `categories` for a business
   // whose owner did fill it in but has no live listings yet.
-  const regulated = [
-    ...(b.listings || []).map((g) => g && g.category),
-    ...(b.listing_categories || []),
-    ...(b.categories || []),
-  ].filter(Boolean).some(needsDirectoryDisclaimer);
+  const regulated = known.some(needsDirectoryDisclaimer);
   const showLicence = !!(regulated && b.license_number);
 
   if (!rows.length && !showCert && !showLicence) return null;

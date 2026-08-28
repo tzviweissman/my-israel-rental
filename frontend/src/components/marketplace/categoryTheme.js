@@ -21,7 +21,7 @@ import {
   Palette, Scissors, Droplet, Zap,
   Music, Home, Dumbbell, Car, Boxes, Plane, Flower, BookOpen,
   Briefcase, SprayCan, Monitor, GraduationCap, Baby, PawPrint, PartyPopper,
-  ShoppingBag, Tag, Scroll, ShieldCheck, CarFront, Banknote, Stamp,
+  ShoppingBag, Tag, ShieldCheck, CarFront, Banknote, Stamp,
   Stethoscope,
 } from 'lucide-react';
 
@@ -36,7 +36,7 @@ const ICONS = {
   Palette, Scissors, Droplet, Zap,
   Music, Home, Dumbbell, Car, Boxes, Plane, Flower, BookOpen,
   Briefcase, SprayCan, Monitor, GraduationCap, Baby, PawPrint, PartyPopper,
-  ShoppingBag, Tag, Scroll, ShieldCheck, CarFront, Banknote, Stamp,
+  ShoppingBag, Tag, ShieldCheck, CarFront, Banknote, Stamp,
   Stethoscope,
 };
 
@@ -120,10 +120,6 @@ const CATEGORY_THEME = {
   'buy-sell': {
     header: '#6B4A1E', body: '#F0DFC2',
     icon: 'Tag', iconColor: '#6B4A1E',
-  },
-  'religious-services': {
-    header: '#1F3D66', body: '#D6E1F0',
-    icon: 'Scroll', iconColor: '#1F3D66',
   },
   'insurance': {
     header: '#28455B', body: '#D8E4EC',

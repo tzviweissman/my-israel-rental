@@ -31,6 +31,7 @@ from utils.businesses import (
 )
 
 from .shared import (
+    HAS_ANY_PHOTO,
     TOP_RATED_MIN_AVG,
     TOP_RATED_MIN_COUNT,
     _batch_rating_aggregate,
@@ -293,15 +294,7 @@ async def my_businesses(user=Depends(verify_token)):
         # completeness checklist kept "add one photo to a service"
         # permanently unticked for exactly the businesses that had done it.
         photos[b["_id"]] = bool(await db.marketplace_gigs.find_one(
-            {
-                "business_id": b["_id"],
-                "$or": [
-                    {"gallery.0": {"$exists": True}},
-                    {"products.images.0": {"$exists": True}},
-                    {"products.image": {"$nin": [None, ""]}},
-                    {"tiers.images.0": {"$exists": True}},
-                ],
-            },
+            {"business_id": b["_id"], "$or": HAS_ANY_PHOTO},
             {"_id": 1},
         ))
     docs.sort(key=lambda b: (not b.get("active", True), b.get("created_at") or ""))

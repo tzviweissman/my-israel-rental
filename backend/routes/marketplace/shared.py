@@ -156,6 +156,25 @@ async def auto_translate_gig_bg(gig_id: str, title: str | None, description: str
 # my sink" doesn't have to guess between "Home Repair" and "Home &
 # Living". Sub-buckets on the broader categories are captured via the
 # optional `subcategory` field on gigs/jobs (see SUBCATEGORIES below).
+# A listing has a photo if it has one ANYWHERE — the gig gallery, a
+# product, or a tier. The wizard sends an empty `gallery` for a store and
+# hangs the photos off each product, and a tiered service hangs them off
+# each tier, so testing `gallery` alone reports a shop that photographed
+# every item as having none.
+#
+# This is the Mongo form of `_has_any_photo()` in gigs.py, which is the
+# test the app applies when it REFUSES to publish. It lives here because
+# it was written out by hand in two other files and one of them got it
+# wrong: the admin dashboard counted 18 "published services with no
+# photo" when 2 were genuinely photoless (Tzvi, 28 Aug 2026). Anything
+# asking "does this listing have a picture" must use this.
+HAS_ANY_PHOTO = [
+    {"gallery.0": {"$exists": True}},
+    {"products.images.0": {"$exists": True}},
+    {"products.image": {"$nin": [None, ""]}},
+    {"tiers.images.0": {"$exists": True}},
+]
+
 CATEGORIES = [
     # --- Kept as-is ---
     {"slug": "real-estate-services", "label": "Real Estate Services",       "icon": "home"},
@@ -198,7 +217,12 @@ CATEGORIES = [
     # visitors — because a category nobody in that group searches for is a
     # page that stays empty forever.
     {"slug": "buy-sell",             "label": "Buy & Sell",                 "icon": "tag"},
-    {"slug": "religious-services",   "label": "Religious Services",         "icon": "scroll"},
+    # religious-services was here for a few hours on 28 Aug and was pulled
+    # by Tzvi before it reached anyone. Removing a slug is normally
+    # forbidden — they are permanent once live, because a printed QR or a
+    # shared link encodes them — but this one never had a listing, was
+    # never indexed, and only ever existed on preview. Deleting it now is
+    # cheap; in a week it would not have been.
     {"slug": "insurance",            "label": "Insurance",                  "icon": "shield"},
     {"slug": "vehicles",             "label": "Vehicles",                   "icon": "car-front"},
     # Released 2026-08-28 on Tzvi's instruction, after the regulatory note

@@ -52,7 +52,7 @@ export const CATEGORY_GROUPS = [
     id: 'buy-sell',
     labelKey: 'categoryGroups.buySell',
     labelDefault: 'Buy & Sell',
-    slugs: ['buy-sell', 'shops-products', 'vehicles'],
+    slugs: ['buy-sell', 'shops-products'],
   },
   {
     id: 'money-admin',
@@ -84,17 +84,23 @@ export const CATEGORY_GROUPS = [
     labelDefault: 'Events & Creative',
     slugs: ['events-catering', 'creative-design', 'travel-tourism'],
   },
+  // Transport used to sit with IT support under "Tech & Transport"
+  // (Tzvi, 28 Aug: it does not belong there). They were together because
+  // each was a leftover, which is not a reason. Transport goes with
+  // vehicles, where somebody thinking about getting around will look —
+  // and `vehicles` covers mechanics, testing and licence conversion, not
+  // just buying one, so it was always a poor fit under Buy & Sell.
   {
-    id: 'community',
-    labelKey: 'categoryGroups.community',
-    labelDefault: 'Community',
-    slugs: ['religious-services'],
+    id: 'getting-around',
+    labelKey: 'categoryGroups.gettingAround',
+    labelDefault: 'Transport & Vehicles',
+    slugs: ['transportation', 'vehicles'],
   },
   {
-    id: 'tech-transport',
-    labelKey: 'categoryGroups.techTransport',
-    labelDefault: 'Tech & Transport',
-    slugs: ['it-tech-support', 'transportation'],
+    id: 'tech',
+    labelKey: 'categoryGroups.tech',
+    labelDefault: 'Tech',
+    slugs: ['it-tech-support'],
   },
 ];
 

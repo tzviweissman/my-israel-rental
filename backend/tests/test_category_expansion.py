@@ -2,7 +2,7 @@
 
 Two things are pinned here, and the second is the point.
 
-FIRST, the five new categories are real: they validate, they are unique,
+FIRST, the four new categories are real: they validate, they are unique,
 and they did not displace anything. Ordinary.
 
 SECOND, the two that are NOT shipped stay not-shipped.
@@ -40,12 +40,13 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from routes.marketplace import shared  # noqa: E402
 
 
-NEW = ["buy-sell", "religious-services", "insurance", "vehicles", "money-exchange"]
+# religious-services was added and pulled the same day (see shared.py).
+NEW = ["buy-sell", "insurance", "vehicles", "money-exchange"]
 HELD = ["immigration-documents", "medical-health"]
 
 
 # --------------------------------------------------------------------------
-# The five that shipped
+# The four that shipped
 # --------------------------------------------------------------------------
 
 @pytest.mark.parametrize("slug", NEW)

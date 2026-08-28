@@ -483,9 +483,19 @@ const PostRequest = () => {
                     <input
                       className={inputCls} style={{ borderColor: 'var(--brand-border)' }}
                       value={form.title} onChange={(e) => set({ title: e.target.value })}
+                      /* FOUR variants, not two. This branched on rental
+                         vs service only, so somebody under the heading
+                         "Describe what you have" was shown "e.g. Mover
+                         needed on the 14th" — an example of the opposite
+                         of what they were doing. Every example here has to
+                         match the KIND of post as well as its type. */
                       placeholder={isRental
-                        ? t('requests.titlePhRental', 'e.g. 3-bed wanted in Ramat Eshkol')
-                        : t('requests.titlePhService', 'e.g. Mover needed on the 14th')}
+                        ? (isOffer
+                          ? t('requests.titlePhRentalOffer', 'e.g. 3-bed in Ramat Eshkol, free from September')
+                          : t('requests.titlePhRental', 'e.g. 3-bed wanted in Ramat Eshkol'))
+                        : (isOffer
+                          ? t('requests.titlePhServiceOffer', 'e.g. Mover with a van, Jerusalem area')
+                          : t('requests.titlePhService', 'e.g. Mover needed on the 14th'))}
                       maxLength={140} data-testid="post-request-title"
                     />
                   </Field>
@@ -493,8 +503,13 @@ const PostRequest = () => {
                     <textarea
                       className={inputCls} style={{ borderColor: 'var(--brand-border)' }}
                       rows={5} value={form.description} onChange={(e) => set({ description: e.target.value })}
+                      /* The offer copy was rental-only — "the floor, the
+                         light" says nothing to a plumber advertising a
+                         service. */
                       placeholder={isOffer
-                        ? t('requests.descriptionPhOffer', 'What makes it worth a look — the floor, the light, when it is free.')
+                        ? (isRental
+                          ? t('requests.descriptionPhOffer', 'What makes it worth a look — the floor, the light, when it is free.')
+                          : t('requests.descriptionPhOfferService', 'What you do, who you do it for, and where you work.'))
                         : t('requests.descriptionPh', 'The things that would make an offer right or wrong for you.')}
                       maxLength={4000} data-testid="post-request-description"
                     />

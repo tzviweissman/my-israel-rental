@@ -39,6 +39,7 @@ const GIG_RETURN_PREFIXES = ['/services'];
 const gigWhatsAppNumber = (gig) => (gig?.whatsapp || gig?.provider?.whatsapp || '');
 
 const ReviewSection = ({ gig, token, user, onRatingChange }) => {
+  const { t } = useTranslation();
   const [reviews, setReviews] = useState([]);
   const [avg, setAvg] = useState(null);
   const [count, setCount] = useState(0);
@@ -72,8 +73,8 @@ const ReviewSection = ({ gig, token, user, onRatingChange }) => {
 
   const submit = async (e) => {
     e.preventDefault();
-    if (!token) return toast.error('Please sign in to review');
-    if (myRating < 1) return toast.error('Pick a star rating');
+    if (!token) return toast.error(t('gigDetail.signInToReview', 'Please sign in to review'));
+    if (myRating < 1) return toast.error(t('gigDetail.pickRating', 'Pick a star rating'));
     setSaving(true);
     try {
       await axios.post(
@@ -81,27 +82,27 @@ const ReviewSection = ({ gig, token, user, onRatingChange }) => {
         { rating: myRating, comment: myComment },
         { headers: { Authorization: `Bearer ${token}` } },
       );
-      toast.success('Review posted');
+      toast.success(t('gigDetail.reviewPosted', 'Review posted'));
       load();
     } catch (err) {
-      toast.error(err.response?.data?.detail || 'Failed to post review');
+      toast.error(err.response?.data?.detail || t('gigDetail.reviewFailed', 'Failed to post review'));
     } finally {
       setSaving(false);
     }
   };
 
   const deleteMine = async () => {
-    if (!window.confirm('Withdraw your review?')) return;
+    if (!window.confirm(t('gigDetail.confirmWithdraw', 'Withdraw your review?'))) return;
     try {
       await axios.delete(`${API}/marketplace/gigs/${gig.id}/reviews/mine`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       setMyRating(0);
       setMyComment('');
-      toast.success('Review withdrawn');
+      toast.success(t('gigDetail.reviewWithdrawn', 'Review withdrawn'));
       load();
     } catch (err) {
-      toast.error(err.response?.data?.detail || 'Failed to delete');
+      toast.error(err.response?.data?.detail || t('gigDetail.deleteFailed', 'Failed to delete'));
     }
   };
 
@@ -111,21 +112,23 @@ const ReviewSection = ({ gig, token, user, onRatingChange }) => {
   return (
     <div data-testid="gig-reviews-section">
       <div className="flex items-baseline justify-between mb-3">
-        <h2 className="text-lg font-bold">Reviews</h2>
+        <h2 className="text-lg font-bold">{t('gigDetail.reviews', 'Reviews')}</h2>
         <StarRating value={avg || 0} count={count} size={16} testidPrefix="gig-avg-stars" />
       </div>
 
       {token && !isProvider && (
         <form onSubmit={submit} className="border border-gray-200 rounded-2xl p-4 mb-4 space-y-3" data-testid="gig-review-form">
           <div className="flex items-center gap-3">
-            <span className="text-sm font-semibold text-gray-700">{myReview ? 'Your rating' : 'Rate this service'}</span>
+            <span className="text-sm font-semibold text-gray-700">
+              {myReview ? t('gigDetail.yourRating', 'Your rating') : t('gigDetail.rateThis', 'Rate this service')}
+            </span>
             <StarRating value={myRating} onChange={setMyRating} size={22} showCount={false} testidPrefix="gig-review-star" />
           </div>
           <textarea
             value={myComment}
             onChange={(e) => setMyComment(e.target.value)}
             rows={3}
-            placeholder="Share how it went (optional)"
+            placeholder={t('gigDetail.reviewPh', 'Share how it went (optional)')}
             className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm"
             data-testid="gig-review-comment"
             maxLength={500}
@@ -133,17 +136,19 @@ const ReviewSection = ({ gig, token, user, onRatingChange }) => {
           <div className="flex justify-end gap-2">
             {myReview && (
               <button type="button" onClick={deleteMine} className="px-3 py-1.5 rounded-lg text-xs font-semibold text-red-500 hover:bg-red-50" data-testid="gig-review-delete">
-                Withdraw
+                {t('gigDetail.withdraw', 'Withdraw')}
               </button>
             )}
             <button type="submit" disabled={saving || myRating < 1} className="px-4 py-2 rounded-lg text-sm font-semibold text-white bg-[var(--brand-primary)] disabled:opacity-50 flex items-center gap-1" data-testid="gig-review-submit">
-              {saving ? <Loader2 className="animate-spin" size={12} /> : (myReview ? 'Update review' : 'Post review')}
+              {saving
+                ? <Loader2 className="animate-spin" size={12} />
+                : (myReview ? t('gigDetail.updateReview', 'Update review') : t('gigDetail.postReview', 'Post review'))}
             </button>
           </div>
         </form>
       )}
       {!token && (
-        <p className="text-sm text-gray-500 mb-3">Sign in to leave a review.</p>
+        <p className="text-sm text-gray-500 mb-3">{t('gigDetail.signInPrompt', 'Sign in to leave a review.')}</p>
       )}
       {isProvider && (
         <p className="text-xs text-gray-500 mb-3">You cannot review your own gig.</p>
@@ -152,7 +157,9 @@ const ReviewSection = ({ gig, token, user, onRatingChange }) => {
       {loading ? (
         <div className="flex items-center py-4"><Loader2 className="animate-spin text-[var(--brand-primary)]" size={18} /></div>
       ) : reviews.length === 0 ? (
-        <p className="text-sm text-gray-500" data-testid="gig-reviews-empty">No reviews yet. Be the first!</p>
+        <p className="text-sm text-gray-500" data-testid="gig-reviews-empty">
+          {t('gigDetail.noReviewsYet', 'No reviews yet. Be the first!')}
+        </p>
       ) : (
         <div className="space-y-3">
           {reviews.map((r) => (
@@ -182,7 +189,7 @@ const BookingForm = ({ gig, tier, onClose, token }) => {
   const [saving, setSaving] = useState(false);
   const submit = async (e) => {
     e.preventDefault();
-    if (!email.trim()) return toast.error('Email required');
+    if (!email.trim()) return toast.error(t('gigDetail.emailRequired', 'Email required'));
     setSaving(true);
     try {
       await axios.post(
@@ -196,10 +203,10 @@ const BookingForm = ({ gig, tier, onClose, token }) => {
         },
         { headers: { Authorization: `Bearer ${token}` } },
       );
-      toast.success('Booking request sent!');
+      toast.success(t('gigDetail.requestSent', 'Booking request sent!'));
       onClose();
     } catch (err) {
-      toast.error(err.response?.data?.detail || 'Failed to send request');
+      toast.error(err.response?.data?.detail || t('gigDetail.requestFailed', 'Failed to send request'));
     } finally {
       setSaving(false);
     }
@@ -212,15 +219,23 @@ const BookingForm = ({ gig, tier, onClose, token }) => {
         className="bg-white rounded-2xl w-full max-w-md p-6 space-y-4"
         data-testid="gig-booking-form"
       >
-        <h3 className="text-lg font-bold">Request &quot;{tier.name}&quot; — ₪{tier.price.toLocaleString()}</h3>
+        <h3 className="text-lg font-bold" dir="auto">
+          {t('gigDetail.requestTier', {
+            defaultValue: 'Request "{{tier}}" — ₪{{price}}',
+            tier: tier.name,
+            price: tier.price.toLocaleString(),
+          })}
+        </h3>
         <input required type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder={t("sweep.yourEmail", "Your email")} className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm" data-testid="gig-booking-email" />
-        <input type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="Phone (optional)" className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm" />
+        <input type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder={t('gigDetail.phoneOptional', 'Phone (optional)')} className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm" />
         <DateField value={date} onChange={setDate} className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm bg-white" testid="gig-booking-date" />
-        <textarea value={message} onChange={(e) => setMessage(e.target.value)} placeholder="Tell the provider what you need…" rows={3} className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm" />
+        <textarea value={message} onChange={(e) => setMessage(e.target.value)} placeholder={t('gigDetail.messagePh', 'Tell the provider what you need…')} rows={3} className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm" />
         <div className="flex justify-end gap-2">
-          <button type="button" onClick={onClose} className="px-4 py-2 rounded-lg text-sm font-semibold text-gray-600">Cancel</button>
+          <button type="button" onClick={onClose} className="px-4 py-2 rounded-lg text-sm font-semibold text-gray-600">
+            {t('common.cancel', 'Cancel')}
+          </button>
           <button type="submit" disabled={saving} className="px-5 py-2 rounded-lg text-sm font-semibold text-white bg-[var(--brand-primary)]" data-testid="gig-booking-submit">
-            {saving ? <Loader2 className="animate-spin" size={14} /> : 'Send request'}
+            {saving ? <Loader2 className="animate-spin" size={14} /> : t('gigDetail.sendRequest', 'Send request')}
           </button>
         </div>
       </form>
@@ -274,7 +289,7 @@ const GigDetail = () => {
           setTier(r.data.tiers?.[0] || null);
         }
       })
-      .catch(() => toast.error('Gig not found'))
+      .catch(() => toast.error(t('gigDetail.notFound', 'Listing not found')))
       .finally(() => setLoading(false));
   }, [id]);
 
@@ -492,7 +507,9 @@ const GigDetail = () => {
 
   const handleBookClick = () => {
     if (!tier) {
-      return toast.error(isStore ? 'Pick a product first' : 'Pick a service option first');
+      return toast.error(isStore
+        ? t('gigDetail.pickProduct', 'Pick a product first')
+        : t('gigDetail.pickOption', 'Pick a service option first'));
     }
     // Store gigs never do calendar booking — always go straight to
     // WhatsApp message (or in-platform message) with the product in
@@ -502,7 +519,7 @@ const GigDetail = () => {
         const msg = `Hi! I'm interested in "${tier.name}" (${sym}${tier.price}) from your ${displayTitle} store on MyIsraelRental.`;
         if (openWhatsApp(msg)) return;
       }
-      if (!token) { toast.error('Please sign in to message the seller'); navigate('/auth'); return; }
+      if (!token) { toast.error(t('gigDetail.signInToMessage', 'Please sign in to message the seller')); navigate('/auth'); return; }
       setShowBook(true);
       return;
     }
@@ -514,7 +531,7 @@ const GigDetail = () => {
         const msg = `Hi! I'd like to book your "${displayTitle}" — ${tier.name} on ${appointmentDate} at ${appointmentSlot} (${sym}${tier.price}) from MyIsraelRental.`;
         if (openWhatsApp(msg)) return;
       }
-      if (!token) { toast.error('Please sign in to book'); navigate('/auth'); return; }
+      if (!token) { toast.error(t('gigDetail.signInToBook', 'Please sign in to book')); navigate('/auth'); return; }
       setShowBook(true);
       return;
     }
@@ -524,7 +541,7 @@ const GigDetail = () => {
       const msg = `Hi! I'd like to book your "${displayTitle}" — ${tier.name} (${sym}${tier.price})${datePart} from MyIsraelRental.`;
       if (openWhatsApp(msg)) return;
     }
-    if (!token) { toast.error('Please sign in to book'); navigate('/auth'); return; }
+    if (!token) { toast.error(t('gigDetail.signInToBook', 'Please sign in to book')); navigate('/auth'); return; }
     setShowBook(true);
   };
 
@@ -576,7 +593,7 @@ const GigDetail = () => {
       <div className="max-w-5xl mx-auto px-4 py-8">
         <Breadcrumb current={displayTitle} testId="gig-breadcrumb" />
         <button onClick={() => navigate(backTo)} className="text-sm text-gray-600 flex items-center gap-1 mb-4 hover:text-[var(--brand-primary)]" data-testid="gig-back">
-          <ArrowLeft size={14} /> Back to services
+          <ArrowLeft size={14} className="rtl:rotate-180" /> {t('gigDetail.backToServices', 'Back to businesses')}
         </button>
 
         <div className="grid md:grid-cols-3 gap-8">
@@ -614,7 +631,7 @@ const GigDetail = () => {
               className="relative aspect-video w-full bg-gray-100 rounded-2xl overflow-hidden group"
               style={cover ? { backgroundImage: `url(${cover})`, backgroundSize: 'cover', backgroundPosition: 'center' } : {}}
               data-testid="gig-cover"
-              aria-label={cover ? 'Open photo gallery' : undefined}
+              aria-label={cover ? t('gigDetail.openGallery', 'Open photo gallery') : undefined}
             >
               {!cover && <div className="w-full h-full flex items-center justify-center text-gray-300">No image</div>}
               {/* The "Photos of · {tier}" tag is gone. It labelled the hero
@@ -705,12 +722,26 @@ const GigDetail = () => {
                     data-testid="gig-available-now"
                   >
                     <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
-                    Available now
+                    {t('gigDetail.availableNow', 'Available now')}
                   </span>
                 )}
               </div>
-              <h1 className="text-2xl md:text-3xl font-bold text-gray-900" style={{ fontFamily: 'Playfair Display' }}>{displayTitle}</h1>
-              <p className="text-gray-600 mt-1">{gig.provider?.name}{gig.area ? ` · ${prettyArea(gig.area, t)}` : ''}</p>
+              {/* var(--font-head), never the literal face — Playfair has
+                  no Hebrew glyphs and an inline fontFamily beats the RTL
+                  rule, so a Hebrew title fell back to a system serif.
+                  dir="auto" because the title is the POSTER's text and
+                  may be in either language regardless of the page. */}
+              <h1
+                className="text-2xl md:text-3xl font-bold text-gray-900"
+                style={{ fontFamily: 'var(--font-head)' }}
+                dir="auto"
+                data-testid="gig-title"
+              >
+                {displayTitle}
+              </h1>
+              <p className="text-gray-600 mt-1" dir="auto" data-testid="gig-byline">
+                {gig.provider?.name}{gig.area ? ` · ${prettyArea(gig.area, t)}` : ''}
+              </p>
               {(gig.rating_count > 0) && (
                 <div className="mt-2">
                   <StarRating value={gig.rating_avg || 0} count={gig.rating_count} size={14} testidPrefix="gig-header-stars" />
@@ -719,13 +750,17 @@ const GigDetail = () => {
             </div>
 
             <div>
-              <h2 className="text-lg font-bold mb-2">{isStore ? 'About this store' : 'About this service'}</h2>
-              <p className="text-gray-700 whitespace-pre-line">{displayDescription || 'No description provided.'}</p>
+              <h2 className="text-lg font-bold mb-2">
+                {isStore ? t('gigDetail.aboutStore', 'About this store') : t('gigDetail.aboutService', 'About this service')}
+              </h2>
+              <p className="text-gray-700 whitespace-pre-line" dir="auto" data-testid="gig-about-body">
+                {displayDescription || t('gigDetail.noDescription', 'No description provided.')}
+              </p>
             </div>
 
             {isStore && (gig.products || []).length > 0 && (
               <div data-testid="gig-store-grid">
-                <h2 className="text-lg font-bold mb-3">Products</h2>
+                <h2 className="text-lg font-bold mb-3">{t('gigDetail.products', 'Products')}</h2>
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                   {gig.products.map((p, i) => {
                     const psym = p.currency === 'USD' ? '$' : '₪';
@@ -744,7 +779,7 @@ const GigDetail = () => {
                       // Fall back to selecting the product + opening the in-platform booking modal.
                       setTier(p);
                       setHeroIndex(0);
-                      if (!token) { toast.error('Please sign in to message the seller'); navigate('/auth'); return; }
+                      if (!token) { toast.error(t('gigDetail.signInToMessage', 'Please sign in to message the seller')); navigate('/auth'); return; }
                       setShowBook(true);
                     };
                     return (
@@ -821,11 +856,11 @@ const GigDetail = () => {
             <div className="border border-gray-200 rounded-2xl p-4 flex items-center gap-4">
               <div className="w-14 h-14 rounded-full bg-gray-200 shrink-0" style={gig.provider?.avatar ? { backgroundImage: `url(${gig.provider.avatar})`, backgroundSize: 'cover' } : {}} />
               <div className="flex-1 min-w-0">
-                <p className="font-semibold text-sm">{gig.provider?.name}</p>
+                <p className="font-semibold text-sm" dir="auto" data-testid="gig-provider-name">{gig.provider?.name}</p>
                 <p className="text-xs text-gray-500">{gig.provider?.tagline || gig.provider?.bio || '\u00A0'}</p>
               </div>
               <button onClick={() => { saveReturnPath(); navigate(`/businesses/provider/${gig.provider?.user_id}`); }} className="text-xs font-semibold text-[var(--brand-primary)] hover:underline" data-testid="gig-view-provider">
-                View profile
+                {t('gigDetail.viewProfile', 'View profile')}
               </button>
             </div>
           </div>
@@ -971,7 +1006,7 @@ const GigDetail = () => {
 
 const TierList = ({ tiers, selected, onSelect, isAppointment, testidPrefix = 'gig-tier' }) => {
   const { t } = useTranslation();
-  if (!tiers.length) return <p className="text-sm text-gray-500">No packages listed yet.</p>;
+  if (!tiers.length) return <p className="text-sm text-gray-500">{t('gigDetail.noPackages', 'No packages listed yet.')}</p>;
   return tiers.map((tt) => {
     const active = selected?.name === tt.name;
     const sym = tt.currency === 'USD' ? '$' : '₪';
@@ -1271,6 +1306,7 @@ export default GigDetail;
 // Keyboard support: Esc closes, ←/→ navigate. Body scroll is locked
 // while open so background content doesn't drift under the modal.
 const Lightbox = ({ images, index, onChange, onClose, label }) => {
+  const { t } = useTranslation();
   const safeIndex = ((index % images.length) + images.length) % images.length;
   const goPrev = React.useCallback(() => onChange((safeIndex - 1 + images.length) % images.length), [onChange, safeIndex, images.length]);
   const goNext = React.useCallback(() => onChange((safeIndex + 1) % images.length), [onChange, safeIndex, images.length]);
@@ -1336,7 +1372,7 @@ const Lightbox = ({ images, index, onChange, onClose, label }) => {
           onClick={(e) => { e.stopPropagation(); goPrev(); }}
           className="absolute left-4 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-colors"
           data-testid="gig-lightbox-prev"
-          aria-label="Previous photo"
+          aria-label={t('gigDetail.prevPhoto', 'Previous photo')}
         >
           <ChevronLeft size={22} />
         </button>
@@ -1354,7 +1390,7 @@ const Lightbox = ({ images, index, onChange, onClose, label }) => {
           onClick={(e) => { e.stopPropagation(); goNext(); }}
           className="absolute right-4 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-colors"
           data-testid="gig-lightbox-next"
-          aria-label="Next photo"
+          aria-label={t('gigDetail.nextPhoto', 'Next photo')}
         >
           <ChevronRight size={22} />
         </button>

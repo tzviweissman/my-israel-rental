@@ -1,11 +1,14 @@
 /**
- * The jobs board and the post-a-job form read as Hebrew pages.
+ * These pages read as Hebrew pages, not as English ones with the labels
+ * swapped.
  *
- * Both were entirely hardcoded English — no `useTranslation`, no `t`, not
- * one key — so a Hebrew visitor got an English page. Tzvi's standing
- * ruling (27 Aug 2026) is that the site has to be as Hebrew-friendly as
- * it is English-friendly: "if an israeli would read this they would be
- * turned off".
+ * The jobs board and the post-a-job form were entirely hardcoded English
+ * — no `useTranslation`, no `t`, not one key. The LISTING page was mostly
+ * translated and gave itself away on the parts nobody re-reads: "Back to
+ * services", "About this service", "Reviews", "No reviews yet. Be the
+ * first!". Tzvi's standing ruling (27 Aug 2026) is that the site has to
+ * be as Hebrew-friendly as it is English-friendly: "if an israeli would
+ * read this they would be turned off".
  *
  * A screenshot cannot answer this, and neither can reading the diff. What
  * is measured:
@@ -21,14 +24,16 @@
  *     if you know the letterforms.
  *   * The page is RTL and does not scroll sideways at 375.
  *
- * Usage: node scripts/check-jobs-hebrew.mjs <jwt>
- *   (the post-a-job form is behind auth)
+ * Usage: node scripts/check-hebrew-pages.mjs <jwt> [listing-id]
+ *   (the post-a-job form is behind auth; pass a listing id to include
+ *   the gig detail page, which needs one to exist)
  */
 import { chromium } from 'playwright';
 
 const TOKEN = process.argv[2];
+const LISTING = process.argv[3];
 if (!TOKEN) {
-  console.error('usage: node scripts/check-jobs-hebrew.mjs <jwt>   (post-a-job needs a signed-in user)');
+  console.error('usage: node scripts/check-hebrew-pages.mjs <jwt> [listing-id]');
   process.exit(1);
 }
 
@@ -76,8 +81,16 @@ const leafText = (page) => page.evaluate(() => {
   const root = document.querySelector('[data-testid$="-page"]') || document.body;
   // `jobs-cat-all` is OUR copy and stays in scope; the slug chips carry
   // API labels and are covered by test-category-groups.mjs.
+  // Poster-authored text is excluded, not translated: a listing written
+  // in English displays in English on the Hebrew site, correctly. Only
+  // OUR chrome is in scope.
   const SKIP = '[data-testid="global-nav"], [data-testid^="jobs-row-"],'
-    + ' [data-testid^="jobs-cat-"]:not([data-testid="jobs-cat-all"])';
+    + ' [data-testid^="jobs-cat-"]:not([data-testid="jobs-cat-all"]),'
+    + ' [data-testid="gig-title"], [data-testid="gig-byline"],'
+    + ' [data-testid="gig-provider-name"],'
+    + ' [data-testid="gig-description"], [data-testid="gig-about-body"],'
+    + ' [data-testid^="gig-tier-"], [data-testid^="gig-m-tier-"],'
+    + ' [data-testid^="gig-product-"], script';
   const out = [];
   const walk = (el) => {
     for (const n of el.childNodes) {
@@ -100,9 +113,10 @@ try {
   // saved-search strip, and neither is on screen in the default view.
   for (const [label, path] of [
     ['jobs board', '/businesses/jobs'],
-    ['jobs board (empty)', '/businesses/jobs?category=religious-services'],
+    ['jobs board (empty)', '/businesses/jobs?category=insurance'],
     ['jobs board (digest strip)', '/businesses/jobs?category=cleaning-services'],
     ['post a job', '/businesses/post-job'],
+    ...(LISTING ? [['listing', `/businesses/${LISTING}`]] : []),
   ]) {
     const { ctx, page } = await open(path);
 
@@ -120,7 +134,9 @@ try {
       };
     });
     if (!head) {
-      failures.push(`${label}: no <h1> found`);
+      // The listing page's title is the POSTER's text and lives in an
+      // h1; a business that wrote it in English is not a failure here.
+      if (label !== 'listing') failures.push(`${label}: no <h1> found`);
     } else {
       note(`${label}: h1 "${head.text}" — font ${head.font}`);
       if (/playfair/i.test(head.font)) {
@@ -129,7 +145,7 @@ try {
           + `it renders in a fallback serif (inline style: "${head.inline}")`,
         );
       }
-      if (!HEBREW.test(head.text)) {
+      if (!HEBREW.test(head.text) && label !== 'listing') {
         failures.push(`${label}: the heading is still English ("${head.text}")`);
       }
     }
@@ -150,7 +166,11 @@ try {
   }
 
   // --- narrow ------------------------------------------------------------
-  for (const path of ['/businesses/jobs', '/businesses/post-job']) {
+  for (const path of [
+    '/businesses/jobs',
+    '/businesses/post-job',
+    ...(LISTING ? [`/businesses/${LISTING}`] : []),
+  ]) {
     const { ctx, page } = await open(path, 375);
     const overflow = await page.evaluate(
       () => document.documentElement.scrollWidth - document.documentElement.clientWidth,

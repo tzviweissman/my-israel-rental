@@ -19,6 +19,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel
 
 from routes.deps import db, verify_token
+from routes.marketplace.shared import HAS_ANY_PHOTO
 
 router = APIRouter()
 api_router = router
@@ -164,13 +165,42 @@ async def admin_attention(payload: dict = Depends(verify_token)) -> dict[str, An
     # Services with no photo. Not a rule violation — S5 says a photoless
     # business is never hidden or down-ranked — but it is the single
     # highest-value thing an admin could nudge someone about.
+    #
+    # `$nor HAS_ANY_PHOTO`, not "gallery is empty". This counted an empty
+    # gig-level gallery, which is the NORMAL state of a store (photos sit
+    # on its products) and of a tiered service (photos sit on its tiers).
+    # It reported 18 photoless listings when 2 were, so the one queue an
+    # admin is meant to work through was 90% businesses who had already
+    # done the thing they were about to be nudged about.
     no_photo = await db.marketplace_gigs.count_documents({
         "status": "published",
-        "$or": [{"gallery": {"$size": 0}}, {"gallery": {"$exists": False}}],
+        "$nor": HAS_ANY_PHOTO,
     })
 
-    # Businesses with listings but no verification decision yet.
-    unverified = await db.businesses.count_documents({"active": True, "verified": {"$ne": True}})
+    # Unverified businesses that are actually trading.
+    #
+    # This said "awaiting a verification decision" and counted every
+    # active business without the flag — which is nearly all of them,
+    # because THERE IS NO REQUEST FLOW. Nothing anywhere records that a
+    # business asked to be verified; `verified` is a boolean an admin
+    # sets, and `set_verified` is the only thing that writes it. So the
+    # row described a queue of applicants that has never had a single
+    # member, and it could only be emptied by verifying every business on
+    # the site (Tzvi, 28 Aug 2026: "theres no businesses awaiting
+    # verification" — correct, there are not).
+    #
+    # Two changes, and the label changed with them. It now counts
+    # businesses with at least one PUBLISHED listing: an empty shell is
+    # not a verification decision anybody needs to make, and including it
+    # is what made the number large enough to ignore. The honest fix is
+    # still a request flow — until one exists this is a prompt, not a
+    # queue, and the copy no longer pretends otherwise.
+    trading = await db.marketplace_gigs.distinct("business_id", {"status": "published"})
+    unverified = await db.businesses.count_documents({
+        "active": True,
+        "verified": {"$ne": True},
+        "_id": {"$in": [b for b in trading if b]},
+    })
 
     # Conversations where the last word came from the OTHER party and has
     # sat there three days. Three because it is long enough not to nag
