@@ -2775,7 +2775,6 @@ const en = {
         'pet-services':          'Pet Services',
         'events-catering':       'Events, Music & Catering',
         'shops-products':        'Shops & Products',
-        'buy-sell':              'Buy & Sell',
         'insurance':             'Insurance',
         'vehicles':              'Vehicles',
         'money-exchange':        'Money Exchange & Transfers',
@@ -2784,7 +2783,7 @@ const en = {
       },
       categoryGroups: {
         homeProperty:   'Home & Property',
-        buySell:        'Buy & Sell',
+        shops:          'Shops',
         moneyAdmin:     'Money & Admin',
         personalFamily: 'Personal & Family',
         eventsCreative: 'Events & Creative',

@@ -48,11 +48,17 @@ export const CATEGORY_GROUPS = [
       'real-estate-services',
     ],
   },
+  // One member on purpose. `shops-products` is the only category on the
+  // site that sells GOODS rather than labour, so it has nothing to sit
+  // beside — and a group called "Buy & Sell" holding a single "Shops &
+  // Products" entry reads like a mistake. Person-to-person selling
+  // (`buy-sell`) is not here and is not a business category; see the
+  // note in shared.py.
   {
-    id: 'buy-sell',
-    labelKey: 'categoryGroups.buySell',
-    labelDefault: 'Buy & Sell',
-    slugs: ['buy-sell', 'shops-products'],
+    id: 'shops',
+    labelKey: 'categoryGroups.shops',
+    labelDefault: 'Shops',
+    slugs: ['shops-products'],
   },
   {
     id: 'money-admin',

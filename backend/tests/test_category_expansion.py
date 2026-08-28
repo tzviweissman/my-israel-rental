@@ -2,7 +2,7 @@
 
 Two things are pinned here, and the second is the point.
 
-FIRST, the four new categories are real: they validate, they are unique,
+FIRST, the three new categories are real: they validate, they are unique,
 and they did not displace anything. Ordinary.
 
 SECOND, the two that are NOT shipped stay not-shipped.
@@ -40,13 +40,15 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from routes.marketplace import shared  # noqa: E402
 
 
-# religious-services was added and pulled the same day (see shared.py).
-NEW = ["buy-sell", "insurance", "vehicles", "money-exchange"]
+# religious-services was added and pulled the same day, and buy-sell was
+# never a BUSINESS category — it belongs on the Requests board (N4). Both
+# are explained in shared.py.
+NEW = ["insurance", "vehicles", "money-exchange"]
 HELD = ["immigration-documents", "medical-health"]
 
 
 # --------------------------------------------------------------------------
-# The four that shipped
+# The three that shipped
 # --------------------------------------------------------------------------
 
 @pytest.mark.parametrize("slug", NEW)

@@ -29,7 +29,6 @@ export const CATEGORY_LABELS = {
   // it was called. Nothing errored; it just read as broken.
   'shops-products':        'Shops & Products',
   // 2026-08-28 expansion (docs/categories-expansion-spec.md N1).
-  'buy-sell':              'Buy & Sell',
   'insurance':             'Insurance',
   'vehicles':              'Vehicles',
   // Held behind CATEGORIES_PENDING_REVIEW_ENABLED on the backend — the

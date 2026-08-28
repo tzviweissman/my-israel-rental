@@ -216,7 +216,19 @@ CATEGORIES = [
     # Chosen for one audience — English-speaking residents, olim and
     # visitors — because a category nobody in that group searches for is a
     # page that stays empty forever.
-    {"slug": "buy-sell",             "label": "Buy & Sell",                 "icon": "tag"},
+    # buy-sell is NOT here, deliberately. It was, for a few hours on 28
+    # Aug, and that was a mistake: the N1 table lists it, but N4 — the
+    # item it points at — says a person selling one sofa is not a
+    # service, has no repeat supply, no meaningful review, and needs a
+    # `sold` state the gig model does not have. It belongs on the
+    # Requests board as `request_type: "item"`, where the 30-day expire/
+    # renew lifecycle already exists, and N4 says in as many words: "Do
+    # not put items in the services grid."
+    #
+    # As a CATEGORY in this list it did the opposite — it put a door in
+    # the Businesses picker leading someone to publish their sofa as a
+    # service listing with no way to mark it sold. Add it back when N4
+    # ships, as a category on the Requests board.
     # religious-services was here for a few hours on 28 Aug and was pulled
     # by Tzvi before it reached anyone. Removing a slug is normally
     # forbidden — they are permanent once live, because a printed QR or a

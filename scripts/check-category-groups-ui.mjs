@@ -25,7 +25,7 @@ const APP = process.env.APP_ORIGIN || 'http://localhost:3210';
 const TOKEN = process.argv[2];
 const API = process.env.API_ORIGIN || 'http://localhost:8001/api';
 const WANT_ORDER = [
-  'home-property', 'buy-sell', 'money-admin',
+  'home-property', 'shops', 'money-admin',
   'personal-family', 'events-creative', 'getting-around', 'tech',
 ];
 const HEBREW = /[֐-׿]/;

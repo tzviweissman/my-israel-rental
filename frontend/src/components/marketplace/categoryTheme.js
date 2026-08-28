@@ -21,7 +21,7 @@ import {
   Palette, Scissors, Droplet, Zap,
   Music, Home, Dumbbell, Car, Boxes, Plane, Flower, BookOpen,
   Briefcase, SprayCan, Monitor, GraduationCap, Baby, PawPrint, PartyPopper,
-  ShoppingBag, Tag, ShieldCheck, CarFront, Banknote, Stamp,
+  ShoppingBag, ShieldCheck, CarFront, Banknote, Stamp,
   Stethoscope,
 } from 'lucide-react';
 
@@ -36,7 +36,7 @@ const ICONS = {
   Palette, Scissors, Droplet, Zap,
   Music, Home, Dumbbell, Car, Boxes, Plane, Flower, BookOpen,
   Briefcase, SprayCan, Monitor, GraduationCap, Baby, PawPrint, PartyPopper,
-  ShoppingBag, Tag, ShieldCheck, CarFront, Banknote, Stamp,
+  ShoppingBag, ShieldCheck, CarFront, Banknote, Stamp,
   Stethoscope,
 };
 
@@ -117,10 +117,6 @@ const CATEGORY_THEME = {
   // the set already uses — trades warm, professional services cool — so
   // seven new tiles do not read as a second, louder set bolted on.
   // check-tile-contrast.mjs is what keeps these honest.
-  'buy-sell': {
-    header: '#6B4A1E', body: '#F0DFC2',
-    icon: 'Tag', iconColor: '#6B4A1E',
-  },
   'insurance': {
     header: '#28455B', body: '#D8E4EC',
     icon: 'ShieldCheck', iconColor: '#28455B',

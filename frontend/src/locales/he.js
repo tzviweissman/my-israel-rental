@@ -2669,7 +2669,6 @@ const he = {
         'events-catering':       'אירועים, מוזיקה וקייטרינג',
         'shops-products':        'חנויות ומוצרים',
         // "יד שנייה" ולא "קנייה ומכירה" — זה הביטוי שמחפשים בו בפועל.
-        'buy-sell':              'יד שנייה',
         'insurance':             'ביטוח',
         'vehicles':              'רכב',
         'money-exchange':        'המרת מטבע והעברות כספים',
@@ -2678,7 +2677,7 @@ const he = {
       },
       categoryGroups: {
         homeProperty:   'בית ונכסים',
-        buySell:        'קנייה ומכירה',
+        shops:          'חנויות',
         moneyAdmin:     'כספים ובירוקרטיה',
         personalFamily: 'אישי ומשפחה',
         eventsCreative: 'אירועים ויצירה',
