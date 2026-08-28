@@ -1580,6 +1580,12 @@ const en = {
         createAccount: 'Create account',
       },
       common: {
+        // DateField calls t('common.pickDate'). There is a `pickDate` in
+        // another block ("Pick a date first"), which is a different
+        // sentence for a different situation and was never reachable
+        // from here — so the placeholder fell through to its English
+        // default on every language.
+        pickDate: 'Pick a date',
         backToDashboard: 'Back to my dashboard',
         cancel: 'Cancel',
         confirm: 'Confirm',
@@ -2638,6 +2644,70 @@ const en = {
         licenceUnverified: 'As supplied by the business',
         licencePh: 'Optional — shown on your page as supplied',
         licenceHint: 'Currency services are licensed in Israel. Adding your number helps customers trust the listing — we show it as supplied by you and do not verify it.',
+      },
+      // The public jobs board (/businesses/jobs).
+      jobsBoard: {
+        metaTitle: 'Open jobs · MyIsraelRental',
+        metaDescription: 'Browse jobs posted by renters and owners on MyIsraelRental — apply directly to reach customers.',
+        title: 'Open jobs',
+        subtitle: 'Real people looking for real work — apply directly, no middleman.',
+        post: 'Post a job',
+        allCategories: 'All categories',
+        digestLabel: 'Daily digest',
+        digestOn: "you'll get one email a day with new matches in this filter.",
+        digestOff: 'save this search and get one email a day instead of one per post.',
+        save: 'Save this search',
+        unsubscribe: 'Unsubscribe',
+        saved: "Search saved. You'll get a daily digest of new matches.",
+        unsaved: "Search unsaved — you'll go back to one email per post.",
+        error: 'Something went wrong',
+        emptyTitle: 'No open jobs in this category right now.',
+        emptyBody: 'Be the first to post — matching providers will reach out.',
+        openToOffers: 'Open to offers',
+        // Plural keys, not interpolated sentences — see the note on
+        // timeAgo in JobsBoard.jsx. English uses one/other.
+        ago: {
+          justNow: 'just now',
+          minutes_one: '1 min ago',
+          minutes_other: '{{count}} min ago',
+          hours_one: '1h ago',
+          hours_other: '{{count}}h ago',
+          days_one: '1d ago',
+          days_other: '{{count}}d ago',
+        },
+      },
+      // The "post a job" form (/businesses/post-job).
+      postJob: {
+        metaTitle: 'Post a job request | MyIsraelRental',
+        metaDescription: 'Say what you need done and let service providers come to you.',
+        intro: "Tell us what you need. We'll email matching providers so they can reach out to you.",
+        fieldTitle: 'What do you need?',
+        titlePh: 'e.g. Need someone to move a 2BR apartment on July 20th',
+        fieldCategory: 'Category',
+        fieldSpecificType: 'Specific type',
+        specificTypeHint: 'Optional — helps us match the right provider.',
+        fieldDescription: 'Describe what you need',
+        descriptionHint: 'Min 10 characters. The more detail, the better the applicant quality.',
+        descriptionPh: "What's the scope? Any constraints? What does a great outcome look like?",
+        fieldBudget: 'Budget',
+        budgetOpen: 'Open to offers',
+        budgetFixed: 'Fixed price',
+        amountPh: 'Amount',
+        fieldDate: 'Preferred date (optional)',
+        fieldArea: 'Area / city',
+        areaHint: 'Free-form — Tel Aviv, Jerusalem, Haifa, or a neighbourhood.',
+        areaPh: 'e.g. Tel Aviv, Florentin',
+        submit: 'Post job',
+        posting: 'Posting…',
+        stillNeeded: 'Still needed:',
+        needTitle: 'Title (at least 6 characters)',
+        needCategory: 'Category',
+        needDescription: 'Description (at least 10 characters)',
+        needBudget: 'Budget amount',
+        needArea: 'Area / city',
+        posted: 'Job posted — matching providers will be notified by email.',
+        myJobs: 'My jobs',
+        failed: 'Failed to post job',
       },
       categoryLabels: {
         'real-estate-services':  'Real Estate Services',

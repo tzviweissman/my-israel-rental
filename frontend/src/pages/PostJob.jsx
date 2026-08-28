@@ -57,15 +57,17 @@ const PostJob = () => {
     axios.get(`${API}/marketplace/categories`).then((r) => setCategories(r.data));
   }, [token, navigate]);
 
+  // Translated, and therefore dependent on `t` — a memo keyed only on
+  // `form` would keep the previous language's list after a switch.
   const missing = useMemo(() => {
     const m = [];
-    if (form.title.trim().length < 6) m.push('Title (at least 6 characters)');
-    if (!form.category) m.push('Category');
-    if (form.description.trim().length < 10) m.push('Description (at least 10 characters)');
-    if (form.budget_type === 'fixed' && !(parseFloat(form.budget_amount) > 0)) m.push('Budget amount');
-    if (!form.area.trim()) m.push('Area / city');
+    if (form.title.trim().length < 6) m.push(t('postJob.needTitle', 'Title (at least 6 characters)'));
+    if (!form.category) m.push(t('postJob.needCategory', 'Category'));
+    if (form.description.trim().length < 10) m.push(t('postJob.needDescription', 'Description (at least 10 characters)'));
+    if (form.budget_type === 'fixed' && !(parseFloat(form.budget_amount) > 0)) m.push(t('postJob.needBudget', 'Budget amount'));
+    if (!form.area.trim()) m.push(t('postJob.needArea', 'Area / city'));
     return m;
-  }, [form]);
+  }, [form, t]);
   const canSubmit = missing.length === 0;
 
   const submit = async () => {
@@ -79,9 +81,9 @@ const PostJob = () => {
       const { data } = await axios.post(`${API}/marketplace/jobs`, payload, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      toast.success('Job posted — matching providers will be notified by email.', {
+      toast.success(t('postJob.posted', 'Job posted — matching providers will be notified by email.'), {
         action: {
-          label: 'My jobs',
+          label: t('postJob.myJobs', 'My jobs'),
           onClick: () => navigate('/dashboard?tab=my-jobs'),
         },
       });
@@ -89,7 +91,7 @@ const PostJob = () => {
       clearDraft('post-job');
       navigate(`/businesses/jobs/${data.id}`);
     } catch (err) {
-      toast.error(err.response?.data?.detail || 'Failed to post job');
+      toast.error(err.response?.data?.detail || t('postJob.failed', 'Failed to post job'));
     } finally {
       setSaving(false);
     }
@@ -97,31 +99,38 @@ const PostJob = () => {
 
   return (
     <div className="min-h-screen bg-[#FAFAF7]" style={{ paddingTop: 'var(--nav-h, 68px)' }} data-testid="post-job-page">
-      <PageMeta title="Post a job request | MyIsraelRental" description="Say what you need done and let service providers come to you." path="/businesses/post-job" />
+      <PageMeta
+        title={t('postJob.metaTitle', 'Post a job request | MyIsraelRental')}
+        description={t('postJob.metaDescription', 'Say what you need done and let service providers come to you.')}
+        path="/businesses/post-job"
+      />
       <div className="max-w-2xl mx-auto px-4 py-8">
         <button onClick={() => navigate(backTo)} className="text-sm text-gray-500 flex items-center gap-1 mb-4" data-testid="post-job-back">
           <ArrowLeft size={14} className="rtl:rotate-180" />
           {backLabelFor(backTo, t, 'services.backToJobs', 'Back to jobs')}
         </button>
-        <h1 className="text-2xl sm:text-3xl font-bold mb-1" style={{ fontFamily: 'Playfair Display' }}>
+        {/* var(--font-head), never the literal face: Playfair carries no
+            Hebrew glyphs and an inline fontFamily beats the RTL rule, so
+            this heading fell back to a system serif in Hebrew. */}
+        <h1 className="text-2xl sm:text-3xl font-bold mb-1" style={{ fontFamily: 'var(--font-head)' }}>
           {t('services.postTitle', 'Post a job request')}
         </h1>
         <p className="text-sm text-gray-600 mb-6">
-          Tell us what you need. We&apos;ll email matching providers so they can reach out to you.
+          {t('postJob.intro', "Tell us what you need. We'll email matching providers so they can reach out to you.")}
         </p>
 
         <div className="space-y-5 bg-white rounded-2xl border border-gray-100 p-5 sm:p-6 shadow-sm">
-          <Field label="What do you need?" required>
+          <Field label={t('postJob.fieldTitle', 'What do you need?')} required>
             <input
               value={form.title}
               onChange={(e) => set({ title: e.target.value })}
-              placeholder="e.g. Need someone to move a 2BR apartment on July 20th"
+              placeholder={t('postJob.titlePh', 'e.g. Need someone to move a 2BR apartment on July 20th')}
               className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/30"
               data-testid="post-job-title"
             />
           </Field>
 
-          <Field label="Category" required>
+          <Field label={t('postJob.fieldCategory', 'Category')} required>
             {/* Grouped (spec N2). The old comment here reasoned about
                 fitting 15 categories into four rows — a count that stops
                 holding as soon as N1 lands, which is why the grid is now
@@ -143,7 +152,10 @@ const PostJob = () => {
               tighter match, but the field is never required so a
               vague poster still lands somewhere sensible. */}
           {SUBCATEGORIES[form.category] && (
-            <Field label="Specific type" hint="Optional — helps us match the right provider.">
+            <Field
+              label={t('postJob.fieldSpecificType', 'Specific type')}
+              hint={t('postJob.specificTypeHint', 'Optional — helps us match the right provider.')}
+            >
               <div className="flex flex-wrap gap-2">
                 {SUBCATEGORIES[form.category].map((s) => (
                   <button
@@ -162,22 +174,26 @@ const PostJob = () => {
             </Field>
           )}
 
-          <Field label="Describe what you need" required hint="Min 10 characters. The more detail, the better the applicant quality.">
+          <Field
+            label={t('postJob.fieldDescription', 'Describe what you need')}
+            required
+            hint={t('postJob.descriptionHint', 'Min 10 characters. The more detail, the better the applicant quality.')}
+          >
             <textarea
               value={form.description}
               onChange={(e) => set({ description: e.target.value })}
               rows={5}
-              placeholder="What's the scope? Any constraints? What does a great outcome look like?"
+              placeholder={t('postJob.descriptionPh', "What's the scope? Any constraints? What does a great outcome look like?")}
               className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/30"
               data-testid="post-job-description"
             />
           </Field>
 
-          <Field label="Budget">
+          <Field label={t('postJob.fieldBudget', 'Budget')}>
             <div className="flex gap-2 mb-2">
               {[
-                { v: 'open', label: 'Open to offers' },
-                { v: 'fixed', label: 'Fixed price' },
+                { v: 'open', label: t('postJob.budgetOpen', 'Open to offers') },
+                { v: 'fixed', label: t('postJob.budgetFixed', 'Fixed price') },
               ].map((o) => (
                 <button
                   key={o.v}
@@ -213,7 +229,7 @@ const PostJob = () => {
                   type="number"
                   value={form.budget_amount}
                   onChange={(e) => set({ budget_amount: e.target.value })}
-                  placeholder="Amount"
+                  placeholder={t('postJob.amountPh', 'Amount')}
                   className="flex-1 px-3 py-2 rounded-lg border border-gray-200 text-sm"
                   data-testid="post-job-budget-amount"
                 />
@@ -221,7 +237,7 @@ const PostJob = () => {
             )}
           </Field>
 
-          <Field label="Preferred date (optional)">
+          <Field label={t('postJob.fieldDate', 'Preferred date (optional)')}>
             <DateField
               value={form.preferred_date}
               onChange={(v) => set({ preferred_date: v })}
@@ -231,11 +247,15 @@ const PostJob = () => {
             />
           </Field>
 
-          <Field label="Area / city" required hint="Free-form — Tel Aviv, Jerusalem, Haifa, or a neighbourhood.">
+          <Field
+            label={t('postJob.fieldArea', 'Area / city')}
+            required
+            hint={t('postJob.areaHint', 'Free-form — Tel Aviv, Jerusalem, Haifa, or a neighbourhood.')}
+          >
             <input
               value={form.area}
               onChange={(e) => set({ area: e.target.value })}
-              placeholder="e.g. Tel Aviv, Florentin"
+              placeholder={t('postJob.areaPh', 'e.g. Tel Aviv, Florentin')}
               className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm"
               data-testid="post-job-area"
             />
@@ -250,11 +270,13 @@ const PostJob = () => {
             className="px-5 py-2.5 rounded-lg text-sm font-semibold text-white bg-[var(--brand-primary)] disabled:opacity-40 flex items-center gap-1"
             data-testid="post-job-submit"
           >
-            {saving ? <><Loader2 className="animate-spin" size={14} /> Posting…</> : <>Post job <ArrowRight size={14} /></>}
+            {saving
+              ? <><Loader2 className="animate-spin" size={14} /> {t('postJob.posting', 'Posting…')}</>
+              : <>{t('postJob.submit', 'Post job')} <ArrowRight size={14} className="rtl:rotate-180" /></>}
           </button>
           {!canSubmit && (
             <div className="text-[11px] text-red-600 leading-snug text-end max-w-xs" data-testid="post-job-blocked-reason">
-              <p className="font-semibold">Still needed:</p>
+              <p className="font-semibold">{t('postJob.stillNeeded', 'Still needed:')}</p>
               <ul className="list-disc ms-5 space-y-0.5">
                 {missing.map((m) => <li key={m}>{m}</li>)}
               </ul>
