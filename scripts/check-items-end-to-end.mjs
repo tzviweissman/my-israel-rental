@@ -211,6 +211,34 @@ try {
         failures.push('he: the safety note renders in English — the person who needs it cannot read it');
       }
 
+      // The item must not be BADGED as something else. The detail page
+      // branched `isRental ? Rental : Service`, so an item was labelled
+      // SERVICE with a wrench — a two-way branch on a three-way
+      // question, and invisible to every assertion here until one
+      // looked at the badge.
+      const badges = await page.locator('.rc-badge').evaluateAll(
+        (els) => els.map((e) => e.textContent.trim()).filter(Boolean),
+      );
+      note(`${lang}: badges -> ${JSON.stringify(badges)}`);
+      const wrongBadge = badges.find((b) => /service|rental|שירות|השכרה/i.test(b));
+      if (wrongBadge) {
+        failures.push(`${lang}: an item is badged "${wrongBadge}" — it is neither a service nor a rental`);
+      }
+      if (!badges.some((b) => /item|פריט/i.test(b))) {
+        failures.push(`${lang}: the item carries no "Item" badge`);
+      }
+
+      // The facts a buyer needs, on the page rather than only in the model.
+      const facts = (await page.locator('[data-testid="request-detail-page"]').innerText()).replace(/\s+/g, ' ');
+      for (const [what, needle] of [
+        ['condition', lang === 'he' ? 'מצב' : 'Condition'],
+        ['collection point', lang === 'he' ? 'איסוף' : 'Collection'],
+      ]) {
+        if (!facts.includes(needle)) {
+          failures.push(`${lang}: the item page never shows its ${what}`);
+        }
+      }
+
       // Nothing may imply we hold the money.
       const body = (await page.locator('body').innerText()).replace(/\s+/g, ' ');
       const promises = [

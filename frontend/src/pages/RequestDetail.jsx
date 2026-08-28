@@ -19,7 +19,7 @@ import formatDate from '../utils/formatDate';
 import {
   Home, Wrench, MapPin, Coins, BedDouble, CalendarDays, Clock,
   MessageCircle, Loader2, ArrowLeft, Flag, CheckCircle2, RefreshCw, ExternalLink,
-  Tag, ShieldAlert,
+  Tag, ShieldAlert, Package,
 } from 'lucide-react';
 import { API, AuthContext } from '../App';
 import PageMeta from '../components/PageMeta';
@@ -205,10 +205,23 @@ const RequestDetail = () => {
                 ? t('requests.badgeHave', 'Post')
                 : t('requests.badgeWant', 'Request')}
             </span>
-            <span className={`rc-badge ${isRental ? 'rc-badge-rental' : 'rc-badge-service'}`}>
-              {isRental ? <Home size={11} aria-hidden="true" /> : <Wrench size={11} aria-hidden="true" />}
-              {isRental ? t('requests.rental', 'Rental') : t('requests.service', 'Service')}
+            {/* Three variants, not two. This read `isRental ? Rental :
+                Service`, so an item was badged SERVICE with a wrench —
+                the same two-way branch on a three-way question that the
+                title placeholder had. */}
+            <span className={`rc-badge ${isItem ? 'rc-badge-item' : isRental ? 'rc-badge-rental' : 'rc-badge-service'}`}>
+              {isItem ? <Package size={11} aria-hidden="true" />
+                : isRental ? <Home size={11} aria-hidden="true" />
+                  : <Wrench size={11} aria-hidden="true" />}
+              {isItem ? t('requests.item', 'Item')
+                : isRental ? t('requests.rental', 'Rental')
+                  : t('requests.service', 'Service')}
             </span>
+            {isSold && (
+              <span className="rc-badge rc-badge-sold" data-testid="request-detail-sold">
+                {t('requests.soldBadge', 'Sold')}
+              </span>
+            )}
             {request.status !== 'open' && (
               <span className="rc-badge" style={{ background: '#F3F4F6', color: '#6B7280' }}>
                 {t(`requests.status_${request.status}`, request.status)}
@@ -258,7 +271,23 @@ const RequestDetail = () => {
                 <Row Icon={Clock} label={t('requests.fieldLease', 'Lease length (months)')} value={request.lease_months} />
               </>
             )}
-            {!isRental && (
+            {isItem && (
+              <>
+                <Row
+                  Icon={Tag}
+                  label={t('requests.fieldCondition', 'Condition')}
+                  value={request.condition
+                    ? t(`requests.condition_${request.condition}`, request.condition.replace(/-/g, ' '))
+                    : null}
+                />
+                <Row
+                  Icon={MapPin}
+                  label={t('requests.fieldPickup', 'Collection from')}
+                  value={request.pickup_area}
+                />
+              </>
+            )}
+            {!isRental && !isItem && (
               <>
                 <Row Icon={Wrench} label={t('requests.fieldCategory', 'Category')} value={(request.category || '').replace(/-/g, ' ')} />
                 <Row Icon={CalendarDays} label={t('requests.fieldPreferredDate', 'Preferred date')} value={dateValue} />
