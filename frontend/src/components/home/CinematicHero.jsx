@@ -16,14 +16,26 @@ import { playWhenAllowed } from '../../utils/videoAutoplay';
  * starts at scene 1, and making this sticky too would mean two elements
  * fighting for the same viewport on the first scroll gesture.
  *
- * The video is unconditional — under reduced motion the CSS hides it and the
- * poster shows through, which is the same fallback the scenes use, so there is
- * no separate code path to keep in sync.
+ * NO PAUSED VIDEO IS EVER VISIBLE, and that is the whole trick. iOS paints a
+ * large native play glyph over any <video> that is not playing, whatever its
+ * attributes say and whether or not the webkit pseudo-element is hidden. So
+ * the poster is a real image layer underneath, and the video is transparent
+ * until it actually reports `playing`.
+ *
+ * Under reduced motion the video is not rendered at all. The old comment here
+ * claimed CSS hid it and "the poster shows through" — it did not: the
+ * reduced-motion rule only covered `.scene video`, never `.hero video`, so
+ * with Reduce Motion switched on the hero was a paused video wearing a play
+ * button. Reproduced with Playwright's `reducedMotion: 'reduce'` before this
+ * was changed, and asserted against afterwards.
  */
 const CinematicHero = ({ reducedMotion }) => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const videoRef = React.useRef(null);
+  // Only once the browser confirms it is playing. `autoplay` being present
+  // is not the same thing — Low Power Mode refuses it and says nothing.
+  const [playing, setPlaying] = React.useState(false);
 
   // The `autoplay` attribute alone is not enough here. The element mounts
   // inside a React tree, and browsers evaluate autoplay at parse time — so a
@@ -43,23 +55,39 @@ const CinematicHero = ({ reducedMotion }) => {
 
   return (
     <header className="hero">
-      <video
-        ref={videoRef}
-        // autoPlay only when motion is welcome. muted+playsInline are what
-        // make autoplay permissible at all on mobile Safari.
-        autoPlay={!reducedMotion}
-        muted
-        loop
-        playsInline
-        preload="auto"
-        poster={SITE_ASSETS['scene1-aerial']}
+      {/* The still, as a real image layer rather than the video's `poster`
+          attribute. A poster only paints while the video element is visible,
+          and a visible video that is not playing is exactly what we are
+          avoiding. */}
+      <div
+        className="media-poster"
+        style={{ backgroundImage: `url('${SITE_ASSETS['scene1-aerial']}')` }}
         aria-hidden="true"
-      >
-        <source
-          src={SITE_ASSETS['clip0-aerial']}
-          type="video/mp4"
-        />
-      </video>
+      />
+
+      {!reducedMotion && (
+        <video
+          ref={videoRef}
+          // muted + playsInline are what make autoplay permissible at all on
+          // mobile Safari; the attribute is written by playWhenAllowed too,
+          // because React only ever sets the property.
+          autoPlay
+          muted
+          loop
+          playsInline
+          preload="auto"
+          aria-hidden="true"
+          onPlaying={() => setPlaying(true)}
+          // Transparent until it is genuinely running, so a refusal leaves
+          // the still above rather than a paused frame with a play glyph.
+          style={{ opacity: playing ? 1 : 0 }}
+        >
+          <source
+            src={SITE_ASSETS['clip0-aerial']}
+            type="video/mp4"
+          />
+        </video>
+      )}
 
       <div className="shade2" />
 

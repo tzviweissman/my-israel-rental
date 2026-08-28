@@ -35,6 +35,15 @@ const CinematicScenes = ({ reducedMotion }) => {
           style={{ height: `${scene.heightVh}vh` }}
         >
           <div className="pin">
+            {/* The still, underneath. Scenes are paused until they scroll
+                into view, and under reduced motion they never play at all —
+                both cases would otherwise be a visible paused video, which
+                iOS decorates with a play glyph. */}
+            <div
+              className="media-poster"
+              style={{ backgroundImage: `url('${scene.poster}')` }}
+              aria-hidden="true"
+            />
             <video
               // `data-layer` rather than a class hook: the engine addresses
               // these two layers by role, and a class is a styling concern
