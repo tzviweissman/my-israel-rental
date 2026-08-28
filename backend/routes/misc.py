@@ -249,8 +249,23 @@ async def _store_upload(content: bytes, is_video: bool, original_filename: str |
     file_path = UPLOAD_DIR / filename
     with open(file_path, "wb") as f:
         f.write(content)
+    # ABSOLUTE when we know our own public address, relative otherwise.
+    #
+    # This returned a bare "/api/uploads/…" and that string is STORED — on
+    # a listing, an item, a property — so it is later rendered by whoever
+    # reads the record. A root-relative path resolves against the page's
+    # origin, and the frontend and the API are different hosts in every
+    # deployed environment, so every photo uploaded through this fallback
+    # 404'd. It renders as an empty box, which is why nobody noticed:
+    # nothing errors, the record looks fine, and the picture is simply
+    # not there.
+    #
+    # Local dev keeps the relative form, where the dev server proxies
+    # /api to the backend and same-origin is the correct answer.
+    base = (os.environ.get("PUBLIC_API_URL") or "").rstrip("/")
+    path = f"/api/uploads/{filename}"
     return {
-        "url": f"/api/uploads/{filename}",
+        "url": f"{base}{path}" if base else path,
         "file_type": file_type,
         "filename": filename,
         "size": len(content),
