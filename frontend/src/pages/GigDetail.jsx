@@ -19,6 +19,7 @@ import { visitorHeaders } from '../utils/visitorId';
 import { Calendar as CalendarUI } from '../components/ui/calendar';
 import { API, AuthContext } from '../App';
 import PageMeta from '../components/PageMeta';
+import { needsDirectoryDisclaimer } from '../lib/categories';
 import StarRating from '../components/marketplace/StarRating';
 import { localizedTitle, localizedDescription } from '../utils/gigLocale';
 import { buildWhatsAppLinkWithMessage, hasValidWhatsApp } from '../utils/whatsappLink';
@@ -912,6 +913,29 @@ const GigDetail = () => {
                   testidPrefix="gig-contact"
                 />
               </div>
+
+              {/* Regulated categories say what we are NOT before they say
+                  what we do not charge. Money exchange is licensed and
+                  supervised in Israel: listing a licensed business is not
+                  facilitating exchange, and that difference has to be
+                  legible on the page rather than merely true. Above the
+                  fee line, because "we don't take a cut" read alone
+                  sounds like a claim about a transaction we are part
+                  of. */}
+              {needsDirectoryDisclaimer(gig.category) && (
+                <div
+                  className="mt-3 rounded-xl p-3 text-start"
+                  style={{ background: 'var(--bg)', border: '1px solid var(--brand-border)' }}
+                  data-testid="gig-directory-disclaimer"
+                >
+                  <p className="text-xs font-bold" style={{ color: 'var(--ink)' }}>
+                    {t('directory.moneyTitle', 'We are a directory, not a money service')}
+                  </p>
+                  <p className="text-[11px] mt-1" style={{ color: 'var(--brand-muted)' }}>
+                    {t('directory.moneyBody', "MyIsraelRental doesn't handle, hold, convert or transfer money. You deal with the business directly, on their terms.")}
+                  </p>
+                </div>
+              )}
 
               <p className="text-[11px] text-gray-400 text-center mt-3">
                 {isStore

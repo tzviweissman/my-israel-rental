@@ -201,17 +201,28 @@ CATEGORIES = [
     {"slug": "religious-services",   "label": "Religious Services",         "icon": "scroll"},
     {"slug": "insurance",            "label": "Insurance",                  "icon": "shield"},
     {"slug": "vehicles",             "label": "Vehicles",                   "icon": "car-front"},
+    # Released 2026-08-28 on Tzvi's instruction, after the regulatory note
+    # below was raised with him. Currency service providers in Israel are
+    # licensed and supervised, so two things travel with this category and
+    # must not be dropped:
+    #   1. We list licensed businesses. We never handle, hold, convert or
+    #      transfer money, and no surface may imply otherwise — the
+    #      disclaimer on a money-exchange listing is load-bearing, not
+    #      decoration.
+    #   2. A licence number is shown when the business supplies one.
+    # Not legal advice.
+    {"slug": "money-exchange",       "label": "Money Exchange & Transfers", "icon": "banknote"},
 ]
 
-# Three more categories from the same spec are written here but NOT
+# Categories where we state plainly that we are a directory and nothing
+# more. Consumed by the frontend via /marketplace/categories so the rule
+# lives with the taxonomy rather than being re-derived per page.
+CATEGORIES_WITH_DISCLAIMER = {"money-exchange"}
+
+# Two more categories from the same spec are written here but NOT
 # served, because each carries a question that is not a programming
 # question:
 #
-#   money-exchange        Currency service providers in Israel are
-#                         licensed and supervised. Listing a licensed
-#                         business is not facilitating exchange, but the
-#                         category must never imply we hold, convert or
-#                         move money.
 #   immigration-documents Highest-intent category on the list, and the
 #                         one closest to the discontinued government
 #                         "paid services" (CLAUDE.md). A directory of
@@ -230,8 +241,8 @@ CATEGORIES = [
 # happens, and so the reason is attached to the code rather than lost in
 # a commit message. Not legal advice; confirm before flipping this.
 # tests/test_category_expansion.py asserts they stay off.
+# money-exchange was here until 2026-08-28 and is now live (see above).
 CATEGORIES_PENDING_REVIEW = [
-    {"slug": "money-exchange",        "label": "Money Exchange & Transfers", "icon": "banknote"},
     {"slug": "immigration-documents", "label": "Immigration & Documents",    "icon": "stamp"},
     {"slug": "medical-health",        "label": "Medical & Health",           "icon": "stethoscope"},
 ]

@@ -128,6 +128,7 @@ def new_business_doc(
         # business's page, and it deserves a real element rather than a
         # truncated row reading "Under the strict Hashgach…".
         "kosher_certification": None,
+        "license_number": None,
         # K1/K2 — page identity. Both absent by default: the page is
         # designed to look finished with neither, and a business that
         # never opens the editor must look exactly as it did before

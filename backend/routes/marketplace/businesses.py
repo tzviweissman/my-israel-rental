@@ -99,6 +99,12 @@ class BusinessIn(BaseModel):
     lead_time: Optional[str] = Field(None, max_length=120)
     payment_note: Optional[str] = Field(None, max_length=200)
     kosher_certification: Optional[KosherCert] = None
+    # Regulated categories only (money-exchange today). Shown when
+    # supplied and never demanded: we cannot verify it, so requiring it
+    # would turn a fact the business volunteers into a badge we appear to
+    # have checked. Free text because licence formats vary and a regex
+    # that rejects a real licence is worse than none.
+    license_number: Optional[str] = Field(None, max_length=60)
     collections: Optional[list[Collection]] = None
     # C5 — capped at three by the MODEL, not by the UI. A page where
     # everything is featured features nothing, and a cap enforced only in
@@ -151,6 +157,12 @@ class BusinessPatch(BaseModel):
     lead_time: Optional[str] = Field(None, max_length=120)
     payment_note: Optional[str] = Field(None, max_length=200)
     kosher_certification: Optional[KosherCert] = None
+    # Regulated categories only (money-exchange today). Shown when
+    # supplied and never demanded: we cannot verify it, so requiring it
+    # would turn a fact the business volunteers into a badge we appear to
+    # have checked. Free text because licence formats vary and a regex
+    # that rejects a real licence is worse than none.
+    license_number: Optional[str] = Field(None, max_length=60)
     collections: Optional[list[Collection]] = None
     # C5 — capped at three by the MODEL, not by the UI. A page where
     # everything is featured features nothing, and a cap enforced only in
@@ -406,7 +418,8 @@ async def update_business(business_id: str, payload: BusinessPatch, user=Depends
         # for a business that has never chosen.
         update["accent"] = payload.accent if payload.accent in ACCENTS else "stone"
     for key in ("hours", "delivery_note", "lead_time", "payment_note",
-                "founded_year", "kosher_certification", "cover_url"):
+                "founded_year", "kosher_certification", "cover_url",
+                "license_number"):
         if key in provided:
             value = getattr(payload, key)
             # Pydantic hands back a model for the nested cert; Mongo wants
@@ -629,6 +642,7 @@ async def public_business(
         "lead_time": biz.get("lead_time"),
         "payment_note": biz.get("payment_note"),
         "kosher_certification": biz.get("kosher_certification"),
+        "license_number": biz.get("license_number"),
         # K1/K2 — page identity. `accent` is a NAME; the hexes live on
         # the client (utils/businessAccent.js) so the database never
         # holds a copy of the design system.

@@ -1,6 +1,7 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { Clock, Languages, CalendarDays, Truck, Timer, Wallet, BadgeCheck } from 'lucide-react';
+import { Clock, Languages, CalendarDays, Truck, Timer, Wallet, BadgeCheck, ScrollText } from 'lucide-react';
+import { needsDirectoryDisclaimer } from '../../lib/categories';
 
 /**
  * The "Good to know" band on a business page (spec C6).
@@ -60,7 +61,13 @@ export default function GoodToKnow({ business }) {
   const cert = b.kosher_certification;
   const showCert = !!(cert && cert.body && isFoodBusiness(b.categories));
 
-  if (!rows.length && !showCert) return null;
+  // Same rule as the hechsher above: shown only where it means
+  // something. A licence number on a cleaner is noise; on a money
+  // changer it is one of the few checkable facts on the page.
+  const regulated = (b.categories || []).some(needsDirectoryDisclaimer);
+  const showLicence = !!(regulated && b.license_number);
+
+  if (!rows.length && !showCert && !showLicence) return null;
 
   return (
     <section
@@ -111,6 +118,37 @@ export default function GoodToKnow({ business }) {
                 {t('businessPage.viewCertificate', 'View certificate')}
               </a>
             )}
+          </div>
+        </div>
+      )}
+
+      {/* Given its own block rather than a row, for the reason the
+          certificate above is: in a regulated category it is the fact a
+          careful buyer is looking for. Labelled as SUPPLIED, not
+          verified — we do not check it against the registrar, and a
+          number presented as if we had is worse than no number. */}
+      {showLicence && (
+        <div
+          className="flex items-start gap-3 rounded-xl p-3 mb-4"
+          style={{ background: 'var(--surface)', border: '1px solid var(--brand-border)' }}
+          data-testid="business-licence"
+        >
+          <span
+            className="w-11 h-11 rounded-lg shrink-0 inline-flex items-center justify-center"
+            style={{ background: 'rgb(var(--brand-primary-rgb) / 0.10)', color: 'var(--brand-primary)' }}
+          >
+            <ScrollText size={20} aria-hidden="true" />
+          </span>
+          <div className="min-w-0">
+            <p className="text-xs font-bold uppercase tracking-wide" style={{ color: 'var(--brand-muted)' }}>
+              {t('directory.licence', 'Licence number')}
+            </p>
+            <p className="text-sm font-semibold" style={{ color: 'var(--ink)' }} dir="auto">
+              {b.license_number}
+            </p>
+            <p className="text-xs" style={{ color: 'var(--brand-muted)' }}>
+              {t('directory.licenceUnverified', 'As supplied by the business')}
+            </p>
           </div>
         </div>
       )}

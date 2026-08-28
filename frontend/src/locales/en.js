@@ -2628,6 +2628,17 @@ const en = {
       // headings. Keyed by slug; the API's own label is the fallback, so
       // a category added to the backend before it is added here still
       // renders its name rather than a blank or a raw slug.
+      // Regulated-category notices. Money exchange is licensed and
+      // supervised in Israel; the line has to be on the page, not just
+      // true in our heads.
+      directory: {
+        moneyTitle: 'We are a directory, not a money service',
+        moneyBody: "MyIsraelRental doesn't handle, hold, convert or transfer money. You deal with the business directly, on their terms.",
+        licence: 'Licence number',
+        licenceUnverified: 'As supplied by the business',
+        licencePh: 'Optional — shown on your page as supplied',
+        licenceHint: 'Currency services are licensed in Israel. Adding your number helps customers trust the listing — we show it as supplied by you and do not verify it.',
+      },
       categoryLabels: {
         'real-estate-services':  'Real Estate Services',
         'health-fitness':        'Health & Fitness',

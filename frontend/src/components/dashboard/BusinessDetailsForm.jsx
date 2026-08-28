@@ -4,6 +4,7 @@ import axios from 'axios';
 import { toast } from 'sonner';
 import { X, Loader2 } from 'lucide-react';
 import { isFoodBusiness } from '../marketplace/GoodToKnow';
+import { needsDirectoryDisclaimer } from '../../lib/categories';
 
 /**
  * Edit the facts behind a business's "Good to know" band (spec C6).
@@ -41,10 +42,16 @@ export default function BusinessDetailsForm({ business, API, token, onClose, onS
     payment_note: b.payment_note || '',
     kosher_body: b.kosher_certification?.body || '',
     kosher_certificate_url: b.kosher_certification?.certificate_url || '',
+    license_number: b.license_number || '',
   });
 
   const set = (patch) => setForm((f) => ({ ...f, ...patch }));
   const showKosher = isFoodBusiness(b.categories);
+  // Same principle as the hechsher: asked only where it means something.
+  // Money exchange is licensed and supervised, so a licence number is
+  // the fact a careful customer looks for — and asking a plumber for one
+  // would be exactly the irrelevant question the note above warns about.
+  const showLicence = (b.categories || []).some(needsDirectoryDisclaimer);
 
   const save = async () => {
     setSaving(true);
@@ -68,6 +75,9 @@ export default function BusinessDetailsForm({ business, API, token, onClose, onS
         delivery_note: orNull(form.delivery_note),
         lead_time: orNull(form.lead_time),
         payment_note: orNull(form.payment_note),
+        // Cleared to null when the field is emptied, so a business that
+        // removes its licence number is not left showing a stale one.
+        license_number: showLicence ? orNull(form.license_number) : undefined,
         kosher_certification: showKosher && form.kosher_body.trim()
           ? {
               body: form.kosher_body.trim(),
@@ -152,6 +162,18 @@ export default function BusinessDetailsForm({ business, API, token, onClose, onS
           {field('delivery_note', t('businessPage.delivery', 'Delivery'), 'Jerusalem and Beit Shemesh, same day')}
           {field('lead_time', t('businessPage.leadTime', 'Notice needed'), '48 hours for large orders')}
           {field('payment_note', t('businessPage.payment', 'Payment'), 'Cash, Bit, bank transfer')}
+
+          {showLicence && (
+            <div className="pt-2 border-t space-y-2" style={{ borderColor: 'var(--brand-border)' }}>
+              {field('license_number',
+                t('directory.licence', 'Licence number'),
+                t('directory.licencePh', 'Optional — shown on your page as supplied'))}
+              <p className="text-[11px]" style={{ color: 'var(--brand-muted)' }}>
+                {t('directory.licenceHint',
+                  'Currency services are licensed in Israel. Adding your number helps customers trust the listing — we show it as supplied by you and do not verify it.')}
+              </p>
+            </div>
+          )}
 
           {showKosher && (
             <div className="pt-2 border-t space-y-4" style={{ borderColor: 'var(--brand-border)' }}>

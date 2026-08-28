@@ -94,3 +94,25 @@ export const SUBCATEGORIES = {
     { slug: 'consulting',  label: 'Consulting' },
   ],
 };
+
+/**
+ * Categories where we say plainly that we are a directory and nothing
+ * more.
+ *
+ * Money exchange is regulated: currency service providers in Israel are
+ * licensed and supervised. Listing a licensed business is not the same
+ * as facilitating exchange, and the difference has to be visible on the
+ * page rather than merely true in our heads — so a listing in one of
+ * these categories carries a line saying we never handle, hold, convert
+ * or transfer money.
+ *
+ * Mirrors CATEGORIES_WITH_DISCLAIMER in
+ * backend/routes/marketplace/shared.py; the mirror is asserted by
+ * scripts/test-category-groups.mjs, because this is the kind of set that
+ * drifts silently and the drift here has legal weight rather than
+ * cosmetic weight.
+ */
+export const CATEGORIES_WITH_DISCLAIMER = new Set(['money-exchange']);
+
+export const needsDirectoryDisclaimer = (slug) =>
+  CATEGORIES_WITH_DISCLAIMER.has(normalizeCategory(slug));

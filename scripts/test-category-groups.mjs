@@ -139,6 +139,30 @@ const mirrored = new Set([...labelsBlock.matchAll(/'([a-z0-9-]+)':/g)].map(([, k
   }
 });
 
+// ---- the disclaimer set has not drifted -------------------------------
+// This mirror carries legal weight rather than cosmetic weight: if the
+// frontend set loses a slug, the listing silently stops saying we are a
+// directory and not a money service. Nothing errors and nothing looks
+// wrong, which is exactly why it is asserted.
+const backendDisc = new Set(
+  [...py.slice(py.indexOf('CATEGORIES_WITH_DISCLAIMER = {'), py.indexOf('CATEGORIES_WITH_DISCLAIMER = {') + 300)
+    .matchAll(/"([a-z0-9-]+)"/g)].map(([, x]) => x),
+);
+const frontDisc = new Set(
+  [...catsSrc.slice(catsSrc.indexOf('CATEGORIES_WITH_DISCLAIMER = new Set('), catsSrc.indexOf('CATEGORIES_WITH_DISCLAIMER = new Set(') + 200)
+    .matchAll(/'([a-z0-9-]+)'/g)].map(([, x]) => x),
+);
+console.log(`  disclaimer categories — backend: [${[...backendDisc]}], frontend: [${[...frontDisc]}]`);
+if (!backendDisc.size) failures.push('could not parse CATEGORIES_WITH_DISCLAIMER from shared.py');
+[...backendDisc].forEach((slug) => {
+  if (!frontDisc.has(slug)) {
+    failures.push(`"${slug}" needs a directory disclaimer per the backend, but the frontend set omits it — the listing renders without it`);
+  }
+});
+[...frontDisc].forEach((slug) => {
+  if (!backendDisc.has(slug)) failures.push(`the frontend disclaims "${slug}" and the backend does not`);
+});
+
 // ---- labels go through i18n ------------------------------------------
 const translated = groupCategories(backend, (k, d) => (k === 'categoryGroups.homeProperty' ? 'בית ונכס' : d));
 eq(translated[0].label, 'בית ונכס', 'group labels do not go through t()');
