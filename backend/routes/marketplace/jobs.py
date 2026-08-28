@@ -21,15 +21,23 @@ from __future__ import annotations
 import asyncio
 import re
 import uuid
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import Any, Optional
 
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Body, Depends, HTTPException, Query
 from pydantic import BaseModel, Field
 
+import jwt
+
 from routes.deps import db, logger, verify_token
+from utils.auth import JWT_SECRET
 from utils.email import send_email
-from utils.notification_tokens import create_deeplink_token, create_snooze_token
+from utils.notification_tokens import (
+    NotificationTokenError,
+    create_deeplink_token,
+    create_snooze_token,
+    verify_notification_token,
+)
 from utils.translate import translate_marketing_to_hebrew
 
 from .notification_prefs import DEFAULT_MODE as DEFAULT_PREF_MODE
@@ -595,9 +603,66 @@ def _admin_only(user: dict) -> None:
         raise HTTPException(status_code=403, detail="Admin only")
 
 
+# Stored on the SAME prefs document the requests digest uses. It is the one
+# "how should we email you about the marketplace" record, and a second
+# store would mean two places to check and one of them eventually
+# forgotten — the reasoning is written out at requests.py:866.
+JOBS_OPT_OUT_FIELD = "jobs_emails_off"
+JOBS_OPT_OUT_PURPOSE = "jobs_optout"
+JOBS_OPT_OUT_TTL_DAYS = 90
+
+
+def create_jobs_optout_token(user_id: str) -> str:
+    """Signed token behind the "stop these emails" link.
+
+    Long TTL on purpose, same as the requests one: somebody who ignored the
+    digest for two months and then decides they have had enough must still
+    be able to act on it. A link that quietly expired would turn an
+    unsubscribe into a dead end, which is worse than never offering it.
+    """
+    return jwt.encode(
+        {
+            "purpose": JOBS_OPT_OUT_PURPOSE,
+            "user_id": user_id,
+            "exp": datetime.now(UTC) + timedelta(days=JOBS_OPT_OUT_TTL_DAYS),
+        },
+        JWT_SECRET,
+        algorithm="HS256",
+    )
+
+
+@router.post("/job-searches/emails/opt-out")
+async def jobs_optout_from_email(payload: dict = Body(...)):
+    """Public. The signed token IS the authentication, so the link works
+    straight from an email client without logging in — which is the whole
+    point of an unsubscribe. An unsubscribe that first demands a password
+    is not one.
+    """
+    try:
+        claims = verify_notification_token(payload.get("token") or "", JOBS_OPT_OUT_PURPOSE)
+    except NotificationTokenError as e:
+        raise HTTPException(status_code=400, detail=str(e)) from e
+    await db.job_notification_preferences.update_one(
+        {"user_id": claims["user_id"]},
+        {"$set": {JOBS_OPT_OUT_FIELD: True, "updated_at": datetime.now(UTC).isoformat()}},
+        upsert=True,
+    )
+    return {"ok": True}
+
+
 @router.post("/job-searches/send-digest")
 async def send_digest(user=Depends(verify_token)):
-    """Admin-triggered (or cron-triggered) daily digest.
+    """Admin-triggered daily digest — kept so a human can force a run.
+
+    The work itself lives in `_send_jobs_digest` so the scheduled loop can
+    call it without inventing an admin request to pass in.
+    """
+    _admin_only(user)
+    return await _send_jobs_digest()
+
+
+async def _send_jobs_digest() -> dict[str, Any]:
+    """The daily digest.
 
     Every saved search whose ``last_digest_sent_at`` is older than 20h
     contributes to one email per provider — grouped by category, capped
@@ -606,10 +671,9 @@ async def send_digest(user=Depends(verify_token)):
     the 20h window.
 
     Providers whose ``mode`` is 'instant' are opted OUT of the digest
-    (they get per-post pings instead).
+    (they get per-post pings instead), as are those who used the
+    unsubscribe link.
     """
-    _admin_only(user)
-    from datetime import timedelta
     now = datetime.now(UTC)
     cutoff_iso = (now - timedelta(hours=20)).isoformat()
 
@@ -640,6 +704,10 @@ async def send_digest(user=Depends(verify_token)):
     sent_count = 0
     for uid, user_searches in by_user.items():
         pref = prefs_by_uid.get(uid, {})
+        if pref.get(JOBS_OPT_OUT_FIELD):
+            # They pressed "stop these emails". Checked before anything
+            # else so no amount of matching work can talk us out of it.
+            continue
         mode = pref.get("mode") or DEFAULT_PREF_MODE
         if mode == "instant":
             # This user wants per-post pings ONLY, no daily digest.
@@ -731,6 +799,11 @@ async def send_digest(user=Depends(verify_token)):
             """)
 
         settings_url = f"{FRONTEND_URL}/dashboard/settings?section=notifications"
+        # One click, no login. The settings link stays for people who want
+        # to tune rather than leave — but "fewer emails" was the only exit
+        # offered and it required signing in first, which is not an
+        # unsubscribe.
+        optout_url = f"{FRONTEND_URL}/jobs-emails-off?t={create_jobs_optout_token(uid)}"
         html = f"""
           <p>Hi {u.get('name') or 'there'},</p>
           <p>Here are the new jobs matching your saved searches — grouped by category for a quick scan:</p>
@@ -739,6 +812,8 @@ async def send_digest(user=Depends(verify_token)):
           <p style="color:#666;font-size:12px;line-height:1.6">
             Want fewer emails?
             <a href="{settings_url}" style="color:#1E6A6A;font-weight:600">Adjust your notification settings →</a>
+            <br/>
+            Or <a href="{optout_url}" style="color:#666">stop these emails altogether</a>.
           </p>
         """
         await send_email(
@@ -750,9 +825,43 @@ async def send_digest(user=Depends(verify_token)):
         sent_count += 1
 
     # Stamp all processed searches so they don't re-fire until tomorrow.
+    # After the sends, deliberately: if the process dies mid-pass the worst
+    # case is a repeat tomorrow, which beats a digest that silently never
+    # goes out at all. Same trade-off the requests digest makes.
     ids = [s["_id"] for s in searches]
     await db.marketplace_job_searches.update_many(
         {"_id": {"$in": ids}},
         {"$set": {"last_digest_sent_at": now.isoformat()}},
     )
+    logger.info(
+        "[jobs] digest: %d email(s) from %d saved search(es)",
+        sent_count, len(searches),
+    )
     return {"sent": sent_count, "searches_processed": len(searches)}
+
+
+async def jobs_digest_daily_loop() -> None:
+    """Daily at 09:00 UTC.
+
+    L2 — this is the loop that did not exist. `JobsBoard.jsx:62` told
+    providers "You'll get a daily digest of new matches" and
+    `JobRequestsTab.jsx:55` labelled saved searches "daily digest", while
+    the only way to send one was an admin pressing a button nobody knew
+    about. A provider who saved a search and heard nothing had every
+    reason to conclude the board was empty.
+
+    Same hour and same shape as `requests_digest_daily_loop`, whose
+    docstring already claimed to share it. Single-replica caveat is the
+    same: two instances would send twice, which the 20h
+    `last_digest_sent_at` window mostly absorbs but does not guarantee.
+    """
+    while True:
+        now = datetime.now(UTC)
+        next_run = now.replace(hour=9, minute=0, second=0, microsecond=0)
+        if next_run <= now:
+            next_run += timedelta(days=1)
+        await asyncio.sleep((next_run - now).total_seconds())
+        try:
+            await _send_jobs_digest()
+        except Exception as e:  # noqa: BLE001
+            logger.warning("[jobs] digest loop crashed: %s", e)

@@ -238,6 +238,14 @@ async def startup_tasks() -> None:
     # to owners and providers. Separate loop from the lifecycle one so a
     # crash in either cannot silence the other.
     asyncio.create_task(requests_digest_daily_loop())
+    # L2 — the JOBS digest, which two places in the UI have been promising
+    # and nothing has ever sent. Its endpoint existed and was admin-only;
+    # a provider who saved a search and heard nothing had every reason to
+    # conclude the board was empty. Same 09:00 UTC hour as the requests
+    # digest, and its own task for the same reason: a crash in one must
+    # not silence the other.
+    from routes.marketplace.jobs import jobs_digest_daily_loop
+    asyncio.create_task(jobs_digest_daily_loop())
     # Auto-dedupe loop — every 30 minutes, silently merge property groups
     # where every user-visible field is identical. Re-attaches chats /
     # bookings / likes / photos to the surviving twin before deleting

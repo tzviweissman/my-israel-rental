@@ -222,6 +222,16 @@ const en = {
           },
         },
       },
+      jobsEmailsOff: {
+        working: 'One moment\u2026',
+        missingToken: 'This link is missing its token.',
+        invalid: 'This link is no longer valid.',
+        doneTitle: 'Done \u2014 no more of these emails',
+        doneBody: "We won't send you the daily digest of new jobs any more. Your saved searches, your listings and your messages are all unaffected, and the board is still there whenever you want it.",
+        seeBoard: 'See the jobs board',
+        failedTitle: "We couldn't use that link",
+        manage: 'Manage email settings',
+      },
       features: {
         metaTitle: 'What you can do here',
         metaDescription: 'Everything MyIsraelRental does for businesses, hosts and travellers \u2014 free to list, free to be found.',

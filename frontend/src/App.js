@@ -99,6 +99,7 @@ const Auth = lazy(() => import('./pages/Auth'));
 const AuthDeeplink = lazy(() => import('./pages/AuthDeeplink'));
 const NotificationSnooze = lazy(() => import('./pages/NotificationSnooze'));
 const RequestsEmailsOff = lazy(() => import('./pages/RequestsEmailsOff'));
+const JobsEmailsOff = lazy(() => import('./pages/JobsEmailsOff'));
 const SignupJoin = lazy(() => import('./pages/SignupJoin'));
 const VerifyPending = lazy(() => import('./pages/VerifyPending'));
 const VerifyEmail = lazy(() => import('./pages/VerifyEmail'));
@@ -299,6 +300,9 @@ function App() {
             {/* Public on purpose — the unsubscribe link in the requests
                 matching email must work without logging in. */}
             <Route path="/requests-emails-off" element={<RequestsEmailsOff />} />
+            {/* L2 — the jobs digest now has a real one-click
+                unsubscribe, and this is where its link lands. */}
+            <Route path="/jobs-emails-off" element={<JobsEmailsOff />} />
             <Route path="/admin" element={user?.role === 'admin' ? <AdminDashboard /> : <Navigate to="/" />} />
             <Route path="/manager/:managerId" element={<ManagerPage />} />
             {/* Where a scanned QR lands. Deliberately NOT lazy like the
