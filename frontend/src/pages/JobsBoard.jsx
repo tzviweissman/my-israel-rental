@@ -6,6 +6,7 @@
  * than a personal ad. Filters: category + area (server-side).
  */
 import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import { groupCategories, flattenGrouped } from '../lib/categoryGroups';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import axios from 'axios';
 import { toast } from 'sonner';
@@ -19,6 +20,14 @@ const JobsBoard = () => {
   const navigate = useNavigate();
   const [params, setParams] = useSearchParams();
   const [categories, setCategories] = useState([]);
+  // No `t` passed on purpose: only the ORDER is used here — the chip
+  // text is the API's own label — and this page has no translation hook
+  // to give it. (That it has none at all is a separate problem: every
+  // string on this page is hardcoded English.)
+  const orderedCategories = useMemo(
+    () => flattenGrouped(groupCategories(categories)),
+    [categories],
+  );
   const [jobs, setJobs] = useState([]);
   const [loading, setLoading] = useState(true);
   const activeCat = params.get('category') || '';
@@ -152,7 +161,11 @@ const JobsBoard = () => {
           >
             All categories
           </button>
-          {categories.map((c) => (
+          {/* Grouped ORDER, not grouped headings (spec N2). A row that
+              scrolls sideways has nowhere to put a heading, but it can
+              still put related categories next to each other instead of
+              in whatever order the API returned. */}
+          {orderedCategories.map((c) => (
             <button
               key={c.slug}
               onClick={() => setCat(c.slug)}

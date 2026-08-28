@@ -36,6 +36,7 @@ import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Briefcase, Calendar as CalendarIcon, Wallet, SlidersHorizontal, ChevronDown, Check, Coins } from 'lucide-react';
 import { iconForCategory } from './categoryTheme';
+import { groupCategories } from '../../lib/categoryGroups';
 import { Popover, PopoverTrigger, PopoverContent } from '../ui/popover';
 import { Calendar } from '../ui/calendar';
 
@@ -113,7 +114,10 @@ const BUDGET_OPTIONS = [
  */
 function SegmentSelect({ icon: Icon, label, value, onChange, options, testId }) {
   const [open, setOpen] = useState(false);
-  const current = options.find((o) => o.value === value) || options[0];
+  // Headings have no `value`; `find` on a heading would match when
+  // `value` is '' and the pill would read the group name as its choice.
+  const choices = options.filter((o) => o.type !== 'group');
+  const current = choices.find((o) => o.value === value) || choices[0];
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -148,6 +152,22 @@ function SegmentSelect({ icon: Icon, label, value, onChange, options, testId }) 
       >
         <div role="listbox">
           {options.map((o) => {
+            // A group heading, not a choice. `role="presentation"` keeps
+            // it out of the option count a screen reader announces —
+            // "option 3 of 20" must not count the headings.
+            if (o.type === 'group') {
+              return (
+                <div
+                  key={`group-${o.label}`}
+                  role="presentation"
+                  className="px-3 pt-3 pb-1 text-[11px] font-semibold uppercase tracking-wider"
+                  style={{ color: 'var(--brand-muted)' }}
+                  data-testid={`${testId}-group-${o.id}`}
+                >
+                  {o.label}
+                </div>
+              );
+            }
             const selected = o.value === value;
             const OptIcon = o.icon;
             return (
@@ -327,18 +347,26 @@ export default function ServicesHeroSearch({
 }) {
   const { t } = useTranslation();
 
-  // Options for the Service dropdown — build once per categories change.
+  // Options for the Service dropdown, grouped (spec N2).
+  //
+  // "All services" stays above the first heading, ungrouped: it is not a
+  // category, and filing it under one would make it look like a member of
+  // that group rather than the way out of all of them.
   const serviceOptions = useMemo(() => {
     const any = {
       value: '',
       label: t('services.hero.service.any', 'All services'),
     };
-    const cats = (categories || []).map((c) => ({
-      value: c.slug,
-      label: c.label,
-      icon: iconForCategory(c.slug),
-    }));
-    return [any, ...cats];
+    const rows = [];
+    groupCategories(categories, t).forEach((g) => {
+      rows.push({ type: 'group', id: g.id, label: g.label });
+      g.items.forEach((c) => rows.push({
+        value: c.slug,
+        label: c.label,
+        icon: iconForCategory(c.slug),
+      }));
+    });
+    return [any, ...rows];
   }, [categories, t]);
 
   const budgetOptions = useMemo(

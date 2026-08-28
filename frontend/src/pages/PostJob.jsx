@@ -21,6 +21,7 @@ import { useReturnDestination, backLabelFor } from '../hooks/useBackNavigation';
 import PageMeta from '../components/PageMeta';
 import DateField from '../components/common/DateField';
 import { SUBCATEGORIES } from '../lib/categories';
+import CategoryPicker from '../components/marketplace/CategoryPicker';
 
 const PostJob = () => {
   const { t } = useTranslation();
@@ -121,24 +122,19 @@ const PostJob = () => {
           </Field>
 
           <Field label="Category" required>
-            {/* 4-column grid on md+ so 15 categories fit cleanly in 4
-                rows without cramping the labels; falls back to 2 on
-                mobile where truncation would hurt more than height. */}
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
-              {categories.map((c) => (
-                <button
-                  key={c.slug}
-                  type="button"
-                  onClick={() => set({ category: c.slug, subcategory: '' })}
-                  className={`px-3 py-2 rounded-lg text-xs font-semibold border transition-colors ${
-                    form.category === c.slug ? 'bg-black text-[var(--gold)] border-black' : 'bg-white text-gray-700 border-gray-200 hover:border-[var(--gold)]'
-                  }`}
-                  data-testid={`post-job-cat-${c.slug}`}
-                >
-                  {c.label}
-                </button>
-              ))}
-            </div>
+            {/* Grouped (spec N2). The old comment here reasoned about
+                fitting 15 categories into four rows — a count that stops
+                holding as soon as N1 lands, which is why the grid is now
+                shared rather than tuned per form. Four columns on md+
+                still, inside each group. */}
+            <CategoryPicker
+              categories={categories}
+              value={form.category}
+              onChange={(slug) => set({ category: slug, subcategory: '' })}
+              testidPrefix="post-job-cat"
+              variant="gold"
+              columns="grid-cols-2 sm:grid-cols-3 md:grid-cols-4"
+            />
           </Field>
 
           {/* Optional subcategory picker — only shown for the four

@@ -49,6 +49,7 @@ import AreaCombobox from '../components/requests/AreaCombobox';
 import Combobox from '../components/common/Combobox';
 import DateField from '../components/common/DateField';
 import { useReturnDestination, backLabelFor } from '../hooks/useBackNavigation';
+import { groupCategories, flattenGrouped } from '../lib/categoryGroups';
 
 const RENTAL_KINDS = ['long-term', 'short-term', 'vacation'];
 
@@ -564,16 +565,25 @@ const PostRequest = () => {
                 ) : (
                   <div className="grid sm:grid-cols-2 gap-4" data-testid="post-request-service-fields">
                     <Field label={t('requests.fieldCategory', 'Category')}>
-                      {/* Fifteen categories behind a select you cannot type
-                          into means hunting for a word you already know.
+                      {/* Categories behind a select you cannot type into
+                          means hunting for a word you already know.
                           allowFreeText is off: the value is a slug the API
                           validates, so an unmatched string would only earn
                           a 400 — it reverts to the last valid choice
-                          instead. */}
+                          instead.
+
+                          Grouped order plus a group hint per row (spec
+                          N2); a filtered list cannot carry headings, so
+                          the hint is how a row still says where it sits.
+                          maxSuggestions is raised because the default of 8
+                          hid everything past the eighth category from
+                          anyone browsing rather than typing. */}
                       <Combobox
                         value={form.category}
                         onChange={(v) => set({ category: v })}
-                        options={categories.map((c) => ({ value: c.slug, label: c.label }))}
+                        options={flattenGrouped(groupCategories(categories, t))
+                          .map((c) => ({ value: c.slug, label: c.label, hint: c.groupLabel }))}
+                        maxSuggestions={40}
                         allowFreeText={false}
                         icon={Wrench}
                         className={inputCls}

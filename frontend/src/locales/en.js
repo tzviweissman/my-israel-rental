@@ -2621,6 +2621,19 @@ const en = {
         englishTitle: 'Built for English speakers',
         englishBody: 'Listings, filters and contracts in English — and in Hebrew.',
       },
+      // Groups for the category pickers. Presentation only — see
+      // frontend/src/lib/categoryGroups.js for why these are not stored.
+      categoryGroups: {
+        homeProperty:   'Home & Property',
+        buySell:        'Buy & Sell',
+        moneyAdmin:     'Money & Admin',
+        personalFamily: 'Personal & Family',
+        eventsCreative: 'Events & Creative',
+        community:      'Community',
+        techTransport:  'Tech & Transport',
+        // Catch-all for a category this build has not been told about.
+        more:           'More',
+      },
       services: {
         // Rentals → services cross-sell strip (property detail + post-booking).
         crossSell: {

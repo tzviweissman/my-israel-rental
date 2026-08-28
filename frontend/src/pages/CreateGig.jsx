@@ -33,6 +33,7 @@ import {
 } from 'lucide-react';
 import { API, AuthContext } from '../App';
 import PageMeta from '../components/PageMeta';
+import CategoryPicker from '../components/marketplace/CategoryPicker';
 import { uploadFilesFast, reportUploadFailure } from '../utils/fastUpload';
 import { useFormDraft, readDraft, clearDraft } from '../hooks/useFormDraft';
 import { normalizeWhatsAppNumber, hasValidWhatsApp } from '../utils/whatsappLink';
@@ -598,15 +599,17 @@ const CreateGig = () => {
             </div>
             <div>
               <label className="text-sm font-semibold text-gray-700">Category</label>
-              <div className="mt-2 grid grid-cols-2 sm:grid-cols-3 gap-2">
-                {categories.map((c) => (
-                  <button key={c.slug} type="button" onClick={() => set({ category: c.slug })}
-                    className={`px-3 py-2 rounded-lg text-xs font-semibold border ${
-                      form.category === c.slug ? 'bg-[var(--brand-primary)] text-white border-[var(--brand-primary)]' : 'bg-white text-gray-700 border-gray-200 hover:border-[var(--brand-primary)]'
-                    }`} data-testid={`wizard-cat-${c.slug}`}>
-                    {c.label}
-                  </button>
-                ))}
+              {/* Grouped (spec N2). Same testids as the flat grid it
+                  replaced — `wizard-cat-<slug>` — so nothing that
+                  referenced them needs to change. */}
+              <div className="mt-2">
+                <CategoryPicker
+                  categories={categories}
+                  value={form.category}
+                  onChange={(slug) => set({ category: slug })}
+                  testidPrefix="wizard-cat"
+                  variant="primary"
+                />
               </div>
             </div>
           </div>

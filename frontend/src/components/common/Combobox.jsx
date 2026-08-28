@@ -21,6 +21,12 @@
  * handler, and the bundle already carries enough.
  */
 import React, { useEffect, useMemo, useRef, useState } from 'react';
+// Eight is right for AREAS — hundreds of them, free text allowed, and a
+// long list under an input you are typing into is noise. It is wrong for a
+// CLOSED list of roughly twenty-five categories, where the cap silently
+// hides everything past the eighth until you already know the word to
+// type. That is the "items at the bottom die" failure the grouped picker
+// exists to prevent, so callers with a closed list raise it.
 const MAX_SUGGESTIONS = 8;
 
 export default function Combobox({
@@ -40,6 +46,7 @@ export default function Combobox({
   style,
   testid = 'combobox',
   emptyHint,
+  maxSuggestions = MAX_SUGGESTIONS,
 }) {
   const pairs = useMemo(
     () => (options || []).map((o) => (typeof o === 'string' ? { value: o, label: o } : o)),
@@ -68,7 +75,7 @@ export default function Combobox({
 
   const matches = useMemo(() => {
     const q = String(text || '').trim().toLowerCase();
-    if (!q) return pairs.slice(0, MAX_SUGGESTIONS);
+    if (!q) return pairs.slice(0, maxSuggestions);
     // Substring, not prefix: an area's canonical value leads with the city
     // ("Jerusalem - Nachlaot"), so someone typing the neighbourhood would
     // match nothing under a prefix rule.
@@ -79,8 +86,8 @@ export default function Combobox({
       const bi = b.label.toLowerCase().indexOf(q);
       return ai - bi || a.label.localeCompare(b.label);
     });
-    return hits.slice(0, MAX_SUGGESTIONS);
-  }, [text, pairs]);
+    return hits.slice(0, maxSuggestions);
+  }, [text, pairs, maxSuggestions]);
 
   // Close on an outside click. Without this the list stays open behind the
   // next field and swallows its first click.
@@ -172,14 +179,21 @@ export default function Combobox({
                 // list before a click ever landed.
                 onMouseDown={(e) => { e.preventDefault(); pick(o); }}
                 onMouseEnter={() => setActive(i)}
-                className="w-full text-start px-3.5 py-2 text-sm"
+                className="w-full text-start px-3.5 py-2 text-sm flex items-baseline gap-2"
                 style={{
                   background: i === active ? 'rgb(var(--brand-primary-rgb) / 0.08)' : 'transparent',
                   color: 'var(--ink)',
                 }}
                 data-testid={`${testid}-option-${i}`}
               >
-                {o.label}
+                <span className="flex-1 min-w-0 truncate">{o.label}</span>
+                {/* Optional group name. A flat list cannot carry headings,
+                    so this is how it still says WHERE an option sits. */}
+                {o.hint && (
+                  <span className="text-[11px] shrink-0" style={{ color: 'var(--brand-muted)' }}>
+                    {o.hint}
+                  </span>
+                )}
               </button>
             </li>
           ))}

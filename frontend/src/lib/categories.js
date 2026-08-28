@@ -23,6 +23,11 @@ export const CATEGORY_LABELS = {
   'childcare-babysitting': 'Childcare & Babysitting',
   'pet-services':          'Pet Services',
   'events-catering':       'Events, Music & Catering',
+  // Added to the backend 2026-08-19 and missed here until 28 Aug — the
+  // mirror this file warns about drifting had already drifted, so
+  // `labelForCategory('shops-products')` rendered the raw slug wherever
+  // it was called. Nothing errored; it just read as broken.
+  'shops-products':        'Shops & Products',
   'other':                 'Other',
 };
 

@@ -2519,6 +2519,18 @@ const he = {
         englishTitle: 'מותאם לדוברי אנגלית',
         englishBody: 'מודעות, סינון וחוזים באנגלית — וגם בעברית.',
       },
+      // קבוצות לבוררי הקטגוריות. תצוגה בלבד — ראו
+      // frontend/src/lib/categoryGroups.js.
+      categoryGroups: {
+        homeProperty:   'בית ונכסים',
+        buySell:        'קנייה ומכירה',
+        moneyAdmin:     'כספים ובירוקרטיה',
+        personalFamily: 'אישי ומשפחה',
+        eventsCreative: 'אירועים ויצירה',
+        community:      'קהילה',
+        techTransport:  'טכנולוגיה ותחבורה',
+        more:           'עוד',
+      },
       services: {
         // Rentals → services cross-sell strip (property detail + post-booking).
         crossSell: {
