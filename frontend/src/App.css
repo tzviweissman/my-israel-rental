@@ -381,6 +381,32 @@ input[type="date"]:valid:before {
    scene 1's Kotel wall with no <h1> anywhere — this is the establishing
    shot and the document's only top-level heading. The `.hint` bob is
    defined here but neutralised under reduced motion below. */
+/* iOS draws a large native play glyph over ANY <video> that is not
+   currently playing, whatever its attributes say. That is what put a play
+   button on the phone home page while the same page played silently on a
+   laptop, and no amount of muted/playsinline/autoplay fixes it — those
+   change whether the video plays, not what Safari paints when it does not.
+
+   And there are cases where it legitimately does not play: Reduce Motion,
+   where the hero falls back to its poster BY DESIGN, and Low Power Mode,
+   which refuses autoplay outright. In both the intended result is a still
+   frame, not a still frame wearing a play button.
+
+   Scoped to `aria-hidden="true"`, which is exactly the decorative videos —
+   the hero and the cinematic scenes. The chat's real video player
+   (components/chat/MessageList.jsx) carries `controls` and no aria-hidden,
+   so it keeps every control it has. */
+video[aria-hidden="true"]::-webkit-media-controls,
+video[aria-hidden="true"]::-webkit-media-controls-enclosure,
+video[aria-hidden="true"]::-webkit-media-controls-panel,
+video[aria-hidden="true"]::-webkit-media-controls-overlay-play-button,
+video[aria-hidden="true"]::-webkit-media-controls-start-playback-button{
+  display:none !important;
+  -webkit-appearance:none;
+  opacity:0;
+  pointer-events:none;
+}
+
 .hero video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
 .hero .shade2{position:absolute;inset:0;background:linear-gradient(180deg,rgba(6,14,19,.4),rgba(6,14,19,.12) 40%,rgba(6,14,19,.75))}
 .hero .center{position:absolute;z-index:5;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:0 20px}
