@@ -104,6 +104,20 @@ try {
       failures.push(`he: headings render as "${headings[0].text}" — the keys are missing from he.js`);
     }
 
+    // The CATEGORY names too, not only the headings. Hebrew group titles
+    // over English category names is the half-translated state that
+    // reads worse than either one on its own.
+    if (lang === 'he') {
+      const labels = await page.locator('[data-testid^="services-hero-service-option-"]').evaluateAll(
+        (els) => els.map((e) => e.textContent.trim()).filter(Boolean),
+      );
+      const english = labels.filter((l) => !HEBREW.test(l));
+      note(`he: ${labels.length - english.length}/${labels.length} option labels in Hebrew`);
+      if (english.length) {
+        failures.push(`he: category names still in English: ${english.slice(0, 5).join(', ')}`);
+      }
+    }
+
     // Every category still reachable — grouping must not drop one.
     const opts = await page.locator('[data-testid^="services-hero-service-option-"]').evaluateAll(
       (els) => els.map((e) => e.getAttribute('data-testid').replace('services-hero-service-option-', '')),

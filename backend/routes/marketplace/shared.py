@@ -187,7 +187,60 @@ CATEGORIES = [
     # purpose — clothing, homeware, gifts, food producers — because the
     # alternative is a new slug per trade and a list nobody can scan.
     {"slug": "shops-products",       "label": "Shops & Products",           "icon": "shopping-bag"},
+    # --- 2026-08-28: the category expansion (docs/categories-expansion-spec.md).
+    # Tzvi's ruling 2 makes these TOP-LEVEL rather than subcategories,
+    # which overrides the "a list nobody can scan" note above. The answer
+    # to that note is the grouped picker in
+    # frontend/src/lib/categoryGroups.js — if the picker is ever
+    # un-grouped, these should not stay top-level.
+    #
+    # Chosen for one audience — English-speaking residents, olim and
+    # visitors — because a category nobody in that group searches for is a
+    # page that stays empty forever.
+    {"slug": "buy-sell",             "label": "Buy & Sell",                 "icon": "tag"},
+    {"slug": "religious-services",   "label": "Religious Services",         "icon": "scroll"},
+    {"slug": "insurance",            "label": "Insurance",                  "icon": "shield"},
+    {"slug": "vehicles",             "label": "Vehicles",                   "icon": "car-front"},
 ]
+
+# Three more categories from the same spec are written here but NOT
+# served, because each carries a question that is not a programming
+# question:
+#
+#   money-exchange        Currency service providers in Israel are
+#                         licensed and supervised. Listing a licensed
+#                         business is not facilitating exchange, but the
+#                         category must never imply we hold, convert or
+#                         move money.
+#   immigration-documents Highest-intent category on the list, and the
+#                         one closest to the discontinued government
+#                         "paid services" (CLAUDE.md). A directory of
+#                         OTHER people's businesses is a different thing
+#                         from us providing those services — but this is
+#                         exactly where that line gets crossed by
+#                         accident, so it opens deliberately or not at
+#                         all.
+#   medical-health        A directory, not a health service. Public
+#                         reviews of individual clinicians carry a
+#                         defamation exposure that a review of a plumber
+#                         does not.
+#
+# The spec asks for a lawyer's five minutes on all three. They are kept
+# here rather than in a branch so they are one env var away once that
+# happens, and so the reason is attached to the code rather than lost in
+# a commit message. Not legal advice; confirm before flipping this.
+# tests/test_category_expansion.py asserts they stay off.
+CATEGORIES_PENDING_REVIEW = [
+    {"slug": "money-exchange",        "label": "Money Exchange & Transfers", "icon": "banknote"},
+    {"slug": "immigration-documents", "label": "Immigration & Documents",    "icon": "stamp"},
+    {"slug": "medical-health",        "label": "Medical & Health",           "icon": "stethoscope"},
+]
+
+# Off by default and deliberately not in .env.example as an enabled
+# value — turning this on is a decision, not configuration drift.
+if os.environ.get("CATEGORIES_PENDING_REVIEW_ENABLED", "").lower() in ("1", "true", "yes"):
+    CATEGORIES.extend(CATEGORIES_PENDING_REVIEW)
+
 _CATEGORY_SLUGS = {c["slug"] for c in CATEGORIES}
 
 # Optional subcategory tags for categories that were merged. Kept as

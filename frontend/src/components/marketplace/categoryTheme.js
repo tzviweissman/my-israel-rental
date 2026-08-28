@@ -21,7 +21,8 @@ import {
   Palette, Scissors, Droplet, Zap,
   Music, Home, Dumbbell, Car, Boxes, Plane, Flower, BookOpen,
   Briefcase, SprayCan, Monitor, GraduationCap, Baby, PawPrint, PartyPopper,
-  ShoppingBag,
+  ShoppingBag, Tag, Scroll, ShieldCheck, CarFront, Banknote, Stamp,
+  Stethoscope,
 } from 'lucide-react';
 
 // The icon-name -> component registry used to live inside
@@ -35,7 +36,8 @@ const ICONS = {
   Palette, Scissors, Droplet, Zap,
   Music, Home, Dumbbell, Car, Boxes, Plane, Flower, BookOpen,
   Briefcase, SprayCan, Monitor, GraduationCap, Baby, PawPrint, PartyPopper,
-  ShoppingBag,
+  ShoppingBag, Tag, Scroll, ShieldCheck, CarFront, Banknote, Stamp,
+  Stethoscope,
 };
 
 // Slugs match backend/routes/marketplace/shared.py CATEGORIES exactly.
@@ -110,6 +112,41 @@ const CATEGORY_THEME = {
   'shops-products': {
     header: '#5A3A2E', body: '#EDD9C8',
     icon: 'ShoppingBag', iconColor: '#5A3A2E',
+  },
+  // 2026-08-28 expansion. Colours picked from the same warm/cool split
+  // the set already uses — trades warm, professional services cool — so
+  // seven new tiles do not read as a second, louder set bolted on.
+  // check-tile-contrast.mjs is what keeps these honest.
+  'buy-sell': {
+    header: '#6B4A1E', body: '#F0DFC2',
+    icon: 'Tag', iconColor: '#6B4A1E',
+  },
+  'religious-services': {
+    header: '#1F3D66', body: '#D6E1F0',
+    icon: 'Scroll', iconColor: '#1F3D66',
+  },
+  'insurance': {
+    header: '#28455B', body: '#D8E4EC',
+    icon: 'ShieldCheck', iconColor: '#28455B',
+  },
+  'vehicles': {
+    header: '#3B3F52', body: '#DEE0E8',
+    icon: 'CarFront', iconColor: '#3B3F52',
+  },
+  // Flag-held categories (see CATEGORIES_PENDING_REVIEW in shared.py).
+  // Themed now so that enabling them is one env var and not a design
+  // task done in a hurry.
+  'money-exchange': {
+    header: '#1F4A3D', body: '#D5E7DF',
+    icon: 'Banknote', iconColor: '#1F4A3D',
+  },
+  'immigration-documents': {
+    header: '#4A3357', body: '#E2D6EA',
+    icon: 'Stamp', iconColor: '#4A3357',
+  },
+  'medical-health': {
+    header: '#1E4F5C', body: '#D4E7EC',
+    icon: 'Stethoscope', iconColor: '#1E4F5C',
   },
 };
 

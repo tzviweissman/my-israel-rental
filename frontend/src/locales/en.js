@@ -2623,6 +2623,36 @@ const en = {
       },
       // Groups for the category pickers. Presentation only — see
       // frontend/src/lib/categoryGroups.js for why these are not stored.
+      // Category names. The API serves these in English only, so a
+      // Hebrew visitor was picking English categories out of Hebrew group
+      // headings. Keyed by slug; the API's own label is the fallback, so
+      // a category added to the backend before it is added here still
+      // renders its name rather than a blank or a raw slug.
+      categoryLabels: {
+        'real-estate-services':  'Real Estate Services',
+        'health-fitness':        'Health & Fitness',
+        'personal-care':         'Personal Care',
+        'transportation':        'Transportation',
+        'home-services-repair':  'Home Services & Repair',
+        'travel-tourism':        'Travel & Tourism',
+        'creative-design':       'Creative & Design Services',
+        'business-financial':    'Business & Financial Services',
+        'moving-relocation':     'Moving & Relocation',
+        'cleaning-services':     'Cleaning Services',
+        'it-tech-support':       'IT & Tech Support',
+        'education-tutoring':    'Education & Tutoring',
+        'childcare-babysitting': 'Childcare & Babysitting',
+        'pet-services':          'Pet Services',
+        'events-catering':       'Events, Music & Catering',
+        'shops-products':        'Shops & Products',
+        'buy-sell':              'Buy & Sell',
+        'religious-services':    'Religious Services',
+        'insurance':             'Insurance',
+        'vehicles':              'Vehicles',
+        'money-exchange':        'Money Exchange & Transfers',
+        'immigration-documents': 'Immigration & Documents',
+        'medical-health':        'Medical & Health',
+      },
       categoryGroups: {
         homeProperty:   'Home & Property',
         buySell:        'Buy & Sell',

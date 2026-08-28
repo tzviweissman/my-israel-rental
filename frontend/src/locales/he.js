@@ -2521,6 +2521,35 @@ const he = {
       },
       // קבוצות לבוררי הקטגוריות. תצוגה בלבד — ראו
       // frontend/src/lib/categoryGroups.js.
+      // שמות הקטגוריות. ה-API מחזיר אנגלית בלבד, ובלעדי זה דובר עברית
+      // בחר קטגוריות באנגלית מתוך כותרות בעברית. המפתח הוא ה-slug,
+      // והתווית מה-API היא ברירת המחדל.
+      categoryLabels: {
+        'real-estate-services':  'שירותי נדל״ן',
+        'health-fitness':        'בריאות וכושר',
+        'personal-care':         'טיפוח אישי',
+        'transportation':        'הסעות ותחבורה',
+        'home-services-repair':  'שירותי בית ותיקונים',
+        'travel-tourism':        'תיירות ונופש',
+        'creative-design':       'צילום ועיצוב',
+        'business-financial':    'שירותים עסקיים ופיננסיים',
+        'moving-relocation':     'הובלות ומעבר דירה',
+        'cleaning-services':     'שירותי ניקיון',
+        'it-tech-support':       'מחשבים ותמיכה טכנית',
+        'education-tutoring':    'לימודים ושיעורים פרטיים',
+        'childcare-babysitting': 'טיפול בילדים ובייביסיטר',
+        'pet-services':          'שירותים לבעלי חיים',
+        'events-catering':       'אירועים, מוזיקה וקייטרינג',
+        'shops-products':        'חנויות ומוצרים',
+        // "יד שנייה" ולא "קנייה ומכירה" — זה הביטוי שמחפשים בו בפועל.
+        'buy-sell':              'יד שנייה',
+        'religious-services':    'שירותי דת',
+        'insurance':             'ביטוח',
+        'vehicles':              'רכב',
+        'money-exchange':        'המרת מטבע והעברות כספים',
+        'immigration-documents': 'עלייה ומסמכים',
+        'medical-health':        'רפואה ובריאות',
+      },
       categoryGroups: {
         homeProperty:   'בית ונכסים',
         buySell:        'קנייה ומכירה',

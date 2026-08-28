@@ -132,7 +132,11 @@ export function groupCategories(categories, t) {
     if (!c || !c.slug) return;
     const gid = groupIdForCategory(c.slug);
     if (!byId.has(gid)) byId.set(gid, []);
-    byId.get(gid).push(c);
+    // The API serves labels in English only, so without this a Hebrew
+    // visitor read English category names under Hebrew group headings.
+    // The API's own label is the fallback, so a category the backend has
+    // but the locale files do not still shows its name.
+    byId.get(gid).push({ ...c, label: tr(`categoryLabels.${c.slug}`, c.label) });
   });
 
   // Within a group, follow the order written above rather than the

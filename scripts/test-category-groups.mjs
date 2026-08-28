@@ -35,10 +35,20 @@ const eq = (a, b, msg) => { if (a !== b) failures.push(`${msg} (got ${a}, want $
 
 // ---- the real backend list -------------------------------------------
 const py = readFileSync('backend/routes/marketplace/shared.py', 'utf8');
-const block = py.slice(py.indexOf('CATEGORIES = ['), py.indexOf('_CATEGORY_SLUGS'));
-const backend = [...block.matchAll(/\{"slug":\s*"([a-z0-9-]+)"[^}]*"label":\s*"([^"]+)"/g)]
-  .map(([, slug, label]) => ({ slug, label }));
-console.log(`  backend ships ${backend.length} categories`);
+const parseList = (start, end) => [
+  ...py.slice(py.indexOf(start), py.indexOf(end)).matchAll(/\{"slug":\s*"([a-z0-9-]+)"[^}]*"label":\s*"([^"]+)"/g),
+].map(([, slug, label]) => ({ slug, label }));
+
+// Two lists, and the boundary matters: CATEGORIES is what ships,
+// CATEGORIES_PENDING_REVIEW is held behind an env flag until three legal
+// questions are answered. Slicing to `_CATEGORY_SLUGS` would swallow
+// both and quietly assert the wrong thing.
+const backend = parseList('CATEGORIES = [', 'CATEGORIES_PENDING_REVIEW = [');
+const pending = parseList('CATEGORIES_PENDING_REVIEW = [', '_CATEGORY_SLUGS');
+console.log(`  backend ships ${backend.length} categories (+${pending.length} held for review)`);
+if (!pending.length) {
+  failures.push('CATEGORIES_PENDING_REVIEW is empty — if those categories were released, say so deliberately');
+}
 if (backend.length < 10) {
   failures.push(`only parsed ${backend.length} categories out of shared.py — the parser is wrong, not the code`);
 }
@@ -54,6 +64,16 @@ backend.forEach((c) => {
 });
 const dupes = flat.map((c) => c.slug).filter((s, i, a) => a.indexOf(s) !== i);
 if (dupes.length) failures.push(`shown more than once: ${[...new Set(dupes)].join(', ')}`);
+
+// The held categories must be grouped too — otherwise flipping the env
+// flag drops three categories into "More" on a live site.
+const withPending = groupCategories([...backend, ...pending]);
+const strandedPending = withPending.find((g) => g.id === OTHER_GROUP.id);
+if (strandedPending) {
+  failures.push(
+    `ungrouped once the review flag is on: ${strandedPending.items.map((c) => c.slug).join(', ')}`,
+  );
+}
 
 // ---- and nothing real is parked in the catch-all ---------------------
 // "More" exists so a deployed frontend older than the backend still
@@ -113,7 +133,7 @@ const labelsBlock = catsSrc.slice(
   catsSrc.indexOf('LEGACY_CATEGORY_MIGRATION'),
 );
 const mirrored = new Set([...labelsBlock.matchAll(/'([a-z0-9-]+)':/g)].map(([, k]) => k));
-backend.forEach((c) => {
+[...backend, ...pending].forEach((c) => {
   if (!mirrored.has(c.slug)) {
     failures.push(`"${c.slug}" is in shared.py but missing from CATEGORY_LABELS — labelForCategory() will render the raw slug`);
   }
@@ -122,6 +142,26 @@ backend.forEach((c) => {
 // ---- labels go through i18n ------------------------------------------
 const translated = groupCategories(backend, (k, d) => (k === 'categoryGroups.homeProperty' ? 'בית ונכס' : d));
 eq(translated[0].label, 'בית ונכס', 'group labels do not go through t()');
+
+// CATEGORY labels too, not just the group headings. Without this a
+// Hebrew visitor picks English category names out of Hebrew groups.
+const heCats = groupCategories(backend, (k, d) => (k === 'categoryLabels.cleaning-services' ? 'שירותי ניקיון' : d));
+const cleaning = flattenGrouped(heCats).find((c) => c.slug === 'cleaning-services');
+eq(cleaning.label, 'שירותי ניקיון', 'category labels do not go through t()');
+// …and the API's label survives when the locale has no key for it.
+const unknown = flattenGrouped(groupCategories([{ slug: 'drone-services', label: 'Drone Services' }], (_k, d) => d));
+eq(unknown[0].label, 'Drone Services', 'a category with no locale key lost its name');
+
+// Every category the backend ships must HAVE a Hebrew label — an
+// English name inside a Hebrew picker is the exact complaint this is
+// answering, and a missing key fails silently to the English fallback.
+const heSrc = readFileSync('frontend/src/locales/he.js', 'utf8');
+const heBlock = heSrc.slice(heSrc.indexOf('categoryLabels: {'), heSrc.indexOf('categoryGroups: {'));
+[...backend, ...pending].forEach((c) => {
+  if (!heBlock.includes(`'${c.slug}':`)) {
+    failures.push(`"${c.slug}" has no Hebrew label in he.js — it renders in English on the Hebrew site`);
+  }
+});
 eq(
   groupCategories(backend)[0].label,
   CATEGORY_GROUPS[0].labelDefault,
