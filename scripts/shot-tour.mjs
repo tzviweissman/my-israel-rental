@@ -50,12 +50,14 @@ const open = async (rtl, width) => {
   return ctx;
 };
 
+/* Entered the way a person enters it: the nav menu, which is where T7's
+   help now lives on every page rather than only on the dashboard. */
 async function startTour(page) {
   await page.goto(`${APP}/dashboard`, { waitUntil: 'domcontentloaded', timeout: 60000 });
-  await page.locator('[data-testid="dashboard-help-button"]').waitFor({ timeout: 30000 });
-  await page.locator('[data-testid="dashboard-help-button"]').click();
-  await page.locator('[data-testid="help-show-around"]').click();
-  await page.locator('[data-testid="tour-tooltip"]').waitFor({ timeout: 20000 });
+  await page.locator('[data-testid="nav-menu-button"]').waitFor({ timeout: 30000 });
+  await page.locator('[data-testid="nav-menu-button"]').click();
+  await page.locator('[data-testid="nav-show-around"]').click();
+  await page.locator('[data-testid="tour-tooltip"]').waitFor({ timeout: 25000 });
   await page.waitForTimeout(700);
 }
 
@@ -162,10 +164,10 @@ try {
     const ctx = await open(false, 1280);
     const page = await ctx.newPage();
     await page.goto(`${APP}/dashboard?tab=settings`, { waitUntil: 'domcontentloaded', timeout: 60000 });
-    await page.locator('[data-testid="dashboard-help-button"]').waitFor({ timeout: 30000 });
+    await page.locator('[data-testid="nav-menu-button"]').waitFor({ timeout: 30000 });
     const before = page.url();
-    await page.locator('[data-testid="dashboard-help-button"]').click();
-    await page.locator('[data-testid="help-show-around"]').click();
+    await page.locator('[data-testid="nav-menu-button"]').click();
+    await page.locator('[data-testid="nav-show-around"]').click();
     await page.locator('[data-testid="tour-tooltip"]').waitFor({ timeout: 20000 });
     // Walk a couple of steps so we are demonstrably somewhere else.
     await page.locator('[data-testid="tour-next"]').click();
@@ -208,9 +210,9 @@ try {
     };
     const before = await page.screenshot({ clip });
 
-    await page.locator('[data-testid="dashboard-help-button"]').click();
-    await page.locator('[data-testid="help-show-around"]').click();
-    await page.locator('[data-testid="tour-tooltip"]').waitFor({ timeout: 20000 });
+    await page.locator('[data-testid="nav-menu-button"]').click();
+    await page.locator('[data-testid="nav-show-around"]').click();
+    await page.locator('[data-testid="tour-tooltip"]').waitFor({ timeout: 25000 });
     await page.waitForTimeout(900);
     const during = await page.screenshot({ clip });
 

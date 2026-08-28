@@ -26,7 +26,6 @@ import DashboardTabs from '../components/dashboard/DashboardTabs';
 import OnboardingProvider from '../components/onboarding/OnboardingProvider';
 import TourProvider from '../components/tour/TourProvider';
 import SetupChecklist from '../components/onboarding/SetupChecklist';
-import HelpMenu from '../components/onboarding/HelpMenu';
 import ShowMeAroundOffer from '../components/onboarding/ShowMeAroundOffer';
 import AttentionStrip from '../components/dashboard/AttentionStrip';
 import { canPublishGigs } from '../utils/providerTrial';
@@ -225,12 +224,6 @@ const Dashboard = () => {
           <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold" style={{ fontFamily: 'var(--font-head)' }}>
             {t('dashboard.title')}
           </h1>
-          {/* T7 — the permanent home for help. Rendered before the
-              role-gated action buttons below so its position does not
-              shift between a lister, a renter and a business owner. */}
-          <div className="flex items-center gap-2 sm:order-last">
-            <HelpMenu />
-          </div>
           {isPropertyLister && (
             <div className="flex gap-2 justify-end sm:justify-start sm:w-auto">
               <button

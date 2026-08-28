@@ -123,21 +123,25 @@ try {
         failures.push(`${label}: progress shown with no next action beside it`);
       }
 
-      // ---- the permanent help control -----------------------------------
-      const help = page.locator('[data-testid="dashboard-help-button"]');
+      /* ---- the permanent help control ------------------------------
+         It lives in the NAV MENU now, not in the dashboard header: one
+         predictable home reachable from every page, rather than a "Help"
+         button on the dashboard competing with a burger in the nav for
+         the same job. */
+      const help = page.locator('[data-testid="nav-menu-button"]');
       if (await help.count() === 0) {
         failures.push(`${label}: no help control in the dashboard header`);
       } else {
         await help.click();
-        await page.locator('[data-testid="dashboard-help-menu"]').waitFor({ timeout: 8000 });
-        for (const entry of ['help-show-around', 'help-feature-library', 'help-support']) {
+        await page.locator('[data-testid="nav-menu-dropdown"]').waitFor({ timeout: 8000 });
+        for (const entry of ['nav-show-around', 'nav-what-you-can-do', 'nav-faq']) {
           if (await page.locator(`[data-testid="${entry}"]`).count() === 0) {
             failures.push(`${label}: help menu is missing "${entry}"`);
           }
         }
         // The menu must hang inside the viewport, not off the edge — the
         // classic RTL failure for anything anchored to a button.
-        const box = await page.locator('[data-testid="dashboard-help-menu"]').boundingBox();
+        const box = await page.locator('[data-testid="nav-menu-dropdown"]').boundingBox();
         if (box && (box.x < -1 || box.x + box.width > width + 1)) {
           failures.push(
             `${label}: help menu sits outside the viewport (x=${Math.round(box.x)}, w=${Math.round(box.width)}, vw=${width})`,

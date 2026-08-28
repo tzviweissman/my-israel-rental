@@ -161,12 +161,41 @@ export default function TourProvider({ children }) {
 
   const start = useCallback((fromIndex = 0) => {
     if (!steps.length) return;
-    returnTo.current = location.pathname + location.search;
+    /* Where to put them back — WITHOUT the `tour` parameter.
+
+       Keeping it made an infinite loop: finishing navigated back to
+       `/dashboard?tour=1`, the effect below saw the parameter again and
+       started the tour again, forever. `location` here can still be the
+       pre-strip value because the strip navigation has not propagated in
+       the same tick, so this cannot rely on that having happened. */
+    const clean = new URLSearchParams(location.search);
+    clean.delete('tour');
+    const q = clean.toString();
+    returnTo.current = `${location.pathname}${q ? `?${q}` : ''}`;
     setSkipped(new Set());
     setStepIndex(Math.min(Math.max(0, fromIndex), steps.length - 1));
     setActive(true);
     record('started');
   }, [steps.length, location, record]);
+
+  /* T7's entry points live in the nav menu, which sits outside this
+     provider — the tour points at dashboard controls, so the engine has to
+     live with them. `?tour=1` carries the click across.
+
+     This is NOT the tour firing by itself. Nothing sets that parameter
+     except somebody pressing "Show me around"; arriving at /dashboard
+     without it starts nothing. The parameter is stripped immediately so a
+     refresh, a bookmark or a shared URL does not replay the tour. */
+  useEffect(() => {
+    if (active || !steps.length) return;
+    const params = new URLSearchParams(location.search);
+    if (params.get('tour') !== '1') return;
+    params.delete('tour');
+    const rest = params.toString();
+    navigate(`${location.pathname}${rest ? `?${rest}` : ''}`, { replace: true });
+    start();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [location.search, steps.length, active]);
 
   const next = useCallback(() => setStepIndex((i) => i + 1), []);
   const back = useCallback(() => setStepIndex((i) => Math.max(0, i - 1)), []);

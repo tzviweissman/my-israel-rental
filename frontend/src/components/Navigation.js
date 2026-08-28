@@ -2,7 +2,7 @@ import React, { useContext, useState, useRef, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { AuthContext, API } from '../App';
-import { Globe, LogOut, LayoutDashboard, Menu, X, Home, Building, Palmtree, Warehouse, ChevronRight, Search, Bell, MessageCircle, HelpCircle, Bed, Briefcase, Store } from 'lucide-react';
+import { Globe, LogOut, LayoutDashboard, Menu, X, Home, Building, Palmtree, Warehouse, ChevronRight, Search, Bell, MessageCircle, HelpCircle, Bed, Briefcase, Store, Compass, BookOpen } from 'lucide-react';
 import axios from 'axios';
 import { toast } from 'sonner';
 import { playMessagePing, requestDesktopNotificationPermission, showDesktopNotification } from '../utils/messageAlerts';
@@ -14,6 +14,21 @@ const Navigation = () => {
   const { user, logout, token } = useContext(AuthContext);
   const navigate = useNavigate();
   const location = useLocation();
+
+  /* Where "Show me around" goes.
+
+     If they are already on the dashboard, `tour=1` is ADDED to the URL they
+     are on rather than replacing it — so the tab they were looking at
+     survives, and the tour can put them back on it when it ends. Sending
+     everyone to a bare `/dashboard?tour=1` lost that: someone who started
+     the tour from Settings was returned to the default tab, which is not
+     where they started. */
+  const startTourHref = () => {
+    if (location.pathname !== '/dashboard') return '/dashboard?tour=1';
+    const params = new URLSearchParams(location.search);
+    params.set('tour', '1');
+    return `/dashboard?${params.toString()}`;
+  };
   const isHome = location.pathname === '/';
   const [menuOpen, setMenuOpen] = useState(false);
   const [homeScrolled, setHomeScrolled] = useState(false);
@@ -654,11 +669,20 @@ const Navigation = () => {
                    moved to 900px, a logged-out visitor between 768 and
                    899px had no links, no Sign in, no CTA and no burger:
                    a nav containing only a logo and a language toggle. */
-                className={`glass-pill inline-flex items-center gap-2 ${
-                  user ? '' : 'min-[900px]:hidden'
-                }`}
+                /* Shown on desktop signed OUT too, which it was not before.
+                   The old reasoning was sound at the time — the drawer held
+                   only dashboard, messages and logout, so a hamburger
+                   offering a menu of things you cannot do is worse than no
+                   hamburger. It now carries Help, which is exactly what a
+                   signed-out visitor might want, so the reason to hide it
+                   has gone. */
+                className="glass-pill inline-flex items-center gap-2"
                 aria-expanded={menuOpen}
                 aria-haspopup="menu"
+                aria-label={t('nav.menu')}
+                // T7's help lives in here now, so this is what the tour's
+                // last step points at.
+                data-tour="help"
                 data-testid="nav-menu-button"
               >
                 {user ? (
@@ -776,8 +800,32 @@ const Navigation = () => {
 
                 <div className="mx-4 border-t" style={{ borderColor: 'rgba(201, 162, 39,0.15)' }} />
 
-                {/* Help / FAQ */}
+                {/* Help — T7's permanent home, moved here from a separate
+                    control in the dashboard header.
+
+                    One menu rather than two: a "Help" button on the
+                    dashboard and a burger in the nav were two places to
+                    look for the same thing, and T7's whole point is that
+                    there is ONE predictable home. Here it is reachable
+                    from every page, not just the dashboard.
+
+                    "Show me around" navigates to the dashboard carrying
+                    `?tour=1`. The tour engine lives inside the dashboard
+                    (it points at dashboard controls), so the nav cannot
+                    call it directly — the parameter carries the click
+                    across. It still never fires by itself: nothing sets
+                    that parameter except somebody pressing this. */}
                 <div className="px-2 py-2">
+                  <button onClick={() => handleNav(startTourHref())} className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-150 hover:bg-white/5 group" style={{ color: 'var(--gold)' }} data-testid="nav-show-around">
+                    <Compass size={16} className="opacity-60 group-hover:opacity-100" />
+                    <span>{t('help.showAround', 'Show me around')}</span>
+                    <ChevronRight size={14} className="ml-auto opacity-0 group-hover:opacity-60 transition-opacity" />
+                  </button>
+                  <button onClick={() => handleNav('/what-you-can-do')} className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-150 hover:bg-white/5 group" style={{ color: 'var(--gold)' }} data-testid="nav-what-you-can-do">
+                    <BookOpen size={16} className="opacity-60 group-hover:opacity-100" />
+                    <span>{t('help.whatYouCanDo', 'What you can do here')}</span>
+                    <ChevronRight size={14} className="ml-auto opacity-0 group-hover:opacity-60 transition-opacity" />
+                  </button>
                   <button onClick={() => handleNav('/faq')} className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-150 hover:bg-white/5 group" style={{ color: 'var(--gold)' }} data-testid="nav-faq">
                     <HelpCircle size={16} className="opacity-60 group-hover:opacity-100" />
                     <span>{t('nav.faq')}</span>
