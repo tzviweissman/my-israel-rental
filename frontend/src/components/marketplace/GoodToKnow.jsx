@@ -64,7 +64,18 @@ export default function GoodToKnow({ business }) {
   // Same rule as the hechsher above: shown only where it means
   // something. A licence number on a cleaner is noise; on a money
   // changer it is one of the few checkable facts on the page.
-  const regulated = (b.categories || []).some(needsDirectoryDisclaimer);
+  //
+  // Read from the LISTINGS, not from `b.categories`. That field is only
+  // ever written when an owner edits the business and fills it in by
+  // hand — creating a listing does not touch it — so it is empty for
+  // most businesses, and keying off it would have meant the licence
+  // almost never appeared. Falls back to `categories` for a business
+  // whose owner did fill it in but has no live listings yet.
+  const regulated = [
+    ...(b.listings || []).map((g) => g && g.category),
+    ...(b.listing_categories || []),
+    ...(b.categories || []),
+  ].filter(Boolean).some(needsDirectoryDisclaimer);
   const showLicence = !!(regulated && b.license_number);
 
   if (!rows.length && !showCert && !showLicence) return null;

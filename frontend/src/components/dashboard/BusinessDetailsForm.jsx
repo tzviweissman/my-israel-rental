@@ -51,7 +51,13 @@ export default function BusinessDetailsForm({ business, API, token, onClose, onS
   // Money exchange is licensed and supervised, so a licence number is
   // the fact a careful customer looks for — and asking a plumber for one
   // would be exactly the irrelevant question the note above warns about.
-  const showLicence = (b.categories || []).some(needsDirectoryDisclaimer);
+  //
+  // `listing_categories` is what the business actually SELLS, served by
+  // the API. `categories` is hand-entered and empty for most businesses
+  // — keying off it alone meant an owner in a regulated category could
+  // never reach this field at all.
+  const showLicence = [...(b.listing_categories || []), ...(b.categories || [])]
+    .some(needsDirectoryDisclaimer);
 
   const save = async () => {
     setSaving(true);

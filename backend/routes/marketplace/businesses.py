@@ -171,7 +171,12 @@ class BusinessPatch(BaseModel):
 
 
 
-def _public(doc: dict[str, Any], gig_count: int = 0, has_listing_photo: bool = False) -> dict[str, Any]:
+def _public(
+    doc: dict[str, Any],
+    gig_count: int = 0,
+    has_listing_photo: bool = False,
+    listing_categories: list[str] | None = None,
+) -> dict[str, Any]:
     return {
         "id": doc["_id"],
         "name": doc.get("name") or "",
@@ -191,6 +196,16 @@ def _public(doc: dict[str, Any], gig_count: int = 0, has_listing_photo: bool = F
         # actually carries a photo. Counted on the server because the
         # dashboard list does not fetch the listings themselves.
         "has_listing_photo": bool(has_listing_photo),
+        # What this business actually SELLS, from its listings.
+        #
+        # Distinct from `categories`, which is only ever written when an
+        # owner edits the business and fills it in by hand — creating a
+        # listing does not touch it, so it is empty for most businesses.
+        # Anything that asks "is this a food business / a regulated one"
+        # off `categories` therefore answers no almost always, which is
+        # how the licence-number field would have become unreachable for
+        # the businesses that need it.
+        "listing_categories": sorted(listing_categories or []),
     }
 
 
@@ -259,8 +274,16 @@ async def my_businesses(user=Depends(verify_token)):
             docs = [created]
     counts = {}
     photos = {}
+    cats: dict[str, set[str]] = {}
     for b in docs:
         counts[b["_id"]] = await db.marketplace_gigs.count_documents({"business_id": b["_id"]})
+        cats[b["_id"]] = {
+            g["category"]
+            async for g in db.marketplace_gigs.find(
+                {"business_id": b["_id"], "category": {"$nin": [None, ""]}},
+                {"category": 1},
+            )
+        }
         # One matching document is enough — this is a yes/no, not a count.
         #
         # All THREE places a photo can live, not just the gig-level
@@ -282,7 +305,15 @@ async def my_businesses(user=Depends(verify_token)):
             {"_id": 1},
         ))
     docs.sort(key=lambda b: (not b.get("active", True), b.get("created_at") or ""))
-    return [_public(b, counts.get(b["_id"], 0), photos.get(b["_id"], False)) for b in docs]
+    return [
+        _public(
+            b,
+            counts.get(b["_id"], 0),
+            photos.get(b["_id"], False),
+            sorted(cats.get(b["_id"], set())),
+        )
+        for b in docs
+    ]
 
 
 @router.post("/businesses")
