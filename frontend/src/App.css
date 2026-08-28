@@ -417,7 +417,7 @@ video[aria-hidden="true"]::-webkit-media-controls-start-playback-button{
 /* The still behind the hero and each scene. A real layer, because a <video>
    `poster` only paints while the video element itself is visible — and a
    visible video that is not playing is what iOS decorates with a play glyph. */
-.media-poster{position:absolute;inset:0;background-size:cover;background-position:center;background-repeat:no-repeat}
+.media-poster{position:absolute;inset:0;background-size:cover;background-position:center;background-repeat:no-repeat;pointer-events:none;transition:opacity .5s ease}
 .hero .shade2{position:absolute;inset:0;background:linear-gradient(180deg,rgba(6,14,19,.4),rgba(6,14,19,.12) 40%,rgba(6,14,19,.75))}
 .hero .center{position:absolute;z-index:5;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:0 20px}
 .hero h1{font-size:clamp(38px,6.6vw,80px);font-weight:800;letter-spacing:-1.5px;line-height:1.02;text-shadow:0 3px 30px rgba(0,0,0,.55)}

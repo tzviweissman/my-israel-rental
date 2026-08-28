@@ -55,16 +55,6 @@ const CinematicHero = ({ reducedMotion }) => {
 
   return (
     <header className="hero">
-      {/* The still, as a real image layer rather than the video's `poster`
-          attribute. A poster only paints while the video element is visible,
-          and a visible video that is not playing is exactly what we are
-          avoiding. */}
-      <div
-        className="media-poster"
-        style={{ backgroundImage: `url('${SITE_ASSETS['scene1-aerial']}')` }}
-        aria-hidden="true"
-      />
-
       {!reducedMotion && (
         <video
           ref={videoRef}
@@ -78,9 +68,6 @@ const CinematicHero = ({ reducedMotion }) => {
           preload="auto"
           aria-hidden="true"
           onPlaying={() => setPlaying(true)}
-          // Transparent until it is genuinely running, so a refusal leaves
-          // the still above rather than a paused frame with a play glyph.
-          style={{ opacity: playing ? 1 : 0 }}
         >
           <source
             src={SITE_ASSETS['clip0-aerial']}
@@ -88,6 +75,24 @@ const CinematicHero = ({ reducedMotion }) => {
           />
         </video>
       )}
+
+      {/* The still sits ON TOP of the video and fades out once it is
+          genuinely running — rather than the video being transparent until
+          then, which was the first attempt.
+
+          The difference matters: Safari can refuse to autoplay a video it
+          considers not visible, so hiding the video to hide a paused frame
+          risks causing the very refusal it was meant to paper over. Covering
+          it instead leaves the video fully visible to the autoplay policy
+          the whole time, and nobody ever sees a paused frame. */}
+      <div
+        className="media-poster"
+        style={{
+          backgroundImage: `url('${SITE_ASSETS['scene1-aerial']}')`,
+          opacity: playing ? 0 : 1,
+        }}
+        aria-hidden="true"
+      />
 
       <div className="shade2" />
 

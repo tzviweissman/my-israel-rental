@@ -36,6 +36,11 @@ export function ensureMuted(video) {
  * Still resolves quietly on failure — a poster frame is a fine outcome and
  * far better than a broken scroll sequence.
  */
+const GESTURES = ['touchstart', 'pointerdown', 'scroll'];
+// Fired once the element has enough data to begin. `loadeddata` is the
+// earliest useful one; `canplay` covers browsers that skip it.
+const READY = ['loadeddata', 'canplay'];
+
 export function playWhenAllowed(video) {
   if (!video) return;
   ensureMuted(video);
@@ -54,11 +59,25 @@ export function playWhenAllowed(video) {
     };
     const cleanup = () => {
       delete video.dataset.autoplayRetry;
-      ['touchstart', 'pointerdown', 'scroll'].forEach((evt) =>
-        window.removeEventListener(evt, retry),
-      );
+      GESTURES.forEach((evt) => window.removeEventListener(evt, retry));
+      READY.forEach((evt) => video.removeEventListener(evt, retry));
     };
-    ['touchstart', 'pointerdown', 'scroll'].forEach((evt) =>
+
+    /* Two kinds of retry, because there are two reasons the first attempt
+       fails and only one of them needs a person.
+
+       READY: play() is called from a mount effect, which can easily run
+       before the element has a single byte. Some browsers reject that
+       outright — nothing is wrong, the video simply was not ready yet, and
+       waiting for data and asking again is all that was needed. Without
+       this the video sat still until the visitor happened to touch the
+       screen, which looked exactly like a refusal.
+
+       GESTURES: the genuine refusals — iOS Low Power Mode and Android Data
+       Saver — which no amount of asking fixes until there is an
+       interaction to hang it on. */
+    READY.forEach((evt) => video.addEventListener(evt, retry, { once: true }));
+    GESTURES.forEach((evt) =>
       window.addEventListener(evt, retry, { once: true, passive: true }),
     );
   });
