@@ -342,9 +342,11 @@ const Services = () => {
   // How many "More filters" chips are active — drives the badge on
   // the Filters button so users can see filters are on at a glance.
   const advCount =
-    // A free-text search counts: without it, searching for something with
-    // no other filter set left the chip strip hidden and the only way to
-    // clear the query was to edit the URL.
+    /* `q` still counts even though no control sets it any more (the hero
+       search box was removed 28 Aug 2026 — see ServicesHeroSearch). A
+       shared or hand-edited link carrying `?q=` still filters, and a
+       filter with no visible cause and no way out is worse than one that
+       announces itself. The chip below is the way out. */
     (q ? 1 : 0) +
     (minRating ? 1 : 0) +
     (minPrice || maxPrice ? 1 : 0) +
@@ -403,7 +405,6 @@ const Services = () => {
           <ServicesHeroSearch
             categories={categories}
             selectedCat={selectedCat}
-            q={q}
             minPrice={minPrice}
             maxPrice={maxPrice}
             availableOn={availableOn}

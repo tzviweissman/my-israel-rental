@@ -2682,11 +2682,6 @@ const he = {
           bookingMode: 'שיטת הזמנה'
         },
         hero: {
-          q: {
-            label: '\u05d7\u05d9\u05e4\u05d5\u05e9',
-            placeholder: '\u05de\u05e0\u05e7\u05d4, \u05de\u05d5\u05d1\u05d9\u05dc, \u05e6\u05dc\u05dd\u2026',
-            clear: '\u05e0\u05d9\u05e7\u05d5\u05d9 \u05d4\u05d7\u05d9\u05e4\u05d5\u05e9',
-          },
           day: {
             any: 'בכל זמן',
             today: 'היום',
