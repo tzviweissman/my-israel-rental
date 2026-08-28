@@ -19,6 +19,7 @@ import formatDate from '../utils/formatDate';
 import {
   Home, Wrench, MapPin, Coins, BedDouble, CalendarDays, Clock,
   MessageCircle, Loader2, ArrowLeft, Flag, CheckCircle2, RefreshCw, ExternalLink,
+  Tag, ShieldAlert,
 } from 'lucide-react';
 import { API, AuthContext } from '../App';
 import PageMeta from '../components/PageMeta';
@@ -86,10 +87,10 @@ const RequestDetail = () => {
     }
   };
 
-  const act = async (path, successMsg) => {
+  const act = async (path, successMsg, body = {}) => {
     setBusy(true);
     try {
-      await axios.post(`${API}/marketplace/requests/${id}/${path}`, {}, {
+      await axios.post(`${API}/marketplace/requests/${id}/${path}`, body, {
         headers: { Authorization: `Bearer ${token}` },
       });
       toast.success(successMsg);
@@ -149,6 +150,8 @@ const RequestDetail = () => {
   }
 
   const isRental = request.request_type === 'rental';
+  const isItem = request.request_type === 'item';
+  const isSold = request.item_status === 'sold';
   const expiresIn = daysUntil(request.expires_at);
   const budget = request.budget_amount
     ? `${request.budget_currency === 'USD' ? '$' : '₪'}${Number(request.budget_amount).toLocaleString()}`
@@ -282,6 +285,29 @@ const RequestDetail = () => {
             {request.description}
           </p>
 
+          {/* N6 — on EVERY item, for BOTH sides. It sat in the buyer's
+              branch first, which meant the seller never saw it: they are
+              the one arranging to meet a stranger at their own address,
+              so if either party needs the line more it is them.
+
+              Phrased so it can never be read as a guarantee. There is no
+              escrow, no buyer protection and nothing to fall back on —
+              saying that plainly IS the protection, and implying
+              otherwise would be a promise we cannot honour. */}
+          {isItem && (
+            <div
+              className="flex items-start gap-2.5 rounded-xl p-3 mb-6"
+              style={{ background: 'var(--bg)', border: '1px solid var(--brand-border)' }}
+              data-testid="request-item-safety"
+            >
+              <ShieldAlert size={16} className="shrink-0 mt-0.5" style={{ color: 'var(--brand-muted)' }} />
+              <p className="text-xs leading-snug" style={{ color: 'var(--brand-muted)' }}>
+                {t('requests.itemSafety',
+                  'Meet in a public place. Never transfer money before you have the item. MyIsraelRental never handles payment.')}
+              </p>
+            </div>
+          )}
+
           {isMine ? (
             /* The seeker's own controls. contact_count is shown here and
                nowhere else — it is the one number that tells them their
@@ -302,6 +328,32 @@ const RequestDetail = () => {
                       : t('requests.markFound', "I found it")}
                   </button>
                 )}
+                {/* One tap, and reversible — a sale falls through, and a
+                    board where "sold" is one-way teaches sellers not to
+                    press it. The post STAYS: it leaves the default view
+                    but a shared link still resolves, so a buyer who
+                    arrives late reads "sold" instead of hitting a 404. */}
+                {isItem && request.status !== 'found' && (
+                  <button
+                    type="button"
+                    onClick={() => act(
+                      'sold',
+                      isSold
+                        ? t('requests.availableToast', 'Back on sale.')
+                        : t('requests.soldToast', 'Marked sold — the post stays up so buyers know.'),
+                      { sold: !isSold },
+                    )}
+                    disabled={busy}
+                    className="px-4 py-2.5 rounded-full text-sm font-semibold border disabled:opacity-60 inline-flex items-center gap-1.5"
+                    style={{ borderColor: 'var(--brand-border)', color: 'var(--ink)' }}
+                    data-testid="request-mark-sold"
+                  >
+                    <Tag size={14} />
+                    {isSold
+                      ? t('requests.markAvailable', 'Put back on sale')
+                      : t('requests.markSold', 'Mark as sold')}
+                  </button>
+                )}
                 {request.status !== 'found' && (
                   <button type="button" onClick={() => act('renew', t('requests.renewed', 'Renewed for another 30 days'))}
                           disabled={busy} className="px-4 py-2.5 rounded-full text-sm font-semibold border disabled:opacity-60 inline-flex items-center gap-1.5"
@@ -313,7 +365,8 @@ const RequestDetail = () => {
               </div>
             </div>
           ) : (
-            <div className="border-t pt-5 flex flex-wrap items-center gap-3" style={{ borderColor: 'var(--brand-border)' }}>
+            <div className="border-t pt-5" style={{ borderColor: 'var(--brand-border)' }}>
+              <div className="flex flex-wrap items-center gap-3">
               <button
                 type="button" onClick={contact} disabled={busy || request.status !== 'open'}
                 className="btn-blue-solid inline-flex items-center gap-2 disabled:opacity-60"
@@ -354,6 +407,7 @@ const RequestDetail = () => {
                   <Flag size={12} />{t('requests.report', 'Report')}
                 </button>
               )}
+              </div>
             </div>
           )}
         </div>

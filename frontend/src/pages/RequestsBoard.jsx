@@ -32,7 +32,7 @@ import formatDate from '../utils/formatDate';
 import {
   Home, Wrench, LayoutGrid, MapPin, Coins, BedDouble, CalendarDays, ShieldCheck,
   Clock, MessageCircle, Loader2, Search, Plus, Users, Sparkles, KeyRound, ExternalLink,
-  Map as MapIcon,
+  Map as MapIcon, Package,
 } from 'lucide-react';
 import { API, AuthContext } from '../App';
 import PageMeta from '../components/PageMeta';
@@ -58,6 +58,10 @@ const TYPES = [
   { key: '', labelKey: 'requests.typeAll', fallback: 'All', Icon: LayoutGrid },
   { key: 'rental', labelKey: 'requests.typeRental', fallback: 'Rentals', Icon: Home },
   { key: 'service', labelKey: 'requests.typeService', fallback: 'Services', Icon: Wrench },
+  // N4. Items are on this board and not in the marketplace: one person
+  // selling one sofa has no repeat supply and no meaningful review, and
+  // needs a `sold` state a business listing does not have.
+  { key: 'item', labelKey: 'requests.typeItem', fallback: 'Items', Icon: Package },
 ];
 
 /** Days until an ISO timestamp, floored at 0. Null when unparseable. */
@@ -75,6 +79,8 @@ const money = (amount, currency) => {
 
 export const RequestCard = ({ request: r, onOpen, t }) => {
   const isRental = r.request_type === 'rental';
+  const isItem = r.request_type === 'item';
+  const isSold = r.item_status === 'sold';
   // Supply-side post. Everything user-facing on this card has to follow it:
   // an "Available" post is not a request, and calling its poster a seeker
   // would be plainly wrong to the person reading it.
@@ -111,12 +117,26 @@ export const RequestCard = ({ request: r, onOpen, t }) => {
           {isOffer ? <KeyRound size={11} aria-hidden="true" /> : <Search size={11} aria-hidden="true" />}
           {isOffer ? t('requests.badgeHave', 'Post') : t('requests.badgeWant', 'Request')}
         </span>
-        <span className={`rc-badge ${isRental ? 'rc-badge-rental' : 'rc-badge-service'}`}>
-          {isRental ? <Home size={11} aria-hidden="true" /> : <Wrench size={11} aria-hidden="true" />}
-          {isRental ? t('requests.rental', 'Rental') : t('requests.service', 'Service')}
+        <span className={`rc-badge ${isItem ? 'rc-badge-item' : isRental ? 'rc-badge-rental' : 'rc-badge-service'}`}>
+          {isItem ? <Package size={11} aria-hidden="true" />
+            : isRental ? <Home size={11} aria-hidden="true" />
+              : <Wrench size={11} aria-hidden="true" />}
+          {isItem ? t('requests.item', 'Item')
+            : isRental ? t('requests.rental', 'Rental')
+              : t('requests.service', 'Service')}
         </span>
+        {/* Sold stays ON the board rather than disappearing (it is out of
+            the default view, but a shared link still resolves). A buyer
+            who arrives late is better served by this than by a 404. */}
+        {isSold && (
+          <span className="rc-badge rc-badge-sold" data-testid={`request-sold-${r.id}`}>
+            {t('requests.soldBadge', 'Sold')}
+          </span>
+        )}
         <span className="text-[11px] font-semibold" style={{ color: 'var(--brand-muted)' }}>
-          {isRental ? (r.rental_kind || '') : (r.category || '').replace(/-/g, ' ')}
+          {isItem
+            ? t(`requests.condition_${r.condition}`, (r.condition || '').replace(/-/g, ' '))
+            : isRental ? (r.rental_kind || '') : (r.category || '').replace(/-/g, ' ')}
         </span>
       </div>
 

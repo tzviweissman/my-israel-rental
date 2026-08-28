@@ -1007,6 +1007,20 @@ select:focus-visible,
 }
 .rc-badge-rental { background: rgb(var(--brand-primary-rgb) / .10); color: var(--brand-primary); }
 .rc-badge-service { background: #F6EFD9; color: var(--gold-text-on-light); }
+/* Items (N4). A third neutral tone rather than a third hue — the card
+   already carries a blue rental badge and a gold service one, and the
+   note below about not turning the corner into a paint chart applies
+   here too. */
+.rc-badge-item { background: rgba(35, 32, 27, .08); color: var(--ink); }
+
+/* SOLD. Muted on purpose: it is a closed post, and it must not compete
+   with the live ones around it for attention. Not green — green is
+   functional-only in this system and "sold" is not a success state for
+   the person reading it. */
+.rc-badge-sold {
+  background: rgba(35, 32, 27, .55);
+  color: #fff;
+}
 
 /* Which SIDE of the market a post is on. Deliberately ink-on-neutral
    rather than a third and fourth colour: the board already carries a blue

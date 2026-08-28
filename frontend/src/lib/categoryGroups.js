@@ -88,19 +88,29 @@ export const CATEGORY_GROUPS = [
     id: 'events-creative',
     labelKey: 'categoryGroups.eventsCreative',
     labelDefault: 'Events & Creative',
-    slugs: ['events-catering', 'creative-design', 'travel-tourism'],
+    slugs: ['events-catering', 'creative-design'],
   },
-  // Transport used to sit with IT support under "Tech & Transport"
-  // (Tzvi, 28 Aug: it does not belong there). They were together because
-  // each was a leftover, which is not a reason. Transport goes with
-  // vehicles, where somebody thinking about getting around will look —
-  // and `vehicles` covers mechanics, testing and licence conversion, not
-  // just buying one, so it was always a poor fit under Buy & Sell.
+  // Transport goes with travel, not with vehicles (Tzvi, 28 Aug). Both
+  // are about a person getting somewhere — a taxi, a shuttle, a tour, a
+  // hotel — and somebody planning a trip looks in one place for all of
+  // it.
+  //
+  // `vehicles` is a different question entirely: it is what a CAR needs
+  // — a mechanic, a test, a licence conversion. Nobody browsing for a
+  // ride to the airport is also looking for a garage, so pairing them
+  // put a maintenance trade in front of travellers and hid it from
+  // drivers. It gets its own group.
   {
-    id: 'getting-around',
-    labelKey: 'categoryGroups.gettingAround',
-    labelDefault: 'Transport & Vehicles',
-    slugs: ['transportation', 'vehicles'],
+    id: 'travel-transport',
+    labelKey: 'categoryGroups.travelTransport',
+    labelDefault: 'Travel & Transport',
+    slugs: ['travel-tourism', 'transportation'],
+  },
+  {
+    id: 'cars',
+    labelKey: 'categoryGroups.cars',
+    labelDefault: 'Cars',
+    slugs: ['vehicles'],
   },
   {
     id: 'tech',

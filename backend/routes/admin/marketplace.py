@@ -16,7 +16,7 @@ from datetime import UTC, datetime, timedelta
 from typing import Any, Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Query
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 from routes.deps import db, verify_token
 from routes.marketplace.shared import HAS_ANY_PHOTO
@@ -244,10 +244,127 @@ async def admin_attention(payload: dict = Depends(verify_token)) -> dict[str, An
         "received_at": {"$gte": week_ago},
     })
 
+    # N6 — reported and flagged posts. Reports have been collected into
+    # `request_reports` since the board shipped and NOTHING has ever read
+    # them: a report button that files into a drawer nobody opens is worse
+    # than no button, because it tells the person who pressed it that
+    # somebody is looking.
+    moderation = await db.requests.count_documents({
+        "$or": [
+            {"report_count": {"$gte": 1}},
+            {"needs_review": True},
+        ],
+        "hidden_by_admin": {"$ne": True},
+    })
+
     return {
         "requests_expiring_unanswered": expiring,
         "services_without_photo": no_photo,
         "businesses_unverified": unverified,
         "chats_unanswered": stale_chats,
         "emails_bounced_7d": bounced,
+        "posts_awaiting_moderation": moderation,
     }
+
+
+# --------------------------------------------------------------------------
+# Moderation queue (spec N6)
+# --------------------------------------------------------------------------
+
+@api_router.get("/admin/request-reports")
+async def admin_request_reports(
+    payload: dict = Depends(verify_token),
+    include_resolved: bool = False,
+    limit: int = Query(100, ge=1, le=500),
+) -> list[dict[str, Any]]:
+    """Posts a human should look at, newest first.
+
+    Two ways in, and they are different situations:
+
+      * somebody REPORTED it. The reasons they typed are attached, because
+        "scam" and "wrong category" need different responses and a bare
+        count cannot tell them apart.
+      * it landed in a category where fraud does the most damage and was
+        flagged on creation (`needs_review`). Nobody complained; we are
+        looking on purpose.
+
+    Auto-hidden posts are included. `REPORT_HIDE_THRESHOLD` reports hides a
+    post automatically, and that is a holding action, not a decision —
+    three coordinated reports can silence a legitimate seller, so a human
+    still has to look and be able to put it back.
+    """
+    _admin_only(payload)
+
+    query: dict[str, Any] = {
+        "$or": [{"report_count": {"$gte": 1}}, {"needs_review": True}],
+    }
+    if not include_resolved:
+        query["moderated_at"] = None
+
+    docs = await db.requests.find(query).sort("report_count", -1).to_list(limit)
+
+    # The reasons, in one query rather than one per post.
+    ids = [d["_id"] for d in docs]
+    reasons: dict[str, list[dict[str, Any]]] = {}
+    if ids:
+        async for r in db.request_reports.find({"request_id": {"$in": ids}}):
+            reasons.setdefault(r["request_id"], []).append({
+                "reason": r.get("reason"),
+                "created_at": r.get("created_at"),
+            })
+
+    return [{
+        "id": d["_id"],
+        "request_type": d.get("request_type"),
+        "post_kind": d.get("post_kind"),
+        "title": d.get("title"),
+        "description": (d.get("description") or "")[:400],
+        "area": d.get("area"),
+        "category": d.get("category"),
+        "photos": d.get("photos") or [],
+        "poster_user_id": d.get("poster_user_id"),
+        "created_at": d.get("created_at"),
+        "status": d.get("status"),
+        "item_status": d.get("item_status"),
+        # The moderation fields the public API deliberately strips.
+        "report_count": d.get("report_count") or 0,
+        "needs_review": bool(d.get("needs_review")),
+        "hidden_by_admin": bool(d.get("hidden_by_admin")),
+        "moderated_at": d.get("moderated_at"),
+        "reports": sorted(reasons.get(d["_id"], []), key=lambda r: r.get("created_at") or ""),
+    } for d in docs]
+
+
+class ModerationIn(BaseModel):
+    # "hide" takes it off the board; "allow" puts it back and clears the
+    # flag. Both are decisions and both are recorded — an admin who looked
+    # and decided it was fine must not have the post reappear in the queue
+    # tomorrow, or the queue trains them to ignore it.
+    action: str = Field(..., pattern="^(hide|allow)$")
+
+
+@api_router.post("/admin/request-reports/{request_id}")
+async def admin_moderate_request(
+    request_id: str, body: ModerationIn, payload: dict = Depends(verify_token),
+) -> dict[str, Any]:
+    """Decide on one reported post."""
+    _admin_only(payload)
+    doc = await db.requests.find_one({"_id": request_id}, {"_id": 1})
+    if not doc:
+        raise HTTPException(status_code=404, detail="Request not found")
+
+    now = datetime.now(UTC).isoformat()
+    if body.action == "hide":
+        update = {"hidden_by_admin": True}
+    else:
+        # Allowing CLEARS the auto-hide and the flag, and zeroes the count
+        # so the same reports cannot re-trigger the threshold. `reported_by`
+        # is kept: it stops the same accounts reporting it again, which is
+        # what a coordinated report campaign would do next.
+        update = {"hidden_by_admin": False, "needs_review": False, "report_count": 0}
+    update["moderated_at"] = now
+    update["moderated_by"] = payload.get("user_id")
+    update["updated_at"] = now
+
+    await db.requests.update_one({"_id": request_id}, {"$set": update})
+    return {"id": request_id, "action": body.action}

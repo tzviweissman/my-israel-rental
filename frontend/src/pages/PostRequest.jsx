@@ -41,6 +41,7 @@ import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import {
   Home, Wrench, Loader2, ArrowLeft, ArrowRight, Search, KeyRound, Check,
+  Package, ShieldAlert,
 } from 'lucide-react';
 import { API, AuthContext } from '../App';
 import PageMeta from '../components/PageMeta';
@@ -52,6 +53,9 @@ import { useReturnDestination, backLabelFor } from '../hooks/useBackNavigation';
 import { groupCategories, flattenGrouped } from '../lib/categoryGroups';
 
 const RENTAL_KINDS = ['long-term', 'short-term', 'vacation'];
+// Mirrors ITEM_CONDITIONS in backend/routes/marketplace/requests.py. The
+// server rejects anything else, so this list is the whole vocabulary.
+const ITEM_CONDITIONS = ['new', 'like-new', 'good', 'used'];
 
 const Field = ({ label, hint, children }) => (
   <div>
@@ -134,6 +138,8 @@ const PostRequest = () => {
   const [furthest, setFurthest] = useState(0);
   const [form, setForm] = useState({
     request_type: 'rental',
+    condition: '',
+    pickup_area: '',
     title: '',
     description: '',
     area: '',
@@ -155,6 +161,12 @@ const PostRequest = () => {
   });
   const set = (patch) => setForm((f) => ({ ...f, ...patch }));
   const isRental = form.request_type === 'rental';
+  // The third variant (N4). Person-to-person selling lives on THIS board
+  // rather than in the marketplace: an item has no repeat supply, no
+  // meaningful review, and needs a `sold` state a business listing does
+  // not have — while the 30-day expire/renew lifecycle it does need is
+  // already here.
+  const isItem = form.request_type === 'item';
   // Supply-side post — flips the wizard's questions from asking to offering.
   const isOffer = form.post_kind === 'have';
 
@@ -221,7 +233,16 @@ const PostRequest = () => {
     {
       key: 'when',
       label: t('requests.stepWhen', 'Specifics and timing'),
-      blocker: () => (!isRental && !form.category ? t('requests.needCategory', 'Pick a service category.') : null),
+      // An item needs a CONDITION; a service needs a category; a rental
+      // needs neither here. Requiring a category on an item is how the
+      // wrong one gets picked at random on a classified ad.
+      blocker: () => {
+        if (isItem) {
+          return form.condition ? null : t('requests.needCondition', 'What condition is it in?');
+        }
+        if (!isRental && !form.category) return t('requests.needCategory', 'Pick a service category.');
+        return null;
+      },
     },
     {
       key: 'budget',
@@ -231,7 +252,7 @@ const PostRequest = () => {
         ? t('requests.needBudget', 'Enter a budget amount, or switch to "open to offers".')
         : null),
     },
-  ], [t, form, isRental, isOffer]);
+  ], [t, form, isRental, isOffer, isItem]);
 
   const current = STEPS[step];
   const blocker = current.blocker();
@@ -295,17 +316,24 @@ const PostRequest = () => {
         budget_type: form.budget_type,
         budget_amount: form.budget_type === 'fixed' ? Number(form.budget_amount) : null,
         budget_currency: form.budget_currency,
-        ...(isRental
+        ...(isItem
           ? {
-              rental_kind: form.rental_kind,
-              bedrooms_min: form.bedrooms_min === '' ? null : Number(form.bedrooms_min),
-              move_in_date: form.date_mode === 'flexible' ? null : (form.move_in_date || null),
-              lease_months: form.lease_months === '' ? null : Number(form.lease_months),
+              condition: form.condition,
+              pickup_area: form.pickup_area.trim() || null,
+              // Category is OPTIONAL on an item — sent only if chosen.
+              category: form.category || null,
             }
-          : {
-              category: form.category,
-              preferred_date: form.date_mode === 'flexible' ? null : (form.preferred_date || null),
-            }),
+          : isRental
+            ? {
+                rental_kind: form.rental_kind,
+                bedrooms_min: form.bedrooms_min === '' ? null : Number(form.bedrooms_min),
+                move_in_date: form.date_mode === 'flexible' ? null : (form.move_in_date || null),
+                lease_months: form.lease_months === '' ? null : Number(form.lease_months),
+              }
+            : {
+                category: form.category,
+                preferred_date: form.date_mode === 'flexible' ? null : (form.preferred_date || null),
+              }),
       };
       const { data } = await axios.post(`${API}/marketplace/requests`, payload, {
         headers: { Authorization: `Bearer ${token}` },
@@ -456,7 +484,7 @@ const PostRequest = () => {
                       testid="post-request-kind-have"
                     />
                   </div>
-                  <div className="grid sm:grid-cols-2 gap-3">
+                  <div className="grid sm:grid-cols-3 gap-3">
                     <ChoiceCard
                       active={isRental} Icon={Home}
                       label={isOffer
@@ -466,12 +494,24 @@ const PostRequest = () => {
                       testid="post-request-type-rental"
                     />
                     <ChoiceCard
-                      active={!isRental} Icon={Wrench}
+                      active={form.request_type === 'service'} Icon={Wrench}
                       label={isOffer
                         ? t('requests.typeServiceOffer', 'A service I provide')
                         : t('requests.typeServiceLong', 'I need a service')}
                       onClick={() => set({ request_type: 'service' })}
                       testid="post-request-type-service"
+                    />
+                    {/* Both sides on purpose. "Looking for a double
+                        stroller" is the wanted-ads half that classifieds
+                        sites never do well, and this board gets it free
+                        because it was demand-side first. */}
+                    <ChoiceCard
+                      active={isItem} Icon={Package}
+                      label={isOffer
+                        ? t('requests.typeItemOffer', 'Something I am selling')
+                        : t('requests.typeItemWant', 'An item I am looking for')}
+                      onClick={() => set({ request_type: 'item' })}
+                      testid="post-request-type-item"
                     />
                   </div>
                 </>
@@ -489,13 +529,17 @@ const PostRequest = () => {
                          needed on the 14th" — an example of the opposite
                          of what they were doing. Every example here has to
                          match the KIND of post as well as its type. */
-                      placeholder={isRental
+                      placeholder={isItem
                         ? (isOffer
-                          ? t('requests.titlePhRentalOffer', 'e.g. 3-bed in Ramat Eshkol, free from September')
-                          : t('requests.titlePhRental', 'e.g. 3-bed wanted in Ramat Eshkol'))
-                        : (isOffer
-                          ? t('requests.titlePhServiceOffer', 'e.g. Mover with a van, Jerusalem area')
-                          : t('requests.titlePhService', 'e.g. Mover needed on the 14th'))}
+                          ? t('requests.titlePhItemOffer', 'e.g. IKEA sofa, three seats, Katamon')
+                          : t('requests.titlePhItemWant', 'e.g. Looking for a double stroller'))
+                        : isRental
+                          ? (isOffer
+                            ? t('requests.titlePhRentalOffer', 'e.g. 3-bed in Ramat Eshkol, free from September')
+                            : t('requests.titlePhRental', 'e.g. 3-bed wanted in Ramat Eshkol'))
+                          : (isOffer
+                            ? t('requests.titlePhServiceOffer', 'e.g. Mover with a van, Jerusalem area')
+                            : t('requests.titlePhService', 'e.g. Mover needed on the 14th'))}
                       maxLength={140} data-testid="post-request-title"
                     />
                   </Field>
@@ -506,11 +550,15 @@ const PostRequest = () => {
                       /* The offer copy was rental-only — "the floor, the
                          light" says nothing to a plumber advertising a
                          service. */
-                      placeholder={isOffer
-                        ? (isRental
-                          ? t('requests.descriptionPhOffer', 'What makes it worth a look — the floor, the light, when it is free.')
-                          : t('requests.descriptionPhOfferService', 'What you do, who you do it for, and where you work.'))
-                        : t('requests.descriptionPh', 'The things that would make an offer right or wrong for you.')}
+                      placeholder={isItem
+                        ? (isOffer
+                          ? t('requests.descriptionPhItemOffer', 'Age, any marks or damage, whether it comes apart for transport.')
+                          : t('requests.descriptionPhItemWant', 'What you are after, and what condition you would accept.'))
+                        : isOffer
+                          ? (isRental
+                            ? t('requests.descriptionPhOffer', 'What makes it worth a look — the floor, the light, when it is free.')
+                            : t('requests.descriptionPhOfferService', 'What you do, who you do it for, and where you work.'))
+                          : t('requests.descriptionPh', 'The things that would make an offer right or wrong for you.')}
                       maxLength={4000} data-testid="post-request-description"
                     />
                   </Field>
@@ -540,7 +588,61 @@ const PostRequest = () => {
               )}
 
               {current.key === 'when' && (
-                isRental ? (
+                isItem ? (
+                  <div className="space-y-4" data-testid="post-request-item-fields">
+                    <div className="grid sm:grid-cols-2 gap-4">
+                      <Field label={t('requests.fieldCondition', 'Condition')}>
+                        <div className="flex flex-wrap gap-2" data-testid="post-request-condition">
+                          {ITEM_CONDITIONS.map((c) => (
+                            <button
+                              key={c}
+                              type="button"
+                              onClick={() => set({ condition: c })}
+                              aria-pressed={form.condition === c}
+                              className={`px-3 py-1.5 rounded-full text-xs font-semibold border transition-colors ${
+                                form.condition === c
+                                  ? 'bg-[var(--brand-primary)] text-white border-[var(--brand-primary)]'
+                                  : 'bg-white text-gray-700 border-gray-200 hover:border-[var(--brand-primary)]'
+                              }`}
+                              data-testid={`post-request-condition-${c}`}
+                            >
+                              {t(`requests.condition_${c}`, c)}
+                            </button>
+                          ))}
+                        </div>
+                      </Field>
+                      <Field
+                        label={t('requests.fieldPickup', 'Collection from')}
+                        hint={t('requests.pickupHint', 'Optional — the street or landmark, not your address.')}
+                      >
+                        <input
+                          className={inputCls} style={{ borderColor: 'var(--brand-border)' }}
+                          value={form.pickup_area} onChange={(e) => set({ pickup_area: e.target.value })}
+                          placeholder={t('requests.pickupPh', 'e.g. Katamon, near the shuk')}
+                          maxLength={120} dir="auto"
+                          data-testid="post-request-pickup"
+                        />
+                      </Field>
+                    </div>
+
+                    {/* N6. On the form as well as the post: the moment to
+                        read this is before you arrange to meet a stranger,
+                        not after. We never handle the money and must never
+                        appear to — there is no escrow and no buyer
+                        protection to fall back on. */}
+                    <div
+                      className="flex items-start gap-2.5 rounded-xl p-3"
+                      style={{ background: 'var(--bg)', border: '1px solid var(--brand-border)' }}
+                      data-testid="post-request-item-safety"
+                    >
+                      <ShieldAlert size={16} className="shrink-0 mt-0.5" style={{ color: 'var(--brand-muted)' }} />
+                      <p className="text-[11px] leading-snug" style={{ color: 'var(--brand-muted)' }}>
+                        {t('requests.itemSafety',
+                          'Meet in a public place. Never transfer money before you have the item. MyIsraelRental never handles payment.')}
+                      </p>
+                    </div>
+                  </div>
+                ) : isRental ? (
                   <div className="grid sm:grid-cols-2 gap-4" data-testid="post-request-rental-fields">
                     <Field label={t('requests.fieldRentalKind', 'Rental type')}>
                       <select

@@ -30,7 +30,7 @@ export const CATEGORY_LABELS = {
   'shops-products':        'Shops & Products',
   // 2026-08-28 expansion (docs/categories-expansion-spec.md N1).
   'insurance':             'Insurance',
-  'vehicles':              'Vehicles',
+  'vehicles':              'Vehicle Services',
   // Held behind CATEGORIES_PENDING_REVIEW_ENABLED on the backend — the
   // labels live here so that flipping the flag needs no frontend change.
   'money-exchange':        'Money Exchange & Transfers',

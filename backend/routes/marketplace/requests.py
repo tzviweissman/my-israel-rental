@@ -95,11 +95,44 @@ REPORT_HIDE_THRESHOLD = 3
 
 RENTAL_KINDS = ("long-term", "short-term", "vacation")
 
+# --- Items (N4) -----------------------------------------------------------
+#
+# Person-to-person selling lives HERE, on the requests board, and not in
+# the marketplace: one person selling one sofa has no repeat supply, no
+# meaningful review, and needs a `sold` state the gig model does not have.
+# What it does need — a post that dies after 30 days unless renewed — is
+# exactly what this board already does, which is why there is no third
+# product.
+ITEM_CONDITIONS = ("new", "like-new", "good", "used")
+ITEM_STATUSES = ("available", "sold")
+MAX_ITEM_PHOTOS = 8
+
+# --- Rate limits (N6) -----------------------------------------------------
+#
+# "Classifieds bring scams. Build for that from day one." The open-post cap
+# and the 20-second cooldown above are about tidiness; these are about
+# spam, and they are per DAY because that is the unit a spammer works in.
+#
+# A brand-new account gets a lower ceiling. Not to punish new users — the
+# limit is above what a real person does on their first day — but because a
+# throwaway account posting twenty items in an hour is the actual attack,
+# and an account that has been around a week has usually cost somebody
+# something.
+MAX_ITEMS_PER_DAY = 10
+MAX_ITEMS_PER_DAY_NEW_ACCOUNT = 3
+NEW_ACCOUNT_DAYS = 7
+
+# Categories where a fraudulent post does the most damage. New items here
+# are flagged for a human to look at — they stay VISIBLE (hiding a
+# legitimate seller's post on suspicion is its own harm) but they surface
+# in the moderation queue without waiting for a report.
+MANUAL_REVIEW_CATEGORIES = {"money-exchange"}
+
 
 # ---------------- Pydantic models ----------------
 
 class RequestIn(BaseModel):
-    request_type: str = Field(..., pattern="^(rental|service)$")
+    request_type: str = Field(..., pattern="^(rental|service|item)$")
 
     # Which SIDE of the market this post is on, which is a separate question
     # from what it is about:
@@ -171,6 +204,19 @@ class RequestIn(BaseModel):
     furnished: Optional[bool] = None
     amenities: Optional[list[str]] = None
 
+    # --- item variant (N4) ---
+    #
+    # The PRICE reuses budget_amount/budget_currency rather than adding a
+    # field. "₪400" and "up to ₪8,000" are the same shape of data, and one
+    # price field means the board's filters, its cards and its search work
+    # for items without a second code path.
+    condition: Optional[str] = None
+    # Where to collect it, which is not always where the seller lives —
+    # "Katamon, near the shuk" is the useful answer and `area` is the
+    # searchable one, so both exist.
+    pickup_area: Optional[str] = Field(None, max_length=120)
+    photos: Optional[list[str]] = Field(None, max_length=MAX_ITEM_PHOTOS)
+
 
 class RequestPatch(BaseModel):
     title: Optional[str] = Field(None, min_length=6, max_length=140)
@@ -189,6 +235,9 @@ class RequestPatch(BaseModel):
     lease_months: Optional[int] = Field(None, ge=1, le=120)
     furnished: Optional[bool] = None
     amenities: Optional[list[str]] = None
+    condition: Optional[str] = None
+    pickup_area: Optional[str] = Field(None, max_length=120)
+    photos: Optional[list[str]] = Field(None, max_length=MAX_ITEM_PHOTOS)
 
 
 class ReportIn(BaseModel):
@@ -296,7 +345,13 @@ def _public(doc: dict[str, Any], identity: dict[str, Any] | None = None) -> dict
     """
     out = {
         k: v for k, v in doc.items()
-        if k not in ("_id", "report_count", "reported_by", "hidden_by_admin", "whatsapp")
+        # `needs_review` is a moderation flag and belongs with the others:
+        # telling a seller their post is under review teaches whoever is
+        # actually committing fraud which categories we watch. This
+        # function excludes rather than whitelists, so a new field is
+        # PUBLIC by default — which is the trap this list exists for.
+        if k not in ("_id", "report_count", "reported_by", "hidden_by_admin",
+                     "whatsapp", "needs_review")
     }
     out["id"] = doc.get("_id")
     # The NUMBER never leaves the server; only the fact that there is one.
@@ -372,6 +427,56 @@ def _require_owner(doc: dict[str, Any], user: dict) -> None:
         raise HTTPException(status_code=403, detail="Not your request")
 
 
+async def _enforce_item_daily_limit(user: dict[str, Any]) -> None:
+    """Items per user per day, lower for a brand-new account (N6).
+
+    The lower tier is not a punishment — it sits above what a real person
+    posts on their first day. It exists because a throwaway account
+    posting twenty items in an hour is the actual attack, and an account
+    a week old has usually cost somebody something.
+
+    Counts by `created_at` rather than a rolling window, so the number a
+    person is told matches the number they can count on the board.
+    """
+    since = (datetime.now(UTC) - timedelta(days=1)).isoformat()
+    posted = await db.requests.count_documents({
+        "poster_user_id": user["user_id"],
+        "request_type": "item",
+        "created_at": {"$gte": since},
+    })
+
+    limit = MAX_ITEMS_PER_DAY
+    # BOTH keys. `auth.py` writes the user document with `id`, while other
+    # collections use `_id`, and the rest of this codebase already looks
+    # up users with the same `or` (see gigs.py:479). Querying `_id` alone
+    # found nothing, fell through to the higher limit, and the new-account
+    # tier silently did not exist — the failure mode of a rate limit that
+    # is written, called, and answers "fine" every time.
+    account = (
+        await db.users.find_one({"_id": user["user_id"]}, {"created_at": 1})
+        or await db.users.find_one({"id": user["user_id"]}, {"created_at": 1})
+    )
+    created = (account or {}).get("created_at")
+    if created:
+        try:
+            age_days = (datetime.now(UTC) - datetime.fromisoformat(created)).days
+            if age_days < NEW_ACCOUNT_DAYS:
+                limit = MAX_ITEMS_PER_DAY_NEW_ACCOUNT
+        except (ValueError, TypeError):
+            # An unreadable join date must not lock somebody out — fall
+            # back to the ordinary limit rather than the strict one.
+            pass
+
+    if posted >= limit:
+        raise HTTPException(
+            status_code=429,
+            detail=(
+                f"That is {limit} items in a day, which is the limit. "
+                "Try again tomorrow, or edit one you have already posted."
+            ),
+        )
+
+
 def _validate_variant(payload: RequestIn) -> None:
     """Per-type required fields.
 
@@ -379,7 +484,25 @@ def _validate_variant(payload: RequestIn) -> None:
     and a rental request without a kind cannot be matched to properties —
     so each is required for its own type and ignored for the other.
     """
-    if payload.request_type == "service":
+    if payload.request_type == "item":
+        # An item needs a condition — it is the first thing a buyer asks
+        # and the one fact a photo cannot settle.
+        if payload.condition not in ITEM_CONDITIONS:
+            raise HTTPException(
+                status_code=400,
+                detail=f"An item needs a condition: one of {', '.join(ITEM_CONDITIONS)}",
+            )
+        # A category is OPTIONAL on items and required on services. A
+        # seeker looking for a plumber has to say so or nobody can be
+        # matched to them; somebody selling a sofa has already described
+        # it in the title, and forcing a taxonomy choice on a classified
+        # ad is how the wrong category gets picked at random.
+        if payload.category:
+            _validate_category(payload.category)
+        # Selling something and naming no price is not a listing, it is a
+        # conversation. `budget_type: open` is still allowed — "offers" is
+        # a real answer — but it must be chosen.
+    elif payload.request_type == "service":
         if not payload.category:
             raise HTTPException(status_code=400, detail="A service request needs a category")
         _validate_category(payload.category)
@@ -398,18 +521,46 @@ def _validate_variant(payload: RequestIn) -> None:
 
 @router.get("/requests")
 async def list_requests(
-    request_type: Optional[str] = Query(None, pattern="^(rental|service)$"),
+    request_type: Optional[str] = Query(None, pattern="^(rental|service|item)$"),
     post_kind: Optional[str] = Query(None, pattern="^(want|have)$"),
     category: Optional[str] = None,
     rental_kind: Optional[str] = None,
     area: Optional[str] = None,
     q: Optional[str] = None,
+    # --- item filters (N4) ---
+    condition: Optional[str] = Query(None, pattern="^(new|like-new|good|used)$"),
+    min_price: Optional[float] = Query(None, ge=0),
+    max_price: Optional[float] = Query(None, ge=0),
+    # Sold items are hidden by default and reachable on request. "A board
+    # full of sold items is how classifieds sites die" — but a buyer who
+    # followed a link deserves to see they were too late rather than a
+    # 404, which is why the post survives and only leaves the DEFAULT view.
+    include_sold: bool = False,
     limit: int = Query(60, ge=1, le=200),
 ):
     """Public board. Only open, un-hidden requests are ever returned."""
     query: dict[str, Any] = {"status": "open", "hidden_by_admin": {"$ne": True}}
     if request_type:
         query["request_type"] = request_type
+
+    if condition:
+        query["condition"] = condition
+    if not include_sold:
+        # Anything that is not an item has no item_status, so `$ne: "sold"`
+        # keeps rentals and services on the board rather than filtering
+        # out the entire rest of the site.
+        query["item_status"] = {"$ne": "sold"}
+    if min_price is not None or max_price is not None:
+        price: dict[str, Any] = {}
+        if min_price is not None:
+            price["$gte"] = min_price
+        if max_price is not None:
+            price["$lte"] = max_price
+        # Only posts that NAMED a price can be compared. An "open to
+        # offers" post has no number, and silently treating that as 0
+        # would put every one of them at the top of a cheapest-first
+        # filter.
+        query["budget_amount"] = price
     if post_kind:
         # Documents written before post_kind existed have no such field, and
         # they are all demand-side. Treat a missing field as "want" so the
@@ -477,6 +628,12 @@ async def create_request(payload: RequestIn, user=Depends(verify_token)):
             ),
         )
 
+    # N6 — the per-DAY cap, which is the unit a spammer works in. The open
+    # cap above limits how much is on the board at once; this limits how
+    # fast it can be filled, which is a different attack.
+    if payload.request_type == "item":
+        await _enforce_item_daily_limit(user)
+
     last = await db.requests.find_one(
         {"poster_user_id": user["user_id"]},
         sort=[("created_at", -1)],
@@ -495,6 +652,7 @@ async def create_request(payload: RequestIn, user=Depends(verify_token)):
 
     now = datetime.now(UTC)
     is_service = payload.request_type == "service"
+    is_item = payload.request_type == "item"
     doc = {
         "_id": str(uuid.uuid4()),
         "request_type": payload.request_type,
@@ -519,7 +677,8 @@ async def create_request(payload: RequestIn, user=Depends(verify_token)):
         "budget_amount": payload.budget_amount if payload.budget_type == "fixed" else None,
         "budget_currency": payload.budget_currency,
         # Service variant — null on rentals so filters can key on presence.
-        "category": payload.category if is_service else None,
+        # Items may carry one and are not required to; see _validate_variant.
+        "category": payload.category if (is_service or is_item) else None,
         "subcategory": ((payload.subcategory or "").strip() or None) if is_service else None,
         # A flexible request stores NO date, whatever arrived in the payload.
         # Otherwise a seeker who fills a date, then switches to flexible,
@@ -539,6 +698,23 @@ async def create_request(payload: RequestIn, user=Depends(verify_token)):
         "lease_months": payload.lease_months if not is_service else None,
         "furnished": payload.furnished if not is_service else None,
         "amenities": (payload.amenities or []) if not is_service else [],
+        # Item variant (N4) — null elsewhere, so a filter can key on
+        # presence the same way the other two variants do.
+        "condition": payload.condition if is_item else None,
+        "pickup_area": ((payload.pickup_area or "").strip() or None) if is_item else None,
+        "photos": (payload.photos or [])[:MAX_ITEM_PHOTOS] if is_item else [],
+        # SEPARATE from `status`. `status` is the post's lifecycle
+        # (open/expired/found) and is shared by all three variants;
+        # item_status is about the object. A sofa can be sold while its
+        # post is still open, and conflating them would mean marking
+        # something sold also removed it from the board — which is how a
+        # buyer loses the ability to see they were too late.
+        "item_status": "available" if is_item else None,
+        "sold_at": None,
+        # N6 — fraud-prone categories surface to a moderator without
+        # waiting for a report. Flagged, never hidden: hiding a legitimate
+        # seller's post on suspicion is its own harm.
+        "needs_review": bool(is_item and payload.category in MANUAL_REVIEW_CATEGORIES),
         # Lifecycle
         "status": "open",
         "created_at": now.isoformat(),
@@ -640,6 +816,43 @@ async def mark_found(request_id: str, user=Depends(verify_token)):
     await db.requests.update_one(
         {"_id": request_id},
         {"$set": {"status": "found", "found_at": now, "updated_at": now}},
+    )
+    return _public(await db.requests.find_one({"_id": request_id}))
+
+
+class SoldIn(BaseModel):
+    sold: bool = True
+
+
+@router.post("/requests/{request_id}/sold")
+async def mark_sold(request_id: str, payload: SoldIn, user=Depends(verify_token)):
+    """One tap: sold, or back on sale (N4).
+
+    A separate flag from `status`, and reversible. Both matter:
+
+    `status` is the POST's lifecycle and is shared with rentals and
+    services; `item_status` is about the object. Marking a sofa sold must
+    not remove the post, because a buyer who followed a link is better
+    served by "sold" than by a 404 — and because the seller who marked it
+    sold in error would otherwise have to write it out again.
+
+    Reversible because the sale falls through. A classifieds board where
+    "sold" is one-way teaches sellers not to press it, and a board full of
+    sold items is how classifieds sites die.
+    """
+    doc = await _request_or_404(request_id)
+    _require_owner(doc, user)
+    if doc.get("request_type") != "item":
+        raise HTTPException(status_code=400, detail="Only an item can be marked sold")
+
+    now = datetime.now(UTC).isoformat()
+    await db.requests.update_one(
+        {"_id": request_id},
+        {"$set": {
+            "item_status": "sold" if payload.sold else "available",
+            "sold_at": now if payload.sold else None,
+            "updated_at": now,
+        }},
     )
     return _public(await db.requests.find_one({"_id": request_id}))
 

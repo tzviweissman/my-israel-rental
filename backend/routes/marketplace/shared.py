@@ -236,7 +236,11 @@ CATEGORIES = [
     # never indexed, and only ever existed on preview. Deleting it now is
     # cheap; in a week it would not have been.
     {"slug": "insurance",            "label": "Insurance",                  "icon": "shield"},
-    {"slug": "vehicles",             "label": "Vehicles",                   "icon": "car-front"},
+    # Services a CAR needs — mechanics, testing, licence conversion, hire.
+    # Not "somewhere to buy one": person-to-person sale lives on the
+    # requests board (N4), and pairing this with transport put a
+    # maintenance trade in front of travellers (Tzvi, 28 Aug).
+    {"slug": "vehicles",             "label": "Vehicle Services",           "icon": "car-front"},
     # Released 2026-08-28 on Tzvi's instruction, after the regulatory note
     # below was raised with him. Currency service providers in Israel are
     # licensed and supervised, so two things travel with this category and
