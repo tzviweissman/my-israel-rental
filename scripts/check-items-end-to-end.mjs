@@ -22,6 +22,9 @@
  *   APP_ORIGIN / API_ORIGIN override the defaults.
  */
 import { chromium } from 'playwright';
+import { writeFileSync, mkdtempSync } from 'node:fs';
+import { join } from 'node:path';
+import { tmpdir } from 'node:os';
 
 const APP = process.env.APP_ORIGIN || 'http://localhost:3210';
 const API = process.env.API_ORIGIN || 'http://localhost:8001/api';
@@ -57,6 +60,13 @@ const newItem = (over = {}) => ({
   budget_amount: 400,
   budget_currency: 'ILS',
   pickup_area: 'Katamon, near the shuk',
+  // Cloudinary's own demo asset: a real, stable URL, so the gallery is
+  // exercised against something that actually loads rather than a
+  // placeholder that would make a broken <img> look like a pass.
+  photos: [
+    'https://res.cloudinary.com/demo/image/upload/sample.jpg',
+    'https://res.cloudinary.com/demo/image/upload/couple.jpg',
+  ],
   ...over,
 });
 
@@ -239,6 +249,26 @@ try {
         }
       }
 
+      // ---- the photos ----------------------------------------------
+      // Stored, returned and RENDERED are three different claims. The
+      // field existed and shipped for a day showing nothing at all.
+      const main = page.locator('[data-testid="request-photo-main"]');
+      const gallery = await main.count();
+      note(`${lang}: photo shown on the item: ${gallery > 0}`);
+      if (!gallery) {
+        failures.push(`${lang}: the item has photos and the page shows none`);
+      } else {
+        // It must actually LOAD. A 404 renders as an empty box, which
+        // every "is it in the DOM" assertion happily passes.
+        const ok = await main.first().evaluate(
+          (img) => img.complete && img.naturalWidth > 0,
+        );
+        if (!ok) failures.push(`${lang}: the item photo is in the page but did not load`);
+        const thumbs = await page.locator('[data-testid^="request-photo-thumb-"]').count();
+        note(`${lang}: thumbnails: ${thumbs}`);
+        if (thumbs < 2) failures.push(`${lang}: a two-photo item shows ${thumbs} thumbnail(s)`);
+      }
+
       // Nothing may imply we hold the money.
       const body = (await page.locator('body').innerText()).replace(/\s+/g, ' ');
       const promises = [
@@ -272,6 +302,19 @@ try {
     note(`board has an Items tab: ${tab > 0}`);
     if (!tab) failures.push('the requests board has no Items tab');
 
+    if (itemId) {
+      await page.goto(`${APP}/requests?request_type=item`, { waitUntil: 'domcontentloaded', timeout: 60000 });
+      await page.waitForTimeout(3000);
+      const thumb = page.locator(`[data-testid="request-card-photo-${itemId}"]`);
+      const onCard = await thumb.count();
+      note(`board card shows a thumbnail: ${onCard > 0}`);
+      if (!onCard) {
+        failures.push('an item with photos shows no thumbnail on the board — the photo is what people scan');
+      } else if (!await thumb.first().evaluate((img) => img.complete && img.naturalWidth > 0)) {
+        failures.push('the board thumbnail did not load');
+      }
+    }
+
     await page.goto(`${APP}/requests/post`, { waitUntil: 'domcontentloaded', timeout: 60000 });
     await page.waitForTimeout(3000);
     const itemChoice = page.locator('[data-testid="post-request-type-item"]');
@@ -292,6 +335,39 @@ try {
       await page.locator('[data-testid="post-request-next"]').click();
       await page.waitForTimeout(1200);
 
+      const addPhoto = await page.locator('[data-testid="post-request-photo-add"]').count();
+      note(`form: photo picker=${addPhoto > 0}`);
+      if (!addPhoto) {
+        failures.push('the item form offers no way to add a photo');
+      } else {
+        // Drive the REAL upload, not the API shortcut the rest of this
+        // file uses. Posting a photo URL over HTTP proves the field
+        // stores and renders; it says nothing about whether a person
+        // holding a phone can get a picture into it, which is the part
+        // that was asked for and the part with a compress step, a
+        // signature call and a CDN in the way.
+        const dir = mkdtempSync(join(tmpdir(), 'mir-item-'));
+        const file = join(dir, 'sofa.png');
+        // A 1x1 PNG. Small enough to upload fast, real enough to decode.
+        writeFileSync(file, Buffer.from(
+          'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==',
+          'base64',
+        ));
+        await page.locator('[data-testid="post-request-photo-add"] input[type=file]')
+          .setInputFiles(file);
+        // The upload compresses, signs and hits a CDN — give it room.
+        await page.locator('[data-testid="post-request-photo-0"]').waitFor({ timeout: 45000 }).catch(() => {});
+        const added = await page.locator('[data-testid="post-request-photo-0"]').count();
+        const src = added
+          ? await page.locator('[data-testid="post-request-photo-0"]').getAttribute('src')
+          : '';
+        note(`form: uploaded a real file -> ${added > 0} ${String(src).slice(0, 48)}`);
+        if (!added) {
+          failures.push('picking a file on the item form produced no photo — the upload path is broken');
+        } else if (!/^https?:/i.test(src || '')) {
+          failures.push(`the uploaded photo is not a URL ("${String(src).slice(0, 40)}") — it will not survive a reload`);
+        }
+      }
       const cond = await page.locator('[data-testid="post-request-condition"]').count();
       const formSafety = await page.locator('[data-testid="post-request-item-safety"]').count();
       note(`form: condition picker=${cond > 0}, safety line=${formSafety > 0}`);

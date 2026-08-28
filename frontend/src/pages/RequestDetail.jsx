@@ -50,6 +50,9 @@ const RequestDetail = () => {
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
   const [busy, setBusy] = useState(false);
+  // Which photo is large. Null means "the first one" rather than being
+  // seeded from `request`, which is not loaded yet at this point.
+  const [chosenPhoto, setChosenPhoto] = useState(null);
 
   // Both sides of the board render through this page, and nearly every
   // label below means the opposite thing on each. Named once so a new row
@@ -152,6 +155,8 @@ const RequestDetail = () => {
   const isRental = request.request_type === 'rental';
   const isItem = request.request_type === 'item';
   const isSold = request.item_status === 'sold';
+  const photos = request.photos || [];
+  const photo = chosenPhoto && photos.includes(chosenPhoto) ? chosenPhoto : photos[0];
   const expiresIn = daysUntil(request.expires_at);
   const budget = request.budget_amount
     ? `${request.budget_currency === 'USD' ? '$' : '₪'}${Number(request.budget_amount).toLocaleString()}`
@@ -235,9 +240,42 @@ const RequestDetail = () => {
             )}
           </div>
 
-          <h1 className="text-2xl sm:text-3xl font-bold mb-4" style={{ fontFamily: 'var(--font-head)', color: 'var(--ink)' }}>
+          <h1 className="text-2xl sm:text-3xl font-bold mb-4" style={{ fontFamily: 'var(--font-head)', color: 'var(--ink)' }} dir="auto">
             {request.title}
           </h1>
+
+          {/* Above the facts, because on a classified ad the photo IS the
+              first fact. One large, the rest as thumbnails that swap it —
+              a grid of equal squares makes the reader choose where to
+              look before they have seen anything. */}
+          {isItem && photos.length > 0 && (
+            <div className="mb-5" data-testid="request-photos">
+              <img
+                src={photo}
+                alt={request.title}
+                className="w-full rounded-xl object-cover"
+                style={{ maxHeight: 420, background: 'var(--bg)' }}
+                data-testid="request-photo-main"
+              />
+              {photos.length > 1 && (
+                <div className="flex gap-2 mt-2 overflow-x-auto no-scrollbar">
+                  {photos.map((url, i) => (
+                    <button
+                      key={url}
+                      type="button"
+                      onClick={() => setChosenPhoto(url)}
+                      className="shrink-0 rounded-lg overflow-hidden border-2 transition-colors"
+                      style={{ borderColor: url === photo ? 'var(--brand-primary)' : 'transparent' }}
+                      aria-label={t('requests.showPhoto', 'Show photo {{n}}', { n: i + 1 })}
+                      data-testid={`request-photo-thumb-${i}`}
+                    >
+                      <img src={url} alt="" className="w-16 h-16 object-cover" />
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
 
           <div className="grid sm:grid-cols-2 gap-2 mb-5">
             <Row Icon={MapPin} label={t('requests.fieldArea', 'Area')} value={request.area} />

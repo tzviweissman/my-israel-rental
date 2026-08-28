@@ -140,7 +140,26 @@ export const RequestCard = ({ request: r, onOpen, t }) => {
         </span>
       </div>
 
-      <div className="min-w-0">
+      <div className="min-w-0 flex gap-4">
+      {/* An item's photo, in the row rather than above it. The row layout
+          exists because demand is SCANNED, not browsed, and a full-width
+          image per post would turn ten scannable lines into ten cards
+          again. A thumbnail beside the title is enough to tell a sofa
+          from a fridge, which is all the photo has to do here.
+
+          Items only: a request for a plumber has no photo and a blank
+          square in its place would read as a broken image. */}
+      {isItem && (r.photos || []).length > 0 && (
+        <img
+          src={r.photos[0]}
+          alt=""
+          loading="lazy"
+          className="w-20 h-20 sm:w-24 sm:h-24 rounded-xl object-cover shrink-0"
+          style={{ background: 'var(--bg)', opacity: isSold ? 0.55 : 1 }}
+          data-testid={`request-card-photo-${r.id}`}
+        />
+      )}
+      <div className="min-w-0 flex-1">
       {/* C6 — two lines, then ellipsis. Titles run to 140 characters and
           an unclamped one took three lines on a phone, which pushes the
           chips and the status row down and makes rows of wildly different
@@ -223,6 +242,7 @@ export const RequestCard = ({ request: r, onOpen, t }) => {
         {/* The clamp lives in .rc-note, not here — two rules claiming the
             same property is what let them disagree in the first place. */}
         {r.description && <p className="rc-note">{r.description}</p>}
+      </div>
       </div>
 
       {/* Who is asking. Identity, not contact — a shortened name, a

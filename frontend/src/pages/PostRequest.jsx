@@ -41,9 +41,10 @@ import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import {
   Home, Wrench, Loader2, ArrowLeft, ArrowRight, Search, KeyRound, Check,
-  Package, ShieldAlert,
+  Package, ShieldAlert, ImagePlus,
 } from 'lucide-react';
 import { API, AuthContext } from '../App';
+import { uploadFilesFast } from '../utils/fastUpload';
 import PageMeta from '../components/PageMeta';
 import DateModePills from '../components/requests/DateModePills';
 import AreaCombobox from '../components/requests/AreaCombobox';
@@ -56,6 +57,9 @@ const RENTAL_KINDS = ['long-term', 'short-term', 'vacation'];
 // Mirrors ITEM_CONDITIONS in backend/routes/marketplace/requests.py. The
 // server rejects anything else, so this list is the whole vocabulary.
 const ITEM_CONDITIONS = ['new', 'like-new', 'good', 'used'];
+// Mirrors MAX_ITEM_PHOTOS in backend/routes/marketplace/requests.py, which
+// rejects anything past it — so the form stops before the server has to.
+const MAX_ITEM_PHOTOS = 8;
 
 const Field = ({ label, hint, children }) => (
   <div>
@@ -140,6 +144,7 @@ const PostRequest = () => {
     request_type: 'rental',
     condition: '',
     pickup_area: '',
+    photos: [],
     title: '',
     description: '',
     area: '',
@@ -160,6 +165,42 @@ const PostRequest = () => {
     preferred_date: '',
   });
   const set = (patch) => setForm((f) => ({ ...f, ...patch }));
+
+  // Photos, for items only (N4). Through `uploadFilesFast` like every
+  // other upload on the site rather than a second path: it compresses
+  // client-side, uploads straight to Cloudinary, and already handles the
+  // HEIC files every iPhone shoots by default — a case a hand-rolled
+  // uploader here would rediscover the hard way.
+  const [uploading, setUploading] = useState(false);
+  const addPhotos = async (fileList) => {
+    const files = Array.from(fileList || []);
+    if (!files.length) return;
+    const room = MAX_ITEM_PHOTOS - form.photos.length;
+    if (room <= 0) {
+      toast.error(t('requests.photosFull', { defaultValue: 'Up to {{n}} photos.', n: MAX_ITEM_PHOTOS }));
+      return;
+    }
+    setUploading(true);
+    try {
+      const uploaded = await uploadFilesFast(files.slice(0, room), API, token);
+      const urls = (uploaded || []).map((u) => u?.url).filter(Boolean);
+      if (!urls.length) throw new Error('no urls');
+      set({ photos: [...form.photos, ...urls].slice(0, MAX_ITEM_PHOTOS) });
+      if (files.length > room) {
+        toast.message(t('requests.photosTrimmed', {
+          defaultValue: 'Added {{n}} — that is the maximum.', n: room,
+        }));
+      }
+    } catch {
+      // The upload helper already reports the technical failure; this is
+      // the part the person needs, and it must not lose what they typed.
+      toast.error(t('requests.photoFailed', 'Those photos would not upload. The rest of your post is safe — try again.'));
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const removePhoto = (url) => set({ photos: form.photos.filter((p) => p !== url) });
   const isRental = form.request_type === 'rental';
   // The third variant (N4). Person-to-person selling lives on THIS board
   // rather than in the marketplace: an item has no repeat supply, no
@@ -320,6 +361,7 @@ const PostRequest = () => {
           ? {
               condition: form.condition,
               pickup_area: form.pickup_area.trim() || null,
+              photos: form.photos,
               // Category is OPTIONAL on an item — sent only if chosen.
               category: form.category || null,
             }
@@ -624,6 +666,65 @@ const PostRequest = () => {
                         />
                       </Field>
                     </div>
+
+                    {/* A photo is the single most useful thing on a
+                        classified ad — somebody scrolling decides from it
+                        before they read a word. Optional, though: a
+                        listing without one is worth more than a person
+                        who abandons the form because they are not
+                        somewhere they can photograph the thing. */}
+                    <Field
+                      label={t('requests.fieldPhotos', 'Photos')}
+                      hint={t('requests.photosHint', 'Optional, up to 8. The first one is what people see on the board.')}
+                    >
+                      <div className="flex flex-wrap gap-2" data-testid="post-request-photos">
+                        {form.photos.map((url, i) => (
+                          <div key={url} className="relative">
+                            <img
+                              src={url}
+                              alt=""
+                              className="w-20 h-20 rounded-lg object-cover border"
+                              style={{ borderColor: 'var(--brand-border)' }}
+                              data-testid={`post-request-photo-${i}`}
+                            />
+                            <button
+                              type="button"
+                              onClick={() => removePhoto(url)}
+                              aria-label={t('requests.removePhoto', 'Remove photo')}
+                              className="absolute -top-1.5 -end-1.5 w-5 h-5 rounded-full text-white text-xs
+                                         inline-flex items-center justify-center"
+                              style={{ background: 'var(--ink)' }}
+                              data-testid={`post-request-photo-remove-${i}`}
+                            >
+                              ×
+                            </button>
+                          </div>
+                        ))}
+                        {form.photos.length < MAX_ITEM_PHOTOS && (
+                          <label
+                            className="w-20 h-20 rounded-lg border border-dashed inline-flex flex-col items-center
+                                       justify-center gap-1 cursor-pointer text-[10px] text-center px-1"
+                            style={{ borderColor: 'var(--brand-border)', color: 'var(--brand-muted)' }}
+                            data-testid="post-request-photo-add"
+                          >
+                            {uploading
+                              ? <Loader2 size={16} className="animate-spin" />
+                              : <ImagePlus size={16} aria-hidden="true" />}
+                            {uploading
+                              ? t('requests.photoUploading', 'Adding…')
+                              : t('requests.addPhoto', 'Add photo')}
+                            <input
+                              type="file"
+                              accept="image/*"
+                              multiple
+                              className="hidden"
+                              disabled={uploading}
+                              onChange={(e) => { addPhotos(e.target.files); e.target.value = ''; }}
+                            />
+                          </label>
+                        )}
+                      </div>
+                    </Field>
 
                     {/* N6. On the form as well as the post: the moment to
                         read this is before you arrange to meet a stranger,
