@@ -2786,6 +2786,11 @@ const en = {
           bookingMode: 'Booking method'
         },
         hero: {
+          q: {
+            label: 'Search',
+            placeholder: 'Cleaner, mover, photographer\u2026',
+            clear: 'Clear search',
+          },
           day: {
             any: 'Anytime',
             today: 'Today',

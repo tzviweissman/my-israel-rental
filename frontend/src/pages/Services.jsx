@@ -342,6 +342,10 @@ const Services = () => {
   // How many "More filters" chips are active — drives the badge on
   // the Filters button so users can see filters are on at a glance.
   const advCount =
+    // A free-text search counts: without it, searching for something with
+    // no other filter set left the chip strip hidden and the only way to
+    // clear the query was to edit the URL.
+    (q ? 1 : 0) +
     (minRating ? 1 : 0) +
     (minPrice || maxPrice ? 1 : 0) +
     (responseTime ? 1 : 0) +
@@ -399,6 +403,7 @@ const Services = () => {
           <ServicesHeroSearch
             categories={categories}
             selectedCat={selectedCat}
+            q={q}
             minPrice={minPrice}
             maxPrice={maxPrice}
             availableOn={availableOn}
@@ -622,6 +627,18 @@ const Services = () => {
         {/* Chip strip showing active advanced filters — one-tap remove. */}
         {advCount > 0 && (
           <div className="flex flex-wrap items-center gap-2 mb-4 text-xs" data-testid="services-active-filters">
+            {q && (
+              <button
+                onClick={() => patchUrl({ q: '' })}
+                className="px-2.5 py-1 rounded-full bg-[var(--brand-primary)] text-white font-semibold max-w-[16rem] truncate"
+                data-testid="active-filter-q"
+                title={q}
+              >
+                {/* `dir="auto"` so a Hebrew query reads correctly inside a
+                    chip on an English page, and vice versa. */}
+                <span dir="auto">“{q}”</span> ×
+              </button>
+            )}
             {minRating && (
               <button
                 onClick={() => patchUrl({ min_rating: '' })}

@@ -25,7 +25,8 @@ import {
 } from 'lucide-react';
 
 // The icon-name -> component registry used to live inside
-// CategoryCarousel. It is here now because the hero search dropdown shows
+// the category carousel that used to sit on this page (deleted Aug 2026,
+// unused). It is here now because the hero search dropdown shows
 // the same icon for the same category: two registries would drift, and a
 // category whose icon resolved in one place and fell back to a generic
 // box in the other is exactly what shipped before this moved.

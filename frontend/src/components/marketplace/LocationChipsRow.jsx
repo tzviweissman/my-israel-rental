@@ -1,7 +1,7 @@
 /**
  * LocationChipsRow — horizontal scrollable pill chips for city filtering.
  *
- * Sits below the CategoryCarousel on the Services hub. Compact chips (not
+ * Sits below the hero search on the Services hub. Compact chips (not
  * tall cards) because location is a secondary filter — the visual weight
  * should sit with the category strip.
  *

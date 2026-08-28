@@ -12,9 +12,9 @@
  * comes from the parent via props (categories list + patchUrl + current
  * URL params) so this component stays a pure controlled surface.
  */
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Briefcase, Calendar as CalendarIcon, Wallet, SlidersHorizontal, ChevronDown, Check, Coins } from 'lucide-react';
+import { Briefcase, Calendar as CalendarIcon, Wallet, SlidersHorizontal, ChevronDown, Check, Coins, Search, X } from 'lucide-react';
 import { iconForCategory } from './categoryTheme';
 import { Popover, PopoverTrigger, PopoverContent } from '../ui/popover';
 import { Calendar } from '../ui/calendar';
@@ -78,6 +78,90 @@ const BUDGET_OPTIONS = [
   { value: '0-800',   labelKey: 'services.hero.budget.under800', labelDefault: 'Under ₪800' },
   { value: '800-',    labelKey: 'services.hero.budget.over800',  labelDefault: '₪800 and up' },
 ];
+
+/**
+ * L5 — the free-text segment. FIRST in the bar, deliberately.
+ *
+ * The backend search has been real all along — tokenised, with number-word
+ * and synonym expansion, matching `title`, `description` and their `_he`
+ * and `_en` variants (shared.py:786-825) — and `Services.jsx` has always
+ * read `q` from the URL and forwarded it. Nothing in the entire frontend
+ * ever set it. A working search engine with no door into it.
+ *
+ * DEBOUNCED, NOT SUBMIT-ONLY. Typing patches the URL 400ms after you stop,
+ * so results follow you and the URL stays shareable at every point. Enter
+ * flushes immediately for people who expect a search box to obey Enter.
+ *
+ * `dir="auto"` MATTERS HERE. The site is bilingual and the backend matches
+ * Hebrew fields, so a Hebrew query must return Hebrew-authored listings —
+ * and Hebrew typed into a `dir="ltr"` box renders with its punctuation in
+ * the wrong place, which reads as broken before anyone has pressed
+ * anything. `auto` lets the first strong character decide, per value.
+ */
+function SearchSegment({ value, onChange, testId = 'services-hero-q' }) {
+  const { t } = useTranslation();
+  const [draft, setDraft] = useState(value || '');
+  const timer = useRef(null);
+
+  /* Follow the URL when it changes from OUTSIDE this box — a cleared chip,
+     the back button, a shared link. Guarded on inequality so it cannot
+     stamp on what someone is mid-way through typing. */
+  useEffect(() => { setDraft(value || ''); }, [value]);
+
+  const push = (next) => {
+    if (timer.current) clearTimeout(timer.current);
+    timer.current = setTimeout(() => onChange(next.trim()), 400);
+  };
+  const flush = () => {
+    if (timer.current) clearTimeout(timer.current);
+    onChange(draft.trim());
+  };
+  useEffect(() => () => { if (timer.current) clearTimeout(timer.current); }, []);
+
+  return (
+    /* `flex-[1.7]`, not `flex-1`: every other segment is also flex-1, so
+       an even split gave typed text the same room as the word "Budget"
+       and clipped the placeholder to "Cleaner, move". A picker shows a
+       short fixed label; a search box has to hold whatever someone
+       types. On a phone the bar stacks and this has no effect. */
+    <div className="flex items-center gap-2.5 px-5 py-3 md:py-2.5 flex-[1.7] min-w-0">
+      <Search size={18} className="shrink-0" style={{ color: 'var(--brand-muted)' }} aria-hidden="true" />
+      <div className="flex-1 min-w-0">
+        <label
+          className="block text-[11px] font-bold uppercase tracking-wide"
+          style={{ color: 'var(--brand-muted)' }}
+          htmlFor={testId}
+        >
+          {t('services.hero.q.label', 'Search')}
+        </label>
+        <input
+          id={testId}
+          type="search"
+          dir="auto"
+          value={draft}
+          onChange={(e) => { setDraft(e.target.value); push(e.target.value); }}
+          onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); flush(); } }}
+          placeholder={t('services.hero.q.placeholder', 'Cleaner, mover, photographer…')}
+          className="w-full bg-transparent border-0 p-0 text-sm font-semibold outline-none placeholder:font-normal"
+          style={{ color: 'var(--ink)' }}
+          data-testid={`${testId}-input`}
+        />
+      </div>
+      {draft && (
+        <button
+          type="button"
+          onClick={() => { setDraft(''); if (timer.current) clearTimeout(timer.current); onChange(''); }}
+          aria-label={t('services.hero.q.clear', 'Clear search')}
+          className="shrink-0 p-1 rounded-full hover:bg-black/5"
+          style={{ color: 'var(--brand-muted)' }}
+          data-testid={`${testId}-clear`}
+        >
+          <X size={14} />
+        </button>
+      )}
+    </div>
+  );
+}
 
 /**
  * A pill segment whose picker is OUR panel, not the browser's.
@@ -298,6 +382,7 @@ function WhenSegment({ value, onChange, locale }) {
 export default function ServicesHeroSearch({
   categories,
   selectedCat,
+  q,
   minPrice,
   maxPrice,
   availableOn,
@@ -356,6 +441,12 @@ export default function ServicesHeroSearch({
         className="flex flex-col md:flex-row bg-white rounded-3xl md:rounded-full shadow-2xl divide-y md:divide-y-0 md:divide-x divide-[var(--brand-border)] overflow-hidden"
         data-testid="services-hero-search"
       >
+        {/* First, and wider than the pickers — see the flex note on the
+            component itself. On a phone the bar stacks, so this is simply
+            the top row: search is the most important control here and is
+            not the one that gets pushed down or collapsed. */}
+        <SearchSegment value={q} onChange={(v) => onPatch({ q: v })} />
+
         <SegmentSelect
           icon={Briefcase}
           label={t('services.hero.service.label', 'Service')}
