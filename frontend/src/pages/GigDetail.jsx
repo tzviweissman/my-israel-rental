@@ -527,19 +527,44 @@ const GigDetail = () => {
     setShowBook(true);
   };
 
-  // The on-site route, always reachable regardless of what the provider
-  // set as their preferred channel. Before this, a WhatsApp-preferring gig
-  // offered NO way to message through the site — so a buyer without
-  // WhatsApp, or facing a number that turned out not to be on WhatsApp,
-  // had no route at all.
+  /* The on-site route, always reachable regardless of what the provider
+     set as their preferred channel. Before this, a WhatsApp-preferring gig
+     offered NO way to message through the site — so a buyer without
+     WhatsApp, or facing a number that turned out not to be on WhatsApp,
+     had no route at all.
+
+     L1 — A MESSAGE IS NOT A BOOKING, and this used to open the booking
+     form for every gig. `book_gig` rejects anything whose `booking_mode`
+     is not `in_platform` (gigs.py:842) and rejects store gigs before that
+     (:840). `booking_mode` defaults to `whatsapp` (shared.py:422), and
+     `in_platform` is offered as a channel unconditionally (shared.py:698)
+     — so the one channel ContactChannels.jsx documents as the one that
+     "cannot silently fail" answered with a 400 toast on most of the
+     marketplace.
+
+     It now opens site chat: the same route BusinessPage uses to reach a
+     business (BusinessPage.jsx:196), keyed by the gig so the thread
+     arrives labelled with what it is about. Chat has no booking_mode
+     concept, so this works for every gig — which is the entire point of
+     having a fallback channel.
+
+     Note it no longer requires a tier. Picking an option is a booking
+     concern; someone asking a question should not have to choose a price
+     tier before they are allowed to ask. */
   const messageOnSite = () => {
-    if (!tier) return toast.error(t('services.pickOneFirst', 'Pick an option first'));
     if (!token) {
       toast.error(t('services.signInToMessage', 'Please sign in to send a message'));
-      navigate('/auth');
+      // Straight back here afterwards, so the intent is not lost on the way.
+      navigate(`/auth/login?redirect=${encodeURIComponent(`/businesses/${id}`)}`);
       return;
     }
-    setShowBook(true);
+    if (!gig?.provider_user_id) {
+      // Nothing to address the thread to. Better an honest message than a
+      // navigation that lands on a broken chat.
+      toast.error(t('services.cannotMessage', 'This listing cannot be messaged right now'));
+      return;
+    }
+    navigate(`/chat/${gig.id}?with=${encodeURIComponent(gig.provider_user_id)}`);
   };
 
   const channels = gig.contact_channels || [];

@@ -2559,6 +2559,7 @@ const he = {
         contactEmailHint: 'מוצג במודעה שלכם כדי שלקוחות יוכלו לשלוח אימייל. האימייל של החשבון שלכם לעולם לא מוצג.',
         pickOneFirst: 'בחרו קודם אפשרות',
         signInToMessage: 'התחברו כדי לשלוח הודעה',
+        cannotMessage: '\u05dc\u05d0 \u05e0\u05d9\u05ea\u05df \u05dc\u05e9\u05dc\u05d5\u05d7 \u05d4\u05d5\u05d3\u05e2\u05d4 \u05dc\u05de\u05d5\u05d3\u05e2\u05d4 \u05d4\u05d6\u05d5 \u05db\u05e8\u05d2\u05e2',
         waGeneric: 'היי! ראיתי את המודעה "{{title}}" ב-MyIsraelRental.',
         waUnavailable: 'וואטסאפ לא זמין למודעה הזו',
         whatsappHint: 'אפשר להזין מספר ישראלי בפורמט 050-1234567 — אנחנו נוסיף את 972+ עבורך.',

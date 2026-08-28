@@ -45,6 +45,7 @@ from .shared import (
     _resolve_gig_coords,
     _response_bucket,
     _update_response_ema,
+    _normalize_category,
     _validate_category,
     _validate_subcategory,
 )
@@ -134,6 +135,16 @@ async def list_gigs(
     if featured:
         query["featured"] = True
     if category:
+        # L4 — NORMALISE BEFORE VALIDATING. `_normalize_category` was written
+        # so old slugs keep working at read time, and the comment above it
+        # (shared.py:229) promises a bookmarked `?category=photography`
+        # still resolves. It was called from nowhere, so `_validate_category`
+        # met the legacy slug first and raised 400: every shared or
+        # bookmarked link from before the migration was a hard error.
+        #
+        # A comment claiming something works is exactly what let this break,
+        # so `test_legacy_category_slugs.py` now hits the real endpoint.
+        category = _normalize_category(category)
         _validate_category(category)
         query["category"] = category
         # Subcategory only applies when scoping to a top-level category

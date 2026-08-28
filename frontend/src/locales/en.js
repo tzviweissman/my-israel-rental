@@ -2658,6 +2658,7 @@ const en = {
         contactEmailHint: 'Shown on your listing so customers can email you. Your account email is never shown.',
         pickOneFirst: 'Pick an option first',
         signInToMessage: 'Please sign in to send a message',
+        cannotMessage: 'This listing cannot be messaged right now',
         waGeneric: 'Hi! I saw your "{{title}}" listing on MyIsraelRental.',
         waUnavailable: 'WhatsApp is not available for this listing',
         whatsappHint: 'Israeli numbers can be entered as 050-123-4567 — we add the +972 for you.',
