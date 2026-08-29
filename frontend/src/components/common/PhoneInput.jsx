@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ChevronDown } from 'lucide-react';
 import { DIAL_CODES, splitPhone, joinPhone } from '../../utils/phoneFormat';
@@ -53,6 +53,30 @@ const PhoneInput = ({
      last explicit pick when it does not. `value` stays '' either way. */
   const [pickedDial, setPickedDial] = useState(null);
   const dial = local ? parsed.dial : (pickedDial || parsed.dial);
+
+  /* AND THE COUNTRY OF A NUMBER THAT WAS ALREADY THERE.
+
+     The paragraph above fixed this for a country the user PICKS and for
+     one they PASTE. It did not cover the third way a country gets
+     chosen, which is the commonest: the number was already in the field.
+
+     Somebody editing a saved +1 732 number who clears the digits to
+     retype them ended up with +972. `pickedDial` was never set — they
+     had not picked or pasted anything — so the moment `local` went
+     empty the expression above fell through to `splitPhone('')`, which
+     answers with the default. The selector moved on its own, and the
+     number they then typed was stored under the wrong country. Nothing
+     looked wrong: the field showed a country and a number, both
+     plausible, and the number was unreachable.
+
+     So: whenever the value actually carries a number, remember ITS
+     country. Guarded on inequality because this runs on every render
+     and an unguarded setState here is a loop. */
+  useEffect(() => {
+    if (local && parsed.dial && parsed.dial !== pickedDial) {
+      setPickedDial(parsed.dial);
+    }
+  }, [local, parsed.dial, pickedDial]);
 
   const setDial = (nextDial) => {
     setPickedDial(nextDial);

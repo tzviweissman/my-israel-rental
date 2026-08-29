@@ -282,10 +282,25 @@ async def _preview_meta(target_type: str, target_id: str) -> dict[str, str]:
     """
     site_img = f"{_SITE_ORIGIN}/brand-logo.png"
     if target_type == "business":
-        biz = await db.businesses.find_one(
-            {"$or": [{"_id": target_id}, {"slug": target_id}]},
-            {"name": 1, "description": 1, "logo_url": 1, "cover_url": 1,
-             "categories": 1, "areas": 1, "_id": 1},
+        # `previous_slugs` too, and this is the whole point of the route.
+        #
+        # A renamed business keeps serving its old links: the page lookup
+        # (marketplace/businesses.py) falls back to the retired slug, so a
+        # customer clicking a link shared months ago still lands on the
+        # right page. This query did not, so the SAME url rendered the
+        # correct page with a generic "MyIsraelRental" card — the exact
+        # failure the preview route exists to fix, on the exact links most
+        # likely to be re-shared.
+        #
+        # Ordering matters and mirrors the page lookup: a live slug always
+        # beats a retired one. `$or` cannot express that, so the fallback
+        # is a second query rather than another clause.
+        fields = {"name": 1, "description": 1, "logo_url": 1, "cover_url": 1,
+                  "categories": 1, "areas": 1, "_id": 1}
+        biz = (
+            await db.businesses.find_one({"_id": target_id}, fields)
+            or await db.businesses.find_one({"slug": target_id}, fields)
+            or await db.businesses.find_one({"previous_slugs": target_id}, fields)
         )
         if biz:
             desc = (biz.get("description") or "").strip()
