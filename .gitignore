@@ -189,9 +189,16 @@ backend/private_contracts/
 # scheduled or cloud run works from a clean checkout — anything not
 # committed does not exist for it. The audit skill was written, never
 # committed, and an overnight run could not find it.
+#
+# Listed one by one, deliberately. The rest of .claude/skills/ is
+# general-purpose tooling that belongs to the machine rather than to this
+# codebase, and a blanket `!.claude/skills/**` would sweep it in along
+# with whatever anyone installs next.
 !.claude/skills/
 .claude/skills/*
 !.claude/skills/site-audit/
+!.claude/skills/visual-diff/
+!.claude/skills/myisraelrental-frontend/
 
 screenshots/
 
