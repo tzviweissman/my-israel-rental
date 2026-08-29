@@ -2271,6 +2271,13 @@ const he = {
         closingBody: 'הפרסום לוקח כמה דקות ולא עולה כלום.',
       },
       whyList: {
+        // כרטיס ההדגמה. "מנקה בירושלים" היא דוגמה לחיפוש, לא הבטחה
+        // לכמות — אין כאן מספרים.
+        getFoundTitle: 'שיגיעו אליכם אנשים שכבר מחפשים',
+        getFoundBody: 'מישהו מחפש בדיוק את מה שאתם עושים, באזור שבו אתם עובדים, והעסק שלכם הוא אחת התשובות. בלי פרסום ובלי עמלה.',
+        getFoundQuery: 'מנקה בירושלים',
+        getFoundYours: 'העסק שלכם',
+        getFoundArea: 'ירושלים',
         // See the note on the English copy — the headline must not narrow
         // the audience to renters or to one language.
         heroTitle: 'שיגיעו אליכם לקוחות מכל הארץ',

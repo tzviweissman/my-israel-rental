@@ -1338,3 +1338,22 @@ select:focus-visible,
   transform: translateY(-1px);
   box-shadow: var(--shadow-md);
 }
+
+/* GetFoundCard — the self-playing demo on /why-list.
+   Transitions live here rather than inline so the reduced-motion guard is
+   a single rule. The component ALSO renders its finished state when
+   reduced motion is set, so this is belt and braces: even if a beat did
+   run, nothing would move. */
+.gf-row { transition: opacity .38s ease, transform .38s ease, box-shadow .38s ease; }
+.gf-caret {
+  display: inline-block;
+  width: 2px;
+  height: 14px;
+  animation: gf-blink 1s step-end infinite;
+}
+@keyframes gf-blink { 50% { opacity: 0; } }
+
+@media (prefers-reduced-motion: reduce) {
+  .gf-row { transition: none; }
+  .gf-caret { animation: none; opacity: 0; }
+}

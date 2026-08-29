@@ -26,6 +26,7 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import BackLink from '../components/common/BackLink';
+import GetFoundCard from '../components/common/GetFoundCard';
 import { Link, useNavigate } from 'react-router-dom';
 import {
   Target, Briefcase, Languages, Star, CalendarCheck, MessageCircle,
@@ -123,6 +124,14 @@ const WhyList = () => {
           <h2 className="text-2xl font-bold text-gray-900 mb-8 text-center">
             {t('whyList.benefitsTitle', 'What you get')}
           </h2>
+
+          {/* One card that PERFORMS the thing, above the six that
+              describe things. A provider deciding whether to list has to
+              picture being found, and a sentence saying "get found" asks
+              them to do that work themselves. */}
+          <div className="mb-6">
+            <GetFoundCard />
+          </div>
           <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
             {BENEFITS.map(({ key, Icon }) => (
               <div

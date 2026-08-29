@@ -2357,6 +2357,13 @@ const en = {
         closingBody: 'Listing takes a few minutes and costs nothing.',
       },
       whyList: {
+        // The self-playing demo card. "Cleaner in Jerusalem" is an
+        // example query, not a claim about volume — no counts here.
+        getFoundTitle: 'Get found by people already looking',
+        getFoundBody: 'Someone searches for what you do, in the area you work, and your business is one of the answers. No ads, no commission.',
+        getFoundQuery: 'cleaner in Jerusalem',
+        getFoundYours: 'Your business',
+        getFoundArea: 'Jerusalem',
         // Deliberately not "English-speaking renters" (Tzvi, 2026-08-23):
         // naming one language and one kind of customer tells every other
         // business on the site that this is not for them. The bilingual
