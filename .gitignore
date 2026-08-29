@@ -175,7 +175,24 @@ backend/private_contracts/
 !.env.example
 !backend/.env.example
 !frontend/.env.example
-.claude/
+# Local Claude Code state: settings.local.json, launch.json, worktrees.
+# Ignored as a whole, with named exceptions below.
+#
+# `.claude/*` rather than `.claude/`: git cannot re-include anything under
+# a directory that is itself excluded, so the directory has to stay
+# visible and its CONTENTS get excluded instead. Without this the
+# negations below silently do nothing.
+.claude/*
+
+# Project skills that are part of the repo's knowledge, not one machine's
+# setup. These encode incidents that already happened here, and a
+# scheduled or cloud run works from a clean checkout — anything not
+# committed does not exist for it. The audit skill was written, never
+# committed, and an overnight run could not find it.
+!.claude/skills/
+.claude/skills/*
+!.claude/skills/site-audit/
+
 screenshots/
 
 # Throwaway verification scripts. Written to drive a browser or probe the
