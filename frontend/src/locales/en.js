@@ -2357,6 +2357,17 @@ const en = {
         closingBody: 'Listing takes a few minutes and costs nothing.',
       },
       whyList: {
+        bookingsTitle: 'Take bookings without a phone call',
+        bookingsBody: 'A request arrives with what they need and when. You accept it, and it is in your calendar — no missed call, no chasing.',
+        bookingsNew: 'New request',
+        bookingsWhen: 'Tomorrow morning',
+        bookingsAccept: 'Accept',
+        bookingsAccepted: 'Booked',
+        bookingsInCalendar: 'In your calendar',
+        // No time promise in this title — "live in ten minutes" would be
+        // a claim nobody measured.
+        pageTitle: 'A page of your own, without building one',
+        pageBody: 'Your services, your area and your photos on a page you can send to anyone — or print as a QR code. It is made from what you already filled in.',
         // The self-playing demo card. "Cleaner in Jerusalem" is an
         // example query, not a claim about volume — no counts here.
         getFoundTitle: 'Get found by people already looking',

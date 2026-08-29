@@ -26,7 +26,7 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import BackLink from '../components/common/BackLink';
-import GetFoundCard from '../components/common/GetFoundCard';
+import { GetFoundCard, TakeBookingsCard, LivePageCard } from '../components/common/WhyListDemos';
 import { Link, useNavigate } from 'react-router-dom';
 import {
   Target, Briefcase, Languages, Star, CalendarCheck, MessageCircle,
@@ -125,12 +125,19 @@ const WhyList = () => {
             {t('whyList.benefitsTitle', 'What you get')}
           </h2>
 
-          {/* One card that PERFORMS the thing, above the six that
+          {/* Three cards that PERFORM the thing, above the six that
               describe things. A provider deciding whether to list has to
-              picture being found, and a sentence saying "get found" asks
-              them to do that work themselves. */}
-          <div className="mb-6">
+              picture being found, being booked and having a page; a
+              sentence saying "get found" asks them to do that work
+              themselves.
+
+              The demo alternates sides down the column — on mobile every
+              card still reads copy-then-demo, so the rhythm never costs
+              anyone the order the words are meant to arrive in. */}
+          <div className="space-y-5 mb-8">
             <GetFoundCard />
+            <TakeBookingsCard />
+            <LivePageCard />
           </div>
           <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
             {BENEFITS.map(({ key, Icon }) => (

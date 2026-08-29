@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>MyIsraelRental — home page, conversion redesign (preview)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,300;0,400;0,500;0,600;1,400&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+<style>
+/* ============================================================
+   LOCKED BRAND TOKENS — copied verbatim from brand/design-tokens.css.
+   Do not re-derive, improve or invent. Green is FUNCTIONAL ONLY
+   (status / verified / available) — never a brand accent.
+   ============================================================ */
+:root{
+  --blue:#1E5F8C; --blue-dark:#184E73; --blue-deep:#123B57;
+  --gold:#C9A227; --gold-sm:#8A6A14; --gold-lg:#A9831C;
+  --bg:#EFE9DC; --ink:#23201B; --muted:#6B6459;
+  --border:#E1D8C6; --surface:#FFFFFF;
+  --ok:#2E7D4F; --ok-bg:#E6F4EA;
+  --head:'Playfair Display',Georgia,serif;
+  --body:'Manrope',system-ui,-apple-system,sans-serif;
+  --wrap:1180px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);
+  -webkit-font-smoothing:antialiased;line-height:1.55}
+.wrap{max-width:var(--wrap);margin:0 auto;padding:0 32px}
+h1,h2,h3{font-family:var(--head);font-weight:400;letter-spacing:-.02em;line-height:1.06}
+em{font-style:italic}
+a{color:inherit}
+
+/* preview chrome only — never ships */
+.pv{background:#2b2b2b;color:#ddd;font-size:12.5px;padding:14px 32px;line-height:1.6}
+.pv b{color:#fff}
+.pv code{background:#111;padding:1px 6px;border-radius:4px;color:#e8c96a}
+
+/* ---------- shared ---------- */
+.eyebrow{font-size:11.5px;font-weight:800;letter-spacing:.2em;text-transform:uppercase;
+  color:var(--gold-sm)}
+.eyebrow.on-dark{color:var(--gold)}
+.lede{font-size:19px;color:var(--muted);max-width:60ch;font-weight:500}
+.lede.on-dark{color:rgba(255,255,255,.76)}
+
+.btn{display:inline-flex;align-items:center;gap:10px;font-family:var(--body);
+  font-weight:700;font-size:16px;padding:19px 38px;border-radius:999px;
+  text-decoration:none;border:1.5px solid transparent;cursor:pointer;
+  transition:transform .18s ease,box-shadow .18s ease}
+.btn-primary{background:var(--blue);color:#fff;box-shadow:0 12px 28px rgba(30,95,140,.26)}
+.btn-primary:hover{transform:translateY(-2px);box-shadow:0 18px 40px rgba(30,95,140,.32)}
+/* ACCENT = SOLID GOLD + INK TEXT (6.71:1). Never frosted — see design-tokens.css */
+.btn-accent{background:var(--gold);color:var(--ink);box-shadow:0 12px 28px rgba(169,131,28,.28)}
+.btn-accent:hover{transform:translateY(-2px)}
+.btn-quiet{background:transparent;color:var(--blue);font-weight:700;text-decoration:none;
+  font-size:16px;border-bottom:1.5px solid rgba(30,95,140,.3);padding-bottom:3px}
+.btn-quiet:hover{border-bottom-color:var(--blue)}
+
+/* number that must come from a real query */
+.n{font-variant-numeric:tabular-nums;border-bottom:2px dotted rgba(169,131,28,.55)}
+
+/* ---------- nav ---------- */
+nav{position:sticky;top:0;z-index:50;background:rgba(239,233,220,.86);
+  backdrop-filter:saturate(180%) blur(14px);border-bottom:1px solid var(--border)}
+.nav-in{max-width:var(--wrap);margin:0 auto;padding:16px 32px;
+  display:flex;align-items:center;gap:34px}
+.logo{display:flex;align-items:center;gap:11px;font-family:var(--head);
+  font-weight:600;font-size:19px;color:var(--blue-deep);text-decoration:none}
+.logo i{width:34px;height:34px;border-radius:9px;background:var(--blue-deep);display:block;
+  flex:0 0 auto;position:relative}
+.logo i::after{content:"";position:absolute;inset:9px;border-radius:3px;
+  border:2px solid var(--gold);border-bottom:none}
+.nav-links{display:flex;gap:26px;margin-inline-start:16px}
+.nav-links a{font-size:14.5px;font-weight:600;color:var(--muted);text-decoration:none}
+.nav-links a:hover{color:var(--blue)}
+.nav-cta{margin-inline-start:auto;display:flex;align-items:center;gap:18px}
+.nav-cta .signin{font-size:14.5px;font-weight:600;color:var(--muted);text-decoration:none}
+.nav-cta .btn{padding:12px 24px;font-size:14.5px}
+
+/* ---------- 1. HERO ---------- */
+.hero{padding:104px 0 0;position:relative;overflow:hidden}
+.hero::before{content:"";position:absolute;top:-260px;inset-inline-end:-180px;
+  width:720px;height:720px;border-radius:50%;
+  background:radial-gradient(circle,rgba(201,162,39,.14),transparent 68%);pointer-events:none}
+.hero-in{position:relative;display:grid;grid-template-columns:1.02fr .98fr;gap:64px;align-items:center}
+h1{font-size:clamp(46px,5.6vw,80px);font-weight:300;letter-spacing:-.028em}
+h1 em{color:var(--gold-lg);font-style:italic}
+.hero .lede{margin-top:26px;font-size:20px}
+.hero-cta{margin-top:40px;display:flex;align-items:center;gap:28px;flex-wrap:wrap}
+.hero-note{margin-top:22px;font-size:14px;color:var(--muted);font-weight:600}
+.hero-note span{color:var(--ok);font-weight:700}
+
+/* the photo collage — real listing photos in production */
+.collage{position:relative;height:520px}
+.ph{position:absolute;border-radius:16px;overflow:hidden;background:var(--surface);
+  box-shadow:0 22px 50px rgba(35,32,27,.16);border:1px solid var(--border)}
+.ph .img{height:100%;width:100%;display:flex;align-items:flex-end;padding:16px;
+  font-size:12px;font-weight:700;color:#fff;text-shadow:0 1px 8px rgba(0,0,0,.6)}
+.ph1{inset-inline-start:0;top:18px;width:56%;height:62%}
+.ph1 .img{background:linear-gradient(160deg,#3d6f92,#123B57)}
+.ph2{inset-inline-end:0;top:0;width:40%;height:44%}
+.ph2 .img{background:linear-gradient(160deg,#b08c3a,#6d5416)}
+.ph3{inset-inline-end:6%;bottom:14px;width:48%;height:44%}
+.ph3 .img{background:linear-gradient(160deg,#7d8b6a,#3f4736)}
+.badge{position:absolute;background:var(--surface);border:1px solid var(--border);
+  border-radius:12px;padding:11px 15px;box-shadow:0 14px 34px rgba(35,32,27,.14);
+  font-size:13px;font-weight:700;display:flex;align-items:center;gap:9px}
+.badge .dot{width:8px;height:8px;border-radius:50%;background:var(--ok);flex:0 0 auto}
+.badge.b1{inset-inline-start:8%;bottom:52px}
+.badge.b2{inset-inline-end:2%;top:47%}
+
+/* ---------- 2. TRUST STRIP ---------- */
+.trust{margin-top:88px;border-top:1px solid var(--border);border-bottom:1px solid var(--border);
+  background:rgba(255,255,255,.5)}
+.trust-in{display:grid;grid-template-columns:repeat(4,1fr);gap:20px;padding:32px}
+.stat{text-align:center}
+.stat b{display:block;font-family:var(--head);font-weight:500;font-size:38px;
+  color:var(--blue-deep);letter-spacing:-.02em;line-height:1}
+.stat span{display:block;margin-top:8px;font-size:13px;font-weight:700;
+  letter-spacing:.09em;text-transform:uppercase;color:var(--muted)}
+
+/* ---------- 3. DEMAND PROOF (dark) ---------- */
+.demand{background:var(--blue-deep);color:#fff;padding:104px 0;margin-top:0}
+.demand h2{font-size:clamp(34px,3.9vw,50px);font-weight:300;color:#fff;max-width:17ch}
+.demand h2 em{color:var(--gold);font-style:italic}
+.demand-in{display:grid;grid-template-columns:1fr 1fr;gap:72px;align-items:center}
+.searches{display:flex;flex-direction:column;gap:12px}
+.srow{display:flex;align-items:center;gap:14px;background:rgba(255,255,255,.06);
+  border:1px solid rgba(255,255,255,.12);border-radius:12px;padding:15px 18px}
+.srow .q{font-weight:600;font-size:15px;color:#fff}
+.srow .c{margin-inline-start:auto;font-size:13px;font-weight:800;color:var(--gold);
+  font-variant-numeric:tabular-nums;white-space:nowrap}
+.srow .mag{width:30px;height:30px;border-radius:50%;flex:0 0 auto;
+  background:rgba(201,162,39,.16);display:grid;place-items:center;color:var(--gold);font-size:14px}
+
+/* ---------- 4. THREE REASONS ---------- */
+.reasons{padding:112px 0}
+.sec-head{text-align:center;max-width:640px;margin:0 auto 60px}
+.sec-head h2{font-size:clamp(34px,3.9vw,52px);font-weight:300;margin-top:16px}
+.sec-head h2 em{color:var(--gold-lg);font-style:italic}
+.sec-head .lede{margin:18px auto 0;text-align:center}
+.three{display:grid;grid-template-columns:repeat(3,1fr);gap:26px}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:18px;
+  padding:38px 32px;transition:transform .22s ease,box-shadow .22s ease}
+.card:hover{transform:translateY(-4px);box-shadow:0 22px 46px rgba(35,32,27,.10)}
+.card .ic{width:52px;height:52px;border-radius:14px;background:rgba(30,95,140,.08);
+  display:grid;place-items:center;margin-bottom:22px;font-size:22px}
+.card h3{font-size:23px;font-weight:500;margin-bottom:12px}
+.card p{font-size:15.5px;color:var(--muted);font-weight:500}
+
+/* ---------- 5. SOCIAL PROOF ---------- */
+.proof{padding:104px 0;background:rgba(255,255,255,.55);
+  border-top:1px solid var(--border);border-bottom:1px solid var(--border)}
+.quotes{display:grid;grid-template-columns:repeat(3,1fr);gap:26px;margin-top:52px}
+.quote{background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:32px}
+.stars{color:var(--gold-lg);font-size:15px;letter-spacing:2px;margin-bottom:16px}
+.quote p{font-family:var(--head);font-size:19px;font-weight:400;line-height:1.45;
+  color:var(--ink)}
+.who{display:flex;align-items:center;gap:13px;margin-top:24px;
+  padding-top:20px;border-top:1px solid var(--border)}
+.face{width:46px;height:46px;border-radius:50%;flex:0 0 auto;
+  background:linear-gradient(150deg,#c9b48d,#8a7a5c);display:grid;place-items:center;
+  color:#fff;font-weight:800;font-size:15px;font-family:var(--body)}
+.who b{display:block;font-size:14.5px;font-weight:800}
+.who span{display:block;font-size:13px;color:var(--muted);font-weight:600}
+
+/* ---------- 6. COMPARISON ---------- */
+.compare{padding:112px 0}
+.ctable{margin-top:52px;background:var(--surface);border:1px solid var(--border);
+  border-radius:20px;overflow:hidden}
+.ctable table{width:100%;border-collapse:collapse}
+.ctable th,.ctable td{padding:20px 22px;text-align:start;font-size:15px;
+  border-bottom:1px solid var(--border)}
+.ctable thead th{font-family:var(--body);font-size:12px;font-weight:800;letter-spacing:.11em;
+  text-transform:uppercase;color:var(--muted);background:rgba(239,233,220,.5)}
+.ctable thead th.us{color:var(--blue-deep);background:rgba(30,95,140,.07)}
+.ctable td.us{background:rgba(30,95,140,.045);font-weight:700;color:var(--blue-deep)}
+.ctable tbody tr:last-child td{border-bottom:none}
+.ctable td:first-child{font-weight:700}
+.yes{color:var(--ok);font-weight:800}
+.no{color:var(--muted)}
+
+/* ---------- 7. FINAL CTA ---------- */
+.final{padding:120px 0;text-align:center;background:var(--blue-deep);color:#fff}
+.final h2{font-size:clamp(38px,4.6vw,62px);font-weight:300;color:#fff;max-width:16ch;margin:20px auto 0}
+.final h2 em{color:var(--gold);font-style:italic}
+.final .lede{margin:22px auto 0;text-align:center}
+.final .btn{margin-top:40px}
+.final .fine{margin-top:26px;font-size:14px;color:rgba(255,255,255,.6);font-weight:600}
+
+footer{padding:56px 0;font-size:13.5px;color:var(--muted);font-weight:600;text-align:center}
+
+/* ---------- responsive ---------- */
+@media(max-width:920px){
+  .hero-in,.demand-in{grid-template-columns:1fr;gap:44px}
+  .collage{height:400px}
+  .three,.quotes{grid-template-columns:1fr}
+  .trust-in{grid-template-columns:repeat(2,1fr);gap:28px}
+  .nav-links{display:none}
+  .hero{padding-top:64px}
+  .ctable{overflow-x:auto}
+}
+@media(prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+
+<div class="pv">
+<b>PREVIEW — home page, conversion redesign.</b> Every number with a dotted gold underline
+is a <b>placeholder and must come from a real query before this ships</b> — real number or
+the line does not render. The three testimonials are <b>placeholders</b>: do not ship invented
+quotes or stock faces. Photo blocks stand in for real listing photography.
+Palette, type and button rules are copied verbatim from <code>brand/design-tokens.css</code>.
+</div>
+
+<nav>
+  <div class="nav-in">
+    <a class="logo" href="#"><i></i> MyIsraelRental</a>
+    <div class="nav-links">
+      <a href="#">Stays</a><a href="#">Services</a><a href="#">Marketplace</a><a href="#">Requests</a>
+    </div>
+    <div class="nav-cta">
+      <a class="signin" href="#">Sign in</a>
+      <a class="btn btn-accent" href="#">List free</a>
+    </div>
+  </div>
+</nav>
+
+<!-- ========== 1. HERO — ONE decision, not four ========== -->
+<header class="hero">
+  <div class="wrap hero-in">
+    <div>
+      <p class="eyebrow">Rentals &amp; local business · Israel</p>
+      <h1>The people looking for you are <em>already here</em>.</h1>
+      <p class="lede">List your property or your business in about four minutes.
+        Free to list, free to be found, and we never take a commission.</p>
+
+      <div class="hero-cta">
+        <a class="btn btn-primary" href="#">Start listing — it's free</a>
+        <a class="btn-quiet" href="#">Just looking? Browse what's here →</a>
+      </div>
+
+      <p class="hero-note"><span>●</span> No card. No listing fee. No commission, ever.</p>
+    </div>
+
+    <div class="collage">
+      <div class="ph ph1"><div class="img">Jerusalem · 3 rooms</div></div>
+      <div class="ph ph2"><div class="img">Bakery · Katamon</div></div>
+      <div class="ph ph3"><div class="img">Electrician · Beit Shemesh</div></div>
+      <div class="badge b1"><span class="dot"></span> Replies within an hour</div>
+      <div class="badge b2">★ 4.9 · <span class="n">28</span> reviews</div>
+    </div>
+  </div>
+
+  <!-- ========== 2. TRUST STRIP — credibility above the fold ========== -->
+  <div class="trust">
+    <div class="wrap trust-in">
+      <div class="stat"><b class="n">1,140</b><span>Properties</span></div>
+      <div class="stat"><b class="n">260</b><span>Businesses</span></div>
+      <div class="stat"><b class="n">14</b><span>Cities</span></div>
+      <div class="stat"><b>₪0</b><span>Commission</span></div>
+    </div>
+  </div>
+</header>
+
+<!-- ========== 3. DEMAND PROOF — the strongest supply-side argument ========== -->
+<section class="demand">
+  <div class="wrap demand-in">
+    <div>
+      <p class="eyebrow on-dark">This month, on this site</p>
+      <h2>People searched for what you offer — and <em>didn't find it</em>.</h2>
+      <p class="lede on-dark" style="margin-top:24px">
+        Every one of these was a real search that returned too few results.
+        Listing takes four minutes and puts you in front of the next one.</p>
+      <a class="btn btn-accent" href="#" style="margin-top:34px">Add your business — free</a>
+    </div>
+    <div class="searches">
+      <div class="srow"><span class="mag">⌕</span><span class="q">Cleaner in Ramat Beit Shemesh</span><span class="c n">41 searches</span></div>
+      <div class="srow"><span class="mag">⌕</span><span class="q">English-speaking electrician</span><span class="c n">33 searches</span></div>
+      <div class="srow"><span class="mag">⌕</span><span class="q">Short-term rental, Nachlaot</span><span class="c n">29 searches</span></div>
+      <div class="srow"><span class="mag">⌕</span><span class="q">Mover, Jerusalem → Tel Aviv</span><span class="c n">22 searches</span></div>
+      <div class="srow"><span class="mag">⌕</span><span class="q">Kosher caterer, Efrat</span><span class="c n">18 searches</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ========== 4. RULE OF THREE ========== -->
+<section class="reasons">
+  <div class="wrap">
+    <div class="sec-head">
+      <p class="eyebrow">Why list here</p>
+      <h2>Three reasons, and <em>none of them</em> is a fee.</h2>
+    </div>
+    <div class="three">
+      <div class="card">
+        <div class="ic">🕊</div>
+        <h3>Free, and staying free</h3>
+        <p>No listing fee, no commission, no cut of anything you earn. You keep your
+          customers and you keep your money.</p>
+      </div>
+      <div class="card">
+        <div class="ic">א</div>
+        <h3>Found in both languages</h3>
+        <p>Write in English and Hebrew speakers find you in Hebrew. Write in Hebrew and
+          English speakers find you too. Nobody else here does this.</p>
+      </div>
+      <div class="card">
+        <div class="ic">◈</div>
+        <h3>A page worth sending</h3>
+        <p>Your own page with your photos, prices and hours — and a QR code for your
+          flyer. Send it instead of building a website.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ========== 5. SOCIAL PROOF ========== -->
+<section class="proof">
+  <div class="wrap">
+    <div class="sec-head">
+      <p class="eyebrow">From people already listed</p>
+      <h2>What it actually <em>did</em> for them.</h2>
+    </div>
+    <div class="quotes">
+      <div class="quote">
+        <div class="stars">★★★★★</div>
+        <p>“I put the QR on my bakery boxes. People scan it and message me before
+          they've finished the cake.”</p>
+        <div class="who"><div class="face">MK</div>
+          <div><b>Placeholder — real name</b><span>Bakery · Katamon</span></div></div>
+      </div>
+      <div class="quote">
+        <div class="stars">★★★★★</div>
+        <p>“Two apartments, both let within the month. I never had to explain my
+          Hebrew or my English to anyone.”</p>
+        <div class="who"><div class="face">DS</div>
+          <div><b>Placeholder — real name</b><span>Property owner · Jerusalem</span></div></div>
+      </div>
+      <div class="quote">
+        <div class="stars">★★★★★</div>
+        <p>“I stopped paying for leads. People here already know what they want
+          when they message me.”</p>
+        <div class="who"><div class="face">AB</div>
+          <div><b>Placeholder — real name</b><span>Electrician · Beit Shemesh</span></div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ========== 6. THE HONEST COMPARISON ========== -->
+<section class="compare">
+  <div class="wrap">
+    <div class="sec-head">
+      <p class="eyebrow">The honest comparison</p>
+      <h2>You have options. Here's <em>how we differ</em>.</h2>
+      <p class="lede">We are not the right place for everyone. If you want the people
+        who find you to be yours, read on.</p>
+    </div>
+    <div class="ctable">
+      <table>
+        <thead>
+          <tr><th></th><th class="us">MyIsraelRental</th><th>Facebook groups</th><th>A lead site</th><th>Your own website</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Cost to be listed</td><td class="us">Free</td><td>Free</td><td class="no">Per lead</td><td class="no">₪2,000+ to build</td></tr>
+          <tr><td>Commission on work</td><td class="us">None</td><td>None</td><td class="no">Often</td><td>None</td></tr>
+          <tr><td>Still findable next month</td><td class="us"><span class="yes">Yes</span></td><td class="no">Scrolled away in a day</td><td class="yes">Yes</td><td class="yes">Yes</td></tr>
+          <tr><td>Works in Hebrew and English</td><td class="us"><span class="yes">Both, automatically</span></td><td class="no">One group, one language</td><td class="no">Usually one</td><td class="no">You translate it</td></tr>
+          <tr><td>Your own shareable page</td><td class="us"><span class="yes">Yes, with a QR</span></td><td class="no">No</td><td class="no">Their page, not yours</td><td class="yes">Yes</td></tr>
+          <tr><td>Time to be live</td><td class="us">About 4 minutes</td><td>Minutes</td><td>A sales call</td><td class="no">Weeks</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- ========== 7. FINAL CTA — the peak-end moment ========== -->
+<section class="final">
+  <div class="wrap">
+    <p class="eyebrow on-dark">One listing, four minutes</p>
+    <h2>Someone is looking for it <em>this week</em>.</h2>
+    <p class="lede on-dark">Add your property or your business. Free to list, free to be
+      found, no commission — and you can take it down whenever you like.</p>
+    <a class="btn btn-accent" href="#">Start listing — it's free</a>
+    <p class="fine">No card required · Nothing to cancel · Your customers stay yours</p>
+  </div>
+</section>
+
+<footer>Preview file · not a shipped page · MyIsraelRental</footer>
+
+</body>
+</html>
