@@ -11,6 +11,7 @@ import { toast } from 'sonner';
 import { ArrowLeft } from 'lucide-react';
 
 import ImageGallery from '../components/property/ImageGallery';
+import Tour3DViewer from '../components/property/Tour3DViewer';
 import PropertyStats from '../components/property/PropertyStats';
 import AmenitiesList from '../components/property/AmenitiesList';
 import BookingSidebar from '../components/property/BookingSidebar';
@@ -78,6 +79,10 @@ const PropertyDetail = () => {
   const [shortLink, setShortLink] = useState(null);
   const [property, setProperty] = useState(null);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  // The 3D walkthrough, when the listing has a finished one. Anonymous
+  // request on purpose: the endpoint already decides what a renter may
+  // see, so the page does not need to know whether anyone is signed in.
+  const [tour, setTour] = useState(null);
   const [showCalendar, setShowCalendar] = useState(null);
   const [dateRange, setDateRange] = useState({ from: undefined, to: undefined });
   const [bookingData, setBookingData] = useState({
@@ -164,6 +169,12 @@ const PropertyDetail = () => {
         .catch(() => setSublease(null));
     }
     fetchProperty();
+    // The tour endpoint returns `{tour: null}` for a listing without one,
+    // and for a renter looking at one that is still processing or failed —
+    // so a 404 here is genuinely nothing to show, not an error.
+    axios.get(`${API}/properties/${id}/tour`)
+      .then((r) => setTour(r.data?.tour || null))
+      .catch(() => setTour(null));
     if (token) {
       axios.get(`${API}/liked-property-ids`, { headers: { Authorization: `Bearer ${token}` } })
         .then(res => setIsLiked(res.data.includes(id)))
@@ -432,17 +443,19 @@ const PropertyDetail = () => {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <div className="lg:col-span-2">
             <div className="mb-6">
-              <ImageGallery
-                media={[
-                  ...(property.images || []).map((url) => ({ type: 'image', url })),
-                  ...(property.videos || []).map((url) => ({ type: 'video', url })),
-                ]}
-                currentIndex={currentImageIndex}
-                onIndexChange={setCurrentImageIndex}
-                alt={property.title}
-                apiBase={API}
-                seed={property.id}
-              />
+              <Tour3DViewer tour={tour}>
+                <ImageGallery
+                  media={[
+                    ...(property.images || []).map((url) => ({ type: 'image', url })),
+                    ...(property.videos || []).map((url) => ({ type: 'video', url })),
+                  ]}
+                  currentIndex={currentImageIndex}
+                  onIndexChange={setCurrentImageIndex}
+                  alt={property.title}
+                  apiBase={API}
+                  seed={property.id}
+                />
+              </Tour3DViewer>
             </div>
 
             <div className="flex items-center justify-between mb-4">

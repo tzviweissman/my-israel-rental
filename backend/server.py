@@ -48,6 +48,7 @@ from routes import (  # noqa: E402
     saved_searches,
     services_waitlist,
     short_links,
+    tours_3d,
     smart_pricing,
     subleases,
 )
@@ -89,6 +90,7 @@ for mod in (
     payments,
     geocode,
     short_links,
+    tours_3d,
 ):
     api_router.include_router(mod.router)
 

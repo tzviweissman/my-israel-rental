@@ -8,6 +8,7 @@ import { Sparkles, X, AlertTriangle, ArrowRight } from 'lucide-react';
 import DateField from './propertyForm/DateField';
 import LocationPicker from './propertyForm/LocationPicker';
 import MediaUploadSection from './propertyForm/MediaUploadSection';
+import Tour3DUpload from '../property/Tour3DUpload';
 import PropertyServicesSelector from '../property/services/PropertyServicesSelector';
 import { nextHolidayWindow } from '../../utils/holidayCalendar';
 import ChipSelect from '../common/ChipSelect';
@@ -377,6 +378,14 @@ const AddPropertyModal = ({ isOpen, onClose, editingProperty, onSaved, API, toke
             API={API}
             token={token}
           />
+
+          {/* Only on EDIT. A 3D tour is attached to a listing id, and a
+              listing being created does not have one yet — offering the
+              button here would mean uploading 500MB against a record that
+              may never be saved. */}
+          {editingProperty?.id && (
+            <Tour3DUpload propertyId={editingProperty.id} token={token} />
+          )}
 
           {!editingProperty?.id && (
             <div
