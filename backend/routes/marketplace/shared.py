@@ -422,6 +422,26 @@ def service_area_labels(slugs: list[str] | None) -> list[str]:
     ]
 
 
+def service_area_slugs_in_text(text: str | None) -> list[str]:
+    """Which catalogue cities a free-text area names.
+
+    Jobs and gigs store area as typed — "Tel Aviv, Florentin", "near
+    Jerusalem" — while service areas are slugs. This is the bridge, and
+    it deliberately uses the SAME case-insensitive substring rule the
+    location filter has always used, so a job is placed in exactly the
+    cities a customer browsing that city would have found it in.
+
+    Returns [] when the text names no catalogue city. Callers must treat
+    that as "cannot place this", not as "matches nothing" — the
+    difference decides whether a provider in an unlisted town keeps
+    getting work.
+    """
+    lowered = (text or "").lower()
+    if not lowered:
+        return []
+    return [loc["slug"] for loc in LOCATIONS if loc["label"].lower() in lowered]
+
+
 def _resolve_gig_coords(gig: dict[str, Any]) -> Optional[tuple[float, float]]:
     """Best-effort lat/lng for a gig. Prefers an explicit `lat`/`lng` on
     the gig doc (future-proof for providers who set precise coordinates),

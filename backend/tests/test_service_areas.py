@@ -215,3 +215,217 @@ def test_nothing_requires_areas_alongside_nationwide():
     for line in stripped.splitlines():
         if "serves_nationwide" in line and "areas" in line:
             pytest.fail(f"areas and serves_nationwide are cross-validated: {line.strip()!r}")
+
+
+# --------------------------------------------------------------------------
+# Job notifications
+# --------------------------------------------------------------------------
+# A posted job emails providers. That fan-out used to match on CATEGORY
+# ALONE — so a Jerusalem-only plumber was told about every Haifa job, and
+# nothing a business said about covering the country made any difference
+# because nothing read it.
+#
+# Narrowing it is the fix, and it is also the danger: filter too eagerly
+# and businesses silently stop receiving the work they get today, with
+# nothing anywhere saying why. The fallbacks below are the whole safety
+# argument, so they are asserted rather than trusted.
+
+def _reaching_source() -> str:
+    from routes.marketplace import jobs
+
+    src = inspect.getsource(jobs._providers_reaching_area)
+    return "\n".join(re.sub(r"#.*$", "", ln) for ln in src.splitlines())
+
+
+def test_job_notifications_consult_service_areas():
+    from routes.marketplace import jobs
+
+    src = "\n".join(
+        re.sub(r"#.*$", "", ln)
+        for ln in inspect.getsource(jobs._notify_matching_providers).splitlines()
+    )
+    assert "_providers_reaching_area" in src, (
+        "job notifications no longer filter by service area — nationwide and "
+        "multi-city businesses are back to being indistinguishable from anyone else"
+    )
+
+
+def test_nationwide_businesses_are_kept():
+    src = _reaching_source()
+    assert "nationwide or (areas & job_slugs)" in src, (
+        "a nationwide business is no longer matched to jobs outside its listed cities"
+    )
+
+
+def test_businesses_that_never_set_an_area_are_not_cut_off():
+    """The migration-safety clause. Most businesses predate the picker."""
+    src = _reaching_source()
+    assert "uid not in configured" in src, (
+        "businesses that have not set a service area would now be filtered out — "
+        "they would silently stop receiving the jobs they get today"
+    )
+
+
+def test_an_unplaceable_job_area_notifies_everyone():
+    """"Ramat Gan" is not in the catalogue. Guessing would cut off every
+    provider working in a town the catalogue does not list yet."""
+    src = _reaching_source()
+    assert "if not job_slugs:" in src and "return provider_ids" in src, (
+        "a job whose area matches no catalogue city no longer falls back to "
+        "notifying everyone"
+    )
+
+
+def test_free_text_area_maps_to_catalogue_cities():
+    from routes.marketplace.shared import service_area_slugs_in_text as f
+
+    assert f("Tel Aviv, Florentin") == ["tel-aviv"]
+    assert f("jerusalem") == ["jerusalem"]
+    assert f("Near Haifa") == ["haifa"]
+
+
+def test_unplaceable_text_returns_empty_not_a_guess():
+    from routes.marketplace.shared import service_area_slugs_in_text as f
+
+    assert f("Ramat Gan") == []
+    assert f("up north") == []
+    assert f("") == []
+    assert f(None) == []
+
+
+# --------------------------------------------------------------------------
+# _providers_reaching_area — BEHAVIOUR, not source
+# --------------------------------------------------------------------------
+# Everything above this line reads source text. That catches a deletion but
+# it cannot catch wrong logic: an `&` that should be `|`, a fallback that
+# inverts, a set built from the wrong side. These run the real function
+# against a stubbed collection and assert who actually comes back.
+
+class _FakeCursor:
+    def __init__(self, docs):
+        self._docs = docs
+
+    def __aiter__(self):
+        async def gen():
+            for d in self._docs:
+                yield d
+        return gen()
+
+
+class _FakeBusinesses:
+    def __init__(self, docs):
+        self._docs = docs
+
+    def find(self, query, projection=None):
+        wanted = query["owner_user_id"]["$in"]
+        return _FakeCursor([d for d in self._docs if d["owner_user_id"] in wanted])
+
+
+class _FakeDb:
+    def __init__(self, docs):
+        self.businesses = _FakeBusinesses(docs)
+
+
+async def _reaching(monkeypatch, docs, provider_ids, job_area):
+    from routes.marketplace import jobs
+
+    monkeypatch.setattr(jobs, "db", _FakeDb(docs))
+    return await jobs._providers_reaching_area(provider_ids, job_area)
+
+
+def _biz(uid, areas=None, nationwide=False):
+    return {"owner_user_id": uid, "areas": areas or [], "serves_nationwide": nationwide}
+
+
+@pytest.mark.asyncio
+async def test_reaching_keeps_the_business_in_that_city(monkeypatch):
+    got = await _reaching(
+        monkeypatch,
+        [_biz("in-city", ["jerusalem"]), _biz("elsewhere", ["haifa"])],
+        ["in-city", "elsewhere"],
+        "Jerusalem",
+    )
+    assert got == ["in-city"]
+
+
+@pytest.mark.asyncio
+async def test_reaching_keeps_a_nationwide_business_anywhere(monkeypatch):
+    got = await _reaching(
+        monkeypatch,
+        [_biz("courier", [], nationwide=True), _biz("local", ["haifa"])],
+        ["courier", "local"],
+        "Beersheba",
+    )
+    assert got == ["courier"], "a nationwide business must match every city"
+
+
+@pytest.mark.asyncio
+async def test_reaching_keeps_a_multi_city_business_on_any_of_its_cities(monkeypatch):
+    docs = [_biz("multi", ["jerusalem", "bet-shemesh", "modiin"])]
+    for city in ("Jerusalem", "Bet Shemesh", "Modiin"):
+        assert await _reaching(monkeypatch, docs, ["multi"], city) == ["multi"], city
+    assert await _reaching(monkeypatch, docs, ["multi"], "Haifa") == []
+
+
+@pytest.mark.asyncio
+async def test_reaching_keeps_businesses_that_never_set_an_area(monkeypatch):
+    """The migration-safety clause, proven rather than asserted in source."""
+    got = await _reaching(
+        monkeypatch,
+        [_biz("unset"), _biz("wrong-city", ["haifa"])],
+        ["unset", "wrong-city"],
+        "Jerusalem",
+    )
+    assert got == ["unset"]
+
+
+@pytest.mark.asyncio
+async def test_reaching_keeps_a_provider_with_no_business_row_at_all(monkeypatch):
+    """Gigs can exist without a business. They must not lose their jobs."""
+    got = await _reaching(monkeypatch, [], ["orphan"], "Jerusalem")
+    assert got == ["orphan"]
+
+
+@pytest.mark.asyncio
+async def test_reaching_returns_everyone_for_an_unplaceable_area(monkeypatch):
+    got = await _reaching(
+        monkeypatch,
+        [_biz("a", ["jerusalem"]), _biz("b", ["haifa"])],
+        ["a", "b"],
+        "Ramat Gan",
+    )
+    assert got == ["a", "b"], "an unplaceable job must not silently notify nobody"
+
+
+@pytest.mark.asyncio
+async def test_reaching_handles_a_free_text_area(monkeypatch):
+    got = await _reaching(
+        monkeypatch,
+        [_biz("tlv", ["tel-aviv"]), _biz("jlm", ["jerusalem"])],
+        ["tlv", "jlm"],
+        "Tel Aviv, Florentin",
+    )
+    assert got == ["tlv"]
+
+
+@pytest.mark.asyncio
+async def test_reaching_matches_a_second_business_of_the_same_owner(monkeypatch):
+    """Someone with two businesses is reachable through either."""
+    got = await _reaching(
+        monkeypatch,
+        [_biz("owner", ["haifa"]), _biz("owner", ["jerusalem"])],
+        ["owner"],
+        "Jerusalem",
+    )
+    assert got == ["owner"]
+
+
+@pytest.mark.asyncio
+async def test_reaching_preserves_input_order_and_never_duplicates(monkeypatch):
+    got = await _reaching(
+        monkeypatch,
+        [_biz("a", ["jerusalem"]), _biz("a", ["jerusalem"]), _biz("b", [], True)],
+        ["b", "a"],
+        "Jerusalem",
+    )
+    assert got == ["b", "a"]

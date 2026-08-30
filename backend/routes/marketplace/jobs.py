@@ -41,7 +41,14 @@ from utils.notification_tokens import (
 from utils.translate import translate_marketing_to_hebrew
 
 from .notification_prefs import DEFAULT_MODE as DEFAULT_PREF_MODE
-from .shared import UTC, _validate_category, _validate_subcategory, CATEGORIES, FRONTEND_URL
+from .shared import (
+    UTC,
+    CATEGORIES,
+    FRONTEND_URL,
+    _validate_category,
+    _validate_subcategory,
+    service_area_slugs_in_text,
+)
 
 
 router = APIRouter(prefix="/marketplace", tags=["marketplace"])
@@ -133,6 +140,50 @@ async def _translate_bg(job_id: str, title: str, description: str) -> None:
         logger.warning("[jobs] Hebrew translation failed for %s: %s", job_id, e)
 
 
+async def _providers_reaching_area(
+    provider_ids: list[str], job_area: str | None
+) -> list[str]:
+    """Of these providers, which cover the job's location?
+
+    A provider is kept when ANY of their businesses:
+
+      * serves the whole country — the shipper, the one who travels;
+      * lists the job's city in `areas`;
+      * has said NOTHING about where it works.
+
+    That third clause is the important one and it is not a loophole. Most
+    businesses predate the service-area picker, so a strict filter would
+    silently stop sending them the work they get today — the product
+    would look broken to the people using it most, and nothing would say
+    why. Only an owner who has actually answered the question gets
+    filtered by their answer.
+
+    Returns everyone unchanged when the job's area names no catalogue
+    city ("Ramat Gan", "up north"). We cannot place it, and guessing
+    would cut off exactly the providers who work in the towns the
+    catalogue does not list yet.
+    """
+    job_slugs = set(service_area_slugs_in_text(job_area))
+    if not job_slugs:
+        return provider_ids
+
+    reaching: set[str] = set()
+    configured: set[str] = set()
+    async for biz in db.businesses.find(
+        {"owner_user_id": {"$in": provider_ids}},
+        {"owner_user_id": 1, "areas": 1, "serves_nationwide": 1},
+    ):
+        uid = biz.get("owner_user_id")
+        areas = set(biz.get("areas") or [])
+        nationwide = bool(biz.get("serves_nationwide"))
+        if areas or nationwide:
+            configured.add(uid)
+        if nationwide or (areas & job_slugs):
+            reaching.add(uid)
+
+    return [uid for uid in provider_ids if uid in reaching or uid not in configured]
+
+
 async def _notify_matching_providers(job: dict[str, Any]) -> None:
     """Fire a per-post email to every provider whose gigs cover the
     job's category AND whose notification preference is 'instant' or
@@ -154,6 +205,15 @@ async def _notify_matching_providers(job: dict[str, Any]) -> None:
             "provider_user_id",
             {"category": cat, "status": "published"},
         )
+        if not provider_ids:
+            return
+
+        # Narrow to providers who actually cover where the job is.
+        # Category alone used to decide this, which meant a Jerusalem-only
+        # plumber was emailed about every Haifa job — and, the other way
+        # round, nothing a business said about serving the whole country
+        # made any difference, because nothing read it.
+        provider_ids = await _providers_reaching_area(provider_ids, job.get("area"))
         if not provider_ids:
             return
 
