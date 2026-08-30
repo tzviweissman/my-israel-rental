@@ -94,6 +94,17 @@ for mod in (
 ):
     api_router.include_router(mod.router)
 
+def _config_ok(name: str) -> bool:
+    """Is this env var set to something that actually resolved?
+
+    An unresolved Railway reference arrives as the literal
+    "${{Service.VAR}}", which is truthy and completely useless. Checking
+    for the marker turns a silent misconfiguration into a visible one.
+    """
+    value = (os.environ.get(name) or "").strip()
+    return bool(value) and "${{" not in value
+
+
 @app.get("/api/health")
 async def health() -> dict:
     """Liveness + dependency probe used by the platform health check.
@@ -112,7 +123,13 @@ async def health() -> dict:
     return {
         "status": "ok" if db_ok else "degraded",
         "database": db_ok,
-        "cloudinary": bool(os.environ.get("CLOUDINARY_CLOUD_NAME")),
+        # `configured` is not the same as `present`. Railway variable
+        # references (`${{Some Service.VAR}}`) that fail to resolve are
+        # stored as the LITERAL string, so a truthy check reports a
+        # healthy Cloudinary while every upload 401s — the exact silent
+        # config failure the rest of this file's deploy notes are about.
+        # Still booleans only: no value, resolved or not, is ever echoed.
+        "cloudinary": _config_ok("CLOUDINARY_CLOUD_NAME") and _config_ok("CLOUDINARY_API_SECRET"),
     }
 
 
