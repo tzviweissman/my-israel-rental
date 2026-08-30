@@ -1357,3 +1357,16 @@ select:focus-visible,
   .gf-row { transition: none; }
   .gf-caret { animation: none; opacity: 0; }
 }
+
+/* Digits inside a Playfair heading — see components/common/Numerals.jsx
+   for the measurements. Playfair's `1` and `0` are ~70% of its cap
+   height while `8` is full height, so a heading beginning with a 1 looks
+   broken. `font-variant-numeric: lining-nums` does NOT fix it; the face
+   ships no lining set. Size and weight are inherited so only the shape
+   of the digits changes. */
+.lining-num {
+  font-family: var(--font-body);
+  font-weight: inherit;
+  font-size: inherit;
+  letter-spacing: 0;
+}

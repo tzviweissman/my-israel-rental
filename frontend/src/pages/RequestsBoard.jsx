@@ -26,6 +26,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { saveReturnPath } from '../hooks/useBackNavigation';
 import { useTranslation } from 'react-i18next';
 import RecentSearchesPanel from '../components/search/RecentSearchesPanel';
+import Numerals from '../components/common/Numerals';
 import { recordSearch } from '../utils/recentSearches';
 import { toast } from 'sonner';
 import formatDate from '../utils/formatDate';
@@ -57,7 +58,22 @@ const SIDES = [
 const TYPES = [
   { key: '', labelKey: 'requests.typeAll', fallback: 'All', Icon: LayoutGrid },
   { key: 'rental', labelKey: 'requests.typeRental', fallback: 'Rentals', Icon: Home },
-  { key: 'service', labelKey: 'requests.typeService', fallback: 'Services', Icon: Wrench },
+  // Labelled by SIDE, not by one fixed word. The nav calls this
+  // "Businesses" and this chip called it "Services", which is the same
+  // thing named two ways one row apart. But the board has two sides and
+  // they genuinely differ: a POST of this type is a business offering
+  // something, while a REQUEST of this type is someone who needs a
+  // service — "Businesses" would be the wrong noun for "I need a
+  // plumber". So supply and the mixed view follow the nav, and the
+  // demand side keeps the word that fits it.
+  {
+    key: 'service',
+    labelKey: 'requests.typeService',
+    fallback: 'Businesses',
+    wantLabelKey: 'requests.typeServiceWant',
+    wantFallback: 'Services',
+    Icon: Wrench,
+  },
   // N4. Items are on this board and not in the marketplace: one person
   // selling one sofa has no repeat supply and no meaningful review, and
   // needs a `sold` state a business listing does not have.
@@ -494,20 +510,23 @@ const RequestsBoard = () => {
           {/* Segmented type filter — the board's primary cut. */}
           <div className="flex justify-center mb-3">
             <div className="wh-tabs" role="tablist" aria-label={t('requests.filterByType', 'Filter requests by type')}>
-              {TYPES.map(({ key, labelKey, fallback, Icon }) => (
-                <button
-                  key={key || 'all'}
-                  type="button"
-                  role="tab"
-                  className="wh-tab inline-flex items-center gap-1.5"
-                  aria-selected={type === key}
-                  onClick={() => patchUrl({ type: key })}
-                  data-testid={`requests-type-${key || 'all'}`}
-                >
-                  <Icon size={13} aria-hidden="true" />
-                  {t(labelKey, fallback)}
-                </button>
-              ))}
+              {TYPES.map(({ key, labelKey, fallback, wantLabelKey, wantFallback, Icon }) => {
+                const demand = side === 'want' && wantLabelKey;
+                return (
+                  <button
+                    key={key || 'all'}
+                    type="button"
+                    role="tab"
+                    className="wh-tab inline-flex items-center gap-1.5"
+                    aria-selected={type === key}
+                    onClick={() => patchUrl({ type: key })}
+                    data-testid={`requests-type-${key || 'all'}`}
+                  >
+                    <Icon size={13} aria-hidden="true" />
+                    {demand ? t(wantLabelKey, wantFallback) : t(labelKey, fallback)}
+                  </button>
+                );
+              })}
             </div>
           </div>
 
@@ -576,9 +595,11 @@ const RequestsBoard = () => {
       <section className="max-w-6xl mx-auto px-4 pt-11 pb-20">
         <div className="section-rhead flex items-baseline justify-between gap-4 mb-5">
           <h2 className="text-gray-900">
-            {loading
-              ? t('requests.loading', 'Loading requests…')
-              : t('requests.count', '{{n}} open on the board', { n: requests.length })}
+            <Numerals>
+              {loading
+                ? t('requests.loading', 'Loading requests…')
+                : t('requests.count', '{{n}} open on the board', { n: requests.length })}
+            </Numerals>
           </h2>
           {(area || q || type) && (
             <button
