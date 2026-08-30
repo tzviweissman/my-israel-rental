@@ -10,6 +10,7 @@ import React, { useContext, useEffect, useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import DateField from '../components/common/DateField';
+import FitImage from '../components/common/FitImage';
 import axios from 'axios';
 import { toast } from 'sonner';
 import { MessageCircle, Send, Loader2, ArrowLeft, Award, Zap, Calendar, Clock, Camera, ChevronLeft, ChevronRight, X } from 'lucide-react';
@@ -628,12 +629,18 @@ const GigDetail = () => {
             <button
               type="button"
               onClick={() => cover && setLightboxIndex(heroIndex)}
+              /* The whole image, not the middle of it. This was a
+                 background-image at `cover` in a 16:9 box, which on the
+                 portrait flyers businesses actually upload cropped the
+                 trade name off the top and the phone number off the
+                 bottom. See components/common/FitImage. */
               className="relative aspect-video w-full bg-gray-100 rounded-2xl overflow-hidden group"
-              style={cover ? { backgroundImage: `url(${cover})`, backgroundSize: 'cover', backgroundPosition: 'center' } : {}}
               data-testid="gig-cover"
               aria-label={cover ? t('gigDetail.openGallery', 'Open photo gallery') : undefined}
             >
-              {!cover && <div className="w-full h-full flex items-center justify-center text-gray-300">No image</div>}
+              {cover
+                ? <FitImage src={cover} alt="" className="absolute inset-0" />
+                : <div className="w-full h-full flex items-center justify-center text-gray-300">No image</div>}
               {/* The "Photos of · {tier}" tag is gone. It labelled the hero
                   with the selected option's name, which told a visitor
                   nothing they could not see from the option they had just
@@ -665,7 +672,15 @@ const GigDetail = () => {
                         ? 'ring-2 ring-[var(--brand-primary)]'
                         : 'hover:ring-2 hover:ring-[var(--brand-primary)] opacity-80 hover:opacity-100'
                     }`}
-                    style={{ backgroundImage: `url(${src})`, backgroundSize: 'cover', backgroundPosition: 'center' }}
+                    /* `contain`, matching the hero. A thumbnail cropped
+                       differently from the image it selects is a different
+                       picture as far as the person choosing is concerned. */
+                    style={{
+                      backgroundImage: `url(${src})`,
+                      backgroundSize: 'contain',
+                      backgroundPosition: 'center',
+                      backgroundRepeat: 'no-repeat',
+                    }}
                     data-testid={`gig-thumb-${i}`}
                     aria-label={`Show photo ${i + 1}`}
                     aria-current={i === heroIndex ? 'true' : undefined}
@@ -798,7 +813,8 @@ const GigDetail = () => {
                           const pc = productCover(p);
                           const extra = productPhotos(p).length - 1;
                           return (
-                            <div className="relative aspect-square bg-gray-100" style={pc ? { backgroundImage: `url(${pc})`, backgroundSize: 'cover', backgroundPosition: 'center' } : {}}>
+                            <div className="relative aspect-square bg-gray-100">
+                            {pc && <FitImage src={pc} alt="" className="absolute inset-0" />}
                               {/* Says there is more to see, so a second
                                   photo is not invisible behind the first. */}
                               {extra > 0 && (

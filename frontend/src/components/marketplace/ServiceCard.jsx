@@ -1,7 +1,7 @@
 import React from 'react';
 import { Award, Zap } from 'lucide-react';
 import StarRating from './StarRating';
-import SafeImage from '../common/SafeImage';
+import FitImage from '../common/FitImage';
 import { localizedTitle, localizedDescription } from '../../utils/gigLocale';
 import { isAvailableNow, getGigCover } from '../../utils/gigAvailability';
 import { gigPriceParts } from '../../utils/gigPrice';
@@ -69,13 +69,13 @@ const ServiceGridCard = ({ gig, onClick, i18n, t }) => {
             two values apart per channel, invisible.
             SafeImage covers the third case: a URL that exists but no
             longer loads, which used to render as a torn-page glyph. */}
-        <SafeImage
+        <FitImage
           src={cover}
           name={gig.provider?.name || localizedTitle(gig, i18n)}
           category={gig.category}
           loading="lazy"
           decoding="async"
-          className="absolute inset-0 w-full h-full object-cover"
+          className="absolute inset-0"
         />
         {/* Top-Rated overlay pill */}
         {gig.is_top_rated && (
@@ -175,13 +175,13 @@ const ServiceRow = ({ gig, onClick, i18n, t }) => {
             torn-page glyph on a page a business shares with its own
             customers. It falls back to the same designed placeholder the
             no-photo case uses. */}
-        <SafeImage
+        <FitImage
           src={cover}
           name={gig.provider?.name || localizedTitle(gig, i18n)}
           category={gig.category}
           loading="lazy"
           decoding="async"
-          className="absolute inset-0 w-full h-full object-cover"
+          className="absolute inset-0"
         />
       </div>
 
