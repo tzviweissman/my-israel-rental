@@ -271,9 +271,21 @@ const BusinessPage = ({ business: injected = null, preview = false }) => {
      small mark on a lot of empty space. */
   const shareImage = biz.cover_url || biz.logo_url
     || (primaryListing ? getGigCover(primaryListing) : null) || undefined;
+  // Where they work, as a human would say it. Two things this must not
+  // do, both of which it did:
+  //   * omit nationwide. A business that only ticked "all of Israel" has
+  //     an EMPTY `areas`, so the card said nothing about the one fact
+  //     that sells them.
+  //   * print raw slugs. `areas` stores canonical slugs now, and
+  //     `.join(', ')` on them put "jerusalem, bet-shemesh" into a share
+  //     card. prettyArea is what turns those back into place names.
+  const areaSummary = [
+    biz.serves_nationwide ? t('serviceArea.chipNationwide', 'All of Israel') : null,
+    ...(biz.areas || []).map((a) => prettyArea(a, t)),
+  ].filter(Boolean).join(', ');
   const shareDescription =
     biz.description?.slice(0, 155)
-    || [ (biz.categories || [])[0], (biz.areas || []).join(', ') ].filter(Boolean).join(' · ')
+    || [ (biz.categories || [])[0], areaSummary ].filter(Boolean).join(' · ')
     || `${biz.name} on MyIsraelRental.`;
 
   return (

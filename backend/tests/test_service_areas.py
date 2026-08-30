@@ -170,3 +170,48 @@ def test_nationwide_and_cities_are_independent():
     doc["serves_nationwide"] = True
     assert doc["areas"] == ["jerusalem"]
     assert doc["serves_nationwide"] is True
+
+
+# --------------------------------------------------------------------------
+# Nationwide with NO cities
+# --------------------------------------------------------------------------
+# A courier or an online shop has no "base city" worth naming. Every layer
+# has to survive `areas == []` with `serves_nationwide == True`, and each
+# one is a separate chance to have written `if areas:` somewhere and
+# quietly dropped the business out of every search.
+
+def test_nationwide_with_no_cities_is_a_valid_state():
+    from utils.businesses import new_business_doc
+
+    doc = new_business_doc("u1", "Courier", slug="courier", areas=[])
+    doc["serves_nationwide"] = True
+    assert doc["areas"] == []
+    assert doc["serves_nationwide"] is True
+
+
+def test_normaliser_does_not_require_a_city():
+    """No floor of one. Empty is a legitimate answer, not a failure."""
+    assert normalize_service_areas([]) == []
+
+
+def test_search_matches_nationwide_regardless_of_areas():
+    """The business lookup is an $or, so `areas` being empty cannot
+    exclude a nationwide business from a city filter."""
+    src = _list_gigs_source()
+    assert '{"$or": [{"areas": location}, {"serves_nationwide": True}]}' in src, (
+        "the business lookup is no longer an $or — a nationwide business "
+        "with no cities listed would match no city filter at all"
+    )
+
+
+def test_nothing_requires_areas_alongside_nationwide():
+    """No cross-validation anywhere: the two fields are independent."""
+    from routes.marketplace import businesses as biz_routes
+
+    src = inspect.getsource(biz_routes.update_business)
+    stripped = "\n".join(re.sub(r"#.*$", "", ln) for ln in src.splitlines())
+    # A guard like `if serves_nationwide and not areas: raise` would show
+    # up as the two names in one conditional. There must not be one.
+    for line in stripped.splitlines():
+        if "serves_nationwide" in line and "areas" in line:
+            pytest.fail(f"areas and serves_nationwide are cross-validated: {line.strip()!r}")
