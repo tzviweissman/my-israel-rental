@@ -32,6 +32,7 @@ from utils.businesses import (
 
 from .shared import (
     HAS_ANY_PHOTO,
+    normalize_service_areas,
     TOP_RATED_MIN_AVG,
     TOP_RATED_MIN_COUNT,
     _batch_rating_aggregate,
@@ -80,7 +81,16 @@ class BusinessIn(BaseModel):
     name: str = Field(..., min_length=2, max_length=80)
     description: str = Field("", max_length=2000)
     categories: list[str] = Field(default_factory=list)
+    # Where this business actually works. Slugs from shared.LOCATIONS;
+    # anything else is dropped by `normalize_service_areas`.
     areas: list[str] = Field(default_factory=list)
+    # "We cover the whole country" — a shipper, or someone who travels.
+    # Kept SEPARATE from listing every city rather than being twelve
+    # entries in `areas`, because the two mean different things to a
+    # customer reading the page, and because a new city added to the
+    # catalogue should widen a nationwide business automatically while
+    # leaving a six-city business exactly as its owner set it.
+    serves_nationwide: bool = False
     logo_url: Optional[str] = None
     # Cover photo behind the business name. Optional, and the page is
     # designed to look finished without one.
@@ -137,7 +147,11 @@ class BusinessPatch(BaseModel):
     name: Optional[str] = Field(None, min_length=2, max_length=80)
     description: Optional[str] = Field(None, max_length=2000)
     categories: Optional[list[str]] = None
+    # None means "leave alone"; [] means "clear it". That distinction is
+    # why these are Optional rather than defaulted — an owner who moves
+    # premises must be able to REMOVE the old city, not only add.
     areas: Optional[list[str]] = None
+    serves_nationwide: Optional[bool] = None
     logo_url: Optional[str] = None
     # Cover photo behind the business name. Optional, and the page is
     # designed to look finished without one.
@@ -187,6 +201,7 @@ def _public(
         "logo_url": doc.get("logo_url"),
         "categories": doc.get("categories") or [],
         "areas": doc.get("areas") or [],
+        "serves_nationwide": bool(doc.get("serves_nationwide")),
         "verified": bool(doc.get("verified")),
         "active": doc.get("active", True),
         "created_at": doc.get("created_at"),
@@ -341,8 +356,13 @@ async def create_business(payload: BusinessIn, user=Depends(verify_token)):
         slug=await unique_slug(name),
         description=payload.description.strip(),
         categories=payload.categories,
-        areas=payload.areas,
+        # Normalised on the way IN, so the database only ever holds
+        # canonical slugs. Search compares against slugs; anything else
+        # stored here would be a service area the owner can see on their
+        # own page and no customer can ever match.
+        areas=normalize_service_areas(payload.areas),
     )
+    doc["serves_nationwide"] = bool(payload.serves_nationwide)
     if payload.logo_url:
         doc["logo_url"] = payload.logo_url
     await db.businesses.insert_one(doc)
@@ -354,10 +374,19 @@ async def update_business(business_id: str, payload: BusinessPatch, user=Depends
     biz = await _owned(business_id, user)
     update: dict[str, Any] = {}
 
-    for field in ("description", "logo_url", "categories", "areas"):
+    for field in ("description", "logo_url", "categories"):
         value = getattr(payload, field)
         if value is not None:
             update[field] = value.strip() if isinstance(value, str) else value
+
+    # Both are independently settable, and both are settable to "none".
+    # An owner who moves premises clears the old city; one who stops
+    # shipping turns nationwide off. Neither implies the other — a
+    # Jerusalem shop that ships countrywide is both at once.
+    if payload.areas is not None:
+        update["areas"] = normalize_service_areas(payload.areas)
+    if payload.serves_nationwide is not None:
+        update["serves_nationwide"] = bool(payload.serves_nationwide)
 
     if payload.name is not None:
         name = payload.name.strip()
@@ -639,6 +668,7 @@ async def public_business(
         "logo_url": biz.get("logo_url"),
         "categories": biz.get("categories") or [],
         "areas": biz.get("areas") or [],
+        "serves_nationwide": bool(biz.get("serves_nationwide")),
         # M5 — verification belongs to the BUSINESS. Verifying that
         # someone owns an apartment says nothing about their trade
         # licence, so the user-level flag is not borrowed here.

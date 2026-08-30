@@ -14,7 +14,7 @@ import React, { useContext, useEffect, useState } from 'react';
 import { Link, useParams, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import axios from 'axios';
-import { Star, BadgeCheck, MapPin, Loader2, MessageCircle, LayoutGrid, List, Zap, Search, CreditCard } from 'lucide-react';
+import { Star, BadgeCheck, MapPin, Loader2, MessageCircle, LayoutGrid, List, Zap, Search, CreditCard, Globe } from 'lucide-react';
 import { API, AuthContext } from '../App';
 import PageMeta from '../components/PageMeta';
 import ServiceCard from '../components/marketplace/ServiceCard';
@@ -489,9 +489,23 @@ const BusinessPage = ({ business: injected = null, preview = false }) => {
                   covering six neighbourhoods reads as a paragraph
                   otherwise, and the one a visitor is scanning for is
                   buried in it. */}
-              {(biz.areas || []).length > 0 && (
+              {((biz.areas || []).length > 0 || biz.serves_nationwide) && (
                 <div className="mt-3 flex flex-wrap gap-1.5" data-testid="business-areas">
-                  {biz.areas.map((a) => (
+                  {/* Nationwide leads, because it is the larger claim and
+                      the cities after it are then read as "and they are
+                      based here" rather than as the limit. Gold: the two
+                      are different kinds of fact, and a visitor scanning
+                      for "do they come to me" should find this first. */}
+                  {biz.serves_nationwide && (
+                    <span
+                      className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold"
+                      style={{ background: 'var(--gold)', color: 'var(--ink)' }}
+                      data-testid="business-nationwide"
+                    >
+                      <Globe size={11} /> {t('serviceArea.chipNationwide', 'All of Israel')}
+                    </span>
+                  )}
+                  {(biz.areas || []).map((a) => (
                     <span key={a}
                       className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium"
                       style={{ background: 'rgb(var(--brand-primary-rgb) / 0.08)', color: 'var(--brand-primary)' }}>

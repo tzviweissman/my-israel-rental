@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import ServiceAreaPicker from '../common/ServiceAreaPicker';
 import axios from 'axios';
 import { toast } from 'sonner';
 import { X, Loader2 } from 'lucide-react';
@@ -43,7 +44,22 @@ export default function BusinessDetailsForm({ business, API, token, onClose, onS
     kosher_body: b.kosher_certification?.body || '',
     kosher_certificate_url: b.kosher_certification?.certificate_url || '',
     license_number: b.license_number || '',
+    // Canonical LOCATION slugs, and the nationwide flag. Both come back
+    // from the API, so reopening the form shows what is actually stored
+    // rather than a fresh empty picker.
+    areas: b.areas || [],
+    serves_nationwide: !!b.serves_nationwide,
   });
+
+  // The curated city list, fetched once. Failing quietly is right: the
+  // rest of the form still saves, and a picker with no options is
+  // better than a modal that will not open.
+  const [locations, setLocations] = useState([]);
+  useEffect(() => {
+    axios.get(`${API}/marketplace/locations`)
+      .then((r) => setLocations(Array.isArray(r.data) ? r.data : (r.data?.locations || [])))
+      .catch(() => setLocations([]));
+  }, [API]);
 
   const set = (patch) => setForm((f) => ({ ...f, ...patch }));
   // Asked of businesses whose listings suggest food, and always of one
@@ -86,6 +102,11 @@ export default function BusinessDetailsForm({ business, API, token, onClose, onS
         delivery_note: orNull(form.delivery_note),
         lead_time: orNull(form.lead_time),
         payment_note: orNull(form.payment_note),
+        // Sent every save, including when empty — [] is how an owner who
+        // moved premises clears the old city. `undefined` would mean
+        // "leave alone" and strand it.
+        areas: form.areas,
+        serves_nationwide: form.serves_nationwide,
         // Cleared to null when the field is emptied, so a business that
         // removes its licence number is not left showing a stale one.
         license_number: showLicence ? orNull(form.license_number) : undefined,
@@ -173,6 +194,15 @@ export default function BusinessDetailsForm({ business, API, token, onClose, onS
           {field('delivery_note', t('businessPage.delivery', 'Delivery'), 'Jerusalem and Beit Shemesh, same day')}
           {field('lead_time', t('businessPage.leadTime', 'Notice needed'), '48 hours for large orders')}
           {field('payment_note', t('businessPage.payment', 'Payment'), 'Cash, Bit, bank transfer')}
+
+          <ServiceAreaPicker
+            locations={locations}
+            areas={form.areas}
+            nationwide={form.serves_nationwide}
+            onChange={({ areas, nationwide }) =>
+              set({ areas, serves_nationwide: nationwide })}
+            disabled={saving}
+          />
 
           {showLicence && (
             <div className="pt-2 border-t space-y-2" style={{ borderColor: 'var(--brand-border)' }}>

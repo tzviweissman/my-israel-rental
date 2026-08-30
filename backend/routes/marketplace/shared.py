@@ -375,6 +375,52 @@ _LOCATION_BY_SLUG = {loc["slug"]: loc for loc in LOCATIONS}
 # (e.g. "Tel Aviv, Florentin") still resolve without a slug rewrite.
 _LOCATION_BY_LABEL = {loc["label"].lower(): loc for loc in LOCATIONS}
 
+# How many curated cities a business may list before "several places" has
+# quietly become "everywhere". Someone who really does cover the whole
+# country has `serves_nationwide` for that, and it says so honestly on
+# their page instead of listing twelve cities and meaning all of them.
+MAX_SERVICE_AREAS = 6
+
+
+def normalize_service_areas(values: list[str] | None) -> list[str]:
+    """Coerce a list of city inputs to canonical LOCATION SLUGS.
+
+    `businesses.areas` predates this function and was never validated, so
+    it holds whatever a client sent — slugs, display labels, and free text
+    from before there was a picker. Search compares against slugs, so
+    anything else in there is invisible: a business that says "Tel Aviv"
+    where the catalogue says "tel-aviv" simply never matches the Tel Aviv
+    filter, and nothing reports the mismatch.
+
+    Accepts either form, stores the slug. Unknown values are DROPPED
+    rather than raising: a stale client sending one retired city should
+    not cost the owner the rest of their save, and the alternative —
+    storing it — recreates the invisible-value bug this exists to end.
+
+    Order is preserved and duplicates removed, so the first city an owner
+    picked stays first (their page lists them in that order).
+    """
+    out: list[str] = []
+    for raw in values or []:
+        if not isinstance(raw, str):
+            continue
+        key = raw.strip().lower()
+        if not key:
+            continue
+        loc = _LOCATION_BY_SLUG.get(key) or _LOCATION_BY_LABEL.get(key)
+        if loc and loc["slug"] not in out:
+            out.append(loc["slug"])
+    return out[:MAX_SERVICE_AREAS]
+
+
+def service_area_labels(slugs: list[str] | None) -> list[str]:
+    """Slugs -> display labels, for matching legacy free-text gig areas."""
+    return [
+        _LOCATION_BY_SLUG[s]["label"]
+        for s in (slugs or [])
+        if s in _LOCATION_BY_SLUG
+    ]
+
 
 def _resolve_gig_coords(gig: dict[str, Any]) -> Optional[tuple[float, float]]:
     """Best-effort lat/lng for a gig. Prefers an explicit `lat`/`lng` on

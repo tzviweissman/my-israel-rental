@@ -152,12 +152,45 @@ async def list_gigs(
         if subcategory:
             query["subcategory"] = subcategory
     if location:
-        # Case-insensitive substring match on the `area` field so a gig
-        # tagged "Jerusalem, Old City" matches the "jerusalem" slug.
         loc = _LOCATION_BY_SLUG.get(location)
         if not loc:
             raise HTTPException(status_code=400, detail=f"Unknown location '{location}'")
-        query["area"] = {"$regex": re.escape(loc["label"]), "$options": "i"}
+
+        # THREE WAYS TO BE IN A CITY, not one.
+        #
+        # This used to be `query["area"] = <regex>` alone, which meant the
+        # only thing that could put a gig in a city was the single city
+        # typed on that gig. A business could list six service areas, or
+        # declare it ships countrywide, and match NONE of them — the
+        # fields existed and search read a different one. Nothing errored;
+        # the listing was simply never returned.
+        #
+        #   1. the gig's own `area` — a case-insensitive substring, so a
+        #      gig tagged "Jerusalem, Old City" still matches "jerusalem";
+        #   2. its business lists this city in `areas`;
+        #   3. its business serves the whole country (a shipper, or
+        #      someone who travels to the customer).
+        #
+        # A separate lookup rather than a join: `businesses` is small and
+        # Mongo cannot express this in one query without an aggregation
+        # pipeline, which would have to be threaded through every other
+        # filter below.
+        reaching_ids = [
+            b["_id"]
+            async for b in db.businesses.find(
+                {"$or": [{"areas": location}, {"serves_nationwide": True}]},
+                {"_id": 1},
+            )
+        ]
+        location_clauses: list[dict[str, Any]] = [
+            {"area": {"$regex": re.escape(loc["label"]), "$options": "i"}}
+        ]
+        if reaching_ids:
+            location_clauses.append({"business_id": {"$in": reaching_ids}})
+        # Appended to `$and` rather than assigned to `query["$or"]`: the
+        # free-text `q` filter below builds its own `$or` clauses, and two
+        # top-level `$or` keys would silently overwrite each other.
+        query["$and"] = query.get("$and", []) + [{"$or": location_clauses}]
     if q:
         # Word-by-word rather than one substring, and shared with the
         # Requests board so both searches behave the same way. It fixes the

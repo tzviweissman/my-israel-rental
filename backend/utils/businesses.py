@@ -107,7 +107,13 @@ def new_business_doc(
         "description_he": None,
         "description_en": None,
         "categories": categories or [],
+        # Canonical LOCATION slugs — see shared.normalize_service_areas.
         "areas": areas or [],
+        # Separate from `areas` rather than "all twelve cities": a new city
+        # added to the catalogue should widen a nationwide business by
+        # itself, and leave a city-list business exactly as its owner set
+        # it. The two also read differently to a customer.
+        "serves_nationwide": False,
         # Per business, not per person (spec M5). Verifying someone owns an
         # apartment says nothing about their trade licence. The user-level
         # verification stays where it is, for identity.

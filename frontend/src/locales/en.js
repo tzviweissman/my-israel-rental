@@ -1556,6 +1556,14 @@ const en = {
         errUpload: 'The upload did not finish. Please try again.',
         errRemove: 'Could not remove the tour. Please try again.',
       },
+      serviceArea: {
+        label: 'Where do you work?',
+        nationwide: 'I serve all of Israel',
+        chipNationwide: 'All of Israel',
+        cap: 'That is the most cities you can list. Covering more than this is what "All of Israel" is for.',
+        hintCities: 'Pick every city you travel to. If you ship or travel anywhere in the country, tick the box instead.',
+        hintNationwide: 'You will show up in every city. Any cities picked above are shown as your base.',
+      },
       signupJoin: {
         headline: 'Join My Israel Rental',
         sub: 'Book a stay, list a property, or add your business — all in one place.',
