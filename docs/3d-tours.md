@@ -11,29 +11,48 @@ answered.
 
 ---
 
-## The vendor problem — read this first
+## The vendor question — read this first
 
-The feature was specified against the **Luma AI** video-to-3D API. That
-API appears to be discontinued:
+The feature was specified against the **Luma AI** video-to-3D capture API.
+That API is **undocumented and unsupported, but still running.**
 
-- `docs.lumalabs.ai/llms.txt`, Luma's full documentation index, lists only
-  Dream Machine generative endpoints — generations, images, videos,
-  reframe, modify, credits. There is no capture, NeRF, or splat endpoint
-  in it.
-- `github.com/lumalabs/lumaapi-python`, Luma's own capture client, opens
-  with "We are no longer actively supporting this capture API."
+Probed 30 Aug 2026 with `python -m scripts.probe_luma_capture` (no API key
+needed — re-run it any time):
 
-So `LumaTourProvider` is written against the historical endpoint shape
-(create a capture → PUT to a signed URL → trigger → poll a slug) and
-**has never been run against a live key**, because we do not have one.
-Treat its first real call as the integration test and expect field names
-to need adjusting.
+| Check | Result |
+|---|---|
+| `/api/v2/capture`, `/api/v2/capture/{slug}` | **live** — auth error, not 404 |
+| Junk paths on the same host (the control) | 404 "Resource not found" |
+| `Authorization: luma-api-key=<bogus>` | **401 "API key does not exist"** — header parsed, key looked up |
+| `Bearer` / `x-api-key` / malformed | generic error — not understood |
 
-Everything else in the feature is vendor-agnostic. Swapping providers is
-one new class in `utils/tour_provider.py` and one env var — not a
-re-plumb. Candidates worth pricing if Luma is out: Polycam, Meshy,
-Matterport, or any service that takes a video and returns an embeddable
-scene.
+The junk-path control is what makes this proof rather than noise: a host
+that rejected *everything* unauthenticated would look identical. And the
+401 confirms the one line of `LumaTourProvider` that no amount of reading
+could — the auth header format is correct.
+
+**Still unverified, because it needs a real key:** every field name
+`submit` and `_to_job` read — `capture.slug`, `signedUrls.source`,
+`latestRun.status`, `latestRun.artifacts[].type`. Those come from Luma's
+old client and should be expected to need adjusting on first contact.
+`probe_luma_capture.py` checks them too if you give it `LUMA_API_KEY`.
+
+**What "alive" does not mean.** The capture API is absent from
+`docs.lumalabs.ai/llms.txt` and from `lumalabs.ai/api`, which now markets
+only Ray3.2 and Uni-1.1. Luma's own client repo says they no longer
+actively support it. So it runs, unadvertised, and could stop without a
+deprecation notice — and it is unclear whether a key issued from
+`platform.lumalabs.ai` today still carries capture scope. **That is the
+open question: get a key and re-run the probe.**
+
+None of this changes the architecture. The vendor sits behind
+`TourProvider` precisely because it is the piece most likely to vanish;
+swapping is one class and one env var. Candidates if Luma does go:
+Polycam, Meshy, Matterport.
+
+> An earlier version of this document said the API "appears to be
+> discontinued". That was too strong — the endpoints answer. Corrected
+> after probing rather than reading.
 
 ## Files
 
@@ -46,6 +65,7 @@ scene.
 | Renter embed + toggle | `frontend/src/components/property/Tour3DViewer.jsx` |
 | Embed URL guard (pure) | `frontend/src/utils/embedSafety.js` |
 | Tests | `backend/tests/test_tour_provider.py`, `scripts/test-tour3d-embed-safety.mjs` |
+| Live vendor probe (no key needed) | `backend/scripts/probe_luma_capture.py` |
 
 Named `tours_3d` / `Tour3D*` deliberately: `frontend/src/components/tour/`
 is already the onboarding coach-mark tour, and `/api/onboarding/tour`
@@ -141,7 +161,8 @@ forever.
 
 ## Known gaps
 
-- The Luma adapter is unverified against a live key (see above).
+- The Luma adapter's response-body field names are unverified against a
+  live key (endpoints and auth format are verified — see above).
 - Luma will not accept our Cloudinary URL — it wants bytes PUT to a signed
   URL of its own — so `submit` streams the video through this container.
   The browser→Cloudinary leg still bypasses us, which is the one the

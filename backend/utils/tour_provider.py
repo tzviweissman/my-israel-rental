@@ -2,18 +2,23 @@
 
 WHY THIS IS AN INTERFACE AND NOT JUST A LUMA CLIENT
 ---------------------------------------------------
-The feature was specified as "call the Luma AI API". While building it I
-checked Luma's current API surface and could not find the capture
-(video-to-3D) endpoint documented any more:
+The feature was specified as "call the Luma AI API". The capture
+(video-to-3D) endpoint is undocumented and unadvertised:
 
   * `docs.lumalabs.ai/llms.txt` — the full documentation index — lists
     only Dream Machine generative endpoints (generations, images, videos,
     reframe, modify, credits). No capture, NeRF, or splat endpoint.
+  * `lumalabs.ai/api` markets only Ray3.2 (video) and Uni-1.1 (image).
   * `github.com/lumalabs/lumaapi-python`, Luma's own capture client,
     opens with "We are no longer actively supporting this capture API."
 
-So the vendor leg is the one part of this feature most likely to need
-replacing, and it is the only part that is vendor-specific. Everything
+It is, however, STILL RUNNING — probed 30 Aug 2026, see the note on
+`LumaTourProvider` and `scripts/probe_luma_capture.py`. Undocumented and
+unsupported is not the same as switched off, and the earlier reading here
+that it was gone was too strong.
+
+It does mean the vendor leg is the part most likely to need replacing at
+no notice, and it is the only part that is vendor-specific. Everything
 else — the `property_tours` documents, the ownership checks, the upload
 flow, the embed — is identical whichever service does the reconstruction.
 Putting the vendor behind `TourProvider` means swapping it is one new
@@ -104,12 +109,30 @@ _LUMA_BASE = os.environ.get(
 class LumaTourProvider:
     """Luma Labs capture API.
 
-    THESE ENDPOINTS ARE UNVERIFIED AGAINST A LIVE KEY. They follow the
-    shape Luma's own (unmaintained) client used — create a capture, PUT
-    the file to a signed URL, trigger, then poll a slug. Nobody has run
-    this against a real account, because the API appears to be on the way
-    out and we have no credentials for it. Treat the first live call as
-    the real integration test, and expect to adjust field names.
+    WHAT IS VERIFIED, AND WHAT IS NOT. Re-check any of it with
+    `python -m scripts.probe_luma_capture`, which needs no key.
+
+    Verified against the live server (30 Aug 2026):
+
+      * The routes EXIST. `/api/v2/capture` and `/api/v2/capture/{slug}`
+        answer with an auth error, while junk paths on the same host get
+        404 "Resource not found". That control is the whole proof — a
+        host that rejected everything unauthenticated would look the same.
+      * The AUTH HEADER BELOW IS RIGHT. `Authorization: luma-api-key=…`
+        with a bogus key returns 401 "API key does not exist" — parsed and
+        looked up. `Bearer`, `x-api-key` and a malformed scheme are not
+        understood at all.
+
+    NOT verified, because it needs a real key: every field name that
+    `submit` and `_to_job` read — `capture.slug`, `signedUrls.source`,
+    `latestRun.status`, `latestRun.artifacts[].type`. Those are still
+    taken from Luma's old client. Expect to adjust them on first contact.
+
+    And note what "alive" does not mean: the capture API is absent from
+    Luma's documentation index and from lumalabs.ai/api, which now
+    markets only Ray3.2 and Uni-1.1. It is running, unadvertised and
+    unsupported — so it can disappear without a deprecation notice. That
+    is an argument for the seam above, not against using it.
 
     Two behaviours here are not incidental:
 
