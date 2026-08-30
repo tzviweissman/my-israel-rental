@@ -377,3 +377,29 @@ async def test_a_job_in_an_unlisted_town_still_reaches_everyone(client, monkeypa
     )
     sent = await _notified_for(monkeypatch, _job("Ramat Gan"))
     assert set(sent) == {"u-a@example.test", "u-b@example.test"}, sent
+
+
+@pytest.mark.asyncio
+async def test_a_business_with_pre_picker_label_areas_still_gets_alerts(client, monkeypatch):
+    """The deploy-order trap.
+
+    Businesses created before the service-area picker hold display labels
+    ("Jerusalem") where the matcher compares slugs ("jerusalem"). That
+    mismatch fails the dangerous way round: non-empty `areas` marks the
+    business as having answered the question, and matching nothing marks
+    it as not covering the city — so it is dropped from alerts it gets
+    today, for work it actually does, with nothing saying why.
+
+    The backfill fixes the stored data, but this must hold whether or not
+    the backfill has run yet — otherwise shipping the feature takes
+    people's leads away for the length of the gap.
+    """
+    await _seed_providers(
+        client.fake_db,
+        [{"_id": "b-legacy", "owner_user_id": "u-legacy",
+          "areas": ["Jerusalem"], "serves_nationwide": False}],
+        [_gig("u-legacy", "b-legacy")],
+    )
+    assert await _notified_for(monkeypatch, _job("Jerusalem")) == ["u-legacy@example.test"]
+    # And it is still genuinely scoped — not just matching everything.
+    assert await _notified_for(monkeypatch, _job("Haifa")) == []

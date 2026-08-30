@@ -47,6 +47,7 @@ from .shared import (
     FRONTEND_URL,
     _validate_category,
     _validate_subcategory,
+    normalize_service_areas,
     service_area_slugs_in_text,
 )
 
@@ -174,7 +175,19 @@ async def _providers_reaching_area(
         {"owner_user_id": 1, "areas": 1, "serves_nationwide": 1},
     ):
         uid = biz.get("owner_user_id")
-        areas = set(biz.get("areas") or [])
+        # NORMALISED ON READ, not trusted as stored. Businesses that
+        # predate the picker hold display labels ("Jerusalem") where this
+        # compares slugs ("jerusalem"), and the mismatch fails in the
+        # worst possible direction: non-empty `areas` counts the business
+        # as having answered the question, while matching nothing counts
+        # it as not covering the city — so it is filtered OUT of alerts it
+        # receives today, silently, for work it does.
+        #
+        # `scripts/backfill_business_service_areas` fixes the stored data,
+        # but making correctness depend on a script having already run is
+        # how a deploy takes people's leads away for however long the gap
+        # is. Normalising here means the order does not matter.
+        areas = set(normalize_service_areas(list(biz.get("areas") or [])))
         nationwide = bool(biz.get("serves_nationwide"))
         if areas or nationwide:
             configured.add(uid)
