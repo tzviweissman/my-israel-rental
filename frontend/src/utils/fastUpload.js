@@ -13,6 +13,7 @@
  * keep its downstream logic unchanged.
  */
 import axios from 'axios';
+import { stripImageMetadata } from './stripImageMetadata';
 
 const MAX_IMAGE_DIMENSION = 2400; // px; covers Retina displays at full-screen
 const IMAGE_QUALITY = 0.85;       // JPEG quality
@@ -24,6 +25,17 @@ const COMPRESS_MIME = 'image/jpeg';
 // so the right move is to skip our own compression and upload the
 // original rather than fail.
 const CANVAS_CANNOT_DECODE = /^image\/(heic|heif|avif)/i;
+
+// HEIC IS THE ONE THIS FILE CANNOT MAKE SAFE, and it is the iPhone
+// default, so it is also the format most likely to arrive with GPS.
+// It is ISOBMFF: Chrome and Firefox cannot decode it, so there is no
+// canvas route, and rewriting its box structure by hand in the browser
+// is not something to do on the upload path. `stripImageMetadata`
+// deliberately refuses it rather than pretending.
+//
+// It is handled where the bytes land instead - the server applies an
+// incoming transformation so Cloudinary stores a re-encoded copy with no
+// metadata. See backend/routes/misc.py::get_cloudinary_signature.
 
 /** Resize + recompress a large image File into a smaller Blob.
  *
@@ -90,9 +102,17 @@ async function compressImage(file) {
 }
 
 /** Fetch a fresh signature from our backend (per upload session). */
-async function getSignature(API, token, resourceType) {
+async function getSignature(API, token, resourceType, stripMetadata = false) {
   const res = await axios.get(`${API}/cloudinary/signature`, {
-    params: { resource_type: resourceType, folder: 'myisraelrental' },
+    params: {
+      resource_type: resourceType,
+      folder: 'myisraelrental',
+      // Only ever set for formats we could not strip in the browser.
+      // It makes Cloudinary re-encode before storing, which drops the
+      // source metadata - and forces JPEG, which is why it is not on
+      // by default (it would flatten a PNG's transparency).
+      ...(stripMetadata ? { strip_metadata: true } : {}),
+    },
     headers: { Authorization: `Bearer ${token}` },
   });
   return res.data;
@@ -106,6 +126,10 @@ async function uploadDirectToCloudinary(file, sig, onProgress) {
   form.append('timestamp', sig.timestamp);
   form.append('signature', sig.signature);
   form.append('folder', sig.folder);
+  // Echoed back exactly as the server signed it. Building this string
+  // here instead would mean a one-character drift produces "Invalid
+  // Signature" on every HEIC upload and nowhere else.
+  if (sig.transformation) form.append('transformation', sig.transformation);
 
   const endpoint = `https://api.cloudinary.com/v1_1/${sig.cloud_name}/${sig.resource_type}/upload`;
   const { data } = await axios.post(endpoint, form, {
@@ -151,8 +175,23 @@ async function fallbackUpload(file, API, token, onProgress) {
 export async function uploadFilesFast(files, API, token, onAggregateProgress) {
   if (!files || files.length === 0) return [];
 
-  // Compress images first (videos pass through unchanged)
-  const prepared = await Promise.all(files.map(compressImage));
+  // STRIP METADATA BEFORE ANYTHING ELSE, and independently of whether
+  // compression runs.
+  //
+  // The canvas redraw in compressImage drops EXIF, but only as a side
+  // effect, and it has six paths that return the ORIGINAL file: non-image,
+  // GIF, HEIC/HEIF/AVIF, files under 600 KB, any thrown error, and
+  // "compressed came out bigger". Three of those are ordinary phone JPEGs,
+  // which is exactly where GPS lives. Someone photographing a sofa in
+  // their living room was publishing their address.
+  //
+  // Running the strip FIRST rather than inside compressImage means it does
+  // not depend on compression succeeding - which is the property that was
+  // missing, since every failure path fell back to the untouched file.
+  const cleaned = await Promise.all(files.map(stripImageMetadata));
+
+  // Compress images (videos pass through unchanged)
+  const prepared = await Promise.all(cleaned.map(compressImage));
 
   // Per-file progress tracker for the aggregate callback
   const perFile = new Array(prepared.length).fill(0);
@@ -165,21 +204,35 @@ export async function uploadFilesFast(files, API, token, onAggregateProgress) {
   // Attempt direct-to-Cloudinary path. We can sign once per resource type.
   let imageSig = null;
   let videoSig = null;
+  // A SECOND image signature, for the files the browser could not strip.
+  // One signature per batch does not work here: the stripping variant
+  // carries a transformation in its signed params, and applying that to
+  // every image would turn PNGs into JPEGs.
+  let strippedImageSig = null;
   try {
     const hasImage = prepared.some((f) => f.type.startsWith('image/'));
     const hasVideo = prepared.some((f) => f.type.startsWith('video/'));
+    const needsServerStrip = prepared.some(
+      (f) => f.type.startsWith('image/') && CANVAS_CANNOT_DECODE.test(f.type),
+    );
     if (hasImage) imageSig = await getSignature(API, token, 'image');
     if (hasVideo) videoSig = await getSignature(API, token, 'video');
+    if (needsServerStrip) strippedImageSig = await getSignature(API, token, 'image', true);
   } catch {
     // 503 — Cloudinary not configured. Fall through to legacy path.
     imageSig = null;
     videoSig = null;
+    strippedImageSig = null;
   }
 
   return Promise.all(
     prepared.map(async (file, idx) => {
       const isVideo = file.type.startsWith('video/');
-      const sig = isVideo ? videoSig : imageSig;
+      // HEIC and friends take the stripping signature when we have one.
+      const needsServerStrip = !isVideo && CANVAS_CANNOT_DECODE.test(file.type);
+      const sig = isVideo
+        ? videoSig
+        : ((needsServerStrip && strippedImageSig) || imageSig);
       const trackProgress = (fraction) => {
         perFile[idx] = fraction;
         report();

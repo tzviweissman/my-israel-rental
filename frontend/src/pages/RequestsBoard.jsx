@@ -30,11 +30,7 @@ import Numerals from '../components/common/Numerals';
 import { recordSearch } from '../utils/recentSearches';
 import { toast } from 'sonner';
 import formatDate from '../utils/formatDate';
-import {
-  Home, Wrench, LayoutGrid, MapPin, Coins, BedDouble, CalendarDays, ShieldCheck,
-  Clock, MessageCircle, Loader2, Search, Plus, Users, Sparkles, KeyRound, ExternalLink,
-  Map as MapIcon, Package,
-} from 'lucide-react';
+import { Home, Wrench, LayoutGrid, MapPin, Coins, BedDouble, CalendarDays, Clock, MessageCircle, Loader2, Search, Plus, Users, Sparkles, KeyRound, ExternalLink, Map as MapIcon, Package, LogIn } from 'lucide-react';
 import { API, AuthContext } from '../App';
 import PageMeta from '../components/PageMeta';
 import RequestsMapView from '../components/requests/RequestsMapView';
@@ -280,10 +276,23 @@ export const RequestCard = ({ request: r, onOpen, t }) => {
         {r.poster_display_name && (
           <>
           <span className="rc-poster-name">{r.poster_display_name}</span>
+          {/* NOT a verification badge, and it used to look like one.
+              `poster_verified` means only that the account signed in with
+              Google (requests.py). It said "Verified", carried a shield,
+              and used #1F8A50 on #E3F3EA - the colour CLAUDE.md reserves
+              for genuinely verified status. Its tooltip went further still
+              and said "Email verified", which is not true of anything:
+              email verification was rolled back in 2026-06 and is set for
+              every account.
+
+              On a board where strangers meet in person to hand over cash,
+              that badge is the site vouching for someone it has not
+              checked. The fact is worth showing - Google asserted the
+              address - so it stays, stated plainly and styled neutrally. */}
           {r.poster_verified && (
-            <span className="rc-verified" title={t('requests.verifiedHint', 'Email verified')}>
-              <ShieldCheck size={11} aria-hidden="true" />
-              {t('requests.verified', 'Verified')}
+            <span className="rc-google" title={t('requests.googleHint', 'This person signed in with Google. We have not checked who they are.')}>
+              <LogIn size={11} aria-hidden="true" />
+              {t('requests.googleAccount', 'Signed in with Google')}
             </span>
           )}
             {r.poster_member_since && (

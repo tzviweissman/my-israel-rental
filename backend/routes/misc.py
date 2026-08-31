@@ -2,7 +2,7 @@
 import os
 import uuid
 from datetime import UTC, datetime, timedelta
-from typing import List
+from typing import Any, List
 
 from fastapi import APIRouter, Body, Depends, File, HTTPException, Request, UploadFile
 from pydantic import BaseModel
@@ -95,6 +95,7 @@ async def get_cloudinary_signature(
     req: Request,
     resource_type: str = "image",
     folder: str = "myisraelrental",
+    strip_metadata: bool = False,
     payload: dict = Depends(verify_token),
 ) -> dict:
     """Sign a direct-to-Cloudinary upload from the browser.
@@ -126,7 +127,30 @@ async def get_cloudinary_signature(
     import cloudinary.utils
 
     timestamp = int(time.time())
-    params = {"timestamp": timestamp, "folder": folder}
+    params: dict[str, Any] = {"timestamp": timestamp, "folder": folder}
+
+    # `strip_metadata` exists for ONE case: HEIC, which is the iPhone
+    # default and therefore the format most likely to carry GPS.
+    #
+    # The browser strips EXIF from JPEG and PNG before upload
+    # (frontend/src/utils/stripImageMetadata.js), but HEIC is ISOBMFF and
+    # Chrome and Firefox cannot decode it, so there is no client-side
+    # route. An INCOMING transformation makes Cloudinary re-encode before
+    # it stores anything, and a re-encode carries no source metadata - so
+    # the original with the GPS in it is never what sits in the account.
+    #
+    # Applied only when asked, because it forces JPEG and would silently
+    # flatten a PNG's transparency if it ran on everything.
+    #
+    # The exact string is returned to the caller rather than agreed by
+    # convention: it is part of the signature, so a client that built its
+    # own copy would only have to differ by a character to produce
+    # "Invalid Signature" on every HEIC upload.
+    transformation = None
+    if strip_metadata and resource_type == "image":
+        transformation = "f_jpg,q_auto:good"
+        params["transformation"] = transformation
+
     signature = cloudinary.utils.api_sign_request(params, cloudinary.config().api_secret)
     return {
         "signature": signature,
@@ -135,6 +159,7 @@ async def get_cloudinary_signature(
         "api_key": cloudinary.config().api_key,
         "folder": folder,
         "resource_type": resource_type,
+        "transformation": transformation,
     }
 
 
@@ -147,10 +172,10 @@ async def translate_text(request: TranslationRequest) -> dict:
             system_message=f"You are a professional translator. Translate the following text from {request.from_lang} to {request.to_lang}. Only provide the translation, no explanations."
         )
         chat.with_model("anthropic", "claude-sonnet-4-6")
-        
+
         message = UserMessage(text=request.text)
         response = await chat.send_message(message)
-        
+
         return {"translation": response}
     except Exception as e:
         raise api_error(

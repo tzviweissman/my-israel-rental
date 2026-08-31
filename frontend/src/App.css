@@ -1113,14 +1113,20 @@ select:focus-visible,
 }
 .rc-poster-name { font-weight: 700; color: var(--ink); }
 .rc-poster-since { color: var(--brand-muted); }
-.rc-verified {
+/* Was `.rc-verified`, in verified-green (#1F8A50 on #E3F3EA). That pair
+   is reserved for genuinely verified status; this chip only says the
+   account signed in with Google. Neutral now, and named for what it is -
+   a class called `verified` is the next person's reason to believe the
+   badge means verification. */
+.rc-google {
   display: inline-flex;
   align-items: center;
   gap: 4px;
   font-size: 11px;
-  font-weight: 800;
-  color: #1F8A50;
-  background: #E3F3EA;
+  font-weight: 700;
+  color: var(--brand-muted);
+  background: var(--bg);
+  border: 1px solid var(--brand-border);
   border-radius: 999px;
   padding: 2px 8px;
 }

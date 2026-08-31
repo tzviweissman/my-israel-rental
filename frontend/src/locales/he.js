@@ -2586,8 +2586,8 @@ const he = {
         status_found: 'נמצא',
         status_expired: 'פג תוקף',
         status_closed: 'סגור',
-        verified: 'מאומת',
-        verifiedHint: 'האימייל אומת דרך חשבון Google',
+        googleAccount: 'התחבר/ה עם Google',
+        googleHint: 'המשתמש התחבר עם Google. לא בדקנו מי זה.',
         memberSince: 'חבר מאז {{year}}',
       },
       errors: {

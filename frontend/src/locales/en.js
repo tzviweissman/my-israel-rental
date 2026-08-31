@@ -2699,8 +2699,13 @@ const en = {
         status_found: 'Found',
         status_expired: 'Expired',
         status_closed: 'Closed',
-        verified: 'Verified',
-        verifiedHint: 'Email verified through Google sign-in',
+        // Was `verified: 'Verified'` with a hint reading "Email verified
+        // through Google sign-in". The flag behind it only means the
+        // account used Google to sign in - see requests.py. Both strings
+        // are gone rather than reworded in place, so a search for
+        // "verified" no longer lands on something that is not.
+        googleAccount: 'Signed in with Google',
+        googleHint: 'This person signed in with Google. We have not checked who they are.',
         memberSince: 'Member since {{year}}',
       },
       errors: {
