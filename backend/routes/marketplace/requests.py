@@ -64,6 +64,14 @@ from utils.translate import detect_lang, translate_marketing
 from utils.whatsapp_link import build_whatsapp_link, normalize_whatsapp_number
 
 from .shared import UTC, FRONTEND_URL, _search_clauses, _validate_category, _validate_subcategory
+from .item_taxonomy import (
+    ITEM_CATEGORY_SLUGS,
+    SCHEMA_VERSION as ITEM_SCHEMA_VERSION,
+    BANNED_MESSAGE,
+    banned_reason,
+    normalize_attributes,
+    validate_item_category,
+)
 
 
 router = APIRouter(prefix="/marketplace", tags=["marketplace"])
@@ -127,6 +135,12 @@ NEW_ACCOUNT_DAYS = 7
 # legitimate seller's post on suspicion is its own harm) but they surface
 # in the moderation queue without waiting for a report.
 MANUAL_REVIEW_CATEGORIES = {"money-exchange"}
+
+# Goods categories that go to a moderator on sight. Deliberately EMPTY:
+# see the note at the `needs_review` assignment. An empty set that is
+# named and explained is honest; a comparison against a services slug
+# that can never match is not.
+ITEM_REVIEW_CATEGORIES: set[str] = set()
 
 
 # ---------------- Pydantic models ----------------
@@ -192,8 +206,19 @@ class RequestIn(BaseModel):
     date_mode: str = Field("on", pattern="^(on|before|flexible)$")
 
     # --- service variant ---
+    # Also carries the ITEM category, which comes from a DIFFERENT tree.
+    # `_validate_variant` routes it to the right validator; the field is
+    # shared only because the storage column is.
     category: Optional[str] = None
     subcategory: Optional[str] = None
+
+    # --- item specifics (G3) ---
+    # Free-form on the wire, schema-checked on the way in. Anything the
+    # category does not declare is dropped rather than stored, because an
+    # attribute no reader knows about is invisible to search and to the
+    # listing page while still looking to the seller like they filled it
+    # in. See item_taxonomy.normalize_attributes.
+    attributes: Optional[dict[str, Any]] = None
     preferred_date: Optional[str] = None
 
     # --- rental variant ---
@@ -497,8 +522,21 @@ def _validate_variant(payload: RequestIn) -> None:
         # matched to them; somebody selling a sofa has already described
         # it in the title, and forcing a taxonomy choice on a classified
         # ad is how the wrong category gets picked at random.
+        # THE GOODS TREE, not the services one. This used to call
+        # `_validate_category`, which accepts service slugs - so a sofa was
+        # offered under "Cleaning Services" and "IT & Tech Support". The
+        # two taxonomies are now separate and a services slug is refused
+        # here with a message naming the goods categories.
         if payload.category:
-            _validate_category(payload.category)
+            validate_item_category(payload.category)
+
+        # Refused on the seller's own words, not on the category they
+        # chose: nobody listing a puppy picks a category that says pets
+        # are not accepted. The message names what IS accepted, because a
+        # bare rejection just gets retried under a different category.
+        banned = banned_reason(payload.title, payload.description)
+        if banned:
+            raise HTTPException(status_code=400, detail=BANNED_MESSAGE)
         # Selling something and naming no price is not a listing, it is a
         # conversation. `budget_type: open` is still allowed — "offers" is
         # a real answer — but it must be chosen.
@@ -701,6 +739,14 @@ async def create_request(payload: RequestIn, user=Depends(verify_token)):
         # Item variant (N4) — null elsewhere, so a filter can key on
         # presence the same way the other two variants do.
         "condition": payload.condition if is_item else None,
+        # Item specifics, already coerced to the category's own schema.
+        # Stored flat as {key: str} so a facet is a plain indexed match
+        # rather than something Python has to post-filter.
+        "attributes": normalize_attributes(payload.category, payload.attributes) if is_item else {},
+        # Which schema the values above were written under. When a field's
+        # meaning changes, this is what lets a reader tell rather than
+        # infer it from the shape of the value.
+        "attributes_version": ITEM_SCHEMA_VERSION if is_item else None,
         "pickup_area": ((payload.pickup_area or "").strip() or None) if is_item else None,
         "photos": (payload.photos or [])[:MAX_ITEM_PHOTOS] if is_item else [],
         # SEPARATE from `status`. `status` is the post's lifecycle
@@ -714,7 +760,22 @@ async def create_request(payload: RequestIn, user=Depends(verify_token)):
         # N6 — fraud-prone categories surface to a moderator without
         # waiting for a report. Flagged, never hidden: hiding a legitimate
         # seller's post on suspicion is its own harm.
-        "needs_review": bool(is_item and payload.category in MANUAL_REVIEW_CATEGORIES),
+        # DEAD AS OF THE GOODS TAXONOMY, and made explicit rather than
+        # left as a comparison that can never be true.
+        #
+        # MANUAL_REVIEW_CATEGORIES holds {"money-exchange"}, a SERVICES
+        # slug. It worked only because items used to borrow the services
+        # tree. Now that they have their own, no item category can ever
+        # match it, so this flag would sit permanently False and the
+        # admin queue permanently empty - while the code still read as
+        # though moderation was wired.
+        #
+        # No goods category auto-flags today. Picking one is a policy
+        # call, not a refactor: electronics is the highest-fraud category
+        # in the research, but flagging every electronics listing floods
+        # the queue until nobody reads it. The report-driven path
+        # (REPORT_HIDE_THRESHOLD) is unaffected and still the live one.
+        "needs_review": bool(is_item and payload.category in ITEM_REVIEW_CATEGORIES),
         # Lifecycle
         "status": "open",
         "created_at": now.isoformat(),
