@@ -1,0 +1,946 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>MyIsraelRental / Marketplace, three screens</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=Manrope:wght@400;500;600;700;800&family=Frank+Ruhl+Libre:wght@300;400;500;700&family=Assistant:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+<style>
+/* ==========================================================================
+   MARKETPLACE / person-to-person goods. Three screens in one file.
+
+   DESIGN READ
+   Transactional classifieds surface for English speakers, olim and visitors
+   in Israel, on the locked MyIsraelRental brand, continuing the broadsheet
+   direction established in home-conversion-preview.html.
+   DESIGN_VARIANCE 7 / MOTION_INTENSITY 4 / VISUAL_DENSITY 5.
+
+   Density is one notch above the home page because this is an index, not a
+   pitch. Everything else is carried over verbatim: limestone paper stock,
+   paper grain, Playfair at 300 with a single italic gold accent, hairline
+   rules that organise real content, 2px corner radius on every interactive
+   surface and 0 on every image frame.
+
+   Colour tokens copied from brand/design-tokens.css. Green is FUNCTIONAL
+   only (verified, sold, available). Accent buttons are solid gold with ink
+   text at 6.71:1, never frosted. No emoji, no drawn icons, no dots.
+
+   Every dimension is a logical property so the RTL toggle in the preview
+   bar is a real test, not a claim.
+   ========================================================================== */
+:root{
+  --blue:#1E5F8C; --blue-dark:#184E73; --blue-deep:#123B57;
+  --gold:#C9A227; --gold-sm:#8A6A14; --gold-lg:#A9831C;
+  --bg:#EFE9DC; --ink:#23201B; --muted:#6B6459;
+  --rule:#E1D8C6; --surface:#FFFFFF;
+  --success:#1F8A50; --success-bg:#E3F3EA;
+  --status-open:#2E7D4F;
+  --head:'Playfair Display',Georgia,serif;
+  --body:'Manrope',system-ui,sans-serif;
+  --head-he:'Frank Ruhl Libre',Georgia,serif;
+  --body-he:'Assistant',system-ui,sans-serif;
+  --page:1240px;
+  --hair:1px solid var(--rule);
+}
+[dir="rtl"]{--head:var(--head-he);--body:var(--body-he)}
+*{box-sizing:border-box;margin:0;padding:0}
+body{
+  background:var(--bg);color:var(--ink);font-family:var(--body);line-height:1.5;
+  -webkit-font-smoothing:antialiased;
+  /* clip, not hidden: hidden on html/body kills position:sticky in descendants
+     across this codebase. Nothing here is sticky, but the guard stays correct. */
+  overflow-x:clip;
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='g'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4'/></filter><rect width='180' height='180' filter='url(%23g)' opacity='0.035'/></svg>");
+}
+.page{max-width:var(--page);margin:0 auto;padding-inline:40px}
+h1,h2,h3,blockquote{font-family:var(--head);font-weight:300;letter-spacing:-.022em;line-height:1.05}
+[dir="rtl"] h1,[dir="rtl"] h2,[dir="rtl"] h3{font-weight:400;letter-spacing:0}
+img{display:block;width:100%;height:100%;object-fit:cover}
+a{color:inherit}
+.it{font-style:italic;color:var(--gold-lg);font-weight:300}
+.est{border-bottom:2px dotted rgba(169,131,28,.65)}
+
+/* ---------- preview chrome. Never ships. ---------- */
+.pv{background:#232020;color:#cfc7ba;font-size:12.5px;padding:14px 40px;line-height:1.7}
+.pv b{color:#fff}
+.pv u{text-decoration-color:var(--gold)}
+.pv button{font-family:var(--body);font-size:12px;font-weight:800;letter-spacing:.08em;
+  background:none;border:1px solid #5b544a;color:#cfc7ba;padding:5px 13px;border-radius:2px;
+  cursor:pointer;margin-inline-start:8px}
+.pv button:hover{border-color:var(--gold);color:#fff}
+.slab{background:var(--ink);color:#efe9dc;padding:11px 40px;
+  display:flex;align-items:baseline;gap:18px;flex-wrap:wrap}
+.slab strong{font-size:12px;font-weight:800;letter-spacing:.2em;text-transform:uppercase;color:var(--gold)}
+.slab span{font-size:12.5px;color:#a89f92;font-weight:600}
+
+/* ---------- masthead ---------- */
+.masthead{border-bottom:2px solid var(--ink);background:rgba(239,233,220,.94)}
+.mast-in{max-width:var(--page);margin:0 auto;padding:15px 40px;display:flex;align-items:baseline;gap:38px}
+.wordmark{font-family:var(--head);font-weight:500;font-size:21px;color:var(--blue-deep);
+  text-decoration:none;letter-spacing:-.015em;white-space:nowrap}
+.mast-nav{display:flex;gap:28px}
+.mast-nav a{font-size:13.5px;font-weight:700;letter-spacing:.04em;color:var(--muted);
+  text-decoration:none;text-transform:uppercase}
+.mast-nav a:hover{color:var(--blue)}
+.mast-nav a[aria-current]{color:var(--ink);border-bottom:2px solid var(--gold);padding-bottom:3px}
+.mast-end{margin-inline-start:auto;display:flex;align-items:baseline;gap:22px}
+.mast-end a.plain{font-size:13.5px;font-weight:700;color:var(--muted);text-decoration:none}
+
+/* ---------- buttons ---------- */
+.gold-btn{background:var(--gold);color:var(--ink);font-family:var(--body);font-weight:800;
+  font-size:14px;padding:11px 22px;border-radius:2px;text-decoration:none;border:none;
+  display:inline-block;cursor:pointer;transition:background .18s ease}
+/* Hover lightens the gold and keeps ink, exactly as design-tokens.css does it
+   (.btn-accent:hover -> #D4AC33). Darkening to --gold-lg with white text
+   measures 3.53:1 and fails; the token file already settled this argument. */
+.gold-btn:hover{background:#D4AC33;color:var(--ink)}
+.big-btn{display:inline-block;background:var(--blue);color:#fff;font-family:var(--body);
+  font-weight:700;font-size:16px;padding:17px 34px;border-radius:2px;text-decoration:none;
+  border:none;cursor:pointer;box-shadow:0 12px 26px rgba(18,59,87,.2);
+  transition:transform .2s ease,box-shadow .2s ease}
+.big-btn:hover{transform:translateY(-2px);box-shadow:0 18px 38px rgba(18,59,87,.26)}
+.big-btn:active{transform:translateY(0)}
+.big-btn.gold{background:var(--gold);color:var(--ink);box-shadow:0 12px 26px rgba(169,131,28,.24)}
+.big-btn.gold:hover{background:#D4AC33;color:var(--ink)}
+.textlink{font-weight:700;font-size:15px;color:var(--blue-deep);text-decoration:none;
+  border-bottom:2px solid var(--gold);padding-bottom:2px}
+:focus-visible{outline:2px solid var(--blue);outline-offset:3px}
+
+/* ---------- shared: seller ledger, the denominator strip ---------- */
+.ledger{border-top:2px solid var(--ink);border-bottom:var(--hair);
+  display:grid;grid-template-columns:repeat(4,1fr)}
+.ledger div{padding:17px 16px;border-inline-end:var(--hair)}
+.ledger div:last-child{border-inline-end:none}
+.ledger b{display:block;font-family:var(--head);font-weight:400;font-size:32px;
+  color:var(--blue-deep);line-height:1;font-variant-numeric:tabular-nums}
+.ledger span{display:block;margin-top:7px;font-size:11px;font-weight:800;
+  letter-spacing:.12em;text-transform:uppercase;color:var(--ink)}
+.ledger em{font-style:normal;font-family:var(--body);font-size:19px;font-weight:800}
+
+/* ---------- shared: seller kind labels ---------- */
+.kind{font-size:10.5px;font-weight:800;letter-spacing:.15em;text-transform:uppercase}
+.kind.biz{color:var(--blue)}
+.kind.priv{color:var(--muted)}
+.verified{color:var(--success);background:var(--success-bg);font-size:10.5px;font-weight:800;
+  letter-spacing:.1em;text-transform:uppercase;padding:2px 7px;border-radius:2px}
+
+/* ==========================================================================
+   SCREEN 1 / BROWSE
+   ========================================================================== */
+.sec-head{padding-top:56px;padding-bottom:26px;border-bottom:2px solid var(--ink);
+  display:grid;grid-template-columns:auto 1fr;gap:48px;align-items:end}
+.sec-head h1{font-size:clamp(46px,6vw,80px)}
+.sec-head p{font-size:16.5px;color:var(--muted);font-weight:500;line-height:1.6;max-width:52ch;
+  padding-bottom:8px}
+.browse{display:grid;grid-template-columns:250px 1fr;gap:56px;align-items:start;
+  padding-top:34px;padding-bottom:96px}
+
+/* filter rail, set as a classifieds column */
+.rail h2{font-size:13px;font-family:var(--body);font-weight:800;letter-spacing:.16em;
+  text-transform:uppercase;color:var(--ink);padding-bottom:10px;border-bottom:2px solid var(--ink)}
+.rail h2:not(:first-child){margin-top:34px}
+.cat{display:flex;align-items:baseline;gap:14px;padding:11px 0;border-bottom:var(--hair);
+  text-decoration:none}
+.cat span{flex:1;font-size:14.5px;font-weight:600;color:var(--ink)}
+/* Counts are blue-deep, not gold. Measured: --gold-sm on limestone is 4.18:1,
+   under AA. Gold on this page is display type, solid button fills and rules
+   only, never small text. See the note at the foot of this stylesheet. */
+.cat b{font-size:12.5px;font-weight:800;color:var(--blue-deep);font-variant-numeric:tabular-nums}
+.cat:hover span{color:var(--blue)}
+.cat[aria-current] span{font-weight:800;color:var(--blue-deep)}
+.field{margin-top:16px}
+.field label{display:block;font-size:11px;font-weight:800;letter-spacing:.12em;
+  text-transform:uppercase;color:var(--ink);margin-bottom:6px}
+.field .hint{font-size:12.5px;color:var(--muted);font-weight:600;margin-top:6px;line-height:1.45}
+input[type=text],input[type=number],select,textarea{
+  width:100%;font-family:var(--body);font-size:14.5px;font-weight:600;color:var(--ink);
+  background:var(--surface);border:1px solid var(--rule);border-radius:2px;padding:10px 12px}
+input::placeholder,textarea::placeholder{color:var(--muted);font-weight:500}
+input:focus,select:focus,textarea:focus{outline:2px solid var(--blue);outline-offset:0;border-color:var(--blue)}
+.pair{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.checks{display:grid;gap:9px;margin-top:14px}
+.checks label{display:flex;align-items:center;gap:9px;font-size:14.5px;font-weight:600;color:var(--ink)}
+.checks input{width:16px;height:16px;accent-color:var(--blue)}
+.saved{margin-top:34px;padding-top:20px;border-top:2px solid var(--ink)}
+.saved h3{font-family:var(--body);font-size:11px;font-weight:800;letter-spacing:.12em;
+  text-transform:uppercase;color:var(--ink)}
+.saved p{margin-top:9px;font-size:14px;color:var(--muted);font-weight:500;line-height:1.5}
+.saved q{font-family:var(--head);font-size:18px;font-weight:400;color:var(--ink);quotes:none;display:block;
+  margin-top:6px}
+.saved q::before,.saved q::after{content:none}
+.saved a{display:inline-block;margin-top:12px;font-size:13.5px}
+
+/* results bar */
+.bar{display:flex;align-items:baseline;gap:20px;padding-bottom:16px;border-bottom:var(--hair);
+  flex-wrap:wrap}
+.bar strong{font-size:14.5px;font-weight:800;color:var(--ink)}
+.bar .sortwrap{margin-inline-start:auto;display:flex;align-items:baseline;gap:9px}
+.bar .sortwrap label{font-size:11px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;
+  color:var(--ink)}
+.bar select{width:auto;padding:6px 10px;font-size:13.5px}
+
+/* the grid. Three columns with a lead cell spanning two, the way a
+   classifieds page leads with one item and sets the rest as a run. */
+.grid{margin-top:30px;display:grid;grid-template-columns:repeat(3,1fr);gap:38px 30px}
+.item{text-decoration:none;display:block}
+.item .frame{aspect-ratio:4/5;overflow:hidden;background:var(--rule);
+  transition:transform .3s cubic-bezier(.16,.7,.3,1)}
+.item:hover .frame{transform:translateY(-4px)}
+.item .meta{padding-top:14px;border-top:var(--hair);margin-top:14px}
+.item h3{font-size:20px;line-height:1.2;font-weight:400}
+.item .price{margin-top:9px;font-family:var(--body);font-size:19px;font-weight:800;
+  color:var(--blue-deep);font-variant-numeric:tabular-nums}
+/* "or best offer" is ink italic, not gold: --gold-lg on limestone measures
+   2.92:1, which misses even the 3:1 large-text floor, and this is 14.5px.
+   The 400-against-800 weight step carries the hierarchy on its own. */
+.item .obo{font-family:var(--head);font-style:italic;font-size:14.5px;font-weight:400;
+  color:var(--ink);margin-inline-start:8px;letter-spacing:0}
+.item .who{margin-top:11px;display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;
+  font-size:13px;color:var(--muted);font-weight:600}
+.item.lead{grid-column:span 2}
+.item.lead .frame{aspect-ratio:16/10}
+.item.lead h3{font-size:30px}
+.item.lead .price{font-size:23px}
+/* sold: the photo drains and the price is struck. No label over the image. */
+.item.sold .frame img{filter:grayscale(1);opacity:.42}
+.item.sold:hover .frame{transform:none}
+.item.sold h3{color:var(--muted)}
+.item.sold .price{color:var(--muted);text-decoration:line-through;text-decoration-thickness:1.5px}
+/* Sold is set in ink, not the functional green. Green here means available or
+   verified; sold is the opposite of available, and colouring it green would
+   read as a success badge on a card the buyer can no longer act on. Also the
+   only line on a drained card that still carries information, so it takes the
+   highest contrast on the page. inline-block stops the parent's line-through
+   propagating onto it. */
+.item.sold .soldon{margin-inline-start:10px;font-family:var(--body);font-size:12.5px;font-weight:800;
+  letter-spacing:.1em;text-transform:uppercase;color:var(--ink);text-decoration:none;
+  display:inline-block}
+.more{margin-top:52px;padding-top:26px;border-top:2px solid var(--ink);text-align:center}
+
+/* ==========================================================================
+   SCREEN 2 / LISTING DETAIL
+   ========================================================================== */
+.crumb{padding:26px 0 24px;font-size:12.5px;font-weight:700;color:var(--muted);
+  border-bottom:var(--hair)}
+.crumb a{text-decoration:none}
+.crumb a:hover{color:var(--blue)}
+.detail{display:grid;grid-template-columns:6.6fr 5.4fr;gap:60px;align-items:start;
+  padding-top:40px;padding-bottom:80px}
+.gallery .frame{aspect-ratio:4/3;overflow:hidden;background:var(--rule)}
+.thumbs{margin-top:12px;display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.thumbs .frame{aspect-ratio:1/1;overflow:hidden;background:var(--rule);cursor:pointer}
+.thumbs .frame:first-child{outline:2px solid var(--blue);outline-offset:-2px}
+.thumbs .frame img{transition:opacity .2s ease}
+.thumbs .frame:hover img{opacity:.8}
+.gallery figcaption{margin-top:12px;padding-top:10px;border-top:var(--hair);
+  font-size:12.5px;color:var(--muted);font-weight:600}
+
+.buy h1{font-size:clamp(32px,3.6vw,46px);font-weight:400}
+.priceline{margin-top:22px;padding-top:20px;border-top:2px solid var(--ink);
+  display:flex;align-items:baseline;gap:12px;flex-wrap:wrap}
+.priceline b{font-family:var(--body);font-size:38px;font-weight:800;color:var(--blue-deep);
+  line-height:1;font-variant-numeric:tabular-nums}
+.priceline i{font-family:var(--head);font-style:italic;font-size:19px;color:var(--ink)}
+.where{margin-top:12px;font-size:14px;color:var(--muted);font-weight:600}
+.acts{margin-top:24px;display:flex;gap:14px;flex-wrap:wrap}
+.acts .big-btn{font-size:15px;padding:15px 26px}
+.acts + .note{margin-top:16px;font-size:13.5px;color:var(--muted);font-weight:600;
+  line-height:1.55;max-width:44ch}
+.seller{margin-top:40px}
+.seller .top{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;padding-bottom:14px}
+.seller .top h2{font-family:var(--head);font-size:24px;font-weight:400}
+/* the seller ledger sits in a 450px rail, so it runs one step down from the
+   page-level ledger or "41 of 46" breaks across two lines inside its cell */
+.seller .ledger b{font-size:28px}
+.seller .ledger em{font-size:17px}
+.seller .ledger span{font-size:10.5px;letter-spacing:.1em}
+.seller .why{margin-top:14px;font-size:13.5px;color:var(--muted);font-weight:600;
+  line-height:1.55;max-width:46ch}
+
+.about{padding-bottom:14px}
+.about-grid{display:grid;grid-template-columns:6.6fr 5.4fr;gap:60px;align-items:start}
+.about h2{font-size:30px;padding-bottom:12px;border-bottom:2px solid var(--ink)}
+.about p.copy{margin-top:20px;font-size:16.5px;color:var(--muted);font-weight:500;
+  line-height:1.66;max-width:60ch}
+.about .swap{margin-top:18px;font-size:14px}
+/* attributes: paired columns, no hairline under every row */
+.attrs{display:grid;grid-template-columns:1fr 1fr;gap:22px 34px;margin-top:28px}
+.attrs div dt{font-size:11px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;
+  color:var(--ink)}
+.attrs div dd{margin-top:5px;font-family:var(--head);font-size:20px;font-weight:400;color:var(--blue-deep)}
+
+/* the one dark band on the page. It is a direct child of body, so it is
+   already full bleed; the calc(50% - 50vw) trick would only add a scrollbar's
+   worth of horizontal overflow here. */
+.handover{margin-top:64px;background:var(--blue-deep);color:#fff;padding-block:76px}
+.handover .inner{max-width:var(--page);margin:0 auto;padding-inline:40px;
+  display:grid;grid-template-columns:5fr 7fr;gap:56px;align-items:start}
+/* "money" drops a y below the baseline in Playfair italic and the display
+   line-height is 1.05, so this line gets leading and a reserve of its own. */
+.handover h2{color:#fff;font-size:clamp(30px,3.4vw,44px);line-height:1.16;padding-bottom:5px}
+.handover h2 .it{color:var(--gold)}
+.handover p{font-size:16.5px;color:rgba(255,255,255,.74);font-weight:500;line-height:1.68}
+.handover p + p{margin-top:18px}
+.handover .fine{margin-top:26px;padding-top:16px;border-top:1px solid rgba(255,255,255,.22);
+  font-size:13.5px;color:rgba(255,255,255,.6);font-weight:600}
+
+/* more from this seller, horizontal scroll-snap */
+.strip{padding-top:70px;padding-bottom:96px}
+.strip .sh{display:flex;align-items:baseline;gap:18px;padding-bottom:14px;
+  border-bottom:2px solid var(--ink);flex-wrap:wrap}
+.strip .sh h2{font-size:28px}
+.strip .sh a{margin-inline-start:auto;font-size:13.5px}
+.rail-x{margin-top:26px;display:grid;grid-auto-flow:column;grid-auto-columns:246px;gap:26px;
+  overflow-x:auto;scroll-snap-type:x mandatory;padding-bottom:14px;
+  scrollbar-color:var(--rule) transparent}
+.rail-x > *{scroll-snap-align:start}
+.rail-x .frame{aspect-ratio:1/1;overflow:hidden;background:var(--rule)}
+.rail-x h3{margin-top:12px;font-size:17px;font-weight:400;line-height:1.25}
+.rail-x .price{margin-top:6px;font-family:var(--body);font-size:15.5px;font-weight:800;
+  color:var(--blue-deep);font-variant-numeric:tabular-nums}
+
+/* ==========================================================================
+   SCREEN 3 / LIST AN ITEM
+   ========================================================================== */
+.sell-head{padding-top:56px;padding-bottom:26px;border-bottom:2px solid var(--ink)}
+/* "photograph" carries both a g and a p in Playfair italic. Same reserve. */
+.sell-head h1{font-size:clamp(42px,5.4vw,74px);max-width:16ch;line-height:1.14;padding-bottom:6px}
+.sell-head p{margin-top:22px;font-size:16.5px;color:var(--muted);font-weight:500;
+  line-height:1.62;max-width:56ch}
+.sell{display:grid;grid-template-columns:5.6fr 6.4fr;gap:64px;align-items:start;
+  padding-top:40px;padding-bottom:100px}
+
+.shots .frame{aspect-ratio:4/3;overflow:hidden;background:var(--rule)}
+.shots .strip4{margin-top:12px;display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.shots .strip4 .frame{aspect-ratio:1/1}
+.addslot{aspect-ratio:1/1;border:1.5px dashed var(--rule);border-radius:2px;background:none;
+  cursor:pointer;font-family:var(--body);font-size:11px;font-weight:800;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--muted);display:flex;align-items:center;
+  justify-content:center;text-align:center;padding:8px;line-height:1.35}
+.addslot:hover{border-color:var(--blue);color:var(--blue)}
+.shots .cap{margin-top:14px;padding-top:12px;border-top:var(--hair);font-size:13.5px;
+  color:var(--muted);font-weight:600;line-height:1.55}
+.shots .redo{margin-top:16px;display:flex;gap:12px;flex-wrap:wrap}
+.mini{font-family:var(--body);font-size:13px;font-weight:800;background:var(--surface);
+  border:1px solid var(--rule);border-radius:2px;padding:9px 16px;cursor:pointer;color:var(--ink)}
+.mini:hover{border-color:var(--blue);color:var(--blue)}
+
+.step{padding-block:30px;border-bottom:var(--hair)}
+.step:first-child{padding-top:0}
+.step > .lab{font-size:11px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;
+  color:var(--ink);display:block;margin-bottom:12px}
+.chips{display:flex;gap:10px;flex-wrap:wrap}
+.chip{font-family:var(--body);font-size:14px;font-weight:700;background:var(--surface);
+  border:1px solid var(--rule);border-radius:2px;padding:9px 16px;cursor:pointer;color:var(--ink)}
+.chip:hover{border-color:var(--blue);color:var(--blue)}
+.chip[aria-pressed=true]{background:var(--blue);border-color:var(--blue);color:#fff}
+.step .sub{margin-top:12px;font-size:13.5px;color:var(--muted);font-weight:600;line-height:1.5}
+
+.draft h2{font-size:30px;margin-bottom:8px}
+.draft .sub{margin-bottom:24px;max-width:52ch}
+.bi{display:grid;grid-template-columns:1fr 1fr;gap:0;border-top:2px solid var(--ink)}
+.bi > div{padding:20px 22px}
+.bi > div:first-child{border-inline-end:var(--hair)}
+.bi .lang{font-size:11px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--ink);margin-bottom:14px}
+.bi .fl{margin-bottom:16px}
+.bi .fl:last-child{margin-bottom:0}
+.bi .fl > label{display:block;font-size:10.5px;font-weight:800;letter-spacing:.12em;
+  text-transform:uppercase;color:var(--ink);margin-bottom:6px}
+.bi textarea{min-height:132px;line-height:1.55;resize:vertical;font-weight:500}
+.bi .he{direction:rtl;text-align:start;font-family:var(--body-he)}
+.bi .he textarea,.bi .he input{font-family:var(--body-he);direction:rtl}
+
+.aggrid{display:grid;grid-template-columns:1fr 1fr;gap:16px 22px;margin-top:6px}
+
+/* price with its comparables */
+.pricebox{border-top:2px solid var(--ink);padding-top:22px}
+.suggest{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap}
+.suggest b{font-family:var(--body);font-size:36px;font-weight:800;color:var(--blue-deep);
+  line-height:1;font-variant-numeric:tabular-nums}
+.suggest span{font-family:var(--head);font-style:italic;font-size:18px;color:var(--ink)}
+.comps{margin-top:20px}
+.comp{display:flex;align-items:center;gap:16px;padding:12px 0;border-bottom:var(--hair)}
+.comp .frame{width:56px;height:56px;flex:none;overflow:hidden;background:var(--rule)}
+.comp .t{flex:1;font-size:14.5px;font-weight:600;color:var(--ink);line-height:1.35}
+.comp .t em{display:block;font-style:normal;font-size:12.5px;color:var(--muted);
+  font-weight:600;margin-top:3px}
+.comp .p{font-family:var(--body);font-size:16px;font-weight:800;color:var(--blue-deep);
+  font-variant-numeric:tabular-nums}
+.comps .none{margin-top:12px;font-size:13px;color:var(--muted);font-weight:600;line-height:1.5}
+.setprice{margin-top:26px;display:grid;grid-template-columns:170px 1fr;gap:22px;align-items:end}
+.publish{margin-top:34px;display:flex;align-items:center;gap:24px;flex-wrap:wrap}
+.publish .fine{font-size:13px;color:var(--muted);font-weight:600;line-height:1.5;max-width:30ch}
+
+footer{border-top:2px solid var(--ink);padding-block:26px;font-size:12.5px;
+  color:var(--muted);font-weight:600}
+
+/* ---------- reveal, fail-safe: nothing is hidden until JS proves it runs ---------- */
+.js-on .reveal{opacity:0;transform:translateY(20px);
+  transition:opacity .7s cubic-bezier(.16,.7,.3,1),transform .7s cubic-bezier(.16,.7,.3,1)}
+.js-on .reveal.in{opacity:1;transform:none}
+@media(prefers-reduced-motion:reduce){
+  .js-on .reveal{opacity:1;transform:none;transition:none}
+  *{transition:none!important;animation:none!important}
+}
+
+/* ---------- responsive ---------- */
+/* The two-column detail is collapsed at 1080 rather than 900: below that the
+   right rail drops under ~450px and the seller ledger starts breaking values
+   across lines inside their cells. */
+@media(max-width:1080px){
+  .browse{grid-template-columns:1fr;gap:44px}
+  .rail{display:grid;grid-template-columns:1fr 1fr;gap:0 44px;align-items:start}
+  .grid{grid-template-columns:repeat(2,1fr)}
+  .item.lead{grid-column:span 1}
+  .item.lead .frame{aspect-ratio:4/5}
+  .item.lead h3{font-size:20px}
+  .item.lead .price{font-size:19px}
+  .detail,.about-grid,.sell{grid-template-columns:1fr;gap:40px}
+  .seller .ledger b{font-size:32px}
+  .seller .ledger em{font-size:19px}
+}
+@media(max-width:900px){
+  .page{padding-inline:22px}
+  .pv,.slab,.mast-in{padding-inline:22px}
+  .handover .inner{padding-inline:22px}
+  .sec-head{grid-template-columns:1fr;gap:22px}
+  .sec-head p{padding-bottom:0}
+  .handover .inner{grid-template-columns:1fr;gap:32px}
+  .mast-nav{display:none}
+  .attrs{gap:20px 26px}
+}
+@media(max-width:620px){
+  /* Sign in moves into an account menu at this width on the real page. */
+  .mast-in{gap:16px}
+  .mast-end a.plain{display:none}
+  .wordmark{font-size:18px}
+  .gold-btn{padding:10px 16px;font-size:13px}
+  .grid{grid-template-columns:1fr;gap:34px}
+  .rail{grid-template-columns:1fr}
+  .rail .catwrap{grid-row:auto}
+  .ledger{grid-template-columns:1fr 1fr}
+  .ledger div:nth-child(2){border-inline-end:none}
+  .ledger div:nth-child(1),.ledger div:nth-child(2){border-bottom:var(--hair)}
+  .bi{grid-template-columns:1fr}
+  .bi > div:first-child{border-inline-end:none;border-bottom:var(--hair)}
+  .attrs,.aggrid,.pair{grid-template-columns:1fr}
+  .setprice{grid-template-columns:1fr;gap:16px}
+  .thumbs,.shots .strip4{grid-template-columns:repeat(2,1fr)}
+  .mast-end{gap:14px}
+  .sec-head{padding-top:38px}
+}
+
+/* ==========================================================================
+   CONTRAST NOTES, measured against the limestone background #EFE9DC.
+   Nothing below changes a locked token; it records what the numbers are so
+   the next person does not have to measure them again.
+
+   PASS, used here
+     ink #23201B on limestone .............. 13.4:1
+     blue-deep #123B57 on limestone ......... 9.7:1
+     ink on solid gold #C9A227 .............. 6.71:1   (accent buttons)
+     white on blue #1E5F8C .................. 5.9:1    (primary buttons)
+     gold #C9A227 on blue-deep .............. 4.85:1   (the dark band)
+
+   FAIL, so gold is display type, button fills and rules only on this page
+     gold-lg #A9831C on limestone ........... 2.92:1   misses even 3:1 large
+     gold-sm #8A6A14 on limestone ........... 4.18:1   (it is 5.06:1 on white,
+                                                       which is what the token
+                                                       comment was measured on)
+
+   INHERITED, not introduced here, flagged rather than unilaterally changed
+     muted #6B6459 on limestone ............. 4.44:1   body copy, nav, captions
+     success #1F8A50 on success-bg #E3F3EA .. 3.81:1   the Verified chip
+     gold-lg display accent on limestone .... 2.92:1   kept at 42px+ only, to
+                                                       match the shipped home
+                                                       page and cinematic hero
+   ========================================================================== */
+</style>
+</head>
+<body>
+
+<div class="pv">
+<b>PREVIEW / Marketplace, three screens.</b>
+Every figure with a <u>gold dotted underline</u> is a placeholder and must come from a real query.
+Names, items, prices, search counts and seller histories are <b>invented structure, not copy</b>.
+No testimonial here is real. Photography is seeded Picsum standing in for real listing photographs.
+The same sofa runs through all three screens on purpose: you find it, you open it, then you see how it was made.
+<button id="dirbtn" type="button">Switch to RTL</button>
+</div>
+
+<div class="slab"><strong>Screen one</strong><span>Browse. The grid, the filter column, a sold item and an empty saved search.</span></div>
+
+<div class="masthead">
+  <div class="mast-in">
+    <a class="wordmark" href="#">MyIsraelRental</a>
+    <nav class="mast-nav">
+      <a href="#">Stays</a><a href="#">Services</a><a href="#" aria-current="page">Marketplace</a><a href="#">Requests</a>
+    </nav>
+    <div class="mast-end">
+      <a class="plain" href="#">Sign in</a>
+      <a class="gold-btn" href="#sell">Sell something</a>
+    </div>
+  </div>
+</div>
+
+<!-- ============ SCREEN 1 : BROWSE ============ -->
+<header class="page sec-head">
+  <h1>Marketplace</h1>
+  <p>Things people here are finished with, sold to people who need them. Fixed prices,
+    an offer if the seller takes offers, and no bidding on anything. You and the seller
+    arrange the handover between yourselves.</p>
+</header>
+
+<div class="page browse">
+
+  <!-- filter column, set the way a classifieds page sets its index -->
+  <form class="rail" onsubmit="return false">
+    <div class="catwrap">
+      <h2 id="cath">Category</h2>
+      <nav aria-labelledby="cath">
+        <a class="cat" href="#" aria-current="true"><span>Furniture and appliances</span><b class="est">412</b></a>
+        <a class="cat" href="#"><span>Baby and kids</span><b class="est">288</b></a>
+        <a class="cat" href="#"><span>Books and sefarim</span><b class="est">174</b></a>
+        <a class="cat" href="#"><span>Kitchen</span><b class="est">131</b></a>
+        <a class="cat" href="#"><span>Transformers and US spec</span><b class="est">63</b></a>
+        <a class="cat" href="#"><span>Tools and garden</span><b class="est">47</b></a>
+      </nav>
+    </div>
+
+    <div>
+      <h2>Price</h2>
+      <div class="field">
+        <label for="pmin">From, in shekels</label>
+        <div class="pair">
+          <input id="pmin" type="number" placeholder="0"/>
+          <input id="pmax" type="number" placeholder="Any" aria-label="To, in shekels"/>
+        </div>
+      </div>
+
+      <h2>Where</h2>
+      <div class="field">
+        <label for="area">Area</label>
+        <select id="area">
+          <option>Jerusalem</option>
+          <option>Beit Shemesh</option>
+          <option>Modiin</option>
+          <option>Tel Aviv and centre</option>
+          <option>Gush Etzion</option>
+          <option>Anywhere</option>
+        </select>
+        <p class="hint">Most people collect in person, so distance matters more here than it does on the rest of the site.</p>
+      </div>
+
+      <h2>Who is selling</h2>
+      <div class="checks">
+        <label><input type="checkbox" checked/> Private sellers</label>
+        <label><input type="checkbox" checked/> Businesses</label>
+        <label><input type="checkbox"/> Hide items already sold</label>
+      </div>
+
+      <div class="saved">
+        <h3>Your saved search</h3>
+        <q>Sefarim in Ra&#8217;anana</q>
+        <p>Nothing matches it yet. We are not going to pad the page with near misses.
+          When somebody lists one, you get a message here.</p>
+        <a class="textlink" href="#">Edit this search</a>
+      </div>
+    </div>
+  </form>
+
+  <!-- the grid -->
+  <div>
+    <div class="bar">
+      <strong><span class="est">38</span> items in Furniture and appliances, Jerusalem</strong>
+      <div class="sortwrap">
+        <label for="sort">Sort</label>
+        <select id="sort">
+          <option>Newest first</option>
+          <option>Price, low to high</option>
+          <option>Price, high to low</option>
+          <option>Nearest to me</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="grid">
+
+      <a class="item lead reveal" href="#detail">
+        <div class="frame"><img src="https://picsum.photos/seed/grey-three-seat-sofa-living-room/1000/625" alt="A light grey three seat sofa against a plastered wall"/></div>
+        <div class="meta">
+          <h3>Three seat sofa, light grey</h3>
+          <p class="price">&#8362;450 <span class="obo">or best offer</span></p>
+          <p class="who">Katamon, Jerusalem <span class="kind priv">Private seller</span></p>
+        </div>
+      </a>
+
+      <a class="item reveal" href="#">
+        <div class="frame"><img src="https://picsum.photos/seed/travel-cot-nursery-corner/560/700" alt="A folding travel cot set up in a bedroom corner"/></div>
+        <div class="meta">
+          <h3>Chicco travel cot and mattress</h3>
+          <p class="price">&#8362;180</p>
+          <p class="who">Ramat Beit Shemesh <span class="kind priv">Private seller</span></p>
+        </div>
+      </a>
+
+      <a class="item reveal" href="#">
+        <div class="frame"><img src="https://picsum.photos/seed/step-down-transformer-on-shelf/560/700" alt="A heavy step down transformer on a workshop shelf"/></div>
+        <div class="meta">
+          <h3>Step down transformer, 2000W</h3>
+          <p class="price">&#8362;140</p>
+          <p class="who">Talpiot, Jerusalem <span class="kind biz">Business</span> <span class="verified">Verified</span></p>
+        </div>
+      </a>
+
+      <a class="item reveal" href="#">
+        <div class="frame"><img src="https://picsum.photos/seed/hebrew-sefarim-bookshelf-volumes/560/700" alt="Rows of bound Hebrew volumes on a shelf"/></div>
+        <div class="meta">
+          <h3>Shas, Vilna edition, twenty volumes</h3>
+          <p class="price">&#8362;1,200 <span class="obo">or best offer</span></p>
+          <p class="who">Geula, Jerusalem <span class="kind biz">Business</span> <span class="verified">Verified</span></p>
+        </div>
+      </a>
+
+      <a class="item sold reveal" href="#">
+        <div class="frame"><img src="https://picsum.photos/seed/white-tumble-dryer-utility-room/560/700" alt="A white tumble dryer in a utility room"/></div>
+        <div class="meta">
+          <h3>Whirlpool dryer, 110 volt</h3>
+          <p class="price">&#8362;700 <span class="soldon">Sold 12 August</span></p>
+          <p class="who">Efrat <span class="kind priv">Private seller</span></p>
+        </div>
+      </a>
+
+      <a class="item reveal" href="#">
+        <div class="frame"><img src="https://picsum.photos/seed/white-square-shelf-unit-room/560/700" alt="A white square shelving unit against a wall"/></div>
+        <div class="meta">
+          <h3>Ikea Kallax, four by four, white</h3>
+          <p class="price">&#8362;220 <span class="obo">or best offer</span></p>
+          <p class="who">Baka, Jerusalem <span class="kind priv">Private seller</span></p>
+        </div>
+      </a>
+
+      <a class="item reveal" href="#">
+        <div class="frame"><img src="https://picsum.photos/seed/english-paperbacks-in-cardboard-box/560/700" alt="English paperback novels packed in a cardboard box"/></div>
+        <div class="meta">
+          <h3>Forty English paperbacks, fiction</h3>
+          <p class="price">&#8362;90</p>
+          <p class="who">Modiin <span class="kind priv">Private seller</span></p>
+        </div>
+      </a>
+
+      <a class="item reveal" href="#">
+        <div class="frame"><img src="https://picsum.photos/seed/black-pram-in-apartment-hallway/560/700" alt="A black pram folded in an apartment hallway"/></div>
+        <div class="meta">
+          <h3>Bugaboo Fox pram, black</h3>
+          <p class="price">&#8362;1,450 <span class="obo">or best offer</span></p>
+          <p class="who">Ra&#8217;anana <span class="kind priv">Private seller</span></p>
+        </div>
+      </a>
+
+    </div>
+
+    <p class="more"><a class="big-btn" href="#">Show the next thirty</a></p>
+  </div>
+</div>
+
+<div class="slab" id="detail"><strong>Screen two</strong><span>Listing detail. One item, the seller shown by counts rather than stars, and no way to pay on the site.</span></div>
+
+<!-- ============ SCREEN 2 : LISTING DETAIL ============ -->
+<div class="page crumb">
+  <a href="#">Marketplace</a> / <a href="#">Furniture and appliances</a> / <a href="#">Sofas</a>
+</div>
+
+<div class="page detail">
+  <figure class="gallery reveal">
+    <div class="frame"><img src="https://picsum.photos/seed/grey-three-seat-sofa-living-room/1040/780" alt="The sofa photographed from the front in daylight"/></div>
+    <div class="thumbs">
+      <div class="frame"><img src="https://picsum.photos/seed/grey-three-seat-sofa-living-room/300/300" alt="The sofa from the front"/></div>
+      <div class="frame"><img src="https://picsum.photos/seed/grey-sofa-cushion-close-up/300/300" alt="Close view of the cushion fabric"/></div>
+      <div class="frame"><img src="https://picsum.photos/seed/grey-sofa-rear-leg-scuff/300/300" alt="The scuffed rear leg"/></div>
+      <div class="frame"><img src="https://picsum.photos/seed/grey-sofa-in-room-context/300/300" alt="The sofa seen across the room"/></div>
+    </div>
+    <figcaption>Four photographs, taken by the seller. The third one is the damage.</figcaption>
+  </figure>
+
+  <div class="buy reveal">
+    <h1>Three seat sofa, light grey</h1>
+
+    <div class="priceline">
+      <b>&#8362;450</b><i>or best offer</i>
+    </div>
+    <p class="where">Collection from Katamon, Jerusalem. Listed <span class="est">six days ago</span>.</p>
+
+    <div class="acts">
+      <a class="big-btn" href="#">Message Miriam</a>
+      <a class="big-btn gold" href="#">Make an offer</a>
+    </div>
+    <p class="note">An offer opens a chat with your number in it. There is no bidding,
+      no clock and no auction. Miriam can accept it, ignore it, or write back.
+      Your phone number and your email stay yours.</p>
+
+    <div class="seller">
+      <div class="top">
+        <h2>Miriam Shapiro</h2>
+        <span class="kind priv">Private seller</span>
+      </div>
+      <div class="ledger">
+        <div><b class="est">34</b><span>Items sold</span></div>
+        <div><b class="est">11</b><span>Months here</span></div>
+        <div><b><em class="est">41 of 46</em></b><span>Messages</span></div>
+        <div><b class="est">0</b><span>Disputes</span></div>
+      </div>
+      <p class="why">We do not show a star average. Below a few dozen sales almost every
+        seller averages five stars, including the ones you should avoid, so the number
+        tells you nothing. Counts and a denominator tell you something.</p>
+    </div>
+  </div>
+</div>
+
+<section class="page about reveal">
+  <div class="about-grid">
+    <div>
+      <h2>What the seller says</h2>
+      <p class="copy">Light grey three seat sofa, ours for four years. The upholstery is clean,
+        no stains and no tears, and it has been in a house with no pets. There is a small
+        scuff on the rear right leg which the third photograph shows. It is a solid frame
+        and heavy, so bring two people. Second floor, no lift.</p>
+      <p class="swap"><a class="textlink" href="#" lang="he">&#1511;&#1512;&#1488;&#1493; &#1489;&#1506;&#1489;&#1512;&#1497;&#1514;</a></p>
+    </div>
+
+    <dl class="attrs">
+      <div><dt>Condition</dt><dd>Good, used</dd></div>
+      <div><dt>Dimensions</dt><dd>218 x 88 x 78 cm</dd></div>
+      <div><dt>Make</dt><dd>Ikea Ektorp</dd></div>
+      <div><dt>Age</dt><dd>Four years</dd></div>
+      <div><dt>Collection</dt><dd>Katamon, second floor</dd></div>
+      <div><dt>Delivery</dt><dd>None, collection only</dd></div>
+    </dl>
+  </div>
+</section>
+
+<section class="handover reveal">
+  <div class="inner">
+    <h2>We never touch <span class="it">the money</span>.</h2>
+    <div>
+      <p>There is no checkout on this page, no basket, no escrow account and nothing
+        called buyer protection, because we do not hold your money and we are not going
+        to pretend otherwise. You agree a price in the chat and you settle it between
+        yourselves, in cash or by whatever transfer you both use.</p>
+      <p>What we can do is make the other person legible before you go. The counts above
+        come from this site and cannot be edited by the seller. Meet somewhere public if
+        the item is small enough to carry, look at it before you hand anything over, and
+        if something goes wrong, report the listing and the account carries it.</p>
+      <p class="fine">Reporting a listing takes one click and no explanation.</p>
+    </div>
+  </div>
+</section>
+
+<section class="page strip reveal">
+  <div class="sh">
+    <h2>Also from Miriam</h2>
+    <a class="textlink" href="#">All six of her listings</a>
+  </div>
+  <div class="rail-x">
+    <a class="item" href="#">
+      <div class="frame"><img src="https://picsum.photos/seed/wooden-dining-chairs-pair/300/300" alt="Two wooden dining chairs"/></div>
+      <h3>Pair of oak dining chairs</h3>
+      <p class="price">&#8362;160</p>
+    </a>
+    <a class="item" href="#">
+      <div class="frame"><img src="https://picsum.photos/seed/standing-floor-lamp-corner/300/300" alt="A standing floor lamp in a corner"/></div>
+      <h3>Brass floor lamp</h3>
+      <p class="price">&#8362;95</p>
+    </a>
+    <a class="item" href="#">
+      <div class="frame"><img src="https://picsum.photos/seed/childrens-wooden-desk-and-chair/300/300" alt="A small wooden desk and chair for a child"/></div>
+      <h3>Child&#8217;s desk and chair</h3>
+      <p class="price">&#8362;120</p>
+    </a>
+    <a class="item" href="#">
+      <div class="frame"><img src="https://picsum.photos/seed/electric-kettle-on-counter/300/300" alt="An electric kettle on a kitchen counter"/></div>
+      <h3>Kettle and toaster, both working</h3>
+      <p class="price">&#8362;60</p>
+    </a>
+  </div>
+</section>
+
+<div class="slab" id="sell"><strong>Screen three</strong><span>List an item. Photograph first, one category, then a drafted listing in both languages that the seller edits.</span></div>
+
+<!-- ============ SCREEN 3 : LIST AN ITEM ============ -->
+<header class="page sell-head">
+  <h1>Start with the <span class="it">photograph</span>.</h1>
+  <p>You took the picture. Everything under it was drafted from that picture and from
+    what similar things sold for. Nothing is published until you have read it, and every
+    line of it can be changed.</p>
+</header>
+
+<div class="page sell">
+
+  <!-- the camera column -->
+  <div class="shots reveal">
+    <div class="frame"><img src="https://picsum.photos/seed/grey-three-seat-sofa-living-room/900/675" alt="The photograph the seller just took of a grey sofa"/></div>
+    <div class="strip4">
+      <div class="frame"><img src="https://picsum.photos/seed/grey-sofa-cushion-close-up/260/260" alt="Close view of the cushion fabric"/></div>
+      <div class="frame"><img src="https://picsum.photos/seed/grey-sofa-rear-leg-scuff/260/260" alt="The scuffed rear leg"/></div>
+      <div class="frame"><img src="https://picsum.photos/seed/grey-sofa-in-room-context/260/260" alt="The sofa seen across the room"/></div>
+      <button class="addslot" type="button">Add another</button>
+    </div>
+    <p class="cap">Four photographs. The first is the one people see in the grid, so put the
+      whole item in it. Photograph the damage too. Listings that show the fault sell faster
+      than listings that hide it.</p>
+    <div class="redo">
+      <button class="mini" type="button">Retake the first</button>
+      <button class="mini" type="button">Reorder</button>
+    </div>
+  </div>
+
+  <!-- the drafted listing -->
+  <form onsubmit="return false">
+
+    <div class="step">
+      <span class="lab" id="catlab">Category</span>
+      <div class="chips" role="group" aria-labelledby="catlab">
+        <button class="chip" type="button" aria-pressed="true">Furniture and appliances</button>
+        <button class="chip" type="button" aria-pressed="false">Baby and kids</button>
+        <button class="chip" type="button" aria-pressed="false">Books and sefarim</button>
+        <button class="chip" type="button" aria-pressed="false">Kitchen</button>
+        <button class="chip" type="button" aria-pressed="false">Tools and garden</button>
+      </div>
+      <p class="sub">Read off the photograph. One tap changes it.</p>
+    </div>
+
+    <div class="step draft">
+      <h2>Written in both languages, once.</h2>
+      <p class="sub">Yad2 is Hebrew only by contract. You write in the language you have and
+        the other half of the country can still find the sofa.</p>
+
+      <div class="bi">
+        <div>
+          <p class="lang">English</p>
+          <div class="fl">
+            <label for="ttl-en">Title</label>
+            <input id="ttl-en" type="text" value="Three seat sofa, light grey"/>
+          </div>
+          <div class="fl">
+            <label for="dsc-en">Description</label>
+            <textarea id="dsc-en">Light grey three seat sofa, ours for four years. The upholstery is clean, no stains and no tears, and it has been in a house with no pets. There is a small scuff on the rear right leg which the third photograph shows. Second floor, no lift, so bring two people.</textarea>
+          </div>
+        </div>
+        <div class="he" lang="he">
+          <p class="lang">&#1506;&#1489;&#1512;&#1497;&#1514;</p>
+          <div class="fl">
+            <label for="ttl-he">&#1499;&#1493;&#1514;&#1512;&#1514;</label>
+            <input id="ttl-he" type="text" value="&#1505;&#1508;&#1492; &#1514;&#1500;&#1514; &#1502;&#1493;&#1513;&#1489;&#1497;&#1514;, &#1488;&#1508;&#1493;&#1512; &#1489;&#1492;&#1497;&#1512;"/>
+          </div>
+          <div class="fl">
+            <label for="dsc-he">&#1514;&#1497;&#1488;&#1493;&#1512;</label>
+            <textarea id="dsc-he">&#1505;&#1508;&#1492; &#1514;&#1500;&#1514; &#1502;&#1493;&#1513;&#1489;&#1497;&#1514; &#1489;&#1490;&#1493;&#1493;&#1503; &#1488;&#1508;&#1493;&#1512; &#1489;&#1492;&#1497;&#1512;, &#1488;&#1510;&#1500;&#1504;&#1493; &#1488;&#1512;&#1489;&#1506; &#1513;&#1504;&#1497;&#1501;. &#1492;&#1512;&#1497;&#1508;&#1493;&#1491; &#1504;&#1511;&#1497;, &#1489;&#1500;&#1497; &#1499;&#1514;&#1502;&#1497;&#1501; &#1493;&#1489;&#1500;&#1497; &#1511;&#1512;&#1506;&#1497;&#1501;, &#1493;&#1500;&#1488; &#1492;&#1497;&#1493; &#1489;&#1489;&#1497;&#1514; &#1489;&#1506;&#1500;&#1497; &#1495;&#1497;&#1497;&#1501;. &#1497;&#1513; &#1513;&#1512;&#1497;&#1496;&#1492; &#1511;&#1496;&#1504;&#1492; &#1489;&#1512;&#1490;&#1500; &#1492;&#1488;&#1495;&#1493;&#1512;&#1497;&#1514; &#1492;&#1497;&#1502;&#1504;&#1497;&#1514;, &#1499;&#1508;&#1497; &#1513;&#1504;&#1512;&#1488;&#1492; &#1489;&#1514;&#1502;&#1493;&#1504;&#1492; &#1492;&#1513;&#1500;&#1497;&#1513;&#1497;&#1514;. &#1511;&#1493;&#1502;&#1492; &#1513;&#1504;&#1497;&#1497;&#1492; &#1489;&#1500;&#1497; &#1502;&#1506;&#1500;&#1497;&#1514;, &#1499;&#1491;&#1488;&#1497; &#1500;&#1489;&#1493;&#1488; &#1489;&#1513;&#1504;&#1497;&#1497;&#1501;.</textarea>
+          </div>
+        </div>
+      </div>
+      <p class="sub">Edit either side. They are saved separately, so correcting the Hebrew
+        will not overwrite your English.</p>
+    </div>
+
+    <div class="step">
+      <span class="lab">Details, also drafted</span>
+      <div class="aggrid">
+        <div class="field"><label for="cond">Condition</label>
+          <select id="cond"><option>Good, used</option><option>As new</option><option>Fair, works</option><option>For parts</option></select></div>
+        <div class="field"><label for="dims">Dimensions</label>
+          <input id="dims" type="text" value="218 x 88 x 78 cm"/></div>
+        <div class="field"><label for="make">Make</label>
+          <input id="make" type="text" value="Ikea Ektorp"/></div>
+        <div class="field"><label for="pick">Collection area</label>
+          <input id="pick" type="text" value="Katamon, Jerusalem"/></div>
+      </div>
+      <p class="sub">Dimensions came from the model, not from your photograph. Measure it
+        if it matters to you.</p>
+    </div>
+
+    <div class="step">
+      <div class="pricebox">
+        <p class="suggest"><b>&#8362;450</b><span>suggested</span></p>
+        <p class="sub">Between <span class="est">&#8362;380</span> and <span class="est">&#8362;520</span>.
+          That range is not a guess, it is these three, all sold here in the last ninety days.</p>
+
+        <div class="comps">
+          <div class="comp">
+            <div class="frame"><img src="https://picsum.photos/seed/beige-fabric-sofa-sold/120/120" alt="A beige fabric three seat sofa"/></div>
+            <p class="t">Three seat fabric sofa, beige<em>Rehavia, sold in eleven days</em></p>
+            <p class="p">&#8362;520</p>
+          </div>
+          <div class="comp">
+            <div class="frame"><img src="https://picsum.photos/seed/grey-two-seat-sofa-sold/120/120" alt="A grey two seat sofa"/></div>
+            <p class="t">Ikea Ektorp, grey, two seat<em>Baka, sold in four days</em></p>
+            <p class="p">&#8362;380</p>
+          </div>
+          <div class="comp">
+            <div class="frame"><img src="https://picsum.photos/seed/charcoal-corner-sofa-sold/120/120" alt="A charcoal corner sofa"/></div>
+            <p class="t">Three seat sofa, charcoal, worn arms<em>Talpiot, sold in twenty six days</em></p>
+            <p class="p">&#8362;430</p>
+          </div>
+          <p class="none">If we cannot find three real sales, we show you nothing and you set
+            the price yourself. A bare number with no comparables behind it is worth less
+            than no number at all.</p>
+        </div>
+
+        <div class="setprice">
+          <div class="field">
+            <label for="ask">Your price, in shekels</label>
+            <input id="ask" type="number" value="450"/>
+          </div>
+          <div class="checks" style="margin-top:0">
+            <label><input type="checkbox" checked/> Accept offers below this</label>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="publish">
+      <button class="big-btn gold" type="button">Publish in both languages</button>
+      <p class="fine">Free. No card. Take it down whenever you like and mark it sold in one tap.</p>
+    </div>
+
+  </form>
+</div>
+
+<footer class="page">Preview file, not a shipped page.</footer>
+
+<script>
+/* Reveal. The hiding rule lives under .js-on, added here, so if this script
+   never runs nothing is hidden and the page is fully readable. */
+(function(){
+  var root=document.documentElement;
+  var els=document.querySelectorAll('.reveal');
+  if('IntersectionObserver' in window){
+    root.classList.add('js-on');
+    var io=new IntersectionObserver(function(rows){
+      rows.forEach(function(r){if(r.isIntersecting){r.target.classList.add('in');io.unobserve(r.target);}});
+    },{rootMargin:'0px 0px -10% 0px'});
+    els.forEach(function(e){io.observe(e);});
+  }
+
+  /* Preview-only direction toggle, so RTL is testable rather than asserted. */
+  var b=document.getElementById('dirbtn');
+  b.addEventListener('click',function(){
+    var rtl=root.getAttribute('dir')==='rtl';
+    root.setAttribute('dir',rtl?'ltr':'rtl');
+    root.setAttribute('lang',rtl?'en':'he');
+    b.textContent=rtl?'Switch to RTL':'Switch to LTR';
+  });
+
+  /* Category chips, single select. Feedback only. */
+  document.querySelectorAll('.chips .chip').forEach(function(c){
+    c.addEventListener('click',function(){
+      c.parentNode.querySelectorAll('.chip').forEach(function(o){o.setAttribute('aria-pressed','false');});
+      c.setAttribute('aria-pressed','true');
+    });
+  });
+})();
+</script>
+</body>
+</html>
