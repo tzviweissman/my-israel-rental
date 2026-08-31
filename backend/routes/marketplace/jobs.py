@@ -76,6 +76,12 @@ class JobIn(BaseModel):
 
 
 class JobPatch(BaseModel):
+    # Category and area were BOTH missing here, and the pair is exactly
+    # what someone gets wrong in a hurry: posted under the wrong trade, or
+    # against the wrong city. Without them the only remedy was delete and
+    # repost, which throws away every application already received.
+    category: Optional[str] = None
+    subcategory: Optional[str] = None
     title: Optional[str] = Field(None, min_length=6, max_length=140)
     description: Optional[str] = Field(None, min_length=10, max_length=4000)
     budget_type: Optional[str] = Field(None, pattern="^(fixed|open)$")
@@ -447,12 +453,51 @@ async def patch_job(job_id: str, payload: JobPatch, user=Depends(verify_token)):
     if not update:
         return _pub_job(job)
     update["updated_at"] = datetime.now(UTC).isoformat()
+
+    # Same validation as posting. A category that only the create path
+    # checks is a category the edit path can put anything into.
+    if "category" in update:
+        _validate_category(update["category"])
+    if "category" in update or "subcategory" in update:
+        _validate_subcategory(
+            update.get("category", job.get("category")),
+            update.get("subcategory", job.get("subcategory")),
+        )
+    # Changing the trade orphans a subcategory that belonged to the old
+    # one, so clear it unless the caller supplied a new one.
+    if (
+        update.get("category")
+        and update["category"] != job.get("category")
+        and "subcategory" not in update
+    ):
+        update["subcategory"] = None
+
     if update.get("budget_type") == "fixed":
         amt = update.get("budget_amount", job.get("budget_amount"))
         if not (amt and amt > 0):
             raise HTTPException(status_code=400, detail="Fixed budget needs an amount greater than 0")
+
+    category_changed = bool(update.get("category")) and update["category"] != job.get("category")
     await db.marketplace_jobs.update_one({"_id": job_id}, {"$set": update})
     job.update(update)
+
+    # A job posted under the wrong trade was announced to the wrong
+    # providers, and the right ones never heard about it. Correcting the
+    # category has to tell them, or the fix leaves the job invisible to
+    # exactly the people who should see it.
+    #
+    # ONCE PER CATEGORY, tracked on the job. Re-notifying on every change
+    # would make the edit form a way to mail the same providers
+    # repeatedly, which is a spam vector wearing a bug-fix costume.
+    if category_changed:
+        already = job.get("notified_categories") or []
+        if update["category"] not in already:
+            await db.marketplace_jobs.update_one(
+                {"_id": job_id},
+                {"$addToSet": {"notified_categories": update["category"]}},
+            )
+            asyncio.create_task(_notify_matching_providers(job))
+
     return _pub_job(job)
 
 

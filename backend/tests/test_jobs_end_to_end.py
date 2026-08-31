@@ -403,3 +403,82 @@ async def test_a_business_with_pre_picker_label_areas_still_gets_alerts(client, 
     assert await _notified_for(monkeypatch, _job("Jerusalem")) == ["u-legacy@example.test"]
     # And it is still genuinely scoped — not just matching everything.
     assert await _notified_for(monkeypatch, _job("Haifa")) == []
+
+
+# --------------------------------------------------------------------------
+# Fixing a job posted wrong
+# --------------------------------------------------------------------------
+# Reported by a real user: posted with the wrong place and category, and
+# no way to change either. `category` and `subcategory` were simply absent
+# from JobPatch, so the only remedy was delete-and-repost, which discards
+# every application already received.
+
+@pytest.mark.asyncio
+async def test_the_poster_can_fix_the_area(client):
+    r = await client.post("/api/marketplace/jobs", json=JOB, headers=_auth(POSTER))
+    job_id = r.json()["id"]
+    fixed = await client.patch(
+        f"/api/marketplace/jobs/{job_id}", json={"area": "Haifa"}, headers=_auth(POSTER),
+    )
+    assert fixed.status_code == 200, fixed.text
+    assert fixed.json()["area"] == "Haifa"
+    assert (await client.get(f"/api/marketplace/jobs/{job_id}")).json()["area"] == "Haifa"
+
+
+@pytest.mark.asyncio
+async def test_the_poster_can_fix_the_category(client):
+    r = await client.post("/api/marketplace/jobs", json=JOB, headers=_auth(POSTER))
+    job_id = r.json()["id"]
+    fixed = await client.patch(
+        f"/api/marketplace/jobs/{job_id}",
+        json={"category": "creative-design"},
+        headers=_auth(POSTER),
+    )
+    assert fixed.status_code == 200, fixed.text
+    assert fixed.json()["category"] == "creative-design"
+    # And it moves on the public board, not just in the record.
+    board = await client.get("/api/marketplace/jobs", params={"category": "creative-design"})
+    assert [j["id"] for j in board.json()] == [job_id]
+
+
+@pytest.mark.asyncio
+async def test_a_bogus_category_is_refused_on_edit_too(client):
+    """The create path validates; an edit path that does not is a hole."""
+    r = await client.post("/api/marketplace/jobs", json=JOB, headers=_auth(POSTER))
+    job_id = r.json()["id"]
+    bad = await client.patch(
+        f"/api/marketplace/jobs/{job_id}",
+        json={"category": "not-a-real-category"},
+        headers=_auth(POSTER),
+    )
+    assert bad.status_code in (400, 422), bad.text
+    assert (await client.get(f"/api/marketplace/jobs/{job_id}")).json()["category"] == JOB["category"]
+
+
+@pytest.mark.asyncio
+async def test_changing_category_drops_a_subcategory_that_no_longer_belongs(client):
+    r = await client.post(
+        "/api/marketplace/jobs",
+        json={**JOB, "subcategory": "plumbing"},
+        headers=_auth(POSTER),
+    )
+    job_id = r.json()["id"]
+    fixed = await client.patch(
+        f"/api/marketplace/jobs/{job_id}",
+        json={"category": "creative-design"},
+        headers=_auth(POSTER),
+    )
+    assert fixed.status_code == 200, fixed.text
+    assert not fixed.json().get("subcategory"), "a subcategory from the old trade survived the move"
+
+
+@pytest.mark.asyncio
+async def test_someone_else_still_cannot_edit_the_category(client):
+    r = await client.post("/api/marketplace/jobs", json=JOB, headers=_auth(POSTER))
+    job_id = r.json()["id"]
+    hijack = await client.patch(
+        f"/api/marketplace/jobs/{job_id}",
+        json={"category": "creative-design"},
+        headers=_auth("someone-else"),
+    )
+    assert hijack.status_code in (403, 404), hijack.text

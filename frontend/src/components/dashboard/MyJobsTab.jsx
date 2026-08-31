@@ -24,20 +24,8 @@ import { useNavigate } from 'react-router-dom';
 import { saveReturnPath } from '../../hooks/useBackNavigation';
 import axios from 'axios';
 import { toast } from 'sonner';
-import {
-  Loader2,
-  MapPin,
-  Coins,
-  Calendar,
-  Plus,
-  ChevronDown,
-  ChevronRight,
-  ExternalLink,
-  Zap,
-  Users,
-  ArrowRight,
-  MessageCircle,
-} from 'lucide-react';
+import EditJobModal from './EditJobModal';
+import { Loader2, MapPin, Coins, Calendar, Plus, ChevronDown, ChevronRight, ExternalLink, Zap, Users, ArrowRight, MessageCircle, Pencil } from 'lucide-react';
 
 const StatusPill = ({ status }) => {
   const styles = {
@@ -120,12 +108,13 @@ const ApplicationRow = ({ app, jobId, onMessage }) => {
   );
 };
 
-const JobCard = ({ job, API, token, onStatusChange }) => {
+const JobCard = ({ job, API, token, onStatusChange, onJobUpdated }) => {
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
   const [applications, setApplications] = useState(null);
   const [loadingApps, setLoadingApps] = useState(false);
   const [mutating, setMutating] = useState(false);
+  const [editing, setEditing] = useState(false);
 
   const sym = job.budget_currency === 'USD' ? '$' : '₪';
   const budget =
@@ -232,6 +221,13 @@ const JobCard = ({ job, API, token, onStatusChange }) => {
 
           <div className="flex flex-wrap gap-2 mb-4">
             <button
+              onClick={() => setEditing(true)}
+              className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-semibold border border-gray-200 bg-white hover:border-[var(--brand-primary)] hover:text-[var(--brand-primary)]"
+              data-testid={`my-job-edit-${job.id}`}
+            >
+              <Pencil size={12} /> Edit job
+            </button>
+            <button
               onClick={() => navigate(`/businesses/jobs/${job.id}`)}
               className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-semibold border border-gray-200 bg-white hover:border-[var(--brand-primary)] hover:text-[var(--brand-primary)]"
               data-testid={`my-job-view-${job.id}`}
@@ -259,6 +255,16 @@ const JobCard = ({ job, API, token, onStatusChange }) => {
               </button>
             )}
           </div>
+
+          {editing && (
+            <EditJobModal
+              job={job}
+              API={API}
+              token={token}
+              onClose={() => setEditing(false)}
+              onSaved={(updated) => onJobUpdated?.(updated)}
+            />
+          )}
 
           {/* Applications list */}
           <p className="text-[11px] font-semibold text-gray-500 uppercase tracking-wide mb-2">
@@ -308,6 +314,14 @@ const MyJobsTab = ({ API, token }) => {
 
   const onStatusChange = (jobId, nextStatus) => {
     setRows((cur) => cur.map((j) => (j.id === jobId ? { ...j, status: nextStatus } : j)));
+  };
+
+  // Merged in place rather than refetching: a refetch collapses every
+  // expanded card and throws the reader back to the top of the list,
+  // right after they finished editing one of them.
+  const onJobUpdated = (updated) => {
+    if (!updated || !updated.id) return;
+    setRows((cur) => cur.map((j) => (j.id === updated.id ? { ...j, ...updated } : j)));
   };
 
   if (loading) {
@@ -363,6 +377,7 @@ const MyJobsTab = ({ API, token }) => {
               API={API}
               token={token}
               onStatusChange={onStatusChange}
+              onJobUpdated={onJobUpdated}
             />
           ))}
         </div>
