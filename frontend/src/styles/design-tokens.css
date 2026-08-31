@@ -54,10 +54,26 @@
   --brand-primary-rgb:30 95 140;   /* #1E5F8C */
   --gold-rgb:201 162 39;           /* #C9A227 */
         /* use on DARK surfaces + large display */
-  --gold-text:#8A6A14;   /* small gold text on LIGHT (passes AA) */
-  --gold-lg:#A9831C;     /* large/display gold on LIGHT ONLY — it is ~3.3:1 on
-                            dark, so never use --gold-lg on a dark panel; use
-                            --gold there instead. */
+  --gold-text:#8A6A14;   /* small gold text on LIGHT. 5.06:1 on white, but
+                            only 4.18:1 on limestone (#EFE9DC), which is
+                            BELOW the 4.5:1 floor for normal text. Safe on
+                            surface, not safe on the page background. Not
+                            changed here because it is used widely and the
+                            call is the brand owner's; flagged rather than
+                            silently altered. */
+  --gold-lg:#977417;     /* large/display gold on LIGHT ONLY.
+
+                            WAS #A9831C, which measured 2.92:1 on limestone
+                            — below even the 3:1 large-text floor, so its
+                            documented purpose was unachievable on the
+                            site's own background. The old comment said
+                            "~3.3:1 on dark" and nobody had measured it on
+                            light.
+
+                            #977417, measured: 3.60:1 on limestone, 4.35:1
+                            on white, 4.10:1 on #FBF8F2 (the one inline use
+                            in AddPropertyModal). Still LIGHT ONLY — darker
+                            is worse on dark, so use --gold there. */
 
   /* Neutrals */
   --ink:#23201B; --brand-muted:#6B6459;

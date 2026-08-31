@@ -349,7 +349,13 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--blue);outline-of
 .bi .fl:last-child{margin-bottom:0}
 .bi .fl > label{display:block;font-size:10.5px;font-weight:800;letter-spacing:.12em;
   text-transform:uppercase;color:var(--ink);margin-bottom:6px}
-.bi textarea{min-height:132px;line-height:1.55;resize:vertical;font-weight:500}
+/* Content-sized. At 1280 the English description showed 130px of the
+   200px it needs - 35% of the seller's own drafted text hidden behind a
+   scrollbar, in the one control whose entire job is letting them read
+   what the machine wrote for them. `field-sizing` grows the box to the
+   text; the min-height is the floor for browsers without it, raised from
+   132px so the common case is not clipped there either. */
+.bi textarea{field-sizing:content;min-height:210px;line-height:1.55;resize:vertical;font-weight:500}
 .bi .he{direction:rtl;text-align:start;font-family:var(--body-he)}
 .bi .he textarea,.bi .he input{font-family:var(--body-he);direction:rtl}
 
@@ -501,7 +507,7 @@ The same sofa runs through all three screens on purpose: you find it, you open i
     <div class="catwrap">
       <h2 id="cath">Category</h2>
       <nav aria-labelledby="cath">
-        <a class="cat" href="#" aria-current="true"><span>Furniture and appliances</span><b class="est">412</b></a>
+        <a class="cat" href="#"><span>Furniture and appliances</span><b class="est">412</b></a>
         <a class="cat" href="#"><span>Baby and kids</span><b class="est">288</b></a>
         <a class="cat" href="#"><span>Books and sefarim</span><b class="est">174</b></a>
         <a class="cat" href="#"><span>Kitchen</span><b class="est">131</b></a>
@@ -554,7 +560,13 @@ The same sofa runs through all three screens on purpose: you find it, you open i
   <!-- the grid -->
   <div>
     <div class="bar">
-      <strong><span class="est">38</span> items in Furniture and appliances, Jerusalem</strong>
+      <!-- Was "38 items in Furniture and appliances, Jerusalem" over a grid
+           containing a pram from Ra'anana, a cot from Ramat Beit Shemesh and
+           books from Modiin: six of the eight cards matched neither facet.
+           The category facet is not applied here, so the bar no longer claims
+           it, and the four out-of-area cards have moved into Jerusalem
+           neighbourhoods so the area facet it does claim is true. -->
+      <strong><span class="est">38</span> items in Jerusalem</strong>
       <div class="sortwrap">
         <label for="sort">Sort</label>
         <select id="sort">
@@ -582,7 +594,7 @@ The same sofa runs through all three screens on purpose: you find it, you open i
         <div class="meta">
           <h3>Chicco travel cot and mattress</h3>
           <p class="price">&#8362;180</p>
-          <p class="who">Ramat Beit Shemesh <span class="kind priv">Private seller</span></p>
+          <p class="who">Kiryat Yovel, Jerusalem <span class="kind priv">Private seller</span></p>
         </div>
       </a>
 
@@ -591,7 +603,7 @@ The same sofa runs through all three screens on purpose: you find it, you open i
         <div class="meta">
           <h3>Step down transformer, 2000W</h3>
           <p class="price">&#8362;140</p>
-          <p class="who">Talpiot, Jerusalem <span class="kind biz">Business</span> <span class="verified">Verified</span></p>
+          <p class="who">Talpiot, Jerusalem <span class="kind biz verified">Verified business</span></p>
         </div>
       </a>
 
@@ -600,7 +612,7 @@ The same sofa runs through all three screens on purpose: you find it, you open i
         <div class="meta">
           <h3>Shas, Vilna edition, twenty volumes</h3>
           <p class="price">&#8362;1,200 <span class="obo">or best offer</span></p>
-          <p class="who">Geula, Jerusalem <span class="kind biz">Business</span> <span class="verified">Verified</span></p>
+          <p class="who">Geula, Jerusalem <span class="kind biz verified">Verified business</span></p>
         </div>
       </a>
 
@@ -609,7 +621,7 @@ The same sofa runs through all three screens on purpose: you find it, you open i
         <div class="meta">
           <h3>Whirlpool dryer, 110 volt</h3>
           <p class="price">&#8362;700 <span class="soldon">Sold 12 August</span></p>
-          <p class="who">Efrat <span class="kind priv">Private seller</span></p>
+          <p class="who">Gilo, Jerusalem <span class="kind priv">Private seller</span></p>
         </div>
       </a>
 
@@ -627,7 +639,7 @@ The same sofa runs through all three screens on purpose: you find it, you open i
         <div class="meta">
           <h3>Forty English paperbacks, fiction</h3>
           <p class="price">&#8362;90</p>
-          <p class="who">Modiin <span class="kind priv">Private seller</span></p>
+          <p class="who">Har Nof, Jerusalem <span class="kind priv">Private seller</span></p>
         </div>
       </a>
 
@@ -636,7 +648,7 @@ The same sofa runs through all three screens on purpose: you find it, you open i
         <div class="meta">
           <h3>Bugaboo Fox pram, black</h3>
           <p class="price">&#8362;1,450 <span class="obo">or best offer</span></p>
-          <p class="who">Ra&#8217;anana <span class="kind priv">Private seller</span></p>
+          <p class="who">Rehavia, Jerusalem <span class="kind priv">Private seller</span></p>
         </div>
       </a>
 
@@ -818,7 +830,12 @@ The same sofa runs through all three screens on purpose: you find it, you open i
         the other half of the country can still find the sofa.</p>
 
       <div class="bi">
-        <div>
+        <!-- dir and lang are declared, not inherited. When the page flips
+             to RTL this half kept `direction: rtl` and the seller's own
+             English sentence rendered right-aligned with its punctuation
+             moved. User-authored text carries its own direction; only the
+             UI follows the reader's. -->
+        <div dir="ltr" lang="en">
           <p class="lang">English</p>
           <div class="fl">
             <label for="ttl-en">Title</label>
@@ -851,7 +868,7 @@ The same sofa runs through all three screens on purpose: you find it, you open i
         <div class="field"><label for="cond">Condition</label>
           <select id="cond"><option>Good, used</option><option>As new</option><option>Fair, works</option><option>For parts</option></select></div>
         <div class="field"><label for="dims">Dimensions</label>
-          <input id="dims" type="text" value="218 x 88 x 78 cm"/></div>
+          <input id="dims" type="text" dir="ltr" value="218 x 88 x 78 cm"/></div>
         <div class="field"><label for="make">Make</label>
           <input id="make" type="text" value="Ikea Ektorp"/></div>
         <div class="field"><label for="pick">Collection area</label>
@@ -891,7 +908,7 @@ The same sofa runs through all three screens on purpose: you find it, you open i
         <div class="setprice">
           <div class="field">
             <label for="ask">Your price, in shekels</label>
-            <input id="ask" type="number" value="450"/>
+            <input id="ask" type="number" dir="ltr" value="450"/>
           </div>
           <div class="checks" style="margin-top:0">
             <label><input type="checkbox" checked/> Accept offers below this</label>

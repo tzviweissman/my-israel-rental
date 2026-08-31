@@ -64,7 +64,14 @@ img{display:block;width:100%;height:100%;object-fit:cover}
 .gold-btn{background:var(--gold);color:var(--ink);font-family:var(--body);font-weight:800;
   font-size:14px;padding:11px 22px;border-radius:2px;text-decoration:none;
   border:none;display:inline-block;transition:background .18s ease}
-.gold-btn:hover{background:var(--gold-lg);color:#fff}
+/* Hover LIGHTENS and keeps ink, matching design-tokens.css:153
+   (.btn-accent:hover -> #D4AC33) and goods-marketplace-preview.html.
+   This darkened to --gold-lg and switched to white: 3.53:1, below the
+   4.5:1 floor, and the same mistake as the frosted-gold button CLAUDE.md
+   already records. Darkening cannot be rescued by keeping ink either -
+   ink on the corrected --gold-lg is 3.73:1. Lightening is what works:
+   ink on #D4AC33 measures 7.53:1. */
+.gold-btn:hover{background:#D4AC33;color:var(--ink)}
 
 /* ---------------- 1. hero: asymmetric broadsheet split ---------------- */
 .hero{padding:74px 0 0}
