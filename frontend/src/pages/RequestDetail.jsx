@@ -23,6 +23,7 @@ import {
 } from 'lucide-react';
 import { API, AuthContext } from '../App';
 import PageMeta from '../components/PageMeta';
+import ItemAttributes from '../components/requests/ItemAttributes';
 
 const daysUntil = (iso) => {
   if (!iso) return null;
@@ -351,6 +352,19 @@ const RequestDetail = () => {
           <p className="text-sm leading-relaxed whitespace-pre-line mb-6" style={{ color: 'var(--ink)' }}>
             {request.description}
           </p>
+
+          {/* G3 — the item specifics. Below the description rather than in
+              the rows above it: the rows are the five things every post
+              has, and burying "does it fit through a door" among them
+              would push price and collection point off the first screen
+              on a phone. */}
+          {isItem && (
+            <ItemAttributes
+              category={request.category}
+              attributes={request.attributes}
+              provenanceProvided={request.provenance_provided}
+            />
+          )}
 
           {/* N6 — on EVERY item, for BOTH sides. It sat in the buyer's
               branch first, which meant the seller never saw it: they are

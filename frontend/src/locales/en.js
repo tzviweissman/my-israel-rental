@@ -1584,6 +1584,15 @@ const en = {
       // language and not the other renders English to Hebrew readers
       // with no error, which is how a whole section shipped untranslated
       // once before.
+      // Units for the numeric item specifics. Not covered by the schema
+      // parity test — that checks categories, attributes and enum options —
+      // so a unit added to the Python schema needs a line here too, or it
+      // renders as the raw unit string.
+      itemUnits: {
+        'years': 'years',
+        'W': 'W',
+        'volumes': 'volumes',
+      },
       itemCategories: {
         'furniture': 'Furniture',
         'appliances': 'Appliances',
@@ -2607,6 +2616,17 @@ const en = {
       // Shown by ErrorBoundary when a page crashes. Until this existed a
       // render error produced a blank white document with no message.
       requests: {
+        // --- G3, the goods composer -------------------------------------
+        fieldItemCategory: 'What kind of thing is it?',
+        needItemCategory: 'Pick what kind of thing it is.',
+        categoryGuess: 'Your photo looks like {{name}} — tap it if that is right.',
+        specificsOptional: 'All optional. Every one you fill in is a filter someone can find you through.',
+        fromYourPhoto: 'from your photo',
+        readingPhoto: 'Reading your photo so you have less to fill in…',
+        useSuggestedTitle: 'Use "{{title}}"',
+        provenanceHint: 'Optional — but a stolen item cannot show one, so buyers trust a listing that does.',
+        serialProvided: 'The seller has the serial number and will show it on collection.',
+        frameProvided: 'The seller has the frame number and will show it on collection.',
         // Two-way board (Phase 3). Was demand-only, and the hero said so
         // — "Tell owners what you're looking for" is wrong on a page where
         // half the posts are owners saying what they have.

@@ -48,6 +48,8 @@ import { uploadFilesFast } from '../utils/fastUpload';
 import PageMeta from '../components/PageMeta';
 import DateModePills from '../components/requests/DateModePills';
 import AreaCombobox from '../components/requests/AreaCombobox';
+import ItemSpecifics from '../components/requests/ItemSpecifics';
+import { useItemSchema } from '../components/requests/itemSchema';
 import Combobox from '../components/common/Combobox';
 import DateField from '../components/common/DateField';
 import { useReturnDestination, backLabelFor } from '../hooks/useBackNavigation';
@@ -162,6 +164,9 @@ const PostRequest = () => {
     lease_months: '',
     // service
     category: '',
+    // item specifics (G3). Keyed by the schema the server declares and
+    // validates against; anything not in it is dropped on write.
+    attributes: {},
     preferred_date: '',
   });
   const set = (patch) => setForm((f) => ({ ...f, ...patch }));
@@ -172,6 +177,69 @@ const PostRequest = () => {
   // HEIC files every iPhone shoots by default — a case a hand-rolled
   // uploader here would rediscover the hard way.
   const [uploading, setUploading] = useState(false);
+
+  // G3 — the photo drafts the specifics; the seller reviews them.
+  //
+  // The friction rule is the whole reason this exists: listing is the
+  // scarce act, and a seller asked eight questions about a sofa posts
+  // fewer sofas. So the answers arrive filled in and the seller's job is
+  // to correct them, not to author them.
+  //
+  // It is an accelerator and NEVER a dependency. No key, no network, a
+  // refusal, a photo of a wall — every one of those leaves the form
+  // exactly as it was, and the seller fills it in themselves. Nothing
+  // below can block Next, and no error from it is ever shown: a listing
+  // flow that interrupts you because a vision call timed out is worse
+  // than one that never offered to help.
+  const itemSchema = useItemSchema();
+  const [draft, setDraft] = useState(null);
+  const [drafting, setDrafting] = useState(false);
+  // Which fields the photo produced, so the composer can mark them. A
+  // seller who cannot tell what they wrote from what was written for them
+  // either checks nothing or checks everything, and both defeat the point.
+  const [draftedKeys, setDraftedKeys] = useState(new Set());
+
+  const runDraft = async (photoUrl) => {
+    if (!photoUrl || !token || !itemSchema?.vision_available) return;
+    setDrafting(true);
+    try {
+      const { data } = await axios.post(`${API}/marketplace/items/draft`, {
+        photo_url: photoUrl,
+        title: form.title || null,
+        description: form.description || null,
+      }, { headers: { Authorization: `Bearer ${token}` } });
+      if (!data?.available) return;
+      setDraft(data);
+      setForm((f) => {
+        const marks = new Set();
+        // A LOW-CONFIDENCE CATEGORY IS NOT APPLIED. It is offered as a
+        // suggestion instead, because a wrong PRE-SELECTED category is a
+        // listing filed where nobody looks and the seller will not notice
+        // it — the field already looks answered.
+        const category = (!f.category && data.category && data.confidence === 'high')
+          ? data.category
+          : f.category;
+        if (category !== f.category) marks.add('__category');
+        // Never over an answer the seller already gave. Their own words
+        // beat a guess about their own object, every time.
+        const attributes = { ...f.attributes };
+        Object.entries(data.attributes || {}).forEach(([k, v]) => {
+          if (attributes[k] === undefined || attributes[k] === '') {
+            attributes[k] = v;
+            marks.add(k);
+          }
+        });
+        setDraftedKeys(marks);
+        return { ...f, category, attributes };
+      });
+    } catch {
+      // Deliberately silent. See above: this is help that did not arrive,
+      // not a failure the seller has to do anything about.
+    } finally {
+      setDrafting(false);
+    }
+  };
+
   const addPhotos = async (fileList) => {
     const files = Array.from(fileList || []);
     if (!files.length) return;
@@ -186,6 +254,11 @@ const PostRequest = () => {
       const urls = (uploaded || []).map((u) => u?.url).filter(Boolean);
       if (!urls.length) throw new Error('no urls');
       set({ photos: [...form.photos, ...urls].slice(0, MAX_ITEM_PHOTOS) });
+      // Only the FIRST photo, and only once. The rest are the same object
+      // from another angle; paying for a second read to learn what the
+      // first one already said spends the seller's waiting time on
+      // nothing. Not awaited — the form stays usable while it runs.
+      if (!form.photos.length && !draft) runDraft(urls[0]);
       if (files.length > room) {
         toast.message(t('requests.photosTrimmed', {
           defaultValue: 'Added {{n}} — that is the maximum.', n: room,
@@ -274,12 +347,28 @@ const PostRequest = () => {
     {
       key: 'when',
       label: t('requests.stepWhen', 'Specifics and timing'),
-      // An item needs a CONDITION; a service needs a category; a rental
-      // needs neither here. Requiring a category on an item is how the
-      // wrong one gets picked at random on a classified ad.
+      // An item needs a CONDITION and a category; a service needs a
+      // category; a rental needs neither here.
+      //
+      // The item category was optional until G3, with the note that
+      // requiring one is how the wrong one gets picked at random on a
+      // classified ad. That was true while the only tree on offer was the
+      // SERVICES tree, where nothing fits a sofa — the reason is gone now
+      // that goods have their own, with "Something else" as a labelled
+      // answer rather than a shrug, and with the photo usually filling it
+      // in before the seller reads the question. An item with no category
+      // appears in no category filter, which is the entire point of the
+      // exercise.
       blocker: () => {
         if (isItem) {
-          return form.condition ? null : t('requests.needCondition', 'What condition is it in?');
+          if (!form.condition) return t('requests.needCondition', 'What condition is it in?');
+          // Only once the schema has loaded. If it never does there are no
+          // chips to pick from, and blocking on a choice the form cannot
+          // offer would trap the seller on this step.
+          if (itemSchema && !form.category) {
+            return t('requests.needItemCategory', 'Pick what kind of thing it is.');
+          }
+          return null;
         }
         if (!isRental && !form.category) return t('requests.needCategory', 'Pick a service category.');
         return null;
@@ -293,7 +382,7 @@ const PostRequest = () => {
         ? t('requests.needBudget', 'Enter a budget amount, or switch to "open to offers".')
         : null),
     },
-  ], [t, form, isRental, isOffer, isItem]);
+  ], [t, form, isRental, isOffer, isItem, itemSchema]);
 
   const current = STEPS[step];
   const blocker = current.blocker();
@@ -362,8 +451,13 @@ const PostRequest = () => {
               condition: form.condition,
               pickup_area: form.pickup_area.trim() || null,
               photos: form.photos,
-              // Category is OPTIONAL on an item — sent only if chosen.
+              // Still sent as null-if-empty. The wizard asks for one, but
+              // the server has always accepted an item without a category
+              // and a parked draft written before G3 can still arrive
+              // here without one — a 400 on somebody's restored draft
+              // would be the worst possible place to enforce this.
               category: form.category || null,
+              attributes: form.attributes,
             }
           : isRental
             ? {
@@ -392,6 +486,73 @@ const PostRequest = () => {
       setSaving(false);
     }
   };
+
+  // PHOTOS COME FIRST FOR AN ITEM, and that is a deliberate reordering.
+  // eBay measured 50% fewer listing steps purely from moving photos to
+  // position one, and here the photo does more than sell the thing: it
+  // drafts the category and the specifics, so every question after it
+  // arrives already answered. Asked last, as it was, it could only ever
+  // decorate a form the seller had already finished filling in.
+  //
+  // A photo is also the single most useful thing on a classified ad —
+  // somebody scrolling decides from it before they read a word. Still
+  // optional: a listing without one is worth more than a person who
+  // abandons the form because they are not somewhere they can photograph
+  // the thing.
+  const photosField = (
+    <Field
+      label={t('requests.fieldPhotos', 'Photos')}
+      hint={t('requests.photosHint', 'Optional, up to 8. The first one is what people see on the board.')}
+    >
+      <div className="flex flex-wrap gap-2" data-testid="post-request-photos">
+        {form.photos.map((url, i) => (
+          <div key={url} className="relative">
+            <img
+              src={url}
+              alt=""
+              className="w-20 h-20 rounded-lg object-cover border"
+              style={{ borderColor: 'var(--brand-border)' }}
+              data-testid={`post-request-photo-${i}`}
+            />
+            <button
+              type="button"
+              onClick={() => removePhoto(url)}
+              aria-label={t('requests.removePhoto', 'Remove photo')}
+              className="absolute -top-1.5 -end-1.5 w-5 h-5 rounded-full text-white text-xs
+                         inline-flex items-center justify-center"
+              style={{ background: 'var(--ink)' }}
+              data-testid={`post-request-photo-remove-${i}`}
+            >
+              ×
+            </button>
+          </div>
+        ))}
+        {form.photos.length < MAX_ITEM_PHOTOS && (
+          <label
+            className="w-20 h-20 rounded-lg border border-dashed inline-flex flex-col items-center
+                       justify-center gap-1 cursor-pointer text-[10px] text-center px-1"
+            style={{ borderColor: 'var(--brand-border)', color: 'var(--brand-muted)' }}
+            data-testid="post-request-photo-add"
+          >
+            {uploading
+              ? <Loader2 size={16} className="animate-spin" />
+              : <ImagePlus size={16} aria-hidden="true" />}
+            {uploading
+              ? t('requests.photoUploading', 'Adding…')
+              : t('requests.addPhoto', 'Add photo')}
+            <input
+              type="file"
+              accept="image/*"
+              multiple
+              className="hidden"
+              disabled={uploading}
+              onChange={(e) => { addPhotos(e.target.files); e.target.value = ''; }}
+            />
+          </label>
+        )}
+      </div>
+    </Field>
+  );
 
   const dateField = (
     <Field label={isRental
@@ -561,6 +722,21 @@ const PostRequest = () => {
 
               {current.key === 'about' && (
                 <>
+                  {isItem && (
+                    <div className="mb-4">
+                      {photosField}
+                      {drafting && (
+                        <p
+                          className="text-[11px] mt-2 inline-flex items-center gap-1.5"
+                          style={{ color: 'var(--brand-muted)' }}
+                          data-testid="post-request-drafting"
+                        >
+                          <Loader2 size={12} className="animate-spin" aria-hidden="true" />
+                          {t('requests.readingPhoto', 'Reading your photo so you have less to fill in…')}
+                        </p>
+                      )}
+                    </div>
+                  )}
                   <Field label={t('requests.fieldTitle', 'Title')}>
                     <input
                       className={inputCls} style={{ borderColor: 'var(--brand-border)' }}
@@ -584,6 +760,24 @@ const PostRequest = () => {
                             : t('requests.titlePhService', 'e.g. Mover needed on the 14th'))}
                       maxLength={140} data-testid="post-request-title"
                     />
+                    {/* OFFERED, NEVER WRITTEN IN. The specifics below are
+                        enums the seller confirms with a glance; a title is
+                        a sentence they have to stand behind to a buyer
+                        standing in their living room, and a model looking
+                        at a photograph will happily call a sofa
+                        "excellent". So this waits for a tap, and only
+                        appears while the field is still empty. */}
+                    {isItem && draft?.title_suggestion && !form.title.trim() && (
+                      <button
+                        type="button"
+                        onClick={() => set({ title: draft.title_suggestion })}
+                        className="mt-2 text-xs font-semibold rounded-full px-3 py-1.5 border transition-colors"
+                        style={{ borderColor: 'var(--brand-border)', color: 'var(--brand-primary)', background: '#fff' }}
+                        data-testid="post-request-title-suggestion"
+                      >
+                        {t('requests.useSuggestedTitle', 'Use “{{title}}”', { title: draft.title_suggestion })}
+                      </button>
+                    )}
                   </Field>
                   <Field label={t('requests.fieldDescription', 'Details')}>
                     <textarea
@@ -667,64 +861,45 @@ const PostRequest = () => {
                       </Field>
                     </div>
 
-                    {/* A photo is the single most useful thing on a
-                        classified ad — somebody scrolling decides from it
-                        before they read a word. Optional, though: a
-                        listing without one is worth more than a person
-                        who abandons the form because they are not
-                        somewhere they can photograph the thing. */}
-                    <Field
-                      label={t('requests.fieldPhotos', 'Photos')}
-                      hint={t('requests.photosHint', 'Optional, up to 8. The first one is what people see on the board.')}
-                    >
-                      <div className="flex flex-wrap gap-2" data-testid="post-request-photos">
-                        {form.photos.map((url, i) => (
-                          <div key={url} className="relative">
-                            <img
-                              src={url}
-                              alt=""
-                              className="w-20 h-20 rounded-lg object-cover border"
-                              style={{ borderColor: 'var(--brand-border)' }}
-                              data-testid={`post-request-photo-${i}`}
-                            />
-                            <button
-                              type="button"
-                              onClick={() => removePhoto(url)}
-                              aria-label={t('requests.removePhoto', 'Remove photo')}
-                              className="absolute -top-1.5 -end-1.5 w-5 h-5 rounded-full text-white text-xs
-                                         inline-flex items-center justify-center"
-                              style={{ background: 'var(--ink)' }}
-                              data-testid={`post-request-photo-remove-${i}`}
-                            >
-                              ×
-                            </button>
-                          </div>
-                        ))}
-                        {form.photos.length < MAX_ITEM_PHOTOS && (
-                          <label
-                            className="w-20 h-20 rounded-lg border border-dashed inline-flex flex-col items-center
-                                       justify-center gap-1 cursor-pointer text-[10px] text-center px-1"
-                            style={{ borderColor: 'var(--brand-border)', color: 'var(--brand-muted)' }}
-                            data-testid="post-request-photo-add"
-                          >
-                            {uploading
-                              ? <Loader2 size={16} className="animate-spin" />
-                              : <ImagePlus size={16} aria-hidden="true" />}
-                            {uploading
-                              ? t('requests.photoUploading', 'Adding…')
-                              : t('requests.addPhoto', 'Add photo')}
-                            <input
-                              type="file"
-                              accept="image/*"
-                              multiple
-                              className="hidden"
-                              disabled={uploading}
-                              onChange={(e) => { addPhotos(e.target.files); e.target.value = ''; }}
-                            />
-                          </label>
-                        )}
-                      </div>
-                    </Field>
+                    {/* G3 — the category and the item specifics, drafted
+                        from the photo on the previous step and shown here
+                        for review. Nothing in it is required beyond the
+                        category itself: every field is one more way a
+                        buyer can find this listing, not one more question
+                        standing between the seller and posting it. */}
+                    <ItemSpecifics
+                      schema={itemSchema}
+                      category={form.category}
+                      attributes={form.attributes}
+                      draftedKeys={draftedKeys}
+                      draft={draft}
+                      onCategoryChange={(slug) => setForm((f) => ({
+                        ...f,
+                        category: slug,
+                        // CHANGING THE CATEGORY CLEARS THE SPECIFICS, and
+                        // it has to. `voltage` on a bookshelf is dropped
+                        // silently on write, so keeping it would leave the
+                        // seller looking at an answer that will not be
+                        // saved. Shared fields survive: a brand is a brand
+                        // whatever shelf it sits on.
+                        attributes: Object.fromEntries(
+                          Object.entries(f.attributes).filter(([k]) => (
+                            (itemSchema?.shared_fields || []).some((sf) => sf.key === k)
+                          )),
+                        ),
+                      }))}
+                      onAttributeChange={(key, value) => {
+                        setForm((f) => ({ ...f, attributes: { ...f.attributes, [key]: value } }));
+                        // Once they have touched it, it is theirs — the
+                        // "from your photo" mark comes off.
+                        setDraftedKeys((keys) => {
+                          if (!keys.has(key)) return keys;
+                          const next = new Set(keys);
+                          next.delete(key);
+                          return next;
+                        });
+                      }}
+                    />
 
                     {/* N6. On the form as well as the post: the moment to
                         read this is before you arrange to meet a stranger,

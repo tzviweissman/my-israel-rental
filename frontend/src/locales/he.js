@@ -1549,6 +1549,11 @@ const he = {
       // language and not the other renders English to Hebrew readers
       // with no error, which is how a whole section shipped untranslated
       // once before.
+      itemUnits: {
+        'years': 'שנים',
+        'W': 'ואט',
+        'volumes': 'כרכים',
+      },
       itemCategories: {
         'furniture': 'ריהוט',
         'appliances': 'מוצרי חשמל',
@@ -2512,6 +2517,17 @@ const he = {
       // Phone/WhatsApp field validation. See en.js.
       // Shown by ErrorBoundary when a page crashes. See en.js.
       requests: {
+        // --- G3, the goods composer -------------------------------------
+        fieldItemCategory: 'איזה סוג של פריט זה?',
+        needItemCategory: 'בחרו איזה סוג של פריט זה.',
+        categoryGuess: 'התמונה נראית כמו {{name}} — הקישו אם זה נכון.',
+        specificsOptional: 'הכול לא חובה. כל פרט שתמלאו הוא עוד דרך שמישהו ימצא אתכם.',
+        fromYourPhoto: 'מהתמונה שלכם',
+        readingPhoto: 'קוראים את התמונה כדי שיישאר לכם פחות למלא…',
+        useSuggestedTitle: 'השתמשו ב"{{title}}"',
+        provenanceHint: 'לא חובה — אבל לפריט גנוב אין מספר כזה, ולכן קונים סומכים יותר על מודעה שיש בה אחד.',
+        serialProvided: 'למוכר יש את המספר הסידורי, והוא יראה אותו באיסוף.',
+        frameProvided: 'למוכר יש את מספר השלדה, והוא יראה אותו באיסוף.',
         // לוח דו-כיווני — הכותרת הקודמת פנתה רק למחפשים.
         heroTitle: 'אם אתם מחפשים, או',
         heroAccent: 'אם יש לכם.',

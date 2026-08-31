@@ -63,9 +63,16 @@ from utils.area_filter import resolve_area_id
 from utils.translate import detect_lang, translate_marketing
 from utils.whatsapp_link import build_whatsapp_link, normalize_whatsapp_number
 
+from utils.rate_limit import check_rate
+
 from .shared import UTC, FRONTEND_URL, _search_clauses, _validate_category, _validate_subcategory
+from . import item_vision
 from .item_taxonomy import (
+    CATEGORY_FIELDS,
+    ITEM_CATEGORIES,
     ITEM_CATEGORY_SLUGS,
+    PROVENANCE_FIELDS,
+    SHARED_FIELDS,
     facet_fields_for,
     SCHEMA_VERSION as ITEM_SCHEMA_VERSION,
     BANNED_MESSAGE,
@@ -355,6 +362,25 @@ async def _poster_identity(user_ids: list[str]) -> dict[str, dict[str, Any]]:
     return out
 
 
+# Not a Mongo field name and not an attribute key, so it can sit in the
+# `applied` map alongside real selections without colliding with one.
+_PROVENANCE_KEY = "__provenance__"
+
+
+def _provenance_query() -> dict[str, Any]:
+    """Items whose seller published a serial or a frame number.
+
+    One filter across both fields rather than one each. A buyer is not
+    hunting for "listings with a frame number"; they are hunting for a
+    seller who did the thing a fence cannot do, and which of the two
+    fields applies is decided by the category, not by them.
+    """
+    return {"$or": [
+        {f"attributes.{key}": {"$exists": True, "$ne": ""}}
+        for key in PROVENANCE_FIELDS
+    ]}
+
+
 def _public(doc: dict[str, Any], identity: dict[str, Any] | None = None) -> dict[str, Any]:
     """API-safe shape.
 
@@ -380,6 +406,24 @@ def _public(doc: dict[str, Any], identity: dict[str, Any] | None = None) -> dict
                      "whatsapp", "needs_review")
     }
     out["id"] = doc.get("_id")
+
+    # THE SERIAL NUMBER ITSELF NEVER LEAVES THE SERVER; only the fact that
+    # the seller published one. Same rule as the phone number below, for a
+    # different reason.
+    #
+    # The signal is "this seller could produce a serial", and it is worth
+    # something precisely because a fence cannot. Printing the digits on a
+    # public page destroys that: anyone can copy a real serial off an
+    # honest listing and paste it onto a stolen one, and the marker then
+    # means nothing on either. The buyer checks the number against the
+    # actual object when they collect it, which is the only check that was
+    # ever going to catch anything.
+    attributes = out.get("attributes")
+    if isinstance(attributes, dict) and attributes:
+        provided = [k for k in PROVENANCE_FIELDS if str(attributes.get(k) or "").strip()]
+        out["attributes"] = {k: v for k, v in attributes.items() if k not in PROVENANCE_FIELDS}
+        out["provenance_provided"] = provided
+
     # The NUMBER never leaves the server; only the fact that there is one.
     # This function whitelists by exclusion, so a field added to the document
     # is public by default — which is exactly how a phone number would have
@@ -585,6 +629,11 @@ async def list_requests(
     # already builds one query and fetches once, so attributes join it as
     # indexed equality matches and the counts below stay exact.
     attr: list[str] = Query(default_factory=list),
+    # G3 - the two safety fields, filtered on PRESENCE. Their value is
+    # never a facet: nobody browses by serial number, and the number is
+    # not served publicly at all. What a buyer can act on is that the
+    # seller published one, which is the thing a fence cannot do.
+    has_provenance: bool = False,
     limit: int = Query(60, ge=1, le=200),
 ):
     """Public board. Only open, un-hidden requests are ever returned."""
@@ -669,6 +718,12 @@ async def list_requests(
         if cleaned:
             query[f"attributes.{key}"] = cleaned[key]
 
+    if has_provenance:
+        # $and, because `area` may already own the top-level $or and a
+        # second one would silently replace it — turning "in Jerusalem
+        # with a serial" into "anywhere with a serial".
+        query["$and"] = query.get("$and", []) + [_provenance_query()]
+
     docs = await db.requests.find(query).sort("created_at", -1).to_list(limit)
     identities = await _poster_identity([d.get("poster_user_id") for d in docs if d.get("poster_user_id")])
     return [_public(d, identities.get(d.get("poster_user_id"))) for d in docs]
@@ -686,6 +741,7 @@ async def request_facets(
     max_price: Optional[float] = Query(None, ge=0),
     include_sold: bool = False,
     attr: list[str] = Query(default_factory=list),
+    has_provenance: bool = False,
 ):
     """Live counts for every filter option, given the filters already on.
 
@@ -753,11 +809,21 @@ async def request_facets(
         cleaned = normalize_attributes(category, {key: value})
         if cleaned:
             applied[f"attributes.{key}"] = cleaned[key]
+    if has_provenance:
+        # Under a sentinel key rather than "$and", because `q` may already
+        # own the base query's $and and a plain merge would REPLACE it -
+        # quietly turning "sofas matching 'ikea' with a serial" into
+        # "anything with a serial". It is expanded in `_match_excluding`.
+        applied[_PROVENANCE_KEY] = _provenance_query()
 
     def _match_excluding(field: str) -> dict[str, Any]:
         m = dict(base)
         for k, v in applied.items():
-            if k != field:
+            if k == field:
+                continue
+            if k == _PROVENANCE_KEY:
+                m["$and"] = m.get("$and", []) + [v]
+            else:
                 m[k] = v
         return m
 
@@ -789,6 +855,18 @@ async def request_facets(
             {"$match": _match_excluding(f"attributes.{key}")},
             {"$group": {"_id": f"$attributes.{key}", "n": {"$sum": 1}}},
         ]
+    # How many sellers published a serial or a frame number. Counted as
+    # a single "true" bucket rather than per field, because that is the
+    # shape of the filter: one checkbox, not two.
+    _prov_match = _match_excluding(_PROVENANCE_KEY)
+    # Appended to $and, never merged as a bare $or: `area` may already own
+    # the top-level $or, and overwriting it would count serials ANYWHERE
+    # while the grid beside it shows one neighbourhood.
+    _prov_match["$and"] = _prov_match.get("$and", []) + [_provenance_query()]
+    branches["provenance"] = [
+        {"$match": _prov_match},
+        {"$group": {"_id": "provided", "n": {"$sum": 1}}},
+    ]
 
     try:
         rows = await db.requests.aggregate([{"$facet": branches}]).to_list(1)
@@ -809,7 +887,10 @@ async def request_facets(
         if counts:
             facets[name] = counts
 
-    total = await db.requests.count_documents({**base, **applied})
+    # Through the same expander, so the sentinel provenance key never
+    # reaches Mongo as a literal field name. "" matches no field, so this
+    # excludes nothing.
+    total = await db.requests.count_documents(_match_excluding(""))
 
     # L6 - NEVER DEAD-END, AND NAME WHAT WAS DROPPED.
     #
@@ -830,8 +911,7 @@ async def request_facets(
     if total == 0 and applied:
         best = None
         for field in applied:
-            trial = {k: v for k, v in applied.items() if k != field}
-            n = await db.requests.count_documents({**base, **trial})
+            n = await db.requests.count_documents(_match_excluding(field))
             if n > 0 and (best is None or n > best["count"]):
                 best = {"drop": field, "count": n}
         # Every filter dropped and still nothing: the constraint is in
@@ -849,6 +929,126 @@ async def request_facets(
             relaxation = {**best, "exhausted": False}
 
     return {"facets": facets, "exact": True, "total": total, "relaxation": relaxation}
+
+
+# --------------------------------------------------------------------------
+# The goods composer (G3)
+# --------------------------------------------------------------------------
+
+def _is_own_media(url: str) -> bool:
+    """Is this a photo on OUR Cloudinary account?
+
+    The check exists because the URL is handed to a third party to fetch.
+    Accepting an arbitrary one would make this an open relay: any account
+    holder could have any host retrieved from our vendor's network, on our
+    bill, with our name on the request.
+
+    Host and cloud name are both checked. `res.cloudinary.com` alone is not
+    enough - anyone can sign up for a Cloudinary account, and
+    `res.cloudinary.com/<someone-else>/...` is a URL they control.
+    """
+    if not url:
+        return False
+    try:
+        parsed = urlparse(url)
+    except ValueError:
+        return False
+    if parsed.scheme != "https" or parsed.netloc != "res.cloudinary.com":
+        return False
+    cloud = os.environ.get("CLOUDINARY_CLOUD_NAME", "").strip()
+    if not cloud:
+        # Unconfigured means local dev with no Cloudinary at all. Refuse
+        # rather than fall open: a missing environment variable must never
+        # be the thing that widens what a URL may point at.
+        return False
+    return parsed.path.lstrip("/").split("/", 1)[0] == cloud
+
+
+@router.get("/item-schema")
+async def item_schema():
+    """The categories and item specifics, as the composer should render them.
+
+    SERVED RATHER THAN MIRRORED IN JS, and that is the whole point of the
+    endpoint. A hand-kept copy of this structure in the frontend is a
+    second source of truth, and the second one goes stale silently: the
+    services taxonomy already shipped a `CATEGORY_LABELS` mirror carrying
+    a slug Python had renamed, and nothing failed - the label just stopped
+    resolving. Here the failure would be worse, because a field the
+    composer offers but the API does not declare is dropped on write, so
+    the seller fills it in and it vanishes.
+
+    LABELS ARE SENT TOO, but the client prefers its own locale files and
+    falls back to these. `en.js` and `he.js` carry the translated strings
+    and a test asserts they match this schema key for key; these are the
+    parachute for the moment a key is added here before it is translated,
+    so a new field reads as English rather than as a raw slug.
+
+    Public: no auth. It is a vocabulary, it is on every listing page
+    already, and requiring a token to learn what "220v" means would only
+    stop the board being readable signed out.
+    """
+    return {
+        "version": ITEM_SCHEMA_VERSION,
+        "categories": ITEM_CATEGORIES,
+        "shared_fields": SHARED_FIELDS,
+        "category_fields": {slug: CATEGORY_FIELDS.get(slug, []) for slug in sorted(ITEM_CATEGORY_SLUGS)},
+        # Presence is shown and filterable; the value is never a facet.
+        # Named here so the composer can mark them without a hardcoded list.
+        "provenance_fields": list(PROVENANCE_FIELDS),
+        "conditions": list(ITEM_CONDITIONS),
+        "max_photos": MAX_ITEM_PHOTOS,
+        # So the composer knows whether to offer the "read my photo" step at
+        # all, rather than showing a spinner for a call that cannot run.
+        "vision_available": item_vision.is_configured(),
+    }
+
+
+class ItemDraftIn(BaseModel):
+    photo_url: str = Field(..., max_length=600)
+    # What the seller has typed so far, if anything. Sent because a photo
+    # of a black rectangle plus the words "Bosch dishwasher" is a much
+    # better draft than either on its own.
+    title: Optional[str] = Field(None, max_length=140)
+    description: Optional[str] = Field(None, max_length=1000)
+
+
+@router.post("/items/draft")
+async def draft_item_from_photo(payload: ItemDraftIn, request: Request, user=Depends(verify_token)):
+    """Read the seller's photo and draft the category and specifics.
+
+    NOTHING IS WRITTEN. This returns a suggestion to the browser and the
+    seller posts, or does not post, afterwards. It exists as an endpoint
+    only because the API key belongs on the server.
+
+    AUTHENTICATED AND RATE-LIMITED because it spends real credit on every
+    call. The limit is per user and generous against a person listing
+    their flat's contents - ten photos in a row is a normal afternoon -
+    while an unattended script is stopped in under a minute.
+
+    The photo URL is checked against our own Cloudinary account before it
+    is handed to a third party to fetch. Without that this is an open
+    relay: anyone with an account could pass any URL and have it retrieved
+    by our vendor on our bill, which is both a cost and a way to probe
+    hosts from somebody else's network.
+    """
+    check_rate(
+        request, bucket="item-draft", limit=20, window_seconds=60,
+        key_extra=str(user.get("id") or ""), ip_agnostic=True,
+    )
+    check_rate(
+        request, bucket="item-draft-hour", limit=120, window_seconds=3600,
+        key_extra=str(user.get("id") or ""), ip_agnostic=True,
+    )
+
+    url = (payload.photo_url or "").strip()
+    if not _is_own_media(url):
+        raise HTTPException(
+            status_code=400,
+            detail="Upload the photo here first — only photos on this site can be read.",
+        )
+
+    seller_text = " ".join(x for x in [(payload.title or "").strip(), (payload.description or "").strip()] if x)
+    return await item_vision.draft_from_photo(url, seller_text=seller_text)
 
 
 @router.get("/requests/{request_id}")
