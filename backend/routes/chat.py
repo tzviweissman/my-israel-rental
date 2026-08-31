@@ -4,7 +4,7 @@ import logging
 import uuid
 from datetime import UTC, datetime, timedelta
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request
 
 from models import ChatMessage, EditMessage, TranslateMessageRequest, TypingPing
 from models_response import (
@@ -16,6 +16,8 @@ from models_response import (
     TypingStatusResponse,
 )
 from routes.deps import db, verify_token
+from utils.advance_payment import advance_payment_signals
+from utils.rate_limit import check_rate
 from utils.chat_translate import detect_language, translate_chat_message
 from utils.email import send_chat_message_email
 from utils.mentions import current_user_role_in_property, extract_mentions
@@ -48,9 +50,36 @@ def _schedule_bg_email(coro) -> asyncio.Task:
 
 
 @api_router.post("/chat/messages", response_model=IdMessageResponse)
-async def send_message(chat_data: ChatMessage, payload: dict = Depends(verify_token)) -> dict:
+async def send_message(
+    chat_data: ChatMessage,
+    req: Request,
+    payload: dict = Depends(verify_token),
+) -> dict:
+    # G5.6 - THERE WAS NO RATE LIMIT HERE AT ALL.
+    #
+    # Every other write path in this app is bucketed; chat was not, and a
+    # goods board is precisely where that matters: it puts strangers in
+    # direct contact with strangers, and the cost of blasting the same
+    # advance-payment message at fifty sellers was zero.
+    #
+    # Sized to be invisible to a real conversation and expensive for a
+    # script. 30 a minute is faster than anyone types; the hourly ceiling
+    # is what actually bites, because the abuse pattern is breadth - many
+    # threads, one message each - not depth.
+    #
+    # ip_agnostic because the ingress rotates egress IPs, so the user id
+    # is the only stable key (same reasoning as the Cloudinary bucket).
+    check_rate(
+        req, bucket="chat-send", limit=30, window_seconds=60,
+        key_extra=payload["user_id"], ip_agnostic=True,
+    )
+    check_rate(
+        req, bucket="chat-send-hour", limit=300, window_seconds=3600,
+        key_extra=payload["user_id"], ip_agnostic=True,
+    )
     message_id = str(uuid.uuid4())
     mentions = extract_mentions(chat_data.message)
+    _signals = advance_payment_signals(chat_data.message)
     # Image-only / video-only messages are allowed — but message must be
     # non-empty if no media is attached.
     has_media = bool(chat_data.image_url or chat_data.video_url)
@@ -69,7 +98,23 @@ async def send_message(chat_data: ChatMessage, payload: dict = Depends(verify_to
         # current user without re-scanning every message body on each fetch.
         "mentions": mentions,
         "created_at": datetime.now(UTC).isoformat(),
-        "read": False
+        "read": False,
+        # G1 - the one intervention with a measured effect behind it.
+        #
+        # Set when a message clusters PAYMENT language with DISTANCE
+        # language ("I am abroad, my courier will collect, send the
+        # deposit"). Either alone is an ordinary sentence on a
+        # second-hand board; the cluster is the shape of the dominant
+        # Israeli marketplace scam, and it is what the BBB's 40% figure
+        # is about - where somebody intervened at the payment moment,
+        # 40% of targets did not lose money.
+        #
+        # The flag travels with the message so the warning reaches the
+        # RECIPIENT, who is the person about to send money. The sender is
+        # not told, not blocked and not accused: this cannot tell a
+        # scammer from a genuinely travelling buyer, and the honest
+        # advice to both is identical.
+        "advance_payment_warning": bool(_signals["payment"] and _signals["distance"]),
     }
     
     await db.messages.insert_one(message_doc)

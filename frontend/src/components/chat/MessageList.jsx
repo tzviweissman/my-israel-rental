@@ -1,5 +1,6 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
+import AdvancePaymentWarning from './AdvancePaymentWarning';
 import { Clock, Check, CheckCheck, Pencil, X, MessageCircle, Languages, ChevronDown, AtSign } from 'lucide-react';
 
 const HEBREW_RE = /[\u0590-\u05FF]/;
@@ -386,7 +387,20 @@ const MessageList = ({
     return groups;
   }, {});
 
+  // G1. Fires only on a flagged message from the OTHER party: the warning
+  // is for the person being asked to pay, and telling senders they
+  // tripped a detector would teach them how to word around it.
+  const advancePaymentTriggered = messages.some(
+    (m) => m.advance_payment_warning && m.sender_id !== user?.id,
+  );
+  // Stable per conversation, so the dialog is shown once and then
+  // remembered. Repeating it on every later message trains the reflex
+  // that dismisses it.
+  const threadKey = property?.id || sublease?.id || 'thread';
+
   return (
+    <>
+      <AdvancePaymentWarning triggered={advancePaymentTriggered} threadKey={threadKey} />
     <div
       ref={messagesContainerRef}
       onScroll={onScroll}
@@ -481,6 +495,7 @@ const MessageList = ({
         </button>
       )}
     </div>
+    </>
   );
 };
 

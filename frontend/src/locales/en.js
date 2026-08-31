@@ -1692,6 +1692,15 @@ const en = {
           '220v': '220V',
         },
       },
+      advancePayment: {
+        title: 'Do not send money before you have the item',
+        body: 'This message asks about paying, or sending a courier, before you collect. That is the most common way people are cheated on second-hand boards here.',
+        ruleCollect: 'Pay when you collect, in person.',
+        ruleScreenshot: 'A transfer screenshot is not a payment. They are easily faked.',
+        ruleCourier: 'A courier or shipping fee asked for up front is a scam pattern.',
+        noProtection: 'MyIsraelRental never handles payment and cannot recover money you send.',
+        understood: 'I understand',
+      },
       signupJoin: {
         headline: 'Join My Israel Rental',
         sub: 'Book a stay, list a property, or add your business — all in one place.',
