@@ -66,6 +66,7 @@ from utils.whatsapp_link import build_whatsapp_link, normalize_whatsapp_number
 from .shared import UTC, FRONTEND_URL, _search_clauses, _validate_category, _validate_subcategory
 from .item_taxonomy import (
     ITEM_CATEGORY_SLUGS,
+    facet_fields_for,
     SCHEMA_VERSION as ITEM_SCHEMA_VERSION,
     BANNED_MESSAGE,
     banned_reason,
@@ -574,6 +575,16 @@ async def list_requests(
     # followed a link deserves to see they were too late rather than a
     # 404, which is why the post survives and only leaves the DEFAULT view.
     include_sold: bool = False,
+    # G4 - attribute facets, as repeated `attr` params: ?attr=voltage:110v
+    # &attr=material:wood. Repeated rather than a JSON blob so a filtered
+    # view is a plain shareable URL that survives the back button.
+    #
+    # Matched in MONGO, not in Python. The spec warns that gig filtering
+    # post-filters in Python after fetching `limit * 3`, which would make
+    # counts wrong and pages short - but that is gigs.py. This endpoint
+    # already builds one query and fetches once, so attributes join it as
+    # indexed equality matches and the counts below stay exact.
+    attr: list[str] = Query(default_factory=list),
     limit: int = Query(60, ge=1, le=200),
 ):
     """Public board. Only open, un-hidden requests are ever returned."""
@@ -606,7 +617,20 @@ async def list_requests(
         query["post_kind"] = {"$in": ["want", None]} if post_kind == "want" else "have"
 
     if category:
-        _validate_category(category)
+        # WHICH TREE depends on what is being browsed. This validated
+        # against the SERVICES tree unconditionally, so the moment items
+        # got their own taxonomy, `?request_type=item&category=furniture`
+        # started returning 400 - a filter for a category the board itself
+        # offers. Introduced by the taxonomy split and caught here.
+        #
+        # With no request_type the browser is looking at everything, so a
+        # slug from either tree is legitimate.
+        if request_type == "item":
+            validate_item_category(category)
+        elif request_type in ("service", "rental"):
+            _validate_category(category)
+        elif category not in ITEM_CATEGORY_SLUGS:
+            _validate_category(category)
         query["category"] = category
     if rental_kind:
         query["rental_kind"] = rental_kind
@@ -632,9 +656,199 @@ async def list_requests(
             # make a two-word search WIDER than a one-word search, which is
             # the opposite of what typing more words means.
             query["$and"] = query.get("$and", []) + clauses
+
+    # Unparseable or unknown attribute filters are DROPPED, not 400'd. A
+    # stale bookmark carrying a retired attribute should show the rest of
+    # the board, not an error page.
+    for pair in attr:
+        key, _, value = str(pair).partition(":")
+        key, value = key.strip(), value.strip()
+        if not key or not value:
+            continue
+        cleaned = normalize_attributes(category, {key: value})
+        if cleaned:
+            query[f"attributes.{key}"] = cleaned[key]
+
     docs = await db.requests.find(query).sort("created_at", -1).to_list(limit)
     identities = await _poster_identity([d.get("poster_user_id") for d in docs if d.get("poster_user_id")])
     return [_public(d, identities.get(d.get("poster_user_id"))) for d in docs]
+
+
+@router.get("/requests/facets")
+async def request_facets(
+    request_type: Optional[str] = Query("item", pattern="^(rental|service|item)$"),
+    post_kind: Optional[str] = Query(None, pattern="^(want|have)$"),
+    category: Optional[str] = None,
+    area: Optional[str] = None,
+    q: Optional[str] = None,
+    condition: Optional[str] = None,
+    min_price: Optional[float] = Query(None, ge=0),
+    max_price: Optional[float] = Query(None, ge=0),
+    include_sold: bool = False,
+    attr: list[str] = Query(default_factory=list),
+):
+    """Live counts for every filter option, given the filters already on.
+
+    EXACT, NOT ESTIMATED, and that is a deliberate constraint rather than
+    an implementation detail. A count that lies is worse than no count:
+    it is read as a promise about what is behind the click, and "220V
+    (14)" leading to four items teaches people to stop trusting the
+    numbers. Where an exact count is not achievable the honest output is
+    none at all.
+
+    Exactness is affordable here because `list_requests` builds ONE Mongo
+    query and post-filters nothing. (The spec's warning about wrong counts
+    is about `gigs.py`, which fetches `limit * 3` and filters in Python -
+    a different endpoint with a different problem.) One `$facet` stage
+    counts every dimension over the same matched set, in the database, in
+    one round trip.
+
+    EACH FACET EXCLUDES ITSELF. The count beside "110V" is what you would
+    get if you switched voltage to 110V, not the count within the current
+    voltage selection - otherwise the option you already picked reads as
+    the only one with anything behind it, and every alternative shows
+    zero. This is the part that is easy to get wrong and invisible when
+    it is wrong.
+    """
+    base: dict[str, Any] = {"status": "open", "hidden_by_admin": {"$ne": True}}
+    if request_type:
+        base["request_type"] = request_type
+    if not include_sold:
+        base["item_status"] = {"$ne": "sold"}
+    if post_kind:
+        base["post_kind"] = {"$in": ["want", None]} if post_kind == "want" else "have"
+    if category:
+        base["category"] = category
+    if q:
+        clauses = _search_clauses(q)
+        if clauses:
+            base["$and"] = clauses
+    if area:
+        wanted_id = resolve_area_id(area)
+        if wanted_id:
+            base["$or"] = [
+                {"area_id": wanted_id},
+                {"area": {"$regex": re.escape(area.strip()), "$options": "i"}},
+            ]
+        else:
+            base["area"] = {"$regex": re.escape(area.strip()), "$options": "i"}
+
+    price: dict[str, Any] = {}
+    if min_price is not None:
+        price["$gte"] = min_price
+    if max_price is not None:
+        price["$lte"] = max_price
+
+    # The selections currently applied, so each facet can drop its own.
+    applied: dict[str, Any] = {}
+    if condition:
+        applied["condition"] = condition
+    if price:
+        applied["budget_amount"] = price
+    for pair in attr:
+        key, _, value = str(pair).partition(":")
+        key, value = key.strip(), value.strip()
+        if not key or not value:
+            continue
+        cleaned = normalize_attributes(category, {key: value})
+        if cleaned:
+            applied[f"attributes.{key}"] = cleaned[key]
+
+    def _match_excluding(field: str) -> dict[str, Any]:
+        m = dict(base)
+        for k, v in applied.items():
+            if k != field:
+                m[k] = v
+        return m
+
+    # One pipeline, one round trip. $facet runs each branch over the same
+    # input, so every count is taken from the same snapshot - counts from
+    # separate queries can disagree with each other and with the grid.
+    branches: dict[str, list[dict[str, Any]]] = {
+        "condition": [
+            {"$match": _match_excluding("condition")},
+            {"$group": {"_id": "$condition", "n": {"$sum": 1}}},
+        ],
+        "area": [
+            {"$match": _match_excluding("area")},
+            {"$group": {"_id": "$area", "n": {"$sum": 1}}},
+            {"$sort": {"n": -1}},
+            {"$limit": 40},
+        ],
+        "category": [
+            {"$match": _match_excluding("category")},
+            {"$group": {"_id": "$category", "n": {"$sum": 1}}},
+        ],
+    }
+    # Only the attributes that are facets FOR THIS CATEGORY. A voltage
+    # filter on a bookshelf is noise, so it is not offered there and not
+    # counted there either.
+    for field in facet_fields_for(category):
+        key = field["key"]
+        branches[f"attr:{key}"] = [
+            {"$match": _match_excluding(f"attributes.{key}")},
+            {"$group": {"_id": f"$attributes.{key}", "n": {"$sum": 1}}},
+        ]
+
+    try:
+        rows = await db.requests.aggregate([{"$facet": branches}]).to_list(1)
+    except Exception as e:  # noqa: BLE001
+        # No counts rather than wrong counts. The grid still works; the
+        # numbers beside the options simply do not appear.
+        logger.warning("facet aggregation failed: %s", e)
+        return {"facets": {}, "exact": False, "total": None}
+
+    raw = rows[0] if rows else {}
+    facets: dict[str, dict[str, int]] = {}
+    for name, buckets in raw.items():
+        counts = {
+            str(b["_id"]): b["n"]
+            for b in (buckets or [])
+            if b.get("_id") is not None and b["n"] > 0
+        }
+        if counts:
+            facets[name] = counts
+
+    total = await db.requests.count_documents({**base, **applied})
+
+    # L6 - NEVER DEAD-END, AND NAME WHAT WAS DROPPED.
+    #
+    # An empty grid is a demand signal thrown away. Rather than showing
+    # nothing, work out which SINGLE filter is costing the most and say
+    # so, so the copy can read "No 110V appliances in Efrat. Showing 6 in
+    # Jerusalem." - which tells the reader what to click, where "0
+    # results" tells them to leave.
+    #
+    # One filter at a time, and the best one wins. Dropping several at
+    # once produces a result set the person did not ask for and cannot
+    # reason about; dropping the first that helps produces an arbitrary
+    # choice that depends on dict ordering.
+    #
+    # Returned as data, never as a sentence: the copy is assembled in the
+    # frontend where both languages live.
+    relaxation = None
+    if total == 0 and applied:
+        best = None
+        for field in applied:
+            trial = {k: v for k, v in applied.items() if k != field}
+            n = await db.requests.count_documents({**base, **trial})
+            if n > 0 and (best is None or n > best["count"]):
+                best = {"drop": field, "count": n}
+        # Every filter dropped and still nothing: the constraint is in
+        # `base` (the category, the area, the search words), not in the
+        # facets. Say that rather than suggesting a click that changes
+        # nothing.
+        if best is None:
+            broad = await db.requests.count_documents(
+                {"status": "open", "hidden_by_admin": {"$ne": True},
+                 "request_type": request_type} if request_type else
+                {"status": "open", "hidden_by_admin": {"$ne": True}}
+            )
+            relaxation = {"drop": None, "count": broad, "exhausted": True}
+        else:
+            relaxation = {**best, "exhausted": False}
+
+    return {"facets": facets, "exact": True, "total": total, "relaxation": relaxation}
 
 
 @router.get("/requests/{request_id}")
