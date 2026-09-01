@@ -7,7 +7,7 @@ import { areaLabel } from '../utils/areaNames';
 import { FileText, PenTool, Check, Download, Loader2, AlertCircle, X, MapPin, Calendar, DollarSign } from 'lucide-react';
 import { toast } from 'sonner';
 
-const API = process.env.REACT_APP_BACKEND_URL || '/api';
+import { API } from '../lib/apiBase';
 
 const SignContract = () => {
   const { t } = useTranslation();

@@ -21,7 +21,7 @@ import axios from 'axios';
  * fallback or go away entirely — no printed code breaks either way, because
  * the slug is what is printed, not the host.
  */
-const API = process.env.REACT_APP_BACKEND_URL;
+import { BACKEND_URL as API } from '../lib/apiBase';
 
 const ShortLinkRedirect = () => {
   const { slug } = useParams();

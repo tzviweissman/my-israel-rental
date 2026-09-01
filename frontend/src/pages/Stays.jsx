@@ -52,7 +52,7 @@ import SortSelect, {
   SORT_NEWEST, SORT_PRICE_ASC, SORT_PRICE_DESC, SORT_NEAREST, parseSort,
 } from '../components/search/SortSelect';
 
-const API = process.env.REACT_APP_BACKEND_URL + '/api';
+import { API } from '../lib/apiBase';
 
 // Stays = everything that's not storage. Storage was retired this session.
 const STAY_RENTAL_TYPES = ['vacation', 'short-term', 'long-term'];

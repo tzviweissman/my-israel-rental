@@ -135,33 +135,10 @@ import ErrorBoundary from './components/common/ErrorBoundary';
 // constant and the whole block below compiles away in production.
 const PREVIEW_NOINDEX = process.env.REACT_APP_PREVIEW === '1';
 
-// WHERE THE API LIVES. Set this to "/" for same origin, which is what
-// production uses: `frontend/server.js` proxies /api to the backend, so
-// the browser makes no cross-origin request and no CORS preflight.
-//
-// That is not a tidiness preference. A real user spent three minutes
-// failing to sign up because her network passed our GETs and passed our
-// CORS preflights and silently dropped every cross-origin POST — a thing
-// filtering software does, and which we cannot fix from her side. There
-// is nothing to single out if the request never leaves the origin.
-//
-// A full URL still wins, which is what local dev uses: the CRA dev server
-// has no proxy, so `.env` points at http://localhost:8001.
-//
-// "undefined" AND "null" ARE TREATED AS UNSET, and that is not paranoia.
-// Setting this variable to an empty string on Railway made the build
-// inline the four-letter STRING "undefined", so every call went to
-// `/undefined/api/...`, which the SPA fallback answered with index.html
-// and a 200 — the app parsing a web page as JSON. It shipped for about
-// six minutes. An absent value, an empty one and a stringified-nothing
-// now all mean the same safe thing.
-const RAW_BACKEND_URL = (process.env.REACT_APP_BACKEND_URL || '').trim();
-const BACKEND_URL = (
-  RAW_BACKEND_URL === 'undefined' || RAW_BACKEND_URL === 'null' || RAW_BACKEND_URL === '/'
-    ? ''
-    : RAW_BACKEND_URL
-).replace(/\/+$/, '');
-export const API = `${BACKEND_URL}/api`;
+// The API base is decided in one place — see lib/apiBase.js for the two
+// production incidents that made that necessary. Re-exported here
+// because ~100 modules already import { API } from '../App'.
+export { API } from './lib/apiBase';
 
 export const AuthContext = React.createContext();
 

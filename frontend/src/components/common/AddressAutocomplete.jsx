@@ -22,7 +22,7 @@ import axios from 'axios';
 import { useTranslation } from 'react-i18next';
 import { Loader2, MapPin, Search, X } from 'lucide-react';
 
-const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
+import { API } from '../../lib/apiBase';
 
 /**
  * @param {object} props

@@ -5,7 +5,7 @@ import axios from 'axios';
 import { toast } from 'sonner';
 import { Mail, RefreshCw, MailWarning } from 'lucide-react';
 
-const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
+import { API } from '../lib/apiBase';
 const RESEND_COOLDOWN_SEC = 60;
 
 /**

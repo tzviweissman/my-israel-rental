@@ -18,7 +18,7 @@ import {
 } from 'lucide-react';
 import { uploadFilesFast } from '../../utils/fastUpload';
 
-const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
+import { API } from '../../lib/apiBase';
 
 const RENTAL_TYPES = [
   { v: 'long-term', label: 'Long-term' },

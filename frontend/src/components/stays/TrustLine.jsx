@@ -23,7 +23,7 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 
-const API = process.env.REACT_APP_BACKEND_URL;
+import { BACKEND_URL as API } from '../../lib/apiBase';
 
 const MIN_LISTINGS = 25;
 const MIN_NEIGHBORHOODS = 5;

@@ -7,7 +7,7 @@ import {
 } from 'lucide-react';
 import QuickAddPropertyForm from './QuickAddPropertyForm';
 
-const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
+import { API } from '../../lib/apiBase';
 
 /**
  * Admin → Import tab.

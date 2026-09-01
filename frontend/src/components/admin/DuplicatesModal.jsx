@@ -7,7 +7,7 @@ import {
   ChevronUp, ChevronDown, ImageIcon, Bot, RefreshCw,
 } from 'lucide-react';
 
-const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
+import { API } from '../../lib/apiBase';
 
 /**
  * Admin-only modal that surfaces groups of duplicate listings AND lets

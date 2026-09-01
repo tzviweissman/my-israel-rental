@@ -3,6 +3,7 @@ import axios from 'axios';
 import { toast } from 'sonner';
 import { Loader2, Search, RefreshCw, Calendar, Mail, Phone, Users as UsersIcon, ExternalLink, Home as HomeIcon, MessageCircle } from 'lucide-react';
 import { getCoverImage } from '../../utils/coverImage';
+import { API } from '../../lib/apiBase';
 
 /**
  * Super Admin → Bookings tab.
@@ -41,7 +42,6 @@ const STATUS_LABELS = {
 };
 
 const BookingsTab = ({ token }) => {
-  const API = process.env.REACT_APP_BACKEND_URL + '/api';
   const [bookings, setBookings] = useState([]);
   const [statusCounts, setStatusCounts] = useState({});
   const [total, setTotal] = useState(0);
