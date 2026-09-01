@@ -1585,6 +1585,7 @@ const en = {
         recategorised: 'Moving this to a new category will let businesses in that category know about it.',
       },
       signupJoin: {
+        notSure: 'Not sure yet?',
         headline: 'Join My Israel Rental',
         sub: 'Book a stay, list a property, or add your business — all in one place.',
         question: 'What best describes you?',
@@ -1629,6 +1630,7 @@ const en = {
         createAccount: 'Create account',
       },
       common: {
+        clearDate: 'Clear date',
         networkError: 'We could not reach the server. Check your connection and try again — nothing you typed was lost.',
         // DateField calls t('common.pickDate'). There is a `pickDate` in
         // another block ("Pick a date first"), which is a different
@@ -2491,6 +2493,17 @@ const en = {
       // Shown by ErrorBoundary when a page crashes. Until this existed a
       // render error produced a blank white document with no message.
       requests: {
+        // --- the dashboard's My requests tab. These ten keys were in
+        // NEITHER locale file, so `t(key, 'English default')` rendered
+        // English to Hebrew readers with no error anywhere.
+        myTitle: 'My requests',
+        myCount: '{{n}} posted',
+        myEmptyTitle: "You haven't posted a request yet",
+        myEmptyBody: 'Tell owners and pros what you are looking for, and let them come to you.',
+        confirmDelete: 'Delete this request? This cannot be undone.',
+        deleted: 'Request deleted',
+        renewedTimes: 'renewed {{n}}x',
+        chatsOpened: 'chats opened about this',
         // Two-way board (Phase 3). Was demand-only, and the hero said so
         // — "Tell owners what you're looking for" is wrong on a page where
         // half the posts are owners saying what they have.

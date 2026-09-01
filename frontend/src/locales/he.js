@@ -1545,6 +1545,7 @@ const he = {
         recategorised: 'העברה לקטגוריה אחרת תיידע עסקים באותה קטגוריה על הבקשה.',
       },
       signupJoin: {
+        notSure: 'עדיין לא בטוחים?',
         headline: 'הצטרפו ל-My Israel Rental',
         sub: 'הזמינו לינה, פרסמו נכס, או הוסיפו את העסק — הכול במקום אחד.',
         question: 'מה הכי מתאר אתכם?',
@@ -1589,6 +1590,7 @@ const he = {
         createAccount: 'צור חשבון',
       },
       common: {
+        clearDate: 'ניקוי תאריך',
         networkError: 'לא הצלחנו להגיע לשרת. בדקו את החיבור ונסו שוב — שום דבר ממה שהקלדתם לא אבד.',
         pickDate: 'בחרו תאריך',
         backToDashboard: 'חזרה ללוח שלי',
@@ -2391,6 +2393,14 @@ const he = {
       // Phone/WhatsApp field validation. See en.js.
       // Shown by ErrorBoundary when a page crashes. See en.js.
       requests: {
+        myTitle: 'הבקשות שלי',
+        myCount: '{{n}} פורסמו',
+        myEmptyTitle: 'עדיין לא פרסמתם בקשה',
+        myEmptyBody: 'ספרו לבעלי נכסים ולבעלי מקצוע מה אתם מחפשים, ותנו להם לפנות אליכם.',
+        confirmDelete: 'למחוק את הבקשה? אי אפשר לבטל את הפעולה.',
+        deleted: 'הבקשה נמחקה',
+        renewedTimes: 'חודשה {{n}} פעמים',
+        chatsOpened: 'שיחות שנפתחו על זה',
         // לוח דו-כיווני — הכותרת הקודמת פנתה רק למחפשים.
         heroTitle: 'אם אתם מחפשים, או',
         heroAccent: 'אם יש לכם.',
