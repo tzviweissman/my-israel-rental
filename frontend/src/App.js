@@ -135,21 +135,32 @@ import ErrorBoundary from './components/common/ErrorBoundary';
 // constant and the whole block below compiles away in production.
 const PREVIEW_NOINDEX = process.env.REACT_APP_PREVIEW === '1';
 
-// SAME ORIGIN BY DEFAULT. Unset means "/api", which `frontend/server.js`
-// proxies to the backend — so the browser makes no cross-origin request
-// and no CORS preflight. That is not a tidiness preference: a real user
-// spent three minutes failing to sign up because her network passed our
-// GETs and our preflights and silently dropped every cross-origin POST,
-// which is a thing filtering software does and which we cannot fix from
-// here. Nothing to single out if the request never leaves the origin.
+// WHERE THE API LIVES. Set this to "/" for same origin, which is what
+// production uses: `frontend/server.js` proxies /api to the backend, so
+// the browser makes no cross-origin request and no CORS preflight.
 //
-// An explicit value still wins, which is what local dev uses (the CRA dev
-// server has no proxy, so `.env` points at http://localhost:8001).
+// That is not a tidiness preference. A real user spent three minutes
+// failing to sign up because her network passed our GETs and passed our
+// CORS preflights and silently dropped every cross-origin POST — a thing
+// filtering software does, and which we cannot fix from her side. There
+// is nothing to single out if the request never leaves the origin.
 //
-// The `|| ''` also closes an old trap: with the variable simply missing
-// this read `undefined/api`, and every call 404'd against a path that
-// looked almost right.
-const BACKEND_URL = (process.env.REACT_APP_BACKEND_URL || '').replace(/\/+$/, '');
+// A full URL still wins, which is what local dev uses: the CRA dev server
+// has no proxy, so `.env` points at http://localhost:8001.
+//
+// "undefined" AND "null" ARE TREATED AS UNSET, and that is not paranoia.
+// Setting this variable to an empty string on Railway made the build
+// inline the four-letter STRING "undefined", so every call went to
+// `/undefined/api/...`, which the SPA fallback answered with index.html
+// and a 200 — the app parsing a web page as JSON. It shipped for about
+// six minutes. An absent value, an empty one and a stringified-nothing
+// now all mean the same safe thing.
+const RAW_BACKEND_URL = (process.env.REACT_APP_BACKEND_URL || '').trim();
+const BACKEND_URL = (
+  RAW_BACKEND_URL === 'undefined' || RAW_BACKEND_URL === 'null' || RAW_BACKEND_URL === '/'
+    ? ''
+    : RAW_BACKEND_URL
+).replace(/\/+$/, '');
 export const API = `${BACKEND_URL}/api`;
 
 export const AuthContext = React.createContext();
