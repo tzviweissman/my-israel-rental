@@ -20,8 +20,19 @@ load_dotenv(ROOT / ".env")
 
 from motor.motor_asyncio import AsyncIOMotorClient  # noqa: E402
 
-from routes import admin as admin_route  # noqa: E402
-from routes import bookings as bookings_route  # noqa: E402
+# The helpers under test moved when `routes/admin` and `routes/bookings`
+# were split from single modules into packages: `_build_email_event` now
+# lives in `routes/admin/events.py`, and the contract-translation helpers
+# in `routes/bookings/contract.py`. The packages do NOT re-export them, so
+# importing the package and reaching for `pkg._helper` raised
+# AttributeError — and eleven tests covering the Postmark webhook and
+# contract translation have been failing on that ever since, saying
+# nothing about the code they were written to protect.
+#
+# Imported from the defining module, so a future move breaks the import
+# loudly at collection instead of turning into a silent AttributeError.
+from routes.admin import events as admin_route  # noqa: E402
+from routes.bookings import contract as bookings_route  # noqa: E402
 from routes import bulk_upload as bulk_route  # noqa: E402
 
 
