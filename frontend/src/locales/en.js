@@ -1103,7 +1103,13 @@ const en = {
         loginHere: 'Login here',
         welcomeBack: 'Welcome back!',
         accountCreated: 'Account created successfully!',
-        failed: 'Authentication failed',
+        // The generic catch-all for ANY failed auth call, including a
+        // signup where nothing was being authenticated. It said
+        // "Authentication failed" (Hebrew: "האימות נכשל"), which tells the
+        // reader their details were rejected — and a real user read that
+        // while her requests were never reaching the server at all.
+        failed: 'Something went wrong. Please try again.',
+        resetFailed: 'Failed to reset password. The link may have expired.',
         checkYourEmail: 'Check Your Email',
         resetLinkSent: "We've sent a password reset link to {{email}}. Check your inbox (and spam folder) and click the link to reset your password.",
         backToLogin: 'Back to Login',
@@ -1623,6 +1629,7 @@ const en = {
         createAccount: 'Create account',
       },
       common: {
+        networkError: 'We could not reach the server. Check your connection and try again — nothing you typed was lost.',
         // DateField calls t('common.pickDate'). There is a `pickDate` in
         // another block ("Pick a date first"), which is a different
         // sentence for a different situation and was never reachable

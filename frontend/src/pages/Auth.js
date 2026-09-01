@@ -5,6 +5,7 @@ import axios from 'axios';
 import DOMPurify from 'dompurify';
 import { API, AuthContext } from '../App';
 import { toast } from 'sonner';
+import { apiErrorMessage } from '../utils/apiError';
 import { Eye, EyeOff, ArrowLeft, Mail, KeyRound, CheckCircle, Home, Building2, Briefcase } from 'lucide-react';
 import WelcomePopups from '../components/WelcomePopups';
 import OwnerManagementOfferModal from '../components/OwnerManagementOfferModal';
@@ -114,7 +115,7 @@ const Auth = () => {
         navigate(destination);
       }
     } catch (error) {
-      toast.error(error.response?.data?.detail || t('auth.failed'));
+      toast.error(apiErrorMessage(error, t('auth.failed', 'Something went wrong. Please try again.'), t));
     }
   };
 
@@ -135,7 +136,7 @@ const Auth = () => {
     } catch (err) {
       // The backend now only errors on malformed requests. Show a generic
       // failure so we never leak whether the email existed.
-      toast.error(err.response?.data?.detail || 'Something went wrong. Please try again.');
+      toast.error(apiErrorMessage(err, t('auth.failed', 'Something went wrong. Please try again.'), t));
     } finally {
       setForgotSending(false);
     }
@@ -160,7 +161,7 @@ const Auth = () => {
       setResetDone(true);
       toast.success('Password has been reset successfully!');
     } catch (err) {
-      toast.error(err.response?.data?.detail || 'Failed to reset password. The link may have expired.');
+      toast.error(apiErrorMessage(err, t('auth.resetFailed', 'Failed to reset password. The link may have expired.'), t));
     } finally {
       setResetting(false);
     }

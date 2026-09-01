@@ -30,11 +30,22 @@
  * be one. `String(x)` is not enough either — it renders "[object Object]",
  * which is not a crash but is not a message either.
  *
- * @param {unknown} error     The caught error (axios or otherwise).
- * @param {string} fallback   Message to show when nothing usable is found.
- * @returns {string}          Always a string, always safe to render.
+ * THE NETWORK BRANCH HAS TO BE TRANSLATED, and it was not. On 1 Sep 2026
+ * someone tried to create a business account thirteen times in three
+ * minutes; the Railway logs show thirteen successful CORS preflights to
+ * `/api/auth/register` and NOT ONE POST. Her requests never reached the
+ * server, so there was no `detail` to show and no way for the screen to
+ * say so — the signup page was not using this helper at all, and the
+ * message it did show read, in Hebrew, "verification failed". She spent
+ * three minutes correcting an email address that was never the problem.
+ * `t` is optional so the four existing call sites keep working unchanged.
+ *
+ * @param {unknown}  error     The caught error (axios or otherwise).
+ * @param {string}   fallback  Message to show when nothing usable is found.
+ * @param {function} [t]       i18next translator, for the network line.
+ * @returns {string}           Always a string, always safe to render.
  */
-export function apiErrorMessage(error, fallback = 'Something went wrong. Please try again.') {
+export function apiErrorMessage(error, fallback = 'Something went wrong. Please try again.', t) {
   const detail = error?.response?.data?.detail;
 
   // The normal case: we raised HTTPException(detail="a sentence we wrote").
@@ -66,8 +77,14 @@ export function apiErrorMessage(error, fallback = 'Something went wrong. Please 
 
   // Network failure — no response at all. Distinguish it, because "check your
   // connection" and "the server said no" call for different reactions.
-  if (error?.request && !error?.response) {
-    return 'Could not reach the server. Check your connection and try again.';
+  //
+  // `!error.response` alone, not `error.request && !error.response`: a
+  // request blocked before it is dispatched has no `request` either, and
+  // that case is the one that sent a real user round in circles.
+  if (error && !error.response) {
+    const tr = typeof t === 'function' ? t : null;
+    const fallbackLine = 'Could not reach the server. Check your connection and try again — nothing you typed was lost.';
+    return tr ? tr('common.networkError', fallbackLine) : fallbackLine;
   }
 
   return fallback;

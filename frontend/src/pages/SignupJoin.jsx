@@ -18,6 +18,7 @@ import { useTranslation } from 'react-i18next';
 import axios from 'axios';
 import { toast } from 'sonner';
 import { phoneError, phonePreview } from '../utils/phoneValidation';
+import { apiErrorMessage } from '../utils/apiError';
 import PhoneInput from '../components/common/PhoneInput';
 import {
   ArrowLeft, ArrowRight, Check, Eye, EyeOff,
@@ -207,7 +208,7 @@ const SignupJoin = () => {
         navigate(redirectParam || '/dashboard');
       }
     } catch (err) {
-      toast.error(err.response?.data?.detail || t('auth.failed', 'Something went wrong. Please try again.'));
+      toast.error(apiErrorMessage(err, t('auth.failed', 'Something went wrong. Please try again.'), t));
     } finally {
       setSubmitting(false);
     }
