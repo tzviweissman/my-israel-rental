@@ -69,7 +69,7 @@ const BookingsTab = ({ token }) => {
     } finally {
       setLoading(false);
     }
-  }, [API, authHeaders, statusFilter]);
+  }, [authHeaders, statusFilter]);
 
   useEffect(() => {
     fetchBookings();
