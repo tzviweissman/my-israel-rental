@@ -37,6 +37,7 @@
  * never be able to cause the second one while trying to fix the first.
  */
 const http = require('node:http');
+const https = require('node:https');
 const fs = require('node:fs');
 const path = require('node:path');
 const handler = require('serve-handler');
@@ -144,7 +145,138 @@ function serveConfig() {
 
 const CONFIG = serveConfig();
 
+/* ─────────────────────────────────────────────────────────────────────
+   SAME-ORIGIN API PROXY
+
+   WHY. The page is served from myisraelrental.com and the API lives on
+   my-israel-rental-production.up.railway.app, so every write the app
+   makes is a CROSS-ORIGIN POST preceded by a CORS preflight.
+
+   On 1 Sep 2026 someone tried thirteen times to create a business
+   account and could not. The logs show, from her IP, thirteen successful
+   OPTIONS to /api/auth/register, six successful GETs — and not one POST,
+   ever, to any path. Her network passed reads and passed preflights and
+   dropped the writes. That is the signature of filtering software
+   between the phone and us, and a cross-origin POST to an unfamiliar
+   *.up.railway.app hostname is exactly what such software objects to.
+
+   We cannot fix her network. We can stop needing it to cooperate: if the
+   API answers on the same origin as the page, there is no cross-origin
+   request, no preflight, and nothing for a filter to single out. It is
+   also one fewer round trip on every write, and it removes CORS
+   configuration as a class of outage.
+
+   XFF IS THE DANGEROUS PART OF THIS FILE. `utils/rate_limit._client_key`
+   reads x-forwarded-for and takes the first entry; Railway already sets
+   it, so the header arriving here names the real caller. If this proxy
+   dropped it, every visitor would reach the backend wearing THIS
+   service's IP — and /auth/register allows 5 per IP per 10 minutes, so
+   the sixth signup anywhere on the site would start failing for
+   everybody. The header is forwarded, with our hop appended.
+
+   IT STREAMS. No buffering in either direction, so contract downloads
+   and uploads behave as they do today rather than being read into this
+   process's memory.
+
+   IT FAILS AS A GATEWAY, NEVER AS A CRASH. Any transport error answers
+   502 with a JSON body shaped like the backend's own errors, so the
+   client's `detail` handling keeps working.
+   ──────────────────────────────────────────────────────────────────── */
+
+// Where API calls are forwarded. Defaults to the public backend, which is
+// exactly where the browser sends them today — so the first deploy of
+// this changes the ROUTE and nothing else. Point it at Railway's private
+// network later to drop the public hop; that is a variable, not a patch.
+const API_TARGET = (process.env.API_PROXY_TARGET || API_ORIGIN).replace(/\/+$/, '');
+
+// Long enough for the slowest real endpoint. The LLM-backed routes
+// (translation, CSV mapping, the goods composer's vision draft) take tens
+// of seconds, and a proxy timeout shorter than the work it is proxying
+// turns a slow success into a failure that looks like an outage.
+const PROXY_TIMEOUT_MS = Number(process.env.API_PROXY_TIMEOUT_MS) || 120000;
+
+// Defined per RFC 7230 §6.1: meaningful to ONE connection, never to be
+// passed along. Forwarding `connection` or `transfer-encoding` to the
+// upstream produces responses the client cannot parse.
+const HOP_BY_HOP = new Set([
+  'connection', 'keep-alive', 'proxy-authenticate', 'proxy-authorization',
+  'te', 'trailer', 'transfer-encoding', 'upgrade',
+]);
+
+const stripHopByHop = (headers) => {
+  const out = {};
+  for (const [k, v] of Object.entries(headers)) {
+    if (!HOP_BY_HOP.has(k.toLowerCase())) out[k] = v;
+  }
+  return out;
+};
+
+function proxyApi(req, res) {
+  let target;
+  try {
+    target = new URL(API_TARGET + req.url);
+  } catch {
+    res.writeHead(502, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({ detail: 'Bad gateway' }));
+    return;
+  }
+
+  const headers = stripHopByHop(req.headers);
+  // The upstream must be addressed by ITS host, not ours, or Railway
+  // routes the request back to this service and the two bounce.
+  headers.host = target.host;
+
+  // Append rather than replace: the first entry is the real client, which
+  // is what the backend's rate limiter keys on.
+  const priorFor = req.headers['x-forwarded-for'];
+  const socketIp = req.socket.remoteAddress || '';
+  headers['x-forwarded-for'] = priorFor ? `${priorFor}, ${socketIp}` : socketIp;
+  headers['x-forwarded-proto'] = req.headers['x-forwarded-proto'] || 'https';
+  headers['x-forwarded-host'] = req.headers['x-forwarded-host'] || req.headers.host || '';
+
+  const transport = target.protocol === 'http:' ? http : https;
+  const upstream = transport.request(
+    {
+      protocol: target.protocol,
+      hostname: target.hostname,
+      port: target.port || (target.protocol === 'http:' ? 80 : 443),
+      method: req.method,
+      path: target.pathname + target.search,
+      headers,
+    },
+    (upRes) => {
+      res.writeHead(upRes.statusCode || 502, stripHopByHop(upRes.headers));
+      upRes.pipe(res);
+    },
+  );
+
+  upstream.setTimeout(PROXY_TIMEOUT_MS, () => upstream.destroy(new Error('upstream timeout')));
+
+  upstream.on('error', (err) => {
+    console.warn(`[server] api proxy ${req.method} ${req.url}: ${err.message}`);
+    if (res.headersSent) { res.destroy(); return; }
+    res.writeHead(502, { 'Content-Type': 'application/json' });
+    // Shaped like the backend's own errors so the client renders it
+    // rather than falling through to a generic message.
+    res.end(JSON.stringify({ detail: 'Could not reach the server. Please try again.' }));
+  });
+
+  // If the client hangs up mid-request, stop talking to the upstream.
+  req.on('aborted', () => upstream.destroy());
+  req.pipe(upstream);
+}
+
 const server = http.createServer(async (req, res) => {
+  // Before anything else: the SPA fallback rewrites every unmatched path
+  // to index.html, so an /api request that reached it would be answered
+  // with the HTML page and a 200 — the worst possible failure, because
+  // the client would try to parse a document as JSON.
+  if (req.url === '/api' || req.url.startsWith('/api/')) {
+    proxyApi(req, res);
+    return;
+  }
+
+
   const slug = isPreviewBot(req) ? businessSlug(req) : null;
   if (slug) {
     const html = await fetchPreview(slug);

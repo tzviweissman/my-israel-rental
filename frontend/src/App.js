@@ -135,7 +135,21 @@ import ErrorBoundary from './components/common/ErrorBoundary';
 // constant and the whole block below compiles away in production.
 const PREVIEW_NOINDEX = process.env.REACT_APP_PREVIEW === '1';
 
-const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
+// SAME ORIGIN BY DEFAULT. Unset means "/api", which `frontend/server.js`
+// proxies to the backend — so the browser makes no cross-origin request
+// and no CORS preflight. That is not a tidiness preference: a real user
+// spent three minutes failing to sign up because her network passed our
+// GETs and our preflights and silently dropped every cross-origin POST,
+// which is a thing filtering software does and which we cannot fix from
+// here. Nothing to single out if the request never leaves the origin.
+//
+// An explicit value still wins, which is what local dev uses (the CRA dev
+// server has no proxy, so `.env` points at http://localhost:8001).
+//
+// The `|| ''` also closes an old trap: with the variable simply missing
+// this read `undefined/api`, and every call 404'd against a path that
+// looked almost right.
+const BACKEND_URL = (process.env.REACT_APP_BACKEND_URL || '').replace(/\/+$/, '');
 export const API = `${BACKEND_URL}/api`;
 
 export const AuthContext = React.createContext();
