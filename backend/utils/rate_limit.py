@@ -58,13 +58,71 @@ def _rate_limiting_disabled() -> bool:
     return True
 
 
-def _client_key(request: Request, extra: str = "") -> str:
-    """Compose the rate-limit key from the caller's IP (falling back to
-    the socket address) plus any endpoint-specific token (e.g. email)."""
-    # X-Forwarded-For may be set by Cloudflare/Kubernetes ingress.
+# Address blocks that can only ever be a hop inside our own
+# infrastructure, never a real internet client. Railway's private network
+# is IPv6 ULA (fd00::/8) and its ingress speaks from CGNAT space
+# (100.64.0.0/10); the rest are the standard private and loopback ranges.
+_INTERNAL_PREFIXES = (
+    "10.", "127.", "192.168.", "::1", "fd", "fc",
+    *[f"172.{n}." for n in range(16, 32)],
+    *[f"100.{n}." for n in range(64, 128)],
+)
+
+
+def _is_internal(ip: str) -> bool:
+    low = ip.lower()
+    return not low or any(low.startswith(p) for p in _INTERNAL_PREFIXES)
+
+
+def client_ip(request: Request) -> str:
+    """The caller's address, as far as it can be trusted.
+
+    X-FORWARDED-FOR IS PARTLY ATTACKER-CONTROLLED, and reading the leftmost
+    entry - which this did - takes the part the attacker writes. Measured
+    against production: while rate-limited, sending
+    `X-Forwarded-For: 203.0.113.78` returned 400 instead of 429, i.e. a
+    fresh allowance. Every per-IP limit could be lifted by rotating one
+    header: the signup cap, and the login brute-force protection.
+
+    The header is a chain, appended to by each hop:
+
+        <client, forgeable> , <hop> , <hop we added>
+
+    Anything a proxy of ours appended is trustworthy; anything to the left
+    of the first trusted hop is not. So walk from the RIGHT, discard hops
+    inside our own infrastructure, and take the first public address left.
+    That is the closest thing to the real caller that we did not let them
+    write.
+
+    It has to work for both shapes we actually run:
+
+      through the same-origin proxy   "<client>, <100.64.x.x frontend>"
+                                      -> the frontend hop is discarded and
+                                         the client is used. Taking the
+                                         RIGHTMOST entry blindly would put
+                                         every visitor in one bucket and
+                                         the sixth signup site-wide would
+                                         start failing.
+      direct to the backend           "<forged>, <edge>" or "<client>"
+                                      -> a forged leftmost entry is only
+                                         used if nothing to its right is
+                                         public, and it is then no worse
+                                         than the socket address.
+    """
     fwd = request.headers.get("x-forwarded-for", "")
-    ip = fwd.split(",", 1)[0].strip() if fwd else (request.client.host if request.client else "?")
-    return f"{ip}|{extra}"
+    hops = [h.strip() for h in fwd.split(",") if h.strip()]
+    for hop in reversed(hops):
+        if not _is_internal(hop):
+            return hop
+    # Everything was internal, or the header was absent: the socket is the
+    # only thing left, and it is not forgeable.
+    return request.client.host if request.client else "?"
+
+
+def _client_key(request: Request, extra: str = "") -> str:
+    """Compose the rate-limit key from the caller's IP plus any
+    endpoint-specific token (e.g. email)."""
+    return f"{client_ip(request)}|{extra}"
 
 
 def check_rate(
