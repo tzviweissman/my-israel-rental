@@ -95,6 +95,40 @@ console.log('\nnothing outside apiBase.js may read the variable');
   check('only apiBase.js reads it', offenders.length === 0, offenders.join(', '));
 }
 
+console.log('\nevery call site agrees with the base it imported');
+{
+  // THE BUG THIS CATCHES. SignContract.js held
+  //   const API = process.env.REACT_APP_BACKEND_URL || '/api';
+  // so in production API was the bare ORIGIN and every call omitted /api.
+  // `<backend>/contracts/sign/x` is a 404; `<backend>/api/contracts/sign/x`
+  // is the real handler. Contract signing was broken from 2026-04-15 until
+  // it was fixed by accident on 2026-09-01 — 4½ months, two contracts sent
+  // and never signed, and nothing anywhere reported it.
+  //
+  // Two importable bases now exist and they differ by exactly `/api`:
+  //   import { API }                  -> origin + '/api'  → paths must NOT start /api/
+  //   import { BACKEND_URL as API }   -> bare origin      → paths MUST start /api/
+  // Getting that backwards is a 404 on every call in the file, which is
+  // silent until a user hits the feature.
+  const { execSync } = await import('node:child_process');
+  const files = execSync('git grep -l "from .*lib/apiBase" -- frontend/src', { encoding: 'utf8' })
+    .trim().split('\n').filter(Boolean);
+
+  const wrong = [];
+  for (const f of files) {
+    const src = readFileSync(f, 'utf8');
+    const bareOrigin = /import\s*\{\s*BACKEND_URL as API\s*\}/.test(src);
+    // Template-literal call sites: `${API}/something`
+    for (const m of src.matchAll(/\$\{API\}(\/[A-Za-z0-9_\-/${}.]*)/g)) {
+      const path = m[1];
+      const startsWithApi = path.startsWith('/api/') || path === '/api';
+      if (bareOrigin && !startsWithApi) wrong.push(`${f}: bare origin but path is ${path} (missing /api)`);
+      if (!bareOrigin && startsWithApi) wrong.push(`${f}: API already ends /api but path is ${path} (doubled)`);
+    }
+  }
+  check(`${files.length} importing files, every call site consistent`, wrong.length === 0, wrong.join('; '));
+}
+
 console.log('');
 if (failures.length) {
   console.log(`${failures.length} failed`);
