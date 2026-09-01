@@ -90,7 +90,7 @@ const NotifyMeCard = ({ filters, dateRange }) => {
           <Bell className="text-[var(--gold)]" size={24} />
         </div>
       </div>
-      <h3 className="text-2xl font-bold text-white mb-2" style={{ fontFamily: 'Playfair Display' }}>
+      <h3 className="text-2xl font-bold text-white mb-2" style={{ fontFamily: 'var(--font-head)' }}>
         {t('stays.notifyTitle', "Don't see what you're looking for?")}
       </h3>
       <p className="text-white/80 text-sm leading-relaxed mb-5 max-w-md mx-auto">

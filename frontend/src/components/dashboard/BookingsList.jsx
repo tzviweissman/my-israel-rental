@@ -278,7 +278,7 @@ const RenterBookingsList = ({ bookings, user, API, actions }) => {
   return (
     <>
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 mb-4">
-        <h2 className="text-2xl font-bold" style={{ fontFamily: 'Playfair Display' }}>
+        <h2 className="text-2xl font-bold" style={{ fontFamily: 'var(--font-head)' }}>
           {t('dashboard.myBookings')}
         </h2>
         {bookings.length > 0 && (
@@ -473,7 +473,7 @@ const OwnerStackedView = ({ bookings, user, token, API, actions, onUpdate }) => 
     <>
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 mb-4">
         <div>
-          <h2 className="text-2xl font-bold" style={{ fontFamily: 'Playfair Display' }}>
+          <h2 className="text-2xl font-bold" style={{ fontFamily: 'var(--font-head)' }}>
             {t('dashboard.myBookings')}
           </h2>
           <p className="text-sm text-gray-500 mt-0.5">
@@ -539,7 +539,7 @@ const OwnerStackedView = ({ bookings, user, token, API, actions, onUpdate }) => 
 
       {myTrips.length > 0 && (
         <section className="mt-8" data-testid="my-trips-section">
-          <h3 className="text-lg font-bold mb-3" style={{ fontFamily: 'Playfair Display' }}>
+          <h3 className="text-lg font-bold mb-3" style={{ fontFamily: 'var(--font-head)' }}>
             {t('dashboard.tripsIveBooked', "Trips I've booked")}
           </h3>
           <div className="space-y-4">

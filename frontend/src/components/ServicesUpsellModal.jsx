@@ -99,7 +99,7 @@ const ServicesUpsellModal = ({ onDone }) => {
           <h2
             id="services-upsell-title"
             className="text-3xl sm:text-4xl leading-tight max-w-lg"
-            style={{ fontFamily: 'Playfair Display' }}
+            style={{ fontFamily: 'var(--font-head)' }}
           >
             Take Your Services to the Next Level with MyIsraelRental
           </h2>

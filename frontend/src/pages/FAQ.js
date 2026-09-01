@@ -228,7 +228,7 @@ const FAQ = () => {
           </p>
           <h1
             className="text-4xl md:text-5xl font-bold text-gray-900 mb-3"
-            style={{ fontFamily: 'Playfair Display' }}
+            style={{ fontFamily: 'var(--font-head)' }}
           >
             Frequently asked questions
           </h1>
@@ -309,7 +309,7 @@ const FAQ = () => {
                     </div>
                     <h2
                       className="text-lg md:text-xl font-bold text-gray-900"
-                      style={{ fontFamily: 'Playfair Display' }}
+                      style={{ fontFamily: 'var(--font-head)' }}
                     >
                       {section.title}
                     </h2>
@@ -343,7 +343,7 @@ const FAQ = () => {
           className="mt-12 rounded-2xl bg-gradient-to-br from-[var(--brand-primary)] to-[#155454] text-white p-6 md:p-8"
           data-testid="faq-contact-cta"
         >
-          <h3 className="text-xl md:text-2xl font-bold mb-2" style={{ fontFamily: 'Playfair Display' }}>
+          <h3 className="text-xl md:text-2xl font-bold mb-2" style={{ fontFamily: 'var(--font-head)' }}>
             Still have questions?
           </h3>
           <p className="text-sm text-white/80 mb-5 max-w-lg">

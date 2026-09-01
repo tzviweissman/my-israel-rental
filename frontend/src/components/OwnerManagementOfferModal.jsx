@@ -73,7 +73,7 @@ const OwnerManagementOfferModal = ({ open, onDismiss }) => {
           </div>
           <h2
             className="text-2xl md:text-3xl font-bold leading-tight"
-            style={{ fontFamily: 'Playfair Display' }}
+            style={{ fontFamily: 'var(--font-head)' }}
           >
             {t('ownerOffer.title', 'Want us to manage your property for you?')}
           </h2>

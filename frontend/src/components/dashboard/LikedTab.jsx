@@ -58,7 +58,7 @@ const LikedTab = ({ API, token }) => {
 
   return (
     <div className="space-y-6" data-testid="liked-tab">
-      <h2 className="text-2xl font-bold" style={{ fontFamily: 'Playfair Display' }}>
+      <h2 className="text-2xl font-bold" style={{ fontFamily: 'var(--font-head)' }}>
         Liked Properties
       </h2>
 

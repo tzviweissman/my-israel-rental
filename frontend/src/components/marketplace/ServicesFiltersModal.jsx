@@ -116,7 +116,7 @@ const ServicesFiltersModal = ({ open, onClose, initial, languages, onApply, onCl
         <div className="sticky top-0 z-10 flex items-center justify-between px-6 py-4 border-b bg-white/95 backdrop-blur">
           <div className="flex items-center gap-2">
             <SlidersHorizontal size={18} className="text-[var(--brand-primary)]" />
-            <h2 className="text-lg font-bold text-gray-900" style={{ fontFamily: 'Playfair Display' }}>
+            <h2 className="text-lg font-bold text-gray-900" style={{ fontFamily: 'var(--font-head)' }}>
               {t('services.filters', 'More filters')}
             </h2>
           </div>

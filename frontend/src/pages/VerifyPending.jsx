@@ -49,7 +49,7 @@ const VerifyPending = () => {
         <div className="inline-flex items-center justify-center w-14 h-14 rounded-full bg-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/10 text-[var(--brand-primary)] mb-5">
           <Mail size={26} />
         </div>
-        <h1 className="text-2xl font-bold mb-2" style={{ fontFamily: 'Playfair Display' }}>
+        <h1 className="text-2xl font-bold mb-2" style={{ fontFamily: 'var(--font-head)' }}>
           {t('auth.verifyPending.title', 'Check your email')}
         </h1>
         <p className="text-sm text-gray-600 leading-relaxed mb-1">

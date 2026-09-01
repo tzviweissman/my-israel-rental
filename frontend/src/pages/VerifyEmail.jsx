@@ -44,7 +44,7 @@ const VerifyEmail = () => {
         >
           <Icon size={26} />
         </div>
-        <h1 className="text-2xl font-bold mb-3" style={{ fontFamily: 'Playfair Display' }}>
+        <h1 className="text-2xl font-bold mb-3" style={{ fontFamily: 'var(--font-head)' }}>
           {t(theme.titleKey, theme.titleFallback)}
         </h1>
         <p className="text-sm text-gray-600 leading-relaxed mb-6">

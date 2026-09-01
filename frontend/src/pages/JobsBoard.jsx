@@ -18,7 +18,7 @@
  * page was written in English first.
  *
  * The heading reads `var(--font-head)`, never the literal face. Playfair
- * has no Hebrew glyphs, and an inline `fontFamily: 'Playfair Display'`
+ * has no Hebrew glyphs, and an inline `fontFamily: 'var(--font-head)'`
  * beats the RTL stylesheet — so the Hebrew heading silently fell back to
  * a system serif. That was the state here.
  */

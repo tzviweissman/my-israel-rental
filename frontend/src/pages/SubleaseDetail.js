@@ -136,7 +136,7 @@ const SubleaseDetail = () => {
           <div className="flex items-start justify-between gap-4 mb-3">
             <h1
               className="text-3xl md:text-4xl font-bold"
-              style={{ fontFamily: 'Playfair Display' }}
+              style={{ fontFamily: 'var(--font-head)' }}
               data-testid="sublease-title"
             >
               {sublease.title || tf('sublease.untitled', 'Sublease')}

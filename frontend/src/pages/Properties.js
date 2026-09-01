@@ -561,7 +561,7 @@ const Properties = () => {
         <div className="flex items-center justify-between mb-3 gap-3">
           <h1
             className="text-2xl sm:text-3xl md:text-4xl font-bold truncate"
-            style={{ fontFamily: 'Playfair Display' }}
+            style={{ fontFamily: 'var(--font-head)' }}
             data-testid="properties-title"
           >
             {rentalTypeLabel[type] || t('filters.allProperties')}
@@ -670,7 +670,7 @@ const Properties = () => {
               <div>
                 <h3
                   className="text-base sm:text-lg font-semibold mb-0.5"
-                  style={{ color: 'var(--gold)', fontFamily: 'Playfair Display' }}
+                  style={{ color: 'var(--gold)', fontFamily: 'var(--font-head)' }}
                 >
                   {t('filters.zeroResultsHeading') || 'No matches right now'}
                 </h3>

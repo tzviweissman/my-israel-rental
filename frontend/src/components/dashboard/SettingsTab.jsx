@@ -202,7 +202,7 @@ const SettingsTab = ({ user, token, API }) => {
 
   return (
     <div>
-      <h2 className="text-2xl font-bold mb-6" style={{ fontFamily: 'Playfair Display' }}>{i18n.t('dashboard.accountSettings')}</h2>
+      <h2 className="text-2xl font-bold mb-6" style={{ fontFamily: 'var(--font-head)' }}>{i18n.t('dashboard.accountSettings')}</h2>
 
       <NotificationSettings API={API} token={token} />
 

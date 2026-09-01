@@ -94,7 +94,7 @@ const SignContract = () => {
       <div className="max-w-2xl mx-auto">
         {/* Header */}
         <div className="text-center mb-6">
-          <h1 className="text-2xl font-bold text-[var(--brand-primary)]" style={{ fontFamily: 'Playfair Display' }}>MyIsraelRental</h1>
+          <h1 className="text-2xl font-bold text-[var(--brand-primary)]" style={{ fontFamily: 'var(--font-head)' }}>MyIsraelRental</h1>
           <p className="text-xs text-[var(--gold)] tracking-widest uppercase mt-1">{t('sign.subleaseContract')}</p>
         </div>
 

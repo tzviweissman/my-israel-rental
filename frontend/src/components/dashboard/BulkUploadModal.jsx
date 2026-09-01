@@ -404,7 +404,7 @@ const BulkUploadModal = ({ isOpen, onClose, onDone, API, token }) => {
         {/* Header */}
         <div className="flex items-start justify-between gap-4 px-6 py-5 border-b border-gray-100">
           <div>
-            <h2 className="text-2xl font-bold flex items-center gap-2" style={{ fontFamily: 'Playfair Display' }}>
+            <h2 className="text-2xl font-bold flex items-center gap-2" style={{ fontFamily: 'var(--font-head)' }}>
               <Sparkles size={20} className="text-[var(--gold)]" />
               Add multiple properties
             </h2>
@@ -596,7 +596,7 @@ const BulkUploadModal = ({ isOpen, onClose, onDone, API, token }) => {
             <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-green-100 mb-4">
               <CheckCircle2 size={32} className="text-green-600" />
             </div>
-            <p className="text-2xl font-bold mb-2" style={{ fontFamily: 'Playfair Display' }}>{t('bulkUpload.allSet')}</p>
+            <p className="text-2xl font-bold mb-2" style={{ fontFamily: 'var(--font-head)' }}>{t('bulkUpload.allSet')}</p>
             <p className="text-sm text-gray-600 mb-6">
               {commitResult.summary.created} properties added to your account.
             </p>

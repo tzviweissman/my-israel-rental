@@ -529,7 +529,7 @@ const CreateGig = () => {
               <div className="text-xs font-semibold uppercase tracking-wider text-[var(--gold)] mb-1">
                 Welcome aboard
               </div>
-              <div className="text-lg font-semibold mb-1" style={{ fontFamily: 'Playfair Display' }}>
+              <div className="text-lg font-semibold mb-1" style={{ fontFamily: 'var(--font-head)' }}>
                 Let&apos;s create your first service
               </div>
               <p className="text-sm text-white/85 leading-snug">
@@ -544,7 +544,7 @@ const CreateGig = () => {
             <div key={n} className={`flex-1 h-1 rounded-full ${n <= step ? 'bg-[var(--brand-primary)]' : 'bg-gray-200'}`} />
           ))}
         </div>
-        <h1 className="text-2xl font-bold mb-6" style={{ fontFamily: 'Playfair Display' }}>
+        <h1 className="text-2xl font-bold mb-6" style={{ fontFamily: 'var(--font-head)' }}>
           {stepLabels[step]}
         </h1>
 

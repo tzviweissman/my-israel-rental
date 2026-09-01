@@ -95,7 +95,7 @@ const PaymentSuccess = () => {
             <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-4">
               <CheckCircle2 size={36} />
             </div>
-            <h1 className="text-2xl font-bold mb-1" style={{ fontFamily: 'Playfair Display' }}>
+            <h1 className="text-2xl font-bold mb-1" style={{ fontFamily: 'var(--font-head)' }}>
               {subState?.ok ? 'You\u2019re now Pro!' : 'Subscription pending'}
             </h1>
             <p className="text-white/80 text-sm">
@@ -164,7 +164,7 @@ const PaymentSuccess = () => {
             <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-4">
               <CheckCircle2 size={36} />
             </div>
-            <h1 className="text-3xl font-bold mb-1" style={{ fontFamily: 'Playfair Display' }}>{t('paymentSuccess.title')}</h1>
+            <h1 className="text-3xl font-bold mb-1" style={{ fontFamily: 'var(--font-head)' }}>{t('paymentSuccess.title')}</h1>
             <p className="text-white/80 text-sm">{t('paymentSuccess.thankYou')}</p>
           </div>
           <div className="p-8">

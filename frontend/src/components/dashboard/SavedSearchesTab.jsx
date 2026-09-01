@@ -454,7 +454,7 @@ const SavedSearchesTab = ({ API, token }) => {
     <div className="space-y-6" data-testid="saved-searches-tab">
       <div className="flex items-start justify-between gap-3 flex-wrap">
         <div>
-          <h2 className="text-2xl font-bold" style={{ fontFamily: 'Playfair Display' }}>
+          <h2 className="text-2xl font-bold" style={{ fontFamily: 'var(--font-head)' }}>
             {t('dashboard.myAlerts')}
           </h2>
           <p className="text-sm text-gray-500 mt-1">

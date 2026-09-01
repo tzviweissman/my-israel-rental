@@ -71,7 +71,7 @@ const AccessibilityButton = () => {
           }}
           data-testid="accessibility-panel"
         >
-          <h3 className="text-xl font-bold mb-4" style={{ fontFamily: 'Playfair Display' }}>
+          <h3 className="text-xl font-bold mb-4" style={{ fontFamily: 'var(--font-head)' }}>
             Accessibility Options
           </h3>
 

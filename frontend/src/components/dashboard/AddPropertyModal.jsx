@@ -364,7 +364,7 @@ const AddPropertyModal = ({ isOpen, onClose, editingProperty, onSaved, API, toke
         >
           <X size={18} />
         </button>
-        <h2 className="text-3xl font-bold mb-6" style={{ fontFamily: 'Playfair Display' }}>
+        <h2 className="text-3xl font-bold mb-6" style={{ fontFamily: 'var(--font-head)' }}>
           {editingProperty && editingProperty.id ? t('dashboard.editProperty') : t('dashboard.addNewProperty')}
         </h2>
         <form onSubmit={handleSubmit} className="space-y-6">

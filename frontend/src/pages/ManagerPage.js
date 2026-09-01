@@ -167,7 +167,7 @@ const ManagerPage = () => {
               </div>
             )}
             <div>
-              <h1 className="text-4xl font-bold mb-2 text-white" style={{ fontFamily: 'Playfair Display' }} data-testid="manager-name">
+              <h1 className="text-4xl font-bold mb-2 text-white" style={{ fontFamily: 'var(--font-head)' }} data-testid="manager-name">
                 {data.manager.name}
               </h1>
               <p className="mt-2 text-sm" style={{ color: 'var(--gold)' }}>
@@ -183,7 +183,7 @@ const ManagerPage = () => {
             className="mb-8 p-5 rounded-xl bg-white border border-[#E5E5E5]"
             data-testid="manager-bio"
           >
-            <h2 className="text-lg font-bold mb-2" style={{ fontFamily: 'Playfair Display', color: 'var(--brand-primary)' }}>
+            <h2 className="text-lg font-bold mb-2" style={{ fontFamily: 'var(--font-head)', color: 'var(--brand-primary)' }}>
               About {data.manager.name}
             </h2>
             <p className="text-sm text-gray-700 leading-relaxed whitespace-pre-line">{wl.bio}</p>
@@ -195,7 +195,7 @@ const ManagerPage = () => {
             entry is a title + optional description. */}
         {Array.isArray(wl.services) && wl.services.length > 0 && (
           <div className="mb-8" data-testid="manager-services">
-            <h2 className="text-lg font-bold mb-3" style={{ fontFamily: 'Playfair Display', color: 'var(--brand-primary)' }}>
+            <h2 className="text-lg font-bold mb-3" style={{ fontFamily: 'var(--font-head)', color: 'var(--brand-primary)' }}>
               Other services offered
             </h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
@@ -299,7 +299,7 @@ const ManagerPage = () => {
           </div>
         )}
 
-        <h2 className="text-3xl font-bold mb-8" style={{ fontFamily: 'Playfair Display' }} data-testid="properties-heading">
+        <h2 className="text-3xl font-bold mb-8" style={{ fontFamily: 'var(--font-head)' }} data-testid="properties-heading">
           {activeType === 'all' ? 'Available Properties' : (rentalTypeLabels[activeType] || activeType)}
         </h2>
 
