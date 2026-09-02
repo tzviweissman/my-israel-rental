@@ -393,7 +393,7 @@ const Properties = () => {
   const saveCurrentFiltersAsAlert = async () => {
     if (!token) {
       toast.error('Please sign in to save this alert.');
-      navigate('/auth?return=' + encodeURIComponent(window.location.pathname + window.location.search));
+      navigate(`/auth/login?redirect=${encodeURIComponent(window.location.pathname + window.location.search)}`);
       return;
     }
     try {

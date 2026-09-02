@@ -59,7 +59,9 @@ const SubleaseDetail = () => {
 
   const handleContact = () => {
     if (!user) {
-      navigate('/auth/login');
+      // Comes straight back here after signing in, so the intent that
+      // brought them is not lost on the way.
+      navigate(`/auth/login?redirect=${encodeURIComponent(`/sublease/${id}`)}`);
       return;
     }
     if (user.id === sublease.subleasor_id) {

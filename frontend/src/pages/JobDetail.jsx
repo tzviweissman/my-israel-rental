@@ -134,7 +134,7 @@ const JobDetail = () => {
               </span>
             ) : (
               <button
-                onClick={() => token ? setApplyOpen(true) : navigate('/auth')}
+                onClick={() => token ? setApplyOpen(true) : navigate(`/auth/login?redirect=${encodeURIComponent(window.location.pathname)}`)}
                 className="px-4 py-2 rounded-lg text-sm font-semibold text-white bg-[var(--brand-primary)] hover:bg-[#0F3A3A] inline-flex items-center gap-1"
                 data-testid="job-apply-btn"
               >
