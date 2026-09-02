@@ -115,7 +115,11 @@ const Auth = () => {
         navigate(destination);
       }
     } catch (error) {
-      toast.error(apiErrorMessage(error, t('auth.failed', 'Something went wrong. Please try again.'), t));
+      // 8s, not the 4s default: this is the sign-in failure a real
+      // person hit thirteen times in three minutes. It is a sentence
+      // naming a cause, and it is the only thing on screen that says
+      // why — it has to outlast a glance at the form.
+      toast.error(apiErrorMessage(error, t('auth.failed', 'Something went wrong. Please try again.'), t), { duration: 8000 });
     }
   };
 
@@ -136,7 +140,7 @@ const Auth = () => {
     } catch (err) {
       // The backend now only errors on malformed requests. Show a generic
       // failure so we never leak whether the email existed.
-      toast.error(apiErrorMessage(err, t('auth.failed', 'Something went wrong. Please try again.'), t));
+      toast.error(apiErrorMessage(err, t('auth.failed', 'Something went wrong. Please try again.'), t), { duration: 8000 });
     } finally {
       setForgotSending(false);
     }
@@ -161,7 +165,7 @@ const Auth = () => {
       setResetDone(true);
       toast.success('Password has been reset successfully!');
     } catch (err) {
-      toast.error(apiErrorMessage(err, t('auth.resetFailed', 'Failed to reset password. The link may have expired.'), t));
+      toast.error(apiErrorMessage(err, t('auth.resetFailed', 'Failed to reset password. The link may have expired.'), t), { duration: 8000 });
     } finally {
       setResetting(false);
     }

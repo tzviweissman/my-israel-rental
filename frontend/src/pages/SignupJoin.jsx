@@ -208,7 +208,8 @@ const SignupJoin = () => {
         navigate(redirectParam || '/dashboard');
       }
     } catch (err) {
-      toast.error(apiErrorMessage(err, t('auth.failed', 'Something went wrong. Please try again.'), t));
+      // See Auth.js — the signup path is where the incident happened.
+      toast.error(apiErrorMessage(err, t('auth.failed', 'Something went wrong. Please try again.'), t), { duration: 8000 });
     } finally {
       setSubmitting(false);
     }

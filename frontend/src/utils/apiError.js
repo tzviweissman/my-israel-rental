@@ -83,7 +83,11 @@ export function apiErrorMessage(error, fallback = 'Something went wrong. Please 
   // that case is the one that sent a real user round in circles.
   if (error && !error.response) {
     const tr = typeof t === 'function' ? t : null;
-    const fallbackLine = 'Could not reach the server. Check your connection and try again — nothing you typed was lost.';
+    // NOT "nothing you typed was lost". A draft is kept on exactly one
+    // screen (SignupJoin), and even there the password is deliberately
+    // excluded. Seven of the eight callers render this over a form that
+    // keeps nothing, so the reassurance was false where it mattered most.
+    const fallbackLine = 'Could not reach the server. Check your connection and try again.';
     return tr ? tr('common.networkError', fallbackLine) : fallbackLine;
   }
 

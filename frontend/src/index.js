@@ -66,7 +66,14 @@ const renderApp = () =>
             uses router hooks, and there is no <Router> out here (it lives
             inside <App/>), so it would throw on startup. */}
         <SilentBoundary>
-          <Toaster position="top-right" duration={1500} />
+          {/* 4000ms is sonner's own default; this said 1500. A toast is
+              the only carrier for "we could not reach the server" — 96
+              characters in English, which needs ~680 wpm to finish inside
+              1.5s against ~240 wpm for ordinary prose. The message was
+              gone at roughly the one-third mark, so the screen a failing
+              user was left staring at had no reason on it. Errors get
+              longer still, at the call site. */}
+          <Toaster position="top-right" duration={4000} />
         </SilentBoundary>
       </HelmetProvider>
     </React.StrictMode>,
