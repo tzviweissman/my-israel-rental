@@ -69,6 +69,113 @@ def _api_is_reachable() -> bool:
     return _live_api_up
 
 
+# ---------------------------------------------------------------------------
+# One test's asyncio.run() must not take the event loop away from the next
+# ---------------------------------------------------------------------------
+#
+# THE BUG THIS FIXES, and it is not the one it looks like. Whole files
+# passed alone and failed in the suite; the visible error was usually
+#
+#     RuntimeError: Task <starlette...BaseHTTPMiddleware> attached to a
+#     different loop
+#
+# which reads like a loop-identity problem. It is a symptom. The cause is
+# in the other failure text, and it is much simpler:
+#
+#     RuntimeError: There is no current event loop in thread 'MainThread'.
+#
+# `asyncio.run()` sets a loop, runs, and on the way out calls
+# `set_event_loop(None)`. That leaves the policy with `_set_called = True`
+# and no current loop. From Python 3.12 on, `get_event_loop()` in that
+# state RAISES instead of quietly making one. Around 30 test files drive
+# coroutines with `asyncio.get_event_loop().run_until_complete(...)`, so
+# the first file in a run that uses `asyncio.run()` breaks every one of
+# them that comes after it - in file order, which is why the failures
+# looked like they belonged to whichever files happened to sort later.
+#
+# Restoring a usable current loop per test is the whole fix. Note what
+# this does NOT do: it never closes a loop, never replaces one that
+# already exists, and never touches an async test. An earlier attempt at
+# this problem handed every test its own fresh loop and made things WORSE
+# (47 failures to 50) by fighting pytest-asyncio's own loop management.
+# The rule that came out of that: only act when there is nothing there.
+#
+# Motor's cached binding is cleared alongside it. `routes/deps.py` builds
+# one AsyncIOMotorClient at import and motor caches `get_event_loop()` on
+# it lazily, forever (motor/core.py:152). Once a test runs on a new loop,
+# that cache is a pointer to a dead one. The list is explicit and asserted
+# non-empty, so a client that stops being found here fails loudly instead
+# of silently going unreset (docs/failure-patterns.md #7).
+
+import asyncio as _asyncio  # noqa: E402
+
+
+def _shared_motor_clients() -> list:
+    """Every module-level Motor client that outlives a single test."""
+    found = []
+
+    import routes.deps
+    found.append(routes.deps.client)
+
+    # Created lazily on first suppression lookup, so it may not exist yet.
+    import utils.email
+    if getattr(utils.email, "_mongo_db", None) is not None:
+        found.append(utils.email._mongo_db.client)
+
+    return found
+
+
+@_pytest.fixture(autouse=True)
+def _leave_a_usable_event_loop_for_the_next_test():
+    clients = _shared_motor_clients()
+    assert clients, (
+        "no shared Motor client found - this fixture has stopped doing "
+        "half its job and cross-test 'attached to a different loop' "
+        "failures will return. Check routes/deps.py still exposes `client`."
+    )
+    for c in clients:
+        c._io_loop = None
+
+    # Only when there is nothing there. A loop that already exists belongs
+    # to whoever put it there - pytest-asyncio, or the test itself.
+    try:
+        _asyncio.get_event_loop()
+    except RuntimeError:
+        _asyncio.set_event_loop(_asyncio.new_event_loop())
+
+    yield
+
+    # The teardown half is the one that actually matters: this is where a
+    # test that called asyncio.run() has just left the thread with no
+    # current loop at all.
+    for c in _shared_motor_clients():
+        c._io_loop = None
+    try:
+        _asyncio.get_event_loop()
+    except RuntimeError:
+        _asyncio.set_event_loop(_asyncio.new_event_loop())
+
+    # And the other half of the same problem, which is not recoverable:
+    # `with TestClient(app)` runs the app's lifespan, and its shutdown
+    # handler calls `client.close()` on the singleton in routes/deps.py.
+    # pymongo 4 will not reopen a closed client, so from that moment every
+    # remaining test in the session fails with "Cannot use MongoClient
+    # after close" - in files that never touched a TestClient. Fail HERE,
+    # naming the test that did it, instead of leaving a trail of unrelated
+    # red further down.
+    import routes.deps
+    if getattr(routes.deps.client.delegate._topology, "_closed", False):
+        raise AssertionError(
+            "this test closed the shared Motor client (routes/deps.py). "
+            "Almost certainly `with TestClient(app)` - its lifespan "
+            "shutdown calls client.close(), and pymongo cannot reopen it, "
+            "so every later test in this session would fail with "
+            "'Cannot use MongoClient after close'. Construct the client "
+            "without the context manager, as tests/test_legacy_category_"
+            "slugs.py does, or start the app in its own process."
+        )
+
+
 def pytest_collection_modifyitems(config, items):  # noqa: ARG001
     if _api_is_reachable():
         return

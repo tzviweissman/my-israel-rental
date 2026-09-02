@@ -83,8 +83,28 @@ def client():
     )
     import server  # noqa: E402  — imported late so the skip above can fire
 
-    with fastapi_testclient.TestClient(server.app) as c:
-        yield c
+    # Deliberately NOT `with`. The context manager fires the app's
+    # lifespan events, and the SHUTDOWN half calls
+    # `server.shutdown_db_client` -> `client.close()` on the Motor client
+    # that routes/deps.py builds once at import and every route reads `db`
+    # from. Closing it is right when a process is exiting and wrong in a
+    # test session, where it is a process-wide singleton later tests still
+    # need: everything after this file died on
+    #
+    #     pymongo.errors.InvalidOperation: Cannot use MongoClient after close
+    #
+    # i.e. a failure in files that have nothing to do with this one. That
+    # is most of what "passes alone, fails in the suite" meant here.
+    #
+    # Skipping lifespan also removes the reason this fixture was
+    # module-scoped (nine startups spawning nine sets of background
+    # loops); the scope is kept anyway, since one client for nine requests
+    # is still the right shape. These tests need the route to answer, and
+    # the route needs `db`, which exists from import.
+    #
+    # conftest asserts the shared client is still open after every test,
+    # so the next file to reach for `with TestClient(...)` finds out there.
+    yield fastapi_testclient.TestClient(server.app)
 
 
 @pytest.mark.parametrize("legacy", sorted(CATEGORY_MIGRATION))
