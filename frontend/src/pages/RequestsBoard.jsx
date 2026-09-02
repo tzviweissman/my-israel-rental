@@ -326,10 +326,12 @@ export const RequestCard = ({ request: r, onOpen, t }) => {
               <Clock size={12} aria-hidden="true" />
               {/* "expires in 1 days" reads as broken, and the Hebrew was
                   worse - "1 ימים" is not a thing anyone writes. Both
-                  languages have a shorter, better word for it. */}
-              {expiresIn === 1
-                ? t('requests.expiresInOne', 'expires tomorrow')
-                : t('requests.expiresIn', 'expires in {{n}} days', { n: expiresIn })}
+                  languages have a shorter, better word for it.
+                  This was a hand-written ternary that only THIS call site
+                  had, so the dashboard tab and the detail page still said
+                  "1 days"; it is a real plural key now and all three read
+                  from it. */}
+              {t('requests.expiresIn', 'expires in {{count}} days', { count: expiresIn })}
             </>
           )}
         </span>

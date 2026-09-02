@@ -1010,8 +1010,6 @@ const en = {
           meta: "post a service · get matched · get paid",
         },
         requests: {
-          lightUpTitle: 'Behind one of these windows, someone is looking for a place like yours.',
-          lightUpBody: 'Requests are posted by people who have already decided to move. Answering one takes a message.',
           kick: "The Requests board",
           h2: "Can't find it?",
           accent: "Let it find you.",
@@ -1631,7 +1629,7 @@ const en = {
       },
       common: {
         clearDate: 'Clear date',
-        networkError: 'We could not reach the server. Check your connection and try again — nothing you typed was lost.',
+        networkError: 'We could not reach the server. Check your connection and try again.',
         // DateField calls t('common.pickDate'). There is a `pickDate` in
         // another block ("Pick a date first"), which is a different
         // sentence for a different situation and was never reachable
@@ -2496,14 +2494,28 @@ const en = {
         // --- the dashboard's My requests tab. These ten keys were in
         // NEITHER locale file, so `t(key, 'English default')` rendered
         // English to Hebrew readers with no error anywhere.
+        // The hero over the night-street photo on /requests. These two
+        // lived under `home.scenes.requests.*`, which CinematicScenes
+        // never reads and which is NOT the key RequestsBoard.jsx asks
+        // for — so the Hebrew existed and never rendered.
+        lightUpTitle: 'Behind one of these windows, someone is looking for a place like yours.',
+        lightUpBody: 'Requests are posted by people who have already decided to move. Answering one takes a message.',
         myTitle: 'My requests',
-        myCount: '{{n}} posted',
+        // `count` (not `n`) is deliberate: i18next only selects a plural
+        // off a variable with that exact name. With `{{n}}` these read
+        // "1 posted", "renewed 1x" and "1 chats opened about this".
+        myCount_one: '1 posted',
+        myCount_other: '{{count}} posted',
         myEmptyTitle: "You haven't posted a request yet",
         myEmptyBody: 'Tell owners and pros what you are looking for, and let them come to you.',
         confirmDelete: 'Delete this request? This cannot be undone.',
         deleted: 'Request deleted',
-        renewedTimes: 'renewed {{n}}x',
-        chatsOpened: 'chats opened about this',
+        renewedTimes_one: 'renewed once',
+        renewedTimes_other: 'renewed {{count}}x',
+        // The number is inside the string, not a separate <b> beside it —
+        // otherwise no plural rule can ever see it.
+        chatsOpened_one: '{{count}} chat opened about this',
+        chatsOpened_other: '{{count}} chats opened about this',
         // Two-way board (Phase 3). Was demand-only, and the hero said so
         // — "Tell owners what you're looking for" is wrong on a page where
         // half the posts are owners saying what they have.
@@ -2532,8 +2544,11 @@ const en = {
         // C1 — shown only when above zero; see the note at the call site.
         responses: '{{n}} responses',
         responsesOne: '1 response',
-        expiresIn: 'expires in {{n}} days',
-        expiresInOne: 'expires tomorrow',
+        // Was a single `{{n}}` string with a hand-written `expiresInOne`
+        // ternary at ONE of its three call sites, so the dashboard tab and
+        // the detail page both said "expires in 1 days".
+        expiresIn_one: 'expires tomorrow',
+        expiresIn_other: 'expires in {{count}} days',
         // C3 — the date question. "Flexible" is an answer, not a blank.
         dateModeLabel: 'When do you need it?',
         dateOn: 'On date',
@@ -2716,6 +2731,10 @@ const en = {
         contactFailed: 'Could not open the chat',
         actionFailed: 'That did not work',
         chatOnlyNote: 'Chat happens on MyIsraelRental — no phone numbers are shared.',
+        // `open` is the DEFAULT status, so this is the pill nearly every
+        // row renders. Without the key the raw enum showed through the
+        // `uppercase` class as "OPEN" — in Hebrew too.
+        status_open: 'Open',
         status_found: 'Found',
         status_expired: 'Expired',
         status_closed: 'Closed',

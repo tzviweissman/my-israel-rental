@@ -975,8 +975,6 @@ const he = {
           meta: "פרסמו שירות · קבלו התאמות · קבלו תשלום",
         },
         requests: {
-          lightUpTitle: 'מאחורי אחד החלונות האלה, מישהו מחפש נכס כמו שלכם.',
-          lightUpBody: 'את הבקשות מפרסמים אנשים שכבר החליטו לעבור דירה. כדי להשיב על אחת מהן צריך הודעה אחת.',
           kick: "לוח הבקשות",
           h2: "לא מוצאים?",
           accent: "תנו לזה למצוא אתכם.",
@@ -1591,7 +1589,7 @@ const he = {
       },
       common: {
         clearDate: 'ניקוי תאריך',
-        networkError: 'לא הצלחנו להגיע לשרת. בדקו את החיבור ונסו שוב — שום דבר ממה שהקלדתם לא אבד.',
+        networkError: 'לא הצלחנו להגיע לשרת. בדקו את החיבור ונסו שוב.',
         pickDate: 'בחרו תאריך',
         backToDashboard: 'חזרה ללוח שלי',
         cancel: 'ביטול',
@@ -2393,14 +2391,24 @@ const he = {
       // Phone/WhatsApp field validation. See en.js.
       // Shown by ErrorBoundary when a page crashes. See en.js.
       requests: {
+        lightUpTitle: 'מאחורי אחד החלונות האלה, מישהו מחפש נכס כמו שלכם.',
+        lightUpBody: 'את הבקשות מפרסמים אנשים שכבר החליטו לעבור דירה. כדי להשיב על אחת מהן צריך הודעה אחת.',
         myTitle: 'הבקשות שלי',
-        myCount: '{{n}} פורסמו',
+        // עברית מבחינה בין יחיד, זוגי ורבים — כמו בבלוק ago למטה.
+        // עם {{n}} יצא "1 פורסמו", "חודשה 1 פעמים" ו"1 שיחות שנפתחו על זה".
+        myCount_one: 'בקשה אחת פורסמה',
+        myCount_two: 'שתי בקשות פורסמו',
+        myCount_other: '{{count}} בקשות פורסמו',
         myEmptyTitle: 'עדיין לא פרסמתם בקשה',
         myEmptyBody: 'ספרו לבעלי נכסים ולבעלי מקצוע מה אתם מחפשים, ותנו להם לפנות אליכם.',
         confirmDelete: 'למחוק את הבקשה? אי אפשר לבטל את הפעולה.',
         deleted: 'הבקשה נמחקה',
-        renewedTimes: 'חודשה {{n}} פעמים',
-        chatsOpened: 'שיחות שנפתחו על זה',
+        renewedTimes_one: 'חודשה פעם אחת',
+        renewedTimes_two: 'חודשה פעמיים',
+        renewedTimes_other: 'חודשה {{count}} פעמים',
+        chatsOpened_one: 'שיחה אחת נפתחה על זה',
+        chatsOpened_two: 'שתי שיחות נפתחו על זה',
+        chatsOpened_other: '{{count}} שיחות שנפתחו על זה',
         // לוח דו-כיווני — הכותרת הקודמת פנתה רק למחפשים.
         heroTitle: 'אם אתם מחפשים, או',
         heroAccent: 'אם יש לכם.',
@@ -2427,8 +2435,9 @@ const he = {
         // C1 — מוצג רק כשיש יותר מאפס.
         responses: '{{n}} פניות',
         responsesOne: 'פנייה אחת',
-        expiresIn: 'פג בעוד {{n}} ימים',
-        expiresInOne: 'פג מחר',
+        expiresIn_one: 'פג מחר',
+        expiresIn_two: 'פג בעוד יומיים',
+        expiresIn_other: 'פג בעוד {{count}} ימים',
         // C3 — שאלת התאריך. "גמיש" היא תשובה, לא שדה ריק.
         dateModeLabel: 'מתי אתם צריכים את זה?',
         dateOn: 'בתאריך',
@@ -2595,6 +2604,7 @@ const he = {
         contactFailed: 'לא הצלחנו לפתוח צ׳אט',
         actionFailed: 'משהו לא עבד',
         chatOnlyNote: 'השיחה מתנהלת באתר — מספרי טלפון לא משותפים.',
+        status_open: 'פתוח',
         status_found: 'נמצא',
         status_expired: 'פג תוקף',
         status_closed: 'סגור',

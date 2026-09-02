@@ -235,7 +235,7 @@ const RequestDetail = () => {
             {request.status === 'open' && expiresIn != null && (
               <span className="rc-status">
                 <Clock size={12} aria-hidden="true" />
-                {t('requests.expiresIn', 'expires in {{n}} days', { n: expiresIn })}
+                {t('requests.expiresIn', 'expires in {{count}} days', { count: expiresIn })}
               </span>
             )}
           </div>

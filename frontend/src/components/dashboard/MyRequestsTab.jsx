@@ -96,7 +96,7 @@ const MyRequestsTab = ({ API, token }) => {
         <div>
           <h2 className="text-lg font-bold text-gray-900">{t('requests.myTitle', 'My requests')}</h2>
           <p className="text-xs text-gray-500 mt-1">
-            {t('requests.myCount', '{{n}} posted', { n: requests.length })}
+            {t('requests.myCount', '{{count}} posted', { count: requests.length })}
           </p>
         </div>
         <button
@@ -146,12 +146,12 @@ const MyRequestsTab = ({ API, token }) => {
                 {r.status === 'open' && expiresIn != null && (
                   <span className="text-xs text-gray-500 inline-flex items-center gap-1">
                     <Clock size={12} />
-                    {t('requests.expiresIn', 'expires in {{n}} days', { n: expiresIn })}
+                    {t('requests.expiresIn', 'expires in {{count}} days', { count: expiresIn })}
                   </span>
                 )}
                 {r.renewed_count > 0 && (
                   <span className="text-xs text-gray-400">
-                    {t('requests.renewedTimes', 'renewed {{n}}x', { n: r.renewed_count })}
+                    {t('requests.renewedTimes', 'renewed {{count}}x', { count: r.renewed_count })}
                   </span>
                 )}
               </div>
@@ -168,9 +168,11 @@ const MyRequestsTab = ({ API, token }) => {
 
               <div className="flex items-center gap-1.5 text-sm text-gray-700 mt-3">
                 <MessageCircle size={14} style={{ color: 'var(--brand-primary)' }} />
-                <b>{r.contact_count || 0}</b>
-                <span className="text-gray-500">
-                  {t('requests.chatsOpened', 'chats opened about this')}
+                {/* The count lives INSIDE the string, not in a <b> beside
+                    it: a number rendered as its own node can never be
+                    pluralised, and this read "1 chats opened about this". */}
+                <span className="font-medium">
+                  {t('requests.chatsOpened', '{{count}} chats opened about this', { count: r.contact_count || 0 })}
                 </span>
               </div>
 
