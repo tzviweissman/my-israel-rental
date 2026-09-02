@@ -3,9 +3,12 @@ import { useTranslation } from 'react-i18next';
 import ServiceAreaPicker from '../common/ServiceAreaPicker';
 import axios from 'axios';
 import { toast } from 'sonner';
-import { X, Loader2 } from 'lucide-react';
+import { X, Loader2, ImagePlus, Trash2 } from 'lucide-react';
 import { isFoodBusiness } from '../marketplace/GoodToKnow';
 import { needsDirectoryDisclaimer } from '../../lib/categories';
+import { uploadOneFile } from '../../utils/fastUpload';
+import CoverPlaceholder from '../common/CoverPlaceholder';
+import { apiErrorMessage } from '../../utils/apiError';
 
 /**
  * Edit the facts behind a business's "Good to know" band (spec C6).
@@ -31,7 +34,17 @@ export default function BusinessDetailsForm({ business, API, token, onClose, onS
   const { t } = useTranslation();
   const b = business || {};
   const [saving, setSaving] = useState(false);
+  // THE LOGO HAD NO HOME. The dashboard checklist's first item is "Add a
+  // logo" and it opens THIS form — which, until now, had no logo field.
+  // Nothing in the app could set `logo_url`: the API accepted it, the
+  // checklist demanded it, the public page rendered it, and no form
+  // offered it. So every business stalled at "75% complete" with an item
+  // that could not be done, and owners kept re-saving this form looking
+  // for it. Two of them sent videos. It lives here because this is where
+  // the checklist sends people.
+  const [uploadingLogo, setUploadingLogo] = useState(false);
   const [form, setForm] = useState({
+    logo_url: b.logo_url || '',
     description: b.description || '',
     hours: b.hours || '',
     // Kept as text while editing; split on save. A chip editor here means
@@ -80,6 +93,23 @@ export default function BusinessDetailsForm({ business, API, token, onClose, onS
   // never reach this field at all.
   const showLicence = known.some(needsDirectoryDisclaimer);
 
+  const pickLogo = async (e) => {
+    const file = e.target.files?.[0];
+    e.target.value = '';   // so choosing the same file twice still fires
+    if (!file) return;
+    setUploadingLogo(true);
+    try {
+      // Straight to Cloudinary, like the cover photo in the page editor;
+      // the URL is stored on Save, so cancelling the form discards it.
+      const url = await uploadOneFile(file, API, token);
+      set({ logo_url: url });
+    } catch (err) {
+      toast.error(err?.message || t('businesses.logoFailed', 'Could not upload that image'));
+    } finally {
+      setUploadingLogo(false);
+    }
+  };
+
   const save = async () => {
     setSaving(true);
     try {
@@ -95,6 +125,10 @@ export default function BusinessDetailsForm({ business, API, token, onClose, onS
       const year = parseInt(form.founded_year, 10);
 
       const payload = {
+        // Sent every save. The API treats null as "leave alone" for this
+        // field, so an EMPTY STRING is how a removed logo is cleared —
+        // the public page and the checklist both test truthiness.
+        logo_url: form.logo_url || '',
         description: form.description.trim(),
         hours: orNull(form.hours),
         languages,
@@ -125,8 +159,16 @@ export default function BusinessDetailsForm({ business, API, token, onClose, onS
       toast.success(t('businesses.detailsSaved', 'Saved'));
       onSaved && onSaved();
       onClose && onClose();
-    } catch {
-      toast.error(t('businesses.detailsSaveFailed', 'Could not save — try again'));
+    } catch (err) {
+      // The reason, not a shrug. A 400 from the API names what it
+      // refused (a payment link, a name clash); "try again" hides that
+      // and sends the owner back into the same wall. Same lesson as the
+      // signup screen that said "details wrong" for a dropped request.
+      // 8s so a sentence can be read before it disappears.
+      toast.error(
+        apiErrorMessage(err, t('businesses.detailsSaveFailed', 'Could not save — try again'), t),
+        { duration: 8000 },
+      );
     } finally {
       setSaving(false);
     }
@@ -185,6 +227,60 @@ export default function BusinessDetailsForm({ business, API, token, onClose, onS
           <p className="text-xs" style={{ color: 'var(--brand-muted)' }}>
             {t('businesses.detailsHint', 'All optional. Anything you leave blank simply is not shown on your page.')}
           </p>
+
+          {/* Logo. First, because it is the first item on the checklist
+              that sends people here, and the one they could not find. */}
+          <div data-testid="biz-details-logo-field">
+            <span className="text-xs font-semibold" style={{ color: 'var(--brand-muted)' }}>
+              {t('businesses.logo', 'Logo')}
+            </span>
+            <div className="mt-1 flex items-center gap-3">
+              <div
+                className="w-16 h-16 rounded-xl overflow-hidden shrink-0 border"
+                style={{ borderColor: 'var(--brand-border)' }}
+              >
+                {form.logo_url ? (
+                  <img src={form.logo_url} alt="" className="w-full h-full object-cover" data-testid="biz-details-logo-preview" />
+                ) : (
+                  <CoverPlaceholder name={b.name} category={(b.categories || [])[0]} className="w-full h-full" />
+                )}
+              </div>
+              <div className="flex flex-wrap items-center gap-2">
+                <label
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-semibold cursor-pointer"
+                  style={{ borderColor: 'var(--brand-border)', color: 'var(--brand-primary)' }}
+                >
+                  {uploadingLogo ? <Loader2 size={14} className="animate-spin" /> : <ImagePlus size={14} />}
+                  {form.logo_url
+                    ? t('businesses.logoReplace', 'Replace')
+                    : t('businesses.logoUpload', 'Upload a logo')}
+                  <input
+                    type="file"
+                    accept="image/*"
+                    className="sr-only"
+                    onChange={pickLogo}
+                    disabled={uploadingLogo || saving}
+                    data-testid="biz-details-logo-input"
+                  />
+                </label>
+                {form.logo_url && (
+                  <button
+                    type="button"
+                    onClick={() => set({ logo_url: '' })}
+                    className="inline-flex items-center gap-1 text-xs font-semibold"
+                    style={{ color: 'var(--brand-muted)' }}
+                    data-testid="biz-details-logo-remove"
+                  >
+                    <Trash2 size={13} />
+                    {t('businesses.logoRemove', 'Remove')}
+                  </button>
+                )}
+              </div>
+            </div>
+            <p className="mt-1 text-[11px]" style={{ color: 'var(--brand-muted)' }}>
+              {t('businesses.logoHint', 'Square works best. Shown on your page, in search results and on your cards.')}
+            </p>
+          </div>
 
           {field('description', t('businesses.about', 'About your business'),
             t('businesses.aboutPh', 'What you do, and what makes you worth choosing.'), { textarea: true })}

@@ -411,6 +411,15 @@ const en = {
         needPhoto: 'Add one photo to a service',
         editDetails: 'Business details',
         detailsHint: 'All optional. Anything you leave blank simply is not shown on your page.',
+        // The logo field. "Add a logo" was the first checklist item and it
+        // opened a form with no logo in it, so no business could ever
+        // reach 100%.
+        logo: 'Logo',
+        logoUpload: 'Upload a logo',
+        logoReplace: 'Replace',
+        logoRemove: 'Remove',
+        logoHint: 'Square works best. Shown on your page, in search results and on your cards.',
+        logoFailed: 'Could not upload that image',
         about: 'About your business',
         aboutPh: 'What you do, and what makes you worth choosing.',
         foundedYear: 'Year started',
