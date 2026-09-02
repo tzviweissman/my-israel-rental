@@ -22,6 +22,7 @@ from models_response import (
     PropertyOut,
 )
 from routes.deps import db, logger, verify_token
+from utils.property_rows import keep_valid_property_rows
 from utils.events import publish
 
 router = APIRouter()
@@ -383,6 +384,9 @@ async def get_all_properties_admin(payload: dict = Depends(verify_token)) -> lis
     if payload['role'] != 'admin':
         raise HTTPException(status_code=403, detail="Admin access required")
     properties = await db.properties.find({}, {"_id": 0}).sort("created_at", -1).to_list(1000)
+    # Same guard as the public list: one partial document must not 500 the
+    # admin table - which is the tool an admin would use to FIND it.
+    properties = keep_valid_property_rows(properties, route="GET /admin/properties", logger=logger)
 
     # Pull every admin block in one go and group by property
     blocks_by_prop: dict = {}

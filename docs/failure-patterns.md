@@ -324,3 +324,21 @@ when the answer is no".
 defect it was written for and seen to fail. Strip comments before scanning
 source; `scripts/test-i18n-parity.mjs` had the same false positive from a
 comment that discussed a deliberately-invalid key.
+
+## 11. A list validated as a unit
+
+`GET /api/properties` declares `response_model=list[PropertyOut]`, and
+`PropertyOut` requires `area` and `property_type`. FastAPI validates the
+whole list before sending any of it, so ONE document missing either field
+turned the endpoint behind /stays, the home page and every search into a
+500 for every visitor - while `?page=1&limit=2` kept answering 200,
+because that page happened not to include the bad row. Locally the bad
+rows were twenty-three seeds from a test whose cleanup was not in a
+`finally`; in production an import or an admin tool writing a partial
+document would do exactly the same.
+
+**Rule:** a collection endpoint validates per row and drops what does not
+fit, logging the id at warning. The page works and the data problem is in
+the logs, instead of the data problem BEING the outage. And test seeds
+are cleaned up in `finally`, because the row that leaks is the row that
+was written before the assertion that failed.

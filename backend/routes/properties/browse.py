@@ -21,6 +21,7 @@ from utils.whatsapp_link import build_whatsapp_link
 from utils.area_filter import area_mongo_query
 from utils.dedupe import find_duplicate
 from utils.helpers import get_usd_ils_rate
+from utils.property_rows import keep_valid_property_rows
 from utils.user_contact import WHATSAPP_PROJECTION, user_whatsapp
 
 
@@ -248,6 +249,10 @@ async def get_properties(
     is_owner_scoped = owner_id is not None
     projection = {"_id": 0} if is_owner_scoped else LIST_PROJECTION
     properties = await db.properties.find(query, projection).to_list(1000)
+
+    # One malformed row must not take the whole list down - see
+    # utils/property_rows.py for the outage this prevents.
+    properties = keep_valid_property_rows(properties, route="GET /properties", logger=logger)
 
     # Slim the list payload: the public listing grid renders only the
     # cover image per card, so shipping all 20-30 image URLs per

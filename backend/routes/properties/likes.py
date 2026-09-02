@@ -9,7 +9,8 @@ from datetime import UTC, datetime
 from fastapi import APIRouter, Depends, HTTPException
 
 from models_response import LikeToggleResponse, PropertyOut
-from routes.deps import db, verify_token
+from routes.deps import db, logger, verify_token
+from utils.property_rows import keep_valid_property_rows
 
 router = APIRouter()
 api_router = router
@@ -53,6 +54,9 @@ async def get_liked_properties(payload: dict = Depends(verify_token)) -> list[di
     properties = await db.properties.find(
         {"id": {"$in": property_ids}}, {"_id": 0}
     ).to_list(500)
+
+    # One malformed liked property must not empty the whole Liked tab.
+    properties = keep_valid_property_rows(properties, route="GET /liked-properties", logger=logger)
 
     # Preserve order from likes
     prop_map = {p['id']: p for p in properties}
