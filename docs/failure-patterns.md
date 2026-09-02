@@ -252,3 +252,75 @@ What does work, and what the new tests do:
 3. **Make the collector fail loudly** if it collects nothing.
 4. **Make silent states visible** — the error boundary doesn't stop crashes,
    it stops them being unreportable.
+
+---
+
+# Two more, from 2026-09-02
+
+Both found while verifying something else, and both had passed every check
+that existed.
+
+## 9. A re-export gives the module no binding
+
+`App.js` decides the API base for the whole app. Consolidating twelve
+copies of that decision into `lib/apiBase.js` left this line behind:
+
+```js
+export { API } from './lib/apiBase';
+```
+
+It compiles, and every importer of `App.js` gets a working `API`. But
+`export … from` **forwards** a binding without creating one locally, so
+sixteen lines further down
+
+```js
+const response = await axios.get(`${API}/auth/me`, …);
+```
+
+threw `ReferenceError: API is not defined`. That call sits in
+`fetchCurrentUser`, whose `catch` calls `logout()`. So the failure did not
+look like a broken API call — it looked like **every signed-in visitor
+being signed out by their next page load**, with a console error nobody
+was reading. It shipped, and ran in production until somebody tried to
+photograph a logged-in screen.
+
+Nothing caught it. CRA's ESLint does not run `no-undef` on module scope,
+the bundle built clean, and `scripts/test-api-base.mjs` passed because it
+looked for the *substring* `from './lib/apiBase'` and found it.
+
+**The tell, if you ever have to find one of these in a minified bundle:**
+free variables are the only identifiers a minifier cannot rename. Local
+ones become `d`, `s`, `t`; this stayed literally `API`:
+
+```js
+const d=async()=>{try{const r=await s.A.get(`${API}/auth/me`,…
+```
+
+**Rule:** import it, then export it. `import { X } from …; export { X };`
+Never `export { X } from …` in a file that also uses `X`.
+`scripts/test-api-base.mjs` now fails on exactly that combination.
+
+## 10. The check was satisfied by the comment explaining the bug
+
+The guard written for #9 asks whether a file that uses `API` also imports
+it. It passed on `App.js` — while `App.js` was still broken — because the
+regex matched this, four lines above the defect:
+
+```js
+// because ~100 modules already import { API } from '../App'.
+```
+
+Nothing about the check was wrong except that it read prose as code. It
+would have shipped as a permanently green check over a permanently broken
+app, which is worse than no check.
+
+**What surfaced it:** running the check against the broken file on
+purpose, and *expecting a failure*. That is the same discipline as #7 —
+a check must fail when the thing it checks is absent — but pointed at a
+new place: not "does it still collect anything", but "does it still say no
+when the answer is no".
+
+**Rule:** a new check is not finished until it has been run against the
+defect it was written for and seen to fail. Strip comments before scanning
+source; `scripts/test-i18n-parity.mjs` had the same false positive from a
+comment that discussed a deliberately-invalid key.

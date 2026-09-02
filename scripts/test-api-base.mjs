@@ -129,6 +129,45 @@ console.log('\nevery call site agrees with the base it imported');
   check(`${files.length} importing files, every call site consistent`, wrong.length === 0, wrong.join('; '));
 }
 
+console.log('\na file that USES API must import it, not just re-export it');
+{
+  // THE BUG THIS CATCHES, and it reached production. App.js had
+  //   export { API } from './lib/apiBase';
+  // which forwards the binding to importers but creates NOTHING in
+  // App.js's own scope. `${API}/auth/me` on line 166 therefore threw
+  //   ReferenceError: API is not defined
+  // at runtime — inside fetchCurrentUser, whose catch calls logout(). So
+  // every signed-in visitor was signed out by their next page load, while
+  // the build compiled with no error and the check above passed, because
+  // App.js does contain the substring "from './lib/apiBase'".
+  //
+  // Nothing about this is specific to `API`: `export { X } from` never
+  // gives you `X`. The check is per-file and mechanical.
+  const { execSync } = await import('node:child_process');
+  const files = execSync('git grep -l "lib/apiBase" -- frontend/src', { encoding: 'utf8' })
+    .trim().split('\n').filter(Boolean).filter((f) => !f.endsWith('lib/apiBase.js'));
+
+  // Comments must come out first. App.js's own note reads "~100 modules
+  // already import { API } from '../App'" — which satisfied the pattern
+  // below and made this check pass on the exact file it was written for.
+  // The control (put the re-export back, expect a failure) is what
+  // surfaced that; without it this would have shipped as a green check
+  // over a broken app.
+  const stripComments = (s) =>
+    s.replace(/\/\*[\s\S]*?\*\//g, '').replace(/(^|[^:])\/\/[^\n]*/g, '$1');
+
+  const broken = [];
+  for (const f of files) {
+    const src = stripComments(readFileSync(f, 'utf8'));
+    if (!/\$\{API\}/.test(src)) continue;                 // does not use it
+    const imports = /import\s*\{[^}]*\bAPI\b[^}]*\}\s*from/.test(src)
+      || /import\s*\{[^}]*BACKEND_URL as API[^}]*\}\s*from/.test(src)
+      || /\b(?:const|let|var)\s+API\s*=/.test(src);
+    if (!imports) broken.push(`${f}: uses the API binding with no import — a bare "export { API } from" does not bind it here`);
+  }
+  check(`${files.length} files touching apiBase, every user of API binds it`, broken.length === 0, broken.join('; '));
+}
+
 console.log('');
 if (failures.length) {
   console.log(`${failures.length} failed`);

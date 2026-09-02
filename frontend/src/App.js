@@ -138,7 +138,18 @@ const PREVIEW_NOINDEX = process.env.REACT_APP_PREVIEW === '1';
 // The API base is decided in one place — see lib/apiBase.js for the two
 // production incidents that made that necessary. Re-exported here
 // because ~100 modules already import { API } from '../App'.
-export { API } from './lib/apiBase';
+//
+// IMPORT AND THEN EXPORT, never `export { API } from './lib/apiBase'`.
+// A re-export forwards the binding to importers WITHOUT creating one in
+// this module, so `${API}` below compiled fine and threw
+// "ReferenceError: API is not defined" at runtime — inside
+// fetchCurrentUser, whose catch calls logout(). Every signed-in visitor
+// was signed out again by their next page load. It shipped because
+// nothing in the build checks that a file can use what it re-exports;
+// scripts/test-api-base.mjs now does.
+import { API } from './lib/apiBase';
+
+export { API };
 
 export const AuthContext = React.createContext();
 
