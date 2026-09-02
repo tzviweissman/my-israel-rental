@@ -267,6 +267,14 @@ const GigDetail = () => {
   // closing the lightbox on photo 3 the strip highlighted 3 while the
   // hero still showed 1, which reads as the page ignoring the click.
   const [heroIndex, setHeroIndex] = useState(0);
+  // The cover's own width/height, read when it loads. The hero box takes
+  // the image's shape - clamped between landscape 16:9 and portrait 4:5 -
+  // instead of a fixed 16:9. Businesses upload FLYERS, and a portrait
+  // flyer in a 16:9 box was a small picture between two broad blurred
+  // bars; kashermybnb sent a photo of exactly that. A portrait box shows
+  // the same flyer at roughly twice the size with the same "nothing
+  // cropped" guarantee FitImage already gives.
+  const [coverRatio, setCoverRatio] = useState(null);
   // Appointment-only: buyer-selected day (YYYY-MM-DD) + slot ("HH:MM").
   const [appointmentDate, setAppointmentDate] = useState(null);
   const [appointmentSlot, setAppointmentSlot] = useState(null);
@@ -634,12 +642,23 @@ const GigDetail = () => {
                  portrait flyers businesses actually upload cropped the
                  trade name off the top and the phone number off the
                  bottom. See components/common/FitImage. */
-              className="relative aspect-video w-full bg-gray-100 rounded-2xl overflow-hidden group"
+              className="relative w-full max-h-[78vh] bg-gray-100 rounded-2xl overflow-hidden group"
+              style={{ aspectRatio: coverRatio ? Math.min(16 / 9, Math.max(4 / 5, coverRatio)) : 16 / 9 }}
               data-testid="gig-cover"
               aria-label={cover ? t('gigDetail.openGallery', 'Open photo gallery') : undefined}
             >
               {cover
-                ? <FitImage src={cover} alt="" className="absolute inset-0" />
+                ? (
+                  <FitImage
+                    src={cover}
+                    alt=""
+                    className="absolute inset-0"
+                    onLoad={(e) => {
+                      const { naturalWidth: w, naturalHeight: h } = e.target;
+                      if (w && h) setCoverRatio(w / h);
+                    }}
+                  />
+                )
                 : <div className="w-full h-full flex items-center justify-center text-gray-300">No image</div>}
               {/* The "Photos of · {tier}" tag is gone. It labelled the hero
                   with the selected option's name, which told a visitor
@@ -870,14 +889,42 @@ const GigDetail = () => {
 
             {/* Provider mini-profile */}
             <div className="border border-gray-200 rounded-2xl p-4 flex items-center gap-4">
-              <div className="w-14 h-14 rounded-full bg-gray-200 shrink-0" style={gig.provider?.avatar ? { backgroundImage: `url(${gig.provider.avatar})`, backgroundSize: 'cover' } : {}} />
+              {/* Avatar, else the BUSINESS LOGO. An owner who uploaded a logo
+                  and then saw a grey circle here had done the right thing;
+                  this card was reading a second image on a second profile
+                  that almost nobody sets. */}
+              {(() => {
+                const pic = gig.provider?.avatar || gig.provider?.logo_url;
+                return (
+                  <div
+                    className="w-14 h-14 rounded-full bg-gray-200 shrink-0"
+                    style={pic ? { backgroundImage: `url(${pic})`, backgroundSize: 'cover', backgroundPosition: 'center' } : {}}
+                    data-testid="gig-provider-picture"
+                  />
+                );
+              })()}
               <div className="flex-1 min-w-0">
                 <p className="font-semibold text-sm" dir="auto" data-testid="gig-provider-name">{gig.provider?.name}</p>
                 <p className="text-xs text-gray-500">{gig.provider?.tagline || gig.provider?.bio || '\u00A0'}</p>
               </div>
-              <button onClick={() => { saveReturnPath(); navigate(`/businesses/provider/${gig.provider?.user_id}`); }} className="text-xs font-semibold text-[var(--brand-primary)] hover:underline" data-testid="gig-view-provider">
-                {t('gigDetail.viewProfile', 'View profile')}
-              </button>
+              {user?.id && user.id === gig.provider?.user_id ? (
+                /* The owner, looking at their own listing - which is where
+                   people go to check their page, and where one owner went
+                   looking for his hours and found nothing to click. Hours,
+                   areas, logo and the rest live on the BUSINESS, not the
+                   listing; this opens that form directly. */
+                <button
+                  onClick={() => navigate(`/dashboard?tab=my-businesses&details=${gig.business_id || 1}`)}
+                  className="text-xs font-semibold text-[var(--brand-primary)] hover:underline"
+                  data-testid="gig-edit-business-details"
+                >
+                  {t('gigDetail.editBusinessDetails', 'Edit hours, areas & logo')}
+                </button>
+              ) : (
+                <button onClick={() => { saveReturnPath(); navigate(`/businesses/provider/${gig.provider?.user_id}`); }} className="text-xs font-semibold text-[var(--brand-primary)] hover:underline" data-testid="gig-view-provider">
+                  {t('gigDetail.viewProfile', 'View profile')}
+                </button>
+              )}
             </div>
           </div>
 

@@ -70,7 +70,7 @@ const BusinessPage = ({ business: injected = null, preview = false }) => {
   const { slug } = useParams();
   const navigate = useNavigate();
   const { t, i18n } = useTranslation();
-  const { token } = useContext(AuthContext);
+  const { token, user } = useContext(AuthContext);
   const [fetched, setFetched] = useState(null);
   const [missing, setMissing] = useState(false);
   /* An injected business wins outright and nothing is requested. Merging
@@ -416,6 +416,24 @@ const BusinessPage = ({ business: injected = null, preview = false }) => {
                   </span>
                 )}
               </h1>
+
+              {/* The owner, on their own public page. This is where an
+                  owner goes to check how the page looks, and where one
+                  went looking for a way to change his hours and found
+                  none - the facts on this page are edited on the
+                  dashboard, two screens away. Not shown inside the page
+                  editor's preview, which has its own controls. */}
+              {!preview && user?.id && user.id === biz.owner_user_id && (
+                <button
+                  type="button"
+                  onClick={() => navigate(`/dashboard?tab=my-businesses&details=${biz.id}`)}
+                  className="mt-1 inline-flex items-center gap-1 text-xs font-semibold hover:underline"
+                  style={{ color: 'var(--brand-primary)' }}
+                  data-testid="business-owner-edit"
+                >
+                  {t('businesses.editOnPage', 'Edit hours, areas & logo')}
+                </button>
+              )}
 
               <div className="flex items-center gap-3 mt-1 flex-wrap text-sm"
                 style={{ color: 'var(--brand-muted)' }}>

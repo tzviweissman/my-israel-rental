@@ -425,6 +425,7 @@ const en = {
         foundedYear: 'Year started',
         certificateLink: 'Link to certificate',
         detailsSaved: 'Saved',
+        editOnPage: 'Edit hours, areas & logo',
         detailsSaveFailed: 'Could not save — try again',
         yourServices: 'Your services',
         yourProducts: 'Your products',
@@ -2216,6 +2217,7 @@ const en = {
         // Step 4 photo gate — a photo per option is REQUIRED to continue,
         // rather than optional and checked once at submit.
         tierPhotos: 'Photos of this service',
+        photoShapeHint: 'Landscape photos fill the page best (16:9, about 1600 × 900). A portrait flyer is shown whole, but smaller.',
         photoRequiredTag: '(required)',
         photoMax: '(max 6)',
         addPhotos: 'Add photos',
@@ -2866,6 +2868,7 @@ const en = {
         aboutService: 'About this service',
         aboutStore: 'About this store',
         viewProfile: 'View profile',
+        editBusinessDetails: 'Edit hours, areas & logo',
         noPackages: 'No packages listed yet.',
         notFound: 'Listing not found',
         reviews: 'Reviews',

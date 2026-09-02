@@ -145,16 +145,21 @@ async def _business_items(uid: str) -> list[dict[str, Any]]:
             "href": "/dashboard?tab=my-businesses",
         },
         {
+# `&details=1` on the four items the Business details form satisfies: the
+# dashboard opens that form on arrival instead of landing on the card and
+# leaving the owner to find a small "Business details" link at its foot.
+# An owner wrote in that he could not find where to change his hours; he
+# had set them from this very list a week earlier.
             "id": "biz.logo",
             "endowed": False,
             "done": any_of(lambda b: bool(b.get("logo_url") or b.get("cover_url"))),
-            "href": "/dashboard?tab=my-businesses",
+            "href": "/dashboard?tab=my-businesses&details=1",
         },
         {
             "id": "biz.about",
             "endowed": False,
             "done": any_of(lambda b: bool((b.get("description") or "").strip())),
-            "href": "/dashboard?tab=my-businesses",
+            "href": "/dashboard?tab=my-businesses&details=1",
         },
         {
             "id": "biz.service",
@@ -166,13 +171,13 @@ async def _business_items(uid: str) -> list[dict[str, Any]]:
             "id": "biz.areas",
             "endowed": False,
             "done": any_of(lambda b: bool(b.get("areas"))),
-            "href": "/dashboard?tab=my-businesses",
+            "href": "/dashboard?tab=my-businesses&details=1",
         },
         {
             "id": "biz.hours",
             "endowed": False,
             "done": any_of(lambda b: bool((b.get("hours") or "").strip())),
-            "href": "/dashboard?tab=my-businesses",
+            "href": "/dashboard?tab=my-businesses&details=1",
         },
     ]
 

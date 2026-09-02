@@ -413,6 +413,7 @@ const he = {
         foundedYear: 'שנת הקמה',
         certificateLink: 'קישור לתעודה',
         detailsSaved: 'נשמר',
+        editOnPage: 'עריכת שעות, אזורים ולוגו',
         detailsSaveFailed: 'השמירה נכשלה — נסו שוב',
         yourServices: 'השירותים שלכם',
         yourProducts: 'המוצרים שלכם',
@@ -2134,6 +2135,7 @@ const he = {
       sweep: {
         // See the note on the English copy.
         tierPhotos: 'תמונות של השירות הזה',
+        photoShapeHint: 'תמונות לרוחב ממלאות את העמוד הכי טוב (16:9, בערך 1600 × 900). פלייר לאורך מוצג בשלמותו, אבל קטן יותר.',
         photoRequiredTag: '(חובה)',
         photoMax: '(עד 6)',
         addPhotos: 'הוספת תמונות',
@@ -2735,6 +2737,7 @@ const he = {
         aboutService: 'על השירות',
         aboutStore: 'על החנות',
         viewProfile: 'לעמוד העסק',
+        editBusinessDetails: 'עריכת שעות, אזורים ולוגו',
         noPackages: 'עדיין לא הוגדרו חבילות.',
         notFound: 'המודעה לא נמצאה',
         reviews: 'ביקורות',

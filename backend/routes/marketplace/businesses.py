@@ -202,6 +202,27 @@ def _public(
         "categories": doc.get("categories") or [],
         "areas": doc.get("areas") or [],
         "serves_nationwide": bool(doc.get("serves_nationwide")),
+        # THE FACTS THE DETAILS FORM EDITS, so the form can open with what
+        # is already saved. This shape is what the owner's dashboard list
+        # returns, and BusinessDetailsForm initialises from it - and it
+        # carried none of these, so the form opened BLANK for hours,
+        # languages, payment and the rest every time. Worse than blank:
+        # the form sends every field on save, null when empty, and the
+        # API clears a null. An owner who reopened the form to fix a typo
+        # in the description and pressed Save wiped his hours. kashermybnb
+        # "could not find where to change his hours" - he had found it; it
+        # was showing him nothing.
+        "hours": doc.get("hours"),
+        "languages": doc.get("languages") or [],
+        "founded_year": doc.get("founded_year"),
+        "delivery_note": doc.get("delivery_note"),
+        "lead_time": doc.get("lead_time"),
+        "payment_note": doc.get("payment_note"),
+        "kosher_certification": doc.get("kosher_certification"),
+        "license_number": doc.get("license_number"),
+        "cover_url": doc.get("cover_url"),
+        "accent": doc.get("accent"),
+        "payment_links": doc.get("payment_links") or [],
         "verified": bool(doc.get("verified")),
         "active": doc.get("active", True),
         "created_at": doc.get("created_at"),

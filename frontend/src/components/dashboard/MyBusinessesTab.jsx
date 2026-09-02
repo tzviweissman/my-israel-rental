@@ -13,6 +13,7 @@
  */
 import React, { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useSearchParams } from 'react-router-dom';
 import axios from 'axios';
 import { Briefcase, Plus, Loader2, Eye, EyeOff, Check, X, Pencil, Palette } from 'lucide-react';
 import { toast } from 'sonner';
@@ -57,6 +58,25 @@ export default function MyBusinessesTab({ API, token }) {
   }, [API, token]);
 
   useEffect(() => { load(); }, [load]);
+
+  // `?details=<business id | 1>` opens the Business details form on
+  // arrival. The setup checklist, the listing page's owner link and the
+  // public page's owner button all send people here for hours, areas and
+  // the logo - and landing on the card with a small "Business details"
+  // link at its foot was not enough: an owner wrote in that he could not
+  // find where to change his hours. Consumed once, then removed from the
+  // URL so a reload or Cancel does not reopen it.
+  const [searchParams, setSearchParams] = useSearchParams();
+  useEffect(() => {
+    const want = searchParams.get('details');
+    if (!want || !items || items.length === 0) return;   // items is null until the first load
+    const target = items.find((b) => b.id === want) || items[0];
+    if (target) setDetailsBiz(target);
+    const next = new URLSearchParams(searchParams);
+    next.delete('details');
+    setSearchParams(next, { replace: true });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [items]);
 
   const add = async (e) => {
     e.preventDefault();

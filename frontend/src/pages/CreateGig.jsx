@@ -1044,6 +1044,13 @@ const TiersStep = ({ gigType, tiers, onUpdate, onAdd, onRemove, onUploadImages, 
               tour" photos). Max 6 per option; falls back to the gig-wide
               gallery on the public page when a tier has no images. */}
           <div className="pt-1">
+            {/* The shape hint. Businesses upload flyers; a portrait flyer
+                is shown whole (never cropped) but small, between two soft
+                bars, and one owner asked why his did not fill the page.
+                Say what fills it, once, where the file is chosen. */}
+            <p className="text-[11px] mb-1" style={{ color: 'var(--brand-muted)' }}>
+              {t('sweep.photoShapeHint', 'Landscape photos fill the page best (16:9, about 1600 × 900). A portrait flyer is shown whole, but smaller.')}
+            </p>
             <div className="flex items-center justify-between mb-1.5">
               <p className="text-[11px] font-semibold text-gray-600">
                 {t('sweep.tierPhotos', 'Photos of this service')}{' '}

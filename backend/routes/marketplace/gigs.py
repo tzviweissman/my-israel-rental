@@ -290,6 +290,10 @@ async def list_gigs(
             "user_id": gig.get("provider_user_id"),
             "name": _public_provider_name(businesses.get(gig.get("business_id")), user),
             "avatar": prov.get("avatar"),
+            # The business logo, so a card can show SOMETHING for a
+            # provider who set a logo on the business and never touched
+            # the separate provider avatar - which is nearly everyone.
+            "logo_url": (businesses.get(gig.get("business_id")) or {}).get("logo_url"),
             "tagline": prov.get("tagline"),
             "languages": prov_langs,
             "response_bucket": bucket,
@@ -519,6 +523,12 @@ async def get_gig(gig_id: str, request: Request, viewer=Depends(optional_user)):
         "user_id": gig["provider_user_id"],
         "name": _public_provider_name(business, user),
         "avatar": (prov or {}).get("avatar"),
+        # The business logo. An owner who uploads a logo on the business
+        # then opens their listing and sees a grey circle next to their
+        # name - because this card read only the provider AVATAR, a
+        # second image on a second profile most owners never find. The
+        # page falls back to this when there is no avatar.
+        "logo_url": (business or {}).get("logo_url"),
         "tagline": (prov or {}).get("tagline"),
         "bio": (prov or {}).get("bio"),
         "active": _provider_is_active(prov or {}),
