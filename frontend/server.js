@@ -266,7 +266,30 @@ function proxyApi(req, res) {
   req.pipe(upstream);
 }
 
+// The same four headers `public/serve.json` declares, kept here as well
+// because serve.json only covers the static path.
+//
+// WHY BOTH. serve.json is read by `handler(req, res, CONFIG)`, the LAST
+// line of the request handler below. Two branches return before reaching
+// it — the /api proxy and the link-preview bot branch — so declaring the
+// headers only in serve.json covered one response path out of three. The
+// bot branch was the sharper miss: it serves HTML assembled from
+// business-supplied content, on our own origin, and was doing it with no
+// nosniff and no X-Frame-Options.
+//
+// setHeader (not writeHead) so it survives all three: Node merges
+// previously-set headers into whatever writeHead passes, and serve-handler
+// does not duplicate a header that is already present.
+const SECURITY_HEADERS = {
+  'X-Content-Type-Options': 'nosniff',
+  'X-Frame-Options': 'SAMEORIGIN',
+  'Referrer-Policy': 'strict-origin-when-cross-origin',
+  'Strict-Transport-Security': 'max-age=15552000; includeSubDomains',
+};
+
 const server = http.createServer(async (req, res) => {
+  for (const [k, v] of Object.entries(SECURITY_HEADERS)) res.setHeader(k, v);
+
   // Before anything else: the SPA fallback rewrites every unmatched path
   // to index.html, so an /api request that reached it would be answered
   // with the HTML page and a 200 — the worst possible failure, because
