@@ -25,17 +25,28 @@ from typing import Any
 from models_response import PropertyOut
 
 
-def keep_valid_property_rows(rows: list[dict[str, Any]], *, route: str, logger: logging.Logger) -> list[dict[str, Any]]:
-    """Return the rows PropertyOut accepts; log and drop the rest."""
+def keep_valid_rows(rows: list[dict[str, Any]], model: type, *, route: str, logger: logging.Logger) -> list[dict[str, Any]]:
+    """Return the rows `model` accepts; log and drop the rest.
+
+    Any collection endpoint with `response_model=list[X]` has the same
+    failure: one bad document, whole response 500. The subleases list
+    had 75 rows a test had seeded without `available_from` and answered
+    500 for everyone; this is the same guard for any model.
+    """
     kept: list[dict[str, Any]] = []
     for row in rows:
         try:
-            PropertyOut.model_validate(row)
+            model.model_validate(row)
         except Exception as e:  # noqa: BLE001 - pydantic ValidationError; broad on purpose
             logger.warning(
-                "%s dropped malformed property %s (%s): %s",
-                route, row.get("id"), row.get("title"), str(e).splitlines()[0][:160],
+                "%s dropped malformed %s %s (%s): %s",
+                route, model.__name__, row.get("id"), row.get("title"), str(e).splitlines()[0][:160],
             )
             continue
         kept.append(row)
     return kept
+
+
+def keep_valid_property_rows(rows: list[dict[str, Any]], *, route: str, logger: logging.Logger) -> list[dict[str, Any]]:
+    """Return the rows PropertyOut accepts; log and drop the rest."""
+    return keep_valid_rows(rows, PropertyOut, route=route, logger=logger)

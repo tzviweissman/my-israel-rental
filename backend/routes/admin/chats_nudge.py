@@ -120,6 +120,18 @@ async def get_all_chats(payload: dict = Depends(verify_token)) -> list[dict]:
 
     messages = await db.messages.find({}, {"_id": 0}).sort("created_at", -1).to_list(1000)
 
+    # A message without a sender, receiver or property is not a
+    # conversation. It used to be a KeyError here, which made the admin's
+    # ENTIRE chat view a 500 - the one place an admin would look to find
+    # the bad row. Logged and skipped instead.
+    complete = []
+    for m in messages:
+        if all(m.get(k) for k in ("sender_id", "receiver_id", "property_id")):
+            complete.append(m)
+        else:
+            logger.warning("GET /admin/chats skipped message %s missing a party or property", m.get("id"))
+    messages = complete
+
     # Pre-fetch every user + property referenced by these messages in a
     # couple of bulk queries — avoids the per-message find_one round-trips
     # that used to dominate the runtime for large message sets.

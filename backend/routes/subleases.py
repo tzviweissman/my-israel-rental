@@ -13,8 +13,9 @@ from models_response import (
     SubleaseContractUploadResponse,
     SubleaseOut,
 )
-from routes.deps import ALLOWED_CONTRACT_TYPES, CONTRACT_DIR, MAX_FILE_SIZE, db, verify_token
+from routes.deps import ALLOWED_CONTRACT_TYPES, CONTRACT_DIR, MAX_FILE_SIZE, db, logger, verify_token
 from utils.area_filter import area_mongo_query
+from utils.property_rows import keep_valid_rows
 from utils.files import extract_text_from_docx, extract_text_from_image, extract_text_from_pdf
 
 router = APIRouter()
@@ -102,7 +103,8 @@ async def list_subleases(area: str | None = None, holiday_tag: str | None = None
     if holiday_tag:
         query["holiday_tags"] = holiday_tag
     subleases = await db.subleases.find(query, {"_id": 0}).sort("created_at", -1).to_list(500)
-    return subleases
+    # One malformed row must not 500 the whole board - see utils/property_rows.py.
+    return keep_valid_rows(subleases, SubleaseOut, route="GET /subleases", logger=logger)
 
 
 @api_router.get("/subleases/{sublease_id}", response_model=SubleaseOut)
@@ -127,7 +129,7 @@ async def get_my_subleases(payload: dict = Depends(verify_token)) -> list[dict]:
             sub["contract_signed"] = contract.get("signed", False) if contract else False
         else:
             sub["contract_signed"] = False
-    return subleases
+    return keep_valid_rows(subleases, SubleaseOut, route="GET /my-subleases", logger=logger)
 
 
 
