@@ -148,6 +148,17 @@ def _shared_motor_clients() -> list:
     return found
 
 
+def _ensure_open_loop() -> None:
+    """Leave an OPEN loop installed as current, creating one only if the
+    current one is missing or closed. Never closes or replaces a live loop."""
+    try:
+        loop = _asyncio.get_event_loop()
+    except RuntimeError:
+        loop = None
+    if loop is None or loop.is_closed():
+        _asyncio.set_event_loop(_asyncio.new_event_loop())
+
+
 @_pytest.fixture(autouse=True)
 def _leave_a_usable_event_loop_for_the_next_test():
     clients = _shared_motor_clients()
@@ -159,12 +170,17 @@ def _leave_a_usable_event_loop_for_the_next_test():
     for c in clients:
         c._io_loop = None
 
-    # Only when there is nothing there. A loop that already exists belongs
-    # to whoever put it there - pytest-asyncio, or the test itself.
-    try:
-        _asyncio.get_event_loop()
-    except RuntimeError:
-        _asyncio.set_event_loop(_asyncio.new_event_loop())
+    # Only when there is nothing USABLE there. A live loop that already
+    # exists belongs to whoever put it there - pytest-asyncio, or the test
+    # itself. A CLOSED one belongs to nobody: several files do
+    # `loop = new_event_loop(); set_event_loop(loop); ...; loop.close()`
+    # and leave the closed loop installed as current. get_event_loop()
+    # happily returns it, and the next `run_until_complete` dies with
+    # "Event loop is closed" - nine tests in test_chat_email.py, none of
+    # which touch a loop themselves. The first version of this fixture
+    # only acted when get_event_loop() RAISED, so it walked past exactly
+    # that case.
+    _ensure_open_loop()
 
     yield
 
@@ -173,10 +189,7 @@ def _leave_a_usable_event_loop_for_the_next_test():
     # current loop at all.
     for c in _shared_motor_clients():
         c._io_loop = None
-    try:
-        _asyncio.get_event_loop()
-    except RuntimeError:
-        _asyncio.set_event_loop(_asyncio.new_event_loop())
+    _ensure_open_loop()
 
     # And the other half of the same problem, which is not recoverable:
     # `with TestClient(app)` runs the app's lifespan, and its shutdown

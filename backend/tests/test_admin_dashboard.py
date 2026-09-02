@@ -334,6 +334,11 @@ class TestAdminChats:
         print("✓ Non-admin correctly denied access to admin chats")
 
 
+@pytest.mark.skip(reason=(
+    "document/government filing services are DISCONTINUED (CLAUDE.md); the API "
+    "answers 410 'no longer offered' on purpose. Kept, not deleted, so the "
+    "tests come back if DOCUMENT_SERVICES_ENABLED is ever turned on."
+))
 class TestAdminDocumentServices:
     """Test admin document services endpoints"""
     

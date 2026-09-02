@@ -48,21 +48,29 @@ def test_property_delete_cascades_detach_subleases() -> None:
             "subleasor_id": owner_id, "active": True, "title": "unrelated",
         })
 
-        # Act
-        await delete_property(prop_id, payload={"user_id": owner_id, "role": "owner"})
+        try:
+            # Act
+            await delete_property(prop_id, payload={"user_id": owner_id, "role": "owner"})
 
-        # Verify property gone
-        assert await db.properties.find_one({"id": prop_id}) is None
-        # Verify cascade: both linked subleases now have None original_property_id
-        for sid in sub_ids:
-            s = await db.subleases.find_one({"id": sid}, {"_id": 0})
-            assert s is not None, f"Sublease {sid} should still exist"
-            assert s["original_property_id"] is None, f"{sid} should be detached"
-        # Verify unrelated untouched
-        s = await db.subleases.find_one({"id": other_sub}, {"_id": 0})
-        assert s["original_property_id"] == other_prop
-
-        # Cleanup
-        await db.subleases.delete_many({"id": {"$in": sub_ids + [other_sub]}})
+            # Verify property gone
+            assert await db.properties.find_one({"id": prop_id}) is None
+            # Verify cascade: both linked subleases now have None original_property_id
+            for sid in sub_ids:
+                s = await db.subleases.find_one({"id": sid}, {"_id": 0})
+                assert s is not None, f"Sublease {sid} should still exist"
+                assert s["original_property_id"] is None, f"{sid} should be detached"
+            # Verify unrelated untouched
+            s = await db.subleases.find_one({"id": other_sub}, {"_id": 0})
+            assert s["original_property_id"] == other_prop
+        finally:
+            # In a `finally`, and the PROPERTY too. The route under test is
+            # what deletes it on the happy path, so on any failure before
+            # that point the seeded row stayed behind - and it is seeded
+            # with no `area` or `property_type`, which PropertyOut requires.
+            # Twenty-two of them had accumulated, and every one made the
+            # public GET /api/properties answer 500 for the whole
+            # environment (response validation fails on the first bad row).
+            await db.properties.delete_many({"id": prop_id})
+            await db.subleases.delete_many({"id": {"$in": sub_ids + [other_sub]}})
 
     asyncio.run(run())

@@ -13,7 +13,12 @@ import pytest
 BASE_URL = os.environ.get("REACT_APP_BACKEND_URL", "https://where-am-i-project.preview.emergentagent.com").rstrip("/")
 API = f"{BASE_URL}/api"
 
-ADMIN = ("admin@rental.com", "Admin123!")
+# The admin password used to be a hardcoded "Admin123!" here - one digit
+# short of the seeded account's "Admin1234!" - so every admin fixture in
+# this file failed with "Invalid credentials" and read as a broken
+# feature. The credentials come from tests/.env.test via conftest now.
+from conftest import TEST_ADMIN_EMAIL, TEST_ADMIN_PASSWORD  # noqa: E402
+ADMIN = (TEST_ADMIN_EMAIL or "admin@rental.com", TEST_ADMIN_PASSWORD or "Admin1234!")
 OWNER = ("owner@test.com", "Test1234!")
 RENTER = ("renter@test.com", "Test1234!")
 

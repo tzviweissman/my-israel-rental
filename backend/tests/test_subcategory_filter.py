@@ -117,6 +117,10 @@ def test_create_gig_accepts_longtail_slug(owner_token):
         "booking_mode": "whatsapp",
         "whatsapp": "+972501234567",
         "area": "Tel Aviv",
+        # A listing needs at least one photo to be created (gigs.py
+        # _has_any_photo reads `gallery`, product images or tier images);
+        # this test is about the subcategory, not photos.
+        "gallery": ["https://example.com/test-subcat.jpg"],
     }
     r = requests.post(f"{API}/marketplace/gigs", json=payload,
                       headers={"Authorization": f"Bearer {owner_token}"}, timeout=60)

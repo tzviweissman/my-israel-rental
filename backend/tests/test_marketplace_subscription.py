@@ -12,6 +12,15 @@ import sys
 from datetime import datetime
 
 import pytest
+
+# PayPal is a real external account. Without credentials every upgrade /
+# activate / cancel call 500s in utils/paypal.py before reaching the code
+# these tests are about, and the failures read as broken billing. Skip,
+# and say what to set.
+pytestmark = pytest.mark.skipif(
+    not os.environ.get("PAYPAL_CLIENT_ID"),
+    reason="PAYPAL_CLIENT_ID is not set - the subscription tests need real PayPal sandbox credentials",
+)
 import requests
 
 sys.path.insert(0, "/app/backend")

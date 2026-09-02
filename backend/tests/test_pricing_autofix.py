@@ -21,7 +21,12 @@ if not BASE_URL:
 MONGO_URL = os.environ.get("MONGO_URL", "mongodb://localhost:27017")
 DB_NAME = os.environ.get("DB_NAME", "test_database")
 
-ADMIN = {"email": "admin@rental.com", "password": "Admin123!"}
+# The admin password used to be a hardcoded "Admin123!" here - one digit
+# short of the seeded account's "Admin1234!" - so every admin fixture in
+# this file failed with "Invalid credentials" and read as a broken
+# feature. The credentials come from tests/.env.test via conftest now.
+from conftest import TEST_ADMIN_EMAIL, TEST_ADMIN_PASSWORD  # noqa: E402
+ADMIN = {"email": TEST_ADMIN_EMAIL or "admin@rental.com", "password": TEST_ADMIN_PASSWORD or "Admin1234!"}
 OWNER = {"email": "owner@test.com", "password": "Test1234!"}
 RENTER = {"email": "renter@test.com", "password": "Test1234!"}
 

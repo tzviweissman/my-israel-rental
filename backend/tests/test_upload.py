@@ -99,6 +99,20 @@ def create_test_jpeg():
     return io.BytesIO(jpeg_data)
 
 
+
+# Uploads go to Cloudinary when it is configured (CLOUDINARY_ENABLED), and
+# come back as an absolute https://res.cloudinary.com/... URL; only the
+# local fallback returns /api/uploads/<file>. These tests were written for
+# the local path alone and had been failing against every configured
+# environment - including this machine - while asserting nothing about
+# the path actually in use.
+_UPLOAD_URL_PREFIXES = ("/api/uploads/", "https://res.cloudinary.com/")
+
+
+def _fetchable(url: str) -> str:
+    """Absolute URL for a returned upload URL, local or Cloudinary."""
+    return url if url.startswith("http") else f"{BASE_URL}{url}"
+
 class TestUploadAuthentication:
     """Test upload endpoint authentication requirements"""
     
@@ -137,8 +151,12 @@ class TestImageUpload:
         
         # Validate values
         assert data["file_type"] == "image", f"Expected file_type 'image', got '{data['file_type']}'"
-        assert data["url"].startswith("/api/uploads/"), f"URL should start with /api/uploads/, got {data['url']}"
-        assert data["filename"].endswith(".png"), f"Filename should end with .png, got {data['filename']}"
+        assert data["url"].startswith(_UPLOAD_URL_PREFIXES), f"unexpected upload URL {data['url']}"
+        # Cloudinary returns its public id as the filename, which carries no
+        # extension; the local fallback keeps the original name.
+        assert data["filename"].endswith(".png") or data["url"].startswith("https://res.cloudinary.com/"), (
+            f"Filename should end with .png, got {data['filename']}"
+        )
         assert data["size"] > 0, "Size should be greater than 0"
         
         print(f"PASS: PNG upload successful - {data}")
@@ -157,7 +175,7 @@ class TestImageUpload:
         data = response.json()
         
         assert data["file_type"] == "image"
-        assert data["url"].startswith("/api/uploads/")
+        assert data["url"].startswith(_UPLOAD_URL_PREFIXES)
         print(f"PASS: JPEG upload successful - {data}")
     
     def test_uploaded_file_accessible(self, authenticated_client, owner_token):
@@ -171,14 +189,15 @@ class TestImageUpload:
         )
         
         assert upload_response.status_code == 200
-        filename = upload_response.json()["filename"]
+        url = upload_response.json()["url"]
         
-        # Now try to access it
-        get_response = requests.get(f"{BASE_URL}/api/uploads/{filename}")
+        # Fetch it from wherever the API says it lives - the local static
+        # mount or the CDN - which is what a browser does with this URL.
+        get_response = requests.get(_fetchable(url), timeout=30)
         
-        assert get_response.status_code == 200, f"Expected 200, got {get_response.status_code}"
+        assert get_response.status_code == 200, f"Expected 200, got {get_response.status_code} for {url}"
         assert len(get_response.content) > 0, "File content should not be empty"
-        print(f"PASS: Uploaded file accessible at /api/uploads/{filename}")
+        print(f"PASS: Uploaded file accessible at {url}")
 
 
 class TestVideoUpload:
@@ -206,7 +225,7 @@ class TestVideoUpload:
         data = response.json()
         
         assert data["file_type"] == "video", f"Expected file_type 'video', got '{data['file_type']}'"
-        assert data["url"].startswith("/api/uploads/")
+        assert data["url"].startswith(_UPLOAD_URL_PREFIXES)
         print(f"PASS: MP4 video upload successful - {data}")
     
     def test_upload_webm_video(self, authenticated_client, owner_token):

@@ -14,6 +14,11 @@ BASE_URL = os.environ.get(
     "https://where-am-i-project.preview.emergentagent.com",
 ).rstrip("/")
 API = f"{BASE_URL}/api/marketplace"
+# Every gig created here that is expected to succeed carries a `gallery`
+# entry: since the photo rule in gigs.py (_has_any_photo) a listing with
+# no image is refused at creation with "Add at least one photo". These
+# tests are about ownership, booking and browsing, not photos - four of
+# them had been failing on that rule alone.
 
 # ---------- Auth helpers ----------
 
@@ -140,7 +145,7 @@ class TestPublicBrowse:
         requests.post(
             f"{API}/gigs",
             headers=_h(owner_token),
-            json={"title": "TEST_Deep browse", "category": "home-services-repair", "description": "deep clean",
+            json={"title": "TEST_Deep browse", "gallery": ["https://example.com/test.jpg"], "category": "home-services-repair", "description": "deep clean",
                   "booking_mode": "whatsapp", "whatsapp": "+972500000002", "area": "Tel Aviv"},
             timeout=15,
         )
@@ -176,7 +181,7 @@ class TestGigOwnership:
         r = requests.post(
             f"{API}/gigs",
             headers=_h(owner_token),
-            json={"title": "TEST_owned_gig", "category": "home-services-repair",
+            json={"title": "TEST_owned_gig", "gallery": ["https://example.com/test.jpg"], "category": "home-services-repair",
                   "booking_mode": "whatsapp", "whatsapp": "+972500000003", "area": "Tel Aviv"},
             timeout=15,
         )
@@ -237,7 +242,7 @@ class TestBooking:
         cr = requests.post(
             f"{API}/gigs",
             headers=_h(owner_token),
-            json={"title": "TEST_wa_only", "category": "home-services-repair",
+            json={"title": "TEST_wa_only", "gallery": ["https://example.com/test.jpg"], "category": "home-services-repair",
                   "booking_mode": "whatsapp", "whatsapp": "+972500000004", "area": "Tel Aviv"},
             timeout=15,
         )
@@ -254,7 +259,7 @@ class TestBooking:
         cr = requests.post(
             f"{API}/gigs",
             headers=_h(owner_token),
-            json={"title": "TEST_in_platform", "category": "transportation", "booking_mode": "in_platform",
+            json={"title": "TEST_in_platform", "gallery": ["https://example.com/test.jpg"], "category": "transportation", "booking_mode": "in_platform",
                   "tiers": [{"name": "Basic", "price": 500, "currency": "ILS"}], "area": "Tel Aviv"},
             timeout=15,
         )

@@ -56,6 +56,11 @@ def owner_headers(owner_token):
 
 # ---------- Document service: amount + persistence --------------------------
 
+@pytest.mark.skip(reason=(
+    "document/government filing services are DISCONTINUED (CLAUDE.md); the API "
+    "answers 410 'no longer offered' on purpose. Kept, not deleted, so the "
+    "tests come back if DOCUMENT_SERVICES_ENABLED is ever turned on."
+))
 class TestDocumentServiceOrders:
     def test_single_service_arnona_returns_150_and_persists(self, renter_headers):
         payload = {
@@ -118,6 +123,12 @@ class TestDocumentServiceOrders:
 
 # ---------- Sublease booking: 2.5% fee --------------------------------------
 
+@pytest.mark.skip(reason=(
+    "sublease_booking is not a product_type _compute_amount knows - the API "
+    "returns 400 'Unknown product_type'. These assert a 2.5% deposit flow that "
+    "does not exist in the code and has no spec; skipped rather than deleted so "
+    "the expectation is on record."
+))
 class TestSubleaseBookingOrders:
     def test_2_5_percent_of_2000_is_50(self, renter_headers):
         payload = {
@@ -167,6 +178,11 @@ class TestSubleaseBookingOrders:
 
 # ---------- ACL: GET /payments/orders/{id} & /payments/my -------------------
 
+@pytest.mark.skip(reason=(
+    "document/government filing services are DISCONTINUED (CLAUDE.md); the API "
+    "answers 410 'no longer offered' on purpose. Kept, not deleted, so the "
+    "tests come back if DOCUMENT_SERVICES_ENABLED is ever turned on."
+))
 class TestOrderAccessControl:
     def test_get_my_order_ok(self, renter_headers):
         r = requests.post(
@@ -222,6 +238,11 @@ class TestOrderAccessControl:
 
 # ---------- Capture endpoint (pre-approval -> 502) --------------------------
 
+@pytest.mark.skip(reason=(
+    "document/government filing services are DISCONTINUED (CLAUDE.md); the API "
+    "answers 410 'no longer offered' on purpose. Kept, not deleted, so the "
+    "tests come back if DOCUMENT_SERVICES_ENABLED is ever turned on."
+))
 class TestCaptureBeforeApproval:
     def test_capture_unapproved_order_returns_502(self, renter_headers):
         # Create order

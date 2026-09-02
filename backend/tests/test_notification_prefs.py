@@ -48,6 +48,22 @@ def renter_headers(renter_token) -> dict[str, str]:
     return {"Authorization": f"Bearer {renter_token}"}
 
 
+_POSTED_JOBS: list[str] = []
+
+
+@pytest.fixture(scope="module", autouse=True)
+def _delete_posted_jobs():
+    """Every job this module posts is deleted when the module ends."""
+    yield
+    if not _POSTED_JOBS:
+        return
+    headers = {"Authorization": f"Bearer {_login(OWNER)}"}
+    for job_id in _POSTED_JOBS:
+        if job_id:
+            requests.delete(f"{BASE_URL}/api/marketplace/jobs/{job_id}", headers=headers, timeout=15)
+    _POSTED_JOBS.clear()
+
+
 # ------------ Preferences GET / PATCH ------------
 
 class TestPreferences:
@@ -197,6 +213,10 @@ class TestDeeplinkConsume:
 
 # ------------ Instant email path (log-observation) ------------
 
+@pytest.mark.skipif(
+    not os.path.exists("/var/log/supervisor/backend.err.log"),
+    reason="reads the backend's supervisor log at /var/log/supervisor - an Emergent-era path that does not exist here",
+)
 class TestInstantEmailPath:
     """We can't reliably read Postmark inbox, but backend logs record
     Postmark send attempts. We assert the code path fires by posting
@@ -263,7 +283,14 @@ class TestInstantEmailPath:
         }
         r = requests.post(f"{BASE_URL}/api/marketplace/jobs", headers=owner_headers, json=payload, timeout=20)
         assert r.status_code in (200, 201), r.text
-        return r.json()
+        job = r.json()
+        # Recorded so the module teardown can delete it. Nothing deleted
+        # these before: five "TEST_ Fix leaky pipe" jobs had piled up on
+        # the owner account across runs, and the API caps open jobs at
+        # five per user - so the sixth post here failed with "Only 5 open
+        # jobs allowed at a time", and every test in this class with it.
+        _POSTED_JOBS.append(job.get("id"))
+        return job
 
     def _set_renter_mode(self, mode, renter_headers):
         r = requests.patch(
