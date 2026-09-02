@@ -31,7 +31,7 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
-import { CheckCircle2, Circle, ChevronRight, X } from 'lucide-react';
+import { CheckCircle2, Circle, ChevronRight } from 'lucide-react';
 import { useOnboarding, localeKeyFor } from './OnboardingProvider';
 import ShowMeAroundOffer from './ShowMeAroundOffer';
 
@@ -47,41 +47,13 @@ export default function SetupChecklist() {
   const lists = ctx.state?.checklists || [];
   if (lists.length === 0) return null;
 
-  const collapsed = ctx.dismissed.has('checklist.collapsed');
   const allDone = lists.every((l) => l.done === l.total);
 
-  // Complete AND collapsed: gone. Complete but not yet collapsed: one line,
-  // per the spec. A permanent "you're done!" panel is clutter that teaches
-  // people to skim past the dashboard.
-  if (allDone && collapsed) return null;
-
-  if (allDone) {
-    return (
-      <div
-        className="rounded-2xl border px-4 py-3 mb-6 flex items-center gap-3"
-        style={{ background: 'var(--surface)', borderColor: 'var(--brand-border)' }}
-        data-testid="setup-checklist-complete"
-      >
-        <CheckCircle2 size={18} style={{ color: DONE_GREEN }} aria-hidden="true" />
-        <p className="text-sm font-semibold flex-1 min-w-0" style={{ color: 'var(--ink)' }}>
-          {t('setup.allDone', 'Your setup is complete.')}
-        </p>
-        {/* The moment of finishing is when appetite for more is highest
-            (T7), so this is where the feature library gets offered. */}
-        <ShowMeAroundOffer moment="complete" inline />
-        <button
-          type="button"
-          onClick={() => ctx.dismiss('checklist.collapsed')}
-          aria-label={t('common.dismiss', 'Dismiss')}
-          className="shrink-0 p-1 rounded"
-          style={{ color: 'var(--brand-muted)' }}
-          data-testid="setup-checklist-collapse"
-        >
-          <X size={15} />
-        </button>
-      </div>
-    );
-  }
+  // Complete: gone. It used to stay as a one-line "Your setup is
+  // complete" until dismissed. The owner of a finished business asked
+  // for it to leave on its own - a panel about setup has nothing to say
+  // once setup is done, and the space is the dashboard's.
+  if (allDone) return null;
 
   return (
     <div

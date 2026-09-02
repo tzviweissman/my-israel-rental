@@ -913,13 +913,22 @@ const GigDetail = () => {
                    looking for his hours and found nothing to click. Hours,
                    areas, logo and the rest live on the BUSINESS, not the
                    listing; this opens that form directly. */
-                <button
-                  onClick={() => navigate(`/dashboard?tab=my-businesses&details=${gig.business_id || 1}`)}
-                  className="text-xs font-semibold text-[var(--brand-primary)] hover:underline"
-                  data-testid="gig-edit-business-details"
-                >
-                  {t('gigDetail.editBusinessDetails', 'Edit hours, areas & logo')}
-                </button>
+                <span className="flex flex-col items-end gap-1">
+                  <button
+                    onClick={() => navigate(`/dashboard?tab=my-businesses&services=${gig.business_id || 1}`)}
+                    className="text-xs font-semibold text-[var(--brand-primary)] hover:underline"
+                    data-testid="gig-edit-listing"
+                  >
+                    {t('gigDetail.editListing', 'Edit this listing & photos')}
+                  </button>
+                  <button
+                    onClick={() => navigate(`/dashboard?tab=my-businesses&details=${gig.business_id || 1}`)}
+                    className="text-xs font-semibold text-[var(--brand-primary)] hover:underline"
+                    data-testid="gig-edit-business-details"
+                  >
+                    {t('gigDetail.editBusinessDetails', 'Edit hours, areas & logo')}
+                  </button>
+                </span>
               ) : (
                 <button onClick={() => { saveReturnPath(); navigate(`/businesses/provider/${gig.provider?.user_id}`); }} className="text-xs font-semibold text-[var(--brand-primary)] hover:underline" data-testid="gig-view-provider">
                   {t('gigDetail.viewProfile', 'View profile')}

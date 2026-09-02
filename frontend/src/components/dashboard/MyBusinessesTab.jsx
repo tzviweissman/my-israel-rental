@@ -13,9 +13,9 @@
  */
 import React, { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useSearchParams } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import axios from 'axios';
-import { Briefcase, Plus, Loader2, Eye, EyeOff, Check, X, Pencil, Palette } from 'lucide-react';
+import { Briefcase, Plus, Loader2, Eye, EyeOff, Check, X, Pencil, Palette, LayoutList } from 'lucide-react';
 import { toast } from 'sonner';
 import CoverPlaceholder from '../common/CoverPlaceholder';
 import BusinessDetailsForm from './BusinessDetailsForm';
@@ -67,13 +67,26 @@ export default function MyBusinessesTab({ API, token }) {
   // find where to change his hours. Consumed once, then removed from the
   // URL so a reload or Cancel does not reopen it.
   const [searchParams, setSearchParams] = useSearchParams();
+  const navigate = useNavigate();
   useEffect(() => {
-    const want = searchParams.get('details');
-    if (!want || !items || items.length === 0) return;   // items is null until the first load
-    const target = items.find((b) => b.id === want) || items[0];
-    if (target) setDetailsBiz(target);
+    if (!items || items.length === 0) return;   // items is null until the first load
+    const wantDetails = searchParams.get('details');
+    const wantServices = searchParams.get('services');
+    if (!wantDetails && !wantServices) return;
+    if (wantDetails) {
+      const target = items.find((b) => b.id === wantDetails) || items[0];
+      if (target) setDetailsBiz(target);
+    }
+    // `?services=<id>` opens the business's services (listings, photos,
+    // add/edit) - the screen that was only reachable by clicking the
+    // business NAME, which one owner never found.
+    if (wantServices) {
+      const target = items.find((b) => b.id === wantServices) || items[0];
+      if (target) setOpenBiz(target);
+    }
     const next = new URLSearchParams(searchParams);
     next.delete('details');
+    next.delete('services');
     setSearchParams(next, { replace: true });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [items]);
@@ -323,10 +336,39 @@ export default function MyBusinessesTab({ API, token }) {
                   onOpenListings={() => setOpenBiz(b)}
                 />
 
-                <p className="text-xs" style={{ color: 'var(--brand-muted)' }}>
-                  {t('businesses.listingCount', '{{n}} listing(s)', { n: b.gig_count })}
-                  {!b.active && ` · ${t('businesses.hidden', 'hidden')}`}
-                </p>
+                {/* The services. This was a line of text - "1 listing(s)" -
+                    and the only way to the listings themselves was clicking
+                    the business NAME above, which nothing marks as a
+                    button. An owner sent a video of himself looking for
+                    where to edit his service, add another, or change its
+                    photos, and not finding it. Two buttons that say so. */}
+                <div className="flex flex-wrap items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setOpenBiz(b)}
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-white"
+                    style={{ background: 'var(--brand-primary)' }}
+                    data-testid={`business-services-${b.id}`}
+                  >
+                    <LayoutList size={13} />
+                    {t('businesses.manageServices', 'Services & photos')}
+                    <span className="opacity-80">({b.gig_count || 0})</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => navigate(`/businesses/add?business=${encodeURIComponent(b.id)}`)}
+                    className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg border text-xs font-semibold"
+                    style={{ borderColor: 'var(--brand-border)', color: 'var(--brand-primary)' }}
+                    data-testid={`business-add-service-${b.id}`}
+                  >
+                    <Plus size={13} /> {t('businesses.addServiceCta', 'Add a service')}
+                  </button>
+                  {!b.active && (
+                    <span className="text-xs" style={{ color: 'var(--brand-muted)' }}>
+                      {t('businesses.hidden', 'hidden')}
+                    </span>
+                  )}
+                </div>
 
                 {/* C6 — until this existed the only editable thing about
                     a business was its name, so every fact the public page

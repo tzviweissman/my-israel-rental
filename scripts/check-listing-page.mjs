@@ -138,6 +138,39 @@ const browser = await chromium.launch();
   await page.goto(`${APP}/business/${biz.slug || biz.id}?lng=en`, { waitUntil: 'networkidle' });
   await page.waitForTimeout(1500);
   ok('owner: the public business page offers the same edit button', await page.locator('[data-testid="business-owner-edit"]').count() === 1);
+
+  // 4. The services themselves: reachable from the listing page and from
+  //    the business card, by name. They used to be behind the business
+  //    NAME only, which nothing marked as clickable.
+  await page.goto(`${APP}/businesses/${gig.id}?lng=en`, { waitUntil: 'networkidle' });
+  await page.waitForTimeout(1500);
+  const editListing = page.locator('[data-testid="gig-edit-listing"]');
+  ok('owner: "Edit this listing & photos" is on the listing', await editListing.count() === 1);
+  await editListing.click();
+  await page.waitForTimeout(2500);
+  ok("owner: it opens the business's services screen", await page.locator('[data-testid="my-gigs-tab"]').count() === 1, page.url());
+  ok('owner: the listing has an Edit button there', await page.locator(`[data-testid="my-gigs-edit-listing-${gig.id}"]`).count() === 1);
+  ok('owner: and an "Add a service" button', /add a (service|product)/i.test(await page.innerText('[data-testid="my-gigs-tab"]')));
+  await page.screenshot({ path: `${OUT}/owner-services.png` });
+
+  await page.goto(`${APP}/dashboard?tab=my-businesses&lng=en`, { waitUntil: 'networkidle' });
+  await page.waitForTimeout(2000);
+  ok('owner: the business card has a "Services & photos" button', await page.locator(`[data-testid="business-services-${biz.id}"]`).count() === 1);
+  ok('owner: and an "Add a service" button', await page.locator(`[data-testid="business-add-service-${biz.id}"]`).count() === 1);
+
+  // 5. A finished setup checklist disappears. Complete every item through
+  //    the API (name, logo, about, a service, areas, hours) and reload.
+  const done = await fetch(`${API}/marketplace/businesses/${biz.id}`, { method: 'PATCH', headers: { ...auth, 'content-type': 'application/json' },
+    body: JSON.stringify({ description: 'Listing check description', areas: ['tel-aviv'], hours: 'Sun-Thu 9-17' }) });
+  ok('setup: every checklist item satisfied via the API', done.status === 200, `status ${done.status}`);
+  await page.goto(`${APP}/dashboard?tab=my-businesses&lng=en`, { waitUntil: 'networkidle' });
+  await page.waitForTimeout(2500);
+  const state = await (await fetch(`${API}/onboarding/state`, { headers: auth })).json().catch(() => null);
+  const bizList = (state?.checklists || []).find((l) => l.role === 'business');
+  ok('setup: the API reports the business checklist complete', bizList && bizList.done === bizList.total, JSON.stringify(bizList || state).slice(0, 200));
+  ok('setup: the checklist panel is gone from the dashboard', await page.locator('[data-testid="setup-checklist"]').count() === 0
+    && await page.locator('[data-testid="setup-checklist-complete"]').count() === 0);
+  await page.screenshot({ path: `${OUT}/owner-dashboard-complete.png` });
   await ctx.close();
 }
 
