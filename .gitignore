@@ -175,6 +175,7 @@ backend/private_contracts/
 !.env.example
 !backend/.env.example
 !frontend/.env.example
+!backend/tests/.env.test.example
 # Local Claude Code state: settings.local.json, launch.json, worktrees.
 # Ignored as a whole, with named exceptions below.
 #

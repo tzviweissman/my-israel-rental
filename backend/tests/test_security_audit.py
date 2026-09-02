@@ -213,7 +213,26 @@ class TestP3SecurityHeaders:
 # These are ordered by increasing "damage" (login is per-email, so cheap
 # to isolate; register/forgot are per-IP, so they will trip once and stay
 # tripped until backend restart).
+#
+# THE CONTRADICTION THIS CLASS LIVES INSIDE. The rest of the HTTP suite
+# logs in and registers hundreds of times in a few seconds, which the
+# limiter correctly reads as abuse — so a local backend has to run with
+# DISABLE_RATE_LIMIT=1 or ~200 tests error at fixture setup with 429.
+# These four tests need the opposite: a limiter that is ON. Against a
+# backend started with the flag they can only ever fail, and they did,
+# reporting "expected 429 within 11 attempts" as though the limiter were
+# broken. It was not; it was switched off on purpose.
+#
+# So: skip when the flag is set, and say so. Start the backend without
+# it to exercise this class (and expect the register cap to trip for the
+# rest of that process — that is the documented "damage" above).
+# The test process must be started with the same environment as the
+# backend for this to be visible; the flag is read here, not over HTTP.
 
+@pytest.mark.skipif(
+    os.environ.get("DISABLE_RATE_LIMIT") == "1",
+    reason="DISABLE_RATE_LIMIT=1 - the limiter is off for this run; start the backend without it to test rate limits",
+)
 class TestP3RateLimits:
     def test_login_email_rate_limit(self):
         """11th attempt on same bogus email in <5min should get 429."""

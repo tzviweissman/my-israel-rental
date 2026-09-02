@@ -23,6 +23,29 @@ TEST_RENTER2_EMAIL = os.environ.get("TEST_RENTER2_EMAIL", "")
 TEST_RENTER2_PASSWORD = os.environ.get("TEST_RENTER2_PASSWORD", "")
 TEST_API_BASE = os.environ.get("TEST_API_BASE", "http://localhost:8001/api")
 
+# ONE place decides where the backend is.
+#
+# 49 test files still resolve it themselves, at import, as
+#
+#     os.environ.get("REACT_APP_BACKEND_URL",
+#                    "https://where-am-i-project.preview.emergentagent.com")
+#
+# — a default that has pointed at nothing since the Emergent exit in July.
+# The variable lives in frontend/.env, which is not in a pytest process's
+# environment, and the "fallback" some of them carry opens
+# /app/frontend/.env, a path that only existed inside Emergent's container.
+# So whether those files found the backend depended on whether some
+# EARLIER file in the run had happened to put the variable into os.environ
+# — which is why the same test could error at fixture setup in one run
+# and pass in the next.
+#
+# conftest is imported before any test module, so seeding it here means
+# every one of those 49 files reads the value TEST_API_BASE already holds.
+# setdefault, not assignment: an explicit REACT_APP_BACKEND_URL in the
+# environment still wins, for anyone pointing the suite at staging.
+_backend_origin = TEST_API_BASE[:-len("/api")] if TEST_API_BASE.endswith("/api") else TEST_API_BASE
+os.environ.setdefault("REACT_APP_BACKEND_URL", _backend_origin)
+
 
 # ---------------------------------------------------------------------------
 # Tests that need a RUNNING backend skip instead of failing
