@@ -24,6 +24,13 @@ from pydantic import BaseModel
 from routes.deps import db, logger, verify_token
 from utils.cloud_storage import mirror_url_to_cloudinary
 from utils.dedupe import find_duplicate
+# Used in the per-row `except` below. It was NOT imported — its sibling
+# users.py imports it and this file was written against the same
+# template without the line — so the first row that failed for any reason
+# raised NameError inside the handler and the whole import 500'd, instead
+# of that one row landing in `skipped` with its reason. Four tests had
+# been failing on exactly this.
+from utils.errors import row_error
 
 from .helpers import (
     _ai_map_columns,
