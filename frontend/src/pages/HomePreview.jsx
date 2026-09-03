@@ -60,7 +60,16 @@ import '../styles/home-v2.css';
 function useLightNav() {
   useEffect(() => {
     document.body.classList.add('hv2-light-nav');
-    return () => document.body.classList.remove('hv2-light-nav');
+    // `theme-preview` is the scope for palette experiments. Tzvi's rule,
+    // 3 September, after a trial palette reached the live home page for ten
+    // minutes: a theme under test is written under `body.theme-preview` and
+    // so exists on this page and nowhere else. scripts/test-theme-scope.mjs
+    // fails the build if an experimental theme file has a rule outside it.
+    document.body.classList.add('theme-preview');
+    return () => {
+      document.body.classList.remove('hv2-light-nav');
+      document.body.classList.remove('theme-preview');
+    };
   }, []);
 }
 

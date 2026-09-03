@@ -7,11 +7,18 @@
    hour - the blue stayed. The file is kept so that seeing it again is one
    import line in App.js, not a rebuild from a description.
 
-   When it is loaded, it loads LAST and overrides theme-flow.css. Everything about the flow
-   theme that is not a colour — the white ground, the hairlines, the radii,
-   the shadows, the black-or-quiet button rule — is inherited untouched, so
-   what changes is exactly the thing being judged. To go back, delete the
-   import in App.js.
+   SCOPED TO THE PREVIEW PAGE. Every rule in this file sits under
+   `body.theme-preview`, which only /home-preview sets. That is Tzvi's rule
+   from the same evening: the first time this palette was loaded it was
+   written on `:root`, so it reached the live home page for the ten minutes
+   it was up, and a visitor saw the real site go pink. An experimental theme
+   is now invisible everywhere except the page built for judging it, and
+   scripts/test-theme-scope.mjs fails if a rule here escapes the scope.
+
+   When it is loaded, it loads LAST and overrides theme-flow.css. Everything
+   about the flow theme that is not a colour — the white ground, the
+   hairlines, the radii, the shadows, the black-or-quiet button rule — is
+   inherited untouched, so what changes is exactly the thing being judged.
 
    THE MAPPING, so nobody has to reverse-engineer it. Five colours, five
    roles:
@@ -40,9 +47,14 @@
 
    Contrast: pink #CC0066 on white is 5.4:1 — fine for text. Purple #D200E6
    on white is 3.6:1 — display sizes only, never small text; the small-text
-   accent stays pink. Blue #004D99 carries white at 9.5:1. */
+   accent stays pink. Blue #004D99 carries white at 9.5:1.
 
-:root {
+   Custom properties set on <body> inherit to everything inside it, which is
+   why scoping the tokens to `body.theme-preview` is enough: the fixed nav,
+   the footer and every component read the overridden values on this page
+   and the :root values everywhere else. */
+
+body.theme-preview {
   /* the accent */
   --brand-primary: #CC0066;
   --brand-primary-dark: #A30052;
@@ -89,41 +101,41 @@
 
 /* The wash button's hairline was the accent blue at half strength; it is the
    accent pink now, at the same strength. */
-.btn-accent,
-.btn-gold,
-.btn-accent--ink {
+body.theme-preview .btn-accent,
+body.theme-preview .btn-gold,
+body.theme-preview .btn-accent--ink {
   border-color: rgba(204, 0, 102, .45);
 }
-.btn-accent:hover,
-.btn-gold:hover,
-.btn-accent--ink:hover {
+body.theme-preview .btn-accent:hover,
+body.theme-preview .btn-gold:hover,
+body.theme-preview .btn-accent--ink:hover {
   background: rgba(255, 255, 102, 0.85);
   border-color: rgba(204, 0, 102, .7);
 }
-.b-gold { border-color: rgba(204, 0, 102, .45); }
+body.theme-preview .b-gold { border-color: rgba(204, 0, 102, .45); }
 
 /* The nav's solid pill and the finale's blue button follow the action. */
-body.hv2-light-nav .glass-pill-solid {
+body.theme-preview.hv2-light-nav .glass-pill-solid {
   background: var(--action);
   border-color: var(--action);
   box-shadow: 0 6px 18px rgba(0, 77, 153, .28);
 }
-body.hv2-light-nav .glass-pill-solid:hover { background: var(--action-hover); }
-body.hv2-light-nav .glass-pill-current {
+body.theme-preview.hv2-light-nav .glass-pill-solid:hover { background: var(--action-hover); }
+body.theme-preview.hv2-light-nav .glass-pill-current {
   background: rgba(204, 0, 102, .10);
   border-color: var(--brand-primary);
   color: var(--brand-primary);
 }
-body.hv2-light-nav .glass-pill svg { color: var(--gold-text); }
-body.hv2-light-nav .glass-dot { background: var(--brand-primary); }
+body.theme-preview.hv2-light-nav .glass-pill svg { color: var(--gold-text); }
+body.theme-preview.hv2-light-nav .glass-dot { background: var(--brand-primary); }
 
 /* The pixel fill's crest and the hero's coverflow accents come through the
    tokens already; the liquid button's glow was blue in a Tailwind class. */
-.group\/liquid {
+body.theme-preview .group\/liquid {
   border-color: rgba(204, 0, 102, .35) !important;
   box-shadow: 0 12px 32px -14px rgba(204, 0, 102, .75) !important;
 }
-.group\/liquid:hover {
+body.theme-preview .group\/liquid:hover {
   border-color: rgba(204, 0, 102, .75) !important;
   box-shadow: 0 16px 40px -12px rgba(210, 0, 230, .9) !important;
 }

@@ -36,7 +36,9 @@ function GradientText({ className, children, as: Component = "span", ...props })
       {...props}
     >
       {children}
-      <span className="pointer-events-none absolute inset-0 mix-blend-lighten">
+      {/* `gradient-breathe` fades the whole light layer in and out, so the
+          phrase goes ink → colour → ink rather than staying lit. */}
+      <span className="pointer-events-none absolute inset-0 mix-blend-lighten animate-[gradient-breathe_7s_ease-in-out_infinite] motion-reduce:animate-none motion-reduce:opacity-100">
         <span className="pointer-events-none absolute -top-1/2 h-[30vw] w-[30vw] animate-[gradient-border_6s_ease-in-out_infinite,gradient-1_12s_ease-in-out_infinite_alternate] bg-[hsl(var(--color-1))] mix-blend-overlay blur-[1rem]" />
         <span className="pointer-events-none absolute right-0 top-0 h-[30vw] w-[30vw] animate-[gradient-border_6s_ease-in-out_infinite,gradient-2_12s_ease-in-out_infinite_alternate] bg-[hsl(var(--color-2))] mix-blend-overlay blur-[1rem]" />
         <span className="pointer-events-none absolute bottom-0 left-0 h-[30vw] w-[30vw] animate-[gradient-border_6s_ease-in-out_infinite,gradient-3_12s_ease-in-out_infinite_alternate] bg-[hsl(var(--color-3))] mix-blend-overlay blur-[1rem]" />

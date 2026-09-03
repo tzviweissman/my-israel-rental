@@ -84,6 +84,15 @@ module.exports = {
           '50%': { bottom: '25%', right: '40%' },
           '90%': { bottom: '50%', right: '25%' },
         },
+        // The light behind the phrase comes and goes: the word reads as ink,
+        // fills with colour, and settles back to ink. In the reference the
+        // text is big enough that the drifting blobs leave it on their own;
+        // on a two-word phrase they never do, so the whole light layer
+        // breathes instead.
+        'gradient-breathe': {
+          '0%, 100%': { opacity: '0' },
+          '35%, 65%': { opacity: '1' },
+        },
   			'accordion-down': {
   				from: {
   					height: '0'

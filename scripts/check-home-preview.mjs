@@ -46,6 +46,11 @@ for (const lng of ['en', 'he']) {
 
   const hero = page.locator('[data-testid="home-preview-hero"]');
   ok(`${lng}: hero is on the page`, await hero.count() === 1);
+  // The scope every experimental theme is written under. If this class is
+  // missing, a scoped theme is invisible here too - and the whole point of
+  // scoping is that it shows HERE and nowhere else.
+  ok(`${lng}: the page carries the theme-preview scope`,
+    await page.evaluate(() => document.body.classList.contains('theme-preview')));
   const srcs = await hero.locator('img').evaluateAll((imgs) => imgs.map((i) => i.getAttribute('src')));
   ok(`${lng}: corridor holds 24 cards`, srcs.length === 24, `${srcs.length}`);
   // The fallback stills are exactly the generated site assets, which all live

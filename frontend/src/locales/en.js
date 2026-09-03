@@ -963,7 +963,11 @@ const en = {
           },
           picks: {
             eyebrow: 'Fresh today',
-            h2: "Today's picks",
+            // "Deals" is the heading Tzvi chose (3 Sep, reaffirmed after the
+            // honesty note). The paragraph under it describes what the cards
+            // actually are, so the body copy does not claim a discount the
+            // card may not carry.
+            h2: "Today's deals",
             p: 'A new selection every day, from everything listed on the site. Drag to browse.',
             kindStay: 'Rental',
             kindBiz: 'Local business',

@@ -81,20 +81,20 @@
   --gold-text: #0F5E8F;   /* small accent text on light */
   --gold-lg: #167AB8;     /* display accent on light */
 
-  /* The five accent colours supplied for the gradient text (3 Sep). They
-     are HSL TRIPLETS, read as `hsl(var(--color-1))`, so they follow the same
-     rule as the shadcn tokens: never write a hex into one.
+  /* The colours the gradient phrase under the hero is lit with. HSL
+     TRIPLETS, read as `hsl(var(--color-1))` - same rule as the shadcn
+     tokens: never a hex.
 
-     They light the animated phrase by the hero and nothing else yet. Making
-     them the palette for the whole site is a separate decision - they are a
-     neon set, and the page they would be repainting is the white, black and
-     one-blue theme settled this morning. Say the word and it is a swap in
-     this file. */
-  --color-1: 330 100% 40%;   /* dark neon pink */
-  --color-2: 140 100% 55%;   /* bright electric green */
-  --color-3: 210 100% 30%;   /* deep neon blue */
-  --color-4: 60 100% 70%;    /* light neon yellow */
-  --color-5: 295 100% 45%;   /* dark neon purple */
+     These are the site's own blues, not the neon set the component came
+     with. The neon five were tried as the whole palette on 3 Sep and
+     declined; leaving them here meant the one phrase kept glowing pink and
+     green on a blue page - "still has the old neon". The five are the
+     accent, its light crest, its deep end, the soft wash, and the dark. */
+  --color-1: 202 77% 47%;    /* #1C8DD4  the accent */
+  --color-2: 199 82% 59%;    /* #3FB6EE  its light crest */
+  --color-3: 205 81% 31%;    /* #0F5E8F  its deep end */
+  --color-4: 197 83% 85%;    /* the soft wash */
+  --color-5: 202 73% 41%;    /* #167AB8  the dark */
 
   /* Radii. The palette's 0.5rem, scaled up only where a card would look
      wrong at 8px. Flatter than the old 18-26px, which is most of why the
