@@ -76,6 +76,9 @@ function BuildRefresh() {
 // banners, floating buttons, ThemePreviewOverride) stays static so we
 // don't ship a spinner where the chrome should already be visible.
 const Home = lazy(() => import('./pages/Home'));
+// The proposed home overhaul, on its own route until it is approved to
+// replace `/`. Not linked from anywhere and noindexed.
+const HomePreview = lazy(() => import('./pages/HomePreview'));
 // Prefetch the top destinations users navigate to from Home during
 // idle browser time. Webpack emits `<link rel="prefetch">` for these
 // chunks, so click-through from Home feels instant while still keeping
@@ -298,6 +301,7 @@ function App() {
                 on the same hero. */}
             <Route path="/" element={<Home />} />
             <Route path="/home" element={<Navigate to="/" replace />} />
+            <Route path="/home-preview" element={<HomePreview />} />
             <Route path="/properties/:type" element={<Properties />} />
             <Route path="/property/:id" element={<PropertyDetail />} />
             <Route path="/sublease/:id" element={<SubleaseDetail />} />

@@ -1,0 +1,165 @@
+/* ── Home overhaul preview (pages/HomePreview.jsx) ─────────────────────
+   Ported from the section library (home-redesign-preview.html) onto the
+   brand tokens. Namespaced `hv2-` so nothing here can collide with the
+   cinematic page's `.finale`, `.kick` and friends, which this page reuses
+   unchanged for its ending.
+
+   Values are the tokens', not re-derived: limestone ground, white
+   surfaces, --brand-border hairlines, --gold-lg for display gold on light
+   and --gold on the dark band (the light-only gold is ~3.3:1 on dark). */
+
+.hv2 { background: var(--bg); color: var(--ink); }
+.hv2-wrap { max-width: 1180px; margin: 0 auto; padding: 0 clamp(16px, 3vw, 36px); }
+.hv2-pad { padding: clamp(56px, 7vw, 94px) 0; }
+
+/* Hero. Dark on purpose: the fixed glass nav only reads over a dark
+   photo, and the corridor's cards need a ground that is not competing
+   with them. The deep brand blue rather than black keeps it on-palette. */
+.hv2-hero {
+  /* `overflow: clip` rather than the component's `overflow: hidden`. Hidden
+     clips what is painted but the cards still count toward an ancestor's
+     scrollable area, so `body.scrollWidth` read 1753 on a 1280 viewport. The
+     app's body already has `overflow-x: clip`, so nothing ever scrolled for a
+     visitor — but a full-page screenshot is captured at that width, which
+     squeezed every section into the left three-quarters of the image and made
+     a correct page look broken. Clip contributes no scroll area at all. */
+  overflow: clip;
+  height: min(88svh, 780px);
+  min-height: 560px;
+  background:
+    radial-gradient(120% 90% at 50% 60%, rgba(30, 95, 140, .55), transparent 65%),
+    var(--brand-primary-deep, #123B57);
+  color: #fff;
+}
+.hv2-hero-scrim {
+  position: absolute; inset: 0; z-index: 1; pointer-events: none;
+  background:
+    linear-gradient(180deg, rgba(18, 59, 87, .78) 0%, rgba(18, 59, 87, 0) 34%, rgba(18, 59, 87, 0) 60%, rgba(18, 59, 87, .82) 100%);
+}
+.hv2-hero-inner {
+  position: relative; z-index: 2;
+  height: 100%;
+  display: flex; flex-direction: column; justify-content: space-between; align-items: center;
+  text-align: center;
+  padding: calc(var(--nav-h, 68px) + 28px) 20px 44px;
+}
+.hv2-hero h1 {
+  margin-top: 14px;
+  font-size: clamp(38px, 6.2vw, 78px);
+  font-weight: 500;
+  line-height: 1.02;
+  letter-spacing: -1.2px;
+  color: #fff;
+  text-shadow: 0 2px 24px rgba(0, 0, 0, .35);
+}
+.hv2-hero h1 .a { color: var(--gold); }
+.hv2-hero-foot { display: flex; flex-direction: column; align-items: center; gap: 18px; }
+.hv2-hero-foot p {
+  max-width: 520px; margin: 0;
+  font-size: 15px; color: rgba(255, 255, 255, .86);
+  text-shadow: 0 1px 12px rgba(0, 0, 0, .4);
+}
+.hv2-hero-ctas { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; }
+.hv2-hero-link {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: none; border: 0; padding: 4px 6px; cursor: pointer;
+  font: inherit; font-size: 14px; font-weight: 700; color: var(--gold);
+  text-shadow: 0 1px 10px rgba(0, 0, 0, .5);
+}
+.hv2-hero-link:hover { text-decoration: underline; }
+
+/* Doors */
+.hv2-doors-wrap { padding-bottom: 0; }
+.hv2-doors-head { text-align: center; font-size: clamp(24px, 3vw, 34px); font-weight: 500; margin-bottom: 26px; }
+.hv2-doors { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+.hv2-door {
+  display: flex; align-items: center; gap: 14px; text-align: start;
+  background: var(--surface); border: 1px solid var(--brand-border); border-radius: var(--radius-card, 18px);
+  padding: 20px 20px; cursor: pointer; font: inherit; color: var(--ink);
+  box-shadow: var(--shadow-sm);
+  transition: transform .26s var(--ease), box-shadow .26s var(--ease), border-color .2s;
+}
+.hv2-door:hover { transform: translateY(-3px); box-shadow: var(--shadow-md); border-color: var(--brand-primary); }
+.hv2-door-ic {
+  flex: none; width: 46px; height: 46px; border-radius: 14px;
+  display: grid; place-items: center;
+  background: rgba(var(--brand-primary-rgb), .10); color: var(--brand-primary);
+}
+.hv2-door-body { display: flex; flex-direction: column; gap: 3px; flex: 1; min-width: 0; }
+.hv2-door-body b { font-size: 17px; font-weight: 700; }
+.hv2-door-body small { font-size: 13px; color: var(--brand-muted); }
+.hv2-door-arw { color: var(--brand-muted); flex: none; }
+
+/* Section heads and rails */
+.hv2-eyebrow { font-size: 12px; font-weight: 800; letter-spacing: .18em; text-transform: uppercase; color: var(--gold-text); }
+.hv2-eyebrow-gold { color: var(--gold); }
+.hv2-sec-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 20px; margin-bottom: 26px; }
+.hv2-sec-head h2 { font-size: clamp(26px, 3.4vw, 40px); font-weight: 500; margin-top: 6px; }
+.hv2-sec-head p { margin-top: 8px; color: var(--brand-muted); max-width: 560px; }
+.hv2-more {
+  flex: none; display: inline-flex; align-items: center; gap: 6px;
+  background: none; border: 0; cursor: pointer; font: inherit; font-weight: 700; color: var(--brand-primary);
+}
+.hv2-more:hover { text-decoration: underline; }
+/* minmax(0, 1fr), never a bare 1fr. A bare `1fr` is minmax(auto, 1fr), so a
+   track never shrinks below its content's min-content width — and a business
+   card holding a 2000px flyer has a large one. Four such tracks blew the grid
+   past its wrapper and out of the page: cards of different widths, the last
+   one sliced off at the edge. Tailwind's own `grid-cols-4` is
+   `repeat(4, minmax(0, 1fr))` for exactly this reason, which is why the
+   services board never showed it. */
+.hv2-grid-3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px; }
+.hv2-grid-4 { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 20px 18px; }
+.hv2-empty { color: var(--brand-muted); grid-column: 1 / -1; }
+.hv2-biz-wrap { background: var(--surface); border-top: 1px solid var(--brand-border); border-bottom: 1px solid var(--brand-border); }
+
+/* How it works */
+.hv2-how { text-align: center; }
+.hv2-how h2 { font-size: clamp(26px, 3.4vw, 38px); font-weight: 500; margin-top: 8px; }
+.hv2-how-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 28px; margin-top: 36px; text-align: start; }
+.hv2-how-col {
+  background: var(--surface); border: 1px solid var(--brand-border); border-radius: var(--radius-card, 18px);
+  padding: 26px 26px 10px;
+}
+.hv2-how-col h3 { font-size: 21px; font-weight: 600; margin-bottom: 14px; color: var(--brand-primary-deep, #123B57); }
+.hv2-step { display: flex; gap: 14px; padding: 12px 0 16px; border-top: 1px solid var(--brand-border); }
+.hv2-num {
+  flex: none; width: 32px; height: 32px; border-radius: 50%;
+  display: grid; place-items: center;
+  background: var(--brand-primary); color: #fff; font-weight: 800; font-size: 14px;
+}
+.hv2-step h4 { font-size: 16px; font-weight: 700; font-family: var(--font-body); }
+.hv2-step p { margin-top: 4px; color: var(--brand-muted); font-size: 14px; }
+
+/* Supply band — the one dark surface between hero and finale */
+.hv2-band {
+  display: grid; grid-template-columns: 1.2fr 1fr; gap: 36px; align-items: center;
+  background: var(--brand-primary-deep, #123B57); color: #fff;
+  border-radius: var(--radius-hero, 28px); padding: clamp(28px, 4vw, 52px);
+  box-shadow: var(--shadow-lg);
+}
+.hv2-band h2 { font-size: clamp(26px, 3.4vw, 40px); font-weight: 500; margin-top: 10px; color: #fff; }
+.hv2-band p { margin-top: 12px; color: rgba(255, 255, 255, .82); max-width: 520px; }
+.hv2-cta-row { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 24px; }
+.hv2-facts { display: flex; flex-direction: column; gap: 12px; }
+.hv2-fact {
+  display: flex; flex-direction: column; gap: 3px;
+  background: rgba(255, 255, 255, .08); border: 1px solid rgba(255, 255, 255, .16);
+  border-radius: 14px; padding: 14px 16px;
+}
+.hv2-fact b { font-size: 15px; }
+.hv2-fact small { font-size: 13px; color: rgba(255, 255, 255, .78); }
+
+@media (max-width: 900px) {
+  .hv2-doors { grid-template-columns: 1fr; }
+  .hv2-grid-3 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .hv2-grid-4 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .hv2-how-cols { grid-template-columns: 1fr; }
+  .hv2-band { grid-template-columns: 1fr; }
+}
+@media (max-width: 560px) {
+  .hv2-hero { height: min(92svh, 720px); }
+  .hv2-hero-inner { padding-bottom: 32px; }
+  .hv2-grid-3 { grid-template-columns: minmax(0, 1fr); }
+  .hv2-sec-head { flex-direction: column; align-items: flex-start; }
+}

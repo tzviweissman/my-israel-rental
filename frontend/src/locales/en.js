@@ -931,6 +931,61 @@ const en = {
         // every string in that section was reaching the English default and
         // the whole ending rendered in English under Hebrew. Adding them is
         // a fix, not a feature.
+        // Home overhaul preview (pages/HomePreview.jsx, route /home-preview).
+        v2: {
+          hero: {
+            kick: 'Rentals · Businesses · Requests',
+            sub: 'Every card behind this text is a real listing or business on the site right now.',
+            ctaBusinesses: 'Find a business',
+            ctaAdd: 'Add your business — free',
+          },
+          doors: {
+            h2: 'Start your search',
+            stays: { title: 'Find a place to stay', sub: 'Long-term, short-term and vacation rentals' },
+            businesses: { title: 'Find a local business', sub: 'Cleaners, movers, caterers, tutors and more' },
+            requests: { title: 'Post what you need', sub: 'Owners and businesses reply to you' },
+          },
+          rentals: {
+            eyebrow: 'Handpicked',
+            h2: 'Featured rentals',
+            p: 'Live listings, posted by the people who hold the keys.',
+            more: 'See all stays',
+            empty: 'New listings are on their way.',
+          },
+          biz: {
+            eyebrow: 'Local businesses',
+            h2: 'The people who help you settle in',
+            p: 'Cleaners, movers, caterers, tutors and more — message them directly, no booking fees.',
+            more: 'See all businesses',
+          },
+          how: {
+            eyebrow: 'Simple & direct',
+            h2: 'How MyIsraelRental works',
+            rent: {
+              title: 'Renting a place',
+              s1: { h: 'Search & filter', p: 'Pick your area, dates and budget. Every listing is posted by the owner or their agent.' },
+              s2: { h: 'Message directly', p: 'Chat with the person who holds the keys — no middleman, no service fee from us.' },
+              s3: { h: 'Sign & move in', p: 'Review and sign your rental contract digitally, in English or Hebrew.' },
+            },
+            hire: {
+              title: 'Hiring a business',
+              s1: { h: 'Browse or post', p: 'Browse businesses by category and area, or post a request and let them come to you.' },
+              s2: { h: 'Compare & choose', p: 'See reviews, photos and what each business offers before you commit.' },
+              s3: { h: 'Book & done', p: 'Agree the details in chat or on WhatsApp. No booking fees on either side.' },
+            },
+          },
+          supply: {
+            eyebrow: 'For businesses & property owners',
+            h2: 'Add your business — free',
+            p: 'Free to list, free to be found, no commission. Have a place to rent? List it the same way.',
+            ctaBiz: 'Add your business',
+            ctaStay: 'List a place',
+            free: { h: '₪0 to list', p: 'Photos, prices and hours in minutes.' },
+            leads: { h: 'Direct leads', p: 'Customers and renters message you directly — you own the relationship.' },
+            tools: { h: 'Tools included', p: 'Your own business page, digital contracts, calendar sync, WhatsApp and email.' },
+          },
+        },
+
         finale: {
           h2: 'Rent a home. Hire the pros.',
           accent: 'One place for both.',
