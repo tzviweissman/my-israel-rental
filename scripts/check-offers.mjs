@@ -74,7 +74,8 @@ const colours = await badge.evaluate((el) => {
   const cs = getComputedStyle(el);
   return { bg: cs.backgroundColor, fg: cs.color };
 });
-ok('the badge is the accent wash with ink text', colours.bg === 'rgba(36, 175, 235, 0.33)' && colours.fg === 'rgb(17, 24, 39)', JSON.stringify(colours));
+const wash = await page.evaluate(() => { const s = document.createElement('span'); s.style.background = 'var(--accent-soft)'; document.body.appendChild(s); const c = getComputedStyle(s).backgroundColor; s.remove(); return c; });
+ok('the badge is the theme\'s accent wash with ink text', colours.bg === wash && colours.fg === 'rgb(17, 24, 39)', JSON.stringify({ ...colours, wash }));
 
 // ---- the services board card carries the chip ----
 await page.goto(`${APP}/businesses?q=${encodeURIComponent(title)}`, { waitUntil: 'networkidle' });

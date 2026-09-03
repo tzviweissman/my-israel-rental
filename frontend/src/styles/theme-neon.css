@@ -1,0 +1,125 @@
+/* ── Neon theme (3 September 2026, evening) ──────────────────────────────
+   Tzvi: "swap the colors, I want to see it." The five colours supplied with
+   the gradient-text component, promoted from lighting one phrase to being
+   the palette of the whole site.
+
+   This loads LAST and overrides theme-flow.css. Everything about the flow
+   theme that is not a colour — the white ground, the hairlines, the radii,
+   the shadows, the black-or-quiet button rule — is inherited untouched, so
+   what changes is exactly the thing being judged. To go back, delete the
+   import in App.js.
+
+   THE MAPPING, so nobody has to reverse-engineer it. Five colours, five
+   roles:
+
+     color-1  dark neon pink    #CC0066   the accent — links, icons, chips,
+                                          the lit word in the headline, and
+                                          everything the old --gold names hold
+     color-5  dark neon purple  #D200E6   the deep end of the accent — the
+                                          bottom of every gradient, hover
+     color-3  deep neon blue    #004D99   solid actions. The flow theme's
+                                          actions are black; here they take
+                                          the palette's one dark colour, or
+                                          the page would show none of it on
+                                          the thing it most wants pressed
+     color-4  light neon yellow #FFFF66   the soft wash behind chips and the
+                                          quiet button, with ink on it
+     color-2  electric green    #1AFF66   NOT used for chrome. Green stays
+                                          functional on this site (status,
+                                          verified, available). It lights the
+                                          gradient phrase and nothing else.
+
+   The pink is the lead because it is the first of the five and the one the
+   set is built around; the yellow is the wash because it is the only one
+   light enough to sit under ink; the blue is the action because it is the
+   only one dark enough to carry white.
+
+   Contrast: pink #CC0066 on white is 5.4:1 — fine for text. Purple #D200E6
+   on white is 3.6:1 — display sizes only, never small text; the small-text
+   accent stays pink. Blue #004D99 carries white at 9.5:1. */
+
+:root {
+  /* the accent */
+  --brand-primary: #CC0066;
+  --brand-primary-dark: #A30052;
+  --brand-primary-deep: #D200E6;
+  --brand-primary-rgb: 204 0 102;
+  --teal: #CC0066;
+  --teal-dark: #A30052;
+  --teal-deep: #D200E6;
+
+  /* the historical accent names — see theme-flow.css for why they exist */
+  --gold: #CC0066;
+  --gold-rgb: 204 0 102;
+  --gold-text: #A30052;
+  --gold-lg: #CC0066;
+  --gold-text-on-light: #A30052;
+
+  /* the wash */
+  --accent-soft: rgba(255, 255, 102, 0.55);
+  --accent-soft-ink: #111827;
+
+  /* solid actions */
+  --action: #004D99;
+  --action-ink: #FFFFFF;
+  --action-hover: #003D7A;
+
+  /* the two animated buttons read their gradients from here rather than
+     from hardcoded hex, so a palette swap reaches them too */
+  --liquid-a: #FF4DA6;
+  --liquid-b: #CC0066;
+  --liquid-c: #D200E6;
+  --sweep-a: #FF4DA6;
+  --sweep-b: #CC0066;
+  --sweep-dot: #FFFFFF;
+
+  /* shadcn's own tokens, as HSL TRIPLETS — never hex, see index.css */
+  --primary: 210 100% 30%;
+  --primary-foreground: 0 0% 100%;
+  --secondary: 330 100% 40%;
+  --secondary-foreground: 0 0% 100%;
+  --accent: 60 100% 85%;
+  --accent-foreground: 220 39% 11%;
+  --ring: 330 100% 40%;
+}
+
+/* The wash button's hairline was the accent blue at half strength; it is the
+   accent pink now, at the same strength. */
+.btn-accent,
+.btn-gold,
+.btn-accent--ink {
+  border-color: rgba(204, 0, 102, .45);
+}
+.btn-accent:hover,
+.btn-gold:hover,
+.btn-accent--ink:hover {
+  background: rgba(255, 255, 102, 0.85);
+  border-color: rgba(204, 0, 102, .7);
+}
+.b-gold { border-color: rgba(204, 0, 102, .45); }
+
+/* The nav's solid pill and the finale's blue button follow the action. */
+body.hv2-light-nav .glass-pill-solid {
+  background: var(--action);
+  border-color: var(--action);
+  box-shadow: 0 6px 18px rgba(0, 77, 153, .28);
+}
+body.hv2-light-nav .glass-pill-solid:hover { background: var(--action-hover); }
+body.hv2-light-nav .glass-pill-current {
+  background: rgba(204, 0, 102, .10);
+  border-color: var(--brand-primary);
+  color: var(--brand-primary);
+}
+body.hv2-light-nav .glass-pill svg { color: var(--gold-text); }
+body.hv2-light-nav .glass-dot { background: var(--brand-primary); }
+
+/* The pixel fill's crest and the hero's coverflow accents come through the
+   tokens already; the liquid button's glow was blue in a Tailwind class. */
+.group\/liquid {
+  border-color: rgba(204, 0, 102, .35) !important;
+  box-shadow: 0 12px 32px -14px rgba(204, 0, 102, .75) !important;
+}
+.group\/liquid:hover {
+  border-color: rgba(204, 0, 102, .75) !important;
+  box-shadow: 0 16px 40px -12px rgba(210, 0, 230, .9) !important;
+}

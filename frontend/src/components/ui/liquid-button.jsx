@@ -5,9 +5,11 @@
  * Ported from a TypeScript source (this project is CRA + JavaScript). No
  * dependencies at all.
  *
- * COLOURS: the source is cyan-on-slate. The slab is this theme's solid
- * action — black — and the liquid is the accent blue, light at its crest
- * and deep at its base. Nothing else changed: the two counter-rotating
+ * COLOURS: the source is cyan-on-slate. The slab is the theme's solid
+ * action and the liquid is the accent, light at its crest and deep at its
+ * base — both read from CSS variables (`--action`, `--liquid-a/b/c`) with
+ * the flow theme's blues as fallbacks, so a palette swap reaches this
+ * button without anyone editing a Tailwind class. Nothing else changed: the two counter-rotating
  * wave discs, the rising bubbles and the hairline along the top are the
  * author's.
  *
@@ -44,7 +46,7 @@ function LiquidButton({ children, className = "", type = "button", ...props }) {
       >
         <span
           aria-hidden="true"
-          className="absolute -inset-x-1/4 top-[96%] z-0 h-[190%] bg-gradient-to-b from-[#3FB6EE] via-[#1C8DD4] to-[#0F5E8F] transition-transform duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover/liquid:-translate-y-[58%] group-focus-visible/liquid:-translate-y-[58%] group-disabled/liquid:translate-y-0 motion-reduce:transition-none"
+          className="absolute -inset-x-1/4 top-[96%] z-0 h-[190%] bg-gradient-to-b from-[var(--liquid-a,#3FB6EE)] via-[var(--liquid-b,#1C8DD4)] to-[var(--liquid-c,#0F5E8F)] transition-transform duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover/liquid:-translate-y-[58%] group-focus-visible/liquid:-translate-y-[58%] group-disabled/liquid:translate-y-0 motion-reduce:transition-none"
         >
           {/* Two discs turning against each other are what make the surface
               roll rather than simply rise. */}

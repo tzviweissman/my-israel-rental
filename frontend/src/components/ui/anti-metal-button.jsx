@@ -87,9 +87,11 @@ export const AntiMetalButton = React.forwardRef(
       className,
       children,
       label,
-      accentFrom = "#3FB6EE",
-      accentTo = "#1C8DD4",
-      dotColor = "#FFFFFF",
+      // Read from the theme so a palette swap reaches the sweep. The flow
+      // theme's blues are the fallbacks.
+      accentFrom = "var(--sweep-a, #3FB6EE)",
+      accentTo = "var(--sweep-b, #1C8DD4)",
+      dotColor = "var(--sweep-dot, #FFFFFF)",
       ...props
     },
     ref,
@@ -101,7 +103,7 @@ export const AntiMetalButton = React.forwardRef(
         ref={ref}
         className={cn(
           "group/btn relative inline-flex h-11 w-36 overflow-hidden rounded-xl transition-transform active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background",
-          "bg-[linear-gradient(180deg,#111827_0%,#000000_100%)] shadow-[inset_0_1px_0_rgba(255,255,255,0.14),0_4px_12px_rgba(0,0,0,0.18)]",
+          "bg-[linear-gradient(180deg,var(--action-hover,#111827)_0%,var(--action,#000000)_100%)] shadow-[inset_0_1px_0_rgba(255,255,255,0.14),0_4px_12px_rgba(0,0,0,0.18)]",
           className,
         )}
         {...props}

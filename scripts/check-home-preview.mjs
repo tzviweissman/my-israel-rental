@@ -393,12 +393,17 @@ for (const lng of ['en', 'he']) {
     // returns null and fails a button that is the right colour.
     return { bg: cs.backgroundImage, dot: getComputedStyle(el.querySelector('circle')).fill };
   });
-  // Site colours, not the source component's lime and near-black: the sweep
-  // takes the accent and the dots have to be visible on it.
-  ok(`${lng}: the button's sweep is the accent, not the source's lime`,
-    /28, 141, 212|63, 182, 238/.test(sweep.bg) && !/214, 245, 74/.test(sweep.bg), sweep.bg.slice(0, 90));
+  // Theme colours, not the source component's lime and near-black. The
+  // palette is read from the page rather than hardcoded here, so the check
+  // follows a theme swap instead of failing every working button on one.
+  const sweepColour = (sweep.bg.match(/rgba?\([^)]+\)/g) || []).pop() || '';
+  const accentVar = await page.evaluate(() => getComputedStyle(document.documentElement).getPropertyValue('--sweep-b').trim() || getComputedStyle(document.documentElement).getPropertyValue('--brand-primary').trim());
+  const accentRgb = await page.evaluate((hex) => { const s = document.createElement('span'); s.style.color = hex; document.body.appendChild(s); const c = getComputedStyle(s).color; s.remove(); return c; }, accentVar);
+  ok(`${lng}: the button's sweep is the theme's accent, not the source's lime`,
+    !/214, 245, 74/.test(sweep.bg) && sweepColour.replace(/\s/g, '') === accentRgb.replace(/\s/g, ''),
+    `${sweepColour} vs ${accentRgb}`);
   ok(`${lng}: its dots read against the sweep`,
-    contrast(sweep.dot, 'rgb(28,141,212)') >= 3, `${contrast(sweep.dot, 'rgb(28,141,212)').toFixed(2)}:1 ${sweep.dot}`);
+    contrast(sweep.dot, sweepColour) >= 3, `${contrast(sweep.dot, sweepColour).toFixed(2)}:1 ${sweep.dot}`);
   // Hovered, the gold panel covers the whole button. The label has to still be
   // there and still be readable — in the source it is wiped out by the sweep,
   // leaving a blank button at the moment of the click.
@@ -410,8 +415,8 @@ for (const lng of ['en', 'he']) {
   });
   ok(`${lng}: the label survives the hover sweep`, hovered.text.length > 1, hovered.text);
   ok(`${lng}: and still reads against the sweep under it`,
-    contrast(hovered.color, 'rgb(28,141,212)') >= 3,
-    `${contrast(hovered.color, 'rgb(28,141,212)').toFixed(2)}:1 ${hovered.color}`);
+    contrast(hovered.color, sweepColour) >= 3,
+    `${contrast(hovered.color, sweepColour).toFixed(2)}:1 ${hovered.color}`);
 
   const h1 = page.locator('[data-testid="home-preview-hero"] h1');
   const font = await h1.evaluate((el) => getComputedStyle(el).fontFamily);
