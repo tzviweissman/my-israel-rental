@@ -240,7 +240,14 @@ for (const lng of ['en', 'he']) {
     return { top: r.top + window.scrollY, height: r.height };
   });
   const sample = async (fraction) => {
+    // Forget the previous sample's reading first. `lastSeen` survived from
+    // one sample to the next, so the first poll after the scroll - before the
+    // page had even processed it - matched the stale value and the wait
+    // returned at once: against production that read 0.74 for a section
+    // that reaches 1, on whichever language ran slower that time.
+    await page.evaluate(() => { delete document.querySelector('[data-testid="pixel-text-fill"]')?.dataset.lastSeen; });
     await page.evaluate((y) => window.scrollTo(0, y), commBox.top + commBox.height * fraction);
+    await page.waitForTimeout(500);
     // The fill chases its target by 18% a frame. Wait until it stops moving
     // rather than a fixed delay: under load a fixed delay catches it at
     // 0.88 on its way to 1 and calls a working section unfinished.
