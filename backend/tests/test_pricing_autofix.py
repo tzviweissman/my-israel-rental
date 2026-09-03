@@ -2,6 +2,16 @@
 from __future__ import annotations
 
 import os
+from pathlib import Path
+
+from dotenv import load_dotenv
+
+# The seed writes straight to Mongo and the assertions read the API, so
+# both MUST point at the same database. Without this the defaults below
+# ("test_database") only matched the server's DB_NAME when some earlier
+# test module happened to have loaded backend/.env first - which is why
+# the totals read 0 in one run and 26 in the next.
+load_dotenv(Path(__file__).resolve().parents[1] / ".env")
 import uuid
 from datetime import datetime, timezone
 
@@ -107,10 +117,14 @@ class TestPricingAutofix:
         assert r.status_code == 200, r.text
         data = r.json()
         totals = data["totals"]
-        assert totals["stripped_nightly"] == 1, totals
-        assert totals["quarantined_low_monthly"] == 1, totals
-        assert totals["quarantined_zero_price"] == 1, totals
-        assert totals["total_fixed"] == 3, totals
+        assert totals["stripped_nightly"] >= 1, totals
+        assert totals["quarantined_low_monthly"] >= 1, totals
+        assert totals["quarantined_zero_price"] >= 1, totals
+        # The autofix runs over EVERY property in the database, not just the
+        # three this test seeds, so exact totals depend on whatever else is
+        # there (13 zero-price rows locally). The seeded rows are asserted
+        # individually below; here only that each bucket saw at least ours.
+        assert totals["total_fixed"] >= 3, totals
 
         # verify db state
         wrong = mongo.properties.find_one({"id": seeded_props["wrong"]})

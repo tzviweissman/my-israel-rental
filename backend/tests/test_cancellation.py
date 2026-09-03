@@ -23,6 +23,23 @@ from conftest import (
 )
 
 
+# Booking dates are computed, not written down. The literals this file
+# carried ("2026-03-01" ...) are in the past now, and every run booked the
+# same windows on the same property, so the second run collided with the
+# first: "These dates overlap an existing booking". Each run picks a base
+# date 1-50 years out and each test takes its own month after it.
+import random as _random
+from datetime import date as _date, timedelta as _td
+
+_RUN_BASE = _date.today() + _td(days=365 + _random.randint(0, 18000))
+
+
+def _window(month_index: int, nights: int = 4) -> tuple[str, str]:
+    start = _RUN_BASE + _td(days=31 * month_index)
+    return start.isoformat(), (start + _td(days=nights)).isoformat()
+
+
+
 class TestCancellationWorkflow:
     """Test booking cancellation workflow"""
     
@@ -92,7 +109,9 @@ class TestCancellationWorkflow:
             "bedrooms": 2,
             "bathrooms": 1,
             "area": "Tel Aviv",
-            "address": "123 Test Street",
+            # Unique per run: the duplicate-listing guard keys on address +
+            # rental type, so a fixed address collided with the previous run.
+            "address": f"123 Test Street {uuid.uuid4().hex[:6]}",
             "nightly_price": 150,
             "currency": "USD",
             "cancellation_policy": "moderate",
@@ -135,8 +154,8 @@ class TestCancellationWorkflow:
         # Create booking WITHOUT guest_count (should work)
         booking_data = {
             "property_id": property_id,
-            "start_date": "2026-03-01",
-            "end_date": "2026-03-05",
+            "start_date": _window(1)[0],
+            "end_date": _window(1)[1],
             "message": "Test booking for cancellation testing"
         }
         
@@ -167,8 +186,8 @@ class TestCancellationWorkflow:
         
         booking_data = {
             "property_id": property_id,
-            "start_date": "2026-04-01",
-            "end_date": "2026-04-05",
+            "start_date": _window(2)[0],
+            "end_date": _window(2)[1],
             "message": "Test booking for renter cancellation request"
         }
         
@@ -227,8 +246,8 @@ class TestCancellationWorkflow:
         # Create booking as renter
         booking_data = {
             "property_id": property_id,
-            "start_date": "2026-05-01",
-            "end_date": "2026-05-05",
+            "start_date": _window(3)[0],
+            "end_date": _window(3)[1],
             "message": "Test booking for approve cancellation"
         }
         
@@ -290,8 +309,8 @@ class TestCancellationWorkflow:
         # Create booking as renter
         booking_data = {
             "property_id": property_id,
-            "start_date": "2026-06-01",
-            "end_date": "2026-06-05",
+            "start_date": _window(4)[0],
+            "end_date": _window(4)[1],
             "message": "Test booking for deny cancellation"
         }
         
@@ -357,8 +376,8 @@ class TestCancellationWorkflow:
         # Create booking as renter
         booking_data = {
             "property_id": property_id,
-            "start_date": "2026-07-01",
-            "end_date": "2026-07-05",
+            "start_date": _window(5)[0],
+            "end_date": _window(5)[1],
             "message": "Test booking for owner direct cancel"
         }
         
@@ -406,8 +425,8 @@ class TestCancellationWorkflow:
         # Create booking
         booking_data = {
             "property_id": property_id,
-            "start_date": "2026-08-01",
-            "end_date": "2026-08-05",
+            "start_date": _window(6)[0],
+            "end_date": _window(6)[1],
             "message": "Test booking for renter direct cancel attempt"
         }
         
@@ -492,8 +511,8 @@ class TestBookingWithoutGuestCount:
         # Create booking with minimal fields (no guest_count)
         booking_data = {
             "property_id": property_id,
-            "start_date": "2026-09-01",
-            "end_date": "2026-09-05"
+            "start_date": _window(7)[0],
+            "end_date": _window(7)[1]
         }
         
         response = session.post(

@@ -38,6 +38,25 @@ def _login(creds: dict[str, str]) -> str:
     return tok
 
 
+_RENTER_ID_CACHE: dict = {}
+
+
+def _renter_id() -> str:
+    """The seeded renter's user id, looked up rather than hardcoded.
+
+    Three tests carried the literal id of renter@test.com from the
+    Emergent-era database. Every other environment gives that account a
+    different id, so the signed tokens named a user that did not exist
+    and the API answered "This link is no longer valid" - which read as a
+    broken deep link. It was a stale constant."""
+    if "id" not in _RENTER_ID_CACHE:
+        tok = _login(RENTER)
+        me = requests.get(f"{BASE_URL}/api/auth/me", headers={"Authorization": f"Bearer {tok}"}, timeout=15)
+        assert me.status_code == 200, me.text
+        _RENTER_ID_CACHE["id"] = me.json()["id"]
+    return _RENTER_ID_CACHE["id"]
+
+
 @pytest.fixture(scope="module")
 def renter_token() -> str:
     return _login(RENTER)
@@ -137,7 +156,7 @@ class TestSnoozeConsume:
     def test_valid_token_applies_snooze(self):
         from utils.notification_tokens import create_snooze_token
         # renter user_id from problem statement
-        user_id = "e4d3695f-6090-4499-9912-9d253d3115a4"
+        user_id = _renter_id()
         token = create_snooze_token(user_id, "transportation")
         r = requests.post(
             f"{BASE_URL}/api/marketplace/notification-preferences/snooze-consume",
@@ -158,7 +177,7 @@ class TestSnoozeConsume:
 
     def test_wrong_purpose_token_400(self):
         from utils.notification_tokens import create_deeplink_token
-        user_id = "e4d3695f-6090-4499-9912-9d253d3115a4"
+        user_id = _renter_id()
         tok = create_deeplink_token(user_id, "some-job")
         r = requests.post(
             f"{BASE_URL}/api/marketplace/notification-preferences/snooze-consume",
@@ -173,7 +192,7 @@ class TestSnoozeConsume:
 class TestDeeplinkConsume:
     def test_valid_deeplink_returns_session_and_works(self):
         from utils.notification_tokens import create_deeplink_token
-        user_id = "e4d3695f-6090-4499-9912-9d253d3115a4"
+        user_id = _renter_id()
         job_id = "test-job-id-abc123"
         token = create_deeplink_token(user_id, job_id)
         r = requests.post(
@@ -203,7 +222,7 @@ class TestDeeplinkConsume:
 
     def test_wrong_purpose_400(self):
         from utils.notification_tokens import create_snooze_token
-        tok = create_snooze_token("e4d3695f-6090-4499-9912-9d253d3115a4", "home-services-repair")
+        tok = create_snooze_token(_renter_id(), "home-services-repair")
         r = requests.post(
             f"{BASE_URL}/api/auth/deeplink-consume",
             json={"token": tok}, timeout=15,
@@ -247,14 +266,14 @@ class TestInstantEmailPath:
             client = AsyncIOMotorClient(os.environ.get("MONGO_URL", "mongodb://localhost:27017"))
             db = client[os.environ.get("DB_NAME", "test_database")]
             existing = await db.marketplace_gigs.find_one({
-                "provider_user_id": "e4d3695f-6090-4499-9912-9d253d3115a4",
+                "provider_user_id": _renter_id(),
                 "category": "home-services-repair",
                 "status": "published",
             })
             if not existing:
                 await db.marketplace_gigs.insert_one({
                     "_id": str(uuid.uuid4()),
-                    "provider_user_id": "e4d3695f-6090-4499-9912-9d253d3115a4",
+                    "provider_user_id": _renter_id(),
                     "category": "home-services-repair",
                     "status": "published",
                     "title": "TEST_ home repair gig",
@@ -266,7 +285,7 @@ class TestInstantEmailPath:
                 })
             # also ensure no active snoozes for home-repair
             await db.job_notification_preferences.update_one(
-                {"user_id": "e4d3695f-6090-4499-9912-9d253d3115a4"},
+                {"user_id": _renter_id()},
                 {"$set": {"snoozed_categories": []}}, upsert=True,
             )
         asyncio.run(_do())
@@ -307,7 +326,7 @@ class TestInstantEmailPath:
             client = AsyncIOMotorClient(os.environ.get("MONGO_URL", "mongodb://localhost:27017"))
             db = client[os.environ.get("DB_NAME", "test_database")]
             await db.job_notification_preferences.update_one(
-                {"user_id": "e4d3695f-6090-4499-9912-9d253d3115a4"},
+                {"user_id": _renter_id()},
                 {"$set": {"snoozed_categories": []}}, upsert=True,
             )
         asyncio.run(_do())

@@ -13,6 +13,13 @@ import time
 from unittest.mock import AsyncMock, patch
 
 from routes import admin_import
+# The names are patched on the MODULES that read them. `routes.admin_import`
+# re-exports db / mirror_url_to_cloudinary / find_duplicate / send_email for
+# convenience, but the import code binds them in `.properties` (and
+# send_email in `.helpers`) at import time - patching the package attribute
+# swapped a copy nobody reads, so the real Cloudinary mirror and the real
+# duplicate check ran and every assertion here counted zero.
+from routes.admin_import import helpers as helpers_mod, properties as props_mod
 
 
 def test_commit_returns_fast_with_mirror_enabled():
@@ -72,11 +79,11 @@ async def _run_test_commit_returns_fast():
         csv_text=csv_text, column_map=column_map, mirror_images=True,
     )
 
-    with patch.object(admin_import, "db", fake_db), \
-         patch.object(admin_import, "mirror_url_to_cloudinary", slow_mirror), \
+    with patch.object(props_mod, "db", fake_db), \
+         patch.object(props_mod, "mirror_url_to_cloudinary", slow_mirror), \
          patch("utils.cloud_storage.CLOUDINARY_ENABLED", True), \
-         patch.object(admin_import, "find_duplicate", AsyncMock(return_value=None)), \
-         patch.object(admin_import, "send_email", AsyncMock(return_value=None)):
+         patch.object(props_mod, "find_duplicate", AsyncMock(return_value=None)), \
+         patch.object(helpers_mod, "send_email", AsyncMock(return_value=None)):
         t0 = time.time()
         res = await admin_import.commit_property_import(req, payload={"role": "admin"})
         elapsed = time.time() - t0

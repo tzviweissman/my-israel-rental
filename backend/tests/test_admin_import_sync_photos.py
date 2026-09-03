@@ -14,6 +14,13 @@ import time
 from unittest.mock import AsyncMock, patch
 
 from routes import admin_import
+# The names are patched on the MODULES that read them. `routes.admin_import`
+# re-exports db / mirror_url_to_cloudinary / find_duplicate / send_email for
+# convenience, but the import code binds them in `.properties` (and
+# send_email in `.helpers`) at import time - patching the package attribute
+# swapped a copy nobody reads, so the real Cloudinary mirror and the real
+# duplicate check ran and every assertion here counted zero.
+from routes.admin_import import helpers as helpers_mod, properties as props_mod
 
 
 def test_sync_photos_updates_existing_listings():
@@ -82,9 +89,9 @@ async def _run_sync_test():
     async def fake_find_dup(*args, **kwargs):
         return existing_doc
 
-    with patch.object(admin_import, "db", fake_db), \
-         patch.object(admin_import, "find_duplicate", fake_find_dup), \
-         patch.object(admin_import, "send_email", AsyncMock(return_value=None)), \
+    with patch.object(props_mod, "db", fake_db), \
+         patch.object(props_mod, "find_duplicate", fake_find_dup), \
+         patch.object(helpers_mod, "send_email", AsyncMock(return_value=None)), \
          patch("utils.cloud_storage.CLOUDINARY_ENABLED", False):
         res = await admin_import.commit_property_import(req, payload={"role": "admin"})
 
@@ -164,9 +171,9 @@ async def _run_skip_test():
     async def fake_find_dup(*args, **kwargs):
         return existing_doc
 
-    with patch.object(admin_import, "db", fake_db), \
-         patch.object(admin_import, "find_duplicate", fake_find_dup), \
-         patch.object(admin_import, "send_email", AsyncMock(return_value=None)), \
+    with patch.object(props_mod, "db", fake_db), \
+         patch.object(props_mod, "find_duplicate", fake_find_dup), \
+         patch.object(helpers_mod, "send_email", AsyncMock(return_value=None)), \
          patch("utils.cloud_storage.CLOUDINARY_ENABLED", False):
         res = await admin_import.commit_property_import(req, payload={"role": "admin"})
 
@@ -228,9 +235,9 @@ async def _run_default_test():
     async def fake_find_dup(*args, **kwargs):
         return existing_doc
 
-    with patch.object(admin_import, "db", fake_db), \
-         patch.object(admin_import, "find_duplicate", fake_find_dup), \
-         patch.object(admin_import, "send_email", AsyncMock(return_value=None)), \
+    with patch.object(props_mod, "db", fake_db), \
+         patch.object(props_mod, "find_duplicate", fake_find_dup), \
+         patch.object(helpers_mod, "send_email", AsyncMock(return_value=None)), \
          patch("utils.cloud_storage.CLOUDINARY_ENABLED", False):
         res = await admin_import.commit_property_import(req, payload={"role": "admin"})
 

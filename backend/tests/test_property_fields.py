@@ -402,8 +402,17 @@ class TestPropertyListWithNewFields:
     """Test GET /api/properties returns properties with all new fields"""
     
     def test_list_properties_includes_new_fields(self):
-        """Verify newly created properties have new fields in list response"""
-        response = requests.get(f"{BASE_URL}/api/properties")
+        """Verify newly created properties have new fields in the OWNER'S list.
+
+        The public list is a lean card projection on purpose (id, title,
+        price, one image, area); the full document - amenities, condition,
+        agent fee - comes back on the owner-scoped list the dashboard edits
+        from. This asserted the rich shape against the lean one."""
+        login = requests.post(f"{BASE_URL}/api/auth/login", json={"email": OWNER_EMAIL, "password": OWNER_PASSWORD})
+        assert login.status_code == 200, login.text
+        token = login.json()["token"]
+        me = requests.get(f"{BASE_URL}/api/auth/me", headers={"Authorization": f"Bearer {token}"}).json()
+        response = requests.get(f"{BASE_URL}/api/properties", params={"owner_id": me["id"]})
         
         assert response.status_code == 200, f"GET failed: {response.text}"
         

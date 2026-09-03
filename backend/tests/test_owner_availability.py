@@ -54,8 +54,18 @@ def test_owner_availability_unauthenticated():
 
 
 def test_preview_merge_stacked_route_removed():
-    """Direct GET to /preview/merge/stacked should fall through to catch-all (200 with SPA index html)."""
-    r = requests.get(f"{BASE_URL}/preview/merge/stacked", timeout=20, allow_redirects=True)
+    """Direct GET to /preview/merge/stacked should fall through to catch-all (200 with SPA index html).
+
+    This is a FRONTEND path. It was fetched from BASE_URL, which is the API
+    server, where it is a 404 by construction; on Emergent both were one
+    origin. The SPA is at FRONTEND_URL (default :3000); skipped when
+    nothing is serving it."""
+    front = os.environ.get("FRONTEND_URL", "http://localhost:3000").rstrip("/")
+    try:
+        requests.get(front, timeout=3)
+    except requests.exceptions.RequestException:
+        pytest.skip(f"no frontend at {front} - set FRONTEND_URL or start the build server")
+    r = requests.get(f"{front}/preview/merge/stacked", timeout=20, allow_redirects=True)
     # SPA serves index.html; route on FE side no longer exists so it falls into NotFound/home.
     # We assert it doesn't render the legacy preview page (no "MergePreview" marker).
     assert r.status_code == 200

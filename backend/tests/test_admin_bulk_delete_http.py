@@ -13,6 +13,8 @@ import sys
 from pathlib import Path
 
 import pytest
+import uuid
+
 import requests
 from dotenv import load_dotenv
 
@@ -53,7 +55,10 @@ def renter_headers():
 def _create_property(headers: dict, title_suffix: str) -> str:
     """Create a throwaway property via the owner API. Returns the new id."""
     payload = {
-        "title": f"TEST_bulk_delete_http_{title_suffix}",
+        # Unique per run. The duplicate-listing guard keys on title, area
+        # and type, so a run that died before its bulk delete left "alpha"
+        # behind and the next run's "alpha" was refused with 409.
+        "title": f"TEST_bulk_delete_http_{title_suffix}_{uuid.uuid4().hex[:8]}",
         "description": "throwaway listing for bulk-delete tests",
         "area": "Tel Aviv",
         "rental_type": "long-term",

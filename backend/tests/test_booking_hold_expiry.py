@@ -155,8 +155,14 @@ def test_bookings_predating_expiry_still_hold():
     assert 720 in _run(_held_slots())
 
 
-def test_sweep_marks_lapsed_holds_expired_and_notifies():
+def test_sweep_marks_lapsed_holds_expired_and_notifies(monkeypatch):
+    from routes.marketplace import gigs
     from routes.marketplace.gigs import sweep_expired_holds
+    # Notifications are held back during quiet hours (22:00-08:00 Israel).
+    # This test is about the sweep, not the clock; the quiet-hours
+    # behaviour has its own tests below. Without this it failed every
+    # night.
+    monkeypatch.setattr(gigs, "_is_waking_hours", lambda *_a, **_k: True)
     bid = _run(_insert("pending", expires_in_hours=-1, slot="13:00", created_hours_ago=25))
     result = _run(sweep_expired_holds())
     assert result["expired"] >= 1
@@ -181,8 +187,14 @@ def test_sweep_does_not_touch_a_live_hold():
     assert _run(_status(bid)) == "pending"
 
 
-def test_halfway_nudge_fires_once():
+def test_halfway_nudge_fires_once(monkeypatch):
+    from routes.marketplace import gigs
     from routes.marketplace.gigs import sweep_expired_holds
+    # Notifications are held back during quiet hours (22:00-08:00 Israel).
+    # This test is about the sweep, not the clock; the quiet-hours
+    # behaviour has its own tests below. Without this it failed every
+    # night.
+    monkeypatch.setattr(gigs, "_is_waking_hours", lambda *_a, **_k: True)
     # Created 13h ago on a 24h hold → 11h left, past the halfway mark.
     bid = _run(_insert("pending", expires_in_hours=11, slot="15:00", created_hours_ago=13))
     first = _run(sweep_expired_holds())
