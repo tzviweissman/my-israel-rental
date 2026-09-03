@@ -334,6 +334,44 @@ for (const lng of ['en', 'he']) {
     ok(`${lng}: and its label turns white on the fill`, afterHover.color === 'rgb(255, 255, 255)', afterHover.color);
   }
 
+  // ── the picks carousel drifts, rather than stepping ────────────────
+  // A step on a timer is a lurch, a pause, a lurch. What reads as motion is
+  // the ring never arriving, so this samples the centre card three times and
+  // asks two things: that it moved every time, and that the amounts are
+  // similar - a stepper is either still or jumping.
+  // Bring it back on screen first: the drift stops when the section is out
+  // of view, so measuring it from wherever the previous block left the page
+  // reads zero movement and calls a working carousel broken.
+  await page.locator('#picks').scrollIntoViewIfNeeded();
+  await page.mouse.move(5, 5);
+  await page.waitForTimeout(1200);
+  const slideX = () => page.evaluate(() => {
+    const el = document.querySelector('[aria-roledescription="slide"]');
+    return new DOMMatrixReadOnly(getComputedStyle(el).transform).e;
+  });
+  const xs = [await slideX()];
+  for (let i = 0; i < 3; i++) {
+    await page.waitForTimeout(700);
+    xs.push(await slideX());
+  }
+  const deltas = xs.slice(1).map((v, i) => Math.abs(v - xs[i]));
+  ok(`${lng}: today's picks is always moving`, deltas.every((d) => d > 0.5), deltas.map((d) => d.toFixed(1)).join(', '));
+  ok(`${lng}: and moves evenly, not in lurches`,
+    Math.max(...deltas) / Math.max(Math.min(...deltas), 0.01) < 3,
+    deltas.map((d) => d.toFixed(1)).join(', '));
+
+  const auto = page.locator('[data-autoplay]');
+  await auto.hover();
+  await page.waitForTimeout(800);
+  const heldFrom = await slideX();
+  await page.waitForTimeout(1400);
+  ok(`${lng}: it holds still under the pointer`, Math.abs((await slideX()) - heldFrom) < 0.5);
+  await page.mouse.move(5, 5);
+  await page.waitForTimeout(900);
+  const resumeFrom = await slideX();
+  await page.waitForTimeout(1200);
+  ok(`${lng}: and picks up again when the pointer leaves`, Math.abs((await slideX()) - resumeFrom) > 0.5);
+
   const primary = page.locator('[data-testid="home-preview-cta-primary"]');
   ok(`${lng}: the CTA's primary button is there`, await primary.count() === 1);
   // One door, not two. A visitor should not have to classify themselves as a

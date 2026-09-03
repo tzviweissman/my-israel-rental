@@ -38,6 +38,7 @@ import ImageStreamHero from '../components/ui/image-stream-hero';
 import AntiMetalButton from '../components/ui/anti-metal-button';
 import LiquidButton from '../components/ui/liquid-button';
 import FlowButton from '../components/ui/flow-button';
+import { GradientText } from '../components/ui/gradient-text';
 import CoverflowCarousel from '../components/ui/coverflow-carousel';
 import useHomeShowcase from '../components/home/useHomeShowcase';
 import CommunitySection from '../components/home/CommunitySection';
@@ -159,6 +160,16 @@ export default function HomePreview() {
               {t('home.hero.h1', 'Find your place')}{' '}
               <span className="a">{t('home.hero.accent', 'in Israel.')}</span>
             </h1>
+            {/* The supply-side promise, under the demand-side headline. The
+                gradient is on "without limits" rather than the whole phrase:
+                the effect is a light behind the words, and lighting all three
+                leaves nothing steady to read it against. */}
+            <p className="hv2-hero-tagline">
+              {t('home.hero.growA', 'Grow')}{' '}
+              <GradientText className="hv2-gradient-word">
+                {t('home.hero.growB', 'without limits')}
+              </GradientText>
+            </p>
           </div>
           <div className="hv2-hero-foot">
             <p>{t('home.v2.hero.sub', 'Every card behind this text is a real listing or business on the site right now.')}</p>
@@ -227,10 +238,11 @@ export default function HomePreview() {
               slides={pickSlides}
               showCaption
               showNavigation
-              // Moves on its own, slowly, and stops the moment a pointer
-              // lands on it — including mid-drag, off screen, and for anyone
-              // who has asked for reduced motion.
-              autoplay={4200}
+              // Cards per second: one every ten. A continuous drift rather
+              // than a step, and it stops the moment a pointer lands on it —
+              // as it does mid-drag, off screen, and for anyone who has asked
+              // for reduced motion.
+              autoplay={0.1}
               showPagination={false}
               onSelect={setPick}
               label={t('home.v2.picks.h2', "Today's picks")}

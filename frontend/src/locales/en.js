@@ -1070,6 +1070,8 @@ const en = {
         },
         hero: {
           h1: "Find your place",
+          growA: 'Grow',
+          growB: 'without limits',
           accent: "in Israel.",
           sub: "Rent a home. Hire the pros. — one place for both. Free for renters and owners, no service fees.",
           ctaStays: "Search rentals",

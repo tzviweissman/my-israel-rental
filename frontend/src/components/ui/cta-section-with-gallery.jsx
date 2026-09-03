@@ -54,10 +54,15 @@ export const ContainerStagger = React.forwardRef(
         ref={ref}
         initial="hidden"
         whileInView={"visible"}
-        viewport={{ once: true }}
+        // `amount: 0.35` rather than the source's default of "any pixel".
+        // A section this tall crosses its first pixel a screen and a half
+        // before anyone is looking at it, so the fade ran and finished
+        // off-stage and the block simply appeared, fully formed. Waiting
+        // until a third of it is on screen is what makes the fade visible.
+        viewport={{ once: true, amount: 0.35 }}
         transition={{
-          staggerChildren: transition?.staggerChildren ?? 0.2,
-          delayChildren: transition?.delayChildren ?? 0.2,
+          staggerChildren: transition?.staggerChildren ?? 0.14,
+          delayChildren: transition?.delayChildren ?? 0.1,
           duration: 0.3,
           ...transition,
         }}
@@ -77,7 +82,7 @@ export const ContainerAnimated = React.forwardRef(
         variants={filterVariants}
         transition={{
           ...SPRING_TRANSITION_CONFIG,
-          duration: 0.3,
+          duration: 0.7,
           ...transition,
         }}
         {...props}
@@ -112,10 +117,11 @@ export const GalleryGridCell = React.forwardRef(
         ref={ref}
         initial={{ opacity: 0 }}
         whileInView={{ opacity: 1 }}
-        viewport={{ once: true }}
+        viewport={{ once: true, amount: 0.3 }}
         transition={{
-          duration: 0.3,
-          delay: index * 0.2,
+          duration: 0.75,
+          ease: [0.22, 1, 0.36, 1],
+          delay: index * 0.16,
           delayChildren: transition?.delayChildren ?? 0.2,
         }}
         className={cn(

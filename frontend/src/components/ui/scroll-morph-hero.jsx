@@ -45,11 +45,21 @@ const IMG_HEIGHT = 85;
 /** Linear interpolation. */
 const lerp = (start, end, t) => start * (1 - t) + end * t;
 
-/** Where one stage ends and the next begins, as a fraction of the scroll. */
-const SCATTER_END = 0.12;   // scattered  → line
-const LINE_END = 0.30;      // line       → ring
-const RING_END = 0.72;      // ring       → rainbow
-                            // rainbow    → sweeps to the end
+/**
+ * The stage map, as fractions of the scroll.
+ *
+ * Each shape gets a HOLD after it forms. Without them the line and the ring
+ * were only ever passed through on the way to the next thing - the cards
+ * were technically in a row, for about a fifth of a second, and the eye read
+ * one continuous churn instead of four shapes. A held shape is what makes it
+ * a sequence you can follow.
+ */
+const SCATTER_END = 0.10;   // scattered → line
+const LINE_HOLD = 0.20;     // the line, held
+const LINE_END = 0.36;      // line      → ring
+const RING_HOLD = 0.48;     // the ring, held
+const RING_END = 0.80;      // ring      → rainbow
+                            // rainbow   → sweeps to the end
 
 /**
  * The scattered starting position for card `i`.
@@ -281,10 +291,14 @@ export default function ScrollMorphCards({ cards, progress, reduced = false, onO
           let target;
           if (v < SCATTER_END) {
             target = blend(scatter, line, ease(v / SCATTER_END));
+          } else if (v < LINE_HOLD) {
+            target = line;
           } else if (v < LINE_END) {
-            target = blend(line, circle, ease((v - SCATTER_END) / (LINE_END - SCATTER_END)));
+            target = blend(line, circle, ease((v - LINE_HOLD) / (LINE_END - LINE_HOLD)));
+          } else if (v < RING_HOLD) {
+            target = circle;
           } else if (v < RING_END) {
-            target = blend(circle, arc, ease((v - LINE_END) / (RING_END - LINE_END)));
+            target = blend(circle, arc, ease((v - RING_HOLD) / (RING_END - RING_HOLD)));
           } else {
             target = arc;
           }

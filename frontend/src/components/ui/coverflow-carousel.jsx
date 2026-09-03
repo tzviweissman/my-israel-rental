@@ -13,13 +13,21 @@
  *    on it, and a carousel of real listings that cannot be opened is a dead
  *    end. Callers use it to render their own control below.
  *
- * 2. `autoplay`, which advances it slowly on its own and STOPS while the
- *    pointer is on it. Three things stop it besides the pointer, and each
- *    matters: a drag in progress (fighting the reader's own hand is the
- *    worst thing a carousel can do), the section being off screen (a timer
- *    animating twelve cards nobody is looking at), and
- *    `prefers-reduced-motion`, where movement that nobody asked for is
- *    exactly what the setting is about.
+ * 2. `autoplay`, a continuous slow drift that STOPS while the pointer is on
+ *    it. It moves the ring by a fraction of a card every frame rather than
+ *    stepping a whole card on a timer — a step lands as a lurch every few
+ *    seconds with stillness between, and the ring reads as a thing being
+ *    clicked rather than a thing turning.
+ *
+ *    Three things stop it besides the pointer, each for its own reason: a
+ *    drag in progress, because fighting the reader's own hand is the worst
+ *    thing a carousel can do; the section being off screen, because
+ *    otherwise it animates twelve cards for somebody four sections away;
+ *    and `prefers-reduced-motion`, which is exactly the setting for
+ *    movement nobody asked for.
+ *
+ *    The drift yields to the arrows and the drag: while one of those
+ *    settles, the drift holds, then picks up from wherever it landed.
  */
 "use client";
 
@@ -51,6 +59,7 @@ const useIsoLayoutEffect =
  * @param {string} [props.cardWidth] Any CSS length. Everything else is derived from it, so the rake scales.
  * @param {number} [props.gap=0.05] Space between cards, as a fraction of card width.
  * @param {boolean} [props.loop=true]
+ * @param {boolean|number} [props.autoplay=false] Continuous drift. A number is its speed in CARDS PER SECOND — 0.1 is one card every ten seconds.
  * @param {boolean} [props.showCaption=false]
  * @param {boolean} [props.showPagination=false]
  * @param {boolean} [props.showNavigation=false]
@@ -89,9 +98,15 @@ export function CoverflowCarousel({
   const targetRef = React.useRef(0);
   const widthRef = React.useRef(0);
   const rafRef = React.useRef(null);
+  /** The drift's own frame handle, kept apart from the settle's. */
+  const driftRef = React.useRef(null);
   const dragRef = React.useRef(null);
 
   const [selected, setSelected] = React.useState(0);
+  // Read inside the drift loop, which must not re-subscribe every time the
+  // centre card changes.
+  const selectedRef = React.useRef(0);
+  selectedRef.current = selected;
   // Anything that should hold the carousel still: the pointer resting on it,
   // a drag under way, or the section being scrolled out of view.
   const [held, setHeld] = React.useState(false);
@@ -280,8 +295,12 @@ export function CoverflowCarousel({
     return () => io.disconnect();
   }, []);
 
-  // The autoplay itself. `settle` already animates to the next whole card, so
-  // this is one step on a timer rather than a second animation.
+  // The drift. A fraction of a card per frame, straight onto `pos` - the
+  // same value a drag moves - so the ring turns rather than being stepped.
+  //
+  // It is deliberately NOT `settle` on a timer. That animates to the next
+  // whole card and then stops dead until the timer fires again: a lurch,
+  // a pause, a lurch. What reads as motion is the thing never arriving.
   React.useEffect(() => {
     if (!autoplay || held || !onScreen) return undefined;
     const reduced =
@@ -289,10 +308,34 @@ export function CoverflowCarousel({
       window.matchMedia &&
       window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     if (reduced) return undefined;
-    const every = typeof autoplay === "number" ? autoplay : 4200;
-    const id = setInterval(() => nudge(1), every);
-    return () => clearInterval(id);
-  }, [autoplay, held, onScreen, nudge]);
+
+    // Cards per second. One card every ten seconds by default, which is slow
+    // enough to read a caption by and fast enough to notice.
+    const speed = typeof autoplay === "number" ? autoplay : 0.1;
+    let last = performance.now();
+
+    const tick = (now) => {
+      // A tab that was in the background hands back a gap of many seconds;
+      // capping it stops the ring from jumping on return.
+      const dt = Math.min(now - last, 100) / 1000;
+      last = now;
+      // Yield while an arrow press or a throw is settling, then carry on
+      // from wherever it left the ring.
+      if (rafRef.current === null) {
+        posRef.current = clamp(posRef.current + speed * dt);
+        targetRef.current = posRef.current;
+        const index = indexAt(posRef.current);
+        if (index !== selectedRef.current) setSelected(index);
+        paint();
+      }
+      driftRef.current = requestAnimationFrame(tick);
+    };
+    driftRef.current = requestAnimationFrame(tick);
+    return () => {
+      if (driftRef.current !== null) cancelAnimationFrame(driftRef.current);
+      driftRef.current = null;
+    };
+  }, [autoplay, held, onScreen, clamp, indexAt, paint]);
 
   const active = slides[selected];
 
