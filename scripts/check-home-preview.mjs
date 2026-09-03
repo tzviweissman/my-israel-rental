@@ -61,22 +61,33 @@ for (const lng of ['en', 'he']) {
   // busy machine the first read can land a second in, when the layer is
   // already at 0.6 - that is a slow reader, not a broken entrance - so the
   // assertion is "small for how far into the animation we are".
+  // `--ish-open` is the corridor's opening: 0 is collapsed to a strip at the
+  // waist, 1 is the full corridor. Judged against the animation's own
+  // clock, so a busy machine that reads late is not called a broken opening.
   const enterEarly = await page.evaluate(() => {
-    const el = document.querySelector('[data-testid="ish-layer"]');
+    const el = document.querySelector('[data-testid="ish-stage"]');
     if (!el) return null;
-    const scale = new DOMMatrixReadOnly(getComputedStyle(el).transform).a;
+    const open = Number(getComputedStyle(el).getPropertyValue('--ish-open')) || 0;
     const anim = el.getAnimations?.()[0];
     const t = anim ? Number(anim.currentTime || 0) : 0;
-    // Before 40% of the 1.9s entrance the layer has to be under 0.8.
-    return { scale, t, small: t > 760 ? scale < 1.5 : scale < 0.8 };
+    // Before 45% of the 1.6s entrance the corridor has to be under 0.85 open.
+    return { open, t, small: t > 720 ? open <= 1.01 : open < 0.85 };
   });
-  await page.waitForTimeout(2600);
+  await page.waitForTimeout(2400);
   const enterLate = await page.evaluate(() => {
     const el = document.querySelector('[data-testid="ish-layer"]');
-    return el ? new DOMMatrixReadOnly(getComputedStyle(el).transform).a : null;
+    return el ? Number(getComputedStyle(el).getPropertyValue('--ish-open')) : null;
   });
-  ok(`${lng}: the corridor opens small at the centre`, enterEarly !== null && enterEarly.small, `scale ${enterEarly?.scale} at ${enterEarly?.t}ms`);
-  ok(`${lng}: and has grown to full size after the entrance`, enterLate !== null && enterLate > 0.98, `scale ${enterLate}`);
+  // Depth: the near cards must project larger than the far ones. A layer
+  // that is being animated flattens, and every card is then its natural
+  // size - which is how two entrances shipped a corridor with no depth.
+  const depth = await page.evaluate(() => {
+    const hs = [...document.querySelectorAll('[data-testid="ish-layer"] > *')].map((c) => c.getBoundingClientRect().height).filter((h) => h > 0);
+    return { min: Math.round(Math.min(...hs)), max: Math.round(Math.max(...hs)) };
+  });
+  ok(`${lng}: the corridor opens from a strip at its waist`, enterEarly !== null && enterEarly.small, `open ${enterEarly?.open} at ${enterEarly?.t}ms`);
+  ok(`${lng}: and is fully open after the entrance`, enterLate !== null && enterLate > 0.99, `open ${enterLate}`);
+  ok(`${lng}: and has depth - near cards project at least 3x the far ones`, depth.max >= depth.min * 3, JSON.stringify(depth));
   // The scope every experimental theme is written under. If this class is
   // missing, a scoped theme is invisible here too - and the whole point of
   // scoping is that it shows HERE and nowhere else.

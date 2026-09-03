@@ -91,6 +91,13 @@ const PATH = {
  */
 function keyframes(dir, name, p) {
   const steps = [];
+  // Where a card is born: the waist, the smallest a card ever is. The
+  // entrance collapses every card back to this depth and onto the axis, so
+  // the corridor starts as one thin strip at the vanishing point and opens
+  // out along its own rails - the reference's motion. Not a zoom of the
+  // finished corridor, which shows the big edge cards from the first frame,
+  // only small.
+  const zWaist = p.perspective * (1 - 1 / (p.birthHeight / p.cardHeight));
   for (let s = 0; s <= p.stops; s++) {
     const u = s / p.stops;
     // Geometric in apparent size, so consecutive cards keep a constant size
@@ -102,10 +109,15 @@ function keyframes(dir, name, p) {
     const rail =
       p.railExit - (p.railExit - p.railBirth) * Math.pow(1 - u, p.fan);
     const turn = p.turnBirth + (p.turnExit - p.turnBirth) * u;
+    // `--ish-open` runs 0 -> 1 during the entrance and is 1 for ever after.
+    // At 0 the lateral offset is nothing and the depth is the waist's; at 1
+    // the expression is exactly the plain path. A browser that cannot
+    // register the property keeps it at 1 and shows the finished corridor -
+    // the old behaviour, not a broken one.
+    const x = `calc(${(dir * rail).toFixed(2)}cqw * var(--ish-open, 1))`;
+    const zz = `calc(${zWaist.toFixed(2)}cqw + ${(z - zWaist).toFixed(2)}cqw * var(--ish-open, 1))`;
     steps.push(
-      `${(u * 100).toFixed(2)}%{transform:translate3d(${(dir * rail).toFixed(
-        2,
-      )}cqw,0,${z.toFixed(2)}cqw) rotateY(${(-dir * turn).toFixed(2)}deg)}`,
+      `${(u * 100).toFixed(2)}%{transform:translate3d(${x},0,${zz}) rotateY(${(-dir * turn).toFixed(2)}deg)}`,
     );
   }
   return `@keyframes ${name}{${steps.join("")}}`;
@@ -155,11 +167,25 @@ export function ImageStreamHero({
       // THE ENTRANCE. The source drops every card mid-flight with a negative
       // delay so the corridor is full on the first frame - correct for a
       // component that is already on screen, wrong for the first thing a
-      // visitor sees. The reference opens as a small strip at the vanishing
-      // point that grows outward until it fills the frame. That is the whole
-      // 3D layer scaled about the axis, from nearly nothing to 1, while the
-      // cards keep flowing inside it; the corridor's own motion is untouched.
-      `@keyframes ${enter}{0%{transform:scale(.06);opacity:0}25%{opacity:1}100%{transform:scale(1);opacity:1}}` +
+      // visitor sees. The reference opens as a thin strip at the vanishing
+      // point and the cards fly OUT along the rails until the corridor fills
+      // the frame. That is `--ish-open` going 0 -> 1 (see keyframes()): the
+      // geometry opens from its own waist while the cards keep flowing. A
+      // first version scaled the finished corridor up from a dot instead,
+      // which is a zoom, not an opening, and not the video.
+      //
+      // The animation runs on the PERSPECTIVE container, never on the
+      // preserve-3d layer, and it animates nothing but this one property.
+      // Chromium flattens a preserve-3d element for the whole life of any
+      // opacity or transform animation on it, not only while opacity is
+      // below 1: every card then renders at its natural size on one plane,
+      // and the corridor is a flat row. Both earlier entrances (the scale,
+      // then the first cut of this one) were fading the layer in, so both
+      // shipped a corridor with no depth at all. There is no fade now: the
+      // reference does not fade either, its strip is there from the first
+      // frame.
+      `@property --ish-open{syntax:'<number>';inherits:true;initial-value:1}` +
+      `@keyframes ${enter}{0%{--ish-open:0}100%{--ish-open:1}}` +
       // Pausing rather than disabling keeps the corridor whole: every card is
       // already dropped mid-flight by its negative delay, so it freezes as a
       // finished still instead of collapsing onto the axis. The entrance is
@@ -178,19 +204,19 @@ export function ImageStreamHero({
 
       <div
         aria-hidden
-        className="pointer-events-none absolute inset-0"
+        className={cn("pointer-events-none absolute inset-0", intro && enter)}
         style={{
           perspective: `${p.perspective}cqw`,
           perspectiveOrigin: `50% ${axis}%`,
+          // 1.6s: the reference's strip is full-width in about a second
+          // and a half. Ease-out, so the near cards arrive last and slow.
+          ...(intro ? { animation: `${enter} 1.6s cubic-bezier(.22,1,.36,1) both` } : {}),
         }}
+        data-testid="ish-stage"
       >
         <div
-          className={cn("absolute inset-0", intro && enter)}
-          style={{
-            transformStyle: "preserve-3d",
-            transformOrigin: `50% ${axis}%`,
-            ...(intro ? { animation: `${enter} 1.9s cubic-bezier(.22,1,.36,1) both` } : {}),
-          }}
+          className="absolute inset-0"
+          style={{ transformStyle: "preserve-3d" }}
           data-testid="ish-layer"
         >
           {[right, left].map((name) =>

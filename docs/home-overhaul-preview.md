@@ -224,3 +224,24 @@ back to stills.
   appear — the component's default of nine showed nine listings and ignored the
   rest. Twelve per rail is the current setting. Raising it only makes the
   corridor denser; lowering it is the direction that tears the ribbon.
+
+## The corridor's entrance (4 Sep 2026)
+
+The corridor opens from its own waist: every card starts on the axis at
+the depth it is born at, so the first frame is one thin strip at the
+vanishing point, and the cards fly out along the rails until the corridor
+fills the frame, in 1.6s with an ease-out. That is the reference's motion.
+It is one registered custom property, `--ish-open`, multiplied into the
+lateral offset and depth of every keyframe; 0 is the strip, 1 is the plain
+path. A browser that cannot register the property keeps 1 and shows the
+finished corridor.
+
+**The property is animated on the perspective container, never on the
+preserve-3d layer, and nothing else is animated with it.** Chromium
+flattens a preserve-3d element for the whole life of any opacity or
+transform animation on it - not only while opacity is below 1 - and a
+flattened corridor is a row of cards at their natural size on one plane.
+Two entrances shipped that way (a scale-up from a dot, then the first cut
+of this one), both fading the layer in, and the check only measured the
+layer's scale, so neither was caught. `check-home-preview.mjs` now asserts
+the near cards project at least three times the far ones.
