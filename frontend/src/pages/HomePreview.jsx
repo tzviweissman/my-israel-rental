@@ -22,9 +22,17 @@
 import React, { useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
-import { ArrowRight, Home as HomeIcon, Store, Megaphone } from 'lucide-react';
+import { ArrowRight, Check, Home as HomeIcon, Store, Megaphone } from 'lucide-react';
+
+import { MotionConfig } from 'motion/react';
 
 import PageMeta from '../components/PageMeta';
+import {
+  ContainerAnimated,
+  ContainerStagger,
+  GalleryGrid,
+  GalleryGridCell,
+} from '../components/ui/cta-section-with-gallery';
 import useFavorites from '../hooks/useFavorites';
 import ImageStreamHero from '../components/ui/image-stream-hero';
 import useHomeShowcase from '../components/home/useHomeShowcase';
@@ -33,6 +41,20 @@ import StaysCard from '../components/stays/StaysCard';
 import ServiceCard from '../components/marketplace/ServiceCard';
 import SiteFooter from '../components/common/SiteFooter';
 import '../styles/home-v2.css';
+
+/**
+ * The nav is fixed chrome rendered outside this page, and it is white-on-dark
+ * glass — correct over every other page's dark photo band, invisible over this
+ * page's white hero. So the page marks the body while it is mounted and
+ * `home-v2.css` carries a light variant scoped to that mark. Nothing about the
+ * nav's own file changes, and no other page can be affected.
+ */
+function useLightNav() {
+  useEffect(() => {
+    document.body.classList.add('hv2-light-nav');
+    return () => document.body.classList.remove('hv2-light-nav');
+  }, []);
+}
 
 /** Fail-safe reveal: content is visible unless JS proves it is running. */
 function useReveal(root) {
@@ -54,12 +76,13 @@ function useReveal(root) {
 export default function HomePreview() {
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
-  const { streamImages, rentals, businesses, loaded } = useHomeShowcase();
+  const { streamImages, gallery, rentals, businesses, loaded } = useHomeShowcase();
   // The card renders a heart whether or not it is given a handler, so it has
   // to be wired here — a control that does nothing is worse than no control.
   const { likedIds, toggleLike } = useFavorites();
   const root = useRef(null);
   useReveal(root);
+  useLightNav();
 
   const doors = [
     { key: 'stays', to: '/stays', Icon: HomeIcon },
@@ -102,10 +125,10 @@ export default function HomePreview() {
           <div className="hv2-hero-foot">
             <p>{t('home.v2.hero.sub', 'Every card behind this text is a real listing or business on the site right now.')}</p>
             <div className="hv2-hero-ctas">
-              <button type="button" className="btn btn-white" onClick={() => navigate('/stays')}>
+              <button type="button" className="btn btn-primary" onClick={() => navigate('/stays')}>
                 {t('home.hero.ctaStays', 'Search rentals')}
               </button>
-              <button type="button" className="btn btn-outline-white" onClick={() => navigate('/businesses')}>
+              <button type="button" className="btn btn-ghost" onClick={() => navigate('/businesses')}>
                 {t('home.v2.hero.ctaBusinesses', 'Find a business')}
               </button>
             </div>
@@ -211,34 +234,66 @@ export default function HomePreview() {
         </div>
       </section>
 
-      {/* ── Supply band ────────────────────────────────────────────────── */}
-      <section className="hv2-pad" id="supply">
-        <div className="hv2-wrap">
-          <div className="hv2-band reveal">
-            <div>
-              <div className="hv2-eyebrow hv2-eyebrow-gold">{t('home.v2.supply.eyebrow', 'For businesses & property owners')}</div>
-              <h2>{t('home.v2.supply.h2', 'Add your business — free')}</h2>
-              <p>{t('home.v2.supply.p', 'Free to list, free to be found, no commission. Have a place to rent? List it the same way.')}</p>
-              <div className="hv2-cta-row">
+      {/* ── Supply CTA, with a gallery of real businesses and homes ────
+          Replaces the section library's flat colour band. The four photos
+          are live listings and businesses taken from deeper in each list
+          than the rails above show, so nothing appears twice on one scroll.
+
+          `reducedMotion="user"` rather than a hand-rolled media query: it
+          drops transform and layout animation for anyone who asked for less
+          movement while letting the fade run, so the content still arrives
+          instead of never appearing. */}
+      <MotionConfig reducedMotion="user">
+        <section className="hv2-pad hv2-cta" id="supply">
+          <div className="hv2-wrap hv2-cta-grid">
+            <ContainerStagger>
+              <ContainerAnimated className="hv2-eyebrow">
+                {t('home.v2.supply.eyebrow', 'For businesses & property owners')}
+              </ContainerAnimated>
+              <ContainerAnimated>
+                <h2 className="hv2-cta-h2">{t('home.v2.supply.h2', 'Add your business — free')}</h2>
+              </ContainerAnimated>
+              <ContainerAnimated className="hv2-cta-p">
+                {t('home.v2.supply.p', 'Free to list, free to be found, no commission. Have a place to rent? List it the same way.')}
+              </ContainerAnimated>
+              <ContainerAnimated>
+                <ul className="hv2-cta-facts">
+                  {['free', 'leads', 'tools'].map((k) => (
+                    <li key={k}>
+                      <Check size={16} aria-hidden="true" />
+                      <span>
+                        <b>{t(`home.v2.supply.${k}.h`)}</b> {t(`home.v2.supply.${k}.p`)}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              </ContainerAnimated>
+              <ContainerAnimated className="hv2-cta-row">
                 <button type="button" className="btn btn-gold btn-lg" onClick={() => navigate('/businesses/add')}>
                   {t('home.v2.supply.ctaBiz', 'Add your business')}
                 </button>
-                <button type="button" className="btn btn-outline-white btn-lg" onClick={() => navigate('/join')}>
+                <button type="button" className="btn btn-ghost btn-lg" onClick={() => navigate('/join')}>
                   {t('home.v2.supply.ctaStay', 'List a place')}
                 </button>
-              </div>
-            </div>
-            <div className="hv2-facts">
-              {['free', 'leads', 'tools'].map((k) => (
-                <div key={k} className="hv2-fact">
-                  <b>{t(`home.v2.supply.${k}.h`)}</b>
-                  <small>{t(`home.v2.supply.${k}.p`)}</small>
-                </div>
+              </ContainerAnimated>
+            </ContainerStagger>
+
+            <GalleryGrid className="hv2-gallery" data-testid="home-preview-gallery">
+              {gallery.map((src, index) => (
+                <GalleryGridCell index={index} key={src}>
+                  <img
+                    className="size-full object-cover object-center"
+                    src={src}
+                    alt=""
+                    loading="lazy"
+                    decoding="async"
+                  />
+                </GalleryGridCell>
               ))}
-            </div>
+            </GalleryGrid>
           </div>
-        </div>
-      </section>
+        </section>
+      </MotionConfig>
 
       {/* ── Finale: unchanged from the live page ───────────────────────── */}
       <section className="finale">

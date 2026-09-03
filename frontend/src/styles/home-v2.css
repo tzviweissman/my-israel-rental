@@ -12,9 +12,21 @@
 .hv2-wrap { max-width: 1180px; margin: 0 auto; padding: 0 clamp(16px, 3vw, 36px); }
 .hv2-pad { padding: clamp(56px, 7vw, 94px) 0; }
 
-/* Hero. Dark on purpose: the fixed glass nav only reads over a dark
-   photo, and the corridor's cards need a ground that is not competing
-   with them. The deep brand blue rather than black keeps it on-palette. */
+/* Hero. White, on Tzvi's instruction (3 Sep) — it was the deep brand blue.
+   White changes three things beyond the fill, and skipping any one of them
+   leaves the page broken rather than light:
+
+   1. The type flips from white to ink, and the accent word from `--gold`
+      (the on-dark gold) to `--gold-lg`, which is the display gold that is
+      only readable on light. Same swap for the small gold link, which takes
+      `--gold-text`. All the text-shadows go: they exist to hold white type
+      against a photo.
+   2. The CTAs stop being the white/outline-white pair. That pair is the
+      documented exception FOR A HERO PHOTO; on a light surface the design
+      system's primary is solid blue and its quiet partner is the bordered
+      ghost. See the button rules in design-tokens.css.
+   3. The nav has to change with it — see the `.hv2-light-nav` block at the
+      bottom of this file. */
 .hv2-hero {
   /* `overflow: clip` rather than the component's `overflow: hidden`. Hidden
      clips what is painted but the cards still count toward an ancestor's
@@ -26,15 +38,26 @@
   overflow: clip;
   height: min(88svh, 780px);
   min-height: 560px;
-  background:
-    radial-gradient(120% 90% at 50% 60%, rgba(30, 95, 140, .55), transparent 65%),
-    var(--brand-primary-deep, #123B57);
-  color: #fff;
+  background: var(--surface, #fff);
+  color: var(--ink);
 }
+
+/* Every card now floats on white with nothing behind it, so each one needs its
+   own edge. The corridor component takes no per-card class, and the card's own
+   class is generated per instance (`ish-c-<id>`), so this reaches them
+   structurally: the aria-hidden perspective layer, its preserve-3d child, and
+   that child's children are the cards and nothing else. */
+.hv2-hero > div[aria-hidden] > div > div {
+  box-shadow: 0 10px 30px rgba(35, 32, 27, .18);
+}
+
+/* The scrim now fades the corridor INTO the page rather than darkening it:
+   white at both ends so the headline and the CTAs sit on clean paper, clear
+   in the middle where the ribbon is the subject. */
 .hv2-hero-scrim {
   position: absolute; inset: 0; z-index: 1; pointer-events: none;
   background:
-    linear-gradient(180deg, rgba(18, 59, 87, .78) 0%, rgba(18, 59, 87, 0) 34%, rgba(18, 59, 87, 0) 60%, rgba(18, 59, 87, .82) 100%);
+    linear-gradient(180deg, #fff 0%, rgba(255, 255, 255, .55) 22%, rgba(255, 255, 255, 0) 38%, rgba(255, 255, 255, 0) 56%, rgba(255, 255, 255, .88) 82%, #fff 100%);
 }
 .hv2-hero-inner {
   position: relative; z-index: 2;
@@ -43,33 +66,31 @@
   text-align: center;
   padding: calc(var(--nav-h, 68px) + 28px) 20px 44px;
 }
+.hv2-hero .kick { color: var(--gold-text); text-shadow: none; }
 .hv2-hero h1 {
   margin-top: 14px;
   font-size: clamp(38px, 6.2vw, 78px);
   font-weight: 500;
   line-height: 1.02;
   letter-spacing: -1.2px;
-  color: #fff;
-  text-shadow: 0 2px 24px rgba(0, 0, 0, .35);
+  color: var(--ink);
 }
-.hv2-hero h1 .a { color: var(--gold); }
+.hv2-hero h1 .a { color: var(--gold-lg); }
 .hv2-hero-foot { display: flex; flex-direction: column; align-items: center; gap: 18px; }
 .hv2-hero-foot p {
   max-width: 520px; margin: 0;
-  font-size: 15px; color: rgba(255, 255, 255, .86);
-  text-shadow: 0 1px 12px rgba(0, 0, 0, .4);
+  font-size: 15px; color: var(--brand-muted);
 }
 .hv2-hero-ctas { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; }
 .hv2-hero-link {
   display: inline-flex; align-items: center; gap: 6px;
   background: none; border: 0; padding: 4px 6px; cursor: pointer;
-  font: inherit; font-size: 14px; font-weight: 700; color: var(--gold);
-  text-shadow: 0 1px 10px rgba(0, 0, 0, .5);
+  font: inherit; font-size: 14px; font-weight: 700; color: var(--gold-text);
 }
 .hv2-hero-link:hover { text-decoration: underline; }
 
 /* Doors */
-.hv2-doors-wrap { padding-bottom: 0; }
+.hv2-doors-wrap { padding-bottom: 0; background: var(--bg); }
 .hv2-doors-head { text-align: center; font-size: clamp(24px, 3vw, 34px); font-weight: 500; margin-bottom: 26px; }
 .hv2-doors { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
 .hv2-door {
@@ -131,31 +152,43 @@
 .hv2-step h4 { font-size: 16px; font-weight: 700; font-family: var(--font-body); }
 .hv2-step p { margin-top: 4px; color: var(--brand-muted); font-size: 14px; }
 
-/* Supply band — the one dark surface between hero and finale */
-.hv2-band {
-  display: grid; grid-template-columns: 1.2fr 1fr; gap: 36px; align-items: center;
-  background: var(--brand-primary-deep, #123B57); color: #fff;
-  border-radius: var(--radius-hero, 28px); padding: clamp(28px, 4vw, 52px);
-  box-shadow: var(--shadow-lg);
+/* Supply CTA with gallery (components/ui/cta-section-with-gallery).
+   Replaced the section library's flat blue band. It is a white surface
+   between two limestone ones, which is the same alternation the rest of the
+   page uses to separate sections without drawing a line. */
+.hv2-cta {
+  background: var(--surface);
+  border-top: 1px solid var(--brand-border);
+  border-bottom: 1px solid var(--brand-border);
 }
-.hv2-band h2 { font-size: clamp(26px, 3.4vw, 40px); font-weight: 500; margin-top: 10px; color: #fff; }
-.hv2-band p { margin-top: 12px; color: rgba(255, 255, 255, .82); max-width: 520px; }
-.hv2-cta-row { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 24px; }
-.hv2-facts { display: flex; flex-direction: column; gap: 12px; }
-.hv2-fact {
-  display: flex; flex-direction: column; gap: 3px;
-  background: rgba(255, 255, 255, .08); border: 1px solid rgba(255, 255, 255, .16);
-  border-radius: 14px; padding: 14px 16px;
+.hv2-cta-grid {
+  display: grid;
+  grid-template-columns: 1.05fr .95fr;
+  gap: clamp(24px, 5vw, 64px);
+  align-items: center;
 }
-.hv2-fact b { font-size: 15px; }
-.hv2-fact small { font-size: 13px; color: rgba(255, 255, 255, .78); }
+.hv2-cta-h2 { font-size: clamp(28px, 3.6vw, 44px); font-weight: 500; margin-top: 10px; letter-spacing: -.8px; }
+.hv2-cta-p { margin-top: 14px; color: var(--brand-muted); max-width: 520px; font-size: 16px; }
+.hv2-cta-facts { list-style: none; margin: 22px 0 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+.hv2-cta-facts li { display: flex; gap: 10px; align-items: flex-start; font-size: 14px; color: var(--brand-muted); }
+.hv2-cta-facts li svg { flex: none; margin-top: 2px; color: var(--success); }
+.hv2-cta-facts b { color: var(--ink); font-weight: 700; }
+.hv2-cta-row { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 26px; }
+
+/* The component ships 50/150px rows, which is a thumbnail strip at desktop
+   width. The proportions are what make the offset grid read, so both values
+   scale together rather than one of them being nudged. */
+.hv2-gallery { grid-template-rows: 46px 132px 46px 132px 46px; }
+@media (min-width: 768px) {
+  .hv2-gallery { grid-template-rows: 64px 190px 64px 190px 64px; gap: 18px; }
+}
 
 @media (max-width: 900px) {
   .hv2-doors { grid-template-columns: 1fr; }
   .hv2-grid-3 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .hv2-grid-4 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .hv2-how-cols { grid-template-columns: 1fr; }
-  .hv2-band { grid-template-columns: 1fr; }
+  .hv2-cta-grid { grid-template-columns: minmax(0, 1fr); }
 }
 @media (max-width: 560px) {
   .hv2-hero { height: min(92svh, 720px); }
@@ -163,3 +196,52 @@
   .hv2-grid-3 { grid-template-columns: minmax(0, 1fr); }
   .hv2-sec-head { flex-direction: column; align-items: flex-start; }
 }
+
+/* ── Light nav, for this page only ────────────────────────────────────
+   Added to <body> by HomePreview while it is mounted, removed on unmount.
+   The bar is fixed chrome rendered outside the page, so it cannot be
+   reached by a descendant selector — and it is white text in translucent
+   white bubbles under a dark top gradient, which over a white hero is
+   white on white with a grey smudge above it.
+
+   Nothing here restyles the nav as a design decision; it re-points the
+   same shapes at the on-light half of the palette the tokens already
+   define. The wordmark and the mark carry INLINE styles (a Tailwind
+   `text-white` and a drop-shadow), so those two need `!important` —
+   an inline style beats any ordinary rule. The gold icon colours do not:
+   they arrive as SVG presentation attributes, which any rule outranks. */
+body.hv2-light-nav .glass-nav {
+  background: linear-gradient(180deg, rgba(255, 255, 255, .92), rgba(255, 255, 255, 0));
+}
+body.hv2-light-nav .glass-pill {
+  background: rgba(255, 255, 255, .72);
+  border-color: var(--brand-border);
+  color: var(--ink);
+  text-shadow: none;
+  box-shadow: 0 2px 10px rgba(35, 32, 27, .07);
+}
+body.hv2-light-nav .glass-pill:hover { background: #fff; border-color: var(--brand-primary); }
+body.hv2-light-nav .glass-pill-current {
+  background: rgba(var(--brand-primary-rgb), .10);
+  border-color: var(--brand-primary);
+  color: var(--brand-primary);
+}
+/* The one solid button in the bar. On dark it is white with ink text; on
+   light that reads as a disabled chip, so it takes the primary fill. */
+body.hv2-light-nav .glass-pill-solid {
+  background: var(--brand-primary);
+  border-color: var(--brand-primary);
+  color: #fff;
+  box-shadow: 0 6px 18px rgba(30, 95, 140, .25);
+}
+body.hv2-light-nav .glass-pill-solid:hover { background: var(--brand-primary-dark); }
+body.hv2-light-nav [data-testid="nav-logo"] span {
+  color: var(--ink) !important;
+  text-shadow: none !important;
+}
+body.hv2-light-nav [data-testid="nav-logo"] img {
+  filter: drop-shadow(0 1px 3px rgba(35, 32, 27, .22)) !important;
+}
+/* #C9A227 is the on-dark gold and measures about 2.4:1 on white. */
+body.hv2-light-nav .glass-pill svg { color: var(--gold-text); }
+body.hv2-light-nav .glass-dot { background: var(--gold-lg); }

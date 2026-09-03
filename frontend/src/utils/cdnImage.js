@@ -30,6 +30,36 @@ export function sizedImage(url, width) {
 }
 
 /**
+ * Fit a whole image into an exact box, padding the remainder.
+ *
+ * `sizedImage` uses `c_limit`, which only ever scales — the browser then
+ * centre-crops whatever does not fit the element. That is fine for a photo of
+ * a room and wrong for the flyers many of our businesses upload as their
+ * cover: cropping a wide flyer into a portrait cell takes the first and last
+ * letters off every line, and the home page's gallery read "sach & / ar round
+ * / tchen / shering".
+ *
+ * A content-aware crop (`c_fill,g_auto`) was the first fix and is better, but
+ * only moves the problem: on that same flyer it locked onto the person and
+ * still cut the words. So this pads instead of cropping. `b_auto` fills the
+ * remainder with a colour sampled from the image itself, so a padded flyer
+ * reads as a framed flyer rather than a photo on a grey card, and a photo that
+ * already matches the box is untouched. Nothing is ever cut.
+ *
+ * Non-Cloudinary URLs come back unchanged, same as `sizedImage`.
+ */
+export function framedImage(url, width, height) {
+  if (!isCloudinary(url) || !url.includes('/upload/')) return url;
+  const [head, tail] = url.split('/upload/', 2);
+  const segs = tail.split('/');
+  while (segs.length && segs[0].includes('_') && !segs[0].includes('.')) {
+    if (/^v\d+$/.test(segs[0])) break;
+    segs.shift();
+  }
+  return `${head}/upload/w_${width},h_${height},c_pad,b_auto,f_auto,q_auto/${segs.join('/')}`;
+}
+
+/**
  * Build a Cloudinary video-frame poster URL.
  *
  *   videoPoster('https://res.cloudinary.com/.../video/upload/v123/foo.mp4', 1200)

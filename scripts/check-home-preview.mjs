@@ -69,6 +69,42 @@ for (const lng of ['en', 'he']) {
     ok(`${lng}: ${name} cards are all one width`, box.widths.length <= 1, box.widths.join(','));
   }
 
+  // The hero is white and the nav is fixed chrome that defaults to white text.
+  // Both halves of that have to hold, and neither is visible to a card count:
+  // a regression here is white type on white paper, which still screenshots as
+  // "a clean hero" to anything not measuring the pixels.
+  const heroBg = await hero.evaluate((el) => getComputedStyle(el).backgroundColor);
+  ok(`${lng}: hero is white`, heroBg === 'rgb(255, 255, 255)', heroBg);
+  const heroInk = await page.locator('[data-testid="home-preview-hero"] h1').evaluate((el) => getComputedStyle(el).color);
+  ok(`${lng}: hero headline is ink, not white`, heroInk !== 'rgb(255, 255, 255)', heroInk);
+  const navPill = await page.locator('.glass-pill').first().evaluate((el) => {
+    const cs = getComputedStyle(el);
+    const [r, g, b] = cs.color.match(/\d+/g).map(Number);
+    return { color: cs.color, luminance: (0.299 * r + 0.587 * g + 0.114 * b) / 255 };
+  });
+  ok(`${lng}: nav text is dark over the white hero`, navPill.luminance < 0.5, navPill.color);
+
+  // The gallery animates in on scroll with opacity and a blur filter. A
+  // reveal that never fires leaves four invisible boxes and a screenshot that
+  // looks like an empty column, so assert the cells actually ended up opaque
+  // and that they hold real photos rather than the site's fallback stills.
+  const gallery = page.locator('[data-testid="home-preview-gallery"]');
+  await gallery.scrollIntoViewIfNeeded();
+  await page.waitForTimeout(1800);
+  const cells = await gallery.evaluate((el) => [...el.children].map((c) => ({
+    opacity: getComputedStyle(c).opacity,
+    src: c.querySelector('img')?.getAttribute('src') || '',
+    w: Math.round(c.getBoundingClientRect().width),
+  })));
+  ok(`${lng}: gallery has four cells`, cells.length === 4, `${cells.length}`);
+  ok(`${lng}: gallery cells finished fading in`, cells.every((c) => Number(c.opacity) > 0.9), cells.map((c) => c.opacity).join(','));
+  ok(`${lng}: gallery photos are real listings/businesses`, cells.every((c) => c.src && !/\/myisraelrental\/site\//.test(c.src)));
+  ok(`${lng}: gallery photos are distinct`, new Set(cells.map((c) => c.src)).size === cells.length);
+  // Padded to the cell, never cropped: many businesses upload a flyer as their
+  // cover, and cropping one into a portrait cell takes the first and last
+  // letter off every line.
+  ok(`${lng}: gallery photos are padded, not cropped`, cells.every((c) => /c_pad,b_auto/.test(c.src)));
+
   const h1 = page.locator('[data-testid="home-preview-hero"] h1');
   const font = await h1.evaluate((el) => getComputedStyle(el).fontFamily);
   ok(`${lng}: heading font is ${lng === 'he' ? 'Frank Ruhl Libre' : 'Playfair Display'}`,

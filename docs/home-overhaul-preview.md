@@ -7,10 +7,19 @@ for a decision.
 ## What it is
 
 A home page whose hero is the site's own supply. Two rails of cards ride out of
-a vanishing point toward the viewer; every card is a live listing or a live
-business, pulled from the same public endpoints the boards use. Beneath it:
-search doors, a featured-rentals rail, a businesses rail, how-it-works, the
-supply band, and the finale the current page already ends with.
+a vanishing point toward the viewer on a white ground; every card is a live
+listing or a live business, pulled from the same public endpoints the boards
+use. Beneath it: search doors, a featured-rentals rail, a businesses rail,
+how-it-works, a supply-side CTA with a four-photo gallery, and the finale the
+current page already ends with.
+
+The hero is **white** (Tzvi, 3 September; it was the deep brand blue). That is
+not only a fill: the type flips to ink with the on-light display gold, the
+CTAs stop being the white/outline-white pair that exists for a hero photo, and
+the fixed nav — white text in translucent bubbles under a dark gradient — has
+to change with it or it is white on white. The page marks the body while it is
+mounted and `home-v2.css` carries a light nav variant scoped to that mark, so
+no other page is touched and the nav's own file is unchanged.
 
 The argument for it over the cinematic page: the cinematic page's seven scenes
 are generated stills of nobody's apartment. This one shows a visitor, in the
@@ -30,6 +39,8 @@ is "Add your business — free" rather than anything addressed to owners.
 | `frontend/src/components/home/useHomeShowcase.js` | One fetch of each public list, three views over it: the corridor's cards, the rentals rail, the businesses rail. |
 | `frontend/src/pages/HomePreview.jsx` | The page. |
 | `frontend/src/styles/home-v2.css` | Its styles, namespaced `hv2-` so they cannot collide with the cinematic page's `.finale` / `.kick`, which this page reuses unchanged. |
+| `frontend/src/components/ui/cta-section-with-gallery.jsx` | The supply-side CTA's staggered text column and offset four-cell photo grid. Also ported from TypeScript. Needs `motion`, the one dependency added; it lands in this page's lazy chunk, and the entry bundle did not move. |
+| `frontend/src/utils/cdnImage.js` | Gained `framedImage`, which fits a whole image into a fixed box and pads the rest. |
 | `scripts/check-home-preview.mjs` | The browser check. |
 
 ## Two things worth knowing before changing it
@@ -69,6 +80,25 @@ and every imported listing's photo is one folder deeper. It reported a broken
 hero that was in fact showing ten real listings. The assertion that survives
 excludes the fallback set by name, since that is the actual thing being ruled
 out.
+
+## The gallery pads its photos rather than cropping them
+
+Many businesses upload a **flyer** as their cover, not a photograph. Fitting a
+wide flyer into the gallery's portrait cell by cropping took the first and last
+letters off every line: the section shipped reading "sach & / ar round / tchen
+/ shering". A content-aware crop (`c_fill,g_auto`) was better and still wrong —
+on that same flyer it locked onto the person and cut the words anyway.
+
+`framedImage` pads instead, with `b_auto` filling the remainder from a colour
+sampled out of the image, so a flyer reads as a framed flyer and a photo that
+already fits the box is untouched. Nothing is ever cut. The check asserts the
+transform, because the failure is legible only by reading the words in the
+picture.
+
+Motion is configured with `reducedMotion="user"`, which drops transform and
+layout animation for anyone who asked for less movement while letting the fade
+run. The alternative — disabling the animation outright — is how content that
+starts at `opacity: 0` never appears at all.
 
 ## Running it
 

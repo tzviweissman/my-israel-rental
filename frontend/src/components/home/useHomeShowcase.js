@@ -22,10 +22,14 @@ import axios from 'axios';
 
 import { API } from '../../lib/apiBase';
 import SITE_ASSETS from '../../lib/siteAssets';
-import { sizedImage } from '../../utils/cdnImage';
+import { framedImage, sizedImage } from '../../utils/cdnImage';
 import { getGigCover } from '../../utils/gigAvailability';
 
 const CARD_WIDTH = 520;
+// The gallery's cells are a fixed portrait box, so its photos are fitted into
+// that box and padded rather than cropped — see framedImage.
+const GALLERY_W = 700;
+const GALLERY_H = 900;
 
 const FALLBACK_STILLS = [
   'scene2-villa-approach',
@@ -91,5 +95,20 @@ export default function useHomeShowcase() {
     return out.length >= 4 ? out : FALLBACK_STILLS;
   }, [rentals, businesses]);
 
-  return { loaded, streamImages, rentals: rentals.slice(0, 6), businesses: businesses.slice(0, 8) };
+  // Four photos for the supply-side gallery: two businesses, two rentals,
+  // taken from deeper in each list than the rails show so the same photo is
+  // not on screen twice in one scroll.
+  const gallery = useMemo(() => {
+    const b = businesses.slice(8, 12).map((g) => framedImage(getGigCover(g), GALLERY_W, GALLERY_H));
+    const r = rentals.slice(6, 10).map((p) => framedImage(propertyPhoto(p), GALLERY_W, GALLERY_H));
+    const out = [b[0], r[0], b[1], r[1]].filter(Boolean);
+    // Short lists fall back to the front of each, then to the site stills, so
+    // the grid is never a row of empty boxes.
+    const spare = [...businesses, ...rentals].map((x) => framedImage(getGigCover(x) || propertyPhoto(x), GALLERY_W, GALLERY_H));
+    for (const u of spare) { if (out.length >= 4) break; if (u && !out.includes(u)) out.push(u); }
+    for (const f of FALLBACK_STILLS) { if (out.length >= 4) break; out.push(f.src); }
+    return out.slice(0, 4);
+  }, [rentals, businesses]);
+
+  return { loaded, streamImages, gallery, rentals: rentals.slice(0, 6), businesses: businesses.slice(0, 8) };
 }
