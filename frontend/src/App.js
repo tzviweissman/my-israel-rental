@@ -7,6 +7,11 @@ import { useTranslation } from 'react-i18next';
 import axios from 'axios';
 import './i18n';
 import '@/App.css';
+// The flow theme, LAST of all the stylesheets. It overrides token values and
+// a handful of button rules that App.css also defines, and App.css evaluates
+// after everything index.js imports - so loading the theme there left the old
+// gold buttons winning on equal specificity. See styles/theme-flow.css.
+import '@/styles/theme-flow.css';
 
 import Navigation from './components/Navigation';
 import ImpersonationBanner from './components/ImpersonationBanner';

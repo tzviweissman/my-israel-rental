@@ -69,12 +69,12 @@ ok('it tells the customer to mention it', await page.locator('[data-testid="gig-
 const body = await page.innerText('body');
 ok('the price is still the price the business wrote', /200/.test(body) && !/150/.test(body));
 
-// The badge is the accent pairing, never green (green is status here).
+// The badge is the palette's accent chip, never green (green is status here).
 const colours = await badge.evaluate((el) => {
   const cs = getComputedStyle(el);
   return { bg: cs.backgroundColor, fg: cs.color };
 });
-ok('the badge is gold with ink text', colours.bg === 'rgb(201, 162, 39)' && colours.fg === 'rgb(35, 32, 27)', JSON.stringify(colours));
+ok('the badge is the accent wash with ink text', colours.bg === 'rgba(36, 175, 235, 0.33)' && colours.fg === 'rgb(17, 24, 39)', JSON.stringify(colours));
 
 // ---- the services board card carries the chip ----
 await page.goto(`${APP}/businesses?q=${encodeURIComponent(title)}`, { waitUntil: 'networkidle' });

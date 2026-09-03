@@ -87,9 +87,9 @@ export const AntiMetalButton = React.forwardRef(
       className,
       children,
       label,
-      accentFrom = "#D4AC33",
-      accentTo = "#C9A227",
-      dotColor = "#23201B",
+      accentFrom = "#3FB6EE",
+      accentTo = "#1C8DD4",
+      dotColor = "#FFFFFF",
       ...props
     },
     ref,
@@ -101,7 +101,7 @@ export const AntiMetalButton = React.forwardRef(
         ref={ref}
         className={cn(
           "group/btn relative inline-flex h-11 w-36 overflow-hidden rounded-xl transition-transform active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background",
-          "bg-[linear-gradient(180deg,#1E5F8C_0%,#123B57_100%)] shadow-[inset_0_1px_0_rgba(255,255,255,0.14),0_4px_12px_rgba(18,59,87,0.22)]",
+          "bg-[linear-gradient(180deg,#111827_0%,#000000_100%)] shadow-[inset_0_1px_0_rgba(255,255,255,0.14),0_4px_12px_rgba(0,0,0,0.18)]",
           className,
         )}
         {...props}
@@ -121,7 +121,7 @@ export const AntiMetalButton = React.forwardRef(
           }
         `}</style>
 
-        <span className="absolute inset-y-0 end-4 z-20 flex items-center text-[14px] font-semibold tracking-tight text-white transition-colors duration-150 delay-150 group-hover/btn:text-[#23201B]">
+        <span className="absolute inset-y-0 end-4 z-20 flex items-center text-[14px] font-semibold tracking-tight text-white transition-colors duration-150 delay-150 group-hover/btn:text-white">
           {content}
         </span>
 

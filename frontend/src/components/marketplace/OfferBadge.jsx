@@ -11,9 +11,10 @@
  * wrote them, and the offer is applied when the two people agree the job.
  * See the note in backend/routes/marketplace/shared.py (GigDiscount).
  *
- * Gold with ink text, which is the accent pairing the design system defines
- * and the one that measures 6.71:1. Never green: green is functional here,
- * reserved for status and verification.
+ * The accent wash with ink text - the pairing the flow theme's own palette
+ * specifies (`--accent` with `--accent-foreground`), which composites to
+ * about 12:1 on white. Never green: green is functional here, reserved for
+ * status and verification.
  */
 import React from 'react';
 import { useTranslation } from 'react-i18next';
@@ -38,7 +39,7 @@ export default function OfferBadge({ discount, variant = 'chip', className = '',
     return (
       <span
         className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-extrabold uppercase tracking-wide shadow ${className}`}
-        style={{ background: 'var(--gold)', color: 'var(--ink)' }}
+        style={{ background: 'var(--accent-soft)', color: 'var(--accent-soft-ink)' }}
         data-testid={testId || 'offer-badge'}
       >
         {pct}
@@ -49,7 +50,7 @@ export default function OfferBadge({ discount, variant = 'chip', className = '',
   return (
     <span
       className={`inline-flex flex-wrap items-baseline gap-2 rounded-lg px-3 py-2 ${className}`}
-      style={{ background: 'var(--gold)', color: 'var(--ink)' }}
+      style={{ background: 'var(--accent-soft)', color: 'var(--accent-soft-ink)' }}
       data-testid={testId || 'offer-badge'}
     >
       <b className="text-sm font-extrabold">{pct}</b>

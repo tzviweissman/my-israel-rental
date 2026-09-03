@@ -48,7 +48,7 @@
    structurally: the aria-hidden perspective layer, its preserve-3d child, and
    that child's children are the cards and nothing else. */
 .hv2-hero > div[aria-hidden] > div > div {
-  box-shadow: 0 10px 30px rgba(35, 32, 27, .18);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, .10), 0 12px 28px rgba(0, 0, 0, .10);
 }
 
 /* The scrim now fades the corridor INTO the page rather than darkening it:
@@ -91,6 +91,7 @@
 
 /* Doors */
 .hv2-doors-wrap { padding-bottom: 0; background: var(--bg); }
+.hv2-pad + .hv2-pad { border-top: 1px solid var(--brand-border); }
 .hv2-doors-head { text-align: center; font-size: clamp(24px, 3vw, 34px); font-weight: 500; margin-bottom: 26px; }
 .hv2-doors { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
 .hv2-door {
@@ -119,27 +120,30 @@
    `text-muted-foreground`), which are dark by design. On this section they are
    re-pointed rather than the component being edited, so it stays portable. */
 .hv2-picks {
-  background: var(--brand-primary-deep, #123B57);
-  color: #fff;
+  background: var(--surface);
+  color: var(--ink);
+  border-top: 1px solid var(--brand-border);
+  border-bottom: 1px solid var(--brand-border);
   padding: clamp(44px, 6vw, 76px) 0 clamp(36px, 5vw, 60px);
   overflow: clip;
 }
 .hv2-picks-head { text-align: center; max-width: 640px; margin: 0 auto; }
-.hv2-picks-head h2 { font-size: clamp(26px, 3.4vw, 42px); font-weight: 500; margin-top: 8px; color: #fff; }
-.hv2-picks-head p { margin-top: 10px; color: rgba(255, 255, 255, .78); font-size: 15px; }
-.hv2-coverflow .text-foreground { color: #fff; }
-.hv2-coverflow .text-muted-foreground { color: rgba(255, 255, 255, .72); }
-.hv2-coverflow dl > div { border-bottom: 1px solid rgba(255, 255, 255, .14); }
+.hv2-picks-head h2 { font-size: clamp(26px, 3.4vw, 42px); font-weight: 500; margin-top: 8px; color: var(--ink); }
+.hv2-picks-head p { margin-top: 10px; color: var(--brand-muted); font-size: 15px; }
+.hv2-coverflow .text-foreground { color: var(--ink); }
+.hv2-coverflow .text-muted-foreground { color: var(--brand-muted); }
+.hv2-coverflow dl > div { border-bottom: 1px solid var(--brand-border); }
 .hv2-coverflow dl > div:last-child { border-bottom: 0; }
 /* The component's nav buttons use `bg-background`, which is the light token. */
 .hv2-picks button[aria-label="Previous slide"],
 .hv2-picks button[aria-label="Next slide"] {
-  background: rgba(255, 255, 255, .16);
-  color: #fff;
-  border: 1px solid rgba(255, 255, 255, .3);
+  background: #fff;
+  color: var(--ink);
+  border: 1px solid var(--brand-border);
+  box-shadow: var(--shadow-sm);
 }
 .hv2-picks button[aria-label="Previous slide"]:hover,
-.hv2-picks button[aria-label="Next slide"]:hover { background: rgba(255, 255, 255, .3); }
+.hv2-picks button[aria-label="Next slide"]:hover { border-color: var(--brand-primary); }
 .hv2-picks-cta { display: flex; justify-content: center; margin-top: 22px; }
 
 /* Section heads and rails */
@@ -163,7 +167,11 @@
 .hv2-grid-3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px; }
 .hv2-grid-4 { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 20px 18px; }
 .hv2-empty { color: var(--brand-muted); grid-column: 1 / -1; }
-.hv2-biz-wrap { background: var(--surface); border-top: 1px solid var(--brand-border); border-bottom: 1px solid var(--brand-border); }
+/* Sections no longer alternate colour. They sit on the same white sheet
+   and are separated by a hairline, which is what makes the page read as one
+   document rather than a stack of panels. The only alternate ground is the
+   quiet grey, used to group - never to divide. */
+.hv2-biz-wrap { background: var(--surface-muted); border-top: 1px solid var(--brand-border); border-bottom: 1px solid var(--brand-border); }
 
 /* How it works */
 .hv2-how { text-align: center; }
@@ -190,7 +198,6 @@
 .hv2-cta {
   background: var(--surface);
   border-top: 1px solid var(--brand-border);
-  border-bottom: 1px solid var(--brand-border);
 }
 .hv2-cta-grid {
   display: grid;

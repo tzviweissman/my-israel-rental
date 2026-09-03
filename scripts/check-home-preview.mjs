@@ -22,6 +22,21 @@ const ok = (name, cond, detail = '') => {
   console.log(`  ${cond ? 'ok  ' : 'FAIL'} ${name}${cond || !detail ? '' : ' — ' + detail}`);
 };
 
+// Contrast, not a hex. These used to name the brand gold and the ink on it,
+// so the flow theme turned four correct buttons into four red lines. What the
+// design actually requires is that the label can be read against whatever is
+// behind it; assert that instead and the next palette change costs nothing.
+const channel = (c) => {
+  const v = c / 255;
+  return v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4;
+};
+const luminance = ([r, g, b]) => 0.2126 * channel(r) + 0.7152 * channel(g) + 0.0722 * channel(b);
+const rgb = (s) => (String(s).match(/\d+(\.\d+)?/g) || []).slice(0, 3).map(Number);
+const contrast = (a, b) => {
+  const [l1, l2] = [luminance(rgb(a)), luminance(rgb(b))].sort((x, y) => y - x);
+  return (l1 + 0.05) / (l2 + 0.05);
+};
+
 const browser = await chromium.launch();
 for (const lng of ['en', 'he']) {
   const page = await (await browser.newContext({ viewport: { width: 1280, height: 900 } })).newPage();
@@ -151,8 +166,12 @@ for (const lng of ['en', 'he']) {
   const openAfter = await page.locator('[data-testid="home-preview-pick-open"]').getAttribute('data-href');
   ok(`${lng}: stepping the carousel changes the named card`, capAfter !== capBefore, `${capBefore} -> ${capAfter}`);
   ok(`${lng}: and the button follows it`, openAfter !== openBefore && /^\/(businesses|property)\//.test(openAfter || ''), String(openAfter));
-  const dark = await picks.evaluate((el) => getComputedStyle(el.querySelector('h2')).color);
-  ok(`${lng}: its heading is legible on the dark band`, dark === 'rgb(255, 255, 255)', dark);
+  const band = await picks.evaluate((el) => ({
+    bg: getComputedStyle(el).backgroundColor,
+    heading: getComputedStyle(el.querySelector('h2')).color,
+  }));
+  ok(`${lng}: its heading reads against the section behind it`,
+    contrast(band.heading, band.bg) >= 4.5, `${contrast(band.heading, band.bg).toFixed(2)}:1 ${JSON.stringify(band)}`);
 
   const primary = page.locator('[data-testid="home-preview-cta-primary"]');
   ok(`${lng}: the CTA's primary button is there`, await primary.count() === 1);
@@ -164,9 +183,12 @@ for (const lng of ['en', 'he']) {
     // returns null and fails a button that is the right colour.
     return { bg: cs.backgroundImage, dot: getComputedStyle(el.querySelector('circle')).fill };
   });
-  // Site colours, not the source component's lime and near-black.
-  ok(`${lng}: the button's sweep is brand gold`, /212, 172, 51|201, 162, 39/.test(sweep.bg), sweep.bg.slice(0, 80));
-  ok(`${lng}: its dots are ink`, sweep.dot === 'rgb(35, 32, 27)', sweep.dot);
+  // Site colours, not the source component's lime and near-black: the sweep
+  // takes the accent and the dots have to be visible on it.
+  ok(`${lng}: the button's sweep is the accent, not the source's lime`,
+    /28, 141, 212|63, 182, 238/.test(sweep.bg) && !/214, 245, 74/.test(sweep.bg), sweep.bg.slice(0, 90));
+  ok(`${lng}: its dots read against the sweep`,
+    contrast(sweep.dot, 'rgb(28,141,212)') >= 3, `${contrast(sweep.dot, 'rgb(28,141,212)').toFixed(2)}:1 ${sweep.dot}`);
   // Hovered, the gold panel covers the whole button. The label has to still be
   // there and still be readable — in the source it is wiped out by the sweep,
   // leaving a blank button at the moment of the click.
@@ -177,7 +199,9 @@ for (const lng of ['en', 'he']) {
     return { text: label.textContent.trim(), color: getComputedStyle(label).color };
   });
   ok(`${lng}: the label survives the hover sweep`, hovered.text.length > 1, hovered.text);
-  ok(`${lng}: and turns ink so it reads on the gold`, hovered.color === 'rgb(35, 32, 27)', hovered.color);
+  ok(`${lng}: and still reads against the sweep under it`,
+    contrast(hovered.color, 'rgb(28,141,212)') >= 3,
+    `${contrast(hovered.color, 'rgb(28,141,212)').toFixed(2)}:1 ${hovered.color}`);
 
   const h1 = page.locator('[data-testid="home-preview-hero"] h1');
   const font = await h1.evaluate((el) => getComputedStyle(el).fontFamily);

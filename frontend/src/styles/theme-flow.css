@@ -1,0 +1,154 @@
+/* ── Flow theme (3 September 2026) ───────────────────────────────────────
+   Tzvi: "our website doesn't look like it flows, there's blue and white and
+   tan, each part seems separate." The reference was a landing page that is
+   ONE white sheet from top to bottom, where structure comes from hairlines
+   and whitespace rather than from a different coloured block per section.
+
+   This file repoints the brand tokens to the palette he supplied. It loads
+   AFTER design-tokens.css and overrides values only — no new selectors, no
+   component rules — so the whole theme is one file to revert.
+
+   TWO THINGS IN THE SUPPLIED BLOCK COULD NOT BE USED AS WRITTEN:
+
+   1. `--foreground: transparent` and `--card-foreground: transparent`.
+      Applied literally, every piece of text on the site disappears. It is
+      an export artefact of the tool the palette came out of. The ink here
+      is #111827, which is the same block's own `--accent-foreground`, so
+      the value is still the palette's rather than invented.
+
+   2. `--primary`, `--border` and `--muted` are shadcn's names in this app
+      and are HSL TRIPLETS consumed as `hsl(var(--primary))`. Writing a hex
+      into them makes `hsl(#000000)` — invalid, dropped, and every shadcn
+      button silently loses its fill. The shadcn half of the palette is set
+      in index.css in triplet form; nothing here touches those three names.
+
+   WHY THE `--gold*` NAMES NOW HOLD BLUE. The supplied palette has no gold.
+   Roughly two hundred call sites across the app say `var(--gold)` meaning
+   "the accent", and renaming them all is a sweep, not a theme change. So
+   the accent tokens keep their historical names and hold the new accent
+   colour. Read `--gold` as "the accent" wherever you meet it. The one gold
+   left on the site is the logo mark, which is an image and reads as a mark
+   rather than as part of the palette. */
+
+:root {
+  /* Grounds. Two, not four: white is the page, and #F9FAFB is the only
+     alternate — used sparingly, to group rather than to divide. The tan
+     limestone and the deep blue band are both gone; they were what made
+     each section read as a separate site. */
+  --bg: #FFFFFF;
+  --surface: #FFFFFF;
+  --surface-muted: #F9FAFB;
+
+  /* Ink and its quiet half. */
+  --ink: #111827;
+  --brand-muted: #666666;
+
+  /* The hairline that does the dividing now. */
+  --brand-border: #E3E3E3;
+  --input-border: #EBEBEB;
+
+  /* Accent — the supplied `--secondary`. Links, icons, focus, chips. */
+  --brand-primary: #1C8DD4;
+  --brand-primary-dark: #167AB8;
+  --brand-primary-deep: #0F5E8F;
+  --brand-primary-rgb: 28 141 212;
+  --teal: #1C8DD4;
+  --teal-dark: #167AB8;
+  --teal-deep: #0F5E8F;
+
+  /* Soft accent wash, straight from the palette, and the ink that sits on
+     it. Composited over white it is ~#B7E5F8, and #111827 on that is about
+     12:1 — the pairing the block itself specifies. */
+  --accent-soft: rgba(36, 175, 235, 0.33);
+  --accent-soft-ink: #111827;
+
+  /* Solid actions are black on white, per the palette's `--primary`. This
+     is the single strongest thing on the page, which is why the accent
+     blue is left to do the quieter work. */
+  --action: #000000;
+  --action-ink: #FFFFFF;
+  --action-hover: #1F2937;
+
+  /* Historical accent names — see the note above. They hold the accent
+     now, not gold. `--gold-text-on-light` is a THIRD gold name, defined in
+     App.css rather than in the tokens, and it is the one every listing
+     price on the site reads. Missing it left prices amber on an otherwise
+     blue-and-black page, which is exactly the "three colours that do not
+     agree" complaint this theme exists to answer. */
+  --gold-text-on-light: #0F5E8F;
+  --gold: #1C8DD4;
+  --gold-rgb: 28 141 212;
+  --gold-text: #0F5E8F;   /* small accent text on light */
+  --gold-lg: #167AB8;     /* display accent on light */
+
+  /* Radii. The palette's 0.5rem, scaled up only where a card would look
+     wrong at 8px. Flatter than the old 18-26px, which is most of why the
+     old page read as a stack of separate panels. */
+  --radius-tile: 8px;
+  --radius-card: 12px;
+  --radius-panel: 12px;
+  --radius-hero: 16px;
+  --r: 12px;
+
+  /* Shadows, near enough gone. The supplied block is 1px at 18% opacity;
+     on a white sheet a hairline does the separating and a heavy shadow
+     re-introduces the boxed look. */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, .06);
+  --shadow-md: 0 1px 3px rgba(0, 0, 0, .10), 0 8px 24px rgba(0, 0, 0, .06);
+  --shadow-lg: 0 1px 3px rgba(0, 0, 0, .10), 0 20px 48px rgba(0, 0, 0, .10);
+}
+
+/* Solid buttons follow the palette: black fill, white text. `.btn-primary`
+   and `.btn-teal` are the same button under two historical names. */
+.btn-primary,
+.btn-teal {
+  background: var(--action);
+  color: var(--action-ink);
+  border-color: var(--action);
+}
+.btn-primary:hover,
+.btn-teal:hover {
+  background: var(--action-hover);
+  border-color: var(--action-hover);
+}
+
+/* The accent button is the soft wash with ink on it, not a second solid.
+   Two solid fills competing in one row is the other half of "nothing
+   flows". */
+.btn-accent,
+.btn-gold,
+.btn-accent--ink {
+  background: var(--accent-soft);
+  color: var(--accent-soft-ink);
+  border: 1.5px solid rgba(36, 175, 235, .55);
+}
+.btn-accent:hover,
+.btn-gold:hover,
+.btn-accent--ink:hover {
+  background: rgba(36, 175, 235, .5);
+  border-color: rgba(36, 175, 235, .8);
+}
+
+/* The finale keeps its shape but loses the tan ground and the gold word. */
+.finale { background: var(--surface-muted); }
+.finale h2 { color: var(--ink); }
+.finale h2 .a { color: var(--brand-primary); }
+.b-blue { background: var(--action); color: var(--action-ink); }
+.b-gold {
+  background: var(--accent-soft);
+  color: var(--accent-soft-ink);
+  border: 1.5px solid rgba(36, 175, 235, .55);
+  text-shadow: none;
+}
+
+/* Three chips carry a tan fill hardcoded in App.css (#F6EFD9) to pair with
+   the old gold text: the rating badge on a service card, the "service" badge
+   on a request card, and the rental type tag. Left alone they are the last
+   tan on the page. */
+.svc-badge-rating,
+.rc-badge-service,
+.svc-cta-offer {
+  background: var(--accent-soft);
+  color: var(--accent-soft-ink);
+  border-color: rgba(36, 175, 235, .55);
+}
