@@ -20,10 +20,13 @@
  *    MotionValue from its parent, which is also what lets the words beside
  *    it move in step — one scroll, two things responding.
  *
- * 2. NO INTRO TIMERS. The source runs scatter → line → circle on
- *    setTimeout, so the whole show plays out while the section is still far
- *    below the fold and is over before anybody sees it. The ring is its
- *    resting state and the scroll does the rest.
+ * 2. THE INTRO IS DRIVEN BY SCROLL, NOT TIMERS. The source runs
+ *    scatter → line → circle on setTimeout, which in a page means the whole
+ *    opening plays out while the section is still far below the fold and is
+ *    finished before anyone sees it. Cutting it altogether was worse: it is
+ *    most of the scene. Every stage is a slice of the scroll instead, so the
+ *    cards scatter in, gather into a line, close into the ring, open into
+ *    the rainbow and then sweep — in that order, at the reader's pace.
  *
  * 3. ITS OWN COPY IS GONE. The headings the source draws over the cards
  *    belong to the page here, on the other side of the section.
@@ -41,6 +44,35 @@ const IMG_HEIGHT = 85;
 
 /** Linear interpolation. */
 const lerp = (start, end, t) => start * (1 - t) + end * t;
+
+/** Where one stage ends and the next begins, as a fraction of the scroll. */
+const SCATTER_END = 0.12;   // scattered  → line
+const LINE_END = 0.30;      // line       → ring
+const RING_END = 0.72;      // ring       → rainbow
+                            // rainbow    → sweeps to the end
+
+/**
+ * The scattered starting position for card `i`.
+ *
+ * Deterministic, not `Math.random()`. The source randomises on mount, which
+ * means the cards land somewhere different on every render — and because
+ * this component re-renders on every scroll frame, a random scatter would
+ * jitter the whole field instead of holding still. A hash of the index gives
+ * the same disorder every time.
+ */
+function scatterAt(index, w, h) {
+  const rand = (salt) => {
+    const x = Math.sin((index + 1) * 12.9898 + salt * 78.233) * 43758.5453;
+    return x - Math.floor(x);
+  };
+  return {
+    x: (rand(1) - 0.5) * w * 1.9,
+    y: (rand(2) - 0.5) * h * 1.7,
+    rotation: (rand(3) - 0.5) * 180,
+    scale: 0.55,
+    opacity: 0,
+  };
+}
 
 /**
  * @typedef {Object} MorphCard
@@ -62,7 +94,11 @@ function FlipCard({ card, index, target, reduced, onOpen }) {
       {/* Front */}
       <div
         className="absolute inset-0 h-full w-full overflow-hidden rounded-xl shadow-lg"
-        style={{ backfaceVisibility: "hidden", background: "var(--surface-muted, #f9fafb)" }}
+        style={{
+          backfaceVisibility: "hidden",
+          WebkitBackfaceVisibility: "hidden",
+          background: "var(--surface-muted, #f9fafb)",
+        }}
       >
         <img
           src={card.src}
@@ -80,6 +116,7 @@ function FlipCard({ card, index, target, reduced, onOpen }) {
         className="absolute inset-0 h-full w-full overflow-hidden rounded-xl shadow-lg flex flex-col items-center justify-center p-2 text-center"
         style={{
           backfaceVisibility: "hidden",
+          WebkitBackfaceVisibility: "hidden",
           transform: "rotateY(180deg)",
           background: "var(--ink, #111827)",
           color: "#fff",
@@ -150,12 +187,9 @@ export default function ScrollMorphCards({ cards, progress, reduced = false, onO
   });
 
   const total = cards.length;
-  // The ring becomes the arch over the first 62% and the arch then drifts a
-  // little to 95%. Both finish BEFORE the words do, which is the order asked
-  // for: the passage should still be arriving when the picture has settled,
-  // not the other way round.
-  const morph = reduced ? 1 : Math.min(1, Math.max(0, value / 0.62));
-  const sweep = reduced ? 0 : Math.min(1, Math.max(0, (value - 0.62) / 0.33));
+  // Stage progress. `reduced` pins the whole thing to its finished state:
+  // the rainbow, formed, with nothing moving.
+  const v = reduced ? 1 : Math.min(1, Math.max(0, value));
 
   return (
     <div
@@ -166,25 +200,41 @@ export default function ScrollMorphCards({ cards, progress, reduced = false, onO
       <div className="relative flex h-full w-full items-center justify-center">
         {cards.map((card, i) => {
           const isMobile = size.width < 768;
-          const minDimension = Math.min(size.width, size.height) || 400;
+          const w = size.width || 400;
+          const h = size.height || 400;
+          const minDimension = Math.min(w, h);
+
+          // ── the four resting shapes ────────────────────────────────
+          const scatter = scatterAt(i, w, h);
+
+          // A line across the middle. The spacing packs the whole set into
+          // the frame's width whatever the count, so it reads as one row
+          // rather than running off both sides.
+          const lineSpacing = Math.min(IMG_WIDTH + 10, (w * 0.92) / total);
+          const line = {
+            x: (i - (total - 1) / 2) * lineSpacing,
+            y: 0,
+            rotation: 0,
+            scale: 1,
+            opacity: 1,
+          };
 
           // The ring fills its frame. It was capped at 260px, which on a
-          // 640px stage drew a modest circle floating in white space - the
+          // 660px stage drew a modest circle floating in white space - the
           // reference fills the frame edge to edge, and "you're not showing
           // the entire scene" is what a shrunken one looks like.
           const circleRadius = minDimension * 0.42;
           const circleAngle = (i / total) * 360;
           const circleRad = (circleAngle * Math.PI) / 180;
-          const circlePos = {
+          const circle = {
             x: Math.cos(circleRad) * circleRadius,
             y: Math.sin(circleRad) * circleRadius,
             rotation: circleAngle + 90,
+            scale: 1,
+            opacity: 1,
           };
 
           const spreadAngle = isMobile ? 116 : 130;
-          const halfSpreadRad = ((spreadAngle / 2) * Math.PI) / 180;
-          const w = size.width || 400;
-          const h = size.height || 400;
 
           // A WIDE, SHALLOW RAINBOW that spans the frame, with its ends
           // running off the sides. An earlier version solved for an arch that
@@ -192,47 +242,52 @@ export default function ScrollMorphCards({ cards, progress, reduced = false, onO
           // card, which produced a small tidy arc adrift in white space. The
           // reference crops at both edges on purpose: that is what makes it
           // read as one big shape rather than a row of pictures.
-          //
-          // Half the arch's width is r·cos(25°) ≈ 0.906r, so a radius of
-          // ~0.62w puts the ends a little past the frame.
           const arcRadius = Math.max(240, w * 0.8);
           // The cards are positioned from the CENTRE of the box, not its top,
           // so the source's `apex + radius` pushed the whole arch down by half
-          // the container. Placing the crown just above centre leaves the ends
-          // dropping toward the bottom corners, which is the reference shape.
-          // The crown sits just below the middle of the frame, which drops the
-          // ends into the bottom corners and crops them there - the shape in
-          // the reference. Placing the crown high instead left the whole
-          // lower half of the stage empty.
+          // the container. The crown sits a little above centre, which drops
+          // the ends toward the bottom corners where the frame clips them.
           const arcCenterY = arcRadius - h * (isMobile ? 0.02 : 0.08);
           const startAngle = -90 - spreadAngle / 2;
           const step = spreadAngle / Math.max(total - 1, 1);
-          // 0.12, well under the source's 0.8. The original is a full-screen
-          // hero where cards are meant to sweep off; at anything like that
-          // rotation a column-sized arch stops being a rainbow and becomes a
-          // tilted segment sliding out of frame. This is a nudge, enough to
-          // show the arch is still listening to the scroll.
-          const boundedRotation = -sweep * (spreadAngle * 0.12);
 
-          const currentArcAngle = startAngle + i * step + boundedRotation;
-          const arcRad = (currentArcAngle * Math.PI) / 180;
-          const arcPos = {
+          // The sweep is the last stage: the formed rainbow travels along its
+          // own curve. A nudge, not the source's full rotation, which on a
+          // frame this size carries every card out of view.
+          const sweep = v <= RING_END ? 0 : (v - RING_END) / (1 - RING_END);
+          const arcAngle = startAngle + i * step - sweep * (spreadAngle * 0.35);
+          const arcRad = (arcAngle * Math.PI) / 180;
+          const arc = {
             x: Math.cos(arcRad) * arcRadius,
             y: Math.sin(arcRad) * arcRadius + arcCenterY,
-            rotation: currentArcAngle + 90,
+            rotation: arcAngle + 90,
             // Back to the source's scale. The cards on the finished arch are
             // meant to be the biggest thing in the frame - at 1.25 on a wide
             // arch they read as thumbnails on a wire.
             scale: isMobile ? 1.35 : 1.8,
-          };
-
-          const target = {
-            x: lerp(circlePos.x, arcPos.x, morph),
-            y: lerp(circlePos.y, arcPos.y, morph),
-            rotation: lerp(circlePos.rotation, arcPos.rotation, morph),
-            scale: lerp(1, arcPos.scale, morph),
             opacity: 1,
           };
+
+          // ── which two shapes are we between, and how far ───────────
+          const blend = (a, bb, t) => ({
+            x: lerp(a.x, bb.x, t),
+            y: lerp(a.y, bb.y, t),
+            rotation: lerp(a.rotation, bb.rotation, t),
+            scale: lerp(a.scale, bb.scale, t),
+            opacity: lerp(a.opacity, bb.opacity, t),
+          });
+          const ease = (t) => t * t * (3 - 2 * t);
+
+          let target;
+          if (v < SCATTER_END) {
+            target = blend(scatter, line, ease(v / SCATTER_END));
+          } else if (v < LINE_END) {
+            target = blend(line, circle, ease((v - SCATTER_END) / (LINE_END - SCATTER_END)));
+          } else if (v < RING_END) {
+            target = blend(circle, arc, ease((v - LINE_END) / (RING_END - LINE_END)));
+          } else {
+            target = arc;
+          }
 
           return (
             <FlipCard

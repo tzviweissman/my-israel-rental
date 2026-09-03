@@ -36,6 +36,8 @@ import {
 import useFavorites from '../hooks/useFavorites';
 import ImageStreamHero from '../components/ui/image-stream-hero';
 import AntiMetalButton from '../components/ui/anti-metal-button';
+import LiquidButton from '../components/ui/liquid-button';
+import FlowButton from '../components/ui/flow-button';
 import CoverflowCarousel from '../components/ui/coverflow-carousel';
 import useHomeShowcase from '../components/home/useHomeShowcase';
 import CommunitySection from '../components/home/CommunitySection';
@@ -161,9 +163,17 @@ export default function HomePreview() {
           <div className="hv2-hero-foot">
             <p>{t('home.v2.hero.sub', 'Every card behind this text is a real listing or business on the site right now.')}</p>
             <div className="hv2-hero-ctas">
-              <button type="button" className="btn btn-primary" onClick={() => navigate('/stays')}>
+              {/* The liquid button is used ONCE on the page, here. This is
+                  the single action the home page most wants — a visitor
+                  searching for somewhere to live — and it is the one place a
+                  control that loud is answering a real question rather than
+                  competing with its neighbours. Its resting state is the
+                  theme's solid black action, so it belongs even before it is
+                  touched. */}
+              <LiquidButton onClick={() => navigate('/stays')} data-testid="home-preview-hero-primary">
                 {t('home.hero.ctaStays', 'Search rentals')}
-              </button>
+                <ArrowRight size={16} className="rtl:rotate-180" />
+              </LiquidButton>
               <button type="button" className="btn btn-ghost" onClick={() => navigate('/businesses')}>
                 {t('home.v2.hero.ctaBusinesses', 'Find a business')}
               </button>
@@ -217,6 +227,10 @@ export default function HomePreview() {
               slides={pickSlides}
               showCaption
               showNavigation
+              // Moves on its own, slowly, and stops the moment a pointer
+              // lands on it — including mid-drag, off screen, and for anyone
+              // who has asked for reduced motion.
+              autoplay={4200}
               showPagination={false}
               onSelect={setPick}
               label={t('home.v2.picks.h2', "Today's picks")}
@@ -251,9 +265,16 @@ export default function HomePreview() {
               <h2>{t('home.v2.rentals.h2', 'Featured rentals')}</h2>
               <p>{t('home.v2.rentals.p', 'Live listings, posted by the people who hold the keys.')}</p>
             </div>
-            <button type="button" className="hv2-more" onClick={() => navigate('/stays')}>
-              {t('home.v2.rentals.more', 'See all stays')} <ArrowRight size={16} className="rtl:rotate-180" />
-            </button>
+            {/* Flow buttons carry the repeated secondary actions. At rest
+                this is a hairline and a word, which is what a "see all" should
+                be next to six listings; the arrow it animates on hover is the
+                same arrow this control already had. */}
+            <FlowButton
+              text={t('home.v2.rentals.more', 'See all stays')}
+              onClick={() => navigate('/stays')}
+              className="shrink-0"
+              data-testid="home-preview-more-stays"
+            />
           </div>
           <div className="hv2-grid-3 reveal" data-testid="home-preview-rentals">
             {rentals.map((p) => (
@@ -282,9 +303,12 @@ export default function HomePreview() {
               <h2>{t('home.v2.biz.h2', 'The people who help you settle in')}</h2>
               <p>{t('home.v2.biz.p', 'Cleaners, movers, caterers, tutors and more — message them directly, no booking fees.')}</p>
             </div>
-            <button type="button" className="hv2-more" onClick={() => navigate('/businesses')}>
-              {t('home.v2.biz.more', 'See all businesses')} <ArrowRight size={16} className="rtl:rotate-180" />
-            </button>
+            <FlowButton
+              text={t('home.v2.biz.more', 'See all businesses')}
+              onClick={() => navigate('/businesses')}
+              className="shrink-0"
+              data-testid="home-preview-more-businesses"
+            />
           </div>
           <div className="hv2-grid-4 reveal" data-testid="home-preview-businesses">
             {businesses.map((g) => (

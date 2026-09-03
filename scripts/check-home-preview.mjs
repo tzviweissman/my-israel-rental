@@ -300,6 +300,40 @@ for (const lng of ['en', 'he']) {
   ok(`${lng}: the page still scrolls with the pointer over the ring`, afterWheel > beforeWheel,
     `${beforeWheel} -> ${afterWheel}`);
 
+  // ── the two button treatments ──────────────────────────────────────
+  // The liquid button appears exactly once, on the hero's main action. Its
+  // whole justification is being the loudest control on the page, which only
+  // holds while there is one of it.
+  const liquid = page.locator('[data-testid="home-preview-hero-primary"]');
+  ok(`${lng}: the hero's main action is the liquid button`, await liquid.count() === 1);
+  await page.evaluate(() => window.scrollTo(0, 0));
+  await page.waitForTimeout(500);
+  const liquidRest = await liquid.evaluate((el) => getComputedStyle(el.querySelector('span[aria-hidden]')).transform);
+  await liquid.hover();
+  await page.waitForTimeout(900);
+  const liquidHover = await liquid.evaluate((el) => getComputedStyle(el.querySelector('span[aria-hidden]')).transform);
+  ok(`${lng}: its liquid rises on hover`, liquidRest !== liquidHover, `${liquidRest} -> ${liquidHover}`);
+
+  for (const [name, id] of [['stays', 'home-preview-more-stays'], ['businesses', 'home-preview-more-businesses']]) {
+    const flow = page.locator(`[data-testid="${id}"]`);
+    await flow.scrollIntoViewIfNeeded();
+    // Park the pointer in the corner first. The page scrolls under a
+    // stationary mouse, so the second of these buttons can arrive already
+    // under it - and its "before hover" reading was the hovered one.
+    await page.mouse.move(5, 5);
+    await page.waitForTimeout(700);
+    const beforeW = await flow.evaluate((el) => getComputedStyle(el.querySelectorAll('span')[1]).width);
+    await flow.hover();
+    await page.waitForTimeout(900);
+    const afterHover = await flow.evaluate((el) => ({
+      w: getComputedStyle(el.querySelectorAll('span')[1]).width,
+      color: getComputedStyle(el).color,
+    }));
+    ok(`${lng}: the ${name} "see all" floods on hover`,
+      parseFloat(afterHover.w) > parseFloat(beforeW) + 100, `${beforeW} -> ${afterHover.w}`);
+    ok(`${lng}: and its label turns white on the fill`, afterHover.color === 'rgb(255, 255, 255)', afterHover.color);
+  }
+
   const primary = page.locator('[data-testid="home-preview-cta-primary"]');
   ok(`${lng}: the CTA's primary button is there`, await primary.count() === 1);
   // One door, not two. A visitor should not have to classify themselves as a

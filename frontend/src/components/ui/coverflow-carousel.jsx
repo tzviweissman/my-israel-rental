@@ -6,10 +6,20 @@
  * already installed. The geometry, the fold-the-ring looping and the settle
  * are the author's, unchanged.
  *
- * ONE ADDITION: an optional `onSelect(index)`, fired whenever the centre card
- * changes. The component names the centred slide in its caption but gives a
- * caller no way to act on it, and a carousel of real listings that cannot be
- * opened is a dead end. Callers use it to render their own control below.
+ * TWO ADDITIONS:
+ *
+ * 1. `onSelect(index)`, fired whenever the centre card changes. The component
+ *    names the centred slide in its caption but gives a caller no way to act
+ *    on it, and a carousel of real listings that cannot be opened is a dead
+ *    end. Callers use it to render their own control below.
+ *
+ * 2. `autoplay`, which advances it slowly on its own and STOPS while the
+ *    pointer is on it. Three things stop it besides the pointer, and each
+ *    matters: a drag in progress (fighting the reader's own hand is the
+ *    worst thing a carousel can do), the section being off screen (a timer
+ *    animating twelve cards nobody is looking at), and
+ *    `prefers-reduced-motion`, where movement that nobody asked for is
+ *    exactly what the setting is about.
  */
 "use client";
 
@@ -59,6 +69,7 @@ export function CoverflowCarousel({
   cardWidth = "clamp(148px, 22vw, 260px)",
   gap = 0.05,
   loop = true,
+  autoplay = false,
   showCaption = false,
   showPagination = false,
   showNavigation = false,
@@ -81,6 +92,10 @@ export function CoverflowCarousel({
   const dragRef = React.useRef(null);
 
   const [selected, setSelected] = React.useState(0);
+  // Anything that should hold the carousel still: the pointer resting on it,
+  // a drag under way, or the section being scrolled out of view.
+  const [held, setHeld] = React.useState(false);
+  const [onScreen, setOnScreen] = React.useState(true);
 
   const onSelectRef = React.useRef(onSelect);
   onSelectRef.current = onSelect;
@@ -180,6 +195,7 @@ export function CoverflowCarousel({
   );
 
   const onPointerDown = (event) => {
+    setHeld(true);
     if (rafRef.current !== null) {
       cancelAnimationFrame(rafRef.current);
       rafRef.current = null;
@@ -217,6 +233,7 @@ export function CoverflowCarousel({
   const endDrag = (event) => {
     const drag = dragRef.current;
     if (!drag || drag.id !== event.pointerId) return;
+    setHeld(false);
     dragRef.current = null;
     // Let a flick carry, but never more than two cards.
     const carried = Math.max(-2, Math.min(2, drag.v * 0.18));
@@ -249,6 +266,34 @@ export function CoverflowCarousel({
     [],
   );
 
+  // Off-screen carousels do not animate. Without this the timer keeps
+  // stepping twelve cards, and their springs keep painting, for a reader who
+  // is four sections further down the page.
+  React.useEffect(() => {
+    const frame = frameRef.current;
+    if (!frame || typeof IntersectionObserver === "undefined") return undefined;
+    const io = new IntersectionObserver(
+      ([entry]) => setOnScreen(entry.isIntersecting),
+      { threshold: 0.2 },
+    );
+    io.observe(frame);
+    return () => io.disconnect();
+  }, []);
+
+  // The autoplay itself. `settle` already animates to the next whole card, so
+  // this is one step on a timer rather than a second animation.
+  React.useEffect(() => {
+    if (!autoplay || held || !onScreen) return undefined;
+    const reduced =
+      typeof window !== "undefined" &&
+      window.matchMedia &&
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (reduced) return undefined;
+    const every = typeof autoplay === "number" ? autoplay : 4200;
+    const id = setInterval(() => nudge(1), every);
+    return () => clearInterval(id);
+  }, [autoplay, held, onScreen, nudge]);
+
   const active = slides[selected];
 
   return (
@@ -267,6 +312,11 @@ export function CoverflowCarousel({
           onPointerMove={onPointerMove}
           onPointerUp={endDrag}
           onPointerCancel={endDrag}
+          onPointerEnter={() => setHeld(true)}
+          onPointerLeave={() => setHeld(false)}
+          onFocus={() => setHeld(true)}
+          onBlur={() => setHeld(false)}
+          data-autoplay={autoplay ? (held ? "held" : "running") : "off"}
           onKeyDown={(event) => {
             if (event.key === "ArrowLeft") {
               event.preventDefault();
