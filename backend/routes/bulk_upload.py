@@ -33,7 +33,11 @@ from models_response import (
     BulkImagesAttachResponse,
     BulkParseResponse,
 )
-from routes.deps import UPLOAD_DIR, db, verify_token
+# `logger` is used by the per-row except handler below (row_error) and by
+# the LLM-parse fallback, and was never imported: the first failing row
+# raised NameError inside the handler and the whole commit 500'd, instead
+# of that row landing in `skipped`. Same defect as admin_import/properties.
+from routes.deps import UPLOAD_DIR, db, logger, verify_token
 from utils.errors import api_error, row_error
 
 router = APIRouter()

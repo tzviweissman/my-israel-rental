@@ -85,12 +85,6 @@ async def send_email(
     """
     normalized_to = (to_email or "").strip().lower()
 
-    client = _get_client()
-    if client is None:
-        logger.error("Postmark email skipped — POSTMARK_SERVER_TOKEN not set (to=%s, subject=%s)", to_email, subject)
-        await _record_email_failure(normalized_to, subject, tag, "postmark_client_missing", "POSTMARK_SERVER_TOKEN not set")
-        return False
-
     # Check suppression list (writable via the /webhooks/postmark endpoint).
     # Lookup uses lowercased email to match the Postmark webhook's own
     # normalization — otherwise mixed-case user emails would silently
@@ -117,6 +111,18 @@ async def send_email(
         except Exception as e:  # noqa: BLE001
             # Don't block sends if suppression check fails
             logger.debug("Suppression check failed (non-fatal): %s", e)
+
+    # After the suppression check, not before it. A suppressed address is a
+    # fact about the RECIPIENT and must be recorded as "suppressed" whether
+    # or not Postmark is configured here; checking the client first turned
+    # every failure on an unconfigured box into "postmark_client_missing",
+    # which hid the suppression from the delivery-health view (and from the
+    # test that reads it).
+    client = _get_client()
+    if client is None:
+        logger.error("Postmark email skipped — POSTMARK_SERVER_TOKEN not set (to=%s, subject=%s)", to_email, subject)
+        await _record_email_failure(normalized_to, subject, tag, "postmark_client_missing", "POSTMARK_SERVER_TOKEN not set")
+        return False
 
     from_address = _from_address()
 

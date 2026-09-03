@@ -252,7 +252,11 @@ async def get_properties(
 
     # One malformed row must not take the whole list down - see
     # utils/property_rows.py for the outage this prevents.
-    properties = keep_valid_property_rows(properties, route="GET /properties", logger=logger)
+    # Public visitors never see a broken card; the OWNER'S OWN list (the
+    # dashboard's edit source) shows it, flagged, so they can fix it.
+    properties = keep_valid_property_rows(
+        properties, route="GET /properties", logger=logger, repair=is_owner_scoped,
+    )
 
     # Slim the list payload: the public listing grid renders only the
     # cover image per card, so shipping all 20-30 image URLs per

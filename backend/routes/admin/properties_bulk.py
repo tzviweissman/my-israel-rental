@@ -386,7 +386,9 @@ async def get_all_properties_admin(payload: dict = Depends(verify_token)) -> lis
     properties = await db.properties.find({}, {"_id": 0}).sort("created_at", -1).to_list(1000)
     # Same guard as the public list: one partial document must not 500 the
     # admin table - which is the tool an admin would use to FIND it.
-    properties = keep_valid_property_rows(properties, route="GET /admin/properties", logger=logger)
+    # SURFACED, not dropped: this table is where an admin would go to find
+    # and repair a broken row. See utils/property_rows.py.
+    properties = keep_valid_property_rows(properties, route="GET /admin/properties", logger=logger, repair=True)
 
     # Pull every admin block in one go and group by property
     blocks_by_prop: dict = {}
