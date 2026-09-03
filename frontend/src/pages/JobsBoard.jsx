@@ -235,6 +235,7 @@ const JobsBoard = () => {
                 key={j.id}
                 job={j}
                 t={t}
+                i18n={i18n}
                 locale={i18n.language}
                 onClick={() => { saveReturnPath(); navigate(`/businesses/jobs/${j.id}`); }}
               />
@@ -246,7 +247,7 @@ const JobsBoard = () => {
   );
 };
 
-const JobRow = ({ job, onClick, t, locale }) => {
+const JobRow = ({ job, onClick, t, i18n, locale }) => {
   const sym = job.budget_currency === 'USD' ? '$' : '₪';
   const budget = job.budget_type === 'fixed' && job.budget_amount
     ? `${sym}${Number(job.budget_amount).toLocaleString(locale)}`
