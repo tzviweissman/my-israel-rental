@@ -342,3 +342,19 @@ fit, logging the id at warning. The page works and the data problem is in
 the logs, instead of the data problem BEING the outage. And test seeds
 are cleaned up in `finally`, because the row that leaks is the row that
 was written before the assertion that failed.
+
+## 12. The empty state passed the check the full state would have failed
+
+A locale-aware title helper was wired into the jobs board's row component
+without being handed the `i18n` instance it needs; the page component had
+it, the row did not. Every row threw `ReferenceError: i18n is not defined`
+the moment a job existed. The build compiled (CRA does not fail the build
+on `no-undef`), the static checks passed, and every browser check that
+existed opened pages with nothing on them - the auth walk, the listing
+page, the logo flow - none of which renders a job row. It shipped, and an
+overnight audit caught it before a person did.
+
+**Rule:** a page with a list has two states and the check has to render the
+FULL one. A browser check that only ever sees the empty state is a check of
+the empty state. `scripts/check-jobs-board.mjs` posts a job first, then
+loads the board; the same discipline belongs to any check on a list page.
