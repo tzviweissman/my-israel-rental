@@ -2981,6 +2981,7 @@ const en = {
         // implying a guarantee we cannot keep.
         waHoursNotice: "Times shown are this business's opening hours — confirm with them directly.",
         contactHintWhatsApp: 'Customers open a WhatsApp chat with you directly.',
+        publishedTranslating: 'Published! The translation appears in a moment.',
         contactHintInPlatform: 'Requests arrive in your MyIsraelRental inbox — no phone number shared.',
         whatsappNumberLabel: 'WhatsApp number',
         whatsappConfirm: 'Yes — this number has WhatsApp',

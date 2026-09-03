@@ -24,6 +24,7 @@
  */
 import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { localizedTitle, localizedDescription } from '../utils/gigLocale';
 import { groupCategories, flattenGrouped } from '../lib/categoryGroups';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import axios from 'axios';
@@ -260,10 +261,10 @@ const JobRow = ({ job, onClick, t, locale }) => {
         {/* dir="auto" on both: a job is posted in Hebrew or English and
             the board shows them side by side, so the direction has to
             follow the text rather than the page. */}
-        <h3 className="text-base sm:text-lg font-bold text-gray-900 flex-1" dir="auto">{job.title}</h3>
+        <h3 className="text-base sm:text-lg font-bold text-gray-900 flex-1" dir="auto">{localizedTitle(job, i18n)}</h3>
         <span className="text-xs text-gray-400 whitespace-nowrap">{timeAgo(job.created_at, t, locale)}</span>
       </div>
-      <p className="text-sm text-gray-600 mt-1 line-clamp-2" dir="auto">{job.description}</p>
+      <p className="text-sm text-gray-600 mt-1 line-clamp-2" dir="auto">{localizedDescription(job, i18n)}</p>
       <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-3 text-xs text-gray-600">
         <span className="inline-flex items-center gap-1"><Coins size={12} /> {budget}</span>
         <span className="inline-flex items-center gap-1"><MapPin size={12} /> {job.area}</span>

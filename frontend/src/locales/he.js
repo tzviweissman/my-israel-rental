@@ -2853,6 +2853,7 @@ const he = {
         // implying a guarantee we cannot keep.
         waHoursNotice: 'השעות המוצגות הן שעות הפעילות של העסק — יש לאשר את המועד מולם ישירות.',
         contactHintWhatsApp: 'הלקוחות יפתחו איתך שיחת וואטסאפ ישירות.',
+        publishedTranslating: 'פורסם! התרגום יופיע בעוד רגע.',
         contactHintInPlatform: 'הפניות מגיעות לתיבה שלך ב-MyIsraelRental — מספר הטלפון לא נחשף.',
         whatsappNumberLabel: 'מספר וואטסאפ',
         whatsappConfirm: 'כן — למספר הזה יש וואטסאפ',

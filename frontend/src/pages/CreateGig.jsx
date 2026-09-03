@@ -484,10 +484,10 @@ const CreateGig = () => {
       const { data } = await axios.post(`${API}/marketplace/gigs`, payload, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      const translated = data?.title_he || data?.description_he;
-      toast.success(translated
-        ? 'Gig published — also translated to Hebrew for you'
-        : 'Gig published!');
+      // The translation now runs in the background (it used to hold the
+      // publish for 3-6 s so this toast could say "also translated"). Say
+      // what is true instead: it is coming.
+      toast.success(t('services.publishedTranslating', 'Published! The translation appears in a moment.'));
 
       // Publishing used to be followed by /subscription/select-plan and a
       // PayPal handoff for the plan starting after the free month. Listing

@@ -444,10 +444,15 @@ async def create_gig(payload: GigIn, user=Depends(verify_token)):
         "business_id": business["_id"],
         "title": payload.title.strip(),
         "title_he": (payload.title_he or "").strip() or None,
+        # The English side of a Hebrew-authored listing, and which language
+        # it was written in. Filled by the background translator.
+        "title_en": None,
+        "source_lang": None,
         "category": payload.category,
         "subcategory": (payload.subcategory or "").strip() or None,
         "description": payload.description,
         "description_he": (payload.description_he or "").strip() or None,
+        "description_en": None,
         "gig_type": payload.gig_type,
         "tiers": [t.model_dump() for t in payload.tiers],
         "products": [p.model_dump() for p in payload.products],
@@ -478,22 +483,20 @@ async def create_gig(payload: GigIn, user=Depends(verify_token)):
     if (payload.area or "").strip():
         from utils.geocode import geocode_gig_area_bg
         asyncio.create_task(geocode_gig_area_bg(gig["_id"], payload.area))
-    # Hebrew auto-translation — done inline so the response the provider
-    # sees already has ``title_he`` / ``description_he`` populated. Adds
-    # ~3-6 s to the publish latency (one Claude Sonnet round-trip per
-    # missing field), but means a Hebrew renter loading the gig one
-    # second later sees native Hebrew copy immediately. If the LLM call
-    # fails we log and continue with English-only; better a working
-    # publish than a hard failure on a nice-to-have translation.
+    # Translation runs in the BACKGROUND. It was inline here for over a
+    # year, adding 3-6 s to every publish so the response could carry the
+    # Hebrew for a toast; see auto_translate_gig_bg for the history. The
+    # provider's own Hebrew, if they typed one, is kept (fill_only).
     if not gig["title_he"] or not gig["description_he"]:
-        from .shared import auto_translate_gig_inline
-        translated = await auto_translate_gig_inline(
+        from utils.bg_tasks import spawn
+
+        from .shared import auto_translate_gig_bg
+        spawn(auto_translate_gig_bg(
+            gig["_id"],
             gig["title"] if not gig["title_he"] else None,
             gig["description"] if not gig["description_he"] else None,
-        )
-        if translated:
-            gig.update(translated)
-            await db.marketplace_gigs.update_one({"_id": gig["_id"]}, {"$set": translated})
+            fill_only=True,
+        ))
     return _clean_gig(gig)
 
 
@@ -604,24 +607,34 @@ async def patch_gig(gig_id: str, payload: GigPatch, user=Depends(verify_token)):
     if "area" in update and (update["area"] or "").strip() and update["area"] != gig.get("area"):
         from utils.geocode import geocode_gig_area_bg
         asyncio.create_task(geocode_gig_area_bg(gig_id, update["area"]))
-    # Refresh Hebrew copy inline whenever the English text changes so
-    # the response we return already reflects the new Hebrew version.
-    # Skipped when the provider is explicitly editing the Hebrew field
-    # themselves (they're overriding the auto-translation on purpose).
+    # Re-translate in the background when the source text changed, unless
+    # the provider is editing the Hebrew field themselves (an override on
+    # purpose). Also the RETRY path: if the create-time task died and a
+    # side is still empty, an edit of anything re-fires it - the same rule
+    # the Requests board uses, which gigs never had.
+    from utils.translate import detect_lang
     title_changed = "title" in update and update["title"] != gig.get("title")
     desc_changed = "description" in update and update["description"] != gig.get("description")
     override_title_he = "title_he" in update
     override_desc_he = "description_he" in update
     needs_title_tr = title_changed and not override_title_he
     needs_desc_tr = desc_changed and not override_desc_he
-    if needs_title_tr or needs_desc_tr:
-        from .shared import auto_translate_gig_inline
-        translated = await auto_translate_gig_inline(
-            update["title"] if needs_title_tr else None,
-            update["description"] if needs_desc_tr else None,
-        )
-        if translated:
-            await db.marketplace_gigs.update_one({"_id": gig_id}, {"$set": translated})
+    after = {**gig, **update}
+    source = after.get("source_lang") or detect_lang(after.get("title"), after.get("description"))
+    other = "en" if source == "he" else "he"
+    missing_side = not after.get(f"title_{other}") or not after.get(f"description_{other}")
+    if needs_title_tr or needs_desc_tr or missing_side:
+        from utils.bg_tasks import spawn
+
+        from .shared import auto_translate_gig_bg
+        spawn(auto_translate_gig_bg(
+            gig_id,
+            after.get("title") if (needs_title_tr or not after.get(f"title_{other}")) else None,
+            after.get("description") if (needs_desc_tr or not after.get(f"description_{other}")) else None,
+            # A changed source makes the old translation stale: overwrite.
+            # A still-missing side only fills what is empty.
+            fill_only=not (needs_title_tr or needs_desc_tr),
+        ))
     fresh = await db.marketplace_gigs.find_one({"_id": gig_id})
     return _clean_gig(fresh)
 

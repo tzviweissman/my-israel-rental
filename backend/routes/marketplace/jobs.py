@@ -38,7 +38,7 @@ from utils.notification_tokens import (
     create_snooze_token,
     verify_notification_token,
 )
-from utils.translate import translate_marketing_to_hebrew
+from utils.bg_tasks import spawn
 
 from .notification_prefs import DEFAULT_MODE as DEFAULT_PREF_MODE
 from .shared import (
@@ -129,22 +129,22 @@ async def _job_or_404(job_id: str) -> dict[str, Any]:
     return job
 
 
-async def _translate_bg(job_id: str, title: str, description: str) -> None:
-    """Background LLM translation to Hebrew — same pattern as gigs. Uses
-    a background task so posting a job stays fast; the Hebrew fields
-    appear once the LLM call returns."""
-    try:
-        title_he = await translate_marketing_to_hebrew(title) if title else None
-        desc_he = await translate_marketing_to_hebrew(description) if description else None
-        updates: dict[str, Any] = {}
-        if title_he:
-            updates["title_he"] = title_he
-        if desc_he:
-            updates["description_he"] = desc_he
-        if updates:
-            await db.marketplace_jobs.update_one({"_id": job_id}, {"$set": updates})
-    except Exception as e:  # noqa: BLE001
-        logger.warning("[jobs] Hebrew translation failed for %s: %s", job_id, e)
+async def _translate_bg(job_id: str, title: str | None, description: str | None, *, fill_only: bool = True) -> None:
+    """Fill whichever language the job is missing, in the background.
+
+    This was ENGLISH -> HEBREW ONLY: it called translate_marketing_to_hebrew
+    on whatever was typed, so a Hebrew-authored job had its Hebrew fed
+    through an English->Hebrew prompt and got no English at all. Requests
+    and gigs were fixed to detect the source language on 2026-08-16
+    (d7e3195); that change did not touch this file, and the job document
+    had no `title_en` to write into. Same translator as gigs now, both
+    directions, with the race guards documented on it.
+    """
+    from utils.translate import translate_missing_side
+    await translate_missing_side(
+        db.marketplace_jobs, job_id, title, description,
+        fill_only=fill_only, label="jobs translate", logger=logger,
+    )
 
 
 async def _providers_reaching_area(
@@ -419,12 +419,15 @@ async def create_job(payload: JobIn, user=Depends(verify_token)):
         "poster_user_id": user["user_id"],
         "title": payload.title.strip(),
         "title_he": None,
+        "title_en": None,
+        "source_lang": None,
         "category": payload.category,
         # Empty string / None normalized to None so downstream filters
         # can key on `subcategory: {"$exists": true}` cleanly.
         "subcategory": (payload.subcategory or "").strip() or None,
         "description": payload.description.strip(),
         "description_he": None,
+        "description_en": None,
         "budget_type": payload.budget_type,
         "budget_amount": payload.budget_amount if payload.budget_type == "fixed" else None,
         "budget_currency": payload.budget_currency,
@@ -438,8 +441,8 @@ async def create_job(payload: JobIn, user=Depends(verify_token)):
 
     # Fire the notification email + Hebrew translation asynchronously so
     # the POST returns fast. If either fails, the job is still live.
-    asyncio.create_task(_notify_matching_providers(doc))
-    asyncio.create_task(_translate_bg(doc["_id"], doc["title"], doc["description"]))
+    spawn(_notify_matching_providers(doc))
+    spawn(_translate_bg(doc["_id"], doc["title"], doc["description"], fill_only=True))
 
     return _pub_job(doc)
 
@@ -478,6 +481,9 @@ async def patch_job(job_id: str, payload: JobPatch, user=Depends(verify_token)):
             raise HTTPException(status_code=400, detail="Fixed budget needs an amount greater than 0")
 
     category_changed = bool(update.get("category")) and update["category"] != job.get("category")
+    # Judged BEFORE the merge below overwrites them.
+    title_changed = "title" in update and update["title"] != job.get("title")
+    desc_changed = "description" in update and update["description"] != job.get("description")
     await db.marketplace_jobs.update_one({"_id": job_id}, {"$set": update})
     job.update(update)
 
@@ -496,7 +502,23 @@ async def patch_job(job_id: str, payload: JobPatch, user=Depends(verify_token)):
                 {"_id": job_id},
                 {"$addToSet": {"notified_categories": update["category"]}},
             )
-            asyncio.create_task(_notify_matching_providers(job))
+            spawn(_notify_matching_providers(job))
+
+    # Re-translate when the text changed, and retry while a side is still
+    # missing - the same two rules as gigs and requests. Before this, an
+    # edited title kept the OLD Hebrew forever, and a job whose
+    # create-time translation failed never got another chance.
+    from utils.translate import detect_lang
+    source = job.get("source_lang") or detect_lang(job.get("title"), job.get("description"))
+    other = "en" if source == "he" else "he"
+    missing_side = not job.get(f"title_{other}") or not job.get(f"description_{other}")
+    if title_changed or desc_changed or missing_side:
+        spawn(_translate_bg(
+            job_id,
+            job.get("title") if (title_changed or not job.get(f"title_{other}")) else None,
+            job.get("description") if (desc_changed or not job.get(f"description_{other}")) else None,
+            fill_only=not (title_changed or desc_changed),
+        ))
 
     return _pub_job(job)
 

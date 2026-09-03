@@ -1,5 +1,6 @@
 """LLM-backed translation helper shared by the contract-translation routes."""
 import uuid
+from typing import Any
 
 from fastapi import HTTPException
 
@@ -126,3 +127,62 @@ async def translate_marketing_to_hebrew(text: str) -> str:
     no benefit.
     """
     return await translate_marketing(text, "he")
+
+
+async def translate_missing_side(
+    collection: Any,
+    doc_id: str,
+    title: str | None,
+    description: str | None,
+    *,
+    fill_only: bool,
+    label: str,
+    logger: Any,
+) -> dict[str, str]:
+    """Fill whichever language a post is missing, in the background, safely.
+
+    Shared by gigs and jobs (the Requests board has its own, older twin).
+    Detects the source language of title + description together, asks the
+    LLM for the OTHER side, and writes each translated field with a guard:
+
+      * the write is filtered on the source text being what it was when
+        this task started. Two edits in quick succession fire two tasks
+        that can finish out of order; without the filter the slower, older
+        one lands last and puts stale Hebrew under a new English title.
+        With it, a translation of text that has since changed is dropped.
+      * with `fill_only=True` (create, and the missing-side retry) a field
+        is written only if it is still EMPTY, so an owner who typed their
+        own Hebrew while the task was in flight keeps it. On an edit that
+        changed the source text the caller passes `fill_only=False`, since
+        the old translation is stale by definition.
+
+    `source_lang` is always recorded, even when the LLM call fails - it
+    costs nothing and lets the UI label the original. A failure leaves the
+    post in the language it was written in; the caller's patch path
+    re-fires this while a side is missing, so an outage self-heals on the
+    next edit. Returns the updates written, for tests.
+    """
+    source = detect_lang(title, description)
+    target = "en" if source == "he" else "he"
+    written: dict[str, str] = {"source_lang": source}
+    await collection.update_one({"_id": doc_id}, {"$set": {"source_lang": source}})
+    for field, text in (("title", title), ("description", description)):
+        if not (text or "").strip():
+            continue
+        try:
+            out = await translate_marketing(text, target)
+        except Exception as e:  # noqa: BLE001 - one field failing must not lose the other
+            logger.warning("[%s] %s translation of %s failed: %s", label, doc_id, field, e)
+            continue
+        if not out:
+            continue
+        key = f"{field}_{target}"
+        guard: dict[str, Any] = {"_id": doc_id, field: text}
+        if fill_only:
+            guard[key] = {"$in": [None, ""]}
+        res = await collection.update_one(guard, {"$set": {key: out}})
+        if res.matched_count:
+            written[key] = out
+        else:
+            logger.info("[%s] %s: %s changed while translating; stale %s dropped", label, doc_id, field, key)
+    return written

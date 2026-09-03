@@ -12,6 +12,7 @@ import { toast } from 'sonner';
 import { ArrowLeft, Loader2, Coins, MapPin, Calendar, Send, User } from 'lucide-react';
 import { API, AuthContext } from '../App';
 import { useTranslation } from 'react-i18next';
+import { localizedTitle, localizedDescription } from '../utils/gigLocale';
 import PageMeta from '../components/PageMeta';
 import { useReturnDestination } from '../hooks/useBackNavigation';
 import Breadcrumb from '../components/common/Breadcrumb';
@@ -19,7 +20,7 @@ import Breadcrumb from '../components/common/Breadcrumb';
 const JOB_RETURN_PREFIXES = ['/businesses/jobs'];
 
 const JobDetail = () => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { id } = useParams();
   const { token, user } = useContext(AuthContext);
   const navigate = useNavigate();
@@ -87,9 +88,9 @@ const JobDetail = () => {
 
   return (
     <div className="min-h-screen bg-[#FAFAF7]" style={{ paddingTop: 'var(--nav-h, 68px)' }} data-testid="job-detail-page">
-      <PageMeta title={`${job.title} · MyIsraelRental`} description={(job.description || '').slice(0, 160)} path={`/businesses/jobs/${id}`} />
+      <PageMeta title={`${localizedTitle(job, i18n)} · MyIsraelRental`} description={localizedDescription(job, i18n).slice(0, 160)} path={`/businesses/jobs/${id}`} />
       <div className="max-w-3xl mx-auto px-4 py-8">
-        <Breadcrumb current={job.title} testId="job-breadcrumb" />
+        <Breadcrumb current={localizedTitle(job, i18n)} testId="job-breadcrumb" />
         <button onClick={() => navigate(backTo)} className="text-sm text-gray-500 flex items-center gap-1 mb-4" data-testid="job-detail-back">
           <ArrowLeft size={14} /> All jobs
         </button>
@@ -98,7 +99,7 @@ const JobDetail = () => {
           <div className="flex items-start justify-between gap-4">
             <div>
               <h1 className="text-xl sm:text-2xl font-bold text-gray-900" data-testid="job-detail-title">
-                {job.title}
+                {localizedTitle(job, i18n)}
               </h1>
               {job.poster?.display_name && (
                 <p className="text-xs text-gray-500 mt-1 flex items-center gap-1">
@@ -118,7 +119,7 @@ const JobDetail = () => {
             {job.preferred_date && <span className="inline-flex items-center gap-1"><Calendar size={14} /> {job.preferred_date}</span>}
           </div>
 
-          <p className="text-gray-700 whitespace-pre-line" data-testid="job-detail-description">{job.description}</p>
+          <p className="text-gray-700 whitespace-pre-line" data-testid="job-detail-description">{localizedDescription(job, i18n)}</p>
 
           <div className="pt-4 border-t border-gray-100 flex items-center justify-between gap-3 flex-wrap">
             <p className="text-xs text-gray-500">

@@ -82,73 +82,30 @@ def plan_for(key: str | None) -> dict:
 FRONTEND_URL = os.environ.get("FRONTEND_URL", "https://myisraelrental.com").rstrip("/")
 
 
-async def auto_translate_gig_inline(
-    title: str | None, description: str | None,
-) -> dict[str, str]:
-    """Translate English gig copy to Hebrew inline (synchronously, in the
-    request path). Returns just the ``title_he`` / ``description_he``
-    dict for the caller to persist — this function itself is DB-free so
-    ``create_gig`` can merge the result into the in-memory doc before
-    the first Mongo write, avoiding a second update round-trip.
+async def auto_translate_gig_bg(gig_id: str, title: str | None, description: str | None, *, fill_only: bool = True) -> None:
+    """Translate a gig's missing side in the background.
 
-    Adds ~3-6 s per missing field to the response latency but ensures
-    Hebrew renters see native copy immediately when the gig goes live.
-    LLM failures are logged and the empty dict is returned — provider's
-    publish still succeeds, English copy still serves.
+    WHY BACKGROUND, AND WHY THIS WAS EVER INLINE. On 2026-07-09 a
+    background twin of this was written and wired, and 31 minutes later
+    replaced by an inline version that ran in the request path so the
+    create response would already carry the Hebrew - the only consumer
+    of which was a toast reading "also translated to Hebrew for you".
+    That cost every provider 3-6 seconds on every publish and every edit
+    (one Claude round-trip per field) for a toast. Nothing else read the
+    Hebrew off the response: the client navigates on `data.id`, search
+    queries the fields at read time, no sitemap or digest reads them at
+    create. A Hebrew visitor in the first seconds sees the English
+    fallback, then Hebrew. That is the whole cost of doing it here.
+
+    The race-safety (out-of-order edits, an owner's own Hebrew) and the
+    failure mode are documented on utils.translate.translate_missing_side.
     """
-    from utils.translate import detect_lang, translate_marketing
+    from utils.translate import translate_missing_side
+    await translate_missing_side(
+        db.marketplace_gigs, gig_id, title, description,
+        fill_only=fill_only, label="auto-translate gig", logger=logger,
+    )
 
-    # Spec 1.4 — fill whichever side is MISSING, not always Hebrew. A gig
-    # written in Hebrew used to be run through an English->Hebrew prompt,
-    # yielding Hebrew-from-Hebrew and no English at all, so an English
-    # speaker browsing services saw copy they could not read.
-    source = detect_lang(title, description)
-    target = "en" if source == "he" else "he"
-    updates: dict[str, str] = {"source_lang": source}
-    try:
-        if (title or "").strip():
-            updates[f"title_{target}"] = await translate_marketing(title, target)
-        if (description or "").strip():
-            updates[f"description_{target}"] = await translate_marketing(description, target)
-    except Exception as e:  # noqa: BLE001 — top-level around a network call
-        logger.warning("[auto-translate-inline] failed: %s", e)
-        # source_lang is still worth keeping: it costs nothing, needed no
-        # API call, and lets the UI label the original even when the
-        # translation did not land.
-        return {"source_lang": source}
-    return updates
-
-
-async def auto_translate_gig_bg(gig_id: str, title: str | None, description: str | None) -> None:
-    """Fire-and-forget: translate the English title / description to
-    Hebrew and cache the results on the gig doc so Hebrew-locale renters
-    see native copy on the very next request.
-
-    Called by ``create_gig`` after insert, and by ``patch_gig`` whenever
-    the English text changes. Kept out of the request path so provider
-    saves stay snappy (LLM call takes 1-3 s). If translation fails, the
-    English text still serves — no user-visible regression.
-    """
-    from utils.translate import detect_lang, translate_marketing
-
-    # Same rule as the inline twin above: fill the missing side.
-    source = detect_lang(title, description)
-    target = "en" if source == "he" else "he"
-    updates: dict[str, str] = {"source_lang": source}
-    try:
-        if (title or "").strip():
-            updates[f"title_{target}"] = await translate_marketing(title, target)
-        if (description or "").strip():
-            updates[f"description_{target}"] = await translate_marketing(description, target)
-    except Exception as e:  # noqa: BLE001 — top-level around a network call
-        logger.warning("[auto-translate] gig=%s failed: %s", gig_id, e)
-        # Record the language even on failure — free, and the retry path
-        # below reads it.
-        await db.marketplace_gigs.update_one({"_id": gig_id}, {"$set": {"source_lang": source}})
-        return
-    if updates:
-        await db.marketplace_gigs.update_one({"_id": gig_id}, {"$set": updates})
-        logger.info("[auto-translate] gig=%s wrote %s", gig_id, list(updates))
 
 # 15 top-level categories (2026-07-15 restructure). Aligned to how
 # renters actually search — home services and travel each consolidated

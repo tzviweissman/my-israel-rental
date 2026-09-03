@@ -60,6 +60,7 @@ from utils.notification_tokens import (
     verify_notification_token,
 )
 from utils.area_filter import resolve_area_id
+from utils.bg_tasks import spawn
 from utils.translate import detect_lang, translate_marketing
 from utils.whatsapp_link import build_whatsapp_link, normalize_whatsapp_number
 
@@ -737,7 +738,7 @@ async def create_request(payload: RequestIn, user=Depends(verify_token)):
     asyncio.create_task(geocode_area_into("requests", doc["_id"], doc["area"]))
     logger.info("[requests] created %s (%s) by %s", doc["_id"], doc["request_type"], user["user_id"])
     # After the insert, so the request is live whatever the LLM does.
-    asyncio.create_task(_translate_bg(doc["_id"], doc["title"], doc["description"]))
+    spawn(_translate_bg(doc["_id"], doc["title"], doc["description"]))
     return _public(doc)
 
 
@@ -794,7 +795,7 @@ async def patch_request(request_id: str, payload: RequestPatch, user=Depends(ver
         not fresh.get(f"title_{other}") or not fresh.get(f"description_{other}")
     )
     if title_changed or desc_changed or missing_translation:
-        asyncio.create_task(_translate_bg(request_id, fresh["title"], fresh["description"]))
+        spawn(_translate_bg(request_id, fresh["title"], fresh["description"]))
 
     return _public(fresh)
 
