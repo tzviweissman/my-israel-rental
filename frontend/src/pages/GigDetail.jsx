@@ -287,7 +287,26 @@ const GigDetail = () => {
     // visitor (see utils/visitorId). Sent only on this fetch — the one
     // that represents a person actually looking at the listing.
     axios.get(`${API}/marketplace/gigs/${id}`, { headers: visitorHeaders() })
-      .then((r) => {
+      .then(async (r) => {
+        // Measure the cover BEFORE the page paints. The hero takes the
+        // image's shape, and learning that shape from the image's own
+        // onLoad meant laying out at 16:9 and then growing to 4:5 under
+        // the reader - 236px of shift at 375 on every portrait flyer. So
+        // the first paint waits (at most 1.5s) for the cover's natural
+        // size; a slow or missing image falls back to 16:9 and stays.
+        const firstCover = r.data.gallery?.[0] || getGigCover(r.data);
+        if (firstCover) {
+          const ratio = await new Promise((resolve) => {
+            const img = new Image();
+            let timer = null;
+            const done = (v) => { clearTimeout(timer); resolve(v); };
+            timer = setTimeout(() => done(null), 1500);
+            img.onload = () => done(img.naturalWidth && img.naturalHeight ? img.naturalWidth / img.naturalHeight : null);
+            img.onerror = () => done(null);
+            img.src = firstCover;
+          });
+          if (ratio) setCoverRatio(ratio);
+        }
         setGig(r.data);
         // Pick the first tier/product as the default selection so the
         // sidebar CTA has something to book on the initial render.
@@ -907,23 +926,23 @@ const GigDetail = () => {
                 <p className="font-semibold text-sm" dir="auto" data-testid="gig-provider-name">{gig.provider?.name}</p>
                 <p className="text-xs text-gray-500">{gig.provider?.tagline || gig.provider?.bio || '\u00A0'}</p>
               </div>
-              {user?.id && user.id === gig.provider?.user_id ? (
+              {user?.id && user.id === gig.provider?.user_id && gig.business_id ? (
                 /* The owner, looking at their own listing - which is where
                    people go to check their page, and where one owner went
                    looking for his hours and found nothing to click. Hours,
                    areas, logo and the rest live on the BUSINESS, not the
                    listing; this opens that form directly. */
-                <span className="flex flex-col items-end gap-1">
+                <span className="flex flex-col items-end gap-2">
                   <button
-                    onClick={() => navigate(`/dashboard?tab=my-businesses&services=${gig.business_id || 1}`)}
-                    className="text-xs font-semibold text-[var(--brand-primary)] hover:underline"
+                    onClick={() => navigate(`/dashboard?tab=my-businesses&services=${gig.business_id}`)}
+                    className="px-3 py-2 -me-3 text-xs font-semibold text-[var(--brand-primary)] hover:underline"
                     data-testid="gig-edit-listing"
                   >
                     {t('gigDetail.editListing', 'Edit this listing & photos')}
                   </button>
                   <button
-                    onClick={() => navigate(`/dashboard?tab=my-businesses&details=${gig.business_id || 1}`)}
-                    className="text-xs font-semibold text-[var(--brand-primary)] hover:underline"
+                    onClick={() => navigate(`/dashboard?tab=my-businesses&details=${gig.business_id}`)}
+                    className="px-3 py-2 -me-3 text-xs font-semibold text-[var(--brand-primary)] hover:underline"
                     data-testid="gig-edit-business-details"
                   >
                     {t('gigDetail.editBusinessDetails', 'Edit hours, areas & logo')}

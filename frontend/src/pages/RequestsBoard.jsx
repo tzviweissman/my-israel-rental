@@ -314,9 +314,7 @@ export const RequestCard = ({ request: r, onOpen, t }) => {
               <span aria-hidden="true">·</span>
               <Users size={12} aria-hidden="true" />
               <span className="rc-responses">
-                {r.contact_count === 1
-                  ? t('requests.responsesOne', '1 response')
-                  : t('requests.responses', '{{n}} responses', { n: r.contact_count })}
+                {t('requests.responses', '{{count}} responses', { count: r.contact_count })}
               </span>
             </>
           )}

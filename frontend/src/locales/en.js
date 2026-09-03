@@ -405,6 +405,8 @@ const en = {
       },
       businesses: {
         completePct: 'Your page is {{pct}}% complete',
+        needName: 'Name your business',
+        needCategory: 'Choose your categories',
         needLogo: 'Add a logo',
         needDescription: 'Write a description',
         needAreas: 'Add your service areas',
@@ -428,7 +430,7 @@ const en = {
         editOnPage: 'Edit hours, areas & logo',
         manageServices: 'Services & photos',
         addServiceCta: 'Add a service',
-        detailsSaveFailed: 'Could not save — try again',
+        detailsSaveFailed: 'Could not save. Try again.',
         yourServices: 'Your services',
         yourProducts: 'Your products',
         addService: 'Add a service',
@@ -2527,6 +2529,7 @@ const en = {
         renewedTimes_other: 'renewed {{count}}x',
         // The number is inside the string, not a separate <b> beside it —
         // otherwise no plural rule can ever see it.
+        chatsOpened_zero: 'No chats opened about this yet',
         chatsOpened_one: '{{count}} chat opened about this',
         chatsOpened_other: '{{count}} chats opened about this',
         // Two-way board (Phase 3). Was demand-only, and the hero said so
@@ -2555,8 +2558,8 @@ const en = {
         emptyBody: 'Be the first — post what you are looking for, or what you have available.',
         open: 'Open',
         // C1 — shown only when above zero; see the note at the call site.
-        responses: '{{n}} responses',
-        responsesOne: '1 response',
+        responses_one: '1 response',
+        responses_other: '{{count}} responses',
         // Was a single `{{n}}` string with a hand-written `expiresInOne`
         // ternary at ONE of its three call sites, so the dashboard tab and
         // the detail page both said "expires in 1 days".

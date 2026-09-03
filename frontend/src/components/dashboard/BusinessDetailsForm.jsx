@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import ServiceAreaPicker from '../common/ServiceAreaPicker';
 import axios from 'axios';
@@ -43,6 +43,7 @@ export default function BusinessDetailsForm({ business, API, token, onClose, onS
   // for it. Two of them sent videos. It lives here because this is where
   // the checklist sends people.
   const [uploadingLogo, setUploadingLogo] = useState(false);
+  const logoInputRef = useRef(null);
   const [form, setForm] = useState({
     logo_url: b.logo_url || '',
     description: b.description || '',
@@ -166,7 +167,7 @@ export default function BusinessDetailsForm({ business, API, token, onClose, onS
       // signup screen that said "details wrong" for a dropped request.
       // 8s so a sentence can be read before it disappears.
       toast.error(
-        apiErrorMessage(err, t('businesses.detailsSaveFailed', 'Could not save — try again'), t),
+        apiErrorMessage(err, t('businesses.detailsSaveFailed', 'Could not save. Try again.'), t),
         { duration: 8000 },
       );
     } finally {
@@ -217,6 +218,11 @@ export default function BusinessDetailsForm({ business, API, token, onClose, onS
           style={{ borderColor: 'var(--brand-border)' }}>
           <h2 className="text-base font-bold" style={{ fontFamily: 'var(--font-head)', color: 'var(--ink)' }}>
             {t('businesses.editDetails', 'Business details')}
+            {/* Which one. An owner with two businesses had no way to tell
+                from this header which record Save would write to. */}
+            <span className="block text-xs font-normal" style={{ color: 'var(--brand-muted)' }} dir="auto" data-testid="biz-details-name">
+              {b.name}
+            </span>
           </h2>
           <button type="button" onClick={onClose} aria-label="Close" data-testid="biz-details-close">
             <X size={18} style={{ color: 'var(--brand-muted)' }} />
@@ -240,34 +246,44 @@ export default function BusinessDetailsForm({ business, API, token, onClose, onS
                 style={{ borderColor: 'var(--brand-border)' }}
               >
                 {form.logo_url ? (
-                  <img src={form.logo_url} alt="" className="w-full h-full object-cover" data-testid="biz-details-logo-preview" />
+                  <img src={form.logo_url} alt="" className="w-full h-full object-contain bg-white" data-testid="biz-details-logo-preview" />
                 ) : (
                   <CoverPlaceholder name={b.name} category={(b.categories || [])[0]} className="w-full h-full" />
                 )}
               </div>
               <div className="flex flex-wrap items-center gap-2">
-                <label
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-semibold cursor-pointer"
+                {/* A real <button> with a display:none input, the house
+                    pattern (AddPhotoNudge, BulkPhotosModal, QrShareCard):
+                    a <label> is not focusable and an sr-only input draws its
+                    focus ring inside a 1x1 clip, so a keyboard user had no
+                    way to see they were on this control. */}
+                <button
+                  type="button"
+                  onClick={() => logoInputRef.current?.click()}
+                  disabled={uploadingLogo || saving}
+                  className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg border text-xs font-semibold disabled:opacity-60"
                   style={{ borderColor: 'var(--brand-border)', color: 'var(--brand-primary)' }}
+                  data-testid="biz-details-logo-button"
                 >
                   {uploadingLogo ? <Loader2 size={14} className="animate-spin" /> : <ImagePlus size={14} />}
                   {form.logo_url
                     ? t('businesses.logoReplace', 'Replace')
                     : t('businesses.logoUpload', 'Upload a logo')}
-                  <input
-                    type="file"
-                    accept="image/*"
-                    className="sr-only"
-                    onChange={pickLogo}
-                    disabled={uploadingLogo || saving}
-                    data-testid="biz-details-logo-input"
-                  />
-                </label>
+                </button>
+                <input
+                  ref={logoInputRef}
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={pickLogo}
+                  disabled={uploadingLogo || saving}
+                  data-testid="biz-details-logo-input"
+                />
                 {form.logo_url && (
                   <button
                     type="button"
                     onClick={() => set({ logo_url: '' })}
-                    className="inline-flex items-center gap-1 text-xs font-semibold"
+                    className="inline-flex items-center gap-1 px-3 py-2 text-xs font-semibold"
                     style={{ color: 'var(--brand-muted)' }}
                     data-testid="biz-details-logo-remove"
                   >

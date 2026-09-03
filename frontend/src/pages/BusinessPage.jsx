@@ -427,7 +427,7 @@ const BusinessPage = ({ business: injected = null, preview = false }) => {
                 <button
                   type="button"
                   onClick={() => navigate(`/dashboard?tab=my-businesses&details=${biz.id}`)}
-                  className="mt-1 inline-flex items-center gap-1 text-xs font-semibold hover:underline"
+                  className="mt-1 inline-flex items-center gap-1 px-3 py-2 -ms-3 text-xs font-semibold hover:underline"
                   style={{ color: 'var(--brand-primary)' }}
                   data-testid="business-owner-edit"
                 >

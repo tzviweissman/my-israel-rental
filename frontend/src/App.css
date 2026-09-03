@@ -550,6 +550,7 @@ video[aria-hidden="true"]::-webkit-media-controls-start-playback-button{
 input:focus-visible,
 textarea:focus-visible,
 select:focus-visible,
+button:focus-visible,
 [contenteditable]:focus-visible {
   outline: 2px solid var(--focus-ring);
   outline-offset: 2px;

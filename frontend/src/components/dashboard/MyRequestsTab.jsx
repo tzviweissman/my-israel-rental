@@ -150,7 +150,7 @@ const MyRequestsTab = ({ API, token }) => {
                   </span>
                 )}
                 {r.renewed_count > 0 && (
-                  <span className="text-xs text-gray-400">
+                  <span className="text-xs text-gray-500">
                     {t('requests.renewedTimes', 'renewed {{count}}x', { count: r.renewed_count })}
                   </span>
                 )}

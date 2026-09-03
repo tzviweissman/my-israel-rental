@@ -28,8 +28,11 @@ const details = src('components/dashboard/BusinessDetailsForm.jsx');
 const tab = src('components/dashboard/MyBusinessesTab.jsx');
 
 // Which prop each checklist item calls when clicked.
+// Receipts (`action: null`) are facts shown struck-through, never buttons;
+// only items wired to a handler are checked for a destination.
 const items = [...checklist.matchAll(/key:\s*'([a-z]+)'[\s\S]*?action:\s*(\w+)/g)]
-  .map((m) => ({ key: m[1], action: m[2] }));
+  .map((m) => ({ key: m[1], action: m[2] }))
+  .filter((i) => i.action !== 'null');
 
 // Where each action prop is wired to, in the tab that renders the list.
 const wiring = {};

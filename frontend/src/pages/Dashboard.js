@@ -27,6 +27,7 @@ import OnboardingProvider from '../components/onboarding/OnboardingProvider';
 import TourProvider from '../components/tour/TourProvider';
 import SetupChecklist from '../components/onboarding/SetupChecklist';
 import ShowMeAroundOffer from '../components/onboarding/ShowMeAroundOffer';
+import { useOnboarding } from '../components/onboarding/OnboardingProvider';
 import AttentionStrip from '../components/dashboard/AttentionStrip';
 import { canPublishGigs } from '../utils/providerTrial';
 
@@ -52,6 +53,12 @@ const Dashboard = () => {
   const [showBulkUpload, setShowBulkUpload] = useState(false);
   const [editingProperty, setEditingProperty] = useState(null);
   const [activeTab, setActiveTab] = useState('properties');
+  // The setup checklist removes itself once complete; the offer that lived
+  // inside its "complete" state - the one route to the feature library for
+  // someone who has already taken the tour - is rendered here instead.
+  const onboarding = useOnboarding();
+  const setupLists = onboarding?.state?.checklists || [];
+  const setupAllDone = setupLists.length > 0 && setupLists.every((l) => l.done === l.total);
   const [unreadConversations, setUnreadConversations] = useState(0);
 
   // Land everyone on a tab they actually have.
@@ -287,6 +294,11 @@ const Dashboard = () => {
         {/* T1 — the backbone. Above the tabs because it is about the
             account as a whole, not about whichever tab is open. */}
         <SetupChecklist />
+        {setupAllDone && (
+          <div className="mb-6 text-sm">
+            <ShowMeAroundOffer moment="complete" eligible={setupAllDone} inline />
+          </div>
+        )}
 
         <DashboardTabs
           activeTab={activeTab}

@@ -28,6 +28,25 @@ export default function BusinessCompleteness({ business, onEditDetails, onOpenLi
   const b = business || {};
 
   const items = [
+    // Two RECEIPTS before the four tasks. Both are real fields with real
+    // truthiness checks - a business cannot be created without a name, and
+    // categories come from its listings - so nothing is credited that was
+    // not done. Without them a minute-old business read "0% complete"
+    // under a setup checklist that, for the same business, read 1 of 5:
+    // the two panels disagreed on the starting number. Never actionable,
+    // never rendered as buttons.
+    {
+      key: 'named',
+      done: !!(b.name || '').trim(),
+      label: t('businesses.needName', 'Name your business'),
+      action: null,
+    },
+    {
+      key: 'category',
+      done: ((b.listing_categories || []).length + (b.categories || []).length) > 0,
+      label: t('businesses.needCategory', 'Choose your categories'),
+      action: null,
+    },
     {
       key: 'logo',
       done: !!b.logo_url,
@@ -87,6 +106,11 @@ export default function BusinessCompleteness({ business, onEditDetails, onOpenLi
               <span className="inline-flex items-center gap-1.5 text-xs" style={{ color: 'var(--brand-muted)' }}>
                 <CheckCircle2 size={12} style={{ color: '#1F8A50' }} aria-hidden="true" />
                 <s>{label}</s>
+              </span>
+            ) : !action ? (
+              <span className="inline-flex items-center gap-1.5 text-xs" style={{ color: 'var(--brand-muted)' }}>
+                <Circle size={12} aria-hidden="true" />
+                {label}
               </span>
             ) : (
               <button

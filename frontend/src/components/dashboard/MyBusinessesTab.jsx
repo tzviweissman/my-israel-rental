@@ -74,14 +74,18 @@ export default function MyBusinessesTab({ API, token }) {
     const wantServices = searchParams.get('services');
     if (!wantDetails && !wantServices) return;
     if (wantDetails) {
-      const target = items.find((b) => b.id === wantDetails) || items[0];
+      // `1` is the checklist's "any of mine" sentinel (the backend computes
+      // that list across all businesses). A real id that matches nothing
+      // opens NOTHING - the positional fallback would have opened, and let
+      // the owner save over, whichever business sorts first.
+      const target = wantDetails === '1' ? items[0] : items.find((b) => b.id === wantDetails);
       if (target) setDetailsBiz(target);
     }
     // `?services=<id>` opens the business's services (listings, photos,
     // add/edit) - the screen that was only reachable by clicking the
     // business NAME, which one owner never found.
     if (wantServices) {
-      const target = items.find((b) => b.id === wantServices) || items[0];
+      const target = wantServices === '1' ? items[0] : items.find((b) => b.id === wantServices);
       if (target) setOpenBiz(target);
     }
     const next = new URLSearchParams(searchParams);
@@ -346,7 +350,7 @@ export default function MyBusinessesTab({ API, token }) {
                   <button
                     type="button"
                     onClick={() => setOpenBiz(b)}
-                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-white"
+                    className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold text-white"
                     style={{ background: 'var(--brand-primary)' }}
                     data-testid={`business-services-${b.id}`}
                   >
@@ -357,7 +361,7 @@ export default function MyBusinessesTab({ API, token }) {
                   <button
                     type="button"
                     onClick={() => navigate(`/businesses/add?business=${encodeURIComponent(b.id)}`)}
-                    className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg border text-xs font-semibold"
+                    className="inline-flex items-center gap-1 px-3 py-2 rounded-lg border text-xs font-semibold"
                     style={{ borderColor: 'var(--brand-border)', color: 'var(--brand-primary)' }}
                     data-testid={`business-add-service-${b.id}`}
                   >
