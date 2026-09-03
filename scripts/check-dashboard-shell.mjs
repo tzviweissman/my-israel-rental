@@ -64,6 +64,23 @@ ok('the scan rollup answers', Array.isArray(mine?.links) && typeof mine.total_sc
 ok('and counts both scans', mine?.total_scans === 2, `${mine?.total_scans}`);
 const summary = await json(await fetch(`${API}/dashboard/summary`, { headers: auth }));
 
+// A business, so the Businesses tab has a card to put a share button on.
+const biz = await json(await fetch(`${API}/marketplace/businesses`, {
+  method: 'POST', headers: auth, body: JSON.stringify({ name: `TEST shell ${stamp}` }),
+}));
+ok('a business exists', !!biz?.id, JSON.stringify(biz).slice(0, 120));
+// ...and one service under it: the Businesses tab only shows for an account
+// that can publish services or already has one (useDashboardNav).
+const gig = biz?.id ? await json(await fetch(`${API}/marketplace/gigs`, {
+  method: 'POST', headers: auth,
+  body: JSON.stringify({
+    title: `TEST_shell_gig_${stamp}`, description: 'shell check', category: 'home-services-repair', area: 'Tel Aviv',
+    gig_type: 'deliverable', budget_currency: 'ILS', booking_mode: 'whatsapp', whatsapp: '+972501234567',
+    gallery: ['https://example.com/photo.jpg'], tiers: [{ name: 'Basic', price: 200, currency: 'ILS' }], business_id: biz.id,
+  }),
+})) : null;
+ok('a service exists under it', !!gig?.id, JSON.stringify(gig).slice(0, 120));
+
 // ── sign in through the real screen ────────────────────────────────────
 const browser = await chromium.launch();
 const signIn = async (ctx) => {
@@ -95,7 +112,8 @@ for (const lng of ['en', 'he']) {
 
   // the cards say what the API says
   const scansValue = (await page.locator('[data-testid="overview-card-scans-value"]').innerText()).trim();
-  ok(`${lng}: the scans card shows the rollup's number`, scansValue === String(mine?.total_scans), scansValue);
+  const mineNow = await json(await fetch(`${API}/short-links/mine`, { headers: auth }));
+  ok(`${lng}: the scans card shows the rollup's number`, scansValue === String(mineNow?.total_scans), `${scansValue} vs ${mineNow?.total_scans}`);
   const waitingValue = (await page.locator('[data-testid="overview-card-waiting-value"]').innerText()).trim();
   ok(`${lng}: the waiting card shows the summary's number`,
     waitingValue === String((summary?.bookings_awaiting_reply || 0) + (summary?.work_offers_open || 0)), waitingValue);
@@ -127,6 +145,52 @@ for (const lng of ['en', 'he']) {
   ok(`${lng}: a sidebar item opens its tab`, await page.locator('[data-testid="overview-tab"]').count() === 0
     && (await page.locator('[data-testid="sidebar-item-properties"]').getAttribute('aria-current')) === 'page');
 
+  // ── the business card's link and QR code ────────────────────────────
+  // The tab's own subtitle promises every business "their own page and QR
+  // code". Until 4 Sep 2026 the card offered neither, though the backend
+  // had minted business short links since the table was built.
+  if (biz?.id) {
+    await page.click('[data-testid="sidebar-item-my-businesses"]');
+    await page.waitForSelector(`[data-testid="business-card-${biz.id}"]`, { timeout: 15000 }).catch(() => {});
+    const toggle = page.locator(`[data-testid="business-share-${biz.id}-toggle"]`);
+    ok(`${lng}: the business card has a Share & QR button`, await toggle.count() === 1);
+    if (await toggle.count()) {
+      await toggle.click();
+      await page.waitForSelector(`[data-testid="business-share-${biz.id}-qr-svg"], [data-testid="business-share-${biz.id}-qr"] svg`, { timeout: 15000 }).catch(() => {});
+      const link = await page.locator(`[data-testid="business-share-${biz.id}-link"] input`).inputValue().catch(() => '');
+      ok(`${lng}: it shows a short link`, /\/p\/[A-Za-z0-9_-]+$/.test(link), link);
+      ok(`${lng}: and a QR code`, await page.locator(`[data-testid="business-share-${biz.id}-panel"] svg`).count() >= 1);
+      // ...that is actually visible: the card used to clip the popover at
+      // its own edge, and a QR that is in the DOM but cut off scans nothing.
+      const seen = await page.evaluate((id) => {
+        const panel = document.querySelector(`[data-testid="business-share-${id}-panel"]`);
+        const svg = panel?.querySelector('svg');
+        if (!svg) return { ok: false };
+        const r = svg.getBoundingClientRect();
+        const hit = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2);
+        return { ok: !!hit && panel.contains(hit) && r.top >= 0 && r.bottom <= window.innerHeight && r.left >= 0 && r.right <= window.innerWidth, r: [Math.round(r.left), Math.round(r.top), Math.round(r.right), Math.round(r.bottom)] };
+      }, biz.id);
+      ok(`${lng}: the QR is on screen and not clipped`, seen.ok, JSON.stringify(seen));
+      // The Copy button had a label the same blue as its fill - a blank
+      // block - after the theme put the accent blue into the `--gold` names.
+      const copyBtn = await page.evaluate((id) => {
+        const el = document.querySelector(`[data-testid="business-share-${id}-link-copy-button"]`);
+        if (!el) return null;
+        const cs = getComputedStyle(el);
+        const lum = (c) => { const m = c.match(/\d+(\.\d+)?/g).slice(0, 3).map(Number).map((v) => { v /= 255; return v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4; }); return 0.2126 * m[0] + 0.7152 * m[1] + 0.0722 * m[2]; };
+        const a = lum(cs.color), b = lum(cs.backgroundColor);
+        return { color: cs.color, bg: cs.backgroundColor, contrast: Math.round(((Math.max(a, b) + 0.05) / (Math.min(a, b) + 0.05)) * 100) / 100 };
+      }, biz.id);
+      ok(`${lng}: the Copy button's label is readable on its fill`, copyBtn && copyBtn.contrast >= 4.5, JSON.stringify(copyBtn));
+      // the code has to open THIS business's page
+      const slug = link.split('/p/')[1];
+      const target = slug ? await json(await fetch(`${API}/short-links/${slug}/resolve`)) : null;
+      ok(`${lng}: the link opens the business page`, target?.target?.startsWith(`/business/${biz.id}`), JSON.stringify(target));
+      if (process.env.SHOT_DIR) await page.screenshot({ path: `${process.env.SHOT_DIR}/business-share-${lng}.png`, clip: { x: 0, y: 0, width: 1280, height: 900 } });
+      await page.keyboard.press('Escape');
+    }
+  }
+
   ok(`${lng}: no page errors`, errors.length === 0, errors[0]);
   await ctx.close();
 }
@@ -146,11 +210,34 @@ for (const lng of ['en', 'he']) {
   ok('phone: the tab strip is there instead', !!strip);
   ok('phone: and is not cut off by the screen edge', strip && strip.right <= strip.vw + 1, JSON.stringify(strip));
   ok('phone: the overview still renders', await page.locator('[data-testid="overview-tab"]').count() === 1);
+
+  // The business share popover on a phone: a 360px panel hanging off a
+  // button in the middle of a 390px card fits on no side, so there it is
+  // pinned to the screen instead. The QR has to be wholly on screen.
+  if (biz?.id) {
+    await page.locator('button:has-text("Businesses")').first().click();
+    await page.waitForSelector(`[data-testid="business-share-${biz.id}-toggle"]`, { timeout: 15000 }).catch(() => {});
+    await page.locator(`[data-testid="business-share-${biz.id}-toggle"]`).scrollIntoViewIfNeeded().catch(() => {});
+    await page.click(`[data-testid="business-share-${biz.id}-toggle"]`).catch(() => {});
+    await page.waitForSelector(`[data-testid="business-share-${biz.id}-panel"] svg`, { timeout: 15000 }).catch(() => {});
+    const seen = await page.evaluate((id) => {
+      const panel = document.querySelector(`[data-testid="business-share-${id}-panel"]`);
+      const svg = panel?.querySelector('svg');
+      if (!svg) return { ok: false };
+      const r = svg.getBoundingClientRect();
+      const hit = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2);
+      return { ok: !!hit && panel.contains(hit) && r.top >= 0 && r.bottom <= window.innerHeight && r.left >= 0 && r.right <= window.innerWidth, r: [Math.round(r.left), Math.round(r.top), Math.round(r.right), Math.round(r.bottom)], vw: window.innerWidth };
+    }, biz.id);
+    ok('phone: the business QR is on screen and not clipped', seen.ok, JSON.stringify(seen));
+    if (process.env.SHOT_DIR) await page.screenshot({ path: `${process.env.SHOT_DIR}/business-share-phone.png` });
+  }
   await ctx.close();
 }
 
 await browser.close();
 if (prop?.id) await fetch(`${API}/properties/${prop.id}`, { method: 'DELETE', headers: auth });
+if (gig?.id) await fetch(`${API}/marketplace/gigs/${gig.id}`, { method: 'DELETE', headers: auth });
+if (biz?.id) await fetch(`${API}/marketplace/businesses/${biz.id}`, { method: 'PATCH', headers: auth, body: JSON.stringify({ active: false }) });
 
 const failed = results.filter((r) => !r).length;
 console.log(`\n${results.length - failed}/${results.length} passed\n`);

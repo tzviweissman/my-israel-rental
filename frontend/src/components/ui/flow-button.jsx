@@ -28,10 +28,17 @@ import { ArrowRight } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 
-export function FlowButton({ text = "Modern Button", className, ...props }) {
+/**
+ * @param {Object} props
+ * @param {string} [props.text]
+ * @param {React.ElementType} [props.as='button'] Render as something else -
+ *   the preview's nav pills are router Links, and a link that is really a
+ *   button loses middle-click, hover URL and "open in new tab".
+ */
+export function FlowButton({ text = "Modern Button", className, as: Tag = "button", ...props }) {
   return (
-    <button
-      type="button"
+    <Tag
+      {...(Tag === "button" ? { type: "button" } : {})}
       className={cn(
         "group/flow relative flex items-center gap-1 overflow-hidden rounded-[100px]",
         "border-[1.5px] border-[var(--ink)]/35 bg-transparent px-8 py-3 text-sm font-semibold text-[var(--ink)]",
@@ -62,7 +69,7 @@ export function FlowButton({ text = "Modern Button", className, ...props }) {
         aria-hidden="true"
         className="absolute w-4 h-4 right-4 stroke-[var(--ink)] fill-none z-[9] group-hover/flow:right-[-25%] group-hover/flow:stroke-white transition-all duration-[800ms] ease-[cubic-bezier(0.34,1.56,0.64,1)] rtl:-scale-x-100"
       />
-    </button>
+    </Tag>
   );
 }
 

@@ -450,6 +450,8 @@ const en = {
         all: 'All businesses',
         title: 'Your businesses',
         body: 'Run more than one? Add each separately — they each get their own listings, page and QR code.',
+        sharePanelTitle: 'Your business page',
+        sharePanelBody: 'One link and a QR code for this business — send it in a message, or print the code for a flyer, a van or a sign.',
         atCap: 'You have the maximum of {{n}} active businesses. Hide one to add another.',
         add: 'Add a business',
         namePh: 'Business name — e.g. Cohen Movers',

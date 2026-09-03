@@ -408,3 +408,13 @@ body.hv2-light-nav [data-testid="nav-logo"] img {
 /* #C9A227 is the on-dark gold and measures about 2.4:1 on white. */
 body.hv2-light-nav .glass-pill svg { color: var(--gold-text); }
 body.hv2-light-nav .glass-dot { background: var(--gold-lg); }
+
+/* ── Scale ────────────────────────────────────────────────────────────
+   Tzvi recorded the preview with the browser at 80% and asked for that
+   size at 100%: "before everything seemed too big and too close up". CSS
+   zoom is the one property that reproduces a browser zoom: every length
+   in the subtree, type and spacing and radii alike, lays out at 0.8, and
+   viewport units keep meaning the viewport, so the 100vh community stage
+   and the corridor's container-relative geometry are untouched. Scoped
+   to the preview page, like every other experiment here. */
+body.theme-preview #root { zoom: 0.8; }

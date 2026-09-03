@@ -23,6 +23,7 @@ import BusinessPageEditor from './BusinessPageEditor';
 import BusinessCompleteness from './BusinessCompleteness';
 import BlockTimePanel from './BlockTimePanel';
 import MyGigsTab from './MyGigsTab';
+import ShareListingsPanel from './ShareListingsPanel';
 
 const MAX_ACTIVE = 5;
 
@@ -275,11 +276,14 @@ export default function MyBusinessesTab({ API, token }) {
           {items.map((b) => (
             <div
               key={b.id}
-              className="rounded-2xl border bg-white overflow-hidden"
+              className="rounded-2xl border bg-white"
               style={{ borderColor: 'var(--brand-border)', opacity: b.active ? 1 : 0.6 }}
               data-testid={`business-card-${b.id}`}
             >
-              <div className="h-24">
+              {/* The corners are clipped HERE, not on the card: the card
+                  used to be overflow-hidden, which cut the Share & QR
+                  popover off at the card's edge. */}
+              <div className="h-24 rounded-t-2xl overflow-hidden">
                 {b.logo_url ? (
                   <img src={b.logo_url} alt="" className="w-full h-full object-cover" />
                 ) : (
@@ -367,6 +371,25 @@ export default function MyBusinessesTab({ API, token }) {
                   >
                     <Plus size={13} /> {t('businesses.addServiceCta', 'Add a service')}
                   </button>
+                  {/* The page's link and QR code. The subtitle above the
+                      cards has promised "their own page and QR code" since
+                      the tab was built; the backend minted business short
+                      links from the start; and nothing on the card offered
+                      either. A hidden business keeps its button: the link
+                      still resolves, and the owner may be about to print
+                      it for the day they switch the business back on. */}
+                  <ShareListingsPanel
+                    API={API}
+                    token={token}
+                    userId={b.owner_id}
+                    target={{ type: 'business', id: b.id }}
+                    longLink={`${window.location.origin}/business/${b.slug || b.id}`}
+                    title={t('businesses.sharePanelTitle', 'Your business page')}
+                    body={t('businesses.sharePanelBody', 'One link and a QR code for this business — send it in a message, or print the code for a flyer, a van or a sign.')}
+                    filename={`myisraelrental-${(b.slug || 'business').toString().slice(0, 40)}-qr`}
+                    testidPrefix={`business-share-${b.id}`}
+                    tour={items[0]?.id === b.id ? 'business-share' : undefined}
+                  />
                   {!b.active && (
                     <span className="text-xs" style={{ color: 'var(--brand-muted)' }}>
                       {t('businesses.hidden', 'hidden')}

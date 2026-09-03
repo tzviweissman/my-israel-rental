@@ -7,6 +7,7 @@ import axios from 'axios';
 import { toast } from 'sonner';
 import { playMessagePing, requestDesktopNotificationPermission, showDesktopNotification } from '../utils/messageAlerts';
 import NavCategoryItem from './NavCategoryItem';
+import FlowButton from './ui/flow-button';
 import logoMark from '../assets/brand/logo-mark.png';
 
 const Navigation = () => {
@@ -30,6 +31,10 @@ const Navigation = () => {
     return `/dashboard?${params.toString()}`;
   };
   const isHome = location.pathname === '/';
+  // The home-page overhaul lives on /home-preview and is judged there;
+  // everything it tries stays there until Tzvi moves it (CLAUDE.md, theme
+  // scope). The flow pills are one of those tries.
+  const isPreview = location.pathname === '/home-preview';
   const [menuOpen, setMenuOpen] = useState(false);
   const [homeScrolled, setHomeScrolled] = useState(false);
   // Mobile-only: collapse the bottom tab strip to text-only once the
@@ -432,6 +437,20 @@ const Navigation = () => {
                 // it's the Host card's "full pitch" link on the join page.
               ].map(({ key, label, to }) => {
                 const active = location.pathname.startsWith(to);
+                if (isPreview) {
+                  return (
+                    <FlowButton
+                      key={key}
+                      as={Link}
+                      to={to}
+                      text={label}
+                      className="px-6 py-2 text-[13px]"
+                      aria-current={active ? 'page' : undefined}
+                      data-testid={`nav-link-${key}`}
+                      data-flow="1"
+                    />
+                  );
+                }
                 return (
                   <Link
                     key={key}

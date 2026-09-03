@@ -49,6 +49,19 @@ Three things the source did that this does not:
 The folded state is remembered per browser (`localStorage`, guarded), so
 someone who folds it for room does not fold it on every visit.
 
+## Each business's link and QR code (4 Sep 2026)
+
+Every business card has a **Share & QR code** button - the same popover as
+the listings header (`ShareListingsPanel`, now taking a `target`), minting
+a `business` short link the backend has supported since the short-link
+table was built. The tab's subtitle had promised "their own page and QR
+code" and the card offered neither (Tzvi: "theres no link to share or qr
+code"). The card is no longer `overflow-hidden` - that clipped the popover
+at the card's edge - and on a phone the popover pins to the screen, since
+a 360px panel off a button in a 390px card fits on no side. The Copy
+button's label was the same blue as its fill after the theme swap; it is
+the black action with a white label now, in both share panels.
+
 ## The scan rollup
 
 `GET /short-links/mine` - every link the caller owns with `scan_count`,
@@ -63,7 +76,7 @@ slug. Scoped to the caller; an admin gets their own, not everyone's.
   asserts the cards say what the API says, the sidebar shows the right
   groups for the role and none of the renter-only ones, it folds and stays
   folded, an item opens its tab, Hebrew puts it on the right, and a phone
-  gets the tab strip. 36 assertions.
+  gets the tab strip, the business card's share popover mints a working link and a visible QR on desktop and phone, and the Copy label is readable. 52 assertions.
 - `backend/tests/test_short_links_mine.py` - scoping, summing, ordering,
   the route-order trap.
 

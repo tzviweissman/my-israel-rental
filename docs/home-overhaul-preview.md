@@ -245,3 +245,21 @@ Two entrances shipped that way (a scale-up from a dot, then the first cut
 of this one), both fading the layer in, and the check only measured the
 layer's scale, so neither was caught. `check-home-preview.mjs` now asserts
 the near cards project at least three times the far ones.
+
+## 4 Sep 2026: the second hero action, the nav pills, the size
+
+- **"Find a business" is the ghost liquid button** (`variant="ghost"` on
+  `liquid-button.jsx`): an outline in ink at rest, the same liquid on
+  hover. The solid one stays unique to "Search rentals" - two solid blacks
+  side by side would say the two actions weigh the same.
+- **The nav's Stays / Businesses / Marketplace pills are flow buttons on
+  the preview only** (`FlowButton as={Link}` in `Navigation.js`, keyed on
+  the `/home-preview` path). Every other page keeps its glass pills; the
+  check opens `/` and asserts so.
+- **The preview lays out at 0.8.** Tzvi recorded it at 80% browser zoom -
+  "before everything seemed too big and too close up" - and asked for that
+  size at 100%. `body.theme-preview #root { zoom: 0.8 }` is the one rule
+  that reproduces a browser zoom: every length in the subtree lays out at
+  0.8 while viewport units keep meaning the viewport, so the 100vh stage
+  and the corridor's container-relative geometry are untouched. Assertions
+  that read rects in viewport px (the ring's card width) scale by 0.8.

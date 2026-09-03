@@ -297,8 +297,10 @@ for (const lng of ['en', 'he']) {
   // inside the column, which is exactly the constraint that produced a small
   // tidy arc adrift in white space.
   ok(`${lng}: the finished scene fills its frame`, late.spanW >= 90, `${late.spanW}% of the width`);
+  // 110 CSS px at the page's 0.8 layout (see `zoom` in home-v2.css): the
+  // rect is read in viewport px, so the same card measures 0.8x what it did.
   ok(`${lng}: and its cards are the size of the stage, not thumbnails`,
-    late.cardW >= 110, `${late.cardW}px wide`);
+    late.cardW >= 110 * 0.8, `${late.cardW}px wide`);
 
   // The complaint this encodes: "you don't see the whole scene until you
   // have already scrolled past it." The scene finishes at 72% of the pinned
@@ -377,6 +379,36 @@ for (const lng of ['en', 'he']) {
   await page.waitForTimeout(900);
   const liquidHover = await liquid.evaluate((el) => getComputedStyle(el.querySelector('span[aria-hidden]')).transform);
   ok(`${lng}: its liquid rises on hover`, liquidRest !== liquidHover, `${liquidRest} -> ${liquidHover}`);
+
+  // The second hero action is the ghost variant: an outline in ink at rest,
+  // the same liquid on hover, and a white label once it is flooded.
+  const ghost = page.locator('[data-testid="home-preview-hero-secondary"]');
+  ok(`${lng}: "Find a business" is the ghost liquid button`, (await ghost.getAttribute('data-variant')) === 'ghost');
+  await page.mouse.move(5, 5);
+  await page.waitForTimeout(500);
+  const ghostRest = await ghost.evaluate((el) => ({ bg: getComputedStyle(el).backgroundColor, color: getComputedStyle(el).color, tf: getComputedStyle(el.querySelector('span[aria-hidden]')).transform }));
+  await ghost.hover();
+  await page.waitForTimeout(900);
+  const ghostHover = await ghost.evaluate((el) => ({ color: getComputedStyle(el).color, tf: getComputedStyle(el.querySelector('span[aria-hidden]')).transform }));
+  ok(`${lng}: it rests transparent with an ink label`, ghostRest.bg === 'rgba(0, 0, 0, 0)' && ghostRest.color !== 'rgb(255, 255, 255)', JSON.stringify(ghostRest));
+  ok(`${lng}: and floods on hover with a white label`, ghostRest.tf !== ghostHover.tf && ghostHover.color === 'rgb(255, 255, 255)', JSON.stringify(ghostHover));
+
+  // The nav's three pills are flow buttons here, and links still.
+  await page.evaluate(() => window.scrollTo(0, 0));
+  await page.waitForTimeout(400);
+  const pills = page.locator('[data-testid="nav-rental-categories"] [data-flow="1"]');
+  ok(`${lng}: the nav pills are flow buttons on the preview`, await pills.count() === 3, `${await pills.count()}`);
+  ok(`${lng}: and still real links`, (await page.locator('[data-testid="nav-link-stays"]').evaluate((el) => el.tagName + ' ' + el.getAttribute('href'))) === 'A /stays');
+  const pillBefore = await pills.first().evaluate((el) => getComputedStyle(el.querySelectorAll('span')[1]).width);
+  await pills.first().hover();
+  await page.waitForTimeout(900);
+  const pillAfter = await pills.first().evaluate((el) => ({ w: getComputedStyle(el.querySelectorAll('span')[1]).width, color: getComputedStyle(el).color }));
+  ok(`${lng}: a nav pill floods on hover with a white label`, parseFloat(pillAfter.w) > parseFloat(pillBefore) + 100 && pillAfter.color === 'rgb(255, 255, 255)', JSON.stringify(pillAfter));
+  await page.mouse.move(5, 5);
+
+  // The page is laid out at 0.8: the size Tzvi saw at 80% browser zoom.
+  const zoom = await page.evaluate(() => getComputedStyle(document.getElementById('root')).zoom);
+  ok(`${lng}: the preview lays out at 0.8`, String(zoom) === '0.8', String(zoom));
 
   for (const [name, id] of [['stays', 'home-preview-more-stays'], ['businesses', 'home-preview-more-businesses']]) {
     const flow = page.locator(`[data-testid="${id}"]`);
@@ -489,6 +521,26 @@ for (const lng of ['en', 'he']) {
   ok(`${lng}: no page errors`, errors.length === 0, errors[0]);
   await page.context().close();
 }
+// ── scope: none of it leaks onto the real home page ─────────────────
+// Tzvi, 2026-09-03: "why is the preview affecting the real site". The flow
+// pills and the 0.8 layout are preview tries; / keeps its glass pills at 1.
+{
+  const ctx = await browser.newContext({ viewport: { width: 1280, height: 800 } });
+  const page = await ctx.newPage();
+  await page.goto(`${APP}/`, { waitUntil: 'domcontentloaded' });
+  await page.waitForSelector('[data-testid="nav-link-stays"]', { timeout: 20000 }).catch(() => {});
+  const real = await page.evaluate(() => ({
+    flow: document.querySelectorAll('[data-testid="nav-rental-categories"] [data-flow="1"]').length,
+    glass: document.querySelectorAll('[data-testid="nav-rental-categories"] .glass-pill').length,
+    zoom: String(getComputedStyle(document.getElementById('root')).zoom),
+    themed: document.body.classList.contains('theme-preview'),
+  }));
+  ok('the real home page keeps its glass pills', real.flow === 0 && real.glass === 3, JSON.stringify(real));
+  ok('and lays out at 1', real.zoom === '1' || real.zoom === 'normal', real.zoom);
+  ok('and carries no preview theme', real.themed === false);
+  await ctx.close();
+}
+
 await browser.close();
 
 const failed = results.filter((r) => !r).length;

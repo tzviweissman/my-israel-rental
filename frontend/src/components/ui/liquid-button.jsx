@@ -26,15 +26,28 @@ import React from "react";
 
 import { cn } from "@/lib/utils";
 
-function LiquidButton({ children, className = "", type = "button", ...props }) {
+/**
+ * @param {Object} props
+ * @param {'solid'|'ghost'} [props.variant='solid'] `solid` rests on the
+ *   theme's black action and is the loudest control on a page. `ghost`
+ *   rests as an outline in ink - the quiet neighbour of a solid one - and
+ *   only on hover does the same liquid flood it. Tzvi: "add liquid fill to
+ *   find a business", the button beside the hero's solid "Search rentals";
+ *   two solid blacks side by side would have said the two actions weigh the
+ *   same, and they do not.
+ */
+function LiquidButton({ children, className = "", type = "button", variant = "solid", ...props }) {
+  const ghost = variant === "ghost";
   return (
     <>
       <button
         className={cn(
           "group/liquid relative isolate inline-flex h-12 shrink-0 items-center justify-center overflow-hidden",
-          "rounded-xl border border-[rgba(28,141,212,0.35)] bg-[var(--action,#000)] px-6 text-sm font-semibold",
-          "whitespace-nowrap text-white shadow-[0_12px_32px_-14px_rgba(28,141,212,0.75)]",
-          "transition-[transform,box-shadow,border-color] duration-300 outline-none select-none",
+          "rounded-xl border px-6 text-sm font-semibold whitespace-nowrap",
+          ghost
+            ? "border-[rgba(17,24,39,0.3)] bg-transparent text-[var(--ink,#111827)] hover:text-white focus-visible:text-white"
+            : "border-[rgba(28,141,212,0.35)] bg-[var(--action,#000)] text-white shadow-[0_12px_32px_-14px_rgba(28,141,212,0.75)]",
+          "transition-[transform,box-shadow,border-color,color] duration-300 outline-none select-none",
           "hover:border-[rgba(28,141,212,0.75)] hover:shadow-[0_16px_40px_-12px_rgba(28,141,212,0.9)]",
           "focus-visible:border-[#3FB6EE] focus-visible:ring-[3px] focus-visible:ring-[rgba(28,141,212,0.35)]",
           "active:translate-y-px active:scale-[0.98]",
@@ -42,6 +55,7 @@ function LiquidButton({ children, className = "", type = "button", ...props }) {
           className,
         )}
         type={type}
+        data-variant={variant}
         {...props}
       >
         <span

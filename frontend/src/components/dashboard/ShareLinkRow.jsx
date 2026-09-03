@@ -69,7 +69,13 @@ const ShareLinkRow = ({
           className={`flex items-center gap-1.5 px-3.5 text-xs font-semibold transition-colors flex-shrink-0 border-l border-[#E5E5E5] ${
             copied
               ? 'bg-green-500 text-white'
-              : 'bg-[var(--brand-primary)] text-[var(--gold)] hover:bg-[#155454]'
+              // The theme's black action with a white label (21:1). This
+              // read `text-[var(--gold)]` on the primary fill; since the flow
+              // theme put the accent blue into every `--gold` name the label
+              // was blue on blue, and the Copy button was a blank block.
+              // White on the accent blue itself is 3.6:1, short of 4.5 for
+              // 12px text, so the fill is the action colour, not the brand.
+              : 'bg-[var(--action,var(--brand-primary))] text-[var(--action-ink,#fff)] hover:opacity-90'
           }`}
           data-testid={`${testidPrefix}-copy-button`}
         >

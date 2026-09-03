@@ -183,20 +183,23 @@ export default function HomePreview() {
           <div className="hv2-hero-foot">
             <p>{t('home.v2.hero.sub', 'Every card behind this text is a real listing or business on the site right now.')}</p>
             <div className="hv2-hero-ctas">
-              {/* The liquid button is used ONCE on the page, here. This is
-                  the single action the home page most wants — a visitor
-                  searching for somewhere to live — and it is the one place a
-                  control that loud is answering a real question rather than
-                  competing with its neighbours. Its resting state is the
-                  theme's solid black action, so it belongs even before it is
-                  touched. */}
+              {/* The SOLID liquid button is used once on the page, here.
+                  This is the single action the home page most wants — a
+                  visitor searching for somewhere to live — and it is the one
+                  place a control that loud is answering a real question
+                  rather than competing with its neighbours. Its resting
+                  state is the theme's solid black action, so it belongs even
+                  before it is touched. */}
               <LiquidButton onClick={() => navigate('/stays')} data-testid="home-preview-hero-primary">
                 {t('home.hero.ctaStays', 'Search rentals')}
                 <ArrowRight size={16} className="rtl:rotate-180" />
               </LiquidButton>
-              <button type="button" className="btn btn-ghost" onClick={() => navigate('/businesses')}>
+              {/* The second action rests as an outline and floods with the
+                  same liquid on hover: the pair reads as one family with one
+                  leader. Tzvi asked for the fill on this button by name. */}
+              <LiquidButton variant="ghost" onClick={() => navigate('/businesses')} data-testid="home-preview-hero-secondary">
                 {t('home.v2.hero.ctaBusinesses', 'Find a business')}
-              </button>
+              </LiquidButton>
             </div>
             <button type="button" className="hv2-hero-link" onClick={() => navigate('/businesses/add')}>
               {t('home.v2.hero.ctaAdd', 'Add your business — free')} <ArrowRight size={14} className="rtl:rotate-180" />
