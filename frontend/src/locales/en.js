@@ -999,7 +999,17 @@ const en = {
             // the product actually keeps: the translation is real (see
             // utils/translate.py), the tools are the ones listed on the CTA
             // above, and nothing here promises a result we cannot deliver.
-            text: 'A home is more than an address, and a business is more than a listing. We are building a place where the people who live here and the people who serve them can find each other, where every door and every trade is one message away, and where the newest tools quietly do the translating, the matching and the paperwork so that what you built has room to be found.',
+            // Longer on purpose: every word lights on its own now, so the
+            // passage is also the clock for the picture beside it.
+            //
+            // THE THIRD SENTENCE IS IN THE FUTURE TENSE AND SAYS SO. Booking
+            // a home does not yet recommend the cleaner or the mover - that
+            // is the thing being built, not a thing that works - and a
+            // paragraph on the home page describing it in the present would
+            // be a promise the product cannot keep today. "None of that last
+            // part exists yet" is in the text itself, where the reader is,
+            // not in a footnote.
+            text: 'A home is more than an address, and a business is more than a listing. We are building a place where the people who live here and the people who serve them can find each other, where every door and every trade is one message away, and where new tools quietly handle the translating and the paperwork. And we are building further than that: one circle, where booking a home also introduces you to the cleaner who works that street and the mover who knows those stairs, each of them recommended because the people before you were glad of them. That part does not exist yet. It is what we are building towards, so that a small business is found by the person who needs it.',
             cardStay: 'Rental',
             cardBiz: 'Business',
           },

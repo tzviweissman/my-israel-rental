@@ -28,12 +28,29 @@ import { motion, useReducedMotion, useTransform } from "motion/react";
 import "./motion-scroll-word-reveal-utils/index.css";
 
 const REST_OPACITY = 0.18;
-const REVEAL_SPAN = 0.8;
-const WORD_WINDOW = 0.2;
+const REVEAL_SPAN = 0.92;
+
+/**
+ * How long one word takes to light, as a fraction of the whole scroll.
+ *
+ * The source uses a flat 0.2, which is a fifth of the entire section per
+ * word. With its own twenty-word demo sentence the words start 0.04 apart,
+ * so about five are in transition at once and it reads as a moving front.
+ * Our passage is five times longer: the starts fall 0.009 apart, twenty-odd
+ * words fade together, and whole LINES light at a time - which is exactly
+ * what it looked like.
+ *
+ * So the window is derived from the spacing rather than fixed: a shade over
+ * two words in transition at any moment, whatever the length of the text.
+ */
+function getWordWindow(count) {
+  const spacing = count <= 1 ? REVEAL_SPAN : REVEAL_SPAN / (count - 1);
+  return Math.max(0.012, spacing * 2.2);
+}
 
 function getWordRange(index, count) {
   const start = count <= 1 ? 0 : (index / (count - 1)) * REVEAL_SPAN;
-  return { start, end: Math.min(1, start + WORD_WINDOW) };
+  return { start, end: Math.min(1, start + getWordWindow(count)) };
 }
 
 export function getWordOpacity(progress, { start, end }, rest = REST_OPACITY) {

@@ -213,7 +213,10 @@ for (const lng of ['en', 'he']) {
   const mid = await sample(0.3);
   const late = await sample(0.55);
 
-  ok(`${lng}: the words start dim`, early.lit === 0, `${early.lit} lit`);
+  // "Almost none", not "none": the sample is taken a little way into the
+  // section, and by then the first few words have legitimately arrived. An
+  // assertion of exactly zero was failing a passage behaving correctly.
+  ok(`${lng}: the words start almost entirely dim`, early.lit <= 8, `${early.lit} of ${early.total || 148} lit`);
   ok(`${lng}: they light as the section is read`, mid.lit > early.lit && late.lit > mid.lit,
     `${early.lit} -> ${mid.lit} -> ${late.lit}`);
   ok(`${lng}: nearly all of them are lit by the end`, late.lit >= mid.lit + 10, `${late.lit}`);
@@ -223,6 +226,53 @@ for (const lng of ['en', 'he']) {
     Math.abs(mid.cardX - early.cardX) > 20 || Math.abs(mid.cardY - early.cardY) > 20,
     `${early.cardX},${early.cardY} -> ${mid.cardX},${mid.cardY}`);
   ok(`${lng}: and the arch stays inside its column`, late.outside === 0, `${late.outside} of ${late.cards} outside`);
+
+  // The complaint this encodes: "you don't see the whole scene until you
+  // have already scrolled past it." The scene finishes at 72% of the pinned
+  // travel, so at three-quarters of the way down the section everything is
+  // complete AND the frame is still pinned - a beat with the finished
+  // picture standing still. Driving the animation to the very end of the
+  // pin is what produced the original behaviour.
+  const hold = await page.evaluate((top) => {
+    window.scrollTo(0, top);
+    return new Promise((done) => setTimeout(() => {
+      const spans = [...document.querySelectorAll('.scroll-word-reveal__heading span')];
+      const frame = document.querySelector('.hv2-community-sticky').getBoundingClientRect();
+      done({
+        lit: spans.filter((el) => parseFloat(getComputedStyle(el).opacity) > 0.95).length,
+        total: spans.length,
+        frameTop: Math.round(frame.top),
+      });
+    }, 900));
+  }, commBox.top + commBox.height * 0.72);
+  ok(`${lng}: the finished scene holds while still pinned`,
+    hold.lit === hold.total && Math.abs(hold.frameTop) <= 2,
+    `${hold.lit}/${hold.total} lit, frame at ${hold.frameTop}`);
+
+  // One or two words in transition at a time, not whole lines. The source's
+  // fixed 0.2 window meant twenty of them faded together on a passage this
+  // long, which is what "a line at a time" looked like.
+  const front = await page.evaluate((top) => {
+    window.scrollTo(0, top);
+    return new Promise((done) => setTimeout(() => {
+      const o = [...document.querySelectorAll('.scroll-word-reveal__heading span')]
+        .map((el) => parseFloat(getComputedStyle(el).opacity));
+      done(o.filter((v) => v > 0.25 && v <= 0.95).length);
+    }, 900));
+  }, commBox.top + commBox.height * 0.3);
+  ok(`${lng}: the words light a couple at a time, not a line`, front <= 5, `${front} mid-fade`);
+
+  // The passage is pinned inside one screen. Sized from viewport WIDTH alone
+  // it grew taller than the frame on a laptop, so the opening lines sat above
+  // the top edge and the closing ones below the bottom - words lighting where
+  // nobody could see them.
+  const fits = await page.evaluate(() => {
+    const frame = document.querySelector('.hv2-community-sticky').getBoundingClientRect();
+    const words = document.querySelector('.scroll-word-reveal__content').getBoundingClientRect();
+    return { above: Math.round(words.top - frame.top), below: Math.round(frame.bottom - words.bottom) };
+  });
+  ok(`${lng}: the whole passage fits inside the pinned frame`,
+    fits.above >= 0 && fits.below >= 0, `${fits.above}px above, ${fits.below}px below`);
 
   // The source component swallowed the wheel. In a section halfway down a
   // page that means the page stops moving while the pointer is over it.

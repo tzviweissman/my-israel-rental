@@ -23,7 +23,7 @@
 import React, { useEffect, useMemo, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { useMotionValue, useReducedMotion } from 'motion/react';
+import { useMotionValue, useReducedMotion, useTransform } from 'motion/react';
 
 import ScrollWordReveal from '../ui/motion-scroll-word-reveal';
 import ScrollMorphCards from '../ui/scroll-morph-hero';
@@ -94,6 +94,14 @@ export default function CommunitySection({ items = [] }) {
     };
   }, [scrollYProgress, cards.length]);
 
+  // The scene finishes at 72% of the pinned travel, not at 100%. Driving it
+   // to the very end means it completes at the exact moment the section
+   // starts leaving, so the finished picture is never on screen standing
+   // still - "you don't see the whole scene until you have scrolled past
+   // it". The last 28% is a hold: everything is complete, the frame is still
+   // pinned, and the reader gets a beat to look at it before moving on.
+  const anim = useTransform(scrollYProgress, [0, 0.72], [0, 1], { clamp: true });
+
   if (!cards.length) return null;
 
   return (
@@ -102,7 +110,7 @@ export default function CommunitySection({ items = [] }) {
         <div className="hv2-wrap hv2-community-grid">
           <div className="hv2-community-words">
             <ScrollWordReveal
-              progress={scrollYProgress}
+              progress={anim}
               kicker={t('home.v2.community.kicker', 'What we are building')}
               text={t('home.v2.community.text')}
               headingId="home-community-heading"
@@ -111,7 +119,7 @@ export default function CommunitySection({ items = [] }) {
           <div className="hv2-community-cards">
             <ScrollMorphCards
               cards={cards}
-              progress={scrollYProgress}
+              progress={anim}
               reduced={!!reduced}
               onOpen={(card) => card.href && navigate(card.href)}
             />

@@ -150,10 +150,12 @@ export default function ScrollMorphCards({ cards, progress, reduced = false, onO
   });
 
   const total = cards.length;
-  // The morph finishes at 0.6 and the remaining scroll sweeps the arch, so
-  // the reader gets the shape first and the browse second.
-  const morph = reduced ? 1 : Math.min(1, Math.max(0, value / 0.6));
-  const sweep = reduced ? 0 : Math.min(1, Math.max(0, (value - 0.6) / 0.4));
+  // The ring becomes the arch over the first 62% and the arch then drifts a
+  // little to 95%. Both finish BEFORE the words do, which is the order asked
+  // for: the passage should still be arriving when the picture has settled,
+  // not the other way round.
+  const morph = reduced ? 1 : Math.min(1, Math.max(0, value / 0.62));
+  const sweep = reduced ? 0 : Math.min(1, Math.max(0, (value - 0.62) / 0.33));
 
   return (
     <div

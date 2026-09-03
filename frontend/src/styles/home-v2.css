@@ -201,7 +201,14 @@
    column at its widest, and hidden would let it count toward the page's
    scrollable width the way the hero's corridor once did. */
 .hv2-community {
-  height: 240vh;
+  /* 520vh. The height IS the pace: 148 words across the pinned travel, so
+     at 320vh each word arrived every ~10px of scroll and one notch of a
+     wheel threw ten of them past the reader. At 520vh the frame is pinned
+     for 420vh - about 3,800px - of which the scene uses the first 72%, so a
+     word lands roughly every 18px and a wheel notch advances the sentence
+     by five or six. The last 28% is a hold with everything finished and the
+     frame still pinned. */
+  height: 520vh;
   background: var(--surface);
   border-top: 1px solid var(--brand-border);
   /* NO overflow here. An ancestor with any overflow other than `visible`
@@ -237,7 +244,9 @@
   /* Stacked, and shorter: two full-height halves on a phone means the
      reader scrolls a screen of words and then a screen of cards, which is
      the opposite of showing them moving together. */
-  .hv2-community { height: 200vh; }
+  /* Shorter on a phone: a touch flick travels much further than a
+     wheel notch, so the same pace needs less document. */
+  .hv2-community { height: 400vh; }
   .hv2-community-grid { grid-template-columns: minmax(0, 1fr); gap: 20px; }
   .hv2-community-cards { height: min(42vh, 320px); }
   .hv2-community-words { max-width: none; }
