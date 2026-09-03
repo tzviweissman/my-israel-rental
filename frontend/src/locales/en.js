@@ -976,7 +976,10 @@ const en = {
           },
           supply: {
             eyebrow: 'For businesses & property owners',
-            h2: 'Add your business — free',
+            // The heading is the campaign line (Tzvi, 3 Sep). The standing
+            // supply-side CTA, 'Add your business — free', is still the button
+            // and the first fact under it, so the offer is not lost.
+            h2: 'Scale your business through innovation',
             p: 'Free to list, free to be found, no commission. Have a place to rent? List it the same way.',
             ctaBiz: 'Add your business',
             ctaStay: 'List a place',

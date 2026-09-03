@@ -40,6 +40,7 @@ is "Add your business — free" rather than anything addressed to owners.
 | `frontend/src/pages/HomePreview.jsx` | The page. |
 | `frontend/src/styles/home-v2.css` | Its styles, namespaced `hv2-` so they cannot collide with the cinematic page's `.finale` / `.kick`, which this page reuses unchanged. |
 | `frontend/src/components/ui/cta-section-with-gallery.jsx` | The supply-side CTA's staggered text column and offset four-cell photo grid. Also ported from TypeScript. Needs `motion`, the one dependency added; it lands in this page's lazy chunk, and the entry bundle did not move. |
+| `frontend/src/components/ui/anti-metal-button.jsx` | The CTA's primary button, whose gold panel sweeps the width on hover. Ported from TypeScript and recoloured to the palette. |
 | `frontend/src/utils/cdnImage.js` | Gained `framedImage`, which fits a whole image into a fixed box and pads the rest. |
 | `scripts/check-home-preview.mjs` | The browser check. |
 
@@ -100,6 +101,34 @@ layout animation for anyone who asked for less movement while letting the fade
 run. The alternative — disabling the animation outright — is how content that
 starts at `opacity: 0` never appears at all.
 
+## The gallery's cells are cards, not photographs
+
+Each cell names the listing or business it is showing and opens it. An
+unlabelled photo of somebody's business, on a section asking you to add yours,
+is decoration; with a name on it, it is the evidence for the claim. The four
+are drawn from deeper in each list than the rails above show, so nothing on
+this page appears twice — which the check asserts, because the duplication
+would be four screens apart and nobody would catch it by eye.
+
+## Three deviations in the sweep button, and why each one is not taste
+
+The source is lime-on-near-black, pins its label with `right-4`, and puts the
+accent panel **above** the label.
+
+- The colours are the palette's: solid blue body with white text, gold panel
+  with ink dots. Those are the two treatments the design system defines, and
+  ink-on-gold is the one that measures 6.71:1. Its `dark:` variants went with
+  them — they invert the button to white, a third treatment this system does
+  not have.
+- `right`/`left` became `end`/`start`, and the chevrons mirror under RTL.
+  Otherwise the panel enters from the wrong edge in Hebrew and lands on top of
+  the label.
+- The label now sits **above** the panel and turns ink as the panel arrives
+  under it. In the source, full hover wipes the text out: the button is blank
+  at the moment someone has decided to press it. The colour change is delayed
+  by the length of the sweep so the two land together instead of the text going
+  dark while it is still over blue.
+
 ## Running it
 
 The page needs data, so point a built bundle at an API that has some:
@@ -128,6 +157,11 @@ back to stills.
   `docs/hero-cinematic-spec.md` plus the ruling in
   `docs/redesign-and-wanted-board-prompt.md` need amending — that ruling names
   `cinematic-preview.html` as the home page.
+- **The CTA heading is a campaign line.** "Scale your business through
+  innovation" (Tzvi, 3 September) replaced "Add your business — free" as the
+  heading. The standing supply-side CTA is still the button and the first fact
+  under it, so the offer itself is not lost — but the heading no longer states
+  it, and headings are what people read.
 - **Cards are unfiltered.** Every published listing and business with a photo is
   eligible for the corridor. There is no quality bar, so a dark or badly cropped
   photo rides past the headline at full size. Featured-first ordering exists on

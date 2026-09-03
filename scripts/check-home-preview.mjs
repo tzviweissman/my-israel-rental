@@ -104,6 +104,49 @@ for (const lng of ['en', 'he']) {
   // cover, and cropping one into a portrait cell takes the first and last
   // letter off every line.
   ok(`${lng}: gallery photos are padded, not cropped`, cells.every((c) => /c_pad,b_auto/.test(c.src)));
+  // Each cell is a card: it names what it is showing and opens it. An
+  // unlabelled photo is decoration; the name is what makes it evidence.
+  const cards = await gallery.locator('[data-testid^="home-preview-gallery-card-"]').evaluateAll((els) => els.map((e) => ({
+    name: (e.querySelector('b')?.textContent || '').trim(),
+    href: e.getAttribute('data-href') || '',
+  })));
+  ok(`${lng}: every gallery cell is a named card`, cards.length === 4 && cards.every((c) => c.name.length > 1), JSON.stringify(cards.map((c) => c.name)));
+  ok(`${lng}: every gallery card links to its listing or business`, cards.every((c) => /^\/(businesses|property)\/[\w-]+$/.test(c.href)), cards.map((c) => c.href).join(' '));
+  ok(`${lng}: gallery cards are four different things`, new Set(cards.map((c) => c.href)).size === 4);
+
+  // Nothing on this page is shown twice: the corridor, the two rails and the
+  // gallery all draw from the same two lists.
+  const railHrefs = await page.evaluate(() => [
+    ...document.querySelectorAll('[data-testid^="stays-card-"]'),
+  ].map((e) => e.getAttribute('data-testid')));
+  const railIds = new Set(railHrefs.map((d) => (d || '').replace('stays-card-', '')));
+  ok(`${lng}: gallery repeats nothing from the rentals rail`,
+    cards.every((c) => !railIds.has(c.href.split('/').pop())), [...railIds].slice(0, 2).join(','));
+
+  const primary = page.locator('[data-testid="home-preview-cta-primary"]');
+  ok(`${lng}: the CTA's primary button is there`, await primary.count() === 1);
+  const sweep = await primary.evaluate((el) => {
+    const panel = el.querySelector('span[aria-hidden]');
+    const cs = getComputedStyle(panel);
+    // The fill is set once on the <g>, so read the circle's COMPUTED fill,
+    // which is what a viewer actually sees. Reading the circle's own attribute
+    // returns null and fails a button that is the right colour.
+    return { bg: cs.backgroundImage, dot: getComputedStyle(el.querySelector('circle')).fill };
+  });
+  // Site colours, not the source component's lime and near-black.
+  ok(`${lng}: the button's sweep is brand gold`, /212, 172, 51|201, 162, 39/.test(sweep.bg), sweep.bg.slice(0, 80));
+  ok(`${lng}: its dots are ink`, sweep.dot === 'rgb(35, 32, 27)', sweep.dot);
+  // Hovered, the gold panel covers the whole button. The label has to still be
+  // there and still be readable — in the source it is wiped out by the sweep,
+  // leaving a blank button at the moment of the click.
+  await primary.hover();
+  await page.waitForTimeout(700);
+  const hovered = await primary.evaluate((el) => {
+    const label = el.querySelector('span');
+    return { text: label.textContent.trim(), color: getComputedStyle(label).color };
+  });
+  ok(`${lng}: the label survives the hover sweep`, hovered.text.length > 1, hovered.text);
+  ok(`${lng}: and turns ink so it reads on the gold`, hovered.color === 'rgb(35, 32, 27)', hovered.color);
 
   const h1 = page.locator('[data-testid="home-preview-hero"] h1');
   const font = await h1.evaluate((el) => getComputedStyle(el).fontFamily);

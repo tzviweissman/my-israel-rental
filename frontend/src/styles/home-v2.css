@@ -175,6 +175,28 @@
 .hv2-cta-facts b { color: var(--ink); font-weight: 700; }
 .hv2-cta-row { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 26px; }
 
+/* Each gallery cell is a card. The caption rides a scrim at the bottom so it
+   stays readable over a photo, a pale flyer, or the padded band framedImage
+   leaves around a picture that does not match the cell's shape. */
+.hv2-gcard {
+  display: block; position: absolute; inset: 0;
+  padding: 0; border: 0; background: none; cursor: pointer; font: inherit;
+  text-align: start; color: #fff; width: 100%; height: 100%;
+}
+.hv2-gcard img { transition: transform .4s var(--ease); }
+.hv2-gcard:hover img { transform: scale(1.04); }
+.hv2-gcard-cap {
+  position: absolute; inset-inline: 0; bottom: 0;
+  display: flex; flex-direction: column; gap: 1px;
+  padding: 26px 12px 10px;
+  background: linear-gradient(180deg, rgba(18, 24, 30, 0), rgba(18, 24, 30, .82));
+}
+.hv2-gcard-cap b { font-size: 13px; font-weight: 700; line-height: 1.25; }
+.hv2-gcard-cap small { font-size: 11.5px; color: rgba(255, 255, 255, .82); }
+@media (prefers-reduced-motion: reduce) {
+  .hv2-gcard img, .hv2-gcard:hover img { transition: none; transform: none; }
+}
+
 /* The component ships 50/150px rows, which is a thumbnail strip at desktop
    width. The proportions are what make the offset grid read, so both values
    scale together rather than one of them being nudged. */

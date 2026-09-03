@@ -35,11 +35,13 @@ import {
 } from '../components/ui/cta-section-with-gallery';
 import useFavorites from '../hooks/useFavorites';
 import ImageStreamHero from '../components/ui/image-stream-hero';
+import AntiMetalButton from '../components/ui/anti-metal-button';
 import useHomeShowcase from '../components/home/useHomeShowcase';
 import FinaleStats from '../components/home/FinaleStats';
 import StaysCard from '../components/stays/StaysCard';
 import ServiceCard from '../components/marketplace/ServiceCard';
 import SiteFooter from '../components/common/SiteFooter';
+import { prettyArea } from '../utils/areaNames';
 import '../styles/home-v2.css';
 
 /**
@@ -251,7 +253,9 @@ export default function HomePreview() {
                 {t('home.v2.supply.eyebrow', 'For businesses & property owners')}
               </ContainerAnimated>
               <ContainerAnimated>
-                <h2 className="hv2-cta-h2">{t('home.v2.supply.h2', 'Add your business — free')}</h2>
+                <h2 className="hv2-cta-h2">
+                  {t('home.v2.supply.h2', 'Scale your business through innovation')}
+                </h2>
               </ContainerAnimated>
               <ContainerAnimated className="hv2-cta-p">
                 {t('home.v2.supply.p', 'Free to list, free to be found, no commission. Have a place to rent? List it the same way.')}
@@ -269,9 +273,17 @@ export default function HomePreview() {
                 </ul>
               </ContainerAnimated>
               <ContainerAnimated className="hv2-cta-row">
-                <button type="button" className="btn btn-gold btn-lg" onClick={() => navigate('/businesses/add')}>
-                  {t('home.v2.supply.ctaBiz', 'Add your business')}
-                </button>
+                {/* The section's one primary action. `w-56` because the label
+                    is absolutely positioned inside the button, so the width
+                    has to be big enough to hold it — the component's default
+                    holds about twelve characters and this is longer in both
+                    languages. */}
+                <AntiMetalButton
+                  className="w-56"
+                  label={t('home.v2.supply.ctaBiz', 'Add your business')}
+                  onClick={() => navigate('/businesses/add')}
+                  data-testid="home-preview-cta-primary"
+                />
                 <button type="button" className="btn btn-ghost btn-lg" onClick={() => navigate('/join')}>
                   {t('home.v2.supply.ctaStay', 'List a place')}
                 </button>
@@ -279,15 +291,31 @@ export default function HomePreview() {
             </ContainerStagger>
 
             <GalleryGrid className="hv2-gallery" data-testid="home-preview-gallery">
-              {gallery.map((src, index) => (
-                <GalleryGridCell index={index} key={src}>
-                  <img
-                    className="size-full object-cover object-center"
-                    src={src}
-                    alt=""
-                    loading="lazy"
-                    decoding="async"
-                  />
+              {gallery.map((item, index) => (
+                <GalleryGridCell index={index} key={item.key}>
+                  {/* A card, not a photo: the four cells name what they are
+                      showing and open it. An unlabelled photo of someone's
+                      business on a page asking you to add yours is decoration;
+                      with a name on it, it is the evidence for the claim. */}
+                  <button
+                    type="button"
+                    className="hv2-gcard"
+                    onClick={() => navigate(item.href)}
+                    data-testid={`home-preview-gallery-card-${index}`}
+                    data-href={item.href}
+                  >
+                    <img
+                      className="size-full object-cover object-center"
+                      src={item.src}
+                      alt=""
+                      loading="lazy"
+                      decoding="async"
+                    />
+                    <span className="hv2-gcard-cap">
+                      <b>{(i18n.language || '').startsWith('he') && item.title_he ? item.title_he : item.title}</b>
+                      {item.sub ? <small>{prettyArea(item.sub, t)}</small> : null}
+                    </span>
+                  </button>
                 </GalleryGridCell>
               ))}
             </GalleryGrid>

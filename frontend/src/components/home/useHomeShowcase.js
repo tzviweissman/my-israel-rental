@@ -95,18 +95,37 @@ export default function useHomeShowcase() {
     return out.length >= 4 ? out : FALLBACK_STILLS;
   }, [rentals, businesses]);
 
-  // Four photos for the supply-side gallery: two businesses, two rentals,
-  // taken from deeper in each list than the rails show so the same photo is
-  // not on screen twice in one scroll.
+  // Four cards for the supply-side gallery. Each one is an identified listing
+  // or business - photo, name, where it is, and a link through - rather than an
+  // anonymous photo, and every one is taken from deeper in its list than the
+  // rails above show, so no card on this page is a repeat of another.
   const gallery = useMemo(() => {
-    const b = businesses.slice(8, 12).map((g) => framedImage(getGigCover(g), GALLERY_W, GALLERY_H));
-    const r = rentals.slice(6, 10).map((p) => framedImage(propertyPhoto(p), GALLERY_W, GALLERY_H));
+    const bizCard = (g) => g && {
+      key: `b-${g.id}`,
+      src: framedImage(getGigCover(g), GALLERY_W, GALLERY_H),
+      title: g.title || '',
+      title_he: g.title_he || '',
+      sub: g.area || '',
+      href: `/businesses/${g.id}`,
+    };
+    const stayCard = (p) => p && {
+      key: `p-${p.id}`,
+      src: framedImage(propertyPhoto(p), GALLERY_W, GALLERY_H),
+      title: p.title || '',
+      title_he: '',
+      sub: p.area || '',
+      href: `/property/${p.id}`,
+    };
+    const b = businesses.slice(8, 12).map(bizCard);
+    const r = rentals.slice(6, 10).map(stayCard);
     const out = [b[0], r[0], b[1], r[1]].filter(Boolean);
-    // Short lists fall back to the front of each, then to the site stills, so
-    // the grid is never a row of empty boxes.
-    const spare = [...businesses, ...rentals].map((x) => framedImage(getGigCover(x) || propertyPhoto(x), GALLERY_W, GALLERY_H));
-    for (const u of spare) { if (out.length >= 4) break; if (u && !out.includes(u)) out.push(u); }
-    for (const f of FALLBACK_STILLS) { if (out.length >= 4) break; out.push(f.src); }
+    // Short lists fall back to whatever is left that is not already used, so
+    // the grid is never a row of empty boxes and never shows one thing twice.
+    const spare = [...businesses.slice(0, 8).map(bizCard), ...rentals.slice(0, 6).map(stayCard)];
+    for (const c of spare) {
+      if (out.length >= 4) break;
+      if (c && c.src && !out.some((o) => o.key === c.key)) out.push(c);
+    }
     return out.slice(0, 4);
   }, [rentals, businesses]);
 
