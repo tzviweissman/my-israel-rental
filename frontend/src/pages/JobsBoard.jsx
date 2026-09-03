@@ -71,7 +71,7 @@ const JobsBoard = () => {
   }, [savedSearches, activeCat, activeArea]);
 
   const toggleSaveSearch = async () => {
-    if (!token) { navigate('/auth'); return; }
+    if (!token) { navigate(`/auth/login?redirect=${encodeURIComponent(window.location.pathname + window.location.search)}`); return; }
     if (!activeCat) return;
     setSavingSearch(true);
     try {
@@ -133,7 +133,7 @@ const JobsBoard = () => {
             </p>
           </div>
           <button
-            onClick={() => { saveReturnPath(); navigate(token ? '/businesses/post-job' : '/auth'); }}
+            onClick={() => { saveReturnPath(); navigate(token ? '/businesses/post-job' : `/auth/login?redirect=${encodeURIComponent('/businesses/post-job')}`); }}
             className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-[var(--brand-primary)] text-white text-sm font-semibold hover:bg-[#0F3A3A]"
             data-testid="jobs-post-cta"
           >
@@ -221,7 +221,7 @@ const JobsBoard = () => {
               {t('jobsBoard.emptyBody', 'Be the first to post — matching providers will reach out.')}
             </p>
             <button
-              onClick={() => { saveReturnPath(); navigate(token ? '/businesses/post-job' : '/auth'); }}
+              onClick={() => { saveReturnPath(); navigate(token ? '/businesses/post-job' : `/auth/login?redirect=${encodeURIComponent('/businesses/post-job')}`); }}
               className="px-5 py-2 rounded-lg text-sm font-semibold text-white bg-[var(--brand-primary)] hover:bg-[#0F3A3A]"
               data-testid="jobs-empty-cta"
             >

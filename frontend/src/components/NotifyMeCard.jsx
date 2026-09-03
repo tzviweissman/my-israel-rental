@@ -20,7 +20,8 @@ const RENTAL_TYPE_KEY = {
 /**
  * Renter-facing "save this search" card. Rendered inside the search results'
  * empty state when there are 0 matching properties. Requires sign-in; if the
- * user isn't logged in we redirect them to /auth with a return URL.
+ * user isn't logged in we redirect them to /auth/login with a ?redirect= back
+ * here.
  */
 const NotifyMeCard = ({ filters, dateRange }) => {
   const { t } = useTranslation();
@@ -45,7 +46,7 @@ const NotifyMeCard = ({ filters, dateRange }) => {
   const handleSave = async () => {
     if (!token) {
       toast.error(t('stays.notifySignInToast', 'Please sign in to save this alert.'));
-      navigate('/auth?return=' + encodeURIComponent(window.location.pathname + window.location.search));
+      navigate(`/auth/login?redirect=${encodeURIComponent(window.location.pathname + window.location.search)}`);
       return;
     }
     setSaving(true);

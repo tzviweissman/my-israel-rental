@@ -53,7 +53,7 @@ const PostJob = () => {
   const set = (patch) => setForm((f) => ({ ...f, ...patch }));
 
   useEffect(() => {
-    if (!token) { navigate('/auth'); return; }
+    if (!token) { navigate(`/auth/login?redirect=${encodeURIComponent(window.location.pathname)}`); return; }
     axios.get(`${API}/marketplace/categories`).then((r) => setCategories(r.data));
   }, [token, navigate]);
 

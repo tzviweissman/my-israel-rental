@@ -528,7 +528,7 @@ const GigDetail = () => {
         const msg = `Hi! I'm interested in "${tier.name}" (${sym}${tier.price}) from your ${displayTitle} store on MyIsraelRental.`;
         if (openWhatsApp(msg)) return;
       }
-      if (!token) { toast.error(t('gigDetail.signInToMessage', 'Please sign in to message the seller')); navigate('/auth'); return; }
+      if (!token) { toast.error(t('gigDetail.signInToMessage', 'Please sign in to message the seller')); navigate(`/auth/login?redirect=${encodeURIComponent(`/businesses/${id}`)}`); return; }
       setShowBook(true);
       return;
     }
@@ -540,7 +540,7 @@ const GigDetail = () => {
         const msg = `Hi! I'd like to book your "${displayTitle}" — ${tier.name} on ${appointmentDate} at ${appointmentSlot} (${sym}${tier.price}) from MyIsraelRental.`;
         if (openWhatsApp(msg)) return;
       }
-      if (!token) { toast.error(t('gigDetail.signInToBook', 'Please sign in to book')); navigate('/auth'); return; }
+      if (!token) { toast.error(t('gigDetail.signInToBook', 'Please sign in to book')); navigate(`/auth/login?redirect=${encodeURIComponent(`/businesses/${id}`)}`); return; }
       setShowBook(true);
       return;
     }
@@ -550,7 +550,7 @@ const GigDetail = () => {
       const msg = `Hi! I'd like to book your "${displayTitle}" — ${tier.name} (${sym}${tier.price})${datePart} from MyIsraelRental.`;
       if (openWhatsApp(msg)) return;
     }
-    if (!token) { toast.error(t('gigDetail.signInToBook', 'Please sign in to book')); navigate('/auth'); return; }
+    if (!token) { toast.error(t('gigDetail.signInToBook', 'Please sign in to book')); navigate(`/auth/login?redirect=${encodeURIComponent(`/businesses/${id}`)}`); return; }
     setShowBook(true);
   };
 
@@ -813,7 +813,7 @@ const GigDetail = () => {
                       // Fall back to selecting the product + opening the in-platform booking modal.
                       setTier(p);
                       setHeroIndex(0);
-                      if (!token) { toast.error(t('gigDetail.signInToMessage', 'Please sign in to message the seller')); navigate('/auth'); return; }
+                      if (!token) { toast.error(t('gigDetail.signInToMessage', 'Please sign in to message the seller')); navigate(`/auth/login?redirect=${encodeURIComponent(`/businesses/${id}`)}`); return; }
                       setShowBook(true);
                     };
                     return (

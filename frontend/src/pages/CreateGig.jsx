@@ -301,7 +301,7 @@ const CreateGig = () => {
   // array so the payload shape is unchanged.
 
   useEffect(() => {
-    if (!token) { navigate('/auth'); return; }
+    if (!token) { navigate(`/auth/login?redirect=${encodeURIComponent(window.location.pathname)}`); return; }
     axios.get(`${API}/marketplace/categories`).then((r) => setCategories(r.data));
     axios.get(`${API}/marketplace/locations`).then((r) => setLocations(r.data)).catch(() => {});
   }, [token, navigate]);
