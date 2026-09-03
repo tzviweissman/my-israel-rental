@@ -19,6 +19,12 @@
  * considered flow, not a quick correction. They are one step away in the
  * wizard.
  *
+ * The OFFER belongs here rather than in the wizard for the same reason the
+ * typo does: a business decides to run one on a Tuesday and wants it up in
+ * a minute, and takes it down the same way. It is percent-only, and it
+ * never rewrites the prices above it - the site shows the offer beside the
+ * price the business wrote, and the business honours it in the conversation.
+ *
  * Only changed fields are sent. PATCH replaces `tiers`/`products`
  * wholesale, so the arrays are rebuilt from the originals with the edited
  * values merged in — dropping a field here would silently erase a tier's
@@ -46,6 +52,13 @@ export default function EditListingModal({ gig, API, token, onClose, onSaved }) 
     ...o,
     photos: isStore ? productPhotos(o) : (Array.isArray(o.images) ? o.images : []),
   })));
+  // The offer. `on` is kept separate from the numbers because switching it
+  // off and saving is what REMOVES it - the API reads a null as "take it
+  // down", so an offer that was on and is now off has to send something.
+  const [offerOn, setOfferOn] = useState(Boolean(gig.discount));
+  const [offerPercent, setOfferPercent] = useState(gig.discount?.percent ?? 10);
+  const [offerLabel, setOfferLabel] = useState(gig.discount?.label || '');
+  const [offerEnds, setOfferEnds] = useState(gig.discount?.ends_at || '');
   const [saving, setSaving] = useState(false);
   const [uploadingAt, setUploadingAt] = useState(null);
   const fileRefs = useRef({});
@@ -125,6 +138,18 @@ export default function EditListingModal({ gig, API, token, onClose, onSaved }) 
       return;
     }
 
+    if (offerOn) {
+      const pct = parseInt(offerPercent, 10);
+      if (!(pct >= 5 && pct <= 90)) {
+        toast.error(t('editListing.offerRange', 'An offer has to be between 5% and 90%.'));
+        return;
+      }
+      if (offerEnds && offerEnds < new Date().toISOString().slice(0, 10)) {
+        toast.error(t('editListing.offerPast', 'That end date has already passed, so nobody would see the offer.'));
+        return;
+      }
+    }
+
     setSaving(true);
     try {
       const payload = {};
@@ -151,6 +176,22 @@ export default function EditListingModal({ gig, API, token, onClose, onSaved }) 
         originals.map((o) => ({ ...o })),
       );
       if (changed) payload[isStore ? 'products' : 'tiers'] = rebuilt;
+
+      const nextOffer = offerOn
+        ? {
+          percent: Math.max(5, Math.min(90, parseInt(offerPercent, 10) || 0)),
+          label: offerLabel.trim().slice(0, 60),
+          ends_at: offerEnds || null,
+        }
+        : null;
+      const prevOffer = gig.discount
+        ? {
+          percent: gig.discount.percent,
+          label: gig.discount.label || '',
+          ends_at: gig.discount.ends_at || null,
+        }
+        : null;
+      if (JSON.stringify(nextOffer) !== JSON.stringify(prevOffer)) payload.discount = nextOffer;
 
       if (!Object.keys(payload).length) {
         toast.success(t('editListing.noChanges', 'Nothing to save.'));
@@ -223,6 +264,88 @@ export default function EditListingModal({ gig, API, token, onClose, onSaved }) 
             <p className="text-[11px] text-gray-500">
               {t('editListing.translationNote', 'The Hebrew version is regenerated from this when you save.')}
             </p>
+          </div>
+
+          {/* Offer. Off unless one is running; switching it on reveals the
+              three fields. The note under them is not decoration - a
+              customer told the price has changed who is then charged the
+              old one blames the site, so the sheet says plainly what the
+              badge does and what it does not. */}
+          <div
+            className="rounded-xl border p-3 space-y-3"
+            style={{ borderColor: 'var(--brand-border)' }}
+            data-testid="edit-listing-offer"
+          >
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={offerOn}
+                onChange={(e) => setOfferOn(e.target.checked)}
+                className="w-4 h-4 accent-[var(--brand-primary)]"
+                data-testid="edit-listing-offer-toggle"
+              />
+              <span className="text-xs font-semibold text-gray-700">
+                {t('editListing.offerOn', 'Run an offer on this listing')}
+              </span>
+            </label>
+
+            {offerOn && (
+              <div className="space-y-3">
+                <div className="flex flex-wrap gap-2 items-end">
+                  <div className="space-y-1">
+                    <label className="text-[11px] font-semibold text-gray-600" htmlFor="edit-listing-offer-percent">
+                      {t('editListing.offerPercent', '% off')}
+                    </label>
+                    <input
+                      id="edit-listing-offer-percent"
+                      type="number"
+                      min="5"
+                      max="90"
+                      value={offerPercent}
+                      onChange={(e) => setOfferPercent(e.target.value)}
+                      className="w-24 px-3 py-2 rounded-lg border bg-white text-sm"
+                      style={{ borderColor: 'var(--brand-border)' }}
+                      data-testid="edit-listing-offer-percent"
+                    />
+                  </div>
+                  <div className="space-y-1 flex-1 min-w-[10rem]">
+                    <label className="text-[11px] font-semibold text-gray-600" htmlFor="edit-listing-offer-label">
+                      {t('editListing.offerLabel', 'What it is for (optional)')}
+                    </label>
+                    <input
+                      id="edit-listing-offer-label"
+                      value={offerLabel}
+                      maxLength={60}
+                      onChange={(e) => setOfferLabel(e.target.value)}
+                      placeholder={t('editListing.offerLabelHint', 'e.g. New customers')}
+                      className="w-full px-3 py-2 rounded-lg border bg-white text-sm"
+                      style={{ borderColor: 'var(--brand-border)' }}
+                      data-testid="edit-listing-offer-label"
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-[11px] font-semibold text-gray-600" htmlFor="edit-listing-offer-ends">
+                      {t('editListing.offerEnds', 'Runs until (optional)')}
+                    </label>
+                    <input
+                      id="edit-listing-offer-ends"
+                      type="date"
+                      value={offerEnds}
+                      onChange={(e) => setOfferEnds(e.target.value)}
+                      className="px-3 py-2 rounded-lg border bg-white text-sm"
+                      style={{ borderColor: 'var(--brand-border)' }}
+                      data-testid="edit-listing-offer-ends"
+                    />
+                  </div>
+                </div>
+                <p className="text-[11px] text-gray-500" data-testid="edit-listing-offer-note">
+                  {t(
+                    'editListing.offerNote',
+                    'Your prices stay exactly as you wrote them. Customers see the offer on your listing and on the home page, and you apply it when you agree the job.',
+                  )}
+                </p>
+              </div>
+            )}
           </div>
 
           <div className="space-y-3">

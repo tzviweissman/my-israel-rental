@@ -80,7 +80,7 @@ function useReveal(root) {
 export default function HomePreview() {
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
-  const { streamImages, gallery, picks, rentals, businesses, loaded } = useHomeShowcase();
+  const { streamImages, gallery, picks, hasDeals, rentals, businesses, loaded } = useHomeShowcase();
   // Which card the coverflow has centred. The component names it in its
   // caption but cannot open it, so the page renders the control.
   const [pick, setPick] = useState(0);
@@ -106,8 +106,12 @@ export default function HomePreview() {
       src: it.src,
       alt: it.alt,
       title,
-      subtitle: it.kind === 'biz' ? t('home.v2.picks.kindBiz', 'Local business') : t('home.v2.picks.kindStay', 'Rental'),
+      subtitle: it.discount?.percent
+        ? t('offers.percentOff', { defaultValue: '{{percent}}% off', percent: it.discount.percent })
+        : (it.kind === 'biz' ? t('home.v2.picks.kindBiz', 'Local business') : t('home.v2.picks.kindStay', 'Rental')),
       meta: [
+        it.discount?.label ? { label: t('home.v2.picks.offer', 'Offer'), value: it.discount.label } : null,
+        it.discount?.ends_at ? { label: t('home.v2.picks.until', 'Until'), value: it.discount.ends_at } : null,
         it.area && !areaIsRedundant ? { label: t('home.v2.picks.where', 'Where'), value: prettyArea(it.area, t) } : null,
         it.beds ? { label: t('home.v2.picks.beds', 'Bedrooms'), value: it.beds } : null,
         it.price ? { label: t('home.v2.picks.price', 'Price'), value: it.price } : null,
@@ -198,9 +202,15 @@ export default function HomePreview() {
         <section className="hv2-picks" id="picks">
           <div className="hv2-wrap">
             <div className="hv2-picks-head">
-              <div className="hv2-eyebrow hv2-eyebrow-gold">{t('home.v2.picks.eyebrow', 'Fresh today')}</div>
-              <h2>{t('home.v2.picks.h2', "Today's picks")}</h2>
-              <p>{t('home.v2.picks.p', 'A new selection every day, from everything listed on the site. Drag to browse.')}</p>
+              <div className="hv2-eyebrow hv2-eyebrow-gold">
+                {hasDeals ? t('home.v2.picks.eyebrowDeals', 'On offer now') : t('home.v2.picks.eyebrow', 'Fresh today')}
+              </div>
+              <h2>{hasDeals ? t('home.v2.picks.h2Deals', "Today's deals") : t('home.v2.picks.h2', "Today's picks")}</h2>
+              <p>
+                {hasDeals
+                  ? t('home.v2.picks.pDeals', 'Offers running right now, put up by the businesses themselves. Drag to browse.')
+                  : t('home.v2.picks.p', 'A new selection every day, from everything listed on the site. Drag to browse.')}
+              </p>
             </div>
             <CoverflowCarousel
               slides={pickSlides}
@@ -220,9 +230,11 @@ export default function HomePreview() {
                 data-testid="home-preview-pick-open"
                 data-href={picks[pick]?.href || ''}
               >
-                {picks[pick]?.kind === 'biz'
-                  ? t('home.v2.picks.openBiz', 'See this business')
-                  : t('home.v2.picks.openStay', 'See this rental')}
+                {picks[pick]?.discount?.percent
+                  ? t('home.v2.picks.openOffer', 'See this offer')
+                  : (picks[pick]?.kind === 'biz'
+                    ? t('home.v2.picks.openBiz', 'See this business')
+                    : t('home.v2.picks.openStay', 'See this rental'))}
               </button>
             </div>
           </div>

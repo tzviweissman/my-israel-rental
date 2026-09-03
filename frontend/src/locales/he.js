@@ -34,6 +34,14 @@ const he = {
       },
       // See the note on the English copy.
       editListing: {
+        offerOn: 'הפעלת מבצע על המודעה הזו',
+        offerPercent: 'אחוז הנחה',
+        offerLabel: 'למה המבצע (לא חובה)',
+        offerLabelHint: 'לדוגמה: לקוחות חדשים',
+        offerEnds: 'בתוקף עד (לא חובה)',
+        offerNote: 'המחירים שלכם נשארים בדיוק כפי שכתבתם. הלקוחות רואים את המבצע במודעה ובדף הבית, ואתם מיישמים אותו כשסוגרים את העבודה.',
+        offerRange: 'מבצע חייב להיות בין 5% ל-90%.',
+        offerPast: 'תאריך הסיום כבר עבר, כך שאף אחד לא יראה את המבצע.',
         edit: 'עריכה',
         title: 'עריכת הרשימה',
         listingTitle: 'כותרת הרשימה',
@@ -892,6 +900,11 @@ const he = {
         denialReason: 'סיבת דחייה',
         message: 'הודעה'
       },
+      offers: {
+        percentOff: '{{percent}}% הנחה',
+        until: 'עד {{date}}',
+        mention: 'הזכירו את המבצע כשאתם יוצרים קשר.',
+      },
       home: {
         // See the note on the English side — these were missing entirely,
         // so the finale rendered in English for Hebrew readers.
@@ -918,6 +931,12 @@ const he = {
             where: 'איפה',
             beds: 'חדרי שינה',
             price: 'מחיר',
+            eyebrowDeals: 'במבצע עכשיו',
+            h2Deals: 'המבצעים של היום',
+            pDeals: 'מבצעים שרצים ממש עכשיו, שהעסקים עצמם פרסמו. גררו כדי לעיין.',
+            offer: 'המבצע',
+            until: 'עד',
+            openOffer: 'לצפייה במבצע',
             openStay: 'לצפייה בנכס',
             openBiz: 'לצפייה בעסק',
           },

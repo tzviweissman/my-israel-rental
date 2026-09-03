@@ -43,6 +43,14 @@ const en = {
       // Quick edit for a live listing — the answer to "I spotted a typo"
       // and "that's the wrong photo". Deliberately not the wizard.
       editListing: {
+        offerOn: 'Run an offer on this listing',
+        offerPercent: '% off',
+        offerLabel: 'What it is for (optional)',
+        offerLabelHint: 'e.g. New customers',
+        offerEnds: 'Runs until (optional)',
+        offerNote: 'Your prices stay exactly as you wrote them. Customers see the offer on your listing and on the home page, and you apply it when you agree the job.',
+        offerRange: 'An offer has to be between 5% and 90%.',
+        offerPast: 'That end date has already passed, so nobody would see the offer.',
         edit: 'Edit',
         title: 'Edit listing',
         listingTitle: 'Listing title',
@@ -926,6 +934,14 @@ const en = {
         denialReason: 'Denial Reason',
         message: 'Message'
       },
+      // A business's own offer on one of its listings. Shared namespace
+      // because the badge renders on the card, the listing page and the
+      // home page, and three copies of "20% off" drift.
+      offers: {
+        percentOff: '{{percent}}% off',
+        until: 'until {{date}}',
+        mention: 'Mention this offer when you get in touch.',
+      },
       home: {
         // The cinematic finale. These keys did not exist at all until now:
         // every string in that section was reaching the English default and
@@ -954,6 +970,12 @@ const en = {
             where: 'Where',
             beds: 'Bedrooms',
             price: 'Price',
+            eyebrowDeals: 'On offer now',
+            h2Deals: "Today's deals",
+            pDeals: 'Offers running right now, put up by the businesses themselves. Drag to browse.',
+            offer: 'Offer',
+            until: 'Until',
+            openOffer: 'See this offer',
             openStay: 'See this rental',
             openBiz: 'See this business',
           },

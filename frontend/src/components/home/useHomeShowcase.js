@@ -31,6 +31,12 @@ const CARD_WIDTH = 520;
 const GALLERY_W = 700;
 // The coverflow's cards are square.
 const PICK_SIZE = 640;
+// The coverflow needs a ring, not a row. Below this the raked cards read as
+// three loose photos, so the section hides itself rather than showing a thin
+// one - and the same floor decides whether there are enough live offers to
+// call the section "Today's deals". Two different numbers here is how the
+// heading once flipped to deals while the section refused to render.
+const MIN_CARDS = 4;
 const GALLERY_H = 900;
 
 const FALLBACK_STILLS = [
@@ -57,6 +63,7 @@ const byNewest = (a, b) => String(b.created_at || '').localeCompare(String(a.cre
 export default function useHomeShowcase() {
   const [properties, setProperties] = useState([]);
   const [gigs, setGigs] = useState([]);
+  const [deals, setDeals] = useState([]);
   const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
@@ -64,10 +71,15 @@ export default function useHomeShowcase() {
     Promise.allSettled([
       axios.get(`${API}/properties`, { params: { limit: 200 } }),
       axios.get(`${API}/marketplace/gigs`, { params: { limit: 60 } }),
-    ]).then(([props, svc]) => {
+      // The offers shelf. Its own endpoint, so an empty result here is a
+      // fact about the site - nobody is running an offer today - and not a
+      // filter that failed.
+      axios.get(`${API}/marketplace/deals`, { params: { limit: 24 } }),
+    ]).then(([props, svc, offers]) => {
       if (!alive) return;
       if (props.status === 'fulfilled' && Array.isArray(props.value.data)) setProperties(props.value.data);
       if (svc.status === 'fulfilled' && Array.isArray(svc.value.data)) setGigs(svc.value.data);
+      if (offers.status === 'fulfilled' && Array.isArray(offers.value.data)) setDeals(offers.value.data);
       setLoaded(true);
     });
     return () => { alive = false; };
@@ -131,15 +143,33 @@ export default function useHomeShowcase() {
     return out.slice(0, 4);
   }, [rentals, businesses]);
 
-  // Today's picks: a dozen square cards for the coverflow, drawn from the same
-  // two lists and rotated by the calendar day so the section genuinely differs
-  // from one day to the next rather than only saying so.
+  // The carousel's cards.
   //
-  // It is "picks", not "deals". Nothing in this product records a discount —
-  // no was-price, no sale flag, no expiry — so a card headed "deal" would be a
-  // claim about price that no field on the listing supports. The rotation is
-  // what makes "today's" true; the word above it has to be true as well.
+  // When businesses are running offers, this is "Today's deals" and every
+  // card carries one, because a discount is now a real field a business sets
+  // (see GigDiscount in the backend) rather than a word on a heading. When
+  // nobody has an offer on, it falls back to "Today's picks" - a rotation of
+  // everything listed, cut at an offset taken from the calendar day so the
+  // selection genuinely differs from one day to the next.
+  //
+  // The heading follows the data rather than the data being bent to fit a
+  // heading: `hasDeals` below is what the page reads to decide which of the
+  // two it is showing.
+  const hasDeals = deals.length >= MIN_CARDS;
   const picks = useMemo(() => {
+    if (deals.length >= MIN_CARDS) {
+      return deals.slice(0, 12).map((g) => ({
+        key: `d-${g.id}`,
+        src: framedImage(getGigCover(g), PICK_SIZE, PICK_SIZE),
+        alt: g.title || '',
+        kind: 'biz',
+        title: g.title || '',
+        title_he: g.title_he || '',
+        area: g.area || '',
+        href: `/businesses/${g.id}`,
+        discount: g.discount || null,
+      }));
+    }
     const day = Math.floor(Date.now() / 86400000);
     const money = (n, currency, per) => (
       n ? `${currency === 'USD' ? '$' : '₪'}${Number(n).toLocaleString()}${per}` : null
@@ -177,12 +207,12 @@ export default function useHomeShowcase() {
       if (r[i]) pool.push(r[i]);
       if (b[i]) pool.push(b[i]);
     }
-    if (pool.length < 4) return [];
+    if (pool.length < MIN_CARDS) return [];
     // Rotate the whole pool, so every listing comes round over time instead of
     // the same twelve showing for ever.
     const start = (day * 3) % pool.length;
     return Array.from({ length: Math.min(12, pool.length) }, (_, i) => pool[(start + i) % pool.length]);
-  }, [rentals, businesses]);
+  }, [rentals, businesses, deals]);
 
-  return { loaded, streamImages, gallery, picks, rentals: rentals.slice(0, 6), businesses: businesses.slice(0, 8) };
+  return { loaded, streamImages, gallery, picks, hasDeals, rentals: rentals.slice(0, 6), businesses: businesses.slice(0, 8) };
 }

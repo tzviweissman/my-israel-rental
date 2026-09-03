@@ -1,6 +1,7 @@
 import React from 'react';
 import { Award, Zap } from 'lucide-react';
 import StarRating from './StarRating';
+import OfferBadge from './OfferBadge';
 import FitImage from '../common/FitImage';
 import { localizedTitle, localizedDescription } from '../../utils/gigLocale';
 import { isAvailableNow, getGigCover } from '../../utils/gigAvailability';
@@ -77,8 +78,16 @@ const ServiceGridCard = ({ gig, onClick, i18n, t }) => {
           decoding="async"
           className="absolute inset-0"
         />
+        {/* An offer outranks the top-rated pill for this corner: it is the
+            reason someone stops on this card, and two pills stacked in one
+            corner is how neither gets read. */}
+        {gig.discount?.percent ? (
+          <span className="absolute top-2 start-2">
+            <OfferBadge discount={gig.discount} testId={`gig-offer-${gig.id}`} />
+          </span>
+        ) : null}
         {/* Top-Rated overlay pill */}
-        {gig.is_top_rated && (
+        {gig.is_top_rated && !gig.discount?.percent && (
           <span
             className="absolute top-2 start-2 inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wide shadow"
             style={{ background: GOLD, color: 'var(--brand-primary)' }}

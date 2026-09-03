@@ -512,6 +512,35 @@ _DEFAULT_WEEKLY: dict[str, list[WeeklyWindow]] = {
 }
 
 
+class GigDiscount(BaseModel):
+    """An offer a business puts on one of its own listings.
+
+    Percent only, deliberately. A money-off amount has to be read against
+    a price, and a listing can carry several tiers at different prices (or
+    none at all, for "message me for a quote"), so "₪50 off" is ambiguous
+    on most of them while "15% off" is not.
+
+    NOTHING IS RECOMPUTED FROM THIS. The listing's prices are shown as the
+    business wrote them and the offer is shown beside them; the site does
+    not quietly restate a tier at a lower number. Bookings on this platform
+    are mostly a message or a WhatsApp thread, and payment, where it
+    happens, happens between the two people — so a price the site had
+    lowered by itself would be a promise the business never made and the
+    checkout would not keep. The badge tells a customer what to ask for.
+
+    `ends_at` is a plain date and the offer simply stops being served the
+    day after it. There is no background job: an expired offer is filtered
+    out at read time, which is the one place that cannot go stale.
+    """
+
+    percent: int = Field(..., ge=5, le=90)
+    # Shown under the badge, e.g. "First clean" or "New customers".
+    label: str = Field("", max_length=60)
+    label_he: str = Field("", max_length=60)
+    # YYYY-MM-DD. Absent means the offer runs until the business removes it.
+    ends_at: Optional[str] = Field(None, pattern=r"^\d{4}-\d{2}-\d{2}$")
+
+
 class GigIn(BaseModel):
     title: str
     category: str
@@ -564,6 +593,7 @@ class GigIn(BaseModel):
     contact_email: Optional[str] = None
     area: Optional[str] = None
     faqs: list[dict[str, str]] = Field(default_factory=list)
+    discount: Optional[GigDiscount] = None
 
 
 class GigPatch(BaseModel):
@@ -587,6 +617,11 @@ class GigPatch(BaseModel):
     area: Optional[str] = None
     faqs: Optional[list[dict[str, str]]] = None
     status: Optional[str] = None      # "draft" | "published" | "paused"
+    # Explicitly nullable: sending `null` REMOVES the offer. patch_gig drops
+    # None values wholesale, so this one field is read off `model_fields_set`
+    # instead - otherwise a business could add an offer and never take it
+    # down, which is worse than not having the feature.
+    discount: Optional[GigDiscount] = None
 
 
 class CredentialDoc(BaseModel):

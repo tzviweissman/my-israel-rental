@@ -91,6 +91,23 @@ def _public_provider_name(business: dict | None, user: dict | None) -> str:
     return ((user or {}).get("name") or "").strip() or "Provider"
 
 
+def active_discount(gig: dict[str, Any], today: str | None = None) -> dict[str, Any] | None:
+    """The listing's offer, or None when there is none or it has finished.
+
+    Read-time filtering rather than a job that flips a flag: an offer that
+    ended overnight is gone from the next request, with nothing to fall
+    behind and nothing to back-fill. Every public read goes through here,
+    so an expired offer cannot reach a page by a route somebody forgot.
+    """
+    disc = gig.get("discount")
+    if not isinstance(disc, dict) or not disc.get("percent"):
+        return None
+    ends = disc.get("ends_at")
+    if ends and ends < (today or datetime.now(UTC).date().isoformat()):
+        return None
+    return disc
+
+
 @router.get("/gigs")
 async def list_gigs(
     category: Optional[str] = None,
@@ -285,6 +302,9 @@ async def list_gigs(
             if not windows:
                 continue
 
+        # Expired offers never leave the server. `discount` on the stored
+        # doc is what the business set; this is what the public may see.
+        gig["discount"] = active_discount(gig)
         user = users.get(gig.get("provider_user_id"))
         gig["provider"] = {
             "user_id": gig.get("provider_user_id"),
@@ -469,6 +489,7 @@ async def create_gig(payload: GigIn, user=Depends(verify_token)):
         "whatsapp": payload.whatsapp,
         "area": payload.area,
         "faqs": payload.faqs,
+        "discount": payload.discount.model_dump() if payload.discount else None,
         "status": "published",
         "created_at": now,
         "updated_at": now,
@@ -501,6 +522,75 @@ async def create_gig(payload: GigIn, user=Depends(verify_token)):
 
 
 
+@router.get("/deals")
+async def list_deals(limit: int = Query(24, ge=1, le=60)):
+    """Published listings that carry a live offer, newest offer first.
+
+    Its own endpoint rather than `?has_discount=1` on the browse route
+    because the two answer different questions. Browse is a search with
+    fifteen filters and a relevance sort; this is a shelf. A caller wants
+    "what is on offer right now", and giving that its own URL keeps the
+    home page from having to know about the filter vocabulary.
+
+    Only published listings from active providers, and only offers that
+    have not finished — the same `active_discount` gate every other public
+    read uses, so an expired offer cannot appear here either.
+    """
+    raw = await db.marketplace_gigs.find({"status": "published"}).to_list(400)
+    live = [g for g in raw if active_discount(g)]
+    if not live:
+        return []
+
+    provider_ids = list({g.get("provider_user_id") for g in live if g.get("provider_user_id")})
+    provs = {
+        p["user_id"]: p
+        async for p in db.marketplace_providers.find({"user_id": {"$in": provider_ids}})
+    }
+    # Keyed on id OR _id, exactly as the browse route does: some user
+    # documents predate the `id` field, and looking up only one of the two
+    # drops those providers' names from the shelf.
+    users = {
+        (u.get("id") or u.get("_id")): u
+        async for u in db.users.find({"$or": [{"id": {"$in": provider_ids}}, {"_id": {"$in": provider_ids}}]})
+    }
+    business_ids = list({g.get("business_id") for g in live if g.get("business_id")})
+    businesses = {
+        b["_id"]: b
+        async for b in db.businesses.find({"_id": {"$in": business_ids}})
+    } if business_ids else {}
+
+    out: list[dict[str, Any]] = []
+    for gig in live:
+        prov = provs.get(gig.get("provider_user_id"))
+        # Same visibility rule as browse: a provider whose trial lapsed is
+        # not shown, offer or no offer.
+        if not prov or not _provider_is_active(prov):
+            continue
+        business = businesses.get(gig.get("business_id")) or {}
+        out.append({
+            "id": gig["_id"],
+            "title": gig.get("title", ""),
+            "title_he": gig.get("title_he"),
+            "title_en": gig.get("title_en"),
+            "category": gig.get("category"),
+            "area": gig.get("area"),
+            "gallery": gig.get("gallery") or [],
+            "products": gig.get("products") or [],
+            "tiers": gig.get("tiers") or [],
+            "business_id": gig.get("business_id"),
+            "discount": active_discount(gig),
+            "provider": {
+                "user_id": gig.get("provider_user_id"),
+                "name": _public_provider_name(business or None, users.get(gig.get("provider_user_id"))),
+                "logo_url": business.get("logo_url"),
+            },
+        })
+    # Biggest saving first: a shelf is read left to right and the strongest
+    # offer earns the first slot. Ties break on the newest listing.
+    out.sort(key=lambda g: (-(g["discount"] or {}).get("percent", 0), str(g.get("id"))))
+    return out[:limit]
+
+
 @router.get("/gigs/{gig_id}")
 async def get_gig(gig_id: str, request: Request, viewer=Depends(optional_user)):
     gig = await db.marketplace_gigs.find_one({"_id": gig_id})
@@ -522,6 +612,7 @@ async def get_gig(gig_id: str, request: Request, viewer=Depends(optional_user)):
         await db.businesses.find_one({"_id": gig["business_id"]})
         if gig.get("business_id") else None
     )
+    gig["discount"] = active_discount(gig)
     gig["provider"] = {
         "user_id": gig["provider_user_id"],
         "name": _public_provider_name(business, user),
@@ -581,6 +672,12 @@ async def patch_gig(gig_id: str, payload: GigPatch, user=Depends(verify_token)):
     if gig["provider_user_id"] != user["user_id"]:
         raise HTTPException(status_code=403, detail="Not your gig")
     update = {k: v for k, v in payload.model_dump(exclude_none=True).items()}
+    # `discount` is the one field where sending null MEANS something - take
+    # the offer down - and exclude_none above has already dropped it. Read
+    # from the set of fields the caller actually sent instead. Without this a
+    # business could put an offer up and never remove it.
+    if "discount" in payload.model_fields_set:
+        update["discount"] = payload.discount.model_dump() if payload.discount else None
     if "tiers" in update:
         update["tiers"] = [t if isinstance(t, dict) else t.model_dump() for t in update["tiers"]]
     if "products" in update:

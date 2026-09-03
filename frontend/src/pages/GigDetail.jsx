@@ -22,6 +22,7 @@ import { API, AuthContext } from '../App';
 import PageMeta from '../components/PageMeta';
 import { needsDirectoryDisclaimer } from '../lib/categories';
 import StarRating from '../components/marketplace/StarRating';
+import OfferBadge from '../components/marketplace/OfferBadge';
 import { localizedTitle, localizedDescription } from '../utils/gigLocale';
 import { buildWhatsAppLinkWithMessage, hasValidWhatsApp } from '../utils/whatsappLink';
 import { isAvailableNow, getGigCover } from '../utils/gigAvailability';
@@ -800,6 +801,21 @@ const GigDetail = () => {
                   <StarRating value={gig.rating_avg || 0} count={gig.rating_count} size={14} testidPrefix="gig-header-stars" />
                 </div>
               )}
+              {/* The offer, directly under the name of the business running
+                  it. The full form here rather than the card's chip: this is
+                  the page where someone decides, so what the offer is for and
+                  when it stops belong on screen, not just the number. The
+                  prices further down are untouched by design - the business
+                  applies this when you agree the job, which is what the line
+                  beneath says. */}
+              {gig.discount?.percent ? (
+                <div className="mt-3 flex flex-col items-start gap-1">
+                  <OfferBadge discount={gig.discount} variant="line" testId="gig-offer" />
+                  <p className="text-xs text-gray-500" data-testid="gig-offer-note">
+                    {t('offers.mention', 'Mention this offer when you get in touch.')}
+                  </p>
+                </div>
+              ) : null}
             </div>
 
             <div>
