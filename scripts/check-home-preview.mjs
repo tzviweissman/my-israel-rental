@@ -205,7 +205,13 @@ for (const lng of ['en', 'he']) {
       }).length;
       const lit = [...document.querySelectorAll('.scroll-word-reveal__heading span')]
         .filter((el) => parseFloat(getComputedStyle(el).opacity) > 0.9).length;
-      return { lit, cardX: Math.round(first.x), cardY: Math.round(first.y), outside, cards: cards.length };
+      const lefts = cards.map((el) => el.getBoundingClientRect().left);
+      const rights = cards.map((el) => el.getBoundingClientRect().right);
+      const spanW = Math.round(((Math.max(...rights) - Math.min(...lefts)) / col.width) * 100);
+      return {
+        lit, cardX: Math.round(first.x), cardY: Math.round(first.y), outside,
+        cards: cards.length, spanW, cardW: Math.round(first.width),
+      };
     });
   };
 
@@ -225,7 +231,15 @@ for (const lng of ['en', 'he']) {
   ok(`${lng}: the ring moves over the same scroll`,
     Math.abs(mid.cardX - early.cardX) > 20 || Math.abs(mid.cardY - early.cardY) > 20,
     `${early.cardX},${early.cardY} -> ${mid.cardX},${mid.cardY}`);
-  ok(`${lng}: and the arch stays inside its column`, late.outside === 0, `${late.outside} of ${late.cards} outside`);
+  // The arch is MEANT to crop at the sides now - that is what makes it read
+  // as one big shape instead of a row of pictures, and it is the shape in the
+  // reference. So the assertion is the opposite of what it was: the finished
+  // scene has to FILL its frame. An earlier version demanded every card sit
+  // inside the column, which is exactly the constraint that produced a small
+  // tidy arc adrift in white space.
+  ok(`${lng}: the finished scene fills its frame`, late.spanW >= 90, `${late.spanW}% of the width`);
+  ok(`${lng}: and its cards are the size of the stage, not thumbnails`,
+    late.cardW >= 110, `${late.cardW}px wide`);
 
   // The complaint this encodes: "you don't see the whole scene until you
   // have already scrolled past it." The scene finishes at 72% of the pinned

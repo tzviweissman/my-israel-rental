@@ -227,7 +227,9 @@
 }
 .hv2-community-grid {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  /* The picture gets the larger half: it is a full scene, and the passage
+     reads better at a narrower measure anyway. */
+  grid-template-columns: minmax(0, 0.86fr) minmax(0, 1.14fr);
   gap: clamp(24px, 4vw, 56px);
   align-items: center;
   width: 100%;
@@ -236,7 +238,9 @@
 /* The cards need a box with a real height to arrange themselves inside. */
 .hv2-community-cards {
   position: relative;
-  height: min(68vh, 560px);
+  height: min(80vh, 660px);
+  /* The arch's ends run past the sides on purpose - see the geometry note in
+     scroll-morph-hero.jsx - so this clips them into the frame. */
   overflow: clip;
 }
 
@@ -248,7 +252,7 @@
      wheel notch, so the same pace needs less document. */
   .hv2-community { height: 400vh; }
   .hv2-community-grid { grid-template-columns: minmax(0, 1fr); gap: 20px; }
-  .hv2-community-cards { height: min(42vh, 320px); }
+  .hv2-community-cards { height: min(50vh, 380px); }
   .hv2-community-words { max-width: none; }
 }
 

@@ -168,7 +168,11 @@ export default function ScrollMorphCards({ cards, progress, reduced = false, onO
           const isMobile = size.width < 768;
           const minDimension = Math.min(size.width, size.height) || 400;
 
-          const circleRadius = Math.min(minDimension * 0.35, 260);
+          // The ring fills its frame. It was capped at 260px, which on a
+          // 640px stage drew a modest circle floating in white space - the
+          // reference fills the frame edge to edge, and "you're not showing
+          // the entire scene" is what a shrunken one looks like.
+          const circleRadius = minDimension * 0.42;
           const circleAngle = (i / total) * 360;
           const circleRad = (circleAngle * Math.PI) / 180;
           const circlePos = {
@@ -177,28 +181,30 @@ export default function ScrollMorphCards({ cards, progress, reduced = false, onO
             rotation: circleAngle + 90,
           };
 
-          const spreadAngle = isMobile ? 100 : 130;
-          // The source derives the arch's radius from the viewport, because
-          // there it IS the viewport. In a column it produced an arch wider
-          // than its box: the ends ran off the right edge and the apex sat
-          // below the frame. Solve for the radius that makes the arch span
-          // the column instead - half its width is r * sin(spread/2), plus
-          // room for the card itself.
+          const spreadAngle = isMobile ? 116 : 130;
           const halfSpreadRad = ((spreadAngle / 2) * Math.PI) / 180;
-          // The margin is based on the card's HEIGHT, not its width. A card at
-          // the end of the arch is rotated about 65 degrees, and a rotated
-          // rectangle's bounding box is w·|cos θ| + h·|sin θ| — mostly its
-          // height at that angle. Budgeting for the width left the outermost
-          // card overhanging the column, where `overflow: clip` sliced it.
-          const usableHalf = Math.max((size.width || 400) / 2 - IMG_HEIGHT * 0.9, 80);
-          const arcRadius = Math.max(150, usableHalf / Math.sin(halfSpreadRad));
+          const w = size.width || 400;
+          const h = size.height || 400;
+
+          // A WIDE, SHALLOW RAINBOW that spans the frame, with its ends
+          // running off the sides. An earlier version solved for an arch that
+          // fitted entirely inside the box with a margin for the outermost
+          // card, which produced a small tidy arc adrift in white space. The
+          // reference crops at both edges on purpose: that is what makes it
+          // read as one big shape rather than a row of pictures.
+          //
+          // Half the arch's width is r·cos(25°) ≈ 0.906r, so a radius of
+          // ~0.62w puts the ends a little past the frame.
+          const arcRadius = Math.max(240, w * 0.8);
           // The cards are positioned from the CENTRE of the box, not its top,
           // so the source's `apex + radius` pushed the whole arch down by half
-          // the container - it sat in the bottom third with its crown out of
-          // frame. Subtracting half the height puts the crown where the number
-          // says it should be: a fifth of the way down.
-          const h = size.height || 400;
-          const arcCenterY = arcRadius - h * (isMobile ? 0.24 : 0.28);
+          // the container. Placing the crown just above centre leaves the ends
+          // dropping toward the bottom corners, which is the reference shape.
+          // The crown sits just below the middle of the frame, which drops the
+          // ends into the bottom corners and crops them there - the shape in
+          // the reference. Placing the crown high instead left the whole
+          // lower half of the stage empty.
+          const arcCenterY = arcRadius - h * (isMobile ? 0.02 : 0.08);
           const startAngle = -90 - spreadAngle / 2;
           const step = spreadAngle / Math.max(total - 1, 1);
           // 0.12, well under the source's 0.8. The original is a full-screen
@@ -214,10 +220,10 @@ export default function ScrollMorphCards({ cards, progress, reduced = false, onO
             x: Math.cos(arcRad) * arcRadius,
             y: Math.sin(arcRad) * arcRadius + arcCenterY,
             rotation: currentArcAngle + 90,
-            // 1.25, not the source's 1.8. Fourteen cards over 130 degrees at
-            // this radius are already shoulder to shoulder; at 1.8 they stack
-            // into a smear instead of a fan.
-            scale: isMobile ? 1.05 : 1.25,
+            // Back to the source's scale. The cards on the finished arch are
+            // meant to be the biggest thing in the frame - at 1.25 on a wide
+            // arch they read as thumbnails on a wire.
+            scale: isMobile ? 1.35 : 1.8,
           };
 
           const target = {

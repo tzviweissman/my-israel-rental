@@ -28,10 +28,10 @@ import { useMotionValue, useReducedMotion, useTransform } from 'motion/react';
 import ScrollWordReveal from '../ui/motion-scroll-word-reveal';
 import ScrollMorphCards from '../ui/scroll-morph-hero';
 
-// Ten, not the source's twenty. The arch spans one column, and the number of
-// cards is what decides whether it reads as a fan of listings or a smear:
-// twenty at this radius overlap by more than half their width.
-const CARD_COUNT = 10;
+// Twelve. The source uses twenty on a full-screen stage; on this one that
+// many overlap by more than half their width, and ten left the ring looking
+// sparse. Twelve fills the circle and still leaves the arch legible.
+const CARD_COUNT = 12;
 
 export default function CommunitySection({ items = [] }) {
   const { t, i18n } = useTranslation();
