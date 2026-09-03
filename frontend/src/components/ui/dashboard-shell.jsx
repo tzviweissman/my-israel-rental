@@ -121,6 +121,20 @@ export function DashboardShell({ groups, selected, onSelect, brand, header, hide
     });
   };
 
+  // No groups means the caller is rendering its own navigation (the
+  // dashboard keeps its tab strip on phones). Then there is no sidebar at
+  // all - not an empty rail with a brand card and a Hide button beside a
+  // tab strip squeezed into the remaining third of a phone, which is what
+  // rendering the column regardless produced.
+  if (!groups || groups.length === 0) {
+    return (
+      <div className={cn("w-full", className)} data-testid="dashboard-shell" data-sidebar="none">
+        {header}
+        {children}
+      </div>
+    );
+  }
+
   return (
     <div className={cn("flex w-full items-start gap-6", className)} data-testid="dashboard-shell">
       <nav

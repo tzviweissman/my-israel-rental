@@ -4,7 +4,7 @@ import {
   Layers, KeyRound, Home, Sparkles, Bell, Heart, MessageCircle, Briefcase,
   Inbox, MoreHorizontal, Store,
 } from 'lucide-react';
-import { canPublishGigs } from '../../utils/providerTrial';
+import useDashboardNav from './useDashboardNav';
 
 /**
  * Horizontal tab navigation for the Dashboard. Pure presentational —
@@ -68,14 +68,11 @@ const DashboardTabs = ({
   summary = {},
 }) => {
   const { t } = useTranslation();
-  const isRenter = role === 'renter';
   // Property-listing tabs are hidden for pure service providers — they
   // only need bookings + messages + My Gigs.
-  const isPropertyLister = ['owner', 'manager', 'admin'].includes(role);
   // My Gigs is unlocked for pure providers AND for anyone else (owner /
   // manager / renter / admin) who accepted the $0 provider trial from
   // the "Take Your Services to the Next Level" upsell modal.
-  const canPublish = canPublishGigs(user);
   // ...but ALSO for anyone who simply has services, whatever their role.
   //
   // The role check alone was hiding people's own listings from them: an
@@ -87,8 +84,6 @@ const DashboardTabs = ({
   // Owning a gig is the honest test of whether this tab is useful to you.
   // It does not widen who may CREATE one — that is still the provider
   // check on the create path, untouched.
-  const hasGigs = (summary?.gigs_count || 0) > 0;
-  const showGigTabs = canPublish || hasGigs;
 
   const [moreOpen, setMoreOpen] = useState(false);
   const [isNarrow, setIsNarrow] = useState(false);
@@ -117,42 +112,10 @@ const DashboardTabs = ({
     };
   }, [moreOpen]);
 
-  const GROUPS = [
-    {
-      key: 'listings',
-      tabs: [
-        { id: 'properties', label: t('dashboard.myProperties'), show: isPropertyLister },
-        { id: 'bulk-manager', label: t('dashboard.bulkManager'), Icon: Layers, show: isPropertyLister },
-        { id: 'my-businesses', label: t('dashboard.myBusinesses', 'Businesses'), Icon: Store, colour: ACTIVE_GOLD, show: showGigTabs },
-        // 'my-gigs' is gone from the bar: listings live INSIDE a business
-        // now, reached by opening one. The panel still renders for any
-        // saved ?tab=my-gigs link.
-      ],
-    },
-    {
-      key: 'activity',
-      tabs: [
-        { id: 'bookings', label: t('dashboard.myBookings'), badge: summary.bookings_awaiting_reply, show: true },
-        // Anyone can post a request — not a role-gated surface.
-        { id: 'my-requests', label: t('dashboard.myRequests', 'My Requests'), Icon: Inbox, colour: ACTIVE_GOLD, badge: summary.requests_with_responses, show: true },
-        // D3: only for someone who has actually posted a job, or who is
-        // already publishing gigs. It used to render for everyone.
-        { id: 'my-jobs', label: t('dashboard.myJobs', "Jobs I've Posted"), Icon: Briefcase, colour: ACTIVE_GOLD, show: showGigTabs || hasPostedJobs },
-        { id: 'job-requests', label: t('dashboard.jobRequests', 'Work Offers'), Icon: Briefcase, colour: ACTIVE_GOLD, badge: summary.work_offers_open, show: showGigTabs },
-        { id: 'subleases', label: t('dashboard.subleases'), Icon: Home, show: isRenter },
-      ],
-    },
-    {
-      key: 'account',
-      tabs: [
-        { id: 'messages', label: t('dashboard.messages'), Icon: MessageCircle, badge: unreadMessages, urgent: true, show: true },
-        { id: 'alerts', label: t('dashboard.alerts'), Icon: Bell, colour: ACTIVE_GOLD, show: isRenter },
-        { id: 'liked', label: t('dashboard.liked'), Icon: Heart, colour: ACTIVE_RED, show: true },
-        { id: 'settings', label: t('dashboard.settings'), Icon: KeyRound, show: true },
-      ],
-    },
-  ].map((g) => ({ ...g, tabs: g.tabs.filter((tab) => tab.show) }))
-    .filter((g) => g.tabs.length > 0);
+  // The groups come from useDashboardNav, shared with the desktop sidebar,
+  // so the two renderers cannot disagree about what exists. The role gating
+  // that used to live here lives there now.
+  const { groups: GROUPS } = useDashboardNav({ role, user, unreadMessages, hasPostedJobs, summary });
 
   const totalVisible = GROUPS.reduce((n, g) => n + g.tabs.length, 0);
   // Only fold when there is actually too much AND folding would help — an

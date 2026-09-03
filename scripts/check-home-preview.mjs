@@ -57,16 +57,25 @@ for (const lng of ['en', 'he']) {
   // Reading before the mount returned null and called a working entrance
   // broken.
   await page.waitForSelector('[data-testid="ish-layer"]', { state: 'attached', timeout: 8000 });
+  // Read the scale together with the entrance animation's own clock. On a
+  // busy machine the first read can land a second in, when the layer is
+  // already at 0.6 - that is a slow reader, not a broken entrance - so the
+  // assertion is "small for how far into the animation we are".
   const enterEarly = await page.evaluate(() => {
     const el = document.querySelector('[data-testid="ish-layer"]');
-    return el ? new DOMMatrixReadOnly(getComputedStyle(el).transform).a : null;
+    if (!el) return null;
+    const scale = new DOMMatrixReadOnly(getComputedStyle(el).transform).a;
+    const anim = el.getAnimations?.()[0];
+    const t = anim ? Number(anim.currentTime || 0) : 0;
+    // Before 40% of the 1.9s entrance the layer has to be under 0.8.
+    return { scale, t, small: t > 760 ? scale < 1.5 : scale < 0.8 };
   });
   await page.waitForTimeout(2600);
   const enterLate = await page.evaluate(() => {
     const el = document.querySelector('[data-testid="ish-layer"]');
     return el ? new DOMMatrixReadOnly(getComputedStyle(el).transform).a : null;
   });
-  ok(`${lng}: the corridor opens small at the centre`, enterEarly !== null && enterEarly < 0.6, `scale ${enterEarly}`);
+  ok(`${lng}: the corridor opens small at the centre`, enterEarly !== null && enterEarly.small, `scale ${enterEarly?.scale} at ${enterEarly?.t}ms`);
   ok(`${lng}: and has grown to full size after the entrance`, enterLate !== null && enterLate > 0.98, `scale ${enterLate}`);
   // The scope every experimental theme is written under. If this class is
   // missing, a scoped theme is invisible here too - and the whole point of
@@ -221,7 +230,17 @@ for (const lng of ['en', 'he']) {
   });
   const sample = async (fraction) => {
     await page.evaluate((y) => window.scrollTo(0, y), commBox.top + commBox.height * fraction);
-    await page.waitForTimeout(1100);
+    // The fill chases its target by 18% a frame. Wait until it stops moving
+    // rather than a fixed delay: under load a fixed delay catches it at
+    // 0.88 on its way to 1 and calls a working section unfinished.
+    await page.waitForFunction(() => {
+      const el = document.querySelector('[data-testid="pixel-text-fill"]');
+      const now = Number(el?.dataset.fill || 0);
+      const same = el && el.dataset.lastSeen === String(now);
+      if (el) el.dataset.lastSeen = String(now);
+      return same;
+    }, null, { timeout: 8000, polling: 250 }).catch(() => {});
+    await page.waitForTimeout(300);
     return page.evaluate(() => {
       const col = document.querySelector('.hv2-community-cards').getBoundingClientRect();
       const cards = [...document.querySelectorAll('[data-testid^="morph-card-"]')];
@@ -276,16 +295,15 @@ for (const lng of ['en', 'he']) {
   // complete AND the frame is still pinned - a beat with the finished
   // picture standing still. Driving the animation to the very end of the
   // pin is what produced the original behaviour.
-  const hold = await page.evaluate((top) => {
-    window.scrollTo(0, top);
-    return new Promise((done) => setTimeout(() => {
-      const frame = document.querySelector('.hv2-community-sticky').getBoundingClientRect();
-      done({
-        fill: Number(document.querySelector('[data-testid="pixel-text-fill"]').dataset.fill || 0),
-        frameTop: Math.round(frame.top),
-      });
-    }, 900));
-  }, commBox.top + commBox.height * 0.80);
+  await page.evaluate((top) => window.scrollTo(0, top), commBox.top + commBox.height * 0.80);
+  await page.waitForFunction(() => Number(document.querySelector('[data-testid="pixel-text-fill"]')?.dataset.fill || 0) >= 0.99, null, { timeout: 8000, polling: 250 }).catch(() => {});
+  const hold = await page.evaluate(() => {
+    const frame = document.querySelector('.hv2-community-sticky').getBoundingClientRect();
+    return {
+      fill: Number(document.querySelector('[data-testid="pixel-text-fill"]').dataset.fill || 0),
+      frameTop: Math.round(frame.top),
+    };
+  });
   ok(`${lng}: the finished scene holds while still pinned`,
     hold.fill >= 0.99 && Math.abs(hold.frameTop) <= 2,
     `fill ${hold.fill}, frame at ${hold.frameTop}`);

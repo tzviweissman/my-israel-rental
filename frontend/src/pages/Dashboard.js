@@ -23,6 +23,10 @@ import JobRequestsTab from '../components/dashboard/JobRequestsTab';
 import MyJobsTab from '../components/dashboard/MyJobsTab';
 import ManagerHeader from '../components/dashboard/ManagerHeader';
 import DashboardTabs from '../components/dashboard/DashboardTabs';
+import DashboardShell from '../components/ui/dashboard-shell';
+import useDashboardNav from '../components/dashboard/useDashboardNav';
+import OverviewTab from '../components/dashboard/OverviewTab';
+import useIsWide from '../hooks/useIsWide';
 import OnboardingProvider from '../components/onboarding/OnboardingProvider';
 import TourProvider from '../components/tour/TourProvider';
 import SetupChecklist from '../components/onboarding/SetupChecklist';
@@ -52,7 +56,11 @@ const Dashboard = () => {
   const [showAddProperty, setShowAddProperty] = useState(false);
   const [showBulkUpload, setShowBulkUpload] = useState(false);
   const [editingProperty, setEditingProperty] = useState(null);
-  const [activeTab, setActiveTab] = useState('properties');
+  // The dashboard opens on the Overview for everyone. It used to open on
+  // a list of properties (or gigs, or bookings, by role), which answers
+  // "what do I have" when the question a person arrives with is "what
+  // changed" - docs/dashboard-ux-spec.md, item 5.
+  const [activeTab, setActiveTab] = useState('overview');
   // The setup checklist removes itself once complete; the offer that lived
   // inside its "complete" state - the one route to the feature library for
   // someone who has already taken the tour - is rendered here instead.
@@ -71,9 +79,8 @@ const Dashboard = () => {
   // Keyed off role rather than patching case by case, so a role added later
   // gets a deliberate answer instead of an empty panel.
   useEffect(() => {
-    if (!user || activeTab !== 'properties') return;
-    if (user.role === 'provider') setActiveTab('my-gigs');
-    else if (user.role === 'renter') setActiveTab('bookings');
+    // Overview is the front page for every role now; nothing to redirect.
+    if (!user) return;
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
 
@@ -185,7 +192,7 @@ const Dashboard = () => {
   // Keep Properties + Bulk-Manager live whenever the user re-enters either view
   useEffect(() => {
     if (!user) return;
-    if (activeTab === 'properties' || activeTab === 'bulk-manager') {
+    if (activeTab === 'properties' || activeTab === 'bulk-manager' || activeTab === 'overview') {
       fetchProperties();
       fetchBookings();
     }
@@ -208,6 +215,10 @@ const Dashboard = () => {
 
   const isRenter = user?.role === 'renter';
   const isOwnerLike = user && user.role !== 'renter';
+  // One list for both renderers (spec: the tab and its panel drifted once).
+  const nav = useDashboardNav({ role: user?.role, user, unreadMessages: unreadConversations, hasPostedJobs, summary });
+  // The sidebar needs 256px it can spare; below that the tab strip stays.
+  const isWide = useIsWide(1024);
   // Providers only interact with the marketplace (My Gigs). Hide all the
   // property-listing / contract / bulk-import UI from them so their
   // dashboard stays focused. Owner/manager/admin still see everything.
@@ -300,15 +311,53 @@ const Dashboard = () => {
           </div>
         )}
 
-        <DashboardTabs
-          activeTab={activeTab}
-          setActiveTab={setActiveTab}
-          role={user?.role}
-          user={user}
-          unreadMessages={unreadConversations}
-          hasPostedJobs={hasPostedJobs}
-          summary={summary}
-        />
+        {/* Wide screens get the sidebar; narrow ones keep the tab strip. Same
+            groups, same badges, one source: useDashboardNav. */}
+        <DashboardShell
+          groups={isWide ? nav.groups : []}
+          selected={activeTab}
+          onSelect={setActiveTab}
+          hideLabel={t('dashboard.hideSidebar', 'Hide')}
+          className={isWide ? '' : 'hv-shell-narrow'}
+          brand={(open) => (
+            <div className="flex items-center gap-3 px-2 py-1">
+              <span className="grid size-9 shrink-0 place-content-center rounded-lg text-sm font-bold" style={{ background: 'var(--action, #000)', color: 'var(--action-ink, #fff)' }} aria-hidden="true">
+                {(user?.name || user?.email || '?').trim().charAt(0).toUpperCase()}
+              </span>
+              {open && (
+                <span className="min-w-0">
+                  <span className="block text-sm font-semibold truncate" style={{ color: 'var(--ink)' }}>{user?.name || user?.email}</span>
+                  <span className="block text-xs truncate" style={{ color: 'var(--brand-muted)' }}>{t(`dashboard.role_${user?.role || 'renter'}`, user?.role || '')}</span>
+                </span>
+              )}
+            </div>
+          )}
+        >
+        {!isWide && (
+          <DashboardTabs
+            activeTab={activeTab}
+            setActiveTab={setActiveTab}
+            role={user?.role}
+            user={user}
+            unreadMessages={unreadConversations}
+            hasPostedJobs={hasPostedJobs}
+            summary={summary}
+          />
+        )}
+
+        {activeTab === 'overview' && (
+          <OverviewTab
+            API={API}
+            token={token}
+            user={user}
+            summary={summary}
+            unreadMessages={unreadConversations}
+            bookings={bookings}
+            isPropertyLister={!!isPropertyLister}
+            showGigTabs={showGigTabs}
+            onGoToTab={setActiveTab}
+          />
+        )}
 
         {activeTab === 'contracts' && isPropertyLister && (
           <ContractManager properties={properties} />
@@ -414,6 +463,7 @@ const Dashboard = () => {
         {activeTab === 'my-jobs' && (
           <MyJobsTab API={API} token={token} />
         )}
+        </DashboardShell>
       </div>
     </div>
     </TourProvider>
