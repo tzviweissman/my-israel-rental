@@ -42,6 +42,9 @@ is "Add your business — free" rather than anything addressed to owners.
 | `frontend/src/components/ui/cta-section-with-gallery.jsx` | The supply-side CTA's staggered text column and offset four-cell photo grid. Also ported from TypeScript. Needs `motion`, the one dependency added; it lands in this page's lazy chunk, and the entry bundle did not move. |
 | `frontend/src/components/ui/anti-metal-button.jsx` | The CTA's primary button, whose gold panel sweeps the width on hover. Ported from TypeScript and recoloured to the palette. |
 | `frontend/src/components/ui/coverflow-carousel.jsx` | Today's picks — a draggable, looping ring of raked cards. Ported from TypeScript; needs only `lucide-react`, already installed. |
+| `frontend/src/components/ui/scroll-morph-hero.jsx` | The ring of listings that morphs into an arch. Ported from TypeScript, and off `motion` rather than `framer-motion` — the same API under its current name, so no second animation library. |
+| `frontend/src/components/ui/motion-scroll-word-reveal.jsx` | The passage whose words light one after another. Its stylesheet was not part of the snippet and is written against the site's tokens. |
+| `frontend/src/components/home/CommunitySection.jsx` | Owns the scroll measurement both of the above read. |
 | `frontend/src/utils/cdnImage.js` | Gained `framedImage`, which fits a whole image into a fixed box and pads the rest. |
 | `scripts/check-home-preview.mjs` | The browser check. |
 
@@ -149,6 +152,35 @@ there — so it takes an added `onSelect` and the page renders the button beneat
 it. The check steps the carousel and asserts the caption and the button move
 **together**, since a caption belonging to a different card than its button is
 invisible in a screenshot.
+
+## "What we are building" replaced how-it-works
+
+Words on the left, a ring of real listings morphing into an arch on the right,
+both moving off **one** progress value. Four things about it are load-bearing:
+
+- **One measurement, not two.** Both components ship with their own scroll
+  tracking. Two measurements of the same scroll drift apart the moment the
+  elements they measure differ in height, and this section's entire point is
+  that the halves move together. The section measures once and hands the number
+  down.
+- **It is measured by hand.** `useScroll` reported exactly 0 at every scroll
+  position here — words dim, ring frozen, nothing in the console. A section
+  whose whole job is to respond to scrolling is not the place for a number that
+  cannot be read, so it is a `getBoundingClientRect` against the viewport, and
+  the browser check samples it at three depths.
+- **`cards.length` is in that effect's dependency list.** The section renders
+  nothing until the listings arrive, so on first mount there was no element to
+  measure; the effect bailed and never ran again. That is the bug above.
+- **No `overflow` on the tall section.** An ancestor with any overflow other
+  than `visible` becomes the sticky scrollport, which unpinned the frame with
+  a screen and a half still to run. The arch is clipped by its own column.
+
+The source component drove itself by swallowing the wheel. Halfway down a page
+that traps the reader, so it takes the progress value instead — which is also
+what makes the two halves synchronous. Its geometry was rewritten for a column:
+the radius solves for the arch spanning its box, the vertical origin is the
+box's centre rather than its top, and the end-of-arch margin budgets for a
+rotated card's bounding box, which at 65 degrees is mostly its height.
 
 ## Running it
 

@@ -1,0 +1,123 @@
+/**
+ * The community section — words on the left, a ring of real listings
+ * morphing into an arch on the right, both moving off ONE scroll.
+ *
+ * Replaces "How MyIsraelRental works" on the home page (Tzvi, 3 Sep).
+ *
+ * WHY ONE PROGRESS VALUE. Each component ships with its own scroll
+ * measurement, and two measurements of the same scroll drift the moment the
+ * elements they measure are different heights — the words would finish
+ * while the cards were mid-morph, on a section whose whole point is that
+ * the two move together. So the section measures once and hands the value
+ * to both.
+ *
+ * The section is tall and its inside is sticky: the reader scrolls the
+ * page normally, the frame holds still, and the progress through the tall
+ * part is what drives everything. Nothing traps the wheel — the source
+ * component did, which on a page halfway down means the page stops moving
+ * while the pointer is over it.
+ *
+ * The cards are the site's own listings and businesses, not stock. They
+ * flip on hover to name what they are showing, and clicking one opens it.
+ */
+import React, { useEffect, useMemo, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
+import { useMotionValue, useReducedMotion } from 'motion/react';
+
+import ScrollWordReveal from '../ui/motion-scroll-word-reveal';
+import ScrollMorphCards from '../ui/scroll-morph-hero';
+
+// Ten, not the source's twenty. The arch spans one column, and the number of
+// cards is what decides whether it reads as a fan of listings or a smear:
+// twenty at this radius overlap by more than half their width.
+const CARD_COUNT = 10;
+
+export default function CommunitySection({ items = [] }) {
+  const { t, i18n } = useTranslation();
+  const navigate = useNavigate();
+  const sectionRef = useRef(null);
+  const reduced = useReducedMotion();
+
+  const isHe = (i18n.language || '').startsWith('he');
+
+  const cards = useMemo(() => {
+    const pool = items.filter((it) => it && it.src);
+    if (!pool.length) return [];
+    return Array.from({ length: CARD_COUNT }, (_, i) => {
+      const it = pool[i % pool.length];
+      return {
+        key: `${it.key || it.href || it.src}-${i}`,
+        src: it.src,
+        alt: '',
+        title: isHe && it.title_he ? it.title_he : it.title,
+        sub: it.kind === 'stay'
+          ? t('home.v2.community.cardStay', 'Rental')
+          : t('home.v2.community.cardBiz', 'Business'),
+        href: it.href,
+      };
+    });
+  }, [items, isHe, t]);
+
+  // ONE measurement, both halves, computed here rather than taken from
+  // `useScroll`. The library's version reported exactly 0 at every scroll
+  // position on this page - words dim, ring frozen, no error to show for it
+  // - and a section whose whole job is to respond to scrolling is not the
+  // place for a number I cannot read. This is a handful of lines and the
+  // browser check samples it at five points down the section.
+  //
+  // 0 when the section's top meets the top of the viewport, 1 when its
+  // bottom does: exactly the span over which the inner frame is pinned.
+  //
+  // `cards.length` is in the dependency list, and it is load-bearing. The
+  // section renders NOTHING until the listings arrive, so on first mount
+  // there is no element to measure: the effect bailed out, never ran again,
+  // and the whole section sat at progress 0 for ever - words dim, ring
+  // frozen, no error anywhere. Re-running when the cards appear is what
+  // attaches the listener to an element that exists.
+  const scrollYProgress = useMotionValue(0);
+  useEffect(() => {
+    const el = sectionRef.current;
+    if (!el) return undefined;
+    const measure = () => {
+      const r = el.getBoundingClientRect();
+      const travel = r.height - window.innerHeight;
+      const p = travel <= 0 ? 0 : Math.min(1, Math.max(0, -r.top / travel));
+      scrollYProgress.set(p);
+    };
+    measure();
+    window.addEventListener('scroll', measure, { passive: true });
+    window.addEventListener('resize', measure);
+    return () => {
+      window.removeEventListener('scroll', measure);
+      window.removeEventListener('resize', measure);
+    };
+  }, [scrollYProgress, cards.length]);
+
+  if (!cards.length) return null;
+
+  return (
+    <section className="hv2-community" ref={sectionRef} id="community" data-testid="home-preview-community">
+      <div className="hv2-community-sticky">
+        <div className="hv2-wrap hv2-community-grid">
+          <div className="hv2-community-words">
+            <ScrollWordReveal
+              progress={scrollYProgress}
+              kicker={t('home.v2.community.kicker', 'What we are building')}
+              text={t('home.v2.community.text')}
+              headingId="home-community-heading"
+            />
+          </div>
+          <div className="hv2-community-cards">
+            <ScrollMorphCards
+              cards={cards}
+              progress={scrollYProgress}
+              reduced={!!reduced}
+              onOpen={(card) => card.href && navigate(card.href)}
+            />
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}

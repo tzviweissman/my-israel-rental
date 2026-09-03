@@ -992,6 +992,17 @@ const en = {
             p: 'Cleaners, movers, caterers, tutors and more — message them directly, no booking fees.',
             more: 'See all businesses',
           },
+          community: {
+            kicker: 'What we are building',
+            // One sentence, revealed word by word as the section is read, so
+            // it has to survive being read slowly. Every claim in it is one
+            // the product actually keeps: the translation is real (see
+            // utils/translate.py), the tools are the ones listed on the CTA
+            // above, and nothing here promises a result we cannot deliver.
+            text: 'A home is more than an address, and a business is more than a listing. We are building a place where the people who live here and the people who serve them can find each other, where every door and every trade is one message away, and where the newest tools quietly do the translating, the matching and the paperwork so that what you built has room to be found.',
+            cardStay: 'Rental',
+            cardBiz: 'Business',
+          },
           how: {
             eyebrow: 'Simple & direct',
             h2: 'How MyIsraelRental works',

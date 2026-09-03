@@ -191,6 +191,58 @@
 .hv2-step h4 { font-size: 16px; font-weight: 700; font-family: var(--font-body); }
 .hv2-step p { margin-top: 4px; color: var(--brand-muted); font-size: 14px; }
 
+/* What we are building — the tall section whose inside is pinned. Its
+   height IS the length of the animation: the reader scrolls the page as
+   normal, the frame holds still, and the distance travelled through the
+   tall part is the progress both halves read. 240vh gives the passage room
+   to light word by word without the scroll feeling stuck.
+
+   `overflow: clip` rather than hidden: the ring of cards is wider than the
+   column at its widest, and hidden would let it count toward the page's
+   scrollable width the way the hero's corridor once did. */
+.hv2-community {
+  height: 240vh;
+  background: var(--surface);
+  border-top: 1px solid var(--brand-border);
+  /* NO overflow here. An ancestor with any overflow other than `visible`
+     becomes the sticky element's scrollport, so clipping this section
+     unpinned the frame inside it: the words scrolled away while the
+     section still had a screen and a half to run. The ring is clipped by
+     its own column instead. */
+}
+.hv2-community-sticky {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  overflow: clip;
+}
+.hv2-community-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: clamp(24px, 4vw, 56px);
+  align-items: center;
+  width: 100%;
+}
+.hv2-community-words { max-width: 34rem; }
+/* The cards need a box with a real height to arrange themselves inside. */
+.hv2-community-cards {
+  position: relative;
+  height: min(68vh, 560px);
+  overflow: clip;
+}
+
+@media (max-width: 900px) {
+  /* Stacked, and shorter: two full-height halves on a phone means the
+     reader scrolls a screen of words and then a screen of cards, which is
+     the opposite of showing them moving together. */
+  .hv2-community { height: 200vh; }
+  .hv2-community-grid { grid-template-columns: minmax(0, 1fr); gap: 20px; }
+  .hv2-community-cards { height: min(42vh, 320px); }
+  .hv2-community-words { max-width: none; }
+}
+
 /* Supply CTA with gallery (components/ui/cta-section-with-gallery).
    Replaced the section library's flat blue band. It is a white surface
    between two limestone ones, which is the same alternation the rest of the

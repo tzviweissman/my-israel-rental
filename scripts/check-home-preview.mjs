@@ -173,6 +173,69 @@ for (const lng of ['en', 'he']) {
   ok(`${lng}: its heading reads against the section behind it`,
     contrast(band.heading, band.bg) >= 4.5, `${contrast(band.heading, band.bg).toFixed(2)}:1 ${JSON.stringify(band)}`);
 
+  // ── What we are building ───────────────────────────────────────────
+  // The words and the ring share ONE scroll progress. Everything here is a
+  // way of asking whether that number is actually moving: the section sat
+  // at progress 0 for a whole build - words dim, ring frozen, no error
+  // anywhere - because its listener attached before the cards existed. A
+  // screenshot of that state looks like a design decision.
+  const community = page.locator('[data-testid="home-preview-community"]');
+  ok(`${lng}: the community section is on the page`, await community.count() === 1);
+  const morphCards = page.locator('[data-testid^="morph-card-"]');
+  ok(`${lng}: the ring is built from real listings`, await morphCards.count() >= 8, `${await morphCards.count()} cards`);
+
+  // Document coordinates, not viewport ones. `boundingBox()` is relative to
+  // the viewport, and by this point the check has already scrolled a long
+  // way down the page - so scrolling to `box.y + …` landed above the
+  // section every time and reported that nothing ever lit.
+  const commBox = await community.evaluate((el) => {
+    const r = el.getBoundingClientRect();
+    return { top: r.top + window.scrollY, height: r.height };
+  });
+  const sample = async (fraction) => {
+    await page.evaluate((y) => window.scrollTo(0, y), commBox.top + commBox.height * fraction);
+    await page.waitForTimeout(1100);
+    return page.evaluate(() => {
+      const col = document.querySelector('.hv2-community-cards').getBoundingClientRect();
+      const cards = [...document.querySelectorAll('[data-testid^="morph-card-"]')];
+      const first = cards[0].getBoundingClientRect();
+      const outside = cards.filter((el) => {
+        const r = el.getBoundingClientRect();
+        return r.top < col.top - 8 || r.bottom > col.bottom + 8 || r.left < col.left - 8 || r.right > col.right + 8;
+      }).length;
+      const lit = [...document.querySelectorAll('.scroll-word-reveal__heading span')]
+        .filter((el) => parseFloat(getComputedStyle(el).opacity) > 0.9).length;
+      return { lit, cardX: Math.round(first.x), cardY: Math.round(first.y), outside, cards: cards.length };
+    });
+  };
+
+  const early = await sample(0.02);
+  const mid = await sample(0.3);
+  const late = await sample(0.55);
+
+  ok(`${lng}: the words start dim`, early.lit === 0, `${early.lit} lit`);
+  ok(`${lng}: they light as the section is read`, mid.lit > early.lit && late.lit > mid.lit,
+    `${early.lit} -> ${mid.lit} -> ${late.lit}`);
+  ok(`${lng}: nearly all of them are lit by the end`, late.lit >= mid.lit + 10, `${late.lit}`);
+  // The two halves move off the same value, so the ring has to have moved
+  // over exactly the span in which the words lit.
+  ok(`${lng}: the ring moves over the same scroll`,
+    Math.abs(mid.cardX - early.cardX) > 20 || Math.abs(mid.cardY - early.cardY) > 20,
+    `${early.cardX},${early.cardY} -> ${mid.cardX},${mid.cardY}`);
+  ok(`${lng}: and the arch stays inside its column`, late.outside === 0, `${late.outside} of ${late.cards} outside`);
+
+  // The source component swallowed the wheel. In a section halfway down a
+  // page that means the page stops moving while the pointer is over it.
+  await page.evaluate((y) => window.scrollTo(0, y), commBox.top + 200);
+  await page.waitForTimeout(400);
+  const beforeWheel = await page.evaluate(() => window.scrollY);
+  await page.mouse.move(1000, 450);
+  await page.mouse.wheel(0, 600);
+  await page.waitForTimeout(600);
+  const afterWheel = await page.evaluate(() => window.scrollY);
+  ok(`${lng}: the page still scrolls with the pointer over the ring`, afterWheel > beforeWheel,
+    `${beforeWheel} -> ${afterWheel}`);
+
   const primary = page.locator('[data-testid="home-preview-cta-primary"]');
   ok(`${lng}: the CTA's primary button is there`, await primary.count() === 1);
   // One door, not two. A visitor should not have to classify themselves as a

@@ -38,6 +38,7 @@ import ImageStreamHero from '../components/ui/image-stream-hero';
 import AntiMetalButton from '../components/ui/anti-metal-button';
 import CoverflowCarousel from '../components/ui/coverflow-carousel';
 import useHomeShowcase from '../components/home/useHomeShowcase';
+import CommunitySection from '../components/home/CommunitySection';
 import FinaleStats from '../components/home/FinaleStats';
 import StaysCard from '../components/stays/StaysCard';
 import ServiceCard from '../components/marketplace/ServiceCard';
@@ -293,29 +294,12 @@ export default function HomePreview() {
         </div>
       </section>
 
-      {/* ── How it works ───────────────────────────────────────────────── */}
-      <section className="hv2-pad hv2-how" id="how">
-        <div className="hv2-wrap">
-          <div className="hv2-eyebrow reveal">{t('home.v2.how.eyebrow', 'Simple & direct')}</div>
-          <h2 className="reveal">{t('home.v2.how.h2', 'How MyIsraelRental works')}</h2>
-          <div className="hv2-how-cols reveal">
-            {['rent', 'hire'].map((track) => (
-              <div key={track} className="hv2-how-col">
-                <h3>{t(`home.v2.how.${track}.title`)}</h3>
-                {[1, 2, 3].map((n) => (
-                  <div key={n} className="hv2-step">
-                    <div className="hv2-num">{n}</div>
-                    <div>
-                      <h4>{t(`home.v2.how.${track}.s${n}.h`)}</h4>
-                      <p>{t(`home.v2.how.${track}.s${n}.p`)}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
+      {/* ── What we are building ──────────────────────────────────────
+          Replaces the how-it-works columns. Words on the left reveal as the
+          cards on the right morph from a ring into an arch, both off the
+          same scroll. See components/home/CommunitySection.jsx for why one
+          progress value drives both. */}
+      <CommunitySection items={picks.length ? picks : gallery} />
 
       {/* ── Supply CTA, with a gallery of real businesses and homes ────
           Replaces the section library's flat colour band. The four photos
