@@ -23,6 +23,7 @@ import PageMeta from '../components/PageMeta';
 import { needsDirectoryDisclaimer } from '../lib/categories';
 import StarRating from '../components/marketplace/StarRating';
 import OfferBadge from '../components/marketplace/OfferBadge';
+import { priceRows, cheapestRow } from '../utils/gigPrice';
 import { localizedTitle, localizedDescription } from '../utils/gigLocale';
 import { buildWhatsAppLinkWithMessage, hasValidWhatsApp } from '../utils/whatsappLink';
 import { isAvailableNow, getGigCover } from '../utils/gigAvailability';
@@ -330,8 +331,14 @@ const GigDetail = () => {
     // Service schema: describes what's on offer + who provides it. We
     // include an AggregateRating so Google can show ★4.7 (12) in the
     // search snippet, plus an Offer with a price range from the tiers.
-    const prices = (gig.tiers || []).map((t) => t.price).filter((p) => typeof p === 'number');
-    const currency = gig.tiers?.[0]?.currency || 'ILS';
+    // Same trap as the card had: a STORE prices itself through `products`,
+    // so reading tiers here published a store's structured data with no
+    // prices at all and, when it did have tiers, a currency taken from a
+    // different row than the figures. priceRows/cheapestRow pick the list
+    // the listing actually uses.
+    const rows = priceRows(gig);
+    const prices = rows.map((r) => Number(r.price)).filter((p) => Number.isFinite(p));
+    const currency = cheapestRow(gig)?.currency || 'ILS';
     const block = {
       '@context': 'https://schema.org',
       '@type': 'Service',
