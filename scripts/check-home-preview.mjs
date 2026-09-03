@@ -203,13 +203,12 @@ for (const lng of ['en', 'he']) {
         const r = el.getBoundingClientRect();
         return r.top < col.top - 8 || r.bottom > col.bottom + 8 || r.left < col.left - 8 || r.right > col.right + 8;
       }).length;
-      const lit = [...document.querySelectorAll('.scroll-word-reveal__heading span')]
-        .filter((el) => parseFloat(getComputedStyle(el).opacity) > 0.9).length;
+      const fill = Number(document.querySelector('[data-testid="pixel-text-fill"]').dataset.fill || 0);
       const lefts = cards.map((el) => el.getBoundingClientRect().left);
       const rights = cards.map((el) => el.getBoundingClientRect().right);
       const spanW = Math.round(((Math.max(...rights) - Math.min(...lefts)) / col.width) * 100);
       return {
-        lit, cardX: Math.round(first.x), cardY: Math.round(first.y), outside,
+        fill, cardX: Math.round(first.x), cardY: Math.round(first.y), outside,
         cards: cards.length, spanW, cardW: Math.round(first.width),
       };
     });
@@ -219,13 +218,13 @@ for (const lng of ['en', 'he']) {
   const mid = await sample(0.3);
   const late = await sample(0.55);
 
-  // "Almost none", not "none": the sample is taken a little way into the
-  // section, and by then the first few words have legitimately arrived. An
-  // assertion of exactly zero was failing a passage behaving correctly.
-  ok(`${lng}: the words start almost entirely dim`, early.lit <= 8, `${early.lit} of ${early.total || 148} lit`);
-  ok(`${lng}: they light as the section is read`, mid.lit > early.lit && late.lit > mid.lit,
-    `${early.lit} -> ${mid.lit} -> ${late.lit}`);
-  ok(`${lng}: nearly all of them are lit by the end`, late.lit >= mid.lit + 10, `${late.lit}`);
+  // The passage fills in behind a dithered wavefront. The sample is taken a
+  // little way into the section, so a few characters have legitimately
+  // arrived by then - "almost none", not "none".
+  ok(`${lng}: the passage starts almost entirely unfilled`, early.fill <= 0.1, `${early.fill}`);
+  ok(`${lng}: it fills as the section is read`, mid.fill > early.fill && late.fill > mid.fill,
+    `${early.fill} -> ${mid.fill} -> ${late.fill}`);
+  ok(`${lng}: and is complete by the end`, late.fill >= 0.9, `${late.fill}`);
   // The two halves move off the same value, so the ring has to have moved
   // over exactly the span in which the words lit.
   ok(`${lng}: the ring moves over the same scroll`,
@@ -250,31 +249,37 @@ for (const lng of ['en', 'he']) {
   const hold = await page.evaluate((top) => {
     window.scrollTo(0, top);
     return new Promise((done) => setTimeout(() => {
-      const spans = [...document.querySelectorAll('.scroll-word-reveal__heading span')];
       const frame = document.querySelector('.hv2-community-sticky').getBoundingClientRect();
       done({
-        lit: spans.filter((el) => parseFloat(getComputedStyle(el).opacity) > 0.95).length,
-        total: spans.length,
+        fill: Number(document.querySelector('[data-testid="pixel-text-fill"]').dataset.fill || 0),
         frameTop: Math.round(frame.top),
       });
     }, 900));
   }, commBox.top + commBox.height * 0.72);
   ok(`${lng}: the finished scene holds while still pinned`,
-    hold.lit === hold.total && Math.abs(hold.frameTop) <= 2,
-    `${hold.lit}/${hold.total} lit, frame at ${hold.frameTop}`);
+    hold.fill >= 0.99 && Math.abs(hold.frameTop) <= 2,
+    `fill ${hold.fill}, frame at ${hold.frameTop}`);
 
-  // One or two words in transition at a time, not whole lines. The source's
-  // fixed 0.2 window meant twenty of them faded together on a passage this
-  // long, which is what "a line at a time" looked like.
-  const front = await page.evaluate((top) => {
+  // Mid-passage there has to be a WAVEFRONT: some accent-coloured pixels
+  // dissolving in between the filled text and the text still to come. All
+  // ink and no accent means the fill is jumping rather than dissolving.
+  const crest = await page.evaluate((top) => {
     window.scrollTo(0, top);
     return new Promise((done) => setTimeout(() => {
-      const o = [...document.querySelectorAll('.scroll-word-reveal__heading span')]
-        .map((el) => parseFloat(getComputedStyle(el).opacity));
-      done(o.filter((v) => v > 0.25 && v <= 0.95).length);
-    }, 900));
+      const c = document.querySelector('[data-testid="pixel-text-fill"] canvas');
+      const ctx = c.getContext('2d');
+      const d = ctx.getImageData(0, 0, c.width, c.height).data;
+      let ink = 0; let accent = 0;
+      for (let i = 0; i < d.length; i += 40) {
+        if (d[i + 3] < 40) continue;
+        if (d[i + 2] > d[i] + 30 && d[i + 2] > 90) accent += 1;
+        else if (d[i] < 90 && d[i + 1] < 90) ink += 1;
+      }
+      done({ ink, accent });
+    }, 1100));
   }, commBox.top + commBox.height * 0.3);
-  ok(`${lng}: the words light a couple at a time, not a line`, front <= 5, `${front} mid-fade`);
+  ok(`${lng}: the fill has a dissolving crest, not a hard edge`,
+    crest.accent > 50 && crest.ink > 50, `${crest.ink} ink, ${crest.accent} accent`);
 
   // The passage is pinned inside one screen. Sized from viewport WIDTH alone
   // it grew taller than the frame on a laptop, so the opening lines sat above
@@ -282,7 +287,7 @@ for (const lng of ['en', 'he']) {
   // nobody could see them.
   const fits = await page.evaluate(() => {
     const frame = document.querySelector('.hv2-community-sticky').getBoundingClientRect();
-    const words = document.querySelector('.scroll-word-reveal__content').getBoundingClientRect();
+    const words = document.querySelector('.hv2-community-words').getBoundingClientRect();
     return { above: Math.round(words.top - frame.top), below: Math.round(frame.bottom - words.bottom) };
   });
   ok(`${lng}: the whole passage fits inside the pinned frame`,

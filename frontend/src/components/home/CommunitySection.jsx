@@ -25,7 +25,7 @@ import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useMotionValue, useReducedMotion, useTransform } from 'motion/react';
 
-import ScrollWordReveal from '../ui/motion-scroll-word-reveal';
+import PixelTextFill from '../ui/pixel-text-fill';
 import ScrollMorphCards from '../ui/scroll-morph-hero';
 
 // Twelve. The source uses twenty on a full-screen stage; on this one that
@@ -109,11 +109,18 @@ export default function CommunitySection({ items = [] }) {
       <div className="hv2-community-sticky">
         <div className="hv2-wrap hv2-community-grid">
           <div className="hv2-community-words">
-            <ScrollWordReveal
+            <p className="hv2-community-kicker">
+              {t('home.v2.community.kicker', 'What we are building')}
+            </p>
+            {/* The passage fills in behind a dithered wavefront rather than
+                lighting word by word. Same progress value as the cards, so
+                the two still move together - the component takes the number
+                instead of measuring the scroll itself, which is also what
+                lets it run without GSAP. */}
+            <PixelTextFill
               progress={anim}
-              kicker={t('home.v2.community.kicker', 'What we are building')}
               text={t('home.v2.community.text')}
-              headingId="home-community-heading"
+              className="hv2-community-pixel"
             />
           </div>
           <div className="hv2-community-cards">
