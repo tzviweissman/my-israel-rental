@@ -123,6 +123,37 @@ for (const lng of ['en', 'he']) {
   ok(`${lng}: gallery repeats nothing from the rentals rail`,
     cards.every((c) => !railIds.has(c.href.split('/').pop())), [...railIds].slice(0, 2).join(','));
 
+  // Today's picks. The carousel is draggable and loops, so the thing worth
+  // asserting is that it centres a real listing, names it, and that the page's
+  // own control opens THAT one — the component itself cannot open anything.
+  const picks = page.locator('#picks');
+  await picks.scrollIntoViewIfNeeded();
+  await page.waitForTimeout(1200);
+  ok(`${lng}: today's picks section is on the page`, await picks.count() === 1);
+  const slideCount = await picks.locator('[aria-roledescription="slide"]').count();
+  ok(`${lng}: the carousel holds a dozen cards`, slideCount === 12, `${slideCount}`);
+  const capBefore = (await picks.locator('.hv2-coverflow p').first().innerText()).trim();
+  const openBefore = await page.locator('[data-testid="home-preview-pick-open"]').getAttribute('data-href');
+  ok(`${lng}: the centred card is named`, capBefore.length > 1, capBefore);
+  // Most rentals are titled with only their neighbourhood, so the headline and
+  // the "Where" row printed the same words twice.
+  const capRows = await picks.locator('.hv2-coverflow dl dd').allInnerTexts();
+  ok(`${lng}: the caption does not repeat the title in its rows`,
+    !capRows.some((v) => v.trim().toLowerCase() === capBefore.toLowerCase()), capRows.join('|'));
+  ok(`${lng}: and the button opens that card`, /^\/(businesses|property)\/[\w-]+$/.test(openBefore || ''), String(openBefore));
+
+  // Step the carousel and confirm the caption and the button follow it. A
+  // carousel whose caption belongs to a different card than its button is the
+  // failure that looks fine in a screenshot.
+  await picks.locator('button[aria-label="Next slide"]').click();
+  await page.waitForTimeout(1200);
+  const capAfter = (await picks.locator('.hv2-coverflow p').first().innerText()).trim();
+  const openAfter = await page.locator('[data-testid="home-preview-pick-open"]').getAttribute('data-href');
+  ok(`${lng}: stepping the carousel changes the named card`, capAfter !== capBefore, `${capBefore} -> ${capAfter}`);
+  ok(`${lng}: and the button follows it`, openAfter !== openBefore && /^\/(businesses|property)\//.test(openAfter || ''), String(openAfter));
+  const dark = await picks.evaluate((el) => getComputedStyle(el.querySelector('h2')).color);
+  ok(`${lng}: its heading is legible on the dark band`, dark === 'rgb(255, 255, 255)', dark);
+
   const primary = page.locator('[data-testid="home-preview-cta-primary"]');
   ok(`${lng}: the CTA's primary button is there`, await primary.count() === 1);
   const sweep = await primary.evaluate((el) => {

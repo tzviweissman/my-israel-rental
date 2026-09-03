@@ -19,7 +19,7 @@
  * business — free"; nothing here addresses "owners" as the default
  * audience.
  */
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { ArrowRight, Check, Home as HomeIcon, Store, Megaphone } from 'lucide-react';
@@ -36,12 +36,14 @@ import {
 import useFavorites from '../hooks/useFavorites';
 import ImageStreamHero from '../components/ui/image-stream-hero';
 import AntiMetalButton from '../components/ui/anti-metal-button';
+import CoverflowCarousel from '../components/ui/coverflow-carousel';
 import useHomeShowcase from '../components/home/useHomeShowcase';
 import FinaleStats from '../components/home/FinaleStats';
 import StaysCard from '../components/stays/StaysCard';
 import ServiceCard from '../components/marketplace/ServiceCard';
 import SiteFooter from '../components/common/SiteFooter';
 import { prettyArea } from '../utils/areaNames';
+import { propertyTitle, isAreaOnlyTitle } from '../utils/propertyTitle';
 import '../styles/home-v2.css';
 
 /**
@@ -78,13 +80,40 @@ function useReveal(root) {
 export default function HomePreview() {
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
-  const { streamImages, gallery, rentals, businesses, loaded } = useHomeShowcase();
+  const { streamImages, gallery, picks, rentals, businesses, loaded } = useHomeShowcase();
+  // Which card the coverflow has centred. The component names it in its
+  // caption but cannot open it, so the page renders the control.
+  const [pick, setPick] = useState(0);
   // The card renders a heart whether or not it is given a handler, so it has
   // to be wired here — a control that does nothing is worse than no control.
   const { likedIds, toggleLike } = useFavorites();
   const root = useRef(null);
   useReveal(root);
   useLightNav();
+
+  // The carousel takes flat slides; the page keeps the objects so its own CTA
+  // can open whichever card is centred.
+  const pickSlides = picks.map((it) => {
+    // Most rentals are titled with nothing but their neighbourhood, so the
+    // headline and the "Where" row said the same words twice. propertyTitle
+    // builds the headline the listing cards use, and the row is dropped when
+    // the title carries no more than the area already does.
+    const title = it.kind === 'stay'
+      ? propertyTitle(it.property, t)
+      : ((i18n.language || '').startsWith('he') && it.title_he ? it.title_he : it.title);
+    const areaIsRedundant = it.kind === 'stay' && isAreaOnlyTitle(title, it.area);
+    return {
+      src: it.src,
+      alt: it.alt,
+      title,
+      subtitle: it.kind === 'biz' ? t('home.v2.picks.kindBiz', 'Local business') : t('home.v2.picks.kindStay', 'Rental'),
+      meta: [
+        it.area && !areaIsRedundant ? { label: t('home.v2.picks.where', 'Where'), value: prettyArea(it.area, t) } : null,
+        it.beds ? { label: t('home.v2.picks.beds', 'Bedrooms'), value: it.beds } : null,
+        it.price ? { label: t('home.v2.picks.price', 'Price'), value: it.price } : null,
+      ].filter(Boolean),
+    };
+  });
 
   const doors = [
     { key: 'stays', to: '/stays', Icon: HomeIcon },
@@ -159,6 +188,46 @@ export default function HomePreview() {
           </div>
         </div>
       </section>
+
+      {/* ── Today's picks ────────────────────────────────────────────────
+          A coverflow of listings and businesses that rotates by the calendar
+          day. Deliberately NOT "today's deals": nothing in this product
+          records a discount, so a card headed "deal" would claim something
+          about price that no field on the listing supports. */}
+      {picks.length >= 4 && (
+        <section className="hv2-picks" id="picks">
+          <div className="hv2-wrap">
+            <div className="hv2-picks-head">
+              <div className="hv2-eyebrow hv2-eyebrow-gold">{t('home.v2.picks.eyebrow', 'Fresh today')}</div>
+              <h2>{t('home.v2.picks.h2', "Today's picks")}</h2>
+              <p>{t('home.v2.picks.p', 'A new selection every day, from everything listed on the site. Drag to browse.')}</p>
+            </div>
+            <CoverflowCarousel
+              slides={pickSlides}
+              showCaption
+              showNavigation
+              showPagination={false}
+              onSelect={setPick}
+              label={t('home.v2.picks.h2', "Today's picks")}
+              className="hv2-coverflow"
+              cardWidth="clamp(160px, 24vw, 280px)"
+            />
+            <div className="hv2-picks-cta">
+              <button
+                type="button"
+                className="btn btn-white"
+                onClick={() => navigate(picks[pick]?.href || '/stays')}
+                data-testid="home-preview-pick-open"
+                data-href={picks[pick]?.href || ''}
+              >
+                {picks[pick]?.kind === 'biz'
+                  ? t('home.v2.picks.openBiz', 'See this business')
+                  : t('home.v2.picks.openStay', 'See this rental')}
+              </button>
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* ── Featured rentals ───────────────────────────────────────────── */}
       <section className="hv2-pad" id="rentals">

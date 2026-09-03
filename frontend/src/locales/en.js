@@ -945,6 +945,18 @@ const en = {
             businesses: { title: 'Find a local business', sub: 'Cleaners, movers, caterers, tutors and more' },
             requests: { title: 'Post what you need', sub: 'Owners and businesses reply to you' },
           },
+          picks: {
+            eyebrow: 'Fresh today',
+            h2: "Today's picks",
+            p: 'A new selection every day, from everything listed on the site. Drag to browse.',
+            kindStay: 'Rental',
+            kindBiz: 'Local business',
+            where: 'Where',
+            beds: 'Bedrooms',
+            price: 'Price',
+            openStay: 'See this rental',
+            openBiz: 'See this business',
+          },
           rentals: {
             eyebrow: 'Handpicked',
             h2: 'Featured rentals',

@@ -29,6 +29,8 @@ const CARD_WIDTH = 520;
 // The gallery's cells are a fixed portrait box, so its photos are fitted into
 // that box and padded rather than cropped — see framedImage.
 const GALLERY_W = 700;
+// The coverflow's cards are square.
+const PICK_SIZE = 640;
 const GALLERY_H = 900;
 
 const FALLBACK_STILLS = [
@@ -129,5 +131,58 @@ export default function useHomeShowcase() {
     return out.slice(0, 4);
   }, [rentals, businesses]);
 
-  return { loaded, streamImages, gallery, rentals: rentals.slice(0, 6), businesses: businesses.slice(0, 8) };
+  // Today's picks: a dozen square cards for the coverflow, drawn from the same
+  // two lists and rotated by the calendar day so the section genuinely differs
+  // from one day to the next rather than only saying so.
+  //
+  // It is "picks", not "deals". Nothing in this product records a discount —
+  // no was-price, no sale flag, no expiry — so a card headed "deal" would be a
+  // claim about price that no field on the listing supports. The rotation is
+  // what makes "today's" true; the word above it has to be true as well.
+  const picks = useMemo(() => {
+    const day = Math.floor(Date.now() / 86400000);
+    const money = (n, currency, per) => (
+      n ? `${currency === 'USD' ? '$' : '₪'}${Number(n).toLocaleString()}${per}` : null
+    );
+    const stay = (p) => ({
+      key: `p-${p.id}`,
+      src: framedImage(propertyPhoto(p), PICK_SIZE, PICK_SIZE),
+      alt: p.title || '',
+      kind: 'stay',
+      // The whole row, so the page can build the headline with propertyTitle
+      // rather than the raw title, which for most listings is just the area.
+      property: p,
+      title: p.title || '',
+      area: p.area || '',
+      href: `/property/${p.id}`,
+      price: money(p.monthly_price, p.currency, '/mo') || money(p.nightly_price, p.currency, '/night'),
+      beds: p.bedrooms ? String(p.bedrooms) : null,
+      rentalType: p.rental_type || '',
+    });
+    const biz = (g) => ({
+      key: `b-${g.id}`,
+      src: framedImage(getGigCover(g), PICK_SIZE, PICK_SIZE),
+      alt: g.title || '',
+      kind: 'biz',
+      title: g.title || '',
+      title_he: g.title_he || '',
+      area: g.area || '',
+      href: `/businesses/${g.id}`,
+      category: g.category || '',
+    });
+    const pool = [];
+    const r = rentals.map(stay);
+    const b = businesses.map(biz);
+    for (let i = 0; i < Math.max(r.length, b.length); i++) {
+      if (r[i]) pool.push(r[i]);
+      if (b[i]) pool.push(b[i]);
+    }
+    if (pool.length < 4) return [];
+    // Rotate the whole pool, so every listing comes round over time instead of
+    // the same twelve showing for ever.
+    const start = (day * 3) % pool.length;
+    return Array.from({ length: Math.min(12, pool.length) }, (_, i) => pool[(start + i) % pool.length]);
+  }, [rentals, businesses]);
+
+  return { loaded, streamImages, gallery, picks, rentals: rentals.slice(0, 6), businesses: businesses.slice(0, 8) };
 }

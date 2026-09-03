@@ -41,6 +41,7 @@ is "Add your business — free" rather than anything addressed to owners.
 | `frontend/src/styles/home-v2.css` | Its styles, namespaced `hv2-` so they cannot collide with the cinematic page's `.finale` / `.kick`, which this page reuses unchanged. |
 | `frontend/src/components/ui/cta-section-with-gallery.jsx` | The supply-side CTA's staggered text column and offset four-cell photo grid. Also ported from TypeScript. Needs `motion`, the one dependency added; it lands in this page's lazy chunk, and the entry bundle did not move. |
 | `frontend/src/components/ui/anti-metal-button.jsx` | The CTA's primary button, whose gold panel sweeps the width on hover. Ported from TypeScript and recoloured to the palette. |
+| `frontend/src/components/ui/coverflow-carousel.jsx` | Today's picks — a draggable, looping ring of raked cards. Ported from TypeScript; needs only `lucide-react`, already installed. |
 | `frontend/src/utils/cdnImage.js` | Gained `framedImage`, which fits a whole image into a fixed box and pads the rest. |
 | `scripts/check-home-preview.mjs` | The browser check. |
 
@@ -128,6 +129,26 @@ accent panel **above** the label.
   at the moment someone has decided to press it. The colour change is delayed
   by the length of the sweep so the two land together instead of the text going
   dark while it is still over blue.
+
+## "Today's picks", not "today's deals"
+
+The section was asked for as *today's deals*. Nothing in this product records a
+discount — there is no was-price, no sale flag, no expiry on any listing or
+service — so a card headed "deal" would claim something about price that no
+field can support. That is the same rule the finale's stat strip is built on:
+a claim with nothing behind it is left out rather than estimated.
+
+What makes "today's" true instead of decorative: the twelve cards are cut from
+the full pool at an offset derived from the calendar day, so the selection
+really does change every day and every listing comes round over time. Change
+the wording and that mechanism still holds; add a discount field one day and
+"deals" becomes available honestly.
+
+The carousel itself cannot open anything — it names the centred card and stops
+there — so it takes an added `onSelect` and the page renders the button beneath
+it. The check steps the carousel and asserts the caption and the button move
+**together**, since a caption belonging to a different card than its button is
+invisible in a screenshot.
 
 ## Running it
 

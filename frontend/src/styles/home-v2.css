@@ -111,6 +111,37 @@
 .hv2-door-body small { font-size: 13px; color: var(--brand-muted); }
 .hv2-door-arw { color: var(--brand-muted); flex: none; }
 
+/* Today's picks — the page's one dark surface, which is also what the
+   coverflow needs: raked cards read as objects against a dark ground and as
+   cut-outs against a white one.
+
+   The component's caption uses the shadcn text tokens (`text-foreground`,
+   `text-muted-foreground`), which are dark by design. On this section they are
+   re-pointed rather than the component being edited, so it stays portable. */
+.hv2-picks {
+  background: var(--brand-primary-deep, #123B57);
+  color: #fff;
+  padding: clamp(44px, 6vw, 76px) 0 clamp(36px, 5vw, 60px);
+  overflow: clip;
+}
+.hv2-picks-head { text-align: center; max-width: 640px; margin: 0 auto; }
+.hv2-picks-head h2 { font-size: clamp(26px, 3.4vw, 42px); font-weight: 500; margin-top: 8px; color: #fff; }
+.hv2-picks-head p { margin-top: 10px; color: rgba(255, 255, 255, .78); font-size: 15px; }
+.hv2-coverflow .text-foreground { color: #fff; }
+.hv2-coverflow .text-muted-foreground { color: rgba(255, 255, 255, .72); }
+.hv2-coverflow dl > div { border-bottom: 1px solid rgba(255, 255, 255, .14); }
+.hv2-coverflow dl > div:last-child { border-bottom: 0; }
+/* The component's nav buttons use `bg-background`, which is the light token. */
+.hv2-picks button[aria-label="Previous slide"],
+.hv2-picks button[aria-label="Next slide"] {
+  background: rgba(255, 255, 255, .16);
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, .3);
+}
+.hv2-picks button[aria-label="Previous slide"]:hover,
+.hv2-picks button[aria-label="Next slide"]:hover { background: rgba(255, 255, 255, .3); }
+.hv2-picks-cta { display: flex; justify-content: center; margin-top: 22px; }
+
 /* Section heads and rails */
 .hv2-eyebrow { font-size: 12px; font-weight: 800; letter-spacing: .18em; text-transform: uppercase; color: var(--gold-text); }
 .hv2-eyebrow-gold { color: var(--gold); }
