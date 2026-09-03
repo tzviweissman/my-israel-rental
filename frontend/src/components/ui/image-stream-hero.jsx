@@ -120,6 +120,7 @@ function keyframes(dir, name, p) {
 /**
  * @typedef {Object} ImageStreamHeroProps
  * @property {StreamImage[]} images Images cycled onto the rails. Both rails run the same sequence, so the corridor reads as one mirrored stream. Fewer than `cards` simply repeat.
+ * @property {boolean} [intro=true] Grow the corridor out from the vanishing point when the page opens. See the note at `enter` below.
  * @property {number} [cards=9] Cards on each rail at once. More cards means a denser corridor, not a faster one — spacing is derived from this and `speed`. Drop it far below the default and consecutive cards grow too fast to stay overlapped near the exit, which tears a gap in the ribbon.
  * @property {number} [speed=18] Seconds for one card to travel the whole corridor.
  * @property {number} [axis=55] Vertical placement of the corridor's axis, as a percentage of height.
@@ -134,6 +135,7 @@ export function ImageStreamHero({
   cards = 9,
   speed = 18,
   axis = 55,
+  intro = true,
   path,
   children,
   className,
@@ -143,17 +145,27 @@ export function ImageStreamHero({
   const right = `ish-r-${id}`;
   const left = `ish-l-${id}`;
   const card = `ish-c-${id}`;
+  const enter = `ish-e-${id}`;
 
   const p = React.useMemo(() => ({ ...PATH, ...path }), [path]);
 
   const css = React.useMemo(
     () =>
       `${keyframes(1, right, p)}${keyframes(-1, left, p)}` +
+      // THE ENTRANCE. The source drops every card mid-flight with a negative
+      // delay so the corridor is full on the first frame - correct for a
+      // component that is already on screen, wrong for the first thing a
+      // visitor sees. The reference opens as a small strip at the vanishing
+      // point that grows outward until it fills the frame. That is the whole
+      // 3D layer scaled about the axis, from nearly nothing to 1, while the
+      // cards keep flowing inside it; the corridor's own motion is untouched.
+      `@keyframes ${enter}{0%{transform:scale(.06);opacity:0}25%{opacity:1}100%{transform:scale(1);opacity:1}}` +
       // Pausing rather than disabling keeps the corridor whole: every card is
       // already dropped mid-flight by its negative delay, so it freezes as a
-      // finished still instead of collapsing onto the axis.
-      `@media(prefers-reduced-motion:reduce){.${card}{animation-play-state:paused}}`,
-    [right, left, card, p],
+      // finished still instead of collapsing onto the axis. The entrance is
+      // simply skipped: a corridor that arrives finished is the still.
+      `@media(prefers-reduced-motion:reduce){.${card}{animation-play-state:paused}.${enter}{animation:none}}`,
+    [right, left, card, enter, p],
   );
 
   return (
@@ -173,8 +185,13 @@ export function ImageStreamHero({
         }}
       >
         <div
-          className="absolute inset-0"
-          style={{ transformStyle: "preserve-3d" }}
+          className={cn("absolute inset-0", intro && enter)}
+          style={{
+            transformStyle: "preserve-3d",
+            transformOrigin: `50% ${axis}%`,
+            ...(intro ? { animation: `${enter} 1.9s cubic-bezier(.22,1,.36,1) both` } : {}),
+          }}
+          data-testid="ish-layer"
         >
           {[right, left].map((name) =>
             Array.from({ length: cards }, (_, i) => {

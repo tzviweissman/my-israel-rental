@@ -46,6 +46,28 @@ for (const lng of ['en', 'he']) {
 
   const hero = page.locator('[data-testid="home-preview-hero"]');
   ok(`${lng}: hero is on the page`, await hero.count() === 1);
+
+  // THE ENTRANCE. The corridor must open as a small strip at the vanishing
+  // point and grow outward - the reference does, and ours arrived already
+  // full on the first frame. Reload and read the 3D layer's scale at once,
+  // then again after the entrance has had time to finish.
+  await page.reload({ waitUntil: 'domcontentloaded' });
+  // Wait for React to mount the layer, then read it at once. The entrance
+  // runs 1.9s, so the first reading after mount is still near the start.
+  // Reading before the mount returned null and called a working entrance
+  // broken.
+  await page.waitForSelector('[data-testid="ish-layer"]', { state: 'attached', timeout: 8000 });
+  const enterEarly = await page.evaluate(() => {
+    const el = document.querySelector('[data-testid="ish-layer"]');
+    return el ? new DOMMatrixReadOnly(getComputedStyle(el).transform).a : null;
+  });
+  await page.waitForTimeout(2600);
+  const enterLate = await page.evaluate(() => {
+    const el = document.querySelector('[data-testid="ish-layer"]');
+    return el ? new DOMMatrixReadOnly(getComputedStyle(el).transform).a : null;
+  });
+  ok(`${lng}: the corridor opens small at the centre`, enterEarly !== null && enterEarly < 0.6, `scale ${enterEarly}`);
+  ok(`${lng}: and has grown to full size after the entrance`, enterLate !== null && enterLate > 0.98, `scale ${enterLate}`);
   // The scope every experimental theme is written under. If this class is
   // missing, a scoped theme is invisible here too - and the whole point of
   // scoping is that it shows HERE and nowhere else.

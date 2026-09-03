@@ -211,6 +211,47 @@ async def create_short_link(payload: ShortLinkIn, user=Depends(verify_token)):
     return _public(doc)
 
 
+@router.get("/short-links/mine")
+async def my_short_links(user=Depends(verify_token)):
+    """Every link the caller owns, with its scan counts, for the dashboard's
+    front page.
+
+    Declared BEFORE `/short-links/{slug}`, or FastAPI would read "mine" as a
+    slug and answer 404 for everyone.
+
+    The dashboard used to reach scan counts one target at a time, from
+    inside each listing's share panel. That answers "did this sign work?";
+    it cannot answer "did any of my signs work?", which is the question the
+    overview asks. This is the same public shape as the single-link read,
+    plus a total, so the page needs one call.
+
+    Only links the caller minted. An admin gets their own, not everyone's -
+    the admin console has its own reads.
+    """
+    docs = await db.short_links.find(
+        {"owner_user_id": user["user_id"]}
+    ).sort("scan_count", -1).to_list(200)
+    links = [_public(d) for d in docs]
+    return {
+        "links": links,
+        "total_scans": sum(l["scan_count"] for l in links),
+        # Summed per day across every link, zero-filled, so the front page can
+        # draw one chart of "people scanning my codes" without merging
+        # thirty-day series in the browser.
+        "daily": _sum_daily([l["daily"] for l in links]),
+    }
+
+
+def _sum_daily(series: list[list[dict]]) -> list[dict]:
+    if not series:
+        return _last_30_days({})
+    totals: dict[str, int] = {}
+    for s in series:
+        for row in s:
+            totals[row["date"]] = totals.get(row["date"], 0) + int(row.get("count") or 0)
+    return [{"date": row["date"], "count": totals.get(row["date"], 0)} for row in series[0]]
+
+
 @router.get("/short-links/{slug}")
 async def get_short_link(slug: str, user=Depends(verify_token)):
     """Read one back, for the dashboard's scan count."""
