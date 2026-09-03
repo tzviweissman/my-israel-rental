@@ -354,20 +354,21 @@ export default function HomePreview() {
                 </ul>
               </ContainerAnimated>
               <ContainerAnimated className="hv2-cta-row">
-                {/* The section's one primary action. `w-56` because the label
-                    is absolutely positioned inside the button, so the width
-                    has to be big enough to hold it — the component's default
-                    holds about twelve characters and this is longer in both
-                    languages. */}
+                {/* One door, not two (Tzvi, 3 Sep). It used to offer "Add your
+                    business" beside "List a place", which asks a visitor to
+                    classify themselves before they have signed up — and the
+                    two land on flows that both start with the same account.
+                    `/join` already asks which they are, so the choice happens
+                    once, in the place built for it.
+
+                    `w-44` because the label is absolutely positioned inside
+                    the button, so the width has to hold it in both languages. */}
                 <AntiMetalButton
-                  className="w-56"
-                  label={t('home.v2.supply.ctaBiz', 'Add your business')}
-                  onClick={() => navigate('/businesses/add')}
+                  className="w-44"
+                  label={t('nav.joinFree', 'Join free')}
+                  onClick={() => navigate('/join')}
                   data-testid="home-preview-cta-primary"
                 />
-                <button type="button" className="btn btn-ghost btn-lg" onClick={() => navigate('/join')}>
-                  {t('home.v2.supply.ctaStay', 'List a place')}
-                </button>
               </ContainerAnimated>
             </ContainerStagger>
 

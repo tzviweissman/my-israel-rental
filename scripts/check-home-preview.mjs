@@ -175,6 +175,12 @@ for (const lng of ['en', 'he']) {
 
   const primary = page.locator('[data-testid="home-preview-cta-primary"]');
   ok(`${lng}: the CTA's primary button is there`, await primary.count() === 1);
+  // One door, not two. A visitor should not have to classify themselves as a
+  // business or a landlord before they have an account; /join asks that once.
+  const ctaButtons = await page.locator('.hv2-cta-row button').count();
+  ok(`${lng}: the CTA offers a single way in`, ctaButtons === 1, `${ctaButtons} buttons`);
+  ok(`${lng}: and its label is the join wording`,
+    /join|הצטרפות/i.test((await primary.innerText()).trim()), (await primary.innerText()).trim());
   const sweep = await primary.evaluate((el) => {
     const panel = el.querySelector('span[aria-hidden]');
     const cs = getComputedStyle(panel);
