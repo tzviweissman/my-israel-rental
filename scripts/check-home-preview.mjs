@@ -214,9 +214,12 @@ for (const lng of ['en', 'he']) {
     });
   };
 
+  // Fractions of the SECTION. The frame is pinned for the first 87% of it
+  // and the scene uses 85% of that, so the scene is complete at about 0.74;
+  // 0.72 is "all but finished" and 0.80 is inside the hold.
   const early = await sample(0.02);
   const mid = await sample(0.3);
-  const late = await sample(0.55);
+  const late = await sample(0.72);
 
   // The passage fills in behind a dithered wavefront. The sample is taken a
   // little way into the section, so a few characters have legitimately
@@ -255,7 +258,7 @@ for (const lng of ['en', 'he']) {
         frameTop: Math.round(frame.top),
       });
     }, 900));
-  }, commBox.top + commBox.height * 0.72);
+  }, commBox.top + commBox.height * 0.80);
   ok(`${lng}: the finished scene holds while still pinned`,
     hold.fill >= 0.99 && Math.abs(hold.frameTop) <= 2,
     `fill ${hold.fill}, frame at ${hold.frameTop}`);

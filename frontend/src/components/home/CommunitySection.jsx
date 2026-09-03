@@ -94,13 +94,15 @@ export default function CommunitySection({ items = [] }) {
     };
   }, [scrollYProgress, cards.length]);
 
-  // The scene finishes at 72% of the pinned travel, not at 100%. Driving it
+  // The scene finishes at 85% of the pinned travel, not at 100%. Driving it
    // to the very end means it completes at the exact moment the section
    // starts leaving, so the finished picture is never on screen standing
    // still - "you don't see the whole scene until you have scrolled past
    // it". The last 28% is a hold: everything is complete, the frame is still
    // pinned, and the reader gets a beat to look at it before moving on.
-  const anim = useTransform(scrollYProgress, [0, 0.72], [0, 1], { clamp: true });
+  // 0.85, up from 0.72: with the section this tall, a 28% hold was a whole
+  // screen of nothing happening. 15% is still a beat.
+  const anim = useTransform(scrollYProgress, [0, 0.85], [0, 1], { clamp: true });
 
   if (!cards.length) return null;
 

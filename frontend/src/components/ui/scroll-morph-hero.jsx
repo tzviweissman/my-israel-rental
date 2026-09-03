@@ -54,35 +54,13 @@ const lerp = (start, end, t) => start * (1 - t) + end * t;
  * one continuous churn instead of four shapes. A held shape is what makes it
  * a sequence you can follow.
  */
-const SCATTER_END = 0.10;   // scattered → line
+const SCATTER_END = 0.10;   // emerging from the centre → line
 const LINE_HOLD = 0.20;     // the line, held
 const LINE_END = 0.36;      // line      → ring
 const RING_HOLD = 0.48;     // the ring, held
 const RING_END = 0.80;      // ring      → rainbow
                             // rainbow   → sweeps to the end
 
-/**
- * The scattered starting position for card `i`.
- *
- * Deterministic, not `Math.random()`. The source randomises on mount, which
- * means the cards land somewhere different on every render — and because
- * this component re-renders on every scroll frame, a random scatter would
- * jitter the whole field instead of holding still. A hash of the index gives
- * the same disorder every time.
- */
-function scatterAt(index, w, h) {
-  const rand = (salt) => {
-    const x = Math.sin((index + 1) * 12.9898 + salt * 78.233) * 43758.5453;
-    return x - Math.floor(x);
-  };
-  return {
-    x: (rand(1) - 0.5) * w * 1.9,
-    y: (rand(2) - 0.5) * h * 1.7,
-    rotation: (rand(3) - 0.5) * 180,
-    scale: 0.55,
-    opacity: 0,
-  };
-}
 
 /**
  * @typedef {Object} MorphCard
@@ -121,9 +99,18 @@ function FlipCard({ card, index, target, reduced, onOpen }) {
       </div>
 
       {/* Back — the card names what it is showing rather than saying
-          "Details", which is the source's placeholder. */}
+          "Details", which is the source's placeholder.
+
+          INVISIBLE UNTIL HOVERED, on top of backface-visibility. On Tzvi's
+          machine every card in the line stage rendered as this dark face
+          with its text mirrored - the back seen from behind - which means
+          the browser was not honouring backface-visibility on it, prefixed
+          or not, while headless Chromium here did. Rather than find out which
+          browser and why, the back is simply not painted until the flip that
+          shows it begins. The opacity change is delayed by the first half of
+          the flip so it arrives as the card passes edge-on. */}
       <div
-        className="absolute inset-0 h-full w-full overflow-hidden rounded-xl shadow-lg flex flex-col items-center justify-center p-2 text-center"
+        className="absolute inset-0 h-full w-full overflow-hidden rounded-xl shadow-lg flex flex-col items-center justify-center p-2 text-center opacity-0 transition-opacity duration-150 delay-200 group-hover:opacity-100"
         style={{
           backfaceVisibility: "hidden",
           WebkitBackfaceVisibility: "hidden",
@@ -215,7 +202,14 @@ export default function ScrollMorphCards({ cards, progress, reduced = false, onO
           const minDimension = Math.min(w, h);
 
           // ── the four resting shapes ────────────────────────────────
-          const scatter = scatterAt(i, w, h);
+          // The opening is not a scatter any more. In the reference the
+          // frame starts almost blank and the row EXTENDS OUT FROM THE
+          // CENTRE: every card begins at the middle, small and faint, and
+          // travels outward to its place in the line - the outer cards
+          // furthest, so the strip grows from the inside. A scatter was the
+          // source component's own opening; this is the one that was asked
+          // for, copied from the recording.
+          const scatter = { x: 0, y: 0, rotation: 0, scale: 0.35, opacity: 0 };
 
           // A line across the middle. The spacing packs the whole set into
           // the frame's width whatever the count, so it reads as one row
