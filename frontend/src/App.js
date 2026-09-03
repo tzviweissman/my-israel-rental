@@ -12,9 +12,9 @@ import '@/App.css';
 // after everything index.js imports - so loading the theme there left the old
 // gold buttons winning on equal specificity. See styles/theme-flow.css.
 import '@/styles/theme-flow.css';
-// The neon palette, on top of the flow theme. Colours only; everything
-// else is inherited. Delete this line to go back to blue.
-import '@/styles/theme-neon.css';
+// styles/theme-neon.css is the five-colour palette tried on 3 September and
+// declined the same evening. It is kept, not deleted, so the next "let me
+// see it" is one import line here rather than a rebuild from a description.
 
 import Navigation from './components/Navigation';
 import ImpersonationBanner from './components/ImpersonationBanner';

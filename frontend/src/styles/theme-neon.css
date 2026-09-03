@@ -3,7 +3,11 @@
    the gradient-text component, promoted from lighting one phrase to being
    the palette of the whole site.
 
-   This loads LAST and overrides theme-flow.css. Everything about the flow
+   NOT LOADED. Tried on the evening of 3 September and declined within the
+   hour - the blue stayed. The file is kept so that seeing it again is one
+   import line in App.js, not a rebuild from a description.
+
+   When it is loaded, it loads LAST and overrides theme-flow.css. Everything about the flow
    theme that is not a colour — the white ground, the hairlines, the radii,
    the shadows, the black-or-quiet button rule — is inherited untouched, so
    what changes is exactly the thing being judged. To go back, delete the
