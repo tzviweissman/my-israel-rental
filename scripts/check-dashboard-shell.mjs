@@ -120,6 +120,11 @@ for (const lng of ['en', 'he']) {
   const leadsSub = (await page.locator('[data-testid="overview-card-leads-sub"]').innerText()).trim();
   ok(`${lng}: the leads card is honest about a young counter`, leadsSub.length > 3, leadsSub);
   ok(`${lng}: no invented growth figures anywhere`, !/[+-]\d+%/.test(await page.locator('[data-testid="overview-tab"]').innerText()));
+  // A listing created a minute ago counts over one day, not a month it has
+  // not had; and a card with nothing to count says 0, not a dash.
+  const overviewText = await page.locator('[data-testid="overview-tab"]').innerText();
+  ok(`${lng}: the visitors card's window is the listing's real age`, /(last 1 days|היום האחרון|1 הימים)/.test(overviewText) || /last 1 day/.test(overviewText), overviewText.match(/[^\n]*(days|הימים)[^\n]*/g)?.join(' | '));
+  ok(`${lng}: no dash placeholders on the cards`, !/[—–]/.test(await page.locator('[data-testid="overview-card-visitors-value"]').innerText()));
 
   // the sidebar side follows the reading direction
   const side = await page.evaluate(() => {
@@ -193,6 +198,41 @@ for (const lng of ['en', 'he']) {
 
   ok(`${lng}: no page errors`, errors.length === 0, errors[0]);
   await ctx.close();
+}
+
+// ── the deep links two emails have carried for months ──────────────────
+// `?edit=<property id>` opens that listing's edit form (the quarantine
+// email's "Fix pricing now" 404ed on a route that never existed), and a
+// signed-out visitor to a gated page is sent to sign in WITH the page in
+// `redirect`. (Dead-ends audit 2026-09-03, #1, #3, #5.)
+{
+  const ctx = await browser.newContext({ viewport: { width: 1280, height: 900 } });
+  const page = await signIn(ctx);
+  if (prop?.id) {
+    await page.goto(`${APP}/dashboard?tab=properties&edit=${prop.id}`, { waitUntil: 'networkidle' });
+    // A controlled input carries its value as a property, not an attribute,
+    // so `input[value=...]` never matches; read the property.
+    await page.waitForFunction((title) => [...document.querySelectorAll('input')].some((e) => e.value === title), `TEST_shell_${stamp}`, { timeout: 15000 }).catch(() => {});
+    // The title as it was posted; the create response does not echo it.
+    const editState = await page.evaluate((title) => ({
+      open: !!document.querySelector('[data-testid="add-property-modal"]'),
+      titled: [...document.querySelectorAll('input')].some((e) => e.value === title),
+      values: [...document.querySelectorAll('input')].map((e) => e.value).filter((v) => v.includes('TEST_')),
+    }), `TEST_shell_${stamp}`);
+    ok("?edit=<id> opens that listing's edit form", editState.open && editState.titled, JSON.stringify(editState));
+    ok('and leaves the URL', !page.url().includes('edit='), page.url());
+  }
+  await ctx.close();
+
+  const anon = await browser.newContext({ viewport: { width: 1280, height: 900 } });
+  const p2 = await anon.newPage();
+  await p2.goto(`${APP}/dashboard?tab=bookings`, { waitUntil: 'networkidle' });
+  ok('a signed-out visitor to the dashboard is sent to sign in with the page kept',
+    p2.url().includes('/auth/login') && decodeURIComponent(p2.url()).includes('redirect=/dashboard?tab=bookings'), p2.url());
+  await p2.goto(`${APP}/businesses/post-job`, { waitUntil: 'networkidle' });
+  ok('and to sign up from post-a-job, with the page kept',
+    p2.url().includes('/signup') && decodeURIComponent(p2.url()).includes('redirect=/businesses/post-job'), p2.url());
+  await anon.close();
 }
 
 // ── a phone keeps the tab strip ────────────────────────────────────────

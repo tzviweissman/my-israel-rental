@@ -143,7 +143,7 @@ export default function ShareListingsPanel({
             {panelTitle}
           </p>
           <p className="text-xs mb-3" style={{ color: 'var(--brand-muted)' }}>
-            {body || t('dashboard.sharePanelBody2', 'One link and a QR code for everything you have listed — send it in a message, or print the code for a flyer or a sign.')}
+            {body || t('dashboard.sharePanelBody2', 'One link and a QR code for everything you have listed. Send it in a message, or print the code for a flyer or a sign.')}
           </p>
           {/* T2 — a caption on the QR, the first time an owner opens this
               panel. Beside the feature, inside the flow: nothing is

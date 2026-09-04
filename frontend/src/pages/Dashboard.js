@@ -38,7 +38,7 @@ import { canPublishGigs } from '../utils/providerTrial';
 const Dashboard = () => {
   const { t } = useTranslation();
   const { user, token } = useContext(AuthContext);
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
   const [properties, setProperties] = useState([]);
   // D3 — the My Jobs tab is gated on this. Fetched once here rather than
@@ -171,6 +171,10 @@ const Dashboard = () => {
   useEffect(() => {
     const tab = searchParams.get('tab');
     if (tab) setActiveTab(tab);
+    // `?edit=<property id>` means the properties tab whatever else the URL
+    // says: the quarantine email and the availability nudge both send
+    // people here to change one listing.
+    if (searchParams.get('edit')) setActiveTab('properties');
     // Support the /dashboard/settings deep-link (used by notification
     // emails with ?section=notifications). Any path that ends in
     // /settings auto-selects the settings tab; NotificationSettings
@@ -179,6 +183,23 @@ const Dashboard = () => {
       setActiveTab('settings');
     }
   }, [searchParams]);
+
+  // `?edit=<property id>` opens that listing's edit form once the list
+  // has loaded, then leaves the URL so a reload or Cancel does not reopen
+  // it. Two emails linked here for months and nothing read the param.
+  useEffect(() => {
+    const editId = searchParams.get('edit');
+    if (!editId || !properties.length) return;
+    const target = properties.find((p) => p.id === editId);
+    if (target) {
+      setEditingProperty(target);
+      setShowAddProperty(true);
+    }
+    const next = new URLSearchParams(searchParams);
+    next.delete('edit');
+    setSearchParams(next, { replace: true });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [properties, searchParams]);
 
   // Refetch bookings whenever the user lands on the Bookings tab,
   // and whenever a notification deep-links here with a `highlight=` param.
@@ -436,6 +457,7 @@ const Dashboard = () => {
             user={user}
             token={token}
             API={API}
+            highlightId={highlightBookingId}
           />
         )}
 

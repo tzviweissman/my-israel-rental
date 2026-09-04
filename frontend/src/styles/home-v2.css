@@ -190,23 +190,6 @@
    quiet grey, used to group - never to divide. */
 .hv2-biz-wrap { background: var(--surface-muted); border-top: 1px solid var(--brand-border); border-bottom: 1px solid var(--brand-border); }
 
-/* How it works */
-.hv2-how { text-align: center; }
-.hv2-how h2 { font-size: clamp(26px, 3.4vw, 38px); font-weight: 500; margin-top: 8px; }
-.hv2-how-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 28px; margin-top: 36px; text-align: start; }
-.hv2-how-col {
-  background: var(--surface); border: 1px solid var(--brand-border); border-radius: var(--radius-card, 18px);
-  padding: 26px 26px 10px;
-}
-.hv2-how-col h3 { font-size: 21px; font-weight: 600; margin-bottom: 14px; color: var(--brand-primary-deep, #123B57); }
-.hv2-step { display: flex; gap: 14px; padding: 12px 0 16px; border-top: 1px solid var(--brand-border); }
-.hv2-num {
-  flex: none; width: 32px; height: 32px; border-radius: 50%;
-  display: grid; place-items: center;
-  background: var(--brand-primary); color: #fff; font-weight: 800; font-size: 14px;
-}
-.hv2-step h4 { font-size: 16px; font-weight: 700; font-family: var(--font-body); }
-.hv2-step p { margin-top: 4px; color: var(--brand-muted); font-size: 14px; }
 
 /* What we are building — the tall section whose inside is pinned. Its
    height IS the length of the animation: the reader scrolls the page as
@@ -350,7 +333,6 @@
   .hv2-doors { grid-template-columns: 1fr; }
   .hv2-grid-3 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .hv2-grid-4 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .hv2-how-cols { grid-template-columns: 1fr; }
   .hv2-cta-grid { grid-template-columns: minmax(0, 1fr); }
 }
 @media (max-width: 560px) {
@@ -417,4 +399,9 @@ body.hv2-light-nav .glass-dot { background: var(--gold-lg); }
    viewport units keep meaning the viewport, so the 100vh community stage
    and the corridor's container-relative geometry are untouched. Scoped
    to the preview page, like every other experiment here. */
-body.theme-preview #root { zoom: 0.8; }
+/* Desktop only. Tzvi's recording was a laptop screen; on a phone the same
+   0.8 takes a fifth off every tap target and every font, and nothing on a
+   phone was "too big and too close up". (2026-09-04 audit 2, finding 1.) */
+@media (min-width: 1024px) {
+  body.theme-preview #root { zoom: 0.8; }
+}

@@ -60,6 +60,16 @@ function FloatingContact() {
   return <WhatsAppButton />;
 }
 
+/* A signed-out visitor at a gated route goes to sign in (or sign up)
+   WITH the page they wanted in `redirect`, so they come back to it. The
+   bare <Navigate to="/auth/login" /> these guards used dropped the
+   marketing CTAs' `?tab=` and the post-a-job intent on the floor.
+   (Dead-ends audit 2026-09-03, #3 and #6.) */
+function ToAuth({ to = '/auth/login' }) {
+  const { pathname, search } = useLocation();
+  return <Navigate to={`${to}?redirect=${encodeURIComponent(pathname + search)}`} replace />;
+}
+
 function ScrollToTop() {
   const { pathname } = useLocation();
   useEffect(() => { window.scrollTo(0, 0); }, [pathname]);
@@ -318,8 +328,8 @@ function App() {
             <Route path="/join" element={<SignupJoin />} />
             <Route path="/verify-pending" element={<VerifyPending />} />
             <Route path="/verify-email" element={<VerifyEmail />} />
-            <Route path="/dashboard" element={user ? <Dashboard /> : <Navigate to="/auth/login" />} />
-            <Route path="/dashboard/settings" element={user ? <Dashboard /> : <Navigate to="/auth/login" />} />
+            <Route path="/dashboard" element={user ? <Dashboard /> : <ToAuth />} />
+            <Route path="/dashboard/settings" element={user ? <Dashboard /> : <ToAuth />} />
             <Route path="/auth/deeplink" element={<AuthDeeplink />} />
             <Route path="/notification-snooze" element={<NotificationSnooze />} />
             {/* Public on purpose — the unsubscribe link in the requests
@@ -395,16 +405,16 @@ function App() {
                 and any QR or message already sent stays valid. */}
             <Route path="/services/jobs" element={<JobsBoard />} />
             <Route path="/services/jobs/:id" element={<JobDetail />} />
-            <Route path="/services/post-job" element={user ? <PostJob /> : <Navigate to="/signup" />} />
+            <Route path="/services/post-job" element={user ? <PostJob /> : <ToAuth to="/signup" />} />
             <Route path="/services/gig/:id" element={<GigDetail />} />
-            <Route path="/services/create-gig" element={user ? <CreateGig /> : <Navigate to="/signup" />} />
+            <Route path="/services/create-gig" element={user ? <CreateGig /> : <ToAuth to="/signup" />} />
 
             {/* The names people see and share from now on. */}
             <Route path="/businesses/jobs" element={<JobsBoard />} />
             <Route path="/businesses/jobs/:id" element={<JobDetail />} />
-            <Route path="/businesses/post-job" element={user ? <PostJob /> : <Navigate to="/signup" />} />
+            <Route path="/businesses/post-job" element={user ? <PostJob /> : <ToAuth to="/signup" />} />
             <Route path="/businesses/:id" element={<GigDetail />} />
-            <Route path="/businesses/add" element={user ? <CreateGig /> : <Navigate to="/signup" />} />
+            <Route path="/businesses/add" element={user ? <CreateGig /> : <ToAuth to="/signup" />} />
             {/* M4 — the public page for ONE business, by slug or by id.
                 Both resolve: the spec allows either as canonical and the
                 short-link table already points at /business/{id}. */}

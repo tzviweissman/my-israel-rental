@@ -18,6 +18,7 @@
  */
 import React from 'react';
 import { useTranslation } from 'react-i18next';
+import { formatDate } from '../../utils/formatDate';
 
 export function offerLabel(discount, i18n) {
   if (!discount) return '';
@@ -57,7 +58,7 @@ export default function OfferBadge({ discount, variant = 'chip', className = '',
       {label ? <span className="text-xs">{label}</span> : null}
       {discount.ends_at ? (
         <span className="text-[11px] opacity-80">
-          {t('offers.until', { defaultValue: 'until {{date}}', date: discount.ends_at })}
+          {t('offers.until', { defaultValue: 'until {{date}}', date: formatDate(discount.ends_at, i18n.language) })}
         </span>
       ) : null}
     </span>

@@ -91,6 +91,13 @@ def _public_provider_name(business: dict | None, user: dict | None) -> str:
     return ((user or {}).get("name") or "").strip() or "Provider"
 
 
+def _il_day(created_at: object) -> str | None:
+    """Israel day of a timestamp that may be a datetime or an ISO string."""
+    if isinstance(created_at, datetime):
+        return view_tracking.il_day_of(created_at)
+    return view_tracking.il_day_of_iso(created_at) if created_at else None
+
+
 def active_discount(gig: dict[str, Any], today: str | None = None) -> dict[str, Any] | None:
     """The listing's offer, or None when there is none or it has finished.
 
@@ -103,7 +110,10 @@ def active_discount(gig: dict[str, Any], today: str | None = None) -> dict[str, 
     if not isinstance(disc, dict) or not disc.get("percent"):
         return None
     ends = disc.get("ends_at")
-    if ends and ends < (today or datetime.now(UTC).date().isoformat()):
+    # Israel's date, not UTC's: UTC's day ends three hours early there in
+    # summer, so an offer "until the 9th" ran into the small hours of the
+    # 10th. `_IL_TZ` is the zone the rest of this file already keeps.
+    if ends and ends < (today or datetime.now(_IL_TZ).date().isoformat()):
         return None
     return disc
 
@@ -978,10 +988,23 @@ async def leads_summary(
         view_ids = [g["_id"] for g in owned] + [business_id]
     views = await view_tracking.view_summary(provider_id, LEADS_PERIOD_DAYS, view_ids)
 
+    # The day the oldest of these listings went live: the counter's real
+    # denominator, which `since` (the first EVENT) is not.
+    live_since = None
+    # Every gig the caller owns (within the business, if one is named) -
+    # not `gig_query`, which is only the gigs that already had a lead.
+    mine_q: dict[str, Any] = {"provider_user_id": provider_id}
+    if business_id:
+        mine_q["business_id"] = business_id
+    oldest = await db.marketplace_gigs.find(mine_q, {"created_at": 1}).sort("created_at", 1).limit(1).to_list(1)
+    if oldest:
+        live_since = _il_day(oldest[0].get("created_at"))
+
     return {
         "total": total,
         "period_days": LEADS_PERIOD_DAYS,
         "period_total": period_total,
+        "live_since": live_since,
         # Same shape as short_links' `daily`, so ScanChart renders it as-is.
         "daily": [{"date": k, "count": buckets[k]} for k in day_keys],
         "since": since,

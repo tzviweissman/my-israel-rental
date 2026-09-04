@@ -733,7 +733,7 @@ async def _notify_owners_of_quarantine(items: list[dict]) -> int:
                     f"We paused \"{item['title']}\" pending a price update — "
                     f"tap to fix and republish."
                 ),
-                "action_url": f"/dashboard/properties/{item['property_id']}/edit#pricing",
+                "action_url": f"/dashboard?tab=properties&edit={item['property_id']}",
                 "read": False,
                 "created_at": datetime.now(UTC).isoformat(),
             })

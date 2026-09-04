@@ -207,7 +207,7 @@ for (const lng of ['en', 'he']) {
   // Step the carousel and confirm the caption and the button follow it. A
   // carousel whose caption belongs to a different card than its button is the
   // failure that looks fine in a screenshot.
-  await picks.locator('button[aria-label="Next slide"]').click();
+  await picks.locator('[data-testid="cf-next"]').click();
   await page.waitForTimeout(1200);
   const capAfter = (await picks.locator('.hv2-coverflow p').first().innerText()).trim();
   const openAfter = await page.locator('[data-testid="home-preview-pick-open"]').getAttribute('data-href');
@@ -292,6 +292,27 @@ for (const lng of ['en', 'he']) {
   ok(`${lng}: it fills as the section is read`, mid.fill > early.fill && late.fill > mid.fill,
     `${early.fill} -> ${mid.fill} -> ${late.fill}`);
   ok(`${lng}: and is complete by the end`, late.fill >= 0.9, `${late.fill}`);
+  // The canvas has to carry paint, the paint has to fill the box top to
+  // bottom, and the canvas has to be the box's size. Hebrew painted into
+  // negative space (2026-09-04 audit, #1) and the 0.8 layout measured the
+  // box in viewport px and drew at 80% ("its not showing full text"); the
+  // fill value above was 1 both times.
+  const painted = await page.evaluate(() => {
+    const wrap = document.querySelector('[data-testid="pixel-text-fill"]');
+    const canvas = wrap?.querySelector('canvas');
+    if (!canvas) return null;
+    const ctx = canvas.getContext('2d');
+    const { data, width, height } = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    let top = height, bottom = 0, left = width, right = 0, n = 0;
+    for (let y = 0; y < height; y += 2) for (let x = 0; x < width; x += 2) {
+      if (data[(y * width + x) * 4 + 3] > 40) { n += 1; if (y < top) top = y; if (y > bottom) bottom = y; if (x < left) left = x; if (x > right) right = x; }
+    }
+    return { n, coverY: n ? (bottom - top) / height : 0, coverX: n ? (right - left) / width : 0,
+      sized: Math.abs(canvas.offsetWidth - wrap.offsetWidth) < 2 && Math.abs(canvas.offsetHeight - wrap.offsetHeight) < 2 };
+  });
+  ok(`${lng}: the passage is painted on the canvas`, painted && painted.n > 2000, JSON.stringify(painted));
+  ok(`${lng}: and fills its box top to bottom`, painted && painted.coverY > 0.8 && painted.coverX > 0.7, JSON.stringify(painted));
+  ok(`${lng}: and the canvas is the size of its box`, painted && painted.sized, JSON.stringify(painted));
   // The two halves move off the same value, so the ring has to have moved
   // over exactly the span in which the words lit.
   ok(`${lng}: the ring moves over the same scroll`,

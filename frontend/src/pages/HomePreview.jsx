@@ -21,6 +21,7 @@
  */
 import React, { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { formatDate } from '../utils/formatDate';
 import { useNavigate } from 'react-router-dom';
 import { ArrowRight, Check, Home as HomeIcon, Store, Megaphone } from 'lucide-react';
 
@@ -124,7 +125,7 @@ export default function HomePreview() {
         : (it.kind === 'biz' ? t('home.v2.picks.kindBiz', 'Local business') : t('home.v2.picks.kindStay', 'Rental')),
       meta: [
         it.discount?.label ? { label: t('home.v2.picks.offer', 'Offer'), value: it.discount.label } : null,
-        it.discount?.ends_at ? { label: t('home.v2.picks.until', 'Until'), value: it.discount.ends_at } : null,
+        it.discount?.ends_at ? { label: t('home.v2.picks.until', 'Until'), value: formatDate(it.discount.ends_at, i18n.language) } : null,
         it.area && !areaIsRedundant ? { label: t('home.v2.picks.where', 'Where'), value: prettyArea(it.area, t) } : null,
         it.beds ? { label: t('home.v2.picks.beds', 'Bedrooms'), value: it.beds } : null,
         it.price ? { label: t('home.v2.picks.price', 'Price'), value: it.price } : null,
@@ -257,7 +258,10 @@ export default function HomePreview() {
               autoplay={0.1}
               showPagination={false}
               onSelect={setPick}
-              label={t('home.v2.picks.h2', "Today's picks")}
+              label={hasDeals ? t('home.v2.picks.h2Deals', "Today's deals") : t('home.v2.picks.h2', "Today's picks")}
+              prevLabel={t('home.v2.picks.prev', 'Previous')}
+              nextLabel={t('home.v2.picks.next', 'Next')}
+              goToLabel={(n) => t('home.v2.picks.goTo', 'Go to card {{n}}', { n })}
               className="hv2-coverflow"
               cardWidth="clamp(160px, 24vw, 280px)"
             />

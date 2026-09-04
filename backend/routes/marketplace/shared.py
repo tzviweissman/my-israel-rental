@@ -760,10 +760,22 @@ def _member_since_year(user: Optional[dict[str, Any]], prov: Optional[dict[str, 
     return None
 
 
+# Keep equal to FX_USD_TO_ILS in frontend/src/utils/listingPrice.js: the
+# card's "from" price and this sort key have to name the same option.
+USD_TO_ILS = 3.65
+
+
 def _cheapest_tier_price(gig: dict[str, Any]) -> Optional[float]:
-    """Lowest price on a gig, coerced to a float. Used by the price
-    filter + price_asc sort. Store gigs use the cheapest product; other
-    types use the cheapest tier — whichever list applies is scanned."""
+    """Lowest price on a gig IN SHEKELS, coerced to a float. Used by the
+    price filter + price_asc sort. Store gigs use the cheapest product;
+    other types use the cheapest tier — whichever list applies is scanned.
+
+    Each row carries its own currency, and a business can price one tier
+    in dollars and the next in shekels. The raw minimum called a $30 item
+    cheaper than a ₪90 one, so "price: low to high" ranked the listing at
+    ~₪30 while its card, which converts before comparing (gigPrice.js,
+    cheapestRow), printed ₪90 - the same page contradicting itself.
+    (2026-09-04 audit, finding 2.)"""
     rows: list[dict[str, Any]] = []
     if (gig.get("gig_type") or "deliverable") == "store":
         rows = gig.get("products") or []
@@ -772,10 +784,14 @@ def _cheapest_tier_price(gig: dict[str, Any]) -> Optional[float]:
     prices: list[float] = []
     for t in rows:
         p = t.get("price") if isinstance(t, dict) else None
+        if p is None or p == "":
+            continue
         try:
-            prices.append(float(p))
+            value = float(p)
         except (TypeError, ValueError):
             continue
+        rate = USD_TO_ILS if str(t.get("currency") or "ILS").upper() == "USD" else 1.0
+        prices.append(value * rate)
     return min(prices) if prices else None
 
 

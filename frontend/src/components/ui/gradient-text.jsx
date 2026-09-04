@@ -37,12 +37,18 @@ function GradientText({ className, children, as: Component = "span", ...props })
     >
       {children}
       {/* `gradient-breathe` fades the whole light layer in and out, so the
-          phrase goes ink → colour → ink rather than staying lit. */}
+          phrase goes ink -> colour -> ink rather than staying lit.
+
+          Only the accent and its deep end drive the blobs. Lighten replaces
+          a letter's ink with the blob's colour, so the blob IS the text
+          colour at the lit peak - and --color-2 (2.3:1 on white) and
+          --color-4 (1.3:1) could not carry a letter. (2026-09-04 audit 2,
+          finding 2.) */}
       <span className="pointer-events-none absolute inset-0 mix-blend-lighten animate-[gradient-breathe_7s_ease-in-out_infinite] motion-reduce:animate-none motion-reduce:opacity-100">
         <span className="pointer-events-none absolute -top-1/2 h-[30vw] w-[30vw] animate-[gradient-border_6s_ease-in-out_infinite,gradient-1_12s_ease-in-out_infinite_alternate] bg-[hsl(var(--color-1))] mix-blend-overlay blur-[1rem]" />
-        <span className="pointer-events-none absolute right-0 top-0 h-[30vw] w-[30vw] animate-[gradient-border_6s_ease-in-out_infinite,gradient-2_12s_ease-in-out_infinite_alternate] bg-[hsl(var(--color-2))] mix-blend-overlay blur-[1rem]" />
+        <span className="pointer-events-none absolute right-0 top-0 h-[30vw] w-[30vw] animate-[gradient-border_6s_ease-in-out_infinite,gradient-2_12s_ease-in-out_infinite_alternate] bg-[hsl(var(--color-3))] mix-blend-overlay blur-[1rem]" />
         <span className="pointer-events-none absolute bottom-0 left-0 h-[30vw] w-[30vw] animate-[gradient-border_6s_ease-in-out_infinite,gradient-3_12s_ease-in-out_infinite_alternate] bg-[hsl(var(--color-3))] mix-blend-overlay blur-[1rem]" />
-        <span className="pointer-events-none absolute -bottom-1/2 right-0 h-[30vw] w-[30vw] animate-[gradient-border_6s_ease-in-out_infinite,gradient-4_12s_ease-in-out_infinite_alternate] bg-[hsl(var(--color-4))] mix-blend-overlay blur-[1rem]" />
+        <span className="pointer-events-none absolute -bottom-1/2 right-0 h-[30vw] w-[30vw] animate-[gradient-border_6s_ease-in-out_infinite,gradient-4_12s_ease-in-out_infinite_alternate] bg-[hsl(var(--color-1))] mix-blend-overlay blur-[1rem]" />
       </span>
     </MotionComponent>
   );

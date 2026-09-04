@@ -83,9 +83,16 @@ export function CoverflowCarousel({
   showPagination = false,
   showNavigation = false,
   label = "Cover carousel",
+  // The controls' names, so a page can hand in its own language: they
+  // were English literals inside an otherwise Hebrew page.
+  prevLabel = "Previous slide",
+  nextLabel = "Next slide",
+  goToLabel = (n) => `Go to slide ${n}`,
   onSelect,
   className,
   cardClassName,
+  style,
+  ...rest
 }) {
   const count = slides.length;
 
@@ -341,8 +348,9 @@ export function CoverflowCarousel({
 
   return (
     <div
+      {...rest}
       className={cn("w-full", className)}
-      style={{ "--cf-card": cardWidth }}
+      style={{ "--cf-card": cardWidth, ...style }}
       role="region"
       aria-roledescription="carousel"
       aria-label={label}
@@ -414,17 +422,19 @@ export function CoverflowCarousel({
           <>
             <button
               type="button"
-              aria-label="Previous slide"
+              aria-label={prevLabel}
+              data-testid="cf-prev"
               onClick={() => nudge(-1)}
-              className="absolute left-3 top-1/2 z-[200] -translate-y-1/2 rounded-full bg-background/70 p-2 text-foreground backdrop-blur transition hover:bg-background"
+              className="absolute left-3 top-1/2 z-[200] -translate-y-1/2 rounded-full bg-background/70 p-3 text-foreground backdrop-blur transition hover:bg-background"
             >
               <ChevronLeft className="size-5" />
             </button>
             <button
               type="button"
-              aria-label="Next slide"
+              aria-label={nextLabel}
+              data-testid="cf-next"
               onClick={() => nudge(1)}
-              className="absolute right-3 top-1/2 z-[200] -translate-y-1/2 rounded-full bg-background/70 p-2 text-foreground backdrop-blur transition hover:bg-background"
+              className="absolute right-3 top-1/2 z-[200] -translate-y-1/2 rounded-full bg-background/70 p-3 text-foreground backdrop-blur transition hover:bg-background"
             >
               <ChevronRight className="size-5" />
             </button>
@@ -464,14 +474,21 @@ export function CoverflowCarousel({
             <button
               key={index}
               type="button"
-              aria-label={`Go to slide ${index + 1}`}
+              aria-label={goToLabel(index + 1)}
               aria-current={index === selected}
               onClick={() => goTo(index)}
-              className={cn(
-                "size-2 rounded-full bg-foreground transition-opacity",
-                index === selected ? "opacity-100" : "opacity-30",
-              )}
-            />
+              // The dot stays 8px; the button around it is 44px, so the
+              // target is a thumb's, not the dot's.
+              className="grid size-11 place-items-center"
+            >
+              <span
+                aria-hidden="true"
+                className={cn(
+                  "size-2 rounded-full bg-foreground transition-opacity",
+                  index === selected ? "opacity-100" : "opacity-30",
+                )}
+              />
+            </button>
           ))}
         </div>
       )}

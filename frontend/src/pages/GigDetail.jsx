@@ -24,6 +24,7 @@ import { needsDirectoryDisclaimer } from '../lib/categories';
 import StarRating from '../components/marketplace/StarRating';
 import OfferBadge from '../components/marketplace/OfferBadge';
 import { priceRows, cheapestRow } from '../utils/gigPrice';
+import { FX_USD_TO_ILS } from '../utils/listingPrice';
 import { localizedTitle, localizedDescription } from '../utils/gigLocale';
 import { buildWhatsAppLinkWithMessage, hasValidWhatsApp } from '../utils/whatsappLink';
 import { isAvailableNow, getGigCover } from '../utils/gigAvailability';
@@ -337,8 +338,17 @@ const GigDetail = () => {
     // different row than the figures. priceRows/cheapestRow pick the list
     // the listing actually uses.
     const rows = priceRows(gig);
-    const prices = rows.map((r) => Number(r.price)).filter((p) => Number.isFinite(p));
     const currency = cheapestRow(gig)?.currency || 'ILS';
+    // Every row converted into the block's one currency before min/max.
+    // Raw figures under a converted currency claimed a $30/₪90 listing
+    // started at ₪30. (2026-09-04 audit, finding 3.)
+    const inBlockCurrency = (r) => {
+      const p = Number(r.price);
+      const rc = r.currency || 'ILS';
+      if (rc === currency) return p;
+      return Math.round((currency === 'ILS' ? p * FX_USD_TO_ILS : p / FX_USD_TO_ILS) * 100) / 100;
+    };
+    const prices = rows.map(inBlockCurrency).filter((p) => Number.isFinite(p));
     const block = {
       '@context': 'https://schema.org',
       '@type': 'Service',
@@ -555,8 +565,12 @@ const GigDetail = () => {
         const msg = `Hi! I'm interested in "${tier.name}" (${sym}${tier.price}) from your ${displayTitle} store on MyIsraelRental.`;
         if (openWhatsApp(msg)) return;
       }
-      if (!token) { toast.error(t('gigDetail.signInToMessage', 'Please sign in to message the seller')); navigate(`/auth/login?redirect=${encodeURIComponent(`/businesses/${id}`)}`); return; }
-      setShowBook(true);
+      // Site chat, not the booking form: book_gig refuses every store
+      // (gigs.py, "Store gigs do not accept bookings"), so the form
+      // answered "Send an inquiry" with a 400 for any store without a
+      // WhatsApp number. Same class as the message-path fix below, which
+      // missed this branch. (Dead-ends audit 2026-09-03, #2.)
+      messageOnSite();
       return;
     }
     if (isAppointment) {

@@ -110,7 +110,7 @@ function FlipCard({ card, index, target, reduced, onOpen }) {
           shows it begins. The opacity change is delayed by the first half of
           the flip so it arrives as the card passes edge-on. */}
       <div
-        className="absolute inset-0 h-full w-full overflow-hidden rounded-xl shadow-lg flex flex-col items-center justify-center p-2 text-center opacity-0 transition-opacity duration-150 delay-200 group-hover:opacity-100"
+        className="absolute inset-0 h-full w-full overflow-hidden rounded-xl shadow-lg flex flex-col items-center justify-center p-2 text-center opacity-0 transition-opacity duration-150 delay-200 group-hover:opacity-100 group-focus-visible:opacity-100"
         style={{
           backfaceVisibility: "hidden",
           WebkitBackfaceVisibility: "hidden",
@@ -144,8 +144,20 @@ function FlipCard({ card, index, target, reduced, onOpen }) {
         transformStyle: "preserve-3d",
         perspective: "1000px",
       }}
-      className={onOpen ? "cursor-pointer group" : "group"}
+      className={onOpen
+        ? "cursor-pointer group rounded-xl outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand-primary,#1C8DD4)] focus-visible:ring-offset-2"
+        : "group"}
       onClick={onOpen ? () => onOpen(card) : undefined}
+      // A card that opens a page is a button: reachable by Tab, named by
+      // what it opens, and Enter or Space opens it. It was a div with an
+      // onClick, and the only place its name lived was the hover-only
+      // back face. (2026-09-04 audit, finding 5.)
+      role={onOpen ? "button" : undefined}
+      tabIndex={onOpen ? 0 : undefined}
+      aria-label={onOpen ? [card.sub, card.title].filter(Boolean).join(": ") || undefined : undefined}
+      onKeyDown={onOpen ? (e) => {
+        if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onOpen(card); }
+      } : undefined}
       data-testid={`morph-card-${index}`}
     >
       {inner}

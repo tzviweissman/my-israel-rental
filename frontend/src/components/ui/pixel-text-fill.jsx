@@ -151,9 +151,13 @@ export default function PixelTextFill({
     };
 
     const build = () => {
-      const rect = wrapper.getBoundingClientRect();
-      const width = rect.width;
-      const height = rect.height;
+      // offsetWidth/Height, not getBoundingClientRect: the rect is in
+      // viewport px, and under the preview's `zoom: 0.8` that is 0.8x the
+      // box the canvas is then sized to in layout px - so the canvas drew
+      // at 80% and the passage stopped ten lines in. Tzvi: "its not
+      // showing full text".
+      const width = wrapper.offsetWidth;
+      const height = wrapper.offsetHeight;
       if (width < 1 || height < 1) {
         layout = null;
         return;
@@ -168,7 +172,18 @@ export default function PixelTextFill({
         : parsedFontSize * 1.34;
       const font = `${styles.fontStyle} ${styles.fontWeight} ${parsedFontSize}px ${styles.fontFamily}`;
       const letterSpacing = styles.letterSpacing;
-      const align = styles.textAlign;
+      // `text-align: start` computes to the literal "start" in Chromium, in
+      // both directions, so it has to be resolved against `direction` here.
+      // Read as "left" it pinned Hebrew to x = 0 - and a canvas inheriting
+      // dir=rtl anchors fillText's default "start" on the RIGHT of x, so the
+      // whole Hebrew passage painted into negative space and the section
+      // was blank. (2026-09-04 audit, finding 1.)
+      const dir = styles.direction === "rtl" ? "rtl" : "ltr";
+      const rawAlign = styles.textAlign;
+      const align =
+        rawAlign === "start" ? (dir === "rtl" ? "right" : "left")
+          : rawAlign === "end" ? (dir === "rtl" ? "left" : "right")
+            : rawAlign;
       const hasLetterSpacing = letterSpacing && letterSpacing !== "normal";
 
       canvas.width = Math.ceil(width * dpr);
@@ -180,6 +195,12 @@ export default function PixelTextFill({
       if (!ctx) return;
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
       ctx.font = font;
+      // Physical anchoring. x below is already the physical left edge of
+      // the line; "left" keeps the canvas from re-anchoring it by direction.
+      // `direction` still tells it the base direction, so a Latin name
+      // inside a Hebrew line orders its runs the way the paragraph does.
+      ctx.textAlign = "left";
+      ctx.direction = dir;
       if (hasLetterSpacing && "letterSpacing" in ctx) ctx.letterSpacing = letterSpacing;
 
       const lines = wrapLines(ctx, text, width);
@@ -193,14 +214,14 @@ export default function PixelTextFill({
         const x =
           align === "right"
             ? width - lineWidth
-            : align === "left" || align === "start"
+            : align === "left"
               ? 0
               : (width - lineWidth) / 2;
-        return { line, x, baseline: firstBaseline + index * computedLineHeight };
+        return { line, x, lineWidth, baseline: firstBaseline + index * computedLineHeight };
       });
 
       const chars = [];
-      for (const { line, x, baseline } of lineGeometry) {
+      for (const { line, x, lineWidth, baseline } of lineGeometry) {
         let previous = 0;
         for (let index = 0; index < line.length; index += 1) {
           const next = ctx.measureText(line.slice(0, index + 1)).width;
@@ -209,7 +230,10 @@ export default function PixelTextFill({
             const glyph = ctx.measureText(character);
             const top = baseline - (glyph.actualBoundingBoxAscent || ascent * 0.72) - 1;
             const bottom = baseline + (glyph.actualBoundingBoxDescent || 0) + 1;
-            chars.push({ x: x + previous, width: next - previous, top, bottom, height: bottom - top });
+            // A Hebrew line's first character sits at its RIGHT end: the
+            // prefix width is measured from the right edge, not the left.
+            const cx = dir === "rtl" ? x + lineWidth - next : x + previous;
+            chars.push({ x: cx, width: next - previous, top, bottom, height: bottom - top });
           }
           previous = next;
         }
@@ -222,6 +246,8 @@ export default function PixelTextFill({
         tctx.clearRect(0, 0, width, height);
         tctx.font = font;
         tctx.textBaseline = "alphabetic";
+        tctx.textAlign = "left";
+        tctx.direction = dir;
         tctx.fillStyle = color;
         if (hasLetterSpacing && "letterSpacing" in tctx) tctx.letterSpacing = letterSpacing;
         for (const { line, x, baseline } of lineGeometry) tctx.fillText(line, x, baseline);
@@ -237,7 +263,7 @@ export default function PixelTextFill({
       paint(crispFill, textColor);
       paint(crispAccent, primaryColor);
 
-      layout = { width, height, dpr, chars, crispDim, crispFill, crispAccent, scratch, mask };
+      layout = { width, height, dpr, rtl: dir === "rtl", chars, crispDim, crispFill, crispAccent, scratch, mask };
     };
 
     const draw = () => {
@@ -285,7 +311,15 @@ export default function PixelTextFill({
           mctx.fillRect(char.x, char.top, char.width, char.height);
           hasFillMask = true;
         } else if (fillT > 0.001) {
-          if (horizontal) {
+          if (horizontal && layout.rtl) {
+            const crestX = right - fillT * (char.width + fadePx * 0.95);
+            const grad = mctx.createLinearGradient(crestX + fadePx, 0, crestX - fadePx * 0.2, 0);
+            grad.addColorStop(0, "rgba(255,255,255,1)");
+            grad.addColorStop(0.65, "rgba(255,255,255,0.4)");
+            grad.addColorStop(1, "rgba(255,255,255,0)");
+            mctx.fillStyle = grad;
+            mctx.fillRect(char.x, char.top, char.width, char.height);
+          } else if (horizontal) {
             const crestX = char.x + fillT * (char.width + fadePx * 0.95);
             const grad = mctx.createLinearGradient(crestX - fadePx, 0, crestX + fadePx * 0.2, 0);
             grad.addColorStop(0, "rgba(255,255,255,1)");

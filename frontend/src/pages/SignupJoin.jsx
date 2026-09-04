@@ -203,7 +203,9 @@ const SignupJoin = () => {
       } else if (activeCard.backendRole === 'owner') {
         setShowOwnerOffer(true);
       } else if (activeCard.backendRole === 'provider') {
-        navigate('/businesses/add');
+        // Someone who came to post a job goes back to posting it, not to
+        // "Add your business". (Dead-ends audit 2026-09-03, #6.)
+        navigate(redirectParam || '/businesses/add');
       } else {
         navigate(redirectParam || '/dashboard');
       }

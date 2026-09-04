@@ -132,8 +132,23 @@ export default function OverviewTab({ API, token, user, summary = {}, unreadMess
   }, [services, listings]);
 
   const waiting = (summary.bookings_awaiting_reply || 0) + (summary.work_offers_open || 0);
+  // The denominator. `live_since` is the day the caller's oldest listing
+  // went live; `since` is the day of the first recorded event, which is
+  // not the same thing - a listing live since June with its first visitor
+  // yesterday was "counting since yesterday", and one with no visitors at
+  // all was "just switched on" six months in. The window in the LABEL is
+  // the real one: a listing three days old shows "last 3 days", not a
+  // month it never had. (2026-09-04 audit 2, the improvement.)
+  const liveSince = [services?.live_since, listings?.live_since].filter(Boolean).sort()[0] || null;
+  const ageDays = liveSince ? Math.max(1, Math.floor((Date.now() - new Date(liveSince).getTime()) / 86400000) + 1) : null;
+  const windowDays = (period) => (ageDays ? Math.min(ageDays, period) : period);
   const notYet = t('overview.notCountingYet', 'Just switched on');
-  const sinceLine = (since) => (since ? t('overview.since', { defaultValue: 'Counting since {{date}}', date: formatDate(since) }) : notYet);
+  const sinceLine = (since) => {
+    if (since) return t('overview.since', { defaultValue: 'Counting since {{date}}', date: formatDate(since) });
+    // No events at all: either brand new, or live a while and not visited.
+    if (ageDays && ageDays > 1) return t('overview.noneYetSince', { defaultValue: 'None yet, live since {{date}}', date: formatDate(liveSince) });
+    return notYet;
+  };
 
   const pendingBookings = bookings.filter((b) => b.status === 'pending' && b.owner_id === user?.id).slice(0, 5);
 
@@ -152,16 +167,16 @@ export default function OverviewTab({ API, token, user, summary = {}, unreadMess
         />
         <StatCard
           Icon={MessageCircle}
-          label={t('overview.leads', { defaultValue: 'Leads, last {{n}} days', n: leads?.days || 30 })}
-          value={leads ? leads.period : '—'}
-          sub={leads ? (leads.since ? t('overview.allTime', { defaultValue: '{{n}} all time · counting since {{date}}', n: leads.total, date: formatDate(leads.since) }) : notYet) : t('overview.leadsNa', 'Add a listing to start counting')}
+          label={t('overview.leads', { defaultValue: 'Leads, last {{n}} days', n: windowDays(leads?.days || 30) })}
+          value={leads ? leads.period : 0}
+          sub={leads ? (leads.since ? t('overview.allTime', { defaultValue: '{{n}} all time · counting since {{date}}', n: leads.total, date: formatDate(leads.since) }) : sinceLine(null)) : t('overview.leadsNa', 'Add a listing to start counting')}
           chart={leads?.since ? <div className="max-w-xs"><ScanChart daily={leads.daily} testidPrefix="overview-leads" /></div> : null}
           testid="leads"
         />
         <StatCard
           Icon={Eye}
-          label={t('overview.visitors', 'Visitors, last 30 days')}
-          value={visitors ? visitors.period : '—'}
+          label={t('overview.visitorsN', { defaultValue: 'Visitors, last {{n}} days', n: windowDays(30) })}
+          value={visitors ? visitors.period : 0}
           sub={visitors ? sinceLine(visitors.since) : t('overview.leadsNa', 'Add a listing to start counting')}
           chart={visitors?.since ? <div className="max-w-xs"><ScanChart daily={visitors.daily} testidPrefix="overview-visitors" /></div> : null}
           testid="visitors"
@@ -169,7 +184,7 @@ export default function OverviewTab({ API, token, user, summary = {}, unreadMess
         <StatCard
           Icon={QrCode}
           label={t('overview.scans', 'QR & link scans')}
-          value={scans ? scans.total_scans : '—'}
+          value={scans ? scans.total_scans : 0}
           sub={
             !scans ? '' : scans.links.length === 0
               ? t('overview.noLinks', 'No share links yet')

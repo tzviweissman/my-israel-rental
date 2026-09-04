@@ -245,7 +245,7 @@ const PropertyAvailabilityCard = ({
  * The renter-facing flat list of bookings. Same UX as before the merge —
  * search + status chips + chronologically sorted `BookingRow`s.
  */
-const RenterBookingsList = ({ bookings, user, API, actions }) => {
+const RenterBookingsList = ({ bookings, user, API, actions, highlightId }) => {
   const { t } = useTranslation();
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
@@ -372,6 +372,7 @@ const RenterBookingsList = ({ bookings, user, API, actions }) => {
             <BookingRow
               key={booking.id}
               booking={booking}
+              highlighted={highlightId === booking.id}
               user={user}
               API={API}
               onAccept={actions.openAccept}
@@ -549,6 +550,7 @@ const OwnerStackedView = ({ bookings, user, token, API, actions, onUpdate }) => 
                 <BookingRow
                   key={booking.id}
                   booking={booking}
+              highlighted={highlightId === booking.id}
                   user={user}
                   API={API}
                   onAccept={actions.openAccept}
@@ -577,7 +579,7 @@ const OwnerStackedView = ({ bookings, user, token, API, actions, onUpdate }) => 
  * Owns the three modals (Accept / Cancel / ContractSign) and the
  * `useBookingActions` hook — both subviews dispatch through it.
  */
-const BookingsList = ({ bookings, onUpdate, user, token, API }) => {
+const BookingsList = ({ bookings, onUpdate, user, token, API, highlightId }) => {
   const actions = useBookingActions({ bookings, API, token, onUpdate });
   const isOwnerLike = user?.role === 'owner' || user?.role === 'manager';
 
@@ -593,7 +595,7 @@ const BookingsList = ({ bookings, onUpdate, user, token, API }) => {
           onUpdate={onUpdate}
         />
       ) : (
-        <RenterBookingsList
+        <RenterBookingsList highlightId={highlightId}
           bookings={bookings}
           user={user}
           API={API}

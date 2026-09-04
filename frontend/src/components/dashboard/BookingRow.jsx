@@ -1,4 +1,4 @@
-import React, { useContext } from 'react';
+import React, { useContext, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { FileText, FileCheck, Download } from 'lucide-react';
 import { AuthContext } from '../../App';
@@ -26,8 +26,16 @@ const BookingRow = ({
   onApproveCancel,
   onDenyCancel,
   onSignContract,
+  highlighted = false,
 }) => {
   const { t } = useTranslation();
+  // The notification bell and its email link here with `highlight=<id>`;
+  // the row it names scrolls into view with a ring, so the person can see
+  // which of twenty bookings the notification was about.
+  const rootRef = useRef(null);
+  useEffect(() => {
+    if (highlighted && rootRef.current) rootRef.current.scrollIntoView({ block: 'center', behavior: 'smooth' });
+  }, [highlighted]);
   const statusLabel = (s) => {
     if (s === 'confirmed') return t('dashboard.confirmed');
     if (s === 'pending') return t('dashboard.pending');
@@ -81,7 +89,9 @@ const BookingRow = ({
 
   return (
     <div
-      className="bg-white rounded-2xl border border-gray-200 p-4 md:p-6"
+      ref={rootRef}
+      className={`bg-white rounded-2xl border p-4 md:p-6 ${highlighted ? 'border-[var(--brand-primary)] ring-2 ring-[var(--brand-primary)]/30' : 'border-gray-200'}`}
+      data-highlighted={highlighted ? '1' : undefined}
       data-testid={`booking-row-${booking.id}`}
     >
       <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-3 md:gap-4">

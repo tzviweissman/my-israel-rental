@@ -51,7 +51,10 @@ export function FlowButton({ text = "Modern Button", className, as: Tag = "butto
       {/* The arrow that waits outside and slides in. */}
       <ArrowRight
         aria-hidden="true"
-        className="absolute w-4 h-4 left-[-25%] stroke-[var(--ink)] fill-none z-[9] group-hover/flow:left-4 group-hover/flow:stroke-white transition-all duration-[800ms] ease-[cubic-bezier(0.34,1.56,0.64,1)] rtl:-scale-x-100"
+        // Logical `start`/`end`, so in Hebrew the arrow that slides in
+        // arrives on the right, where the mirrored label now is. Physical
+        // left/right kept it on the LTR side. (2026-09-04 audit, finding 6.)
+        className="absolute w-4 h-4 start-[-25%] stroke-[var(--ink)] fill-none z-[9] group-hover/flow:start-4 group-hover/flow:stroke-white transition-all duration-[800ms] ease-[cubic-bezier(0.34,1.56,0.64,1)] rtl:-scale-x-100"
       />
 
       <span className="relative z-[1] -translate-x-3 group-hover/flow:translate-x-3 rtl:translate-x-3 rtl:group-hover/flow:-translate-x-3 transition-all duration-[800ms] ease-out">
@@ -67,7 +70,7 @@ export function FlowButton({ text = "Modern Button", className, as: Tag = "butto
       {/* The arrow that leaves. */}
       <ArrowRight
         aria-hidden="true"
-        className="absolute w-4 h-4 right-4 stroke-[var(--ink)] fill-none z-[9] group-hover/flow:right-[-25%] group-hover/flow:stroke-white transition-all duration-[800ms] ease-[cubic-bezier(0.34,1.56,0.64,1)] rtl:-scale-x-100"
+        className="absolute w-4 h-4 end-4 stroke-[var(--ink)] fill-none z-[9] group-hover/flow:end-[-25%] group-hover/flow:stroke-white transition-all duration-[800ms] ease-[cubic-bezier(0.34,1.56,0.64,1)] rtl:-scale-x-100"
       />
     </Tag>
   );

@@ -286,7 +286,7 @@ async def send_welcome_email(to_email: str, name: str, role: str, verification_l
     <ul style="color:#555;font-size:13px;line-height:1.9;padding-left:20px;margin:0 0 10px;">
       <li>Browse long-term, short-term and vacation rentals across Israel</li>
       <li>List your sublease in a few clicks</li>
-      <li>Request Arnona discounts, name changes and other government services</li>
+      <li>Find a local business, or add your own for free</li>
     </ul>
     {_button("Open Dashboard", f"{FRONTEND_URL}/dashboard")}
     """
@@ -832,7 +832,11 @@ async def send_pricing_quarantine_email(
         plausibility floor (usually a stranded nightly rate migrated to
         the monthly field by an older import).
     """
-    edit_url = f"{FRONTEND_URL}/dashboard/properties/{property_id}/edit#pricing"
+    # /dashboard?tab=properties&edit=<id>: the dashboard opens that
+    # listing's edit form on arrival. The old /dashboard/properties/<id>/edit
+    # was never a route - editing is a modal - so "Fix pricing now" 404ed
+    # for every quarantined owner. (Dead-ends audit 2026-09-03, #1.)
+    edit_url = f"{FRONTEND_URL}/dashboard?tab=properties&edit={property_id}"
     dashboard_url = f"{FRONTEND_URL}/dashboard?tab=properties"
     cur_symbol = "$" if (currency or "ILS").upper() == "USD" else "₪"
 

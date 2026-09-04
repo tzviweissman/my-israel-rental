@@ -21,7 +21,10 @@ import requests
 
 BASE = os.environ.get("TEST_API_BASE", "http://localhost:8001/api")
 
-TODAY = datetime.now(UTC).date()
+# Israel's date, the one active_discount uses: with UTC here, the "ends
+# today" test fails every evening between 21:00 UTC and midnight.
+from zoneinfo import ZoneInfo
+TODAY = datetime.now(ZoneInfo("Asia/Jerusalem")).date()
 YESTERDAY = (TODAY - timedelta(days=1)).isoformat()
 NEXT_WEEK = (TODAY + timedelta(days=7)).isoformat()
 

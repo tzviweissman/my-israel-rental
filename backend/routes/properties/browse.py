@@ -646,10 +646,19 @@ async def property_performance_summary(user=Depends(verify_token)) -> dict:
 
     views = await view_tracking.view_summary(owner_id, _PROP_PERIOD_DAYS, prop_ids)
 
+    # The day the oldest listing went live - the counter's real denominator.
+    live_since = None
+    # Properties are keyed by `id`, not `_id` (see `owned` above).
+    oldest = await db.properties.find({"id": {"$in": prop_ids}}, {"created_at": 1, "_id": 0}).sort("created_at", 1).limit(1).to_list(1)
+    if oldest:
+        c = oldest[0].get("created_at")
+        live_since = view_tracking.il_day_of(c) if isinstance(c, datetime) else (view_tracking.il_day_of_iso(c) if c else None)
+
     return {
         "total": total,
         "period_days": _PROP_PERIOD_DAYS,
         "period_total": period_total,
+        "live_since": live_since,
         "daily": [{"date": k, "count": buckets[k]} for k in day_keys],
         "since": since,
         "by_listing": by_listing,
