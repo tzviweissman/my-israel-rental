@@ -1,6 +1,7 @@
 import React, { useRef } from 'react';
 import { ChevronLeft, ChevronRight, Film, Play } from 'lucide-react';
 import { sizedImage, srcSet, videoPoster } from '../../utils/cdnImage';
+import { ThumbnailStrip } from '../ui/thumbnail-carousel';
 import { pickFallback } from '../../utils/coverImage';
 import useIsRtl from '../../hooks/useIsRtl';
 import DefaultImageBadge from './DefaultImageBadge';
@@ -32,6 +33,17 @@ const ImageGallery = ({ media, currentIndex, onIndexChange, alt, apiBase, seed }
   const NextIcon = isRtl ? ChevronLeft : ChevronRight;
 
   const toSrc = (url) => (url.startsWith('/api') ? `${apiBase.replace('/api', '')}${url}` : url);
+
+  // What to blur behind the current frame. A 64px variant: blurred, it is
+  // indistinguishable from the full-size one and costs nothing. A video
+  // uses its own poster, and falls back to nothing rather than blurring a
+  // video element.
+  const active = media?.[currentIndex];
+  const activeBlurSrc = active
+    ? (active.type === 'image'
+      ? sizedImage(toSrc(active.url), 64)
+      : videoPoster(toSrc(active.url), 64) || null)
+    : null;
 
   const goTo = (newIdx) => {
     // Pause any video that was playing before navigating
@@ -89,8 +101,16 @@ const ImageGallery = ({ media, currentIndex, onIndexChange, alt, apiBase, seed }
           tall and the strip was off-screen anyway; the moment the strip came
           into view the "1 / 6" counter sat on top of it. */}
       <div className="relative">
+      {/* NOT `bg-black`. The frame is capped against the viewport, so a
+          photo almost never matches its shape exactly, and `object-contain`
+          then left two black bars - on a portrait photo, most of the frame.
+          Cropping instead is worse: a listing photo is evidence about a
+          property, and `cover` would quietly cut off whatever the owner was
+          showing. So the picture stays whole and the surround is a blurred,
+          enlarged copy of the picture itself. Nothing is cut, and nothing
+          is black. */}
       <div
-        className="overflow-hidden rounded-2xl bg-black mx-auto"
+        className="relative overflow-hidden rounded-2xl mx-auto"
         style={{
           height: 'min(75vw, 67vh, 620px)',
           // Cap the WIDTH as well, so the box is roughly photo-shaped
@@ -108,8 +128,23 @@ const ImageGallery = ({ media, currentIndex, onIndexChange, alt, apiBase, seed }
           maxWidth: 'calc(min(75vw, 67vh, 620px) * 1.6)',
         }}
       >
+        {/* The blurred backdrop, following the CURRENT frame. One layer
+            for the whole gallery rather than one per slide: it is the
+            frame's ground, and sliding it with the strip would show the
+            next photo's colours arriving before the photo. */}
+        {activeBlurSrc && (
+          <>
+            <img
+              src={activeBlurSrc}
+              alt=""
+              aria-hidden="true"
+              className="pointer-events-none absolute inset-0 h-full w-full scale-125 object-cover blur-2xl"
+            />
+            <div aria-hidden="true" className="pointer-events-none absolute inset-0 bg-black/25" />
+          </>
+        )}
         <div
-          className="flex h-full transition-transform duration-500 ease-in-out"
+          className="relative flex h-full transition-transform duration-500 ease-in-out"
           style={{ transform: `translateX(-${currentIndex * 100}%)` }}
         >
           {media.map((m, idx) =>
@@ -181,50 +216,32 @@ const ImageGallery = ({ media, currentIndex, onIndexChange, alt, apiBase, seed }
       </div>
       {media.length > 1 && (
         <div
-          className="flex gap-2 mt-3 overflow-x-auto pb-2 mx-auto"
+          className="mt-3 mx-auto"
           // Same ceiling as the photo above it, so the strip reads as
           // belonging to that image rather than to the page.
           style={{ maxWidth: 'calc(min(75vw, 67vh, 620px) * 1.6)' }}
           data-testid="gallery-thumbnails"
         >
-          {media.map((m, idx) => (
-            <div
-              key={`thumb-${m.url}`}
-              onClick={() => goTo(idx)}
-              className={`relative w-20 h-14 rounded-lg cursor-pointer flex-shrink-0 transition-all overflow-hidden ${
-                idx === currentIndex ? 'ring-2 ring-black opacity-100' : 'opacity-60 hover:opacity-100'
-              }`}
-              data-testid={`gallery-thumb-${idx}`}
-            >
-              {m.type === 'image' ? (
-                <img
-                  src={sizedImage(toSrc(m.url), 160)}
-                  alt={`Thumb ${idx + 1}`}
-                  className="w-full h-full object-cover"
-                />
-              ) : (
-                <>
-                  {videoPoster(toSrc(m.url), 160) ? (
-                    <img
-                      src={videoPoster(toSrc(m.url), 160)}
-                      alt={`Video thumb ${idx + 1}`}
-                      className="w-full h-full object-cover bg-black"
-                    />
-                  ) : (
-                    <video
-                      src={toSrc(m.url)}
-                      preload="metadata"
-                      muted
-                      className="w-full h-full object-cover bg-black"
-                    />
-                  )}
-                  <div className="absolute inset-0 flex items-center justify-center bg-black/30 pointer-events-none">
-                    <Play size={18} className="text-white drop-shadow" fill="white" />
-                  </div>
-                </>
-              )}
-            </div>
-          ))}
+          {/* The open frame is the one you are looking at, and the rest are
+              slivers - so a long strip stays one row and the current
+              position is legible without counting. */}
+          <ThumbnailStrip
+            items={media.map((m, idx) => ({
+              key: `${m.url}-${idx}`,
+              src: m.type === 'image' ? sizedImage(toSrc(m.url), 320) : (videoPoster(toSrc(m.url), 320) || toSrc(m.url)),
+              alt: `${alt} - ${idx + 1}`,
+              badge: m.type === 'video' ? (
+                <span className="pointer-events-none absolute inset-0 flex items-center justify-center bg-black/25">
+                  <Play size={16} className="text-white drop-shadow" fill="white" />
+                </span>
+              ) : null,
+            }))}
+            index={currentIndex}
+            onIndexChange={goTo}
+            rtl={isRtl}
+            label={alt}
+            testidPrefix="gallery-thumb"
+          />
         </div>
       )}
     </div>
