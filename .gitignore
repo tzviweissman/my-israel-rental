@@ -112,21 +112,24 @@ backend/private_contracts/
 # negations below silently do nothing.
 .claude/*
 
-# Project skills that are part of the repo's knowledge, not one machine's
-# setup. These encode incidents that already happened here, and a
-# scheduled or cloud run works from a clean checkout — anything not
-# committed does not exist for it. The audit skill was written, never
-# committed, and an overnight run could not find it.
+# Skills are repo knowledge. ALL of them are committed. They encode
+# incidents that already happened here, and a scheduled or cloud run works
+# from a clean checkout — anything not committed does not exist for it.
 #
-# Listed one by one, deliberately. The rest of .claude/skills/ is
-# general-purpose tooling that belongs to the machine rather than to this
-# codebase, and a blanket `!.claude/skills/**` would sweep it in along
-# with whatever anyone installs next.
+# This was an allowlist of three named skills until 31 Aug 2026. It cost us
+# twice: the audit skill was written and never committed, and an overnight
+# run could not find it; then `dead-ends` and `audit-followup` were written,
+# `git add`ed four times, and silently dropped, because an allowlist fails
+# closed and says nothing. The rule now fails open instead — Tzvi's call,
+# and the right one, because a skill that is invisible to a clean checkout
+# is a skill that does not exist.
+#
+# Machine state stays out via `.claude/*` above: settings.local.json,
+# launch.json and worktrees are still excluded. Only skills/ is re-included.
+#
+# If a genuinely machine-local skill ever needs excluding, exclude THAT ONE
+# by name below. Do not go back to an allowlist.
 !.claude/skills/
-.claude/skills/*
-!.claude/skills/site-audit/
-!.claude/skills/visual-diff/
-!.claude/skills/myisraelrental-frontend/
 
 screenshots/
 
