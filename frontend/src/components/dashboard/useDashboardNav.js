@@ -75,5 +75,35 @@ export default function useDashboardNav({ role, user, unreadMessages = 0, hasPos
     .map((g) => ({ ...g, tabs: g.tabs.filter((tab) => tab.show) }))
     .filter((g) => g.tabs.length > 0);
 
-  return { groups, isRenter, isPropertyLister, showGigTabs };
+  const ids = groups.flatMap((g) => g.tabs.map((t) => t.id));
+  return { groups, ids, isRenter, isPropertyLister, showGigTabs };
 }
+
+/**
+ * EVERY tab id this hook can produce, for any role. Used to validate a
+ * `?tab=` deep link: the owner checklist pointed at `my-properties` for
+ * months while the tab is `properties`, and the dashboard set whatever
+ * the URL said, so the pane rendered empty (dead-ends audit 2026-09-04).
+ *
+ * Deliberately the FULL set, not the ids visible right now: the role
+ * gating depends on `summary`, which arrives a moment after the first
+ * render, so validating against the visible subset would bounce a
+ * perfectly good link to the Overview and never come back.
+ */
+export const ALL_TAB_IDS = [
+  'overview',
+  'properties',
+  'bulk-manager',
+  'my-businesses',
+  'my-gigs',
+  'contracts',
+  'bookings',
+  'my-requests',
+  'my-jobs',
+  'job-requests',
+  'subleases',
+  'messages',
+  'alerts',
+  'liked',
+  'settings',
+];

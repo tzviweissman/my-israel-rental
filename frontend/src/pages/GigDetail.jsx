@@ -924,7 +924,7 @@ const GigDetail = () => {
 
             {gig.faqs?.length > 0 && (
               <div>
-                <h2 className="text-lg font-bold mb-2">FAQs</h2>
+                <h2 className="text-lg font-bold mb-2">{t('gigDetail.faqs', 'FAQs')}</h2>
                 <div className="space-y-3">
                   {gig.faqs.map((f, i) => (
                     <div key={i} className="border border-gray-200 rounded-lg p-3">

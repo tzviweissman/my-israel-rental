@@ -49,6 +49,9 @@ const BAND_IMAGE = SITE_ASSETS['scene8-requests-man'];
 // owners/pros offering. This is a separate axis from rental-vs-service, so
 // it gets its own row of tabs rather than being folded into TYPES — a
 // combined list would need six entries and read as a menu.
+// The backend's ITEM_CONDITIONS, in the order a buyer thinks of them.
+const CONDITIONS = ['new', 'like-new', 'good', 'used'];
+
 const SIDES = [
   { key: '', labelKey: 'requests.sideAll', fallback: 'Everything', Icon: LayoutGrid },
   { key: 'want', labelKey: 'requests.sideWant', fallback: 'Requests', Icon: Search },
@@ -394,6 +397,15 @@ const RequestsBoard = () => {
   const view = searchParams.get('view') === 'map' ? 'map' : 'list';
   const area = searchParams.get('area') || '';
   const q = searchParams.get('q') || '';
+  // Item filters (N4). The API has taken these since items landed on the
+  // board and the board never sent them (dead-ends audit 2026-09-03, #7).
+  // Deep-linkable like everything else here: /requests?type=item&condition=new
+  const condition = searchParams.get('condition') || '';
+  const minPrice = searchParams.get('min_price') || '';
+  const maxPrice = searchParams.get('max_price') || '';
+  const includeSold = searchParams.get('include_sold') === '1';
+  const [minDraft, setMinDraft] = useState(minPrice);
+  const [maxDraft, setMaxDraft] = useState(maxPrice);
 
   const patchUrl = useCallback((patch) => {
     setSearchParams((prev) => {
@@ -419,17 +431,31 @@ const RequestsBoard = () => {
   }, [patchUrl]);
 
   useEffect(() => {
+    // Two filters changed a beat apart are two requests in flight, and the
+    // first can land last: a stale answer must not overwrite the current
+    // one. The cleanup marks this run dead before the next one starts.
+    let alive = true;
     setLoading(true);
     const params = {};
     if (type) params.request_type = type;
     if (side) params.post_kind = side;
     if (area) params.area = area;
     if (q) params.q = q;
+    // Only meaningful on items, and only sent then: a price filter on the
+    // whole board would hide every rental and service, which name no
+    // `budget_amount` a buyer would recognise as a price.
+    if (type === 'item') {
+      if (condition) params.condition = condition;
+      if (minPrice !== '' && Number.isFinite(Number(minPrice))) params.min_price = Number(minPrice);
+      if (maxPrice !== '' && Number.isFinite(Number(maxPrice))) params.max_price = Number(maxPrice);
+      if (includeSold) params.include_sold = true;
+    }
     axios.get(`${API}/marketplace/requests`, { params })
-      .then((r) => { setRequests(r.data || []); setLoadError(false); })
-      .catch(() => { setRequests([]); setLoadError(true); })
-      .finally(() => setLoading(false));
-  }, [type, side, area, q]);
+      .then((r) => { if (!alive) return; setRequests(r.data || []); setLoadError(false); })
+      .catch(() => { if (!alive) return; setRequests([]); setLoadError(true); })
+      .finally(() => { if (alive) setLoading(false); });
+    return () => { alive = false; };
+  }, [type, side, area, q, condition, minPrice, maxPrice, includeSold]);
 
   const openRequest = (id) => navigate(`/requests/${id}`);
 
@@ -529,6 +555,79 @@ const RequestsBoard = () => {
               })}
             </div>
           </div>
+
+          {type === 'item' && (
+            <div className="flex flex-wrap items-center gap-2 mb-3" data-testid="requests-item-filters">
+              <div className="flex flex-wrap items-center gap-1" role="group" aria-label={t('requests.fieldCondition', 'Condition')}>
+                {[['', t('requests.anyCondition', 'Any condition')], ...CONDITIONS.map((c) => [c, t(`requests.condition_${c}`, c.replace(/-/g, ' '))])].map(([key, label]) => (
+                  <button
+                    key={key || 'any'}
+                    type="button"
+                    aria-pressed={condition === key}
+                    onClick={() => patchUrl({ condition: key })}
+                    className="px-3 py-1.5 rounded-full border text-xs font-semibold"
+                    style={condition === key
+                      ? { background: 'var(--action, #000)', color: 'var(--action-ink, #fff)', borderColor: 'var(--action, #000)' }
+                      : { background: '#fff', color: 'var(--ink)', borderColor: 'var(--brand-border)' }}
+                    data-testid={`requests-condition-${key || 'any'}`}
+                  >
+                    {label}
+                  </button>
+                ))}
+              </div>
+              <div className="flex items-center gap-1">
+                <input
+                  type="number"
+                  min="0"
+                  inputMode="numeric"
+                  value={minDraft}
+                  onChange={(e) => setMinDraft(e.target.value)}
+                  onBlur={() => patchUrl({ min_price: minDraft })}
+                  onKeyDown={(e) => { if (e.key === 'Enter') patchUrl({ min_price: minDraft }); }}
+                  className="w-24 px-3 py-1.5 rounded-full border bg-white text-xs"
+                  style={{ borderColor: 'var(--brand-border)' }}
+                  placeholder={t('requests.minPrice', 'Min ₪')}
+                  aria-label={t('requests.minPrice', 'Min ₪')}
+                  data-testid="requests-min-price"
+                />
+                <span className="text-xs" style={{ color: 'var(--brand-muted)' }} aria-hidden="true">–</span>
+                <input
+                  type="number"
+                  min="0"
+                  inputMode="numeric"
+                  value={maxDraft}
+                  onChange={(e) => setMaxDraft(e.target.value)}
+                  onBlur={() => patchUrl({ max_price: maxDraft })}
+                  onKeyDown={(e) => { if (e.key === 'Enter') patchUrl({ max_price: maxDraft }); }}
+                  className="w-24 px-3 py-1.5 rounded-full border bg-white text-xs"
+                  style={{ borderColor: 'var(--brand-border)' }}
+                  placeholder={t('requests.maxPrice', 'Max ₪')}
+                  aria-label={t('requests.maxPrice', 'Max ₪')}
+                  data-testid="requests-max-price"
+                />
+              </div>
+              <label className="inline-flex items-center gap-1.5 text-xs" style={{ color: 'var(--ink)' }}>
+                <input
+                  type="checkbox"
+                  checked={includeSold}
+                  onChange={(e) => patchUrl({ include_sold: e.target.checked ? '1' : '' })}
+                  data-testid="requests-include-sold"
+                />
+                {t('requests.showSold', 'Show sold items too')}
+              </label>
+              {(condition || minPrice || maxPrice || includeSold) && (
+                <button
+                  type="button"
+                  onClick={() => { setMinDraft(''); setMaxDraft(''); patchUrl({ condition: '', min_price: '', max_price: '', include_sold: '' }); }}
+                  className="text-xs font-semibold underline"
+                  style={{ color: 'var(--brand-primary)' }}
+                  data-testid="requests-item-filters-clear"
+                >
+                  {t('requests.clearItemFilters', 'Clear')}
+                </button>
+              )}
+            </div>
+          )}
 
           <div className="flex flex-wrap items-center gap-2">
             {/* The input sets `outline-none` and nothing replaced it, so

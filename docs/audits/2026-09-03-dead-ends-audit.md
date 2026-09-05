@@ -77,5 +77,20 @@ Fixed in the commit that added this file:
   mechanism as #1).
 - **#8** the welcome email no longer pitches government document services.
 
-Still open: **#7** (requests board filters), **#9** (`faqs` has no editor),
-**#10–#14** (orphaned fields, enum values, endpoints and components).
+Fixed later the same day: **#7** the board's item tab has condition
+chips, a price range and a "show sold" toggle, deep-linkable, sent only
+for items; **#9** a FAQ editor on the create wizard's description step
+and on the dashboard's edit sheet (`components/marketplace/FaqEditor.jsx`),
+with the listing page's heading translated. `scripts/check-requests-filters.mjs`
+walks both through the UI; `backend/tests/test_requests_item_filters.py`
+pins the API.
+
+Found by the 4 Sep dead-ends run and fixed with them: the property
+checklist sent four of its five tasks to `?tab=my-properties`, and the
+dashboard's tab is `properties` - the pane rendered empty for every
+owner who used the checklist. The tab ids are now a closed set the
+dashboard validates against, so a wrong one falls back to the Overview
+instead of a blank page.
+
+Still open: **#10-#14** (orphaned fields, enum values, endpoints and
+components).

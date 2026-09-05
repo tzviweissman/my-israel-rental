@@ -24,7 +24,7 @@ import MyJobsTab from '../components/dashboard/MyJobsTab';
 import ManagerHeader from '../components/dashboard/ManagerHeader';
 import DashboardTabs from '../components/dashboard/DashboardTabs';
 import DashboardShell from '../components/ui/dashboard-shell';
-import useDashboardNav from '../components/dashboard/useDashboardNav';
+import useDashboardNav, { ALL_TAB_IDS } from '../components/dashboard/useDashboardNav';
 import OverviewTab from '../components/dashboard/OverviewTab';
 import useIsWide from '../hooks/useIsWide';
 import OnboardingProvider from '../components/onboarding/OnboardingProvider';
@@ -68,6 +68,12 @@ const Dashboard = () => {
   const setupLists = onboarding?.state?.checklists || [];
   const setupAllDone = setupLists.length > 0 && setupLists.every((l) => l.done === l.total);
   const [unreadConversations, setUnreadConversations] = useState(0);
+
+  // One list for both renderers (spec: the tab and its panel drifted once).
+  // Declared HERE, above the effects that read it: a const referenced by
+  // something that runs earlier in the body is a temporal dead zone, and
+  // this file's neighbours have been bitten by exactly that.
+  const nav = useDashboardNav({ role: user?.role, user, unreadMessages: unreadConversations, hasPostedJobs, summary });
 
   // Land everyone on a tab they actually have.
   //
@@ -169,8 +175,14 @@ const Dashboard = () => {
 
   // Handle tab query parameter from notifications
   useEffect(() => {
+    // A tab id from the URL is only honoured if it EXISTS. The owner
+    // checklist linked to `my-properties` for months while the tab is
+    // `properties`, and this line set it regardless - so the sidebar
+    // highlighted nothing and the pane rendered empty, with no error.
+    // An unknown id now falls back to the Overview, which is at least a
+    // page. (Dead-ends audit 2026-09-04.)
     const tab = searchParams.get('tab');
-    if (tab) setActiveTab(tab);
+    if (tab) setActiveTab(ALL_TAB_IDS.includes(tab) ? tab : 'overview');
     // `?edit=<property id>` means the properties tab whatever else the URL
     // says: the quarantine email and the availability nudge both send
     // people here to change one listing.
@@ -236,8 +248,6 @@ const Dashboard = () => {
 
   const isRenter = user?.role === 'renter';
   const isOwnerLike = user && user.role !== 'renter';
-  // One list for both renderers (spec: the tab and its panel drifted once).
-  const nav = useDashboardNav({ role: user?.role, user, unreadMessages: unreadConversations, hasPostedJobs, summary });
   // The sidebar needs 256px it can spare; below that the tab strip stays.
   const isWide = useIsWide(1024);
   // Providers only interact with the marketplace (My Gigs). Hide all the

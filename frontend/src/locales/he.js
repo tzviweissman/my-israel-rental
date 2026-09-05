@@ -33,6 +33,17 @@ const he = {
         countingSince: 'נספר מאז {{date}}',
       },
       // See the note on the English copy.
+      faqEditor: {
+        title: 'שאלות שלקוחות שואלים',
+        hint: 'לא חובה. ענו על מה ששואלים אתכם ממילא בהודעות: זמני אספקה, מה כלול, איך משלמים. מוצג במודעה שלכם תחת "שאלות ותשובות".',
+        question: 'שאלה',
+        answer: 'תשובה',
+        qPh: 'למשל: כמה זמן מראש כדאי להזמין?',
+        aPh: 'למשל: שבוע מספיק. לפעמים אפשר גם באותו יום, שלחו הודעה.',
+        add: 'הוספת שאלה',
+        addAnother: 'הוספת שאלה נוספת',
+        remove: 'הסרה',
+      },
       editListing: {
         offerOn: 'הפעלת מבצע על המודעה הזו',
         offerPercent: 'אחוז הנחה',
@@ -1675,6 +1686,8 @@ const he = {
         recategorised: 'העברה לקטגוריה אחרת תיידע עסקים באותה קטגוריה על הבקשה.',
       },
       signupJoin: {
+        sphereEyebrow: 'כבר באתר',
+        sphereQuote: 'כל עיגול הוא בית או עסק שמפורסם כאן עכשיו. סובבו, הקישו על אחד.',
         notSure: 'עדיין לא בטוחים?',
         headline: 'הצטרפו ל-My Israel Rental',
         sub: 'הזמינו לינה, פרסמו נכס, או הוסיפו את העסק — הכול במקום אחד.',
@@ -2677,6 +2690,11 @@ const he = {
         // --- פריטים (N4). מכירה בין אנשים פרטיים בלוח הזה. ---
         typeItemOffer: 'משהו שאני מוכר',
         typeItem: 'פריטים',
+        anyCondition: 'כל מצב',
+        minPrice: 'מינימום ₪',
+        maxPrice: 'מקסימום ₪',
+        showSold: 'להציג גם פריטים שנמכרו',
+        clearItemFilters: 'ניקוי',
         item: 'פריט',
         typeItemWant: 'פריט שאני מחפש',
         titlePhItemOffer: 'לדוגמה: ספה תלת-מושבית של איקאה, קטמון',
@@ -2860,6 +2878,7 @@ const he = {
       },
       // עמוד המודעה.
       gigDetail: {
+        faqs: 'שאלות ותשובות',
         backToServices: 'חזרה לעסקים',
         aboutService: 'על השירות',
         aboutStore: 'על החנות',

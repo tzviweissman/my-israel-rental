@@ -53,7 +53,8 @@ const FALLBACK_STILLS = [
 const isVideo = (u) => /\.(mp4|webm|mov)(\?|$)/i.test(u || '');
 
 /** A property's cover, or null when it has no real photo. */
-const propertyPhoto = (p) => {
+// Exported: the sign-up page's sphere draws from the same well.
+export const propertyPhoto = (p) => {
   const first = (p.images || []).find((u) => typeof u === 'string' && u.startsWith('http') && !isVideo(u));
   return first || null;
 };

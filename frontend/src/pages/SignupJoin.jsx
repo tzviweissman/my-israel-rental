@@ -28,6 +28,8 @@ import { API, AuthContext } from '../App';
 import WelcomePopups from '../components/WelcomePopups';
 import OwnerManagementOfferModal from '../components/OwnerManagementOfferModal';
 import GoogleSignInButton from '../components/auth/GoogleSignInButton';
+import SignupSphere from '../components/auth/SignupSphere';
+import useIsWide from '../hooks/useIsWide';
 
 // Namespaced so it cannot collide with the listing wizard's draft.
 const SIGNUP_DRAFT = 'signup-join';
@@ -157,6 +159,7 @@ const SignupJoin = () => {
   const [showOwnerOffer, setShowOwnerOffer] = useState(false);
 
   const activeCard = ROLE_CARDS.find((r) => r.key === selectedRole);
+  const isWide = useIsWide(1024);
 
   const handleContinue = () => {
     if (!selectedRole) return;
@@ -219,7 +222,7 @@ const SignupJoin = () => {
 
   return (
     <div
-      className="min-h-screen relative overflow-hidden"
+      className="min-h-screen relative [overflow-x:clip]"
       style={{
         // Limestone base with a gold and a blue bloom. Was hardcoded
         // rgba() + #FBF7EF from the teal era — the numbers had been
@@ -232,7 +235,19 @@ const SignupJoin = () => {
       }}
       data-testid="signup-join-page"
     >
-      <div className="mx-auto max-w-6xl px-4 sm:px-6 pt-24 sm:pt-28 pb-12">
+      {/* Two panels from lg up (Tzvi, 4 Sep 2026: "make this the sign
+          up"): the form in a white card on the left, and on the right a
+          dark panel with a sphere of the homes and businesses already
+          listed - every circle a real page. On a phone the sphere is
+          not drawn at all: the form is the job there, and a 360px
+          sphere above it would be a screen of scrolling before the first
+          field. */}
+      <div className="mx-auto max-w-[1400px] px-3 sm:px-4 pt-20 sm:pt-24 pb-6 lg:grid lg:grid-cols-[0.94fr_1.06fr] lg:gap-4">
+      <div
+        className="rounded-md border bg-white px-4 py-8 sm:px-8 sm:py-10 lg:px-12 xl:px-16"
+        style={{ borderColor: 'var(--brand-border)' }}
+        data-testid="signup-form-panel"
+      >
         {/* Top-right: log-in shortcut. The global fixed nav already
             shows the brand mark so we don't duplicate it here. */}
         <header className="flex items-center justify-end">
@@ -261,7 +276,7 @@ const SignupJoin = () => {
         {step === 1 && (
           <section className="mt-8 sm:mt-12" data-testid="signup-step-role">
             <h1
-              className="display-weight text-4xl sm:text-5xl lg:text-6xl font-semibold lg:font-normal tracking-tight"
+              className="display-weight text-4xl sm:text-5xl font-semibold lg:font-normal tracking-tight"
               // Playfair (Frank Ruhl Libre in Hebrew) via the token, and
               // --ink instead of the leftover #0F3A3A dark teal.
               // font-black is dropped: Playfair ships 600–800 here, so a
@@ -285,7 +300,7 @@ const SignupJoin = () => {
             </p>
 
             <div
-              className="mt-4 grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-5"
+              className="mt-4 grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-1 2xl:grid-cols-3 gap-4 sm:gap-5"
               data-testid="signup-role-cards"
             >
               {ROLE_CARDS.map(({
@@ -433,7 +448,10 @@ const SignupJoin = () => {
                 onClick={handleContinue}
                 disabled={!selectedRole}
                 className="inline-flex items-center gap-2 rounded-full px-8 py-3 text-sm font-bold shadow-lg transition-all disabled:opacity-40 disabled:cursor-not-allowed hover:shadow-xl hover:-translate-y-0.5"
-                style={{ background: 'var(--brand-primary)', color: 'var(--gold)' }}
+                // The theme's black action with a white label. This read `--gold` on
+                  // the primary blue; since the flow theme put the accent blue into
+                  // every gold name, the label was blue on blue and the button blank.
+                  style={{ background: 'var(--action, #000)', color: 'var(--action-ink, #fff)' }}
                 data-testid="signup-continue-btn"
               >
                 {t('signupJoin.continue', 'Continue')}
@@ -659,7 +677,10 @@ const SignupJoin = () => {
                   type="submit"
                   disabled={submitting}
                   className="w-full mt-2 inline-flex items-center justify-center gap-2 rounded-full px-8 py-3.5 text-sm font-bold shadow-lg transition-all hover:shadow-xl hover:-translate-y-0.5 disabled:opacity-60 disabled:cursor-not-allowed"
-                  style={{ background: 'var(--brand-primary)', color: 'var(--gold)' }}
+                  // The theme's black action with a white label. This read `--gold` on
+                  // the primary blue; since the flow theme put the accent blue into
+                  // every gold name, the label was blue on blue and the button blank.
+                  style={{ background: 'var(--action, #000)', color: 'var(--action-ink, #fff)' }}
                   data-testid="signup-submit-btn"
                 >
                   {submitting
@@ -677,6 +698,17 @@ const SignupJoin = () => {
             </div>
           </section>
         )}
+      </div>
+
+      {/* Sticky, one screen tall: on the role step the left column runs
+          to three tall cards, and a panel that simply stretched put the
+          sphere a screen and a half down. Mounted only where it is shown,
+          so a phone does not fetch a sphere it never draws. */}
+      {isWide && (
+        <div className="hidden lg:block lg:self-start lg:sticky lg:top-24 lg:h-[calc(100vh-7rem)]" data-testid="signup-right-panel">
+          <SignupSphere />
+        </div>
+      )}
       </div>
 
       {/* Post-signup modals (renter welcome + owner upsell), mirrored

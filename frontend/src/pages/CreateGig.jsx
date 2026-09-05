@@ -24,6 +24,7 @@
  * All state is local; we POST once on the final "Publish" click.
  */
 import React, { useContext, useEffect, useMemo, useRef, useState } from 'react';
+import FaqEditor, { cleanFaqs } from '../components/marketplace/FaqEditor';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import axios from 'axios';
 import { toast } from 'sonner';
@@ -432,7 +433,7 @@ const CreateGig = () => {
         title: form.title,
         category: form.category,
         description: form.description,
-        faqs: form.faqs,
+        faqs: cleanFaqs(form.faqs),
         gallery: form.gallery,
         booking_mode: form.booking_mode,
         whatsapp: form.whatsapp,
@@ -622,6 +623,11 @@ const CreateGig = () => {
               placeholder="Describe what you offer, who it's for, and what's included…"
               className="w-full px-3 py-2 rounded-lg border bg-white border-gray-300 focus:outline-none focus:border-[var(--brand-primary)] focus:ring-2 focus:ring-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/20 text-sm" data-testid="wizard-description" />
             <p className="text-xs text-gray-500">Min 10 characters. Hebrew-browsing renters will see this auto-translated — no need to write it twice.</p>
+            {/* The FAQs. `form.faqs` was initialised and sent from the first
+                day and nothing on any step let anyone write one. */}
+            <div className="pt-2 border-t" style={{ borderColor: 'var(--brand-border)' }}>
+              <FaqEditor faqs={form.faqs || []} onChange={(faqs) => set({ faqs })} testidPrefix="wizard-faq" />
+            </div>
           </div>
         )}
 

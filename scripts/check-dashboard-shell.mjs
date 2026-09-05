@@ -224,15 +224,31 @@ for (const lng of ['en', 'he']) {
   }
   await ctx.close();
 
+  const ctx2 = await browser.newContext({ viewport: { width: 1280, height: 900 } });
+  const p3 = await signIn(ctx2);
   const anon = await browser.newContext({ viewport: { width: 1280, height: 900 } });
   const p2 = await anon.newPage();
   await p2.goto(`${APP}/dashboard?tab=bookings`, { waitUntil: 'networkidle' });
   ok('a signed-out visitor to the dashboard is sent to sign in with the page kept',
     p2.url().includes('/auth/login') && decodeURIComponent(p2.url()).includes('redirect=/dashboard?tab=bookings'), p2.url());
+  // A tab id that does not exist falls back to the Overview rather than
+  // rendering an empty pane. The owner checklist linked to `my-properties`
+  // for months while the tab is `properties`. (Dead-ends audit 2026-09-04.)
+  await p3.goto(`${APP}/dashboard?tab=my-properties`, { waitUntil: 'networkidle' });
+  await p3.waitForSelector('[data-testid="dashboard-shell"]', { timeout: 20000 }).catch(() => {});
+  await p3.waitForTimeout(2500);
+  ok('an unknown ?tab= falls back to the Overview', await p3.locator('[data-testid="overview-tab"]').count() === 1);
+  await p3.goto(`${APP}/dashboard?tab=properties`, { waitUntil: 'networkidle' });
+  await p3.waitForSelector('[data-testid="sidebar-item-properties"]', { timeout: 20000 }).catch(() => {});
+  await p3.waitForTimeout(1500);
+  ok('and a real one still opens its tab', await p3.locator('[data-testid="overview-tab"]').count() === 0
+    && (await p3.locator('[data-testid="sidebar-item-properties"]').getAttribute('aria-current')) === 'page');
+
   await p2.goto(`${APP}/businesses/post-job`, { waitUntil: 'networkidle' });
   ok('and to sign up from post-a-job, with the page kept',
     p2.url().includes('/signup') && decodeURIComponent(p2.url()).includes('redirect=/businesses/post-job'), p2.url());
   await anon.close();
+  await ctx2.close();
 }
 
 // ── a phone keeps the tab strip ────────────────────────────────────────

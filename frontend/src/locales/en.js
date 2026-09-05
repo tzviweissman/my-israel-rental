@@ -42,6 +42,17 @@ const en = {
       },
       // Quick edit for a live listing — the answer to "I spotted a typo"
       // and "that's the wrong photo". Deliberately not the wizard.
+      faqEditor: {
+        title: 'Questions customers ask',
+        hint: 'Optional. Answer the things people message you about anyway: turnaround, what is included, how to pay. Shown on your listing under "FAQs".',
+        question: 'Question',
+        answer: 'Answer',
+        qPh: 'e.g. How far in advance should I book?',
+        aPh: 'e.g. A week is plenty. Same-day is sometimes possible, message me.',
+        add: 'Add a question',
+        addAnother: 'Add another question',
+        remove: 'Remove',
+      },
       editListing: {
         offerOn: 'Run an offer on this listing',
         offerPercent: '% off',
@@ -1744,6 +1755,8 @@ const en = {
         recategorised: 'Moving this to a new category will let businesses in that category know about it.',
       },
       signupJoin: {
+        sphereEyebrow: 'Already on the site',
+        sphereQuote: 'Every circle is a home or a business listed here right now. Turn it, tap one.',
         notSure: 'Not sure yet?',
         headline: 'Join My Israel Rental',
         sub: 'Book a stay, list a property, or add your business — all in one place.',
@@ -2830,6 +2843,11 @@ const en = {
         // --- Items (N4). Person-to-person selling on this board. ---
         typeItemOffer: 'Something I am selling',
         typeItem: 'Items',
+        anyCondition: 'Any condition',
+        minPrice: 'Min ₪',
+        maxPrice: 'Max ₪',
+        showSold: 'Show sold items too',
+        clearItemFilters: 'Clear',
         item: 'Item',
         typeItemWant: 'An item I am looking for',
         titlePhItemOffer: 'e.g. IKEA sofa, three seats, Katamon',
@@ -3016,6 +3034,7 @@ const en = {
       },
       // The listing (gig) detail page.
       gigDetail: {
+        faqs: 'FAQs',
         backToServices: 'Back to businesses',
         aboutService: 'About this service',
         aboutStore: 'About this store',

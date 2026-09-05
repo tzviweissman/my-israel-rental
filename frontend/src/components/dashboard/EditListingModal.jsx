@@ -31,6 +31,7 @@
  * features, its duration or its delivery time.
  */
 import React, { useEffect, useRef, useState } from 'react';
+import FaqEditor, { cleanFaqs } from '../marketplace/FaqEditor';
 import axios from 'axios';
 import { toast } from 'sonner';
 import { X, Trash2, ImagePlus, Loader2 } from 'lucide-react';
@@ -59,6 +60,8 @@ export default function EditListingModal({ gig, API, token, onClose, onSaved }) 
   const [offerPercent, setOfferPercent] = useState(gig.discount?.percent ?? 10);
   const [offerLabel, setOfferLabel] = useState(gig.discount?.label || '');
   const [offerEnds, setOfferEnds] = useState(gig.discount?.ends_at || '');
+  // The FAQs, edited as a copy so Cancel really cancels.
+  const [faqs, setFaqs] = useState(() => (Array.isArray(gig.faqs) ? gig.faqs.map((f) => ({ q: f?.q || '', a: f?.a || '' })) : []));
   const [saving, setSaving] = useState(false);
   const [uploadingAt, setUploadingAt] = useState(null);
   const fileRefs = useRef({});
@@ -192,6 +195,9 @@ export default function EditListingModal({ gig, API, token, onClose, onSaved }) 
         }
         : null;
       if (JSON.stringify(nextOffer) !== JSON.stringify(prevOffer)) payload.discount = nextOffer;
+
+      const nextFaqs = cleanFaqs(faqs);
+      if (JSON.stringify(nextFaqs) !== JSON.stringify(cleanFaqs(gig.faqs))) payload.faqs = nextFaqs;
 
       if (!Object.keys(payload).length) {
         toast.success(t('editListing.noChanges', 'Nothing to save.'));
@@ -346,6 +352,10 @@ export default function EditListingModal({ gig, API, token, onClose, onSaved }) 
                 </p>
               </div>
             )}
+          </div>
+
+          <div className="rounded-xl border p-3" style={{ borderColor: 'var(--brand-border)' }} data-testid="edit-listing-faqs">
+            <FaqEditor faqs={faqs} onChange={setFaqs} testidPrefix="edit-listing-faq" />
           </div>
 
           <div className="space-y-3">

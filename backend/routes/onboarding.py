@@ -205,19 +205,19 @@ async def _property_items(uid: str, user_doc: dict[str, Any]) -> list[dict[str, 
             # supplied them.
             "endowed": True,
             "done": len(props) > 0,
-            "href": "/dashboard?tab=my-properties",
+            "href": "/dashboard?tab=properties",
         },
         {
             "id": "prop.photos",
             "endowed": False,
             "done": any_of(lambda p: bool(p.get("images"))),
-            "href": "/dashboard?tab=my-properties",
+            "href": "/dashboard?tab=properties",
         },
         {
             "id": "prop.availability",
             "endowed": False,
             "done": any_of(lambda p: bool(p.get("available_from") or p.get("ical_url"))),
-            "href": "/dashboard?tab=my-properties",
+            "href": "/dashboard?tab=properties",
         },
         {
             "id": "prop.contact",
@@ -232,7 +232,7 @@ async def _property_items(uid: str, user_doc: dict[str, Any]) -> list[dict[str, 
             "id": "prop.share",
             "endowed": False,
             "done": bool(shared),
-            "href": "/dashboard?tab=my-properties",
+            "href": "/dashboard?tab=properties",
         },
     ]
 
