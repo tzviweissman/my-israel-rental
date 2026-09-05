@@ -31,6 +31,12 @@ const HeroBand = ({
   headlineTestId,
   ledeTestId,
   testId = 'hero-band',
+  // The band is the page's title everywhere it was designed for, so h1
+  // is the default. On a composed business page it is not: the business
+  // name above it already is, and two h1s leave a screen reader with two
+  // page titles. Additive rather than a change of contract - the three
+  // existing callers pass nothing and keep the h1 they had.
+  headingLevel: Heading = 'h1',
   children,
 }) => (
   <div className="hero-band" data-testid={testId}>
@@ -43,13 +49,13 @@ const HeroBand = ({
     />
     <div className="hero-band-shade" aria-hidden="true" />
     <div className="hero-band-head">
-      <h1 data-testid={headlineTestId}>
+      <Heading data-testid={headlineTestId}>
         {headline ?? (
           <>
             {title} <span className="accent">{accent}</span>
           </>
         )}
-      </h1>
+      </Heading>
       {lede && (
         <p className="mx-auto max-w-2xl" data-testid={ledeTestId}>
           {lede}

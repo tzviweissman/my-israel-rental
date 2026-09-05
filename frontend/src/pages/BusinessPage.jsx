@@ -14,14 +14,12 @@ import React, { useContext, useEffect, useState } from 'react';
 import { Link, useParams, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import axios from 'axios';
-import { Star, BadgeCheck, MapPin, Loader2, MessageCircle, LayoutGrid, List, Zap, Search, CreditCard, Globe } from 'lucide-react';
+import { Star, BadgeCheck, MapPin, Loader2, MessageCircle, Zap, CreditCard, Globe } from 'lucide-react';
 import { API, AuthContext } from '../App';
 import PageMeta from '../components/PageMeta';
-import ServiceCard from '../components/marketplace/ServiceCard';
-import GoodToKnow from '../components/marketplace/GoodToKnow';
+import BlockList from '../components/pagebuilder/BlockList';
+import { PAGE_SIZE } from '../components/pagebuilder/ServicesBlock';
 import SiteFooter from '../components/common/SiteFooter';
-import { buildCollections } from '../utils/businessCollections';
-import { localizedTitle, localizedDescription } from '../utils/gigLocale';
 import { getGigCover } from '../utils/gigAvailability';
 import { visitorHeaders } from '../utils/visitorId';
 import BusinessCoverBand, { BusinessLogoMark } from '../components/marketplace/BusinessCoverBand';
@@ -29,34 +27,6 @@ import SafeImage from '../components/common/SafeImage';
 import { prettyArea } from '../utils/areaNames';
 import { accentFor, accentColors } from '../utils/businessAccent';
 import useCoverScrim from '../hooks/useCoverScrim';
-
-/* The list column is CAPPED, and that cap is the whole point of the row.
-   The row puts the price at the far end so the eye can ladder down a column
-   comparing prices — which is the one thing a long list is good at, and it
-   only works while the ladder is short. Un-capped, a 1280px page stretched
-   each row to ~1540px and left 1,300px of empty white between a service's
-   name and its price: the two facts a customer is actually comparing, placed
-   as far apart as the screen allows.
-   720px keeps the title and the price in one glance at every width, and the
-   rows stay the shape they were designed as — a phone-density list, not a
-   full-bleed table. */
-const LIST_CLASS = 'flex flex-col gap-2 max-w-[720px]';
-
-// First screenful and each subsequent step. Twelve fills a desktop grid
-// three rows deep and a phone list well past the fold, without asking
-// for twenty-five photos nobody has scrolled to.
-const PAGE_SIZE = 12;
-
-// How many of a collection show before "See all". Six is what the
-// WhatsApp catalog this was modelled on uses, and it is about right:
-// enough to show the group has range, few enough that four groups still
-// fit on one screen.
-const COLLECTION_PREVIEW = 6;
-
-// Past this many services, browsing stops being enough and the page
-// needs tools: jump-to-section chips and a filter. Below it they are
-// clutter — chips over three sections is furniture, not navigation.
-const CATALOG_TOOLS_MIN = 16;
 
 /**
  * @param {object|null} business  K3 — render THIS business instead of fetching
@@ -220,42 +190,13 @@ const BusinessPage = ({ business: injected = null, preview = false }) => {
      narrows, so a small catalogue reads as deliberate rather than as a
      page that failed to load the rest. */
   const columnWidth = listingCount < 4 ? 'max-w-[900px]' : 'max-w-5xl';
-  const autoLayout = listingCount <= 6 ? 'grid' : 'list';
-  const effectiveLayout = layout || autoLayout;
-  /* C4 — search across BOTH languages. A Hebrew shopper searching
-     "עוגה" must find a service whose title was written in English and
-     translated, and the reverse; matching only the displayed string
-     would hide half the catalogue from half the customers. */
-  const q = query.trim().toLowerCase();
-  const matches = (g) => {
-    if (!q) return true;
-    const fields = [
-      g.title, g.title_he, localizedTitle(g, i18n),
-      g.description, g.description_he, localizedDescription(g, i18n),
-    ];
-    return fields.some((f) => String(f || '').toLowerCase().includes(q));
-  };
-  const searching = q.length > 0;
-  const searchResults = searching ? (biz.listings || []).filter(matches) : [];
 
-  /* C5 — the owner's own pick, above everything. Their judgement about
-     what sells beats any ordering we could invent, and three is the cap
-     precisely so it stays a judgement. Stale ids are skipped, same as in
-     collections: a pinned service that was later deleted should vanish
-     rather than leave a gap. */
-  const pinned = (biz.pinned_service_ids || [])
-    .map((id) => (biz.listings || []).find((g) => g.id === id))
-    .filter(Boolean)
-    .slice(0, 3);
-
-  const { groups, mode: groupMode } = buildCollections(biz.listings, biz.collections, { t });
-  // While searching, sections would fragment a handful of results across
-  // four headings. One list answers the question that was asked.
-  const grouped = groupMode !== 'flat' && !searching;
-  const showCatalogTools = listingCount >= CATALOG_TOOLS_MIN;
-
-  const visibleListings = (biz.listings || []).slice(0, shown);
-  const remaining = listingCount - visibleListings.length;
+  /* Everything that used to be derived here - the search, the grouping,
+     the pinned row, how many are on screen - moved into the `services`
+     block with the markup that used it (components/pagebuilder/
+     ServicesBlock.jsx). What stays is what the whole page needs: the
+     header, the share card, and the state below, which the reader owns
+     and the composition may not touch. */
 
   const chooseLayout = (next) => {
     setLayout(next);
@@ -569,236 +510,42 @@ const BusinessPage = ({ business: injected = null, preview = false }) => {
           </div>
         </div>
 
-        {/* C6 — facts in their own band, above the catalogue and never
-            interleaved with it. Renders nothing at all when the business
-            has filled none of it in. */}
-        <GoodToKnow business={biz} />
+        {/* THE COMPOSED BODY.
+            Everything between the header above and the recruitment band
+            below is now drawn from this business's composition document
+            (utils/pageComposition.js), through one renderer, from a closed
+            vocabulary. A business that has never opened the designer gets
+            `composeDefault`, which describes the page it already had - the
+            facts band, then the catalogue with its featured row, its
+            groups and its tools.
 
-        {/* B8 — was a small grey caption reading "What they offer", which
-            is both third person and too quiet to be a section heading.
-            A real heading, in the site's own voice. */}
-        <div className="flex items-center justify-between gap-3 mb-3 flex-wrap">
-          <h2 className="text-xl font-bold" style={{ fontFamily: 'var(--font-head)', color: 'var(--ink)' }}>
-            {t('businessPage.services', 'Services')}
-          </h2>
-          {/* Only worth offering once there is enough for the choice to
-              matter; below that the grid is simply right. */}
-          {listingCount > 6 && (
-            <div className="flex items-center gap-1 p-1 rounded-lg"
-              style={{ background: 'rgb(var(--brand-primary-rgb) / 0.07)' }}
-              data-testid="business-layout-toggle">
-              {[['grid', LayoutGrid, t('businessPage.viewGrid', 'Grid')],
-                ['list', List, t('businessPage.viewList', 'List')]].map(([key, Icon, label]) => (
-                <button
-                  key={key}
-                  type="button"
-                  onClick={() => chooseLayout(key)}
-                  className={`px-2.5 py-1 rounded-md text-xs font-semibold inline-flex items-center gap-1.5 transition-colors ${
-                    effectiveLayout === key ? 'bg-white shadow-sm' : ''
-                  }`}
-                  style={{ color: effectiveLayout === key ? 'var(--brand-primary)' : 'var(--brand-muted)' }}
-                  aria-pressed={effectiveLayout === key}
-                  data-testid={`business-layout-${key}`}
-                >
-                  <Icon size={13} aria-hidden="true" /> {label}
-                </button>
-              ))}
-            </div>
-          )}
-        </div>
-
-        {/* C5 — first, and not repeated: a pinned service still appears
-            in its collection below, because removing it from there would
-            make the section it belongs to look incomplete. */}
-        {!searching && pinned.length > 0 && (
-          <section className="mb-8" data-testid="business-pinned">
-            <h3 className="text-base font-bold mb-3" style={{ fontFamily: 'var(--font-head)', color: 'var(--ink)' }}>
-              {t('businessPage.mostPopular', 'Start here')}
-            </h3>
-            <div className={effectiveLayout === 'list' ? LIST_CLASS : 'grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4'}>
-              {pinned.map((g) => (
-                <ServiceCard key={g.id} gig={g} variant={effectiveLayout === 'list' ? 'list' : 'grid'}
-                  i18n={i18n} t={t} onClick={() => navigate(`/businesses/${g.id}`)} />
-              ))}
-            </div>
-          </section>
-        )}
-
-        {/* C3 + C4 — only for a catalogue big enough to need them. */}
-        {showCatalogTools && (
-          <div
-            className="sticky z-30 -mx-4 px-4 py-2 mb-4 backdrop-blur"
-            style={{ top: 'var(--nav-h, 68px)', background: 'rgb(239 233 220 / 0.92)' }}
-            data-testid="business-catalog-tools"
-          >
-            <div className="relative mb-2">
-              <Search
-                size={15}
-                className="absolute top-1/2 -translate-y-1/2 start-3"
-                style={{ color: 'var(--brand-muted)' }}
-                aria-hidden="true"
-              />
-              <input
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-                placeholder={t('businessPage.searchThis', 'Search this business')}
-                className="w-full ps-9 pe-3 py-2 rounded-lg border text-sm bg-white"
-                style={{ borderColor: 'var(--brand-border)' }}
-                data-testid="business-search"
-              />
-            </div>
-
-            {/* Jump-to-section chips. Hidden while searching: there are
-                no sections to jump to then. */}
-            {!searching && groups.length > 1 && (
-              <div className="flex gap-1.5 overflow-x-auto pb-0.5" data-testid="business-collection-chips">
-                {groups.map((g) => (
-                  <button
-                    key={g.id}
-                    type="button"
-                    onClick={() => {
-                      const el = document.querySelector(`[data-testid="collection-${g.id}"]`);
-                      if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                    }}
-                    className="px-3 py-1 rounded-full text-xs font-semibold whitespace-nowrap border shrink-0"
-                    style={{ borderColor: 'var(--brand-border)', background: 'var(--surface)', color: 'var(--brand-primary)' }}
-                    data-testid={`chip-${g.id}`}
-                  >
-                    {g.name} · {g.services.length}
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
-        )}
-
-        {searching ? (
-          searchResults.length === 0 ? (
-            /* A dead end is the worst possible answer here: they wanted
-               something this business might well do, and the page just
-               says no. Offer the person instead. */
-            <div className="text-center py-8" data-testid="business-search-empty">
-              <p className="text-sm mb-3" style={{ color: 'var(--brand-muted)' }}>
-                {t('businessPage.noMatches', 'Nothing matches “{{q}}”.', { q: query.trim() })}
-              </p>
-              {canMessage && (
-                <button
-                  type="button"
-                  onClick={messageBusiness}
-                  className="btn-gold inline-flex items-center gap-2 px-5 py-2.5 text-sm"
-                  data-testid="business-search-message"
-                >
-                  <MessageCircle size={16} aria-hidden="true" /> {t('businessPage.askThem', 'Ask them directly')}
-                </button>
-              )}
-            </div>
-          ) : (
-            <div className={effectiveLayout === 'list' ? LIST_CLASS : 'grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4'}
-              data-testid="business-search-results">
-              {searchResults.map((g) => (
-                <ServiceCard key={g.id} gig={g} variant={effectiveLayout === 'list' ? 'list' : 'grid'}
-                  i18n={i18n} t={t} onClick={() => navigate(`/businesses/${g.id}`)} />
-              ))}
-            </div>
-          )
-        ) : biz.listings.length === 0 ? (
-          <p className="text-sm" style={{ color: 'var(--brand-muted)' }} data-testid="business-empty">
-            {t('businessPage.nothingYet', 'Nothing listed yet.')}
-          </p>
-        ) : grouped ? (
-          /* C1 — sections. Owner-defined when they exist, otherwise
-             auto-grouped by category past the threshold. Each shows six
-             with "See all" rather than everything, so four collections
-             still fit on a screen. */
-          <div className="space-y-8" data-testid="business-collections">
-            {groups.map((group) => {
-              const isOpen = expanded.has(group.id);
-              const visible = isOpen ? group.services : group.services.slice(0, COLLECTION_PREVIEW);
-              const hidden = group.services.length - visible.length;
-              return (
-                <section key={group.id} data-testid={`collection-${group.id}`}>
-                  <div className="flex items-baseline justify-between gap-3 mb-3 flex-wrap">
-                    <div>
-                      <h3 className="text-base font-bold" style={{ fontFamily: 'var(--font-head)', color: 'var(--ink)' }}>
-                        {group.name}
-                      </h3>
-                      {group.description && (
-                        <p className="text-xs mt-0.5" style={{ color: 'var(--brand-muted)' }}>{group.description}</p>
-                      )}
-                    </div>
-                    {hidden > 0 && (
-                      <button
-                        type="button"
-                        onClick={() => setExpanded((prev) => new Set(prev).add(group.id))}
-                        className="text-sm font-semibold whitespace-nowrap"
-                        style={{ color: 'var(--brand-primary)' }}
-                        data-testid={`collection-see-all-${group.id}`}
-                      >
-                        {t('businessPage.seeAll', 'See all {{n}}', { n: group.services.length })}
-                      </button>
-                    )}
-                  </div>
-
-                  {effectiveLayout === 'list' ? (
-                    <div className={LIST_CLASS}>
-                      {visible.map((g) => (
-                        <ServiceCard key={g.id} gig={g} variant="list" i18n={i18n} t={t}
-                          onClick={() => navigate(`/businesses/${g.id}`)} />
-                      ))}
-                    </div>
-                  ) : (
-                    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-                      {visible.map((g) => (
-                        <ServiceCard key={g.id} gig={g} variant="grid" i18n={i18n} t={t}
-                          onClick={() => navigate(`/businesses/${g.id}`)} />
-                      ))}
-                    </div>
-                  )}
-                </section>
-              );
-            })}
-          </div>
-        ) : effectiveLayout === 'list' ? (
-          <div className={LIST_CLASS} data-testid="business-listings-list">
-            {visibleListings.map((g) => (
-              <ServiceCard
-                key={g.id}
-                gig={g}
-                variant="list"
-                i18n={i18n}
-                t={t}
-                onClick={() => navigate(`/businesses/${g.id}`)}
-              />
-            ))}
-          </div>
-        ) : (
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4" data-testid="business-listings-grid">
-            {visibleListings.map((g) => (
-              <ServiceCard
-                key={g.id}
-                gig={g}
-                variant="grid"
-                i18n={i18n}
-                t={t}
-                onClick={() => navigate(`/businesses/${g.id}`)}
-              />
-            ))}
-          </div>
-        )}
-
-        {!grouped && remaining > 0 && (
-          <div className="mt-4 flex justify-center">
-            <button
-              type="button"
-              onClick={() => setShown((n) => n + PAGE_SIZE)}
-              className="px-5 py-2.5 rounded-lg text-sm font-semibold border"
-              style={{ borderColor: 'var(--brand-border)', color: 'var(--brand-primary)', background: 'var(--surface)' }}
-              data-testid="business-show-more"
-            >
-              {t('businessPage.showMore', 'Show {{n}} more', { n: Math.min(remaining, PAGE_SIZE) })}
-            </button>
-          </div>
-        )}
+            Nothing here is a second renderer. The blocks call the same
+            GoodToKnow and the same ServiceCard the page always called; the
+            document decides which of them appear, in what order, and under
+            which six theme dials. Live state - the reader's grid-or-rows
+            choice, their search, how far down the catalogue they are -
+            travels in `ctx` and stays the reader's, because a document
+            that could hold someone's search box open would be a document
+            fighting the person reading it. */}
+        <BlockList
+          business={biz}
+          ctx={{
+            t,
+            i18n,
+            layout,
+            chooseLayout,
+            query,
+            setQuery,
+            shown,
+            setShown,
+            expanded,
+            setExpanded,
+            canMessage,
+            messageBusiness,
+            openService: (g) => navigate(`/businesses/${g.id}`),
+            apiBase: API,
+          }}
+        />
 
         {/* B7 — the highest-intent placement on the site for this CTA.
             The people who read a competitor's business page to the end

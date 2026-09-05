@@ -336,6 +336,22 @@ async def _preview_meta(target_type: str, target_id: str) -> dict[str, str]:
         # Ordering matters and mirrors the page lookup: a live slug always
         # beats a retired one. `$or` cannot express that, so the fallback
         # is a second query rather than another clause.
+        # `page` (the composition document, utils/page_composition.py) is
+        # deliberately NOT projected here, and this note is the reason.
+        #
+        # This is the third read path where a new field on a business is
+        # invisible until it is named, so leaving it out is a decision
+        # rather than an oversight. The share card is built from the name,
+        # the description, the logo and the cover, and a phase-1
+        # composition changes none of those: it rearranges and themes what
+        # is already on the page. Projecting a field nothing reads is dead
+        # weight that later reads as an unfinished intention.
+        #
+        # It becomes real the moment a block can choose which photo leads
+        # (a hero naming `listing:<id>` rather than the cover). At that
+        # point the card and the page would show different pictures, and
+        # this projection has to resolve the reference to keep them the
+        # same.
         fields = {"name": 1, "description": 1, "logo_url": 1, "cover_url": 1,
                   "categories": 1, "areas": 1, "_id": 1}
         biz = (

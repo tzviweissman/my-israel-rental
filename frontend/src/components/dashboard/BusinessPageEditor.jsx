@@ -44,6 +44,11 @@ import BusinessPage from '../../pages/BusinessPage';
 import PreviewFrame from './PreviewFrame';
 import { ACCENTS, ACCENT_NAMES, DEFAULT_ACCENT } from '../../utils/businessAccent';
 import BusinessShelfEditor, { cleanCollections } from './BusinessShelfEditor';
+import PageThemeDials, { dialLabel, dialValueLabel } from './PageThemeDials';
+import PageBriefForm from './PageBriefForm';
+import {
+  DIAL_DEFAULTS, PRESETS, briefToTheme, composeDefault, normalizeTheme, themeDiff,
+} from '../../utils/pageComposition';
 import { uploadOneFile } from '../../utils/fastUpload';
 
 // The two shapes a page is actually read at. Not a slider: an owner asked
@@ -137,6 +142,19 @@ export default function BusinessPageEditor({ business, API, token, onClose, onSa
   // with no way to set either (dead-ends audit 2026-09-03, #10).
   const [pinned, setPinned] = useState([]);
   const [collections, setCollections] = useState([]);
+  /* Phase 2 - the six dials and the brief behind them.
+     `touched` is which dials the owner has set BY HAND. It exists because
+     the brief and the dials are two ways to reach the same six values,
+     and without it answering a later question would silently undo a dial
+     the owner had already moved. The brief proposes; a hand does not get
+     overruled by a tap. */
+  const [theme, setTheme] = useState(DIAL_DEFAULTS);
+  const [touched, setTouched] = useState(() => new Set());
+  const [brief, setBrief] = useState({});
+  /* P7f - "then show what changed". It teaches the vocabulary, so the
+     next choice is sharper than the last, and it is how an owner finds
+     out they can reach the same result with a free button. */
+  const [changed, setChanged] = useState([]);
 
   const slug = business?.slug || business?.id;
 
@@ -161,12 +179,32 @@ export default function BusinessPageEditor({ business, API, token, onClose, onSa
         setRows((data.payment_links || []).map(newRow));
         setPinned((data.pinned_service_ids || []).slice(0, 3));
         setCollections((data.collections || []).map((c) => ({ ...c, service_ids: c.service_ids || [] })));
+        const loadedTheme = normalizeTheme(data.page && data.page.theme);
+        setTheme(loadedTheme);
+        setBrief(data.page_brief || {});
+        /* Which dials were set BY HAND, worked out rather than guessed:
+           a dial whose saved value is what the saved brief would have
+           produced was not set by hand, and one that differs was. Exact,
+           because both halves are stored.
+
+           The obvious shortcut - "anything saved counts as touched" - is
+           wrong in the case that matters most: an owner who saved once
+           and came back to answer the questions would find that every
+           answer moved nothing, and the brief would be inert for exactly
+           the people using it properly. */
+        const derived = briefToTheme(data.page_brief || {}, loadedTheme);
+        setTouched(new Set(
+          Object.keys(DIAL_DEFAULTS).filter((d) => loadedTheme[d] !== derived[d]),
+        ));
         setSaved({
           accent: ACCENTS[data.accent] ? data.accent : DEFAULT_ACCENT,
           cover_url: data.cover_url || null,
           payment_links: data.payment_links || [],
           pinned_service_ids: (data.pinned_service_ids || []).slice(0, 3),
           collections: cleanCollections(data.collections || []),
+          theme: loadedTheme,
+          brief: data.page_brief || {},
+          composed: Boolean(data.page),
         });
       } catch {
         if (!cancelled) setFailed(true);
@@ -209,11 +247,30 @@ export default function BusinessPageEditor({ business, API, token, onClose, onSa
   /* The preview's business: the real payload with the pending edits over
      it. This object is the entire mechanism — there is no second renderer
      to keep in step, only a different value for three keys. */
+  /* The blocks. There is no block editor yet - phase 1 built the library
+     and the schema, not a canvas - so these are whatever the business
+     already has, or the document that describes the page it already had.
+     Saving a dial on a business that has never been designed therefore
+     writes a composition of its CURRENT page plus the new theme, rather
+     than inventing a layout nobody asked for. */
+  const blocks = useMemo(
+    () => (page && page.page && (page.page.blocks || []).length
+      ? page.page.blocks
+      : composeDefault(page).blocks),
+    [page],
+  );
+
+  /* The palette dial IS the accent picker. One decision, one control: a
+     second colour control in the same panel is two controls that can
+     disagree, and the one that loses is whichever they used first. */
+  const fullTheme = useMemo(() => ({ ...theme, palette: accent }), [theme, accent]);
+
   const previewBusiness = useMemo(() => (page ? {
     ...page,
     accent,
     cover_url: coverUrl,
     payment_links: validLinks,
+    page: { theme: fullTheme, blocks },
     // The preview is the point of this screen, so every edit has to reach
     // it. Cleaned, not raw: a group being typed has no name yet, and the
     // preview would show a heading over nothing until the owner finished
@@ -221,18 +278,24 @@ export default function BusinessPageEditor({ business, API, token, onClose, onSa
     // which is also exactly when it would save.
     pinned_service_ids: pinned,
     collections: cleanCollections(collections),
-  } : null), [page, accent, coverUrl, validLinks, pinned, collections]);
+  } : null), [page, accent, coverUrl, validLinks, pinned, collections, fullTheme, blocks]);
 
   const dirty = useMemo(() => {
     if (!saved) return false;
     if (JSON.stringify(pinned) !== JSON.stringify(saved.pinned_service_ids || [])) return true;
     if (JSON.stringify(cleanCollections(collections)) !== JSON.stringify(saved.collections || [])) return true;
+    if (JSON.stringify(brief) !== JSON.stringify(saved.brief || {})) return true;
+    // A theme that MATCHES the defaults is still a change on a business
+    // that has never been designed: saving is what turns "the page it
+    // happens to have" into "the page it chose".
+    if (themeDiff(saved.theme, theme).length > 0) return true;
+    if (!saved.composed && touched.size > 0) return true;
     return accent !== saved.accent
       || (coverUrl || null) !== (saved.cover_url || null)
       || JSON.stringify(validLinks) !== JSON.stringify(
         (saved.payment_links || []).map((p) => ({ label: p.label, url: p.url })),
       );
-  }, [saved, accent, coverUrl, validLinks, pinned, collections]);
+  }, [saved, accent, coverUrl, validLinks, pinned, collections, brief, theme, touched]);
 
   const close = useCallback(() => {
     if (dirty) {
@@ -283,6 +346,39 @@ export default function BusinessPageEditor({ business, API, token, onClose, onSa
     }
   };
 
+  const markTouched = (dials) => setTouched((prev) => {
+    const next = new Set(prev);
+    dials.forEach((d) => next.add(d));
+    return next;
+  });
+
+  const applyTheme = (next, touchedDials) => {
+    const clean = normalizeTheme(next);
+    setChanged(themeDiff(theme, clean));
+    setTheme(clean);
+    if (touchedDials) markTouched(touchedDials);
+  };
+
+  /* An answer moves the dials the owner has NOT set by hand.
+     This is P2's crux running for real, with no model behind it: the
+     brief becomes a position on six axes. Later a model produces the same
+     six values from the same brief with more nuance, which makes
+     generation a swap rather than a rebuild - and means the questions are
+     tested against whether they change anything before anyone is charged
+     for an answer. */
+  const changeBrief = (nextBrief) => {
+    setBrief(nextBrief);
+    const proposed = briefToTheme(nextBrief, { ...theme, palette: accent });
+    const merged = { ...theme };
+    Object.keys(DIAL_DEFAULTS).forEach((d) => {
+      if (!touched.has(d)) merged[d] = proposed[d];
+    });
+    setChanged(themeDiff(theme, merged));
+    setTheme(merged);
+  };
+
+  const pickPreset = (name) => applyTheme({ ...theme, ...PRESETS[name] }, Object.keys(PRESETS[name]));
+
   const save = async () => {
     setSaving(true);
     try {
@@ -290,6 +386,19 @@ export default function BusinessPageEditor({ business, API, token, onClose, onSa
       // sent: the API would take it and the page would render a heading
       // over nothing.
       const keptCollections = cleanCollections(collections);
+      /* Every key spelled out rather than spread. The API refuses an
+         unexpected one outright (`extra="forbid"` on every level of the
+         composition), which is the point of the schema - but it means a
+         stray key here is a save that fails wholesale rather than one
+         field being ignored. */
+      const briefPayload = {
+        showing: brief.showing || null,
+        action: brief.action || null,
+        audience: brief.audience || null,
+        pricing: brief.pricing || null,
+        strengths: brief.strengths || [],
+        note: (brief.note || '').trim(),
+      };
       await axios.patch(
         `${API}/marketplace/businesses/${business.id}`,
         {
@@ -298,13 +407,17 @@ export default function BusinessPageEditor({ business, API, token, onClose, onSa
           payment_links: validLinks,
           pinned_service_ids: pinned,
           collections: keptCollections,
+          page: { theme: fullTheme, blocks },
+          page_brief: briefPayload,
         },
         auth,
       );
       setCollections(keptCollections);
+      setBrief(briefPayload);
       setSaved({
         accent, cover_url: coverUrl, payment_links: validLinks,
         pinned_service_ids: pinned, collections: keptCollections,
+        theme, brief: briefPayload, composed: true,
       });
       toast.success(t('pageDesign.saved', 'Your page is updated'));
       onSaved && onSaved();
@@ -478,6 +591,36 @@ export default function BusinessPageEditor({ business, API, token, onClose, onSa
           />
         </div>
       </section>
+
+      {/* ---- The brief (P7b), then the dials it moves (P2) ---- */}
+      <PageBriefForm
+        business={page}
+        brief={brief}
+        onChange={changeBrief}
+        theme={fullTheme}
+        onPickPreset={pickPreset}
+        previewBusiness={previewBusiness}
+      />
+
+      <PageThemeDials
+        theme={fullTheme}
+        onChange={(next) => applyTheme(next)}
+        touched={touched}
+        onTouch={markTouched}
+      />
+
+      {/* P7f - what just changed, in the same words the buttons use. Said
+          plainly rather than animated, because the point is that they can
+          read it and learn the vocabulary, not that they notice it. */}
+      {changed.length > 0 && (
+        <p className="text-xs -mt-3" style={{ color: 'var(--brand-muted)' }} data-testid="page-design-changed">
+          {t('pageDesign.changed', 'Changed:')}{' '}
+          {changed
+            .filter((c) => c.dial !== 'palette')
+            .map((c) => `${dialLabel(t, c.dial)} - ${dialValueLabel(t, c.dial, c.to)}`)
+            .join(', ')}
+        </p>
+      )}
 
       {/* ---- What the page leads with, and its groups (C1 + C5) ---- */}
       <BusinessShelfEditor

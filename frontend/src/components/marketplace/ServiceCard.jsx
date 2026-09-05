@@ -147,7 +147,10 @@ const ServiceGridCard = ({ gig, onClick, i18n, t }) => {
       )}
       {/* C7 — a price line is always rendered. A blank where a number
           should be reads as a broken card. */}
-      <p className="text-xs mt-0.5 text-gray-900">
+      {/* `svc-price` is the hook the price-prominence dial needs. It is
+          styled ONLY inside `[data-page-theme]` (styles/page-theme.css),
+          so this card is unchanged everywhere else it is drawn. */}
+      <p className="text-xs mt-0.5 text-gray-900 svc-price" data-testid={`gig-price-${gig.id}`}>
         {price.quote ? (
           <span className="text-[var(--brand-muted)]">{t('services.askForQuote', 'Ask for a quote')}</span>
         ) : (
@@ -240,7 +243,7 @@ const ServiceRow = ({ gig, onClick, i18n, t }) => {
 
       {/* Price pinned to the end so the eye can ladder down the column
           comparing, which is the one thing a long list is good at. */}
-      <p className="text-sm shrink-0 ps-2 text-gray-900 text-end">
+      <p className="text-sm shrink-0 ps-2 text-gray-900 text-end svc-price" data-testid={`gig-price-${gig.id}`}>
         {price.quote ? (
           <span className="text-[var(--brand-muted)] text-xs">{t('services.askForQuote', 'Ask for a quote')}</span>
         ) : (

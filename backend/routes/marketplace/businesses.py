@@ -29,6 +29,7 @@ from utils.businesses import (
     new_business_doc,
     unique_slug,
 )
+from utils.page_composition import PageBrief, PageComposition, dial_catalog
 
 from .shared import (
     HAS_ANY_PHOTO,
@@ -183,6 +184,25 @@ class BusinessPatch(BaseModel):
     # everything is featured features nothing, and a cap enforced only in
     # a form is a cap that a second client ignores.
     pinned_service_ids: Optional[list[str]] = Field(None, max_length=3)
+    # The composition document: this business's page as data (phase 1 of
+    # docs/ai-page-builder-spec.md). Validated against a CLOSED vocabulary
+    # in utils/page_composition - an unknown block type, an unknown
+    # variant, an unexpected prop key or anything URL-shaped in an image
+    # slot is a 422 naming the field, never a quietly repaired document.
+    #
+    # Absent means "leave the page alone"; null means "go back to the
+    # default composition". That distinction is why this is Optional and
+    # why it is read off model_fields_set below, like every field added
+    # since the ones at the top of this class.
+    #
+    # Patch-only, deliberately. A page is designed after a business
+    # exists, so BusinessIn does not take one and there is one fewer
+    # surface a composition can arrive through.
+    page: Optional[PageComposition] = None
+    # P7b - the six answers behind the page. Stored because "regenerating
+    # never re-asks" and "editing the brief is free" are both promises the
+    # spec makes, and neither is keepable if the answers are not kept.
+    page_brief: Optional[PageBrief] = None
 
 
 
@@ -223,6 +243,18 @@ def _public(
         "cover_url": doc.get("cover_url"),
         "accent": doc.get("accent"),
         "payment_links": doc.get("payment_links") or [],
+        # The composition, exactly as stored. Not re-validated on the way
+        # out: a block type retired after this was saved would otherwise
+        # 500 the owner's whole dashboard rather than costing them one
+        # block. The renderer skips what it does not recognise, which is
+        # the same tolerance `collections` already relies on.
+        #
+        # Every caller of _public is owner-scoped (the dashboard list,
+        # create, patch), which is why the brief - the owner's answers
+        # about who they sell to - is safe here and is NOT on the public
+        # page payload.
+        "page": doc.get("page"),
+        "page_brief": doc.get("page_brief"),
         "verified": bool(doc.get("verified")),
         "active": doc.get("active", True),
         "created_at": doc.get("created_at"),
@@ -274,6 +306,25 @@ async def list_payment_providers():
     refusal message already names the same domains to anyone who asks.
     """
     return {"providers": payment_providers(), "max": MAX_PAYMENT_LINKS}
+
+
+@router.get("/page-vocabulary")
+async def page_vocabulary():
+    """Everything a page may be made of: dials, blocks, variants, brief.
+
+    Served rather than duplicated. The editor has to render these names,
+    so a copy of them exists on the client either way; the difference is
+    whether the copy can silently disagree with what the API accepts. A
+    form offering a variant the server refuses is a save that fails for a
+    reason the owner cannot see, and that is the failure this endpoint
+    exists to make impossible - scripts/check-page-builder.mjs asserts the
+    two agree rather than trusting them to.
+
+    Public and unauthenticated, like the payment-provider list: it is a
+    constant, and it describes what we accept, not anything a business
+    has chosen.
+    """
+    return dial_catalog()
 
 
 @router.get("/businesses")
@@ -476,6 +527,15 @@ async def update_business(business_id: str, payload: BusinessPatch, user=Depends
         update["pinned_service_ids"] = (payload.pinned_service_ids or [])[:3]
     if "collections" in provided:
         update["collections"] = [c.model_dump() for c in (payload.collections or [])]
+    if "page" in provided:
+        # Already validated by PageComposition on the way in - a bad
+        # document never reaches here, it is a 422 naming the block. Null
+        # clears the design and the page falls back to the default
+        # composition, which is a real thing an owner wants: "put it back
+        # how it was" has to be one click and must not need us.
+        update["page"] = payload.page.model_dump() if payload.page else None
+    if "page_brief" in provided:
+        update["page_brief"] = payload.page_brief.model_dump() if payload.page_brief else None
     if "payment_links" in provided:
         # Refused loudly, not dropped. An owner who pasted a link from an
         # unsupported provider needs to know that is the reason rather than
@@ -734,6 +794,18 @@ async def public_business(
         # drift between here and there.
         "collections": biz.get("collections") or [],
         "pinned_service_ids": (biz.get("pinned_service_ids") or [])[:3],
+        # The composition, as stored. Public because it IS the page: the
+        # client renders from it, skipping any block type or reference it
+        # cannot resolve, so a document written by an older build degrades
+        # rather than breaking.
+        #
+        # `page_brief` is deliberately NOT here for a visitor. The answers
+        # are about who the business sells to and where it prices itself,
+        # which is theirs to know and nobody else's business to read off a
+        # public endpoint. The owner gets it through their dashboard, and
+        # through this endpoint only when it is their own page.
+        "page": biz.get("page"),
+        **({"page_brief": biz.get("page_brief")} if owner_preview else {}),
         "response_bucket": _response_bucket(
             await db.marketplace_providers.find_one({"user_id": biz.get("owner_user_id")}) or {}
         ),

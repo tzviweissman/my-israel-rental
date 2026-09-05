@@ -1,0 +1,207 @@
+/* The six dials of a business page, as CSS.
+ *
+ * Phase 2 of docs/ai-page-builder-spec.md. Every rule here is inside
+ * `[data-page-theme]`, an attribute set by exactly one component
+ * (components/pagebuilder/BlockList.jsx) on exactly one thing: the body
+ * of a business's own page. Nothing global, no `:root`, no `body` rule.
+ *
+ * NOT AN EXPERIMENTAL THEME, and the distinction matters because of the
+ * rule that exists after one reached the live site. `theme-*.css` files
+ * are trial SITE palettes and must stay under `body.theme-preview`
+ * (scripts/test-theme-scope.mjs). This is not one: it is a per-business
+ * page style, it changes nothing outside a business page, and its colours
+ * are not written here at all - they arrive as `--pg-accent*`, set inline
+ * from `utils/businessAccent.js`, which remains the only place those four
+ * hexes live. A palette change is still a code change in one file.
+ *
+ * WHY ATTRIBUTES RATHER THAN CLASSES. A dial is a position on an axis,
+ * so everything that follows from "airy" belongs in one place instead of
+ * scattered across components as one-off numbers. It also makes the whole
+ * theme legible in devtools and assertable from a check.
+ *
+ * WHAT IS NOT A DIAL. Contrast, touch-target size and the spacing scale
+ * are not opinions (P4). No value below drops a tap target under 44px,
+ * and none sets a colour: text colour comes from the tokens, and the
+ * accent from the four contrast-checked entries in businessAccent.js.
+ */
+
+[data-page-theme] {
+  /* Defaults, so a block is renderable before any dial is read. Every
+     value below is overridden by one of the dial rules; these are what a
+     document with an unknown dial value falls back to. */
+  --pg-section-y: 2rem;
+  --pg-gap: 1rem;
+  /* Split in two on purpose. Density decides how much room a card gets;
+     imagery decides how much bigger or smaller the photo wants it. If
+     imagery set the width outright it would silently overrule density,
+     because it is the later rule. */
+  --pg-card-base: 14rem;
+  --pg-card-scale: 1;
+  --pg-head-font: var(--font-head);
+  --pg-head-weight: 600;
+  --pg-head-track: -0.02em;
+  --pg-head-scale: 1;
+  --pg-label-case: none;
+  --pg-label-track: 0.02em;
+  --pg-cover-ratio: 1 / 1;
+  --pg-price-scale: 1;
+  --pg-price-weight: 700;
+  --pg-motion: 240ms;
+  /* Set inline by the renderer from businessAccent.js. The fallbacks are
+     the site's own tokens rather than a copy of an accent, so a business
+     with no accent still draws correctly and no hex is duplicated. */
+  --pg-accent: var(--brand-primary);
+  --pg-accent-on: var(--ink);
+  --pg-rule: var(--brand-border);
+}
+
+/* ------------------------------------------------------------ density
+ * Whitespace, and how many things are visible at once. The premium end
+ * of this axis is the one thing that is qualitatively well supported
+ * (luxury pages are less dense); the specific numbers are a starting
+ * default to test, not a proven optimum, and the two figures that get
+ * quoted for this in the wild were both traced back to nothing.
+ * See docs/page-builder-research.md, part 3. */
+[data-page-theme][data-density='airy'] {
+  --pg-section-y: 3.5rem;
+  --pg-gap: 1.75rem;
+  --pg-card-base: 17.5rem;
+}
+[data-page-theme][data-density='balanced'] {
+  --pg-section-y: 2rem;
+  --pg-gap: 1rem;
+  --pg-card-base: 14rem;
+}
+[data-page-theme][data-density='packed'] {
+  --pg-section-y: 1.25rem;
+  --pg-gap: 0.625rem;
+  --pg-card-base: 10.5rem;
+}
+
+/* --------------------------------------------------------------- type
+ * Three positions on the faces this site already loads: Playfair Display
+ * and Manrope, which become Frank Ruhl Libre and Assistant under RTL.
+ *
+ * THE VARIABLES, NEVER A FACE. `--font-head` is swapped wholesale by
+ * `[dir="rtl"]`, and Playfair has no Hebrew glyphs, so a literal family
+ * name in any rule here is the bug already found ~69 times in this
+ * codebase - a Hebrew heading silently falling back to a system serif.
+ *
+ * A fourth position means downloading a fourth family, which is a brand
+ * decision and a performance cost, not a dial. */
+[data-page-theme][data-type='serif'] {
+  --pg-head-font: var(--font-head);
+  --pg-head-weight: 500;
+  --pg-head-track: -0.02em;
+  --pg-head-scale: 1.06;
+  --pg-label-case: none;
+}
+[data-page-theme][data-type='grotesque'] {
+  --pg-head-font: var(--font-body);
+  --pg-head-weight: 800;
+  --pg-head-track: -0.03em;
+  --pg-head-scale: 1;
+  --pg-label-case: none;
+}
+[data-page-theme][data-type='geometric'] {
+  --pg-head-font: var(--font-body);
+  --pg-head-weight: 500;
+  --pg-head-track: 0.005em;
+  --pg-head-scale: 1.02;
+  --pg-label-case: uppercase;
+  --pg-label-track: 0.09em;
+}
+
+/* ------------------------------------------------------------ imagery
+ * The shape and size of a photo, not the layout. Grid-versus-list is the
+ * reader's choice and stays theirs. */
+[data-page-theme][data-imagery='full-bleed'] {
+  --pg-cover-ratio: 4 / 3;
+  --pg-card-scale: 1.25;
+}
+[data-page-theme][data-imagery='grid'] {
+  --pg-cover-ratio: 1 / 1;
+  --pg-card-scale: 1;
+}
+[data-page-theme][data-imagery='thumbnail'] {
+  --pg-cover-ratio: 3 / 2;
+  --pg-card-scale: 0.72;
+}
+
+/* ---------------------------------------------------- price prominence
+ * "Quiet" is the luxury convention and "loud" the value one, but neither
+ * end licenses a dark pattern: there is no urgency, no countdown and no
+ * invented comparison at any setting (P5). The dial moves size and
+ * weight, and nothing else. */
+[data-page-theme][data-price='quiet'] {
+  --pg-price-scale: 0.9;
+  --pg-price-weight: 500;
+}
+[data-page-theme][data-price='normal'] {
+  --pg-price-scale: 1;
+  --pg-price-weight: 700;
+}
+[data-page-theme][data-price='loud'] {
+  --pg-price-scale: 1.25;
+  --pg-price-weight: 800;
+}
+
+/* ------------------------------------------------------------- motion */
+[data-page-theme][data-motion='still'] { --pg-motion: 0ms; }
+[data-page-theme][data-motion='subtle'] { --pg-motion: 240ms; }
+
+/* The dial is an owner's preference. This is a reader's, and it wins. */
+@media (prefers-reduced-motion: reduce) {
+  [data-page-theme] { --pg-motion: 0ms; }
+}
+
+/* ---------------------------------------------------------- the blocks
+ * Only the hooks the dials need. Everything else about these components
+ * is still their own CSS, which is the point of converting what already
+ * works rather than restyling it. */
+
+.pg-block + .pg-block { margin-top: var(--pg-section-y); }
+
+.pg-head {
+  font-family: var(--pg-head-font);
+  font-weight: var(--pg-head-weight);
+  letter-spacing: var(--pg-head-track);
+  font-size: calc(1em * var(--pg-head-scale));
+  color: var(--ink);
+}
+
+.pg-label {
+  text-transform: var(--pg-label-case);
+  letter-spacing: var(--pg-label-track);
+}
+
+/* The service grid. `auto-fill` with a dial-driven minimum is what makes
+   density and imagery change how much is on screen without either dial
+   having to know the breakpoints. */
+.pg-grid {
+  display: grid;
+  gap: var(--pg-gap);
+  /* The `min(..., 47%)` is load-bearing and not a tidy-up. Without it a
+     14rem minimum on a 358px phone resolves to ONE column, and the page
+     that shows two cards side by side today would show one - a dial
+     quietly costing every phone reader half their screen. The floor keeps
+     two columns at every width, which is what the grid has always been on
+     a phone. */
+  grid-template-columns: repeat(auto-fill, minmax(min(calc(var(--pg-card-base) * var(--pg-card-scale)), 47%), 1fr));
+}
+
+.pg-list { display: flex; flex-direction: column; gap: calc(var(--pg-gap) * 0.5); }
+
+/* The cover shape inside a card, when the card is drawn by a block. */
+.pg-grid [class*='aspect-square'] { aspect-ratio: var(--pg-cover-ratio); }
+
+/* Prices, wherever a service card draws one. Scoped to the page body so
+   the same card on the services board is untouched. */
+[data-page-theme] .svc-price {
+  font-size: calc(1em * var(--pg-price-scale));
+  font-weight: var(--pg-price-weight);
+}
+
+[data-page-theme] .pg-reveal {
+  transition: opacity var(--pg-motion) ease, transform var(--pg-motion) ease;
+}

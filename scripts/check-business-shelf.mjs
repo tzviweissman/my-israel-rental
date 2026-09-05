@@ -93,7 +93,13 @@ ok('an incomplete group is called out before saving',
 // The preview is the point of this screen, so an edit has to reach it
 // BEFORE saving - the first cut overlaid only accent, cover and payment
 // links, so these two showed the old page until you closed and reopened.
-const previewText = await page.frameLocator('iframe').locator('body').innerText().catch(() => '');
+/* The LAST iframe, not "the" iframe. The designer now also renders the
+   brief's recognition question - four small copies of this page under
+   the four presets - and those are PreviewFrames too, sitting in the
+   controls column ahead of the main preview in the DOM. `frameLocator`
+   is strict, so an unqualified match throws once there is more than
+   one. */
+const previewText = await page.frameLocator('iframe').last().locator('body').innerText().catch(() => '');
 ok('the preview shows the group before it is saved', previewText.includes('Shabbos'), previewText.slice(0, 100));
 
 await page.click('[data-testid="page-design-save"]');
