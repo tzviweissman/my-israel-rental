@@ -7,6 +7,12 @@
  * quoted price + response-time band in one place.
  *
  * Actions:
+ *   • Awarded   — PATCH status:awarded (someone got the job). The model
+ *                 has allowed this since jobs shipped, it had a badge
+ *                 colour waiting for it, and nothing ever set it: a
+ *                 poster who had hired somebody could only "close", which
+ *                 says the job is over without saying it was filled.
+ *                 (Dead-ends audit 2026-09-03, #11.)
  *   • Close     — PATCH status:closed (job is hidden from the board and
  *                 stops accepting applications; keeps the applicant list
  *                 visible so the poster can still review history).
@@ -21,13 +27,17 @@
  */
 import React, { useCallback, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { saveReturnPath } from '../../hooks/useBackNavigation';
 import axios from 'axios';
 import { toast } from 'sonner';
 import EditJobModal from './EditJobModal';
-import { Loader2, MapPin, Coins, Calendar, Plus, ChevronDown, ChevronRight, ExternalLink, Zap, Users, ArrowRight, MessageCircle, Pencil } from 'lucide-react';
+import { Loader2, MapPin, Coins, Calendar, Plus, ChevronDown, ChevronRight, ExternalLink, Zap, Users, ArrowRight, MessageCircle, Pencil, Award, RotateCcw } from 'lucide-react';
 
 const StatusPill = ({ status }) => {
+  // Its own, because this is a module-level component: a `t` from the
+  // card below would be a ReferenceError at render.
+  const { t } = useTranslation();
   const styles = {
     open: 'bg-emerald-50 text-emerald-700 border-emerald-100',
     awarded: 'bg-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/10 text-[var(--brand-primary)] border-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/20',
@@ -38,7 +48,7 @@ const StatusPill = ({ status }) => {
       className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold border whitespace-nowrap ${styles[status] || styles.closed}`}
       data-testid={`my-job-status-${status}`}
     >
-      {status?.[0]?.toUpperCase() + status?.slice(1)}
+      {t(`myJobs.status_${status}`, status?.[0]?.toUpperCase() + status?.slice(1))}
     </span>
   );
 };
@@ -109,6 +119,7 @@ const ApplicationRow = ({ app, jobId, onMessage }) => {
 };
 
 const JobCard = ({ job, API, token, onStatusChange, onJobUpdated }) => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
   const [applications, setApplications] = useState(null);
@@ -152,13 +163,15 @@ const JobCard = ({ job, API, token, onStatusChange, onJobUpdated }) => {
         { headers: { Authorization: `Bearer ${token}` } },
       );
       toast.success(
-        nextStatus === 'closed'
-          ? 'Job closed. Providers can no longer apply.'
-          : 'Job reopened.',
+        {
+          closed: t('myJobs.toastClosed', 'Job closed. Businesses can no longer apply.'),
+          awarded: t('myJobs.toastAwarded', 'Marked as awarded. It stays on your list and leaves the board.'),
+          open: t('myJobs.toastReopened', 'Job reopened.'),
+        }[nextStatus] || t('myJobs.toastUpdated', 'Updated'),
       );
       onStatusChange?.(job.id, nextStatus);
     } catch (err) {
-      toast.error(err.response?.data?.detail || 'Could not update job');
+      toast.error(err.response?.data?.detail || t('myJobs.updateFailed', 'Could not update that job'));
     } finally {
       setMutating(false);
     }
@@ -235,23 +248,37 @@ const JobCard = ({ job, API, token, onStatusChange, onJobUpdated }) => {
               <ExternalLink size={12} /> View public page
             </button>
             {job.status === 'open' && (
-              <button
-                onClick={() => patchStatus('closed')}
-                disabled={mutating}
-                className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-semibold border border-gray-200 bg-white hover:border-red-300 hover:text-red-600 disabled:opacity-60"
-                data-testid={`my-job-close-${job.id}`}
-              >
-                Close job
-              </button>
+              <>
+                {/* "Awarded" and "closed" are different facts, and the
+                    model has carried both since jobs shipped. Closing says
+                    the job is over; awarding says somebody got it. A
+                    poster who had hired could only say the first. */}
+                <button
+                  onClick={() => patchStatus('awarded')}
+                  disabled={mutating}
+                  className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-semibold border border-gray-200 bg-white hover:border-[var(--brand-primary)] hover:text-[var(--brand-primary)] disabled:opacity-60"
+                  data-testid={`my-job-award-${job.id}`}
+                >
+                  <Award size={12} aria-hidden="true" /> {t('myJobs.markAwarded', 'Mark as awarded')}
+                </button>
+                <button
+                  onClick={() => patchStatus('closed')}
+                  disabled={mutating}
+                  className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-semibold border border-gray-200 bg-white hover:border-red-300 hover:text-red-600 disabled:opacity-60"
+                  data-testid={`my-job-close-${job.id}`}
+                >
+                  {t('myJobs.closeJob', 'Close job')}
+                </button>
+              </>
             )}
-            {job.status === 'closed' && (
+            {job.status !== 'open' && (
               <button
                 onClick={() => patchStatus('open')}
                 disabled={mutating}
                 className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-semibold border border-[var(--brand-primary)] bg-[var(--brand-primary)] text-white hover:bg-[#0F3A3A] disabled:opacity-60"
                 data-testid={`my-job-reopen-${job.id}`}
               >
-                Reopen
+                <RotateCcw size={12} aria-hidden="true" /> {t('myJobs.reopen', 'Reopen')}
               </button>
             )}
           </div>

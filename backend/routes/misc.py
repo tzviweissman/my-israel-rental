@@ -7,14 +7,11 @@ from typing import List
 from fastapi import APIRouter, Body, Depends, File, HTTPException, Request, UploadFile
 from pydantic import BaseModel
 
-from models import ContactRequest, TranslationRequest
 from models_response import (
     ExchangeRateResponse,
     IdMessageResponse,
     LogoUploadResponse,
     MessageResponse,
-    ServiceRequestOut,
-    TranslationResponse,
     UploadResponse,
 )
 from routes.deps import (
@@ -136,63 +133,6 @@ async def get_cloudinary_signature(
         "folder": folder,
         "resource_type": resource_type,
     }
-
-
-@api_router.post("/translate", response_model=TranslationResponse)
-async def translate_text(request: TranslationRequest) -> dict:
-    try:
-        chat = LlmChat(
-            api_key=ANTHROPIC_API_KEY,
-            session_id=str(uuid.uuid4()),
-            system_message=f"You are a professional translator. Translate the following text from {request.from_lang} to {request.to_lang}. Only provide the translation, no explanations."
-        )
-        chat.with_model("anthropic", "claude-sonnet-4-6")
-        
-        message = UserMessage(text=request.text)
-        response = await chat.send_message(message)
-        
-        return {"translation": response}
-    except Exception as e:
-        raise api_error(
-            status_code=500, message="We couldn't translate that just now. Please try again in a moment.",
-            exc=e, logger=logger, context="translate endpoint",
-        ) from e
-
-@api_router.post("/service-requests", response_model=IdMessageResponse)
-async def create_service_request(request_data: dict = Body(...), payload: dict = Depends(verify_token)) -> dict:
-    request_id = str(uuid.uuid4())
-    service_doc = {
-        "id": request_id,
-        "user_id": payload['user_id'],
-        "service_type": request_data.get('service_type', 'unknown'),
-        "details": request_data,
-        "status": "pending",
-        "created_at": datetime.now(UTC).isoformat(),
-        "updated_at": datetime.now(UTC).isoformat()
-    }
-    await db.service_requests.insert_one(service_doc)
-    return {"id": request_id, "message": "Service request submitted successfully"}
-
-
-
-@api_router.get("/service-requests", response_model=list[ServiceRequestOut])
-async def list_service_requests(payload: dict = Depends(verify_token)) -> list[dict]:
-    query = {"user_id": payload['user_id']} if payload.get('role') != 'admin' else {}
-    requests = await db.service_requests.find(query, {"_id": 0}).sort("created_at", -1).to_list(500)
-    return requests
-
-
-
-@api_router.post("/contact", response_model=MessageResponse)
-async def submit_contact_form(request: ContactRequest) -> dict:
-    contact_id = str(uuid.uuid4())
-    contact_doc = request.model_dump()
-    contact_doc['id'] = contact_id
-    contact_doc['created_at'] = datetime.now(UTC).isoformat()
-    contact_doc['status'] = 'new'
-    
-    await db.contacts.insert_one(contact_doc)
-    return {"message": "Contact request submitted successfully"}
 
 
 # --- Property Contracts ---

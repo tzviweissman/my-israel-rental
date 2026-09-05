@@ -76,7 +76,11 @@ const Stays = ({ landing = null }) => {
   const navigate = useNavigate();
   const { t } = useTranslation();
   const [searchParams, setSearchParams] = useSearchParams();
-  // Live USD->ILS. Feeds the price filter AND the price sort, so both agree
+  // The orders the API can do itself. `nearest` is absent on purpose: the
+// server does not know where the reader is.
+const SERVER_SORTS = [SORT_NEWEST, SORT_PRICE_ASC, SORT_PRICE_DESC];
+
+// Live USD->ILS. Feeds the price filter AND the price sort, so both agree
   // with what the cards display. Was a hardcoded 3.65 against a real rate
   // near 3.06 — see hooks/useExchangeRate.
   const { rate: fxRate } = useExchangeRate();
@@ -173,7 +177,17 @@ const Stays = ({ landing = null }) => {
   useEffect(() => {
     setLoading(true);
     axios
-      .get(`${API}/properties`, { params: { limit: 1000 } })
+      // The sort goes with it, for the three orders the server knows.
+      // The list is sorted again below and the two agree - both normalise
+      // USD at the same live rate - so this is not about the order, it is
+      // about the LIMIT: at a thousand listings, sorting the page's own
+      // slice would give the cheapest of an arbitrary thousand rather
+      // than the cheapest thousand. Sent once, from whatever the reader
+      // arrived with; changing the sort afterwards stays instant and
+      // client-side, and proximity always is, because the server does not
+      // know where the reader is standing.
+      // (Dead-ends audit 2026-09-03, #13: the parameter had no caller.)
+      .get(`${API}/properties`, { params: { limit: 1000, ...(SERVER_SORTS.includes(sort) ? { sort } : {}) } })
       .then((r) => {
         const list = (r.data || []).filter((p) =>
           STAY_RENTAL_TYPES.includes(p.rental_type),
@@ -186,6 +200,9 @@ const Stays = ({ landing = null }) => {
         setLoadError(true);
       })
       .finally(() => setLoading(false));
+    // Mount only, `sort` read once on purpose - see above. Re-fetching on
+    // every sort change would trade an instant re-order for a round trip.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // How many cards are actually rendered. Every matching listing used to

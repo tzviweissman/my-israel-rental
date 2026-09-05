@@ -43,6 +43,7 @@ import {
 import BusinessPage from '../../pages/BusinessPage';
 import PreviewFrame from './PreviewFrame';
 import { ACCENTS, ACCENT_NAMES, DEFAULT_ACCENT } from '../../utils/businessAccent';
+import BusinessShelfEditor, { cleanCollections } from './BusinessShelfEditor';
 import { uploadOneFile } from '../../utils/fastUpload';
 
 // The two shapes a page is actually read at. Not a slider: an owner asked
@@ -131,6 +132,11 @@ export default function BusinessPageEditor({ business, API, token, onClose, onSa
   const [accent, setAccent] = useState(DEFAULT_ACCENT);
   const [coverUrl, setCoverUrl] = useState(null);
   const [rows, setRows] = useState([]);
+  // What the page leads with, and how it is grouped. Both have been on
+  // the business document and rendered by the page since it was built,
+  // with no way to set either (dead-ends audit 2026-09-03, #10).
+  const [pinned, setPinned] = useState([]);
+  const [collections, setCollections] = useState([]);
 
   const slug = business?.slug || business?.id;
 
@@ -153,10 +159,14 @@ export default function BusinessPageEditor({ business, API, token, onClose, onSa
         setAccent(ACCENTS[data.accent] ? data.accent : DEFAULT_ACCENT);
         setCoverUrl(data.cover_url || null);
         setRows((data.payment_links || []).map(newRow));
+        setPinned((data.pinned_service_ids || []).slice(0, 3));
+        setCollections((data.collections || []).map((c) => ({ ...c, service_ids: c.service_ids || [] })));
         setSaved({
           accent: ACCENTS[data.accent] ? data.accent : DEFAULT_ACCENT,
           cover_url: data.cover_url || null,
           payment_links: data.payment_links || [],
+          pinned_service_ids: (data.pinned_service_ids || []).slice(0, 3),
+          collections: cleanCollections(data.collections || []),
         });
       } catch {
         if (!cancelled) setFailed(true);
@@ -208,12 +218,14 @@ export default function BusinessPageEditor({ business, API, token, onClose, onSa
 
   const dirty = useMemo(() => {
     if (!saved) return false;
+    if (JSON.stringify(pinned) !== JSON.stringify(saved.pinned_service_ids || [])) return true;
+    if (JSON.stringify(cleanCollections(collections)) !== JSON.stringify(saved.collections || [])) return true;
     return accent !== saved.accent
       || (coverUrl || null) !== (saved.cover_url || null)
       || JSON.stringify(validLinks) !== JSON.stringify(
         (saved.payment_links || []).map((p) => ({ label: p.label, url: p.url })),
       );
-  }, [saved, accent, coverUrl, validLinks]);
+  }, [saved, accent, coverUrl, validLinks, pinned, collections]);
 
   const close = useCallback(() => {
     if (dirty) {
@@ -267,12 +279,26 @@ export default function BusinessPageEditor({ business, API, token, onClose, onSa
   const save = async () => {
     setSaving(true);
     try {
+      // A group with no name or nothing in it is dropped rather than
+      // sent: the API would take it and the page would render a heading
+      // over nothing.
+      const keptCollections = cleanCollections(collections);
       await axios.patch(
         `${API}/marketplace/businesses/${business.id}`,
-        { accent, cover_url: coverUrl, payment_links: validLinks },
+        {
+          accent,
+          cover_url: coverUrl,
+          payment_links: validLinks,
+          pinned_service_ids: pinned,
+          collections: keptCollections,
+        },
         auth,
       );
-      setSaved({ accent, cover_url: coverUrl, payment_links: validLinks });
+      setCollections(keptCollections);
+      setSaved({
+        accent, cover_url: coverUrl, payment_links: validLinks,
+        pinned_service_ids: pinned, collections: keptCollections,
+      });
       toast.success(t('pageDesign.saved', 'Your page is updated'));
       onSaved && onSaved();
     } catch (err) {
@@ -445,6 +471,15 @@ export default function BusinessPageEditor({ business, API, token, onClose, onSa
           />
         </div>
       </section>
+
+      {/* ---- What the page leads with, and its groups (C1 + C5) ---- */}
+      <BusinessShelfEditor
+        listings={page?.listings || []}
+        pinned={pinned}
+        onPinnedChange={setPinned}
+        collections={collections}
+        onCollectionsChange={setCollections}
+      />
 
       {/* ---- Payment links (P1) ---- */}
       <section className="pt-5 border-t" style={{ borderColor: 'var(--brand-border)' }}>

@@ -114,7 +114,41 @@ wizard. Two things had to be true first:
   a listing an admin is holding down. `backend/tests/test_gig_pause.py`
   covers both locks with a real admin takedown.
 
-Still open: **#10, #12-#14** (business `collections` and
-`pinned_service_ids` with no editor, `JobPatch.status: 'awarded'`, the
-dead endpoints, the unused `sort` on `GET /properties`, and the
-unimported components).
+**Everything else is closed too (5 September).**
+
+- **#10** the page designer gained a "what comes first" section:
+  `pinned_service_ids` as up to three featured services, and
+  `collections` as named groups with a service in as many as it belongs
+  to. `BusinessShelfEditor.jsx`, saved through the PATCH that already
+  accepted both. A group with no name or nothing in it is dropped rather
+  than sent, because the API would take it and the page would render a
+  heading over nothing.
+- **#11 (second half)** a job can be marked **awarded**. The model has
+  allowed it since jobs shipped and the dashboard had a badge colour
+  waiting for it; a poster who had hired could only "close", which says
+  the job is over without saying it was filled. `MyJobsTab` had no
+  translator at all, so the three status words and its toasts are strings
+  now rather than a capitalised wire value.
+- **#12** `POST /translate`, `POST /contact` and `GET|POST
+  /service-requests` are gone. `/translate` took unauthenticated text
+  straight to Anthropic, so it was a standing invitation to spend credit,
+  not merely dead. `/services/waitlist` is gone with its module and test:
+  its own docstring described the Services page as "a stub today" where
+  businesses "register their interest in a paid monthly listing", and
+  neither has been true for months. Anything already captured is still in
+  `db.services_waitlist`. **Kept:** the subscription endpoints (dormant on
+  purpose, and commented as such) and the jobs-digest trigger (an admin
+  escape hatch with a test).
+- **#13** Stays sends `sort` for the three orders the API knows. Once, at
+  mount, from whatever the reader arrived with - changing the sort after
+  that stays instant and client-side, and proximity always is. The point
+  is the 1,000 limit: sorting only the page's own slice gives the cheapest
+  of an arbitrary thousand rather than the cheapest thousand.
+- **#14** `PlanPicker`, `ServicesUpsellModal`, `ServicesHeroTitle`,
+  `HeroSlideshow` and `PayPalCheckout` are deleted. None was imported
+  anywhere; `motion-scroll-word-reveal` went on 4 September.
+
+Checks: `backend/tests/test_business_shelf.py` (4),
+`backend/tests/test_job_awarded.py` (3),
+`scripts/check-business-shelf.mjs` (12, new - drives the designer and
+then reads the public page).
