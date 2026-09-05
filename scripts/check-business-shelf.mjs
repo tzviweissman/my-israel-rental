@@ -90,6 +90,12 @@ await page.click('[data-testid="page-design-collection-add"]');
 ok('an incomplete group is called out before saving',
   await page.locator('[data-testid="page-design-collection-warning"]').count() === 1);
 
+// The preview is the point of this screen, so an edit has to reach it
+// BEFORE saving - the first cut overlaid only accent, cover and payment
+// links, so these two showed the old page until you closed and reopened.
+const previewText = await page.frameLocator('iframe').locator('body').innerText().catch(() => '');
+ok('the preview shows the group before it is saved', previewText.includes('Shabbos'), previewText.slice(0, 100));
+
 await page.click('[data-testid="page-design-save"]');
 await page.waitForTimeout(3000);
 

@@ -214,7 +214,14 @@ export default function BusinessPageEditor({ business, API, token, onClose, onSa
     accent,
     cover_url: coverUrl,
     payment_links: validLinks,
-  } : null), [page, accent, coverUrl, validLinks]);
+    // The preview is the point of this screen, so every edit has to reach
+    // it. Cleaned, not raw: a group being typed has no name yet, and the
+    // preview would show a heading over nothing until the owner finished
+    // the word. It appears the moment it has a name and something in it,
+    // which is also exactly when it would save.
+    pinned_service_ids: pinned,
+    collections: cleanCollections(collections),
+  } : null), [page, accent, coverUrl, validLinks, pinned, collections]);
 
   const dirty = useMemo(() => {
     if (!saved) return false;
