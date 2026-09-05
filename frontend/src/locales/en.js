@@ -53,6 +53,20 @@ const en = {
         addAnother: 'Add another question',
         remove: 'Remove',
       },
+      myGigs: {
+        view: 'View',
+        delete: 'Delete',
+        deleteConfirm: 'Delete this listing? This cannot be undone.',
+        deleted: 'Listing deleted',
+        deleteFailed: 'Could not delete that',
+        pause: 'Pause',
+        resume: 'Put back on',
+        paused: 'Paused. It is off the site until you turn it back on.',
+        resumed: 'Back on the site.',
+        pauseFailed: 'Could not change that',
+        pausedBadge: 'Paused, customers cannot see this',
+        takenDown: 'Taken down by MyIsraelRental',
+      },
       editListing: {
         offerOn: 'Run an offer on this listing',
         offerPercent: '% off',
@@ -3035,6 +3049,8 @@ const en = {
       // The listing (gig) detail page.
       gigDetail: {
         faqs: 'FAQs',
+        pausedNotice: 'This listing is paused, so only you can see this page. Put it back on from your dashboard.',
+        takenDown: 'MyIsraelRental has taken this listing down. Only you can see this page.',
         backToServices: 'Back to businesses',
         aboutService: 'About this service',
         aboutStore: 'About this store',

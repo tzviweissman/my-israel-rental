@@ -44,6 +44,20 @@ const he = {
         addAnother: 'הוספת שאלה נוספת',
         remove: 'הסרה',
       },
+      myGigs: {
+        view: 'צפייה',
+        delete: 'מחיקה',
+        deleteConfirm: 'למחוק את המודעה? אי אפשר לבטל את זה.',
+        deleted: 'המודעה נמחקה',
+        deleteFailed: 'לא הצלחנו למחוק',
+        pause: 'השהיה',
+        resume: 'החזרה לאתר',
+        paused: 'הושהה. המודעה יורדת מהאתר עד שתחזירו אותה.',
+        resumed: 'המודעה חזרה לאתר.',
+        pauseFailed: 'לא הצלחנו לשנות',
+        pausedBadge: 'מושהה, לקוחות לא רואים את זה',
+        takenDown: 'הורד על ידי MyIsraelRental',
+      },
       editListing: {
         offerOn: 'הפעלת מבצע על המודעה הזו',
         offerPercent: 'אחוז הנחה',
@@ -2879,6 +2893,8 @@ const he = {
       // עמוד המודעה.
       gigDetail: {
         faqs: 'שאלות ותשובות',
+        pausedNotice: 'המודעה מושהית, ולכן רק אתם רואים את העמוד הזה. אפשר להחזיר אותה מלוח הבקרה.',
+        takenDown: 'MyIsraelRental הורידה את המודעה הזו. רק אתם רואים את העמוד הזה.',
         backToServices: 'חזרה לעסקים',
         aboutService: 'על השירות',
         aboutStore: 'על החנות',

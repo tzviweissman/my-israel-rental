@@ -606,6 +606,26 @@ async def get_gig(gig_id: str, request: Request, viewer=Depends(optional_user)):
     gig = await db.marketplace_gigs.find_one({"_id": gig_id})
     if not gig:
         raise HTTPException(status_code=404, detail="Gig not found")
+    # A listing that is not live is not reachable by its link either.
+    #
+    # Every LIST already filtered on `status: "published"` and this route
+    # did not - so a paused listing still took bookings from anyone
+    # holding the URL, which is precisely what "I am away" has to stop,
+    # and an admin's moderation only removed a listing from browse while
+    # its link kept working. A link is what a reported listing gets
+    # shared by.
+    #
+    # The owner still reaches their own, so they can preview it and turn
+    # it back on; an admin reaches everything, which is how they check a
+    # report. Both are authenticated and neither widens anything.
+    owner_preview = bool(
+        viewer and (
+            viewer.get("user_id") == gig.get("provider_user_id")
+            or viewer.get("role") == "admin"
+        ),
+    )
+    if gig.get("status", "published") != "published" and not owner_preview:
+        raise HTTPException(status_code=404, detail="Gig not found")
     # L2 — count the visit. Fire-and-forget: a metric must never slow down
     # or fail the page it is measuring. `viewer` is optional auth purely so
     # the provider's own visits can be skipped; it gates nothing.
@@ -681,6 +701,14 @@ async def patch_gig(gig_id: str, payload: GigPatch, user=Depends(verify_token)):
         raise HTTPException(status_code=404, detail="Gig not found")
     if gig["provider_user_id"] != user["user_id"]:
         raise HTTPException(status_code=403, detail="Not your gig")
+    # `unpublished` is an admin's moderation decision. The provider owns
+    # the listing, so this route authorises them for everything else on
+    # it - but not for putting it back up.
+    if "status" in payload.model_fields_set and gig.get("status") == "unpublished":
+        raise HTTPException(
+            status_code=403,
+            detail="This listing was taken down by MyIsraelRental. Contact us to have it reviewed.",
+        )
     update = {k: v for k, v in payload.model_dump(exclude_none=True).items()}
     # `discount` is the one field where sending null MEANS something - take
     # the offer down - and exclude_none above has already dropped it. Read
@@ -1023,6 +1051,11 @@ async def book_gig(gig_id: str, payload: BookingIn, user=Depends(verify_token)):
     gig = await db.marketplace_gigs.find_one({"_id": gig_id})
     if not gig:
         raise HTTPException(status_code=404, detail="Gig not found")
+    # Paused means paused. The detail page 404s for the public, so this is
+    # the stale-tab case rather than the common path - but a booking taken
+    # while the business is away is the exact thing pausing prevents.
+    if gig.get("status", "published") != "published":
+        raise HTTPException(status_code=400, detail="This listing is not taking bookings right now")
     # Store gigs use direct messaging only — no calendar / no tier booking.
     if (gig.get("gig_type") or "deliverable") == "store":
         raise HTTPException(status_code=400, detail="Store gigs do not accept bookings — message the seller directly")

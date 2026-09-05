@@ -289,7 +289,16 @@ const GigDetail = () => {
     // The visitor header is what stops a refresh counting as a new
     // visitor (see utils/visitorId). Sent only on this fetch — the one
     // that represents a person actually looking at the listing.
-    axios.get(`${API}/marketplace/gigs/${id}`, { headers: visitorHeaders() })
+    //
+    // The token goes with it when there is one. The endpoint takes
+    // optional auth, and it decides two things with it: a listing that is
+    // paused or taken down is a 404 for the public but still loads for
+    // its owner (and for an admin checking a report), and a view by the
+    // owner is not counted. Anonymous, this page 404'd on the owner's own
+    // paused listing and quietly credited them with visiting themselves.
+    axios.get(`${API}/marketplace/gigs/${id}`, {
+      headers: { ...visitorHeaders(), ...(token ? { Authorization: `Bearer ${token}` } : {}) },
+    })
       .then(async (r) => {
         // Measure the cover BEFORE the page paints. The hero takes the
         // image's shape, and learning that shape from the image's own
@@ -322,7 +331,11 @@ const GigDetail = () => {
       })
       .catch(() => toast.error(t('gigDetail.notFound', 'Listing not found')))
       .finally(() => setLoading(false));
-  }, [id]);
+    // `token` too: signing in is what turns a 404 on your own paused
+    // listing into the page with the banner, and it has to re-fetch when
+    // that happens rather than leaving the visitor's answer on screen.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [id, token]);
 
   // JSON-LD Service schema — declared BEFORE the early returns so React
   // hooks ordering stays stable across renders. Falls back to null when
@@ -641,6 +654,21 @@ const GigDetail = () => {
     <div className="min-h-screen bg-[#FAFAF7]" style={{ paddingTop: 'var(--nav-h, 68px)' }} data-testid="gig-detail-page">
       <PageMeta title={`${displayTitle} — MyIsraelRental Services`} description={displayDescription?.slice(0, 155) || `Book ${displayTitle} on MyIsraelRental.`} path={`/businesses/${id}`} jsonLd={gigJsonLd} />
       <div className="max-w-5xl mx-auto px-4 py-8">
+        {/* Only the owner and an admin can load a listing that is not
+            live (the API 404s for everyone else), so this banner is the
+            answer to "why is my listing not showing" - asked on the very
+            page that looks fine. */}
+        {gig.status && gig.status !== 'published' && (
+          <div
+            className="mb-4 rounded-xl border px-4 py-3 text-sm"
+            style={{ borderColor: 'var(--brand-border)', background: 'var(--surface-muted, #F9FAFB)', color: 'var(--ink)' }}
+            data-testid="gig-not-live-banner"
+          >
+            {gig.status === 'unpublished'
+              ? t('gigDetail.takenDown', 'MyIsraelRental has taken this listing down. Only you can see this page.')
+              : t('gigDetail.pausedNotice', 'This listing is paused, so only you can see this page. Put it back on from your dashboard.')}
+          </div>
+        )}
         <Breadcrumb current={displayTitle} testId="gig-breadcrumb" />
         <button onClick={() => navigate(backTo)} className="text-sm text-gray-600 flex items-center gap-1 mb-4 hover:text-[var(--brand-primary)]" data-testid="gig-back">
           <ArrowLeft size={14} className="rtl:rotate-180" /> {t('gigDetail.backToServices', 'Back to businesses')}

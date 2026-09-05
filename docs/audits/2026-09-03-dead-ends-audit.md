@@ -92,5 +92,29 @@ owner who used the checklist. The tab ids are now a closed set the
 dashboard validates against, so a wrong one falls back to the Overview
 instead of a blank page.
 
-Still open: **#10-#14** (orphaned fields, enum values, endpoints and
-components).
+**#11 (the unreachable `paused` status)** is fixed too, and it was more
+than an unreachable enum. Providers can now pause and resume a listing
+from its own card, instead of deleting it and rebuilding it in the
+wizard. Two things had to be true first:
+
+- **Pausing had to mean something.** Every LIST filtered on
+  `status: "published"` and the DETAIL route did not, so a paused listing
+  still took bookings from anyone holding its link, and an admin's
+  takedown only removed a listing from browse while its link kept
+  working. The detail route and the booking route honour the status now;
+  the owner and an admin still load it, with a banner saying who can see
+  it. `GigDetail` sends the token on that fetch, which it never did - so
+  the owner's own visits are no longer counted as anonymous traffic to
+  their own listing either.
+- **`paused` and `unpublished` had to stay apart.** `paused` is the
+  business's own choice; `unpublished` is moderation. `GigPatch.status`
+  was an unvalidated string, so a provider could PATCH
+  `{"status": "published"}` and walk a moderated listing back onto the
+  site. It is a pattern now, and `patch_gig` refuses any status change on
+  a listing an admin is holding down. `backend/tests/test_gig_pause.py`
+  covers both locks with a real admin takedown.
+
+Still open: **#10, #12-#14** (business `collections` and
+`pinned_service_ids` with no editor, `JobPatch.status: 'awarded'`, the
+dead endpoints, the unused `sort` on `GET /properties`, and the
+unimported components).

@@ -196,6 +196,42 @@ for (const lng of ['en', 'he']) {
     }
   }
 
+  // ── pausing a listing, from the card that owns it ───────────────────
+  // The status has been in the model since the marketplace was built and
+  // nothing set it (dead-ends audit 2026-09-03, #11): a business going
+  // away for a month had to delete the listing and rebuild it.
+  if (gig?.id && lng === 'en') {
+    await page.click('[data-testid="sidebar-item-my-gigs"]');
+    await page.waitForSelector(`[data-testid="my-gigs-item-${gig.id}"]`, { timeout: 20000 }).catch(() => {});
+    ok('a live listing shows no state badge', await page.locator(`[data-testid="my-gigs-status-${gig.id}"]`).count() === 0);
+    await page.click(`[data-testid="my-gigs-pause-${gig.id}"]`);
+    await page.waitForFunction((id) => document.querySelector(`[data-testid="my-gigs-item-${id}"]`)?.dataset.status === 'paused', gig.id, { timeout: 15000 }).catch(() => {});
+    ok('pausing marks the card paused', (await page.locator(`[data-testid="my-gigs-item-${gig.id}"]`).getAttribute('data-status')) === 'paused');
+    ok('and says so on the card', await page.locator(`[data-testid="my-gigs-status-${gig.id}"]`).count() === 1);
+
+    // The point of pausing: it is off the public site, link included.
+    const anonCtx = await browser.newContext({ viewport: { width: 1280, height: 900 } });
+    const anonPage = await anonCtx.newPage();
+    const resp = await anonPage.goto(`${APP}/businesses/${gig.id}`, { waitUntil: 'networkidle' });
+    await anonPage.waitForTimeout(1500);
+    const anonText = await anonPage.locator('body').innerText();
+    ok('a paused listing is not public at its own link',
+      !anonText.includes(`TEST_shell_gig_${stamp}`), `${resp?.status()} ${anonText.slice(0, 80)}`);
+    await anonCtx.close();
+
+    // ...but its owner can still open it, and is told why it looks empty.
+    await page.goto(`${APP}/businesses/${gig.id}`, { waitUntil: 'networkidle' });
+    await page.waitForTimeout(2000);
+    ok('the owner still sees it, with a banner saying only they can',
+      await page.locator('[data-testid="gig-not-live-banner"]').count() === 1);
+
+    await page.goto(`${APP}/dashboard?tab=my-gigs`, { waitUntil: 'networkidle' });
+    await page.waitForSelector(`[data-testid="my-gigs-pause-${gig.id}"]`, { timeout: 20000 }).catch(() => {});
+    await page.click(`[data-testid="my-gigs-pause-${gig.id}"]`);
+    await page.waitForFunction((id) => document.querySelector(`[data-testid="my-gigs-item-${id}"]`)?.dataset.status === 'published', gig.id, { timeout: 15000 }).catch(() => {});
+    ok('and putting it back on restores it', (await page.locator(`[data-testid="my-gigs-item-${gig.id}"]`).getAttribute('data-status')) === 'published');
+  }
+
   ok(`${lng}: no page errors`, errors.length === 0, errors[0]);
   await ctx.close();
 }

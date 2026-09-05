@@ -616,7 +616,23 @@ class GigPatch(BaseModel):
     whatsapp: Optional[str] = None
     area: Optional[str] = None
     faqs: Optional[list[dict[str, str]]] = None
-    status: Optional[str] = None      # "draft" | "published" | "paused"
+    # THREE states, and only two of them are the provider's to set:
+    #
+    #   published    - live.
+    #   paused       - the business's own choice ("away", "booked up").
+    #                  Theirs to set and to undo.
+    #   unpublished  - an ADMIN took it down (routes/admin/marketplace.py).
+    #                  Never settable here: this route authorises on
+    #                  `provider_user_id == user_id`, so an unvalidated
+    #                  string let a provider PATCH `status: "published"`
+    #                  and undo a moderation decision on their own
+    #                  listing. patch_gig also refuses to touch the status
+    #                  of a gig an admin is holding down.
+    #
+    # It was `Optional[str]` with those three in a comment and no pattern,
+    # so any string at all was stored - including a typo, which takes a
+    # listing off every surface with no way back through the UI.
+    status: Optional[str] = Field(None, pattern="^(published|paused)$")
     # Explicitly nullable: sending `null` REMOVES the offer. patch_gig drops
     # None values wholesale, so this one field is read off `model_fields_set`
     # instead - otherwise a business could add an offer and never take it

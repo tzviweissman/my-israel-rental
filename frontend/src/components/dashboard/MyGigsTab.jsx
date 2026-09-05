@@ -11,9 +11,7 @@ import axios from 'axios';
 import { toast } from 'sonner';
 import PhoneInput from '../common/PhoneInput';
 import { phoneError } from '../../utils/phoneValidation';
-import {
-  Plus, Loader2, ExternalLink, Trash2,
-  Pencil, Upload, X, FileText, Globe, Award, ArrowLeft } from 'lucide-react';
+import { Plus, Loader2, ExternalLink, Trash2, Pencil, Upload, X, FileText, Globe, Award, ArrowLeft, PauseCircle, PlayCircle, EyeOff } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { uploadFilesFast } from '../../utils/fastUpload';
 import CoverPlaceholder from '../common/CoverPlaceholder';
@@ -388,16 +386,48 @@ const MyGigsTab = ({ API, token, business = null, onBack = null }) => {
 
   useEffect(() => { load(); }, []);
 
+  // Which card is mid-request, so its own control disables while the
+  // rest of the grid stays usable.
+  const [busyId, setBusyId] = useState(null);
+
+  /* Pause and resume. The status has been in the model since the
+     marketplace was built and nothing ever set it (dead-ends audit
+     2026-09-03, #11), so a business that went away for a month had one
+     option: delete the listing and build it again in the wizard, losing
+     its reviews and its link.
+
+     `unpublished` is not in this control's vocabulary. That is an admin
+     taking a listing down, and the API refuses to let the provider undo
+     it - the card says so instead of offering a button that 403s. */
+  const setPaused = async (gig, paused) => {
+    setBusyId(gig.id);
+    try {
+      await axios.patch(
+        `${API}/marketplace/gigs/${gig.id}`,
+        { status: paused ? 'paused' : 'published' },
+        { headers: { Authorization: `Bearer ${token}` } },
+      );
+      toast.success(paused
+        ? t('myGigs.paused', 'Paused. It is off the site until you turn it back on.')
+        : t('myGigs.resumed', 'Back on the site.'));
+      await load();
+    } catch (err) {
+      toast.error(err.response?.data?.detail || t('myGigs.pauseFailed', 'Could not change that'));
+    } finally {
+      setBusyId(null);
+    }
+  };
+
   const deleteGig = async (id) => {
-    if (!window.confirm('Delete this gig? This cannot be undone.')) return;
+    if (!window.confirm(t('myGigs.deleteConfirm', 'Delete this listing? This cannot be undone.'))) return;
     try {
       await axios.delete(`${API}/marketplace/gigs/${id}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      toast.success('Gig deleted');
+      toast.success(t('myGigs.deleted', 'Listing deleted'));
       load();
     } catch (err) {
-      toast.error(err.response?.data?.detail || 'Failed to delete');
+      toast.error(err.response?.data?.detail || t('myGigs.deleteFailed', 'Could not delete that'));
     }
   };
 
@@ -521,11 +551,16 @@ const MyGigsTab = ({ API, token, business = null, onBack = null }) => {
               null,
             );
             const sym = g.tiers?.[0]?.currency === 'USD' ? '$' : '₪';
+            // A gig written before the field existed has no status and is live.
+            const status = g.status || 'published';
+            const heldByAdmin = status === 'unpublished';
             return (
               <div
                 key={g.id}
                 className="bg-white border border-gray-200 rounded-2xl overflow-hidden hover:shadow-md transition-shadow"
+                style={status === 'published' ? undefined : { opacity: 0.65 }}
                 data-testid={`my-gigs-item-${g.id}`}
+                data-status={status}
               >
                 <button
                   onClick={() => navigate(`/businesses/${g.id}`)}
@@ -566,6 +601,23 @@ const MyGigsTab = ({ API, token, business = null, onBack = null }) => {
                     />
                   )}
                   <p className="font-semibold text-sm text-gray-900 truncate">{g.title}</p>
+                  {/* Only when it is NOT live: a green "published" badge on
+                      every card in a list of published cards is noise, and
+                      the one state worth interrupting for is the one where
+                      customers cannot see this. */}
+                  {status !== 'published' && (
+                    <p
+                      className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-semibold"
+                      style={heldByAdmin
+                        ? { background: '#FDECEA', color: '#B3261E' }
+                        : { background: 'var(--surface-muted, #F9FAFB)', color: 'var(--brand-muted)' }}
+                      data-testid={`my-gigs-status-${g.id}`}
+                    >
+                      {heldByAdmin
+                        ? <><EyeOff size={11} aria-hidden="true" /> {t('myGigs.takenDown', 'Taken down by MyIsraelRental')}</>
+                        : <><PauseCircle size={11} aria-hidden="true" /> {t('myGigs.pausedBadge', 'Paused, customers cannot see this')}</>}
+                    </p>
+                  )}
                   <p className="text-xs text-gray-500 truncate">
                     {g.category}{g.area ? ` · ${g.area}` : ''}
                   </p>
@@ -582,7 +634,7 @@ const MyGigsTab = ({ API, token, business = null, onBack = null }) => {
                         className="text-xs font-semibold text-[var(--brand-primary)] hover:underline flex items-center gap-1"
                         data-testid={`my-gigs-view-${g.id}`}
                       >
-                        View <ExternalLink size={11} />
+                        {t('myGigs.view', 'View')} <ExternalLink size={11} />
                       </button>
                       {/* Fixing a typo or a wrong photo used to mean
                           deleting the listing and rebuilding it in the
@@ -594,13 +646,27 @@ const MyGigsTab = ({ API, token, business = null, onBack = null }) => {
                       >
                         <Pencil size={11} /> {t('editListing.edit', 'Edit')}
                       </button>
+                      {/* Absent, not disabled, while an admin holds it
+                          down: a control that can only fail is not one. */}
+                      {!heldByAdmin && (
+                        <button
+                          onClick={() => setPaused(g, status === 'published')}
+                          disabled={busyId === g.id}
+                          className="text-xs font-semibold text-gray-700 hover:text-[var(--brand-primary)] flex items-center gap-1 disabled:opacity-50"
+                          data-testid={`my-gigs-pause-${g.id}`}
+                        >
+                          {status === 'published'
+                            ? <><PauseCircle size={11} /> {t('myGigs.pause', 'Pause')}</>
+                            : <><PlayCircle size={11} /> {t('myGigs.resume', 'Put back on')}</>}
+                        </button>
+                      )}
                     </div>
                     <button
                       onClick={() => deleteGig(g.id)}
                       className="text-xs text-red-500 hover:text-red-700 flex items-center gap-1"
                       data-testid={`my-gigs-delete-${g.id}`}
                     >
-                      <Trash2 size={11} /> Delete
+                      <Trash2 size={11} /> {t('myGigs.delete', 'Delete')}
                     </button>
                   </div>
                 </div>
