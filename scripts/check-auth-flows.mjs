@@ -279,6 +279,59 @@ console.log('\n8. Google sign-in button present\n');
   await ctx.close();
 }
 
+// ── the sign-up page's photo sphere, from a keyboard ───────────────────
+// It shipped as 36 focusable divs that unmounted as they rotated behind
+// the sphere, so a keyboard user tabbing into it lost their place in the
+// form within seconds, with no focus ring to show where they had been
+// (2026-09-05 audit, finding 1). It is one tab stop now.
+{
+  const ctx = await browser.newContext({ viewport: { width: 1280, height: 900 }, reducedMotion: 'no-preference' });
+  const page = await ctx.newPage();
+  await page.goto(`${APP}/signup`, { waitUntil: 'networkidle' });
+  await page.waitForSelector('[data-testid="signup-sphere"]', { timeout: 20000 }).catch(() => {});
+  await page.waitForTimeout(2500);
+
+  const shape = await page.evaluate(() => {
+    const panel = document.querySelector('[data-testid="signup-right-panel"]');
+    const sphere = document.querySelector('[data-testid="signup-sphere"]');
+    return {
+      stops: panel ? panel.querySelectorAll('[tabindex="0"], a[href], button, input, select, textarea').length : -1,
+      nodes: document.querySelectorAll('[data-testid^="img-sphere-node-"]').length,
+      tabbableNodes: document.querySelectorAll('[data-testid^="img-sphere-node-"][tabindex="0"]').length,
+      role: sphere?.getAttribute('role'),
+      named: !!sphere?.getAttribute('aria-label'),
+    };
+  });
+  ok('the sphere is drawn', shape.nodes > 10, JSON.stringify(shape));
+  ok('and is ONE tab stop, not one per photo', shape.stops === 1 && shape.tabbableNodes === 0, JSON.stringify(shape));
+  ok('with a role and a name', shape.role === 'group' && shape.named, JSON.stringify(shape));
+
+  // Focus has to survive the rotation that used to destroy it.
+  await page.focus('[data-testid="signup-sphere"]');
+  await page.waitForTimeout(4000);
+  ok('focus survives the rotation', await page.evaluate(() => document.activeElement?.dataset?.testid) === 'signup-sphere');
+
+  const ring = await page.evaluate(() => {
+    const cs = getComputedStyle(document.querySelector('[data-testid="signup-sphere"]'));
+    return cs.boxShadow !== 'none' || cs.outlineStyle !== 'none';
+  });
+  ok('and shows a focus ring the global rule would not have given it', ring);
+
+  // Arrow keys turn it: a Shift step is 24 degrees, far more than the
+  // auto-rotation covers in the same window, so the two cannot be confused.
+  const angle = () => page.evaluate(() => Number(document.querySelector('[data-testid="signup-sphere"]').dataset.rotY));
+  const turn = (a, b) => Math.abs(((b - a + 540) % 360) - 180);
+  const a0 = await angle();
+  await page.waitForTimeout(150);
+  const drift = turn(a0, await angle());
+  const a1 = await angle();
+  await page.keyboard.press('Shift+ArrowRight');
+  await page.waitForTimeout(150);
+  const moved = turn(a1, await angle());
+  ok('arrow keys turn it', moved > drift + 10, `key ${moved}deg vs drift ${drift}deg in the same window`);
+  await ctx.close();
+}
+
 await browser.close();
 
 const failed = results.filter((r) => !r.ok);

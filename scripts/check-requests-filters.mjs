@@ -109,6 +109,25 @@ const settle = async (page, action) => {
   ids = await cardsOn(page);
   ok('a max price of 500 keeps the 150 item and drops the 900 one', has(ids, newCheap) && !has(ids, usedDear), `${page.url()} new=${has(ids, newCheap)} used=${has(ids, usedDear)}`);
 
+  // The controls stand as tall as the tab row above them, and the sold
+  // toggle is a thumb-sized target rather than a 13px native box.
+  const heights = await page.evaluate(() => {
+    const h = (sel) => Math.round(document.querySelector(sel)?.getBoundingClientRect().height || 0);
+    return { chip: h('[data-testid="requests-condition-new"]'), price: h('[data-testid="requests-max-price"]'),
+      sold: Math.round(document.querySelector('[data-testid="requests-include-sold"]')?.closest('label')?.getBoundingClientRect().height || 0) };
+  });
+  ok('the filter controls are not 30px tall', heights.chip >= 36 && heights.price >= 36, JSON.stringify(heights));
+  ok('and the sold toggle is a thumb-sized target', heights.sold >= 44, JSON.stringify(heights));
+  // 12px text needs 4.5:1 (2026-09-05 audit, finding 4).
+  const clearContrast = await page.evaluate(() => {
+    const el = document.querySelector('[data-testid="requests-item-filters-clear"]');
+    if (!el) return null;
+    const lum = (c) => { const m = c.match(/\d+(\.\d+)?/g).slice(0, 3).map(Number).map((v) => { v /= 255; return v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4; }); return 0.2126 * m[0] + 0.7152 * m[1] + 0.0722 * m[2]; };
+    const a = lum(getComputedStyle(el).color), b = lum('rgb(255,255,255)');
+    return Math.round(((Math.max(a, b) + 0.05) / (Math.min(a, b) + 0.05)) * 100) / 100;
+  });
+  ok('the Clear link is readable at 12px', clearContrast >= 4.5, `${clearContrast}:1`);
+
   await settle(page, () => page.click('[data-testid="requests-item-filters-clear"]'));
   await settle(page, () => page.click('[data-testid="requests-include-sold"]'));
   ids = await cardsOn(page);
@@ -136,7 +155,9 @@ if (gig?.id) {
   await page.click(`[data-testid="my-gigs-edit-listing-${gig.id}"]`);
   await page.waitForSelector('[data-testid="edit-listing-modal"]', { timeout: 10000 }).catch(() => {});
   ok('the edit sheet has the FAQ editor', await page.locator('[data-testid="edit-listing-faqs"]').count() === 1);
-  await page.click('[data-testid="edit-listing-faq-add"]');
+  // It opens with one row already there - the placeholders are what tell a
+  // provider what a good question looks like (2026-09-05, the improvement).
+  ok('and it opens with a row, not a button', await page.locator('[data-testid="edit-listing-faq-q-0"]').count() === 1);
   await page.fill('[data-testid="edit-listing-faq-q-0"]', 'How far ahead should I book?');
   await page.fill('[data-testid="edit-listing-faq-a-0"]', 'A week is plenty.');
   // an empty second row must not be saved

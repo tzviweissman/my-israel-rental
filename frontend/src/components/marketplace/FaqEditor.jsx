@@ -10,6 +10,15 @@
  * Shape is the one the listing page reads: `{ q, a }`. Empty rows are
  * dropped by `cleanFaqs` before anything is sent, so a person who opened
  * a row and changed their mind has nothing to undo.
+ *
+ * IT OPENS WITH ONE EMPTY ROW rather than a button. The placeholders are
+ * the persuasive part of this component - they show a provider what a
+ * good question looks like - and hiding them behind "Add a question"
+ * asked people to commit before seeing what they were committing to.
+ * The seeded row is DISPLAY ONLY: it is never written into the caller's
+ * state on mount, so the edit sheet's "nothing changed" check still
+ * sees nothing changed, and `cleanFaqs` drops it if it is left alone.
+ * (2026-09-05 audit, the improvement.)
  */
 import React from 'react';
 import { useTranslation } from 'react-i18next';
@@ -19,9 +28,14 @@ export const MAX_FAQS = 8;
 
 /** Rows worth keeping: both halves written. Trimmed. */
 export const cleanFaqs = (faqs) => (Array.isArray(faqs) ? faqs : [])
+  // `_k` is the row's identity while it is being edited (see below) and
+  // is never part of the listing.
   .map((f) => ({ q: String(f?.q || '').trim(), a: String(f?.a || '').trim() }))
   .filter((f) => f.q && f.a)
   .slice(0, MAX_FAQS);
+
+let seq = 0;
+const newRow = () => { seq += 1; return { q: '', a: '', _k: `faq-${seq}` }; };
 
 /**
  * @param {Object} props
@@ -31,11 +45,17 @@ export const cleanFaqs = (faqs) => (Array.isArray(faqs) ? faqs : [])
  */
 export default function FaqEditor({ faqs = [], onChange, testidPrefix = 'faq' }) {
   const { t } = useTranslation();
-  const rows = Array.isArray(faqs) ? faqs : [];
+  const given = Array.isArray(faqs) ? faqs : [];
+  // One open row when there are none. Held in a ref so it keeps its
+  // identity across renders and is not re-created under the caret.
+  const seeded = React.useRef(null);
+  if (!seeded.current) seeded.current = [newRow()];
+  const rows = given.length ? given : seeded.current;
 
+  // The first keystroke is what commits the seeded row to the caller.
   const setRow = (i, patch) => onChange(rows.map((r, idx) => (idx === i ? { ...r, ...patch } : r)));
   const remove = (i) => onChange(rows.filter((_, idx) => idx !== i));
-  const add = () => { if (rows.length < MAX_FAQS) onChange([...rows, { q: '', a: '' }]); };
+  const add = () => { if (rows.length < MAX_FAQS) onChange([...rows, newRow()]); };
 
   return (
     <div className="space-y-3" data-testid={`${testidPrefix}-editor`}>
@@ -47,7 +67,7 @@ export default function FaqEditor({ faqs = [], onChange, testidPrefix = 'faq' })
       </div>
 
       {rows.map((row, i) => (
-        <div key={i} className="rounded-xl border p-3 space-y-2" style={{ borderColor: 'var(--brand-border)' }} data-testid={`${testidPrefix}-row-${i}`}>
+        <div key={row._k || i} className="rounded-xl border p-3 space-y-2" style={{ borderColor: 'var(--brand-border)' }} data-testid={`${testidPrefix}-row-${i}`}>
           <input
             value={row.q || ''}
             onChange={(e) => setRow(i, { q: e.target.value })}
@@ -81,12 +101,14 @@ export default function FaqEditor({ faqs = [], onChange, testidPrefix = 'faq' })
         </div>
       ))}
 
+      {/* The deep accent on the label, not `--brand-primary`: 12px text
+          needs 4.5:1 and the accent is 3.61:1 on white; the deep is 6.96. */}
       {rows.length < MAX_FAQS && (
         <button
           type="button"
           onClick={add}
           className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg border text-xs font-semibold"
-          style={{ borderColor: 'var(--brand-border)', color: 'var(--brand-primary)' }}
+          style={{ borderColor: 'var(--brand-border)', color: 'var(--brand-primary-deep)' }}
           data-testid={`${testidPrefix}-add`}
         >
           <Plus size={13} aria-hidden="true" /> {rows.length ? t('faqEditor.addAnother', 'Add another question') : t('faqEditor.add', 'Add a question')}

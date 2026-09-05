@@ -1701,6 +1701,7 @@ const he = {
       },
       signupJoin: {
         sphereEyebrow: 'כבר באתר',
+        sphereLabel: 'בתים ועסקים שמפורסמים ב-MyIsraelRental. אפשר לסובב עם מקשי החצים.',
         sphereQuote: 'כל עיגול הוא בית או עסק שמפורסם כאן עכשיו. סובבו, הקישו על אחד.',
         notSure: 'עדיין לא בטוחים?',
         headline: 'הצטרפו ל-My Israel Rental',

@@ -36,7 +36,7 @@ def seller():
     return _account("seller")
 
 
-def _item(token, title, condition, price):
+def _item(token, title, condition, price, currency="ILS"):
     # The board has its own per-account posting cooldown, which the
     # rate-limit flag does not cover, so each item comes from its own
     # account. Returns (id, that account's token).
@@ -45,7 +45,7 @@ def _item(token, title, condition, price):
         "request_type": "item", "post_kind": "have", "title": title,
         "description": "item filter test, a description long enough",
         "area": "Jerusalem", "budget_type": "fixed", "budget_amount": price,
-        "budget_currency": "ILS", "condition": condition,
+        "budget_currency": currency, "condition": condition,
     }, headers=_auth(token), timeout=30)
     assert r.status_code in (200, 201), r.text
     return r.json()["id"], token
@@ -81,6 +81,33 @@ def test_condition_price_and_sold_filters(seller):
 
         over_500 = _ids({"min_price": 500})
         assert used_dear in over_500 and new_cheap not in over_500
+    finally:
+        for rid, tok in owners.items():
+            requests.delete(f"{BASE}/marketplace/requests/{rid}", headers=_auth(tok), timeout=30)
+
+
+def test_a_price_filter_in_shekels_compares_in_shekels(seller):
+    """The bounds are shekels and a post carries its own currency.
+
+    A raw comparison let "under 500" return a $500 item (about 1,850
+    shekels) under a filter labelled with a shekel sign, and hide a 600
+    shekel one (2026-09-05 audit, finding 2).
+    """
+    stamp = datetime.now(UTC).strftime("%H%M%S%f")
+    # $200 is about 730 shekels: outside a 500 ceiling, inside a 1000 one.
+    dollars, td = _item(seller, f"TEST_item_usd_{stamp}", "good", 200, currency="USD")
+    shekels, ts = _item(seller, f"TEST_item_ils_{stamp}", "good", 400)
+    owners = {dollars: td, shekels: ts}
+    try:
+        under_500 = _ids({"max_price": 500})
+        assert shekels in under_500, "400 shekels is under 500"
+        assert dollars not in under_500, "$200 is about 730 shekels, not under 500"
+
+        under_1000 = _ids({"max_price": 1000})
+        assert dollars in under_1000 and shekels in under_1000
+
+        over_500 = _ids({"min_price": 500})
+        assert dollars in over_500 and shekels not in over_500
     finally:
         for rid, tok in owners.items():
             requests.delete(f"{BASE}/marketplace/requests/{rid}", headers=_auth(tok), timeout=30)

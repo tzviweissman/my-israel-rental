@@ -18,7 +18,7 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
-import { motion } from 'motion/react';
+import { motion, useReducedMotion } from 'motion/react';
 
 import SphereImageGrid from '../ui/img-sphere';
 import useHomeShowcase, { propertyPhoto } from '../home/useHomeShowcase';
@@ -30,6 +30,11 @@ const WANT = 36;
 export default function SignupSphere() {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  // The sphere's own rotation was gated and these three entrances were
+  // not, which read as an oversight rather than a decision.
+  // `initial={false}` starts them at their final state.
+  const reduced = useReducedMotion();
+  const from = (v) => (reduced ? false : v);
   const { rentals, businesses, loaded } = useHomeShowcase();
   const boxRef = React.useRef(null);
   const [size, setSize] = React.useState(420);
@@ -86,7 +91,7 @@ export default function SignupSphere() {
 
       <div className="relative z-10 max-w-[460px]">
         <motion.p
-          initial={{ opacity: 0, y: 12, filter: 'blur(6px)' }}
+          initial={from({ opacity: 0, y: 12, filter: 'blur(6px)' })}
           animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
           transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
           className="text-xs font-semibold uppercase tracking-[0.18em] text-white/60"
@@ -94,7 +99,7 @@ export default function SignupSphere() {
           {t('signupJoin.sphereEyebrow', 'Already on the site')}
         </motion.p>
         <motion.blockquote
-          initial={{ opacity: 0, y: 18, filter: 'blur(8px)' }}
+          initial={from({ opacity: 0, y: 18, filter: 'blur(8px)' })}
           animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
           transition={{ duration: 0.8, delay: 0.12, ease: [0.22, 1, 0.36, 1] }}
           className="mt-4 text-2xl font-light leading-tight tracking-[-0.02em] text-white/90 sm:text-3xl"
@@ -107,7 +112,7 @@ export default function SignupSphere() {
       <div ref={boxRef} className="relative z-10 mt-6 flex min-h-[320px] flex-1 items-center justify-center">
         {loaded && images.length > 0 ? (
           <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
+            initial={from({ opacity: 0, scale: 0.9 })}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.9, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
           >
@@ -120,6 +125,7 @@ export default function SignupSphere() {
               momentumDecay={0.96}
               baseImageScale={0.16}
               onOpen={(img) => img.href && navigate(img.href)}
+              label={t('signupJoin.sphereLabel', 'Homes and businesses listed on MyIsraelRental. Use the arrow keys to turn it.')}
               data-testid="signup-sphere"
             />
           </motion.div>

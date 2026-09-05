@@ -64,7 +64,7 @@ from utils.bg_tasks import spawn
 from utils.translate import detect_lang, translate_marketing
 from utils.whatsapp_link import build_whatsapp_link, normalize_whatsapp_number
 
-from .shared import UTC, FRONTEND_URL, _search_clauses, _validate_category, _validate_subcategory
+from .shared import UTC, USD_TO_ILS, FRONTEND_URL, _search_clauses, _validate_category, _validate_subcategory
 
 
 router = APIRouter(prefix="/marketplace", tags=["marketplace"])
@@ -552,16 +552,35 @@ async def list_requests(
         # out the entire rest of the site.
         query["item_status"] = {"$ne": "sold"}
     if min_price is not None or max_price is not None:
-        price: dict[str, Any] = {}
-        if min_price is not None:
-            price["$gte"] = min_price
-        if max_price is not None:
-            price["$lte"] = max_price
+        # THE BOUNDS ARE SHEKELS, and a post carries its own currency.
+        #
+        # This compared `budget_amount` raw, so "under 500" showed a $500
+        # item - about 1,850 shekels - and hid a 600 shekel one, under a
+        # filter whose own label says shekels. The same fault the services
+        # board had in its cheapest-price sort (fixed 2026-09-04), at the
+        # same rate.
+        #
+        # A two-branch match rather than a stored `budget_amount_ils`,
+        # which would be a schema change and a backfill: each branch
+        # compares like with like, in the currency the post was written in.
+        #
         # Only posts that NAMED a price can be compared. An "open to
         # offers" post has no number, and silently treating that as 0
         # would put every one of them at the top of a cheapest-first
         # filter.
-        query["budget_amount"] = price
+        def _bounds(rate: float) -> dict[str, Any]:
+            b: dict[str, Any] = {}
+            if min_price is not None:
+                b["$gte"] = min_price / rate
+            if max_price is not None:
+                b["$lte"] = max_price / rate
+            return b
+
+        query["$and"] = query.get("$and", []) + [{"$or": [
+            # Written before the field existed, or written in shekels.
+            {"budget_currency": {"$in": ["ILS", None]}, "budget_amount": _bounds(1.0)},
+            {"budget_currency": "USD", "budget_amount": _bounds(USD_TO_ILS)},
+        ]}]
     if post_kind:
         # Documents written before post_kind existed have no such field, and
         # they are all demand-side. Treat a missing field as "want" so the

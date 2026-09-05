@@ -406,6 +406,11 @@ const RequestsBoard = () => {
   const includeSold = searchParams.get('include_sold') === '1';
   const [minDraft, setMinDraft] = useState(minPrice);
   const [maxDraft, setMaxDraft] = useState(maxPrice);
+  // Every other filter on this board is derived from the URL on each
+  // render. These two are typed into, so they hold a draft - but the URL
+  // is still the truth, and Back has to reach the boxes too, or the old
+  // number sits there over unfiltered results.
+  useEffect(() => { setMinDraft(minPrice); setMaxDraft(maxPrice); }, [minPrice, maxPrice]);
 
   const patchUrl = useCallback((patch) => {
     setSearchParams((prev) => {
@@ -565,7 +570,7 @@ const RequestsBoard = () => {
                     type="button"
                     aria-pressed={condition === key}
                     onClick={() => patchUrl({ condition: key })}
-                    className="px-3 py-1.5 rounded-full border text-xs font-semibold"
+                    className="px-3 py-2.5 rounded-full border text-xs font-semibold"
                     style={condition === key
                       ? { background: 'var(--action, #000)', color: 'var(--action-ink, #fff)', borderColor: 'var(--action, #000)' }
                       : { background: '#fff', color: 'var(--ink)', borderColor: 'var(--brand-border)' }}
@@ -584,13 +589,13 @@ const RequestsBoard = () => {
                   onChange={(e) => setMinDraft(e.target.value)}
                   onBlur={() => patchUrl({ min_price: minDraft })}
                   onKeyDown={(e) => { if (e.key === 'Enter') patchUrl({ min_price: minDraft }); }}
-                  className="w-24 px-3 py-1.5 rounded-full border bg-white text-xs"
+                  className="w-24 px-3 py-2.5 rounded-full border bg-white text-xs"
                   style={{ borderColor: 'var(--brand-border)' }}
                   placeholder={t('requests.minPrice', 'Min ₪')}
                   aria-label={t('requests.minPrice', 'Min ₪')}
                   data-testid="requests-min-price"
                 />
-                <span className="text-xs" style={{ color: 'var(--brand-muted)' }} aria-hidden="true">–</span>
+                <span className="text-xs" style={{ color: 'var(--brand-muted)' }} aria-hidden="true">-</span>
                 <input
                   type="number"
                   min="0"
@@ -599,14 +604,16 @@ const RequestsBoard = () => {
                   onChange={(e) => setMaxDraft(e.target.value)}
                   onBlur={() => patchUrl({ max_price: maxDraft })}
                   onKeyDown={(e) => { if (e.key === 'Enter') patchUrl({ max_price: maxDraft }); }}
-                  className="w-24 px-3 py-1.5 rounded-full border bg-white text-xs"
+                  className="w-24 px-3 py-2.5 rounded-full border bg-white text-xs"
                   style={{ borderColor: 'var(--brand-border)' }}
                   placeholder={t('requests.maxPrice', 'Max ₪')}
                   aria-label={t('requests.maxPrice', 'Max ₪')}
                   data-testid="requests-max-price"
                 />
               </div>
-              <label className="inline-flex items-center gap-1.5 text-xs" style={{ color: 'var(--ink)' }}>
+              {/* The whole label is the target, at a thumb's height: the
+                  native box alone is about 13px. */}
+              <label className="inline-flex min-h-11 items-center gap-1.5 py-2.5 text-xs" style={{ color: 'var(--ink)' }}>
                 <input
                   type="checkbox"
                   checked={includeSold}
@@ -615,12 +622,14 @@ const RequestsBoard = () => {
                 />
                 {t('requests.showSold', 'Show sold items too')}
               </label>
+              {/* The deep accent: 12px text needs 4.5:1, and
+                  `--brand-primary` is 3.61:1 on white against 6.96:1 here. */}
               {(condition || minPrice || maxPrice || includeSold) && (
                 <button
                   type="button"
-                  onClick={() => { setMinDraft(''); setMaxDraft(''); patchUrl({ condition: '', min_price: '', max_price: '', include_sold: '' }); }}
+                  onClick={() => patchUrl({ condition: '', min_price: '', max_price: '', include_sold: '' })}
                   className="text-xs font-semibold underline"
-                  style={{ color: 'var(--brand-primary)' }}
+                  style={{ color: 'var(--brand-primary-deep)' }}
                   data-testid="requests-item-filters-clear"
                 >
                   {t('requests.clearItemFilters', 'Clear')}

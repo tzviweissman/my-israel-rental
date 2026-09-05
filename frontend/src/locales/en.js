@@ -1770,6 +1770,7 @@ const en = {
       },
       signupJoin: {
         sphereEyebrow: 'Already on the site',
+        sphereLabel: 'Homes and businesses listed on MyIsraelRental. Use the arrow keys to turn it.',
         sphereQuote: 'Every circle is a home or a business listed here right now. Turn it, tap one.',
         notSure: 'Not sure yet?',
         headline: 'Join My Israel Rental',

@@ -32,6 +32,16 @@
  *    so the page does not scroll under a drag, instead of the source's
  *    non-passive document listeners calling preventDefault on every move.
  *
+ * 6. ONE TAB STOP, and it is the sphere. The first cut gave every node
+ *    `tabIndex={0}`, which put 36 tab stops after the sign-up form AND
+ *    destroyed a keyboard user's place: a node behind the equator
+ *    unmounts, and at 0.18 degrees a frame they cross that line every
+ *    few seconds, so focus fell back to <body> mid-form. The nodes are
+ *    decorative here - every listing on the sphere has its own page,
+ *    reachable from the boards - so the sphere takes the focus, arrow
+ *    keys turn it, and the nodes stay clickable by pointer.
+ *    (2026-09-05 audit, finding 1.)
+ *
  * Only dependency: lucide-react is NOT needed any more (the X was the
  * modal's). Nothing else.
  */
@@ -75,6 +85,7 @@ function spherePositions(count) {
  * @param {boolean} [props.autoRotate=false]
  * @param {number} [props.autoRotateSpeed=0.3] Degrees per frame.
  * @param {(image: SphereImage) => void} [props.onOpen]
+ * @param {string} [props.label] The sphere's accessible name.
  * @param {string} [props.className]
  */
 export function SphereImageGrid({
@@ -88,6 +99,7 @@ export function SphereImageGrid({
   autoRotate = false,
   autoRotateSpeed = 0.3,
   onOpen,
+  label = "Photo sphere",
   className,
   ...rest
 }) {
@@ -158,6 +170,24 @@ export function SphereImageGrid({
     if (reduced.current) { p.vx = 0; p.vy = 0; }
   };
 
+  // Arrow keys turn it, in the same units a drag does, so a keyboard
+  // reaches every face the pointer can.
+  const onKeyDown = (e) => {
+    const step = e.shiftKey ? 24 : 8;
+    const p = physics.current;
+    const moves = {
+      ArrowLeft: () => { p.y = (p.y - step + 360) % 360; },
+      ArrowRight: () => { p.y = (p.y + step + 360) % 360; },
+      ArrowUp: () => { p.x = Math.max(-80, p.x - step); },
+      ArrowDown: () => { p.x = Math.min(80, p.x + step); },
+    };
+    if (!moves[e.key]) return;
+    e.preventDefault();
+    p.vx = 0; p.vy = 0;
+    moves[e.key]();
+    setRotation({ x: p.x, y: p.y });
+  };
+
   // Project every image for this rotation.
   const rx = rotation.x * DEG;
   const ry = rotation.y * DEG;
@@ -188,12 +218,27 @@ export function SphereImageGrid({
   return (
     <div
       {...rest}
-      className={cn("relative select-none cursor-grab active:cursor-grabbing", className)}
+      className={cn(
+        "relative select-none cursor-grab active:cursor-grabbing rounded-full outline-none",
+        // Its own ring: the global focus-visible rule covers form
+        // elements only, so a focusable div would have shown nothing.
+        "focus-visible:ring-2 focus-visible:ring-white/80 focus-visible:ring-offset-2 focus-visible:ring-offset-transparent",
+        className,
+      )}
       style={{ width: containerSize, height: containerSize, touchAction: "none", ...rest.style }}
       onPointerDown={onPointerDown}
       onPointerMove={onPointerMove}
       onPointerUp={onPointerUp}
       onPointerCancel={onPointerUp}
+      onKeyDown={onKeyDown}
+      role="group"
+      tabIndex={0}
+      aria-label={label}
+      // The rotation, rounded, so a check can tell an arrow key from the
+      // drift: counting node positions cannot, because nodes appear and
+      // disappear as they cross behind the sphere.
+      data-rot-y={Math.round(rotation.y)}
+      data-rot-x={Math.round(rotation.x)}
       data-testid={rest["data-testid"] || "img-sphere"}
     >
       {images.map((image, index) => {
@@ -215,10 +260,9 @@ export function SphereImageGrid({
               willChange: "transform, opacity",
             }}
             onClick={open}
-            role={onOpen ? "link" : undefined}
-            tabIndex={onOpen ? 0 : undefined}
-            aria-label={onOpen ? image.title || image.alt : undefined}
-            onKeyDown={onOpen ? (e) => { if (e.key === "Enter") onOpen(image); } : undefined}
+            // Not a tab stop, and not announced: the sphere above carries
+            // the name, and these turn in and out of existence.
+            aria-hidden="true"
             data-testid={`img-sphere-node-${index}`}
           >
             <div className="relative h-full w-full overflow-hidden rounded-full border-2 border-white/25 shadow-lg" style={{ background: "#1f2937" }}>
