@@ -196,6 +196,59 @@ async def download_contract(
     )
 
 
+@api_router.get("/contracts/sign/{sign_token}/file")
+async def download_contract_for_signing(sign_token: str) -> FileResponse:
+    """Give the person being asked to sign a copy of what they are signing.
+
+    THE BUG THIS FIXES. The signing page at /sign/:signToken is used by an
+    EXTERNAL person - a sublessee, who has no account here and never will.
+    Its Download button called `/contracts/download/{id}`, which is gated by
+    `verify_token`, and a browser opening a URL in a new tab cannot attach an
+    Authorization header. FastAPI's HTTPBearer answers a missing header with
+    403, so the button failed for everybody, and for this person there was no
+    login to route around it: they were asked to sign a legal document they
+    could not obtain a copy of.
+
+    WHY THIS IS NOT A WIDENING OF ACCESS. The `sign_token` is the credential,
+    exactly as it already is for the two endpoints beside it in
+    routes/subleases.py: the same token already serves this contract's full
+    extracted TEXT and already accepts a binding signature on it. Anyone
+    holding it can read the agreement and sign it; refusing them the file
+    itself protects nothing and costs them the copy they are entitled to.
+    It is an unguessable UUID4, given only to the person invited to sign.
+
+    WHY IT LIVES HERE. Its two siblings are in routes/subleases.py with the
+    rest of the sign flow, but this one SERVES CONTRACT BYTES, and every
+    route that does needs to sit together where the access rule on each can
+    be read in one place. That is the whole reason CLAUDE.md forbids serving
+    a contract from the public static mount - a rule broken three separate
+    times before, and once permanently, at the cost of a real contract.
+
+    Not the static mount, then: the file is resolved inside CONTRACT_DIR
+    through the same basename-only helper the other readers use, so a stored
+    value containing "../" resolves to nothing rather than to /etc/passwd.
+    """
+    contract = await db.contracts.find_one({"sign_token": sign_token}, {"_id": 0})
+    if not contract:
+        # Same wording and status as the sign page's own lookup, so a stale
+        # link says the same thing wherever it is used.
+        raise HTTPException(status_code=404, detail="Contract not found or link is invalid")
+
+    file_path = _resolve_private_contract_file(contract.get("stored_filename") or "")
+    if file_path is None:
+        raise HTTPException(status_code=404, detail="Contract file not found")
+
+    ext = (contract.get("file_type") or file_path.suffix.lstrip(".")).lower()
+    return FileResponse(
+        path=str(file_path),
+        media_type=_CONTRACT_MEDIA_TYPES.get(ext, "application/octet-stream"),
+        # `filename=` is what makes this a download rather than something the
+        # browser may try to render. nosniff is already set globally
+        # (server.py), so an uploaded file cannot be sniffed into markup.
+        filename=contract.get("original_filename") or f"contract.{ext or 'pdf'}",
+    )
+
+
 
 _CONTRACT_MEDIA_TYPES = {
     "pdf": "application/pdf",

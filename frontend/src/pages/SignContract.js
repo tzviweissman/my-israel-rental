@@ -8,6 +8,7 @@ import { FileText, PenTool, Check, Download, Loader2, AlertCircle, X, MapPin, Ca
 import { toast } from 'sonner';
 
 import { API } from '../lib/apiBase';
+import openAuthedFile from '../utils/openAuthedFile';
 
 const SignContract = () => {
   const { t } = useTranslation();
@@ -63,10 +64,19 @@ const SignContract = () => {
     }
   };
 
+  /* Keyed on the SIGN TOKEN, not the contract id, and that is the fix
+     rather than a detail. This page is opened by someone with no account
+     here: `/contracts/download/{id}` needs a bearer token they will never
+     have, so the button 403'd with no login to route around it. Their
+     entitlement is the token already in the URL, which the endpoint checks -
+     the same token that already shows them the agreement and already
+     accepts their signature on it. */
   const downloadContract = () => {
-    if (contract) {
-      window.open(`${API}/contracts/download/${contract.id}`, '_blank');
-    }
+    if (!contract) return;
+    openAuthedFile(`/contracts/sign/${signToken}/file`, API, null, {
+      download: true,
+      filename: contract.original_filename || 'contract',
+    });
   };
 
   if (loading) {

@@ -190,6 +190,11 @@ const he = {
         toastUpdated: 'עודכן',
         updateFailed: 'לא הצלחנו לעדכן את העבודה',
       },
+      contracts: {
+        notAuthorized: 'אין לכם הרשאה לצפות בחוזה הזה',
+        notAvailable: 'החוזה אינו זמין',
+        openFailed: 'לא הצלחנו לפתוח את החוזה',
+      },
       pageDesign: {
         look: 'המראה',
         lookHint: 'בחרו אחד ואז שנו מה שתרצו. שום דבר כאן לא עולה כסף ותמיד אפשר לחזור אחורה.',

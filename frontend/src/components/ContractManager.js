@@ -6,6 +6,7 @@ import { toast } from 'sonner';
 import { API, AuthContext } from '../App';
 import ContractUploadForm from './contracts/ContractUploadForm';
 import ContractListItem from './contracts/ContractListItem';
+import openAuthedFile from '../utils/openAuthedFile';
 
 /**
  * Owner-side contract manager: list/upload/translate/sign/delete contracts.
@@ -124,8 +125,13 @@ const ContractManager = ({ properties }) => {
     ), { duration: 10000 });
   };
 
+  /* `window.open` cannot attach the Authorization header this endpoint
+     requires, so this button 403'd for everyone - including the owner
+     looking at their own contract. openAuthedFile fetches the bytes with
+     the token and hands the browser a blob instead; it exists for exactly
+     this and three other call sites already use it. */
   const downloadContract = (contractId) => {
-    window.open(`${API}/contracts/download/${contractId}`, '_blank');
+    openAuthedFile(`/contracts/download/${contractId}`, API, token, { download: true });
   };
 
   const getPropertyTitle = (propertyId) => {

@@ -228,7 +228,13 @@ async def upload_sublease_contract(
 
 @api_router.get("/contracts/sign/{sign_token}", response_model=PublicContractResponse)
 async def get_contract_for_signing(sign_token: str) -> dict:
-    """Public endpoint - sublessee accesses contract via sign_token (no auth needed)"""
+    """Public endpoint - sublessee accesses contract via sign_token (no auth needed)
+
+    The third endpoint on this token, `GET /contracts/sign/{sign_token}/file`,
+    lives in routes/contracts.py rather than here. It serves the contract's
+    BYTES, and every route that does is kept together so the access rule on
+    each can be read in one place.
+    """
     contract = await db.contracts.find_one({"sign_token": sign_token}, {"_id": 0})
     if not contract:
         raise HTTPException(status_code=404, detail="Contract not found or link is invalid")

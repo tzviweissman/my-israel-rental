@@ -199,6 +199,11 @@ const en = {
         toastUpdated: 'Updated',
         updateFailed: 'Could not update that job',
       },
+      contracts: {
+        notAuthorized: 'You are not authorized to view this contract',
+        notAvailable: 'Contract not available',
+        openFailed: 'Could not open contract',
+      },
       pageDesign: {
         look: 'The look',
         lookHint: 'Try one, then adjust anything. Nothing here costs you anything and you can always change it back.',
