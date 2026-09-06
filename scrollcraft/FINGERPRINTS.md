@@ -28,9 +28,8 @@ changes only grammar and world will fail it.
 
 | Build | Grammar | Nav treatment | Hero device | Act-sequence shape | Close pattern | Signature move | World | Port |
 |---|---|---|---|---|---|---|---|---|
+| lechem-emek | 2026-09-06 | Night shoot (named): distinct scenes, full-bleed photographic hero, one dark-to-light cut at the peak | Fixed wordmark + time-of-morning clock, no CTA in the bar | Pinned still photograph with a --sc-p push-in and a greet-and-fade kinetic headline | pin > flow > pin > flow > pin > pan > flow > pin, 8 acts, 14.0vh | Pinned photo, one held cue, magnetic CTA, footer inside the stage | The scroll is the sunrise: one --dawn value walks the clock 04:00 to 07:00 and regrades every night photograph and ground together, then cuts to day | Photographic, generated stills, warm | 4500 |
 
-*(empty: your first build has nothing to clear, so build whatever the interview
-points at. From the second onwards, this table is the constraint.)*
 
 ---
 
@@ -41,7 +40,13 @@ reusing: a grammar, a nav treatment, a close pattern, a signature move, an
 act-count-and-length band. The shared columns are what the next build inherits
 as a constraint, so writing them down is the whole point.
 
-Nothing is taken yet.
+- **lechem-emek** claims: the named "Night shoot" grammar (distinct scenes,
+  photographic hero, one dark-to-light cut at the peak); a fixed
+  wordmark-plus-clock chrome with no CTA in the bar; the still-photograph
+  hero with a `--sc-p` push-in; the shape pin > flow > pin > flow > pin > pan
+  > flow > pin at 8 acts and 14.0vh; the pinned-photo close with a magnetic
+  CTA; and the sunrise move (one scroll value regrading the whole page and
+  a clock). Shares nothing with prior rows, since there were none.
 
 ---
 
@@ -63,5 +68,3 @@ If you want to see what a filled-in table looks like, and which shapes tend to
 collide, read `EXAMPLES.md` in the scroll-craft repository. Treat it as
 illustration only: those rows are somebody else's builds and they do **not**
 constrain yours.
-
-| lechem-emek | 2026-09-06 | Night shoot (named): distinct scenes, full-bleed photographic hero, one dark-to-light cut at the peak | Fixed wordmark + time-of-morning clock, no CTA in the bar | Pinned still photograph with a --sc-p push-in and a greet-and-fade kinetic headline | pin > flow > pin > flow > pin > pan > flow > pin, 8 acts, 14.0vh | Pinned photo, one held cue, magnetic CTA, footer inside the stage | The scroll is the sunrise: one --dawn value walks the clock 04:00 to 07:00 and regrades every night photograph and ground together, then cuts to day | Photographic, generated stills, warm | 4500 |
