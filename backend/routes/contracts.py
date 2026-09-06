@@ -18,6 +18,7 @@ from models_response import (
 from routes.deps import ALLOWED_CONTRACT_TYPES, CONTRACT_DIR, MAX_FILE_SIZE, ROOT_DIR, db, logger, verify_token
 from utils.errors import api_error
 from utils.cloud_storage import fetch_contract_from_cloudinary
+from utils.contract_files import CONTRACT_MEDIA_TYPES, resolve_private_contract_file
 from utils.contract_template import ensure_templates as ensure_contract_templates
 from utils.files import extract_text_from_docx, extract_text_from_image, extract_text_from_pdf
 from utils.translate import translate_text as _translate_text
@@ -263,36 +264,11 @@ async def download_contract_for_signing(sign_token: str) -> FileResponse:
 
 
 
-_CONTRACT_MEDIA_TYPES = {
-    "pdf": "application/pdf",
-    "docx": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-    "jpg": "image/jpeg",
-    "jpeg": "image/jpeg",
-    "png": "image/png",
-    "webp": "image/webp",
-}
-
-
-def _resolve_private_contract_file(stored: str):
-    """Map a stored contract reference to a file inside CONTRACT_DIR.
-
-    Accepts BOTH the legacy public-URL form ("/api/uploads/signed_x.pdf") and a
-    bare filename, so this works before and after the stored values are
-    normalised — no flag day, and old records keep resolving.
-
-    Returns the resolved Path, or None if it's missing/outside CONTRACT_DIR.
-    """
-    if not stored:
-        return None
-    # basename only — defeats "../" traversal in the stored value
-    filename = PurePosixPath(stored.replace("\\", "/")).name
-    if not filename or filename in (".", ".."):
-        return None
-    root = CONTRACT_DIR.resolve()
-    candidate = (root / filename).resolve()
-    if not str(candidate).startswith(str(root)):
-        return None
-    return candidate if candidate.exists() else None
+# Both moved to utils/contract_files.py so the booking flow decides the
+# same way. It used to have its own answer, and its answer was the public
+# uploads tree - which is the bug this file's own docstrings warn about.
+_CONTRACT_MEDIA_TYPES = CONTRACT_MEDIA_TYPES
+_resolve_private_contract_file = resolve_private_contract_file
 
 
 async def _serve_contract(doc: dict, url_field: str, pid_field: str, download_name: str):

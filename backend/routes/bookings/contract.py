@@ -15,8 +15,9 @@ from typing import Any
 from fastapi import APIRouter, Body, Depends, HTTPException
 
 from models_response import BookingSignContractResponse, BookingTranslationResponse
-from routes.deps import ROOT_DIR, db, logger, verify_token
+from routes.deps import CONTRACT_DIR, db, logger, verify_token
 from utils.errors import api_error
+from utils.contract_files import contract_reference, resolve_private_contract_file
 from utils.contract_signing import stamp_signature_on_contract
 from utils.files import extract_text_from_image, extract_text_from_pdf
 from utils.translate import translate_text as _translate_text
@@ -102,16 +103,40 @@ async def _stamp_contract_if_present(
     display_width: float | None, display_height: float | None,
     legal_name: str,
 ) -> str | None:
-    """If the property has an attached contract, stamp the signature onto
-    a fresh copy in `uploads/` and return its public URL. Otherwise None."""
+    """Stamp the signature onto a private copy and return its reference.
+
+    TWO BUGS FIXED HERE, both from this function deciding for itself where
+    contracts live.
+
+    IT READ FROM THE WRONG PLACE. Property contracts moved to CONTRACT_DIR
+    when the public-uploads leak was closed (routes/properties/contract.py),
+    and this was left pointing at `uploads/`. So for every contract uploaded
+    since that move, the file was not where this looked, and a renter
+    pressing Sign got "Contract file not found" - on the step that confirms
+    their booking.
+
+    AND IT WROTE TO A PUBLIC ONE. The signed copy went into `uploads/`,
+    which IS mounted as StaticFiles (server.py). A signed rental agreement,
+    carrying two people's names, ID numbers and signatures, was downloadable
+    by anyone who guessed or was given the URL, with no permission check
+    anywhere near it. That is the exact bug CLAUDE.md records shipping three
+    times, and it was still live here.
+
+    Both are now the shared rule in utils/contract_files.py: read through
+    the resolver, write to CONTRACT_DIR, and hand back an identifier rather
+    than a location. Reading is already permission-checked at
+    GET /bookings/{id}/signed-contract, which - being the other half of this
+    - looked in CONTRACT_DIR all along, so it could never have found what
+    this function wrote.
+    """
     if not property_data.get('contract_url'):
         return None
-    contract_filename = property_data['contract_url'].split('/')[-1]
-    contract_path = ROOT_DIR / "uploads" / contract_filename
-    if not contract_path.exists():
+    contract_path = resolve_private_contract_file(property_data['contract_url'])
+    if contract_path is None:
         raise HTTPException(status_code=404, detail="Contract file not found")
+    contract_filename = contract_path.name
     signed_filename = f"signed_{booking_id}_{contract_filename}"
-    signed_path = ROOT_DIR / "uploads" / signed_filename
+    signed_path = CONTRACT_DIR / signed_filename
     try:
         stamp_signature_on_contract(
             contract_path=contract_path,
@@ -121,7 +146,10 @@ async def _stamp_contract_if_present(
             display_width=display_width, display_height=display_height,
             legal_name=legal_name,
             booking_id=booking_id,
-            uploads_dir=ROOT_DIR / "uploads",
+            # Scratch space for the stamper's temporary signature PNG. The
+            # private directory, so a half-written signature is never
+            # momentarily public either.
+            uploads_dir=CONTRACT_DIR,
         )
     except Exception as e:
         raise api_error(
@@ -134,7 +162,10 @@ async def _stamp_contract_if_present(
             exc=e, logger=logger, context="stamp signature on contract",
             extra={"booking_id": booking_id},
         ) from e
-    return f"/api/uploads/{signed_filename}"
+    # Looks like a URL, is not one: the file is private and the only way to
+    # read it is the permission-checked endpoint. Same shape the property
+    # contract already stores, so both old and new rows resolve identically.
+    return contract_reference(signed_filename)
 
 
 async def _persist_signed_contract(
@@ -284,9 +315,12 @@ async def _resolve_contract_path(booking: dict):
     property_data = await db.properties.find_one({"id": booking["property_id"]}, {"_id": 0})
     if not property_data or not property_data.get("contract_url"):
         raise HTTPException(status_code=404, detail="No contract available for this booking")
-    contract_filename = property_data["contract_url"].split("/")[-1]
-    contract_path = ROOT_DIR / "uploads" / contract_filename
-    if not contract_path.exists():
+    # Same move as the stamping path above: contracts live in CONTRACT_DIR,
+    # so reading from `uploads/` found nothing for any contract uploaded
+    # since that changed. Here it meant "Translate contract" answered 404
+    # rather than translating.
+    contract_path = resolve_private_contract_file(property_data["contract_url"])
+    if contract_path is None:
         raise HTTPException(status_code=404, detail="Contract file not found on server")
     return contract_path
 
