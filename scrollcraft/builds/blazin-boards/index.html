@@ -1,0 +1,381 @@
+<!doctype html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Blazin' Boards. Premium meat boards, Jerusalem.</title>
+<meta name="description" content="Premium meats, cooked and grilled to perfection. Meat boards in Jerusalem. Message the business directly.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='7' fill='%2315110F'/><path d='M9 22h14M11 22V11h6a3 3 0 0 1 0 6h-6' stroke='%23C9A227' stroke-width='2.5' fill='none' stroke-linecap='round'/></svg>">
+<!--
+  Blazin' Boards, scroll-driven, from the business's real record and nothing
+  else. See BRIEF.md beside this file. What follows is the mechanism.
+
+  THE ONE IDEA. Scroll speed is the flame. Page-local JS turns scroll
+  velocity into --heat (0 to 1). Heat warms the ground through a fixed ember
+  layer, raises the grain, and mixes the accent from the site's gold toward
+  ember, so the poster word's ground, the timeline nodes and the link all
+  flare together and cool together. Stop scrolling and the page settles in
+  about a second. Off under reduced motion.
+
+  ONE PHOTOGRAPH. The business uploaded one image, a flyer with its own
+  headline baked in. The board is cut out of it (assets/board-*.jpg) and
+  appears twice: inside the letters of the poster word, and once on its own.
+  Nothing was generated; a generated board next to this name would read as
+  their product, and it would not be.
+
+  ENGINE UNTOUCHED. scrollcraft.js and scrollcraft.css are verbatim copies.
+  Everything bespoke is here, off --sc-p (published per act by the engine)
+  and off scroll velocity (which belongs to the page, not to any act).
+
+  RULES KEPT. No number that is not on their record, and there are none, so
+  there are none here. One CTA label. No em dash. No scroll cue, no counters,
+  no cards, no scrims, no photographic ground (typographic poster grammar).
+  Logical properties throughout, so the direction toggle mirrors the page.
+-->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400;1,500&family=Manrope:wght@400;500;600;700;800&family=Frank+Ruhl+Libre:wght@400;500;700&family=Assistant:wght@400;500;600;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="scrollcraft.css">
+<style>
+  /* ------------------------------------------------------------ tokens --
+     Charcoal family, three stops, painted per section and cut. The accent is
+     the site's gold at rest and mixes toward ember with heat. */
+  :root {
+    --font-head: 'Playfair Display', Georgia, serif;
+    --font-body: 'Manrope', system-ui, sans-serif;
+    --font-head-he: 'Frank Ruhl Libre', Georgia, serif;
+    --font-body-he: 'Assistant', system-ui, sans-serif;
+
+    --char-0: #0F0C0A;
+    --char-1: #15110F;
+    --char-2: #1B1512;
+    --gold: #C9A227;
+    --ember: #E0672A;
+    --heat: 0;
+
+    --sc-canvas: var(--char-1);
+    --sc-surface: #221A15;
+    --sc-ink: #EFE9DC;
+    --sc-ink-soft: #B8AC9A;
+    --sc-accent: color-mix(in oklab, var(--gold), var(--ember) calc(var(--heat) * 100%));
+    --sc-accent-ink: #15110F;
+    --sc-shadow-color: 20 30% 4%;
+
+    --sc-font-display: var(--font-head);
+    --sc-font-text: var(--font-body);
+    --sc-font-mono: var(--font-body);
+  }
+  [dir="rtl"] { --font-head: var(--font-head-he); --font-body: var(--font-body-he); }
+
+  html { scroll-behavior: auto; }
+  body { font-size: 17px; background: var(--char-1); color: var(--sc-ink); }
+  h1, h2, h3 { font-family: var(--font-head); }
+  section { position: relative; color: var(--sc-ink); }
+  .g0 { background: var(--char-0); }
+  .g1 { background: var(--char-1); }
+  .g2 { background: var(--char-2); }
+  .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+  /* ---------------------------------------------------------------- heat --
+     The ember layer sits under the grain and over every section. Opacity is
+     the only property that moves, and it moves with scroll velocity. */
+  .heat {
+    position: fixed; inset: 0; z-index: 2; pointer-events: none;
+    opacity: calc(var(--heat) * 0.7);
+    background:
+      radial-gradient(120% 70% at 50% 112%, rgba(224, 103, 42, 0.62), rgba(224, 103, 42, 0) 62%),
+      radial-gradient(70% 40% at 50% -12%, rgba(201, 162, 39, 0.22), rgba(201, 162, 39, 0) 70%);
+    mix-blend-mode: screen;
+  }
+  .sc-grain { opacity: calc(0.045 + var(--heat) * 0.11); }
+
+  /* -------------------------------------------------------------- chrome --
+     No nav. The wordmark is the composition. The only fixed thing is the
+     direction toggle every page on this site carries. */
+  .dir-toggle {
+    position: fixed; inset-block-start: var(--sc-4); inset-inline-end: var(--sc-gutter); z-index: var(--sc-z-chrome);
+    min-height: 40px; padding: 0 var(--sc-3); border-radius: var(--sc-r-pill); cursor: pointer;
+    font-family: var(--font-body); font-size: var(--sc-t-xs); font-weight: 600;
+    color: var(--sc-ink); background: color-mix(in oklab, var(--char-1) 55%, transparent);
+    border: 1px solid color-mix(in oklab, currentColor 28%, transparent);
+    backdrop-filter: blur(10px);
+    transition: background var(--sc-d-fast) var(--sc-ease-out);
+  }
+  .dir-toggle:hover { background: color-mix(in oklab, var(--char-1) 85%, transparent); }
+  .dir-toggle:active { transform: translateY(1px); }
+
+  /* ---------------------------------------------------------------- hero --
+     One word at the width of the viewport, the board inside the letters. The
+     word is presentational; the promise is the real h1 below it. The word
+     grows with --sc-p, on the clipped element itself, so the clip holds. */
+  .hero .mark-wrap {
+    position: absolute; inset: 0; display: grid; place-items: center;
+    padding-block-end: clamp(3rem, 12vh, 9rem);
+  }
+  .mark {
+    font-family: var(--font-body); font-weight: 800;
+    font-size: 25.5vw; line-height: 0.92; letter-spacing: -0.055em;
+    white-space: nowrap; direction: ltr; unicode-bidi: isolate;
+    padding-inline: 0.06em;
+    background: url(assets/board-wide.jpg) 50% 40% / cover no-repeat;
+    -webkit-background-clip: text; background-clip: text;
+    color: transparent; -webkit-text-fill-color: transparent;
+    transform: scale(calc(1 + var(--sc-p, 0) * 0.10));
+    transform-origin: 50% 50%;
+    will-change: transform;
+  }
+  .mark span { display: block; }
+  /* Desktop is one word, the poster. Phones stack the full name, the way
+     their own flyer does, so the mark fills a tall viewport. */
+  .mark > .mark__b { display: none; }
+  .hero .sc-copy--lead { max-width: min(46rem, 88vw); }
+  .hero h1 {
+    font-family: var(--font-head); font-weight: 500; font-style: italic;
+    font-size: var(--sc-t-xl); line-height: 1.15; letter-spacing: var(--sc-track-snug);
+    margin: 0 0 var(--sc-3);
+  }
+  .hero h1 b { font-style: normal; font-weight: 500; color: var(--sc-accent); }
+  .hero .where { margin: 0; color: var(--sc-ink-soft); font-size: var(--sc-t-sm); }
+
+  /* --------------------------------------------------------------- photo --
+     The one image, as an object, trail-anchored, wiping in from the start
+     edge. The caption says whose it is. */
+  .photo .sc-wrap { display: grid; gap: var(--sc-4); }
+  .photo__fig {
+    margin: 0; width: min(62vw, 880px); margin-inline-start: auto;
+    box-shadow: var(--sc-shadow-lg);
+  }
+  .photo__fig img { display: block; width: 100%; height: auto; }
+  .photo__cap { margin: 0; color: var(--sc-ink-soft); }
+
+  /* ------------------------------------------------------------- promise --
+     Their sentence, one word at a time, each one larger than the last. The
+     scale rides --sc-p on a wrapper so it never fights the cue's transform. */
+  .promise .word-scale {
+    position: absolute; inset: 0; display: grid; place-items: center; text-align: center;
+    transform-origin: 50% 50%;
+  }
+  .promise .word-scale--a { transform: scale(calc(0.84 + var(--sc-p, 0) * 0.30)); }
+  .promise .word-scale--b { transform: scale(calc(0.86 + var(--sc-p, 0) * 0.30)); }
+  .promise .word-scale--c { transform: scale(calc(0.90 + var(--sc-p, 0) * 0.22)); }
+  .word {
+    margin: 0; font-family: var(--font-head); font-weight: 500; line-height: 0.95;
+    letter-spacing: -0.03em; white-space: nowrap;
+    /* Latin word, split into spans: without this the spans lay out backwards under RTL. */
+    direction: ltr; unicode-bidi: isolate;
+  }
+  .word--a { font-size: clamp(3.5rem, 21vw, 21vw); }
+  .word--b { font-size: clamp(3.8rem, 24vw, 24vw); font-style: italic; }
+  .word--c { font-size: clamp(2.2rem, 7.6vw, 7.6vw); white-space: normal; max-width: 92vw; letter-spacing: var(--sc-track-tight); }
+  .word--c em { font-style: italic; color: var(--sc-accent); }
+  .promise .sc-copy--lead { bottom: clamp(2rem, 8vh, 5rem); }
+  .promise .from { margin: 0; color: var(--sc-ink-soft); }
+
+  /* --------------------------------------------------------------- facts --
+     A list, not cards. Label, then the fact, at reading size. */
+  .facts__list { margin: 0; display: grid; gap: var(--sc-6); max-width: 56rem; }
+  .facts__list > div { display: grid; grid-template-columns: 7.5rem 1fr; gap: var(--sc-4); align-items: baseline; }
+  .facts__list dt { margin: 0; color: var(--sc-ink-soft); }
+  .facts__list dd { margin: 0; font-family: var(--font-head); font-size: var(--sc-t-2xl); line-height: 1.1; letter-spacing: var(--sc-track-snug); }
+
+  /* -------------------------------------------------------------- breath --
+     An empty screen on purpose. See BRIEF.md, authored silence. */
+  .breath { min-height: 42vh; }
+
+  /* ----------------------------------------------------------------- how --
+     A timeline, three nodes on one line, lit in order as they enter. */
+  .how h2 { margin: 0 0 var(--sc-7); font-weight: 500; }
+  .steps {
+    list-style: none; margin: 0; padding: 0; display: grid; gap: var(--sc-6);
+    position: relative; max-width: 40rem;
+    padding-inline-start: 2.25rem;
+  }
+  .steps::before {
+    content: ""; position: absolute; inset-block: 0.6rem; inset-inline-start: 0.42rem;
+    width: 2px; background: color-mix(in oklab, var(--sc-ink) 22%, transparent);
+  }
+  .steps li { position: relative; margin: 0; font-size: var(--sc-t-lg); line-height: 1.3; }
+  .steps li::before {
+    content: ""; position: absolute; inset-inline-start: -2.25rem; top: 0.42em;
+    width: 0.95rem; height: 0.95rem; border-radius: 50%;
+    background: var(--sc-accent); box-shadow: 0 0 0 4px var(--char-2);
+  }
+  .steps li small { display: block; margin-top: var(--sc-1); font-size: var(--sc-t-sm); color: var(--sc-ink-soft); }
+
+  /* --------------------------------------------------------------- close --
+     The whole page inverts: the smallest type on it, one underlined link,
+     the reassurance beside the link and nowhere else. */
+  .close__copy { max-width: 30rem; }
+  .close__line { margin: 0 0 var(--sc-5); font-size: var(--sc-t-sm); color: var(--sc-ink-soft); }
+  .close__link {
+    display: inline-block; font-family: var(--font-head); font-weight: 500; font-size: var(--sc-t-lg);
+    color: var(--sc-accent); text-decoration: underline; text-underline-offset: 0.22em; text-decoration-thickness: 1.5px;
+    padding: var(--sc-2) 0; min-height: 44px;
+  }
+  .close__link:hover { text-decoration-thickness: 2.5px; }
+  .close__link:focus-visible { outline: 2px solid var(--sc-accent); outline-offset: 6px; border-radius: 4px; }
+  .close__assure { margin: var(--sc-5) 0 0; font-size: var(--sc-t-sm); color: var(--sc-ink-soft); line-height: 1.5; }
+  .close__foot {
+    position: absolute; inset-inline: var(--sc-gutter); bottom: var(--sc-5); margin: 0;
+    font-size: var(--sc-t-xs); color: var(--sc-ink-soft); letter-spacing: 0.06em;
+  }
+
+  /* -------------------------------------------------------------- mobile -- */
+  @media (max-width: 860px) {
+    .mark { font-size: 24.5vw; line-height: 0.9; }
+    .mark > .mark__b { display: block; }
+    /* Two lines cover a taller box, so the tighter crop keeps meat in every letter. */
+    .mark { background-image: url(assets/board-close.jpg); background-position: 50% 50%; }
+    .hero .mark-wrap { padding-block-end: clamp(9rem, 30vh, 15rem); }
+    .photo__fig { width: 100%; }
+    .word--c { font-size: clamp(2.2rem, 10.5vw, 10.5vw); }
+    .facts__list > div { grid-template-columns: 1fr; gap: var(--sc-2); }
+    .facts__list dd { font-size: var(--sc-t-xl); }
+    /* The kit sets inset-inline on every .sc-copy here, which breaks the
+       centre anchor. Restate it. */
+    .close .sc-copy--center { inset-inline: var(--sc-gutter); left: auto; translate: 0 -50%; max-width: none; text-align: center; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .mark, .promise .word-scale { transform: none; }
+    .heat { display: none; }
+  }
+</style>
+</head>
+<body id="top">
+<button class="dir-toggle" id="dirToggle" type="button" aria-label="Switch direction">עברית</button>
+<div class="heat" aria-hidden="true"></div>
+<div class="sc-grain" aria-hidden="true"></div>
+
+<main>
+  <!-- 1  Impact -->
+  <section class="hero g1" data-sc-act="pin" data-sc-span="1.6" data-sc-dwell="0.3" aria-label="Blazin' Boards">
+    <div data-sc-stage>
+      <div class="mark-wrap" data-sc-cue="0 1 0 0" data-sc-rise="0" aria-hidden="true">
+        <div class="mark"><span>BLAZIN’</span><span class="mark__b">BOARDS</span></div>
+      </div>
+      <div class="sc-copy sc-copy--lead" data-sc-cue="0 1 0 0">
+        <h1>Premium meat boards, <b>grilled to perfection.</b></h1>
+        <p class="where">Blazin' Boards, Jerusalem. Ordered by message, on this page.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 2  Appetite -->
+  <section class="photo sc-section g2" id="photo" data-sc-act="flow" aria-label="The board">
+    <div class="sc-wrap">
+      <figure class="photo__fig" data-sc-reveal="right" data-sc-reveal-at="0.06 0.48">
+        <picture>
+          <source media="(max-width: 860px)" srcset="assets/board-tall.jpg">
+          <img src="assets/board-close.jpg" width="825" height="660" alt="A long wooden board covered edge to edge in sliced grilled and cured meats, with a bone-in cut resting in the middle" loading="eager">
+        </picture>
+      </figure>
+      <p class="photo__cap sc-label" data-sc-in>One of their boards. Their photograph.</p>
+    </div>
+  </section>
+
+  <!-- 3  Hunger, the peak -->
+  <section class="promise g0" id="promise" data-sc-act="pin" data-sc-span="2.8" aria-labelledby="promiseText">
+    <h2 class="sr" id="promiseText">Premium meats, cooked and grilled to perfection.</h2>
+    <div data-sc-stage>
+      <div class="word-scale word-scale--a" aria-hidden="true">
+        <p class="word word--a" data-sc-cue="0.02 0.31 0.10 0.10">Premium</p>
+      </div>
+      <div class="word-scale word-scale--b" aria-hidden="true">
+        <p class="word word--b" data-sc-cue="0.31 0.61 0.10 0.10" data-sc-kinetic="chars">meats.</p>
+      </div>
+      <div class="word-scale word-scale--c" aria-hidden="true">
+        <p class="word word--c" data-sc-cue="0.61 1 0.10 0">Cooked and grilled to <em>perfection.</em></p>
+      </div>
+      <div class="sc-copy sc-copy--lead" data-sc-cue="0.72 1 0.12 0">
+        <p class="from sc-label">In their words.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 4  Trust -->
+  <section class="facts sc-section g1" id="facts" data-sc-act="flow" aria-label="The facts">
+    <div class="sc-wrap">
+      <dl class="facts__list" data-sc-in data-sc-stagger="90">
+        <div><dt class="sc-label">What</dt><dd>Premium meat boards.</dd></div>
+        <div><dt class="sc-label">Where</dt><dd>Jerusalem.</dd></div>
+        <div><dt class="sc-label">Pay by</dt><dd>Credit card, Zelle or bank transfer.</dd></div>
+        <div><dt class="sc-label">You talk to</dt><dd>The business itself. No middleman.</dd></div>
+      </dl>
+    </div>
+  </section>
+
+  <!-- 5  Breath -->
+  <section class="breath g0" data-sc-act="flow" aria-hidden="true"></section>
+
+  <!-- 6  Certainty -->
+  <section class="how sc-section g2" id="how" data-sc-act="flow" aria-label="How it goes">
+    <div class="sc-wrap">
+      <h2 class="sc-display sc-display--md">How it goes.</h2>
+      <ol class="steps" data-sc-in data-sc-stagger="140">
+        <li>You send a message.<small>From this page. No account for them to make, no form for you.</small></li>
+        <li>You agree the board and the day, in chat.<small>What you want on it, how many people, when.</small></li>
+        <li>You pay them the way they take it.<small>Card, Zelle or bank transfer. Between you and them.</small></li>
+      </ol>
+    </div>
+  </section>
+
+  <!-- 7  Resolve -->
+  <section class="close g1" id="order" data-sc-act="pin" data-sc-span="1.1" aria-label="Order">
+    <div data-sc-stage>
+      <div class="sc-copy sc-copy--center close__copy" data-sc-cue="0.06">
+        <p class="close__line">That's the page.</p>
+        <a class="close__link" href="#top">Message Blazin' Boards</a>
+        <p class="close__assure">Pay by card, Zelle or bank transfer. You talk to the business directly.</p>
+      </div>
+      <p class="close__foot">Blazin' Boards, Jerusalem, on MyIsraelRental.</p>
+    </div>
+  </section>
+</main>
+
+<script src="scrollcraft.js"></script>
+<script>
+  ScrollCraft.mount(document.body);
+  /* ----------------------------------------------------------- the flame --
+     Page-local, engine untouched. Scroll velocity, smoothed, becomes --heat
+     on the root. Fast attack, slow cooling: it should flare the instant you
+     move and take about a second to settle once you stop. */
+  (function () {
+    var root = document.documentElement;
+    var reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (reduce) return;
+    var lastY = scrollY, lastT = performance.now();
+    var target = 0, heat = 0, raf = 0;
+    function frame() {
+      raf = 0;
+      var k = target > heat ? 0.32 : 0.045;
+      heat += (target - heat) * k;
+      if (heat < 0.003 && target === 0) heat = 0;
+      root.style.setProperty('--heat', heat.toFixed(3));
+      /* Velocity decays on its own when no scroll event arrives. */
+      target *= 0.82;
+      if (target < 0.01) target = 0;
+      if (heat > 0 || target > 0) raf = requestAnimationFrame(frame);
+    }
+    addEventListener('scroll', function () {
+      var now = performance.now(), dt = Math.max(now - lastT, 8);
+      var v = Math.abs(scrollY - lastY) / dt;          /* px per ms */
+      lastY = scrollY; lastT = now;
+      /* About 2.6 px/ms is a hard flick. Trackpad drift stays under 0.5. */
+      target = Math.max(target, Math.min(v / 2.6, 1));
+      if (!raf) raf = requestAnimationFrame(frame);
+    }, { passive: true });
+
+    /* Direction toggle. Every page on this site works both ways, and that
+       is only true if the check is one click away. */
+    var toggle = document.getElementById('dirToggle');
+    toggle.addEventListener('click', function () {
+      var rtl = root.getAttribute('dir') === 'rtl';
+      root.setAttribute('dir', rtl ? 'ltr' : 'rtl');
+      root.setAttribute('lang', rtl ? 'en' : 'he');
+      toggle.textContent = rtl ? 'עברית' : 'English';
+      ScrollCraft.instances.forEach(function (i) { i.layout(); });
+    });
+  })();
+</script>
+</body>
+</html>
