@@ -1,0 +1,621 @@
+<!doctype html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Lechem Emek — business page mockup</title>
+
+<!--
+  WHAT THIS IS
+  ============
+  A layout mockup for what a BUSINESS PAGE should look like, in the same
+  role as cinematic-preview.html and stays-preview.html: the source of
+  truth for layout, to be ported into real components afterwards. The
+  business is a bakery because a bakery is the hardest honest test - it
+  has photographs, prices, hours and a story, and nothing else to hide
+  behind.
+
+  WHY THESE COLOURS AND NOT NICER ONES
+  ------------------------------------
+  Limestone #EFE9DC, ink #23201B, gold #C9A227. Those are the `gold`
+  business accent exactly as `frontend/src/utils/businessAccent.js`
+  already defines it, plus the palette's own neutrals. A terracotta-and-
+  sage bakery would have looked lovely and would have been undeliverable:
+  the page builder can only give a business one of four accents, so a
+  mockup painted in a fifth is a picture of a page this site cannot
+  produce. `--gold-lg` #A9831C is used for large display gold on light,
+  because #C9A227 at display size on limestone is too weak to read.
+
+  REFERENCES STUDIED (Mobbin, at design time only, per P5 of
+  docs/ai-page-builder-spec.md - nothing third-party is fetched here or
+  reaches a visitor):
+    Savor    - cream ground, macro film hero, the floating order card,
+               the offset photo pair with a mono-caps caption
+    Graza    - the item row: eyebrow, quoted nickname, serif name, one
+               line of copy, price. Their pills sit ON the photo; ours
+               sit under it, because a label over an image is a tell.
+    Eat Real Food - the closing band: one enormous line, one button
+    Escape Cafe   - one large photo interrupting a grid's rhythm
+
+  RULES THIS FILE KEEPS
+  ---------------------
+  * Logical properties throughout, so it mirrors under RTL. The toggle
+    top-right is real - use it. Headings read `var(--font-head)`, never a
+    literal face, because the RTL swap is on the variable and Playfair
+    has no Hebrew glyphs.
+  * Scroll reveal is fail-safe: everything is visible with JavaScript
+    off, and only becomes animatable once `html.js` exists.
+  * `prefers-reduced-motion` stops the drift, the marquee and the
+    reveals. Nothing is only understandable in motion.
+  * Every photograph was generated for this mockup (Nano Banana Pro,
+    6 Sep 2026, art-directed as one dawn shoot) and lives in
+    frontend/public/images/mockups/bakery/. No face appears anywhere:
+    hands only, so no generated person is ever presented as this
+    bakery's baker or customer. No number on this page claims to be a
+    real count.
+-->
+
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400&family=Manrope:wght@400;500;600;700&family=Frank+Ruhl+Libre:wght@400;500;700&family=Assistant:wght@400;500;600&display=swap" rel="stylesheet" />
+
+<style>
+/* ---------------------------------------------------------------- tokens */
+:root{
+  --ink:#23201B;
+  --ink-soft:#5B534A;
+  --muted:#8A8073;
+  --limestone:#EFE9DC;
+  --cream:#F7F3EA;
+  --surface:#FFFFFF;
+  --line:#DCD3C1;
+  --gold:#C9A227;
+  --gold-lg:#A9831C;      /* large display gold, light backgrounds only */
+  --gold-wash:rgba(201,162,39,.14);
+
+  --font-head:'Playfair Display',Georgia,serif;
+  --font-body:'Manrope',system-ui,sans-serif;
+  --font-head-he:'Frank Ruhl Libre',Georgia,serif;
+  --font-body-he:'Assistant',system-ui,sans-serif;
+
+  --shell:min(1240px,100% - 3rem);
+  --ease:cubic-bezier(.22,1,.36,1);
+}
+[dir="rtl"]{--font-head:var(--font-head-he);--font-body:var(--font-body-he)}
+
+*,*::before,*::after{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{
+  margin:0;
+  background:var(--limestone);
+  color:var(--ink);
+  font-family:var(--font-body);
+  font-size:17px;
+  line-height:1.6;
+  -webkit-font-smoothing:antialiased;
+  /* `clip`, not `hidden`: overflow-x:hidden on body kills position:sticky
+     in every descendant, which is how the pinned scenes on the cinematic
+     page silently stopped working. */
+  overflow-x:clip;
+}
+img{max-width:100%;display:block}
+a{color:inherit}
+
+h1,h2,h3{font-family:var(--font-head);font-weight:500;margin:0;letter-spacing:-.015em;line-height:1.05}
+.display{font-size:clamp(2.6rem,7.2vw,6rem)}
+.h2{font-size:clamp(2rem,4.6vw,3.6rem)}
+.h3{font-size:clamp(1.3rem,2.2vw,1.85rem);line-height:1.15}
+
+.eyebrow{
+  font-family:var(--font-body);
+  font-size:.68rem;font-weight:600;
+  letter-spacing:.16em;text-transform:uppercase;
+  color:var(--muted);
+}
+.lede{font-size:clamp(1rem,1.35vw,1.15rem);color:var(--ink-soft);max-width:46ch}
+
+.shell{width:var(--shell);margin-inline:auto}
+section{position:relative}
+
+/* Buttons. Solid ink is the action; the gold one is ink-on-gold, never
+   white-on-gold - measured 6.71:1 rather than the 1.88:1 a frosted gold
+   gave, which is the whole reason the frosted treatment was retired. */
+.btn{
+  display:inline-flex;align-items:center;gap:.55rem;
+  min-height:48px;padding:0 1.5rem;border-radius:999px;
+  font-family:var(--font-body);font-size:.92rem;font-weight:600;
+  text-decoration:none;border:1px solid transparent;cursor:pointer;
+  transition:transform .35s var(--ease),background .35s var(--ease),box-shadow .35s var(--ease);
+}
+.btn:hover{transform:translateY(-2px)}
+.btn-ink{background:var(--ink);color:#fff}
+.btn-ink:hover{box-shadow:0 14px 34px rgba(35,32,27,.28)}
+.btn-gold{background:var(--gold);color:var(--ink)}
+.btn-gold:hover{box-shadow:0 14px 34px rgba(201,162,39,.4)}
+.btn-quiet{border-color:var(--line);background:transparent;color:var(--ink)}
+.btn-quiet:hover{background:var(--surface)}
+.btn-ghost-light{border-color:rgba(255,255,255,.55);color:#fff}
+.btn-ghost-light:hover{background:rgba(255,255,255,.12)}
+
+/* Scroll reveal, FAIL-SAFE. Nothing hides until JS says it may. */
+.js .js-reveal{opacity:0;transform:translateY(22px);transition:opacity .9s var(--ease),transform .9s var(--ease)}
+.js .js-reveal.in{opacity:1;transform:none}
+.js .js-reveal[data-delay="1"]{transition-delay:.09s}
+.js .js-reveal[data-delay="2"]{transition-delay:.18s}
+.js .js-reveal[data-delay="3"]{transition-delay:.27s}
+
+/* ------------------------------------------------------------------- nav */
+.nav{
+  position:fixed;inset-block-start:0;inset-inline:0;z-index:60;
+  display:flex;align-items:center;justify-content:space-between;gap:1rem;
+  padding:1.05rem clamp(1rem,4vw,2.5rem);
+  transition:background .4s var(--ease),backdrop-filter .4s var(--ease),border-color .4s var(--ease);
+  border-block-end:1px solid transparent;
+}
+.nav.solid{background:rgba(247,243,234,.86);backdrop-filter:blur(14px);border-block-end-color:var(--line)}
+.nav-mark{font-family:var(--font-head);font-size:1.42rem;letter-spacing:-.02em;color:#fff;transition:color .4s var(--ease);text-decoration:none}
+.nav.solid .nav-mark{color:var(--ink)}
+.nav-links{display:none;gap:1.9rem;font-size:.9rem;font-weight:500}
+.nav-links a{color:rgba(255,255,255,.9);text-decoration:none;transition:color .4s var(--ease)}
+.nav.solid .nav-links a{color:var(--ink-soft)}
+.nav-links a:hover{color:var(--gold)}
+.nav-right{display:flex;align-items:center;gap:.6rem}
+.dir-toggle{
+  min-height:40px;padding:0 .85rem;border-radius:999px;cursor:pointer;
+  font-family:var(--font-body);font-size:.78rem;font-weight:600;
+  background:rgba(255,255,255,.16);color:#fff;border:1px solid rgba(255,255,255,.4);
+  transition:all .4s var(--ease);
+}
+.nav.solid .dir-toggle{background:transparent;color:var(--ink-soft);border-color:var(--line)}
+@media(min-width:900px){.nav-links{display:flex}}
+
+/* ------------------------------------------------------------------ hero */
+.hero{min-height:100svh;display:grid;align-items:end;position:relative;overflow:hidden;isolation:isolate}
+.hero-media{position:absolute;inset:0;z-index:-2}
+.hero-media img{width:100%;height:100%;object-fit:cover;transform:scale(1.08);transform-origin:center}
+/* The cinematic part: a slow drift, and a scale the scroll drives. Both
+   are decoration, so both stop dead under reduced motion. */
+.js .hero-media img{animation:drift 26s var(--ease) infinite alternate}
+@keyframes drift{from{transform:scale(1.08) translate3d(0,0,0)}to{transform:scale(1.16) translate3d(-1.5%,-2%,0)}}
+.hero-shade{
+  position:absolute;inset:0;z-index:-1;
+  background:
+    linear-gradient(to top,rgba(21,18,14,.86) 0%,rgba(21,18,14,.35) 42%,rgba(21,18,14,.12) 70%,rgba(21,18,14,.42) 100%);
+}
+/* Grain. A single repeated SVG turbulence, cheap and static, which is
+   what stops a big flat gradient reading as a CSS gradient. */
+.grain{position:absolute;inset:0;z-index:-1;opacity:.16;pointer-events:none;mix-blend-mode:overlay;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)' opacity='.5'/%3E%3C/svg%3E")}
+.hero-inner{width:var(--shell);margin-inline:auto;padding-block:0 clamp(3rem,9vh,7rem);color:#fff}
+.hero h1{color:#fff;max-width:15ch}
+.hero h1 em{font-style:italic;color:var(--gold)}
+.hero .eyebrow{color:rgba(255,255,255,.72);margin-block-end:1.1rem}
+.hero-lede{color:rgba(255,255,255,.86);max-width:40ch;margin-block:1.4rem 2rem}
+.hero-cta{display:flex;flex-wrap:wrap;gap:.7rem}
+
+/* The floating order card, borrowed in SHAPE from Savor: the commercial
+   ask sits beside the photograph instead of interrupting it. */
+.order-card{
+  position:absolute;z-index:2;inset-block-end:clamp(1.5rem,5vh,3rem);inset-inline-end:clamp(1rem,4vw,2.5rem);
+  display:none;align-items:center;gap:.85rem;
+  padding:.7rem .8rem;border-radius:18px;
+  background:rgba(247,243,234,.94);backdrop-filter:blur(10px);
+  box-shadow:0 22px 60px rgba(21,18,14,.35);
+  max-width:340px;
+}
+.order-card img{width:62px;height:62px;border-radius:12px;object-fit:cover}
+.order-card p{margin:0 0 .45rem;font-size:.86rem;font-weight:600;line-height:1.3}
+@media(min-width:820px){.order-card{display:flex}}
+
+/* --------------------------------------------------------------- marquee */
+.ticker{
+  border-block:1px solid var(--line);
+  background:var(--cream);
+  padding-block:.9rem;overflow:hidden;
+}
+.ticker-track{display:flex;gap:3.5rem;width:max-content;font-family:var(--font-head);font-size:1.3rem;color:var(--ink-soft);white-space:nowrap}
+.js .ticker-track{animation:slide 42s linear infinite}
+[dir="rtl"] .js .ticker-track{animation-direction:reverse}
+@keyframes slide{from{transform:translate3d(0,0,0)}to{transform:translate3d(-50%,0,0)}}
+.ticker-track span{display:inline-flex;align-items:center;gap:3.5rem}
+.ticker-track span::after{content:"";width:6px;height:6px;border-radius:50%;background:var(--gold)}
+
+/* ----------------------------------------------------------------- story */
+.story{padding-block:clamp(4.5rem,11vw,9rem)}
+.story-head{display:grid;gap:2rem;align-items:end;margin-block-end:clamp(2.5rem,6vw,4.5rem)}
+@media(min-width:900px){.story-head{grid-template-columns:1.25fr .85fr;gap:4rem}}
+/* The second line indented, the way a printed pull-quote sets. One
+   typographic move, used once. */
+.story-head h2 .indent{display:block;padding-inline-start:1.6em}
+.story-photos{display:grid;gap:clamp(1rem,2.5vw,2rem);grid-template-columns:1fr}
+@media(min-width:760px){.story-photos{grid-template-columns:.78fr 1.22fr;align-items:start}}
+.story-photos figure{margin:0}
+.story-photos img{width:100%;border-radius:4px;object-fit:cover}
+.ph-small img{aspect-ratio:4/5}
+@media(min-width:760px){.ph-small{margin-block-start:clamp(3rem,9vw,7rem)}}
+.ph-large img{aspect-ratio:16/11}
+.photo-note{margin-block-start:.9rem;font-size:.7rem;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);max-width:26ch}
+
+/* ----------------------------------------------------------------- items */
+.counter{padding-block:clamp(4rem,10vw,8rem);background:var(--cream);border-block:1px solid var(--line)}
+.counter-head{display:flex;flex-wrap:wrap;gap:1.5rem;align-items:end;justify-content:space-between;margin-block-end:clamp(2.5rem,5vw,3.5rem)}
+.items{display:grid;gap:clamp(1.6rem,3vw,2.6rem);grid-template-columns:repeat(auto-fit,minmax(240px,1fr))}
+.item{display:flex;flex-direction:column}
+.item-shot{position:relative;overflow:hidden;border-radius:4px;background:var(--limestone)}
+.item-shot img{aspect-ratio:4/5;width:100%;object-fit:cover;transition:transform 1.1s var(--ease)}
+.item:hover .item-shot img{transform:scale(1.05)}
+/* Meta BELOW the photograph, never a chip on top of it. A label floating
+   over someone's product shot is one of the most recognisable tells
+   there is, and it also covers the thing being sold. */
+.item-meta{display:flex;justify-content:space-between;gap:1rem;align-items:baseline;margin-block-start:1.1rem}
+.item-name{font-family:var(--font-head);font-size:1.32rem;line-height:1.2}
+.item-name .nick{font-style:italic;color:var(--gold-lg)}
+.item-price{font-family:var(--font-body);font-weight:700;font-size:1rem;white-space:nowrap}
+.item p{margin:.5rem 0 0;font-size:.92rem;color:var(--ink-soft);max-width:32ch}
+.counter-all{margin-block-start:clamp(2.5rem,5vw,3.5rem);display:flex;justify-content:center}
+.btn-wide{width:100%;max-width:none;justify-content:center;border:1px solid var(--line);background:var(--surface)}
+.btn-wide:hover{background:var(--gold-wash);border-color:var(--gold)}
+
+/* --------------------------------------------------------------- process */
+/* Deliberately NOT three equal cards in a row. A stepped rhythm, each
+   step offset from the last, so the eye travels rather than scans. */
+.process{padding-block:clamp(4.5rem,11vw,9rem)}
+.steps{display:grid;gap:clamp(2rem,5vw,3.5rem);margin-block-start:clamp(2.5rem,5vw,4rem)}
+@media(min-width:860px){.steps{grid-template-columns:repeat(3,1fr);align-items:start}
+  .step:nth-child(2){margin-block-start:clamp(2.5rem,6vw,5rem)}
+  .step:nth-child(3){margin-block-start:clamp(5rem,12vw,10rem)}}
+.step{display:grid;gap:1rem}
+.step-rule{height:1px;background:var(--line);position:relative}
+.step-rule::before{content:"";position:absolute;inset-block-start:-3px;inset-inline-start:0;width:34px;height:7px;background:var(--gold)}
+.step h3{margin-block-start:.35rem}
+.step p{margin:0;color:var(--ink-soft);font-size:.96rem}
+.step-time{font-family:var(--font-body);font-size:.72rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--gold-lg)}
+
+/* ------------------------------------------------------------------ word */
+.word{background:var(--ink);color:#fff;padding-block:clamp(4.5rem,11vw,8rem);position:relative;overflow:hidden}
+.word blockquote{margin:0;max-width:22ch;font-family:var(--font-head);font-size:clamp(1.85rem,4.2vw,3.2rem);line-height:1.15}
+.word .who{margin-block-start:2rem;display:flex;align-items:center;gap:.9rem}
+.word .who b{display:block;font-family:var(--font-body);font-size:.95rem;font-weight:600}
+.word .who span{font-size:.85rem;color:rgba(255,255,255,.6)}
+.word-glow{position:absolute;inset-block-start:-30%;inset-inline-end:-10%;width:60vw;height:60vw;border-radius:50%;
+  background:radial-gradient(circle,rgba(201,162,39,.22) 0%,rgba(201,162,39,0) 65%);pointer-events:none}
+
+/* ----------------------------------------------------------------- visit */
+.visit{padding-block:clamp(4.5rem,11vw,9rem)}
+.visit-grid{display:grid;gap:clamp(2rem,5vw,4rem)}
+@media(min-width:900px){.visit-grid{grid-template-columns:.9fr 1.1fr;align-items:center}}
+.facts{border-block-start:1px solid var(--line)}
+.fact{display:grid;grid-template-columns:minmax(9rem,auto) 1fr;gap:1.5rem;padding-block:1.15rem;border-block-end:1px solid var(--line)}
+.fact dt{font-size:.72rem;font-weight:700;letter-spacing:.13em;text-transform:uppercase;color:var(--muted);margin:0}
+.fact dd{margin:0;font-size:1rem}
+.visit-map{border-radius:4px;overflow:hidden;position:relative}
+.visit-map img{aspect-ratio:5/4;width:100%;object-fit:cover}
+.kosher{
+  position:absolute;inset-block-end:1rem;inset-inline-start:1rem;
+  display:flex;align-items:center;gap:.6rem;padding:.6rem .9rem;border-radius:12px;
+  background:rgba(247,243,234,.95);backdrop-filter:blur(8px);font-size:.85rem;font-weight:600;
+}
+.kosher svg{color:#1F8A50;flex:none}
+
+/* ------------------------------------------------------------------- cta */
+.cta{position:relative;isolation:isolate;overflow:hidden;min-height:78svh;display:grid;place-items:center;text-align:center;color:#fff}
+.cta-media{position:absolute;inset:0;z-index:-2}
+.cta-media img{width:100%;height:100%;object-fit:cover}
+.cta::after{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(to bottom,rgba(21,18,14,.62),rgba(21,18,14,.78))}
+.cta h2{color:#fff;max-width:17ch;margin-inline:auto}
+.cta p{color:rgba(255,255,255,.82);max-width:42ch;margin:1.3rem auto 2.2rem}
+.cta-actions{display:flex;flex-wrap:wrap;gap:.7rem;justify-content:center}
+
+/* ---------------------------------------------------------------- footer */
+.foot{background:var(--cream);padding-block:clamp(3rem,7vw,5rem);border-block-start:1px solid var(--line)}
+.foot-top{display:flex;flex-wrap:wrap;gap:2rem;justify-content:space-between;align-items:start}
+.foot-mark{font-family:var(--font-head);font-size:1.5rem}
+.foot-links{display:flex;flex-wrap:wrap;gap:1.6rem;font-size:.92rem}
+.foot-links a{color:var(--ink-soft);text-decoration:none}
+.foot-links a:hover{color:var(--gold-lg)}
+.foot-rule{height:1px;background:var(--line);margin-block:2.2rem}
+.foot-bottom{display:flex;flex-wrap:wrap;gap:1rem;justify-content:space-between;font-size:.82rem;color:var(--muted)}
+.foot-bottom a{color:var(--ink-soft)}
+
+/* The one band that is OURS, and it earns its place: anyone reading a
+   business page to the end is a candidate to list their own. Quiet, and
+   after everything the customer came for. */
+.recruit{background:var(--limestone);border-block-start:1px solid var(--line);padding-block:1.4rem}
+.recruit .shell{display:flex;flex-wrap:wrap;gap:1rem;align-items:center;justify-content:space-between;font-size:.92rem}
+
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.001ms !important;animation-iteration-count:1 !important;transition-duration:.001ms !important}
+  .js .js-reveal{opacity:1;transform:none}
+  .hero-media img{transform:scale(1.08)}
+}
+</style>
+</head>
+
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+  <!-- Placeholders. In the real build these are lucide-react: badge-check,
+       map-pin, clock, arrow-right. -->
+  <symbol id="i-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M3.85 8.62a4 4 0 0 1 4.78-4.77 4 4 0 0 1 6.74 0 4 4 0 0 1 4.78 4.78 4 4 0 0 1 0 6.74 4 4 0 0 1-4.77 4.78 4 4 0 0 1-6.75 0 4 4 0 0 1-4.78-4.77 4 4 0 0 1 0-6.76Z"/><path d="m9 12 2 2 4-4"/>
+  </symbol>
+  <symbol id="i-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M5 12h14"/><path d="m12 5 7 7-7 7"/>
+  </symbol>
+</defs></svg>
+
+<header class="nav" id="nav">
+  <a class="nav-mark" href="#top">Lechem Emek</a>
+  <nav class="nav-links" aria-label="Sections">
+    <a href="#counter">The counter</a>
+    <a href="#process">How we bake</a>
+    <a href="#visit">Visit</a>
+  </nav>
+  <div class="nav-right">
+    <button class="dir-toggle" id="dirToggle" type="button">עברית</button>
+  </div>
+</header>
+
+<main id="top">
+
+  <!-- ============================================================ HERO -->
+  <section class="hero">
+    <div class="hero-media">
+      <img src="frontend/public/images/mockups/bakery/hero.jpg" alt="" />
+    </div>
+    <div class="hero-shade"></div>
+    <div class="grain"></div>
+
+    <div class="hero-inner">
+      <p class="eyebrow">Emek Refaim, Jerusalem</p>
+      <!-- nowrap on the pun, so it is never split across lines. At 1280 it
+           was landing as "flour / at four", which is two half-jokes. -->
+      <h1 class="display">Bread that was <em style="white-space:nowrap">flour at four</em> this morning.</h1>
+      <p class="lede hero-lede">A small bakery on Emek Refaim since 1998. Everything on the shelf was mixed, proved and baked in the same room you are standing in.</p>
+      <div class="hero-cta">
+        <a class="btn btn-gold" href="#counter">See today's counter</a>
+        <a class="btn btn-ghost-light" href="#visit">Hours and address</a>
+      </div>
+    </div>
+
+    <aside class="order-card" aria-label="Order for Shabbos">
+      <img src="frontend/public/images/mockups/bakery/order-card.jpg" alt="" />
+      <div>
+        <p>Shabbos orders close Thursday, 14:00</p>
+        <a class="btn btn-ink" style="min-height:38px;padding:0 1rem;font-size:.82rem" href="#cta">Reserve a challah</a>
+      </div>
+    </aside>
+  </section>
+
+  <!-- ========================================================== TICKER -->
+  <div class="ticker" aria-hidden="true">
+    <div class="ticker-track">
+      <span>Challah&nbsp;</span><span>Rugelach&nbsp;</span><span>Sourdough&nbsp;</span><span>Babka&nbsp;</span><span>Cinnamon buns&nbsp;</span><span>Almond croissants&nbsp;</span>
+      <span>Challah&nbsp;</span><span>Rugelach&nbsp;</span><span>Sourdough&nbsp;</span><span>Babka&nbsp;</span><span>Cinnamon buns&nbsp;</span><span>Almond croissants&nbsp;</span>
+    </div>
+  </div>
+
+  <!-- =========================================================== STORY -->
+  <section class="story shell">
+    <div class="story-head">
+      <h2 class="h2 js-reveal">Twenty eight years<span class="indent">on one street.</span></h2>
+      <p class="lede js-reveal" data-delay="1">Batya opened with one oven and a list of her mother's proportions. The list has not changed. The oven has, twice.</p>
+    </div>
+
+    <div class="story-photos">
+      <figure class="ph-small js-reveal">
+        <img src="frontend/public/images/mockups/bakery/hands.jpg" alt="Hands shaping dough on a floured counter" />
+        <figcaption class="photo-note">Everything is shaped by hand, before six</figcaption>
+      </figure>
+      <figure class="ph-large js-reveal" data-delay="2">
+        <img src="frontend/public/images/mockups/bakery/rack.jpg" alt="Cooling loaves on a steel rack" />
+        <figcaption class="photo-note">Out of the oven at 06:40, on the shelf by seven</figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <!-- ========================================================= COUNTER -->
+  <section class="counter" id="counter">
+    <div class="shell">
+      <div class="counter-head">
+        <div>
+          <p class="eyebrow js-reveal">What is out today</p>
+          <h2 class="h2 js-reveal" data-delay="1">The counter</h2>
+        </div>
+        <p class="lede js-reveal" data-delay="2" style="max-width:34ch">Baked in one batch each morning. When a shelf is empty, that is the day.</p>
+      </div>
+
+      <div class="items">
+        <article class="item js-reveal">
+          <div class="item-shot"><img src="frontend/public/images/mockups/bakery/item-challah.jpg" alt="A plaited challah" /></div>
+          <div class="item-meta">
+            <h3 class="item-name">Challah, <span class="nick">plain</span></h3>
+            <span class="item-price">₪18</span>
+          </div>
+          <p>Six strands, a long cold prove, brushed twice.</p>
+        </article>
+
+        <article class="item js-reveal" data-delay="1">
+          <div class="item-shot"><img src="frontend/public/images/mockups/bakery/item-babka.jpg" alt="A chocolate babka, sliced" /></div>
+          <div class="item-meta">
+            <h3 class="item-name">Babka, <span class="nick">chocolate</span></h3>
+            <span class="item-price">₪46</span>
+          </div>
+          <p>Laminated Thursday night, baked Friday morning.</p>
+        </article>
+
+        <article class="item js-reveal" data-delay="2">
+          <div class="item-shot"><img src="frontend/public/images/mockups/bakery/item-rugelach.jpg" alt="A box of rugelach" /></div>
+          <div class="item-meta">
+            <h3 class="item-name">Rugelach, <span class="nick">a box</span></h3>
+            <span class="item-price">₪38</span>
+          </div>
+          <p>Twelve, still warm if you come before nine.</p>
+        </article>
+
+        <article class="item js-reveal" data-delay="3">
+          <div class="item-shot"><img src="frontend/public/images/mockups/bakery/item-sourdough.jpg" alt="A round sourdough loaf" /></div>
+          <div class="item-meta">
+            <h3 class="item-name">Sourdough <span class="nick">boule</span></h3>
+            <span class="item-price">₪32</span>
+          </div>
+          <p>One starter, fed since the year we opened.</p>
+        </article>
+      </div>
+
+      <div class="counter-all">
+        <a class="btn btn-wide js-reveal" href="#cta">See everything on the shelf <svg width="17" height="17" aria-hidden="true"><use href="#i-arrow"/></svg></a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========================================================= PROCESS -->
+  <section class="process shell" id="process">
+    <p class="eyebrow js-reveal">A morning here</p>
+    <h2 class="h2 js-reveal" data-delay="1" style="max-width:16ch">Three things happen before the door opens.</h2>
+
+    <div class="steps">
+      <article class="step js-reveal">
+        <div class="step-rule"></div>
+        <span class="step-time">04:00</span>
+        <h3 class="h3">The mix</h3>
+        <p>Flour, water, salt, the starter from the fridge. Nothing else goes in, which is why the list on the wall has never needed a second page.</p>
+      </article>
+      <article class="step js-reveal" data-delay="1">
+        <div class="step-rule"></div>
+        <span class="step-time">05:15</span>
+        <h3 class="h3">The shaping</h3>
+        <p>Every loaf is shaped by hand at the same bench, by whoever is in. It is the slowest part of the morning and the part nobody has agreed to speed up.</p>
+      </article>
+      <article class="step js-reveal" data-delay="2">
+        <div class="step-rule"></div>
+        <span class="step-time">06:40</span>
+        <h3 class="h3">The bake</h3>
+        <p>One oven, one batch, steam for the first ten minutes. What comes out is what there is until tomorrow.</p>
+      </article>
+    </div>
+  </section>
+
+  <!-- ============================================================ WORD -->
+  <section class="word">
+    <div class="word-glow" aria-hidden="true"></div>
+    <div class="shell">
+      <blockquote class="js-reveal">I stopped buying bread anywhere else in 2004.</blockquote>
+      <div class="who js-reveal" data-delay="1">
+        <div>
+          <b>Miriam Ben-Ari</b>
+          <span>Two streets away</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- =========================================================== VISIT -->
+  <section class="visit shell" id="visit">
+    <div class="visit-grid">
+      <div>
+        <p class="eyebrow js-reveal">Come in</p>
+        <h2 class="h2 js-reveal" data-delay="1" style="margin-block-end:2rem">Good to know</h2>
+        <dl class="facts js-reveal" data-delay="2">
+          <div class="fact"><dt>Hours</dt><dd>Sunday to Thursday, 07:00 to 19:00<br />Friday, 07:00 to 14:00</dd></div>
+          <div class="fact"><dt>Address</dt><dd>Emek Refaim 41, Jerusalem</dd></div>
+          <div class="fact"><dt>Languages</dt><dd>Hebrew, English</dd></div>
+          <div class="fact"><dt>Delivery</dt><dd>Across Jerusalem on orders over ₪120</dd></div>
+          <div class="fact"><dt>Notice</dt><dd>Two days for platters and large orders</dd></div>
+        </dl>
+      </div>
+      <figure class="visit-map js-reveal" data-delay="1" style="margin:0">
+        <img src="frontend/public/images/mockups/bakery/shopfront.jpg" alt="The shopfront on Emek Refaim" />
+        <figcaption class="kosher">
+          <svg width="19" height="19" aria-hidden="true"><use href="#i-check"/></svg>
+          Kosher, Rabbanut Yerushalayim
+        </figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <!-- ============================================================= CTA -->
+  <section class="cta" id="cta">
+    <div class="cta-media"><img src="frontend/public/images/mockups/bakery/cta.jpg" alt="" /></div>
+    <div class="grain"></div>
+    <div class="shell">
+      <h2 class="h2 js-reveal">Order for Shabbos before Thursday at two.</h2>
+      <p class="js-reveal" data-delay="1">Tell us what you want and when you are coming. We will have it wrapped and waiting with your name on it.</p>
+      <div class="cta-actions js-reveal" data-delay="2">
+        <a class="btn btn-gold" href="#top">Message the bakery</a>
+        <a class="btn btn-ghost-light" href="#visit">Call 02 566 0041</a>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer class="foot">
+  <div class="shell">
+    <div class="foot-top">
+      <div>
+        <div class="foot-mark">Lechem Emek</div>
+        <p class="lede" style="font-size:.95rem;margin-block-start:.6rem">Emek Refaim 41, Jerusalem</p>
+      </div>
+      <nav class="foot-links" aria-label="Footer">
+        <a href="#counter">The counter</a>
+        <a href="#process">How we bake</a>
+        <a href="#visit">Visit</a>
+        <a href="#cta">Order</a>
+      </nav>
+    </div>
+    <div class="foot-rule"></div>
+    <div class="foot-bottom">
+      <span>&copy; 2026 Lechem Emek</span>
+      <span>Powered by <a href="#top">MyIsraelRental</a></span>
+    </div>
+  </div>
+</footer>
+
+<div class="recruit">
+  <div class="shell">
+    <span>Are you a business? Add yours, free.</span>
+    <a class="btn btn-quiet" style="min-height:40px;font-size:.85rem" href="#top">Add your business <svg width="15" height="15" aria-hidden="true"><use href="#i-arrow"/></svg></a>
+  </div>
+</div>
+
+<script>
+/* `js` is added FIRST, before anything is hidden. That ordering is the
+   whole fail-safe: with scripting off, or if this file fails to parse,
+   the page is a complete, readable, scrollable document. Nothing here
+   carries meaning - it only carries pace. */
+document.documentElement.classList.add('js');
+
+const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+if (!reduced && 'IntersectionObserver' in window) {
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach((e) => {
+      if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); }
+    });
+  }, { rootMargin: '0px 0px -12% 0px', threshold: 0.08 });
+  document.querySelectorAll('.js-reveal').forEach((el) => io.observe(el));
+} else {
+  document.querySelectorAll('.js-reveal').forEach((el) => el.classList.add('in'));
+}
+
+/* The nav is transparent over the hero photograph and solid once you are
+   past it. Anything else puts grey text on a picture. */
+const nav = document.getElementById('nav');
+const onScroll = () => nav.classList.toggle('solid', window.scrollY > window.innerHeight * 0.72);
+onScroll();
+window.addEventListener('scroll', onScroll, { passive: true });
+
+/* Direction toggle. Not a demo gimmick: half this audience reads Hebrew,
+   and the layout has to be checked in both, which is only true if it is
+   one click away. */
+const html = document.documentElement;
+const toggle = document.getElementById('dirToggle');
+toggle.addEventListener('click', () => {
+  const rtl = html.getAttribute('dir') === 'rtl';
+  html.setAttribute('dir', rtl ? 'ltr' : 'rtl');
+  html.setAttribute('lang', rtl ? 'en' : 'he');
+  toggle.textContent = rtl ? 'עברית' : 'English';
+});
+</script>
+</body>
+</html>
