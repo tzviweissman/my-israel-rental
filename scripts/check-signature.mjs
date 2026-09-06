@@ -27,6 +27,7 @@
  *   APP_ORIGIN=http://localhost:3210 API_ORIGIN=http://127.0.0.1:8001 node scripts/check-signature.mjs
  */
 import { chromium } from 'playwright';
+import { readFileSync } from 'node:fs';
 
 const APP = process.env.APP_ORIGIN || 'http://localhost:3000';
 const API = (process.env.API_ORIGIN || 'http://localhost:8001') + '/api';
@@ -38,11 +39,15 @@ const ok = (name, cond, detail = '') => {
 };
 const json = async (r) => { try { return await r.json(); } catch { return null; } };
 
-const PDF = Buffer.from(
-  '%PDF-1.4\n1 0 obj<</Type/Catalog/Pages 2 0 R>>endobj\n'
-  + '2 0 obj<</Type/Pages/Kids[3 0 R]/Count 1>>endobj\n'
-  + '3 0 obj<</Type/Page/Parent 2 0 R/MediaBox[0 0 200 200]>>endobj\n'
-  + 'trailer<</Root 1 0 R>>\n%%EOF\n', 'latin1');
+/* The project's own blank rental contract - a real, parseable PDF.
+   A hand-typed skeleton was used here first and it quietly broke the last
+   two assertions: with no xref table the server cannot open it, so no
+   signed copy is ever built and the download falls back to the original.
+   A fixture a PDF library cannot read turns "did signing produce a signed
+   document" into a question about the fixture. */
+const PDF = readFileSync(new URL(
+  '../backend/uploads/templates/myisraelrental_contract_en.pdf', import.meta.url,
+).pathname.replace(/^\/([A-Za-z]:)/, '$1'));
 
 /** A sublease with a contract on it, and the link the signer is sent. */
 async function freshLink(tag) {
@@ -192,6 +197,19 @@ for (const lng of ['en', 'he']) {
     && sig.signature_data.length > 3000,
     `${sig ? sig.signature_data.length : 0} chars`);
   ok(`${lng}: signed by the name that was typed`, sig?.signer_name === 'Rivka Adler', sig?.signer_name);
+
+  // And the thing they came for: a document that shows the signature.
+  // Before signing this same URL served the original; now it serves the
+  // agreement with a signature page after it.
+  const dl = await fetch(`${API}/contracts/sign/${link.token}/file`);
+  const bytes = Buffer.from(await dl.arrayBuffer());
+  ok(`${lng}: downloading after signing gives the SIGNED document`,
+    dl.status === 200 && !bytes.equals(PDF) && bytes.length > PDF.length,
+    `${bytes.length} bytes vs ${PDF.length} original`);
+  ok(`${lng}: offered as a signed copy, and as a PDF`,
+    /signed/i.test(decodeURIComponent(dl.headers.get('content-disposition') || ''))
+    && (dl.headers.get('content-type') || '').includes('pdf'),
+    dl.headers.get('content-disposition'));
   ok(`${lng}: no page errors`, errors.length === 0, errors[0]);
 
   await fetch(`${API}/contracts/${link.contractId}`, { method: 'DELETE', headers: link.bearer });

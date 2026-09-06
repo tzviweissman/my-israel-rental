@@ -176,25 +176,39 @@ async def download_contract(
     if not await _may_access_contract(contract, payload):
         raise HTTPException(status_code=403, detail="Not authorized to access this contract")
 
-    file_path = CONTRACT_DIR / contract.get('stored_filename', '')
-    if not file_path.exists():
+    # Same choice the signer's route makes, through the same helper: the
+    # signed copy once there is one. Two routes deciding this separately is
+    # how the owner and the signer end up holding different documents.
+    file_path, ext, download_name = _contract_file(contract)
+    if file_path is None:
         raise HTTPException(status_code=404, detail="Contract file not found on disk")
-
-    media_types = {
-        "pdf": "application/pdf",
-        "docx": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-        "jpg": "image/jpeg",
-        "png": "image/png",
-        "webp": "image/webp",
-    }
-    media_type = media_types.get(contract.get('file_type', ''), "application/octet-stream")
 
     return FileResponse(
         path=str(file_path),
-        media_type=media_type,
-        filename=contract.get('original_filename', f"contract.{contract.get('file_type', 'pdf')}")
+        media_type=_CONTRACT_MEDIA_TYPES.get(ext, "application/octet-stream"),
+        filename=download_name,
     )
 
+
+def _contract_file(contract: dict) -> tuple:
+    """Which file to hand over, and what to call it.
+
+    The SIGNED copy once one exists, because that is what a person asking
+    for "the contract" after signing means: the agreement with the
+    signature page on it. Before signing there is no signed copy and this
+    naturally returns the original, so no caller needs a flag.
+
+    Falls back to the original if the signed file has gone missing, rather
+    than 404ing - a lost derived file must not take the document with it.
+    """
+    signed = _resolve_private_contract_file(contract.get("signed_filename") or "")
+    if signed is not None:
+        stem = (contract.get("original_filename") or "contract").rsplit(".", 1)[0]
+        return signed, "pdf", f"{stem} (signed).pdf"
+    original = _resolve_private_contract_file(contract.get("stored_filename") or "")
+    ext = (contract.get("file_type") or (original.suffix.lstrip(".") if original else "")).lower()
+    name = contract.get("original_filename") or f"contract.{ext or 'pdf'}"
+    return original, ext, name
 
 @api_router.get("/contracts/sign/{sign_token}/file")
 async def download_contract_for_signing(sign_token: str) -> FileResponse:
@@ -234,18 +248,17 @@ async def download_contract_for_signing(sign_token: str) -> FileResponse:
         # link says the same thing wherever it is used.
         raise HTTPException(status_code=404, detail="Contract not found or link is invalid")
 
-    file_path = _resolve_private_contract_file(contract.get("stored_filename") or "")
+    file_path, ext, download_name = _contract_file(contract)
     if file_path is None:
         raise HTTPException(status_code=404, detail="Contract file not found")
 
-    ext = (contract.get("file_type") or file_path.suffix.lstrip(".")).lower()
     return FileResponse(
         path=str(file_path),
         media_type=_CONTRACT_MEDIA_TYPES.get(ext, "application/octet-stream"),
         # `filename=` is what makes this a download rather than something the
         # browser may try to render. nosniff is already set globally
         # (server.py), so an uploaded file cannot be sniffed into markup.
-        filename=contract.get("original_filename") or f"contract.{ext or 'pdf'}",
+        filename=download_name,
     )
 
 

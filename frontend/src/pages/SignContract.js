@@ -171,7 +171,7 @@ const SignContract = () => {
         {/* Header */}
         <div className="text-center mb-6">
           <h1 className="text-2xl font-bold text-[var(--brand-primary)]" style={{ fontFamily: 'var(--font-head)' }}>MyIsraelRental</h1>
-          <p className="text-xs text-[var(--gold)] tracking-widest uppercase mt-1">{t('sign.subleaseContract')}</p>
+          <p className="text-xs text-[var(--gold)] tracking-widest uppercase mt-1">{t('sign.contractEyebrow')}</p>
         </div>
 
         {/* Contract Card */}
@@ -183,7 +183,7 @@ const SignContract = () => {
                 <FileText size={22} className="text-white" />
               </div>
               <div>
-                <h2 className="text-lg font-bold text-white">{t('sign.subleaseAgreement')}</h2>
+                <h2 className="text-lg font-bold text-white">{t('sign.contractTitle')}</h2>
                 <p className="text-white/70 text-sm">{contract.original_filename}</p>
               </div>
             </div>
@@ -238,7 +238,13 @@ const SignContract = () => {
               className="flex items-center gap-2 px-4 py-2 rounded-xl border border-gray-200 text-sm font-medium text-gray-700 hover:border-[var(--brand-primary)] hover:text-[var(--brand-primary)] transition-colors"
               data-testid="download-contract-btn"
             >
-              <Download size={16} /> {t('sign.downloadContract')}
+              <Download size={16} />{' '}
+              {/* Once signed this URL serves the agreement WITH the
+                  signature page, so the button should say so rather
+                  than leaving them to open it and find out. */}
+              {signed
+                ? t('sign.downloadSigned', 'Download signed contract')
+                : t('sign.downloadContract')}
             </button>
 
             {/* Existing Signatures */}

@@ -17,6 +17,7 @@ from routes.deps import ALLOWED_CONTRACT_TYPES, CONTRACT_DIR, MAX_FILE_SIZE, db,
 from utils.area_filter import area_mongo_query
 from utils.property_rows import keep_valid_rows
 from utils.files import extract_text_from_docx, extract_text_from_image, extract_text_from_pdf
+from utils.signed_contract import build_signed_pdf
 
 router = APIRouter()
 api_router = router  # alias so existing @api_router decorators work verbatim
@@ -291,6 +292,47 @@ async def sign_contract_public(sign_token: str, body: dict = Body(...)) -> dict:
             "$set": {"signed": True, "updated_at": datetime.now(UTC).isoformat()}
         }
     )
+
+    # Build the document the two of them can actually send someone: the
+    # agreement with a signature page after it.
+    #
+    # AFTER the signature is stored, and deliberately so. The signature is
+    # the part that cannot be recreated - the signer has closed the tab by
+    # the time anything here runs - so it is written down first and the PDF
+    # is assembled from it. If assembly fails, the signature survives, the
+    # page still says signed, and the original is still downloadable; the
+    # only thing lost is the combined copy, which can be rebuilt from what
+    # was saved. The other order round would trade a signature for a
+    # rendering error.
+    try:
+        source = CONTRACT_DIR / (contract.get("stored_filename") or "")
+        if source.exists():
+            sublease_doc = await db.subleases.find_one(
+                {"id": contract.get("sublease_id")}, {"_id": 0, "title": 1},
+            ) if contract.get("sublease_id") else None
+            signed_name = f"signed_{contract['id']}.pdf"
+            build_signed_pdf(
+                source,
+                CONTRACT_DIR / signed_name,
+                signer_name=signer_name,
+                signed_at=datetime.now(UTC),
+                signature_data=signature_data,
+                document_title=(sublease_doc or {}).get("title", ""),
+                original_filename=contract.get("original_filename") or "",
+            )
+            # PRIVATE, like every other contract file. Not `uploads/`, which
+            # is the public static mount - a signed agreement served from
+            # there bypasses every permission check, which is the bug this
+            # codebase shipped three times and once paid for with a real
+            # contract (CLAUDE.md).
+            await db.contracts.update_one(
+                {"sign_token": sign_token},
+                {"$set": {"signed_filename": signed_name}},
+            )
+    except Exception as e:
+        logger.warning(
+            "signed contract PDF could not be built for %s: %s", contract.get("id"), e,
+        )
     
     # Update sublease to mark contract as signed
     if contract.get("sublease_id"):
