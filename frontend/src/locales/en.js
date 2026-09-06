@@ -1477,6 +1477,10 @@ const en = {
         mentionManager: 'a property manager'
       },
       sign: {
+        needName: 'Please enter your full name.',
+        needSignature: 'Please draw your signature.',
+        signedOk: 'Contract signed successfully!',
+        signFailed: 'Could not sign just now. Please try again.',
         invalidLink: 'Invalid Link',
         subleaseContract: 'Sublease Contract',
         subleaseAgreement: 'Sublease Agreement',

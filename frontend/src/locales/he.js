@@ -1408,6 +1408,10 @@ const he = {
         mentionManager: 'מנהל הנכס'
       },
       sign: {
+        needName: 'נא להזין את השם המלא שלכם.',
+        needSignature: 'נא לחתום במסגרת.',
+        signedOk: 'החוזה נחתם בהצלחה!',
+        signFailed: 'לא הצלחנו לחתום כרגע. נסו שוב.',
         invalidLink: 'קישור לא תקין',
         subleaseContract: 'חוזה תת-שכירות',
         subleaseAgreement: 'הסכם תת-שכירות',

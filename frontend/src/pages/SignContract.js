@@ -21,6 +21,53 @@ const SignContract = () => {
   const [signed, setSigned] = useState(false);
   const [showText, setShowText] = useState(false);
   const sigCanvasRef = useRef(null);
+  const padRef = useRef(null);
+  /* Read off the design system at run time rather than typed in here. A
+     canvas needs a real colour value and cannot take `var(--ink)`, but that
+     is no reason to keep a second copy of the token. */
+  const [penColor, setPenColor] = useState('#111827');
+
+  useEffect(() => {
+    const ink = getComputedStyle(document.documentElement)
+      .getPropertyValue('--ink').trim();
+    if (ink) setPenColor(ink);
+  }, []);
+
+  /* Size the drawing buffer to the box the canvas is actually drawn in.
+     The two are independent: `width`/`height` are the pixel grid, the CSS
+     size is the element. Where they disagree the ink lands somewhere other
+     than the pen, which on a phone is far enough to look broken. Times
+     devicePixelRatio as well, or a signature on a retina screen is a blurry
+     approximation of one on a legal document. */
+  useEffect(() => {
+    const pad = sigCanvasRef.current;
+    const canvas = pad && pad.getCanvas && pad.getCanvas();
+    if (!canvas) return undefined;
+    padRef.current = pad;
+
+    let lastWidth = 0;
+    const fit = () => {
+      const width = canvas.offsetWidth;
+      const height = canvas.offsetHeight;
+      if (!width || !height || width === lastWidth) return;
+      lastWidth = width;
+      const ratio = Math.max(window.devicePixelRatio || 1, 1);
+      // Resizing a canvas wipes it, so anything already drawn is kept and
+      // put back. Someone mid-signature when the keyboard opens on a phone
+      // must not lose it.
+      const drawn = pad.isEmpty() ? null : pad.toData();
+      canvas.width = width * ratio;
+      canvas.height = height * ratio;
+      canvas.getContext('2d').scale(ratio, ratio);
+      pad.clear();
+      if (drawn) pad.fromData(drawn);
+    };
+
+    fit();
+    const ro = new ResizeObserver(fit);
+    ro.observe(canvas);
+    return () => ro.disconnect();
+  }, [signed]);
 
   useEffect(() => {
     fetchContract();
@@ -38,13 +85,32 @@ const SignContract = () => {
     }
   };
 
+  /* Is there actually ink on the canvas?
+     `isEmpty()` answers a different question - whether the pad RECORDED any
+     strokes - and the two came apart badly. With the pen colour unresolved,
+     every stroke was painted transparent: the pad said it had a signature,
+     the image was blank, and this would have posted an empty PNG as a
+     binding signature on a rental agreement. The colour is fixed, and this
+     is here so that class of failure can never be silent again. */
+  const hasInk = () => {
+    const canvas = sigCanvasRef.current?.getCanvas?.();
+    if (!canvas) return false;
+    const { width, height } = canvas;
+    if (!width || !height) return false;
+    const pixels = canvas.getContext('2d').getImageData(0, 0, width, height).data;
+    for (let i = 3; i < pixels.length; i += 4) {
+      if (pixels[i] > 0) return true;
+    }
+    return false;
+  };
+
   const handleSign = async () => {
     if (!signerName.trim()) {
-      toast.error('Please enter your full name.');
+      toast.error(t('sign.needName', 'Please enter your full name.'));
       return;
     }
-    if (!sigCanvasRef.current || sigCanvasRef.current.isEmpty()) {
-      toast.error('Please draw your signature.');
+    if (!sigCanvasRef.current || sigCanvasRef.current.isEmpty() || !hasInk()) {
+      toast.error(t('sign.needSignature', 'Please draw your signature.'));
       return;
     }
     setSigning(true);
@@ -54,11 +120,11 @@ const SignContract = () => {
         signer_name: signerName,
         signature_data: signatureData
       });
-      toast.success('Contract signed successfully!');
+      toast.success(t('sign.signedOk', 'Contract signed successfully!'));
       setSigned(true);
       fetchContract();
     } catch (err) {
-      toast.error(err.response?.data?.detail || 'Failed to sign.');
+      toast.error(err.response?.data?.detail || t('sign.signFailed', 'Could not sign just now. Please try again.'));
     } finally {
       setSigning(false);
     }
@@ -221,12 +287,18 @@ const SignContract = () => {
                     <div className="bg-white rounded-xl border-2 border-dashed border-gray-300 overflow-hidden">
                       <SignatureCanvas
                         ref={sigCanvasRef}
-                        penColor="var(--brand-primary)"
+                        /* A RESOLVED COLOUR, never a CSS variable. A canvas
+                           2D context cannot read custom properties: the
+                           assignment is rejected, the value left over from
+                           the pad's own clear() stands, and that value is
+                           TRANSPARENT. So every stroke was painted in
+                           nothing. It was not that the pen missed the
+                           canvas - the ink was invisible. */
+                        penColor={penColor}
                         canvasProps={{
-                          width: 600,
-                          height: 160,
-                          className: 'w-full',
-                          style: { width: '100%', height: '160px' }
+                          className: 'w-full block touch-none',
+                          style: { width: '100%', height: '160px' },
+                          'data-testid': 'signature-canvas',
                         }}
                       />
                     </div>
