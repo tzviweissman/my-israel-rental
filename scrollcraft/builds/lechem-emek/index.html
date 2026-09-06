@@ -1,0 +1,609 @@
+<!doctype html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Lechem Emek. Flour at four, bread by seven.</title>
+<meta name="description" content="A small bakery on Emek Refaim, Jerusalem, since 1998. Everything on the shelf was baked in this room today.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='7' fill='%2314100C'/><circle cx='16' cy='16' r='7' fill='%23C9A227'/></svg>">
+<!--
+  Lechem Emek, scroll-driven. See BRIEF.md beside this file for the interview,
+  the feeling curve, the peak and the score. What follows is the mechanism.
+
+  THE ONE IDEA. The scroll is the morning. --dawn runs 0 to 1 from the top of
+  the page to the shop door (act 5). One value regrades everything above the
+  door: the ground warms from near-black toward ember, every night photograph
+  loses its ember cast, and the clock in the corner walks from 04:00 to 07:00.
+  Then the ground cuts to daylight, once, and stays there. That cut is the
+  peak, and it is the only place the page changes family.
+
+  ENGINE UNTOUCHED. scrollcraft.js and scrollcraft.css are copied verbatim.
+  Everything bespoke is in this file, driven off --sc-p (published per act by
+  the engine) and off scrollY (for --dawn, which belongs to the page and not
+  to any act).
+
+  RULES KEPT. Logical properties, so the direction toggle mirrors it. Headings
+  read var(--font-head), which the RTL rule swaps, because Playfair has no
+  Hebrew glyphs and an inline face would beat the swap. Grounds are painted
+  per section and cut, never drifted. No em dash anywhere. No number that is
+  not this business's own. One CTA label. No scroll cue, no counters, no
+  eyebrow past the one in the hero.
+-->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400&family=Manrope:wght@400;500;600;700&family=Frank+Ruhl+Libre:wght@400;500;700&family=Assistant:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="scrollcraft.css">
+<style>
+  /* ------------------------------------------------------------ tokens --
+     The locked brand's `gold` accent: limestone, ink, gold. Two stops of the
+     one hue, one per ground family, which is the exception taste.md allows
+     for a page that hard-cuts light and dark and cannot clear 4.5:1 on both
+     with a single value. */
+  :root {
+    --font-head: 'Playfair Display', Georgia, serif;
+    --font-body: 'Manrope', system-ui, sans-serif;
+    --font-head-he: 'Frank Ruhl Libre', Georgia, serif;
+    --font-body-he: 'Assistant', system-ui, sans-serif;
+
+    --night: #14100C;
+    --ember: #2A1A10;
+    --limestone: #EFE9DC;
+    --cream: #F7F3EA;
+
+    --sc-canvas: var(--night);
+    --sc-surface: #1F1712;
+    --sc-ink: #EFE9DC;
+    --sc-ink-soft: #B8AC9A;
+    --sc-accent: #C9A227;
+    --sc-accent-ink: #23201B;
+    --sc-shadow-color: 25 30% 5%;
+
+    --sc-font-display: var(--font-head);
+    --sc-font-text: var(--font-body);
+    /* Two families on the page, so the kit's label class uses the text face
+       rather than pulling in a third. */
+    --sc-font-mono: var(--font-body);
+
+    --dawn: 0;
+  }
+  [dir="rtl"] { --font-head: var(--font-head-he); --font-body: var(--font-body-he); }
+
+  /* The day family. `color` restated on the subtree, because color inherits as
+     a computed value and redefining the token alone re-inks nothing. */
+  .day {
+    --sc-canvas: var(--limestone);
+    --sc-surface: #FFFFFF;
+    --sc-ink: #23201B;
+    --sc-ink-soft: #5B534A;
+    --sc-accent: #A9831C;
+    --sc-accent-ink: #EFE9DC;
+    --sc-shadow-color: 35 25% 20%;
+    color: var(--sc-ink);
+    background: var(--sc-canvas);
+  }
+  .day--cream { --sc-canvas: var(--cream); background: var(--cream); }
+
+  /* The night family. Ground is painted, then warmed by --dawn through an
+     opacity layer: opacity is the sanctioned continuous property, and it
+     needs no calc() inside a colour function. */
+  .night { position: relative; background: var(--night); color: var(--sc-ink); }
+  .night::before {
+    content: ""; position: absolute; inset: 0; z-index: 0; pointer-events: none;
+    background: var(--ember); opacity: var(--dawn);
+  }
+  .night > .sc-wrap { position: relative; z-index: 1; }
+
+  body { font-size: 17px; }
+  h1, h2, h3 { font-family: var(--font-head); }
+  .sc-display { font-weight: 500; }
+  .sc-display em { font-style: italic; color: var(--sc-accent); }
+  .sc-lede { color: var(--sc-ink); }
+  .sc-body { font-size: var(--sc-t-base); }
+  .sc-label { font-weight: 600; letter-spacing: 0.16em; }
+
+  /* -------------------------------------------------------------- chrome --
+     The clock is the chrome. Wordmark, the time of morning, and the direction
+     toggle every page on this site carries. No CTA in the bar: the one CTA
+     lives at the end. */
+  .chrome {
+    position: fixed; inset-block-start: 0; inset-inline: 0; z-index: var(--sc-z-chrome);
+    display: flex; align-items: center; justify-content: space-between; gap: var(--sc-4);
+    padding: var(--sc-4) var(--sc-gutter);
+    color: var(--sc-ink);
+    pointer-events: none;
+  }
+  .chrome > * { pointer-events: auto; }
+  .chrome__mark {
+    font-family: var(--font-head); font-size: var(--sc-t-lg); letter-spacing: var(--sc-track-snug);
+    text-decoration: none; color: inherit;
+  }
+  .chrome__right { display: flex; align-items: center; gap: var(--sc-3); }
+  .clock {
+    font-family: var(--font-body); font-variant-numeric: tabular-nums;
+    font-size: var(--sc-t-sm); font-weight: 600; letter-spacing: 0.12em;
+    padding: var(--sc-2) var(--sc-3); border-radius: var(--sc-r-pill);
+    border: 1px solid color-mix(in oklab, currentColor 28%, transparent);
+    background: color-mix(in oklab, var(--sc-canvas) 55%, transparent);
+    backdrop-filter: blur(10px);
+  }
+  .dir-toggle {
+    min-height: 40px; padding: 0 var(--sc-3); border-radius: var(--sc-r-pill); cursor: pointer;
+    font-family: var(--font-body); font-size: var(--sc-t-xs); font-weight: 600;
+    color: inherit; background: color-mix(in oklab, var(--sc-canvas) 55%, transparent);
+    border: 1px solid color-mix(in oklab, currentColor 28%, transparent);
+    backdrop-filter: blur(10px);
+    transition: background var(--sc-d-fast) var(--sc-ease-out);
+  }
+  .dir-toggle:hover { background: color-mix(in oklab, var(--sc-canvas) 80%, transparent); }
+  .dir-toggle:active { transform: translateY(1px); }
+  /* The chrome flips family at the door, with the page. */
+  .is-day .chrome { --sc-canvas: var(--limestone); color: #23201B; }
+
+  /* ---------------------------------------------------------------- hero -- */
+  .hero { background: var(--night); }
+  .hero__img {
+    position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover;
+    object-position: 62% 50%;
+    /* The push-in: the camera already moving under the hand. Driven from the
+       act's own progress, transform only. */
+    transform: scale(calc(1.05 + var(--sc-p, 0) * 0.11));
+    transform-origin: 62% 45%;
+    will-change: transform;
+  }
+  /* Ember. The same warm cast on every night photograph, fading as the
+     morning comes. Multiply, so it darkens as it warms. Opacity only. */
+  .ember {
+    position: absolute; inset: 0; pointer-events: none;
+    background: #B4622A; mix-blend-mode: multiply;
+    opacity: calc(0.46 - var(--dawn) * 0.36);
+  }
+  .hero .sc-copy--lead { bottom: clamp(3rem, 12vh, 9rem); max-width: min(44rem, 78vw); }
+  .hero h1 { max-width: 12ch; }
+  .hero .sc-label { display: block; margin-block-end: var(--sc-4); }
+  .hero .sc-lede { margin-block-start: var(--sc-5); max-width: 36ch; }
+  .hero__link {
+    display: inline-block; margin-block-start: var(--sc-5);
+    font-weight: 600; text-underline-offset: 0.28em;
+    color: var(--sc-ink);
+  }
+  .hero__link:hover { color: var(--sc-accent); }
+  @media (max-width: 700px) {
+    .hero h1 { font-size: var(--sc-t-2xl); max-width: none; }
+    .hero__img { object-position: 70% 50%; }
+  }
+
+  /* ---------------------------------------------------------------- making --
+     A flow section straight after a pin takes reduced top padding: the
+     stage above already needs a full viewport to leave. */
+  .making { padding-block: var(--sc-7) var(--sc-section); }
+  .split {
+    display: grid; gap: var(--sc-7); align-items: center;
+  }
+  @media (min-width: 880px) {
+    .split { grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr); gap: var(--sc-9); }
+    .split--photo-first { grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr); }
+  }
+  .split figure { margin: 0; }
+  .split img { width: 100%; height: auto; border-radius: var(--sc-r-sm); }
+  .frame { position: relative; overflow: hidden; border-radius: var(--sc-r-sm); }
+  .frame img { display: block; }
+
+  /* --------------------------------------------------------------- shaping --
+     A typographic pin. Ember ground, three lines crossing. The stage carries
+     no photograph on purpose: the page owns four scene photographs and this
+     is where the words do the work. */
+  .shaping { background: var(--night); }
+  .shaping .sc-stage { display: grid; place-items: center; }
+  .shaping .line {
+    position: absolute; inset-inline: var(--sc-gutter); top: 50%; translate: 0 -50%;
+    max-width: min(40rem, 84vw); margin-inline: auto; left: 0; right: 0;
+    text-align: center;
+    font-family: var(--font-head); font-size: var(--sc-t-2xl); line-height: 1.12;
+    letter-spacing: var(--sc-track-snug); text-wrap: balance;
+  }
+  .shaping .line--small { font-size: var(--sc-t-xl); color: var(--sc-ink-soft); }
+
+  /* ------------------------------------------------------------------ bake --
+     Authored silence. Ember ground, the rack barely there, one line. See
+     BRIEF.md so this is not read as dead scroll. */
+  .bake { min-height: 100svh; display: grid; place-items: center; overflow: clip; }
+  .bake__img {
+    position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover;
+    opacity: 0.14; z-index: 0;
+  }
+  .bake .sc-wrap { text-align: center; }
+  .bake .sc-lede { max-width: 30ch; margin-inline: auto; color: var(--sc-ink-soft); }
+
+  /* ------------------------------------------------------------------ door --
+     THE PEAK. Flat limestone for the entry viewport (the lights coming on),
+     then the rack, the same photograph act 4 could barely see, irises open
+     in daylight. Largest span on the page. */
+  .door .sc-stage { background: var(--limestone); }
+  .door figure { position: absolute; inset: 0; margin: 0; }
+  .door figure img { width: 100%; height: 100%; object-fit: cover; }
+  .door .sc-copy--lead { max-width: min(40rem, 78vw); }
+  .door h2 { max-width: 13ch; }
+  .door .sc-lede { margin-block-start: var(--sc-5); max-width: 34ch; }
+  @media (max-width: 700px) { .door h2 { font-size: var(--sc-t-2xl); max-width: none; } }
+
+  /* --------------------------------------------------------------- counter --
+     A rail. Museum labels, not pitch: name, nickname, price, one fact. */
+  .counter .sc-stage { display: flex; align-items: center; }
+  .rail {
+    display: flex; align-items: flex-start; gap: var(--sc-7);
+    padding-inline: var(--sc-gutter); width: max-content;
+  }
+  .rail__lead { flex: 0 0 auto; width: clamp(15rem, 24vw, 22rem); padding-block-start: var(--sc-6); }
+  .rail__lead .sc-body { margin-block-start: var(--sc-4); }
+  .item { flex: 0 0 auto; width: clamp(15rem, 24vw, 22rem); }
+  .item__shot { border-radius: var(--sc-r-sm); overflow: hidden; background: var(--sc-surface); box-shadow: var(--sc-e2), var(--sc-edge); }
+  .item__shot img { width: 100%; height: auto; aspect-ratio: 4 / 5; object-fit: cover; }
+  .item__meta { display: flex; justify-content: space-between; gap: var(--sc-4); align-items: baseline; margin-block-start: var(--sc-4); }
+  .item__name { font-family: var(--font-head); font-size: var(--sc-t-lg); line-height: 1.15; margin: 0; }
+  .item__name em { font-style: italic; color: var(--sc-accent); }
+  .item__price { font-weight: 700; font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .item__note { margin: var(--sc-2) 0 0; font-size: var(--sc-t-sm); color: var(--sc-ink-soft); max-width: 28ch; }
+  .rail__end { flex: 0 0 auto; width: clamp(13rem, 20vw, 18rem); align-self: center; }
+  .rail__end .sc-lede { font-size: var(--sc-t-lg); }
+  /* Staggered settle from the act's progress, so the rail reads as a drawer
+     being pulled rather than a slideshow. The lead is exempt (a pan needs its
+     opening content present), and the floor keeps an unsettled item reading
+     as arriving rather than as failed. */
+  @media (prefers-reduced-motion: no-preference) {
+    .rail > :nth-child(2) { opacity: clamp(0.55, calc(0.55 + (var(--sc-p, 1) - 0.00) * 4), 1); }
+    .rail > :nth-child(3) { opacity: clamp(0.55, calc(0.55 + (var(--sc-p, 1) - 0.12) * 4), 1); }
+    .rail > :nth-child(4) { opacity: clamp(0.55, calc(0.55 + (var(--sc-p, 1) - 0.24) * 4), 1); }
+    .rail > :nth-child(5) { opacity: clamp(0.55, calc(0.55 + (var(--sc-p, 1) - 0.36) * 4), 1); }
+    .rail > :nth-child(6) { opacity: clamp(0.55, calc(0.55 + (var(--sc-p, 1) - 0.48) * 4), 1); }
+    /* The engine writes the rail's transform inline and always negative, which
+       is the LTR direction. Under RTL the overflow is on the other side, so the
+       rail has to travel the other way. --rail-over is measured in the page's
+       own JS; !important is what lets a stylesheet rule beat an inline one.
+       Scoped to no-preference so the engine's reduced-motion scroll-region
+       fallback keeps working. */
+    [dir="rtl"] .rail { transform: translate3d(calc(var(--rail-over, 0px) * var(--sc-p, 0)), 0, 0) !important; }
+  }
+
+  /* ----------------------------------------------------------------- visit -- */
+  .visit { padding-block: var(--sc-section); }
+  .facts { margin: var(--sc-6) 0 0; border-block-start: 1px solid var(--sc-hairline-strong); }
+  .facts > div {
+    display: grid; grid-template-columns: minmax(7rem, auto) 1fr; gap: var(--sc-5);
+    padding-block: var(--sc-4); border-block-end: 1px solid var(--sc-hairline);
+  }
+  .facts dt { margin: 0; font-size: var(--sc-t-xs); font-weight: 700; letter-spacing: 0.13em; text-transform: uppercase; color: var(--sc-ink-soft); }
+  .facts dd { margin: 0; }
+  .hechsher { display: inline-flex; align-items: center; gap: var(--sc-2); margin-block-start: var(--sc-5); font-weight: 600; }
+  .hechsher svg { color: #1F8A50; flex: none; }
+
+  /* ----------------------------------------------------------------- close --
+     The last element on the page. Photo is the ground, the copy holds, the
+     footer lives inside the stage so there is no dead tail after the CTA. */
+  .close .sc-stage { background: var(--night); color: #EFE9DC; --sc-ink: #EFE9DC; --sc-ink-soft: #CFC4B2; }
+  .close__img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+  /* The scrim mixes against --sc-canvas, so it is given the night value here
+     even though the section is in the day family. A sibling of the copy,
+     never a child, or the harness hides it along with the text. */
+  .close .sc-scrim--vignette { --sc-canvas: #1A1410; }
+  .close .sc-copy--center { max-width: min(42rem, 86vw); }
+  .close h2 { max-width: 16ch; margin-inline: auto; }
+  .close .sc-lede { margin: var(--sc-5) auto 0; max-width: 36ch; color: #E4DBC9; }
+  .cta {
+    display: inline-flex; align-items: center; min-height: 52px; padding: 0 var(--sc-6);
+    margin-block-start: var(--sc-6); border-radius: var(--sc-r-pill);
+    background: var(--sc-accent); color: var(--sc-accent-ink);
+    font-weight: 700; text-decoration: none; letter-spacing: var(--sc-track-normal);
+    box-shadow: var(--sc-e2);
+    transition: box-shadow var(--sc-d-fast) var(--sc-ease-out), filter var(--sc-d-fast) var(--sc-ease-out);
+  }
+  .close .cta { --sc-accent: #C9A227; --sc-accent-ink: #23201B; }
+  .cta:hover { box-shadow: var(--sc-e3); filter: brightness(1.04); }
+  .cta:active { transform: translateY(1px) !important; }
+  .foot {
+    position: absolute; inset-inline: var(--sc-gutter); inset-block-end: var(--sc-5);
+    display: flex; flex-wrap: wrap; justify-content: space-between; gap: var(--sc-3);
+    font-size: var(--sc-t-xs); color: #CFC4B2; z-index: var(--sc-z-copy);
+  }
+  .foot a { color: inherit; }
+  @media (max-width: 700px) { .close h2 { font-size: var(--sc-t-2xl); } }
+  /* The kit's own phone rule puts inset-inline on every .sc-copy, which is
+     the shorthand for left+right and resets the centred block's left: 50%
+     while its -50% translate still applies, so the copy hangs half off the
+     edge (verify.md lists exactly this). Below 860px the block is simply
+     full width between the gutters and only vertically centred. */
+  @media (max-width: 860px) {
+    .close .sc-copy--center {
+      inset-inline: var(--sc-gutter); left: auto; right: auto;
+      translate: 0 -50%; max-width: none; width: auto;
+    }
+  }
+
+  /* Keyboard: a focused control inside a pinned act is centred by the
+     engine, and the close's cue opens at 0.06, so it is lit by then. */
+
+  /* ----------------------------------------------------- scrims, measured --
+     Tuned against the harness's composited numbers, not by eye. The hero's
+     copy block is tall (label, two display lines, lede, link), so the corner
+     gradient has to carry density higher than the kit's default reaches; the
+     small label reads ink, not ink-soft, because 3.03:1 on a 12px label is a
+     failure even where 3:1 on the display line is fine. */
+  .hero .sc-label { color: var(--sc-ink); }
+  .hero .sc-scrim--lead {
+    background: linear-gradient(to top right,
+      color-mix(in oklab, var(--sc-canvas) 96%, transparent) 0%,
+      color-mix(in oklab, var(--sc-canvas) 82%, transparent) 36%,
+      color-mix(in oklab, var(--sc-canvas) 48%, transparent) 58%,
+      transparent 80%);
+  }
+  /* The door's copy is dark ink over a bright photograph, so the scrim is
+     limestone (--sc-canvas in the day family) and it has to be dense where
+     the bread is brightest. Below 860px the copy spans the frame, so the
+     corner becomes a band, the same switch the engine makes for --trail. */
+  .door .sc-scrim--lead {
+    background: linear-gradient(to top right,
+      color-mix(in oklab, var(--sc-canvas) 97%, transparent) 0%,
+      color-mix(in oklab, var(--sc-canvas) 88%, transparent) 34%,
+      color-mix(in oklab, var(--sc-canvas) 55%, transparent) 58%,
+      transparent 78%);
+  }
+  @media (max-width: 860px) {
+    .door .sc-scrim--lead {
+      background: linear-gradient(to top,
+        color-mix(in oklab, var(--sc-canvas) 97%, transparent) 0%,
+        color-mix(in oklab, var(--sc-canvas) 86%, transparent) 30%,
+        color-mix(in oklab, var(--sc-canvas) 42%, transparent) 54%,
+        transparent 68%);
+    }
+  }
+  /* The close's copy is centred, so the density is a plate under the copy
+     and nowhere else: the table stays visible around it. A sibling of the
+     copy, never a child, or the harness hides it with the text. */
+  .close__plate {
+    position: absolute; inset: 0; z-index: 1; pointer-events: none;
+    background: radial-gradient(58% 60% at 50% 52%,
+      rgba(26, 20, 16, 0.90) 0%, rgba(26, 20, 16, 0.84) 44%,
+      rgba(26, 20, 16, 0.38) 78%, transparent 100%);
+  }
+  @media (max-width: 860px) {
+    .close__plate {
+      background: radial-gradient(110% 64% at 50% 52%,
+        rgba(26, 20, 16, 0.92) 0%, rgba(26, 20, 16, 0.86) 48%,
+        rgba(26, 20, 16, 0.40) 80%, transparent 100%);
+    }
+  }
+</style>
+</head>
+<body>
+
+<div class="sc-grain" aria-hidden="true"></div>
+
+<header class="chrome" id="chrome">
+  <a class="chrome__mark" href="#top">Lechem Emek</a>
+  <div class="chrome__right">
+    <time class="clock" id="clock" datetime="04:00" aria-label="Time of morning">04:00</time>
+    <button class="dir-toggle" id="dirToggle" type="button">עברית</button>
+  </div>
+</header>
+
+<main id="top">
+
+  <!-- 1 · STILLNESS · 04:00 -->
+  <section class="hero night" data-sc-act="pin" data-sc-span="2.0" data-sc-dwell="0.3" aria-label="Lechem Emek">
+    <div data-sc-stage>
+      <img class="hero__img" src="assets/hero.jpg" width="2000" height="1116" alt="A baker sliding a wooden peel of sourdough loaves out of a stone oven at dawn">
+      <div class="ember" aria-hidden="true"></div>
+      <div class="sc-scrim sc-scrim--lead" aria-hidden="true"></div>
+      <div class="sc-copy sc-copy--lead" data-sc-cue="0 0.78 0">
+        <span class="sc-label">Emek Refaim, Jerusalem</span>
+        <h1 class="sc-display sc-display--xl" data-sc-kinetic="lines">Flour at four. <em>Bread by seven.</em></h1>
+        <p class="sc-lede">A small bakery on Emek Refaim since 1998. Everything on the shelf was baked in this room today.</p>
+        <a class="hero__link" href="#counter">See what is on the counter</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- 2 · INTIMACY · the making -->
+  <section class="making sc-section night" data-sc-act="flow" aria-label="How it is made">
+    <div class="sc-wrap split">
+      <div class="sc-stack" data-sc-in data-sc-stagger="70">
+        <h2 class="sc-display sc-display--md">Four things go in.</h2>
+        <p class="sc-body">Flour, water, salt, and a starter that has been fed every day since the year the shop opened. Nothing else, which is why the list on the wall has never needed a second page.</p>
+        <p class="sc-body">Batya opened with one oven and her mother's proportions. The proportions have not changed. The oven has, twice.</p>
+      </div>
+      <figure class="frame" data-sc-reveal="up" data-sc-reveal-at="0.14 0.52">
+        <img src="assets/hands.jpg" width="1000" height="1241" alt="Flour-dusted hands shaping a round of dough on a worn wooden bench">
+        <div class="ember" aria-hidden="true"></div>
+      </figure>
+    </div>
+  </section>
+
+  <!-- 3 · PATIENCE · 05:15 -->
+  <section class="shaping night" data-sc-act="pin" data-sc-span="1.8" aria-label="Shaping">
+    <div data-sc-stage>
+      <p class="line" data-sc-cue="0 0.36 0">Every loaf is shaped by hand.</p>
+      <p class="line" data-sc-cue="0.30 0.64">By whoever is in that morning.</p>
+<!-- Ends at 1, not 0.92: a middle act's last cue closes at the end of the
+           pin so the line is still lit when the stage starts to slide, and the
+           fade lands on the exit rather than leaving two empty screens. -->
+      <p class="line line--small" data-sc-cue="0.58 1">It is the slowest part of the day, and nobody has agreed to speed it up.</p>
+    </div>
+  </section>
+
+  <!-- 4 · HELD BREATH · 06:40 · authored silence -->
+  <section class="bake night" id="bake" data-sc-act="flow" aria-label="The bake">
+    <img class="bake__img" src="assets/rack.jpg" width="1600" height="1073" alt="" aria-hidden="true">
+    <div class="sc-wrap" data-sc-in>
+      <p class="sc-lede">Steam for the first ten minutes. Then you wait.</p>
+    </div>
+  </section>
+
+  <!-- 5 · AWE · 07:00 · THE PEAK -->
+  <section class="door day" id="door" data-sc-act="pin" data-sc-span="3.4" data-sc-dwell="0.25" aria-label="The door opens">
+    <div data-sc-stage>
+<!-- The window starts BELOW zero on purpose. A pinned stage is on screen for
+           a full viewport before its progress leaves 0, and at "0.05 0.40" that
+           whole entry slide was flat limestone with nothing on it. Starting the
+           window at -0.3 means the iris is already a porthole of morning, about
+           a third open, as the stage arrives: the door opens, rather than a
+           blank screen appearing and then a hole forming in it. -->
+      <figure data-sc-reveal="iris" data-sc-reveal-at="-0.3 0.42">
+        <img src="assets/rack.jpg" width="1600" height="1073" alt="Loaves and braided challahs cooling on a steel rack in morning light">
+      </figure>
+      <div class="sc-scrim sc-scrim--lead" aria-hidden="true"></div>
+      <div class="sc-copy sc-copy--lead" data-sc-cue="0.34 0.90">
+        <h2 class="sc-display sc-display--xl" data-sc-kinetic="lines">The door opens at seven.</h2>
+        <p class="sc-lede">Out of the oven at twenty to, on the shelf by the time you are standing here.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 6 · APPETITE · the counter -->
+  <section class="counter day day--cream" id="counter" data-sc-act="pan" data-sc-span="2.8" aria-label="The counter">
+    <div data-sc-stage>
+      <div class="rail" data-sc-pan="0.06">
+        <div class="rail__lead">
+          <h2 class="sc-display sc-display--md">The counter.</h2>
+          <p class="sc-body">Baked in one batch each morning. When a shelf is empty, that is the day.</p>
+        </div>
+
+        <article class="item">
+          <div class="item__shot" data-sc-tilt="5"><img src="assets/item-challah.jpg" width="900" height="1117" alt="A plain braided challah"></div>
+          <div class="item__meta"><h3 class="item__name">Challah, <em>plain</em></h3><span class="item__price">₪18</span></div>
+          <p class="item__note">Six strands. A long cold prove, brushed twice.</p>
+        </article>
+
+        <article class="item">
+          <div class="item__shot" data-sc-tilt="5"><img src="assets/item-babka.jpg" width="900" height="1117" alt="A chocolate babka, two slices cut"></div>
+          <div class="item__meta"><h3 class="item__name">Babka, <em>chocolate</em></h3><span class="item__price">₪46</span></div>
+          <p class="item__note">Laminated Thursday night, baked Friday morning.</p>
+        </article>
+
+        <article class="item">
+          <div class="item__shot" data-sc-tilt="5"><img src="assets/item-rugelach.jpg" width="900" height="1117" alt="An open box of chocolate rugelach"></div>
+          <div class="item__meta"><h3 class="item__name">Rugelach, <em>a box</em></h3><span class="item__price">₪38</span></div>
+          <p class="item__note">Twelve. Still warm if you are here before nine.</p>
+        </article>
+
+        <article class="item">
+          <div class="item__shot" data-sc-tilt="5"><img src="assets/item-sourdough.jpg" width="900" height="1117" alt="A round sourdough boule with a scored crust"></div>
+          <div class="item__meta"><h3 class="item__name">Sourdough <em>boule</em></h3><span class="item__price">₪32</span></div>
+          <p class="item__note">One starter, fed since the year we opened.</p>
+        </article>
+
+        <div class="rail__end">
+          <p class="sc-lede">Shabbos orders close Thursday at two.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 7 · WARMTH · come in -->
+  <section class="visit sc-section day" id="visit" data-sc-act="flow" aria-label="Visit">
+    <div class="sc-wrap split split--photo-first">
+      <figure class="frame" data-sc-reveal="left" data-sc-reveal-at="0.12 0.5">
+        <img src="assets/shopfront.jpg" width="1400" height="1128" alt="The bakery's stone shopfront on Emek Refaim, loaves in the window">
+      </figure>
+      <div class="sc-stack" data-sc-in data-sc-stagger="70">
+        <h2 class="sc-display sc-display--md">Come in.</h2>
+        <dl class="facts">
+          <div><dt>Hours</dt><dd>Sunday to Thursday, 07:00 to 19:00<br>Friday, 07:00 to 14:00</dd></div>
+          <div><dt>Address</dt><dd>Emek Refaim 41, Jerusalem</dd></div>
+          <div><dt>Languages</dt><dd>Hebrew, English</dd></div>
+          <div><dt>Delivery</dt><dd>Across Jerusalem on orders over ₪120</dd></div>
+          <div><dt>Notice</dt><dd>Two days for platters and large orders</dd></div>
+        </dl>
+        <p class="hechsher">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.85 8.62a4 4 0 0 1 4.78-4.77 4 4 0 0 1 6.74 0 4 4 0 0 1 4.78 4.78 4 4 0 0 1 0 6.74 4 4 0 0 1-4.77 4.78 4 4 0 0 1-6.75 0 4 4 0 0 1-4.78-4.77 4 4 0 0 1 0-6.76Z"/><path d="m9 12 2 2 4-4"/></svg>
+          Kosher, Rabbanut Yerushalayim
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 8 · RESOLVE · the last element on the page -->
+  <section class="close day" id="order" data-sc-act="pin" data-sc-span="1.2" aria-label="Order">
+    <div data-sc-stage>
+      <img class="close__img" src="assets/cta.jpg" width="2000" height="1116" alt="" aria-hidden="true">
+      <div class="sc-scrim sc-scrim--vignette" aria-hidden="true"></div>
+      <div class="close__plate" aria-hidden="true"></div>
+      <div class="sc-copy sc-copy--center" data-sc-cue="0.06">
+        <h2 class="sc-display sc-display--lg" data-sc-kinetic="lines">Order for Shabbos before Thursday at two.</h2>
+        <p class="sc-lede">Tell us what you want and when you are coming. It will be wrapped and waiting with your name on it.</p>
+        <a class="cta" href="#top" data-sc-magnet="0.26" data-sc-cue="0.06" data-sc-rise="0">Message the bakery</a>
+      </div>
+      <footer class="foot">
+        <span>Lechem Emek, Emek Refaim 41, Jerusalem</span>
+        <span>Powered by <a href="#top">MyIsraelRental</a></span>
+      </footer>
+    </div>
+  </section>
+
+</main>
+
+<script src="scrollcraft.js"></script>
+<script>
+  ScrollCraft.mount(document.body);
+
+  /* ------------------------------------------------------ the sunrise --
+     Page-local, engine untouched. --dawn is 0 at the top and 1 at the
+     moment the door stage fills the viewport, then holds. It belongs to
+     the page rather than to any act because it has to outlive three acts. */
+  (function () {
+    var root = document.documentElement;
+    var body = document.body;
+    var door = document.getElementById('door');
+    var clock = document.getElementById('clock');
+    var lastText = '';
+    var lastDay = null;
+
+    function fmt(minutes) {
+      var h = Math.floor(minutes / 60), m = Math.round((minutes % 60) / 5) * 5;
+      if (m === 60) { h += 1; m = 0; }
+      return (h < 10 ? '0' : '') + h + ':' + (m < 10 ? '0' : '') + m;
+    }
+
+    function dawn() {
+      var end = door.offsetTop - innerHeight * 0.55;
+      var d = Math.min(Math.max(scrollY / Math.max(end, 1), 0), 1);
+      root.style.setProperty('--dawn', d.toFixed(3));
+      /* 04:00 at the top, 07:00 at the door. */
+      var text = fmt(240 + d * 180);
+      if (text !== lastText) { clock.textContent = text; clock.setAttribute('datetime', text); lastText = text; }
+      var day = d >= 1;
+      if (day !== lastDay) { body.classList.toggle('is-day', day); lastDay = day; }
+    }
+
+    /* The RTL rail travel. The engine measures overflow and moves the rail
+       negative; under RTL it must move positive by the same amount. */
+    var rail = document.querySelector('.rail');
+    function railOver() {
+      if (!rail) return;
+      var over = Math.max(rail.scrollWidth - innerWidth, 0) * 1.06;
+      rail.style.setProperty('--rail-over', over.toFixed(1) + 'px');
+    }
+
+    var ticking = false;
+    addEventListener('scroll', function () {
+      if (ticking) return;
+      ticking = true;
+      requestAnimationFrame(function () { dawn(); ticking = false; });
+    }, { passive: true });
+    addEventListener('resize', function () { dawn(); railOver(); }, { passive: true });
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { dawn(); railOver(); });
+    dawn(); railOver();
+
+    /* Direction toggle. Every page on this site works both ways, and that is
+       only true if the check is one click away. */
+    var toggle = document.getElementById('dirToggle');
+    toggle.addEventListener('click', function () {
+      var rtl = root.getAttribute('dir') === 'rtl';
+      root.setAttribute('dir', rtl ? 'ltr' : 'rtl');
+      root.setAttribute('lang', rtl ? 'en' : 'he');
+      toggle.textContent = rtl ? 'עברית' : 'English';
+      railOver();
+      ScrollCraft.instances.forEach(function (i) { i.layout(); });
+    });
+  })();
+</script>
+</body>
+</html>
