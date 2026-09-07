@@ -1498,6 +1498,7 @@ const en = {
         signing: 'Signing...',
         confirmAndSign: 'Confirm & Sign Contract',
         signingDisclaimer: 'By signing, you agree to the terms set out in this agreement. Your signature is legally binding.',
+        afterSignNote: 'After you sign, you can download a copy with your signature on it, from this page.',
         contractSigned: 'Contract Signed!',
         contractSignedMsg: 'This contract has been signed successfully.',
         footer: '© MyIsraelRental.com — Secure Document Signing',

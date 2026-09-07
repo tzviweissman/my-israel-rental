@@ -67,7 +67,12 @@ const SignContract = () => {
     const ro = new ResizeObserver(fit);
     ro.observe(canvas);
     return () => ro.disconnect();
-  }, [signed]);
+    // `loading` is a dependency on purpose: the canvas is behind the loading
+    // guard, so on the first render there is nothing to observe and the
+    // effect bails. It has to run again once the contract has loaded and the
+    // pad exists, or the observer is never attached and the library's default
+    // clearOnResize wipes a half-drawn signature when the keyboard opens.
+  }, [signed, loading]);
 
   useEffect(() => {
     fetchContract();
@@ -315,6 +320,12 @@ const SignContract = () => {
                       {t('sign.clearSignature')}
                     </button>
                   </div>
+
+                  {/* What they get, not only what they give up: true since the
+                      signed PDF was wired up, so it can be said. */}
+                  <p className="text-xs text-gray-600 text-center leading-relaxed" data-testid="after-sign-note">
+                    {t('sign.afterSignNote')}
+                  </p>
 
                   <button
                     onClick={handleSign}

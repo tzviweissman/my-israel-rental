@@ -1429,6 +1429,7 @@ const he = {
         signing: 'חותם...',
         confirmAndSign: 'אשר וחתום על החוזה',
         signingDisclaimer: 'החתימה מהווה הסכמה לתנאים המפורטים בהסכם זה. החתימה מחייבת מבחינה משפטית.',
+        afterSignNote: 'אחרי החתימה תוכלו להוריד מהעמוד הזה עותק של החוזה עם החתימה שלכם.',
         contractSigned: 'החוזה נחתם!',
         contractSignedMsg: 'החוזה נחתם בהצלחה.',
         footer: '© MyIsraelRental.com — חתימת מסמכים מאובטחת',

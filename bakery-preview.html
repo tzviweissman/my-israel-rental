@@ -64,7 +64,7 @@
 :root{
   --ink:#23201B;
   --ink-soft:#5B534A;
-  --muted:#8A8073;
+  --muted:#6B6459; /* the token value; #8A8073 measured 3.21:1 on limestone */
   --limestone:#EFE9DC;
   --cream:#F7F3EA;
   --surface:#FFFFFF;
@@ -158,7 +158,7 @@ section{position:relative}
 .nav-links{display:none;gap:1.9rem;font-size:.9rem;font-weight:500}
 .nav-links a{color:rgba(255,255,255,.9);text-decoration:none;transition:color .4s var(--ease)}
 .nav.solid .nav-links a{color:var(--ink-soft)}
-.nav-links a:hover{color:var(--gold)}
+.nav-links a:hover{color:var(--ink);text-decoration:underline;text-underline-offset:.2em}
 .nav-right{display:flex;align-items:center;gap:.6rem}
 .dir-toggle{
   min-height:40px;padding:0 .85rem;border-radius:999px;cursor:pointer;
@@ -249,7 +249,7 @@ section{position:relative}
    there is, and it also covers the thing being sold. */
 .item-meta{display:flex;justify-content:space-between;gap:1rem;align-items:baseline;margin-block-start:1.1rem}
 .item-name{font-family:var(--font-head);font-size:1.32rem;line-height:1.2}
-.item-name .nick{font-style:italic;color:var(--gold-lg)}
+.item-name .nick{font-style:italic;color:#6B6459}
 .item-price{font-family:var(--font-body);font-weight:700;font-size:1rem;white-space:nowrap}
 .item p{margin:.5rem 0 0;font-size:.92rem;color:var(--ink-soft);max-width:32ch}
 .counter-all{margin-block-start:clamp(2.5rem,5vw,3.5rem);display:flex;justify-content:center}
@@ -269,7 +269,7 @@ section{position:relative}
 .step-rule::before{content:"";position:absolute;inset-block-start:-3px;inset-inline-start:0;width:34px;height:7px;background:var(--gold)}
 .step h3{margin-block-start:.35rem}
 .step p{margin:0;color:var(--ink-soft);font-size:.96rem}
-.step-time{font-family:var(--font-body);font-size:.72rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--gold-lg)}
+.step-time{font-family:var(--font-body);font-size:.72rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:#6B6459}
 
 /* ------------------------------------------------------------------ word */
 .word{background:var(--ink);color:#fff;padding-block:clamp(4.5rem,11vw,8rem);position:relative;overflow:hidden}
