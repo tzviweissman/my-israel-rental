@@ -55,6 +55,8 @@ Signed contracts and uploaded contract templates are **personal/legal documents*
 
 ## Local dev
 
+- **Never make Tzvi sign in to test a build.** Open every local preview with `?as=owner` on the URL (also `renter`, `provider`, `admin`), e.g. `http://localhost:3210/dashboard?tab=orders&as=owner`. It signs in as a persistent local test account (`dev-owner@local.test`) and drops the param. Needs `DEV_AUTOLOGIN=1` in `backend/.env` and a localhost `MONGO_URL`; the endpoint is a 404 otherwise, and the frontend hook is dead outside `NODE_ENV=development`. Never set the flag on Railway.
+
 See `backend/.env.example` and `frontend/.env.example` for the full list of variables and what each does. Local dev typically runs a local MongoDB rather than pointing at production Atlas — check `backend/.env`'s current `MONGO_URL` before assuming which database you're touching, especially before running any migration or backfill script.
 
 ## Design system (locked) — do not reinterpret

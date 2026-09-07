@@ -123,7 +123,11 @@ export default function OrdersTab({ API, token }) {
 
   // ---- orders ------------------------------------------------------------
   const load = useCallback(async () => {
-    if (!bizId) return;
+    // Only for a business in THIS account's list. The remembered id can
+    // belong to whoever was signed in last on this browser, and asking
+    // for their orders is a 403 (and a wrong "could not load" toast)
+    // until the list arrives and the id is corrected.
+    if (!bizId || !businesses || !businesses.some((b) => b.id === bizId)) return;
     setLoading(true);
     try {
       const today = localDate(new Date());
@@ -142,7 +146,7 @@ export default function OrdersTab({ API, token }) {
     } finally {
       setLoading(false);
     }
-  }, [API, auth, bizId, range, t]);
+  }, [API, auth, bizId, businesses, range, t]);
 
   useEffect(() => { load(); }, [load]);
 

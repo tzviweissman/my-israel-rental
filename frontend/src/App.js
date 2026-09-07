@@ -183,7 +183,13 @@ function App() {
   // Use sessionStorage instead of localStorage for better security
   // sessionStorage is cleared when browser tab is closed, reducing XSS attack window
   const [token, setToken] = useState(sessionStorage.getItem('token'));
-  const [loading, setLoading] = useState(!!sessionStorage.getItem('token'));
+  // Also "loading" while a dev auto sign-in (`?as=owner`, below) is in
+  // flight: the protected routes redirect to /auth/login the moment they
+  // render with no user, which is before the sign-in call can answer.
+  const [loading, setLoading] = useState(
+    !!sessionStorage.getItem('token')
+    || (process.env.NODE_ENV === 'development' && new URLSearchParams(window.location.search).has('as')),
+  );
 
   useEffect(() => {
     if (token) {
@@ -222,6 +228,29 @@ function App() {
     setToken(newToken);
     setUser(userData);
   };
+
+  // Dev-only auto sign-in: `?as=owner` (or renter / provider / admin) on
+  // any local URL signs in as a persistent test account and drops the
+  // param. Testing a build must never start at a login form (Tzvi,
+  // 2026-09-07). Dead in a production bundle: CRA never sets NODE_ENV
+  // to development there, and the backend 404s unless DEV_AUTOLOGIN=1
+  // AND the database is local. See routes/auth.py dev_login.
+  useEffect(() => {
+    if (process.env.NODE_ENV !== 'development') return;
+    const params = new URLSearchParams(window.location.search);
+    const as = params.get('as');
+    if (!as) return;
+    axios.get(`${API}/auth/dev-login`, { params: { role: as } })
+      .then(({ data }) => {
+        login(data.token, data.user);
+        params.delete('as');
+        const qs = params.toString();
+        window.history.replaceState(null, '', `${window.location.pathname}${qs ? `?${qs}` : ''}${window.location.hash}`);
+      })
+      .catch((err) => console.error('dev-login failed', err?.response?.data || err))
+      .finally(() => setLoading(false));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Admin-only helper: swap into a target user's session while stashing the
   // current admin's token so we can restore it in one click. The banner

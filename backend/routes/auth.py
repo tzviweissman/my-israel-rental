@@ -211,6 +211,75 @@ GOOGLE_TOKENINFO_URL = "https://oauth2.googleapis.com/tokeninfo"
 GOOGLE_USERINFO_URL = "https://www.googleapis.com/oauth2/v3/userinfo"
 
 
+# ── Dev-only auto sign-in ─────────────────────────────────────────────────
+# Tzvi's rule (2026-09-07): testing a local build must never start with a
+# login form. Any page opened as `?as=owner` (or renter / provider / admin)
+# signs in as a persistent local test account, so the person testing lands
+# on the page they wanted, already signed in, every time.
+#
+# Three locks, all of which must open:
+#   * DEV_AUTOLOGIN=1 in the environment. Never set on Railway.
+#   * MONGO_URL points at localhost. Even with the flag set by mistake,
+#     this cannot hand out a session against the production database.
+#   * The frontend only calls it under NODE_ENV=development, which CRA
+#     never sets in a built bundle.
+# Otherwise the endpoint does not exist (404), same as an unknown path.
+_DEV_LOGIN_ROLES = {"owner", "renter", "provider", "admin", "manager"}
+
+
+def _dev_autologin_enabled() -> bool:
+    if os.environ.get("DEV_AUTOLOGIN", "") != "1":
+        return False
+    mongo = os.environ.get("MONGO_URL", "")
+    return "localhost" in mongo or "127.0.0.1" in mongo
+
+
+@api_router.get("/auth/dev-login")
+async def dev_login(role: str = "owner") -> dict:
+    if not _dev_autologin_enabled():
+        raise HTTPException(status_code=404, detail="Not Found")
+    role = (role or "owner").strip().lower()
+    if role not in _DEV_LOGIN_ROLES:
+        raise HTTPException(status_code=400, detail=f"role must be one of {sorted(_DEV_LOGIN_ROLES)}")
+
+    email = f"dev-{role}@local.test"
+    user = await db.users.find_one({"email": email}, {"_id": 0})
+    if not user:
+        # A random password nobody knows: this account is only ever
+        # entered through this endpoint, on this machine.
+        hashed = bcrypt.hashpw(secrets.token_urlsafe(24).encode("utf-8"), bcrypt.gensalt())
+        user = {
+            "id": str(uuid.uuid4()),
+            "email": email,
+            "password": hashed.decode("utf-8"),
+            "name": f"Dev {role.capitalize()}",
+            "role": role,
+            "phone": None,
+            "created_at": datetime.now(UTC).isoformat(),
+            "email_verified": True,
+        }
+        if role in ("owner", "manager"):
+            # An owner sees the business tabs only while a provider trial
+            # is running (utils/providerTrial.js). Ten years is "always".
+            user["provider_trial"] = {
+                "started_at": datetime.now(UTC).isoformat(),
+                "ends_at": (datetime.now(UTC) + timedelta(days=3650)).isoformat(),
+            }
+        await db.users.insert_one(dict(user))
+        if role in ("owner", "manager", "provider"):
+            from utils.businesses import ensure_default_business
+            await ensure_default_business(user["id"], name=f"Dev {role.capitalize()} Bakery")
+
+    token = create_token(user["id"], user["role"])
+    return {
+        "token": token,
+        "user": {
+            "id": user["id"], "email": user["email"], "name": user["name"],
+            "role": user["role"], "email_verified": True,
+        },
+    }
+
+
 @api_router.post("/auth/google/session", response_model=TokenResponse)
 async def google_session_exchange(
     payload: dict = Body(..., embed=False),
