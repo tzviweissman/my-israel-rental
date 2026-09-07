@@ -24,19 +24,16 @@
  */
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { toast } from 'sonner';
 import {
-  Plus, Loader2, ClipboardPaste, Phone, MapPin, Store as StoreIcon, Bike, Pencil, X,
-  ChevronDown, Undo2, Sparkles, ClipboardList, MessageCircle,
+  Plus, Loader2, ClipboardPaste, Store as StoreIcon, Bike, X, Sparkles, ClipboardList,
+  LayoutList, Table2, Printer, Download, Upload, Link2, Copy, Check, RotateCcw, Pencil, MessageCircle,
 } from 'lucide-react';
 import { phoneError } from '../../utils/phoneValidation';
-import { buildWhatsAppLink } from '../../utils/whatsappLink';
+import OrderCard, { STATUS_ORDER, OPEN, NEXT, pillStyle } from './OrderCard';
 
-const STATUS_ORDER = ['new', 'preparing', 'ready', 'done', 'cancelled', 'failed'];
-const NEXT = { new: 'preparing', preparing: 'ready', ready: 'done' };
-const BACK = { preparing: 'new', ready: 'preparing' };
-const OPEN = new Set(['new', 'preparing', 'ready']);
 
 const pad = (n) => String(n).padStart(2, '0');
 const localDate = (d) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
@@ -60,6 +57,19 @@ const splitNeededBy = (s) => {
   return { date, time: time || '' };
 };
 const joinNeededBy = (date, time) => (time ? `${date}T${time}` : date);
+
+/** The query for each range tab; also what Print and Export use, so
+ * what you print is what you were looking at. */
+const rangeParams = (range) => {
+  const today = localDate(new Date());
+  if (range === 'today') return { from: today, to: today };
+  if (range === 'week') {
+    const end = new Date(); end.setDate(end.getDate() + 6);
+    return { from: today, to: localDate(end) };
+  }
+  if (range === 'open') return { status: 'open' };
+  return { status: 'done' };
+};
 
 const EMPTY_FORM = () => ({
   customer_name: '',
@@ -87,6 +97,7 @@ const fromOrder = (o) => ({
 
 export default function OrdersTab({ API, token }) {
   const { t, i18n } = useTranslation();
+  const navigate = useNavigate();
   const auth = useMemo(() => ({ headers: { Authorization: `Bearer ${token}` } }), [token]);
 
   const [businesses, setBusinesses] = useState(null);
@@ -101,6 +112,16 @@ export default function OrdersTab({ API, token }) {
   const [entryOpen, setEntryOpen] = useState(false);
   const [editing, setEditing] = useState(null);       // order being edited, or null
   const [busyId, setBusyId] = useState(null);
+  // Cards are the board; the table is for the owner who wants the sheet
+  // feel (spec O3). Remembered per browser.
+  const [view, setView] = useState(() => {
+    try { return localStorage.getItem('orders.view') === 'table' ? 'table' : 'cards'; } catch { return 'cards'; }
+  });
+  const [panel, setPanel] = useState(null);           // 'staff' | 'import' | null
+
+  useEffect(() => {
+    try { localStorage.setItem('orders.view', view); } catch { /* private mode */ }
+  }, [view]);
 
   // ---- businesses -------------------------------------------------------
   useEffect(() => {
@@ -130,14 +151,7 @@ export default function OrdersTab({ API, token }) {
     if (!bizId || !businesses || !businesses.some((b) => b.id === bizId)) return;
     setLoading(true);
     try {
-      const today = localDate(new Date());
-      const params = {};
-      if (range === 'today') { params.from = today; params.to = today; }
-      else if (range === 'week') {
-        const end = new Date(); end.setDate(end.getDate() + 6);
-        params.from = today; params.to = localDate(end);
-      } else if (range === 'open') { params.status = 'open'; }
-      else if (range === 'done') { params.status = 'done'; }
+      const params = rangeParams(range);
       const { data } = await axios.get(`${API}/marketplace/businesses/${bizId}/orders`, { ...auth, params });
       setOrders(data.orders || []);
       setCounts(data.status_counts || {});
@@ -191,6 +205,40 @@ export default function OrdersTab({ API, token }) {
       load();
     }
     toast.success(wasEdit ? t('orders.updated', 'Order updated') : t('orders.saved', 'Order saved'));
+  };
+
+  // Spec O9: the export is always one tap away, because owners keep the
+  // sheet open out of fear and this is what lets them close it.
+  const exportCsv = async () => {
+    try {
+      const res = await axios.get(`${API}/marketplace/businesses/${bizId}/orders/export.csv`, {
+        ...auth, params: rangeParams(range), responseType: 'blob',
+      });
+      const url = URL.createObjectURL(res.data);
+      const a = document.createElement('a');
+      const p = rangeParams(range);
+      a.href = url;
+      a.download = `orders-${p.from || range}-${p.to || ''}.csv`.replace(/-$/, '');
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 60_000);
+    } catch (err) {
+      toast.error(err?.response?.data?.detail || t('orders.exportFailed', 'Could not export'));
+    }
+  };
+
+  const printOrders = () => {
+    const p = rangeParams(range);
+    const today = localDate(new Date());
+    // The print page shows OPEN orders in a date window; "All open" and
+    // "Done" have no window, so print the month ahead.
+    const end = new Date(); end.setDate(end.getDate() + 30);
+    const q = new URLSearchParams({ business: bizId, from: p.from || today, to: p.to || localDate(end) });
+    // Same tab, not window.open: the session lives in sessionStorage,
+    // which a new tab does not inherit, so a new tab lands on the login
+    // page. The print page has a Back button.
+    navigate(`/orders/print?${q.toString()}`);
   };
 
   const lang = String(i18n.language || 'en').split('-')[0];
@@ -271,6 +319,47 @@ export default function OrdersTab({ API, token }) {
         />
       )}
 
+      {/* Toolbar: view, staff link, print, export, import. Small and
+          quiet - the black button on this screen is New order. */}
+      <div className="flex flex-wrap items-center gap-1.5 mb-3" data-testid="orders-toolbar">
+        <div className="inline-flex rounded-full border p-0.5 me-1" style={{ borderColor: 'var(--brand-border)' }} role="group" aria-label={t('orders.view', 'View')}>
+          {[['cards', LayoutList, t('orders.viewCards', 'Cards')], ['table', Table2, t('orders.viewTable', 'Table')]].map(([v, Icon, lbl]) => (
+            <button
+              key={v}
+              type="button"
+              onClick={() => setView(v)}
+              aria-pressed={view === v}
+              className="inline-flex items-center gap-1 px-2.5 min-h-[36px] rounded-full text-xs font-semibold"
+              style={view === v ? { background: 'var(--ink)', color: 'var(--action-ink)' } : { color: 'var(--brand-muted)' }}
+              data-testid={`orders-view-${v}`}
+            >
+              <Icon size={13} /> {lbl}
+            </button>
+          ))}
+        </div>
+        {[
+          ['staff', Link2, t('orders.staffLink', 'Staff link'), () => setPanel(panel === 'staff' ? null : 'staff')],
+          ['print', Printer, t('orders.print.button', 'Print'), printOrders],
+          ['export', Download, t('orders.export', 'Export CSV'), exportCsv],
+          ['import', Upload, t('orders.import', 'Import customers'), () => setPanel(panel === 'import' ? null : 'import')],
+        ].map(([key, Icon, lbl, fn]) => (
+          <button
+            key={key}
+            type="button"
+            onClick={fn}
+            aria-pressed={panel === key ? true : undefined}
+            className="inline-flex items-center gap-1 px-3 min-h-[36px] rounded-full text-xs font-semibold border"
+            style={{ borderColor: 'var(--brand-border)', color: 'var(--ink)', background: panel === key ? 'var(--surface-muted)' : 'transparent' }}
+            data-testid={`orders-tool-${key}`}
+          >
+            <Icon size={13} /> {lbl}
+          </button>
+        ))}
+      </div>
+
+      {panel === 'staff' && <StaffLinkPanel API={API} auth={auth} businessId={biz.id} onClose={() => setPanel(null)} />}
+      {panel === 'import' && <ImportCustomersPanel API={API} auth={auth} businessId={biz.id} onClose={() => setPanel(null)} />}
+
       {/* Range tabs */}
       <div className="flex gap-1 mb-3 overflow-x-auto" role="tablist" data-testid="orders-range">
         {[
@@ -334,6 +423,14 @@ export default function OrdersTab({ API, token }) {
             </button>
           )}
         </div>
+      ) : view === 'table' ? (
+        <OrdersTable
+          orders={visible}
+          busyId={busyId}
+          onStatus={setStatus}
+          onEdit={(o) => { setEntryOpen(false); setEditing(o); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
+          t={t}
+        />
       ) : (
         <div className="space-y-5">
           {groups.map(([day, list]) => (
@@ -358,160 +455,6 @@ export default function OrdersTab({ API, token }) {
         </div>
       )}
     </div>
-  );
-}
-
-// Status colours. Green is the site's one functional colour and it means
-// "ready to go out"; new is the accent wash; everything else is neutral
-// so the board reads calm at 6am. Cancelled/failed are told by the word
-// and a strikethrough, not by a red the theme does not have.
-function pillStyle(status, on) {
-  const base = { borderColor: 'var(--brand-border)', color: 'var(--ink)', background: 'var(--surface)' };
-  if (status === 'new') Object.assign(base, { background: 'var(--accent-soft)', color: 'var(--accent-soft-ink)', borderColor: 'transparent' });
-  if (status === 'ready') Object.assign(base, { background: 'var(--status-open-bg)', color: 'var(--status-open)', borderColor: 'transparent' });
-  if (status === 'preparing') Object.assign(base, { background: 'var(--surface-muted)' });
-  if (status === 'done' || status === 'cancelled' || status === 'failed') Object.assign(base, { color: 'var(--brand-muted)' });
-  if (on) Object.assign(base, { outline: '2px solid var(--ink)', outlineOffset: 1 });
-  return base;
-}
-
-function OrderCard({ order: o, busy, onStatus, onEdit, t }) {
-  const [more, setMore] = useState(false);
-  const time = (o.needed_by || '').includes('T') ? o.needed_by.slice(11, 16) : '';
-  const closed = !OPEN.has(o.status);
-  const next = NEXT[o.status];
-  const back = BACK[o.status];
-  const wa = o.customer_phone_e164 ? buildWhatsAppLink(o.customer_phone_e164) : null;
-  const nextLabel = {
-    preparing: t('orders.action.start', 'Start'),
-    ready: t('orders.action.ready', 'Ready'),
-    done: o.fulfilment === 'delivery' ? t('orders.action.delivered', 'Delivered') : t('orders.action.collected', 'Collected'),
-  }[next];
-
-  return (
-    <article
-      className="rounded-2xl border bg-white p-3"
-      style={{ borderColor: 'var(--brand-border)', opacity: closed ? 0.7 : 1 }}
-      data-testid={`order-card-${o.id}`}
-      data-status={o.status}
-    >
-      <div className="flex items-start gap-3">
-        <div className="shrink-0 w-14 text-center">
-          <div className="text-base font-bold tabular-nums" style={{ color: 'var(--ink)' }}>{time || '—'}</div>
-          <div className="text-[10px]" style={{ color: 'var(--brand-muted)' }}>{time ? '' : t('orders.anyTime', 'any time')}</div>
-        </div>
-        <div className="min-w-0 flex-1">
-          <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
-            {/* dir="auto" on every free-text field: a Hebrew board full of
-                English item names (or the reverse) must not read "rolls 6". */}
-            <span dir="auto" className="font-semibold truncate" style={{ color: 'var(--ink)', textDecoration: o.status === 'cancelled' ? 'line-through' : 'none' }}>
-              {o.customer_name}
-            </span>
-            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold border" style={pillStyle(o.status, false)}>
-              {t(`orders.status.${o.status}`, o.status)}
-            </span>
-            <span className="inline-flex items-center gap-1 text-[11px]" style={{ color: 'var(--brand-muted)' }}>
-              {o.fulfilment === 'delivery' ? <Bike size={12} /> : <StoreIcon size={12} />}
-              {o.fulfilment === 'delivery' ? t('orders.delivery', 'Delivery') : t('orders.pickup', 'Pickup')}
-            </span>
-            {o.total != null && (
-              <span className="text-[12px] font-semibold ms-auto" style={{ color: 'var(--ink)' }}>₪{Number(o.total).toLocaleString()}</span>
-            )}
-          </div>
-          <p dir="auto" className="text-sm mt-1 whitespace-pre-line" style={{ color: 'var(--ink)' }}>{o.items}</p>
-          {o.fulfilment === 'delivery' && o.address && (
-            <p className="text-xs mt-1 inline-flex items-start gap-1" style={{ color: 'var(--brand-muted)' }}>
-              <MapPin size={12} className="mt-0.5 shrink-0" /> <span dir="auto">{o.address}</span>
-            </p>
-          )}
-          {o.notes && (
-            <p dir="auto" className="text-xs mt-1 italic" style={{ color: 'var(--brand-muted)' }}>{o.notes}</p>
-          )}
-        </div>
-      </div>
-
-      <div className="flex items-center gap-2 mt-3">
-        {!closed && next && (
-          <button
-            type="button"
-            disabled={busy}
-            onClick={() => onStatus(next)}
-            className="px-4 min-h-[44px] rounded-full text-sm font-semibold disabled:opacity-60"
-            style={next === 'done'
-              ? { background: 'var(--status-open-bg)', color: 'var(--status-open)' }
-              : { background: 'var(--action)', color: 'var(--action-ink)' }}
-            data-testid={`order-next-${o.id}`}
-          >
-            {busy ? <Loader2 size={14} className="animate-spin inline" /> : nextLabel}
-          </button>
-        )}
-        {o.customer_phone_e164 && (
-          <a
-            href={`tel:+${o.customer_phone_e164}`}
-            className="inline-flex items-center justify-center min-h-[44px] min-w-[44px] rounded-full border"
-            style={{ borderColor: 'var(--brand-border)', color: 'var(--ink)' }}
-            aria-label={t('orders.call', 'Call {{name}}', { name: o.customer_name })}
-            title={o.customer_phone}
-          >
-            <Phone size={16} />
-          </a>
-        )}
-        {wa && (
-          <a
-            href={wa}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center justify-center min-h-[44px] min-w-[44px] rounded-full border"
-            style={{ borderColor: 'var(--brand-border)', color: 'var(--ink)' }}
-            aria-label={t('orders.whatsapp', 'WhatsApp {{name}}', { name: o.customer_name })}
-          >
-            <MessageCircle size={16} />
-          </a>
-        )}
-        {!closed && (
-          <button
-            type="button"
-            onClick={() => setMore((m) => !m)}
-            className="inline-flex items-center justify-center min-h-[44px] min-w-[44px] rounded-full ms-auto"
-            style={{ color: 'var(--brand-muted)' }}
-            aria-expanded={more}
-            aria-label={t('orders.more', 'More')}
-          >
-            <ChevronDown size={16} style={{ transform: more ? 'rotate(180deg)' : 'none' }} />
-          </button>
-        )}
-      </div>
-
-      {more && !closed && (
-        <div className="flex flex-wrap gap-2 mt-2 pt-2 border-t" style={{ borderColor: 'var(--brand-border)' }}>
-          <button type="button" onClick={onEdit} className="inline-flex items-center gap-1 px-3 min-h-[40px] rounded-full text-xs font-semibold border" style={{ borderColor: 'var(--brand-border)', color: 'var(--ink)' }}>
-            <Pencil size={12} /> {t('orders.edit', 'Edit')}
-          </button>
-          {back && (
-            <button type="button" disabled={busy} onClick={() => onStatus(back)} className="inline-flex items-center gap-1 px-3 min-h-[40px] rounded-full text-xs font-semibold border" style={{ borderColor: 'var(--brand-border)', color: 'var(--ink)' }}>
-              <Undo2 size={12} /> {t('orders.action.back', 'Back to {{status}}', { status: t(`orders.status.${back}`, back) })}
-            </button>
-          )}
-          {o.status === 'ready' && o.fulfilment === 'delivery' && (
-            <button type="button" disabled={busy} onClick={() => onStatus('failed')} className="px-3 min-h-[40px] rounded-full text-xs font-semibold border" style={{ borderColor: 'var(--brand-border)', color: 'var(--ink)' }}>
-              {t('orders.action.failed', 'Delivery failed')}
-            </button>
-          )}
-          <button
-            type="button"
-            disabled={busy}
-            onClick={() => {
-              // eslint-disable-next-line no-alert
-              if (window.confirm(t('orders.confirmCancel', 'Cancel this order for {{name}}?', { name: o.customer_name }))) onStatus('cancelled');
-            }}
-            className="px-3 min-h-[40px] rounded-full text-xs font-semibold ms-auto"
-            style={{ color: 'var(--brand-muted)' }}
-          >
-            {t('orders.action.cancel', 'Cancel order')}
-          </button>
-        </div>
-      )}
-    </article>
   );
 }
 
@@ -843,5 +786,285 @@ function OrderForm({ API, auth, businessId, initial, orderId, onCancel, onSaved 
         </button>
       </div>
     </form>
+  );
+}
+
+/**
+ * The sheet feel (spec O3): one row per order, the columns the sheet
+ * had, sortable by clicking a header. The next step is still one tap.
+ */
+function OrdersTable({ orders, busyId, onStatus, onEdit, t }) {
+  const [sort, setSort] = useState({ key: 'needed_by', dir: 1 });
+  const rows = useMemo(() => {
+    const list = [...orders];
+    const val = (o) => {
+      if (sort.key === 'total') return o.total == null ? -1 : Number(o.total);
+      if (sort.key === 'status') return STATUS_ORDER.indexOf(o.status);
+      if (sort.key === 'customer_name') return (o.customer_name || '').toLowerCase();
+      return o.needed_by || '';
+    };
+    list.sort((a, b) => (val(a) > val(b) ? 1 : val(a) < val(b) ? -1 : 0) * sort.dir);
+    return list;
+  }, [orders, sort]);
+  const th = (key, label, extra = '') => (
+    <th className={`text-start font-semibold py-2 px-2 whitespace-nowrap ${extra}`} style={{ color: 'var(--brand-muted)' }}>
+      <button type="button" onClick={() => setSort((s) => ({ key, dir: s.key === key ? -s.dir : 1 }))} className="inline-flex items-center gap-1 min-h-[32px]">
+        {label}{sort.key === key && <span aria-hidden="true">{sort.dir === 1 ? '\u2191' : '\u2193'}</span>}
+      </button>
+    </th>
+  );
+  return (
+    <div className="overflow-x-auto rounded-2xl border bg-white" style={{ borderColor: 'var(--brand-border)' }} data-testid="orders-table">
+      <table className="w-full text-sm min-w-[720px]">
+        <thead>
+          <tr className="border-b" style={{ borderColor: 'var(--brand-border)' }}>
+            {th('needed_by', t('orders.neededBy', 'Needed by'))}
+            {th('customer_name', t('orders.name', 'Customer'))}
+            <th className="text-start font-semibold py-2 px-2" style={{ color: 'var(--brand-muted)' }}>{t('orders.items', 'Items')}</th>
+            <th className="text-start font-semibold py-2 px-2" style={{ color: 'var(--brand-muted)' }}>{t('orders.fulfilment', 'Pickup or delivery')}</th>
+            {th('total', t('orders.total', 'Total (\u20aa)'), 'text-end')}
+            {th('status', t('orders.statusCol', 'Status'))}
+            <th className="py-2 px-2" />
+          </tr>
+        </thead>
+        <tbody>
+          {rows.map((o) => {
+            const next = NEXT[o.status];
+            const nextLabel = next && {
+              preparing: t('orders.action.start', 'Start'),
+              ready: t('orders.action.ready', 'Ready'),
+              done: o.fulfilment === 'delivery' ? t('orders.action.delivered', 'Delivered') : t('orders.action.collected', 'Collected'),
+            }[next];
+            const nb = o.needed_by || '';
+            return (
+              <tr key={o.id} className="border-b align-top" style={{ borderColor: 'var(--brand-border)', opacity: OPEN.has(o.status) ? 1 : 0.65 }} data-testid={`orders-row-${o.id}`}>
+                <td className="py-2 px-2 whitespace-nowrap tabular-nums" style={{ color: 'var(--ink)' }}>
+                  <div className="font-semibold">{nb.includes('T') ? nb.slice(11, 16) : '\u2014'}</div>
+                  <div className="text-[11px]" style={{ color: 'var(--brand-muted)' }}>{nb.slice(0, 10)}</div>
+                </td>
+                <td className="py-2 px-2" style={{ color: 'var(--ink)' }}>
+                  <div className="font-semibold" dir="auto">{o.customer_name}</div>
+                  {o.customer_phone && (
+                    <a href={o.customer_phone_e164 ? `tel:+${o.customer_phone_e164}` : undefined} className="text-[11px]" dir="ltr" style={{ color: 'var(--brand-muted)' }}>{o.customer_phone}</a>
+                  )}
+                </td>
+                <td className="py-2 px-2 whitespace-pre-line" dir="auto" style={{ color: 'var(--ink)' }}>
+                  {o.items}
+                  {o.notes && <div className="text-[11px] italic" style={{ color: 'var(--brand-muted)' }}>{o.notes}</div>}
+                </td>
+                <td className="py-2 px-2" style={{ color: 'var(--ink)' }}>
+                  {o.fulfilment === 'delivery' ? t('orders.delivery', 'Delivery') : t('orders.pickup', 'Pickup')}
+                  {o.address && <div className="text-[11px]" dir="auto" style={{ color: 'var(--brand-muted)' }}>{o.address}</div>}
+                </td>
+                <td className="py-2 px-2 text-end tabular-nums whitespace-nowrap" style={{ color: 'var(--ink)' }}>{o.total != null ? `\u20aa${Number(o.total).toLocaleString()}` : ''}</td>
+                <td className="py-2 px-2 whitespace-nowrap">
+                  <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold border" style={pillStyle(o.status, false)}>{t(`orders.status.${o.status}`, o.status)}</span>
+                </td>
+                <td className="py-2 px-2 whitespace-nowrap text-end">
+                  {next && (
+                    <button type="button" disabled={busyId === o.id} onClick={() => onStatus(o, next)} className="px-3 min-h-[32px] rounded-full text-xs font-semibold me-1 disabled:opacity-60" style={next === 'done' ? { background: 'var(--status-open-bg)', color: 'var(--status-open)' } : { background: 'var(--action)', color: 'var(--action-ink)' }}>
+                      {busyId === o.id ? <Loader2 size={12} className="animate-spin inline" /> : nextLabel}
+                    </button>
+                  )}
+                  {OPEN.has(o.status) && (
+                    <button type="button" onClick={() => onEdit(o)} className="inline-flex items-center justify-center min-h-[32px] min-w-[32px] rounded-full" style={{ color: 'var(--brand-muted)' }} aria-label={t('orders.edit', 'Edit')}>
+                      <Pencil size={13} />
+                    </button>
+                  )}
+                </td>
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
+/**
+ * The shared staff link (spec O3). One per business; anyone holding it
+ * sees the board and moves orders, with no login. The panel says so in
+ * plain words, because "share" undersells what the link can do.
+ */
+function StaffLinkPanel({ API, auth, businessId, onClose }) {
+  const { t } = useTranslation();
+  const [token, setToken] = useState(undefined);   // undefined = loading
+  const [busy, setBusy] = useState(false);
+  const [copied, setCopied] = useState(false);
+
+  useEffect(() => {
+    let alive = true;
+    axios.get(`${API}/marketplace/businesses/${businessId}/orders/staff-link`, auth)
+      .then(({ data }) => alive && setToken(data.token || null))
+      .catch(() => alive && setToken(null));
+    return () => { alive = false; };
+  }, [API, auth, businessId]);
+
+  const url = token ? `${window.location.origin}/orders/staff/${token}` : '';
+
+  const create = async (rotate) => {
+    if (rotate) {
+      // eslint-disable-next-line no-alert
+      if (!window.confirm(t('orders.staff.confirmReset', 'Reset the link? Everyone with the old one loses access right away.'))) return;
+    }
+    setBusy(true);
+    try {
+      const { data } = await axios.post(`${API}/marketplace/businesses/${businessId}/orders/staff-link`, null, { ...auth, params: rotate ? { rotate: true } : {} });
+      setToken(data.token);
+      setCopied(false);
+    } catch (err) {
+      toast.error(err?.response?.data?.detail || t('orders.saveFailed', 'Could not save'));
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const revoke = async () => {
+    // eslint-disable-next-line no-alert
+    if (!window.confirm(t('orders.staff.confirmOff', 'Turn the link off? The board stops working for everyone who has it.'))) return;
+    setBusy(true);
+    try {
+      await axios.delete(`${API}/marketplace/businesses/${businessId}/orders/staff-link`, auth);
+      setToken(null);
+    } catch (err) {
+      toast.error(err?.response?.data?.detail || t('orders.saveFailed', 'Could not save'));
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const copy = async () => {
+    try {
+      await navigator.clipboard.writeText(url);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      toast.error(t('orders.staff.copyFailed', 'Could not copy - select the link and copy it by hand'));
+    }
+  };
+
+  const btn = 'inline-flex items-center gap-1.5 px-3 min-h-[40px] rounded-full text-xs font-semibold border disabled:opacity-60';
+  const btnStyle = { borderColor: 'var(--brand-border)', color: 'var(--ink)' };
+
+  return (
+    <div className="rounded-2xl border p-4 mb-4 bg-white" style={{ borderColor: 'var(--brand-border)' }} data-testid="staff-link-panel">
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <h3 className="font-bold" style={{ color: 'var(--ink)' }}>{t('orders.staff.title', 'The board for your staff')}</h3>
+          <p className="text-sm mt-1" style={{ color: 'var(--brand-muted)' }}>
+            {t('orders.staff.body', 'One link for the counter. Anyone who has it sees the day\'s orders and can mark them started, ready and done - no login, no account. They cannot add or change orders.')}
+          </p>
+        </div>
+        <button type="button" onClick={onClose} className="inline-flex items-center justify-center min-h-[44px] min-w-[44px] rounded-full shrink-0" style={{ color: 'var(--brand-muted)' }} aria-label={t('orders.close', 'Close')}>
+          <X size={18} />
+        </button>
+      </div>
+
+      {token === undefined ? (
+        <div className="py-4" style={{ color: 'var(--brand-muted)' }}><Loader2 className="animate-spin inline" size={16} /></div>
+      ) : token ? (
+        <div className="mt-3 space-y-2">
+          <input readOnly value={url} onFocus={(e) => e.target.select()} className="w-full px-3 min-h-[44px] rounded-lg border text-sm bg-white" style={{ borderColor: 'var(--brand-border)', color: 'var(--ink)' }} dir="ltr" data-testid="staff-link-url" />
+          <div className="flex flex-wrap gap-2">
+            <button type="button" onClick={copy} className={btn} style={{ background: 'var(--action)', color: 'var(--action-ink)', borderColor: 'transparent' }} data-testid="staff-link-copy">
+              {copied ? <Check size={13} /> : <Copy size={13} />} {copied ? t('orders.staff.copied', 'Copied') : t('orders.staff.copy', 'Copy link')}
+            </button>
+            <a href={`https://wa.me/?text=${encodeURIComponent(t('orders.staff.shareText', 'Orders board: {{url}}', { url }))}`} target="_blank" rel="noopener noreferrer" className={btn} style={btnStyle}>
+              <MessageCircle size={13} /> {t('orders.staff.share', 'Send on WhatsApp')}
+            </a>
+            <a href={url} target="_blank" rel="noopener noreferrer" className={btn} style={btnStyle}>
+              <Link2 size={13} /> {t('orders.staff.open', 'Open')}
+            </a>
+            <button type="button" disabled={busy} onClick={() => create(true)} className={btn} style={btnStyle}>
+              <RotateCcw size={13} /> {t('orders.staff.reset', 'Reset link')}
+            </button>
+            <button type="button" disabled={busy} onClick={revoke} className="px-3 min-h-[40px] text-xs font-semibold ms-auto" style={{ color: 'var(--brand-muted)' }}>
+              {t('orders.staff.off', 'Turn off')}
+            </button>
+          </div>
+        </div>
+      ) : (
+        <div className="mt-3">
+          <button type="button" disabled={busy} onClick={() => create(false)} className={btn} style={{ background: 'var(--action)', color: 'var(--action-ink)', borderColor: 'transparent' }} data-testid="staff-link-create">
+            {busy ? <Loader2 size={13} className="animate-spin" /> : <Link2 size={13} />} {t('orders.staff.create', 'Create the link')}
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
+
+/**
+ * Import customers from the sheet (spec O9): paste it, or pick the
+ * exported file. Name, phone and address are found by their headers in
+ * either language; nothing else is read. Day one with forty names in
+ * the autocomplete, not zero.
+ */
+function ImportCustomersPanel({ API, auth, businessId, onClose }) {
+  const { t } = useTranslation();
+  const [text, setText] = useState('');
+  const [busy, setBusy] = useState(false);
+  const [result, setResult] = useState(null);
+
+  const onFile = (e) => {
+    const f = e.target.files?.[0];
+    if (!f) return;
+    const reader = new FileReader();
+    reader.onload = () => setText(String(reader.result || ''));
+    reader.readAsText(f);
+  };
+
+  const run = async () => {
+    if (!text.trim()) return;
+    setBusy(true);
+    try {
+      const { data } = await axios.post(`${API}/marketplace/businesses/${businessId}/customers/import`, { text }, auth);
+      setResult(data);
+      toast.success(t('orders.importDone', '{{n}} customers imported', { n: data.imported }));
+    } catch (err) {
+      toast.error(err?.response?.data?.detail || t('orders.importFailed', 'Could not import'));
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  return (
+    <div className="rounded-2xl border p-4 mb-4 bg-white" style={{ borderColor: 'var(--brand-border)' }} data-testid="import-panel">
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <h3 className="font-bold" style={{ color: 'var(--ink)' }}>{t('orders.importTitle', 'Bring your customers over')}</h3>
+          <p className="text-sm mt-1" style={{ color: 'var(--brand-muted)' }}>
+            {t('orders.importBody', 'Paste your customer list from the sheet, or choose the file. We read the name, phone and address columns and nothing else. Names then fill in as you type.')}
+          </p>
+        </div>
+        <button type="button" onClick={onClose} className="inline-flex items-center justify-center min-h-[44px] min-w-[44px] rounded-full shrink-0" style={{ color: 'var(--brand-muted)' }} aria-label={t('orders.close', 'Close')}>
+          <X size={18} />
+        </button>
+      </div>
+      <textarea
+        value={text}
+        onChange={(e) => setText(e.target.value)}
+        rows={5}
+        dir="auto"
+        placeholder={t('orders.importPh', 'Name, Phone, Address\nRivka Levi, 052-9998877, Herzl 3')}
+        className="w-full mt-3 px-3 py-2 rounded-lg border text-sm bg-white font-mono"
+        style={{ borderColor: 'var(--brand-border)', color: 'var(--ink)' }}
+        data-testid="import-text"
+      />
+      <div className="flex flex-wrap items-center gap-2 mt-2">
+        <button type="button" disabled={busy || !text.trim()} onClick={run} className="inline-flex items-center gap-1.5 px-4 min-h-[44px] rounded-full text-sm font-semibold disabled:opacity-50" style={{ background: 'var(--action)', color: 'var(--action-ink)' }} data-testid="import-run">
+          {busy ? <Loader2 size={14} className="animate-spin" /> : <Upload size={14} />} {t('orders.importRun', 'Import')}
+        </button>
+        <label className="inline-flex items-center gap-1.5 px-3 min-h-[44px] rounded-full text-sm font-semibold border cursor-pointer" style={{ borderColor: 'var(--brand-border)', color: 'var(--ink)' }}>
+          <input type="file" accept=".csv,.txt,.tsv,text/csv,text/plain" onChange={onFile} className="sr-only" />
+          {t('orders.importFile', 'Choose a file')}
+        </label>
+        {result && (
+          <span className="text-xs" style={{ color: 'var(--brand-muted)' }} data-testid="import-result">
+            {t('orders.importResult', '{{n}} of {{rows}} rows imported', { n: result.imported, rows: result.rows })}
+          </span>
+        )}
+      </div>
+    </div>
   );
 }

@@ -1384,3 +1384,22 @@ button:focus-visible,
   font-size: inherit;
   letter-spacing: 0;
 }
+
+/* Store orders: the staff board and the print view are "bare" pages.
+   The site nav's links all go to pages the person at the counter has no
+   account for, and a printed page wants neither the nav nor the floating
+   WhatsApp button. The route adds the class on mount and removes it on
+   unmount (pages/StaffOrdersPage.jsx, pages/OrdersPrintPage.jsx). */
+body.orders-bare .App > nav,
+body.orders-bare .fab-peek-right,
+body.orders-bare .fab-peek-left { display: none !important; }
+@media print {
+  body.orders-bare .App > nav,
+  body.orders-bare .fab-peek-right,
+  body.orders-bare .fab-peek-left,
+  [data-sonner-toaster],
+  .print-hide { display: none !important; }
+  .orders-print { max-width: none; padding: 0; }
+  .orders-print table { page-break-inside: auto; }
+  .orders-print tr { page-break-inside: avoid; }
+}

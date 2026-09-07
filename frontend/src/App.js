@@ -136,6 +136,8 @@ const PaymentSuccess = lazy(() => import('./pages/PaymentSuccess'));
 const PaymentCancel = lazy(() => import('./pages/PaymentCancel'));
 const AvailabilityExtended = lazy(() => import('./pages/AvailabilityExtended'));
 const GigDetail = lazy(() => import('./pages/GigDetail'));
+const StaffOrdersPage = lazy(() => import('./pages/StaffOrdersPage'));
+const OrdersPrintPage = lazy(() => import('./pages/OrdersPrintPage'));
 const CreateGig = lazy(() => import('./pages/CreateGig'));
 const JobsBoard = lazy(() => import('./pages/JobsBoard'));
 const JobDetail = lazy(() => import('./pages/JobDetail'));
@@ -451,6 +453,11 @@ function App() {
                 Both resolve: the spec allows either as canonical and the
                 short-link table already points at /business/{id}. */}
             <Route path="/business/:slug" element={<BusinessPage />} />
+            {/* Store orders (docs/orders-and-delivery-spec.md O3): the
+                counter's board, no login, one capability token per
+                business; and the owner's print view. */}
+            <Route path="/orders/staff/:token" element={<StaffOrdersPage />} />
+            <Route path="/orders/print" element={user ? <OrdersPrintPage /> : <ToAuth />} />
 
             {/* The old per-person pages keep working, as the spec requires,
                 by resolving to that person's first business. Kept for both

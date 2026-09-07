@@ -37,14 +37,18 @@ an unread field on a model is exactly what the dead-ends audit flags.
 """
 from __future__ import annotations
 
+import csv
+import io
 import json
 import re
+import secrets
 import uuid
 from datetime import datetime, timedelta
 from typing import Any, Optional
 from zoneinfo import ZoneInfo
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Request
+from fastapi.responses import StreamingResponse
 from pydantic import BaseModel, Field, field_validator, model_validator
 
 from routes.deps import db, logger, verify_token
@@ -231,6 +235,8 @@ async def ensure_order_indexes() -> None:
     try:
         await db.store_orders.create_index([("business_id", 1), ("needed_by", 1)], background=True)
         await db.store_orders.create_index([("business_id", 1), ("status", 1)], background=True)
+        await db.businesses.create_index("orders_staff_token", sparse=True, background=True)
+        await db.store_customers.create_index([("business_id", 1), ("key", 1)], unique=True, background=True)
     except Exception as exc:  # noqa: BLE001
         logger.warning("[orders] index creation failed: %s", exc)
 
@@ -256,6 +262,16 @@ async def list_orders(
     what is on screen, not for all time.
     """
     await _owned_business(business_id, user)
+    return await _list(business_id, status, date_from, date_to, limit)
+
+
+async def _list(
+    business_id: str,
+    status: Optional[str],
+    date_from: Optional[str],
+    date_to: Optional[str],
+    limit: int,
+) -> dict[str, Any]:
     q: dict[str, Any] = {"business_id": business_id}
     if date_from or date_to:
         rng: dict[str, str] = {}
@@ -367,6 +383,10 @@ async def set_order_status(order_id: str, payload: StatusIn, user=Depends(verify
     not allow, with the current state in the message so the client can
     refresh rather than retry."""
     order = await _owned_order(order_id, user)
+    return await _transition(order, payload, by=user["user_id"])
+
+
+async def _transition(order: dict[str, Any], payload: StatusIn, *, by: str) -> dict[str, Any]:
     current = order["status"]
     if payload.status == current:
         return _public(order)
@@ -376,18 +396,262 @@ async def set_order_status(order_id: str, payload: StatusIn, user=Depends(verify
             detail=f"An order that is '{current}' cannot become '{payload.status}'",
         )
     now = _now_iso()
-    entry: dict[str, Any] = {"status": payload.status, "at": now, "by": user["user_id"]}
+    entry: dict[str, Any] = {"status": payload.status, "at": now, "by": by}
     if payload.note:
         entry["note"] = payload.note
     await db.store_orders.update_one(
-        {"_id": order_id},
+        {"_id": order["_id"]},
         {
             "$set": {"status": payload.status, "status_changed_at": now, "updated_at": now},
             "$push": {"history": entry},
         },
     )
-    fresh = await db.store_orders.find_one({"_id": order_id})
+    fresh = await db.store_orders.find_one({"_id": order["_id"]})
     return _public(fresh)
+
+
+# ---------------------------------------------------------------------------
+# the shared staff link (spec O3)
+# ---------------------------------------------------------------------------
+#
+# The sheet's second job, the one nobody names: it is the screen the person
+# at the counter has open. Without a way for staff to see the day without
+# the owner's login, the sheet stays open "just in case" and the migration
+# never finishes. So: one link per business, no account, read the board
+# and move orders along. Not create, not edit, not export - the counter
+# reads and ticks; the owner types. (Creating from the counter is a likely
+# follow-up; it is not in the spec's O3 and it widens what a leaked link
+# can do, so it waits for a real ask.)
+#
+# The token is a capability. It lives on the business document in the
+# clear so the owner can re-open the same link next week; rotating it
+# replaces it and every old copy stops working at once. The rate limit is
+# per IP and generous - a counter refreshes a lot - and exists to make a
+# brute-force of a 32-character token not worth starting.
+
+async def _business_by_staff_token(token: str) -> dict[str, Any]:
+    if not token or len(token) < 20:
+        raise HTTPException(status_code=404, detail="This link is not valid")
+    biz = await db.businesses.find_one({"orders_staff_token": token})
+    if not biz or not biz.get("active", True):
+        raise HTTPException(status_code=404, detail="This link is not valid")
+    return biz
+
+
+@router.get("/businesses/{business_id}/orders/staff-link")
+async def get_staff_link(business_id: str, user=Depends(verify_token)):
+    biz = await _owned_business(business_id, user)
+    return {"token": biz.get("orders_staff_token")}
+
+
+@router.post("/businesses/{business_id}/orders/staff-link")
+async def create_staff_link(business_id: str, rotate: bool = False, user=Depends(verify_token)):
+    """Create the link, or return the one that exists. `rotate=true`
+    replaces it - the old link dies immediately."""
+    biz = await _owned_business(business_id, user)
+    token = biz.get("orders_staff_token")
+    if token and not rotate:
+        return {"token": token, "created": False}
+    token = secrets.token_urlsafe(24)
+    await db.businesses.update_one(
+        {"_id": business_id},
+        {"$set": {"orders_staff_token": token, "orders_staff_token_at": _now_iso()}},
+    )
+    logger.info("[orders] staff link %s: business=%s", "rotated" if biz.get("orders_staff_token") else "created", business_id)
+    return {"token": token, "created": True}
+
+
+@router.delete("/businesses/{business_id}/orders/staff-link")
+async def revoke_staff_link(business_id: str, user=Depends(verify_token)):
+    await _owned_business(business_id, user)
+    await db.businesses.update_one(
+        {"_id": business_id},
+        {"$unset": {"orders_staff_token": "", "orders_staff_token_at": ""}},
+    )
+    return {"ok": True}
+
+
+@router.get("/orders/staff/{token}")
+async def staff_board(
+    token: str,
+    request: Request,
+    status: Optional[str] = Query(None, pattern="^(new|preparing|ready|done|cancelled|failed|open)$"),
+    date_from: Optional[str] = Query(None, alias="from"),
+    date_to: Optional[str] = Query(None, alias="to"),
+):
+    check_rate(request, bucket="orders_staff", limit=600, window_seconds=600)
+    biz = await _business_by_staff_token(token)
+    out = await _list(biz["_id"], status, date_from, date_to, 300)
+    out["business"] = {"name": biz.get("name") or "", "name_he": biz.get("name_he"), "logo_url": biz.get("logo_url")}
+    return out
+
+
+@router.patch("/orders/staff/{token}/{order_id}/status")
+async def staff_set_status(token: str, order_id: str, payload: StatusIn, request: Request):
+    check_rate(request, bucket="orders_staff", limit=600, window_seconds=600)
+    biz = await _business_by_staff_token(token)
+    order = await db.store_orders.find_one({"_id": order_id, "business_id": biz["_id"]})
+    if not order:
+        raise HTTPException(status_code=404, detail="Order not found")
+    return await _transition(order, payload, by="staff")
+
+
+# ---------------------------------------------------------------------------
+# export (spec O9): never make the site the only copy
+# ---------------------------------------------------------------------------
+
+_CSV_COLUMNS = (
+    "date", "time", "customer", "phone", "items", "fulfilment", "address",
+    "total", "currency", "status", "notes", "source", "created_at",
+)
+
+
+def _csv_number(v: Any) -> Any:
+    """85.0 prints as 85 - a sheet shows whole shekels without a decimal
+    and the owner's eye is used to that column."""
+    if v is None:
+        return ""
+    try:
+        f = float(v)
+    except (TypeError, ValueError):
+        return v
+    return int(f) if f.is_integer() else f
+
+
+def orders_to_csv(orders: list[dict[str, Any]]) -> str:
+    """One row per order, the columns the sheet had. UTF-8 with a BOM so
+    Excel on Windows opens Hebrew correctly without an import wizard."""
+    buf = io.StringIO()
+    buf.write("\ufeff")
+    w = csv.writer(buf, lineterminator="\n")
+    w.writerow(_CSV_COLUMNS)
+    for o in orders:
+        nb = o.get("needed_by") or ""
+        w.writerow([
+            nb[:10], nb[11:16] if "T" in nb else "",
+            o.get("customer_name") or "", o.get("customer_phone") or "",
+            o.get("items") or "", o.get("fulfilment") or "", o.get("address") or "",
+            _csv_number(o.get("total")), o.get("currency") or "ILS",
+            o.get("status") or "", o.get("notes") or "", o.get("source") or "",
+            o.get("created_at") or "",
+        ])
+    return buf.getvalue()
+
+
+@router.get("/businesses/{business_id}/orders/export.csv")
+async def export_orders_csv(
+    business_id: str,
+    status: Optional[str] = Query(None, pattern="^(new|preparing|ready|done|cancelled|failed|open)$"),
+    date_from: Optional[str] = Query(None, alias="from"),
+    date_to: Optional[str] = Query(None, alias="to"),
+    user=Depends(verify_token),
+):
+    await _owned_business(business_id, user)
+    data = await _list(business_id, status, date_from, date_to, 1000)
+    body = orders_to_csv(data["orders"])
+    name = f"orders-{date_from or 'all'}-{date_to or 'all'}.csv"
+    return StreamingResponse(
+        iter([body.encode("utf-8")]),
+        media_type="text/csv; charset=utf-8",
+        headers={"Content-Disposition": f'attachment; filename="{name}"'},
+    )
+
+
+# ---------------------------------------------------------------------------
+# import (spec O9): day one with forty names, not zero
+# ---------------------------------------------------------------------------
+
+_NAME_HEADERS = ("name", "customer", "client", "\u05e9\u05dd", "\u05dc\u05e7\u05d5\u05d7")
+_PHONE_HEADERS = ("phone", "mobile", "tel", "whatsapp", "\u05d8\u05dc\u05e4\u05d5\u05df", "\u05e0\u05d9\u05d9\u05d3", "\u05e4\u05dc\u05d0\u05e4\u05d5\u05df")
+_ADDRESS_HEADERS = ("address", "street", "\u05db\u05ea\u05d5\u05d1\u05ea", "\u05e8\u05d7\u05d5\u05d1")
+
+
+def _pick_column(headers: list[str], wanted: tuple[str, ...]) -> Optional[int]:
+    for i, h in enumerate(headers):
+        low = (h or "").strip().lower()
+        if any(w in low for w in wanted):
+            return i
+    return None
+
+
+def parse_customers_csv(text: str) -> tuple[list[dict[str, Any]], dict[str, Optional[str]]]:
+    """Rows of {name, phone, address} from a pasted sheet. Headers are
+    matched by keyword in either language (the escaped strings above are
+    Hebrew: name/customer, phone/mobile, address/street); with no
+    recognisable header row the first column is the name and the second
+    the phone, which is what a sheet of customers almost always is."""
+    text = (text or "").lstrip("\ufeff")
+    if not text.strip():
+        return [], {}
+    first = text.splitlines()[0]
+    delim = "\t" if "\t" in first else (";" if first.count(";") > first.count(",") else ",")
+    rows = list(csv.reader(io.StringIO(text), delimiter=delim))
+    if not rows:
+        return [], {}
+    headers = [c.strip() for c in rows[0]]
+    ni = _pick_column(headers, _NAME_HEADERS)
+    pi = _pick_column(headers, _PHONE_HEADERS)
+    ai = _pick_column(headers, _ADDRESS_HEADERS)
+    headerless = ni is None and pi is None
+    if headerless:
+        ni, pi, ai = 0, 1, 2
+        body = rows
+    else:
+        body = rows[1:]
+    out = []
+    for r in body:
+        def cell(i, r=r):
+            return r[i].strip() if i is not None and i < len(r) else ""
+        name, phone, address = cell(ni), cell(pi), cell(ai)
+        if not name and not phone:
+            continue
+        out.append({"name": name[:120], "phone": phone[:40], "address": address[:400]})
+    if headerless:
+        return out, {"name": None, "phone": None, "address": None}
+    used = {
+        "name": headers[ni] if ni is not None and ni < len(headers) else None,
+        "phone": headers[pi] if pi is not None and pi < len(headers) else None,
+        "address": headers[ai] if ai is not None and ai < len(headers) else None,
+    }
+    return out, used
+
+
+class CustomersImportIn(BaseModel):
+    text: str = Field(..., min_length=1, max_length=400_000)
+
+
+@router.post("/businesses/{business_id}/customers/import")
+async def import_customers(business_id: str, payload: CustomersImportIn, user=Depends(verify_token)):
+    """Upsert by normalised phone (or lowercased name when there is no
+    usable phone). Re-importing the same sheet changes nothing; a row
+    with a new address updates the old one."""
+    await _owned_business(business_id, user)
+    rows, used = parse_customers_csv(payload.text)
+    if len(rows) > 5000:
+        raise HTTPException(status_code=413, detail="Too many rows (max 5000)")
+    now = _now_iso()
+    imported = 0
+    for r in rows:
+        e164 = normalize_whatsapp_number(r["phone"]) if r["phone"] else None
+        key = e164 or (r["name"].lower() if r["name"] else None)
+        if not key:
+            continue
+        doc = {
+            "business_id": business_id,
+            "key": key,
+            "customer_name": r["name"] or r["phone"],
+            "customer_phone": r["phone"] or None,
+            "customer_phone_e164": e164,
+            "address": r["address"] or None,
+            "updated_at": now,
+        }
+        await db.store_customers.update_one(
+            {"business_id": business_id, "key": key},
+            {"$set": doc, "$setOnInsert": {"_id": str(uuid.uuid4()), "created_at": now, "source": "import"}},
+            upsert=True,
+        )
+        imported += 1
+    return {"imported": imported, "rows": len(rows), "columns": used}
 
 
 @router.get("/businesses/{business_id}/customers")
@@ -422,6 +686,17 @@ async def returning_customers(
         {"$limit": 400},
     ]
     rows = [r async for r in db.store_orders.aggregate(pipeline)]
+    # Imported customers (spec O9) fill in behind the ones who have
+    # actually ordered, so a sheet of forty names is in the autocomplete
+    # on day one without outranking the regulars.
+    seen = {r["_id"] for r in rows}
+    async for c in db.store_customers.find({"business_id": business_id}).sort("customer_name", 1).limit(2000):
+        if c["key"] in seen:
+            continue
+        rows.append({
+            "_id": c["key"], "customer_name": c.get("customer_name"), "customer_phone": c.get("customer_phone"),
+            "address": c.get("address"), "last_items": None, "orders": 0, "last_at": c.get("updated_at"),
+        })
     if needle:
         rows = [
             r for r in rows
