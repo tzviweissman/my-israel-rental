@@ -894,11 +894,16 @@ const GigDetail = () => {
                         const msg = `Hi! I'm interested in "${p.name}" (${psym}${Number(p.price).toLocaleString()}) from your ${displayTitle} store on MyIsraelRental.\n${link}`;
                         if (openWhatsApp(msg)) return;
                       }
-                      // Fall back to selecting the product + opening the in-platform booking modal.
+                      // Select the product, then the site chat - NOT the
+                      // booking form. book_gig refuses every store
+                      // ("Store gigs do not accept bookings"), so this
+                      // path 400'd for any store without a WhatsApp
+                      // number. The main CTA was fixed for exactly this
+                      // (dead-ends audit 2026-09-03, #2); this second
+                      // route to the same modal was missed.
                       setTier(p);
                       setHeroIndex(0);
-                      if (!token) { toast.error(t('gigDetail.signInToMessage', 'Please sign in to message the seller')); navigate(`/auth/login?redirect=${encodeURIComponent(`/businesses/${id}`)}`); return; }
-                      setShowBook(true);
+                      messageOnSite();
                     };
                     return (
                       <div

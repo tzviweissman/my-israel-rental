@@ -19,6 +19,7 @@ import BulkManagerTab from '../components/dashboard/BulkManagerTab';
 import MessagesTab from '../components/dashboard/MessagesTab';
 import MyGigsTab from '../components/dashboard/MyGigsTab';
 import MyBusinessesTab from '../components/dashboard/MyBusinessesTab';
+import OrdersTab from '../components/dashboard/OrdersTab';
 import JobRequestsTab from '../components/dashboard/JobRequestsTab';
 import MyJobsTab from '../components/dashboard/MyJobsTab';
 import ManagerHeader from '../components/dashboard/ManagerHeader';
@@ -482,6 +483,10 @@ const Dashboard = () => {
             that rendered an empty panel. */}
         {activeTab === 'my-businesses' && showGigTabs && (
           <MyBusinessesTab API={API} token={token} />
+        )}
+
+        {activeTab === 'orders' && showGigTabs && (
+          <OrdersTab API={API} token={token} />
         )}
 
         {activeTab === 'my-gigs' && showGigTabs && (

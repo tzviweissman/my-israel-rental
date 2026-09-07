@@ -19,7 +19,7 @@
  */
 import { useTranslation } from 'react-i18next';
 import {
-  LayoutDashboard, Building2, Layers, Store, Wrench, CalendarCheck, Inbox, Briefcase,
+  LayoutDashboard, Building2, Layers, Store, Wrench, CalendarCheck, Inbox, Briefcase, ClipboardList,
   Home, MessageCircle, Bell, Heart, KeyRound, FileText,
 } from 'lucide-react';
 import { canPublishGigs } from '../../utils/providerTrial';
@@ -55,6 +55,9 @@ export default function useDashboardNav({ role, user, unreadMessages = 0, hasPos
       label: t('dashboard.groupActivity', 'Activity'),
       tabs: [
         { id: 'bookings', label: t('dashboard.myBookings'), Icon: CalendarCheck, badge: summary.bookings_awaiting_reply, show: true },
+        // Store orders (docs/orders-and-delivery-spec.md). Shown to anyone
+        // who can run a business: the tab is where a shop's day lives.
+        { id: 'orders', label: t('dashboard.orders', 'Orders'), Icon: ClipboardList, show: showGigTabs },
         { id: 'my-requests', label: t('dashboard.myRequests', 'My Requests'), Icon: Inbox, badge: summary.requests_with_responses, show: true },
         { id: 'my-jobs', label: t('dashboard.myJobs', "Jobs I've Posted"), Icon: Briefcase, show: showGigTabs || hasPostedJobs },
         { id: 'job-requests', label: t('dashboard.jobRequests', 'Work Offers'), Icon: Briefcase, badge: summary.work_offers_open, show: showGigTabs },
@@ -98,6 +101,7 @@ export const ALL_TAB_IDS = [
   'my-gigs',
   'contracts',
   'bookings',
+  'orders',
   'my-requests',
   'my-jobs',
   'job-requests',

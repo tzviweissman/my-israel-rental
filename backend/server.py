@@ -224,6 +224,8 @@ async def startup_tasks() -> None:
     # would fall back to the racy path.
     from routes.marketplace.gigs import booking_hold_sweep_loop, ensure_booking_indexes
     await ensure_booking_indexes()
+    from routes.marketplace.orders import ensure_order_indexes
+    await ensure_order_indexes()
 
     asyncio.create_task(sync_all_ical_feeds())
     asyncio.create_task(mention_email_loop())
