@@ -4,68 +4,64 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Blazin' Boards. Premium meat boards, Jerusalem.</title>
-<meta name="description" content="Premium meats, cooked and grilled to perfection. Meat boards in Jerusalem. Message the business directly.">
-<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='7' fill='%2315110F'/><path d='M9 22h14M11 22V11h6a3 3 0 0 1 0 6h-6' stroke='%23C9A227' stroke-width='2.5' fill='none' stroke-linecap='round'/></svg>">
+<meta name="description" content="Premium meat boards in Jerusalem, in five sizes from the Mini to the Extra Large VIP. Orders 48 hours ahead. Delivery throughout Israel.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='7' fill='%2315110F'/><rect x='7' y='10' width='18' height='12' rx='2' fill='%23C9A227'/></svg>">
 <!--
-  Blazin' Boards, scroll-driven, revision 2. See BRIEF.md beside this file.
+  Blazin' Boards, scroll-driven, revision 3. See BRIEF.md beside this file.
 
-  THE OPEN. Their own photograph, animated: the board cut out of their flyer
-  was given a slow tracking move, encoded with a dense GOP, and scrubs under
-  the wheel. The peak is a second clip, a brisket being cut, with their
-  sentence crossing it. Two scrub acts, the maximum.
+  TWO IDEAS, BOTH THEIRS.
+  1. The tumble. Their board, cut out of their own photograph, tumbles in
+     three dimensions through the hero under the wheel: spinning in small
+     and edge-on, landing flat and huge as the name scrolls away. Page JS
+     interpolates keyframes from --sc-p; the engine is untouched.
+  2. The board grows to scale. Their boards are sizes: 15x20 to 37x57 cm.
+     One plank grows through the five sizes at one pixels-per-centimetre
+     ratio, with a 10 cm ruler beside it, and every board sold at that
+     size lights up with its price. The page answers "how big is $700".
 
-  THE ONE IDEA, kept. Scroll speed is the flame. Velocity becomes --heat;
-  an ember layer, the grain and the accent flare together and cool when the
-  scroll stops. Off under reduced motion.
+  EVERYTHING ON THIS PAGE IS THEIR OWN. The photographs are from their
+  website and their flyer. The boards, sizes, contents, prices, add-ons,
+  notice period, delivery and address are transcribed from their price
+  list. Nothing generated, no number that is not theirs.
 
-  GROUNDS DRIFT. Filmic one-shot forbids hard cuts, so no section paints its
-  own background: every act declares data-sc-drift and the engine walks
-  --sc-canvas between them. body reads --sc-canvas.
-
-  HONESTY. The moving board at the top is theirs. The four boards in the
-  rail, the brisket clip and the close photograph are generated
-  illustrations for this preview, and the close says so. No number on this
-  page that is not on their record, and there are none, so there are none.
-  One CTA label. No em dash. No scroll cue, no counters.
+  Scroll speed is still the flame (--heat), kept from the earlier
+  revisions as texture rather than the headline idea. Grounds drift. No
+  em dash. One CTA label. No scroll cue, no counters.
 -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400;1,500&family=Manrope:wght@400;500;600;700&family=Frank+Ruhl+Libre:wght@400;500;700&family=Assistant:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400;1,500&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="scrollcraft.css">
 <style>
   :root {
     --font-head: 'Playfair Display', Georgia, serif;
     --font-body: 'Manrope', system-ui, sans-serif;
-    --font-head-he: 'Frank Ruhl Libre', Georgia, serif;
-    --font-body-he: 'Assistant', system-ui, sans-serif;
 
-    --char-0: #0F0C0A;
-    --char-1: #15110F;
-    --char-2: #1B1512;
-    --gold: #C9A227;
-    --ember: #E0672A;
+    /* One brand colour, like the reference, and it is theirs: the oxblood of
+       their own logo badge, deepened for a ground. Cream type, mustard accent. */
+    --ox-0: #3A0812;
+    --ox-1: #4B0C19;
+    --ox-2: #5A1222;
+    --char-0: var(--ox-0);
+    --char-1: var(--ox-1);
+    --char-2: var(--ox-2);
+    --gold: #E9B23B;
+    --ember: #FF7A2E;
+    --crimson: #82001E;     /* their logo's badge, as printed */
     --heat: 0;
 
-    --sc-canvas: var(--char-1);
-    --sc-surface: #221A15;
-    --sc-ink: #EFE9DC;
-    --sc-ink-soft: #B8AC9A;
+    --sc-canvas: var(--ox-1);
+    --sc-surface: #63182A;
+    --sc-ink: #F4EADB;
+    --sc-ink-soft: #E0C4BA;
     --sc-accent: color-mix(in oklab, var(--gold), var(--ember) calc(var(--heat) * 100%));
-    --sc-accent-ink: #15110F;
-    --sc-shadow-color: 20 30% 4%;
+    --sc-accent-ink: #3A0812;
+    --sc-shadow-color: 350 40% 6%;
 
     --sc-font-display: var(--font-head);
     --sc-font-text: var(--font-body);
     --sc-font-mono: var(--font-body);
   }
-  [dir="rtl"] { --font-head: var(--font-head-he); --font-body: var(--font-body-he); }
-  /* The copy is English (the business has no Hebrew text on file). Under a
-     mirrored layout, Latin sentences would otherwise put their full stop at
-     the front; plaintext lets each line resolve its own direction while the
-     page stays mirrored, and the alignment is restated physically. */
-  [dir="rtl"] :is(h1, h2, h3, p, dt, dd, li, .price) { unicode-bidi: plaintext; text-align: right; }
-  [dir="rtl"] .cut .line--b { text-align: left; }
-  [dir="rtl"] .close .sc-copy--center :is(h2, p) { text-align: center; }
 
   html { scroll-behavior: auto; }
   body { font-size: 17px; background: var(--sc-canvas); color: var(--sc-ink); }
@@ -73,103 +69,134 @@
   section { position: relative; color: var(--sc-ink); }
   .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
   .sc-display em, .accent { font-style: italic; color: var(--sc-accent); }
+  .num { font-family: var(--font-body); font-variant-numeric: tabular-nums; }
 
   /* ---------------------------------------------------------------- heat -- */
   .heat {
     position: fixed; inset: 0; z-index: 2; pointer-events: none;
     opacity: calc(var(--heat) * 0.7);
     background:
-      radial-gradient(120% 70% at 50% 112%, rgba(224, 103, 42, 0.62), rgba(224, 103, 42, 0) 62%),
-      radial-gradient(70% 40% at 50% -12%, rgba(201, 162, 39, 0.22), rgba(201, 162, 39, 0) 70%);
+      radial-gradient(120% 70% at 50% 112%, rgba(255, 122, 46, 0.6), rgba(255, 122, 46, 0) 62%),
+      radial-gradient(70% 40% at 50% -12%, rgba(233, 178, 59, 0.22), rgba(233, 178, 59, 0) 70%);
     mix-blend-mode: screen;
   }
-  .sc-grain { opacity: calc(0.045 + var(--heat) * 0.11); }
+  .sc-grain { opacity: calc(0.05 + var(--heat) * 0.11); }
 
-  /* ----------------------------------------------------------------- bar --
-     Filmic: wordmark and one CTA, nothing else, plus the direction toggle
-     every page on this site carries. */
+  /* ----------------------------------------------------------------- bar -- */
   .bar {
     position: fixed; inset-block-start: 0; inset-inline: 0; z-index: var(--sc-z-chrome);
     display: flex; align-items: center; justify-content: space-between; gap: var(--sc-4);
     padding: var(--sc-4) var(--sc-gutter); pointer-events: none;
   }
   .bar > * { pointer-events: auto; }
-  .bar__mark { font-family: var(--font-head); font-size: var(--sc-t-lg); letter-spacing: var(--sc-track-snug); color: var(--sc-ink); text-decoration: none; }
+  .bar__mark { display: inline-flex; align-items: center; gap: var(--sc-3); font-family: var(--font-body); font-weight: 800; letter-spacing: -0.02em; font-size: var(--sc-t-lg); color: var(--sc-ink); text-decoration: none; text-transform: uppercase; }
+  .bar__mark img { height: 34px; width: auto; }
   .bar__end { display: flex; align-items: center; gap: var(--sc-3); }
-  .bar__cta, .dir-toggle {
+  .bar__cta {
     min-height: 40px; display: inline-flex; align-items: center; padding: 0 var(--sc-4); border-radius: var(--sc-r-pill);
-    font-family: var(--font-body); font-size: var(--sc-t-xs); font-weight: 600; text-decoration: none; cursor: pointer;
-    color: var(--sc-ink); background: color-mix(in oklab, var(--char-1) 55%, transparent);
+    font-family: var(--font-body); font-size: var(--sc-t-xs); font-weight: 700; text-decoration: none; cursor: pointer;
+    color: var(--sc-ink); background: color-mix(in oklab, var(--ox-0) 55%, transparent);
     border: 1px solid color-mix(in oklab, currentColor 28%, transparent);
     backdrop-filter: blur(10px);
     transition: background var(--sc-d-fast) var(--sc-ease-out);
   }
-  .bar__cta:hover, .dir-toggle:hover { background: color-mix(in oklab, var(--char-1) 85%, transparent); }
-  .bar__cta { background: var(--sc-ink); color: var(--sc-accent-ink); border-color: transparent; }
-  .bar__cta:hover { background: #FFFFFF; }
+  .bar__cta { background: var(--gold); color: var(--sc-accent-ink); border-color: transparent; }
+  .bar__cta:hover { background: #F2C25A; }
 
-  /* ---------------------------------------------------------------- hero -- */
-  .hero .sc-copy--lead {
-    max-width: min(44rem, 88vw);
-    padding: var(--sc-5) var(--sc-6); margin-inline-start: calc(var(--sc-6) * -1);
-    background: rgba(15, 12, 10, 0.6); backdrop-filter: blur(14px); border-radius: var(--sc-r-lg);
+  /* ---------------------------------------------------------------- hero --
+     The tumble. A perspective stage; the board's transform is written by
+     the page each frame from --sc-p. Type is the ground it lands on. */
+  .hero .stage3d { position: absolute; inset: 0; perspective: 1400px; perspective-origin: 50% 40%; overflow: hidden; }
+  .hero .name {
+    position: absolute; inset-inline-start: var(--sc-gutter); inset-block-start: clamp(5rem, 14vh, 9rem); z-index: 1; margin: 0;
+    font-family: var(--font-body); font-weight: 800; text-transform: uppercase; letter-spacing: -0.045em; line-height: 0.86;
+    font-size: clamp(4.2rem, 17vw, 15rem); color: var(--gold);
+    direction: ltr; unicode-bidi: isolate;
   }
-  .hero h1 { margin: 0 0 var(--sc-3); }
-  .hero__sub { margin: 0; color: var(--sc-ink); font-size: var(--sc-t-base); }
-  video[data-sc-scrub], .sc-stage__poster { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+  .hero .name span { display: block; }
+  .hero .name .b { padding-inline-start: 0.12em; }
+  .tumble {
+    position: absolute; left: 50%; top: 50%; width: min(56vw, 860px); z-index: 2;
+    margin-left: calc(min(56vw, 860px) / -2); margin-top: calc(min(56vw, 860px) * -0.407);
+    transform-style: preserve-3d; will-change: transform; backface-visibility: hidden;
+  }
+  .tumble img { display: block; width: 100%; height: auto; }
+  .tumble__shadow {
+    position: absolute; left: 50%; top: 50%; width: min(56vw, 860px); aspect-ratio: 1.6; z-index: 1; pointer-events: none;
+    margin-left: calc(min(56vw, 860px) / -2); margin-top: calc(min(56vw, 860px) * -0.30);
+    background: radial-gradient(ellipse at 50% 50%, rgba(0, 0, 0, 0.55) 0%, rgba(0, 0, 0, 0.28) 40%, rgba(0, 0, 0, 0) 70%);
+    opacity: 0; will-change: transform, opacity;
+  }
+  .hero .land {
+    position: absolute; inset-inline-start: var(--sc-gutter); inset-block-start: clamp(5rem, 14vh, 9rem); z-index: 3;
+    display: grid; gap: var(--sc-5); max-width: 24rem; justify-items: start;
+  }
+  .hero .land h1 { margin: 0; font-size: var(--sc-t-xl); font-style: italic; line-height: 1.15; }
+  .hero .land h1 b { font-style: normal; font-weight: 500; color: var(--sc-accent); }
+  .hero .land p { margin: var(--sc-2) 0 0; color: var(--sc-ink-soft); font-size: var(--sc-t-sm); }
 
-  /* -------------------------------------------------------------- boards --
-     The rail. Four boards, each named by what is on it. No prices, because
-     none are on file. */
-  .boards__head {
-    position: absolute; inset-inline-start: var(--sc-gutter); inset-block-start: clamp(4.5rem, 12vh, 8rem);
-    max-width: 36rem; z-index: var(--sc-z-copy);
+  /* --------------------------------------------------------------- sizes --
+     The peak. One plank, five real sizes, one pixels-per-centimetre. */
+  .sizes .sc-copy--lead { bottom: auto; top: clamp(4.5rem, 11vh, 7rem); max-width: 34rem; }
+  .sizes .sc-copy--lead h2 { margin: 0 0 var(--sc-2); }
+  .sizes .sc-copy--lead p { margin: 0; color: var(--sc-ink-soft); }
+  .scale {
+    position: absolute; inset-inline-start: var(--sc-gutter); inset-block-end: clamp(2rem, 7vh, 4rem);
+    width: 46vw; height: 58vh;
+    display: flex; align-items: flex-end; justify-content: flex-start;
   }
-  .boards__head h2 { margin: 0 0 var(--sc-2); }
-  .boards__head p { margin: 0; color: var(--sc-ink-soft); font-size: var(--sc-t-base); }
-  .boards__head p b { font-weight: 600; color: var(--sc-ink); }
-  .rail {
-    position: absolute; inset-inline-start: 0; inset-block-end: clamp(2rem, 7vh, 4.5rem);
-    display: flex; gap: var(--sc-6); align-items: flex-end; width: max-content;
-    padding-inline: var(--sc-gutter);
+  .plank {
+    position: relative; width: 200px; height: 150px; border-radius: 6px; overflow: hidden;
+    background: #7A5230 url(assets/board-flat.jpg) center / cover no-repeat;
+    box-shadow: var(--sc-shadow-lg), inset 0 0 0 1px rgba(255, 255, 255, 0.08);
+    will-change: width, height;
   }
-  /* Wide enough that four overflow a laptop screen, so the pan has travel. */
-  .item { width: clamp(16rem, 30vw, 26rem); flex: none; }
-  .item__shot { border-radius: var(--sc-r-lg); overflow: hidden; box-shadow: var(--sc-shadow-lg); background: var(--sc-surface); }
-  .item__shot img { display: block; width: 100%; height: auto; aspect-ratio: 4 / 5; object-fit: cover; }
-  .item h3 { margin: var(--sc-4) 0 var(--sc-1); font-size: var(--sc-t-lg); }
-  .item p { margin: 0; color: var(--sc-ink-soft); font-size: var(--sc-t-sm); line-height: 1.45; }
-  .item .price { display: block; margin-top: var(--sc-2); color: var(--sc-accent); font-weight: 600; font-size: var(--sc-t-sm); }
-  @media (prefers-reduced-motion: no-preference) {
-    /* The engine moves the rail negative by its overflow. Under RTL it must
-       move positive by the same amount; the page measures --rail-over. */
-    [dir="rtl"] .rail { transform: translate3d(calc(var(--rail-over, 0px) * var(--sc-p, 0)), 0, 0) !important; }
+  .plank__dims {
+    position: absolute; inset-inline-end: var(--sc-2); inset-block-end: var(--sc-2);
+    padding: 2px 8px; border-radius: var(--sc-r-sm);
+    background: rgba(58, 8, 18, 0.78); color: var(--sc-ink); font-family: var(--font-body); font-size: var(--sc-t-xs); font-weight: 700; letter-spacing: 0.06em;
   }
+  .ruler {
+    position: absolute; inset-inline-start: var(--sc-gutter); inset-block-end: calc(clamp(2rem, 7vh, 4rem) - 1.6rem);
+    height: 2px; width: 100px; background: var(--sc-ink-soft);
+  }
+  .ruler::before, .ruler::after { content: ""; position: absolute; top: -5px; width: 2px; height: 12px; background: var(--sc-ink-soft); }
+  .ruler::before { inset-inline-start: 0; } .ruler::after { inset-inline-end: 0; }
+  .ruler span { position: absolute; inset-inline-start: 0; top: 8px; font-family: var(--font-body); font-size: var(--sc-t-xs); color: var(--sc-ink-soft); letter-spacing: 0.08em; white-space: nowrap; }
+  .tiers { position: absolute; inset-inline-end: var(--sc-gutter); inset-block-end: clamp(2rem, 7vh, 4rem); width: min(40vw, 30rem); height: 58vh; }
+  .tier { position: absolute; inset-inline: 0; inset-block-end: 0; margin: 0; }
+  .tier__size { margin: 0; font-family: var(--font-body); font-weight: 800; font-size: clamp(2.6rem, 6vw, 5rem); letter-spacing: -0.03em; line-height: 1; }
+  .tier__size small { font-size: 0.42em; font-weight: 600; letter-spacing: 0.04em; color: var(--sc-ink-soft); margin-inline-start: 0.2em; }
+  .tier ul { list-style: none; margin: var(--sc-4) 0 0; padding: 0; display: grid; gap: var(--sc-3); }
+  .tier li { display: grid; grid-template-columns: 1fr auto; gap: var(--sc-3); align-items: baseline; padding-block-end: var(--sc-3); border-bottom: 1px solid color-mix(in oklab, var(--sc-ink) 16%, transparent); }
+  .tier li b { display: block; font-family: var(--font-head); font-weight: 500; font-size: var(--sc-t-lg); }
+  .tier li small { display: block; margin-top: 2px; color: var(--sc-ink-soft); font-size: var(--sc-t-sm); line-height: 1.4; }
+  .tier li .price { font-family: var(--font-body); font-weight: 800; font-size: var(--sc-t-lg); color: var(--sc-accent); white-space: nowrap; }
 
-  /* ----------------------------------------------------------------- cut --
-     The peak. Their sentence crosses the frame in three lines, each over its
-     own local scrim, while the camera goes into the brisket. */
-  .cut .line {
-    position: absolute; z-index: var(--sc-z-copy); margin: 0;
-    font-family: var(--font-head); font-weight: 500; line-height: 1.02; letter-spacing: var(--sc-track-tight);
-    font-size: var(--sc-t-4xl); max-width: 14ch;
-    padding: var(--sc-5) var(--sc-6);
-    /* A firm local scrim, not a soft one: the harness measures each line
-       against the brightest frame under it, and the brisket is bright. */
-    background: rgba(15, 12, 10, 0.78);
-    backdrop-filter: blur(14px);
-    border-radius: var(--sc-r-lg);
-  }
-  .cut .line--a { inset-inline-start: calc(var(--sc-gutter) - var(--sc-7)); inset-block-start: clamp(4rem, 12vh, 8rem); }
-  .cut .line--b { inset-inline-end: calc(var(--sc-gutter) - var(--sc-7)); top: 50%; translate: 0 -50%; text-align: end; }
-  .cut .line--c { inset-inline-start: calc(var(--sc-gutter) - var(--sc-7)); inset-block-end: clamp(3rem, 10vh, 7rem); }
-  .cut .from { position: absolute; inset-inline-end: var(--sc-gutter); inset-block-end: clamp(2rem, 6vh, 4rem); margin: 0; z-index: var(--sc-z-copy); color: var(--sc-ink); }
+  /* ---------------------------------------------------------------- menu -- */
+  .menu { padding-block: clamp(4rem, 9vw, 8rem); }
+  .menu h2 { margin: 0 0 var(--sc-2); }
+  .menu .lede { margin: 0 0 var(--sc-7); color: var(--sc-ink-soft); max-width: 40rem; }
+  .shots { display: grid; grid-template-columns: 1.4fr 1fr 1fr; gap: var(--sc-4); margin: 0 0 var(--sc-8); }
+  .shots figure { margin: 0; border-radius: var(--sc-r-lg); overflow: hidden; box-shadow: var(--sc-shadow-md); aspect-ratio: 3 / 2; }
+  .shots img { display: block; width: 100%; height: 100%; object-fit: cover; }
+  .shots figcaption { position: absolute; }
+  .list { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: 1fr 1fr; gap: 0 var(--sc-8); }
+  .list li { display: grid; grid-template-columns: 1fr auto; gap: var(--sc-3); align-items: baseline; padding-block: var(--sc-4); border-bottom: 1px solid color-mix(in oklab, var(--sc-ink) 14%, transparent); }
+  .list li b { display: block; font-family: var(--font-head); font-weight: 500; font-size: var(--sc-t-lg); }
+  .list li i { font-style: normal; color: var(--sc-ink-soft); font-size: var(--sc-t-xs); letter-spacing: 0.08em; text-transform: uppercase; margin-inline-start: 0.5em; }
+  .list li small { display: block; margin-top: 3px; color: var(--sc-ink-soft); font-size: var(--sc-t-sm); line-height: 1.45; }
+  .list li .price { font-family: var(--font-body); font-weight: 800; font-size: var(--sc-t-lg); color: var(--sc-accent); white-space: nowrap; }
+  .addons { margin: var(--sc-7) 0 0; display: flex; flex-wrap: wrap; gap: var(--sc-2) var(--sc-4); align-items: baseline; color: var(--sc-ink-soft); font-size: var(--sc-t-sm); }
+  .addons b { color: var(--sc-ink); font-weight: 600; margin-inline-end: var(--sc-2); }
+  .addons span { white-space: nowrap; }
+  .addons span em { font-style: normal; color: var(--sc-accent); font-weight: 700; }
 
   /* --------------------------------------------------------------- facts -- */
   .facts { padding-block: clamp(3.5rem, 8vw, 7rem); }
   .facts .sc-wrap { display: grid; grid-template-columns: 1fr 1fr; gap: var(--sc-8); align-items: start; }
   .facts__list { margin: 0; display: grid; gap: var(--sc-5); }
-  .facts__list > div { display: grid; grid-template-columns: 6.5rem 1fr; gap: var(--sc-3); align-items: baseline; }
+  .facts__list > div { display: grid; grid-template-columns: 7rem 1fr; gap: var(--sc-3); align-items: baseline; }
   .facts__list dt { margin: 0; color: var(--sc-ink-soft); }
   .facts__list dd { margin: 0; font-family: var(--font-head); font-size: var(--sc-t-xl); line-height: 1.12; letter-spacing: var(--sc-track-snug); }
   .how h2 { margin: 0 0 var(--sc-5); font-size: var(--sc-t-xl); }
@@ -179,27 +206,22 @@
   .steps li::before { content: ""; position: absolute; inset-inline-start: -2.25rem; top: 0.38em; width: 0.95rem; height: 0.95rem; border-radius: 50%; background: var(--sc-accent); box-shadow: 0 0 0 4px var(--sc-canvas); }
   .steps li small { display: block; margin-top: 2px; font-size: var(--sc-t-sm); color: var(--sc-ink-soft); }
 
-  /* --------------------------------------------------------------- close --
-     Filmic close: pinned photograph, a spotlight that follows the pointer,
-     a magnetic CTA, the reassurance beside it, the footer inside the stage. */
+  /* --------------------------------------------------------------- close -- */
   .close__img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
   .close__light {
     position: absolute; inset: 0; pointer-events: none;
-    background: radial-gradient(42rem circle at calc(var(--sc-mx, 0.5) * 100%) calc(var(--sc-my, 0.5) * 100%), rgba(15, 12, 10, 0) 0%, rgba(15, 12, 10, 0.55) 55%, rgba(15, 12, 10, 0.86) 100%);
+    background: radial-gradient(42rem circle at calc(var(--sc-mx, 0.5) * 100%) calc(var(--sc-my, 0.5) * 100%), rgba(58, 8, 18, 0) 0%, rgba(58, 8, 18, 0.55) 55%, rgba(58, 8, 18, 0.88) 100%);
   }
-  .close .sc-copy--center {
-    max-width: 34rem; padding: var(--sc-7) var(--sc-7);
-    background: rgba(15, 12, 10, 0.66); backdrop-filter: blur(16px); border-radius: var(--sc-r-xl, 1.5rem);
-  }
+  .close .sc-copy--center { max-width: 34rem; padding: var(--sc-7); background: rgba(58, 8, 18, 0.7); backdrop-filter: blur(16px); border-radius: 24px; }
   .close h2 { margin: 0 0 var(--sc-5); }
   .cta {
     display: inline-flex; align-items: center; justify-content: center; min-height: 52px; padding: 0 var(--sc-6);
-    border-radius: var(--sc-r-pill); background: var(--sc-ink); color: var(--sc-accent-ink);
-    font-family: var(--font-body); font-weight: 600; font-size: var(--sc-t-base); text-decoration: none;
+    border-radius: var(--sc-r-pill); background: var(--gold); color: var(--sc-accent-ink);
+    font-family: var(--font-body); font-weight: 700; font-size: var(--sc-t-base); text-decoration: none;
     box-shadow: var(--sc-shadow-md);
-    transition: background var(--sc-d-fast) var(--sc-ease-out), transform var(--sc-d-fast) var(--sc-ease-out);
+    transition: background var(--sc-d-fast) var(--sc-ease-out);
   }
-  .cta:hover { background: #FFFFFF; }
+  .cta:hover { background: #F2C25A; }
   .cta:focus-visible { outline: 2px solid var(--sc-accent); outline-offset: 4px; }
   .close__assure { margin: var(--sc-5) 0 0; font-size: var(--sc-t-sm); color: var(--sc-ink); line-height: 1.5; }
   .close__foot {
@@ -209,18 +231,23 @@
 
   /* -------------------------------------------------------------- mobile -- */
   @media (max-width: 860px) {
-    .bar__mark { font-size: var(--sc-t-base); }
+    .bar__mark { font-size: var(--sc-t-base); } .bar__mark img { height: 28px; }
     .bar__cta { display: none; }
-    .boards__head { inset-block-start: clamp(4rem, 10vh, 6rem); max-width: none; inset-inline-end: var(--sc-gutter); }
-    .rail { gap: var(--sc-5); inset-block-end: clamp(1.5rem, 5vh, 3rem); }
-    .item { width: min(68vw, 20rem); }
-    .cut .line { font-size: var(--sc-t-3xl); max-width: 11ch; padding: var(--sc-5) var(--sc-6); }
-    .cut .line--a { inset-inline-start: calc(var(--sc-gutter) - var(--sc-6)); }
-    .cut .line--b { inset-inline-end: calc(var(--sc-gutter) - var(--sc-6)); }
-    .cut .line--c { inset-inline-start: calc(var(--sc-gutter) - var(--sc-6)); inset-block-end: clamp(5rem, 14vh, 8rem); }
+    .hero .name { font-size: clamp(3.6rem, 21vw, 8rem); inset-block-start: clamp(4.5rem, 12vh, 7rem); }
+    .tumble, .tumble__shadow { width: 90vw; margin-left: -45vw; }
+    .tumble { margin-top: calc(90vw * -0.407); } .tumble__shadow { margin-top: calc(90vw * -0.30); }
+    .hero .land { inset-inline-end: var(--sc-gutter); max-width: none; inset-block-start: clamp(4.5rem, 12vh, 7rem); }
+    .sizes .sc-copy--lead { top: clamp(4rem, 9vh, 6rem); inset-inline: var(--sc-gutter); max-width: none; }
+    .scale { width: calc(100vw - var(--sc-gutter) * 2); height: 34vh; inset-block-end: auto; top: 24vh; align-items: flex-end; }
+    .ruler { inset-block-end: auto; top: calc(24vh + 34vh + 0.6rem); }
+    .tiers { inset-inline: var(--sc-gutter); width: auto; height: auto; inset-block-end: clamp(1.5rem, 5vh, 3rem); }
+    .tier__size { font-size: clamp(2.2rem, 11vw, 3.6rem); }
+    .tier li small { display: none; }
+    .shots { grid-template-columns: 1fr 1fr; } .shots figure:first-child { grid-column: 1 / -1; }
+    .list { grid-template-columns: 1fr; }
     .facts .sc-wrap { grid-template-columns: 1fr; gap: var(--sc-7); }
     .facts__list > div { grid-template-columns: 1fr; gap: var(--sc-1); }
-    .close .sc-copy--center { inset-inline: var(--sc-gutter); left: auto; translate: 0 -56%; max-width: none; text-align: center; }
+    .close .sc-copy--center { inset-inline: var(--sc-gutter); left: auto; translate: 0 -56%; max-width: none; text-align: center; padding: var(--sc-6) var(--sc-5); }
     .close__foot { bottom: var(--sc-3); }
   }
   @media (prefers-reduced-motion: reduce) { .heat { display: none; } }
@@ -228,93 +255,129 @@
 </head>
 <body id="top">
 <header class="bar">
-  <a class="bar__mark" href="#top">Blazin' Boards</a>
+  <a class="bar__mark" href="#top"><img src="assets/their-logo.png" alt="" width="1170" height="782"> Blazin' Boards</a>
   <div class="bar__end">
     <a class="bar__cta" href="#order">Message Blazin' Boards</a>
-    <button class="dir-toggle" id="dirToggle" type="button" aria-label="Switch direction">עברית</button>
   </div>
 </header>
 <div class="heat" aria-hidden="true"></div>
 <div class="sc-grain" aria-hidden="true"></div>
 
 <main>
-  <!-- 1  Appetite: their board, moving -->
-  <section class="hero" data-sc-act="scrub" data-sc-span="2.6" data-sc-dwell="0.35" data-sc-drift="#15110F" aria-label="Blazin' Boards">
+  <!-- 1  The tumble -->
+  <section class="hero" id="hero" data-sc-act="pin" data-sc-span="3.2" data-sc-drift="#4B0C19" aria-label="Blazin' Boards">
     <div data-sc-stage>
-      <img class="sc-stage__poster" src="assets/hero.webp" alt="" width="1600" height="900">
-      <video data-sc-scrub data-sc-src="assets/hero.mp4" data-sc-src-mobile="assets/hero-m.mp4" playsinline muted aria-hidden="true"></video>
-      <div class="sc-scrim sc-scrim--lead"></div>
-      <div class="sc-copy sc-copy--lead" data-sc-cue="0 0.74 0 0.3">
-        <h1 class="sc-display sc-display--xl" data-sc-kinetic="lines">Premium meat boards, <em>grilled to perfection.</em></h1>
-        <p class="hero__sub">Blazin' Boards, Jerusalem.</p>
+      <div class="stage3d">
+        <p class="name" data-sc-cue="0 0.44 0 0.38" aria-hidden="true"><span>Blazin’</span><span class="b">Boards</span></p>
+        <div class="tumble__shadow" id="tumbleShadow" aria-hidden="true"></div>
+        <div class="tumble" id="tumble">
+          <img src="assets/board-cut.webp" width="1510" height="1230" alt="A Blazin' Boards meat board: rows of sliced steak, candied pastrami, jerky and a bone-in rib, on a wooden board" fetchpriority="high">
+        </div>
+      </div>
+      <div class="land" data-sc-cue="0.6 1 0.3 0">
+        <div>
+          <h1>Premium meat boards, <b>grilled to perfection.</b></h1>
+          <p>Jerusalem. Orders 48 hours ahead. Delivery throughout Israel.</p>
+        </div>
+        <a class="cta" href="#order">Message Blazin' Boards</a>
       </div>
     </div>
   </section>
 
-  <!-- 2  Choice: the boards -->
-  <section class="boards" id="boards" data-sc-act="pan" data-sc-span="2.2" data-sc-drift="#1B1512" aria-label="Meatboards">
+  <!-- 2  The board grows to scale: the peak -->
+  <section class="sizes" id="sizes" data-sc-act="pin" data-sc-span="3.6" data-sc-drift="#3A0812" aria-labelledby="sizesTitle">
     <div data-sc-stage>
-      <div class="boards__head">
-        <h2 class="sc-display sc-display--md">Meatboards.</h2>
-        <p>Say who is coming and what they like. <b>Message for a price.</b></p>
+      <div class="sc-copy sc-copy--lead" data-sc-cue="0 1 0 0">
+        <h2 class="sc-display sc-display--md" id="sizesTitle">Five sizes, <em>to scale.</em></h2>
+        <p>Scroll and the board grows, at one scale, from the Mini to the Extra Large VIP. Every board sold at that size, with its price.</p>
       </div>
-      <div class="rail" data-sc-pan="0.06">
-        <article class="item">
-          <div class="item__shot" data-sc-tilt="5"><img src="assets/item-long.jpg" width="900" height="1117" alt="A long board of sliced smoked brisket, pastrami, beef salami, pickles and mustard"></div>
-          <h3>The long board</h3>
-          <p>Smoked brisket, pastrami, beef salami, pickles, grainy mustard.</p>
-          <span class="price">Message for a price</span>
-        </article>
-        <article class="item">
-          <div class="item__shot" data-sc-tilt="5"><img src="assets/item-round.jpg" width="900" height="1117" alt="A round board of lamb chops, chicken skewers, charred onions, tahini and pickled turnip"></div>
-          <h3>The round</h3>
-          <p>Lamb chops, chicken skewers, charred onion, tahini, pickled turnip.</p>
-          <span class="price">Message for a price</span>
-        </article>
-        <article class="item">
-          <div class="item__shot" data-sc-tilt="5"><img src="assets/item-two.jpg" width="900" height="1117" alt="A small board for two with brisket, cured beef, olives, pickles, mustard and grilled bread"></div>
-          <h3>For two</h3>
-          <p>Brisket, cured beef, olives, pickles, mustard, grilled bread.</p>
-          <span class="price">Message for a price</span>
-        </article>
-        <article class="item">
-          <div class="item__shot" data-sc-tilt="5"><img src="assets/item-party.jpg" width="900" height="1117" alt="A large square party board of sliced ribeye, beef sausages, chicken thighs, grilled corn and two sauces"></div>
-          <h3>The party board</h3>
-          <p>Sliced ribeye, beef sausages, chicken thighs, grilled corn, two sauces.</p>
-          <span class="price">Message for a price</span>
-        </article>
+      <div class="scale" aria-hidden="true">
+        <div class="plank" id="plank"><span class="plank__dims" id="plankDims">20 × 15 cm</span></div>
+      </div>
+      <div class="ruler" id="ruler" aria-hidden="true"><span>10 cm</span></div>
+      <div class="tiers">
+        <div class="tier" data-sc-cue="0 0.2 0.1 0.3">
+          <p class="tier__size"><span class="num">15 × 20</span><small>cm</small></p>
+          <ul>
+            <li><span><b>Mini Board</b><small>Entrecote steak, candied pastrami, salami chips, sometimes brisket or London broil, beef jerky.</small></span><span class="price">$75</span></li>
+          </ul>
+        </div>
+        <div class="tier" data-sc-cue="0.2 0.4 0.3 0.3">
+          <p class="tier__size"><span class="num">20 × 30</span><small>cm</small></p>
+          <ul>
+            <li><span><b>Small Premium Steak Board</b><small>Oyster steak, entrecote, candied pastrami, brisket, skirt or hanger steak, beef jerky.</small></span><span class="price">$250</span></li>
+            <li><span><b>Small Blazin' Board</b><small>Salami chips, sticky beef bites, candied pastrami, brisket, London broil, beef jerky.</small></span><span class="price">$149</span></li>
+            <li><span><b>The All Jerky Board</b></span><span class="price">$139</span></li>
+          </ul>
+        </div>
+        <div class="tier" data-sc-cue="0.4 0.6 0.3 0.3">
+          <p class="tier__size"><span class="num">24 × 35</span><small>cm</small></p>
+          <ul>
+            <li><span><b>Medium Premium Steak Board</b><small>Oyster steak, entrecote, candied pastrami, brisket, skirt or hanger steak, beef jerky.</small></span><span class="price">$350</span></li>
+            <li><span><b>Medium Blazin' Board</b><small>Sliced entrecote, maple herb baby chicken, salami chips, sticky beef bites, candied pastrami, brisket, London broil, beef jerky.</small></span><span class="price">$250</span></li>
+          </ul>
+        </div>
+        <div class="tier" data-sc-cue="0.6 0.8 0.3 0.3">
+          <p class="tier__size"><span class="num">33 × 47</span><small>cm</small></p>
+          <ul>
+            <li><span><b>Large Premium Steak Board</b><small>Oyster steak, entrecote, candied pastrami, brisket, skirt or hanger steak, beef jerky.</small></span><span class="price">$485</span></li>
+            <li><span><b>Large Blazin' Board</b><small>Sliced entrecote, maple herb baby chicken, salami chips, sticky beef bites, candied pastrami, London broil, brisket, beef jerky.</small></span><span class="price">$385</span></li>
+          </ul>
+        </div>
+        <div class="tier" data-sc-cue="0.8 1 0.3 0">
+          <p class="tier__size"><span class="num">37 × 57</span><small>cm</small></p>
+          <ul>
+            <li><span><b>Extra Large VIP Board</b><small>Rib steak, oyster steak, sliced entrecote, salami chips, sticky beef bites, candied pastrami, London broil, brisket, beef facon, beef jerky.</small></span><span class="price">$700</span></li>
+          </ul>
+        </div>
       </div>
     </div>
   </section>
 
-  <!-- 3  Hunger, the peak: the cut -->
-  <section class="cut" id="cut" data-sc-act="scrub" data-sc-span="3.0" data-sc-dwell="0.4" data-sc-drift="#0F0C0A" aria-labelledby="cutText">
-    <h2 class="sr" id="cutText">Premium meats, cooked and grilled to perfection.</h2>
-    <div data-sc-stage>
-      <img class="sc-stage__poster" src="assets/cut.webp" alt="" width="1600" height="900">
-      <video data-sc-scrub data-sc-src="assets/cut.mp4" data-sc-src-mobile="assets/cut-m.mp4" playsinline muted aria-hidden="true"></video>
-      <div class="sc-scrim sc-scrim--vignette"></div>
-      <p class="line line--a" data-sc-cue="0.02 0.38 0.3 0.3" aria-hidden="true">Premium meats.</p>
-      <p class="line line--b" data-sc-cue="0.32 0.68 0.3 0.3" aria-hidden="true">Cooked and grilled</p>
-      <p class="line line--c" data-sc-cue="0.62 1 0.3 0" aria-hidden="true"><em class="accent">to perfection.</em></p>
-      <p class="from sc-label" data-sc-cue="0.74 1 0.25 0">In their words.</p>
+  <!-- 3  The full list -->
+  <section class="menu" id="menu" data-sc-act="flow" data-sc-drift="#5A1222" aria-labelledby="menuTitle">
+    <div class="sc-wrap">
+      <h2 class="sc-display sc-display--md" id="menuTitle">Every board.</h2>
+      <p class="lede">Their price list, as they publish it. Prices in dollars. Say who is coming and what they like.</p>
+      <div class="shots">
+        <figure data-sc-reveal="right" data-sc-reveal-at="0.06 0.42"><img src="assets/their-long.jpg" width="1024" height="683" alt="Their long board on marble: pastrami, brisket, salami and a bone-in rib, with olives and parsley" loading="lazy"></figure>
+        <figure data-sc-reveal="up" data-sc-reveal-at="0.1 0.46"><img src="assets/their-salami.jpg" width="1024" height="683" alt="A square board of sliced meats and salami rounds, with pistachios and olives" loading="lazy"></figure>
+        <figure data-sc-reveal="up" data-sc-reveal-at="0.14 0.5"><img src="assets/their-rustic.jpg" width="1600" height="1031" alt="Sliced steak and candied pastrami piled on a wooden board" loading="lazy"></figure>
+      </div>
+      <ul class="list" data-sc-in data-sc-stagger="60">
+        <li><span><b>Mini Board <i>15 × 20 cm</i></b><small>Entrecote steak, candied pastrami, salami chips, sometimes brisket or London broil, beef jerky.</small></span><span class="price">$75</span></li>
+        <li><span><b>Small Blazin' Board <i>20 × 30 cm</i></b><small>Salami chips, sticky beef bites, candied pastrami, brisket, London broil, beef jerky.</small></span><span class="price">$149</span></li>
+        <li><span><b>Small Premium Steak Board <i>20 × 30 cm</i></b><small>Oyster steak, entrecote, candied pastrami, brisket, skirt or hanger steak, beef jerky.</small></span><span class="price">$250</span></li>
+        <li><span><b>Medium Blazin' Board <i>24 × 35 cm</i></b><small>Sliced entrecote, maple herb baby chicken, salami chips, sticky beef bites, candied pastrami, brisket, London broil, beef jerky.</small></span><span class="price">$250</span></li>
+        <li><span><b>Medium Premium Steak Board <i>24 × 35 cm</i></b><small>Oyster steak, entrecote, candied pastrami, brisket, skirt or hanger steak, beef jerky.</small></span><span class="price">$350</span></li>
+        <li><span><b>Large Blazin' Board <i>33 × 47 cm</i></b><small>Sliced entrecote, maple herb baby chicken, salami chips, sticky beef bites, candied pastrami, London broil, brisket, beef jerky.</small></span><span class="price">$385</span></li>
+        <li><span><b>Large Premium Steak Board <i>33 × 47 cm</i></b><small>Oyster steak, entrecote, candied pastrami, brisket, skirt or hanger steak, beef jerky.</small></span><span class="price">$485</span></li>
+        <li><span><b>Extra Large VIP Board <i>37 × 57 cm</i></b><small>Rib steak, oyster steak, sliced entrecote, salami chips, sticky beef bites, candied pastrami, London broil, brisket, beef facon, beef jerky.</small></span><span class="price">$700</span></li>
+        <li><span><b>The Party Board</b><small>Two rib steaks, oyster steak, entrecote, candied pastrami, brisket, London broil, skirt or hanger steak, beef jerky.</small></span><span class="price">$750</span></li>
+        <li><span><b>The All Jerky Board <i>20 × 30 cm</i></b></span><span class="price">$139</span></li>
+      </ul>
+      <p class="addons" data-sc-in><b>Add a bottle.</b>
+        <span>Bartenura Moscato <em>$35</em></span> <span>Psagot Cabernet <em>$50</em></span> <span>Pardes Merlot <em>$65</em></span>
+        <span>Four Roses <em>$65</em></span> <span>Glenlivet 12 <em>$75</em></span> <span>Woodford Reserve <em>$85</em></span>
+      </p>
     </div>
   </section>
 
-  <!-- 4  Certainty: the facts and how it goes, one screen -->
-  <section class="facts" id="facts" data-sc-act="flow" data-sc-drift="#15110F" aria-label="The facts">
+  <!-- 4  The facts and how it goes -->
+  <section class="facts" id="facts" data-sc-act="flow" data-sc-drift="#4B0C19" aria-label="The facts">
     <div class="sc-wrap">
       <dl class="facts__list" data-sc-in data-sc-stagger="80">
-        <div><dt class="sc-label">What</dt><dd>Premium meat boards.</dd></div>
-        <div><dt class="sc-label">Where</dt><dd>Jerusalem.</dd></div>
+        <div><dt class="sc-label">Notice</dt><dd>Orders 48 hours ahead.</dd></div>
+        <div><dt class="sc-label">Delivery</dt><dd>Throughout Israel.</dd></div>
+        <div><dt class="sc-label">On request</dt><dd>Gluten-free and soy-free boards.</dd></div>
         <div><dt class="sc-label">Pay by</dt><dd>Credit card, Zelle or bank transfer.</dd></div>
-        <div><dt class="sc-label">You talk to</dt><dd>The business itself. No middleman.</dd></div>
+        <div><dt class="sc-label">Kitchen</dt><dd>Farn 5, Jerusalem.</dd></div>
       </dl>
       <div class="how" data-sc-in data-sc-stagger="120">
         <h2>How it goes.</h2>
         <ol class="steps">
-          <li>You send a message.<small>From this page. No form, no account for them to make.</small></li>
-          <li>You agree the board and the day, in chat.<small>What you want on it, how many people, when.</small></li>
+          <li>You send a message.<small>From this page. Say the size, the date, how many people.</small></li>
+          <li>They confirm the board and the day.<small>Two days ahead at least. Special boards on request.</small></li>
           <li>You pay them the way they take it.<small>Card, Zelle or bank transfer. Between you and them.</small></li>
         </ol>
       </div>
@@ -322,17 +385,17 @@
   </section>
 
   <!-- 5  Resolve -->
-  <section class="close" id="order" data-sc-act="pin" data-sc-span="1.3" data-sc-drift="#0F0C0A" data-sc-spotlight aria-label="Order">
+  <section class="close" id="order" data-sc-act="pin" data-sc-span="1.2" data-sc-drift="#3A0812" data-sc-spotlight aria-label="Order">
     <div data-sc-stage>
-      <img class="close__img" src="assets/close.jpg" alt="" width="1800" height="1005">
+      <img class="close__img" src="assets/their-square.jpg" alt="" width="2000" height="1333">
       <div class="close__light" aria-hidden="true"></div>
       <div class="sc-scrim sc-scrim--vignette"></div>
       <div class="sc-copy sc-copy--center" data-sc-cue="0.06">
         <h2 class="sc-display sc-display--lg" data-sc-kinetic="lines">Ready when you are.</h2>
         <a class="cta" href="#top" data-sc-magnet="0.26">Message Blazin' Boards</a>
-        <p class="close__assure">Pay by card, Zelle or bank transfer. You talk to the business directly.</p>
+        <p class="close__assure">Orders 48 hours ahead. Pay by card, Zelle or bank transfer. You talk to the business directly.</p>
       </div>
-      <p class="close__foot">Blazin' Boards, Jerusalem, on MyIsraelRental. The moving board at the top is theirs. The other food photographs on this page are illustrations for this preview.</p>
+      <p class="close__foot">Blazin' Boards, Farn 5, Jerusalem, on MyIsraelRental. Every photograph on this page is theirs.</p>
     </div>
   </section>
 </main>
@@ -342,10 +405,95 @@
   ScrollCraft.mount(document.body);
   (function () {
     var root = document.documentElement;
-    /* ----------------------------------------------------------- the flame --
-       Scroll velocity, smoothed, becomes --heat on the root. Fast attack,
-       slow cooling. Page-local, engine untouched. */
     var reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    var small = function () { return innerWidth <= 860; };
+
+    /* Read an act's progress the way the engine publishes it: as --sc-p on
+       the act element, written each frame. A MutationObserver on the style
+       attribute is cheaper than polling and never fights the engine. */
+    function onProgress(el, fn) {
+      var last = -1;
+      var read = function () {
+        var p = parseFloat(el.style.getPropertyValue('--sc-p'));
+        if (isNaN(p)) p = 0;
+        if (p !== last) { last = p; fn(p); }
+      };
+      new MutationObserver(read).observe(el, { attributes: true, attributeFilter: ['style'] });
+      read();
+    }
+    var ease = function (t) { return t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2; };
+    var lerp = function (a, b, t) { return a + (b - a) * t; };
+
+    /* ------------------------------------------------------------ tumble --
+       Keyframes over p. Position in vw/vh, scale, and three rotations. */
+    var tumble = document.getElementById('tumble');
+    var shadow = document.getElementById('tumbleShadow');
+    var K = [
+      { p: 0.00, x: 42, y: -64, s: 0.30, rx: 78, ry: -22, rz: -300 },
+      { p: 0.30, x: 35, y: -18, s: 0.58, rx: 48, ry: -8,  rz: -160 },
+      { p: 0.50, x: 29, y: -4,  s: 0.76, rx: 26, ry: -3,  rz: -70 },
+      { p: 0.68, x: 19, y: 6,   s: 0.94, rx: 10, ry: 0,   rz: -16 },
+      { p: 0.88, x: 15, y: 9,   s: 1.00, rx: 0,  ry: 0,   rz: 0 },
+      { p: 1.00, x: 15, y: 9,   s: 1.00, rx: 0,  ry: 0,   rz: 0 }
+    ];
+    function frameAt(p) {
+      var i = 0; while (i < K.length - 2 && p > K[i + 1].p) i++;
+      var a = K[i], b = K[i + 1], t = ease(Math.min(Math.max((p - a.p) / (b.p - a.p), 0), 1));
+      return { x: lerp(a.x, b.x, t), y: lerp(a.y, b.y, t), s: lerp(a.s, b.s, t), rx: lerp(a.rx, b.rx, t), ry: lerp(a.ry, b.ry, t), rz: lerp(a.rz, b.rz, t) };
+    }
+    function paintTumble(p) {
+      /* Reduced motion: no flight. The board parks lower right, clear of the name. */
+      var f = reduce ? { x: 27, y: 16, s: 0.62, rx: 0, ry: 0, rz: 0 } : frameAt(p);
+      var mob = small();
+      /* Phones: no room beside the name, so the board comes up from below
+         it and lands in the lower half, under nothing. */
+      var x = mob ? f.x * 0.15 : f.x, y = mob ? 18 - f.y * 0.45 : f.y;
+      tumble.style.transform = 'translate3d(' + x + 'vw,' + y + 'vh,0) scale(' + f.s + ') rotateX(' + f.rx + 'deg) rotateY(' + f.ry + 'deg) rotateZ(' + f.rz + 'deg)';
+      /* The shadow lives on the table: it grows and darkens as the board
+         comes down flat. */
+      var down = 1 - Math.min(f.rx / 78, 1);
+      shadow.style.transform = 'translate3d(' + x + 'vw,' + (y + 4) + 'vh,0) scale(' + (f.s * 1.08) + ')';
+      shadow.style.opacity = (down * 0.9).toFixed(3);
+    }
+    if (tumble) onProgress(document.getElementById('hero'), paintTumble);
+
+    /* ------------------------------------------------------------- sizes --
+       One pixels-per-centimetre for the whole act, from the space the
+       plank has. The plank interpolates through the five real sizes,
+       holding on each one where its tier's text is up. */
+    var plank = document.getElementById('plank'), dims = document.getElementById('plankDims'), ruler = document.getElementById('ruler');
+    var scaleBox = document.querySelector('.scale');
+    var SIZES = [[20, 15], [30, 20], [35, 24], [47, 33], [57, 37]];
+    var STOPS = [0.10, 0.30, 0.50, 0.70, 0.90];
+    var pxPerCm = 8;
+    function fitScale() {
+      var w = scaleBox.clientWidth, h = scaleBox.clientHeight;
+      pxPerCm = Math.max(Math.min(w / 57, h / 37), 2);
+      ruler.style.width = (pxPerCm * 10).toFixed(1) + 'px';
+    }
+    function sizeAt(p) {
+      if (p <= STOPS[0]) return SIZES[0];
+      if (p >= STOPS[STOPS.length - 1]) return SIZES[SIZES.length - 1];
+      var i = 0; while (p > STOPS[i + 1]) i++;
+      /* Hold on each size for the first half of the gap, grow in the second. */
+      var t = (p - STOPS[i]) / (STOPS[i + 1] - STOPS[i]);
+      t = ease(Math.min(Math.max((t - 0.45) / 0.55, 0), 1));
+      return [lerp(SIZES[i][0], SIZES[i + 1][0], t), lerp(SIZES[i][1], SIZES[i + 1][1], t)];
+    }
+    function paintPlank(p) {
+      var s = sizeAt(reduce ? 1 : p);
+      plank.style.width = (s[0] * pxPerCm).toFixed(1) + 'px';
+      plank.style.height = (s[1] * pxPerCm).toFixed(1) + 'px';
+      dims.textContent = Math.round(s[0]) + ' × ' + Math.round(s[1]) + ' cm';
+    }
+    var lastP = 0;
+    if (plank) {
+      fitScale(); paintPlank(0);
+      onProgress(document.getElementById('sizes'), function (p) { lastP = p; paintPlank(p); });
+      addEventListener('resize', function () { fitScale(); paintPlank(lastP); }, { passive: true });
+    }
+
+    /* ----------------------------------------------------------- the flame -- */
     if (!reduce) {
       var lastY = scrollY, lastT = performance.now();
       var target = 0, heat = 0, raf = 0;
@@ -367,27 +515,7 @@
         if (!raf) raf = requestAnimationFrame(frame);
       }, { passive: true });
     }
-    /* The RTL rail travel: the engine moves the rail negative by its
-       overflow; under RTL it must move positive by the same amount. */
-    var rail = document.querySelector('.rail');
-    function railOver() {
-      if (!rail) return;
-      var over = Math.max(rail.scrollWidth - innerWidth, 0) * 1.06;
-      rail.style.setProperty('--rail-over', over.toFixed(1) + 'px');
-    }
-    addEventListener('resize', railOver, { passive: true });
-    if (document.fonts && document.fonts.ready) document.fonts.ready.then(railOver);
-    railOver();
-    /* Direction toggle. */
-    var toggle = document.getElementById('dirToggle');
-    toggle.addEventListener('click', function () {
-      var rtl = root.getAttribute('dir') === 'rtl';
-      root.setAttribute('dir', rtl ? 'ltr' : 'rtl');
-      root.setAttribute('lang', rtl ? 'en' : 'he');
-      toggle.textContent = rtl ? 'עברית' : 'English';
-      railOver();
-      ScrollCraft.instances.forEach(function (i) { i.layout(); });
-    });
+
   })();
 </script>
 </body>

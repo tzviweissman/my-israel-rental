@@ -29,7 +29,7 @@ changes only grammar and world will fail it.
 | Build | Grammar | Nav treatment | Hero device | Act-sequence shape | Close pattern | Signature move | World | Port |
 |---|---|---|---|---|---|---|---|---|
 | lechem-emek | 2026-09-06 | Night shoot (named): distinct scenes, full-bleed photographic hero, one dark-to-light cut at the peak | Fixed wordmark + time-of-morning clock, no CTA in the bar | Pinned still photograph with a --sc-p push-in and a greet-and-fade kinetic headline | pin > flow > pin > flow > pin > pan > flow > pin, 8 acts, 14.0vh | Pinned photo, one held cue, magnetic CTA, footer inside the stage | The scroll is the sunrise: one --dawn value walks the clock 04:00 to 07:00 and regrades every night photograph and ground together, then cuts to day | Photographic, generated stills, warm | 4500 |
-| blazin-boards | 2026-09-07 (r2; r1 of 2026-09-06 was a typographic poster, rebuilt on request) | Filmic one-shot: two scrub clips, grounds drift, one entry point | Fixed minimal bar: wordmark, one CTA, direction toggle | Full-bleed scrub of the business's own photograph animated (Kling), corner-anchored kinetic h1 on a greet cue, local scrim | scrub > pan > scrub > flow > pin, 5 acts, 9.7vh | Pinned photograph, pointer spotlight, magnetic CTA, reassurance beside it, footer in the stage | Scroll speed is the flame: velocity, smoothed into --heat, flares an ember layer, the grain and the accent together, and cools when the scroll stops | Photographic, generated stills + one real animated photo, charcoal | 4501 |
+| blazin-boards | 2026-09-07 (r3; r1 poster and r2 filmic were rebuilt on request) | Product tumble (named): flat brand-coloured typographic ground, the product as a cut-out object performing under the scroll, no video | Fixed minimal bar: wordmark with their logo, one CTA | Their board cut out of their own photograph, tumbling in three dimensions from the top corner to a flat landing beside the promise, keyframed on --sc-p | pin > pin > flow > flow > pin, 5 acts, 10.3vh | Pinned photograph, pointer spotlight, magnetic CTA, reassurance beside it, footer in the stage | The board grows to scale: one plank through the five real sizes at one px-per-cm with a ruler, every board at that size lighting up with its price | Their photography only, oxblood from their logo, cream and mustard | 4501 |
 
 
 ---
@@ -49,14 +49,13 @@ as a constraint, so writing them down is the whole point.
   CTA; and the sunrise move (one scroll value regrading the whole page and
   a clock). Shares nothing with prior rows, since there were none.
 
-- **blazin-boards** claims (revision 2): the filmic one-shot grammar on a
-  charcoal drift; the fixed wordmark-plus-one-CTA bar; the animated-real-
-  photograph scrub hero; the shape scrub > pan > scrub > flow > pin at 5 acts
-  and 9.7vh; and the velocity move (scroll speed regrades the page, cooling
-  on stop). Shares with lechem-emek the pinned-photo-plus-magnet close
-  (dimension 5), the site's gold accent and Playfair/Manrope; differs on the
-  other five dimensions. Revision 1's typographic-poster claims are released:
-  that page no longer exists.
+- **blazin-boards** claims (revision 3): the named "Product tumble" grammar
+  (flat brand ground, cut-out product performing under the scroll); the
+  wordmark-plus-one-CTA bar; the 3D cut-out tumble hero; the shape
+  pin > pin > flow > flow > pin at 5 acts and 10.3vh; and the
+  grows-to-scale move (one plank through the real sizes with a ruler and
+  prices). Shares with lechem-emek only the pinned-photo-plus-magnet close.
+  Revisions 1 and 2 released their claims: those pages no longer exist.
 ---
 
 ## Appending a row
