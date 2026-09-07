@@ -464,7 +464,9 @@
     var plank = document.getElementById('plank'), dims = document.getElementById('plankDims'), ruler = document.getElementById('ruler');
     var scaleBox = document.querySelector('.scale');
     var SIZES = [[20, 15], [30, 20], [35, 24], [47, 33], [57, 37]];
-    var STOPS = [0.10, 0.30, 0.50, 0.70, 0.90];
+    /* The tiers hand off at these points; the plank grows through each
+       handoff, so the size and the text change together. */
+    var EDGES = [0.2, 0.4, 0.6, 0.8], HALF = 0.05;
     var pxPerCm = 8;
     function fitScale() {
       var w = scaleBox.clientWidth, h = scaleBox.clientHeight;
@@ -472,13 +474,13 @@
       ruler.style.width = (pxPerCm * 10).toFixed(1) + 'px';
     }
     function sizeAt(p) {
-      if (p <= STOPS[0]) return SIZES[0];
-      if (p >= STOPS[STOPS.length - 1]) return SIZES[SIZES.length - 1];
-      var i = 0; while (p > STOPS[i + 1]) i++;
-      /* Hold on each size for the first half of the gap, grow in the second. */
-      var t = (p - STOPS[i]) / (STOPS[i + 1] - STOPS[i]);
-      t = ease(Math.min(Math.max((t - 0.45) / 0.55, 0), 1));
-      return [lerp(SIZES[i][0], SIZES[i + 1][0], t), lerp(SIZES[i][1], SIZES[i + 1][1], t)];
+      var k = 0;
+      while (k < EDGES.length && p > EDGES[k] + HALF) k++;
+      if (k < EDGES.length && p > EDGES[k] - HALF) {
+        var t = ease((p - (EDGES[k] - HALF)) / (2 * HALF));
+        return [lerp(SIZES[k][0], SIZES[k + 1][0], t), lerp(SIZES[k][1], SIZES[k + 1][1], t)];
+      }
+      return SIZES[k];
     }
     function paintPlank(p) {
       var s = sizeAt(reduce ? 1 : p);
