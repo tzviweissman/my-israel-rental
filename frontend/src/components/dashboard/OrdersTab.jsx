@@ -29,7 +29,7 @@ import axios from 'axios';
 import { toast } from 'sonner';
 import {
   Plus, Loader2, ClipboardPaste, Store as StoreIcon, Bike, X, Sparkles, ClipboardList,
-  LayoutList, Table2, Printer, Download, Upload, Link2, Copy, Check, RotateCcw, Pencil, MessageCircle,
+  LayoutList, Table2, Printer, Download, Upload, Link2, Copy, Check, RotateCcw, Pencil, MessageCircle, Trash2,
 } from 'lucide-react';
 import { phoneError } from '../../utils/phoneValidation';
 import OrderCard, { STATUS_ORDER, OPEN, NEXT, pillStyle } from './OrderCard';
@@ -117,7 +117,17 @@ export default function OrdersTab({ API, token }) {
   const [view, setView] = useState(() => {
     try { return localStorage.getItem('orders.view') === 'table' ? 'table' : 'cards'; } catch { return 'cards'; }
   });
-  const [panel, setPanel] = useState(null);           // 'staff' | 'import' | null
+  const [panel, setPanel] = useState(null);           // 'staff' | 'import' | 'couriers' | null
+  const [couriers, setCouriers] = useState([]);
+
+  const loadCouriers = useCallback(async () => {
+    if (!bizId) return;
+    try {
+      const { data } = await axios.get(`${API}/marketplace/businesses/${bizId}/couriers`, auth);
+      setCouriers(data || []);
+    } catch { setCouriers([]); }
+  }, [API, auth, bizId]);
+  useEffect(() => { if (businesses && businesses.some((b) => b.id === bizId)) loadCouriers(); }, [loadCouriers, businesses, bizId]);
 
   useEffect(() => {
     try { localStorage.setItem('orders.view', view); } catch { /* private mode */ }
@@ -189,6 +199,31 @@ export default function OrdersTab({ API, token }) {
     } catch (err) {
       toast.error(err?.response?.data?.detail || t('orders.saveFailed', 'Could not save'));
       if (err?.response?.status === 409) load();
+    } finally {
+      setBusyId(null);
+    }
+  };
+
+  const assign = async (order, courierId) => {
+    setBusyId(order.id);
+    try {
+      const { data } = await axios.patch(`${API}/marketplace/orders/${order.id}/assign`, { courier_id: courierId }, auth);
+      setOrders((prev) => prev.map((o) => (o.id === data.order.id ? data.order : o)));
+      if (courierId) toast.success(data.sms_sent ? t('orders.assignedSms', 'Assigned and texted the run sheet') : t('orders.assigned', 'Assigned - send them the run sheet'));
+    } catch (err) {
+      toast.error(err?.response?.data?.detail || t('orders.saveFailed', 'Could not save'));
+    } finally {
+      setBusyId(null);
+    }
+  };
+
+  const setPayment = async (order, method) => {
+    setBusyId(order.id);
+    try {
+      const { data } = await axios.patch(`${API}/marketplace/orders/${order.id}/payment`, { method, amount: method ? order.total : null }, auth);
+      setOrders((prev) => prev.map((o) => (o.id === data.id ? data : o)));
+    } catch (err) {
+      toast.error(err?.response?.data?.detail || t('orders.saveFailed', 'Could not save'));
     } finally {
       setBusyId(null);
     }
@@ -342,6 +377,7 @@ export default function OrdersTab({ API, token }) {
           ['print', Printer, t('orders.print.button', 'Print'), printOrders],
           ['export', Download, t('orders.export', 'Export CSV'), exportCsv],
           ['import', Upload, t('orders.import', 'Import customers'), () => setPanel(panel === 'import' ? null : 'import')],
+          ['couriers', Bike, t('orders.couriers', 'Couriers'), () => setPanel(panel === 'couriers' ? null : 'couriers')],
         ].map(([key, Icon, lbl, fn]) => (
           <button
             key={key}
@@ -359,6 +395,7 @@ export default function OrdersTab({ API, token }) {
 
       {panel === 'staff' && <StaffLinkPanel API={API} auth={auth} businessId={biz.id} onClose={() => setPanel(null)} />}
       {panel === 'import' && <ImportCustomersPanel API={API} auth={auth} businessId={biz.id} onClose={() => setPanel(null)} />}
+      {panel === 'couriers' && <CouriersPanel API={API} auth={auth} businessId={biz.id} couriers={couriers} onChanged={loadCouriers} onClose={() => setPanel(null)} />}
 
       {/* Range tabs */}
       <div className="flex gap-1 mb-3 overflow-x-auto" role="tablist" data-testid="orders-range">
@@ -407,6 +444,8 @@ export default function OrdersTab({ API, token }) {
         </div>
       )}
 
+      {range === 'today' && <MoneyStrip orders={orders} t={t} />}
+
       {loading && orders.length === 0 ? (
         <div className="py-10 text-center" style={{ color: 'var(--brand-muted)' }}><Loader2 className="animate-spin inline" size={18} /></div>
       ) : groups.length === 0 ? (
@@ -446,6 +485,9 @@ export default function OrdersTab({ API, token }) {
                     busy={busyId === o.id}
                     onStatus={(s) => setStatus(o, s)}
                     onEdit={() => { setEntryOpen(false); setEditing(o); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
+                    onAssign={assign}
+                    onPayment={setPayment}
+                    couriers={couriers}
                     t={t}
                   />
                 ))}
@@ -1065,6 +1107,133 @@ function ImportCustomersPanel({ API, auth, businessId, onClose }) {
           </span>
         )}
       </div>
+    </div>
+  );
+}
+
+/**
+ * Collected vs expected, for today (spec O6). Real numbers or nothing:
+ * the strip renders only when at least one order today carries a total.
+ * Expected excludes cancelled and failed; collected is what has been
+ * recorded, by the courier at the door or the owner at the counter.
+ */
+function MoneyStrip({ orders, t }) {
+  const live = orders.filter((o) => !['cancelled', 'failed'].includes(o.status));
+  const withTotal = live.filter((o) => o.total != null);
+  if (withTotal.length === 0) return null;
+  const sum = (list, f) => list.reduce((a, o) => a + (Number(f(o)) || 0), 0);
+  const expected = sum(withTotal, (o) => o.total);
+  const paid = live.filter((o) => o.payment?.method);
+  const cash = sum(paid.filter((o) => o.payment.method === 'cash'), (o) => o.payment.amount ?? o.total);
+  const bit = sum(paid.filter((o) => o.payment.method !== 'cash'), (o) => o.payment.amount ?? o.total);
+  const unpaidDone = live.filter((o) => o.status === 'done' && !o.payment?.method).length;
+  const cell = (label, value, testid) => (
+    <div className="min-w-0" data-testid={testid}>
+      <div className="text-[11px]" style={{ color: 'var(--brand-muted)' }}>{label}</div>
+      <div className="text-base font-bold tabular-nums" style={{ color: 'var(--ink)' }}>{value}</div>
+    </div>
+  );
+  return (
+    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 rounded-2xl border p-3 mb-4" style={{ borderColor: 'var(--brand-border)', background: 'var(--surface-muted)' }} data-testid="money-strip">
+      {cell(t('orders.money.expected', 'Expected today'), `₪${expected.toLocaleString()}`, 'money-expected')}
+      {cell(t('orders.money.cash', 'Cash collected'), `₪${cash.toLocaleString()}`, 'money-cash')}
+      {cell(t('orders.money.store', 'Paid to the store'), `₪${bit.toLocaleString()}`, 'money-store')}
+      {cell(t('orders.money.unpaid', 'Done, not marked paid'), String(unpaidDone), 'money-unpaid')}
+    </div>
+  );
+}
+
+/**
+ * The trusted list (spec O5). A courier is a relationship: the friend
+ * with the scooter, by name and phone, no account. Each one has their
+ * own run-sheet link; the owner sends it once on WhatsApp.
+ */
+function CouriersPanel({ API, auth, businessId, couriers, onChanged, onClose }) {
+  const { t } = useTranslation();
+  const [name, setName] = useState('');
+  const [phone, setPhone] = useState('');
+  const [busy, setBusy] = useState(false);
+  const phoneErr = phoneError(phone, t);
+
+  const add = async (e) => {
+    e.preventDefault();
+    if (!name.trim() || !phone.trim() || phoneErr) return;
+    setBusy(true);
+    try {
+      await axios.post(`${API}/marketplace/businesses/${businessId}/couriers`, { name: name.trim(), phone: phone.trim() }, auth);
+      setName(''); setPhone('');
+      await onChanged();
+    } catch (err) {
+      toast.error(err?.response?.data?.detail || t('orders.saveFailed', 'Could not save'));
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const remove = async (c) => {
+    // eslint-disable-next-line no-alert
+    if (!window.confirm(t('orders.courierRemoveConfirm', 'Remove {{name}}? Their link stops working and their open deliveries go back to unassigned.', { name: c.name }))) return;
+    setBusy(true);
+    try {
+      await axios.delete(`${API}/marketplace/businesses/${businessId}/couriers/${c.id}`, auth);
+      await onChanged();
+    } catch (err) {
+      toast.error(err?.response?.data?.detail || t('orders.saveFailed', 'Could not save'));
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const input = 'px-3 min-h-[44px] rounded-lg border text-base bg-white';
+  const inputStyle = { borderColor: 'var(--brand-border)', color: 'var(--ink)' };
+
+  return (
+    <div className="rounded-2xl border p-4 mb-4 bg-white" style={{ borderColor: 'var(--brand-border)' }} data-testid="couriers-panel">
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <h3 className="font-bold" style={{ color: 'var(--ink)' }}>{t('orders.couriersTitle', 'Your couriers')}</h3>
+          <p className="text-sm mt-1" style={{ color: 'var(--brand-muted)' }}>
+            {t('orders.couriersBody', 'People you trust with a delivery - by name and phone, no account needed. Each gets their own run-sheet link; assign an order to them and send it once.')}
+          </p>
+        </div>
+        <button type="button" onClick={onClose} className="inline-flex items-center justify-center min-h-[44px] min-w-[44px] rounded-full shrink-0" style={{ color: 'var(--brand-muted)' }} aria-label={t('orders.close', 'Close')}>
+          <X size={18} />
+        </button>
+      </div>
+
+      {couriers.length > 0 && (
+        <ul className="mt-3 divide-y" style={{ borderColor: 'var(--brand-border)' }}>
+          {couriers.map((c) => {
+            const url = `${window.location.origin}/orders/courier/${c.token}`;
+            return (
+              <li key={c.id} className="py-2 flex flex-wrap items-center gap-2" data-testid={`courier-${c.id}`}>
+                <div className="min-w-0 flex-1">
+                  <div className="text-sm font-semibold" dir="auto" style={{ color: 'var(--ink)' }}>{c.name}</div>
+                  <div className="text-xs" dir="ltr" style={{ color: 'var(--brand-muted)' }}>{c.phone}</div>
+                </div>
+                <a href={`https://wa.me/${c.phone_e164}?text=${encodeURIComponent(t('orders.courierLinkText', 'Your run sheet from {{name}}: {{url}}', { name: '', url }).replace(/^[^:]*: /, ''))}`} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 px-3 min-h-[40px] rounded-full text-xs font-semibold border" style={{ borderColor: 'var(--brand-border)', color: 'var(--ink)' }} data-testid="courier-send-link">
+                  <MessageCircle size={12} /> {t('orders.courierSendLink', 'Send their link')}
+                </a>
+                <a href={url} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 px-3 min-h-[40px] rounded-full text-xs font-semibold border" style={{ borderColor: 'var(--brand-border)', color: 'var(--ink)' }}>
+                  <Link2 size={12} /> {t('orders.staff.open', 'Open')}
+                </a>
+                <button type="button" disabled={busy} onClick={() => remove(c)} className="inline-flex items-center justify-center min-h-[40px] min-w-[40px] rounded-full" style={{ color: 'var(--brand-muted)' }} aria-label={t('orders.courierRemove', 'Remove')} data-testid="courier-remove">
+                  <Trash2 size={14} />
+                </button>
+              </li>
+            );
+          })}
+        </ul>
+      )}
+
+      <form onSubmit={add} className="flex flex-wrap gap-2 mt-3" data-testid="courier-add-form">
+        <input value={name} onChange={(e) => setName(e.target.value)} placeholder={t('orders.courierName', 'Name')} dir="auto" className={`${input} flex-1 min-w-[140px]`} style={inputStyle} data-testid="courier-name" />
+        <input value={phone} onChange={(e) => setPhone(e.target.value)} type="tel" inputMode="tel" placeholder="050-123-4567" className={`${input} flex-1 min-w-[140px]`} style={{ ...inputStyle, borderColor: phoneErr ? 'var(--ink)' : 'var(--brand-border)' }} data-testid="courier-phone" />
+        <button type="submit" disabled={busy || !name.trim() || !phone.trim() || !!phoneErr} className="inline-flex items-center gap-1.5 px-4 min-h-[44px] rounded-full text-sm font-semibold disabled:opacity-50" style={{ background: 'var(--action)', color: 'var(--action-ink)' }} data-testid="courier-add">
+          {busy ? <Loader2 size={14} className="animate-spin" /> : <Plus size={14} />} {t('orders.courierAdd', 'Add courier')}
+        </button>
+        {phoneErr && <p className="w-full text-[11px]" style={{ color: 'var(--ink)' }}>{phoneErr}</p>}
+      </form>
     </div>
   );
 }

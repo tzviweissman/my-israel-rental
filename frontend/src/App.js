@@ -138,6 +138,8 @@ const AvailabilityExtended = lazy(() => import('./pages/AvailabilityExtended'));
 const GigDetail = lazy(() => import('./pages/GigDetail'));
 const StaffOrdersPage = lazy(() => import('./pages/StaffOrdersPage'));
 const OrdersPrintPage = lazy(() => import('./pages/OrdersPrintPage'));
+const CourierRunSheet = lazy(() => import('./pages/CourierRunSheet'));
+const OrderTrackPage = lazy(() => import('./pages/OrderTrackPage'));
 const CreateGig = lazy(() => import('./pages/CreateGig'));
 const JobsBoard = lazy(() => import('./pages/JobsBoard'));
 const JobDetail = lazy(() => import('./pages/JobDetail'));
@@ -457,6 +459,8 @@ function App() {
                 counter's board, no login, one capability token per
                 business; and the owner's print view. */}
             <Route path="/orders/staff/:token" element={<StaffOrdersPage />} />
+            <Route path="/orders/courier/:token" element={<CourierRunSheet />} />
+            <Route path="/orders/track/:token" element={<OrderTrackPage />} />
             <Route path="/orders/print" element={user ? <OrdersPrintPage /> : <ToAuth />} />
 
             {/* The old per-person pages keep working, as the spec requires,

@@ -9,7 +9,7 @@
  */
 import React, { useState } from 'react';
 import {
-  Loader2, Phone, MapPin, Store as StoreIcon, Bike, Pencil, ChevronDown, Undo2, MessageCircle,
+  Loader2, Phone, MapPin, Store as StoreIcon, Bike, Pencil, ChevronDown, Undo2, MessageCircle, Camera,
 } from 'lucide-react';
 import { buildWhatsAppLink } from '../../utils/whatsappLink';
 
@@ -32,7 +32,12 @@ export function pillStyle(status, on) {
   return base;
 }
 
-export default function OrderCard({ order: o, busy, onStatus, onEdit, t }) {
+/**
+ * `couriers`, `onAssign` and `onPayment` are the owner's: the staff board
+ * passes none of them and so shows none of the controls. Assignment is
+ * delivery-only; payment is any order (a pickup is paid at the counter).
+ */
+export default function OrderCard({ order: o, busy, onStatus, onEdit, onAssign, onPayment, couriers, t }) {
   const [more, setMore] = useState(false);
   const time = (o.needed_by || '').includes('T') ? o.needed_by.slice(11, 16) : '';
   const closed = !OPEN.has(o.status);
@@ -75,6 +80,25 @@ export default function OrderCard({ order: o, busy, onStatus, onEdit, t }) {
               <span className="text-[12px] font-semibold ms-auto" style={{ color: 'var(--ink)' }}>₪{Number(o.total).toLocaleString()}</span>
             )}
           </div>
+          {(o.courier || o.payment?.method || o.delivery?.delivered_at || o.delivery?.failed_at) && (
+            <div className="flex flex-wrap items-center gap-x-2 gap-y-1 mt-1 text-[11px]" style={{ color: 'var(--brand-muted)' }}>
+              {o.courier && <span className="inline-flex items-center gap-1" data-testid="order-courier"><Bike size={11} /> {o.courier.name}</span>}
+              {o.payment?.method && (
+                <span style={{ color: 'var(--status-open)' }} data-testid="order-paid">
+                  {t('orders.paidShort', 'paid')} · {t(`orders.pay.${o.payment.method}`, o.payment.method)}{o.payment.amount != null ? ` ₪${Number(o.payment.amount).toLocaleString()}` : ''}
+                </span>
+              )}
+              {o.delivery?.delivered_at && (
+                <span className="inline-flex items-center gap-1">
+                  {t('orders.deliveredAt', 'delivered {{time}}', { time: String(o.delivery.delivered_at).slice(11, 16) })}
+                  {o.delivery.photo_url && <a href={o.delivery.photo_url} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-0.5 underline"><Camera size={11} /> {t('orders.photo', 'photo')}</a>}
+                </span>
+              )}
+              {o.delivery?.failed_at && (
+                <span>{t('orders.failedWhy', 'not delivered: {{reason}}', { reason: t(`orders.courier.reason.${o.delivery.failed_reason}`, o.delivery.failed_reason) })}</span>
+              )}
+            </div>
+          )}
           <p dir="auto" className="text-sm mt-1 whitespace-pre-line" style={{ color: 'var(--ink)' }}>{o.items}</p>
           {o.fulfilment === 'delivery' && o.address && (
             <p className="text-xs mt-1 inline-flex items-start gap-1" style={{ color: 'var(--brand-muted)' }}>
@@ -139,6 +163,53 @@ export default function OrderCard({ order: o, busy, onStatus, onEdit, t }) {
         )}
       </div>
 
+      {more && !closed && (onAssign || onPayment) && (
+        <div className="mt-2 pt-2 border-t space-y-2" style={{ borderColor: 'var(--brand-border)' }}>
+          {onAssign && o.fulfilment === 'delivery' && (
+            <div className="flex flex-wrap items-center gap-2">
+              <label className="text-xs font-semibold" style={{ color: 'var(--brand-muted)' }} htmlFor={`assign-${o.id}`}>{t('orders.assign', 'Courier')}</label>
+              <select
+                id={`assign-${o.id}`}
+                value={o.courier?.id || ''}
+                disabled={busy}
+                onChange={(e) => onAssign(o, e.target.value || null)}
+                className="px-2 min-h-[40px] rounded-lg border text-sm bg-white"
+                style={{ borderColor: 'var(--brand-border)', color: 'var(--ink)' }}
+                data-testid={`order-assign-${o.id}`}
+              >
+                <option value="">{t('orders.unassigned', 'Not assigned')}</option>
+                {(couriers || []).map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
+              </select>
+              {o.courier && (() => {
+                const c = (couriers || []).find((x) => x.id === o.courier.id);
+                if (!c?.phone_e164 || !c?.token) return null;
+                const url = `${window.location.origin}/orders/courier/${c.token}`;
+                const msg = t('orders.courierShareText', '{{name}}: delivery for {{customer}} ({{when}}). Your run sheet: {{url}}', {
+                  name: c.name, customer: o.customer_name, when: (o.needed_by || '').replace('T', ' '), url,
+                });
+                return (
+                  <a href={`https://wa.me/${c.phone_e164}?text=${encodeURIComponent(msg)}`} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 px-3 min-h-[40px] rounded-full text-xs font-semibold border" style={{ borderColor: 'var(--brand-border)', color: 'var(--ink)' }} data-testid="order-send-runsheet">
+                    <MessageCircle size={12} /> {t('orders.sendRunsheet', 'Send run sheet')}
+                  </a>
+                );
+              })()}
+              {(couriers || []).length === 0 && <span className="text-[11px]" style={{ color: 'var(--brand-muted)' }}>{t('orders.noCouriersYet', 'Add a courier from the toolbar first')}</span>}
+            </div>
+          )}
+          {onPayment && (
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="text-xs font-semibold" style={{ color: 'var(--brand-muted)' }}>{t('orders.paid', 'Paid')}</span>
+              {[['cash', t('orders.pay.cash', 'Cash')], ['bit', t('orders.pay.bit', 'Bit')], ['', t('orders.pay.none', 'Not yet')]].map(([m, lbl]) => {
+                const on = (o.payment?.method || '') === m;
+                return (
+                  <button key={m || 'none'} type="button" disabled={busy} onClick={() => onPayment(o, m || null)} aria-pressed={on} className="px-3 min-h-[36px] rounded-full text-xs font-semibold border" style={on ? { background: 'var(--ink)', color: 'var(--action-ink)', borderColor: 'var(--ink)' } : { borderColor: 'var(--brand-border)', color: 'var(--ink)' }} data-testid={`order-pay-${m || 'none'}-${o.id}`}>{lbl}</button>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      )}
+
       {more && !closed && (
         <div className="flex flex-wrap gap-2 mt-2 pt-2 border-t" style={{ borderColor: 'var(--brand-border)' }}>
           {onEdit && (
@@ -146,6 +217,15 @@ export default function OrderCard({ order: o, busy, onStatus, onEdit, t }) {
               <Pencil size={12} /> {t('orders.edit', 'Edit')}
             </button>
           )}
+          {o.track_token && o.customer_phone_e164 && (() => {
+            const url = `${window.location.origin}/orders/track/${o.track_token}`;
+            const msg = t('orders.trackShareText', 'Hi {{name}}, you can follow your order here: {{url}}', { name: o.customer_name, url });
+            return (
+              <a href={`https://wa.me/${o.customer_phone_e164}?text=${encodeURIComponent(msg)}`} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 px-3 min-h-[40px] rounded-full text-xs font-semibold border" style={{ borderColor: 'var(--brand-border)', color: 'var(--ink)' }} data-testid="order-send-track">
+                <MessageCircle size={12} /> {t('orders.sendTrack', 'Send status link')}
+              </a>
+            );
+          })()}
           {back && (
             <button type="button" disabled={busy} onClick={() => onStatus(back)} className="inline-flex items-center gap-1 px-3 min-h-[40px] rounded-full text-xs font-semibold border" style={{ borderColor: 'var(--brand-border)', color: 'var(--ink)' }}>
               <Undo2 size={12} /> {t('orders.action.back', 'Back to {{status}}', { status: t(`orders.status.${back}`, back) })}

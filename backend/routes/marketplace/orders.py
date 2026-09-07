@@ -29,17 +29,19 @@ Design facts, from the spec, that this module is built around:
     and saves through the normal create. One small model call, and the
     form stays fully usable if it fails.
 
-Deliberately NOT here yet (later phases of the same spec): couriers and
-assignment (O5), money at the door and the customer-phone rule (O6), the
+Later phases of the same spec live further down this file: the staff
+link, export and import (O3, O9), couriers, the run sheet, money at the
+door and the customer-phone rule (O5, O6). Deliberately NOT here yet: the
 customer status link (O7), cutoffs and standing orders (O8). No field for
-any of them exists on the record until the surface that uses it does —
-an unread field on a model is exactly what the dead-ends audit flags.
+either exists on the record until the surface that uses it does — an
+unread field on a model is exactly what the dead-ends audit flags.
 """
 from __future__ import annotations
 
 import csv
 import io
 import json
+import os
 import re
 import secrets
 import uuid
@@ -47,12 +49,13 @@ from datetime import datetime, timedelta
 from typing import Any, Optional
 from zoneinfo import ZoneInfo
 
-from fastapi import APIRouter, Depends, HTTPException, Query, Request
+from fastapi import APIRouter, Depends, File, HTTPException, Query, Request, UploadFile
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel, Field, field_validator, model_validator
 
 from routes.deps import db, logger, verify_token
 from utils.rate_limit import check_rate
+from utils.sms import send_sms
 from utils.whatsapp_link import normalize_whatsapp_number
 
 router = APIRouter(prefix="/marketplace", tags=["marketplace"])
@@ -236,6 +239,9 @@ async def ensure_order_indexes() -> None:
         await db.store_orders.create_index([("business_id", 1), ("needed_by", 1)], background=True)
         await db.store_orders.create_index([("business_id", 1), ("status", 1)], background=True)
         await db.businesses.create_index("orders_staff_token", sparse=True, background=True)
+        await db.businesses.create_index("couriers.token", sparse=True, background=True)
+        await db.store_orders.create_index([("business_id", 1), ("courier.id", 1)], background=True)
+        await db.store_orders.create_index("track_token", sparse=True, background=True)
         await db.store_customers.create_index([("business_id", 1), ("key", 1)], unique=True, background=True)
     except Exception as exc:  # noqa: BLE001
         logger.warning("[orders] index creation failed: %s", exc)
@@ -300,10 +306,14 @@ async def _list(
     elif status:
         q["status"] = status
 
-    docs = [
-        _public(d)
-        async for d in db.store_orders.find(q).sort([("needed_by", 1), ("created_at", 1)]).limit(limit)
-    ]
+    docs = []
+    async for d in db.store_orders.find(q).sort([("needed_by", 1), ("created_at", 1)]).limit(limit):
+        if not d.get("track_token"):
+            # Orders from before the status link existed get one the
+            # first time the owner looks at them. One write, once.
+            d["track_token"] = secrets.token_urlsafe(16)
+            await db.store_orders.update_one({"_id": d["_id"]}, {"$set": {"track_token": d["track_token"]}})
+        docs.append(_public(d))
     return {"orders": docs, "status_counts": counts, "total": sum(counts.values())}
 
 
@@ -334,6 +344,9 @@ async def create_order(business_id: str, payload: OrderIn, user=Depends(verify_t
         "updated_at": now,
         "status_changed_at": now,
         "history": [{"status": "new", "at": now, "by": user["user_id"]}],
+        # The customer's status link (spec O7). Minted with the order so
+        # the owner can send it from the chat thread in the same breath.
+        "track_token": secrets.token_urlsafe(16),
     }
     await db.store_orders.insert_one(doc)
     logger.info("[orders] created: business=%s order=%s source=%s", business_id, doc["_id"], payload.source)
@@ -817,3 +830,340 @@ async def extract_order(business_id: str, payload: ExtractIn, request: Request, 
         raise HTTPException(status_code=502, detail="Could not read that message — fill the form by hand")
     draft["source"] = "whatsapp_paste"
     return {"draft": draft}
+
+# ---------------------------------------------------------------------------
+# couriers, the run sheet, and money at the door (spec O5 + O6)
+# ---------------------------------------------------------------------------
+#
+# A courier is a RELATIONSHIP, not a status. The store adds the friend
+# with the scooter to its own trusted list, by name and phone; there is
+# no marketplace pool, no rating, no new role on the user model. Each
+# courier gets a capability token, like the staff link, and their run
+# sheet lives behind it: one ordered list of the stops assigned to them,
+# each with Waze, the items, the amount due and — only while the order is
+# `ready` — the customer's phone.
+#
+# The phone rule (O6) is the one genuinely new surface here. Today no
+# user learns another user's number as data; a courier reaching a
+# customer is that, so: visible only on the assigned courier's sheet,
+# only while `ready`, and every reveal is written on the order.
+#
+# Money (O6): the courier's screen shows the store's own payment link and
+# note first ("pay the store on your phone") and "Collected cash" one tap
+# further. What is recorded is the courier's tap at the door, timestamped,
+# which is the store's reconciliation. We record money; we never move it.
+
+FAILED_REASONS = ("nobody_home", "wrong_address", "refused", "not_found", "other")
+PAYMENT_METHODS = ("cash", "bit", "other")
+
+
+class CourierIn(BaseModel):
+    name: str = Field(..., min_length=1, max_length=80)
+    phone: str = Field(..., min_length=5, max_length=40)
+
+    @field_validator("name", "phone")
+    @classmethod
+    def _strip(cls, v):
+        return v.strip()
+
+
+class AssignIn(BaseModel):
+    courier_id: Optional[str] = None      # None = take it off the courier
+
+
+class PaymentIn(BaseModel):
+    # method None = "not paid" (clears the record)
+    method: Optional[str] = Field(None, pattern="^(cash|bit|other)$")
+    amount: Optional[float] = Field(None, ge=0, le=1_000_000)
+
+
+class CourierStatusIn(BaseModel):
+    status: str = Field(..., pattern="^(done|failed)$")
+    reason: Optional[str] = Field(None, pattern="^(nobody_home|wrong_address|refused|not_found|other)$")
+    note: str = Field("", max_length=300)
+    photo_url: Optional[str] = Field(None, max_length=600)
+    payment: Optional[PaymentIn] = None
+
+
+def _public_courier(c: dict[str, Any], *, with_token: bool) -> dict[str, Any]:
+    out = {k: c.get(k) for k in ("id", "name", "phone", "phone_e164", "added_at")}
+    if with_token:
+        out["token"] = c.get("token")
+    return out
+
+
+def _payment_record(p: Optional[PaymentIn], by: str) -> Optional[dict[str, Any]]:
+    if p is None or p.method is None:
+        return None
+    return {"method": p.method, "amount": p.amount, "at": _now_iso(), "by": by}
+
+
+@router.get("/businesses/{business_id}/couriers")
+async def list_couriers(business_id: str, user=Depends(verify_token)):
+    biz = await _owned_business(business_id, user)
+    return [_public_courier(c, with_token=True) for c in biz.get("couriers") or []]
+
+
+@router.post("/businesses/{business_id}/couriers")
+async def add_courier(business_id: str, payload: CourierIn, user=Depends(verify_token)):
+    """Add by phone. The number must normalise — a courier we cannot
+    text or the owner cannot WhatsApp is not a courier we can hand an
+    order to. Same phone twice updates the name rather than duplicating."""
+    biz = await _owned_business(business_id, user)
+    e164 = normalize_whatsapp_number(payload.phone)
+    if not e164:
+        raise HTTPException(status_code=400, detail="Please enter the courier's mobile number with the leading 0 or a country code")
+    couriers = list(biz.get("couriers") or [])
+    for c in couriers:
+        if c.get("phone_e164") == e164:
+            c["name"] = payload.name
+            c["phone"] = payload.phone
+            await db.businesses.update_one({"_id": business_id}, {"$set": {"couriers": couriers}})
+            return _public_courier(c, with_token=True)
+    if len(couriers) >= 20:
+        raise HTTPException(status_code=400, detail="Up to 20 couriers per business")
+    c = {
+        "id": str(uuid.uuid4()),
+        "name": payload.name,
+        "phone": payload.phone,
+        "phone_e164": e164,
+        "token": secrets.token_urlsafe(24),
+        "added_at": _now_iso(),
+    }
+    couriers.append(c)
+    await db.businesses.update_one({"_id": business_id}, {"$set": {"couriers": couriers}})
+    return _public_courier(c, with_token=True)
+
+
+@router.delete("/businesses/{business_id}/couriers/{courier_id}")
+async def remove_courier(business_id: str, courier_id: str, user=Depends(verify_token)):
+    """Removing a courier kills their link and takes them off every OPEN
+    order, which then shows as unassigned so the owner sees it needs a
+    new pair of hands. Closed orders keep the name for the record."""
+    biz = await _owned_business(business_id, user)
+    couriers = [c for c in biz.get("couriers") or [] if c.get("id") != courier_id]
+    await db.businesses.update_one({"_id": business_id}, {"$set": {"couriers": couriers}})
+    await db.store_orders.update_many(
+        {"business_id": business_id, "courier.id": courier_id, "status": {"$in": list(OPEN_STATUSES)}},
+        {"$set": {"courier": None, "assigned_at": None, "updated_at": _now_iso()}},
+    )
+    return {"ok": True}
+
+
+def _runsheet_url(token: str) -> str:
+    base = (os.environ.get("FRONTEND_URL") or os.environ.get("PLATFORM_PUBLIC_URL") or "").rstrip("/")
+    return f"{base}/orders/courier/{token}"
+
+
+@router.patch("/orders/{order_id}/assign")
+async def assign_order(order_id: str, payload: AssignIn, user=Depends(verify_token)):
+    """Hand a delivery to one of the business's couriers, or take it
+    back. Texts the courier the run-sheet link when SMS is configured;
+    always returns the link so the owner can send it themselves."""
+    order = await _owned_order(order_id, user)
+    if order.get("fulfilment") != "delivery":
+        raise HTTPException(status_code=400, detail="Only delivery orders are assigned to a courier")
+    if order["status"] not in OPEN_STATUSES:
+        raise HTTPException(status_code=409, detail="This order is closed")
+    biz = await db.businesses.find_one({"_id": order["business_id"]})
+    now = _now_iso()
+    if payload.courier_id is None:
+        await db.store_orders.update_one(
+            {"_id": order_id},
+            {"$set": {"courier": None, "assigned_at": None, "updated_at": now},
+             "$push": {"history": {"status": order["status"], "at": now, "by": user["user_id"], "event": "unassigned"}}},
+        )
+        fresh = await db.store_orders.find_one({"_id": order_id})
+        return {"order": _public(fresh), "runsheet_url": None, "sms_sent": False}
+
+    courier = next((c for c in (biz or {}).get("couriers") or [] if c.get("id") == payload.courier_id), None)
+    if not courier:
+        raise HTTPException(status_code=404, detail="Courier not found on this business")
+    await db.store_orders.update_one(
+        {"_id": order_id},
+        {"$set": {"courier": {"id": courier["id"], "name": courier["name"]}, "assigned_at": now, "updated_at": now},
+         "$push": {"history": {"status": order["status"], "at": now, "by": user["user_id"], "event": "assigned", "courier": courier["name"]}}},
+    )
+    url = _runsheet_url(courier["token"])
+    nb = order.get("needed_by") or ""
+    when = f"{nb[:10]} {nb[11:16]}".strip()
+    sms_sent = await send_sms(
+        courier.get("phone_e164"),
+        f"{biz.get('name') or 'A store'}: delivery for {order.get('customer_name')} ({when}). Your run sheet: {url}",
+    )
+    fresh = await db.store_orders.find_one({"_id": order_id})
+    return {"order": _public(fresh), "runsheet_url": url, "sms_sent": sms_sent}
+
+
+@router.patch("/orders/{order_id}/payment")
+async def set_payment(order_id: str, payload: PaymentIn, user=Depends(verify_token)):
+    """The owner's own record of a payment at the counter or after the
+    fact. Method None clears it. We never move money; this is a note."""
+    order = await _owned_order(order_id, user)
+    rec = _payment_record(payload, by=user["user_id"])
+    await db.store_orders.update_one({"_id": order_id}, {"$set": {"payment": rec, "updated_at": _now_iso()}})
+    fresh = await db.store_orders.find_one({"_id": order_id})
+    return _public(fresh)
+
+
+async def _courier_by_token(token: str) -> tuple[dict[str, Any], dict[str, Any]]:
+    if not token or len(token) < 20:
+        raise HTTPException(status_code=404, detail="This link is not valid")
+    biz = await db.businesses.find_one({"couriers.token": token})
+    if not biz or not biz.get("active", True):
+        raise HTTPException(status_code=404, detail="This link is not valid")
+    courier = next((c for c in biz.get("couriers") or [] if c.get("token") == token), None)
+    if not courier:
+        raise HTTPException(status_code=404, detail="This link is not valid")
+    return biz, courier
+
+
+def _stop(order: dict[str, Any], *, reveal_phone: bool) -> dict[str, Any]:
+    """What a courier sees of an order: enough to deliver it, and no
+    more. Never the history, never the owner's notes to self, and the
+    phone only under the rule above."""
+    out = {k: order.get(k) for k in (
+        "customer_name", "items", "notes", "needed_by", "address", "status", "total", "currency",
+        "fulfilment", "assigned_at", "delivery", "payment", "status_changed_at",
+    )}
+    out["id"] = order["_id"]
+    if reveal_phone:
+        out["customer_phone"] = order.get("customer_phone")
+        out["customer_phone_e164"] = order.get("customer_phone_e164")
+    return out
+
+
+@router.get("/orders/courier/{token}")
+async def courier_runsheet(token: str, request: Request):
+    """One ordered list, not five notifications. Open stops assigned to
+    this courier plus today's closed ones (so a finished run still
+    reads as a run). Soonest first. Phone revealed only on `ready`, and
+    the reveal is written on the order the first time it happens."""
+    check_rate(request, bucket="orders_courier", limit=600, window_seconds=600)
+    biz, courier = await _courier_by_token(token)
+    today = datetime.now(_IL_TZ).date().isoformat()
+    q = {
+        "business_id": biz["_id"],
+        "courier.id": courier["id"],
+        "$or": [
+            {"status": {"$in": list(OPEN_STATUSES)}},
+            {"status": {"$in": ["done", "failed"]}, "status_changed_at": {"$gte": today}},
+        ],
+    }
+    stops = []
+    async for o in db.store_orders.find(q).sort([("needed_by", 1), ("created_at", 1)]).limit(200):
+        reveal = o["status"] == "ready"
+        if reveal and not any(r.get("courier_id") == courier["id"] for r in o.get("phone_reveals") or []):
+            await db.store_orders.update_one(
+                {"_id": o["_id"]},
+                {"$push": {"phone_reveals": {"at": _now_iso(), "courier_id": courier["id"], "courier": courier["name"]}}},
+            )
+        stops.append(_stop(o, reveal_phone=reveal))
+    return {
+        "business": {
+            "name": biz.get("name") or "",
+            "name_he": biz.get("name_he"),
+            "logo_url": biz.get("logo_url"),
+            # The store's own way of being paid, shown to the customer on
+            # the courier's phone. Never the courier's.
+            "payment_links": biz.get("payment_links") or [],
+            "payment_note": biz.get("payment_note"),
+        },
+        "courier": {"name": courier["name"]},
+        "stops": stops,
+    }
+
+
+@router.patch("/orders/courier/{token}/{order_id}/status")
+async def courier_set_status(token: str, order_id: str, payload: CourierStatusIn, request: Request):
+    """Delivered or failed, at the door, timestamped. Delivered needs a
+    photo — it is what protects the courier when a customer says it never
+    came. Failed needs a reason from the short list, for the same reason
+    in the other direction."""
+    check_rate(request, bucket="orders_courier", limit=600, window_seconds=600)
+    biz, courier = await _courier_by_token(token)
+    order = await db.store_orders.find_one({"_id": order_id, "business_id": biz["_id"], "courier.id": courier["id"]})
+    if not order:
+        raise HTTPException(status_code=404, detail="Order not found")
+    if order["status"] != "ready":
+        raise HTTPException(status_code=409, detail="This order is not out for delivery yet")
+    if payload.status == "done" and not payload.photo_url:
+        raise HTTPException(status_code=400, detail="Add a photo of the delivery first")
+    if payload.status == "failed" and not payload.reason:
+        raise HTTPException(status_code=400, detail="Pick a reason")
+    now = _now_iso()
+    delivery: dict[str, Any] = dict(order.get("delivery") or {})
+    if payload.status == "done":
+        delivery.update({"delivered_at": now, "photo_url": payload.photo_url, "by": courier["name"]})
+    else:
+        delivery.update({"failed_at": now, "failed_reason": payload.reason, "failed_photo_url": payload.photo_url, "by": courier["name"]})
+    sets: dict[str, Any] = {"delivery": delivery}
+    if payload.payment is not None and payload.payment.method is not None:
+        if payload.payment.method == "cash" and payload.payment.amount is None:
+            raise HTTPException(status_code=400, detail="Enter the amount collected")
+        sets["payment"] = _payment_record(payload.payment, by=f"courier:{courier['id']}")
+    await db.store_orders.update_one({"_id": order_id}, {"$set": sets})
+    order = await db.store_orders.find_one({"_id": order_id})
+    fresh = await _transition(order, StatusIn(status=payload.status, note=payload.note), by=f"courier:{courier['id']}")
+    return _stop({**fresh, "_id": fresh["id"]}, reveal_phone=False)
+
+
+@router.post("/orders/courier/{token}/{order_id}/photo")
+async def courier_photo(token: str, order_id: str, request: Request, file: UploadFile = File(...)):
+    """The delivery photo. Same validation and storage as every other
+    upload on the site, keyed by the courier's token instead of a session."""
+    check_rate(request, bucket="orders_courier_photo", limit=60, window_seconds=600)
+    biz, courier = await _courier_by_token(token)
+    order = await db.store_orders.find_one({"_id": order_id, "business_id": biz["_id"], "courier.id": courier["id"]})
+    if not order:
+        raise HTTPException(status_code=404, detail="Order not found")
+    from routes.misc import _read_validated_upload, _store_upload
+    content, is_video = await _read_validated_upload(file)
+    if is_video:
+        raise HTTPException(status_code=400, detail="A photo, not a video")
+    stored = await _store_upload(content, False, file.filename)
+    return {"url": stored["url"]}
+
+
+# ---------------------------------------------------------------------------
+# the customer's status link (spec O7)
+# ---------------------------------------------------------------------------
+#
+# "Where's my order?" is most of a food business's inbound on a Friday.
+# One link, sent once in the chat thread, answers it for the rest of the
+# day. No login: the token is the credential, minted per order. What it
+# shows is what the customer already knows plus the one thing they want
+# — the step it is at — and, for a delivery, the line the spec requires:
+# the delivery person will see your number to reach you.
+
+@router.get("/orders/track/{token}")
+async def track_order(token: str, request: Request):
+    check_rate(request, bucket="orders_track", limit=300, window_seconds=600)
+    if not token or len(token) < 16:
+        raise HTTPException(status_code=404, detail="This link is not valid")
+    o = await db.store_orders.find_one({"track_token": token})
+    if not o:
+        raise HTTPException(status_code=404, detail="This link is not valid")
+    biz = await db.businesses.find_one({"_id": o["business_id"]}) or {}
+    delivered_at = (o.get("delivery") or {}).get("delivered_at")
+    return {
+        "business": {
+            "name": biz.get("name") or "",
+            "name_he": biz.get("name_he"),
+            "logo_url": biz.get("logo_url"),
+            "slug": biz.get("slug"),
+        },
+        "customer_name": o.get("customer_name"),
+        "items": o.get("items"),
+        "needed_by": o.get("needed_by"),
+        "fulfilment": o.get("fulfilment"),
+        "address": o.get("address"),
+        "total": o.get("total"),
+        "currency": o.get("currency") or "ILS",
+        "status": o.get("status"),
+        "status_changed_at": o.get("status_changed_at"),
+        # Only the fact of it, never the courier's own details.
+        "out_for_delivery": bool(o.get("fulfilment") == "delivery" and o.get("status") == "ready" and o.get("courier")),
+        "delivered_at": delivered_at,
+        "paid": bool((o.get("payment") or {}).get("method")),
+    }

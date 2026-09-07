@@ -308,3 +308,13 @@ keeps all of that. Say it plainly on the page that sells this feature.
 - Every string in `en.js` and `he.js`. **The courier's run sheet in Hebrew at 375px
   on a scooter is the real test.** Design for that screen first.
 - Real numbers or nothing on the reconciliation view.
+
+---
+
+## Build log
+
+- **2026-09-07 — phase 1 (O1 + O2).** `store_orders`, the entry form with WhatsApp paste and returning-customer autocomplete, the Orders tab. Transitions enforced server-side. `backend/routes/marketplace/orders.py`, `frontend/src/components/dashboard/OrdersTab.jsx`, tests in `backend/tests/test_store_orders.py`.
+- **2026-09-08 — phase 2 (O3 + O9).** Staff link (`/orders/staff/:token`, read + move only), table view, print view, CSV export, customer import. `test_store_orders_staff.py`.
+- **2026-09-08 — phase 3 (O5 + O6).** Trusted courier list per business, assignment, the run sheet (`/orders/courier/:token`) with Waze, phone-only-while-ready with every reveal logged, delivered-with-photo, failed-with-reason, cash-at-the-door record, today's collected-vs-expected strip. SMS via `utils/sms.py` when `TWILIO_SMS_FROM` is set; the owner's "Send run sheet" WhatsApp button needs nothing. `test_store_orders_couriers.py`.
+- **2026-09-08 — phase 4 (O7).** Per-order status link (`/orders/track/:token`, minted at creation, backfilled on list) with the step, items, time and, for a delivery, the "delivery person will see your number" line. "Send status link" on the card opens WhatsApp to the customer. `test_store_orders_track.py`.
+- **Not built:** O8 (cutoffs, Shabbat view, standing orders) and the Meta WhatsApp template for "new delivery assigned".
