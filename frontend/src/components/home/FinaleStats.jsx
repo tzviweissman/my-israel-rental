@@ -53,7 +53,7 @@ export default function FinaleStats({ t }) {
     <div className="strip" data-testid="finale-stats">
       {items.map(([value, label]) => (
         <span key={label}>
-          <b>{value}</b> {label}
+          <b>{value}<span className="fs">.</span></b> {label}
         </span>
       ))}
     </div>

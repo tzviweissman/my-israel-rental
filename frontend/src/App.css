@@ -299,6 +299,19 @@ input[type="date"]:valid:before {
 .b-gold{background:rgba(172,134,28,.85);color:#fff;border:1.5px solid rgba(201,162,39,.9);border-radius:999px;font-weight:700;font-size:15px;padding:15px 30px;cursor:pointer;font-family:inherit;text-shadow:0 1px 2px rgba(50,36,0,.5)}
 .strip{display:flex;gap:26px;justify-content:center;flex-wrap:wrap;margin-top:44px;color:#6B6459;font-size:13.5px;font-weight:600}
 .strip b{color:var(--blue-deep)}
+/* Stat numbers end in a gold full stop, so the strip reads as three
+   statements rather than three data points. The period is a real
+   character, not a pseudo-element, so it is selectable and copies with
+   the number.
+
+   direction/unicode-bidi are load-bearing, not decoration. In Hebrew the
+   strip sits inside [dir="rtl"], and a trailing "." after a digit run is
+   a bidi-neutral character: with no isolation it takes the paragraph
+   direction and renders on the LEFT of the number. Isolating each <b>
+   as its own LTR run keeps "196." and "₪0." intact while the <b>
+   itself is still placed right-to-left within the sentence. */
+.strip b{direction:ltr;unicode-bidi:isolate}
+.strip b .fs{color:var(--gold-lg)}
 /* These three were inside @media blocks in the preview. My extraction
    flattened them, so `.scene video{display:none}` — a REDUCED-MOTION rule —
    applied at every width and hid the video for everyone. The page rendered
