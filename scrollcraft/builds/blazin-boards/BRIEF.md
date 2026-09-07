@@ -1,4 +1,4 @@
-# Blazin' Boards, a scroll-driven page from real data
+# Blazin' Boards, a scroll-driven page from real data (revision 2)
 
 **Self-authored, on instruction.** Tzvi, 6 Sep 2026: "use one of the real
 businesses on the site to see what you would make. Use blazin boards as the
@@ -7,9 +7,16 @@ make a full hero page like you did for the bakery. Make the hero cinematic
 and use your disgression to choose what is placed on the hero page and where
 using sales psychology. Make it look professional and beautiful."
 
-So the eight interview answers below are mine, written from what the
-business actually put on the site and nothing else. Nothing on this page
-touched production: one public GET, read-only, no account.
+Then, 7 Sep 2026, on the first revision: "it has too many blank pages and
+doesnt show any of the products and the cinematic isnt a real cinematic it
+just zooms in a tiny bit. make it look nice using scrollcraft skill and you
+can generate pictures and cinematic scroll videos using higgsfield mcp."
+
+So revision 2 changes three things and keeps the rest. The grammar moves
+from typographic poster (which forbids video, and is why the hero only
+zoomed) to filmic one-shot. The products get their own act. The empty
+screen goes. Nothing on this page touched production: one public GET,
+read-only, no account.
 
 ## What the business actually has (the whole input)
 
@@ -17,161 +24,142 @@ touched production: one public GET, read-only, no account.
 - One listing, "Meatboards", a store: *"Experience the Flavours of Blazin'
   Boards in Israel. Discover a Blend of premium meats cooked and grilled to
   perfection."* No tiers, no prices.
-- One photograph (Cloudinary), no logo, no cover, no hours, no languages,
-  no rating, no reviews, no hechsher on file.
+- One photograph (a flyer with the headline baked in), no logo, no cover,
+  no hours, no rating, no reviews.
 - Payment note: "credit card, zelle, bank transfer".
 
-That is the test. A page that only works with ten art-directed photographs
-and a founding year is a page for a business that does not exist.
+## Assets, and what is honest about them
 
-## The eight answers (self-authored)
+- **Their photograph, animated.** The board cut out of their flyer was
+  uploaded to Higgsfield and given a slow tracking move (Kling 3.0, 5s).
+  The hero clip is their actual product, moving.
+- **Six generated stills** (Nano Banana, one style preamble reused
+  verbatim) and **one generated macro clip** (brisket being cut, Kling 3.0).
+  These are illustrations. They are not photographs of Blazin' Boards'
+  food, and a line at the foot of the page says so. Tzvi approved the
+  spend for this test run; on a real deploy these would be replaced by the
+  business's own photographs, or the act would use whatever they upload.
+- Kosher-consistent by construction: every prompt excluded dairy, pork and
+  shellfish, because the flyer carries a hechsher stamp.
 
-1. **Vibe.** Heat, char, appetite. Blunt. References: a butcher's chalk
-   board; a boxing poster; the Tel Aviv shuk at night.
-2. **The scroll.** One word you cannot miss, with the meat inside it. Then
-   the photograph itself, close. Then what it is, said three ways at three
-   sizes. Then the plain facts. A breath. Then how ordering works, step by
-   step. Then the ask, quiet.
-3. **Loud and quiet.** Loud open, quieter photograph, the loudest thing on
-   the page third, then it settles and stays settled to the end.
-4. **Feeling and the moment.** See the curve. The moment: a sentence
-   arriving at the width of the screen, one word at a time, over black.
-5. **One thing no site does.** The page is a grill: scroll speed is the
-   flame. Scroll fast and the ground and the accent flare; stop and it
-   cools. Blazin'.
-6. **Range.** Brutalist-leaning poster. Type does the work. Not premium-
-   minimal, not cream-and-brass, not the bakery.
-7. **World or scenes.** Scenes. Hard grounds, no drift interpolation.
-8. **Assets.** One real photograph. **Nothing generated.** A generated meat
-   board presented beside this name would be stock imagery implying it is
-   their product, which the page-builder spec (P5) forbids. The one photo is
-   cropped to the part that matters, which the conversion checklist's
-   sourcing ladder ranks above a raw shot.
+## The eight answers (self-authored, unchanged where still true)
+
+1. **Vibe.** Heat, char, appetite. A boxing poster's confidence, a
+   steakhouse's light.
+2. **The scroll.** The board itself, moving under your hand. Then the
+   boards you can order, sideways. Then the cut, close, with their words
+   over it. Then the plain facts and how ordering works, on one screen.
+   Then the ask.
+3. **Loud and quiet.** Loud open, a browsing beat, the loudest thing on the
+   page third, then it settles and stays settled.
+4. **Feeling and the moment.** See the curve. The moment: the knife has
+   just gone through the brisket and the camera is going in, slowly, and
+   the visitor is the one moving it.
+5. **One thing no site does.** Scroll speed is the flame. Kept from
+   revision 1: it was the one thing that was not the problem.
+6. **Range.** Editorial with a filmic open. Photographs, one serif, one
+   accent.
+7. **World or scenes.** One shot. Grounds drift, never cut.
+8. **Assets.** Above.
 
 ## The feeling curve
 
 ```
-1  Impact       BLAZIN' at the width of the viewport, the meat inside the
-                letters, present the instant the page lands. Greet, no fade-in
-2  Appetite     the photograph alone, close-cropped, wiping in. Quiet
-3  Hunger       "Premium meats. Grilled to perfection." arriving word by word
-                at the width of the screen over black. THE PEAK
-4  Trust        the facts as they are: Jerusalem; card, Zelle or bank
-                transfer; message through the site. Small type, no claims
-5  Breath       an empty ground. AUTHORED SILENCE
-6  Certainty    how ordering works, three nodes lighting in sequence as you
-                scroll: message, confirm the date, collect or delivery
-7  Resolve      the smallest type on the page, one underlined link, one line
-                of reassurance beside it. The page stops
+1  Appetite     their board, tracking slowly along the meat under the wheel,
+                the promise in the corner, present the instant the page lands
+2  Choice       four boards travelling sideways, each named by what is on it,
+                no prices because there are none, "message for a price"
+3  Hunger       the brisket cut, the camera pushing in, their words crossing
+                the frame one line at a time. THE PEAK
+4  Certainty    the facts and the three steps side by side on one screen
+5  Resolve      a full table under a spotlight, one button, the page stops
 ```
 
-No two adjacent acts share a feeling. Act 2 is the quiet in front of act 3.
+Five acts, no two adjacent with the same feeling, no empty screen anywhere.
+Act 2 is the browsing beat that makes act 3 land.
 
 ## The peak
 
-**Act 3.** "premium meats cooked and grilled to perfection" is the listing's
-own sentence, and it arrives one word at a time at 12 to 18vw over black,
-the biggest scale change on the page, with the largest span (2.8vh) and
-the quiet photograph before it. The visitor's sentence:
+**Act 3.** The largest span on the page (3.0vh against 2.6 for the hero),
+the second and last scrub clip, dwell set so the camera settles exactly
+where the last line of their sentence holds. The visitor's sentence:
 
-> the words came at me one at a time, huge, and I wanted meat
+> the knife went through the brisket and I was the one pushing the camera in
 
 ## The tell-someone sentence
 
-> it's the site where the page heats up the faster you scroll, like a grill
+> it's the site where you scroll the camera along the meat board yourself,
+> and the page heats up the faster you go
 
-## Authored silence
+## Sales psychology, applied (source counts from page-conversion-review)
 
-Act 5 is an empty charcoal screen on purpose, the breath between the facts
-and the timeline. Flow act, so the harness does not grade it dead.
-
-## Sales psychology, applied honestly (source counts from page-conversion-review)
-
-- **Congruency (4).** The hero pays off the listing's own words, not new ones.
-- **One job per surface (4).** One action on the page: Message Blazin'
-  Boards. The label is identical everywhere it appears.
-- **Reassurance adjacent to the CTA (5).** Beside the link, not in a footer:
-  "Pay by card, Zelle or bank transfer. You talk to the business directly."
-  All three are on their record.
-- **A timeline beats prose (4).** Three connected nodes for what happens
-  after you message. No durations, because none are on file.
-- **Specific numbers beat round ones (2 to 3).** There are no numbers on
-  file, so there are none on the page. No rating, no review count, no
-  "since", no counter. An invented one is a liability, not a design element.
-- **Brand name not in the headline (2 to 3).** The wordmark is the poster's
-  composition; the real `<h1>` behind it is the promise.
-- **Text never sits on a photo (2).** The photograph is inside the letters
-  and beside the copy, never under it.
-- **Never do**: no urgency, no scarcity, no "people are viewing".
+- **Congruency (4).** Hero headline is the listing's own promise.
+- **Show the product (the ask).** Four boards in a rail, the real listing
+  name "Meatboards" as the heading, each board labelled by its contents.
+- **No prices on file, so no prices (2 to 3).** Every board says "Message
+  for a price." A made-up price is worse than none.
+- **One job (4).** One label everywhere: **Message Blazin' Boards**. The
+  bar carries it, the close carries it.
+- **Reassurance adjacent to the CTA (5).** Payment methods and "you talk
+  to the business directly" sit beside the button, not in a footer.
+- **Timeline beats prose (4).** Three nodes beside the facts.
+- **Text never sits on a photo without a local scrim (2).** Every line over
+  video has a scrim under it; the harness measures the worst frame.
+- **Never do**: no urgency, no scarcity, no counters, no rating.
 
 ## Grammar
 
-**Typographic poster** (uniqueness.md 2.5). Type is the imagery. Chosen
-because the business has one photograph, and generating more is forbidden
-here; the grammar exists for exactly this case. It forbids a photographic
-ground, scrub, scrims and cards. The photograph appears as an object, twice:
-inside the hero letters, and as a cropped figure in act 2.
+**Filmic one-shot.** Chosen because the human asked for a real cinematic
+and the poster grammar forbids `scrub`. Burden of proof, as the skill
+requires: chaptered editorial forbids media above the fold; typographic
+poster forbids video (revision 1, rejected); gallery bans a hero claim;
+split stage has no two sides; live surface is software; cutlist bans `pin`
+and is for pulse brands; continuous world needs a worldflight chain, and
+one continuous flight is the fragile, expensive route the skill warns
+against when two scrub acts and a rail do the job. Night shoot is the
+bakery's and would fail the gate.
 
-Why not the others: filmic and night-shoot need photographs; chaptered is
-long-form; continuous world is video; gallery needs a range and there is one
-product; split stage has no two sides; live surface is software; cutlist is
-for a pulse brand with many frames, and there is one.
+Forbids, kept: no chapter numbers, no progress readout, no hard cuts
+between grounds (every act declares `data-sc-drift`, the engine
+interpolates), one entry point.
 
-## The signature move
+## The signature move (kept)
 
-**Scroll speed is the flame.** Page-local JS measures scroll velocity,
-smooths it, and publishes `--heat` (0 to 1). Heat raises the grain, flares
-the accent from gold toward ember on the poster word and the timeline
-nodes, and warms the charcoal ground. Stopping cools it over a second or so.
-It touches everything at once, which is the test for a move that regrades
-the page; it is not in the kit, and it is not the bakery's sunrise, which
-was position, not speed. Off under reduced motion.
+**Scroll speed is the flame.** Velocity smoothed into `--heat`; an ember
+layer, the grain and the accent flare together and cool when the scroll
+stops. Off under reduced motion. Now it also sits over the video.
 
 ## Score
 
-| Act | Beat | Device | Span | Ground | Why |
+| Act | Beat | Device | Span | Drift | Why |
 |---|---|---|---|---|---|
-| 1 hero | Impact | `pin` + kinetic (chars, the one grammar where that is right) + photo-in-letters | 1.6 | #15110F | The wordmark at composition scale, greet, held |
-| 2 photo | Appetite | `flow` + `reveal` right | ~1.0 | #1B1512 | The one real image, close, as an object |
-| 3 promise | Hunger (PEAK) | `pin`, words arriving at scale from `--sc-p` | 2.8 | #0F0C0A | Scale contrast is the whole grammar |
-| 4 facts | Trust | `flow` + `in` | ~0.9 | #15110F | Information, compressed |
-| 5 breath | Breath | `flow`, ground only | ~0.7 | #0F0C0A | Silence |
-| 6 how | Certainty | `pin`, three cued nodes | 2.0 | #1B1512 | A timeline lights in sequence |
-| 7 close | Resolve | `pin`, hold cue, plain link | 1.1 | #15110F | The smallest type on the page |
+| 1 hero | Appetite | `scrub` (their board) + kinetic lines, greet | 2.6 | #15110F | The camera under the reader's hand is the strongest open there is |
+| 2 boards | Choice | `pan` + `tilt`, four items | 2.2 | #1B1512 | Sideways reads as breadth: what there is |
+| 3 cut | Hunger (PEAK) | `scrub` (macro) + three crossing cues | 3.0 | #0F0C0A | The only place the camera goes in close; their words over it |
+| 4 facts | Certainty | `flow` + `in`, two columns | ~1.0 | #15110F | Information, compressed to one screen |
+| 5 close | Resolve | `pin` + `spotlight` + `magnet` | 1.3 | #0F0C0A | The page stops moving and starts responding |
 
-Families: pin, flow, reveal, kinetic, pointer (none; poster bans tilt and
-magnet, so the close has no magnet). Four families. Sequence pin > flow >
-pin > flow > flow > pin > pin: acts 4 and 5 are both flow. Resolved by
-making act 5 the trailing empty half of act 4's section rather than its own
-act, so the recorded sequence is pin > flow > pin > flow > pin > pin, which
-still has pin twice at the end. Resolved again: act 6 becomes `flow` with
-`data-sc-in` staggered nodes (the timeline lights on entry rather than on
-scroll progress). Final: **pin > flow > pin > flow > flow(silence) >
-flow(timeline) > pin.** Two flows adjacent remain. Accepted and stated: the
-silence is a deliberate empty screen, not a device, and the skill's own
-worked curves place an empty viewport between acts. Total ~10.1vh, 7 acts,
-outside the 6-7 at 13.6-13.8 band and outside the bakery's 8 at 14.0.
-
-## Grounds
-
-One family, charcoal: #0F0C0A, #15110F, #1B1512, painted per section. Ink
-#EFE9DC. Accent #C9A227 (the site's gold accent) at rest, flaring toward
-#E0672A with heat. Body ink on charcoal clears 13:1. No pure black.
+Families: scrub, pan, tilt, kinetic, flow+in, pin, pointer (spotlight,
+magnet). No family twice in a row. Two scrubs, the maximum. About 10.1vh
+across 5 acts, outside the 6-to-7-at-13.6-to-13.8 band and outside the
+bakery's 8 at 14.0.
 
 ## Fingerprint gate, against lechem-emek
 
-| Dimension | lechem-emek | blazin-boards | Differs |
+| Dimension | lechem-emek | blazin-boards r2 | Differs |
 |---|---|---|---|
-| Grammar | Night shoot | Typographic poster | yes |
-| Nav | fixed wordmark + clock | none fixed; wordmark is the composition; a small language toggle only | yes |
-| Hero device | pinned photo, push-in, kinetic lines | pinned poster word, photo inside letters, kinetic chars | yes |
-| Act shape | 8 acts, 14.0vh, pin>flow>pin>flow>pin>pan>flow>pin | 7 acts, ~10.1vh, pin>flow>pin>flow>flow>flow>pin | yes |
-| Close | photo ground, magnet CTA | smallest type, underlined link, no photo, no magnet | yes |
-| Signature | position regrades (sunrise) | velocity regrades (heat) | yes |
+| Grammar | Night shoot | Filmic one-shot | yes |
+| Nav | fixed wordmark + clock, no CTA | fixed wordmark + one CTA + toggle | yes |
+| Hero device | pinned still, push-in, kinetic | scrub clip, kinetic | yes |
+| Act shape | 8 acts, 14.0vh, pin>flow>pin>flow>pin>pan>flow>pin | 5 acts, ~10.1vh, scrub>pan>scrub>flow>pin | yes |
+| Close | pinned photo, held cue, magnet | pinned photo, spotlight, magnet | no |
+| Signature | sunrise (position) | heat (velocity) | yes |
 
-6 of 6. Passes.
+5 of 6. Passes. The registry row for blazin-boards is revised in place,
+because it describes this build and revision 1 no longer exists as a page.
 
 ## Copy rules
 
-No em dashes. No invented numbers. One CTA label: **Message Blazin'
-Boards**. The listing's own sentence is the promise, quoted, not improved.
+No em dashes. No invented numbers. One CTA label. The listing's own
+sentence is the promise, quoted, not improved. Illustration note in the
+close, small, honest.

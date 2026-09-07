@@ -30,8 +30,8 @@ for (const dir of ['ltr', 'rtl']) {
       const mid = (sel) => { const el = document.querySelector(sel); return el.offsetTop + (el.offsetHeight - vh) * 0.55; };
       return {
         hero: 0,
-        promise: mid('#promise'),
-        how: mid('#how'),
+        boards: mid('#boards'),
+        cut: mid('#cut'),
         close: document.querySelector('#order').offsetTop + document.querySelector('#order').offsetHeight - vh,
       };
     });

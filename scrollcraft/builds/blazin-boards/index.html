@@ -7,39 +7,32 @@
 <meta name="description" content="Premium meats, cooked and grilled to perfection. Meat boards in Jerusalem. Message the business directly.">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='7' fill='%2315110F'/><path d='M9 22h14M11 22V11h6a3 3 0 0 1 0 6h-6' stroke='%23C9A227' stroke-width='2.5' fill='none' stroke-linecap='round'/></svg>">
 <!--
-  Blazin' Boards, scroll-driven, from the business's real record and nothing
-  else. See BRIEF.md beside this file. What follows is the mechanism.
+  Blazin' Boards, scroll-driven, revision 2. See BRIEF.md beside this file.
 
-  THE ONE IDEA. Scroll speed is the flame. Page-local JS turns scroll
-  velocity into --heat (0 to 1). Heat warms the ground through a fixed ember
-  layer, raises the grain, and mixes the accent from the site's gold toward
-  ember, so the poster word's ground, the timeline nodes and the link all
-  flare together and cool together. Stop scrolling and the page settles in
-  about a second. Off under reduced motion.
+  THE OPEN. Their own photograph, animated: the board cut out of their flyer
+  was given a slow tracking move, encoded with a dense GOP, and scrubs under
+  the wheel. The peak is a second clip, a brisket being cut, with their
+  sentence crossing it. Two scrub acts, the maximum.
 
-  ONE PHOTOGRAPH. The business uploaded one image, a flyer with its own
-  headline baked in. The board is cut out of it (assets/board-*.jpg) and
-  appears twice: inside the letters of the poster word, and once on its own.
-  Nothing was generated; a generated board next to this name would read as
-  their product, and it would not be.
+  THE ONE IDEA, kept. Scroll speed is the flame. Velocity becomes --heat;
+  an ember layer, the grain and the accent flare together and cool when the
+  scroll stops. Off under reduced motion.
 
-  ENGINE UNTOUCHED. scrollcraft.js and scrollcraft.css are verbatim copies.
-  Everything bespoke is here, off --sc-p (published per act by the engine)
-  and off scroll velocity (which belongs to the page, not to any act).
+  GROUNDS DRIFT. Filmic one-shot forbids hard cuts, so no section paints its
+  own background: every act declares data-sc-drift and the engine walks
+  --sc-canvas between them. body reads --sc-canvas.
 
-  RULES KEPT. No number that is not on their record, and there are none, so
-  there are none here. One CTA label. No em dash. No scroll cue, no counters,
-  no cards, no scrims, no photographic ground (typographic poster grammar).
-  Logical properties throughout, so the direction toggle mirrors the page.
+  HONESTY. The moving board at the top is theirs. The four boards in the
+  rail, the brisket clip and the close photograph are generated
+  illustrations for this preview, and the close says so. No number on this
+  page that is not on their record, and there are none, so there are none.
+  One CTA label. No em dash. No scroll cue, no counters.
 -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400;1,500&family=Manrope:wght@400;500;600;700;800&family=Frank+Ruhl+Libre:wght@400;500;700&family=Assistant:wght@400;500;600;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400;1,500&family=Manrope:wght@400;500;600;700&family=Frank+Ruhl+Libre:wght@400;500;700&family=Assistant:wght@400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="scrollcraft.css">
 <style>
-  /* ------------------------------------------------------------ tokens --
-     Charcoal family, three stops, painted per section and cut. The accent is
-     the site's gold at rest and mixes toward ember with heat. */
   :root {
     --font-head: 'Playfair Display', Georgia, serif;
     --font-body: 'Manrope', system-ui, sans-serif;
@@ -66,19 +59,22 @@
     --sc-font-mono: var(--font-body);
   }
   [dir="rtl"] { --font-head: var(--font-head-he); --font-body: var(--font-body-he); }
+  /* The copy is English (the business has no Hebrew text on file). Under a
+     mirrored layout, Latin sentences would otherwise put their full stop at
+     the front; plaintext lets each line resolve its own direction while the
+     page stays mirrored, and the alignment is restated physically. */
+  [dir="rtl"] :is(h1, h2, h3, p, dt, dd, li, .price) { unicode-bidi: plaintext; text-align: right; }
+  [dir="rtl"] .cut .line--b { text-align: left; }
+  [dir="rtl"] .close .sc-copy--center :is(h2, p) { text-align: center; }
 
   html { scroll-behavior: auto; }
-  body { font-size: 17px; background: var(--char-1); color: var(--sc-ink); }
-  h1, h2, h3 { font-family: var(--font-head); }
+  body { font-size: 17px; background: var(--sc-canvas); color: var(--sc-ink); }
+  h1, h2, h3 { font-family: var(--font-head); font-weight: 500; }
   section { position: relative; color: var(--sc-ink); }
-  .g0 { background: var(--char-0); }
-  .g1 { background: var(--char-1); }
-  .g2 { background: var(--char-2); }
   .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+  .sc-display em, .accent { font-style: italic; color: var(--sc-accent); }
 
-  /* ---------------------------------------------------------------- heat --
-     The ember layer sits under the grain and over every section. Opacity is
-     the only property that moves, and it moves with scroll velocity. */
+  /* ---------------------------------------------------------------- heat -- */
   .heat {
     position: fixed; inset: 0; z-index: 2; pointer-events: none;
     opacity: calc(var(--heat) * 0.7);
@@ -89,245 +85,254 @@
   }
   .sc-grain { opacity: calc(0.045 + var(--heat) * 0.11); }
 
-  /* -------------------------------------------------------------- chrome --
-     No nav. The wordmark is the composition. The only fixed thing is the
-     direction toggle every page on this site carries. */
-  .dir-toggle {
-    position: fixed; inset-block-start: var(--sc-4); inset-inline-end: var(--sc-gutter); z-index: var(--sc-z-chrome);
-    min-height: 40px; padding: 0 var(--sc-3); border-radius: var(--sc-r-pill); cursor: pointer;
-    font-family: var(--font-body); font-size: var(--sc-t-xs); font-weight: 600;
+  /* ----------------------------------------------------------------- bar --
+     Filmic: wordmark and one CTA, nothing else, plus the direction toggle
+     every page on this site carries. */
+  .bar {
+    position: fixed; inset-block-start: 0; inset-inline: 0; z-index: var(--sc-z-chrome);
+    display: flex; align-items: center; justify-content: space-between; gap: var(--sc-4);
+    padding: var(--sc-4) var(--sc-gutter); pointer-events: none;
+  }
+  .bar > * { pointer-events: auto; }
+  .bar__mark { font-family: var(--font-head); font-size: var(--sc-t-lg); letter-spacing: var(--sc-track-snug); color: var(--sc-ink); text-decoration: none; }
+  .bar__end { display: flex; align-items: center; gap: var(--sc-3); }
+  .bar__cta, .dir-toggle {
+    min-height: 40px; display: inline-flex; align-items: center; padding: 0 var(--sc-4); border-radius: var(--sc-r-pill);
+    font-family: var(--font-body); font-size: var(--sc-t-xs); font-weight: 600; text-decoration: none; cursor: pointer;
     color: var(--sc-ink); background: color-mix(in oklab, var(--char-1) 55%, transparent);
     border: 1px solid color-mix(in oklab, currentColor 28%, transparent);
     backdrop-filter: blur(10px);
     transition: background var(--sc-d-fast) var(--sc-ease-out);
   }
-  .dir-toggle:hover { background: color-mix(in oklab, var(--char-1) 85%, transparent); }
-  .dir-toggle:active { transform: translateY(1px); }
+  .bar__cta:hover, .dir-toggle:hover { background: color-mix(in oklab, var(--char-1) 85%, transparent); }
+  .bar__cta { background: var(--sc-ink); color: var(--sc-accent-ink); border-color: transparent; }
+  .bar__cta:hover { background: #FFFFFF; }
 
-  /* ---------------------------------------------------------------- hero --
-     One word at the width of the viewport, the board inside the letters. The
-     word is presentational; the promise is the real h1 below it. The word
-     grows with --sc-p, on the clipped element itself, so the clip holds. */
-  .hero .mark-wrap {
-    position: absolute; inset: 0; display: grid; place-items: center;
-    padding-block-end: clamp(3rem, 12vh, 9rem);
+  /* ---------------------------------------------------------------- hero -- */
+  .hero .sc-copy--lead {
+    max-width: min(44rem, 88vw);
+    padding: var(--sc-5) var(--sc-6); margin-inline-start: calc(var(--sc-6) * -1);
+    background: rgba(15, 12, 10, 0.6); backdrop-filter: blur(14px); border-radius: var(--sc-r-lg);
   }
-  .mark {
-    font-family: var(--font-body); font-weight: 800;
-    font-size: 25.5vw; line-height: 0.92; letter-spacing: -0.055em;
-    white-space: nowrap; direction: ltr; unicode-bidi: isolate;
-    padding-inline: 0.06em;
-    background: url(assets/board-wide.jpg) 50% 40% / cover no-repeat;
-    -webkit-background-clip: text; background-clip: text;
-    color: transparent; -webkit-text-fill-color: transparent;
-    transform: scale(calc(1 + var(--sc-p, 0) * 0.10));
-    transform-origin: 50% 50%;
-    will-change: transform;
-  }
-  .mark span { display: block; }
-  /* Desktop is one word, the poster. Phones stack the full name, the way
-     their own flyer does, so the mark fills a tall viewport. */
-  .mark > .mark__b { display: none; }
-  .hero .sc-copy--lead { max-width: min(46rem, 88vw); }
-  .hero h1 {
-    font-family: var(--font-head); font-weight: 500; font-style: italic;
-    font-size: var(--sc-t-xl); line-height: 1.15; letter-spacing: var(--sc-track-snug);
-    margin: 0 0 var(--sc-3);
-  }
-  .hero h1 b { font-style: normal; font-weight: 500; color: var(--sc-accent); }
-  .hero .where { margin: 0; color: var(--sc-ink-soft); font-size: var(--sc-t-sm); }
+  .hero h1 { margin: 0 0 var(--sc-3); }
+  .hero__sub { margin: 0; color: var(--sc-ink); font-size: var(--sc-t-base); }
+  video[data-sc-scrub], .sc-stage__poster { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
 
-  /* --------------------------------------------------------------- photo --
-     The one image, as an object, trail-anchored, wiping in from the start
-     edge. The caption says whose it is. */
-  .photo .sc-wrap { display: grid; gap: var(--sc-4); }
-  .photo__fig {
-    margin: 0; width: min(62vw, 880px); margin-inline-start: auto;
-    box-shadow: var(--sc-shadow-lg);
+  /* -------------------------------------------------------------- boards --
+     The rail. Four boards, each named by what is on it. No prices, because
+     none are on file. */
+  .boards__head {
+    position: absolute; inset-inline-start: var(--sc-gutter); inset-block-start: clamp(4.5rem, 12vh, 8rem);
+    max-width: 36rem; z-index: var(--sc-z-copy);
   }
-  .photo__fig img { display: block; width: 100%; height: auto; }
-  .photo__cap { margin: 0; color: var(--sc-ink-soft); }
+  .boards__head h2 { margin: 0 0 var(--sc-2); }
+  .boards__head p { margin: 0; color: var(--sc-ink-soft); font-size: var(--sc-t-base); }
+  .boards__head p b { font-weight: 600; color: var(--sc-ink); }
+  .rail {
+    position: absolute; inset-inline-start: 0; inset-block-end: clamp(2rem, 7vh, 4.5rem);
+    display: flex; gap: var(--sc-6); align-items: flex-end; width: max-content;
+    padding-inline: var(--sc-gutter);
+  }
+  /* Wide enough that four overflow a laptop screen, so the pan has travel. */
+  .item { width: clamp(16rem, 30vw, 26rem); flex: none; }
+  .item__shot { border-radius: var(--sc-r-lg); overflow: hidden; box-shadow: var(--sc-shadow-lg); background: var(--sc-surface); }
+  .item__shot img { display: block; width: 100%; height: auto; aspect-ratio: 4 / 5; object-fit: cover; }
+  .item h3 { margin: var(--sc-4) 0 var(--sc-1); font-size: var(--sc-t-lg); }
+  .item p { margin: 0; color: var(--sc-ink-soft); font-size: var(--sc-t-sm); line-height: 1.45; }
+  .item .price { display: block; margin-top: var(--sc-2); color: var(--sc-accent); font-weight: 600; font-size: var(--sc-t-sm); }
+  @media (prefers-reduced-motion: no-preference) {
+    /* The engine moves the rail negative by its overflow. Under RTL it must
+       move positive by the same amount; the page measures --rail-over. */
+    [dir="rtl"] .rail { transform: translate3d(calc(var(--rail-over, 0px) * var(--sc-p, 0)), 0, 0) !important; }
+  }
 
-  /* ------------------------------------------------------------- promise --
-     Their sentence, one word at a time, each one larger than the last. The
-     scale rides --sc-p on a wrapper so it never fights the cue's transform. */
-  .promise .word-scale {
-    position: absolute; inset: 0; display: grid; place-items: center; text-align: center;
-    transform-origin: 50% 50%;
+  /* ----------------------------------------------------------------- cut --
+     The peak. Their sentence crosses the frame in three lines, each over its
+     own local scrim, while the camera goes into the brisket. */
+  .cut .line {
+    position: absolute; z-index: var(--sc-z-copy); margin: 0;
+    font-family: var(--font-head); font-weight: 500; line-height: 1.02; letter-spacing: var(--sc-track-tight);
+    font-size: var(--sc-t-4xl); max-width: 14ch;
+    padding: var(--sc-5) var(--sc-6);
+    /* A firm local scrim, not a soft one: the harness measures each line
+       against the brightest frame under it, and the brisket is bright. */
+    background: rgba(15, 12, 10, 0.78);
+    backdrop-filter: blur(14px);
+    border-radius: var(--sc-r-lg);
   }
-  .promise .word-scale--a { transform: scale(calc(0.84 + var(--sc-p, 0) * 0.30)); }
-  .promise .word-scale--b { transform: scale(calc(0.86 + var(--sc-p, 0) * 0.30)); }
-  .promise .word-scale--c { transform: scale(calc(0.90 + var(--sc-p, 0) * 0.22)); }
-  .word {
-    margin: 0; font-family: var(--font-head); font-weight: 500; line-height: 0.95;
-    letter-spacing: -0.03em; white-space: nowrap;
-    /* Latin word, split into spans: without this the spans lay out backwards under RTL. */
-    direction: ltr; unicode-bidi: isolate;
-  }
-  .word--a { font-size: clamp(3.5rem, 21vw, 21vw); }
-  .word--b { font-size: clamp(3.8rem, 24vw, 24vw); font-style: italic; }
-  .word--c { font-size: clamp(2.2rem, 7.6vw, 7.6vw); white-space: normal; max-width: 92vw; letter-spacing: var(--sc-track-tight); }
-  .word--c em { font-style: italic; color: var(--sc-accent); }
-  .promise .sc-copy--lead { bottom: clamp(2rem, 8vh, 5rem); }
-  .promise .from { margin: 0; color: var(--sc-ink-soft); }
+  .cut .line--a { inset-inline-start: calc(var(--sc-gutter) - var(--sc-7)); inset-block-start: clamp(4rem, 12vh, 8rem); }
+  .cut .line--b { inset-inline-end: calc(var(--sc-gutter) - var(--sc-7)); top: 50%; translate: 0 -50%; text-align: end; }
+  .cut .line--c { inset-inline-start: calc(var(--sc-gutter) - var(--sc-7)); inset-block-end: clamp(3rem, 10vh, 7rem); }
+  .cut .from { position: absolute; inset-inline-end: var(--sc-gutter); inset-block-end: clamp(2rem, 6vh, 4rem); margin: 0; z-index: var(--sc-z-copy); color: var(--sc-ink); }
 
-  /* --------------------------------------------------------------- facts --
-     A list, not cards. Label, then the fact, at reading size. */
-  .facts__list { margin: 0; display: grid; gap: var(--sc-6); max-width: 56rem; }
-  .facts__list > div { display: grid; grid-template-columns: 7.5rem 1fr; gap: var(--sc-4); align-items: baseline; }
+  /* --------------------------------------------------------------- facts -- */
+  .facts { padding-block: clamp(3.5rem, 8vw, 7rem); }
+  .facts .sc-wrap { display: grid; grid-template-columns: 1fr 1fr; gap: var(--sc-8); align-items: start; }
+  .facts__list { margin: 0; display: grid; gap: var(--sc-5); }
+  .facts__list > div { display: grid; grid-template-columns: 6.5rem 1fr; gap: var(--sc-3); align-items: baseline; }
   .facts__list dt { margin: 0; color: var(--sc-ink-soft); }
-  .facts__list dd { margin: 0; font-family: var(--font-head); font-size: var(--sc-t-2xl); line-height: 1.1; letter-spacing: var(--sc-track-snug); }
-
-  /* -------------------------------------------------------------- breath --
-     An empty screen on purpose. See BRIEF.md, authored silence. */
-  .breath { min-height: 42vh; }
-
-  /* ----------------------------------------------------------------- how --
-     A timeline, three nodes on one line, lit in order as they enter. */
-  .how h2 { margin: 0 0 var(--sc-7); font-weight: 500; }
-  .steps {
-    list-style: none; margin: 0; padding: 0; display: grid; gap: var(--sc-6);
-    position: relative; max-width: 40rem;
-    padding-inline-start: 2.25rem;
-  }
-  .steps::before {
-    content: ""; position: absolute; inset-block: 0.6rem; inset-inline-start: 0.42rem;
-    width: 2px; background: color-mix(in oklab, var(--sc-ink) 22%, transparent);
-  }
-  .steps li { position: relative; margin: 0; font-size: var(--sc-t-lg); line-height: 1.3; }
-  .steps li::before {
-    content: ""; position: absolute; inset-inline-start: -2.25rem; top: 0.42em;
-    width: 0.95rem; height: 0.95rem; border-radius: 50%;
-    background: var(--sc-accent); box-shadow: 0 0 0 4px var(--char-2);
-  }
-  .steps li small { display: block; margin-top: var(--sc-1); font-size: var(--sc-t-sm); color: var(--sc-ink-soft); }
+  .facts__list dd { margin: 0; font-family: var(--font-head); font-size: var(--sc-t-xl); line-height: 1.12; letter-spacing: var(--sc-track-snug); }
+  .how h2 { margin: 0 0 var(--sc-5); font-size: var(--sc-t-xl); }
+  .steps { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--sc-5); position: relative; padding-inline-start: 2.25rem; }
+  .steps::before { content: ""; position: absolute; inset-block: 0.6rem; inset-inline-start: 0.42rem; width: 2px; background: color-mix(in oklab, var(--sc-ink) 22%, transparent); }
+  .steps li { position: relative; margin: 0; font-size: var(--sc-t-base); line-height: 1.35; }
+  .steps li::before { content: ""; position: absolute; inset-inline-start: -2.25rem; top: 0.38em; width: 0.95rem; height: 0.95rem; border-radius: 50%; background: var(--sc-accent); box-shadow: 0 0 0 4px var(--sc-canvas); }
+  .steps li small { display: block; margin-top: 2px; font-size: var(--sc-t-sm); color: var(--sc-ink-soft); }
 
   /* --------------------------------------------------------------- close --
-     The whole page inverts: the smallest type on it, one underlined link,
-     the reassurance beside the link and nowhere else. */
-  .close__copy { max-width: 30rem; }
-  .close__line { margin: 0 0 var(--sc-5); font-size: var(--sc-t-sm); color: var(--sc-ink-soft); }
-  .close__link {
-    display: inline-block; font-family: var(--font-head); font-weight: 500; font-size: var(--sc-t-lg);
-    color: var(--sc-accent); text-decoration: underline; text-underline-offset: 0.22em; text-decoration-thickness: 1.5px;
-    padding: var(--sc-2) 0; min-height: 44px;
+     Filmic close: pinned photograph, a spotlight that follows the pointer,
+     a magnetic CTA, the reassurance beside it, the footer inside the stage. */
+  .close__img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+  .close__light {
+    position: absolute; inset: 0; pointer-events: none;
+    background: radial-gradient(42rem circle at calc(var(--sc-mx, 0.5) * 100%) calc(var(--sc-my, 0.5) * 100%), rgba(15, 12, 10, 0) 0%, rgba(15, 12, 10, 0.55) 55%, rgba(15, 12, 10, 0.86) 100%);
   }
-  .close__link:hover { text-decoration-thickness: 2.5px; }
-  .close__link:focus-visible { outline: 2px solid var(--sc-accent); outline-offset: 6px; border-radius: 4px; }
-  .close__assure { margin: var(--sc-5) 0 0; font-size: var(--sc-t-sm); color: var(--sc-ink-soft); line-height: 1.5; }
+  .close .sc-copy--center {
+    max-width: 34rem; padding: var(--sc-7) var(--sc-7);
+    background: rgba(15, 12, 10, 0.66); backdrop-filter: blur(16px); border-radius: var(--sc-r-xl, 1.5rem);
+  }
+  .close h2 { margin: 0 0 var(--sc-5); }
+  .cta {
+    display: inline-flex; align-items: center; justify-content: center; min-height: 52px; padding: 0 var(--sc-6);
+    border-radius: var(--sc-r-pill); background: var(--sc-ink); color: var(--sc-accent-ink);
+    font-family: var(--font-body); font-weight: 600; font-size: var(--sc-t-base); text-decoration: none;
+    box-shadow: var(--sc-shadow-md);
+    transition: background var(--sc-d-fast) var(--sc-ease-out), transform var(--sc-d-fast) var(--sc-ease-out);
+  }
+  .cta:hover { background: #FFFFFF; }
+  .cta:focus-visible { outline: 2px solid var(--sc-accent); outline-offset: 4px; }
+  .close__assure { margin: var(--sc-5) 0 0; font-size: var(--sc-t-sm); color: var(--sc-ink); line-height: 1.5; }
   .close__foot {
-    position: absolute; inset-inline: var(--sc-gutter); bottom: var(--sc-5); margin: 0;
-    font-size: var(--sc-t-xs); color: var(--sc-ink-soft); letter-spacing: 0.06em;
+    position: absolute; inset-inline: var(--sc-gutter); bottom: var(--sc-4); margin: 0; z-index: var(--sc-z-copy);
+    font-size: var(--sc-t-xs); color: var(--sc-ink-soft); letter-spacing: 0.02em; line-height: 1.5; max-width: 60rem;
   }
 
   /* -------------------------------------------------------------- mobile -- */
   @media (max-width: 860px) {
-    .mark { font-size: 24.5vw; line-height: 0.9; }
-    .mark > .mark__b { display: block; }
-    /* Two lines cover a taller box, so the tighter crop keeps meat in every letter. */
-    .mark { background-image: url(assets/board-close.jpg); background-position: 50% 50%; }
-    .hero .mark-wrap { padding-block-end: clamp(9rem, 30vh, 15rem); }
-    .photo__fig { width: 100%; }
-    .word--c { font-size: clamp(2.2rem, 10.5vw, 10.5vw); }
-    .facts__list > div { grid-template-columns: 1fr; gap: var(--sc-2); }
-    .facts__list dd { font-size: var(--sc-t-xl); }
-    /* The kit sets inset-inline on every .sc-copy here, which breaks the
-       centre anchor. Restate it. */
-    .close .sc-copy--center { inset-inline: var(--sc-gutter); left: auto; translate: 0 -50%; max-width: none; text-align: center; }
+    .bar__mark { font-size: var(--sc-t-base); }
+    .bar__cta { display: none; }
+    .boards__head { inset-block-start: clamp(4rem, 10vh, 6rem); max-width: none; inset-inline-end: var(--sc-gutter); }
+    .rail { gap: var(--sc-5); inset-block-end: clamp(1.5rem, 5vh, 3rem); }
+    .item { width: min(68vw, 20rem); }
+    .cut .line { font-size: var(--sc-t-3xl); max-width: 11ch; padding: var(--sc-5) var(--sc-6); }
+    .cut .line--a { inset-inline-start: calc(var(--sc-gutter) - var(--sc-6)); }
+    .cut .line--b { inset-inline-end: calc(var(--sc-gutter) - var(--sc-6)); }
+    .cut .line--c { inset-inline-start: calc(var(--sc-gutter) - var(--sc-6)); inset-block-end: clamp(5rem, 14vh, 8rem); }
+    .facts .sc-wrap { grid-template-columns: 1fr; gap: var(--sc-7); }
+    .facts__list > div { grid-template-columns: 1fr; gap: var(--sc-1); }
+    .close .sc-copy--center { inset-inline: var(--sc-gutter); left: auto; translate: 0 -56%; max-width: none; text-align: center; }
+    .close__foot { bottom: var(--sc-3); }
   }
-  @media (prefers-reduced-motion: reduce) {
-    .mark, .promise .word-scale { transform: none; }
-    .heat { display: none; }
-  }
+  @media (prefers-reduced-motion: reduce) { .heat { display: none; } }
 </style>
 </head>
 <body id="top">
-<button class="dir-toggle" id="dirToggle" type="button" aria-label="Switch direction">עברית</button>
+<header class="bar">
+  <a class="bar__mark" href="#top">Blazin' Boards</a>
+  <div class="bar__end">
+    <a class="bar__cta" href="#order">Message Blazin' Boards</a>
+    <button class="dir-toggle" id="dirToggle" type="button" aria-label="Switch direction">עברית</button>
+  </div>
+</header>
 <div class="heat" aria-hidden="true"></div>
 <div class="sc-grain" aria-hidden="true"></div>
 
 <main>
-  <!-- 1  Impact -->
-  <section class="hero g1" data-sc-act="pin" data-sc-span="1.6" data-sc-dwell="0.3" aria-label="Blazin' Boards">
+  <!-- 1  Appetite: their board, moving -->
+  <section class="hero" data-sc-act="scrub" data-sc-span="2.6" data-sc-dwell="0.35" data-sc-drift="#15110F" aria-label="Blazin' Boards">
     <div data-sc-stage>
-      <div class="mark-wrap" data-sc-cue="0 1 0 0" data-sc-rise="0" aria-hidden="true">
-        <div class="mark"><span>BLAZIN’</span><span class="mark__b">BOARDS</span></div>
-      </div>
-      <div class="sc-copy sc-copy--lead" data-sc-cue="0 1 0 0">
-        <h1>Premium meat boards, <b>grilled to perfection.</b></h1>
-        <p class="where">Blazin' Boards, Jerusalem. Ordered by message, on this page.</p>
+      <img class="sc-stage__poster" src="assets/hero.webp" alt="" width="1600" height="900">
+      <video data-sc-scrub data-sc-src="assets/hero.mp4" data-sc-src-mobile="assets/hero-m.mp4" playsinline muted aria-hidden="true"></video>
+      <div class="sc-scrim sc-scrim--lead"></div>
+      <div class="sc-copy sc-copy--lead" data-sc-cue="0 0.74 0 0.3">
+        <h1 class="sc-display sc-display--xl" data-sc-kinetic="lines">Premium meat boards, <em>grilled to perfection.</em></h1>
+        <p class="hero__sub">Blazin' Boards, Jerusalem.</p>
       </div>
     </div>
   </section>
 
-  <!-- 2  Appetite -->
-  <section class="photo sc-section g2" id="photo" data-sc-act="flow" aria-label="The board">
-    <div class="sc-wrap">
-      <figure class="photo__fig" data-sc-reveal="right" data-sc-reveal-at="0.06 0.48">
-        <picture>
-          <source media="(max-width: 860px)" srcset="assets/board-tall.jpg">
-          <img src="assets/board-close.jpg" width="825" height="660" alt="A long wooden board covered edge to edge in sliced grilled and cured meats, with a bone-in cut resting in the middle" loading="eager">
-        </picture>
-      </figure>
-      <p class="photo__cap sc-label" data-sc-in>One of their boards. Their photograph.</p>
-    </div>
-  </section>
-
-  <!-- 3  Hunger, the peak -->
-  <section class="promise g0" id="promise" data-sc-act="pin" data-sc-span="2.8" aria-labelledby="promiseText">
-    <h2 class="sr" id="promiseText">Premium meats, cooked and grilled to perfection.</h2>
+  <!-- 2  Choice: the boards -->
+  <section class="boards" id="boards" data-sc-act="pan" data-sc-span="2.2" data-sc-drift="#1B1512" aria-label="Meatboards">
     <div data-sc-stage>
-      <div class="word-scale word-scale--a" aria-hidden="true">
-        <p class="word word--a" data-sc-cue="0.02 0.31 0.10 0.10">Premium</p>
+      <div class="boards__head">
+        <h2 class="sc-display sc-display--md">Meatboards.</h2>
+        <p>Say who is coming and what they like. <b>Message for a price.</b></p>
       </div>
-      <div class="word-scale word-scale--b" aria-hidden="true">
-        <p class="word word--b" data-sc-cue="0.31 0.61 0.10 0.10" data-sc-kinetic="chars">meats.</p>
-      </div>
-      <div class="word-scale word-scale--c" aria-hidden="true">
-        <p class="word word--c" data-sc-cue="0.61 1 0.10 0">Cooked and grilled to <em>perfection.</em></p>
-      </div>
-      <div class="sc-copy sc-copy--lead" data-sc-cue="0.72 1 0.12 0">
-        <p class="from sc-label">In their words.</p>
+      <div class="rail" data-sc-pan="0.06">
+        <article class="item">
+          <div class="item__shot" data-sc-tilt="5"><img src="assets/item-long.jpg" width="900" height="1117" alt="A long board of sliced smoked brisket, pastrami, beef salami, pickles and mustard"></div>
+          <h3>The long board</h3>
+          <p>Smoked brisket, pastrami, beef salami, pickles, grainy mustard.</p>
+          <span class="price">Message for a price</span>
+        </article>
+        <article class="item">
+          <div class="item__shot" data-sc-tilt="5"><img src="assets/item-round.jpg" width="900" height="1117" alt="A round board of lamb chops, chicken skewers, charred onions, tahini and pickled turnip"></div>
+          <h3>The round</h3>
+          <p>Lamb chops, chicken skewers, charred onion, tahini, pickled turnip.</p>
+          <span class="price">Message for a price</span>
+        </article>
+        <article class="item">
+          <div class="item__shot" data-sc-tilt="5"><img src="assets/item-two.jpg" width="900" height="1117" alt="A small board for two with brisket, cured beef, olives, pickles, mustard and grilled bread"></div>
+          <h3>For two</h3>
+          <p>Brisket, cured beef, olives, pickles, mustard, grilled bread.</p>
+          <span class="price">Message for a price</span>
+        </article>
+        <article class="item">
+          <div class="item__shot" data-sc-tilt="5"><img src="assets/item-party.jpg" width="900" height="1117" alt="A large square party board of sliced ribeye, beef sausages, chicken thighs, grilled corn and two sauces"></div>
+          <h3>The party board</h3>
+          <p>Sliced ribeye, beef sausages, chicken thighs, grilled corn, two sauces.</p>
+          <span class="price">Message for a price</span>
+        </article>
       </div>
     </div>
   </section>
 
-  <!-- 4  Trust -->
-  <section class="facts sc-section g1" id="facts" data-sc-act="flow" aria-label="The facts">
+  <!-- 3  Hunger, the peak: the cut -->
+  <section class="cut" id="cut" data-sc-act="scrub" data-sc-span="3.0" data-sc-dwell="0.4" data-sc-drift="#0F0C0A" aria-labelledby="cutText">
+    <h2 class="sr" id="cutText">Premium meats, cooked and grilled to perfection.</h2>
+    <div data-sc-stage>
+      <img class="sc-stage__poster" src="assets/cut.webp" alt="" width="1600" height="900">
+      <video data-sc-scrub data-sc-src="assets/cut.mp4" data-sc-src-mobile="assets/cut-m.mp4" playsinline muted aria-hidden="true"></video>
+      <div class="sc-scrim sc-scrim--vignette"></div>
+      <p class="line line--a" data-sc-cue="0.02 0.38 0.3 0.3" aria-hidden="true">Premium meats.</p>
+      <p class="line line--b" data-sc-cue="0.32 0.68 0.3 0.3" aria-hidden="true">Cooked and grilled</p>
+      <p class="line line--c" data-sc-cue="0.62 1 0.3 0" aria-hidden="true"><em class="accent">to perfection.</em></p>
+      <p class="from sc-label" data-sc-cue="0.74 1 0.25 0">In their words.</p>
+    </div>
+  </section>
+
+  <!-- 4  Certainty: the facts and how it goes, one screen -->
+  <section class="facts" id="facts" data-sc-act="flow" data-sc-drift="#15110F" aria-label="The facts">
     <div class="sc-wrap">
-      <dl class="facts__list" data-sc-in data-sc-stagger="90">
+      <dl class="facts__list" data-sc-in data-sc-stagger="80">
         <div><dt class="sc-label">What</dt><dd>Premium meat boards.</dd></div>
         <div><dt class="sc-label">Where</dt><dd>Jerusalem.</dd></div>
         <div><dt class="sc-label">Pay by</dt><dd>Credit card, Zelle or bank transfer.</dd></div>
         <div><dt class="sc-label">You talk to</dt><dd>The business itself. No middleman.</dd></div>
       </dl>
+      <div class="how" data-sc-in data-sc-stagger="120">
+        <h2>How it goes.</h2>
+        <ol class="steps">
+          <li>You send a message.<small>From this page. No form, no account for them to make.</small></li>
+          <li>You agree the board and the day, in chat.<small>What you want on it, how many people, when.</small></li>
+          <li>You pay them the way they take it.<small>Card, Zelle or bank transfer. Between you and them.</small></li>
+        </ol>
+      </div>
     </div>
   </section>
 
-  <!-- 5  Breath -->
-  <section class="breath g0" data-sc-act="flow" aria-hidden="true"></section>
-
-  <!-- 6  Certainty -->
-  <section class="how sc-section g2" id="how" data-sc-act="flow" aria-label="How it goes">
-    <div class="sc-wrap">
-      <h2 class="sc-display sc-display--md">How it goes.</h2>
-      <ol class="steps" data-sc-in data-sc-stagger="140">
-        <li>You send a message.<small>From this page. No account for them to make, no form for you.</small></li>
-        <li>You agree the board and the day, in chat.<small>What you want on it, how many people, when.</small></li>
-        <li>You pay them the way they take it.<small>Card, Zelle or bank transfer. Between you and them.</small></li>
-      </ol>
-    </div>
-  </section>
-
-  <!-- 7  Resolve -->
-  <section class="close g1" id="order" data-sc-act="pin" data-sc-span="1.1" aria-label="Order">
+  <!-- 5  Resolve -->
+  <section class="close" id="order" data-sc-act="pin" data-sc-span="1.3" data-sc-drift="#0F0C0A" data-sc-spotlight aria-label="Order">
     <div data-sc-stage>
-      <div class="sc-copy sc-copy--center close__copy" data-sc-cue="0.06">
-        <p class="close__line">That's the page.</p>
-        <a class="close__link" href="#top">Message Blazin' Boards</a>
+      <img class="close__img" src="assets/close.jpg" alt="" width="1800" height="1005">
+      <div class="close__light" aria-hidden="true"></div>
+      <div class="sc-scrim sc-scrim--vignette"></div>
+      <div class="sc-copy sc-copy--center" data-sc-cue="0.06">
+        <h2 class="sc-display sc-display--lg" data-sc-kinetic="lines">Ready when you are.</h2>
+        <a class="cta" href="#top" data-sc-magnet="0.26">Message Blazin' Boards</a>
         <p class="close__assure">Pay by card, Zelle or bank transfer. You talk to the business directly.</p>
       </div>
-      <p class="close__foot">Blazin' Boards, Jerusalem, on MyIsraelRental.</p>
+      <p class="close__foot">Blazin' Boards, Jerusalem, on MyIsraelRental. The moving board at the top is theirs. The other food photographs on this page are illustrations for this preview.</p>
     </div>
   </section>
 </main>
@@ -335,44 +340,52 @@
 <script src="scrollcraft.js"></script>
 <script>
   ScrollCraft.mount(document.body);
-  /* ----------------------------------------------------------- the flame --
-     Page-local, engine untouched. Scroll velocity, smoothed, becomes --heat
-     on the root. Fast attack, slow cooling: it should flare the instant you
-     move and take about a second to settle once you stop. */
   (function () {
     var root = document.documentElement;
+    /* ----------------------------------------------------------- the flame --
+       Scroll velocity, smoothed, becomes --heat on the root. Fast attack,
+       slow cooling. Page-local, engine untouched. */
     var reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
-    if (reduce) return;
-    var lastY = scrollY, lastT = performance.now();
-    var target = 0, heat = 0, raf = 0;
-    function frame() {
-      raf = 0;
-      var k = target > heat ? 0.32 : 0.045;
-      heat += (target - heat) * k;
-      if (heat < 0.003 && target === 0) heat = 0;
-      root.style.setProperty('--heat', heat.toFixed(3));
-      /* Velocity decays on its own when no scroll event arrives. */
-      target *= 0.82;
-      if (target < 0.01) target = 0;
-      if (heat > 0 || target > 0) raf = requestAnimationFrame(frame);
+    if (!reduce) {
+      var lastY = scrollY, lastT = performance.now();
+      var target = 0, heat = 0, raf = 0;
+      var frame = function () {
+        raf = 0;
+        var k = target > heat ? 0.32 : 0.045;
+        heat += (target - heat) * k;
+        if (heat < 0.003 && target === 0) heat = 0;
+        root.style.setProperty('--heat', heat.toFixed(3));
+        target *= 0.82;
+        if (target < 0.01) target = 0;
+        if (heat > 0 || target > 0) raf = requestAnimationFrame(frame);
+      };
+      addEventListener('scroll', function () {
+        var now = performance.now(), dt = Math.max(now - lastT, 8);
+        var v = Math.abs(scrollY - lastY) / dt;
+        lastY = scrollY; lastT = now;
+        target = Math.max(target, Math.min(v / 2.6, 1));
+        if (!raf) raf = requestAnimationFrame(frame);
+      }, { passive: true });
     }
-    addEventListener('scroll', function () {
-      var now = performance.now(), dt = Math.max(now - lastT, 8);
-      var v = Math.abs(scrollY - lastY) / dt;          /* px per ms */
-      lastY = scrollY; lastT = now;
-      /* About 2.6 px/ms is a hard flick. Trackpad drift stays under 0.5. */
-      target = Math.max(target, Math.min(v / 2.6, 1));
-      if (!raf) raf = requestAnimationFrame(frame);
-    }, { passive: true });
-
-    /* Direction toggle. Every page on this site works both ways, and that
-       is only true if the check is one click away. */
+    /* The RTL rail travel: the engine moves the rail negative by its
+       overflow; under RTL it must move positive by the same amount. */
+    var rail = document.querySelector('.rail');
+    function railOver() {
+      if (!rail) return;
+      var over = Math.max(rail.scrollWidth - innerWidth, 0) * 1.06;
+      rail.style.setProperty('--rail-over', over.toFixed(1) + 'px');
+    }
+    addEventListener('resize', railOver, { passive: true });
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(railOver);
+    railOver();
+    /* Direction toggle. */
     var toggle = document.getElementById('dirToggle');
     toggle.addEventListener('click', function () {
       var rtl = root.getAttribute('dir') === 'rtl';
       root.setAttribute('dir', rtl ? 'ltr' : 'rtl');
       root.setAttribute('lang', rtl ? 'en' : 'he');
       toggle.textContent = rtl ? 'עברית' : 'English';
+      railOver();
       ScrollCraft.instances.forEach(function (i) { i.layout(); });
     });
   })();

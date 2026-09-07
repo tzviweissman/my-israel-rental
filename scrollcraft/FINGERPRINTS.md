@@ -29,7 +29,7 @@ changes only grammar and world will fail it.
 | Build | Grammar | Nav treatment | Hero device | Act-sequence shape | Close pattern | Signature move | World | Port |
 |---|---|---|---|---|---|---|---|---|
 | lechem-emek | 2026-09-06 | Night shoot (named): distinct scenes, full-bleed photographic hero, one dark-to-light cut at the peak | Fixed wordmark + time-of-morning clock, no CTA in the bar | Pinned still photograph with a --sc-p push-in and a greet-and-fade kinetic headline | pin > flow > pin > flow > pin > pan > flow > pin, 8 acts, 14.0vh | Pinned photo, one held cue, magnetic CTA, footer inside the stage | The scroll is the sunrise: one --dawn value walks the clock 04:00 to 07:00 and regrades every night photograph and ground together, then cuts to day | Photographic, generated stills, warm | 4500 |
-| blazin-boards | 2026-09-06 | Typographic poster: type is the imagery, charcoal grounds cut per section, one real photograph used twice as an object, never as ground | None. No bar, no wordmark item; the wordmark is the hero composition, and the only fixed chrome is the direction toggle | A single word at 25vw with the business's own photograph clipped inside the letters, growing with --sc-p, the real h1 beneath | pin > flow > pin > flow > flow > flow > pin, 7 acts, about 10vh | Inverts the page: the smallest type on it, the CTA as a plain underlined link, reassurance beside it, no photo, no magnet | Scroll speed is the flame: velocity, smoothed into --heat, flares an ember layer, the grain and the accent (gold toward ember) together, and cools when the scroll stops | Typographic, charcoal, one real cut-out photo | 4501 |
+| blazin-boards | 2026-09-07 (r2; r1 of 2026-09-06 was a typographic poster, rebuilt on request) | Filmic one-shot: two scrub clips, grounds drift, one entry point | Fixed minimal bar: wordmark, one CTA, direction toggle | Full-bleed scrub of the business's own photograph animated (Kling), corner-anchored kinetic h1 on a greet cue, local scrim | scrub > pan > scrub > flow > pin, 5 acts, 9.7vh | Pinned photograph, pointer spotlight, magnetic CTA, reassurance beside it, footer in the stage | Scroll speed is the flame: velocity, smoothed into --heat, flares an ember layer, the grain and the accent together, and cools when the scroll stops | Photographic, generated stills + one real animated photo, charcoal | 4501 |
 
 
 ---
@@ -49,14 +49,14 @@ as a constraint, so writing them down is the whole point.
   CTA; and the sunrise move (one scroll value regrading the whole page and
   a clock). Shares nothing with prior rows, since there were none.
 
-- **blazin-boards** claims: the typographic poster grammar on charcoal; the
-  no-chrome nav (wordmark as composition, direction toggle only); the
-  photo-inside-the-letters hero; the shape pin > flow > pin > flow > flow >
-  flow > pin at 7 acts and about 10vh; the inverted close (smallest type,
-  underlined link, no photo); and the velocity move (scroll speed regrades
-  the page, cooling on stop). Shares with lechem-emek: the site's gold accent
-  and Playfair/Manrope, which are the brand's and not the build's; nothing on
-  the six dimensions.
+- **blazin-boards** claims (revision 2): the filmic one-shot grammar on a
+  charcoal drift; the fixed wordmark-plus-one-CTA bar; the animated-real-
+  photograph scrub hero; the shape scrub > pan > scrub > flow > pin at 5 acts
+  and 9.7vh; and the velocity move (scroll speed regrades the page, cooling
+  on stop). Shares with lechem-emek the pinned-photo-plus-magnet close
+  (dimension 5), the site's gold accent and Playfair/Manrope; differs on the
+  other five dimensions. Revision 1's typographic-poster claims are released:
+  that page no longer exists.
 ---
 
 ## Appending a row
