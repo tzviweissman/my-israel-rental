@@ -73,6 +73,16 @@ export default function GoodToKnow({ business }) {
     },
     b.delivery_note && { key: 'delivery', Icon: Truck, label: t('businessPage.delivery', 'Delivery'), value: b.delivery_note },
     b.lead_time && { key: 'lead', Icon: Timer, label: t('businessPage.leadTime', 'Notice needed'), value: b.lead_time },
+    // Order cutoffs (orders spec O8): "Friday orders close Thursday 14:00".
+    (b.order_cutoffs || []).length > 0 && {
+      key: 'cutoffs', Icon: Timer,
+      label: t('businessPage.orderBy', 'Order by'),
+      value: b.order_cutoffs.map((c) => t('businessPage.cutoffValue', '{{for}} orders close {{closes}} {{time}}', {
+        for: t(`weekday.${c.for_day}`, String(c.for_day)),
+        closes: t(`weekday.${c.closes_day}`, String(c.closes_day)),
+        time: c.closes_time,
+      })).join(' · '),
+    },
     b.payment_note && { key: 'payment', Icon: Wallet, label: t('businessPage.payment', 'Payment'), value: b.payment_note },
   ].filter(Boolean);
 

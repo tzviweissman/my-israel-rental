@@ -29,7 +29,7 @@ import axios from 'axios';
 import { toast } from 'sonner';
 import {
   Plus, Loader2, ClipboardPaste, Store as StoreIcon, Bike, X, Sparkles, ClipboardList,
-  LayoutList, Table2, Printer, Download, Upload, Link2, Copy, Check, RotateCcw, Pencil, MessageCircle, Trash2,
+  LayoutList, Table2, Printer, Download, Upload, Link2, Copy, Check, RotateCcw, Pencil, MessageCircle, Trash2, Repeat, Timer, Pause, Play,
 } from 'lucide-react';
 import { phoneError } from '../../utils/phoneValidation';
 import OrderCard, { STATUS_ORDER, OPEN, NEXT, pillStyle } from './OrderCard';
@@ -60,9 +60,36 @@ const joinNeededBy = (date, time) => (time ? `${date}T${time}` : date);
 
 /** The query for each range tab; also what Print and Export use, so
  * what you print is what you were looking at. */
+/** The coming Friday (today, if it is Friday). Spec O8: "a Shabbat
+ * view - everything due Friday, in delivery order, one screen". */
+const nextFriday = () => {
+  const d = new Date();
+  d.setDate(d.getDate() + ((5 - d.getDay() + 7) % 7));
+  return localDate(d);
+};
+
+/** Pure twin of the server's `past_cutoff`: the cutoff an order for
+ * `date` has already missed, or null. Weekdays are JS-style. */
+export const pastCutoff = (date, cutoffs, now = new Date()) => {
+  if (!date) return null;
+  const day = new Date(`${date}T00:00`);
+  const wd = day.getDay();
+  for (const c of cutoffs || []) {
+    if (c.for_day !== wd) continue;
+    const back = (wd - c.closes_day + 7) % 7;
+    const closes = new Date(day);
+    closes.setDate(closes.getDate() - back);
+    const [h, m] = String(c.closes_time || '00:00').split(':').map(Number);
+    closes.setHours(h, m, 0, 0);
+    if (now > closes) return { ...c, closes };
+  }
+  return null;
+};
+
 const rangeParams = (range) => {
   const today = localDate(new Date());
   if (range === 'today') return { from: today, to: today };
+  if (range === 'friday') { const f = nextFriday(); return { from: f, to: f }; }
   if (range === 'week') {
     const end = new Date(); end.setDate(end.getDate() + 6);
     return { from: today, to: localDate(end) };
@@ -119,6 +146,21 @@ export default function OrdersTab({ API, token }) {
   });
   const [panel, setPanel] = useState(null);           // 'staff' | 'import' | 'couriers' | null
   const [couriers, setCouriers] = useState([]);
+  const [cutoffs, setCutoffs] = useState([]);
+  const [standing, setStanding] = useState([]);
+
+  const loadSettings = useCallback(async () => {
+    if (!bizId) return;
+    try {
+      const [{ data: st }, { data: so }] = await Promise.all([
+        axios.get(`${API}/marketplace/businesses/${bizId}/orders/settings`, auth),
+        axios.get(`${API}/marketplace/businesses/${bizId}/standing-orders`, auth),
+      ]);
+      setCutoffs(st.cutoffs || []);
+      setStanding(so || []);
+    } catch { /* the board works without them */ }
+  }, [API, auth, bizId]);
+  useEffect(() => { if (businesses && businesses.some((b) => b.id === bizId)) loadSettings(); }, [loadSettings, businesses, bizId]);
 
   const loadCouriers = useCallback(async () => {
     if (!bizId) return;
@@ -222,6 +264,19 @@ export default function OrdersTab({ API, token }) {
     try {
       const { data } = await axios.patch(`${API}/marketplace/orders/${order.id}/payment`, { method, amount: method ? order.total : null }, auth);
       setOrders((prev) => prev.map((o) => (o.id === data.id ? data : o)));
+    } catch (err) {
+      toast.error(err?.response?.data?.detail || t('orders.saveFailed', 'Could not save'));
+    } finally {
+      setBusyId(null);
+    }
+  };
+
+  const repeatWeekly = async (order) => {
+    setBusyId(order.id);
+    try {
+      await axios.post(`${API}/marketplace/orders/${order.id}/repeat-weekly`, null, auth);
+      toast.success(t('orders.repeatDone', 'Set to repeat every week - next week\'s is on the board'));
+      await Promise.all([load(), loadSettings()]);
     } catch (err) {
       toast.error(err?.response?.data?.detail || t('orders.saveFailed', 'Could not save'));
     } finally {
@@ -349,6 +404,7 @@ export default function OrdersTab({ API, token }) {
           businessId={biz.id}
           initial={editing ? fromOrder(editing) : EMPTY_FORM()}
           orderId={editing?.id}
+          cutoffs={cutoffs}
           onCancel={() => { setEntryOpen(false); setEditing(null); }}
           onSaved={onSaved}
         />
@@ -378,6 +434,8 @@ export default function OrdersTab({ API, token }) {
           ['export', Download, t('orders.export', 'Export CSV'), exportCsv],
           ['import', Upload, t('orders.import', 'Import customers'), () => setPanel(panel === 'import' ? null : 'import')],
           ['couriers', Bike, t('orders.couriers', 'Couriers'), () => setPanel(panel === 'couriers' ? null : 'couriers')],
+          ['cutoffs', Timer, t('orders.cutoffs', 'Cutoffs'), () => setPanel(panel === 'cutoffs' ? null : 'cutoffs')],
+          ['standing', Repeat, t('orders.standing', 'Weekly'), () => setPanel(panel === 'standing' ? null : 'standing')],
         ].map(([key, Icon, lbl, fn]) => (
           <button
             key={key}
@@ -396,11 +454,14 @@ export default function OrdersTab({ API, token }) {
       {panel === 'staff' && <StaffLinkPanel API={API} auth={auth} businessId={biz.id} onClose={() => setPanel(null)} />}
       {panel === 'import' && <ImportCustomersPanel API={API} auth={auth} businessId={biz.id} onClose={() => setPanel(null)} />}
       {panel === 'couriers' && <CouriersPanel API={API} auth={auth} businessId={biz.id} couriers={couriers} onChanged={loadCouriers} onClose={() => setPanel(null)} />}
+      {panel === 'cutoffs' && <CutoffsPanel API={API} auth={auth} businessId={biz.id} cutoffs={cutoffs} onSaved={loadSettings} onClose={() => setPanel(null)} />}
+      {panel === 'standing' && <StandingPanel API={API} auth={auth} standing={standing} onChanged={() => Promise.all([loadSettings(), load()])} onClose={() => setPanel(null)} />}
 
       {/* Range tabs */}
       <div className="flex gap-1 mb-3 overflow-x-auto" role="tablist" data-testid="orders-range">
         {[
           ['today', t('orders.rangeToday', 'Today')],
+          ['friday', t('orders.rangeFriday', 'Friday')],
           ['week', t('orders.rangeWeek', 'This week')],
           ['open', t('orders.rangeOpen', 'All open')],
           ['done', t('orders.rangeDone', 'Done')],
@@ -487,6 +548,7 @@ export default function OrdersTab({ API, token }) {
                     onEdit={() => { setEntryOpen(false); setEditing(o); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
                     onAssign={assign}
                     onPayment={setPayment}
+                    onRepeat={repeatWeekly}
                     couriers={couriers}
                     t={t}
                   />
@@ -506,7 +568,7 @@ export default function OrdersTab({ API, token }) {
  * name field autocompletes returning customers; everything else is a
  * large target with a sensible default.
  */
-function OrderForm({ API, auth, businessId, initial, orderId, onCancel, onSaved }) {
+function OrderForm({ API, auth, businessId, initial, orderId, cutoffs, onCancel, onSaved }) {
   const { t } = useTranslation();
   const [f, setF] = useState(initial);
   const [paste, setPaste] = useState('');
@@ -577,6 +639,8 @@ function OrderForm({ API, auth, businessId, initial, orderId, onCancel, onSaved 
 
   const phoneErr = phoneError(f.customer_phone, t);
   const needPhone = f.fulfilment === 'delivery';
+  // Warns, never refuses: the owner on the phone with a regular decides.
+  const missed = pastCutoff(f.date, cutoffs);
   const canSave = f.customer_name.trim().length > 0
     && f.items.trim().length > 0
     && f.date
@@ -770,6 +834,16 @@ function OrderForm({ API, auth, businessId, initial, orderId, onCancel, onSaved 
           </div>
         </div>
       </div>
+
+      {missed && (
+        <p className="text-xs rounded-lg px-3 py-2" style={{ background: 'var(--accent-soft)', color: 'var(--accent-soft-ink)' }} data-testid="order-cutoff-warning">
+          {t('orders.cutoffWarning', 'Past your cutoff for {{day}} orders (closed {{closes}} {{time}}). You can still save it.', {
+            day: t(`weekday.${missed.for_day}`, String(missed.for_day)),
+            closes: t(`weekday.${missed.closes_day}`, String(missed.closes_day)),
+            time: missed.closes_time,
+          })}
+        </p>
+      )}
 
       {f.fulfilment === 'delivery' && (
         <div>
@@ -1234,6 +1308,133 @@ function CouriersPanel({ API, auth, businessId, couriers, onChanged, onClose }) 
         </button>
         {phoneErr && <p className="w-full text-[11px]" style={{ color: 'var(--ink)' }}>{phoneErr}</p>}
       </form>
+    </div>
+  );
+}
+
+const WEEKDAYS = [0, 1, 2, 3, 4, 5, 6];
+
+/**
+ * Cutoffs (spec O8): "Friday orders close Thursday 2pm". One per
+ * weekday. Shown on the business page and warned about in the form.
+ */
+function CutoffsPanel({ API, auth, businessId, cutoffs, onSaved, onClose }) {
+  const { t } = useTranslation();
+  const [rows, setRows] = useState(cutoffs.length ? cutoffs : [{ for_day: 5, closes_day: 4, closes_time: '14:00' }]);
+  const [busy, setBusy] = useState(false);
+  const set = (i, k, v) => setRows((r) => r.map((row, j) => (j === i ? { ...row, [k]: v } : row)));
+  const usedDays = new Set(rows.map((r) => r.for_day));
+  const dayName = (d) => t(`weekday.${d}`, String(d));
+
+  const save = async () => {
+    setBusy(true);
+    try {
+      const { data } = await axios.put(`${API}/marketplace/businesses/${businessId}/orders/settings`, { cutoffs: rows }, auth);
+      setRows(data.cutoffs);
+      await onSaved();
+      toast.success(t('orders.cutoffsSaved', 'Cutoffs saved - they show on your page'));
+    } catch (err) {
+      const d = err?.response?.data?.detail;
+      toast.error(typeof d === 'string' ? d : t('orders.saveFailed', 'Could not save'));
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const sel = 'px-2 min-h-[40px] rounded-lg border text-sm bg-white';
+  const selStyle = { borderColor: 'var(--brand-border)', color: 'var(--ink)' };
+  return (
+    <div className="rounded-2xl border p-4 mb-4 bg-white" style={{ borderColor: 'var(--brand-border)' }} data-testid="cutoffs-panel">
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <h3 className="font-bold" style={{ color: 'var(--ink)' }}>{t('orders.cutoffsTitle', 'Order cutoffs')}</h3>
+          <p className="text-sm mt-1" style={{ color: 'var(--brand-muted)' }}>{t('orders.cutoffsBody', 'When orders for a given day close. Shown on your page; the form warns you when an order comes in late, but you decide.')}</p>
+        </div>
+        <button type="button" onClick={onClose} className="inline-flex items-center justify-center min-h-[44px] min-w-[44px] rounded-full shrink-0" style={{ color: 'var(--brand-muted)' }} aria-label={t('orders.close', 'Close')}><X size={18} /></button>
+      </div>
+      <div className="mt-3 space-y-2">
+        {rows.map((r, i) => (
+          <div key={i} className="flex flex-wrap items-center gap-2 text-sm" style={{ color: 'var(--ink)' }} data-testid={`cutoff-row-${i}`}>
+            <select value={r.for_day} onChange={(e) => set(i, 'for_day', Number(e.target.value))} className={sel} style={selStyle} aria-label={t('orders.cutoffFor', 'Orders for')}>
+              {WEEKDAYS.map((d) => <option key={d} value={d} disabled={d !== r.for_day && usedDays.has(d)}>{dayName(d)}</option>)}
+            </select>
+            <span>{t('orders.cutoffClose', 'close')}</span>
+            <select value={r.closes_day} onChange={(e) => set(i, 'closes_day', Number(e.target.value))} className={sel} style={selStyle} aria-label={t('orders.cutoffOn', 'on')}>
+              {WEEKDAYS.map((d) => <option key={d} value={d}>{dayName(d)}</option>)}
+            </select>
+            <input type="time" value={r.closes_time} onChange={(e) => set(i, 'closes_time', e.target.value)} className={sel} style={selStyle} aria-label={t('orders.cutoffAt', 'at')} />
+            <button type="button" onClick={() => setRows((rs) => rs.filter((_, j) => j !== i))} className="inline-flex items-center justify-center min-h-[40px] min-w-[40px] rounded-full" style={{ color: 'var(--brand-muted)' }} aria-label={t('orders.courierRemove', 'Remove')}><Trash2 size={14} /></button>
+          </div>
+        ))}
+      </div>
+      <div className="flex flex-wrap items-center gap-2 mt-3">
+        <button type="button" disabled={busy} onClick={save} className="inline-flex items-center gap-1.5 px-4 min-h-[44px] rounded-full text-sm font-semibold disabled:opacity-50" style={{ background: 'var(--action)', color: 'var(--action-ink)' }} data-testid="cutoffs-save">
+          {busy ? <Loader2 size={14} className="animate-spin" /> : <Check size={14} />} {t('orders.save', 'Save')}
+        </button>
+        {rows.length < 7 && (
+          <button type="button" onClick={() => setRows((rs) => [...rs, { for_day: WEEKDAYS.find((d) => !usedDays.has(d)), closes_day: 4, closes_time: '14:00' }])} className="inline-flex items-center gap-1 px-3 min-h-[44px] rounded-full text-sm font-semibold border" style={{ borderColor: 'var(--brand-border)', color: 'var(--ink)' }}>
+            <Plus size={14} /> {t('orders.cutoffAdd', 'Another day')}
+          </button>
+        )}
+      </div>
+    </div>
+  );
+}
+
+/**
+ * Standing orders (spec O8): challah every Friday. Made from a card's
+ * "Repeat every week"; here they are paused, resumed or stopped. Next
+ * week's copy appears on the board by itself.
+ */
+function StandingPanel({ API, auth, standing, onChanged, onClose }) {
+  const { t } = useTranslation();
+  const [busy, setBusy] = useState(null);
+  const dayName = (d) => t(`weekday.${d}`, String(d));
+
+  const toggle = async (sd) => {
+    setBusy(sd.id);
+    try {
+      await axios.patch(`${API}/marketplace/standing-orders/${sd.id}`, { active: !sd.active }, auth);
+      await onChanged();
+    } catch (err) { toast.error(err?.response?.data?.detail || t('orders.saveFailed', 'Could not save')); } finally { setBusy(null); }
+  };
+  const remove = async (sd) => {
+    // eslint-disable-next-line no-alert
+    if (!window.confirm(t('orders.standingRemoveConfirm', 'Stop the weekly order for {{name}}? Orders already on the board stay.', { name: sd.customer_name }))) return;
+    setBusy(sd.id);
+    try {
+      await axios.delete(`${API}/marketplace/standing-orders/${sd.id}`, auth);
+      await onChanged();
+    } catch (err) { toast.error(err?.response?.data?.detail || t('orders.saveFailed', 'Could not save')); } finally { setBusy(null); }
+  };
+
+  return (
+    <div className="rounded-2xl border p-4 mb-4 bg-white" style={{ borderColor: 'var(--brand-border)' }} data-testid="standing-panel">
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <h3 className="font-bold" style={{ color: 'var(--ink)' }}>{t('orders.standingTitle', 'Weekly orders')}</h3>
+          <p className="text-sm mt-1" style={{ color: 'var(--brand-muted)' }}>{t('orders.standingBody', 'Challah every Friday, a box every Sunday. Open any order and tap "Repeat every week" - next week\'s copy appears on the board by itself.')}</p>
+        </div>
+        <button type="button" onClick={onClose} className="inline-flex items-center justify-center min-h-[44px] min-w-[44px] rounded-full shrink-0" style={{ color: 'var(--brand-muted)' }} aria-label={t('orders.close', 'Close')}><X size={18} /></button>
+      </div>
+      {standing.length === 0 ? (
+        <p className="text-sm mt-3" style={{ color: 'var(--brand-muted)' }}>{t('orders.standingEmpty', 'No weekly orders yet.')}</p>
+      ) : (
+        <ul className="mt-3 divide-y" style={{ borderColor: 'var(--brand-border)' }}>
+          {standing.map((sd) => (
+            <li key={sd.id} className="py-2 flex flex-wrap items-center gap-2" style={{ opacity: sd.active ? 1 : 0.6 }} data-testid={`standing-${sd.id}`}>
+              <div className="min-w-0 flex-1">
+                <div className="text-sm font-semibold" dir="auto" style={{ color: 'var(--ink)' }}>{sd.customer_name} <span className="font-normal" style={{ color: 'var(--brand-muted)' }}>· {dayName(sd.weekday)}{sd.time ? ` ${sd.time}` : ''}</span></div>
+                <div className="text-xs whitespace-pre-line" dir="auto" style={{ color: 'var(--brand-muted)' }}>{sd.items}{sd.total != null ? ` · ₪${Number(sd.total).toLocaleString()}` : ''}{!sd.active ? ` · ${t('orders.standingPaused', 'paused')}` : ''}</div>
+              </div>
+              <button type="button" disabled={busy === sd.id} onClick={() => toggle(sd)} className="inline-flex items-center gap-1 px-3 min-h-[40px] rounded-full text-xs font-semibold border" style={{ borderColor: 'var(--brand-border)', color: 'var(--ink)' }} data-testid="standing-toggle">
+                {sd.active ? <><Pause size={12} /> {t('orders.standingPause', 'Pause')}</> : <><Play size={12} /> {t('orders.standingResume', 'Resume')}</>}
+              </button>
+              <button type="button" disabled={busy === sd.id} onClick={() => remove(sd)} className="inline-flex items-center justify-center min-h-[40px] min-w-[40px] rounded-full" style={{ color: 'var(--brand-muted)' }} aria-label={t('orders.standingStop', 'Stop')} data-testid="standing-remove"><Trash2 size={14} /></button>
+            </li>
+          ))}
+        </ul>
+      )}
     </div>
   );
 }

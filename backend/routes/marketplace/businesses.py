@@ -776,6 +776,9 @@ async def public_business(
         "delivery_note": biz.get("delivery_note"),
         "lead_time": biz.get("lead_time"),
         "payment_note": biz.get("payment_note"),
+        # Order cutoffs (orders spec O8): "Friday orders close Thursday
+        # 2pm". Set from the Orders tab, shown in the good-to-know band.
+        "order_cutoffs": biz.get("order_cutoffs") or [],
         "kosher_certification": biz.get("kosher_certification"),
         "license_number": biz.get("license_number"),
         # K1/K2 — page identity. `accent` is a NAME; the hexes live on

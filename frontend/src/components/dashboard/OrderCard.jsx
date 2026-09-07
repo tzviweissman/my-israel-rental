@@ -9,7 +9,7 @@
  */
 import React, { useState } from 'react';
 import {
-  Loader2, Phone, MapPin, Store as StoreIcon, Bike, Pencil, ChevronDown, Undo2, MessageCircle, Camera,
+  Loader2, Phone, MapPin, Store as StoreIcon, Bike, Pencil, ChevronDown, Undo2, MessageCircle, Camera, Repeat,
 } from 'lucide-react';
 import { buildWhatsAppLink } from '../../utils/whatsappLink';
 
@@ -37,7 +37,7 @@ export function pillStyle(status, on) {
  * passes none of them and so shows none of the controls. Assignment is
  * delivery-only; payment is any order (a pickup is paid at the counter).
  */
-export default function OrderCard({ order: o, busy, onStatus, onEdit, onAssign, onPayment, couriers, t }) {
+export default function OrderCard({ order: o, busy, onStatus, onEdit, onAssign, onPayment, onRepeat, couriers, t }) {
   const [more, setMore] = useState(false);
   const time = (o.needed_by || '').includes('T') ? o.needed_by.slice(11, 16) : '';
   const closed = !OPEN.has(o.status);
@@ -76,6 +76,11 @@ export default function OrderCard({ order: o, busy, onStatus, onEdit, onAssign, 
               {o.fulfilment === 'delivery' ? <Bike size={12} /> : <StoreIcon size={12} />}
               {o.fulfilment === 'delivery' ? t('orders.delivery', 'Delivery') : t('orders.pickup', 'Pickup')}
             </span>
+            {o.standing_id && (
+              <span className="inline-flex items-center gap-1 text-[11px]" style={{ color: 'var(--brand-muted)' }} title={t('orders.weeklyTitle', 'Repeats every week')} data-testid="order-weekly">
+                <Repeat size={11} /> {t('orders.weekly', 'weekly')}
+              </span>
+            )}
             {o.total != null && (
               <span className="text-[12px] font-semibold ms-auto" style={{ color: 'var(--ink)' }}>₪{Number(o.total).toLocaleString()}</span>
             )}
@@ -215,6 +220,11 @@ export default function OrderCard({ order: o, busy, onStatus, onEdit, onAssign, 
           {onEdit && (
             <button type="button" onClick={onEdit} className="inline-flex items-center gap-1 px-3 min-h-[40px] rounded-full text-xs font-semibold border" style={{ borderColor: 'var(--brand-border)', color: 'var(--ink)' }}>
               <Pencil size={12} /> {t('orders.edit', 'Edit')}
+            </button>
+          )}
+          {onRepeat && !o.standing_id && (
+            <button type="button" disabled={busy} onClick={() => onRepeat(o)} className="inline-flex items-center gap-1 px-3 min-h-[40px] rounded-full text-xs font-semibold border" style={{ borderColor: 'var(--brand-border)', color: 'var(--ink)' }} data-testid="order-repeat">
+              <Repeat size={12} /> {t('orders.repeatWeekly', 'Repeat every week')}
             </button>
           )}
           {o.track_token && o.customer_phone_e164 && (() => {

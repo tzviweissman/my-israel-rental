@@ -126,12 +126,12 @@ export default function OrderTrackPage() {
         </section>
 
         <section className="rounded-2xl border bg-white p-4 mt-3 text-sm space-y-2" style={{ borderColor: 'var(--brand-border)' }}>
-          {when && <p className="inline-flex items-center gap-2" style={{ color: 'var(--ink)' }}><Clock size={14} /> {when}</p>}
-          <p className="inline-flex items-center gap-2" style={{ color: 'var(--ink)' }}>
+          {when && <p className="flex items-center gap-2" style={{ color: 'var(--ink)' }}><Clock size={14} /> {when}</p>}
+          <p className="flex items-center gap-2" style={{ color: 'var(--ink)' }}>
             {delivery ? <Bike size={14} /> : <StoreIcon size={14} />}
             {delivery ? t('orders.delivery', 'Delivery') : t('orders.track.pickupAtStore', 'Pickup at the store')}
           </p>
-          {delivery && data.address && <p className="inline-flex items-start gap-2" dir="auto" style={{ color: 'var(--ink)' }}><MapPin size={14} className="mt-0.5 shrink-0" /> <span>{data.address}</span></p>}
+          {delivery && data.address && <p className="flex items-start gap-2" dir="auto" style={{ color: 'var(--ink)' }}><MapPin size={14} className="mt-0.5 shrink-0" /> <span>{data.address}</span></p>}
           <p className="whitespace-pre-line pt-1 border-t" dir="auto" style={{ color: 'var(--ink)', borderColor: 'var(--brand-border)' }}>{data.items}</p>
           {data.total != null && (
             <p style={{ color: 'var(--ink)' }}>

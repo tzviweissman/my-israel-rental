@@ -31,10 +31,8 @@ Design facts, from the spec, that this module is built around:
 
 Later phases of the same spec live further down this file: the staff
 link, export and import (O3, O9), couriers, the run sheet, money at the
-door and the customer-phone rule (O5, O6). Deliberately NOT here yet: the
-customer status link (O7), cutoffs and standing orders (O8). No field for
-either exists on the record until the surface that uses it does — an
-unread field on a model is exactly what the dead-ends audit flags.
+door and the customer-phone rule (O5, O6), the customer's status link
+(O7), and cutoffs plus standing orders (O8).
 """
 from __future__ import annotations
 
@@ -115,7 +113,7 @@ class OrderIn(BaseModel):
     fulfilment: str = Field("pickup", pattern="^(pickup|delivery)$")
     address: Optional[str] = Field(None, max_length=400)
     notes: str = Field("", max_length=1000)
-    source: str = Field("manual", pattern="^(manual|chat|assistant|whatsapp_paste)$")
+    source: str = Field("manual", pattern="^(manual|chat|assistant|whatsapp_paste)$")   # "standing" is set by the generator only
 
     @field_validator("customer_name", "items", "notes", "address", "customer_phone")
     @classmethod
@@ -242,6 +240,12 @@ async def ensure_order_indexes() -> None:
         await db.businesses.create_index("couriers.token", sparse=True, background=True)
         await db.store_orders.create_index([("business_id", 1), ("courier.id", 1)], background=True)
         await db.store_orders.create_index("track_token", sparse=True, background=True)
+        # One generated order per standing order per date, even if two
+        # requests generate at once.
+        await db.store_orders.create_index(
+            [("standing_id", 1), ("occurrence_date", 1)], unique=True, sparse=True, background=True,
+        )
+        await db.store_standing_orders.create_index([("business_id", 1), ("active", 1)], background=True)
         await db.store_customers.create_index([("business_id", 1), ("key", 1)], unique=True, background=True)
     except Exception as exc:  # noqa: BLE001
         logger.warning("[orders] index creation failed: %s", exc)
@@ -268,6 +272,7 @@ async def list_orders(
     what is on screen, not for all time.
     """
     await _owned_business(business_id, user)
+    await generate_standing_orders(business_id)
     return await _list(business_id, status, date_from, date_to, limit)
 
 
@@ -494,6 +499,7 @@ async def staff_board(
 ):
     check_rate(request, bucket="orders_staff", limit=600, window_seconds=600)
     biz = await _business_by_staff_token(token)
+    await generate_standing_orders(biz["_id"])
     out = await _list(biz["_id"], status, date_from, date_to, 300)
     out["business"] = {"name": biz.get("name") or "", "name_he": biz.get("name_he"), "logo_url": biz.get("logo_url")}
     return out
@@ -1167,3 +1173,246 @@ async def track_order(token: str, request: Request):
         "delivered_at": delivered_at,
         "paid": bool((o.get("payment") or {}).get("method")),
     }
+
+
+# ---------------------------------------------------------------------------
+# Israel-specific: cutoffs and standing orders (spec O8)
+# ---------------------------------------------------------------------------
+#
+# Friday is the day. For a food business here Shabbat orders are the
+# week's peak and the week's deadline, so two things the sheet never did:
+#
+#   * CUTOFFS — "Friday orders close Thursday 2pm". Set here, shown on
+#     the business page's good-to-know band, and the entry form warns
+#     when an order is typed past it. Warns, not refuses: the owner on
+#     the phone with a regular is the one who decides.
+#   * STANDING ORDERS — challah every Friday, a box every Sunday. One
+#     record that regenerates weekly. Generated lazily, whenever the
+#     board is read, for the next occurrence within seven days — no
+#     scheduler, and a unique index makes a double-generate impossible.
+#
+# Weekdays are JS-style throughout (0 = Sunday … 6 = Saturday), because
+# the client sets them and the Israeli week starts on Sunday anyway.
+
+_TIME_RE = re.compile(r"^\d{2}:\d{2}$")
+
+
+def _js_weekday(d) -> int:
+    """Python's Monday=0 to JS's Sunday=0."""
+    return (d.weekday() + 1) % 7
+
+
+class CutoffIn(BaseModel):
+    for_day: int = Field(..., ge=0, le=6)        # orders FOR this weekday…
+    closes_day: int = Field(..., ge=0, le=6)     # …close on this weekday…
+    closes_time: str = Field(..., pattern=r"^\d{2}:\d{2}$")   # …at this time
+
+    @field_validator("closes_time")
+    @classmethod
+    def _real_time(cls, v):
+        h, m = v.split(":")
+        if not (0 <= int(h) <= 23 and 0 <= int(m) <= 59):
+            raise ValueError("closes_time must be HH:MM")
+        return v
+
+
+class OrderSettingsIn(BaseModel):
+    cutoffs: list[CutoffIn] = Field(default_factory=list, max_length=7)
+
+    @model_validator(mode="after")
+    def _one_per_day(self):
+        days = [c.for_day for c in self.cutoffs]
+        if len(days) != len(set(days)):
+            raise ValueError("One cutoff per weekday")
+        return self
+
+
+@router.get("/businesses/{business_id}/orders/settings")
+async def get_order_settings(business_id: str, user=Depends(verify_token)):
+    biz = await _owned_business(business_id, user)
+    return {"cutoffs": biz.get("order_cutoffs") or []}
+
+
+@router.put("/businesses/{business_id}/orders/settings")
+async def put_order_settings(business_id: str, payload: OrderSettingsIn, user=Depends(verify_token)):
+    await _owned_business(business_id, user)
+    cutoffs = [c.model_dump() for c in sorted(payload.cutoffs, key=lambda c: c.for_day)]
+    await db.businesses.update_one({"_id": business_id}, {"$set": {"order_cutoffs": cutoffs}})
+    return {"cutoffs": cutoffs}
+
+
+def past_cutoff(needed_by: str, cutoffs: list[dict[str, Any]], now: datetime) -> Optional[dict[str, Any]]:
+    """The cutoff an order for `needed_by` has already missed, or None.
+    Pure, so the client's copy and this one can be checked against each
+    other. The cutoff for a day is the most recent `closes_day
+    closes_time` at or before that day."""
+    try:
+        day = datetime.strptime(needed_by[:10], "%Y-%m-%d").date()
+    except ValueError:
+        return None
+    wd = _js_weekday(day)
+    for c in cutoffs or []:
+        if c.get("for_day") != wd:
+            continue
+        back = (wd - int(c.get("closes_day", wd))) % 7
+        closes_date = day - timedelta(days=back)
+        h, m = (c.get("closes_time") or "00:00").split(":")
+        closes_at = datetime(closes_date.year, closes_date.month, closes_date.day, int(h), int(m), tzinfo=now.tzinfo)
+        if now > closes_at:
+            return {**c, "closed_at": closes_at.replace(microsecond=0).isoformat()}
+    return None
+
+
+# ---- standing orders --------------------------------------------------------
+
+class StandingPatch(BaseModel):
+    active: Optional[bool] = None
+
+
+def _public_standing(d: dict[str, Any]) -> dict[str, Any]:
+    out = dict(d)
+    out["id"] = out.pop("_id")
+    out.pop("owner_user_id", None)
+    return out
+
+
+@router.get("/businesses/{business_id}/standing-orders")
+async def list_standing_orders(business_id: str, user=Depends(verify_token)):
+    await _owned_business(business_id, user)
+    docs = [
+        _public_standing(d)
+        async for d in db.store_standing_orders.find({"business_id": business_id}).sort([("weekday", 1), ("time", 1)])
+    ]
+    return docs
+
+
+@router.post("/orders/{order_id}/repeat-weekly")
+async def repeat_weekly(order_id: str, user=Depends(verify_token)):
+    """Turn an order into a standing one: same customer, same items,
+    same weekday and time, every week from now. The order it came from
+    is left as it is; the first generated copy is next week's."""
+    order = await _owned_order(order_id, user)
+    if order.get("standing_id"):
+        existing = await db.store_standing_orders.find_one({"_id": order["standing_id"]})
+        if existing:
+            return _public_standing(existing)
+    nb = order.get("needed_by") or ""
+    if not nb:
+        raise HTTPException(status_code=400, detail="This order has no date to repeat from")
+    day = datetime.strptime(nb[:10], "%Y-%m-%d").date()
+    now = _now_iso()
+    doc = {
+        "_id": str(uuid.uuid4()),
+        "business_id": order["business_id"],
+        "owner_user_id": order["owner_user_id"],
+        "customer_name": order.get("customer_name"),
+        "customer_phone": order.get("customer_phone"),
+        "customer_phone_e164": order.get("customer_phone_e164"),
+        "items": order.get("items"),
+        "total": order.get("total"),
+        "currency": order.get("currency") or "ILS",
+        "weekday": _js_weekday(day),
+        "time": nb[11:16] if "T" in nb else None,
+        "fulfilment": order.get("fulfilment") or "pickup",
+        "address": order.get("address"),
+        "notes": order.get("notes") or "",
+        "active": True,
+        "from_order_id": order["_id"],
+        # Generation starts AFTER the source order's date, so the week it
+        # was typed for is not produced twice.
+        "last_generated_date": day.isoformat(),
+        "created_at": now,
+        "updated_at": now,
+    }
+    await db.store_standing_orders.insert_one(doc)
+    await db.store_orders.update_one({"_id": order_id}, {"$set": {"standing_id": doc["_id"]}})
+    await generate_standing_orders(order["business_id"])
+    return _public_standing(doc)
+
+
+@router.patch("/standing-orders/{standing_id}")
+async def patch_standing(standing_id: str, payload: StandingPatch, user=Depends(verify_token)):
+    d = await db.store_standing_orders.find_one({"_id": standing_id})
+    if not d:
+        raise HTTPException(status_code=404, detail="Standing order not found")
+    if d.get("owner_user_id") != user["user_id"] and user.get("role") != "admin":
+        raise HTTPException(status_code=403, detail="Not your standing order")
+    sets: dict[str, Any] = {"updated_at": _now_iso()}
+    if payload.active is not None:
+        sets["active"] = payload.active
+    await db.store_standing_orders.update_one({"_id": standing_id}, {"$set": sets})
+    if payload.active:
+        await generate_standing_orders(d["business_id"])
+    fresh = await db.store_standing_orders.find_one({"_id": standing_id})
+    return _public_standing(fresh)
+
+
+@router.delete("/standing-orders/{standing_id}")
+async def delete_standing(standing_id: str, user=Depends(verify_token)):
+    """Stops future weeks. Orders already generated stay - they are real
+    orders the customer is expecting, and cancelling them is a separate,
+    visible decision on each card."""
+    d = await db.store_standing_orders.find_one({"_id": standing_id})
+    if not d:
+        raise HTTPException(status_code=404, detail="Standing order not found")
+    if d.get("owner_user_id") != user["user_id"] and user.get("role") != "admin":
+        raise HTTPException(status_code=403, detail="Not your standing order")
+    await db.store_standing_orders.delete_one({"_id": standing_id})
+    return {"ok": True}
+
+
+async def generate_standing_orders(business_id: str, *, horizon_days: int = 7) -> int:
+    """Create the next occurrence of every active standing order that
+    falls within `horizon_days` and has not been created yet. Called on
+    every board read; cheap because a business has a handful of these
+    and the query is indexed. Returns how many were created."""
+    today = datetime.now(_IL_TZ).date()
+    created = 0
+    async for sd in db.store_standing_orders.find({"business_id": business_id, "active": True}):
+        wd = int(sd.get("weekday", 0))
+        ahead = (wd - _js_weekday(today)) % 7
+        occurrence = today + timedelta(days=ahead)
+        last = sd.get("last_generated_date") or ""
+        if occurrence.isoformat() <= last:
+            # This week's is already made (or was the order it came
+            # from); the next one is a week on.
+            occurrence += timedelta(days=7)
+            ahead += 7
+        if ahead > horizon_days:
+            continue
+        needed_by = occurrence.isoformat() + (f"T{sd['time']}" if sd.get("time") else "")
+        now = _now_iso()
+        doc = {
+            "_id": str(uuid.uuid4()),
+            "business_id": business_id,
+            "owner_user_id": sd["owner_user_id"],
+            "customer_name": sd.get("customer_name"),
+            "customer_phone": sd.get("customer_phone"),
+            "customer_phone_e164": sd.get("customer_phone_e164"),
+            "items": sd.get("items"),
+            "total": sd.get("total"),
+            "currency": sd.get("currency") or "ILS",
+            "needed_by": needed_by,
+            "fulfilment": sd.get("fulfilment") or "pickup",
+            "address": sd.get("address") if sd.get("fulfilment") == "delivery" else None,
+            "notes": sd.get("notes") or "",
+            "status": "new",
+            "source": "standing",
+            "standing_id": sd["_id"],
+            "occurrence_date": occurrence.isoformat(),
+            "created_by": "standing",
+            "created_at": now,
+            "updated_at": now,
+            "status_changed_at": now,
+            "history": [{"status": "new", "at": now, "by": "standing"}],
+            "track_token": secrets.token_urlsafe(16),
+        }
+        try:
+            await db.store_orders.insert_one(doc)
+            created += 1
+        except Exception as exc:  # noqa: BLE001 — the unique index caught a race
+            logger.info("[orders] standing occurrence already exists: %s", exc)
+        await db.store_standing_orders.update_one(
+            {"_id": sd["_id"]}, {"$set": {"last_generated_date": occurrence.isoformat()}},
+        )
+    return created
