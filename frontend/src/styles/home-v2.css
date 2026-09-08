@@ -417,8 +417,16 @@ body.hv2-light-nav .glass-dot { background: var(--gold-lg); }
    taste call. Phones get a portrait render, the panel across the top. */
 .hv2-hero--film { position: relative; background: #fff; }
 .hv2-hero--film .hv2-film {
-  position: absolute; inset: 0; z-index: 0; width: 100%; height: 100%;
-  object-fit: cover; object-position: 70% 50%;
+  /* The film gets its own box, the inline-end half of the hero, rather than
+     the whole hero under the panel: the render's action is centred in its
+     frame, so a full-width film put the cube and the skyline half under
+     the panel edge. In its own box the action is centred in what the
+     visitor can see. Cover inside that box scales the film to the hero's
+     height and trims only the film's own white sides, so the formation is
+     as large as the hero allows and still whole. */
+  position: absolute; top: 0; bottom: 0; inset-inline-start: 50%;
+  z-index: 0; width: 50%; height: 100%;
+  object-fit: cover; object-position: 50% 50%;
   background: #fff;
 }
 .hv2-hero--film .hv2-hero-scrim {
@@ -426,7 +434,6 @@ body.hv2-light-nav .glass-dot { background: var(--gold-lg); }
     linear-gradient(90deg, #fff 0%, #fff 44%, rgba(255, 255, 255, .86) 49%, rgba(255, 255, 255, 0) 58%),
     linear-gradient(180deg, rgba(255, 255, 255, .55) 0%, rgba(255, 255, 255, 0) 18%, rgba(255, 255, 255, 0) 78%, rgba(255, 255, 255, .8) 100%);
 }
-[dir="rtl"] .hv2-hero--film .hv2-film { object-position: 30% 50%; }
 [dir="rtl"] .hv2-hero--film .hv2-hero-scrim {
   background:
     linear-gradient(270deg, #fff 0%, #fff 44%, rgba(255, 255, 255, .86) 49%, rgba(255, 255, 255, 0) 58%),
@@ -447,18 +454,28 @@ body.hv2-light-nav .glass-dot { background: var(--gold-lg); }
   /* The copy runs to about 60% of the hero on a phone (measured at 375 wide
      with the add-your-business link last), so the panel is the top 62%,
      solid, and the build shows beneath it. */
-  .hv2-hero--film .hv2-film,
-  [dir="rtl"] .hv2-hero--film .hv2-film { object-position: 50% 100%; }
+  /* The copy is a fixed pixel height (it ends at about 420px at 375 wide,
+     the add-your-business link last), so the panel is measured in pixels,
+     the hero takes the full screen, and the film gets the band below the
+     copy. The render's action sits in the middle of its frame, so the
+     band looks at that middle rather than the film's bottom. */
+  .hv2-hero--film { height: 100svh; min-height: 640px; --copy-h: 432px; }
+  .hv2-hero--film .hv2-film {
+    inset-inline-start: 0; width: 100%;
+    top: var(--copy-h); height: calc(100% - var(--copy-h));
+    object-position: 50% 62%;
+  }
   .hv2-hero--film .hv2-hero-scrim,
   [dir="rtl"] .hv2-hero--film .hv2-hero-scrim {
-    background: linear-gradient(180deg, #fff 0%, #fff 62%, rgba(255, 255, 255, .86) 67%, rgba(255, 255, 255, 0) 76%, rgba(255, 255, 255, 0) 90%, rgba(255, 255, 255, .8) 100%);
+    background: linear-gradient(180deg, #fff 0, #fff var(--copy-h), rgba(255, 255, 255, .86) calc(var(--copy-h) + 18px), rgba(255, 255, 255, 0) calc(var(--copy-h) + 44px), rgba(255, 255, 255, 0) 92%, rgba(255, 255, 255, .8) 100%);
   }
   .hv2-hero--film .hv2-hero-inner { justify-content: flex-start; gap: 22px; }
 }
 /* Tablets: the portrait render under the desktop copy layout (the foot at
    the bottom). The headline is narrowed so it wraps inside the panel (at
-   768 it ran as one line, half of it over the cube), and the panel is the
-   start 58% plus paper under the foot. */
+   768 it ran as one line, half of it over the cube), the panel is the
+   start 58% plus paper under the foot, and the film sits in a box on the
+   inline-end above that paper, looking at the film's lower band. */
 @media (min-width: 761px) and (max-width: 1000px) {
   .hv2-hero--film .hv2-hero-inner > div:first-child { max-width: 400px; }
   .hv2-hero--film .hv2-hero-scrim {
@@ -471,6 +488,5 @@ body.hv2-light-nav .glass-dot { background: var(--gold-lg); }
       linear-gradient(270deg, #fff 0%, #fff 58%, rgba(255, 255, 255, .86) 63%, rgba(255, 255, 255, 0) 72%),
       linear-gradient(180deg, rgba(255, 255, 255, .55) 0%, rgba(255, 255, 255, 0) 18%, rgba(255, 255, 255, 0) 62%, rgba(255, 255, 255, .94) 78%, #fff 100%);
   }
-  .hv2-hero--film .hv2-film,
-  [dir="rtl"] .hv2-hero--film .hv2-film { object-position: 50% 40%; }
+  .hv2-hero--film .hv2-film { inset-inline-start: 55%; width: 45%; height: 66%; object-position: 50% 85%; }
 }
