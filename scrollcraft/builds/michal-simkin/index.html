@@ -213,7 +213,7 @@
   }
   /* Tablets take the phone layout; give the stack room there. */
   @media (min-width: 600px) and (max-width: 860px) {
-    .deck { width: min(44vw, 360px); }
+    .deck { width: min(44vw, 360px); inset-inline-end: calc(var(--sc-gutter) + 3vw); }
     .hero .sc-copy--lead { max-width: 34rem; }
   }
   @media (prefers-reduced-motion: reduce) {
@@ -376,7 +376,7 @@
         var x = parseFloat(c.style.getPropertyValue('--x')) || 0;
         var y = parseFloat(c.style.getPropertyValue('--y')) || 0;
         var fx = 40 * (1 - t), fy = 50 * (1 - t), fr = r + (28 - r) * (1 - t);
-        c.style.opacity = t.toFixed(3);
+        c.style.opacity = Math.min(t * 3, 1).toFixed(3);
         c.style.transform = 'translate3d(calc(' + fx.toFixed(2) + 'vw + ' + x + '%), calc(' + fy.toFixed(2) + 'vh + ' + y + '%), 0) rotate(' + fr.toFixed(2) + 'deg)';
       });
     }
