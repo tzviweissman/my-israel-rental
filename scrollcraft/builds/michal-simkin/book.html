@@ -1,0 +1,321 @@
+<!doctype html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Book with Michal Simkin, Bet Shemesh.</title>
+<meta name="description" content="Book a wig consultation (₪100) or enrol in the Michal Simkin Academy. Sunday to Thursday, 10 to 2, by appointment, Bet Shemesh.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='7' fill='%230E1F39'/><circle cx='16' cy='16' r='8' fill='%23E9C4B0'/></svg>">
+<!--
+  The booking page. It reads her real items (the consultation, the two
+  academy courses and the bundle, at her prices) from the site's order-form
+  API and places a real request on her board, with a track link. The site
+  processes no payment; she confirms the time in reply.
+
+  Buyer psychology, honest only: the bundle sits beside the two singles
+  with "₪16,000 separately" (her own figure); a default already chosen; a
+  step count; three of her real reviews with names beside the picker; the
+  total and the one button always in view; no countdown, no scarcity.
+-->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400;1,500&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --font-head: 'Playfair Display', Georgia, serif;
+    --font-body: 'Manrope', system-ui, sans-serif;
+    --navy: #0E1F39; --navy-2: #16294A; --ivory: #FBF7F4; --blush: #DBB3B1; --blush-pale: #F3E4E0;
+    --rose-gold: #E9C4B0; --rose-text: #9E4560; --muted: #5B6577; --line: rgba(14, 31, 57, 0.14); --ok: #2E7D4F;
+    --bar-h: 84px; --pill: 45px 10px; --wash: var(--blush-pale); --soft: var(--muted);
+  }
+  * { box-sizing: border-box; }
+  :focus-visible { outline: 2px solid var(--rose-text); outline-offset: 2px; }
+  input:focus, select:focus, textarea:focus { outline: 2px solid var(--rose-text); outline-offset: 1px; }
+  html { scroll-behavior: smooth; }
+  body { margin: 0; font: 17px/1.5 var(--font-body); background: #FFFFFF; color: var(--navy); padding-block-end: var(--bar-h); }
+  h1, h2, h3 { font-family: var(--font-head); font-weight: 500; margin: 0; }
+  a { color: inherit; }
+  button { font: inherit; cursor: pointer; }
+  .wrap { max-width: 1180px; margin-inline: auto; padding-inline: clamp(1.25rem, 5vw, 3rem); }
+  .nav { position: sticky; top: 0; z-index: 30; display: flex; align-items: center; gap: 1rem; padding: 0.8rem clamp(1.25rem, 5vw, 3rem); background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(12px); border-bottom: 1px solid var(--line); }
+  .nav__mark { display: inline-flex; align-items: center; gap: 0.6rem; font-weight: 800; text-transform: uppercase; letter-spacing: -0.02em; text-decoration: none; }
+  .nav__mark img { width: 30px; height: 30px; border-radius: 50%; object-fit: cover; }
+  .nav__back { margin-inline-start: auto; font-size: 0.9rem; color: var(--muted); text-decoration: none; }
+
+  /* gallery: the product first, on a soft wash, then the details */
+  .gallery { display: grid; gap: 0.7rem; margin-bottom: 0.5rem; }
+  .gallery .lead { margin: 0; border-radius: 18px; overflow: hidden; background: var(--wash); aspect-ratio: 4 / 3; display: grid; place-items: center; padding: 6%; }
+  .gallery .lead img { width: 100%; height: 100%; object-fit: contain; }
+  .gallery .more { display: grid; grid-template-columns: 1fr 1fr; gap: 0.7rem; }
+  .gallery .more figure { margin: 0; border-radius: 14px; overflow: hidden; aspect-ratio: 4 / 3; }
+  .gallery .more img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .gallery figcaption { font-size: 0.75rem; color: var(--soft); padding: 0.3rem 0.2rem 0; }
+  .badge { display: inline-block; padding: 0.15rem 0.6rem; border: 1px solid var(--line); border-radius: 999px; font-size: 0.75rem; font-weight: 700; letter-spacing: 0.04em; color: var(--soft); margin-bottom: 0.4rem; }
+
+  .head { padding-block: clamp(2rem, 5vw, 3.5rem) 1rem; }
+  .head h1 { font-size: clamp(2rem, 4.2vw, 3.4rem); line-height: 1.05; letter-spacing: -0.02em; }
+  .head h1 em { font-style: italic; color: var(--rose-text); }
+  .head p { margin: 0.6rem 0 0; color: var(--muted); max-width: 40rem; }
+  .steps { display: flex; gap: 0.5rem; flex-wrap: wrap; margin: 1.4rem 0 0; padding: 0; list-style: none; }
+  .steps li { display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.35rem 0.8rem 0.35rem 0.5rem; border-radius: 999px; border: 1px solid var(--line); font-size: 0.85rem; font-weight: 600; color: var(--muted); }
+  .steps li i { display: grid; place-content: center; width: 22px; height: 22px; border-radius: 50%; background: var(--line); font-style: normal; font-size: 0.75rem; color: var(--navy); }
+  .steps li.done { color: var(--navy); border-color: transparent; background: #E6F4EA; }
+  .steps li.done i { background: var(--ok); color: #fff; }
+  .steps li.now { color: #fff; background: var(--navy); border-color: transparent; }
+  .steps li.now i { background: var(--rose-gold); color: var(--navy); }
+  .grid { display: grid; grid-template-columns: 1fr minmax(300px, 380px); gap: clamp(1.5rem, 4vw, 3.5rem); align-items: start; padding-block: 1rem 3rem; }
+  section.step { padding: clamp(1.4rem, 3vw, 2rem) 0; border-top: 1px solid var(--line); }
+  section.step h2 { font-size: clamp(1.5rem, 2.6vw, 2.1rem); margin-bottom: 0.3rem; }
+  section.step > p.lead { margin: 0 0 1.2rem; color: var(--muted); }
+  .group { margin: 0 0 1.2rem; }
+  .group h3 { font-family: var(--font-body); font-size: 0.8rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); margin: 0 0 0.5rem; font-weight: 700; }
+  .picks { display: grid; grid-template-columns: 1fr 1fr; gap: 0.6rem; }
+  .picks:has(> :only-child) { grid-template-columns: 1fr; }
+  @media (max-width: 560px) { .picks { grid-template-columns: 1fr; } }
+  .pick { text-align: start; padding: 0.9rem 1rem; border-radius: 16px; border: 1px solid var(--line); background: var(--ivory); color: var(--navy); display: grid; gap: 0.3rem; transition: border-color .15s, box-shadow .15s; }
+  .pick:hover { border-color: var(--blush); }
+  .pick[aria-pressed="true"] { border-color: var(--navy); box-shadow: 0 0 0 1px var(--navy) inset; background: var(--blush-pale); }
+  /* The bundle is the one to weigh the singles against, so it stands apart. */
+  .pick.bundle { grid-column: 1 / -1; grid-template-columns: 1fr auto; align-items: center; column-gap: 1rem; border-color: var(--rose-gold); }
+  .pick.bundle .what { grid-column: 1; }
+  .pick .name { font-family: var(--font-head); font-size: 1.15rem; line-height: 1.2; }
+  .pick .price { font-weight: 800; font-size: 1.15rem; color: var(--rose-text); }
+  .pick .price small { font-weight: 500; font-size: 0.75rem; color: var(--muted); margin-inline-start: 0.35rem; text-decoration: line-through; }
+  .pick .what { font-size: 0.85rem; color: var(--muted); line-height: 1.4; }
+  .pick .start { display: inline-block; font-size: 0.72rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--rose-text); }
+  .fields { display: grid; grid-template-columns: 1fr 1fr; gap: 0.9rem 1rem; }
+  .fields .full { grid-column: 1 / -1; }
+  label.f { display: grid; gap: 0.3rem; font-size: 0.85rem; font-weight: 600; color: var(--muted); }
+  .f input, .f textarea, .f select { font: inherit; color: var(--navy); background: #fff; border: 1px solid var(--line); border-radius: 12px; padding: 0.7rem 0.85rem; min-height: 48px; width: 100%; }
+  .f input:focus, .f textarea:focus, .f select:focus { outline: 2px solid var(--rose-text); outline-offset: 1px; }
+  .f textarea { min-height: 96px; resize: vertical; }
+  .f .hint { font-weight: 500; font-size: 0.8rem; }
+  .choices { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+  .choice { padding: 0.55rem 0.9rem; border-radius: 999px; border: 1px solid var(--line); background: #fff; color: var(--navy); font-weight: 600; font-size: 0.9rem; min-height: 44px; }
+  .choice[aria-pressed="true"] { background: var(--navy); color: #fff; border-color: transparent; }
+  .err { color: #B3261E; font-size: 0.85rem; margin: 0.4rem 0 0; min-height: 1.2em; }
+  .summary { position: sticky; top: 76px; display: grid; gap: 1rem; }
+  .card { padding: 1.2rem 1.3rem; border-radius: 18px; background: var(--ivory); border: 1px solid var(--line); }
+  .card h2 { font-size: 1.2rem; margin-bottom: 0.8rem; }
+  .lines { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.5rem; }
+  .lines li { display: grid; grid-template-columns: 1fr auto; gap: 0.6rem; font-size: 0.95rem; }
+  .lines .amt { font-variant-numeric: tabular-nums; font-weight: 600; }
+  .contents { margin: 0.8rem 0 0; padding: 0.8rem 0 0; border-top: 1px solid var(--line); font-size: 0.9rem; color: var(--muted); line-height: 1.45; }
+  .total { display: flex; justify-content: space-between; align-items: baseline; margin-top: 1rem; padding-top: 0.8rem; border-top: 1px solid var(--line); }
+  .total b { font-weight: 800; font-size: 1.6rem; color: var(--rose-text); font-variant-numeric: tabular-nums; }
+  .cta { display: inline-flex; align-items: center; justify-content: center; width: 100%; min-height: 54px; margin-top: 1rem; border: 0; border-radius: var(--pill); background: var(--navy); color: #fff; font-weight: 700; font-size: 1.05rem; }
+  .cta:hover { background: var(--navy-2); }
+  .cta:disabled { opacity: 0.55; cursor: not-allowed; }
+  .assure { margin: 0.8rem 0 0; color: var(--muted); font-size: 0.85rem; line-height: 1.45; }
+  .assure b { color: var(--navy); font-weight: 600; }
+  .voice { display: grid; grid-template-columns: 44px 1fr; gap: 0.6rem; align-items: start; margin: 0; }
+  .voice img { width: 44px; height: 44px; border-radius: 50%; object-fit: cover; }
+  .voice p { margin: 0; font-size: 0.85rem; line-height: 1.45; }
+  .voice b { display: block; margin-top: 2px; font-size: 0.75rem; color: var(--rose-text); }
+  .bar { position: fixed; inset-inline: 0; bottom: 0; z-index: 30; display: none; align-items: center; gap: 0.8rem; padding: 0.7rem clamp(1.25rem, 5vw, 3rem) calc(0.7rem + env(safe-area-inset-bottom)); background: rgba(251, 247, 244, 0.92); backdrop-filter: blur(12px); border-top: 1px solid var(--line); }
+  .bar .t { display: grid; } .bar .t small { color: var(--muted); font-size: 0.75rem; } .bar .t b { font-weight: 800; font-size: 1.25rem; color: var(--rose-text); }
+  .bar .cta { width: auto; margin: 0; flex: 1; min-height: 48px; }
+  .done { display: none; padding-block: clamp(2rem, 6vw, 4rem); max-width: 40rem; }
+  .done h1 { font-size: clamp(2rem, 4.2vw, 3.2rem); line-height: 1.05; } .done h1 em { font-style: italic; color: var(--rose-text); }
+  .done .card p { margin: 0.4rem 0; }
+  .done .track { display: inline-block; margin-top: 0.6rem; font-weight: 700; color: var(--rose-text); }
+  body.is-done .grid, body.is-done .head, body.is-done .bar { display: none !important; }
+  body.is-done .done { display: block; }
+  @media (max-width: 900px) {
+    .grid { grid-template-columns: 1fr; } .summary { position: static; } .bar { display: flex; } .fields { grid-template-columns: 1fr; }
+  }
+  @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+</style>
+</head>
+<body>
+<nav class="nav" aria-label="Book">
+  <a class="nav__mark" href="index.html"><img src="assets/mark.jpg" alt="" width="96" height="96"> Michal Simkin</a>
+  <a class="nav__back" href="index.html">Back to the page</a>
+</nav>
+
+<main class="wrap">
+  <header class="head">
+    <h1>Book with Michal, <em>in three steps.</em></h1>
+    <p>A consultation at the salon, or a place in the academy. Say when suits you; she confirms the time in reply. Sunday to Thursday, 10 to 2, Bet Shemesh.</p>
+    <ol class="steps" id="steps" aria-label="Progress">
+      <li class="now" data-step="1"><i>1</i> What</li>
+      <li data-step="2"><i>2</i> When</li>
+      <li data-step="3"><i>3</i> Your details</li>
+    </ol>
+  </header>
+
+  <div class="grid">
+    <div>
+      <div class="gallery" aria-label="Her clients">
+        <figure class="lead"><img src="assets/client-1.jpg" width="720" height="960" alt="A client in the salon chair in a long brown wig, smiling" style="object-fit: cover"></figure>
+        <div class="more">
+          <figure><img src="assets/client-2.jpg" width="720" height="960" alt="A client in a soft shoulder-length brown wig" loading="lazy"></figure>
+          <figure><img src="assets/client-3.jpg" width="720" height="960" alt="A client in a long wavy light-brown wig" loading="lazy"></figure>
+          <figure><img src="assets/client-6.jpg" width="720" height="960" alt="A client in a long wavy honey-brown wig" loading="lazy"></figure>
+          <figure><img src="assets/client-7.jpg" width="720" height="960" alt="A client smiling in a shoulder-length dark wig" loading="lazy"></figure>
+        </div>
+        <figcaption>Her clients, from her website.</figcaption>
+      </div>
+      <section class="step" id="step-what">
+        <h2>What would you like?</h2>
+        <p class="lead">Her prices, as she publishes them.</p>
+        <div id="groups"></div>
+        <p class="err" id="errWhat"></p>
+      </section>
+
+      <section class="step" id="step-when">
+        <h2>When suits you?</h2>
+        <p class="lead">Sunday to Thursday, between 10 and 2. She confirms the exact time with you.</p>
+        <div class="fields">
+          <label class="f">Preferred day<input type="date" id="date" required><span class="hint" id="dateHint">Sunday to Thursday.</span></label>
+          <label class="f">Preferred time<select id="time"><option>10:00</option><option>11:00</option><option>12:00</option><option>13:00</option><option>Any time between 10 and 2</option></select></label>
+        </div>
+        <p class="err" id="errWhen"></p>
+      </section>
+
+      <section class="step" id="step-you">
+        <h2>Your details.</h2>
+        <p class="lead">So she can confirm with you. Nothing is stored for anyone else.</p>
+        <div class="fields">
+          <label class="f">Your name<input type="text" id="name" autocomplete="name" required maxlength="120"></label>
+          <label class="f">Mobile<input type="tel" id="phone" autocomplete="tel" inputmode="tel" required placeholder="05x-xxx-xxxx" maxlength="40"></label>
+          <label class="f full">Email, for your confirmation <span class="hint">(optional)</span><input type="email" id="email" autocomplete="email" maxlength="200"></label>
+          <label class="f full">Anything she should know? <span class="hint">(optional) A wig you already own, what you're hoping for, past experiences.</span><textarea id="notes" maxlength="1000"></textarea></label>
+        </div>
+        <p class="err" id="errYou"></p>
+      </section>
+    </div>
+
+    <aside class="summary">
+      <div class="card" aria-live="polite">
+        <span class="badge">Bet Shemesh · by appointment</span>
+        <h2>Your booking</h2>
+        <ul class="lines" id="lines"><li>Nothing chosen yet.</li></ul>
+        <p class="contents" id="contents" hidden></p>
+        <div class="total"><span>Total</span><b id="total">₪0</b></div>
+        <button type="button" class="cta" id="place" disabled>Request the time</button>
+        <p class="assure"><b>Nothing is paid here.</b> Michal confirms the time with you, and payment is between you and her.</p>
+      </div>
+      <div class="card" aria-label="What clients say">
+        <h2>In their words</h2>
+        <div style="display:grid;gap:.9rem">
+          <figure class="voice"><img src="assets/yael.jpg" alt=""><figcaption><p>"She had a ton of options and she tried so many on me, giving her honest opinion, with no pressure to buy. Its not surprising that 2 years later I still love the wig I got."<b>Yael Stoolback</b></p></figcaption></figure>
+          <figure class="voice"><img src="assets/debbie.jpg" alt=""><figcaption><p>"Immediately, she saw the problems and brought the sheitl back to life! Now, I love it."<b>Debbie Burack</b></p></figcaption></figure>
+          <figure class="voice"><img src="assets/miriam.jpg" alt=""><figcaption><p>"Something I actually think is cute, light, and works AMAZINGLY for me!"<b>Miriam Campbell</b></p></figcaption></figure>
+        </div>
+      </div>
+    </aside>
+  </div>
+
+  <section class="done" id="done" aria-live="polite">
+    <h1>Your request is with <em>Michal.</em></h1>
+    <div class="card">
+      <p id="doneWhat"></p>
+      <p id="doneWhen"></p>
+      <p>She confirms the time with you. Nothing is paid here; payment is between you and her.</p>
+      <a class="track" id="track" href="#" target="_blank" rel="noopener">Follow your request</a>
+    </div>
+    <p style="margin-top:1.2rem;color:var(--muted)"><a href="index.html">Back to the page</a></p>
+  </section>
+</main>
+
+<div class="bar" aria-hidden="true">
+  <div class="t"><small>Total</small><b id="totalBar">₪0</b></div>
+  <button type="button" class="cta" id="placeBar" disabled>Request the time</button>
+</div>
+
+<script>
+(function () {
+  var API = 'http://localhost:8001/api';
+  var APP = 'http://localhost:3210';
+  var SLUG = 'michal-simkin';
+  var SYM = { USD: '$', ILS: '₪', EUR: '€', GBP: '£' };
+  var $ = function (s) { return document.querySelector(s); };
+  var state = { gig: null, products: [], chosen: null };
+  function money(n, cur) { return (SYM[cur] || cur + ' ') + (Math.round(n * 100) / 100).toLocaleString('en-US'); }
+
+  fetch(API + '/marketplace/business/' + SLUG).then(function (r) { return r.json(); }).then(function (d) {
+    var gigs = d.listings || d.gigs || [];
+    var store = gigs.filter(function (g) { return g.gig_type === 'store'; })[0] || gigs[0];
+    return fetch(API + '/marketplace/order-form/' + store.id).then(function (r) { return r.json(); });
+  }).then(function (form) {
+    state.gig = form.gig; state.products = form.products;
+    render(); initDate();
+    var want = location.hash === '#academy' ? /both courses/ : /consultation/i;
+    var def = state.products.filter(function (p) { return want.test(p.name); })[0];
+    if (def) choose(def.id);
+  }).catch(function (e) { $('#errWhat').textContent = 'Could not load. Is the local API running on 8001? (' + e.message + ')'; });
+
+  function render() {
+    var groups = {}, order = [];
+    state.products.forEach(function (p) { var g = p.group || 'Other'; if (!groups[g]) { groups[g] = []; order.push(g); } groups[g].push(p); });
+    $('#groups').innerHTML = order.map(function (g) {
+      return '<div class="group"><h3>' + g + '</h3><div class="picks">' + groups[g].map(function (p) {
+        var bundle = /both courses/.test(p.name);
+        return '<button type="button" class="pick' + (bundle ? ' bundle' : '') + '" data-id="' + p.id + '" aria-pressed="false">'
+          + '<span class="name">' + p.name.replace('Academy · ', '') + '</span>'
+          + '<span class="price">' + money(p.price, p.currency) + (bundle ? '<small>₪16,000</small>' : '') + '</span>'
+          + (p.description ? '<span class="what">' + p.description + '</span>' : '')
+          + (/consultation/i.test(p.name) ? '<span class="start">The usual first step</span>' : '')
+          + '</button>';
+      }).join('') + '</div></div>';
+    }).join('');
+    $('#groups').addEventListener('click', function (e) { var b = e.target.closest('.pick'); if (b) choose(b.getAttribute('data-id')); });
+  }
+  function choose(id) { state.chosen = state.products.filter(function (p) { return p.id === id; })[0] || null; paint(); }
+
+  function initDate() {
+    var d = new Date(); d.setDate(d.getDate() + 1);
+    while ([5, 6].indexOf(d.getDay()) !== -1) d.setDate(d.getDate() + 1);   /* not Friday, not Shabbat */
+    var iso = d.toISOString().slice(0, 10);
+    $('#date').min = iso; $('#date').value = iso;
+    $('#date').addEventListener('change', function () {
+      var wd = new Date($('#date').value + 'T12:00:00').getDay();
+      $('#errWhen').textContent = (wd === 5 || wd === 6) ? 'The salon is open Sunday to Thursday.' : '';
+      paint();
+    });
+  }
+  ['name', 'phone', 'email', 'notes'].forEach(function (id) { $('#' + id).addEventListener('input', paint); });
+
+  function paint() {
+    document.querySelectorAll('.pick').forEach(function (b) { b.setAttribute('aria-pressed', String(!!state.chosen && b.getAttribute('data-id') === state.chosen.id)); });
+    var p = state.chosen;
+    $('#lines').innerHTML = p ? '<li><span>' + p.name.replace('Academy · ', 'Academy: ') + '</span><span class="amt">' + money(p.price, p.currency) + '</span></li>' : '<li>Nothing chosen yet.</li>';
+    $('#contents').hidden = !(p && p.description); if (p && p.description) $('#contents').textContent = p.description;
+    var tot = p ? money(p.price, p.currency) : '₪0';
+    $('#total').textContent = tot; $('#totalBar').textContent = tot;
+    var wd = $('#date').value ? new Date($('#date').value + 'T12:00:00').getDay() : -1;
+    var s1 = !!p, s2 = s1 && wd >= 0 && wd !== 5 && wd !== 6;
+    var s3 = s2 && $('#name').value.trim() && $('#phone').value.trim().length >= 9;
+    var li = document.querySelectorAll('#steps li');
+    li[0].className = s1 ? 'done' : 'now'; li[1].className = s2 ? 'done' : (s1 ? 'now' : ''); li[2].className = s3 ? 'done' : (s2 ? 'now' : '');
+    var label = p ? 'Request the time · ' + tot : 'Request the time';
+    $('#place').textContent = label; $('#placeBar').textContent = label;
+    $('#place').disabled = !s1; $('#placeBar').disabled = !s1;
+  }
+
+  function place() {
+    $('#errWhat').textContent = ''; $('#errWhen').textContent = ''; $('#errYou').textContent = '';
+    if (!state.chosen) { $('#errWhat').textContent = 'Choose one.'; return; }
+    var wd = new Date($('#date').value + 'T12:00:00').getDay();
+    if (!$('#date').value || wd === 5 || wd === 6) { $('#errWhen').textContent = 'Pick a day, Sunday to Thursday.'; $('#step-when').scrollIntoView(); return; }
+    if (!$('#name').value.trim() || $('#phone').value.trim().length < 9) { $('#errYou').textContent = 'Your name and a mobile number, so she can confirm.'; $('#step-you').scrollIntoView(); return; }
+    var notes = ('Preferred time: ' + $('#time').value + ($('#notes').value.trim() ? '\n' + $('#notes').value.trim() : ''));
+    var body = { lines: [{ product_id: state.chosen.id, qty: 1 }], fulfilment: 'pickup', date: $('#date').value, window: null, address: null,
+      customer_name: $('#name').value.trim(), customer_phone: $('#phone').value.trim(), customer_email: $('#email').value.trim() || null, notes: notes };
+    $('#place').disabled = true; $('#placeBar').disabled = true; $('#place').textContent = 'Sending…';
+    fetch(API + '/marketplace/order-form/' + state.gig.id + '/orders', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) })
+      .then(function (r) { return r.json().then(function (j) { if (!r.ok) throw new Error(j.detail || 'Could not send the request'); return j; }); })
+      .then(function (j) {
+        $('#doneWhat').textContent = state.chosen.name.replace('Academy · ', 'Academy: ') + ' · ' + money(j.total || 0, j.currency || 'ILS') + '.';
+        $('#doneWhen').textContent = 'Preferred: ' + $('#date').value + ', ' + $('#time').value + '.';
+        $('#track').href = APP + '/orders/track/' + j.track_token;
+        document.body.classList.add('is-done'); window.scrollTo(0, 0);
+      })
+      .catch(function (e) { $('#errYou').textContent = e.message; $('#place').disabled = false; $('#placeBar').disabled = false; paint(); });
+  }
+  $('#place').addEventListener('click', place); $('#placeBar').addEventListener('click', place);
+})();
+</script>
+</body>
+</html>

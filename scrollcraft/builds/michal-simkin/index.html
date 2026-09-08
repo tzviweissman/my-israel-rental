@@ -71,6 +71,27 @@
   .accent { color: var(--sc-accent); font-style: italic; }
   .sc-grain { opacity: 0.035; }
 
+  /* ----------------------------------------------------------------- top --
+     Where you are, and where to go. Desktop carries the one CTA here;
+     phones keep it in the thumb-reach bar below. */
+  .top {
+    position: fixed; inset-inline: 0; inset-block-start: 0; z-index: var(--sc-z-chrome);
+    display: flex; align-items: center; gap: var(--sc-4); padding: var(--sc-3) var(--sc-gutter);
+    background: rgba(251, 247, 244, 0.86); backdrop-filter: blur(14px); border-bottom: 1px solid rgba(14, 31, 57, 0.1);
+    color: var(--navy);
+  }
+  .on-navy ~ .top { color: var(--navy); }
+  .top__mark { display: inline-flex; align-items: center; gap: var(--sc-3); font-family: var(--font-body); font-weight: 800; text-transform: uppercase; letter-spacing: -0.02em; font-size: var(--sc-t-base); color: var(--navy); text-decoration: none; }
+  .top__mark img { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; }
+  .top__nav { display: flex; gap: var(--sc-1); margin-inline: auto; }
+  .top__nav a { position: relative; padding: 0.5rem 0.8rem; border-radius: 999px; text-decoration: none; font-size: var(--sc-t-xs); font-weight: 700; color: var(--muted); transition: color var(--sc-d-fast) var(--sc-ease-out); }
+  .top__nav a:hover { color: var(--navy); }
+  .top__nav a[aria-current="true"] { color: var(--navy); }
+  .top__nav a[aria-current="true"]::after { content: ""; position: absolute; inset-inline: 0.8rem; bottom: 0.25rem; height: 2px; background: var(--rose-text); border-radius: 1px; }
+  .top__cta { min-height: 42px; padding: 0 var(--sc-5); font-size: var(--sc-t-sm); }
+  .bar { display: none; }
+  body { padding-block-end: 0; }
+
   /* ----------------------------------------------------------------- bar --
      Fixed at the bottom, the booking pattern a phone already knows. Her
      mark, the one button, the reassurance beside it. */
@@ -97,7 +118,7 @@
 
   /* ---------------------------------------------------------------- hero --
      Her headline, and her clients dealt onto a stack beside it. */
-  .hero .sc-copy--lead { max-width: min(38rem, 52vw); bottom: auto; top: 50%; translate: 0 -50%; }
+  .hero .sc-copy--lead { max-width: min(38rem, 52vw); bottom: auto; top: 52%; translate: 0 -50%; }
   .hero h1 { margin: 0 0 var(--sc-4); font-size: clamp(2.2rem, 4.6vw, 4.4rem); line-height: 1.04; letter-spacing: var(--sc-track-tight); }
   .hero h1 em { font-style: italic; color: var(--rose-gold); }
   .hero .lede { margin: 0; color: #C9CFDA; font-size: var(--sc-t-lg); line-height: 1.45; max-width: 30rem; }
@@ -195,6 +216,14 @@
   /* -------------------------------------------------------------- mobile -- */
   @media (max-width: 860px) {
     :root { --bar-h: 84px; }
+    .top { flex-wrap: wrap; row-gap: 0; padding-block: var(--sc-2); }
+    .top__cta { display: none; }
+    .top__nav { order: 3; flex-basis: 100%; margin: 0; overflow-x: auto; scrollbar-width: none; gap: 0; }
+    .top__nav::-webkit-scrollbar { display: none; }
+    .top__nav a { white-space: nowrap; padding: 0.45rem 0.6rem; }
+    .bar { display: flex; }
+    body { padding-block-end: var(--bar-h); }
+    .hero .sc-copy--lead { top: clamp(6rem, 14vh, 8rem) !important; }
     .bar { flex-wrap: wrap; gap: var(--sc-2) var(--sc-3); padding-block: var(--sc-2); height: auto; min-height: var(--bar-h); }
     .bar__mark { width: 34px; height: 34px; }
     .bar__assure { order: 3; flex-basis: 100%; font-size: var(--sc-t-xs); }
@@ -231,10 +260,21 @@
 <body id="top">
 <div class="sc-grain" aria-hidden="true"></div>
 
+<header class="top">
+  <a class="top__mark" href="#top"><img src="assets/mark.jpg" alt="" width="96" height="96"> Michal Simkin</a>
+  <nav class="top__nav" aria-label="On this page" data-spy>
+    <a href="#hero">Clients</a>
+    <a href="#consult">The consult</a>
+    <a href="#same">In their words</a>
+    <a href="#academy">Academy</a>
+    <a href="#close">Get in touch</a>
+  </nav>
+  <a class="cta top__cta" href="book.html">Book a consultation</a>
+</header>
 <nav class="bar" aria-label="Book">
   <img class="bar__mark" src="assets/mark.jpg" width="96" height="96" alt="">
   <p class="bar__assure"><b>Consultation ₪100.</b> Sun to Thu, 10 to 2, by appointment. Bet Shemesh.</p>
-  <a class="cta" href="#close">Message Michal Simkin</a>
+  <a class="cta" href="book.html">Book a consultation</a>
 </nav>
 
 <main>
@@ -331,8 +371,8 @@
         <span class="big">₪12,000<small>the full bundle</small></span>
       </div>
       <p class="grad" data-sc-in>Chaya Basya took the course. She now runs her own salon in Ramat Beit Shemesh Daled, with a clientele of her own.<b>Chaya Basya, graduate of the academy</b></p>
-      <p class="enrol">Enrolment is by message. Say "Academy" and she takes it from there.</p>
-      <p style="margin: var(--sc-4) 0 0"><a class="cta" href="#close">Message Michal Simkin</a></p>
+      <p class="enrol">Enrolment is a request: pick a course, say when suits you, and she confirms your place.</p>
+      <p style="margin: var(--sc-4) 0 0"><a class="cta" href="book.html#academy">Enrol in the Academy</a></p>
     </div>
   </section>
 
@@ -346,7 +386,7 @@
           <img src="assets/michal-small.jpg" width="160" height="160" alt="Michal Simkin">
           <p>Michal<small>Bet Shemesh</small></p>
         </div>
-        <a class="cta" href="#close">Message Michal Simkin</a>
+        <a class="cta" href="book.html">Book a consultation</a>
         <p class="facts">Send a message with what you're looking for. Appointments are arranged in reply. Consultation ₪100. Sunday to Thursday, 10 to 2, by appointment. English and Hebrew. Custom wigs, cuts and transformations, wash and sets, handwork, repairs, cap adjustments, baby hairs, colour.</p>
       </div>
       <p class="foot">Michal Simkin, Bet Shemesh, on MyIsraelRental. Also on WhatsApp, 054-682-6258. Every photograph on this page is from her website.</p>
@@ -360,10 +400,38 @@
   ScrollCraft.mount(document.body);
   (function () {
     var reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
-    /* The bar wraps on phones, so its height is measured, not assumed. */
+    /* The bar wraps on phones, so its height is measured, not assumed. On
+       desktop it is hidden and the padding it reserves goes to zero. */
     var bar = document.querySelector('.bar');
-    function barH() { document.documentElement.style.setProperty('--bar-h', Math.ceil(bar.getBoundingClientRect().height) + 'px'); }
-    if (bar) { barH(); new ResizeObserver(barH).observe(bar); }
+    function barH() { var h = getComputedStyle(bar).display === 'none' ? 0 : Math.ceil(bar.getBoundingClientRect().height); document.documentElement.style.setProperty('--bar-h', h + 'px'); }
+    if (bar) { barH(); new ResizeObserver(barH).observe(bar); addEventListener('resize', barH, { passive: true }); }
+    /* ------------------------------------------------------------ nav spy --
+       The nav says where you are: the section whose box holds the middle
+       of the viewport is the current one. Pinned acts are tall boxes, so
+       this holds through a pin. */
+    (function () {
+      var links = Array.prototype.slice.call(document.querySelectorAll('[data-spy] a[href^="#"]'));
+      if (!links.length) return;
+      var targets = links.map(function (a) { return document.getElementById(a.getAttribute('href').slice(1)); });
+      var current = null;
+      function spy() {
+        var mid = innerHeight * 0.5, best = null;
+        targets.forEach(function (el, i) {
+          if (!el) return;
+          var r = el.getBoundingClientRect();
+          if (r.top <= mid && r.bottom > mid) best = i;
+        });
+        if (best === null) { var last = targets.length - 1; if (targets[last] && targets[last].getBoundingClientRect().top <= mid) best = last; else best = 0; }
+        if (best === current) return;
+        current = best;
+        links.forEach(function (a, i) { if (i === best) a.setAttribute('aria-current', 'true'); else a.removeAttribute('aria-current'); });
+      }
+      var t = false;
+      addEventListener('scroll', function () { if (t) return; t = true; requestAnimationFrame(function () { spy(); t = false; }); }, { passive: true });
+      addEventListener('resize', spy, { passive: true });
+      spy();
+    })();
+
     var ease = function (t) { return t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2; };
     var clamp = function (v) { return Math.min(Math.max(v, 0), 1); };
     function onProgress(el, fn) {
