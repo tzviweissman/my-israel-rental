@@ -297,9 +297,10 @@ function App() {
               real pricing) and by the gig wizard's plan step, which states the
               free month at the point it actually applies.
 
-              The component and /api/user/services-pitch/action still exist, so
-              re-enabling is a one-line change if you want it back on a
-              different trigger. `services_pitch_seen_at` on the user doc is
+              The ServicesUpsellModal component itself was deleted in the
+              2026-09-05 dead-code sweep; /api/user/services-pitch/action
+              still exists. Re-enabling means restoring the component and
+              wiring it back in. `services_pitch_seen_at` on the user doc is
               now unread by the UI. */}
           <FloatingContact />
           <AccessibilityButton />

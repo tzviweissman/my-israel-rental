@@ -18,14 +18,12 @@ from routes.deps import (
     optional_user,
     ALLOWED_IMAGE_TYPES,
     ALLOWED_VIDEO_TYPES,
-    ANTHROPIC_API_KEY,
     MAX_FILE_SIZE,
     UPLOAD_DIR,
     db,
     logger,
     verify_token,
 )
-from utils.llm import LlmChat, UserMessage
 from utils.rate_limit import check_rate
 from utils.cloud_storage import (
     CLOUDINARY_ENABLED,

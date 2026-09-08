@@ -328,22 +328,6 @@ class ConversationOut(BaseModel):
     business_name: str | None = None
 
 
-class ServiceRequestOut(BaseModel):
-    """Persisted ``db.service_requests`` / ``db.document_services`` row."""
-    model_config = ConfigDict(extra='allow')
-    id: str
-    user_id: str
-    service_type: str | None = None
-    status: str
-    created_at: str
-    updated_at: str | None = None
-    details: dict | None = None
-    property_address: str | None = None
-    tenant_name: str | None = None
-    tenant_id: str | None = None
-    additional_info: str | None = None
-
-
 class EmailEventOut(BaseModel):
     """Postmark webhook event row stored in ``db.email_events``."""
     model_config = ConfigDict(extra='allow')
@@ -395,14 +379,6 @@ class AdminEmailHealthResponse(BaseModel):
 class ExchangeRateResponse(BaseModel):
     usd_to_ils: float
     ils_to_usd: float
-
-
-class TranslationResponse(BaseModel):
-    model_config = ConfigDict(extra='allow')
-    translation: str | None = None
-    translated_text: str | None = None
-    direction: str | None = None
-    status: str | None = None
 
 
 # ---------------------------------------------------------------------------

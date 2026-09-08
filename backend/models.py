@@ -275,13 +275,6 @@ class SiteSettings(BaseModel):
     featured_property_ids: List[str] | None = []
 
 
-class ContactRequest(BaseModel):
-    name: str
-    email: EmailStr
-    phone: str | None = None
-    message: str
-
-
 class ICalUrlInput(BaseModel):
     url: str
 

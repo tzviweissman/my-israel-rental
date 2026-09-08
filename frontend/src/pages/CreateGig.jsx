@@ -514,7 +514,7 @@ const CreateGig = () => {
       <div className="max-w-2xl mx-auto px-4 py-8">
         {showWelcome && (
           <div
-            className="mb-6 relative rounded-2xl bg-gradient-to-br from-[var(--brand-primary)] to-[#0F3A3A] text-white p-5 shadow-lg"
+            className="mb-6 relative rounded-2xl bg-gradient-to-br from-[var(--brand-primary)] to-[var(--brand-primary-dark)] text-white p-5 shadow-lg"
             data-testid="create-gig-welcome-banner"
           >
             <button

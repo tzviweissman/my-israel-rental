@@ -499,7 +499,7 @@ const MyGigsTab = ({ API, token, business = null, onBack = null }) => {
               so there is nothing to upgrade to and nothing to cancel. */}
           <button
             onClick={() => { saveReturnPath(); navigate(addServiceHref); }}
-            className="px-4 py-2.5 rounded-lg text-sm font-semibold text-white bg-[var(--brand-primary)] hover:bg-[#0F3A3A] flex items-center gap-1.5"
+            className="px-4 py-2.5 rounded-lg text-sm font-semibold text-white bg-[var(--brand-primary)] hover:bg-[var(--brand-primary-dark)] flex items-center gap-1.5"
             data-testid="my-gigs-create-btn"
           >
             <Plus size={14} /> {t(`businesses.add${noun}`, noun === 'Product' ? 'Add a product' : 'Add a service')}
@@ -536,7 +536,7 @@ const MyGigsTab = ({ API, token, business = null, onBack = null }) => {
           </p>
           <button
             onClick={() => { saveReturnPath(); navigate(addServiceHref); }}
-            className="px-5 py-2.5 rounded-lg text-sm font-semibold text-white bg-[var(--brand-primary)] hover:bg-[#0F3A3A] inline-flex items-center gap-1.5"
+            className="px-5 py-2.5 rounded-lg text-sm font-semibold text-white bg-[var(--brand-primary)] hover:bg-[var(--brand-primary-dark)] inline-flex items-center gap-1.5"
             data-testid="my-gigs-empty-cta"
           >
             <Plus size={14} /> Create your first gig

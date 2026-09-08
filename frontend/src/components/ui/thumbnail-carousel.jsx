@@ -142,8 +142,8 @@ export function ThumbnailStrip({ items = [], index = 0, onIndexChange, rtl = fal
             initial={false}
             animate={i === index ? "active" : "inactive"}
             variants={{
-              active: { width: FULL_WIDTH_PX, marginLeft: MARGIN_PX, marginRight: MARGIN_PX },
-              inactive: { width: COLLAPSED_WIDTH_PX, marginLeft: 0, marginRight: 0 },
+              active: { width: FULL_WIDTH_PX, marginInlineStart: MARGIN_PX, marginInlineEnd: MARGIN_PX },
+              inactive: { width: COLLAPSED_WIDTH_PX, marginInlineStart: 0, marginInlineEnd: 0 },
             }}
             transition={reduced ? { duration: 0 } : { duration: 0.3, ease: "easeOut" }}
             className={cn(
