@@ -1,0 +1,400 @@
+<!doctype html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Michal Simkin. A wig you love, Bet Shemesh.</title>
+<meta name="description" content="Boutique wig salon and academy in Bet Shemesh. Custom wigs, cuts, transformations and repairs, made to fit your face, your lifestyle and you. Consultation ₪100, by appointment.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='7' fill='%230E1F39'/><circle cx='16' cy='16' r='8' fill='%23E9C4B0'/></svg>">
+<!--
+  Michal Simkin, scroll-driven. See BRIEF.md beside this file.
+
+  EVERYTHING ON THIS PAGE IS HERS. The headline, the promise, the five
+  steps, the two services, the eight reviews and their names, the academy
+  courses with their prices and dates, the hours and the place are
+  transcribed from her website and her record on this site. The portraits
+  are her clients, from her website. Nothing generated, no number that is
+  not hers.
+
+  TWO BESPOKE MOVES, ENGINE UNTOUCHED.
+  1. The deal. Her clients' portraits are dealt onto a stack under the
+     wheel, one per notch, each settling at its own angle. Transforms only,
+     keyframed on --sc-p.
+  2. The same wig. The words her clients used about their old wigs are
+     struck through as you scroll (a rule, transform scaleX), and the
+     words they used afterwards rise in their place. Every pair is one
+     reviewer's own before and after.
+
+  No top bar. A fixed bottom bar carries her mark, the one CTA, and the
+  reassurance beside it. No scroll cue, no counters, no em dash.
+-->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="scrollcraft.css">
+<style>
+  :root {
+    --font-head: 'Playfair Display', Georgia, serif;
+    --font-body: 'Manrope', system-ui, sans-serif;
+
+    /* Hers: navy and blush from her site, rose-gold from her logo. */
+    --navy: #0E1F39;
+    --navy-2: #16294A;
+    --ivory: #FBF7F4;
+    --blush: #DBB3B1;
+    --blush-pale: #F3E4E0;
+    --rose-gold: #E9C4B0;     /* display accent on navy, 10.2:1 */
+    --rose-text: #9E4560;     /* small accent text on ivory, 5.67:1 */
+    --muted: #5B6577;         /* 5.5:1 on ivory */
+
+    --sc-canvas: var(--ivory);
+    --sc-surface: #FFFFFF;
+    --sc-ink: var(--navy);
+    --sc-ink-soft: var(--muted);
+    --sc-accent: var(--rose-text);
+    --sc-accent-ink: #FFFFFF;
+    --sc-shadow-color: 220 30% 12%;
+    --sc-font-display: var(--font-head);
+    --sc-font-text: var(--font-body);
+    --sc-font-mono: var(--font-body);
+
+    --bar-h: 76px;
+    --pill: 45px 10px;        /* her buttons' asymmetric radius */
+  }
+  html { scroll-behavior: auto; }
+  body { font-size: 17px; background: var(--ivory); color: var(--navy); padding-block-end: var(--bar-h); }
+  h1, h2, h3 { font-family: var(--font-head); font-weight: 500; }
+  section { position: relative; }
+  .on-navy { background: var(--navy); color: #FFFFFF; --sc-ink: #FFFFFF; --sc-ink-soft: #C9CFDA; --sc-accent: var(--rose-gold); }
+  .on-ivory { background: var(--ivory); color: var(--navy); }
+  .on-blush { background: var(--blush-pale); color: var(--navy); }
+  .accent { color: var(--sc-accent); font-style: italic; }
+  .sc-grain { opacity: 0.035; }
+  .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+  /* ----------------------------------------------------------------- bar --
+     Fixed at the bottom, the booking pattern a phone already knows. Her
+     mark, the one button, the reassurance beside it. */
+  .bar {
+    position: fixed; inset-inline: 0; inset-block-end: 0; z-index: var(--sc-z-chrome);
+    height: var(--bar-h); display: flex; align-items: center; gap: var(--sc-4);
+    padding: 0 var(--sc-gutter); padding-block-end: env(safe-area-inset-bottom);
+    background: rgba(251, 247, 244, 0.86); backdrop-filter: blur(14px);
+    border-top: 1px solid rgba(14, 31, 57, 0.12);
+  }
+  .bar__mark { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; flex: none; }
+  .bar__assure { margin: 0; color: var(--muted); font-size: var(--sc-t-sm); line-height: 1.35; flex: 1; min-width: 0; }
+  .bar__assure b { color: var(--navy); font-weight: 600; }
+  .cta {
+    display: inline-flex; align-items: center; justify-content: center; min-height: 48px; padding: 0 var(--sc-6);
+    border-radius: var(--pill); background: var(--navy); color: #FFFFFF; flex: none;
+    font-family: var(--font-body); font-weight: 700; font-size: var(--sc-t-base); text-decoration: none;
+    transition: background var(--sc-d-fast) var(--sc-ease-out), transform var(--sc-d-fast) var(--sc-ease-out);
+  }
+  .cta:hover { background: var(--navy-2); transform: translateY(-1px); }
+  .cta:focus-visible { outline: 2px solid var(--rose-text); outline-offset: 3px; }
+  .on-navy .cta { background: var(--rose-gold); color: var(--navy); }
+  .on-navy .cta:hover { background: #F2D3C2; }
+
+  /* ---------------------------------------------------------------- hero --
+     Her headline, and her clients dealt onto a stack beside it. */
+  .hero .sc-copy--lead { max-width: min(38rem, 52vw); bottom: auto; top: 50%; translate: 0 -50%; }
+  .hero h1 { margin: 0 0 var(--sc-4); font-size: clamp(2.2rem, 4.6vw, 4.4rem); line-height: 1.04; letter-spacing: var(--sc-track-tight); }
+  .hero h1 em { font-style: italic; color: var(--rose-gold); }
+  .hero .lede { margin: 0; color: #C9CFDA; font-size: var(--sc-t-lg); line-height: 1.45; max-width: 30rem; }
+  .hero .who { margin: var(--sc-5) 0 0; color: var(--rose-gold); font-size: var(--sc-t-sm); font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; }
+  .deck {
+    position: absolute; inset-inline-end: var(--sc-gutter); top: 50%; translate: 0 -50%;
+    width: min(34vw, 420px); aspect-ratio: 3 / 4; z-index: 1;
+  }
+  .card {
+    position: absolute; inset: 0; border-radius: 14px; overflow: hidden;
+    box-shadow: 0 30px 60px -20px rgba(0, 0, 0, 0.55), 0 0 0 1px rgba(255, 255, 255, 0.08);
+    background: var(--navy-2); will-change: transform, opacity; opacity: 0;
+    transform: translate3d(40vw, 50vh, 0) rotate(28deg);
+  }
+  .card img { display: block; width: 100%; height: 100%; object-fit: cover; }
+
+  /* ------------------------------------------------------------- consult --
+     "This isn't about hair. This is about you." Her five steps. */
+  .consult { padding-block: clamp(4rem, 9vw, 8rem); }
+  .consult .sc-wrap { display: grid; grid-template-columns: 1.1fr 1fr; gap: var(--sc-8); align-items: start; }
+  .consult h2 { margin: 0 0 var(--sc-4); font-size: clamp(2rem, 3.6vw, 3.4rem); line-height: 1.06; letter-spacing: var(--sc-track-tight); }
+  .consult .why { margin: 0 0 var(--sc-6); color: var(--muted); font-size: var(--sc-t-lg); line-height: 1.5; max-width: 30rem; }
+  .rework { padding: var(--sc-5) var(--sc-5); border-inline-start: 3px solid var(--blush); max-width: 30rem; }
+  .rework h3 { margin: 0 0 var(--sc-2); font-size: var(--sc-t-xl); }
+  .rework p { margin: 0; color: var(--muted); line-height: 1.5; font-size: var(--sc-t-base); }
+  .steps { list-style: none; margin: 0; padding: 0 0 0 2.4rem; position: relative; display: grid; gap: var(--sc-5); padding-inline-start: 2.4rem; }
+  .steps::before { content: ""; position: absolute; inset-block: 0.7rem; inset-inline-start: 0.5rem; width: 2px; background: var(--blush); }
+  .steps li { position: relative; margin: 0; }
+  .steps li::before { content: ""; position: absolute; inset-inline-start: -2.4rem; top: 0.42em; width: 1.1rem; height: 1.1rem; border-radius: 50%; background: var(--rose-text); box-shadow: 0 0 0 4px var(--ivory); }
+  .steps b { display: block; font-family: var(--font-head); font-weight: 500; font-size: var(--sc-t-xl); line-height: 1.15; }
+  .steps small { display: block; margin-top: 3px; color: var(--muted); font-size: var(--sc-t-base); line-height: 1.45; }
+
+  /* ------------------------------------------------------------- same wig --
+     The peak. Before-words struck through, after-words rising, then three
+     clients say it in full. */
+  .same .sc-copy--lead { bottom: auto; top: clamp(4rem, 9vh, 6rem); max-width: 40rem; }
+  .same .sc-copy--lead h2 { margin: 0 0 var(--sc-2); font-size: clamp(1.9rem, 3.4vw, 3.2rem); line-height: 1.08; letter-spacing: var(--sc-track-tight); }
+  .same .sc-copy--lead p { margin: 0; color: var(--muted); font-size: var(--sc-t-base); }
+  .pairs {
+    position: absolute; inset-inline-start: var(--sc-gutter); top: 50%; translate: 0 -46%;
+    width: min(44vw, 34rem); list-style: none; margin: 0; padding: 0; display: grid; gap: clamp(0.5rem, 1.6vh, 1rem);
+  }
+  .pair { margin: 0; display: grid; grid-template-columns: 1fr 1fr; gap: var(--sc-4); align-items: baseline; }
+  .pair .before { position: relative; display: inline-block; font-family: var(--font-head); font-size: clamp(1.15rem, 2vw, 1.7rem); color: var(--muted); }
+  .pair .before i { position: absolute; inset-inline-start: -2%; top: 56%; width: 104%; height: 2px; background: var(--rose-text); transform: scaleX(0); transform-origin: 0 50%; }
+  .pair .after { font-family: var(--font-head); font-size: clamp(1.25rem, 2.2vw, 1.9rem); font-weight: 500; color: var(--navy); }
+  .pair .after em { font-style: italic; color: var(--rose-text); }
+  .pair .after small { display: block; font-family: var(--font-body); font-size: var(--sc-t-xs); color: var(--muted); font-weight: 600; margin-top: 2px; }
+  .voices {
+    position: absolute; inset-inline-end: var(--sc-gutter); top: 50%; translate: 0 -46%;
+    width: min(40vw, 30rem); display: grid; gap: var(--sc-4);
+  }
+  .voice { margin: 0; display: grid; grid-template-columns: 56px 1fr; gap: var(--sc-3); align-items: start; }
+  .voice img { width: 56px; height: 56px; border-radius: 50%; object-fit: cover; }
+  .voice p { margin: 0; font-size: var(--sc-t-sm); line-height: 1.45; color: var(--navy); }
+  .voice b { display: block; margin-top: 3px; font-family: var(--font-body); font-weight: 700; font-size: var(--sc-t-xs); color: var(--rose-text); }
+
+  /* ------------------------------------------------------------- academy -- */
+  .academy { padding-block: clamp(4rem, 9vw, 8rem); }
+  .academy h2 { margin: 0 0 var(--sc-2); font-size: clamp(2rem, 3.6vw, 3.4rem); line-height: 1.06; letter-spacing: var(--sc-track-tight); }
+  .academy .lede { margin: 0 0 var(--sc-7); color: #C9CFDA; max-width: 36rem; font-size: var(--sc-t-lg); line-height: 1.45; }
+  .courses { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: var(--sc-5); }
+  .course { padding: var(--sc-6); border: 1px solid rgba(255, 255, 255, 0.14); border-radius: 18px; }
+  .course h3 { margin: 0 0 var(--sc-2); font-size: var(--sc-t-xl); color: var(--rose-gold); }
+  .course p { margin: 0; color: #C9CFDA; font-size: var(--sc-t-base); line-height: 1.5; }
+  .course .price { display: block; margin-top: var(--sc-4); font-family: var(--font-body); font-weight: 800; font-size: var(--sc-t-2xl); color: #FFFFFF; }
+  .course .price small { display: block; font-weight: 500; font-size: var(--sc-t-sm); color: #C9CFDA; }
+  .bundle { margin: var(--sc-6) 0 0; display: grid; grid-template-columns: 1fr auto; gap: var(--sc-5); align-items: center; padding: var(--sc-6); border-radius: 18px; background: rgba(233, 196, 176, 0.12); }
+  .bundle h3 { margin: 0 0 var(--sc-2); font-size: var(--sc-t-xl); }
+  .bundle p { margin: 0; color: #C9CFDA; line-height: 1.5; }
+  .bundle .big { font-family: var(--font-body); font-weight: 800; font-size: clamp(2.4rem, 5vw, 4rem); color: var(--rose-gold); line-height: 1; }
+  .bundle .big small { display: block; font-weight: 500; font-size: var(--sc-t-sm); color: #C9CFDA; }
+  .grad { margin: var(--sc-6) 0 0; padding-inline-start: var(--sc-5); border-inline-start: 3px solid var(--rose-gold); color: #FFFFFF; font-size: var(--sc-t-lg); line-height: 1.4; max-width: 40rem; }
+  .grad b { display: block; margin-top: var(--sc-2); font-family: var(--font-body); font-size: var(--sc-t-sm); font-weight: 600; color: var(--rose-gold); }
+
+  /* --------------------------------------------------------------- close --
+     A letter. Her words, her name, one button. */
+  .close .letter { position: absolute; inset-inline-start: var(--sc-gutter); inset-inline-end: var(--sc-gutter); top: 50%; translate: 0 -54%; max-width: 40rem; margin-inline: auto; }
+  .close h2 { margin: 0 0 var(--sc-4); font-size: clamp(2rem, 4vw, 3.8rem); line-height: 1.06; letter-spacing: var(--sc-track-tight); }
+  .close .body { margin: 0 0 var(--sc-5); color: var(--muted); font-size: var(--sc-t-lg); line-height: 1.5; }
+  .close .sign { display: flex; align-items: center; gap: var(--sc-4); margin: 0 0 var(--sc-6); }
+  .close .sign img { width: 56px; height: 56px; border-radius: 50%; object-fit: cover; }
+  .close .sign p { margin: 0; font-family: var(--font-head); font-style: italic; font-size: var(--sc-t-lg); }
+  .close .sign p small { display: block; font-family: var(--font-body); font-style: normal; font-size: var(--sc-t-xs); color: var(--muted); font-weight: 600; margin-top: 2px; }
+  .close .facts { margin: var(--sc-4) 0 0; color: var(--muted); font-size: var(--sc-t-sm); line-height: 1.5; }
+  .close .foot { position: absolute; inset-inline: var(--sc-gutter); bottom: var(--sc-4); margin: 0; font-size: var(--sc-t-xs); color: var(--muted); }
+
+  /* -------------------------------------------------------------- mobile -- */
+  @media (max-width: 860px) {
+    :root { --bar-h: 84px; }
+    .bar { flex-wrap: wrap; gap: var(--sc-2) var(--sc-3); padding-block: var(--sc-2); height: auto; min-height: var(--bar-h); }
+    .bar__mark { width: 34px; height: 34px; }
+    .bar__assure { order: 3; flex-basis: 100%; font-size: var(--sc-t-xs); }
+    .cta { flex: 1; min-height: 44px; }
+    .hero .sc-copy--lead { top: clamp(4rem, 9vh, 6rem); translate: none; inset-inline: var(--sc-gutter); max-width: none; }
+    .hero h1 { font-size: clamp(1.9rem, 8vw, 2.6rem); }
+    .hero .lede { font-size: var(--sc-t-base); }
+    .deck { width: min(58vw, 260px); inset-inline-end: var(--sc-gutter); top: auto; bottom: calc(var(--bar-h) + 2rem); translate: none; }
+    .consult .sc-wrap { grid-template-columns: 1fr; gap: var(--sc-6); }
+    .same .sc-copy--lead { top: clamp(3.5rem, 7vh, 5rem); inset-inline: var(--sc-gutter); max-width: none; }
+    .same .sc-copy--lead h2 { font-size: clamp(1.5rem, 6.4vw, 2rem); }
+    .pairs { width: auto; inset-inline: var(--sc-gutter); top: 30vh; translate: none; gap: 0.35rem; }
+    .pair { gap: var(--sc-3); }
+    .pair .before { font-size: 1rem; } .pair .after { font-size: 1.1rem; } .pair .after small { display: none; }
+    .voices { width: auto; inset-inline: var(--sc-gutter); top: auto; bottom: calc(var(--bar-h) + 1rem); translate: none; gap: var(--sc-3); }
+    .voice { grid-template-columns: 40px 1fr; } .voice img { width: 40px; height: 40px; } .voice p { font-size: var(--sc-t-xs); }
+    .voice:nth-child(3) { display: none; }
+    .courses { grid-template-columns: 1fr; }
+    .bundle { grid-template-columns: 1fr; }
+    .close .letter { top: 46%; }
+    .close h2 { font-size: clamp(1.8rem, 7.5vw, 2.4rem); }
+  }
+  /* Tablets take the phone layout; give the stack room there. */
+  @media (min-width: 600px) and (max-width: 860px) {
+    .deck { width: min(44vw, 360px); }
+    .hero .sc-copy--lead { max-width: 34rem; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .card { opacity: 1 !important; }
+    .pair .before i { transform: scaleX(1) !important; }
+  }
+</style>
+</head>
+<body id="top">
+<div class="sc-grain" aria-hidden="true"></div>
+
+<main>
+  <!-- 1  Recognition: her headline, her clients dealt one by one -->
+  <section class="hero on-navy" id="hero" data-sc-act="pin" data-sc-span="2.8" data-sc-dwell="0.2" aria-label="Michal Simkin, boutique wig salon">
+    <div data-sc-stage>
+      <div class="sc-copy sc-copy--lead" data-sc-cue="0 1 0 0">
+        <p class="who">Michal Simkin, boutique wig salon and academy</p>
+        <h1 data-sc-kinetic="lines">The difference between a wig that works and <em>a wig you love.</em></h1>
+        <p class="lede">We create wigs that are a joy to wear, because when your wig feels right, you feel right.</p>
+      </div>
+      <div class="deck" id="deck" aria-label="Clients in the salon, photographed by Michal">
+        <figure class="card" style="--r: -7deg; --x: -6%; --y: 3%"><img src="assets/client-8.jpg" width="720" height="960" alt="A client in the salon chair, long dark wig, the wig shelves behind her" loading="eager"></figure>
+        <figure class="card" style="--r: 5deg; --x: 5%; --y: -2%"><img src="assets/client-7.jpg" width="720" height="960" alt="A client smiling in a shoulder-length dark wig"></figure>
+        <figure class="card" style="--r: -3deg; --x: 2%; --y: 4%"><img src="assets/client-6.jpg" width="720" height="960" alt="A client in a long wavy honey-brown wig"></figure>
+        <figure class="card" style="--r: 6deg; --x: -4%; --y: -3%"><img src="assets/client-5.jpg" width="720" height="960" alt="A client with glasses in a dark shoulder-length wig"></figure>
+        <figure class="card" style="--r: -5deg; --x: 4%; --y: 2%"><img src="assets/client-4.jpg" width="720" height="960" alt="A client laughing in a dark curled wig"></figure>
+        <figure class="card" style="--r: 3deg; --x: -2%; --y: -4%"><img src="assets/client-3.jpg" width="720" height="960" alt="A client in a long wavy light-brown wig with a green cardigan"></figure>
+        <figure class="card" style="--r: -4deg; --x: 3%; --y: 1%"><img src="assets/client-2.jpg" width="720" height="960" alt="A client in a striped sweater with a soft shoulder-length brown wig"></figure>
+        <figure class="card" style="--r: 2deg; --x: 0%; --y: 0%"><img src="assets/client-1.jpg" width="720" height="960" alt="A client in the salon chair in a long brown wig, smiling"></figure>
+      </div>
+    </div>
+  </section>
+
+  <!-- 2  Ease: what happens when you come in -->
+  <section class="consult on-ivory" id="consult" data-sc-act="flow" aria-labelledby="consultTitle">
+    <div class="sc-wrap">
+      <div data-sc-in data-sc-stagger="80">
+        <h2 id="consultTitle">This isn't about hair. <span class="accent">This is about you.</span></h2>
+        <p class="why">That's why we begin by listening: to your needs, your lifestyle, how you want to look and feel. Then we design your wig around that vision.</p>
+        <div class="rework">
+          <h3>Already have a wig that never sat right?</h3>
+          <p>Maybe the cut feels heavy, the balance is off, or it never really fit from the start. With creative cutting, advanced styling and careful attention to detail, we rework the wig you had to make do with into one that feels authentically you.</p>
+        </div>
+      </div>
+      <ol class="steps" data-sc-in data-sc-stagger="110" aria-label="A custom wig, step by step">
+        <li><b>We listen.</b><small>Your past wig experiences, your lifestyle, what you're looking for and what you want to avoid.</small></li>
+        <li><b>We make a blueprint.</b><small>We explore different options together and draw up the plan for your wig.</small></li>
+        <li><b>We source the materials.</b><small>And refine the design, keeping you involved as it takes shape.</small></li>
+        <li><b>The cut, the colour, the fit.</b><small>Cuts and transformations, wash and sets, handwork, repairs, cap adjustments, baby hairs, colour.</small></li>
+        <li><b>You try it on.</b><small>And feel like it was always meant to be yours.</small></li>
+      </ol>
+    </div>
+  </section>
+
+  <!-- 3  Relief, the peak: the same wig -->
+  <section class="same on-blush" id="same" data-sc-act="pin" data-sc-span="3.4" aria-labelledby="sameTitle">
+    <div data-sc-stage>
+      <div class="sc-copy sc-copy--lead" data-sc-cue="0 1 0 0">
+        <h2 id="sameTitle">The same wig, <span class="accent">in their words.</span></h2>
+        <p>What clients said about the wig they walked in with, and what they said after. Every pair is one woman's own review.</p>
+      </div>
+      <ul class="pairs" id="pairs" aria-label="Before and after, in clients' own words">
+        <li class="pair" data-at="0.06"><span class="before">"it's fine"<i></i></span><span class="after" data-sc-cue="0.10 1 0.3 0"><em>cute, light, works amazingly</em><small>Miriam</small></span></li>
+        <li class="pair" data-at="0.18"><span class="before">"dread wearing it"<i></i></span><span class="after" data-sc-cue="0.22 1 0.3 0"><em>brought back to life</em><small>Debbie</small></span></li>
+        <li class="pair" data-at="0.30"><span class="before">"old style, uncomfortable"<i></i></span><span class="after" data-sc-cue="0.34 1 0.3 0"><em>I finally feel myself</em><small>Shaina</small></span></li>
+        <li class="pair" data-at="0.42"><span class="before">"lost its wow factor"<i></i></span><span class="after" data-sc-cue="0.46 1 0.3 0"><em>a fabulous fit</em><small>Tova Leah</small></span></li>
+        <li class="pair" data-at="0.54"><span class="before">"hating all my wigs"<i></i></span><span class="after" data-sc-cue="0.58 1 0.3 0"><em>2 years later, still love it</em><small>Yael</small></span></li>
+      </ul>
+      <div class="voices">
+        <figure class="voice" data-sc-cue="0.34 1 0.3 0">
+          <img src="assets/debbie.jpg" width="160" height="160" alt="">
+          <figcaption><p>"I had a sheitl I wore regularly, but every time I put it on I was frustrated. Instead of throwing it out, I brought it to Michal. Immediately she saw the problems and brought it back to life. I can't believe my new look is from the same sheitl I used to dread wearing."<b>Debbie Burack</b></p></figcaption>
+        </figure>
+        <figure class="voice" data-sc-cue="0.52 1 0.3 0">
+          <img src="assets/yael.jpg" width="160" height="160" alt="">
+          <figcaption><p>"I came with a tight budget, after three other wig places and hating all my wigs since I got married. She had a ton of options, tried so many on me, honest opinion, no pressure to buy. Two years later I still love the wig I got."<b>Yael Stoolback</b></p></figcaption>
+        </figure>
+        <figure class="voice" data-sc-cue="0.70 1 0.3 0">
+          <img src="assets/miriam.jpg" width="160" height="160" alt="">
+          <figcaption><p>"She transformed my 'it's fine' wig, a hand-me-down from my aunt, into something I actually think is cute, light, and works amazingly for me."<b>Miriam Campbell</b></p></figcaption>
+        </figure>
+      </div>
+    </div>
+  </section>
+
+  <!-- 4  Ambition: the academy -->
+  <section class="academy on-navy" id="academy" data-sc-act="flow" aria-labelledby="academyTitle">
+    <div class="sc-wrap">
+      <div data-sc-in data-sc-stagger="80">
+        <h2 id="academyTitle">The Michal Simkin <span class="accent">Academy.</span></h2>
+        <p class="lede">Professional wig styling and cutting, taught in person: demonstrations, then hands-on practice. Starts 3 November 2026, Sunday and Tuesday mornings at 10:00. Ten students at most.</p>
+      </div>
+      <div class="courses" data-sc-in data-sc-stagger="120">
+        <article class="course"><h3>Styling Mastery</h3><p>Ten in-depth lessons: curls, blow-dry techniques, volume, tool control.</p><span class="price">₪8,000</span></article>
+        <article class="course"><h3>Cutting Mastery</h3><p>Nine advanced lessons: wig construction, weight, balance, natural flow.</p><span class="price">₪8,000</span></article>
+        <article class="course"><h3>The Salon Hub</h3><p>A private group for ongoing support: pricing questions, real-world guidance.</p><span class="price">Included<small>with either course</small></span></article>
+      </div>
+      <div class="bundle" data-sc-reveal="right" data-sc-reveal-at="0.1 0.5">
+        <div>
+          <h3>Both courses, one place in the class.</h3>
+          <p>₪16,000 separately. Enrol early and the toolkit, worth ₪3,000, is included.</p>
+        </div>
+        <span class="big">₪12,000<small>the full bundle</small></span>
+      </div>
+      <p class="grad" data-sc-in>Chaya Basya took the course. She now runs her own salon in Ramat Beit Shemesh Daled, with a clientele of her own.<b>Chaya Basya, graduate of the academy</b></p>
+      <p style="margin: var(--sc-6) 0 0"><a class="cta" href="#top">Message Michal Simkin</a></p>
+    </div>
+  </section>
+
+  <!-- 5  Welcome: her sign-off -->
+  <section class="close on-ivory" id="close" data-sc-act="pin" data-sc-span="1.2" aria-label="Get in touch">
+    <div data-sc-stage>
+      <div class="letter" data-sc-cue="0.06">
+        <h2 data-sc-kinetic="lines">You deserve to love <span class="accent">your wig, too.</span></h2>
+        <p class="body">I'd be honored to get to know you and create the wig that makes you look and feel your best. I can't wait to meet you.</p>
+        <div class="sign">
+          <img src="assets/michal-small.jpg" width="160" height="160" alt="Michal Simkin">
+          <p>Michal<small>Bet Shemesh</small></p>
+        </div>
+        <a class="cta" href="#top">Message Michal Simkin</a>
+        <p class="facts">Consultation ₪100. Sunday to Thursday, 10 to 2, by appointment. English and Hebrew. Custom wigs, cuts and transformations, wash and sets, handwork, repairs, cap adjustments, baby hairs, colour.</p>
+      </div>
+      <p class="foot">Michal Simkin, Bet Shemesh, on MyIsraelRental. Every photograph on this page is hers.</p>
+    </div>
+  </section>
+</main>
+
+<nav class="bar" aria-label="Book">
+  <img class="bar__mark" src="assets/mark.jpg" width="96" height="96" alt="">
+  <p class="bar__assure"><b>Consultation ₪100.</b> Sun to Thu, 10 to 2, by appointment. Bet Shemesh.</p>
+  <a class="cta" href="#top">Message Michal Simkin</a>
+</nav>
+
+<script src="scrollcraft.js"></script>
+<script>
+  ScrollCraft.mount(document.body);
+  (function () {
+    var reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    var ease = function (t) { return t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2; };
+    var clamp = function (v) { return Math.min(Math.max(v, 0), 1); };
+    function onProgress(el, fn) {
+      var last = -1;
+      var read = function () {
+        var p = parseFloat(el.style.getPropertyValue('--sc-p')); if (isNaN(p)) p = 0;
+        if (p !== last) { last = p; fn(p); }
+      };
+      new MutationObserver(read).observe(el, { attributes: true, attributeFilter: ['style'] });
+      read();
+    }
+
+    /* -------------------------------------------------------------- deal --
+       Card k is dealt over its own window of the act. Each lands at the
+       angle and offset its markup declares. */
+    var cards = Array.prototype.slice.call(document.querySelectorAll('#deck .card'));
+    var N = cards.length;
+    function paintDeck(p) {
+      cards.forEach(function (c, k) {
+        var start = 0.02 + k * (0.72 / N), t = reduce ? 1 : ease(clamp((p - start) / 0.16));
+        var r = parseFloat(c.style.getPropertyValue('--r')) || 0;
+        var x = parseFloat(c.style.getPropertyValue('--x')) || 0;
+        var y = parseFloat(c.style.getPropertyValue('--y')) || 0;
+        var fx = 40 * (1 - t), fy = 50 * (1 - t), fr = r + (28 - r) * (1 - t);
+        c.style.opacity = t.toFixed(3);
+        c.style.transform = 'translate3d(calc(' + fx.toFixed(2) + 'vw + ' + x + '%), calc(' + fy.toFixed(2) + 'vh + ' + y + '%), 0) rotate(' + fr.toFixed(2) + 'deg)';
+      });
+    }
+    if (N) onProgress(document.getElementById('hero'), paintDeck);
+
+    /* ---------------------------------------------------------- the strike --
+       Each before-word's rule draws from left to right over a short window
+       starting at its data-at; the after-word's cue is set just behind it. */
+    var pairs = Array.prototype.slice.call(document.querySelectorAll('#pairs .pair'));
+    function paintStrike(p) {
+      pairs.forEach(function (li) {
+        var at = parseFloat(li.getAttribute('data-at')) || 0;
+        var t = reduce ? 1 : ease(clamp((p - at) / 0.08));
+        li.querySelector('.before i').style.transform = 'scaleX(' + t.toFixed(3) + ')';
+      });
+    }
+    if (pairs.length) onProgress(document.getElementById('same'), paintStrike);
+  })();
+</script>
+</body>
+</html>
